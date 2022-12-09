@@ -1,7 +1,10 @@
-using CMMSAPIs.BS;
+using CMMSAPIs.BS.Jobs;
+using CMMSAPIs.BS.Mails;
+using CMMSAPIs.BS.Masters;
 using CMMSAPIs.BS.SM;
+using CMMSAPIs.BS.Users;
 using CMMSAPIs.Helper;
-using CMMSAPIs.Models;
+using CMMSAPIs.Models.Mails;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;

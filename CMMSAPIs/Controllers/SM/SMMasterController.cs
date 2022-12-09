@@ -239,13 +239,13 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
-        [Route("AddAssetMastert")]
+        [Route("AddAssetMaster")]
         [HttpPost]
-        public async Task<IActionResult> AddAssetMastert()
+        public async Task<IActionResult> AddAssetMaster()
         {
             try
             {
-                var data = await _SMMasterBS.AddAssetMastert();
+                var data = await _SMMasterBS.AddAssetMaster();
                 return Ok(data);
             }
             catch (Exception ex)
