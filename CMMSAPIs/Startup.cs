@@ -2,6 +2,7 @@ using CMMSAPIs.BS.Jobs;
 using CMMSAPIs.BS.Mails;
 using CMMSAPIs.BS.Masters;
 using CMMSAPIs.BS.SM;
+using CMMSAPIs.BS.Utils;
 using CMMSAPIs.BS.Users;
 using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Mails;
@@ -44,6 +45,7 @@ namespace CMMSAPIs
             services.AddScoped<IJobBS, JobBS>();
             services.AddScoped<iLoginBS, LoginBS>();
             services.AddScoped<ISMMasterBS, SMMasterBS>();
+            services.AddScoped<IUtilsBS, UtilsBS>();
 
             services.Configure<MailSettings>(Configuration.GetSection("MailSettings"));
             services.AddTransient<IMailService, MailService>();
