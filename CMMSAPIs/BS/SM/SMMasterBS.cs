@@ -25,10 +25,11 @@ namespace CMMSAPIs.BS.SM
         Task<List<SMMaster>> UpdateUnitMeasurement();
         Task<List<SMMaster>> DeleteUnitMeasurement();
 
-        Task<List<SMMaster>> GetAssetMasterList();
-        Task<List<SMMaster>> AddAssetMaster();
-        Task<List<SMMaster>> UpdateAssetMaster();
-        Task<List<SMMaster>> DeleteAssetMaster();
+        Task<List<SMAssetMaster>> GetAssetMasterList();
+        /*        Task<int> AddAssetMaster(string aasetCode, string assetName, string assetType, string cat_name, string description, string unitMeasurement, string approvalRequired);*/
+        Task<int> AddAssetMaster(SMAssetMaster request);
+        Task<int> UpdateAssetMaster(SMAssetMaster request);
+        Task<int> DeleteAssetMaster(SMAssetMaster request);
 
     }
 
@@ -222,7 +223,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<SMMaster>> GetAssetMasterList()
+        public async Task<List<SMAssetMaster>> GetAssetMasterList()
         {
             try
             {
@@ -237,13 +238,41 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<SMMaster>> AddAssetMaster()
+        /*        public async Task<int> AddAssetMaster(string aasetCode, string assetName, string assetType, string cat_name, string description, string unitMeasurement, string approvalRequired)
+                {
+                    try
+                    {
+                        using (var repos = new SMMasterRepository(getDB))
+                        {
+                            return await repos.AddAssetMaster(aasetCode, assetName, assetType, cat_name, description, unitMeasurement, approvalRequired);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        throw;
+                    }
+                }*/
+        public async Task<int> AddAssetMaster(SMAssetMaster request)
         {
             try
             {
                 using (var repos = new SMMasterRepository(getDB))
                 {
-                    return await repos.AddAssetMaster();
+                    return await repos.AddAssetMaster(request);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<int> UpdateAssetMaster(SMAssetMaster request)
+        {
+            try
+            {
+                using (var repos = new SMMasterRepository(getDB))
+                {
+                    return await repos.UpdateAssetMaster(request);
                 }
             }
             catch (Exception ex)
@@ -252,28 +281,13 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<SMMaster>> UpdateAssetMaster()
+        public async Task<int> DeleteAssetMaster(SMAssetMaster request)
         {
             try
             {
                 using (var repos = new SMMasterRepository(getDB))
                 {
-                    return await repos.UpdateAssetMaster();
-                }
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        }
-
-        public async Task<List<SMMaster>> DeleteAssetMaster()
-        {
-            try
-            {
-                using (var repos = new SMMasterRepository(getDB))
-                {
-                    return await repos.DeleteAssetMaster();
+                    return await repos.DeleteAssetMaster(request);
                 }
             }
             catch (Exception ex)

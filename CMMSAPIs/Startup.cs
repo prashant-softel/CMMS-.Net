@@ -42,6 +42,8 @@ namespace CMMSAPIs
             services.AddScoped<DatabaseProvider>();
             services.AddScoped<ICMMSBS, CMMSBS>();
             services.AddScoped<IJobBS, JobBS>();
+            services.AddScoped<IJobWorkTypeBS, JobWorkTypeBS>();
+
             services.AddScoped<iLoginBS, LoginBS>();
             services.AddScoped<ISMMasterBS, SMMasterBS>();
 

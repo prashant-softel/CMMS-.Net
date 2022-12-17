@@ -240,12 +240,14 @@ namespace CMMSAPIs.Controllers.SM
         }
 
         [Route("AddAssetMaster")]
+        //HttpPost("send")]
         [HttpPost]
-        public async Task<IActionResult> AddAssetMaster()
+
+        public async Task<IActionResult> AddAssetMaster([FromForm] SMAssetMaster request)
         {
             try
             {
-                var data = await _SMMasterBS.AddAssetMaster();
+                var data = await _SMMasterBS.AddAssetMaster(request);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -256,11 +258,11 @@ namespace CMMSAPIs.Controllers.SM
 
         [Route("UpdateAssetMaster")]
         [HttpPut]
-        public async Task<IActionResult> UpdateAssetMaster()
+        public async Task<IActionResult> UpdateAssetMaster([FromForm] SMAssetMaster request)
         {
             try
             {
-                var data = await _SMMasterBS.UpdateAssetMaster();
+                var data = await _SMMasterBS.UpdateAssetMaster(request);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -271,11 +273,11 @@ namespace CMMSAPIs.Controllers.SM
 
         [Route("DeleteAssetMaster")]
         [HttpDelete]
-        public async Task<IActionResult> DeleteAssetMaster()
+        public async Task<IActionResult> DeleteAssetMaster([FromForm] SMAssetMaster request)
         {
             try
             {
-                var data = await _SMMasterBS.DeleteAssetMaster();
+                var data = await _SMMasterBS.DeleteAssetMaster(request);
                 return Ok(data);
             }
             catch (Exception ex)

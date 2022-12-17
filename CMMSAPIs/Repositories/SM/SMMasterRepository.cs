@@ -16,16 +16,19 @@ namespace CMMSAPIs.Repositories.SM
         {
         }
 
-        internal Task<List<SMMaster>> GetAssetTypeList()
+        internal async Task<List<SMMaster>> GetAssetTypeList()
         {
             /*
              * Return id, asset_type from SMAssetTypes
             */
-            return null;
+            string myQuery = "SELECT ID, asset_type as title FROM SMAssetTypes";
+            List<SMMaster> _AssetTypeList = await Context.GetData<SMMaster>(myQuery).ConfigureAwait(false);
+            return _AssetTypeList;
         }
 
-        internal Task<List<SMMaster>> AddAssetType()
+        internal async Task<List<SMMaster>> AddAssetType()
         {
+            //dont implement now
             /*
              * Add record in SMAssetTypes
             */
@@ -34,6 +37,7 @@ namespace CMMSAPIs.Repositories.SM
 
         internal Task<List<SMMaster>> UpdateAssetType()
         {
+            //dont implement now
             /*
              * Update record in SMAssetTypes
             */
@@ -42,18 +46,21 @@ namespace CMMSAPIs.Repositories.SM
 
         internal Task<List<SMMaster>> DeleteAssetType()
         {
+            //dont implement now
             /*
              * Delete record in SMAssetTypes
             */
             return null;
         }
 
-        internal Task<List<SMMaster>> GetAssetCategoryList()
+        internal async Task<List<SMMaster>> GetAssetCategoryList()
         {
             /*
              * Return id, name from SMItemCategory
             */
-            return null;
+            string myQuery = "SELECT ID, cat_name as title FROM smitemcategory ";
+            List<SMMaster> _AssetCategoryList = await Context.GetData<SMMaster>(myQuery).ConfigureAwait(false);
+            return _AssetCategoryList;
         }
 
         internal Task<List<SMMaster>> AddAssetCategory()
@@ -80,12 +87,14 @@ namespace CMMSAPIs.Repositories.SM
             return null;
         }
 
-        internal Task<List<SMMaster>> GetUnitMeasurementList()
+        internal async Task<List<SMMaster>> GetUnitMeasurementList()
         {
             /*
              * Return * from SMUnitMeasurement
             */
-            return null;
+            string myQuery = "SELECT ID, name as title FROM smunitmeasurement";
+            List<SMMaster> _UnitMeasurementList = await Context.GetData<SMMaster>(myQuery).ConfigureAwait(false);
+            return _UnitMeasurementList;
         }
 
         internal Task<List<SMMaster>> AddUnitMeasurement()
@@ -112,37 +121,62 @@ namespace CMMSAPIs.Repositories.SM
             return null;
         }
 
-        internal Task<List<SMMaster>> GetAssetMasterList()
+        internal async Task<List<SMAssetMaster>> GetAssetMasterList()
         {
             /*
              * Return id, name, code, description, asset type, asset categroy, unit measurement, attached files  
              * from SMAssetMasters, SMAssetMasterFiles, SMUnitMeasurement, SMAssetTypes, SMAssetCategory
             */
-            return null;
+            string myQuery = "SELECT " +
+                                    "am.asset_code as assetsCode,am.asset_name as assetName,at.asset_type as assetType ,ic.cat_name as assetCat,am.description as description,um.name as unitMeasurement," +
+                                    "IF(am.approval_required = '1', 'YES', 'NO') as approvalRequired " +
+                                   "FROM " +
+                                    "smassetmasters as am " +
+                             "JOIN " +
+                                    "smassettypes as at ON at.ID = am.asset_type_ID " +
+                             "JOIN " +
+                                    "smitemcategory as ic ON ic.ID = am.item_category_ID " +
+                             "JOIN " +
+                                    "smunitmeasurement as um ON um.ID = am.unit_of_measurement " +
+                             "WHERE " +
+                                    " am.flag = 1" ;
+            List<SMAssetMaster> _Employee = await Context.GetData<SMAssetMaster>(myQuery).ConfigureAwait(false);
+            return _Employee;
         }
 
-        internal Task<List<SMMaster>> AddAssetMaster()
+        internal async Task<int> AddAssetMaster(SMAssetMaster request)
         {
-            /*
+
+            /*implement
              * Add record in SMAssetMasters and SMAssetMasterFiles
             */
-            return null;
+            string qry = "insert into smassetmasters (asset_code, asset_name, asset_type_ID, item_category_ID, description, unit_of_measurement, approval_required) values " +
+                     "('"+ request.assetsCode + "', '"+ request.assetName + "', '"+ request.assetType + "', '"+ request.assetCat + "', '"+ request.description + "', '"+ request.unitMeasurement + "', '"+ request.approvalRequired + "')";           
+            
+            
+            return await Context.ExecuteNonQry<int>(qry).ConfigureAwait(false);
+
         }
 
-        internal Task<List<SMMaster>> UpdateAssetMaster()
+
+        internal async Task<int> UpdateAssetMaster(SMAssetMaster request)
         {
             /*
              * Update record in SMAssetMasters and SMAssetMasterFiles
             */
-            return null;
+            string updateQry = "update smassetmasters set asset_code = '" + request.assetsCode + "', asset_name = '" + request.assetName + "', asset_type_ID = " + request.assetType + ", item_category_ID = " + request.assetCat + " , description = '" + request.description + "' , unit_of_measurement = " + request.unitMeasurement + ", approval_required = " + request.approvalRequired + " where ID = " + request.id + ";";
+
+            return await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
         }
 
-        internal Task<List<SMMaster>> DeleteAssetMaster()
+        internal async Task<int> DeleteAssetMaster(SMAssetMaster request)
         {
             /*
              * Delete record in SMAssetMasters and SMAssetMasterFiles
             */
-            return null;
+            string updateQry = "delete from smassetmasters where ID = " + request.id + ";";
+
+            return await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
         }
     }
 }

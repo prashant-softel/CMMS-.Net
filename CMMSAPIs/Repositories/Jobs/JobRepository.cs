@@ -16,17 +16,43 @@ namespace CMMSAPIs.Repositories.Jobs
         {
         }
 
-        internal Task<List<Job>> GetJobList(int facility_id)
+        internal async Task<List<Job>> GetJobList(int facility_id)
         {
             /*
             * Fetch data from Job table for provided facility_id.
             * If facility_id 0 then fetch jobs for all facility (No. Facility assigned to employee)
             * Joins these table for relationship using ids Users, Assets, AssetCategory, Facility
             * id and it string value should be there in list
+            * ignore standard action, site permit no
+            *  job.createdAt as jobDate,DATE_FORMAT(job.breakdownTime, '%d-%m-%Y') as breaKdownTime job.breaKdownTime as brealdownDate,
            */
-
             /*Your code goes here*/
-            return null;
+            string myQuery = "SELECT " +
+                                 "facilities.name as plantName, job.id as id, asset_cat.name as equipmentCat, asset.name as workingArea, job.title as jobDetails, workType.workTypeName as workType,  permit.code as permitId, job.createdBy as raisedBy, CONCAT(user.firstName, user.lastName) as assignedTo , IF(job.breakdownTime = '', 'Non Breakdown Maintenance', 'Breakdown Maintenance') as breakdownType" +
+                                 " FROM " +
+                                   "jobs as job " +
+                                 "JOIN " +
+                                        "jobmappingassets as mapAssets ON mapAssets.jobId = job.id " +
+                                 "JOIN " +
+                                        "assets as asset ON mapAssets.assetId  =  asset.id " +
+                                 "JOIN " +
+                                        "assetcategories as asset_cat ON mapAssets.categoryId = asset_cat.id " +
+                                 "LEFT JOIN " +
+                                        "permits as permit ON permit.id = job.linkedPermit " +
+                                 "LEFT JOIN " +
+                                        "jobworktypes as workType ON workType.equipmentCategoryId = asset_cat.id " +
+                                 "JOIN " +
+                                        "facilities as facilities ON job.facilityId = facilities.id " +
+                                 "LEFT JOIN " +
+                                        "users as user ON user.id = job.createdBy or user.id = job.assignedId";
+            if (facility_id != 0)
+            {
+                myQuery += "WHERE job.facilityId = " + facility_id;
+
+            }
+        
+            List<Job> _JobList = await Context.GetData<Job>(myQuery).ConfigureAwait(false);
+            return _JobList;
         }
 
         internal Task<List<Job>> GetJobDetail(int job_id)
