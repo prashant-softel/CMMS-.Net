@@ -1,29 +1,30 @@
-﻿using CMMSAPIs.BS.Masters;
-using CMMSAPIs.BS.Utils;
-using CMMSAPIs.Models.Utils;
+﻿using CMMSAPIs.BS.JC;
 using Microsoft.AspNetCore.Mvc;
-using System;
 using System.Threading.Tasks;
+using System;
+using CMMSAPIs.Models.JC;
+using CMMSAPIs.Models.Utils;
 
-namespace CMMSAPIs.Controllers.utils
+namespace CMMSAPIs.Controllers.JC
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class UtilsController : ControllerBase
+    public class JCController : ControllerBase
     {
-        private readonly IUtilsBS _UtilsBS;
-        public UtilsController(IUtilsBS utils)
+        private readonly IJCBS _JCBS;
+        public JCController(IJCBS jc)
         {
-            _UtilsBS = utils;
+            _JCBS = jc;
         }
 
-        [Route("GetCountryList")]
+        /*
+         * JobCard Basic End Points
+        */
+        [Route("GetJCList")]
         [HttpGet]
-        public async Task<IActionResult> GetCountryList()
+        public async Task<IActionResult> GetJCList(int facility_id)
         {
             try
             {
-                var data = await _UtilsBS.GetCountryList();
+                var data = await _JCBS.GetJCList(facility_id);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -32,13 +33,13 @@ namespace CMMSAPIs.Controllers.utils
             }
         }
 
-        [Route("GetStateList")]
+        [Route("GetJCDetail")]
         [HttpGet]
-        public async Task<IActionResult> GetStateList(int country_id)
+        public async Task<IActionResult> GetJCDetail(int job_id)
         {
             try
             {
-                var data = await _UtilsBS.GetStateList(country_id);
+                var data = await _JCBS.GetJCDetail(job_id);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -47,13 +48,13 @@ namespace CMMSAPIs.Controllers.utils
             }
         }
 
-        [Route("GetCityList")]
+        [Route("CreateJC")]
         [HttpGet]
-        public async Task<IActionResult> GetCityList(int state_id)
+        public async Task<IActionResult> CreateJC(int job_id)
         {
             try
             {
-                var data = await _UtilsBS.GetCityList(state_id);
+                var data = await _JCBS.CreateJC(job_id);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -62,13 +63,13 @@ namespace CMMSAPIs.Controllers.utils
             }
         }
 
-        [Route("GetCurrencyList")]
+        [Route("UpdateJC")]
         [HttpGet]
-        public async Task<IActionResult> GetCurrencyList()
+        public async Task<IActionResult> UpdateJC(JCUpdateModel request)
         {
             try
             {
-                var data = await _UtilsBS.GetCurrencyList();
+                var data = await _JCBS.UpdateJC(request);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -77,13 +78,13 @@ namespace CMMSAPIs.Controllers.utils
             }
         }
 
-        [Route("GetTimeZoneList")]
+        [Route("CloseJC")]
         [HttpGet]
-        public async Task<IActionResult> GetTimeZoneList()
+        public async Task<IActionResult> CloseJC(JCCloseModel request)
         {
             try
             {
-                var data = await _UtilsBS.GetTimeZoneList();
+                var data = await _JCBS.CloseJC(request);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -92,13 +93,13 @@ namespace CMMSAPIs.Controllers.utils
             }
         }
 
-        [Route("AddLog")]
+        [Route("ApproveJC")]
         [HttpGet]
-        public async Task<IActionResult> AddLog([FromForm] LogModel log)
+        public async Task<IActionResult> ApproveJC(ApprovalModel request)
         {
             try
             {
-                var data = await _UtilsBS.AddLog(log);
+                var data = await _JCBS.ApproveJC(request);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -107,13 +108,13 @@ namespace CMMSAPIs.Controllers.utils
             }
         }
 
-        [Route("GetLog")]
+        [Route("RejectJC")]
         [HttpGet]
-        public async Task<IActionResult> GetLog(int module_type, int id)
+        public async Task<IActionResult> RejectJC(ApprovalModel request)
         {
             try
             {
-                var data = await _UtilsBS.GetLog(module_type, id);
+                var data = await _JCBS.RejectJC(request);
                 return Ok(data);
             }
             catch (Exception ex)

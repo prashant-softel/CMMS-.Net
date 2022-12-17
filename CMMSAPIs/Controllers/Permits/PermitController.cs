@@ -1,5 +1,6 @@
 ﻿using CMMSAPIs.BS.Permits;
 using CMMSAPIs.Models;
+using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -139,11 +140,11 @@ namespace CMMSAPIs.Controllers.Permits
 
         [Route("PermitIssue")]
         [HttpPost]
-        public async Task<IActionResult> PermitIssue()
+        public async Task<IActionResult> PermitIssue(ApprovalModel request)
         {
             try
             {
-                var data = await _PermitBS.PermitIssue();
+                var data = await _PermitBS.PermitIssue(request);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -154,11 +155,11 @@ namespace CMMSAPIs.Controllers.Permits
 
         [Route("PermitApprove")]
         [HttpPost]
-        public async Task<IActionResult> PermitApprove()
+        public async Task<IActionResult> PermitApprove(ApprovalModel request)
         {
             try
             {
-                var data = await _PermitBS.PermitApprove();
+                var data = await _PermitBS.PermitApprove(request);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -169,11 +170,11 @@ namespace CMMSAPIs.Controllers.Permits
 
         [Route("PermitReject")]
         [HttpPost]
-        public async Task<IActionResult> PermitReject()
+        public async Task<IActionResult> PermitReject(ApprovalModel request)
         {
             try
             {
-                var data = await _PermitBS.PermitReject();
+                var data = await _PermitBS.PermitReject(request);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -184,11 +185,11 @@ namespace CMMSAPIs.Controllers.Permits
 
         [Route("PermitCancel")]
         [HttpPost]
-        public async Task<IActionResult> PermitCancel()
+        public async Task<IActionResult> PermitCancel(ApprovalModel request)
         {
             try
             {
-                var data = await _PermitBS.PermitCancel();
+                var data = await _PermitBS.PermitCancel(request);
                 return Ok(data);
             }
             catch (Exception ex)

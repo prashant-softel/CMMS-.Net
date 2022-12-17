@@ -36,10 +36,10 @@ namespace CMMSAPIs.Repositories.Utils
             List<Util> _List = await Context.GetData<Util>(myQuery).ConfigureAwait(false);
             return _List;
         }
-        internal async Task<List<Currency>> GetCurrencyList()
+        internal async Task<List<CurrencyModel>> GetCurrencyList()
         {
             string myQuery = "SELECT id,code, name FROM Currency";
-            List<Currency> _List = await Context.GetData<Currency>(myQuery).ConfigureAwait(false);
+            List<CurrencyModel> _List = await Context.GetData<CurrencyModel>(myQuery).ConfigureAwait(false);
             return _List;
         }
 
@@ -62,7 +62,7 @@ namespace CMMSAPIs.Repositories.Utils
             return null;
         }
 
-        internal async Task<List<DefaultResponse>> AddLog(Log log)
+        internal async Task<List<DefaultResponseModel>> AddLog(LogModel log)
         {
             /*
              * Insert the log model properties to History table
@@ -71,7 +71,7 @@ namespace CMMSAPIs.Repositories.Utils
             return null;
         }
 
-        internal async Task<List<Log>> GetLog(int module_type, int id)
+        internal async Task<List<LogModel>> GetLog(int module_type, int id)
         {
             /*
              * Fetch data from History table for requested module_type and id

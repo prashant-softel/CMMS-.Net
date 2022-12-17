@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Permits;
+using CMMSAPIs.Models.Utils;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -20,7 +21,7 @@ namespace CMMSAPIs.Repositories.Permits
          * Permit Create Form Required End Points 
         */
 
-        internal Task<List<Permit>> GetPermitTypeList(int facility_id)
+        internal Task<List<DefaultListModel>> GetPermitTypeList(int facility_id)
         {
             /*
              * return permit_type_id, name from PermitTypeLists table for requsted facility_id 
@@ -28,7 +29,7 @@ namespace CMMSAPIs.Repositories.Permits
             return null;
         }
 
-        internal Task<List<Permit>> GetSafetyMeasurementQuestionList(int permit_type_id)
+        internal Task<List<DefaultListModel>> GetSafetyMeasurementQuestionList(int permit_type_id)
         {
             /*
              * return id, title from PermitTypeSafetyMeasures table for requested permit_type_id
@@ -37,7 +38,7 @@ namespace CMMSAPIs.Repositories.Permits
             return null;
         }
 
-        internal Task<List<Permit>> GetJobTypeList(int facility_id)
+        internal Task<List<DefaultListModel>> GetJobTypeList(int facility_id)
         {
             /*
              * return id, title from PermitJobTypeList table for requested facility_id
@@ -45,7 +46,7 @@ namespace CMMSAPIs.Repositories.Permits
             return null;
         }
 
-        internal Task<List<Permit>> GetSOPList(int job_type_id)
+        internal Task<List<DefaultListModel>> GetSOPList(int job_type_id)
         {
             /*
              * return * from PermitTBTJobList table for requested job_type_id
@@ -57,7 +58,7 @@ namespace CMMSAPIs.Repositories.Permits
          * Permit Main Feature End Points
         */
 
-        internal Task<List<Permit>> GetPermitList(int facility_id)
+        internal Task<List<PermitListModel>> GetPermitList(int facility_id)
         {
             /*
              * Return id as well as string value
@@ -68,7 +69,7 @@ namespace CMMSAPIs.Repositories.Permits
             return null;
         }
 
-        internal Task<List<Permit>> CreatePermit()
+        internal Task<List<PermitModel>> CreatePermit()
         {
             /*
              * Create Form data will go in several tables
@@ -85,7 +86,7 @@ namespace CMMSAPIs.Repositories.Permits
             return null;
         }
 
-        internal Task<List<Permit>> GetPermitDetails(int permit_id)
+        internal Task<List<PermitModel>> GetPermitDetails(int permit_id)
         {
             /*
              * Return id and string values which are stored in 
@@ -100,7 +101,7 @@ namespace CMMSAPIs.Repositories.Permits
          * Permit Issue/Approval/Rejection/Cancel End Points
         */
 
-        internal Task<List<Permit>> PermitApprove()
+        internal Task<List<DefaultResponseModel>> PermitApprove(ApprovalModel request)
         {
             /*
              * Update Permit Table reccomendationsByApprover, approvedStatus, approvedDate
@@ -109,7 +110,7 @@ namespace CMMSAPIs.Repositories.Permits
             return null;
         }
 
-        internal Task<List<Permit>> PermitReject()
+        internal Task<List<DefaultResponseModel>> PermitReject(ApprovalModel request)
         {
             /*
              * Pending
@@ -117,7 +118,7 @@ namespace CMMSAPIs.Repositories.Permits
             return null;
         }
 
-        internal Task<List<Permit>> PermitIssue()
+        internal Task<List<DefaultResponseModel>> PermitIssue(ApprovalModel request)
         {
             /*
              * Update Permit Table issuedReccomendations, issuedStatus, issuedDate
@@ -126,7 +127,7 @@ namespace CMMSAPIs.Repositories.Permits
             return null;
         }
 
-        internal Task<List<Permit>> PermitCancel()
+        internal Task<List<DefaultResponseModel>> PermitCancel(ApprovalModel request)
         {
             /*
              * Update Permit Table 	cancelReccomendations, cancelRequestDate, cancelRequestStatus

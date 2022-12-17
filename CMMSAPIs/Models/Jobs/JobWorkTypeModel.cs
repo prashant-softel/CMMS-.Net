@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace CMMSAPIs.Models.Jobs
 {
-    public class JobWorkType
+    public class JobWorkTypeModel
     {
         public int id { get; set; }
         public int categoryid { get; set; }

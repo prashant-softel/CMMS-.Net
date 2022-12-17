@@ -2,7 +2,7 @@
 
 namespace CMMSAPIs.Models.Utils
 {
-    public class DefaultResponse
+    public class DefaultResponseModel
     {
         public int id { get; set; }
         public string message { get; set; }

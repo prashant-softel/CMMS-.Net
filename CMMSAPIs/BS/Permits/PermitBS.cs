@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using CMMSAPIs.Repositories.Permits;
 using CMMSAPIs.Models.Permits;
+using CMMSAPIs.Models.Utils;
 
 namespace CMMSAPIs.BS.Permits
 {
@@ -13,25 +14,25 @@ namespace CMMSAPIs.BS.Permits
         /*
          * Permit Create End Points
         */
-        Task<List<Permit>> GetPermitTypeList(int facility_id);
-        Task<List<Permit>> GetSafetyMeasurementQuestionList(int permit_type_id);
-        Task<List<Permit>> GetJobTypeList(int facility_id);
-        Task<List<Permit>> GetSOPList(int job_type_id);
+        Task<List<DefaultListModel>> GetPermitTypeList(int facility_id);
+        Task<List<DefaultListModel>> GetSafetyMeasurementQuestionList(int permit_type_id);
+        Task<List<DefaultListModel>> GetJobTypeList(int facility_id);
+        Task<List<DefaultListModel>> GetSOPList(int job_type_id);
 
         /*
          * Permit Main End Points 
         */
-        Task<List<Permit>> CreatePermit();
-        Task<List<Permit>> GetPermitList(int facility_id);
-        Task<List<Permit>> GetPermitDetails(int permit_id);
+        Task<List<PermitModel>> CreatePermit();
+        Task<List<PermitListModel>> GetPermitList(int facility_id);
+        Task<List<PermitModel>> GetPermitDetails(int permit_id);
 
         /*
          * Permit Issue/Approve/Reject/Cancel End Points
         */
-        Task<List<Permit>> PermitApprove();
-        Task<List<Permit>> PermitReject();
-        Task<List<Permit>> PermitIssue();
-        Task<List<Permit>> PermitCancel();
+        Task<List<DefaultResponseModel>> PermitApprove(ApprovalModel request);
+        Task<List<DefaultResponseModel>> PermitReject(ApprovalModel request);
+        Task<List<DefaultResponseModel>> PermitIssue(ApprovalModel request);
+        Task<List<DefaultResponseModel>> PermitCancel(ApprovalModel request);
     }
 
     public class PermitBS : IPermitBS
@@ -47,7 +48,7 @@ namespace CMMSAPIs.BS.Permits
          * Permit Create Form Required End Points 
         */
 
-        public async Task<List<Permit>> GetPermitTypeList(int facility_id)
+        public async Task<List<DefaultListModel>> GetPermitTypeList(int facility_id)
         {
             try
             {
@@ -62,7 +63,7 @@ namespace CMMSAPIs.BS.Permits
             }
         }
 
-        public async Task<List<Permit>> GetSafetyMeasurementQuestionList(int permit_type_id)
+        public async Task<List<DefaultListModel>> GetSafetyMeasurementQuestionList(int permit_type_id)
         {
             try
             {
@@ -77,7 +78,7 @@ namespace CMMSAPIs.BS.Permits
             }
         }
 
-        public async Task<List<Permit>> GetJobTypeList(int facility_id)
+        public async Task<List<DefaultListModel>> GetJobTypeList(int facility_id)
         {
             try
             {
@@ -92,7 +93,7 @@ namespace CMMSAPIs.BS.Permits
             }
         }
 
-        public async Task<List<Permit>> GetSOPList(int job_type_id)
+        public async Task<List<DefaultListModel>> GetSOPList(int job_type_id)
         {
             try
             {
@@ -111,7 +112,7 @@ namespace CMMSAPIs.BS.Permits
          * Permit Main Feature End Points
         */
 
-        public async Task<List<Permit>> GetPermitList(int facility_id)
+        public async Task<List<PermitListModel>> GetPermitList(int facility_id)
         {
             try
             {
@@ -128,7 +129,7 @@ namespace CMMSAPIs.BS.Permits
 
         }
 
-        public async Task<List<Permit>> CreatePermit()
+        public async Task<List<PermitModel>> CreatePermit()
         {
             try
             {
@@ -143,7 +144,7 @@ namespace CMMSAPIs.BS.Permits
             }
         }
 
-        public async Task<List<Permit>> GetPermitDetails(int permit_id)
+        public async Task<List<PermitModel>> GetPermitDetails(int permit_id)
         {
             try
             {
@@ -162,13 +163,13 @@ namespace CMMSAPIs.BS.Permits
          * Permit Issue/Approval/Rejection/Cancel End Points
         */
 
-        public async Task<List<Permit>> PermitApprove()
+        public async Task<List<DefaultResponseModel>> PermitApprove(ApprovalModel request)
         {
             try
             {
                 using (var repos = new PermitRepository(getDB))
                 {
-                    return await repos.PermitApprove();
+                    return await repos.PermitApprove(request);
                 }
             }
             catch (Exception ex)
@@ -177,13 +178,13 @@ namespace CMMSAPIs.BS.Permits
             }
         }
 
-        public async Task<List<Permit>> PermitReject()
+        public async Task<List<DefaultResponseModel>> PermitReject(ApprovalModel request)
         {
             try
             {
                 using (var repos = new PermitRepository(getDB))
                 {
-                    return await repos.PermitReject();
+                    return await repos.PermitReject(request);
                 }
             }
             catch (Exception ex)
@@ -192,13 +193,13 @@ namespace CMMSAPIs.BS.Permits
             }
         }
 
-        public async Task<List<Permit>> PermitIssue()
+        public async Task<List<DefaultResponseModel>> PermitIssue(ApprovalModel request)
         {
             try
             {
                 using (var repos = new PermitRepository(getDB))
                 {
-                    return await repos.PermitIssue();
+                    return await repos.PermitIssue(request);
                 }
             }
             catch (Exception ex)
@@ -207,13 +208,13 @@ namespace CMMSAPIs.BS.Permits
             }
         }
 
-        public async Task<List<Permit>> PermitCancel()
+        public async Task<List<DefaultResponseModel>> PermitCancel(ApprovalModel request)
         {
             try
             {
                 using (var repos = new PermitRepository(getDB))
                 {
-                    return await repos.PermitCancel();
+                    return await repos.PermitCancel(request);
                 }
             }
             catch (Exception ex)

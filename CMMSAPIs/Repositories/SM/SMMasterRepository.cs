@@ -16,7 +16,7 @@ namespace CMMSAPIs.Repositories.SM
         {
         }
 
-        internal Task<List<SMMaster>> GetAssetTypeList()
+        internal Task<List<SMMasterModel>> GetAssetTypeList()
         {
             /*
              * Return id, asset_type from SMAssetTypes
@@ -24,7 +24,7 @@ namespace CMMSAPIs.Repositories.SM
             return null;
         }
 
-        internal Task<List<SMMaster>> AddAssetType()
+        internal Task<List<SMMasterModel>> AddAssetType()
         {
             /*
              * Add record in SMAssetTypes
@@ -32,7 +32,7 @@ namespace CMMSAPIs.Repositories.SM
             return null;
         }
 
-        internal Task<List<SMMaster>> UpdateAssetType()
+        internal Task<List<SMMasterModel>> UpdateAssetType()
         {
             /*
              * Update record in SMAssetTypes
@@ -40,7 +40,7 @@ namespace CMMSAPIs.Repositories.SM
             return null;
         }
 
-        internal Task<List<SMMaster>> DeleteAssetType()
+        internal Task<List<SMMasterModel>> DeleteAssetType()
         {
             /*
              * Delete record in SMAssetTypes
@@ -48,7 +48,7 @@ namespace CMMSAPIs.Repositories.SM
             return null;
         }
 
-        internal Task<List<SMMaster>> GetAssetCategoryList()
+        internal Task<List<SMMasterModel>> GetAssetCategoryList()
         {
             /*
              * Return id, name from SMItemCategory
@@ -56,7 +56,7 @@ namespace CMMSAPIs.Repositories.SM
             return null;
         }
 
-        internal Task<List<SMMaster>> AddAssetCategory()
+        internal Task<List<SMMasterModel>> AddAssetCategory()
         {
             /*
              * Add record in SMItemCategory
@@ -64,7 +64,7 @@ namespace CMMSAPIs.Repositories.SM
             return null;
         }
 
-        internal Task<List<SMMaster>> UpdateAssetCategory()
+        internal Task<List<SMMasterModel>> UpdateAssetCategory()
         {
             /*
              * Update record in SMItemCategory
@@ -72,7 +72,7 @@ namespace CMMSAPIs.Repositories.SM
             return null;
         }
 
-        internal Task<List<SMMaster>> DeleteAssetCategory()
+        internal Task<List<SMMasterModel>> DeleteAssetCategory()
         {
             /*
              * Delete record in SMItemCategory
@@ -80,7 +80,7 @@ namespace CMMSAPIs.Repositories.SM
             return null;
         }
 
-        internal Task<List<SMMaster>> GetUnitMeasurementList()
+        internal Task<List<SMMasterModel>> GetUnitMeasurementList()
         {
             /*
              * Return * from SMUnitMeasurement
@@ -88,7 +88,7 @@ namespace CMMSAPIs.Repositories.SM
             return null;
         }
 
-        internal Task<List<SMMaster>> AddUnitMeasurement()
+        internal Task<List<SMMasterModel>> AddUnitMeasurement()
         {
             /*
              * Add record in SMUnitMeasurement
@@ -96,7 +96,7 @@ namespace CMMSAPIs.Repositories.SM
             return null;
         }
 
-        internal Task<List<SMMaster>> UpdateUnitMeasurement()
+        internal Task<List<SMMasterModel>> UpdateUnitMeasurement()
         {
             /*
              * Update record in SMUnitMeasurement
@@ -104,7 +104,7 @@ namespace CMMSAPIs.Repositories.SM
             return null;
         }
 
-        internal Task<List<SMMaster>> DeleteUnitMeasurement()
+        internal Task<List<SMMasterModel>> DeleteUnitMeasurement()
         {
             /*
              * Delete record in SMUnitMeasurement
@@ -112,7 +112,7 @@ namespace CMMSAPIs.Repositories.SM
             return null;
         }
 
-        internal Task<List<SMMaster>> GetAssetMasterList()
+        internal Task<List<SMMasterModel>> GetAssetMasterList()
         {
             /*
              * Return id, name, code, description, asset type, asset categroy, unit measurement, attached files  
@@ -121,7 +121,7 @@ namespace CMMSAPIs.Repositories.SM
             return null;
         }
 
-        internal Task<List<SMMaster>> AddAssetMaster()
+        internal Task<List<SMMasterModel>> AddAssetMaster()
         {
             /*
              * Add record in SMAssetMasters and SMAssetMasterFiles
@@ -129,7 +129,7 @@ namespace CMMSAPIs.Repositories.SM
             return null;
         }
 
-        internal Task<List<SMMaster>> UpdateAssetMaster()
+        internal Task<List<SMMasterModel>> UpdateAssetMaster()
         {
             /*
              * Update record in SMAssetMasters and SMAssetMasterFiles
@@ -137,7 +137,7 @@ namespace CMMSAPIs.Repositories.SM
             return null;
         }
 
-        internal Task<List<SMMaster>> DeleteAssetMaster()
+        internal Task<List<SMMasterModel>> DeleteAssetMaster()
         {
             /*
              * Delete record in SMAssetMasters and SMAssetMasterFiles

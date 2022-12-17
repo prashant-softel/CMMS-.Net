@@ -1,6 +1,6 @@
 ﻿namespace CMMSAPIs.Models.Utils
 {
-    public class Log
+    public class LogModel
     {
         public int id { get; set; }
         public int module_type { get; set; }
