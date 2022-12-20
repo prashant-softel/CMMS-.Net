@@ -1,4 +1,5 @@
 using CMMSAPIs.BS.Jobs;
+using CMMSAPIs.BS.Permits;
 using CMMSAPIs.BS.Mails;
 using CMMSAPIs.BS.Masters;
 using CMMSAPIs.BS.SM;
@@ -42,6 +43,8 @@ namespace CMMSAPIs
             services.AddScoped<DatabaseProvider>();
             services.AddScoped<ICMMSBS, CMMSBS>();
             services.AddScoped<IJobBS, JobBS>();
+            services.AddScoped<IPermitBS, PermitBS>();
+
             services.AddScoped<IJobWorkTypeBS, JobWorkTypeBS>();
 
             services.AddScoped<iLoginBS, LoginBS>();
