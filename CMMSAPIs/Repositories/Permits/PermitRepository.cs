@@ -57,15 +57,31 @@ namespace CMMSAPIs.Repositories.Permits
          * Permit Main Feature End Points
         */
 
-        internal Task<List<Permit>> GetPermitList(int facility_id)
+        internal async Task<List<Permit>> GetPermitList(int facility_id, int userID)
         {
             /*
              * Return id as well as string value
              * Use Permits, Assets, AssetsCategory, Users table to fetch below fields
              * Permit id, site Permit No., Permit Type, Equipment Categories, Working Area/Equipment, Description, Permit requested by
-             * Request Date/Time, Approved By, Approved Date/Time, Current Status(Approved, Rejected, closed).
+             * Request Date/Time, Approved By, Approved Date/Time, Current Status(Approved, Rejected, closed).           
             */
-            return null;
+            string myQuery = "SELECT " +
+                                 "ptw.id as permitId, ptw.permitNumber as sitePermitNo, permitType.id as permitType,  permitType.title as PermitTypeName, asset_cat.name as equipmentCat, facilities.id as workingAreaId, facilities.name as workingAreaName, ptw.description as description, ptw.acceptedById as ptwRequestedBy, ptw.acceptedDate as ptwRequestDate, ptw.approvedById as approvedBy, ptw.approvedDate as approvedDate, ptw.status as currentStatus " +
+                                 " FROM " +
+                                        "permits as ptw " +                                 
+                                  "JOIN " +
+                                        "facilities as facilities ON ptw.blockId = facilities.id " +
+                                  "JOIN " +
+                                        "assetcategories as asset_cat ON ptw.id = asset_cat.id " +
+                                  "LEFT JOIN " +
+                                         "permittypelists as permitType ON ptw.typeId = permitType.id " +
+                                  "LEFT JOIN " +
+                                         "jobs as job ON ptw.id = job.linkedPermit " +
+                                  "LEFT JOIN " +
+                                        "users as user ON user.id = ptw.issuedById or user.id = ptw.approvedById" +
+                                  " WHERE ptw.facilityId = " + facility_id + " and user.id = " + userID;          
+            List<Permit> _PermitList = await Context.GetData<Permit>(myQuery).ConfigureAwait(false);
+            return _PermitList;
         }
 
         internal Task<List<Permit>> CreatePermit()
@@ -85,7 +101,7 @@ namespace CMMSAPIs.Repositories.Permits
             return null;
         }
 
-        internal Task<List<Permit>> GetPermitDetails(int permit_id)
+        internal  Task<List<Permit>> GetPermitDetails(int permit_id)
         {
             /*
              * Return id and string values which are stored in 
@@ -93,7 +109,20 @@ namespace CMMSAPIs.Repositories.Permits
              * for request permit_id Join with below tables to get string value from
              * Assets, AssetsCategory, Facility, Users, PermitTypeSafetyMeasures, PermitTypeList, PermitJobTypeList, PermitTBTJobList
             */
-            return null;
+         /*   string myQuery = "SELECT " +
+                                   "ptw.PTW_id as permitId, ptw.PTW_code as sitePermitNo, ptw.id as permitType, ptw.PTW_Title as PermitTypeName, asset_cat.name as equipmentCat, asset.id as workingAreaId, asset.name as workingAreaName, job.description as description, ptw.File_added_by as ptwRequestedBy, ptw.File_added_date as ptwRequestDate, ptw.File_updated_by as approvedBy, ptw.File_updated_date as approvedDate, ptw.status as currentStatus " +
+                                   " FROM " +
+                                          "fleximc_ptw_files as ptw " +
+                                   "JOIN " +
+                                          "assets as asset ON  ptw.File_Category_id  =  asset.id " +
+                                   "JOIN " +
+                                          "assetcategories as asset_cat ON ptw.File_Category_id = asset_cat.id " +
+                                   "LEFT JOIN " +
+                                          "users as user ON user.id = ptw.File_added_by or user.id = ptw.File_updated_by" +
+                                    " WHERE ptw.Facility_id= " + facility_id + " and user.id= " + userID;
+*/
+/*            List<Permit> _PermitList = await Context.GetData<Permit>(myQuery).ConfigureAwait(false);
+*/            return null;
         }
 
         /*

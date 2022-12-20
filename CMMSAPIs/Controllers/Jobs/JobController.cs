@@ -24,11 +24,11 @@ namespace CMMSAPIs.Controllers.Jobs
 
         [Route("GetJobList")]
         [HttpGet]
-        public async Task<IActionResult> GetJobList(int facility_id)
+        public async Task<IActionResult> GetJobList(int facility_id, int userId)
         {
             try
             {
-                var data = await _JobBS.GetJobList(facility_id);
+                var data = await _JobBS.GetJobList(facility_id, userId);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -43,7 +43,7 @@ namespace CMMSAPIs.Controllers.Jobs
         {
             try
             {
-                var data = await _JobBS.GetJobList(job_id);
+                var data = await _JobBS.GetJobDetail(job_id);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -54,11 +54,11 @@ namespace CMMSAPIs.Controllers.Jobs
 
         [Route("CreateNewJob")]
         [HttpPost]
-        public async Task<IActionResult> CreateNewJob()
+        public async Task<IActionResult> CreateNewJob([FromForm] CreateJob request)
         {
             try
             {
-                var data = await _JobBS.CreateNewJob();
+                var data = await _JobBS.CreateNewJob(request);
                 return Ok(data);
             }
             catch (Exception ex)

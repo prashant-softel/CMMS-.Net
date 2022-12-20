@@ -16,7 +16,7 @@ namespace CMMSAPIs.Repositories.Jobs
         {
         }
 
-        internal async Task<List<Job>> GetJobList(int facility_id)
+        internal async Task<List<Job>> GetJobList(int facility_id, int userId)
         {
             /*
             * Fetch data from Job table for provided facility_id.
@@ -28,9 +28,9 @@ namespace CMMSAPIs.Repositories.Jobs
            */
             /*Your code goes here*/
             string myQuery = "SELECT " +
-                                 "facilities.name as plantName, job.id as id, asset_cat.name as equipmentCat, asset.name as workingArea, job.title as jobDetails, workType.workTypeName as workType,  permit.code as permitId, job.createdBy as raisedBy, CONCAT(user.firstName, user.lastName) as assignedTo , IF(job.breakdownTime = '', 'Non Breakdown Maintenance', 'Breakdown Maintenance') as breakdownType" +
+                                 "facilities.name as plantName, job.createdAt as jobDate,DATE_FORMAT(job.breakdownTime, '%Y-%m-%d') as breaKdownTime, job.id as id, asset_cat.name as equipmentCat, asset.name as workingArea, job.title as jobDetails, workType.workTypeName as workType,  permit.code as permitId, job.createdBy as raisedBy, CONCAT(user.firstName + ' ' + user.lastName) as assignedTo , IF(job.breakdownTime = '', 'Non Breakdown Maintenance', 'Breakdown Maintenance') as breakdownType" +
                                  " FROM " +
-                                   "jobs as job " +
+                                        "jobs as job " +
                                  "JOIN " +
                                         "jobmappingassets as mapAssets ON mapAssets.jobId = job.id " +
                                  "JOIN " +
@@ -47,7 +47,7 @@ namespace CMMSAPIs.Repositories.Jobs
                                         "users as user ON user.id = job.createdBy or user.id = job.assignedId";
             if (facility_id != 0)
             {
-                myQuery += "WHERE job.facilityId = " + facility_id;
+                myQuery += " WHERE job.facilityId= " + facility_id + " and user.id= " + userId;
 
             }
         
@@ -55,7 +55,7 @@ namespace CMMSAPIs.Repositories.Jobs
             return _JobList;
         }
 
-        internal Task<List<Job>> GetJobDetail(int job_id)
+        internal async Task<List<JobView>> GetJobDetail(int job_id)
         {
             /*
              * Fetch data from Job table and joins these table for relationship using ids Users, Assets, AssetCategory, Facility
@@ -63,10 +63,34 @@ namespace CMMSAPIs.Repositories.Jobs
             */
 
             /*Your code goes here*/
-            return null;
+
+
+            string myQuery = "SELECT " +
+                                    "facilities.id as block_id, facilities.name as block_name, asset_cat.id as equipmentCat_id, asset_cat.name as equipmentCat_name, asset.id as workingArea_id, asset.name as workingArea_name, job.status as status, user.id as assigned_id , CONCAT(user.firstName, user.lastName) as assigned_name , workType.workTypeName as workType,  job.title as job_title, job.description as job_description " +
+                                      "FROM " +
+                                            "jobs as job " +
+                                      "JOIN " +
+                                            "jobmappingassets as mapAssets ON mapAssets.jobId = job.id " +
+                                      "JOIN " +
+                                            "assets as asset ON mapAssets.assetId  =  asset.id " +
+                                      "JOIN " +
+                                            "assetcategories as asset_cat ON mapAssets.categoryId = asset_cat.id " +
+                                      "LEFT JOIN " +
+                                            "jobworktypes as workType ON workType.equipmentCategoryId = asset_cat.id " +
+                                      "JOIN " +
+                                            "facilities as facilities ON job.facilityId = facilities.id " +
+                                      "LEFT JOIN " +
+                                            "users as user ON user.id = job.assignedId" +           
+                                      " WHERE job.id= " + job_id;
+
+            List<JobView> _ViewJobList = await Context.GetData<JobView>(myQuery).ConfigureAwait(false);
+
+
+            return _ViewJobList;
+
         }
 
-        internal Task<List<Job>> CreateNewJob()
+        internal Task<int> CreateNewJob(CreateJob request)
         {
             /*
              * Job basic details will go to Job table
@@ -76,6 +100,11 @@ namespace CMMSAPIs.Repositories.Jobs
             */
 
             /*Your code goes here*/
+            /*string qry = "insert into job (facilityId, blockId, assignedId, title, description, linkedPermit, breakdownTime,belongsTo,status, createdAt,updatedAt,createdBy,updatedBy,cancellationRemarks,cancelStatus) values " +
+                     "('" + request.facilityId + "', '" + request.blockId + "', '" + request.assignedId + "', '" + request.title + "', '" + request.description + "', '" + request.linkedPermit + "', '" + request.breakdownTime + "','" + request.belongsTo + "','" + request.status + "','" + request.createdAt + "','" + request.updatedAt + "','" + request.createdBy + "','" + request.updatedBy + "','" + request.createdAt + "','" + request.cancellationRemarks + "','" + request.cancelStatus + "')";
+
+            return await Context.ExecuteNonQry<int>(qry).ConfigureAwait(false);
+*/
             return null;
         }
 

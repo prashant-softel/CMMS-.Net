@@ -90,11 +90,11 @@ namespace CMMSAPIs.Controllers.Permits
 
         [Route("GetPermitList")]
         [HttpGet]
-        public async Task<IActionResult> GetPermitList(int facility_id)
+        public async Task<IActionResult> GetPermitList(int facility_id, int userID)
         {
             try
             {
-                var data = await _PermitBS.GetPermitList(facility_id);
+                var data = await _PermitBS.GetPermitList(facility_id, userID);
                 return Ok(data);
             }
             catch (Exception ex)

@@ -8,6 +8,8 @@ namespace CMMSAPIs.Models.Jobs
     public class Job
     {
         public int id { get; set; }
+        public int userId { get; set; }
+
         public string plantName { get; set; }
         public DateTime jobDate { get; set; }
         public string equipmentCat { get; set; }
