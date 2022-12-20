@@ -23,6 +23,7 @@ namespace CMMSAPIs.Repositories.Permits
 
         internal Task<List<DefaultListModel>> GetPermitTypeList(int facility_id)
         {
+            
             /*
              * return permit_type_id, name from PermitTypeLists table for requsted facility_id 
             */
@@ -69,7 +70,7 @@ namespace CMMSAPIs.Repositories.Permits
             return null;
         }
 
-        internal Task<List<PermitModel>> CreatePermit()
+        internal Task<List<DefaultResponseModel>> CreatePermit(CreatePermitModel request)
         {
             /*
              * Create Form data will go in several tables
@@ -86,7 +87,7 @@ namespace CMMSAPIs.Repositories.Permits
             return null;
         }
 
-        internal Task<List<PermitModel>> GetPermitDetails(int permit_id)
+        internal Task<List<PermitDetailModel>> GetPermitDetails(int permit_id)
         {
             /*
              * Return id and string values which are stored in 

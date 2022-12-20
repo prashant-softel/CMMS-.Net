@@ -10,9 +10,9 @@ namespace CMMSAPIs.BS.Utils
 {
     public interface IUtilsBS
     {
-        Task<List<Util>> GetCountryList();
-        Task<List<Util>> GetStateList(int country_id);
-        Task<List<Util>> GetCityList(int state_id);
+        Task<List<DefaultListModel>> GetCountryList();
+        Task<List<DefaultListModel>> GetStateList(int country_id);
+        Task<List<DefaultListModel>> GetCityList(int state_id);
         Task<List<CurrencyModel>> GetCurrencyList();
         Task<List<TZone>> GetTimeZoneList();
         Task<List<DefaultResponseModel>> AddLog(LogModel log);
@@ -28,7 +28,7 @@ namespace CMMSAPIs.BS.Utils
             databaseProvider = dbProvider;
         }
 
-        public async Task<List<Util>> GetCountryList()
+        public async Task<List<DefaultListModel>> GetCountryList()
         {
             try
             {
@@ -43,7 +43,7 @@ namespace CMMSAPIs.BS.Utils
             }
         }
 
-        public async Task<List<Util>> GetStateList(int country_id)
+        public async Task<List<DefaultListModel>> GetStateList(int country_id)
         {
             try
             {
@@ -58,7 +58,7 @@ namespace CMMSAPIs.BS.Utils
             }
         }
 
-        public async Task<List<Util>> GetCityList(int state_id)
+        public async Task<List<DefaultListModel>> GetCityList(int state_id)
         {
             try
             {

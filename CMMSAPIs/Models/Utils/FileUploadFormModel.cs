@@ -1,4 +1,4 @@
-﻿namespace CMMSAPIs.Models.JC
+﻿namespace CMMSAPIs.Models.Utils
 {
     public class FileUploadFormModel
     {

@@ -16,24 +16,24 @@ namespace CMMSAPIs.Repositories.Utils
 
         }
 
-        internal async Task<List<Util>> GetCountryList()
+        internal async Task<List<DefaultListModel>> GetCountryList()
         {
             string myQuery = "SELECT id, name FROM Countries";
-            List<Util> _List = await Context.GetData<Util>(myQuery).ConfigureAwait(false);
+            List<DefaultListModel> _List = await Context.GetData<DefaultListModel>(myQuery).ConfigureAwait(false);
             return _List;
         }
 
-        internal async Task<List<Util>> GetStateList(int country_id)
+        internal async Task<List<DefaultListModel>> GetStateList(int country_id)
         {
             string myQuery = "SELECT id, name FROM States WHERE country_id = "+country_id;
-            List<Util> _List = await Context.GetData<Util>(myQuery).ConfigureAwait(false);
+            List<DefaultListModel> _List = await Context.GetData<DefaultListModel>(myQuery).ConfigureAwait(false);
             return _List;
         }
 
-        internal async Task<List<Util>> GetCityList(int state_id)
+        internal async Task<List<DefaultListModel>> GetCityList(int state_id)
         {
             string myQuery = "SELECT id, name FROM Cities WHERE state_id = " + state_id;
-            List<Util> _List = await Context.GetData<Util>(myQuery).ConfigureAwait(false);
+            List<DefaultListModel> _List = await Context.GetData<DefaultListModel>(myQuery).ConfigureAwait(false);
             return _List;
         }
         internal async Task<List<CurrencyModel>> GetCurrencyList()

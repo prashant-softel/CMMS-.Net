@@ -8,4 +8,5 @@ namespace CMMSAPIs.Models.Utils
         public string message { get; set; }
         public Boolean status { get; set; }
     }
+
 }

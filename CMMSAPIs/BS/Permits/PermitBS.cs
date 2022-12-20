@@ -22,9 +22,9 @@ namespace CMMSAPIs.BS.Permits
         /*
          * Permit Main End Points 
         */
-        Task<List<PermitModel>> CreatePermit();
+        Task<List<DefaultResponseModel>> CreatePermit(CreatePermitModel request);
         Task<List<PermitListModel>> GetPermitList(int facility_id);
-        Task<List<PermitModel>> GetPermitDetails(int permit_id);
+        Task<List<PermitDetailModel>> GetPermitDetails(int permit_id);
 
         /*
          * Permit Issue/Approve/Reject/Cancel End Points
@@ -129,13 +129,13 @@ namespace CMMSAPIs.BS.Permits
 
         }
 
-        public async Task<List<PermitModel>> CreatePermit()
+        public async Task<List<DefaultResponseModel>> CreatePermit(CreatePermitModel request)
         {
             try
             {
                 using (var repos = new PermitRepository(getDB))
                 {
-                    return await repos.CreatePermit();
+                    return await repos.CreatePermit(request);
                 }
             }
             catch (Exception ex)
@@ -144,7 +144,7 @@ namespace CMMSAPIs.BS.Permits
             }
         }
 
-        public async Task<List<PermitModel>> GetPermitDetails(int permit_id)
+        public async Task<List<PermitDetailModel>> GetPermitDetails(int permit_id)
         {
             try
             {

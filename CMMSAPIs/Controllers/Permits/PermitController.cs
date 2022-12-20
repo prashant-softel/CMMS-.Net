@@ -1,5 +1,6 @@
 ﻿using CMMSAPIs.BS.Permits;
 using CMMSAPIs.Models;
+using CMMSAPIs.Models.Permits;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories;
 using Microsoft.AspNetCore.Http;
@@ -106,11 +107,11 @@ namespace CMMSAPIs.Controllers.Permits
 
         [Route("CreatePermit")]
         [HttpPost]
-        public async Task<IActionResult> CreatePermit()
+        public async Task<IActionResult> CreatePermit(CreatePermitModel request)
         {
             try
             {
-                var data = await _PermitBS.CreatePermit();
+                var data = await _PermitBS.CreatePermit(request);
                 return Ok(data);
             }
             catch (Exception ex)
