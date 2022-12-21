@@ -2,6 +2,7 @@
 {
     public class Constant
     {
+        // Token expiration time
         public const int TOKEN_EXPIRATION_TIME = 30;
 
         // Possible actions in each modules
@@ -10,7 +11,6 @@
         // Module Prefix
         public const string PREFIX_JOB = "JOB", PREFIX_PERMIT = "PERMIT", PREFIX_JC = "JC";
 
-        public const int JOB = 1, PERMIT = 2, JOBCARD = 3;
-        
+        public const int JOB = 1, PERMIT = 2, JOBCARD = 3;        
     }
 }
