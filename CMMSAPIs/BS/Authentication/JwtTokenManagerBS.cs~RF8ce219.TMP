@@ -1,0 +1,57 @@
+﻿using CMMSAPIs.Models.Authentication;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+using System;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+
+namespace CMMSAPIs.BS.Authentication
+{
+    public interface IJwtTokenManagerBS
+    {
+        string Authenticate(UserCrentialsModel userCrentials);
+    }
+    public class JwtTokenManagerBS : IJwtTokenManagerBS
+    {
+        private readonly IConfiguration _configuration;
+        
+        public JwtTokenManagerBS(IConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
+        public string Authenticate(UserCrentialsModel userCrentials)
+        {
+            try
+            {
+                //using (var repos = new JwtTokenManagerRepository(getDB))
+                //{
+                //    return repos.Authenticate(user_name, password);
+                //}
+                var key = _configuration.GetValue<string>("JwtConfig:Key");
+                var keyBytes = Encoding.ASCII.GetBytes(key);
+
+                var tokenHandler = new JwtSecurityTokenHandler();
+
+                var tokenDescriptor = new SecurityTokenDescriptor()
+                {
+                    Subject = new ClaimsIdentity(new Claim[] {
+                        new Claim(ClaimTypes.NameIdentifier, userCrentials.user_name)
+                    }),
+                    Expires = DateTime.UtcNow.AddSeconds(30),
+                    SigningCredentials = new SigningCredentials(
+                    new SymmetricSecurityKey(keyBytes), SecurityAlgorithms.HmacSha256Signature)
+                };
+
+                var token = tokenHandler.CreateToken(tokenDescriptor);
+
+                    
+                return tokenHandler.WriteToken(token);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+    }
+}
