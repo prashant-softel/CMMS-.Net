@@ -11,7 +11,7 @@ namespace CMMSAPIs.BS.Authentication
 {
     public interface IJwtTokenManagerBS
     {
-        Task<UserToken> Authenticate(UserCrentialsModel userCrentials);
+        Task<UserToken> Authenticate(CMUserCrentials userCrentials);
     }
     public class JwtTokenManagerBS : IJwtTokenManagerBS
     {
@@ -24,7 +24,7 @@ namespace CMMSAPIs.BS.Authentication
             _configuration = configuration;
             databaseProvider = dbProvider;
         }
-        public Task<UserToken> Authenticate(UserCrentialsModel userCrentials)
+        public Task<UserToken> Authenticate(CMUserCrentials userCrentials)
         {
             try
             {

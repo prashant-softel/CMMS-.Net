@@ -22,50 +22,50 @@ namespace CMMSAPIs.Repositories.Masters
 
         }
 
-        internal async Task<List<FinancialYear>> GetFinancialYear()
+        internal async Task<List<CMFinancialYear>> GetFinancialYear()
         {
-            List<FinancialYear> _FinancialYear = new List<FinancialYear>();
-            _FinancialYear.Add(new FinancialYear { financial_year = "2020-21" });
-            _FinancialYear.Add(new FinancialYear { financial_year = "2021-22" });
-            _FinancialYear.Add(new FinancialYear { financial_year = "2022-23" });
+            List<CMFinancialYear> _FinancialYear = new List<CMFinancialYear>();
+            _FinancialYear.Add(new CMFinancialYear { financial_year = "2020-21" });
+            _FinancialYear.Add(new CMFinancialYear { financial_year = "2021-22" });
+            _FinancialYear.Add(new CMFinancialYear { financial_year = "2022-23" });
             return _FinancialYear;
 
         }
 
-        internal async Task<List<Facility>> GetFacilityList()
+        internal async Task<List<CMFacility>> GetFacilityList()
         {
             string myQuery = "SELECT id, name, address, city, state, country, zipcode as pin FROM Facilities WHERE isBlock = 0";
-            List<Facility> _Facility = await Context.GetData<Facility>(myQuery).ConfigureAwait(false);
+            List<CMFacility> _Facility = await Context.GetData<CMFacility>(myQuery).ConfigureAwait(false);
             return _Facility;
         }
 
-        internal async Task<List<Facility>> GetFacility(int facility_id)
+        internal async Task<List<CMFacility>> GetFacility(int facility_id)
         {
             string myQuery = "SELECT id, name, address, city, state, country, zipcode as pin FROM Facilities WHERE id= " + facility_id;
-            List<Facility> _Facility = await Context.GetData<Facility>(myQuery).ConfigureAwait(false);
+            List<CMFacility> _Facility = await Context.GetData<CMFacility>(myQuery).ConfigureAwait(false);
             return _Facility;
         }
 
-        internal async Task<List<Facility>> GetBlockList(int facility_id)
+        internal async Task<List<CMFacility>> GetBlockList(int facility_id)
         {
             string myQuery = "SELECT id, name, address, city, state, country, zipcode as pin FROM Facilities WHERE isBlock = 1 AND status = 1 AND parentId = " + facility_id;
-            List<Facility> _Facility = await Context.GetData<Facility>(myQuery).ConfigureAwait(false);
+            List<CMFacility> _Facility = await Context.GetData<CMFacility>(myQuery).ConfigureAwait(false);
             return _Facility;
         }
-        internal async Task<List<AssetCategory>> GetAssetCategoryList()
+        internal async Task<List<CMAssetCategory>> GetAssetCategoryList()
         {
             string myQuery = "SELECT id, name FROM AssetCategories where status = 1";
-            List<AssetCategory> _AssetCategory = await Context.GetData<AssetCategory>(myQuery).ConfigureAwait(false);
+            List<CMAssetCategory> _AssetCategory = await Context.GetData<CMAssetCategory>(myQuery).ConfigureAwait(false);
             return _AssetCategory;
         }
-        internal async Task<List<Asset>> GetAssetList(int facility_id)
+        internal async Task<List<CMAsset>> GetAssetList(int facility_id)
         {
             string myQuery = "SELECT id,name FROM Assets where status = 1 AND facilityId = " + facility_id;
-            List<Asset> _Asset = await Context.GetData<Asset>(myQuery).ConfigureAwait(false);
+            List<CMAsset> _Asset = await Context.GetData<CMAsset>(myQuery).ConfigureAwait(false);
             return _Asset;
         }
 
-        internal async Task<List<Employee>> GetEmployeeList(int facility_id)
+        internal async Task<List<CMEmployee>> GetEmployeeList(int facility_id)
         {
             string myQuery = "SELECT " +
                                     "u.id, loginId, concat(firstName,' ', lastName) as name, birthday as birthdate, " +
@@ -76,7 +76,7 @@ namespace CMMSAPIs.Repositories.Masters
                                     "UserFacilities as uf ON u.id = uf.userId " +
                              "WHERE " +
                                     "u.status = 1 AND uf.status = 1 AND isEmployee = 1 AND uf.facilityId = " + facility_id;
-            List<Employee> _Employee = await Context.GetData<Employee>(myQuery).ConfigureAwait(false);
+            List<CMEmployee> _Employee = await Context.GetData<CMEmployee>(myQuery).ConfigureAwait(false);
             return _Employee;
         }
     }

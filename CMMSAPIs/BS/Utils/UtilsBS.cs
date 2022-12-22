@@ -10,13 +10,13 @@ namespace CMMSAPIs.BS.Utils
 {
     public interface IUtilsBS
     {
-        Task<List<DefaultListModel>> GetCountryList();
-        Task<List<DefaultListModel>> GetStateList(int country_id);
-        Task<List<DefaultListModel>> GetCityList(int state_id);
-        Task<List<CurrencyModel>> GetCurrencyList();
+        Task<List<CMDefaultList>> GetCountryList();
+        Task<List<CMDefaultList>> GetStateList(int country_id);
+        Task<List<CMDefaultList>> GetCityList(int state_id);
+        Task<List<CMCurrency>> GetCurrencyList();
         Task<List<TZone>> GetTimeZoneList();
-        Task<List<DefaultResponseModel>> AddLog(LogModel log);
-        Task<List<LogModel>> GetLog(int module_type, int id);
+        Task<List<CMDefaultResponse>> AddLog(CMLog log);
+        Task<List<CMLog>> GetLog(int module_type, int id);
 
     }
     public class UtilsBS : IUtilsBS
@@ -28,7 +28,7 @@ namespace CMMSAPIs.BS.Utils
             databaseProvider = dbProvider;
         }
 
-        public async Task<List<DefaultListModel>> GetCountryList()
+        public async Task<List<CMDefaultList>> GetCountryList()
         {
             try
             {
@@ -43,7 +43,7 @@ namespace CMMSAPIs.BS.Utils
             }
         }
 
-        public async Task<List<DefaultListModel>> GetStateList(int country_id)
+        public async Task<List<CMDefaultList>> GetStateList(int country_id)
         {
             try
             {
@@ -58,7 +58,7 @@ namespace CMMSAPIs.BS.Utils
             }
         }
 
-        public async Task<List<DefaultListModel>> GetCityList(int state_id)
+        public async Task<List<CMDefaultList>> GetCityList(int state_id)
         {
             try
             {
@@ -73,7 +73,7 @@ namespace CMMSAPIs.BS.Utils
             }
         }
 
-        public async Task<List<CurrencyModel>> GetCurrencyList()
+        public async Task<List<CMCurrency>> GetCurrencyList()
         {
             try
             {
@@ -102,7 +102,7 @@ namespace CMMSAPIs.BS.Utils
                 throw;
             }
         }
-        public async Task<List<DefaultResponseModel>> AddLog(LogModel log)
+        public async Task<List<CMDefaultResponse>> AddLog(CMLog log)
         {
             try
             {
@@ -117,7 +117,7 @@ namespace CMMSAPIs.BS.Utils
             }
         }
 
-        public async Task<List<LogModel>> GetLog(int module_type, int id)
+        public async Task<List<CMLog>> GetLog(int module_type, int id)
         {
             try
             {

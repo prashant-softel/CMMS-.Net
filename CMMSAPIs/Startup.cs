@@ -80,7 +80,7 @@ namespace CMMSAPIs
             services.AddScoped<IUtilsBS, UtilsBS>();
             services.AddScoped<IPermitBS, PermitBS>();
             services.AddScoped<IJCBS, JCBS>();
-            services.Configure<MailSettings>(Configuration.GetSection("MailSettings"));
+            services.Configure<CMMailSettings>(Configuration.GetSection("MailSettings"));
             services.AddTransient<IMailService, MailService>();
             services.AddScoped<IJwtTokenManagerBS, JwtTokenManagerBS>();
         }

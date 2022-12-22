@@ -17,7 +17,7 @@ namespace CMMSAPIs.Repositories.JC
         {
         }
 
-        internal Task<List<JCListModel>> GetJCList(int facility_id)
+        internal Task<List<CMJCList>> GetJCList(int facility_id)
         {
             /* Return all field mentioned in JCListModel model
             *  tables are JobCards, Jobs, Permit, Users
@@ -27,7 +27,7 @@ namespace CMMSAPIs.Repositories.JC
             return null;
         }
 
-        internal Task<List<JCDetailModel>> GetJCDetail(int jc_id)
+        internal Task<List<CMJCDetail>> GetJCDetail(int jc_id)
         {
             /*
              * Fetch data from JobCards table and joins these table for relationship using ids 
@@ -39,7 +39,7 @@ namespace CMMSAPIs.Repositories.JC
             return null;
         }
 
-        internal Task<List<DefaultResponseModel>> CreateJC(int job_id)
+        internal Task<List<CMDefaultResponse>> CreateJC(int job_id)
         {
             /*
              * 
@@ -56,7 +56,7 @@ namespace CMMSAPIs.Repositories.JC
             return null;
         }
 
-        internal Task<List<DefaultResponseModel>> UpdateJC(JCUpdateModel request)
+        internal Task<List<CMDefaultResponse>> UpdateJC(CMJCUpdate request)
         {
             /*
              * Below thing will happen in update function
@@ -64,14 +64,14 @@ namespace CMMSAPIs.Repositories.JC
              * Add new comments - History Table (use Utils AddLog functions)
              * Add/Remove employee list - PermiEmployeeLists table
              * Status - JobCards table
-             * Return the DefaultResponseModel
+             * Return the CMDefaultResponse
             */
 
             /*Your code goes here*/
             return null;
         }
 
-        internal Task<List<DefaultResponseModel>> CloseJC(JCCloseModel request)
+        internal Task<List<CMDefaultResponse>> CloseJC(CMJCClose request)
         {
             /*
              * AssignedID/PermitID/CancelJob. Out of 3 we can update any one fields based on request
@@ -83,19 +83,19 @@ namespace CMMSAPIs.Repositories.JC
             return null;
         }
 
-        internal Task<List<DefaultResponseModel>> ApproveJC(ApprovalModel request)
+        internal Task<List<CMDefaultResponse>> ApproveJC(CMApproval request)
         {
             /*
              * Read the fields name from JCApprovalModel model and update in JobCard table
              * Add log also using utils addlog function
-             * return DefaultResponseModel
+             * return CMDefaultResponse
             */
 
             /*Your code goes here*/
             return null;
         }
 
-        internal Task<List<DefaultResponseModel>> RejectJC(ApprovalModel request)
+        internal Task<List<CMDefaultResponse>> RejectJC(CMApproval request)
         {
             /*
              * Read the fields name from JCApprovalModel model and update in JobCard table

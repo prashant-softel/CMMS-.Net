@@ -16,7 +16,7 @@ namespace CMMSAPIs.Controllers.Mails
             this.mailService = mailService;
         }
         [HttpPost("send")]
-        public async Task<IActionResult> SendMail([FromForm] MailRequest request)
+        public async Task<IActionResult> SendMail([FromForm] CMMailRequest request)
         {
             try
             {

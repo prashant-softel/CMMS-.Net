@@ -16,7 +16,7 @@ namespace CMMSAPIs.Repositories.Jobs
         {
         }
 
-        internal Task<List<JobModel>> GetJobList(int facility_id)
+        internal Task<List<CMJob>> GetJobList(int facility_id)
         {
             /*
             * Fetch data from Job table for provided facility_id.
@@ -29,7 +29,7 @@ namespace CMMSAPIs.Repositories.Jobs
             return null;
         }
 
-        internal Task<List<JobModel>> GetJobDetail(int job_id)
+        internal Task<List<CMJob>> GetJobDetail(int job_id)
         {
             /*
              * Fetch data from Job table and joins these table for relationship using ids Users, Assets, AssetCategory, Facility
@@ -40,7 +40,7 @@ namespace CMMSAPIs.Repositories.Jobs
             return null;
         }
 
-        internal Task<List<JobModel>> CreateNewJob()
+        internal Task<List<CMJob>> CreateNewJob()
         {
             /*
              * Job basic details will go to Job table
@@ -53,7 +53,7 @@ namespace CMMSAPIs.Repositories.Jobs
             return null;
         }
 
-        internal Task<List<JobModel>> UpdateJob()
+        internal Task<List<CMJob>> UpdateJob()
         {
             /*
              * AssignedID/PermitID/CancelJob. Out of 3 we can update any one fields based on request

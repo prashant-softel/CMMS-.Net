@@ -17,14 +17,14 @@ namespace CMMSAPIs.Repositories
         }
 
         
-        internal Task<List<GOModel>> GetGOList()
+        internal Task<List<CMGO>> GetGOList()
         {
             /*
              * 
             */
             return null;
         }
-        internal Task<List<GOModel>> GetAssetCodeDetails(int asset_code)
+        internal Task<List<CMGO>> GetAssetCodeDetails(int asset_code)
         {
             /*
              * 
@@ -32,19 +32,19 @@ namespace CMMSAPIs.Repositories
             return null;
         }
 
-        internal Task<List<GOModel>> CreateGO()
+        internal Task<List<CMGO>> CreateGO()
         {
             return null;
         }
-        internal Task<List<GOModel>> UpdateGO()
+        internal Task<List<CMGO>> UpdateGO()
         {
             return null;
         }
-        internal Task<List<GOModel>> DeleteGO()
+        internal Task<List<CMGO>> DeleteGO()
         {
             return null;
         }
-        internal Task<List<GOModel>> WithdrawGO()
+        internal Task<List<CMGO>> WithdrawGO()
         {
             return null;
         }

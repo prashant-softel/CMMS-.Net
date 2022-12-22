@@ -22,10 +22,10 @@ namespace CMMSAPIs.Repositories.Authenticate
             _configuration = configuration;
         }
 
-        internal async Task<UserToken> Authenticate(UserCrentialsModel userCrentials)
+        internal async Task<UserToken> Authenticate(CMUserCrentials userCrentials)
         {
             string myQuery = "SELECT loginId as login_id FROM Users WHERE loginId = '" + userCrentials.user_name + "' AND password = '" + userCrentials.password + "'";
-            List<UserLogin> _List = await Context.GetData<UserLogin>(myQuery).ConfigureAwait(false);
+            List<CMUserLogin> _List = await Context.GetData<CMUserLogin>(myQuery).ConfigureAwait(false);
             if (_List.Count == 0)
             {
                 return null;
