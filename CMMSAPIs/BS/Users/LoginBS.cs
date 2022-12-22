@@ -11,7 +11,7 @@ namespace CMMSAPIs.BS.Users
     public interface iLoginBS
     {
         Task<int> eQry(string qry);
-        Task<UserLogin> GetUserLogin(string username, string password);
+        Task<CMUserLogin> GetUserLogin(string username, string password);
 
     }
     public class LoginBS : iLoginBS
@@ -23,7 +23,7 @@ namespace CMMSAPIs.BS.Users
             databaseProvider = dbProvider;
         }
 
-        public async Task<UserLogin> GetUserLogin(string username, string password)
+        public async Task<CMUserLogin> GetUserLogin(string username, string password)
         {
             try
             {

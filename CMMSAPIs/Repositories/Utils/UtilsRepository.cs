@@ -16,30 +16,30 @@ namespace CMMSAPIs.Repositories.Utils
 
         }
 
-        internal async Task<List<DefaultListModel>> GetCountryList()
+        internal async Task<List<CMDefaultList>> GetCountryList()
         {
             string myQuery = "SELECT id, name FROM Countries";
-            List<DefaultListModel> _List = await Context.GetData<DefaultListModel>(myQuery).ConfigureAwait(false);
+            List<CMDefaultList> _List = await Context.GetData<CMDefaultList>(myQuery).ConfigureAwait(false);
             return _List;
         }
 
-        internal async Task<List<DefaultListModel>> GetStateList(int country_id)
+        internal async Task<List<CMDefaultList>> GetStateList(int country_id)
         {
             string myQuery = "SELECT id, name FROM States WHERE country_id = "+country_id;
-            List<DefaultListModel> _List = await Context.GetData<DefaultListModel>(myQuery).ConfigureAwait(false);
+            List<CMDefaultList> _List = await Context.GetData<CMDefaultList>(myQuery).ConfigureAwait(false);
             return _List;
         }
 
-        internal async Task<List<DefaultListModel>> GetCityList(int state_id)
+        internal async Task<List<CMDefaultList>> GetCityList(int state_id)
         {
             string myQuery = "SELECT id, name FROM Cities WHERE state_id = " + state_id;
-            List<DefaultListModel> _List = await Context.GetData<DefaultListModel>(myQuery).ConfigureAwait(false);
+            List<CMDefaultList> _List = await Context.GetData<CMDefaultList>(myQuery).ConfigureAwait(false);
             return _List;
         }
-        internal async Task<List<CurrencyModel>> GetCurrencyList()
+        internal async Task<List<CMCurrency>> GetCurrencyList()
         {
             string myQuery = "SELECT id,code, name FROM Currency";
-            List<CurrencyModel> _List = await Context.GetData<CurrencyModel>(myQuery).ConfigureAwait(false);
+            List<CMCurrency> _List = await Context.GetData<CMCurrency>(myQuery).ConfigureAwait(false);
             return _List;
         }
 
@@ -62,7 +62,7 @@ namespace CMMSAPIs.Repositories.Utils
             return null;
         }
 
-        internal async Task<List<DefaultResponseModel>> AddLog(LogModel log)
+        internal async Task<List<CMDefaultResponse>> AddLog(CMLog log)
         {
             /*
              * Insert the log model properties to History table
@@ -71,7 +71,7 @@ namespace CMMSAPIs.Repositories.Utils
             return null;
         }
 
-        internal async Task<List<LogModel>> GetLog(int module_type, int id)
+        internal async Task<List<CMLog>> GetLog(int module_type, int id)
         {
             /*
              * Fetch data from History table for requested module_type and id

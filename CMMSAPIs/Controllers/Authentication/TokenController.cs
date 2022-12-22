@@ -23,7 +23,7 @@ namespace CMMSAPIs.Controllers.Authentication
         [AllowAnonymous]
         [Route("Authenticate")]
         [HttpPost]
-        public async Task<IActionResult> Authenticate([FromForm] UserCrentialsModel credential)
+        public async Task<IActionResult> Authenticate([FromForm] CMUserCrentials credential)
         {
             try
             {

@@ -13,19 +13,19 @@ namespace CMMSAPIs.BS.Jobs
         /*
          * Work Type CRUD Operation
         */
-        Task<List<JobWorkTypeModel>> GetJobWorkTypeList();
-        Task<List<JobWorkTypeModel>> CreateJobWorkType();
-        Task<List<JobWorkTypeModel>> UpdateJobWorkType();
-        Task<List<JobWorkTypeModel>> DeleteJobWorkType();
+        Task<List<CMJobWorkType>> GetJobWorkTypeList();
+        Task<List<CMJobWorkType>> CreateJobWorkType();
+        Task<List<CMJobWorkType>> UpdateJobWorkType();
+        Task<List<CMJobWorkType>> DeleteJobWorkType();
 
         /*
          * Tools Associated to Work Type CRUD Operation
         */
-        Task<List<JobWorkTypeToolModel>> GetJobWorkTypeToolList();
-        Task<List<MasterToolModel>> GetMasterToolList();
-        Task<List<JobWorkTypeToolModel>> CreateJobWorkTypeTool();
-        Task<List<JobWorkTypeToolModel>> UpdateJobWorkTypeTool();
-        Task<List<JobWorkTypeToolModel>> DeleteJobWorkTypeTool();
+        Task<List<CMJobWorkTypeTool>> GetJobWorkTypeToolList();
+        Task<List<CMMasterTool>> GetMasterToolList();
+        Task<List<CMJobWorkTypeTool>> CreateJobWorkTypeTool();
+        Task<List<CMJobWorkTypeTool>> UpdateJobWorkTypeTool();
+        Task<List<CMJobWorkTypeTool>> DeleteJobWorkTypeTool();
     }
 
     public class JobWorkTypeBS : IJobWorkTypeBS
@@ -40,7 +40,7 @@ namespace CMMSAPIs.BS.Jobs
         /*
          * Work Type CRUD Operation
         */
-        public async Task<List<JobWorkTypeModel>> GetJobWorkTypeList()
+        public async Task<List<CMJobWorkType>> GetJobWorkTypeList()
         {
             try
             {
@@ -55,7 +55,7 @@ namespace CMMSAPIs.BS.Jobs
             }
         }
 
-        public async Task<List<JobWorkTypeModel>> CreateJobWorkType()
+        public async Task<List<CMJobWorkType>> CreateJobWorkType()
         {
             try
             {
@@ -70,7 +70,7 @@ namespace CMMSAPIs.BS.Jobs
             }
         }
 
-        public async Task<List<JobWorkTypeModel>> UpdateJobWorkType()
+        public async Task<List<CMJobWorkType>> UpdateJobWorkType()
         {
             try
             {
@@ -85,7 +85,7 @@ namespace CMMSAPIs.BS.Jobs
             }
         }
 
-        public async Task<List<JobWorkTypeModel>> DeleteJobWorkType()
+        public async Task<List<CMJobWorkType>> DeleteJobWorkType()
         {
             try
             {
@@ -106,7 +106,7 @@ namespace CMMSAPIs.BS.Jobs
         */
 
 
-        public async Task<List<JobWorkTypeToolModel>> GetJobWorkTypeToolList()
+        public async Task<List<CMJobWorkTypeTool>> GetJobWorkTypeToolList()
         {
             try
             {
@@ -121,7 +121,7 @@ namespace CMMSAPIs.BS.Jobs
             }
         }
 
-        public async Task<List<MasterToolModel>> GetMasterToolList()
+        public async Task<List<CMMasterTool>> GetMasterToolList()
         {
             try
             {
@@ -136,7 +136,7 @@ namespace CMMSAPIs.BS.Jobs
             }
         }
 
-        public async Task<List<JobWorkTypeToolModel>> CreateJobWorkTypeTool()
+        public async Task<List<CMJobWorkTypeTool>> CreateJobWorkTypeTool()
         {
             try
             {
@@ -151,7 +151,7 @@ namespace CMMSAPIs.BS.Jobs
             }
         }
 
-        public async Task<List<JobWorkTypeToolModel>> UpdateJobWorkTypeTool()
+        public async Task<List<CMJobWorkTypeTool>> UpdateJobWorkTypeTool()
         {
             try
             {
@@ -166,7 +166,7 @@ namespace CMMSAPIs.BS.Jobs
             }
         }
 
-        public async Task<List<JobWorkTypeToolModel>> DeleteJobWorkTypeTool()
+        public async Task<List<CMJobWorkTypeTool>> DeleteJobWorkTypeTool()
         {
             try
             {
