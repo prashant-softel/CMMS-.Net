@@ -65,7 +65,7 @@ namespace CMMSAPIs.Controllers.JC
 
         [Route("UpdateJC")]
         [HttpGet]
-        public async Task<IActionResult> UpdateJC(JCUpdateModel request)
+        public async Task<IActionResult> UpdateJC(CMJCUpdate request)
         {
             try
             {
@@ -80,7 +80,7 @@ namespace CMMSAPIs.Controllers.JC
 
         [Route("CloseJC")]
         [HttpGet]
-        public async Task<IActionResult> CloseJC(JCCloseModel request)
+        public async Task<IActionResult> CloseJC(CMJCClose request)
         {
             try
             {
@@ -95,7 +95,7 @@ namespace CMMSAPIs.Controllers.JC
 
         [Route("ApproveJC")]
         [HttpGet]
-        public async Task<IActionResult> ApproveJC(ApprovalModel request)
+        public async Task<IActionResult> ApproveJC(CMApproval request)
         {
             try
             {
@@ -110,7 +110,7 @@ namespace CMMSAPIs.Controllers.JC
 
         [Route("RejectJC")]
         [HttpGet]
-        public async Task<IActionResult> RejectJC(ApprovalModel request)
+        public async Task<IActionResult> RejectJC(CMApproval request)
         {
             try
             {

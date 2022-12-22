@@ -21,7 +21,7 @@ namespace CMMSAPIs.Repositories.Permits
          * Permit Create Form Required End Points 
         */
 
-        internal Task<List<DefaultListModel>> GetPermitTypeList(int facility_id)
+        internal Task<List<CMDefaultList>> GetPermitTypeList(int facility_id)
         {
             
             /*
@@ -30,7 +30,7 @@ namespace CMMSAPIs.Repositories.Permits
             return null;
         }
 
-        internal Task<List<DefaultListModel>> GetSafetyMeasurementQuestionList(int permit_type_id)
+        internal Task<List<CMDefaultList>> GetSafetyMeasurementQuestionList(int permit_type_id)
         {
             /*
              * return id, title from PermitTypeSafetyMeasures table for requested permit_type_id
@@ -39,7 +39,7 @@ namespace CMMSAPIs.Repositories.Permits
             return null;
         }
 
-        internal Task<List<DefaultListModel>> GetJobTypeList(int facility_id)
+        internal Task<List<CMDefaultList>> GetJobTypeList(int facility_id)
         {
             /*
              * return id, title from PermitJobTypeList table for requested facility_id
@@ -47,7 +47,7 @@ namespace CMMSAPIs.Repositories.Permits
             return null;
         }
 
-        internal Task<List<DefaultListModel>> GetSOPList(int job_type_id)
+        internal Task<List<CMDefaultList>> GetSOPList(int job_type_id)
         {
             /*
              * return * from PermitTBTJobList table for requested job_type_id
@@ -59,7 +59,7 @@ namespace CMMSAPIs.Repositories.Permits
          * Permit Main Feature End Points
         */
 
-        internal Task<List<PermitListModel>> GetPermitList(int facility_id)
+        internal Task<List<CMPermitList>> GetPermitList(int facility_id)
         {
             /*
              * Return id as well as string value
@@ -70,7 +70,7 @@ namespace CMMSAPIs.Repositories.Permits
             return null;
         }
 
-        internal Task<List<DefaultResponseModel>> CreatePermit(CreatePermitModel request)
+        internal Task<List<CMDefaultResponse>> CreatePermit(CMCreatePermit request)
         {
             /*
              * Create Form data will go in several tables
@@ -87,7 +87,7 @@ namespace CMMSAPIs.Repositories.Permits
             return null;
         }
 
-        internal Task<List<PermitDetailModel>> GetPermitDetails(int permit_id)
+        internal Task<List<CMPermitDetail>> GetPermitDetails(int permit_id)
         {
             /*
              * Return id and string values which are stored in 
@@ -102,7 +102,7 @@ namespace CMMSAPIs.Repositories.Permits
          * Permit Issue/Approval/Rejection/Cancel End Points
         */
 
-        internal Task<List<DefaultResponseModel>> PermitApprove(ApprovalModel request)
+        internal Task<List<CMDefaultResponse>> PermitApprove(CMApproval request)
         {
             /*
              * Update Permit Table reccomendationsByApprover, approvedStatus, approvedDate
@@ -111,7 +111,7 @@ namespace CMMSAPIs.Repositories.Permits
             return null;
         }
 
-        internal Task<List<DefaultResponseModel>> PermitReject(ApprovalModel request)
+        internal Task<List<CMDefaultResponse>> PermitReject(CMApproval request)
         {
             /*
              * Pending
@@ -119,7 +119,7 @@ namespace CMMSAPIs.Repositories.Permits
             return null;
         }
 
-        internal Task<List<DefaultResponseModel>> PermitIssue(ApprovalModel request)
+        internal Task<List<CMDefaultResponse>> PermitIssue(CMApproval request)
         {
             /*
              * Update Permit Table issuedReccomendations, issuedStatus, issuedDate
@@ -128,7 +128,7 @@ namespace CMMSAPIs.Repositories.Permits
             return null;
         }
 
-        internal Task<List<DefaultResponseModel>> PermitCancel(ApprovalModel request)
+        internal Task<List<CMDefaultResponse>> PermitCancel(CMApproval request)
         {
             /*
              * Update Permit Table 	cancelReccomendations, cancelRequestDate, cancelRequestStatus

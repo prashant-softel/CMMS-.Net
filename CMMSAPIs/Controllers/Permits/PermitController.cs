@@ -107,7 +107,7 @@ namespace CMMSAPIs.Controllers.Permits
 
         [Route("CreatePermit")]
         [HttpPost]
-        public async Task<IActionResult> CreatePermit(CreatePermitModel request)
+        public async Task<IActionResult> CreatePermit(CMCreatePermit request)
         {
             try
             {
@@ -141,7 +141,7 @@ namespace CMMSAPIs.Controllers.Permits
 
         [Route("PermitIssue")]
         [HttpPost]
-        public async Task<IActionResult> PermitIssue(ApprovalModel request)
+        public async Task<IActionResult> PermitIssue(CMApproval request)
         {
             try
             {
@@ -156,7 +156,7 @@ namespace CMMSAPIs.Controllers.Permits
 
         [Route("PermitApprove")]
         [HttpPost]
-        public async Task<IActionResult> PermitApprove(ApprovalModel request)
+        public async Task<IActionResult> PermitApprove(CMApproval request)
         {
             try
             {
@@ -171,7 +171,7 @@ namespace CMMSAPIs.Controllers.Permits
 
         [Route("PermitReject")]
         [HttpPost]
-        public async Task<IActionResult> PermitReject(ApprovalModel request)
+        public async Task<IActionResult> PermitReject(CMApproval request)
         {
             try
             {
@@ -186,7 +186,7 @@ namespace CMMSAPIs.Controllers.Permits
 
         [Route("PermitCancel")]
         [HttpPost]
-        public async Task<IActionResult> PermitCancel(ApprovalModel request)
+        public async Task<IActionResult> PermitCancel(CMApproval request)
         {
             try
             {

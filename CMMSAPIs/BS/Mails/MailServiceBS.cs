@@ -13,21 +13,21 @@ namespace CMMSAPIs.BS.Mails
 {
     public interface IMailService
     {
-        Task<List<MailResponse>> SendEmailAsync(MailRequest mailRequest);
+        Task<List<CMMailResponse>> SendEmailAsync(CMMailRequest mailRequest);
     }
     public class MailService : IMailService
     {
-        private readonly MailSettings _mailSettings;
-        public MailService(IOptions<MailSettings> mailSettings)
+        private readonly CMMailSettings _mailSettings;
+        public MailService(IOptions<CMMailSettings> mailSettings)
         {
             _mailSettings = mailSettings.Value;
         }
 
-        public async Task<List<MailResponse>> SendEmailAsync(MailRequest mailRequest)
+        public async Task<List<CMMailResponse>> SendEmailAsync(CMMailRequest mailRequest)
         {
             try
             {
-                List<MailResponse> _MailResponse = new List<MailResponse>();
+                List<CMMailResponse> _MailResponse = new List<CMMailResponse>();
 
                 var email = new MimeMessage();
                 email.Sender = MailboxAddress.Parse(_mailSettings.Mail);
@@ -57,7 +57,7 @@ namespace CMMSAPIs.BS.Mails
                 smtp.Authenticate(_mailSettings.Mail, _mailSettings.Password);
                 await smtp.SendAsync(email);
                 smtp.Disconnect(true);
-                _MailResponse.Add(new MailResponse { mail_sent = true, message = "Mail sent successfully" });
+                _MailResponse.Add(new CMMailResponse { mail_sent = true, message = "Mail sent successfully" });
                 return _MailResponse;
             }
             catch (Exception ex)

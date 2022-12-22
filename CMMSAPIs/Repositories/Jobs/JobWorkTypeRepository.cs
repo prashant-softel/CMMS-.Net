@@ -14,7 +14,7 @@ namespace CMMSAPIs.Repositories.Jobs
         /*
          * Work Type CRUD Operation
         */
-        internal Task<List<JobWorkTypeModel>> GetJobWorkTypeList()
+        internal Task<List<CMJobWorkType>> GetJobWorkTypeList()
         {
             /*
              * Fetch id, categoryId, categroyName, workType from JobWorkTypes table and join AssetCategories to get CategoryName
@@ -23,7 +23,7 @@ namespace CMMSAPIs.Repositories.Jobs
             return null;
         }
 
-        internal Task<List<JobWorkTypeModel>> CreateJobWorkType()
+        internal Task<List<CMJobWorkType>> CreateJobWorkType()
         {
             /*
              * Insert workTypeName, CategoryId in JobWorkTypes
@@ -32,7 +32,7 @@ namespace CMMSAPIs.Repositories.Jobs
             return null;
         }
 
-        internal Task<List<JobWorkTypeModel>> UpdateJobWorkType()
+        internal Task<List<CMJobWorkType>> UpdateJobWorkType()
         {
             /*
              * Update Work Type, Category id in JobWorkTypes table for requested workTypeId
@@ -41,7 +41,7 @@ namespace CMMSAPIs.Repositories.Jobs
             return null;
         }
 
-        internal Task<List<JobWorkTypeModel>> DeleteJobWorkType()
+        internal Task<List<CMJobWorkType>> DeleteJobWorkType()
         {
             /*
              * Delete the record from JobWorkTypes table for requested workTypeId only if no record present in JobAssociatedWorkTypes
@@ -57,7 +57,7 @@ namespace CMMSAPIs.Repositories.Jobs
 
 
 
-        internal Task<List<JobWorkTypeToolModel>> GetJobWorkTypeToolList()
+        internal Task<List<CMJobWorkTypeTool>> GetJobWorkTypeToolList()
         {
             /*
              * Fetch id, categoryId, categroyName, workType from worktypeassociatedtools table and join AssetCategories to get CategoryName
@@ -66,7 +66,7 @@ namespace CMMSAPIs.Repositories.Jobs
             return null;
         }
 
-        internal Task<List<MasterToolModel>> GetMasterToolList()
+        internal Task<List<CMMasterTool>> GetMasterToolList()
         {
             /*
              * Fetch id, workType, ToolName (if more than 1 tool linked concat then return) from WorkTypeAssociatedTools table 
@@ -76,7 +76,7 @@ namespace CMMSAPIs.Repositories.Jobs
             return null;
         }
 
-        internal Task<List<JobWorkTypeToolModel>> CreateJobWorkTypeTool()
+        internal Task<List<CMJobWorkTypeTool>> CreateJobWorkTypeTool()
         {
             /*
              * Insert workTypeid, ToolId(s) in WorkTypeAssociatedTools
@@ -85,7 +85,7 @@ namespace CMMSAPIs.Repositories.Jobs
             return null;
         }
 
-        internal Task<List<JobWorkTypeToolModel>> UpdateJobWorkTypeTool()
+        internal Task<List<CMJobWorkTypeTool>> UpdateJobWorkTypeTool()
         {
             /*
              * Update workTypeid, ToolId(s) in WorkTypeAssociatedTools table for requested AssociatedToolId
@@ -94,7 +94,7 @@ namespace CMMSAPIs.Repositories.Jobs
             return null;
         }
 
-        internal Task<List<JobWorkTypeToolModel>> DeleteJobWorkTypeTool()
+        internal Task<List<CMJobWorkTypeTool>> DeleteJobWorkTypeTool()
         {
             /*
              * Delete the record from WorkTypeAssociatedTools table for requested AssociatedToolId.

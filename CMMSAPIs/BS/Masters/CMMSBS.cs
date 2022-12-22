@@ -11,13 +11,13 @@ namespace CMMSAPIs.BS.Masters
     public interface ICMMSBS
     {
         //sTask<int> eQry(string qry); 
-        Task<List<FinancialYear>> GetFinancialYear();
-        Task<List<Facility>> GetFacility(int facility_id);
-        Task<List<Facility>> GetFacilityList();
-        Task<List<Facility>> GetBlockList(int facility_id);
-        Task<List<AssetCategory>> GetAssetCategoryList();
-        Task<List<Asset>> GetAssetList(int facility_id);
-        Task<List<Employee>> GetEmployeeList(int facility_id);
+        Task<List<CMFinancialYear>> GetFinancialYear();
+        Task<List<CMFacility>> GetFacility(int facility_id);
+        Task<List<CMFacility>> GetFacilityList();
+        Task<List<CMFacility>> GetBlockList(int facility_id);
+        Task<List<CMAssetCategory>> GetAssetCategoryList();
+        Task<List<CMAsset>> GetAssetList(int facility_id);
+        Task<List<CMEmployee>> GetEmployeeList(int facility_id);
     }
     public class CMMSBS : ICMMSBS
     {
@@ -31,7 +31,7 @@ namespace CMMSAPIs.BS.Masters
 
         #region helper
 
-        public async Task<List<FinancialYear>> GetFinancialYear()
+        public async Task<List<CMFinancialYear>> GetFinancialYear()
         {
             try
             {
@@ -48,7 +48,7 @@ namespace CMMSAPIs.BS.Masters
 
         }
 
-        public async Task<List<Facility>> GetFacility(int facility_id)
+        public async Task<List<CMFacility>> GetFacility(int facility_id)
         {
             try
             {
@@ -64,7 +64,7 @@ namespace CMMSAPIs.BS.Masters
             }
         }
 
-        public async Task<List<Facility>> GetFacilityList()
+        public async Task<List<CMFacility>> GetFacilityList()
         {
             try
             {
@@ -79,7 +79,7 @@ namespace CMMSAPIs.BS.Masters
             }
         }
 
-        public async Task<List<Facility>> GetBlockList(int facility_id)
+        public async Task<List<CMFacility>> GetBlockList(int facility_id)
         {
             try
             {
@@ -94,7 +94,7 @@ namespace CMMSAPIs.BS.Masters
             }
         }
 
-        public async Task<List<AssetCategory>> GetAssetCategoryList()
+        public async Task<List<CMAssetCategory>> GetAssetCategoryList()
         {
             try
             {
@@ -110,7 +110,7 @@ namespace CMMSAPIs.BS.Masters
             }
         }
 
-        public async Task<List<Asset>> GetAssetList(int facility_id)
+        public async Task<List<CMAsset>> GetAssetList(int facility_id)
         {
             try
             {
@@ -126,7 +126,7 @@ namespace CMMSAPIs.BS.Masters
             }
         }
 
-        public async Task<List<Employee>> GetEmployeeList(int facility_id)
+        public async Task<List<CMEmployee>> GetEmployeeList(int facility_id)
         {
             try
             {

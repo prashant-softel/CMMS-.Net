@@ -12,13 +12,13 @@ namespace CMMSAPIs.BS.JC
 {
     public interface IJCBS
     {
-        Task<List<JCListModel>> GetJCList(int facility_id);
-        Task<List<JCDetailModel>> GetJCDetail(int jc_id);
-        Task<List<DefaultResponseModel>> CreateJC(int job_id);
-        Task<List<DefaultResponseModel>> UpdateJC(JCUpdateModel request);
-        Task<List<DefaultResponseModel>> CloseJC(JCCloseModel request);
-        Task<List<DefaultResponseModel>> ApproveJC(ApprovalModel request);
-        Task<List<DefaultResponseModel>> RejectJC(ApprovalModel request);
+        Task<List<CMJCList>> GetJCList(int facility_id);
+        Task<List<CMJCDetail>> GetJCDetail(int jc_id);
+        Task<List<CMDefaultResponse>> CreateJC(int job_id);
+        Task<List<CMDefaultResponse>> UpdateJC(CMJCUpdate request);
+        Task<List<CMDefaultResponse>> CloseJC(CMJCClose request);
+        Task<List<CMDefaultResponse>> ApproveJC(CMApproval request);
+        Task<List<CMDefaultResponse>> RejectJC(CMApproval request);
     }
 
     public class JCBS : IJCBS
@@ -30,7 +30,7 @@ namespace CMMSAPIs.BS.JC
             databaseProvider = dbProvider;
         }
 
-        public async Task<List<JCListModel>> GetJCList(int facility_id)
+        public async Task<List<CMJCList>> GetJCList(int facility_id)
         {
             try
             {
@@ -45,7 +45,7 @@ namespace CMMSAPIs.BS.JC
             }
         }
 
-        public async Task<List<JCDetailModel>> GetJCDetail(int jc_id)
+        public async Task<List<CMJCDetail>> GetJCDetail(int jc_id)
         {
             try
             {
@@ -60,7 +60,7 @@ namespace CMMSAPIs.BS.JC
             }
         }
 
-        public async Task<List<DefaultResponseModel>> CreateJC(int job_id)
+        public async Task<List<CMDefaultResponse>> CreateJC(int job_id)
         {
             try
             {
@@ -75,7 +75,7 @@ namespace CMMSAPIs.BS.JC
             }
         }
 
-        public async Task<List<DefaultResponseModel>> UpdateJC(JCUpdateModel request)
+        public async Task<List<CMDefaultResponse>> UpdateJC(CMJCUpdate request)
         {
             try
             {
@@ -90,7 +90,7 @@ namespace CMMSAPIs.BS.JC
             }
         }
 
-        public async Task<List<DefaultResponseModel>> CloseJC(JCCloseModel request)
+        public async Task<List<CMDefaultResponse>> CloseJC(CMJCClose request)
         {
             try
             {
@@ -105,7 +105,7 @@ namespace CMMSAPIs.BS.JC
             }
         }
 
-        public async Task<List<DefaultResponseModel>> ApproveJC(ApprovalModel request)
+        public async Task<List<CMDefaultResponse>> ApproveJC(CMApproval request)
         {
             try
             {
@@ -120,7 +120,7 @@ namespace CMMSAPIs.BS.JC
             }
         }
 
-        public async Task<List<DefaultResponseModel>> RejectJC(ApprovalModel request)
+        public async Task<List<CMDefaultResponse>> RejectJC(CMApproval request)
         {
             try
             {

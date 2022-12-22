@@ -96,7 +96,7 @@ namespace CMMSAPIs.Controllers.utils
 
         [Route("AddLog")]
         [HttpGet]
-        public async Task<IActionResult> AddLog([FromForm] LogModel log)
+        public async Task<IActionResult> AddLog([FromForm] CMLog log)
         {
             try
             {
