@@ -20,6 +20,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using CMMSAPIs.BS.Permits;
 using CMMSAPIs.BS.JC;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using CMMSAPIs.BS.Authentication;
+using System.Configuration;
+using System.Text;
 
 namespace CMMSAPIs
 {
@@ -35,6 +40,25 @@ namespace CMMSAPIs
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddAuthentication(authOption =>
+            {
+                authOption.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                authOption.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(jwtOption =>
+            {
+                var key = Configuration.GetValue<string>("JwtConfig:Key");
+                var keyBytes = Encoding.ASCII.GetBytes(key);
+                jwtOption.SaveToken = false;
+                jwtOption.TokenValidationParameters = new TokenValidationParameters
+                {
+                    IssuerSigningKey = new SymmetricSecurityKey(keyBytes),
+                    ValidateLifetime = true,
+                    ValidateAudience = false,
+                    ValidateIssuer = false,
+                    ClockSkew = TimeSpan.Zero
+                };
+            });
+
             services.AddControllers();
             //services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
           
@@ -52,6 +76,7 @@ namespace CMMSAPIs
             services.AddScoped<IJCBS, JCBS>();
             services.Configure<MailSettings>(Configuration.GetSection("MailSettings"));
             services.AddTransient<IMailService, MailService>();
+            services.AddScoped<IJwtTokenManagerBS, JwtTokenManagerBS>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -70,7 +95,7 @@ namespace CMMSAPIs
           //  app.UseHttpsRedirection();
             //app.UseMvc();
             app.UseRouting();
-
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

@@ -1,6 +1,7 @@
 ﻿using CMMSAPIs.BS.Masters;
 using CMMSAPIs.BS.Utils;
 using CMMSAPIs.Models.Utils;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
@@ -17,6 +18,7 @@ namespace CMMSAPIs.Controllers.utils
             _UtilsBS = utils;
         }
 
+        [Authorize]
         [Route("GetCountryList")]
         [HttpGet]
         public async Task<IActionResult> GetCountryList()
