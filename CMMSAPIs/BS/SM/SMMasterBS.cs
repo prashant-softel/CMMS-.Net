@@ -10,25 +10,25 @@ namespace CMMSAPIs.BS.SM
 {
     public interface ISMMasterBS
     {
-        Task<List<SMMaster>> GetAssetTypeList();
-        Task<List<SMMaster>> AddAssetType();
-        Task<List<SMMaster>> UpdateAssetType();
-        Task<List<SMMaster>> DeleteAssetType();
+        Task<List<SMMasterModel>> GetAssetTypeList();
+        Task<List<SMMasterModel>> AddAssetType();
+        Task<List<SMMasterModel>> UpdateAssetType();
+        Task<List<SMMasterModel>> DeleteAssetType();
 
-        Task<List<SMMaster>> GetAssetCategoryList();
-        Task<List<SMMaster>> AddAssetCategory();
-        Task<List<SMMaster>> UpdateAssetCategory();
-        Task<List<SMMaster>> DeleteAssetCategory();
+        Task<List<SMMasterModel>> GetAssetCategoryList();
+        Task<List<SMMasterModel>> AddAssetCategory();
+        Task<List<SMMasterModel>> UpdateAssetCategory();
+        Task<List<SMMasterModel>> DeleteAssetCategory();
 
-        Task<List<SMMaster>> GetUnitMeasurementList();
-        Task<List<SMMaster>> AddUnitMeasurement();
-        Task<List<SMMaster>> UpdateUnitMeasurement();
-        Task<List<SMMaster>> DeleteUnitMeasurement();
+        Task<List<SMMasterModel>> GetUnitMeasurementList();
+        Task<List<SMMasterModel>> AddUnitMeasurement();
+        Task<List<SMMasterModel>> UpdateUnitMeasurement();
+        Task<List<SMMasterModel>> DeleteUnitMeasurement();
 
-        Task<List<SMMaster>> GetAssetMasterList();
-        Task<List<SMMaster>> AddAssetMaster();
-        Task<List<SMMaster>> UpdateAssetMaster();
-        Task<List<SMMaster>> DeleteAssetMaster();
+        Task<List<SMMasterModel>> GetAssetMasterList();
+        Task<List<SMMasterModel>> AddAssetMaster();
+        Task<List<SMMasterModel>> UpdateAssetMaster();
+        Task<List<SMMasterModel>> DeleteAssetMaster();
 
     }
 
@@ -42,7 +42,7 @@ namespace CMMSAPIs.BS.SM
         }
 
 
-        public async Task<List<SMMaster>> GetAssetTypeList()
+        public async Task<List<SMMasterModel>> GetAssetTypeList()
         {
             try
             {
@@ -57,7 +57,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<SMMaster>> AddAssetType()
+        public async Task<List<SMMasterModel>> AddAssetType()
         {
             try
             {
@@ -72,7 +72,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<SMMaster>> UpdateAssetType()
+        public async Task<List<SMMasterModel>> UpdateAssetType()
         {
             try
             {
@@ -87,7 +87,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<SMMaster>> DeleteAssetType()
+        public async Task<List<SMMasterModel>> DeleteAssetType()
         {
             try
             {
@@ -102,7 +102,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<SMMaster>> GetAssetCategoryList()
+        public async Task<List<SMMasterModel>> GetAssetCategoryList()
         {
             try
             {
@@ -117,7 +117,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<SMMaster>> AddAssetCategory()
+        public async Task<List<SMMasterModel>> AddAssetCategory()
         {
             try
             {
@@ -132,7 +132,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<SMMaster>> UpdateAssetCategory()
+        public async Task<List<SMMasterModel>> UpdateAssetCategory()
         {
             try
             {
@@ -147,7 +147,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<SMMaster>> DeleteAssetCategory()
+        public async Task<List<SMMasterModel>> DeleteAssetCategory()
         {
             try
             {
@@ -162,7 +162,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<SMMaster>> GetUnitMeasurementList()
+        public async Task<List<SMMasterModel>> GetUnitMeasurementList()
         {
             try
             {
@@ -177,7 +177,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<SMMaster>> AddUnitMeasurement()
+        public async Task<List<SMMasterModel>> AddUnitMeasurement()
         {
             try
             {
@@ -192,7 +192,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<SMMaster>> UpdateUnitMeasurement()
+        public async Task<List<SMMasterModel>> UpdateUnitMeasurement()
         {
             try
             {
@@ -207,7 +207,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<SMMaster>> DeleteUnitMeasurement()
+        public async Task<List<SMMasterModel>> DeleteUnitMeasurement()
         {
             try
             {
@@ -222,7 +222,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<SMMaster>> GetAssetMasterList()
+        public async Task<List<SMMasterModel>> GetAssetMasterList()
         {
             try
             {
@@ -237,7 +237,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<SMMaster>> AddAssetMaster()
+        public async Task<List<SMMasterModel>> AddAssetMaster()
         {
             try
             {
@@ -252,7 +252,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<SMMaster>> UpdateAssetMaster()
+        public async Task<List<SMMasterModel>> UpdateAssetMaster()
         {
             try
             {
@@ -267,7 +267,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<SMMaster>> DeleteAssetMaster()
+        public async Task<List<SMMasterModel>> DeleteAssetMaster()
         {
             try
             {

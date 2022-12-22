@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace CMMSAPIs.Models
 {
-    public class GO
+    public class GOModel
     {
         public int id { get; set; }
         public string title { get; set; }

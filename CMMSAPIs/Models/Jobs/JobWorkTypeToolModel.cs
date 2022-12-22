@@ -1,6 +1,6 @@
 ﻿namespace CMMSAPIs.Models.Jobs
 {
-    public class JobWorkTypeTool
+    public class JobWorkTypeToolModel
     {
         public int id { get; set; }
         public string toolName { get; set; }
