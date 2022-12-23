@@ -25,6 +25,7 @@ using Microsoft.IdentityModel.Tokens;
 using CMMSAPIs.BS.Authentication;
 using System.Configuration;
 using System.Text;
+using CMMSAPIs.BS.FileUpload;
 
 namespace CMMSAPIs
 {
@@ -77,6 +78,7 @@ namespace CMMSAPIs
             services.Configure<CMMailSettings>(Configuration.GetSection("MailSettings"));
             services.AddTransient<IMailService, MailService>();
             services.AddScoped<IJwtTokenManagerBS, JwtTokenManagerBS>();
+            services.AddScoped<IFileUploadBS, FileUploadBS>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
