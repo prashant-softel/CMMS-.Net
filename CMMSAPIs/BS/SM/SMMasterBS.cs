@@ -10,26 +10,26 @@ namespace CMMSAPIs.BS.SM
 {
     public interface ISMMasterBS
     {
-        Task<List<SMMaster>> GetAssetTypeList();
-        Task<List<SMMaster>> AddAssetType();
-        Task<List<SMMaster>> UpdateAssetType();
-        Task<List<SMMaster>> DeleteAssetType();
+        Task<List<SMMasterModel>> GetAssetTypeList();
+        Task<List<SMMasterModel>> AddAssetType();
+        Task<List<SMMasterModel>> UpdateAssetType();
+        Task<List<SMMasterModel>> DeleteAssetType();
 
-        Task<List<SMMaster>> GetAssetCategoryList();
-        Task<List<SMMaster>> AddAssetCategory();
-        Task<List<SMMaster>> UpdateAssetCategory();
-        Task<List<SMMaster>> DeleteAssetCategory();
+        Task<List<SMMasterModel>> GetAssetCategoryList();
+        Task<List<SMMasterModel>> AddAssetCategory();
+        Task<List<SMMasterModel>> UpdateAssetCategory();
+        Task<List<SMMasterModel>> DeleteAssetCategory();
 
-        Task<List<SMMaster>> GetUnitMeasurementList();
-        Task<List<SMMaster>> AddUnitMeasurement();
-        Task<List<SMMaster>> UpdateUnitMeasurement();
-        Task<List<SMMaster>> DeleteUnitMeasurement();
+        Task<List<SMMasterModel>> GetUnitMeasurementList();
+        Task<List<SMMasterModel>> AddUnitMeasurement();
+        Task<List<SMMasterModel>> UpdateUnitMeasurement();
+        Task<List<SMMasterModel>> DeleteUnitMeasurement();
 
         Task<List<SMAssetMaster>> GetAssetMasterList();
-        /*        Task<int> AddAssetMaster(string aasetCode, string assetName, string assetType, string cat_name, string description, string unitMeasurement, string approvalRequired);*/
+        
         Task<int> AddAssetMaster(SMAssetMaster request);
         Task<int> UpdateAssetMaster(SMAssetMaster request);
-        Task<int> DeleteAssetMaster(SMAssetMaster request);
+        Task<int> DeleteAssetMaster(int id);
 
     }
 
@@ -43,7 +43,7 @@ namespace CMMSAPIs.BS.SM
         }
 
 
-        public async Task<List<SMMaster>> GetAssetTypeList()
+        public async Task<List<SMMasterModel>> GetAssetTypeList()
         {
             try
             {
@@ -58,7 +58,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<SMMaster>> AddAssetType()
+        public async Task<List<SMMasterModel>> AddAssetType()
         {
             try
             {
@@ -73,7 +73,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<SMMaster>> UpdateAssetType()
+        public async Task<List<SMMasterModel>> UpdateAssetType()
         {
             try
             {
@@ -88,7 +88,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<SMMaster>> DeleteAssetType()
+        public async Task<List<SMMasterModel>> DeleteAssetType()
         {
             try
             {
@@ -103,7 +103,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<SMMaster>> GetAssetCategoryList()
+        public async Task<List<SMMasterModel>> GetAssetCategoryList()
         {
             try
             {
@@ -118,7 +118,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<SMMaster>> AddAssetCategory()
+        public async Task<List<SMMasterModel>> AddAssetCategory()
         {
             try
             {
@@ -133,7 +133,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<SMMaster>> UpdateAssetCategory()
+        public async Task<List<SMMasterModel>> UpdateAssetCategory()
         {
             try
             {
@@ -148,7 +148,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<SMMaster>> DeleteAssetCategory()
+        public async Task<List<SMMasterModel>> DeleteAssetCategory()
         {
             try
             {
@@ -163,7 +163,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<SMMaster>> GetUnitMeasurementList()
+        public async Task<List<SMMasterModel>> GetUnitMeasurementList()
         {
             try
             {
@@ -178,7 +178,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<SMMaster>> AddUnitMeasurement()
+        public async Task<List<SMMasterModel>> AddUnitMeasurement()
         {
             try
             {
@@ -193,7 +193,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<SMMaster>> UpdateUnitMeasurement()
+        public async Task<List<SMMasterModel>> UpdateUnitMeasurement()
         {
             try
             {
@@ -208,7 +208,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<SMMaster>> DeleteUnitMeasurement()
+        public async Task<List<SMMasterModel>> DeleteUnitMeasurement()
         {
             try
             {
@@ -238,20 +238,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        /*        public async Task<int> AddAssetMaster(string aasetCode, string assetName, string assetType, string cat_name, string description, string unitMeasurement, string approvalRequired)
-                {
-                    try
-                    {
-                        using (var repos = new SMMasterRepository(getDB))
-                        {
-                            return await repos.AddAssetMaster(aasetCode, assetName, assetType, cat_name, description, unitMeasurement, approvalRequired);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        throw;
-                    }
-                }*/
+        
         public async Task<int> AddAssetMaster(SMAssetMaster request)
         {
             try
@@ -281,13 +268,13 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<int> DeleteAssetMaster(SMAssetMaster request)
+        public async Task<int> DeleteAssetMaster(int id)
         {
             try
             {
                 using (var repos = new SMMasterRepository(getDB))
                 {
-                    return await repos.DeleteAssetMaster(request);
+                    return await repos.DeleteAssetMaster(id);
                 }
             }
             catch (Exception ex)

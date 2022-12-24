@@ -10,12 +10,10 @@ namespace CMMSAPIs.BS.Jobs
 {
     public interface IJobBS
     {
-        Task<List<Job>> GetJobList(int facility_id, int userId);
+        Task<List<JobModel>> GetJobList(int facility_id, int userId);
         Task<List<JobView>> GetJobDetail(int job_id);
-        Task<int> CreateNewJob(CreateJob request);
-
-
-        Task<List<Job>> UpdateJob();
+        Task<List<JobModel>> CreateNewJob();
+        Task<List<JobModel>> UpdateJob();
 
     }
 
@@ -28,7 +26,7 @@ namespace CMMSAPIs.BS.Jobs
             databaseProvider = dbProvider;
         }
 
-        public async Task<List<Job>> GetJobList(int facility_id, int userId)
+        public async Task<List<JobModel>> GetJobList(int facility_id, int userId)
         {
             try
             {
@@ -58,13 +56,13 @@ namespace CMMSAPIs.BS.Jobs
             }
         }
 
-        public async Task<int> CreateNewJob(CreateJob request)
+        public async Task<List<JobModel>> CreateNewJob()
         {
             try
             {
                 using (var repos = new JobRepository(getDB))
                 {
-                    return await repos.CreateNewJob(request);
+                    return await repos.CreateNewJob();
                 }
             }
             catch (Exception ex)
@@ -73,7 +71,7 @@ namespace CMMSAPIs.BS.Jobs
             }
         }
 
-        public async Task<List<Job>> UpdateJob()
+        public async Task<List<JobModel>> UpdateJob()
         {
             try
             {

@@ -16,7 +16,7 @@ namespace CMMSAPIs.Repositories.Jobs
         {
         }
 
-        internal async Task<List<Job>> GetJobList(int facility_id, int userId)
+        internal async Task<List<JobModel>> GetJobList(int facility_id, int userId)
         {
             /*
             * Fetch data from Job table for provided facility_id.
@@ -51,7 +51,7 @@ namespace CMMSAPIs.Repositories.Jobs
 
             }
         
-            List<Job> _JobList = await Context.GetData<Job>(myQuery).ConfigureAwait(false);
+            List<JobModel> _JobList = await Context.GetData<JobModel>(myQuery).ConfigureAwait(false);
             return _JobList;
         }
 
@@ -60,6 +60,7 @@ namespace CMMSAPIs.Repositories.Jobs
             /*
              * Fetch data from Job table and joins these table for relationship using ids Users, Assets, AssetCategory, Facility
              * id and it string value should be there in list
+             * job_id = 3064
             */
 
             /*Your code goes here*/
@@ -90,7 +91,7 @@ namespace CMMSAPIs.Repositories.Jobs
 
         }
 
-        internal Task<int> CreateNewJob(CreateJob request)
+        internal Task<List<JobModel>> CreateNewJob()
         {
             /*
              * Job basic details will go to Job table
@@ -108,7 +109,7 @@ namespace CMMSAPIs.Repositories.Jobs
             return null;
         }
 
-        internal Task<List<Job>> UpdateJob()
+        internal Task<List<JobModel>> UpdateJob()
         {
             /*
              * AssignedID/PermitID/CancelJob. Out of 3 we can update any one fields based on request

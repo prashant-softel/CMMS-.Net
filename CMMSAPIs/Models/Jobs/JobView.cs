@@ -18,18 +18,9 @@ namespace CMMSAPIs.Models.Jobs
         public int assigned_id { get; set; }
         public string assigned_name { get; set; }
         public string workType { get; set; }
-
         public string job_title { get; set; }
-
         public string job_description { get; set; }
-        public DateTime breaKdownTime { get; set; }
-/*
-        public int permit_id { get; set; }
-        public string permit_code { get; set; }
-        public DateTime breakdown_time { get; set; }
-        public int job_type { get; set; }
-        public string job_type_name { get; set; }
-        public string cancellation_remark { get; set; }
-*/
+        public dynamic breaKdownTime { get; set; }
+
     }
 }

@@ -54,11 +54,11 @@ namespace CMMSAPIs.Controllers.Jobs
 
         [Route("CreateNewJob")]
         [HttpPost]
-        public async Task<IActionResult> CreateNewJob([FromForm] CreateJob request)
+        public async Task<IActionResult> CreateNewJob()
         {
             try
             {
-                var data = await _JobBS.CreateNewJob(request);
+                var data = await _JobBS.CreateNewJob();
                 return Ok(data);
             }
             catch (Exception ex)

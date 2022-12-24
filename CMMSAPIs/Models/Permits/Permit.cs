@@ -16,9 +16,9 @@ namespace CMMSAPIs.Models.Permits
         public string workingAreaName { get; set; }
         public string description { get; set; }
         public int ptwRequestedBy { get; set; }
-        public DateTime ptwRequestDate { get; set; }
+        public dynamic ptwRequestDate { get; set; }
         public int approvedBy { get; set; }
-        public DateTime approvedDate { get; set; }
+        public dynamic approvedDate { get; set; }
         public int currentStatus { get; set; }
 
 /*

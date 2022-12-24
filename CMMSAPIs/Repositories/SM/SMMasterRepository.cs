@@ -16,17 +16,17 @@ namespace CMMSAPIs.Repositories.SM
         {
         }
 
-        internal async Task<List<SMMaster>> GetAssetTypeList()
+        internal async Task<List<SMMasterModel>> GetAssetTypeList()
         {
             /*
              * Return id, asset_type from SMAssetTypes
             */
             string myQuery = "SELECT ID, asset_type as title FROM SMAssetTypes";
-            List<SMMaster> _AssetTypeList = await Context.GetData<SMMaster>(myQuery).ConfigureAwait(false);
+            List<SMMasterModel> _AssetTypeList = await Context.GetData<SMMasterModel>(myQuery).ConfigureAwait(false);
             return _AssetTypeList;
         }
 
-        internal async Task<List<SMMaster>> AddAssetType()
+        internal async Task<List<SMMasterModel>> AddAssetType()
         {
             //dont implement now
             /*
@@ -35,7 +35,7 @@ namespace CMMSAPIs.Repositories.SM
             return null;
         }
 
-        internal Task<List<SMMaster>> UpdateAssetType()
+        internal Task<List<SMMasterModel>> UpdateAssetType()
         {
             //dont implement now
             /*
@@ -44,7 +44,7 @@ namespace CMMSAPIs.Repositories.SM
             return null;
         }
 
-        internal Task<List<SMMaster>> DeleteAssetType()
+        internal Task<List<SMMasterModel>> DeleteAssetType()
         {
             //dont implement now
             /*
@@ -53,17 +53,17 @@ namespace CMMSAPIs.Repositories.SM
             return null;
         }
 
-        internal async Task<List<SMMaster>> GetAssetCategoryList()
+        internal async Task<List<SMMasterModel>> GetAssetCategoryList()
         {
             /*
              * Return id, name from SMItemCategory
             */
             string myQuery = "SELECT ID, cat_name as title FROM smitemcategory ";
-            List<SMMaster> _AssetCategoryList = await Context.GetData<SMMaster>(myQuery).ConfigureAwait(false);
+            List<SMMasterModel> _AssetCategoryList = await Context.GetData<SMMasterModel>(myQuery).ConfigureAwait(false);
             return _AssetCategoryList;
         }
 
-        internal Task<List<SMMaster>> AddAssetCategory()
+        internal Task<List<SMMasterModel>> AddAssetCategory()
         {
             /*
              * Add record in SMItemCategory
@@ -71,7 +71,7 @@ namespace CMMSAPIs.Repositories.SM
             return null;
         }
 
-        internal Task<List<SMMaster>> UpdateAssetCategory()
+        internal Task<List<SMMasterModel>> UpdateAssetCategory()
         {
             /*
              * Update record in SMItemCategory
@@ -79,7 +79,7 @@ namespace CMMSAPIs.Repositories.SM
             return null;
         }
 
-        internal Task<List<SMMaster>> DeleteAssetCategory()
+        internal Task<List<SMMasterModel>> DeleteAssetCategory()
         {
             /*
              * Delete record in SMItemCategory
@@ -87,17 +87,17 @@ namespace CMMSAPIs.Repositories.SM
             return null;
         }
 
-        internal async Task<List<SMMaster>> GetUnitMeasurementList()
+        internal async Task<List<SMMasterModel>> GetUnitMeasurementList()
         {
             /*
              * Return * from SMUnitMeasurement
             */
             string myQuery = "SELECT ID, name as title FROM smunitmeasurement";
-            List<SMMaster> _UnitMeasurementList = await Context.GetData<SMMaster>(myQuery).ConfigureAwait(false);
+            List<SMMasterModel> _UnitMeasurementList = await Context.GetData<SMMasterModel>(myQuery).ConfigureAwait(false);
             return _UnitMeasurementList;
         }
 
-        internal Task<List<SMMaster>> AddUnitMeasurement()
+        internal Task<List<SMMasterModel>> AddUnitMeasurement()
         {
             /*
              * Add record in SMUnitMeasurement
@@ -105,7 +105,7 @@ namespace CMMSAPIs.Repositories.SM
             return null;
         }
 
-        internal Task<List<SMMaster>> UpdateUnitMeasurement()
+        internal Task<List<SMMasterModel>> UpdateUnitMeasurement()
         {
             /*
              * Update record in SMUnitMeasurement
@@ -113,7 +113,7 @@ namespace CMMSAPIs.Repositories.SM
             return null;
         }
 
-        internal Task<List<SMMaster>> DeleteUnitMeasurement()
+        internal Task<List<SMMasterModel>> DeleteUnitMeasurement()
         {
             /*
              * Delete record in SMUnitMeasurement
@@ -140,10 +140,12 @@ namespace CMMSAPIs.Repositories.SM
                                     "smunitmeasurement as um ON um.ID = am.unit_of_measurement " +
                              "WHERE " +
                                     " am.flag = 1" ;
+
             List<SMAssetMaster> _Employee = await Context.GetData<SMAssetMaster>(myQuery).ConfigureAwait(false);
+
             return _Employee;
         }
-
+        // asset master view
         internal async Task<int> AddAssetMaster(SMAssetMaster request)
         {
 
@@ -169,12 +171,12 @@ namespace CMMSAPIs.Repositories.SM
             return await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
         }
 
-        internal async Task<int> DeleteAssetMaster(SMAssetMaster request)
+        internal async Task<int> DeleteAssetMaster(int id)
         {
             /*
              * Delete record in SMAssetMasters and SMAssetMasterFiles
             */
-            string updateQry = "delete from smassetmasters where ID = " + request.id + ";";
+            string updateQry = "delete from smassetmasters where ID = " + id + ";";
 
             return await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
         }

@@ -7,7 +7,6 @@ namespace CMMSAPIs.Models.SM
 {
     public class SMAssetMaster
     {
-        public int id { get; set; }
         public string assetsCode { get; set; }
         public string assetName { get; set; }
         public string assetType { get; set; }
@@ -16,6 +15,8 @@ namespace CMMSAPIs.Models.SM
 
         public string unitMeasurement { get; set; }
         public string approvalRequired { get; set; }
+        public int id { get; set; }
+
 
     }
 }

@@ -19,6 +19,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using CMMSAPIs.BS.Permits;
+using CMMSAPIs.BS.JC;
 
 namespace CMMSAPIs
 {
@@ -51,7 +53,8 @@ namespace CMMSAPIs
             services.AddScoped<iLoginBS, LoginBS>();
             services.AddScoped<ISMMasterBS, SMMasterBS>();
             services.AddScoped<IUtilsBS, UtilsBS>();
-
+            services.AddScoped<IPermitBS, PermitBS>();
+            services.AddScoped<IJCBS, JCBS>();
             services.Configure<MailSettings>(Configuration.GetSection("MailSettings"));
             services.AddTransient<IMailService, MailService>();
         }

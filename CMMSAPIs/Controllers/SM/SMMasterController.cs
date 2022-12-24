@@ -273,11 +273,11 @@ namespace CMMSAPIs.Controllers.SM
 
         [Route("DeleteAssetMaster")]
         [HttpDelete]
-        public async Task<IActionResult> DeleteAssetMaster([FromForm] SMAssetMaster request)
+        public async Task<IActionResult> DeleteAssetMaster(int id)
         {
             try
             {
-                var data = await _SMMasterBS.DeleteAssetMaster(request);
+                var data = await _SMMasterBS.DeleteAssetMaster(id);
                 return Ok(data);
             }
             catch (Exception ex)

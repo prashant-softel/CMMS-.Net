@@ -10,12 +10,12 @@ namespace CMMSAPIs.BS
 {
     public interface IGOBS
     {
-        Task<List<GO>> GetGOList();
-        Task<List<GO>> GetAssetCodeDetails(int asset_code);
-        Task<List<GO>> CreateGO();
-        Task<List<GO>> UpdateGO();
-        Task<List<GO>> DeleteGO();
-        Task<List<GO>> WithdrawGO();
+        Task<List<GOModel>> GetGOList();
+        Task<List<GOModel>> GetAssetCodeDetails(int asset_code);
+        Task<List<GOModel>> CreateGO();
+        Task<List<GOModel>> UpdateGO();
+        Task<List<GOModel>> DeleteGO();
+        Task<List<GOModel>> WithdrawGO();
     }
 
     public class GOBS : IGOBS
@@ -27,7 +27,7 @@ namespace CMMSAPIs.BS
             databaseProvider = dbProvider;
         }
 
-        public async Task<List<GO>> GetGOList()
+        public async Task<List<GOModel>> GetGOList()
         {
             try
             {
@@ -43,7 +43,7 @@ namespace CMMSAPIs.BS
             }
         }
 
-        public async Task<List<GO>> GetAssetCodeDetails(int asset_code)
+        public async Task<List<GOModel>> GetAssetCodeDetails(int asset_code)
         {
             try
             {
@@ -59,7 +59,7 @@ namespace CMMSAPIs.BS
             }
         }
 
-        public async Task<List<GO>> CreateGO()
+        public async Task<List<GOModel>> CreateGO()
         {
             try
             {
@@ -75,7 +75,7 @@ namespace CMMSAPIs.BS
             }
         }
 
-        public async Task<List<GO>> UpdateGO()
+        public async Task<List<GOModel>> UpdateGO()
         {
             try
             {
@@ -91,7 +91,7 @@ namespace CMMSAPIs.BS
             }
         }
 
-        public async Task<List<GO>> DeleteGO()
+        public async Task<List<GOModel>> DeleteGO()
         {
             try
             {
@@ -106,7 +106,7 @@ namespace CMMSAPIs.BS
                 throw;
             }
         }
-        public async Task<List<GO>> WithdrawGO()
+        public async Task<List<GOModel>> WithdrawGO()
         {
             try
             {
