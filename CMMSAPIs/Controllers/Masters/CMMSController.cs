@@ -112,6 +112,21 @@ namespace CMMSAPIs.Controllers.Masters
                 throw;
             }
         }
+
+        [Route("GetSupplierList")]
+        [HttpGet]
+        public async Task<IActionResult> GetSupplierList()
+        {
+            try
+            {
+                var data = await _CMMSBS.GetSupplierList();
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
         #endregion //helper functions
 
         #region JobAPIs

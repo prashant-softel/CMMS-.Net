@@ -11,7 +11,8 @@
         // Module Prefix
         public const string PREFIX_JOB = "JOB", PREFIX_PERMIT = "PERMIT", PREFIX_JC = "JC";
 
-
+        //Business Type
+        public const int OWNER = 1, OPERATOR = 2, CUSTOMER = 3, MANUFACTURER = 4, SUPPLIER = 5;
         
     }
 }
