@@ -25,6 +25,8 @@ using Microsoft.IdentityModel.Tokens;
 using CMMSAPIs.BS.Authentication;
 using System.Configuration;
 using System.Text;
+using CMMSAPIs.BS.FileUpload;
+using CMMSAPIs.Middlewares;
 
 namespace CMMSAPIs
 {
@@ -48,7 +50,7 @@ namespace CMMSAPIs
             {
                 var key = Configuration.GetValue<string>("JwtConfig:Key");
                 var keyBytes = Encoding.ASCII.GetBytes(key);
-                jwtOption.SaveToken = false;
+                jwtOption.SaveToken = true;
                 jwtOption.TokenValidationParameters = new TokenValidationParameters
                 {
                     IssuerSigningKey = new SymmetricSecurityKey(keyBytes),
@@ -59,6 +61,10 @@ namespace CMMSAPIs
                 };
             });
 
+            services.AddDistributedMemoryCache();
+            services.AddSession(options => {
+                options.IdleTimeout = TimeSpan.FromMinutes(1);//You can set Time   
+            });
             services.AddControllers();
             //services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
           
@@ -97,7 +103,8 @@ namespace CMMSAPIs
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
-
+            app.UseSession();
+            app.UseMyMiddleware();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
