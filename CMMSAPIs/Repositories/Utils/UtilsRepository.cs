@@ -64,10 +64,18 @@ namespace CMMSAPIs.Repositories.Utils
 
         internal async Task<List<CMDefaultResponse>> AddLog(CMLog log)
         {
-            /*
-             * Insert the log model properties to History table
-             * Return inserted id/log
-            */
+            string qry = "INSERT INTO History" +
+                            "(" +
+                                "moduleType, moduleRefId, secondaryModuleRefType, secondaryModuleRefId, comment, " +
+                                "status, currentLatitude, currentLongitude, createdBy, createdAt" +
+                            ")" +
+                        "VALUES" +
+                            "(" +
+                                $"{log.module_type}, {log.module_ref_id}, {log.secondary_module_type}, {log.secondary_module_ref_id}," +
+                                $"'{log.comment}', {log.status}, '{log.current_latitude}', '{log.current_longitude}', {log.created_by}, {log.created_at}" +
+                            ")";
+
+            await Context.GetData<List<int>>(qry).ConfigureAwait(false);
             return null;
         }
 

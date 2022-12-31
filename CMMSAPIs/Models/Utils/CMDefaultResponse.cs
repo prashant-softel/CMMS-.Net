@@ -6,6 +6,7 @@ namespace CMMSAPIs.Models.Utils
     {
         public int id { get; set; }
         public int status_code { get; set; }
+        public string message { get; set; }
     }
 
 }
