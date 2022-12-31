@@ -22,17 +22,21 @@ namespace CMMSAPIs.BS.Permits
         /*
          * Permit Main End Points 
         */
-        Task<List<DefaultResponseModel>> CreatePermit(CreatePermitModel request);
+        Task<int> CreatePermit(CreatePermitModel set);
+
         Task<List<PermitListModel>> GetPermitList(int facility_id,int userID);
         Task<List<PermitDetailModel>> GetPermitDetails(int permit_id);
 
         /*
          * Permit Issue/Approve/Reject/Cancel End Points
         */
+        /*        Task<int> PermitApprove(ApprovalModel request);
+        */
         Task<List<DefaultResponseModel>> PermitApprove(ApprovalModel request);
         Task<List<DefaultResponseModel>> PermitReject(ApprovalModel request);
         Task<List<DefaultResponseModel>> PermitIssue(ApprovalModel request);
         Task<List<DefaultResponseModel>> PermitCancel(ApprovalModel request);
+        Task<int> UpdatePermit(UpdatePermitModel request);
     }
 
     public class PermitBS : IPermitBS
@@ -129,13 +133,30 @@ namespace CMMSAPIs.BS.Permits
 
         }
 
-        public async Task<List<DefaultResponseModel>> CreatePermit(CreatePermitModel request)
+        public async Task<int> CreatePermit(CreatePermitModel request)
         {
             try
             {
                 using (var repos = new PermitRepository(getDB))
                 {
                     return await repos.CreatePermit(request);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<int> UpdatePermit(UpdatePermitModel request)
+        {
+            try
+            {
+                using (var repos = new PermitRepository(getDB))
+                {
+                    return await repos.UpdatePermit(request);
+
                 }
             }
             catch (Exception ex)
@@ -177,6 +198,20 @@ namespace CMMSAPIs.BS.Permits
                 throw;
             }
         }
+/*        public async Task<int> PermitApprove(ApprovalModel request)
+        {
+            try
+            {
+                using (var repos = new PermitRepository(getDB))
+                {
+                    return await repos.PermitApprove(request);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }*/
 
         public async Task<List<DefaultResponseModel>> PermitReject(ApprovalModel request)
         {

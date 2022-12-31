@@ -12,8 +12,12 @@ namespace CMMSAPIs.BS.Jobs
     {
         Task<List<JobModel>> GetJobList(int facility_id, int userId);
         Task<List<JobView>> GetJobDetail(int job_id);
-        Task<List<JobModel>> CreateNewJob();
-        Task<List<JobModel>> UpdateJob();
+        Task<int> CreateNewJob(CreateJob request);
+
+        Task<int> ReAssignJob(int job_id, int user_id, int changed_by);
+        Task<int> CancelJob(int job_id, int user_id, string Cancelremark);
+        Task<int> LinkToPTW(int job_id, int ptw_id);
+
 
     }
 
@@ -56,13 +60,45 @@ namespace CMMSAPIs.BS.Jobs
             }
         }
 
-        public async Task<List<JobModel>> CreateNewJob()
+        public async Task<int> CreateNewJob(CreateJob request)
         {
             try
             {
                 using (var repos = new JobRepository(getDB))
                 {
-                    return await repos.CreateNewJob();
+                    return await repos.CreateNewJob(request);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+   
+
+      
+
+        public async Task<int> ReAssignJob(int job_id, int user_id, int changed_by)
+        {
+            try
+            {
+                using (var repos = new JobRepository(getDB))
+                {
+                    return await repos.ReAssignJob(job_id, user_id, changed_by);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<int> CancelJob(int job_id, int user_id, string Cancelremark)
+        {
+            try
+            {
+                using (var repos = new JobRepository(getDB))
+                {
+                    return await repos.CancelJob(job_id, user_id, Cancelremark);
                 }
             }
             catch (Exception ex)
@@ -71,13 +107,13 @@ namespace CMMSAPIs.BS.Jobs
             }
         }
 
-        public async Task<List<JobModel>> UpdateJob()
+        public async Task<int> LinkToPTW(int job_id, int ptw_id)
         {
             try
             {
                 using (var repos = new JobRepository(getDB))
                 {
-                    return await repos.UpdateJob();
+                    return await repos.LinkToPTW(job_id, ptw_id);
                 }
             }
             catch (Exception ex)
@@ -85,7 +121,5 @@ namespace CMMSAPIs.BS.Jobs
                 throw;
             }
         }
-
-
     }
 }

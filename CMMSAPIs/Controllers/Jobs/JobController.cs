@@ -29,6 +29,17 @@ namespace CMMSAPIs.Controllers.Jobs
             try
             {
                 var data = await _JobBS.GetJobList(facility_id, userId);
+                /*if (data != 200)
+                {
+                     if (userId < 0)
+                     {
+                        m_ErrorLog.SetError("User id should not be less than zero");
+                        m_ErrorLog.SetInformation("User id should not be less than zero");
+                     }
+                }
+              
+               
+                */
                 return Ok(data);
             }
             catch (Exception ex)
@@ -54,37 +65,77 @@ namespace CMMSAPIs.Controllers.Jobs
 
         [Route("CreateNewJob")]
         [HttpPost]
-        public async Task<IActionResult> CreateNewJob()
+        public async Task<IActionResult> CreateNewJob(CreateJob request)
         {
+            String status;
             try
             {
-                var data = await _JobBS.CreateNewJob();
-                return Ok(data);
+                var data = await _JobBS.CreateNewJob(request);
+                status = "Job Created Successfully";
             }
             catch (Exception ex)
             {
                 throw;
             }
-        }
-
-        [Route("UpdateJob")]
-        [HttpPost]
-        public async Task<IActionResult> UpdateJob()
-        {
-            try
-            {
-                var data = await _JobBS.UpdateJob();
-                return Ok(data);
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
+            return Ok(status);
         }
 
         /*
          * WorkType Crud Operation
         */
+
+        [Route("ReAssignJob")]
+        [HttpPut]
+        public async Task<IActionResult> ReAssignJob(int job_id, int user_id, int changed_by)
+        {
+            String status;
+            try
+            {
+                var data = await _JobBS.ReAssignJob(job_id, user_id, changed_by);
+                status = "Assign Job Successfully";
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+            return Ok(status);
+
+        }
+
+
+        [Route("CancelJob")]
+        [HttpPut]
+        public async Task<IActionResult> CancelJob(int job_id, int user_id, string Cancelremark)
+        {
+            String status;
+            try
+            {
+                var data = await _JobBS.CancelJob(job_id, user_id, Cancelremark);
+                status = "Job Cancel Successfully";
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+            return Ok(status);
+        }
+
+        [Route("LinkToPTW")]
+        [HttpPut]
+        public async Task<IActionResult> LinkToPTW(int job_id, int ptw_id)
+        {
+            String status;
+            try
+            {
+                var data = await _JobBS.LinkToPTW(job_id, ptw_id);
+                status = "Link To Permit Successfully";
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+            return Ok(status);
+        }
 
         [Route("GetWorkTypeList")]
         [HttpGet]

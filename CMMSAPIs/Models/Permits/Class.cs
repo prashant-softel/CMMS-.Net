@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace CMMSAPIs.Models.Jobs
+namespace CMMSAPIs.Models.Permits
 {
     public class Class
     {

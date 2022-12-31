@@ -1,16 +1,17 @@
-﻿using CMMSAPIs.Models.Utils;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using CMMSAPIs.Models.Utils;
 
 namespace CMMSAPIs.Models.Permits
 {
-    public class CreatePermitModel
+    public class UpdatePermitModel
     {
+        public int permit_id { get; set; }
         public int facility_id { get; set; }
-        public DateTime start_datetime { get; set; }
-        public DateTime end_datetime { get; set;}
+        public DateTime start_date { get; set; }
+        public DateTime end_date { get; set; }
         public string description { get; set; }
-        public int work_type_id { get; set; }
+        public int job_type_id { get; set; }
         public int sop_type_id { get; set; }
         public int issuer_id { get; set; }
         public int approver_id { get; set; }
@@ -19,11 +20,10 @@ namespace CMMSAPIs.Models.Permits
         public List<int> category_ids { get; set; }
         public Boolean is_isolation_required { get; set; }
         public List<int> isolated_category_ids { get; set; }
-        public List<CMPermitLotoList> Loto_list { get; set; }
-        public List<CMPermitEmpList> employee_list { get; set; }
-        public List<CMPermitSaftyQueList> safety_question_list { get; set; }
+        public List<KeyValuePairs> Loto_list { get; set; }
+        public List<KeyValuePairs> employee_list { get; set; }
+        public List<KeyValuePairs> safety_question_list { get; set; }
 
         public List<FileUploadFormModel> file_upload_form { get; set; }
-
     }
 }

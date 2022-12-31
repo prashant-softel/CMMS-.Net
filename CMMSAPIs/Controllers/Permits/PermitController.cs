@@ -116,10 +116,12 @@ namespace CMMSAPIs.Controllers.Permits
             }
             catch (Exception ex)
             {
-                throw;
+
+                return BadRequest(ex.Message);
             }
         }
 
+       
         [Route("GetPermitDetails")]
         [HttpGet]
         public async Task<IActionResult> GetPermitDetails(int permit_id)
@@ -141,32 +143,40 @@ namespace CMMSAPIs.Controllers.Permits
 
         [Route("PermitIssue")]
         [HttpPost]
-        public async Task<IActionResult> PermitIssue(ApprovalModel request)
+        public async Task<IActionResult> PermitIssue([FromForm] ApprovalModel request)
         {
+            String status;
             try
             {
                 var data = await _PermitBS.PermitIssue(request);
-                return Ok(data);
+                status = "Issued Successfully";
             }
             catch (Exception ex)
             {
+                status = "something went wrong " + ex;
                 throw;
             }
+            return Ok(status);
+
         }
 
         [Route("PermitApprove")]
-        [HttpPost]
-        public async Task<IActionResult> PermitApprove(ApprovalModel request)
+        [HttpPut]
+        public async Task<IActionResult> PermitApprove([FromForm] ApprovalModel request)
         {
+           String status;
             try
             {
                 var data = await _PermitBS.PermitApprove(request);
-                return Ok(data);
-            }
+                status = "Approved Successfully";
+/*                return Ok(data);
+*/            }
             catch (Exception ex)
             {
+                status = "something went wrong "+ex;
                 throw;
             }
+            return Ok(status);
         }
 
         [Route("PermitReject")]
@@ -186,17 +196,43 @@ namespace CMMSAPIs.Controllers.Permits
 
         [Route("PermitCancel")]
         [HttpPost]
-        public async Task<IActionResult> PermitCancel(ApprovalModel request)
+        public async Task<IActionResult> PermitCancel([FromForm] ApprovalModel request)
         {
+            String status;
             try
             {
                 var data = await _PermitBS.PermitCancel(request);
-                return Ok(data);
+                status = "Cancelled Successfully";
             }
             catch (Exception ex)
             {
+                status = "something went wrong " + ex;
                 throw;
             }
+            return Ok(status);
+
         }
+
+
+        [Route("UpdatePermit")]
+        [HttpPost]
+        public async Task<IActionResult> UpdatePermit(UpdatePermitModel request)
+        {
+            String status;
+            try
+            {
+                var data = await _PermitBS.UpdatePermit(request);
+                status = "Update permit Successfully";
+                /*                return Ok(data);
+                */
+            }
+            catch (Exception ex)
+            {
+                status = "something went wrong " + ex;
+                throw;
+            }
+            return Ok(status);
+        }
+
     }
 }

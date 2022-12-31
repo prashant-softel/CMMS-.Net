@@ -26,9 +26,9 @@ namespace CMMSAPIs.Repositories.Permits
             /*
              * return permit_type_id, name from PermitTypeLists table for requsted facility_id 
             */
-            string myQuery = " SELECT id, title as name FROM permittypelists WHERE facilityId = " + facility_id;
+            string myQuery = $"SELECT id, title as name FROM permittypelists WHERE facilityId = { facility_id }";
             List<DefaultListModel> _PermitTypeList = await Context.GetData<DefaultListModel>(myQuery).ConfigureAwait(false);
-            return _PermitTypeList;           
+            return _PermitTypeList;
         }
 
         internal async Task<List<DefaultListModel>> GetSafetyMeasurementQuestionList(int permit_type_id)
@@ -37,8 +37,8 @@ namespace CMMSAPIs.Repositories.Permits
              * return id, title from PermitTypeSafetyMeasures table for requested permit_type_id
              * input 1 - checkbox, 2 - radio, 3 - text, 4 - Ok
             */
-            
-            string myQuery5 = "SELECT permitsaftymea.id as saftyQuestionId, permitsaftymea.title as SaftyQuestionName, permitsaftymea.input as input FROM permitsafetyquestions  as                       permitsaftyques " +
+
+            string myQuery5 = "SELECT permitsaftymea.id as saftyQuestionId, permitsaftymea.title as SaftyQuestionName, permitsaftymea.input as input FROM                      permitsafetyquestions  as  permitsaftyques " +
                              "LEFT JOIN permittypesafetymeasures as permitsaftymea ON permitsaftyques.safetyMeasureId = permitsaftymea.id " +
                              "JOIN permits as ptw ON ptw.id = permitsaftymea.permitTypeId " +
                              "where ptw.id = " + permit_type_id;
@@ -81,7 +81,7 @@ namespace CMMSAPIs.Repositories.Permits
             string myQuery = "SELECT " +
                                  "ptw.id as permitId, ptw.permitNumber as permit_site_no, permitType.id as permit_type,  permitType.title as PermitTypeName, asset_cat.id as equipment_category, asset_cat.name as equipment, facilities.id as workingAreaId, facilities.name as workingAreaName, ptw.description as description, CONCAT(user.firstName + ' ' + user.lastName) as request_by_name, ptw.acceptedDate as request_datetime, CONCAT(user.firstName + ' ' + user.lastName) as approved_by_name, ptw.approvedDate as approved_datetime, ptw.status as currentStatus " +
                                  " FROM " +
-                                        "permits as ptw " +                                 
+                                        "permits as ptw " +
                                   "JOIN " +
                                         "facilities as facilities ON ptw.blockId = facilities.id " +
                                   "JOIN " +
@@ -92,12 +92,12 @@ namespace CMMSAPIs.Repositories.Permits
                                          "jobs as job ON ptw.id = job.linkedPermit " +
                                   "LEFT JOIN " +
                                         "users as user ON user.id = ptw.issuedById or user.id = ptw.approvedById" +
-                                  " WHERE ptw.facilityId = " + facility_id + " and user.id = " + userID;          
+                                  " WHERE ptw.facilityId = " + facility_id + " and user.id = " + userID;
             List<PermitListModel> _PermitList = await Context.GetData<PermitListModel>(myQuery).ConfigureAwait(false);
             return _PermitList;
         }
 
-        internal Task<List<DefaultResponseModel>> CreatePermit(CreatePermitModel request)
+        internal async Task<int> CreatePermit(CreatePermitModel request)
         {
             /*
              * Create Form data will go in several tables
@@ -111,7 +111,55 @@ namespace CMMSAPIs.Repositories.Permits
              * Once you saved the records
              * Return GetPermitDetails(permit_id);
             */
-            return null;
+            string qryPermitBasic = "insert into permits(facilityId,startDate,endDate,description,jobId,TBTId,issuedById,approvedById,acceptedById) values" +
+             "('" + request.facility_id + "','" + request.start_datetime + "','" + request.end_datetime + "','" + request.description + "','" + request.work_type_id + "','" + request.sop_type_id + "','" + request.issuer_id + "','" + request.approver_id + "','" + request.user_id + "')";
+            int permitPrimaryKey = 59635;
+            await Context.ExecuteNonQry<int>(qryPermitBasic).ConfigureAwait(false);
+
+       /*     string PrimaryKey = "SELECT id FROM `permits` order by id desc limit 1";
+            List<int key = await Context.ExecuteNonQry<List<int>>(PrimaryKey).ConfigureAwait(false);
+            int permitPrimaryKey = key;*/
+
+            foreach (var data in request.block_ids)
+            {
+                string qryPermitBlock = "insert into permitblocks(ptw_id, block_id ) value ('" + permitPrimaryKey + "','" + data + "')";
+                await Context.ExecuteNonQry<int>(qryPermitBlock).ConfigureAwait(false);
+            }
+
+            foreach (int data in request.category_ids)
+            {
+                string qryPermitCategory = "insert into permitassetlists (ptwId	, categoryId ) value ('" + permitPrimaryKey + "','" + data + "')";
+                await Context.ExecuteNonQry<int>(qryPermitCategory).ConfigureAwait(false);
+            }
+
+            if (request.is_isolation_required == true)
+            {
+                foreach (int data in request.isolated_category_ids)
+                {
+                    string qryPermitisolatedCategory = "insert into permitisolatedassetcategories (permitId , assetCategoryId ) value ('" + permitPrimaryKey + "','" + data + "')";
+                    await Context.ExecuteNonQry<int>(qryPermitisolatedCategory).ConfigureAwait(false);
+                }
+            }
+
+            foreach (var data in request.Loto_list)
+            {
+                string qryPermitlotoAssets = "insert into permitlotoassets ( PTW_id , Loto_Asset_id, Loto_Key ) value ('" + permitPrimaryKey + "','" + data.Loto_id + "','" + data.Loto_Key + "')";
+                await Context.ExecuteNonQry<int>(qryPermitlotoAssets).ConfigureAwait(false);
+            }
+
+            foreach (var data in request.employee_list)
+            {
+                string qryPermitEmpList = "insert into permitemployeelists ( pwtId , employeeId , responsibility ) value ('" + permitPrimaryKey + "','" + data.employeeId + "','" + data.responsibility + "')";
+                 await Context.ExecuteNonQry<int>(qryPermitEmpList).ConfigureAwait(false);
+            }
+
+            foreach (var data in request.safety_question_list)
+            {
+                string qryPermitSaftyQuestion = "insert into permitsafetyquestions ( permitId , safetyMeasureId, safetyMeasureValue) value ('" + permitPrimaryKey + "','" + data.safetyMeasureId + "','" + data.safetyMeasureValue + "')";
+                await Context.ExecuteNonQry<int>(qryPermitSaftyQuestion).ConfigureAwait(false);
+            }
+            return permitPrimaryKey;
+            //file_upload_form pending 
         }
 
         internal async Task<List<PermitDetailModel>> GetPermitDetails(int permit_id)
@@ -133,12 +181,12 @@ namespace CMMSAPIs.Repositories.Permits
                "LEFT JOIN users as user3 ON user3.id = ptw.completedById " +
                "LEFT JOIN users as user4 ON user4.id = ptw.cancelRequestById " +
                 "where ptw.id = " + permit_id;
-              List<PermitDetailModel> _PermitDetailsList = await Context.GetData<PermitDetailModel>(myQuery).ConfigureAwait(false);
+            List<PermitDetailModel> _PermitDetailsList = await Context.GetData<PermitDetailModel>(myQuery).ConfigureAwait(false);
 
             //get employee list
             string myQuery1 = "SELECT  CONCAT(user.firstName,' ',user.lastName) as empName, ptwEmpList.responsibility as resp FROM permitemployeelists as ptwEmpList " +
                                "JOIN permits as ptw  ON ptw.id = ptwEmpList.pwtId " +
-                              "LEFT JOIN users as user ON user.id = ptwEmpList.employeeId where ptw.id = " + permit_id; 
+                              "LEFT JOIN users as user ON user.id = ptwEmpList.employeeId where ptw.id = " + permit_id;
             List<CMEMPLIST> _EmpList = await Context.GetData<CMEMPLIST>(myQuery1).ConfigureAwait(false);
 
             //get isolation list
@@ -148,23 +196,22 @@ namespace CMMSAPIs.Repositories.Permits
 
             //get loto
             string myQuery3 = "SELECT assets_cat.id as asset_id, assets_cat.name as asset_name, ptw.lockSrNo as locksrno FROM assetcategories as assets_cat " +
-                                "LEFT JOIN permits as ptw on ptw.id = assets_cat.id " +
+                               "LEFT JOIN permits as ptw on ptw.id = assets_cat.id " +
                                "LEFT JOIN permitlotoassets AS LOTOAssets on LOTOAssets.PTW_id = ptw.id " +
                                "where ptw.id = " + permit_id;
             List<CMLoto> _LotoList = await Context.GetData<CMLoto>(myQuery3).ConfigureAwait(false);
 
             //get upload file
-            string myQuery4 = "SELECT PTWFiles.File_Name as fileName, PTWFiles.File_Category_name as fileCategory,PTWFiles.File_Size as fileSize,                                                         PTWFiles.status as status FROM fleximc_ptw_files AS PTWFiles " +
+            string myQuery4 = "SELECT PTWFiles.File_Name as fileName, PTWFiles.File_Category_name as fileCategory,PTWFiles.File_Size as fileSize,                              PTWFiles.status as status FROM fleximc_ptw_files AS PTWFiles " +
                                "LEFT JOIN permits ptw on  ptw.id = PTWFiles.PTW_id where ptw.id = " + permit_id;
             List<FileDetailModel> _UploadFileList = await Context.GetData<FileDetailModel>(myQuery4).ConfigureAwait(false);
 
             //get safty question
-            string myQuery5 = "SELECT permitsaftymea.id as saftyQuestionId, permitsaftymea.title as SaftyQuestionName, permitsaftymea.input as input FROM permitsafetyquestions  as                       permitsaftyques " +
+            string myQuery5 = "SELECT permitsaftymea.id as saftyQuestionId, permitsaftymea.title as SaftyQuestionName, permitsaftymea.input as input FROM                       permitsafetyquestions  as permitsaftyques " +
                                "LEFT JOIN permittypesafetymeasures as permitsaftymea ON permitsaftyques.safetyMeasureId = permitsaftymea.id " +
                                "JOIN permits as ptw ON ptw.id = permitsaftymea.permitTypeId " +
                                "where ptw.id = " + permit_id;
             List<CMSaftyQuestion> _QuestionList = await Context.GetData<CMSaftyQuestion>(myQuery5).ConfigureAwait(false);
-            
             List<PermitDetailModel> LstKeyValue = new List<PermitDetailModel>();
 
             _PermitDetailsList[0].LstLoto = _LotoList;
@@ -176,19 +223,21 @@ namespace CMMSAPIs.Repositories.Permits
             return _PermitDetailsList;
         }
 
-        /*
-         * Permit Issue/Approval/Rejection/Cancel End Points
+
+        /*         * Permit Issue/Approval/Rejection/Cancel End Points
         */
-
-        internal Task<List<DefaultResponseModel>> PermitApprove(ApprovalModel request)
+        internal async Task<List<DefaultResponseModel>> PermitApprove(ApprovalModel request)
         {
-            /*
-             * Update Permit Table reccomendationsByApprover, approvedStatus, approvedDate
-             * Return Message Approved successfully
-            */
-            return null;
-        }
 
+            /*Update Permit Table reccomendationsByApprover, approvedStatus, approvedDate
+                       * Return Message Approved successfully*/
+
+            string updateQry = "update permits set reccomendationsByApprover = '" + request.commnet + "', approvedStatus = '" + request.status + "', approvedDate = '" + request.approvedDate + "', approvedById = '" + request.employee_id + "'  where id = " + request.id + ";";
+            List<DefaultResponseModel> _Employee = await Context.GetData<DefaultResponseModel>(updateQry).ConfigureAwait(false);
+
+            return _Employee;
+        }
+       
         internal Task<List<DefaultResponseModel>> PermitReject(ApprovalModel request)
         {
             /*
@@ -197,24 +246,81 @@ namespace CMMSAPIs.Repositories.Permits
             return null;
         }
 
-        internal Task<List<DefaultResponseModel>> PermitIssue(ApprovalModel request)
+        internal async Task<List<DefaultResponseModel>> PermitIssue(ApprovalModel request)
         {
             /*
              * Update Permit Table issuedReccomendations, issuedStatus, issuedDate
              * Return Message Issued successfully
             */
-            return null;
+            string updateQry = "update permits set issuedReccomendations = '" + request.commnet + "', issuedStatus = '" + request.status + "', issuedDate = '" + request.approvedDate + "', issuedById = '" + request.employee_id + "'  where id = " + request.id + ";";
+            List<DefaultResponseModel> _Employee = await Context.GetData<DefaultResponseModel>(updateQry).ConfigureAwait(false);
+
+            return _Employee;
         }
 
-        internal Task<List<DefaultResponseModel>> PermitCancel(ApprovalModel request)
+        internal async Task<List<DefaultResponseModel>> PermitCancel(ApprovalModel request)
         {
             /*
              * Update Permit Table 	cancelReccomendations, cancelRequestDate, cancelRequestStatus
              * Return Message Cancelled successfully
             */
-            return null;
-        }
+            string updateQry = "update permits set cancelReccomendations = '" + request.commnet + "', cancelRequestStatus = '" + request.status + "', cancelRequestDate = '" + request.approvedDate + "', cancelRequestById = '" + request.employee_id + "'  where id = " + request.id + ";";
+            List<DefaultResponseModel> _Employee = await Context.GetData<DefaultResponseModel>(updateQry).ConfigureAwait(false);
 
+            return _Employee;
+        }
+        internal async Task<int> UpdatePermit(UpdatePermitModel request)
+        {
+            /*
+             * Update Permit Table issuedReccomendations, issuedStatus, issuedDate
+             * Return Message Issued successfully
+            */
+
+            string updatePermitQry = "update permits set facilityId = '"+request.facility_id+"' , startDate = '"+request.start_date+"', endDate = '"+request.end_date+"', description = '"+ request.description +"', jobId = '"+request.job_type_id+"', TBTId = '"+request.sop_type_id+"', issuedById = '"+request.issuer_id+"', approvedById = '"+request.approver_id+"', acceptedById = '"+request.user_id+"' where id = '"+request.permit_id +"';";
+            await Context.ExecuteNonQry<int>(updatePermitQry).ConfigureAwait(false);
+            int updatePrimaryKey = request.permit_id;
+                foreach (var data in request.block_ids)
+            {
+                string updateFacilityQry = $"update permitblocks set block_id = {data} where ptw_id =  { request.permit_id } ;";
+                await Context.ExecuteNonQry<int>(updateFacilityQry).ConfigureAwait(false);
+            }
+
+            foreach (var data in request.category_ids)
+            {
+                string updateFacilityQry = $"update permitassetlists set categoryId = { data } where ptwId = { request.permit_id } ;";
+                await Context.ExecuteNonQry<int>(updateFacilityQry).ConfigureAwait(false);
+            }
+
+            if (request.is_isolation_required == true)
+            {
+                foreach (int data in request.isolated_category_ids)
+                {
+                    string updatePermitlotoAssets = $"update permitisolatedassetcategories set assetCategoryId = { data } where permitId ={ request.permit_id } ;";
+                    await Context.ExecuteNonQry<int>(updatePermitlotoAssets).ConfigureAwait(false);
+                }
+            }
+
+            foreach (var data in request.Loto_list)
+            {
+                string updatePermitlotoAssets = "update permitlotoassets set Loto_Asset_id = '"+data.id +"' , Loto_Key = '"+data.name+"' where PTW_id ='"+request.permit_id +"' ;";
+                await Context.ExecuteNonQry<int>(updatePermitlotoAssets).ConfigureAwait(false);
+            }
+
+            foreach (var data in request.employee_list)
+            {
+                string updateyPermitEmpList = "update permitemployeelists set employeeId = '"+data.id+"', responsibility = '"+ data.name +"' where pwtId = '"+request.permit_id +"';";
+                await Context.ExecuteNonQry<int>(updateyPermitEmpList).ConfigureAwait(false);
+            }
+
+            foreach (var data in request.safety_question_list)
+            {
+                string updateyPermitEmpList = "update permitsafetyquestions set safetyMeasureId = '"+data.id+"' ,                                    safetyMeasureValue = '"+ data.name +"' where permitId = '"+ request.permit_id +"' ;";
+                await Context.ExecuteNonQry<int>(updateyPermitEmpList).ConfigureAwait(false);
+            }
+          
+            return updatePrimaryKey;
+
+        }
 
     }
 }

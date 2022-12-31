@@ -153,13 +153,11 @@ namespace CMMSAPIs.Repositories.SM
              * Add record in SMAssetMasters and SMAssetMasterFiles
             */
             string qry = "insert into smassetmasters (asset_code, asset_name, asset_type_ID, item_category_ID, description, unit_of_measurement, approval_required) values " +
-                     "('"+ request.assetsCode + "', '"+ request.assetName + "', '"+ request.assetType + "', '"+ request.assetCat + "', '"+ request.description + "', '"+ request.unitMeasurement + "', '"+ request.approvalRequired + "')";           
-            
-            
+                     "('"+ request.assetsCode + "', '"+ request.assetName + "', '"+ request.assetType + "', '"+ request.assetCat + "', '"+ request.description + "', '"+ request.unitMeasurement + "', '"+ request.approvalRequired + "')";          
+                       
             return await Context.ExecuteNonQry<int>(qry).ConfigureAwait(false);
 
         }
-
 
         internal async Task<int> UpdateAssetMaster(SMAssetMaster request)
         {

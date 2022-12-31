@@ -65,7 +65,6 @@ namespace CMMSAPIs.Repositories.Jobs
 
             /*Your code goes here*/
 
-
             string myQuery = "SELECT " +
                                     "facilities.id as block_id, facilities.name as block_name, asset_cat.id as equipmentCat_id, asset_cat.name as equipmentCat_name, asset.id as workingArea_id, asset.name as workingArea_name, job.status as status, user.id as assigned_id , CONCAT(user.firstName, user.lastName) as assigned_name , workType.workTypeName as workType,  job.title as job_title, job.description as job_description " +
                                       "FROM " +
@@ -85,13 +84,11 @@ namespace CMMSAPIs.Repositories.Jobs
                                       " WHERE job.id= " + job_id;
 
             List<JobView> _ViewJobList = await Context.GetData<JobView>(myQuery).ConfigureAwait(false);
-
-
             return _ViewJobList;
 
         }
 
-        internal Task<List<JobModel>> CreateNewJob()
+        internal async Task<int> CreateNewJob(CreateJob request)
         {
             /*
              * Job basic details will go to Job table
@@ -101,24 +98,71 @@ namespace CMMSAPIs.Repositories.Jobs
             */
 
             /*Your code goes here*/
-            /*string qry = "insert into job (facilityId, blockId, assignedId, title, description, linkedPermit, breakdownTime,belongsTo,status, createdAt,updatedAt,createdBy,updatedBy,cancellationRemarks,cancelStatus) values " +
-                     "('" + request.facilityId + "', '" + request.blockId + "', '" + request.assignedId + "', '" + request.title + "', '" + request.description + "', '" + request.linkedPermit + "', '" + request.breakdownTime + "','" + request.belongsTo + "','" + request.status + "','" + request.createdAt + "','" + request.updatedAt + "','" + request.createdBy + "','" + request.updatedBy + "','" + request.createdAt + "','" + request.cancellationRemarks + "','" + request.cancelStatus + "')";
 
-            return await Context.ExecuteNonQry<int>(qry).ConfigureAwait(false);
-*/
-            return null;
+            string qryJobBasic = "insert into jobs(facilityId,blockId,title,description,assignedId,breakdownTime) values" +
+            "('" + request.facility_id + "','" + request.block_id + "','" + request.title + "','" + request.description + "','" + request.assigned_id + "','" + request.breakdown_time + "')";
+            int jobPrimaryKey = 3168;
+            await Context.ExecuteNonQry<int>(qryJobBasic).ConfigureAwait(false);
+
+            foreach (var data in request.AssetsIds)
+            {
+                string qryAssetsIds = "insert into jobmappingassets(jobId, assetId, categoryId ) value ('" + jobPrimaryKey + "','" + data.asset_id + "','" + data.category_ids + "')";
+                await Context.ExecuteNonQry<int>(qryAssetsIds).ConfigureAwait(false);
+            }
+            foreach (var data in request.JobType_Ids)
+            {
+                string qryCategoryIds = "insert into jobassociatedworktypes(jobId, workTypeId ) value ('" + jobPrimaryKey + "','" + data + "')";
+                await Context.ExecuteNonQry<int>(qryCategoryIds).ConfigureAwait(false);
+            }
+
+            return jobPrimaryKey;
         }
 
-        internal Task<List<JobModel>> UpdateJob()
-        {
+        internal async Task<int> ReAssignJob(int job_id, int user_id, int changed_by)
+         {
             /*
+             * update history also
+             * Get id and what parameter changed
              * AssignedID/PermitID/CancelJob. Out of 3 we can update any one fields based on request
              * Re-assigned employee/ link permit / Cancel Permit. 3 different end points call this function.
              * return boolean true/false
             */
-
             /*Your code goes here*/
-            return null;
+            string updateQry = "update jobs set assignedId = '" + user_id + "', updatedBy = '" + changed_by + "' where id = " + job_id + ";";
+            return await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
         }
+        internal async Task<int> CancelJob(int job_id, int user_id, string Cancelremark)
+        {
+            /*
+             * update history also
+             * Get id and what parameter changed
+             * AssignedID/PermitID/CancelJob. Out of 3 we can update any one fields based on request
+             * Re-assigned employee/ link permit / Cancel Permit. 3 different end points call this function.
+             * return boolean true/false
+            */
+            /*Your code goes here*/
+            int Cancelstatus = 1;
+            string updateQry = "update jobs set updatedBy = '" + user_id + "',  cancellationRemarks = '" + Cancelremark + "' ,  cancelStatus = '" + Cancelstatus + "'  where id = " + job_id + ";";
+            return await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+        }
+
+
+
+        internal async Task<int> LinkToPTW(int job_id, int ptw_id)
+        {
+            /*
+                 *Get id and what parameter changed
+                 * AssignedID/ PermitID / CancelJob.Out of 3 we can update any one fields based on request
+                 * Re-assigned employee / link permit / Cancel Permit. 3 different end points call this function.     
+                 * return boolean true / false
+    
+                 //update history table
+                 Your code goes here
+            */
+            string updateQry = "update jobs set linkedPermit = '" + ptw_id + "'  where id = " + job_id + ";";
+            return await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+        }
+             
+
     }
 }
