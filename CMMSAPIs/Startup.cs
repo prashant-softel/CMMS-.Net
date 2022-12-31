@@ -26,7 +26,6 @@ using CMMSAPIs.BS.Authentication;
 using System.Configuration;
 using System.Text;
 using CMMSAPIs.BS.FileUpload;
-using CMMSAPIs.Middlewares;
 
 namespace CMMSAPIs
 {
