@@ -79,6 +79,13 @@ namespace CMMSAPIs.Repositories.Masters
             List<CMEmployee> _Employee = await Context.GetData<CMEmployee>(myQuery).ConfigureAwait(false);
             return _Employee;
         }
+
+        internal async Task<List<CMSupplier>> GetSupplierList()
+        {
+            string myQuery = $"SELECT id,name FROM Business where status = 1 AND type = {Constant.SUPPLIER}";
+            List<CMSupplier> _Suppliers  = await Context.GetData<CMSupplier>(myQuery).ConfigureAwait(false);
+            return _Suppliers;
+        }
     }
 
 }
