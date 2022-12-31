@@ -75,6 +75,7 @@ namespace CMMSAPIs
             services.AddScoped<ICMMSBS, CMMSBS>();
             services.AddScoped<IJobBS, JobBS>();
             services.AddScoped<iLoginBS, LoginBS>();
+            services.AddScoped<IRoleAccessBS, RoleAccessBS>();
             services.AddScoped<ISMMasterBS, SMMasterBS>();
             services.AddScoped<IUtilsBS, UtilsBS>();
             services.AddScoped<IPermitBS, PermitBS>();
