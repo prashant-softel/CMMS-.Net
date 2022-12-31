@@ -1,9 +1,11 @@
-﻿using CMMSAPIs.BS.Masters;
-using CMMSAPIs.BS.Utils;
+﻿using CMMSAPIs.BS.Utils;
+using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace CMMSAPIs.Controllers.utils
@@ -13,9 +15,11 @@ namespace CMMSAPIs.Controllers.utils
     public class UtilsController : ControllerBase
     {
         private readonly IUtilsBS _UtilsBS;
-        public UtilsController(IUtilsBS utils)
+        private readonly AddLog _AddLog;
+        public UtilsController(IUtilsBS utils, IConfiguration configuration)
         {
             _UtilsBS = utils;
+            _AddLog = new AddLog(configuration);
         }
 
         [Authorize]
@@ -30,6 +34,7 @@ namespace CMMSAPIs.Controllers.utils
             }
             catch (Exception ex)
             {
+                _AddLog.ErrorLog($"{DateTime.Now} : Failed to get country list");
                 throw;
             }
         }
