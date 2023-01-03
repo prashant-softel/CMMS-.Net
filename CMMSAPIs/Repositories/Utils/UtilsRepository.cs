@@ -51,14 +51,6 @@ namespace CMMSAPIs.Repositories.Utils
              * Return : list Of Timezone with offset
             */
 
-            //foreach (TimeZoneInfo z in TimeZoneInfo.GetSystemTimeZones())
-            //{
-            //  offset = z.BaseUtcOffset ;
-            //  standard_name = z.StandardName;
-            //  display_name = z.DisplayName;
-            //}
-
-
             return null;
         }
 
@@ -72,7 +64,7 @@ namespace CMMSAPIs.Repositories.Utils
                         "VALUES" +
                             "(" +
                                 $"{log.module_type}, {log.module_ref_id}, {log.secondary_module_type}, {log.secondary_module_ref_id}," +
-                                $"'{log.comment}', {log.status}, '{log.current_latitude}', '{log.current_longitude}', {log.created_by}, {log.created_at}" +
+                                $"'{log.comment}', {log.status}, '{log.current_latitude}', '{log.current_longitude}', {GetUserID()}, '{GetUTCTime()}'" +
                             ")";
 
             await Context.GetData<List<int>>(qry).ConfigureAwait(false);
@@ -86,6 +78,20 @@ namespace CMMSAPIs.Repositories.Utils
              * Return Log
             */
             return null;
+        }
+
+        // Return User ID
+        internal static int GetUserID()
+        {
+            // Pending : Fetch User Id from Token
+            return 232;
+        }
+
+        // Return UTC time
+        internal static string GetUTCTime()
+        {
+            DateTime Utc = DateTime.UtcNow;
+            return Utc.ToString("yyyy-MM-dd hh:mm:ss");
         }
 
 

@@ -50,7 +50,7 @@
         public const int PLANT = 38;
 
         // Users
-        public const int USER = 39, ROLE_DEFAULT_ACCESS_MODULE = 50;
+        public const int USER = 39, USER_NOTIFICATIONS = 40, ROLE_DEFAULT_NOTIFICATIONS = 41, ROLE_DEFAULT_ACCESS_MODULE = 50;
 
         /* Features Constant END */
 

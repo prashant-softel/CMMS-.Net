@@ -26,6 +26,8 @@ using CMMSAPIs.BS.Authentication;
 using System.Configuration;
 using System.Text;
 using CMMSAPIs.BS.FileUpload;
+using CMMSAPIs.Middlewares;
+using Microsoft.AspNetCore.Http;
 
 namespace CMMSAPIs
 {
@@ -76,6 +78,7 @@ namespace CMMSAPIs
             services.AddScoped<IJobBS, JobBS>();
             services.AddScoped<iLoginBS, LoginBS>();
             services.AddScoped<IRoleAccessBS, RoleAccessBS>();
+            services.AddScoped<IUserAccessBS, UserAccessBS>();
             services.AddScoped<ISMMasterBS, SMMasterBS>();
             services.AddScoped<IUtilsBS, UtilsBS>();
             services.AddScoped<IPermitBS, PermitBS>();
@@ -84,6 +87,7 @@ namespace CMMSAPIs
             services.AddTransient<IMailService, MailService>();
             services.AddScoped<IJwtTokenManagerBS, JwtTokenManagerBS>();
             services.AddScoped<IFileUploadBS, FileUploadBS>();
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

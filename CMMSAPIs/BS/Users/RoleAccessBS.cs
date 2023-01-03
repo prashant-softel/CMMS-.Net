@@ -12,6 +12,9 @@ namespace CMMSAPIs.BS.Users
     {
         public Task<List<CMAccess>> GetRoleAccess(int role_id);
         public Task<CMDefaultResponse> SetRoleAccess(CMRoleAccess request);
+        public Task<List<CMRoleNotifications>> GetRoleNotifications(int role_id);
+        public Task<CMDefaultResponse> SetRoleNotifications(List<CMRoleNotifications> request);
+        //public Task<int> SetRoleAccessAll(CMRoleAccess request);
     }
 
     public class RoleAccessBS : IRoleAccessBS
@@ -52,5 +55,51 @@ namespace CMMSAPIs.BS.Users
                 throw;
             }
         }
+
+        public async Task<List<CMRoleNotifications>> GetRoleNotifications(int role_id)
+        {
+            try
+            {
+                using (var repos = new RoleAccessRepository(getDB))
+                {
+                    return await repos.GetRoleNotifications(role_id);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> SetRoleNotifications(List<CMRoleNotifications> request)
+        {
+            try
+            {
+                using (var repos = new RoleAccessRepository(getDB))
+                {
+                    return await repos.SetRoleNotifications(request);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+
+        //public async Task<int> SetRoleAccessAll(CMRoleAccess request)
+        //{
+        //    try
+        //    {
+        //        using (var repos = new RoleAccessRepository(getDB))
+        //        {
+        //            return await repos.CompareAndSetUserAccess(request.role_id, request.access_list);
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        throw;
+        //    }
+        //}
     }
 }

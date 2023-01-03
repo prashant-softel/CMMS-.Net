@@ -45,7 +45,7 @@ namespace CMMSAPIs.Repositories.FileUpload
                     }
                 }
                
-                CMDefaultResponse response = new CMDefaultResponse(0, 201);
+                CMDefaultResponse response = new CMDefaultResponse(0, 201, "");
                 return response;
             }
             catch (Exception ex) 
@@ -56,14 +56,14 @@ namespace CMMSAPIs.Repositories.FileUpload
 
         // TODO Below function is not working.
         // Its thrwoing error on Image image = Image.FromFile(imageFile); that System.Drawing.Common is not supported for this platform
-        public static void CreateThumbnail(string imageFile)
-        {
-            string dir = new FileInfo(imageFile).DirectoryName;
-            string thmFilePath = Path.Combine(dir, "thumbnail.jpeg");
+        //public static void CreateThumbnail(string imageFile)
+        //{
+        //    string dir = new FileInfo(imageFile).DirectoryName;
+        //    string thmFilePath = Path.Combine(dir, "thumbnail.jpeg");
 
-            Image image = Image.FromFile(imageFile);
-            var thumbImage = image.GetThumbnailImage(64, 64, new Image.GetThumbnailImageAbort(() => false), IntPtr.Zero);
-            thumbImage.Save(thmFilePath, System.Drawing.Imaging.ImageFormat.Jpeg);
-        }
+        //    Image image = Image.FromFile(imageFile);
+        //    var thumbImage = image.GetThumbnailImage(64, 64, new Image.GetThumbnailImageAbort(() => false), IntPtr.Zero);
+        //    thumbImage.Save(thmFilePath, System.Drawing.Imaging.ImageFormat.Jpeg);
+        //}
     }
 }

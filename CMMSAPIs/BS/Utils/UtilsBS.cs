@@ -14,10 +14,11 @@ namespace CMMSAPIs.BS.Utils
         Task<List<CMDefaultList>> GetStateList(int country_id);
         Task<List<CMDefaultList>> GetCityList(int state_id);
         Task<List<CMCurrency>> GetCurrencyList();
+       // Task<List<double>> GetConversionRate(int currency_id_from, int currency_id_to);
         Task<List<TZone>> GetTimeZoneList();
+       // Task<List<TZone>> GetTimeZone(int facility_id);
         Task<List<CMDefaultResponse>> AddLog(CMLog log);
         Task<List<CMLog>> GetLog(int module_type, int id);
-
     }
     public class UtilsBS : IUtilsBS
     {
@@ -88,6 +89,21 @@ namespace CMMSAPIs.BS.Utils
             }
         }
 
+        //public async Task<List<double>> GetConversionRate(int currency_id_from, int currency_id_to)
+        //{
+        //    try
+        //    {
+        //        using (var repos = new UtilsRepository(getDB))
+        //        {
+        //            return await repos.GetConversionRate(currency_id_from, currency_id_to);
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        throw;
+        //    }
+        //}
+
         public async Task<List<TZone>> GetTimeZoneList()
         {
             try
@@ -102,6 +118,20 @@ namespace CMMSAPIs.BS.Utils
                 throw;
             }
         }
+        //public async Task<List<TZone>> GetTimeZone(int facility_id)
+        //{
+        //    try
+        //    {
+        //        using (var repos = new UtilsRepository(getDB))
+        //        {
+        //            return await repos.GetTimeZone(facility_id);
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        throw new Exception(ex.Message);
+        //    }
+        //}
         public async Task<List<CMDefaultResponse>> AddLog(CMLog log)
         {
             try
