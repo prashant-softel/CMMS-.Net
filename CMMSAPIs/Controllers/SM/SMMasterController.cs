@@ -240,50 +240,58 @@ namespace CMMSAPIs.Controllers.SM
         }
 
         [Route("AddAssetMaster")]
-        //HttpPost("send")]
         [HttpPost]
 
         public async Task<IActionResult> AddAssetMaster([FromForm] SMAssetMaster request)
         {
+            String status;
             try
             {
                 var data = await _SMMasterBS.AddAssetMaster(request);
-                return Ok(data);
+                status = "Record Inserted Successfully";
             }
             catch (Exception ex)
             {
+                status = "something went wrong " + ex;
                 throw;
             }
+            return Ok(status);
         }
 
         [Route("UpdateAssetMaster")]
         [HttpPut]
         public async Task<IActionResult> UpdateAssetMaster([FromForm] SMAssetMaster request)
         {
+            String status;
             try
             {
                 var data = await _SMMasterBS.UpdateAssetMaster(request);
-                return Ok(data);
+                status = "Record Updated Successfully";
             }
             catch (Exception ex)
             {
+                status = "something went wrong " + ex;
                 throw;
             }
+            return Ok(status);
         }
 
         [Route("DeleteAssetMaster")]
         [HttpDelete]
         public async Task<IActionResult> DeleteAssetMaster(int id)
         {
+            String status;
             try
             {
                 var data = await _SMMasterBS.DeleteAssetMaster(id);
-                return Ok(data);
+                status = "Record Deleted Successfully";
             }
             catch (Exception ex)
             {
+                status = "something went wrong " + ex;
                 throw;
             }
+            return Ok(status);
         }
     }
 }

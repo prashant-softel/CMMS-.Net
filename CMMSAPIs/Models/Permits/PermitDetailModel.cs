@@ -6,8 +6,9 @@ namespace CMMSAPIs.Models.Permits
 {
     public class PermitDetailModel
     {
-        public dynamic startDate { get; set; }
-        public dynamic tillDate { get; set; }
+        public DateTime startDate { get; set; }
+        public DateTime tillDate { get; set; }
+        public int ptwStatus { get; set; }        
         public string siteName { get; set; }
         public string BlockName { get; set; }
         public int permitNo { get; set; }
@@ -20,13 +21,13 @@ namespace CMMSAPIs.Models.Permits
         public string description { get; set; }
 
         public string issuedByName { get; set; }
-        public dynamic issue_at { get; set; }
+        public DateTime issue_at { get; set; }
         public string approvedByName { get; set; }
-        public dynamic approve_at { get; set; }
+        public DateTime approve_at { get; set; }
         public string completedByName { get; set; }
-        public dynamic close_at { get; set; }
+        public DateTime close_at { get; set; }
         public string cancelRequestByName { get; set; }
-        public dynamic cancel_at { get; set; }
+        public DateTime cancel_at { get; set; }
 
 
 
@@ -37,10 +38,20 @@ namespace CMMSAPIs.Models.Permits
         public List<CMLoto> LstLoto { get; set; }
         public List<CMEMPLIST> LstEmp { get; set; }
         public List<CMIsolationList> LstIsolation { get; set; }
+        public List<CMCategory> LstCategory { get; set; }
 
+        public List<CMAssociatedList> LstAssociatedJob { get; set; }
 
     }
-
+    public class CMAssociatedList
+    {
+        public int JobId { get; set; }
+        public int JobCardId { get; set; }
+        public string JobTitle { get; set; }
+        public string JobDes { get; set; }
+        public DateTime JobDate { get; set; }
+        public int JobStatus { get; set; }
+    }
     public class CMLoto
     {
         public int asset_id { get; set; }
@@ -48,6 +59,11 @@ namespace CMMSAPIs.Models.Permits
         public string locksrno { get; set; }
 
     }
+    public class CMCategory
+    {
+        public string equipmentCat { get; set; }
+    }
+
     public class CMEMPLIST
     {
         public string empName { get; set; }

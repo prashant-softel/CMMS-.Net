@@ -17,7 +17,8 @@ namespace CMMSAPIs.Models.Jobs
         public int permit_id { get; set; }
         public DateTime breakdown_time { get; set; }
         public DateTime job_create_Date { get; set; }
-
+        public DateTime createdAt { get; set; }
+        public string createdBy { get; set; }
 
         /*  public string facility_name { get; set; }
           public string block_name { get; set; }

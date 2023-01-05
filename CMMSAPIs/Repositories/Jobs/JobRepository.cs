@@ -28,7 +28,7 @@ namespace CMMSAPIs.Repositories.Jobs
            */
             /*Your code goes here*/
             string myQuery = "SELECT " +
-                                 "facilities.name as plantName, job.createdAt as jobDate,DATE_FORMAT(job.breakdownTime, '%Y-%m-%d') as breaKdownTime, job.id as id, asset_cat.name as equipmentCat, asset.name as workingArea, job.title as jobDetails, workType.workTypeName as workType,  permit.code as permitId, job.createdBy as raisedBy, CONCAT(user.firstName + ' ' + user.lastName) as assignedTo , IF(job.breakdownTime = '', 'Non Breakdown Maintenance', 'Breakdown Maintenance') as breakdownType" +
+                                 "facilities.name as plantName, job.status, job.createdAt as jobDate, DATE_FORMAT(job.breakdownTime, '%Y-%m-%d') as breaKdownTime, job.id as id, asset_cat.name as equipmentCat, asset.name as workingArea, job.title as jobDetails, workType.workTypeName as workType, permit.code as permitId, job.createdBy as raisedBy, CONCAT(user.firstName + ' ' + user.lastName) as assignedTo, IF(job.breakdownTime = '', 'Non Breakdown Maintenance', 'Breakdown Maintenance') as breakdownType" +
                                  " FROM " +
                                         "jobs as job " +
                                  "JOIN " +
@@ -62,11 +62,10 @@ namespace CMMSAPIs.Repositories.Jobs
              * id and it string value should be there in list
              * job_id = 3064
             */
-
             /*Your code goes here*/
 
             string myQuery = "SELECT " +
-                                    "facilities.id as block_id, facilities.name as block_name, asset_cat.id as equipmentCat_id, asset_cat.name as equipmentCat_name, asset.id as workingArea_id, asset.name as workingArea_name, job.status as status, user.id as assigned_id , CONCAT(user.firstName, user.lastName) as assigned_name , workType.workTypeName as workType,  job.title as job_title, job.description as job_description " +
+                                    "facilities.id as block_id, job.status as JobStatus, facilities.name as block_name, job.status as status, user.id as assigned_id, CONCAT(user.firstName, user.lastName) as assigned_name, workType.workTypeName as workType,  job.title as job_title, job.description as job_description " +
                                       "FROM " +
                                             "jobs as job " +
                                       "JOIN " +
@@ -82,8 +81,29 @@ namespace CMMSAPIs.Repositories.Jobs
                                       "LEFT JOIN " +
                                             "users as user ON user.id = job.assignedId" +           
                                       " WHERE job.id= " + job_id;
-
             List<JobView> _ViewJobList = await Context.GetData<JobView>(myQuery).ConfigureAwait(false);
+
+            //get equipmentCat list
+            string myQuery1 = "SELECT asset_cat.id as equipmentCat_id, asset_cat.name as equipmentCat_name  FROM assetcategories as asset_cat " +
+                "JOIN jobmappingassets as mapAssets ON mapAssets.categoryId = asset_cat.id JOIN jobs as job ON mapAssets.jobId = job.id WHERE job.id =" + job_id;
+            List<CMequipmentCatList> _equipmentCatList = await Context.GetData<CMequipmentCatList>(myQuery1).ConfigureAwait(false);
+
+            //get workingArea_name list 
+            string myQuery2 = "SELECT asset.id as workingArea_id, asset.name as workingArea_name FROM assets as asset " +
+             "JOIN jobmappingassets as mapAssets ON mapAssets.assetId  =  asset.id  JOIN jobs as job ON mapAssets.jobId = job.id WHERE job.id =" + job_id;
+            List<CMworkingAreaNameList> _WorkingAreaNameList = await Context.GetData<CMworkingAreaNameList>(myQuery2).ConfigureAwait(false);
+
+            //get Associated permits
+            string myQuery3 = "SELECT ptw.title as title, ptw.permitNumber as sitePermitNo, CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, ptw.status as ptwStatus FROM permits as ptw JOIN jobs as job ON ptw.id = job.linkedPermit " +
+                "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
+                "LEFT JOIN fleximc_jc_files as jobCard ON jobCard.JC_id = ptw.id " +
+            "WHERE job.id= " + job_id;
+            List<CMAssociatedPermitList> _AssociatedpermitList = await Context.GetData<CMAssociatedPermitList>(myQuery3).ConfigureAwait(false);
+
+            _ViewJobList[0].LstCMequipmentCatList = _equipmentCatList;
+            _ViewJobList[0].LstCMworkingAreaNameList = _WorkingAreaNameList;
+            _ViewJobList[0].LstAssociatedPermit = _AssociatedpermitList;
+
             return _ViewJobList;
 
         }
@@ -96,25 +116,23 @@ namespace CMMSAPIs.Repositories.Jobs
              * Job associated work type will go in JobAssociatedWorkTypes
              * return value will be inserted record. Use GetJobDetail() function
             */
-
             /*Your code goes here*/
 
-            string qryJobBasic = "insert into jobs(facilityId,blockId,title,description,assignedId,breakdownTime) values" +
-            "('" + request.facility_id + "','" + request.block_id + "','" + request.title + "','" + request.description + "','" + request.assigned_id + "','" + request.breakdown_time + "')";
-            int jobPrimaryKey = 3168;
+            string qryJobBasic = "insert into jobs(facilityId, blockId,title, description, createdAt, createdBy, breakdownTime) values" +
+            $"({ request.facility_id }, { request.block_id }, '{ request.title }', '{ request.description }', '{ request.createdAt }','{ request.createdBy }','{ request.breakdown_time }')";
+            int jobPrimaryKey = 3172;
             await Context.ExecuteNonQry<int>(qryJobBasic).ConfigureAwait(false);
 
             foreach (var data in request.AssetsIds)
             {
-                string qryAssetsIds = "insert into jobmappingassets(jobId, assetId, categoryId ) value ('" + jobPrimaryKey + "','" + data.asset_id + "','" + data.category_ids + "')";
+                string qryAssetsIds = $"insert into jobmappingassets(jobId, assetId, categoryId ) value ({ jobPrimaryKey }, { data.asset_id },{ data.category_ids })";
                 await Context.ExecuteNonQry<int>(qryAssetsIds).ConfigureAwait(false);
             }
             foreach (var data in request.JobType_Ids)
             {
-                string qryCategoryIds = "insert into jobassociatedworktypes(jobId, workTypeId ) value ('" + jobPrimaryKey + "','" + data + "')";
+                string qryCategoryIds = $"insert into jobassociatedworktypes(jobId, workTypeId ) value ( { jobPrimaryKey }, { data } )";
                 await Context.ExecuteNonQry<int>(qryCategoryIds).ConfigureAwait(false);
             }
-
             return jobPrimaryKey;
         }
 
@@ -128,7 +146,7 @@ namespace CMMSAPIs.Repositories.Jobs
              * return boolean true/false
             */
             /*Your code goes here*/
-            string updateQry = "update jobs set assignedId = '" + user_id + "', updatedBy = '" + changed_by + "' where id = " + job_id + ";";
+            string updateQry = $"update jobs set assignedId = { user_id }, updatedBy = { changed_by } where id = { job_id } ";
             return await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
         }
         internal async Task<int> CancelJob(int job_id, int user_id, string Cancelremark)
@@ -142,7 +160,7 @@ namespace CMMSAPIs.Repositories.Jobs
             */
             /*Your code goes here*/
             int Cancelstatus = 1;
-            string updateQry = "update jobs set updatedBy = '" + user_id + "',  cancellationRemarks = '" + Cancelremark + "' ,  cancelStatus = '" + Cancelstatus + "'  where id = " + job_id + ";";
+            string updateQry = $"update jobs set updatedBy = { user_id },  cancellationRemarks = '{ Cancelremark }',  cancelStatus = { Cancelstatus }  where id = { job_id };";
             return await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
         }
 
@@ -159,7 +177,7 @@ namespace CMMSAPIs.Repositories.Jobs
                  //update history table
                  Your code goes here
             */
-            string updateQry = "update jobs set linkedPermit = '" + ptw_id + "'  where id = " + job_id + ";";
+            string updateQry = $"update jobs set linkedPermit = { ptw_id }  where id =  { job_id };";
             return await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
         }
              

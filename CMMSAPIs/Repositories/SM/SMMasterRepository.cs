@@ -21,7 +21,7 @@ namespace CMMSAPIs.Repositories.SM
             /*
              * Return id, asset_type from SMAssetTypes
             */
-            string myQuery = "SELECT ID, asset_type as title FROM SMAssetTypes";
+            string myQuery = $"SELECT ID, asset_type as title FROM SMAssetTypes";
             List<SMMasterModel> _AssetTypeList = await Context.GetData<SMMasterModel>(myQuery).ConfigureAwait(false);
             return _AssetTypeList;
         }
@@ -58,7 +58,7 @@ namespace CMMSAPIs.Repositories.SM
             /*
              * Return id, name from SMItemCategory
             */
-            string myQuery = "SELECT ID, cat_name as title FROM smitemcategory ";
+            string myQuery = $"SELECT ID, cat_name as title FROM smitemcategory";
             List<SMMasterModel> _AssetCategoryList = await Context.GetData<SMMasterModel>(myQuery).ConfigureAwait(false);
             return _AssetCategoryList;
         }
@@ -92,7 +92,7 @@ namespace CMMSAPIs.Repositories.SM
             /*
              * Return * from SMUnitMeasurement
             */
-            string myQuery = "SELECT ID, name as title FROM smunitmeasurement";
+            string myQuery = $"SELECT ID, name as title FROM smunitmeasurement";
             List<SMMasterModel> _UnitMeasurementList = await Context.GetData<SMMasterModel>(myQuery).ConfigureAwait(false);
             return _UnitMeasurementList;
         }
@@ -121,14 +121,14 @@ namespace CMMSAPIs.Repositories.SM
             return null;
         }
 
-        internal async Task<List<SMAssetMaster>> GetAssetMasterList()
+        internal async Task<List<AssetsMaster>> GetAssetMasterList()
         {
             /*
              * Return id, name, code, description, asset type, asset categroy, unit measurement, attached files  
              * from SMAssetMasters, SMAssetMasterFiles, SMUnitMeasurement, SMAssetTypes, SMAssetCategory
             */
             string myQuery = "SELECT " +
-                                    "am.asset_code as assetsCode,am.asset_name as assetName,at.asset_type as assetType ,ic.cat_name as assetCat,am.description as description,um.name as unitMeasurement," +
+                                    "am.asset_code as assetsCode, am.asset_name as assetName, at.asset_type as assetType, ic.cat_name as assetCat, am.description as description, um.name as unitMeasurement," +
                                     "IF(am.approval_required = '1', 'YES', 'NO') as approvalRequired " +
                                    "FROM " +
                                     "smassetmasters as am " +
@@ -140,9 +140,7 @@ namespace CMMSAPIs.Repositories.SM
                                     "smunitmeasurement as um ON um.ID = am.unit_of_measurement " +
                              "WHERE " +
                                     " am.flag = 1" ;
-
-            List<SMAssetMaster> _Employee = await Context.GetData<SMAssetMaster>(myQuery).ConfigureAwait(false);
-
+            List<AssetsMaster> _Employee = await Context.GetData<AssetsMaster>(myQuery).ConfigureAwait(false);
             return _Employee;
         }
         // asset master view
@@ -153,8 +151,7 @@ namespace CMMSAPIs.Repositories.SM
              * Add record in SMAssetMasters and SMAssetMasterFiles
             */
             string qry = "insert into smassetmasters (asset_code, asset_name, asset_type_ID, item_category_ID, description, unit_of_measurement, approval_required) values " +
-                     "('"+ request.assetsCode + "', '"+ request.assetName + "', '"+ request.assetType + "', '"+ request.assetCat + "', '"+ request.description + "', '"+ request.unitMeasurement + "', '"+ request.approvalRequired + "')";          
-                       
+                     $"('{ request.assetsCode }', '{ request.assetName}', { request.assetType}, { request.assetCat}, '{ request.description}', { request.unitMeasurement}, { request.approvalRequired})";   
             return await Context.ExecuteNonQry<int>(qry).ConfigureAwait(false);
 
         }
@@ -164,8 +161,7 @@ namespace CMMSAPIs.Repositories.SM
             /*
              * Update record in SMAssetMasters and SMAssetMasterFiles
             */
-            string updateQry = "update smassetmasters set asset_code = '" + request.assetsCode + "', asset_name = '" + request.assetName + "', asset_type_ID = " + request.assetType + ", item_category_ID = " + request.assetCat + " , description = '" + request.description + "' , unit_of_measurement = " + request.unitMeasurement + ", approval_required = " + request.approvalRequired + " where ID = " + request.id + ";";
-
+            string updateQry = $"update smassetmasters set asset_code = '{ request.assetsCode }', asset_name = '{ request.assetName }', asset_type_ID =  { request.assetType}, item_category_ID = { request.assetCat }, description = '{ request.description }' , unit_of_measurement =  { request.unitMeasurement}, approval_required = { request.approvalRequired } where ID = { request.id } ";
             return await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
         }
 
@@ -174,8 +170,7 @@ namespace CMMSAPIs.Repositories.SM
             /*
              * Delete record in SMAssetMasters and SMAssetMasterFiles
             */
-            string updateQry = "delete from smassetmasters where ID = " + id + ";";
-
+            string updateQry = $"delete from smassetmasters where ID = { id }";
             return await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
         }
     }

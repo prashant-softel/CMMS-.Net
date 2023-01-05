@@ -33,6 +33,11 @@ namespace CMMSAPIs.BS.Permits
         /*        Task<int> PermitApprove(ApprovalModel request);
         */
         Task<List<DefaultResponseModel>> PermitApprove(ApprovalModel request);
+        Task<List<DefaultResponseModel>> PermitExtend(ApprovalModel request);
+        Task<List<DefaultResponseModel>> PermitExtendApprove(ApprovalModel request);
+        Task<List<DefaultResponseModel>> PermitExtendCancel(ApprovalModel request);
+        Task<List<DefaultResponseModel>> PermitClose (ApprovalModel request);
+
         Task<List<DefaultResponseModel>> PermitReject(ApprovalModel request);
         Task<List<DefaultResponseModel>> PermitIssue(ApprovalModel request);
         Task<List<DefaultResponseModel>> PermitCancel(ApprovalModel request);
@@ -198,21 +203,63 @@ namespace CMMSAPIs.BS.Permits
                 throw;
             }
         }
-/*        public async Task<int> PermitApprove(ApprovalModel request)
+        public async Task<List<DefaultResponseModel>> PermitExtend(ApprovalModel request)
         {
             try
             {
                 using (var repos = new PermitRepository(getDB))
                 {
-                    return await repos.PermitApprove(request);
+                    return await repos.PermitExtend(request);
                 }
             }
             catch (Exception ex)
             {
                 throw;
             }
-        }*/
-
+        }
+        public async Task<List<DefaultResponseModel>> PermitExtendApprove(ApprovalModel request)
+        {
+            try
+            {
+                using (var repos = new PermitRepository(getDB))
+                {
+                    return await repos.PermitExtendApprove(request);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<List<DefaultResponseModel>> PermitExtendCancel(ApprovalModel request)
+        {
+            try
+            {
+                using (var repos = new PermitRepository(getDB))
+                {
+                    return await repos.PermitExtendCancel(request);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<List<DefaultResponseModel>> PermitClose(ApprovalModel request)
+        {
+            try
+            {
+                using (var repos = new PermitRepository(getDB))
+                {
+                    return await repos.PermitClose(request);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+  
         public async Task<List<DefaultResponseModel>> PermitReject(ApprovalModel request)
         {
             try

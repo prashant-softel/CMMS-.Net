@@ -14,19 +14,15 @@ namespace CMMSAPIs.BS.SM
         Task<List<SMMasterModel>> AddAssetType();
         Task<List<SMMasterModel>> UpdateAssetType();
         Task<List<SMMasterModel>> DeleteAssetType();
-
         Task<List<SMMasterModel>> GetAssetCategoryList();
         Task<List<SMMasterModel>> AddAssetCategory();
         Task<List<SMMasterModel>> UpdateAssetCategory();
         Task<List<SMMasterModel>> DeleteAssetCategory();
-
         Task<List<SMMasterModel>> GetUnitMeasurementList();
         Task<List<SMMasterModel>> AddUnitMeasurement();
         Task<List<SMMasterModel>> UpdateUnitMeasurement();
         Task<List<SMMasterModel>> DeleteUnitMeasurement();
-
-        Task<List<SMAssetMaster>> GetAssetMasterList();
-        
+        Task<List<AssetsMaster>> GetAssetMasterList();        
         Task<int> AddAssetMaster(SMAssetMaster request);
         Task<int> UpdateAssetMaster(SMAssetMaster request);
         Task<int> DeleteAssetMaster(int id);
@@ -223,7 +219,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<SMAssetMaster>> GetAssetMasterList()
+        public async Task<List<AssetsMaster>> GetAssetMasterList()
         {
             try
             {

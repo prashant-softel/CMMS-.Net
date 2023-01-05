@@ -179,6 +179,86 @@ namespace CMMSAPIs.Controllers.Permits
             return Ok(status);
         }
 
+        [Route("PermitExtend")]
+        [HttpPut]
+        public async Task<IActionResult> PermitExtend([FromForm] ApprovalModel request)
+        {
+            String status;
+            try
+            {
+                var data = await _PermitBS.PermitExtend(request);
+                status = "Permit Extend Successfully";
+                /*                return Ok(data);
+                */
+            }
+            catch (Exception ex)
+            {
+                status = "something went wrong " + ex;
+                throw;
+            }
+            return Ok(status);
+        }
+
+        [Route("PermitExtendApprove")]
+        [HttpPut]
+        public async Task<IActionResult> PermitExtendApprove([FromForm] ApprovalModel request)
+        {
+            String status;
+            try
+            {
+                var data = await _PermitBS.PermitExtendApprove(request);
+                status = "Approved Extended Permit";
+                /*                return Ok(data);
+                */
+            }
+            catch (Exception ex)
+            {
+                status = "something went wrong " + ex;
+                throw;
+            }
+            return Ok(status);
+        }
+
+        [Route("PermitExtendCancel")]
+        [HttpPut]
+        public async Task<IActionResult> PermitExtendCancel([FromForm] ApprovalModel request)
+        {
+            String status;
+            try
+            {
+                var data = await _PermitBS.PermitExtendCancel(request);
+                status = "Cancel Extended Permit";
+                /*                return Ok(data);
+                */
+            }
+            catch (Exception ex)
+            {
+                status = "something went wrong " + ex;
+                throw;
+            }
+            return Ok(status);
+        }
+
+        [Route("PermitClose")]
+        [HttpPut]
+        public async Task<IActionResult> PermitClose([FromForm] ApprovalModel request)
+        {
+            String status;
+            try
+            {
+                var data = await _PermitBS.PermitClose(request);
+                status = "Permit Close";
+                /*                return Ok(data);
+                */
+            }
+            catch (Exception ex)
+            {
+                status = "something went wrong " + ex;
+                throw;
+            }
+            return Ok(status);
+        }
+
         [Route("PermitReject")]
         [HttpPost]
         public async Task<IActionResult> PermitReject(ApprovalModel request)

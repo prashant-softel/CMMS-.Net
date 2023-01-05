@@ -5,18 +5,15 @@ using System.Threading.Tasks;
 
 namespace CMMSAPIs.Models.SM
 {
-    public class SMAssetMaster
+    public class AssetsMaster
     {
         public string assetsCode { get; set; }
         public string assetName { get; set; }
-        public int assetType { get; set; }
-        public int assetCat { get; set; }
+        public string assetType { get; set; }
+        public string assetCat { get; set; }
         public string description { get; set; }
-        public int unitMeasurement { get; set; }
-        public int approvalRequired { get; set; }
+        public string unitMeasurement { get; set; }
+        public string approvalRequired { get; set; }
         public int id { get; set; }
-
-
     }
 }
-
