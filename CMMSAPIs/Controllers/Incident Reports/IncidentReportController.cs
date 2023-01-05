@@ -17,11 +17,11 @@ namespace CMMSAPIs.Controllers.Incident_Reports
 
         [Route("GetIncidentList")]
         [HttpGet]
-        public async Task<IActionResult> GetIncidentList(int facility_id)
+        public async Task<IActionResult> GetIncidentList(int facility_id, DateTime start_date, DateTime end_date)
         {
             try
             {
-                var data = await _IncidentReportBS.GetIncidentList(facility_id);
+                var data = await _IncidentReportBS.GetIncidentList(facility_id, start_date, end_date);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -60,13 +60,13 @@ namespace CMMSAPIs.Controllers.Incident_Reports
             }
         }
 
-        [Route("FeedBackIncidentReport")]
+        [Route("UpdateIncidentReport")]
         [HttpPut]
-        public async Task<IActionResult> FeedBackIncidentReport(CMFeedBackIncidentReport request)
+        public async Task<IActionResult> UpdateIncidentReport(CMCreateIncidentReport request)
         {
             try
             {
-                var data = await _IncidentReportBS.FeedBackIncidentReport(request);
+                var data = await _IncidentReportBS.UpdateIncidentReport(request);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -75,13 +75,28 @@ namespace CMMSAPIs.Controllers.Incident_Reports
             }
         }
 
-        [Route("CloseIncidentReport")]
+        [Route("ApproveIncidentReport")]
         [HttpPut]
-        public async Task<IActionResult> CloseIncidentReport(int id)
+        public async Task<IActionResult> ApproveIncidentReport(int id)
         {
             try
             {
-                var data = await _IncidentReportBS.CloseIncidentReport(id);
+                var data = await _IncidentReportBS.ApproveIncidentReport(id);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        [Route("RejectIncidentReport")]
+        [HttpPut]
+        public async Task<IActionResult> RejectIncidentReport(int id)
+        {
+            try
+            {
+                var data = await _IncidentReportBS.RejectIncidentReport(id);
                 return Ok(data);
             }
             catch (Exception ex)
