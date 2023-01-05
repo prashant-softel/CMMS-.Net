@@ -10,11 +10,12 @@ namespace CMMSAPIs.BS.Incident_Reports
 {
     public interface IIncidentReportBS
     {
-        Task<List<CMIncidentList>> GetIncidentList(int facility_id);
+        Task<List<CMIncidentList>> GetIncidentList(int facility_id, DateTime start_date, DateTime end_date);
         Task<CMDefaultResponse> CreateIncidentReport(CMCreateIncidentReport request);
         Task<CMViewIncidentReport> ViewIncidentReport(int id);
-        Task<CMDefaultResponse> FeedBackIncidentReport(CMFeedBackIncidentReport request);
-        Task<CMDefaultResponse> CloseIncidentReport(int id);
+        Task<CMDefaultResponse> UpdateIncidentReport(CMCreateIncidentReport request);
+        Task<CMDefaultResponse> ApproveIncidentReport(int id);
+        Task<CMDefaultResponse> RejectIncidentReport(int id);
 
     }
     public class IncidentReportBS : IIncidentReportBS
@@ -26,13 +27,13 @@ namespace CMMSAPIs.BS.Incident_Reports
             databaseProvider = dbProvider;
         }
 
-        public async Task<List<CMIncidentList>> GetIncidentList(int facility_id)
+        public async Task<List<CMIncidentList>> GetIncidentList(int facility_id, DateTime start_date, DateTime end_date)
         {
             try
             {
                 using (var repos = new IncidentReportRepository(getDB))
                 {
-                    return await repos.GetIncidentList(facility_id);
+                    return await repos.GetIncidentList(facility_id, start_date, end_date);
 
                 }
             }
@@ -77,13 +78,13 @@ namespace CMMSAPIs.BS.Incident_Reports
 
         }
 
-        public async Task<CMDefaultResponse> FeedBackIncidentReport(CMFeedBackIncidentReport request)
+        public async Task<CMDefaultResponse> UpdateIncidentReport(CMCreateIncidentReport request)
         {
             try
             {
                 using (var repos = new IncidentReportRepository(getDB))
                 {
-                    return await repos.FeedBackIncidentReport(request);
+                    return await repos.UpdateIncidentReport(request);
 
                 }
             }
@@ -93,13 +94,13 @@ namespace CMMSAPIs.BS.Incident_Reports
             }
         }
 
-        public async Task<CMDefaultResponse> CloseIncidentReport(int id)
+        public async Task<CMDefaultResponse> ApproveIncidentReport(int id)
         {
             try
             {
                 using (var repos = new IncidentReportRepository(getDB))
                 {
-                    return await repos.CloseIncidentReport(id);
+                    return await repos.ApproveIncidentReport(id);
 
                 }
             }
@@ -107,7 +108,22 @@ namespace CMMSAPIs.BS.Incident_Reports
             {
                 throw;
             }
+        }
 
+        public async Task<CMDefaultResponse> RejectIncidentReport(int id)
+        {
+            try
+            {
+                using (var repos = new IncidentReportRepository(getDB))
+                {
+                    return await repos.RejectIncidentReport(id);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
         }
     }
 }
