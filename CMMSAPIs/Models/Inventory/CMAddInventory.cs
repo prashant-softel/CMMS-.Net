@@ -13,6 +13,7 @@ namespace CMMSAPIs.Models.Inventory
         public int block_id { get; set; }
         public int parent_id { get; set; }
         public string serial_number { get; set; }
+        public int mutliplier { get; set; }
         public int calibration_frequency { get; set; }
         public int frequency_type { get; set; }
         public int calibration_reminder { get; set; }
