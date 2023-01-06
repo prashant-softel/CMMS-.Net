@@ -55,5 +55,7 @@ namespace CMMSAPIs.Models.Incident_Reports
         public string file_name { get; set; }
         public string category_name { get; set; }
         public float file_size { get; set; }
+
+        public string file_path { get; set; }
     }
 }

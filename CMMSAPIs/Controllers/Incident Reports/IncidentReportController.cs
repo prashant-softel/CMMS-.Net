@@ -6,6 +6,8 @@ using CMMSAPIs.BS.Incident_Reports;
 
 namespace CMMSAPIs.Controllers.Incident_Reports
 {
+    [Route("api/[controller]")]
+    [ApiController]
     public class IncidentReportController : ControllerBase
     {
         private readonly IIncidentReportBS _IncidentReportBS;

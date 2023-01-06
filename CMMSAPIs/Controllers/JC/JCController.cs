@@ -7,6 +7,8 @@ using CMMSAPIs.Models.Utils;
 
 namespace CMMSAPIs.Controllers.JC
 {
+    [Route("api/[controller]")]
+    [ApiController]
     public class JCController : ControllerBase
     {
         private readonly IJCBS _JCBS;
