@@ -28,6 +28,9 @@ using System.Text;
 using CMMSAPIs.BS.FileUpload;
 using CMMSAPIs.Middlewares;
 using Microsoft.AspNetCore.Http;
+using CMMSAPIs.BS.Incident_Reports;
+using CMMSAPIs.BS.WC;
+using CMMSAPIs.BS.Inventory;
 
 namespace CMMSAPIs
 {
@@ -83,6 +86,9 @@ namespace CMMSAPIs
             services.AddScoped<IUtilsBS, UtilsBS>();
             services.AddScoped<IPermitBS, PermitBS>();
             services.AddScoped<IJCBS, JCBS>();
+            services.AddScoped<IIncidentReportBS, IncidentReportBS>();
+            services.AddScoped<IWCBS, WCBS>();
+            services.AddScoped<IInventoryBS, InventoryBS>();
             services.Configure<CMMailSettings>(Configuration.GetSection("MailSettings"));
             services.AddTransient<IMailService, MailService>();
             services.AddScoped<IJwtTokenManagerBS, JwtTokenManagerBS>();

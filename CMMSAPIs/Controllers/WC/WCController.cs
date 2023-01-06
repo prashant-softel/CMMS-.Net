@@ -6,6 +6,8 @@ using CMMSAPIs.Models.WC;
 
 namespace CMMSAPIs.Controllers.WC
 {
+    [Route("api/[controller]")]
+    [ApiController]
     public class WCController : ControllerBase
     {
         private readonly IWCBS _WCBS;

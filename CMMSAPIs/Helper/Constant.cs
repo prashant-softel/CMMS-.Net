@@ -57,6 +57,9 @@ namespace CMMSAPIs.Helper
         // Incident Report
         public const int INCIDENT = 51;
 
+        // Invetory Assets
+        public const int INVENTORY = 52;
+
         enum INCIDENT_RISK_LEVEL
         {
             HIGH = 1,
