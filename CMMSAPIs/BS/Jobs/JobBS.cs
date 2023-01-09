@@ -10,10 +10,14 @@ namespace CMMSAPIs.BS.Jobs
 {
     public interface IJobBS
     {
-        Task<List<CMJob>> GetJobList(int facility_id);
-        Task<List<CMJob>> GetJobDetail(int job_id);
-        Task<List<CMJob>> CreateNewJob();
-        Task<List<CMJob>> UpdateJob();
+        Task<List<CMJobModel>> GetJobList(int facility_id, int userId);
+        Task<List<CMJobView>> GetJobDetail(int job_id);
+        Task<int> CreateNewJob(CMCreateJob request);
+
+        Task<int> ReAssignJob(int job_id, int user_id, int changed_by);
+        Task<int> CancelJob(int job_id, int user_id, string Cancelremark);
+        Task<int> LinkToPTW(int job_id, int ptw_id);
+
 
     }
 
@@ -26,13 +30,13 @@ namespace CMMSAPIs.BS.Jobs
             databaseProvider = dbProvider;
         }
 
-        public async Task<List<CMJob>> GetJobList(int facility_id)
+        public async Task<List<CMJobModel>> GetJobList(int facility_id, int userId)
         {
             try
             {
                 using (var repos = new JobRepository(getDB))
                 {
-                    return await repos.GetJobList(facility_id);
+                    return await repos.GetJobList(facility_id, userId);
                 }
             }
             catch (Exception ex)
@@ -41,7 +45,7 @@ namespace CMMSAPIs.BS.Jobs
             }
         }
 
-        public async Task<List<CMJob>> GetJobDetail(int job_id)
+        public async Task<List<CMJobView>> GetJobDetail(int job_id)
         {
             try
             {
@@ -56,28 +60,13 @@ namespace CMMSAPIs.BS.Jobs
             }
         }
 
-        public async Task<List<CMJob>> CreateNewJob()
+        public async Task<int> CreateNewJob(CMCreateJob request)
         {
             try
             {
                 using (var repos = new JobRepository(getDB))
                 {
-                    return await repos.CreateNewJob();
-                }
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        }
-
-        public async Task<List<CMJob>> UpdateJob()
-        {
-            try
-            {
-                using (var repos = new JobRepository(getDB))
-                {
-                    return await repos.UpdateJob();
+                    return await repos.CreateNewJob(request);
                 }
             }
             catch (Exception ex)
@@ -87,5 +76,49 @@ namespace CMMSAPIs.BS.Jobs
         }
 
 
+
+        public async Task<int> ReAssignJob(int job_id, int user_id, int changed_by)
+        {
+            try
+            {
+                using (var repos = new JobRepository(getDB))
+                {
+                    return await repos.ReAssignJob(job_id, user_id, changed_by);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<int> CancelJob(int job_id, int user_id, string Cancelremark)
+        {
+            try
+            {
+                using (var repos = new JobRepository(getDB))
+                {
+                    return await repos.CancelJob(job_id, user_id, Cancelremark);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<int> LinkToPTW(int job_id, int ptw_id)
+        {
+            try
+            {
+                using (var repos = new JobRepository(getDB))
+                {
+                    return await repos.LinkToPTW(job_id, ptw_id);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
     }
 }
