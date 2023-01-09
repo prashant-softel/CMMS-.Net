@@ -1,4 +1,5 @@
 using CMMSAPIs.BS.Jobs;
+using CMMSAPIs.BS.Permits;
 using CMMSAPIs.BS.Mails;
 using CMMSAPIs.BS.Masters;
 using CMMSAPIs.BS.SM;
@@ -71,7 +72,7 @@ namespace CMMSAPIs
             });
             services.AddControllers();
             //services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
-          
+
             services.AddHttpClient();
             //Enable CORS
             services.AddCors(c =>
@@ -79,6 +80,10 @@ namespace CMMSAPIs
             services.AddScoped<DatabaseProvider>();
             services.AddScoped<ICMMSBS, CMMSBS>();
             services.AddScoped<IJobBS, JobBS>();
+            services.AddScoped<IPermitBS, PermitBS>();
+
+            services.AddScoped<IJobWorkTypeBS, JobWorkTypeBS>();
+
             services.AddScoped<iLoginBS, LoginBS>();
             services.AddScoped<IRoleAccessBS, RoleAccessBS>();
             services.AddScoped<IUserAccessBS, UserAccessBS>();
@@ -106,10 +111,10 @@ namespace CMMSAPIs
             }
             else
             {
-              
+
                 app.UseHsts();
             }
-          //  app.UseHttpsRedirection();
+            //  app.UseHttpsRedirection();
             //app.UseMvc();
             app.UseRouting();
             app.UseAuthentication();

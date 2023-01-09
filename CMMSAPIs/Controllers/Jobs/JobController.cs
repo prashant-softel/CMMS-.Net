@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CMMSAPIs.Controllers.Jobs
 {
@@ -22,13 +23,14 @@ namespace CMMSAPIs.Controllers.Jobs
             _JobWorkTypeBS = jobWorkTypeBS;
         }
 
+        [Authorize]
         [Route("GetJobList")]
         [HttpGet]
-        public async Task<IActionResult> GetJobList(int facility_id)
+        public async Task<IActionResult> GetJobList(int facility_id, int userId)
         {
             try
             {
-                var data = await _JobBS.GetJobList(facility_id);
+                var data = await _JobBS.GetJobList(facility_id, userId);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -37,13 +39,14 @@ namespace CMMSAPIs.Controllers.Jobs
             }
         }
 
+        [Authorize]
         [Route("GetJobDetail")]
         [HttpGet]
         public async Task<IActionResult> GetJobDetail(int job_id)
         {
             try
             {
-                var data = await _JobBS.GetJobList(job_id);
+                var data = await _JobBS.GetJobDetail(job_id);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -52,40 +55,85 @@ namespace CMMSAPIs.Controllers.Jobs
             }
         }
 
+        [Authorize]
         [Route("CreateNewJob")]
         [HttpPost]
-        public async Task<IActionResult> CreateNewJob()
+        public async Task<IActionResult> CreateNewJob(CMCreateJob request)
         {
+            String status;
             try
             {
-                var data = await _JobBS.CreateNewJob();
-                return Ok(data);
+                var data = await _JobBS.CreateNewJob(request);
+                status = "Job Created Successfully";
             }
             catch (Exception ex)
             {
                 throw;
             }
-        }
-
-        [Route("UpdateJob")]
-        [HttpPost]
-        public async Task<IActionResult> UpdateJob()
-        {
-            try
-            {
-                var data = await _JobBS.UpdateJob();
-                return Ok(data);
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
+            return Ok(status);
         }
 
         /*
          * WorkType Crud Operation
         */
+        [Authorize]
+        [Route("ReAssignJob")]
+        [HttpPut]
+        public async Task<IActionResult> ReAssignJob(int job_id, int user_id, int changed_by)
+        {
+            String status;
+            try
+            {
+                var data = await _JobBS.ReAssignJob(job_id, user_id, changed_by);
+                status = "Assign Job Successfully";
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+            return Ok(status);
 
+        }
+
+        [Authorize]
+        [Route("CancelJob")]
+        [HttpPut]
+        public async Task<IActionResult> CancelJob(int job_id, int user_id, string Cancelremark)
+        {
+            String status;
+            try
+            {
+                var data = await _JobBS.CancelJob(job_id, user_id, Cancelremark);
+                status = "Job Cancel Successfully";
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+            return Ok(status);
+        }
+
+        [Authorize]
+        [Route("LinkToPTW")]
+        [HttpPut]
+        public async Task<IActionResult> LinkToPTW(int job_id, int ptw_id)
+        {
+            String status;
+            try
+            {
+                var data = await _JobBS.LinkToPTW(job_id, ptw_id);
+                status = "Link To Permit Successfully";
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+            return Ok(status);
+        }
+
+        /*
+         * WorkType Crud Operation
+        */
         [Route("GetWorkTypeList")]
         [HttpGet]
         public async Task<IActionResult> GetWorkTypeList()
