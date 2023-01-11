@@ -22,17 +22,18 @@ namespace CMMSAPIs.BS.Permits
         /*
          * Permit Main End Points 
         */
-        Task<List<CMDefaultResponse>> CreatePermit(CMCreatePermit request);
-        Task<List<CMPermitList>> GetPermitList(int facility_id);
-        Task<List<CMPermitDetail>> GetPermitDetails(int permit_id);
-
-        /*
-         * Permit Issue/Approve/Reject/Cancel End Points
-        */
-        Task<List<CMDefaultResponse>> PermitApprove(CMApproval request);
-        Task<List<CMDefaultResponse>> PermitReject(CMApproval request);
-        Task<List<CMDefaultResponse>> PermitIssue(CMApproval request);
-        Task<List<CMDefaultResponse>> PermitCancel(CMApproval request);
+        Task<int> CreatePermit(CMCreatePermit set);
+        Task<List<CMPermitList>> GetPermitList(int facility_id, int userID);
+        Task<List<CMPermitDetail>> GetPermitDetails(int permit_id);    
+        Task<List<CMDefaultResp>> PermitApprove(CMApproval request);
+        Task<List<CMDefaultResp>> PermitExtend(CMApproval request);
+        Task<List<CMDefaultResp>> PermitExtendApprove(CMApproval request);
+        Task<List<CMDefaultResp>> PermitExtendCancel(CMApproval request);
+        Task<List<CMDefaultResp>> PermitClose(CMApproval request);
+        Task<List<CMDefaultResp>> PermitReject(CMApproval request);
+        Task<List<CMDefaultResp>> PermitIssue(CMApproval request);
+        Task<List<CMDefaultResp>> PermitCancel(CMApproval request);
+        Task<int> UpdatePermit(CMUpdatePermit request);
     }
 
     public class PermitBS : IPermitBS
@@ -112,13 +113,13 @@ namespace CMMSAPIs.BS.Permits
          * Permit Main Feature End Points
         */
 
-        public async Task<List<CMPermitList>> GetPermitList(int facility_id)
+        public async Task<List<CMPermitList>> GetPermitList(int facility_id, int userID)
         {
             try
             {
                 using (var repos = new PermitRepository(getDB))
                 {
-                    return await repos.GetPermitList(facility_id);
+                    return await repos.GetPermitList(facility_id, userID);
 
                 }
             }
@@ -129,13 +130,30 @@ namespace CMMSAPIs.BS.Permits
 
         }
 
-        public async Task<List<CMDefaultResponse>> CreatePermit(CMCreatePermit request)
+        public async Task<int> CreatePermit(CMCreatePermit request)
         {
             try
             {
                 using (var repos = new PermitRepository(getDB))
                 {
                     return await repos.CreatePermit(request);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<int> UpdatePermit(CMUpdatePermit request)
+        {
+            try
+            {
+                using (var repos = new PermitRepository(getDB))
+                {
+                    return await repos.UpdatePermit(request);
+
                 }
             }
             catch (Exception ex)
@@ -163,7 +181,7 @@ namespace CMMSAPIs.BS.Permits
          * Permit Issue/Approval/Rejection/Cancel End Points
         */
 
-        public async Task<List<CMDefaultResponse>> PermitApprove(CMApproval request)
+        public async Task<List<CMDefaultResp>> PermitApprove(CMApproval request)
         {
             try
             {
@@ -177,8 +195,64 @@ namespace CMMSAPIs.BS.Permits
                 throw;
             }
         }
+        public async Task<List<CMDefaultResp>> PermitExtend(CMApproval request)
+        {
+            try
+            {
+                using (var repos = new PermitRepository(getDB))
+                {
+                    return await repos.PermitExtend(request);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<List<CMDefaultResp>> PermitExtendApprove(CMApproval request)
+        {
+            try
+            {
+                using (var repos = new PermitRepository(getDB))
+                {
+                    return await repos.PermitExtendApprove(request);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<List<CMDefaultResp>> PermitExtendCancel(CMApproval request)
+        {
+            try
+            {
+                using (var repos = new PermitRepository(getDB))
+                {
+                    return await repos.PermitExtendCancel(request);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<List<CMDefaultResp>> PermitClose(CMApproval request)
+        {
+            try
+            {
+                using (var repos = new PermitRepository(getDB))
+                {
+                    return await repos.PermitClose(request);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
 
-        public async Task<List<CMDefaultResponse>> PermitReject(CMApproval request)
+        public async Task<List<CMDefaultResp>> PermitReject(CMApproval request)
         {
             try
             {
@@ -193,7 +267,7 @@ namespace CMMSAPIs.BS.Permits
             }
         }
 
-        public async Task<List<CMDefaultResponse>> PermitIssue(CMApproval request)
+        public async Task<List<CMDefaultResp>> PermitIssue(CMApproval request)
         {
             try
             {
@@ -208,7 +282,7 @@ namespace CMMSAPIs.BS.Permits
             }
         }
 
-        public async Task<List<CMDefaultResponse>> PermitCancel(CMApproval request)
+        public async Task<List<CMDefaultResp>> PermitCancel(CMApproval request)
         {
             try
             {

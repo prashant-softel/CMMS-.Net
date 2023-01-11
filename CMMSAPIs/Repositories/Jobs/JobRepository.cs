@@ -19,7 +19,6 @@ namespace CMMSAPIs.Repositories.Jobs
         public JobRepository(MYSQLDBHelper sqlDBHelper) : base(sqlDBHelper)
         {
             _utilsRepo = new UtilsRepository(sqlDBHelper);
-
         }
 
         internal async Task<List<CMJobModel>> GetJobList(int facility_id, int userId)
@@ -124,7 +123,7 @@ namespace CMMSAPIs.Repositories.Jobs
             /*Your code goes here*/
             string qryJobBasic = "insert into jobs(facilityId, blockId,title, description, createdAt, createdBy, breakdownTime,assignedId, linkedPermit) values" +
             $"({ request.facility_id }, { request.block_id }, '{ request.title }', '{ request.description }', '{UtilsRepository.GetUTCTime() }','{ request.createdBy }','{ UtilsRepository.GetUTCTime() }','{ request.assigned_id }','{ request.permit_id }')";
-            int jobPrimaryKey = 3172;
+            int jobPrimaryKey = 3158;
             await Context.ExecuteNonQry<int>(qryJobBasic).ConfigureAwait(false);
 
             foreach (var data in request.AssetsIds)
@@ -141,7 +140,7 @@ namespace CMMSAPIs.Repositories.Jobs
             CMLog _log = new CMLog();
             _log.module_type = Constant.JOB;
             _log.module_ref_id = jobPrimaryKey;
-            _log.comment = "Job Created Successfully";
+            _log.comment = "Job Added";
             _log.status = Constant.JOB_CREATED;
             await _utilsRepo.AddLog(_log);
             return jobPrimaryKey;
@@ -155,6 +154,7 @@ namespace CMMSAPIs.Repositories.Jobs
              * return boolean true/false*/
             string updateQry = $"update jobs set assignedId = { user_id }, updatedBy = { changed_by } where id = { job_id } ";
             return await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+
         }
         internal async Task<int> CancelJob(int job_id, int user_id, string Cancelremark)
         {
