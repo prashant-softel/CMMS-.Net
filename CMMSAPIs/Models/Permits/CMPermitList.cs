@@ -7,16 +7,19 @@ namespace CMMSAPIs.Models.Permits
 {
     public class CMPermitList
     {
-        public int id { get; set; }
-        public string permit_site_no { get; set; }
-        public string permit_type { get; set; }
+        public int permitId { get; set; }
+        public int permit_site_no { get; set; }
+        public int permit_type { get; set; }
+        public string PermitTypeName { get; set; }
         public int equipment_category { get; set; }
         public string equipment { get; set; }
-        public int description { get; set; }
+        public int workingAreaId { get; set; }
+        public string workingAreaName { get; set; }
+        public string description { get; set; }
         public string request_by_name { get; set; }
-        public DateTime request_datetime { get; set;}
+        public dynamic request_datetime { get; set; }
         public string approved_by_name { get; set; }
-        public DateTime approved_datetime { get; set; }
+        public dynamic approved_datetime { get; set; }
         public string current_status { get; set; }
 
     }
