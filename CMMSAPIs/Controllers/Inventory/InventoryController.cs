@@ -3,6 +3,7 @@ using CMMSAPIs.Models.Inventory;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using System;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CMMSAPIs.Controllers.Inventory
 {
@@ -17,6 +18,7 @@ namespace CMMSAPIs.Controllers.Inventory
             _InventoryBS = inventory;
         }
 
+        [Authorize]
         [Route("GetInventoryList")]
         [HttpGet]
         public async Task<IActionResult> GetInventoryList(int facility_id)
@@ -32,6 +34,7 @@ namespace CMMSAPIs.Controllers.Inventory
             }
         }
 
+        [Authorize]
         [Route("ViewInventory")]
         [HttpGet]
         public async Task<IActionResult> ViewInventory(int id)
@@ -47,6 +50,7 @@ namespace CMMSAPIs.Controllers.Inventory
             }
         }
 
+        [Authorize]
         [Route("AddInventory")]
         [HttpPost]
         public async Task<IActionResult> AddInventory(CMAddInventory request)
@@ -62,6 +66,7 @@ namespace CMMSAPIs.Controllers.Inventory
             }
         }
 
+        [Authorize]
         [Route("UpdateInventory")]
         [HttpPut]
         public async Task<IActionResult> UpdateInventory(CMAddInventory request)
@@ -77,6 +82,7 @@ namespace CMMSAPIs.Controllers.Inventory
             }
         }
 
+        [Authorize]
         [Route("DeleteInventory")]
         [HttpDelete]
         public async Task<IActionResult> DeleteInventory(int id)
@@ -92,6 +98,7 @@ namespace CMMSAPIs.Controllers.Inventory
             }
         }
 
+        [Authorize]
         [Route("GetInventoryTypeList")]
         [HttpGet]
         public async Task<IActionResult> GetInventoryTypeList()
@@ -107,6 +114,7 @@ namespace CMMSAPIs.Controllers.Inventory
             }
         }
 
+        [Authorize]
         [Route("GetInventoryStatusList")]
         [HttpGet]
         public async Task<IActionResult> GetInventoryStatusList()
