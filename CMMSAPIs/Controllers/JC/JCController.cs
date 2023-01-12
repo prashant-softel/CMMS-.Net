@@ -51,12 +51,12 @@ namespace CMMSAPIs.Controllers.JC
         }
 
         [Route("CreateJC")]
-        [HttpGet]
-        public async Task<IActionResult> CreateJC(int job_id)
+        [HttpPost]
+        public async Task<IActionResult> CreateJC( CMJCCreate request)
         {
             try
             {
-                var data = await _JCBS.CreateJC(job_id);
+                var data = await _JCBS.CreateJC(request);
                 return Ok(data);
             }
             catch (Exception ex)

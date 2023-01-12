@@ -75,8 +75,6 @@ namespace CMMSAPIs.Repositories.Jobs
                                       "JOIN " +
                                             "jobmappingassets as mapAssets ON mapAssets.jobId = job.id " +
                                       "JOIN " +
-                                            "assets as asset ON mapAssets.assetId  =  asset.id " +
-                                      "JOIN " +
                                             "assetcategories as asset_cat ON mapAssets.categoryId = asset_cat.id " +
                                       "LEFT JOIN " +
                                             "jobworktypes as workType ON workType.equipmentCategoryId = asset_cat.id " +

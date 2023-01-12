@@ -14,7 +14,7 @@ namespace CMMSAPIs.BS.JC
     {
         Task<List<CMJCList>> GetJCList(int facility_id);
         Task<List<CMJCDetail>> GetJCDetail(int jc_id);
-        Task<List<CMDefaultResponse>> CreateJC(int job_id);
+        Task<int> CreateJC(CMJCCreate request);
         Task<List<CMDefaultResponse>> UpdateJC(CMJCUpdate request);
         Task<List<CMDefaultResponse>> CloseJC(CMJCClose request);
         Task<List<CMDefaultResponse>> ApproveJC(CMApproval request);
@@ -60,13 +60,13 @@ namespace CMMSAPIs.BS.JC
             }
         }
 
-        public async Task<List<CMDefaultResponse>> CreateJC(int job_id)
+        public async Task<int> CreateJC(CMJCCreate request)
         {
             try
             {
                 using (var repos = new JCRepository(getDB))
                 {
-                    return await repos.CreateJC(job_id);
+                    return await repos.CreateJC(request);
                 }
             }
             catch (Exception ex)

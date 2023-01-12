@@ -155,7 +155,14 @@ namespace CMMSAPIs.Repositories.Permits
                 string qryPermitSaftyQuestion = $"insert into permitsafetyquestions ( permitId , safetyMeasureId, safetyMeasureValue) value ({ permitPrimaryKey }, { data.safetyMeasureId }, '{ data.safetyMeasureValue }')";
                 await Context.ExecuteNonQry<int>(qryPermitSaftyQuestion).ConfigureAwait(false);
             }
+
+            foreach (var data in request.employee_list)
+            {
+                string qryPermitEmpList = $"insert into permitemployeelists ( pwtId , employeeId , responsibility ) value ({ permitPrimaryKey },{ data.employeeId }, '{ data.responsibility }')";
+                await Context.ExecuteNonQry<int>(qryPermitEmpList).ConfigureAwait(false);
+            }
             return permitPrimaryKey;
+
             //file_upload_form pending 
         }
 
@@ -198,7 +205,7 @@ namespace CMMSAPIs.Repositories.Permits
 
             //get upload file
             string myQuery4 = "SELECT PTWFiles.File_Name as fileName, PTWFiles.File_Category_name as fileCategory,PTWFiles.File_Size as fileSize,                              PTWFiles.status as status FROM fleximc_ptw_files AS PTWFiles " +
-                               $"LEFT JOIN permits ptw on  ptw.id = PTWFiles.PTW_id where ptw.id = { permit_id }";
+                               $"LEFT JOIN permits ptw as ptw on ptw.id = PTWFiles.PTW_id where ptw.id = { permit_id }";
             List<CMFileDetail> _UploadFileList = await Context.GetData<CMFileDetail>(myQuery4).ConfigureAwait(false);
 
             //get safty question
