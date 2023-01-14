@@ -28,7 +28,7 @@ namespace CMMSAPIs.Repositories.Inventory
             */
             /*Your code goes here*/
             string myQuery = 
-                "SELECT a.id ,a.name, a.description, b2.name as supplier_name, b5.name as operator_name, ac.name as category_name," +
+                "SELECT a.id ,a.name, a.discription, b2.name as supplier_name, b5.name as operator_name, ac.name as category_name," +
 
                 " f.name AS block_name,a2.name as parent_name,  custbl.name as customer,owntbl.name as owner_name, s.name AS status, b5.name AS operator_name" +
 

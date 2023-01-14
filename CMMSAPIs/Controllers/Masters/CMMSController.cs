@@ -83,9 +83,9 @@ namespace CMMSAPIs.Controllers.Masters
             }
         }
 
-        [Route("GetAssetsList")]
+        [Route("GetAssetList")]
         [HttpGet]
-        public async Task<IActionResult> GetAssetsList(int facility_id)
+        public async Task<IActionResult> GetAssetList(int facility_id)
         {
             try
             {
