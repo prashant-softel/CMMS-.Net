@@ -32,6 +32,7 @@ using Microsoft.AspNetCore.Http;
 using CMMSAPIs.BS.Incident_Reports;
 using CMMSAPIs.BS.WC;
 using CMMSAPIs.BS.Inventory;
+using CMMSAPIs.BS;
 
 namespace CMMSAPIs
 {
@@ -88,6 +89,8 @@ namespace CMMSAPIs
             services.AddScoped<IRoleAccessBS, RoleAccessBS>();
             services.AddScoped<IUserAccessBS, UserAccessBS>();
             services.AddScoped<ISMMasterBS, SMMasterBS>();
+            services.AddScoped<IGOBS, GOBS>();
+            services.AddScoped<ISMMRSBS, SMMRSBS>();
             services.AddScoped<IUtilsBS, UtilsBS>();
             services.AddScoped<IPermitBS, PermitBS>();
             services.AddScoped<IJCBS, JCBS>();

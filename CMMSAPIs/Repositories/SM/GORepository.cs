@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using CMMSAPIs.Helper;
 using CMMSAPIs.Models;
-using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using CMMSAPIs.Models.Utils;
+
 
 namespace CMMSAPIs.Repositories
 {
@@ -17,14 +15,7 @@ namespace CMMSAPIs.Repositories
         }
 
         
-        internal Task<List<CMGO>> GetGOList()
-        {
-            /*
-             * 
-            */
-            return null;
-        }
-        internal Task<List<CMGO>> GetAssetCodeDetails(int asset_code)
+        internal Task<List<CMGOList>> GetGOList()
         {
             /*
              * 
@@ -32,19 +23,27 @@ namespace CMMSAPIs.Repositories
             return null;
         }
 
-        internal Task<List<CMGO>> CreateGO()
+        internal Task<CMAssetDetail> GetAssetCodeDetails(int asset_code)
+        {
+            /*
+             * 
+            */
+            return null;
+        }
+
+        internal Task<CMDefaultResponse> CreateGO()
         {
             return null;
         }
-        internal Task<List<CMGO>> UpdateGO()
+        internal Task<CMDefaultResponse> UpdateGO()
         {
             return null;
         }
-        internal Task<List<CMGO>> DeleteGO()
+        internal Task<CMDefaultResponse> DeleteGO()
         {
             return null;
         }
-        internal Task<List<CMGO>> WithdrawGO()
+        internal Task<CMDefaultResponse> WithdrawGO()
         {
             return null;
         }

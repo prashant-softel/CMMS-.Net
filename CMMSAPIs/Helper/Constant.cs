@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using CMMSAPIs.BS.Inventory;
+using System.Collections.Generic;
+using static System.Formats.Asn1.AsnWriter;
+using System.Numerics;
 
 namespace CMMSAPIs.Helper
 {
@@ -67,8 +70,8 @@ namespace CMMSAPIs.Helper
             LOW = 3
         }
 
-        public Dictionary<string, int> INCIDENT_RISK_TYPE =  new Dictionary<string, int>() { {"First-Aids Injury", 1 }, { "Electric Short", 2} };
-        
+        public Dictionary<string, int> INCIDENT_RISK_TYPE = new Dictionary<string, int>() { { "First-Aids Injury", 1 }, { "Electric Short", 2 } };
+
 
         /* Features Constant END */
 
@@ -84,6 +87,16 @@ namespace CMMSAPIs.Helper
                          PTW_LINKED_TO_JOB = 14, PTW_LINKED_TO_PM = 15, PTW_LINKED_TO_AUDIT = 16, PTW_LINKED_TO_HOTO = 17, PTW_EXPIRED = 18;
 
         // JOBCARD
-        public const int JC_OPENED = 0, JC_UPDADATED = 1, JC_CLOSED = 2, JC_CARRRY_FORWARDED = 3, JC_APPROVED = 4, JC_REJECTED = 5, JC_PTW_TIMED_OUT = 6;       
+        public const int JC_OPENED = 0, JC_UPDADATED = 1, JC_CLOSED = 2, JC_CARRRY_FORWARDED = 3, JC_APPROVED = 4, JC_REJECTED = 5, JC_PTW_TIMED_OUT = 6;
+
+        //SM Actors
+
+        enum SM_ACTORS
+        {
+            VENDOR = 1,
+            STORE = 2,
+            ENGINEER = 3,
+            Inventory = 4
+         }
     }
 }

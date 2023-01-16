@@ -1,21 +1,21 @@
 ﻿using CMMSAPIs.Helper;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using CMMSAPIs.Repositories;
+using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Models;
 
 namespace CMMSAPIs.BS
 {
     public interface IGOBS
     {
-        Task<List<CMGO>> GetGOList();
-        Task<List<CMGO>> GetAssetCodeDetails(int asset_code);
-        Task<List<CMGO>> CreateGO();
-        Task<List<CMGO>> UpdateGO();
-        Task<List<CMGO>> DeleteGO();
-        Task<List<CMGO>> WithdrawGO();
+        Task<List<CMGOList>> GetGOList();
+        Task<CMAssetDetail> GetAssetCodeDetails(int asset_code);
+        Task<CMDefaultResponse> CreateGO();
+        Task<CMDefaultResponse> UpdateGO();
+        Task<CMDefaultResponse> DeleteGO();
+        Task<CMDefaultResponse> WithdrawGO();
     }
 
     public class GOBS : IGOBS
@@ -27,7 +27,7 @@ namespace CMMSAPIs.BS
             databaseProvider = dbProvider;
         }
 
-        public async Task<List<CMGO>> GetGOList()
+        public async Task<List<CMGOList>> GetGOList()
         {
             try
             {
@@ -43,7 +43,7 @@ namespace CMMSAPIs.BS
             }
         }
 
-        public async Task<List<CMGO>> GetAssetCodeDetails(int asset_code)
+        public async Task<CMAssetDetail> GetAssetCodeDetails(int asset_code)
         {
             try
             {
@@ -59,7 +59,7 @@ namespace CMMSAPIs.BS
             }
         }
 
-        public async Task<List<CMGO>> CreateGO()
+        public async Task<CMDefaultResponse> CreateGO()
         {
             try
             {
@@ -75,7 +75,7 @@ namespace CMMSAPIs.BS
             }
         }
 
-        public async Task<List<CMGO>> UpdateGO()
+        public async Task<CMDefaultResponse> UpdateGO()
         {
             try
             {
@@ -91,7 +91,7 @@ namespace CMMSAPIs.BS
             }
         }
 
-        public async Task<List<CMGO>> DeleteGO()
+        public async Task<CMDefaultResponse> DeleteGO()
         {
             try
             {
@@ -106,7 +106,7 @@ namespace CMMSAPIs.BS
                 throw;
             }
         }
-        public async Task<List<CMGO>> WithdrawGO()
+        public async Task<CMDefaultResponse> WithdrawGO()
         {
             try
             {

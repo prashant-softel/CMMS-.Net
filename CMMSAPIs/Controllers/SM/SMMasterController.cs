@@ -49,11 +49,11 @@ namespace CMMSAPIs.Controllers.SM
 
         [Route("AddAssetType")]
         [HttpPost]
-        public async Task<IActionResult> AddAssetType()
+        public async Task<IActionResult> AddAssetType(CMSMMaster request)
         {
             try
             {
-                var data = await _SMMasterBS.AddAssetType();
+                var data = await _SMMasterBS.AddAssetType(request);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -64,11 +64,11 @@ namespace CMMSAPIs.Controllers.SM
 
         [Route("UpdateAssetType")]
         [HttpPut]
-        public async Task<IActionResult> UpdateAssetType()
+        public async Task<IActionResult> UpdateAssetType(CMSMMaster request)
         {
             try
             {
-                var data = await _SMMasterBS.UpdateAssetType();
+                var data = await _SMMasterBS.UpdateAssetType(request);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -79,11 +79,11 @@ namespace CMMSAPIs.Controllers.SM
 
         [Route("DeleteAssetType")]
         [HttpDelete]
-        public async Task<IActionResult> DeleteAssetType()
+        public async Task<IActionResult> DeleteAssetType(int id)
         {
             try
             {
-                var data = await _SMMasterBS.DeleteAssetType();
+                var data = await _SMMasterBS.DeleteAssetType(id);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -113,11 +113,11 @@ namespace CMMSAPIs.Controllers.SM
 
         [Route("AddAssetCategory")]
         [HttpPost]
-        public async Task<IActionResult> AddAssetCategory()
+        public async Task<IActionResult> AddAssetCategory(CMSMMaster request)
         {
             try
             {
-                var data = await _SMMasterBS.AddAssetCategory();
+                var data = await _SMMasterBS.AddAssetCategory(request);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -128,11 +128,11 @@ namespace CMMSAPIs.Controllers.SM
 
         [Route("UpdateAssetCategory")]
         [HttpPut]
-        public async Task<IActionResult> UpdateAssetCategory()
+        public async Task<IActionResult> UpdateAssetCategory(CMSMMaster request)
         {
             try
             {
-                var data = await _SMMasterBS.UpdateAssetCategory();
+                var data = await _SMMasterBS.UpdateAssetCategory(request);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -143,11 +143,11 @@ namespace CMMSAPIs.Controllers.SM
 
         [Route("DeleteAssetCategory")]
         [HttpDelete]
-        public async Task<IActionResult> DeleteAssetCategory()
+        public async Task<IActionResult> DeleteAssetCategory(int id)
         {
             try
             {
-                var data = await _SMMasterBS.DeleteAssetCategory();
+                var data = await _SMMasterBS.DeleteAssetCategory(id);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -177,11 +177,11 @@ namespace CMMSAPIs.Controllers.SM
 
         [Route("AddUnitMeasurement")]
         [HttpPost]
-        public async Task<IActionResult> AddUnitMeasurement()
+        public async Task<IActionResult> AddUnitMeasurement(CMSMUnitMaster request)
         {
             try
             {
-                var data = await _SMMasterBS.AddUnitMeasurement();
+                var data = await _SMMasterBS.AddUnitMeasurement(request);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -192,11 +192,11 @@ namespace CMMSAPIs.Controllers.SM
 
         [Route("UpdateUnitMeasurement")]
         [HttpPut]
-        public async Task<IActionResult> UpdateUnitMeasurement()
+        public async Task<IActionResult> UpdateUnitMeasurement(CMSMUnitMaster request)
         {
             try
             {
-                var data = await _SMMasterBS.UpdateUnitMeasurement();
+                var data = await _SMMasterBS.UpdateUnitMeasurement(request);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -207,11 +207,11 @@ namespace CMMSAPIs.Controllers.SM
 
         [Route("DeleteUnitMeasurement")]
         [HttpDelete]
-        public async Task<IActionResult> DeleteUnitMeasurement()
+        public async Task<IActionResult> DeleteUnitMeasurement(int id)
         {
             try
             {
-                var data = await _SMMasterBS.DeleteUnitMeasurement();
+                var data = await _SMMasterBS.DeleteUnitMeasurement(id);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -241,11 +241,11 @@ namespace CMMSAPIs.Controllers.SM
 
         [Route("AddAssetMaster")]
         [HttpPost]
-        public async Task<IActionResult> AddAssetMaster()
+        public async Task<IActionResult> AddAssetMaster(CMSMAssetMaster request)
         {
             try
             {
-                var data = await _SMMasterBS.AddAssetMaster();
+                var data = await _SMMasterBS.AddAssetMaster(request);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -256,11 +256,11 @@ namespace CMMSAPIs.Controllers.SM
 
         [Route("UpdateAssetMaster")]
         [HttpPut]
-        public async Task<IActionResult> UpdateAssetMaster()
+        public async Task<IActionResult> UpdateAssetMaster(CMSMAssetMaster request)
         {
             try
             {
-                var data = await _SMMasterBS.UpdateAssetMaster();
+                var data = await _SMMasterBS.UpdateAssetMaster(request);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -271,11 +271,11 @@ namespace CMMSAPIs.Controllers.SM
 
         [Route("DeleteAssetMaster")]
         [HttpDelete]
-        public async Task<IActionResult> DeleteAssetMaster()
+        public async Task<IActionResult> DeleteAssetMaster(int id)
         {
             try
             {
-                var data = await _SMMasterBS.DeleteAssetMaster();
+                var data = await _SMMasterBS.DeleteAssetMaster(id);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -283,5 +283,38 @@ namespace CMMSAPIs.Controllers.SM
                 throw;
             }
         }
+
+        /* Stock List */
+
+        [Route("GetStockList")]
+        [HttpGet]
+        public async Task<IActionResult> GetStockList(int facility_id)
+        {
+            try
+            {
+                var data = await _SMMasterBS.GetStockList(facility_id);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        [Route("UpdateStockList")]
+        [HttpPut]
+        public async Task<IActionResult> UpdateStockList(List<CMStock> request)
+        {
+            try
+            {
+                var data = await _SMMasterBS.UpdateStockList(request);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
     }
 }
