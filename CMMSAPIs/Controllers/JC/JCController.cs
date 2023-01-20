@@ -37,11 +37,11 @@ namespace CMMSAPIs.Controllers.JC
 
         [Route("GetJCDetail")]
         [HttpGet]
-        public async Task<IActionResult> GetJCDetail(int job_id)
+        public async Task<IActionResult> GetJCDetail(int jc_id)
         {
             try
             {
-                var data = await _JCBS.GetJCDetail(job_id);
+                var data = await _JCBS.GetJCDetail(jc_id);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -52,11 +52,11 @@ namespace CMMSAPIs.Controllers.JC
 
         [Route("CreateJC")]
         [HttpPost]
-        public async Task<IActionResult> CreateJC( CMJCCreate request)
+        public async Task<IActionResult> CreateJC(int job_id)
         {
             try
             {
-                var data = await _JCBS.CreateJC(request);
+                var data = await _JCBS.CreateJC(job_id);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -66,7 +66,7 @@ namespace CMMSAPIs.Controllers.JC
         }
 
         [Route("UpdateJC")]
-        [HttpGet]
+        [HttpPut]
         public async Task<IActionResult> UpdateJC(CMJCUpdate request)
         {
             try
@@ -81,7 +81,7 @@ namespace CMMSAPIs.Controllers.JC
         }
 
         [Route("CloseJC")]
-        [HttpGet]
+        [HttpPut]
         public async Task<IActionResult> CloseJC(CMJCClose request)
         {
             try
@@ -96,8 +96,8 @@ namespace CMMSAPIs.Controllers.JC
         }
 
         [Route("ApproveJC")]
-        [HttpGet]
-        public async Task<IActionResult> ApproveJC(CMApproval request)
+        [HttpPut]
+        public async Task<IActionResult> ApproveJC([FromForm] CMJCApprove request)
         {
             try
             {
@@ -111,8 +111,8 @@ namespace CMMSAPIs.Controllers.JC
         }
 
         [Route("RejectJC")]
-        [HttpGet]
-        public async Task<IActionResult> RejectJC(CMApproval request)
+        [HttpPut]
+        public async Task<IActionResult> RejectJC([FromForm] CMJCReject request)
         {
             try
             {

@@ -8,8 +8,8 @@ namespace CMMSAPIs.Models.Utils
         public int id { get; set; }
         public int status_code { get; set; }
         public string message { get; set; }
-        public List<CMJobDetailsList> LstJobDetails { get; set; }
-        public List<CMEmpDetailsList> LstEmpDetails { get; set; }
+       //public List<CMJobDetailsList> LstJobDetails { get; set; }
+       //public List<CMEmpDetailsList> LstEmpDetails { get; set; }
         public CMDefaultResponse(int id, int status_code, string message)
         {
             this.id = id;
@@ -17,7 +17,7 @@ namespace CMMSAPIs.Models.Utils
             this.message = message;
         }
     }
-    public class CMJobDetailsList
+   /* public class CMJobDetailsList
     {
         public int jobid { get; set; }
         public int ptw_id { get; set; }
@@ -30,7 +30,7 @@ namespace CMMSAPIs.Models.Utils
     {
         public int employeeId { get; set; }
         public string responsibility { get; set; }
-    }
+    }*/
 
 
     }

@@ -21,6 +21,15 @@ namespace CMMSAPIs.Models.JC
     }
 }
 
+public class CMFileDetail
+{
+    public int id { get; set; }
+    public string fileName { get; set; }
+    public string fileCategory { get; set; }
+    public double fileSize { get; set; }
+    public int status { get; set; }
+    public string PTWFiles { get; set; }
+}
 public class CMJCJobDetail
 {  
     public int job_id { get; set; }
@@ -32,7 +41,7 @@ public class CMJCJobDetail
 public class CMJCPermitDetail
 {
     public int permit_id { get; set; }
-    public string site_permit_no { get; set; }
+    public int site_permit_no { get; set; }
     public string permit_type { get; set; }
     public string permit_description { get; set; }
     public string job_created_by_name { get; set; }

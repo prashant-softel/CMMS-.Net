@@ -12,9 +12,9 @@ namespace CMMSAPIs.Models.JC
         public int current_status { get; set; }
         public string description { get; set; }
         public string job_assinged_to { get; set; }
-        public DateAndTime job_card_date { get; set; }
-        public DateAndTime start_time { get; set; }
-        public DateAndTime end_time { get; set; }
+        public dynamic job_card_date { get; set; }
+        public dynamic start_time { get; set; }
+        public dynamic end_time { get; set; }
         public List<equipmentCatList> LstequipmentCatList { get; set; }
     }
    

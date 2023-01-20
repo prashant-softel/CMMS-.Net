@@ -8,7 +8,7 @@ namespace CMMSAPIs.Models.JC
     public class CMJCUpdate
     {
         public int id { get; set; }
-        public bool status { get; set; }
+        public int status { get; set; }
         public string comment { get; set; }
         public Boolean is_isolation_required { get; set; }
         public List<CMEmpList> employee_list { get; set; }
@@ -20,16 +20,19 @@ namespace CMMSAPIs.Models.JC
     }
     public class CMIsolatedCategoryId
     {
+        public int isolation_id { get; set; }
         public int normalisedStatus { get; set; }
         public DateTime normalisedDate { get; set; }
     }
     public class CMLotoList
     {
+        public int loto_id { get; set; }
         public int lotoRemovedStatus { get; set; }
         public DateTime lotoRemovedDate { get; set; }
     }    
     public class CMEmpList
     {
+        public int empId { get; set; }
         public int employeeId { get; set; }
         public string responsibility { get; set; }
     }

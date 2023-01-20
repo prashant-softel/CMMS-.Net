@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-namespace CMMSAPIs.Models.Utils
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace CMMSAPIs.Models.JC
 {
-    public class CMApproval
+    public class CMJCReject
     {
         public int id { get; set; }
         public string commnet { get; set; }
-        public int status { get; set; }
         public int employee_id { get; set; }
-        public int Time { get; set; }
     }
 }
