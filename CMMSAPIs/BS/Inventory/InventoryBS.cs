@@ -12,7 +12,7 @@ namespace CMMSAPIs.BS.Inventory
     {
         Task<List<CMInventoryList>> GetInventoryList(int facility_id);
         Task<List<CMViewInventory>> ViewInventory(int id);
-        Task<CMDefaultResponse> AddInventory(CMAddInventory request);
+        Task<CMDefaultResponse> AddInventory(List<CMAddInventory> request);
         Task<CMDefaultResponse> UpdateInventory(CMAddInventory request);
         Task<CMDefaultResponse> DeleteInventory(int id);
         Task<List<KeyValuePairs>> GetInventoryTypeList();
@@ -61,7 +61,7 @@ namespace CMMSAPIs.BS.Inventory
             }
         }
 
-        public async Task<CMDefaultResponse> AddInventory(CMAddInventory request)
+        public async Task<CMDefaultResponse> AddInventory(List<CMAddInventory> request)
         {
             try
             {

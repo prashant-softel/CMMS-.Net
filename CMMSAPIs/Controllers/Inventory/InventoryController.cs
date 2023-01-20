@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using System;
 using Microsoft.AspNetCore.Authorization;
+using System.Collections.Generic;
 
 namespace CMMSAPIs.Controllers.Inventory
 {
@@ -53,8 +54,13 @@ namespace CMMSAPIs.Controllers.Inventory
         [Authorize]
         [Route("AddInventory")]
         [HttpPost]
-        public async Task<IActionResult> AddInventory(CMAddInventory request)
+        public async Task<IActionResult> AddInventory(List<CMAddInventory> request)
         {
+            if (request is null)
+            {
+                throw new ArgumentNullException(nameof(request));
+            }
+
             try
             {
                 var data = await _InventoryBS.AddInventory(request);

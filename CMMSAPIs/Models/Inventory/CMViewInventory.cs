@@ -1,9 +1,10 @@
 ﻿using CMMSAPIs.Models.Incident_Reports;
 using System;
+using static CMMSAPIs.Models.Inventory.CMAddInventory;
 
 namespace CMMSAPIs.Models.Inventory
 {
-    public class CMViewInventory : CMWarrantyDetail
+    public class CMViewInventory  : CMWarrantyDetail
     {
         public string name { get; set; }
         public string description { get; set; }
