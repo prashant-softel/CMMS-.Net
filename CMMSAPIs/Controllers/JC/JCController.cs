@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using System;
 using CMMSAPIs.Models.JC;
 using CMMSAPIs.Models.Utils;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CMMSAPIs.Controllers.JC
 {
@@ -20,6 +21,7 @@ namespace CMMSAPIs.Controllers.JC
         /*
          * JobCard Basic End Points
         */
+        [Authorize]
         [Route("GetJCList")]
         [HttpGet]
         public async Task<IActionResult> GetJCList(int facility_id)
@@ -35,6 +37,7 @@ namespace CMMSAPIs.Controllers.JC
             }
         }
 
+        [Authorize]
         [Route("GetJCDetail")]
         [HttpGet]
         public async Task<IActionResult> GetJCDetail(int jc_id)
@@ -50,6 +53,7 @@ namespace CMMSAPIs.Controllers.JC
             }
         }
 
+        [Authorize]
         [Route("CreateJC")]
         [HttpPost]
         public async Task<IActionResult> CreateJC(int job_id)
@@ -65,6 +69,7 @@ namespace CMMSAPIs.Controllers.JC
             }
         }
 
+        [Authorize]
         [Route("UpdateJC")]
         [HttpPut]
         public async Task<IActionResult> UpdateJC(CMJCUpdate request)
@@ -80,6 +85,7 @@ namespace CMMSAPIs.Controllers.JC
             }
         }
 
+        [Authorize]
         [Route("CloseJC")]
         [HttpPut]
         public async Task<IActionResult> CloseJC(CMJCClose request)
@@ -95,6 +101,7 @@ namespace CMMSAPIs.Controllers.JC
             }
         }
 
+        [Authorize]
         [Route("ApproveJC")]
         [HttpPut]
         public async Task<IActionResult> ApproveJC([FromForm] CMJCApprove request)
@@ -110,6 +117,7 @@ namespace CMMSAPIs.Controllers.JC
             }
         }
 
+        [Authorize]
         [Route("RejectJC")]
         [HttpPut]
         public async Task<IActionResult> RejectJC([FromForm] CMJCReject request)
