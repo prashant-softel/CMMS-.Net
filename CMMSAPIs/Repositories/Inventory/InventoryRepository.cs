@@ -4,7 +4,9 @@ using CMMSAPIs.Models.Utils;
 using Microsoft.VisualBasic;
 using Org.BouncyCastle.Utilities.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.Design;
+using System.Formats.Asn1;
 using System.Threading.Tasks;
 
 
@@ -110,22 +112,36 @@ namespace CMMSAPIs.Repositories.Inventory
 
             }
 
-            internal Task<CMDefaultResponse> UpdateInventory(CMAddInventory request)
-            {
-                /*
-                 * update all data in assets table and warranty table
-                */
-                /*Your code goes here*/
-               // "SELECT* FROM assets JOIN assetwarranty ON assets.warrantyId = assetwarranty.id";
-                return null;
+        internal async Task<CMDefaultResponse> UpdateInventory(CMAddInventory request)
+        {
+
+            /*
+             * update all data in assets table and warranty table
+            */
+            /*Your code goes here*/
+            // "SELECT* FROM assets JOIN assetwarranty ON assets.warrantyId = assetwarranty.id";
+           
+            
+                string updateQry = $" name = '{request.name}  ', description = ' {request.description}  ', parent_id = ' {request.parent_id}  ', acCapacity = '  {request.acCapacity}  ', moduleQuantity = '  {request.moduleQuantity}' , categoryId = ' {request.category_Id} ', typeId = ' {request.type_Id} ', status_Id = ' {request.status_Id}' , facilityId = ' {request.facility_Id} ', blockId = ' {request.block_Id} ' customer id = ' {request.customer_Id}', owner Id = ' {request.owner_Id} ', manufacturer Id = ' {request.manufacturer_Id} ', supplier Id = ' {request.supplier_Id} ', serial Number = ' {request.serialNumber}' warranty Id = ' {request.warranty_Id} ', Created At = ' {request.createdAt}', Created By = '{request.createdBy} ', Updated At = '{request.updatedAt}' , Updated By = ' {request.updatedBy} ', status = ' {request.status} ', photo Id = '  {request.photoId}' , cost = ' {request.cost} ' currency = ' {request.currency} ', stock Count = ' {request.stockCount}' , Special Tool = ' {request.specialTool} ' , specialToolEmpId = ' {request.specialToolEmpId} ', first Due Date = ' {request.firstDueDate} ', frequency ' {request.frequency}' , Description Maintainence = ' {request.descriptionMaintainence} 'Calibration Frequency = ' {request.calibrationFrequency} ', Calibration Reminder = '{request.calibrationReminder}', retirement Status = ' {request.retirementStatus} ', Multiplier = '{request.multiplier}' ";
+                if (request.id > 0)
+                {
+                    updateQry += $" WHERE a.id= '{request.id}'";
+
+                }
+            await Context.GetData<List<int>>(updateQry).ConfigureAwait(false);
+
+            CMDefaultResponse obj = new CMDefaultResponse(request.id, 200, "Inventory has been updated");
+            return obj;
+ 
             }
 
             internal Task<CMDefaultResponse> DeleteInventory(int id)
             {
-                /*
+                /*?ID=34
                  * delete from assets and warranty table
                 */
                 /*Your code goes here*/
+                
 
 
 
