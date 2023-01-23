@@ -15,8 +15,7 @@ namespace CMMSAPIs.Models.Inventory
         public string description { get; set; }
         public int type { get; set; }
         public int status { get; set; }
-        public int facility_id { get; set; }
-        public int block_id { get; set; }
+      
         public int parent_id { get; set; }
         public string serial_number { get; set; }
         public int mutliplier { get; set; }
@@ -24,8 +23,7 @@ namespace CMMSAPIs.Models.Inventory
         public int frequency_type { get; set; }
         public int calibration_reminder { get; set; }
         public DateTime last_calibration_date { get; set; }
-        public int manufacturer_id { get; set; }
-        public int supplier_id { get; set; }
+        
         public string model { get; set; }
         public int last_price { get; set; }
         public string currency { get; set; }
@@ -53,7 +51,7 @@ namespace CMMSAPIs.Models.Inventory
         public int stockCount { get; set; }
         public int specialTool { get; set; }
         public int specialToolEmpId { get; set; }
-        public int firstDueDate { get; set; }
+        public DateTime firstDueDate { get; set; }
         public int frequency { get; set; }
         public int descriptionMaintainence { get; set; }
         public int calibrationFrequency { get; set; }
