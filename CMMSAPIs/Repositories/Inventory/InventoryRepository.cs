@@ -1,6 +1,7 @@
 ﻿using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Inventory;
 using CMMSAPIs.Models.Utils;
+using Microsoft.VisualBasic;
 using Org.BouncyCastle.Utilities.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
@@ -90,23 +91,23 @@ namespace CMMSAPIs.Repositories.Inventory
             
         }
 
-            internal Task<CMDefaultResponse> AddInventory(CMAddInventory request)
+            internal async Task<CMDefaultResponse> AddInventory(List<CMAddInventory> request)
             {
             /*
              * Add all data in assets table and warranty table
             */
             /*Your code goes here*/
-            // "SELECT* FROM assets JOIN assetwarranty ON assets.warrantyId = assetwarranty.id";
-          /*  string qry = " insert into assets (id, name, description, parent_id, acCapacity, moduleQuantity, dcCapacity, category_Id, type_Id, status_Id, facility_Id, block_Id, customer_Id, owner_Id,operator_Id, manufacturer_Id,supplier_Id,serialNumber,warranty_Id,createdAt,createdBy,updatedAt,updatedBy,status,photoId,cost,currency,stockCount,specialTool,specialToolEmpId,firstDueDate,frequency,descriptionMaintainence,calibrationFrequency,calibrationReminder,retirementStatus,multiplier) values";
+            //
+            string qry = "insert into assets (id, name, description, parent_id, acCapacity, moduleQuantity, dcCapacity, category_Id, type_Id, status_Id, facility_Id, block_Id, customer_Id, owner_Id,operator_Id, manufacturer_Id,supplier_Id,serialNumber,warranty_Id,createdAt,createdBy,updatedAt,updatedBy,status,photoId,cost,currency,stockCount,specialTool,specialToolEmpId,firstDueDate,frequency,descriptionMaintainence,calibrationFrequency,calibrationReminder,retirementStatus,multiplier) values ";
 
-            foreach (var unit in set)
+            foreach (var unit in request)
             {
-                values += "('" + unit.id + "','" + unit.name + "','" + unit.description + "','" + unit.parent_id + "','" + unit.acCapacity + "','" + unit.moduleQuantity + "','" + unit.dcCapacity + "','" + unit.category_Id + "','" + unit.type_Id + "','" + unit.status_Id + "','" + unit.facility_Id + "','" + unit.block_Id + "','" + unit.customer_Id + "','" + unit.owner_Id + "','" + unit.operator_Id + "','" + unit.manufacturer_Id + "','" + unit.supplier_Id + unit.serialNumber + "','" + unit.warranty_Id + "','" + unit.createdAt + "','" + unit.createdBy + "','" + unit.updatedAt + "','" + unit.updatedBy + "','" + unit.status + unit.photoId + "','" + unit.cost + "','" + unit.currency + "','" + unit.stockCount + "','" + unit.specialTool + "','" + unit.specialToolEmpId + "','" + unit.firstDueDate + "','" + unit.frequency + "','" + unit.descriptionMaintainence + "','" + unit.calibrationFrequency + "','" + unit.calibrationReminder + "','"+ unit.retirementStatus+ "','"+ unit.multiplier  ),";
+                qry += "('" + unit.id + "','" + unit.name + "','" + unit.description + "','" + unit.parent_id + "','" + unit.acCapacity + "','" + unit.moduleQuantity + "','" + unit.dcCapacity + "','" + unit.category_Id + "','" + unit.type_Id + "','" + unit.status_Id + "','" + unit.facility_Id + "','" + unit.block_Id + "','" + unit.customer_Id + "','" + unit.owner_Id + "','" + unit.operator_Id + "','" + unit.manufacturer_Id + "','" + unit.supplier_Id + unit.serialNumber + "','" + unit.warranty_Id + "','" + unit.createdAt + "','" + unit.createdBy + "','" + unit.updatedAt + "','" + unit.updatedBy + "','" + unit.status + unit.photoId + "','" + unit.cost + "','" + unit.currency + "','" + unit.stockCount + "','" + unit.specialTool + "','" + unit.specialToolEmpId + "','" + unit.firstDueDate + "','" + unit.frequency + "','" + unit.descriptionMaintainence + "','" + unit.calibrationFrequency + "','" + unit.calibrationReminder + "','"+ unit.retirementStatus+ "','"+ unit.multiplier + "'),";
             }
-          */
+            int retID = await Context.ExecuteNonQry<int>(qry.Substring(0, (qry.Length - 1)) + ";").ConfigureAwait(false);
 
+            return new CMDefaultResponse(retID, 1, "");
 
-            return null;
             }
 
             internal Task<CMDefaultResponse> UpdateInventory(CMAddInventory request)
@@ -138,7 +139,7 @@ namespace CMMSAPIs.Repositories.Inventory
             */
             /*Your code goes here*/
             // "SELECT * FROM assetTypes";
-            string myQuery = "SELECT * FROM assettypes";
+            string myQuery = "SELECT * FROM assettypes WHERE type = 1";
             List<KeyValuePairs> _InventoryTypeList = await Context.GetData<KeyValuePairs>(myQuery).ConfigureAwait(false);
             return _InventoryTypeList;
         }
@@ -150,7 +151,7 @@ namespace CMMSAPIs.Repositories.Inventory
             */
             /*Your code goes here*/
             // "SELECT * FROM assetStatus";
-            string myQuery = "SELECT * FROM assetstatus";
+            string myQuery = "SELECT id, name FROM assetstatus WHERE status = 1";
             List<KeyValuePairs> _InventoryStatusList = await Context.GetData<KeyValuePairs>(myQuery).ConfigureAwait(false);
             return _InventoryStatusList;
 
