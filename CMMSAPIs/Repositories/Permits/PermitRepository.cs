@@ -14,8 +14,10 @@ namespace CMMSAPIs.Repositories.Permits
 {
     public class PermitRepository : GenericRepository
     {
+        private UtilsRepository _utilsRepo;
         public PermitRepository(MYSQLDBHelper sqlDBHelper) : base(sqlDBHelper)
         {
+            _utilsRepo = new UtilsRepository(sqlDBHelper);
         }
 
         /* 
@@ -155,7 +157,11 @@ namespace CMMSAPIs.Repositories.Permits
                 string qryPermitSaftyQuestion = $"insert into permitsafetyquestions ( permitId , safetyMeasureId, safetyMeasureValue) value ({ permitPrimaryKey }, { data.safetyMeasureId }, '{ data.safetyMeasureValue }')";
                 await Context.ExecuteNonQry<int>(qryPermitSaftyQuestion).ConfigureAwait(false);
             }
+
+            await _utilsRepo.AddHistoryLog(Constant.PTW, permitPrimaryKey, 0, 0, "Permit is created", Constant.PTW_CREATED);
+            await _utilsRepo.SendNotification(Constant.PTW, Constant.PTW_CREATED, permitPrimaryKey);
             return permitPrimaryKey;
+            
             //file_upload_form pending 
         }
 
@@ -198,7 +204,7 @@ namespace CMMSAPIs.Repositories.Permits
 
             //get upload file
             string myQuery4 = "SELECT PTWFiles.File_Name as fileName, PTWFiles.File_Category_name as fileCategory,PTWFiles.File_Size as fileSize,                              PTWFiles.status as status FROM fleximc_ptw_files AS PTWFiles " +
-                               $"LEFT JOIN permits ptw on  ptw.id = PTWFiles.PTW_id where ptw.id = { permit_id }";
+                               $"LEFT JOIN permits  as ptw on ptw.id = PTWFiles.PTW_id where ptw.id = { permit_id }";
             List<CMFileDetail> _UploadFileList = await Context.GetData<CMFileDetail>(myQuery4).ConfigureAwait(false);
 
             //get safty question
@@ -239,22 +245,31 @@ namespace CMMSAPIs.Repositories.Permits
         */
         internal async Task<List<CMDefaultResp>> PermitExtend(CMApproval request)
         {
-            string updateQry = $"update permits set extendReason = '{ request.commnet }', extendTime = { request.Time }, extendStatus = { request.status }                        where id = { request.id }";
+            string updateQry = $"update permits set extendReason = '{ Constant.PTW_EXTEND_REQUESTED }', extendTime = { request.Time }, extendStatus = { request.status }                        where id = { request.id }";
             List<CMDefaultResp> _Employee = await Context.GetData<CMDefaultResp>(updateQry).ConfigureAwait(false);
+
+            await _utilsRepo.AddHistoryLog(Constant.PTW, request.id, 0, 0, request.commnet, Constant.PTW_EXTEND_REQUESTED);
+            await _utilsRepo.SendNotification(Constant.PTW, Constant.PTW_EXTEND_REQUESTED, request.id);
             return _Employee;
         }
 
         internal async Task<List<CMDefaultResp>> PermitExtendApprove(CMApproval request)
         {
-            string updateQry = $"update permits set extendStatus = '{ request.status }', extendApproveTime = '{ UtilsRepository.GetUTCTime() }' where id = { request.id }";
+            string updateQry = $"update permits set extendStatus = '{ Constant.PTW_EXTEND_REQUEST_APPROVE }', extendApproveTime = '{ UtilsRepository.GetUTCTime() }' where id = { request.id }";
             List<CMDefaultResp> _Employee = await Context.GetData<CMDefaultResp>(updateQry).ConfigureAwait(false);
+       
+            await _utilsRepo.AddHistoryLog(Constant.PTW, request.id, 0, 0, "Approve Permit Extend Request", Constant.PTW_EXTEND_REQUEST_APPROVE);
+            await _utilsRepo.SendNotification(Constant.PTW, Constant.PTW_EXTEND_REQUEST_APPROVE, request.id);
             return _Employee;
         }
 
         internal async Task<List<CMDefaultResp>> PermitExtendCancel(CMApproval request)
         {
-            string updateQry = $"update permits set extendStatus = { request.status }, extendRejectReason = '{ request.commnet }' where id = { request.id }";
+            string updateQry = $"update permits set extendStatus = {Constant.PTW_EXTEND_REQUEST_REJECTED }, extendRejectReason = '{ request.commnet }' where id = { request.id }";
             List<CMDefaultResp> _Employee = await Context.GetData<CMDefaultResp>(updateQry).ConfigureAwait(false);
+      
+            await _utilsRepo.AddHistoryLog(Constant.PTW, request.id, 0, 0, request.commnet, Constant.PTW_EXTEND_REQUEST_REJECTED);
+            await _utilsRepo.SendNotification(Constant.PTW, Constant.PTW_EXTEND_REQUEST_REJECTED, request.id);
             return _Employee;
         }
 
@@ -264,8 +279,11 @@ namespace CMMSAPIs.Repositories.Permits
              * Update Permit Table issuedReccomendations, issuedStatus, issuedDate
              * Return Message Issued successfully
             */
-            string updateQry = $"update permits set issuedReccomendations = '{ request.commnet }', issuedStatus = { request.status }, issuedDate = '{ UtilsRepository.GetUTCTime() }', issuedById = { request.employee_id }  where id = { request.id }";
+            string updateQry = $"update permits set issuedReccomendations = '{ request.commnet }', issuedStatus = {  Constant.PTW_ISSUED }, issuedDate = '{ UtilsRepository.GetUTCTime() }', issuedById = { request.employee_id }  where id = { request.id }";
             List<CMDefaultResp> _Employee = await Context.GetData<CMDefaultResp>(updateQry).ConfigureAwait(false);
+         
+            await _utilsRepo.AddHistoryLog(Constant.PTW, request.id, 0, 0, request.commnet, Constant.PTW_ISSUED);
+            await _utilsRepo.SendNotification(Constant.PTW, Constant.PTW_ISSUED, request.id);
             return _Employee;
         }
 
@@ -274,15 +292,22 @@ namespace CMMSAPIs.Repositories.Permits
             /*Update Permit Table reccomendationsByApprover, approvedStatus, approvedDate
                        * Return Message Approved successfully*/
 
-            string updateQry = $"update permits set reccomendationsByApprover = '{ request.commnet }', approvedStatus = { request.status }, approvedDate = '{ UtilsRepository.GetUTCTime() }', approvedById = { request.employee_id }  where id = { request.id }";
+            string updateQry = $"update permits set reccomendationsByApprover = '{ request.commnet }', approvedStatus = { Constant.PTW_APPROVE }, approvedDate = '{ UtilsRepository.GetUTCTime() }', approvedById = { request.employee_id }  where id = { request.id }";
             List<CMDefaultResp> _Employee = await Context.GetData<CMDefaultResp>(updateQry).ConfigureAwait(false);
+        
+            await _utilsRepo.AddHistoryLog(Constant.PTW, request.id, 0, 0, request.commnet, Constant.PTW_APPROVE);
+            await _utilsRepo.SendNotification(Constant.PTW, Constant.PTW_APPROVE, request.id);
             return _Employee;
         }
 
         internal async Task<List<CMDefaultResp>> PermitClose(CMApproval request)
         {
-            string updateQry = $"update permits set completedDate = '{ UtilsRepository.GetUTCTime() }', completedStatus = { request.status }, completedById = { request.employee_id }  where id = { request.id }";
+            string updateQry = $"update permits set completedDate = '{ UtilsRepository.GetUTCTime() }', completedStatus = { Constant.PTW_CLOSED }, completedById = { request.employee_id }  where id = { request.id }";
             List<CMDefaultResp> _Employee = await Context.GetData<CMDefaultResp>(updateQry).ConfigureAwait(false);
+
+            await _utilsRepo.AddHistoryLog(Constant.PTW, request.id, 0, 0, "Permit Close", Constant.PTW_CLOSED);
+            await _utilsRepo.SendNotification(Constant.PTW, Constant.PTW_CLOSED, request.id);
+
             return _Employee;
         }
 
@@ -291,8 +316,11 @@ namespace CMMSAPIs.Repositories.Permits
             /*
              * Pending
             */
-            string updateQry = $"update permits set issuedReccomendations = '{ request.commnet }', issuedStatus = { request.status }, issuedDate ='{ UtilsRepository.GetUTCTime() }', issuedById = { request.employee_id }  where id = { request.id }";
+            string updateQry = $"update permits set issuedReccomendations = '{ request.commnet }', issuedStatus = { Constant.PTW_REJECTED_BY_ISSUER }, issuedDate ='{ UtilsRepository.GetUTCTime() }', issuedById = { request.employee_id }  where id = { request.id }";
             List<CMDefaultResp> _Employee = await Context.GetData<CMDefaultResp>(updateQry).ConfigureAwait(false);
+       
+            await _utilsRepo.AddHistoryLog(Constant.PTW, request.id, 0, 0, request.commnet, Constant.PTW_REJECTED_BY_ISSUER);
+            await _utilsRepo.SendNotification(Constant.PTW, Constant.PTW_REJECTED_BY_ISSUER, request.id);
 
             return _Employee;
         }
@@ -303,8 +331,11 @@ namespace CMMSAPIs.Repositories.Permits
              * Update Permit Table 	cancelReccomendations, cancelRequestDate, cancelRequestStatus
              * Return Message Cancelled successfully
             */
-            string updateQry = $"update permits set cancelReccomendations = '{ request.commnet }', cancelRequestStatus = { request.status }, cancelRequestDate = '{ UtilsRepository.GetUTCTime() }', cancelRequestById = { request.employee_id }  where id = { request.id }";
+            string updateQry = $"update permits set cancelReccomendations = '{ request.commnet }', cancelRequestStatus = { Constant.PTW_CANCELLED_BY_ISSUER }, cancelRequestDate = '{ UtilsRepository.GetUTCTime() }', cancelRequestById = { request.employee_id }  where id = { request.id }";
             List<CMDefaultResp> _Employee = await Context.GetData<CMDefaultResp>(updateQry).ConfigureAwait(false);
+                 
+            await _utilsRepo.AddHistoryLog(Constant.PTW, request.id, 0, 0, request.commnet, Constant.PTW_CANCELLED_BY_ISSUER);
+            await _utilsRepo.SendNotification(Constant.PTW, Constant.PTW_CANCELLED_BY_ISSUER, request.id);
 
             return _Employee;
         }
@@ -366,6 +397,9 @@ namespace CMMSAPIs.Repositories.Permits
                 string qryPermitSaftyQuestion = $"insert into permitsafetyquestions ( permitId , safetyMeasureId, safetyMeasureValue) value ({ updatePrimaryKey }, { data.safetyMeasureId }, '{ data.safetyMeasureValue }')";
                 await Context.ExecuteNonQry<int>(qryPermitSaftyQuestion).ConfigureAwait(false);
             }
+            
+            await _utilsRepo.AddHistoryLog(Constant.PTW, updatePrimaryKey, 0, 0, "Permit Updated", Constant.PTW_EDIT);
+            await _utilsRepo.SendNotification(Constant.PTW, Constant.PTW_EDIT, updatePrimaryKey);
 
             return updatePrimaryKey;
 

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using System;
 using CMMSAPIs.Models.JC;
 using CMMSAPIs.Models.Utils;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CMMSAPIs.Controllers.JC
 {
@@ -20,6 +21,7 @@ namespace CMMSAPIs.Controllers.JC
         /*
          * JobCard Basic End Points
         */
+        [Authorize]
         [Route("GetJCList")]
         [HttpGet]
         public async Task<IActionResult> GetJCList(int facility_id)
@@ -35,13 +37,14 @@ namespace CMMSAPIs.Controllers.JC
             }
         }
 
+        [Authorize]
         [Route("GetJCDetail")]
         [HttpGet]
-        public async Task<IActionResult> GetJCDetail(int job_id)
+        public async Task<IActionResult> GetJCDetail(int jc_id)
         {
             try
             {
-                var data = await _JCBS.GetJCDetail(job_id);
+                var data = await _JCBS.GetJCDetail(jc_id);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -50,8 +53,9 @@ namespace CMMSAPIs.Controllers.JC
             }
         }
 
+        [Authorize]
         [Route("CreateJC")]
-        [HttpGet]
+        [HttpPost]
         public async Task<IActionResult> CreateJC(int job_id)
         {
             try
@@ -65,8 +69,9 @@ namespace CMMSAPIs.Controllers.JC
             }
         }
 
+        [Authorize]
         [Route("UpdateJC")]
-        [HttpGet]
+        [HttpPut]
         public async Task<IActionResult> UpdateJC(CMJCUpdate request)
         {
             try
@@ -80,8 +85,9 @@ namespace CMMSAPIs.Controllers.JC
             }
         }
 
+        [Authorize]
         [Route("CloseJC")]
-        [HttpGet]
+        [HttpPut]
         public async Task<IActionResult> CloseJC(CMJCClose request)
         {
             try
@@ -95,9 +101,10 @@ namespace CMMSAPIs.Controllers.JC
             }
         }
 
+        [Authorize]
         [Route("ApproveJC")]
-        [HttpGet]
-        public async Task<IActionResult> ApproveJC(CMApproval request)
+        [HttpPut]
+        public async Task<IActionResult> ApproveJC([FromForm] CMJCApprove request)
         {
             try
             {
@@ -110,9 +117,10 @@ namespace CMMSAPIs.Controllers.JC
             }
         }
 
+        [Authorize]
         [Route("RejectJC")]
-        [HttpGet]
-        public async Task<IActionResult> RejectJC(CMApproval request)
+        [HttpPut]
+        public async Task<IActionResult> RejectJC([FromForm] CMJCReject request)
         {
             try
             {

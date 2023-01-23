@@ -75,8 +75,6 @@ namespace CMMSAPIs.Repositories.Jobs
                                       "JOIN " +
                                             "jobmappingassets as mapAssets ON mapAssets.jobId = job.id " +
                                       "JOIN " +
-                                            "assets as asset ON mapAssets.assetId  =  asset.id " +
-                                      "JOIN " +
                                             "assetcategories as asset_cat ON mapAssets.categoryId = asset_cat.id " +
                                       "LEFT JOIN " +
                                             "jobworktypes as workType ON workType.equipmentCategoryId = asset_cat.id " +
@@ -140,7 +138,7 @@ namespace CMMSAPIs.Repositories.Jobs
             CMLog _log = new CMLog();
             _log.module_type = Constant.JOB;
             _log.module_ref_id = jobPrimaryKey;
-            _log.comment = "Job Added";
+            _log.comment = "Job is created";
             _log.status = Constant.JOB_CREATED;
             await _utilsRepo.AddLog(_log);
             return jobPrimaryKey;
@@ -176,6 +174,7 @@ namespace CMMSAPIs.Repositories.Jobs
             */
             string updateQry = $"update jobs set linkedPermit = { ptw_id }  where id =  { job_id };";
             return await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+
         }
 
     }

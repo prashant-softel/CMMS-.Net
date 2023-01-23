@@ -14,11 +14,11 @@ namespace CMMSAPIs.BS.JC
     {
         Task<List<CMJCList>> GetJCList(int facility_id);
         Task<List<CMJCDetail>> GetJCDetail(int jc_id);
-        Task<List<CMDefaultResponse>> CreateJC(int job_id);
-        Task<List<CMDefaultResponse>> UpdateJC(CMJCUpdate request);
-        Task<List<CMDefaultResponse>> CloseJC(CMJCClose request);
-        Task<List<CMDefaultResponse>> ApproveJC(CMApproval request);
-        Task<List<CMDefaultResponse>> RejectJC(CMApproval request);
+        Task<CMDefaultResponse> CreateJC(int job_id);
+        Task<CMDefaultResponse> UpdateJC(CMJCUpdate request);
+        Task<CMDefaultResponse> CloseJC(CMJCClose request);
+        Task<CMDefaultResponse> ApproveJC(CMJCApprove request);
+        Task<CMDefaultResponse> RejectJC(CMJCReject request);
     }
 
     public class JCBS : IJCBS
@@ -60,7 +60,7 @@ namespace CMMSAPIs.BS.JC
             }
         }
 
-        public async Task<List<CMDefaultResponse>> CreateJC(int job_id)
+        public async Task<CMDefaultResponse> CreateJC(int job_id)
         {
             try
             {
@@ -75,7 +75,7 @@ namespace CMMSAPIs.BS.JC
             }
         }
 
-        public async Task<List<CMDefaultResponse>> UpdateJC(CMJCUpdate request)
+        public async Task<CMDefaultResponse> UpdateJC(CMJCUpdate request)
         {
             try
             {
@@ -90,7 +90,7 @@ namespace CMMSAPIs.BS.JC
             }
         }
 
-        public async Task<List<CMDefaultResponse>> CloseJC(CMJCClose request)
+        public async Task<CMDefaultResponse> CloseJC(CMJCClose request)
         {
             try
             {
@@ -105,7 +105,7 @@ namespace CMMSAPIs.BS.JC
             }
         }
 
-        public async Task<List<CMDefaultResponse>> ApproveJC(CMApproval request)
+        public async Task<CMDefaultResponse> ApproveJC(CMJCApprove request)
         {
             try
             {
@@ -120,7 +120,7 @@ namespace CMMSAPIs.BS.JC
             }
         }
 
-        public async Task<List<CMDefaultResponse>> RejectJC(CMApproval request)
+        public async Task<CMDefaultResponse> RejectJC(CMJCReject request)
         {
             try
             {

@@ -8,6 +8,7 @@ namespace CMMSAPIs.Models.Permits
 {
     public class CMUpdatePermit
     {
+     
         public int permit_id { get; set; }
         public int blockId { get; set; }
         public int lotoId { get; set; }
