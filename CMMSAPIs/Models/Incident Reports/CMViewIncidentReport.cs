@@ -26,30 +26,38 @@ namespace CMMSAPIs.Models.Incident_Reports
         public string verified_by_name { get; set; }
         public int risk_type { get; set; }
         public string risk_type_name { get; set; }
-        public bool esi_applicability { get; set; }
+        public int esi_applicability { get; set; }
         public string esi_applicability_name { get; set; }
-        public bool legal_applicability { get; set; }
+        public int legal_applicability { get; set; }
         public string legal_applicability_name { get; set; }
-        public bool rca_required { get; set; }
+        public int rca_required { get; set; }
         public string rca_required_name { get; set; }
         public double damaged_cost { get; set; }
         public int generation_loss { get; set; }
         public int job_id { get; set; }
         public string job_name { get; set; }
         public string description { get; set; }
-        public bool is_insurance_applicable { get; set; }
+        public int is_insurance_applicable { get; set; }
         public string is_insurance_applicable_name { get; set; }
         public int insurance_status { get; set; }
         public string insurance_status_name { get; set; }
         public string insurance_remark { get; set; }
         public int approved_by { get; set; }
         public string approved_by_name { get; set; }        
-        public string status { get; set; }
+        public int status { get; set; }
+        public int historyId { get; set; }
         public string status_name { get; set; }
         public DateTime approved_at { get; set; }
+        public List<CMHistoryLIST> LstHistory { get; set; }
+
         public AttachmentByReporter attachments { get; set; }
     }
-
+    public class CMHistoryLIST
+    {
+        public int moduleRefId { get; set; }
+        public int moduleType { get; set; }
+        public string comment { get; set; }
+    }
     public class AttachmentByReporter
     {
         public string file_name { get; set; }
