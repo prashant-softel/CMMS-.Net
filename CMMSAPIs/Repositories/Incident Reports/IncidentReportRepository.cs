@@ -18,14 +18,17 @@ namespace CMMSAPIs.Repositories.Incident_Reports
 
         internal async Task<List<CMIncidentList>> GetIncidentList(int facility_id, DateTime start_date, DateTime end_date)
         {
-            /*
-              
+            /*              
              * Fetch all the CMIncidentList model data from Incidents table and join other table to get string value for facility, user using there respctive tables
              * Update the string value of status from constant defined for incident report
              * Your code goes here
             */
-            string filter = "(incident.facility_id ="+ facility_id + " AND incident.incident_datetime >= '" + start_date + "' AND incident.incident_datetime <= '" + end_date + "')";
-            string selectqry = "SELECT incident.id as id,  incident.description as description , facilities.name as block_name, assets.name as equipment_name, incident.risk_level as risk_level, CONCAT(user.firstName + ' ' + user.lastName) as approved_by, incident.approved_at as approved_at, CONCAT(user1.firstName + ' ' + user1.lastName) as reported_by_name, incident.incident_datetime as created_at , incident.status as status FROM softel_cmms.incidents as incident JOIN softel_cmms.facilities AS facilities on facilities.id = incident.facility_id JOIN softel_cmms.assets as assets on incident.equipment_id = assets.id LEFT JOIN softel_cmms.users as user on incident.approved_by = user.id LEFT JOIN softel_cmms.users as user1 on incident.verified_by = user1.id where " + filter + ""; 
+            string filter = "(incident.facility_id =" + facility_id + " AND incident.incident_datetime >= '" + start_date + "' AND incident.incident_datetime <= '" + end_date + "')";
+            string selectqry = "SELECT incident.id as id,  incident.description as description , facilities.name as block_name, assets.name as equipment_name, incident.risk_level as risk_level, CONCAT(user.firstName + ' ' + user.lastName) as approved_by, incident.approved_at as approved_at, CONCAT(user1.firstName + ' ' + user1.lastName) as reported_by_name, incident.incident_datetime as created_at , incident.status as status FROM softel_cmms.incidents as incident JOIN softel_cmms.facilities AS facilities on facilities.id = incident.facility_id JOIN softel_cmms.assets as assets on incident.equipment_id = assets.id LEFT JOIN softel_cmms.users as user on incident.approved_by = user.id LEFT JOIN softel_cmms.users as user1 on incident.verified_by = user1.id where " + filter + "";
+            // check start and end  value 
+            // If present then
+            // else 
+            // current
             List<CMIncidentList> getIncidentList = await Context.GetData<CMIncidentList>(selectqry).ConfigureAwait(false);
             return getIncidentList;
         }
@@ -38,7 +41,6 @@ namespace CMMSAPIs.Repositories.Incident_Reports
              * Add created log in history table
              * Your code goes here
             */
-
             //Add Log in history uncomment the below code
             string qryIncident = "INSERT INTO incidents" +
                                      "(" +
@@ -50,8 +52,8 @@ namespace CMMSAPIs.Repositories.Incident_Reports
                                      ")";
 
             int incident_id = await Context.ExecuteNonQry<int>(qryIncident).ConfigureAwait(false);
-             await _utilsRepo.AddHistoryLog(Constant.INCIDENT, incident_id, 0, 0, "Added Incident Report", 0);
-             await _utilsRepo.SendNotification(Constant.INCIDENT, 0, incident_id);
+            await _utilsRepo.AddHistoryLog(Constant.INCIDENT, incident_id, 0, 0, "Added Incident Report", 0);
+            await _utilsRepo.SendNotification(Constant.INCIDENT, 0, incident_id);
 
             CMDefaultResponse response = new CMDefaultResponse(incident_id, 200, "Added Incident Report");
             return response;
@@ -59,7 +61,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
 
         internal async Task<List<CMViewIncidentReport>> ViewIncidentReport(int id)
         {
-            /*
+            /*risk_type
              * Fetch all the CMViewIncidentReport model data from Incidents table
              * User - Users
              * Facility & Block - Facility
@@ -70,17 +72,18 @@ namespace CMMSAPIs.Repositories.Incident_Reports
              * 
             */
 
-            //string data = Constant.INCIDENT_RISK_LEVEL;
-
-
-
-         string strRiskType= "foreach (var kvp in Constant.INCIDENT_RISK_TYPE)('Key: {0}, Value: {1}', kvp.Key, kvp.Value)";
-
-
-            //string strRiskType = "IF(risk_type = '1', 'First-Aids Injury', 'Electric Short')";
-
+            string strRiskType = "";
+            string strParanthesis = "";
+            //string last_ele = Constant.INCIDENT_RISK_TYPE.Count-1;
+            foreach (var kvp in Constant.INCIDENT_RISK_TYPE)
+            {
+                strRiskType +=   $"If(risk_type = '{kvp.Key}', '{kvp.Value}',";
+                strParanthesis += ")";
+            }
+            strRiskType = strRiskType.Substring(0, (strRiskType.Length - 1)) + ",''" + strParanthesis + " as risk_type_name ";
+                    
             string myQuery = "SELECT " +
-                               "incident.id as id, facilities.id as facility_id, facilities.name as facility_name, blockName.id as block_id, blockName.name as block_name, assets.id as equipment_id,  assets.name as equipment_name, incident.risk_level as risk_level ,IF(risk_level = '1','high',IF(risk_level ='2','medium','Low')) as risk_level_name, incident.incident_datetime as incident_datetime, user.id as victim_id, user.firstName as victim_name , user1.id as action_taken_by,  CONCAT(user1.firstName, user1.lastName) as action_taken_by_name, user2.id as inverstigated_by ,  CONCAT(user2.firstName, user2.lastName) as inverstigated_by_name , user3.id as verified_by ,CONCAT(user3.firstName, user3.lastName) as verified_by_name,IF(risk_type = 1 "+ strRiskType + "), IF(esi_applicability = '1', 'YES', 'NO') as esi_applicability_name, IF(legal_applicability = '1', 'YES', 'NO') as legal_applicability_name, IF(rca_required = '1', 'YES', 'NO') as rca_required_name, incident.damaged_cost AS damaged_cost, incident.generation_loss as generation_loss, job.id as job_id, job.title as job_name , job.description as description , IF(is_insurance_applicable = '1', 'YES', 'NO') as is_insurance_applicable_name, incident.insurance_status as insurance_status,  IF(incident.insurance_status ='1','YES','NO') as is_insurance_applicable_name, incident.insurance_remark as insurance_remark, user4.id as approved_by ,CONCAT(user4.firstName, user4.lastName) as approved_by_name, incident.status as status, incident.approved_at as approved_at " +
+                               "incident.id as id, facilities.id as facility_id, facilities.name as facility_name, blockName.id as block_id, blockName.name as block_name, assets.id as equipment_id,  assets.name as equipment_name, incident.risk_level as risk_level ,IF(risk_level = '1','high',IF(risk_level ='2','medium','Low')) as risk_level_name, incident.incident_datetime as incident_datetime, user.id as victim_id, user.firstName as victim_name , user1.id as action_taken_by,  CONCAT(user1.firstName, user1.lastName) as action_taken_by_name, user2.id as inverstigated_by ,  CONCAT(user2.firstName, user2.lastName) as inverstigated_by_name , user3.id as verified_by ,CONCAT(user3.firstName, user3.lastName) as verified_by_name, incident.risk_type as risk_type, " + strRiskType + ", IF(esi_applicability = '1', 'YES', 'NO') as esi_applicability_name, IF(legal_applicability = '1', 'YES', 'NO') as legal_applicability_name, IF(rca_required = '1', 'YES', 'NO') as rca_required_name, incident.damaged_cost AS damaged_cost, incident.generation_loss as generation_loss, job.id as job_id, job.title as job_name , job.description as description , IF(is_insurance_applicable = '1', 'YES', 'NO') as is_insurance_applicable_name, incident.insurance_status as insurance_status,  IF(incident.insurance_status ='1','YES','NO') as is_insurance_applicable_name, incident.insurance_remark as insurance_remark, user4.id as approved_by ,CONCAT(user4.firstName, user4.lastName) as approved_by_name, incident.status as status, incident.approved_at as approved_at " +
                                " FROM incidents as incident " +
                                "JOIN facilities AS facilities on facilities.id = incident.facility_id " +
                                "JOIN facilities AS blockName on blockName.id = incident.block_id  and blockName.isBlock = 1 " +
@@ -94,8 +97,8 @@ namespace CMMSAPIs.Repositories.Incident_Reports
                                " where incident.id = " + id;
 
             List<CMViewIncidentReport> _IncidentReportList = await Context.GetData<CMViewIncidentReport>(myQuery).ConfigureAwait(false);
-
-            string myQuery1 = "SELECT history.moduleRefId as moduleRefId, history.moduleType as moduleType, history.comment as comment FROM history as history left join incidents as incident on incident.id = history.moduleRefId AND history.moduleType = " + Constant.INCIDENT + " where history.id = "+ _IncidentReportList[0].id;
+          
+            string myQuery1 = "SELECT history.moduleRefId as moduleRefId, history.moduleType as moduleType, history.comment as comment FROM history as history left join incidents as incident on incident.id = history.moduleRefId AND history.moduleType = " + Constant.INCIDENT + " where history.id = " + _IncidentReportList[0].id;
             List<CMHistoryLIST> _historyList = await Context.GetData<CMHistoryLIST>(myQuery1).ConfigureAwait(false);
 
             _IncidentReportList[0].LstHistory = _historyList;

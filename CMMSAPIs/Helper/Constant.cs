@@ -60,15 +60,22 @@ namespace CMMSAPIs.Helper
         // Invetory Assets
         public const int INVENTORY = 52;
 
-        enum INCIDENT_RISK_LEVEL
+        public enum INCIDENT_RISK_LEVEL
         {
             HIGH = 1,
             MEDIUM = 2,
             LOW = 3
         }
 
-        public Dictionary<string, int> INCIDENT_RISK_TYPE =  new Dictionary<string, int>() { {"First-Aids Injury", 1 }, { "Electric Short", 2} };
-        
+        /*public enum INCIDENT_RISK_TYPE
+        {
+            FirstAidsInjury = 1,
+            ElectricShort = 2,
+        }*/
+
+        //static public Dictionary<string, int> INCIDENT_RISK_TYPE =  new Dictionary<string, int>() { {"First-Aids Injury", 1 }, { "Electric Short", 2} };
+        static public Dictionary<int, string> INCIDENT_RISK_TYPE = new Dictionary<int, string>() { {1, "First-Aids Injury" }, { 2,"Electric Short" } };
+
 
         /* Features Constant END */
 
@@ -84,6 +91,10 @@ namespace CMMSAPIs.Helper
                          PTW_LINKED_TO_JOB = 14, PTW_LINKED_TO_PM = 15, PTW_LINKED_TO_AUDIT = 16, PTW_LINKED_TO_HOTO = 17, PTW_EXPIRED = 18;
 
         // JOBCARD
-        public const int JC_OPENED = 0, JC_UPDADATED = 1, JC_CLOSED = 2, JC_CARRRY_FORWARDED = 3, JC_APPROVED = 4, JC_REJECTED = 5, JC_PTW_TIMED_OUT = 6;       
+        public const int JC_OPENED = 0, JC_UPDADATED = 1, JC_CLOSED = 2, JC_CARRRY_FORWARDED = 3, JC_APPROVED = 4, JC_REJECTED = 5, JC_PTW_TIMED_OUT = 6;
+
+        //incident report
+        public const int IR_APPROVED = 1, IR_REJECTED = 2;
+
     }
 }

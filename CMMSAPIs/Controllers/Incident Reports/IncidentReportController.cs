@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using System;
 using CMMSAPIs.Models.Incident_Reports;
 using CMMSAPIs.BS.Incident_Reports;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CMMSAPIs.Controllers.Incident_Reports
 {
@@ -16,7 +17,7 @@ namespace CMMSAPIs.Controllers.Incident_Reports
             _IncidentReportBS = incident_report;
         }
 
-
+        [Authorize]
         [Route("GetIncidentList")]
         [HttpGet]
         public async Task<IActionResult> GetIncidentList(int facility_id, DateTime start_date, DateTime end_date)
@@ -31,7 +32,7 @@ namespace CMMSAPIs.Controllers.Incident_Reports
                 throw;
             }
         }
-
+        [Authorize]
         [Route("CreateIncidentReport")]
         [HttpPost]
         public async Task<IActionResult> CreateIncidentReport(CMCreateIncidentReport request)
@@ -47,6 +48,7 @@ namespace CMMSAPIs.Controllers.Incident_Reports
             }
         }
 
+        [Authorize]
         [Route("ViewIncidentReport")]
         [HttpGet]
         public async Task<IActionResult> ViewIncidentReport(int id)
@@ -62,6 +64,7 @@ namespace CMMSAPIs.Controllers.Incident_Reports
             }
         }
 
+        [Authorize]
         [Route("UpdateIncidentReport")]
         [HttpPut]
         public async Task<IActionResult> UpdateIncidentReport(CMCreateIncidentReport request)
@@ -77,6 +80,7 @@ namespace CMMSAPIs.Controllers.Incident_Reports
             }
         }
 
+        [Authorize]
         [Route("ApproveIncidentReport")]
         [HttpPut]
         public async Task<IActionResult> ApproveIncidentReport(int id)
@@ -92,6 +96,7 @@ namespace CMMSAPIs.Controllers.Incident_Reports
             }
         }
 
+        [Authorize]
         [Route("RejectIncidentReport")]
         [HttpPut]
         public async Task<IActionResult> RejectIncidentReport([FromForm] CMApproveIncident request)
