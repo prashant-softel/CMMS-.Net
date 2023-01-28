@@ -72,7 +72,7 @@ namespace CMMSAPIs.Repositories.Users
                         await repos.AddLog(_log);
                     }
                 }
-                CMDefaultResponse response = new CMDefaultResponse(user_id, 200, "Updated User Access Successfully");
+                CMDefaultResponse response = new CMDefaultResponse(user_id, CMMS.RETRUNSTATUS.SUCCESS, "Updated User Access Successfully");
                 return response;
             }
             catch (Exception)
@@ -133,12 +133,12 @@ namespace CMMSAPIs.Repositories.Users
                         _log.status = Constant.UPDATED;
                         await repos.AddLog(_log);
                     }
-                    CMDefaultResponse response = new CMDefaultResponse(user_id, 200, "Updated User Notifications Successfully");
+                    CMDefaultResponse response = new CMDefaultResponse(user_id, CMMS.RETRUNSTATUS.SUCCESS, "Updated User Notifications Successfully");
                     return response;
                 }
                 else 
                 {
-                    CMDefaultResponse response = new CMDefaultResponse(user_id, 200, "User Notifications Failed to Update");
+                    CMDefaultResponse response = new CMDefaultResponse(user_id, CMMS.RETRUNSTATUS.SUCCESS, "User Notifications Failed to Update");
                     return response;
                 }                
             }

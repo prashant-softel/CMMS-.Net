@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using CMMSAPIs.Repositories.JC;
 using CMMSAPIs.Models.JC;
 using CMMSAPIs.Models.Utils;
-using Microsoft.AspNetCore.Mvc;
 
 namespace CMMSAPIs.BS.JC
 {

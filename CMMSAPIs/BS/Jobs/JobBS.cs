@@ -1,8 +1,8 @@
-﻿using CMMSAPIs.Helper;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
+using CMMSAPIs.Helper;
+using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Jobs;
 using CMMSAPIs.Models.Jobs;
 
@@ -13,12 +13,9 @@ namespace CMMSAPIs.BS.Jobs
         Task<List<CMJobModel>> GetJobList(int facility_id, int userId);
         Task<List<CMJobView>> GetJobDetail(int job_id);
         Task<int> CreateNewJob(CMCreateJob request);
-
-        Task<int> ReAssignJob(int job_id, int user_id, int changed_by);
-        Task<int> CancelJob(int job_id, int user_id, string Cancelremark);
-        Task<int> LinkToPTW(int job_id, int ptw_id);
-
-
+        Task<CMDefaultResponse> ReAssignJob(int job_id, int user_id, int changed_by);
+        Task<CMDefaultResponse> CancelJob(int job_id, int user_id, string Cancelremark);
+        Task<CMDefaultResponse> LinkToPTW(int job_id, int ptw_id);
     }
 
     public class JobBS : IJobBS
@@ -77,7 +74,7 @@ namespace CMMSAPIs.BS.Jobs
 
 
 
-        public async Task<int> ReAssignJob(int job_id, int user_id, int changed_by)
+        public async Task<CMDefaultResponse> ReAssignJob(int job_id, int user_id, int changed_by)
         {
             try
             {
@@ -91,7 +88,7 @@ namespace CMMSAPIs.BS.Jobs
                 throw;
             }
         }
-        public async Task<int> CancelJob(int job_id, int user_id, string Cancelremark)
+        public async Task<CMDefaultResponse> CancelJob(int job_id, int user_id, string Cancelremark)
         {
             try
             {
@@ -106,7 +103,7 @@ namespace CMMSAPIs.BS.Jobs
             }
         }
 
-        public async Task<int> LinkToPTW(int job_id, int ptw_id)
+        public async Task<CMDefaultResponse> LinkToPTW(int job_id, int ptw_id)
         {
             try
             {

@@ -7,6 +7,7 @@ namespace CMMSAPIs.Models.Jobs
 {
     public class CMJobView
     {
+        public int id { get; set; }
         public string facility_name { get; set; }
         public int block_id { get; set; }
         public string block_name { get; set; }
@@ -22,6 +23,7 @@ namespace CMMSAPIs.Models.Jobs
         public string job_title { get; set; }
         public string job_description { get; set; }
         public dynamic breaKdownTime { get; set; }
+        public int current_ptwId { get; set; }
 
         public List<CMequipmentCatList> LstCMequipmentCatList { get; set; }
         public List<CMworkingAreaNameList> LstCMworkingAreaNameList { get; set; }

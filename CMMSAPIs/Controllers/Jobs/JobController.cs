@@ -81,17 +81,17 @@ namespace CMMSAPIs.Controllers.Jobs
         [HttpPut]
         public async Task<IActionResult> ReAssignJob(int job_id, int user_id, int changed_by)
         {
-            String status;
+        
             try
             {
                 var data = await _JobBS.ReAssignJob(job_id, user_id, changed_by);
-                status = "Assign Job Successfully";
+                return Ok(data);
+
             }
             catch (Exception ex)
             {
                 throw;
             }
-            return Ok(status);
 
         }
 
@@ -100,17 +100,16 @@ namespace CMMSAPIs.Controllers.Jobs
         [HttpPut]
         public async Task<IActionResult> CancelJob(int job_id, int user_id, string Cancelremark)
         {
-            String status;
             try
             {
                 var data = await _JobBS.CancelJob(job_id, user_id, Cancelremark);
-                status = "Job Cancel Successfully";
+                return Ok(data);
+
             }
             catch (Exception ex)
             {
                 throw;
             }
-            return Ok(status);
         }
 
         [Authorize]
@@ -118,17 +117,15 @@ namespace CMMSAPIs.Controllers.Jobs
         [HttpPut]
         public async Task<IActionResult> LinkToPTW(int job_id, int ptw_id)
         {
-            String status;
             try
             {
                 var data = await _JobBS.LinkToPTW(job_id, ptw_id);
-                status = "Link To Permit Successfully";
+                return Ok(data);
             }
             catch (Exception ex)
             {
                 throw;
             }
-            return Ok(status);
         }
 
         /*

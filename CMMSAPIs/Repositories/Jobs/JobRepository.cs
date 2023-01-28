@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Jobs;
-using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Utils;
+using CMMSAPIs.Models.Notifications;
 
 namespace CMMSAPIs.Repositories.Jobs
 {
@@ -121,60 +117,164 @@ namespace CMMSAPIs.Repositories.Jobs
             /*Your code goes here*/
             string qryJobBasic = "insert into jobs(facilityId, blockId,title, description, createdAt, createdBy, breakdownTime,assignedId, linkedPermit) values" +
             $"({ request.facility_id }, { request.block_id }, '{ request.title }', '{ request.description }', '{UtilsRepository.GetUTCTime() }','{ request.createdBy }','{ UtilsRepository.GetUTCTime() }','{ request.assigned_id }','{ request.permit_id }')";
-            int jobPrimaryKey = 3158;
             await Context.ExecuteNonQry<int>(qryJobBasic).ConfigureAwait(false);
 
+            //string qry = "select id as insertedId from jobs order by id desc limit 1";
+            string myNewJobQuery = "SELECT " +
+                        "facilities.id as block_id, job.status as JobStatus, facilities.name as block_name, job.status as status, user.id as assigned_id, CONCAT(user.firstName, user.lastName) as assigned_name, workType.workTypeName as workType,  job.title as job_title, job.description as job_description " +
+                          "FROM " +
+                                "jobs as job " +
+                          "JOIN " +
+                                "jobmappingassets as mapAssets ON mapAssets.jobId = job.id " +
+                          "JOIN " +
+                                "assetcategories as asset_cat ON mapAssets.categoryId = asset_cat.id " +
+                          "LEFT JOIN " +
+                                "jobworktypes as workType ON workType.equipmentCategoryId = asset_cat.id " +
+                          "JOIN " +
+                                "facilities as facilities ON job.facilityId = facilities.id " +
+                          "LEFT JOIN " +
+                                "users as user ON user.id = job.assignedId order by id desc limit 1";
+
+            List<CMCreateJob> newJob = await Context.GetData<CMCreateJob>(myNewJobQuery).ConfigureAwait(false);
+            int newJobID = newJob[0].id;
             foreach (var data in request.AssetsIds)
             {
-                string qryAssetsIds = $"insert into jobmappingassets(jobId, assetId, categoryId ) value ({ jobPrimaryKey }, { data.asset_id },{ data.category_ids })";
+                string qryAssetsIds = $"insert into jobmappingassets(jobId, assetId, categoryId ) value ({ newJobID }, { data.asset_id },{ data.category_ids })";
                 await Context.ExecuteNonQry<int>(qryAssetsIds).ConfigureAwait(false);
             }
             foreach (var data in request.WorkType_Ids)
             {
-                string qryCategoryIds = $"insert into jobassociatedworktypes(jobId, workTypeId ) value ( { jobPrimaryKey }, { data } )";
+                string qryCategoryIds = $"insert into jobassociatedworktypes(jobId, workTypeId ) value ( { newJobID }, { data } )";
                 await Context.ExecuteNonQry<int>(qryCategoryIds).ConfigureAwait(false);
             }
-            // Add previous setting to log table
-            CMLog _log = new CMLog();
-            _log.module_type = Constant.JOB;
-            _log.module_ref_id = jobPrimaryKey;
-            _log.comment = "Job is created";
-            _log.status = Constant.JOB_CREATED;
-            await _utilsRepo.AddLog(_log);
-            return jobPrimaryKey;
+        
+            //await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, newJob[0].insertedId, 0, 0, "Job is created", CMMS.CMMS_Status.JOB_CREATED);
+          //await _utilsRepo.SendNotification(Constant.JOB, Constant.JOB_CREATED, newJobID);
+           // CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_CREATED, newJobID);
+
+            return newJobID;
         }
 
-        internal async Task<int> ReAssignJob(int job_id, int user_id, int changed_by)
+        internal async Task<CMDefaultResponse> ReAssignJob(int job_id, int user_id, int changed_by)
         {
             /*
              * AssignedID/PermitID/CancelJob. Out of 3 we can update any one fields based on request
              * Re-assigned employee/ link permit / Cancel Permit. 3 different end points call this function.
              * return boolean true/false*/
             string updateQry = $"update jobs set assignedId = { user_id }, updatedBy = { changed_by } where id = { job_id } ";
-            return await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+            int retVal = await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
 
+            CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
+            if(retVal > 0)
+            {
+                retCode = CMMS.RETRUNSTATUS.SUCCESS;
+            }
+
+            string myQuery = "SELECT " +
+                                    "facilities.id as block_id, job.status as JobStatus, facilities.name as block_name, job.status as status, user.id as assigned_id, CONCAT(user.firstName, user.lastName) as assigned_name, workType.workTypeName as workType,  job.title as job_title, job.description as job_description " +
+                                      "FROM " +
+                                            "jobs as job " +
+                                      "JOIN " +
+                                            "jobmappingassets as mapAssets ON mapAssets.jobId = job.id " +
+                                      "JOIN " +
+                                            "assetcategories as asset_cat ON mapAssets.categoryId = asset_cat.id " +
+                                      "LEFT JOIN " +
+                                            "jobworktypes as workType ON workType.equipmentCategoryId = asset_cat.id " +
+                                      "JOIN " +
+                                            "facilities as facilities ON job.facilityId = facilities.id " +
+                                      "LEFT JOIN " +
+                                            "users as user ON user.id = job.assignedId" +
+                                      " WHERE job.id= " + job_id;
+            List<CMJobView> _ViewJobList = await Context.GetData<CMJobView>(myQuery).ConfigureAwait(false);
+
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, retVal, 0, 0, "Permit Assigned", CMMS.CMMS_Status.JOB_ASSIGNED);
+
+            CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_ASSIGNED, _ViewJobList[0]);
+
+            CMDefaultResponse response = new CMDefaultResponse(job_id, CMMS.RETRUNSTATUS.SUCCESS, "");
+
+            return response;
         }
-        internal async Task<int> CancelJob(int job_id, int user_id, string Cancelremark)
+
+        internal async Task<CMDefaultResponse> CancelJob(int job_id, int user_id, string Cancelremark)
         {
             /*Your code goes here*/
-            int Cancelstatus = 1;
-            string updateQry = $"update jobs set updatedBy = { user_id },  cancellationRemarks = '{ Cancelremark }',  cancelStatus = { Cancelstatus }  where id = { job_id };";
-            return await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+            string updateQry = $"update jobs set updatedBy = { user_id },  cancellationRemarks = '{ Cancelremark }',  cancelStatus = { (int)CMMS.CMMS_Status.JOB_CANCELLED }  where id = { job_id };";
+            int retValue = await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+
+            CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
+
+            if(retValue > 0)
+            {
+                retCode = CMMS.RETRUNSTATUS.SUCCESS;
+            }
+            string myQuery = "SELECT " +
+                                   "facilities.id as block_id, job.status as JobStatus, facilities.name as block_name, job.status as status, user.id as assigned_id, CONCAT(user.firstName, user.lastName) as assigned_name, workType.workTypeName as workType,  job.title as job_title, job.description as job_description " +
+                                     "FROM " +
+                                           "jobs as job " +
+                                     "JOIN " +
+                                           "jobmappingassets as mapAssets ON mapAssets.jobId = job.id " +
+                                     "JOIN " +
+                                           "assetcategories as asset_cat ON mapAssets.categoryId = asset_cat.id " +
+                                     "LEFT JOIN " +
+                                           "jobworktypes as workType ON workType.equipmentCategoryId = asset_cat.id " +
+                                     "JOIN " +
+                                           "facilities as facilities ON job.facilityId = facilities.id " +
+                                     "LEFT JOIN " +
+                                           "users as user ON user.id = job.assignedId" +
+                                     " WHERE job.id= " + job_id;
+            List<CMJobView> _ViewJobList = await Context.GetData<CMJobView>(myQuery).ConfigureAwait(false);
+
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, retValue, 0, 0, "Permit Canceled", CMMS.CMMS_Status.JOB_CANCELLED);
+
+            CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_CANCELLED, _ViewJobList[0]);
+
+            CMDefaultResponse response = new CMDefaultResponse(job_id, CMMS.RETRUNSTATUS.SUCCESS, "");
+            return response;
         }
-        internal async Task<int> LinkToPTW(int job_id, int ptw_id)
+        internal async Task<CMDefaultResponse> LinkToPTW(int job_id, int ptw_id)
         {
             /*
                  *Get id and what parameter changed
                  * AssignedID/ PermitID / CancelJob.Out of 3 we can update any one fields based on request
                  * Re-assigned employee / link permit / Cancel Permit. 3 different end points call this function.     
-                 * return boolean true / false
-    
-                 //update history table
+                 * return boolean true / false    
                  Your code goes here
             */
             string updateQry = $"update jobs set linkedPermit = { ptw_id }  where id =  { job_id };";
-            return await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+            int retVal = await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
 
+            CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
+            if (retVal > 0)
+            {
+                retCode = CMMS.RETRUNSTATUS.SUCCESS;
+            }
+
+            string myQuery = "SELECT " +
+                                    "facilities.id as block_id, job.status as JobStatus, facilities.name as block_name, job.status as status, user.id as assigned_id, CONCAT(user.firstName, user.lastName) as assigned_name, workType.workTypeName as workType,  job.linkedPermit as current_ptwId, job.title as job_title, job.description as job_description " +
+                                      "FROM " +
+                                            "jobs as job " +
+                                      "JOIN " +
+                                            "jobmappingassets as mapAssets ON mapAssets.jobId = job.id " +
+                                      "JOIN " +
+                                            "assetcategories as asset_cat ON mapAssets.categoryId = asset_cat.id " +
+                                      "LEFT JOIN " +
+                                            "jobworktypes as workType ON workType.equipmentCategoryId = asset_cat.id " +
+                                      "JOIN " +
+                                            "facilities as facilities ON job.facilityId = facilities.id " +
+                                      "LEFT JOIN " +
+                                            "users as user ON user.id = job.assignedId" +
+                                      " WHERE job.id= " + job_id;
+            List<CMJobView> _ViewJobList = await Context.GetData<CMJobView>(myQuery).ConfigureAwait(false);
+
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, retVal, 0, 0, "Permit Assigned", CMMS.CMMS_Status.JOB_LINKED);
+
+            CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_LINKED, _ViewJobList[0]);
+
+            CMDefaultResponse response = new CMDefaultResponse(job_id, CMMS.RETRUNSTATUS.SUCCESS, "");
+
+           return response;
+        
         }
 
     }
