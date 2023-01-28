@@ -86,6 +86,13 @@ namespace CMMSAPIs.Repositories.Masters
             List<CMSupplier> _Suppliers  = await Context.GetData<CMSupplier>(myQuery).ConfigureAwait(false);
             return _Suppliers;
         }
+
+        internal async Task<List<CMFrequency>> GetFrequencyList()
+        {
+            string myQuery = $"SELECT id,name, days FROM Frequency where status = 1 AND type = {Constant.SUPPLIER}";
+            List<CMFrequency> _FrequencyList = await Context.GetData<CMFrequency>(myQuery).ConfigureAwait(false);
+            return _FrequencyList;
+        }
     }
 
 }
