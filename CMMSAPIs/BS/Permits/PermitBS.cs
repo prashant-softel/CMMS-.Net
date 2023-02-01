@@ -25,14 +25,14 @@ namespace CMMSAPIs.BS.Permits
         Task<int> CreatePermit(CMCreatePermit set);
         Task<List<CMPermitList>> GetPermitList(int facility_id, int userID);
         Task<List<CMPermitDetail>> GetPermitDetails(int permit_id);    
-        Task<List<CMDefaultResp>> PermitApprove(CMApproval request);
-        Task<List<CMDefaultResp>> PermitExtend(CMApproval request);
-        Task<List<CMDefaultResp>> PermitExtendApprove(CMApproval request);
-        Task<List<CMDefaultResp>> PermitExtendCancel(CMApproval request);
-        Task<List<CMDefaultResp>> PermitClose(CMApproval request);
-        Task<List<CMDefaultResp>> PermitReject(CMApproval request);
-        Task<List<CMDefaultResp>> PermitIssue(CMApproval request);
-        Task<List<CMDefaultResp>> PermitCancel(CMApproval request);
+        Task<CMDefaultResponse> PermitApprove(CMApproval request);
+        Task<CMDefaultResponse> PermitExtend(CMApproval request);
+        Task<CMDefaultResponse> PermitExtendApprove(CMApproval request);
+        Task<CMDefaultResponse> PermitExtendCancel(CMApproval request);
+        Task<CMDefaultResponse> PermitClose(CMApproval request);
+        Task<CMDefaultResponse> PermitReject(CMApproval request);
+        Task<CMDefaultResponse> PermitIssue(CMApproval request);
+        Task<CMDefaultResponse> PermitCancel(CMApproval request);
         Task<int> UpdatePermit(CMUpdatePermit request);
     }
 
@@ -181,7 +181,7 @@ namespace CMMSAPIs.BS.Permits
          * Permit Issue/Approval/Rejection/Cancel End Points
         */
 
-        public async Task<List<CMDefaultResp>> PermitApprove(CMApproval request)
+        public async Task<CMDefaultResponse> PermitApprove(CMApproval request)
         {
             try
             {
@@ -195,7 +195,7 @@ namespace CMMSAPIs.BS.Permits
                 throw;
             }
         }
-        public async Task<List<CMDefaultResp>> PermitExtend(CMApproval request)
+        public async Task<CMDefaultResponse> PermitExtend(CMApproval request)
         {
             try
             {
@@ -209,7 +209,7 @@ namespace CMMSAPIs.BS.Permits
                 throw;
             }
         }
-        public async Task<List<CMDefaultResp>> PermitExtendApprove(CMApproval request)
+        public async Task<CMDefaultResponse> PermitExtendApprove(CMApproval request)
         {
             try
             {
@@ -223,7 +223,7 @@ namespace CMMSAPIs.BS.Permits
                 throw;
             }
         }
-        public async Task<List<CMDefaultResp>> PermitExtendCancel(CMApproval request)
+        public async Task<CMDefaultResponse> PermitExtendCancel(CMApproval request)
         {
             try
             {
@@ -237,7 +237,7 @@ namespace CMMSAPIs.BS.Permits
                 throw;
             }
         }
-        public async Task<List<CMDefaultResp>> PermitClose(CMApproval request)
+        public async Task<CMDefaultResponse> PermitClose(CMApproval request)
         {
             try
             {
@@ -252,7 +252,7 @@ namespace CMMSAPIs.BS.Permits
             }
         }
 
-        public async Task<List<CMDefaultResp>> PermitReject(CMApproval request)
+        public async Task<CMDefaultResponse> PermitReject(CMApproval request)
         {
             try
             {
@@ -267,7 +267,7 @@ namespace CMMSAPIs.BS.Permits
             }
         }
 
-        public async Task<List<CMDefaultResp>> PermitIssue(CMApproval request)
+        public async Task<CMDefaultResponse> PermitIssue(CMApproval request)
         {
             try
             {
@@ -282,7 +282,7 @@ namespace CMMSAPIs.BS.Permits
             }
         }
 
-        public async Task<List<CMDefaultResp>> PermitCancel(CMApproval request)
+        public async Task<CMDefaultResponse> PermitCancel(CMApproval request)
         {
             try
             {

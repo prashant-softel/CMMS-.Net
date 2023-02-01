@@ -26,7 +26,7 @@ namespace CMMSAPIs.Controllers.Permits
         /* 
          * Permit Create Form Required End Points 
          */
-        [Authorize]
+       // [Authorize]
         [Route("GetPermitTypeList")]
         [HttpGet]
         public async Task<IActionResult> GetPermitTypeList(int facility_id)
@@ -42,7 +42,7 @@ namespace CMMSAPIs.Controllers.Permits
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("GetSafetyMeasurementQuestionList")]
         [HttpGet]
         public async Task<IActionResult> GetSafetyMeasurementQuestionList(int permit_type_id)
@@ -58,7 +58,7 @@ namespace CMMSAPIs.Controllers.Permits
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("GetJobTypeList")]
         [HttpGet]
         public async Task<IActionResult> GetJobTypeList(int facility_id)
@@ -74,7 +74,7 @@ namespace CMMSAPIs.Controllers.Permits
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("GetSOPList")]
         [HttpGet]
         public async Task<IActionResult> GetSOPList(int job_type_id)
@@ -93,7 +93,7 @@ namespace CMMSAPIs.Controllers.Permits
         /*
          * Permit Main Feature End Points
         */
-        [Authorize]
+       // [Authorize]
         [Route("GetPermitList")]
         [HttpGet]
         public async Task<IActionResult> GetPermitList(int facility_id, int userID)
@@ -109,7 +109,7 @@ namespace CMMSAPIs.Controllers.Permits
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("CreatePermit")]
         [HttpPost]
         public async Task<IActionResult> CreatePermit(CMCreatePermit request)
@@ -125,7 +125,7 @@ namespace CMMSAPIs.Controllers.Permits
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("GetPermitDetails")]
         [HttpGet]
         public async Task<IActionResult> GetPermitDetails(int permit_id)
@@ -144,179 +144,149 @@ namespace CMMSAPIs.Controllers.Permits
         /*
          * Permit Issue/Approval/Rejection/Cancel End Points
         */
-        [Authorize]
+        //[Authorize]
         [Route("PermitIssue")]
         [HttpPost]
         public async Task<IActionResult> PermitIssue([FromForm] CMApproval request)
         {
-            String status;
             try
             {
                 var data = await _PermitBS.PermitIssue(request);
-                status = "Issued Successfully";
+                return Ok(data);
             }
             catch (Exception ex)
             {
-                status = "something went wrong " + ex;
                 throw;
             }
-            return Ok(status);
-
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("PermitApprove")]
         [HttpPost]
         public async Task<IActionResult> PermitApprove([FromForm] CMApproval request)
         {
-            String status;
             try
             {
                 var data = await _PermitBS.PermitApprove(request);
-                status = "Approved Successfully";
-
+                return Ok(data);
             }
             catch (Exception ex)
             {
-                status = "something went wrong " + ex;
                 throw;
             }
-            return Ok(status);
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("PermitExtend")]
         [HttpPut]
         public async Task<IActionResult> PermitExtend([FromForm] CMApproval request)
         {
-            String status;
             try
             {
                 var data = await _PermitBS.PermitExtend(request);
-                status = "Permit Extend Successfully";
+                return Ok(data);
             }
             catch (Exception ex)
             {
-                status = "something went wrong " + ex;
                 throw;
             }
-            return Ok(status);
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("PermitExtendApprove")]
         [HttpPut]
         public async Task<IActionResult> PermitExtendApprove([FromForm] CMApproval request)
         {
-            String status;
             try
             {
                 var data = await _PermitBS.PermitExtendApprove(request);
-                status = "Approved Extended Permit";             
+                return Ok(data);
             }
             catch (Exception ex)
             {
-                status = "something went wrong " + ex;
                 throw;
             }
-            return Ok(status);
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("PermitExtendCancel")]
         [HttpPut]
         public async Task<IActionResult> PermitExtendCancel([FromForm] CMApproval request)
         {
-            String status;
             try
             {
                 var data = await _PermitBS.PermitExtendCancel(request);
-                status = "Cancel Extended Permit";
+                return Ok(data);
             }
             catch (Exception ex)
             {
-                status = "something went wrong " + ex;
                 throw;
             }
-            return Ok(status);
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("PermitClose")]
         [HttpPut]
         public async Task<IActionResult> PermitClose([FromForm] CMApproval request)
         {
-            String status;
             try
             {
                 var data = await _PermitBS.PermitClose(request);
-                status = "Permit Close";
+                return Ok(data);
             }
             catch (Exception ex)
             {
-                status = "something went wrong " + ex;
                 throw;
             }
-            return Ok(status);
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("PermitReject")]
         [HttpPost]
         public async Task<IActionResult> PermitReject([FromForm] CMApproval request)
         {
-            String status;
-
             try
             {
                 var data = await _PermitBS.PermitReject(request);
-                status = "Permit Reject";
+                return Ok(data);
             }
             catch (Exception ex)
             {
-                status = "something went wrong " + ex;
                 throw;
             }
-            return Ok(status);
 
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("PermitCancel")]
         [HttpPost]
         public async Task<IActionResult> PermitCancel([FromForm] CMApproval request)
         {
-            String status;
             try
             {
                 var data = await _PermitBS.PermitCancel(request);
-                status = "Cancelled Successfully";
+                return Ok(data);
             }
             catch (Exception ex)
             {
-                status = "something went wrong " + ex;
                 throw;
             }
-            return Ok(status);
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("UpdatePermit")]
         [HttpPost]
         public async Task<IActionResult> UpdatePermit(CMUpdatePermit request)
         {
-            String status;
             try
             {
                 var data = await _PermitBS.UpdatePermit(request);
-                status = "Update permit Successfully";
+                return Ok(data);
             }
             catch (Exception ex)
             {
-                status = "something went wrong " + ex;
                 throw;
             }
-            return Ok(status);
         }
     }
 }

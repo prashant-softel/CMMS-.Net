@@ -83,23 +83,21 @@ namespace CMMSAPIs.Models.Notifications
 
         internal string getHTMLBodyTemplate(params object[] args)
         {
-            string template = "<h1>This is Job Title {0}</h1>";
+            string template = String.Format("<h1>This is Job Title {0}</h1>",m_jobObj.job_title);
             switch (m_notificationID)
             {
                 case CMMS.CMMS_Status.JOB_CREATED:     //Created
-                    template += "<p><b>Job status is :</b> Created</p>";
+                    template += String.Format("<p><b>Job status is :</b> Created{0}</p>",m_jobObj.job_title);
                     break;
                 case CMMS.CMMS_Status.JOB_ASSIGNED:     //Assigned
-                    template += "<p><b>Job status is : Assiged</p>";
-                    template += "<p><b>Job assigned to:</b> {1}</p>";
+                    template += String.Format("<p><b>Job status is : Assiged</p>");
+                    template += String.Format("<p><b>Job assigned to:</b> {0} </p>",m_jobObj.assigned_name);
                     break;
                 case CMMS.CMMS_Status.JOB_CLOSED:     //Closed
-                    template += "<p><b>Job status is : Assiged</p>";
-                    template += "<p><b>Job assigned to:</b> {1}</p>";
+                    template += String.Format("<p><b>Job status is : Closed</p>");
                     break;
                 case CMMS.CMMS_Status.JOB_LINKED:     //Linked to PTW
-                    template += "<p><b>Job status is : Assigned to PTW ID  PTW Desc</p>";
-                    template += "<p>Job assigned to:</b> {1}</p>";
+                    template += String.Format("<p><b>Job status is : Assigned to {0} Job Id {1} Linked to PTW ID {2}<p>",m_jobObj.assigned_name,m_jobObj.id,m_jobObj.current_ptwId);
                     break;
                 default:
                     break;

@@ -6,7 +6,7 @@ namespace CMMSAPIs.Models.Permits
 {
     public class CMPermitDetail
     {
-        public int id { get; set; }
+        public int insertedId { get; set; }
         public DateTime startDate { get; set; }
         public DateTime tillDate { get; set; }
         public int ptwStatus { get; set; }

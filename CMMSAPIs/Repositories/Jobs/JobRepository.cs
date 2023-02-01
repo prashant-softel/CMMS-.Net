@@ -119,9 +119,12 @@ namespace CMMSAPIs.Repositories.Jobs
             $"({ request.facility_id }, { request.block_id }, '{ request.title }', '{ request.description }', '{UtilsRepository.GetUTCTime() }','{ request.createdBy }','{ UtilsRepository.GetUTCTime() }','{ request.assigned_id }','{ request.permit_id }')";
             await Context.ExecuteNonQry<int>(qryJobBasic).ConfigureAwait(false);
 
+           // string query = "select LAST_INSERT_ID() from jobs; ";
+            //List<CMCreateJob> newJob1 = await Context.GetData<CMCreateJob>(query).ConfigureAwait(false);
+
             //string qry = "select id as insertedId from jobs order by id desc limit 1";
             string myNewJobQuery = "SELECT " +
-                        "facilities.id as block_id, job.status as JobStatus, facilities.name as block_name, job.status as status, user.id as assigned_id, CONCAT(user.firstName, user.lastName) as assigned_name, workType.workTypeName as workType,  job.title as job_title, job.description as job_description " +
+                        "job.id as id, facilities.id as block_id, job.status as JobStatus, facilities.name as block_name, job.status as status, user.id as assigned_id, CONCAT(user.firstName, user.lastName) as assigned_name, workType.workTypeName as workType,  job.title as job_title, job.description as job_description " +
                           "FROM " +
                                 "jobs as job " +
                           "JOIN " +
@@ -133,10 +136,11 @@ namespace CMMSAPIs.Repositories.Jobs
                           "JOIN " +
                                 "facilities as facilities ON job.facilityId = facilities.id " +
                           "LEFT JOIN " +
-                                "users as user ON user.id = job.assignedId order by id desc limit 1";
+                                "users as user ON user.id = job.assignedId order by job.id desc limit 1";
 
-            List<CMCreateJob> newJob = await Context.GetData<CMCreateJob>(myNewJobQuery).ConfigureAwait(false);
+            List<CMJobView> newJob = await Context.GetData<CMJobView>(myNewJobQuery).ConfigureAwait(false);
             int newJobID = newJob[0].id;
+            
             foreach (var data in request.AssetsIds)
             {
                 string qryAssetsIds = $"insert into jobmappingassets(jobId, assetId, categoryId ) value ({ newJobID }, { data.asset_id },{ data.category_ids })";
@@ -147,10 +151,10 @@ namespace CMMSAPIs.Repositories.Jobs
                 string qryCategoryIds = $"insert into jobassociatedworktypes(jobId, workTypeId ) value ( { newJobID }, { data } )";
                 await Context.ExecuteNonQry<int>(qryCategoryIds).ConfigureAwait(false);
             }
-        
-            //await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, newJob[0].insertedId, 0, 0, "Job is created", CMMS.CMMS_Status.JOB_CREATED);
-          //await _utilsRepo.SendNotification(Constant.JOB, Constant.JOB_CREATED, newJobID);
-           // CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_CREATED, newJobID);
+
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, newJobID, 0, 0, "Job Created", CMMS.CMMS_Status.CREATED);
+
+            CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.CREATED, newJob[0]);
 
             return newJobID;
         }

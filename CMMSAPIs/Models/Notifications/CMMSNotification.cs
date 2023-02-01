@@ -4,6 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Jobs;
+using CMMSAPIs.Models.Permits;
+
 //using CommonUtilities;
 //using CMMSAPIs.Models.Notifications;
 
@@ -75,7 +77,7 @@ namespace CMMSAPIs.Models.Notifications
         public CMMS.RETRUNSTATUS sendEmailNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, params object[] args)
         {
             CMMS.RETRUNSTATUS retValue = CMMS.RETRUNSTATUS.FAILURE;
-
+          
             string subject = getSubject(args);
             string HTMLBody = getHTMLBody(args);
             string HTMLHeader = getHTMLHeader(args);
@@ -101,8 +103,8 @@ namespace CMMSAPIs.Models.Notifications
             }
             else if (moduleID == CMMS.CMMS_Modules.PTW)    //PTW
             {
-                //CMPermitDetail _Permit = (CMPermitDetail)args[0];
-                //notificationObj = new PTWNotification(moduleID, notificationID);
+                CMPermitDetail _Permit = (CMPermitDetail)args[0];
+                notificationObj = new PTWNotification(moduleID, notificationID, _Permit);
             }
             else if (moduleID == CMMS.CMMS_Modules.JOBCARD)    //Job card
             {
@@ -110,7 +112,7 @@ namespace CMMSAPIs.Models.Notifications
             }
 
             //create else if block for your module and add Notification class for  your module to implement yous notification
-            retValue = notificationObj.sendEmailNotification(moduleID, notificationID);
+            retValue = notificationObj.sendEmailNotification(moduleID, notificationID, args);
             return retValue;
         }
     }

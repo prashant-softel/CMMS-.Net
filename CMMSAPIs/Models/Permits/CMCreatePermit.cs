@@ -6,7 +6,6 @@ namespace CMMSAPIs.Models.Permits
 {
     public class CMCreatePermit
     {
-        public int insertedId { get; set; }
         public int facility_id { get; set; }
         public int blockId { get; set; }
         public int lotoId { get; set; }
