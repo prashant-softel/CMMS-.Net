@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Jobs;
 using CMMSAPIs.Models.Permits;
+using CMMSAPIs.Models.JC;
 
 //using CommonUtilities;
 //using CMMSAPIs.Models.Notifications;
@@ -108,7 +109,8 @@ namespace CMMSAPIs.Models.Notifications
             }
             else if (moduleID == CMMS.CMMS_Modules.JOBCARD)    //Job card
             {
-                //notificationObj = new JCNotification(moduleID, notificationID);
+                CMJCDetail _JobCard = (CMJCDetail)args[0];
+                notificationObj = new JCNotification(moduleID, notificationID, _JobCard);
             }
 
             //create else if block for your module and add Notification class for  your module to implement yous notification
