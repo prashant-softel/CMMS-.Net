@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using CMMSAPIs.Repositories.Utils;
+using CMMSAPIs.Models.Notifications;
 
 namespace CMMSAPIs.Repositories.Permits
 {
@@ -24,6 +25,24 @@ namespace CMMSAPIs.Repositories.Permits
          * Permit Create Form Required End Points 
         */
 
+        internal async Task<List<CMPermitDetail>> getPermitDetails(int permit_id)
+        {
+            string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as startDate, ptw.endDate as tillDate, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, facilities.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.description as description,CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, CONCAT(user3.firstName,' ',user3.lastName) as completedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, CONCAT(user5.firstName,' ',user5.lastName) as closedByName, ptw.cancelRequestDate as cancel_at " +
+              "FROM permits as ptw " +
+              "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
+              "JOIN facilities as facilities  ON ptw.blockId = facilities.id and facilities.isBlock = 1 " +
+              "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
+              "LEFT JOIN users as user2 ON user2.id = ptw.approvedById " +
+              "LEFT JOIN users as user3 ON user3.id = ptw.completedById " +
+              "LEFT JOIN users as user4 ON user4.id = ptw.cancelRequestById " +
+              "LEFT JOIN users as user5 ON user5.id = ptw.completedById " +
+              $"where ptw.id = { permit_id }";
+
+            List<CMPermitDetail> permitDetails = await Context.GetData<CMPermitDetail>(myQuery).ConfigureAwait(false);
+
+            //return permitDetails[0];
+            return permitDetails;
+        }
         internal async Task<List<CMDefaultList>> GetPermitTypeList(int facility_id)
         {
             /*
@@ -41,7 +60,7 @@ namespace CMMSAPIs.Repositories.Permits
              * input 1 - checkbox, 2 - radio, 3 - text, 4 - Ok
             */
 
-            string myQuery5 = "SELECT permitsaftymea.id as saftyQuestionId, permitsaftymea.title as SaftyQuestionName, permitsaftymea.input as input FROM                      permitsafetyquestions  as  permitsaftyques " +
+            string myQuery5 = "SELECT permitsaftymea.id as saftyQuestionId, permitsaftymea.title as SaftyQuestionName, permitsaftymea.input as input FROM permitsafetyquestions  as  permitsaftyques " +
                              "LEFT JOIN permittypesafetymeasures as permitsaftymea ON permitsaftyques.safetyMeasureId = permitsaftymea.id " +
                              "JOIN permits as ptw ON ptw.id = permitsaftymea.permitTypeId " +
                              $"where ptw.id =  { permit_type_id }";
@@ -116,18 +135,32 @@ namespace CMMSAPIs.Repositories.Permits
             */
             string qryPermitBasic = "insert into permits(facilityId, blockId, startDate, endDate, description, jobId, LOTOId, typeId, TBTId, issuedById, approvedById, acceptedById) values" +
              $"({ request.facility_id }, { request.blockId }, '{ UtilsRepository.GetUTCTime() }', '{ UtilsRepository.GetUTCTime() }', '{ request.description }', { request.work_type_id }, { request.lotoId }, '{ request.typeId }', { request.sop_type_id }, { request.issuer_id }, { request.approver_id }, { request.user_id })";
-            int permitPrimaryKey = 59613;
             await Context.ExecuteNonQry<int>(qryPermitBasic).ConfigureAwait(false);
+
+            string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as startDate, ptw.endDate as tillDate, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, facilities.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.description as description,CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, CONCAT(user3.firstName,' ',user3.lastName) as completedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, CONCAT(user5.firstName,' ',user5.lastName) as closedByName, ptw.cancelRequestDate as cancel_at " +
+              "FROM permits as ptw " +
+              "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
+              "JOIN facilities as facilities  ON ptw.blockId = facilities.id and facilities.isBlock = 1 " +
+              "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
+              "LEFT JOIN users as user2 ON user2.id = ptw.approvedById " +
+              "LEFT JOIN users as user3 ON user3.id = ptw.completedById " +
+              "LEFT JOIN users as user4 ON user4.id = ptw.cancelRequestById " +
+              "LEFT JOIN users as user5 ON user5.id = ptw.completedById  order by ptw.id desc limit 1";
+
+            List<CMPermitDetail> permitPrimaryKey = await Context.GetData<CMPermitDetail>(myQuery).ConfigureAwait(false);
+            int insertedId = permitPrimaryKey[0].insertedId;
+
+            // qry = "select id as insertedId from permits order by id desc limit 1";
 
             foreach (var data in request.block_ids)
             {
-                string qryPermitBlock = $"insert into permitblocks(ptw_id, block_id ) value ({ permitPrimaryKey }, { data })";
+                string qryPermitBlock = $"insert into permitblocks(ptw_id, block_id ) value ({ insertedId  }, { data })";
                 await Context.ExecuteNonQry<int>(qryPermitBlock).ConfigureAwait(false);
             }
 
             foreach (int data in request.category_ids)
             {
-                string qryPermitCategory = $"insert into permitassetlists (ptwId, assetId ) value ({ permitPrimaryKey }, { data })";
+                string qryPermitCategory = $"insert into permitassetlists (ptwId, assetId ) value ({ insertedId  }, { data })";
                 await Context.ExecuteNonQry<int>(qryPermitCategory).ConfigureAwait(false);
             }
 
@@ -135,34 +168,35 @@ namespace CMMSAPIs.Repositories.Permits
             {
                 foreach (int data in request.isolated_category_ids)
                 {
-                    string qryPermitisolatedCategory = $"insert into permitisolatedassetcategories (permitId , assetCategoryId ) value ({ permitPrimaryKey },{ data })";
+                    string qryPermitisolatedCategory = $"insert into permitisolatedassetcategories (permitId , assetCategoryId ) value ({ insertedId  },{ data })";
                     await Context.ExecuteNonQry<int>(qryPermitisolatedCategory).ConfigureAwait(false);
                 }
             }
 
             foreach (var data in request.Loto_list)
             {
-                string qryPermitlotoAssets = $"insert into permitlotoassets ( PTW_id, Loto_Asset_id, Loto_Key ) value ({ permitPrimaryKey },{ data.Loto_id }, '{ data.Loto_Key }')";
+                string qryPermitlotoAssets = $"insert into permitlotoassets ( PTW_id, Loto_Asset_id, Loto_Key ) value ({ insertedId },{ data.Loto_id }, '{ data.Loto_Key }')";
                 await Context.ExecuteNonQry<int>(qryPermitlotoAssets).ConfigureAwait(false);
             }
 
             foreach (var data in request.employee_list)
             {
-                string qryPermitEmpList = $"insert into permitemployeelists ( pwtId , employeeId , responsibility ) value ({ permitPrimaryKey },{ data.employeeId }, '{ data.responsibility }')";
+                string qryPermitEmpList = $"insert into permitemployeelists ( pwtId , employeeId , responsibility ) value ({ insertedId  },{ data.employeeId }, '{ data.responsibility }')";
                 await Context.ExecuteNonQry<int>(qryPermitEmpList).ConfigureAwait(false);
             }
 
             foreach (var data in request.safety_question_list)
             {
-                string qryPermitSaftyQuestion = $"insert into permitsafetyquestions ( permitId , safetyMeasureId, safetyMeasureValue) value ({ permitPrimaryKey }, { data.safetyMeasureId }, '{ data.safetyMeasureValue }')";
+                string qryPermitSaftyQuestion = $"insert into permitsafetyquestions ( permitId , safetyMeasureId, safetyMeasureValue) value ({ insertedId  }, { data.safetyMeasureId }, '{ data.safetyMeasureValue }')";
                 await Context.ExecuteNonQry<int>(qryPermitSaftyQuestion).ConfigureAwait(false);
             }
-
-            await _utilsRepo.AddHistoryLog(Constant.PTW, permitPrimaryKey, 0, 0, "Permit is created", Constant.PTW_CREATED);
-            await _utilsRepo.SendNotification(Constant.PTW, Constant.PTW_CREATED, permitPrimaryKey);
-            return permitPrimaryKey;
-            
             //file_upload_form pending 
+
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, insertedId, 0, 0, "Permit Created", CMMS.CMMS_Status.PTW_CREATED);
+
+            CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_CREATED, permitPrimaryKey[0]);
+
+            return insertedId;
         }
 
         internal async Task<List<CMPermitDetail>> GetPermitDetails(int permit_id)
@@ -174,14 +208,15 @@ namespace CMMSAPIs.Repositories.Permits
              * Assets, AssetsCategory, Facility, Users, PermitTypeSafetyMeasures, PermitTypeList, PermitJobTypeList, PermitTBTJobList
             */
 
-            string myQuery = "SELECT ptw.status as ptwStatus, ptw.startDate as startDate, ptw.endDate as tillDate, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, facilities.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.description as description,CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, CONCAT(user3.firstName,' ',user3.lastName) as completedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, ptw.cancelRequestDate as cancel_at " +
+            string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as startDate, ptw.endDate as tillDate, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, facilities.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.description as description,CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, CONCAT(user3.firstName,' ',user3.lastName) as completedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, CONCAT(user5.firstName,' ',user5.lastName) as closedByName, ptw.cancelRequestDate as cancel_at " +
               "FROM permits as ptw " +
               "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
               "JOIN facilities as facilities  ON ptw.blockId = facilities.id and facilities.isBlock = 1 " +
-               "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
-               "LEFT JOIN users as user2 ON user2.id = ptw.approvedById " +
-               "LEFT JOIN users as user3 ON user3.id = ptw.completedById " +
-               "LEFT JOIN users as user4 ON user4.id = ptw.cancelRequestById " +
+              "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
+              "LEFT JOIN users as user2 ON user2.id = ptw.approvedById " +
+              "LEFT JOIN users as user3 ON user3.id = ptw.completedById " +
+              "LEFT JOIN users as user4 ON user4.id = ptw.cancelRequestById " +
+              "LEFT JOIN users as user5 ON user5.id = ptw.completedById " +
                 $"where ptw.id = { permit_id }";
             List<CMPermitDetail> _PermitDetailsList = await Context.GetData<CMPermitDetail>(myQuery).ConfigureAwait(false);
 
@@ -203,12 +238,12 @@ namespace CMMSAPIs.Repositories.Permits
             List<CMLoto> _LotoList = await Context.GetData<CMLoto>(myQuery3).ConfigureAwait(false);
 
             //get upload file
-            string myQuery4 = "SELECT PTWFiles.File_Name as fileName, PTWFiles.File_Category_name as fileCategory,PTWFiles.File_Size as fileSize,                              PTWFiles.status as status FROM fleximc_ptw_files AS PTWFiles " +
+            string myQuery4 = "SELECT PTWFiles.File_Name as fileName, PTWFiles.File_Category_name as fileCategory,PTWFiles.File_Size as fileSize,PTWFiles.status as status FROM fleximc_ptw_files AS PTWFiles " +
                                $"LEFT JOIN permits  as ptw on ptw.id = PTWFiles.PTW_id where ptw.id = { permit_id }";
             List<CMFileDetail> _UploadFileList = await Context.GetData<CMFileDetail>(myQuery4).ConfigureAwait(false);
 
             //get safty question
-            string myQuery5 = "SELECT permitsaftymea.id as saftyQuestionId, permitsaftymea.title as SaftyQuestionName, permitsaftymea.input as input FROM                       permitsafetyquestions  as permitsaftyques " +
+            string myQuery5 = "SELECT permitsaftymea.id as saftyQuestionId, permitsaftymea.title as SaftyQuestionName, permitsaftymea.input as input FROM permitsafetyquestions  as permitsaftyques " +
                                "LEFT JOIN permittypesafetymeasures as permitsaftymea ON permitsaftyques.safetyMeasureId = permitsaftymea.id " +
                                "JOIN permits as ptw ON ptw.id = permitsaftymea.permitTypeId " +
                                $"where ptw.id = { permit_id }";
@@ -240,104 +275,260 @@ namespace CMMSAPIs.Repositories.Permits
             return _PermitDetailsList;
         }
 
-
         /*         * Permit Issue/Approval/Rejection/Cancel End Points
         */
-        internal async Task<List<CMDefaultResp>> PermitExtend(CMApproval request)
+        internal async Task<CMDefaultResponse> PermitExtend(CMApproval request)
         {
-            string updateQry = $"update permits set extendReason = '{ Constant.PTW_EXTEND_REQUESTED }', extendTime = { request.Time }, extendStatus = { request.status }                        where id = { request.id }";
-            List<CMDefaultResp> _Employee = await Context.GetData<CMDefaultResp>(updateQry).ConfigureAwait(false);
+            string updateQry = $"update permits set extendReason = '{ request.commnet }', extendTime = { request.Time }, extendStatus = { (int)CMMS.CMMS_Status.PTW_EXTEND_REQUESTED }  where id = { request.id }";
+            int retValue = await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
 
-            await _utilsRepo.AddHistoryLog(Constant.PTW, request.id, 0, 0, request.commnet, Constant.PTW_EXTEND_REQUESTED);
-            await _utilsRepo.SendNotification(Constant.PTW, Constant.PTW_EXTEND_REQUESTED, request.id);
-            return _Employee;
+            CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
+
+            if (retValue > 0)
+            {
+                retCode = CMMS.RETRUNSTATUS.SUCCESS;
+            }
+            string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as startDate, ptw.endDate as tillDate, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, facilities.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.description as description,CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, CONCAT(user3.firstName,' ',user3.lastName) as completedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, ptw.cancelRequestDate as cancel_at "+
+            "FROM permits as ptw " +
+            "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
+            "JOIN facilities as facilities  ON ptw.blockId = facilities.id and facilities.isBlock = 1 " +
+             "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
+             "LEFT JOIN users as user2 ON user2.id = ptw.approvedById " +
+             "LEFT JOIN users as user3 ON user3.id = ptw.completedById " +
+             "LEFT JOIN users as user4 ON user4.id = ptw.cancelRequestById "+
+             $"where ptw.id = { request.id }";
+
+             //Task<List<CMPermitDetail>> permitDetails = getPermitDetails(request.id);
+            List<CMPermitDetail> permitDetails = await Context.GetData<CMPermitDetail>(myQuery).ConfigureAwait(false);
+
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, permitDetails[0].insertedId, 0, 0, request.commnet, CMMS.CMMS_Status.PTW_EXTEND_REQUESTED);
+
+            CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_EXTEND_REQUESTED, permitDetails[0]);
+            CMDefaultResponse response = new CMDefaultResponse(permitDetails[0].insertedId, CMMS.RETRUNSTATUS.SUCCESS, "");
+            return response;
         }
 
-        internal async Task<List<CMDefaultResp>> PermitExtendApprove(CMApproval request)
+        internal async Task<CMDefaultResponse> PermitExtendApprove(CMApproval request)
         {
-            string updateQry = $"update permits set extendStatus = '{ Constant.PTW_EXTEND_REQUEST_APPROVE }', extendApproveTime = '{ UtilsRepository.GetUTCTime() }' where id = { request.id }";
+            string updateQry = $"update permits set extendStatus = '{ (int)CMMS.CMMS_Status.PTW_EXTEND_REQUEST_APPROVE }', extendApproveTime = '{ UtilsRepository.GetUTCTime() }' where id = { request.id }";
             List<CMDefaultResp> _Employee = await Context.GetData<CMDefaultResp>(updateQry).ConfigureAwait(false);
-       
-            await _utilsRepo.AddHistoryLog(Constant.PTW, request.id, 0, 0, "Approve Permit Extend Request", Constant.PTW_EXTEND_REQUEST_APPROVE);
-            await _utilsRepo.SendNotification(Constant.PTW, Constant.PTW_EXTEND_REQUEST_APPROVE, request.id);
-            return _Employee;
+            int retValue = await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+
+            CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
+
+            if (retValue > 0)
+            {
+                retCode = CMMS.RETRUNSTATUS.SUCCESS;
+            }
+
+            string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as startDate, ptw.endDate as tillDate, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, facilities.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.description as description,CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, CONCAT(user3.firstName,' ',user3.lastName) as completedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, ptw.cancelRequestDate as cancel_at "+
+              "FROM permits as ptw " +
+              "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
+              "JOIN facilities as facilities  ON ptw.blockId = facilities.id and facilities.isBlock = 1 " +
+              "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
+              "LEFT JOIN users as user2 ON user2.id = ptw.approvedById " +
+              "LEFT JOIN users as user3 ON user3.id = ptw.completedById " +
+              "LEFT JOIN users as user4 ON user4.id = ptw.cancelRequestById "+
+              $"where ptw.id = { request.id }";
+
+            List<CMPermitDetail> permitDetails = await Context.GetData<CMPermitDetail>(myQuery).ConfigureAwait(false);
+
+              await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, permitDetails[0].insertedId, 0, 0, "Approve Permit Extend Request", CMMS.CMMS_Status.PTW_EXTEND_REQUEST_APPROVE);
+
+              CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_EXTEND_REQUEST_APPROVE, permitDetails[0]);
+              CMDefaultResponse response = new CMDefaultResponse(permitDetails[0].insertedId, CMMS.RETRUNSTATUS.SUCCESS, "");
+              return response;
         }
 
-        internal async Task<List<CMDefaultResp>> PermitExtendCancel(CMApproval request)
+        internal async Task<CMDefaultResponse> PermitExtendCancel(CMApproval request)
         {
-            string updateQry = $"update permits set extendStatus = {Constant.PTW_EXTEND_REQUEST_REJECTED }, extendRejectReason = '{ request.commnet }' where id = { request.id }";
-            List<CMDefaultResp> _Employee = await Context.GetData<CMDefaultResp>(updateQry).ConfigureAwait(false);
-      
-            await _utilsRepo.AddHistoryLog(Constant.PTW, request.id, 0, 0, request.commnet, Constant.PTW_EXTEND_REQUEST_REJECTED);
-            await _utilsRepo.SendNotification(Constant.PTW, Constant.PTW_EXTEND_REQUEST_REJECTED, request.id);
-            return _Employee;
+            string updateQry = $"update permits set extendStatus = {(int)CMMS.CMMS_Status.PTW_EXTEND_REQUEST_REJECTED }, extendRejectReason = '{ request.commnet }' where id = { request.id }";
+            int retValue = await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+
+            CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
+
+            if (retValue > 0)
+            {
+                retCode = CMMS.RETRUNSTATUS.SUCCESS;
+            }
+            string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as startDate, ptw.endDate as tillDate, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, facilities.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.description as description,CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, CONCAT(user3.firstName,' ',user3.lastName) as completedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, ptw.cancelRequestDate as cancel_at "+
+              "FROM permits as ptw " +
+              "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
+              "JOIN facilities as facilities  ON ptw.blockId = facilities.id and facilities.isBlock = 1 " +
+              "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
+              "LEFT JOIN users as user2 ON user2.id = ptw.approvedById " +
+              "LEFT JOIN users as user3 ON user3.id = ptw.completedById " +
+              "LEFT JOIN users as user4 ON user4.id = ptw.cancelRequestById "+
+                $"where ptw.id = { request.id }";
+
+            List<CMPermitDetail> permitDetails = await Context.GetData<CMPermitDetail>(myQuery).ConfigureAwait(false);   
+            
+              await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, permitDetails[0].insertedId, 0, 0, request.commnet, CMMS.CMMS_Status.PTW_EXTEND_REQUEST_REJECTED);
+
+              CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_EXTEND_REQUEST_REJECTED, permitDetails[0]);
+              CMDefaultResponse response = new CMDefaultResponse(permitDetails[0].insertedId, CMMS.RETRUNSTATUS.SUCCESS, "");
+              return response;
         }
 
-        internal async Task<List<CMDefaultResp>> PermitIssue(CMApproval request)
+        internal async Task<CMDefaultResponse> PermitIssue(CMApproval request)
         {
             /*
              * Update Permit Table issuedReccomendations, issuedStatus, issuedDate
              * Return Message Issued successfully
             */
-            string updateQry = $"update permits set issuedReccomendations = '{ request.commnet }', issuedStatus = {  Constant.PTW_ISSUED }, issuedDate = '{ UtilsRepository.GetUTCTime() }', issuedById = { request.employee_id }  where id = { request.id }";
-            List<CMDefaultResp> _Employee = await Context.GetData<CMDefaultResp>(updateQry).ConfigureAwait(false);
-         
-            await _utilsRepo.AddHistoryLog(Constant.PTW, request.id, 0, 0, request.commnet, Constant.PTW_ISSUED);
-            await _utilsRepo.SendNotification(Constant.PTW, Constant.PTW_ISSUED, request.id);
-            return _Employee;
+            string updateQry = $"update permits set issuedReccomendations = '{ request.commnet }', issuedStatus = { (int) CMMS.CMMS_Status.PTW_ISSUED }, issuedDate = '{ UtilsRepository.GetUTCTime() }', issuedById = { request.employee_id }  where id = { request.id }";
+            int retValue = await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+
+            CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
+
+            if (retValue > 0)
+            {
+                retCode = CMMS.RETRUNSTATUS.SUCCESS;
+            }
+            string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as startDate, ptw.endDate as tillDate, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, facilities.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.description as description,CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, CONCAT(user3.firstName,' ',user3.lastName) as completedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, ptw.cancelRequestDate as cancel_at "+
+              "FROM permits as ptw " +
+              "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
+              "JOIN facilities as facilities  ON ptw.blockId = facilities.id and facilities.isBlock = 1 " +
+              "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
+              "LEFT JOIN users as user2 ON user2.id = ptw.approvedById " +
+              "LEFT JOIN users as user3 ON user3.id = ptw.completedById " +
+              "LEFT JOIN users as user4 ON user4.id = ptw.cancelRequestById "+
+                $"where ptw.id = { request.id }";
+
+            List<CMPermitDetail> permitDetails = await Context.GetData<CMPermitDetail>(myQuery).ConfigureAwait(false);
+           // return permitDetails[0];
+               await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, permitDetails[0].insertedId, 0, 0, request.commnet, CMMS.CMMS_Status.PTW_ISSUED);
+
+               CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_ISSUED, permitDetails[0]);
+               CMDefaultResponse response = new CMDefaultResponse(permitDetails[0].insertedId, CMMS.RETRUNSTATUS.SUCCESS, "");
+               return response;
         }
 
-        internal async Task<List<CMDefaultResp>> PermitApprove(CMApproval request)
+        internal async Task<CMDefaultResponse> PermitApprove(CMApproval request)
         {
             /*Update Permit Table reccomendationsByApprover, approvedStatus, approvedDate
                        * Return Message Approved successfully*/
 
-            string updateQry = $"update permits set reccomendationsByApprover = '{ request.commnet }', approvedStatus = { Constant.PTW_APPROVE }, approvedDate = '{ UtilsRepository.GetUTCTime() }', approvedById = { request.employee_id }  where id = { request.id }";
-            List<CMDefaultResp> _Employee = await Context.GetData<CMDefaultResp>(updateQry).ConfigureAwait(false);
-        
-            await _utilsRepo.AddHistoryLog(Constant.PTW, request.id, 0, 0, request.commnet, Constant.PTW_APPROVE);
-            await _utilsRepo.SendNotification(Constant.PTW, Constant.PTW_APPROVE, request.id);
-            return _Employee;
+            string updateQry = $"update permits set reccomendationsByApprover = '{ request.commnet }', approvedStatus = { (int)CMMS.CMMS_Status.PTW_APPROVE }, approvedDate = '{ UtilsRepository.GetUTCTime() }', approvedById = { request.employee_id }  where id = { request.id }";
+            int retValue = await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+
+            CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
+
+            if (retValue > 0)
+            {
+                retCode = CMMS.RETRUNSTATUS.SUCCESS;
+            }
+            string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as startDate, ptw.endDate as tillDate, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, facilities.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.description as description,CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, CONCAT(user3.firstName,' ',user3.lastName) as completedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, ptw.cancelRequestDate as cancel_at "+
+                  "FROM permits as ptw " +
+                  "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
+                  "JOIN facilities as facilities  ON ptw.blockId = facilities.id and facilities.isBlock = 1 " +
+                  "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
+                  "LEFT JOIN users as user2 ON user2.id = ptw.approvedById " +
+                  "LEFT JOIN users as user3 ON user3.id = ptw.completedById " +
+                  "LEFT JOIN users as user4 ON user4.id = ptw.cancelRequestById "+
+                    $"where ptw.id = { request.id }";
+
+            List<CMPermitDetail> permitDetails = await Context.GetData<CMPermitDetail>(myQuery).ConfigureAwait(false);
+
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, permitDetails[0].insertedId, 0, 0, request.commnet, CMMS.CMMS_Status.PTW_APPROVE);
+
+            CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_APPROVE, permitDetails[0]);
+            CMDefaultResponse response = new CMDefaultResponse(permitDetails[0].insertedId, CMMS.RETRUNSTATUS.SUCCESS, "");
+            return response;
         }
 
-        internal async Task<List<CMDefaultResp>> PermitClose(CMApproval request)
+        internal async Task<CMDefaultResponse> PermitClose(CMApproval request)
         {
-            string updateQry = $"update permits set completedDate = '{ UtilsRepository.GetUTCTime() }', completedStatus = { Constant.PTW_CLOSED }, completedById = { request.employee_id }  where id = { request.id }";
-            List<CMDefaultResp> _Employee = await Context.GetData<CMDefaultResp>(updateQry).ConfigureAwait(false);
+            string updateQry = $"update permits set completedDate = '{ UtilsRepository.GetUTCTime() }', completedStatus = { (int)CMMS.CMMS_Status.PTW_CLOSED }, completedById = { request.employee_id }  where id = { request.id }";
+            int retValue = await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
 
-            await _utilsRepo.AddHistoryLog(Constant.PTW, request.id, 0, 0, "Permit Close", Constant.PTW_CLOSED);
-            await _utilsRepo.SendNotification(Constant.PTW, Constant.PTW_CLOSED, request.id);
+            CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
 
-            return _Employee;
+            if (retValue > 0)
+            {
+                retCode = CMMS.RETRUNSTATUS.SUCCESS;
+            }
+            string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as startDate, ptw.endDate as tillDate, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, facilities.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.description as description,CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, CONCAT(user3.firstName,' ',user3.lastName) as completedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, ptw.cancelRequestDate as cancel_at "+
+                  "FROM permits as ptw " +
+                  "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
+                  "JOIN facilities as facilities  ON ptw.blockId = facilities.id and facilities.isBlock = 1 " +
+                  "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
+                  "LEFT JOIN users as user2 ON user2.id = ptw.approvedById " +
+                  "LEFT JOIN users as user3 ON user3.id = ptw.completedById " +
+                  "LEFT JOIN users as user4 ON user4.id = ptw.cancelRequestById "+
+                  $"where ptw.id = { request.id }";
+
+            List<CMPermitDetail> permitDetails = await Context.GetData<CMPermitDetail>(myQuery).ConfigureAwait(false);
+
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, permitDetails[0].insertedId, 0, 0, "Permit Close", CMMS.CMMS_Status.PTW_CLOSED);
+
+            CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_CLOSED, permitDetails[0]);
+            CMDefaultResponse response = new CMDefaultResponse(permitDetails[0].insertedId, CMMS.RETRUNSTATUS.SUCCESS, "");
+            return response;
         }
 
-        internal async Task<List<CMDefaultResp>> PermitReject(CMApproval request)
+        internal async Task<CMDefaultResponse> PermitReject(CMApproval request)
         {
-            /*
-             * Pending
-            */
-            string updateQry = $"update permits set issuedReccomendations = '{ request.commnet }', issuedStatus = { Constant.PTW_REJECTED_BY_ISSUER }, issuedDate ='{ UtilsRepository.GetUTCTime() }', issuedById = { request.employee_id }  where id = { request.id }";
-            List<CMDefaultResp> _Employee = await Context.GetData<CMDefaultResp>(updateQry).ConfigureAwait(false);
-       
-            await _utilsRepo.AddHistoryLog(Constant.PTW, request.id, 0, 0, request.commnet, Constant.PTW_REJECTED_BY_ISSUER);
-            await _utilsRepo.SendNotification(Constant.PTW, Constant.PTW_REJECTED_BY_ISSUER, request.id);
+            string updateQry = $"update permits set issuedReccomendations = '{ request.commnet }', issuedStatus = { (int)CMMS.CMMS_Status.PTW_REJECTED_BY_ISSUER }, issuedDate ='{ UtilsRepository.GetUTCTime() }', issuedById = { request.employee_id }  where id = { request.id }";
+            int retValue = await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
 
-            return _Employee;
+            CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
+
+            if (retValue > 0)
+            {
+                retCode = CMMS.RETRUNSTATUS.SUCCESS;
+            }
+            string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as startDate, ptw.endDate as tillDate, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, facilities.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.description as description,CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, CONCAT(user3.firstName,' ',user3.lastName) as completedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, ptw.cancelRequestDate as cancel_at " +
+                 "FROM permits as ptw " +
+                 "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
+                 "JOIN facilities as facilities  ON ptw.blockId = facilities.id and facilities.isBlock = 1 " +
+                 "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
+                 "LEFT JOIN users as user2 ON user2.id = ptw.approvedById " +
+                 "LEFT JOIN users as user3 ON user3.id = ptw.completedById " +
+                 "LEFT JOIN users as user4 ON user4.id = ptw.cancelRequestById "+
+                   $"where ptw.id = { request.id }";
+
+            List<CMPermitDetail> permitDetails = await Context.GetData<CMPermitDetail>(myQuery).ConfigureAwait(false);
+
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, permitDetails[0].insertedId, 0, 0, request.commnet, CMMS.CMMS_Status.PTW_CANCELLED_BY_ISSUER);
+
+            CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_CANCELLED_BY_ISSUER, permitDetails[0]);
+            CMDefaultResponse response = new CMDefaultResponse(permitDetails[0].insertedId, CMMS.RETRUNSTATUS.SUCCESS, "");
+            return response;
         }
 
-        internal async Task<List<CMDefaultResp>> PermitCancel(CMApproval request)
+        internal async Task<CMDefaultResponse> PermitCancel(CMApproval request)
         {
             /*
              * Update Permit Table 	cancelReccomendations, cancelRequestDate, cancelRequestStatus
              * Return Message Cancelled successfully
             */
-            string updateQry = $"update permits set cancelReccomendations = '{ request.commnet }', cancelRequestStatus = { Constant.PTW_CANCELLED_BY_ISSUER }, cancelRequestDate = '{ UtilsRepository.GetUTCTime() }', cancelRequestById = { request.employee_id }  where id = { request.id }";
-            List<CMDefaultResp> _Employee = await Context.GetData<CMDefaultResp>(updateQry).ConfigureAwait(false);
-                 
-            await _utilsRepo.AddHistoryLog(Constant.PTW, request.id, 0, 0, request.commnet, Constant.PTW_CANCELLED_BY_ISSUER);
-            await _utilsRepo.SendNotification(Constant.PTW, Constant.PTW_CANCELLED_BY_ISSUER, request.id);
+            string updateQry = $"update permits set cancelReccomendations = '{ request.commnet }', cancelRequestStatus = { (int)CMMS.CMMS_Status.PTW_CANCELLED_BY_ISSUER }, cancelRequestDate = '{ UtilsRepository.GetUTCTime() }', cancelRequestById = { request.employee_id }  where id = { request.id }";
+            int retValue = await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
 
-            return _Employee;
+            CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
+
+            if (retValue > 0)
+            {
+                retCode = CMMS.RETRUNSTATUS.SUCCESS;
+            }
+            string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as startDate, ptw.endDate as tillDate, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, facilities.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.description as description,CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, CONCAT(user3.firstName,' ',user3.lastName) as completedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, ptw.cancelRequestDate as cancel_at " +
+                "FROM permits as ptw " +
+                "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
+                "JOIN facilities as facilities  ON ptw.blockId = facilities.id and facilities.isBlock = 1 " +
+                "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
+                "LEFT JOIN users as user2 ON user2.id = ptw.approvedById " +
+                "LEFT JOIN users as user3 ON user3.id = ptw.completedById " +
+                "LEFT JOIN users as user4 ON user4.id = ptw.cancelRequestById "+
+                 $"where ptw.id = { request.id }";
+
+            List<CMPermitDetail> permitDetails = await Context.GetData<CMPermitDetail>(myQuery).ConfigureAwait(false);
+
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, permitDetails[0].insertedId, 0, 0, request.commnet, CMMS.CMMS_Status.PTW_CANCELLED_BY_ISSUER);
+
+            CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_CANCELLED_BY_ISSUER, permitDetails[0]);
+            CMDefaultResponse response = new CMDefaultResponse(permitDetails[0].insertedId, CMMS.RETRUNSTATUS.SUCCESS, "");
+            return response;
         }
 
         internal async Task<int> UpdatePermit(CMUpdatePermit request)
@@ -345,6 +536,19 @@ namespace CMMSAPIs.Repositories.Permits
             string updatePermitQry = $"update permits set facilityId = { request.facility_id },blockId = { request.blockId }, startDate = '{ UtilsRepository.GetUTCTime() }', endDate = '{ UtilsRepository.GetUTCTime() }', description = '{ request.description }', jobId = { request.job_type_id }, LOTOId = { request.lotoId }, typeId = { request.typeId }, TBTId = { request.sop_type_id }, issuedById = { request.issuer_id }, approvedById = { request.approver_id }, acceptedById = { request.user_id } where id = { request.permit_id };";
             await Context.ExecuteNonQry<int>(updatePermitQry).ConfigureAwait(false);
             int updatePrimaryKey = request.permit_id;
+
+            string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as startDate, ptw.endDate as tillDate, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, facilities.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.description as description,CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, CONCAT(user3.firstName,' ',user3.lastName) as completedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, ptw.cancelRequestDate as cancel_at "+
+             "FROM permits as ptw " +
+             "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
+             "JOIN facilities as facilities  ON ptw.blockId = facilities.id and facilities.isBlock = 1 " +
+              "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
+              "LEFT JOIN users as user2 ON user2.id = ptw.approvedById " +
+              "LEFT JOIN users as user3 ON user3.id = ptw.completedById " +
+              "LEFT JOIN users as user4 ON user4.id = ptw.cancelRequestById " +
+            $"where ptw.id = { request.permit_id }";
+
+            List<CMPermitDetail> permitDetails = await Context.GetData<CMPermitDetail>(myQuery).ConfigureAwait(false);
+            int insertedId = permitDetails[0].insertedId;
 
             string DeleteQry = $"delete from permitblocks where ptw_id = { request.permit_id };";
             await Context.ExecuteNonQry<int>(DeleteQry).ConfigureAwait(false);
@@ -397,10 +601,10 @@ namespace CMMSAPIs.Repositories.Permits
                 string qryPermitSaftyQuestion = $"insert into permitsafetyquestions ( permitId , safetyMeasureId, safetyMeasureValue) value ({ updatePrimaryKey }, { data.safetyMeasureId }, '{ data.safetyMeasureValue }')";
                 await Context.ExecuteNonQry<int>(qryPermitSaftyQuestion).ConfigureAwait(false);
             }
-            
-            await _utilsRepo.AddHistoryLog(Constant.PTW, updatePrimaryKey, 0, 0, "Permit Updated", Constant.PTW_EDIT);
-            await _utilsRepo.SendNotification(Constant.PTW, Constant.PTW_EDIT, updatePrimaryKey);
+        
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, updatePrimaryKey, 0, 0, "Permit Updated", CMMS.CMMS_Status.PTW_EDIT);
 
+            CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_EDIT, permitDetails[0]);
             return updatePrimaryKey;
 
         }

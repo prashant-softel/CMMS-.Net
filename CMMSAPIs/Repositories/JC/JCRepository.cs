@@ -6,6 +6,8 @@ using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Models.JC;
 using CMMSAPIs.Repositories.Utils;
+using CMMSAPIs.Models.Notifications;
+
 
 namespace CMMSAPIs.Repositories.JC
 {
@@ -26,10 +28,8 @@ namespace CMMSAPIs.Repositories.JC
             string myQuery1 = $"select jc.id as jobCardId, jc.JC_Date_Start as job_card_date, jc.JC_Date_Stop as end_time, job.id as jobid, job.title as description, CONCAT(user.firstName, user.lastName) as job_assinged_to, ptw.id as permit_id, ptw.Permitnumber as permit_no,JC_Status as current_status  from jobcards as jc JOIN jobs as job ON JC.jobid = job.id JOIN permits as ptw ON JC.PTW_id = PTW.ID LEFT JOIN users as user ON user.id = job.assignedId WHERE job.facilityId = { facility_id }";
             List<CMJCList> _ViewJobCardList = await Context.GetData<CMJCList>(myQuery1).ConfigureAwait(false);
 
-            int job_id = 2533;
-
             //job equipment category
-            string myQuery2 = $"SELECT asset_cat.id as equipmentCat_id, asset_cat.name as equipmentCat_name  FROM assetcategories as asset_cat JOIN jobmappingassets as mapAssets ON mapAssets.categoryId = asset_cat.id JOIN jobs as job ON mapAssets.jobId = job.id WHERE job.id = {job_id} and job.facilityId = { facility_id }";
+            string myQuery2 = $"SELECT asset_cat.id as equipmentCat_id, asset_cat.name as equipmentCat_name  FROM assetcategories as asset_cat JOIN jobmappingassets as mapAssets ON mapAssets.categoryId = asset_cat.id JOIN jobs as job ON mapAssets.jobId = job.id WHERE job.id = {_ViewJobCardList[0].jobid } and job.facilityId = { facility_id }";
             List<equipmentCatList> _equipmentCatList = await Context.GetData<equipmentCatList>(myQuery1).ConfigureAwait(false);
 
             _ViewJobCardList[0].LstequipmentCatList = _equipmentCatList;
@@ -45,7 +45,8 @@ namespace CMMSAPIs.Repositories.JC
             */
 
             //plant details 
-            string myQuery1 = $"SELECT facilities.name as plant_name, asset_cat.name as asset_category_name FROM jobs as job JOIN  jobmappingassets as mapAssets ON mapAssets.jobId = job.id join assetcategories as asset_cat ON mapAssets.categoryId = asset_cat.id   JOIN facilities as facilities ON job.blockId = facilities.id LEFT JOIN jobcards as jc on jc.jobId = job.id  where jc.id = { jc_id }";
+            string myQuery1 = $"SELECT jc.id as id , jc.PTW_id as ptwId, job.id as jobid, facilities.name as plant_name, asset_cat.name as asset_category_name, CONCAT(user.firstName + ' ' + user.lastName) as JC_Closed_by_Name, CONCAT(user1.firstName + ' ' + user1.lastName) as JC_Rejected_By_Name, jc.JC_Approved_By_Name as  JC_Approved_By_Name FROM jobs as job JOIN  jobmappingassets as mapAssets ON mapAssets.jobId = job.id join assetcategories as asset_cat ON mapAssets.categoryId = asset_cat.id JOIN facilities as facilities ON job.blockId = facilities.id LEFT JOIN jobcards as jc on jc.jobId = job.id LEFT JOIN users as user ON user.id = jc.JC_Update_by LEFT JOIN  users as user1 ON user1.id = jc.JC_Rejected_By_id where jc.id = { jc_id }";
+
             List<CMJCDetail> _plantDetails = await Context.GetData<CMJCDetail>(myQuery1).ConfigureAwait(false);
 
             //job details
@@ -113,11 +114,23 @@ namespace CMMSAPIs.Repositories.JC
 
                 jc_id = await Context.ExecuteNonQry<int>(qryJCBasic).ConfigureAwait(false);
             }
-            
-            await _utilsRepo.AddHistoryLog(Constant.JOBCARD, jc_id, 0, 0, "Job Card Start", Constant.JC_OPENED);
-            await _utilsRepo.SendNotification(Constant.JOBCARD, Constant.JC_OPENED, jc_id);
+            CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
 
-            CMDefaultResponse response = new CMDefaultResponse(jc_id, 200, "Job Card Started");
+            if (jc_id > 0)
+            {
+                retCode = CMMS.RETRUNSTATUS.SUCCESS;
+            }
+
+            string myQuery1 = $"SELECT  jc.id as id , jc.PTW_id as ptwId, job.id as jobid, facilities.name as plant_name, asset_cat.name as asset_category_name, CONCAT(user.firstName + ' ' + user.lastName) as JC_Closed_by_Name, CONCAT(user1.firstName + ' ' + user1.lastName) as JC_Rejected_By_Name, jc.JC_Approved_By_Name as  JC_Approved_By_Name FROM jobs as job JOIN  jobmappingassets as mapAssets ON mapAssets.jobId = job.id join assetcategories as asset_cat ON mapAssets.categoryId = asset_cat.id JOIN facilities as facilities ON job.blockId = facilities.id LEFT JOIN jobcards as jc on jc.jobId = job.id LEFT JOIN users as user ON user.id = jc.JC_Update_by LEFT JOIN  users as user1 ON user1.id = jc.JC_Rejected_By_id order by jc.id desc limit 1";
+
+            List<CMJCDetail> _jcDetails = await Context.GetData<CMJCDetail>(myQuery1).ConfigureAwait(false);
+
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOBCARD, jc_id, 0, 0, "Job Card Opened", CMMS.CMMS_Status.JC_OPENED);
+
+            CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOBCARD, CMMS.CMMS_Status.JC_OPENED, _jcDetails[0]);
+
+            CMDefaultResponse response = new CMDefaultResponse(job_id, CMMS.RETRUNSTATUS.SUCCESS, "Job Card Start");
+
             return response;
         }
 
@@ -159,10 +172,17 @@ namespace CMMSAPIs.Repositories.JC
 
             // JCFILES PENDINGidand history 
 
-            await _utilsRepo.AddHistoryLog(Constant.JOBCARD, request.id, 0, 0, request.comment, request.status);
-            await _utilsRepo.SendNotification(Constant.JOBCARD, Constant.JC_OPENED, request.id);
+            string myQuery1 = $"SELECT id as currentEmpID, CONCAT(firstName + ' ' + lastName) as UpdatedByName from users where id = '{ UtilsRepository.GetUTCTime() }'";
 
-            CMDefaultResponse response = new CMDefaultResponse(request.id, 200, request.comment);
+            List<CMJCDetail> _jcDetails = await Context.GetData<CMJCDetail>(myQuery1).ConfigureAwait(false);
+
+            //who updated it means = current emp id and name
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOBCARD, _jcDetails[0].currentEmpID, 0, 0, "Job Card Updated", CMMS.CMMS_Status.JC_UPDADATED);
+
+            CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOBCARD, CMMS.CMMS_Status.JC_UPDADATED, _jcDetails[0]);
+
+            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Job Card Updated");
+
             return response;
         }
 
@@ -174,8 +194,8 @@ namespace CMMSAPIs.Repositories.JC
              * return boolean true/false
              *                 
             /*Your code goes here*/
-            
-            string queryCloseJc = $"update jobcards set JC_Update_by={request.employee_id}, JC_Update_date ='{UtilsRepository.GetUTCTime()}', JC_Status={Constant.JC_CLOSED} where id ={request.id};";
+     
+            string queryCloseJc = $"update jobcards set JC_Update_by={request.employee_id}, JC_Update_date ='{UtilsRepository.GetUTCTime()}', JC_Status={(int)CMMS.CMMS_Status.JC_CLOSED} where id ={request.id};";
             await Context.ExecuteNonQry<int>(queryCloseJc).ConfigureAwait(false);
 
             string queryIsolated = $"update permitisolatedassetcategories set normalisedStatus={request.normalisedStatus}, normalisedDate ='{UtilsRepository.GetUTCTime()}' where id ={request.isolationId};";
@@ -183,11 +203,18 @@ namespace CMMSAPIs.Repositories.JC
 
             string queryLoto = $"update permitlotoassets set lotoRemovedStatus={request.lotoStatus}, lotoRemovedDate ='{UtilsRepository.GetUTCTime()}' where id ={request.lotoId};";
             await Context.ExecuteNonQry<int>(queryLoto).ConfigureAwait(false);
-      
-            await _utilsRepo.AddHistoryLog(Constant.JOBCARD, request.id, 0, 0, request.comment, Constant.JC_CLOSED);
-            await _utilsRepo.SendNotification(Constant.JOBCARD, Constant.JC_OPENED, request.id);
 
-            CMDefaultResponse response = new CMDefaultResponse(request.id, 200, request.comment);
+            string myQuery1 = $"SELECT  jc.id as id , jc.PTW_id as ptwId, job.id as jobid, facilities.name as plant_name, asset_cat.name as asset_category_name, CONCAT(user.firstName + ' ' + user.lastName) as JC_Closed_by_Name, CONCAT(user1.firstName + ' ' + user1.lastName) as JC_Rejected_By_Name, jc.JC_Approved_By_Name as  JC_Approved_By_Name FROM jobs as job JOIN  jobmappingassets as mapAssets ON mapAssets.jobId = job.id join assetcategories as asset_cat ON mapAssets.categoryId = asset_cat.id JOIN facilities as facilities ON job.blockId = facilities.id LEFT JOIN jobcards as jc on jc.jobId = job.id LEFT JOIN users as user ON user.id = jc.JC_Update_by LEFT JOIN  users as user1 ON user1.id = jc.JC_Rejected_By_id where jc.id = {request.id}";
+
+            List<CMJCDetail> _jcDetails = await Context.GetData<CMJCDetail>(myQuery1).ConfigureAwait(false);
+
+
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOBCARD, request.id, 0, 0, "Job Card Closed", CMMS.CMMS_Status.JC_CLOSED);
+
+            CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOBCARD, CMMS.CMMS_Status.JC_CLOSED, _jcDetails[0]);
+
+            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Job Card Closed");
+
             return response;
         }
 
@@ -199,14 +226,21 @@ namespace CMMSAPIs.Repositories.JC
              * return CMDefaultResponse                       	
             */
             
-            string approveQuery = $"Update jobcards set JC_Status = {Constant.JC_APPROVED} where id = {request.id} ";
+            string approveQuery = $"Update jobcards set JC_Status = {CMMS.CMMS_Status.JC_APPROVED} where id = {request.id} ";
             await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
-            CMLog _log = new CMLog();
+            // eng = user id = job created id , job appr
 
-            await _utilsRepo.AddHistoryLog(Constant.JOBCARD, request.id, 0, 0, request.comment, Constant.JC_APPROVED);
-            await _utilsRepo.SendNotification(Constant.JOBCARD, Constant.JC_APPROVED, request.id);
+            string myQuery1 = $"SELECT  jc.id as id , jc.PTW_id as ptwId, job.id as jobid, facilities.name as plant_name, asset_cat.name as asset_category_name, CONCAT(user.firstName + ' ' + user.lastName) as JC_Closed_by_Name, CONCAT(user1.firstName + ' ' + user1.lastName) as JC_Rejected_By_Name, jc.JC_Approved_By_Name as  JC_Approved_By_Name FROM jobs as job JOIN  jobmappingassets as mapAssets ON mapAssets.jobId = job.id join assetcategories as asset_cat ON mapAssets.categoryId = asset_cat.id JOIN facilities as facilities ON job.blockId = facilities.id LEFT JOIN jobcards as jc on jc.jobId = job.id LEFT JOIN users as user ON user.id = jc.JC_Update_by LEFT JOIN  users as user1 ON user1.id = jc.JC_Rejected_By_id where jc.id = {request.id}";
 
-            CMDefaultResponse response = new CMDefaultResponse(request.id, 200, request.comment);
+            List<CMJCDetail> _jcDetails = await Context.GetData<CMJCDetail>(myQuery1).ConfigureAwait(false);
+
+
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOBCARD, request.id, 0, 0, "Job Card Closed", CMMS.CMMS_Status.JC_APPROVED);
+
+            CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOBCARD, CMMS.CMMS_Status.JC_APPROVED, _jcDetails[0]);
+
+            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Job Card Approved");
+
             return response;
         }
 
@@ -219,13 +253,19 @@ namespace CMMSAPIs.Repositories.JC
              * return boolean true/false
              */
 
-            string approveQuery = $"Update jobcards set JC_Rejected_By_id={request.employee_id}, JC_Rejected_Reason='{request.commnet}', JC_Status = {Constant.JC_REJECTED},JC_Rejected_TimeStamp ='{UtilsRepository.GetUTCTime()}' where id = {request.id} ";
+            string approveQuery = $"Update jobcards set JC_Rejected_By_id={request.employee_id}, JC_Rejected_Reason='{request.commnet}', JC_Status = {CMMS.CMMS_Status.JC_REJECTED5 },JC_Rejected_TimeStamp ='{UtilsRepository.GetUTCTime()}' where id = {request.id} ";
             await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
 
-            await _utilsRepo.AddHistoryLog(Constant.JOBCARD, request.id, 0, 0, request.commnet, Constant.JC_REJECTED);
-            await _utilsRepo.SendNotification(Constant.JOBCARD, Constant.JC_REJECTED, request.id);
+            string myQuery1 = $"SELECT  jc.id as id , jc.PTW_id as ptwId, job.id as jobid, facilities.name as plant_name, asset_cat.name as asset_category_name, CONCAT(user.firstName + ' ' + user.lastName) as JC_Closed_by_Name, CONCAT(user1.firstName + ' ' + user1.lastName) as JC_Rejected_By_Name, jc.JC_Approved_By_Name as  JC_Approved_By_Name FROM jobs as job JOIN  jobmappingassets as mapAssets ON mapAssets.jobId = job.id join assetcategories as asset_cat ON mapAssets.categoryId = asset_cat.id JOIN facilities as facilities ON job.blockId = facilities.id LEFT JOIN jobcards as jc on jc.jobId = job.id LEFT JOIN users as user ON user.id = jc.JC_Update_by LEFT JOIN  users as user1 ON user1.id = jc.JC_Rejected_By_id where jc.id = {request.id}";
 
-            CMDefaultResponse response = new CMDefaultResponse(request.id, 200, request.commnet);
+            List<CMJCDetail> _jcDetails = await Context.GetData<CMJCDetail>(myQuery1).ConfigureAwait(false);
+
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOBCARD, request.id, 0, 0, request.commnet, CMMS.CMMS_Status.JC_REJECTED5);
+
+            CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOBCARD, CMMS.CMMS_Status.JC_REJECTED5, _jcDetails[0]);
+
+            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, request.commnet);
+
             return response;
 
         }

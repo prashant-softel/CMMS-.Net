@@ -8,9 +8,16 @@ namespace CMMSAPIs.Models.JC
     {
         public string plant_name { get; set; }
         public string asset_category_name { get; set; }
+        public string JC_Approved_By_Name { get; set; }
+        public string UpdatedByName { get; set; }
         public int id { get; set; }
-        public string current_status { get; set; }    
-        public string block { get; set; }      
+        public int currentEmpID { get; set; }
+        public string current_status { get; set; }
+        public string JC_Closed_by_Name { get; set; }
+        public string JC_Rejected_By_Name { get; set; }
+        public string description { get; set; }
+        public int jobid { get; set; }
+        public int ptwId { get; set; }          
 
         public List<CMJCJobDetail> LstCMJCJobDetailList { get; set; }
         public List<CMJCPermitDetail> LstPermitDetailList { get; set; }

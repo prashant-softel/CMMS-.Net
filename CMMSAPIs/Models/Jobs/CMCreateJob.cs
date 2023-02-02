@@ -9,6 +9,7 @@ namespace CMMSAPIs.Models.Jobs
 {
     public class CMCreateJob
     {
+        public int insertedId { get; set; }
         public int id { get; set; }
         public string title { get; set; }
         public string description { get; set; }

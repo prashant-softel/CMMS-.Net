@@ -45,7 +45,7 @@ namespace CMMSAPIs.Repositories.FileUpload
                     }
                 }
                
-                CMDefaultResponse response = new CMDefaultResponse(0, 201, "");
+                CMDefaultResponse response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.SUCCESS, "");
                 return response;
             }
             catch (Exception ex) 

@@ -105,8 +105,13 @@ namespace CMMSAPIs.Repositories.Inventory
                 qry += "('" + unit.id + "','" + unit.name + "','" + unit.description + "','" + unit.parent_id + "','" + unit.acCapacity + "','" + unit.moduleQuantity + "','" + unit.dcCapacity + "','" + unit.category_Id + "','" + unit.type_Id + "','" + unit.status_Id + "','" + unit.facility_Id + "','" + unit.block_Id + "','" + unit.customer_Id + "','" + unit.owner_Id + "','" + unit.operator_Id + "','" + unit.manufacturer_Id + "','" + unit.supplier_Id + unit.serialNumber + "','" + unit.warranty_Id + "','" + unit.createdAt + "','" + unit.createdBy + "','" + unit.updatedAt + "','" + unit.updatedBy + "','" + unit.status + unit.photoId + "','" + unit.cost + "','" + unit.currency + "','" + unit.stockCount + "','" + unit.specialTool + "','" + unit.specialToolEmpId + "','" + unit.firstDueDate + "','" + unit.frequency + "','" + unit.descriptionMaintainence + "','" + unit.calibrationFrequency + "','" + unit.calibrationReminder + "','"+ unit.retirementStatus+ "','"+ unit.multiplier + "'),";
             }
             int retID = await Context.ExecuteNonQry<int>(qry.Substring(0, (qry.Length - 1)) + ";").ConfigureAwait(false);
+            CMMS.RETRUNSTATUS retValue = CMMS.RETRUNSTATUS.FAILURE;
+            if(retID > 0)
+            {
+                retValue = CMMS.RETRUNSTATUS.SUCCESS;
+            }
 
-            return new CMDefaultResponse(retID, 1, "");
+            return new CMDefaultResponse(retID, retValue, "");
 
             }
 

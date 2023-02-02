@@ -88,7 +88,7 @@ namespace CMMSAPIs.Repositories.Users
                     //await SetUsersAccess(request.role_id, old_access_list);
                 }
 
-                CMDefaultResponse response = new CMDefaultResponse(request.role_id, 200, "Updated Role Access Successfully");
+                CMDefaultResponse response = new CMDefaultResponse(request.role_id, CMMS.RETRUNSTATUS.SUCCESS, "Updated Role Access Successfully");
                 return response;
             }
             catch (Exception)
@@ -149,7 +149,7 @@ namespace CMMSAPIs.Repositories.Users
                     await _utilsRepo.AddLog(_log);
                 }
 
-                CMDefaultResponse response = new CMDefaultResponse(role_id, 200, "Updated Role Access Successfully");
+                CMDefaultResponse response = new CMDefaultResponse(role_id, CMMS.RETRUNSTATUS.SUCCESS, "Updated Role Access Successfully");
                 return response;
             }
             catch (Exception)

@@ -71,8 +71,9 @@ namespace CMMSAPIs.Repositories.Utils
             return null;
         }
 
-        internal async Task<List<CMDefaultResponse>> AddHistoryLog(int module_type, int module_ref_id, int secondary_module_type, int secondary_module_ref_id, string comment, int status, string current_latitude="", string current_longitude="")
+        internal async Task<List<CMDefaultResponse>> AddHistoryLog(CMMS.CMMS_Modules module_type, int module_ref_id, CMMS.CMMS_Modules secondary_module_type, int secondary_module_ref_id, string comment, CMMS.CMMS_Status status, string current_latitude="", string current_longitude="")
         {
+
             string qry = "INSERT INTO History" +
                             "(" +
                                 "moduleType, moduleRefId, secondaryModuleRefType, secondaryModuleRefId, comment, " +
@@ -80,8 +81,8 @@ namespace CMMSAPIs.Repositories.Utils
                             ")" +
                         "VALUES" +
                             "(" +
-                                $"{module_type}, {module_ref_id}, {secondary_module_type}, {secondary_module_ref_id}," +
-                                $"'{comment}', {status}, '{current_latitude}', '{current_longitude}', {GetUserID()}, '{GetUTCTime()}'" +
+                                $"{(int)module_type}, {module_ref_id}, {(int)secondary_module_type}, {secondary_module_ref_id}," +
+                                $"'{comment}', {(int)status}, '{current_latitude}', '{current_longitude}', {GetUserID()}, '{GetUTCTime()}'" +
                             ")";
 
             await Context.GetData<List<int>>(qry).ConfigureAwait(false);
