@@ -26,6 +26,7 @@ namespace CMMSAPIs.Models.Permits
         public DateTime approve_at { get; set; }
         public string completedByName { get; set; }
         public DateTime close_at { get; set; }
+        public string closedByName { get; set; }
         public string cancelRequestByName { get; set; }
         public DateTime cancel_at { get; set; }
         public List<CMSaftyQuestion> safety_question_list { get; set; }

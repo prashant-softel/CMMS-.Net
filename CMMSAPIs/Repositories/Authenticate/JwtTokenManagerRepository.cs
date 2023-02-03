@@ -30,8 +30,8 @@ namespace CMMSAPIs.Repositories.Authenticate
             {
                 return null;
             }
-            var user_id = _List[0].login_id;
-            var key = _configuration.GetValue<string>("JwtConfig:Key");
+            var user_id  = _List[0].login_id;
+            var key      = _configuration.GetValue<string>("JwtConfig:Key");
             var keyBytes = Encoding.ASCII.GetBytes(key);
 
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -41,7 +41,7 @@ namespace CMMSAPIs.Repositories.Authenticate
                 Subject = new ClaimsIdentity(new Claim[] {
                         new Claim(ClaimTypes.NameIdentifier, user_id)
                     }),
-                Expires = DateTime.UtcNow.AddMinutes(Constant.TOKEN_EXPIRATION_TIME),
+                Expires = DateTime.UtcNow.AddMinutes(CMMS.TOKEN_EXPIRATION_TIME),
                 SigningCredentials = new SigningCredentials(
                 new SymmetricSecurityKey(keyBytes), SecurityAlgorithms.HmacSha256Signature)
             };

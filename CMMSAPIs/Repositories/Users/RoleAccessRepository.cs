@@ -71,10 +71,10 @@ namespace CMMSAPIs.Repositories.Users
 
                         // Add previous setting to log table
                         CMLog _log = new CMLog();
-                        _log.module_type = Constant.ROLE_DEFAULT_ACCESS_MODULE;
+                        _log.module_type = CMMS.CMMS_Modules.ROLE_DEFAULT_ACCESS_MODULE;
                         _log.module_ref_id = request.role_id;
                         _log.comment = JsonSerializer.Serialize(old_access_list);
-                        _log.status = Constant.UPDATED;
+                        _log.status = CMMS.CMMS_Status.UPDATED;
                         await _utilsRepo.AddLog(_log);                        
                     }
                 }
@@ -142,10 +142,10 @@ namespace CMMSAPIs.Repositories.Users
 
                     // Add previous setting to log table
                     CMLog _log = new CMLog();
-                    _log.module_type = Constant.ROLE_DEFAULT_NOTIFICATIONS;
+                    _log.module_type = CMMS.CMMS_Modules.ROLE_DEFAULT_NOTIFICATIONS;
                     _log.module_ref_id = role_id;
                     _log.comment = JsonSerializer.Serialize(old_access_list);
-                    _log.status = Constant.UPDATED;
+                    _log.status = CMMS.CMMS_Status.UPDATED;
                     await _utilsRepo.AddLog(_log);
                 }
 

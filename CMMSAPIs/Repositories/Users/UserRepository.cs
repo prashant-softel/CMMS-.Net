@@ -65,10 +65,10 @@ namespace CMMSAPIs.Repositories.Users
                     {
                         // Add previous setting to log table
                         CMLog _log = new CMLog();
-                        _log.module_type = Constant.USER;
+                        _log.module_type = CMMS.CMMS_Modules.USER;
                         _log.module_ref_id = user_id;
                         _log.comment = JsonSerializer.Serialize(old_access_list);
-                        _log.status = Constant.UPDATED;
+                        _log.status = CMMS.CMMS_Status.UPDATED;
                         await repos.AddLog(_log);
                     }
                 }
@@ -127,10 +127,10 @@ namespace CMMSAPIs.Repositories.Users
                     {
                         // Add previous setting to log table
                         CMLog _log = new CMLog();
-                        _log.module_type = Constant.USER_NOTIFICATIONS;
+                        _log.module_type = CMMS.CMMS_Modules.USER_NOTIFICATIONS;
                         _log.module_ref_id = user_id;
                         _log.comment = JsonSerializer.Serialize(old_access_list);
-                        _log.status = Constant.UPDATED;
+                        _log.status = CMMS.CMMS_Status.UPDATED;
                         await repos.AddLog(_log);
                     }
                     CMDefaultResponse response = new CMDefaultResponse(user_id, CMMS.RETRUNSTATUS.SUCCESS, "Updated User Notifications Successfully");

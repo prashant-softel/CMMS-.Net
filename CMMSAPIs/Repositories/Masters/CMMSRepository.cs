@@ -82,14 +82,14 @@ namespace CMMSAPIs.Repositories.Masters
 
         internal async Task<List<CMSupplier>> GetSupplierList()
         {
-            string myQuery = $"SELECT id,name FROM Business where status = 1 AND type = {Constant.SUPPLIER}";
+            string myQuery = $"SELECT id,name FROM Business where status = 1 AND type = {CMMS.CMMS_BusinessType.SUPPLIER}";
             List<CMSupplier> _Suppliers  = await Context.GetData<CMSupplier>(myQuery).ConfigureAwait(false);
             return _Suppliers;
         }
 
         internal async Task<List<CMFrequency>> GetFrequencyList()
         {
-            string myQuery = $"SELECT id,name, days FROM Frequency where status = 1 AND type = {Constant.SUPPLIER}";
+            string myQuery = $"SELECT id,name, days FROM Frequency where status = 1";
             List<CMFrequency> _FrequencyList = await Context.GetData<CMFrequency>(myQuery).ConfigureAwait(false);
             return _FrequencyList;
         }
