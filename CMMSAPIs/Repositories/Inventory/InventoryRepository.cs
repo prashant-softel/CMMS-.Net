@@ -125,7 +125,7 @@ namespace CMMSAPIs.Repositories.Inventory
                 }
                 else
                 {
-                    strRetMessage = "New asset <" + assetName + "> added";
+                    strRetMessage = "<" + count + "> new assets added";
                 }
             }
             else
