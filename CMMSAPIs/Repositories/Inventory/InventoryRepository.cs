@@ -334,27 +334,27 @@ namespace CMMSAPIs.Repositories.Inventory
             //WHERE t1.id = t2.id AND t2.id = t3.id;
         }
 
-        internal async Task<List<KeyValuePairs>> GetInventoryTypeList()
+        internal async Task<List<CMInventoryTypeList>> GetInventoryTypeList()
         {
             /*
              * Fetch data from assetType
             */
             /*Your code goes here*/
             // "SELECT * FROM assetTypes";
-            string myQuery = "SELECT * FROM assettypes";
-            List<KeyValuePairs> _InventoryTypeList = await Context.GetData<KeyValuePairs>(myQuery).ConfigureAwait(false);
+            string myQuery = "SELECT id, name, description, status FROM assettypes";
+            List<CMInventoryTypeList> _InventoryTypeList = await Context.GetData<CMInventoryTypeList>(myQuery).ConfigureAwait(false);
             return _InventoryTypeList;
         }
 
-        internal async Task<List<KeyValuePairs>> GetInventoryStatusList()
+        internal async Task<List<CMInventoryStatusList>> GetInventoryStatusList()
         {
             /*
              * Fetch data from assetStatus
             */
             /*Your code goes here*/
             // "SELECT * FROM assetStatus";
-            string myQuery = "SELECT id, name FROM assetstatus WHERE status = 1";
-            List<KeyValuePairs> _InventoryStatusList = await Context.GetData<KeyValuePairs>(myQuery).ConfigureAwait(false);
+            string myQuery = "SELECT id, name, description, status FROM assetstatus";
+            List<CMInventoryStatusList> _InventoryStatusList = await Context.GetData<CMInventoryStatusList>(myQuery).ConfigureAwait(false);
             return _InventoryStatusList;
 
         }

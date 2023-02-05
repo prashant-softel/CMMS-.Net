@@ -88,7 +88,7 @@ namespace CMMSAPIs.Repositories.Masters
         }
         internal async Task<List<CMBusiness>> GetBusinessList(CMMS.CMMS_BusinessType businessType)
         {
-            string myQuery = $"SELECT id, name, description FROM Business where status = 1 AND type = {businessType}";
+            string myQuery = $"SELECT id, name, email, contactPerson, contactNumber, address, city, state, country, zip, type, status, addedAt FROM Business where type = " + (int) businessType;
             List<CMBusiness> _Business = await Context.GetData<CMBusiness>(myQuery).ConfigureAwait(false);
             return _Business;
         }
