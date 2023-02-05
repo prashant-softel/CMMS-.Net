@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using CMMSAPIs.Repositories.Masters;
 using CMMSAPIs.Models.Masters;
+using CMMSAPIs.Models.Utils;
 
 namespace CMMSAPIs.BS.Masters
 {
@@ -19,6 +20,7 @@ namespace CMMSAPIs.BS.Masters
         Task<List<CMAsset>> GetAssetList(int facility_id);
         Task<List<CMEmployee>> GetEmployeeList(int facility_id);
         Task<List<CMBusinessType>> GetBusinessTypeList();
+        Task<CMDefaultResponse> AddBusiness(List<CMBusiness> request);
         Task<List<CMBusiness>> GetBusinessList(CMMS.CMMS_BusinessType businessType);
     }
     public class CMMSBS : ICMMSBS
@@ -176,6 +178,21 @@ namespace CMMSAPIs.BS.Masters
             }
         }
 
+        public async Task<CMDefaultResponse> AddBusiness(List<CMBusiness> request)
+        {
+            try
+            {
+                using (var repos = new CMMSRepository(getDB))
+                {
+                    return await repos.AddBusiness(request);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
         #endregion //helper functions
 
 

@@ -1,8 +1,10 @@
-﻿using CMMSAPIs.BS.Masters;
-using CMMSAPIs.Helper;
-using Microsoft.AspNetCore.Mvc;
-using System;
+﻿using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using CMMSAPIs.Models.Masters;
+using CMMSAPIs.BS.Masters;
+using CMMSAPIs.Helper;
 
 namespace CMMSAPIs.Controllers.Masters
 {
@@ -131,6 +133,20 @@ namespace CMMSAPIs.Controllers.Masters
             try
             {
                 var data = await _CMMSBS.GetBusinessList(businessType);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        [Route("AddBusiness")]
+        [HttpPost]
+        public async Task<IActionResult> AddBusiness(List<CMBusiness> request)
+        {
+            try
+            {
+                var data = await _CMMSBS.AddBusiness(request);
                 return Ok(data);
             }
             catch (Exception ex)

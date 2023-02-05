@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Data;
 using System.Threading.Tasks;
 using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Masters;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using CMMSAPIs.Models.Utils;
 
 namespace CMMSAPIs.Repositories.Masters
 {
@@ -86,9 +85,47 @@ namespace CMMSAPIs.Repositories.Masters
             List<CMBusinessType> _Business = await Context.GetData<CMBusinessType>(myQuery).ConfigureAwait(false);
             return _Business;
         }
+        internal async Task<CMDefaultResponse> AddBusiness(List<CMBusiness> request)
+        {
+            int count = 0;
+            int retID = 0;
+            string businessName = "";
+            CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.INVALID_ARG;
+            string strRetMessage = "";
+            int useId = 11;     //pending : get from session
+            string qry = "insert into business ( name, email, contactPerson, contactNumber, website, location, address, city, state, country, zip, type, status, addedBy) values ";
+            foreach (var unit in request)
+            {
+                count++;
+                businessName = unit.name;
+                qry += "('" + unit.name + "','" + unit.email + "','" + unit.contactPerson + "','" + unit.contactNumber+ "','" + unit.website + "','" + unit.location + "','" + unit.address + "','" + unit.city + "','" + unit.state + "','" + unit.country + "','" + unit.zip + "','" + unit.type + "','" + unit.status + "','" + useId + "'),";
+            }
+            if (count > 0)
+            {
+                qry = qry.Substring(0, (qry.Length - 1)) + ";" + "select LAST_INSERT_ID(); ";
+
+                //List<CMInventoryList> newInventory = await Context.GetData<CMInventoryList>(qry).ConfigureAwait(false);
+                DataTable dt = await Context.FetchData(qry).ConfigureAwait(false);
+                retID = Convert.ToInt32(dt.Rows[0][0]);
+                retCode = CMMS.RETRUNSTATUS.SUCCESS;
+                if (count == 1)
+                {
+                    strRetMessage = "New busineess <" + businessName + "> added";
+                }
+                else
+                {
+                    strRetMessage = "<" + count + "> new businesses added";
+                }
+            }
+            else
+            {
+                strRetMessage = "No busineess to add";
+            }
+            return new CMDefaultResponse(retID, retCode, strRetMessage);
+        }
         internal async Task<List<CMBusiness>> GetBusinessList(CMMS.CMMS_BusinessType businessType)
         {
-            string myQuery = $"SELECT id, name, email, contactPerson, contactNumber, address, city, state, country, zip, type, status, addedAt FROM Business where type = " + (int) businessType;
+            string myQuery = $"SELECT id, name, email, contactPerson, contactNumber, website, location, address, city, state, country, zip, type, status, addedAt FROM Business where type = " + (int)businessType;
             List<CMBusiness> _Business = await Context.GetData<CMBusiness>(myQuery).ConfigureAwait(false);
             return _Business;
         }
