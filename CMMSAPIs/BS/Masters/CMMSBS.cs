@@ -18,7 +18,8 @@ namespace CMMSAPIs.BS.Masters
         Task<List<CMAssetCategory>> GetAssetCategoryList();
         Task<List<CMAsset>> GetAssetList(int facility_id);
         Task<List<CMEmployee>> GetEmployeeList(int facility_id);
-        Task<List<CMSupplier>> GetSupplierList();
+        Task<List<CMBusinessType>> GetBusinessTypeList();
+        Task<List<CMBusiness>> GetBusinessList(CMMS.CMMS_BusinessType businessType);
     }
     public class CMMSBS : ICMMSBS
     {
@@ -143,13 +144,29 @@ namespace CMMSAPIs.BS.Masters
             }
         }
 
-        public async Task<List<CMSupplier>> GetSupplierList()
+        public async Task<List<CMBusinessType>> GetBusinessTypeList()
         {
             try
             {
                 using (var repos = new CMMSRepository(getDB))
                 {
-                    return await repos.GetSupplierList();
+                    return await repos.GetBusinessTypeList();
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<CMBusiness>> GetBusinessList(CMMS.CMMS_BusinessType  businessType)
+        {
+            try
+            {
+                using (var repos = new CMMSRepository(getDB))
+                {
+                    return await repos.GetBusinessList((CMMS.CMMS_BusinessType) businessType);
 
                 }
             }

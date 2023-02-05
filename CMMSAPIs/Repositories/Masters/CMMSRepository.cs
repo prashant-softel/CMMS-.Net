@@ -80,11 +80,17 @@ namespace CMMSAPIs.Repositories.Masters
             return _Employee;
         }
 
-        internal async Task<List<CMSupplier>> GetSupplierList()
+        internal async Task<List<CMBusinessType>> GetBusinessTypeList()
         {
-            string myQuery = $"SELECT id,name FROM Business where status = 1 AND type = {CMMS.CMMS_BusinessType.SUPPLIER}";
-            List<CMSupplier> _Suppliers  = await Context.GetData<CMSupplier>(myQuery).ConfigureAwait(false);
-            return _Suppliers;
+            string myQuery = $"SELECT id, name, description, status FROM businesstype";
+            List<CMBusinessType> _Business = await Context.GetData<CMBusinessType>(myQuery).ConfigureAwait(false);
+            return _Business;
+        }
+        internal async Task<List<CMBusiness>> GetBusinessList(CMMS.CMMS_BusinessType businessType)
+        {
+            string myQuery = $"SELECT id, name, description FROM Business where status = 1 AND type = {businessType}";
+            List<CMBusiness> _Business = await Context.GetData<CMBusiness>(myQuery).ConfigureAwait(false);
+            return _Business;
         }
 
         internal async Task<List<CMFrequency>> GetFrequencyList()
