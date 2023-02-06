@@ -94,11 +94,11 @@ namespace CMMSAPIs.Controllers.Incident_Reports
 
         [Route("RejectIncidentReport")]
         [HttpPut]
-        public async Task<IActionResult> RejectIncidentReport(int id)
+        public async Task<IActionResult> RejectIncidentReport([FromForm] CMApproveIncident request)
         {
             try
             {
-                var data = await _IncidentReportBS.RejectIncidentReport(id);
+                var data = await _IncidentReportBS.RejectIncidentReport(request);
                 return Ok(data);
             }
             catch (Exception ex)

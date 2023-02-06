@@ -6,6 +6,7 @@ using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Jobs;
 using CMMSAPIs.Models.Permits;
 using CMMSAPIs.Models.JC;
+using CMMSAPIs.Models.Incident_Reports;
 
 //using CommonUtilities;
 //using CMMSAPIs.Models.Notifications;
@@ -22,7 +23,6 @@ namespace CMMSAPIs.Models.Notifications
         {
             m_moduleID = moduleID;
             m_notificationID = notificationID;
-
         }
         protected virtual string getModuleName(params object[] args)
         {
@@ -112,7 +112,11 @@ namespace CMMSAPIs.Models.Notifications
                 CMJCDetail _JobCard = (CMJCDetail)args[0];
                 notificationObj = new JCNotification(moduleID, notificationID, _JobCard);
             }
-
+            else if (moduleID == CMMS.CMMS_Modules.INCIDENT_REPORT)    //Incident Report
+            {
+                CMViewIncidentReport _IncidentReport = (CMViewIncidentReport)args[0];
+                notificationObj = new IncidentReportNotification(moduleID, notificationID, _IncidentReport);
+            }
             //create else if block for your module and add Notification class for  your module to implement yous notification
             retValue = notificationObj.sendEmailNotification(moduleID, notificationID, args);
             return retValue;
