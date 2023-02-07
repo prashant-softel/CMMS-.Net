@@ -11,7 +11,6 @@ namespace CMMSAPIs.Models.Jobs
         public string facility_name { get; set; }
         public int block_id { get; set; }
         public string block_name { get; set; }
-        public int JobStatus { get; set; }
         public int equipmentCat_id { get; set; }
         public string equipmentCat_name { get; set; }
         public int workingArea_id { get; set; }

@@ -1,5 +1,6 @@
 using CMMSAPIs.BS.Jobs;
 using CMMSAPIs.BS.Permits;
+using CMMSAPIs.BS.Facility;
 using CMMSAPIs.BS.Mails;
 using CMMSAPIs.BS.Masters;
 using CMMSAPIs.BS.SM;
@@ -16,10 +17,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using CMMSAPIs.BS.Permits;
 using CMMSAPIs.BS.JC;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -81,15 +78,13 @@ namespace CMMSAPIs
             services.AddScoped<ICMMSBS, CMMSBS>();
             services.AddScoped<IJobBS, JobBS>();
             services.AddScoped<IPermitBS, PermitBS>();
-
+            services.AddScoped<IFacilityBS, FacilityBs>();
             services.AddScoped<IJobWorkTypeBS, JobWorkTypeBS>();
-
             services.AddScoped<iLoginBS, LoginBS>();
             services.AddScoped<IRoleAccessBS, RoleAccessBS>();
             services.AddScoped<IUserAccessBS, UserAccessBS>();
             services.AddScoped<ISMMasterBS, SMMasterBS>();
             services.AddScoped<IUtilsBS, UtilsBS>();
-            services.AddScoped<IPermitBS, PermitBS>();
             services.AddScoped<IJCBS, JCBS>();
             services.AddScoped<IIncidentReportBS, IncidentReportBS>();
             services.AddScoped<IWCBS, WCBS>();

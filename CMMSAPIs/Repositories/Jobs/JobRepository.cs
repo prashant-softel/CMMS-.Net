@@ -28,7 +28,7 @@ namespace CMMSAPIs.Repositories.Jobs
 
             /*Your code goes here*/
             string myQuery = "SELECT " +
-                                 "facilities.name as plantName, job.status, job.createdAt as jobDate, DATE_FORMAT(job.breakdownTime, '%Y-%m-%d') as breaKdownTime, job.id as id, asset_cat.name as equipmentCat, asset.name as workingArea, job.title as jobDetails, workType.workTypeName as workType, permit.code as permitId, job.createdBy as raisedBy, CONCAT(user.firstName + ' ' + user.lastName) as assignedTo, IF(job.breakdownTime = '', 'Non Breakdown Maintenance', 'Breakdown Maintenance') as breakdownType" +
+                                 "facilities.name as plantName, job.status as status, job.createdAt as jobDate, DATE_FORMAT(job.breakdownTime, '%Y-%m-%d') as breaKdownTime, job.id as id, asset_cat.name as equipmentCat, asset.name as workingArea, job.title as jobDetails, workType.workTypeName as workType, permit.code as permitId, job.createdBy as raisedBy, CONCAT(user.firstName + ' ' + user.lastName) as assignedToName, user.id as assignedToId, IF(job.breakdownTime = '', 'Non Breakdown Maintenance', 'Breakdown Maintenance') as breakdownType" +
                                  " FROM " +
                                         "jobs as job " +
                                  "JOIN " +
@@ -65,7 +65,7 @@ namespace CMMSAPIs.Repositories.Jobs
             /*Your code goes here*/
 
             string myQuery = "SELECT " +
-                                    "facilities.id as block_id, job.status as JobStatus, facilities.name as block_name, job.status as status, user.id as assigned_id, CONCAT(user.firstName, user.lastName) as assigned_name, workType.workTypeName as workType,  job.title as job_title, job.description as job_description " +
+                                    "facilities.id as block_id, facilities.name as block_name, job.status as status, user.id as assigned_id, CONCAT(user.firstName, user.lastName) as assigned_name, user.id as assigned_id, workType.workTypeName as workType,  job.title as job_title, job.description as job_description " +
                                       "FROM " +
                                             "jobs as job " +
                                       "JOIN " +
@@ -159,13 +159,14 @@ namespace CMMSAPIs.Repositories.Jobs
             return newJobID;
         }
 
-        internal async Task<CMDefaultResponse> ReAssignJob(int job_id, int user_id, int changed_by)
+        internal async Task<CMDefaultResponse> ReAssignJob(int job_id, int assignedTo)
         {
             /*
              * AssignedID/PermitID/CancelJob. Out of 3 we can update any one fields based on request
              * Re-assigned employee/ link permit / Cancel Permit. 3 different end points call this function.
              * return boolean true/false*/
-            string updateQry = $"update jobs set assignedId = { user_id }, updatedBy = { changed_by } where id = { job_id } ";
+            int changed_by = Utils.UtilsRepository.GetUserID();
+            string updateQry = $"update jobs set assignedId = { assignedTo }, updatedBy = { changed_by } where id = { job_id } ";
             int retVal = await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
 
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
