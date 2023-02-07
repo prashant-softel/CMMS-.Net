@@ -15,8 +15,8 @@ namespace CMMSAPIs.BS.Inventory
         Task<CMDefaultResponse> AddInventory(List<CMAddInventory> request);
         Task<CMDefaultResponse> UpdateInventory(CMAddInventory request);
         Task<CMDefaultResponse> DeleteInventory(int id);
-        Task<List<KeyValuePairs>> GetInventoryTypeList();
-        Task<List<KeyValuePairs>> GetInventoryStatusList();
+        Task<List<CMInventoryTypeList>> GetInventoryTypeList();
+        Task<List<CMInventoryStatusList>> GetInventoryStatusList();
 
 
     }
@@ -109,7 +109,7 @@ namespace CMMSAPIs.BS.Inventory
             }
         }
 
-        public async Task<List<KeyValuePairs>> GetInventoryTypeList()
+        public async Task<List<CMInventoryTypeList>> GetInventoryTypeList()
         {
             try
             {
@@ -125,7 +125,7 @@ namespace CMMSAPIs.BS.Inventory
             }
         }
 
-        public async Task<List<KeyValuePairs>> GetInventoryStatusList()
+        public async Task<List<CMInventoryStatusList>> GetInventoryStatusList()
         {
             try
             {

@@ -16,7 +16,6 @@ namespace CMMSAPIs.Models.Permits
         public int sitePermitNo { get; set; }
         public int permitTypeid { get; set; }
         public string PermitTypeName { get; set; }
-        public string equipmentCat { get; set; }
         public string permitArea { get; set; }
         public int workingTime { get; set; }
         public string description { get; set; }

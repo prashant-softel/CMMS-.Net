@@ -59,7 +59,7 @@ namespace CMMSAPIs.Models.Notifications
                     retValue = String.Format("Permit <{0}> Updated Permit Updated By <{1}> Permit Description <{2}>", m_permitObj.permitNo,m_permitObj.issuedByName,desc);
                     break;
                 case CMMS.CMMS_Status.PTW_EXTEND_REQUESTED:
-                    retValue = String.Format("Permit <{0}> Extend Requested By Permit Extend Requested By Name <{1}>Permit Description <{2}>", m_permitObj.permitNo, m_permitObj.issuedByName,desc);
+                    retValue = String.Format("Permit <{0}> Extend Requested By Permit Extend Requested By Name <{1}>Permit Description <{2}>", m_permitObj.permitNo, m_permitObj.issuedByName, desc);
                     break;
                 case CMMS.CMMS_Status.PTW_EXTEND_REQUEST_APPROVE:
                     retValue = String.Format("Permit <{0}> Extend Request Approve Permit Extend Requested Approve By Name <{1}> Permit Description <{2}>", m_permitObj.permitNo, m_permitObj.approvedByName,desc);
