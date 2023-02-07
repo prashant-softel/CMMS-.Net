@@ -79,12 +79,12 @@ namespace CMMSAPIs.Controllers.Jobs
         [Authorize]
         [Route("ReAssignJob")]
         [HttpPut]
-        public async Task<IActionResult> ReAssignJob(int job_id, int user_id, int changed_by)
+        public async Task<IActionResult> ReAssignJob(int job_id, int assignedTo)
         {
         
             try
             {
-                var data = await _JobBS.ReAssignJob(job_id, user_id, changed_by);
+                var data = await _JobBS.ReAssignJob(job_id, assignedTo);
                 return Ok(data);
 
             }

@@ -20,7 +20,8 @@ namespace CMMSAPIs.Models.Jobs
         public dynamic breaKdownTime { get; set; }
         public string breakdownType { get; set; }
         public string permitId { get; set; }
-        public string assignedTo { get; set; }
+        public string assignedToName { get; set; }
+        public int assignedToId { get; set; }
         public int facility_id { get; set; }
     }
 
