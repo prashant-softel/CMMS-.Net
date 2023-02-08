@@ -28,7 +28,7 @@ namespace CMMSAPIs.Repositories.Jobs
 
             /*Your code goes here*/
             string myQuery = "SELECT " +
-                                 "facilities.name as plantName, job.status as status, job.createdAt as jobDate, DATE_FORMAT(job.breakdownTime, '%Y-%m-%d') as breaKdownTime, job.id as id, asset_cat.name as equipmentCat, asset.name as workingArea, job.title as jobDetails, workType.workTypeName as workType, permit.code as permitId, job.createdBy as raisedBy, CONCAT(user.firstName + ' ' + user.lastName) as assignedToName, user.id as assignedToId, IF(job.breakdownTime = '', 'Non Breakdown Maintenance', 'Breakdown Maintenance') as breakdownType , job.description as description" +
+                                 "job.id, job.facilityId, user.id, facilities.name as plantName, job.status as status, job.createdAt as jobDate, DATE_FORMAT(job.breakdownTime, '%Y-%m-%d') as breaKdownTime, job.id as id, asset_cat.name as equipmentCat, asset.name as workingArea, job.title as jobDetails, workType.workTypeName as workType, permit.code as permitId, job.createdBy as raisedBy, CONCAT(user.firstName , ' ' , user.lastName) as assignedToName, user.id as assignedToId, IF(job.breakdownTime = '', 'Non Breakdown Maintenance', 'Breakdown Maintenance') as breakdownType , job.description as description" +
                                  " FROM " +
                                         "jobs as job " +
                                  "JOIN " +
@@ -48,7 +48,6 @@ namespace CMMSAPIs.Repositories.Jobs
             if (facility_id != 0)
             {
                 myQuery += " WHERE job.facilityId= " + facility_id + " and user.id= " + userId;
-
             }
 
             List<CMJobModel> _JobList = await Context.GetData<CMJobModel>(myQuery).ConfigureAwait(false);
@@ -117,8 +116,15 @@ namespace CMMSAPIs.Repositories.Jobs
             */
 
             /*Your code goes here*/
-            string qryJobBasic = "insert into jobs(facilityId, blockId,title, description, createdAt, createdBy, breakdownTime,assignedId, linkedPermit) values" +
-            $"({ request.facility_id }, { request.block_id }, '{ request.title }', '{ request.description }', '{UtilsRepository.GetUTCTime() }','{ request.createdBy }','{ UtilsRepository.GetUTCTime() }','{ request.assigned_id }','{ request.permit_id }')";
+            int status = (int)CMMS.CMMS_Status.CREATED;
+            if (request.assigned_id > 0)
+            {
+                status = (int)CMMS.CMMS_Status.ASSIGNED;
+            }
+            //int created_by = Utils.UtilsRepository.GetUserID();
+
+            string qryJobBasic = "insert into jobs(facilityId, blockId,title, description, createdAt, createdBy, breakdownTime, status, assignedId, linkedPermit) values" +
+            $"({ request.facility_id }, { request.block_id }, '{ request.title }', '{ request.description }', '{UtilsRepository.GetUTCTime() }','{ request.createdBy }','{ UtilsRepository.GetUTCTime() }','{ status }','{ request.assigned_id }','{ request.permit_id }')";
             await Context.ExecuteNonQry<int>(qryJobBasic).ConfigureAwait(false);
 
             /*    string query = "select LAST_INSERT_ID() as insertedId from jobs; ";
