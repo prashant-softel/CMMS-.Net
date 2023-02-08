@@ -256,10 +256,19 @@ namespace CMMSAPIs.Helper
             JC_REJECTED5,
             JC_PTW_TIMED_OUT,
 
+
+            PM_START = 171,
+            PM_SAVE,
+            PM_SUBMIT,
+            PM_APPROVE,
+            PM_REJECT,
+            PM_PTW_TIMEOUT,
+
             IR_CREATED = 181,
             IR_APPROVED,
             IR_REJECTED,
             IR_UPDATED,
+
         }
 
     }

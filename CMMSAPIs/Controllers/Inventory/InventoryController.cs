@@ -38,11 +38,11 @@ namespace CMMSAPIs.Controllers.Inventory
         [Authorize]
         [Route("ViewInventory")]
         [HttpGet]
-        public async Task<IActionResult> ViewInventory(int id)
+        public async Task<IActionResult> GetInventoryDetails(int id)
         {
             try
             {
-                var data = await _InventoryBS.ViewInventory(id);
+                var data = await _InventoryBS.GetInventoryDetails(id);
                 return Ok(data);
             }
             catch (Exception ex)

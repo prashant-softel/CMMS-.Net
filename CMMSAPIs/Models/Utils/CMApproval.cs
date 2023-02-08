@@ -10,4 +10,5 @@ namespace CMMSAPIs.Models.Utils
         public int employee_id { get; set; }
         public int Time { get; set; }
     }
+
 }

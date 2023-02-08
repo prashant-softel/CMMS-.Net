@@ -47,13 +47,13 @@ namespace CMMSAPIs.Controllers.Incident_Reports
             }
         }
 
-        [Route("ViewIncidentReport")]
+        [Route("GetIncidentDetailsReport")]
         [HttpGet]
-        public async Task<IActionResult> ViewIncidentReport(int id)
+        public async Task<IActionResult> GetIncidentDetailsReport(int id)
         {
             try
             {
-                var data = await _IncidentReportBS.ViewIncidentReport(id);
+                var data = await _IncidentReportBS.GetIncidentDetailsReport(id);
                 return Ok(data);
             }
             catch (Exception ex)
