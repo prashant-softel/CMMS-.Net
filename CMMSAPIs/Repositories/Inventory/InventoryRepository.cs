@@ -341,7 +341,7 @@ namespace CMMSAPIs.Repositories.Inventory
             */
             /*Your code goes here*/
             // "SELECT * FROM assetTypes";
-            string myQuery = "SELECT id, name, description, status FROM assettypes";
+            string myQuery = "SELECT id, name, description, status FROM assettypes where status = 1";
             List<CMInventoryTypeList> _InventoryTypeList = await Context.GetData<CMInventoryTypeList>(myQuery).ConfigureAwait(false);
             return _InventoryTypeList;
         }
@@ -353,10 +353,17 @@ namespace CMMSAPIs.Repositories.Inventory
             */
             /*Your code goes here*/
             // "SELECT * FROM assetStatus";
-            string myQuery = "SELECT id, name, description, status FROM assetstatus";
+            string myQuery = "SELECT id, name, description, status FROM assetstatus where status = 1";
             List<CMInventoryStatusList> _InventoryStatusList = await Context.GetData<CMInventoryStatusList>(myQuery).ConfigureAwait(false);
             return _InventoryStatusList;
 
         }
+        internal async Task<List<CMInventoryCategoryList>> GetInventoryCategoryList()
+        {
+            string myQuery = "SELECT id, name FROM assetcategories where status = 1";
+            List<CMInventoryCategoryList> _AssetCategory = await Context.GetData<CMInventoryCategoryList>(myQuery).ConfigureAwait(false);
+            return _AssetCategory;
+        }
+
     }
 }

@@ -17,8 +17,7 @@ namespace CMMSAPIs.BS.Inventory
         Task<CMDefaultResponse> DeleteInventory(int id);
         Task<List<CMInventoryTypeList>> GetInventoryTypeList();
         Task<List<CMInventoryStatusList>> GetInventoryStatusList();
-
-
+        Task<List<CMInventoryCategoryList>> GetInventoryCategoryList();
     }
     public class InventoryBS : IInventoryBS
     {
@@ -125,6 +124,21 @@ namespace CMMSAPIs.BS.Inventory
             }
         }
 
+        public async Task<List<CMInventoryCategoryList>> GetInventoryCategoryList()
+        {
+            try
+            {
+                using (var repos = new InventoryRepository(getDB))
+                {
+                    return await repos.GetInventoryCategoryList();
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
         public async Task<List<CMInventoryStatusList>> GetInventoryStatusList()
         {
             try
