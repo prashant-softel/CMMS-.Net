@@ -9,7 +9,6 @@ namespace CMMSAPIs.Models.Facility
     {
         public int id { get; set; }
         public string name { get; set; }
-        public string description_del { get; set; }
         public int customerId { get; set; }
         public int ownerId { get; set; }
         public int isBlock { get; set; }

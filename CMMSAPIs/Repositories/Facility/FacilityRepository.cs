@@ -35,17 +35,14 @@ namespace CMMSAPIs.Repositories.Facility
 
         internal async Task<List<CMFacilityDetails>> GetFacilityDetails(int id)
         {
-            string myQuery = "SELECT a.name, a.description, s.name AS status, f.name AS block_name, a2.name as parent_name, " +
-                "b3.name as manufacturer_name, a.currency FROM assets AS a JOIN assetstatus as s on s.id = a.statusId " +
-                "JOIN facilities as f ON f.id = a.blockId JOIN assets as a2 ON a.parentId = a2.id " +
-                "JOIN business AS b2 ON a.ownerId = b2.id JOIN business AS b3 ON a.manufacturerId = b3.id";
+            string myQuery = "SELECT facility.id as id, asset.name as parentName, facility.name AS blockName, b.name as ownerName, facility.customerId as customerId, facility.ownerId as ownerId, facility.operatorId as operatorId, facility.isBlock as isBlock, facility.parentId as parentId, facility.address as address, facility.city as city, facility.state as state, facility.country as country, facility.zipcode as zipcode, facility.latitude as latitude, facility.longitude as longitude, facility.createdBy as createdById, facility.createdAt as createdAt, facility.status as status, facility.photoId as photoId, facility.description as description, facility.timezone as timezone, facility.startDate as startDate, facility.endDate as endDate, CONCAT(u.firstName + ' ' + u.lastName) as createdByName  FROM softel_cmms.facilities as facility JOIN assets as asset on asset.parentId = facility.parentId JOIN business AS b ON facility.ownerId = b.id LEFT JOIN users as u ON u.id = facility.createdBy ";
             if (id != 0)
             {
-                myQuery += " WHERE a.id= " + id;
+                myQuery += " WHERE facility.id= " + id;
             }
-            List<CMFacilityDetails> _ViewInventoryList = await Context.GetData<CMFacilityDetails>(myQuery).ConfigureAwait(false);
+            List<CMFacilityDetails> _GetFacilityDetails = await Context.GetData<CMFacilityDetails>(myQuery).ConfigureAwait(false);
 
-            return _ViewInventoryList;
+            return _GetFacilityDetails;
 
 
         }
@@ -53,8 +50,8 @@ namespace CMMSAPIs.Repositories.Facility
         { 
      
         string qryFacilityInsert = "insert into facilities " +
-                                    "(name, description_del, customerId, ownerId, operatorId, isBlock, parentId, address, city, state, country, zipcode, latitude,longitude,createdBy,createdAt,status,photoId,description,timezone,startDate,endDate ) values" +
-                                 $"('{ request.name }', '{ request.description_del }', { request.customerId }, { request.ownerId }, { request.operatorId }, { request.isBlock }, { request.parentId }, '{ request.address }', '{ request.city }', '{ request.state }', '{ request.country }', { request.zipcode }, { request.latitude }, { request.longitude }, { request.createdBy }, '{ UtilsRepository.GetUTCTime() }', { request.status }, { request.photoId }, '{ request.description }','{ request.timezone }', '{ UtilsRepository.GetUTCTime() }', '{ UtilsRepository.GetUTCTime() }' )";
+                                    "(name, customerId, ownerId, operatorId, isBlock, parentId, address, city, state, country, zipcode, latitude,longitude,createdBy,createdAt,status,photoId,description,timezone,startDate,endDate ) values" +
+                                 $"('{ request.name }', { request.customerId }, { request.ownerId }, { request.operatorId }, { request.isBlock }, { request.parentId }, '{ request.address }', '{ request.city }', '{ request.state }', '{ request.country }', { request.zipcode }, { request.latitude }, { request.longitude }, { request.createdBy }, '{ UtilsRepository.GetUTCTime() }', { request.status }, { request.photoId }, '{ request.description }','{ request.timezone }', '{ UtilsRepository.GetUTCTime() }', '{ UtilsRepository.GetUTCTime() }' )";
 
             int insertedId = await Context.ExecuteNonQry<int>(qryFacilityInsert).ConfigureAwait(false);
 
@@ -63,7 +60,7 @@ namespace CMMSAPIs.Repositories.Facility
 
         internal async Task<int> UpdateFacility(CMUpdateFacility request)
         {
-            string qryFacilityUpdate = $"update facilities set name = '{ request.name }', description_del='{ request.description_del }', customerId = { request.customerId }, ownerId={ request.ownerId }, operatorId={ request.operatorId }, isBlock={ request.isBlock }, parentId={ request.parentId }, address='{ request.address }', city='{ request.city }', state='{ request.state }', country='{ request.country }', zipcode={ request.zipcode }, latitude={ request.latitude }, longitude={ request.longitude }, updatedBy={ request.updatedBy }, updatedAt='{ UtilsRepository.GetUTCTime() }', status={ request.status }, photoId= { request.photoId }, description='{ request.description }', timezone='{ request.timezone }', startDate= '{ UtilsRepository.GetUTCTime() }', endDate='{ UtilsRepository.GetUTCTime() }' where id = { request.id } ;";
+            string qryFacilityUpdate = $"update facilities set name = '{ request.name }', customerId = { request.customerId }, ownerId={ request.ownerId }, operatorId={ request.operatorId }, isBlock={ request.isBlock }, parentId={ request.parentId }, address='{ request.address }', city='{ request.city }', state='{ request.state }', country='{ request.country }', zipcode={ request.zipcode }, latitude={ request.latitude }, longitude={ request.longitude }, updatedBy={ request.updatedBy }, updatedAt='{ UtilsRepository.GetUTCTime() }', status={ request.status }, photoId= { request.photoId }, description='{ request.description }', timezone='{ request.timezone }', startDate= '{ UtilsRepository.GetUTCTime() }', endDate='{ UtilsRepository.GetUTCTime() }' where id = { request.id } ;";
 
             int UpdatededId=await Context.ExecuteNonQry<int>(qryFacilityUpdate).ConfigureAwait(false);
 

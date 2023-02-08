@@ -7,26 +7,31 @@ namespace CMMSAPIs.Models.Facility
 {
     public class CMFacilityDetails
     {
-        public string name { get; set; }
+        public int id { get; set; }
+        public string parentName { get; set; }
+        public string blockName { get; set; }
+        public string ownerName { get; set; }
+        public int customerId { get; set; }
+        public int ownerId { get; set; }
+        public int operatorId { get; set; }
+        public int isBlock { get; set; }
+        public int parentId { get; set; }
+        public string address { get; set; }
+        public string city { get; set; }
+        public string state { get; set; }
+        public string country { get; set; }
+        public int zipcode { get; set; }
+       // public string latitude { get; set; }
+       // public string  longitude { get; set; }
+        public int createdById { get; set; }
+        public string createdByName { get; set; }
+        public DateTime createdAt { get; set; }
+        public int status { get; set; }
+        public int photoId { get; set; }
         public string description { get; set; }
-        public string type { get; set; }
-        public string status { get; set; }
-        public string facility_name { get; set; }
-        public string block_name { get; set; }
-        public string parent_name { get; set; }
-        public string serial_number { get; set; }
-        public int mutliplier { get; set; }
-        public int calibration_frequency { get; set; }
-        public string frequency_type { get; set; }
-        public int calibration_reminder { get; set; }
-        public DateTime last_calibration_date { get; set; }
-        public string manufacturer_name { get; set; }
-        public string supplier_name { get; set; }
-        public string model { get; set; }
-        public int last_price { get; set; }
-        public string currency { get; set; }
-        public string warranty_type_name { get; set; }
-        public string warranty_provider_name { get; set; }
-        public string warrranty_term_type_name { get; set; }
+        public string timezone { get; set; }
+        public DateTime startDate { get; set; }
+        public DateTime endDate { get; set; }
+
     }
 }
