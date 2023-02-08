@@ -101,7 +101,7 @@ namespace CMMSAPIs.Repositories.Permits
              * Request Date/Time, Approved By, Approved Date/Time, Current Status(Approved, Rejected, closed).           
             */
             string myQuery = "SELECT " +
-                                 "ptw.id as permitId, ptw.permitNumber as permit_site_no, permitType.id as permit_type,  permitType.title as PermitTypeName, asset_cat.id as equipment_category, asset_cat.name as equipment, facilities.id as workingAreaId, facilities.name as workingAreaName, ptw.description as description, CONCAT(user.firstName + ' ' + user.lastName) as request_by_name, ptw.acceptedDate as request_datetime, CONCAT(user.firstName + ' ' + user.lastName) as approved_by_name, ptw.approvedDate as approved_datetime, ptw.status as currentStatus " +
+                                 "ptw.id as permitId, ptw.status as ptwStatus, ptw.permitNumber as permit_site_no, permitType.id as permit_type,  permitType.title as PermitTypeName, asset_cat.id as equipment_category, asset_cat.name as equipment, facilities.id as workingAreaId, facilities.name as workingAreaName, ptw.description as description, CONCAT(user.firstName + ' ' + user.lastName) as request_by_name, ptw.acceptedDate as request_datetime, CONCAT(user.firstName + ' ' + user.lastName) as approved_by_name, ptw.approvedDate as approved_datetime, ptw.status as currentStatus " +
                                  " FROM " +
                                         "permits as ptw " +
                                   "JOIN " +

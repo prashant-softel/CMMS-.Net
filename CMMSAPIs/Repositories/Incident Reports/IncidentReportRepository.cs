@@ -100,8 +100,8 @@ namespace CMMSAPIs.Repositories.Incident_Reports
 
             return response;
         }
-
-        internal async Task<List<CMViewIncidentReport>> ViewIncidentReport(int id)
+        
+        internal async Task<List<CMViewIncidentReport>> GetIncidentDetailsReport(int id)
         {
             /*risk_type
              * Fetch all the CMViewIncidentReport model data from Incidents table

@@ -22,6 +22,7 @@ namespace CMMSAPIs.Models.Jobs
         public string permitId { get; set; }
         public string assignedToName { get; set; }
         public int assignedToId { get; set; }
+        public int status { get; set; }
         public int facility_id { get; set; }
     }
 

@@ -179,7 +179,7 @@ namespace CMMSAPIs.Repositories.Jobs
             }
 
             string myQuery = "SELECT " +
-                                    "facilities.id as block_id, job.status as JobStatus, facilities.name as block_name, job.status as status, user.id as assigned_id, CONCAT(user.firstName, user.lastName) as assigned_name, workType.workTypeName as workType,  job.title as job_title, job.description as job_description " +
+                                    "job.id as id, facilities.id as block_id, facilities.name as block_name, facilities1.name as block_name, facilities.name as facility_name, job.status as status, user.id as assigned_id, CONCAT(user.firstName, user.lastName) as assigned_name, workType.workTypeName as workType,  job.title as job_title, job.description as job_description " +
                                       "FROM " +
                                             "jobs as job " +
                                       "JOIN " +
@@ -190,9 +190,12 @@ namespace CMMSAPIs.Repositories.Jobs
                                             "jobworktypes as workType ON workType.equipmentCategoryId = asset_cat.id " +
                                       "JOIN " +
                                             "facilities as facilities ON job.facilityId = facilities.id " +
+                                      "JOIN " +
+                                            "facilities as facilities1 ON job.blockId = facilities1.id " +
                                       "LEFT JOIN " +
                                             "users as user ON user.id = job.assignedId" +
                                       " WHERE job.id= " + job_id;
+
             List<CMJobView> _ViewJobList = await Context.GetData<CMJobView>(myQuery).ConfigureAwait(false);
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, retVal, 0, 0, "Permit Assigned", CMMS.CMMS_Status.JOB_ASSIGNED);
@@ -217,20 +220,23 @@ namespace CMMSAPIs.Repositories.Jobs
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
             }
             string myQuery = "SELECT " +
-                                   "facilities.id as block_id, job.status as JobStatus, facilities.name as block_name, job.status as status, user.id as assigned_id, CONCAT(user.firstName, user.lastName) as assigned_name, workType.workTypeName as workType,  job.title as job_title, job.description as job_description " +
-                                     "FROM " +
-                                           "jobs as job " +
-                                     "JOIN " +
-                                           "jobmappingassets as mapAssets ON mapAssets.jobId = job.id " +
-                                     "JOIN " +
-                                           "assetcategories as asset_cat ON mapAssets.categoryId = asset_cat.id " +
-                                     "LEFT JOIN " +
-                                           "jobworktypes as workType ON workType.equipmentCategoryId = asset_cat.id " +
-                                     "JOIN " +
-                                           "facilities as facilities ON job.facilityId = facilities.id " +
-                                     "LEFT JOIN " +
-                                           "users as user ON user.id = job.assignedId" +
-                                     " WHERE job.id= " + job_id;
+                                    "job.id as id, facilities.id as block_id, facilities.name as block_name, facilities1.name as block_name, facilities.name as facility_name, job.status as status, user.id as assigned_id, CONCAT(user.firstName, user.lastName) as assigned_name, workType.workTypeName as workType,  job.title as job_title, job.description as job_description " +
+                                      "FROM " +
+                                            "jobs as job " +
+                                      "JOIN " +
+                                            "jobmappingassets as mapAssets ON mapAssets.jobId = job.id " +
+                                      "JOIN " +
+                                            "assetcategories as asset_cat ON mapAssets.categoryId = asset_cat.id " +
+                                      "LEFT JOIN " +
+                                            "jobworktypes as workType ON workType.equipmentCategoryId = asset_cat.id " +
+                                      "JOIN " +
+                                            "facilities as facilities ON job.facilityId = facilities.id " +
+                                      "JOIN " +
+                                            "facilities as facilities1 ON job.blockId = facilities1.id " +
+                                      "LEFT JOIN " +
+                                            "users as user ON user.id = job.assignedId" +
+                                      " WHERE job.id= " + job_id;
+
             List<CMJobView> _ViewJobList = await Context.GetData<CMJobView>(myQuery).ConfigureAwait(false);
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, retValue, 0, 0, "Permit Canceled", CMMS.CMMS_Status.JOB_CANCELLED);
@@ -259,7 +265,7 @@ namespace CMMSAPIs.Repositories.Jobs
             }
 
             string myQuery = "SELECT " +
-                                    "facilities.id as block_id, job.status as JobStatus, facilities.name as block_name, job.status as status, user.id as assigned_id, CONCAT(user.firstName, user.lastName) as assigned_name, workType.workTypeName as workType,  job.linkedPermit as current_ptwId, job.title as job_title, job.description as job_description " +
+                                    "job.id as id, facilities.id as block_id, facilities.name as block_name, facilities1.name as block_name, facilities.name as facility_name, job.status as status, user.id as assigned_id, CONCAT(user.firstName, user.lastName) as assigned_name, workType.workTypeName as workType,  job.title as job_title, job.description as job_description " +
                                       "FROM " +
                                             "jobs as job " +
                                       "JOIN " +
@@ -270,6 +276,8 @@ namespace CMMSAPIs.Repositories.Jobs
                                             "jobworktypes as workType ON workType.equipmentCategoryId = asset_cat.id " +
                                       "JOIN " +
                                             "facilities as facilities ON job.facilityId = facilities.id " +
+                                      "JOIN " +
+                                            "facilities as facilities1 ON job.blockId = facilities1.id " +
                                       "LEFT JOIN " +
                                             "users as user ON user.id = job.assignedId" +
                                       " WHERE job.id= " + job_id;
