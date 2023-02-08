@@ -60,7 +60,7 @@ namespace CMMSAPIs.Repositories.Inventory
             return inventory;
         }
 
-            internal async Task<List<CMViewInventory>> ViewInventory(int id)
+            internal async Task<List<CMViewInventory>> GetInventoryDetails(int id)
             {
                 /*
                 * get all details mentioned in model

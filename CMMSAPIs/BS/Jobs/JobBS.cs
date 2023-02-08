@@ -13,7 +13,7 @@ namespace CMMSAPIs.BS.Jobs
         Task<List<CMJobModel>> GetJobList(int facility_id, int userId);
         Task<List<CMJobView>> GetJobDetail(int job_id);
         Task<int> CreateNewJob(CMCreateJob request);
-        Task<CMDefaultResponse> ReAssignJob(int job_id, int user_id, int changed_by);
+        Task<CMDefaultResponse> ReAssignJob(int job_id, int assignedTo);
         Task<CMDefaultResponse> CancelJob(int job_id, int user_id, string Cancelremark);
         Task<CMDefaultResponse> LinkToPTW(int job_id, int ptw_id);
     }
@@ -74,13 +74,13 @@ namespace CMMSAPIs.BS.Jobs
 
 
 
-        public async Task<CMDefaultResponse> ReAssignJob(int job_id, int user_id, int changed_by)
+        public async Task<CMDefaultResponse> ReAssignJob(int job_id, int assignedTo)
         {
             try
             {
                 using (var repos = new JobRepository(getDB))
                 {
-                    return await repos.ReAssignJob(job_id, user_id, changed_by);
+                    return await repos.ReAssignJob(job_id, assignedTo);
                 }
             }
             catch (Exception ex)
