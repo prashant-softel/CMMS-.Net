@@ -16,7 +16,7 @@ namespace CMMSAPIs.Repositories.Inventory
         {
         }
 
-        internal async Task<List<CMInventoryList>> GetInventoryList(int facilityId)
+        internal async Task<List<CMInventoryList>> GetInventoryList(int facilityId, int categoryId)
         {
             /*
              * get all details mentioned in model
@@ -49,13 +49,18 @@ namespace CMMSAPIs.Repositories.Inventory
                 "JOIN business as b5 ON b5.id = a.operatorId " +
                 "" +
                 "JOIN facilities as f ON f.id = a.blockId";
-            if (facilityId != 0)
+            if (facilityId > 0)
             {
                 myQuery += " WHERE a.facilityId= " + facilityId;
-
-
-
+                if(categoryId !=  0)
+                {
+                    myQuery += " AND a.categoryId = " + categoryId;
+                }
             }
+            //else
+            //{
+            //    throw new ArgumentException("FacilityId cannot be 0");
+            //}
             List<CMInventoryList> inventory = await Context.GetData<CMInventoryList>(myQuery).ConfigureAwait(false);
             return inventory;
         }

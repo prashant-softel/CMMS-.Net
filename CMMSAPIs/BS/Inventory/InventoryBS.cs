@@ -10,7 +10,7 @@ namespace CMMSAPIs.BS.Inventory
 {
     public interface IInventoryBS
     {
-        Task<List<CMInventoryList>> GetInventoryList(int facility_id);
+        Task<List<CMInventoryList>> GetInventoryList(int facilityId, int categoryId);
         Task<List<CMViewInventory>> GetInventoryDetails(int id);
         Task<CMDefaultResponse> AddInventory(List<CMAddInventory> request);
         Task<CMDefaultResponse> UpdateInventory(CMAddInventory request);
@@ -28,13 +28,13 @@ namespace CMMSAPIs.BS.Inventory
             databaseProvider = dbProvider;
         }
 
-        public async Task<List<CMInventoryList>> GetInventoryList(int facility_id)
+        public async Task<List<CMInventoryList>> GetInventoryList(int facilityId, int categoryId)
         {
             try
             {
                 using (var repos = new InventoryRepository(getDB))
                 {
-                    return await repos.GetInventoryList(facility_id);
+                    return await repos.GetInventoryList(facilityId, categoryId);
 
                 }
             }
