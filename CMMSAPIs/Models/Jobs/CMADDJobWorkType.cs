@@ -11,8 +11,5 @@ namespace CMMSAPIs.Models.Jobs
         public int categoryid { get; set; }
         public string categoryName { get; set; }
         public string workType { get; set; }
-        public DateTime createdAt { get; set; }
-        public int createdBy { get; set; }
-        public int status { get; set; }
     }
 }

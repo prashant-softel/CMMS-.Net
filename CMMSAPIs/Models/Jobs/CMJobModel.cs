@@ -8,7 +8,7 @@ namespace CMMSAPIs.Models.Jobs
     public class CMJobModel
     {
         public int id { get; set; }
-        public int userId { get; set; }
+        public int createdBy { get; set; }
         public string plantName { get; set; }
         public dynamic jobDate { get; set; }
         public string equipmentCat { get; set; }
@@ -22,9 +22,8 @@ namespace CMMSAPIs.Models.Jobs
         public string permitId { get; set; }
         public string assignedToName { get; set; }
         public int assignedToId { get; set; }
-        public int facility_id { get; set; }
         public int status { get; set; }
-
+        public int facilityId { get; set; }
     }
 
 }

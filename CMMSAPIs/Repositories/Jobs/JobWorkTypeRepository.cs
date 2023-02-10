@@ -1,9 +1,9 @@
 ﻿using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Jobs;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Utils;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace CMMSAPIs.Repositories.Jobs
 {
@@ -35,8 +35,8 @@ namespace CMMSAPIs.Repositories.Jobs
             */
             /*Your code goes here*/
             string qryWorkTypeInsert = "insert into jobworktypes " +
-                                   "( equipmentCategoryId, workTypeName , status, createdAt, createdBy ) values" +
-                                $"({ request.categoryid }, '{ request.workType }', { request.status }, '{ UtilsRepository.GetUTCTime() }', { UtilsRepository.GetUserID() } )";
+                                   "( equipmentCategoryId, workTypeName , createdAt, createdBy ) values" +
+                                $"({ request.categoryid }, '{ request.workType }', '{ UtilsRepository.GetUTCTime() }', { UtilsRepository.GetUserID() } )";
 
             int insertedId = await Context.ExecuteNonQry<int>(qryWorkTypeInsert).ConfigureAwait(false);
 
@@ -49,7 +49,7 @@ namespace CMMSAPIs.Repositories.Jobs
              * Update Work Type, Category id in JobWorkTypes table for requested workTypeId
             */
             /*Your code goes here*/
-            string qryFacilityUpdate = $"update jobworktypes set equipmentCategoryId = { request.categoryid }, workTypeName = '{ request.workType }', status={ request.status }, updatedAt='{ UtilsRepository.GetUTCTime() }', updatedBy={ UtilsRepository.GetUserID() } where id = { request.id } ;";
+            string qryFacilityUpdate = $"update jobworktypes set equipmentCategoryId = { request.categoryid }, workTypeName = '{ request.workType }',  updatedAt='{ UtilsRepository.GetUTCTime() }', updatedBy={ UtilsRepository.GetUserID() } where id = { request.id } ;";
 
             int UpdatededId = await Context.ExecuteNonQry<int>(qryFacilityUpdate).ConfigureAwait(false);
 
@@ -90,35 +90,59 @@ namespace CMMSAPIs.Repositories.Jobs
             return _WorkType;
         }
 
-        internal Task<List<CMMasterTool>> GetMasterToolList()
+        internal async Task<List<CMMasterTool>> GetMasterToolList(int id)
         {
             /*
              * Fetch id, workType, ToolName (if more than 1 tool linked concat then return) from WorkTypeAssociatedTools table 
              * and JOIN WorkTypeMasterAssets to get ToolName
             */
             /*Your code goes here*/
-            return null;
+       /*     string myQuery = "SELECT wt.id as id, jwt.workTypeName as workTypeName, group_concat(a.assetName SEPARATOR ', ') as linkedToolName FROM worktypeassociatedtools as wt LEFT JOIN jobworktypes as jwt ON jwt.id = wt.workTypeId LEFT JOIN worktypemasterassets as a ON FIND_IN_SET(a.id, wt.ToolId) where wt.id = " + id + " group by wt.workTypeId";*/
+
+            string myQuery = "SELECT wt.id as id, jwt.workTypeName as workTypeName, group_concat(a.assetName SEPARATOR ', ') as linkedToolName FROM worktypeassociatedtools as wt LEFT JOIN jobworktypes as jwt ON jwt.id = wt.workTypeId LEFT JOIN worktypemasterassets as a ON a.id = wt.ToolId where wt.workTypeId = " + id + " group by wt.workTypeId";
+            List<CMMasterTool> _MasterToolList = await Context.GetData<CMMasterTool>(myQuery).ConfigureAwait(false);
+            return _MasterToolList;
         }
 
-        internal Task<List<CMJobWorkTypeTool>> CreateJobWorkTypeTool()
+        internal async Task<int> CreateJobWorkTypeTool(CMAddJobWorkTypeTool request)
         {
             /*
              * Insert workTypeid, ToolId(s) in WorkTypeAssociatedTools
             */
             /*Your code goes here*/
-            return null;
+            int inseartedId = 0;
+
+            string qryAssetsIds = $"insert into worktypeassociatedtools(workTypeId, ToolId, createdAt, createdBy ) value ";
+                  foreach (var data in request.ToolIds)
+                  {
+                        qryAssetsIds += $" ({ data.workTypeId }, { data.toolId },'{ UtilsRepository.GetUTCTime() }', { UtilsRepository.GetUserID() }),";
+                  }
+             inseartedId = await Context.ExecuteNonQry<int>(qryAssetsIds.Substring(0, (qryAssetsIds.Length - 1)) + ";").ConfigureAwait(false);
+
+            return inseartedId;
         }
 
-        internal Task<List<CMJobWorkTypeTool>> UpdateJobWorkTypeTool()
+        internal async Task<CMDefaultResponse> UpdateJobWorkTypeTool(CMUpdateJobWorkTypeTool request)
         {
             /*
              * Update workTypeid, ToolId(s) in WorkTypeAssociatedTools table for requested AssociatedToolId
             */
             /*Your code goes here*/
-            return null;
+            string DeleteQry = $"delete from worktypeassociatedtools where workTypeId = { request.id };";
+            await Context.ExecuteNonQry<int>(DeleteQry).ConfigureAwait(false);
+
+            string qryAssetsIds = $"insert into worktypeassociatedtools(workTypeId, ToolId, updatedAt, updatedBy ) value ";
+                foreach (var data in request.ToolIds)
+                {
+                    qryAssetsIds += $"({ data.workTypeId }, { data.toolId },'{ UtilsRepository.GetUTCTime() }', { UtilsRepository.GetUserID() }),";               
+                }
+             await Context.ExecuteNonQry<int>(qryAssetsIds.Substring(0, (qryAssetsIds.Length - 1)) + ";").ConfigureAwait(false);
+            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Update Work Type Tool");
+
+            return response;
         }
 
-        internal Task<List<CMJobWorkTypeTool>> DeleteJobWorkTypeTool()
+        internal Task<CMDefaultResponse> DeleteJobWorkTypeTool(int id)
         {
             /*
              * Delete the record from WorkTypeAssociatedTools table for requested AssociatedToolId.

@@ -23,10 +23,10 @@ namespace CMMSAPIs.BS.Jobs
          * Tools Associated to Work Type CRUD Operation
         */
         Task<List<CMJobWorkTypeTool>> GetJobWorkTypeToolList(int jobId);
-        Task<List<CMMasterTool>> GetMasterToolList();
-        Task<List<CMJobWorkTypeTool>> CreateJobWorkTypeTool();
-        Task<List<CMJobWorkTypeTool>> UpdateJobWorkTypeTool();
-        Task<List<CMJobWorkTypeTool>> DeleteJobWorkTypeTool();
+        Task<List<CMMasterTool>> GetMasterToolList(int id);
+        Task<int> CreateJobWorkTypeTool(CMAddJobWorkTypeTool request);
+        Task<CMDefaultResponse> UpdateJobWorkTypeTool(CMUpdateJobWorkTypeTool request);
+        Task<CMDefaultResponse> DeleteJobWorkTypeTool(int id);
     }
 
     public class JobWorkTypeBS : IJobWorkTypeBS
@@ -122,13 +122,13 @@ namespace CMMSAPIs.BS.Jobs
             }
         }
 
-        public async Task<List<CMMasterTool>> GetMasterToolList()
+        public async Task<List<CMMasterTool>> GetMasterToolList(int id)
         {
             try
             {
                 using (var repos = new JobWorkTypeRepository(getDB))
                 {
-                    return await repos.GetMasterToolList();
+                    return await repos.GetMasterToolList(id);
                 }
             }
             catch (Exception ex)
@@ -137,13 +137,13 @@ namespace CMMSAPIs.BS.Jobs
             }
         }
 
-        public async Task<List<CMJobWorkTypeTool>> CreateJobWorkTypeTool()
+        public async Task<int> CreateJobWorkTypeTool(CMAddJobWorkTypeTool request)
         {
             try
             {
                 using (var repos = new JobWorkTypeRepository(getDB))
                 {
-                    return await repos.CreateJobWorkTypeTool();
+                    return await repos.CreateJobWorkTypeTool(request);
                 }
             }
             catch (Exception ex)
@@ -152,13 +152,13 @@ namespace CMMSAPIs.BS.Jobs
             }
         }
 
-        public async Task<List<CMJobWorkTypeTool>> UpdateJobWorkTypeTool()
+        public async Task<CMDefaultResponse> UpdateJobWorkTypeTool(CMUpdateJobWorkTypeTool request)
         {
             try
             {
                 using (var repos = new JobWorkTypeRepository(getDB))
                 {
-                    return await repos.UpdateJobWorkTypeTool();
+                    return await repos.UpdateJobWorkTypeTool(request);
                 }
             }
             catch (Exception ex)
@@ -167,13 +167,13 @@ namespace CMMSAPIs.BS.Jobs
             }
         }
 
-        public async Task<List<CMJobWorkTypeTool>> DeleteJobWorkTypeTool()
+        public async Task<CMDefaultResponse> DeleteJobWorkTypeTool(int id)
         {
             try
             {
                 using (var repos = new JobWorkTypeRepository(getDB))
                 {
-                    return await repos.DeleteJobWorkTypeTool();
+                    return await repos.DeleteJobWorkTypeTool(id);
                 }
             }
             catch (Exception ex)

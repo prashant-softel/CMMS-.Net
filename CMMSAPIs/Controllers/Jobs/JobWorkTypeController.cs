@@ -109,12 +109,12 @@ namespace CMMSAPIs.Controllers.Jobs
         */
 
         [Route("GetMasterToolList")]
-        [HttpDelete]
-        public async Task<IActionResult> GetMasterToolList()
+        [HttpGet]
+        public async Task<IActionResult> GetMasterToolList(int id)
         {
             try
             {
-                var data = await _JobWorkTypeBS.GetMasterToolList();
+                var data = await _JobWorkTypeBS.GetMasterToolList(id);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -125,11 +125,11 @@ namespace CMMSAPIs.Controllers.Jobs
 
         [Route("CreateJobWorkTypeTool")]
         [HttpPost]
-        public async Task<IActionResult> CreateJobWorkTypeTool()
+        public async Task<IActionResult> CreateJobWorkTypeTool(CMAddJobWorkTypeTool request)
         {
             try
             {
-                var data = await _JobWorkTypeBS.CreateJobWorkTypeTool();
+                var data = await _JobWorkTypeBS.CreateJobWorkTypeTool(request);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -140,11 +140,11 @@ namespace CMMSAPIs.Controllers.Jobs
 
         [Route("UpdateJobWorkTypeTool")]
         [HttpPut]
-        public async Task<IActionResult> UpdateJobWorkTypeTool()
+        public async Task<IActionResult> UpdateJobWorkTypeTool(CMUpdateJobWorkTypeTool request)
         {
             try
             {
-                var data = await _JobWorkTypeBS.UpdateJobWorkTypeTool();
+                var data = await _JobWorkTypeBS.UpdateJobWorkTypeTool(request);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -155,11 +155,11 @@ namespace CMMSAPIs.Controllers.Jobs
 
         [Route("DeleteJobWorkTypeTool")]
         [HttpDelete]
-        public async Task<IActionResult> DeleteJobWorkTypeTool()
+        public async Task<IActionResult> DeleteJobWorkTypeTool(int id)
         {
             try
             {
-                var data = await _JobWorkTypeBS.DeleteJobWorkTypeTool();
+                var data = await _JobWorkTypeBS.DeleteJobWorkTypeTool(id);
                 return Ok(data);
             }
             catch (Exception ex)

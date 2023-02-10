@@ -1,6 +1,24 @@
+using System;
+using System.Text;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
+using CMMSAPIs.BS.Authentication;
+using CMMSAPIs.BS.FileUpload;
+using CMMSAPIs.Middlewares;
+using CMMSAPIs.BS.Incident_Reports;
+using CMMSAPIs.BS.WC;
+using CMMSAPIs.BS.Inventory;
+using CMMSAPIs.BS.Facility;
 using CMMSAPIs.BS.Jobs;
 using CMMSAPIs.BS.Permits;
-using CMMSAPIs.BS.Facility;
+using CMMSAPIs.BS.JC;
 using CMMSAPIs.BS.Mails;
 using CMMSAPIs.BS.Masters;
 using CMMSAPIs.BS.SM;
@@ -8,27 +26,6 @@ using CMMSAPIs.BS.Utils;
 using CMMSAPIs.BS.Users;
 using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Mails;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using System;
-using CMMSAPIs.BS.JC;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using CMMSAPIs.BS.Authentication;
-using System.Configuration;
-using System.Text;
-using CMMSAPIs.BS.FileUpload;
-using CMMSAPIs.Middlewares;
-using Microsoft.AspNetCore.Http;
-using CMMSAPIs.BS.Incident_Reports;
-using CMMSAPIs.BS.WC;
-using CMMSAPIs.BS.Inventory;
 
 namespace CMMSAPIs
 {
@@ -80,11 +77,13 @@ namespace CMMSAPIs
             services.AddScoped<IPermitBS, PermitBS>();
             services.AddScoped<IFacilityBS, FacilityBs>();
             services.AddScoped<IJobWorkTypeBS, JobWorkTypeBS>();
+
             services.AddScoped<iLoginBS, LoginBS>();
             services.AddScoped<IRoleAccessBS, RoleAccessBS>();
             services.AddScoped<IUserAccessBS, UserAccessBS>();
             services.AddScoped<ISMMasterBS, SMMasterBS>();
             services.AddScoped<IUtilsBS, UtilsBS>();
+            services.AddScoped<IPermitBS, PermitBS>();
             services.AddScoped<IJCBS, JCBS>();
             services.AddScoped<IIncidentReportBS, IncidentReportBS>();
             services.AddScoped<IWCBS, WCBS>();

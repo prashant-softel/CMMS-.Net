@@ -28,7 +28,7 @@ namespace CMMSAPIs.Repositories.Jobs
 
             /*Your code goes here*/
             string myQuery = "SELECT " +
-                                 "facilities.name as plantName, job.status as status, job.createdAt as jobDate, DATE_FORMAT(job.breakdownTime, '%Y-%m-%d') as breaKdownTime, job.id as id, asset_cat.name as equipmentCat, asset.name as workingArea, job.title as jobDetails, workType.workTypeName as workType, permit.code as permitId, job.createdBy as raisedBy, CONCAT(user.firstName ,' ' , user.lastName) as assignedToName, user.id as assignedToId, IF(job.breakdownTime = '', 'Non Breakdown Maintenance', 'Breakdown Maintenance') as breakdownType" +
+                                 "job.id, job.facilityId, user.id, facilities.name as plantName, job.status as status, job.createdAt as jobDate, DATE_FORMAT(job.breakdownTime, '%Y-%m-%d') as breaKdownTime, job.id as id, asset_cat.name as equipmentCat, asset.name as workingArea, job.title as jobDetails, workType.workTypeName as workType, permit.code as permitId, job.createdBy as raisedBy, CONCAT(user.firstName , ' ' , user.lastName) as assignedToName, user.id as assignedToId, IF(job.breakdownTime = '', 'Non Breakdown Maintenance', 'Breakdown Maintenance') as breakdownType , job.description as description" +
                                  " FROM " +
                                         "jobs as job " +
                                  "JOIN " +
@@ -65,7 +65,7 @@ namespace CMMSAPIs.Repositories.Jobs
             /*Your code goes here*/
 
             string myQuery = "SELECT " +
-                                    "facilities.id as block_id, facilities.name as block_name, job.status as status, user.id as assigned_id, CONCAT(user.firstName, user.lastName) as assigned_name, user.id as assigned_id, workType.workTypeName as workType,  job.title as job_title, job.description as job_description " +
+                                    "job.id as id, facilities.id as block_id, facilities.name as block_name, facilities1.name as block_name, facilities.name as facility_name, job.status as status, user.id as assigned_id, CONCAT(user.firstName, user.lastName) as assigned_name, workType.workTypeName as workType,  job.title as job_title, job.description as job_description " +
                                       "FROM " +
                                             "jobs as job " +
                                       "JOIN " +
@@ -76,6 +76,8 @@ namespace CMMSAPIs.Repositories.Jobs
                                             "jobworktypes as workType ON workType.equipmentCategoryId = asset_cat.id " +
                                       "JOIN " +
                                             "facilities as facilities ON job.facilityId = facilities.id " +
+                                      "JOIN " +
+                                            "facilities as facilities1 ON job.blockId = facilities1.id " +
                                       "LEFT JOIN " +
                                             "users as user ON user.id = job.assignedId" +
                                       " WHERE job.id= " + job_id;
@@ -115,15 +117,22 @@ namespace CMMSAPIs.Repositories.Jobs
             */
 
             /*Your code goes here*/
-            string qryJobBasic = "insert into jobs(facilityId, blockId,title, description, createdAt, createdBy, breakdownTime,assignedId, linkedPermit) values" +
-            $"({ request.facility_id }, { request.block_id }, '{ request.title }', '{ request.description }', '{UtilsRepository.GetUTCTime() }','{ request.createdBy }','{ UtilsRepository.GetUTCTime() }','{ request.assigned_id }','{ request.permit_id }')";
+            int status = (int)CMMS.CMMS_Status.CREATED;
+            if (request.assigned_id > 0)
+            {
+                status = (int)CMMS.CMMS_Status.ASSIGNED;
+            }
+            //int created_by = Utils.UtilsRepository.GetUserID();
+
+            string qryJobBasic = "insert into jobs(facilityId, blockId,title, description, createdAt, createdBy, breakdownTime, status, assignedId, linkedPermit) values" +
+            $"({ request.facility_id }, { request.block_id }, '{ request.title }', '{ request.description }', '{UtilsRepository.GetUTCTime() }','{ request.createdBy }','{ UtilsRepository.GetUTCTime() }','{ status }','{ request.assigned_id }','{ request.permit_id }')";
             await Context.ExecuteNonQry<int>(qryJobBasic).ConfigureAwait(false);
 
            // string query = "select LAST_INSERT_ID() from jobs; ";
             //List<CMCreateJob> newJob1 = await Context.GetData<CMCreateJob>(query).ConfigureAwait(false);
 
-            //string qry = "select id as insertedId from jobs order by id desc limit 1";
-            string myNewJobQuery = "SELECT " +
+            string qry = "select id as id , title as job_title, description as job_description from jobs order by id desc limit 1";
+            /*string myNewJobQuery = "SELECT " +
                         "job.id as id, facilities.id as block_id, job.status as JobStatus, facilities.name as block_name, job.status as status, user.id as assigned_id, CONCAT(user.firstName, user.lastName) as assigned_name, workType.workTypeName as workType,  job.title as job_title, job.description as job_description " +
                           "FROM " +
                                 "jobs as job " +
@@ -137,8 +146,8 @@ namespace CMMSAPIs.Repositories.Jobs
                                 "facilities as facilities ON job.facilityId = facilities.id " +
                           "LEFT JOIN " +
                                 "users as user ON user.id = job.assignedId order by job.id desc limit 1";
-
-            List<CMJobView> newJob = await Context.GetData<CMJobView>(myNewJobQuery).ConfigureAwait(false);
+*/
+            List<CMJobView> newJob = await Context.GetData<CMJobView>(qry).ConfigureAwait(false);
             int newJobID = newJob[0].id;
             
             foreach (var data in request.AssetsIds)
@@ -176,7 +185,7 @@ namespace CMMSAPIs.Repositories.Jobs
             }
 
             string myQuery = "SELECT " +
-                                    "facilities.id as block_id, job.status as JobStatus, facilities.name as block_name, job.status as status, user.id as assigned_id, CONCAT(user.firstName, user.lastName) as assigned_name, workType.workTypeName as workType,  job.title as job_title, job.description as job_description " +
+                                    "job.id as id, facilities.id as block_id, facilities.name as block_name, facilities1.name as block_name, facilities.name as facility_name, job.status as status, user.id as assigned_id, CONCAT(user.firstName, user.lastName) as assigned_name, workType.workTypeName as workType,  job.title as job_title, job.description as job_description " +
                                       "FROM " +
                                             "jobs as job " +
                                       "JOIN " +
@@ -187,6 +196,8 @@ namespace CMMSAPIs.Repositories.Jobs
                                             "jobworktypes as workType ON workType.equipmentCategoryId = asset_cat.id " +
                                       "JOIN " +
                                             "facilities as facilities ON job.facilityId = facilities.id " +
+                                      "JOIN " +
+                                            "facilities as facilities1 ON job.blockId = facilities1.id " +
                                       "LEFT JOIN " +
                                             "users as user ON user.id = job.assignedId" +
                                       " WHERE job.id= " + job_id;
@@ -196,7 +207,7 @@ namespace CMMSAPIs.Repositories.Jobs
 
             CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_ASSIGNED, _ViewJobList[0]);
 
-            CMDefaultResponse response = new CMDefaultResponse(job_id, CMMS.RETRUNSTATUS.SUCCESS, "");
+            CMDefaultResponse response = new CMDefaultResponse(job_id, CMMS.RETRUNSTATUS.SUCCESS, "Job Assigned");
 
             return response;
         }
@@ -214,27 +225,30 @@ namespace CMMSAPIs.Repositories.Jobs
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
             }
             string myQuery = "SELECT " +
-                                   "facilities.id as block_id, job.status as JobStatus, facilities.name as block_name, job.status as status, user.id as assigned_id, CONCAT(user.firstName, user.lastName) as assigned_name, workType.workTypeName as workType,  job.title as job_title, job.description as job_description " +
-                                     "FROM " +
-                                           "jobs as job " +
-                                     "JOIN " +
-                                           "jobmappingassets as mapAssets ON mapAssets.jobId = job.id " +
-                                     "JOIN " +
-                                           "assetcategories as asset_cat ON mapAssets.categoryId = asset_cat.id " +
-                                     "LEFT JOIN " +
-                                           "jobworktypes as workType ON workType.equipmentCategoryId = asset_cat.id " +
-                                     "JOIN " +
-                                           "facilities as facilities ON job.facilityId = facilities.id " +
-                                     "LEFT JOIN " +
-                                           "users as user ON user.id = job.assignedId" +
-                                     " WHERE job.id= " + job_id;
+                                    "job.id as id, facilities.id as block_id, facilities.name as block_name, facilities1.name as block_name, facilities.name as facility_name, job.status as status, user.id as assigned_id, CONCAT(user.firstName, user.lastName) as assigned_name, workType.workTypeName as workType,  job.title as job_title, job.description as job_description " +
+                                      "FROM " +
+                                            "jobs as job " +
+                                      "JOIN " +
+                                            "jobmappingassets as mapAssets ON mapAssets.jobId = job.id " +
+                                      "JOIN " +
+                                            "assetcategories as asset_cat ON mapAssets.categoryId = asset_cat.id " +
+                                      "LEFT JOIN " +
+                                            "jobworktypes as workType ON workType.equipmentCategoryId = asset_cat.id " +
+                                      "JOIN " +
+                                            "facilities as facilities ON job.facilityId = facilities.id " +
+                                      "JOIN " +
+                                            "facilities as facilities1 ON job.blockId = facilities1.id " +
+                                      "LEFT JOIN " +
+                                            "users as user ON user.id = job.assignedId" +
+                                      " WHERE job.id= " + job_id;
+
             List<CMJobView> _ViewJobList = await Context.GetData<CMJobView>(myQuery).ConfigureAwait(false);
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, retValue, 0, 0, "Permit Canceled", CMMS.CMMS_Status.JOB_CANCELLED);
 
             CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_CANCELLED, _ViewJobList[0]);
 
-            CMDefaultResponse response = new CMDefaultResponse(job_id, CMMS.RETRUNSTATUS.SUCCESS, "");
+            CMDefaultResponse response = new CMDefaultResponse(job_id, CMMS.RETRUNSTATUS.SUCCESS, "Job Cancel");
             return response;
         }
         internal async Task<CMDefaultResponse> LinkToPTW(int job_id, int ptw_id)
@@ -256,7 +270,7 @@ namespace CMMSAPIs.Repositories.Jobs
             }
 
             string myQuery = "SELECT " +
-                                    "facilities.id as block_id, job.status as JobStatus, facilities.name as block_name, job.status as status, user.id as assigned_id, CONCAT(user.firstName, user.lastName) as assigned_name, workType.workTypeName as workType,  job.linkedPermit as current_ptwId, job.title as job_title, job.description as job_description " +
+                                    "job.id as id, facilities.id as block_id, facilities.name as block_name, facilities1.name as block_name, facilities.name as facility_name, job.status as status, user.id as assigned_id, CONCAT(user.firstName, user.lastName) as assigned_name, workType.workTypeName as workType,  job.title as job_title, job.description as job_description " +
                                       "FROM " +
                                             "jobs as job " +
                                       "JOIN " +
@@ -267,6 +281,8 @@ namespace CMMSAPIs.Repositories.Jobs
                                             "jobworktypes as workType ON workType.equipmentCategoryId = asset_cat.id " +
                                       "JOIN " +
                                             "facilities as facilities ON job.facilityId = facilities.id " +
+                                      "JOIN " +
+                                            "facilities as facilities1 ON job.blockId = facilities1.id " +
                                       "LEFT JOIN " +
                                             "users as user ON user.id = job.assignedId" +
                                       " WHERE job.id= " + job_id;
@@ -276,7 +292,7 @@ namespace CMMSAPIs.Repositories.Jobs
 
             CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_LINKED, _ViewJobList[0]);
 
-            CMDefaultResponse response = new CMDefaultResponse(job_id, CMMS.RETRUNSTATUS.SUCCESS, "");
+            CMDefaultResponse response = new CMDefaultResponse(job_id, CMMS.RETRUNSTATUS.SUCCESS, "Job Linked To Permit");
 
            return response;
         
