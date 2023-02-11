@@ -129,7 +129,7 @@ namespace CMMSAPIs.Repositories.JC
 
             CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOBCARD, CMMS.CMMS_Status.JC_OPENED, _jcDetails[0]);
 
-            CMDefaultResponse response = new CMDefaultResponse(job_id, CMMS.RETRUNSTATUS.SUCCESS, "Job Card Start");
+            CMDefaultResponse response = new CMDefaultResponse(_jcDetails[0].id, CMMS.RETRUNSTATUS.SUCCESS, $"Job Card {_jcDetails[0].id} Start");
 
             return response;
         }
@@ -181,7 +181,7 @@ namespace CMMSAPIs.Repositories.JC
 
             CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOBCARD, CMMS.CMMS_Status.JC_UPDADATED, _jcDetails[0]);
 
-            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Job Card Updated");
+            CMDefaultResponse response = new CMDefaultResponse(_jcDetails[0].id, CMMS.RETRUNSTATUS.SUCCESS, $"Job Card { _jcDetails[0].id } Updated");
 
             return response;
         }
@@ -213,7 +213,7 @@ namespace CMMSAPIs.Repositories.JC
 
             CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOBCARD, CMMS.CMMS_Status.JC_CLOSED, _jcDetails[0]);
 
-            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, request.comment);
+            CMDefaultResponse response = new CMDefaultResponse(_jcDetails[0].id, CMMS.RETRUNSTATUS.SUCCESS, $"Job Card {_jcDetails[0].id } Closed");
 
             return response;
         }
@@ -239,7 +239,7 @@ namespace CMMSAPIs.Repositories.JC
 
             CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOBCARD, CMMS.CMMS_Status.JC_APPROVED, _jcDetails[0]);
 
-            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, request.comment);
+            CMDefaultResponse response = new CMDefaultResponse(_jcDetails[0].id, CMMS.RETRUNSTATUS.SUCCESS, $"Job Card {_jcDetails[0].id } Approve");
 
             return response;
         }
@@ -264,7 +264,7 @@ namespace CMMSAPIs.Repositories.JC
 
             CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOBCARD, CMMS.CMMS_Status.JC_REJECTED5, _jcDetails[0]);
 
-            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, request.commnet);
+            CMDefaultResponse response = new CMDefaultResponse(_jcDetails[0].id, CMMS.RETRUNSTATUS.SUCCESS, $"Job Card {_jcDetails[0].id} Rejected");
 
             return response;
 

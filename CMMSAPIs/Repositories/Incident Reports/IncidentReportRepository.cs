@@ -96,7 +96,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
 
             CMMSNotification.sendNotification(CMMS.CMMS_Modules.INCIDENT_REPORT, CMMS.CMMS_Status.IR_CREATED, _IncidentReportDetails[0]);
 
-            CMDefaultResponse response = new CMDefaultResponse(_IncidentReportDetails[0].id, CMMS.RETRUNSTATUS.SUCCESS, "Added Incident Report");
+            CMDefaultResponse response = new CMDefaultResponse(_IncidentReportDetails[0].id, CMMS.RETRUNSTATUS.SUCCESS, $"Incident Report {_IncidentReportDetails[0].id} Created");
 
             return response;
         }
@@ -203,7 +203,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
 
             CMMSNotification.sendNotification(CMMS.CMMS_Modules.INCIDENT_REPORT, CMMS.CMMS_Status.IR_UPDATED, _IncidentReportList[0]);
 
-            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Updated Incident Report Successfully");
+            CMDefaultResponse response = new CMDefaultResponse(_IncidentReportList[0].id, CMMS.RETRUNSTATUS.SUCCESS, $"Incident Report {_IncidentReportList[0].id} Updated");
 
             return response;
         }
@@ -258,7 +258,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
 
             CMMSNotification.sendNotification(CMMS.CMMS_Modules.INCIDENT_REPORT, CMMS.CMMS_Status.IR_APPROVED, _IncidentReportList[0]);
 
-            CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Approved Incident Report Successfully");
+            CMDefaultResponse response = new CMDefaultResponse(_IncidentReportList[0].id, CMMS.RETRUNSTATUS.SUCCESS, $"Incident Report { _IncidentReportList[0].id } Approved");
             return response;
         }
 
@@ -311,7 +311,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
 
             CMMSNotification.sendNotification(CMMS.CMMS_Modules.INCIDENT_REPORT, CMMS.CMMS_Status.IR_REJECTED, _IncidentReportList[0]);
 
-            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Rejected Incident Report Successfully");
+            CMDefaultResponse response = new CMDefaultResponse(_IncidentReportList[0].id, CMMS.RETRUNSTATUS.SUCCESS, $"Incident Report { _IncidentReportList[0].id } Rejected");
 
             return response;
         }
