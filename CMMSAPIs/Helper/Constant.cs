@@ -192,24 +192,30 @@ namespace CMMSAPIs.Helper
         }
 
         public static Dictionary<string, int> INCIDENT_RISK_TYPE =  new Dictionary<string, int>() { {"First-Aids Injury", 1 }, { "Electric Short", 2} };
-        
 
         /* Features Constant END */
 
         /* Feature Status */
-/*
-        // Job
-        public const int JOB_CREATED = 1, JOB_ASSIGNED = 2, JOB_LINKED = 3, JOB_IN_PROGRESS = 4, JOB_CANCELLED = 5;
+        /*
+                // Job
+                public const int JOB_CREATED = 1, JOB_ASSIGNED = 2, JOB_LINKED = 3, JOB_IN_PROGRESS = 4, JOB_CANCELLED = 5;
 
-        // Permit
-        public const int PTW_CREATED = 1, PTW_ISSUED = 2, PTW_REJECTED_BY_ISSUER = 3, PTW_APPROVE = 4, PTW_REJECTED_BY_APPROVER = 5,
-                         PTW_CLOSED = 6, PTW_CANCELLED_BY_ISSUER = 7, PTW_CANCELLLED_BY_HSE = 8, PTW_CANCELLED_BY_APPROVER = 9,
-                         PTW_EDIT = 10, PTW_EXTEND_REQUESTED = 11, PTW_EXTEND_REQUEST_APPROVE = 12, PTW_EXTEND_REQUEST_REJECTED = 13,
-                         PTW_LINKED_TO_JOB = 14, PTW_LINKED_TO_PM = 15, PTW_LINKED_TO_AUDIT = 16, PTW_LINKED_TO_HOTO = 17, PTW_EXPIRED = 18;
+                // Permit
+                public const int PTW_CREATED = 1, PTW_ISSUED = 2, PTW_REJECTED_BY_ISSUER = 3, PTW_APPROVE = 4, PTW_REJECTED_BY_APPROVER = 5,
+                                 PTW_CLOSED = 6, PTW_CANCELLED_BY_ISSUER = 7, PTW_CANCELLLED_BY_HSE = 8, PTW_CANCELLED_BY_APPROVER = 9,
+                                 PTW_EDIT = 10, PTW_EXTEND_REQUESTED = 11, PTW_EXTEND_REQUEST_APPROVE = 12, PTW_EXTEND_REQUEST_REJECTED = 13,
+                                 PTW_LINKED_TO_JOB = 14, PTW_LINKED_TO_PM = 15, PTW_LINKED_TO_AUDIT = 16, PTW_LINKED_TO_HOTO = 17, PTW_EXPIRED = 18;
 
-        // JOBCARD
-        public const int JC_OPENED = 0, JC_UPDADATED = 1, JC_CLOSED = 2, JC_CARRRY_FORWARDED = 3, JC_APPROVED = 4, JC_REJECTED = 5, JC_PTW_TIMED_OUT = 6;
-*/
+                // JOBCARD
+                public const int JC_OPENED = 0, JC_UPDADATED = 1, JC_CLOSED = 2, JC_CARRRY_FORWARDED = 3, JC_APPROVED = 4, JC_REJECTED = 5, JC_PTW_TIMED_OUT = 6;
+        */
+        public enum CMMS_JobType
+        {
+            BreakdownMaintenance = 0,
+            PreventiveMaintenance,
+            Audit
+        }
+
         public enum CMMS_Status
         {
             Invalid = 0,

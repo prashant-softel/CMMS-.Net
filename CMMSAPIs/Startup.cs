@@ -15,6 +15,7 @@ using CMMSAPIs.Middlewares;
 using CMMSAPIs.BS.Incident_Reports;
 using CMMSAPIs.BS.WC;
 using CMMSAPIs.BS.Inventory;
+using CMMSAPIs.BS.Facility;
 using CMMSAPIs.BS.Jobs;
 using CMMSAPIs.BS.Permits;
 using CMMSAPIs.BS.JC;
@@ -76,7 +77,7 @@ namespace CMMSAPIs
             services.AddScoped<ICMMSBS, CMMSBS>();
             services.AddScoped<IJobBS, JobBS>();
             services.AddScoped<IPermitBS, PermitBS>();
-
+            services.AddScoped<IFacilityBS, FacilityBs>();
             services.AddScoped<IJobWorkTypeBS, JobWorkTypeBS>();
 
             services.AddScoped<iLoginBS, LoginBS>();
