@@ -123,9 +123,20 @@ namespace CMMSAPIs.Repositories.Jobs
                 status = (int)CMMS.CMMS_Status.ASSIGNED;
             }
             //int created_by = Utils.UtilsRepository.GetUserID();
-
-            string qryJobBasic = "insert into jobs(facilityId, blockId,title, description, createdAt, createdBy, breakdownTime, status, assignedId, linkedPermit) values" +
-            $"({ request.facility_id }, { request.block_id }, '{ request.title }', '{ request.description }', '{UtilsRepository.GetUTCTime() }','{ request.createdBy }','{ UtilsRepository.GetUTCTime() }','{ status }','{ request.assigned_id }','{ request.permit_id }')";
+            if (request.jobType == 0)
+            {
+                request.jobType = (int)CMMS.CMMS_JobType.BreakdownMaintenance;
+            }
+            else if(request.jobType == 1)
+            {
+                request.jobType = (int)CMMS.CMMS_JobType.PreventiveMaintenance;
+            }
+            else if (request.jobType == 2)
+            {
+                request.jobType = (int)CMMS.CMMS_JobType.Audit;
+            }
+            string qryJobBasic = "insert into jobs(facilityId, blockId, title, description, createdAt, createdBy, breakdownTime, JobType, status, assignedId, linkedPermit) values" +
+            $"({ request.facility_id }, { request.block_id }, '{ request.title }', '{ request.description }', '{UtilsRepository.GetUTCTime() }','{ request.createdBy }','{ UtilsRepository.GetUTCTime() }',{request.jobType},'{ status }','{ request.assigned_id }','{ request.permit_id }')";
             await Context.ExecuteNonQry<int>(qryJobBasic).ConfigureAwait(false);
 
            // string query = "select LAST_INSERT_ID() from jobs; ";

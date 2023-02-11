@@ -17,6 +17,7 @@ namespace CMMSAPIs.Models.Jobs
         public int block_id { get; set; }
         public int assigned_id { get; set; }
         public int permit_id { get; set; }
+        public int jobType { get; set; }
         public DateTime breakdown_time { get; set; }
         public DateTime job_create_Date { get; set; }
         public DateTime createdAt { get; set; }
