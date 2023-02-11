@@ -18,6 +18,8 @@ namespace CMMSAPIs.Repositories.Masters
             /*
              * Primary Table - CheckList_Mapping
              * Read All properties mention in model and return list
+             * 
+             * if type is Audit then return Plan_id, Audit_schedule_date and List of Checklist mapped
              * Code goes here
             */
             return null;
@@ -28,6 +30,8 @@ namespace CMMSAPIs.Repositories.Masters
             /*
              * Primary Table - CheckList_Mapping
              * Insert All properties mention in model
+             * 
+             * If type is Audit then insert Plan_id, Audit_schedule_date and List of Checklist mapped. Other properties not required
              * Code goes here
             */
             return null;
@@ -37,6 +41,8 @@ namespace CMMSAPIs.Repositories.Masters
         {
             /* Primary Table - CheckList_Mapping
              * Update All properties mention in model
+             * 
+             * If type is Audit then Update Plan_id, Audit_schedule_date and List of Checklist mapped. Other properties not required
              * Code goes here
             */
             return null;

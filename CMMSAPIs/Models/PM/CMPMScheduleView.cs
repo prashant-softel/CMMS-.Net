@@ -48,7 +48,7 @@ namespace CMMSAPIs.Models.PM
 
     }
 
-    public class CMPMScheduleExecution : ScheduleCheckList
+    public class CMPMScheduleExecution : CMPMScheduleViewDetail
     {
 
     }

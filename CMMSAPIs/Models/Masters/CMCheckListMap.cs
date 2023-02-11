@@ -13,5 +13,12 @@ namespace CMMSAPIs.Models.Masters
     {
         public int category_id { get; set; }
         public List<int> checklist_ids { get; set; }
+
+       /* Audit specific fields start */
+        
+        public int plan_id { get; set; }
+        public DateTime audit_schedule_date { get; set; }
+
+        /* End */
     }
 }
