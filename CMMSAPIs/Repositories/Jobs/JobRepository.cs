@@ -28,7 +28,7 @@ namespace CMMSAPIs.Repositories.Jobs
 
             /*Your code goes here*/
             string myQuery = "SELECT " +
-                                 "job.id, job.facilityId, user.id, facilities.name as plantName, job.status as status, job.createdAt as jobDate, DATE_FORMAT(job.breakdownTime, '%Y-%m-%d') as breaKdownTime, job.id as id, asset_cat.name as equipmentCat, asset.name as workingArea, job.title as jobDetails, workType.workTypeName as workType, permit.code as permitId, job.createdBy as raisedBy, CONCAT(user.firstName , ' ' , user.lastName) as assignedToName, user.id as assignedToId, IF(job.breakdownTime = '', 'Non Breakdown Maintenance', 'Breakdown Maintenance') as breakdownType , job.description as description" +
+                                 "job.id, job.facilityId, user.id, facilities.name as plantName, job.status as status, job.createdAt as jobDate, DATE_FORMAT(job.breakdownTime, '%Y-%m-%d') as breakdownTime, job.id as id, asset_cat.name as equipmentCat, asset.name as workingArea, job.title as jobDetails, workType.workTypeName as workType, permit.code as permitId, job.createdBy as raisedBy, CONCAT(user.firstName , ' ' , user.lastName) as assignedToName, user.id as assignedToId, IF(job.breakdownTime = '', 'Non Breakdown Maintenance', 'Breakdown Maintenance') as breakdownType , job.description as description" +
                                  " FROM " +
                                         "jobs as job " +
                                  "JOIN " +
@@ -207,8 +207,7 @@ namespace CMMSAPIs.Repositories.Jobs
 
             CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_ASSIGNED, _ViewJobList[0]);
 
-            CMDefaultResponse response = new CMDefaultResponse(job_id, CMMS.RETRUNSTATUS.SUCCESS, "Job Assigned");
-
+            CMDefaultResponse response = new CMDefaultResponse(_ViewJobList[0].id, CMMS.RETRUNSTATUS.SUCCESS, $"Job {_ViewJobList[0].id} Assigned");
             return response;
         }
 
@@ -248,7 +247,7 @@ namespace CMMSAPIs.Repositories.Jobs
 
             CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_CANCELLED, _ViewJobList[0]);
 
-            CMDefaultResponse response = new CMDefaultResponse(job_id, CMMS.RETRUNSTATUS.SUCCESS, "Job Cancel");
+            CMDefaultResponse response = new CMDefaultResponse(_ViewJobList[0].id, CMMS.RETRUNSTATUS.SUCCESS, $"Job {_ViewJobList[0].id} Canceled");
             return response;
         }
         internal async Task<CMDefaultResponse> LinkToPTW(int job_id, int ptw_id)
@@ -292,11 +291,9 @@ namespace CMMSAPIs.Repositories.Jobs
 
             CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_LINKED, _ViewJobList[0]);
 
-            CMDefaultResponse response = new CMDefaultResponse(job_id, CMMS.RETRUNSTATUS.SUCCESS, "Job Linked To Permit");
+            CMDefaultResponse response = new CMDefaultResponse(_ViewJobList[0].id, CMMS.RETRUNSTATUS.SUCCESS, $"Job {_ViewJobList[0].id} Linked To Permit");
 
-           return response;
-        
+            return response;        
         }
-
     }
 }
