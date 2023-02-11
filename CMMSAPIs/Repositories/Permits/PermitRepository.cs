@@ -25,7 +25,7 @@ namespace CMMSAPIs.Repositories.Permits
          * Permit Create Form Required End Points 
         */
 
-        internal async Task<List<CMPermitDetail>> getPermitDetails(int permit_id)
+        /*internal async Task<List<CMPermitDetail>> getPermitDetails(int permit_id)
         {
             string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as startDate, ptw.endDate as tillDate, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, facilities.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.description as description,CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, CONCAT(user3.firstName,' ',user3.lastName) as completedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, CONCAT(user5.firstName,' ',user5.lastName) as closedByName, ptw.cancelRequestDate as cancel_at " +
               "FROM permits as ptw " +
@@ -42,7 +42,7 @@ namespace CMMSAPIs.Repositories.Permits
 
             //return permitDetails[0];
             return permitDetails;
-        }
+        }*/
         internal async Task<List<CMDefaultList>> GetPermitTypeList(int facility_id)
         {
             /*
@@ -60,7 +60,7 @@ namespace CMMSAPIs.Repositories.Permits
              * input 1 - checkbox, 2 - radio, 3 - text, 4 - Ok
             */
 
-            string myQuery5 = "SELECT permitsaftymea.id as saftyQuestionId, permitsaftymea.title as SaftyQuestionName, permitsaftymea.input as input FROM permitsafetyquestions  as  permitsaftyques " +
+            string myQuery5 = "SELECT permitsaftymea.id as id, permitsaftymea.title as name, permitsaftymea.input as input FROM permitsafetyquestions  as  permitsaftyques " +
                              "LEFT JOIN permittypesafetymeasures as permitsaftymea ON permitsaftyques.safetyMeasureId = permitsaftymea.id " +
                              "JOIN permits as ptw ON ptw.id = permitsaftymea.permitTypeId " +
                              $"where ptw.id =  { permit_type_id }";
@@ -101,7 +101,7 @@ namespace CMMSAPIs.Repositories.Permits
              * Request Date/Time, Approved By, Approved Date/Time, Current Status(Approved, Rejected, closed).           
             */
             string myQuery = "SELECT " +
-                                 "ptw.id as permitId, ptw.permitNumber as permit_site_no, permitType.id as permit_type,  permitType.title as PermitTypeName, asset_cat.id as equipment_category, asset_cat.name as equipment, facilities.id as workingAreaId, facilities.name as workingAreaName, ptw.description as description, CONCAT(user.firstName + ' ' + user.lastName) as request_by_name, ptw.acceptedDate as request_datetime, CONCAT(user.firstName + ' ' + user.lastName) as approved_by_name, ptw.approvedDate as approved_datetime, ptw.status as currentStatus " +
+                                 "ptw.id as permitId, ptw.status as ptwStatus, ptw.permitNumber as permit_site_no, permitType.id as permit_type,  permitType.title as PermitTypeName, asset_cat.id as equipment_category, asset_cat.name as equipment, facilities.id as workingAreaId, facilities.name as workingAreaName, ptw.description as description, CONCAT(user.firstName + ' ' + user.lastName) as request_by_name, ptw.acceptedDate as request_datetime, CONCAT(user.firstName + ' ' + user.lastName) as approved_by_name, ptw.approvedDate as approved_datetime, ptw.status as currentStatus " +
                                  " FROM " +
                                         "permits as ptw " +
                                   "JOIN " +
@@ -247,9 +247,10 @@ namespace CMMSAPIs.Repositories.Permits
                                "LEFT JOIN permittypesafetymeasures as permitsaftymea ON permitsaftyques.safetyMeasureId = permitsaftymea.id " +
                                "JOIN permits as ptw ON ptw.id = permitsaftymea.permitTypeId " +
                                $"where ptw.id = { permit_id }";
+            List<CMSaftyQuestion> _QuestionList = await Context.GetData<CMSaftyQuestion>(myQuery5).ConfigureAwait(false);
 
             //get Associated Job
-            string myQuery6 = "SELECT job.id as JobId, jobCard.id as JobCardId, job.title as JobTitle , job.description as JobDes, job.createdAt as JobDate, job.status as JobStatus FROM jobs as job JOIN permits as ptw ON job.linkedPermit = " + permit_id +
+            string myQuery6 = "SELECT job.id as JobId, jobCard.id as JobCardId, job.title as JobTitle , job.description as JobDes, job.createdAt as JobDate, job.status as JobStatus FROM jobs as job JOIN permits as ptw ON job.linkedPermit = ptw.id "+
             " LEFT JOIN fleximc_jc_files as jobCard ON jobCard.JC_id = job.id " +
               $"where ptw.id = { permit_id }";
             List<CMAssociatedList> _AssociatedJobList = await Context.GetData<CMAssociatedList>(myQuery6).ConfigureAwait(false);
@@ -259,10 +260,6 @@ namespace CMMSAPIs.Repositories.Permits
                                "LEFT JOIN permits as ptw on ptw.id = assets_cat.id " +
                                $"where ptw.id = { permit_id }";
             List<CMCategory> _CategoryList = await Context.GetData<CMCategory>(myQuery7).ConfigureAwait(false);
-
-
-            List<CMSaftyQuestion> _QuestionList = await Context.GetData<CMSaftyQuestion>(myQuery5).ConfigureAwait(false);
-            List<CMSaftyQuestion> LstKeyValue = new List<CMSaftyQuestion>();
 
             _PermitDetailsList[0].LstLoto = _LotoList;
             _PermitDetailsList[0].LstEmp = _EmpList;

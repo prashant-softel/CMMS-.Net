@@ -1,19 +1,48 @@
-﻿namespace CMMSAPIs.Models.Inventory
+﻿using System;
+
+namespace CMMSAPIs.Models.Inventory
 {
     public class CMInventoryList
     {
         public int id { get; set; }
         public string name { get; set; }
+        public string facilityName { get; set; }
+        public string blockName { get; set; }
         public string description { get; set; }
         public string type { get; set; }
-        public string category_name { get; set; }
-        public string block_name { get; set; }
-        public string parent_name { get; set; }
-        public string serial_number { get; set; }
-        public string customer_name { get; set; }
-        public string owner_name { get; set; }
-        public string operator_name { get; set; }
+        public string categoryName { get; set; }
+        public string parentName { get; set; }
+        public string customerName { get; set; }
+        public string ownerName { get; set; }
+        public string operatorName { get; set; }
+        public string serialNumber { get; set; }
+        public int specialTool { get; set; }
+        public int warrantyId { get; set; }
+        public DateTime calibrationDueDate { get; set; }
         public string status { get; set; }
-
     }
+
+    public class CMInventoryTypeList
+    {
+        public int id { get; set; }
+        public string name { get; set; }
+        public string description { get; set; }
+        public int status{ get; set; }
+    }
+
+    public class CMInventoryStatusList
+    {
+        public int id { get; set; }
+        public string name { get; set; }
+        public string description { get; set; }
+        public int status { get; set; }
+    }
+
+    public class CMInventoryCategoryList
+    {
+        public int id { get; set; }
+        public string name { get; set; }
+        public string description { get; set; }
+    }
+
 }

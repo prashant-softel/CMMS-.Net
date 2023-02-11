@@ -12,10 +12,10 @@ namespace CMMSAPIs.BS.Incident_Reports
     {
         Task<List<CMIncidentList>> GetIncidentList(int facility_id, DateTime start_date, DateTime end_date);
         Task<CMDefaultResponse> CreateIncidentReport(CMCreateIncidentReport request);
-        Task<CMViewIncidentReport> ViewIncidentReport(int id);
+        Task<List<CMViewIncidentReport>> GetIncidentDetailsReport(int id);
         Task<CMDefaultResponse> UpdateIncidentReport(CMCreateIncidentReport request);
         Task<CMDefaultResponse> ApproveIncidentReport(int id);
-        Task<CMDefaultResponse> RejectIncidentReport(int id);
+        Task<CMDefaultResponse> RejectIncidentReport(CMApproveIncident  request);
 
     }
     public class IncidentReportBS : IIncidentReportBS
@@ -61,13 +61,13 @@ namespace CMMSAPIs.BS.Incident_Reports
 
         }
 
-        public async Task<CMViewIncidentReport> ViewIncidentReport(int id)
+        public async Task<List<CMViewIncidentReport>> GetIncidentDetailsReport(int id)
         {
             try
             {
                 using (var repos = new IncidentReportRepository(getDB))
                 {
-                    return await repos.ViewIncidentReport(id);
+                    return await repos.GetIncidentDetailsReport(id);
 
                 }
             }
@@ -110,13 +110,13 @@ namespace CMMSAPIs.BS.Incident_Reports
             }
         }
 
-        public async Task<CMDefaultResponse> RejectIncidentReport(int id)
+        public async Task<CMDefaultResponse> RejectIncidentReport(CMApproveIncident request)
         {
             try
             {
                 using (var repos = new IncidentReportRepository(getDB))
                 {
-                    return await repos.RejectIncidentReport(id);
+                    return await repos.RejectIncidentReport(request);
 
                 }
             }

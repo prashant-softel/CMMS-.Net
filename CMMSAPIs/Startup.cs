@@ -26,6 +26,8 @@ using CMMSAPIs.BS.Utils;
 using CMMSAPIs.BS.Users;
 using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Mails;
+using CMMSAPIs.BS.PM;
+using CMMSAPIs.BS.Audits;
 
 namespace CMMSAPIs
 {
@@ -92,6 +94,12 @@ namespace CMMSAPIs
             services.AddTransient<IMailService, MailService>();
             services.AddScoped<IJwtTokenManagerBS, JwtTokenManagerBS>();
             services.AddScoped<IFileUploadBS, FileUploadBS>();
+            services.AddScoped<ICheckListBS, CheckListBS>();
+            services.AddScoped<ICheckPointBS, CheckPointBS>();
+            services.AddScoped<ICheckListMapBS, CheckListMapBS>();
+            services.AddScoped<IPMScheduleViewBS, PMScheduleViewBS>();
+            services.AddScoped<IAuditPlanBS, AuditPlanBS>();
+            services.AddScoped<IAuditScheduleViewBS, AuditScheduleViewBS>();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
         }
 

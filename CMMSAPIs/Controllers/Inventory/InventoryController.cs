@@ -22,11 +22,11 @@ namespace CMMSAPIs.Controllers.Inventory
         [Authorize]
         [Route("GetInventoryList")]
         [HttpGet]
-        public async Task<IActionResult> GetInventoryList(int facility_id)
+        public async Task<IActionResult> GetInventoryList(int facilityId, int categoryId)
         {
             try
             {
-                var data = await _InventoryBS.GetInventoryList(facility_id);
+                var data = await _InventoryBS.GetInventoryList(facilityId, categoryId);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -36,13 +36,13 @@ namespace CMMSAPIs.Controllers.Inventory
         }
 
         [Authorize]
-        [Route("ViewInventory")]
+        [Route("GetInventoryDetails")]
         [HttpGet]
-        public async Task<IActionResult> ViewInventory(int id)
+        public async Task<IActionResult> GetInventoryDetails(int id)
         {
             try
             {
-                var data = await _InventoryBS.ViewInventory(id);
+                var data = await _InventoryBS.GetInventoryDetails(id);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -96,6 +96,22 @@ namespace CMMSAPIs.Controllers.Inventory
             try
             {
                 var data = await _InventoryBS.DeleteInventory(id);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
+        [Route("GetInventoryCategoryList")]
+        [HttpGet]
+        public async Task<IActionResult> GetInventoryCategoryList()
+        {
+            try
+            {
+                var data = await _InventoryBS.GetInventoryCategoryList();
                 return Ok(data);
             }
             catch (Exception ex)

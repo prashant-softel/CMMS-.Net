@@ -48,7 +48,6 @@ namespace CMMSAPIs.Repositories.Jobs
             if (facility_id != 0)
             {
                 myQuery += " WHERE job.facilityId= " + facility_id + " and user.id= " + userId;
-
             }
 
             List<CMJobModel> _JobList = await Context.GetData<CMJobModel>(myQuery).ConfigureAwait(false);
@@ -123,6 +122,7 @@ namespace CMMSAPIs.Repositories.Jobs
                 status = (int)CMMS.CMMS_Status.ASSIGNED;
             }
             //int created_by = Utils.UtilsRepository.GetUserID();
+
             if (request.jobType == 0)
             {
                 request.jobType = (int)CMMS.CMMS_JobType.BreakdownMaintenance;
@@ -139,8 +139,9 @@ namespace CMMSAPIs.Repositories.Jobs
             $"({ request.facility_id }, { request.block_id }, '{ request.title }', '{ request.description }', '{UtilsRepository.GetUTCTime() }','{ request.createdBy }','{ UtilsRepository.GetUTCTime() }',{request.jobType},'{ status }','{ request.assigned_id }','{ request.permit_id }')";
             await Context.ExecuteNonQry<int>(qryJobBasic).ConfigureAwait(false);
 
-           // string query = "select LAST_INSERT_ID() from jobs; ";
-            //List<CMCreateJob> newJob1 = await Context.GetData<CMCreateJob>(query).ConfigureAwait(false);
+            /*    string query = "select LAST_INSERT_ID() as insertedId from jobs; ";
+                List<CMCreateJob> newJob1 = await Context.GetData<CMCreateJob>(query).ConfigureAwait(false);
+                int newJobID1 = newJob1[0].insertedId;*/
 
             string qry = "select id as id , title as job_title, description as job_description from jobs order by id desc limit 1";
             /*string myNewJobQuery = "SELECT " +
@@ -212,6 +213,7 @@ namespace CMMSAPIs.Repositories.Jobs
                                       "LEFT JOIN " +
                                             "users as user ON user.id = job.assignedId" +
                                       " WHERE job.id= " + job_id;
+
             List<CMJobView> _ViewJobList = await Context.GetData<CMJobView>(myQuery).ConfigureAwait(false);
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, retVal, 0, 0, "Permit Assigned", CMMS.CMMS_Status.JOB_ASSIGNED);

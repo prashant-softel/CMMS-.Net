@@ -191,8 +191,7 @@ namespace CMMSAPIs.Helper
             LOW = 3
         }
 
-        public Dictionary<string, int> INCIDENT_RISK_TYPE =  new Dictionary<string, int>() { {"First-Aids Injury", 1 }, { "Electric Short", 2} };
-
+        public static Dictionary<string, int> INCIDENT_RISK_TYPE =  new Dictionary<string, int>() { {"First-Aids Injury", 1 }, { "Electric Short", 2} };
 
         /* Features Constant END */
 
@@ -262,6 +261,20 @@ namespace CMMSAPIs.Helper
             JC_APPROVED,
             JC_REJECTED5,
             JC_PTW_TIMED_OUT,
+
+
+            PM_START = 171,
+            PM_SAVE,
+            PM_SUBMIT,
+            PM_APPROVE,
+            PM_REJECT,
+            PM_PTW_TIMEOUT,
+
+            IR_CREATED = 181,
+            IR_APPROVED,
+            IR_REJECTED,
+            IR_UPDATED,
+
         }
 
     }

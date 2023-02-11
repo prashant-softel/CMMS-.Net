@@ -19,6 +19,8 @@ namespace CMMSAPIs.Repositories.Masters
              * supporting table - AssetCategory - to get Category Name, Frequency - To get Frequency Name
              * Read All properties from above table and return the list
              * Code goes here
+             * 
+             * If type is Audit then we need to return only checklist number and Is active or not. Category and other information is not required
             */
             return null;
         }
@@ -28,6 +30,8 @@ namespace CMMSAPIs.Repositories.Masters
             /*
              * Table - CheckList_Number
              * Insert all properties in CMCreateCheckList model to CheckList_Number
+             * 
+             * If type is Audit then we need to insert only checklist number. Category and other information is not required
              * Code goes here
             */
             return null;
@@ -37,6 +41,8 @@ namespace CMMSAPIs.Repositories.Masters
         {
             /*
              * Update the changed value in CheckList_Number for requested id
+             * 
+             *  If type is Audit then we need to update only checklist number. Category and other information is not required
              * Code goes here
             */
             return null;

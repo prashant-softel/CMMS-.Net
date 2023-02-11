@@ -10,15 +10,14 @@ namespace CMMSAPIs.BS.Inventory
 {
     public interface IInventoryBS
     {
-        Task<List<CMInventoryList>> GetInventoryList(int facility_id);
-        Task<List<CMViewInventory>> ViewInventory(int id);
+        Task<List<CMInventoryList>> GetInventoryList(int facilityId, int categoryId);
+        Task<List<CMViewInventory>> GetInventoryDetails(int id);
         Task<CMDefaultResponse> AddInventory(List<CMAddInventory> request);
         Task<CMDefaultResponse> UpdateInventory(CMAddInventory request);
         Task<CMDefaultResponse> DeleteInventory(int id);
-        Task<List<KeyValuePairs>> GetInventoryTypeList();
-        Task<List<KeyValuePairs>> GetInventoryStatusList();
-
-
+        Task<List<CMInventoryTypeList>> GetInventoryTypeList();
+        Task<List<CMInventoryStatusList>> GetInventoryStatusList();
+        Task<List<CMInventoryCategoryList>> GetInventoryCategoryList();
     }
     public class InventoryBS : IInventoryBS
     {
@@ -29,13 +28,13 @@ namespace CMMSAPIs.BS.Inventory
             databaseProvider = dbProvider;
         }
 
-        public async Task<List<CMInventoryList>> GetInventoryList(int facility_id)
+        public async Task<List<CMInventoryList>> GetInventoryList(int facilityId, int categoryId)
         {
             try
             {
                 using (var repos = new InventoryRepository(getDB))
                 {
-                    return await repos.GetInventoryList(facility_id);
+                    return await repos.GetInventoryList(facilityId, categoryId);
 
                 }
             }
@@ -45,13 +44,13 @@ namespace CMMSAPIs.BS.Inventory
             }
         }
 
-        public async Task<List<CMViewInventory>> ViewInventory(int id)
+        public async Task<List<CMViewInventory>> GetInventoryDetails(int id)
         {
             try
             {
                 using (var repos = new InventoryRepository(getDB))
                 {
-                    return await repos.ViewInventory(id);
+                    return await repos.GetInventoryDetails(id);
 
                 }
             }
@@ -109,7 +108,7 @@ namespace CMMSAPIs.BS.Inventory
             }
         }
 
-        public async Task<List<KeyValuePairs>> GetInventoryTypeList()
+        public async Task<List<CMInventoryTypeList>> GetInventoryTypeList()
         {
             try
             {
@@ -125,7 +124,22 @@ namespace CMMSAPIs.BS.Inventory
             }
         }
 
-        public async Task<List<KeyValuePairs>> GetInventoryStatusList()
+        public async Task<List<CMInventoryCategoryList>> GetInventoryCategoryList()
+        {
+            try
+            {
+                using (var repos = new InventoryRepository(getDB))
+                {
+                    return await repos.GetInventoryCategoryList();
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<List<CMInventoryStatusList>> GetInventoryStatusList()
         {
             try
             {

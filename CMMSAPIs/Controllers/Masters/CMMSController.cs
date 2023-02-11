@@ -1,12 +1,10 @@
-﻿using CMMSAPIs.BS.Masters;
-using CMMSAPIs.Models.Masters;
-using CMMSAPIs.Repositories.Masters;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using CMMSAPIs.Models.Masters;
+using CMMSAPIs.BS.Masters;
+using CMMSAPIs.Helper;
 
 namespace CMMSAPIs.Controllers.Masters
 {
@@ -113,13 +111,13 @@ namespace CMMSAPIs.Controllers.Masters
             }
         }
 
-        [Route("GetSupplierList")]
+        [Route("GetBusinessTypeList")]
         [HttpGet]
-        public async Task<IActionResult> GetSupplierList()
+        public async Task<IActionResult> GetBusinessTypeList()
         {
             try
             {
-                var data = await _CMMSBS.GetSupplierList();
+                var data = await _CMMSBS.GetBusinessTypeList();
                 return Ok(data);
             }
             catch (Exception ex)
@@ -127,9 +125,35 @@ namespace CMMSAPIs.Controllers.Masters
                 throw;
             }
         }
-        #endregion //helper functions
 
-        #region JobAPIs
+        [Route("GetBusinessList")]
+        [HttpGet]
+        public async Task<IActionResult> GetBusinessList(CMMS.CMMS_BusinessType businessType)
+        {
+            try
+            {
+                var data = await _CMMSBS.GetBusinessList(businessType);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        [Route("AddBusiness")]
+        [HttpPost]
+        public async Task<IActionResult> AddBusiness(List<CMBusiness> request)
+        {
+            try
+            {
+                var data = await _CMMSBS.AddBusiness(request);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
 
         [Route("GetFinancialYear")]
         [HttpGet]
@@ -148,7 +172,7 @@ namespace CMMSAPIs.Controllers.Masters
             }
         }
 
-        #endregion
+        #endregion //helper functions
 
         /*
         [Route("GetWindDailyGenSummary")]
