@@ -14,42 +14,36 @@ namespace CMMSAPIs.Models.Inventory
         public int id { get; set; }
         public string name { get; set; }
         public string description { get; set; }
+        public int facilityId { get; set; }
+        public int blockId { get; set; }
+        public int categoryId { get; set; }
         public int typeId { get; set; }
         public int statusId { get; set; }
         public int parentId { get; set; }
+        public int customerId { get; set; }
+        public int ownerId { get; set; }
+        public int operatorId { get; set; }
+        public int supplierId { get; set; }
+        public int manufacturerId { get; set; }
+        public int warrantyId { get; set; }
+        public int acCapacity { get; set; }
+        public int dcCapacity { get; set; }
+        public string model { get; set; }   
         public string serialNumber { get; set; }
+        public int cost { get; set; }
+        public string currency { get; set; }
+        public int stockCount { get; set; }
+        public int moduleQuantity { get; set; }
+        public int photoId { get; set; }
         public DateTime calibrationFirstDueDate { get; set; }
         public DateTime calibrationLastDate { get; set; } //add this col to database if its not there
         public int calibrationFrequencyType { get; set; }
         public int calibrationReminderDays { get; set; }
         public int retirementStatus { get; set; }
-        public int multiplier { get; set; }
-        
-        public int lastPrice { get; set; }
-        public string currency { get; set; }
-        public string model { get; set; }       //add this col to dataabse okay
-        public int moduleQuantity { get; set; }
-        public int acCapacity { get; set; }
-        public int dcCapacity { get; set; }
-        public int categoryId { get; set; }
-        public int facilityId { get; set; }
-        public int blockId { get; set; }
-        public int customerId { get; set; }
-        public int ownerId { get; set; }
-        public int operatorId { get; set; }
-        public int manufacturerId { get; set; }
-        public int supplierId { get; set; }
-        public int warrantyId { get; set; }
-        public int createdAt { get; set; }
-        public int createdBy { get; set; }
-        public int updatedAt { get; set; }
-        public int updatedBy { get; set; }
-        public int photoId { get; set; }
-        public int cost { get; set; }
-        public int stockCount { get; set; }
         public int specialToolId { get; set; }
         public int specialToolEmpId { get; set; }
         public List<CMWarrantyDetail> lstWarrantyDetail { get; set; }
+        public int multiplier { get; set; }
     }
 
     public class CMWarrantyDetail

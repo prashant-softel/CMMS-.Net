@@ -36,7 +36,7 @@ namespace CMMSAPIs.Controllers.Inventory
         }
 
         [Authorize]
-        [Route("ViewInventory")]
+        [Route("GetInventoryDetails")]
         [HttpGet]
         public async Task<IActionResult> GetInventoryDetails(int id)
         {

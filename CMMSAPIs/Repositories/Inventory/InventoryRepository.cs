@@ -28,12 +28,14 @@ namespace CMMSAPIs.Repositories.Inventory
              * Business - owner, operator, customer
             */
             /*Your code goes here*/
-            string myQuery = 
-                "SELECT a.id ,a.name, a.description, b2.name as supplier_name, b5.name as operator_name, ac.name as category_name," +
+            string myQuery =
+                "SELECT a.id, a.name, a.description, ast.name as type, b2.name as supplierName, b5.name as operatorName, ac.name as categoryName, a.serialNumber,a.specialTool, a.warrantyId, a.calibrationDueDate" +
 
-                " f.name AS block_name,a2.name as parent_name,  custbl.name as customer,owntbl.name as owner_name, s.name AS status, b5.name AS operator_name" +
+                ", f.name AS facilityName, bl.name AS blockName,a2.name as parentName, custbl.name as customerName, owntbl.name as ownerName, s.name AS status, b5.name AS operatorName" +
 
                 " from assets as a " +
+                "join assettypes as ast on ast.id = a.typeId " +
+                "" +
                 "join assetcategories as ac on ac.id= a.categoryId " +
                 "" +
                 "join business as custbl on custbl.id = a.customerId " +
@@ -48,7 +50,9 @@ namespace CMMSAPIs.Repositories.Inventory
 
                 "JOIN business as b5 ON b5.id = a.operatorId " +
                 "" +
-                "JOIN facilities as f ON f.id = a.blockId";
+                "JOIN facilities as f ON f.id = a.facilityId " +
+                "" +
+                "JOIN facilities as bl ON bl.id = a.blockId";
             if (facilityId > 0)
             {
                 myQuery += " WHERE a.facilityId= " + facilityId;
@@ -67,27 +71,50 @@ namespace CMMSAPIs.Repositories.Inventory
 
             internal async Task<List<CMViewInventory>> GetInventoryDetails(int id)
             {
-                /*
-                * get all details mentioned in model
-                * Primary Table - Assets
-                * Asset_category - asset category nam
-                * AssetWarranty - warranty related information 
-                * AssetType - type of inventory 
-                * AssetSatus - status of inventory, 
-                * Business - owner, operator, customer
-               */
-                /*Your code goes here*/
+            /*
+            * get all details mentioned in model
+            * Primary Table - Assets
+            * Asset_category - asset category nam
+            * AssetWarranty - warranty related information 
+            * AssetType - type of inventory 
+            * AssetSatus - status of inventory, 
+            * Business - owner, operator, customer
+           */
+            /*Your code goes here*/
 
-                string myQuery = "SELECT a.name, a.description, s.name AS status, f.name AS block_name, a2.name as parent_name, " +
-                    "b3.name as manufacturer_name, a.currency FROM assets AS a JOIN assetstatus as s on s.id = a.statusId " +
-                    "JOIN facilities as f ON f.id = a.blockId JOIN assets as a2 ON a.parentId = a2.id " +
-                    "JOIN business AS b2 ON a.ownerId = b2.id JOIN business AS b3 ON a.manufacturerId = b3.id";
+            //string myQuery = "SELECT a.name, a.description, s.name AS status, f.name AS block_name, a2.name as parent_name, " +
+            //    "b3.name as manufacturer_name, a.currency FROM assets AS a JOIN assetstatus as s on s.id = a.statusId " +
+            //    "JOIN facilities as f ON f.id = a.blockId JOIN assets as a2 ON a.parentId = a2.id " +
+            //    "JOIN business AS b2 ON a.ownerId = b2.id JOIN business AS b3 ON a.manufacturerId = b3.id";
+            string myQuery = "SELECT a.id ,a.name, a.description, ast.name as type, b2.name as supplierName, manufacturertlb.name as manufacturerName, b5.name as operatorName, ac.name as categoryName, a.serialNumber, a.calibrationFrequency, a.calibrationFreqType, a.calibrationReminderDays, a.calibrationLastDate as calibrationLastDate, a.calibrationDueDate, a.model, a.currency, a.cost, a.acCapacity, a.dcCapacity, a.moduleQuantity" +
+            //a.firstDueDate as calibrationDueDate, 
+            ", f.name AS facilityName, bl.name AS blockName,a2.name as parentName,  custbl.name as customerName,owntbl.name as ownerName, s.name AS status, b5.name AS operatorName, a.specialTool, a.warrantyId" +     //use a.specialToolEmpId to put specialToolEmp,
+
+            " from assets as a " +
+            "join assettypes as ast on ast.id = a.typeId " +
+            "" +
+            "join assetcategories as ac on ac.id= a.categoryId " +
+            "" +
+            "join business as custbl on custbl.id = a.customerId " +
+            "" +
+            "join business as owntbl" + " on owntbl.id = a.ownerId " +
+            "" +
+            "JOIN business AS manufacturertlb ON a.ownerId = manufacturertlb.id " +
+            "" +
+            "JOIN business AS b2 ON a.ownerId = b2.id " +
+
+            "JOIN business as b5 ON b5.id = a.operatorId " +
+            "" +
+            "JOIN assets as a2 ON a.parentId = a2.id " +
+            "" +
+            "JOIN assetstatus as s on s.id = a.statusId " +
+            "" +
+            "JOIN facilities as f ON f.id = a.facilityId " +
+            "" +
+            "JOIN facilities as bl ON bl.id = a.blockId";
             if (id != 0)
             {
                 myQuery += " WHERE a.id= " + id;
-
-
-
             }
             List<CMViewInventory> _ViewInventoryList = await Context.GetData<CMViewInventory>(myQuery).ConfigureAwait(false);
             
@@ -103,18 +130,19 @@ namespace CMMSAPIs.Repositories.Inventory
             */
 
             int count = 0;
+            int userID = UtilsRepository.GetUserID();
             int retID = 0;
             string assetName = "";
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.INVALID_ARG;
             string strRetMessage = "";
-            string qry = "insert into assets (name, description, parentId, acCapacity, moduleQuantity, dcCapacity, categoryId, typeId, statusId, facilityId, blockId, customerId, ownerId,operatorId, manufacturerId,supplierId,serialNumber,warrantyId,createdBy,status,photoId,cost,currency,stockCount,specialTool,specialToolEmpId,firstDueDate,calibration_last_date,frequency,calibrationFrequency,calibrationReminderDays,retirementStatus,multiplier) values ";
+            string qry = "insert into assets (name, description, parentId, acCapacity, dcCapacity, categoryId, typeId, statusId, facilityId, blockId, customerId, ownerId,operatorId, manufacturerId,supplierId,serialNumber,warrantyId,createdBy,status,photoId,model,stockCount,moduleQuantity, cost,currency,specialTool,specialToolEmpId,calibrationDueDate,calibrationLastDate,calibrationFreqType,calibrationFrequency,calibrationReminderDays,retirementStatus,multiplier) values ";
             foreach (var unit in request)
             {
                 count++;
                 assetName = unit.name;
                 string firstCalibrationDate    = unit.calibrationFirstDueDate.ToString("yyyy-MM-dd");
                 string lastCalibrationDate = unit.calibrationLastDate.ToString("yyyy-MM-dd");
-                qry += "('" + unit.name + "','" + unit.description + "','" + unit.parentId + "','" + unit.acCapacity + "','" + unit.moduleQuantity + "','" + unit.dcCapacity + "','" + unit.categoryId + "','" + unit.typeId + "','" + unit.statusId + "','" + unit.facilityId + "','" + unit.blockId + "','" + unit.customerId + "','" + unit.ownerId + "','" + unit.operatorId + "','" + unit.manufacturerId + "','" + unit.supplierId + "','" + unit.serialNumber + "','" + unit.warrantyId + "','" + unit.createdBy + "','" + unit.statusId + "','" + unit.photoId + "','" + unit.cost + "','" + unit.currency + "','" + unit.stockCount + "','" + unit.specialToolId + "','" + unit.specialToolEmpId + "','" + firstCalibrationDate + "','" + lastCalibrationDate + "','" + unit.calibrationFrequencyType + "','" + unit.calibrationFrequencyType + "','" + unit.calibrationReminderDays + "','"+ unit.retirementStatus+ "','"+ unit.multiplier + "'),";
+                qry += "('" + unit.name + "','" + unit.description + "','" + unit.parentId + "','" + unit.acCapacity + "','" + unit.dcCapacity + "','" + unit.categoryId + "','" + unit.typeId + "','" + unit.statusId + "','" + unit.facilityId + "','" + unit.blockId + "','" + unit.customerId + "','" + unit.ownerId + "','" + unit.operatorId + "','" + unit.manufacturerId + "','" + unit.supplierId + "','" + unit.serialNumber + "','" + unit.warrantyId + "','" + userID + "','" + unit.statusId + "','" + unit.photoId + "','" + unit.model + "','" + unit.stockCount + "','" + unit.moduleQuantity + "','" + unit.cost + "','" + unit.currency + "','" + unit.specialToolId + "','" + unit.specialToolEmpId + "','" + firstCalibrationDate + "','" + lastCalibrationDate + "','" + unit.calibrationFrequencyType + "','" + unit.calibrationFrequencyType + "','" + unit.calibrationReminderDays + "','"+ unit.retirementStatus+ "','"+ unit.multiplier + "'),";
             }
             if (count > 0)
             {
@@ -158,9 +186,10 @@ namespace CMMSAPIs.Repositories.Inventory
             */
 
             string updateQry = "";
+            int userID = UtilsRepository.GetUserID();
             if (request.name != null)
             {
-                updateQry += $"name= '{request.name}',";
+                updateQry += $" name= '{request.name}',";
             }
             if (request.description != null)
             {
@@ -231,18 +260,7 @@ namespace CMMSAPIs.Repositories.Inventory
             {
                 updateQry += $" warrantyId= '{request.warrantyId}',";
 
-            }
-            
-            if (request.updatedAt != 0)
-            {
-                updateQry += $" updatedAt= '{UtilsRepository.GetUTCTime()}',";
-
-            }
-            if (request.updatedBy != 0)
-            {
-                updateQry += $" updatedBy= '{request.updatedBy}',";
-
-            }
+            }            
             if (request.photoId != 0)
             {
                 updateQry += $" photoId= '{request.photoId}',";
@@ -298,7 +316,9 @@ namespace CMMSAPIs.Repositories.Inventory
                 updateQry += $" multiplier = '{request.multiplier}',";
 
             }
-            if(updateQry != null)
+            updateQry += $" updatedAt= '{UtilsRepository.GetUTCTime()}',";
+            updateQry += $" updatedBy= '{userID}',";
+            if (updateQry != null)
             {
                 updateQry = "UPDATE assets SET " + updateQry.Substring(0, updateQry.Length - 1);
                 updateQry += $" WHERE id= '{request.id}'";
