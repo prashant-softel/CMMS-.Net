@@ -16,7 +16,7 @@ namespace CMMSAPIs.Repositories.Inventory
         {
         }
 
-        internal async Task<List<CMInventoryList>> GetInventoryList(int facilityId, int categoryId)
+        internal async Task<List<CMInventoryList>> GetInventoryList(int facilityId, string categoryIds)
         {
             /*
              * get all details mentioned in model
@@ -29,9 +29,9 @@ namespace CMMSAPIs.Repositories.Inventory
             */
             /*Your code goes here*/
             string myQuery =
-                "SELECT a.id, a.name, a.description, ast.name as type, b2.name as supplierName, b5.name as operatorName, ac.name as categoryName, a.serialNumber,a.specialTool, a.warrantyId, a.calibrationDueDate" +
+                "SELECT a.id, a.name, a.description, ast.name as type, b2.name as supplierName, b5.name as operatorName, a.categoryId , ac.name as categoryName, a.serialNumber,a.specialTool, a.warrantyId, a.calibrationDueDate" +
 
-                ", f.name AS facilityName, bl.name AS blockName,a2.name as parentName, custbl.name as customerName, owntbl.name as ownerName, s.name AS status, b5.name AS operatorName" +
+                ", f.name AS facilityName, bl.name AS blockName, a.parentId, a2.name as parentName, custbl.name as customerName, owntbl.name as ownerName, s.name AS status, b5.name AS operatorName" +
 
                 " from assets as a " +
                 "join assettypes as ast on ast.id = a.typeId " +
@@ -56,9 +56,9 @@ namespace CMMSAPIs.Repositories.Inventory
             if (facilityId > 0)
             {
                 myQuery += " WHERE a.facilityId= " + facilityId;
-                if(categoryId !=  0)
+                if(categoryIds?.Length > 0)
                 {
-                    myQuery += " AND a.categoryId = " + categoryId;
+                    myQuery += " AND a.categoryId IN (" + categoryIds + ")";
                 }
             }
             //else
@@ -390,5 +390,22 @@ namespace CMMSAPIs.Repositories.Inventory
             return _AssetCategory;
         }
 
+        internal async Task<List<CMDefaultList>> GetWarrantyTypeList()
+        {
+            List<CMDefaultList> warrentyType = new List<CMDefaultList>();
+            warrentyType.Add(new CMDefaultList() { id = 1, name = "Basic" });
+            warrentyType.Add(new CMDefaultList() { id = 2, name = "Comprehensive" });
+            return warrentyType;
+        }
+
+        internal async Task<List<CMDefaultList>> GetWarrantyUsageTermList()
+        {
+            List<CMDefaultList> warrentyUsageTermType = new List<CMDefaultList> ();
+            warrentyUsageTermType.Add(new CMDefaultList() { id = 1, name = "Duration" });
+            warrentyUsageTermType.Add(new CMDefaultList() { id = 2, name = "Meter" });
+            warrentyUsageTermType.Add(new CMDefaultList() { id = 3, name = "Earier of duration or meter" });
+            warrentyUsageTermType.Add(new CMDefaultList() { id = 4, name = "Process completion" });
+            return warrentyUsageTermType;
+        }
     }
 }

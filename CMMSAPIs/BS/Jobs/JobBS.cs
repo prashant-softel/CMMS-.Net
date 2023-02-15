@@ -11,8 +11,8 @@ namespace CMMSAPIs.BS.Jobs
     public interface IJobBS
     {
         Task<List<CMJobModel>> GetJobList(int facility_id, int userId);
-        Task<List<CMJobView>> GetJobDetail(int job_id);
-        Task<int> CreateNewJob(CMCreateJob request);
+        Task<CMJobView> GetJobDetails(int job_id);
+        Task<CMDefaultResponse> CreateNewJob(CMCreateJob request);
         Task<CMDefaultResponse> ReAssignJob(int job_id, int assignedTo);
         Task<CMDefaultResponse> CancelJob(int job_id, int user_id, string Cancelremark);
         Task<CMDefaultResponse> LinkToPTW(int job_id, int ptw_id);
@@ -42,13 +42,13 @@ namespace CMMSAPIs.BS.Jobs
             }
         }
 
-        public async Task<List<CMJobView>> GetJobDetail(int job_id)
+        public async Task<CMJobView> GetJobDetails(int job_id)
         {
             try
             {
                 using (var repos = new JobRepository(getDB))
                 {
-                    return await repos.GetJobDetail(job_id);
+                    return await repos.GetJobDetails(job_id);
                 }
             }
             catch (Exception ex)
@@ -57,7 +57,7 @@ namespace CMMSAPIs.BS.Jobs
             }
         }
 
-        public async Task<int> CreateNewJob(CMCreateJob request)
+        public async Task<CMDefaultResponse> CreateNewJob(CMCreateJob request)
         {
             try
             {

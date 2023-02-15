@@ -22,11 +22,11 @@ namespace CMMSAPIs.Controllers.Inventory
         [Authorize]
         [Route("GetInventoryList")]
         [HttpGet]
-        public async Task<IActionResult> GetInventoryList(int facilityId, int categoryId)
+        public async Task<IActionResult> GetInventoryList(int facilityId, string categoryIds)
         {
             try
             {
-                var data = await _InventoryBS.GetInventoryList(facilityId, categoryId);
+                var data = await _InventoryBS.GetInventoryList(facilityId, categoryIds);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -151,6 +151,36 @@ namespace CMMSAPIs.Controllers.Inventory
                 throw;
             }
         }
-
+        [Authorize]
+        [Route("GetWarrantyTypeList")]
+        [HttpGet]
+        public async Task<IActionResult> GetWarrantyTypeList()
+        {
+            try
+            {
+                var data = await _InventoryBS.GetWarrantyTypeList();
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        [Authorize]
+        [Route("GetWarrantyUsageTermList")]
+        [HttpGet]
+        public async Task<IActionResult> GetWarrantyUsageTermList()
+        {
+            try
+            {
+                var data = await _InventoryBS.GetWarrantyUsageTermList();
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        
     }
 }

@@ -10,7 +10,9 @@ namespace CMMSAPIs.Models.Inventory
         public string blockName { get; set; }
         public string description { get; set; }
         public string type { get; set; }
+        public int categoryId { get; set; }
         public string categoryName { get; set; }
+        public int parentId { get; set; }
         public string parentName { get; set; }
         public string customerName { get; set; }
         public string ownerName { get; set; }
@@ -18,7 +20,7 @@ namespace CMMSAPIs.Models.Inventory
         public string serialNumber { get; set; }
         public int specialTool { get; set; }
         public int warrantyId { get; set; }
-        public DateTime calibrationDueDate { get; set; }
+        public dynamic calibrationDueDate { get; set; }
         public string status { get; set; }
     }
 

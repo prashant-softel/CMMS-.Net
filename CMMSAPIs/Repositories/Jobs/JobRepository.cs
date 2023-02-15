@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+﻿    using System.Collections.Generic;
 using System.Threading.Tasks;
 using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Jobs;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Utils;
 using CMMSAPIs.Models.Notifications;
+using System.Data;
+using System;
 
 namespace CMMSAPIs.Repositories.Jobs
 {
@@ -28,7 +30,7 @@ namespace CMMSAPIs.Repositories.Jobs
 
             /*Your code goes here*/
             string myQuery = "SELECT " +
-                                 "job.id, job.facilityId, user.id, facilities.name as plantName, job.status as status, job.createdAt as jobDate, DATE_FORMAT(job.breakdownTime, '%Y-%m-%d') as breakdownTime, job.id as id, asset_cat.name as equipmentCat, asset.name as workingArea, job.title as jobDetails, workType.workTypeName as workType, permit.code as permitId, job.createdBy as raisedBy, CONCAT(user.firstName , ' ' , user.lastName) as assignedToName, user.id as assignedToId, IF(job.breakdownTime = '', 'Non Breakdown Maintenance', 'Breakdown Maintenance') as breakdownType , job.description as description" +
+                                 "job.id, job.facilityId, user.id, facilities.name as plantName, job.status as status, job.createdAt as jobDate, DATE_FORMAT(job.breakdownTime, '%Y-%m-%d') as breakdown_time, job.id as id, asset_cat.name as equipmentCat, asset.name as workingArea, job.title as jobDetails, workType.workTypeName as workType, permit.code as permitId, job.createdBy as raisedBy, CONCAT(user.firstName , ' ' , user.lastName) as assignedToName, user.id as assignedToId, IF(job.breakdownTime = '', 'Non Breakdown Maintenance', 'Breakdown Maintenance') as breakdownType , job.description as description" +
                                  " FROM " +
                                         "jobs as job " +
                                  "JOIN " +
@@ -54,8 +56,69 @@ namespace CMMSAPIs.Repositories.Jobs
             return _JobList;
         }
 
-        internal async Task<List<CMJobView>> GetJobDetail(int job_id)
+        public static string getShortStatus(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status m_notificationID)
         {
+            string retValue;
+
+            switch (m_notificationID)
+            {
+                case CMMS.CMMS_Status.JOB_CREATED:     //Created
+                    retValue = "Created";
+                    break;
+                case CMMS.CMMS_Status.JOB_ASSIGNED:     //Assigned
+                    retValue = "Assigned";
+                    break;
+                case CMMS.CMMS_Status.JOB_LINKED:     //Linked
+                    retValue = "Linked to PTW";
+                    break;
+                case CMMS.CMMS_Status.JOB_CLOSED:     //Closed
+                    retValue = "Closed";
+                    break;
+                case CMMS.CMMS_Status.JOB_CANCELLED:     //Cancelled
+                    retValue = "Cancelled";
+                    break;
+                default:
+                    retValue = "Unknown <" + m_notificationID + ">";
+                    break;
+            }
+            return retValue;
+
+        }
+
+
+        public string getLongStatus(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMJobView jobObj)
+        {
+                string retValue = "My job subject";
+                int jobId = jobObj.id;
+
+                switch (notificationID)
+                {
+                    case CMMS.CMMS_Status.JOB_CREATED:     //Created
+                                                           //description is sent at 1 index of arg for this notification, so developer fetch it and use to format the subject
+                        string desc = jobObj.job_description;
+                        retValue = String.Format("Job <{0}><{1}> created", jobId, desc);
+                        break;
+                    case CMMS.CMMS_Status.JOB_ASSIGNED:     //Assigned
+                        retValue = String.Format("Job <{0}> assigned to <{1}>", jobObj.job_title, jobObj.assigned_name);
+                        break;
+                    case CMMS.CMMS_Status.JOB_LINKED:     //Linked
+                        retValue = String.Format("Job <{0}> linked to PTW <{1}>", jobObj.job_title, jobObj.current_ptw_id);
+                        break;
+                    case CMMS.CMMS_Status.JOB_CLOSED:     //Closed
+                        retValue = String.Format("Job <{0}> closed", jobObj.job_title);
+                        break;
+                    case CMMS.CMMS_Status.JOB_CANCELLED:     //Cancelled
+                        retValue = String.Format("Job <{0}> Cancelled", jobObj.job_title);
+                        break;
+                    default:
+                        break;
+                }
+                return retValue;
+
+            }
+
+            internal async Task<CMJobView> GetJobDetails(int job_id)
+            {
             /*
              * Fetch data from Job table and joins these table for relationship using ids Users, Assets, AssetCategory, Facility
              * id and it string value should be there in list
@@ -64,7 +127,7 @@ namespace CMMSAPIs.Repositories.Jobs
             /*Your code goes here*/
 
             string myQuery = "SELECT " +
-                                    "job.id as id, facilities.id as block_id, facilities.name as block_name, facilities1.name as block_name, facilities.name as facility_name, job.status as status, user.id as assigned_id, CONCAT(user.firstName, user.lastName) as assigned_name, workType.workTypeName as workType,  job.title as job_title, job.description as job_description " +
+                                    "job.id as id, facilities.id as facility_id, facilities.name as facility_name, blocks.id as block_id, blocks.name as block_name,                                     job.jobType as job_type,         job.status as status, created_user.id as created_by_id, CONCAT(created_user.firstName, created_user.lastName) as created_by_name, user.id as assigned_id, CONCAT(user.firstName, user.lastName) as assigned_name, workType.workTypeName as workType,  job.title as job_title, job.description as job_description, job.breakdownTime as breakdown_time, ptw.id as current_ptw_id, ptw.title as current_ptw_title " +
                                       "FROM " +
                                             "jobs as job " +
                                       "JOIN " +
@@ -76,11 +139,25 @@ namespace CMMSAPIs.Repositories.Jobs
                                       "JOIN " +
                                             "facilities as facilities ON job.facilityId = facilities.id " +
                                       "JOIN " +
-                                            "facilities as facilities1 ON job.blockId = facilities1.id " +
+                                            "facilities as blocks ON job.blockId = blocks.id " +
                                       "LEFT JOIN " +
-                                            "users as user ON user.id = job.assignedId" +
-                                      " WHERE job.id= " + job_id;
+                                            "permits as ptw ON job.linkedPermit = ptw.id " +
+                                      "LEFT JOIN " +
+                                            "users as created_user ON created_user.id = job.createdby " +
+                                      "LEFT JOIN " +
+                                            "users as user ON user.id = job.assignedId " +
+                                      "WHERE job.id = " + job_id;
             List<CMJobView> _ViewJobList = await Context.GetData<CMJobView>(myQuery).ConfigureAwait(false);
+
+            CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_ViewJobList[0].status);
+			if(_ViewJobList[0].status < 100)
+			{
+                _Status = (CMMS.CMMS_Status)(_ViewJobList[0].status + 100);
+			}
+            string _shortStatus = getShortStatus(CMMS.CMMS_Modules.JOB, _Status);
+            _ViewJobList[0].status_short = _shortStatus;
+            string _longStatus = getLongStatus(CMMS.CMMS_Modules.JOB, _Status, _ViewJobList[0]);
+            _ViewJobList[0].status_long = _longStatus;
 
             //get equipmentCat list
             string myQuery1 = "SELECT asset_cat.id as equipmentCat_id, asset_cat.name as equipmentCat_name  FROM assetcategories as asset_cat " +
@@ -93,20 +170,20 @@ namespace CMMSAPIs.Repositories.Jobs
             List<CMworkingAreaNameList> _WorkingAreaNameList = await Context.GetData<CMworkingAreaNameList>(myQuery2).ConfigureAwait(false);
 
             //get Associated permits
-            string myQuery3 = "SELECT ptw.title as title, ptw.permitNumber as sitePermitNo, CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, ptw.status as ptwStatus FROM permits as ptw JOIN jobs as job ON ptw.id = job.linkedPermit " +
+            string myQuery3 = "SELECT ptw.id as permitId, ptw.title as title, ptw.code as sitePermitNo, ptw.startDate, ptw.endDate,  CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, ptw.status as ptwStatus FROM permits as ptw JOIN jobs as job ON ptw.id = job.linkedPermit " +
                 "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
                 "LEFT JOIN fleximc_jc_files as jobCard ON jobCard.JC_id = ptw.id " +
             "WHERE job.id= " + job_id;
             List<CMAssociatedPermitList> _AssociatedpermitList = await Context.GetData<CMAssociatedPermitList>(myQuery3).ConfigureAwait(false);
+            _AssociatedpermitList[0].ptwStatus_short = "Linked";    //temp till JOIN is made
+            _ViewJobList[0].equipment_cat_list = _equipmentCatList;
+            _ViewJobList[0].working_area_name_list = _WorkingAreaNameList;
+            _ViewJobList[0].associated_permit = _AssociatedpermitList;
 
-            _ViewJobList[0].LstCMequipmentCatList = _equipmentCatList;
-            _ViewJobList[0].LstCMworkingAreaNameList = _WorkingAreaNameList;
-            _ViewJobList[0].LstAssociatedPermit = _AssociatedpermitList;
-
-            return _ViewJobList;
+            return _ViewJobList[0];
         }
 
-        internal async Task<int> CreateNewJob(CMCreateJob request)
+        internal async Task<CMDefaultResponse> CreateNewJob(CMCreateJob request)
         {
             /*
              * Job basic details will go to Job table
@@ -137,15 +214,20 @@ namespace CMMSAPIs.Repositories.Jobs
             }
             string qryJobBasic = "insert into jobs(facilityId, blockId, title, description, createdAt, createdBy, breakdownTime, JobType, status, assignedId, linkedPermit) values" +
             $"({ request.facility_id }, { request.block_id }, '{ request.title }', '{ request.description }', '{UtilsRepository.GetUTCTime() }','{ request.createdBy }','{ UtilsRepository.GetUTCTime() }',{request.jobType},'{ status }','{ request.assigned_id }','{ request.permit_id }')";
-            await Context.ExecuteNonQry<int>(qryJobBasic).ConfigureAwait(false);
-
-            /*    string query = "select LAST_INSERT_ID() as insertedId from jobs; ";
-                List<CMCreateJob> newJob1 = await Context.GetData<CMCreateJob>(query).ConfigureAwait(false);
-                int newJobID1 = newJob1[0].insertedId;*/
-
+            qryJobBasic = qryJobBasic + ";" + "select LAST_INSERT_ID(); ";
             string qry = "select id as id , title as job_title, description as job_description from jobs order by id desc limit 1";
+            DataTable dt = await Context.FetchData(qry).ConfigureAwait(false);
+            int retID = System.Convert.ToInt32(dt.Rows[0][0]);
+
+            
+
+            //Pending : modify this query to get assignedd_id and assigned_name
+
             /*string myNewJobQuery = "SELECT " +
-                        "job.id as id, facilities.id as block_id, job.status as JobStatus, facilities.name as block_name, job.status as status, user.id as assigned_id, CONCAT(user.firstName, user.lastName) as assigned_name, workType.workTypeName as workType,  job.title as job_title, job.description as job_description " +
+                        "job.id as id, facilities.id as block_id, job.status as JobStatus, " + 
+                          "facilities.name as block_name, job.status as status, user.id as assigned_id, " + 
+                          "CONCAT(user.firstName, user.lastName) as assigned_name, workType.workTypeName as workType, "+
+                          "job.title as job_title, job.description as job_description " +
                           "FROM " +
                                 "jobs as job " +
                           "JOIN " +
@@ -177,7 +259,15 @@ namespace CMMSAPIs.Repositories.Jobs
 
             CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.CREATED, newJob[0]);
 
-            return newJobID;
+            string strJobStatusMsg = "Job {newJobID} Created";
+            if (newJob[0].assigned_id > 0)
+            {             
+                strJobStatusMsg = "Job {newJobID} Created and Assigned to " + newJob[0].assigned_name;
+            }
+
+            CMDefaultResponse response = new CMDefaultResponse(newJobID, CMMS.RETRUNSTATUS.SUCCESS, strJobStatusMsg);
+
+            return response;
         }
 
         internal async Task<CMDefaultResponse> ReAssignJob(int job_id, int assignedTo)

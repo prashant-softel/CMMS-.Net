@@ -7,18 +7,20 @@ namespace CMMSAPIs.Models.Permits
     public class CMPermitDetail
     {
         public int insertedId { get; set; }
-        public DateTime startDate { get; set; }
-        public DateTime tillDate { get; set; }
         public int ptwStatus { get; set; }
-        public string siteName { get; set; }
-        public string BlockName { get; set; }
         public int permitNo { get; set; }
         public int sitePermitNo { get; set; }
         public int permitTypeid { get; set; }
         public string PermitTypeName { get; set; }
+        public string title { get; set; }
+        public string description { get; set; }
+        public string siteName { get; set; }
+        public string BlockName { get; set; }
+        public DateTime startDate { get; set; }
+        public DateTime tillDate { get; set; }
+//Loto?
         public string permitArea { get; set; }
         public int workingTime { get; set; }
-        public string description { get; set; }
         public string issuedByName { get; set; }
         public DateTime issue_at { get; set; }
         public string approvedByName { get; set; }

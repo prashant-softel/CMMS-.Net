@@ -16,10 +16,11 @@ namespace CMMSAPIs.Models.Jobs
         public string description { get; set; }
         public string jobDetails { get; set; }
         public string workType { get; set; }
-        public string raisedBy { get; set; }
         public dynamic breakdownTime { get; set; }
         public string breakdownType { get; set; }
         public string permitId { get; set; }
+        public int raisedBy { get; set; }
+        public string raisedByName { get; set; }
         public string assignedToName { get; set; }
         public int assignedToId { get; set; }
         public int status { get; set; }

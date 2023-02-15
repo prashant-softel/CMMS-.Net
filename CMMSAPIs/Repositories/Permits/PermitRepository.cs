@@ -53,7 +53,7 @@ namespace CMMSAPIs.Repositories.Permits
             return _PermitTypeList;
         }
 
-        internal async Task<List<CMDefaultList>> GetSafetyMeasurementQuestionList(int permit_type_id)
+        internal async Task<List<CMSafetyMeasurementQuestionList>> GetSafetyMeasurementQuestionList(int permit_type_id)
         {
             /*
              * return id, title from PermitTypeSafetyMeasures table for requested permit_type_id
@@ -64,7 +64,7 @@ namespace CMMSAPIs.Repositories.Permits
                              "LEFT JOIN permittypesafetymeasures as permitsaftymea ON permitsaftyques.safetyMeasureId = permitsaftymea.id " +
                              "JOIN permits as ptw ON ptw.id = permitsaftymea.permitTypeId " +
                              $"where ptw.id =  { permit_type_id }";
-            List<CMDefaultList> _QuestionList = await Context.GetData<CMDefaultList>(myQuery5).ConfigureAwait(false);
+            List<CMSafetyMeasurementQuestionList> _QuestionList = await Context.GetData<CMSafetyMeasurementQuestionList>(myQuery5).ConfigureAwait(false);
             return _QuestionList;
         }
 
@@ -199,7 +199,7 @@ namespace CMMSAPIs.Repositories.Permits
             return insertedId;
         }
 
-        internal async Task<List<CMPermitDetail>> GetPermitDetails(int permit_id)
+        internal async Task<CMPermitDetail> GetPermitDetails(int permit_id)
         {
             /*
              * Return id and string values which are stored in 
@@ -269,7 +269,7 @@ namespace CMMSAPIs.Repositories.Permits
             _PermitDetailsList[0].LstAssociatedJob = _AssociatedJobList;
             _PermitDetailsList[0].LstCategory = _CategoryList;
 
-            return _PermitDetailsList;
+            return _PermitDetailsList[0];
         }
 
         /*         * Permit Issue/Approval/Rejection/Cancel End Points

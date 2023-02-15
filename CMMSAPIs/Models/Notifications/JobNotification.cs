@@ -36,7 +36,7 @@ namespace CMMSAPIs.Models.Notifications
                     retValue = String.Format("Job <{0}> assigned to <{1}>", m_jobObj.job_title, m_jobObj.assigned_name);
                     break;
                 case CMMS.CMMS_Status.JOB_LINKED:     //Linked
-                    retValue = String.Format("Job <{0}> linked to PTW <{1}>", m_jobObj.job_title,m_jobObj.current_ptwId);
+                    retValue = String.Format("Job <{0}> linked to PTW <{1}>", m_jobObj.job_title,m_jobObj.current_ptw_id);
                     break;
                 case CMMS.CMMS_Status.JOB_CLOSED:     //Closed
                     retValue = String.Format("Job <{0}> closed", m_jobObj.job_title);
@@ -70,7 +70,7 @@ namespace CMMSAPIs.Models.Notifications
                     retValue = String.Format(template, jobTitle, jobDesc);
                     break;
                 case CMMS.CMMS_Status.JOB_LINKED:     //Linked to PTW
-                    int ptwId = m_jobObj.current_ptwId;
+                    int ptwId = m_jobObj.current_ptw_id;
                     string ptwDesc = (string)m_jobObj.job_description;
                     retValue = String.Format(template, jobTitle, jobDesc, ptwId, ptwDesc);
                     break;
@@ -97,7 +97,7 @@ namespace CMMSAPIs.Models.Notifications
                     template += String.Format("<p><b>Job status is : Closed</p>");
                     break;
                 case CMMS.CMMS_Status.JOB_LINKED:     //Linked to PTW
-                    template += String.Format("<p><b>Job status is : Assigned to {0} Job Id {1} Linked to PTW ID {2}<p>",m_jobObj.assigned_name,m_jobObj.id,m_jobObj.current_ptwId);
+                    template += String.Format("<p><b>Job status is : Assigned to {0} Job Id {1} Linked to PTW ID {2}<p>",m_jobObj.assigned_name,m_jobObj.id,m_jobObj.current_ptw_id);
                     break;
                 default:
                     break;

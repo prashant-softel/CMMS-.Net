@@ -42,11 +42,11 @@ namespace CMMSAPIs.Controllers.Jobs
         [Authorize]
         [Route("GetJobDetail")]
         [HttpGet]
-        public async Task<IActionResult> GetJobDetail(int job_id)
+        public async Task<IActionResult> GetJobDetails(int job_id)
         {
             try
             {
-                var data = await _JobBS.GetJobDetail(job_id);
+                var data = await _JobBS.GetJobDetails(job_id);
                 return Ok(data);
             }
             catch (Exception ex)
