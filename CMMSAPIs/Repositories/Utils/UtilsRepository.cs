@@ -63,8 +63,8 @@ namespace CMMSAPIs.Repositories.Utils
                             ")" +
                         "VALUES" +
                             "(" +
-                                $"{log.module_type}, {log.module_ref_id}, {log.secondary_module_type}, {log.secondary_module_ref_id}," +
-                                $"'{log.comment}', {log.status}, '{log.current_latitude}', '{log.current_longitude}', {GetUserID()}, '{GetUTCTime()}'" +
+                                $"{(int)log.module_type}, {log.module_ref_id}, {log.secondary_module_type}, {log.secondary_module_ref_id}," +
+                                $"'{log.comment}', {(int)log.status}, '{log.current_latitude}', '{log.current_longitude}', {GetUserID()}, '{GetUTCTime()}'" +
                             ")";
 
             await Context.GetData<List<int>>(qry).ConfigureAwait(false);

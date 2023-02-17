@@ -35,7 +35,7 @@ namespace CMMSAPIs.Controllers.Users
 
         [Route("SetUserAccess")]
         [HttpPost]
-        public async Task<IActionResult> SetUserAccess(List<CMUserAccess> request)
+        public async Task<IActionResult> SetUserAccess(CMUserAccess request)
         {
             try
             {
@@ -66,7 +66,7 @@ namespace CMMSAPIs.Controllers.Users
 
         [Route("SetUserNotifications")]
         [HttpPost]
-        public async Task<IActionResult> SetUserNotifications(List<CMUserNotifications> request)
+        public async Task<IActionResult> SetUserNotifications(CMUserNotifications request)
         {
             try
             {
