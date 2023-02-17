@@ -10,7 +10,7 @@ namespace CMMSAPIs.BS.Inventory
 {
     public interface IInventoryBS
     {
-        Task<List<CMInventoryList>> GetInventoryList(int facilityId, int categoryId);
+        Task<List<CMInventoryList>> GetInventoryList(int facilityId, string categoryIds);
         Task<List<CMViewInventory>> GetInventoryDetails(int id);
         Task<CMDefaultResponse> AddInventory(List<CMAddInventory> request);
         Task<CMDefaultResponse> UpdateInventory(CMAddInventory request);
@@ -18,6 +18,8 @@ namespace CMMSAPIs.BS.Inventory
         Task<List<CMInventoryTypeList>> GetInventoryTypeList();
         Task<List<CMInventoryStatusList>> GetInventoryStatusList();
         Task<List<CMInventoryCategoryList>> GetInventoryCategoryList();
+        Task<List<CMDefaultList>> GetWarrantyTypeList();
+        Task<List<CMDefaultList>> GetWarrantyUsageTermList();
     }
     public class InventoryBS : IInventoryBS
     {
@@ -28,13 +30,13 @@ namespace CMMSAPIs.BS.Inventory
             databaseProvider = dbProvider;
         }
 
-        public async Task<List<CMInventoryList>> GetInventoryList(int facilityId, int categoryId)
+        public async Task<List<CMInventoryList>> GetInventoryList(int facilityId, string categoryIds)
         {
             try
             {
                 using (var repos = new InventoryRepository(getDB))
                 {
-                    return await repos.GetInventoryList(facilityId, categoryId);
+                    return await repos.GetInventoryList(facilityId, categoryIds);
 
                 }
             }
@@ -154,5 +156,37 @@ namespace CMMSAPIs.BS.Inventory
                 throw;
             }
         }
+
+        public async Task<List<CMDefaultList>> GetWarrantyTypeList()
+        {
+            try
+            {
+                using (var repos = new InventoryRepository(getDB))
+                {
+                    return await repos.GetWarrantyTypeList();
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<List<CMDefaultList>> GetWarrantyUsageTermList()
+        {
+            try
+            {
+                using (var repos = new InventoryRepository(getDB))
+                {
+                    return await repos.GetWarrantyUsageTermList();
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
     }
 }

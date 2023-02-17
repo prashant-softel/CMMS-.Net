@@ -42,11 +42,11 @@ namespace CMMSAPIs.Controllers.Jobs
         [Authorize]
         [Route("GetJobDetail")]
         [HttpGet]
-        public async Task<IActionResult> GetJobDetail(int job_id)
+        public async Task<IActionResult> GetJobDetails(int job_id)
         {
             try
             {
-                var data = await _JobBS.GetJobDetail(job_id);
+                var data = await _JobBS.GetJobDetails(job_id);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -131,9 +131,9 @@ namespace CMMSAPIs.Controllers.Jobs
         /*
          * WorkType Crud Operation
         */
-        [Route("GetWorkTypeList")]
+       /* [Route("GetJobWorkTypeList")]
         [HttpGet]
-        public async Task<IActionResult> GetWorkTypeList()
+        public async Task<IActionResult> GetJobWorkTypeList()
         {
             try
             {
@@ -146,13 +146,13 @@ namespace CMMSAPIs.Controllers.Jobs
             }
         }
 
-        [Route("AddWorkType")]
+        [Route("CreateJobWorkType")]
         [HttpPost]
-        public async Task<IActionResult> AddWorkType()
+        public async Task<IActionResult> CreateJobWorkType(CMJobWorkType request)
         {
             try
             {
-                var data = await _JobWorkTypeBS.CreateJobWorkType();
+                var data = await _JobWorkTypeBS.CreateJobWorkType(request);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -163,11 +163,11 @@ namespace CMMSAPIs.Controllers.Jobs
 
         [Route("UpdateWorkType")]
         [HttpPut]
-        public async Task<IActionResult> UpdateWorkType()
+        public async Task<IActionResult> UpdateWorkType(CMJobWorkType request)
         {
             try
             {
-                var data = await _JobWorkTypeBS.UpdateJobWorkType();
+                var data = await _JobWorkTypeBS.UpdateJobWorkType(request);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -178,11 +178,11 @@ namespace CMMSAPIs.Controllers.Jobs
 
         [Route("DeleteWorkType")]
         [HttpDelete]
-        public async Task<IActionResult> DeleteWorkType()
+        public async Task<IActionResult> DeleteWorkType(int id)
         {
             try
             {
-                var data = await _JobWorkTypeBS.DeleteJobWorkType();
+                var data = await _JobWorkTypeBS.DeleteJobWorkType(id);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -191,9 +191,9 @@ namespace CMMSAPIs.Controllers.Jobs
             }
         }
 
-        /*
+        *//*
          * Associated Tool to Work Type Crud Operation
-        */
+        *//*
 
         [Route("GetJobWorkTypeToolList")]
         [HttpGet]
@@ -210,9 +210,9 @@ namespace CMMSAPIs.Controllers.Jobs
             }
         }
 
-        /*
+        *//*
          * Master Tool List of Required by Work Type
-        */
+        *//*
 
         [Route("GetMasterToolList")]
         [HttpDelete]
@@ -273,6 +273,6 @@ namespace CMMSAPIs.Controllers.Jobs
                 throw;
             }
         }
-
+*/
     }
 }

@@ -53,7 +53,7 @@ namespace CMMSAPIs.Repositories.Permits
             return _PermitTypeList;
         }
 
-        internal async Task<List<CMDefaultList>> GetSafetyMeasurementQuestionList(int permit_type_id)
+        internal async Task<List<CMSafetyMeasurementQuestionList>> GetSafetyMeasurementQuestionList(int permit_type_id)
         {
             /*
              * return id, title from PermitTypeSafetyMeasures table for requested permit_type_id
@@ -64,7 +64,7 @@ namespace CMMSAPIs.Repositories.Permits
                              "LEFT JOIN permittypesafetymeasures as permitsaftymea ON permitsaftyques.safetyMeasureId = permitsaftymea.id " +
                              "JOIN permits as ptw ON ptw.id = permitsaftymea.permitTypeId " +
                              $"where ptw.id =  { permit_type_id }";
-            List<CMDefaultList> _QuestionList = await Context.GetData<CMDefaultList>(myQuery5).ConfigureAwait(false);
+            List<CMSafetyMeasurementQuestionList> _QuestionList = await Context.GetData<CMSafetyMeasurementQuestionList>(myQuery5).ConfigureAwait(false);
             return _QuestionList;
         }
 
@@ -199,7 +199,7 @@ namespace CMMSAPIs.Repositories.Permits
             return insertedId;
         }
 
-        internal async Task<List<CMPermitDetail>> GetPermitDetails(int permit_id)
+        internal async Task<CMPermitDetail> GetPermitDetails(int permit_id)
         {
             /*
              * Return id and string values which are stored in 
@@ -269,7 +269,7 @@ namespace CMMSAPIs.Repositories.Permits
             _PermitDetailsList[0].LstAssociatedJob = _AssociatedJobList;
             _PermitDetailsList[0].LstCategory = _CategoryList;
 
-            return _PermitDetailsList;
+            return _PermitDetailsList[0];
         }
 
         /*         * Permit Issue/Approval/Rejection/Cancel End Points
@@ -301,7 +301,7 @@ namespace CMMSAPIs.Repositories.Permits
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, permitDetails[0].insertedId, 0, 0, request.commnet, CMMS.CMMS_Status.PTW_EXTEND_REQUESTED);
 
             CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_EXTEND_REQUESTED, permitDetails[0]);
-            CMDefaultResponse response = new CMDefaultResponse(permitDetails[0].insertedId, CMMS.RETRUNSTATUS.SUCCESS, request.commnet);
+            CMDefaultResponse response = new CMDefaultResponse(permitDetails[0].insertedId, CMMS.RETRUNSTATUS.SUCCESS, $" Permit { permitDetails[0].insertedId } Extended");
             return response;
         }
 
@@ -333,7 +333,7 @@ namespace CMMSAPIs.Repositories.Permits
               await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, permitDetails[0].insertedId, 0, 0, "Approve Permit Extend Request", CMMS.CMMS_Status.PTW_EXTEND_REQUEST_APPROVE);
 
               CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_EXTEND_REQUEST_APPROVE, permitDetails[0]);
-              CMDefaultResponse response = new CMDefaultResponse(permitDetails[0].insertedId, CMMS.RETRUNSTATUS.SUCCESS, "Approve Permit Extend Request");
+              CMDefaultResponse response = new CMDefaultResponse(permitDetails[0].insertedId, CMMS.RETRUNSTATUS.SUCCESS, $" Permit  { permitDetails[0].insertedId } Extend Approved");
               return response;
         }
 
@@ -363,7 +363,7 @@ namespace CMMSAPIs.Repositories.Permits
               await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, permitDetails[0].insertedId, 0, 0, request.commnet, CMMS.CMMS_Status.PTW_EXTEND_REQUEST_REJECTED);
 
               CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_EXTEND_REQUEST_REJECTED, permitDetails[0]);
-              CMDefaultResponse response = new CMDefaultResponse(permitDetails[0].insertedId, CMMS.RETRUNSTATUS.SUCCESS, request.commnet);
+              CMDefaultResponse response = new CMDefaultResponse(permitDetails[0].insertedId, CMMS.RETRUNSTATUS.SUCCESS, $" Permit  { permitDetails[0].insertedId } Extend Canceled");
               return response;
         }
 
@@ -397,7 +397,7 @@ namespace CMMSAPIs.Repositories.Permits
                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, permitDetails[0].insertedId, 0, 0, request.commnet, CMMS.CMMS_Status.PTW_ISSUED);
 
                CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_ISSUED, permitDetails[0]);
-               CMDefaultResponse response = new CMDefaultResponse(permitDetails[0].insertedId, CMMS.RETRUNSTATUS.SUCCESS, request.commnet);
+               CMDefaultResponse response = new CMDefaultResponse(permitDetails[0].insertedId, CMMS.RETRUNSTATUS.SUCCESS, $" Permit  { permitDetails[0].insertedId } Issued");
                return response;
         }
 
@@ -430,7 +430,7 @@ namespace CMMSAPIs.Repositories.Permits
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, permitDetails[0].insertedId, 0, 0, request.commnet, CMMS.CMMS_Status.PTW_APPROVE);
 
             CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_APPROVE, permitDetails[0]);
-            CMDefaultResponse response = new CMDefaultResponse(permitDetails[0].insertedId, CMMS.RETRUNSTATUS.SUCCESS, request.commnet);
+            CMDefaultResponse response = new CMDefaultResponse(permitDetails[0].insertedId, CMMS.RETRUNSTATUS.SUCCESS, $" Permit  { permitDetails[0].insertedId }  Approve");
             return response;
         }
 
@@ -460,7 +460,7 @@ namespace CMMSAPIs.Repositories.Permits
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, permitDetails[0].insertedId, 0, 0, "Permit Close", CMMS.CMMS_Status.PTW_CLOSED);
 
             CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_CLOSED, permitDetails[0]);
-            CMDefaultResponse response = new CMDefaultResponse(permitDetails[0].insertedId, CMMS.RETRUNSTATUS.SUCCESS, "Permit Close");
+            CMDefaultResponse response = new CMDefaultResponse(permitDetails[0].insertedId, CMMS.RETRUNSTATUS.SUCCESS, $" Permit  { permitDetails[0].insertedId } Close");
             return response;
         }
 
@@ -490,7 +490,7 @@ namespace CMMSAPIs.Repositories.Permits
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, permitDetails[0].insertedId, 0, 0, request.commnet, CMMS.CMMS_Status.PTW_CANCELLED_BY_ISSUER);
 
             CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_CANCELLED_BY_ISSUER, permitDetails[0]);
-            CMDefaultResponse response = new CMDefaultResponse(permitDetails[0].insertedId, CMMS.RETRUNSTATUS.SUCCESS, request.commnet);
+            CMDefaultResponse response = new CMDefaultResponse(permitDetails[0].insertedId, CMMS.RETRUNSTATUS.SUCCESS, $" Permit  { permitDetails[0].insertedId } Reject");
             return response;
         }
 
@@ -524,7 +524,7 @@ namespace CMMSAPIs.Repositories.Permits
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, permitDetails[0].insertedId, 0, 0, request.commnet, CMMS.CMMS_Status.PTW_CANCELLED_BY_ISSUER);
 
             CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_CANCELLED_BY_ISSUER, permitDetails[0]);
-            CMDefaultResponse response = new CMDefaultResponse(permitDetails[0].insertedId, CMMS.RETRUNSTATUS.SUCCESS, request.commnet);
+            CMDefaultResponse response = new CMDefaultResponse(permitDetails[0].insertedId, CMMS.RETRUNSTATUS.SUCCESS, $" Permit  { permitDetails[0].insertedId } Cancel");
             return response;
         }
 

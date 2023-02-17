@@ -15,7 +15,7 @@ namespace CMMSAPIs.BS.Permits
          * Permit Create End Points
         */
         Task<List<CMDefaultList>> GetPermitTypeList(int facility_id);
-        Task<List<CMDefaultList>> GetSafetyMeasurementQuestionList(int permit_type_id);
+        Task<List<CMSafetyMeasurementQuestionList>> GetSafetyMeasurementQuestionList(int permit_type_id);
         Task<List<CMDefaultList>> GetJobTypeList(int facility_id);
         Task<List<CMDefaultList>> GetSOPList(int job_type_id);
 
@@ -24,7 +24,7 @@ namespace CMMSAPIs.BS.Permits
         */
         Task<int> CreatePermit(CMCreatePermit set);
         Task<List<CMPermitList>> GetPermitList(int facility_id, int userID);
-        Task<List<CMPermitDetail>> GetPermitDetails(int permit_id);    
+        Task<CMPermitDetail> GetPermitDetails(int permit_id);    
         Task<CMDefaultResponse> PermitApprove(CMApproval request);
         Task<CMDefaultResponse> PermitExtend(CMApproval request);
         Task<CMDefaultResponse> PermitExtendApprove(CMApproval request);
@@ -64,7 +64,7 @@ namespace CMMSAPIs.BS.Permits
             }
         }
 
-        public async Task<List<CMDefaultList>> GetSafetyMeasurementQuestionList(int permit_type_id)
+        public async Task<List<CMSafetyMeasurementQuestionList>> GetSafetyMeasurementQuestionList(int permit_type_id)
         {
             try
             {
@@ -162,7 +162,7 @@ namespace CMMSAPIs.BS.Permits
             }
         }
 
-        public async Task<List<CMPermitDetail>> GetPermitDetails(int permit_id)
+        public async Task<CMPermitDetail> GetPermitDetails(int permit_id)
         {
             try
             {

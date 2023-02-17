@@ -52,7 +52,7 @@ namespace CMMSAPIs.BS.Masters
 
         }
 
-        public async Task<List<CMFacility>> GetFacility(int facility_id)
+       public async Task<List<CMFacility>> GetFacility(int facility_id)
         {
             try
             {

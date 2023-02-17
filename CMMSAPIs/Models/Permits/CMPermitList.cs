@@ -24,4 +24,11 @@ namespace CMMSAPIs.Models.Permits
         public string current_status { get; set; }
 
     }
+    public class CMSafetyMeasurementQuestionList
+    {
+        public int id { get; set; }
+        public string name { get; set; }
+        public int input { get; set; }
+    }
+
 }
