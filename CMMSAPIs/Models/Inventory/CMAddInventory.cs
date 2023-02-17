@@ -14,10 +14,10 @@ namespace CMMSAPIs.Models.Inventory
         public int id { get; set; }
         public string name { get; set; }
         public string description { get; set; }
+        public int typeId { get; set; }
         public int facilityId { get; set; }
         public int blockId { get; set; }
         public int categoryId { get; set; }
-        public int typeId { get; set; }
         public int statusId { get; set; }
         public int parentId { get; set; }
         public int customerId { get; set; }
@@ -25,18 +25,19 @@ namespace CMMSAPIs.Models.Inventory
         public int operatorId { get; set; }
         public int supplierId { get; set; }
         public int manufacturerId { get; set; }
-        public int warrantyId { get; set; }
         public int acCapacity { get; set; }
         public int dcCapacity { get; set; }
         public string model { get; set; }   
         public string serialNumber { get; set; }
         public int cost { get; set; }
         public string currency { get; set; }
+        public int currencyId { get; set; }
         public int stockCount { get; set; }
         public int moduleQuantity { get; set; }
         public int photoId { get; set; }
         public DateTime calibrationFirstDueDate { get; set; }
         public DateTime calibrationLastDate { get; set; } //add this col to database if its not there
+        public int calibrationFrequency { get; set; }
         public int calibrationFrequencyType { get; set; }
         public int calibrationReminderDays { get; set; }
         public int retirementStatus { get; set; }

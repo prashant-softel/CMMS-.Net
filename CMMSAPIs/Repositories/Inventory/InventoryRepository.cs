@@ -142,7 +142,7 @@ namespace CMMSAPIs.Repositories.Inventory
                 assetName = unit.name;
                 string firstCalibrationDate    = unit.calibrationFirstDueDate.ToString("yyyy-MM-dd");
                 string lastCalibrationDate = unit.calibrationLastDate.ToString("yyyy-MM-dd");
-                qry += "('" + unit.name + "','" + unit.description + "','" + unit.parentId + "','" + unit.acCapacity + "','" + unit.dcCapacity + "','" + unit.categoryId + "','" + unit.typeId + "','" + unit.statusId + "','" + unit.facilityId + "','" + unit.blockId + "','" + unit.customerId + "','" + unit.ownerId + "','" + unit.operatorId + "','" + unit.manufacturerId + "','" + unit.supplierId + "','" + unit.serialNumber + "','" + unit.warrantyId + "','" + userID + "','" + unit.statusId + "','" + unit.photoId + "','" + unit.model + "','" + unit.stockCount + "','" + unit.moduleQuantity + "','" + unit.cost + "','" + unit.currency + "','" + unit.specialToolId + "','" + unit.specialToolEmpId + "','" + firstCalibrationDate + "','" + lastCalibrationDate + "','" + unit.calibrationFrequencyType + "','" + unit.calibrationFrequencyType + "','" + unit.calibrationReminderDays + "','"+ unit.retirementStatus+ "','"+ unit.multiplier + "'),";
+                qry += "('" + unit.name + "','" + unit.description + "','" + unit.parentId + "','" + unit.acCapacity + "','" + unit.dcCapacity + "','" + unit.categoryId + "','" + unit.typeId + "','" + unit.statusId + "','" + unit.facilityId + "','" + unit.blockId + "','" + unit.customerId + "','" + unit.ownerId + "','" + unit.operatorId + "','" + unit.manufacturerId + "','" + unit.supplierId + "','" + unit.serialNumber + "','" + userID + "','" + unit.statusId + "','" + unit.photoId + "','" + unit.model + "','" + unit.stockCount + "','" + unit.moduleQuantity + "','" + unit.cost + "','" + unit.currency + "','" + unit.specialToolId + "','" + unit.specialToolEmpId + "','" + firstCalibrationDate + "','" + lastCalibrationDate + "','" + unit.calibrationFrequencyType + "','" + unit.calibrationFrequencyType + "','" + unit.calibrationReminderDays + "','"+ unit.retirementStatus+ "','"+ unit.multiplier + "'),";
             }
             if (count > 0)
             {
@@ -195,13 +195,17 @@ namespace CMMSAPIs.Repositories.Inventory
             {
                 updateQry += $" description = '{request.description}',";
             }
-            if (request.parentId != 0)
+            if (request.typeId != 0)
             {
-                updateQry += $" parentId= '{request.parentId}',";
+                updateQry += $" typeId= '{request.typeId}',";
             }
             if (request.acCapacity != 0)
             {
                 updateQry += $" acCapacity= '{request.acCapacity}',";
+            }
+            if (request.dcCapacity != 0)
+            {
+                updateQry += $" dcCapacity= '{request.dcCapacity}',";
             }
             if (request.categoryId != 0)
             {
@@ -212,14 +216,18 @@ namespace CMMSAPIs.Repositories.Inventory
                 updateQry += $" moduleQuantity= '{request.moduleQuantity}',";
 
             }
-            if (request.typeId != 0)
+            if (request.categoryId != 0)
             {
-                updateQry += $" typeId= '{request.typeId}',";
-
+                updateQry += $" categoryId = '{request.categoryId}',";
             }
             if (request.statusId != 0)
             {
-                updateQry += $" status= '{request.statusId}',";
+                updateQry += $" statusId = '{request.statusId}',";
+                updateQry += $" status = '{request.statusId}',";
+            }
+            if (request.parentId != 0)
+            {
+                updateQry += $" parentId = '{request.parentId}',";
             }
             if (request.facilityId != 0)
             {
@@ -241,6 +249,11 @@ namespace CMMSAPIs.Repositories.Inventory
                 updateQry += $" ownerId= '{request.ownerId}',";
 
             }
+            if (request.operatorId != 0)
+            {
+                updateQry += $" operatorId = '{request.operatorId}',";
+
+            }
             if (request.manufacturerId != 0)
             {
                 updateQry += $" manufacturerid= '{request.manufacturerId}',";
@@ -251,16 +264,31 @@ namespace CMMSAPIs.Repositories.Inventory
                 updateQry += $" supplierId= '{request.supplierId}',";
 
             }
+            if (request.acCapacity != 0)
+            {
+                updateQry += $" acCapacity= '{request.acCapacity}',";
+            }
+            if (request.dcCapacity != 0)
+            {
+                updateQry += $" dcCapacity= '{request.dcCapacity}',";
+            }
+            if (request.model != null)
+            {
+                updateQry += $" model = '{request.model}',";
+            }
             if (request.serialNumber != null)
             {
                 updateQry += $" serialNumber= '{request.serialNumber}',";
-
             }
-            if (request.warrantyId != 0)
+            if (request.currency != null)
             {
-                updateQry += $" warrantyId= '{request.warrantyId}',";
+                updateQry += $" currency = '{request.currency}',";
+            }
+            //if (request.currencyId != 0)
+            //{
+            //    updateQry += $" currencyId = '{request.currencyId}',";
 
-            }            
+            //}
             if (request.photoId != 0)
             {
                 updateQry += $" photoId= '{request.photoId}',";
@@ -286,19 +314,24 @@ namespace CMMSAPIs.Repositories.Inventory
                 updateQry += $" specialToolEmpId= '{request.specialToolEmpId}',";
 
             }
-            if (request.calibrationFirstDueDate != null)
+            //if (request.calibrationFirstDueDate != null)
+            //{
+            //    updateQry += $" calibrationDueDate= '{request.calibrationFirstDueDate}',";
+
+            //}
+            //if (request.calibrationLastDate != 0)
+            //{
+            //    updateQry += $" calibrationLastDate = '{request.calibrationLastDate}',";
+
+            //}
+            if (request.calibrationFrequency != 0)
             {
-                updateQry += $" firstDueDate= '{request.calibrationFirstDueDate}',";
+                updateQry += $" calibrationFrequency = '{request.calibrationFrequency}',";
 
             }
             if (request.calibrationFrequencyType != 0)
             {
-                updateQry += $" frequency = '{request.calibrationFrequencyType}',";
-
-            }
-            if (request.calibrationFrequencyType != 0)
-            {
-                updateQry += $" calibrationFrequency= '{request.calibrationFrequencyType}',";
+                updateQry += $" calibrationFreqType= '{request.calibrationFrequencyType}',";
 
             }
             if (request.calibrationReminderDays != 0)
@@ -311,15 +344,30 @@ namespace CMMSAPIs.Repositories.Inventory
                 updateQry += $" retirementStatus= '{request.retirementStatus}',";
 
             }
+            if (request.retirementStatus != 0)
+            {
+                updateQry += $" retirementStatus = '{request.retirementStatus}',";
+
+            }
+            if (request.lstWarrantyDetail != null)
+            {
+                CMWarrantyDetail warrentyDetails = request.lstWarrantyDetail[0];
+                string certificateNumber = warrentyDetails.certificate_number;
+                //warrentyDetails.expiry_date;
+                int status = warrentyDetails.status;
+                string warrantyDescription = warrentyDetails.warranty_description;
+            }
+            //        public List<CMWarrantyDetail> lstWarrantyDetail { get; set; }
+
             if (request.multiplier != 0)
             {
                 updateQry += $" multiplier = '{request.multiplier}',";
 
             }
-            updateQry += $" updatedAt= '{UtilsRepository.GetUTCTime()}',";
-            updateQry += $" updatedBy= '{userID}',";
             if (updateQry != null)
             {
+                updateQry += $" updatedAt= '{UtilsRepository.GetUTCTime()}',";
+                updateQry += $" updatedBy= '{userID}',";
                 updateQry = "UPDATE assets SET " + updateQry.Substring(0, updateQry.Length - 1);
                 updateQry += $" WHERE id= '{request.id}'";
                 await Context.GetData<List<int>>(updateQry).ConfigureAwait(false);                
