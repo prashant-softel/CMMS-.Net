@@ -10,11 +10,17 @@ namespace CMMSAPIs.BS.Masters
 {
     public interface ICheckListBS
     {
-        Task<List<CMCheckList>> GetCheckList(int facility_id, int type);
-        Task<CMDefaultResponse> CreateChecklist(CMCreateCheckList request);
+        Task<List<CMCheckList>> GetCheckList(int facility_id, string type);
+        Task<CMDefaultResponse> CreateChecklist(CMCreateCheckList request);      
         Task<CMDefaultResponse> UpdateCheckList(CMCreateCheckList request);
-        Task<CMDefaultResponse> DeleteChecklist(int id);
-
+        Task<CMDefaultResponse> DeleteChecklist(CMCreateCheckList request);
+        Task<List<CMCheckListMapList>> GetCheckListMap(int facility_id, int type);
+        Task<CMDefaultResponse> CreateCheckListMap(CMCreateCheckListMap request);      
+        Task<CMDefaultResponse> UpdateCheckListMap(CMCreateCheckListMap request);
+        Task<List<CMCheckPointList>> GetCheckPointList(int checklist_id);
+        Task<CMDefaultResponse> CreateCheckPoint(CMCreateCheckPoint request);
+        Task<CMDefaultResponse> UpdateCheckPoint(CMCreateCheckPoint request);
+        Task<CMDefaultResponse> DeleteCheckPoint(CMCreateCheckPoint request);
     }
     public class CheckListBS : ICheckListBS
     {
@@ -25,7 +31,7 @@ namespace CMMSAPIs.BS.Masters
             databaseProvider = dbProvider;
         }
 
-        public async Task<List<CMCheckList>> GetCheckList(int facility_id, int type)
+        public async Task<List<CMCheckList>> GetCheckList(int facility_id, string type)
         {
             try
             {
@@ -72,13 +78,123 @@ namespace CMMSAPIs.BS.Masters
             }
         }
 
-        public async Task<CMDefaultResponse> DeleteChecklist(int id)
+        public async Task<CMDefaultResponse> DeleteChecklist(CMCreateCheckList request)
         {
             try
             {
                 using (var repos = new CheckListRepository(getDB))
                 {
-                    return await repos.DeleteChecklist(id);
+                    return await repos.DeleteChecklist(request);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<CMCheckListMapList>> GetCheckListMap(int facility_id, int type)
+        {
+            try
+            {
+                using (var repos = new CheckListRepository(getDB))
+                {
+                    return await repos.GetCheckListMap(facility_id, type);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> CreateCheckListMap(CMCreateCheckListMap request)
+        {
+            try
+            {
+                using (var repos = new CheckListRepository(getDB))
+                {
+                    return await repos.CreateCheckListMap(request);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<CMDefaultResponse> UpdateCheckListMap(CMCreateCheckListMap request)
+        {
+            try
+            {
+                using (var repos = new CheckListRepository(getDB))
+                {
+                    return await repos.UpdateCheckListMap(request);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<CMCheckPointList>> GetCheckPointList(int checklist_id)
+        {
+            try
+            {
+                using (var repos = new CheckListRepository(getDB))
+                {
+                    return await repos.GetCheckPointList(checklist_id);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> CreateCheckPoint(CMCreateCheckPoint request)
+        {
+            try
+            {
+                using (var repos = new CheckListRepository(getDB))
+                {
+                    return await repos.CreateCheckPoint(request);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<CMDefaultResponse> UpdateCheckPoint(CMCreateCheckPoint request)
+        {
+            try
+            {
+                using (var repos = new CheckListRepository(getDB))
+                {
+                    return await repos.UpdateCheckPoint(request);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> DeleteCheckPoint(CMCreateCheckPoint request)
+        {
+            try
+            {
+                using (var repos = new CheckListRepository(getDB))
+                {
+                    return await repos.DeleteCheckPoint(request);
 
                 }
             }

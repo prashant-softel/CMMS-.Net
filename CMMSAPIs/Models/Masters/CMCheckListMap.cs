@@ -12,11 +12,13 @@ namespace CMMSAPIs.Models.Masters
     public class CMCheckListMapList
     {
         public int category_id { get; set; }
-        public List<int> checklist_ids { get; set; }
-
-       /* Audit specific fields start */
-        
+        public int status { get; set; }
         public int plan_id { get; set; }
+        public int mapping_id { get; set; }
+        public int check_id { get; set; }
+        public List<int> checklist_ids { get; set; }
+		       /* Audit specific fields start */
+        
         public DateTime audit_schedule_date { get; set; }
 
         /* End */

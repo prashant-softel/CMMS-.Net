@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using CMMSAPIs.Models.Masters;
 
 using System;
-using System.Collections.Generic;
 
 namespace CMMSAPIs.Controllers.Masters
 {
@@ -23,7 +22,7 @@ namespace CMMSAPIs.Controllers.Masters
         [Authorize]
         [Route("GetCheckList")]
         [HttpGet]
-        public async Task<IActionResult> GetCheckList(int facility_id, int type)
+        public async Task<IActionResult> GetCheckList(int facility_id, string type)
         {
             try
             {
@@ -54,7 +53,7 @@ namespace CMMSAPIs.Controllers.Masters
 
         [Authorize]
         [Route("UpdateCheckList")]
-        [HttpPut]
+        [HttpPost]
         public async Task<IActionResult> UpdateCheckList(CMCreateCheckList request)
         {
             try
@@ -70,12 +69,124 @@ namespace CMMSAPIs.Controllers.Masters
 
         [Authorize]
         [Route("DeleteChecklist")]
-        [HttpDelete]
-        public async Task<IActionResult> DeleteChecklist(int id)
+        [HttpPost]
+        public async Task<IActionResult> DeleteChecklist(CMCreateCheckList request)
         {
             try
             {
-                var data = await _CheckListBS.DeleteChecklist(id);
+                var data = await _CheckListBS.DeleteChecklist(request);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
+        [Route("GetCheckListMap")]
+        [HttpGet]
+        public async Task<IActionResult> GetCheckListMap(int facility_id, int type)
+        {
+            try
+            {
+                var data = await _CheckListBS.GetCheckListMap(facility_id, type);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
+        [Route("CreateChecklistMap")]
+        [HttpPost]
+        public async Task<IActionResult> CreateChecklistMap(CMCreateCheckListMap request)
+        {
+            try
+            {
+                var data = await _CheckListBS.CreateCheckListMap(request);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
+        [Route("UpdateCheckListMap")]
+        [HttpPut]
+        public async Task<IActionResult> UpdateCheckListMap(CMCreateCheckListMap request)
+        {
+            try
+            {
+                var data = await _CheckListBS.UpdateCheckListMap(request);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
+        [Route("GetCheckPointList")]
+        [HttpGet]
+        public async Task<IActionResult> GetCheckPointList(int checklist_id)
+        {
+            try
+            {
+                var data = await _CheckListBS.GetCheckPointList(checklist_id);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
+        [Route("CreateCheckPoint")]
+        [HttpPost]
+        public async Task<IActionResult> CreateCheckPoint(CMCreateCheckPoint request)
+        {
+            try
+            {
+                var data = await _CheckListBS.CreateCheckPoint(request);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
+        [Route("UpdateCheckPoint")]
+        [HttpPut]
+        public async Task<IActionResult> UpdateCheckPoint(CMCreateCheckPoint request)
+        {
+            try
+            {
+                var data = await _CheckListBS.UpdateCheckPoint(request);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
+        [Route("DeleteCheckPoint")]
+        [HttpDelete]
+        public async Task<IActionResult> DeleteCheckPoint(CMCreateCheckPoint request)
+        {
+            try
+            {
+                var data = await _CheckListBS.DeleteCheckPoint(request);
                 return Ok(data);
             }
             catch (Exception ex)
