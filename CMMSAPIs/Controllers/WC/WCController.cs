@@ -1,8 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using System;
+using System.Collections.Generic;
+using Microsoft.AspNetCore.Authorization;
 using CMMSAPIs.BS.WC;
 using CMMSAPIs.Models.WC;
+using CMMSAPIs.Models.Utils;
 
 namespace CMMSAPIs.Controllers.WC
 {
@@ -16,13 +19,14 @@ namespace CMMSAPIs.Controllers.WC
             _WCBS = wc;            
         }
 
+        [Authorize]
         [Route("GetWCList")]
         [HttpGet]
-        public async Task<IActionResult> GetWCList(int facility_id)
+        public async Task<IActionResult> GetWCList(int facilityId, string startDate, string endDate, int statusId)
         {
             try
             {
-                var data = await _WCBS.GetWCList(facility_id);
+                var data = await _WCBS.GetWCList(facilityId, startDate, endDate, statusId);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -31,9 +35,10 @@ namespace CMMSAPIs.Controllers.WC
             }
         }
 
+        [Authorize]
         [Route("CreateWC")]
         [HttpPost]
-        public async Task<IActionResult> CreateWC(CMWCCreate request)
+        public async Task<IActionResult> CreateWC(List<CMWCCreate> request)
         {
             try
             {
@@ -46,19 +51,60 @@ namespace CMMSAPIs.Controllers.WC
             }
         }
 
-        [Route("ViewWC")]
+        [Authorize]
+        [Route("GetWCDetails")]
         [HttpGet]
-        public async Task<IActionResult> ViewWC(int wc_id)
+        public async Task<IActionResult> GetWCDetails(int wc_id)
         {
             try
             {
-                var data = await _WCBS.ViewWC(wc_id);
+                var data = await _WCBS.GetWCDetails(wc_id);
                 return Ok(data);
             }
             catch (Exception ex)
             {
                 throw;
             }
+        }
+
+        internal async Task<IActionResult> UpdateWC(CMWCCreate request)
+        {
+            try
+            {
+                var data = await _WCBS.UpdateWC(request);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        internal async Task<IActionResult> ApproveWC(CMApproval request)
+        {
+            try
+            {
+                var data = await _WCBS.ApproveWC(request);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        internal async Task<IActionResult> RejectWC(CMApproval request)
+        {
+            try
+            {
+                var data = await _WCBS.RejectWC(request);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+
         }
     }
 }
