@@ -2,6 +2,7 @@
 using CMMSAPIs.Models.Jobs;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Utils;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -14,16 +15,23 @@ namespace CMMSAPIs.Repositories.Jobs
         }
 
         /*
-         * Work Type CRUD Operation
+         * Work Type relevant tables
+         * select * from jobworktypes;
+         * select * from jobassociatedworktypes;
+         * select * from worktypeassociatedtools;
+         * select * from worktypemasterassets;
         */
-        internal async Task<List<CMJobWorkType>> GetJobWorkTypeList()
+        internal async Task<List<CMJobWorkType>> GetJobWorkTypeList(string categoryIds)
         {
             /*
              * Fetch id, categoryId, categroyName, workType from JobWorkTypes table and join AssetCategories to get CategoryName
             */
-            /*Your code goes here*/
+            if (categoryIds.Length <= 0)
+            {
+                throw new ArgumentException($"categoryIds cannot be empty");
+            }
 
-            string myQuery = "SELECT jwt.id, jwt.equipmentCategoryId as categoryId , jwt.workTypeName as workType, assetCat.name as categoryName , jwt.status as status FROM jobworktypes as jwt JOIN AssetCategories AS assetCat on jwt.equipmentCategoryId = assetCat.id WHERE jwt.status = 1";
+            string myQuery = "SELECT jwt.id, jwt.equipmentCategoryId as categoryId , jwt.workTypeName as workType, assetCat.name as categoryName , jwt.status as status FROM jobworktypes as jwt JOIN AssetCategories AS assetCat on jwt.equipmentCategoryId = assetCat.id WHERE jwt.status = 1 and jwt.equipmentCategoryId IN (" + categoryIds + ")";
             List<CMJobWorkType> _WorkType = await Context.GetData<CMJobWorkType>(myQuery).ConfigureAwait(false);
             return _WorkType;
         }
@@ -53,7 +61,7 @@ namespace CMMSAPIs.Repositories.Jobs
 
             int UpdatededId = await Context.ExecuteNonQry<int>(qryFacilityUpdate).ConfigureAwait(false);
 
-            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Update Work Type");
+            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Updated Work Type { request.workType }");
 
             return response;
         }
@@ -90,16 +98,19 @@ namespace CMMSAPIs.Repositories.Jobs
             return _WorkType;
         }
 
-        internal async Task<List<CMMasterTool>> GetMasterToolList(int id)
+        internal async Task<List<CMMasterTool>> GetMasterToolList(string worktypeIds)
         {
             /*
              * Fetch id, workType, ToolName (if more than 1 tool linked concat then return) from WorkTypeAssociatedTools table 
              * and JOIN WorkTypeMasterAssets to get ToolName
             */
-            /*Your code goes here*/
-       /*     string myQuery = "SELECT wt.id as id, jwt.workTypeName as workTypeName, group_concat(a.assetName SEPARATOR ', ') as linkedToolName FROM worktypeassociatedtools as wt LEFT JOIN jobworktypes as jwt ON jwt.id = wt.workTypeId LEFT JOIN worktypemasterassets as a ON FIND_IN_SET(a.id, wt.ToolId) where wt.id = " + id + " group by wt.workTypeId";*/
+            if (worktypeIds.Length <= 0)
+            {
+                throw new ArgumentException($"worktypeId cannot be empty");
+            }
+            /*     string myQuery = "SELECT wt.id as id, jwt.workTypeName as workTypeName, group_concat(a.assetName SEPARATOR ', ') as linkedToolName FROM worktypeassociatedtools as wt LEFT JOIN jobworktypes as jwt ON jwt.id = wt.workTypeId LEFT JOIN worktypemasterassets as a ON FIND_IN_SET(a.id, wt.ToolId) where wt.id = " + id + " group by wt.workTypeId";*/
 
-            string myQuery = "SELECT wt.id as id, jwt.workTypeName as workTypeName, group_concat(a.assetName SEPARATOR ', ') as linkedToolName FROM worktypeassociatedtools as wt LEFT JOIN jobworktypes as jwt ON jwt.id = wt.workTypeId LEFT JOIN worktypemasterassets as a ON a.id = wt.ToolId where wt.workTypeId = " + id + " group by wt.workTypeId";
+            string myQuery = "SELECT wt.id as id, jwt.workTypeName as workTypeName, group_concat(a.assetName SEPARATOR ', ') as linkedToolName FROM worktypeassociatedtools as wt LEFT JOIN jobworktypes as jwt ON jwt.id = wt.workTypeId LEFT JOIN worktypemasterassets as a ON a.id = wt.ToolId where wt.workTypeId IN (" + worktypeIds + ") group by wt.workTypeId";
             List<CMMasterTool> _MasterToolList = await Context.GetData<CMMasterTool>(myQuery).ConfigureAwait(false);
             return _MasterToolList;
         }

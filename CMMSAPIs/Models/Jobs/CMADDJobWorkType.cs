@@ -9,7 +9,6 @@ namespace CMMSAPIs.Models.Jobs
     {
         public int id { get; set; }
         public int categoryid { get; set; }
-        public string categoryName { get; set; }
         public string workType { get; set; }
     }
 }

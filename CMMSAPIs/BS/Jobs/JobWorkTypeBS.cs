@@ -14,7 +14,7 @@ namespace CMMSAPIs.BS.Jobs
         /*
          * Work Type CRUD Operation
         */
-        Task<List<CMJobWorkType>> GetJobWorkTypeList();
+        Task<List<CMJobWorkType>> GetJobWorkTypeList(string categoryIds);
         Task<int> CreateJobWorkType(CMADDJobWorkType request);
         Task<CMDefaultResponse> UpdateJobWorkType(CMUpdateJobWorkType request);
         Task<CMDefaultResponse> DeleteJobWorkType(int id);
@@ -23,7 +23,7 @@ namespace CMMSAPIs.BS.Jobs
          * Tools Associated to Work Type CRUD Operation
         */
         Task<List<CMJobWorkTypeTool>> GetJobWorkTypeToolList(int jobId);
-        Task<List<CMMasterTool>> GetMasterToolList(int id);
+        Task<List<CMMasterTool>> GetMasterToolList(string worktypeIds);
         Task<int> CreateJobWorkTypeTool(CMAddJobWorkTypeTool request);
         Task<CMDefaultResponse> UpdateJobWorkTypeTool(CMUpdateJobWorkTypeTool request);
         Task<CMDefaultResponse> DeleteJobWorkTypeTool(int id);
@@ -41,13 +41,13 @@ namespace CMMSAPIs.BS.Jobs
         /*
          * Work Type CRUD Operation
         */
-        public async Task<List<CMJobWorkType>> GetJobWorkTypeList()
+        public async Task<List<CMJobWorkType>> GetJobWorkTypeList(string categoryIds)
         {
             try
             {
                 using (var repos = new JobWorkTypeRepository(getDB))
                 {
-                    return await repos.GetJobWorkTypeList();
+                    return await repos.GetJobWorkTypeList(categoryIds);
                 }
             }
             catch (Exception ex)
@@ -122,13 +122,13 @@ namespace CMMSAPIs.BS.Jobs
             }
         }
 
-        public async Task<List<CMMasterTool>> GetMasterToolList(int id)
+        public async Task<List<CMMasterTool>> GetMasterToolList(string worktypeIds)
         {
             try
             {
                 using (var repos = new JobWorkTypeRepository(getDB))
                 {
-                    return await repos.GetMasterToolList(id);
+                    return await repos.GetMasterToolList(worktypeIds);
                 }
             }
             catch (Exception ex)

@@ -27,11 +27,11 @@ namespace CMMSAPIs.Controllers.Jobs
         */
         [Route("GetJobWorkTypeList")]
         [HttpGet]
-        public async Task<IActionResult> GetJobWorkTypeList()
+        public async Task<IActionResult> GetJobWorkTypeList(string categoryIds)
         {
             try
             {
-                var data = await _JobWorkTypeBS.GetJobWorkTypeList();
+                var data = await _JobWorkTypeBS.GetJobWorkTypeList(categoryIds);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -110,11 +110,11 @@ namespace CMMSAPIs.Controllers.Jobs
 
         [Route("GetMasterToolList")]
         [HttpGet]
-        public async Task<IActionResult> GetMasterToolList(int id)
+        public async Task<IActionResult> GetMasterToolList(string worktypeIds)
         {
             try
             {
-                var data = await _JobWorkTypeBS.GetMasterToolList(id);
+                var data = await _JobWorkTypeBS.GetMasterToolList(worktypeIds);
                 return Ok(data);
             }
             catch (Exception ex)
