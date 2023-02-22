@@ -49,7 +49,7 @@ namespace CMMSAPIs.Models.Notifications
                 case CMMS.CMMS_Status.PTW_CANCELLED_BY_ISSUER: 
                     retValue = String.Format("Permit <{0}> Cancelled By Issuer Permit Cancelled By Issuer Name <{1}> Permit Description <{2}>", m_permitObj.permitNo, m_permitObj.cancelRequestByName, desc);
                     break;
-                case CMMS.CMMS_Status.PTW_CANCELLLED_BY_HSE:
+                case CMMS.CMMS_Status.PTW_CANCELLED_BY_HSE:
                     retValue = String.Format("Pemit <{0}> cancelled by HSE Permit Description <{1}>>", m_permitObj.permitNo,desc);
                     break;
                 case CMMS.CMMS_Status.PTW_CANCELLED_BY_APPROVER:
@@ -125,7 +125,7 @@ namespace CMMSAPIs.Models.Notifications
                 case CMMS.CMMS_Status.PTW_CANCELLED_BY_ISSUER:     //Linked to PTW
                     retValue = String.Format(template, permitName, ptw_issued, ptw_cancelled_name, permitDesc);
                     break;
-                case CMMS.CMMS_Status.PTW_CANCELLLED_BY_HSE:     //Linked to PTW
+                case CMMS.CMMS_Status.PTW_CANCELLED_BY_HSE:     //Linked to PTW
                     retValue = String.Format(template, permitName, permitDesc);
                     break;
                 case CMMS.CMMS_Status.PTW_CANCELLED_BY_APPROVER:     //Linked to PTW
@@ -203,7 +203,7 @@ namespace CMMSAPIs.Models.Notifications
                     template += String.Format("<p>Permit {0} cancelled by issuer</p>", m_permitObj.permitNo);
                     template += String.Format("<p>Permit cancelled issuer By:</b> {0}</p>", m_permitObj.cancelRequestByName);
                     break;
-                case CMMS.CMMS_Status.PTW_CANCELLLED_BY_HSE:
+                case CMMS.CMMS_Status.PTW_CANCELLED_BY_HSE:
                     template += String.Format("<p><b>Permit status is : Permit cancelled by HSE </p>");
                     template += String.Format("<p>Permit {0} is cancelled by HSE </p>", m_permitObj.permitNo);
                     break;

@@ -242,7 +242,7 @@ namespace CMMSAPIs.Helper
             PTW_REJECTED_BY_APPROVER,
             PTW_CLOSED,
             PTW_CANCELLED_BY_ISSUER,
-            PTW_CANCELLLED_BY_HSE,
+            PTW_CANCELLED_BY_HSE,
             PTW_CANCELLED_BY_APPROVER,
             PTW_EDIT,
             PTW_EXTEND_REQUESTED,
