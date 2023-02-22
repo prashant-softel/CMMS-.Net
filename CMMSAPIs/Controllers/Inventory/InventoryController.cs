@@ -22,11 +22,11 @@ namespace CMMSAPIs.Controllers.Inventory
         [Authorize]
         [Route("GetInventoryList")]
         [HttpGet]
-        public async Task<IActionResult> GetInventoryList(int facilityId, string categoryIds)
+        public async Task<IActionResult> GetInventoryList(int facilityId, int linkedToBlockId, int status, string categoryIds)
         {
             try
             {
-                var data = await _InventoryBS.GetInventoryList(facilityId, categoryIds);
+                var data = await _InventoryBS.GetInventoryList(facilityId, linkedToBlockId, status, categoryIds);
                 return Ok(data);
             }
             catch (Exception ex)

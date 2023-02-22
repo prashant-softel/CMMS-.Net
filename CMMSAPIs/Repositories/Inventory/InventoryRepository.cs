@@ -16,7 +16,7 @@ namespace CMMSAPIs.Repositories.Inventory
         {
         }
 
-        internal async Task<List<CMInventoryList>> GetInventoryList(int facilityId, string categoryIds)
+        internal async Task<List<CMInventoryList>> GetInventoryList(int facilityId, int linkedToBlockId, int status, string categoryIds)
         {
             /*
              * get all details mentioned in model
@@ -29,9 +29,9 @@ namespace CMMSAPIs.Repositories.Inventory
             */
             /*Your code goes here*/
             string myQuery =
-                "SELECT a.id, a.name, a.description, ast.name as type, b2.name as supplierName, b5.name as operatorName, a.categoryId , ac.name as categoryName, a.serialNumber,a.specialTool, a.warrantyId, a.calibrationDueDate" +
+                "SELECT a.id, a.name, a.description, ast.name as type, b2.name as supplierName, b5.name as operatorName, a.categoryId , ac.name as categoryName, a.serialNumber,a.specialTool, a.warrantyId" +
 
-                ", f.name AS facilityName, bl.name AS blockName, a.parentId, a2.name as parentName, custbl.name as customerName, owntbl.name as ownerName, s.name AS status, b5.name AS operatorName" +
+                ", f.name AS facilityName, f.id AS facilityId, bl.id AS blockId, bl.name AS blockName, linkedbl.id AS linkedToBlockId, linkedbl.name AS linkedToBlockName, a.parentId, a2.name as parentName, custbl.name as customerName, owntbl.name as ownerName, s.name AS status, b5.name AS operatorName" +
 
                 " from assets as a " +
                 "join assettypes as ast on ast.id = a.typeId " +
@@ -44,7 +44,7 @@ namespace CMMSAPIs.Repositories.Inventory
                 "" +
                 "JOIN assets as a2 ON a.parentId = a2.id " +
                 "" +
-                "JOIN assetstatus as s on s.id = a.statusId " +
+                "JOIN assetstatus as s on s.id = a.status " +
                 "" +
                 "JOIN business AS b2 ON a.ownerId = b2.id " +
 
@@ -52,19 +52,37 @@ namespace CMMSAPIs.Repositories.Inventory
                 "" +
                 "JOIN facilities as f ON f.id = a.facilityId " +
                 "" +
+                "JOIN facilities as linkedbl ON linkedbl.id = a.linkedToBlockId " +
+                "" +
                 "JOIN facilities as bl ON bl.id = a.blockId";
-            if (facilityId > 0)
+            if (facilityId > 0 || linkedToBlockId > 0)
             {
-                myQuery += " WHERE a.facilityId= " + facilityId;
-                if(categoryIds?.Length > 0)
+                if (linkedToBlockId > 0)
+                {
+                    myQuery += " WHERE a.linkedToBlockId= " + linkedToBlockId;
+                }
+                else
+                {
+                    myQuery += " WHERE a.facilityId= " + facilityId;
+                }
+                if (categoryIds?.Length > 0)
                 {
                     myQuery += " AND a.categoryId IN (" + categoryIds + ")";
                 }
+                if (status > 0)
+                {
+                    myQuery += " AND a.status = " + status;
+                }
             }
-            //else
-            //{
-            //    throw new ArgumentException("FacilityId cannot be 0");
-            //}
+            else
+            {
+                if (status > 0)
+                {
+                    myQuery += " WHERE a.status = " + status;
+                }
+
+                //                throw new ArgumentException("FacilityId or linkedToBlockId cannot be 0");
+            }
             List<CMInventoryList> inventory = await Context.GetData<CMInventoryList>(myQuery).ConfigureAwait(false);
             return inventory;
         }
@@ -107,7 +125,7 @@ namespace CMMSAPIs.Repositories.Inventory
             "" +
             "JOIN assets as a2 ON a.parentId = a2.id " +
             "" +
-            "JOIN assetstatus as s on s.id = a.statusId " +
+            "JOIN assetstatus as s on s.id = a.status " +
             "" +
             "JOIN facilities as f ON f.id = a.facilityId " +
             "" +
@@ -135,14 +153,38 @@ namespace CMMSAPIs.Repositories.Inventory
             string assetName = "";
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.INVALID_ARG;
             string strRetMessage = "";
-            string qry = "insert into assets (name, description, parentId, acCapacity, dcCapacity, categoryId, typeId, statusId, facilityId, blockId, customerId, ownerId,operatorId, manufacturerId,supplierId,serialNumber,warrantyId,createdBy,status,photoId,model,stockCount,moduleQuantity, cost,currency,specialTool,specialToolEmpId,calibrationDueDate,calibrationLastDate,calibrationFreqType,calibrationFrequency,calibrationReminderDays,retirementStatus,multiplier) values ";
+            string qry = "insert into assets (name, description, parentId, acCapacity, dcCapacity, categoryId, typeId, status, facilityId, blockId, customerId, ownerId,operatorId, manufacturerId,supplierId,serialNumber,createdBy,photoId,model,stockCount,moduleQuantity, cost,currency,specialTool,specialToolEmpId,calibrationDueDate,calibrationLastDate,calibrationFreqType,calibrationFrequency,calibrationReminderDays,retirementStatus,multiplier) values ";
+            int linkedToBlockId = 0;
             foreach (var unit in request)
             {
                 count++;
                 assetName = unit.name;
+                if(assetName.Length <= 0)
+                {
+                    throw new ArgumentException($"name of asset cannot be empty on line {count}");
+                }
                 string firstCalibrationDate    = unit.calibrationFirstDueDate.ToString("yyyy-MM-dd");
                 string lastCalibrationDate = unit.calibrationLastDate.ToString("yyyy-MM-dd");
-                qry += "('" + unit.name + "','" + unit.description + "','" + unit.parentId + "','" + unit.acCapacity + "','" + unit.dcCapacity + "','" + unit.categoryId + "','" + unit.typeId + "','" + unit.statusId + "','" + unit.facilityId + "','" + unit.blockId + "','" + unit.customerId + "','" + unit.ownerId + "','" + unit.operatorId + "','" + unit.manufacturerId + "','" + unit.supplierId + "','" + unit.serialNumber + "','" + userID + "','" + unit.statusId + "','" + unit.photoId + "','" + unit.model + "','" + unit.stockCount + "','" + unit.moduleQuantity + "','" + unit.cost + "','" + unit.currency + "','" + unit.specialToolId + "','" + unit.specialToolEmpId + "','" + firstCalibrationDate + "','" + lastCalibrationDate + "','" + unit.calibrationFrequencyType + "','" + unit.calibrationFrequencyType + "','" + unit.calibrationReminderDays + "','"+ unit.retirementStatus+ "','"+ unit.multiplier + "'),";
+                if(unit.blockId > 0)
+                {
+                    linkedToBlockId = unit.blockId;
+                    //pending :validate if blockId exist
+                }
+                else if (unit.facilityId > 0)
+                {
+                    linkedToBlockId = unit.facilityId;
+                    //pending :validate if blockId exist
+                }
+                else
+                {
+                    throw new ArgumentException($"{assetName} does not have facility or block mapping on line {count}");
+                }
+                if (unit.categoryId <= 0)
+                {
+                    throw new ArgumentException($"{assetName} does not have category mapping on line {count}");
+                    //pending :validate if category id exist
+                }
+                qry += "('" + unit.name + "','" + unit.description + "','" + unit.parentId + "','" + unit.acCapacity + "','" + unit.dcCapacity + "','" + unit.categoryId + "','" + unit.typeId + "','" + unit.statusId + "','" + unit.facilityId + "','" + unit.blockId + "','" + unit.customerId + "','" + unit.ownerId + "','" + unit.operatorId + "','" + unit.manufacturerId + "','" + unit.supplierId + "','" + unit.serialNumber + "','" + userID + "','" + unit.photoId + "','" + unit.model + "','" + unit.stockCount + "','" + unit.moduleQuantity + "','" + unit.cost + "','" + unit.currency + "','" + unit.specialToolId + "','" + unit.specialToolEmpId + "','" + firstCalibrationDate + "','" + lastCalibrationDate + "','" + unit.calibrationFrequencyType + "','" + unit.calibrationFrequencyType + "','" + unit.calibrationReminderDays + "','"+ unit.retirementStatus+ "','"+ unit.multiplier + "'),";
             }
             if (count > 0)
             {
