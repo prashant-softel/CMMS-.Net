@@ -276,6 +276,13 @@ namespace CMMSAPIs.Helper
             IR_UPDATED,
 
         }
+		
+		public enum checklist_type
+        {
+            Common = 0,
+            PM,
+            Audit,
+        }
 
     }
 }
