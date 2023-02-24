@@ -10,10 +10,10 @@ namespace CMMSAPIs.BS.Users
 {
     public interface IUserAccessBS
     {
-        public Task<List<CMUserAccess>> GetUserAccess(int user_id);
-        public Task<CMDefaultResponse> SetUserAccess(List<CMUserAccess> request);
-        public Task<List<CMUserNotifications>> GetUserNotifications(int user_id);
-        public Task<CMDefaultResponse> SetUserNotifications(List<CMUserNotifications> request);
+        public Task<CMUserAccess> GetUserAccess(int user_id);
+        public Task<CMDefaultResponse> SetUserAccess(CMUserAccess request);
+        public Task<CMUserNotifications> GetUserNotifications(int user_id);
+        public Task<CMDefaultResponse> SetUserNotifications(CMUserNotifications request);
     }
 
     public class UserAccessBS : IUserAccessBS
@@ -25,7 +25,7 @@ namespace CMMSAPIs.BS.Users
             databaseProvider = dbProvider;
         }
 
-        public async Task<List<CMUserAccess>> GetUserAccess(int role_id)
+        public async Task<CMUserAccess> GetUserAccess(int role_id)
         {
             try
             {
@@ -40,7 +40,7 @@ namespace CMMSAPIs.BS.Users
             }
         }
 
-        public async Task<CMDefaultResponse> SetUserAccess(List<CMUserAccess> request)
+        public async Task<CMDefaultResponse> SetUserAccess(CMUserAccess request)
         {
             try
             {
@@ -55,7 +55,7 @@ namespace CMMSAPIs.BS.Users
             }
         }
 
-        public async Task<List<CMUserNotifications>> GetUserNotifications(int role_id)
+        public async Task<CMUserNotifications> GetUserNotifications(int role_id)
         {
             try
             {
@@ -70,7 +70,7 @@ namespace CMMSAPIs.BS.Users
             }
         }
 
-        public async Task<CMDefaultResponse> SetUserNotifications(List<CMUserNotifications> request)
+        public async Task<CMDefaultResponse> SetUserNotifications(CMUserNotifications request)
         {
             try
             {

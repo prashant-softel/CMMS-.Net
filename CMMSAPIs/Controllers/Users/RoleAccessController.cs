@@ -4,9 +4,11 @@ using System;
 using CMMSAPIs.BS.Users;
 using CMMSAPIs.Models.Users;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CMMSAPIs.Controllers.Users
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class RoleAccessController : ControllerBase
@@ -16,7 +18,7 @@ namespace CMMSAPIs.Controllers.Users
         {
             _roleAcceesBs = roleAcceesBs;
         }
-
+        
         [Route("GetRoleAccess")]
         [HttpGet]
         
@@ -35,7 +37,7 @@ namespace CMMSAPIs.Controllers.Users
 
         [Route("SetRoleAccess")]
         [HttpPost]
-        public async Task<IActionResult> SetRoleAccess(CMRoleAccess request)
+        public async Task<IActionResult> SetRoleAccess(CMSetRoleAccess request)
         {
             try
             {
@@ -65,7 +67,7 @@ namespace CMMSAPIs.Controllers.Users
 
         [Route("SetRoleNotifications")]
         [HttpPost]
-        public async Task<IActionResult> SetRoleNotifications(List<CMRoleNotifications> request)
+        public async Task<IActionResult> SetRoleNotifications(CMSetRoleNotifications request)
         {
             try
             {
@@ -77,21 +79,6 @@ namespace CMMSAPIs.Controllers.Users
                 throw;
             }
         }
-
-        //[Route("SetRoleAccessAll")]
-        //[HttpPost]
-        //public async Task<IActionResult> SetRoleAccessAll(CMRoleAccess request)
-        //{
-        //    try
-        //    {
-        //        var data = await _roleAcceesBs.SetRoleAccessAll(request);
-        //        return Ok(data);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        throw;
-        //    }
-        //}
     }
 
 
