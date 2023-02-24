@@ -275,9 +275,21 @@ namespace CMMSAPIs.Helper
             IR_REJECTED,
             IR_UPDATED,
 
+            WC_DRAFT = 191,
+            WC_CREATED,
+            WC_WAITING_FOR_SUBMIT_APPROVAL,
+            WC_SUBMIT_REJECTED,
+            WC_SUBMITTED,
+            WC_REJECTED_BY_MANUFACTURER,
+            WC_APPROVED_BY_MANUFACTURER,
+            WC_ITEM_REPLENISHED,
+            WC_WAITING_FOR_CLOSE_APPROVAL,
+            WC_CLOSE_REJECTED,
+            WC_CLOSE_APPROVED,
+            WC_CANCELLED,
         }
-		
-		public enum checklist_type
+
+        public enum checklist_type
         {
             Common = 0,
             PM,
