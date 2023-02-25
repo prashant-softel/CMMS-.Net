@@ -18,19 +18,34 @@ namespace CMMSAPIs.Repositories.Users
             _conn = sqlDBHelper;
         }
 
+        internal async Task<List<CMUser>> GetUserList(int user_id = 0) 
+        {
+            string qry = $"SELECT " +
+                            $"id, CONCAT(firstName, ' ', lastName) as full_name FROM Users ";
+            if (user_id > 0) 
+            {
+                qry += $" WHERE id = {user_id}";
+            }
+            List<CMUser> user_list = await Context.GetData<CMUser>(qry).ConfigureAwait(false);
+            return user_list;
+        }
+
         internal async Task<CMUserAccess> GetUserAccess(int user_id)
         {
             string qry = $"SELECT " +
-                            $"`featureId` as feature_id, `add`, `edit`, `delete`, `view`, `issue`, `approve`, `selfView` " +
+                            $"featureId as feature_id, f.featureName as feature_name, u.add, u.edit, u.delete, u.view, u.issue, u.approve, u.selfView " +
                          $"FROM " +
-                            $"`UsersAccess` " +
+                            $"`UsersAccess` as u " +
+                            $"JOIN Features as f ON u.featureId = f.id " +
                          $"WHERE " +
                             $"userId = {user_id}";
 
             List<CMAccessList> access_list = await Context.GetData<CMAccessList>(qry).ConfigureAwait(false);
-            CMUserAccess user_access = new CMUserAccess();
-            user_access.user_id = user_id;
-            user_access.access_list = access_list;
+            List<CMUser> user_detail       = await GetUserList(user_id);
+            CMUserAccess user_access       = new CMUserAccess();
+            user_access.user_id            = user_id;
+            user_access.user_name          = user_detail[0].full_name;
+            user_access.access_list        = access_list;
             return user_access;
         }
 
@@ -87,16 +102,18 @@ namespace CMMSAPIs.Repositories.Users
         internal async Task<CMUserNotifications> GetUserNotifications(int user_id)
         {
             string qry = $"SELECT " +
-                            $"`notificationId` as notification_id, `canChange` as can_change, userPreference as flag " +
+                            $"`notificationId` as notification_id, notification as notification_name, `canChange` as can_change, userPreference as flag " +
                          $"FROM " +
-                            $"`UserNotifications` " +
+                            $"`UserNotifications` un JOIN Notifications n ON un.notificationId = n.id " +
                          $"WHERE " +
                             $"userId = {user_id}";
 
             List<CMNotificationList> notification_list = await Context.GetData<CMNotificationList>(qry).ConfigureAwait(false);
+            List<CMUser> user_detail = await GetUserList(user_id);
             CMUserNotifications user_notification = new CMUserNotifications();
-            user_notification.user_id = user_id;
-            user_notification.notification_list = notification_list;
+            user_notification.user_id             = user_id;
+            user_notification.user_name           = user_detail[0].full_name;
+            user_notification.notification_list   = notification_list;
             return user_notification;
         }
 

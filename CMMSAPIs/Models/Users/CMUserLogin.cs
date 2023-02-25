@@ -23,4 +23,10 @@ namespace CMMSAPIs.Models.Users
             token = _token;
         }
     }
+
+    public class CMUser 
+    {
+        public int id { get; set; }
+        public string full_name { get; set; }
+    }
 }

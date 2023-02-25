@@ -18,7 +18,22 @@ namespace CMMSAPIs.Controllers.Users
         {
             _roleAcceesBs = roleAcceesBs;
         }
-        
+
+        [Route("GetRoleList")]
+        [HttpGet]
+        public async Task<IActionResult> GetRoleList()
+        {
+            try
+            {
+                var data = await _roleAcceesBs.GetRoleList();
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
         [Route("GetRoleAccess")]
         [HttpGet]
         

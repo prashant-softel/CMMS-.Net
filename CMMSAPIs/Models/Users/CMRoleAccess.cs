@@ -5,6 +5,7 @@ namespace CMMSAPIs.Models.Users
     public class CMRoleAccess
     {
         public int role_id { get; set; }
+        public string role_name { get; set; }
         public List<CMAccessList> access_list { get; set; }
     }
 
@@ -17,6 +18,7 @@ namespace CMMSAPIs.Models.Users
     public class CMRoleNotifications
     {
         public int role_id { get; set; }
+        public string role_name { get; set; }
         public List<CMNotificationList> notification_list { get; set; }
     }
 

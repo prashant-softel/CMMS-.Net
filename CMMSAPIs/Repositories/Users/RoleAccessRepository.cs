@@ -27,17 +27,33 @@ namespace CMMSAPIs.Repositories.Users
         internal async Task<CMRoleAccess> GetRoleAccess(int role_id)
         {
             string qry = $"SELECT " +
-                            $"`featureId` as feature_id, `add`, `edit`, `delete`, `view`, `issue`, `approve`, `selfView` " +
+                            $"featureId as feature_id, f.featureName as feature_name, r.add, r.edit, r.delete, r.view, r.issue, r.approve, r.selfView " +
                          $"FROM " +
-                            $"`RoleAccess` " +
+                            $"`RoleAccess` r " +
+                            $"JOIN Features as f ON r.featureId = f.id " +
                          $"WHERE " +
                             $"roleId = {role_id}";
 
             List<CMAccessList> access_list = await Context.GetData<CMAccessList>(qry).ConfigureAwait(false);
+
+            List<KeyValuePairs> roleDetail = await GetRoleList(role_id);
+
             CMRoleAccess role_access = new CMRoleAccess();
             role_access.access_list = access_list;
             role_access.role_id = role_id;
+            role_access.role_name = roleDetail[0].name;
             return role_access;
+        }
+
+        internal async Task<List<KeyValuePairs>> GetRoleList(int role_id = 0) 
+        {
+            string roleQry = $"SELECT id, name FROM UserRoles ";
+            if(role_id > 0) 
+            {
+                roleQry += $"WHERE id = {role_id}";
+            }
+            List<KeyValuePairs> roleList = await Context.GetData<KeyValuePairs>(roleQry).ConfigureAwait(false);
+            return roleList;
         }
 
         internal async Task<CMDefaultResponse> SetRoleAccess(CMSetRoleAccess request)
@@ -115,22 +131,26 @@ namespace CMMSAPIs.Repositories.Users
             catch (Exception e)
             {
                 throw new Exception("Unable to get Users List");
-            }
-            
+            }            
         }
+
         internal async Task<CMRoleNotifications> GetRoleNotifications(int role_id)
         {
             string qry = $"SELECT " +
-                            $"notificationId as notification_id, defaultFlag as flag, canChange as can_change " +
+                            $"notificationId as notification_id, notification as notification_name, defaultFlag as flag, canChange as can_change " +
                          $"FROM " +
-                            $"`RoleNotifications` " +
+                            $"`RoleNotifications` as rn JOIN Notifications n ON rn.notificationId = n.id " +
                          $"WHERE " +
                             $"roleId = {role_id}";
 
             List<CMNotificationList> access_list = await Context.GetData<CMNotificationList>(qry).ConfigureAwait(false);
+            
+            List<KeyValuePairs> roleDetail = await GetRoleList(role_id);
+
             CMRoleNotifications role_notification_list = new CMRoleNotifications();
             role_notification_list.notification_list = access_list;
-            role_notification_list.role_id = role_id;         
+            role_notification_list.role_id = role_id;
+            role_notification_list.role_name = roleDetail[0].name;
             return role_notification_list;
         }
 
