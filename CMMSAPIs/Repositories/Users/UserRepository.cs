@@ -3,6 +3,7 @@ using CMMSAPIs.Models.Users;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Utils;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -18,14 +19,87 @@ namespace CMMSAPIs.Repositories.Users
             _conn = sqlDBHelper;
         }
 
-        internal async Task<List<CMUser>> GetUserList(int user_id = 0) 
+        internal async Task<CMUserDetail> GetUserDetail(int user_id)
+        {
+            // Pending - Include all the property listed in CMUserDetail Model
+            string qry = $"SELECT " +
+                            $"u.id, CONCAT(firstName, ' ', lastName) as full_name, loginId as user_name, mobileNumber as contact_no " +
+                         $"FROM " +
+                            $"Users as u " +
+                         $"JOIN " +
+                            $"UserRoles as r ON u.roleId = r.id " +
+                         $" WHERE " +
+                            $"u.id = {user_id}";
+            List<CMUserDetail> user_detail = await Context.GetData<CMUserDetail>(qry).ConfigureAwait(false);
+
+            return user_detail[0];
+        }
+    
+        internal async Task<CMDefaultResponse> CreateUser(CMUserDetail request)
+        {
+            /*
+             * Read the required field for insert
+             * Table - Users, UserNofication, UserAccess
+             * Use existing functions to insert UserNotification and User Access in table
+            */
+            return null;
+        }
+        internal async Task<CMDefaultResponse> UpdateUser(CMUserDetail request)
+        {
+            /*
+             * Read the required field for update
+             * Table - Users, UserNofication, UserAccess
+             * Use existing functions to insert UserNotification and User Access in table
+            */
+            return null;
+        }
+        internal async Task<CMDefaultResponse> DeleteUser(int user_id)
+        {
+            /*
+             * Table - Users, UserNotification, UserAccess
+             * Delete from above tables and add log in history table
+            */
+            return null;
+        }
+
+        internal async Task<List<CMUser>> GetUserByNotificationId(int facility_id, CMMS.CMMS_Status notification_id, List<int> user_ids)
+        {
+            // Pending convert user_ids into string for where condition
+            string user_ids_str = string.Join(",", user_ids.ToArray());
+            string qry = $"SELECT " +
+                            $"u.loginId as email, concat(firstName, ' ', lastName) as full_name " +
+                         $"FROM " +
+                            $"Users u " +
+                         $"JOIN " +
+                            $"UserNotifications un ON u.id = un.userId " +
+                         $"JOIN " +
+                            $"UserFacilities uf ON uf.userId = u.id " +
+                         $"WHERE " +
+                            $"uf.facilityId = {facility_id} AND userPreference = 1 AND notificationId = {(int)notification_id} " +
+                            $"AND (self = 0 OR u.id IN({user_ids_str}))";
+
+            List<CMUser> user_list = await Context.GetData<CMUser>(qry).ConfigureAwait(false);
+            /*
+             * Table - Users, UserNotification, Notification
+             * Return user based on notification_id and facility_id 
+            */
+            return user_list;
+        }
+
+
+        internal async Task<List<CMUser>> GetUserList(int facility_id) 
         {
             string qry = $"SELECT " +
-                            $"id, CONCAT(firstName, ' ', lastName) as full_name FROM Users ";
-            if (user_id > 0) 
-            {
-                qry += $" WHERE id = {user_id}";
-            }
+                            $"u.id, firstName as first_name, lastName as last_name, CONCAT(firstName, ' ', lastName) as full_name, loginId as user_name, mobileNumber as contact_no, r.name as role_name " +
+                         $"FROM " +
+                            $"Users as u " +
+                         $"JOIN " +
+                            $"UserRoles as r ON u.roleId = r.id " +
+                         $"JOIN " +
+                            $"UserFacilities as uf ON uf.userId = u.id " +
+                         $"WHERE " +
+                            $"uf.facilityId = {facility_id}";
+            
             List<CMUser> user_list = await Context.GetData<CMUser>(qry).ConfigureAwait(false);
             return user_list;
         }
@@ -41,10 +115,10 @@ namespace CMMSAPIs.Repositories.Users
                             $"userId = {user_id}";
 
             List<CMAccessList> access_list = await Context.GetData<CMAccessList>(qry).ConfigureAwait(false);
-            List<CMUser> user_detail       = await GetUserList(user_id);
+            CMUserDetail user_detail       = await GetUserDetail(user_id);
             CMUserAccess user_access       = new CMUserAccess();
             user_access.user_id            = user_id;
-            user_access.user_name          = user_detail[0].full_name;
+            user_access.user_name          = user_detail.full_name;
             user_access.access_list        = access_list;
             return user_access;
         }
@@ -109,10 +183,10 @@ namespace CMMSAPIs.Repositories.Users
                             $"userId = {user_id}";
 
             List<CMNotificationList> notification_list = await Context.GetData<CMNotificationList>(qry).ConfigureAwait(false);
-            List<CMUser> user_detail = await GetUserList(user_id);
+            CMUserDetail user_detail              = await GetUserDetail(user_id);
             CMUserNotifications user_notification = new CMUserNotifications();
             user_notification.user_id             = user_id;
-            user_notification.user_name           = user_detail[0].full_name;
+            user_notification.user_name           = user_detail.full_name;
             user_notification.notification_list   = notification_list;
             return user_notification;
         }

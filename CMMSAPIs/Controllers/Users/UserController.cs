@@ -17,6 +17,109 @@ namespace CMMSAPIs.Controllers.Users
             _userAccessBs = userBs;
         }
 
+        //Get Signle User details
+        [Route("GetUserDetail")]
+        [HttpGet]
+
+        public async Task<IActionResult> GetUserDetail(int user_id)
+        {
+            try
+            {
+                var data = await _userAccessBs.GetUserDetail(user_id);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        // List Of Users
+        [Route("GetUserList")]
+        [HttpGet]
+
+        public async Task<IActionResult> GetUserList(int facility_id)
+        {
+            try
+            {
+                var data = await _userAccessBs.GetUserList(facility_id);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        // Create User
+        [Route("CreateUser")]
+        [HttpPost]
+
+        public async Task<IActionResult> CreateUser(CMUserDetail request)
+        {
+            try
+            {
+                var data = await _userAccessBs.CreateUser(request);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        // Update User
+        [Route("UpdateUser")]
+        [HttpPut]
+
+        public async Task<IActionResult> UpdateUser(CMUserDetail request)
+        {
+            try
+            {
+                var data = await _userAccessBs.UpdateUser(request);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        // Delete User
+        [Route("DeleteUser")]
+        [HttpDelete]
+
+        public async Task<IActionResult> DeleteUser(int user_id)
+        {
+            try
+            {
+                var data = await _userAccessBs.DeleteUser(user_id);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        // Get User By Notification id
+        [Route("GetUserByNotificationId")]
+        [HttpDelete]
+
+        public async Task<IActionResult> GetUserByNotificationId(int notification_id, int facility_id)
+        {
+            try
+            {
+                var data = await _userAccessBs.GetUserByNotificationId(notification_id, facility_id);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+
         [Route("GetUserAccess")]
         [HttpGet]
 
