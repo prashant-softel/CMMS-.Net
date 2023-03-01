@@ -10,6 +10,13 @@ namespace CMMSAPIs.BS.Users
 {
     public interface IUserAccessBS
     {
+
+        public Task<CMUserDetail> GetUserDetail(int user_id);
+        public Task<List<CMUser>> GetUserList(int facility_id);
+        public Task<CMDefaultResponse> CreateUser(CMUserDetail request);
+        public Task<CMDefaultResponse> UpdateUser(CMUserDetail request);
+        public Task<CMDefaultResponse> DeleteUser(int user_id);
+        public Task<List<CMUser>> GetUserByNotificationId(int notification_id, int facility_id);
         public Task<CMUserAccess> GetUserAccess(int user_id);
         public Task<CMDefaultResponse> SetUserAccess(CMUserAccess request);
         public Task<CMUserNotifications> GetUserNotifications(int user_id);
@@ -23,6 +30,96 @@ namespace CMMSAPIs.BS.Users
         public UserAccessBS(DatabaseProvider dbProvider)
         {
             databaseProvider = dbProvider;
+        }
+
+        public async Task<CMUserDetail> GetUserDetail(int user_id)
+        {
+            try
+            {
+                using (var repos = new UserAccessRepository(getDB))
+                {
+                    return await repos.GetUserDetail(user_id);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<CMUser>> GetUserList(int facility_id)
+        {
+            try
+            {
+                using (var repos = new UserAccessRepository(getDB))
+                {
+                    return await repos.GetUserList(facility_id);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> CreateUser(CMUserDetail request)
+        {
+            try
+            {
+                using (var repos = new UserAccessRepository(getDB))
+                {
+                    return await repos.CreateUser(request);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> UpdateUser(CMUserDetail request)
+        {
+            try
+            {
+                using (var repos = new UserAccessRepository(getDB))
+                {
+                    return await repos.UpdateUser(request);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> DeleteUser(int user_id)
+        {
+            try
+            {
+                using (var repos = new UserAccessRepository(getDB))
+                {
+                    return await repos.DeleteUser(user_id);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        
+        public async Task<List<CMUser>> GetUserByNotificationId(int notification_id, int facility_id)
+        {
+            try
+            {
+                using (var repos = new UserAccessRepository(getDB))
+                {
+                    return await repos.GetUserByNotificationId(notification_id, facility_id);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
         }
 
         public async Task<CMUserAccess> GetUserAccess(int role_id)
