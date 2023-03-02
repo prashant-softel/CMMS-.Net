@@ -21,6 +21,43 @@ namespace CMMSAPIs.Repositories.Masters
 
         }
 
+        internal async Task<CMDefaultResponse> AddModule(CMModule request)
+        {
+            /*
+             * Read property of CMModule and insert into Features table
+            */
+            return null;
+        }
+
+        internal async Task<CMDefaultResponse> UpdateModule(CMModule request)
+        {
+            /*
+             * Read property of CMModule and Update into Features table
+            */
+            return null;
+        }
+        internal async Task<CMDefaultResponse> DeleteModule(int id)
+        {
+            /*
+             * Disable the status for requested id in Features table
+            */
+            return null;
+        }
+        internal async Task<CMModule> GetModuleDetail(int id)
+        {
+            /*
+             * Return request id detail from Features table
+            */
+            return null;
+        }
+        internal async Task<List<CMModule>> GetModuleList()
+        {
+            /*
+             * Return List of modules from Features table
+            */
+            return null;
+        }
+
         internal async Task<List<CMFinancialYear>> GetFinancialYear()
         {
             List<CMFinancialYear> _FinancialYear = new List<CMFinancialYear>();

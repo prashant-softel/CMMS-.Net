@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using CMMSAPIs.Models.Masters;
 using CMMSAPIs.BS.Masters;
 using CMMSAPIs.Helper;
+using System.Reflection;
 
 namespace CMMSAPIs.Controllers.Masters
 {
@@ -169,6 +170,82 @@ namespace CMMSAPIs.Controllers.Masters
             {
 
                 return BadRequest(ex.Message);
+            }
+        }
+
+        // Module CRUD
+        [Route("AddModule")]
+        [HttpPost]
+        public async Task<IActionResult> AddModule(CMModule request)
+        {
+            try
+            {
+                var data = await _CMMSBS.AddModule(request);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        [Route("UpdateModule")]
+        [HttpPut]
+        public async Task<IActionResult> UpdateModule(CMModule request)
+        {
+            try
+            {
+                var data = await _CMMSBS.UpdateModule(request);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        [Route("DeleteModule")]
+        [HttpDelete]
+        public async Task<IActionResult> DeleteModule(int id)
+        {
+            try
+            {
+                var data = await _CMMSBS.DeleteModule(id);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        [Route("GetModuleList")]
+        [HttpGet]
+        public async Task<IActionResult> GetModuleList()
+        {
+            try
+            {
+                var data = await _CMMSBS.GetModuleList();
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        [Route("GetModuleDetail")]
+        [HttpGet]
+        public async Task<IActionResult> GetModuleDetail(int id)
+        {
+            try
+            {
+                var data = await _CMMSBS.GetModuleDetail();
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
             }
         }
 

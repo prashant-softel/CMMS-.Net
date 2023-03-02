@@ -22,6 +22,12 @@ namespace CMMSAPIs.BS.Masters
         Task<List<CMBusinessType>> GetBusinessTypeList();
         Task<CMDefaultResponse> AddBusiness(List<CMBusiness> request);
         Task<List<CMBusiness>> GetBusinessList(CMMS.CMMS_BusinessType businessType);
+        Task<CMDefaultResponse> AddModule(CMModule request);
+        Task<CMDefaultResponse> UpdateModule(CMModule request);
+        Task<CMDefaultResponse> DeleteModule(int id);
+        Task<CMModule> GetModuleDetail(int id);
+        Task<List<CMModule>> GetModuleList();
+
     }
     public class CMMSBS : ICMMSBS
     {
@@ -34,6 +40,81 @@ namespace CMMSAPIs.BS.Masters
 
 
         #region helper
+
+        public async Task<CMDefaultResponse> AddModule(CMModule request)
+        {
+            try
+            {
+                using (var repos = new CMMSRepository(getDB))
+                {
+                    return await repos.AddModule(request);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> UpdateModule(CMModule request)
+        {
+            try
+            {
+                using (var repos = new CMMSRepository(getDB))
+                {
+                    return await repos.UpdateModule(request);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> DeleteModule(int id)
+        {
+            try
+            {
+                using (var repos = new CMMSRepository(getDB))
+                {
+                    return await repos.DeleteModule(id);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMModule> GetModuleDetail(int id)
+        {
+            try
+            {
+                using (var repos = new CMMSRepository(getDB))
+                {
+                    return await repos.GetModuleDetail(id);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<CMModule>> GetModuleList()
+        {
+            try
+            {
+                using (var repos = new CMMSRepository(getDB))
+                {
+                    return await repos.GetModuleList();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
 
         public async Task<List<CMFinancialYear>> GetFinancialYear()
         {
