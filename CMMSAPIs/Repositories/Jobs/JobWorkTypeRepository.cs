@@ -93,7 +93,7 @@ namespace CMMSAPIs.Repositories.Jobs
              * Fetch id, categoryId, categroyName, workType from worktypeassociatedtools table and join AssetCategories to get CategoryName
             */
             /*Your code goes here*/
-            string myQuery = "SELECT a.otherWorkTypeName as toolName, a.workTypeId as workTypeId, b.workTypeName as workTypeName, c.name as CategoryName FROM jobassociatedworktypes as a LEFT JOIN jobworktypes as b ON a.workTypeId = b.id LEFT JOIN  assetcategories as c ON c.id = b.equipmentCategoryId where a.jobId =" + jobId;
+            string myQuery = $"SELECT tools.id as toolId, tools.assetName as toolName, workType.id as workTypeId, workType.workTypeName as workTypeName, asset_cat.name as CategoryName FROM jobs AS job JOIN jobmappingassets AS mapAssets ON mapAssets.jobId = job.id JOIN assetcategories AS asset_cat ON mapAssets.categoryId = asset_cat.id LEFT JOIN jobassociatedworktypes as mapWorkTypes on mapWorkTypes.jobId = job.id LEFT JOIN jobworktypes AS workType ON (workType.equipmentCategoryId = asset_cat.id OR mapWorkTypes.workTypeId = workType.id) LEFT JOIN worktypeassociatedtools AS mapTools ON mapTools.workTypeId=workType.id LEFT JOIN worktypemasterassets AS tools ON tools.id=mapTools.ToolId WHERE job.id = {jobId} GROUP BY toolId;";
             List<CMJobWorkTypeTool> _WorkType = await Context.GetData<CMJobWorkTypeTool>(myQuery).ConfigureAwait(false);
             return _WorkType;
         }
