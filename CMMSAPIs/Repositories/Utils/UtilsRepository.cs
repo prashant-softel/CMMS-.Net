@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Utils;
+using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -63,8 +64,8 @@ namespace CMMSAPIs.Repositories.Utils
                             ")" +
                         "VALUES" +
                             "(" +
-                                $"{(int)log.module_type}, {log.module_ref_id}, {log.secondary_module_type}, {log.secondary_module_ref_id}," +
-                                $"'{log.comment}', {(int)log.status}, '{log.current_latitude}', '{log.current_longitude}', {GetUserID()}, '{GetUTCTime()}'" +
+                                $"{log.module_type}, {log.module_ref_id}, {log.secondary_module_type}, {log.secondary_module_ref_id}," +
+                                $"'{log.comment}', {log.status}, '{log.latitude}', '{log.longitude}', {GetUserID()}, '{GetUTCTime()}'" +
                             ")";
 
             await Context.GetData<List<int>>(qry).ConfigureAwait(false);
@@ -95,13 +96,16 @@ namespace CMMSAPIs.Repositories.Utils
         }
 
 
-            internal async Task<List<CMLog>> GetLog(int module_type, int id)
+        internal async Task<List<CMHistoryLogList>> GetHistoryLog(int module_type, int id)
         {
             /*
              * Fetch data from History table for requested module_type and id
              * Return Log
             */
-            return null;
+            string myQuery = "select Id as id, moduleType as module_type, moduleRefId as module_ref_id, secondaryModuleRefType as sec_module, secondaryModuleRefId as sec_ref_id, comment as comment, status as status, createdAt as timestamp, currentLatitude as current_latitude, currentLongitude as current_longitude from history " +
+                $"WHERE (moduleType = {module_type} or sec_module = {module_type}) AND (moduleRefId = {id} or sec_ref_id = {id})";
+            List<CMHistoryLogList> _Log = await Context.GetData<CMHistoryLogList>(myQuery).ConfigureAwait(false);
+            return _Log;
         }
 
         // Return User ID
