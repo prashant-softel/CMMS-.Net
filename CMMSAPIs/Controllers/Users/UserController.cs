@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using System;
 using System.Collections.Generic;
+using CMMSAPIs.Helper;
 
 namespace CMMSAPIs.Controllers.Users
 {
@@ -104,13 +105,13 @@ namespace CMMSAPIs.Controllers.Users
 
         // Get User By Notification id
         [Route("GetUserByNotificationId")]
-        [HttpDelete]
+        [HttpGet]
 
-        public async Task<IActionResult> GetUserByNotificationId(int notification_id, int facility_id)
+        public async Task<IActionResult> GetUserByNotificationId(CMUserByNotificationId request)
         {
             try
             {
-                var data = await _userAccessBs.GetUserByNotificationId(notification_id, facility_id);
+                var data = await _userAccessBs.GetUserByNotificationId(request);
                 return Ok(data);
             }
             catch (Exception ex)
