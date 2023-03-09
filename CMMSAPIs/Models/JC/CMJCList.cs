@@ -6,6 +6,7 @@ namespace CMMSAPIs.Models.JC
     {
         public int id { get; set; }
         public int jobCardId { get; set; }
+        public string jobCardNo { get; set; }
         public int jobid { get; set;  }
         public int permit_id { get; set; }
         public string permit_no { get; set; }
