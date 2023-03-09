@@ -16,7 +16,7 @@ namespace CMMSAPIs.BS.Users
         public Task<CMDefaultResponse> CreateUser(CMUserDetail request);
         public Task<CMDefaultResponse> UpdateUser(CMUserDetail request);
         public Task<CMDefaultResponse> DeleteUser(int user_id);
-        public Task<List<CMUser>> GetUserByNotificationId(int notification_id, int facility_id);
+        public Task<List<CMUser>> GetUserByNotificationId(CMUserByNotificationId request);
         public Task<CMUserAccess> GetUserAccess(int user_id);
         public Task<CMDefaultResponse> SetUserAccess(CMUserAccess request);
         public Task<CMUserNotifications> GetUserNotifications(int user_id);
@@ -107,13 +107,13 @@ namespace CMMSAPIs.BS.Users
             }
         }
         
-        public async Task<List<CMUser>> GetUserByNotificationId(int notification_id, int facility_id)
+        public async Task<List<CMUser>> GetUserByNotificationId(CMUserByNotificationId request)
         {
             try
             {
                 using (var repos = new UserAccessRepository(getDB))
                 {
-                    return await repos.GetUserByNotificationId(notification_id, facility_id);
+                    return await repos.GetUserByNotificationId(request);
                 }
             }
             catch (Exception ex)

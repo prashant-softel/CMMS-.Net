@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using CMMSAPIs.Helper;
+using System.Collections.Generic;
+using static CMMSAPIs.Helper.CMMS;
 
 namespace CMMSAPIs.Models.Users
 {
@@ -40,5 +42,12 @@ namespace CMMSAPIs.Models.Users
         public string notification_name { get; set; }
         public int can_change { get; set; }
         public int flag { get; set; }
+    }
+
+    public class CMUserByNotificationId
+    {
+        public int facility_id { get; set; }
+        public CMMS.CMMS_Status notification_id { get; set; }
+        public List<int> user_ids { get; set; }
     }
 }
