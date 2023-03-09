@@ -9,7 +9,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
-using CMMSAPIs.BS.Authentication;
 using CMMSAPIs.BS.FileUpload;
 using CMMSAPIs.Middlewares;
 using CMMSAPIs.BS.Incident_Reports;
@@ -92,7 +91,6 @@ namespace CMMSAPIs
             services.AddScoped<IInventoryBS, InventoryBS>();
             services.Configure<CMMailSettings>(Configuration.GetSection("MailSettings"));
             services.AddTransient<IMailService, MailService>();
-            services.AddScoped<IJwtTokenManagerBS, JwtTokenManagerBS>();
             services.AddScoped<IFileUploadBS, FileUploadBS>();
             services.AddScoped<ICheckListBS, CheckListBS>();
             services.AddScoped<ICheckPointBS, CheckPointBS>();

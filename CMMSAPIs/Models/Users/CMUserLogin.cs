@@ -18,10 +18,12 @@ namespace CMMSAPIs.Models.Users
     public class UserToken
     {
         public string token { get; set; }
+        public CMUserDetail user_detail { get; set; }
 
-        public UserToken(string _token) 
+        public UserToken(string _token, CMUserDetail _user_detail) 
         {
             token = _token;
+            user_detail = _user_detail;
         }
     }
 

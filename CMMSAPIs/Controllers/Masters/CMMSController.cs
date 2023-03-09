@@ -240,7 +240,7 @@ namespace CMMSAPIs.Controllers.Masters
         {
             try
             {
-                var data = await _CMMSBS.GetModuleDetail();
+                var data = await _CMMSBS.GetModuleDetail(id);
                 return Ok(data);
             }
             catch (Exception ex)
