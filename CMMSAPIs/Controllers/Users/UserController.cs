@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using System;
 using System.Collections.Generic;
 using CMMSAPIs.Helper;
+using CMMSAPIs.Models.Authentication;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CMMSAPIs.Controllers.Users
 {
@@ -16,6 +18,24 @@ namespace CMMSAPIs.Controllers.Users
         public UserController(IUserAccessBS userBs)
         {
             _userAccessBs = userBs;
+        }
+
+        [AllowAnonymous]
+        [Route("Authenticate")]
+        [HttpPost]
+        public async Task<IActionResult> Authenticate([FromForm] CMUserCrentials credential)
+        {
+            try
+            {
+                var data = await _userAccessBs.Authenticate(credential);
+                if (data == null)
+                    return Unauthorized();
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
         }
 
         //Get Signle User details

@@ -1,10 +1,16 @@
 ﻿using CMMSAPIs.Helper;
+using CMMSAPIs.Models.Authentication;
 using CMMSAPIs.Models.Users;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Utils;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -14,24 +20,58 @@ namespace CMMSAPIs.Repositories.Users
     public class UserAccessRepository : GenericRepository
     {
         private MYSQLDBHelper _conn;
-        public UserAccessRepository(MYSQLDBHelper sqlDBHelper) : base(sqlDBHelper)
+        private readonly IConfiguration _configuration;
+        public UserAccessRepository(MYSQLDBHelper sqlDBHelper, IConfiguration configuration = null) : base(sqlDBHelper)
         {
+            _configuration = configuration;
             _conn = sqlDBHelper;
+        }
+
+        internal async Task<UserToken> Authenticate(CMUserCrentials userCrentials)
+        {
+            string myQuery = "SELECT id FROM Users WHERE loginId = '" + userCrentials.user_name + "' AND password = '" + userCrentials.password + "'";
+            List<CMUser> _List = await Context.GetData<CMUser>(myQuery).ConfigureAwait(false);
+            if (_List.Count == 0)
+            {
+                return null;
+            }
+            var user_id = _List[0].id;
+            var key = _configuration.GetValue<string>("JwtConfig:Key");
+            var keyBytes = Encoding.ASCII.GetBytes(key);
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+
+            var tokenDescriptor = new SecurityTokenDescriptor()
+            {
+                Subject = new ClaimsIdentity(new Claim[] {
+                        new Claim(ClaimTypes.NameIdentifier, ""+user_id)
+                    }),
+                Expires = DateTime.UtcNow.AddMinutes(CMMS.TOKEN_EXPIRATION_TIME),
+                SigningCredentials = new SigningCredentials(
+                new SymmetricSecurityKey(keyBytes), SecurityAlgorithms.HmacSha256Signature)
+            };
+
+            CMUserDetail userDetail = await GetUserDetail(user_id);
+            userDetail.user_access = await GetUserAccess(user_id);
+            userDetail.user_notification = await GetUserNotifications(user_id);
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            UserToken user_token = new UserToken(tokenHandler.WriteToken(token), userDetail);
+            return user_token;
         }
 
         internal async Task<CMUserDetail> GetUserDetail(int user_id)
         {
             // Pending - Include all the property listed in CMUserDetail Model
             string qry = $"SELECT " +
-                            $"u.id, CONCAT(firstName, ' ', lastName) as full_name, loginId as user_name, mobileNumber as contact_no " +
+                            $"u.id, firstName as first_name, lastName as last_name,  CONCAT(firstName, ' ', lastName) as full_name, loginId as user_name, mobileNumber as contact_no " +
                          $"FROM " +
                             $"Users as u " +
                          $"JOIN " +
                             $"UserRoles as r ON u.roleId = r.id " +
                          $" WHERE " +
                             $"u.id = {user_id}";
-            List<CMUserDetail> user_detail = await Context.GetData<CMUserDetail>(qry).ConfigureAwait(false);
 
+            List<CMUserDetail> user_detail = await Context.GetData<CMUserDetail>(qry).ConfigureAwait(false);
             return user_detail[0];
         }
     
@@ -115,7 +155,7 @@ namespace CMMSAPIs.Repositories.Users
         }
 
         internal async Task<CMUserAccess> GetUserAccess(int user_id)
-        {
+        {           
             string qry = $"SELECT " +
                             $"featureId as feature_id, f.featureName as feature_name, u.add, u.edit, u.delete, u.view, u.issue, u.approve, u.selfView " +
                          $"FROM " +
