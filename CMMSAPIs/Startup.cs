@@ -28,6 +28,7 @@ using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Mails;
 using CMMSAPIs.BS.PM;
 using CMMSAPIs.BS.Audits;
+using CMMSAPIs.BS.MC;
 
 namespace CMMSAPIs
 {
@@ -99,6 +100,7 @@ namespace CMMSAPIs
             services.AddScoped<ICheckListMapBS, CheckListMapBS>();
             services.AddScoped<IPMScheduleViewBS, PMScheduleViewBS>();
             services.AddScoped<IAuditPlanBS, AuditPlanBS>();
+            services.AddScoped<IMCBS, MCBS>();            
             services.AddScoped<IAuditScheduleViewBS, AuditScheduleViewBS>();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
         }
