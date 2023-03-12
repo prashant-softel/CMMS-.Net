@@ -33,7 +33,7 @@ namespace CMMSAPIs.Models.Users
         public string full_name { get; set; }
         public string user_name { get; set; }
         public string role_name { get; set; }
-        public string contanct_no { get; set; }        
+        public string contact_no { get; set; }        
     }
 
     public class CMUserDetail : CMUser
@@ -42,15 +42,13 @@ namespace CMMSAPIs.Models.Users
         public string last_name { get; set; }
         public int gender_id { get; set; }
         public string gender_name { get; set; }
-        public string DOB { get; set; }
+        public dynamic DOB { get; set; }
         public string country_name { get; set; }
         public int country_id { get; set; }
-        public string state_id { get; set; }
+        public int state_id { get; set; }
         public string state_name { get; set; }
         public int city_id { get; set; }
         public string city_name { get; set; }
         public List<KeyValuePairs> plant_list { get; set; }
-        public CMUserAccess user_access { get; set; }
-        public CMUserNotifications user_notification { get; set; }
     }
 }
