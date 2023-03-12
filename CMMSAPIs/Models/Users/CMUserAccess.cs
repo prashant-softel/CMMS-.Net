@@ -15,6 +15,7 @@ namespace CMMSAPIs.Models.Users
     {
         public int feature_id { get; set; }
         public string feature_name { get; set; }
+        public string menu_image { get; set; }
         public int add { get; set; }
         public int edit { get; set; }
         public int delete { get; set; }
