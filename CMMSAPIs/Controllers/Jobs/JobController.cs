@@ -1,4 +1,5 @@
 ﻿using CMMSAPIs.BS.Jobs;
+using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Jobs;
 using CMMSAPIs.Repositories.Jobs;
 using Microsoft.AspNetCore.Http;
@@ -26,11 +27,12 @@ namespace CMMSAPIs.Controllers.Jobs
         [Authorize]
         [Route("GetJobList")]
         [HttpGet]
-        public async Task<IActionResult> GetJobList(int facility_id, int userId)
+        public async Task<IActionResult> GetJobList(int facility_id, string startDate, string endDate, CMMS.CMMS_JobType jobType, int selfView, string status)
         {
             try
             {
-                var data = await _JobBS.GetJobList(facility_id, userId);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _JobBS.GetJobList(facility_id,startDate, endDate, jobType, selfView, userID, status);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -40,7 +42,7 @@ namespace CMMSAPIs.Controllers.Jobs
         }
 
         [Authorize]
-        [Route("GetJobDetail")]
+        [Route("GetJobDetails")]
         [HttpGet]
         public async Task<IActionResult> GetJobDetails(int job_id)
         {
@@ -60,17 +62,16 @@ namespace CMMSAPIs.Controllers.Jobs
         [HttpPost]
         public async Task<IActionResult> CreateNewJob(CMCreateJob request)
         {
-            String status;
             try
             {
-                var data = await _JobBS.CreateNewJob(request);
-                status = "Job Created Successfully";
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _JobBS.CreateNewJob(request, userID);
+                return Ok(data);
             }
             catch (Exception ex)
             {
                 throw;
             }
-            return Ok(status);
         }
 
         /*
@@ -84,7 +85,8 @@ namespace CMMSAPIs.Controllers.Jobs
         
             try
             {
-                var data = await _JobBS.ReAssignJob(job_id, assignedTo);
+                int updatedBy = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _JobBS.ReAssignJob(job_id, assignedTo, updatedBy);
                 return Ok(data);
 
             }
@@ -102,7 +104,26 @@ namespace CMMSAPIs.Controllers.Jobs
         {
             try
             {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
                 var data = await _JobBS.CancelJob(job_id, user_id, Cancelremark);
+                return Ok(data);
+
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
+        [Route("DeleteJob")]
+        [HttpDelete]
+        public async Task<IActionResult> DeleteJob(int job_id)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _JobBS.DeleteJob(job_id, userID);
                 return Ok(data);
 
             }
@@ -119,7 +140,8 @@ namespace CMMSAPIs.Controllers.Jobs
         {
             try
             {
-                var data = await _JobBS.LinkToPTW(job_id, ptw_id);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _JobBS.LinkToPTW(job_id, ptw_id, userID);
                 return Ok(data);
             }
             catch (Exception ex)

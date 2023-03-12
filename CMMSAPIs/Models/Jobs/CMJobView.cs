@@ -34,33 +34,45 @@ namespace CMMSAPIs.Models.Jobs
         
         public List<CMequipmentCatList> equipment_cat_list { get; set; }
         public List<CMworkingAreaNameList> working_area_name_list { get; set; }
-        public List<CMAssociatedPermitList> associated_permit { get; set; }
-        public List<CMJobWorkTypeTool> lst_tools_required { get; set; }
-        
+        public List<CMAssociatedPermitList> associated_permit_list { get; set; }
+        public List<CMWorkType> work_type_list { get; set; }
+        public List<CMWorkTypeTool> tools_required_list { get; set; }
+
     }
-}
 
-public class CMequipmentCatList
-{
-    public int equipmentCat_id { get; set; }
-    public string equipmentCat_name { get; set; }
-}
+    public class CMequipmentCatList
+    {
+        public int equipmentCat_id { get; set; }
+        public string equipmentCat_name { get; set; }
+    }
 
-public class CMworkingAreaNameList
-{
-    public int workingArea_id { get; set; }
-    public string workingArea_name { get; set; }
-}
-public class CMAssociatedPermitList
-{
-    public int permitId { get; set; }
-    public string sitePermitNo { get; set; }
-    public string PermitTypeName { get; set; }
-    public string title { get; set; }
-    public string issuedByName { get; set; }
-    public DateTime issue_at { get; set; }
-    public int ptwStatus { get; set; }
-    public string ptwStatus_short { get; set; }
-    public dynamic startDate { get; set; }
-    public dynamic endDate { get; set; }
+    public class CMworkingAreaNameList
+    {
+        public int workingArea_id { get; set; }
+        public string workingArea_name { get; set; }
+    }
+    public class CMAssociatedPermitList
+    {
+        public int permitId { get; set; }
+        public string sitePermitNo { get; set; }
+        public string PermitTypeName { get; set; }
+        public string title { get; set; }
+        public string issuedByName { get; set; }
+        public DateTime issue_at { get; set; }
+        public int ptwStatus { get; set; }
+        public string ptwStatus_short { get; set; }
+        public dynamic startDate { get; set; }
+        public dynamic endDate { get; set; }
+    }
+
+    public class CMWorkType
+    {
+        public int workTypeId { get; set; }
+        public string workTypeName { get; set; }
+    }
+    public class CMWorkTypeTool
+    {
+        public int toolId { get; set; }
+        public string toolName { get; set; }
+    }
 }

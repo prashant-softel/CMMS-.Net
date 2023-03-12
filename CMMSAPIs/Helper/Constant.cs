@@ -234,6 +234,7 @@ namespace CMMSAPIs.Helper
             JOB_IN_PROGRESS,
             JOB_CLOSED,
             JOB_CANCELLED,
+            JOB_DELETED,
 
             PTW_CREATED = 121,
             PTW_ISSUED,
