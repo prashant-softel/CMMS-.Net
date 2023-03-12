@@ -52,8 +52,6 @@ namespace CMMSAPIs.Repositories.Users
             };
 
             CMUserDetail userDetail = await GetUserDetail(user_id);
-            userDetail.user_access = await GetUserAccess(user_id);
-            userDetail.user_notification = await GetUserNotifications(user_id);
             var token = tokenHandler.CreateToken(tokenDescriptor);
             UserToken user_token = new UserToken(tokenHandler.WriteToken(token), userDetail);
             return user_token;
@@ -62,17 +60,27 @@ namespace CMMSAPIs.Repositories.Users
         internal async Task<CMUserDetail> GetUserDetail(int user_id)
         {
             // Pending - Include all the property listed in CMUserDetail Model
-            string qry = $"SELECT " +
-                            $"u.id, firstName as first_name, lastName as last_name,  CONCAT(firstName, ' ', lastName) as full_name, loginId as user_name, mobileNumber as contact_no " +
-                         $"FROM " +
-                            $"Users as u " +
-                         $"JOIN " +
-                            $"UserRoles as r ON u.roleId = r.id " +
-                         $" WHERE " +
+            string qry = "SELECT " +
+                            "u.id, firstName as first_name, lastName as last_name,  CONCAT(firstName, ' ', lastName) as full_name, loginId as user_name, r.name as role_name, mobileNumber as contact_no, gender as gender_name, birthday as DOB, country as country_name, countries.id as country_id, state as state_name, states.id as state_id, city as city_name, cities.id as city_id " +
+                         "FROM " +
+                            "Users as u " +
+                         "JOIN " +
+                            "countries as countries ON countries.name = u.country " + 
+                         "JOIN " +
+                            "states as states ON states.name = u.state " + 
+                         "JOIN " +
+                            "cities as cities ON cities.name = u.city " + 
+                         "JOIN " +
+                            "UserRoles as r ON u.roleId = r.id " +
+                         " WHERE " +
                             $"u.id = {user_id}";
 
             List<CMUserDetail> user_detail = await Context.GetData<CMUserDetail>(qry).ConfigureAwait(false);
-            return user_detail[0];
+            if (user_detail.Count > 0)
+            {
+                return user_detail[0];
+            }
+            return null;
         }
     
         internal async Task<CMDefaultResponse> CreateUser(CMUserDetail request)
@@ -107,13 +115,15 @@ namespace CMMSAPIs.Repositories.Users
             // Pending convert user_ids into string for where condition
             string user_ids_str = string.Join(",", request.user_ids.ToArray());
             string qry = $"SELECT " +
-                            $"u.loginId as user_name, concat(firstName, ' ', lastName) as full_name " +
+                            $"u.id as id, u.loginId as user_name, concat(firstName, ' ', lastName) as full_name, ur.name as role_name, u.mobileNumber as contact_no " +
                          $"FROM " +
-                            $"Users u " +
+                            $"Users as u " +
                          $"JOIN " +
-                            $"UserNotifications un ON u.id = un.userId " +
+                            $"UserNotifications as un ON u.id = un.userId " +
                          $"JOIN " +
-                            $"UserFacilities uf ON uf.userId = u.id " +
+                            $"UserFacilities as uf ON uf.userId = u.id " +
+                         $"JOIN " +
+                            $"UserRoles as ur ON ur.id = u.roleId " +
                          $"WHERE " +
                             $"uf.facilityId = {request.facility_id} AND userPreference = 1 AND notificationId = {(int)request.notification_id} " +
                             $" ";
@@ -157,9 +167,9 @@ namespace CMMSAPIs.Repositories.Users
         internal async Task<CMUserAccess> GetUserAccess(int user_id)
         {           
             string qry = $"SELECT " +
-                            $"featureId as feature_id, f.featureName as feature_name, u.add, u.edit, u.delete, u.view, u.issue, u.approve, u.selfView " +
+                            $"featureId as feature_id, f.featureName as feature_name, f.menuimage as menu_image, u.add, u.edit, u.delete, u.view, u.issue, u.approve, u.selfView " +
                          $"FROM " +
-                            $"`UsersAccess` as u " +
+                            $"UsersAccess as u " +
                             $"JOIN Features as f ON u.featureId = f.id " +
                          $"WHERE " +
                             $"userId = {user_id}";
@@ -285,7 +295,7 @@ namespace CMMSAPIs.Repositories.Users
                 }
                 else 
                 {
-                    CMDefaultResponse response = new CMDefaultResponse(user_id, CMMS.RETRUNSTATUS.SUCCESS, "User Notifications Failed to Update");
+                    CMDefaultResponse response = new CMDefaultResponse(user_id, CMMS.RETRUNSTATUS.FAILURE, "User Notifications Failed to Update");
                     return response;
                 }                
             }
