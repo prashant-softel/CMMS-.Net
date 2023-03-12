@@ -60,8 +60,6 @@ namespace CMMSAPIs.Repositories.Jobs
                                 "JOIN " +
                                         "facilities as facilities ON job.facilityId = facilities.id " +
                                 "LEFT JOIN " +
-                                        "users as user ON user.id = job.assignedId " +
-                                "LEFT JOIN " +
                                         "users as created_user ON created_user.id = job.createdBy " +
                                 "LEFT JOIN " +
                                         "jobmappingassets as mapAssets ON mapAssets.jobId = job.id " +
@@ -75,8 +73,6 @@ namespace CMMSAPIs.Repositories.Jobs
                                         "jobassociatedworktypes as mapWorkTypes on mapWorkTypes.jobId = job.id " +
                                  "LEFT JOIN " +
                                         "jobworktypes as workType ON workType.equipmentCategoryId = asset_cat.id " +
-                                 "JOIN " +
-                                        "facilities as facilities ON job.facilityId = facilities.id " +
                                  "LEFT JOIN " +
                                         "users as rasiedByUser ON rasiedByUser.id = job.createdBy " + 
                                  "LEFT JOIN " +
@@ -84,7 +80,7 @@ namespace CMMSAPIs.Repositories.Jobs
             if (facility_id > 0)
             {
                 myQuery += " WHERE job.facilityId = " + facility_id + " AND job.JobType = " + (int)jobType;
-                if (startDate.Length > 0 && endDate.Length > 0)
+                if (startDate?.Length > 0 && endDate?.Length > 0)
                 {
                     DateTime start = DateTime.Parse(startDate);
                     DateTime end = DateTime.Parse(endDate);
@@ -95,7 +91,7 @@ namespace CMMSAPIs.Repositories.Jobs
                 if (selfView > 0)
                     myQuery += " AND (user.id = " + userId + " OR created_user.id = " + userId + ")";
 
-                if (status.Length > 0)
+                if (status?.Length > 0)
                     myQuery += " AND job.status IN ("+status+")";
             }
             else
