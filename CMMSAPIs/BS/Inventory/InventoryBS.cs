@@ -12,9 +12,9 @@ namespace CMMSAPIs.BS.Inventory
     {
         Task<List<CMInventoryList>> GetInventoryList(int facilityId, int linkedToBlockId, int status, string categoryIds);
         Task<List<CMViewInventory>> GetInventoryDetails(int id);
-        Task<CMDefaultResponse> AddInventory(List<CMAddInventory> request);
-        Task<CMDefaultResponse> UpdateInventory(CMAddInventory request);
-        Task<CMDefaultResponse> DeleteInventory(int id);
+        Task<CMDefaultResponse> AddInventory(List<CMAddInventory> request, int userID);
+        Task<CMDefaultResponse> UpdateInventory(CMAddInventory request, int userID);
+        Task<CMDefaultResponse> DeleteInventory(int id, int userID);
         Task<List<CMInventoryTypeList>> GetInventoryTypeList();
         Task<List<CMInventoryStatusList>> GetInventoryStatusList();
         Task<List<CMInventoryCategoryList>> GetInventoryCategoryList();
@@ -62,13 +62,13 @@ namespace CMMSAPIs.BS.Inventory
             }
         }
 
-        public async Task<CMDefaultResponse> AddInventory(List<CMAddInventory> request)
+        public async Task<CMDefaultResponse> AddInventory(List<CMAddInventory> request, int userID)
         {
             try
             {
                 using (var repos = new InventoryRepository(getDB))
                 {
-                    return await repos.AddInventory(request);
+                    return await repos.AddInventory(request, userID);
 
                 }
             }
@@ -78,13 +78,13 @@ namespace CMMSAPIs.BS.Inventory
             }
         }
 
-        public async Task<CMDefaultResponse> UpdateInventory(CMAddInventory request)
+        public async Task<CMDefaultResponse> UpdateInventory(CMAddInventory request, int userID)
         {
             try
             {
                 using (var repos = new InventoryRepository(getDB))
                 {
-                    return await repos.UpdateInventory(request);
+                    return await repos.UpdateInventory(request, userID);
 
                 }
             }
@@ -94,13 +94,13 @@ namespace CMMSAPIs.BS.Inventory
             }
         }
 
-        public async Task<CMDefaultResponse> DeleteInventory(int id)
+        public async Task<CMDefaultResponse> DeleteInventory(int id, int userID)
         {
             try
             {
                 using (var repos = new InventoryRepository(getDB))
                 {
-                    return await repos.DeleteInventory(id);
+                    return await repos.DeleteInventory(id, userID);
 
                 }
             }

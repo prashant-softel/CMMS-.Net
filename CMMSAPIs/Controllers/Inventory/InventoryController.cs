@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System;
 using Microsoft.AspNetCore.Authorization;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Http;
 
 namespace CMMSAPIs.Controllers.Inventory
 {
@@ -54,7 +55,7 @@ namespace CMMSAPIs.Controllers.Inventory
         [Authorize]
         [Route("AddInventory")]
         [HttpPost]
-        public async Task<IActionResult> AddInventory(List<CMAddInventory> request)
+        public async Task<IActionResult> AddInventory(List<CMAddInventory> request, int userID)
         {
             if (request is null)
             {
@@ -63,7 +64,7 @@ namespace CMMSAPIs.Controllers.Inventory
 
             try
             {
-                var data = await _InventoryBS.AddInventory(request);
+                var data = await _InventoryBS.AddInventory(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -79,7 +80,8 @@ namespace CMMSAPIs.Controllers.Inventory
         {
             try
             {
-                var data = await _InventoryBS.UpdateInventory(request);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _InventoryBS.UpdateInventory(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -95,7 +97,8 @@ namespace CMMSAPIs.Controllers.Inventory
         {
             try
             {
-                var data = await _InventoryBS.DeleteInventory(id);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _InventoryBS.DeleteInventory(id, userID);
                 return Ok(data);
             }
             catch (Exception ex)

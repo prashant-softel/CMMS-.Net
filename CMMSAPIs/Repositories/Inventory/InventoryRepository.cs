@@ -141,14 +141,13 @@ namespace CMMSAPIs.Repositories.Inventory
             
         }
 
-        internal async Task<CMDefaultResponse> AddInventory(List<CMAddInventory> request)
+        internal async Task<CMDefaultResponse> AddInventory(List<CMAddInventory> request, int userID)
         {
             /*
              * Add all data in assets table and warranty table
             */
 
             int count = 0;
-            int userID = UtilsRepository.GetUserID();
             int retID = 0;
             string assetName = "";
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.INVALID_ARG;
@@ -210,7 +209,7 @@ namespace CMMSAPIs.Repositories.Inventory
             return new CMDefaultResponse(retID, retCode, strRetMessage);
         }
 
-        internal async Task<CMDefaultResponse> UpdateInventory(CMAddInventory request)
+        internal async Task<CMDefaultResponse> UpdateInventory(CMAddInventory request, int userID)
         {
 
             /*
@@ -228,7 +227,6 @@ namespace CMMSAPIs.Repositories.Inventory
             */
 
             string updateQry = "";
-            int userID = UtilsRepository.GetUserID();
             if (request.name != null)
             {
                 updateQry += $" name= '{request.name}',";
@@ -423,7 +421,7 @@ namespace CMMSAPIs.Repositories.Inventory
 
         }
 
-        internal async Task<CMDefaultResponse> DeleteInventory(int id)
+        internal async Task<CMDefaultResponse> DeleteInventory(int id, int userID)
         {
             /*?ID=34
              * delete from assets and warranty table
