@@ -61,16 +61,16 @@ namespace CMMSAPIs.Repositories.Users
         {
             // Pending - Include all the property listed in CMUserDetail Model
             string qry = "SELECT " +
-                            "u.id, firstName as first_name, lastName as last_name,  CONCAT(firstName, ' ', lastName) as full_name, loginId as user_name, r.name as role_name, mobileNumber as contact_no, gender as gender_name, birthday as DOB, country as country_name, countries.id as country_id, state as state_name, states.id as state_id, city as city_name, cities.id as city_id " +
+                            "u.id as id, firstName as first_name, lastName as last_name,  CONCAT(firstName, ' ', lastName) as full_name, loginId as user_name, r.name as role_name, mobileNumber as contact_no, gender as gender_name, birthday as DOB, countries.name as country_name, countryId as country_id, states.name as state_name, stateId as state_id, cities.name as city_name, cityId as city_id " +
                          "FROM " +
                             "Users as u " +
-                         "JOIN " +
-                            "countries as countries ON countries.name = u.country " + 
-                         "JOIN " +
-                            "states as states ON states.name = u.state " + 
-                         "JOIN " +
-                            "cities as cities ON cities.name = u.city " + 
-                         "JOIN " +
+                         "LEFT JOIN " +
+                            "cities as cities ON cities.id = u.cityId " + 
+                         "LEFT JOIN " +
+                            "states as states ON states.id = u.stateId and states.id = cities.state_id " + 
+                         "LEFT JOIN " +
+                            "countries as countries ON countries.id = u.countryId and countries.id = cities.country_id and countries.id = states.country_id " + 
+                         "LEFT JOIN " +
                             "UserRoles as r ON u.roleId = r.id " +
                          " WHERE " +
                             $"u.id = {user_id}";
