@@ -27,7 +27,7 @@ namespace CMMSAPIs.BS.Masters
         Task<CMDefaultResponse> DeleteModule(int id);
         Task<CMModule> GetModuleDetail(int id);
         Task<List<CMModule>> GetModuleList();
-
+        Task<List<CMFrequency>> GetFrequencyList();
     }
     public class CMMSBS : ICMMSBS
     {
@@ -270,6 +270,20 @@ namespace CMMSAPIs.BS.Masters
                 }
             }
             catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<List<CMFrequency>> GetFrequencyList()
+        {
+            try
+            {
+                using (var repos = new CMMSRepository(getDB))
+                {
+                    return await repos.GetFrequencyList();
+                }
+            }
+            catch(Exception ex)
             {
                 throw;
             }

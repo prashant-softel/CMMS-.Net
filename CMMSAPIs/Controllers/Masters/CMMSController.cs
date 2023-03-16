@@ -31,7 +31,7 @@ namespace CMMSAPIs.Controllers.Masters
                 var data = await _CMMSBS.GetFacility(facility_id);
                 return Ok(data);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
@@ -46,7 +46,7 @@ namespace CMMSAPIs.Controllers.Masters
                 var data = await _CMMSBS.GetFacilityList();
                 return Ok(data);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
@@ -61,7 +61,7 @@ namespace CMMSAPIs.Controllers.Masters
                 var data = await _CMMSBS.GetBlockList(facility_id);
                 return Ok(data);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
@@ -76,7 +76,7 @@ namespace CMMSAPIs.Controllers.Masters
                 var data = await _CMMSBS.GetAssetCategoryList();
                 return Ok(data);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
@@ -91,7 +91,7 @@ namespace CMMSAPIs.Controllers.Masters
                 var data = await _CMMSBS.GetAssetList(facility_id);
                 return Ok(data);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
@@ -106,7 +106,7 @@ namespace CMMSAPIs.Controllers.Masters
                 var data = await _CMMSBS.GetEmployeeList(facility_id);
                 return Ok(data);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
@@ -121,7 +121,7 @@ namespace CMMSAPIs.Controllers.Masters
                 var data = await _CMMSBS.GetBusinessTypeList();
                 return Ok(data);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
@@ -136,7 +136,7 @@ namespace CMMSAPIs.Controllers.Masters
                 var data = await _CMMSBS.GetBusinessList(businessType);
                 return Ok(data);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
@@ -150,7 +150,7 @@ namespace CMMSAPIs.Controllers.Masters
                 var data = await _CMMSBS.AddBusiness(request);
                 return Ok(data);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
@@ -183,7 +183,7 @@ namespace CMMSAPIs.Controllers.Masters
                 var data = await _CMMSBS.AddModule(request);
                 return Ok(data);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
@@ -198,7 +198,7 @@ namespace CMMSAPIs.Controllers.Masters
                 var data = await _CMMSBS.UpdateModule(request);
                 return Ok(data);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
@@ -213,7 +213,7 @@ namespace CMMSAPIs.Controllers.Masters
                 var data = await _CMMSBS.DeleteModule(id);
                 return Ok(data);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
@@ -228,7 +228,7 @@ namespace CMMSAPIs.Controllers.Masters
                 var data = await _CMMSBS.GetModuleList();
                 return Ok(data);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
@@ -243,7 +243,22 @@ namespace CMMSAPIs.Controllers.Masters
                 var data = await _CMMSBS.GetModuleDetail(id);
                 return Ok(data);
             }
-            catch (Exception ex)
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [Route("GetFrequencyList")]
+        [HttpGet]
+        public async Task<IActionResult> GetFrequencyList()
+        {
+            try
+            {
+                var data = await _CMMSBS.GetFrequencyList();
+                return Ok(data);
+            }
+            catch(Exception)
             {
                 throw;
             }
