@@ -11,9 +11,9 @@ namespace CMMSAPIs.BS.Masters
     public interface ICheckListBS
     {
         Task<List<CMCheckList>> GetCheckList(int facility_id, string type);
-        Task<CMDefaultResponse> CreateChecklist(CMCreateCheckList request);      
-        Task<CMDefaultResponse> UpdateCheckList(CMCreateCheckList request);
-        Task<CMDefaultResponse> DeleteChecklist(CMCreateCheckList request);
+        Task<CMDefaultResponse> CreateChecklist(List<CMCreateCheckList> request, int userID);      
+        Task<CMDefaultResponse> UpdateCheckList(CMCreateCheckList request, int userID);
+        Task<CMDefaultResponse> DeleteChecklist(int id);
         Task<List<CMCheckListMapList>> GetCheckListMap(int facility_id, int type);
         Task<CMDefaultResponse> CreateCheckListMap(CMCreateCheckListMap request);      
         Task<CMDefaultResponse> UpdateCheckListMap(CMCreateCheckListMap request);
@@ -47,13 +47,13 @@ namespace CMMSAPIs.BS.Masters
             }
         }
 
-        public async Task<CMDefaultResponse> CreateChecklist(CMCreateCheckList request)
+        public async Task<CMDefaultResponse> CreateChecklist(List<CMCreateCheckList> request, int userID)
         {
             try
             {
                 using (var repos = new CheckListRepository(getDB))
                 {
-                    return await repos.CreateChecklist(request);
+                    return await repos.CreateChecklist(request, userID);
 
                 }
             }
@@ -62,13 +62,13 @@ namespace CMMSAPIs.BS.Masters
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> UpdateCheckList(CMCreateCheckList request)
+        public async Task<CMDefaultResponse> UpdateCheckList(CMCreateCheckList request, int userID)
         {
             try
             {
                 using (var repos = new CheckListRepository(getDB))
                 {
-                    return await repos.UpdateCheckList(request);
+                    return await repos.UpdateCheckList(request, userID);
 
                 }
             }
@@ -78,13 +78,13 @@ namespace CMMSAPIs.BS.Masters
             }
         }
 
-        public async Task<CMDefaultResponse> DeleteChecklist(CMCreateCheckList request)
+        public async Task<CMDefaultResponse> DeleteChecklist(int id)
         {
             try
             {
                 using (var repos = new CheckListRepository(getDB))
                 {
-                    return await repos.DeleteChecklist(request);
+                    return await repos.DeleteChecklist(id);
 
                 }
             }

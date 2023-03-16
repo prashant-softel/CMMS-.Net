@@ -1,8 +1,10 @@
 ﻿using CMMSAPIs.BS.Masters;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using CMMSAPIs.Models.Masters;
+using System.Collections.Generic;
 
 using System;
 
@@ -29,6 +31,10 @@ namespace CMMSAPIs.Controllers.Masters
                 var data = await _CheckListBS.GetCheckList(facility_id, type);
                 return Ok(data);
             }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
             catch (Exception ex)
             {
                 throw;
@@ -38,11 +44,12 @@ namespace CMMSAPIs.Controllers.Masters
         [Authorize]
         [Route("CreateChecklist")]
         [HttpPost]
-        public async Task<IActionResult> CreateChecklist(CMCreateCheckList request)
+        public async Task<IActionResult> CreateChecklist(List<CMCreateCheckList> request)
         {
             try
             {
-                var data = await _CheckListBS.CreateChecklist(request);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _CheckListBS.CreateChecklist(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -53,12 +60,13 @@ namespace CMMSAPIs.Controllers.Masters
 
         [Authorize]
         [Route("UpdateCheckList")]
-        [HttpPost]
+        [HttpPatch]
         public async Task<IActionResult> UpdateCheckList(CMCreateCheckList request)
         {
             try
             {
-                var data = await _CheckListBS.UpdateCheckList(request);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _CheckListBS.UpdateCheckList(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -69,12 +77,12 @@ namespace CMMSAPIs.Controllers.Masters
 
         [Authorize]
         [Route("DeleteChecklist")]
-        [HttpPost]
-        public async Task<IActionResult> DeleteChecklist(CMCreateCheckList request)
+        [HttpDelete]
+        public async Task<IActionResult> DeleteChecklist(int id)
         {
             try
             {
-                var data = await _CheckListBS.DeleteChecklist(request);
+                var data = await _CheckListBS.DeleteChecklist(id);
                 return Ok(data);
             }
             catch (Exception ex)

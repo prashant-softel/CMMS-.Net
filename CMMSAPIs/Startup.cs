@@ -94,8 +94,6 @@ namespace CMMSAPIs
             services.AddTransient<IMailService, MailService>();
             services.AddScoped<IFileUploadBS, FileUploadBS>();
             services.AddScoped<ICheckListBS, CheckListBS>();
-            services.AddScoped<ICheckPointBS, CheckPointBS>();
-            services.AddScoped<ICheckListMapBS, CheckListMapBS>();
             services.AddScoped<IPMScheduleViewBS, PMScheduleViewBS>();
             services.AddScoped<IAuditPlanBS, AuditPlanBS>();
             services.AddScoped<IMCBS, MCBS>();            

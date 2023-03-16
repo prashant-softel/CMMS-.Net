@@ -292,8 +292,7 @@ namespace CMMSAPIs.Helper
 
         public enum checklist_type
         {
-            Common = 0,
-            PM,
+            PM=1,
             Audit,
         }
 
