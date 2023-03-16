@@ -11,7 +11,7 @@ namespace CMMSAPIs.BS.FileUpload
 {
     public interface IFileUploadBS
     {
-        Task<CMDefaultResponse> UploadFile(CMFileUpload request);
+        Task<CMDefaultResponse> UploadFile(CMFileUpload request, int userID);
     }
     public class FileUploadBS : IFileUploadBS
     {
@@ -26,13 +26,13 @@ namespace CMMSAPIs.BS.FileUpload
             databaseProvider = dbProvider;
         }
 
-        public async Task<CMDefaultResponse> UploadFile(CMFileUpload request)
+        public async Task<CMDefaultResponse> UploadFile(CMFileUpload request, int userID)
         {
             try
             {
                 using (var repos = new FileUploadRepository(getDB, _environment))
                 {
-                    return await repos.UploadFile(request);
+                    return await repos.UploadFile(request, userID);
                 }
             }
             catch (Exception ex)

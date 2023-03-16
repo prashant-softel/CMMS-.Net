@@ -6,6 +6,8 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using System.Drawing;
+using System.Data;
+using System.Collections.Generic;
 
 namespace CMMSAPIs.Repositories.FileUpload
 {
@@ -21,16 +23,16 @@ namespace CMMSAPIs.Repositories.FileUpload
          * File Path will be something as below
          * FacilityID/Moduel/ID/All Files
         */
-        internal async Task<CMDefaultResponse> UploadFile(CMFileUpload request)
+        internal async Task<CMDefaultResponse> UploadFile(CMFileUpload request, int userID)
         {
             try
             {
-                string UploadPath = _environment.WebRootPath + "\\Upload\\" + request.facility_id + "\\" + request.module_id + "\\" + request.id+"\\";
+                string UploadPath = $"{ _environment.WebRootPath }\\Upload\\{ request.facility_id }\\{ (int)request.module_type }\\{ request.module_ref_id }\\";
                 if (!Directory.Exists(UploadPath))
                 {
                     Directory.CreateDirectory(UploadPath);
                 }
-                
+                List<int> idList = new List<int>(); 
                 foreach (var file in request.files)
                 {
                     if (file.Length > 0)
@@ -39,16 +41,23 @@ namespace CMMSAPIs.Repositories.FileUpload
                         {
                             file.CopyTo(filestream);
                             filestream.Flush();
+                            string path = filestream.Name.Replace(@"\", @"\\");
                             //TODO Implement CreateThumbnail Function
                             //CreateThumbnail(filePath);
+                            string myQuery = "INSERT INTO uploadedfiles(facility_id, module_type, module_ref_id, file_path, file_type, created_by, created_at)" + 
+                                $"VALUES ({request.facility_id}, {(int)request.module_type}, {request.module_ref_id}, '{path}', '{file.ContentType}', {userID}, '{Utils.UtilsRepository.GetUTCTime()}'); " +
+                                "SELECT LAST_INSERT_ID();";
+                            DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
+                            int id = Convert.ToInt32(dt.Rows[0][0]);
+                            idList.Add(id);
+
                         }
                     }
                 }
-               
-                CMDefaultResponse response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.SUCCESS, "");
+                CMDefaultResponse response = new CMDefaultResponse(idList, CMMS.RETRUNSTATUS.SUCCESS, $"{idList.Count} file(s) uploaded successfully");
                 return response;
             }
-            catch (Exception ex) 
+            catch (Exception) 
             {
                 throw;
             }            
