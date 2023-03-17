@@ -104,12 +104,18 @@ namespace CMMSAPIs.Repositories.Masters
         internal async Task<List<CMEmployee>> GetEmployeeList(int facility_id)
         {
             string myQuery = "SELECT " +
-                                    "u.id, loginId, concat(firstName,' ', lastName) as name, birthday as birthdate, " +
-                                    "gender, mobileNumber, city, state, country, zipcode as pin " +
+                                    "u.id, loginId as login_id, concat(firstName,' ', lastName) as name, birthday as birthdate, " +
+                                    "gender, mobileNumber, cities.name as city, states.name as state, countries.name as country, zipcode as pin " +
                              "FROM " +
                                     "Users as u " +
                              "JOIN " +
                                     "UserFacilities as uf ON u.id = uf.userId " +
+                             "LEFT JOIN " +
+                                    "cities as cities ON cities.id = u.cityId " +
+                             "LEFT JOIN " +
+                                    "states as states ON states.id = u.stateId and states.id = cities.state_id " +
+                             "LEFT JOIN " +
+                                    "countries as countries ON countries.id = u.countryId and countries.id = cities.country_id and countries.id = states.country_id " +
                              "WHERE " +
                                     "u.status = 1 AND uf.status = 1 AND isEmployee = 1 AND uf.facilityId = " + facility_id;
             List<CMEmployee> _Employee = await Context.GetData<CMEmployee>(myQuery).ConfigureAwait(false);
