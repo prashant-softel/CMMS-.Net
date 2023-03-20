@@ -288,6 +288,15 @@ namespace CMMSAPIs.Helper
             WC_CLOSE_REJECTED,
             WC_CLOSE_APPROVED,
             WC_CANCELLED,
+
+            CALIBRATION_REQUEST = 201,
+            CALIBRATION_REQUEST_APPROVED,
+            CALIBRATION_REQUEST_REJECTED,
+            CALIBRATION_STARTED,
+            CALIBRATION_COMPLETED,
+            CALIBRATION_CLOSED,
+            CALIBRATION_APPROVED,
+            CALIBRATION_REJECTED,
         }
 
         public enum checklist_type
