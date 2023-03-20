@@ -35,7 +35,7 @@ namespace CMMSAPIs.Controllers.Masters
             {
                 return BadRequest(ex.Message);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
@@ -52,7 +52,7 @@ namespace CMMSAPIs.Controllers.Masters
                 var data = await _CheckListBS.CreateChecklist(request, userID);
                 return Ok(data);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
@@ -69,7 +69,7 @@ namespace CMMSAPIs.Controllers.Masters
                 var data = await _CheckListBS.UpdateCheckList(request, userID);
                 return Ok(data);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
@@ -85,7 +85,7 @@ namespace CMMSAPIs.Controllers.Masters
                 var data = await _CheckListBS.DeleteChecklist(id);
                 return Ok(data);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
@@ -101,7 +101,7 @@ namespace CMMSAPIs.Controllers.Masters
                 var data = await _CheckListBS.GetCheckListMap(facility_id, type);
                 return Ok(data);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
@@ -117,7 +117,7 @@ namespace CMMSAPIs.Controllers.Masters
                 var data = await _CheckListBS.CreateCheckListMap(request);
                 return Ok(data);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
@@ -133,7 +133,7 @@ namespace CMMSAPIs.Controllers.Masters
                 var data = await _CheckListBS.UpdateCheckListMap(request);
                 return Ok(data);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
@@ -149,7 +149,11 @@ namespace CMMSAPIs.Controllers.Masters
                 var data = await _CheckListBS.GetCheckPointList(checklist_id);
                 return Ok(data);
             }
-            catch (Exception ex)
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception)
             {
                 throw;
             }
@@ -158,14 +162,15 @@ namespace CMMSAPIs.Controllers.Masters
         [Authorize]
         [Route("CreateCheckPoint")]
         [HttpPost]
-        public async Task<IActionResult> CreateCheckPoint(CMCreateCheckPoint request)
+        public async Task<IActionResult> CreateCheckPoint(List<CMCreateCheckPoint> request)
         {
             try
             {
-                var data = await _CheckListBS.CreateCheckPoint(request);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _CheckListBS.CreateCheckPoint(request, userID);
                 return Ok(data);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
@@ -173,15 +178,16 @@ namespace CMMSAPIs.Controllers.Masters
 
         [Authorize]
         [Route("UpdateCheckPoint")]
-        [HttpPut]
+        [HttpPatch]
         public async Task<IActionResult> UpdateCheckPoint(CMCreateCheckPoint request)
         {
             try
             {
-                var data = await _CheckListBS.UpdateCheckPoint(request);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _CheckListBS.UpdateCheckPoint(request, userID);
                 return Ok(data);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
@@ -190,14 +196,14 @@ namespace CMMSAPIs.Controllers.Masters
         [Authorize]
         [Route("DeleteCheckPoint")]
         [HttpDelete]
-        public async Task<IActionResult> DeleteCheckPoint(CMCreateCheckPoint request)
+        public async Task<IActionResult> DeleteCheckPoint(int id)
         {
             try
             {
-                var data = await _CheckListBS.DeleteCheckPoint(request);
+                var data = await _CheckListBS.DeleteCheckPoint(id);
                 return Ok(data);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }

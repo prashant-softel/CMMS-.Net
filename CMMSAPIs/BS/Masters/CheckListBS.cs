@@ -18,9 +18,9 @@ namespace CMMSAPIs.BS.Masters
         Task<CMDefaultResponse> CreateCheckListMap(CMCreateCheckListMap request);      
         Task<CMDefaultResponse> UpdateCheckListMap(CMCreateCheckListMap request);
         Task<List<CMCheckPointList>> GetCheckPointList(int checklist_id);
-        Task<CMDefaultResponse> CreateCheckPoint(CMCreateCheckPoint request);
-        Task<CMDefaultResponse> UpdateCheckPoint(CMCreateCheckPoint request);
-        Task<CMDefaultResponse> DeleteCheckPoint(CMCreateCheckPoint request);
+        Task<CMDefaultResponse> CreateCheckPoint(List<CMCreateCheckPoint> request, int userID);
+        Task<CMDefaultResponse> UpdateCheckPoint(CMCreateCheckPoint request, int userID);
+        Task<CMDefaultResponse> DeleteCheckPoint(int id);
     }
     public class CheckListBS : ICheckListBS
     {
@@ -41,7 +41,7 @@ namespace CMMSAPIs.BS.Masters
 
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
@@ -57,7 +57,7 @@ namespace CMMSAPIs.BS.Masters
 
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
@@ -72,7 +72,7 @@ namespace CMMSAPIs.BS.Masters
 
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
@@ -88,7 +88,7 @@ namespace CMMSAPIs.BS.Masters
 
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
@@ -101,10 +101,9 @@ namespace CMMSAPIs.BS.Masters
                 using (var repos = new CheckListRepository(getDB))
                 {
                     return await repos.GetCheckListMap(facility_id, type);
-
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
@@ -120,7 +119,7 @@ namespace CMMSAPIs.BS.Masters
 
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
@@ -135,7 +134,7 @@ namespace CMMSAPIs.BS.Masters
 
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
@@ -151,54 +150,53 @@ namespace CMMSAPIs.BS.Masters
 
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
         }
 
-        public async Task<CMDefaultResponse> CreateCheckPoint(CMCreateCheckPoint request)
+        public async Task<CMDefaultResponse> CreateCheckPoint(List<CMCreateCheckPoint> request, int userID)
         {
             try
             {
                 using (var repos = new CheckListRepository(getDB))
                 {
-                    return await repos.CreateCheckPoint(request);
+                    return await repos.CreateCheckPoint(request, userID);
 
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> UpdateCheckPoint(CMCreateCheckPoint request)
+        public async Task<CMDefaultResponse> UpdateCheckPoint(CMCreateCheckPoint request, int userID)
         {
             try
             {
                 using (var repos = new CheckListRepository(getDB))
                 {
-                    return await repos.UpdateCheckPoint(request);
+                    return await repos.UpdateCheckPoint(request, userID);
 
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
         }
 
-        public async Task<CMDefaultResponse> DeleteCheckPoint(CMCreateCheckPoint request)
+        public async Task<CMDefaultResponse> DeleteCheckPoint(int id)
         {
             try
             {
                 using (var repos = new CheckListRepository(getDB))
                 {
-                    return await repos.DeleteCheckPoint(request);
-
+                    return await repos.DeleteCheckPoint(id);
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }

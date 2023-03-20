@@ -9,8 +9,8 @@
         public int category_id { get; set; }
         public int frequency_id { get; set; }
         public int manPower { get; set; }
-        public int duration { get; set; }
-        public int status { get; set; }
+        public int? duration { get; set; }
+        public int? status { get; set; }
     }
 
     public class CMCheckList
@@ -25,8 +25,8 @@
         public int frequency_id { get; set; }
         public string frequency_name { get; set; }
         public int manPower { get; set; }
-        public int duration { get; set; }
-        public int status { get; set; }
+        public int? duration { get; set; }
+        public int? status { get; set; }
         public int createdById { get; set; }
         public string createdByName { get; set; }
         public dynamic createdAt { get; set; }

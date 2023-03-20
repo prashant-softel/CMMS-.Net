@@ -103,7 +103,7 @@ namespace CMMSAPIs.Repositories.Masters
              * Code goes here
             */
             string updateQry = $"UPDATE  softel_cmms.checklist_number SET ";
-            if (request.checklist_number != null || request.checklist_number != "")
+            if (request.checklist_number != null && request.checklist_number != "")
                 updateQry += $" checklist_number = '{request.checklist_number}', ";
             if (request.type > 0)
                 updateQry += $" checklist_type = {request.type}, ";
@@ -117,7 +117,7 @@ namespace CMMSAPIs.Repositories.Masters
                 updateQry += $" frequency_id = {request.frequency_id}, ";
             if (request.manPower > 0)
                 updateQry += $" manpower = {request.manPower}, ";
-            if (request.duration > 0)
+            if (request.duration != null)
                 updateQry += $" duration = {request.duration}, ";
             updateQry += $" updated_by = {userID}, updated_at = '{UtilsRepository.GetUTCTime()}' WHERE id = {request.id}; ";
             await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
@@ -213,71 +213,90 @@ namespace CMMSAPIs.Repositories.Masters
              * Read All properties mention in CMCheckPointList and return list
              * Code goes here
             */
-            string myQuery = "";
-            myQuery = "SELECT check_point, check_list_id, requirement, is_document_required,"+
-                        "created_by, created_at, updated_by, updated_at, status FROM  checkpoint; ";
-            if (checklist_id != 0)
+            string myQuery = "SELECT " +
+                                "checkpoint.id as id, check_point, check_list_id as checklist_id, checklist_number.checklist_number as checklist_name, requirement, is_document_required, checkpoint.created_by as created_by_id, CONCAT(created_user.firstName,' ',created_user.lastName) as created_by_name, checkpoint.created_at, checkpoint.updated_by as updated_by_id, CONCAT(updated_user.firstName,' ',updated_user.lastName) as updated_by_name, checkpoint.updated_at, checkpoint.status " +
+                             "FROM " + 
+                                "checkpoint " + 
+                             "LEFT JOIN " + 
+                                "checklist_number ON checklist_number.id=checkpoint.check_list_id " + 
+                             "LEFT JOIN " + 
+                                "users as created_user ON created_user.id=checkpoint.created_by " +
+                             "LEFT JOIN " +
+                                "users as updated_user ON updated_user.id=checkpoint.updated_by ";
+            if (checklist_id > 0)
             {
-                myQuery += " WHERE asset_category_id= " + checklist_id ;
-
+                myQuery += $" WHERE check_list_id = {checklist_id} ";
             }
             else
             {
-                throw new ArgumentException("Invalid checklist_id <" + checklist_id  + ">");
+                throw new ArgumentException("Invalid checklist_id");
             }
+            myQuery += "ORDER BY checkpoint.id DESC";
 
             List<CMCheckPointList> _checkList = await Context.GetData<CMCheckPointList>(myQuery).ConfigureAwait(false);
             return _checkList;
         }
 
-        internal async Task<CMDefaultResponse> CreateCheckPoint(CMCreateCheckPoint request)
+        internal async Task<CMDefaultResponse> CreateCheckPoint(List<CMCreateCheckPoint> requestList, int userID)
         {
             /*
              * Primary Table - CheckPoint
              * Insert all properties mention in model to CheckPoint table
              * Code goes here
             */
-            string query = "INSERT INTO  checkpoint (check_point, check_list_id, requirement, is_document_required, "+
-            "created_by, created_at, status) VALUES " +
-             $"('{request.check_point}', '{request.checklist_id}', '{request.requirement}',  '{request.is_document_required}'," +
-             $"'{request.created_by}', '{UtilsRepository.GetUTCTime()}', '{request.status}'); select LAST_INSERT_ID();";
+            List<int> idList = new List<int>();
+            foreach (CMCreateCheckPoint request in requestList)
+            {
+                string query = "INSERT INTO  checkpoint (check_point, check_list_id, requirement, is_document_required, " +
+                "created_by, created_at, status) VALUES " +
+                 $"('{request.check_point}', {request.checklist_id}, '{request.requirement}', {request.is_document_required}," +
+                 $"{userID}, '{UtilsRepository.GetUTCTime()}', {request.status}); select LAST_INSERT_ID();";
 
-            DataTable dt = await Context.FetchData(query).ConfigureAwait(false);
+                DataTable dt = await Context.FetchData(query).ConfigureAwait(false);
 
-            int id = Convert.ToInt32(dt.Rows[0][0]);
-            CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "");
+                int id = Convert.ToInt32(dt.Rows[0][0]);
+                idList.Add(id);
+            }
+            CMDefaultResponse response = new CMDefaultResponse(idList, CMMS.RETRUNSTATUS.SUCCESS, $"{idList.Count} checkpoint(s) created successfully");
 
             return response;
         }
 
-        internal async Task<CMDefaultResponse> UpdateCheckPoint(CMCreateCheckPoint request)
+        internal async Task<CMDefaultResponse> UpdateCheckPoint(CMCreateCheckPoint request, int userID)
         {
             /*
              * Primary Table - CheckPoint
              * Update all properties mention in model to CheckPoint table for requisted id
              * Code goes here
             */
-            string updateQry = $"UPDATE checkpoint SET check_point  = '{request.check_point}', check_list_id  = '{request.checklist_id}', requirement  = '{request.requirement}',"+
-            $"is_document_required = '{request.is_document_required}', updated_by = '{request.updated_by}',updated_at = '{UtilsRepository.GetUTCTime()}',status = '{request.status}' "+
-            $" WHERE id = '{request.id}'; ";
+            string updateQry = $"UPDATE checkpoint SET ";
+            if (request.check_point != "" && request.check_point != null)
+                updateQry += $"check_point = '{request.check_point}', ";
+            if (request.checklist_id != 0)
+                updateQry += $"check_list_id = {request.checklist_id}, ";
+            if (request.requirement != "" && request.requirement != null)
+                updateQry += $"requirement = '{request.requirement}', ";
+            if (request.is_document_required != null)
+                updateQry += $"is_document_required = {request.is_document_required}, ";
+            if (request.status != null)
+                updateQry += $"status = {request.status} ";
+            updateQry += $"updated_by = {userID}, updated_at='{UtilsRepository.GetUTCTime()}' WHERE id = {request.id};";
             int retVal = await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
-            CMDefaultResponse response = new CMDefaultResponse(retVal, CMMS.RETRUNSTATUS.SUCCESS, "");
+            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Checkpoint updated successfully");
 
             return response;
         }
 
-        internal async Task<CMDefaultResponse> DeleteCheckPoint(CMCreateCheckPoint request)
+        internal async Task<CMDefaultResponse> DeleteCheckPoint(int id)
         {
             /*
              * Primary Table - CheckPoint
              * Set status 0 for requested id in CheckPoint table
              * Code goes here
             */
-            string updateQry = $"UPDATE  softel_cmms.checkpoint SET " +
-            $"status  = 0,  updated_at  = '{UtilsRepository.GetUTCTime()}' WHERE  id  = {request.id};";
+            string updateQry = $"DELETE FROM checkpoint WHERE id = {id};";
             int retVal = await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
-            CMDefaultResponse response = new CMDefaultResponse(retVal, CMMS.RETRUNSTATUS.SUCCESS, "");
-
+            CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Checkpoint deleted successfully");
             return response;
         }
         #endregion
