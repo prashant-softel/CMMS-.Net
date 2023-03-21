@@ -82,7 +82,8 @@ namespace CMMSAPIs.Controllers.Masters
         {
             try
             {
-                var data = await _CheckListBS.DeleteChecklist(id);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _CheckListBS.DeleteChecklist(id, userID);
                 return Ok(data);
             }
             catch (Exception)
@@ -200,7 +201,8 @@ namespace CMMSAPIs.Controllers.Masters
         {
             try
             {
-                var data = await _CheckListBS.DeleteCheckPoint(id);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _CheckListBS.DeleteCheckPoint(id, userID);
                 return Ok(data);
             }
             catch (Exception)
