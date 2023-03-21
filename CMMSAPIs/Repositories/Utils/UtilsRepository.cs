@@ -103,7 +103,7 @@ namespace CMMSAPIs.Repositories.Utils
              * Return Log
             */
             string myQuery = "select Id as id, moduleType as module_type, moduleRefId as module_ref_id, secondaryModuleRefType as sec_module, secondaryModuleRefId as sec_ref_id, comment as comment, status as status, createdAt as timestamp, currentLatitude as current_latitude, currentLongitude as current_longitude from history " +
-                $"WHERE (moduleType = {module_type} or sec_module = {module_type}) AND (moduleRefId = {id} or sec_ref_id = {id})";
+                $"WHERE (moduleType = {module_type} or secondaryModuleRefType = {module_type}) AND (moduleRefId = {id} or secondaryModuleRefId = {id})";
             List<CMHistoryLogList> _Log = await Context.GetData<CMHistoryLogList>(myQuery).ConfigureAwait(false);
             return _Log;
         }
