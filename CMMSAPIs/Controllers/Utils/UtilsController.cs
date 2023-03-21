@@ -114,13 +114,13 @@ namespace CMMSAPIs.Controllers.utils
             }
         }
 
-        [Route("GetLog")]
+        [Route("GetHistoryLog")]
         [HttpGet]
-        public async Task<IActionResult> GetLog(int module_type, int id)
+        public async Task<IActionResult> GetHistoryLog(int module_type, int id)
         {
             try
             {
-                var data = await _UtilsBS.GetLog(module_type, id);
+                var data = await _UtilsBS.GetHistoryLog(module_type, id);
                 return Ok(data);
             }
             catch (Exception ex)
