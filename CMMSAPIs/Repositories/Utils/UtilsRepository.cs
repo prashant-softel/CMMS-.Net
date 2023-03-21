@@ -72,7 +72,7 @@ namespace CMMSAPIs.Repositories.Utils
             return null;
         }
 
-        internal async Task<List<CMDefaultResponse>> AddHistoryLog(CMMS.CMMS_Modules module_type, int module_ref_id, CMMS.CMMS_Modules secondary_module_type, int secondary_module_ref_id, string comment, CMMS.CMMS_Status status, int userID=0, string current_latitude="", string current_longitude="")
+        internal async Task<List<CMDefaultResponse>> AddHistoryLog(CMMS.CMMS_Modules module_type, int module_ref_id, CMMS.CMMS_Modules secondary_module_type, int secondary_module_ref_id, string comment, CMMS.CMMS_Status status, string current_latitude="", string current_longitude="")
         {
 
             string qry = "INSERT INTO History" +
@@ -83,7 +83,7 @@ namespace CMMSAPIs.Repositories.Utils
                         "VALUES" +
                             "(" +
                                 $"{(int)module_type}, {module_ref_id}, {(int)secondary_module_type}, {secondary_module_ref_id}," +
-                                $"'{comment}', {(int)status}, '{current_latitude}', '{current_longitude}', {userID}, '{GetUTCTime()}'" +
+                                $"'{comment}', {(int)status}, '{current_latitude}', '{current_longitude}', {GetUserID()}, '{GetUTCTime()}'" +
                             ")";
 
             await Context.GetData<List<int>>(qry).ConfigureAwait(false);
@@ -103,7 +103,7 @@ namespace CMMSAPIs.Repositories.Utils
              * Return Log
             */
             string myQuery = "select Id as id, moduleType as module_type, moduleRefId as module_ref_id, secondaryModuleRefType as sec_module, secondaryModuleRefId as sec_ref_id, comment as comment, status as status, createdAt as timestamp, currentLatitude as current_latitude, currentLongitude as current_longitude from history " +
-                $"WHERE (moduleType = {module_type} or secondaryModuleRefType = {module_type}) AND (moduleRefId = {id} or secondaryModuleRefId = {id})";
+                $"WHERE (moduleType = {module_type} or sec_module = {module_type}) AND (moduleRefId = {id} or sec_ref_id = {id})";
             List<CMHistoryLogList> _Log = await Context.GetData<CMHistoryLogList>(myQuery).ConfigureAwait(false);
             return _Log;
         }
