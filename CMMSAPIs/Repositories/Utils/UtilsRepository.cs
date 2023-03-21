@@ -96,15 +96,15 @@ namespace CMMSAPIs.Repositories.Utils
         }
 
 
-        internal async Task<List<CMHistoryLogList>> GetHistoryLog(int module_type, int id)
+        internal async Task<List<CMLog>> GetHistoryLog(int module_type, int id)
         {
             /*
              * Fetch data from History table for requested module_type and id
              * Return Log
             */
-            string myQuery = "select Id as id, moduleType as module_type, moduleRefId as module_ref_id, secondaryModuleRefType as sec_module, secondaryModuleRefId as sec_ref_id, comment as comment, status as status, createdAt as timestamp, currentLatitude as current_latitude, currentLongitude as current_longitude from history " +
+            string myQuery = "select history.Id as id, moduleType as module_type, moduleRefId as module_ref_id, secondaryModuleRefType as sec_module, secondaryModuleRefId as sec_ref_id, comment as comment, history.status as status, history.createdBy as created_by_id, CONCAT(created_user.firstName,' ',created_user.lastName) as created_by_name, history.createdAt as created_at, history.currentLatitude as current_latitude, history.currentLongitude as current_longitude from history join users as created_user on history.createdBy=created_user.id " +
                 $"WHERE (moduleType = {module_type} or secondaryModuleRefType = {module_type}) AND (moduleRefId = {id} or secondaryModuleRefId = {id})";
-            List<CMHistoryLogList> _Log = await Context.GetData<CMHistoryLogList>(myQuery).ConfigureAwait(false);
+            List<CMLog> _Log = await Context.GetData<CMLog>(myQuery).ConfigureAwait(false);
             return _Log;
         }
 
