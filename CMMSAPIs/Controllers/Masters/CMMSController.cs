@@ -190,7 +190,7 @@ namespace CMMSAPIs.Controllers.Masters
         }
 
         [Route("UpdateModule")]
-        [HttpPut]
+        [HttpPatch]
         public async Task<IActionResult> UpdateModule(CMModule request)
         {
             try

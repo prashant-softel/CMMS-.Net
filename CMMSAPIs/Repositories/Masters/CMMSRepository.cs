@@ -5,11 +5,13 @@ using System.Threading.Tasks;
 using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Masters;
 using CMMSAPIs.Models.Utils;
+using CMMSAPIs.Repositories.Utils;
 
 namespace CMMSAPIs.Repositories.Masters
 {
     public class CMMSRepository : GenericRepository
     {
+        private UtilsRepository _utilsRepo;
 
         public const string MA_Actual = "MA_Actual";
         public const string MA_Contractual = "MA_Contractual";
@@ -18,7 +20,7 @@ namespace CMMSAPIs.Repositories.Masters
 
         public CMMSRepository(MYSQLDBHelper sqlDBHelper) : base(sqlDBHelper)
         {
-
+            _utilsRepo = new UtilsRepository(sqlDBHelper);
         }
 
         internal async Task<CMDefaultResponse> AddModule(CMModule request)
@@ -26,7 +28,13 @@ namespace CMMSAPIs.Repositories.Masters
             /*
              * Read property of CMModule and insert into Features table
             */
-            return null;
+            string myQuery = "INSERT INTO features(`moduleName`, `featureName`, `menuImage`, `add`, `edit`, `delete`, `view`, `issue`, `approve`, `selfView`) " + 
+                $"VALUES('{request.moduleName}', '{request.featureName}', '{request.menuImage}', {request.add}, {request.edit}, " + 
+                $"{request.delete}, {request.view}, {request.issue}, {request.approve}, {request.selfView}); SELECT LAST_INSERT_ID();";
+            DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
+            int id = Convert.ToInt32(dt.Rows[0][0]);
+            CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Module Added Successfully");
+            return response;
         }
 
         internal async Task<CMDefaultResponse> UpdateModule(CMModule request)
@@ -34,28 +42,60 @@ namespace CMMSAPIs.Repositories.Masters
             /*
              * Read property of CMModule and Update into Features table
             */
-            return null;
+            string myQuery = "UPDATE features SET ";
+            if (request.moduleName != null && request.moduleName != "")
+                myQuery += $"`moduleName` = '{request.moduleName}', ";
+            if (request.featureName != null && request.featureName != "")
+                myQuery += $"`featureName` = '{request.featureName}', ";
+            if (request.menuImage != null && request.menuImage != "")
+                myQuery += $"`menuImage` = '{request.menuImage}', ";
+            if (request.add != null)
+                myQuery += $"`add` = {request.add}, ";
+            if (request.edit != null)
+                myQuery += $"`edit` = {request.edit}, ";
+            if (request.delete != null)
+                myQuery += $"`delete` = {request.delete}, ";
+            if (request.view != null)
+                myQuery += $"`view` = {request.view}, ";
+            if (request.approve != null)
+                myQuery += $"`approve` = {request.approve}, ";
+            if (request.issue != null)
+                myQuery += $"`issue` = {request.issue}, ";
+            if (request.selfView != null)
+                myQuery += $"`selfView` = {request.selfView}, ";
+            myQuery = myQuery.Substring(0, myQuery.LastIndexOf(','));
+            myQuery += $" WHERE id={request.id};";
+            await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
+            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Module Updated Successfully");
+            return response;
         }
         internal async Task<CMDefaultResponse> DeleteModule(int id)
         {
             /*
              * Disable the status for requested id in Features table
             */
-            return null;
+            string myQuery = $"DELETE FROM features WHERE id={id};";
+            await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
+            CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Module Deleted Successfully");
+            return response;
         }
         internal async Task<CMModule> GetModuleDetail(int id)
         {
             /*
              * Return request id detail from Features table
             */
-            return null;
+            string myQuery = $"SELECT * FROM features WHERE id = {id}; ";
+            List<CMModule> _moduleDetails = await Context.GetData<CMModule>(myQuery).ConfigureAwait(false);
+            return _moduleDetails[0];
         }
         internal async Task<List<CMModule>> GetModuleList()
         {
             /*
              * Return List of modules from Features table
             */
-            return null;
+            string myQuery = "SELECT * FROM features; ";
+            List<CMModule> _moduleList = await Context.GetData<CMModule>(myQuery).ConfigureAwait(false);
+            return _moduleList;
         }
 
         internal async Task<List<CMFinancialYear>> GetFinancialYear()
