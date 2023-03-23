@@ -1,6 +1,7 @@
 ﻿using CMMSAPIs.BS.SM;
 using CMMSAPIs.Models.SM;
 using CMMSAPIs.Repositories.SM;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -12,6 +13,7 @@ namespace CMMSAPIs.Controllers.SM
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class SMMasterController : ControllerBase
     {
         private readonly ISMMasterBS _SMMasterBS;
