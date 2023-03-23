@@ -21,7 +21,7 @@ namespace CMMSAPIs.Models.Jobs
         public DateTime breakdown_time { get; set; }
 //        public DateTime job_create_Date { get; set; }
 //        public DateTime createdAt { get; set; }
-        public string createdBy { get; set; }
+        public int createdBy { get; set; }
 //        public string cancellation_remark { get; set; }
         public List<int> WorkType_Ids { get; set; }
         public List<CMAssetsIds> AssetsIds { get; set; }
