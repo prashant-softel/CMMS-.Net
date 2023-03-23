@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
 using System;
 using CMMSAPIs.Models.Utils;
@@ -17,7 +19,7 @@ namespace CMMSAPIs.Controllers.Calibration
             _CalibrationBS = calibration;
         }
 
-        
+        [Authorize]
         [Route("GetCalibrationList")]
         [HttpGet]
         public async Task<IActionResult> GetCalibrationList(int facility_id)
@@ -27,28 +29,38 @@ namespace CMMSAPIs.Controllers.Calibration
                 var data = await _CalibrationBS.GetCalibrationList(facility_id);
                 return Ok(data);
             }
-            catch (Exception ex)
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception)
             {
                 throw;
             }
         }
 
-        
+        [Authorize]
         [Route("RequestCalibration")]
         [HttpPost]
         public async Task<IActionResult> RequestCalibration(CMRequestCalibration request)
         {
             try
             {
-                var data = await _CalibrationBS.RequestCalibration(request);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _CalibrationBS.RequestCalibration(request, userID);
                 return Ok(data);
             }
-            catch (Exception ex)
+            catch(ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception)
             {
                 throw;
             }
         }
 
+        [Authorize]
         [Route("ApproveRequestCalibration")]
         [HttpPut]
         public async Task<IActionResult> ApproveRequestCalibration(CMApproval request)
@@ -64,6 +76,7 @@ namespace CMMSAPIs.Controllers.Calibration
             }
         }
 
+        [Authorize]
         [Route("RejectRequestCalibration")]
         [HttpPut]
         public async Task<IActionResult> RejectRequestCalibration(CMApproval request)
@@ -79,6 +92,7 @@ namespace CMMSAPIs.Controllers.Calibration
             }
         }
 
+        [Authorize]
         [Route("GetPreviousCalibration")]
         [HttpGet]
         public async Task<IActionResult> GetPreviousCalibration(CMPreviousCalibration request)
@@ -94,6 +108,7 @@ namespace CMMSAPIs.Controllers.Calibration
             }
         }
 
+        [Authorize]
         [Route("StartCalibration")]
         [HttpPost]
         public async Task<IActionResult> StartCalibration(int calibration_id)
@@ -109,6 +124,7 @@ namespace CMMSAPIs.Controllers.Calibration
             }
         }
 
+        [Authorize]
         [Route("CompleteCalibration")]
         [HttpPut]
         public async Task<IActionResult> CompleteCalibration(CMCompleteCalibration request)
@@ -124,6 +140,7 @@ namespace CMMSAPIs.Controllers.Calibration
             }
         }
 
+        [Authorize]
         [Route("CloseCalibration")]
         [HttpPut]
         public async Task<IActionResult> CloseCalibration(CMCloseCalibration request)
@@ -139,6 +156,7 @@ namespace CMMSAPIs.Controllers.Calibration
             }
         }
 
+        [Authorize]
         [Route("ApproveCalibration")]
         [HttpPut]
         public async Task<IActionResult> ApproveCalibration(CMApproval request)
@@ -154,6 +172,7 @@ namespace CMMSAPIs.Controllers.Calibration
             }
         }
 
+        [Authorize]
         [Route("RejectCalibration")]
         [HttpPut]
         public async Task<IActionResult> RejectCalibration(CMApproval request)

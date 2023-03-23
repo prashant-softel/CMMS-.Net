@@ -82,7 +82,8 @@ namespace CMMSAPIs.Helper
             OPERATOR = 2,
             CUSTOMER = 3,
             MANUFACTURER = 4,
-            SUPPLIER = 5
+            SUPPLIER = 5,
+            VENDOR=6,
         }
 
         /* Features Constant START */

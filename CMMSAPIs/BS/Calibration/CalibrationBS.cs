@@ -15,7 +15,7 @@ namespace CMMSAPIs.BS.Calibration
     public interface ICalibrationBS
     {
         Task<List<CMCalibrationList>> GetCalibrationList(int facility_id);
-        Task<CMDefaultResponse> RequestCalibration(CMRequestCalibration request);
+        Task<CMDefaultResponse> RequestCalibration(CMRequestCalibration request, int userID);
         Task<CMDefaultResponse> ApproveRequestCalibration(CMApproval request);
         Task<CMDefaultResponse> RejectRequestCalibration(CMApproval request);
         Task<CMDefaultResponse> GetPreviousCalibration(CMPreviousCalibration request);
@@ -48,13 +48,13 @@ namespace CMMSAPIs.BS.Calibration
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> RequestCalibration(CMRequestCalibration request)
+        public async Task<CMDefaultResponse> RequestCalibration(CMRequestCalibration request,int userID)
         {
             try
             {
                 using (var repos = new CalibrationRepository(getDB))
                 {
-                    return await repos.RequestCalibration(request);
+                    return await repos.RequestCalibration(request, userID);
                 }
             }
             catch (Exception ex)
