@@ -17,7 +17,50 @@ namespace CMMSAPIs.Repositories.Calibration
         {
             _utilsRepo = new UtilsRepository(sqlDBHelper);
         }
+        private string GetStatus(int status_id)
+        {
+            CMMS.CMMS_Status status = (CMMS.CMMS_Status) status_id;
+            string statusStr = "";
+            switch(status)
+            {
+                case CMMS.CMMS_Status.CALIBRATION_REQUEST:
+                    statusStr = "Calibration Request Waiting for Approval";
+                    break;
 
+                case CMMS.CMMS_Status.CALIBRATION_REQUEST_APPROVED:
+                    statusStr = "Calibration Request Approved";
+                    break;
+
+                case CMMS.CMMS_Status.CALIBRATION_REQUEST_REJECTED:
+                    statusStr = "Calibration Request Rejected";
+                    break;
+
+                case CMMS.CMMS_Status.CALIBRATION_STARTED:
+                    statusStr = "Calibration Started";
+                    break;
+
+                case CMMS.CMMS_Status.CALIBRATION_COMPLETED:
+                    statusStr = "Calibration Completed";
+                    break;
+
+                case CMMS.CMMS_Status.CALIBRATION_CLOSED:
+                    statusStr = "Calibration Closed";
+                    break;
+
+                case CMMS.CMMS_Status.CALIBRATION_APPROVED:
+                    statusStr = "Calibration Approved";
+                    break;
+
+                case CMMS.CMMS_Status.CALIBRATION_REJECTED:
+                    statusStr = "Calibration Rejected";
+                    break;
+
+                default:
+                    statusStr = "Invalid";
+                    break;
+            }
+            return statusStr;
+        }
         internal async Task<List<CMCalibrationList>> GetCalibrationList(int facility_id)
         {
             /* Fetch all the Asset table which calibration due date is lower than current date
@@ -67,7 +110,7 @@ namespace CMMSAPIs.Repositories.Calibration
             if (dt0.Rows.Count > 0)
             {
                 int status = Convert.ToInt32(dt0.Rows[0][0]);
-                int[] status_array = { 203, 206, 208 };
+                int[] status_array = { 213, 216, 218, 0 };
                 exists = Array.Exists(status_array, element => element == status);
             }
             if(exists)
@@ -90,32 +133,75 @@ namespace CMMSAPIs.Repositories.Calibration
             }
         }
 
-        internal async Task<CMDefaultResponse> ApproveRequestCalibration(CMApproval request)
+        internal async Task<CMDefaultResponse> ApproveRequestCalibration(CMApproval request, int userID)
         {
             /*
              * Update the status in Calibration table and update history log
              * Your Code goes here
              * 
             */
-            return null;
+            string myQuery = $"UPDATE calibration SET status = {(int)CMMS.CMMS_Status.CALIBRATION_REQUEST_APPROVED}, request_approved_by = {userID}, " +
+                                $"request_approved_at = '{UtilsRepository.GetUTCTime()}', request_approve_remark = '{request.comment}' " + 
+                                $"WHERE id = {request.id} AND status = {(int)CMMS.CMMS_Status.CALIBRATION_REQUEST};";
+            int retVal = await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
+            CMMS.RETRUNSTATUS returnStatus = CMMS.RETRUNSTATUS.FAILURE;
+            if (retVal > 0)
+                returnStatus = CMMS.RETRUNSTATUS.SUCCESS;
+            CMDefaultResponse response;
+            if(returnStatus == CMMS.RETRUNSTATUS.SUCCESS)
+            {
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.CALIBRATION, request.id, 0, 0, "Calibration Request Approved", CMMS.CMMS_Status.CALIBRATION_REQUEST_APPROVED, userID);
+                response = new CMDefaultResponse(request.id, returnStatus, "Calibration Request Approved Successfully");
+            }
+            else 
+            {
+                response = new CMDefaultResponse(request.id, returnStatus, "Calibration Request Could Not Be Approved");
+            }
+            return response;
         }
 
-        internal async Task<CMDefaultResponse> RejectRequestCalibration(CMApproval request)
+        internal async Task<CMDefaultResponse> RejectRequestCalibration(CMApproval request, int userID)
         {
             /*
              * Update the status in Calibration table and update history log
              * Your Code goes here
             */
-            return null;
+            string myQuery = $"UPDATE calibration SET status = {(int)CMMS.CMMS_Status.CALIBRATION_REQUEST_REJECTED}, request_rejected_by = {userID}, " +
+                                $"request_rejected_at = '{UtilsRepository.GetUTCTime()}', request_reject_remark = '{request.comment}' " +
+                                $"WHERE id = {request.id} AND status = {(int)CMMS.CMMS_Status.CALIBRATION_REQUEST};";
+            int retVal = await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
+            CMMS.RETRUNSTATUS returnStatus = CMMS.RETRUNSTATUS.FAILURE;
+            if (retVal > 0)
+                returnStatus = CMMS.RETRUNSTATUS.SUCCESS;
+            CMDefaultResponse response;
+            if (returnStatus == CMMS.RETRUNSTATUS.SUCCESS)
+            {
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.CALIBRATION, request.id, 0, 0, "Calibration Request Rejected", CMMS.CMMS_Status.CALIBRATION_REQUEST_REJECTED, userID);
+                response = new CMDefaultResponse(request.id, returnStatus, "Calibration Request Rejected Successfully");
+            }
+            else
+            {
+                response = new CMDefaultResponse(request.id, returnStatus, "Calibration Request Could Not Be Rejected");
+            }
+            return response;
         }
-        internal async Task<CMDefaultResponse> GetPreviousCalibration(CMPreviousCalibration request)
+        internal async Task<CMPreviousCalibration> GetPreviousCalibration(int asset_id)
         {
             /*
              * While requesting user need to show the previous calibrated details.
              * Fetch required properties mentioned in CMPreviousCalibration and return
              * Your Code goes here
             */
-            return null;
+            string myQuery = "SELECT " + 
+                                "asset_id, vendor_id, due_date as previous_calibration_date " + 
+                             "FROM " + 
+                                "calibration " + 
+                             $"WHERE due_date<current_date() AND asset_id = {asset_id}";
+            List<CMPreviousCalibration> _calibrationList = await Context.GetData<CMPreviousCalibration>(myQuery).ConfigureAwait(false);
+            if (_calibrationList.Count > 1)
+                return _calibrationList[1];
+            else
+                throw new NullReferenceException("No Previous Calibration was found");
         }
         internal async Task<CMDefaultResponse> StartCalibration(int calibration_id)
         {

@@ -16,9 +16,9 @@ namespace CMMSAPIs.BS.Calibration
     {
         Task<List<CMCalibrationList>> GetCalibrationList(int facility_id);
         Task<CMDefaultResponse> RequestCalibration(CMRequestCalibration request, int userID);
-        Task<CMDefaultResponse> ApproveRequestCalibration(CMApproval request);
-        Task<CMDefaultResponse> RejectRequestCalibration(CMApproval request);
-        Task<CMDefaultResponse> GetPreviousCalibration(CMPreviousCalibration request);
+        Task<CMDefaultResponse> ApproveRequestCalibration(CMApproval request, int userID);
+        Task<CMDefaultResponse> RejectRequestCalibration(CMApproval request, int userID);
+        Task<CMPreviousCalibration> GetPreviousCalibration(int asset_id);
         Task<CMDefaultResponse> StartCalibration(int calibration_id);
         Task<CMDefaultResponse> CompleteCalibration(CMCompleteCalibration request);
         Task<CMDefaultResponse> CloseCalibration(CMCloseCalibration request);
@@ -63,13 +63,13 @@ namespace CMMSAPIs.BS.Calibration
             }
         }
 
-        public async Task<CMDefaultResponse> ApproveRequestCalibration(CMApproval request)
+        public async Task<CMDefaultResponse> ApproveRequestCalibration(CMApproval request, int userID)
         {
             try
             {
                 using (var repos = new CalibrationRepository(getDB))
                 {
-                    return await repos.ApproveRequestCalibration(request);
+                    return await repos.ApproveRequestCalibration(request, userID);
                 }
             }
             catch (Exception ex)
@@ -78,13 +78,13 @@ namespace CMMSAPIs.BS.Calibration
             }
         }
 
-        public async Task<CMDefaultResponse> RejectRequestCalibration(CMApproval request)
+        public async Task<CMDefaultResponse> RejectRequestCalibration(CMApproval request, int userID)
         {
             try
             {
                 using (var repos = new CalibrationRepository(getDB))
                 {
-                    return await repos.RejectRequestCalibration(request);
+                    return await repos.RejectRequestCalibration(request, userID);
                 }
             }
             catch (Exception ex)
@@ -93,13 +93,13 @@ namespace CMMSAPIs.BS.Calibration
             }
         }
 
-        public async Task<CMDefaultResponse> GetPreviousCalibration(CMPreviousCalibration request)
+        public async Task<CMPreviousCalibration> GetPreviousCalibration(int asset_id)
         {
             try
             {
                 using (var repos = new CalibrationRepository(getDB))
                 {
-                    return await repos.GetPreviousCalibration(request);
+                    return await repos.GetPreviousCalibration(asset_id);
                 }
             }
             catch (Exception ex)

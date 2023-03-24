@@ -67,10 +67,11 @@ namespace CMMSAPIs.Controllers.Calibration
         {
             try
             {
-                var data = await _CalibrationBS.ApproveRequestCalibration(request);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _CalibrationBS.ApproveRequestCalibration(request, userID);
                 return Ok(data);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
@@ -83,10 +84,11 @@ namespace CMMSAPIs.Controllers.Calibration
         {
             try
             {
-                var data = await _CalibrationBS.RejectRequestCalibration(request);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _CalibrationBS.RejectRequestCalibration(request, userID);
                 return Ok(data);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
@@ -95,14 +97,18 @@ namespace CMMSAPIs.Controllers.Calibration
         [Authorize]
         [Route("GetPreviousCalibration")]
         [HttpGet]
-        public async Task<IActionResult> GetPreviousCalibration(CMPreviousCalibration request)
+        public async Task<IActionResult> GetPreviousCalibration(int asset_id)
         {
             try
             {
-                var data = await _CalibrationBS.GetPreviousCalibration(request);
+                var data = await _CalibrationBS.GetPreviousCalibration(asset_id);
                 return Ok(data);
             }
-            catch (Exception ex)
+            catch(NullReferenceException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception)
             {
                 throw;
             }
