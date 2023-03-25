@@ -15,7 +15,7 @@ namespace CMMSAPIs.Models.Calibration
         public string vendor_name { get; set; }
         public string responsible_person { get; set; }
         public DateTime received_date { get; set; }
-        public string asset_heath_status { get; set; }
+        public string asset_health_status { get; set; }
     }
 
     public class CMRequestCalibration
@@ -25,9 +25,11 @@ namespace CMMSAPIs.Models.Calibration
         public DateTime next_calibration_date { get; set; }
     }
 
-    public class CMPreviousCalibration : CMRequestCalibration
+    public class CMPreviousCalibration
     {
-        
+        public int asset_id { get; set; }
+        public int vendor_id { get; set; }
+        public DateTime previous_calibration_date { get; set; }
     }
 
     public class CMCompleteCalibration

@@ -82,7 +82,8 @@ namespace CMMSAPIs.Helper
             OPERATOR = 2,
             CUSTOMER = 3,
             MANUFACTURER = 4,
-            SUPPLIER = 5
+            SUPPLIER = 5,
+            VENDOR=6,
         }
 
         /* Features Constant START */
@@ -136,10 +137,11 @@ namespace CMMSAPIs.Helper
             PTW,
             JOBCARD,
 
-            PM_CHECKLIST_NUMBER = 11,
-            PM_CHECKPOINTS,
-            PM_MAPPING,
-            PM_SCHEDULE,
+            CHECKLIST_NUMBER = 11,
+            CHECKPOINTS,
+            CHECKLIST_MAPPING,
+
+            PM_SCHEDULE = 21,
             PM_SCEHDULE_VIEW,
             PM_EXECUTION,
             PM_SCHEDULE_REPORT,
@@ -152,18 +154,12 @@ namespace CMMSAPIs.Helper
             SM_S2S,
 
             AUDIT_PLAN = 41,
-            AUDIT_CHECKLIST_NUMBER,
-            AUDIT_CHECKPOINTS,
-            AUDIT_MAPPING,
             AUDIT_SCHEDULE,
             AUDIT_SCEHDULE_VIEW,
             AUDIT_EXECUTION,
             AUDIT_SUMMARY,
 
             HOTO_PLAN = 61,
-            HOTO_CHECKLIST_NUMBER,
-            HOTO_CHECKPOINTS,
-            HOTO_MAPPING,
             HOTO_SCHEDULE,
             HOTO_SCEHDULE_VIEW,
             HOTO_EXECUTION,
@@ -179,6 +175,7 @@ namespace CMMSAPIs.Helper
             PLANT = 151,
 
             USER = 171,
+            USER_MODULE,
             USER_NOTIFICATIONS, 
             ROLE_DEFAULT_NOTIFICATIONS, 
             ROLE_DEFAULT_ACCESS_MODULE
@@ -289,7 +286,7 @@ namespace CMMSAPIs.Helper
             WC_CLOSE_APPROVED,
             WC_CANCELLED,
 
-            CALIBRATION_REQUEST = 201,
+            CALIBRATION_REQUEST = 211,
             CALIBRATION_REQUEST_APPROVED,
             CALIBRATION_REQUEST_REJECTED,
             CALIBRATION_STARTED,

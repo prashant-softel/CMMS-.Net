@@ -79,15 +79,7 @@ namespace CMMSAPIs.Repositories.Masters
                 DataTable dt = await Context.FetchData(query).ConfigureAwait(false);
 
                 int id = Convert.ToInt32(dt.Rows[0][0]);
-                switch(request.type)
-                {
-                    case 2:
-                        await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.AUDIT_CHECKLIST_NUMBER, id, 0, 0, "Check List Created", CMMS.CMMS_Status.CREATED);
-                        break;
-                    default:
-                        await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_CHECKLIST_NUMBER, id, 0, 0, "Check List Created", CMMS.CMMS_Status.CREATED);
-                        break;
-                }
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.CHECKLIST_NUMBER, id, 0, 0, "Check List Created", CMMS.CMMS_Status.CREATED, userID);
                 id_list.Add(id);
             }
             CMDefaultResponse response = new CMDefaultResponse(id_list, CMMS.RETRUNSTATUS.SUCCESS, "Check List Created Successfully");
@@ -121,14 +113,14 @@ namespace CMMSAPIs.Repositories.Masters
                 updateQry += $" duration = {request.duration}, ";
             updateQry += $" updated_by = {userID}, updated_at = '{UtilsRepository.GetUTCTime()}' WHERE id = {request.id}; ";
             await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.HOTO_CHECKLIST_NUMBER, request.id, 0, 0, "Check List Updated", CMMS.CMMS_Status.UPDATED);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.CHECKLIST_NUMBER, request.id, 0, 0, "Check List Updated", CMMS.CMMS_Status.UPDATED, userID);
 
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Check List Updated Successfully");
 
             return response;
         }
 
-        internal async Task<CMDefaultResponse> DeleteChecklist(int id)
+        internal async Task<CMDefaultResponse> DeleteChecklist(int id, int userID)
         {
             /* 
              * Set Status to 0 in CheckList_Number table for requested id
@@ -137,13 +129,13 @@ namespace CMMSAPIs.Repositories.Masters
             string deleteQry = $"DELETE FROM  softel_cmms.checklist_number " +
                $"WHERE  id  = {id};";
             await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.HOTO_CHECKLIST_NUMBER, id, 0, 0, "Check List Deleted", CMMS.CMMS_Status.DELETED);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.CHECKLIST_NUMBER, id, 0, 0, "Check List Deleted", CMMS.CMMS_Status.DELETED, userID);
             CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Check List Deleted");
 
             return response;
            
         }
-#endregion
+        #endregion
 
         #region checklistmap
         internal async Task<List<CMCheckListMapList>> GetCheckListMap(int facility_id, int type)
@@ -160,7 +152,6 @@ namespace CMMSAPIs.Repositories.Masters
             if (facility_id != 0)
             {
                 myQuery += " WHERE facility_id= " + facility_id + " and  checklist_id = " + type;
-
             }
 
             List<CMCheckListMapList> _checkList = await Context.GetData<CMCheckListMapList>(myQuery).ConfigureAwait(false);
@@ -202,7 +193,7 @@ namespace CMMSAPIs.Repositories.Masters
             return response;
             
         }
-#endregion
+        #endregion
 
         #region CheckPoint
         internal async Task<List<CMCheckPointList>> GetCheckPointList(int checklist_id)
@@ -255,6 +246,7 @@ namespace CMMSAPIs.Repositories.Masters
                 DataTable dt = await Context.FetchData(query).ConfigureAwait(false);
 
                 int id = Convert.ToInt32(dt.Rows[0][0]);
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.CHECKPOINTS, id, 0, 0, "Check Point Created", CMMS.CMMS_Status.CREATED, userID);
                 idList.Add(id);
             }
             CMDefaultResponse response = new CMDefaultResponse(idList, CMMS.RETRUNSTATUS.SUCCESS, $"{idList.Count} checkpoint(s) created successfully");
@@ -281,13 +273,14 @@ namespace CMMSAPIs.Repositories.Masters
             if (request.status != null)
                 updateQry += $"status = {request.status} ";
             updateQry += $"updated_by = {userID}, updated_at='{UtilsRepository.GetUTCTime()}' WHERE id = {request.id};";
-            int retVal = await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+            await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.CHECKPOINTS, request.id, 0, 0, "Check Point Updated", CMMS.CMMS_Status.UPDATED, userID);
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Checkpoint updated successfully");
 
             return response;
         }
 
-        internal async Task<CMDefaultResponse> DeleteCheckPoint(int id)
+        internal async Task<CMDefaultResponse> DeleteCheckPoint(int id, int userID)
         {
             /*
              * Primary Table - CheckPoint
@@ -296,6 +289,7 @@ namespace CMMSAPIs.Repositories.Masters
             */
             string updateQry = $"DELETE FROM checkpoint WHERE id = {id};";
             int retVal = await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.CHECKPOINTS, id, 0, 0, "Check Point Deleted", CMMS.CMMS_Status.DELETED, userID);
             CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Checkpoint deleted successfully");
             return response;
         }
