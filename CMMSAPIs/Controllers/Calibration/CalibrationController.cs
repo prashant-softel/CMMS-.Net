@@ -116,7 +116,7 @@ namespace CMMSAPIs.Controllers.Calibration
 
         [Authorize]
         [Route("StartCalibration")]
-        [HttpPost]
+        [HttpPut]
         public async Task<IActionResult> StartCalibration(int calibration_id)
         {
             try
@@ -137,7 +137,8 @@ namespace CMMSAPIs.Controllers.Calibration
         {
             try
             {
-                var data = await _CalibrationBS.CompleteCalibration(request);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _CalibrationBS.CompleteCalibration(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -153,7 +154,8 @@ namespace CMMSAPIs.Controllers.Calibration
         {
             try
             {
-                var data = await _CalibrationBS.CloseCalibration(request);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _CalibrationBS.CloseCalibration(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -169,7 +171,8 @@ namespace CMMSAPIs.Controllers.Calibration
         {
             try
             {
-                var data = await _CalibrationBS.ApproveCalibration(request);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _CalibrationBS.ApproveCalibration(request,userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -185,7 +188,8 @@ namespace CMMSAPIs.Controllers.Calibration
         {
             try
             {
-                var data = await _CalibrationBS.RejectCalibration(request);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _CalibrationBS.RejectCalibration(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)

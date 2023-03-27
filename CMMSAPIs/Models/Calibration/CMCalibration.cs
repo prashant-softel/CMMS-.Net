@@ -38,7 +38,7 @@ namespace CMMSAPIs.Models.Calibration
         public DateTime done_date { get; set; }
         public DateTime received_date { get; set; }
         public string comment { get; set; }
-        public string is_damaged { get; set; }
+        public int? is_damaged { get; set; }
     }
 
     public class CMCloseCalibration 
