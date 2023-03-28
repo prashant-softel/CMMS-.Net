@@ -1,5 +1,6 @@
 ﻿using CMMSAPIs.BS.Masters;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using System;
@@ -39,11 +40,12 @@ namespace CMMSAPIs.Controllers.PM
         [Authorize]
         [Route("SetScheduleData")]
         [HttpPost]
-        public async Task<IActionResult> SetScheduleData(List<CMSetScheduleData> request)
+        public async Task<IActionResult> SetScheduleData(CMSetScheduleData request)
         {
             try
             {
-                var data = await _PMBS.SetScheduleData(request);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _PMBS.SetScheduleData(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
