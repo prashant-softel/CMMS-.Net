@@ -138,43 +138,75 @@ namespace CMMSAPIs.Repositories.Masters
         #endregion
 
         #region checklistmap
-        internal async Task<List<CMCheckListMapList>> GetCheckListMap(int facility_id, int type)
+        internal async Task<List<CMCheckListMapList>> GetCheckListMap(int facility_id, int? type=null)
         {
             /*
              * Primary Table - CheckList_Mapping
              * Read All properties mention in model and return list
              * Code goes here
             */
-            string myQuery = "";
-            myQuery = "SELECT  checklist_mapping.id , checklist_mapping.facility_id ,checklist_mapping.category_id ,"+
-            "checklist_mapping.status ,checklist_mapping.checklist_id ,checklist_mapping.plan_id"+
-            " FROM  softel_cmms.checklist_mapping; ";
-            if (facility_id != 0)
+            string myQuery = "SELECT " + 
+                                "checklist_mapping.category_id, asset_cat.name as category_name, checklist_mapping.status, checklist_mapping.plan_id "+
+                             "FROM  " + 
+                                "checklist_mapping " + 
+                             "JOIN " + 
+                                "assetcategories as asset_cat ON checklist_mapping.category_id=asset_cat.id ";
+            if (facility_id > 0)
             {
-                myQuery += " WHERE facility_id= " + facility_id + " and  checklist_id = " + type;
+                myQuery += $"WHERE facility_id = {facility_id} ";
             }
-
-            List<CMCheckListMapList> _checkList = await Context.GetData<CMCheckListMapList>(myQuery).ConfigureAwait(false);
-            return _checkList;
+            else
+            {
+                throw new ArgumentException("Invalid Facility ID");
+            }
+            myQuery += "GROUP BY checklist_mapping.category_id;";
+            List<CMCheckListMapList> _checkListMapList = await Context.GetData<CMCheckListMapList>(myQuery).ConfigureAwait(false);
+            foreach (CMCheckListMapList _checkListMap in _checkListMapList)
+            {
+                string myQuery2 = "SELECT " + 
+                                    "checklist_mapping.id as mapping_id, checklist_mapping.checklist_id, checklist_number.checklist_number as checklist_name, checklist_number.checklist_type as type " + 
+                                  "FROM " +
+                                    "checklist_mapping " + 
+                                  "JOIN " + 
+                                    "checklist_number ON checklist_number.id = checklist_mapping.checklist_id " + 
+                                  $"WHERE checklist_mapping.facility_id = {facility_id} AND checklist_mapping.category_id = {_checkListMap.category_id} ";
+                if(type != null)
+                {
+                    myQuery2 += $"AND checklist_number.type = {type}";
+                }
+                List<CMCheckListIdName> _checkLists = await Context.GetData<CMCheckListIdName>(myQuery2).ConfigureAwait(false);
+                _checkListMap.checklists = _checkLists;
+            }
+            return _checkListMapList;
         }
 
-        internal async Task<CMDefaultResponse> CreateCheckListMap(CMCreateCheckListMap request)
+        internal async Task<CMDefaultResponse> CreateCheckListMap(CMCreateCheckListMap request, int userID)
         {
             /*
              * Primary Table - CheckList_Mapping
              * Insert All properties mention in model
              * Code goes here
             */
-            string query = "INSERT INTO checklist_mapping ( facility_id ,category_id ,status ,"+
- "checklist_id ,plan_id )VALUES "+
-                       $"('{request.facility_id}', '{request.category_id}', '{request.status}',  '{request.check_id}'," +
-                       $"'{request.plan_id}'); select LAST_INSERT_ID();";
-
-            DataTable dt = await Context.FetchData(query).ConfigureAwait(false);
-
-            int id = Convert.ToInt32(dt.Rows[0][0]);
-            CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "");
-
+            List<int> idList = new List<int>();
+            foreach(CMCheckListMap checkListMap in request.checklist_map_list)
+            {
+                foreach(int checklist_id in checkListMap.checklist_ids)
+                {
+                    string query1 = $"SELECT id FROM checklist_mapping WHERE facility_id = {request.facility_id} AND category_id = {checkListMap.category_id} AND checklist_id = {checklist_id};";
+                    DataTable dt1 = await Context.FetchData(query1).ConfigureAwait(false);
+                    if(dt1.Rows.Count == 0)
+                    {
+                        string query2 = "INSERT INTO checklist_mapping (facility_id, category_id, status ,checklist_id, plan_id) VALUES " +
+                                    $"({request.facility_id}, {checkListMap.category_id}, {checkListMap.status}, {checklist_id}, {checkListMap.plan_id}); " +
+                                    "select LAST_INSERT_ID();";
+                        DataTable dt = await Context.FetchData(query2).ConfigureAwait(false);
+                        int id = Convert.ToInt32(dt.Rows[0][0]);
+                        await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.CHECKLIST_MAPPING, id, 0, 0, "Checklist Mapping Added", CMMS.CMMS_Status.CREATED, userID);
+                        idList.Add(id);
+                    }
+                }
+            }
+            CMDefaultResponse response = new CMDefaultResponse(idList, CMMS.RETRUNSTATUS.SUCCESS, $"{idList.Count} checklist mapping(s) added successfully");
             return response;
         }
 
@@ -184,13 +216,14 @@ namespace CMMSAPIs.Repositories.Masters
              * Update All properties mention in model
              * Code goes here
             */
-            string updateQry = $"UPDATE  checklist_mapping SET facility_id  = '{request.facility_id}', category_id  = '{request.category_id}',"+
+            /*string updateQry = $"UPDATE  checklist_mapping SET facility_id  = '{request.facility_id}', category_id  = '{request.category_id}',"+
             $"status = '{request.status}', checklist_id = '{request.checklist_ids}', plan_id = '{request.plan_id}'"+
             $" WHERE id = '{request.mapping_id}'; ";
             int retVal = await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
             CMDefaultResponse response = new CMDefaultResponse(retVal, CMMS.RETRUNSTATUS.SUCCESS, "");
 
-            return response;
+            return response;*/
+            return null;
             
         }
         #endregion

@@ -95,12 +95,16 @@ namespace CMMSAPIs.Controllers.Masters
         [Authorize]
         [Route("GetCheckListMap")]
         [HttpGet]
-        public async Task<IActionResult> GetCheckListMap(int facility_id, int type)
+        public async Task<IActionResult> GetCheckListMap(int facility_id, int? type)
         {
             try
             {
                 var data = await _CheckListBS.GetCheckListMap(facility_id, type);
                 return Ok(data);
+            }
+            catch(ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
             }
             catch (Exception)
             {
@@ -115,7 +119,8 @@ namespace CMMSAPIs.Controllers.Masters
         {
             try
             {
-                var data = await _CheckListBS.CreateCheckListMap(request);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _CheckListBS.CreateCheckListMap(request, userID);
                 return Ok(data);
             }
             catch (Exception)
