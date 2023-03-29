@@ -80,7 +80,9 @@ namespace CMMSAPIs.Repositories.PM
             int id = Convert.ToInt32(dt2.Rows[0][0]);
             string setCodeNameQuery = "UPDATE pm_schedule " +
                                         "SET PM_Schedule_Code = CONCAT(id+1,Facility_Code,Asset_Category_Code,Asset_Code,PM_Frequecy_Code), " +
-                                        "PM_Schedule_Name = CONCAT(id+1,' ',Facility_Name,' ',Asset_Category_name,' ',Asset_Name) " +
+                                        "PM_Schedule_Name = CONCAT(id+1,' ',Facility_Name,' ',Asset_Category_name,' ',Asset_Name), " +
+                                        "PM_Schedule_Number = CONCAT('SCH',id), " +
+                                        "PM_Maintenance_Order_Number = CONCAT('PMSCH',id+1) " + 
                                         $"WHERE id = {id};";
             await Context.ExecuteNonQry<int>(setCodeNameQuery);
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, id, 0, 0, "PM Schedule Created", CMMS.CMMS_Status.CREATED, userID);
