@@ -20,10 +20,10 @@ namespace CMMSAPIs.BS.Calibration
         Task<CMDefaultResponse> RejectRequestCalibration(CMApproval request, int userID);
         Task<CMPreviousCalibration> GetPreviousCalibration(int asset_id);
         Task<CMDefaultResponse> StartCalibration(int calibration_id);
-        Task<CMDefaultResponse> CompleteCalibration(CMCompleteCalibration request);
-        Task<CMDefaultResponse> CloseCalibration(CMCloseCalibration request);
-        Task<CMDefaultResponse> ApproveCalibration(CMApproval request);
-        Task<CMDefaultResponse> RejectCalibration(CMApproval request);
+        Task<CMDefaultResponse> CompleteCalibration(CMCompleteCalibration request, int userID);
+        Task<CMDefaultResponse> CloseCalibration(CMCloseCalibration request, int userID);
+        Task<CMDefaultResponse> ApproveCalibration(CMApproval request, int userID);
+        Task<CMDefaultResponse> RejectCalibration(CMApproval request, int userID);
     }
     public class CalibrationBS : ICalibrationBS
     {
@@ -123,13 +123,13 @@ namespace CMMSAPIs.BS.Calibration
             }
         }
 
-        public async Task<CMDefaultResponse> CompleteCalibration(CMCompleteCalibration request)
+        public async Task<CMDefaultResponse> CompleteCalibration(CMCompleteCalibration request, int userID)
         {
             try
             {
                 using (var repos = new CalibrationRepository(getDB))
                 {
-                    return await repos.CompleteCalibration(request);
+                    return await repos.CompleteCalibration(request, userID);
                 }
             }
             catch (Exception ex)
@@ -138,13 +138,13 @@ namespace CMMSAPIs.BS.Calibration
             }
         }
 
-        public async Task<CMDefaultResponse> CloseCalibration(CMCloseCalibration request)
+        public async Task<CMDefaultResponse> CloseCalibration(CMCloseCalibration request, int userID)
         {
             try
             {
                 using (var repos = new CalibrationRepository(getDB))
                 {
-                    return await repos.CloseCalibration(request);
+                    return await repos.CloseCalibration(request, userID);
                 }
             }
             catch (Exception ex)
@@ -153,13 +153,13 @@ namespace CMMSAPIs.BS.Calibration
             }
         }
 
-        public async Task<CMDefaultResponse> ApproveCalibration(CMApproval request)
+        public async Task<CMDefaultResponse> ApproveCalibration(CMApproval request, int userID)
         {
             try
             {
                 using (var repos = new CalibrationRepository(getDB))
                 {
-                    return await repos.ApproveCalibration(request);
+                    return await repos.ApproveCalibration(request, userID);
                 }
             }
             catch (Exception ex)
@@ -168,13 +168,13 @@ namespace CMMSAPIs.BS.Calibration
             }
         }
 
-        public async Task<CMDefaultResponse> RejectCalibration(CMApproval request)
+        public async Task<CMDefaultResponse> RejectCalibration(CMApproval request, int userID)
         {
             try
             {
                 using (var repos = new CalibrationRepository(getDB))
                 {
-                    return await repos.RejectCalibration(request);
+                    return await repos.RejectCalibration(request, userID);
                 }
             }
             catch (Exception ex)

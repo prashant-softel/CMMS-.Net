@@ -104,7 +104,7 @@ namespace CMMSAPIs.Repositories.Calibration
                 throw new ArgumentException("Invalid Vendor ID");
             if (request.next_calibration_date == null)
                 throw new ArgumentException("Invalid Due Date");
-            string statusQuery = $"SELECT status FROM calibration where due_date=(SELECT MAX(due_date) FROM calibration WHERE asset_id={request.asset_id}) and asset_id={request.asset_id};";
+            string statusQuery = $"SELECT status FROM calibration where due_date=(SELECT MAX(due_date) FROM calibration WHERE asset_id={request.asset_id} AND due_date is not null) and asset_id={request.asset_id};";
             DataTable dt0=await Context.FetchData(statusQuery).ConfigureAwait(false);
             bool exists=true;
             if (dt0.Rows.Count > 0)
@@ -209,40 +209,137 @@ namespace CMMSAPIs.Repositories.Calibration
              * Update the Calibration table status and History log
              * Your Code goes here
             */
-            return null;
+            DateTime start_date = DateTime.Parse(UtilsRepository.GetUTCTime());
+            string myQuery = $"UPDATE calibration SET status = {(int)CMMS.CMMS_Status.CALIBRATION_STARTED}, " + 
+                                $"start_date = '{start_date.ToString("yyyy'-'MM'-'dd")}' " + 
+                                $"WHERE id = {calibration_id} AND status = {(int)CMMS.CMMS_Status.CALIBRATION_REQUEST_APPROVED};";
+            int retVal = await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
+            string userIDQuery = $"SELECT requested_by FROM calibration where id = {calibration_id};";
+            DataTable dt = await Context.FetchData(userIDQuery).ConfigureAwait(false);
+            int userID = Convert.ToInt32(dt.Rows[0][0]);
+            CMMS.RETRUNSTATUS returnStatus = CMMS.RETRUNSTATUS.FAILURE;
+            if (retVal > 0)
+                returnStatus = CMMS.RETRUNSTATUS.SUCCESS;
+            CMDefaultResponse response;
+            if (returnStatus == CMMS.RETRUNSTATUS.SUCCESS)
+            {
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.CALIBRATION, calibration_id, 0, 0, "Calibration Started", CMMS.CMMS_Status.CALIBRATION_STARTED, userID);
+                response = new CMDefaultResponse(calibration_id, returnStatus, "Calibration Started");
+            }
+            else
+            {
+                response = new CMDefaultResponse(calibration_id, returnStatus, "Calibration Cannot be Started");
+            }
+            return response;
         }
-        internal async Task<CMDefaultResponse> CompleteCalibration(CMCompleteCalibration request)
+        internal async Task<CMDefaultResponse> CompleteCalibration(CMCompleteCalibration request, int userID)
         {
             /*
              * Update the required fields in CMCompleteCalibration model and history Log
              * File upload will be in file table with ref of calibration id
              * Your Code goes here
             */
-            return null;
+            string myQuery = $"UPDATE calibration SET done_date = '{request.done_date.ToString("yyyy'-'MM'-'dd")}', received_date = '{request.received_date.ToString("yyyy'-'MM'-'dd")}', " + 
+                                $"completed_by = {userID}, completed_remark = '{request.comment}', is_damaged = {request.is_damaged}, status = {(int)CMMS.CMMS_Status.CALIBRATION_COMPLETED} " + 
+                                $"WHERE id = {request.calibration_id} AND status = {(int)CMMS.CMMS_Status.CALIBRATION_STARTED};";
+            int retVal = await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
+            CMMS.RETRUNSTATUS returnStatus = CMMS.RETRUNSTATUS.FAILURE;
+            if (retVal > 0)
+                returnStatus = CMMS.RETRUNSTATUS.SUCCESS;
+            CMDefaultResponse response;
+            if (returnStatus == CMMS.RETRUNSTATUS.SUCCESS)
+            {
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.CALIBRATION, request.calibration_id, 0, 0, "Calibration Completed", CMMS.CMMS_Status.CALIBRATION_COMPLETED, userID);
+                response = new CMDefaultResponse(request.calibration_id, returnStatus, "Calibration Completed");
+            }
+            else
+            {
+                response = new CMDefaultResponse(request.calibration_id, returnStatus, "Calibration Failed To Complete or is already completed");
+            }
+            return response;
         }
-        internal async Task<CMDefaultResponse> CloseCalibration(CMCloseCalibration request)
+        internal async Task<CMDefaultResponse> CloseCalibration(CMCloseCalibration request, int userID)
         {
             /*
              * Update the Calibration status and update the history log
              * Your Code goes here
             */
-            return null;
+            string myQuery = $"UPDATE calibration SET close_by = {userID}, close_remark = '{request.comment}', status = {(int)CMMS.CMMS_Status.CALIBRATION_CLOSED} " +
+                                $"WHERE id = {request.calibration_id} AND status = {(int)CMMS.CMMS_Status.CALIBRATION_COMPLETED};";
+            int retVal = await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
+            CMMS.RETRUNSTATUS returnStatus = CMMS.RETRUNSTATUS.FAILURE;
+            if (retVal > 0)
+                returnStatus = CMMS.RETRUNSTATUS.SUCCESS;
+            CMDefaultResponse response;
+            if (returnStatus == CMMS.RETRUNSTATUS.SUCCESS)
+            {
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.CALIBRATION, request.calibration_id, 0, 0, "Calibration Closed", CMMS.CMMS_Status.CALIBRATION_CLOSED, userID);
+                response = new CMDefaultResponse(request.calibration_id, returnStatus, "Calibration Closed");
+            }
+            else
+            {
+                response = new CMDefaultResponse(request.calibration_id, returnStatus, "Calibration cannot be closed or is already closed");
+            }
+            return response;
         }
-        internal async Task<CMDefaultResponse> ApproveCalibration(CMApproval request)
+        internal async Task<CMDefaultResponse> ApproveCalibration(CMApproval request, int userID)
         {
             /* Update the Calibration status and history log
              * Also update the CalibrationDueDate with new date as per frequency setup 
              * Your Code goes here
             */
-            return null;
+            string myQuery1 = "SELECT asset_id, vendor_id, received_date as next_calibration_date FROM calibration " + 
+                                $"WHERE id = {request.id};";
+            List<CMRequestCalibration> nextRequest = await Context.GetData<CMRequestCalibration>(myQuery1).ConfigureAwait(false);
+            string myQuery2 = $"SELECT days FROM assets JOIN frequency ON assets.calibrationFrequency = frequency.id " +
+                                $"WHERE assets.id = {nextRequest[0].asset_id};";
+            DataTable dt = await Context.FetchData(myQuery2).ConfigureAwait(false);
+            int days = Convert.ToInt32(dt.Rows[0][0]);
+            nextRequest[0].next_calibration_date = nextRequest[0].next_calibration_date.AddDays(days);
+            CMDefaultResponse newCalibration = await RequestCalibration(nextRequest[0], userID);
+            string myQuery3 = $"UPDATE calibration SET approved_by = {userID}, approved_at = '{UtilsRepository.GetUTCTime()}', " +
+                                $"approve_remark = '{request.comment}', status = {(int)CMMS.CMMS_Status.CALIBRATION_APPROVED} " +
+                                $"WHERE id = {request.id} AND status = {(int)CMMS.CMMS_Status.CALIBRATION_CLOSED};";
+            int retVal = await Context.ExecuteNonQry<int>(myQuery3).ConfigureAwait(false);
+            CMMS.RETRUNSTATUS returnStatus = CMMS.RETRUNSTATUS.FAILURE;
+            if (retVal > 0)
+                returnStatus = CMMS.RETRUNSTATUS.SUCCESS;
+            CMDefaultResponse response;
+            if (returnStatus == CMMS.RETRUNSTATUS.SUCCESS)
+            {
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.CALIBRATION, request.id, 0, 0, $"Calibration Approved to ID {newCalibration.id[0]}", CMMS.CMMS_Status.CALIBRATION_COMPLETED, userID);
+                response = new CMDefaultResponse(request.id, returnStatus, $"Calibration Approved. Next Calibration with ID {newCalibration.id[0]} on '{nextRequest[0].next_calibration_date.ToString("yyyy'-'MM'-'dd")}'");
+            }
+            else
+            {
+                response = new CMDefaultResponse(request.id, returnStatus, "Calibration could not be approved");
+            }
+            return response;
         }
 
-        internal async Task<CMDefaultResponse> RejectCalibration(CMApproval request)
+        internal async Task<CMDefaultResponse> RejectCalibration(CMApproval request, int userID)
         {
             /* Update the Calibration status and history log
              * Your Code goes here
             */
-            return null;
+            string myQuery = $"UPDATE calibration SET rejected_by = {userID}, rejected_at = '{UtilsRepository.GetUTCTime()}', " +
+                                $"reject_remark = '{request.comment}', status = {(int)CMMS.CMMS_Status.CALIBRATION_REJECTED} " +
+                                $"WHERE id = {request.id} AND status = {(int)CMMS.CMMS_Status.CALIBRATION_CLOSED};";
+            int retVal = await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
+            CMMS.RETRUNSTATUS returnStatus = CMMS.RETRUNSTATUS.FAILURE;
+            if (retVal > 0)
+                returnStatus = CMMS.RETRUNSTATUS.SUCCESS;
+            CMDefaultResponse response;
+            if (returnStatus == CMMS.RETRUNSTATUS.SUCCESS)
+            {
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.CALIBRATION, request.id, 0, 0, "Calibration Rejected", CMMS.CMMS_Status.CALIBRATION_REJECTED, userID);
+                response = new CMDefaultResponse(request.id, returnStatus, "Calibration Rejected");
+            }
+            else
+            {
+                response = new CMDefaultResponse(request.id, returnStatus, "Calibration could not get rejected.");
+            }
+            return response;
         }
     }
 }
