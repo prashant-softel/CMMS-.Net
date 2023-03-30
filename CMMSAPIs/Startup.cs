@@ -80,7 +80,7 @@ namespace CMMSAPIs
             services.AddScoped<IPermitBS, PermitBS>();
             services.AddScoped<IFacilityBS, FacilityBs>();
             services.AddScoped<IJobWorkTypeBS, JobWorkTypeBS>();
-
+            services.AddScoped<IPMBS, PMBS>();
             services.AddScoped<iLoginBS, LoginBS>();
             services.AddScoped<IRoleAccessBS, RoleAccessBS>();
             services.AddScoped<IUserAccessBS, UserAccessBS>();

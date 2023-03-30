@@ -13,8 +13,10 @@ namespace CMMSAPIs.Models.PM
 
     public class CMSetScheduleData 
     {
-        public int id { get; set; }
-        public DateTime schedule_date { get; set;}
+        public DateTime schedule_date { get; set; }
+        public int facility_id { get; set; }
+        public int frequency_id { get; set; }
+        public int asset_id { get; set; }
     }
 
 }
