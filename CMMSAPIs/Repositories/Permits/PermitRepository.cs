@@ -43,6 +43,74 @@ namespace CMMSAPIs.Repositories.Permits
             //return permitDetails[0];
             return permitDetails;
         }*/
+
+        private static string Status(int statusID)
+        {
+            CMMS.CMMS_Status status = (CMMS.CMMS_Status)statusID;
+            string statusName = "";
+            switch (status)
+            {
+                case CMMS.CMMS_Status.PTW_CREATED:
+                    statusName = "Permit Created";
+                    break;
+                case CMMS.CMMS_Status.PTW_ISSUED:
+                    statusName = "Permit Issued";
+                    break;
+                case CMMS.CMMS_Status.PTW_REJECTED_BY_ISSUER:
+                    statusName = "Permit Rejected By Issuer";
+                    break;
+                case CMMS.CMMS_Status.PTW_APPROVE:
+                    statusName = "Permit Approved";
+                    break;
+                case CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER:
+                    statusName = "Permit Rejected By Approver";
+                    break;
+                case CMMS.CMMS_Status.PTW_CLOSED:
+                    statusName = "Permit Closed";
+                    break;
+                case CMMS.CMMS_Status.PTW_CANCELLED_BY_ISSUER:
+                    statusName = "Permit Cancelled BY Issuer";
+                    break;
+                case CMMS.CMMS_Status.PTW_CANCELLED_BY_HSE:
+                    statusName = "Permit Cancelled By HSE";
+                    break;
+                case CMMS.CMMS_Status.PTW_CANCELLED_BY_APPROVER:
+                    statusName = "Permit Cancelled By Approver";
+                    break;
+                case CMMS.CMMS_Status.PTW_EDIT:
+                    statusName = "Permit Edited";
+                    break;
+                case CMMS.CMMS_Status.PTW_EXTEND_REQUESTED:
+                    statusName = "Requested for Permit Extension";
+                    break;
+                case CMMS.CMMS_Status.PTW_EXTEND_REQUEST_APPROVE:
+                    statusName = "Approved Extension for Permit";
+                    break;
+                case CMMS.CMMS_Status.PTW_EXTEND_REQUEST_REJECTED:
+                    statusName = "Rejected Extension for Permit";
+                    break;
+                case CMMS.CMMS_Status.PTW_LINKED_TO_JOB:
+                    statusName = "Permit Linked to Job";
+                    break;
+                case CMMS.CMMS_Status.PTW_LINKED_TO_PM:
+                    statusName = "Permit Linked to PM";
+                    break;
+                case CMMS.CMMS_Status.PTW_LINKED_TO_AUDIT:
+                    statusName = "Permit Linked to Audit";
+                    break;
+                case CMMS.CMMS_Status.PTW_LINKED_TO_HOTO:
+                    statusName = "Permit Linked to HOTO";
+                    break;
+                case CMMS.CMMS_Status.PTW_EXPIRED:
+                    statusName = "Permit Expired";
+                    break;
+                default:
+                    statusName = "Invalid";
+                    break;
+            }
+            return statusName;
+        }
+
         internal async Task<List<CMDefaultList>> GetPermitTypeList(int facility_id)
         {
             /*
@@ -101,7 +169,7 @@ namespace CMMSAPIs.Repositories.Permits
              * Request Date/Time, Approved By, Approved Date/Time, Current Status(Approved, Rejected, closed).           
             */
             string myQuery = "SELECT " +
-                                 "ptw.id as permitId, ptw.status as ptwStatus, ptw.permitNumber as permit_site_no, permitType.id as permit_type,  permitType.title as PermitTypeName, asset_cat.id as equipment_category, asset_cat.name as equipment, facilities.id as workingAreaId, facilities.name as workingAreaName, ptw.description as description, CONCAT(user.firstName + ' ' + user.lastName) as request_by_name, ptw.acceptedDate as request_datetime, CONCAT(user.firstName + ' ' + user.lastName) as approved_by_name, ptw.approvedDate as approved_datetime, ptw.status as currentStatus " +
+                                 "ptw.id as permitId, ptw.status as ptwStatus, ptw.permitNumber as permit_site_no, permitType.id as permit_type,  permitType.title as PermitTypeName, asset_cat.id as equipment_category, asset_cat.name as equipment, facilities.id as workingAreaId, facilities.name as workingAreaName, ptw.description as description, CONCAT(issuedBy.firstName , ' ' , issuedBy.lastName) as request_by_name, ptw.acceptedDate as request_datetime, CONCAT(approvedBy.firstName , ' ' , approvedBy.lastName) as approved_by_name, ptw.approvedDate as approved_datetime, ptw.status as currentStatus " +
                                  " FROM " +
                                         "permits as ptw " +
                                   "JOIN " +
@@ -113,9 +181,15 @@ namespace CMMSAPIs.Repositories.Permits
                                   "LEFT JOIN " +
                                          "jobs as job ON ptw.id = job.linkedPermit " +
                                   "LEFT JOIN " +
-                                        "users as user ON user.id = ptw.issuedById or user.id = ptw.approvedById" +
-                                  $" WHERE ptw.facilityId = { facility_id } and user.id = { userID } ";
+                                        "users as issuedBy ON issuedBy.id = ptw.issuedById " +
+                                  "LEFT JOIN " +
+                                        "users as approvedBy ON approvedBy.id = ptw.approvedById " +
+                                  $" WHERE ptw.facilityId = { facility_id } and (issuedBy.id = { userID } or approvedBy.id = { userID }) ";
             List<CMPermitList> _PermitList = await Context.GetData<CMPermitList>(myQuery).ConfigureAwait(false);
+            foreach(CMPermitList _permit in _PermitList)
+            {
+                _permit.current_status = Status(_permit.ptwStatus+120);
+            }
             return _PermitList;
         }
 
