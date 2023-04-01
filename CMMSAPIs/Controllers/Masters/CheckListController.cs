@@ -95,11 +95,11 @@ namespace CMMSAPIs.Controllers.Masters
         [Authorize]
         [Route("GetCheckListMap")]
         [HttpGet]
-        public async Task<IActionResult> GetCheckListMap(int facility_id, int? type)
+        public async Task<IActionResult> GetCheckListMap(int facility_id, int category_id, int? type)
         {
             try
             {
-                var data = await _CheckListBS.GetCheckListMap(facility_id, type);
+                var data = await _CheckListBS.GetCheckListMap(facility_id, category_id, type);
                 return Ok(data);
             }
             catch(ArgumentException ex)
