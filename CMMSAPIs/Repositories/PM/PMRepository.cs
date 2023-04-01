@@ -19,24 +19,29 @@ namespace CMMSAPIs.Repositories.PM
             _utilsRepo = new UtilsRepository(sqlDBHelper);
         }
 
-        internal async Task<List<CMScheduleData>> GetScheduleData(int facility_id, int category_id)
+        internal async Task<List<CMScheduleData>> GetScheduleData(int facility_id, int? category_id)
         {
             /*
              * Primary Table - PMSchedule
              * Read All properties mention in model and return list
              * Code goes here
             */
-            string myQuery = "";
-            myQuery = "SELECT \n      COALESCE(PM_Schedule_Code, '') as PM_Schedule_Code,\n    COALESCE(PM_Schedule_Name, '') as PM_Schedule_Name,\n    COALESCE(PM_Schedule_date, '0001-01-01') as PM_Schedule_date,\n    COALESCE(checklist_type, '') as checklist_type,\n    COALESCE(plan_id, 0) as plan_id,\n    COALESCE(PM_Frequecy_Name, '') as PM_Frequecy_Name,\n    COALESCE(PM_Frequecy_id, 0) as PM_Frequecy_id,\n    COALESCE(PM_Frequecy_Code, '') as PM_Frequecy_Code,\n    COALESCE(Facility_id, 0) as Facility_id,\n    COALESCE(Facility_Name, '') as Facility_Name,\n    COALESCE(Facility_Code, '') as Facility_Code,\n    COALESCE(Asset_Category_id, 0) as Asset_Category_id,\n    COALESCE(Asset_Category_name, '') as Asset_Category_name,\n    COALESCE(Asset_Category_Code, '') as Asset_Category_Code,\n    COALESCE(Asset_id, 0) as Asset_id,\n    COALESCE(Asset_Code, '') as Asset_Code,\n    COALESCE(Asset_Name, '') as Asset_Name,\n    COALESCE(PM_Schedule_User_id, 0) as PM_Schedule_User_id,\n    COALESCE(PM_Schedule_User_Name, '') as PM_Schedule_User_Name,\n    COALESCE(PM_Schedule_Emp_id, 0) as PM_Schedule_Emp_id,\n    COALESCE(PM_Schedule_Emp_name, '') as PM_Schedule_Emp_name,\n    COALESCE(PM_Schedule_created_date, '0001-01-01') as PM_Schedule_created_date,\n    COALESCE(PM_Schedule_Start_Flag, '') as PM_Schedule_Start_Flag,\n    COALESCE(PM_Schedule_issued_by_id, 0) as PM_Schedule_issued_by_id,\n    COALESCE(PM_Schedule_issued_by_Code, '') as PM_Schedule_issued_by_Code,\n    COALESCE(PM_Schedule_issued_by_name, '') as PM_Schedule_issued_by_name,\n    COALESCE(PM_Schedule_issued_requested_to_id, 0) as PM_Schedule_issued_requested_to_id,\n    COALESCE(PM_Schedule_issued_requested_to_Code, '') as PM_Schedule_issued_requested_to_Code,\n    \n    COALESCE(PM_Schedule_issued_requested_to_Name, '') as PM_Schedule_issued_requested_to_Name,\n    COALESCE(PM_Schedule_issued_status,0) as PM_Schedule_issued_status,\n    PM_Schedule_issued_Reccomendations,\n    COALESCE(PM_Schedule_issued_date,'0001-01-01') as PM_Schedule_issued_date,\n    PM_Schedule_accepted_by_id,\n    PM_Schedule_accepted_by_Code,\n    PM_Schedule_accepted_status,\n    COALESCE(PM_Schedule_accepted_date,'0001-01-01') as PM_Schedule_accepted_date,\n    PM_Schedule_accepted_by_name,\n    PM_Schedule_accepted_requested_to_name,\n    PM_Schedule_accepted_requested_to_id,\n    PM_Schedule_Approved_by_id,\n    PM_Schedule_Approved_Status,\n    COALESCE(PM_Schedule_Approved_date,'0001-01-01') as PM_Schedule_Approved_date,\n    PM_Schedule_Reccomendations_by_Approver,\n    PM_Schedule_Approved_by_name,\n    PM_Schedule_Approved_by_Code,\n    PM_Schedule_Approve_requested_to_name,\n    PM_Schedule_Approve_requested_to_id,\n    PM_Schedule_Approve_requested_to_Code,\n    PM_Schedule_final_Signature,\n    Status,\n    COALESCE(PM_Schedule_Completed_date,'0001-01-01') as PM_Schedule_Completed_date,\n    PM_Schedule_Completed_Status,\n    PM_Schedule_Completed_by_id,\n    PM_Schedule_Completed_by_Name,\n    PM_Schedule_Completed_by_Code,\n    PTW_id,\n    PTW_Code,\n    PTW_Ttitle,\n    PTW_by_id,\n    PTW_Status,\n    COALESCE(PTW_Attached_At,'0001-01-01') as PTW_Attached_At,\n    Job_Card_Status,\n    COALESCE(Job_Card_date,'0001-01-01') as Job_Card_date,\n    Job_Card_id,\n    Job_Card_Name,\n    Job_Card_Code,\n    PM_Schedule_cancel_Request_by_id,\n    COALESCE(PM_Schedule_cancel_Request_status,'') as PM_Schedule_cancel_Request_status,\n    PM_Schedule_cancel_Request_by_name,\n    PM_Schedule_cancel_Request_by_Code,\n    COALESCE(PM_Schedule_cancel_Request_date,'0001-01-01') as PM_Schedule_cancel_Request_date,\n    PM_Schedule_cancel_Request_approve_by_id,\n    PM_Schedule_cancel_Request_approve_by_Name,\n    PM_Schedule_cancel_Request_approve_by_Code,\n    COALESCE(PM_Schedule_cancel_Request_approve_date,'0001-01-01') as PM_Schedule_cancel_Request_approve_date,\n    PM_Schedule_cancel_Request_approve_status,\n    PM_Schedule_cancel_Reccomendations,\n    PM_Schedule_lat,\n    PM_Schedule_long,\n    PM_Schedule_ip,\n    PM_Schedule_UA,\n    PM_Schedule_Number,\n    PM_Maintenance_Order_Number,\n    COALESCE(PTW_Complete_Date,'0001-01-01') as PTW_Complete_Date,\n    Asset_Sno,\n    PM_Rescheduled,\n    Prev_Schedule_id\n    from pm_schedule ";
-            if (facility_id != 0)
+            string myQuery = "SELECT * from pm_schedule ";
+            if (facility_id > 0)
             {
-                myQuery += " WHERE Facility_id= " + facility_id + " and  Asset_Category_id = " + category_id;
-
+                myQuery += " WHERE Facility_id = " + facility_id;
+                if (category_id != null)
+                {
+                    myQuery += " AND  Asset_Category_id = " + category_id;
+                }
             }
-
+            else
+            {
+                throw new ArgumentException("Invalid Facility ID");
+            }
+            myQuery += " ORDER BY id DESC;";
             List<CMScheduleData> _checkList = await Context.GetData<CMScheduleData>(myQuery).ConfigureAwait(false);
             return _checkList;
-
         }
 
         internal async Task<CMDefaultResponse> SetScheduleData(CMSetScheduleData request, int userID)

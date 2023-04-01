@@ -24,14 +24,18 @@ namespace CMMSAPIs.Controllers.PM
         [Authorize]
         [Route("GetScheduleData")]
         [HttpGet]
-        public async Task<IActionResult> GetScheduleData(int facility_id, int category_id)
+        public async Task<IActionResult> GetScheduleData(int facility_id, int? category_id)
         {
             try
             {
                 var data = await _PMBS.GetScheduleData(facility_id, category_id);
                 return Ok(data);
             }
-            catch (Exception ex)
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception)
             {
                 throw;
             }
@@ -48,7 +52,7 @@ namespace CMMSAPIs.Controllers.PM
                 var data = await _PMBS.SetScheduleData(request, userID);
                 return Ok(data);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
