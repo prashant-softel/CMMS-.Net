@@ -138,7 +138,7 @@ namespace CMMSAPIs.Repositories.Masters
         #endregion
 
         #region checklistmap
-        internal async Task<List<CMCheckListMapList>> GetCheckListMap(int facility_id, int? type=null)
+        internal async Task<List<CMCheckListMapList>> GetCheckListMap(int facility_id, int category_id = 0, int? checklist_type=null)
         {
             /*
              * Primary Table - CheckList_Mapping
@@ -159,6 +159,10 @@ namespace CMMSAPIs.Repositories.Masters
             {
                 throw new ArgumentException("Invalid Facility ID");
             }
+            if (category_id > 0)
+            {
+                myQuery += $"AND checklist_mapping.category_id = {category_id} ";
+            }
             myQuery += "GROUP BY checklist_mapping.category_id;";
             List<CMCheckListMapList> _checkListMapList = await Context.GetData<CMCheckListMapList>(myQuery).ConfigureAwait(false);
             foreach (CMCheckListMapList _checkListMap in _checkListMapList)
@@ -170,9 +174,9 @@ namespace CMMSAPIs.Repositories.Masters
                                   "JOIN " + 
                                     "checklist_number ON checklist_number.id = checklist_mapping.checklist_id " + 
                                   $"WHERE checklist_mapping.facility_id = {facility_id} AND checklist_mapping.category_id = {_checkListMap.category_id} ";
-                if(type != null)
+                if (checklist_type != null)
                 {
-                    myQuery2 += $"AND checklist_number.type = {type}";
+                    myQuery2 += $"AND checklist_number.type = {checklist_type}";
                 }
                 List<CMCheckListIdName> _checkLists = await Context.GetData<CMCheckListIdName>(myQuery2).ConfigureAwait(false);
                 _checkListMap.checklists = _checkLists;
@@ -194,13 +198,15 @@ namespace CMMSAPIs.Repositories.Masters
                 {
                     string query1 = $"SELECT id FROM checklist_mapping WHERE facility_id = {request.facility_id} AND category_id = {checkListMap.category_id} AND checklist_id = {checklist_id};";
                     DataTable dt1 = await Context.FetchData(query1).ConfigureAwait(false);
-                    if(dt1.Rows.Count == 0)
+                    string query2 = $"SELECT id FROM checklist_number WHERE facility_id = {request.facility_id} AND id = {checklist_id};";
+                    DataTable dt2 = await Context.FetchData(query2).ConfigureAwait(false);
+                    if(dt1.Rows.Count == 0 && dt2.Rows.Count != 0)
                     {
-                        string query2 = "INSERT INTO checklist_mapping (facility_id, category_id, status ,checklist_id, plan_id) VALUES " +
+                        string query3 = "INSERT INTO checklist_mapping (facility_id, category_id, status ,checklist_id, plan_id) VALUES " +
                                     $"({request.facility_id}, {checkListMap.category_id}, {checkListMap.status}, {checklist_id}, {checkListMap.plan_id}); " +
                                     "select LAST_INSERT_ID();";
-                        DataTable dt = await Context.FetchData(query2).ConfigureAwait(false);
-                        int id = Convert.ToInt32(dt.Rows[0][0]);
+                        DataTable dt3 = await Context.FetchData(query3).ConfigureAwait(false);
+                        int id = Convert.ToInt32(dt3.Rows[0][0]);
                         await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.CHECKLIST_MAPPING, id, 0, 0, "Checklist Mapping Added", CMMS.CMMS_Status.CREATED, userID);
                         idList.Add(id);
                     }
