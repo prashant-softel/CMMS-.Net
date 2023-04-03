@@ -184,23 +184,24 @@ namespace CMMSAPIs.Repositories.Masters
             return _checkListMapList;
         }
 
-        internal async Task<CMDefaultResponse> CreateCheckListMap(CMCreateCheckListMap request, int userID)
+        internal async Task<List<CMDefaultResponse>> CreateCheckListMap(CMCreateCheckListMap request, int userID)
         {
             /*
              * Primary Table - CheckList_Mapping
              * Insert All properties mention in model
              * Code goes here
             */
-            List<int> idList = new List<int>();
-            foreach(CMCheckListMap checkListMap in request.checklist_map_list)
+            List<CMDefaultResponse> responseList = new List<CMDefaultResponse>();
+            foreach (CMCheckListMap checkListMap in request.checklist_map_list)
             {
-                foreach(int checklist_id in checkListMap.checklist_ids)
+                foreach (int checklist_id in checkListMap.checklist_ids)
                 {
+                    CMDefaultResponse response = null;
                     string query1 = $"SELECT id FROM checklist_mapping WHERE facility_id = {request.facility_id} AND category_id = {checkListMap.category_id} AND checklist_id = {checklist_id};";
                     DataTable dt1 = await Context.FetchData(query1).ConfigureAwait(false);
                     string query2 = $"SELECT id FROM checklist_number WHERE facility_id = {request.facility_id} AND id = {checklist_id};";
                     DataTable dt2 = await Context.FetchData(query2).ConfigureAwait(false);
-                    if(dt1.Rows.Count == 0 && dt2.Rows.Count != 0)
+                    if (dt1.Rows.Count == 0 && dt2.Rows.Count != 0)
                     {
                         string query3 = "INSERT INTO checklist_mapping (facility_id, category_id, status ,checklist_id, plan_id) VALUES " +
                                     $"({request.facility_id}, {checkListMap.category_id}, {checkListMap.status}, {checklist_id}, {checkListMap.plan_id}); " +
@@ -208,12 +209,20 @@ namespace CMMSAPIs.Repositories.Masters
                         DataTable dt3 = await Context.FetchData(query3).ConfigureAwait(false);
                         int id = Convert.ToInt32(dt3.Rows[0][0]);
                         await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.CHECKLIST_MAPPING, id, 0, 0, "Checklist Mapping Added", CMMS.CMMS_Status.CREATED, userID);
-                        idList.Add(id);
+                        response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Checklist mapped successfully");
                     }
+                    else if (dt1.Rows.Count != 0)
+                    {
+                        response = new CMDefaultResponse(checklist_id, CMMS.RETRUNSTATUS.FAILURE, "Checklist is already mapped with given asset category");
+                    }
+                    else if (dt2.Rows.Count == 0)
+                    {
+                        response = new CMDefaultResponse(checklist_id, CMMS.RETRUNSTATUS.FAILURE, "Checklist is not linked with given facility");
+                    }
+                    responseList.Add(response);
                 }
             }
-            CMDefaultResponse response = new CMDefaultResponse(idList, CMMS.RETRUNSTATUS.SUCCESS, $"{idList.Count} checklist mapping(s) added successfully");
-            return response;
+            return responseList;
         }
 
         internal async Task<CMDefaultResponse> UpdateCheckListMap(CMCreateCheckListMap request)

@@ -15,7 +15,7 @@ namespace CMMSAPIs.BS.Masters
         Task<CMDefaultResponse> UpdateCheckList(CMCreateCheckList request, int userID);
         Task<CMDefaultResponse> DeleteChecklist(int id, int userID);
         Task<List<CMCheckListMapList>> GetCheckListMap(int facility_id, int category_id, int? type);
-        Task<CMDefaultResponse> CreateCheckListMap(CMCreateCheckListMap request, int userID);      
+        Task<List<CMDefaultResponse>> CreateCheckListMap(CMCreateCheckListMap request, int userID);      
         Task<CMDefaultResponse> UpdateCheckListMap(CMCreateCheckListMap request);
         Task<List<CMCheckPointList>> GetCheckPointList(int checklist_id);
         Task<CMDefaultResponse> CreateCheckPoint(List<CMCreateCheckPoint> request, int userID);
@@ -109,7 +109,7 @@ namespace CMMSAPIs.BS.Masters
             }
         }
 
-        public async Task<CMDefaultResponse> CreateCheckListMap(CMCreateCheckListMap request, int userID)
+        public async Task<List<CMDefaultResponse>> CreateCheckListMap(CMCreateCheckListMap request, int userID)
         {
             try
             {
