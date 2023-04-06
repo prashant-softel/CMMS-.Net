@@ -124,7 +124,7 @@ namespace CMMSAPIs.Controllers.Calibration
                 var data = await _CalibrationBS.StartCalibration(calibration_id);
                 return Ok(data);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
@@ -141,7 +141,7 @@ namespace CMMSAPIs.Controllers.Calibration
                 var data = await _CalibrationBS.CompleteCalibration(request, userID);
                 return Ok(data);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
@@ -158,7 +158,7 @@ namespace CMMSAPIs.Controllers.Calibration
                 var data = await _CalibrationBS.CloseCalibration(request, userID);
                 return Ok(data);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
@@ -175,7 +175,7 @@ namespace CMMSAPIs.Controllers.Calibration
                 var data = await _CalibrationBS.ApproveCalibration(request,userID);
                 return Ok(data);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
@@ -192,7 +192,7 @@ namespace CMMSAPIs.Controllers.Calibration
                 var data = await _CalibrationBS.RejectCalibration(request, userID);
                 return Ok(data);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
