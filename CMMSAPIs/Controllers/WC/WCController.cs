@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
 using System;
 using System.Collections.Generic;
@@ -29,7 +30,11 @@ namespace CMMSAPIs.Controllers.WC
                 var data = await _WCBS.GetWCList(facilityId, startDate, endDate, statusId);
                 return Ok(data);
             }
-            catch (Exception ex)
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception)
             {
                 throw;
             }
@@ -42,10 +47,11 @@ namespace CMMSAPIs.Controllers.WC
         {
             try
             {
-                var data = await _WCBS.CreateWC(request);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _WCBS.CreateWC(request,userID);
                 return Ok(data);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
@@ -61,12 +67,23 @@ namespace CMMSAPIs.Controllers.WC
                 var data = await _WCBS.GetWCDetails(wc_id);
                 return Ok(data);
             }
-            catch (Exception ex)
+            catch(ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch(NullReferenceException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception)
             {
                 throw;
             }
         }
 
+        [Authorize]
+        [Route("UpdateWC")]
+        [HttpPatch]
         internal async Task<IActionResult> UpdateWC(CMWCCreate request)
         {
             try
@@ -80,6 +97,9 @@ namespace CMMSAPIs.Controllers.WC
             }
         }
 
+        [Authorize]
+        [Route("ApproveWC")]
+        [HttpPut]
         internal async Task<IActionResult> ApproveWC(CMApproval request)
         {
             try
@@ -93,6 +113,9 @@ namespace CMMSAPIs.Controllers.WC
             }
         }
 
+        [Authorize]
+        [Route("RejectWC")]
+        [HttpPut]
         internal async Task<IActionResult> RejectWC(CMApproval request)
         {
             try

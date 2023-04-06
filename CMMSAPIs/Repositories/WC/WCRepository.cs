@@ -33,25 +33,15 @@ namespace CMMSAPIs.Repositories.WC
             */
             /*Your code goes here*/
             string myQuery = "SELECT  wc.id as wc_id, wc.facilityID as facility_Id, f.name as facility_name, ac.name AS equipment_category, a.name AS equipment_name, equipment_sr_no," +
-
                 "b1.name AS supplier_name, good_order_id, affected_part, order_reference_number, affected_sr_no, cost_of_replacement, wc.currency," +
-
                 " warranty_start_date, warranty_end_date, warranty_claim_title, warranty_description, " +
-
                 "corrective_action_by_buyer, request_to_supplier, concat(user.firstName , ' ' , user.lastName) AS approver_name," +
-
                 " created_by, issued_on, wc.status, approved_by, wc_fac_code, failure_time " +
-
                 " FROM wc " +
-                "" +
                 "JOIN facilities as f ON f.id = wc.facilityId " +
-                "" +
                 "JOIN assets as a ON a.id = wc.equipment_id " +
-                "" +
                 "JOIN business as b1 ON b1.id = wc.supplier_id " +
-                "" +
                 "JOIN assetcategories AS ac ON ac.id = wc.equipment_cat_id  " +
-                "" +
                 "JOIN users as user ON user.id = wc.approver_id";
             if (facilityId != 0)
             {
@@ -75,50 +65,48 @@ namespace CMMSAPIs.Repositories.WC
             return GetWCData;
         }
 
-        internal async Task<CMDefaultResponse> CreateWC(List<CMWCCreate> set)
+        internal async Task<CMDefaultResponse> CreateWC(List<CMWCCreate> set, int userID)
         {
             /*
              * Insert all data in WC table in their respective columns 
             */
             int count = 0;
-            int userID = UtilsRepository.GetUserID();
-            int retID = 0;
-            string wcTitle = "";
+            List<int> idList = new List<int>();
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.INVALID_ARG;
             string strRetMessage = "";
 
-            string qry = "insert into wc(facilityId, equipment_cat_id, equipment_id, equipment_sr_no, supplier_id, good_order_id, affected_part, order_reference_number, affected_sr_no, cost_of_replacement, currencyId, warranty_start_date, warranty_end_date, warranty_claim_title, warranty_description, corrective_action_by_buyer, request_to_supplier, approver_id, status, wc_fac_code, failure_time, created_by) values";
-
-            foreach (var unit in set)
+            
+            foreach (CMWCCreate unit in set)
             {
+                string qry = "insert into wc(facilityId, equipment_id, good_order_id, affected_part, order_reference_number, affected_sr_no, " + 
+                                "cost_of_replacement, currencyId, warranty_start_date, warranty_end_date, warranty_claim_title, warranty_description, " + 
+                                "corrective_action_by_buyer, request_to_supplier, approver_id, status, wc_fac_code, failure_time, created_by) values" + 
+                                $"({unit.facilityId}, {unit.equipmentId}, '{unit.goodsOrderId}', '{unit.affectedPart}', '{unit.orderReference}', " + 
+                                $"'{unit.affectedSrNo}', '{unit.costOfReplacement}', {unit.currencyId}, '{unit.warrantyStartAt.ToString("yyyy'-'MM'-'dd")}', " + 
+                                $"'{unit.warrantyEndAt.ToString("yyyy'-'MM'-'dd")}', '{unit.warrantyClaimTitle}', '{unit.warrantyDescription}', " + 
+                                $"'{unit.correctiveActionByBuyer}', '{unit.requestToSupplier}', {unit.approverId}, {(int)CMMS.CMMS_Status.WC_CREATED}, " + 
+                                $"'FAC{1000 + unit.facilityId}', '{unit.failureTime.ToString("yyyy'-'MM'-'dd")}', {userID}); select LAST_INSERT_ID(); ";
+                DataTable dt = await Context.FetchData(qry).ConfigureAwait(false);
+                int id = Convert.ToInt32(dt.Rows[0][0]);
+                string updateQry = $"UPDATE wc SET equipment_cat_id = (SELECT categoryId FROM assets WHERE assets.id = {unit.equipmentId}), " +
+                                    $"equipment_sr_no = (SELECT serialNumber FROM assets WHERE assets.id = {unit.equipmentId}), " +
+                                    $"supplier_id = (SELECT supplierId FROM assets WHERE assets.id = {unit.equipmentId}), " +
+                                    $"currency = (SELECT code FROM currency WHERE currency.id = {unit.currencyId}) WHERE wc.id = {id};";
+                await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
                 count++;
-                wcTitle = unit.warrantyClaimTitle;
-                
-                qry += "('" + unit.facilityId + "','" + unit.equipmentCategoryId + "','" + unit.equipmentId + "','" + unit.equipmentSrNo + "','" + unit.manufacturerId + "','" + unit.goodsOrderId + "','" + unit.affectedPart + "','" + unit.orderReference + "','" + unit.affectedSrNo + "','" + unit.costOfReplacement + "','" + unit.currencyId + "','" + unit.warrantyStartAt.ToString("yyyy-MM-dd") + "','" + unit.warrantyEndAt.ToString("yyyy-MM-dd") + "','" + unit.warrantyClaimTitle + "','" + unit.warrantyDescription + "','" + unit.correctiveActionByBuyer + "','" + unit.requestToSupplier + "','" + unit.approverId + "','" + unit.status + "','" + unit.wcFacCode + "','" + unit.failureTime.ToString("yyyy-MM-dd")  + "'," + userID + "),";
+                idList.Add(id);
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.WARRANTY_CLAIM, id, 0, 0, "Warranty Claim Created", CMMS.CMMS_Status.WC_CREATED, userID);
             }
-
             if (count > 0)
             {
-                qry = qry.Substring(0, (qry.Length - 1)) + ";" + "select LAST_INSERT_ID(); ";
-
-                //List<CMInventoryList> newInventory = await Context.GetData<CMInventoryList>(qry).ConfigureAwait(false);
-                DataTable dt = await Context.FetchData(qry).ConfigureAwait(false);
-                retID = Convert.ToInt32(dt.Rows[0][0]);
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
-                if (count == 1)
-                {
-                    strRetMessage = "New warranty claim <" + wcTitle + "> added";
-                }
-                else
-                {
-                    strRetMessage = "<" + count + "> new warranty claims added";
-                }
+                strRetMessage = $"{count} warranty claim(s) added";
             }
             else
             {
-                strRetMessage = "No warranty claim to add";
+                strRetMessage = "No warranty claim(s) added";
             }
-            return new CMDefaultResponse(retID, retCode, strRetMessage);
+            return new CMDefaultResponse(idList, retCode, strRetMessage);
         }
 
         internal async Task<CMWCDetail> GetWCDetails(int id)  
@@ -137,29 +125,19 @@ namespace CMMSAPIs.Repositories.WC
             */
             if(id <= 0)
             {
-                throw new ArgumentException("Invalid argument. id<" + id + "> cannot be 0");
+                throw new ArgumentException("Invalid ID");
             }
 
             string myQuery = "SELECT  wc.id as wc_id, wc.facilityId as facility_Id, f.name as facility_name, ac.name AS equipment_category, a.name AS equipment_name, equipment_sr_no," +
-
             "b1.name AS supplier_name, good_order_id, affected_part, order_reference_number, affected_sr_no, cost_of_replacement,  wc.currency," + // add cost_of_replacement,
-
             " warranty_start_date, warranty_end_date, warranty_claim_title, warranty_description, " +
-
             "corrective_action_by_buyer, request_to_supplier, concat(user.firstName , ' ' , user.lastName) AS approver_name," +
-
             " created_by, issued_on, wc.status, approved_by, wc_fac_code, failure_time " +
-
             " FROM wc " +
-            "" +
             "JOIN facilities as f ON f.id = wc.facilityId " +
-            "" +
             "JOIN assets as a ON a.id = wc.equipment_id " +
-            "" +
             "JOIN business as b1 ON b1.id = wc.supplier_id " +
-            "" +
             "JOIN assetcategories AS ac ON ac.id = wc.equipment_cat_id  " +
-            "" +
             "JOIN users as user ON user.id = wc.approver_id";
 
             if (id != 0)
@@ -168,6 +146,8 @@ namespace CMMSAPIs.Repositories.WC
 
             }
             List<CMWCDetail> GetWCDetails = await Context.GetData<CMWCDetail>(myQuery).ConfigureAwait(false);
+            if (GetWCDetails.Count == 0)
+                throw new NullReferenceException($"Warranty Claim with ID {id} not found");
             return GetWCDetails[0];
         }
 

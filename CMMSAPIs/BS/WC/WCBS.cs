@@ -11,7 +11,7 @@ namespace CMMSAPIs.BS.WC
     public interface IWCBS
     {
         Task<List<CMWCList>> GetWCList(int facilityId, string startDate, string endDate, int statusId);
-        Task<CMDefaultResponse> CreateWC(List<CMWCCreate> request);
+        Task<CMDefaultResponse> CreateWC(List<CMWCCreate> request, int userID);
         Task<CMWCDetail> GetWCDetails(int wc_id);
 
         Task<CMDefaultResponse> UpdateWC(CMWCCreate request);
@@ -46,13 +46,13 @@ namespace CMMSAPIs.BS.WC
             }
         }
 
-        public async Task<CMDefaultResponse> CreateWC(List<CMWCCreate> request)
+        public async Task<CMDefaultResponse> CreateWC(List<CMWCCreate> request, int userID)
         {
             try
             {
                 using (var repos = new WCRepository(getDB))
                 {
-                    return await repos.CreateWC(request);
+                    return await repos.CreateWC(request, userID);
                 }
             }
             catch (Exception ex)
