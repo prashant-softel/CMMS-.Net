@@ -13,6 +13,21 @@ namespace CMMSAPIs.Repositories.WC
     public class WCRepository : GenericRepository
     {
         private UtilsRepository _utilsRepo;
+        private Dictionary<int, string> StatusDictionary = new Dictionary<int, string>() {
+            { 191, "Warranty Claim in Draft" },
+         //   { 192, "Warranty Claim Created" },
+            { 192, "Warranty Claim Waiting for Submit Approval" },
+            { 193, "Warranty Claim Submit Request Rejected" },
+            { 194, "Warranty Claim Submitted" },
+            { 195, "Asset Dispatched" },
+            { 196, "Warranty Claim Rejected By Manufacturer" },
+            { 197, "Warranty Claim Approved By Manufacturer" },
+            { 198, "Item Replenished" },
+        //    { 199, "Warranty Claim Waiting for Close Approval" },
+            { 199, "Warranty Claim Close Request Rejected" },
+            { 200, "Warranty Claim Closed" },
+            { 201, "Warranty Claim Cancelled" }
+        };
         public WCRepository(MYSQLDBHelper sqlDBHelper) : base(sqlDBHelper)
         {
             _utilsRepo = new UtilsRepository(sqlDBHelper);
@@ -32,11 +47,17 @@ namespace CMMSAPIs.Repositories.WC
              * Fetch all data present in CMWCList Model
             */
             /*Your code goes here*/
+            string statusOut = "CASE ";
+            foreach(KeyValuePair<int, string> status in StatusDictionary)
+            {
+                statusOut += $"WHEN wc.status = {status.Key} THEN '{status.Value}' ";
+            }
+            statusOut += $"ELSE 'Invalid Status' END";
             string myQuery = "SELECT  wc.id as wc_id, wc.facilityID as facility_Id, f.name as facility_name, ac.name AS equipment_category, a.name AS equipment_name, equipment_sr_no," +
                 "b1.name AS supplier_name, good_order_id, affected_part, order_reference_number, affected_sr_no, cost_of_replacement, wc.currency," +
                 " warranty_start_date, warranty_end_date, warranty_claim_title, warranty_description, " +
                 "corrective_action_by_buyer, request_to_supplier, concat(user.firstName , ' ' , user.lastName) AS approver_name," +
-                " created_by, issued_on, wc.status, approved_by, wc_fac_code, failure_time " +
+                $" created_by, issued_on, {statusOut} as status, approved_by, wc_fac_code, failure_time " +
                 " FROM wc " +
                 "JOIN facilities as f ON f.id = wc.facilityId " +
                 "JOIN assets as a ON a.id = wc.equipment_id " +
