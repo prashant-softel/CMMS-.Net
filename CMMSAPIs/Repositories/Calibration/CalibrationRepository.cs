@@ -78,7 +78,7 @@ namespace CMMSAPIs.Repositories.Calibration
                                 "business as vendor ON calibration.vendor_id=vendor.id " + 
                              "LEFT JOIN " +
                                 "users as request_by ON calibration.requested_by=request_by.id " +
-                             "WHERE calibration.due_date<=now() and calibration.due_date is not null ";
+                             "WHERE calibration.due_date<current_date() ";
             if(facility_id > 0)
             {
                 myQuery += $"AND calibration.facility_id = {facility_id} ";
@@ -89,13 +89,6 @@ namespace CMMSAPIs.Repositories.Calibration
             }
             myQuery += "GROUP BY calibration.asset_id;";
             List<CMCalibrationList> _calibrationList = await Context.GetData<CMCalibrationList>(myQuery).ConfigureAwait(false);
-            foreach(CMCalibrationList calibration in _calibrationList)
-            {
-                string statusQuery = $"SELECT status FROM calibration where due_date=(SELECT MAX(due_date) FROM calibration WHERE asset_id={calibration.asset_id} AND due_date is not null AND due_date<=now()) and asset_id={calibration.asset_id};";
-                DataTable dt = await Context.FetchData(statusQuery).ConfigureAwait(false);
-                int status = Convert.ToInt32(dt.Rows[0][0]);
-                calibration.calibration_status = GetStatus(status);
-            }
             return _calibrationList;
         }
 
