@@ -43,7 +43,7 @@ namespace CMMSAPIs.Repositories.WC
                 "JOIN business as b1 ON b1.id = wc.supplier_id " +
                 "JOIN assetcategories AS ac ON ac.id = wc.equipment_cat_id  " +
                 "JOIN users as user ON user.id = wc.approver_id";
-            if (facilityId != 0)
+            if (facilityId > 0)
             {
                 myQuery += " WHERE wc.facilityId = " + facilityId ;
                 //if (startDate.Length() > 0 && endDate.Length > 0)
@@ -59,7 +59,7 @@ namespace CMMSAPIs.Repositories.WC
             }
             else
             {
-                throw new ArgumentException("Invalid argument facilityId<" + facilityId + ">");
+                throw new ArgumentException("Invalid Facility ID");
             }
             List<CMWCList> GetWCData = await Context.GetData<CMWCList>(myQuery).ConfigureAwait(false);
             return GetWCData;
