@@ -1,4 +1,5 @@
 ﻿using CMMSAPIs.BS.PM;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
@@ -8,6 +9,8 @@ using CMMSAPIs.Models.PM;
 
 namespace CMMSAPIs.Controllers.PM
 {
+    [Route("api/[controller]")]
+    [ApiController]
     public class PMScheduleViewController : ControllerBase
     {
         private readonly IPMScheduleViewBS _PMScheduleViewBS;
@@ -20,14 +23,18 @@ namespace CMMSAPIs.Controllers.PM
         [Authorize]
         [Route("GetScheduleViewList")]
         [HttpGet]
-        public async Task<IActionResult> GetScheduleViewList(int facility_id, DateTime start_date, DateTime end_date)
+        public async Task<IActionResult> GetScheduleViewList(int facility_id, DateTime? start_date, DateTime? end_date)
         {
             try
             {
                 var data = await _PMScheduleViewBS.GetScheduleViewList(facility_id, start_date, end_date);
                 return Ok(data);
             }
-            catch (Exception ex)
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception)
             {
                 throw;
             }
@@ -35,12 +42,13 @@ namespace CMMSAPIs.Controllers.PM
 
         [Authorize]
         [Route("CancelPMScheduleView")]
-        [HttpGet]
-        public async Task<IActionResult> CancelPMScheduleView(int schedule_id)
+        [HttpPut]
+        public async Task<IActionResult> CancelPMScheduleView(CMApproval request)
         {
             try
             {
-                var data = await _PMScheduleViewBS.CancelPMScheduleView(schedule_id);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _PMScheduleViewBS.CancelPMScheduleView(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -59,7 +67,15 @@ namespace CMMSAPIs.Controllers.PM
                 var data = await _PMScheduleViewBS.GetPMScheduleViewDetail(schedule_id);
                 return Ok(data);
             }
-            catch (Exception ex)
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch(MissingMemberException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception)
             {
                 throw;
             }

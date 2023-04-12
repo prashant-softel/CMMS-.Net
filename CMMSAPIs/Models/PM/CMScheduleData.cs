@@ -74,16 +74,11 @@ namespace CMMSAPIs.Models.PM
         public int Job_Card_id { get; set; }
         public string Job_Card_Name { get; set; }
         public string Job_Card_Code { get; set; }
-        public int PM_Schedule_cancel_Request_by_id { get; set; }
-        public int PM_Schedule_cancel_Request_status { get; set; }
-        public string PM_Schedule_cancel_Request_by_name { get; set; }
-        public string PM_Schedule_cancel_Request_by_Code { get; set; }
-        public dynamic PM_Schedule_cancel_Request_date { get; set; }
-        public int PM_Schedule_cancel_Request_approve_by_id { get; set; }
-        public string PM_Schedule_cancel_Request_approve_by_Name { get; set; }
-        public string PM_Schedule_cancel_Request_approve_by_Code { get; set; }
-        public string PM_Schedule_cancel_Request_approve_date { get; set; }
-        public int PM_Schedule_cancel_Request_approve_status { get; set; }
+        public int PM_Schedule_cancel_by_id { get; set; }
+        public string PM_Schedule_cancel_by_Name { get; set; }
+        public string PM_Schedule_cancel_by_Code { get; set; }
+        public string PM_Schedule_cancel_date { get; set; }
+        public int PM_Schedule_cancel_status { get; set; }
         public string PM_Schedule_cancel_Reccomendations { get; set; }
         public double PM_Schedule_lat { get; set; }
         public double PM_Schedule_long { get; set; }

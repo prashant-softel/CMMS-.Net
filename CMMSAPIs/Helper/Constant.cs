@@ -266,6 +266,8 @@ namespace CMMSAPIs.Helper
             PM_SUBMIT,
             PM_APPROVE,
             PM_REJECT,
+            PM_COMPLETED,
+            PM_CANCELLED,
             PM_PTW_TIMEOUT,
 
             IR_CREATED = 181,
