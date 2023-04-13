@@ -8,20 +8,19 @@ namespace CMMSAPIs.Models.PM
     {
         public int id { get; set; }
         public string maintenance_order_number { get; set; }
-        public DateTime schedule_date { get; set; }
-        public string completed_date { get; set; }
+        public DateTime? schedule_date { get; set; }
+        public DateTime? completed_date { get; set; }
         public string equipment_name { get; set; }
+        public string category_name { get; set; }
         public string frequency_name { get; set; }
         public string assigned_to_name { get; set; }
         public int permit_id { get; set; }
         public string status_name { get; set; }
-        public int status { get; set; }
     }
 
     public class CMPMScheduleViewDetail : CMPMScheduleView
     {   
         public string facility_name { get; set; }
-        public string category_name { get; set; }
         public List<ScheduleCheckList> schedule_check_list { get; set; }
         public List<ScheduleLinkJob> schedule_link_job { get; set; }
         public List<CMLog> history_log { get; set; }
@@ -34,7 +33,6 @@ namespace CMMSAPIs.Models.PM
         public string requirement { get; set; }
         public string observation { get; set; }
         public int is_job_created { get; set; }
-
         public int is_custom_check_point { get; set; } 
     }
 

@@ -11,8 +11,8 @@ namespace CMMSAPIs.BS.PM
 {
     public interface IPMScheduleViewBS
     {
-        Task<List<CMPMScheduleView>> GetScheduleViewList(int facility_id, DateTime start_date, DateTime end_date);
-        Task<CMDefaultResponse> CancelPMScheduleView(int schedule_id);
+        Task<List<CMPMScheduleView>> GetScheduleViewList(int facility_id, DateTime? start_date, DateTime? end_date);
+        Task<CMDefaultResponse> CancelPMScheduleView(CMApproval request, int userID);
         Task<CMPMScheduleViewDetail> GetPMScheduleViewDetail(int schedule_id);
         Task<CMDefaultResponse> SetPMScheduleView(CMPMScheduleExecution request);
         Task<CMDefaultResponse> UpdatePMScheduleExecution(CMPMScheduleExecution request);
@@ -30,7 +30,7 @@ namespace CMMSAPIs.BS.PM
             databaseProvider = dbProvider;
         }
 
-        public async Task<List<CMPMScheduleView>> GetScheduleViewList(int facility_id, DateTime start_date, DateTime end_date)
+        public async Task<List<CMPMScheduleView>> GetScheduleViewList(int facility_id, DateTime? start_date, DateTime? end_date)
         {
             try
             {
@@ -45,13 +45,13 @@ namespace CMMSAPIs.BS.PM
             }
         }
 
-        public async Task<CMDefaultResponse> CancelPMScheduleView(int schedule_id)
+        public async Task<CMDefaultResponse> CancelPMScheduleView(CMApproval request, int userID)
         {
             try
             {
                 using (var repos = new PMScheduleViewRepository(getDB))
                 {
-                    return await repos.CancelPMScheduleView(schedule_id);
+                    return await repos.CancelPMScheduleView(request, userID);
                 }
             }
             catch (Exception ex)
