@@ -11,6 +11,7 @@ namespace CMMSAPIs.Models.Calibration
         public int asset_id { get; set; }
         public string asset_name { get; set; }
         public string category_name { get; set; }
+        public string calibration_status { get; set; }
         public DateTime last_calibration_date { get; set; }
         public string vendor_name { get; set; }
         public string responsible_person { get; set; }

@@ -17,77 +17,51 @@ namespace CMMSAPIs.Repositories.Calibration
         {
             _utilsRepo = new UtilsRepository(sqlDBHelper);
         }
-        private string GetStatus(int status_id)
+        private Dictionary<int, string> StatusDictionary = new Dictionary<int, string>()
         {
-            CMMS.CMMS_Status status = (CMMS.CMMS_Status) status_id;
-            string statusStr = "";
-            switch(status)
-            {
-                case CMMS.CMMS_Status.CALIBRATION_REQUEST:
-                    statusStr = "Calibration Request Waiting for Approval";
-                    break;
+            { 211, "Calibration Request Waiting for Approval" },
+            { 212, "Calibration Request Approved" },
+            { 213, "Calibration Request Rejected" },
+            { 214, "Calibration Started" },
+            { 215, "Calibration Completed" },
+            { 216, "Calibration Closed" },
+            { 217, "Calibration Approved" },
+            { 218, "Calibration Rejected" }
+        };
 
-                case CMMS.CMMS_Status.CALIBRATION_REQUEST_APPROVED:
-                    statusStr = "Calibration Request Approved";
-                    break;
-
-                case CMMS.CMMS_Status.CALIBRATION_REQUEST_REJECTED:
-                    statusStr = "Calibration Request Rejected";
-                    break;
-
-                case CMMS.CMMS_Status.CALIBRATION_STARTED:
-                    statusStr = "Calibration Started";
-                    break;
-
-                case CMMS.CMMS_Status.CALIBRATION_COMPLETED:
-                    statusStr = "Calibration Completed";
-                    break;
-
-                case CMMS.CMMS_Status.CALIBRATION_CLOSED:
-                    statusStr = "Calibration Closed";
-                    break;
-
-                case CMMS.CMMS_Status.CALIBRATION_APPROVED:
-                    statusStr = "Calibration Approved";
-                    break;
-
-                case CMMS.CMMS_Status.CALIBRATION_REJECTED:
-                    statusStr = "Calibration Rejected";
-                    break;
-
-                default:
-                    statusStr = "Invalid";
-                    break;
-            }
-            return statusStr;
-        }
         internal async Task<List<CMCalibrationList>> GetCalibrationList(int facility_id)
         {
             /* Fetch all the Asset table which calibration due date is lower than current date
              * JOIN Calibration table to fetch their previous details for list model
              * Your Code goes here
             */
+            string statusOut = "CASE ";
+            foreach (KeyValuePair<int, string> status in StatusDictionary)
+            {
+                statusOut += $"WHEN a_calibration.status = {status.Key} THEN '{status.Value}' ";
+            }
+            statusOut += $"ELSE 'Invalid Status' END";
             string myQuery = "SELECT " +
-                                "calibration.asset_id, assets.name as asset_name, CASE WHEN categories.name is null THEN 'Others' ELSE categories.name END as category_name, MAX(due_date) as last_calibration_date, vendor.name as vendor_name, CONCAT(request_by.firstName,' ',request_by.lastName) as responsible_person, calibration.received_date, calibration.health_status as asset_health_status " +
+                                $"a_calibration.asset_id, assets.name as asset_name, CASE WHEN categories.name is null THEN 'Others' ELSE categories.name END as category_name, {statusOut} as calibration_status, a_calibration.due_date as last_calibration_date, vendor.name as vendor_name, CONCAT(request_by.firstName,' ',request_by.lastName) as responsible_person, a_calibration.received_date, a_calibration.health_status as asset_health_status " +
                              "FROM assets " +
                              "JOIN " +
-                                "calibration on calibration.asset_id=assets.id " + 
+                                "calibration as a_calibration on a_calibration.asset_id=assets.id " + 
                              "LEFT JOIN " +
                                 "assetcategories as categories on categories.id=assets.categoryId " + 
                              "LEFT JOIN " +
-                                "business as vendor ON calibration.vendor_id=vendor.id " + 
+                                "business as vendor ON a_calibration.vendor_id=vendor.id " + 
                              "LEFT JOIN " +
-                                "users as request_by ON calibration.requested_by=request_by.id " +
-                             "WHERE calibration.due_date<current_date() ";
+                                "users as request_by ON a_calibration.requested_by=request_by.id " +
+                             "WHERE due_date = (SELECT MAX(due_date) FROM calibration as b_calibration WHERE a_calibration.asset_id=b_calibration.asset_id AND b_calibration.due_date<=now()) ";
             if(facility_id > 0)
             {
-                myQuery += $"AND calibration.facility_id = {facility_id} ";
+                myQuery += $"AND a_calibration.facility_id = {facility_id} ";
             }
             else
             {
-                throw new ArgumentException("Facility ID cannot be null or zero");
+                throw new ArgumentException("Invalid Facility ID");
             }
-            myQuery += "GROUP BY calibration.asset_id;";
+            myQuery += "ORDER BY a_calibration.id DESC;";
             List<CMCalibrationList> _calibrationList = await Context.GetData<CMCalibrationList>(myQuery).ConfigureAwait(false);
             return _calibrationList;
         }
