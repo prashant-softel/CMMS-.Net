@@ -171,7 +171,7 @@ namespace CMMSAPIs.Helper
             VEGETATION = 111,
             WARRANTY_CLAIM = 121,
             INCIDENT_REPORT = 131,
-
+            INVENTORY = 141,
             PLANT = 151,
 
             USER = 171,
@@ -261,9 +261,10 @@ namespace CMMSAPIs.Helper
             JC_PTW_TIMED_OUT,
 
 
-            PM_START = 171,
-            PM_SAVE,
+            PM_START = 161,
+            PM_UPDATE,
             PM_SUBMIT,
+            PM_LINK_PTW,
             PM_APPROVE,
             PM_REJECT,
             PM_COMPLETED,

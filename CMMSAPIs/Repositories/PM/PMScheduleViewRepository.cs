@@ -16,17 +16,18 @@ namespace CMMSAPIs.Repositories.PM
         {
             _utilsRepo = new UtilsRepository(sqlDBHelper);
         }
-        Dictionary<int, string> statusList = new Dictionary<int, string>()
+        Dictionary<CMMS.CMMS_Status, string> statusList = new Dictionary<CMMS.CMMS_Status, string>()
         {
-            { 171, "PM Started" },
-            { 172, "PM Saved" },
-            { 173, "PM Submitted" },
-            { 174, "PM Approved" },
-            { 175, "PM Rejected" },
-            { 176, "PM Completed" },
-            { 177, "Permit Timed Out" }
+            { CMMS.CMMS_Status.PM_START, "PM Started" },
+            { CMMS.CMMS_Status.PM_UPDATE, "PM Updated" },
+            { CMMS.CMMS_Status.PM_SUBMIT, "PM Submitted" },
+            { CMMS.CMMS_Status.PM_APPROVE, "PM Approved" },
+            { CMMS.CMMS_Status.PM_REJECT, "PM Rejected" },
+            { CMMS.CMMS_Status.PM_COMPLETED, "PM Completed" },
+            { CMMS.CMMS_Status.PM_CANCELLED, "PM Cancelled" },
+            { CMMS.CMMS_Status.PM_PTW_TIMEOUT, "Permit Timed Out" }
         };
-        internal async Task<List<CMPMScheduleView>> GetScheduleViewList(int facility_id, DateTime? start_date, DateTime? end_date)
+        internal async Task<List<CMPMScheduleView>> GetPMTaskList(int facility_id, DateTime? start_date, DateTime? end_date)
         {
             /*
              * Primary Table - PMExecution & PMSchedule
@@ -34,8 +35,8 @@ namespace CMMSAPIs.Repositories.PM
              * Code goes here
             */
             string statusQry = "CASE ";
-            foreach (KeyValuePair<int, string> status in statusList)
-                statusQry += $"WHEN {status.Key} THEN '{status.Value}' ";
+            foreach (KeyValuePair<CMMS.CMMS_Status, string> status in statusList)
+                statusQry += $"WHEN {(int)status.Key} THEN '{status.Value}' ";
             statusQry += "ELSE 'Unknown Status' END";
             string myQuery = $"SELECT id, PM_Maintenance_Order_Number as maintenance_order_number, PM_Schedule_date as schedule_date, PM_Schedule_Completed_date as completed_date, Asset_Name as equipment_name, Asset_Category_name as category_name, PM_Frequecy_Name as frequency_name, PM_Schedule_Emp_name as assigned_to_name, PTW_id as permit_id, {statusQry} as status_name " + 
                                 "FROM pm_schedule ";
@@ -59,7 +60,7 @@ namespace CMMSAPIs.Repositories.PM
             return scheduleViewList;
         }
 
-        internal async Task<CMDefaultResponse> CancelPMScheduleView(CMApproval request, int userID)
+        internal async Task<CMDefaultResponse> CancelPMTask(CMApproval request, int userID)
         {
             /*
              * Primary Table - PMSchedule
@@ -92,7 +93,7 @@ namespace CMMSAPIs.Repositories.PM
             return response;
         }
 
-        internal async Task<CMPMScheduleViewDetail> GetPMScheduleViewDetail(int schedule_id)
+        internal async Task<CMPMScheduleViewDetail> GetPMTaskDetail(int schedule_id)
         {
             /*
              * Primary Table - PMExecution & PMSchedule
@@ -103,8 +104,8 @@ namespace CMMSAPIs.Repositories.PM
             if (schedule_id <= 0)
                 throw new ArgumentException("Invalid Schedule ID");
             string statusQry = "CASE ";
-            foreach (KeyValuePair<int, string> status in statusList)
-                statusQry += $"WHEN {status.Key} THEN '{status.Value}' ";
+            foreach (KeyValuePair<CMMS.CMMS_Status, string> status in statusList)
+                statusQry += $"WHEN {(int)status.Key} THEN '{status.Value}' ";
             statusQry += "ELSE 'Unknown Status' END";
             string myQuery1 = $"SELECT id, PM_Maintenance_Order_Number as maintenance_order_number, PM_Schedule_date as schedule_date, PM_Schedule_Completed_date as completed_date, Asset_Name as equipment_name, Asset_Category_name as category_name, PM_Frequecy_Name as frequency_name, PM_Schedule_Emp_name as assigned_to_name, PTW_id as permit_id, {statusQry} as status_name, Facility_Name as facility_name " +
                                 $"FROM pm_schedule WHERE id = {schedule_id};";
@@ -120,7 +121,51 @@ namespace CMMSAPIs.Repositories.PM
             return scheduleViewDetail[0];
         }
 
-        internal async Task<CMDefaultResponse> SetPMScheduleView(CMPMScheduleExecution request)
+        internal async Task<CMDefaultResponse> LinkPermitToPMTask(int schedule_id, int permit_id, int userID)
+        {
+            /*
+             * Primary Table - PMSchedule
+             * Set the required fields in primary table for linling permit to PM
+             * Code goes here
+            */
+            string scheduleQuery = "SELECT PM_Schedule_date as schedule_date, Facility_id as facility_id, Asset_id as asset_id, PM_Frequecy_id as frequency_id " +
+                                    $"FROM pm_schedule WHERE schedule_id = {schedule_id};";
+            List<CMSetScheduleData> scheduleData = await Context.GetData<CMSetScheduleData>(scheduleQuery).ConfigureAwait(false);
+            string permitQuery = "SELECT ptw.id as ptw_id, ptw.code as ptw_code, ptw.title as ptw_title, ptw.status as ptw_status " + 
+                                    "FROM " + 
+                                        "permit as ptw " +
+                                    "LEFT JOIN " +
+                                        "permitlotoassets as loto on ptw.LOTOId = loto.id " +
+                                    $"WHERE ptw.id = {permit_id} AND ptw.facilityId = {scheduleData[0].facility_id} AND loto.Loto_Asset_id = {scheduleData[0].asset_id};";
+            List<ScheduleLinkedPermit> permit = await Context.GetData<ScheduleLinkedPermit>(permitQuery).ConfigureAwait(false);
+            string myQuery = "UPDATE pm_schedule SET " +
+                                $"PTW_id = {permit[0].ptw_id}, " +
+                                $"PTW_Code = '{permit[0].ptw_code}', " +
+                                $"PTW_Ttitle = '{permit[0].ptw_title}', " +
+                                $"PTW_by_id = {userID}, " +
+                                $"PTW_Status = {permit[0].status}, " +
+                                $"PTW_Attached_At = '{UtilsRepository.GetUTCTime()}', " +
+                                $"status = {CMMS.CMMS_Status.PM_LINK_PTW} " +
+                                $"WHERE id = {schedule_id};";
+            int retVal = await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
+            CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
+            if (retVal > 0)
+                retCode = CMMS.RETRUNSTATUS.SUCCESS;
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, schedule_id, 0, 0, "PTW linked to PM", CMMS.CMMS_Status.PM_LINK_PTW, userID);
+            CMDefaultResponse response = new CMDefaultResponse(schedule_id, CMMS.RETRUNSTATUS.SUCCESS, $"Permit {permit_id} linked to schedule {schedule_id}");
+            return response;
+        }
+        internal async Task<CMDefaultResponse> AddCustomCheckpoint(CMPMScheduleExecution request)
+        {
+            /*
+             * Primary Table - PMExecution
+             * Add all the details present in CMPMScheduleExecution model
+             * Code goes here
+            */
+
+            return null;
+        }
+        internal async Task<CMDefaultResponse> SetPMTask(CMPMScheduleExecution request)
         {
             /*
              * Primary Table - PMExecution
@@ -131,7 +176,7 @@ namespace CMMSAPIs.Repositories.PM
             return null;
         }
 
-        internal async Task<CMDefaultResponse> UpdatePMScheduleExecution(CMPMScheduleExecution request)
+        internal async Task<CMDefaultResponse> UpdatePMTaskExecution(CMPMScheduleExecution request)
         {
             /*
              * Primary Table - PMExecution
@@ -141,7 +186,7 @@ namespace CMMSAPIs.Repositories.PM
             return null;
         }
 
-        internal async Task<CMDefaultResponse> ApprovePMScheduleExecution(CMApproval request)
+        internal async Task<CMDefaultResponse> ApprovePMTaskExecution(CMApproval request)
         {
             /*
              * Primary Table - PMExecution
@@ -151,7 +196,7 @@ namespace CMMSAPIs.Repositories.PM
             return null;
         }
 
-        internal async Task<CMDefaultResponse> RejectPMScheduleExecution(CMApproval request)
+        internal async Task<CMDefaultResponse> RejectPMTaskExecution(CMApproval request)
         {
             /*
              * Primary Table - PMExecution

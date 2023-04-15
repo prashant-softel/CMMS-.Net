@@ -11,14 +11,14 @@ namespace CMMSAPIs.BS.PM
 {
     public interface IPMScheduleViewBS
     {
-        Task<List<CMPMScheduleView>> GetScheduleViewList(int facility_id, DateTime? start_date, DateTime? end_date);
-        Task<CMDefaultResponse> CancelPMScheduleView(CMApproval request, int userID);
-        Task<CMPMScheduleViewDetail> GetPMScheduleViewDetail(int schedule_id);
-        Task<CMDefaultResponse> SetPMScheduleView(CMPMScheduleExecution request);
-        Task<CMDefaultResponse> UpdatePMScheduleExecution(CMPMScheduleExecution request);
-        Task<CMDefaultResponse> ApprovePMScheduleExecution(CMApproval request);
-        Task<CMDefaultResponse> RejectPMScheduleExecution(CMApproval request);
-
+        Task<List<CMPMScheduleView>> GetPMTaskList(int facility_id, DateTime? start_date, DateTime? end_date);
+        Task<CMDefaultResponse> CancelPMTask(CMApproval request, int userID);
+        Task<CMPMScheduleViewDetail> GetPMTaskDetail(int schedule_id);
+        Task<CMDefaultResponse> SetPMTask(CMPMScheduleExecution request);
+        Task<CMDefaultResponse> UpdatePMTaskExecution(CMPMScheduleExecution request);
+        Task<CMDefaultResponse> ApprovePMTaskExecution(CMApproval request);
+        Task<CMDefaultResponse> RejectPMTaskExecution(CMApproval request);
+        Task<CMDefaultResponse> LinkPermitToPMTask(int schedule_id, int permit_id, int userID);
 
     }
     public class PMScheduleViewBS : IPMScheduleViewBS
@@ -30,106 +30,121 @@ namespace CMMSAPIs.BS.PM
             databaseProvider = dbProvider;
         }
 
-        public async Task<List<CMPMScheduleView>> GetScheduleViewList(int facility_id, DateTime? start_date, DateTime? end_date)
+        public async Task<List<CMPMScheduleView>> GetPMTaskList(int facility_id, DateTime? start_date, DateTime? end_date)
         {
             try
             {
                 using (var repos = new PMScheduleViewRepository(getDB))
                 {
-                    return await repos.GetScheduleViewList(facility_id, start_date, end_date);
+                    return await repos.GetPMTaskList(facility_id, start_date, end_date);
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
         }
 
-        public async Task<CMDefaultResponse> CancelPMScheduleView(CMApproval request, int userID)
+        public async Task<CMDefaultResponse> CancelPMTask(CMApproval request, int userID)
         {
             try
             {
                 using (var repos = new PMScheduleViewRepository(getDB))
                 {
-                    return await repos.CancelPMScheduleView(request, userID);
+                    return await repos.CancelPMTask(request, userID);
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
         }
 
-        public async Task<CMPMScheduleViewDetail> GetPMScheduleViewDetail(int schedule_id)
+        public async Task<CMPMScheduleViewDetail> GetPMTaskDetail(int schedule_id)
         {
             try
             {
                 using (var repos = new PMScheduleViewRepository(getDB))
                 {
-                    return await repos.GetPMScheduleViewDetail(schedule_id);
+                    return await repos.GetPMTaskDetail(schedule_id);
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
         }
 
-        public async Task<CMDefaultResponse> SetPMScheduleView(CMPMScheduleExecution request)
+        public async Task<CMDefaultResponse> LinkPermitToPMTask(int schedule_id, int permit_id, int userID)
         {
             try
             {
-                using (var repos = new PMScheduleViewRepository(getDB))
+                using(var repos = new PMScheduleViewRepository(getDB))
                 {
-                    return await repos.SetPMScheduleView(request);
+                    return await repos.LinkPermitToPMTask(schedule_id, permit_id, userID);
                 }
             }
-            catch (Exception ex)
+            catch(Exception)
             {
                 throw;
             }
         }
 
-        public async Task<CMDefaultResponse> UpdatePMScheduleExecution(CMPMScheduleExecution request)
+        public async Task<CMDefaultResponse> SetPMTask(CMPMScheduleExecution request)
         {
             try
             {
                 using (var repos = new PMScheduleViewRepository(getDB))
                 {
-                    return await repos.UpdatePMScheduleExecution(request);
+                    return await repos.SetPMTask(request);
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
         }
 
-        public async Task<CMDefaultResponse> ApprovePMScheduleExecution(CMApproval request)
+        public async Task<CMDefaultResponse> UpdatePMTaskExecution(CMPMScheduleExecution request)
         {
             try
             {
                 using (var repos = new PMScheduleViewRepository(getDB))
                 {
-                    return await repos.ApprovePMScheduleExecution(request);
+                    return await repos.UpdatePMTaskExecution(request);
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
         }
 
-        public async Task<CMDefaultResponse> RejectPMScheduleExecution(CMApproval request)
+        public async Task<CMDefaultResponse> ApprovePMTaskExecution(CMApproval request)
         {
             try
             {
                 using (var repos = new PMScheduleViewRepository(getDB))
                 {
-                    return await repos.RejectPMScheduleExecution(request);
+                    return await repos.ApprovePMTaskExecution(request);
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> RejectPMTaskExecution(CMApproval request)
+        {
+            try
+            {
+                using (var repos = new PMScheduleViewRepository(getDB))
+                {
+                    return await repos.RejectPMTaskExecution(request);
+                }
+            }
+            catch (Exception)
             {
                 throw;
             }

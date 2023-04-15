@@ -116,7 +116,7 @@ namespace CMMSAPIs.Controllers.utils
 
         [Route("GetHistoryLog")]
         [HttpGet]
-        public async Task<IActionResult> GetHistoryLog(int module_type, int id)
+        public async Task<IActionResult> GetHistoryLog(CMMS.CMMS_Modules module_type, int id)
         {
             try
             {

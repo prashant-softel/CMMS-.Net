@@ -51,7 +51,12 @@ namespace CMMSAPIs.Models.PM
 
     }
 
-  
+    public class ScheduleLinkedPermit
+    {
+        public int ptw_id { get; set; }
+        public string ptw_code { get; set; }
+        public string ptw_title { get; set; }
+        public int status { get; set; }
+    }
 
-    
 }
