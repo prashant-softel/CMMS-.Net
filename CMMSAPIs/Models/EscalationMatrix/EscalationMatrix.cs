@@ -17,6 +17,9 @@ namespace CMMSAPIs.Models.EscalationMatrix
         public DateTime? updatedAt { get; set; }
         public int isActive { get; set; }
         public int isDone { get; set; }
+        public long DayDifference { get; set; }
+        public long NoOfDays { get; set; }
+        public long Levels { get; set; }
     }
 
     public class EscalationLevel

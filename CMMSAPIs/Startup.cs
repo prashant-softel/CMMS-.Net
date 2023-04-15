@@ -66,7 +66,7 @@ namespace CMMSAPIs
 
             services.AddDistributedMemoryCache();
             services.AddSession(options => {
-                options.IdleTimeout = TimeSpan.FromMinutes(1);//You can set Time   
+                options.IdleTimeout = TimeSpan.FromMinutes(5);//You can set Time   
             });
             services.AddControllers();
             //services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
@@ -103,6 +103,7 @@ namespace CMMSAPIs
             services.AddScoped<ICalibrationBS, CalibrationBS>();
             services.AddScoped<IAuditScheduleViewBS, AuditScheduleViewBS>();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddHostedService<SchedulerService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
