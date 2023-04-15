@@ -150,6 +150,9 @@ namespace CMMSAPIs.Repositories.Permits
             List<CMPermitDetail> permitPrimaryKey = await Context.GetData<CMPermitDetail>(myQuery).ConfigureAwait(false);
             int insertedId = permitPrimaryKey[0].insertedId;
 
+            string ptwCodeQry = $"UPDATE permits SET code = 'PTW{insertedId}' WHERE id = {insertedId};";
+            await Context.ExecuteNonQry<int>(ptwCodeQry).ConfigureAwait(false);
+
             // qry = "select id as insertedId from permits order by id desc limit 1";
 
             foreach (var data in request.block_ids)
