@@ -26,7 +26,7 @@ namespace CMMSAPIs.Repositories.PM
              * Read All properties mention in model and return list
              * Code goes here
             */
-            string myQuery = "SELECT * from pm_schedule ";
+            string myQuery = "SELECT Asset_id as asset_id, Asset_Name as asset_name from pm_schedule ";
             if (facility_id > 0)
             {
                 myQuery += " WHERE Facility_id = " + facility_id;
@@ -39,9 +39,18 @@ namespace CMMSAPIs.Repositories.PM
             {
                 throw new ArgumentException("Invalid Facility ID");
             }
-            myQuery += " ORDER BY id DESC;";
-            List<CMScheduleData> _checkList = await Context.GetData<CMScheduleData>(myQuery).ConfigureAwait(false);
-            return _checkList;
+            myQuery += " GROUP BY Asset_id";
+            List<CMScheduleData> _scheduleList = await Context.GetData<CMScheduleData>(myQuery).ConfigureAwait(false);
+            foreach(CMScheduleData schedule in _scheduleList)
+            {
+                string query2 = "SELECT a.id as schedule_id, a.PM_Maintenance_Order_Number as maintenance_order_number, a.PM_Frequecy_Name as frequency_name, a.PM_Schedule_date as schedule_date " +
+                                    $"FROM pm_schedule as a WHERE a.PM_Schedule_date = (SELECT MAX(b.PM_Schedule_date) FROM pm_schedule as b " +
+                                    $"WHERE a.Asset_id = b.Asset_id AND a.PM_Frequecy_id = b.PM_Frequecy_id) AND a.Asset_id = {schedule.asset_id} " + 
+                                    "GROUP BY PM_Frequecy_id;";
+                List<ScheduleFrequencyData> _freqData = await Context.GetData<ScheduleFrequencyData>(query2).ConfigureAwait(false);
+                schedule.frequency_dates = _freqData;
+            }
+            return _scheduleList;
         }
 
         internal async Task<CMDefaultResponse> SetScheduleData(CMSetScheduleData request, int userID)
@@ -51,8 +60,11 @@ namespace CMMSAPIs.Repositories.PM
              * Set All properties mention in model and return list
              * Code goes here
             */
+            
             string myQuery1 = $"SELECT id, facilityId, categoryId, name FROM assets WHERE id = {request.asset_id};";
             List<CMAsset> asset = await Context.GetData<CMAsset>(myQuery1).ConfigureAwait(false);
+            if (asset[0].facilityId != request.facility_id)
+                throw new ArgumentException($"Asset no. {request.asset_id} is not associated with Facility no. {request.facility_id}");
             string myQuery2 = $"SELECT serialNumber FROM assets WHERE id = {request.asset_id};";
             DataTable dt = await Context.FetchData(myQuery2).ConfigureAwait(false);
             string serialNumber = Convert.ToString(dt.Rows[0][0]);
@@ -66,13 +78,18 @@ namespace CMMSAPIs.Repositories.PM
                 cat.description = "Others";
                 category.Add(cat);
             }
-            string myQuery4 = $"SELECT id, name, address, city, state, country, zipcode as pin FROM facilities WHERE id = {request.facility_id};";
+            string myQuery4 = $"SELECT id, name, address, city, state, country, zipcode as pin FROM facilities WHERE id = {asset[0].facilityId};";
             List<CMFacility> facility = await Context.GetData<CMFacility>(myQuery4).ConfigureAwait(false);
             string myQuery5 = $"SELECT * FROM frequency WHERE id = {request.frequency_id};";
             List<CMFrequency> frequency = await Context.GetData<CMFrequency>(myQuery5).ConfigureAwait(false);
             string myQuery6 = $"SELECT id, CONCAT(firstName,' ',lastName) as full_name, loginId as user_name, mobileNumber as contact_no " +
                                 $"FROM users WHERE id = {userID};";
             List<CMUser> user = await Context.GetData<CMUser>(myQuery6).ConfigureAwait(false);
+            string myQuery7 = "SELECT PM_Schedule_date as schedule_date, Facility_id as facility_id, Asset_id as asset_id, PM_Frequecy_id as frequency_id " +
+                                    $"FROM pm_schedule WHERE Asset_id = {request.asset_id} AND PM_Frequecy_id = {request.frequency_id} AND PM_Rescheduled = 0;";
+            List<CMSetScheduleData> scheduleData = await Context.GetData<CMSetScheduleData>(myQuery7).ConfigureAwait(false);
+            if (scheduleData.Count > 0)
+                throw new ArgumentException($"Schedule with Asset ID {request.asset_id} and {frequency[0].name} already exists");
             string mainQuery = $"INSERT INTO pm_schedule(PM_Schedule_Date, PM_Frequecy_Name, PM_Frequecy_id, PM_Frequecy_Code, " +
                                 $"Facility_id, Facility_Name, Facility_Code, Asset_Category_id, Asset_Category_Code, Asset_Category_name, " +
                                 $"Asset_id, Asset_Code, Asset_Name, PM_Schedule_User_id, PM_Schedule_User_Name, PM_Schedule_Emp_id, PM_Schedule_Emp_name, " +
