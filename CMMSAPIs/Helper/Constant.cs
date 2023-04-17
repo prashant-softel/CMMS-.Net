@@ -270,6 +270,7 @@ namespace CMMSAPIs.Helper
             PM_COMPLETED,
             PM_CANCELLED,
             PM_PTW_TIMEOUT,
+            PM_DELETED,
 
             IR_CREATED = 181,
             IR_APPROVED,

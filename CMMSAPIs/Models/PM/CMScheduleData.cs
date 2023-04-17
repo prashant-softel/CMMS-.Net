@@ -30,6 +30,7 @@ namespace CMMSAPIs.Models.PM
         public int schedule_id { get; set; }
         public int facility_id { get; set; }
         public int asset_id { get; set; }
+        public int category_id { get; set; }
         public int frequency_id { get; set; }
         public DateTime schedule_date { get; set; }
     }

@@ -100,13 +100,18 @@ namespace CMMSAPIs.Controllers.PM
 
         [Authorize]
         [Route("SetPMTask")]
-        [HttpGet]
-        public async Task<IActionResult> SetPMTask(CMPMScheduleExecution request)
+        [HttpPost]
+        public async Task<IActionResult> SetPMTask(int schedule_id)
         {
             try
             {
-                var data = await _PMScheduleViewBS.SetPMTask(request);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _PMScheduleViewBS.SetPMTask(schedule_id, userID);
                 return Ok(data);
+            }
+            catch (FieldAccessException ex)
+            {
+                return Conflict(ex.Message);
             }
             catch (Exception)
             {

@@ -1,9 +1,11 @@
 ﻿using CMMSAPIs.Helper;
 using CMMSAPIs.Models.PM;
+using CMMSAPIs.Models.Masters;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Models.Users;
 using CMMSAPIs.Repositories.Utils;
 using System;
+using System.Data;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -129,11 +131,11 @@ namespace CMMSAPIs.Repositories.PM
              * Code goes here
             */
             string scheduleQuery = "SELECT PM_Schedule_date as schedule_date, Facility_id as facility_id, Asset_id as asset_id, PM_Frequecy_id as frequency_id " +
-                                    $"FROM pm_schedule WHERE schedule_id = {schedule_id};";
-            List<CMSetScheduleData> scheduleData = await Context.GetData<CMSetScheduleData>(scheduleQuery).ConfigureAwait(false);
+                                    $"FROM pm_schedule WHERE id = {schedule_id};";
+            List<ScheduleIDData> scheduleData = await Context.GetData<ScheduleIDData>(scheduleQuery).ConfigureAwait(false);
             string permitQuery = "SELECT ptw.id as ptw_id, ptw.code as ptw_code, ptw.title as ptw_title, ptw.status as ptw_status " + 
                                     "FROM " + 
-                                        "permit as ptw " +
+                                        "permits as ptw " +
                                     "LEFT JOIN " +
                                         "permitlotoassets as loto on ptw.LOTOId = loto.id " +
                                     $"WHERE ptw.id = {permit_id} AND ptw.facilityId = {scheduleData[0].facility_id} AND loto.Loto_Asset_id = {scheduleData[0].asset_id};";
@@ -145,7 +147,7 @@ namespace CMMSAPIs.Repositories.PM
                                 $"PTW_by_id = {userID}, " +
                                 $"PTW_Status = {permit[0].status}, " +
                                 $"PTW_Attached_At = '{UtilsRepository.GetUTCTime()}', " +
-                                $"status = {CMMS.CMMS_Status.PM_LINK_PTW} " +
+                                $"status = {(int)CMMS.CMMS_Status.PM_LINK_PTW} " +
                                 $"WHERE id = {schedule_id};";
             int retVal = await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
@@ -159,21 +161,65 @@ namespace CMMSAPIs.Repositories.PM
         {
             /*
              * Primary Table - PMExecution
-             * Add all the details present in CMPMScheduleExecution model
+             * Add a custom checkpoint
              * Code goes here
             */
 
             return null;
         }
-        internal async Task<CMDefaultResponse> SetPMTask(CMPMScheduleExecution request)
+
+        internal async Task<CMDefaultResponse> SetPMTask(int schedule_id, int userID)
         {
             /*
              * Primary Table - PMExecution
              * Add all the details present in CMPMScheduleExecution model
              * Code goes here
             */
-
-            return null;
+            CMDefaultResponse response;
+            string statusQry = $"SELECT status FROM pm_schedule WHERE id = {schedule_id}";
+            DataTable dt1 = await Context.FetchData(statusQry).ConfigureAwait(false);
+            CMMS.CMMS_Status status = (CMMS.CMMS_Status)Convert.ToInt32(dt1.Rows[0][0]);
+            if (status != CMMS.CMMS_Status.PM_LINK_PTW)
+            {
+                throw new FieldAccessException("Cannot start execution due to following reasons:" +
+                    "\n 1. Permit is not linked to PM" +
+                    "\n 2. Permit has been expired" +
+                    "\n 3. Execution has already been started" +
+                    "\n 4. Execution is completed");
+            }
+            string getParamsQry = "SELECT id as schedule_id, PM_Frequecy_id as frequency_id, Facility_id as facility_id, Asset_Category_id as category_id, Asset_id as asset_id, PM_Schedule_date as schedule_date " +
+                                $"FROM pm_schedule WHERE id = {schedule_id};";
+            List<ScheduleIDData> schedule_details = await Context.GetData<ScheduleIDData>(getParamsQry).ConfigureAwait(false);
+            string checkpointsQuery = "SELECT checkpoint.id, checkpoint.check_point, checkpoint.check_list_id as checklist_id, checkpoint.requirement, checkpoint.is_document_required, checkpoint.status " +
+                                        "FROM checkpoint " +
+                                        "JOIN checklist_mapping as map ON map.checklist_id=checkpoint.check_list_id " +
+                                        "JOIN checklist_number as checklist ON checklist.id=map.checklist_id " +
+                                        $"WHERE map.facility_id = {schedule_details[0].facility_id} AND map.category_id = {schedule_details[0].category_id} AND checklist.frequency_id = {schedule_details[0].frequency_id};";
+            List<CMCreateCheckPoint> checkpointList = await Context.GetData<CMCreateCheckPoint>(checkpointsQuery).ConfigureAwait(false);
+            if(checkpointList.Count == 0)
+            {
+                response = new CMDefaultResponse(schedule_id, CMMS.RETRUNSTATUS.FAILURE, "No checklist or checkpoints found");
+            }
+            else
+            {
+                List<int> idList = new List<int>();
+                foreach(CMCreateCheckPoint checkpoint in checkpointList)
+                {
+                    string executeQuery = "INSERT INTO pm_execution(PM_Schedule_Id, PM_Schedule_Code, Check_Point_id, Check_Point_Name, " +
+                                            "Check_Point_Code, Status, Check_Point_Requirement) VALUES " + 
+                                            $"({schedule_id}, 'PMSCH{schedule_id}', {checkpoint.id}, " +
+                                            $"'{checkpoint.check_point}', 'CP{checkpoint.id}', 1, '{checkpoint.requirement}'); " +
+                                            $"SELECT LAST_INSERT_ID();";
+                    DataTable dt2 = await Context.FetchData(executeQuery).ConfigureAwait(false);
+                    int id = Convert.ToInt32(dt2.Rows[0][0]);
+                    idList.Add(id);
+                }
+                string startQry = $"UPDATE pm_schedule SET PM_Execution_Started_by_id = {userID}, PM_Execution_Started_date = '{UtilsRepository.GetUTCTime()}' WHERE id = {schedule_id};";
+                await Context.ExecuteNonQry<int>(startQry).ConfigureAwait(false);
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, schedule_id, CMMS.CMMS_Modules.INVENTORY, schedule_details[0].asset_id, "PM Execution Started", CMMS.CMMS_Status.PM_START, userID);
+                response = new CMDefaultResponse(idList, CMMS.RETRUNSTATUS.SUCCESS, $"Execution PMSCH{schedule_id} Started Successfully");
+            }
+            return response;
         }
 
         internal async Task<CMDefaultResponse> UpdatePMTaskExecution(CMPMScheduleExecution request)
