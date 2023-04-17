@@ -21,13 +21,13 @@ namespace CMMSAPIs.Controllers.PM
         }
 
         [Authorize]
-        [Route("GetScheduleViewList")]
+        [Route("GetPMTaskList")]
         [HttpGet]
-        public async Task<IActionResult> GetScheduleViewList(int facility_id, DateTime? start_date, DateTime? end_date)
+        public async Task<IActionResult> GetPMTaskList(int facility_id, DateTime? start_date, DateTime? end_date)
         {
             try
             {
-                var data = await _PMScheduleViewBS.GetScheduleViewList(facility_id, start_date, end_date);
+                var data = await _PMScheduleViewBS.GetPMTaskList(facility_id, start_date, end_date);
                 return Ok(data);
             }
             catch (ArgumentException ex)
@@ -41,30 +41,30 @@ namespace CMMSAPIs.Controllers.PM
         }
 
         [Authorize]
-        [Route("CancelPMScheduleView")]
+        [Route("CancelPMTask")]
         [HttpPut]
-        public async Task<IActionResult> CancelPMScheduleView(CMApproval request)
+        public async Task<IActionResult> CancelPMTask(CMApproval request)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _PMScheduleViewBS.CancelPMScheduleView(request, userID);
+                var data = await _PMScheduleViewBS.CancelPMTask(request, userID);
                 return Ok(data);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
         }
 
         [Authorize]
-        [Route("GetPMScheduleViewDetail")]
+        [Route("GetPMTaskDetail")]
         [HttpGet]
-        public async Task<IActionResult> GetPMScheduleViewDetail(int schedule_id)
+        public async Task<IActionResult> GetPMTaskDetail(int schedule_id)
         {
             try
             {
-                var data = await _PMScheduleViewBS.GetPMScheduleViewDetail(schedule_id);
+                var data = await _PMScheduleViewBS.GetPMTaskDetail(schedule_id);
                 return Ok(data);
             }
             catch (ArgumentException ex)
@@ -82,64 +82,81 @@ namespace CMMSAPIs.Controllers.PM
         }
 
         [Authorize]
-        [Route("SetPMScheduleView")]
-        [HttpGet]
-        public async Task<IActionResult> SetPMScheduleView(CMPMScheduleExecution request)
+        [Route("LinkPermitToPMTask")]
+        [HttpPut]
+        public async Task<IActionResult> LinkPermitToPMTask(int schedule_id, int permit_id)
         {
             try
             {
-                var data = await _PMScheduleViewBS.SetPMScheduleView(request);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _PMScheduleViewBS.LinkPermitToPMTask(schedule_id, permit_id, userID);
                 return Ok(data);
             }
-            catch (Exception ex)
+            catch(Exception)
             {
                 throw;
             }
         }
 
         [Authorize]
-        [Route("UpdatePMScheduleExecution")]
+        [Route("SetPMTask")]
         [HttpGet]
-        public async Task<IActionResult> UpdatePMScheduleExecution(CMPMScheduleExecution request)
+        public async Task<IActionResult> SetPMTask(CMPMScheduleExecution request)
         {
             try
             {
-                var data = await _PMScheduleViewBS.UpdatePMScheduleExecution(request);
+                var data = await _PMScheduleViewBS.SetPMTask(request);
                 return Ok(data);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
         }
 
         [Authorize]
-        [Route("ApprovePMScheduleExecution")]
+        [Route("UpdatePMTaskExecution")]
         [HttpGet]
-        public async Task<IActionResult> ApprovePMScheduleExecution(CMApproval request)
+        public async Task<IActionResult> UpdatePMTaskExecution(CMPMScheduleExecution request)
         {
             try
             {
-                var data = await _PMScheduleViewBS.ApprovePMScheduleExecution(request);
+                var data = await _PMScheduleViewBS.UpdatePMTaskExecution(request);
                 return Ok(data);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
         }
 
         [Authorize]
-        [Route("RejectPMScheduleExecution")]
+        [Route("ApprovePMTaskExecution")]
         [HttpGet]
-        public async Task<IActionResult> RejectPMScheduleExecution(CMApproval request)
+        public async Task<IActionResult> ApprovePMTaskExecution(CMApproval request)
         {
             try
             {
-                var data = await _PMScheduleViewBS.RejectPMScheduleExecution(request);
+                var data = await _PMScheduleViewBS.ApprovePMTaskExecution(request);
                 return Ok(data);
             }
-            catch (Exception ex)
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
+        [Route("RejectPMTaskExecution")]
+        [HttpGet]
+        public async Task<IActionResult> RejectPMTaskExecution(CMApproval request)
+        {
+            try
+            {
+                var data = await _PMScheduleViewBS.RejectPMTaskExecution(request);
+                return Ok(data);
+            }
+            catch (Exception)
             {
                 throw;
             }

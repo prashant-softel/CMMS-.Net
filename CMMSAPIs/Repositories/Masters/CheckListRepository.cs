@@ -72,9 +72,9 @@ namespace CMMSAPIs.Repositories.Masters
             foreach (CMCreateCheckList request in request_list)
             {
                 string query = "INSERT INTO checklist_number(checklist_number, checklist_type, facility_id, status ,created_by ," +
-                    " created_at , asset_category_id ,frequency_id ,manpower , duration,updated_at )VALUES" +
+                    " created_at , asset_category_id ,frequency_id ,manpower , duration)VALUES" +
                             $"('{request.checklist_number}', {request.type}, {request.facility_id},{request.status},  {userID}," +
-                            $"'{UtilsRepository.GetUTCTime()}',{request.category_id},{request.frequency_id}, {request.manPower},{request.duration},'{UtilsRepository.GetUTCTime()}'); select LAST_INSERT_ID();";
+                            $"'{UtilsRepository.GetUTCTime()}',{request.category_id},{request.frequency_id}, {request.manPower},{request.duration}); select LAST_INSERT_ID();";
 
                 DataTable dt = await Context.FetchData(query).ConfigureAwait(false);
 
@@ -199,7 +199,7 @@ namespace CMMSAPIs.Repositories.Masters
                     CMDefaultResponse response = null;
                     string query1 = $"SELECT id FROM checklist_mapping WHERE facility_id = {request.facility_id} AND category_id = {checkListMap.category_id} AND checklist_id = {checklist_id};";
                     DataTable dt1 = await Context.FetchData(query1).ConfigureAwait(false);
-                    string query2 = $"SELECT id FROM checklist_number WHERE facility_id = {request.facility_id} AND id = {checklist_id};";
+                    string query2 = $"SELECT id FROM checklist_number WHERE facility_id = {request.facility_id} AND category_id = {checkListMap.category_id} AND id = {checklist_id};";
                     DataTable dt2 = await Context.FetchData(query2).ConfigureAwait(false);
                     if (dt1.Rows.Count == 0 && dt2.Rows.Count != 0)
                     {
@@ -217,7 +217,7 @@ namespace CMMSAPIs.Repositories.Masters
                     }
                     else if (dt2.Rows.Count == 0)
                     {
-                        response = new CMDefaultResponse(checklist_id, CMMS.RETRUNSTATUS.FAILURE, "Checklist is not linked with given facility");
+                        response = new CMDefaultResponse(checklist_id, CMMS.RETRUNSTATUS.FAILURE, "Checklist is not linked with given facility or asset category");
                     }
                     responseList.Add(response);
                 }
