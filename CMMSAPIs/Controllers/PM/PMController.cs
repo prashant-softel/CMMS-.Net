@@ -52,6 +52,10 @@ namespace CMMSAPIs.Controllers.PM
                 var data = await _PMBS.SetScheduleData(request, userID);
                 return Ok(data);
             }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
             catch (Exception)
             {
                 throw;

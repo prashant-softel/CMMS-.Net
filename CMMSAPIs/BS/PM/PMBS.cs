@@ -11,7 +11,7 @@ namespace CMMSAPIs.BS.PM
     public interface IPMBS
     {
         Task<List<CMScheduleData>> GetScheduleData(int facility_id, int? category_id);
-        Task<CMDefaultResponse> SetScheduleData(CMSetScheduleData request, int userID);
+        Task<List<CMDefaultResponse>> SetScheduleData(CMSetScheduleData request, int userID);
 
     }
     public class PMBS : IPMBS
@@ -38,7 +38,7 @@ namespace CMMSAPIs.BS.PM
             }
         }
 
-        public async Task<CMDefaultResponse> SetScheduleData(CMSetScheduleData request, int userID)
+        public async Task<List<CMDefaultResponse>> SetScheduleData(CMSetScheduleData request, int userID)
         {
             try
             {

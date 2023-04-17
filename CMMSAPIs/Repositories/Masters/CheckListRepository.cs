@@ -199,7 +199,7 @@ namespace CMMSAPIs.Repositories.Masters
                     CMDefaultResponse response = null;
                     string query1 = $"SELECT id FROM checklist_mapping WHERE facility_id = {request.facility_id} AND category_id = {checkListMap.category_id} AND checklist_id = {checklist_id};";
                     DataTable dt1 = await Context.FetchData(query1).ConfigureAwait(false);
-                    string query2 = $"SELECT id FROM checklist_number WHERE facility_id = {request.facility_id} AND category_id = {checkListMap.category_id} AND id = {checklist_id};";
+                    string query2 = $"SELECT id FROM checklist_number WHERE facility_id = {request.facility_id} AND asset_category_id = {checkListMap.category_id} AND id = {checklist_id};";
                     DataTable dt2 = await Context.FetchData(query2).ConfigureAwait(false);
                     if (dt1.Rows.Count == 0 && dt2.Rows.Count != 0)
                     {
@@ -208,16 +208,16 @@ namespace CMMSAPIs.Repositories.Masters
                                     "select LAST_INSERT_ID();";
                         DataTable dt3 = await Context.FetchData(query3).ConfigureAwait(false);
                         int id = Convert.ToInt32(dt3.Rows[0][0]);
-                        await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.CHECKLIST_MAPPING, id, 0, 0, "Checklist Mapping Added", CMMS.CMMS_Status.CREATED, userID);
+                        await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.CHECKLIST_MAPPING, id, 0, 0, "Checklist Mapped", CMMS.CMMS_Status.CREATED, userID);
                         response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Checklist mapped successfully");
                     }
                     else if (dt1.Rows.Count != 0)
                     {
-                        response = new CMDefaultResponse(checklist_id, CMMS.RETRUNSTATUS.FAILURE, "Checklist is already mapped with given asset category");
+                        response = new CMDefaultResponse(checklist_id, CMMS.RETRUNSTATUS.FAILURE, $"Checklist {checklist_id} is already mapped with Asset Category {checkListMap.category_id} for Facility {request.facility_id}");
                     }
                     else if (dt2.Rows.Count == 0)
                     {
-                        response = new CMDefaultResponse(checklist_id, CMMS.RETRUNSTATUS.FAILURE, "Checklist is not linked with given facility or asset category");
+                        response = new CMDefaultResponse(checklist_id, CMMS.RETRUNSTATUS.FAILURE, $"Checklist {checklist_id} is not from Facility {request.facility_id} or not associated with Asset Category {checkListMap.category_id}");
                     }
                     responseList.Add(response);
                 }

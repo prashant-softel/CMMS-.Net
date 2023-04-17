@@ -14,7 +14,7 @@ namespace CMMSAPIs.BS.PM
         Task<List<CMPMScheduleView>> GetPMTaskList(int facility_id, DateTime? start_date, DateTime? end_date);
         Task<CMDefaultResponse> CancelPMTask(CMApproval request, int userID);
         Task<CMPMScheduleViewDetail> GetPMTaskDetail(int schedule_id);
-        Task<CMDefaultResponse> SetPMTask(CMPMScheduleExecution request);
+        Task<CMDefaultResponse> SetPMTask(int schedule_id, int userID);
         Task<CMDefaultResponse> UpdatePMTaskExecution(CMPMScheduleExecution request);
         Task<CMDefaultResponse> ApprovePMTaskExecution(CMApproval request);
         Task<CMDefaultResponse> RejectPMTaskExecution(CMApproval request);
@@ -90,13 +90,13 @@ namespace CMMSAPIs.BS.PM
             }
         }
 
-        public async Task<CMDefaultResponse> SetPMTask(CMPMScheduleExecution request)
+        public async Task<CMDefaultResponse> SetPMTask(int schedule_id, int userID)
         {
             try
             {
                 using (var repos = new PMScheduleViewRepository(getDB))
                 {
-                    return await repos.SetPMTask(request);
+                    return await repos.SetPMTask(schedule_id, userID);
                 }
             }
             catch (Exception)
