@@ -9,8 +9,8 @@ namespace CMMSAPIs.Models.EscalationMatrix
         public int SrNo { get; set; }
         public string Module{ get; set; }
         public string Status{ get; set; }
-        public List<EscalationLevel> EscalationLevelList { get; set; }
-        public List<NoOfDay> NoOfDayList { get; set; }
+        public List<EscalationLevelwithDays> EscalationLevelList { get; set; }
+  
         public int createdBy { get; set; }
         public DateTime? CreatedAt { get; set; }
         public int updatedBy { get; set; }
@@ -22,13 +22,9 @@ namespace CMMSAPIs.Models.EscalationMatrix
         public long Levels { get; set; }
     }
 
-    public class EscalationLevel
+    public class EscalationLevelwithDays
     {
-        public int Levels { get; set; }
-    }
-
-    public class NoOfDay
-    {
+        public int Level { get; set; }
         public int NoOfDays { get; set; }
     }
 

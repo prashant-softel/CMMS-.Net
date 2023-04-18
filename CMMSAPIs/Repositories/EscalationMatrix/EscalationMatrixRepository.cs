@@ -31,13 +31,13 @@ namespace CMMSAPIs.Repositories.EscalationMatrix
              * Code goes here
             */
             string mainQuery = $"INSERT INTO escalationmatrix" +
-                               $"(Module, Status, " +
+                               $"(JobID, Status, " +
                                $"createdBy, CreatedAt, updatedBy," +
-                               $"updatedAt, isActive, isDone)" +
+                               $"updatedAt, isActive)" +
                                $"VALUES" +
                                 $"('{request.Module}', '{request.Status}', " +
                                 $"{userID}, '{UtilsRepository.GetUTCTime()}', null, " +
-                                $"null, 1, 0); SELECT LAST_INSERT_ID();";
+                                $"null, 1); SELECT LAST_INSERT_ID();";
 
             DataTable dt2 = await Context.FetchData(mainQuery).ConfigureAwait(false);
             int id = Convert.ToInt32(dt2.Rows[0][0]);
@@ -45,11 +45,11 @@ namespace CMMSAPIs.Repositories.EscalationMatrix
             {
                
                     
-                        string InsertQuery = $"INSERT INTO escalationlevel" +
-                       $"(Module_Id,NoOfDays,Levels)" +
+                        string InsertQuery = $"INSERT INTO escalationlevelmapping" +
+                       $"(Escalation_id,NoOfDays,Levels)" +
                        $"VALUES" +
                         $"('{id}'," +
-                        $"{request.NoOfDayList[i].NoOfDays}, '{request.EscalationLevelList[i].Levels}'" +
+                        $"{request.EscalationLevelList[i].NoOfDays}, '{request.EscalationLevelList[i].Level}'" +
                         $"); select 1 Dummay;";
                         DataTable dt = await Context.FetchData(InsertQuery).ConfigureAwait(false);
                  
