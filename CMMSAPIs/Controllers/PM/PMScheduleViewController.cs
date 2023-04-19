@@ -99,6 +99,23 @@ namespace CMMSAPIs.Controllers.PM
         }
 
         [Authorize]
+        [Route("AddCustomCheckpoint")]
+        [HttpPost]
+        public async Task<IActionResult> AddCustomCheckpoint(CMCustomCheckPoint request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _PMScheduleViewBS.AddCustomCheckpoint(request, userID);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
         [Route("SetPMTask")]
         [HttpPost]
         public async Task<IActionResult> SetPMTask(int schedule_id)
@@ -121,12 +138,30 @@ namespace CMMSAPIs.Controllers.PM
 
         [Authorize]
         [Route("UpdatePMTaskExecution")]
-        [HttpGet]
-        public async Task<IActionResult> UpdatePMTaskExecution(CMPMScheduleExecution request)
+        [HttpPatch]
+        public async Task<IActionResult> UpdatePMTaskExecution(CMPMExecutionDetail request)
         {
             try
             {
-                var data = await _PMScheduleViewBS.UpdatePMTaskExecution(request);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _PMScheduleViewBS.UpdatePMTaskExecution(request, userID);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
+        [Route("ClosePMTaskExecution")]
+        [HttpPut]
+        public async Task<IActionResult> ClosePMTaskExecution(CMApproval request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _PMScheduleViewBS.ClosePMTaskExecution(request, userID);
                 return Ok(data);
             }
             catch (Exception)
@@ -137,12 +172,13 @@ namespace CMMSAPIs.Controllers.PM
 
         [Authorize]
         [Route("ApprovePMTaskExecution")]
-        [HttpGet]
+        [HttpPut]
         public async Task<IActionResult> ApprovePMTaskExecution(CMApproval request)
         {
             try
             {
-                var data = await _PMScheduleViewBS.ApprovePMTaskExecution(request);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _PMScheduleViewBS.ApprovePMTaskExecution(request, userID);
                 return Ok(data);
             }
             catch (Exception)
@@ -153,12 +189,13 @@ namespace CMMSAPIs.Controllers.PM
 
         [Authorize]
         [Route("RejectPMTaskExecution")]
-        [HttpGet]
+        [HttpPut]
         public async Task<IActionResult> RejectPMTaskExecution(CMApproval request)
         {
             try
             {
-                var data = await _PMScheduleViewBS.RejectPMTaskExecution(request);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _PMScheduleViewBS.RejectPMTaskExecution(request, userID);
                 return Ok(data);
             }
             catch (Exception)

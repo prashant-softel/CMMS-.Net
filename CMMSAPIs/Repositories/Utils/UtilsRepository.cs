@@ -122,6 +122,58 @@ namespace CMMSAPIs.Repositories.Utils
             return Utc.ToString("yyyy-MM-dd hh:mm:ss");
         }
 
+        internal static DateTime Reschedule(DateTime source, int frequencyID)
+        {
+            switch(frequencyID)
+            {
+                case 1:
+                    return source.AddDays(1);
 
+                case 2:
+                    return source.AddDays(7);
+
+                case 3:
+                    return source.AddDays(14);
+                
+                case 4:
+                    return source.AddMonths(1);
+                
+                case 5:
+                    return source.AddMonths(3);
+
+                case 6:
+                    return source.AddMonths(6);
+                
+                case 7:
+                    return source.AddYears(1);
+
+                case 8:
+                    return source.AddYears(2);
+
+                case 9:
+                    return source.AddYears(5);
+                
+                case 10:
+                    return source.AddYears(10);
+                
+                case 11:
+                    return source.AddYears(3);
+                
+                case 12:
+                    return source.AddYears(6);
+                
+                case 13:
+                    return source.AddYears(4);
+                
+                case 14:
+                    return source.AddYears(20);
+
+                case 15:
+                    return source.AddMonths(2);
+
+                default:
+                    return source;
+            }
+        }
     }
 }

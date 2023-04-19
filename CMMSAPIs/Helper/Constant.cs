@@ -86,6 +86,12 @@ namespace CMMSAPIs.Helper
             VENDOR=6,
         }
 
+        public enum CMMS_Events
+        {
+            BEFORE = 1,
+            DURING = 2,
+            AFTER = 3
+        }
         /* Features Constant START */
 
         /*
@@ -265,12 +271,13 @@ namespace CMMSAPIs.Helper
             PM_UPDATE,
             PM_SUBMIT,
             PM_LINK_PTW,
+            PM_COMPLETED,
             PM_APPROVE,
             PM_REJECT,
-            PM_COMPLETED,
             PM_CANCELLED,
             PM_PTW_TIMEOUT,
             PM_DELETED,
+
 
             IR_CREATED = 181,
             IR_APPROVED,
