@@ -49,11 +49,12 @@ namespace CMMSAPIs.Controllers.SM
 
         [Route("AddAssetType")]
         [HttpPost]
-        public async Task<IActionResult> AddAssetType()
+        public async Task<IActionResult> AddAssetType(CMSMMaster request)
         {
             try
             {
-                var data = await _SMMasterBS.AddAssetType();
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _SMMasterBS.AddAssetType(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -64,11 +65,12 @@ namespace CMMSAPIs.Controllers.SM
 
         [Route("UpdateAssetType")]
         [HttpPut]
-        public async Task<IActionResult> UpdateAssetType()
+        public async Task<IActionResult> UpdateAssetType(CMSMMaster request)
         {
             try
             {
-                var data = await _SMMasterBS.UpdateAssetType();
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _SMMasterBS.UpdateAssetType(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -79,11 +81,12 @@ namespace CMMSAPIs.Controllers.SM
 
         [Route("DeleteAssetType")]
         [HttpDelete]
-        public async Task<IActionResult> DeleteAssetType()
+        public async Task<IActionResult> DeleteAssetType(int Id)
         {
             try
             {
-                var data = await _SMMasterBS.DeleteAssetType();
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _SMMasterBS.DeleteAssetType(Id, userID);
                 return Ok(data);
             }
             catch (Exception ex)

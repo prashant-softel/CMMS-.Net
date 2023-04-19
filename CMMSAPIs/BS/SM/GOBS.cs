@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using CMMSAPIs.Repositories;
 using CMMSAPIs.Models;
+using CMMSAPIs.Models.Utils;
 
 namespace CMMSAPIs.BS
 {
@@ -12,8 +13,8 @@ namespace CMMSAPIs.BS
     {
         Task<List<CMGO>> GetGOList();
         Task<List<CMGO>> GetAssetCodeDetails(int asset_code);
-        Task<List<CMGO>> CreateGO();
-        Task<List<CMGO>> UpdateGO();
+        Task<CMDefaultResponse> CreateGO(CMGO request, int userID);
+        Task<CMDefaultResponse> UpdateGO(CMGO request, int userID);
         Task<List<CMGO>> DeleteGO();
         Task<List<CMGO>> WithdrawGO();
     }
@@ -59,13 +60,13 @@ namespace CMMSAPIs.BS
             }
         }
 
-        public async Task<List<CMGO>> CreateGO()
+        public async Task<CMDefaultResponse> CreateGO(CMGO request, int userID)
         {
             try
             {
                 using (var repos = new GORepository(getDB))
                 {
-                    return await repos.CreateGO();
+                    return await repos.CreateGO(request, userID);
 
                 }
             }
@@ -75,13 +76,13 @@ namespace CMMSAPIs.BS
             }
         }
 
-        public async Task<List<CMGO>> UpdateGO()
+        public async Task<CMDefaultResponse> UpdateGO(CMGO request, int userID)
         {
             try
             {
                 using (var repos = new GORepository(getDB))
                 {
-                    return await repos.UpdateGO();
+                    return await repos.UpdateGO(request, userID);
 
                 }
             }

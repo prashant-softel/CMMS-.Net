@@ -5,15 +5,16 @@ using System.Linq;
 using System.Threading.Tasks;
 using CMMSAPIs.Repositories.SM;
 using CMMSAPIs.Models.SM;
+using CMMSAPIs.Models.Utils;
 
 namespace CMMSAPIs.BS.SM
 {
     public interface ISMMasterBS
     {
         Task<List<CMSMMaster>> GetAssetTypeList();
-        Task<List<CMSMMaster>> AddAssetType();
-        Task<List<CMSMMaster>> UpdateAssetType();
-        Task<List<CMSMMaster>> DeleteAssetType();
+        Task<CMDefaultResponse> AddAssetType(CMSMMaster request, int userID);
+        Task<CMDefaultResponse> UpdateAssetType(CMSMMaster request, int userID);
+        Task<CMDefaultResponse> DeleteAssetType(int Id, int userID);
 
         Task<List<CMSMMaster>> GetAssetCategoryList();
         Task<List<CMSMMaster>> AddAssetCategory();
@@ -57,13 +58,13 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<CMSMMaster>> AddAssetType()
+        public async Task<CMDefaultResponse> AddAssetType(CMSMMaster request, int userID)
         {
             try
             {
                 using (var repos = new SMMasterRepository(getDB))
                 {
-                    return await repos.AddAssetType();
+                    return await repos.AddAssetType(request, userID);
                 }
             }
             catch (Exception ex)
@@ -72,13 +73,13 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<CMSMMaster>> UpdateAssetType()
+        public async Task<CMDefaultResponse> UpdateAssetType(CMSMMaster request, int userID)
         {
             try
             {
                 using (var repos = new SMMasterRepository(getDB))
                 {
-                    return await repos.UpdateAssetType();
+                    return await repos.UpdateAssetType(request, userID);
                 }
             }
             catch (Exception ex)
@@ -87,13 +88,13 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<CMSMMaster>> DeleteAssetType()
+        public async Task<CMDefaultResponse> DeleteAssetType(int Id, int userID)
         {
             try
             {
                 using (var repos = new SMMasterRepository(getDB))
                 {
-                    return await repos.DeleteAssetType();
+                    return await repos.DeleteAssetType(Id, userID);
                 }
             }
             catch (Exception ex)

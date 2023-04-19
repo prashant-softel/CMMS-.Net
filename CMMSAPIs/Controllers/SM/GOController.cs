@@ -1,5 +1,6 @@
 ﻿using CMMSAPIs.BS;
 using CMMSAPIs.Models;
+using CMMSAPIs.Models.Users;
 using CMMSAPIs.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -52,11 +53,12 @@ namespace CMMSAPIs.Controllers
 
         [Route("CreateGO")]
         [HttpPost]
-        public async Task<IActionResult> CreateGO()
+        public async Task<IActionResult> CreateGO(CMGO request)
         {
             try
             {
-                var data = await _GOBS.CreateGO();
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _GOBS.CreateGO(request,  userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -67,11 +69,12 @@ namespace CMMSAPIs.Controllers
 
         [Route("UpdateGO")]
         [HttpPut]
-        public async Task<IActionResult> UpdateGO()
+        public async Task<IActionResult> UpdateGO(CMGO request)
         {
             try
             {
-                var data = await _GOBS.UpdateGO();
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _GOBS.UpdateGO(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)

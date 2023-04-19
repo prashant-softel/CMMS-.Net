@@ -7,7 +7,8 @@ namespace CMMSAPIs.Models.SM
 {
     public class CMSMMaster
     {
-        public int id { get; set; }
-        public string title { get; set; }
+        public int ID { get; set; }
+        public string asset_type { get; set; }
+        public int flag { get; set; }
     }
 }

@@ -12,6 +12,7 @@ using CMMSAPIs.Models.PM;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using CMMSAPIs.Models.Notifications;
+using static CMMSAPIs.Helper.CMMS;
 
 namespace CMMSAPIs.Repositories.EscalationMatrix
 {
@@ -30,12 +31,16 @@ namespace CMMSAPIs.Repositories.EscalationMatrix
              * Set All properties mention in model and return list
              * Code goes here
             */
+
+            CMMS_Status EnumValue = (CMMS_Status)Enum.Parse(typeof(CMMS_Status), request.Status);
+            int StatusID = (int)EnumValue;
+
             string mainQuery = $"INSERT INTO escalationmatrix" +
                                $"(JobID, Status, " +
                                $"createdBy, CreatedAt, updatedBy," +
                                $"updatedAt, isActive)" +
                                $"VALUES" +
-                                $"('{request.Module}', '{request.Status}', " +
+                                $"('{request.Module}', '{StatusID}', " +
                                 $"{userID}, '{UtilsRepository.GetUTCTime()}', null, " +
                                 $"null, 1); SELECT LAST_INSERT_ID();";
 
