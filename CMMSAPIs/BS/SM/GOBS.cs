@@ -15,8 +15,8 @@ namespace CMMSAPIs.BS
         Task<List<CMGO>> GetAssetCodeDetails(int asset_code);
         Task<CMDefaultResponse> CreateGO(CMGO request, int userID);
         Task<CMDefaultResponse> UpdateGO(CMGO request, int userID);
-        Task<List<CMGO>> DeleteGO();
-        Task<List<CMGO>> WithdrawGO();
+        Task<CMDefaultResponse> DeleteGO(int GOid, int userID);
+        Task<CMDefaultResponse> WithdrawGO(CMGO request, int userID);
     }
 
     public class GOBS : IGOBS
@@ -92,13 +92,13 @@ namespace CMMSAPIs.BS
             }
         }
 
-        public async Task<List<CMGO>> DeleteGO()
+        public async Task<CMDefaultResponse> DeleteGO(int GOid, int userID)
         {
             try
             {
                 using (var repos = new GORepository(getDB))
                 {
-                    return await repos.DeleteGO();
+                    return await repos.DeleteGO(GOid, userID);
 
                 }
             }
@@ -107,13 +107,13 @@ namespace CMMSAPIs.BS
                 throw;
             }
         }
-        public async Task<List<CMGO>> WithdrawGO()
+        public async Task<CMDefaultResponse> WithdrawGO(CMGO request, int userID)
         {
             try
             {
                 using (var repos = new GORepository(getDB))
                 {
-                    return await repos.WithdrawGO();
+                    return await repos.WithdrawGO(request, userID);
 
                 }
             }

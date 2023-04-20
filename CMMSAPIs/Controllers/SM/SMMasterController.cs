@@ -1,5 +1,6 @@
 ﻿using CMMSAPIs.BS.SM;
 using CMMSAPIs.Models.SM;
+using CMMSAPIs.Models.Users;
 using CMMSAPIs.Repositories.SM;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -22,9 +23,9 @@ namespace CMMSAPIs.Controllers.SM
 
         /*
          * Stock Management Master End Points
-         * 1. Asset Type
+         * 1. Asset Type --done
          * 2. Asset Category
-         * 3. Measurement Units
+         * 3. Measurement Units -- done
          * 4. Master Assets
         */
 
@@ -116,11 +117,12 @@ namespace CMMSAPIs.Controllers.SM
 
         [Route("AddAssetCategory")]
         [HttpPost]
-        public async Task<IActionResult> AddAssetCategory()
+        public async Task<IActionResult> AddAssetCategory(ItemCategory request)
         {
             try
             {
-                var data = await _SMMasterBS.AddAssetCategory();
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _SMMasterBS.AddAssetCategory(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -131,11 +133,12 @@ namespace CMMSAPIs.Controllers.SM
 
         [Route("UpdateAssetCategory")]
         [HttpPut]
-        public async Task<IActionResult> UpdateAssetCategory()
+        public async Task<IActionResult> UpdateAssetCategory(ItemCategory request)
         {
             try
             {
-                var data = await _SMMasterBS.UpdateAssetCategory();
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _SMMasterBS.UpdateAssetCategory(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -146,11 +149,12 @@ namespace CMMSAPIs.Controllers.SM
 
         [Route("DeleteAssetCategory")]
         [HttpDelete]
-        public async Task<IActionResult> DeleteAssetCategory()
+        public async Task<IActionResult> DeleteAssetCategory(int acID)
         {
             try
             {
-                var data = await _SMMasterBS.DeleteAssetCategory();
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _SMMasterBS.DeleteAssetCategory(acID, userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -180,11 +184,12 @@ namespace CMMSAPIs.Controllers.SM
 
         [Route("AddUnitMeasurement")]
         [HttpPost]
-        public async Task<IActionResult> AddUnitMeasurement()
+        public async Task<IActionResult> AddUnitMeasurement(UnitMeasurement request)
         {
             try
             {
-                var data = await _SMMasterBS.AddUnitMeasurement();
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _SMMasterBS.AddUnitMeasurement(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -195,11 +200,12 @@ namespace CMMSAPIs.Controllers.SM
 
         [Route("UpdateUnitMeasurement")]
         [HttpPut]
-        public async Task<IActionResult> UpdateUnitMeasurement()
+        public async Task<IActionResult> UpdateUnitMeasurement(UnitMeasurement request)
         {
             try
             {
-                var data = await _SMMasterBS.UpdateUnitMeasurement();
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _SMMasterBS.UpdateUnitMeasurement(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -210,11 +216,12 @@ namespace CMMSAPIs.Controllers.SM
 
         [Route("DeleteUnitMeasurement")]
         [HttpDelete]
-        public async Task<IActionResult> DeleteUnitMeasurement()
+        public async Task<IActionResult> DeleteUnitMeasurement(int umID)
         {
             try
             {
-                var data = await _SMMasterBS.DeleteUnitMeasurement();
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _SMMasterBS.DeleteUnitMeasurement(umID, userID);
                 return Ok(data);
             }
             catch (Exception ex)

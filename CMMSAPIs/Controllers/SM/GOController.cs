@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 
 namespace CMMSAPIs.Controllers
@@ -85,11 +86,12 @@ namespace CMMSAPIs.Controllers
 
         [Route("DeleteGO")]
         [HttpDelete]
-        public async Task<IActionResult> DeleteGO()
+        public async Task<IActionResult> DeleteGO(int GOid)
         {
             try
             {
-                var data = await _GOBS.DeleteGO();
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _GOBS.DeleteGO(GOid, userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -100,11 +102,12 @@ namespace CMMSAPIs.Controllers
 
         [Route("WithdrawGO")]
         [HttpDelete]
-        public async Task<IActionResult> WithdrawGO()
+        public async Task<IActionResult> WithdrawGO(CMGO request)
         {
             try
             {
-                var data = await _GOBS.WithdrawGO();
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _GOBS.WithdrawGO(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)

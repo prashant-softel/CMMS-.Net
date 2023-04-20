@@ -11,6 +11,7 @@ using Newtonsoft.Json.Linq;
 using CMMSAPIs.Repositories.Utils;
 using CMMSAPIs.Models.Utils;
 using System.Data;
+using CMMSAPIs.Models.Users;
 
 namespace CMMSAPIs.Repositories.SM
 {
@@ -65,68 +66,83 @@ namespace CMMSAPIs.Repositories.SM
             return response;
         }
 
-        internal Task<List<CMSMMaster>> GetAssetCategoryList()
+        internal async Task<List<ItemCategory>> GetAssetCategoryList()
         {
             /*
              * Return id, name from SMItemCategory
             */
-            return null;
+
+            var myQuery = "SELECT * FROM SMItemCategory WHERE flag = 1";
+
+            List<ItemCategory> _List = await Context.GetData<ItemCategory>(myQuery).ConfigureAwait(false);
+            return _List;
         }
 
-        internal Task<List<CMSMMaster>> AddAssetCategory()
+        internal async Task<CMDefaultResponse> AddAssetCategory(ItemCategory request, int userID)
         {
             /*
              * Add record in SMItemCategory
             */
-            return null;
+            string mainQuery = $"INSERT INTO SMItemCategory (cat_name,flag) VALUES ('" + request.cat_name + "',1); SELECT LAST_INSERT_ID();";
+            DataTable dt2 = await Context.FetchData(mainQuery).ConfigureAwait(false);
+            int id = Convert.ToInt32(dt2.Rows[0][0]);
+            CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Asset category added successfully.");
+            return response;
         }
 
-        internal Task<List<CMSMMaster>> UpdateAssetCategory()
+        internal async Task<CMDefaultResponse> UpdateAssetCategory(ItemCategory request, int userID)
         {
             /*
              * Update record in SMItemCategory
             */
-            return null;
+            string mainQuery = $"UPDATE SMItemCategory SET cat_name = '"+request.cat_name+"' where ID = " + request.ID + "";
+            await Context.ExecuteNonQry<int>(mainQuery);
+            CMDefaultResponse response = new CMDefaultResponse(1, CMMS.RETRUNSTATUS.SUCCESS, "Unit measurement deleted.");
+            return response;
         }
 
-        internal Task<List<CMSMMaster>> DeleteAssetCategory()
+        internal async Task<CMDefaultResponse> DeleteAssetCategory(int acID, int userID)
         {
             /*
              * Delete record in SMItemCategory
             */
-            return null;
+            string mainQuery = $"UPDATE SMItemCategory SET flag = 0 where ID = " + acID + "";
+            await Context.ExecuteNonQry<int>(mainQuery);
+            CMDefaultResponse response = new CMDefaultResponse(1, CMMS.RETRUNSTATUS.SUCCESS, "Unit measurement deleted.");
+            return response;
         }
 
-        internal Task<List<CMSMMaster>> GetUnitMeasurementList()
+        internal async Task<List<UnitMeasurement>> GetUnitMeasurementList()
         {
-            /*
-             * Return * from SMUnitMeasurement
-            */
-            return null;
+
+            var myQuery = "SELECT * FROM smunitmeasurement WHERE flag = 1";
+            List<UnitMeasurement> _List = await Context.GetData<UnitMeasurement>(myQuery).ConfigureAwait(false);
+            return _List;
         }
 
-        internal Task<List<CMSMMaster>> AddUnitMeasurement()
+        internal async Task<CMDefaultResponse> AddUnitMeasurement(UnitMeasurement request,int userID)
         {
-            /*
-             * Add record in SMUnitMeasurement
-            */
-            return null;
+            string mainQuery = $"INSERT INTO smunitmeasurement (name,flag,decimal_status, spare_multi_selection) VALUES ('"+request.name+"',1,"+request.decimal_status+", "+request.spare_multi_selection+"); SELECT LAST_INSERT_ID();";
+            DataTable dt2 = await Context.FetchData(mainQuery).ConfigureAwait(false);
+            int id = Convert.ToInt32(dt2.Rows[0][0]);
+            CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Unit measurement added successfully.");
+            return response;
         }
 
-        internal Task<List<CMSMMaster>> UpdateUnitMeasurement()
+        internal async Task<CMDefaultResponse> UpdateUnitMeasurement(UnitMeasurement request, int userID)
         {
-            /*
-             * Update record in SMUnitMeasurement
-            */
-            return null;
+            string mainQuery = $"UPDATE smunitmeasurement SET name = '"+request.name+"',decimal_status="+request.decimal_status+", spare_multi_selection = "+request.spare_multi_selection+" WHERE ID = "+request.ID+"";
+            await Context.ExecuteNonQry<int>(mainQuery);
+            CMDefaultResponse response = new CMDefaultResponse(1, CMMS.RETRUNSTATUS.SUCCESS, "Unit measurement updated successfully.");
+            return response;
         }
 
-        internal Task<List<CMSMMaster>> DeleteUnitMeasurement()
+        internal async Task<CMDefaultResponse> DeleteUnitMeasurement(int umID, int userID)
         {
-            /*
-             * Delete record in SMUnitMeasurement
-            */
-            return null;
+            string mainQuery = $"UPDATE smunitmeasurement SET flag = 0 where ID = " + umID + "";
+            await Context.ExecuteNonQry<int>(mainQuery);
+            CMDefaultResponse response = new CMDefaultResponse(1, CMMS.RETRUNSTATUS.SUCCESS, "Unit measurement deleted.");
+            return response;
         }
 
         internal Task<List<CMSMMaster>> GetAssetMasterList()

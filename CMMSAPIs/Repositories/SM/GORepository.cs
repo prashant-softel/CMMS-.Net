@@ -44,7 +44,7 @@ namespace CMMSAPIs.Repositories
 
         internal async Task<CMDefaultResponse> CreateGO(CMGO request, int userID)
         {
-            string mainQuery = $"INSERT INTO FlexiMC_SM_Purchase_Order_Details (purchaseID,assetItemID,order_type,cost,ordered_qty,location_ID) "+
+            string mainQuery = $"INSERT INTO smpurchaseorderdetails (purchaseID,assetItemID,order_type,cost,ordered_qty,location_ID) " +
                 "values("+request.purchaseID+", "+request.assetItemID+", '"+request.order_type + "', "+request.cost+", "+request.ordered_qty+", "+request.location_ID+") ; SELECT LAST_INSERT_ID();";
             DataTable dt2 = await Context.FetchData(mainQuery).ConfigureAwait(false);
             int id = Convert.ToInt32(dt2.Rows[0][0]);
@@ -53,18 +53,24 @@ namespace CMMSAPIs.Repositories
         }
         internal async Task<CMDefaultResponse> UpdateGO(CMGO request, int userID)
         {
-            string mainQuery = $"UPDATE FlexiMC_SM_Purchase_Order SET generate_flag = "+request.generate_flag + ",flag = "+request.flag+", vendorID = "+request.vendorID+" WHERE ID = "+request.id+""; 
+            string mainQuery = $"UPDATE smpurchaseorderdetails SET generate_flag = " +request.generate_flag + ",flag = "+request.flag+", vendorID = "+request.vendorID+" WHERE ID = "+request.id+""; 
             await Context.ExecuteNonQry<int>(mainQuery);
-            CMDefaultResponse response = new CMDefaultResponse(1, CMMS.RETRUNSTATUS.SUCCESS, "Asset type updated successfully.");
+            CMDefaultResponse response = new CMDefaultResponse(1, CMMS.RETRUNSTATUS.SUCCESS, "Goods order updated successfully.");
             return response;
         }
-        internal Task<List<CMGO>> DeleteGO()
+        internal async Task<CMDefaultResponse> DeleteGO(int GOid, int userID)
         {
-            return null;
+            string mainQuery = $"UPDATE smpurchaseorderdetails SET flag = 0 WHERE ID = "+ GOid + "";
+            await Context.ExecuteNonQry<int>(mainQuery);
+            CMDefaultResponse response = new CMDefaultResponse(1, CMMS.RETRUNSTATUS.SUCCESS, "Goods order deleted.");
+            return response;
         }
-        internal Task<List<CMGO>> WithdrawGO()
+        internal async Task<CMDefaultResponse> WithdrawGO(CMGO request, int userID)
         {
-            return null;
+            string mainQuery = $"UPDATE smpurchaseorderdetails SET withdraw_by = " + userID + ", flag = "+request.flag+", remarks = '"+request.remarks+"', withdrawOn = '"+DateTime.Now.ToString()+"' WHERE ID = "+request.id+"";
+            await Context.ExecuteNonQry<int>(mainQuery);
+            CMDefaultResponse response = new CMDefaultResponse(1, CMMS.RETRUNSTATUS.SUCCESS, "Goods order withdrawn successfully.");
+            return response;
         }
     }
 }
