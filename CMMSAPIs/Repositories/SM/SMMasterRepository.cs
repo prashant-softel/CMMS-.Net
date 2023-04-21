@@ -12,6 +12,10 @@ using CMMSAPIs.Repositories.Utils;
 using CMMSAPIs.Models.Utils;
 using System.Data;
 using CMMSAPIs.Models.Users;
+using MySql.Data.MySqlClient;
+using System.Transactions;
+using Microsoft.IdentityModel.Tokens;
+using System.Diagnostics;
 
 namespace CMMSAPIs.Repositories.SM
 {
@@ -145,37 +149,170 @@ namespace CMMSAPIs.Repositories.SM
             return response;
         }
 
-        internal Task<List<CMSMMaster>> GetAssetMasterList()
+        internal async Task<List<CMSMMaster>> GetAssetMasterList()
         {
             /*
              * Return id, name, code, description, asset type, asset categroy, unit measurement, attached files  
              * from SMAssetMasters, SMAssetMasterFiles, SMUnitMeasurement, SMAssetTypes, SMAssetCategory
             */
-            return null;
+            var myQuery = "SELECT sam.ID,sam.asset_type_ID,sam.asset_code,sam.asset_name,sam.description,if(sam.approval_required = 1, 'Yes','No') as approval_required,"+
+                " sat.asset_type,sic.cat_name,sm.name as measurement,sm.decimal_status "+
+                " FROM smassetmasters sam LEFT JOIN smassettypes sat ON sat.ID = sam.asset_type_ID "+
+                " LEFT JOIN smitemcategory sic ON sic.ID = sam.item_category_ID  LEFT JOIN smunitmeasurement sm ON sm.ID = sam.unit_of_measurement "+
+                " WHERE sam.flag = 1;";
+            List<CMSMMaster> _List = await Context.GetData<CMSMMaster>(myQuery).ConfigureAwait(false);
+            return _List;
         }
 
-        internal Task<List<CMSMMaster>> AddAssetMaster()
+        internal async Task<CMDefaultResponse> AddAssetMaster(CMSMMaster request, AssetMasterFiles fileData, int UserID)
         {
             /*
              * Add record in SMAssetMasters and SMAssetMasterFiles
             */
-            return null;
+            string selectQuery = "SELECT ID FROM smassetmasters WHERE asset_code LIKE '"+request.asset_code+"'";
+            List<CMSMMaster> checkingCountList = await Context.GetData<CMSMMaster>(selectQuery).ConfigureAwait(false);
+            if (checkingCountList != null && checkingCountList.Count > 0 )
+            {
+                CMDefaultResponse response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "MDM or Asset Code already exist.");
+                return response;
+            }
+            else
+            {
+                string insertQuery = @"INSERT INTO smassetmasters (asset_code, asset_name, description, asset_type_ID, item_category_ID, unit_of_measurement, approval_required, flag) "+
+                    "VALUES ('" +request.asset_code+"', '"+request.asset_name+"', '"+request.asset_description + "', "+request.asset_type_ID+", "+request.item_category_ID + ", "+request.unit_measurement_ID + ", "+ request.approval_required_ID + ", 1); SELECT SCOPE_IDENTITY()";
+
+                DataTable dt2 = await Context.FetchData(insertQuery).ConfigureAwait(false);
+                int assetID = Convert.ToInt32(dt2.Rows[0][0]);
+
+                if (!string.IsNullOrEmpty(fileData.File_path) && !string.IsNullOrEmpty(fileData.File_size) && !string.IsNullOrEmpty(fileData.File_name) && !string.IsNullOrEmpty(fileData.File_type))
+                {
+                    string filesInsertQuery = "INSERT INTO smassetmasterfiles(Asset_master_id , File_path, File_name, File_type, File_size) "+
+                        "VALUES("+assetID+ ", '"+ fileData.File_path + "', '"+fileData.File_name+ "', '"+fileData.File_type+ "', '"+fileData.File_size+ "')";
+                    await Context.ExecuteNonQry<int>(filesInsertQuery);
+                }
+                CMDefaultResponse response = new CMDefaultResponse(assetID, CMMS.RETRUNSTATUS.SUCCESS, "Asset data successfully inserted.");
+                return response;
+
+            }
+
         }
 
-        internal Task<List<CMSMMaster>> UpdateAssetMaster()
+        internal async Task<CMDefaultResponse> UpdateAssetMaster(CMSMMaster request, AssetMasterFiles fileData, int UserID)
         {
             /*
              * Update record in SMAssetMasters and SMAssetMasterFiles
             */
-            return null;
+            CMDefaultResponse response ;
+
+            bool condition = false;
+            string status = "", message = "";
+            string selectStmt = "SELECT ID FROM smassetmasters WHERE asset_code = '"+request.asset_code + "'";
+            List<CMSMMaster> checkingCountList = await Context.GetData<CMSMMaster>(selectStmt).ConfigureAwait(false);
+            if (checkingCountList != null && checkingCountList.Count > 0)
+            {
+                for (var i = 0; i < checkingCountList.Count; i++) { 
+                if (checkingCountList[i].ID == request.ID)
+                    {
+                        condition = true;
+                    }
+                    else
+                    {
+                        condition = false;
+                        status = "Failed";
+                        message = "MDM Code already exists";
+                    }
+                }
+            }
+            else
+            {
+                condition = true;
+            }
+
+            if (condition)
+            {
+                string updateStmt = "UPDATE smassetmasters SET asset_code = '" + request.asset_code+"', asset_name = '"+request.asset_name+"', description = '"+request.description+"',"+
+                    " asset_type_ID = "+request.asset_type_ID+", item_category_ID = "+request.item_category_ID+", unit_of_measurement = "+request.unit_measurement_ID+", approval_required = "+request.approval_required_ID+""+
+                    " WHERE ID = "+request.ID+"";
+                await Context.ExecuteNonQry<int>(updateStmt);
+
+                int assetID = request.ID;
+                if (!string.IsNullOrEmpty(fileData.File_path) && !string.IsNullOrEmpty(fileData.File_size) && !string.IsNullOrEmpty(fileData.File_name) && !string.IsNullOrEmpty(fileData.File_type))
+                {
+                    string filesInsertQuery = "INSERT INTO smassetmasterfiles(Asset_master_id , File_path, File_name, File_type, File_size) " +
+                        "VALUES(" + assetID + ", '" + fileData.File_path + "', '" + fileData.File_name + "', '" + fileData.File_type + "', '" + fileData.File_size + "')";
+                    await Context.ExecuteNonQry<int>(filesInsertQuery);
+                }
+
+                status = "Success";
+
+            }
+
+            if(status == "Failed")
+            {
+                response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "MDM Code already exists.");
+            }
+            else
+            {
+                response = new CMDefaultResponse(1, CMMS.RETRUNSTATUS.SUCCESS, "Master asset data updated.");
+            }
+
+            return response;
         }
 
-        internal Task<List<CMSMMaster>> DeleteAssetMaster()
+        
+
+        internal async Task<CMDefaultResponse> DeleteAssetMaster(CMSMMaster request, int UserID)
         {
             /*
              * Delete record in SMAssetMasters and SMAssetMasterFiles
             */
-            return null;
+            CMDefaultResponse response;
+
+            bool condition = false;
+            string status = "", message = "";
+            string selectStmt = "SELECT ID FROM smassetmasters WHERE asset_code = '" + request.asset_code + "'";
+            List<CMSMMaster> checkingCountList = await Context.GetData<CMSMMaster>(selectStmt).ConfigureAwait(false);
+            if (checkingCountList != null && checkingCountList.Count > 0)
+            {
+                for (var i = 0; i < checkingCountList.Count; i++)
+                {
+                    if (checkingCountList[i].ID == request.ID)
+                    {
+                        condition = true;
+                    }
+                    else
+                    {
+                        condition = false;
+                        status = "Failed";
+                        message = "MDM Code already exists";
+                    }
+                }
+            }
+            else
+            {
+                condition = true;
+            }
+
+            if (condition)
+            {
+                string deleteStmt = "UPDATE smassetmasters SET flag = 0 WHERE ID = " + request.ID + "";
+                await Context.ExecuteNonQry<int>(deleteStmt);
+                                
+
+                status = "Success";
+
+            }
+
+            if (status == "Failed")
+            {
+                response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "MDM Code already exists.");
+            }
+            else
+            {
+                response = new CMDefaultResponse(1, CMMS.RETRUNSTATUS.SUCCESS, "Master asset data deleted.");
+            }
+
+            return response;
         }
     }
 }

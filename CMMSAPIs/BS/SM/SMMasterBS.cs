@@ -28,9 +28,9 @@ namespace CMMSAPIs.BS.SM
         Task<CMDefaultResponse> DeleteUnitMeasurement(int umID, int userID);
 
         Task<List<CMSMMaster>> GetAssetMasterList();
-        Task<List<CMSMMaster>> AddAssetMaster();
-        Task<List<CMSMMaster>> UpdateAssetMaster();
-        Task<List<CMSMMaster>> DeleteAssetMaster();
+        Task<CMDefaultResponse> AddAssetMaster(CMSMMaster request, AssetMasterFiles fileData, int UserID);
+        Task<CMDefaultResponse> UpdateAssetMaster(CMSMMaster request, AssetMasterFiles fileData, int UserID);
+        Task<CMDefaultResponse> DeleteAssetMaster(CMSMMaster request, int UserID);
 
     }
 
@@ -239,13 +239,13 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<CMSMMaster>> AddAssetMaster()
+        public async Task<CMDefaultResponse> AddAssetMaster(CMSMMaster request, AssetMasterFiles fileData, int UserID)
         {
             try
             {
                 using (var repos = new SMMasterRepository(getDB))
                 {
-                    return await repos.AddAssetMaster();
+                    return await repos.AddAssetMaster(request, fileData, UserID);
                 }
             }
             catch (Exception ex)
@@ -254,13 +254,13 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<CMSMMaster>> UpdateAssetMaster()
+        public async Task<CMDefaultResponse> UpdateAssetMaster(CMSMMaster request, AssetMasterFiles fileData,int UserID)
         {
             try
             {
                 using (var repos = new SMMasterRepository(getDB))
                 {
-                    return await repos.UpdateAssetMaster();
+                    return await repos.UpdateAssetMaster(request, fileData, UserID);
                 }
             }
             catch (Exception ex)
@@ -269,13 +269,13 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<CMSMMaster>> DeleteAssetMaster()
+        public async Task<CMDefaultResponse> DeleteAssetMaster(CMSMMaster request, int UserID)
         {
             try
             {
                 using (var repos = new SMMasterRepository(getDB))
                 {
-                    return await repos.DeleteAssetMaster();
+                    return await repos.DeleteAssetMaster(request, UserID);
                 }
             }
             catch (Exception ex)
