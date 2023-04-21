@@ -22,7 +22,7 @@ namespace CMMSAPIs.BS.Permits
         /*
          * Permit Main End Points 
         */
-        Task<int> CreatePermit(CMCreatePermit set);
+        Task<CMDefaultResponse> CreatePermit(CMCreatePermit set, int userID);
         Task<List<CMPermitList>> GetPermitList(int facility_id, int userID);
         Task<CMPermitDetail> GetPermitDetails(int permit_id);    
         Task<CMDefaultResponse> PermitApprove(CMApproval request);
@@ -130,13 +130,13 @@ namespace CMMSAPIs.BS.Permits
 
         }
 
-        public async Task<int> CreatePermit(CMCreatePermit request)
+        public async Task<CMDefaultResponse> CreatePermit(CMCreatePermit request, int userID)
         {
             try
             {
                 using (var repos = new PermitRepository(getDB))
                 {
-                    return await repos.CreatePermit(request);
+                    return await repos.CreatePermit(request, userID);
 
                 }
             }

@@ -86,6 +86,53 @@ namespace CMMSAPIs.Helper
 
         }
 
+        public static void ConvertColumnType(this DataTable dt, string columnName, Type newType)
+        {
+            using (DataColumn dc = new DataColumn(columnName + "_new", newType))
+            {
+                // Add the new column which has the new type, and move it to the ordinal of the old column
+                int ordinal = dt.Columns[columnName].Ordinal;
+                dt.Columns.Add(dc);
+                dc.SetOrdinal(ordinal);
+
+                // Get and convert the values of the old column, and insert them into the new
+                foreach (DataRow dr in dt.Rows)
+                    dr[dc.ColumnName] = Convert.ChangeType(dr[columnName], newType);
+
+                // Remove the old column
+                dt.Columns.Remove(columnName);
+
+                // Give the new column the old column's name
+                dc.ColumnName = columnName;
+            }
+        }
+
+        public static List<T> GetColumn<T>(this DataTable dt, string column)
+        {
+            return (from row in dt.AsEnumerable() select row.Field<T>(column)).ToList();
+        }
+
+        private static void Each<T>(this IEnumerable<T> els, Action<T, int> a)
+        {
+            int i = 0;
+            foreach (T e in els)
+            {
+                a(e, i++);
+            }
+        }
+
+        public static Dictionary<TKey, TValue> Merge<TKey, TValue>(this Dictionary<TKey, TValue> dict, IEnumerable<TKey> keys, IEnumerable<TValue> values)
+        {
+            var dic = new Dictionary<TKey, TValue>();
+
+            keys.Each((x, i) =>
+            {
+                dic.Add(x, values.ElementAt(i));
+            });
+
+            return dic;
+        }
+
         public static bool IsNullOrEmpty(this string value)
         {
             return string.IsNullOrEmpty(value) || value.Trim().Length == 0;

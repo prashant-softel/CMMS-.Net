@@ -1,4 +1,5 @@
 ﻿using CMMSAPIs.Models.Utils;
+using CMMSAPIs.Helper;
 using System;
 using System.Collections.Generic;
 
@@ -33,7 +34,8 @@ namespace CMMSAPIs.Models.PM
         public string requirement { get; set; }
         public string observation { get; set; }
         public int is_job_created { get; set; }
-        public int is_custom_check_point { get; set; } 
+        public int is_custom_check_point { get; set; }
+        public int is_file_required { get; set; }
     }
 
     public class ScheduleLinkJob 
@@ -46,11 +48,32 @@ namespace CMMSAPIs.Models.PM
 
     }
 
-    public class CMPMScheduleExecution : CMPMScheduleViewDetail
+    public class CMCustomCheckPoint
     {
-
+        public int schedule_id { get; set; }
+        public string check_point_name { get; set; }
+        public int is_document_required { get; set; }
+        public string requirement { get; set; }
     }
 
+    public class CMPMExecutionDetail
+    {
+        public int schedule_id { get; set; }
+        public List<AddObservation> add_observations { get; set; }
+    }
+    public class AddObservation
+    {
+        public int execution_id { get; set; }
+        public string observation { get; set; }
+        public int job_create { get; set; }
+        public List<PMFileUpload> pm_files { get; set; }
+    }
+    public class PMFileUpload
+    {
+        public int file_id { get; set; }
+        public string file_desc { get; set; }
+        public CMMS.CMMS_Events pm_event { get; set; }
+    }
     public class ScheduleLinkedPermit
     {
         public int ptw_id { get; set; }

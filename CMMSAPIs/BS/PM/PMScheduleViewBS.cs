@@ -14,10 +14,12 @@ namespace CMMSAPIs.BS.PM
         Task<List<CMPMScheduleView>> GetPMTaskList(int facility_id, DateTime? start_date, DateTime? end_date);
         Task<CMDefaultResponse> CancelPMTask(CMApproval request, int userID);
         Task<CMPMScheduleViewDetail> GetPMTaskDetail(int schedule_id);
+        Task<CMDefaultResponse> AddCustomCheckpoint(CMCustomCheckPoint request, int userID);
         Task<CMDefaultResponse> SetPMTask(int schedule_id, int userID);
-        Task<CMDefaultResponse> UpdatePMTaskExecution(CMPMScheduleExecution request);
-        Task<CMDefaultResponse> ApprovePMTaskExecution(CMApproval request);
-        Task<CMDefaultResponse> RejectPMTaskExecution(CMApproval request);
+        Task<List<CMDefaultResponse>> UpdatePMTaskExecution(CMPMExecutionDetail request, int userID);
+        Task<CMDefaultResponse> ClosePMTaskExecution(CMApproval request, int userID);
+        Task<CMDefaultResponse> ApprovePMTaskExecution(CMApproval request, int userID);
+        Task<CMDefaultResponse> RejectPMTaskExecution(CMApproval request, int userID);
         Task<CMDefaultResponse> LinkPermitToPMTask(int schedule_id, int permit_id, int userID);
 
     }
@@ -90,6 +92,21 @@ namespace CMMSAPIs.BS.PM
             }
         }
 
+        public async Task<CMDefaultResponse> AddCustomCheckpoint(CMCustomCheckPoint request, int userID)
+        {
+            try
+            {
+                using (var repos = new PMScheduleViewRepository(getDB))
+                {
+                    return await repos.AddCustomCheckpoint(request, userID);
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<CMDefaultResponse> SetPMTask(int schedule_id, int userID)
         {
             try
@@ -105,13 +122,13 @@ namespace CMMSAPIs.BS.PM
             }
         }
 
-        public async Task<CMDefaultResponse> UpdatePMTaskExecution(CMPMScheduleExecution request)
+        public async Task<List<CMDefaultResponse>> UpdatePMTaskExecution(CMPMExecutionDetail request, int userID)
         {
             try
             {
                 using (var repos = new PMScheduleViewRepository(getDB))
                 {
-                    return await repos.UpdatePMTaskExecution(request);
+                    return await repos.UpdatePMTaskExecution(request, userID);
                 }
             }
             catch (Exception)
@@ -120,13 +137,13 @@ namespace CMMSAPIs.BS.PM
             }
         }
 
-        public async Task<CMDefaultResponse> ApprovePMTaskExecution(CMApproval request)
+        public async Task<CMDefaultResponse> ClosePMTaskExecution(CMApproval request, int userID)
         {
             try
             {
                 using (var repos = new PMScheduleViewRepository(getDB))
                 {
-                    return await repos.ApprovePMTaskExecution(request);
+                    return await repos.ClosePMTaskExecution(request, userID);
                 }
             }
             catch (Exception)
@@ -135,13 +152,28 @@ namespace CMMSAPIs.BS.PM
             }
         }
 
-        public async Task<CMDefaultResponse> RejectPMTaskExecution(CMApproval request)
+        public async Task<CMDefaultResponse> ApprovePMTaskExecution(CMApproval request, int userID)
         {
             try
             {
                 using (var repos = new PMScheduleViewRepository(getDB))
                 {
-                    return await repos.RejectPMTaskExecution(request);
+                    return await repos.ApprovePMTaskExecution(request, userID);
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> RejectPMTaskExecution(CMApproval request, int userID)
+        {
+            try
+            {
+                using (var repos = new PMScheduleViewRepository(getDB))
+                {
+                    return await repos.RejectPMTaskExecution(request, userID);
                 }
             }
             catch (Exception)
