@@ -113,13 +113,13 @@ namespace CMMSAPIs.Repositories.Permits
                                   "LEFT JOIN " +
                                          "jobs as job ON ptw.id = job.linkedPermit " +
                                   "LEFT JOIN " +
-                                        "users as user ON user.id = ptw.issuedById or user.id = ptw.approvedById" +
+                                        "users as user ON user.id = ptw.issuedById or user.id = ptw.approvedById or user.id = ptw.acceptedById " +
                                   $" WHERE ptw.facilityId = { facility_id } and user.id = { userID } ";
             List<CMPermitList> _PermitList = await Context.GetData<CMPermitList>(myQuery).ConfigureAwait(false);
             return _PermitList;
         }
 
-        internal async Task<int> CreatePermit(CMCreatePermit request)
+        internal async Task<CMDefaultResponse> CreatePermit(CMCreatePermit request, int userID)
         {
             /*
              * Create Form data will go in several tables
@@ -133,8 +133,8 @@ namespace CMMSAPIs.Repositories.Permits
              * Once you saved the records
              * Return GetPermitDetails(permit_id);
             */
-            string qryPermitBasic = "insert into permits(facilityId, blockId, startDate, endDate, description, jobId, LOTOId, typeId, TBTId, issuedById, approvedById, acceptedById) values" +
-             $"({ request.facility_id }, { request.blockId }, '{ UtilsRepository.GetUTCTime() }', '{ UtilsRepository.GetUTCTime() }', '{ request.description }', { request.work_type_id }, { request.lotoId }, '{ request.typeId }', { request.sop_type_id }, { request.issuer_id }, { request.approver_id }, { request.user_id })";
+            string qryPermitBasic = "insert into permits(facilityId, blockId, startDate, endDate, title, description, jobTypeId, typeId, TBTId, issuedById, approvedById, acceptedById, latitude, longitude) values" +
+             $"({ request.facility_id }, { request.blockId }, '{ request.start_datetime.ToString("yyyy-MM-dd hh:mm:ss") }', '{ request.end_datetime.ToString("yyyy-MM-dd hh:mm:ss") }', '{request.title}', '{ request.description }', { request.job_type_id }, { request.typeId }, { request.sop_type_id }, { request.issuer_id }, { request.approver_id }, {userID}, {request.latitude}, {request.longitude}); ";
             await Context.ExecuteNonQry<int>(qryPermitBasic).ConfigureAwait(false);
 
             string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as startDate, ptw.endDate as tillDate, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, facilities.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.description as description,CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, CONCAT(user3.firstName,' ',user3.lastName) as completedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, CONCAT(user5.firstName,' ',user5.lastName) as closedByName, ptw.cancelRequestDate as cancel_at " +
@@ -154,12 +154,9 @@ namespace CMMSAPIs.Repositories.Permits
             await Context.ExecuteNonQry<int>(ptwCodeQry).ConfigureAwait(false);
 
             // qry = "select id as insertedId from permits order by id desc limit 1";
-
-            foreach (var data in request.block_ids)
-            {
-                string qryPermitBlock = $"insert into permitblocks(ptw_id, block_id ) value ({ insertedId  }, { data })";
-                await Context.ExecuteNonQry<int>(qryPermitBlock).ConfigureAwait(false);
-            }
+            
+            string qryPermitBlock = $"insert into permitblocks(ptw_id, block_id ) value ({ insertedId  }, { request.blockId })";
+            await Context.ExecuteNonQry<int>(qryPermitBlock).ConfigureAwait(false);
 
             foreach (int data in request.category_ids)
             {
@@ -199,7 +196,9 @@ namespace CMMSAPIs.Repositories.Permits
 
             CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_CREATED, permitPrimaryKey[0]);
 
-            return insertedId;
+            CMDefaultResponse response = new CMDefaultResponse(insertedId, CMMS.RETRUNSTATUS.SUCCESS, "Permit Created Successfully");
+
+            return response;
         }
 
         internal async Task<CMPermitDetail> GetPermitDetails(int permit_id)

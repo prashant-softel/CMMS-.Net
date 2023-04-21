@@ -116,7 +116,8 @@ namespace CMMSAPIs.Controllers.Permits
         {
             try
             {
-                var data = await _PermitBS.CreatePermit(request);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _PermitBS.CreatePermit(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
