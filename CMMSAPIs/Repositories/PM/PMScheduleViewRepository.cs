@@ -397,7 +397,7 @@ namespace CMMSAPIs.Repositories.PM
                                     $"FROM pm_schedule WHERE id = {request.id};";
             List<ScheduleIDData> scheduleData = await Context.GetData<ScheduleIDData>(scheduleQuery).ConfigureAwait(false);
             scheduleData[0].schedule_date = UtilsRepository.Reschedule(scheduleData[0].schedule_date, scheduleData[0].frequency_id);
-            CMSetScheduleData newData = new CMSetScheduleData(scheduleData[0]);
+            CMSetScheduleData newData = CreateScheduleData(scheduleData[0]);
             List<CMDefaultResponse> createResponse = await _pmScheduleRepo.SetScheduleData(newData, userID);
             string prevScheduleQry = $"UPDATE pm_schedule SET Prev_Schedule_id = {request.id} WHERE id = {createResponse[0].id[0]}";
             await Context.ExecuteNonQry<int>(prevScheduleQry).ConfigureAwait(false);
@@ -435,6 +435,26 @@ namespace CMMSAPIs.Repositories.PM
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, request.id, 0, 0, "PM Schedule Rejected", CMMS.CMMS_Status.PM_REJECT, userID);
             CMDefaultResponse response = new CMDefaultResponse(request.id, retCode, "PM Schedule Rejected");
             return response;
+        }
+        private CMSetScheduleData CreateScheduleData(ScheduleIDData scheduleData)
+        {
+            CMSetScheduleData schData = new CMSetScheduleData();
+            schData.facility_id = scheduleData.facility_id;
+            schData.asset_schedules = new List<CMScheduleData>();
+            CMScheduleData asset_schedule = new CMScheduleData();
+            asset_schedule.asset_id = scheduleData.asset_id;
+            asset_schedule.asset_name = null;
+            asset_schedule.category_id = 0;
+            asset_schedule.category_name = null;
+            asset_schedule.frequency_dates = new List<ScheduleFrequencyData>();
+            ScheduleFrequencyData schedule = new ScheduleFrequencyData();
+            schedule.frequency_name = null;
+            schedule.frequency_id = scheduleData.frequency_id;
+            schedule.schedule_id = 0;
+            schedule.schedule_date = scheduleData.schedule_date;
+            asset_schedule.frequency_dates.Add(schedule);
+            schData.asset_schedules.Add(asset_schedule);
+            return schData;
         }
     }
 

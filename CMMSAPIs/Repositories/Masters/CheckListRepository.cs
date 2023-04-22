@@ -138,7 +138,7 @@ namespace CMMSAPIs.Repositories.Masters
         #endregion
 
         #region checklistmap
-        internal async Task<List<CMCheckListMapList>> GetCheckListMap(int facility_id, int category_id = 0, int? checklist_type=null)
+        internal async Task<List<CMCheckListMapList>> GetCheckListMap(int facility_id, int category_id = 0, int? type=null)
         {
             /*
              * Primary Table - CheckList_Mapping
@@ -174,9 +174,9 @@ namespace CMMSAPIs.Repositories.Masters
                                   "JOIN " + 
                                     "checklist_number ON checklist_number.id = checklist_mapping.checklist_id " + 
                                   $"WHERE checklist_mapping.facility_id = {facility_id} AND checklist_mapping.category_id = {_checkListMap.category_id} ";
-                if (checklist_type != null)
+                if (type != null)
                 {
-                    myQuery2 += $"AND checklist_number.type = {checklist_type}";
+                    myQuery2 += $"AND checklist_number.checklist_type = {type}";
                 }
                 List<CMCheckListIdName> _checkLists = await Context.GetData<CMCheckListIdName>(myQuery2).ConfigureAwait(false);
                 _checkListMap.checklists = _checkLists;
