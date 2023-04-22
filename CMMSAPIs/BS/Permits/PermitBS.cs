@@ -23,17 +23,17 @@ namespace CMMSAPIs.BS.Permits
          * Permit Main End Points 
         */
         Task<CMDefaultResponse> CreatePermit(CMCreatePermit set, int userID);
-        Task<List<CMPermitList>> GetPermitList(int facility_id, int userID);
+        Task<List<CMPermitList>> GetPermitList(int facility_id, int userID, bool self_view);
         Task<CMPermitDetail> GetPermitDetails(int permit_id);    
-        Task<CMDefaultResponse> PermitApprove(CMApproval request);
-        Task<CMDefaultResponse> PermitExtend(CMApproval request);
-        Task<CMDefaultResponse> PermitExtendApprove(CMApproval request);
-        Task<CMDefaultResponse> PermitExtendCancel(CMApproval request);
-        Task<CMDefaultResponse> PermitClose(CMApproval request);
-        Task<CMDefaultResponse> PermitReject(CMApproval request);
-        Task<CMDefaultResponse> PermitIssue(CMApproval request);
-        Task<CMDefaultResponse> PermitCancel(CMApproval request);
-        Task<int> UpdatePermit(CMUpdatePermit request);
+        Task<CMDefaultResponse> PermitApprove(CMApproval request, int userID);
+        Task<CMDefaultResponse> PermitExtend(CMApproval request, int userID);
+        Task<CMDefaultResponse> PermitExtendApprove(CMApproval request, int userID);
+        Task<CMDefaultResponse> PermitExtendCancel(CMApproval request, int userID);
+        Task<CMDefaultResponse> PermitClose(CMApproval request, int userID);
+        Task<CMDefaultResponse> PermitReject(CMApproval request, int userID);
+        Task<CMDefaultResponse> PermitIssue(CMApproval request, int userID);
+        Task<CMDefaultResponse> PermitCancel(CMApproval request, int userID);
+        Task<int> UpdatePermit(CMUpdatePermit request, int userID);
     }
 
     public class PermitBS : IPermitBS
@@ -113,13 +113,13 @@ namespace CMMSAPIs.BS.Permits
          * Permit Main Feature End Points
         */
 
-        public async Task<List<CMPermitList>> GetPermitList(int facility_id, int userID)
+        public async Task<List<CMPermitList>> GetPermitList(int facility_id, int userID, bool self_view)
         {
             try
             {
                 using (var repos = new PermitRepository(getDB))
                 {
-                    return await repos.GetPermitList(facility_id, userID);
+                    return await repos.GetPermitList(facility_id, userID, self_view);
 
                 }
             }
@@ -146,13 +146,13 @@ namespace CMMSAPIs.BS.Permits
             }
         }
 
-        public async Task<int> UpdatePermit(CMUpdatePermit request)
+        public async Task<int> UpdatePermit(CMUpdatePermit request, int userID)
         {
             try
             {
                 using (var repos = new PermitRepository(getDB))
                 {
-                    return await repos.UpdatePermit(request);
+                    return await repos.UpdatePermit(request, userID);
 
                 }
             }
@@ -181,13 +181,13 @@ namespace CMMSAPIs.BS.Permits
          * Permit Issue/Approval/Rejection/Cancel End Points
         */
 
-        public async Task<CMDefaultResponse> PermitApprove(CMApproval request)
+        public async Task<CMDefaultResponse> PermitApprove(CMApproval request, int userID)
         {
             try
             {
                 using (var repos = new PermitRepository(getDB))
                 {
-                    return await repos.PermitApprove(request);
+                    return await repos.PermitApprove(request, userID);
                 }
             }
             catch (Exception ex)
@@ -195,13 +195,13 @@ namespace CMMSAPIs.BS.Permits
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> PermitExtend(CMApproval request)
+        public async Task<CMDefaultResponse> PermitExtend(CMApproval request, int userID)
         {
             try
             {
                 using (var repos = new PermitRepository(getDB))
                 {
-                    return await repos.PermitExtend(request);
+                    return await repos.PermitExtend(request, userID);
                 }
             }
             catch (Exception ex)
@@ -209,13 +209,13 @@ namespace CMMSAPIs.BS.Permits
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> PermitExtendApprove(CMApproval request)
+        public async Task<CMDefaultResponse> PermitExtendApprove(CMApproval request, int userID)
         {
             try
             {
                 using (var repos = new PermitRepository(getDB))
                 {
-                    return await repos.PermitExtendApprove(request);
+                    return await repos.PermitExtendApprove(request, userID);
                 }
             }
             catch (Exception ex)
@@ -223,13 +223,13 @@ namespace CMMSAPIs.BS.Permits
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> PermitExtendCancel(CMApproval request)
+        public async Task<CMDefaultResponse> PermitExtendCancel(CMApproval request, int userID)
         {
             try
             {
                 using (var repos = new PermitRepository(getDB))
                 {
-                    return await repos.PermitExtendCancel(request);
+                    return await repos.PermitExtendCancel(request, userID);
                 }
             }
             catch (Exception ex)
@@ -237,28 +237,13 @@ namespace CMMSAPIs.BS.Permits
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> PermitClose(CMApproval request)
+        public async Task<CMDefaultResponse> PermitClose(CMApproval request, int userID)
         {
             try
             {
                 using (var repos = new PermitRepository(getDB))
                 {
-                    return await repos.PermitClose(request);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        }
-
-        public async Task<CMDefaultResponse> PermitReject(CMApproval request)
-        {
-            try
-            {
-                using (var repos = new PermitRepository(getDB))
-                {
-                    return await repos.PermitReject(request);
+                    return await repos.PermitClose(request, userID);
                 }
             }
             catch (Exception ex)
@@ -267,13 +252,13 @@ namespace CMMSAPIs.BS.Permits
             }
         }
 
-        public async Task<CMDefaultResponse> PermitIssue(CMApproval request)
+        public async Task<CMDefaultResponse> PermitReject(CMApproval request, int userID)
         {
             try
             {
                 using (var repos = new PermitRepository(getDB))
                 {
-                    return await repos.PermitIssue(request);
+                    return await repos.PermitReject(request, userID);
                 }
             }
             catch (Exception ex)
@@ -282,13 +267,28 @@ namespace CMMSAPIs.BS.Permits
             }
         }
 
-        public async Task<CMDefaultResponse> PermitCancel(CMApproval request)
+        public async Task<CMDefaultResponse> PermitIssue(CMApproval request, int userID)
         {
             try
             {
                 using (var repos = new PermitRepository(getDB))
                 {
-                    return await repos.PermitCancel(request);
+                    return await repos.PermitIssue(request, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> PermitCancel(CMApproval request, int userID)
+        {
+            try
+            {
+                using (var repos = new PermitRepository(getDB))
+                {
+                    return await repos.PermitCancel(request, userID);
                 }
             }
             catch (Exception ex)

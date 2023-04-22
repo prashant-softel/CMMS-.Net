@@ -96,11 +96,12 @@ namespace CMMSAPIs.Controllers.Permits
         [Authorize]
         [Route("GetPermitList")]
         [HttpGet]
-        public async Task<IActionResult> GetPermitList(int facility_id, int userID)
+        public async Task<IActionResult> GetPermitList(int facility_id, bool self_view)
         {
             try
             {
-                var data = await _PermitBS.GetPermitList(facility_id, userID);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _PermitBS.GetPermitList(facility_id, userID, self_view);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -147,12 +148,13 @@ namespace CMMSAPIs.Controllers.Permits
         */
         [Authorize]
         [Route("PermitIssue")]
-        [HttpPost]
+        [HttpPut]
         public async Task<IActionResult> PermitIssue([FromForm] CMApproval request)
         {
             try
             {
-                var data = await _PermitBS.PermitIssue(request);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _PermitBS.PermitIssue(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -163,12 +165,13 @@ namespace CMMSAPIs.Controllers.Permits
 
         [Authorize]
         [Route("PermitApprove")]
-        [HttpPost]
+        [HttpPut]
         public async Task<IActionResult> PermitApprove([FromForm] CMApproval request)
         {
             try
             {
-                var data = await _PermitBS.PermitApprove(request);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _PermitBS.PermitApprove(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -184,7 +187,8 @@ namespace CMMSAPIs.Controllers.Permits
         {
             try
             {
-                var data = await _PermitBS.PermitExtend(request);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _PermitBS.PermitExtend(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -200,7 +204,8 @@ namespace CMMSAPIs.Controllers.Permits
         {
             try
             {
-                var data = await _PermitBS.PermitExtendApprove(request);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _PermitBS.PermitExtendApprove(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -216,7 +221,8 @@ namespace CMMSAPIs.Controllers.Permits
         {
             try
             {
-                var data = await _PermitBS.PermitExtendCancel(request);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _PermitBS.PermitExtendCancel(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -232,7 +238,8 @@ namespace CMMSAPIs.Controllers.Permits
         {
             try
             {
-                var data = await _PermitBS.PermitClose(request);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _PermitBS.PermitClose(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -243,12 +250,13 @@ namespace CMMSAPIs.Controllers.Permits
 
         [Authorize]
         [Route("PermitReject")]
-        [HttpPost]
+        [HttpPut]
         public async Task<IActionResult> PermitReject([FromForm] CMApproval request)
         {
             try
             {
-                var data = await _PermitBS.PermitReject(request);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _PermitBS.PermitReject(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -260,12 +268,13 @@ namespace CMMSAPIs.Controllers.Permits
 
         [Authorize]
         [Route("PermitCancel")]
-        [HttpPost]
+        [HttpPut]
         public async Task<IActionResult> PermitCancel([FromForm] CMApproval request)
         {
             try
             {
-                var data = await _PermitBS.PermitCancel(request);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _PermitBS.PermitCancel(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -276,12 +285,13 @@ namespace CMMSAPIs.Controllers.Permits
 
         [Authorize]
         [Route("UpdatePermit")]
-        [HttpPost]
+        [HttpPatch]
         public async Task<IActionResult> UpdatePermit(CMUpdatePermit request)
         {
             try
             {
-                var data = await _PermitBS.UpdatePermit(request);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _PermitBS.UpdatePermit(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)

@@ -116,7 +116,10 @@ namespace CMMSAPIs.Repositories.Permits
             /*
              * return permit_type_id, name from PermitTypeLists table for requsted facility_id 
             */
-            string myQuery = $"SELECT id, title as name FROM permittypelists WHERE facilityId = { facility_id }";
+            string myQuery = $"SELECT id, title as name FROM permittypelists ";
+            if (facility_id <= 0)
+                throw new ArgumentException("Invalid Facility ID");
+            myQuery += $"WHERE facilityId = { facility_id };";
             List<CMDefaultList> _PermitTypeList = await Context.GetData<CMDefaultList>(myQuery).ConfigureAwait(false);
             return _PermitTypeList;
         }
@@ -130,8 +133,10 @@ namespace CMMSAPIs.Repositories.Permits
 
             string myQuery5 = "SELECT permitsaftymea.id as id, permitsaftymea.title as name, permitsaftymea.input as input FROM permitsafetyquestions  as  permitsaftyques " +
                              "LEFT JOIN permittypesafetymeasures as permitsaftymea ON permitsaftyques.safetyMeasureId = permitsaftymea.id " +
-                             "JOIN permits as ptw ON ptw.id = permitsaftymea.permitTypeId " +
-                             $"where ptw.id =  { permit_type_id }";
+                             "JOIN permittypelists as ptw ON ptw.id = permitsaftymea.permitTypeId ";
+            if(permit_type_id > 0)
+                myQuery5 += $"where ptw.id =  { permit_type_id } ";
+            myQuery5 += "GROUP BY permitsaftyques.safetyMeasureId;";
             List<CMSafetyMeasurementQuestionList> _QuestionList = await Context.GetData<CMSafetyMeasurementQuestionList>(myQuery5).ConfigureAwait(false);
             return _QuestionList;
         }
@@ -141,7 +146,10 @@ namespace CMMSAPIs.Repositories.Permits
             /*
              * return id, title from PermitJobTypeList table for requested facility_id
             */
-            string myQuery = $"SELECT id as id, title as name FROM permitjobtypelist WHERE facilityId =  { facility_id } ";
+            string myQuery = $"SELECT id as id, title as name FROM permitjobtypelist ";
+            if (facility_id <= 0)
+                throw new ArgumentException("Invalid Facility ID");
+            myQuery += $"WHERE facilityId =  { facility_id } ";
             List<CMDefaultList> _JobTypeList = await Context.GetData<CMDefaultList>(myQuery).ConfigureAwait(false);
             return _JobTypeList;
         }
@@ -151,7 +159,9 @@ namespace CMMSAPIs.Repositories.Permits
             /*
              * return * from PermitTBTJobList table for requested job_type_id
             */
-            string myQuery = $"SELECT id as id, title as name FROM permittbtjoblist WHERE jobTypeId =  { job_type_id } ";
+            string myQuery = $"SELECT id as id, title as name FROM permittbtjoblist ";
+            if (job_type_id > 0)
+                myQuery += $"WHERE jobTypeId =  { job_type_id } ";
             List<CMDefaultList> _JobTypeList = await Context.GetData<CMDefaultList>(myQuery).ConfigureAwait(false);
             return _JobTypeList;
         }
@@ -160,7 +170,7 @@ namespace CMMSAPIs.Repositories.Permits
          * Permit Main Feature End Points
         */
 
-        internal async Task<List<CMPermitList>> GetPermitList(int facility_id, int userID)
+        internal async Task<List<CMPermitList>> GetPermitList(int facility_id, int userID, bool self_view)
         {
             /*
              * Return id as well as string value
@@ -181,8 +191,15 @@ namespace CMMSAPIs.Repositories.Permits
                                   "LEFT JOIN " +
                                          "jobs as job ON ptw.id = job.linkedPermit " +
                                   "LEFT JOIN " +
-                                        "users as user ON user.id = ptw.issuedById or user.id = ptw.approvedById or user.id = ptw.acceptedById " +
-                                  $" WHERE ptw.facilityId = { facility_id } and user.id = { userID } ";
+                                        "users as user ON user.id = ptw.issuedById or user.id = ptw.approvedById or user.id = ptw.acceptedById ";
+            if(facility_id>0)
+            {
+                myQuery += $"WHERE ptw.facilityId = { facility_id } ";
+                if (self_view)
+                    myQuery += $"AND user.id = {userID} ";
+            }
+            myQuery += "GROUP BY ptw.id;";
+            //$" WHERE ptw.facilityId = { facility_id } and user.id = { userID } ";
             List<CMPermitList> _PermitList = await Context.GetData<CMPermitList>(myQuery).ConfigureAwait(false);
             foreach(CMPermitList _permit in _PermitList)
             {
@@ -348,9 +365,9 @@ namespace CMMSAPIs.Repositories.Permits
 
         /*         * Permit Issue/Approval/Rejection/Cancel End Points
         */
-        internal async Task<CMDefaultResponse> PermitExtend(CMApproval request)
+        internal async Task<CMDefaultResponse> PermitExtend(CMApproval request, int userID)
         {
-            string updateQry = $"update permits set extendReason = '{ request.comment }', extendTime = { UtilsRepository.GetUTCTime() }, extendStatus = { (int)CMMS.CMMS_Status.PTW_EXTEND_REQUESTED }  where id = { request.id }";
+            string updateQry = $"update permits set extendReason = '{ request.comment }', extendTime = '{ UtilsRepository.GetUTCTime() }', extendStatus = { (int)CMMS.CMMS_Status.PTW_EXTEND_REQUESTED }  where id = { request.id }";
             int retValue = await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
 
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
@@ -379,7 +396,7 @@ namespace CMMSAPIs.Repositories.Permits
             return response;
         }
 
-        internal async Task<CMDefaultResponse> PermitExtendApprove(CMApproval request)
+        internal async Task<CMDefaultResponse> PermitExtendApprove(CMApproval request, int userID)
         {
             string updateQry = $"update permits set extendStatus = '{ (int)CMMS.CMMS_Status.PTW_EXTEND_REQUEST_APPROVE }', extendApproveTime = '{ UtilsRepository.GetUTCTime() }' where id = { request.id }";
             List<CMDefaultResp> _Employee = await Context.GetData<CMDefaultResp>(updateQry).ConfigureAwait(false);
@@ -411,7 +428,7 @@ namespace CMMSAPIs.Repositories.Permits
               return response;
         }
 
-        internal async Task<CMDefaultResponse> PermitExtendCancel(CMApproval request)
+        internal async Task<CMDefaultResponse> PermitExtendCancel(CMApproval request, int userID)
         {
             string updateQry = $"update permits set extendStatus = {(int)CMMS.CMMS_Status.PTW_EXTEND_REQUEST_REJECTED }, extendRejectReason = '{ request.comment }' where id = { request.id }";
             int retValue = await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
@@ -441,14 +458,14 @@ namespace CMMSAPIs.Repositories.Permits
               return response;
         }
 
-        internal async Task<CMDefaultResponse> PermitIssue(CMApproval request)
+        internal async Task<CMDefaultResponse> PermitIssue(CMApproval request, int userID)
         {
             /*
              * Update Permit Table issuedReccomendations, issuedStatus, issuedDate
              * Return Message Issued successfully
             */
-            int userId = Utils.UtilsRepository.GetUserID();
-            string updateQry = $"update permits set issuedReccomendations = '{ request.comment }', issuedStatus = { (int) CMMS.CMMS_Status.PTW_ISSUED }, issuedDate = '{ UtilsRepository.GetUTCTime() }', issuedById = { userId }  where id = { request.id }";
+
+            string updateQry = $"update permits set issuedReccomendations = '{ request.comment }', issuedStatus = { (int) CMMS.CMMS_Status.PTW_ISSUED }, issuedDate = '{ UtilsRepository.GetUTCTime() }', issuedById = { userID }  where id = { request.id }";
             int retValue = await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
 
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
@@ -476,13 +493,12 @@ namespace CMMSAPIs.Repositories.Permits
                return response;
         }
 
-        internal async Task<CMDefaultResponse> PermitApprove(CMApproval request)
+        internal async Task<CMDefaultResponse> PermitApprove(CMApproval request, int userID)
         {
             /*Update Permit Table reccomendationsByApprover, approvedStatus, approvedDate
                        * Return Message Approved successfully*/
 
-            int userId = Utils.UtilsRepository.GetUserID();
-            string updateQry = $"update permits set reccomendationsByApprover = '{ request.comment }', approvedStatus = { (int)CMMS.CMMS_Status.PTW_APPROVE }, approvedDate = '{ UtilsRepository.GetUTCTime() }', approvedById = { userId }  where id = { request.id }";
+            string updateQry = $"update permits set reccomendationsByApprover = '{ request.comment }', approvedStatus = { (int)CMMS.CMMS_Status.PTW_APPROVE }, approvedDate = '{ UtilsRepository.GetUTCTime() }', approvedById = { userID }  where id = { request.id }";
             int retValue = await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
 
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
@@ -510,10 +526,10 @@ namespace CMMSAPIs.Repositories.Permits
             return response;
         }
 
-        internal async Task<CMDefaultResponse> PermitClose(CMApproval request)
+        internal async Task<CMDefaultResponse> PermitClose(CMApproval request, int userID)
         {
-            int userId = Utils.UtilsRepository.GetUserID();
-            string updateQry = $"update permits set completedDate = '{ UtilsRepository.GetUTCTime() }', completedStatus = { (int)CMMS.CMMS_Status.PTW_CLOSED }, completedById = { userId }  where id = { request.id }";
+
+            string updateQry = $"update permits set completedDate = '{ UtilsRepository.GetUTCTime() }', completedStatus = { (int)CMMS.CMMS_Status.PTW_CLOSED }, completedById = { userID }  where id = { request.id }";
             int retValue = await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
 
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
@@ -541,10 +557,10 @@ namespace CMMSAPIs.Repositories.Permits
             return response;
         }
 
-        internal async Task<CMDefaultResponse> PermitReject(CMApproval request)
+        internal async Task<CMDefaultResponse> PermitReject(CMApproval request, int userID)
         {
             int userId = Utils.UtilsRepository.GetUserID();
-            string updateQry = $"update permits set issuedReccomendations = '{ request.comment }', issuedStatus = { (int)CMMS.CMMS_Status.PTW_REJECTED_BY_ISSUER }, issuedDate ='{ UtilsRepository.GetUTCTime() }', issuedById = { userId }  where id = { request.id }";
+            string updateQry = $"update permits set issuedReccomendations = '{ request.comment }', issuedStatus = { (int)CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER }, issuedDate ='{ UtilsRepository.GetUTCTime() }', issuedById = { userId }  where id = { request.id }";
             int retValue = await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
 
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
@@ -565,21 +581,21 @@ namespace CMMSAPIs.Repositories.Permits
 
             List<CMPermitDetail> permitDetails = await Context.GetData<CMPermitDetail>(myQuery).ConfigureAwait(false);
 
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, permitDetails[0].insertedId, 0, 0, request.comment, CMMS.CMMS_Status.PTW_CANCELLED_BY_ISSUER);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, permitDetails[0].insertedId, 0, 0, request.comment, CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER);
 
-            CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_CANCELLED_BY_ISSUER, permitDetails[0]);
+            CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER, permitDetails[0]);
             CMDefaultResponse response = new CMDefaultResponse(permitDetails[0].insertedId, CMMS.RETRUNSTATUS.SUCCESS, $" Permit  { permitDetails[0].insertedId } Reject");
             return response;
         }
 
-        internal async Task<CMDefaultResponse> PermitCancel(CMApproval request)
+        internal async Task<CMDefaultResponse> PermitCancel(CMApproval request, int userID)
         {
             /*
              * Update Permit Table 	cancelReccomendations, cancelRequestDate, cancelRequestStatus
              * Return Message Cancelled successfully
             */
-            int userId = Utils.UtilsRepository.GetUserID();
-            string updateQry = $"update permits set cancelReccomendations = '{ request.comment }', cancelRequestStatus = { (int)CMMS.CMMS_Status.PTW_CANCELLED_BY_ISSUER }, cancelRequestDate = '{ UtilsRepository.GetUTCTime() }', cancelRequestById = { userId }  where id = { request.id }";
+
+            string updateQry = $"update permits set cancelReccomendations = '{ request.comment }', cancelRequestStatus = { (int)CMMS.CMMS_Status.PTW_CANCELLED_BY_ISSUER }, cancelRequestDate = '{ UtilsRepository.GetUTCTime() }', cancelRequestById = { userID }  where id = { request.id }";
             int retValue = await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
 
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
@@ -607,9 +623,31 @@ namespace CMMSAPIs.Repositories.Permits
             return response;
         }
 
-        internal async Task<int> UpdatePermit(CMUpdatePermit request)
+        internal async Task<int> UpdatePermit(CMUpdatePermit request, int userID)
         {
-            string updatePermitQry = $"update permits set facilityId = { request.facility_id },blockId = { request.blockId }, startDate = '{ UtilsRepository.GetUTCTime() }', endDate = '{ UtilsRepository.GetUTCTime() }', description = '{ request.description }', jobId = { request.job_type_id }, LOTOId = { request.lotoId }, typeId = { request.typeId }, TBTId = { request.sop_type_id }, issuedById = { request.issuer_id }, approvedById = { request.approver_id }, acceptedById = { request.user_id } where id = { request.permit_id };";
+            string updatePermitQry = $"update permits set ";
+            if (request.facility_id > 0)
+                updatePermitQry += $"facilityId = { request.facility_id }, ";
+            if (request.blockId > 0)
+                updatePermitQry += $"blockId = { request.blockId }, ";
+            if (request.start_date != null)
+                updatePermitQry += $"startDate = '{ ((DateTime)request.start_date).ToString("yyyy-MM-dd") }', ";
+            if (request.end_date != null)
+                updatePermitQry += $"endDate = '{ ((DateTime)request.end_date).ToString("yyyy-MM-dd") }', ";
+            if (request.description != null && request.description != "")
+                updatePermitQry += $"description = '{ request.description }', ";
+            if (request.job_type_id > 0)
+                updatePermitQry += $"jobTypeId = { request.job_type_id }, ";
+            if (request.typeId > 0)
+                updatePermitQry += $"typeId = { request.typeId }, ";
+            if (request.sop_type_id > 0)
+                updatePermitQry += $"TBTId = { request.sop_type_id }, ";
+            if (request.issuer_id > 0)
+                updatePermitQry += $"issuedById = { request.issuer_id }, ";
+            if (request.approver_id > 0)
+                updatePermitQry += $"approvedById = { request.approver_id }, ";
+            updatePermitQry += $"acceptedById = {userID} ";
+            updatePermitQry += $"where id = { request.permit_id };";
             await Context.ExecuteNonQry<int>(updatePermitQry).ConfigureAwait(false);
             int updatePrimaryKey = request.permit_id;
 
