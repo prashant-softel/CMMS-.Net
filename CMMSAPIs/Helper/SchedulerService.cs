@@ -56,7 +56,7 @@ namespace CMMSAPIs.Helper
                 
 
                     var repo = new EscalationMatrixRepository(db);
-                    repo.getEscalationLevel();
+                    //repo.getEscalationLevel();
 
                 }
 

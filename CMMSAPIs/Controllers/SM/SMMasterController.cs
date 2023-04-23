@@ -251,10 +251,11 @@ namespace CMMSAPIs.Controllers.SM
 
         [Route("AddAssetMaster")]
         [HttpPost]
-        public async Task<IActionResult> AddAssetMaster(CMSMMaster request, AssetMasterFiles fileData)
+        public async Task<IActionResult> AddAssetMaster(CMSMMaster request)
         {
             try
             {
+                AssetMasterFiles fileData = request.fileData;
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
                 var data = await _SMMasterBS.AddAssetMaster(request, fileData, userID);
                 return Ok(data);
@@ -267,10 +268,11 @@ namespace CMMSAPIs.Controllers.SM
 
         [Route("UpdateAssetMaster")]
         [HttpPut]
-        public async Task<IActionResult> UpdateAssetMaster(CMSMMaster request, AssetMasterFiles fileData)
+        public async Task<IActionResult> UpdateAssetMaster(CMSMMaster request)
         {
             try
             {
+                AssetMasterFiles fileData = request.fileData;
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
                 var data = await _SMMasterBS.UpdateAssetMaster(request, fileData, userID);
                 return Ok(data);
