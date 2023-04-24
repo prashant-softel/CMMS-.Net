@@ -28,7 +28,14 @@ namespace CMMSAPIs.Models.Permits
     {
         public int id { get; set; }
         public string name { get; set; }
-        public int input { get; set; }
+        public int inputID { get; set; }
+        public string inputName { get; set; }
+        public string permitType { get; set; }
     }
-
+    public class CMSOPList
+    {
+        public int id { get; set; }
+        public string name { get; set; }
+        public string jobTypeName { get; set; }
+    }
 }

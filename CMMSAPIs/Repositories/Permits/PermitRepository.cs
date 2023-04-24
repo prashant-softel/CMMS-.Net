@@ -62,13 +62,25 @@ namespace CMMSAPIs.Repositories.Permits
              * return id, title from PermitTypeSafetyMeasures table for requested permit_type_id
              * input 1 - checkbox, 2 - radio, 3 - text, 4 - Ok
             */
-
-            string myQuery5 = "SELECT permitsaftymea.id as id, permitsaftymea.title as name, permitsaftymea.input as input FROM permitsafetyquestions  as  permitsaftyques " +
+            Dictionary<int, string> InputDictionary = new Dictionary<int, string>
+            {
+                { 1, "Checkbox" },
+                { 2, "Radio" },
+                { 3, "Text" },
+                { 4, "OK" }
+            };
+            string inputTypeOut = "CASE ";
+            foreach (KeyValuePair<int, string> input in InputDictionary)
+            {
+                inputTypeOut += $"WHEN permitsaftymea.input = {input.Key} THEN '{input.Value}' ";
+            }
+            inputTypeOut += $"ELSE 'Invalid Input Type' END";
+            string myQuery5 = $"SELECT permitsaftymea.id as id, permitsaftymea.title as name, permitsaftymea.input as inputID, { inputTypeOut } as inputName, ptw.title as permitType FROM permitsafetyquestions  as  permitsaftyques " +
                              "LEFT JOIN permittypesafetymeasures as permitsaftymea ON permitsaftyques.safetyMeasureId = permitsaftymea.id " +
                              "JOIN permittypelists as ptw ON ptw.id = permitsaftymea.permitTypeId ";
             if(permit_type_id > 0)
                 myQuery5 += $"where ptw.id =  { permit_type_id } ";
-            myQuery5 += "GROUP BY permitsaftyques.safetyMeasureId;";
+            myQuery5 += "GROUP BY permitsaftyques.safetyMeasureId ORDER BY ptw.id ASC;";
             List<CMSafetyMeasurementQuestionList> _QuestionList = await Context.GetData<CMSafetyMeasurementQuestionList>(myQuery5).ConfigureAwait(false);
             return _QuestionList;
         }
@@ -86,15 +98,18 @@ namespace CMMSAPIs.Repositories.Permits
             return _JobTypeList;
         }
 
-        internal async Task<List<CMDefaultList>> GetSOPList(int job_type_id)
+        internal async Task<List<CMSOPList>> GetSOPList(int job_type_id)
         {
             /*
              * return * from PermitTBTJobList table for requested job_type_id
             */
-            string myQuery = $"SELECT id as id, title as name FROM permittbtjoblist ";
+            string myQuery = $"SELECT tbtlist.id as id, tbtlist.title as name, jobtypes.title as jobTypeName " +
+                                $"FROM permittbtjoblist as tbtlist " +
+                                $"LEFT JOIN permitjobtypelist as jobtypes ON tbtlist.jobTypeId = jobtypes.id ";
             if (job_type_id > 0)
-                myQuery += $"WHERE jobTypeId =  { job_type_id } ";
-            List<CMDefaultList> _JobTypeList = await Context.GetData<CMDefaultList>(myQuery).ConfigureAwait(false);
+                myQuery += $"WHERE tbtlist.jobTypeId =  { job_type_id } ";
+            myQuery += "ORDER BY jobtypes.id ASC, tbtlist.id ASC;";
+            List<CMSOPList> _JobTypeList = await Context.GetData<CMSOPList>(myQuery).ConfigureAwait(false);
             return _JobTypeList;
         }
 
