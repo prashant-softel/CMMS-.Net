@@ -16,6 +16,8 @@ using MySql.Data.MySqlClient;
 using System.Transactions;
 using Microsoft.IdentityModel.Tokens;
 using System.Diagnostics;
+using System.ComponentModel;
+using Google.Protobuf.WellKnownTypes;
 
 
 namespace CMMSAPIs.Repositories.SM
@@ -51,17 +53,57 @@ namespace CMMSAPIs.Repositories.SM
                 var lastMRSID = request.ID;
                 var refType = "MRSEdit";
                 var mailSub = "MRS Request Updated";
-                string updatestmt = $"UPDATE smmrs SET plant_ID = { request.plant_ID}, requested_by_emp_ID = {request.requested_by_emp_ID}, requested_date = {request.requestd_date},"+
-                    $"status = '0', flag = {request.flag}, setAsTemplate = {request.setAsTemplate}, templateName = {request.templateName}, approval_status = {request.approval_status} WHERE ID = {request.ID}";
+                string updatestmt = $" START TRANSACTION; UPDATE smmrs SET plant_ID = {request.plant_ID}, requested_by_emp_ID = {request.requested_by_emp_ID}, requested_date = {request.requestd_date}," +
+                    $"status = '0', flag = {request.flag}, setAsTemplate = {request.setAsTemplate}, templateName = {request.templateName}, approval_status = {request.approval_status} WHERE ID = {request.ID}" +
+                    $"DELETE FROM smrsitems WHERE mrs_ID =  {lastMRSID} ; IF @@ERROR <> 0 THEN\r\n    ROLLBACK;\r\nELSE\r\n    COMMIT;\r\nEND IF;";
                 await Context.ExecuteNonQry<int>(updatestmt);
+
             }
             else
             {
-
+                var refType = "MRS";
+                var mailSub = "MRS Request";
+                string insertStmt = $"START TRANSACTION; INSERT INTO smmrs (plant_ID,requested_by_emp_ID,requested_date," +
+                    $"status,flag,setAsTemplate,templateName)\r\n VALUES ({request.plant_ID},{request.requested_by_emp_ID},{request.requestd_date}" +
+                    $",0,{request.flag},{request.setAsTemplate},'{request.templateName}'); SELECT LAST_INSERT_ID(); IF @@ERROR <> 0 THEN\r\n    ROLLBACK;\r\nELSE\r\n    COMMIT;\r\n END IF;";
+                DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
+                request.ID = Convert.ToInt32(dt2.Rows[0][0]);
             }
-            return response;
+
+            if (request.ID != null)
+            {
+             for(var i=0; i<request.equipments.Count; i++) {
+
+                    int equipmentID = request.equipments[i].equipmentID;
+                    decimal quantity = request.equipments[i].qty;
+
+                    string selectQuery = "SELECT sam.approval_required, sat.asset_code, asset_type_ID FROM smassetitems sat " +
+                               "LEFT JOIN smassetmasters sam ON sam.asset_code = sat.asset_code " +
+                               "WHERE sat.ID = " + equipmentID;
+                    
+                   List<CMSMMaster> _checkList = await Context.GetData<CMSMMaster>(selectQuery).ConfigureAwait(false);
+                }                           
+            }
+                return response;
         }
-        
+
+        protected async Task<List<UnitMeasurement>> getUnitIDs(string asset_code = "", int asset_ID = 0)
+        {
+            string stmt = "";
+            if (!string.IsNullOrEmpty(asset_code))
+            {
+
+                stmt = $"SELECT f_sum.spare_multi_selection FROM smassetmasters sam JOIN smunitmeasurement f_sum ON sam.unit_of_measurement = f_sum.ID WHERE sam.asset_code = '{asset_code}'";
+            }
+            else if (asset_ID>0)
+            {
+
+                stmt = $"SELECT f_sum.spare_multi_selection FROM smassetitems sai JOIN smassetmasters sam ON sai.asset_code = sam.asset_code JOIN smunitmeasurement f_sum ON sam.unit_of_measurement = f_sum.ID WHERE sai.ID = {asset_code}";
+            }
+
+            List<UnitMeasurement> _checkList = await Context.GetData<UnitMeasurement>(stmt).ConfigureAwait(false);
+            return _checkList;
+        } 
         internal async Task<List<MRS>> getMRSItems(int ID)
         {
             string stmt = "SELECT smi.ID,smi.return_remarks,smi.mrs_return_ID,smi.finalRemark,smi.asset_item_ID,smi.asset_MDM_code," +

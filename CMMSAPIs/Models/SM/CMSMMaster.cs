@@ -101,5 +101,13 @@ namespace CMMSAPIs.Models.SM
         public int Asset_master_id { get; set; }
         public int isEditMode { get; set; }
 
+        public List<equipments> equipments { get; set;}
+
+    }
+    public class equipments
+    {
+        public int id { get; set; }
+        public int equipmentID { get; set; }
+        public decimal qty { get; set; }
     }
 }
