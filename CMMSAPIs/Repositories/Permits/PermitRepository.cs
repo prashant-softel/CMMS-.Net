@@ -130,13 +130,25 @@ namespace CMMSAPIs.Repositories.Permits
              * return id, title from PermitTypeSafetyMeasures table for requested permit_type_id
              * input 1 - checkbox, 2 - radio, 3 - text, 4 - Ok
             */
-
-            string myQuery5 = "SELECT permitsaftymea.id as id, permitsaftymea.title as name, permitsaftymea.input as input FROM permitsafetyquestions  as  permitsaftyques " +
+            Dictionary<int, string> InputDictionary = new Dictionary<int, string>
+            {
+                { 1, "Checkbox" },
+                { 2, "Radio" },
+                { 3, "Text" },
+                { 4, "OK" }
+            };
+            string inputTypeOut = "CASE ";
+            foreach (KeyValuePair<int, string> input in InputDictionary)
+            {
+                inputTypeOut += $"WHEN permitsaftymea.input = {input.Key} THEN '{input.Value}' ";
+            }
+            inputTypeOut += $"ELSE 'Invalid Input Type' END";
+            string myQuery5 = $"SELECT permitsaftymea.id as id, permitsaftymea.title as name, permitsaftymea.input as inputID, { inputTypeOut } as inputName, ptw.title as permitType FROM permitsafetyquestions  as  permitsaftyques " +
                              "LEFT JOIN permittypesafetymeasures as permitsaftymea ON permitsaftyques.safetyMeasureId = permitsaftymea.id " +
                              "JOIN permittypelists as ptw ON ptw.id = permitsaftymea.permitTypeId ";
             if(permit_type_id > 0)
                 myQuery5 += $"where ptw.id =  { permit_type_id } ";
-            myQuery5 += "GROUP BY permitsaftyques.safetyMeasureId;";
+            myQuery5 += "GROUP BY permitsaftyques.safetyMeasureId ORDER BY ptw.id ASC;";
             List<CMSafetyMeasurementQuestionList> _QuestionList = await Context.GetData<CMSafetyMeasurementQuestionList>(myQuery5).ConfigureAwait(false);
             return _QuestionList;
         }
@@ -154,15 +166,18 @@ namespace CMMSAPIs.Repositories.Permits
             return _JobTypeList;
         }
 
-        internal async Task<List<CMDefaultList>> GetSOPList(int job_type_id)
+        internal async Task<List<CMSOPList>> GetSOPList(int job_type_id)
         {
             /*
              * return * from PermitTBTJobList table for requested job_type_id
             */
-            string myQuery = $"SELECT id as id, title as name FROM permittbtjoblist ";
+            string myQuery = $"SELECT tbtlist.id as id, tbtlist.title as name, jobtypes.title as jobTypeName " +
+                                $"FROM permittbtjoblist as tbtlist " +
+                                $"LEFT JOIN permitjobtypelist as jobtypes ON tbtlist.jobTypeId = jobtypes.id ";
             if (job_type_id > 0)
-                myQuery += $"WHERE jobTypeId =  { job_type_id } ";
-            List<CMDefaultList> _JobTypeList = await Context.GetData<CMDefaultList>(myQuery).ConfigureAwait(false);
+                myQuery += $"WHERE tbtlist.jobTypeId =  { job_type_id } ";
+            myQuery += "ORDER BY jobtypes.id ASC, tbtlist.id ASC;";
+            List<CMSOPList> _JobTypeList = await Context.GetData<CMSOPList>(myQuery).ConfigureAwait(false);
             return _JobTypeList;
         }
 
@@ -229,7 +244,7 @@ namespace CMMSAPIs.Repositories.Permits
             string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as startDate, ptw.endDate as tillDate, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, facilities.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.description as description,CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, CONCAT(user3.firstName,' ',user3.lastName) as completedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, CONCAT(user5.firstName,' ',user5.lastName) as closedByName, ptw.cancelRequestDate as cancel_at " +
               "FROM permits as ptw " +
               "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
-              "JOIN facilities as facilities  ON ptw.blockId = facilities.id and facilities.isBlock = 1 " +
+              "JOIN facilities as facilities  ON ptw.blockId = facilities.id " +
               "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
               "LEFT JOIN users as user2 ON user2.id = ptw.approvedById " +
               "LEFT JOIN users as user3 ON user3.id = ptw.completedById " +
@@ -302,7 +317,7 @@ namespace CMMSAPIs.Repositories.Permits
             string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as startDate, ptw.endDate as tillDate, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, facilities.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.description as description,CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, CONCAT(user3.firstName,' ',user3.lastName) as completedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, CONCAT(user5.firstName,' ',user5.lastName) as closedByName, ptw.cancelRequestDate as cancel_at " +
               "FROM permits as ptw " +
               "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
-              "JOIN facilities as facilities  ON ptw.blockId = facilities.id and facilities.isBlock = 1 " +
+              "JOIN facilities as facilities  ON ptw.blockId = facilities.id " +
               "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
               "LEFT JOIN users as user2 ON user2.id = ptw.approvedById " +
               "LEFT JOIN users as user3 ON user3.id = ptw.completedById " +
@@ -318,7 +333,7 @@ namespace CMMSAPIs.Repositories.Permits
             List<CMEMPLIST> _EmpList = await Context.GetData<CMEMPLIST>(myQuery1).ConfigureAwait(false);
 
             //get isolation list
-            string myQuery2 = "SELECT asset_cat.id as IsolationAssetsCatID, asset_cat.name as IsolationAssetsCatName FROM permitisolatedassetcategories AS ptwISOCat LEFT JOIN assetcategories as asset_cat  ON ptwISOCat.assetCategoryId = asset_cat.id where ptwISOCat.permitId = " + permit_id;
+            string myQuery2 = $"SELECT asset_cat.id as IsolationAssetsCatID, asset_cat.name as IsolationAssetsCatName FROM permitisolatedassetcategories AS ptwISOCat LEFT JOIN assetcategories as asset_cat  ON ptwISOCat.assetCategoryId = asset_cat.id where ptwISOCat.permitId =  {permit_id} GROUP BY asset_cat.id ;";
             List<CMIsolationList> _IsolationList = await Context.GetData<CMIsolationList>(myQuery2).ConfigureAwait(false);
 
             //get loto
@@ -379,7 +394,7 @@ namespace CMMSAPIs.Repositories.Permits
             string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as startDate, ptw.endDate as tillDate, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, facilities.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.description as description,CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, CONCAT(user3.firstName,' ',user3.lastName) as completedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, ptw.cancelRequestDate as cancel_at "+
             "FROM permits as ptw " +
             "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
-            "JOIN facilities as facilities  ON ptw.blockId = facilities.id and facilities.isBlock = 1 " +
+            "LEFT JOIN facilities as facilities  ON ptw.blockId = facilities.id " +
              "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
              "LEFT JOIN users as user2 ON user2.id = ptw.approvedById " +
              "LEFT JOIN users as user3 ON user3.id = ptw.completedById " +
@@ -412,7 +427,7 @@ namespace CMMSAPIs.Repositories.Permits
             string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as startDate, ptw.endDate as tillDate, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, facilities.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.description as description,CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, CONCAT(user3.firstName,' ',user3.lastName) as completedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, ptw.cancelRequestDate as cancel_at "+
               "FROM permits as ptw " +
               "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
-              "JOIN facilities as facilities  ON ptw.blockId = facilities.id and facilities.isBlock = 1 " +
+              "LEFT JOIN facilities as facilities  ON ptw.blockId = facilities.id " +
               "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
               "LEFT JOIN users as user2 ON user2.id = ptw.approvedById " +
               "LEFT JOIN users as user3 ON user3.id = ptw.completedById " +
@@ -442,7 +457,7 @@ namespace CMMSAPIs.Repositories.Permits
             string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as startDate, ptw.endDate as tillDate, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, facilities.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.description as description,CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, CONCAT(user3.firstName,' ',user3.lastName) as completedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, ptw.cancelRequestDate as cancel_at "+
               "FROM permits as ptw " +
               "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
-              "JOIN facilities as facilities  ON ptw.blockId = facilities.id and facilities.isBlock = 1 " +
+              "LEFT JOIN facilities as facilities  ON ptw.blockId = facilities.id " +
               "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
               "LEFT JOIN users as user2 ON user2.id = ptw.approvedById " +
               "LEFT JOIN users as user3 ON user3.id = ptw.completedById " +
@@ -477,7 +492,7 @@ namespace CMMSAPIs.Repositories.Permits
             string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as startDate, ptw.endDate as tillDate, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, facilities.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.description as description,CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, CONCAT(user3.firstName,' ',user3.lastName) as completedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, ptw.cancelRequestDate as cancel_at "+
               "FROM permits as ptw " +
               "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
-              "JOIN facilities as facilities  ON ptw.blockId = facilities.id and facilities.isBlock = 1 " +
+              "LEFT JOIN facilities as facilities  ON ptw.blockId = facilities.id " +
               "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
               "LEFT JOIN users as user2 ON user2.id = ptw.approvedById " +
               "LEFT JOIN users as user3 ON user3.id = ptw.completedById " +
@@ -510,7 +525,7 @@ namespace CMMSAPIs.Repositories.Permits
             string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as startDate, ptw.endDate as tillDate, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, facilities.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.description as description,CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, CONCAT(user3.firstName,' ',user3.lastName) as completedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, ptw.cancelRequestDate as cancel_at "+
                   "FROM permits as ptw " +
                   "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
-                  "JOIN facilities as facilities  ON ptw.blockId = facilities.id and facilities.isBlock = 1 " +
+                  "LEFT JOIN facilities as facilities  ON ptw.blockId = facilities.id " +
                   "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
                   "LEFT JOIN users as user2 ON user2.id = ptw.approvedById " +
                   "LEFT JOIN users as user3 ON user3.id = ptw.completedById " +
@@ -541,7 +556,7 @@ namespace CMMSAPIs.Repositories.Permits
             string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as startDate, ptw.endDate as tillDate, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, facilities.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.description as description,CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, CONCAT(user3.firstName,' ',user3.lastName) as completedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, ptw.cancelRequestDate as cancel_at "+
                   "FROM permits as ptw " +
                   "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
-                  "JOIN facilities as facilities  ON ptw.blockId = facilities.id and facilities.isBlock = 1 " +
+                  "LEFT JOIN facilities as facilities  ON ptw.blockId = facilities.id " +
                   "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
                   "LEFT JOIN users as user2 ON user2.id = ptw.approvedById " +
                   "LEFT JOIN users as user3 ON user3.id = ptw.completedById " +
@@ -572,7 +587,7 @@ namespace CMMSAPIs.Repositories.Permits
             string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as startDate, ptw.endDate as tillDate, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, facilities.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.description as description,CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, CONCAT(user3.firstName,' ',user3.lastName) as completedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, ptw.cancelRequestDate as cancel_at " +
                  "FROM permits as ptw " +
                  "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
-                 "JOIN facilities as facilities  ON ptw.blockId = facilities.id and facilities.isBlock = 1 " +
+                 "LEFT JOIN facilities as facilities  ON ptw.blockId = facilities.id " +
                  "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
                  "LEFT JOIN users as user2 ON user2.id = ptw.approvedById " +
                  "LEFT JOIN users as user3 ON user3.id = ptw.completedById " +
@@ -607,7 +622,7 @@ namespace CMMSAPIs.Repositories.Permits
             string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as startDate, ptw.endDate as tillDate, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, facilities.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.description as description,CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, CONCAT(user3.firstName,' ',user3.lastName) as completedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, ptw.cancelRequestDate as cancel_at " +
                 "FROM permits as ptw " +
                 "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
-                "JOIN facilities as facilities  ON ptw.blockId = facilities.id and facilities.isBlock = 1 " +
+                "LEFT JOIN facilities as facilities  ON ptw.blockId = facilities.id " +
                 "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
                 "LEFT JOIN users as user2 ON user2.id = ptw.approvedById " +
                 "LEFT JOIN users as user3 ON user3.id = ptw.completedById " +
@@ -647,14 +662,15 @@ namespace CMMSAPIs.Repositories.Permits
             if (request.approver_id > 0)
                 updatePermitQry += $"approvedById = { request.approver_id }, ";
             updatePermitQry += $"acceptedById = {userID} ";
-            updatePermitQry += $"where id = { request.permit_id };";
+            updatePermitQry += $"where id = { request.permit_id }; ";
+
             await Context.ExecuteNonQry<int>(updatePermitQry).ConfigureAwait(false);
             int updatePrimaryKey = request.permit_id;
 
             string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as startDate, ptw.endDate as tillDate, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, facilities.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.description as description,CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, CONCAT(user3.firstName,' ',user3.lastName) as completedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, ptw.cancelRequestDate as cancel_at "+
              "FROM permits as ptw " +
              "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
-             "JOIN facilities as facilities  ON ptw.blockId = facilities.id and facilities.isBlock = 1 " +
+             "LEFT JOIN facilities as facilities  ON ptw.blockId = facilities.id " +
               "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
               "LEFT JOIN users as user2 ON user2.id = ptw.approvedById " +
               "LEFT JOIN users as user3 ON user3.id = ptw.completedById " +
@@ -664,58 +680,77 @@ namespace CMMSAPIs.Repositories.Permits
             List<CMPermitDetail> permitDetails = await Context.GetData<CMPermitDetail>(myQuery).ConfigureAwait(false);
             int insertedId = permitDetails[0].insertedId;
 
-            string DeleteQry = $"delete from permitblocks where ptw_id = { request.permit_id };";
-            await Context.ExecuteNonQry<int>(DeleteQry).ConfigureAwait(false);
-
-            foreach (var data in request.block_ids)
+            if(request.block_ids.Count > 0)
             {
-                string qryPermitBlock = $"insert into permitblocks(ptw_id, block_id ) value ({ updatePrimaryKey }, { data })";
-                await Context.ExecuteNonQry<int>(qryPermitBlock).ConfigureAwait(false);
-            }
-            string DeleteQry1 = $"delete from permitassetlists where ptwId = {request.permit_id};";
-            await Context.ExecuteNonQry<int>(DeleteQry1).ConfigureAwait(false);
+                string DeleteQry = $"delete from permitblocks where ptw_id = { request.permit_id };";
+                await Context.ExecuteNonQry<int>(DeleteQry).ConfigureAwait(false);
 
-            foreach (var data in request.category_ids)
-            {     
-                string qryPermitCategory = $"insert into permitassetlists (ptwId, assetId ) value ({ updatePrimaryKey }, { data })";
-                await Context.ExecuteNonQry<int>(qryPermitCategory).ConfigureAwait(false);
-            }
-
-            string DeleteQry2 = $"delete from permitisolatedassetcategories where permitId = { request.permit_id };";
-            await Context.ExecuteNonQry<int>(DeleteQry2).ConfigureAwait(false);
-            if (request.is_isolation_required == true)
-            {
-                foreach (int data in request.isolated_category_ids)
+                foreach (var data in request.block_ids)
                 {
-                    string qryPermitisolatedCategory = $"insert into permitisolatedassetcategories (permitId , assetCategoryId ) value ({ updatePrimaryKey },{ data })";
-                    await Context.ExecuteNonQry<int>(qryPermitisolatedCategory).ConfigureAwait(false);
+                    string qryPermitBlock = $"insert into permitblocks(ptw_id, block_id ) value ({ updatePrimaryKey }, { data })";
+                    await Context.ExecuteNonQry<int>(qryPermitBlock).ConfigureAwait(false);
                 }
             }
 
-            string DeleteQry3 = $"delete from permitlotoassets where PTW_id = { request.permit_id };";
-            await Context.ExecuteNonQry<int>(DeleteQry3).ConfigureAwait(false);
-            foreach (var data in request.Loto_list)
+            if(request.category_ids.Count > 0)
             {
-                string qryPermitlotoAssets = $"insert into permitlotoassets ( PTW_id , Loto_Asset_id, Loto_Key ) value ({ updatePrimaryKey }, { data.Loto_id }, '{ data.Loto_Key }')";
-                await Context.ExecuteNonQry<int>(qryPermitlotoAssets).ConfigureAwait(false);
+                string DeleteQry1 = $"delete from permitassetlists where ptwId = {request.permit_id};";
+                await Context.ExecuteNonQry<int>(DeleteQry1).ConfigureAwait(false);
+
+                foreach (var data in request.category_ids)
+                {
+                    string qryPermitCategory = $"insert into permitassetlists (ptwId, assetId ) value ({ updatePrimaryKey }, { data })";
+                    await Context.ExecuteNonQry<int>(qryPermitCategory).ConfigureAwait(false);
+                }
             }
 
-            string DeleteQry4 = $"delete from permitemployeelists where pwtId = { request.permit_id };";
-            await Context.ExecuteNonQry<int>(DeleteQry4).ConfigureAwait(false);
-            foreach (var data in request.employee_list)
+            if (request.is_isolation_required != null)
             {
-                string qryPermitEmpList = $"insert into permitemployeelists ( pwtId , employeeId , responsibility ) value ({ updatePrimaryKey },{ data.employeeId }, '{ data.responsibility}')";
-                await Context.ExecuteNonQry<int>(qryPermitEmpList).ConfigureAwait(false);
+                string DeleteQry2 = $"delete from permitisolatedassetcategories where permitId = { request.permit_id };";
+                await Context.ExecuteNonQry<int>(DeleteQry2).ConfigureAwait(false);
+                if (request.is_isolation_required == true)
+                {
+                    foreach (int data in request.isolated_category_ids)
+                    {
+                        string qryPermitisolatedCategory = $"insert into permitisolatedassetcategories (permitId , assetCategoryId ) value ({ updatePrimaryKey },{ data })";
+                        await Context.ExecuteNonQry<int>(qryPermitisolatedCategory).ConfigureAwait(false);
+                    }
+                }
             }
 
-            string DeleteQry5 = $"delete from permitsafetyquestions where permitId = { request.permit_id };";
-            await Context.ExecuteNonQry<int>(DeleteQry5).ConfigureAwait(false);
-            foreach (var data in request.safety_question_list)
+            if(request.Loto_list.Count > 0)
             {
-                string qryPermitSaftyQuestion = $"insert into permitsafetyquestions ( permitId , safetyMeasureId, safetyMeasureValue) value ({ updatePrimaryKey }, { data.safetyMeasureId }, '{ data.safetyMeasureValue }')";
-                await Context.ExecuteNonQry<int>(qryPermitSaftyQuestion).ConfigureAwait(false);
+                string DeleteQry3 = $"delete from permitlotoassets where PTW_id = { request.permit_id };";
+                await Context.ExecuteNonQry<int>(DeleteQry3).ConfigureAwait(false);
+                foreach (var data in request.Loto_list)
+                {
+                    string qryPermitlotoAssets = $"insert into permitlotoassets ( PTW_id , Loto_Asset_id, Loto_Key ) value ({ updatePrimaryKey }, { data.Loto_id }, '{ data.Loto_Key }')";
+                    await Context.ExecuteNonQry<int>(qryPermitlotoAssets).ConfigureAwait(false);
+                }
             }
-        
+
+            if(request.employee_list.Count > 0)
+            {
+                string DeleteQry4 = $"delete from permitemployeelists where pwtId = { request.permit_id };";
+                await Context.ExecuteNonQry<int>(DeleteQry4).ConfigureAwait(false);
+                foreach (var data in request.employee_list)
+                {
+                    string qryPermitEmpList = $"insert into permitemployeelists ( pwtId , employeeId , responsibility ) value ({ updatePrimaryKey },{ data.employeeId }, '{ data.responsibility}')";
+                    await Context.ExecuteNonQry<int>(qryPermitEmpList).ConfigureAwait(false);
+                }
+            }
+
+            if(request.safety_question_list.Count > 0)
+            {
+                string DeleteQry5 = $"delete from permitsafetyquestions where permitId = { request.permit_id };";
+                await Context.ExecuteNonQry<int>(DeleteQry5).ConfigureAwait(false);
+                foreach (var data in request.safety_question_list)
+                {
+                    string qryPermitSaftyQuestion = $"insert into permitsafetyquestions ( permitId , safetyMeasureId, safetyMeasureValue) value ({ updatePrimaryKey }, { data.safetyMeasureId }, '{ data.safetyMeasureValue }')";
+                    await Context.ExecuteNonQry<int>(qryPermitSaftyQuestion).ConfigureAwait(false);
+                }
+            }
+
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, updatePrimaryKey, 0, 0, "Permit Updated", CMMS.CMMS_Status.PTW_EDIT);
 
             CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_EDIT, permitDetails[0]);

@@ -17,7 +17,7 @@ namespace CMMSAPIs.BS.Permits
         Task<List<CMDefaultList>> GetPermitTypeList(int facility_id);
         Task<List<CMSafetyMeasurementQuestionList>> GetSafetyMeasurementQuestionList(int permit_type_id);
         Task<List<CMDefaultList>> GetJobTypeList(int facility_id);
-        Task<List<CMDefaultList>> GetSOPList(int job_type_id);
+        Task<List<CMSOPList>> GetSOPList(int job_type_id);
 
         /*
          * Permit Main End Points 
@@ -94,7 +94,7 @@ namespace CMMSAPIs.BS.Permits
             }
         }
 
-        public async Task<List<CMDefaultList>> GetSOPList(int job_type_id)
+        public async Task<List<CMSOPList>> GetSOPList(int job_type_id)
         {
             try
             {
