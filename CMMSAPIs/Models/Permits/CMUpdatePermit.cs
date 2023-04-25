@@ -24,7 +24,7 @@ namespace CMMSAPIs.Models.Permits
         public int user_id { get; set; }
         public List<int> block_ids { get; set; }
         public List<int> category_ids { get; set; }
-        public Boolean is_isolation_required { get; set; }
+        public Boolean? is_isolation_required { get; set; }
         public List<int> isolated_category_ids { get; set; }
         public List<CMPermitLotoList> Loto_list { get; set; }
         public List<CMPermitEmpList> employee_list { get; set; }
