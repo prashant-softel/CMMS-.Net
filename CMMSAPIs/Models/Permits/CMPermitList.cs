@@ -19,6 +19,8 @@ namespace CMMSAPIs.Models.Permits
         public string description { get; set; }
         public string request_by_name { get; set; }
         public dynamic request_datetime { get; set; }
+        public string issued_by_name { get; set; }
+        public dynamic issue_datetime { get; set; }
         public string approved_by_name { get; set; }
         public dynamic approved_datetime { get; set; }
         public string current_status { get; set; }
