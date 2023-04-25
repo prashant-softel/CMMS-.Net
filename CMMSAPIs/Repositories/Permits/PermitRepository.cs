@@ -126,7 +126,7 @@ namespace CMMSAPIs.Repositories.Permits
              * Request Date/Time, Approved By, Approved Date/Time, Current Status(Approved, Rejected, closed).           
             */
             string myQuery = "SELECT " +
-                                 "ptw.id as permitId, ptw.status as ptwStatus, ptw.permitNumber as permit_site_no, permitType.id as permit_type,  permitType.title as PermitTypeName, asset_cat.id as equipment_category, asset_cat.name as equipment, facilities.id as workingAreaId, facilities.name as workingAreaName, ptw.description as description, CONCAT(user.firstName + ' ' + user.lastName) as request_by_name, ptw.acceptedDate as request_datetime, CONCAT(user.firstName + ' ' + user.lastName) as approved_by_name, ptw.approvedDate as approved_datetime, ptw.status as currentStatus " +
+                                 "ptw.id as permitId, ptw.status as ptwStatus, ptw.permitNumber as permit_site_no, permitType.id as permit_type,  permitType.title as PermitTypeName, asset_cat.id as equipment_category, asset_cat.name as equipment, facilities.id as workingAreaId, facilities.name as workingAreaName, ptw.description as description, CONCAT(acceptedUser.firstName, ' ', acceptedUser.lastName) as request_by_name, ptw.acceptedDate as request_datetime, CONCAT(issuedUser.firstName, ' ', issuedUser.lastName) as issued_by_name, ptw.issuedDate as issued_datetime, CONCAT(approvedUser.firstName, ' ', approvedUser.lastName) as approved_by_name, ptw.approvedDate as approved_datetime, ptw.status as currentStatus " +
                                  " FROM " +
                                         "permits as ptw " +
                                   "JOIN " +
@@ -138,8 +138,12 @@ namespace CMMSAPIs.Repositories.Permits
                                   "LEFT JOIN " +
                                          "jobs as job ON ptw.id = job.linkedPermit " +
                                   "LEFT JOIN " +
-                                        "users as user ON user.id = ptw.issuedById or user.id = ptw.approvedById or user.id = ptw.acceptedById ";
-            if(facility_id>0)
+                                        "users as issuedUser ON issuedUser.id = ptw.issuedById " +
+                                  "LEFT JOIN " +
+                                        "users as approvedUser ON approvedUser.id = ptw.approvedById " +
+                                  "LEFT JOIN " +
+                                        "users as acceptedUser ON acceptedUser.id = ptw.acceptedById ";
+            if (facility_id>0)
             {
                 myQuery += $"WHERE ptw.facilityId = { facility_id } ";
                 if (self_view)
