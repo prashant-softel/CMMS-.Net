@@ -172,7 +172,7 @@ namespace CMMSAPIs.Repositories.Permits
             string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as startDate, ptw.endDate as tillDate, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, facilities.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.description as description,CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, CONCAT(user3.firstName,' ',user3.lastName) as completedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, CONCAT(user5.firstName,' ',user5.lastName) as closedByName, ptw.cancelRequestDate as cancel_at " +
               "FROM permits as ptw " +
               "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
-              "JOIN facilities as facilities  ON ptw.blockId = facilities.id and facilities.isBlock = 1 " +
+              "JOIN facilities as facilities  ON ptw.blockId = facilities.id " +
               "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
               "LEFT JOIN users as user2 ON user2.id = ptw.approvedById " +
               "LEFT JOIN users as user3 ON user3.id = ptw.completedById " +
@@ -245,7 +245,7 @@ namespace CMMSAPIs.Repositories.Permits
             string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as startDate, ptw.endDate as tillDate, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, facilities.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.description as description,CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, CONCAT(user3.firstName,' ',user3.lastName) as completedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, CONCAT(user5.firstName,' ',user5.lastName) as closedByName, ptw.cancelRequestDate as cancel_at " +
               "FROM permits as ptw " +
               "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
-              "JOIN facilities as facilities  ON ptw.blockId = facilities.id and facilities.isBlock = 1 " +
+              "JOIN facilities as facilities  ON ptw.blockId = facilities.id " +
               "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
               "LEFT JOIN users as user2 ON user2.id = ptw.approvedById " +
               "LEFT JOIN users as user3 ON user3.id = ptw.completedById " +
@@ -322,7 +322,7 @@ namespace CMMSAPIs.Repositories.Permits
             string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as startDate, ptw.endDate as tillDate, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, facilities.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.description as description,CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, CONCAT(user3.firstName,' ',user3.lastName) as completedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, ptw.cancelRequestDate as cancel_at "+
             "FROM permits as ptw " +
             "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
-            "LEFT JOIN facilities as facilities  ON ptw.blockId = facilities.id and facilities.isBlock = 1 " +
+            "LEFT JOIN facilities as facilities  ON ptw.blockId = facilities.id " +
              "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
              "LEFT JOIN users as user2 ON user2.id = ptw.approvedById " +
              "LEFT JOIN users as user3 ON user3.id = ptw.completedById " +
@@ -355,7 +355,7 @@ namespace CMMSAPIs.Repositories.Permits
             string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as startDate, ptw.endDate as tillDate, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, facilities.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.description as description,CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, CONCAT(user3.firstName,' ',user3.lastName) as completedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, ptw.cancelRequestDate as cancel_at "+
               "FROM permits as ptw " +
               "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
-              "LEFT JOIN facilities as facilities  ON ptw.blockId = facilities.id and facilities.isBlock = 1 " +
+              "LEFT JOIN facilities as facilities  ON ptw.blockId = facilities.id " +
               "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
               "LEFT JOIN users as user2 ON user2.id = ptw.approvedById " +
               "LEFT JOIN users as user3 ON user3.id = ptw.completedById " +
@@ -385,7 +385,7 @@ namespace CMMSAPIs.Repositories.Permits
             string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as startDate, ptw.endDate as tillDate, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, facilities.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.description as description,CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, CONCAT(user3.firstName,' ',user3.lastName) as completedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, ptw.cancelRequestDate as cancel_at "+
               "FROM permits as ptw " +
               "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
-              "LEFT JOIN facilities as facilities  ON ptw.blockId = facilities.id and facilities.isBlock = 1 " +
+              "LEFT JOIN facilities as facilities  ON ptw.blockId = facilities.id " +
               "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
               "LEFT JOIN users as user2 ON user2.id = ptw.approvedById " +
               "LEFT JOIN users as user3 ON user3.id = ptw.completedById " +
@@ -420,7 +420,7 @@ namespace CMMSAPIs.Repositories.Permits
             string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as startDate, ptw.endDate as tillDate, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, facilities.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.description as description,CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, CONCAT(user3.firstName,' ',user3.lastName) as completedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, ptw.cancelRequestDate as cancel_at "+
               "FROM permits as ptw " +
               "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
-              "LEFT JOIN facilities as facilities  ON ptw.blockId = facilities.id and facilities.isBlock = 1 " +
+              "LEFT JOIN facilities as facilities  ON ptw.blockId = facilities.id " +
               "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
               "LEFT JOIN users as user2 ON user2.id = ptw.approvedById " +
               "LEFT JOIN users as user3 ON user3.id = ptw.completedById " +
@@ -453,7 +453,7 @@ namespace CMMSAPIs.Repositories.Permits
             string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as startDate, ptw.endDate as tillDate, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, facilities.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.description as description,CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, CONCAT(user3.firstName,' ',user3.lastName) as completedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, ptw.cancelRequestDate as cancel_at "+
                   "FROM permits as ptw " +
                   "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
-                  "LEFT JOIN facilities as facilities  ON ptw.blockId = facilities.id and facilities.isBlock = 1 " +
+                  "LEFT JOIN facilities as facilities  ON ptw.blockId = facilities.id " +
                   "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
                   "LEFT JOIN users as user2 ON user2.id = ptw.approvedById " +
                   "LEFT JOIN users as user3 ON user3.id = ptw.completedById " +
@@ -484,7 +484,7 @@ namespace CMMSAPIs.Repositories.Permits
             string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as startDate, ptw.endDate as tillDate, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, facilities.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.description as description,CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, CONCAT(user3.firstName,' ',user3.lastName) as completedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, ptw.cancelRequestDate as cancel_at "+
                   "FROM permits as ptw " +
                   "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
-                  "LEFT JOIN facilities as facilities  ON ptw.blockId = facilities.id and facilities.isBlock = 1 " +
+                  "LEFT JOIN facilities as facilities  ON ptw.blockId = facilities.id " +
                   "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
                   "LEFT JOIN users as user2 ON user2.id = ptw.approvedById " +
                   "LEFT JOIN users as user3 ON user3.id = ptw.completedById " +
@@ -515,7 +515,7 @@ namespace CMMSAPIs.Repositories.Permits
             string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as startDate, ptw.endDate as tillDate, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, facilities.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.description as description,CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, CONCAT(user3.firstName,' ',user3.lastName) as completedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, ptw.cancelRequestDate as cancel_at " +
                  "FROM permits as ptw " +
                  "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
-                 "LEFT JOIN facilities as facilities  ON ptw.blockId = facilities.id and facilities.isBlock = 1 " +
+                 "LEFT JOIN facilities as facilities  ON ptw.blockId = facilities.id " +
                  "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
                  "LEFT JOIN users as user2 ON user2.id = ptw.approvedById " +
                  "LEFT JOIN users as user3 ON user3.id = ptw.completedById " +
@@ -550,7 +550,7 @@ namespace CMMSAPIs.Repositories.Permits
             string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as startDate, ptw.endDate as tillDate, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, facilities.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.description as description,CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, CONCAT(user3.firstName,' ',user3.lastName) as completedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, ptw.cancelRequestDate as cancel_at " +
                 "FROM permits as ptw " +
                 "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
-                "LEFT JOIN facilities as facilities  ON ptw.blockId = facilities.id and facilities.isBlock = 1 " +
+                "LEFT JOIN facilities as facilities  ON ptw.blockId = facilities.id " +
                 "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
                 "LEFT JOIN users as user2 ON user2.id = ptw.approvedById " +
                 "LEFT JOIN users as user3 ON user3.id = ptw.completedById " +
@@ -598,7 +598,7 @@ namespace CMMSAPIs.Repositories.Permits
             string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as startDate, ptw.endDate as tillDate, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, facilities.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.description as description,CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, CONCAT(user3.firstName,' ',user3.lastName) as completedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, ptw.cancelRequestDate as cancel_at "+
              "FROM permits as ptw " +
              "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
-             "LEFT JOIN facilities as facilities  ON ptw.blockId = facilities.id and facilities.isBlock = 1 " +
+             "LEFT JOIN facilities as facilities  ON ptw.blockId = facilities.id " +
               "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
               "LEFT JOIN users as user2 ON user2.id = ptw.approvedById " +
               "LEFT JOIN users as user3 ON user3.id = ptw.completedById " +
