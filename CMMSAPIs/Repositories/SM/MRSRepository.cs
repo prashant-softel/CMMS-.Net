@@ -39,6 +39,7 @@ namespace CMMSAPIs.Repositories.SM
         internal async Task<CMDefaultResponse> requestMRS(MRS request)
         {
             /* This is incomplete code */
+            bool Queryflag = false;
             CMDefaultResponse response = null;
             string flag = "MRS_REQUEST";
             int setAsTemplate = 0;
@@ -81,13 +82,69 @@ namespace CMMSAPIs.Repositories.SM
                                "LEFT JOIN smassetmasters sam ON sam.asset_code = sat.asset_code " +
                                "WHERE sat.ID = " + equipmentID;
                     
-                   List<CMSMMaster> _checkList = await Context.GetData<CMSMMaster>(selectQuery).ConfigureAwait(false);
-                }                           
+                   List<CMSMMaster> assetList = await Context.GetData<CMSMMaster>(selectQuery).ConfigureAwait(false);
+                    var approval_required = assetList[0].approval_required;
+                    var asset_type_ID = assetList[0].asset_type_ID;
+                    var asset_code = assetList[0].asset_code;
+                    var IsSpareSelectionEnable = getMultiSpareSelectionStatus(asset_code, asset_type_ID);
+                    if(Convert.ToInt32(IsSpareSelectionEnable) == 0 || asset_type_ID != 0)
+                    {
+                        try
+                        {
+                            string insertStmt = $"START TRANSACTION; " +
+                            $"INSERT INTO FlexiMC_SM_MRS_Items (mrs_ID,asset_item_ID,asset_MDM_code,requested_qty,status,flag,approval_required)" +
+                            $"VALUES ({request.ID},{request.equipments[i].equipmentID},'{asset_code}',{request.equipments[i].qty},0,0,{approval_required})" +
+                            $" SELECT LAST_INSERT_ID(); IF @@ERROR <> 0 THEN\r\n    ROLLBACK;\r\nELSE\r\n    COMMIT;\r\n END IF;";
+                            DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
+                        }catch(Exception ex) 
+                        { throw ex; }
+                    }
+                    else
+                    {
+                        try
+                        {
+                            string insertStmt = $"START TRANSACTION; " +
+                            $"INSERT INTO FlexiMC_SM_MRS_Items (mrs_ID,asset_item_ID,asset_MDM_code,requested_qty,status,flag,approval_required)" +
+                            $"VALUES ({request.ID},{request.equipments[i].equipmentID},'{asset_code}',1,0,0,{approval_required})" +
+                            $" SELECT LAST_INSERT_ID(); IF @@ERROR <> 0 THEN\r\n    ROLLBACK;\r\nELSE\r\n    COMMIT;\r\n END IF;";
+                            DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
+                        }catch (Exception ex)
+                        { throw ex; }
+                    }
+                    if (Convert.ToInt32(IsSpareSelectionEnable) == 1 && asset_type_ID != 2){
+                         UpdateAssetStatus(request.equipments[i].equipmentID, 2);
+                }
+                    Queryflag = true;
+            }
+        }
+            if (Queryflag)
+            {
+                response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Failed to submit MRS.");
+            }else
+            {
+                response = new CMDefaultResponse(1, CMMS.RETRUNSTATUS.SUCCESS, "Request has been submitted.");
             }
                 return response;
         }
 
-        protected async Task<List<UnitMeasurement>> getUnitIDs(string asset_code = "", int asset_ID = 0)
+
+        public async void UpdateAssetStatus(int assetItemID, int status)
+        {
+            string stmt = "SELECT sam.asset_type_ID FROM smassetitems sai " +
+                          "LEFT JOIN smassetmasters sam ON sam.asset_code = sai.asset_code " +
+                          $"WHERE sai.ID = {assetItemID}";
+            List<MRS> _List = await Context.GetData<MRS>(stmt).ConfigureAwait(false);
+            if (_List != null  && _List[0].asset_type_ID > 0)
+            {
+                string stmtUpdate = $"UPDATE smassetitems SET status = {status} WHERE ID = {assetItemID}";
+                await Context.ExecuteNonQry<int>(stmtUpdate);
+            }
+
+        }
+
+
+
+        protected async Task<int> getMultiSpareSelectionStatus(string asset_code = "", int asset_ID = 0)
         {
             string stmt = "";
             if (!string.IsNullOrEmpty(asset_code))
@@ -102,7 +159,7 @@ namespace CMMSAPIs.Repositories.SM
             }
 
             List<UnitMeasurement> _checkList = await Context.GetData<UnitMeasurement>(stmt).ConfigureAwait(false);
-            return _checkList;
+            return _checkList[0].spare_multi_selection;
         } 
         internal async Task<List<MRS>> getMRSItems(int ID)
         {
@@ -137,5 +194,30 @@ namespace CMMSAPIs.Repositories.SM
             return _List;
         }
 
+
+        internal async Task<List<MRS>> getMRSItemsWithCode(int ID)
+        {
+            string stmt = "SELECT smi.ID,smi.mrs_return_ID,smi.finalRemark,smi.asset_item_ID,smi.asset_MDM_code,smi.returned_qty," +
+                "smi.available_qty,smi.used_qty,smi.ID,smi.issued_qty,sm.flag,DATE_FORMAT(sm.returnDate,'%Y-%m-%d') as returnDate," +
+                "sm.approval_status,DATE_FORMAT(sm.approved_date,'%Y-%m-%d') as approved_date,DATE_FORMAT(sm.requested_date,'%Y-%m-%d') as issued_date," +
+                "DATE_FORMAT(sm.returnDate, '%Y-%m-%d') as returnDate, sum(smi.requested_qty) as requested_qty,if(smi.approval_required = 1," +
+                "'Yes','No') as approval_required, \r\n        sam.asset_name, sam.asset_type_ID,sat.asset_type," +
+                "COALESCE(file.file_path,'') as file_path,file.Asset_master_id, f_sum.spare_multi_selection, sai.serial_number" +
+                " FROM smrsitems smi  \r\n   LEFT JOIN smmrs sm ON sm.ID = smi.mrs_ID \r\n LEFT JOIN smassetmasterfilessmassetmasters sam " +
+                "ON sam.asset_code = smi.asset_MDM_code \r\n    LEFT JOIN smassettypessmassetmasterfiles file ON file.Asset_master_id = sam.ID " +
+                "\r\n        LEFT JOIN smassettypes sat ON sat.ID = sam.asset_type_ID\r\n      " +
+                "  LEFT JOIN smunitmeasurement f_sum ON  f_sum.id = sam.unit_of_measurement\r\n      " +
+                "  LEFT JOIN smassetitems sai ON  sai.ID = smi.asset_item_ID\r\n       " +
+                " WHERE smi.mrs_ID = "+ID+" GROUP BY smi.asset_MDM_code";
+            List<MRS> _List = await Context.GetData<MRS>(stmt).ConfigureAwait(false);
+            return _List;
+        }
+
+        internal async Task<List<MRS>> getMRSDetails(int ID)
+        {
+            string stmt = $"SELECT * FROM FlexiMC_SM_MRS WHERE ID = {ID}";
+            List<MRS> _List = await Context.GetData<MRS>(stmt).ConfigureAwait(false);
+            return _List;
+        }
     }
 }
