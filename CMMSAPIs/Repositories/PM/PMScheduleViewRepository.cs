@@ -7,6 +7,7 @@ using CMMSAPIs.Models.Jobs;
 using CMMSAPIs.Repositories.Utils;
 using System;
 using System.Data;
+using System.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -34,7 +35,7 @@ namespace CMMSAPIs.Repositories.PM
             { CMMS.CMMS_Status.PM_PTW_TIMEOUT, "Permit Timed Out" },
             { CMMS.CMMS_Status.PM_DELETED, "PM Deleted" }
         };
-        internal async Task<List<CMPMScheduleView>> GetPMTaskList(int facility_id, DateTime? start_date, DateTime? end_date)
+        internal async Task<List<CMPMScheduleView>> GetPMTaskList(int facility_id, DateTime? start_date, DateTime? end_date, List<int> categoryIds, List<int> frequencyIds)
         {
             /*
              * Primary Table - PMExecution & PMSchedule
@@ -43,20 +44,33 @@ namespace CMMSAPIs.Repositories.PM
             */
             string statusQry = "CASE ";
             foreach (KeyValuePair<CMMS.CMMS_Status, string> status in statusList)
-                statusQry += $"WHEN {(int)status.Key} THEN '{status.Value}' ";
+                statusQry += $"WHEN status = {(int)status.Key} THEN '{status.Value}' ";
             statusQry += "ELSE 'Unknown Status' END";
-            string myQuery = $"SELECT id, PM_Maintenance_Order_Number as maintenance_order_number, PM_Schedule_date as schedule_date, PM_Schedule_Completed_date as completed_date, Asset_Name as equipment_name, Asset_Category_name as category_name, PM_Frequecy_Name as frequency_name, PM_Schedule_Emp_name as assigned_to_name, PTW_id as permit_id, {statusQry} as status_name " + 
+            string myQuery = $"SELECT id, PM_Maintenance_Order_Number as maintenance_order_number, PM_Schedule_date as schedule_date, PM_Schedule_Completed_date as completed_date, Asset_id as equipment_id, Asset_Name as equipment_name, Asset_Category_id as category_id, Asset_Category_name as category_name, PM_Frequecy_id as frequency_id, PM_Frequecy_Name as frequency_name, PM_Schedule_Emp_name as assigned_to_name, PTW_id as permit_id, PTW_Code as permit_code, status, {statusQry} as status_name " + 
                                 "FROM pm_schedule ";
             if(facility_id > 0)
             {
                 myQuery += $"WHERE Facility_id = {facility_id} ";
-                if(start_date != null && end_date != null)
+                if (start_date == null)
+                    start_date = DateTime.UtcNow;
+                if (end_date == null)
+                    end_date = DateTime.UtcNow;
+                if (start_date > end_date)
+                    throw new ArgumentException("Start date should be earlier than end date");
+                string start = ((DateTime)start_date).ToString("yyyy'-'MM'-'dd");
+                myQuery += $"AND PM_Schedule_date >= '{start}' ";
+                string end = ((DateTime)end_date).ToString("yyyy'-'MM'-'dd");
+                myQuery += $"AND PM_Schedule_date <= '{end}' ";
+                if (categoryIds.Count > 0)
                 {
-                    if (start_date > end_date)
-                        throw new ArgumentException("Start date should be earlier than end date");
-                    string start = ((DateTime)start_date).ToString("yyyy'-'MM'-'dd");
-                    string end = ((DateTime)end_date).ToString("yyyy'-'MM'-'dd");
-                    myQuery += $"AND PM_Schedule_date >= '{start}' AND PM_Schedule_date <= '{end}'";
+                    string catList = string.Join(", ", categoryIds);
+                    myQuery += $"AND Asset_Category_id in ({catList}) ";
+                }
+                if (frequencyIds.Count > 0)
+                {
+                    frequencyIds.RemoveAll(x => x == 0);
+                    string freqList = string.Join(", ", frequencyIds);
+                    myQuery += $"AND PM_Frequecy_id in ({freqList}) ";
                 }
             }
             else
