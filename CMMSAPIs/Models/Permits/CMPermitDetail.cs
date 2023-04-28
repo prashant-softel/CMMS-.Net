@@ -14,13 +14,20 @@ namespace CMMSAPIs.Models.Permits
         public string PermitTypeName { get; set; }
         public string title { get; set; }
         public string description { get; set; }
+        public int facility_id { get; set; }
+        public int blockId { get; set; }
         public string siteName { get; set; }
         public string BlockName { get; set; }
-        public DateTime? startDate { get; set; }
-        public DateTime? tillDate { get; set; }
+        public DateTime? start_datetime { get; set; }
+        public DateTime? end_datetime { get; set; }
 //Loto?
         public string permitArea { get; set; }
         public int workingTime { get; set; }
+        public int job_type_id { get; set; }
+        public int sop_type_id { get; set; }
+        public int issuer_id { get; set; }
+        public int approver_id { get; set; }
+        public int requester_id { get; set; }
         public string issuedByName { get; set; }
         public DateTime? issue_at { get; set; }
         public string approvedByName { get; set; }
@@ -30,12 +37,18 @@ namespace CMMSAPIs.Models.Permits
         public string closedByName { get; set; }
         public string cancelRequestByName { get; set; }
         public DateTime? cancel_at { get; set; }
+        public double latitude { get; set; }
+        public double longitude { get; set; }
+        public List<int> category_ids { get; set; }
+        public List<CMCategory> LstCategory { get; set; }
+        public Boolean is_isolation_required { get; set; }
+        public List<int> isolated_category_ids { get; set; }
+        public List<CMCategory> LstIsolationCategory { get; set; }
         public List<CMSaftyQuestion> safety_question_list { get; set; }
         public List<CMFileDetail> file_list { get; set; }
-        public List<CMLoto> LstLoto { get; set; }
-        public List<CMEMPLIST> LstEmp { get; set; }
+        public List<CMLoto> Loto_list { get; set; }
+        public List<CMEMPLIST> employee_list { get; set; }
         public List<CMIsolationList> LstIsolation { get; set; }
-        public List<CMCategory> LstCategory { get; set; }
         public List<CMAssociatedList> LstAssociatedJob { get; set; }
     }
     public class CMAssociatedList

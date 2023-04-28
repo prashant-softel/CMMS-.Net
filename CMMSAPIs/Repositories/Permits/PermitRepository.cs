@@ -324,13 +324,14 @@ namespace CMMSAPIs.Repositories.Permits
              * Assets, AssetsCategory, Facility, Users, PermitTypeSafetyMeasures, PermitTypeList, PermitJobTypeList, PermitTBTJobList
             */
 
-            string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as startDate, ptw.endDate as tillDate, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, facilities.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.description as description,CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, CONCAT(user3.firstName,' ',user3.lastName) as completedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, CONCAT(user5.firstName,' ',user5.lastName) as closedByName, ptw.cancelRequestDate as cancel_at " +
+            string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as start_datetime, ptw.endDate as end_datetime, facilities.id as facility_id, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, blocks.id as blockId, blocks.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.description as description, ptw.jobTypeId as job_type_id, ptw.TBTId as sop_type_id, user1.id as issuer_id, CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, user2.id as approver_id, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, user3.id as requester_id, CONCAT(user3.firstName,' ',user3.lastName) as completedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, CONCAT(user5.firstName,' ',user5.lastName) as closedByName, ptw.cancelRequestDate as cancel_at " +
               "FROM permits as ptw " +
               "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
-              "JOIN facilities as facilities  ON ptw.blockId = facilities.id " +
+              "JOIN facilities as facilities  ON ptw.facilityId = facilities.id " +
+              "JOIN facilities as blocks  ON ptw.blockId = blocks.id " +
               "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
               "LEFT JOIN users as user2 ON user2.id = ptw.approvedById " +
-              "LEFT JOIN users as user3 ON user3.id = ptw.completedById " +
+              "LEFT JOIN users as user3 ON user3.id = ptw.acceptedById " +
               "LEFT JOIN users as user4 ON user4.id = ptw.cancelRequestById " +
               "LEFT JOIN users as user5 ON user5.id = ptw.completedById " +
                 $"where ptw.id = { permit_id }";
@@ -380,8 +381,8 @@ namespace CMMSAPIs.Repositories.Permits
                                $"where ptw.id =  { permit_id }";
             List<CMCategory> _CategoryList = await Context.GetData<CMCategory>(myQuery7).ConfigureAwait(false);
 
-            _PermitDetailsList[0].LstLoto = _LotoList;
-            _PermitDetailsList[0].LstEmp = _EmpList;
+            _PermitDetailsList[0].Loto_list = _LotoList;
+            _PermitDetailsList[0].employee_list = _EmpList;
             _PermitDetailsList[0].LstIsolation = _IsolationList;
             _PermitDetailsList[0].file_list = _UploadFileList;
             _PermitDetailsList[0].safety_question_list = _QuestionList;
