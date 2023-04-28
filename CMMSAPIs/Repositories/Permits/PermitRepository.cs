@@ -193,14 +193,24 @@ namespace CMMSAPIs.Repositories.Permits
              * Permit id, site Permit No., Permit Type, Equipment Categories, Working Area/Equipment, Description, Permit requested by
              * Request Date/Time, Approved By, Approved Date/Time, Current Status(Approved, Rejected, closed).           
             */
+            string statusSubQuery = "CASE ";
+            for(int i = 121; i <= 138; i++)
+            {
+                statusSubQuery += $"WHEN ptw.status = {i} THEN '{Status(i)}' ";
+            }
+            statusSubQuery += $"ELSE '{Status(0)}' END";
             string myQuery = "SELECT " +
-                                 "ptw.id as permitId, ptw.status as ptwStatus, ptw.permitNumber as permit_site_no, permitType.id as permit_type,  permitType.title as PermitTypeName, asset_cat.id as equipment_category, asset_cat.name as equipment, facilities.id as workingAreaId, facilities.name as workingAreaName, ptw.description as description, CONCAT(acceptedUser.firstName, ' ', acceptedUser.lastName) as request_by_name, ptw.acceptedDate as request_datetime, CONCAT(issuedUser.firstName, ' ', issuedUser.lastName) as issued_by_name, ptw.issuedDate as issued_datetime, CONCAT(approvedUser.firstName, ' ', approvedUser.lastName) as approved_by_name, ptw.approvedDate as approved_datetime, ptw.status as currentStatus " +
+                                 $"ptw.id as permitId, ptw.status as ptwStatus, ptw.permitNumber as permit_site_no, permitType.id as permit_type, permitType.title as PermitTypeName, group_concat(distinct asset_cat.name order by asset_cat.id separator ', ') as equipment_categories, facilities.id as workingAreaId, facilities.name as workingAreaName, ptw.description as description, CONCAT(acceptedUser.firstName , ' ' , acceptedUser.lastName) as request_by_name, ptw.acceptedDate as request_datetime, CONCAT(issuedUser.firstName , ' ' , issuedUser.lastName) as issued_by_name, ptw.issuedDate as issue_datetime, CONCAT(approvedUser.firstName , ' ' , approvedUser.lastName) as approved_by_name, ptw.approvedDate as approved_datetime, {statusSubQuery} as currentStatus " +
                                  " FROM " +
                                         "permits as ptw " +
                                   "JOIN " +
                                         "facilities as facilities ON ptw.blockId = facilities.id " +
-                                  "JOIN " +
-                                        "assetcategories as asset_cat ON ptw.LOTOId = asset_cat.id " +
+                                  "LEFT JOIN " +
+                                        "permitlotoassets as loto ON ptw.id = loto.PTW_id " +
+                                  "LEFT JOIN " +
+                                        "assets ON assets.id = loto.Loto_Asset_id " + 
+                                  "LEFT JOIN " +
+                                        "assetcategories as asset_cat ON assets.categoryId = asset_cat.id " +
                                   "LEFT JOIN " +
                                          "permittypelists as permitType ON ptw.typeId = permitType.id " +
                                   "LEFT JOIN " +
@@ -220,10 +230,6 @@ namespace CMMSAPIs.Repositories.Permits
             myQuery += "GROUP BY ptw.id;";
             //$" WHERE ptw.facilityId = { facility_id } and user.id = { userID } ";
             List<CMPermitList> _PermitList = await Context.GetData<CMPermitList>(myQuery).ConfigureAwait(false);
-            foreach(CMPermitList _permit in _PermitList)
-            {
-                _permit.current_status = Status(_permit.ptwStatus+120);
-            }
             return _PermitList;
         }
 
@@ -241,8 +247,8 @@ namespace CMMSAPIs.Repositories.Permits
              * Once you saved the records
              * Return GetPermitDetails(permit_id);
             */
-            string qryPermitBasic = "insert into permits(facilityId, blockId, LOTOId, startDate, endDate, title, description, jobTypeId, typeId, TBTId, issuedById, approvedById, acceptedById, status, latitude, longitude) values" +
-             $"({ request.facility_id }, { request.blockId }, {request.lotoId},'{ request.start_datetime.ToString("yyyy-MM-dd hh:mm:ss") }', '{ request.end_datetime.ToString("yyyy-MM-dd hh:mm:ss") }', '{request.title}', '{ request.description }', { request.job_type_id }, { request.typeId }, { request.sop_type_id }, { request.issuer_id }, { request.approver_id }, {userID}, {(int)CMMS.CMMS_Status.PTW_CREATED}, {request.latitude}, {request.longitude}); ";
+            string qryPermitBasic = "insert into permits(facilityId, blockId, startDate, endDate, title, description, jobTypeId, typeId, issuedById, approvedById, acceptedById, status, latitude, longitude) values" +
+             $"({ request.facility_id }, { request.blockId }, '{ request.start_datetime.ToString("yyyy-MM-dd hh:mm:ss") }', '{ request.end_datetime.ToString("yyyy-MM-dd hh:mm:ss") }', '{request.title}', '{ request.description }', { request.job_type_id }, { request.typeId }, { request.issuer_id }, { request.approver_id }, {userID}, {(int)CMMS.CMMS_Status.PTW_CREATED}, {request.latitude}, {request.longitude}); ";
             await Context.ExecuteNonQry<int>(qryPermitBasic).ConfigureAwait(false);
 
             string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as startDate, ptw.endDate as tillDate, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, facilities.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.description as description,CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, CONCAT(user3.firstName,' ',user3.lastName) as completedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, CONCAT(user5.firstName,' ',user5.lastName) as closedByName, ptw.cancelRequestDate as cancel_at " +
@@ -342,8 +348,9 @@ namespace CMMSAPIs.Repositories.Permits
 
             //get loto
             string myQuery3 = "SELECT assets_cat.id as asset_id, assets_cat.name as asset_name, ptw.lockSrNo as locksrno FROM assetcategories as assets_cat " +
-                               "LEFT JOIN permits as ptw on ptw.id = assets_cat.id " +
-                               "LEFT JOIN permitlotoassets AS LOTOAssets on LOTOAssets.PTW_id = ptw.id " +
+                               "JOIN assets on assets.categoryId = assets_cat.id " +
+                               "JOIN permitlotoassets AS LOTOAssets on LOTOAssets.Loto_Asset_id = assets.id " +
+                               "JOIN permits as ptw ON LOTOAssets.PTW_id=ptw.id " +
                                $"where ptw.id =  { permit_id }";
             List<CMLoto> _LotoList = await Context.GetData<CMLoto>(myQuery3).ConfigureAwait(false);
 
@@ -355,8 +362,8 @@ namespace CMMSAPIs.Repositories.Permits
             //get safty question
             string myQuery5 = "SELECT permitsaftymea.id as saftyQuestionId, permitsaftymea.title as SaftyQuestionName, permitsaftymea.input as input FROM permitsafetyquestions  as permitsaftyques " +
                                "LEFT JOIN permittypesafetymeasures as permitsaftymea ON permitsaftyques.safetyMeasureId = permitsaftymea.id " +
-                               "JOIN permits as ptw ON ptw.id = permitsaftymea.permitTypeId " +
-                               $"where ptw.id = { permit_id }";
+                               "JOIN permits as ptw ON ptw.typeId = permitsaftymea.permitTypeId " +
+                               $"where ptw.id = { permit_id } GROUP BY saftyQuestionId";
             List<CMSaftyQuestion> _QuestionList = await Context.GetData<CMSaftyQuestion>(myQuery5).ConfigureAwait(false);
 
             //get Associated Job
@@ -367,8 +374,10 @@ namespace CMMSAPIs.Repositories.Permits
 
             //get category list
             string myQuery7 = "SELECT assets_cat.name as equipmentCat FROM assetcategories as assets_cat " +
-                               "LEFT JOIN permits as ptw on ptw.id = assets_cat.id " +
-                               $"where ptw.id = { permit_id }";
+                               "JOIN assets on assets.categoryId = assets_cat.id " +
+                               "JOIN permitassetlists AS assetList on assetList.assetId = assets.id " +
+                               "JOIN permits as ptw ON assetList.ptwId=ptw.id " +
+                               $"where ptw.id =  { permit_id }";
             List<CMCategory> _CategoryList = await Context.GetData<CMCategory>(myQuery7).ConfigureAwait(false);
 
             _PermitDetailsList[0].LstLoto = _LotoList;
