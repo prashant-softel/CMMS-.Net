@@ -3,6 +3,7 @@ using CMMSAPIs.Models.Inventory;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using System;
+using System.IO;
 using Microsoft.AspNetCore.Authorization;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
@@ -21,6 +22,39 @@ namespace CMMSAPIs.Controllers.Inventory
         }
 
         [Authorize]
+        [Route("ImportInventories")]
+        [HttpPost]
+        public async Task<IActionResult> ImportInventories(int file_id)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _InventoryBS.ImportInventories(file_id, userID);
+                return Ok(data);
+            }/*
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (DirectoryNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (FileNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch(InvalidCastException ex)
+            {
+                return Conflict(ex.Message);
+            }*/
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
         [Route("GetInventoryList")]
         [HttpGet]
         public async Task<IActionResult> GetInventoryList(int facilityId, int linkedToBlockId, int status, string categoryIds)
@@ -28,6 +62,23 @@ namespace CMMSAPIs.Controllers.Inventory
             try
             {
                 var data = await _InventoryBS.GetInventoryList(facilityId, linkedToBlockId, status, categoryIds);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
+        [Route("SetParentAsset")]
+        [HttpPut]
+        public async Task<IActionResult> SetParentAsset(CMSetParentAsset parent_child_group)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _InventoryBS.SetParentAsset(parent_child_group, userID);
                 return Ok(data);
             }
             catch (Exception ex)

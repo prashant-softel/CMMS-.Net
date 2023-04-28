@@ -67,11 +67,8 @@ namespace CMMSAPIs.Helper
                         }
                         else
                         {
-                            pair.Value2.SetValue(item, mapToObject(row, pair.Value2, pair.Value1.ToString()), null); ;
-
+                            pair.Value2.SetValue(item, mapToObject(row, pair.Value2, pair.Value1.ToString()), null);
                         }
-
-
                     }
                     list.Add(item);
                 }
@@ -79,11 +76,8 @@ namespace CMMSAPIs.Helper
             }
             catch (Exception ex)
             {
-
                 throw new Exception($"Error At Col:{colErr}{Environment.NewLine}{ex.Message}", ex);
             }
-
-
         }
 
         public static void ConvertColumnType(this DataTable dt, string columnName, Type newType)
@@ -121,18 +115,48 @@ namespace CMMSAPIs.Helper
             }
         }
 
-        public static Dictionary<TKey, TValue> Merge<TKey, TValue>(this Dictionary<TKey, TValue> dict, IEnumerable<TKey> keys, IEnumerable<TValue> values)
+        public static void Merge<TKey, TValue>(this Dictionary<TKey, TValue> dict, IEnumerable<TKey> keys, IEnumerable<TValue> values)
         {
-            var dic = new Dictionary<TKey, TValue>();
 
             keys.Each((x, i) =>
             {
-                dic.Add(x, values.ElementAt(i));
+                dict.Add(x, values.ElementAt(i));
             });
 
-            return dic;
         }
 
+        public static List<string> GetColumnNames(this DataTable dt)
+        {
+            List<string> names = new List<string>();
+            foreach(DataColumn dc in dt.Columns)
+                names.Add(dc.ColumnName);
+            return names;
+        }
+
+        public static List<string> ToStringList<TKey, TValue>(this Dictionary<TKey, TValue> dict)
+        {
+            List<string> listDict = new List<string>();
+            foreach (KeyValuePair<TKey, TValue> keyValues in dict)
+            {
+                string dictionaryString = keyValues.Key.ToString() + " : " + keyValues.Value.ToString() ;
+                listDict.Add(dictionaryString);
+            }
+            return listDict;
+        }
+        public static List<List<string>> ToStringMatrix(this DataTable dt)
+        {
+            List<List<string>> list = new List<List<string>>();
+            foreach(DataRow row in dt.Rows)
+            {
+                List<string> sublist = new List<string>();
+                foreach (DataColumn col in dt.Columns)
+                {
+                    sublist.Add($"{col.ColumnName} : {row[col]}");
+                }
+                list.Add(sublist);
+            }
+            return list;
+        }
         public static bool IsNullOrEmpty(this string value)
         {
             return string.IsNullOrEmpty(value) || value.Trim().Length == 0;
