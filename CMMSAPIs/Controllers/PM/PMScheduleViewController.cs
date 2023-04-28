@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 using System;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Models.PM;
@@ -23,11 +24,11 @@ namespace CMMSAPIs.Controllers.PM
         [Authorize]
         [Route("GetPMTaskList")]
         [HttpGet]
-        public async Task<IActionResult> GetPMTaskList(int facility_id, DateTime? start_date, DateTime? end_date)
+        public async Task<IActionResult> GetPMTaskList(int facility_id, DateTime? start_date, DateTime? end_date, [FromQuery] List<int> categoryIds, [FromQuery] List<int> frequencyIds)
         {
             try
             {
-                var data = await _PMScheduleViewBS.GetPMTaskList(facility_id, start_date, end_date);
+                var data = await _PMScheduleViewBS.GetPMTaskList(facility_id, start_date, end_date, categoryIds, frequencyIds);
                 return Ok(data);
             }
             catch (ArgumentException ex)

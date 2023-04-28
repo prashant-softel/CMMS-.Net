@@ -11,11 +11,16 @@ namespace CMMSAPIs.Models.PM
         public string maintenance_order_number { get; set; }
         public DateTime? schedule_date { get; set; }
         public DateTime? completed_date { get; set; }
+        public int equipment_id { get; set; }
         public string equipment_name { get; set; }
+        public int category_id { get; set; }
         public string category_name { get; set; }
+        public int frequency_id { get; set; }
         public string frequency_name { get; set; }
         public string assigned_to_name { get; set; }
         public int permit_id { get; set; }
+        public string permit_code { get; set; }
+        public int status { get; set; }
         public string status_name { get; set; }
     }
 
