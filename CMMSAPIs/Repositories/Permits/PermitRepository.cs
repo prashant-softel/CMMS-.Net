@@ -221,7 +221,6 @@ namespace CMMSAPIs.Repositories.Permits
                                         "users as approvedUser ON approvedUser.id = ptw.approvedById " +
                                   "LEFT JOIN " +
                                         "users as acceptedUser ON acceptedUser.id = ptw.acceptedById ";
-
             if (facility_id>0)
             {
                 myQuery += $"WHERE ptw.facilityId = { facility_id } ";
