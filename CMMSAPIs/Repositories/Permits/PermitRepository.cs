@@ -226,7 +226,7 @@ namespace CMMSAPIs.Repositories.Permits
             {
                 myQuery += $"WHERE ptw.facilityId = { facility_id } ";
                 if (self_view)
-                    myQuery += $"AND user.id = {userID} ";
+                    myQuery += $"AND ( issuedUser.id = {userID} OR approvedUser.id = {userID} OR acceptedUser.id = {userID} ) ";
             }
             myQuery += "GROUP BY ptw.id;";
             //$" WHERE ptw.facilityId = { facility_id } and user.id = { userID } ";
