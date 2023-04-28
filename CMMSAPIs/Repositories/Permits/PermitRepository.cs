@@ -43,6 +43,74 @@ namespace CMMSAPIs.Repositories.Permits
             //return permitDetails[0];
             return permitDetails;
         }*/
+
+        private static string Status(int statusID)
+        {
+            CMMS.CMMS_Status status = (CMMS.CMMS_Status)statusID;
+            string statusName = "";
+            switch (status)
+            {
+                case CMMS.CMMS_Status.PTW_CREATED:
+                    statusName = "Permit Created";
+                    break;
+                case CMMS.CMMS_Status.PTW_ISSUED:
+                    statusName = "Permit Issued";
+                    break;
+                case CMMS.CMMS_Status.PTW_REJECTED_BY_ISSUER:
+                    statusName = "Permit Rejected By Issuer";
+                    break;
+                case CMMS.CMMS_Status.PTW_APPROVE:
+                    statusName = "Permit Approved";
+                    break;
+                case CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER:
+                    statusName = "Permit Rejected By Approver";
+                    break;
+                case CMMS.CMMS_Status.PTW_CLOSED:
+                    statusName = "Permit Closed";
+                    break;
+                case CMMS.CMMS_Status.PTW_CANCELLED_BY_ISSUER:
+                    statusName = "Permit Cancelled BY Issuer";
+                    break;
+                case CMMS.CMMS_Status.PTW_CANCELLED_BY_HSE:
+                    statusName = "Permit Cancelled By HSE";
+                    break;
+                case CMMS.CMMS_Status.PTW_CANCELLED_BY_APPROVER:
+                    statusName = "Permit Cancelled By Approver";
+                    break;
+                case CMMS.CMMS_Status.PTW_EDIT:
+                    statusName = "Permit Edited";
+                    break;
+                case CMMS.CMMS_Status.PTW_EXTEND_REQUESTED:
+                    statusName = "Requested for Permit Extension";
+                    break;
+                case CMMS.CMMS_Status.PTW_EXTEND_REQUEST_APPROVE:
+                    statusName = "Approved Extension for Permit";
+                    break;
+                case CMMS.CMMS_Status.PTW_EXTEND_REQUEST_REJECTED:
+                    statusName = "Rejected Extension for Permit";
+                    break;
+                case CMMS.CMMS_Status.PTW_LINKED_TO_JOB:
+                    statusName = "Permit Linked to Job";
+                    break;
+                case CMMS.CMMS_Status.PTW_LINKED_TO_PM:
+                    statusName = "Permit Linked to PM";
+                    break;
+                case CMMS.CMMS_Status.PTW_LINKED_TO_AUDIT:
+                    statusName = "Permit Linked to Audit";
+                    break;
+                case CMMS.CMMS_Status.PTW_LINKED_TO_HOTO:
+                    statusName = "Permit Linked to HOTO";
+                    break;
+                case CMMS.CMMS_Status.PTW_EXPIRED:
+                    statusName = "Permit Expired";
+                    break;
+                default:
+                    statusName = "Invalid";
+                    break;
+            }
+            return statusName;
+        }
+
         internal async Task<List<CMDefaultList>> GetPermitTypeList(int facility_id)
         {
             /*
@@ -152,6 +220,10 @@ namespace CMMSAPIs.Repositories.Permits
             myQuery += "GROUP BY ptw.id;";
             //$" WHERE ptw.facilityId = { facility_id } and user.id = { userID } ";
             List<CMPermitList> _PermitList = await Context.GetData<CMPermitList>(myQuery).ConfigureAwait(false);
+            foreach(CMPermitList _permit in _PermitList)
+            {
+                _permit.current_status = Status(_permit.ptwStatus+120);
+            }
             return _PermitList;
         }
 
@@ -169,8 +241,8 @@ namespace CMMSAPIs.Repositories.Permits
              * Once you saved the records
              * Return GetPermitDetails(permit_id);
             */
-            string qryPermitBasic = "insert into permits(facilityId, blockId, startDate, endDate, title, description, jobTypeId, typeId, TBTId, issuedById, approvedById, acceptedById, latitude, longitude) values" +
-             $"({ request.facility_id }, { request.blockId }, '{ request.start_datetime.ToString("yyyy-MM-dd hh:mm:ss") }', '{ request.end_datetime.ToString("yyyy-MM-dd hh:mm:ss") }', '{request.title}', '{ request.description }', { request.job_type_id }, { request.typeId }, { request.sop_type_id }, { request.issuer_id }, { request.approver_id }, {userID}, {request.latitude}, {request.longitude}); ";
+            string qryPermitBasic = "insert into permits(facilityId, blockId, LOTOId, startDate, endDate, title, description, jobTypeId, typeId, TBTId, issuedById, approvedById, acceptedById, status, latitude, longitude) values" +
+             $"({ request.facility_id }, { request.blockId }, {request.lotoId},'{ request.start_datetime.ToString("yyyy-MM-dd hh:mm:ss") }', '{ request.end_datetime.ToString("yyyy-MM-dd hh:mm:ss") }', '{request.title}', '{ request.description }', { request.job_type_id }, { request.typeId }, { request.sop_type_id }, { request.issuer_id }, { request.approver_id }, {userID}, {(int)CMMS.CMMS_Status.PTW_CREATED}, {request.latitude}, {request.longitude}); ";
             await Context.ExecuteNonQry<int>(qryPermitBasic).ConfigureAwait(false);
 
             string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as startDate, ptw.endDate as tillDate, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, facilities.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.description as description,CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, CONCAT(user3.firstName,' ',user3.lastName) as completedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, CONCAT(user5.firstName,' ',user5.lastName) as closedByName, ptw.cancelRequestDate as cancel_at " +

@@ -8,7 +8,7 @@ namespace CMMSAPIs.Models.Permits
     {
         public int facility_id { get; set; }
         public int blockId { get; set; }
-        //public int lotoId { get; set; }
+        public int lotoId { get; set; }
         public int typeId { get; set; }
         public DateTime start_datetime { get; set; }
         public DateTime end_datetime { get; set; }
