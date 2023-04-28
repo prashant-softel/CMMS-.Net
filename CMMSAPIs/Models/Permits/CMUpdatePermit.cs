@@ -22,6 +22,8 @@ namespace CMMSAPIs.Models.Permits
         public int issuer_id { get; set; }
         public int approver_id { get; set; }
         public int user_id { get; set; }
+        public double latitude { get; set; }
+        public double longitude { get; set; }
         public List<int> block_ids { get; set; }
         public List<int> category_ids { get; set; }
         public Boolean? is_isolation_required { get; set; }
