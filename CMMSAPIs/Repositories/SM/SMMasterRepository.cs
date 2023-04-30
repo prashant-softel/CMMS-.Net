@@ -30,7 +30,7 @@ namespace CMMSAPIs.Repositories.SM
             /*
              * Return id, asset_type from SMAssetTypes
             */
-            var myQuery = "SELECT * FROM SM_Asset_Type WHERE flag = 1";
+            var myQuery = "SELECT * FROM smassettypes WHERE flag = 1";
             
             List<CMSMMaster> _checkList = await Context.GetData<CMSMMaster>(myQuery).ConfigureAwait(false);
             return _checkList;
@@ -41,7 +41,7 @@ namespace CMMSAPIs.Repositories.SM
             /*
              * Add record in SMAssetTypes
             */
-            string mainQuery = $"INSERT INTO smassettypes (asset_type,flag) VALUES (" +request.asset_type+",1); SELECT LAST_INSERT_ID();";
+            string mainQuery = $"INSERT INTO smassettypes (asset_type,flag) VALUES ('" +request.asset_type+"',1); SELECT LAST_INSERT_ID();";
             DataTable dt2 = await Context.FetchData(mainQuery).ConfigureAwait(false);
             int id = Convert.ToInt32(dt2.Rows[0][0]);
             CMDefaultResponse  response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Asset type added successfully.");
@@ -53,7 +53,7 @@ namespace CMMSAPIs.Repositories.SM
             /*
              * Update record in SMAssetTypes
             */
-            string mainQuery = $"UPDATE smassettypes SET asset_type = " + request.asset_type + " where ID = "+request.ID+"";
+            string mainQuery = $"UPDATE smassettypes SET asset_type = '" + request.asset_type + "' where ID = "+request.ID+"";
             await Context.ExecuteNonQry<int>(mainQuery); 
             CMDefaultResponse response = new CMDefaultResponse(1, CMMS.RETRUNSTATUS.SUCCESS, "Asset type updated successfully.");
             return response;
@@ -101,7 +101,7 @@ namespace CMMSAPIs.Repositories.SM
             */
             string mainQuery = $"UPDATE SMItemCategory SET cat_name = '"+request.cat_name+"' where ID = " + request.ID + "";
             await Context.ExecuteNonQry<int>(mainQuery);
-            CMDefaultResponse response = new CMDefaultResponse(1, CMMS.RETRUNSTATUS.SUCCESS, "Unit measurement deleted.");
+            CMDefaultResponse response = new CMDefaultResponse(1, CMMS.RETRUNSTATUS.SUCCESS, "Asset category updated successfully.");
             return response;
         }
 
@@ -112,7 +112,7 @@ namespace CMMSAPIs.Repositories.SM
             */
             string mainQuery = $"UPDATE SMItemCategory SET flag = 0 where ID = " + acID + "";
             await Context.ExecuteNonQry<int>(mainQuery);
-            CMDefaultResponse response = new CMDefaultResponse(1, CMMS.RETRUNSTATUS.SUCCESS, "Unit measurement deleted.");
+            CMDefaultResponse response = new CMDefaultResponse(1, CMMS.RETRUNSTATUS.SUCCESS, "Asset category deleted.");
             return response;
         }
 
@@ -178,8 +178,8 @@ namespace CMMSAPIs.Repositories.SM
             }
             else
             {
-                string insertQuery = @"INSERT INTO smassetmasters (asset_code, asset_name, description, asset_type_ID, item_category_ID, unit_of_measurement, approval_required, flag) "+
-                    "VALUES ('" +request.asset_code+"', '"+request.asset_name+"', '"+request.asset_description + "', "+request.asset_type_ID+", "+request.item_category_ID + ", "+request.unit_measurement_ID + ", "+ request.approval_required_ID + ", 1); SELECT SCOPE_IDENTITY()";
+                string insertQuery = @"INSERT INTO smassetmasters (plant_ID,asset_code, asset_name, description, asset_type_ID, item_category_ID, unit_of_measurement, approval_required, flag) " +
+                    "VALUES (0,'" +request.asset_code+"', '"+request.asset_name+"', '"+request.asset_description + "', "+request.asset_type_ID+", "+request.item_category_ID + ", "+request.unit_measurement_ID + ", "+ request.approval_required_ID + ", 1); SELECT LAST_INSERT_ID()";
 
                 DataTable dt2 = await Context.FetchData(insertQuery).ConfigureAwait(false);
                 int assetID = Convert.ToInt32(dt2.Rows[0][0]);
@@ -230,7 +230,7 @@ namespace CMMSAPIs.Repositories.SM
 
             if (condition)
             {
-                string updateStmt = "UPDATE smassetmasters SET asset_code = '" + request.asset_code+"', asset_name = '"+request.asset_name+"', description = '"+request.description+"',"+
+                string updateStmt = "UPDATE smassetmasters SET asset_code = '" + request.asset_code+"', asset_name = '"+request.asset_name+"', description = '"+request.asset_description+"',"+
                     " asset_type_ID = "+request.asset_type_ID+", item_category_ID = "+request.item_category_ID+", unit_of_measurement = "+request.unit_measurement_ID+", approval_required = "+request.approval_required_ID+""+
                     " WHERE ID = "+request.ID+"";
                 await Context.ExecuteNonQry<int>(updateStmt);

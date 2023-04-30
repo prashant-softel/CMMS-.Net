@@ -69,7 +69,7 @@ namespace CMMSAPIs.Controllers
         }
 
         [Route("UpdateGO")]
-        [HttpPut]
+        [HttpPost]
         public async Task<IActionResult> UpdateGO(CMGO request)
         {
             try
@@ -85,8 +85,8 @@ namespace CMMSAPIs.Controllers
         }
 
         [Route("DeleteGO")]
-        [HttpDelete]
-        public async Task<IActionResult> DeleteGO(int GOid)
+        [HttpPost]
+        public async Task<IActionResult> DeleteGO([FromForm] int GOid)
         {
             try
             {

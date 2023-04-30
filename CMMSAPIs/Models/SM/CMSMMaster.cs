@@ -100,6 +100,7 @@ namespace CMMSAPIs.Models.SM
         public string file_path { get; set; }
         public int Asset_master_id { get; set; }
         public int isEditMode { get; set; }
+        public int item_condition { get; set; }
 
         public List<equipments> equipments { get; set;}
 
@@ -109,5 +110,8 @@ namespace CMMSAPIs.Models.SM
         public int id { get; set; }
         public int equipmentID { get; set; }
         public decimal qty { get; set; }
+        public decimal requested_qty { get; set; }
+        public decimal issued_qty { get; set; }
+        public string return_remarks { get; set; }
     }
 }

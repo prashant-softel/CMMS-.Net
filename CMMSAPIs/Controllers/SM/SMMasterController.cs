@@ -65,7 +65,7 @@ namespace CMMSAPIs.Controllers.SM
         }
 
         [Route("UpdateAssetType")]
-        [HttpPut]
+        [HttpPost]
         public async Task<IActionResult> UpdateAssetType(CMSMMaster request)
         {
             try
@@ -81,8 +81,8 @@ namespace CMMSAPIs.Controllers.SM
         }
 
         [Route("DeleteAssetType")]
-        [HttpDelete]
-        public async Task<IActionResult> DeleteAssetType(int Id)
+        [HttpPost]
+        public async Task<IActionResult> DeleteAssetType([FromForm] int Id)
         {
             try
             {
@@ -132,7 +132,7 @@ namespace CMMSAPIs.Controllers.SM
         }
 
         [Route("UpdateAssetCategory")]
-        [HttpPut]
+        [HttpPost]
         public async Task<IActionResult> UpdateAssetCategory(ItemCategory request)
         {
             try
@@ -148,8 +148,8 @@ namespace CMMSAPIs.Controllers.SM
         }
 
         [Route("DeleteAssetCategory")]
-        [HttpDelete]
-        public async Task<IActionResult> DeleteAssetCategory(int acID)
+        [HttpPost]
+        public async Task<IActionResult> DeleteAssetCategory([FromForm] int acID)
         {
             try
             {
@@ -199,7 +199,7 @@ namespace CMMSAPIs.Controllers.SM
         }
 
         [Route("UpdateUnitMeasurement")]
-        [HttpPut]
+        [HttpPost]
         public async Task<IActionResult> UpdateUnitMeasurement(UnitMeasurement request)
         {
             try
@@ -215,8 +215,8 @@ namespace CMMSAPIs.Controllers.SM
         }
 
         [Route("DeleteUnitMeasurement")]
-        [HttpDelete]
-        public async Task<IActionResult> DeleteUnitMeasurement(int umID)
+        [HttpPost]
+        public async Task<IActionResult> DeleteUnitMeasurement([FromForm] int umID)
         {
             try
             {
@@ -267,7 +267,7 @@ namespace CMMSAPIs.Controllers.SM
         }
 
         [Route("UpdateAssetMaster")]
-        [HttpPut]
+        [HttpPost]
         public async Task<IActionResult> UpdateAssetMaster(CMSMMaster request)
         {
             try
@@ -284,7 +284,7 @@ namespace CMMSAPIs.Controllers.SM
         }
 
         [Route("DeleteAssetMaster")]
-        [HttpDelete]
+        [HttpPost]
         public async Task<IActionResult> DeleteAssetMaster(CMSMMaster request)
         {
             try

@@ -10,7 +10,7 @@ namespace CMMSAPIs.Models
         public int id { get; set; }
         public string title { get; set; }
         public int podID { get; set; }
-        public string order_type { get; set; }
+        public int order_type { get; set; }
         public string spare_status { get; set; }
         public string remarks { get; set; }
         public int orderflag { get; set; }

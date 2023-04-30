@@ -30,6 +30,7 @@ using CMMSAPIs.BS.Audits;
 using CMMSAPIs.BS.MC;
 using CMMSAPIs.BS.Calibration;
 using CMMSAPIs.BS.EscalationMatrix;
+using CMMSAPIs.BS;
 
 namespace CMMSAPIs
 {
@@ -102,6 +103,7 @@ namespace CMMSAPIs
             services.AddScoped<IMCBS, MCBS>();
             services.AddScoped<ICalibrationBS, CalibrationBS>();
             services.AddScoped<IMRSBS, MRSBS>();
+            services.AddScoped<IGOBS, GOBS>();
             services.AddScoped<IAuditScheduleViewBS, AuditScheduleViewBS>();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddHostedService<SchedulerService>();

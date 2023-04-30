@@ -18,7 +18,10 @@ using Microsoft.IdentityModel.Tokens;
 using System.Diagnostics;
 using System.ComponentModel;
 using Google.Protobuf.WellKnownTypes;
-
+using System.Runtime.CompilerServices;
+using System.Xml.Linq;
+using Org.BouncyCastle.Ocsp;
+using System.Collections;
 
 namespace CMMSAPIs.Repositories.SM
 {
@@ -92,7 +95,7 @@ namespace CMMSAPIs.Repositories.SM
                         try
                         {
                             string insertStmt = $"START TRANSACTION; " +
-                            $"INSERT INTO FlexiMC_SM_MRS_Items (mrs_ID,asset_item_ID,asset_MDM_code,requested_qty,status,flag,approval_required)" +
+                            $"INSERT INTO smrsitems (mrs_ID,asset_item_ID,asset_MDM_code,requested_qty,status,flag,approval_required)" +
                             $"VALUES ({request.ID},{request.equipments[i].equipmentID},'{asset_code}',{request.equipments[i].qty},0,0,{approval_required})" +
                             $" SELECT LAST_INSERT_ID(); IF @@ERROR <> 0 THEN\r\n    ROLLBACK;\r\nELSE\r\n    COMMIT;\r\n END IF;";
                             DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
@@ -104,7 +107,7 @@ namespace CMMSAPIs.Repositories.SM
                         try
                         {
                             string insertStmt = $"START TRANSACTION; " +
-                            $"INSERT INTO FlexiMC_SM_MRS_Items (mrs_ID,asset_item_ID,asset_MDM_code,requested_qty,status,flag,approval_required)" +
+                            $"INSERT INTO smrsitems (mrs_ID,asset_item_ID,asset_MDM_code,requested_qty,status,flag,approval_required)" +
                             $"VALUES ({request.ID},{request.equipments[i].equipmentID},'{asset_code}',1,0,0,{approval_required})" +
                             $" SELECT LAST_INSERT_ID(); IF @@ERROR <> 0 THEN\r\n    ROLLBACK;\r\nELSE\r\n    COMMIT;\r\n END IF;";
                             DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
@@ -215,9 +218,341 @@ namespace CMMSAPIs.Repositories.SM
 
         internal async Task<List<MRS>> getMRSDetails(int ID)
         {
-            string stmt = $"SELECT * FROM FlexiMC_SM_MRS WHERE ID = {ID}";
+            string stmt = $"SELECT * FROM smmrs WHERE ID = {ID}";
             List<MRS> _List = await Context.GetData<MRS>(stmt).ConfigureAwait(false);
             return _List;
         }
+        internal async Task<List<MRS>> getReturnDataByID(int ID)
+        {
+            string stmt = $"SELECT * FROM smrsitems WHERE ID = {ID}";
+            List<MRS> _List = await Context.GetData<MRS>(stmt).ConfigureAwait(false);
+            return _List;
+        }
+
+        internal async Task<CMDefaultResponse> mrsApproval(MRS request)
+        {
+            CMDefaultResponse response = null;
+            bool Queryflag = false;
+            var flag = "MRS_RETURN_REQUEST";
+            string comment = "";
+            string remarks = "";
+            string stmtSelect = $"SELECT * FROM smmrs WHERE ID = {request.ID}";
+            List<MRS> mrsList = await Context.GetData<MRS>(stmtSelect).ConfigureAwait(false);
+
+            var equipmentName = new List<int>();
+            for (int i = 0; i < request.equipments.Count; i++)
+            {
+                // equipmentID = 3 for SM_ASSET_TYPE_SPARE
+                if (request.equipments[i].equipmentID == 3)
+                {
+                    decimal availableQty = Convert.ToDecimal(GetAvailableQty(request.asset_item_ID, mrsList[0].plant_ID));
+
+                    if (availableQty < request.equipments[i].issued_qty)
+                    {
+                        equipmentName.Add(request.equipments[i].id);
+                    }
+                }
+            }
+
+            if (equipmentName != null && equipmentName.Count >0)
+            {
+                response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Sorry, " + string.Join(",", equipmentName) + " serial no.(s) has lower quantity than issued.");
+                return response;
+            }
+
+            for(int i=0; i < request.equipments.Count; i++)
+            {
+                bool callUpdateAssetStatus = false;
+                string stmtUpdate = $"UPDATE smrsitems SET available_qty={request.equipments[i].qty}, issued_qty={request.equipments[i].issued_qty}";
+                // SM_ASSET_TYPE_SPARE = 3
+                if (request.equipments[i].equipmentID == 3 && request.asset_item_ID != null)
+                {
+                    stmtUpdate = stmtUpdate + $" , asset_item_ID = {request.asset_item_ID}";
+                    request.asset_item_ID = request.asset_item_ID;
+                    if (request.equipments[i].equipmentID == 1)
+                    {
+                        callUpdateAssetStatus = true;
+                    }
+                }
+
+                stmtUpdate += $" WHERE ID = {request.equipments[i].id}";
+                await Context.ExecuteNonQry<int>(stmtUpdate);
+                Queryflag = true;   
+
+                if(request.approval_status == 1)
+                {
+                    if (callUpdateAssetStatus)
+                    {
+                        UpdateAssetStatus(request.asset_item_ID, 3);
+                    }
+                    int requested_by_emp_ID = mrsList[0].requested_by_emp_ID;
+                    if (Convert.ToInt32(mrsList[0].reference) == 4)
+                    {
+                        remarks = "JOBCard : JC" + mrsList[0].referenceID;
+                    }
+                    if (Convert.ToInt32(mrsList[0].reference) == 5)
+                    {
+                        remarks = "Prementive Maintainance : PM" + mrsList[0].referenceID;
+                    }
+                    var refID = mrsList[0].ID;
+                    var tResult = await TransactionDetails(mrsList[0].plant_ID, mrsList[0].plant_ID,2 , mrsList[0].requested_by_emp_ID,3, request.equipments[0].id, Convert.ToInt32(request.equipments[0].issued_qty), Convert.ToInt32(mrsList[0].reference), Convert.ToInt32(mrsList[0].referenceID),"", refID);
+                    if (!tResult) {
+
+                        throw new Exception("transaction details failed");
+                    }
+                    comment = "MRS Request Approved";
+                }
+                else
+                {
+                      comment = "MRS Request Rejected";
+                        UpdateAssetStatus(request.asset_item_ID, 1); // if it is MRS reject reset the status of assets
+                }
+                }
+
+            if (!Queryflag)
+            {
+                response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Failed to update data.");
+            }
+            else
+            {
+                string stmt = $"UPDATE smmrs SET approved_by_emp_ID = {request.approved_by_emp_ID}, approved_date={request.approved_date},"+ 
+                               $"approval_status ={request.approval_status},approval_comment = {request.return_remarks},flag = 1 WHERE ID = {request.ID}";
+                await Context.ExecuteNonQry<int>(stmt);
+                response = new CMDefaultResponse(1, CMMS.RETRUNSTATUS.SUCCESS, "Status updated.");
+            }
+            return response;
+        }
+
+        public async Task<bool> TransactionDetails(int plantID, int fromActorID, int fromActorType, int toActorID, int toActorType, int assetItemID, int qty, int refType, int refID, string remarks, int mrsID = 0, int natureOfTransaction = 0, int assetItemStatus = 0)
+        {
+            try
+            {
+                string stmt = "INSERT INTO smtransactiondetails (plantID,fromActorID,fromActorType,toActorID,toActorType,assetItemID,qty,referedby,reference_ID,remarks,Nature_Of_Transaction,Asset_Item_Status)" +
+                              $"VALUES ({plantID},{fromActorID},{fromActorType},{toActorID},{toActorType},{assetItemID},{qty},{refType},{refID},'{remarks}',{natureOfTransaction},{assetItemStatus})";
+      
+                DataTable dt2 = await Context.FetchData(stmt).ConfigureAwait(false);
+                int transaction_ID = 0;
+                if (dt2.Rows.Count > 0)
+                {
+                    transaction_ID = Convert.ToInt32(dt2.Rows[0][0]);
+                    int debitTransactionID = await DebitTransation(transaction_ID, fromActorID, fromActorType, qty, assetItemID, mrsID);
+                    int creditTransactionID = await CreditTransation(transaction_ID, toActorID, toActorType, qty, assetItemID, mrsID);
+                    bool isValid = await VerifyTransactionDetails(transaction_ID, debitTransactionID, creditTransactionID, plantID, fromActorID, fromActorType, toActorID, toActorType, assetItemID, qty, refType, refID, remarks, mrsID);
+                    if (isValid)
+                    {
+                        //minQtyReminder(assetItemID, plantID);
+                        return true;
+                    }
+                    else
+                    {
+                        throw new Exception("transaction table not updated properly");
+                    }
+                }
+                else
+                {
+                    throw new Exception("transaction table not updated properly");
+                }
+            }
+            catch (Exception e)
+            {
+                return false;
+            }
+        }
+
+        private async Task<int> DebitTransation(int transactionID, int actorType, int actorID, int debitQty, int assetItemID, int mrsID)
+        {
+            string stmt = $"INSERT INTO smtransition (transactionID, actorType, actorID, debitQty, assetItemID, mrsID) VALUES ({transactionID}, '{actorType}', {actorID}, {debitQty}, {assetItemID}, {mrsID})";
+            DataTable dt2 = await Context.FetchData(stmt).ConfigureAwait(false);
+            int id = Convert.ToInt32(dt2.Rows[0][0]);
+            return id;
+        }
+
+        private async Task<int> CreditTransation(int transactionID, int actorID, int actorType, int qty, int assetItemID, int mrsID)
+        {
+            string query = $"INSERT INTO FlexiMC_SM_Transition (transactionID,actorType,actorID,creditQty,assetItemID,mrsID) VALUES ({transactionID},'{actorType}',{actorID},{qty},{assetItemID},{mrsID})";
+            DataTable dt2 = await Context.FetchData(query).ConfigureAwait(false);
+            int id = Convert.ToInt32(dt2.Rows[0][0]);
+            return id;
+        }
+
+        public async Task<bool>  VerifyTransactionDetails(int transaction_ID, int debitTransactionID, int creditTransactionID, int plantID, int fromActorID, int fromActorType, int toActorID, int toActorType, int assetItemID, int qty, int refType, int refID, string remarks, int mrsID, bool isS2STransaction = false, int dispatchedQty = 0, int vendor_assetItemID = 0)
+        {
+            string qry = $"SELECT ID FROM smtransactiondetails WHERE ID = '{transaction_ID}' AND plantID = '{plantID}' AND fromActorID = '{fromActorID}' AND fromActorType = '{fromActorType}' AND toActorID = '{toActorID}' AND toActorType = '{toActorType}' AND assetItemID = '{assetItemID}' AND qty = '{qty}' AND referedby = '{refType}' AND reference_ID ='{refID}'";
+
+            string qry2;
+            if (isS2STransaction)
+            {
+                qry2 = $"SELECT ID FROM smtransition WHERE ID = '{debitTransactionID}' AND actorType = '{fromActorType}' AND actorID = '{fromActorID}' AND debitQty = '{dispatchedQty}' AND assetItemID = '{vendor_assetItemID}'";
+            }
+            else
+            {
+                qry2 = $"SELECT ID FROM smtransition WHERE ID = '{debitTransactionID}' AND actorType = '{fromActorType}' AND actorID = '{fromActorID}' AND debitQty = '{qty}' AND assetItemID = '{assetItemID}'";
+            }
+
+            string qry3 = $"SELECT ID FROM smtransition WHERE ID = '{creditTransactionID}' AND actorType = '{toActorType}' AND actorID = '{toActorID}' AND creditQty = '{qty}' AND assetItemID = '{assetItemID}'";
+
+            DataTable dt1 = await Context.FetchData(qry).ConfigureAwait(false);
+            DataTable dt2 = await Context.FetchData(qry2).ConfigureAwait(false);
+            DataTable dt3 = await Context.FetchData(qry3).ConfigureAwait(false);
+
+            int transactionDetailID = 0;
+            int transactionDebitID = 0;
+            int transactionCreditID = 0;
+
+            transactionDetailID = Convert.ToInt32(dt1.Rows[0][0]);        
+            transactionDebitID = Convert.ToInt32(dt2.Rows[0][0]);
+            transactionCreditID = Convert.ToInt32(dt3.Rows[0][0]);
+
+
+            if (transactionDetailID != 0 && transactionDebitID != 0 && transactionCreditID != 0)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        internal async Task<CMDefaultResponse> mrsReturn(MRS request)
+        {
+            CMDefaultResponse response = null; 
+            bool Queryflag = false;
+            var flag = "MRS_RETURN_REQUEST";
+            
+            if (request.isEditMode == 1)
+            {
+                // Updating existing MRS;
+
+                var lastMRSID = request.ID;
+                var refType = "MRSReturnEdit";
+                var mailSub = "MRS Return Request Updated.";
+                string updatestmt = $" START TRANSACTION; UPDATE smmrs SET plant_ID = {request.plant_ID}, requested_by_emp_ID = {request.requested_by_emp_ID}, requested_date = {request.returnDate}," +
+                    $"status = '0', flag = {request.flag}, approval_status = {request.approval_status} WHERE ID = {request.ID}" +
+                    $"DELETE FROM smrsitems WHERE mrs_ID =  {lastMRSID} ; IF @@ERROR <> 0 THEN\r\n    ROLLBACK;\r\nELSE\r\n    COMMIT;\r\nEND IF;";
+                try
+                {
+                    await Context.ExecuteNonQry<int>(updatestmt);
+                }catch(Exception ex)
+                {
+                    Queryflag = false;
+                    throw ex;
+                }
+
+            }
+            else
+            {
+                var refType = "MRSReturn";
+                var mailSub = "MRS Return Request";
+                string insertStmt = $"START TRANSACTION; INSERT INTO smmrs (plant_ID,requested_by_emp_ID,requested_date," +
+                    $"returnDate,flag)\r\n VALUES ({request.plant_ID},{request.requested_by_emp_ID},{request.requestd_date}" +
+                    $",{request.returnDate},{request.flag}); SELECT LAST_INSERT_ID(); IF @@ERROR <> 0 THEN\r\n    ROLLBACK;\r\nELSE\r\n    COMMIT;\r\n END IF;";
+                try
+                {
+                    DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
+                    request.ID = Convert.ToInt32(dt2.Rows[0][0]);
+                }catch(Exception ex)
+                {
+                    Queryflag = false;
+                    throw ex;
+                }
+            }
+            if (request.equipments != null)
+            {
+                for (var i = 0; i < request.equipments.Count; i++)
+                {
+
+                    int equipmentID = request.equipments[i].equipmentID;
+                    decimal quantity = request.equipments[i].qty;
+
+                    
+                        try
+                        {
+                            string insertStmt = $"START TRANSACTION; " +
+                            $"INSERT INTO smrsitems (mrs_ID,mrs_return_ID,asset_item_ID,available_qty,requested_qty,return_remarks,flag)" +
+                            $"VALUES ({request.ID},{request.equipments[i].id},{request.equipments[i].equipmentID},{request.equipments[i].qty}, {request.equipments[i].requested_qty}, {request.equipments[i].return_remarks}, 2)" +
+                            $" SELECT LAST_INSERT_ID(); IF @@ERROR <> 0 THEN\r\n    ROLLBACK;\r\nELSE\r\n    COMMIT;\r\n END IF;";
+                            DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
+
+                        string updatestmt = $"UPDATE smassetitems SET item_condition = {request.item_condition}, status = {request.status} WHERE ID = {request.asset_item_ID}";
+                        await Context.ExecuteNonQry<int>(updatestmt);
+                    }
+                        catch (Exception ex)
+                        {
+                        Queryflag = false;
+                        throw ex; }
+                    
+                    
+                    Queryflag = true;
+                }
+            }
+            if (Queryflag)
+            {
+                response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Failed to submit MRS return.");
+            }
+            else
+            {
+                response = new CMDefaultResponse(1, CMMS.RETRUNSTATUS.SUCCESS, "MRS return submitted.");
+            }
+            return response;
+        }
+        internal async Task<CMDefaultResponse> mrsReturnApproval(MRS request)
+        {
+            CMDefaultResponse response = null;
+            return response;
+        }
+        internal async Task<List<MRS>> getAssetTypeByItemID(int ItemID)
+        {
+                   string stmt = "SELECT sat.asset_type,sam.asset_code,sam.asset_name,sat.ID,sai.ID as item_ID,sai.plant_ID,sai.serial_number,sam.asset_type_ID,sm.decimal_status,COALESCE(file.file_path,'') as file_path,file.Asset_master_id, f_sum.spare_multi_selection FROM smassetitems sai " +
+                            "LEFT JOIN smassetmasters sam ON sam.asset_code = sai.asset_code " +
+                            "LEFT JOIN smunitmeasurement sm ON sm.ID = sam.unit_of_measurement " +
+                            "LEFT JOIN smassetmasterfiles file ON file.Asset_master_id = sam.ID " +
+                            "LEFT JOIN smassettypes sat ON sat.ID = sam.asset_type_ID " +
+                            "LEFT JOIN smunitmeasurement f_sum ON f_sum.ID = sam.unit_of_measurement " +
+                            "WHERE(sai.ID = " +ItemID+ " OR sai.serial_number = " + ItemID + " OR  sai.asset_code = " + ItemID + ")";
+            List<MRS> _List = await Context.GetData<MRS>(stmt).ConfigureAwait(false);
+            var isMultiSpareSelectionStatus = getMultiSpareSelectionStatus("", ItemID);
+           
+            if (_List[0].asset_type_ID == 2 || (_List[0].asset_type_ID == 3 && Convert.ToInt32(isMultiSpareSelectionStatus) == 0))
+            {
+                _List[0].available_qty = await GetAvailableQty(_List[0].asset_item_ID, _List[0].plant_ID);
+            }
+            else
+            {
+                _List[0].available_qty = await GetAvailableQtyByCode(_List[0].asset_MDM_code, _List[0].plant_ID);
+            }
+
+            return _List;
+        }
+
+        public async Task<int> GetAvailableQty(int assetItemID, int plantID)
+        {
+            string actorType = "Store";
+            string stmt = "SELECT SUM(debitQty) as drQty, SUM(creditQty) as crQty FROM smtransition WHERE assetItemID = " + assetItemID.ToString() + " AND actorType = '" + actorType + "' AND transactionID IN (SELECT ID FROM FlexiMC_SM_Transaction_Details WHERE plantID = " + plantID.ToString() + ")";
+            DataTable dt2 = await Context.FetchData(stmt).ConfigureAwait(false);
+            int crQty = 0, drQty = 0;
+            while (dt2 != null && dt2.Rows.Count >0)
+            {
+                crQty = Convert.ToInt32(dt2.Rows[0]["crQty"]);
+                drQty = Convert.ToInt32(dt2.Rows[0]["drQty"]);
+            }
+            int availableQty = crQty - drQty;
+            return availableQty;
+        }
+        public async Task<int> GetAvailableQtyByCode(string assetCode, int plantID)
+        {
+            string actorType = "Store";
+            string stmt = "SELECT SUM(debitQty) as drQty, SUM(creditQty) as crQty FROM  smtransition WHERE assetItemID IN (SELECT ID FROM FlexiMC_SM_Asset_Items WHERE asset_code = '" + assetCode + "' AND plant_ID = " + plantID.ToString() + ") AND actorType = '" + actorType + "' AND transactionID IN (SELECT ID FROM FlexiMC_SM_Transaction_Details WHERE plantID = " + plantID.ToString() + ")";
+            DataTable dt2 = await Context.FetchData(stmt).ConfigureAwait(false);
+            int crQty = 0, drQty = 0;
+            while (dt2 != null && dt2.Rows.Count > 0)
+            {
+                crQty = Convert.ToInt32(dt2.Rows[0]["crQty"]);
+                drQty = Convert.ToInt32(dt2.Rows[0]["drQty"]);
+            }
+            int availableQty = crQty - drQty;
+            return availableQty;
+        }
+
     }
 }

@@ -302,5 +302,12 @@ namespace CMMSAPIs.Helper
             Audit,
         }
 
+        public enum StockManagement
+        {
+            MRS_REQUEST_APPROVE = 1,
+            MRS_REQUEST_REJECT=2,
+            SM_ASSET_TYPE_SPARE=3, 
+
+        }
     }
 }

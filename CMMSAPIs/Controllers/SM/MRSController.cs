@@ -2,6 +2,7 @@
 using CMMSAPIs.Helper;
 using CMMSAPIs.Models.SM;
 using CMMSAPIs.Models.Users;
+using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.SM;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -51,15 +52,13 @@ namespace CMMSAPIs.Controllers.SM
         {
             try
             {
-                int b = 0;
-                var a = 1/b;
                 var data = await _MRSBS.getMRSList(plant_ID, emp_id, toDate, fromDate);
                 return Ok(data);
             }
             catch (Exception ex)
             {
                 _AddLog.ErrorLog(ex.ToString());
-                _logger.LogInformation("Exception got using ILOGGER "+ex.ToString());
+                _AddLog.ErrorLog("Exception got using ILOGGER "+ex.ToString());
                 throw ex;
             }
         }
@@ -75,7 +74,7 @@ namespace CMMSAPIs.Controllers.SM
             }
             catch (Exception ex)
             {
-                _logger.LogInformation(ex.ToString());
+                _AddLog.ErrorLog(ex.ToString());
                 throw ex;
             }
         }
@@ -90,7 +89,121 @@ namespace CMMSAPIs.Controllers.SM
             }
             catch (Exception ex)
             {
-                _logger.LogInformation(ex.ToString());
+                _AddLog.ErrorLog(ex.ToString());
+                throw ex;
+            }
+        }
+        [Route("getMRSItemsWithCode")]
+        [HttpGet]
+        public async Task<IActionResult> getMRSItemsWithCode(int ID)
+        {
+            try
+            {
+                var data = await _MRSBS.getMRSItemsWithCode(ID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                _AddLog.ErrorLog(ex.ToString());
+                throw ex;
+            }
+        }
+
+        [Route("getMRSDetails")]
+        [HttpGet]
+        public async Task<IActionResult> getMRSDetails(int ID)
+        {
+            try
+            {
+                var data = await _MRSBS.getMRSDetails(ID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                _AddLog.ErrorLog(ex.ToString());
+                throw ex;
+            }
+        }
+
+        [Route("mrsApproval")]
+        [HttpPost]
+        public async Task<IActionResult> mrsApproval(MRS request)
+        {
+            try
+            {
+                /* mrs Approval is not implemented yet */
+                int ID = 0;
+                var data = await _MRSBS.mrsApproval(request);
+                return Ok(data);
+            }
+            catch(Exception ex)
+            {
+                _AddLog.ErrorLog(ex.ToString());
+                throw ex;
+            }
+        }
+        
+        [Route("getReturnDataByID")]
+        [HttpGet]
+        public async Task<IActionResult> getReturnDataByID(int ID)
+        {
+            try
+            {
+                var data = await _MRSBS.getReturnDataByID(ID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                _AddLog.ErrorLog(ex.ToString());
+                throw ex;
+            }
+
+        }
+        
+        [Route("getAssetTypeByItemID")]
+        [HttpGet]
+        public async Task<IActionResult> getAssetTypeByItemID(int ItemID)
+        {
+            try
+            {
+                var data = await _MRSBS.getAssetTypeByItemID(ItemID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                _AddLog.ErrorLog(ex.ToString());
+                throw ex;
+            }
+        }
+        
+        [Route("mrsReturn")]
+        [HttpPost]
+        public async Task<IActionResult> mrsReturn(MRS request)
+        {
+            try
+            {
+                var data = await _MRSBS.mrsReturn(request);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                _AddLog.ErrorLog(ex.ToString());
+                throw ex;
+            }
+        }
+        
+            [Route("mrsReturnApproval")]
+        [HttpPost]
+        public async Task<IActionResult> mrsReturnApproval(MRS request)
+        {
+            try
+            {
+                var data = await _MRSBS.mrsReturnApproval(request);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                _AddLog.ErrorLog(ex.ToString());
                 throw ex;
             }
         }
