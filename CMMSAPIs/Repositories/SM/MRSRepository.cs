@@ -22,6 +22,7 @@ using System.Runtime.CompilerServices;
 using System.Xml.Linq;
 using Org.BouncyCastle.Ocsp;
 using System.Collections;
+using System.Security.Cryptography.Xml;
 
 namespace CMMSAPIs.Repositories.SM
 {
@@ -158,7 +159,7 @@ namespace CMMSAPIs.Repositories.SM
             else if (asset_ID>0)
             {
 
-                stmt = $"SELECT f_sum.spare_multi_selection FROM smassetitems sai JOIN smassetmasters sam ON sai.asset_code = sam.asset_code JOIN smunitmeasurement f_sum ON sam.unit_of_measurement = f_sum.ID WHERE sai.ID = {asset_code}";
+                stmt = $"SELECT f_sum.spare_multi_selection FROM smassetitems sai JOIN smassetmasters sam ON sai.asset_code = sam.asset_code JOIN smunitmeasurement f_sum ON sam.unit_of_measurement = f_sum.ID WHERE sai.ID = {asset_ID}";
             }
 
             List<UnitMeasurement> _checkList = await Context.GetData<UnitMeasurement>(stmt).ConfigureAwait(false);
@@ -200,17 +201,19 @@ namespace CMMSAPIs.Repositories.SM
 
         internal async Task<List<MRS>> getMRSItemsWithCode(int ID)
         {
-            string stmt = "SELECT smi.ID,smi.mrs_return_ID,smi.finalRemark,smi.asset_item_ID,smi.asset_MDM_code,smi.returned_qty," +
-                "smi.available_qty,smi.used_qty,smi.ID,smi.issued_qty,sm.flag,DATE_FORMAT(sm.returnDate,'%Y-%m-%d') as returnDate," +
-                "sm.approval_status,DATE_FORMAT(sm.approved_date,'%Y-%m-%d') as approved_date,DATE_FORMAT(sm.requested_date,'%Y-%m-%d') as issued_date," +
-                "DATE_FORMAT(sm.returnDate, '%Y-%m-%d') as returnDate, sum(smi.requested_qty) as requested_qty,if(smi.approval_required = 1," +
-                "'Yes','No') as approval_required, \r\n        sam.asset_name, sam.asset_type_ID,sat.asset_type," +
-                "COALESCE(file.file_path,'') as file_path,file.Asset_master_id, f_sum.spare_multi_selection, sai.serial_number" +
-                " FROM smrsitems smi  \r\n   LEFT JOIN smmrs sm ON sm.ID = smi.mrs_ID \r\n LEFT JOIN smassetmasterfilessmassetmasters sam " +
-                "ON sam.asset_code = smi.asset_MDM_code \r\n    LEFT JOIN smassettypessmassetmasterfiles file ON file.Asset_master_id = sam.ID " +
-                "\r\n        LEFT JOIN smassettypes sat ON sat.ID = sam.asset_type_ID\r\n      " +
-                "  LEFT JOIN smunitmeasurement f_sum ON  f_sum.id = sam.unit_of_measurement\r\n      " +
-                "  LEFT JOIN smassetitems sai ON  sai.ID = smi.asset_item_ID\r\n       " +
+            string stmt = "SELECT smi.ID,smi.mrs_return_ID,smi.finalRemark,smi.asset_item_ID,smi.asset_MDM_code," +
+                "smi.returned_qty,smi.available_qty,smi.used_qty,smi.ID,smi.issued_qty,\r\nsm.flag," +
+                "DATE_FORMAT(sm.returnDate,'%Y-%m-%d') as returnDate,sm.approval_status,DATE_FORMAT(sm.approved_date,'%Y-%m-%d') as approved_date," +
+                "\r\nDATE_FORMAT(sm.requested_date,'%Y-%m-%d') as issued_date,DATE_FORMAT(sm.returnDate, '%Y-%m-%d') as returnDate," +
+                " sum(smi.requested_qty) as requested_qty,if(smi.approval_required = 1,'Yes','No') as approval_required, " +
+                "\r\n        '' as asset_name, sam.ID as asset_type_ID,sat.asset_type,COALESCE(file.file_path,'') as file_path," +
+                "file.Asset_master_id, f_sum.spare_multi_selection, sai.serial_number \r\n       " +
+                " FROM smrsitems smi \r\n        LEFT JOIN smmrs sm ON sm.ID = smi.mrs_ID \r\n       " +
+                " LEFT JOIN smassetitems sam ON sam.asset_code = smi.asset_MDM_code \r\n       " +
+                " LEFT JOIN smassetmasterfiles file ON file.Asset_master_id = sam.ID \r\n        " +
+                "LEFT JOIN smassettypes sat ON sat.ID = sam.plant_ID\r\n        " +
+                "LEFT JOIN smunitmeasurement f_sum ON  f_sum.id = sam.plant_ID\r\n        " +
+                "LEFT JOIN smassetitems sai ON  sai.ID = smi.asset_item_ID" +
                 " WHERE smi.mrs_ID = "+ID+" GROUP BY smi.asset_MDM_code";
             List<MRS> _List = await Context.GetData<MRS>(stmt).ConfigureAwait(false);
             return _List;
@@ -499,6 +502,74 @@ namespace CMMSAPIs.Repositories.SM
         internal async Task<CMDefaultResponse> mrsReturnApproval(MRS request)
         {
             CMDefaultResponse response = null;
+            var executeUpdateStmt = 0 ;
+            bool Queryflag = false;
+            string comment = "";
+
+            string stmtSelect = "SELECT * FROM smmrs WHERE ID = "+request.ID+"";
+            List<MRS> mrsList = await Context.GetData<MRS>(stmtSelect).ConfigureAwait(false);
+            for (int i = 0; i < request.equipments.Count; i++)
+            {
+                decimal req_qty = request.equipments[i].returned_qty;
+                //MRS_REQUEST_REJECT contains 2 as enum value
+                if (request.approval_status == 2)
+                {
+                    req_qty = 0;
+                }
+                string stmt = "UPDATE smrsitems SET returned_qty = " + request.equipments[i].returned_qty + ", finalRemark = '" + request.equipments[i].return_remarks + "' WHERE ID = " + request.equipments[i].id;  
+                try
+                {
+                  executeUpdateStmt = await Context.ExecuteNonQry<int>(stmt);
+                }
+                catch (Exception ex)
+                {
+                    throw ex;
+                }
+                if (executeUpdateStmt == null || executeUpdateStmt == 0)
+                {
+                    return new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Failed to update MRS item return.");
+                }
+                Queryflag = true;
+
+                // MRS_REQUEST_APPROVE == 1 in constant.cs file
+                if (request.approval_status == 1)
+                {
+                    var tResult = await TransactionDetails(mrsList[0].plant_ID, mrsList[0].requested_by_emp_ID, 2, mrsList[0].plant_ID, 2, request.equipments[0].id, Convert.ToInt32(request.equipments[0].received_qty), Convert.ToInt32(mrsList[0].reference), request.ID, request.return_remarks, request.mrs_return_ID);
+                    if (!tResult)
+                    {
+                        return new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Transaction details failed.");                        
+                    }
+                }
+            }
+
+            if (request.approval_status == 1) {
+                comment = "MRS Return Approved";
+            } else
+            {
+                comment = "MRS Return Rejected. Reason : "+request.return_remarks+"";
+            }
+
+            if (Queryflag)
+            {
+                var stmtUpdate = $"UPDATE smmrs SET approved_by_emp_ID = {request.approved_by_emp_ID}, approved_date = '{request.approved_date}'," + 
+                $"approval_status = {request.approval_status}, approval_comment = '{request.return_remarks}'"+
+                $"WHERE ID = {request.ID}";
+                try
+                {
+                    executeUpdateStmt = await Context.ExecuteNonQry<int>(stmtUpdate);
+                }
+                catch (Exception ex)
+                {
+                    return new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "MRS Item update details failed.");
+                }
+                if(executeUpdateStmt == 0 || executeUpdateStmt == null)
+                {
+                    return new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "MRS Item update details failed.");
+                }
+
+            }
+            string msg = request.approval_status == 1 ? "Equipment returned to store." : "MRS Return Rejected.";
+            response = new CMDefaultResponse(1, CMMS.RETRUNSTATUS.SUCCESS, msg);
             return response;
         }
         internal async Task<List<MRS>> getAssetTypeByItemID(int ItemID)
@@ -528,7 +599,7 @@ namespace CMMSAPIs.Repositories.SM
         public async Task<int> GetAvailableQty(int assetItemID, int plantID)
         {
             string actorType = "Store";
-            string stmt = "SELECT SUM(debitQty) as drQty, SUM(creditQty) as crQty FROM smtransition WHERE assetItemID = " + assetItemID.ToString() + " AND actorType = '" + actorType + "' AND transactionID IN (SELECT ID FROM FlexiMC_SM_Transaction_Details WHERE plantID = " + plantID.ToString() + ")";
+            string stmt = "SELECT SUM(debitQty) as drQty, SUM(creditQty) as crQty FROM smtransition WHERE assetItemID = " + assetItemID.ToString() + " AND actorType = '" + actorType + "' AND transactionID IN (SELECT ID FROM smtransactiondetails WHERE plantID = " + plantID.ToString() + ")";
             DataTable dt2 = await Context.FetchData(stmt).ConfigureAwait(false);
             int crQty = 0, drQty = 0;
             while (dt2 != null && dt2.Rows.Count >0)
@@ -542,17 +613,19 @@ namespace CMMSAPIs.Repositories.SM
         public async Task<int> GetAvailableQtyByCode(string assetCode, int plantID)
         {
             string actorType = "Store";
-            string stmt = "SELECT SUM(debitQty) as drQty, SUM(creditQty) as crQty FROM  smtransition WHERE assetItemID IN (SELECT ID FROM FlexiMC_SM_Asset_Items WHERE asset_code = '" + assetCode + "' AND plant_ID = " + plantID.ToString() + ") AND actorType = '" + actorType + "' AND transactionID IN (SELECT ID FROM FlexiMC_SM_Transaction_Details WHERE plantID = " + plantID.ToString() + ")";
+            string stmt = "SELECT SUM(debitQty) as drQty, SUM(creditQty) as crQty FROM  smtransition WHERE assetItemID IN (SELECT ID FROM smassetitems WHERE asset_code = '" + assetCode + "' AND plant_ID = " + plantID.ToString() + ") AND actorType = '" + actorType + "' AND transactionID IN (SELECT ID FROM smtransactiondetails WHERE plantID = " + plantID.ToString() + ")";
             DataTable dt2 = await Context.FetchData(stmt).ConfigureAwait(false);
             int crQty = 0, drQty = 0;
-            while (dt2 != null && dt2.Rows.Count > 0)
+            if (dt2 != null && dt2.Rows.Count > 0)
             {
-                crQty = Convert.ToInt32(dt2.Rows[0]["crQty"]);
-                drQty = Convert.ToInt32(dt2.Rows[0]["drQty"]);
+                crQty = dt2.Rows[0]["crQty"] == "" || dt2.Rows[0]["crQty"] == DBNull.Value ? 0 : Convert.ToInt32(dt2.Rows[0]["crQty"]);
+                drQty = dt2.Rows[0]["drQty"] == "" || dt2.Rows[0]["drQty"] == DBNull.Value ? 0 : Convert.ToInt32(dt2.Rows[0]["drQty"]);
             }
             int availableQty = crQty - drQty;
             return availableQty;
         }
+
+        
 
     }
 }

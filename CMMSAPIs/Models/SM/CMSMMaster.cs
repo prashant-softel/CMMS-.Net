@@ -69,11 +69,11 @@ namespace CMMSAPIs.Models.SM
 
         public int plant_ID { get; set; }
         public int approved_by_emp_ID { get; set; }
-        public string approved_date { get; set; }
-        public string status { get; set; }
+        public DateTime? approved_date { get; set; }
+        public int status { get; set; }
         public string reference { get; set; }
         public string referenceID { get; set; }
-        public string lastmodifieddate { get; set; }
+        public DateTime? lastmodifieddate { get; set; }
         public int setAsTemplate { get; set; }
         public string templateName { get; set; }
         public int approval_manager_ID { get; set; }
@@ -91,7 +91,7 @@ namespace CMMSAPIs.Models.SM
         public decimal used_qty { get; set; }
    
         public decimal issued_qty { get; set; }
-        public string issued_date { get; set; }
+        public DateTime? issued_date { get; set; }
         public decimal requested_qty { get; set; }
         public string approval_required { get; set; }
         public string asset_name { get; set; }
@@ -113,5 +113,7 @@ namespace CMMSAPIs.Models.SM
         public decimal requested_qty { get; set; }
         public decimal issued_qty { get; set; }
         public string return_remarks { get; set; }
+        public decimal returned_qty { get; set; }
+        public decimal received_qty { get; set; }
     }
 }

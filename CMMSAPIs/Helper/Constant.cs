@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using CMMSAPIs.BS.Inventory;
+using System.Collections.Generic;
+using static System.Formats.Asn1.AsnWriter;
+using System.Numerics;
 
 namespace CMMSAPIs.Helper
 {
@@ -306,8 +309,16 @@ namespace CMMSAPIs.Helper
         {
             MRS_REQUEST_APPROVE = 1,
             MRS_REQUEST_REJECT=2,
-            SM_ASSET_TYPE_SPARE=3, 
+            SM_ASSET_TYPE_SPARE=3,
 
-        }
+    }
+
+    public enum SM_Types
+    {
+        Vendor = 1, 
+        Store = 2,
+        Engineer = 3,
+        Inventory = 4
+    }
     }
 }
