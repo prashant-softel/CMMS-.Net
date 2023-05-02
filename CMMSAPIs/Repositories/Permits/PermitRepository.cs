@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Data;
 using System.Threading.Tasks;
 using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Permits;
@@ -227,6 +228,10 @@ namespace CMMSAPIs.Repositories.Permits
                 if (self_view)
                     myQuery += $"AND ( issuedUser.id = {userID} OR approvedUser.id = {userID} OR acceptedUser.id = {userID} ) ";
             }
+            else
+            {
+                throw new ArgumentException("Invalid Facility ID");
+            }
             myQuery += "GROUP BY ptw.id;";
             //$" WHERE ptw.facilityId = { facility_id } and user.id = { userID } ";
             List<CMPermitList> _PermitList = await Context.GetData<CMPermitList>(myQuery).ConfigureAwait(false);
@@ -323,10 +328,13 @@ namespace CMMSAPIs.Repositories.Permits
              * for request permit_id Join with below tables to get string value from
              * Assets, AssetsCategory, Facility, Users, PermitTypeSafetyMeasures, PermitTypeList, PermitJobTypeList, PermitTBTJobList
             */
-
-            string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as start_datetime, ptw.endDate as end_datetime, facilities.id as facility_id, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, blocks.id as blockId, blocks.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.description as description, ptw.jobTypeId as job_type_id, ptw.TBTId as sop_type_id, user1.id as issuer_id, CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, user2.id as approver_id, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, user3.id as requester_id, CONCAT(user3.firstName,' ',user3.lastName) as completedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, CONCAT(user5.firstName,' ',user5.lastName) as closedByName, ptw.cancelRequestDate as cancel_at " +
+            if (permit_id <= 0)
+                throw new ArgumentException("Invalid Permit ID");
+            string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as start_datetime, ptw.endDate as end_datetime, facilities.id as facility_id, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, blocks.id as blockId, blocks.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.title as title, ptw.description as description, ptw.jobTypeId as job_type_id, jobType.title as job_type_name, ptw.TBTId as sop_type_id, sop.title as sop_type_name, user1.id as issuer_id, CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, user2.id as approver_id, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, user3.id as requester_id, CONCAT(user3.firstName,' ',user3.lastName) as requestedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, CONCAT(user5.firstName,' ',user5.lastName) as closedByName, ptw.cancelRequestDate as cancel_at " +
               "FROM permits as ptw " +
               "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
+              "LEFT JOIN permitjobtypelist as jobType ON ptw.jobTypeId = jobType.id " +
+              "LEFT JOIN permittbtjoblist as sop ON ptw.TBTId = sop.id " +
               "JOIN facilities as facilities  ON ptw.facilityId = facilities.id " +
               "JOIN facilities as blocks  ON ptw.blockId = blocks.id " +
               "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
@@ -336,7 +344,8 @@ namespace CMMSAPIs.Repositories.Permits
               "LEFT JOIN users as user5 ON user5.id = ptw.completedById " +
                 $"where ptw.id = { permit_id }";
             List<CMPermitDetail> _PermitDetailsList = await Context.GetData<CMPermitDetail>(myQuery).ConfigureAwait(false);
-
+            if (_PermitDetailsList.Count == 0)
+                throw new MissingMemberException($"Permit with ID {permit_id} not found");
             //get employee list
             string myQuery1 = "SELECT  CONCAT(user.firstName,' ',user.lastName) as empName, ptwEmpList.responsibility as resp FROM permitemployeelists as ptwEmpList " +
                                "JOIN permits as ptw  ON ptw.id = ptwEmpList.pwtId " +
@@ -654,6 +663,11 @@ namespace CMMSAPIs.Repositories.Permits
 
         internal async Task<int> UpdatePermit(CMUpdatePermit request, int userID)
         {
+            string requesterQuery = $"SELECT acceptedById FROM permits WHERE id = {request.permit_id};";
+            DataTable requesterDt = await Context.FetchData(requesterQuery).ConfigureAwait(false);
+            int requester = Convert.ToInt32(requesterDt.Rows[0][0]);
+            if (requester != userID)
+                throw new AccessViolationException("Only requester can update permit info");
             string updatePermitQry = $"update permits set ";
             if (request.facility_id > 0)
                 updatePermitQry += $"facilityId = { request.facility_id }, ";
@@ -675,8 +689,8 @@ namespace CMMSAPIs.Repositories.Permits
                 updatePermitQry += $"issuedById = { request.issuer_id }, ";
             if (request.approver_id > 0)
                 updatePermitQry += $"approvedById = { request.approver_id }, ";
-            updatePermitQry += $"acceptedById = {userID} ";
-            updatePermitQry += $"where id = { request.permit_id }; ";
+            updatePermitQry = updatePermitQry.Substring(0, updatePermitQry.Length - 2);
+            updatePermitQry += $" where id = { request.permit_id }; ";
 
             await Context.ExecuteNonQry<int>(updatePermitQry).ConfigureAwait(false);
             int updatePrimaryKey = request.permit_id;
@@ -694,27 +708,32 @@ namespace CMMSAPIs.Repositories.Permits
             List<CMPermitDetail> permitDetails = await Context.GetData<CMPermitDetail>(myQuery).ConfigureAwait(false);
             int insertedId = permitDetails[0].insertedId;
 
-            if(request.block_ids.Count > 0)
+            if(request.block_ids != null)
             {
-                string DeleteQry = $"delete from permitblocks where ptw_id = { request.permit_id };";
-                await Context.ExecuteNonQry<int>(DeleteQry).ConfigureAwait(false);
-
-                foreach (var data in request.block_ids)
+                if (request.block_ids.Count > 0)
                 {
-                    string qryPermitBlock = $"insert into permitblocks(ptw_id, block_id ) value ({ updatePrimaryKey }, { data })";
-                    await Context.ExecuteNonQry<int>(qryPermitBlock).ConfigureAwait(false);
+                    string DeleteQry = $"delete from permitblocks where ptw_id = { request.permit_id };";
+                    await Context.ExecuteNonQry<int>(DeleteQry).ConfigureAwait(false);
+
+                    foreach (var data in request.block_ids)
+                    {
+                        string qryPermitBlock = $"insert into permitblocks(ptw_id, block_id ) value ({ updatePrimaryKey }, { data })";
+                        await Context.ExecuteNonQry<int>(qryPermitBlock).ConfigureAwait(false);
+                    }
                 }
             }
-
-            if(request.category_ids.Count > 0)
+            if (request.category_ids != null)
             {
-                string DeleteQry1 = $"delete from permitassetlists where ptwId = {request.permit_id};";
-                await Context.ExecuteNonQry<int>(DeleteQry1).ConfigureAwait(false);
-
-                foreach (var data in request.category_ids)
+                if (request.category_ids.Count > 0)
                 {
-                    string qryPermitCategory = $"insert into permitassetlists (ptwId, assetId ) value ({ updatePrimaryKey }, { data })";
-                    await Context.ExecuteNonQry<int>(qryPermitCategory).ConfigureAwait(false);
+                    string DeleteQry1 = $"delete from permitassetlists where ptwId = {request.permit_id};";
+                    await Context.ExecuteNonQry<int>(DeleteQry1).ConfigureAwait(false);
+
+                    foreach (var data in request.category_ids)
+                    {
+                        string qryPermitCategory = $"insert into permitassetlists (ptwId, assetId ) value ({ updatePrimaryKey }, { data })";
+                        await Context.ExecuteNonQry<int>(qryPermitCategory).ConfigureAwait(false);
+                    }
                 }
             }
 
@@ -732,36 +751,45 @@ namespace CMMSAPIs.Repositories.Permits
                 }
             }
 
-            if(request.Loto_list.Count > 0)
+            if(request.Loto_list != null)
             {
-                string DeleteQry3 = $"delete from permitlotoassets where PTW_id = { request.permit_id };";
-                await Context.ExecuteNonQry<int>(DeleteQry3).ConfigureAwait(false);
-                foreach (var data in request.Loto_list)
+                if (request.Loto_list.Count > 0)
                 {
-                    string qryPermitlotoAssets = $"insert into permitlotoassets ( PTW_id , Loto_Asset_id, Loto_Key ) value ({ updatePrimaryKey }, { data.Loto_id }, '{ data.Loto_Key }')";
-                    await Context.ExecuteNonQry<int>(qryPermitlotoAssets).ConfigureAwait(false);
+                    string DeleteQry3 = $"delete from permitlotoassets where PTW_id = { request.permit_id };";
+                    await Context.ExecuteNonQry<int>(DeleteQry3).ConfigureAwait(false);
+                    foreach (var data in request.Loto_list)
+                    {
+                        string qryPermitlotoAssets = $"insert into permitlotoassets ( PTW_id , Loto_Asset_id, Loto_Key ) value ({ updatePrimaryKey }, { data.Loto_id }, '{ data.Loto_Key }')";
+                        await Context.ExecuteNonQry<int>(qryPermitlotoAssets).ConfigureAwait(false);
+                    }
                 }
             }
 
-            if(request.employee_list.Count > 0)
+            if(request.employee_list != null)
             {
-                string DeleteQry4 = $"delete from permitemployeelists where pwtId = { request.permit_id };";
-                await Context.ExecuteNonQry<int>(DeleteQry4).ConfigureAwait(false);
-                foreach (var data in request.employee_list)
+                if (request.employee_list.Count > 0)
                 {
-                    string qryPermitEmpList = $"insert into permitemployeelists ( pwtId , employeeId , responsibility ) value ({ updatePrimaryKey },{ data.employeeId }, '{ data.responsibility}')";
-                    await Context.ExecuteNonQry<int>(qryPermitEmpList).ConfigureAwait(false);
+                    string DeleteQry4 = $"delete from permitemployeelists where pwtId = { request.permit_id };";
+                    await Context.ExecuteNonQry<int>(DeleteQry4).ConfigureAwait(false);
+                    foreach (var data in request.employee_list)
+                    {
+                        string qryPermitEmpList = $"insert into permitemployeelists ( pwtId , employeeId , responsibility ) value ({ updatePrimaryKey },{ data.employeeId }, '{ data.responsibility}')";
+                        await Context.ExecuteNonQry<int>(qryPermitEmpList).ConfigureAwait(false);
+                    }
                 }
             }
 
-            if(request.safety_question_list.Count > 0)
+            if(request.safety_question_list != null)
             {
-                string DeleteQry5 = $"delete from permitsafetyquestions where permitId = { request.permit_id };";
-                await Context.ExecuteNonQry<int>(DeleteQry5).ConfigureAwait(false);
-                foreach (var data in request.safety_question_list)
+                if (request.safety_question_list.Count > 0)
                 {
-                    string qryPermitSaftyQuestion = $"insert into permitsafetyquestions ( permitId , safetyMeasureId, safetyMeasureValue) value ({ updatePrimaryKey }, { data.safetyMeasureId }, '{ data.safetyMeasureValue }')";
-                    await Context.ExecuteNonQry<int>(qryPermitSaftyQuestion).ConfigureAwait(false);
+                    string DeleteQry5 = $"delete from permitsafetyquestions where permitId = { request.permit_id };";
+                    await Context.ExecuteNonQry<int>(DeleteQry5).ConfigureAwait(false);
+                    foreach (var data in request.safety_question_list)
+                    {
+                        string qryPermitSaftyQuestion = $"insert into permitsafetyquestions ( permitId , safetyMeasureId, safetyMeasureValue) value ({ updatePrimaryKey }, { data.safetyMeasureId }, '{ data.safetyMeasureValue }')";
+                        await Context.ExecuteNonQry<int>(qryPermitSaftyQuestion).ConfigureAwait(false);
+                    }
                 }
             }
 
