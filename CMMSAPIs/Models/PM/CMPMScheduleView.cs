@@ -27,6 +27,7 @@ namespace CMMSAPIs.Models.PM
     public class CMPMScheduleViewDetail : CMPMScheduleView
     {   
         public string facility_name { get; set; }
+        public List<CMDefaultList> checklists { get; set; }
         public List<ScheduleCheckList> schedule_check_list { get; set; }
         public List<ScheduleLinkJob> schedule_link_job { get; set; }
         public List<CMLog> history_log { get; set; }
@@ -34,6 +35,7 @@ namespace CMMSAPIs.Models.PM
 
     public class ScheduleCheckList 
     {
+        public int execution_id { get; set; }
         public int check_point_id { get; set; }
         public string check_point_name { get; set; }
         public string requirement { get; set; }
@@ -41,6 +43,14 @@ namespace CMMSAPIs.Models.PM
         public int is_job_created { get; set; }
         public int is_custom_check_point { get; set; }
         public int is_file_required { get; set; }
+        public List<ScheduleFiles> files { get; set; }
+    }
+
+    public class ScheduleFiles
+    {
+        public string _event { get; set; }
+        public string file_path { get; set; }
+        public string file_description { get; set; }
     }
 
     public class ScheduleLinkJob 
