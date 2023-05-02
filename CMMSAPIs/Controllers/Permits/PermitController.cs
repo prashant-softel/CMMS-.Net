@@ -36,11 +36,7 @@ namespace CMMSAPIs.Controllers.Permits
                 var data = await _PermitBS.GetPermitTypeList(facility_id);
                 return Ok(data);
             }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (Exception)
+            catch (Exception ex)
             {
                 throw;
             }
@@ -56,7 +52,7 @@ namespace CMMSAPIs.Controllers.Permits
                 var data = await _PermitBS.GetSafetyMeasurementQuestionList(permit_type_id);
                 return Ok(data);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 throw;
             }
@@ -72,11 +68,7 @@ namespace CMMSAPIs.Controllers.Permits
                 var data = await _PermitBS.GetJobTypeList(facility_id);
                 return Ok(data);
             }
-            catch(ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (Exception)
+            catch (Exception ex)
             {
                 throw;
             }
@@ -92,7 +84,7 @@ namespace CMMSAPIs.Controllers.Permits
                 var data = await _PermitBS.GetSOPList(job_type_id);
                 return Ok(data);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 throw;
             }
@@ -112,11 +104,7 @@ namespace CMMSAPIs.Controllers.Permits
                 var data = await _PermitBS.GetPermitList(facility_id, userID, self_view);
                 return Ok(data);
             }
-            catch(ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (Exception)
+            catch (Exception ex)
             {
                 throw;
             }
@@ -133,7 +121,7 @@ namespace CMMSAPIs.Controllers.Permits
                 var data = await _PermitBS.CreatePermit(request, userID);
                 return Ok(data);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 throw;
             }
@@ -149,15 +137,7 @@ namespace CMMSAPIs.Controllers.Permits
                 var data = await _PermitBS.GetPermitDetails(permit_id);
                 return Ok(data);
             }
-            catch(ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch(MissingMemberException ex)
-            {
-                return NotFound(ex.Message);
-            }
-            catch (Exception)
+            catch (Exception ex)
             {
                 throw;
             }
@@ -177,7 +157,7 @@ namespace CMMSAPIs.Controllers.Permits
                 var data = await _PermitBS.PermitIssue(request, userID);
                 return Ok(data);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 throw;
             }
@@ -194,7 +174,7 @@ namespace CMMSAPIs.Controllers.Permits
                 var data = await _PermitBS.PermitApprove(request, userID);
                 return Ok(data);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 throw;
             }
@@ -211,7 +191,7 @@ namespace CMMSAPIs.Controllers.Permits
                 var data = await _PermitBS.PermitExtend(request, userID);
                 return Ok(data);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 throw;
             }
@@ -228,7 +208,7 @@ namespace CMMSAPIs.Controllers.Permits
                 var data = await _PermitBS.PermitExtendApprove(request, userID);
                 return Ok(data);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 throw;
             }
@@ -245,7 +225,7 @@ namespace CMMSAPIs.Controllers.Permits
                 var data = await _PermitBS.PermitExtendCancel(request, userID);
                 return Ok(data);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 throw;
             }
@@ -262,7 +242,7 @@ namespace CMMSAPIs.Controllers.Permits
                 var data = await _PermitBS.PermitClose(request, userID);
                 return Ok(data);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 throw;
             }
@@ -279,7 +259,7 @@ namespace CMMSAPIs.Controllers.Permits
                 var data = await _PermitBS.PermitReject(request, userID);
                 return Ok(data);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 throw;
             }
@@ -297,7 +277,7 @@ namespace CMMSAPIs.Controllers.Permits
                 var data = await _PermitBS.PermitCancel(request, userID);
                 return Ok(data);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 throw;
             }
@@ -314,11 +294,7 @@ namespace CMMSAPIs.Controllers.Permits
                 var data = await _PermitBS.UpdatePermit(request, userID);
                 return Ok(data);
             }
-            catch (AccessViolationException ex)
-            {
-                return Unauthorized(ex.Message);
-            }
-            catch (Exception)
+            catch (Exception ex)
             {
                 throw;
             }
