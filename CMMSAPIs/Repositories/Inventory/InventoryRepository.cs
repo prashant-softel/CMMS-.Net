@@ -36,7 +36,7 @@ namespace CMMSAPIs.Repositories.Inventory
         {
             List<CMDefaultResponse> responseList = new List<CMDefaultResponse>();
 
-            string queryAsset = "SELECT id, name FROM assetcategories GROUP BY name ORDER BY id ASC;";
+            string queryAsset = "SELECT id, name FROM assets GROUP BY name ORDER BY id ASC;";
             DataTable dtAsset = await Context.FetchData(queryAsset).ConfigureAwait(false);
             List<string> assetNames = dtAsset.GetColumn<string>("name");
             List<int> assetIDs = dtAsset.GetColumn<int>("id");
