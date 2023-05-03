@@ -120,17 +120,39 @@ namespace CMMSAPIs.Repositories.PM
                 throw new ArgumentException("Invalid Schedule ID");
             string statusQry = "CASE ";
             foreach (KeyValuePair<CMMS.CMMS_Status, string> status in statusList)
-                statusQry += $"WHEN {(int)status.Key} THEN '{status.Value}' ";
-            statusQry += "ELSE 'Unknown Status' END";
+                statusQry += $"WHEN Status = {(int)status.Key} THEN '{status.Value}' ";
+            statusQry += "ELSE 'Unknown Status' END ";
+            string eventQry = "CASE ";
+            foreach (CMMS.CMMS_Events _event in Enum.GetValues(typeof(CMMS.CMMS_Events)))
+            {
+                eventQry += $"WHEN pm_schedule_files.PM_Event = {(int)_event} THEN '{_event}' ";
+            }
+            eventQry += "ELSE 'Unknown Event' END ";
             string myQuery1 = $"SELECT id, PM_Maintenance_Order_Number as maintenance_order_number, PM_Schedule_date as schedule_date, PM_Schedule_Completed_date as completed_date, Asset_Name as equipment_name, Asset_Category_name as category_name, PM_Frequecy_Name as frequency_name, PM_Schedule_Emp_name as assigned_to_name, PTW_id as permit_id, {statusQry} as status_name, Facility_Name as facility_name " +
                                 $"FROM pm_schedule WHERE id = {schedule_id};";
             List<CMPMScheduleViewDetail> scheduleViewDetail = await Context.GetData<CMPMScheduleViewDetail>(myQuery1).ConfigureAwait(false);
-            string myQuery2 = "SELECT Check_Point_id as check_point_id, Check_Point_Name as check_point_name, Check_Point_Requirement as requirement, PM_Schedule_Observation as observation, job_created as is_job_created, custom_checkpoint as is_custom_check_point, file_required as is_file_required " + 
-                                $"FROM pm_execution WHERE PM_Schedule_Id = {schedule_id};";
-            List<ScheduleCheckList> scheduleCheckList = await Context.GetData<ScheduleCheckList>(myQuery2).ConfigureAwait(false);
-            if (scheduleCheckList.Count == 0)
+            if (scheduleViewDetail.Count == 0)
                 throw new MissingMemberException("PM Schedule not found");
+            string myQuery2 = $"SELECT DISTINCT checklist.id, checklist.checklist_number AS name FROM pm_execution " + 
+                                $"JOIN checkpoint on pm_execution.Check_Point_id = checkpoint.id " + 
+                                $"JOIN checklist_number as checklist ON checklist.id = checkpoint.check_list_id " +
+                                $"WHERE pm_execution.PM_Schedule_Id = {schedule_id};";
+            List<CMDefaultList> checklist_collection = await Context.GetData<CMDefaultList>(myQuery2).ConfigureAwait(false);
+            string myQuery3 = "SELECT id as execution_id, Check_Point_id as check_point_id, Check_Point_Name as check_point_name, Check_Point_Requirement as requirement, PM_Schedule_Observation as observation, job_created as is_job_created, custom_checkpoint as is_custom_check_point, file_required as is_file_required " + 
+                                $"FROM pm_execution WHERE PM_Schedule_Id = {schedule_id};";
+            List<ScheduleCheckList> scheduleCheckList = await Context.GetData<ScheduleCheckList>(myQuery3).ConfigureAwait(false);
+            if(scheduleCheckList.Count > 0)
+            {
+                foreach(ScheduleCheckList scheduleCheckPoint in scheduleCheckList)
+                {
+                    string fileQry = $"SELECT {eventQry} AS _event, File_Path as file_path, File_Discription as file_description " +
+                                        $"FROM pm_schedule_files WHERE PM_Execution_id = {scheduleCheckPoint.execution_id}; ";
+                    List<ScheduleFiles> fileList = await Context.GetData<ScheduleFiles>(fileQry).ConfigureAwait(false);
+                    scheduleCheckPoint.files = fileList;
+                }
+            }
             List<CMLog> log = await _utilsRepo.GetHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, schedule_id);
+            scheduleViewDetail[0].checklists = checklist_collection;
             scheduleViewDetail[0].schedule_check_list = scheduleCheckList;
             scheduleViewDetail[0].history_log = log;
             return scheduleViewDetail[0];
