@@ -31,7 +31,7 @@ namespace CMMSAPIs.Controllers.SM
         }
 
         [Route("requestMRS")]
-        [HttpGet]       
+        [HttpPost]       
         public async Task<IActionResult> requestMRS(MRS request)
         {
             try
@@ -131,7 +131,6 @@ namespace CMMSAPIs.Controllers.SM
         {
             try
             {
-                /* mrs Approval is not implemented yet */
                 int ID = 0;
                 var data = await _MRSBS.mrsApproval(request);
                 return Ok(data);

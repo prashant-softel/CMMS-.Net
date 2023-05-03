@@ -23,6 +23,8 @@ using System.Xml.Linq;
 using Org.BouncyCastle.Ocsp;
 using System.Collections;
 using System.Security.Cryptography.Xml;
+using static Org.BouncyCastle.Math.EC.ECCurve;
+using Microsoft.Extensions.Configuration;
 
 namespace CMMSAPIs.Repositories.SM
 {
@@ -60,7 +62,7 @@ namespace CMMSAPIs.Repositories.SM
                 var mailSub = "MRS Request Updated";
                 string updatestmt = $" START TRANSACTION; UPDATE smmrs SET plant_ID = {request.plant_ID}, requested_by_emp_ID = {request.requested_by_emp_ID}, requested_date = {request.requestd_date}," +
                     $"status = '0', flag = {request.flag}, setAsTemplate = {request.setAsTemplate}, templateName = {request.templateName}, approval_status = {request.approval_status} WHERE ID = {request.ID}" +
-                    $"DELETE FROM smrsitems WHERE mrs_ID =  {lastMRSID} ; IF @@ERROR <> 0 THEN\r\n    ROLLBACK;\r\nELSE\r\n    COMMIT;\r\nEND IF;";
+                    $"DELETE FROM smrsitems WHERE mrs_ID =  {lastMRSID} ;/* IF @@ERROR <> 0 THEN\r\n    ROLLBACK;\r\nELSE\r\n    COMMIT;\r\nEND IF;*/";
                 await Context.ExecuteNonQry<int>(updatestmt);
 
             }
@@ -69,8 +71,8 @@ namespace CMMSAPIs.Repositories.SM
                 var refType = "MRS";
                 var mailSub = "MRS Request";
                 string insertStmt = $"START TRANSACTION; INSERT INTO smmrs (plant_ID,requested_by_emp_ID,requested_date," +
-                    $"status,flag,setAsTemplate,templateName)\r\n VALUES ({request.plant_ID},{request.requested_by_emp_ID},{request.requestd_date}" +
-                    $",0,{request.flag},{request.setAsTemplate},'{request.templateName}'); SELECT LAST_INSERT_ID(); IF @@ERROR <> 0 THEN\r\n    ROLLBACK;\r\nELSE\r\n    COMMIT;\r\n END IF;";
+                    $"status,flag,setAsTemplate,templateName, approved_by_emp_ID, approved_date)\r\n VALUES ({request.plant_ID},{request.requested_by_emp_ID},'{ request.requestd_date.Value.ToString("yyyy-MM-dd HH:mm")}'" +
+                    $",0,{request.flag},{request.setAsTemplate},'{request.templateName}',0,'2001-01-01 00:00'); SELECT LAST_INSERT_ID(); /*IF @@ERROR <> 0 THEN\r\n    ROLLBACK;\r\nELSE\r\n    COMMIT;\r\n END IF; */";
                 DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
                 request.ID = Convert.ToInt32(dt2.Rows[0][0]);
             }
@@ -90,15 +92,15 @@ namespace CMMSAPIs.Repositories.SM
                     var approval_required = assetList[0].approval_required;
                     var asset_type_ID = assetList[0].asset_type_ID;
                     var asset_code = assetList[0].asset_code;
-                    var IsSpareSelectionEnable = getMultiSpareSelectionStatus(asset_code, asset_type_ID);
+                    var IsSpareSelectionEnable = await getMultiSpareSelectionStatus(asset_code, asset_type_ID);
                     if(Convert.ToInt32(IsSpareSelectionEnable) == 0 || asset_type_ID != 0)
                     {
                         try
                         {
                             string insertStmt = $"START TRANSACTION; " +
-                            $"INSERT INTO smrsitems (mrs_ID,asset_item_ID,asset_MDM_code,requested_qty,status,flag,approval_required)" +
-                            $"VALUES ({request.ID},{request.equipments[i].equipmentID},'{asset_code}',{request.equipments[i].qty},0,0,{approval_required})" +
-                            $" SELECT LAST_INSERT_ID(); IF @@ERROR <> 0 THEN\r\n    ROLLBACK;\r\nELSE\r\n    COMMIT;\r\n END IF;";
+                            $"INSERT INTO smrsitems (mrs_ID,asset_item_ID,asset_MDM_code,requested_qty,status,flag,approval_required,mrs_return_ID)" +
+                            $"VALUES ({request.ID},{request.equipments[i].equipmentID},'{asset_code}',{request.equipments[i].qty},0,0,{approval_required},0)" +
+                            $"; SELECT LAST_INSERT_ID();/* IF @@ERROR <> 0 THEN\r\n    ROLLBACK;\r\nELSE\r\n    COMMIT;\r\n END IF;*/";
                             DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
                         }catch(Exception ex) 
                         { throw ex; }
@@ -108,9 +110,9 @@ namespace CMMSAPIs.Repositories.SM
                         try
                         {
                             string insertStmt = $"START TRANSACTION; " +
-                            $"INSERT INTO smrsitems (mrs_ID,asset_item_ID,asset_MDM_code,requested_qty,status,flag,approval_required)" +
-                            $"VALUES ({request.ID},{request.equipments[i].equipmentID},'{asset_code}',1,0,0,{approval_required})" +
-                            $" SELECT LAST_INSERT_ID(); IF @@ERROR <> 0 THEN\r\n    ROLLBACK;\r\nELSE\r\n    COMMIT;\r\n END IF;";
+                            $"INSERT INTO smrsitems (mrs_ID,asset_item_ID,asset_MDM_code,requested_qty,status,flag,approval_required,mrs_return_ID)" +
+                            $"VALUES ({request.ID},{request.equipments[i].equipmentID},'{asset_code}',1,0,0,{approval_required},0)" +
+                            $"; SELECT LAST_INSERT_ID();/* IF @@ERROR <> 0 THEN\r\n    ROLLBACK;\r\nELSE\r\n    COMMIT;\r\n END IF;*/";
                             DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
                         }catch (Exception ex)
                         { throw ex; }
@@ -121,7 +123,7 @@ namespace CMMSAPIs.Repositories.SM
                     Queryflag = true;
             }
         }
-            if (Queryflag)
+            if (!Queryflag)
             {
                 response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Failed to submit MRS.");
             }else
@@ -140,8 +142,19 @@ namespace CMMSAPIs.Repositories.SM
             List<MRS> _List = await Context.GetData<MRS>(stmt).ConfigureAwait(false);
             if (_List != null  && _List[0].asset_type_ID > 0)
             {
-                string stmtUpdate = $"UPDATE smassetitems SET status = {status} WHERE ID = {assetItemID}";
-                await Context.ExecuteNonQry<int>(stmtUpdate);
+                if (Context != null)
+                {
+                    string stmtUpdate = $"UPDATE smassetitems SET status = {status} WHERE ID = {assetItemID}";
+                    await Context.ExecuteNonQry<int>(stmtUpdate);
+                }
+                else
+                {
+                    var MyConfig = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
+                    string connectionstring = MyConfig.GetValue<string>("ConnectionStrings:Con");
+                    MYSQLDBHelper db = new MYSQLDBHelper(connectionstring);
+                    string stmtUpdate = $"UPDATE smassetitems SET status = {status} WHERE ID = {assetItemID}";
+                    await db.ExecuteNonQry<int>(stmtUpdate);
+                }
             }
 
         }
@@ -252,7 +265,7 @@ namespace CMMSAPIs.Repositories.SM
 
                     if (availableQty < request.equipments[i].issued_qty)
                     {
-                        equipmentName.Add(request.equipments[i].id);
+                        equipmentName.Add(request.equipments[i].id);    
                     }
                 }
             }

@@ -22,7 +22,8 @@ namespace CMMSAPIs.BS.SM
         Task<List<MRS>> getAssetTypeByItemID(int ItemID);
         Task<CMDefaultResponse> mrsReturn(MRS request);        
         Task<CMDefaultResponse> mrsApproval(MRS request);        
-        Task<CMDefaultResponse> mrsReturnApproval(MRS request);        
+        Task<CMDefaultResponse> mrsReturnApproval(MRS request);
+        void UpdateAssetStatus(int assetItemID, int status);
     }
     public class MRSBS : IMRSBS
     {
@@ -188,6 +189,21 @@ namespace CMMSAPIs.BS.SM
                 using (var repos = new MRSRepository(getDB))
                 {
                     return await repos.mrsReturnApproval(request);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async void UpdateAssetStatus(int assetItemID, int status)
+        {
+            try
+            {
+                using (var repos = new MRSRepository(getDB))
+                {
+                     repos.UpdateAssetStatus(assetItemID, status);
                 }
             }
             catch (Exception ex)

@@ -14,7 +14,7 @@ namespace CMMSAPIs.Models.SM
         public string asset_code { get; set; }
         public string asset_name { get; set; }
         public string description { get; set; }
-        public string approval_required { get; set; }
+        public int approval_required { get; set; }
         public string cat_name { get; set; }
         public string measurement { get; set; }
         public double decimal_status { get; set; }
