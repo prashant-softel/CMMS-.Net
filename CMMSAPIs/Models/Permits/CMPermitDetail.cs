@@ -20,19 +20,21 @@ namespace CMMSAPIs.Models.Permits
         public string BlockName { get; set; }
         public DateTime? start_datetime { get; set; }
         public DateTime? end_datetime { get; set; }
-//Loto?
+        //Loto?
         public string permitArea { get; set; }
         public int workingTime { get; set; }
         public int job_type_id { get; set; }
+        public string job_type_name { get; set; }
         public int sop_type_id { get; set; }
+        public string sop_type_name { get; set; }
         public int issuer_id { get; set; }
-        public int approver_id { get; set; }
-        public int requester_id { get; set; }
         public string issuedByName { get; set; }
         public DateTime? issue_at { get; set; }
+        public int approver_id { get; set; }
         public string approvedByName { get; set; }
         public DateTime? approve_at { get; set; }
-        public string completedByName { get; set; }
+        public int requester_id { get; set; }
+        public string requestedByName { get; set; }
         public DateTime? close_at { get; set; }
         public string closedByName { get; set; }
         public string cancelRequestByName { get; set; }
