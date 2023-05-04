@@ -45,7 +45,7 @@ namespace CMMSAPIs.Models.Permits
         public List<CMCategory> LstCategory { get; set; }
         public Boolean is_isolation_required { get; set; }
         public List<int> isolated_category_ids { get; set; }
-        public List<CMCategory> LstIsolationCategory { get; set; }
+        public List<CMDefaultList> LstIsolationCategory { get; set; }
         public List<CMSaftyQuestion> safety_question_list { get; set; }
         public List<CMFileDetail> file_list { get; set; }
         public List<CMLoto> Loto_list { get; set; }

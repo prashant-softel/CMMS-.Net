@@ -33,7 +33,7 @@ namespace CMMSAPIs.BS.Permits
         Task<CMDefaultResponse> PermitReject(CMApproval request, int userID);
         Task<CMDefaultResponse> PermitIssue(CMApproval request, int userID);
         Task<CMDefaultResponse> PermitCancel(CMApproval request, int userID);
-        Task<int> UpdatePermit(CMUpdatePermit request, int userID);
+        Task<CMDefaultResponse> UpdatePermit(CMUpdatePermit request, int userID);
     }
 
     public class PermitBS : IPermitBS
@@ -146,7 +146,7 @@ namespace CMMSAPIs.BS.Permits
             }
         }
 
-        public async Task<int> UpdatePermit(CMUpdatePermit request, int userID)
+        public async Task<CMDefaultResponse> UpdatePermit(CMUpdatePermit request, int userID)
         {
             try
             {

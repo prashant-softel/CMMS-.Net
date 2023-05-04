@@ -54,7 +54,7 @@ namespace CMMSAPIs.Repositories.Jobs
             /*Your code goes here*/
             string myQuery = "SELECT " +
                                  //                                 "job.id, job.facilityId, user.id, facilities.name as plantName, job.status as status, job.createdAt as jobDate, DATE_FORMAT(job.breakdownTime, '%Y-%m-%d') as breakdown_time, job.id as id, asset_cat.name as equipmentCat, asset.name as workingArea, job.title as jobDetails, workType.workTypeName as workType, permit.code as permitId, job.createdBy as raisedBy, CONCAT(user.firstName , ' ' , user.lastName) as assignedToName, user.id as assignedToId, IF(job.breakdownTime = '', 'Non Breakdown Maintenance', 'Breakdown Maintenance') as breakdownType , job.description as description" +
-                                 "job.id, job.facilityId as facilityId, user.id, facilities.name as facilityName, group_concat(distinct asset_cat.name order by asset_cat.id separator ', ') as equipmentCat, group_concat(distinct asset.name order by asset.id separator ', ') as workingArea, job.title as jobDetails, job.description as description, job.createdBy as raisedBy, CONCAT(rasiedByUser.firstName , ' ' , rasiedByUser.lastName) as raisedByName, job.createdAt as jobDate, CONCAT(user.firstName , ' ' , user.lastName) as assignedToName, user.id as assignedToId, job.status as status, DATE_FORMAT(job.breakdownTime, '%Y-%m-%d') as breakdown_time, IF(job.breakdownTime = '', 'Non Breakdown Maintenance', 'Breakdown Maintenance') as breakdownType, group_concat(distinct workType.workTypeName order by workType.id separator ', ') as workType, permit.code as permitId " + 
+                                 "job.id, job.facilityId as facilityId, facilities.name as facilityName, group_concat(distinct asset_cat.name order by asset_cat.id separator ', ') as equipmentCat, group_concat(distinct asset.name order by asset.id separator ', ') as workingArea, job.title as jobDetails, job.description as description, job.createdBy as raisedBy, CONCAT(rasiedByUser.firstName , ' ' , rasiedByUser.lastName) as raisedByName, job.createdAt as jobDate, CONCAT(user.firstName , ' ' , user.lastName) as assignedToName, user.id as assignedToId, job.status as status, DATE_FORMAT(job.breakdownTime, '%Y-%m-%d') as breakdown_time, IF(job.breakdownTime = '', 'Non Breakdown Maintenance', 'Breakdown Maintenance') as breakdownType, group_concat(distinct workType.workTypeName order by workType.id separator ', ') as workType, permit.code as permitId " + 
                                  " FROM " +
                                         "jobs as job " +
                                 "JOIN " +
@@ -111,22 +111,25 @@ namespace CMMSAPIs.Repositories.Jobs
             switch (m_notificationID)
             {
                 case CMMS.CMMS_Status.JOB_CREATED:     //Created
-                    retValue = "Created";
+                    retValue = "Job Created";
                     break;
                 case CMMS.CMMS_Status.JOB_ASSIGNED:     //Assigned
-                    retValue = "Assigned";
+                    retValue = "Job Assigned";
                     break;
                 case CMMS.CMMS_Status.JOB_LINKED:     //Linked
-                    retValue = "Linked to PTW";
+                    retValue = "Job Linked to PTW";
+                    break;
+                case CMMS.CMMS_Status.JOB_IN_PROGRESS:
+                    retValue = "Job In Progress";
                     break;
                 case CMMS.CMMS_Status.JOB_CLOSED:     //Closed
-                    retValue = "Closed";
+                    retValue = "Job Closed";
                     break;
                 case CMMS.CMMS_Status.JOB_CANCELLED:     //Cancelled
-                    retValue = "Cancelled";
+                    retValue = "Job Cancelled";
                     break;
                 default:
-                    retValue = "Unknown <" + m_notificationID + ">";
+                    retValue = "Unknown Status";
                     break;
             }
             return retValue;
@@ -191,8 +194,7 @@ namespace CMMSAPIs.Repositories.Jobs
                                       "WHERE job.id = " + job_id;
             List<CMJobView> _ViewJobList = await Context.GetData<CMJobView>(myQuery).ConfigureAwait(false);
 
-            CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_ViewJobList[0].status + 100);
-            string _shortStatus = getShortStatus(CMMS.CMMS_Modules.JOB, _Status);
+            string _shortStatus = getShortStatus(CMMS.CMMS_Modules.JOB, (CMMS.CMMS_Status)_ViewJobList[0].status);
             _ViewJobList[0].status_short = _shortStatus;
 
             //get equipmentCat list
@@ -250,7 +252,8 @@ namespace CMMSAPIs.Repositories.Jobs
              * Job associated work type will go in JobAssociatedWorkTypes
              * return value will be inserted record. Use GetJobDetail() function
             */
-
+            //if(request.AssetsIds.Count > 10)
+            //    throw new 
             /*Your code goes here*/
             int status = ((int)CMMS.CMMS_Status.JOB_CREATED);
             if (request.assigned_id > 0)

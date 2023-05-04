@@ -232,7 +232,7 @@ namespace CMMSAPIs.Repositories.Permits
             {
                 throw new ArgumentException("Invalid Facility ID");
             }
-            myQuery += "GROUP BY ptw.id;";
+            myQuery += "GROUP BY ptw.id ORDER BY ptw.id DESC;";
             //$" WHERE ptw.facilityId = { facility_id } and user.id = { userID } ";
             List<CMPermitList> _PermitList = await Context.GetData<CMPermitList>(myQuery).ConfigureAwait(false);
             return _PermitList;
@@ -253,23 +253,27 @@ namespace CMMSAPIs.Repositories.Permits
              * Return GetPermitDetails(permit_id);
             */
             string qryPermitBasic = "insert into permits(facilityId, blockId, LOTOId, startDate, endDate, title, description, jobTypeId, typeId, TBTId, issuedById, approvedById, acceptedById, status, latitude, longitude) values" +
-             $"({ request.facility_id }, { request.blockId },{request.lotoId},'{ request.start_datetime.ToString("yyyy-MM-dd hh:mm:ss") }', '{ request.end_datetime.ToString("yyyy-MM-dd hh:mm:ss") }', '{request.title}', '{ request.description }', { request.job_type_id }, { request.permitTypeId }, { request.sop_type_id }, { request.issuer_id }, { request.approver_id }, {userID}, {(int)CMMS.CMMS_Status.PTW_CREATED}, {request.latitude}, {request.longitude}); ";
-            await Context.ExecuteNonQry<int>(qryPermitBasic).ConfigureAwait(false);
+             $"({ request.facility_id }, { request.blockId },{request.lotoId},'{ request.start_datetime.ToString("yyyy-MM-dd hh:mm:ss") }', '{ request.end_datetime.ToString("yyyy-MM-dd hh:mm:ss") }', '{request.title}', '{ request.description }', { request.job_type_id }, { request.permitTypeId }, { request.sop_type_id }, { request.issuer_id }, { request.approver_id }, {userID}, {(int)CMMS.CMMS_Status.PTW_CREATED}, {request.latitude}, {request.longitude}); " +
+             $"SELECT LAST_INSERT_ID();";
+            DataTable dt = await Context.FetchData(qryPermitBasic).ConfigureAwait(false);
+            int insertedId = Convert.ToInt32(dt.Rows[0][0]);
 
-            string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as startDate, ptw.endDate as tillDate, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, facilities.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.description as description,CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, CONCAT(user3.firstName,' ',user3.lastName) as completedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, CONCAT(user5.firstName,' ',user5.lastName) as closedByName, ptw.cancelRequestDate as cancel_at " +
+            string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as start_datetime, ptw.endDate as end_datetime, facilities.id as facility_id, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, blocks.id as blockId, blocks.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.title as title, ptw.description as description, ptw.jobTypeId as job_type_id, jobType.title as job_type_name, ptw.TBTId as sop_type_id, sop.title as sop_type_name, user1.id as issuer_id, CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, user2.id as approver_id, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, user3.id as requester_id, CONCAT(user3.firstName,' ',user3.lastName) as requestedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, CONCAT(user5.firstName,' ',user5.lastName) as closedByName, ptw.cancelRequestDate as cancel_at " +
               "FROM permits as ptw " +
               "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
-              "JOIN facilities as facilities  ON ptw.blockId = facilities.id " +
+              "LEFT JOIN permitjobtypelist as jobType ON ptw.jobTypeId = jobType.id " +
+              "LEFT JOIN permittbtjoblist as sop ON ptw.TBTId = sop.id " +
+              "JOIN facilities as facilities  ON ptw.facilityId = facilities.id " +
+              "JOIN facilities as blocks  ON ptw.blockId = blocks.id " +
               "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
               "LEFT JOIN users as user2 ON user2.id = ptw.approvedById " +
-              "LEFT JOIN users as user3 ON user3.id = ptw.completedById " +
+              "LEFT JOIN users as user3 ON user3.id = ptw.acceptedById " +
               "LEFT JOIN users as user4 ON user4.id = ptw.cancelRequestById " +
-              "LEFT JOIN users as user5 ON user5.id = ptw.completedById  order by ptw.id desc limit 1";
+              "LEFT JOIN users as user5 ON user5.id = ptw.completedById order by ptw.id desc limit 1";
 
-            List<CMPermitDetail> permitPrimaryKey = await Context.GetData<CMPermitDetail>(myQuery).ConfigureAwait(false);
-            int insertedId = permitPrimaryKey[0].insertedId;
+            List<CMPermitDetail> permitDetails = await Context.GetData<CMPermitDetail>(myQuery).ConfigureAwait(false);
 
-            string ptwCodeQry = $"UPDATE permits SET code = 'PTW{insertedId}' WHERE id = {insertedId};";
+            string ptwCodeQry = $"UPDATE permits SET code = CONCAT('PTW', id);";
             await Context.ExecuteNonQry<int>(ptwCodeQry).ConfigureAwait(false);
 
             // qry = "select id as insertedId from permits order by id desc limit 1";
@@ -313,7 +317,7 @@ namespace CMMSAPIs.Repositories.Permits
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, insertedId, 0, 0, "Permit Created", CMMS.CMMS_Status.PTW_CREATED);
 
-            CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_CREATED, permitPrimaryKey[0]);
+            CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_CREATED, permitDetails[0]);
 
             CMDefaultResponse response = new CMDefaultResponse(insertedId, CMMS.RETRUNSTATUS.SUCCESS, "Permit Created Successfully");
 
@@ -414,23 +418,26 @@ namespace CMMSAPIs.Repositories.Permits
             {
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
             }
-            string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as startDate, ptw.endDate as tillDate, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, facilities.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.description as description,CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, CONCAT(user3.firstName,' ',user3.lastName) as completedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, ptw.cancelRequestDate as cancel_at " +
-            "FROM permits as ptw " +
-            "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
-            "LEFT JOIN facilities as facilities  ON ptw.blockId = facilities.id " +
-             "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
-             "LEFT JOIN users as user2 ON user2.id = ptw.approvedById " +
-             "LEFT JOIN users as user3 ON user3.id = ptw.completedById " +
-             "LEFT JOIN users as user4 ON user4.id = ptw.cancelRequestById " +
-             $"where ptw.id = { request.id }";
 
-            //Task<List<CMPermitDetail>> permitDetails = getPermitDetails(request.id);
+            string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as start_datetime, ptw.endDate as end_datetime, facilities.id as facility_id, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, blocks.id as blockId, blocks.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.title as title, ptw.description as description, ptw.jobTypeId as job_type_id, jobType.title as job_type_name, ptw.TBTId as sop_type_id, sop.title as sop_type_name, user1.id as issuer_id, CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, user2.id as approver_id, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, user3.id as requester_id, CONCAT(user3.firstName,' ',user3.lastName) as requestedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, CONCAT(user5.firstName,' ',user5.lastName) as closedByName, ptw.cancelRequestDate as cancel_at " +
+              "FROM permits as ptw " +
+              "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
+              "LEFT JOIN permitjobtypelist as jobType ON ptw.jobTypeId = jobType.id " +
+              "LEFT JOIN permittbtjoblist as sop ON ptw.TBTId = sop.id " +
+              "JOIN facilities as facilities  ON ptw.facilityId = facilities.id " +
+              "JOIN facilities as blocks  ON ptw.blockId = blocks.id " +
+              "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
+              "LEFT JOIN users as user2 ON user2.id = ptw.approvedById " +
+              "LEFT JOIN users as user3 ON user3.id = ptw.acceptedById " +
+              "LEFT JOIN users as user4 ON user4.id = ptw.cancelRequestById " +
+              $"LEFT JOIN users as user5 ON user5.id = ptw.completedById where ptw.id = {request.id};";
+
             List<CMPermitDetail> permitDetails = await Context.GetData<CMPermitDetail>(myQuery).ConfigureAwait(false);
 
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, permitDetails[0].insertedId, 0, 0, request.comment, CMMS.CMMS_Status.PTW_EXTEND_REQUESTED);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.id, 0, 0, request.comment, CMMS.CMMS_Status.PTW_EXTEND_REQUESTED);
 
             CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_EXTEND_REQUESTED, permitDetails[0]);
-            CMDefaultResponse response = new CMDefaultResponse(permitDetails[0].insertedId, CMMS.RETRUNSTATUS.SUCCESS, $" Permit { permitDetails[0].insertedId } Extended");
+            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $" Permit { request.id } Extended");
             return response;
         }
 
@@ -447,22 +454,26 @@ namespace CMMSAPIs.Repositories.Permits
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
             }
 
-            string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as startDate, ptw.endDate as tillDate, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, facilities.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.description as description,CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, CONCAT(user3.firstName,' ',user3.lastName) as completedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, ptw.cancelRequestDate as cancel_at " +
+
+            string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as start_datetime, ptw.endDate as end_datetime, facilities.id as facility_id, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, blocks.id as blockId, blocks.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.title as title, ptw.description as description, ptw.jobTypeId as job_type_id, jobType.title as job_type_name, ptw.TBTId as sop_type_id, sop.title as sop_type_name, user1.id as issuer_id, CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, user2.id as approver_id, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, user3.id as requester_id, CONCAT(user3.firstName,' ',user3.lastName) as requestedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, CONCAT(user5.firstName,' ',user5.lastName) as closedByName, ptw.cancelRequestDate as cancel_at " +
               "FROM permits as ptw " +
               "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
-              "LEFT JOIN facilities as facilities  ON ptw.blockId = facilities.id " +
+              "LEFT JOIN permitjobtypelist as jobType ON ptw.jobTypeId = jobType.id " +
+              "LEFT JOIN permittbtjoblist as sop ON ptw.TBTId = sop.id " +
+              "JOIN facilities as facilities  ON ptw.facilityId = facilities.id " +
+              "JOIN facilities as blocks  ON ptw.blockId = blocks.id " +
               "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
               "LEFT JOIN users as user2 ON user2.id = ptw.approvedById " +
-              "LEFT JOIN users as user3 ON user3.id = ptw.completedById " +
+              "LEFT JOIN users as user3 ON user3.id = ptw.acceptedById " +
               "LEFT JOIN users as user4 ON user4.id = ptw.cancelRequestById " +
-              $"where ptw.id = { request.id }";
+              $"LEFT JOIN users as user5 ON user5.id = ptw.completedById where ptw.id = {request.id};";
 
             List<CMPermitDetail> permitDetails = await Context.GetData<CMPermitDetail>(myQuery).ConfigureAwait(false);
 
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, permitDetails[0].insertedId, 0, 0, "Approve Permit Extend Request", CMMS.CMMS_Status.PTW_EXTEND_REQUEST_APPROVE);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.id, 0, 0, "Approve Permit Extend Request", CMMS.CMMS_Status.PTW_EXTEND_REQUEST_APPROVE);
 
             CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_EXTEND_REQUEST_APPROVE, permitDetails[0]);
-            CMDefaultResponse response = new CMDefaultResponse(permitDetails[0].insertedId, CMMS.RETRUNSTATUS.SUCCESS, $" Permit  { permitDetails[0].insertedId } Extend Approved");
+            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $" Permit  { request.id } Extend Approved");
             return response;
         }
 
@@ -477,22 +488,26 @@ namespace CMMSAPIs.Repositories.Permits
             {
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
             }
-            string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as startDate, ptw.endDate as tillDate, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, facilities.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.description as description,CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, CONCAT(user3.firstName,' ',user3.lastName) as completedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, ptw.cancelRequestDate as cancel_at " +
+
+            string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as start_datetime, ptw.endDate as end_datetime, facilities.id as facility_id, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, blocks.id as blockId, blocks.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.title as title, ptw.description as description, ptw.jobTypeId as job_type_id, jobType.title as job_type_name, ptw.TBTId as sop_type_id, sop.title as sop_type_name, user1.id as issuer_id, CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, user2.id as approver_id, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, user3.id as requester_id, CONCAT(user3.firstName,' ',user3.lastName) as requestedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, CONCAT(user5.firstName,' ',user5.lastName) as closedByName, ptw.cancelRequestDate as cancel_at " +
               "FROM permits as ptw " +
               "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
-              "LEFT JOIN facilities as facilities  ON ptw.blockId = facilities.id " +
+              "LEFT JOIN permitjobtypelist as jobType ON ptw.jobTypeId = jobType.id " +
+              "LEFT JOIN permittbtjoblist as sop ON ptw.TBTId = sop.id " +
+              "JOIN facilities as facilities  ON ptw.facilityId = facilities.id " +
+              "JOIN facilities as blocks  ON ptw.blockId = blocks.id " +
               "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
               "LEFT JOIN users as user2 ON user2.id = ptw.approvedById " +
-              "LEFT JOIN users as user3 ON user3.id = ptw.completedById " +
+              "LEFT JOIN users as user3 ON user3.id = ptw.acceptedById " +
               "LEFT JOIN users as user4 ON user4.id = ptw.cancelRequestById " +
-                $"where ptw.id = { request.id }";
+              $"LEFT JOIN users as user5 ON user5.id = ptw.completedById where ptw.id = {request.id};";
 
             List<CMPermitDetail> permitDetails = await Context.GetData<CMPermitDetail>(myQuery).ConfigureAwait(false);
 
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, permitDetails[0].insertedId, 0, 0, request.comment, CMMS.CMMS_Status.PTW_EXTEND_REQUEST_REJECTED);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.id, 0, 0, request.comment, CMMS.CMMS_Status.PTW_EXTEND_REQUEST_REJECTED);
 
             CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_EXTEND_REQUEST_REJECTED, permitDetails[0]);
-            CMDefaultResponse response = new CMDefaultResponse(permitDetails[0].insertedId, CMMS.RETRUNSTATUS.SUCCESS, $" Permit  { permitDetails[0].insertedId } Extend Canceled");
+            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $" Permit  { request.id } Extend Canceled");
             return response;
         }
 
@@ -512,22 +527,25 @@ namespace CMMSAPIs.Repositories.Permits
             {
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
             }
-            string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as startDate, ptw.endDate as tillDate, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, facilities.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.description as description,CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, CONCAT(user3.firstName,' ',user3.lastName) as completedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, ptw.cancelRequestDate as cancel_at " +
+            string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as start_datetime, ptw.endDate as end_datetime, facilities.id as facility_id, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, blocks.id as blockId, blocks.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.title as title, ptw.description as description, ptw.jobTypeId as job_type_id, jobType.title as job_type_name, ptw.TBTId as sop_type_id, sop.title as sop_type_name, user1.id as issuer_id, CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, user2.id as approver_id, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, user3.id as requester_id, CONCAT(user3.firstName,' ',user3.lastName) as requestedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, CONCAT(user5.firstName,' ',user5.lastName) as closedByName, ptw.cancelRequestDate as cancel_at " +
               "FROM permits as ptw " +
               "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
-              "LEFT JOIN facilities as facilities  ON ptw.blockId = facilities.id " +
+              "LEFT JOIN permitjobtypelist as jobType ON ptw.jobTypeId = jobType.id " +
+              "LEFT JOIN permittbtjoblist as sop ON ptw.TBTId = sop.id " +
+              "JOIN facilities as facilities  ON ptw.facilityId = facilities.id " +
+              "JOIN facilities as blocks  ON ptw.blockId = blocks.id " +
               "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
               "LEFT JOIN users as user2 ON user2.id = ptw.approvedById " +
-              "LEFT JOIN users as user3 ON user3.id = ptw.completedById " +
+              "LEFT JOIN users as user3 ON user3.id = ptw.acceptedById " +
               "LEFT JOIN users as user4 ON user4.id = ptw.cancelRequestById " +
-                $"where ptw.id = { request.id }";
+              $"LEFT JOIN users as user5 ON user5.id = ptw.completedById where ptw.id = {request.id};";
 
             List<CMPermitDetail> permitDetails = await Context.GetData<CMPermitDetail>(myQuery).ConfigureAwait(false);
             // return permitDetails[0];
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, permitDetails[0].insertedId, 0, 0, request.comment, CMMS.CMMS_Status.PTW_ISSUED);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.id, 0, 0, request.comment, CMMS.CMMS_Status.PTW_ISSUED);
 
             CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_ISSUED, permitDetails[0]);
-            CMDefaultResponse response = new CMDefaultResponse(permitDetails[0].insertedId, CMMS.RETRUNSTATUS.SUCCESS, $" Permit  { permitDetails[0].insertedId } Issued");
+            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $" Permit  { request.id } Issued");
             return response;
         }
 
@@ -545,22 +563,25 @@ namespace CMMSAPIs.Repositories.Permits
             {
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
             }
-            string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as startDate, ptw.endDate as tillDate, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, facilities.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.description as description,CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, CONCAT(user3.firstName,' ',user3.lastName) as completedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, ptw.cancelRequestDate as cancel_at " +
-                  "FROM permits as ptw " +
-                  "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
-                  "LEFT JOIN facilities as facilities  ON ptw.blockId = facilities.id " +
-                  "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
-                  "LEFT JOIN users as user2 ON user2.id = ptw.approvedById " +
-                  "LEFT JOIN users as user3 ON user3.id = ptw.completedById " +
-                  "LEFT JOIN users as user4 ON user4.id = ptw.cancelRequestById " +
-                    $"where ptw.id = { request.id }";
+            string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as start_datetime, ptw.endDate as end_datetime, facilities.id as facility_id, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, blocks.id as blockId, blocks.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.title as title, ptw.description as description, ptw.jobTypeId as job_type_id, jobType.title as job_type_name, ptw.TBTId as sop_type_id, sop.title as sop_type_name, user1.id as issuer_id, CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, user2.id as approver_id, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, user3.id as requester_id, CONCAT(user3.firstName,' ',user3.lastName) as requestedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, CONCAT(user5.firstName,' ',user5.lastName) as closedByName, ptw.cancelRequestDate as cancel_at " +
+              "FROM permits as ptw " +
+              "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
+              "LEFT JOIN permitjobtypelist as jobType ON ptw.jobTypeId = jobType.id " +
+              "LEFT JOIN permittbtjoblist as sop ON ptw.TBTId = sop.id " +
+              "JOIN facilities as facilities  ON ptw.facilityId = facilities.id " +
+              "JOIN facilities as blocks  ON ptw.blockId = blocks.id " +
+              "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
+              "LEFT JOIN users as user2 ON user2.id = ptw.approvedById " +
+              "LEFT JOIN users as user3 ON user3.id = ptw.acceptedById " +
+              "LEFT JOIN users as user4 ON user4.id = ptw.cancelRequestById " +
+              $"LEFT JOIN users as user5 ON user5.id = ptw.completedById where ptw.id = {request.id}";
 
             List<CMPermitDetail> permitDetails = await Context.GetData<CMPermitDetail>(myQuery).ConfigureAwait(false);
 
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, permitDetails[0].insertedId, 0, 0, request.comment, CMMS.CMMS_Status.PTW_APPROVE);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.id, 0, 0, request.comment, CMMS.CMMS_Status.PTW_APPROVE);
 
             CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_APPROVE, permitDetails[0]);
-            CMDefaultResponse response = new CMDefaultResponse(permitDetails[0].insertedId, CMMS.RETRUNSTATUS.SUCCESS, $" Permit  { permitDetails[0].insertedId }  Approve");
+            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $" Permit  { request.id }  Approve");
             return response;
         }
 
@@ -576,22 +597,25 @@ namespace CMMSAPIs.Repositories.Permits
             {
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
             }
-            string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as startDate, ptw.endDate as tillDate, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, facilities.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.description as description,CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, CONCAT(user3.firstName,' ',user3.lastName) as completedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, ptw.cancelRequestDate as cancel_at " +
-                  "FROM permits as ptw " +
-                  "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
-                  "LEFT JOIN facilities as facilities  ON ptw.blockId = facilities.id " +
-                  "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
-                  "LEFT JOIN users as user2 ON user2.id = ptw.approvedById " +
-                  "LEFT JOIN users as user3 ON user3.id = ptw.completedById " +
-                  "LEFT JOIN users as user4 ON user4.id = ptw.cancelRequestById " +
-                  $"where ptw.id = { request.id }";
+            string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as start_datetime, ptw.endDate as end_datetime, facilities.id as facility_id, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, blocks.id as blockId, blocks.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.title as title, ptw.description as description, ptw.jobTypeId as job_type_id, jobType.title as job_type_name, ptw.TBTId as sop_type_id, sop.title as sop_type_name, user1.id as issuer_id, CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, user2.id as approver_id, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, user3.id as requester_id, CONCAT(user3.firstName,' ',user3.lastName) as requestedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, CONCAT(user5.firstName,' ',user5.lastName) as closedByName, ptw.cancelRequestDate as cancel_at " +
+              "FROM permits as ptw " +
+              "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
+              "LEFT JOIN permitjobtypelist as jobType ON ptw.jobTypeId = jobType.id " +
+              "LEFT JOIN permittbtjoblist as sop ON ptw.TBTId = sop.id " +
+              "JOIN facilities as facilities  ON ptw.facilityId = facilities.id " +
+              "JOIN facilities as blocks  ON ptw.blockId = blocks.id " +
+              "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
+              "LEFT JOIN users as user2 ON user2.id = ptw.approvedById " +
+              "LEFT JOIN users as user3 ON user3.id = ptw.acceptedById " +
+              "LEFT JOIN users as user4 ON user4.id = ptw.cancelRequestById " +
+              $"LEFT JOIN users as user5 ON user5.id = ptw.completedById where ptw.id = {request.id};";
 
             List<CMPermitDetail> permitDetails = await Context.GetData<CMPermitDetail>(myQuery).ConfigureAwait(false);
 
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, permitDetails[0].insertedId, 0, 0, "Permit Close", CMMS.CMMS_Status.PTW_CLOSED);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.id, 0, 0, "Permit Close", CMMS.CMMS_Status.PTW_CLOSED);
 
             CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_CLOSED, permitDetails[0]);
-            CMDefaultResponse response = new CMDefaultResponse(permitDetails[0].insertedId, CMMS.RETRUNSTATUS.SUCCESS, $" Permit  { permitDetails[0].insertedId } Close");
+            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $" Permit  { request.id } Close");
             return response;
         }
 
@@ -607,22 +631,26 @@ namespace CMMSAPIs.Repositories.Permits
             {
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
             }
-            string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as startDate, ptw.endDate as tillDate, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, facilities.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.description as description,CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, CONCAT(user3.firstName,' ',user3.lastName) as completedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, ptw.cancelRequestDate as cancel_at " +
-                 "FROM permits as ptw " +
-                 "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
-                 "LEFT JOIN facilities as facilities  ON ptw.blockId = facilities.id " +
-                 "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
-                 "LEFT JOIN users as user2 ON user2.id = ptw.approvedById " +
-                 "LEFT JOIN users as user3 ON user3.id = ptw.completedById " +
-                 "LEFT JOIN users as user4 ON user4.id = ptw.cancelRequestById " +
-                   $"where ptw.id = { request.id }";
+
+            string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as start_datetime, ptw.endDate as end_datetime, facilities.id as facility_id, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, blocks.id as blockId, blocks.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.title as title, ptw.description as description, ptw.jobTypeId as job_type_id, jobType.title as job_type_name, ptw.TBTId as sop_type_id, sop.title as sop_type_name, user1.id as issuer_id, CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, user2.id as approver_id, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, user3.id as requester_id, CONCAT(user3.firstName,' ',user3.lastName) as requestedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, CONCAT(user5.firstName,' ',user5.lastName) as closedByName, ptw.cancelRequestDate as cancel_at " +
+              "FROM permits as ptw " +
+              "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
+              "LEFT JOIN permitjobtypelist as jobType ON ptw.jobTypeId = jobType.id " +
+              "LEFT JOIN permittbtjoblist as sop ON ptw.TBTId = sop.id " +
+              "JOIN facilities as facilities  ON ptw.facilityId = facilities.id " +
+              "JOIN facilities as blocks  ON ptw.blockId = blocks.id " +
+              "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
+              "LEFT JOIN users as user2 ON user2.id = ptw.approvedById " +
+              "LEFT JOIN users as user3 ON user3.id = ptw.acceptedById " +
+              "LEFT JOIN users as user4 ON user4.id = ptw.cancelRequestById " +
+              $"LEFT JOIN users as user5 ON user5.id = ptw.completedById where ptw.id = {request.id};";
 
             List<CMPermitDetail> permitDetails = await Context.GetData<CMPermitDetail>(myQuery).ConfigureAwait(false);
 
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, permitDetails[0].insertedId, 0, 0, request.comment, CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.id, 0, 0, request.comment, CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER);
 
             CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER, permitDetails[0]);
-            CMDefaultResponse response = new CMDefaultResponse(permitDetails[0].insertedId, CMMS.RETRUNSTATUS.SUCCESS, $" Permit  { permitDetails[0].insertedId } Reject");
+            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $" Permit  { request.id } Reject");
             return response;
         }
 
@@ -642,26 +670,29 @@ namespace CMMSAPIs.Repositories.Permits
             {
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
             }
-            string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as startDate, ptw.endDate as tillDate, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, facilities.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.description as description,CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, CONCAT(user3.firstName,' ',user3.lastName) as completedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, ptw.cancelRequestDate as cancel_at " +
-                "FROM permits as ptw " +
-                "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
-                "LEFT JOIN facilities as facilities  ON ptw.blockId = facilities.id " +
-                "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
-                "LEFT JOIN users as user2 ON user2.id = ptw.approvedById " +
-                "LEFT JOIN users as user3 ON user3.id = ptw.completedById " +
-                "LEFT JOIN users as user4 ON user4.id = ptw.cancelRequestById " +
-                 $"where ptw.id = { request.id }";
+            string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as start_datetime, ptw.endDate as end_datetime, facilities.id as facility_id, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, blocks.id as blockId, blocks.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.title as title, ptw.description as description, ptw.jobTypeId as job_type_id, jobType.title as job_type_name, ptw.TBTId as sop_type_id, sop.title as sop_type_name, user1.id as issuer_id, CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, user2.id as approver_id, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, user3.id as requester_id, CONCAT(user3.firstName,' ',user3.lastName) as requestedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, CONCAT(user5.firstName,' ',user5.lastName) as closedByName, ptw.cancelRequestDate as cancel_at " +
+              "FROM permits as ptw " +
+              "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
+              "LEFT JOIN permitjobtypelist as jobType ON ptw.jobTypeId = jobType.id " +
+              "LEFT JOIN permittbtjoblist as sop ON ptw.TBTId = sop.id " +
+              "JOIN facilities as facilities  ON ptw.facilityId = facilities.id " +
+              "JOIN facilities as blocks  ON ptw.blockId = blocks.id " +
+              "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
+              "LEFT JOIN users as user2 ON user2.id = ptw.approvedById " +
+              "LEFT JOIN users as user3 ON user3.id = ptw.acceptedById " +
+              "LEFT JOIN users as user4 ON user4.id = ptw.cancelRequestById " +
+              $"LEFT JOIN users as user5 ON user5.id = ptw.completedById where ptw.id = {request.id};";
 
             List<CMPermitDetail> permitDetails = await Context.GetData<CMPermitDetail>(myQuery).ConfigureAwait(false);
 
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, permitDetails[0].insertedId, 0, 0, request.comment, CMMS.CMMS_Status.PTW_CANCELLED_BY_ISSUER);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.id, 0, 0, request.comment, CMMS.CMMS_Status.PTW_CANCELLED_BY_ISSUER);
 
             CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_CANCELLED_BY_ISSUER, permitDetails[0]);
-            CMDefaultResponse response = new CMDefaultResponse(permitDetails[0].insertedId, CMMS.RETRUNSTATUS.SUCCESS, $" Permit  { permitDetails[0].insertedId } Cancel");
+            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $" Permit  { request.id } Cancel");
             return response;
         }
 
-        internal async Task<int> UpdatePermit(CMUpdatePermit request, int userID)
+        internal async Task<CMDefaultResponse> UpdatePermit(CMUpdatePermit request, int userID)
         {
             string requesterQuery = $"SELECT acceptedById FROM permits WHERE id = {request.permit_id};";
             DataTable requesterDt = await Context.FetchData(requesterQuery).ConfigureAwait(false);
@@ -695,18 +726,20 @@ namespace CMMSAPIs.Repositories.Permits
             await Context.ExecuteNonQry<int>(updatePermitQry).ConfigureAwait(false);
             int updatePrimaryKey = request.permit_id;
 
-            string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as startDate, ptw.endDate as tillDate, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, facilities.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.description as description,CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, CONCAT(user3.firstName,' ',user3.lastName) as completedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, ptw.cancelRequestDate as cancel_at " +
-             "FROM permits as ptw " +
-             "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
-             "LEFT JOIN facilities as facilities  ON ptw.blockId = facilities.id " +
+            string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as start_datetime, ptw.endDate as end_datetime, facilities.id as facility_id, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, blocks.id as blockId, blocks.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.title as title, ptw.description as description, ptw.jobTypeId as job_type_id, jobType.title as job_type_name, ptw.TBTId as sop_type_id, sop.title as sop_type_name, user1.id as issuer_id, CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, user2.id as approver_id, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, user3.id as requester_id, CONCAT(user3.firstName,' ',user3.lastName) as requestedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, CONCAT(user5.firstName,' ',user5.lastName) as closedByName, ptw.cancelRequestDate as cancel_at " +
+              "FROM permits as ptw " +
+              "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
+              "LEFT JOIN permitjobtypelist as jobType ON ptw.jobTypeId = jobType.id " +
+              "LEFT JOIN permittbtjoblist as sop ON ptw.TBTId = sop.id " +
+              "JOIN facilities as facilities  ON ptw.facilityId = facilities.id " +
+              "JOIN facilities as blocks  ON ptw.blockId = blocks.id " +
               "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
               "LEFT JOIN users as user2 ON user2.id = ptw.approvedById " +
-              "LEFT JOIN users as user3 ON user3.id = ptw.completedById " +
+              "LEFT JOIN users as user3 ON user3.id = ptw.acceptedById " +
               "LEFT JOIN users as user4 ON user4.id = ptw.cancelRequestById " +
-            $"where ptw.id = { request.permit_id }";
+              "LEFT JOIN users as user5 ON user5.id = ptw.completedById order by ptw.id desc limit 1";
 
             List<CMPermitDetail> permitDetails = await Context.GetData<CMPermitDetail>(myQuery).ConfigureAwait(false);
-            int insertedId = permitDetails[0].insertedId;
 
             if (request.block_ids != null)
             {
@@ -793,10 +826,13 @@ namespace CMMSAPIs.Repositories.Permits
                 }
             }
 
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, updatePrimaryKey, 0, 0, "Permit Updated", CMMS.CMMS_Status.PTW_EDIT);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.permit_id, 0, 0, "Permit Updated", CMMS.CMMS_Status.PTW_EDIT);
 
             CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_EDIT, permitDetails[0]);
-            return updatePrimaryKey;
+
+            CMDefaultResponse response = new CMDefaultResponse(request.permit_id, CMMS.RETRUNSTATUS.SUCCESS, "Permit Updated Successfully");
+
+            return response;
 
         }
     }

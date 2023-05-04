@@ -10,7 +10,7 @@ using CMMSAPIs.Repositories.Utils;
 using System.IO;
 using Microsoft.AspNetCore.Hosting;
 using OfficeOpenXml;
-using IronXL;
+//using IronXL;
 
 namespace CMMSAPIs.Repositories.Inventory
 {

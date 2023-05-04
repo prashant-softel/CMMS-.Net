@@ -40,7 +40,10 @@ namespace CMMSAPIs.Helper
 
                         using (DbDataReader dataReader = await cmd.ExecuteReaderAsync(CommandBehavior.CloseConnection))
                         {
+                            DataSet ds = new DataSet();
                             DataTable dt = new DataTable();
+                            ds.Tables.Add(dt);
+                            dt.DataSet.EnforceConstraints = false;
                             dt.Load(dataReader);
                             cmd.Parameters.Clear();
                             return dt.MapTo<T>();
@@ -80,7 +83,10 @@ namespace CMMSAPIs.Helper
 
                         using (DbDataReader dataReader = await cmd.ExecuteReaderAsync(CommandBehavior.CloseConnection))
                         {
+                            DataSet ds = new DataSet();
                             DataTable dt = new DataTable();
+                            ds.Tables.Add(dt);
+                            dt.DataSet.EnforceConstraints = false;
                             dt.Load(dataReader);
                             cmd.Parameters.Clear();
                             return dt;
@@ -118,7 +124,10 @@ namespace CMMSAPIs.Helper
 
                         using (DbDataReader dataReader = await cmd.ExecuteReaderAsync(CommandBehavior.CloseConnection))
                         {
+                            DataSet ds = new DataSet();
                             DataTable dt = new DataTable();
+                            ds.Tables.Add(dt);
+                            dt.DataSet.EnforceConstraints = false;
                             dt.Load(dataReader);
                             cmd.Parameters.Clear();
                             return dt.Rows.Count;
@@ -240,7 +249,10 @@ namespace CMMSAPIs.Helper
                          
                         using (DbDataReader dataReader = await cmd.ExecuteReaderAsync(CommandBehavior.CloseConnection))
                         {
+                            DataSet ds = new DataSet();
                             DataTable dt = new DataTable();
+                            ds.Tables.Add(dt);
+                            dt.DataSet.EnforceConstraints = false;
                             dt.Load(dataReader);
                             cmd.Parameters.Clear();
                             return dt.MapTo<T>();
