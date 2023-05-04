@@ -13,11 +13,45 @@ namespace CMMSAPIs.Repositories.Masters
     {
         private UtilsRepository _utilsRepo;
 
-        public const string MA_Actual = "MA_Actual";
+        public const string MA_Actual = "MA_Actual"; 
         public const string MA_Contractual = "MA_Contractual";
         public const string Internal_Grid = "Internal_Grid";
         public const string External_Grid = "External_Grid";
-
+        private Dictionary<CMMS.CMMS_Modules, int> module_dict = new Dictionary<CMMS.CMMS_Modules, int>()
+        {
+            { CMMS.CMMS_Modules.DASHBOARD, 1 },
+            { CMMS.CMMS_Modules.JOB, 2 },
+            { CMMS.CMMS_Modules.PTW, 3 },
+            { CMMS.CMMS_Modules.JOBCARD, 4 },
+            { CMMS.CMMS_Modules.CHECKLIST_NUMBER, 5 },
+            { CMMS.CMMS_Modules.CHECKPOINTS, 6 },
+            { CMMS.CMMS_Modules.CHECKLIST_MAPPING, 7 },
+            { CMMS.CMMS_Modules.PM_SCHEDULE, 8 },
+            { CMMS.CMMS_Modules.PM_SCEHDULE_VIEW, 9 },
+            { CMMS.CMMS_Modules.PM_EXECUTION, 10 },
+            { CMMS.CMMS_Modules.PM_SCHEDULE_REPORT, 11 },
+            { CMMS.CMMS_Modules.PM_SUMMARY, 12 },
+            { CMMS.CMMS_Modules.SM_MASTER, 13 },
+            { CMMS.CMMS_Modules.SM_PO, 14 },
+            { CMMS.CMMS_Modules.SM_MRS, 15 },
+            { CMMS.CMMS_Modules.SM_MRS_RETURN, 16 },
+            { CMMS.CMMS_Modules.SM_S2S, 17 },
+            { CMMS.CMMS_Modules.AUDIT_PLAN, 18 },
+            { CMMS.CMMS_Modules.AUDIT_SCHEDULE, 19 },
+            { CMMS.CMMS_Modules.AUDIT_SCEHDULE_VIEW, 20 },
+            { CMMS.CMMS_Modules.AUDIT_EXECUTION, 21 },
+            { CMMS.CMMS_Modules.AUDIT_SUMMARY, 22 },
+            { CMMS.CMMS_Modules.HOTO_PLAN, 23 },
+            { CMMS.CMMS_Modules.HOTO_SCHEDULE, 24 },
+            { CMMS.CMMS_Modules.HOTO_SCEHDULE_VIEW, 25 },
+            { CMMS.CMMS_Modules.HOTO_EXECUTION, 26 },
+            { CMMS.CMMS_Modules.HOTO_SUMMARY, 27 },
+            { CMMS.CMMS_Modules.INVENTORY, 28 },
+            { CMMS.CMMS_Modules.WARRANTY_CLAIM, 30 },
+            { CMMS.CMMS_Modules.CALIBRATION, 31 },
+            { CMMS.CMMS_Modules.MODULE_CLEANING, 32 },
+            { CMMS.CMMS_Modules.VEGETATION, 33 }
+        };
         public CMMSRepository(MYSQLDBHelper sqlDBHelper) : base(sqlDBHelper)
         {
             _utilsRepo = new UtilsRepository(sqlDBHelper);
@@ -141,7 +175,7 @@ namespace CMMSAPIs.Repositories.Masters
             return _Asset;
         }
 
-        internal async Task<List<CMEmployee>> GetEmployeeList(int facility_id)
+        internal async Task<List<CMEmployee>> GetEmployeeList(int facility_id, CMMS.CMMS_Modules module, CMMS.CMMS_Access access)
         {
             string myQuery = "SELECT " +
                                     "u.id, loginId as login_id, concat(firstName,' ', lastName) as name, birthday as birthdate, " +
@@ -156,8 +190,54 @@ namespace CMMSAPIs.Repositories.Masters
                                     "states as states ON states.id = u.stateId and states.id = cities.state_id " +
                              "LEFT JOIN " +
                                     "countries as countries ON countries.id = u.countryId and countries.id = cities.country_id and countries.id = states.country_id " +
+                             "LEFT JOIN " +
+                                    "usersaccess as access ON u.id = access.userId " + 
                              "WHERE " +
-                                    "u.status = 1 AND uf.status = 1 AND isEmployee = 1 AND uf.facilityId = " + facility_id;
+                                    $"u.status = 1 AND uf.status = 1 AND isEmployee = 1 AND uf.facilityId = {facility_id} ";
+            if (facility_id < 0)
+                throw new ArgumentException("Invalid Facility ID");
+            if(module != 0 && access != 0)
+            {
+                myQuery += $"AND access.featureId = {module_dict[module]} AND ( ";
+                if ((access & CMMS.CMMS_Access.ADD) == CMMS.CMMS_Access.ADD)
+                {
+                    myQuery += "access.`add` = 1 OR ";
+                }
+                if ((access & CMMS.CMMS_Access.EDIT) == CMMS.CMMS_Access.EDIT)
+                {
+                    myQuery += "access.`edit` = 1 OR ";
+                }
+                if ((access & CMMS.CMMS_Access.DELETE) == CMMS.CMMS_Access.DELETE)
+                {
+                    myQuery += "access.`delete` = 1 OR ";
+                }
+                if ((access & CMMS.CMMS_Access.VIEW) == CMMS.CMMS_Access.VIEW)
+                {
+                    myQuery += "access.`view` = 1 OR ";
+                }
+                if ((access & CMMS.CMMS_Access.ISSUE) == CMMS.CMMS_Access.ISSUE)
+                {
+                    myQuery += "access.`issue` = 1 OR ";
+                }
+                if ((access & CMMS.CMMS_Access.APPROVE) == CMMS.CMMS_Access.APPROVE)
+                {
+                    myQuery += "access.`approve` = 1 OR ";
+                }
+                if ((access & CMMS.CMMS_Access.SELF_VIEW) == CMMS.CMMS_Access.SELF_VIEW)
+                {
+                    myQuery += "access.`selfView` = 1 OR ";
+                }
+                myQuery = myQuery.Substring(0, myQuery.Length - 3);
+                myQuery += ") ";
+            }
+            else
+            {
+                if (!(module == 0 && access == 0))
+                {
+                    throw new ArgumentException("Both module type and access types are required");
+                }
+            }
+            myQuery += " GROUP BY u.id ORDER BY u.id;";
             List<CMEmployee> _Employee = await Context.GetData<CMEmployee>(myQuery).ConfigureAwait(false);
             return _Employee;
         }

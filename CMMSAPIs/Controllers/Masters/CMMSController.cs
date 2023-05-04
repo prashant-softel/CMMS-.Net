@@ -99,12 +99,16 @@ namespace CMMSAPIs.Controllers.Masters
 
         [Route("GetEmployeeList")]
         [HttpGet]
-        public async Task<IActionResult> GetEmployeeList(int facility_id)
+        public async Task<IActionResult> GetEmployeeList(int facility_id, CMMS.CMMS_Modules module, CMMS.CMMS_Access access)
         {
             try
             {
-                var data = await _CMMSBS.GetEmployeeList(facility_id);
+                var data = await _CMMSBS.GetEmployeeList(facility_id, module, access);
                 return Ok(data);
+            }
+            catch(ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
             }
             catch (Exception)
             {

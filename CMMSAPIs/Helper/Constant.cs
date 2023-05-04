@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System;
 
 namespace CMMSAPIs.Helper
 {
@@ -139,7 +140,8 @@ namespace CMMSAPIs.Helper
         */
         public enum CMMS_Modules
         {
-            JOB = 1,
+            DASHBOARD = 1,
+            JOB,
             PTW,
             JOBCARD,
 
@@ -217,6 +219,17 @@ namespace CMMSAPIs.Helper
             BreakdownMaintenance = 0,
             PreventiveMaintenance,
             Audit
+        }
+        [Flags]
+        public enum CMMS_Access
+        {
+            ADD = 1,
+            EDIT = 2,
+            DELETE = 4,
+            VIEW = 8,
+            ISSUE = 16,
+            APPROVE = 32,
+            SELF_VIEW = 64
         }
 
         public enum CMMS_Status

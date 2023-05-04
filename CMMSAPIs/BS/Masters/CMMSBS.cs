@@ -18,7 +18,7 @@ namespace CMMSAPIs.BS.Masters
         Task<List<CMFacility>> GetBlockList(int facility_id);
         Task<List<CMAssetCategory>> GetAssetCategoryList();
         Task<List<CMAsset>> GetAssetList(int facility_id);
-        Task<List<CMEmployee>> GetEmployeeList(int facility_id);
+        Task<List<CMEmployee>> GetEmployeeList(int facility_id, CMMS.CMMS_Modules module, CMMS.CMMS_Access access);
         Task<List<CMBusinessType>> GetBusinessTypeList();
         Task<CMDefaultResponse> AddBusiness(List<CMBusiness> request);
         Task<List<CMBusiness>> GetBusinessList(CMMS.CMMS_BusinessType businessType);
@@ -211,13 +211,13 @@ namespace CMMSAPIs.BS.Masters
             }
         }
 
-        public async Task<List<CMEmployee>> GetEmployeeList(int facility_id)
+        public async Task<List<CMEmployee>> GetEmployeeList(int facility_id, CMMS.CMMS_Modules module, CMMS.CMMS_Access access)
         {
             try
             {
                 using (var repos = new CMMSRepository(getDB))
                 {
-                    return await repos.GetEmployeeList(facility_id);
+                    return await repos.GetEmployeeList(facility_id, module, access);
 
                 }
             }
