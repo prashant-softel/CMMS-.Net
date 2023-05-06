@@ -125,6 +125,68 @@ namespace CMMSAPIs.Controllers.Permits
         }
 
         [Authorize]
+        [Route("CreateSafetyMeasure")]
+        [HttpPost]
+        public async Task<IActionResult> CreateSafetyMeasure(CMCreateSafetyMeasures request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _PermitBS.CreateSafetyMeasure(request, userID);
+                return Ok(data);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
+        [Route("UpdateSafetyMeasure")]
+        [HttpPatch]
+        public async Task<IActionResult> UpdateSafetyMeasure(CMCreateSafetyMeasures request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _PermitBS.UpdateSafetyMeasure(request, userID);
+                return Ok(data);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
+        [Route("DeleteSafetyMeasure")]
+        [HttpDelete]
+        public async Task<IActionResult> DeleteSafetyMeasure(int id)
+        {
+            try
+            {
+                var data = await _PermitBS.DeleteSafetyMeasure(id);
+                return Ok(data);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
         [Route("GetJobTypeList")]
         [HttpGet]
         public async Task<IActionResult> GetJobTypeList(int facility_id)

@@ -133,7 +133,7 @@ namespace CMMSAPIs.Repositories.Permits
         internal async Task<CMDefaultResponse> CreatePermitType(CMCreatePermitType request, int userID)
         {
             string myQuery = "INSERT INTO permittypelists (title, description, facilityId, status, createdBy, createdAt) VALUES " +
-                                $"('{request.title}', '{request.description}', {request.facilityId}, {request.status}, {userID}, '{UtilsRepository.GetUTCTime()}'); " +
+                                $"('{request.title}', '{request.description}', {request.facilityId}, {((request.status == null)? 1 : request.status)}, {userID}, '{UtilsRepository.GetUTCTime()}'); " +
                                 $"SELECT LAST_INSERT_ID(); ";
             DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
             int id = Convert.ToInt32(dt.Rows[0][0]);
@@ -187,7 +187,43 @@ namespace CMMSAPIs.Repositories.Permits
             List<CMSafetyMeasurementQuestionList> _QuestionList = await Context.GetData<CMSafetyMeasurementQuestionList>(myQuery5).ConfigureAwait(false);
             return _QuestionList;
         }
-        
+        internal async Task<CMDefaultResponse> CreateSafetyMeasure(CMCreateSafetyMeasures request, int userID)
+        {
+            string myQuery = "INSERT INTO permittypesafetymeasures(title, discription, permitTypeId, input, required, createdAt, createdBy) VALUES " +
+                                $"('{request.title}', '{request.description}', {request.permitType}, {(int)request.input}, {(request.required==null?0:request.required)}, " +
+                                $"'{UtilsRepository.GetUTCTime()}', {userID}); SELECT LAST_INSERT_ID(); ";
+            DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
+            int id = Convert.ToInt32(dt.Rows[0][0]);
+            CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Safety Measure added");
+            return response;
+        }
+        internal async Task<CMDefaultResponse> UpdateSafetyMeasure(CMCreateSafetyMeasures request, int userID)
+        {
+            if (request.id <= 0)
+                throw new ArgumentException("Invalid ID");
+            string updateQry = $"UPDATE permittypesafetymeasures SET";
+            if (request.title != null && request.title != "")
+                updateQry += $" title = '{request.title}',";
+            if (request.description != null && request.description != "")
+                updateQry += $" discription = '{request.description}',";
+            if (request.permitType > 0)
+                updateQry += $" permitTypeId = {request.permitType},";
+            if (request.input > 0)
+                updateQry += $" input = {(int)request.input},";
+            if (request.required != null)
+                updateQry += $" required = {request.required},";
+            updateQry += $" updatedBy = {userID}, updatedAt = '{UtilsRepository.GetUTCTime()}' WHERE id = {request.id};";
+            await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Safety Measure Details Updated");
+            return response;
+        }
+        internal async Task<CMDefaultResponse> DeleteSafetyMeasure(int id)
+        {
+            string deleteQry = $"DELETE FROM permittypesafetymeasures WHERE id = {id}";
+            await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
+            CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Safety Measure Deleted");
+            return response;
+        }
         internal async Task<List<CMDefaultList>> GetJobTypeList(int facility_id)
         {
             /*

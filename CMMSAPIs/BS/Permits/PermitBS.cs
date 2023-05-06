@@ -19,6 +19,9 @@ namespace CMMSAPIs.BS.Permits
         Task<CMDefaultResponse> UpdatePermitType(CMCreatePermitType request, int userID);
         Task<CMDefaultResponse> DeletePermitType(int id);
         Task<List<CMSafetyMeasurementQuestionList>> GetSafetyMeasurementQuestionList(int permit_type_id);
+        Task<CMDefaultResponse> CreateSafetyMeasure(CMCreateSafetyMeasures request, int userID);
+        Task<CMDefaultResponse> UpdateSafetyMeasure(CMCreateSafetyMeasures request, int userID);
+        Task<CMDefaultResponse> DeleteSafetyMeasure(int id);
         Task<List<CMDefaultList>> GetJobTypeList(int facility_id);
         Task<List<CMSOPList>> GetSOPList(int job_type_id);
 
@@ -121,6 +124,49 @@ namespace CMMSAPIs.BS.Permits
                 using (var repos = new PermitRepository(getDB))
                 {
                     return await repos.GetSafetyMeasurementQuestionList(permit_type_id);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> CreateSafetyMeasure(CMCreateSafetyMeasures request, int userID)
+        {
+            try
+            {
+                using (var repos = new PermitRepository(getDB))
+                {
+                    return await repos.CreateSafetyMeasure(request, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<CMDefaultResponse> UpdateSafetyMeasure(CMCreateSafetyMeasures request, int userID)
+        {
+            try
+            {
+                using (var repos = new PermitRepository(getDB))
+                {
+                    return await repos.UpdateSafetyMeasure(request, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<CMDefaultResponse> DeleteSafetyMeasure(int id)
+        {
+            try
+            {
+                using (var repos = new PermitRepository(getDB))
+                {
+                    return await repos.DeleteSafetyMeasure(id);
                 }
             }
             catch (Exception ex)

@@ -14,7 +14,7 @@ namespace CMMSAPIs.Models.Permits
         public int facilityId { get; set; }
         public int? status { get; set; }
     }
-    public class CMCreateSafetyMesaures
+    public class CMCreateSafetyMeasures
     {
         public int id { get; set; }
         public string title { get; set; }
