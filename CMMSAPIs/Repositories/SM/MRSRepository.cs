@@ -443,9 +443,9 @@ namespace CMMSAPIs.Repositories.SM
                 var lastMRSID = request.ID;
                 var refType = "MRSReturnEdit";
                 var mailSub = "MRS Return Request Updated.";
-                string updatestmt = $" START TRANSACTION; UPDATE smmrs SET plant_ID = {request.plant_ID}, requested_by_emp_ID = {request.requested_by_emp_ID}, requested_date = {request.returnDate}," +
+                string updatestmt = $" START TRANSACTION; UPDATE smmrs SET plant_ID = {request.plant_ID}, requested_by_emp_ID = {request.requested_by_emp_ID}, requested_date = '{request.returnDate.Value.ToString("yyyy-MM-dd HH:mm")}'," +
                     $"status = '0', flag = {request.flag}, approval_status = {request.approval_status} WHERE ID = {request.ID}" +
-                    $"DELETE FROM smrsitems WHERE mrs_ID =  {lastMRSID} ; IF @@ERROR <> 0 THEN\r\n    ROLLBACK;\r\nELSE\r\n    COMMIT;\r\nEND IF;";
+                    $" ; DELETE FROM smrsitems WHERE mrs_ID =  {lastMRSID} ; /*IF @@ERROR <> 0 THEN\r\n    ROLLBACK;\r\nELSE\r\n    COMMIT;\r\nEND IF;*/";
                 try
                 {
                     await Context.ExecuteNonQry<int>(updatestmt);
@@ -461,8 +461,8 @@ namespace CMMSAPIs.Repositories.SM
                 var refType = "MRSReturn";
                 var mailSub = "MRS Return Request";
                 string insertStmt = $"START TRANSACTION; INSERT INTO smmrs (plant_ID,requested_by_emp_ID,requested_date," +
-                    $"returnDate,flag)\r\n VALUES ({request.plant_ID},{request.requested_by_emp_ID},{request.requestd_date}" +
-                    $",{request.returnDate},{request.flag}); SELECT LAST_INSERT_ID(); IF @@ERROR <> 0 THEN\r\n    ROLLBACK;\r\nELSE\r\n    COMMIT;\r\n END IF;";
+                    $"returnDate,flag)\r\n VALUES ({request.plant_ID},{request.requested_by_emp_ID},'{request.requestd_date.Value.ToString("yyyy-MM-dd HH:mm")}'" +
+                    $",'{request.returnDate}',{request.flag}); SELECT LAST_INSERT_ID();/* IF @@ERROR <> 0 THEN\r\n    ROLLBACK;\r\nELSE\r\n    COMMIT;\r\n END IF;*/";
                 try
                 {
                     DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
@@ -486,11 +486,11 @@ namespace CMMSAPIs.Repositories.SM
                         {
                             string insertStmt = $"START TRANSACTION; " +
                             $"INSERT INTO smrsitems (mrs_ID,mrs_return_ID,asset_item_ID,available_qty,requested_qty,return_remarks,flag)" +
-                            $"VALUES ({request.ID},{request.equipments[i].id},{request.equipments[i].equipmentID},{request.equipments[i].qty}, {request.equipments[i].requested_qty}, {request.equipments[i].return_remarks}, 2)" +
-                            $" SELECT LAST_INSERT_ID(); IF @@ERROR <> 0 THEN\r\n    ROLLBACK;\r\nELSE\r\n    COMMIT;\r\n END IF;";
+                            $"VALUES ({request.ID},{request.equipments[i].id},{request.equipments[i].equipmentID},{request.equipments[i].qty}, {request.equipments[i].requested_qty}, '{request.equipments[i].return_remarks}', 2)" +
+                            $"; SELECT LAST_INSERT_ID(); /* IF @@ERROR <> 0 THEN\r\n    ROLLBACK;\r\nELSE\r\n    COMMIT;\r\n END IF;*/";
                             DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
 
-                        string updatestmt = $"UPDATE smassetitems SET item_condition = {request.item_condition}, status = {request.status} WHERE ID = {request.asset_item_ID}";
+                        string updatestmt = $"UPDATE smassetitems SET item_condition = {request.item_condition}, status = {request.status} WHERE ID = {request.asset_item_ID};";
                         await Context.ExecuteNonQry<int>(updatestmt);
                     }
                         catch (Exception ex)
@@ -502,7 +502,7 @@ namespace CMMSAPIs.Repositories.SM
                     Queryflag = true;
                 }
             }
-            if (Queryflag)
+            if (!Queryflag)
             {
                 response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Failed to submit MRS return.");
             }
@@ -564,7 +564,7 @@ namespace CMMSAPIs.Repositories.SM
 
             if (Queryflag)
             {
-                var stmtUpdate = $"UPDATE smmrs SET approved_by_emp_ID = {request.approved_by_emp_ID}, approved_date = '{request.approved_date}'," + 
+                var stmtUpdate = $"UPDATE smmrs SET approved_by_emp_ID = {request.approved_by_emp_ID}, approved_date = '{request.approved_date.Value.ToString("yyyy-MM-dd HH:mm")}'," + 
                 $"approval_status = {request.approval_status}, approval_comment = '{request.return_remarks}'"+
                 $"WHERE ID = {request.ID}";
                 try
