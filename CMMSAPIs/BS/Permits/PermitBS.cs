@@ -15,6 +15,9 @@ namespace CMMSAPIs.BS.Permits
          * Permit Create End Points
         */
         Task<List<CMDefaultList>> GetPermitTypeList(int facility_id);
+        Task<CMDefaultResponse> CreatePermitType(CMCreatePermitType request, int userID);
+        Task<CMDefaultResponse> UpdatePermitType(CMCreatePermitType request, int userID);
+        Task<CMDefaultResponse> DeletePermitType(int id);
         Task<List<CMSafetyMeasurementQuestionList>> GetSafetyMeasurementQuestionList(int permit_type_id);
         Task<List<CMDefaultList>> GetJobTypeList(int facility_id);
         Task<List<CMSOPList>> GetSOPList(int job_type_id);
@@ -32,7 +35,12 @@ namespace CMMSAPIs.BS.Permits
         Task<CMDefaultResponse> PermitClose(CMApproval request, int userID);
         Task<CMDefaultResponse> PermitReject(CMApproval request, int userID);
         Task<CMDefaultResponse> PermitIssue(CMApproval request, int userID);
-        Task<CMDefaultResponse> PermitCancel(CMApproval request, int userID);
+        Task<CMDefaultResponse> PermitIssueReject(CMApproval request, int userID);
+        Task<CMDefaultResponse> PermitCancelRequest(CMApproval request, int userID);
+        Task<CMDefaultResponse> PermitCancelReject(CMApproval request, int userID);
+        Task<CMDefaultResponse> PermitCancelByApprover(CMApproval request, int userID);
+        Task<CMDefaultResponse> PermitCancelByHSE(CMApproval request, int userID);
+        Task<CMDefaultResponse> PermitCancelByIssuer(CMApproval request, int userID);
         Task<CMDefaultResponse> UpdatePermit(CMUpdatePermit request, int userID);
     }
 
@@ -56,6 +64,48 @@ namespace CMMSAPIs.BS.Permits
                 using (var repos = new PermitRepository(getDB))
                 {
                     return await repos.GetPermitTypeList(facility_id);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<CMDefaultResponse> CreatePermitType(CMCreatePermitType request, int userID)
+        {
+            try
+            {
+                using (var repos = new PermitRepository(getDB))
+                {
+                    return await repos.CreatePermitType(request, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<CMDefaultResponse> UpdatePermitType(CMCreatePermitType request, int userID)
+        {
+            try
+            {
+                using (var repos = new PermitRepository(getDB))
+                {
+                    return await repos.UpdatePermitType(request, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<CMDefaultResponse> DeletePermitType(int id)
+        {
+            try
+            {
+                using (var repos = new PermitRepository(getDB))
+                {
+                    return await repos.DeletePermitType(id);
                 }
             }
             catch (Exception ex)
@@ -282,13 +332,88 @@ namespace CMMSAPIs.BS.Permits
             }
         }
 
-        public async Task<CMDefaultResponse> PermitCancel(CMApproval request, int userID)
+        public async Task<CMDefaultResponse> PermitIssueReject(CMApproval request, int userID)
         {
             try
             {
                 using (var repos = new PermitRepository(getDB))
                 {
-                    return await repos.PermitCancel(request, userID);
+                    return await repos.PermitIssueReject(request, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> PermitCancelRequest(CMApproval request, int userID)
+        {
+            try
+            {
+                using (var repos = new PermitRepository(getDB))
+                {
+                    return await repos.PermitCancelRequest(request, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> PermitCancelByApprover(CMApproval request, int userID)
+        {
+            try
+            {
+                using (var repos = new PermitRepository(getDB))
+                {
+                    return await repos.PermitCancelByApprover(request, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> PermitCancelByHSE(CMApproval request, int userID)
+        {
+            try
+            {
+                using (var repos = new PermitRepository(getDB))
+                {
+                    return await repos.PermitCancelByHSE(request, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> PermitCancelByIssuer(CMApproval request, int userID)
+        {
+            try
+            {
+                using (var repos = new PermitRepository(getDB))
+                {
+                    return await repos.PermitCancelByIssuer(request, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> PermitCancelReject(CMApproval request, int userID)
+        {
+            try
+            {
+                using (var repos = new PermitRepository(getDB))
+                {
+                    return await repos.PermitCancelReject(request, userID);
                 }
             }
             catch (Exception ex)

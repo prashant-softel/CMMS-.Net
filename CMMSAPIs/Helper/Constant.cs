@@ -93,6 +93,14 @@ namespace CMMSAPIs.Helper
             DURING = 2,
             AFTER = 3
         }
+
+        public enum CMMS_Input
+        {
+            Checkbox = 1,
+            Radio,
+            Text,
+            OK
+        }
         /* Features Constant START */
 
         /*
@@ -261,6 +269,8 @@ namespace CMMSAPIs.Helper
             PTW_CANCELLED_BY_ISSUER,
             PTW_CANCELLED_BY_HSE,
             PTW_CANCELLED_BY_APPROVER,
+            PTW_CANCEL_REQUESTED,
+            PTW_CANCEL_REQUEST_REJECTED,
             PTW_EDIT,
             PTW_EXTEND_REQUESTED,
             PTW_EXTEND_REQUEST_APPROVE,
