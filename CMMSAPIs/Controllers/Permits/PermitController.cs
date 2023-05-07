@@ -47,6 +47,68 @@ namespace CMMSAPIs.Controllers.Permits
         }
 
         [Authorize]
+        [Route("CreatePermitType")]
+        [HttpPost]
+        public async Task<IActionResult> CreatePermitType(CMCreatePermitType request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _PermitBS.CreatePermitType(request, userID);
+                return Ok(data);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
+        [Route("UpdatePermitType")]
+        [HttpPatch]
+        public async Task<IActionResult> UpdatePermitType(CMCreatePermitType request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _PermitBS.UpdatePermitType(request, userID);
+                return Ok(data);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
+        [Route("DeletePermitType")]
+        [HttpDelete]
+        public async Task<IActionResult> DeletePermitType(int id)
+        {
+            try
+            {
+                var data = await _PermitBS.DeletePermitType(id);
+                return Ok(data);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
         [Route("GetSafetyMeasurementQuestionList")]
         [HttpGet]
         public async Task<IActionResult> GetSafetyMeasurementQuestionList(int permit_type_id)
@@ -55,6 +117,68 @@ namespace CMMSAPIs.Controllers.Permits
             {
                 var data = await _PermitBS.GetSafetyMeasurementQuestionList(permit_type_id);
                 return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
+        [Route("CreateSafetyMeasure")]
+        [HttpPost]
+        public async Task<IActionResult> CreateSafetyMeasure(CMCreateSafetyMeasures request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _PermitBS.CreateSafetyMeasure(request, userID);
+                return Ok(data);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
+        [Route("UpdateSafetyMeasure")]
+        [HttpPatch]
+        public async Task<IActionResult> UpdateSafetyMeasure(CMCreateSafetyMeasures request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _PermitBS.UpdateSafetyMeasure(request, userID);
+                return Ok(data);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
+        [Route("DeleteSafetyMeasure")]
+        [HttpDelete]
+        public async Task<IActionResult> DeleteSafetyMeasure(int id)
+        {
+            try
+            {
+                var data = await _PermitBS.DeleteSafetyMeasure(id);
+                return Ok(data);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
             }
             catch (Exception)
             {
@@ -287,14 +411,100 @@ namespace CMMSAPIs.Controllers.Permits
         }
 
         [Authorize]
-        [Route("PermitCancel")]
+        [Route("PermitIssueReject")]
         [HttpPut]
-        public async Task<IActionResult> PermitCancel([FromForm] CMApproval request)
+        public async Task<IActionResult> PermitIssueReject([FromForm] CMApproval request)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _PermitBS.PermitCancel(request, userID);
+                var data = await _PermitBS.PermitIssueReject(request, userID);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+        }
+
+        [Authorize]
+        [Route("PermitCancelRequest")]
+        [HttpPut]
+        public async Task<IActionResult> PermitCancelRequest([FromForm] CMApproval request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _PermitBS.PermitCancelRequest(request, userID);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
+        [Route("PermitCancelReject")]
+        [HttpPut]
+        public async Task<IActionResult> PermitCancelReject([FromForm] CMApproval request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _PermitBS.PermitCancelReject(request, userID);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
+        [Route("PermitCancelByApprover")]
+        [HttpPut]
+        public async Task<IActionResult> PermitCancelByApprover([FromForm] CMApproval request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _PermitBS.PermitCancelByApprover(request, userID);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
+        [Route("PermitCancelByHSE")]
+        [HttpPut]
+        public async Task<IActionResult> PermitCancelByHSE([FromForm] CMApproval request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _PermitBS.PermitCancelByHSE(request, userID);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
+        [Route("PermitCancelByIssuer")]
+        [HttpPut]
+        public async Task<IActionResult> PermitCancelByIssuer([FromForm] CMApproval request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _PermitBS.PermitCancelByIssuer(request, userID);
                 return Ok(data);
             }
             catch (Exception)
