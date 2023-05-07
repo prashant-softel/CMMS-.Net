@@ -53,7 +53,7 @@ namespace CMMSAPIs.Repositories.SM
                 if (_List != null && _List.Count > 0)
                 {
                     ID = _List[0].ID;
-                    string stmtUpdate = $"UPDATE smreorderdata SET asset_code = '{request.asset_code}', max_qty = {request.max_qty}, min_qty = {request.min_qty} WHERE ID = {request.ID};";
+                    string stmtUpdate = $"UPDATE smreorderdata SET asset_code = '{request.asset_code}', max_qty = {request.max_qty}, min_qty = {request.min_qty} WHERE ID = {ID};";
                     await Context.ExecuteNonQry<int>(stmtUpdate);
                 }
                 else
@@ -81,12 +81,12 @@ namespace CMMSAPIs.Repositories.SM
             bool QueryFlag = true;
             try
             {
-                string stmtSelect = $"SELECT * FROM smreorderdata WHERE asset_code = {request.asset_code} AND plant_ID = {request.plant_ID}";
+                string stmtSelect = $"SELECT * FROM smreorderdata WHERE asset_code = '{request.asset_code}' AND plant_ID = {request.plant_ID}";
                 List<ReOrder> _List = await Context.GetData<ReOrder>(stmtSelect).ConfigureAwait(false);
                 if (_List != null && _List.Count > 0)
                 {
                     ID = _List[0].ID;
-                    string stmtUpdate = $"UPDATE smreorderdata SET max_qty = {request.max_qty}, min_qty = {request.min_qty} WHERE ID = {request.ID};";
+                    string stmtUpdate = $"UPDATE smreorderdata SET max_qty = {request.max_qty}, min_qty = {request.min_qty} WHERE ID = {ID};";
                     await Context.ExecuteNonQry<int>(stmtUpdate);
                 }
                 else
@@ -228,7 +228,7 @@ namespace CMMSAPIs.Repositories.SM
 
             try
             {
-                string stmt = $"INSERT INTO smpurchaseorderdetails (purchaseID, assetItemID, order_type, cost, ordered_qty, location_ID); " +
+                string stmt = $"INSERT INTO smpurchaseorderdetails (purchaseID, assetItemID, order_type, cost, ordered_qty, location_ID) " +
                               $"VALUES ({purchaseID}, {assetitemID}, {type}, {cost}, {o_qty}, {location}); SELECT LAST_INSERT_ID();";
                 
                 DataTable dt2 = await Context.FetchData(stmt).ConfigureAwait(false);
@@ -283,8 +283,9 @@ namespace CMMSAPIs.Repositories.SM
             {
 
 
-                string stmt = $"INSERT INTO smpurchaseorder (plantID, vendorID, generated_by, purchaseDate, flag, generate_flag) " +
-                    $"VALUES ({plantID},{vendorID},{generatedBy},'{purchaseDate.Value.ToString("yyyy-MM-dd")}',{generateFlag},{generateFlag});  SELECT LAST_INSERT_ID();";
+                string stmt = $"INSERT INTO smpurchaseorder (plantID, vendorID, generated_by, purchaseDate, flag, generate_flag , challan_no, po_no, freight, transport, no_pkg_received, lr_no, condition_pkg_received, vehicle_no, gir_no,challan_date, po_date, job_ref, amount, currency, withdrawOn, order_type) " +
+                    $"VALUES ({plantID},{vendorID},{generatedBy},'{purchaseDate.Value.ToString("yyyy-MM-dd")}',{generateFlag},{generateFlag}," +
+                    $"0,0,0, '','', '', '', '', '', '2000-01-01', '2000-01-01', '', 0, '', '2000-01-01',0 );  SELECT LAST_INSERT_ID();";
                 DataTable dtInsert = await Context.FetchData(stmt).ConfigureAwait(false);             
                 purchaseID = Convert.ToInt32(dtInsert.Rows[0][0]);
             }
