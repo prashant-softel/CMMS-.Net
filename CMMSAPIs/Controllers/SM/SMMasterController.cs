@@ -35,11 +35,11 @@ namespace CMMSAPIs.Controllers.SM
         
         [Route("GetAssetTypeList")]
         [HttpGet]
-        public async Task<IActionResult> GetAssetTypeList()
+        public async Task<IActionResult> GetAssetTypeList(int ID)
         {
             try
             {
-                var data = await _SMMasterBS.GetAssetTypeList();
+                var data = await _SMMasterBS.GetAssetTypeList(ID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -102,11 +102,11 @@ namespace CMMSAPIs.Controllers.SM
 
         [Route("GetAssetCategoryList")]
         [HttpGet]
-        public async Task<IActionResult> GetAssetCategoryList()
+        public async Task<IActionResult> GetAssetCategoryList(int ID)
         {
             try
             {
-                var data = await _SMMasterBS.GetAssetCategoryList();
+                var data = await _SMMasterBS.GetAssetCategoryList(ID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -169,11 +169,11 @@ namespace CMMSAPIs.Controllers.SM
 
         [Route("GetUnitMeasurementList")]
         [HttpGet]
-        public async Task<IActionResult> GetUnitMeasurementList()
+        public async Task<IActionResult> GetUnitMeasurementList(int ID)
         {
             try
             {
-                var data = await _SMMasterBS.GetUnitMeasurementList();
+                var data = await _SMMasterBS.GetUnitMeasurementList(ID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -236,11 +236,11 @@ namespace CMMSAPIs.Controllers.SM
 
         [Route("GetAssetMasterList")]
         [HttpGet]
-        public async Task<IActionResult> GetAssetMasterList()
+        public async Task<IActionResult> GetAssetMasterList(int ID)
         {
             try
             {
-                var data = await _SMMasterBS.GetAssetMasterList();
+                var data = await _SMMasterBS.GetAssetMasterList(ID);
                 return Ok(data);
             }
             catch (Exception ex)

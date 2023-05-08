@@ -12,22 +12,22 @@ namespace CMMSAPIs.BS.SM
 {
     public interface ISMMasterBS
     {
-        Task<List<CMSMMaster>> GetAssetTypeList();
+        Task<List<CMSMMaster>> GetAssetTypeList(int ID);
         Task<CMDefaultResponse> AddAssetType(CMSMMaster request, int userID);
         Task<CMDefaultResponse> UpdateAssetType(CMSMMaster request, int userID);
         Task<CMDefaultResponse> DeleteAssetType(int Id, int userID);
 
-        Task<List<ItemCategory>> GetAssetCategoryList();
+        Task<List<ItemCategory>> GetAssetCategoryList(int ID);
         Task<CMDefaultResponse> AddAssetCategory(ItemCategory request, int userID);
         Task<CMDefaultResponse> UpdateAssetCategory(ItemCategory request, int userID);
         Task<CMDefaultResponse> DeleteAssetCategory(int acID, int userID);
 
-        Task<List<UnitMeasurement>> GetUnitMeasurementList();
+        Task<List<UnitMeasurement>> GetUnitMeasurementList(int ID);
         Task<CMDefaultResponse> AddUnitMeasurement(UnitMeasurement request, int userID);
         Task<CMDefaultResponse> UpdateUnitMeasurement(UnitMeasurement request, int userID);
         Task<CMDefaultResponse> DeleteUnitMeasurement(int umID, int userID);
 
-        Task<List<CMSMMaster>> GetAssetMasterList();
+        Task<List<CMSMMaster>> GetAssetMasterList(int ID);
         Task<CMDefaultResponse> AddAssetMaster(CMSMMaster request, AssetMasterFiles fileData, int UserID);
         Task<CMDefaultResponse> UpdateAssetMaster(CMSMMaster request, AssetMasterFiles fileData, int UserID);
         Task<CMDefaultResponse> DeleteAssetMaster(CMSMMaster request, int UserID);
@@ -44,13 +44,13 @@ namespace CMMSAPIs.BS.SM
         }
 
 
-        public async Task<List<CMSMMaster>> GetAssetTypeList()
+        public async Task<List<CMSMMaster>> GetAssetTypeList(int ID)
         {
             try
             {
                 using (var repos = new SMMasterRepository(getDB))
                 {
-                    return await repos.GetAssetTypeList();
+                    return await repos.GetAssetTypeList(ID);
                 }
             }
             catch (Exception ex)
@@ -104,13 +104,13 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<ItemCategory>> GetAssetCategoryList()
+        public async Task<List<ItemCategory>> GetAssetCategoryList(int ID)
         {
             try
             {
                 using (var repos = new SMMasterRepository(getDB))
                 {
-                    return await repos.GetAssetCategoryList();
+                    return await repos.GetAssetCategoryList(ID);
                 }
             }
             catch (Exception ex)
@@ -164,13 +164,13 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<UnitMeasurement>> GetUnitMeasurementList()
+        public async Task<List<UnitMeasurement>> GetUnitMeasurementList(int ID)
         {
             try
             {
                 using (var repos = new SMMasterRepository(getDB))
                 {
-                    return await repos.GetUnitMeasurementList();
+                    return await repos.GetUnitMeasurementList(ID);
                 }
             }
             catch (Exception ex)
@@ -224,13 +224,13 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<CMSMMaster>> GetAssetMasterList()
+        public async Task<List<CMSMMaster>> GetAssetMasterList(int ID)
         {
             try
             {
                 using (var repos = new SMMasterRepository(getDB))
                 {
-                    return await repos.GetAssetMasterList();
+                    return await repos.GetAssetMasterList(ID);
                 }
             }
             catch (Exception ex)

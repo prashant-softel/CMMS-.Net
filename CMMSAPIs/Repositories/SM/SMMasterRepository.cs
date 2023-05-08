@@ -25,12 +25,20 @@ namespace CMMSAPIs.Repositories.SM
         {
         }
 
-        internal async Task<List<CMSMMaster>> GetAssetTypeList()
+        internal async Task<List<CMSMMaster>> GetAssetTypeList(int ID)
         {
             /*
              * Return id, asset_type from SMAssetTypes
             */
-            var myQuery = "SELECT * FROM smassettypes WHERE flag = 1";
+            string myQuery = "";
+            if (ID == 0)
+            {
+                myQuery = "SELECT * FROM smassettypes WHERE flag = 1";
+            }
+            else
+            {
+                myQuery = "SELECT * FROM smassettypes WHERE ID = "+ID+" and flag = 1";
+            }
             
             List<CMSMMaster> _checkList = await Context.GetData<CMSMMaster>(myQuery).ConfigureAwait(false);
             return _checkList;
@@ -70,13 +78,21 @@ namespace CMMSAPIs.Repositories.SM
             return response;
         }
 
-        internal async Task<List<ItemCategory>> GetAssetCategoryList()
+        internal async Task<List<ItemCategory>> GetAssetCategoryList(int ID)
         {
             /*
              * Return id, name from SMItemCategory
             */
+            string myQuery = "";
+            if (ID == 0)
+            {
+                myQuery = "SELECT * FROM SMItemCategory WHERE flag = 1";
+            }
+            else
+            {
+                myQuery = "SELECT * FROM SMItemCategory WHERE ID = "+ID+" flag = 1";
+            }
 
-            var myQuery = "SELECT * FROM SMItemCategory WHERE flag = 1";
 
             List<ItemCategory> _List = await Context.GetData<ItemCategory>(myQuery).ConfigureAwait(false);
             return _List;
@@ -116,10 +132,18 @@ namespace CMMSAPIs.Repositories.SM
             return response;
         }
 
-        internal async Task<List<UnitMeasurement>> GetUnitMeasurementList()
+        internal async Task<List<UnitMeasurement>> GetUnitMeasurementList(int ID)
         {
+            string myQuery = "";
+            if(ID == 0)
+            {
+                myQuery = "SELECT * FROM smunitmeasurement WHERE flag = 1";
+            }
+            else
+            {
+                myQuery = "SELECT * FROM smunitmeasurement WHERE ID = "+ID+" AND flag = 1";
+            }
 
-            var myQuery = "SELECT * FROM smunitmeasurement WHERE flag = 1";
             List<UnitMeasurement> _List = await Context.GetData<UnitMeasurement>(myQuery).ConfigureAwait(false);
             return _List;
         }
@@ -149,17 +173,29 @@ namespace CMMSAPIs.Repositories.SM
             return response;
         }
 
-        internal async Task<List<CMSMMaster>> GetAssetMasterList()
+        internal async Task<List<CMSMMaster>> GetAssetMasterList(int ID)
         {
             /*
              * Return id, name, code, description, asset type, asset categroy, unit measurement, attached files  
              * from SMAssetMasters, SMAssetMasterFiles, SMUnitMeasurement, SMAssetTypes, SMAssetCategory
             */
-            var myQuery = "SELECT sam.ID,sam.asset_type_ID,sam.asset_code,sam.asset_name,sam.description,if(sam.approval_required = 1, 'Yes','No') as approval_required,"+
-                " sat.asset_type,sic.cat_name,sm.name as measurement,sm.decimal_status "+
-                " FROM smassetmasters sam LEFT JOIN smassettypes sat ON sat.ID = sam.asset_type_ID "+
-                " LEFT JOIN smitemcategory sic ON sic.ID = sam.item_category_ID  LEFT JOIN smunitmeasurement sm ON sm.ID = sam.unit_of_measurement "+
-                " WHERE sam.flag = 1;";
+            string myQuery = "";
+            if (ID == 0)
+            {
+                myQuery = "SELECT sam.ID,sam.asset_type_ID,sam.asset_code,sam.asset_name,sam.description,if(sam.approval_required = 1, 'Yes','No') as approval_required," +
+                    " sat.asset_type,sic.cat_name,sm.name as measurement,sm.decimal_status " +
+                    " FROM smassetmasters sam LEFT JOIN smassettypes sat ON sat.ID = sam.asset_type_ID " +
+                    " LEFT JOIN smitemcategory sic ON sic.ID = sam.item_category_ID  LEFT JOIN smunitmeasurement sm ON sm.ID = sam.unit_of_measurement " +
+                    " WHERE sam.flag = 1;";
+            }
+            else
+            {
+                myQuery = "SELECT sam.ID,sam.asset_type_ID,sam.asset_code,sam.asset_name,sam.description,if(sam.approval_required = 1, 'Yes','No') as approval_required," +
+    " sat.asset_type,sic.cat_name,sm.name as measurement,sm.decimal_status " +
+    " FROM smassetmasters sam LEFT JOIN smassettypes sat ON sat.ID = sam.asset_type_ID " +
+    " LEFT JOIN smitemcategory sic ON sic.ID = sam.item_category_ID  LEFT JOIN smunitmeasurement sm ON sm.ID = sam.unit_of_measurement " +
+    " WHERE sam.ID = "+ID+" AND sam.flag = 1;";
+            }
             List<CMSMMaster> _List = await Context.GetData<CMSMMaster>(myQuery).ConfigureAwait(false);
             return _List;
         }
