@@ -259,12 +259,13 @@ namespace CMMSAPIs.Helper
             JOB_CLOSED,
             JOB_CANCELLED,
             JOB_DELETED,
+            JOB_UPDATED,    //For notification purpose. Do not update JOB_UPDATED in databbase.
 
             PTW_CREATED = 121,
-            PTW_ISSUED,
             PTW_REJECTED_BY_ISSUER,
-            PTW_APPROVE,
+            PTW_ISSUED,
             PTW_REJECTED_BY_APPROVER,
+            PTW_APPROVE,
             PTW_CLOSED,
             PTW_CANCELLED_BY_ISSUER,
             PTW_CANCELLED_BY_HSE,

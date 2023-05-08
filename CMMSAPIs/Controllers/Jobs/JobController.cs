@@ -73,7 +73,23 @@ namespace CMMSAPIs.Controllers.Jobs
                 throw;
             }
         }
-
+        
+        [Authorize]
+        [Route("UpdateJob")]
+        [HttpPatch]
+        public async Task<IActionResult> UpdateJob(CMCreateJob request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _JobBS.UpdateJob(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
         /*
          * WorkType Crud Operation
         */

@@ -13,6 +13,7 @@ namespace CMMSAPIs.BS.Jobs
 		Task<List<CMJobModel>> GetJobList(int facility_id, string startDate, string endDate, CMMS.CMMS_JobType jobType, int selfView, int userId, string status);
         Task<CMJobView> GetJobDetails(int job_id);
         Task<CMDefaultResponse> CreateNewJob(CMCreateJob request, int userId);
+        Task<CMDefaultResponse> UpdateJob(CMCreateJob request, int userId);
         Task<CMDefaultResponse> ReAssignJob(int job_id, int assignedTo, int userId);
         Task<CMDefaultResponse> CancelJob(int job_id, int cancelledBy, string Cancelremark);
         Task<CMDefaultResponse> DeleteJob(int job_id, int userId);
@@ -72,8 +73,21 @@ namespace CMMSAPIs.BS.Jobs
                 throw;
             }
         }
-
-
+       
+        public async Task<CMDefaultResponse> UpdateJob(CMCreateJob request, int userId)
+        {
+            try
+            {
+                using (var repos = new JobRepository(getDB))
+                {
+                    return await repos.UpdateJob(request, userId);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
 
         public async Task<CMDefaultResponse> ReAssignJob(int job_id, int assignedTo, int updatedBy)
         {

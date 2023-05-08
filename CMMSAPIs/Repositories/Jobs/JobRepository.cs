@@ -314,13 +314,31 @@ namespace CMMSAPIs.Repositories.Jobs
             return response;
         }
 
+        internal async Task<CMDefaultResponse> UpdateJob(CMCreateJob request, int userId)
+        {
+            //Build and Add update query here
+
+            int jobID = request.id;
+            List<CMJobView> _ViewJobList = await GetJobView(jobID);
+
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, jobID, 0, 0, "Job Updated", (CMMS.CMMS_Status) _ViewJobList[0].status, userId);
+            CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_UPDATED, _ViewJobList[0]);
+
+            string strJobStatusMsg = $"Job {jobID} Updated";
+            CMDefaultResponse response = new CMDefaultResponse(jobID, CMMS.RETRUNSTATUS.SUCCESS, strJobStatusMsg);
+
+            return response;
+        }
+
+
+
         internal async Task<CMDefaultResponse> ReAssignJob(int job_id, int assignedTo, int updatedBy)
         {
             /*
              * AssignedID/PermitID/CancelJob. Out of 3 we can update any one fields based on request
              * Re-assigned employee/ link permit / Cancel Permit. 3 different end points call this function.
              * return boolean true/false*/
-            string updateQry = $"update jobs set assignedId = { assignedTo }, updatedBy = { updatedBy } where id = { job_id } ";
+            string updateQry = $"update jobs set assignedId = { assignedTo }, status = { (int)CMMS.CMMS_Status.JOB_ASSIGNED }, updatedBy = { updatedBy } where id = { job_id } ";
             int retVal = await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
 
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
@@ -394,7 +412,7 @@ namespace CMMSAPIs.Repositories.Jobs
                  * return boolean true / false    
                  Your code goes here
             */
-            string updateQry = $"update jobs set updatedBy = { updatedBy },linkedPermit = { ptw_id }  where id =  { job_id };";
+            string updateQry = $"update jobs set updatedBy = { updatedBy },status = { (int) CMMS.CMMS_Status.JOB_LINKED }, linkedPermit = { ptw_id }  where id =  { job_id };";
             int retVal = await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
 
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
