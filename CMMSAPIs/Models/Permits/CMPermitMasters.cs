@@ -12,7 +12,6 @@ namespace CMMSAPIs.Models.Permits
         public string title { get; set; }
         public string description { get; set; }
         public int facilityId { get; set; }
-        public int? status { get; set; }
     }
     public class CMCreateSafetyMeasures
     {
@@ -28,9 +27,8 @@ namespace CMMSAPIs.Models.Permits
         public int id { get; set; }
         public string title { get; set; }
         public string description { get; set; }
-        public int? status { get; set; }
         public int facilityId { get; set; }
-        public int requires_SOP_JSA { get; set; }
+        public int? requires_SOP_JSA { get; set; }
     }
     public class CMCreateSOP
     {
@@ -39,7 +37,6 @@ namespace CMMSAPIs.Models.Permits
         public string description { get; set; }
         public int jobType { get; set; }
         public int fileId { get; set; }
-        public int? status { get; set; }
         public string tbt_remarks { get; set; }
         public int jsa_fileId { get; set; }
     }

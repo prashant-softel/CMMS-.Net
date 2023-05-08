@@ -23,6 +23,9 @@ namespace CMMSAPIs.BS.Permits
         Task<CMDefaultResponse> UpdateSafetyMeasure(CMCreateSafetyMeasures request, int userID);
         Task<CMDefaultResponse> DeleteSafetyMeasure(int id);
         Task<List<CMDefaultList>> GetJobTypeList(int facility_id);
+        Task<CMDefaultResponse> CreateJobType(CMCreateJobType request, int userID);
+        Task<CMDefaultResponse> UpdateJobType(CMCreateJobType request, int userID);
+        Task<CMDefaultResponse> DeleteJobType(int id);
         Task<List<CMSOPList>> GetSOPList(int job_type_id);
 
         /*
@@ -189,6 +192,48 @@ namespace CMMSAPIs.BS.Permits
             }
         }
 
+        public async Task<CMDefaultResponse> CreateJobType(CMCreateJobType request, int userID)
+        {
+            try
+            {
+                using (var repos = new PermitRepository(getDB))
+                {
+                    return await repos.CreateJobType(request, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<CMDefaultResponse> UpdateJobType(CMCreateJobType request, int userID)
+        {
+            try
+            {
+                using (var repos = new PermitRepository(getDB))
+                {
+                    return await repos.UpdateJobType(request, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<CMDefaultResponse> DeleteJobType(int id)
+        {
+            try
+            {
+                using (var repos = new PermitRepository(getDB))
+                {
+                    return await repos.DeleteJobType(id);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
         public async Task<List<CMSOPList>> GetSOPList(int job_type_id)
         {
             try
