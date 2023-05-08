@@ -45,7 +45,7 @@ namespace CMMSAPIs.Controllers.Permits
                 throw;
             }
         }
-
+        
         [Authorize]
         [Route("CreatePermitType")]
         [HttpPost]

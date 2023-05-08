@@ -174,7 +174,6 @@ namespace CMMSAPIs.BS.Permits
                 throw;
             }
         }
-
         public async Task<List<CMDefaultList>> GetJobTypeList(int facility_id)
         {
             try
@@ -377,7 +376,6 @@ namespace CMMSAPIs.BS.Permits
                 throw;
             }
         }
-
         public async Task<CMDefaultResponse> PermitIssueReject(CMApproval request, int userID)
         {
             try
