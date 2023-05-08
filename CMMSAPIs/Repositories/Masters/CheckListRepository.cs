@@ -319,7 +319,7 @@ namespace CMMSAPIs.Repositories.Masters
             if (request.is_document_required != null)
                 updateQry += $"is_document_required = {request.is_document_required}, ";
             if (request.status != null)
-                updateQry += $"status = {request.status} ";
+                updateQry += $"status = {request.status}, ";
             updateQry += $"updated_by = {userID}, updated_at='{UtilsRepository.GetUTCTime()}' WHERE id = {request.id};";
             await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.CHECKPOINTS, request.id, 0, 0, "Check Point Updated", CMMS.CMMS_Status.UPDATED, userID);
