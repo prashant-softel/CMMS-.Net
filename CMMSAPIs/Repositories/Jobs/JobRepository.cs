@@ -261,21 +261,10 @@ namespace CMMSAPIs.Repositories.Jobs
                 status = ((int)CMMS.CMMS_Status.JOB_ASSIGNED);
             }
             //int created_by = Utils.UtilsRepository.GetUserID();
-
-            if (request.jobType == 0)
-            {
-                request.jobType = (int)CMMS.CMMS_JobType.BreakdownMaintenance;
-            }
-            else if(request.jobType == 1)
-            {
-                request.jobType = (int)CMMS.CMMS_JobType.PreventiveMaintenance;
-            }
-            else if (request.jobType == 2)
-            {
-                request.jobType = (int)CMMS.CMMS_JobType.Audit;
-            }
+            if (request.jobType == null)
+                request.jobType = CMMS.CMMS_JobType.BreakdownMaintenance;
             string qryJobBasic = "insert into jobs(facilityId, blockId, title, description, createdAt, createdBy, breakdownTime, JobType, status, assignedId, linkedPermit) values" +
-            $"({ request.facility_id }, { request.block_id }, '{ request.title }', '{ request.description }', '{UtilsRepository.GetUTCTime() }',{ userId},'{  request.breakdown_time.ToString("yyyy-MM-dd HH:mm:ss")}',{request.jobType},{ status },{ request.assigned_id },{ request.permit_id })";
+            $"({ request.facility_id }, { request.block_id }, '{ request.title }', '{ request.description }', '{UtilsRepository.GetUTCTime() }',{ userId},'{  request.breakdown_time.ToString("yyyy-MM-dd HH:mm:ss")}',{(int)request.jobType},{ status },{ request.assigned_id },{ (request.permit_id==null?0:request.permit_id) })";
             qryJobBasic = qryJobBasic + ";" + "select LAST_INSERT_ID(); ";
 
             DataTable dt = await Context.FetchData(qryJobBasic).ConfigureAwait(false);
@@ -286,9 +275,11 @@ namespace CMMSAPIs.Repositories.Jobs
             
             foreach (var data in request.AssetsIds)
             {
-                string qryAssetsIds = $"insert into jobmappingassets(jobId, assetId, categoryId ) value ({ newJobID }, { data.asset_id },{ data.category_ids });";
+                string qryAssetsIds = $"insert into jobmappingassets(jobId, assetId ) values ({ newJobID }, { data });";
                 await Context.ExecuteNonQry<int>(qryAssetsIds).ConfigureAwait(false);
             }
+            string setCat = $"UPDATE jobmappingassets, assets SET jobmappingassets.categoryId = assets.categoryId WHERE jobmappingassets.assetId = assets.id;";
+            await Context.ExecuteNonQry<int>(setCat).ConfigureAwait(false);
             foreach (var data in request.WorkType_Ids)
             {
                string qryCategoryIds = $"insert into jobassociatedworktypes(jobId, workTypeId ) value ( { newJobID }, { data } );";
@@ -317,11 +308,58 @@ namespace CMMSAPIs.Repositories.Jobs
         internal async Task<CMDefaultResponse> UpdateJob(CMCreateJob request, int userId)
         {
             //Build and Add update query here
+            string myQuery = "UPDATE jobs SET ";
+            if (request.title != null && request.title != "")
+                myQuery += $"title = '{request.title}', ";
+            if (request.description != null && request.description != "")
+                myQuery += $"description = '{request.description}', ";
+            if (request.facility_id > 0)
+                myQuery += $"facilityId = {request.facility_id}, ";
+            if (request.block_id > 0)
+                myQuery += $"blockId = {request.block_id}, ";
+            if (request.assigned_id > 0)
+                myQuery += $"assignedId = {request.assigned_id}, ";
+            if (request.permit_id != null)
+                myQuery += $"linkedPermit = {request.permit_id}, ";
+            if (request.jobType != null)
+                myQuery += $"JobType = {request.jobType}, ";
+            if (request.breakdown_time != null)
+                myQuery += $"breakdownTime = '{request.breakdown_time.ToString("yyyy-MM-dd hh:mm:ss")}', ";
+            myQuery += $"updatedAt = '{UtilsRepository.GetUTCTime()}', updatedBy = {userId} WHERE id = {request.id};";
+            await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
 
+            if (request.AssetsIds != null)
+            {
+                string deleteAssets = $"DELETE FROM jobmappingassets WHERE jobId = {request.id};";
+                await Context.ExecuteNonQry<int>(deleteAssets).ConfigureAwait(false);
+                if (request.AssetsIds.Count > 0)
+                {
+                    foreach (var data in request.AssetsIds)
+                    {
+                        string qryAssetsIds = $"insert into jobmappingassets(jobId, assetId ) values ({ request.id }, { data });";
+                        await Context.ExecuteNonQry<int>(qryAssetsIds).ConfigureAwait(false);
+                    }
+                }
+            }
+            string setCat = $"UPDATE jobmappingassets, assets SET jobmappingassets.categoryId = assets.categoryId WHERE jobmappingassets.assetId = assets.id;";
+            await Context.ExecuteNonQry<int>(setCat).ConfigureAwait(false);
+            if (request.WorkType_Ids != null)
+            {
+                string deleteWorkType = $"DELETE FROM jobassociatedworktypes WHERE jobId = {request.id};";
+                await Context.ExecuteNonQry<int>(deleteWorkType).ConfigureAwait(false);
+                if (request.WorkType_Ids.Count > 0)
+                {
+                    foreach (var data in request.WorkType_Ids)
+                    {
+                        string qryCategoryIds = $"insert into jobassociatedworktypes(jobId, workTypeId ) values ( { request.id }, { data } );";
+                        await Context.ExecuteNonQry<int>(qryCategoryIds).ConfigureAwait(false);
+                    }
+                }
+            }
             int jobID = request.id;
             List<CMJobView> _ViewJobList = await GetJobView(jobID);
 
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, jobID, 0, 0, "Job Updated", (CMMS.CMMS_Status) _ViewJobList[0].status, userId);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, jobID, 0, 0, "Job Updated", CMMS.CMMS_Status.JOB_UPDATED, userId);
             CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_UPDATED, _ViewJobList[0]);
 
             string strJobStatusMsg = $"Job {jobID} Updated";
