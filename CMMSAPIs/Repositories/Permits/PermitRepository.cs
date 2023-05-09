@@ -123,10 +123,10 @@ namespace CMMSAPIs.Repositories.Permits
             /*
              * return permit_type_id, name from PermitTypeLists table for requsted facility_id 
             */
-            string myQuery = $"SELECT id, title as name FROM permittypelists ORDER BY id DESC;";
+            string myQuery = $"SELECT id, title as name FROM permittypelists ";
             if (facility_id <= 0)
                 throw new ArgumentException("Invalid Facility ID");
-            myQuery += $"WHERE facilityId = { facility_id };";
+            myQuery += $"WHERE facilityId = { facility_id } ORDER BY id DESC;";
             List<CMDefaultList> _PermitTypeList = await Context.GetData<CMDefaultList>(myQuery).ConfigureAwait(false);
             return _PermitTypeList;
         }
@@ -284,11 +284,81 @@ namespace CMMSAPIs.Repositories.Permits
             List<CMSOPList> _JobTypeList = await Context.GetData<CMSOPList>(myQuery).ConfigureAwait(false);
             return _JobTypeList;
         }
-
+        internal async Task<CMDefaultResponse> CreateSOP(CMCreateSOP request)
+        {
+            string myQuery = "INSERT INTO permittbtjoblist (title, description, jobTypeId, fileId, fileDescription, TBTRemarks, JSAFileId, status ) " +
+                                $"VALUES ('{request.title}', '{request.description}', {request.jobType}, {request.fileId}, '{request.file_desc}', " +
+                                $"'{request.tbt_remarks}', {request.jsa_fileId}, 1); SELECT LAST_INSERT_ID();";
+            DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
+            int id = Convert.ToInt32(dt.Rows[0][0]);
+            string fileInfoAdd = "UPDATE permittbtjoblist AS sop " +
+                                    "JOIN uploadedfiles as sopfile ON sop.fileId = sopfile.id " +
+                                    "JOIN uploadedfiles as jsafile ON sop.JSAFileId = jsafile.id " +
+                                 "SET " +
+                                    "sop.fileName = SUBSTRING_INDEX(sopfile.file_path, '\\\\', -1), " +
+                                    "sop.filePath = sopfile.file_path, " +
+                                    "sop.fileTypeId = sopfile.file_category, " +
+                                    "sop.fileCategoryId = sopfile.file_category, " +
+                                    "sop.fileNameChanged = SUBSTRING_INDEX(sopfile.file_path, '\\\\', -1), " +
+                                    "sop.JSAFileCategoryId = jsafile.file_category, " +
+                                    "sop.JSAFileName = SUBSTRING_INDEX(jsafile.file_path, '\\\\', -1), " +
+                                    "sop.JSAFilePath = jsafile.file_path, " +
+                                    "sop.JSAFileNameChanged = SUBSTRING_INDEX(jsafile.file_path, '\\\\', -1) " +
+                                    $"WHERE sop.id = {id};";
+            await Context.FetchData(fileInfoAdd).ConfigureAwait(false);
+            CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "SOP Created");
+            return response;
+        }
+        internal async Task<CMDefaultResponse> UpdateSOP(CMCreateSOP request)
+        {
+            if (request.id <= 0)
+                throw new ArgumentException("Invalid ID");
+            string updateQry = $"UPDATE permittbtjoblist SET ";
+            if (request.title != null && request.title != "")
+                updateQry += $"title = '{request.title}', ";
+            if (request.description != null && request.description != "")
+                updateQry += $"description = '{request.description}', ";
+            if (request.jobType > 0)
+                updateQry += $"jobTypeId = {request.jobType}, ";
+            if (request.fileId > 0)
+                updateQry += $"fileId = {request.fileId}, ";
+            if (request.file_desc != null && request.file_desc != "")
+                updateQry += $"fileDescription = '{request.file_desc}', ";
+            if (request.tbt_remarks != null && request.tbt_remarks != "")
+                updateQry += $"TBTremarks = '{request.tbt_remarks}', ";
+            if (request.jsa_fileId > 0)
+                updateQry += $"JSAFileId = {request.jsa_fileId}, ";
+            updateQry = updateQry.Substring(0, updateQry.Length - 2);
+            updateQry += $" WHERE id = {request.id};";
+            await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+            string fileInfoAdd = "UPDATE permittbtjoblist AS sop " +
+                                    "JOIN uploadedfiles as sopfile ON sop.fileId = sopfile.id " +
+                                    "JOIN uploadedfiles as jsafile ON sop.JSAFileId = jsafile.id " +
+                                 "SET " +
+                                    "sop.fileName = SUBSTRING_INDEX(sopfile.file_path, '\\\\', -1), " +
+                                    "sop.filePath = sopfile.file_path, " +
+                                    "sop.fileTypeId = sopfile.file_category, " +
+                                    "sop.fileCategoryId = sopfile.file_category, " +
+                                    "sop.fileNameChanged = SUBSTRING_INDEX(sopfile.file_path, '\\\\', -1), " +
+                                    "sop.JSAFileCategoryId = jsafile.file_category, " +
+                                    "sop.JSAFileName = SUBSTRING_INDEX(jsafile.file_path, '\\\\', -1), " +
+                                    "sop.JSAFilePath = jsafile.file_path, " +
+                                    "sop.JSAFileNameChanged = SUBSTRING_INDEX(jsafile.file_path, '\\\\', -1) " +
+                                    $"WHERE sop.id = {request.id};";
+            await Context.ExecuteNonQry<int>(fileInfoAdd).ConfigureAwait(false);
+            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "SOP Details Updated");
+            return response;
+        }
         /*
          * Permit Main Feature End Points
         */
-
+        internal async Task<CMDefaultResponse> DeleteSOP(int id)
+        {
+            string deleteQry = $"UPDATE permittbtjoblist SET status = 0 WHERE id = {id};";
+            await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
+            CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "SOP Deleted");
+            return response;
+        }
         internal async Task<List<CMPermitList>> GetPermitList(int facility_id, int userID, bool self_view)
         {
             /*

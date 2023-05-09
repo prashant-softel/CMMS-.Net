@@ -65,7 +65,7 @@ namespace CMMSAPIs.BS.Utils
             {
                 using (var repos = new UtilsRepository(getDB))
                 {
-                    return await repos.GetStateList(state_id);
+                    return await repos.GetCityList(state_id);
                 }
             }
             catch (Exception ex)
