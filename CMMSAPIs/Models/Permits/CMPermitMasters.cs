@@ -37,6 +37,7 @@ namespace CMMSAPIs.Models.Permits
         public string description { get; set; }
         public int jobType { get; set; }
         public int fileId { get; set; }
+        public string file_desc { get; set; }
         public string tbt_remarks { get; set; }
         public int jsa_fileId { get; set; }
     }

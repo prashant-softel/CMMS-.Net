@@ -27,6 +27,9 @@ namespace CMMSAPIs.BS.Permits
         Task<CMDefaultResponse> UpdateJobType(CMCreateJobType request, int userID);
         Task<CMDefaultResponse> DeleteJobType(int id);
         Task<List<CMSOPList>> GetSOPList(int job_type_id);
+        Task<CMDefaultResponse> CreateSOP(CMCreateSOP request);
+        Task<CMDefaultResponse> UpdateSOP(CMCreateSOP request);
+        Task<CMDefaultResponse> DeleteSOP(int id);
 
         /*
          * Permit Main End Points 
@@ -241,6 +244,48 @@ namespace CMMSAPIs.BS.Permits
                 using (var repos = new PermitRepository(getDB))
                 {
                     return await repos.GetSOPList(job_type_id);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<CMDefaultResponse> CreateSOP(CMCreateSOP request)
+        {
+            try
+            {
+                using (var repos = new PermitRepository(getDB))
+                {
+                    return await repos.CreateSOP(request);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<CMDefaultResponse> UpdateSOP(CMCreateSOP request)
+        {
+            try
+            {
+                using (var repos = new PermitRepository(getDB))
+                {
+                    return await repos.UpdateSOP(request);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<CMDefaultResponse> DeleteSOP(int id)
+        {
+            try
+            {
+                using (var repos = new PermitRepository(getDB))
+                {
+                    return await repos.DeleteSOP(id);
                 }
             }
             catch (Exception ex)

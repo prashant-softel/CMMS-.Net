@@ -284,6 +284,65 @@ namespace CMMSAPIs.Controllers.Permits
             }
         }
 
+        [Authorize]
+        [Route("CreateSOP")]
+        [HttpPost]
+        public async Task<IActionResult> CreateSOP(CMCreateSOP request)
+        {
+            try
+            {
+                var data = await _PermitBS.CreateSOP(request);
+                return Ok(data);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
+        [Route("UpdateSOP")]
+        [HttpPatch]
+        public async Task<IActionResult> UpdateSOP(CMCreateSOP request)
+        {
+            try
+            {
+                var data = await _PermitBS.UpdateSOP(request);
+                return Ok(data);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
+        [Route("DeleteSOP")]
+        [HttpDelete]
+        public async Task<IActionResult> DeleteSOP(int id)
+        {
+            try
+            {
+                var data = await _PermitBS.DeleteSOP(id);
+                return Ok(data);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
         /*
          * Permit Main Feature End Points
         */
