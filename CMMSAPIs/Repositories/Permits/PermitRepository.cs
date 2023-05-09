@@ -133,7 +133,7 @@ namespace CMMSAPIs.Repositories.Permits
         internal async Task<CMDefaultResponse> CreatePermitType(CMCreatePermitType request, int userID)
         {
             string myQuery = "INSERT INTO permittypelists (title, description, facilityId, status, createdBy, createdAt) VALUES " +
-                                $"('{request.title}', '{request.description}', {request.facilityId}, {((request.status == null)? 1 : request.status)}, {userID}, '{UtilsRepository.GetUTCTime()}'); " +
+                                $"('{request.title}', '{request.description}', {request.facilityId}, 1, {userID}, '{UtilsRepository.GetUTCTime()}'); " +
                                 $"SELECT LAST_INSERT_ID(); ";
             DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
             int id = Convert.ToInt32(dt.Rows[0][0]);
@@ -151,8 +151,6 @@ namespace CMMSAPIs.Repositories.Permits
                 updateQry += $" description = '{request.description}',";
             if (request.facilityId > 0)
                 updateQry += $" facilityId = {request.facilityId},";
-            if (request.status != null)
-                updateQry += $" status = {request.status},";
             updateQry += $" updatedBy = {userID}, updatedAt = '{UtilsRepository.GetUTCTime()}' WHERE id = {request.id};";
             await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Permit Type Updated");
@@ -160,7 +158,7 @@ namespace CMMSAPIs.Repositories.Permits
         }
         internal async Task<CMDefaultResponse> DeletePermitType(int id)
         {
-            string deleteQry = $"DELETE FROM permittypelists WHERE id = {id}";
+            string deleteQry = $"UPDATE permittypelists SET status = 0 WHERE id = {id}";
             await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
             CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Permit Type Deleted");
             return response;
@@ -189,8 +187,8 @@ namespace CMMSAPIs.Repositories.Permits
         }
         internal async Task<CMDefaultResponse> CreateSafetyMeasure(CMCreateSafetyMeasures request, int userID)
         {
-            string myQuery = "INSERT INTO permittypesafetymeasures(title, discription, permitTypeId, input, required, createdAt, createdBy) VALUES " +
-                                $"('{request.title}', '{request.description}', {request.permitType}, {(int)request.input}, {(request.required==null?0:request.required)}, " +
+            string myQuery = "INSERT INTO permittypesafetymeasures(title, discription, permitTypeId, input, status, required, createdAt, createdBy) VALUES " +
+                                $"('{request.title}', '{request.description}', {request.permitType}, {(int)request.input}, 1, {(request.required==null?0:request.required)}, " +
                                 $"'{UtilsRepository.GetUTCTime()}', {userID}); SELECT LAST_INSERT_ID(); ";
             DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
             int id = Convert.ToInt32(dt.Rows[0][0]);
@@ -219,7 +217,7 @@ namespace CMMSAPIs.Repositories.Permits
         }
         internal async Task<CMDefaultResponse> DeleteSafetyMeasure(int id)
         {
-            string deleteQry = $"DELETE FROM permittypesafetymeasures WHERE id = {id}";
+            string deleteQry = $"UPDATE permittypesafetymeasures SET status = 0 WHERE id = {id}";
             await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
             CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Safety Measure Deleted");
             return response;
@@ -237,6 +235,41 @@ namespace CMMSAPIs.Repositories.Permits
             return _JobTypeList;
         }
 
+        internal async Task<CMDefaultResponse> CreateJobType(CMCreateJobType request, int userID)
+        {
+            string myQuery = "INSERT INTO permitjobtypelist(title, description, status, facilityId, requireSOPJSA, createdAt, createdBy) VALUES " +
+                                $"('{request.title}', '{request.description}', 1, {request.facilityId}, {(request.requires_SOP_JSA == null ? 0 : request.requires_SOP_JSA)}, " +
+                                $"'{UtilsRepository.GetUTCTime()}', {userID}); SELECT LAST_INSERT_ID();";
+            DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
+            int id = Convert.ToInt32(dt.Rows[0][0]);
+            CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Job Type Created");
+            return response;
+        }
+        internal async Task<CMDefaultResponse> UpdateJobType(CMCreateJobType request, int userID)
+        {
+            if (request.id <= 0)
+                throw new ArgumentException("Invalid ID");
+            string updateQry = $"UPDATE permitjobtypelist SET ";
+            if (request.title != null && request.title != "")
+                updateQry += $"title = '{request.title}', ";
+            if (request.description != null && request.description != "")
+                updateQry += $"description = '{request.description}', ";
+            if (request.facilityId > 0)
+                updateQry += $"facilityId = {request.facilityId}, ";
+            if (request.requires_SOP_JSA != null)
+                updateQry += $"requireSOPJSA = {request.requires_SOP_JSA}, ";
+            updateQry += $"updatedBy = {userID}, updatedAt = '{UtilsRepository.GetUTCTime()}' WHERE id = {request.id};";
+            await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Job Type Details Updated");
+            return response;
+        }
+        internal async Task<CMDefaultResponse> DeleteJobType(int id)
+        {
+            string deleteQry = $"UPDATE permitjobtypelist SET status = 0 WHERE id = {id}";
+            await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
+            CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Job Type Deleted");
+            return response;
+        }
         internal async Task<List<CMSOPList>> GetSOPList(int job_type_id)
         {
             /*

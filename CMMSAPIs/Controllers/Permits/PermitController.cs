@@ -207,6 +207,68 @@ namespace CMMSAPIs.Controllers.Permits
         }
 
         [Authorize]
+        [Route("CreateJobType")]
+        [HttpPost]
+        public async Task<IActionResult> CreateJobType(CMCreateJobType request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _PermitBS.CreateJobType(request, userID);
+                return Ok(data);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
+        [Route("UpdateJobType")]
+        [HttpPatch]
+        public async Task<IActionResult> UpdateJobType(CMCreateJobType request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _PermitBS.UpdateJobType(request, userID);
+                return Ok(data);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
+        [Route("DeleteJobType")]
+        [HttpDelete]
+        public async Task<IActionResult> DeleteJobType(int id)
+        {
+            try
+            {
+                var data = await _PermitBS.DeleteJobType(id);
+                return Ok(data);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
         [Route("GetSOPList")]
         [HttpGet]
         public async Task<IActionResult> GetSOPList(int job_type_id)
