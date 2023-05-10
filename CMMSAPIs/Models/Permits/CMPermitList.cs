@@ -23,7 +23,8 @@ namespace CMMSAPIs.Models.Permits
         public dynamic issued_datetime { get; set; }
         public string approved_by_name { get; set; }
         public dynamic approved_datetime { get; set; }
-        public string current_status { get; set; }
+        public string current_status_short { get; set; }
+        public string current_status_long { get; set; }
     }
     public class CMSafetyMeasurementQuestionList
     {
