@@ -10,6 +10,7 @@ namespace CMMSAPIs.Models.Calibration
     {
         public int asset_id { get; set; }
         public string asset_name { get; set; }
+        public string asset_serial { get; set; }
         public string category_name { get; set; }
         public string calibration_status { get; set; }
         public DateTime last_calibration_date { get; set; }
@@ -36,8 +37,6 @@ namespace CMMSAPIs.Models.Calibration
     public class CMCompleteCalibration
     {
         public int calibration_id { get; set; }
-        public DateTime done_date { get; set; }
-        public DateTime received_date { get; set; }
         public string comment { get; set; }
         public int? is_damaged { get; set; }
     }

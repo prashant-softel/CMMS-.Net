@@ -42,7 +42,7 @@ namespace CMMSAPIs.Repositories.Calibration
             }
             statusOut += $"ELSE 'Invalid Status' END";
             string myQuery = "SELECT " +
-                                $"a_calibration.asset_id, assets.name as asset_name, CASE WHEN categories.name is null THEN 'Others' ELSE categories.name END as category_name, {statusOut} as calibration_status, a_calibration.due_date as last_calibration_date, vendor.name as vendor_name, CONCAT(request_by.firstName,' ',request_by.lastName) as responsible_person, a_calibration.received_date, a_calibration.health_status as asset_health_status " +
+                                $"a_calibration.asset_id, assets.name as asset_name, assets.serialNumber as asset_serial, CASE WHEN categories.name is null THEN 'Others' ELSE categories.name END as category_name, {statusOut} as calibration_status, a_calibration.due_date as last_calibration_date, vendor.name as vendor_name, CONCAT(request_by.firstName,' ',request_by.lastName) as responsible_person, a_calibration.received_date, a_calibration.health_status as asset_health_status " +
                              "FROM assets " +
                              "JOIN " +
                                 "calibration as a_calibration on a_calibration.asset_id=assets.id " + 
@@ -52,7 +52,8 @@ namespace CMMSAPIs.Repositories.Calibration
                                 "business as vendor ON a_calibration.vendor_id=vendor.id " + 
                              "LEFT JOIN " +
                                 "users as request_by ON a_calibration.requested_by=request_by.id " +
-                             "WHERE due_date = (SELECT MAX(due_date) FROM calibration as b_calibration WHERE a_calibration.asset_id=b_calibration.asset_id AND b_calibration.due_date<=now()) ";
+                             "WHERE due_date = (SELECT MAX(due_date) FROM calibration as b_calibration WHERE a_calibration.asset_id = b_calibration.asset_id AND b_calibration.due_date <= now() AND " +
+                                "(b_calibration.requested_at = (SELECT MAX(requested_at) FROM calibration as c_calibration WHERE b_calibration.asset_id = c_calibration.asset_id) OR b_calibration.requested_at is null)) ";
             if(facility_id > 0)
             {
                 myQuery += $"AND a_calibration.facility_id = {facility_id} ";
@@ -61,7 +62,7 @@ namespace CMMSAPIs.Repositories.Calibration
             {
                 throw new ArgumentException("Invalid Facility ID");
             }
-            myQuery += "ORDER BY a_calibration.id DESC;";
+            myQuery += "GROUP BY a_calibration.asset_id ORDER BY a_calibration.id DESC;";
             List<CMCalibrationList> _calibrationList = await Context.GetData<CMCalibrationList>(myQuery).ConfigureAwait(false);
             return _calibrationList;
         }
@@ -97,7 +98,7 @@ namespace CMMSAPIs.Repositories.Calibration
                                 $"{userID}, '{UtilsRepository.GetUTCTime()}', {(int)CMMS.CMMS_Status.CALIBRATION_REQUEST}); SELECT LAST_INSERT_ID();";
                 DataTable dt2 = await Context.FetchData(myQuery).ConfigureAwait(false);
                 int id = Convert.ToInt32(dt2.Rows[0][0]);
-                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.CALIBRATION, id, 0, 0, "Calibration Requested", CMMS.CMMS_Status.CALIBRATION_REQUEST, userID);
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, request.asset_id, CMMS.CMMS_Modules.CALIBRATION, id, "Calibration Requested", CMMS.CMMS_Status.CALIBRATION_REQUEST, userID);
                 CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Calibration requested successfully");
                 return response;
             }
@@ -118,13 +119,16 @@ namespace CMMSAPIs.Repositories.Calibration
                                 $"request_approved_at = '{UtilsRepository.GetUTCTime()}', request_approve_remark = '{request.comment}' " + 
                                 $"WHERE id = {request.id} AND status = {(int)CMMS.CMMS_Status.CALIBRATION_REQUEST};";
             int retVal = await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
+            string assetIDQuery = $"SELECT asset_id FROM calibration where id = {request.id};";
+            DataTable dtAsset = await Context.FetchData(assetIDQuery).ConfigureAwait(false);
+            int assetID = Convert.ToInt32(dtAsset.Rows[0][0]);
             CMMS.RETRUNSTATUS returnStatus = CMMS.RETRUNSTATUS.FAILURE;
             if (retVal > 0)
                 returnStatus = CMMS.RETRUNSTATUS.SUCCESS;
             CMDefaultResponse response;
             if(returnStatus == CMMS.RETRUNSTATUS.SUCCESS)
             {
-                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.CALIBRATION, request.id, 0, 0, "Calibration Request Approved", CMMS.CMMS_Status.CALIBRATION_REQUEST_APPROVED, userID);
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, assetID, CMMS.CMMS_Modules.CALIBRATION, request.id, "Calibration Request Approved", CMMS.CMMS_Status.CALIBRATION_REQUEST_APPROVED, userID);
                 response = new CMDefaultResponse(request.id, returnStatus, "Calibration Request Approved Successfully");
             }
             else 
@@ -144,13 +148,16 @@ namespace CMMSAPIs.Repositories.Calibration
                                 $"request_rejected_at = '{UtilsRepository.GetUTCTime()}', request_reject_remark = '{request.comment}' " +
                                 $"WHERE id = {request.id} AND status = {(int)CMMS.CMMS_Status.CALIBRATION_REQUEST};";
             int retVal = await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
+            string assetIDQuery = $"SELECT asset_id FROM calibration where id = {request.id};";
+            DataTable dtAsset = await Context.FetchData(assetIDQuery).ConfigureAwait(false);
+            int assetID = Convert.ToInt32(dtAsset.Rows[0][0]);
             CMMS.RETRUNSTATUS returnStatus = CMMS.RETRUNSTATUS.FAILURE;
             if (retVal > 0)
                 returnStatus = CMMS.RETRUNSTATUS.SUCCESS;
             CMDefaultResponse response;
             if (returnStatus == CMMS.RETRUNSTATUS.SUCCESS)
             {
-                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.CALIBRATION, request.id, 0, 0, "Calibration Request Rejected", CMMS.CMMS_Status.CALIBRATION_REQUEST_REJECTED, userID);
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, assetID, CMMS.CMMS_Modules.CALIBRATION, request.id, "Calibration Request Rejected", CMMS.CMMS_Status.CALIBRATION_REQUEST_REJECTED, userID);
                 response = new CMDefaultResponse(request.id, returnStatus, "Calibration Request Rejected Successfully");
             }
             else
@@ -189,16 +196,19 @@ namespace CMMSAPIs.Repositories.Calibration
                                 $"WHERE id = {calibration_id} AND status = {(int)CMMS.CMMS_Status.CALIBRATION_REQUEST_APPROVED};";
             int retVal = await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
             string userIDQuery = $"SELECT requested_by FROM calibration where id = {calibration_id};";
-            DataTable dt = await Context.FetchData(userIDQuery).ConfigureAwait(false);
-            int userID = Convert.ToInt32(dt.Rows[0][0]);
+            DataTable dtUser = await Context.FetchData(userIDQuery).ConfigureAwait(false);
+            int userID = Convert.ToInt32(dtUser.Rows[0][0]);
+            string assetIDQuery = $"SELECT asset_id FROM calibration where id = {calibration_id};";
+            DataTable dtAsset = await Context.FetchData(assetIDQuery).ConfigureAwait(false);
+            int assetID = Convert.ToInt32(dtAsset.Rows[0][0]);
             CMMS.RETRUNSTATUS returnStatus = CMMS.RETRUNSTATUS.FAILURE;
             if (retVal > 0)
                 returnStatus = CMMS.RETRUNSTATUS.SUCCESS;
             CMDefaultResponse response;
             if (returnStatus == CMMS.RETRUNSTATUS.SUCCESS)
             {
-                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.CALIBRATION, calibration_id, 0, 0, "Calibration Started", CMMS.CMMS_Status.CALIBRATION_STARTED, userID);
-                response = new CMDefaultResponse(calibration_id, returnStatus, "Calibration Started");
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, assetID, CMMS.CMMS_Modules.CALIBRATION, calibration_id, "Calibration Started", CMMS.CMMS_Status.CALIBRATION_STARTED, userID);
+                response = new CMDefaultResponse(calibration_id, returnStatus, $"Calibration Started for Asset {assetID}");
             }
             else
             {
@@ -213,17 +223,21 @@ namespace CMMSAPIs.Repositories.Calibration
              * File upload will be in file table with ref of calibration id
              * Your Code goes here
             */
-            string myQuery = $"UPDATE calibration SET done_date = '{request.done_date.ToString("yyyy'-'MM'-'dd")}', received_date = '{request.received_date.ToString("yyyy'-'MM'-'dd")}', " + 
-                                $"completed_by = {userID}, completed_remark = '{request.comment}', is_damaged = {request.is_damaged}, status = {(int)CMMS.CMMS_Status.CALIBRATION_COMPLETED} " + 
+            string myQuery = $"UPDATE calibration SET done_date = '{DateTime.UtcNow.ToString("yyyy'-'MM'-'dd")}', completed_by = {userID}, " +
+                                $"completed_remark = '{request.comment}', is_damaged = {(request.is_damaged == null ? 0 : request.is_damaged)}, " + 
+                                $"status = {(int)CMMS.CMMS_Status.CALIBRATION_COMPLETED} " + 
                                 $"WHERE id = {request.calibration_id} AND status = {(int)CMMS.CMMS_Status.CALIBRATION_STARTED};";
             int retVal = await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
+            string assetIDQuery = $"SELECT asset_id FROM calibration where id = {request.calibration_id};";
+            DataTable dtAsset = await Context.FetchData(assetIDQuery).ConfigureAwait(false);
+            int assetID = Convert.ToInt32(dtAsset.Rows[0][0]);
             CMMS.RETRUNSTATUS returnStatus = CMMS.RETRUNSTATUS.FAILURE;
             if (retVal > 0)
                 returnStatus = CMMS.RETRUNSTATUS.SUCCESS;
             CMDefaultResponse response;
             if (returnStatus == CMMS.RETRUNSTATUS.SUCCESS)
             {
-                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.CALIBRATION, request.calibration_id, 0, 0, "Calibration Completed", CMMS.CMMS_Status.CALIBRATION_COMPLETED, userID);
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, assetID, CMMS.CMMS_Modules.CALIBRATION, request.calibration_id, "Calibration Completed", CMMS.CMMS_Status.CALIBRATION_COMPLETED, userID);
                 response = new CMDefaultResponse(request.calibration_id, returnStatus, "Calibration Completed");
             }
             else
@@ -238,16 +252,21 @@ namespace CMMSAPIs.Repositories.Calibration
              * Update the Calibration status and update the history log
              * Your Code goes here
             */
-            string myQuery = $"UPDATE calibration SET close_by = {userID}, close_remark = '{request.comment}', status = {(int)CMMS.CMMS_Status.CALIBRATION_CLOSED} " +
+            string myQuery = $"UPDATE calibration SET close_by = {userID}, received_date = '{DateTime.UtcNow.ToString("yyyy'-'MM'-'dd")}', " +
+                                $"close_remark = '{request.comment}', " +
+                                $"status = {(int)CMMS.CMMS_Status.CALIBRATION_CLOSED} " +
                                 $"WHERE id = {request.calibration_id} AND status = {(int)CMMS.CMMS_Status.CALIBRATION_COMPLETED};";
             int retVal = await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
+            string assetIDQuery = $"SELECT asset_id FROM calibration where id = {request.calibration_id};";
+            DataTable dtAsset = await Context.FetchData(assetIDQuery).ConfigureAwait(false);
+            int assetID = Convert.ToInt32(dtAsset.Rows[0][0]);
             CMMS.RETRUNSTATUS returnStatus = CMMS.RETRUNSTATUS.FAILURE;
             if (retVal > 0)
                 returnStatus = CMMS.RETRUNSTATUS.SUCCESS;
             CMDefaultResponse response;
             if (returnStatus == CMMS.RETRUNSTATUS.SUCCESS)
             {
-                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.CALIBRATION, request.calibration_id, 0, 0, "Calibration Closed", CMMS.CMMS_Status.CALIBRATION_CLOSED, userID);
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, assetID, CMMS.CMMS_Modules.CALIBRATION, request.calibration_id, "Calibration Closed", CMMS.CMMS_Status.CALIBRATION_CLOSED, userID);
                 response = new CMDefaultResponse(request.calibration_id, returnStatus, "Calibration Closed");
             }
             else
@@ -265,12 +284,19 @@ namespace CMMSAPIs.Repositories.Calibration
             string myQuery1 = "SELECT asset_id, vendor_id, received_date as next_calibration_date FROM calibration " + 
                                 $"WHERE id = {request.id};";
             List<CMRequestCalibration> nextRequest = await Context.GetData<CMRequestCalibration>(myQuery1).ConfigureAwait(false);
-            string myQuery2 = $"SELECT days FROM assets JOIN frequency ON assets.calibrationFrequency = frequency.id " +
-                                $"WHERE assets.id = {nextRequest[0].asset_id};";
+            string myQuery2 = $"SELECT calibrationFrequency FROM assets " +
+                                $"WHERE id = {nextRequest[0].asset_id};";
             DataTable dt = await Context.FetchData(myQuery2).ConfigureAwait(false);
-            int days = Convert.ToInt32(dt.Rows[0][0]);
-            nextRequest[0].next_calibration_date = nextRequest[0].next_calibration_date.AddDays(days);
+            int frequencyId = Convert.ToInt32(dt.Rows[0][0]);
+            DateTime nextDate = UtilsRepository.Reschedule(nextRequest[0].next_calibration_date, frequencyId);
+            nextRequest[0].next_calibration_date = nextDate;
             CMDefaultResponse newCalibration = await RequestCalibration(nextRequest[0], userID);
+            CMApproval approval = new CMApproval()
+            {
+                id = newCalibration.id[0],
+                comment = null
+            };
+            await ApproveRequestCalibration(approval, userID);
             string myQuery3 = $"UPDATE calibration SET approved_by = {userID}, approved_at = '{UtilsRepository.GetUTCTime()}', " +
                                 $"approve_remark = '{request.comment}', status = {(int)CMMS.CMMS_Status.CALIBRATION_APPROVED} " +
                                 $"WHERE id = {request.id} AND status = {(int)CMMS.CMMS_Status.CALIBRATION_CLOSED};";
@@ -281,7 +307,7 @@ namespace CMMSAPIs.Repositories.Calibration
             CMDefaultResponse response;
             if (returnStatus == CMMS.RETRUNSTATUS.SUCCESS)
             {
-                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.CALIBRATION, request.id, 0, 0, $"Calibration Approved to ID {newCalibration.id[0]}", CMMS.CMMS_Status.CALIBRATION_COMPLETED, userID);
+                await _utilsRepo.AddHistoryLog( CMMS.CMMS_Modules.INVENTORY, nextRequest[0].asset_id, CMMS.CMMS_Modules.CALIBRATION, request.id, $"Calibration Approved to ID {newCalibration.id[0]}", CMMS.CMMS_Status.CALIBRATION_COMPLETED, userID);
                 response = new CMDefaultResponse(request.id, returnStatus, $"Calibration Approved. Next Calibration with ID {newCalibration.id[0]} on '{nextRequest[0].next_calibration_date.ToString("yyyy'-'MM'-'dd")}'");
             }
             else
@@ -301,12 +327,15 @@ namespace CMMSAPIs.Repositories.Calibration
                                 $"WHERE id = {request.id} AND status = {(int)CMMS.CMMS_Status.CALIBRATION_CLOSED};";
             int retVal = await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
             CMMS.RETRUNSTATUS returnStatus = CMMS.RETRUNSTATUS.FAILURE;
+            string assetIDQuery = $"SELECT asset_id FROM calibration where id = {request.id};";
+            DataTable dtAsset = await Context.FetchData(assetIDQuery).ConfigureAwait(false);
+            int assetID = Convert.ToInt32(dtAsset.Rows[0][0]);
             if (retVal > 0)
                 returnStatus = CMMS.RETRUNSTATUS.SUCCESS;
             CMDefaultResponse response;
             if (returnStatus == CMMS.RETRUNSTATUS.SUCCESS)
             {
-                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.CALIBRATION, request.id, 0, 0, "Calibration Rejected", CMMS.CMMS_Status.CALIBRATION_REJECTED, userID);
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, assetID, CMMS.CMMS_Modules.CALIBRATION, request.id, "Calibration Rejected", CMMS.CMMS_Status.CALIBRATION_REJECTED, userID);
                 response = new CMDefaultResponse(request.id, returnStatus, "Calibration Rejected");
             }
             else
