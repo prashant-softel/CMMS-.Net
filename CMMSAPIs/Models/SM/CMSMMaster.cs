@@ -27,6 +27,20 @@ namespace CMMSAPIs.Models.SM
 
     }
 
+    public class smassettypes
+    {
+        public int ID { get; set; }
+        public string asset_type { get; set; }
+        public int status { get; set; }
+    }
+    public class SMItemCategory
+    {
+        public int ID { get; set; }
+        public string cat_name { get; set; }
+        public int status { get; set; }
+    }
+
+
     public class UnitMeasurement
     {
         public int ID { get; set; }

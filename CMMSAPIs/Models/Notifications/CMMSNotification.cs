@@ -7,6 +7,7 @@ using CMMSAPIs.Models.Jobs;
 using CMMSAPIs.Models.Permits;
 using CMMSAPIs.Models.JC;
 using CMMSAPIs.Models.Incident_Reports;
+using CMMSAPIs.Models.SM;
 
 //using CommonUtilities;
 //using CMMSAPIs.Models.Notifications;
@@ -116,6 +117,10 @@ namespace CMMSAPIs.Models.Notifications
             {
                 CMViewIncidentReport _IncidentReport = (CMViewIncidentReport)args[0];
                 notificationObj = new IncidentReportNotification(moduleID, notificationID, _IncidentReport);
+            }else if (moduleID == CMMS.CMMS_Modules.SM_MASTER)
+            {
+                CMSMMaster cMSMMaster = (CMSMMaster)args[0];
+                notificationObj = new SMMasterNotification(moduleID, notificationID, cMSMMaster);
             }
             //create else if block for your module and add Notification class for  your module to implement yous notification
             retValue = notificationObj.sendEmailNotification(moduleID, notificationID, args);

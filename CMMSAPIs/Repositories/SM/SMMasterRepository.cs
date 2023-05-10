@@ -16,16 +16,21 @@ using MySql.Data.MySqlClient;
 using System.Transactions;
 using Microsoft.IdentityModel.Tokens;
 using System.Diagnostics;
+using CMMSAPIs.Models.Jobs;
+using CMMSAPIs.Models.Notifications;
 
 namespace CMMSAPIs.Repositories.SM
 {
     public class SMMasterRepository : GenericRepository
     {
+        private UtilsRepository _utilsRepo;
         public SMMasterRepository(MYSQLDBHelper sqlDBHelper) : base(sqlDBHelper)
         {
+            _utilsRepo = new UtilsRepository(sqlDBHelper);
         }
 
-        internal async Task<List<CMSMMaster>> GetAssetTypeList(int ID)
+        
+        internal async Task<List<smassettypes>> GetAssetTypeList(int ID)
         {
             /*
              * Return id, asset_type from SMAssetTypes
@@ -33,14 +38,14 @@ namespace CMMSAPIs.Repositories.SM
             string myQuery = "";
             if (ID == 0)
             {
-                myQuery = "SELECT * FROM smassettypes WHERE flag = 1";
+                myQuery = "SELECT * FROM smassettypes WHERE status = 1";
             }
             else
             {
-                myQuery = "SELECT * FROM smassettypes WHERE ID = "+ID+" and flag = 1";
+                myQuery = "SELECT * FROM smassettypes WHERE ID = "+ID+ " and status = 1";
             }
             
-            List<CMSMMaster> _checkList = await Context.GetData<CMSMMaster>(myQuery).ConfigureAwait(false);
+            List<smassettypes> _checkList = await Context.GetData<smassettypes>(myQuery).ConfigureAwait(false);
             return _checkList;
         }
 
@@ -49,10 +54,24 @@ namespace CMMSAPIs.Repositories.SM
             /*
              * Add record in SMAssetTypes
             */
-            string mainQuery = $"INSERT INTO smassettypes (asset_type,flag) VALUES ('" +request.asset_type+"',1); SELECT LAST_INSERT_ID();";
+            string mainQuery = $"INSERT INTO smassettypes (asset_type,status) VALUES ('" +request.asset_type+"',1); SELECT LAST_INSERT_ID();";
             DataTable dt2 = await Context.FetchData(mainQuery).ConfigureAwait(false);
             int id = Convert.ToInt32(dt2.Rows[0][0]);
-            CMDefaultResponse  response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Asset type added successfully.");
+
+            List<smassettypes> _ViewAssetList = await GetAssetTypeList(id);
+
+            //await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_MASTER, id, 0, 0, "Asset Created", CMMS.CMMS_Status.CREATED);
+            //CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_CREATED, _ViewAssetList[0]);
+
+            string strJobStatusMsg = $"Job {id} Created";
+            if (_ViewAssetList[0].ID > 0)
+            {
+                strJobStatusMsg = $"New Asset type Created with name of " + _ViewAssetList[0].asset_type;
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, id, 0, 0, "Job Assigned", CMMS.CMMS_Status.CREATED);
+                CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_MASTER, CMMS.CMMS_Status.CREATED, _ViewAssetList[0]);
+            }
+
+            CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Asset type added successfully.");
             return response;
         }
 
@@ -72,13 +91,13 @@ namespace CMMSAPIs.Repositories.SM
             /*
              * Delete record in SMAssetTypes
             */
-            string mainQuery = $"UPDATE smassettypes SET flag = 0 where ID = " + Id + "";
+            string mainQuery = $"UPDATE smassettypes SET status = 0 where ID = " + Id + "";
             await Context.ExecuteNonQry<int>(mainQuery);
             CMDefaultResponse response = new CMDefaultResponse(1, CMMS.RETRUNSTATUS.SUCCESS, "Asset type deleted successfully.");
             return response;
         }
 
-        internal async Task<List<ItemCategory>> GetAssetCategoryList(int ID)
+        internal async Task<List<SMItemCategory>> GetAssetCategoryList(int ID)
         {
             /*
              * Return id, name from SMItemCategory
@@ -86,15 +105,15 @@ namespace CMMSAPIs.Repositories.SM
             string myQuery = "";
             if (ID == 0)
             {
-                myQuery = "SELECT * FROM SMItemCategory WHERE flag = 1";
+                myQuery = "SELECT * FROM SMItemCategory WHERE status = 1";
             }
             else
             {
-                myQuery = "SELECT * FROM SMItemCategory WHERE ID = "+ID+" flag = 1";
+                myQuery = "SELECT * FROM SMItemCategory WHERE ID = "+ID+ " and status = 1";
             }
 
 
-            List<ItemCategory> _List = await Context.GetData<ItemCategory>(myQuery).ConfigureAwait(false);
+            List<SMItemCategory> _List = await Context.GetData<SMItemCategory>(myQuery).ConfigureAwait(false);
             return _List;
         }
 
@@ -103,7 +122,7 @@ namespace CMMSAPIs.Repositories.SM
             /*
              * Add record in SMItemCategory
             */
-            string mainQuery = $"INSERT INTO SMItemCategory (cat_name,flag) VALUES ('" + request.cat_name + "',1); SELECT LAST_INSERT_ID();";
+            string mainQuery = $"INSERT INTO SMItemCategory (cat_name,status) VALUES ('" + request.cat_name + "',1); SELECT LAST_INSERT_ID();";
             DataTable dt2 = await Context.FetchData(mainQuery).ConfigureAwait(false);
             int id = Convert.ToInt32(dt2.Rows[0][0]);
             CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Asset category added successfully.");
@@ -126,7 +145,7 @@ namespace CMMSAPIs.Repositories.SM
             /*
              * Delete record in SMItemCategory
             */
-            string mainQuery = $"UPDATE SMItemCategory SET flag = 0 where ID = " + acID + "";
+            string mainQuery = $"UPDATE SMItemCategory SET status = 0 where ID = " + acID + "";
             await Context.ExecuteNonQry<int>(mainQuery);
             CMDefaultResponse response = new CMDefaultResponse(1, CMMS.RETRUNSTATUS.SUCCESS, "Asset category deleted.");
             return response;

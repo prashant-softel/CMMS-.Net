@@ -12,12 +12,12 @@ namespace CMMSAPIs.BS.SM
 {
     public interface ISMMasterBS
     {
-        Task<List<CMSMMaster>> GetAssetTypeList(int ID);
+        Task<List<smassettypes>> GetAssetTypeList(int ID);
         Task<CMDefaultResponse> AddAssetType(CMSMMaster request, int userID);
         Task<CMDefaultResponse> UpdateAssetType(CMSMMaster request, int userID);
         Task<CMDefaultResponse> DeleteAssetType(int Id, int userID);
 
-        Task<List<ItemCategory>> GetAssetCategoryList(int ID);
+        Task<List<SMItemCategory>> GetAssetCategoryList(int ID);
         Task<CMDefaultResponse> AddAssetCategory(ItemCategory request, int userID);
         Task<CMDefaultResponse> UpdateAssetCategory(ItemCategory request, int userID);
         Task<CMDefaultResponse> DeleteAssetCategory(int acID, int userID);
@@ -44,7 +44,7 @@ namespace CMMSAPIs.BS.SM
         }
 
 
-        public async Task<List<CMSMMaster>> GetAssetTypeList(int ID)
+        public async Task<List<smassettypes>> GetAssetTypeList(int ID)
         {
             try
             {
@@ -104,7 +104,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<ItemCategory>> GetAssetCategoryList(int ID)
+        public async Task<List<SMItemCategory>> GetAssetCategoryList(int ID)
         {
             try
             {

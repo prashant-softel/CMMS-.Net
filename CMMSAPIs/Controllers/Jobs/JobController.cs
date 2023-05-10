@@ -57,7 +57,7 @@ namespace CMMSAPIs.Controllers.Jobs
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("CreateNewJob")]
         [HttpPost]
         public async Task<IActionResult> CreateNewJob(CMCreateJob request)
