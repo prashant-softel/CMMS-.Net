@@ -573,6 +573,14 @@ namespace CMMSAPIs.Repositories.Permits
                                $"where ptw.id =  { permit_id }";
             List<CMCategory> _CategoryList = await Context.GetData<CMCategory>(myQuery7).ConfigureAwait(false);
 
+            string myQuery8 = "SELECT assets_cat.id as catID FROM assetcategories as assets_cat " +
+                               "JOIN assets on assets.categoryId = assets_cat.id " +
+                               "JOIN permitassetlists AS assetList on assetList.assetId = assets.id " +
+                               "JOIN permits as ptw ON assetList.ptwId=ptw.id " +
+                               $"where ptw.id =  { permit_id }";
+            DataTable catIDdt = await Context.FetchData(myQuery8).ConfigureAwait(false);
+            List<int> _CategoryIDList = catIDdt.GetColumn<int>("catID");
+
             _PermitDetailsList[0].Loto_list = _LotoList;
             _PermitDetailsList[0].employee_list = _EmpList;
             _PermitDetailsList[0].LstIsolation = _IsolationList;
@@ -580,7 +588,7 @@ namespace CMMSAPIs.Repositories.Permits
             _PermitDetailsList[0].safety_question_list = _QuestionList;
             _PermitDetailsList[0].LstAssociatedJob = _AssociatedJobList;
             _PermitDetailsList[0].LstCategory = _CategoryList;
-
+            _PermitDetailsList[0].category_ids = _CategoryIDList;
             return _PermitDetailsList[0];
         }
 
