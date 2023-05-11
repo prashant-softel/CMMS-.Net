@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
 using System;
 using CMMSAPIs.BS.Users;
@@ -50,13 +51,15 @@ namespace CMMSAPIs.Controllers.Users
             }
         }
 
+        [Authorize]
         [Route("SetRoleAccess")]
         [HttpPost]
         public async Task<IActionResult> SetRoleAccess(CMSetRoleAccess request)
         {
             try
             {
-                var data = await _roleAcceesBs.SetRoleAccess(request);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _roleAcceesBs.SetRoleAccess(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)

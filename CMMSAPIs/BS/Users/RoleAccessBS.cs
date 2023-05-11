@@ -12,7 +12,7 @@ namespace CMMSAPIs.BS.Users
     {
         public Task<List<KeyValuePairs>> GetRoleList();
         public Task<CMRoleAccess> GetRoleAccess(int role_id);
-        public Task<CMDefaultResponse> SetRoleAccess(CMSetRoleAccess request);
+        public Task<CMDefaultResponse> SetRoleAccess(CMSetRoleAccess request, int userID);
         public Task<CMRoleNotifications> GetRoleNotifications(int role_id);
         public Task<CMDefaultResponse> SetRoleNotifications(CMSetRoleNotifications request);      
     }
@@ -56,13 +56,13 @@ namespace CMMSAPIs.BS.Users
             }
         }
 
-        public async Task<CMDefaultResponse> SetRoleAccess(CMSetRoleAccess request)
+        public async Task<CMDefaultResponse> SetRoleAccess(CMSetRoleAccess request, int userID)
         {
             try
             {
                 using (var repos = new RoleAccessRepository(getDB))
                 {
-                    return await repos.SetRoleAccess(request);
+                    return await repos.SetRoleAccess(request, userID);
                 }
             }
             catch (Exception ex)

@@ -4,6 +4,7 @@ using CMMSAPIs.Models.Users;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Utils;
 using System;
+using System.Data;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text.Json;
@@ -56,13 +57,19 @@ namespace CMMSAPIs.Repositories.Users
             return roleList;
         }
 
-        internal async Task<CMDefaultResponse> SetRoleAccess(CMSetRoleAccess request)
+        internal async Task<CMDefaultResponse> SetRoleAccess(CMSetRoleAccess request, int userID)
         {
             try
             {                
                 // Get previous settings
                 CMRoleAccess old_access = await GetRoleAccess(request.role_id);
-
+                string featureAccessQry = "SELECT id as feature_id, concat(moduleName,': ',featureName) as feature_name, menuImage as menu_image, features.* FROM features;";
+                List<CMAccessList> featureAccessList = await Context.GetData<CMAccessList>(featureAccessQry).ConfigureAwait(false);
+                string featureIDquery = "SELECT id FROM features;";
+                DataTable dt = await Context.FetchData(featureIDquery).ConfigureAwait(false);
+                List<int> featureIDs = dt.GetColumn<int>("id");
+                Dictionary<int, CMAccessList> features = new Dictionary<int, CMAccessList>();
+                features.Merge(featureIDs, featureAccessList);
                 // Check the whether to change existing settings or not
                 if (request.set_role) 
                 {
@@ -77,8 +84,11 @@ namespace CMMSAPIs.Repositories.Users
 
                         foreach (var access in request.access_list)
                         {
-                            role_access.Add($"({request.role_id}, {access.feature_id}, {access.add}, {access.edit}, " +
-                                            $"{access.view}, {access.delete}, {access.issue}, {access.approve}, {access.selfView}, " +
+                            CMAccessList feature = features[access.feature_id];
+                            role_access.Add($"({request.role_id}, {access.feature_id}, {(feature.add == 0 ? -1 : access.add)}, " +
+                                            $"{(feature.edit == 0 ? -1 : access.edit)}, {(feature.view == 0 ? -1 : access.view)}, " +
+                                            $"{(feature.delete == 0 ? -1 : access.delete)}, {(feature.issue == 0 ? -1 : access.issue)}, " +
+                                            $"{(feature.approve == 0 ? -1 : access.approve)}, {(feature.selfView == 0 ? -1 : access.selfView)}, " +
                                             $"'{UtilsRepository.GetUTCTime()}', {UtilsRepository.GetUserID()})");
                         }
                         string role_access_insert_str = string.Join(',', role_access);
