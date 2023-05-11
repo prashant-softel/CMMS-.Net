@@ -7,7 +7,6 @@ namespace CMMSAPIs.Models.Permits
     public class CMPermitDetail
     {
         public int insertedId { get; set; }
-        public int ptwStatus { get; set; }
         public int permitNo { get; set; }
         public int sitePermitNo { get; set; }
         public int permitTypeid { get; set; }
@@ -52,6 +51,9 @@ namespace CMMSAPIs.Models.Permits
         public List<CMEMPLIST> employee_list { get; set; }
         public List<CMIsolationList> LstIsolation { get; set; }
         public List<CMAssociatedList> LstAssociatedJob { get; set; }
+        public int ptwStatus { get; set; }
+        public string current_status_short { get; set; }
+        public string current_status_long { get; set; }
     }
     public class CMAssociatedList
     {

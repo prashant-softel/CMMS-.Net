@@ -649,6 +649,10 @@ namespace CMMSAPIs.Controllers.Permits
             {
                 return Unauthorized(ex.Message);
             }
+            catch (MissingFieldException ex)
+            {
+                return NotFound(ex.Message);
+            }
             catch (Exception)
             {
                 throw;
