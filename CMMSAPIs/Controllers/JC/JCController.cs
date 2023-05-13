@@ -1,5 +1,6 @@
 ﻿using CMMSAPIs.BS.JC;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
 using System;
 using CMMSAPIs.Models.JC;
@@ -76,7 +77,8 @@ namespace CMMSAPIs.Controllers.JC
         {
             try
             {
-                var data = await _JCBS.UpdateJC(request);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _JCBS.UpdateJC(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
