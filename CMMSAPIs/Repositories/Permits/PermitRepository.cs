@@ -275,9 +275,11 @@ namespace CMMSAPIs.Repositories.Permits
             /*
              * return * from PermitTBTJobList table for requested job_type_id
             */
-            string myQuery = $"SELECT tbtlist.id as id, tbtlist.title as name, jobtypes.title as jobTypeName " +
+            string myQuery = $"SELECT tbtlist.id as id, tbtlist.title as name, tbtlist.description, jobtypes.title as jobTypeName, tbtlist.fileId as sop_file_id, tbtlist.fileName as sop_file_name, tbtlist.filePath as sop_file_path, sopcat.id as sop_file_cat_id, sopcat.name as sop_file_cat_name, tbtlist.JSAFileId as jsa_file_id, tbtlist.JSAFileName as jsa_file_name, tbtlist.JSAFilePath as jsa_file_path, jsacat.id as jsa_file_cat_id, jsacat.name as jsa_file_cat_name, tbtlist.TBTRemarks as tbt_remarks " +
                                 $"FROM permittbtjoblist as tbtlist " +
-                                $"LEFT JOIN permitjobtypelist as jobtypes ON tbtlist.jobTypeId = jobtypes.id ";
+                                $"LEFT JOIN permitjobtypelist as jobtypes ON tbtlist.jobTypeId = jobtypes.id " +
+                                $"LEFT JOIN filecategory as sopcat ON tbtlist.fileCategoryId = sopcat.id " +
+                                $"LEFT JOIN filecategory as jsacat ON tbtlist.JSAFileCategoryId = jsacat.id ";
             if (job_type_id > 0)
                 myQuery += $"WHERE tbtlist.jobTypeId =  { job_type_id } ";
             myQuery += "ORDER BY jobtypes.id ASC, tbtlist.id ASC;";
