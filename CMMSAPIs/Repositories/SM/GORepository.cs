@@ -20,7 +20,7 @@ namespace CMMSAPIs.Repositories
         }
 
 
-        internal async Task<List<CMGO>> GetGOList()
+        internal async Task<List<CMGO>> GetGOList(int plantID, DateTime fromDate, DateTime toDate)
         {
             /*
              * 
@@ -48,6 +48,11 @@ namespace CMMSAPIs.Repositories
                 "LEFT JOIN business bl ON bl.id = po.vendorID\r\n\r\n\t\t     " +
                 "/*  WHERE po.ID =1 */";
             List<CMGO> _GOList = await Context.GetData<CMGO>(stmt).ConfigureAwait(false);
+
+            //CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_GOList[0].flag + 100);
+            //string _shortStatus = getShortStatus(CMMS.CMMS_Modules.JOB, _Status);
+            //_ViewJobList[0].status_short = _shortStatus;
+
             return _GOList;
         }
         internal Task<List<CMGO>> GetAssetCodeDetails(int asset_code)
@@ -60,11 +65,29 @@ namespace CMMSAPIs.Repositories
 
         internal async Task<CMDefaultResponse> CreateGO(CMGO request, int userID)
         {
-            string mainQuery = $"INSERT INTO smpurchaseorderdetails (purchaseID,assetItemID,order_type,cost,ordered_qty,location_ID) " +
-                "values("+request.purchaseID+", "+request.assetItemID+", '"+request.order_type + "', "+request.cost+", "+request.ordered_qty+", "+request.location_ID+") ; SELECT LAST_INSERT_ID();";
-            DataTable dt2 = await Context.FetchData(mainQuery).ConfigureAwait(false);
-            int id = Convert.ToInt32(dt2.Rows[0][0]);
-            CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Goods order created successfully.");
+
+            if (request.go_items != null)
+            {
+                string poInsertQuery = $" INSERT INTO smpurchaseorder (plantID,vendorID,receiverID,generated_by,purchaseDate,orderDate,status," +
+                    $" challan_no,po_no, freight,transport, " +
+                    $"no_pkg_received,lr_no,condition_pkg_received,vehicle_no, gir_no, challan_date,po_date, job_ref,amount, currency,withdraw_by,withdrawOn,order_type) " +
+                    $"VALUES({request.plantID},{request.vendorID}, {request.receiverID}, {userID}, '{DateTime.Now.ToString("yyyy-MM-dd")}', '{DateTime.Now.ToString("yyyy-MM-dd")}', {request.status}," +
+                    $"'','','','', '', '', '','','','00001-01-01','00001-01-01','',0, '',0,'0001-01-01',0);" + 
+                    $"";
+                DataTable dt2 = await Context.FetchData(poInsertQuery).ConfigureAwait(false);
+                int poid = Convert.ToInt32(dt2.Rows[0][0]);
+
+                for (var i = 0; i < request.go_items.Count; i++)
+                {
+                    string poDetailsQuery = $"INSERT INTO smpurchaseorderdetails (purchaseID,assetItemID,order_type,cost,ordered_qty,location_ID) " +
+                    "values(" + poid + ", " + request.go_items[i].assetItemID + ", '" + request.go_items[i]. + "', " + request.cost + ", " + request.ordered_qty + ", " + request.location_ID + ") ; SELECT LAST_INSERT_ID();";
+                    DataTable dt2 = await Context.FetchData(mainQuery).ConfigureAwait(false);
+                    int id = Convert.ToInt32(dt2.Rows[0][0]);
+                }
+            }
+
+
+            CMDefaultResponse response = new CMDefaultResponse(1, CMMS.RETRUNSTATUS.SUCCESS, "Goods order created successfully.");
             return response;
         }
         internal async Task<CMDefaultResponse> UpdateGO(CMGO request, int userID)
@@ -85,10 +108,40 @@ namespace CMMSAPIs.Repositories
         }
         internal async Task<CMDefaultResponse> WithdrawGO(CMGO request, int userID)
         {
-            string mainQuery = $"UPDATE smpurchaseorderdetails SET withdraw_by = " + userID + ", flag = "+request.flag+", remarks = '"+request.remarks+"', withdrawOn = '"+DateTime.Now.ToString()+"' WHERE ID = "+request.id+"";
+            string mainQuery = $"UPDATE smpurchaseorderdetails SET withdraw_by = " + userID + ", flag = "+request.status+", remarks = '"+request.remarks+"', withdrawOn = '"+DateTime.Now.ToString()+"' WHERE ID = "+request.id+"";
             await Context.ExecuteNonQry<int>(mainQuery);
             CMDefaultResponse response = new CMDefaultResponse(1, CMMS.RETRUNSTATUS.SUCCESS, "Goods order withdrawn successfully.");
             return response;
         }
+
+        internal static string getShortStatus(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status m_notificationID)
+        {
+            string retValue;
+
+            switch (m_notificationID)
+            {
+                case CMMS.CMMS_Status.JOB_CREATED:     //Created
+                    retValue = "Created";
+                    break;
+                case CMMS.CMMS_Status.JOB_ASSIGNED:     //Assigned
+                    retValue = "Assigned";
+                    break;
+                case CMMS.CMMS_Status.JOB_LINKED:     //Linked
+                    retValue = "Linked to PTW";
+                    break;
+                case CMMS.CMMS_Status.JOB_CLOSED:     //Closed
+                    retValue = "Closed";
+                    break;
+                case CMMS.CMMS_Status.JOB_CANCELLED:     //Cancelled
+                    retValue = "Cancelled";
+                    break;
+                default:
+                    retValue = "Unknown <" + m_notificationID + ">";
+                    break;
+            }
+            return retValue;
+
+        }
+
     }
 }

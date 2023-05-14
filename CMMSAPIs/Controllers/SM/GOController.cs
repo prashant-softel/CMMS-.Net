@@ -22,13 +22,14 @@ namespace CMMSAPIs.Controllers
             _GOBS = GO;
         }
 
+        
         [Route("GetGOList")]
         [HttpGet]
-        public async Task<IActionResult> GetGOList()
+        public async Task<IActionResult> GetGOList(int plantID, DateTime fromDate, DateTime toDate)
         {
             try
             {
-                var data = await _GOBS.GetGOList();
+                var data = await _GOBS.GetGOList(plantID, fromDate, toDate);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -39,8 +40,9 @@ namespace CMMSAPIs.Controllers
 
         [Route("GetAssetCodeDetails")]
         [HttpGet]
-        public async Task<IActionResult> GetAssetCodeDetails(int asset_code)
+        public async Task<IActionResult> GetAssetCodeDetails(int asset_code, int plantID, DateTime fromDate, DateTime toDate)
         {
+            //int plantID, DateTime fromDate, DateTime toDate
             try
             {
                 var data = await _GOBS.GetAssetCodeDetails(asset_code);
@@ -86,12 +88,12 @@ namespace CMMSAPIs.Controllers
 
         [Route("DeleteGO")]
         [HttpPost]
-        public async Task<IActionResult> DeleteGO([FromForm] int GOid)
+        public async Task<IActionResult> DeleteGO([FromForm] int id)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _GOBS.DeleteGO(GOid, userID);
+                var data = await _GOBS.DeleteGO(id, userID);
                 return Ok(data);
             }
             catch (Exception ex)

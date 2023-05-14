@@ -22,18 +22,18 @@ namespace CMMSAPIs.Models.SM
         public int item_category_ID { get; set; }
         public int unit_measurement_ID { get; set; }
         public int approval_required_ID { get; set; }
-        public AssetMasterFiles fileData { get; set; }
+        public CMAssetMasterFiles fileData { get; set; }
 
 
     }
-
-    public class smassettypes
+   
+    public class CMAssetTypes
     {
         public int ID { get; set; }
         public string asset_type { get; set; }
         public int status { get; set; }
     }
-    public class SMItemCategory
+    public class CMItemCategory
     {
         public int ID { get; set; }
         public string cat_name { get; set; }
@@ -41,7 +41,7 @@ namespace CMMSAPIs.Models.SM
     }
 
 
-    public class UnitMeasurement
+    public class CMUnitMeasurement
     {
         public int ID { get; set; }
         public string name { get; set; }
@@ -50,14 +50,14 @@ namespace CMMSAPIs.Models.SM
         public int spare_multi_selection { get; set; }
     }
 
-    public class ItemCategory
-    {
-        public int ID { get; set; }
-        public string cat_name { get; set; }
-        public int flag { get; set; }
-    }
+    //public class ItemCategory
+    //{
+    //    public int ID { get; set; }
+    //    public string cat_name { get; set; }
+    //    public int flag { get; set; }
+    //}
 
-    public class AssetMasterFiles
+    public class CMAssetMasterFiles
     {
         public int id { get; set; }
         public int Asset_master_id { get; set; }
@@ -68,7 +68,7 @@ namespace CMMSAPIs.Models.SM
         public DateTime? Uploaded_date { get; set; }
     }
 
-    public class MRS
+    public class CMMRS
     {
         public int ID { get; set; }
         public int requested_by_emp_ID { get; set; }
@@ -116,10 +116,10 @@ namespace CMMSAPIs.Models.SM
         public int isEditMode { get; set; }
         public int item_condition { get; set; }
 
-        public List<equipments> equipments { get; set;}
+        public List<CMEquipments> equipments { get; set;}
 
     }
-    public class equipments
+    public class CMEquipments
     {
         public int id { get; set; }
         public int equipmentID { get; set; }

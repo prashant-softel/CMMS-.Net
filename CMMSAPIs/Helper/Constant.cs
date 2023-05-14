@@ -297,6 +297,17 @@ namespace CMMSAPIs.Helper
             CALIBRATION_CLOSED,
             CALIBRATION_APPROVED,
             CALIBRATION_REJECTED,
+
+            SM_PO_DRAFT = 301,          //1         
+            SM_PO_SUBMITTED,            //2
+            SM_PO_IN_PROCESS,           //3
+            SM_PO_REJECTED,
+            SM_PO_S2S_SUBMITTED,        //7
+
+
+            MRS_REQUEST_APPROVE = 321, 
+            MRS_REQUEST_REJECT ,
+            SM_ASSET_TYPE_SPARE ,
         }
 
         public enum checklist_type
@@ -305,13 +316,12 @@ namespace CMMSAPIs.Helper
             Audit,
         }
 
-        public enum StockManagement
+        public enum SM_OrderByType
         {
-            MRS_REQUEST_APPROVE = 1,
-            MRS_REQUEST_REJECT=2,
-            SM_ASSET_TYPE_SPARE=3,
+            SM_OWNER = 1,
+            SM_OPERATOR
 
-    }
+        }
 
     public enum SM_Types
     {

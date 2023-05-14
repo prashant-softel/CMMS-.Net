@@ -24,6 +24,9 @@ namespace CMMSAPIs.Models.Utils
             this.return_status = return_status;
             this.message = message;
         }
+        public CMDefaultResponse()
+        {
+        }
     }
    
 

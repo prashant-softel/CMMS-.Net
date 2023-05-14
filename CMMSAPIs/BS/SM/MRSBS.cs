@@ -12,17 +12,17 @@ namespace CMMSAPIs.BS.SM
 {
     public interface IMRSBS
     {
-        Task<CMDefaultResponse> requestMRS(MRS request);        
-        Task<List<MRS>> getMRSList(int plant_ID, int emp_id, DateTime toDate, DateTime fromDate);        
-        Task<List<MRS>> getMRSItems(int ID);        
-        Task<List<MRS>> getMRSItemsBeforeIssue(int ID);        
-        Task<List<MRS>> getMRSItemsWithCode(int ID);        
-        Task<List<MRS>> getMRSDetails(int ID);        
-        Task<List<MRS>> getReturnDataByID(int ID);        
-        Task<List<MRS>> getAssetTypeByItemID(int ItemID);
-        Task<CMDefaultResponse> mrsReturn(MRS request);        
-        Task<CMDefaultResponse> mrsApproval(MRS request);        
-        Task<CMDefaultResponse> mrsReturnApproval(MRS request);
+        Task<CMDefaultResponse> requestMRS(CMMRS request);        
+        Task<List<CMMRS>> getMRSList(int plant_ID, int emp_id, DateTime toDate, DateTime fromDate);        
+        Task<List<CMMRS>> getMRSItems(int ID);        
+        Task<List<CMMRS>> getMRSItemsBeforeIssue(int ID);        
+        Task<List<CMMRS>> getMRSItemsWithCode(int ID);        
+        Task<List<CMMRS>> getMRSDetails(int ID);        
+        Task<List<CMMRS>> getReturnDataByID(int ID);        
+        Task<List<CMMRS>> getAssetTypeByItemID(int ItemID);
+        Task<CMDefaultResponse> mrsReturn(CMMRS request);        
+        Task<CMDefaultResponse> mrsApproval(CMMRS request);        
+        Task<CMDefaultResponse> mrsReturnApproval(CMMRS request);
         void UpdateAssetStatus(int assetItemID, int status);
     }
     public class MRSBS : IMRSBS
@@ -34,7 +34,7 @@ namespace CMMSAPIs.BS.SM
             databaseProvider = dbProvider;
         }
 
-        public async Task<CMDefaultResponse> requestMRS(MRS request)
+        public async Task<CMDefaultResponse> requestMRS(CMMRS request)
         {
             try
             {
@@ -49,7 +49,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<MRS>> getMRSList(int plant_ID, int emp_id, DateTime toDate, DateTime fromDate)
+        public async Task<List<CMMRS>> getMRSList(int plant_ID, int emp_id, DateTime toDate, DateTime fromDate)
         {
             try
             {
@@ -64,7 +64,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
         
-        public async Task<List<MRS>> getMRSItems(int ID)
+        public async Task<List<CMMRS>> getMRSItems(int ID)
            {
             try
             {
@@ -79,7 +79,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
         
-        public async Task<List<MRS>> getMRSItemsBeforeIssue(int ID)
+        public async Task<List<CMMRS>> getMRSItemsBeforeIssue(int ID)
         {
             try
             {
@@ -94,7 +94,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<MRS>> getMRSItemsWithCode(int ID)
+        public async Task<List<CMMRS>> getMRSItemsWithCode(int ID)
         {
             try
             {
@@ -109,7 +109,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<MRS>> getMRSDetails(int ID)
+        public async Task<List<CMMRS>> getMRSDetails(int ID)
         {
             try
             {
@@ -123,7 +123,7 @@ namespace CMMSAPIs.BS.SM
                 throw;
             }
         }
-        public async Task<List<MRS>> getReturnDataByID(int ID)
+        public async Task<List<CMMRS>> getReturnDataByID(int ID)
         {
             try
             {
@@ -137,7 +137,7 @@ namespace CMMSAPIs.BS.SM
                 throw;
             }
         }
-        public async Task<List<MRS>> getAssetTypeByItemID(int ItemID)
+        public async Task<List<CMMRS>> getAssetTypeByItemID(int ItemID)
         {
             try
             {
@@ -152,7 +152,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<CMDefaultResponse> mrsReturn(MRS request)
+        public async Task<CMDefaultResponse> mrsReturn(CMMRS request)
         {
             try
             {
@@ -167,7 +167,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
         
-        public async Task<CMDefaultResponse> mrsApproval(MRS request)
+        public async Task<CMDefaultResponse> mrsApproval(CMMRS request)
         {
             try
             {
@@ -182,7 +182,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
         
-        public async Task<CMDefaultResponse> mrsReturnApproval(MRS request)
+        public async Task<CMDefaultResponse> mrsReturnApproval(CMMRS request)
         {
             try
             {

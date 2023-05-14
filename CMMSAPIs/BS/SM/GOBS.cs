@@ -11,7 +11,7 @@ namespace CMMSAPIs.BS
 {
     public interface IGOBS
     {
-        Task<List<CMGO>> GetGOList();
+        Task<List<CMGO>> GetGOList(int plantID, DateTime fromDate, DateTime toDate);
         Task<List<CMGO>> GetAssetCodeDetails(int asset_code);
         Task<CMDefaultResponse> CreateGO(CMGO request, int userID);
         Task<CMDefaultResponse> UpdateGO(CMGO request, int userID);
@@ -28,13 +28,13 @@ namespace CMMSAPIs.BS
             databaseProvider = dbProvider;
         }
 
-        public async Task<List<CMGO>> GetGOList()
+        public async Task<List<CMGO>> GetGOList(int plantID, DateTime fromDate, DateTime toDate)
         {
             try
             {
                 using (var repos = new GORepository(getDB))
                 {
-                    return await repos.GetGOList();
+                    return await repos.GetGOList(plantID, fromDate, toDate);
 
                 }
             }

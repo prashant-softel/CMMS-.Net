@@ -30,9 +30,10 @@ namespace CMMSAPIs.Controllers.SM
             _AddLog = new AddLog(configuration); 
         }
 
+        // First 
         [Route("requestMRS")]
         [HttpPost]       
-        public async Task<IActionResult> requestMRS(MRS request)
+        public async Task<IActionResult> requestMRS(CMMRS request)
         {
             try
             {
@@ -42,6 +43,7 @@ namespace CMMSAPIs.Controllers.SM
             catch (Exception ex)
             {
                 _logger.LogInformation(ex.ToString());
+                _logger.LogError(ex.ToString());
                 throw ex;
             }
         }
@@ -57,6 +59,7 @@ namespace CMMSAPIs.Controllers.SM
             }
             catch (Exception ex)
             {
+
                 _AddLog.ErrorLog(ex.ToString());
                 _AddLog.ErrorLog("Exception got using ILOGGER "+ex.ToString());
                 throw ex;
@@ -127,7 +130,7 @@ namespace CMMSAPIs.Controllers.SM
 
         [Route("mrsApproval")]
         [HttpPost]
-        public async Task<IActionResult> mrsApproval(MRS request)
+        public async Task<IActionResult> mrsApproval(CMMRS request)
         {
             try
             {
@@ -176,8 +179,8 @@ namespace CMMSAPIs.Controllers.SM
         }
         
         [Route("mrsReturn")]
-        [HttpPost]
-        public async Task<IActionResult> mrsReturn(MRS request)
+        [HttpPost] 
+        public async Task<IActionResult> mrsReturn(CMMRS request)
         {
             try
             {
@@ -191,9 +194,9 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
         
-            [Route("mrsReturnApproval")]
+        [Route("mrsReturnApproval")]
         [HttpPost]
-        public async Task<IActionResult> mrsReturnApproval(MRS request)
+        public async Task<IActionResult> mrsReturnApproval(CMMRS request)
         {
             try
             {

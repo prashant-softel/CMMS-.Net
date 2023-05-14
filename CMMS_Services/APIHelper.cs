@@ -9,6 +9,8 @@ using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading;
+using CMMSAPIs.Models.Utils;
+
 
 namespace CMMS_Services
 {
@@ -83,10 +85,9 @@ namespace CMMS_Services
         public T GetContent(RestResponse response)
         {
             var content = response.Content.ToString();
-            var a = JsonConvert.DeserializeObject(content);
-            
             T dtoObject = JsonConvert.DeserializeObject<T>(content);
             
+
             return dtoObject;
         }
     }

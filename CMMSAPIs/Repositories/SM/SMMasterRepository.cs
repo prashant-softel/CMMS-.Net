@@ -30,7 +30,7 @@ namespace CMMSAPIs.Repositories.SM
         }
 
         
-        internal async Task<List<smassettypes>> GetAssetTypeList(int ID)
+        internal async Task<List<CMAssetTypes>> GetAssetTypeList(int ID)
         {
             /*
              * Return id, asset_type from SMAssetTypes
@@ -45,7 +45,7 @@ namespace CMMSAPIs.Repositories.SM
                 myQuery = "SELECT * FROM smassettypes WHERE ID = "+ID+ " and status = 1";
             }
             
-            List<smassettypes> _checkList = await Context.GetData<smassettypes>(myQuery).ConfigureAwait(false);
+            List<CMAssetTypes> _checkList = await Context.GetData<CMAssetTypes>(myQuery).ConfigureAwait(false);
             return _checkList;
         }
 
@@ -58,18 +58,18 @@ namespace CMMSAPIs.Repositories.SM
             DataTable dt2 = await Context.FetchData(mainQuery).ConfigureAwait(false);
             int id = Convert.ToInt32(dt2.Rows[0][0]);
 
-            List<smassettypes> _ViewAssetList = await GetAssetTypeList(id);
+            List<CMAssetTypes> _ViewAssetList = await GetAssetTypeList(id);
 
             //await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_MASTER, id, 0, 0, "Asset Created", CMMS.CMMS_Status.CREATED);
             //CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_CREATED, _ViewAssetList[0]);
 
-            string strJobStatusMsg = $"Job {id} Created";
-            if (_ViewAssetList[0].ID > 0)
-            {
-                strJobStatusMsg = $"New Asset type Created with name of " + _ViewAssetList[0].asset_type;
-                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, id, 0, 0, "Job Assigned", CMMS.CMMS_Status.CREATED);
-                CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_MASTER, CMMS.CMMS_Status.CREATED, _ViewAssetList[0]);
-            }
+            //string strJobStatusMsg = $"Job {id} Created";
+            //if (_ViewAssetList[0].ID > 0)
+            //{
+            //    strJobStatusMsg = $"New Asset type Created with name of " + _ViewAssetList[0].asset_type;
+            //    await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, id, 0, 0, "Job Assigned", CMMS.CMMS_Status.CREATED);
+            //    CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_MASTER, CMMS.CMMS_Status.CREATED, _ViewAssetList[0]);
+            //}
 
             CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Asset type added successfully.");
             return response;
@@ -97,7 +97,7 @@ namespace CMMSAPIs.Repositories.SM
             return response;
         }
 
-        internal async Task<List<SMItemCategory>> GetAssetCategoryList(int ID)
+        internal async Task<List<CMItemCategory>> GetAssetCategoryList(int ID)
         {
             /*
              * Return id, name from SMItemCategory
@@ -113,11 +113,11 @@ namespace CMMSAPIs.Repositories.SM
             }
 
 
-            List<SMItemCategory> _List = await Context.GetData<SMItemCategory>(myQuery).ConfigureAwait(false);
+            List<CMItemCategory> _List = await Context.GetData<CMItemCategory>(myQuery).ConfigureAwait(false);
             return _List;
         }
 
-        internal async Task<CMDefaultResponse> AddAssetCategory(ItemCategory request, int userID)
+        internal async Task<CMDefaultResponse> AddAssetCategory(CMItemCategory request, int userID)
         {
             /*
              * Add record in SMItemCategory
@@ -129,7 +129,7 @@ namespace CMMSAPIs.Repositories.SM
             return response;
         }
 
-        internal async Task<CMDefaultResponse> UpdateAssetCategory(ItemCategory request, int userID)
+        internal async Task<CMDefaultResponse> UpdateAssetCategory(CMItemCategory request, int userID)
         {
             /*
              * Update record in SMItemCategory
@@ -151,7 +151,7 @@ namespace CMMSAPIs.Repositories.SM
             return response;
         }
 
-        internal async Task<List<UnitMeasurement>> GetUnitMeasurementList(int ID)
+        internal async Task<List<CMUnitMeasurement>> GetUnitMeasurementList(int ID)
         {
             string myQuery = "";
             if(ID == 0)
@@ -163,11 +163,11 @@ namespace CMMSAPIs.Repositories.SM
                 myQuery = "SELECT * FROM smunitmeasurement WHERE ID = "+ID+" AND flag = 1";
             }
 
-            List<UnitMeasurement> _List = await Context.GetData<UnitMeasurement>(myQuery).ConfigureAwait(false);
+            List<CMUnitMeasurement> _List = await Context.GetData<CMUnitMeasurement>(myQuery).ConfigureAwait(false);
             return _List;
         }
 
-        internal async Task<CMDefaultResponse> AddUnitMeasurement(UnitMeasurement request,int userID)
+        internal async Task<CMDefaultResponse> AddUnitMeasurement(CMUnitMeasurement request,int userID)
         {
             string mainQuery = $"INSERT INTO smunitmeasurement (name,flag,decimal_status, spare_multi_selection) VALUES ('"+request.name+"',1,"+request.decimal_status+", "+request.spare_multi_selection+"); SELECT LAST_INSERT_ID();";
             DataTable dt2 = await Context.FetchData(mainQuery).ConfigureAwait(false);
@@ -176,7 +176,7 @@ namespace CMMSAPIs.Repositories.SM
             return response;
         }
 
-        internal async Task<CMDefaultResponse> UpdateUnitMeasurement(UnitMeasurement request, int userID)
+        internal async Task<CMDefaultResponse> UpdateUnitMeasurement(CMUnitMeasurement request, int userID)
         {
             string mainQuery = $"UPDATE smunitmeasurement SET name = '"+request.name+"',decimal_status="+request.decimal_status+", spare_multi_selection = "+request.spare_multi_selection+" WHERE ID = "+request.ID+"";
             await Context.ExecuteNonQry<int>(mainQuery);
@@ -219,7 +219,7 @@ namespace CMMSAPIs.Repositories.SM
             return _List;
         }
 
-        internal async Task<CMDefaultResponse> AddAssetMaster(CMSMMaster request, AssetMasterFiles fileData, int UserID)
+        internal async Task<CMDefaultResponse> AddAssetMaster(CMSMMaster request, CMAssetMasterFiles fileData, int UserID)
         {
             /*
              * Add record in SMAssetMasters and SMAssetMasterFiles
@@ -252,7 +252,7 @@ namespace CMMSAPIs.Repositories.SM
 
         }
 
-        internal async Task<CMDefaultResponse> UpdateAssetMaster(CMSMMaster request, AssetMasterFiles fileData, int UserID)
+        internal async Task<CMDefaultResponse> UpdateAssetMaster(CMSMMaster request, CMAssetMasterFiles fileData, int UserID)
         {
             /*
              * Update record in SMAssetMasters and SMAssetMasterFiles

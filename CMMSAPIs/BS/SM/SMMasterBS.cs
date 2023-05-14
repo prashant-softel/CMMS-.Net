@@ -12,24 +12,24 @@ namespace CMMSAPIs.BS.SM
 {
     public interface ISMMasterBS
     {
-        Task<List<smassettypes>> GetAssetTypeList(int ID);
+        Task<List<CMAssetTypes>> GetAssetTypeList(int ID);
         Task<CMDefaultResponse> AddAssetType(CMSMMaster request, int userID);
         Task<CMDefaultResponse> UpdateAssetType(CMSMMaster request, int userID);
         Task<CMDefaultResponse> DeleteAssetType(int Id, int userID);
 
-        Task<List<SMItemCategory>> GetAssetCategoryList(int ID);
-        Task<CMDefaultResponse> AddAssetCategory(ItemCategory request, int userID);
-        Task<CMDefaultResponse> UpdateAssetCategory(ItemCategory request, int userID);
+        Task<List<CMItemCategory>> GetAssetCategoryList(int ID);
+        Task<CMDefaultResponse> AddAssetCategory(CMItemCategory request, int userID);
+        Task<CMDefaultResponse> UpdateAssetCategory(CMItemCategory request, int userID);
         Task<CMDefaultResponse> DeleteAssetCategory(int acID, int userID);
 
-        Task<List<UnitMeasurement>> GetUnitMeasurementList(int ID);
-        Task<CMDefaultResponse> AddUnitMeasurement(UnitMeasurement request, int userID);
-        Task<CMDefaultResponse> UpdateUnitMeasurement(UnitMeasurement request, int userID);
+        Task<List<CMUnitMeasurement>> GetUnitMeasurementList(int ID);
+        Task<CMDefaultResponse> AddUnitMeasurement(CMUnitMeasurement request, int userID);
+        Task<CMDefaultResponse> UpdateUnitMeasurement(CMUnitMeasurement request, int userID);
         Task<CMDefaultResponse> DeleteUnitMeasurement(int umID, int userID);
 
         Task<List<CMSMMaster>> GetAssetMasterList(int ID);
-        Task<CMDefaultResponse> AddAssetMaster(CMSMMaster request, AssetMasterFiles fileData, int UserID);
-        Task<CMDefaultResponse> UpdateAssetMaster(CMSMMaster request, AssetMasterFiles fileData, int UserID);
+        Task<CMDefaultResponse> AddAssetMaster(CMSMMaster request, CMAssetMasterFiles fileData, int UserID);
+        Task<CMDefaultResponse> UpdateAssetMaster(CMSMMaster request, CMAssetMasterFiles fileData, int UserID);
         Task<CMDefaultResponse> DeleteAssetMaster(CMSMMaster request, int UserID);
 
     }
@@ -44,7 +44,7 @@ namespace CMMSAPIs.BS.SM
         }
 
 
-        public async Task<List<smassettypes>> GetAssetTypeList(int ID)
+        public async Task<List<CMAssetTypes>> GetAssetTypeList(int ID)
         {
             try
             {
@@ -104,7 +104,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<SMItemCategory>> GetAssetCategoryList(int ID)
+        public async Task<List<CMItemCategory>> GetAssetCategoryList(int ID)
         {
             try
             {
@@ -119,7 +119,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<CMDefaultResponse> AddAssetCategory(ItemCategory request, int userID)
+        public async Task<CMDefaultResponse> AddAssetCategory(CMItemCategory request, int userID)
         {
             try
             {
@@ -134,7 +134,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<CMDefaultResponse> UpdateAssetCategory(ItemCategory request, int userID)
+        public async Task<CMDefaultResponse> UpdateAssetCategory(CMItemCategory request, int userID)
         {
             try
             {
@@ -164,7 +164,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<UnitMeasurement>> GetUnitMeasurementList(int ID)
+        public async Task<List<CMUnitMeasurement>> GetUnitMeasurementList(int ID)
         {
             try
             {
@@ -179,7 +179,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<CMDefaultResponse> AddUnitMeasurement(UnitMeasurement request, int userID)
+        public async Task<CMDefaultResponse> AddUnitMeasurement(CMUnitMeasurement request, int userID)
         {
             try
             {
@@ -194,7 +194,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<CMDefaultResponse> UpdateUnitMeasurement(UnitMeasurement request, int userID)
+        public async Task<CMDefaultResponse> UpdateUnitMeasurement(CMUnitMeasurement request, int userID)
         {
             try
             {
@@ -239,7 +239,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<CMDefaultResponse> AddAssetMaster(CMSMMaster request, AssetMasterFiles fileData, int UserID)
+        public async Task<CMDefaultResponse> AddAssetMaster(CMSMMaster request, CMAssetMasterFiles fileData, int UserID)
         {
             try
             {
@@ -254,7 +254,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<CMDefaultResponse> UpdateAssetMaster(CMSMMaster request, AssetMasterFiles fileData,int UserID)
+        public async Task<CMDefaultResponse> UpdateAssetMaster(CMSMMaster request, CMAssetMasterFiles fileData,int UserID)
         {
             try
             {
