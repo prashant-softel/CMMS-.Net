@@ -101,6 +101,9 @@ namespace CMMSAPIs
             services.AddScoped<ICalibrationBS, CalibrationBS>();
             services.AddScoped<IAuditScheduleViewBS, AuditScheduleViewBS>();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+             services.AddScoped<IMRSBS, MRSBS>();
+            services.AddScoped<IGOBS, GOBS>();
+                    services.AddScoped<IReOrderBS, ReOrderBS>();    
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
