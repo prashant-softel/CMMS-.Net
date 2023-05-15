@@ -104,7 +104,7 @@ namespace CMMSAPIs
             services.AddScoped<ICalibrationBS, CalibrationBS>();
             services.AddScoped<IMRSBS, MRSBS>();
             services.AddScoped<IGOBS, GOBS>();
-            services.AddScoped<IReOrderBS, ReOrderBS>();
+            services.AddScoped<IReOrderBS, ReOrderBS>();    
             services.AddScoped<IAuditScheduleViewBS, AuditScheduleViewBS>();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddHostedService<SchedulerService>();
