@@ -6,6 +6,7 @@ using CMMSAPIs.Repositories.Utils;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System;
+using System.Data;
 using System.Collections;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
@@ -21,10 +22,12 @@ namespace CMMSAPIs.Repositories.Users
     {
         private MYSQLDBHelper _conn;
         private readonly IConfiguration _configuration;
+        //private RoleAccessRepository _roleAccessRepo;
         public UserAccessRepository(MYSQLDBHelper sqlDBHelper, IConfiguration configuration = null) : base(sqlDBHelper)
         {
             _configuration = configuration;
             _conn = sqlDBHelper;
+            //_roleAccessRepo = new RoleAccessRepository(sqlDBHelper);
         }
 
         internal async Task<UserToken> Authenticate(CMUserCrentials userCrentials)
@@ -61,9 +64,15 @@ namespace CMMSAPIs.Repositories.Users
         {
             // Pending - Include all the property listed in CMUserDetail Model
             string qry = "SELECT " +
-                            "u.id as id, firstName as first_name, lastName as last_name,  CONCAT(firstName, ' ', lastName) as full_name, loginId as user_name, r.name as role_name, mobileNumber as contact_no, gender as gender_name, birthday as DOB, countries.name as country_name, countryId as country_id, states.name as state_name, stateId as state_id, cities.name as city_name, cityId as city_id " +
+                            "u.id as id, firstName as first_name, lastName as last_name, u.secondaryEmail, u.landlineNumber as landline_number, CONCAT(firstName, ' ', lastName) as full_name, loginId as user_name, r.id as role_id, r.name as role_name, mobileNumber as contact_no, u.genderId as gender_id, gender.name as gender_name, u.bloodGroupId as blood_group_id, bloodgroup.name as blood_group_name, birthday as DOB, countries.name as country_name, countryId as country_id, states.name as state_name, stateId as state_id, cities.name as city_name, cityId as city_id, zipcode, CASE WHEN u.status=0 THEN 'Inactive' ELSE 'Active' END AS status, u.isEmployee, u.joiningDate, u.photoId, files.file_path AS photoPath " +
                          "FROM " +
                             "Users as u " +
+                         "LEFT JOIN " +
+                            "gender ON u.genderId = gender.id " +
+                         "LEFT JOIN " + 
+                            "bloodgroup ON u.bloodGroupId = bloodgroup.id " + 
+                         "LEFT JOIN " +
+                            "uploadedfiles as files ON files.id = u.photoId " +
                          "LEFT JOIN " +
                             "cities as cities ON cities.id = u.cityId " + 
                          "LEFT JOIN " +
@@ -76,38 +85,116 @@ namespace CMMSAPIs.Repositories.Users
                             $"u.id = {user_id}";
 
             List<CMUserDetail> user_detail = await Context.GetData<CMUserDetail>(qry).ConfigureAwait(false);
+            
             if (user_detail.Count > 0)
             {
+                string facilitiesQry = $"SELECT facilities.id, facilities.name FROM userfacilities JOIN facilities ON userfacilities.facilityId = facilities.id WHERE userfacilities.userId = {user_id};";
+                List<CMDefaultList> facilities = await Context.GetData<CMDefaultList>(facilitiesQry).ConfigureAwait(false);
+                user_detail[0].plant_list = facilities;
                 return user_detail[0];
             }
             return null;
         }
     
-        internal async Task<CMDefaultResponse> CreateUser(CMUserDetail request)
+        internal async Task<CMDefaultResponse> CreateUser(CMCreateUser request, int userID)
         {
             /*
              * Read the required field for insert
              * Table - Users, UserNofication, UserAccess
              * Use existing functions to insert UserNotification and User Access in table
             */
-            return null;
+            string myQuery = "INSERT INTO users(loginId, password, secondaryEmail, firstName, lastName, birthday, genderId, gender, bloodGroupId, bloodGroup, photoId, " +
+                                "mobileNumber, landlineNumber, countryId, stateId, cityId, zipcode, roleId, isEmployee, joiningDate, createdBy, createdAt, status) " +
+                                $"VALUES ('{request.credentials.user_name}', '{request.credentials.password}', '{request.secondaryEmail}', '{request.first_name}', " +
+                                $"'{request.last_name}', '{((DateTime)request.DOB).ToString("yyyy-MM-dd")}', {(int)request.gender_id}, '{request.gender_id}', {request.blood_group_id}, " +
+                                $"'{CMMS.BLOOD_GROUPS[request.blood_group_id]}', {request.photoId}, '{request.contact_no}','{request.landline_number}', {request.country_id}, {request.state_id}, " +
+                                $"{request.city_id}, {request.zipcode}, {request.role_id}, {request.isEmployee}, '{((DateTime)request.joiningDate).ToString("yyyy-MM-dd hh:mm:ss")}', " +
+                                $"{userID}, '{UtilsRepository.GetUTCTime()}', 1); SELECT LAST_INSERT_ID(); ";
+            
+            DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
+            int id = Convert.ToInt32(dt.Rows[0][0]);
+            /*  */
+            foreach(int facility in request.facilities)
+            {
+                string addFacility = $"INSERT INTO userfacilities(userId, facilityId, createdAt, createdBy, status) " +
+                                        $"VALUES ({id}, {facility}, '{UtilsRepository.GetUTCTime()}', {userID}, 0);";
+                await Context.ExecuteNonQry<int>(addFacility).ConfigureAwait(false);
+            }
+            using(var repos = new RoleAccessRepository(_conn))
+            {
+                CMRoleAccess roleAccess = await repos.GetRoleAccess(request.role_id);
+                var accessDict = roleAccess.access_list.SetPrimaryKey("feature_id");
+                CMRoleNotifications roleNotifications = await repos.GetRoleNotifications(request.role_id);
+                var notificationDict = roleNotifications.notification_list.SetPrimaryKey("notification_id");
+                
+                if (request.access_list != null)
+                {
+                    var inputAccessDict = request.access_list.SetPrimaryKey("feature_id");
+                    foreach(var acc in inputAccessDict)
+                    {
+                        accessDict[acc.Key] = acc.Value;
+                    }
+                }
+                request.access_list = new List<CMAccessList>(accessDict.Values);
+                if (request.notification_list != null)
+                {
+                    var inputNotificationDict = request.notification_list.SetPrimaryKey("notification_id");
+                    foreach(var notif in inputNotificationDict)
+                    {
+                        notificationDict[notif.Key] = notif.Value;
+                    }
+                }
+                request.notification_list = new List<CMNotificationList>(notificationDict.Values);
+                /*
+                 */
+            }
+            
+            CMUserAccess userAccess = new CMUserAccess()
+            {
+                user_id = id,
+                access_list = request.access_list
+            };
+            CMUserNotifications userNotifications = new CMUserNotifications()
+            {
+                user_id = id,
+                notification_list = request.notification_list
+            };
+            using(var repos = new UtilsRepository(_conn))
+            {
+                await repos.AddHistoryLog(CMMS.CMMS_Modules.USER, id, 0, 0, "User Added", CMMS.CMMS_Status.CREATED, userID);
+            }
+            await SetUserAccess(userAccess, userID);
+            await SetUserNotifications(userNotifications, userID);
+            CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "User Created");
+            /*    */
+            return response;
         }
-        internal async Task<CMDefaultResponse> UpdateUser(CMUserDetail request)
+        internal async Task<CMDefaultResponse> UpdateUser(CMCreateUser request, int userID)
         {
             /*
              * Read the required field for update
              * Table - Users, UserNofication, UserAccess
              * Use existing functions to insert UserNotification and User Access in table
             */
+
             return null;
         }
-        internal async Task<CMDefaultResponse> DeleteUser(int user_id)
+        internal async Task<CMDefaultResponse> DeleteUser(int id, int userID)
         {
             /*
              * Table - Users, UserNotification, UserAccess
              * Delete from above tables and add log in history table
             */
-            return null;
+            string deleteQry = $"DELETE FROM users WHERE id = {id}; " +
+                                $"DELETE FROM usernotifications WHERE userId = {id}; " +
+                                $"DELETE FROM usersaccess WHERE userId = {id};";
+            await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
+            using (var repos = new UtilsRepository(_conn))
+            {
+                await repos.AddHistoryLog(CMMS.CMMS_Modules.USER, id, 0, 0, "User Deleted", CMMS.CMMS_Status.DELETED, userID);
+            }
+            CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "User Deleted");
+            return response;
         }
 
         internal async Task<List<CMUser>> GetUserByNotificationId(CMUserByNotificationId request)
@@ -115,7 +202,7 @@ namespace CMMSAPIs.Repositories.Users
             // Pending convert user_ids into string for where condition
             string user_ids_str = string.Join(",", request.user_ids.ToArray());
             string qry = $"SELECT " +
-                            $"u.id as id, u.loginId as user_name, concat(firstName, ' ', lastName) as full_name, ur.name as role_name, u.mobileNumber as contact_no " +
+                            $"u.id as id, u.loginId as user_name, concat(firstName, ' ', lastName) as full_name, ur.id as role_id, ur.name as role_name, u.mobileNumber as contact_no " +
                          $"FROM " +
                             $"Users as u " +
                          $"JOIN " +
@@ -150,13 +237,15 @@ namespace CMMSAPIs.Repositories.Users
         internal async Task<List<CMUser>> GetUserList(int facility_id) 
         {
             string qry = $"SELECT " +
-                            $"u.id, firstName as first_name, lastName as last_name, CONCAT(firstName, ' ', lastName) as full_name, loginId as user_name, mobileNumber as contact_no, r.name as role_name " +
+                            $"u.id, CONCAT(firstName, ' ', lastName) as full_name, loginId as user_name, mobileNumber as contact_no, r.id as role_id, r.name as role_name, CASE WHEN u.status=0 THEN 'Inactive' ELSE 'Active' END AS status, u.photoId AS photoId, files.file_path AS photoPath " +
                          $"FROM " +
                             $"Users as u " +
                          $"JOIN " +
                             $"UserRoles as r ON u.roleId = r.id " +
                          $"JOIN " +
                             $"UserFacilities as uf ON uf.userId = u.id " +
+                         $"LEFT JOIN " +
+                            $"uploadedfiles as files ON files.id = u.photoId " +
                          $"WHERE " +
                             $"uf.facilityId = {facility_id}";
             
@@ -183,7 +272,7 @@ namespace CMMSAPIs.Repositories.Users
             return user_access;
         }
 
-        internal async Task<CMDefaultResponse> SetUserAccess(CMUserAccess request)
+        internal async Task<CMDefaultResponse> SetUserAccess(CMUserAccess request, int userID)
         {
             try
             {
@@ -204,7 +293,7 @@ namespace CMMSAPIs.Repositories.Users
                     {
                         user_access.Add($"({user_id}, {access.feature_id}, {access.add}, {access.edit}, " +
                                         $"{access.view},{access.delete}, {access.issue}, {access.approve}, {access.selfView}, " +
-                                        $"'{UtilsRepository.GetUTCTime()}', {UtilsRepository.GetUserID()})");
+                                        $"'{UtilsRepository.GetUTCTime()}', {userID})");
                     }
                     string user_access_insert_str = string.Join(',', user_access);
 
@@ -212,16 +301,9 @@ namespace CMMSAPIs.Repositories.Users
                                                 $"(userId, featureId, `add`, `edit`, `view`, `delete`, `issue`, `approve`, `selfView`, `lastModifiedAt`, `lastModifiedBy`) " +
                                           $" VALUES {user_access_insert_str}";
                     await Context.GetData<List<int>>(insert_query).ConfigureAwait(false);
-
                     using (var repos = new UtilsRepository(_conn))
                     {
-                        // Add previous setting to log table
-                        CMLog _log = new CMLog();
-                        _log.module_type = CMMS.CMMS_Modules.USER;
-                        _log.module_ref_id = user_id;
-                        _log.comment = JsonSerializer.Serialize(old_user_access.access_list);
-                        _log.status = CMMS.CMMS_Status.UPDATED;
-                        await repos.AddLog(_log);
+                        await repos.AddHistoryLog(CMMS.CMMS_Modules.USER_MODULE, user_id, 0, 0, "User Access Set", CMMS.CMMS_Status.UPDATED, userID);
                     }
                 }
                 CMDefaultResponse response = new CMDefaultResponse(user_id, CMMS.RETRUNSTATUS.SUCCESS, "Updated User Access Successfully");
@@ -251,7 +333,7 @@ namespace CMMSAPIs.Repositories.Users
             return user_notification;
         }
 
-        internal async Task<CMDefaultResponse> SetUserNotifications(CMUserNotifications request)
+        internal async Task<CMDefaultResponse> SetUserNotifications(CMUserNotifications request, int userID)
         {
             try
             {
@@ -271,7 +353,7 @@ namespace CMMSAPIs.Repositories.Users
                     foreach (var access in request.notification_list)
                     {
                         user_access.Add($"({user_id}, {access.notification_id}, {access.can_change}, {access.flag}, " +
-                                        $"'{UtilsRepository.GetUTCTime()}', {UtilsRepository.GetUserID()})");
+                                        $"'{UtilsRepository.GetUTCTime()}', {userID})");
                     }
                     string user_access_insert_str = string.Join(',', user_access);
 
@@ -279,16 +361,9 @@ namespace CMMSAPIs.Repositories.Users
                                                 $"(userId, notificationId, `canChange`, `userPreference`, `lastModifiedAt`, `lastModifiedBy`) " +
                                           $" VALUES {user_access_insert_str}";
                     await Context.GetData<List<int>>(insert_query).ConfigureAwait(false);
-
-                    using (var repos = new UtilsRepository(_conn))
+                    using(var repos = new UtilsRepository(_conn))
                     {
-                        // Add previous setting to log table
-                        CMLog _log = new CMLog();
-                        _log.module_type = CMMS.CMMS_Modules.USER_NOTIFICATIONS;
-                        _log.module_ref_id = user_id;
-                        _log.comment = JsonSerializer.Serialize(user_old_notification.notification_list);
-                        _log.status = CMMS.CMMS_Status.UPDATED;
-                        await repos.AddLog(_log);
+                        await repos.AddHistoryLog(CMMS.CMMS_Modules.USER_NOTIFICATIONS, user_id, 0, 0, "User Notifications Set", CMMS.CMMS_Status.UPDATED, userID);
                     }
                     CMDefaultResponse response = new CMDefaultResponse(user_id, CMMS.RETRUNSTATUS.SUCCESS, "Updated User Notifications Successfully");
                     return response;

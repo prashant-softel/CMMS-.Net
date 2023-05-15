@@ -14,7 +14,7 @@ namespace CMMSAPIs.BS.Users
         public Task<CMRoleAccess> GetRoleAccess(int role_id);
         public Task<CMDefaultResponse> SetRoleAccess(CMSetRoleAccess request, int userID);
         public Task<CMRoleNotifications> GetRoleNotifications(int role_id);
-        public Task<CMDefaultResponse> SetRoleNotifications(CMSetRoleNotifications request);      
+        public Task<CMDefaultResponse> SetRoleNotifications(CMSetRoleNotifications request, int userID);      
     }
 
     public class RoleAccessBS : IRoleAccessBS
@@ -86,13 +86,13 @@ namespace CMMSAPIs.BS.Users
             }
         }
 
-        public async Task<CMDefaultResponse> SetRoleNotifications(CMSetRoleNotifications request)
+        public async Task<CMDefaultResponse> SetRoleNotifications(CMSetRoleNotifications request, int userID)
         {
             try
             {
                 using (var repos = new RoleAccessRepository(getDB))
                 {
-                    return await repos.SetRoleNotifications(request);
+                    return await repos.SetRoleNotifications(request, userID);
                 }
             }
             catch (Exception ex)

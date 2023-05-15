@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Data;
@@ -131,6 +132,27 @@ namespace CMMSAPIs.Helper
             foreach(DataColumn dc in dt.Columns)
                 names.Add(dc.ColumnName);
             return names;
+        }
+
+        public static Dictionary<dynamic, T> SetPrimaryKey<T>(this List<T> list, string propertyName)
+        {
+            PropertyInfo primaryKey = null;
+            foreach(PropertyInfo property in typeof(T).GetProperties())
+            {
+                if(property.Name == propertyName)
+                {
+                    primaryKey = property;
+                    break;
+                }
+            }
+            if (primaryKey == null)
+                return null;
+            Dictionary<dynamic, T> dict = new Dictionary<dynamic, T>();
+            foreach(T obj in list)
+            {
+                dict.Add(primaryKey.GetValue(obj), obj);
+            }
+            return dict;
         }
 
         public static List<string> ToStringList<TKey, TValue>(this Dictionary<TKey, TValue> dict)
