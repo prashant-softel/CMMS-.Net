@@ -1,5 +1,6 @@
 ﻿using CMMSAPIs.BS.SM;
 using CMMSAPIs.Models.SM;
+using CMMSAPIs.Models.Users;
 using CMMSAPIs.Repositories.SM;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -22,9 +23,9 @@ namespace CMMSAPIs.Controllers.SM
 
         /*
          * Stock Management Master End Points
-         * 1. Asset Type
+         * 1. Asset Type --done
          * 2. Asset Category
-         * 3. Measurement Units
+         * 3. Measurement Units -- done
          * 4. Master Assets
         */
 
@@ -34,11 +35,11 @@ namespace CMMSAPIs.Controllers.SM
         
         [Route("GetAssetTypeList")]
         [HttpGet]
-        public async Task<IActionResult> GetAssetTypeList()
+        public async Task<IActionResult> GetAssetTypeList(int id)
         {
             try
             {
-                var data = await _SMMasterBS.GetAssetTypeList();
+                var data = await _SMMasterBS.GetAssetTypeList(id);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -49,11 +50,12 @@ namespace CMMSAPIs.Controllers.SM
 
         [Route("AddAssetType")]
         [HttpPost]
-        public async Task<IActionResult> AddAssetType()
+        public async Task<IActionResult> AddAssetType(CMSMMaster request)
         {
             try
             {
-                var data = await _SMMasterBS.AddAssetType();
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _SMMasterBS.AddAssetType(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -63,12 +65,13 @@ namespace CMMSAPIs.Controllers.SM
         }
 
         [Route("UpdateAssetType")]
-        [HttpPut]
-        public async Task<IActionResult> UpdateAssetType()
+        [HttpPost]
+        public async Task<IActionResult> UpdateAssetType(CMSMMaster request)
         {
             try
             {
-                var data = await _SMMasterBS.UpdateAssetType();
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _SMMasterBS.UpdateAssetType(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -78,12 +81,13 @@ namespace CMMSAPIs.Controllers.SM
         }
 
         [Route("DeleteAssetType")]
-        [HttpDelete]
-        public async Task<IActionResult> DeleteAssetType()
+        [HttpPost]
+        public async Task<IActionResult> DeleteAssetType([FromForm] int id)
         {
             try
             {
-                var data = await _SMMasterBS.DeleteAssetType();
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _SMMasterBS.DeleteAssetType(id, userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -98,11 +102,11 @@ namespace CMMSAPIs.Controllers.SM
 
         [Route("GetAssetCategoryList")]
         [HttpGet]
-        public async Task<IActionResult> GetAssetCategoryList()
+        public async Task<IActionResult> GetAssetCategoryList(int id)
         {
             try
             {
-                var data = await _SMMasterBS.GetAssetCategoryList();
+                var data = await _SMMasterBS.GetAssetCategoryList(id);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -113,11 +117,12 @@ namespace CMMSAPIs.Controllers.SM
 
         [Route("AddAssetCategory")]
         [HttpPost]
-        public async Task<IActionResult> AddAssetCategory()
+        public async Task<IActionResult> AddAssetCategory(CMItemCategory request)
         {
             try
             {
-                var data = await _SMMasterBS.AddAssetCategory();
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _SMMasterBS.AddAssetCategory(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -127,12 +132,13 @@ namespace CMMSAPIs.Controllers.SM
         }
 
         [Route("UpdateAssetCategory")]
-        [HttpPut]
-        public async Task<IActionResult> UpdateAssetCategory()
+        [HttpPost]
+        public async Task<IActionResult> UpdateAssetCategory(CMItemCategory request)
         {
             try
             {
-                var data = await _SMMasterBS.UpdateAssetCategory();
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _SMMasterBS.UpdateAssetCategory(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -142,12 +148,13 @@ namespace CMMSAPIs.Controllers.SM
         }
 
         [Route("DeleteAssetCategory")]
-        [HttpDelete]
-        public async Task<IActionResult> DeleteAssetCategory()
+        [HttpPost]
+        public async Task<IActionResult> DeleteAssetCategory([FromForm] int id)
         {
             try
             {
-                var data = await _SMMasterBS.DeleteAssetCategory();
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _SMMasterBS.DeleteAssetCategory(id, userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -162,11 +169,11 @@ namespace CMMSAPIs.Controllers.SM
 
         [Route("GetUnitMeasurementList")]
         [HttpGet]
-        public async Task<IActionResult> GetUnitMeasurementList()
+        public async Task<IActionResult> GetUnitMeasurementList(int id)
         {
             try
             {
-                var data = await _SMMasterBS.GetUnitMeasurementList();
+                var data = await _SMMasterBS.GetUnitMeasurementList(id);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -177,11 +184,12 @@ namespace CMMSAPIs.Controllers.SM
 
         [Route("AddUnitMeasurement")]
         [HttpPost]
-        public async Task<IActionResult> AddUnitMeasurement()
+        public async Task<IActionResult> AddUnitMeasurement(CMUnitMeasurement request)
         {
             try
             {
-                var data = await _SMMasterBS.AddUnitMeasurement();
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _SMMasterBS.AddUnitMeasurement(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -191,12 +199,13 @@ namespace CMMSAPIs.Controllers.SM
         }
 
         [Route("UpdateUnitMeasurement")]
-        [HttpPut]
-        public async Task<IActionResult> UpdateUnitMeasurement()
+        [HttpPost]
+        public async Task<IActionResult> UpdateUnitMeasurement(CMUnitMeasurement request)
         {
             try
             {
-                var data = await _SMMasterBS.UpdateUnitMeasurement();
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _SMMasterBS.UpdateUnitMeasurement(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -206,12 +215,13 @@ namespace CMMSAPIs.Controllers.SM
         }
 
         [Route("DeleteUnitMeasurement")]
-        [HttpDelete]
-        public async Task<IActionResult> DeleteUnitMeasurement()
+        [HttpPost]
+        public async Task<IActionResult> DeleteUnitMeasurement([FromForm] int id)
         {
             try
             {
-                var data = await _SMMasterBS.DeleteUnitMeasurement();
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _SMMasterBS.DeleteUnitMeasurement(id, userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -226,11 +236,11 @@ namespace CMMSAPIs.Controllers.SM
 
         [Route("GetAssetMasterList")]
         [HttpGet]
-        public async Task<IActionResult> GetAssetMasterList()
+        public async Task<IActionResult> GetAssetMasterList(int id)
         {
             try
             {
-                var data = await _SMMasterBS.GetAssetMasterList();
+                var data = await _SMMasterBS.GetAssetMasterList(id);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -241,11 +251,13 @@ namespace CMMSAPIs.Controllers.SM
 
         [Route("AddAssetMaster")]
         [HttpPost]
-        public async Task<IActionResult> AddAssetMaster()
+        public async Task<IActionResult> AddAssetMaster(CMSMMaster request)
         {
             try
             {
-                var data = await _SMMasterBS.AddAssetMaster();
+                CMAssetMasterFiles fileData = request.fileData;
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _SMMasterBS.AddAssetMaster(request, fileData, userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -255,12 +267,14 @@ namespace CMMSAPIs.Controllers.SM
         }
 
         [Route("UpdateAssetMaster")]
-        [HttpPut]
-        public async Task<IActionResult> UpdateAssetMaster()
+        [HttpPost]
+        public async Task<IActionResult> UpdateAssetMaster(CMSMMaster request)
         {
             try
             {
-                var data = await _SMMasterBS.UpdateAssetMaster();
+                CMAssetMasterFiles fileData = request.fileData;
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _SMMasterBS.UpdateAssetMaster(request, fileData, userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -270,12 +284,13 @@ namespace CMMSAPIs.Controllers.SM
         }
 
         [Route("DeleteAssetMaster")]
-        [HttpDelete]
-        public async Task<IActionResult> DeleteAssetMaster()
+        [HttpPost]
+        public async Task<IActionResult> DeleteAssetMaster(CMSMMaster request)
         {
             try
             {
-                var data = await _SMMasterBS.DeleteAssetMaster();
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _SMMasterBS.DeleteAssetMaster(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
