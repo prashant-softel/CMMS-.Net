@@ -5,17 +5,18 @@ using System.Linq;
 using System.Threading.Tasks;
 using CMMSAPIs.Repositories;
 using CMMSAPIs.Models;
+using CMMSAPIs.Models.Utils;
 
 namespace CMMSAPIs.BS
 {
     public interface IGOBS
     {
-        Task<List<CMGO>> GetGOList();
+        Task<List<CMGO>> GetGOList(int plantID, DateTime fromDate, DateTime toDate);
         Task<List<CMGO>> GetAssetCodeDetails(int asset_code);
-        Task<List<CMGO>> CreateGO();
-        Task<List<CMGO>> UpdateGO();
-        Task<List<CMGO>> DeleteGO();
-        Task<List<CMGO>> WithdrawGO();
+        Task<CMDefaultResponse> CreateGO(CMGO request, int userID);
+        Task<CMDefaultResponse> UpdateGO(CMGO request, int userID);
+        Task<CMDefaultResponse> DeleteGO(int GOid, int userID);
+        Task<CMDefaultResponse> WithdrawGO(CMGO request, int userID);
     }
 
     public class GOBS : IGOBS
@@ -27,13 +28,13 @@ namespace CMMSAPIs.BS
             databaseProvider = dbProvider;
         }
 
-        public async Task<List<CMGO>> GetGOList()
+        public async Task<List<CMGO>> GetGOList(int plantID, DateTime fromDate, DateTime toDate)
         {
             try
             {
                 using (var repos = new GORepository(getDB))
                 {
-                    return await repos.GetGOList();
+                    return await repos.GetGOList(plantID, fromDate, toDate);
 
                 }
             }
@@ -59,13 +60,13 @@ namespace CMMSAPIs.BS
             }
         }
 
-        public async Task<List<CMGO>> CreateGO()
+        public async Task<CMDefaultResponse> CreateGO(CMGO request, int userID)
         {
             try
             {
                 using (var repos = new GORepository(getDB))
                 {
-                    return await repos.CreateGO();
+                    return await repos.CreateGO(request, userID);
 
                 }
             }
@@ -75,13 +76,13 @@ namespace CMMSAPIs.BS
             }
         }
 
-        public async Task<List<CMGO>> UpdateGO()
+        public async Task<CMDefaultResponse> UpdateGO(CMGO request, int userID)
         {
             try
             {
                 using (var repos = new GORepository(getDB))
                 {
-                    return await repos.UpdateGO();
+                    return await repos.UpdateGO(request, userID);
 
                 }
             }
@@ -91,13 +92,13 @@ namespace CMMSAPIs.BS
             }
         }
 
-        public async Task<List<CMGO>> DeleteGO()
+        public async Task<CMDefaultResponse> DeleteGO(int GOid, int userID)
         {
             try
             {
                 using (var repos = new GORepository(getDB))
                 {
-                    return await repos.DeleteGO();
+                    return await repos.DeleteGO(GOid, userID);
 
                 }
             }
@@ -106,13 +107,13 @@ namespace CMMSAPIs.BS
                 throw;
             }
         }
-        public async Task<List<CMGO>> WithdrawGO()
+        public async Task<CMDefaultResponse> WithdrawGO(CMGO request, int userID)
         {
             try
             {
                 using (var repos = new GORepository(getDB))
                 {
-                    return await repos.WithdrawGO();
+                    return await repos.WithdrawGO(request, userID);
 
                 }
             }
