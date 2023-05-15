@@ -38,6 +38,18 @@ namespace CMMSAPIs.Models.Permits
     {
         public int id { get; set; }
         public string name { get; set; }
+        public string description { get; set; }
         public string jobTypeName { get; set; }
+        public int sop_file_id { get; set; }
+        public string sop_file_name { get; set; }
+        public string sop_file_path { get; set; }
+        public int sop_file_cat_id { get; set; }
+        public string sop_file_cat_name { get; set; }
+        public int jsa_file_id { get; set; }
+        public string jsa_file_name { get; set; }
+        public string jsa_file_path { get; set; }
+        public int jsa_file_cat_id { get; set; }
+        public string jsa_file_cat_name { get; set; }
+        public string tbt_remarks { get; set; }
     }
 }
