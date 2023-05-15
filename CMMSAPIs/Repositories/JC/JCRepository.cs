@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -25,14 +26,14 @@ namespace CMMSAPIs.Repositories.JC
             */
            
             /*Your code goes here*/
-            string myQuery1 = $"select jc.id as jobCardId, jc.JC_Date_Start as job_card_date, jc.JC_Date_Stop as end_time, job.id as jobid, job.title as description, CONCAT(user.firstName, user.lastName) as job_assinged_to, ptw.id as permit_id, ptw.Permitnumber as permit_no,JC_Status as current_status  from jobcards as jc JOIN jobs as job ON JC.jobid = job.id JOIN permits as ptw ON JC.PTW_id = PTW.ID LEFT JOIN users as user ON user.id = job.assignedId WHERE job.facilityId = { facility_id }";
+            string myQuery1 = $"select jc.id as jobCardId, jc.JC_Date_Start as job_card_date, jc.JC_Date_Stop as end_time, job.id as jobid, job.title as description, CONCAT(user.firstName, user.lastName) as job_assinged_to, ptw.id as permit_id, ptw.code as permit_no,JC_Status as current_status  from jobcards as jc JOIN jobs as job ON JC.jobid = job.id JOIN permits as ptw ON JC.PTW_id = PTW.ID LEFT JOIN users as user ON user.id = job.assignedId WHERE job.facilityId = { facility_id }";
             List<CMJCList> _ViewJobCardList = await Context.GetData<CMJCList>(myQuery1).ConfigureAwait(false);
 
             //job equipment category
-            string myQuery2 = $"SELECT asset_cat.id as equipmentCat_id, asset_cat.name as equipmentCat_name  FROM assetcategories as asset_cat JOIN jobmappingassets as mapAssets ON mapAssets.categoryId = asset_cat.id JOIN jobs as job ON mapAssets.jobId = job.id WHERE job.id = {_ViewJobCardList[0].jobid } and job.facilityId = { facility_id }";
-            List<equipmentCatList> _equipmentCatList = await Context.GetData<equipmentCatList>(myQuery1).ConfigureAwait(false);
+           /* string myQuery2 = $"SELECT asset_cat.id as equipmentCat_id, asset_cat.name as equipmentCat_name  FROM assetcategories as asset_cat JOIN jobmappingassets as mapAssets ON mapAssets.categoryId = asset_cat.id JOIN jobs as job ON mapAssets.jobId = job.id WHERE job.id = {_ViewJobCardList[0].jobid } and job.facilityId = { facility_id }";
+            List<equipmentCatList> _equipmentCatList = await Context.GetData<equipmentCatList>(myQuery2).ConfigureAwait(false);
 
-            _ViewJobCardList[0].LstequipmentCatList = _equipmentCatList;
+            _ViewJobCardList[0].LstequipmentCatList = _equipmentCatList;*/
              return _ViewJobCardList;
         }
 
@@ -99,25 +100,29 @@ namespace CMMSAPIs.Repositories.JC
             string myQuery = $"SELECT job.id as job_id, ptw.id as ptw_id FROM permits AS ptw JOIN jobs as job on job.linkedPermit = ptw.id where job.id = { job_id }";
             List<CMJCCreate> _JobList = await Context.GetData<CMJCCreate>(myQuery).ConfigureAwait(false);
             int jc_id = 0;
-
+            string jobQuery = $"SELECT title as job_title, description as job_description FROM jobs where id = {job_id}";
+            List<CMJCJobDetail> job = await Context.GetData<CMJCJobDetail>(jobQuery).ConfigureAwait(false);
             //_JobList.Count(); pending: add check for only one record is returned
             foreach (var data in _JobList)
             {
                 string qryJCBasic = "insert into jobcards" +
                                      "(" +
-                                             "jobId, PTW_id, JC_Date_Start, JC_Date_Stop, JC_Added_Date" +
+                                             "jobId, PTW_id, PTW_Code, JC_title, JC_Description, JC_Added_Date" +
                                       ")" +
-                                      "values" +
+                                      " values" +
                                      "(" +
-                                            $"{ data.job_id }, { data.ptw_id }, '{ UtilsRepository.GetUTCTime() }', '{ UtilsRepository.GetUTCTime() }', '{ UtilsRepository.GetUTCTime() }' " +
-                                     ")";
+                                            $"{ data.job_id }, { data.ptw_id }, 'PTW{ data.ptw_id }', '{ job[0].job_title }', '{ job[0].job_description }', '{ UtilsRepository.GetUTCTime() }' " +
+                                     "); SELECT LAST_INSERT_ID();";
 
-                jc_id = await Context.ExecuteNonQry<int>(qryJCBasic).ConfigureAwait(false);
+                DataTable dt = await Context.FetchData(qryJCBasic).ConfigureAwait(false);
+                jc_id = Convert.ToInt32(dt.Rows[0][0]);
             }
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
 
             if (jc_id > 0)
             {
+                string jcCodeQry = "UPDATE jobcards SET JC_Code = CONCAT('JC',id);";
+                await Context.ExecuteNonQry<int>(jcCodeQry).ConfigureAwait(false);
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
 
                 string myQuery1 = $"SELECT  jc.id as id , jc.PTW_id as ptwId, job.id as jobid, facilities.name as plant_name, asset_cat.name as asset_category_name, CONCAT(user.firstName + ' ' + user.lastName) as JC_Closed_by_Name, CONCAT(user1.firstName + ' ' + user1.lastName) as JC_Rejected_By_Name, jc.JC_Approved_By_Name as  JC_Approved_By_Name FROM jobs as job JOIN  jobmappingassets as mapAssets ON mapAssets.jobId = job.id join assetcategories as asset_cat ON mapAssets.categoryId = asset_cat.id JOIN facilities as facilities ON job.blockId = facilities.id LEFT JOIN jobcards as jc on jc.jobId = job.id LEFT JOIN users as user ON user.id = jc.JC_Update_by LEFT JOIN  users as user1 ON user1.id = jc.JC_Rejected_By_id order by jc.id desc limit 1";
@@ -136,7 +141,7 @@ namespace CMMSAPIs.Repositories.JC
 
         }
 
-        internal async Task<CMDefaultResponse> UpdateJC(CMJCUpdate request)
+        internal async Task<CMDefaultResponse> UpdateJC(CMJCUpdate request, int userID)
         {
             //cmdefault response check
             /*
@@ -174,7 +179,7 @@ namespace CMMSAPIs.Repositories.JC
 
             // JCFILES PENDINGidand history 
 
-            string myQuery1 = $"SELECT id as currentEmpID, CONCAT(firstName + ' ' + lastName) as UpdatedByName from users where id = { UtilsRepository.GetUserID() }";
+            string myQuery1 = $"SELECT id as currentEmpID, CONCAT(firstName + ' ' + lastName) as UpdatedByName from users where id = { userID }";
 
             List<CMJCDetail> _jcDetails = await Context.GetData<CMJCDetail>(myQuery1).ConfigureAwait(false);
 

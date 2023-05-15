@@ -15,6 +15,7 @@ namespace CMMSAPIs.Models.JC
         public string current_status { get; set; }
         public string JC_Closed_by_Name { get; set; }
         public string JC_Rejected_By_Name { get; set; }
+        public string title { get; set; }
         public string description { get; set; }
         public int jobid { get; set; }
         public int ptwId { get; set; }          
