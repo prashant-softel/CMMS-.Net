@@ -16,13 +16,13 @@ namespace CMMSAPIs.Repositories.Users
     public class RoleAccessRepository : GenericRepository
     {
         private MYSQLDBHelper _conn;
-        private UserAccessRepository _userAccessRepo;
+        //private UserAccessRepository _userAccessRepo;
         private UtilsRepository _utilsRepo;
         public RoleAccessRepository(MYSQLDBHelper sqlDBHelper) : base(sqlDBHelper)
         {
             _conn = sqlDBHelper;
             _utilsRepo = new UtilsRepository(_conn);
-            _userAccessRepo = new UserAccessRepository(_conn);
+            //_userAccessRepo = new UserAccessRepository(_conn);
         }
 
         internal async Task<CMRoleAccess> GetRoleAccess(int role_id)
@@ -114,10 +114,13 @@ namespace CMMSAPIs.Repositories.Users
                     CMUserAccess user_access  = new CMUserAccess();
                     user_access.access_list   = request.access_list;
 
-                    foreach (var user in user_list) 
+                    using (var repos = new UserAccessRepository(_conn))
                     {
-                        user_access.user_id = user.id;
-                        await _userAccessRepo.SetUserAccess(user_access);
+                        foreach (var user in user_list)
+                        {
+                            user_access.user_id = user.id;
+                            await repos.SetUserAccess(user_access, userID);
+                        }
                     }
                 }
 
@@ -164,7 +167,7 @@ namespace CMMSAPIs.Repositories.Users
             return role_notification_list;
         }
 
-        internal async Task<CMDefaultResponse> SetRoleNotifications(CMSetRoleNotifications request)
+        internal async Task<CMDefaultResponse> SetRoleNotifications(CMSetRoleNotifications request, int userID)
         {
             try
             {
@@ -212,10 +215,13 @@ namespace CMMSAPIs.Repositories.Users
                     CMUserNotifications user_notification = new CMUserNotifications();
                     user_notification.notification_list = request.notification_list;
 
-                    foreach (var user in user_list)
+                    using(var repos = new UserAccessRepository(_conn))
                     {
-                        user_notification.user_id = user.id;
-                        await _userAccessRepo.SetUserNotifications(user_notification);
+                        foreach (var user in user_list)
+                        {
+                            user_notification.user_id = user.id;
+                            await repos.SetUserNotifications(user_notification, userID);
+                        }
                     }
                 }                
 

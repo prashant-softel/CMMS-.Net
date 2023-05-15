@@ -1,6 +1,7 @@
 ﻿using CMMSAPIs.BS.Users;
 using CMMSAPIs.Models.Users;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
 using System;
 using System.Collections.Generic;
@@ -73,14 +74,16 @@ namespace CMMSAPIs.Controllers.Users
         }
 
         // Create User
+        [Authorize]
         [Route("CreateUser")]
         [HttpPost]
 
-        public async Task<IActionResult> CreateUser(CMUserDetail request)
+        public async Task<IActionResult> CreateUser(CMCreateUser request)
         {
             try
             {
-                var data = await _userAccessBs.CreateUser(request);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _userAccessBs.CreateUser(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -93,11 +96,12 @@ namespace CMMSAPIs.Controllers.Users
         [Route("UpdateUser")]
         [HttpPut]
 
-        public async Task<IActionResult> UpdateUser(CMUserDetail request)
+        public async Task<IActionResult> UpdateUser(CMCreateUser request)
         {
             try
             {
-                var data = await _userAccessBs.UpdateUser(request);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _userAccessBs.UpdateUser(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -107,14 +111,16 @@ namespace CMMSAPIs.Controllers.Users
         }
 
         // Delete User
+        [Authorize]
         [Route("DeleteUser")]
         [HttpDelete]
 
-        public async Task<IActionResult> DeleteUser(int user_id)
+        public async Task<IActionResult> DeleteUser(int id)
         {
             try
             {
-                var data = await _userAccessBs.DeleteUser(user_id);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _userAccessBs.DeleteUser(id, userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -157,13 +163,15 @@ namespace CMMSAPIs.Controllers.Users
             }
         }
 
+        [Authorize]
         [Route("SetUserAccess")]
         [HttpPost]
         public async Task<IActionResult> SetUserAccess(CMUserAccess request)
         {
             try
             {
-                var data = await _userAccessBs.SetUserAccess(request);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _userAccessBs.SetUserAccess(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -188,13 +196,15 @@ namespace CMMSAPIs.Controllers.Users
             }
         }
 
+        [Authorize]
         [Route("SetUserNotifications")]
         [HttpPost]
         public async Task<IActionResult> SetUserNotifications(CMUserNotifications request)
         {
             try
             {
-                var data = await _userAccessBs.SetUserNotifications(request);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _userAccessBs.SetUserNotifications(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)

@@ -1,4 +1,6 @@
 ﻿using CMMSAPIs.Models.Utils;
+using CMMSAPIs.Helper;
+using CMMSAPIs.Models.Authentication;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,23 +34,42 @@ namespace CMMSAPIs.Models.Users
         public int id { get; set; }
         public string full_name { get; set; }
         public string user_name { get; set; }
+        public int role_id { get; set; }
         public string role_name { get; set; }
-        public string contact_no { get; set; }        
+        public string contact_no { get; set; }
+        public string status { get; set; }
+        public int photoId { get; set; }
+        public string photoPath { get; set; }
     }
 
     public class CMUserDetail : CMUser
     {
         public string first_name { get; set; }
         public string last_name { get; set; }
-        public int gender_id { get; set; }
+        public string secondaryEmail { get; set; }
+        public string landline_number { get; set; }
+        public CMMS.Gender gender_id { get; set; }
         public string gender_name { get; set; }
-        public dynamic DOB { get; set; }
+        public DateTime? DOB { get; set; }
         public string country_name { get; set; }
         public int country_id { get; set; }
         public int state_id { get; set; }
         public string state_name { get; set; }
         public int city_id { get; set; }
         public string city_name { get; set; }
-        public List<KeyValuePairs> plant_list { get; set; }
+        public int zipcode { get; set; }
+        public int isEmployee { get; set; }
+        public DateTime? joiningDate { get; set; }
+        public int blood_group_id { get; set; }
+        public string blood_group_name { get; set; }
+        public List<CMDefaultList> plant_list { get; set; }
     }
+    public class CMCreateUser : CMUserDetail
+    {
+        public List<int> facilities { get; set; }
+        public CMUserCrentials credentials { get; set; }
+        public List<CMAccessList> access_list { get; set; }
+        public List<CMNotificationList> notification_list { get; set; }
+    }
+
 }

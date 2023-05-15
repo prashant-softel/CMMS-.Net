@@ -289,7 +289,7 @@ namespace CMMSAPIs.Repositories.Permits
         internal async Task<CMDefaultResponse> CreateSOP(CMCreateSOP request)
         {
             string myQuery = "INSERT INTO permittbtjoblist (title, description, jobTypeId, fileId, fileDescription, TBTRemarks, JSAFileId, status ) " +
-                                $"VALUES ('{request.title}', '{request.description}', {request.jobType}, {request.fileId}, '{request.file_desc}', " +
+                                $"VALUES ('{request.title}', '{request.description}', {request.tbt_jobType}, {request.sop_fileId}, '{request.sop_file_desc}', " +
                                 $"'{request.tbt_remarks}', {request.jsa_fileId}, 1); SELECT LAST_INSERT_ID();";
             DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
             int id = Convert.ToInt32(dt.Rows[0][0]);
@@ -320,12 +320,12 @@ namespace CMMSAPIs.Repositories.Permits
                 updateQry += $"title = '{request.title}', ";
             if (request.description != null && request.description != "")
                 updateQry += $"description = '{request.description}', ";
-            if (request.jobType > 0)
-                updateQry += $"jobTypeId = {request.jobType}, ";
-            if (request.fileId > 0)
-                updateQry += $"fileId = {request.fileId}, ";
-            if (request.file_desc != null && request.file_desc != "")
-                updateQry += $"fileDescription = '{request.file_desc}', ";
+            if (request.tbt_jobType > 0)
+                updateQry += $"jobTypeId = {request.tbt_jobType}, ";
+            if (request.sop_fileId > 0)
+                updateQry += $"fileId = {request.sop_fileId}, ";
+            if (request.sop_file_desc != null && request.sop_file_desc != "")
+                updateQry += $"fileDescription = '{request.sop_file_desc}', ";
             if (request.tbt_remarks != null && request.tbt_remarks != "")
                 updateQry += $"TBTremarks = '{request.tbt_remarks}', ";
             if (request.jsa_fileId > 0)
@@ -427,8 +427,8 @@ namespace CMMSAPIs.Repositories.Permits
              * Once you saved the records
              * Return GetPermitDetails(permit_id);
             */
-            string qryPermitBasic = "insert into permits(facilityId, blockId, LOTOId, startDate, endDate, title, description, jobTypeId, typeId, TBTId, issuedById, approvedById, acceptedById, status, latitude, longitude) values" +
-             $"({ request.facility_id }, { request.blockId },{request.lotoId},'{ request.start_datetime.ToString("yyyy-MM-dd hh:mm:ss") }', '{ request.end_datetime.ToString("yyyy-MM-dd hh:mm:ss") }', '{request.title}', '{ request.description }', { request.job_type_id }, { request.permitTypeId }, { request.sop_type_id }, { request.issuer_id }, { request.approver_id }, {userID}, {(int)CMMS.CMMS_Status.PTW_CREATED}, {request.latitude}, {request.longitude}); " +
+            string qryPermitBasic = "insert into permits(facilityId, blockId, LOTOId, startDate, endDate, title, description, jobTypeId, typeId, TBTId, issuedById, approvedById, acceptedById, acceptedDate, status, latitude, longitude) values" +
+             $"({ request.facility_id }, { request.blockId },{request.lotoId},'{ request.start_datetime.ToString("yyyy-MM-dd hh:mm:ss") }', '{ request.end_datetime.ToString("yyyy-MM-dd hh:mm:ss") }', '{request.title}', '{ request.description }', { request.job_type_id }, { request.permitTypeId }, { request.sop_type_id }, { request.issuer_id }, { request.approver_id }, {userID}, '{UtilsRepository.GetUTCTime()}', {(int)CMMS.CMMS_Status.PTW_CREATED}, {request.latitude}, {request.longitude}); " +
              $"SELECT LAST_INSERT_ID();";
             DataTable dt = await Context.FetchData(qryPermitBasic).ConfigureAwait(false);
             int insertedId = Convert.ToInt32(dt.Rows[0][0]);

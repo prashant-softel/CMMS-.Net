@@ -89,7 +89,8 @@ namespace CMMSAPIs.Controllers.Users
         {
             try
             {
-                var data = await _roleAcceesBs.SetRoleNotifications(request);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _roleAcceesBs.SetRoleNotifications(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)

@@ -15,14 +15,14 @@ namespace CMMSAPIs.BS.Users
         Task<UserToken> Authenticate(CMUserCrentials userCrentials);
         public Task<CMUserDetail> GetUserDetail(int user_id);
         public Task<List<CMUser>> GetUserList(int facility_id);
-        public Task<CMDefaultResponse> CreateUser(CMUserDetail request);
-        public Task<CMDefaultResponse> UpdateUser(CMUserDetail request);
-        public Task<CMDefaultResponse> DeleteUser(int user_id);
+        public Task<CMDefaultResponse> CreateUser(CMCreateUser request, int userID);
+        public Task<CMDefaultResponse> UpdateUser(CMCreateUser request, int userID);
+        public Task<CMDefaultResponse> DeleteUser(int id, int userID);
         public Task<List<CMUser>> GetUserByNotificationId(CMUserByNotificationId request);
         public Task<CMUserAccess> GetUserAccess(int user_id);
-        public Task<CMDefaultResponse> SetUserAccess(CMUserAccess request);
+        public Task<CMDefaultResponse> SetUserAccess(CMUserAccess request, int userID);
         public Task<CMUserNotifications> GetUserNotifications(int user_id);
-        public Task<CMDefaultResponse> SetUserNotifications(CMUserNotifications request);
+        public Task<CMDefaultResponse> SetUserNotifications(CMUserNotifications request, int userID);
     }
 
     public class UserAccessBS : IUserAccessBS
@@ -81,13 +81,13 @@ namespace CMMSAPIs.BS.Users
             }
         }
 
-        public async Task<CMDefaultResponse> CreateUser(CMUserDetail request)
+        public async Task<CMDefaultResponse> CreateUser(CMCreateUser request, int userID)
         {
             try
             {
                 using (var repos = new UserAccessRepository(getDB))
                 {
-                    return await repos.CreateUser(request);
+                    return await repos.CreateUser(request, userID);
                 }
             }
             catch (Exception ex)
@@ -96,13 +96,13 @@ namespace CMMSAPIs.BS.Users
             }
         }
 
-        public async Task<CMDefaultResponse> UpdateUser(CMUserDetail request)
+        public async Task<CMDefaultResponse> UpdateUser(CMCreateUser request, int userID)
         {
             try
             {
                 using (var repos = new UserAccessRepository(getDB))
                 {
-                    return await repos.UpdateUser(request);
+                    return await repos.UpdateUser(request, userID);
                 }
             }
             catch (Exception ex)
@@ -111,13 +111,13 @@ namespace CMMSAPIs.BS.Users
             }
         }
 
-        public async Task<CMDefaultResponse> DeleteUser(int user_id)
+        public async Task<CMDefaultResponse> DeleteUser(int id, int userID)
         {
             try
             {
                 using (var repos = new UserAccessRepository(getDB))
                 {
-                    return await repos.DeleteUser(user_id);
+                    return await repos.DeleteUser(id, userID);
                 }
             }
             catch (Exception ex)
@@ -156,13 +156,13 @@ namespace CMMSAPIs.BS.Users
             }
         }
 
-        public async Task<CMDefaultResponse> SetUserAccess(CMUserAccess request)
+        public async Task<CMDefaultResponse> SetUserAccess(CMUserAccess request, int userID)
         {
             try
             {
                 using (var repos = new UserAccessRepository(getDB))
                 {
-                    return await repos.SetUserAccess(request);
+                    return await repos.SetUserAccess(request, userID);
                 }
             }
             catch (Exception ex)
@@ -186,13 +186,13 @@ namespace CMMSAPIs.BS.Users
             }
         }
 
-        public async Task<CMDefaultResponse> SetUserNotifications(CMUserNotifications request)
+        public async Task<CMDefaultResponse> SetUserNotifications(CMUserNotifications request, int userID)
         {
             try
             {
                 using (var repos = new UserAccessRepository(getDB))
                 {
-                    return await repos.SetUserNotifications(request);
+                    return await repos.SetUserNotifications(request, userID);
                 }
             }
             catch (Exception ex)

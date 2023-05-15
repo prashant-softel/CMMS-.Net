@@ -101,6 +101,26 @@ namespace CMMSAPIs.Helper
             Text,
             OK
         }
+
+        public enum Gender
+        {
+            Male = 1,
+            Female = 2,
+            Transgender = 3,
+            Other = 4
+        }
+
+        public static Dictionary<int, string> BLOOD_GROUPS = new Dictionary<int, string>()
+        {
+            { 1, "A+" },
+            { 2, "A-" },
+            { 3, "B+" },
+            { 4, "B-" },
+            { 5, "AB+" },
+            { 6, "AB-" },
+            { 7, "O+" },
+            { 8, "O-" }
+        };
         /* Features Constant START */
 
         /*

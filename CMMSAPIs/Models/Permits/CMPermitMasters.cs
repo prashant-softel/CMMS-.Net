@@ -35,10 +35,10 @@ namespace CMMSAPIs.Models.Permits
         public int id { get; set; }
         public string title { get; set; }
         public string description { get; set; }
-        public int jobType { get; set; }
-        public int fileId { get; set; }
-        public string file_desc { get; set; }
+        public int tbt_jobType { get; set; }
         public string tbt_remarks { get; set; }
+        public int sop_fileId { get; set; }
+        public string sop_file_desc { get; set; }
         public int jsa_fileId { get; set; }
     }
 }
