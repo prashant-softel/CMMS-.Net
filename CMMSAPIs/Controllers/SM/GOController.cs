@@ -103,13 +103,29 @@ namespace CMMSAPIs.Controllers
         }
 
         [Route("WithdrawGO")]
-        [HttpDelete]
+        [HttpPost]
         public async Task<IActionResult> WithdrawGO(CMGO request)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
                 var data = await _GOBS.WithdrawGO(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        [Route("GOApproval")]
+        [HttpPost]
+        public async Task<IActionResult> GOApproval(CMGO request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _GOBS.GOApproval(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)

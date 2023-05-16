@@ -17,6 +17,7 @@ namespace CMMSAPIs.BS
         Task<CMDefaultResponse> UpdateGO(CMGO request, int userID);
         Task<CMDefaultResponse> DeleteGO(int GOid, int userID);
         Task<CMDefaultResponse> WithdrawGO(CMGO request, int userID);
+        Task<CMDefaultResponse> GOApproval(CMGO request, int userID);
     }
 
     public class GOBS : IGOBS
@@ -114,6 +115,21 @@ namespace CMMSAPIs.BS
                 using (var repos = new GORepository(getDB))
                 {
                     return await repos.WithdrawGO(request, userID);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<CMDefaultResponse> GOApproval(CMGO request, int userID)
+        {
+            try
+            {
+                using (var repos = new GORepository(getDB))
+                {
+                    return await repos.GOApproval(request, userID);
 
                 }
             }

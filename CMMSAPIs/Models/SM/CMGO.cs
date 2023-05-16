@@ -29,6 +29,11 @@ namespace CMMSAPIs.Models
         public int approvedBy { get; set; }
         public DateTime approvedOn { get; set; }
 
+        public int receive_later { get; set; }
+        public int added_to_store { get; set; }
+        public int assetItemID { get; set; }
+        public double accepted_qty { get; set; }
+        public int spare_status { get; set; }
 
         public List<go_items> go_items { get;set; }
     }

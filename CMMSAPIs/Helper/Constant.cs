@@ -303,6 +303,7 @@ namespace CMMSAPIs.Helper
             SM_PO_IN_PROCESS,           //3
             SM_PO_REJECTED,
             SM_PO_S2S_SUBMITTED,        //7
+            SM_PO,
 
 
             MRS_REQUEST_APPROVE = 321, 
