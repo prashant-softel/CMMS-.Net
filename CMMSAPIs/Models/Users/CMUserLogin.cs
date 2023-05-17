@@ -58,16 +58,19 @@ namespace CMMSAPIs.Models.Users
         public int city_id { get; set; }
         public string city_name { get; set; }
         public int zipcode { get; set; }
-        public int isEmployee { get; set; }
+        public int? isEmployee { get; set; }
         public DateTime? joiningDate { get; set; }
         public int blood_group_id { get; set; }
         public string blood_group_name { get; set; }
         public List<CMDefaultList> plant_list { get; set; }
     }
-    public class CMCreateUser : CMUserDetail
+    public class CMUpdateUser : CMUserDetail
     {
         public List<int> facilities { get; set; }
         public CMUserCrentials credentials { get; set; }
+    }
+    public class CMCreateUser : CMUpdateUser
+    {
         public List<CMAccessList> access_list { get; set; }
         public List<CMNotificationList> notification_list { get; set; }
     }

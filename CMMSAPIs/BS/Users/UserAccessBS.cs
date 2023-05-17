@@ -16,7 +16,7 @@ namespace CMMSAPIs.BS.Users
         public Task<CMUserDetail> GetUserDetail(int user_id);
         public Task<List<CMUser>> GetUserList(int facility_id);
         public Task<CMDefaultResponse> CreateUser(CMCreateUser request, int userID);
-        public Task<CMDefaultResponse> UpdateUser(CMCreateUser request, int userID);
+        public Task<CMDefaultResponse> UpdateUser(CMUpdateUser request, int userID);
         public Task<CMDefaultResponse> DeleteUser(int id, int userID);
         public Task<List<CMUser>> GetUserByNotificationId(CMUserByNotificationId request);
         public Task<CMUserAccess> GetUserAccess(int user_id);
@@ -96,7 +96,7 @@ namespace CMMSAPIs.BS.Users
             }
         }
 
-        public async Task<CMDefaultResponse> UpdateUser(CMCreateUser request, int userID)
+        public async Task<CMDefaultResponse> UpdateUser(CMUpdateUser request, int userID)
         {
             try
             {

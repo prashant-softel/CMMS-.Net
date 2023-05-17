@@ -93,10 +93,11 @@ namespace CMMSAPIs.Controllers.Users
         }
 
         // Update User
+        [Authorize]
         [Route("UpdateUser")]
-        [HttpPut]
+        [HttpPatch]
 
-        public async Task<IActionResult> UpdateUser(CMCreateUser request)
+        public async Task<IActionResult> UpdateUser(CMUpdateUser request)
         {
             try
             {

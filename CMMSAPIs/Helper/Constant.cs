@@ -217,7 +217,7 @@ namespace CMMSAPIs.Helper
             ROLE_DEFAULT_ACCESS_MODULE
         }
 
-        enum INCIDENT_RISK_LEVEL
+        public enum INCIDENT_RISK_LEVEL
         {
             HIGH = 1,
             MEDIUM = 2,
