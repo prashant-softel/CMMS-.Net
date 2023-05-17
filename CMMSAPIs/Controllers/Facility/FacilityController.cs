@@ -25,21 +25,6 @@ namespace CMMSAPIs.Controllers.Facility
 
         [Route("GetFacilityList")]
         [HttpGet]
-        public async Task<IActionResult> GetFacilityList(int facility_id)
-        {
-            try
-            {
-                var data = await _FacilityBS.GetFacilityList(facility_id);
-                return Ok(data);
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        }
-
-        [Route("GetFacilityList")]
-        [HttpGet]
         public async Task<IActionResult> GetFacilityList()
         {
             try
@@ -47,7 +32,7 @@ namespace CMMSAPIs.Controllers.Facility
                 var data = await _FacilityBS.GetFacilityList();
                 return Ok(data);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
@@ -62,7 +47,38 @@ namespace CMMSAPIs.Controllers.Facility
                 var data = await _FacilityBS.GetFacilityDetails(id);
                 return Ok(data);
             }
-            catch (Exception ex)
+            catch(ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch(NullReferenceException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [Route("GetBlockList")]
+        [HttpGet]
+        public async Task<IActionResult> GetBlockList(int parent_id)
+        {
+            try
+            {
+                var data = await _FacilityBS.GetBlockList(parent_id);
+                return Ok(data);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (NullReferenceException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception)
             {
                 throw;
             }
@@ -75,10 +91,15 @@ namespace CMMSAPIs.Controllers.Facility
         {
             try
             {
-                var data = await _FacilityBS.CreateNewFacility(request);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _FacilityBS.CreateNewFacility(request, userID);
                 return Ok(data);
             }
-            catch (Exception ex)
+            catch(ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception)
             {
                 throw;
             }
@@ -86,15 +107,20 @@ namespace CMMSAPIs.Controllers.Facility
 
         [Authorize]
         [Route("UpdateFacility")]
-        [HttpPost]
-        public async Task<IActionResult> UpdateFacility(CMUpdateFacility request)
+        [HttpPatch]
+        public async Task<IActionResult> UpdateFacility(CMCreateFacility request)
         {
             try
             {
-                var data = await _FacilityBS.UpdateFacility(request);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _FacilityBS.UpdateFacility(request, userID);
                 return Ok(data);
             }
-            catch (Exception ex)
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception)
             {
                 throw;
             }
@@ -102,7 +128,7 @@ namespace CMMSAPIs.Controllers.Facility
 
         [Authorize]
         [Route("DeleteFacility")]
-        [HttpPut]
+        [HttpDelete]
         public async Task<IActionResult> DeleteFacility(int facility_id)
         {
             try
@@ -110,11 +136,64 @@ namespace CMMSAPIs.Controllers.Facility
                 var data = await _FacilityBS.DeleteFacility(facility_id);
                 return Ok(data);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
         }
 
+        [Authorize]
+        [Route("CreateNewBlock")]
+        [HttpPost]
+        public async Task<IActionResult> CreateNewBlock(CMCreateBlock request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _FacilityBS.CreateNewBlock(request, userID);
+                return Ok(data);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
+        [Route("UpdateBlock")]
+        [HttpPatch]
+        public async Task<IActionResult> UpdateBlock(CMCreateBlock request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _FacilityBS.UpdateBlock(request, userID);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
+        [Route("DeleteBlock")]
+        [HttpDelete]
+        public async Task<IActionResult> DeleteBlock(int block_id)
+        {
+            try
+            {
+                var data = await _FacilityBS.DeleteBlock(block_id);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

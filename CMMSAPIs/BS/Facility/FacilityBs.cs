@@ -8,14 +8,17 @@ using CMMSAPIs.Models.Facility;
 
 namespace CMMSAPIs.BS.Facility
 {
-      public interface IFacilityBS
+    public interface IFacilityBS
     {
-        Task<List<CMFacilityList>> GetFacilityList(int facility_id);
         Task<List<CMFacilityList>> GetFacilityList();
-        Task<List<CMFacilityDetails>> GetFacilityDetails(int id);
-        Task<int> CreateNewFacility(CMCreateFacility request);
-        Task<int> UpdateFacility(CMUpdateFacility request);
+        Task<List<CMFacilityList>> GetBlockList(int parent_id);
+        Task<CMFacilityDetails> GetFacilityDetails(int id);
+        Task<CMDefaultResponse> CreateNewFacility(CMCreateFacility request, int userID);
+        Task<CMDefaultResponse> UpdateFacility(CMCreateFacility request, int userID);
         Task<CMDefaultResponse> DeleteFacility(int facility_id);
+        Task<CMDefaultResponse> CreateNewBlock(CMCreateBlock request, int userID);
+        Task<CMDefaultResponse> UpdateBlock(CMCreateBlock request, int userID);
+        Task<CMDefaultResponse> DeleteBlock(int block_id);
     }
 
     public class FacilityBs : IFacilityBS
@@ -27,22 +30,6 @@ namespace CMMSAPIs.BS.Facility
             databaseProvider = dbProvider;
         }
 
-        public async Task<List<CMFacilityList>> GetFacilityList(int facility_id)
-        {
-            try
-            {
-                using (var repos = new FacilityRepository(getDB))
-                {
-                    return await repos.GetFacilityList(facility_id);
-
-                }
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        }
-
         public async Task<List<CMFacilityList>> GetFacilityList()
         {
             try
@@ -52,13 +39,28 @@ namespace CMMSAPIs.BS.Facility
                     return await repos.GetFacilityList();
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
         }
 
-        public async Task<List<CMFacilityDetails>> GetFacilityDetails(int id)
+        public async Task<List<CMFacilityList>> GetBlockList(int parent_id)
+        {
+            try
+            {
+                using (var repos = new FacilityRepository(getDB))
+                {
+                    return await repos.GetBlockList(parent_id);
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMFacilityDetails> GetFacilityDetails(int id)
         {
             try
             {
@@ -68,36 +70,36 @@ namespace CMMSAPIs.BS.Facility
 
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
         }
-        public async Task<int> CreateNewFacility(CMCreateFacility request)
+        public async Task<CMDefaultResponse> CreateNewFacility(CMCreateFacility request, int userID)
         {
             try
             {
                 using (var repos = new FacilityRepository(getDB))
                 {
-                    return await repos.CreateNewFacility(request);
+                    return await repos.CreateNewFacility(request, userID);
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
         }
 
-        public async Task<int> UpdateFacility(CMUpdateFacility request)
+        public async Task<CMDefaultResponse> UpdateFacility(CMCreateFacility request, int userID)
         {
             try
             {
                 using (var repos = new FacilityRepository(getDB))
                 {
-                    return await repos.UpdateFacility(request);
+                    return await repos.UpdateFacility(request, userID);
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
@@ -112,7 +114,51 @@ namespace CMMSAPIs.BS.Facility
                     return await repos.DeleteFacility(facility_id);
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        public async Task<CMDefaultResponse> CreateNewBlock(CMCreateBlock request, int userID)
+        {
+            try
+            {
+                using (var repos = new FacilityRepository(getDB))
+                {
+                    return await repos.CreateNewBlock(request, userID);
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> UpdateBlock(CMCreateBlock request, int userID)
+        {
+            try
+            {
+                using (var repos = new FacilityRepository(getDB))
+                {
+                    return await repos.UpdateBlock(request, userID);
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> DeleteBlock(int block_id)
+        {
+            try
+            {
+                using (var repos = new FacilityRepository(getDB))
+                {
+                    return await repos.DeleteBlock(block_id);
+                }
+            }
+            catch (Exception)
             {
                 throw;
             }
