@@ -37,6 +37,20 @@ namespace CMMSAPIs.Controllers
                 throw;
             }
         }
+        [Route("GetGOItemByID")]
+        [HttpGet]
+        public async Task<IActionResult> GetGOItemByID(int id)
+        {
+            try
+            {
+                var data = await _GOBS.GetGOItemByID(id);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
 
         [Route("GetAssetCodeDetails")]
         [HttpGet]

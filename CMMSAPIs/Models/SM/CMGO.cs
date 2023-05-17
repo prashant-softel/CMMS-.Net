@@ -18,27 +18,28 @@ namespace CMMSAPIs.Models
         public int vendorID { get; set; }
         public int status { get; set; }
         public string status_short { get; set; }
-        public int generatedBy { get; set; }
+        public string generatedBy { get; set; }
         public int receiverID { get; set; }
 
         public string vendor_name { get; set; }
         public int generate_flag { get; set; }
         public int location_ID { get; set; }
-        public DateTime received_on { get; set; }
-        public int receivedBy { get; set; }
-        public int approvedBy { get; set; }
-        public DateTime approvedOn { get; set; }
+        public DateTime? received_on { get; set; }
+        public string receivedBy { get; set; }
+        public string approvedBy { get; set; }
+        public DateTime? approvedOn { get; set; }
 
         public int receive_later { get; set; }
         public int added_to_store { get; set; }
         public int assetItemID { get; set; }
-        public double accepted_qty { get; set; }
+        public decimal accepted_qty { get; set; }
         public int spare_status { get; set; }
 
         public List<go_items> go_items { get;set; }
     }
     public class go_items
     {
+        public int poID { get; set; }
         public int assetItemID { get; set; }
         public double cost { get; set; }
         public double ordered_qty { get; set; }
