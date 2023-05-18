@@ -175,6 +175,20 @@ namespace CMMSAPIs.Repositories.Masters
             return _Asset;
         }
 
+        internal async Task<List<CMDefaultList>> GetBloodGroupList()
+        {
+            string myQuery = "SELECT id, name FROM bloodgroup";
+            List<CMDefaultList> _BloodGroup = await Context.GetData<CMDefaultList>(myQuery).ConfigureAwait(false);
+            return _BloodGroup;
+        }
+
+        internal async Task<List<CMDefaultList>> GetGenderList()
+        {
+            string myQuery = "SELECT id, name FROM gender";
+            List<CMDefaultList> _Gender = await Context.GetData<CMDefaultList>(myQuery).ConfigureAwait(false);
+            return _Gender;
+        }
+
         internal async Task<List<CMEmployee>> GetEmployeeList(int facility_id, CMMS.CMMS_Modules module, CMMS.CMMS_Access access)
         {
             string myQuery = "SELECT " +

@@ -177,6 +177,40 @@ namespace CMMSAPIs.Controllers.Masters
             }
         }
 
+        [Route("GetBloodGroupList")]
+        [HttpGet]
+        public async Task<IActionResult> GetBloodGroupList()
+        {
+            try
+            {
+                var data = await _CMMSBS.GetBloodGroupList();
+                return Ok(data);
+
+            }
+            catch (Exception ex)
+            {
+
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [Route("GetGenderList")]
+        [HttpGet]
+        public async Task<IActionResult> GetGenderList()
+        {
+            try
+            {
+                var data = await _CMMSBS.GetGenderList();
+                return Ok(data);
+
+            }
+            catch (Exception ex)
+            {
+
+                return BadRequest(ex.Message);
+            }
+        }
+
         // Module CRUD
         [Route("AddModule")]
         [HttpPost]
