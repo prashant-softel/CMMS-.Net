@@ -130,4 +130,11 @@ namespace CMMSAPIs.Models.SM
         public decimal returned_qty { get; set; }
         public decimal received_qty { get; set; }
     }
+
+    public class VendorList
+    {
+        public int id { get; set; }
+        public string name { get; set; }
+        public string description { get; set; }
+    }
 }

@@ -369,5 +369,25 @@ namespace CMMSAPIs.Repositories.SM
 
             return response;
         }
+
+
+        internal async Task<List<CMAssetTypes>> GetAssetDataList(int facility_id)
+        {
+            
+            string myQuery = "SELECT sat.ID as asset_ID,sm.asset_code,sic.cat_name as CategoryName,sat.serial_number,sm.asset_name," +
+                "st.asset_type,if(sm.approval_required=1,'Yes','NO') as approval_required \r\n        FROM smassetitems sat\r\n       " +
+                " LEFT JOIN smassetmasters sm ON sm.asset_code = sat.asset_code\r\n        LEFT JOIN smassettypes st ON st.ID = sm.asset_type_ID" +
+                " LEFT JOIN smitemcategory sic ON sic.ID = sm.item_category_ID\r\n        " +
+                "WHERE sat.plant_ID = "+facility_id+" AND sat.item_condition < 3 AND sat.status >= 1";
+            
+            List<CMAssetTypes> _checkList = await Context.GetData<CMAssetTypes>(myQuery).ConfigureAwait(false);
+            return _checkList;
+        }
+        internal async Task<List<VendorList>> GetVendorList()
+        {
+            string myQuery = "select * from businesstype;";
+            List<VendorList> list = await Context.GetData<VendorList>(myQuery).ConfigureAwait(false);
+            return list;
+        }
     }
 }

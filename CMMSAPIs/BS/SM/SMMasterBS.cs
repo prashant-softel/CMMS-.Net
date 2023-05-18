@@ -31,6 +31,8 @@ namespace CMMSAPIs.BS.SM
         Task<CMDefaultResponse> AddAssetMaster(CMSMMaster request, CMAssetMasterFiles fileData, int UserID);
         Task<CMDefaultResponse> UpdateAssetMaster(CMSMMaster request, CMAssetMasterFiles fileData, int UserID);
         Task<CMDefaultResponse> DeleteAssetMaster(CMSMMaster request, int UserID);
+        Task<List<CMAssetTypes>> GetAssetDataList(int facility_id);
+        Task<List<VendorList>> GetVendorList();
 
     }
 
@@ -283,5 +285,36 @@ namespace CMMSAPIs.BS.SM
                 throw;
             }
         }
+
+        public async Task<List<CMAssetTypes>> GetAssetDataList(int facility_id)
+        {
+            try
+            {
+                using (var repos = new SMMasterRepository(getDB))
+                {
+                    return await repos.GetAssetDataList(facility_id);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<VendorList>> GetVendorList()
+        {
+            try
+            {
+                using (var repos = new SMMasterRepository(getDB))
+                {
+                    return await repos.GetVendorList();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        
     }
 }

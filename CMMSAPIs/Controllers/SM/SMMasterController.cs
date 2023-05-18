@@ -298,5 +298,36 @@ namespace CMMSAPIs.Controllers.SM
                 throw;
             }
         }
+
+        //Get Asset List by plant ID
+        [Route("GetAssetDataList")]
+        [HttpGet]
+        public async Task<IActionResult> GetAssetDataList(int facility_id)
+        {
+            try
+            {
+                var data = await _SMMasterBS.GetAssetDataList(facility_id);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        [Route("GetVendorList")]
+        [HttpGet]
+        public async Task<IActionResult> GetVendorList()
+        {
+            try
+            {
+                var data = await _SMMasterBS.GetVendorList();
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        
     }
 }
