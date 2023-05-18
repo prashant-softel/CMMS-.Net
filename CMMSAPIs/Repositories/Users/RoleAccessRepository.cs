@@ -150,7 +150,7 @@ namespace CMMSAPIs.Repositories.Users
         internal async Task<CMRoleNotifications> GetRoleNotifications(int role_id)
         {
             string qry = $"SELECT " +
-                            $"notificationId as notification_id, notification as notification_name, defaultFlag as flag, canChange as can_change " +
+                            $"notificationId as notification_id, notification as notification_name, defaultFlag as default_flag, canChange as can_change " +
                          $"FROM " +
                             $"`RoleNotifications` as rn JOIN Notifications n ON rn.notificationId = n.id " +
                          $"WHERE " +
@@ -189,7 +189,7 @@ namespace CMMSAPIs.Repositories.Users
 
                         foreach (var access in request.notification_list)
                         {
-                            role_access.Add($"({role_id}, {access.notification_id}, {access.flag}, {access.can_change}, " +
+                            role_access.Add($"({role_id}, {access.notification_id}, {access.default_flag}, {access.can_change}, " +
                                             $"'{UtilsRepository.GetUTCTime()}', {UtilsRepository.GetUserID()})");
                         }
                         string role_access_insert_str = string.Join(',', role_access);

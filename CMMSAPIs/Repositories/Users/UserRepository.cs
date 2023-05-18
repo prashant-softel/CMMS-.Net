@@ -104,6 +104,11 @@ namespace CMMSAPIs.Repositories.Users
              * Table - Users, UserNofication, UserAccess
              * Use existing functions to insert UserNotification and User Access in table
             */
+            string loginIdQuery = "SELECT loginId FROM users;";
+            DataTable dtLogin = await Context.FetchData(loginIdQuery).ConfigureAwait(false);
+            string[] loginList = dtLogin.GetColumn<string>("loginId").ToArray();
+            if (Array.Exists(loginList, loginId => loginId == request.user_name))
+                throw new ArgumentException("Login ID already exists");
             string country, state, city;
             string getCountryQry = $"SELECT name FROM countries WHERE id = {request.country_id};";
             DataTable dtCountry = await Context.FetchData(getCountryQry).ConfigureAwait(false);
@@ -130,8 +135,8 @@ namespace CMMSAPIs.Repositories.Users
                 throw new ArgumentException($"{city} is not situated in {state}, {country}");
             string myQuery = "INSERT INTO users(loginId, password, secondaryEmail, firstName, lastName, birthday, genderId, gender, bloodGroupId, bloodGroup, photoId, " +
                                 "mobileNumber, landlineNumber, countryId, stateId, cityId, zipcode, roleId, isEmployee, joiningDate, createdBy, createdAt, status) " +
-                                $"VALUES ('{request.credentials.user_name}', '{request.credentials.password}', '{request.secondaryEmail}', '{request.first_name}', " +
-                                $"'{request.last_name}', '{((DateTime)request.DOB).ToString("yyyy-MM-dd")}', {(int)request.gender_id}, '{request.gender_id}', " +
+                                $"VALUES ('{request.credentials.user_name}', '{request.credentials.password}', '{request.secondaryEmail}', " +
+                                $"'{request.first_name}', '{request.last_name}', '{((DateTime)request.DOB).ToString("yyyy-MM-dd")}', {(int)request.gender_id}, '{request.gender_id}', " +
                                 $"{request.blood_group_id}, '{CMMS.BLOOD_GROUPS[request.blood_group_id]}', {request.photoId}, '{request.contact_no}','{request.landline_number}', " +
                                 $"{request.country_id}, {request.state_id}, {request.city_id}, {request.zipcode}, {request.role_id}, {(request.isEmployee==null?0:request.isEmployee)}, " +
                                 $"'{((DateTime)request.joiningDate).ToString("yyyy-MM-dd hh:mm:ss")}', {userID}, '{UtilsRepository.GetUTCTime()}', 1); SELECT LAST_INSERT_ID(); ";
@@ -440,11 +445,13 @@ namespace CMMSAPIs.Repositories.Users
         internal async Task<CMUserNotifications> GetUserNotifications(int user_id)
         {
             string qry = $"SELECT " +
-                            $"`notificationId` as notification_id, notification as notification_name, `canChange` as can_change, userPreference as flag " +
+                            $"un.notificationId as notification_id, n.notification as notification_name, f.moduleName as module_name, f.featureName as feature_name, un.default_flag, un.can_change as can_change, un.user_flag as user_flag " +
                          $"FROM " +
-                            $"`UserNotifications` un JOIN Notifications n ON un.notificationId = n.id " +
+                            $"users_notification_view as un " +
+                         $"JOIN Notifications n ON un.notificationId = n.id " +
+                         $"JOIN features f ON n.featureId=f.id " +
                          $"WHERE " +
-                            $"userId = {user_id}";
+                            $"un.userId = {user_id}";
 
             List<CMNotificationList> notification_list = await Context.GetData<CMNotificationList>(qry).ConfigureAwait(false);
             CMUserDetail user_detail              = await GetUserDetail(user_id);
@@ -459,37 +466,54 @@ namespace CMMSAPIs.Repositories.Users
         {
             try
             {
+                if (request.notification_list == null)
+                    request.notification_list = new List<CMNotificationList>();
                 // Get previous settings
                 int user_id = request.user_id;
-                List<CMNotificationList> default_notifications = (await GetUserNotifications(user_id)).notification_list;
-                if (default_notifications == null)
+                List<CMNotificationList> default_notifications = null; 
+                string roleQry = $"SELECT roleId FROM users WHERE id = {request.user_id};";
+                DataTable dt = await Context.FetchData(roleQry).ConfigureAwait(false);
+                int role = Convert.ToInt32(dt.Rows[0][0]);
+                using (var repos = new RoleAccessRepository(_conn))
                 {
-                    string roleQry = $"SELECT roleId FROM users WHERE id = {request.user_id};";
-                    DataTable dt = await Context.FetchData(roleQry).ConfigureAwait(false);
-                    int role = Convert.ToInt32(dt.Rows[0][0]);
-                    using (var repos = new RoleAccessRepository(_conn))
-                    {
-                        default_notifications = (await repos.GetRoleNotifications(role)).notification_list;
-                    }
+                    default_notifications = (await repos.GetRoleNotifications(role)).notification_list;
                 }
-                else
-                {
-                    if (default_notifications.Count == 0)
-                    {
-                        string roleQry = $"SELECT roleId FROM users WHERE id = {request.user_id};";
-                        DataTable dt = await Context.FetchData(roleQry).ConfigureAwait(false);
-                        int role = Convert.ToInt32(dt.Rows[0][0]);
-                        using (var repos = new RoleAccessRepository(_conn))
-                        {
-                            default_notifications = (await repos.GetRoleNotifications(role)).notification_list;
-                        }
-                    }
-                }
-                Dictionary<dynamic, CMNotificationList> old_notif = default_notifications.SetPrimaryKey("notification_id");
-                Dictionary<dynamic, CMNotificationList> new_notif = request.notification_list.SetPrimaryKey("notification_id");
-                foreach (var access in new_notif)
-                    old_notif[access.Key] = access.Value;
+                List<CMNotificationList> old_notifications = (await GetUserNotifications(user_id)).notification_list;
 
+                Dictionary<dynamic, CMNotificationList> def_notif = default_notifications.SetPrimaryKey("notification_id");
+                Dictionary<dynamic, CMNotificationList> old_notif = old_notifications.SetPrimaryKey("notification_id");
+                Dictionary<dynamic, CMNotificationList> new_notif = request.notification_list.SetPrimaryKey("notification_id");
+
+                foreach (var notif in new_notif)
+                    old_notif[notif.Key] = notif.Value;
+
+                foreach (var notif in old_notif)
+                {
+                    if(def_notif.ContainsKey(notif.Key))
+                    {
+                        if (def_notif[notif.Key].can_change == 0)
+                            def_notif[notif.Key].user_flag = def_notif[notif.Key].default_flag;
+                        else
+                            def_notif[notif.Key].user_flag = notif.Value.user_flag;
+                    }
+                    else
+                    {
+                        CMNotificationList n = new CMNotificationList()
+                        {
+                            notification_id = notif.Key,
+                            default_flag = 0,
+                            can_change = 1,
+                            user_flag = notif.Value.user_flag
+                        };
+                        def_notif[notif.Key] = n;
+                    }
+                }
+
+                foreach (var notif in def_notif)
+                {
+                    if (!old_notif.ContainsKey(notif.Key))
+                        notif.Value.user_flag = notif.Value.default_flag;
+                }
 
                 // Delete the previous setting
                 string delete_qry = $" DELETE FROM UserNotifications WHERE UserId = {user_id}";
@@ -498,9 +522,9 @@ namespace CMMSAPIs.Repositories.Users
                 // Insert the new setting
                 List<string> user_access = new List<string>();
 
-                foreach (var access in old_notif.Values)
+                foreach (var access in def_notif.Values)
                 {
-                    user_access.Add($"({user_id}, {access.notification_id}, {access.can_change}, {access.flag}, " +
+                    user_access.Add($"({user_id}, {access.notification_id}, {access.can_change}, {access.user_flag}, " +
                                     $"'{UtilsRepository.GetUTCTime()}', {userID})");
                 }
                 string user_access_insert_str = string.Join(',', user_access);
