@@ -86,6 +86,10 @@ namespace CMMSAPIs.Controllers.Users
                 var data = await _userAccessBs.CreateUser(request, userID);
                 return Ok(data);
             }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
             catch (Exception ex)
             {
                 throw;

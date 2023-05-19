@@ -107,7 +107,7 @@ namespace CMMSAPIs.Repositories.Users
             string loginIdQuery = "SELECT loginId FROM users;";
             DataTable dtLogin = await Context.FetchData(loginIdQuery).ConfigureAwait(false);
             string[] loginList = dtLogin.GetColumn<string>("loginId").ToArray();
-            if (Array.Exists(loginList, loginId => loginId == request.user_name))
+            if (Array.Exists(loginList, loginId => loginId == request.credentials.user_name))
                 throw new ArgumentException("Login ID already exists");
             string country, state, city;
             string getCountryQry = $"SELECT name FROM countries WHERE id = {request.country_id};";
