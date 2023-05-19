@@ -175,6 +175,56 @@ namespace CMMSAPIs.Controllers.Inventory
         }
 
         [Authorize]
+        [Route("AddInventoryCategory")]
+        [HttpPost]
+        public async Task<IActionResult> AddInventoryCategory(CMInventoryCategoryList request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _InventoryBS.AddInventoryCategory(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
+        [Route("UpdateInventoryCategory")]
+        [HttpPatch]
+        public async Task<IActionResult> UpdateInventoryCategory(CMInventoryCategoryList request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _InventoryBS.UpdateInventoryCategory(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
+        [Route("DeleteInventoryCategory")]
+        [HttpDelete]
+        public async Task<IActionResult> DeleteInventoryCategory(int id)
+        {
+            try
+            {
+                var data = await _InventoryBS.DeleteInventoryCategory(id);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
         [Route("GetInventoryTypeList")]
         [HttpGet]
         public async Task<IActionResult> GetInventoryTypeList()
@@ -182,6 +232,56 @@ namespace CMMSAPIs.Controllers.Inventory
             try
             {
                 var data = await _InventoryBS.GetInventoryTypeList();
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
+        [Route("AddInventoryType")]
+        [HttpPost]
+        public async Task<IActionResult> AddInventoryType(CMInventoryTypeList request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _InventoryBS.AddInventoryType(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
+        [Route("UpdateInventoryType")]
+        [HttpPatch]
+        public async Task<IActionResult> UpdateInventoryType(CMInventoryTypeList request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _InventoryBS.UpdateInventoryType(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
+        [Route("DeleteInventoryType")]
+        [HttpDelete]
+        public async Task<IActionResult> DeleteInventoryType(int id)
+        {
+            try
+            {
+                var data = await _InventoryBS.DeleteInventoryType(id);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -205,6 +305,57 @@ namespace CMMSAPIs.Controllers.Inventory
                 throw;
             }
         }
+
+        [Authorize]
+        [Route("AddInventoryStatus")]
+        [HttpPost]
+        public async Task<IActionResult> AddInventoryStatus(CMInventoryStatusList request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _InventoryBS.AddInventoryStatus(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
+        [Route("UpdateInventoryStatus")]
+        [HttpPatch]
+        public async Task<IActionResult> UpdateInventoryStatus(CMInventoryStatusList request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _InventoryBS.UpdateInventoryStatus(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
+        [Route("DeleteInventoryStatus")]
+        [HttpDelete]
+        public async Task<IActionResult> DeleteInventoryStatus(int id)
+        {
+            try
+            {
+                var data = await _InventoryBS.DeleteInventoryStatus(id);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
         [Authorize]
         [Route("GetWarrantyTypeList")]
         [HttpGet]

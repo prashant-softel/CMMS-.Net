@@ -321,17 +321,17 @@ namespace CMMSAPIs.Repositories.Inventory
                 "" +
                 "join assetcategories as ac on ac.id= a.categoryId " +
                 "" +
-                "join business as custbl on custbl.id = a.customerId " +
+                "left join business as custbl on custbl.id = a.customerId " +
                 "" +
-                "join business as owntbl" + " on owntbl.id = a.ownerId " +
+                "left join business as owntbl on owntbl.id = a.ownerId " +
                 "" +
-                "JOIN assets as a2 ON a.parentId = a2.id " +
+                "left JOIN assets as a2 ON a.parentId = a2.id " +
                 "" +
-                "JOIN assetstatus as s on s.id = a.status " +
+                "left JOIN assetstatus as s on s.id = a.status " +
                 "" +
-                "JOIN business AS b2 ON a.ownerId = b2.id " +
+                "left JOIN business AS b2 ON a.ownerId = b2.id " +
 
-                "JOIN business as b5 ON b5.id = a.operatorId " +
+                "left JOIN business as b5 ON b5.id = a.operatorId " +
                 "" +
                 "JOIN facilities as f ON f.id = a.facilityId " +
                 "" +
@@ -730,6 +730,7 @@ namespace CMMSAPIs.Repositories.Inventory
             //WHERE t1.id = t2.id AND t2.id = t3.id;
         }
 
+        #region Inventory Masters
         internal async Task<List<CMInventoryTypeList>> GetInventoryTypeList()
         {
             /*
@@ -737,11 +738,36 @@ namespace CMMSAPIs.Repositories.Inventory
             */
             /*Your code goes here*/
             // "SELECT * FROM assetTypes";
-            string myQuery = "SELECT id, name, description, status FROM assettypes where status = 1";
+            string myQuery = "SELECT id, name, description FROM assettypes where status = 1";
             List<CMInventoryTypeList> _InventoryTypeList = await Context.GetData<CMInventoryTypeList>(myQuery).ConfigureAwait(false);
             return _InventoryTypeList;
         }
-
+        internal async Task<CMDefaultResponse> AddInventoryType(CMInventoryTypeList request, int userID)
+        {
+            string myQuery = $"INSERT INTO assettypes(name, description, status, addedBy, addedAt) VALUES " +
+                                $"('{request.name}', '{request.description}', 1, {userID}, '{UtilsRepository.GetUTCTime()}');" +
+                                $"SELECT LAST_INSERT_ID();";
+            DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
+            int id = Convert.ToInt32(dt.Rows[0][0]);
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Asset Type Added");
+        }
+        internal async Task<CMDefaultResponse> UpdateInventoryType(CMInventoryTypeList request, int userID)
+        {
+            string updateQry = "UPDATE assettypes SET ";
+            if (request.name != null && request.name != "")
+                updateQry += $"name = '{request.name}', ";
+            if (request.description != null && request.description != "")
+                updateQry += $"description = '{request.description}', ";
+            updateQry += $"updatedBy = {userID}, updatedAt = '{UtilsRepository.GetUTCTime()}' WHERE id = {request.id};";
+            await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+            return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Asset Type Updated");
+        }
+        internal async Task<CMDefaultResponse> DeleteInventoryType(int id)
+        {
+            string deleteQry = $"UPDATE assettypes SET status = 0 WHERE id = {id};";
+            await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Asset Type Deleted");
+        }
         internal async Task<List<CMInventoryStatusList>> GetInventoryStatusList()
         {
             /*
@@ -749,16 +775,73 @@ namespace CMMSAPIs.Repositories.Inventory
             */
             /*Your code goes here*/
             // "SELECT * FROM assetStatus";
-            string myQuery = "SELECT id, name, description, status FROM assetstatus where status = 1";
+            string myQuery = "SELECT id, name, description FROM assetstatus where status = 1";
             List<CMInventoryStatusList> _InventoryStatusList = await Context.GetData<CMInventoryStatusList>(myQuery).ConfigureAwait(false);
             return _InventoryStatusList;
-
         }
+
+        internal async Task<CMDefaultResponse> AddInventoryStatus(CMInventoryStatusList request, int userID)
+        {
+            string myQuery = $"INSERT INTO assetstatus(name, description, status, addedBy, addedAt) VALUES " +
+                                $"('{request.name}', '{request.description}', 1, {userID}, '{UtilsRepository.GetUTCTime()}');" +
+                                $"SELECT LAST_INSERT_ID(); ";
+            DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
+            int id = Convert.ToInt32(dt.Rows[0][0]);
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Asset Status Added");
+        }
+        internal async Task<CMDefaultResponse> UpdateInventoryStatus(CMInventoryStatusList request, int userID)
+        {
+            string updateQry = "UPDATE assetstatus SET ";
+            if (request.name != null && request.name != "")
+                updateQry += $"name = '{request.name}', ";
+            if (request.description != null && request.description != "")
+                updateQry += $"description = '{request.description}', ";
+            updateQry += $"updatedBy = {userID}, updatedAt = '{UtilsRepository.GetUTCTime()}' WHERE id = {request.id};";
+            await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+            return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Asset Status Details Updated");
+        }
+        internal async Task<CMDefaultResponse> DeleteInventoryStatus(int id)
+        {
+            string deleteQry = $"UPDATE assetstatus SET status = 0 WHERE id = {id};";
+            await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Asset Status Deleted");
+        }
+
         internal async Task<List<CMInventoryCategoryList>> GetInventoryCategoryList()
         {
-            string myQuery = "SELECT id, name FROM assetcategories where status = 1";
+            string myQuery = "SELECT id, name, description, calibrationStatus as calibration_required FROM assetcategories where status = 1";
             List<CMInventoryCategoryList> _AssetCategory = await Context.GetData<CMInventoryCategoryList>(myQuery).ConfigureAwait(false);
             return _AssetCategory;
+        }
+
+        internal async Task<CMDefaultResponse> AddInventoryCategory(CMInventoryCategoryList request, int userID)
+        {
+            string myQuery = $"INSERT INTO assetcategories(name, description, status, calibrationStatus, createdBy, createdAt) " +
+                                $"VALUES ('{request.name}', '{(request.description==null?"":request.description)}', 1, " +
+                                $"{(request.calibration_required==null?0:request.calibration_required)}, {userID}, " +
+                                $"'{UtilsRepository.GetUTCTime()}'); SELECT LAST_INSERT_ID();";
+            DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
+            int id = Convert.ToInt32(dt.Rows[0][0]);
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Asset Category Added");
+        }
+        internal async Task<CMDefaultResponse> UpdateInventoryCategory(CMInventoryCategoryList request, int userID)
+        {
+            string updateQry = "UPDATE assetcategories SET ";
+            if (request.name != null && request.name != "")
+                updateQry += $"name = '{request.name}', ";
+            if (request.description != null && request.description != "")
+                updateQry += $"description = '{request.description}', ";
+            if (request.calibration_required != null)
+                updateQry += $"calibrationStatus = {request.calibration_required}, ";
+            updateQry += $"updatedBy = {userID}, updatedAt = '{UtilsRepository.GetUTCTime()}' WHERE id = {request.id};";
+            await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+            return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Asset Category Details Updated");
+        }
+        internal async Task<CMDefaultResponse> DeleteInventoryCategory(int id)
+        {
+            string deleteQry = $"UPDATE assetcategories SET status = 0 WHERE id = {id};";
+            await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Asset Category Deleted");
         }
 
         internal async Task<List<CMDefaultList>> GetWarrantyTypeList()
@@ -778,5 +861,6 @@ namespace CMMSAPIs.Repositories.Inventory
             warrentyUsageTermType.Add(new CMDefaultList() { id = 4, name = "Process completion" });
             return warrentyUsageTermType;
         }
+        #endregion
     }
 }
