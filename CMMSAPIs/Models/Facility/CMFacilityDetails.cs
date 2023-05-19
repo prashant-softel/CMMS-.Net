@@ -10,6 +10,7 @@ namespace CMMSAPIs.Models.Facility
         public int id { get; set; }
         public string parentName { get; set; }
         public string blockName { get; set; }
+        public string spvName { get; set; }
         public string ownerName { get; set; }
         public int customerId { get; set; }
         public int ownerId { get; set; }

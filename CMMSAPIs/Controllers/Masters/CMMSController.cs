@@ -211,6 +211,23 @@ namespace CMMSAPIs.Controllers.Masters
             }
         }
 
+        [Route("GetSPVList")]
+        [HttpGet]
+        public async Task<IActionResult> GetSPVList()
+        {
+            try
+            {
+                var data = await _CMMSBS.GetSPVList();
+                return Ok(data);
+
+            }
+            catch (Exception ex)
+            {
+
+                return BadRequest(ex.Message);
+            }
+        }
+
         // Module CRUD
         [Route("AddModule")]
         [HttpPost]

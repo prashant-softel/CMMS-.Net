@@ -9,6 +9,7 @@ namespace CMMSAPIs.Models.Facility
     {
         public int id { get; set; }
         public string name { get; set; }
+        public int spvId { get; set; }
         public int customerId { get; set; }
         public int ownerId { get; set; }
         public int operatorId { get; set; }

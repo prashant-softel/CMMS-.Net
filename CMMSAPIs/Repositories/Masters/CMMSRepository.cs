@@ -189,6 +189,13 @@ namespace CMMSAPIs.Repositories.Masters
             return _Gender;
         }
 
+        internal async Task<List<CMDefaultList>> GetSPVList()
+        {
+            string myQuery = "SELECT id, name FROM spv";
+            List<CMDefaultList> _SPV = await Context.GetData<CMDefaultList>(myQuery).ConfigureAwait(false);
+            return _SPV;
+        }
+
         internal async Task<List<CMEmployee>> GetEmployeeList(int facility_id, CMMS.CMMS_Modules module, CMMS.CMMS_Access access)
         {
             string myQuery = "SELECT " +

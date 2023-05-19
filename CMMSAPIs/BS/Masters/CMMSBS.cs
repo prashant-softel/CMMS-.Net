@@ -22,6 +22,7 @@ namespace CMMSAPIs.BS.Masters
         Task<List<CMBusinessType>> GetBusinessTypeList();
         Task<List<CMDefaultList>> GetBloodGroupList();
         Task<List<CMDefaultList>> GetGenderList();
+        Task<List<CMDefaultList>> GetSPVList();
         Task<CMDefaultResponse> AddBusiness(List<CMBusiness> request);
         Task<List<CMBusiness>> GetBusinessList(CMMS.CMMS_BusinessType businessType);
         Task<CMDefaultResponse> AddModule(CMModule request);
@@ -268,6 +269,22 @@ namespace CMMSAPIs.BS.Masters
                 using (var repos = new CMMSRepository(getDB))
                 {
                     return await repos.GetGenderList();
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<CMDefaultList>> GetSPVList()
+        {
+            try
+            {
+                using (var repos = new CMMSRepository(getDB))
+                {
+                    return await repos.GetSPVList();
 
                 }
             }
