@@ -20,6 +20,8 @@ namespace CMMSAPIs.BS.Masters
         Task<List<CMAsset>> GetAssetList(int facility_id);
         Task<List<CMEmployee>> GetEmployeeList(int facility_id, CMMS.CMMS_Modules module, CMMS.CMMS_Access access);
         Task<List<CMBusinessType>> GetBusinessTypeList();
+        Task<List<CMDefaultList>> GetBloodGroupList();
+        Task<List<CMDefaultList>> GetGenderList();
         Task<CMDefaultResponse> AddBusiness(List<CMBusiness> request);
         Task<List<CMBusiness>> GetBusinessList(CMMS.CMMS_BusinessType businessType);
         Task<CMDefaultResponse> AddModule(CMModule request);
@@ -234,6 +236,38 @@ namespace CMMSAPIs.BS.Masters
                 using (var repos = new CMMSRepository(getDB))
                 {
                     return await repos.GetBusinessTypeList();
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<CMDefaultList>> GetBloodGroupList()
+        {
+            try
+            {
+                using (var repos = new CMMSRepository(getDB))
+                {
+                    return await repos.GetBloodGroupList();
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<CMDefaultList>> GetGenderList()
+        {
+            try
+            {
+                using (var repos = new CMMSRepository(getDB))
+                {
+                    return await repos.GetGenderList();
 
                 }
             }

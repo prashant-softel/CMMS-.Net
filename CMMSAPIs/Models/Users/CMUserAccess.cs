@@ -32,17 +32,20 @@ namespace CMMSAPIs.Models.Users
 
     public class CMUserNotifications
     {
-       public int user_id { get; set; }
-       public string user_name { get; set; }
-       public List<CMNotificationList> notification_list { get; set; }
+        public int user_id { get; set; }
+        public string user_name { get; set; }
+        public List<CMNotificationList> notification_list { get; set; }
     }
 
     public class CMNotificationList 
     {
         public int notification_id { get; set; }
+        public string module_name { get; set; }
+        public string feature_name { get; set; }
         public string notification_name { get; set; }
+        public int default_flag { get; set; }
         public int can_change { get; set; }
-        public int flag { get; set; }
+        public int user_flag { get; set; }
     }
 
     public class CMUserByNotificationId
