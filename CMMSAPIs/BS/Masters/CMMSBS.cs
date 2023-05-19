@@ -24,7 +24,7 @@ namespace CMMSAPIs.BS.Masters
         Task<List<CMDefaultList>> GetGenderList();
         Task<List<CMDefaultList>> GetSPVList();
         Task<CMDefaultResponse> AddBusiness(List<CMBusiness> request);
-        Task<List<CMBusiness>> GetBusinessList(CMMS.CMMS_BusinessType businessType);
+        Task<List<CMBusiness>> GetBusinessList(int businessType);
         Task<CMDefaultResponse> AddModule(CMModule request);
         Task<CMDefaultResponse> UpdateModule(CMModule request);
         Task<CMDefaultResponse> DeleteModule(int id);
@@ -294,13 +294,13 @@ namespace CMMSAPIs.BS.Masters
             }
         }
 
-        public async Task<List<CMBusiness>> GetBusinessList(CMMS.CMMS_BusinessType  businessType)
+        public async Task<List<CMBusiness>> GetBusinessList(int businessType)
         {
             try
             {
                 using (var repos = new CMMSRepository(getDB))
                 {
-                    return await repos.GetBusinessList((CMMS.CMMS_BusinessType) businessType);
+                    return await repos.GetBusinessList(businessType);
 
                 }
             }

@@ -133,7 +133,7 @@ namespace CMMSAPIs.Controllers.Masters
 
         [Route("GetBusinessList")]
         [HttpGet]
-        public async Task<IActionResult> GetBusinessList(CMMS.CMMS_BusinessType businessType)
+        public async Task<IActionResult> GetBusinessList(int businessType)
         {
             try
             {

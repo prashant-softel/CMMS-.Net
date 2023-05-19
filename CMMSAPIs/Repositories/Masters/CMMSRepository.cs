@@ -164,7 +164,7 @@ namespace CMMSAPIs.Repositories.Masters
         }
         internal async Task<List<CMAssetCategory>> GetAssetCategoryList()
         {
-            string myQuery = "SELECT id, name FROM AssetCategories where status = 1";
+            string myQuery = "SELECT id, name, description FROM AssetCategories where status = 1";
             List<CMAssetCategory> _AssetCategory = await Context.GetData<CMAssetCategory>(myQuery).ConfigureAwait(false);
             return _AssetCategory;
         }
@@ -307,9 +307,11 @@ namespace CMMSAPIs.Repositories.Masters
             }
             return new CMDefaultResponse(retID, retCode, strRetMessage);
         }
-        internal async Task<List<CMBusiness>> GetBusinessList(CMMS.CMMS_BusinessType businessType)
+        internal async Task<List<CMBusiness>> GetBusinessList(int businessType)
         {
-            string myQuery = $"SELECT id, name, email, contactPerson, contactNumber, website, location, address, city, state, country, zip, type, status, addedAt FROM Business where type = " + (int)businessType;
+            string myQuery = $"SELECT id, name, email, contactPerson, contactNumber, website, location, address, city, state, country, zip, type, status, addedAt FROM Business ";
+            if(businessType > 0)
+                myQuery += $"where type = {businessType}";
             List<CMBusiness> _Business = await Context.GetData<CMBusiness>(myQuery).ConfigureAwait(false);
             return _Business;
         }
