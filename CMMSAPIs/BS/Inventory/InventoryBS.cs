@@ -19,8 +19,17 @@ namespace CMMSAPIs.BS.Inventory
         Task<CMDefaultResponse> UpdateInventory(CMAddInventory request, int userID);
         Task<CMDefaultResponse> DeleteInventory(int id, int userID);
         Task<List<CMInventoryTypeList>> GetInventoryTypeList();
+        Task<CMDefaultResponse> AddInventoryType(CMInventoryTypeList request, int userID);
+        Task<CMDefaultResponse> UpdateInventoryType(CMInventoryTypeList request, int userID);
+        Task<CMDefaultResponse> DeleteInventoryType(int id);
         Task<List<CMInventoryStatusList>> GetInventoryStatusList();
+        Task<CMDefaultResponse> AddInventoryStatus(CMInventoryStatusList request, int userID);
+        Task<CMDefaultResponse> UpdateInventoryStatus(CMInventoryStatusList request, int userID);
+        Task<CMDefaultResponse> DeleteInventoryStatus(int id);
         Task<List<CMInventoryCategoryList>> GetInventoryCategoryList();
+        Task<CMDefaultResponse> AddInventoryCategory(CMInventoryCategoryList request, int userID);
+        Task<CMDefaultResponse> UpdateInventoryCategory(CMInventoryCategoryList request, int userID);
+        Task<CMDefaultResponse> DeleteInventoryCategory(int id);
         Task<List<CMDefaultList>> GetWarrantyTypeList();
         Task<List<CMDefaultList>> GetWarrantyUsageTermList();
         Task<CMDefaultResponse> SetParentAsset(CMSetParentAsset parent_child_group, int userID);
@@ -153,7 +162,51 @@ namespace CMMSAPIs.BS.Inventory
                 using (var repos = new InventoryRepository(getDB, _environment))
                 {
                     return await repos.GetInventoryTypeList();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
 
+        public async Task<CMDefaultResponse> AddInventoryType(CMInventoryTypeList request, int userID)
+        {
+            try
+            {
+                using (var repos = new InventoryRepository(getDB, _environment))
+                {
+                    return await repos.AddInventoryType(request, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> UpdateInventoryType(CMInventoryTypeList request, int userID)
+        {
+            try
+            {
+                using (var repos = new InventoryRepository(getDB, _environment))
+                {
+                    return await repos.UpdateInventoryType(request, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> DeleteInventoryType(int id)
+        {
+            try
+            {
+                using (var repos = new InventoryRepository(getDB, _environment))
+                {
+                    return await repos.DeleteInventoryType(id);
                 }
             }
             catch (Exception ex)
@@ -177,6 +230,52 @@ namespace CMMSAPIs.BS.Inventory
                 throw;
             }
         }
+
+        public async Task<CMDefaultResponse> AddInventoryCategory(CMInventoryCategoryList request, int userID)
+        {
+            try
+            {
+                using (var repos = new InventoryRepository(getDB, _environment))
+                {
+                    return await repos.AddInventoryCategory(request, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> UpdateInventoryCategory(CMInventoryCategoryList request, int userID)
+        {
+            try
+            {
+                using (var repos = new InventoryRepository(getDB, _environment))
+                {
+                    return await repos.UpdateInventoryCategory(request, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> DeleteInventoryCategory(int id)
+        {
+            try
+            {
+                using (var repos = new InventoryRepository(getDB, _environment))
+                {
+                    return await repos.DeleteInventoryCategory(id);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
         public async Task<List<CMInventoryStatusList>> GetInventoryStatusList()
         {
             try
@@ -185,6 +284,51 @@ namespace CMMSAPIs.BS.Inventory
                 {
                     return await repos.GetInventoryStatusList();
 
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> AddInventoryStatus(CMInventoryStatusList request, int userID)
+        {
+            try
+            {
+                using (var repos = new InventoryRepository(getDB, _environment))
+                {
+                    return await repos.AddInventoryStatus(request, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> UpdateInventoryStatus(CMInventoryStatusList request, int userID)
+        {
+            try
+            {
+                using (var repos = new InventoryRepository(getDB, _environment))
+                {
+                    return await repos.UpdateInventoryStatus(request, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> DeleteInventoryStatus(int id)
+        {
+            try
+            {
+                using (var repos = new InventoryRepository(getDB, _environment))
+                {
+                    return await repos.DeleteInventoryStatus(id);
                 }
             }
             catch (Exception ex)

@@ -164,7 +164,7 @@ namespace CMMSAPIs.Repositories.Masters
         }
         internal async Task<List<CMAssetCategory>> GetAssetCategoryList()
         {
-            string myQuery = "SELECT id, name FROM AssetCategories where status = 1";
+            string myQuery = "SELECT id, name, description FROM AssetCategories where status = 1";
             List<CMAssetCategory> _AssetCategory = await Context.GetData<CMAssetCategory>(myQuery).ConfigureAwait(false);
             return _AssetCategory;
         }
@@ -187,6 +187,13 @@ namespace CMMSAPIs.Repositories.Masters
             string myQuery = "SELECT id, name FROM gender";
             List<CMDefaultList> _Gender = await Context.GetData<CMDefaultList>(myQuery).ConfigureAwait(false);
             return _Gender;
+        }
+
+        internal async Task<List<CMDefaultList>> GetSPVList()
+        {
+            string myQuery = "SELECT id, name FROM spv";
+            List<CMDefaultList> _SPV = await Context.GetData<CMDefaultList>(myQuery).ConfigureAwait(false);
+            return _SPV;
         }
 
         internal async Task<List<CMEmployee>> GetEmployeeList(int facility_id, CMMS.CMMS_Modules module, CMMS.CMMS_Access access)
@@ -300,9 +307,11 @@ namespace CMMSAPIs.Repositories.Masters
             }
             return new CMDefaultResponse(retID, retCode, strRetMessage);
         }
-        internal async Task<List<CMBusiness>> GetBusinessList(CMMS.CMMS_BusinessType businessType)
+        internal async Task<List<CMBusiness>> GetBusinessList(int businessType)
         {
-            string myQuery = $"SELECT id, name, email, contactPerson, contactNumber, website, location, address, city, state, country, zip, type, status, addedAt FROM Business where type = " + (int)businessType;
+            string myQuery = $"SELECT id, name, email, contactPerson, contactNumber, website, location, address, city, state, country, zip, type, status, addedAt FROM Business ";
+            if(businessType > 0)
+                myQuery += $"where type = {businessType}";
             List<CMBusiness> _Business = await Context.GetData<CMBusiness>(myQuery).ConfigureAwait(false);
             return _Business;
         }

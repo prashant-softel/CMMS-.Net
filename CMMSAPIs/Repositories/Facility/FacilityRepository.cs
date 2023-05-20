@@ -22,21 +22,23 @@ namespace CMMSAPIs.Repositories.Facility
      
         internal async Task<List<CMFacilityList>> GetFacilityList()
         {
-            string myQuery = "SELECT id, name, address, city, state, country, zipcode as pin FROM Facilities WHERE isBlock = 0 and status = 1;";
+            string myQuery = "SELECT facilities.id, facilities.name, spv.name as spv, facilities.address, facilities.city, facilities.state, facilities.country, facilities.zipcode as pin FROM Facilities LEFT JOIN spv ON facilities.spvId=spv.id WHERE isBlock = 0 and status = 1;";
             List<CMFacilityList> _Facility = await Context.GetData<CMFacilityList>(myQuery).ConfigureAwait(false);
             return _Facility;
         }
 
         internal async Task<List<CMFacilityList>> GetBlockList(int parent_id)
         {
-            string myQuery = $"SELECT id, name, address, city, state, country, zipcode as pin FROM Facilities WHERE isBlock = 1 and parentId = {parent_id} and status = 1;";
+            if (parent_id <= 0)
+                throw new ArgumentException("Invalid Parent ID");
+            string myQuery = $"SELECT facilities.id, facilities.name, spv.name as spv, facilities.address, facilities.city, facilities.state, facilities.country, facilities.zipcode as pin FROM Facilities JOIN spv ON facilities.spvId=spv.id WHERE isBlock = 1 and parentId = {parent_id} and status = 1;";
             List<CMFacilityList> _Block = await Context.GetData<CMFacilityList>(myQuery).ConfigureAwait(false);
             return _Block;
         }
 
         internal async Task<CMFacilityDetails> GetFacilityDetails(int id)
         {
-            string myQuery = $"SELECT facility.id as id, block.name as parentName, facility.name AS blockName, b.name as ownerName, facility.customerId as customerId, facility.ownerId as ownerId, facility.operatorId as operatorId, facility.isBlock as isBlock, facility.parentId as parentId, facility.address as address, facility.city as city, facility.state as state, facility.country as country, facility.zipcode as zipcode, facility.latitude as latitude, facility.longitude as longitude, facility.createdBy as createdById, facility.createdAt as createdAt, facility.status as status, facility.photoId as photoId, facility.description as description, facility.timezone as timezone, facility.startDate as startDate, facility.endDate as endDate, CONCAT(u.firstName + ' ' + u.lastName) as createdByName FROM softel_cmms.facilities as facility LEFT JOIN facilities as block on block.id = facility.parentId LEFT JOIN business AS b ON facility.ownerId = b.id LEFT JOIN users as u ON u.id = facility.createdBy ";
+            string myQuery = $"SELECT facility.id as id, block.name as parentName, facility.name AS blockName, b.name as ownerName, spv.name as spvName, facility.customerId as customerId, facility.ownerId as ownerId, facility.operatorId as operatorId, facility.isBlock as isBlock, facility.parentId as parentId, facility.address as address, facility.city as city, facility.state as state, facility.country as country, facility.zipcode as zipcode, facility.latitude as latitude, facility.longitude as longitude, facility.createdBy as createdById, facility.createdAt as createdAt, facility.status as status, facility.photoId as photoId, facility.description as description, facility.timezone as timezone, facility.startDate as startDate, facility.endDate as endDate, CONCAT(u.firstName + ' ' + u.lastName) as createdByName FROM softel_cmms.facilities as facility LEFT JOIN facilities as block on block.id = facility.parentId LEFT JOIN business AS b ON facility.ownerId = b.id LEFT JOIN spv ON facility.spvId=spv.id LEFT JOIN users as u ON u.id = facility.createdBy ";
             if (id > 0)
             {
                 myQuery += " WHERE facility.id= " + id;
@@ -77,10 +79,10 @@ namespace CMMSAPIs.Repositories.Facility
             DataTable dt2 = await Context.FetchData(myQuery2).ConfigureAwait(false);
             if (dt2.Rows.Count == 0)
                 throw new ArgumentException($"{city} is not situated in {state}, {country}");
-            string qryFacilityInsert = "insert into facilities(name, customerId, ownerId, operatorId, isBlock, parentId, " +
+            string qryFacilityInsert = "insert into facilities(name, spvId, customerId, ownerId, operatorId, isBlock, parentId, " +
                                         "address, country, state, city, zipcode, countryId, stateId, cityId, latitude, longitude, " +
                                         "createdBy, createdAt, status, photoId, description, timezone, startDate, endDate) " + 
-                                        $"values ('{request.name}', {request.customerId}, {request.ownerId}, {request.operatorId}, " +
+                                        $"values ('{request.name}', {request.spvId}, {request.customerId}, {request.ownerId}, {request.operatorId}, " +
                                         $"0, 0, '{request.address}', '{country}', '{state}', '{city}', {request.zipcode}, {request.countryId}, " +
                                         $"{request.stateId}, {request.cityId}, {request.latitude}, {request.longitude}, {userID}, " +
                                         $"'{UtilsRepository.GetUTCTime()}', 1, {request.photoId}, '{request.description}', '{request.timezone}', " +
@@ -177,6 +179,8 @@ namespace CMMSAPIs.Repositories.Facility
             string qryFacilityUpdate = "UPDATE facilities SET ";
             if (request.name != "" && request.name != null)
                 qryFacilityUpdate += $"name = '{request.name}', ";
+            if (request.spvId > 0)
+                qryFacilityUpdate += $"spvId = {request.spvId}, ";
             if (request.customerId > 0)
                 qryFacilityUpdate += $"customerId = {request.customerId}, ";
             if (request.ownerId > 0)

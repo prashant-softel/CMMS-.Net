@@ -33,7 +33,6 @@ namespace CMMSAPIs.Models.Inventory
         public int id { get; set; }
         public string name { get; set; }
         public string description { get; set; }
-        public int status{ get; set; }
     }
 
     public class CMInventoryStatusList
@@ -41,7 +40,6 @@ namespace CMMSAPIs.Models.Inventory
         public int id { get; set; }
         public string name { get; set; }
         public string description { get; set; }
-        public int status { get; set; }
     }
 
     public class CMInventoryCategoryList
@@ -49,6 +47,7 @@ namespace CMMSAPIs.Models.Inventory
         public int id { get; set; }
         public string name { get; set; }
         public string description { get; set; }
+        public int? calibration_required { get; set; }
     }
 
 }

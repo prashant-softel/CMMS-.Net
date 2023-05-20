@@ -133,7 +133,7 @@ namespace CMMSAPIs.Controllers.Masters
 
         [Route("GetBusinessList")]
         [HttpGet]
-        public async Task<IActionResult> GetBusinessList(CMMS.CMMS_BusinessType businessType)
+        public async Task<IActionResult> GetBusinessList(int businessType)
         {
             try
             {
@@ -201,6 +201,23 @@ namespace CMMSAPIs.Controllers.Masters
             try
             {
                 var data = await _CMMSBS.GetGenderList();
+                return Ok(data);
+
+            }
+            catch (Exception ex)
+            {
+
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [Route("GetSPVList")]
+        [HttpGet]
+        public async Task<IActionResult> GetSPVList()
+        {
+            try
+            {
+                var data = await _CMMSBS.GetSPVList();
                 return Ok(data);
 
             }
