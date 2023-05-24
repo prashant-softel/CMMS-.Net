@@ -33,6 +33,7 @@ namespace CMMSAPIs.BS.SM
         Task<CMDefaultResponse> DeleteAssetMaster(CMSMMaster request, int UserID);
         Task<List<CMAssetTypes>> GetAssetDataList(int facility_id);
         Task<List<VendorList>> GetVendorList();
+        Task<AssetBySerialNo> GetAssetBySerialNo(string serial_number);
 
     }
 
@@ -315,6 +316,21 @@ namespace CMMSAPIs.BS.SM
                 throw;
             }
         }
+        public async Task<AssetBySerialNo> GetAssetBySerialNo(string serial_number)
+        {
+            try
+            {
+                using (var repos = new SMMasterRepository(getDB))
+                {
+                    return await repos.GetAssetBySerialNo(serial_number);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
         
+
     }
 }

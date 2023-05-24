@@ -179,7 +179,7 @@ namespace CMMSAPIs.Repositories.SM
             List<CMUnitMeasurement> _checkList = await Context.GetData<CMUnitMeasurement>(stmt).ConfigureAwait(false);
             return _checkList[0].spare_multi_selection;
         } 
-        internal async Task<List<CMMRS>> getMRSItems(int ID)
+        internal async Task<List<MRSItems>> getMRSItems(int ID)
         {
             string stmt = "SELECT smi.ID,smi.return_remarks,smi.mrs_return_ID,smi.finalRemark,smi.asset_item_ID,smi.asset_MDM_code," +
                 "t1.serial_number,smi.returned_qty,smi.available_qty,smi.used_qty,smi.ID,smi.issued_qty,sm.flag,DATE_FORMAT(sm.returnDate,'%Y-%m-%d') as returnDate," +
@@ -190,8 +190,8 @@ namespace CMMSAPIs.Repositories.SM
                 "sam.asset_type_ID,sat.asset_type,COALESCE(file.file_path,'') as file_path,file.Asset_master_id\r\n        FROM smassetitems sai  " +
                 "LEFT JOIN smassetmasters sam ON sam.asset_code = sai.asset_code LEFT JOIN smassetmasterfiles  file ON file.Asset_master_id =  sam.ID " +
                 "LEFT JOIN smassettypes sat ON sat.ID = sam.asset_type_ID) as t1 ON t1.asset_item_ID = smi.asset_item_ID" +
-                "  WHERE smi.mrs_ID = "+ID+" GROUP BY smi.ID";
-            List<CMMRS> _List = await Context.GetData<CMMRS>(stmt).ConfigureAwait(false);
+                "  WHERE smi.mrs_ID = "+ID+" /*GROUP BY smi.ID*/";
+            List<MRSItems> _List = await Context.GetData<MRSItems>(stmt).ConfigureAwait(false);
             return _List;
         }
 

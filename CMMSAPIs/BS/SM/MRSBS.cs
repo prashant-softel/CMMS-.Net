@@ -14,7 +14,7 @@ namespace CMMSAPIs.BS.SM
     {
         Task<CMDefaultResponse> requestMRS(CMMRS request);        
         Task<List<CMMRS>> getMRSList(int plant_ID, int emp_id, DateTime toDate, DateTime fromDate);        
-        Task<List<CMMRS>> getMRSItems(int ID);        
+        Task<List<MRSItems>> getMRSItems(int ID);        
         Task<List<CMMRS>> getMRSItemsBeforeIssue(int ID);        
         Task<List<CMMRS>> getMRSItemsWithCode(int ID);        
         Task<List<CMMRS>> getMRSDetails(int ID);        
@@ -64,7 +64,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
         
-        public async Task<List<CMMRS>> getMRSItems(int ID)
+        public async Task<List<MRSItems>> getMRSItems(int ID)
            {
             try
             {

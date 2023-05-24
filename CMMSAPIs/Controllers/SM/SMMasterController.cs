@@ -328,6 +328,20 @@ namespace CMMSAPIs.Controllers.SM
                 throw;
             }
         }
-        
+
+        [Route("GetAssetBySerialNo")]
+        [HttpGet]
+        public async Task<IActionResult> GetAssetBySerialNo(string serial_number)
+        {
+            try
+            {
+                var data = await _SMMasterBS.GetAssetBySerialNo(serial_number);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
     }
 }

@@ -389,5 +389,12 @@ namespace CMMSAPIs.Repositories.SM
             List<VendorList> list = await Context.GetData<VendorList>(myQuery).ConfigureAwait(false);
             return list;
         }
+
+        internal async Task<AssetBySerialNo> GetAssetBySerialNo(string serial_number)
+        {
+            string myQuery = "SELECT * FROM SMAssetItems WHERE serial_number = '"+ serial_number + "';";
+            List<AssetBySerialNo> items = await Context.GetData<AssetBySerialNo>(myQuery).ConfigureAwait(false);
+            return items[0];
+        }
     }
 }

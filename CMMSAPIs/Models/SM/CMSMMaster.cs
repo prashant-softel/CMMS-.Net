@@ -137,4 +137,48 @@ namespace CMMSAPIs.Models.SM
         public string name { get; set; }
         public string description { get; set; }
     }
+
+    public class MRSItems
+    {
+        public int ID { get; set; }
+        public string return_remarks { get; set; }
+        public int mrs_return_ID { get; set; }
+        public string finalRemark { get; set; }
+        public int asset_item_ID { get; set; }
+        public string asset_MDM_code { get; set; }
+        public string serial_number { get; set; }
+        public decimal returned_qty { get; set; }
+        public decimal available_qty { get; set; }
+        public decimal used_qty { get; set; }
+        public decimal issued_qty { get; set; }
+        public int flag { get; set; }
+        public DateTime? returnDate { get; set; }
+        public int approval_status { get; set; }
+        public string approved_date { get; set; }
+        public string issued_date { get; set; }
+        public decimal requested_qty { get; set; }
+        public string approval_required { get; set; }
+        public string asset_name { get; set; }
+        public int asset_type_ID { get; set; }
+        public string asset_type { get; set; }
+        public string file_path { get; set; }
+        public int Asset_master_id { get; set; }
+
+    }
+
+    public class AssetBySerialNo
+    {
+        public int ID { get; set; }
+        public int plant_ID { get; set; }
+        public string asset_code { get; set; }
+        public string serial_number { get; set; }
+        public int replaced_asset_id { get; set; }
+        public int replaced_serial_number { get; set; }
+        public int location_ID { get; set; }
+        public int item_condition { get; set; }
+        public int status { get; set; }
+        public DateTime? lastmodifieddate { get; set; }
+        public int orderflag { get; set; }
+
+    }
 }
