@@ -40,6 +40,8 @@ namespace CMMSAPIs.Models.Users
         public string status { get; set; }
         public int photoId { get; set; }
         public string photoPath { get; set; }
+        public int signatureId { get; set; }
+        public string signaturePath { get; set; }
     }
 
     public class CMUserDetail : CMUser
@@ -62,7 +64,7 @@ namespace CMMSAPIs.Models.Users
         public DateTime? joiningDate { get; set; }
         public int blood_group_id { get; set; }
         public string blood_group_name { get; set; }
-        public List<CMDefaultList> plant_list { get; set; }
+        public List<CMPlantAccess> plant_list { get; set; }
     }
     public class CMUpdateUser : CMUserDetail
     {
@@ -74,5 +76,11 @@ namespace CMMSAPIs.Models.Users
         public List<CMAccessList> access_list { get; set; }
         public List<CMNotificationList> notification_list { get; set; }
     }
-
+    public class CMPlantAccess
+    {
+        public int plant_id { get; set; }
+        public string plant_name { get; set; }
+        public int spv_id { get; set; }
+        public string spv_name { get; set; }
+    }
 }

@@ -65,7 +65,7 @@ namespace CMMSAPIs.Repositories.Users
         {
             // Pending - Include all the property listed in CMUserDetail Model
             string qry = "SELECT " +
-                            "u.id as id, firstName as first_name, lastName as last_name, u.secondaryEmail, u.landlineNumber as landline_number, CONCAT(firstName, ' ', lastName) as full_name, loginId as user_name, r.id as role_id, r.name as role_name, mobileNumber as contact_no, u.genderId as gender_id, gender.name as gender_name, u.bloodGroupId as blood_group_id, bloodgroup.name as blood_group_name, birthday as DOB, countries.name as country_name, countryId as country_id, states.name as state_name, stateId as state_id, cities.name as city_name, cityId as city_id, zipcode, CASE WHEN u.status=0 THEN 'Inactive' ELSE 'Active' END AS status, u.isEmployee, u.joiningDate, u.photoId, files.file_path AS photoPath " +
+                            "u.id as id, firstName as first_name, lastName as last_name, u.secondaryEmail, u.landlineNumber as landline_number, CONCAT(firstName, ' ', lastName) as full_name, loginId as user_name, r.id as role_id, r.name as role_name, mobileNumber as contact_no, u.genderId as gender_id, gender.name as gender_name, u.bloodGroupId as blood_group_id, bloodgroup.name as blood_group_name, birthday as DOB, countries.name as country_name, countryId as country_id, states.name as state_name, stateId as state_id, cities.name as city_name, cityId as city_id, zipcode, CASE WHEN u.status=0 THEN 'Inactive' ELSE 'Active' END AS status, u.isEmployee, u.joiningDate, photo.id as photoId, photo.file_path AS photoPath, sign.id AS signatureId, sign.file_path AS signaturePath " +
                          "FROM " +
                             "Users as u " +
                          "LEFT JOIN " +
@@ -73,7 +73,9 @@ namespace CMMSAPIs.Repositories.Users
                          "LEFT JOIN " + 
                             "bloodgroup ON u.bloodGroupId = bloodgroup.id " + 
                          "LEFT JOIN " +
-                            "uploadedfiles as files ON files.id = u.photoId " +
+                            "uploadedfiles as photo ON photo.id = u.photoId " +
+                         "LEFT JOIN " +
+                            "uploadedfiles as sign ON sign.id = u.signatureId " +
                          "LEFT JOIN " +
                             "cities as cities ON cities.id = u.cityId " + 
                          "LEFT JOIN " +
@@ -89,8 +91,8 @@ namespace CMMSAPIs.Repositories.Users
             
             if (user_detail.Count > 0)
             {
-                string facilitiesQry = $"SELECT facilities.id, facilities.name FROM userfacilities JOIN facilities ON userfacilities.facilityId = facilities.id WHERE userfacilities.userId = {user_id};";
-                List<CMDefaultList> facilities = await Context.GetData<CMDefaultList>(facilitiesQry).ConfigureAwait(false);
+                string facilitiesQry = $"SELECT facilities.id as plant_id, facilities.name as plant_name, spv.id as spv_id, spv.name as spv_name FROM userfacilities JOIN facilities ON userfacilities.facilityId = facilities.id LEFT JOIN spv ON facilities.spvId=spv.id WHERE userfacilities.userId = {user_id};";
+                List<CMPlantAccess> facilities = await Context.GetData<CMPlantAccess>(facilitiesQry).ConfigureAwait(false);
                 user_detail[0].plant_list = facilities;
                 return user_detail[0];
             }
@@ -341,7 +343,7 @@ namespace CMMSAPIs.Repositories.Users
         internal async Task<List<CMUser>> GetUserList(int facility_id) 
         {
             string qry = $"SELECT " +
-                            $"u.id, CONCAT(firstName, ' ', lastName) as full_name, loginId as user_name, mobileNumber as contact_no, r.id as role_id, r.name as role_name, CASE WHEN u.status=0 THEN 'Inactive' ELSE 'Active' END AS status, u.photoId AS photoId, files.file_path AS photoPath " +
+                            $"u.id, CONCAT(firstName, ' ', lastName) as full_name, loginId as user_name, mobileNumber as contact_no, r.id as role_id, r.name as role_name, CASE WHEN u.status=0 THEN 'Inactive' ELSE 'Active' END AS status, photo.id AS photoId, photo.file_path AS photoPath, sign.id AS signatureId, sign.file_path AS signaturePath " +
                          $"FROM " +
                             $"Users as u " +
                          $"JOIN " +
@@ -349,7 +351,9 @@ namespace CMMSAPIs.Repositories.Users
                          $"JOIN " +
                             $"UserFacilities as uf ON uf.userId = u.id " +
                          $"LEFT JOIN " +
-                            $"uploadedfiles as files ON files.id = u.photoId " +
+                            $"uploadedfiles as photo ON photo.id = u.photoId " +
+                         $"LEFT JOIN " +
+                            $"uploadedfiles as sign ON sign.id = u.signatureId " +
                          $"WHERE " +
                             $"uf.facilityId = {facility_id}";
             
