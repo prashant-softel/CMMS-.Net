@@ -43,22 +43,19 @@ namespace CMMSAPIs.Models.Inventory
         public int retirementStatus { get; set; }
         public int specialToolId { get; set; }
         public int specialToolEmpId { get; set; }
-        public List<CMWarrantyDetail> lstWarrantyDetail { get; set; }
-        public int multiplier { get; set; }
-    }
-
-    public class CMWarrantyDetail
-    {
         public int warranty_type { get; set; }
         public string warranty_description { get; set; }
         public int warrranty_term_type { get; set; }
-        public DateTime expiry_date { get; set; }
+        public DateTime? start_date { get; set; }
+        public DateTime? expiry_date { get; set; }
         public int meter_limit { get; set; }
         public int meter_unit { get; set; }
         public int warranty_provider_id { get; set; }
         public string certificate_number { get; set; }
-        public int status { get; set; }
+        public int warranty_status { get; set; }
+        public int multiplier { get; set; }
     }
+
     public class CMSetParentAsset
     {
         public int parentId { get; set; }
