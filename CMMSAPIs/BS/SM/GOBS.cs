@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using CMMSAPIs.Repositories;
 using CMMSAPIs.Models;
 using CMMSAPIs.Models.Utils;
+using CMMSAPIs.Models.Users;
+using MailKit.Search;
 
 namespace CMMSAPIs.BS
 {
@@ -19,6 +21,9 @@ namespace CMMSAPIs.BS
         Task<CMDefaultResponse> DeleteGO(int GOid, int userID);
         Task<CMDefaultResponse> WithdrawGO(CMGO request, int userID);
         Task<CMDefaultResponse> GOApproval(CMGO request, int userID);
+        Task<List<PurchaseData>> GetPurchaseData(int plantID, string empRole, DateTime fromDate, DateTime toDate, string status, string order_type);
+        Task<List<CMGO>> getPurchaseDetailsByID(int id);
+        Task<CMDefaultResponse> SubmitPurchaseData(SubmitPurchaseData request);
     }
 
     public class GOBS : IGOBS
@@ -146,6 +151,53 @@ namespace CMMSAPIs.BS
                 using (var repos = new GORepository(getDB))
                 {
                     return await repos.GOApproval(request, userID);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<PurchaseData>> GetPurchaseData(int plantID, string empRole, DateTime fromDate, DateTime toDate, string status, string order_type)
+        {
+            try
+            {
+                using (var repos = new GORepository(getDB))
+                {
+                    return await repos.GetPurchaseData(plantID, empRole, fromDate, toDate, status, order_type);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<CMGO>> getPurchaseDetailsByID(int id)
+        {
+            try
+            {
+                using (var repos = new GORepository(getDB))
+                {
+                    return await repos.getPurchaseDetailsByID(id);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<CMDefaultResponse> SubmitPurchaseData(SubmitPurchaseData request)
+        {
+            try
+            {
+                using (var repos = new GORepository(getDB))
+                {
+                    return await repos.SubmitPurchaseData(request);
 
                 }
             }

@@ -304,7 +304,7 @@ namespace CMMSAPIs.Helper
             SM_PO_REJECTED,
             SM_PO_S2S_SUBMITTED,        //7
             SM_PO,
-
+            SM_ASSET_TYPE_CONSUMABLE,
 
             MRS_REQUEST_APPROVE = 321, 
             MRS_REQUEST_REJECT ,

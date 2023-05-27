@@ -56,4 +56,44 @@ namespace CMMSAPIs.Models
 
 
     }
+
+    public class PurchaseData
+    {
+        public string facilityName { get; set; }
+        public int orderID { get; set; }
+        public DateTime? purchaseDate { get; set; }
+        public int generate_flag { get; set; }
+        public DateTime? received_on { get; set; }
+        public int status { get; set; }
+        public string vendor_name { get; set; }
+        public int? vendorID { get; set; }
+        public int generatedByID { get; set; }
+        public string remarks { get; set; }
+        public string generatedBy { get; set; }
+        public string receivedOn { get; set; }
+        public string receivedDate { get; set; }
+        public string approvedBy { get; set; }
+        public DateTime? approvedOn { get; set; }
+        public int statusFlag { get; set; }
+
+    }
+
+    public class SubmitPurchaseData
+    {
+        public int purchaseID { get; set; }
+        public int facilityId { get; set; }
+        public int vendor { get; set; }
+        public int empId { get; set; }
+        public DateTime purchaseDate { get; set; }
+        public int generateFlag { get; set; }
+        public List<submitItems> submitItems { get; set; }
+    }
+    public class submitItems
+    {
+        public string assetCode { get; set; }
+        public int assetItemID { get; set; }
+        public decimal orderedQty { get; set; }
+        public int type { get; set; }
+        public decimal cost { get; set; }
+    }
 }

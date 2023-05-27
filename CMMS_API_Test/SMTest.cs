@@ -18,6 +18,7 @@ namespace CMMS_API_Test
         string EP_AddAssetType = "/api/SMMaster/AddAssetType";
         string EP_UpdateAssetType = "/api/SMMaster/UpdateAssetType";
         string EP_DeleteAssetType = "/api/SMMaster/DeleteAssetType";
+        string EP_GetAssetBySerialNo = "/api/SMMaster/GetAssetBySerialNo";
 
         //Asset Category Master
         string EP_GetAssetCategoryList = "/api/SMMaster/GetAssetCategoryList";
@@ -52,6 +53,9 @@ namespace CMMS_API_Test
         string EP_updateGO = "/api/GO/UpdateGO";
         string EP_GOApproval = "/api/GO/GOApproval";
         string EP_withdrawGO = "/api/GO/WithdrawGO";
+        string EP_GetPurchaseData = "/api/GO/GetPurchaseData";
+        string EP_getPurchaseDetailsByID = "/api/GO/getPurchaseDetailsByID";
+        string EP_SubmitPurchaseOrderData = "/api/GO/SubmitPurchaseOrderData";
 
         [TestMethod]
         public void VerifyListofAssetType()
@@ -524,6 +528,62 @@ namespace CMMS_API_Test
             Assert.AreEqual("Goods order withdrawn successfully.", response.message);
         }
 
+        [TestMethod]
+        public void GetAssetBySerialNo()
+        {
+
+            string serial_number = "3000009";
+            var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.SM.AssetBySerialNo>();
+            var response = ptwService.GetItem(EP_GetAssetBySerialNo + "?serial_number=" + serial_number);
+            Assert.AreEqual("H41111955100001", response.asset_code);
+            Assert.AreEqual(45, response.plant_ID);
+
+        }
+        [TestMethod]
+        public void GetPurchaseData()
+        {
+
+            int plantID = 45;
+            string empRole = "";
+            DateTime fromDate = Convert.ToDateTime("2019-01-01");
+            DateTime toDate = Convert.ToDateTime("2022-01-01");
+            int status = 1;
+            int order_type = 0;
+            var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.PurchaseData>();
+            var response = ptwService.GetItemList(EP_GetPurchaseData + "?plantID=" + plantID+ "&empRole="+ empRole+ "&fromDate="+ fromDate +"&toDate="+toDate+ "&status="+status+ "&order_type="+ order_type);
+            Assert.AreEqual("Hero Future Solar Plant 1000MW", response[0].facilityName); 
+            Assert.AreEqual(19, response[0].orderID); 
+        }
+        [TestMethod]
+        public void GetPurchaseDetailsByID()
+        {
+
+            int id = 19;
+            var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.CMGO>();
+            var response = ptwService.GetItemList(EP_getPurchaseDetailsByID + "?id=" + id);           
+            Assert.AreEqual(187, response[0].vendorID);
+
+        }
+
+        [TestMethod]
+        public void SubmitPurchaseOrderData()
+        {
+
+            string payload = @"{
+                                  ""purchaseID"":1,
+                                  ""facilityId"":45,
+                                  ""vendor"":2,
+                                  ""empId"":10,
+                                  ""purchaseDate"":""2023-10-10"",
+                                  ""generateFlag"":1,
+                                  ""submitItems"":[{""assetCode"":""H39121448100005"", ""assetItemID"":1,""orderedQty"":10,""type"":4,""cost"":45}]
+                              }";
+
+            var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.Utils.CMDefaultResponse>();
+            var response = ptwService.CreateItem(EP_SubmitPurchaseOrderData, payload);
+
+            Assert.AreEqual("Goods order submitted successfully.", response.message);
+        }
 
     }
 }

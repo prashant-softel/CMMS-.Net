@@ -11,10 +11,12 @@ using CMMSAPIs.Models.SM;
 using CMMSAPIs.Models.Utils;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualBasic;
+using MySql.Data.MySqlClient;
 using MySqlX.XDevAPI.Common;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Org.BouncyCastle.Utilities.Collections;
+using static Google.Protobuf.Reflection.SourceCodeInfo.Types;
 
 namespace CMMSAPIs.Repositories
 {
@@ -382,5 +384,225 @@ namespace CMMSAPIs.Repositories
             }
         }
 
+        // Get PO List Data
+
+        public async Task<List<PurchaseData>> GetPurchaseData(int plantID, string empRole, DateTime fromDate, DateTime toDate, string status, string order_type)
+        {
+            var stmt = $"SELECT fc.Name as facilityName, po.ID as orderID,po.purchaseDate,po.generate_flag,po.received_on,po.status,bl.name as vendor_name,po.vendorID," +
+                $"ed.id as generatedByID,po.remarks, CONCAT(ed.Firstname,' ',ed.lastname) as generatedBy, CONCAT(ed1.Firstname,' ',ed1.lastname) as receivedOn, DATE_FORMAT(po.lastModifiedDate,'%Y-%m-%d') as receivedDate," +
+                $" CONCAT(ed2.Firstname,' ',ed2.lastname) as approvedBy,   DATE_FORMAT(po.approvedOn,'%Y-%m-%d') as approvedOn,    po.status as statusFlag "+
+                //$" CASE WHEN po.flag = {GO_SAVE_BY_PURCHASE_MANAGER} THEN 'Draft' WHEN po.flag = {GO_SUBMIT_BY_PURCHASE_MANAGER} THEN 'Submitted' " +
+                //$"WHEN po.flag = {GO_SAVE_BY_STORE_KEEPER} THEN 'In Process' ELSE 'Received' END" +
+             
+                $"FROM smpurchaseorder po " +
+                $"LEFT JOIN business bl ON bl.id = po.vendorID " +
+                $"LEFT JOIN employees ed ON ed.ID = po.generated_by " +
+                $"LEFT JOIN employees ed1 ON ed1.ID = po.receiverID " +
+                $"LEFT JOIN employees ed2 ON ed2.ID = po.approved_by " +
+                $"LEFT JOIN facilities fc ON fc.id = po.plantID WHERE po.plantID = {plantID} ";
+            if (!string.IsNullOrEmpty(status))
+            {
+                stmt += $" AND po.status = {status} ";
+            }
+            else
+            {
+                stmt += $" AND po.status > 0 ";
+            }
+            stmt += $" AND po.order_type = {order_type} AND DATE_FORMAT(po.lastModifiedDate, '%Y-%m-%d') BETWEEN '{fromDate.ToString("yyyy-MM-dd")}' AND '{toDate.ToString("yyyy-MM-dd")}'";
+
+
+            List<PurchaseData> _List = await Context.GetData<PurchaseData>(stmt).ConfigureAwait(false);
+            return _List;
+        }
+
+
+        public async Task<CMDefaultResponse> SubmitPurchaseData(SubmitPurchaseData request)
+        {
+            try
+            {
+                // Start a transaction.
+                
+                // Get the purchase ID if it is not provided.
+                int purchaseId;
+                if (request.purchaseID == null || request.purchaseID == 0)
+                    {
+                    purchaseId = await PurchaseOrderAsync(request.facilityId, request.vendor, request.empId, request.purchaseDate, request.generateFlag);
+                    if (purchaseId == 0)
+                    {
+                        throw new Exception("Purchase ID not found");
+                    }
+                }
+                else
+                {
+                    purchaseId = request.purchaseID;
+                }
+
+                // Update the purchase order.
+                var stmtUpdateP = $"UPDATE smpurchaseorder SET status = {request.generateFlag}, vendorID = {request.vendor}, purchaseDate = '{request.purchaseDate.ToString("yyyy-MM-dd")}' WHERE ID = {purchaseId}";
+                var result = await Context.ExecuteNonQry<int>(stmtUpdateP);
+
+                // Delete the existing purchase order details.
+                var stmtDelete = $"DELETE FROM smpurchaseorderdetails WHERE purchaseID = {purchaseId}";
+                await Context.ExecuteNonQry<int>(stmtDelete);
+
+                // Insert the new purchase order details.
+                foreach (var item in request.submitItems)
+                {
+                    var assetCode = item.assetCode;
+                    var orderedQty = item.orderedQty;
+                    var type = item.type;
+                    var cost = item.cost;
+                    int purchaseOrderDetailsID = 0;
+                    // Get the asset type ID.
+                    int assetTypeId =0;
+                    string stmtAssetType = $"SELECT asset_type_ID FROM smassetmasters WHERE asset_code = '{item.assetCode}'";
+                    DataTable dtAssetType = await Context.FetchData(stmtAssetType).ConfigureAwait(false);
+                  
+                    if (dtAssetType == null && dtAssetType.Rows.Count == 0)
+                    {
+                        throw new Exception("Asset type ID not found");
+                    }
+                    else
+                    {
+                        assetTypeId = Convert.ToInt32(dtAssetType.Rows[0][0]);
+                    }
+                    int isMultiSelectionEnabled = await getMultiSpareSelectionStatus(item.assetCode);
+                    // Check if the asset type is consumable.
+                    if (assetTypeId != 307)
+                    {
+                        // Check if the asset item ID is already exists.
+                        int assetItemId;
+                        if (item.assetItemID == null || item.assetItemID == 0)
+                        {
+                            if (isMultiSelectionEnabled > 0)
+                            {
+                                // Insert the asset item.
+                                var stmtI = $"INSERT INTO smassetitems (plant_ID,asset_code,item_condition,status) VALUES ({request.purchaseID},'{assetCode}',1,0); SELECT LAST_INSERT_ID();";
+                                DataTable dtInsert = await Context.FetchData(stmtI).ConfigureAwait(false);
+                                assetItemId = Convert.ToInt32(dtInsert.Rows[0][0]);
+                                //assetItemIDByCode[assetCode] = assetItemId;
+                                stmtI = "";
+                                stmtI = $"INSERT INTO smpurchaseorderdetails (purchaseID,assetItemID,order_type,cost,ordered_qty,location_ID)"+
+                                            $"VALUES({purchaseId},{assetItemId},{item.type},{item.cost},1,0); SELECT LAST_INSERT_ID();";
+                                DataTable dtInsertOD = await Context.FetchData(stmtI).ConfigureAwait(false);
+                                purchaseOrderDetailsID = Convert.ToInt32(dtInsertOD.Rows[0][0]);
+                            }
+                            else
+                            {
+                                // Insert the asset item.
+                                var stmtI = $"INSERT INTO smassetitems (plant_ID,asset_code,item_condition,status) VALUES ({request.purchaseID},'{assetCode}',1,0); SELECT LAST_INSERT_ID();";
+                                DataTable dtInsert = await Context.FetchData(stmtI).ConfigureAwait(false);
+                                assetItemId = Convert.ToInt32(dtInsert.Rows[0][0]);
+                                //assetItemIDByCode[assetCode] = assetItemId;
+                                stmtI = "";
+                                stmtI = $"INSERT INTO smpurchaseorderdetails (purchaseID,assetItemID,order_type,cost,ordered_qty,location_ID)" +
+                                            $"VALUES({purchaseId},{assetItemId},{item.type},{item.cost},0,0); SELECT LAST_INSERT_ID();";
+                                DataTable dtInsertOD = await Context.FetchData(stmtI).ConfigureAwait(false);
+                                purchaseOrderDetailsID = Convert.ToInt32(dtInsertOD.Rows[0][0]);
+                            }
+                        }
+                        else
+                        {
+                            string stmtI = $"INSERT INTO smpurchaseorderdetails (purchaseID,assetItemID,order_type,cost,ordered_qty,location_ID)" +
+                                        $"VALUES({purchaseId},{item.assetItemID},{item.type},{item.cost},0,0); SELECT LAST_INSERT_ID();";
+                            DataTable dtInsertOD = await Context.FetchData(stmtI).ConfigureAwait(false);
+                            purchaseOrderDetailsID = Convert.ToInt32(dtInsertOD.Rows[0][0]);
+                        }
+
+                        // Insert the purchase order detail.
+                    }
+                    else
+                    {
+                        // Get the asset item ID.
+                        int assetItemId = 0;
+                        assetItemId = await getAssetItemID(item.assetCode, request.facilityId, 0);
+                        if (assetItemId == 0)
+                        {
+                            throw new Exception("asset_item_ID is empty");
+                        }
+                        else
+                        {
+                            string stmtI = $"INSERT INTO smpurchaseorderdetails (purchaseID,assetItemID,order_type,cost,ordered_qty,location_ID)" +
+                                        $"VALUES({purchaseId},{item.assetItemID},{item.type},{item.cost},0,0); SELECT LAST_INSERT_ID();";
+                            DataTable dtInsertOD = await Context.FetchData(stmtI).ConfigureAwait(false);
+                            purchaseOrderDetailsID = Convert.ToInt32(dtInsertOD.Rows[0][0]);
+                        }
+
+                        
+                    }
+                }
+
+                CMDefaultResponse response = new CMDefaultResponse(1, CMMS.RETRUNSTATUS.SUCCESS, "Goods order submitted successfully.");
+                return response;
+            }
+            catch (Exception e)
+            {
+                CMDefaultResponse response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.SUCCESS, "Goods order failed to submit.");
+                return response;
+            }
+        }
+
+        public async Task<int> PurchaseOrderAsync(int facilityId, int vendor, int empId, DateTime? purchaseDate, int generateFlag)
+        {
+            int purchaseID = 0;
+
+            string stmtSelect = $"SELECT * FROM smpurchaseorder WHERE plantID = {facilityId}"+
+                                $"AND vendorID = {vendor} AND generated_by = {empId} AND purchaseDate = '{purchaseDate.Value.ToString("yyyy-MM-dd")}' AND status = {generateFlag}";
+
+            DataTable dt1 = await Context.FetchData(stmtSelect).ConfigureAwait(false);
+            if (dt1 != null)
+            {
+                purchaseID = Convert.ToInt32(dt1.Rows[0]["ID"]);
+                string stmtUpdate = $"UPDATE smpurchaseorder SET generate_flag = {generateFlag}, status = {generateFlag}, vendorID = {vendor} WHERE ID = {purchaseID}";
+                var result = await Context.ExecuteNonQry<int>(stmtUpdate);
+            }
+            else
+            {
+                string stmt = $"INSERT INTO smpurchaseorder (plantID,vendorID,generated_by,purchaseDate,status,generate_flag) " +
+                    $"VALUES({facilityId}, {vendor}, {empId}, '{purchaseDate.Value.ToString("yyyy-MM-dd")}', {generateFlag},{generateFlag}); SELECT LAST_INSERT_ID();";
+                DataTable dtInsert = await Context.FetchData(stmt).ConfigureAwait(false);
+                purchaseID = Convert.ToInt32(dtInsert.Rows[0][0]);
+            }
+            return purchaseID;
+        }
+
+        protected async Task<int> getMultiSpareSelectionStatus(string asset_code = "", int asset_ID = 0)
+        {
+            string stmt = "";
+            if (!string.IsNullOrEmpty(asset_code))
+            {
+
+                stmt = $"SELECT f_sum.spare_multi_selection FROM smassetmasters sam JOIN smunitmeasurement f_sum ON sam.unit_of_measurement = f_sum.ID WHERE sam.asset_code = '{asset_code}'";
+            }
+            else if (asset_ID > 0)
+            {
+
+                stmt = $"SELECT f_sum.spare_multi_selection FROM smassetitems sai JOIN smassetmasters sam ON sai.asset_code = sam.asset_code JOIN smunitmeasurement f_sum ON sam.unit_of_measurement = f_sum.ID WHERE sai.ID = {asset_ID}";
+            }
+
+            List<CMUnitMeasurement> _checkList = await Context.GetData<CMUnitMeasurement>(stmt).ConfigureAwait(false);
+            return _checkList[0].spare_multi_selection;
+        }
+
+        protected async Task<int> getAssetItemID(string asset_code = "", int facility_id = 0, int location_ID = 0)
+        {
+            int asset_item_ID = 0;
+            if (!string.IsNullOrEmpty(asset_code))
+            {
+
+                string stmt = $"SELECT ID FROM smassetitems WHERE asset_code = '{asset_code}' AND plant_ID = {facility_id}";
+                DataTable dt = await Context.FetchData(stmt).ConfigureAwait(false);
+                asset_item_ID = Convert.ToInt32(dt.Rows[0][0]);
+            }
+            else
+            {
+                string stmtI = $"INSERT INTO smassetitems (plant_ID,asset_code,location_ID,item_condition,status) VALUES ({facility_id},'{asset_code}',{location_ID},1,1); SELECT LAST_INSERT_ID();";
+                DataTable dt = await Context.FetchData(stmtI).ConfigureAwait(false);
+                asset_item_ID = Convert.ToInt32(dt.Rows[0][0]);
+            }
+
+
+            return asset_item_ID;
+        }
     }
 }

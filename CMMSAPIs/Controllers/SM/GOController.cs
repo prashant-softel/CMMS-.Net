@@ -1,7 +1,9 @@
 ﻿using CMMSAPIs.BS;
 using CMMSAPIs.Models;
 using CMMSAPIs.Models.Users;
+using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories;
+using MailKit.Search;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -140,6 +142,49 @@ namespace CMMSAPIs.Controllers
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
                 var data = await _GOBS.GOApproval(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        [Route("GetPurchaseData")]
+        [HttpGet]
+        public async Task<IActionResult> GetPurchaseData(int plantID, string empRole, DateTime fromDate, DateTime toDate, string status, string order_type)
+        {
+            try
+            {
+                var data = await _GOBS.GetPurchaseData(plantID, empRole, fromDate, toDate, status, order_type);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        [Route("GetPurchaseDetailsByID")]
+        [HttpGet]
+        public async Task<IActionResult> getPurchaseDetailsByID(int id)
+        {
+            try
+            {
+                var data = await _GOBS.getPurchaseDetailsByID(id);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        [Route("SubmitPurchaseOrderData")]
+        [HttpPost]
+        public async Task<IActionResult> SubmitPurchaseData(SubmitPurchaseData request)
+        {
+            try
+            {
+                var data = await _GOBS.SubmitPurchaseData(request);
                 return Ok(data);
             }
             catch (Exception ex)
