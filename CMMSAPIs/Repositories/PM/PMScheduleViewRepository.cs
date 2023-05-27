@@ -5,6 +5,7 @@ using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Models.Users;
 using CMMSAPIs.Models.Jobs;
 using CMMSAPIs.Repositories.Utils;
+using CMMSAPIs.Repositories.Jobs;
 using System;
 using System.Data;
 using System.Linq;
@@ -17,10 +18,12 @@ namespace CMMSAPIs.Repositories.PM
     {
         private UtilsRepository _utilsRepo;
         private PMRepository _pmScheduleRepo;
+        private JobRepository _jobRepo;
         public PMScheduleViewRepository(MYSQLDBHelper sqlDBHelper) : base(sqlDBHelper)
         {
             _utilsRepo = new UtilsRepository(sqlDBHelper);
             _pmScheduleRepo = new PMRepository(sqlDBHelper);
+            _jobRepo = new JobRepository(sqlDBHelper);
         }
         Dictionary<CMMS.CMMS_Status, string> statusList = new Dictionary<CMMS.CMMS_Status, string>()
         {
@@ -128,7 +131,7 @@ namespace CMMSAPIs.Repositories.PM
                 eventQry += $"WHEN pm_schedule_files.PM_Event = {(int)_event} THEN '{_event}' ";
             }
             eventQry += "ELSE 'Unknown Event' END ";
-            string myQuery1 = $"SELECT id, PM_Maintenance_Order_Number as maintenance_order_number, PM_Schedule_date as schedule_date, PM_Schedule_Completed_date as completed_date, Asset_Name as equipment_name, Asset_Category_name as category_name, PM_Frequecy_Name as frequency_name, PM_Schedule_Emp_name as assigned_to_name, PTW_id as permit_id, {statusQry} as status_name, Facility_Name as facility_name " +
+            string myQuery1 = $"SELECT id, PM_Maintenance_Order_Number as maintenance_order_number, PM_Schedule_date as schedule_date, PM_Schedule_Completed_date as completed_date, Asset_Name as equipment_name, Asset_Category_name as category_name, PM_Frequecy_Name as frequency_name, PM_Schedule_Emp_name as assigned_to_name, PTW_id as permit_id, {statusQry} as status_name, Facility_id as facility_id, Facility_Name as facility_name " +
                                 $"FROM pm_schedule WHERE id = {schedule_id};";
             List<CMPMScheduleViewDetail> scheduleViewDetail = await Context.GetData<CMPMScheduleViewDetail>(myQuery1).ConfigureAwait(false);
             if (scheduleViewDetail.Count == 0)
@@ -294,7 +297,7 @@ namespace CMMSAPIs.Repositories.PM
                 if(executeIds.Contains(schedule_detail.execution_id))
                 {
                     int changeFlag = 0;
-                    string myQuery1 = "SELECT id as execution_id, PM_Schedule_Observation as observation, job_created as job_create " +
+                    string myQuery1 = "SELECT id as execution_id, is_ok as isOK, PM_Schedule_Observation as observation, job_created as job_create " +
                                         $"FROM pm_execution WHERE id = {schedule_detail.execution_id};";
                     List<AddObservation> execution_details = await Context.GetData<AddObservation>(myQuery1).ConfigureAwait(false);
                     if(schedule_detail.observation != null && schedule_detail.observation != "" && !schedule_detail.observation.Equals(execution_details[0].observation))
@@ -305,15 +308,17 @@ namespace CMMSAPIs.Repositories.PM
                         {
                             updateQry += $"PM_Schedule_Observation_added_by = {userID}, " +
                                         $"PM_Schedule_Observation_add_date = '{UtilsRepository.GetUTCTime()}', " +
-                                        $"PM_Schedule_Observation = '{schedule_detail.observation}' ";
+                                        $"is_ok = {schedule_detail.isOK}, " +
+                                        $"PM_Schedule_Observation = '{(schedule_detail.isOK==1?"OK":schedule_detail.observation)}' ";
                             message = "Observation Added";
                             response = new CMDefaultResponse(schedule_detail.execution_id, CMMS.RETRUNSTATUS.SUCCESS, "Observation Added Successfully");
                         }
                         else
                         {
+                            if (execution_details[0].isOK == 0)
+                                updateQry += $"PM_Schedule_Observation = '{schedule_detail.observation}', ";
                             updateQry += $"PM_Schedule_Observation_update_by = {userID}, " +
-                                        $"PM_Schedule_Observation_update_date = '{UtilsRepository.GetUTCTime()}', " +
-                                        $"PM_Schedule_Observation = '{schedule_detail.observation}' ";
+                                        $"PM_Schedule_Observation_update_date = '{UtilsRepository.GetUTCTime()}' " ;
                             message = "Observation Updated";
                             response = new CMDefaultResponse(schedule_detail.execution_id, CMMS.RETRUNSTATUS.SUCCESS, "Observation Updated Successfully");
                         }
@@ -325,10 +330,31 @@ namespace CMMSAPIs.Repositories.PM
                     }
                     if(schedule_detail.job_create == 1 && execution_details[0].job_create == 0)
                     {
-                        string updateQry = $"UPDATE pm_execution SET job_created = 1 WHERE id = {schedule_detail.execution_id};";
+
+                        string facilityQry = $"SELECT facilities.id as block, CASE WHEN facilities.parentId=0 THEN facilities.id ELSE facilities.parentId END AS parent " +
+                                            $"FROM facilities JOIN pm_schedule ON pm_schedule.Block_Id=facilities.id " +
+                                            $"WHERE pm_schedule.id = {request.schedule_id};";
+                        DataTable dtFacility = await Context.FetchData(facilityQry).ConfigureAwait(false);
+                        string titleDescQry = $"SELECT CONCAT('PMSCH{request.schedule_id}\\r\\n', Check_Point_Name, ': ', Check_Point_Requirement) as title, " +
+                                                $"PM_Schedule_Observation as description FROM pm_execution WHERE id = {execution_details[0].execution_id};";
+                        DataTable dtTitleDesc = await Context.FetchData(titleDescQry).ConfigureAwait(false);
+                        string assetsPMQry = $"SELECT Asset_id FROM pm_schedule WHERE id = {request.schedule_id};";
+                        DataTable dtPMAssets = await Context.FetchData(assetsPMQry).ConfigureAwait(false);
+                        CMCreateJob newJob = new CMCreateJob()
+                        {
+                            title = dtTitleDesc.GetColumn<string>("title")[0],
+                            description = dtTitleDesc.GetColumn<string>("description")[0],
+                            facility_id = dtFacility.GetColumn<int>("parent")[0],
+                            block_id = dtFacility.GetColumn<int>("block")[0],
+                            breakdown_time = DateTime.UtcNow,
+                            AssetsIds = dtPMAssets.GetColumn<int>("Asset_id"),
+                            jobType = CMMS.CMMS_JobType.PreventiveMaintenance
+                        };
+                        CMDefaultResponse jobResp = await _jobRepo.CreateNewJob(newJob,userID);
+                        string updateQry = $"UPDATE pm_execution SET job_created = 1, linked_job_id = {jobResp.id[0]} WHERE id = {schedule_detail.execution_id};";
                         await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
-                        await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, request.schedule_id, CMMS.CMMS_Modules.PM_EXECUTION, schedule_detail.execution_id, "Job Created for PM", CMMS.CMMS_Status.PM_UPDATE, userID);
-                        response = new CMDefaultResponse(schedule_detail.execution_id, CMMS.RETRUNSTATUS.SUCCESS, "Job Created for PM Successfully");
+                        await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, request.schedule_id, CMMS.CMMS_Modules.PM_EXECUTION, schedule_detail.execution_id, $"Job {jobResp.id[0]} Created for PM", CMMS.CMMS_Status.PM_UPDATE, userID);
+                        response = new CMDefaultResponse(schedule_detail.execution_id, CMMS.RETRUNSTATUS.SUCCESS, $"Job {jobResp.id[0]} Created for PM Successfully");
                         responseList.Add(response);
                         changeFlag++;
                     }

@@ -271,8 +271,10 @@ namespace CMMSAPIs.Repositories.Jobs
             int newJobID = Convert.ToInt32(dt.Rows[0][0]);
 
             //List<CMJobView> newJob = await Context.GetData<CMJobView>(qry).ConfigureAwait(false);
-//            int newJobID = newJob[0].id;
-            
+            //            int newJobID = newJob[0].id;
+            if (request.AssetsIds == null)
+                request.AssetsIds = new List<int>();
+
             foreach (var data in request.AssetsIds)
             {
                 string qryAssetsIds = $"insert into jobmappingassets(jobId, assetId ) values ({ newJobID }, { data });";
@@ -280,6 +282,9 @@ namespace CMMSAPIs.Repositories.Jobs
             }
             string setCat = $"UPDATE jobmappingassets, assets SET jobmappingassets.categoryId = assets.categoryId WHERE jobmappingassets.assetId = assets.id;";
             await Context.ExecuteNonQry<int>(setCat).ConfigureAwait(false);
+            if (request.WorkType_Ids == null)
+                request.WorkType_Ids = new List<int>();
+
             foreach (var data in request.WorkType_Ids)
             {
                string qryCategoryIds = $"insert into jobassociatedworktypes(jobId, workTypeId ) value ( { newJobID }, { data } );";

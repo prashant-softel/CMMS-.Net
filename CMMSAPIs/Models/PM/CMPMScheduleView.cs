@@ -26,6 +26,7 @@ namespace CMMSAPIs.Models.PM
 
     public class CMPMScheduleViewDetail : CMPMScheduleView
     {   
+        public int facility_id { get; set; }
         public string facility_name { get; set; }
         public List<CMDefaultList> checklists { get; set; }
         public List<ScheduleCheckList> schedule_check_list { get; set; }
@@ -79,6 +80,7 @@ namespace CMMSAPIs.Models.PM
     public class AddObservation
     {
         public int execution_id { get; set; }
+        public int isOK { get; set; }
         public string observation { get; set; }
         public int job_create { get; set; }
         public List<PMFileUpload> pm_files { get; set; }
