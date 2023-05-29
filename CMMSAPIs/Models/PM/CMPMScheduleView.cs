@@ -42,7 +42,7 @@ namespace CMMSAPIs.Models.PM
         public string check_point_name { get; set; }
         public string requirement { get; set; }
         public string observation { get; set; }
-        public int job_linked_id { get; set; }
+        public int linked_job_id { get; set; }
         public int is_custom_check_point { get; set; }
         public int is_file_required { get; set; }
         public List<ScheduleFiles> files { get; set; }
