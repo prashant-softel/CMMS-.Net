@@ -155,8 +155,9 @@ namespace CMMSAPIs.Repositories.PM
                 }
             }
             List<CMLog> log = await _utilsRepo.GetHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, schedule_id);
-            scheduleViewDetail[0].checklists = checklist_collection;
-            scheduleViewDetail[0].schedule_check_list = scheduleCheckList;
+            scheduleViewDetail[0].checklist_id = checklist_collection[0].id;
+            scheduleViewDetail[0].checklist_name = checklist_collection[0].name;
+            scheduleViewDetail[0].schedule_check_points = scheduleCheckList;
             scheduleViewDetail[0].history_log = log;
             return scheduleViewDetail[0];
         }
