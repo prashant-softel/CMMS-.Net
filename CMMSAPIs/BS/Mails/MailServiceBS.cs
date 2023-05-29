@@ -8,22 +8,22 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-
 namespace CMMSAPIs.BS.Mails
 {
     public interface IMailService
     {
-        Task<List<CMMailResponse>> SendEmailAsync(CMMailRequest mailRequest);
+        Task<List<CMMailResponse>> SendEmailAsync(CMMailRequest mailRequest, CMMailSettings _mailSettings);
     }
-    public class MailService : IMailService
+    //public class MailService : IMailService
+    public class MailService 
     {
-        private readonly CMMailSettings _mailSettings;
-        public MailService(IOptions<CMMailSettings> mailSettings)
-        {
-            _mailSettings = mailSettings.Value;
-        }
+        //private readonly CMMailSettings _mailSettings;
+        //public MailService(IOptions<CMMailSettings> mailSettings)
+        //{
+        //    _mailSettings = mailSettings.Value;
+        //}
 
-        public async Task<List<CMMailResponse>> SendEmailAsync(CMMailRequest mailRequest)
+        public static async Task<List<CMMailResponse>> SendEmailAsync(CMMailRequest mailRequest, CMMailSettings _mailSettings)
         {
             try
             {
@@ -31,8 +31,17 @@ namespace CMMSAPIs.BS.Mails
 
                 var email = new MimeMessage();
                 email.Sender = MailboxAddress.Parse(_mailSettings.Mail);
-                email.To.Add(MailboxAddress.Parse(mailRequest.ToEmail));
+                foreach (var mail in mailRequest.ToEmail)
+                {
+                    email.To.Add(MailboxAddress.Parse(mail));
+                }
+                foreach (var mail in mailRequest.CcEmail)
+                {
+                    email.To.Add(MailboxAddress.Parse(mail));
+                }
+                // email.Cc.Add(MailboxAddress.Parse(mailRequest.CcEmail));
                 email.Subject = mailRequest.Subject;
+                //email.Headers = mailRequest.Headers;
                 var builder = new BodyBuilder();
                 if (mailRequest.Attachments != null)
                 {
