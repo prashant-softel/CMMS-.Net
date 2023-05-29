@@ -639,7 +639,77 @@ namespace CMMSAPIs.Repositories.SM
             return availableQty;
         }
 
-        
+        public  async Task<CMMRS> getLastTemplateData(int ID)
+        {
+            string sqlstmt = $" SELECT mri.asset_item_ID,  mri.requested_qty, mr.templateName FROM smrsitems mri" +
+                              $" LEFT JOIN smmrs mr ON mr.ID = mri.mrs_ID  " +
+                              $"WHERE mr.ID = {ID};";
+            List<CMMRS> mrsItem = await Context.GetData<CMMRS>(sqlstmt).ConfigureAwait(false);
+            return mrsItem[0];
+        }
+
+        public async Task<List<AssetItem>> GetAssetItems(int plantID, bool isGroupByCode = false)
+        {
+            //spare 
+
+            string spareAssetIds = "SELECT sai.ID FROM smassetitems as sai JOIN smassetmasters as sam ON sai.asset_code = sam.asset_code " +
+                "JOIN smunitmeasurement as f_sum ON f_sum.ID = sam.unit_of_measurement WHERE f_sum.spare_multi_selection = 0 " +
+                "AND sam.asset_type_ID =2 AND sai.plant_ID = "+plantID+";";
+            DataTable dtSA = await Context.FetchData(spareAssetIds).ConfigureAwait(false);
+            string spareAssetIdsString = "";
+            if (dtSA.Rows.Count>0)
+            {
+                IEnumerable<string> columnValues = dtSA.AsEnumerable().Select(row => row.Field<int>("ID").ToString());
+
+                spareAssetIdsString = string.Join(",", columnValues);
+            }
+
+
+
+            //var_dump(spareAssetIds);
+
+            var stmt = @"SELECT sm.asset_type_ID, sat.ID as asset_ID, sm.asset_code, sic.cat_name, sat.serial_number, sat.ID, sm.asset_name, st.asset_type, if(sm.approval_required = 1, 'Yes', 'NO') as approval_required, COALESCE(file.file_path, '') as file_path, file.Asset_master_id, f_sum.spare_multi_selection
+    FROM smassetitems sat
+    LEFT JOIN smassetmasters sm ON sm.asset_code = sat.asset_code
+    LEFT JOIN smassettypes st ON st.ID = sm.asset_type_ID
+    LEFT JOIN smassetmasterfiles file ON file.Asset_master_id = sm.ID
+    LEFT JOIN smitemcategory sic ON sic.ID = sm.item_category_ID
+    LEFT JOIN smunitmeasurement f_sum ON f_sum.ID = sm.unit_of_measurement
+    WHERE sat.plant_ID = "+plantID+" AND sat.item_condition < 3 AND sat.status = 1 ";
+
+
+
+            if (!spareAssetIdsString.IsNullOrEmpty())
+            {
+                stmt += "AND sat.ID NOT IN("+spareAssetIdsString+")";
+            }
+
+            if (isGroupByCode)
+            {
+                stmt += "GROUP BY sm.asset_code";
+            }
+            else
+            {
+                stmt += "GROUP BY asset_ID";
+            }
+
+            if (!spareAssetIdsString.IsNullOrEmpty())
+            {
+                stmt += "  UNION ALL SELECT sm.asset_type_ID, sat.ID as asset_ID, sm.asset_code, sic.cat_name, sat.serial_number, sat.ID, sm.asset_name, st.asset_type, if(sm.approval_required = 1, 'Yes', 'NO') as approval_required, COALESCE(file.file_path, '') as file_path, file.Asset_master_id, f_sum.spare_multi_selection"
+                + " FROM smassetitems sat"
+                + " LEFT JOIN smassetmasters sm ON sm.asset_code = sat.asset_code"
+                + " LEFT JOIN smassettypes st ON st.ID = sm.asset_type_ID"
+                + " LEFT JOIN smassetmasterfiles file ON file.Asset_master_id = sm.ID"
+                + " LEFT JOIN smitemcategory sic ON sic.ID = sm.item_category_ID"
+                + " LEFT JOIN smunitmeasurement f_sum ON f_sum.ID = sm.unit_of_measurement"
+                + " WHERE sat.plant_ID = "+plantID+" AND sat.item_condition < 3 AND sat.ID IN("+ spareAssetIdsString + ") AND sat.status = 1";
+            }
+
+            //echo $stmt;
+            List<AssetItem> Listitem = await Context.GetData<AssetItem>(stmt).ConfigureAwait(false);
+            return Listitem;
+        }
+
 
     }
 }

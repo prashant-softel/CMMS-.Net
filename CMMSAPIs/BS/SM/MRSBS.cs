@@ -24,6 +24,8 @@ namespace CMMSAPIs.BS.SM
         Task<CMDefaultResponse> mrsApproval(CMMRS request);        
         Task<CMDefaultResponse> mrsReturnApproval(CMMRS request);
         void UpdateAssetStatus(int assetItemID, int status);
+        Task<CMMRS> getLastTemplateData(int ID);
+        Task<List<AssetItem>> GetAssetItems(int plantID, bool isGroupByCode = false);
     }
     public class MRSBS : IMRSBS
     {
@@ -211,6 +213,37 @@ namespace CMMSAPIs.BS.SM
                 throw;
             }
         }
+        public async Task<CMMRS> getLastTemplateData(int ID)
+        {
+            try
+            {
+                using (var repos = new MRSRepository(getDB))
+                {
+                   return await repos.getLastTemplateData(ID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<AssetItem>> GetAssetItems(int plantID, bool isGroupByCode = false)
+        {
+            try
+            {
+                using (var repos = new MRSRepository(getDB))
+                {
+                    return await repos.GetAssetItems(plantID, isGroupByCode);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        
     }
 
 }

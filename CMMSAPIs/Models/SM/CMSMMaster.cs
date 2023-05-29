@@ -181,4 +181,22 @@ namespace CMMSAPIs.Models.SM
         public int orderflag { get; set; }
 
     }
+
+    public class AssetItem
+    {
+        public int asset_type_ID { get; set; }
+        public int asset_ID { get; set; }
+        public string asset_code { get; set; }
+        public string cat_name { get; set; }
+        public string serial_number { get; set; }
+        public int ID { get; set; }
+        public string asset_name { get; set; }
+        public string asset_type { get; set; }
+        public string approval_required { get; set; }
+        public string file_path { get; set; }
+        public int Asset_master_id { get; set; }
+        public int spare_multi_selection { get; set; }
+
+
+    }
 }

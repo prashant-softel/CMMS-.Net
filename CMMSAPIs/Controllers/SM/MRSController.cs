@@ -209,5 +209,37 @@ namespace CMMSAPIs.Controllers.SM
                 throw ex;
             }
         }
+
+        [Route("getLastTemplateData")]
+        [HttpGet]
+        public async Task<IActionResult> getLastTemplateData(int ID)
+        {
+            try
+            {
+                var data = await _MRSBS.getLastTemplateData(ID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                _AddLog.ErrorLog(ex.ToString());
+                throw ex;
+            }
+        }
+
+        [Route("GetAssetItems")]
+        [HttpGet]
+        public async Task<IActionResult> GetAssetItems(int plantID, bool isGroupByCode = false)
+        {
+            try
+            {
+                var data = await _MRSBS.GetAssetItems(plantID, isGroupByCode);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                _AddLog.ErrorLog(ex.ToString());
+                throw ex;
+            }
+        }
     }
 }
