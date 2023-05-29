@@ -92,7 +92,7 @@ namespace CMMSAPIs
             services.AddScoped<IWCBS, WCBS>();
             services.AddScoped<IInventoryBS, InventoryBS>();
             services.Configure<CMMailSettings>(Configuration.GetSection("MailSettings"));
-            services.AddTransient<IMailService, MailService>();
+           // services.AddTransient<IMailService, MailService>();
             services.AddScoped<IFileUploadBS, FileUploadBS>();
             services.AddScoped<ICheckListBS, CheckListBS>();
             services.AddScoped<IPMScheduleViewBS, PMScheduleViewBS>();
