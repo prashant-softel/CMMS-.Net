@@ -150,9 +150,11 @@ namespace CMMSAPIs.Repositories.Users
         internal async Task<CMRoleNotifications> GetRoleNotifications(int role_id)
         {
             string qry = $"SELECT " +
-                            $"notificationId as notification_id, notification as notification_name, defaultFlag as default_flag, canChange as can_change " +
+                            $"rn.notificationId as notification_id, n.notification as notification_name, f.moduleName as module_name, f.featureName as feature_name, rn.defaultFlag as default_flag, rn.canChange as can_change " +
                          $"FROM " +
-                            $"`RoleNotifications` as rn JOIN Notifications n ON rn.notificationId = n.id " +
+                            $"RoleNotifications as rn " +
+                         $"JOIN Notifications n ON rn.notificationId = n.id " +
+                         $"JOIN features f ON n.featureId=f.id " +
                          $"WHERE " +
                             $"roleId = {role_id}";
 
