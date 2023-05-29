@@ -28,9 +28,8 @@ namespace CMMSAPIs.Models.PM
     {   
         public int facility_id { get; set; }
         public string facility_name { get; set; }
-        public int checklist_id { get; set; }
-        public string checklist_name { get; set; }
-        public List<ScheduleCheckList> schedule_check_points { get; set; }
+        public List<CMDefaultList> checklists { get; set; }
+        public List<ScheduleCheckList> schedule_check_list { get; set; }
         public List<ScheduleLinkJob> schedule_link_job { get; set; }
         public List<CMLog> history_log { get; set; }
     }
@@ -42,7 +41,7 @@ namespace CMMSAPIs.Models.PM
         public string check_point_name { get; set; }
         public string requirement { get; set; }
         public string observation { get; set; }
-        public int linked_job_id { get; set; }
+        public int is_job_created { get; set; }
         public int is_custom_check_point { get; set; }
         public int is_file_required { get; set; }
         public List<ScheduleFiles> files { get; set; }
