@@ -16,11 +16,11 @@ namespace CMMSAPIs.Controllers.Mails
             this.mailService = mailService;
         }
         [HttpPost("send")]
-        public async Task<IActionResult> SendMail([FromForm] CMMailRequest request)
+        public async Task<IActionResult> SendMail([FromForm] CMMailRequest request, CMMailSettings settings)
         {
             try
             {
-                var data = await mailService.SendEmailAsync(request);
+                var data = await mailService.SendEmailAsync(request,settings);
                 return Ok(data);
             }
             catch (Exception ex)

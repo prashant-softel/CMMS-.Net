@@ -5,9 +5,11 @@ namespace CMMSAPIs.Models.Mails
 {
     public class CMMailRequest
     {
-        public string ToEmail { get; set; }
+        public List<string> ToEmail { get; set; }
+        public List<string> CcEmail { get; set; }
         public string Subject { get; set; }
         public string Body { get; set; }
         public List<IFormFile> Attachments { get; set; }
+        public string Headers { get; internal set; }
     }
 }
