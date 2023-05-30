@@ -13,12 +13,19 @@ namespace CMMSAPIs.Models.JC
         public int id { get; set; }
         public int currentEmpID { get; set; }
         public string current_status { get; set; }
+		public int status { get; set; }
         public string JC_Closed_by_Name { get; set; }
         public string JC_Rejected_By_Name { get; set; }
         public string title { get; set; }
         public string description { get; set; }
         public int jobid { get; set; }
-        public int ptwId { get; set; }          
+        public int ptwId { get; set; }
+        public string status_short { get; set; }
+        public string status_long { get; set; }
+        public dynamic opened_at { get; set; }
+        public string opened_by { get; set; }
+
+
 
         public List<CMJCJobDetail> LstCMJCJobDetailList { get; set; }
         public List<CMJCPermitDetail> LstPermitDetailList { get; set; }

@@ -19,6 +19,77 @@ namespace CMMSAPIs.Repositories.JC
         {
             _utilsRepo = new UtilsRepository(sqlDBHelper);
         }
+        internal static string getShortStatus(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status m_notificationID)
+        {
+            string retValue;
+
+            switch (m_notificationID)
+            {
+                case CMMS.CMMS_Status.JC_OPENED:     
+                    retValue = "Opened";
+                    break;
+                case CMMS.CMMS_Status.JC_UPDADATED:     
+                    retValue = "Updated";
+                    break;
+                case CMMS.CMMS_Status.JC_CLOSED:     
+                    retValue = "Closed";
+                    break;
+                case CMMS.CMMS_Status.JC_CARRRY_FORWARDED:     
+                    retValue = "Carry Forwarded";
+                    break;
+                case CMMS.CMMS_Status.JC_APPROVED:     
+                    retValue = "Approved";
+                    break;
+                case CMMS.CMMS_Status.JC_REJECTED5:     
+                    retValue = "Rejected";
+                    break;
+                case CMMS.CMMS_Status.JC_PTW_TIMED_OUT:     
+                    retValue = "PTW Timed Out";
+                    break;
+                default:
+                    retValue = "Unknown <" + m_notificationID + ">";
+                    break;
+            }
+            return retValue;
+
+        }
+
+
+        internal string getLongStatus(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMJCDetail jobObj)
+        {
+            string retValue = "My job subject";
+            int jobId = jobObj.id;
+
+            switch (notificationID)
+            {
+                case CMMS.CMMS_Status.JC_OPENED:
+                    retValue = String.Format("Job Card Opened at {0}", jobObj.opened_at);
+                    break;
+                case CMMS.CMMS_Status.JC_UPDADATED:
+                    retValue = String.Format("Job Card Updated by at {0}", jobObj.UpdatedByName);
+                    break;
+                case CMMS.CMMS_Status.JC_CLOSED:
+                    retValue = String.Format("Job Card Closed by {0}", jobObj.JC_Closed_by_Name);
+                    break;
+                case CMMS.CMMS_Status.JC_CARRRY_FORWARDED:
+                    retValue = String.Format("Job Card Carry Forwarded by {0}", jobObj.JC_Closed_by_Name);
+                    break;
+                case CMMS.CMMS_Status.JC_APPROVED:
+                    retValue = String.Format("Job Card Approved by {0}", jobObj.JC_Approved_By_Name);
+                    break;
+                case CMMS.CMMS_Status.JC_REJECTED5:
+                    retValue = String.Format("Job card Rejected by {0}", jobObj.JC_Rejected_By_Name);
+                    break;
+                case CMMS.CMMS_Status.JC_PTW_TIMED_OUT:
+                    retValue = String.Format("PTW <{0}> Timed Out", jobObj.ptwId);
+                    break;
+                default:
+                    break;
+            }
+            return retValue;
+
+        }
+
         internal async Task<List<CMJCList>> GetJCList(int facility_id)
         {
             /* Return all field mentioned in JCListModel model
@@ -80,6 +151,14 @@ namespace CMMSAPIs.Repositories.JC
             _plantDetails[0].LstCMJCLotoDetailList = _lotoList;
             _plantDetails[0].LstCMJCEmpList = _empList;
             _plantDetails[0].file_list = _fileUpload;
+
+            CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_plantDetails[0].status + 100);
+            string _shortStatus = getShortStatus(CMMS.CMMS_Modules.JOBCARD, _Status);
+            _plantDetails[0].status_short = _shortStatus;
+
+            CMMS.CMMS_Status _Status_long = (CMMS.CMMS_Status)(_plantDetails[0].status + 100);
+            string _longStatus = getLongStatus(CMMS.CMMS_Modules.JOBCARD, _Status_long, _plantDetails[0]);
+            _plantDetails[0].status_long = _longStatus;
 
             return _plantDetails;
         }

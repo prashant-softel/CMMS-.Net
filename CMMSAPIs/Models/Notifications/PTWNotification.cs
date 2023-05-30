@@ -101,63 +101,59 @@ namespace CMMSAPIs.Models.Notifications
             string ptw_approve_name = (string)m_permitObj.approvedByName;
             string ptw_closed_name = (string)m_permitObj.closedByName;
 
-            var template = getHTMLBodyTemplate(args);
+            retValue = String.Format("<h3><b style='color:#31576D'>Status:</b>{0}</h3><br>", m_permitObj.current_status_long);
+            retValue += String.Format("<table style='width: 50%; margin:0 auto; border-collapse: collapse ; border-spacing: 10px; ' border='1'><tr><td style=' width: 20%; text-align: left; padding:0.5rem; background-color:#31576D;color:#ffffff'><b>&nbsp;&nbsp;PTW ID<b/></td><td style='text-align: left; padding:0.5rem;'>&nbsp;&nbsp;{0}</td>", m_permitObj.permitNo);
+            retValue += String.Format("<tr><td style=' text-align: left; padding:0.5rem; background-color:#31576D;color:#ffffff'><b>&nbsp;&nbsp;Status</b></td><td style='text-align: left; padding:0.5rem;'>&nbsp;&nbsp;{0}</td></tr>", m_permitObj.current_status_short);
+            retValue += String.Format("<tr><td style=' text-align: left; padding:0.5rem; background-color:#31576D;color:#ffffff'><b>&nbsp;&nbsp;PTW Title</b></td><td style='text-align: left; padding:0.5rem;'>&nbsp;&nbsp;{0}</td></tr>", m_permitObj.PermitTypeName);
+            retValue += String.Format("<tr><td style='text-align: left; padding:0.5rem; background-color:#31576D;color:#ffffff'><b>&nbsp;&nbsp;PTW Description</b></td><td style='text-align: left; padding:0.5rem;'>&nbsp;&nbsp;{0}</td>", m_permitObj.description);
+            retValue += String.Format("<tr><td style='text-align: left; padding:0.5rem; background-color:#31576D;color:#ffffff'><b>&nbsp;&nbsp;Created by</b></td><td style='text-align: left; padding:0.5rem;'>&nbsp;&nbsp;{0}</td>", m_permitObj.requestedByName); 
+            
             switch (m_notificationID)
             {
                 case CMMS.CMMS_Status.PTW_CREATED:     //Created
-                    retValue = String.Format(template, permitName, permitDesc);
+                    retValue += "</table>";
                     break;
                 case CMMS.CMMS_Status.PTW_ISSUED:     //Assigned
-                    retValue = String.Format(template, permitName, ptw_issued, permitDesc);
-                    break;
+                    retValue += String.Format("<tr><td style='text-align: left; padding:0.5rem; background-color:#31576D;color:#ffffff'><b>&nbsp;&nbsp;Issued by</b></td><td style='text-align: left; padding:0.5rem;'>&nbsp;&nbsp;{0}</td></table></table>", m_permitObj.issuedByName); break;
                 case CMMS.CMMS_Status.PTW_REJECTED_BY_ISSUER:     //Closed
-                    retValue = String.Format(template, permitName, ptw_cancelled_name, permitDesc);
+                    retValue += String.Format("<tr><td style='text-align: left; padding:0.5rem; background-color:#31576D;color:#ffffff'><b>&nbsp;&nbsp;Rejected by</b></td><td style='text-align: left; padding:0.5rem;'>&nbsp;&nbsp;{0}</td></table>", m_permitObj.issuedByName);
                     break;
                 case CMMS.CMMS_Status.PTW_APPROVE:     //Linked to PTW
-                    retValue = String.Format(template, permitName, ptw_approve_name, permitDesc);
+                    retValue += String.Format("<tr><td style='text-align: left; padding:0.5rem; background-color:#31576D;color:#ffffff'><b>&nbsp;&nbsp;Approved by</b></td><td style='text-align: left; padding:0.5rem;'>&nbsp;&nbsp;{0}</td></table>", m_permitObj.approvedByName);
                     break;
                 case CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER:     //Linked to PTW
-                    retValue = String.Format(template, permitName, ptw_approve_name, permitDesc);
+                    retValue += String.Format("<tr><td style='text-align: left; padding:0.5rem; background-color:#31576D;color:#ffffff'><b>&nbsp;&nbsp;Rejected by</b></td><td style='text-align: left; padding:0.5rem;'>&nbsp;&nbsp;{0}</td></table>", m_permitObj.approvedByName);
                     break;
-                case CMMS.CMMS_Status.PTW_CLOSED:     
-                    retValue = String.Format(template, permitName, ptw_closed_name, permitDesc);
+                case CMMS.CMMS_Status.PTW_CLOSED:
+                    retValue += String.Format("<tr><td style='text-align: left; padding:0.5rem; background-color:#31576D;color:#ffffff'><b>&nbsp;&nbsp;Closed by</b></td><td style='text-align: left; padding:0.5rem;'>&nbsp;&nbsp;{0}</td></table>", m_permitObj.closedByName); 
                     break;
                 case CMMS.CMMS_Status.PTW_CANCELLED_BY_ISSUER:     //Linked to PTW
-                    retValue = String.Format(template, permitName, ptw_issued, ptw_cancelled_name, permitDesc);
+                    retValue += String.Format("<tr><td style='text-align: left; padding:0.5rem; background-color:#31576D;color:#ffffff'><b>&nbsp;&nbsp;Cancelled by</b></td><td style='text-align: left; padding:0.5rem;'>&nbsp;&nbsp;{0}</td></table>", m_permitObj.issuedByName);
                     break;
                 case CMMS.CMMS_Status.PTW_CANCELLED_BY_HSE:     //Linked to PTW
-                    retValue = String.Format(template, permitName, permitDesc);
+                    retValue += String.Format("<tr><td style='text-align: left; padding:0.5rem; background-color:#31576D;color:#ffffff'><b>&nbsp;&nbsp;Cancelled by</b></td><td style='text-align: left; padding:0.5rem;'>&nbsp;&nbsp;{0}</td></table>", m_permitObj.cancelRequestByName);
                     break;
                 case CMMS.CMMS_Status.PTW_CANCELLED_BY_APPROVER:     //Linked to PTW
-                    retValue = String.Format(template, permitName, ptw_approve_name, permitDesc);
-                    break;
+                    retValue += String.Format("<tr><td style='text-align: left; padding:0.5rem; background-color:#31576D;color:#ffffff'><b>&nbsp;&nbsp;Cancelled by</b></td><td style='text-align: left; padding:0.5rem;'>&nbsp;&nbsp;{0}</td></table>", m_permitObj.approvedByName); break;
                 case CMMS.CMMS_Status.PTW_EDIT:     //Linked to PTW
-                    retValue = String.Format(template, permitName, ptw_issued, permitDesc);
-                    break;
+                    retValue += String.Format("<tr><td style='text-align: left; padding:0.5rem; background-color:#31576D;color:#ffffff'><b>&nbsp;&nbsp;Edited by</b></td><td style='text-align: left; padding:0.5rem;'>&nbsp;&nbsp;{0}</td></table>", m_permitObj.requestedByName); break;
                 case CMMS.CMMS_Status.PTW_EXTEND_REQUESTED:     //Linked to PTW
-                    retValue = String.Format(template, permitName, ptw_issued, permitDesc);
-                    break;
+                    retValue += String.Format("<tr><td style='text-align: left; padding:0.5rem; background-color:#31576D;color:#ffffff'><b>&nbsp;&nbsp;Extedend Requested by</b></td><td style='text-align: left; padding:0.5rem;'>&nbsp;&nbsp;{0}</td></table>", m_permitObj.requestedByName); break;
                 case CMMS.CMMS_Status.PTW_EXTEND_REQUEST_APPROVE:     //Linked to PTW
-                    retValue = String.Format(template, permitName, ptw_approve_name, permitDesc);
-                    break;
+                    retValue += String.Format("<tr><td style='text-align: left; padding:0.5rem; background-color:#31576D;color:#ffffff'><b>&nbsp;&nbsp;Extend Request Approved by</b></td><td style='text-align: left; padding:0.5rem;'>&nbsp;&nbsp;{0}</td></table>", m_permitObj.approvedByName); break;
                 case CMMS.CMMS_Status.PTW_EXTEND_REQUEST_REJECTED:     //Linked to PTW
-                    retValue = String.Format(template, permitName, ptw_cancelled_name, permitDesc);
-                    break;
+                    retValue += String.Format("<tr><td style='text-align: left; padding:0.5rem; background-color:#31576D;color:#ffffff'><b>&nbsp;&nbsp;Extend Request Rejected by</b></td><td style='text-align: left; padding:0.5rem;'>&nbsp;&nbsp;{0}</td></table>", m_permitObj.approvedByName); break;
                 case CMMS.CMMS_Status.PTW_LINKED_TO_JOB:     //Linked to PTW
-                    retValue = String.Format(template, permitName, permitDesc);
-                    break;
+                    retValue += String.Format("<tr><td style='text-align: left; padding:0.5rem; background-color:#31576D;color:#ffffff'><b>&nbsp;&nbsp;Linked Job</b></td><td style='text-align: left; padding:0.5rem;'>&nbsp;&nbsp;{0}</td>", m_permitObj.job_type_id); 
+                    retValue += String.Format("<tr><td style='text-align: left; padding:0.5rem; background-color:#31576D;color:#ffffff'><b>&nbsp;&nbsp;Job Title</b></td><td style='text-align: left; padding:0.5rem;'>&nbsp;&nbsp;{0}</td></table>", m_permitObj.job_type_name); break;
                 case CMMS.CMMS_Status.PTW_LINKED_TO_PM:     //Linked to PTW
-                    retValue = String.Format(template, permitName, permitDesc);
-                    break;
+                    retValue += String.Format("<tr><td style='text-align: left; padding:0.5rem; background-color:#31576D;color:#ffffff'><b>&nbsp;&nbsp;Linked PM</b></td><td style='text-align: left; padding:0.5rem;'>&nbsp;&nbsp;{0}</td></table>", m_permitObj.permitNo); break;
                 case CMMS.CMMS_Status.PTW_LINKED_TO_AUDIT:     //Linked to PTW
-                    retValue = String.Format(template, permitName, permitDesc);
-                    break;
+                    retValue += String.Format("<tr><td style='text-align: left; padding:0.5rem; background-color:#31576D;color:#ffffff'><b>&nbsp;&nbsp;Linked Audit</b></td><td style='text-align: left; padding:0.5rem;'>&nbsp;&nbsp;{0}</td></table>", m_permitObj.permitNo); break;
                 case CMMS.CMMS_Status.PTW_LINKED_TO_HOTO:     //Linked to PTW
-                    retValue = String.Format(template, permitName, permitDesc);
-                    break;
+                    retValue += String.Format("<tr><td style='text-align: left; padding:0.5rem; background-color:#31576D;color:#ffffff'><b>&nbsp;&nbsp;Linked HOTO</b></td><td style='text-align: left; padding:0.5rem;'>&nbsp;&nbsp;{0}</td></table>", m_permitObj.permitNo); break;
                 case CMMS.CMMS_Status.PTW_EXPIRED:     //Linked to PTW
-                    retValue = String.Format(template, permitName, permitDesc);
-                    break;
+                    //retValue += String.Format("<tr><td style='text-align: left; padding:0.5rem; background-color:#31576D;color:#ffffff'><b>&nbsp;&nbsp;Closed by</b></td><td style='text-align: left; padding:0.5rem;'>&nbsp;&nbsp;{0}</td></table>", m_permitObj.JC_Closed_by_Name); break;
                 default:
                     break;
             }

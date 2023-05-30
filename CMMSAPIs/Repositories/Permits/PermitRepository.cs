@@ -78,11 +78,78 @@ namespace CMMSAPIs.Repositories.Permits
                 case CMMS.CMMS_Status.PTW_CANCELLED_BY_APPROVER:
                     statusName = "Permit Cancelled By Approver";
                     break;
-                case CMMS.CMMS_Status.PTW_CANCEL_REQUESTED:
+				case CMMS.CMMS_Status.PTW_CANCEL_REQUESTED:
                     statusName = "Cancel Requested for Permit";
                     break;
                 case CMMS.CMMS_Status.PTW_CANCEL_REQUEST_REJECTED:
                     statusName = "Cancel Request Rejected for Permit";
+	                break;
+                case CMMS.CMMS_Status.PTW_EDIT:
+                    statusName = "Permit Edited";
+                    break;
+                case CMMS.CMMS_Status.PTW_EXTEND_REQUESTED:
+                    statusName = "Requested for Permit Extension";
+                    break;
+                case CMMS.CMMS_Status.PTW_EXTEND_REQUEST_APPROVE:
+                    statusName = "Approved Extension for Permit";
+                    break;
+                case CMMS.CMMS_Status.PTW_EXTEND_REQUEST_REJECTED:
+                    statusName = "Rejected Extension for Permit";
+                    break;
+                case CMMS.CMMS_Status.PTW_LINKED_TO_JOB:
+                    statusName = "Permit Linked to Job";
+                    break;
+                case CMMS.CMMS_Status.PTW_LINKED_TO_PM:
+                    statusName = "Permit Linked to PM";
+                    break;
+                case CMMS.CMMS_Status.PTW_LINKED_TO_AUDIT:
+                    statusName = "Permit Linked to Audit";
+                    break;
+                case CMMS.CMMS_Status.PTW_LINKED_TO_HOTO:
+                    statusName = "Permit Linked to HOTO";
+                    break;
+                case CMMS.CMMS_Status.PTW_EXPIRED:
+                    statusName = "Permit Expired";
+                    break;
+                default:
+                    statusName = "Invalid";
+                    break;
+            }
+            return statusName;
+        }
+
+        private static string LongStatus(int statusID, CMPermitDetail permitObj)
+        {
+            CMMS.CMMS_Status status = (CMMS.CMMS_Status)statusID;
+            string statusName = "";
+            switch (status)
+            {
+                case CMMS.CMMS_Status.PTW_CREATED:
+                    statusName = "Permit Created";
+                    break;
+                case CMMS.CMMS_Status.PTW_ISSUED:
+                    statusName = "Permit Issued";
+                    break;
+                case CMMS.CMMS_Status.PTW_REJECTED_BY_ISSUER:
+                    statusName = "Permit Rejected By Issuer";
+                    break;
+                case CMMS.CMMS_Status.PTW_APPROVE:
+                    statusName = "Permit Approved";
+                    break;
+                case CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER:
+                    statusName = "Permit Rejected By Approver";
+                    break;
+                case CMMS.CMMS_Status.PTW_CLOSED:
+                    statusName = "Permit Closed";
+                    break;
+                case CMMS.CMMS_Status.PTW_CANCELLED_BY_ISSUER:
+                    statusName = "Permit Cancelled BY Issuer";
+                    break;
+                case CMMS.CMMS_Status.PTW_CANCELLED_BY_HSE:
+                    statusName = "Permit Cancelled By HSE";
+                    break;
+                case CMMS.CMMS_Status.PTW_CANCELLED_BY_APPROVER:
+                    statusName = "Permit Cancelled By Approver";
                     break;
                 case CMMS.CMMS_Status.PTW_EDIT:
                     statusName = "Permit Edited";

@@ -37,6 +37,14 @@ namespace CMMSAPIs.Repositories.Jobs
                                             "users as user ON user.id = job.assignedId " +
                                       "WHERE job.id = " + jobID;
             List<CMJobView> _ViewJobList = await Context.GetData<CMJobView>(myQuery).ConfigureAwait(false);
+            CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_ViewJobList[0].status + 100);
+            string _shortStatus = getShortStatus(CMMS.CMMS_Modules.JOB, _Status);
+            _ViewJobList[0].status_short = _shortStatus;
+
+            CMMS.CMMS_Status _Status_long = (CMMS.CMMS_Status)(_ViewJobList[0].status + 100);
+            string _longStatus = getLongStatus(CMMS.CMMS_Modules.JOB, _Status_long, _ViewJobList[0]);
+            _ViewJobList[0].status_long = _longStatus;
+
             return _ViewJobList;
         }
 
@@ -139,7 +147,7 @@ namespace CMMSAPIs.Repositories.Jobs
 
         internal string getLongStatus(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMJobView jobObj)
         {
-                string retValue = "My job subject";
+                string retValue = "Job";
                 int jobId = jobObj.id;
 
                 switch (notificationID)
@@ -147,8 +155,15 @@ namespace CMMSAPIs.Repositories.Jobs
                     case CMMS.CMMS_Status.JOB_CREATED:     //Created
                                                            //description is sent at 1 index of arg for this notification, so developer fetch it and use to format the subject
                         string desc = jobObj.job_description;
-                        retValue = String.Format("Job <{0}><{1}> created", jobId, desc);
-                        break;
+                    if (string.IsNullOrEmpty(jobObj.assigned_name))
+                    {
+                        retValue = String.Format("Job {0} created by", jobObj.created_by_name);
+                    }
+                    else
+                    {
+                        retValue = String.Format("Job {0} Created by and Assigned to", jobObj.created_by_name, jobObj.assigned_name);
+                    }
+                    break;
                     case CMMS.CMMS_Status.JOB_ASSIGNED:     //Assigned
                         retValue = String.Format("Job <{0}> assigned to <{1}>", jobObj.job_title, jobObj.assigned_name);
                         break;
@@ -241,6 +256,9 @@ namespace CMMSAPIs.Repositories.Jobs
             _ViewJobList[0].work_type_list = _WorkType;
             _ViewJobList[0].tools_required_list = _Tools;
             //add worktype and tools ka collection
+            CMMS.CMMS_Status _Status_long = (CMMS.CMMS_Status)(_ViewJobList[0].status + 100);
+            string _longStatus = getLongStatus(CMMS.CMMS_Modules.JOB, _Status_long, _ViewJobList[0]);
+            _ViewJobList[0].status_long = _longStatus;
             return _ViewJobList[0];
         }
 
