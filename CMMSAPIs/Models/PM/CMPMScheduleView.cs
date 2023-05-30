@@ -33,6 +33,28 @@ namespace CMMSAPIs.Models.PM
         public List<ScheduleCheckList> schedule_check_points { get; set; }
         public List<ScheduleLinkJob> schedule_link_job { get; set; }
         public List<CMLog> history_log { get; set; }
+        public string status_short { get; set; }
+        public string status_long { get; set; }
+        public DateTime? last_done_date { get; set; }
+        public DateTime? started_at { get; set; }
+        public string started_by { get; set; }
+        public DateTime? updated_at { get; set; }
+        public string updated_by { get; set; }
+        public DateTime? submitted_at { get; set; }
+        public string submitted_by { get; set; }
+        public DateTime? completed_at { get; set; }
+        public DateTime? approved_at { get; set; }
+        public string approved_by { get; set; }
+        public DateTime? rejected_at { get; set; }
+        public string rejected_by { get; set; }
+        public DateTime? cancelled_at { get; set; }
+        public string cancelled_by { get; set; }
+        public DateTime? deleted_at { get; set; }
+        public string deleted_by { get; set; }
+        //public DateTime? ptw_timed_out_at { get; set; }
+
+
+
     }
 
     public class ScheduleCheckList 

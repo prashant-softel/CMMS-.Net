@@ -10,7 +10,7 @@ namespace CMMSAPIs.Models.Calibration
     {
         public int asset_id { get; set; }
         public string asset_name { get; set; }
-        public string asset_serial { get; set; }
+		public string asset_serial { get; set; }
         public string category_name { get; set; }
         public string calibration_status { get; set; }
         public DateTime last_calibration_date { get; set; }
@@ -20,6 +20,28 @@ namespace CMMSAPIs.Models.Calibration
         public string asset_health_status { get; set; }
     }
 
+    public class CMCalibrationDetails: CMCalibrationList
+    {
+        public int calibration_id { get; set; }
+        public int status { get; set; }
+        public string request_approved_by { get; set; }
+        public string request_rejected_by { get; set; }
+        public DateTime request_approved_at { get; set; }
+        public DateTime request_rejected_at { get; set; }
+        public string approved_by { get; set; }
+        public string rejected_by { get; set; }
+        public DateTime started_at { get; set; }
+        public string status_short { get; set; }
+        public string status_long { get; set; }
+        public DateTime next_calibration_due_date { get; set; }
+        public DateTime requested_at { get; set; }
+        public int requested_by { get; set; }
+        public DateTime completed_at { get; set; }
+        public string completed_by{ get; set; }
+        public DateTime Closed_at { get; set; }
+        public string Closed_by { get; set; }
+      
+    }
     public class CMRequestCalibration
     {
         public int asset_id { get; set; }
@@ -37,6 +59,8 @@ namespace CMMSAPIs.Models.Calibration
     public class CMCompleteCalibration
     {
         public int calibration_id { get; set; }
+        public DateTime done_date { get; set; }
+        public DateTime received_date { get; set; }
         public string comment { get; set; }
         public int? is_damaged { get; set; }
     }

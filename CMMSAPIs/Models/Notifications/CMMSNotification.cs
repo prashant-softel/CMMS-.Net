@@ -27,7 +27,7 @@ namespace CMMSAPIs.Models.Notifications
         private CMMS.CMMS_Modules m_moduleID;
         protected CMMS.CMMS_Status m_notificationID;
 
-        public string template = "<tr><td style=' text-align: left; padding:0.5rem; background-color:#31576D;color:#ffffff'><b>&nbsp;&nbsp;{0}</b></td><td style='text-align: left; padding:0.5rem;'>&nbsp;&nbsp;{1}</td></tr>";
+        public string template = "<tr><td style=' text-align: left; padding:0.5rem; background-color:#31576D;color:#ffffff;width:35%' ><b>&nbsp;&nbsp;{0}</b></td><td style='text-align: left; padding:0.5rem;'>&nbsp;&nbsp;{1}</td></tr>";
 
         public string templateEnd = "<tr><td style=' text-align: left; padding:0.5rem; background-color:#31576D;color:#ffffff'><b>&nbsp;&nbsp;{0}</b></td><td style='text-align: left; padding:0.5rem;'>&nbsp;&nbsp;{1}</td></tr></table>";
 
@@ -169,16 +169,16 @@ namespace CMMSAPIs.Models.Notifications
                 CMJCDetail _JobCard = (CMJCDetail)args[0];
                 notificationObj = new JCNotification(moduleID, notificationID, _JobCard);
             }
-            //else if (moduleID == CMMS.CMMS_Modules.INCIDENT_REPORT)    //Incident Report
-            //{
-            //    CMViewIncidentReport _IncidentReport = (CMViewIncidentReport)args[0];
-            //    notificationObj = new IncidentReportNotification(moduleID, notificationID, _IncidentReport);
-            //}
-            //else if (moduleID == CMMS.CMMS_Modules.WARRANTY_CLAIM)    //Incident Report
-            //{
-            //    CMWCDetail _WC = (CMWCDetail)args[0];
-            //    notificationObj = new WCNotification(moduleID, notificationID, _WC);
-            //}
+            else if (moduleID == CMMS.CMMS_Modules.INCIDENT_REPORT)    //Incident Report
+            {
+                CMViewIncidentReport _IncidentReport = (CMViewIncidentReport)args[0];
+                notificationObj = new IncidentReportNotification(moduleID, notificationID, _IncidentReport);
+            }
+            else if (moduleID == CMMS.CMMS_Modules.WARRANTY_CLAIM)    //Incident Report
+            {
+                CMWCDetail _WC = (CMWCDetail)args[0];
+                notificationObj = new WCNotification(moduleID, notificationID, _WC);
+            }
             else if (moduleID == CMMS.CMMS_Modules.CALIBRATION)    //Incident Report
             {
                 CMCalibrationDetails _Calibration = (CMCalibrationDetails)args[0];

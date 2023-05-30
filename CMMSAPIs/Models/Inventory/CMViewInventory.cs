@@ -40,6 +40,16 @@ namespace CMMSAPIs.Models.Inventory
         public AttachmentByReporter attachments { get; set; }
         public int mutliplier { get; set; }
         public string status { get; set; }
+        public string status_short { get; set; }
+        public string status_long { get; set; }
+        public DateTime? Imported_at { get; set; }
+        public string Imported_by { get; set; }
+        public DateTime? added_at { get; set; }
+        public string added_by { get; set; }
+        public DateTime? updated_at { get; set; }
+        public string updated_by { get; set; }
+        public DateTime? deleted_at { get; set; }
+        public string deleted_by { get; set; }
 
     }
 }

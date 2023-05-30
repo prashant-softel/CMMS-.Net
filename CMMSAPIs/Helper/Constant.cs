@@ -351,6 +351,11 @@ namespace CMMSAPIs.Helper
             CALIBRATION_APPROVED,
             CALIBRATION_REJECTED,
             
+			INVENTORY_IMPORTED = 221,
+            INVENTORY_ADDED,
+            INVENTORY_UPDATED,
+            INVENTORY_DELETED,
+			
             SM_PO_DRAFT = 301,          //1         
             SM_PO_SUBMITTED,            //2
             SM_PO_IN_PROCESS,           //3
