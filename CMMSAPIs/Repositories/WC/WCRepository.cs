@@ -103,10 +103,10 @@ namespace CMMSAPIs.Repositories.WC
                                 "cost_of_replacement, currencyId, warranty_start_date, warranty_end_date, warranty_claim_title, warranty_description, " + 
                                 "corrective_action_by_buyer, request_to_supplier, approver_id, status, wc_fac_code, failure_time, created_by) values" + 
                                 $"({unit.facilityId}, {unit.equipmentId}, '{unit.goodsOrderId}', '{unit.affectedPart}', '{unit.orderReference}', " + 
-                                $"'{unit.affectedSrNo}', '{unit.costOfReplacement}', {unit.currencyId}, '{unit.warrantyStartAt.ToString("yyyy'-'MM'-'dd")}', " + 
-                                $"'{unit.warrantyEndAt.ToString("yyyy'-'MM'-'dd")}', '{unit.warrantyClaimTitle}', '{unit.warrantyDescription}', " + 
+                                $"'{unit.affectedSrNo}', '{unit.costOfReplacement}', {unit.currencyId}, '{((DateTime)unit.warrantyStartAt).ToString("yyyy'-'MM'-'dd")}', " + 
+                                $"'{((DateTime)unit.warrantyEndAt).ToString("yyyy'-'MM'-'dd")}', '{unit.warrantyClaimTitle}', '{unit.warrantyDescription}', " + 
                                 $"'{unit.correctiveActionByBuyer}', '{unit.requestToSupplier}', {unit.approverId}, {(int)CMMS.CMMS_Status.WC_CREATED}, " + 
-                                $"'FAC{1000 + unit.facilityId}', '{unit.failureTime.ToString("yyyy'-'MM'-'dd")}', {userID}); select LAST_INSERT_ID(); ";
+                                $"'FAC{1000 + unit.facilityId}', '{((DateTime)unit.failureTime).ToString("yyyy'-'MM'-'dd")}', {userID}); select LAST_INSERT_ID(); ";
                 DataTable dt = await Context.FetchData(qry).ConfigureAwait(false);
                 int id = Convert.ToInt32(dt.Rows[0][0]);
                 string updateQry = $"UPDATE wc SET equipment_cat_id = (SELECT categoryId FROM assets WHERE assets.id = {unit.equipmentId}), " +
@@ -114,6 +114,32 @@ namespace CMMSAPIs.Repositories.WC
                                     $"supplier_id = (SELECT supplierId FROM assets WHERE assets.id = {unit.equipmentId}), " +
                                     $"currency = (SELECT code FROM currency WHERE currency.id = {unit.currencyId}) WHERE wc.id = {id};";
                 await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+                string idToMail = $"SELECT loginId as email, CONCAT(firstName,' ',lastName) as name FROM users " +
+                                    $"WHERE id IN ({string.Join(',', unit.additionalEmailEmployees)});";
+                DataTable mailList = await Context.FetchData(idToMail).ConfigureAwait(false);
+                string addMailQry = "INSERT INTO wc_emails (wc_id, email, name, type) VALUES ";
+                foreach (DataRow mail in mailList.Rows)
+                {
+                    addMailQry += $"({id}, '{mail["email"]}', '{mail["name"]}', 'Internal'), ";
+                }
+                string getAllMails = "SELECT loginId FROM users;";
+                DataTable allMails = await Context.FetchData(getAllMails).ConfigureAwait(false);
+                foreach(var mail in unit.externalEmails)
+                {
+                    bool exists = allMails.GetColumn<string>("loginId").Contains(mail.email);
+                    addMailQry += $"({id}, '{mail.email}', '{mail.name}', '{(exists?"Internal":"External")}'), ";
+                }
+                addMailQry = addMailQry.Substring(0, addMailQry.Length - 2) + ";";
+                await Context.ExecuteNonQry<int>(addMailQry).ConfigureAwait(false);
+                string addSupplierActions = "INSERT INTO wcschedules (warranty_id, supplier_action, input_value, input_date, created_at) VALUES ";
+                foreach (var action in unit.supplierActions)
+                {
+                    addSupplierActions += $"({id}, '{action.name}', {(action.is_required?1:0)}, '{((DateTime)action.required_by_date).ToString("yyyy-MM-dd")}', " +
+                                            $"'{UtilsRepository.GetUTCTime()}'), ";
+                }
+                addSupplierActions = addSupplierActions.Substring(0, addSupplierActions.Length - 2) + ";";
+                await Context.ExecuteNonQry<int>(addSupplierActions).ConfigureAwait(false);
+
                 count++;
                 idList.Add(id);
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.WARRANTY_CLAIM, id, 0, 0, "Warranty Claim Created", CMMS.CMMS_Status.WC_CREATED, userID);
@@ -183,6 +209,93 @@ namespace CMMSAPIs.Repositories.WC
                 throw new ArgumentException("Invalid argument id<" + request.id + ">");
             }
             string updateQry = "UPDATE wc SET ";
+            if (request.facilityId > 0)
+                updateQry += $"facilityId = {request.facilityId}, wc_fac_code = 'FAC{1000+request.facilityId}', ";
+            if (request.equipmentId > 0)
+                updateQry += $"equipment_id = {request.equipmentId}, " +
+                                $"equipment_cat_id = (SELECT categoryId FROM assets WHERE assets.id = {request.equipmentId}), " +
+                                $"equipment_sr_no = (SELECT serialNumber FROM assets WHERE assets.id = {request.equipmentId}), " +
+                                $"supplier_id = (SELECT supplierId FROM assets WHERE assets.id = {request.equipmentId}), " ;
+            if (request.goodsOrderId > 0)
+                updateQry += $"good_order_id = {request.goodsOrderId}, ";
+            if (request.affectedPart != null && request.affectedPart != "")
+                updateQry += $"affected_part = '{request.affectedPart}', ";
+            if (request.orderReference != null && request.orderReference != "")
+                updateQry += $"order_reference_number = '{request.orderReference}', ";
+            if (request.affectedSrNo != null && request.affectedSrNo != "")
+                updateQry += $"affected_sr_no = '{request.affectedSrNo}', ";
+            if (request.costOfReplacement > 0)
+                updateQry += $"cost_of_replacement = '{request.costOfReplacement}', ";
+            if (request.currencyId > 0)
+                updateQry += $"currencyId = {request.currencyId}, " +
+                                $"currency = (SELECT code FROM currency WHERE currency.id = {request.currencyId}), ";
+            if (request.warrantyStartAt != null)
+                updateQry += $"warranty_start_date = '{((DateTime)request.warrantyStartAt).ToString("yyyy'-'MM'-'dd")}', ";
+            if (request.warrantyEndAt != null)
+                updateQry += $"warranty_end_date = '{((DateTime)request.warrantyEndAt).ToString("yyyy'-'MM'-'dd")}', ";
+            if (request.warrantyClaimTitle != null && request.warrantyClaimTitle != "")
+                updateQry += $"warranty_claim_title = '{request.warrantyClaimTitle}', ";
+            if (request.warrantyDescription != null && request.warrantyDescription != "")
+                updateQry += $"warranty_description = '{request.warrantyDescription}', ";
+            if (request.correctiveActionByBuyer != null && request.correctiveActionByBuyer != "")
+                updateQry += $"corrective_action_by_buyer = '{request.correctiveActionByBuyer}', ";
+            if (request.requestToSupplier != null && request.requestToSupplier != "")
+                updateQry += $"request_to_supplier = '{request.requestToSupplier}', ";
+            if (request.approverId > 0)
+                updateQry += $"approver_id = {request.approverId}, ";
+            if (request.failureTime != null)
+                updateQry += $"failure_time = '{((DateTime)request.failureTime).ToString("yyyy'-'MM'-'dd")}', ";
+            updateQry = updateQry.Substring(0, updateQry.Length - 2) + $" WHERE id = {request.id};";
+            await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+            if(request.additionalEmailEmployees != null || request.externalEmails != null)
+            {
+                if (request.additionalEmailEmployees.Count > 0 || request.externalEmails.Count > 0)
+                {
+                    string addMailQry = "INSERT INTO wc_emails (wc_id, email, name, type) VALUES ";
+                    if (request.additionalEmailEmployees != null)
+                    {
+                        if (request.additionalEmailEmployees.Count > 0)
+                        {
+                            string idToMail = $"SELECT loginId as email, CONCAT(firstName,' ',lastName) as name FROM users " +
+                                    $"WHERE id IN ({string.Join(',', request.additionalEmailEmployees)});";
+                            DataTable mailList = await Context.FetchData(idToMail).ConfigureAwait(false);
+                            foreach (DataRow mail in mailList.Rows)
+                            {
+                                addMailQry += $"({request.id}, '{mail["email"]}', '{mail["name"]}', 'Internal'), ";
+                            }
+                        }
+                    }
+                    if (request.externalEmails != null)
+                    {
+                        if (request.externalEmails.Count > 0)
+                        {
+                            string getAllMails = "SELECT loginId FROM users;";
+                            DataTable allMails = await Context.FetchData(getAllMails).ConfigureAwait(false);
+                            foreach (var mail in request.externalEmails)
+                            {
+                                bool exists = allMails.GetColumn<string>("loginId").Contains(mail.email);
+                                addMailQry += $"({request.id}, '{mail.email}', '{mail.name}', '{(exists ? "Internal" : "External")}'), ";
+                            }
+                        }
+                    }
+                    addMailQry = addMailQry.Substring(0, addMailQry.Length - 2) + ";";
+                    await Context.ExecuteNonQry<int>(addMailQry).ConfigureAwait(false);
+                }
+            }
+            if(request.supplierActions != null)
+            {
+                if(request.supplierActions.Count > 0)
+                {
+                    string addSupplierActions = "INSERT INTO wcschedules (warranty_id, supplier_action, input_value, input_date, created_at) VALUES ";
+                    foreach (var action in request.supplierActions)
+                    {
+                        addSupplierActions += $"({request.id}, '{action.name}', {(action.is_required ? 1 : 0)}, '{((DateTime)action.required_by_date).ToString("yyyy-MM-dd")}', " +
+                                                $"'{UtilsRepository.GetUTCTime()}'), ";
+                    }
+                    addSupplierActions = addSupplierActions.Substring(0, addSupplierActions.Length - 2) + ";";
+                    await Context.ExecuteNonQry<int>(addSupplierActions).ConfigureAwait(false);
+                }
+            }
             return null;
         }
 
