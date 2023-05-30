@@ -17,6 +17,58 @@ namespace CMMSAPIs.Repositories.Incident_Reports
             _utilsRepo = new UtilsRepository(sqlDBHelper);
         }
 
+        internal static string getShortStatus(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status m_notificationID)
+        {
+            string retValue;
+
+            switch (m_notificationID)
+            {
+                case CMMS.CMMS_Status.IR_CREATED:     
+                    retValue = "Created";
+                    break;
+                case CMMS.CMMS_Status.IR_UPDATED:     
+                    retValue = "Updated";
+                    break;
+                case CMMS.CMMS_Status.IR_APPROVED:     
+                    retValue = "Approved";
+                    break;
+                case CMMS.CMMS_Status.IR_REJECTED:     
+                    retValue = "Rejected";
+                    break;               
+                default:
+                    retValue = "Unknown <" + m_notificationID + ">";
+                    break;
+            }
+            return retValue;
+
+        }
+
+
+        internal string getLongStatus(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMViewIncidentReport IRObj)
+        {
+            string retValue = "";
+
+            switch (notificationID)
+            {
+                case CMMS.CMMS_Status.IR_CREATED:
+                    retValue = String.Format("Incident Report <{0}> Created by {1} ", IRObj.id, IRObj.title);
+                    break;
+                case CMMS.CMMS_Status.IR_UPDATED:
+                    retValue = String.Format("Incident Report <{0}> Updated by {1} ", IRObj.id, IRObj.title);
+                    break;
+                case CMMS.CMMS_Status.IR_APPROVED:
+                    retValue = String.Format("Incident Report <{0}> Approved by {1} ", IRObj.id, IRObj.title);
+                    break;
+                case CMMS.CMMS_Status.IR_REJECTED:
+                    retValue = String.Format("Incident Report <{0}> Rejected by {1} ", IRObj.id, IRObj.title);
+                    break;
+                default:
+                    break;
+            }
+            return retValue;
+
+        }
+
         internal async Task<List<CMIncidentList>> GetIncidentList(int facility_id, DateTime start_date, DateTime end_date)
         {
             /*              
@@ -146,6 +198,14 @@ namespace CMMSAPIs.Repositories.Incident_Reports
             List<CMHistoryLIST> _historyList = await Context.GetData<CMHistoryLIST>(myQuery1).ConfigureAwait(false);
 
             _IncidentReportList[0].LstHistory = _historyList;
+
+            CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_IncidentReportList[0].status);
+            string _shortStatus = getShortStatus(CMMS.CMMS_Modules.INCIDENT_REPORT, _Status);
+            _IncidentReportList[0].status_short = _shortStatus;
+
+            CMMS.CMMS_Status _Status_long = (CMMS.CMMS_Status)(_IncidentReportList[0].status);
+            string _longStatus = getLongStatus(CMMS.CMMS_Modules.INCIDENT_REPORT, _Status_long, _IncidentReportList[0]);
+            _IncidentReportList[0].status_long = _longStatus;
 
             return _IncidentReportList;
         }

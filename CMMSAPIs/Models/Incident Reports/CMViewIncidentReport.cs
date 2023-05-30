@@ -50,6 +50,11 @@ namespace CMMSAPIs.Models.Incident_Reports
         public int historyId { get; set; }
         public string status_name { get; set; }
         public DateTime approved_at { get; set; }
+        public string title { get; set; }
+        public string status_short { get; set; }
+        public string status_long { get; set; }
+        public string severity { get; set; }
+
         public List<CMHistoryLIST> LstHistory { get; set; }
 
         public AttachmentByReporter attachments { get; set; }

@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Data;
 using System;
+using CMMSAPIs.Models.Notifications;
+
 
 namespace CMMSAPIs.Repositories.Calibration
 {
@@ -28,6 +30,47 @@ namespace CMMSAPIs.Repositories.Calibration
             { 217, "Calibration Approved" },
             { 218, "Calibration Rejected" }
         };
+      
+
+        internal string getLongStatus(CMMS.CMMS_Status notificationID, CMCalibrationDetails CaliObj)
+        {
+            string retValue = " ";
+
+
+            switch (notificationID)
+            {
+                case CMMS.CMMS_Status.CALIBRATION_REQUEST:
+                    retValue = String.Format("Calibration Requested by {0}", CaliObj.responsible_person);
+                    break;
+                case CMMS.CMMS_Status.CALIBRATION_REQUEST_APPROVED:
+                    retValue = String.Format("Calibration Request Approved by {0}", CaliObj.request_approved_by);
+                    break;
+                case CMMS.CMMS_Status.CALIBRATION_REQUEST_REJECTED:
+                    retValue = String.Format("Calibration  Request Rejected by {0}", CaliObj.request_rejected_by);
+                    break;
+                case CMMS.CMMS_Status.CALIBRATION_STARTED:
+                    retValue = String.Format("Calibration started at {0}", CaliObj.started_at);
+                    break;
+                case CMMS.CMMS_Status.CALIBRATION_COMPLETED:
+                    //retValue = String.Format("Calibration Dispachted by {0} at {1}", CaliObj.dispatched_by, CaliObj.dispatched_at);
+                    retValue = String.Format("Calibration Completed by {0} at {1}", CaliObj.completed_by, CaliObj.completed_at);
+                    break;
+                case CMMS.CMMS_Status.CALIBRATION_CLOSED:
+                    retValue = String.Format("Calibration by {0} at {1}", CaliObj.Closed_at, CaliObj.Closed_by);
+                    break;
+                case CMMS.CMMS_Status.CALIBRATION_APPROVED:
+                    retValue = String.Format("Calibration Approved by {0}", CaliObj.approved_by);
+                    break;
+                case CMMS.CMMS_Status.CALIBRATION_REJECTED:
+                    retValue = String.Format("Calibration Rejected by {0}", CaliObj.rejected_by);
+                    break;
+                
+                default:
+                    break;
+            }
+            return retValue;
+
+        }
 
         internal async Task<List<CMCalibrationList>> GetCalibrationList(int facility_id)
         {
@@ -66,6 +109,53 @@ namespace CMMSAPIs.Repositories.Calibration
             List<CMCalibrationList> _calibrationList = await Context.GetData<CMCalibrationList>(myQuery).ConfigureAwait(false);
             return _calibrationList;
         }
+        internal async Task<List<CMCalibrationDetails>> GetCalibrationDetails(int id)
+        {
+            /* Fetch all the Asset table which calibration due date is lower than current date
+             * JOIN Calibration table to fetch their previous details for list model
+             * Your Code goes here
+            */
+            string statusOut = "CASE ";
+            foreach (KeyValuePair<int, string> status in StatusDictionary)
+            {
+                statusOut += $"WHEN a_calibration.status = {status.Key} THEN '{status.Value}' ";
+            }
+            statusOut += $"ELSE 'Invalid Status' END";
+            string myQuery = "SELECT " +
+                                $"a_calibration.asset_id, assets.name as asset_name, CASE WHEN categories.name is null THEN 'Others' ELSE categories.name END as category_name, {statusOut} as status_short,a_calibration.status, a_calibration.due_date as last_calibration_date, vendor.name as vendor_name, CONCAT(request_by.firstName,' ',request_by.lastName) as responsible_person, CONCAT(request_approved_by.firstName,' ',request_approved_by.lastName) as request_approved_by, CONCAT(request_rejected_by.firstName,' ',request_rejected_by.lastName) as request_rejected_by,CONCAT(completed_by.firstName,' ',completed_by.lastName) as completed_by, CONCAT(approved_by.firstName,' ',approved_by.lastName) as approved_by,CONCAT(rejected_by.firstName,' ',rejected_by.lastName) as rejected_by,CONCAT(close_by.firstName,' ',close_by.lastName) as Closed_by,a_calibration.received_date,a_calibration.requested_by,a_calibration.requested_at,a_calibration.request_approved_at,a_calibration.request_rejected_at,a_calibration.start_date as started_at,a_calibration.done_date as completed_at,a_calibration.rejected_at,a_calibration.health_status as asset_health_status " +
+                             "FROM assets " +
+                             "JOIN " +
+                                "calibration as a_calibration on a_calibration.asset_id=assets.id " +
+                             "LEFT JOIN " +
+                                "assetcategories as categories on categories.id=assets.categoryId " +
+                             "LEFT JOIN " +
+                                "business as vendor ON a_calibration.vendor_id=vendor.id " +
+                             "LEFT JOIN " +
+                                "users as request_by ON a_calibration.requested_by= request_by.id " +
+                               "LEFT JOIN users as request_approved_by on a_calibration.request_approved_by = request_approved_by.id " +
+                               "LEFT JOIN users as request_rejected_by on a_calibration.request_rejected_by = request_rejected_by.id " +
+                               "LEFT JOIN users as completed_by on a_calibration.completed_by = completed_by.id " +
+                               "LEFT JOIN users as approved_by on a_calibration.approved_by = approved_by.id " +
+                               "LEFT JOIN users as rejected_by on a_calibration.rejected_by = rejected_by.id " +
+                               "LEFT JOIN users as close_by on a_calibration.close_by = close_by.id " +
+                             "WHERE   ";
+            if (id > 0)
+            {
+                myQuery += $"a_calibration.id = {id} ";
+            }
+            else
+            {
+                throw new ArgumentException("Invalid ID");
+            }
+            List<CMCalibrationDetails> _calibrationDetails = await Context.GetData<CMCalibrationDetails>(myQuery).ConfigureAwait(false);
+
+
+            CMMS.CMMS_Status _Status_long = (CMMS.CMMS_Status)(_calibrationDetails[0].status);
+            string _longStatus = getLongStatus( _Status_long, _calibrationDetails[0]);
+            _calibrationDetails[0].status_long = _longStatus;
+            _calibrationDetails[0].calibration_id = id;
+            return _calibrationDetails;
+        }
 
         internal async Task<CMDefaultResponse> RequestCalibration(CMRequestCalibration request, int userID)
         {
@@ -99,6 +189,8 @@ namespace CMMSAPIs.Repositories.Calibration
                 DataTable dt2 = await Context.FetchData(myQuery).ConfigureAwait(false);
                 int id = Convert.ToInt32(dt2.Rows[0][0]);
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, request.asset_id, CMMS.CMMS_Modules.CALIBRATION, id, "Calibration Requested", CMMS.CMMS_Status.CALIBRATION_REQUEST, userID);
+                List<CMCalibrationDetails> _ViewCalibratiom = await GetCalibrationDetails(id);
+                CMMSNotification.sendNotification(CMMS.CMMS_Modules.CALIBRATION, CMMS.CMMS_Status.CALIBRATION_REQUEST, _ViewCalibratiom[0]);
                 CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Calibration requested successfully");
                 return response;
             }
@@ -129,6 +221,9 @@ namespace CMMSAPIs.Repositories.Calibration
             if(returnStatus == CMMS.RETRUNSTATUS.SUCCESS)
             {
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, assetID, CMMS.CMMS_Modules.CALIBRATION, request.id, "Calibration Request Approved", CMMS.CMMS_Status.CALIBRATION_REQUEST_APPROVED, userID);
+                List<CMCalibrationDetails> _ViewCalibratiom = await GetCalibrationDetails(request.id);
+
+                CMMSNotification.sendNotification(CMMS.CMMS_Modules.CALIBRATION, CMMS.CMMS_Status.CALIBRATION_REQUEST_APPROVED, _ViewCalibratiom[0]);
                 response = new CMDefaultResponse(request.id, returnStatus, "Calibration Request Approved Successfully");
             }
             else 
@@ -158,6 +253,9 @@ namespace CMMSAPIs.Repositories.Calibration
             if (returnStatus == CMMS.RETRUNSTATUS.SUCCESS)
             {
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, assetID, CMMS.CMMS_Modules.CALIBRATION, request.id, "Calibration Request Rejected", CMMS.CMMS_Status.CALIBRATION_REQUEST_REJECTED, userID);
+                List<CMCalibrationDetails> _ViewCalibratiom = await GetCalibrationDetails(request.id);
+
+                CMMSNotification.sendNotification(CMMS.CMMS_Modules.CALIBRATION, CMMS.CMMS_Status.CALIBRATION_REQUEST_REJECTED, _ViewCalibratiom[0]);
                 response = new CMDefaultResponse(request.id, returnStatus, "Calibration Request Rejected Successfully");
             }
             else
@@ -208,6 +306,10 @@ namespace CMMSAPIs.Repositories.Calibration
             if (returnStatus == CMMS.RETRUNSTATUS.SUCCESS)
             {
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, assetID, CMMS.CMMS_Modules.CALIBRATION, calibration_id, "Calibration Started", CMMS.CMMS_Status.CALIBRATION_STARTED, userID);
+                List<CMCalibrationDetails> _ViewCalibratiom = await GetCalibrationDetails(calibration_id);
+
+                CMMSNotification.sendNotification(CMMS.CMMS_Modules.CALIBRATION, CMMS.CMMS_Status.CALIBRATION_STARTED, _ViewCalibratiom[0]);
+                
                 response = new CMDefaultResponse(calibration_id, returnStatus, $"Calibration Started for Asset {assetID}");
             }
             else
@@ -238,6 +340,9 @@ namespace CMMSAPIs.Repositories.Calibration
             if (returnStatus == CMMS.RETRUNSTATUS.SUCCESS)
             {
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, assetID, CMMS.CMMS_Modules.CALIBRATION, request.calibration_id, "Calibration Completed", CMMS.CMMS_Status.CALIBRATION_COMPLETED, userID);
+                List<CMCalibrationDetails> _ViewCalibratiom = await GetCalibrationDetails(request.calibration_id);
+
+                CMMSNotification.sendNotification(CMMS.CMMS_Modules.CALIBRATION, CMMS.CMMS_Status.CALIBRATION_COMPLETED, _ViewCalibratiom[0]);
                 response = new CMDefaultResponse(request.calibration_id, returnStatus, "Calibration Completed");
             }
             else
@@ -267,6 +372,9 @@ namespace CMMSAPIs.Repositories.Calibration
             if (returnStatus == CMMS.RETRUNSTATUS.SUCCESS)
             {
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, assetID, CMMS.CMMS_Modules.CALIBRATION, request.calibration_id, "Calibration Closed", CMMS.CMMS_Status.CALIBRATION_CLOSED, userID);
+                List<CMCalibrationDetails> _ViewCalibratiom = await GetCalibrationDetails(request.calibration_id);
+
+                CMMSNotification.sendNotification(CMMS.CMMS_Modules.CALIBRATION, CMMS.CMMS_Status.CALIBRATION_CLOSED, _ViewCalibratiom[0]);
                 response = new CMDefaultResponse(request.calibration_id, returnStatus, "Calibration Closed");
             }
             else
@@ -308,6 +416,9 @@ namespace CMMSAPIs.Repositories.Calibration
             if (returnStatus == CMMS.RETRUNSTATUS.SUCCESS)
             {
                 await _utilsRepo.AddHistoryLog( CMMS.CMMS_Modules.INVENTORY, nextRequest[0].asset_id, CMMS.CMMS_Modules.CALIBRATION, request.id, $"Calibration Approved to ID {newCalibration.id[0]}", CMMS.CMMS_Status.CALIBRATION_COMPLETED, userID);
+                List<CMCalibrationDetails> _ViewCalibratiom = await GetCalibrationDetails(request.id);
+
+                CMMSNotification.sendNotification(CMMS.CMMS_Modules.CALIBRATION, CMMS.CMMS_Status.CALIBRATION_APPROVED, _ViewCalibratiom[0]);
                 response = new CMDefaultResponse(request.id, returnStatus, $"Calibration Approved. Next Calibration with ID {newCalibration.id[0]} on '{nextRequest[0].next_calibration_date.ToString("yyyy'-'MM'-'dd")}'");
             }
             else
@@ -336,6 +447,9 @@ namespace CMMSAPIs.Repositories.Calibration
             if (returnStatus == CMMS.RETRUNSTATUS.SUCCESS)
             {
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, assetID, CMMS.CMMS_Modules.CALIBRATION, request.id, "Calibration Rejected", CMMS.CMMS_Status.CALIBRATION_REJECTED, userID);
+                List<CMCalibrationDetails> _ViewCalibratiom = await GetCalibrationDetails(request.id);
+
+                CMMSNotification.sendNotification(CMMS.CMMS_Modules.CALIBRATION, CMMS.CMMS_Status.CALIBRATION_REJECTED, _ViewCalibratiom[0]);
                 response = new CMDefaultResponse(request.id, returnStatus, "Calibration Rejected");
             }
             else

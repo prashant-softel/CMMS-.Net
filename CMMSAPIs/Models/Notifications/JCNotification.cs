@@ -57,42 +57,45 @@ namespace CMMSAPIs.Models.Notifications
         override protected string getHTMLBody(params object[] args)
         {
             string retValue = "";
-            int jcId = m_JCObj.id;
-            int permitId = m_JCObj.ptwId;
-            int jobid = m_JCObj.jobid;
-            var JobDesc = m_JCObj.description;
-            string JC_Closed_by_Name = (string)m_JCObj.JC_Closed_by_Name;
-            string JC_Rejected_By_Name = (string)m_JCObj.JC_Rejected_By_Name;
-            string JC_Updated_By_Name = (string)m_JCObj.UpdatedByName;
-            string JC_Approved_By_Name = (string)m_JCObj.JC_Approved_By_Name;
 
-            var template = getHTMLBodyTemplate(args);
+            retValue = String.Format("<h3><b style='color:#31576D'>Status:</b>{0}</h3><br>", m_JCObj.status_long);
+
+            retValue += String.Format("<table style='width: 50%; margin:0 auto; border-collapse: collapse ; border-spacing: 10px; ' border='1'>");
+            retValue += String.Format(template, "ID", m_JCObj.id);
+            retValue += String.Format(template, "Status", m_JCObj.status_short);
+            retValue += String.Format(template, "Job ID", m_JCObj.jobid);
+            retValue += String.Format(template, "PTW ID", m_JCObj.ptwId);
+            retValue += String.Format(template, "Job Card Description", m_JCObj.description);
+            retValue += String.Format(template, "Opened By", m_JCObj.opened_by);
+            retValue += String.Format(template, "Opened By ", m_JCObj.opened_at);
+
             switch (m_notificationID)
             {
-                case CMMS.CMMS_Status.JC_OPENED:     
-                    retValue = String.Format(template, jcId, JobDesc);
+                case CMMS.CMMS_Status.JC_OPENED:
+                    retValue += "</table>";            
                     break;
-                case CMMS.CMMS_Status.JC_UPDADATED:     
-                    retValue = String.Format(template, jcId, JC_Updated_By_Name, JobDesc);
+                case CMMS.CMMS_Status.JC_UPDADATED:
+                    retValue += String.Format(templateEnd, "Updated By", m_JCObj.UpdatedByName);
                     break;
-                case CMMS.CMMS_Status.JC_CLOSED:     
-                    retValue = String.Format(template, jcId, JC_Closed_by_Name, JobDesc);
+                case CMMS.CMMS_Status.JC_CLOSED:
+                    retValue += String.Format(templateEnd, "Closed By", m_JCObj.JC_Closed_by_Name);
                     break;
-                case CMMS.CMMS_Status.JC_CARRRY_FORWARDED:     
-                    retValue = String.Format(template, jcId, JobDesc);
+                case CMMS.CMMS_Status.JC_CARRRY_FORWARDED:
+                    retValue += "</table>";
                     break;
-                case CMMS.CMMS_Status.JC_APPROVED:     
-                    retValue = String.Format(template, jcId, JC_Approved_By_Name, JobDesc);
+                case CMMS.CMMS_Status.JC_APPROVED:
+                    retValue += String.Format(templateEnd, "Approved By", m_JCObj.JC_Approved_By_Name);
                     break;
-                case CMMS.CMMS_Status.JC_REJECTED5:     
-                    retValue = String.Format(template, jcId, JC_Rejected_By_Name, JobDesc);
+                case CMMS.CMMS_Status.JC_REJECTED5:
+                    retValue += String.Format(templateEnd, "Rejected By", m_JCObj.JC_Rejected_By_Name);
                     break;
-                case CMMS.CMMS_Status.JC_PTW_TIMED_OUT:    
-                    retValue = String.Format(template, jcId, JobDesc);
+                case CMMS.CMMS_Status.JC_PTW_TIMED_OUT:
                     break;               
                 default:
                     break;
             }
+
+                
 
             return retValue;
         }

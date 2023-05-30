@@ -101,63 +101,75 @@ namespace CMMSAPIs.Models.Notifications
             string ptw_approve_name = (string)m_permitObj.approvedByName;
             string ptw_closed_name = (string)m_permitObj.closedByName;
 
-            var template = getHTMLBodyTemplate(args);
+            retValue = String.Format("<h3><b style='color:#31576D'>Status:</b>{0}</h3><br>", m_permitObj.current_status_long);
+
+            retValue += String.Format("<table style='width: 50%; margin:0 auto; border-collapse: collapse ; border-spacing: 10px; ' border='1'>");
+            retValue += String.Format(template, "ID", m_permitObj.permitNo);
+            retValue += String.Format(template, "Status", m_permitObj.current_status_short);
+            retValue += String.Format(template, "PTW Title", m_permitObj.PermitTypeName);
+            retValue += String.Format(template, "PTW Description", m_permitObj.description);
+            retValue += String.Format(template, "Created By", m_permitObj.requestedByName);
+
             switch (m_notificationID)
             {
                 case CMMS.CMMS_Status.PTW_CREATED:     //Created
-                    retValue = String.Format(template, permitName, permitDesc);
+                    retValue += "</table>";
                     break;
                 case CMMS.CMMS_Status.PTW_ISSUED:     //Assigned
-                    retValue = String.Format(template, permitName, ptw_issued, permitDesc);
+                    retValue += String.Format(templateEnd, "Issued By", m_permitObj.issuedByName);
                     break;
                 case CMMS.CMMS_Status.PTW_REJECTED_BY_ISSUER:     //Closed
-                    retValue = String.Format(template, permitName, ptw_cancelled_name, permitDesc);
+                    retValue += String.Format(templateEnd, "Rejected By", m_permitObj.issuedByName);
                     break;
                 case CMMS.CMMS_Status.PTW_APPROVE:     //Linked to PTW
-                    retValue = String.Format(template, permitName, ptw_approve_name, permitDesc);
+                    retValue += String.Format(templateEnd, "Approved By", m_permitObj.approvedByName);
                     break;
                 case CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER:     //Linked to PTW
-                    retValue = String.Format(template, permitName, ptw_approve_name, permitDesc);
+                    retValue += String.Format(templateEnd, "Rejected By", m_permitObj.approvedByName);
+
                     break;
-                case CMMS.CMMS_Status.PTW_CLOSED:     
-                    retValue = String.Format(template, permitName, ptw_closed_name, permitDesc);
+                case CMMS.CMMS_Status.PTW_CLOSED:
+                    retValue += String.Format(templateEnd, "Closed By", m_permitObj.closedByName);
+
                     break;
                 case CMMS.CMMS_Status.PTW_CANCELLED_BY_ISSUER:     //Linked to PTW
-                    retValue = String.Format(template, permitName, ptw_issued, ptw_cancelled_name, permitDesc);
+                    retValue += String.Format(templateEnd, "Cancelled By", m_permitObj.issuedByName);
+
                     break;
                 case CMMS.CMMS_Status.PTW_CANCELLED_BY_HSE:     //Linked to PTW
-                    retValue = String.Format(template, permitName, permitDesc);
+                    retValue += String.Format(templateEnd, "Cancelled By", m_permitObj.cancelRequestByName);
+
                     break;
                 case CMMS.CMMS_Status.PTW_CANCELLED_BY_APPROVER:     //Linked to PTW
-                    retValue = String.Format(template, permitName, ptw_approve_name, permitDesc);
+                    retValue += String.Format(templateEnd, "Cancelled By", m_permitObj.approvedByName);
                     break;
                 case CMMS.CMMS_Status.PTW_EDIT:     //Linked to PTW
-                    retValue = String.Format(template, permitName, ptw_issued, permitDesc);
+                    retValue += String.Format(templateEnd, "Edited By", m_permitObj.requestedByName);
                     break;
                 case CMMS.CMMS_Status.PTW_EXTEND_REQUESTED:     //Linked to PTW
-                    retValue = String.Format(template, permitName, ptw_issued, permitDesc);
+                    retValue += String.Format(templateEnd, "Extedend By", m_permitObj.requestedByName);
                     break;
                 case CMMS.CMMS_Status.PTW_EXTEND_REQUEST_APPROVE:     //Linked to PTW
-                    retValue = String.Format(template, permitName, ptw_approve_name, permitDesc);
+                    retValue += String.Format(templateEnd, "Issued By", m_permitObj.approvedByName);
                     break;
                 case CMMS.CMMS_Status.PTW_EXTEND_REQUEST_REJECTED:     //Linked to PTW
-                    retValue = String.Format(template, permitName, ptw_cancelled_name, permitDesc);
+                    retValue += String.Format(templateEnd, "Extend Request Approved by", m_permitObj.approvedByName);
                     break;
                 case CMMS.CMMS_Status.PTW_LINKED_TO_JOB:     //Linked to PTW
-                    retValue = String.Format(template, permitName, permitDesc);
+                    retValue += String.Format(template, "Linked Job", m_permitObj.job_type_id);
+                    retValue += String.Format(templateEnd, "Job Title", m_permitObj.job_type_name);
                     break;
-                case CMMS.CMMS_Status.PTW_LINKED_TO_PM:     //Linked to PTW
-                    retValue = String.Format(template, permitName, permitDesc);
+                case CMMS.CMMS_Status.PTW_LINKED_TO_PM:     //Linked to PTW                   
+                    retValue += String.Format(templateEnd, "Linked PM", m_permitObj.permitNo);
                     break;
                 case CMMS.CMMS_Status.PTW_LINKED_TO_AUDIT:     //Linked to PTW
-                    retValue = String.Format(template, permitName, permitDesc);
+                    retValue += String.Format(templateEnd, "Linked Audit", m_permitObj.permitNo);
                     break;
                 case CMMS.CMMS_Status.PTW_LINKED_TO_HOTO:     //Linked to PTW
-                    retValue = String.Format(template, permitName, permitDesc);
+                    retValue += String.Format(templateEnd, "Linked HOTO", m_permitObj.permitNo);
                     break;
                 case CMMS.CMMS_Status.PTW_EXPIRED:     //Linked to PTW
-                    retValue = String.Format(template, permitName, permitDesc);
-                    break;
+                    //retValue += String.Format("<tr><td style='text-align: left; padding:0.5rem; background-color:#31576D;color:#ffffff'><b>&nbsp;&nbsp;Closed by</b></td><td style='text-align: left; padding:0.5rem;'>&nbsp;&nbsp;{0}</td></table>", m_permitObj.JC_Closed_by_Name); break;
                 default:
                     break;
             }

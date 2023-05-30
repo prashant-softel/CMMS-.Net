@@ -36,8 +36,10 @@ namespace CMMSAPIs.Models.WC
         public string approver_name { get; set; }
         public dynamic last_updated_at { get; set; }
         public dynamic closed_at { get; set; }
-        public string status { get; set; }
+        public int status { get; set; }
         public List<CMLog> log { get; set; }
+        public string status_short { get; set; }
+        public string status_long { get; set; }
 
     }
 }
