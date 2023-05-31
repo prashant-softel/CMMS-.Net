@@ -251,6 +251,8 @@ namespace CMMSAPIs.Repositories.WC
             {
                 if (request.additionalEmailEmployees.Count > 0 || request.externalEmails.Count > 0)
                 {
+                    string deleteMail = $"DELETE FROM wc_emails WHERE wc_id = {request.id}";
+                    await Context.ExecuteNonQry<int>(deleteMail).ConfigureAwait(false);
                     string addMailQry = "INSERT INTO wc_emails (wc_id, email, name, type) VALUES ";
                     if (request.additionalEmailEmployees != null)
                     {
@@ -286,6 +288,8 @@ namespace CMMSAPIs.Repositories.WC
             {
                 if(request.supplierActions.Count > 0)
                 {
+                    string deleteActions = $"DELETE FROM wcschedules WHERE warranty_id = {request.id}";
+                    await Context.ExecuteNonQry<int>(deleteActions).ConfigureAwait(false);
                     string addSupplierActions = "INSERT INTO wcschedules (warranty_id, supplier_action, input_value, input_date, created_at) VALUES ";
                     foreach (var action in request.supplierActions)
                     {
@@ -296,7 +300,7 @@ namespace CMMSAPIs.Repositories.WC
                     await Context.ExecuteNonQry<int>(addSupplierActions).ConfigureAwait(false);
                 }
             }
-            return null;
+            return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "WC Details Updated Successfully");
         }
 
         internal async Task<CMDefaultResponse> ApproveWC(CMApproval request)

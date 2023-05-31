@@ -84,7 +84,7 @@ namespace CMMSAPIs.Controllers.WC
         [Authorize]
         [Route("UpdateWC")]
         [HttpPatch]
-        internal async Task<IActionResult> UpdateWC(CMWCCreate request)
+        public async Task<IActionResult> UpdateWC(CMWCCreate request)
         {
             try
             {
