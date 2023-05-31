@@ -4,14 +4,14 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using CMMSAPIs.Helper;
-using CMMSAPIs.Models;
+using CMMSAPIs.Models.GO;
 using CMMSAPIs.Models.SM;
 using CMMSAPIs.Models.Utils;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace CMMSAPIs.Repositories
+namespace CMMSAPIs.Repositories.GO
 {
     public class GORepository : GenericRepository
     {
@@ -74,14 +74,14 @@ namespace CMMSAPIs.Repositories
                     $"VALUES({request.plantID},{request.vendorID}, {request.receiverID}, {userID}, '{DateTime.Now.ToString("yyyy-MM-dd")}', '{DateTime.Now.ToString("yyyy-MM-dd")}', {request.status}," +
                     $"'','','','', '', '', '','','','00001-01-01','00001-01-01','',0, '',0,'0001-01-01',0);" + 
                     $"";
-                DataTable dt2 = await Context.FetchData(poInsertQuery).ConfigureAwait(false);
-                int poid = Convert.ToInt32(dt2.Rows[0][0]);
+                DataTable dt1 = await Context.FetchData(poInsertQuery).ConfigureAwait(false);
+                int poid = Convert.ToInt32(dt1.Rows[0][0]);
 
                 for (var i = 0; i < request.go_items.Count; i++)
                 {
                     string poDetailsQuery = $"INSERT INTO smpurchaseorderdetails (purchaseID,assetItemID,order_type,cost,ordered_qty,location_ID) " +
-                    "values(" + poid + ", " + request.go_items[i].assetItemID + ", '" + request.go_items[i]. + "', " + request.cost + ", " + request.ordered_qty + ", " + request.location_ID + ") ; SELECT LAST_INSERT_ID();";
-                    DataTable dt2 = await Context.FetchData(mainQuery).ConfigureAwait(false);
+                    "values(" + poid + ", " + request.go_items[i].assetItemID + ", '" + request.order_by_type + "', " + request.go_items[i].cost + ", " + request.go_items[i].ordered_qty + ", " + request.location_ID + ") ; SELECT LAST_INSERT_ID();";
+                    DataTable dt2 = await Context.FetchData(poDetailsQuery).ConfigureAwait(false);
                     int id = Convert.ToInt32(dt2.Rows[0][0]);
                 }
             }
@@ -92,9 +92,13 @@ namespace CMMSAPIs.Repositories
         }
         internal async Task<CMDefaultResponse> UpdateGO(CMGO request, int userID)
         {
+            foreach(var item in request.go_items)
+            {
+                string updateQ = $"UPDATE smpurchaseorderdetails SET assetItemID = {item.assetItemID},order_type = {request.order_by_type},cost = {item.cost},ordered_qty = {item.ordered_qty},location_ID = {request.location_ID} WHERE purchaseID = {request.id}";
+                var result = await Context.ExecuteNonQry<int>(updateQ);
+            }
             //string mainQuery = $"UPDATE smpurchaseorderdetails SET generate_flag = " +request.generate_flag + ",flag = "+request.flag+", vendorID = "+request.vendorID+" WHERE ID = "+request.id+"";
-            string updateQ = $"UPDATE smpurchaseorderdetails SET assetItemID = {request.assetItemID},order_type = {request.order_type},cost = {request.cost},ordered_qty = {request.ordered_qty},location_ID = {request.location_ID} WHERE ID = {request.id}";
-            var result = await Context.ExecuteNonQry<int>(updateQ);
+            
 
             CMDefaultResponse response = new CMDefaultResponse(1, CMMS.RETRUNSTATUS.SUCCESS, "Goods order updated successfully.");
             return response;
