@@ -78,7 +78,7 @@ namespace CMMSAPIs.Controllers.Users
         [Route("CreateUser")]
         [HttpPost]
 
-        public async Task<IActionResult> CreateUser(CMCreateUser request)
+        public async Task<IActionResult> CreateUser(List<CMCreateUser> request)
         {
             try
             {
