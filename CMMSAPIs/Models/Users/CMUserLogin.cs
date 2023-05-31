@@ -70,9 +70,13 @@ namespace CMMSAPIs.Models.Users
     {
         public List<int> facilities { get; set; }
         public CMUserCrentials credentials { get; set; }
+        public bool flagUpdateAccess { get; set; }
+        public bool flagUpdateNotifications { get; set; }
     }
-    public class CMCreateUser : CMUpdateUser
+    public class CMCreateUser : CMUserDetail
     {
+        public List<int> facilities { get; set; }
+        public CMUserCrentials credentials { get; set; }
         public List<CMAccessList> access_list { get; set; }
         public List<CMNotificationList> notification_list { get; set; }
     }

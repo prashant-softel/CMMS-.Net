@@ -4,6 +4,7 @@ using CMMSAPIs.Models.Users;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Utils;
 using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Data;
@@ -23,9 +24,11 @@ namespace CMMSAPIs.Repositories.Users
     {
         private MYSQLDBHelper _conn;
         private readonly IConfiguration _configuration;
+        private IWebHostEnvironment _webHostEnvironment;
         //private RoleAccessRepository _roleAccessRepo;
-        public UserAccessRepository(MYSQLDBHelper sqlDBHelper, IConfiguration configuration = null) : base(sqlDBHelper)
+        public UserAccessRepository(MYSQLDBHelper sqlDBHelper, IWebHostEnvironment webHostEnvironment = null, IConfiguration configuration = null) : base(sqlDBHelper)
         {
+            _webHostEnvironment = webHostEnvironment;
             _configuration = configuration;
             _conn = sqlDBHelper;
             //_roleAccessRepo = new RoleAccessRepository(sqlDBHelper);
@@ -98,83 +101,120 @@ namespace CMMSAPIs.Repositories.Users
             }
             return null;
         }
-    
-        internal async Task<CMDefaultResponse> CreateUser(CMCreateUser request, int userID)
+        
+        internal async Task<List<CMDefaultResponse>> ImportUsers(int file_id, int userID)
+        {
+            string bloodGroupQry = "SELECT name, blood_group_id FROM bloodgroupaltnames";
+            DataTable dtBloodGroups = await Context.FetchData(bloodGroupQry).ConfigureAwait(false);
+            List<string> bloodGroupNames = dtBloodGroups.GetColumn<string>("name");
+            List<int> bloodGroupIds = dtBloodGroups.GetColumn<int>("blood_group_id");
+            Dictionary<string, int> bloodGroups = new Dictionary<string, int>();
+            bloodGroups.Merge(bloodGroupNames, bloodGroupIds);
+
+            string genderQry = "SELECT id, name FROM gender";
+            DataTable dtGender = await Context.FetchData(genderQry).ConfigureAwait(false);
+            List<string> genderNames = dtGender.GetColumn<string>("name");
+            List<int> genderIds = dtGender.GetColumn<int>("id");
+            Dictionary<string, int> gender = new Dictionary<string, int>();
+            gender.Merge(genderNames, genderIds);
+
+            return null;
+        }
+
+        internal async Task<List<CMDefaultResponse>> CreateUser(List<CMCreateUser> request, int userID)
         {
             /*
              * Read the required field for insert
              * Table - Users, UserNofication, UserAccess
              * Use existing functions to insert UserNotification and User Access in table
             */
-            string loginIdQuery = "SELECT loginId FROM users;";
-            DataTable dtLogin = await Context.FetchData(loginIdQuery).ConfigureAwait(false);
-            string[] loginList = dtLogin.GetColumn<string>("loginId").ToArray();
-            if (Array.Exists(loginList, loginId => loginId == request.credentials.user_name))
-                throw new ArgumentException("Login ID already exists");
-            string country, state, city;
-            string getCountryQry = $"SELECT name FROM countries WHERE id = {request.country_id};";
-            DataTable dtCountry = await Context.FetchData(getCountryQry).ConfigureAwait(false);
-            if (dtCountry.Rows.Count == 0)
-                throw new ArgumentException("Invalid Country");
-            country = Convert.ToString(dtCountry.Rows[0][0]);
-            string getStateQry = $"SELECT name FROM states WHERE id = {request.state_id};";
-            DataTable dtState = await Context.FetchData(getStateQry).ConfigureAwait(false);
-            if (dtState.Rows.Count == 0)
-                throw new ArgumentException("Invalid State");
-            state = Convert.ToString(dtState.Rows[0][0]);
-            string getCityQry = $"SELECT name FROM cities WHERE id = {request.city_id};";
-            DataTable dtCity = await Context.FetchData(getCityQry).ConfigureAwait(false);
-            if (dtCity.Rows.Count == 0)
-                throw new ArgumentException("Invalid City");
-            city = Convert.ToString(dtCity.Rows[0][0]);
-            string myQuery1 = $"SELECT * FROM states WHERE id = {request.state_id} AND country_id = {request.country_id};";
-            DataTable dt1 = await Context.FetchData(myQuery1).ConfigureAwait(false);
-            if (dt1.Rows.Count == 0)
-                throw new ArgumentException($"{state} is not situated in {country}");
-            string myQuery2 = $"SELECT * FROM cities WHERE id = {request.city_id} AND state_id = {request.state_id} AND country_id = {request.country_id};";
-            DataTable dt2 = await Context.FetchData(myQuery2).ConfigureAwait(false);
-            if (dt2.Rows.Count == 0)
-                throw new ArgumentException($"{city} is not situated in {state}, {country}");
-            string myQuery = "INSERT INTO users(loginId, password, secondaryEmail, firstName, lastName, birthday, genderId, gender, bloodGroupId, bloodGroup, photoId, " +
-                                "mobileNumber, landlineNumber, countryId, stateId, cityId, zipcode, roleId, isEmployee, joiningDate, createdBy, createdAt, status) " +
-                                $"VALUES ('{request.credentials.user_name}', '{request.credentials.password}', '{request.secondaryEmail}', " +
-                                $"'{request.first_name}', '{request.last_name}', '{((DateTime)request.DOB).ToString("yyyy-MM-dd")}', {(int)request.gender_id}, '{request.gender_id}', " +
-                                $"{request.blood_group_id}, '{CMMS.BLOOD_GROUPS[request.blood_group_id]}', {request.photoId}, '{request.contact_no}','{request.landline_number}', " +
-                                $"{request.country_id}, {request.state_id}, {request.city_id}, {request.zipcode}, {request.role_id}, {(request.isEmployee==null?0:request.isEmployee)}, " +
-                                $"'{((DateTime)request.joiningDate).ToString("yyyy-MM-dd hh:mm:ss")}', {userID}, '{UtilsRepository.GetUTCTime()}', 1); SELECT LAST_INSERT_ID(); ";
-            
-            DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
-            int id = Convert.ToInt32(dt.Rows[0][0]);
-            /*  */
-            if(request.facilities != null)
+            List<CMDefaultResponse> responseList = new List<CMDefaultResponse>();
+            foreach(CMCreateUser user in request)
             {
-                foreach (int facility in request.facilities)
+                ErrorLog err = new ErrorLog(_webHostEnvironment);
+                string.Join("\n", err.errorLog());
+                string loginIdQuery = "SELECT loginId FROM users;";
+                DataTable dtLogin = await Context.FetchData(loginIdQuery).ConfigureAwait(false);
+                string[] loginList = dtLogin.GetColumn<string>("loginId").ToArray();
+                if (Array.Exists(loginList, loginId => loginId == user.credentials.user_name))
+                    err.SetError("Login ID already exists");
+                string country, state, city;
+                string getCountryQry = $"SELECT name FROM countries WHERE id = {user.country_id};";
+                DataTable dtCountry = await Context.FetchData(getCountryQry).ConfigureAwait(false);
+                if (dtCountry.Rows.Count == 0)
+                    err.SetError("Invalid Country");
+                country = Convert.ToString(dtCountry.Rows[0][0]);
+                string getStateQry = $"SELECT name FROM states WHERE id = {user.state_id};";
+                DataTable dtState = await Context.FetchData(getStateQry).ConfigureAwait(false);
+                if (dtState.Rows.Count == 0)
+                    err.SetError("Invalid State");
+                state = Convert.ToString(dtState.Rows[0][0]);
+                string getCityQry = $"SELECT name FROM cities WHERE id = {user.city_id};";
+                DataTable dtCity = await Context.FetchData(getCityQry).ConfigureAwait(false);
+                if (dtCity.Rows.Count == 0)
+                    err.SetError("Invalid City");
+                city = Convert.ToString(dtCity.Rows[0][0]);
+                string myQuery1 = $"SELECT * FROM states WHERE id = {user.state_id} AND country_id = {user.country_id};";
+                DataTable dt1 = await Context.FetchData(myQuery1).ConfigureAwait(false);
+                if (dt1.Rows.Count == 0)
+                    err.SetError($"{state} is not situated in {country}");
+                string myQuery2 = $"SELECT * FROM cities WHERE id = {user.city_id} AND state_id = {user.state_id} AND country_id = {user.country_id};";
+                DataTable dt2 = await Context.FetchData(myQuery2).ConfigureAwait(false);
+                if (dt2.Rows.Count == 0)
+                    err.SetError($"{city} is not situated in {state}, {country}");
+                int index = request.FindIndex(x => x == user);
+                if(err.GetErrorCount() != 0)
                 {
-                    string addFacility = $"INSERT INTO userfacilities(userId, facilityId, createdAt, createdBy, status) " +
-                                            $"VALUES ({id}, {facility}, '{UtilsRepository.GetUTCTime()}', {userID}, 0);";
-                    await Context.ExecuteNonQry<int>(addFacility).ConfigureAwait(false);
+                    responseList.Add(new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, $"Errors found at line {index} \n{string.Join('\n',err.errorLog().ToArray()/**/)}"));
                 }
             }
-            
-            CMUserAccess userAccess = new CMUserAccess()
+            if(responseList.Count == 0)
             {
-                user_id = id,
-                access_list = request.access_list
-            };
-            CMUserNotifications userNotifications = new CMUserNotifications()
-            {
-                user_id = id,
-                notification_list = request.notification_list
-            };
-            using(var repos = new UtilsRepository(_conn))
-            {
-                await repos.AddHistoryLog(CMMS.CMMS_Modules.USER, id, 0, 0, "User Added", CMMS.CMMS_Status.CREATED, userID);
+                foreach (var user in request)
+                {
+                    string myQuery = "INSERT INTO users(loginId, password, secondaryEmail, firstName, lastName, birthday, genderId, gender, bloodGroupId, bloodGroup, photoId, " +
+                                       "mobileNumber, landlineNumber, countryId, stateId, cityId, zipcode, roleId, isEmployee, joiningDate, createdBy, createdAt, status) " +
+                                       $"VALUES ('{user.credentials.user_name}', '{user.credentials.password}', '{user.secondaryEmail}', '{user.first_name}', '{user.last_name}', " +
+                                       $"'{((DateTime)user.DOB).ToString("yyyy-MM-dd")}', {(int)user.gender_id}, '{user.gender_id}', {user.blood_group_id}, '{CMMS.BLOOD_GROUPS[user.blood_group_id]}', " +
+                                       $"{user.photoId}, '{user.contact_no}','{user.landline_number}', {user.country_id}, {user.state_id}, {user.city_id}, {user.zipcode}, " +
+                                       $"{user.role_id}, {(user.isEmployee == null ? 0 : user.isEmployee)}, '{((DateTime)user.joiningDate).ToString("yyyy-MM-dd hh:mm:ss")}', " +
+                                       $"{userID}, '{UtilsRepository.GetUTCTime()}', 1); SELECT LAST_INSERT_ID(); ";
+
+                    DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
+                    int id = Convert.ToInt32(dt.Rows[0][0]);
+                    /*  */
+                    if (user.facilities != null)
+                    {
+                        foreach (int facility in user.facilities)
+                        {
+                            string addFacility = $"INSERT INTO userfacilities(userId, facilityId, createdAt, createdBy, status) " +
+                                                    $"VALUES ({id}, {facility}, '{UtilsRepository.GetUTCTime()}', {userID}, 0);";
+                            await Context.ExecuteNonQry<int>(addFacility).ConfigureAwait(false);
+                        }
+                    }
+
+                    CMUserAccess userAccess = new CMUserAccess()
+                    {
+                        user_id = id,
+                        access_list = user.access_list
+                    };
+                    CMUserNotifications userNotifications = new CMUserNotifications()
+                    {
+                        user_id = id,
+                        notification_list = user.notification_list
+                    };
+                    using (var repos = new UtilsRepository(_conn))
+                    {
+                        await repos.AddHistoryLog(CMMS.CMMS_Modules.USER, id, 0, 0, "User Added", CMMS.CMMS_Status.CREATED, userID);
+                    }
+                    await SetUserAccess(userAccess, userID);
+                    await SetUserNotifications(userNotifications, userID);
+                    CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "User Created");
+                    responseList.Add(response);
+                }
             }
-            await SetUserAccess(userAccess, userID);
-            await SetUserNotifications(userNotifications, userID);
-            CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "User Created");
             /*    */
-            return response;
+            return responseList;
         }
         internal async Task<CMDefaultResponse> UpdateUser(CMUpdateUser request, int userID)
         {
@@ -277,6 +317,29 @@ namespace CMMSAPIs.Repositories.Users
                                                 $"VALUES ({request.id}, {facility}, '{UtilsRepository.GetUTCTime()}', {userID}, 0);";
                         await Context.ExecuteNonQry<int>(addFacility).ConfigureAwait(false);
                     }
+                }
+            }
+            if (request.role_id > 0)
+            {
+                if (request.flagUpdateAccess)
+                {
+                    string delete_qry = $"DELETE FROM UsersAccess WHERE UserId = {request.id};";
+                    await Context.ExecuteNonQry<int>(delete_qry).ConfigureAwait(false);
+                    CMUserAccess acc = new CMUserAccess()
+                    {
+                        user_id = request.id
+                    };
+                    await SetUserAccess(acc, userID);
+                }
+                if (request.flagUpdateNotifications)
+                {
+                    string delete_qry = $"DELETE FROM usernotifications WHERE UserId = {request.id};";
+                    await Context.ExecuteNonQry<int>(delete_qry).ConfigureAwait(false);
+                    CMUserNotifications notif = new CMUserNotifications()
+                    {
+                        user_id = request.id
+                    };
+                    await SetUserNotifications(notif, userID);
                 }
             }
             using (var repos = new UtilsRepository(_conn))
@@ -395,6 +458,7 @@ namespace CMMSAPIs.Repositories.Users
                     using (var repos = new RoleAccessRepository(_conn))
                     {
                         default_user_access = (await repos.GetRoleAccess(role)).access_list;
+                        request.access_list = default_user_access;
                     }
                 }
                 else
@@ -407,6 +471,7 @@ namespace CMMSAPIs.Repositories.Users
                         using (var repos = new RoleAccessRepository(_conn))
                         {
                             default_user_access = (await repos.GetRoleAccess(role)).access_list;
+                            request.access_list = default_user_access;
                         }
                     }
                 }
