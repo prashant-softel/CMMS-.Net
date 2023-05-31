@@ -17,8 +17,8 @@ namespace CMMSAPIs.Models.WC
         public string contactReferenceNumber { get; set; }
         public int costOfReplacement { get; set; }
         public int currencyId { get; set; }
-        public DateTime warrantyStartAt { get; set; }
-        public DateTime warrantyEndAt { get; set; }
+        public DateTime? warrantyStartAt { get; set; }
+        public DateTime? warrantyEndAt { get; set; }
         public string title { get; set; }
         public string description { get; set; }
         public List<IFormFile> equipmentImages { get; set; }
@@ -35,15 +35,15 @@ namespace CMMSAPIs.Models.WC
         public string warrantyClaimTitle { get; set; }
         public string warrantyDescription { get; set; }
         public string correctiveActionByBuyer { get; set; }
-        public DateTime issuedOn { get; set; }
+        public DateTime? issuedOn { get; set; }
         public int status{ get;  set; }
         public string lastModifiedDate { get; set; }
         public string approvedBy { get; set; }
-        public string approvedOn { get; internal set; }
-        public string wcFacCode { get; internal set; }
-        public DateTime failureTime { get; internal set; }
-        public int estimatedLoss { get; internal set; }
-        public int estimatedLossCurrencyId { get; internal set; } 
+        public DateTime? approvedOn { get; set; }
+        public string wcFacCode { get; set; }
+        public DateTime? failureTime { get; set; }
+        public int estimatedLoss { get; set; }
+        public int estimatedLossCurrencyId { get; set; } 
         public int quantity { get; set; }
     }
 
@@ -51,14 +51,13 @@ namespace CMMSAPIs.Models.WC
     {
         public string name { get; set; }
         public string email { get; set; }
-        public string comment { get; set; }
     }
 
     public class CMWCSupplierActions 
     {
         public string name { get; set; }
         public bool is_required { get; set; }
-        public DateTime required_by_date { get; set; }
+        public DateTime? required_by_date { get; set; }
 
     }
 }

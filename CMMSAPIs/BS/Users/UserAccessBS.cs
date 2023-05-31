@@ -4,6 +4,7 @@ using CMMSAPIs.Models.Users;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Users;
 using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Hosting;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -15,7 +16,7 @@ namespace CMMSAPIs.BS.Users
         Task<UserToken> Authenticate(CMUserCrentials userCrentials);
         public Task<CMUserDetail> GetUserDetail(int user_id);
         public Task<List<CMUser>> GetUserList(int facility_id);
-        public Task<CMDefaultResponse> CreateUser(CMCreateUser request, int userID);
+        public Task<List<CMDefaultResponse>> CreateUser(List<CMCreateUser> request, int userID);
         public Task<CMDefaultResponse> UpdateUser(CMUpdateUser request, int userID);
         public Task<CMDefaultResponse> DeleteUser(int id, int userID);
         public Task<List<CMUser>> GetUserByNotificationId(CMUserByNotificationId request);
@@ -28,11 +29,13 @@ namespace CMMSAPIs.BS.Users
     public class UserAccessBS : IUserAccessBS
     {
         private readonly IConfiguration _configuration;
+        private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly DatabaseProvider databaseProvider;
         private MYSQLDBHelper getDB => databaseProvider.SqlInstance();
-        public UserAccessBS(DatabaseProvider dbProvider, IConfiguration configuration)
+        public UserAccessBS(DatabaseProvider dbProvider, IWebHostEnvironment webHostEnvironment, IConfiguration configuration)
         {
             _configuration   = configuration;
+            _webHostEnvironment = webHostEnvironment;
             databaseProvider = dbProvider;
         }
 
@@ -40,7 +43,7 @@ namespace CMMSAPIs.BS.Users
         {
             try
             {
-                using (var repos = new UserAccessRepository(getDB, _configuration))
+                using (var repos = new UserAccessRepository(getDB, _webHostEnvironment, _configuration))
                 {
                     return await repos.Authenticate(userCrentials);
                 }
@@ -81,11 +84,11 @@ namespace CMMSAPIs.BS.Users
             }
         }
 
-        public async Task<CMDefaultResponse> CreateUser(CMCreateUser request, int userID)
+        public async Task<List<CMDefaultResponse>> CreateUser(List<CMCreateUser> request, int userID)
         {
             try
             {
-                using (var repos = new UserAccessRepository(getDB))
+                using (var repos = new UserAccessRepository(getDB, _webHostEnvironment))
                 {
                     return await repos.CreateUser(request, userID);
                 }

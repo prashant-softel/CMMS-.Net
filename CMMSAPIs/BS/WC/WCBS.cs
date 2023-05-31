@@ -13,7 +13,6 @@ namespace CMMSAPIs.BS.WC
         Task<List<CMWCList>> GetWCList(int facilityId, string startDate, string endDate, int statusId);
         Task<CMDefaultResponse> CreateWC(List<CMWCCreate> request, int userID);
         Task<CMWCDetail> GetWCDetails(int wc_id);
-
         Task<CMDefaultResponse> UpdateWC(CMWCCreate request);
         Task<CMDefaultResponse> ApproveWC(CMApproval request);
         Task<CMDefaultResponse> RejectWC(CMApproval request);

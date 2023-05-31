@@ -3,11 +3,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using CMMSAPIs.Repositories;
-using CMMSAPIs.Models;
+using CMMSAPIs.Repositories.GO;
+using CMMSAPIs.Models.GO;
 using CMMSAPIs.Models.Utils;
 
-namespace CMMSAPIs.BS
+namespace CMMSAPIs.BS.GO
 {
     public interface IGOBS
     {
