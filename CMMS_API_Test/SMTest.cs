@@ -45,6 +45,8 @@ namespace CMMS_API_Test
         string EP_getAssetTypeByItemID = "/api/MRS/getAssetTypeByItemID";
         string EP_mrsReturn = "/api/MRS/mrsReturn";
         string EP_mrsReturnApproval = "/api/MRS/mrsReturnApproval";
+        string EP_getLastTemplateData = "/api/MRS/getLastTemplateData";
+        string EP_GetAssetItems = "/api/MRS/GetAssetItems";
 
         // GO
         string EP_getGOList = "/api/GO/GetGOList";
@@ -585,5 +587,27 @@ namespace CMMS_API_Test
             Assert.AreEqual("Goods order submitted successfully.", response.message);
         }
 
+        [TestMethod]
+        public void getLastTemplateData()
+        {
+
+            int id = 1;
+            var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.SM.CMMRS>();
+            var response = ptwService.GetItem(EP_getLastTemplateData + "?ID=" + id);
+            Assert.AreEqual(4, response.requested_qty);
+            Assert.AreEqual(218, response.asset_item_ID);
+
+        }
+        [TestMethod]
+        public void GetAssetItems()
+        {
+
+            int id = 45;
+            var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.SM.AssetItem>();
+            var response = ptwService.GetItemList(EP_GetAssetItems + "?plantID=" + id);
+            Assert.AreEqual(4, response[0].ID);
+            Assert.AreEqual(218, response[0].asset_ID);
+
+        }
     }
 }
