@@ -498,27 +498,27 @@ namespace CMMSAPIs.Repositories.Inventory
             ", f.name AS facilityName, bl.name AS blockName,a2.name as parentName,  custbl.name as customerName,owntbl.name as ownerName, s.name AS status, b5.name AS operatorName, a.specialTool, a.warrantyId" +     //use a.specialToolEmpId to put specialToolEmp,
 
             " from assets as a " +
-            "join assettypes as ast on ast.id = a.typeId " +
+            "left join assettypes as ast on ast.id = a.typeId " +
             "" +
-            "join assetcategories as ac on ac.id= a.categoryId " +
+            "left join assetcategories as ac on ac.id= a.categoryId " +
             "" +
-            "join business as custbl on custbl.id = a.customerId " +
+            "left join business as custbl on custbl.id = a.customerId " +
             "" +
-            "join business as owntbl" + " on owntbl.id = a.ownerId " +
+            "left join business as owntbl" + " on owntbl.id = a.ownerId " +
             "" +
-            "JOIN business AS manufacturertlb ON a.ownerId = manufacturertlb.id " +
+            "left JOIN business AS manufacturertlb ON a.ownerId = manufacturertlb.id " +
             "" +
-            "JOIN business AS b2 ON a.ownerId = b2.id " +
+            "left JOIN business AS b2 ON a.ownerId = b2.id " +
 
-            "JOIN business as b5 ON b5.id = a.operatorId " +
+            "left JOIN business as b5 ON b5.id = a.operatorId " +
             "" +
-            "JOIN assets as a2 ON a.parentId = a2.id " +
+            "left JOIN assets as a2 ON a.parentId = a2.id " +
             "" +
-            "JOIN assetstatus as s on s.id = a.status " +
+            "left JOIN assetstatus as s on s.id = a.status " +
             "" +
-            "JOIN facilities as f ON f.id = a.facilityId " +
+            "left JOIN facilities as f ON f.id = a.facilityId " +
             "" +
-            "JOIN facilities as bl ON bl.id = a.blockId";
+            "left JOIN facilities as bl ON bl.id = a.blockId";
             if (id != 0)
             {
                 myQuery += " WHERE a.id= " + id;

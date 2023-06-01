@@ -9,6 +9,7 @@ using CMMSAPIs.Models.JC;
 using CMMSAPIs.Models.Incident_Reports;
 using CMMSAPIs.Models.WC;
 using CMMSAPIs.Models.Calibration;
+using CMMSAPIs.Models.Inventory;
 using CMMSAPIs.Models.Mails;
 using Microsoft.Extensions.Configuration;
 using CMMSAPIs.BS;
@@ -183,6 +184,11 @@ namespace CMMSAPIs.Models.Notifications
             {
                 CMCalibrationDetails _Calibration = (CMCalibrationDetails)args[0];
                 notificationObj = new CalibrationNotification(moduleID, notificationID, _Calibration);
+            }
+            else if (moduleID == CMMS.CMMS_Modules.INVENTORY)    //Incident Report
+            {
+                CMViewInventory _Inventory = (CMViewInventory)args[0];
+                notificationObj = new InventoryNotification(moduleID, notificationID, _Inventory);
             }
             //create else if block for your module and add Notification class for  your module to implement yous notification
             retValue = notificationObj.sendEmailNotification(moduleID, notificationID, args);
