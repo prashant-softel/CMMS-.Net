@@ -29,6 +29,7 @@ using CMMSAPIs.BS.PM;
 using CMMSAPIs.BS.Audits;
 using CMMSAPIs.BS.MC;
 using CMMSAPIs.BS.Calibration;
+using CMMSAPIs.BS.GO;
 
 namespace CMMSAPIs
 {
@@ -92,7 +93,7 @@ namespace CMMSAPIs
             services.AddScoped<IWCBS, WCBS>();
             services.AddScoped<IInventoryBS, InventoryBS>();
             services.Configure<CMMailSettings>(Configuration.GetSection("MailSettings"));
-            services.AddTransient<IMailService, MailService>();
+           // services.AddTransient<IMailService, MailService>();
             services.AddScoped<IFileUploadBS, FileUploadBS>();
             services.AddScoped<ICheckListBS, CheckListBS>();
             services.AddScoped<IPMScheduleViewBS, PMScheduleViewBS>();

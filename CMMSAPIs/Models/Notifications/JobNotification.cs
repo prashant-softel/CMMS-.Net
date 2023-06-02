@@ -57,22 +57,31 @@ namespace CMMSAPIs.Models.Notifications
             int jobID = m_jobObj.id; //jobid
             var jobTitle = m_jobObj.job_title;//job title
             var jobDesc = m_jobObj.job_description;//job desc
-            var template = getHTMLBodyTemplate(args);
+
+            retValue = String.Format("<h3><b style='color:#31576D'>Status:</b>{0}</h3><br>", m_jobObj.status_long);
+
+            retValue += String.Format("<table style='width: 50%; margin:0 auto; border-collapse: collapse ; border-spacing: 10px; ' border='1'>");
+            retValue += String.Format(template, "ID", m_jobObj.id);
+            retValue += String.Format(template, "Status", m_jobObj.status_short);
+            retValue += String.Format(template, "Job Title", m_jobObj.job_title);
+            retValue += String.Format(template, "Job Description", m_jobObj.job_description);
+            retValue += String.Format(template, "Created by", m_jobObj.created_by_name);
+        
             switch (m_notificationID)
             {
-                case CMMS.CMMS_Status.JOB_CREATED:     //Created
-                    retValue = String.Format(template, jobTitle, jobDesc);
+                case CMMS.CMMS_Status.JOB_CREATED:
+                    retValue += "</table>";            //Created
                     break;
                 case CMMS.CMMS_Status.JOB_ASSIGNED:     //Assigned
-                    retValue = String.Format(template, jobTitle, jobDesc);
+                    retValue += String.Format(templateEnd, "Assigned To", m_jobObj.assigned_name);
                     break;
                 case CMMS.CMMS_Status.JOB_CLOSED:     //Closed
-                    retValue = String.Format(template, jobTitle, jobDesc);
+                    retValue += String.Format(templateEnd, "Closed At", m_jobObj.closed_at);
+
                     break;
                 case CMMS.CMMS_Status.JOB_LINKED:     //Linked to PTW
-                    int ptwId = m_jobObj.current_ptw_id;
-                    string ptwDesc = (string)m_jobObj.job_description;
-                    retValue = String.Format(template, jobTitle, jobDesc, ptwId, ptwDesc);
+                    retValue += String.Format(template, "PTW Id", m_jobObj.current_ptw_id);
+                    retValue += String.Format(templateEnd, "PTW Title", m_jobObj.current_ptw_title);
                     break;
                 default:
                     break;
@@ -87,7 +96,7 @@ namespace CMMSAPIs.Models.Notifications
             switch (m_notificationID)
             {
                 case CMMS.CMMS_Status.JOB_CREATED:     //Created
-                    template += String.Format("<p><b>Job status is :</b> Created{0}</p>",m_jobObj.job_title);
+                    template += String.Format("<p><b>{0}</b> Created{0}</p>",m_jobObj.job_title);
                     break;
                 case CMMS.CMMS_Status.JOB_ASSIGNED:     //Assigned
                     template += String.Format("<p><b>Job status is : Assiged</p>");

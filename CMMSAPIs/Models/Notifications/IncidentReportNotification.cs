@@ -49,27 +49,41 @@ namespace CMMSAPIs.Models.Notifications
         override protected string getHTMLBody(params object[] args)
         {
             string retValue = "";
-            int IncidentReportNo = m_IncidentReportObj.id;
-            var IncidentReportDesc = m_IncidentReportObj.description;
-            string IncidentReport_created_name = (string)m_IncidentReportObj.created_by_name;
-            string IncidentReport_updated_name = (string)m_IncidentReportObj.updated_by_name;
-            string IncidentReport_approver_name = (string)m_IncidentReportObj.approved_by_name;
-            string IncidentReport_rejected_name = (string)m_IncidentReportObj.inverstigated_by_name;
 
-            var template = getHTMLBodyTemplate(args);
+            retValue = String.Format("<h3><b style='color:#31576D'>Status:</b>{0}</h3><br>", m_IncidentReportObj.status_long);
+
+            retValue += String.Format("<table style='width: 50%; margin:0 auto; border-collapse: collapse ; border-spacing: 10px; ' border='1'>");
+            retValue += String.Format(template, "ID", m_IncidentReportObj.id);
+            retValue += String.Format(template, "Title", m_IncidentReportObj.title);
+            retValue += String.Format(template, "Description", m_IncidentReportObj.description);
+            retValue += String.Format(template, "Status ", m_IncidentReportObj.status_short);
+            retValue += String.Format(template, "Incident Date & Time", m_IncidentReportObj.incident_datetime);
+            retValue += String.Format(template, "Reporting Date & Time", m_IncidentReportObj.incident_datetime);
+            retValue += String.Format(template, "Severity ", m_IncidentReportObj.severity);
+            retValue += String.Format(template, "Action Taken By", m_IncidentReportObj.action_taken_by_name);
+            retValue += String.Format(template, "Action Taken Date & Time ", m_IncidentReportObj.action_taken_datetime);
+            retValue += String.Format(template, "Investigated By", m_IncidentReportObj.inverstigated_by_name);
+            retValue += String.Format(template, "Verified By", m_IncidentReportObj.verified_by_name);
+            retValue += String.Format(template, "Risk Type", m_IncidentReportObj.risk_type);
+            retValue += String.Format(template, "Risk Level", m_IncidentReportObj.risk_level_name);
+            retValue += String.Format(template, "Damaged asset cost approx.", m_IncidentReportObj.damaged_cost);
+            retValue += String.Format(template, "Gen loss due to asset damage", m_IncidentReportObj.generation_loss);
+            retValue += String.Format(template, "Insurance", m_IncidentReportObj.is_insurance_applicable_name);
+            retValue += String.Format(template, "Insurance Status", m_IncidentReportObj.insurance_status_name);
+            retValue += String.Format(template, "Insurance Remark", m_IncidentReportObj.insurance_remark);
+
             switch (m_notificationID)
             {
-                case CMMS.CMMS_Status.IR_CREATED:     
-                    retValue = String.Format(template, IncidentReportNo, IncidentReportDesc, IncidentReport_created_name);
+                case CMMS.CMMS_Status.IR_CREATED:
+                    retValue += "</table>"; break;
+                case CMMS.CMMS_Status.IR_UPDATED:
+                    retValue += String.Format(templateEnd, "Updated By", m_IncidentReportObj.updated_by_name);
                     break;
-                case CMMS.CMMS_Status.IR_UPDATED:     
-                    retValue = String.Format(template, IncidentReportNo, IncidentReport_updated_name, IncidentReportDesc);
+                case CMMS.CMMS_Status.IR_APPROVED:
+                    retValue += String.Format(templateEnd, "Approved By", m_IncidentReportObj.approved_by_name);
                     break;
-                case CMMS.CMMS_Status.IR_APPROVED:     
-                    retValue = String.Format(template, IncidentReportNo, IncidentReport_approver_name, IncidentReportDesc);
-                    break;
-                case CMMS.CMMS_Status.IR_REJECTED:    
-                    retValue = String.Format(template, IncidentReportNo, IncidentReport_rejected_name, IncidentReportDesc);
+                case CMMS.CMMS_Status.IR_REJECTED:
+                    retValue += String.Format(templateEnd, "Rejected By", m_IncidentReportObj.inverstigated_by_name);
                     break;
                 default:
                     break;
@@ -94,7 +108,7 @@ namespace CMMSAPIs.Models.Notifications
                 case CMMS.CMMS_Status.IR_APPROVED:
                     template += String.Format("<p><b>Incident Report status is : Approved Incident Report</p>");
                     template += String.Format("<p>Incident Report {0} Approved </p>", m_IncidentReportObj.id);
-                    template += String.Format("<p><b>Incident Report approved By :</b> {0}</p>",m_IncidentReportObj.approved_by_name);
+                    template += String.Format("<p><b>Incident Report approved By :</b> {0}</p>", m_IncidentReportObj.approved_by_name);
                     break;
                 case CMMS.CMMS_Status.IR_REJECTED:
                     template += String.Format("<p><b>Incident Report status is : Incident Report rejected </p>");

@@ -11,6 +11,7 @@ using System.Data;
 using System.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using CMMSAPIs.Models.Notifications;
 
 namespace CMMSAPIs.Repositories.PM
 {
@@ -468,6 +469,10 @@ namespace CMMSAPIs.Repositories.PM
             if (retVal > 0)
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, request.id, 0, 0, $"PM Schedule Approved to PMSCH{createResponse[0].id[0]}", CMMS.CMMS_Status.PM_APPROVE, userID);
+            string details = "SELECT * from wc where id = {request.id}";
+            List<CMPMScheduleViewDetail> _PMList = await Context.GetData<CMPMScheduleViewDetail>(details).ConfigureAwait(false);
+            CMMSNotification.sendNotification(CMMS.CMMS_Modules.WARRANTY_CLAIM, CMMS.CMMS_Status.APPROVED, _PMList[0]);
+
             CMDefaultResponse response = new CMDefaultResponse(request.id, retCode, $"PM Schedule Approved to PMSCH{createResponse[0].id[0]}");
             return response;
         }

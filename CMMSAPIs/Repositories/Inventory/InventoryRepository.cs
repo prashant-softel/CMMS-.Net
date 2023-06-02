@@ -10,6 +10,7 @@ using CMMSAPIs.Repositories.Utils;
 using System.IO;
 using Microsoft.AspNetCore.Hosting;
 using OfficeOpenXml;
+using CMMSAPIs.Models.Notifications;
 //using IronXL;
 
 namespace CMMSAPIs.Repositories.Inventory
@@ -23,6 +24,59 @@ namespace CMMSAPIs.Repositories.Inventory
             _utilsRepo = new UtilsRepository(sqlDBHelper);
             m_errorLog = new ErrorLog(iwebhostobj);
         }
+
+        internal static string getShortStatus(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status m_notificationID)
+        {
+            string retValue;
+
+            switch (m_notificationID)
+            {
+                case CMMS.CMMS_Status.INVENTORY_IMPORTED:     
+                    retValue = "Imported";
+                    break;
+                case CMMS.CMMS_Status.INVENTORY_ADDED:     
+                    retValue = "Added";
+                    break;
+                case CMMS.CMMS_Status.INVENTORY_UPDATED:     
+                    retValue = "Updated";
+                    break;
+                case CMMS.CMMS_Status.INVENTORY_DELETED:     
+                    retValue = "Deleted";
+                    break;              
+                default:
+                    retValue = "Unknown <" + m_notificationID + ">";
+                    break;
+            }
+            return retValue;
+
+        }
+
+
+        internal string getLongStatus(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMViewInventory InvObj)
+        {
+            string retValue = "Job";
+
+            switch (notificationID)
+            {
+                case CMMS.CMMS_Status.INVENTORY_IMPORTED:
+                    retValue += String.Format("Assets Imported by {0} at {1}</p>", InvObj.added_by, InvObj.Imported_at);
+                    break;
+                case CMMS.CMMS_Status.INVENTORY_ADDED:
+                    retValue += String.Format("Asset {0} Added by {1} at {2}</p>", InvObj.name, InvObj.added_by, InvObj.added_at);
+                    break;
+                case CMMS.CMMS_Status.INVENTORY_UPDATED:
+                    retValue += String.Format("Asset {0} Updated by {1} at {2}</p>", InvObj.name, InvObj.updated_by, InvObj.updated_at);
+                    break;
+                case CMMS.CMMS_Status.INVENTORY_DELETED:
+                    retValue += String.Format("Asset {0} Deleted by {1} at {2}</p>", InvObj.name, InvObj.deleted_by, InvObj.deleted_at);
+                    break;
+                default:
+                    break;
+            }
+            return retValue;
+
+        }
+
         internal async Task<CMDefaultResponse> SetParentAsset(CMSetParentAsset parent_child_group, int userID)
         {
             string child_list = string.Join(", ", parent_child_group.childAssets);
@@ -444,27 +498,27 @@ namespace CMMSAPIs.Repositories.Inventory
             ", f.name AS facilityName, bl.name AS blockName,a2.name as parentName,  custbl.name as customerName,owntbl.name as ownerName, s.name AS status, b5.name AS operatorName, a.specialTool, a.warrantyId" +     //use a.specialToolEmpId to put specialToolEmp,
 
             " from assets as a " +
-            "join assettypes as ast on ast.id = a.typeId " +
+            "left join assettypes as ast on ast.id = a.typeId " +
             "" +
-            "join assetcategories as ac on ac.id= a.categoryId " +
+            "left join assetcategories as ac on ac.id= a.categoryId " +
             "" +
-            "join business as custbl on custbl.id = a.customerId " +
+            "left join business as custbl on custbl.id = a.customerId " +
             "" +
-            "join business as owntbl" + " on owntbl.id = a.ownerId " +
+            "left join business as owntbl" + " on owntbl.id = a.ownerId " +
             "" +
-            "JOIN business AS manufacturertlb ON a.ownerId = manufacturertlb.id " +
+            "left JOIN business AS manufacturertlb ON a.ownerId = manufacturertlb.id " +
             "" +
-            "JOIN business AS b2 ON a.ownerId = b2.id " +
+            "left JOIN business AS b2 ON a.ownerId = b2.id " +
 
-            "JOIN business as b5 ON b5.id = a.operatorId " +
+            "left JOIN business as b5 ON b5.id = a.operatorId " +
             "" +
-            "JOIN assets as a2 ON a.parentId = a2.id " +
+            "left JOIN assets as a2 ON a.parentId = a2.id " +
             "" +
-            "JOIN assetstatus as s on s.id = a.status " +
+            "left JOIN assetstatus as s on s.id = a.status " +
             "" +
-            "JOIN facilities as f ON f.id = a.facilityId " +
+            "left JOIN facilities as f ON f.id = a.facilityId " +
             "" +
-            "JOIN facilities as bl ON bl.id = a.blockId";
+            "left JOIN facilities as bl ON bl.id = a.blockId";
             if (id != 0)
             {
                 myQuery += " WHERE a.id= " + id;
@@ -554,6 +608,16 @@ string warrantyQry = "insert into assetwarranty
             {
                 strRetMessage = "No assets to add";
             }
+
+            List<CMViewInventory> _inventoryAdded = await GetInventoryDetails(retID);
+
+            string _shortStatus = getShortStatus(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_ADDED);
+            _inventoryAdded[0].status_short = _shortStatus;
+
+            string _longStatus = getLongStatus(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_ADDED, _inventoryAdded[0]);
+            _inventoryAdded[0].status_long = _longStatus;
+
+            CMMSNotification.sendNotification(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_ADDED, _inventoryAdded[0]);
             return new CMDefaultResponse(retID, retCode, strRetMessage);
         }
 
@@ -761,6 +825,17 @@ string warrantyQry = "insert into assetwarranty
                 await Context.GetData<List<int>>(updateQry).ConfigureAwait(false);
             }
             CMDefaultResponse obj = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Inventory  <" + request.id + "> has been updated");
+
+            List<CMViewInventory> _inventoryAdded = await GetInventoryDetails(request.id);
+
+            string _shortStatus = getShortStatus(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_UPDATED);
+            _inventoryAdded[0].status_short = _shortStatus;
+
+            string _longStatus = getLongStatus(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_UPDATED, _inventoryAdded[0]);
+            _inventoryAdded[0].status_long = _longStatus;
+
+            CMMSNotification.sendNotification(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_UPDATED, _inventoryAdded[0]);
+
             return obj;
 
 
@@ -780,6 +855,23 @@ string warrantyQry = "insert into assetwarranty
                 throw new ArgumentException("Invalid argument <" + id + ">");
 
             }
+
+            List<CMViewInventory> _inventoryAdded = await GetInventoryDetails(id);
+
+            string qry = $"SELECT CONCA(firstName,' ',lastName) as deleted_by FROM users WHERE id = {id}";
+
+            List<CMViewInventory> deleted_by = await Context.GetData<CMViewInventory>(qry).ConfigureAwait(false);
+
+            _inventoryAdded[0].deleted_by = deleted_by[0].deleted_by;
+
+            string _shortStatus = getShortStatus(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_DELETED);
+            _inventoryAdded[0].status_short = _shortStatus;
+
+            string _longStatus = getLongStatus(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_DELETED, _inventoryAdded[0]);
+            _inventoryAdded[0].status_long = _longStatus;
+
+            CMMSNotification.sendNotification(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_DELETED, _inventoryAdded[0]);
+
             string delQuery1 = $"DELETE FROM assets WHERE id = {id}";
             string delQuery2 = $"DELETE FROM assetwarranty where asset_id = {id}";
             await Context.GetData<List<int>>(delQuery1).ConfigureAwait(false);

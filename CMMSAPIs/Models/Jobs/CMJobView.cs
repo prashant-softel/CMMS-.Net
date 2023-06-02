@@ -29,7 +29,8 @@ namespace CMMSAPIs.Models.Jobs
         public int current_ptw_id { get; set; }
         public string current_ptw_title { get; set; }
 
-        
+        public dynamic closed_at { get; set; }
+
 
         
         public List<CMequipmentCatList> equipment_cat_list { get; set; }

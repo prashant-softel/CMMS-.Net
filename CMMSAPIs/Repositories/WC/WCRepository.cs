@@ -33,6 +33,92 @@ namespace CMMSAPIs.Repositories.WC
             _utilsRepo = new UtilsRepository(sqlDBHelper);
         }
 
+        internal static string getShortStatus(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status m_notificationID)
+        {
+            string retValue;
+            retValue = "";
+
+            switch (m_notificationID)
+            {
+                case CMMS.CMMS_Status.WC_DRAFT:
+                    retValue = "Draft"; break;
+                case CMMS.CMMS_Status.WC_CREATED:
+                    retValue = "Created"; break;
+                case CMMS.CMMS_Status.WC_SUBMIT_REJECTED:
+                    retValue = "Rejected"; break;
+                case CMMS.CMMS_Status.WC_SUBMITTED:
+                    retValue = "Submitted"; break;
+                case CMMS.CMMS_Status.WC_DISPATCHED:
+                    retValue = "Dispatched"; break; 
+                case CMMS.CMMS_Status.WC_REJECTED_BY_MANUFACTURER:
+                    retValue = "Rejected By Manufacturer"; break;
+                case CMMS.CMMS_Status.WC_APPROVED_BY_MANUFACTURER:
+                    retValue = "Approved By Manufacturer"; break;
+                case CMMS.CMMS_Status.WC_ITEM_REPLENISHED:
+                    retValue = "Item Replenished"; break;
+                case CMMS.CMMS_Status.WC_CLOSE_REJECTED:
+                    retValue = "Close Rejected"; break;
+                case CMMS.CMMS_Status.WC_CLOSE_APPROVED:
+                    retValue = "Closed"; break;
+                case CMMS.CMMS_Status.WC_CANCELLED:
+                    retValue = "Cancelled"; break;
+                default:
+                    break;
+            }
+            return retValue;
+
+        }
+
+
+        internal string getLongStatus(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMWCDetail WCObj)
+        {
+            string retValue = " ";
+
+
+            switch (notificationID)
+                {
+                case CMMS.CMMS_Status.WC_DRAFT:
+                    retValue = String.Format("Warranty Claim in Draft by {0}", WCObj.created_by);
+                    break;
+                case CMMS.CMMS_Status.WC_CREATED:
+                    retValue = String.Format("Warranty Claim created by {0}", WCObj.created_by);
+                    break;
+                case CMMS.CMMS_Status.WC_SUBMIT_REJECTED:
+                    retValue = String.Format("Warranty Claim  Submit Rejected by {0}", WCObj.approved_by);
+                    break;
+                case CMMS.CMMS_Status.WC_SUBMITTED:
+                    retValue = String.Format("Warranty Claim in Draft by {0}", WCObj.created_by);
+                    break;
+                case CMMS.CMMS_Status.WC_DISPATCHED:
+                    //retValue = String.Format("Warranty Claim Dispachted by {0} at {1}", WCObj.dispatched_by, WCObj.dispatched_at);
+                    retValue = String.Format("Warranty Claim Dispachted by {0} at {1}", WCObj.created_by, WCObj.closed_at);
+                    break;
+                case CMMS.CMMS_Status.WC_REJECTED_BY_MANUFACTURER:
+                    retValue = String.Format("Warranty Claim Rejected by Manufacturer {0}", WCObj.created_by);
+                    break;
+                case CMMS.CMMS_Status.WC_APPROVED_BY_MANUFACTURER:
+                    retValue = String.Format("Warranty Claim Approved by Manufacturer {0}", WCObj.approver_name);
+                    break;
+                case CMMS.CMMS_Status.WC_ITEM_REPLENISHED:
+                    retValue = String.Format("Warranty Claim Item Replenished {0}", WCObj.created_by);
+                    break;
+                case CMMS.CMMS_Status.WC_CLOSE_REJECTED:
+                    retValue = String.Format("Warranty Claim Close Rejected by {0}", WCObj.approver_name);
+                    break;
+                case CMMS.CMMS_Status.WC_CLOSE_APPROVED:
+                    retValue = String.Format("Warranty Claim Close Approved by {0} at {1}", WCObj.approver_name, WCObj.closed_at);
+                    break;
+                case CMMS.CMMS_Status.WC_CANCELLED:
+                    // retValue = String.Format("Warranty Claim Cancelled by {0} at {1}", WCObj.cancelled_by, WCObj.cancelled_at);
+                    retValue = String.Format("Warranty Claim Cancelled by {0} at {1}", WCObj.approver_name, WCObj.closed_at);
+                    break;
+                default:
+                    break;
+            }
+                return retValue;
+
+            }
+
         internal async Task<List<CMWCList>> GetWCList(int facilityId, string startDate, string endDate, int statusId)
         {
             /*
@@ -195,6 +281,16 @@ namespace CMMSAPIs.Repositories.WC
             List<CMWCDetail> GetWCDetails = await Context.GetData<CMWCDetail>(myQuery).ConfigureAwait(false);
             if (GetWCDetails.Count == 0)
                 throw new NullReferenceException($"Warranty Claim with ID {id} not found");
+
+            CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(GetWCDetails[0].status);
+            string _shortStatus = getShortStatus(CMMS.CMMS_Modules.WARRANTY_CLAIM, _Status);
+            GetWCDetails[0].status_short = _shortStatus;
+
+            CMMS.CMMS_Status _Status_long = (CMMS.CMMS_Status)(GetWCDetails[0].status);
+            string _longStatus = getLongStatus(CMMS.CMMS_Modules.WARRANTY_CLAIM, _Status_long, GetWCDetails[0]);
+            GetWCDetails[0].status_long = _longStatus;
+
+
             return GetWCDetails[0];
         }
 

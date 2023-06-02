@@ -1,5 +1,5 @@
-﻿using CMMSAPIs.BS;
-using CMMSAPIs.Models;
+﻿using CMMSAPIs.BS.GO;
+using CMMSAPIs.Models.GO;
 using CMMSAPIs.Models.Users;
 using CMMSAPIs.Repositories;
 using Microsoft.AspNetCore.Http;
@@ -10,7 +10,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 
-namespace CMMSAPIs.Controllers
+namespace CMMSAPIs.Controllers.GO
 {
     [Route("api/[controller]")]
     [ApiController]
