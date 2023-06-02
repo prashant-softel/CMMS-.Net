@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.RegularExpressions;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -102,6 +103,32 @@ namespace CMMSAPIs.Helper
             }
         }
 
+        public static System.Tuple<DataTable, DataTable> Split(this DataTable dt, List<string> lhsColumns)
+        {
+            DataTable firstPart = dt.DefaultView.ToTable(false, lhsColumns.ToArray());
+            DataTable secondPart = dt.DefaultView.ToTable(false, GetRemainingColumns(dt.Columns, lhsColumns.ToArray()));
+            System.Tuple<DataTable, DataTable> result = new System.Tuple<DataTable, DataTable>(firstPart, secondPart);
+            return result;
+        }
+
+        private static string[] GetRemainingColumns(DataColumnCollection allColumns, string[] splitColumns)
+        {
+            // Get the column names that are not in the splitColumns array
+            var remainingColumns = new string[allColumns.Count - splitColumns.Length];
+            int index = 0;
+
+            foreach (DataColumn column in allColumns)
+            {
+                if (!Array.Exists(splitColumns, columnName => columnName == column.ColumnName))
+                {
+                    remainingColumns[index] = column.ColumnName;
+                    index++;
+                }
+            }
+
+            return remainingColumns;
+        }
+
         public static List<T> GetColumn<T>(this DataTable dt, string column)
         {
             return (from row in dt.AsEnumerable() select row.Field<T>(column)).ToList();
@@ -124,6 +151,40 @@ namespace CMMSAPIs.Helper
                 dict.Add(x, values.ElementAt(i));
             });
 
+        }
+
+        public static bool IsEmpty(this DataRow row)
+        {
+            foreach (var item in row.ItemArray)
+            {
+                if (item != null && item != DBNull.Value)
+                {
+                    return false; // DataRow is not empty
+                }
+            }
+            return true; // DataRow is empty
+        }
+
+        public static bool IsContactNumber(this string input)
+        {
+            // Regular expression pattern for contact number validation
+            string pattern = @"^\+?\d+$";
+
+            // Check if the input matches the pattern
+            bool isValid = Regex.IsMatch(input, pattern);
+
+            return isValid;
+        }
+
+        public static bool IsEmail(this string email)
+        {
+            // Regular expression pattern for email validation
+            string pattern = @"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$";
+
+            // Check if the email matches the pattern
+            bool isEmailValid = Regex.IsMatch(email, pattern);
+
+            return isEmailValid;
         }
 
         public static List<string> GetColumnNames(this DataTable dt)
