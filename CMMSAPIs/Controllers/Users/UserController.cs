@@ -73,6 +73,27 @@ namespace CMMSAPIs.Controllers.Users
             }
         }
 
+        [Authorize]
+        [Route("ImportUsers")]
+        [HttpPost]
+        public async Task<IActionResult> ImportUsers(int file_id)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _userAccessBs.ImportUsers(file_id, userID);
+                return Ok(data);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
         // Create User
         [Authorize]
         [Route("CreateUser")]

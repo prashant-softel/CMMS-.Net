@@ -16,7 +16,8 @@ namespace CMMSAPIs.BS.Users
         Task<UserToken> Authenticate(CMUserCrentials userCrentials);
         public Task<CMUserDetail> GetUserDetail(int user_id);
         public Task<List<CMUser>> GetUserList(int facility_id);
-        public Task<List<CMDefaultResponse>> CreateUser(List<CMCreateUser> request, int userID);
+        public Task<CMDefaultResponse> ImportUsers(int file_id, int userID);
+        public Task<CMDefaultResponse> CreateUser(List<CMCreateUser> request, int userID);
         public Task<CMDefaultResponse> UpdateUser(CMUpdateUser request, int userID);
         public Task<CMDefaultResponse> DeleteUser(int id, int userID);
         public Task<List<CMUser>> GetUserByNotificationId(CMUserByNotificationId request);
@@ -84,7 +85,22 @@ namespace CMMSAPIs.BS.Users
             }
         }
 
-        public async Task<List<CMDefaultResponse>> CreateUser(List<CMCreateUser> request, int userID)
+        public async Task<CMDefaultResponse> ImportUsers(int file_id, int userID)
+        {
+            try
+            {
+                using (var repos = new UserAccessRepository(getDB, _webHostEnvironment))
+                {
+                    return await repos.ImportUsers(file_id, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> CreateUser(List<CMCreateUser> request, int userID)
         {
             try
             {

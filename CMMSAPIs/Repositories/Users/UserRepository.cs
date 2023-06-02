@@ -3,18 +3,18 @@ using CMMSAPIs.Models.Authentication;
 using CMMSAPIs.Models.Users;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Utils;
-using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using OfficeOpenXml;
 using System;
-using System.Data;
-using System.Linq;
-using System.Collections;
 using System.Collections.Generic;
+using System.Data;
 using System.IdentityModel.Tokens.Jwt;
+using System.IO;
+using System.Linq;
 using System.Security.Claims;
 using System.Text;
-using System.Text.Json;
 using System.Threading.Tasks;
 
 
@@ -24,13 +24,14 @@ namespace CMMSAPIs.Repositories.Users
     {
         private MYSQLDBHelper _conn;
         private readonly IConfiguration _configuration;
-        private IWebHostEnvironment _webHostEnvironment;
+        private ErrorLog m_errorLog;
         //private RoleAccessRepository _roleAccessRepo;
         public UserAccessRepository(MYSQLDBHelper sqlDBHelper, IWebHostEnvironment webHostEnvironment = null, IConfiguration configuration = null) : base(sqlDBHelper)
         {
-            _webHostEnvironment = webHostEnvironment;
+            m_errorLog = new ErrorLog(webHostEnvironment);
             _configuration = configuration;
             _conn = sqlDBHelper;
+            
             //_roleAccessRepo = new RoleAccessRepository(sqlDBHelper);
         }
 
@@ -102,73 +103,358 @@ namespace CMMSAPIs.Repositories.Users
             return null;
         }
         
-        internal async Task<List<CMDefaultResponse>> ImportUsers(int file_id, int userID)
+        internal async Task<CMDefaultResponse> ImportUsers(int file_id, int userID)
         {
-            string bloodGroupQry = "SELECT name, blood_group_id FROM bloodgroupaltnames";
+            CMDefaultResponse response = null;
+
+            string bloodGroupQry = "SELECT UPPER(name) as name, blood_group_id FROM bloodgroupaltnames";
             DataTable dtBloodGroups = await Context.FetchData(bloodGroupQry).ConfigureAwait(false);
             List<string> bloodGroupNames = dtBloodGroups.GetColumn<string>("name");
             List<int> bloodGroupIds = dtBloodGroups.GetColumn<int>("blood_group_id");
             Dictionary<string, int> bloodGroups = new Dictionary<string, int>();
             bloodGroups.Merge(bloodGroupNames, bloodGroupIds);
 
-            string genderQry = "SELECT id, name FROM gender";
+            string genderQry = "SELECT id, UPPER(name) as name, UPPER(initial) as initial FROM gender";
             DataTable dtGender = await Context.FetchData(genderQry).ConfigureAwait(false);
             List<string> genderNames = dtGender.GetColumn<string>("name");
+            genderNames.AddRange(dtGender.GetColumn<string>("initial"));
             List<int> genderIds = dtGender.GetColumn<int>("id");
+            genderIds.AddRange(genderIds);
             Dictionary<string, int> gender = new Dictionary<string, int>();
             gender.Merge(genderNames, genderIds);
 
-            return null;
+            string roleQry = "SELECT id, UPPER(name) as name FROM userroles";
+            DataTable dtRole = await Context.FetchData(roleQry).ConfigureAwait(false);
+            List<string> roleNames = dtRole.GetColumn<string>("name");
+            List<int> roleIds = dtRole.GetColumn<int>("id");
+            Dictionary<string, int> roles = new Dictionary<string, int>();
+            roles.Merge(roleNames, roleIds);
+
+            string countryQry = "SELECT id, UPPER(name) as name FROM countries";
+            DataTable dtCountry = await Context.FetchData(countryQry).ConfigureAwait(false);
+            List<string> countryNames = dtCountry.GetColumn<string>("name");
+            List<int> countryIds = dtCountry.GetColumn<int>("id");
+            Dictionary<string, int> countries = new Dictionary<string, int>();
+            countries.Merge(countryNames, countryIds);
+
+            string stateQry = "";
+            DataTable dtState = null;
+            List<string> stateNames = null;
+            List<int> stateIds = null;
+            Dictionary<string, int> states = new Dictionary<string, int>();
+
+            string cityQry = "";
+            DataTable dtCity = null;
+            List<string> cityNames = null;
+            List<int> cityIds = null;
+            Dictionary<string, int> cities = new Dictionary<string, int>();
+
+            List<string> yesNo = new List<string>() { "NO", "YES" };
+
+            /*
+            Username	Password	Secondary Email	First Name	Last Name	Date of Birth	Gender	Blood Group	
+            Mobile Number	Landline Number	Country	State	City	Zipcode	Role	Is Employee	Joining Date
+
+             */
+            Dictionary<string, Tuple<string, Type>> columnNames = new Dictionary<string, Tuple<string, Type>>()
+            {
+                { "Username", new Tuple<string, Type>("user_name", typeof(string)) },
+                { "Password", new Tuple<string, Type>("password", typeof(string)) },
+                { "Secondary Email", new Tuple<string, Type>("secondaryEmail", typeof(string)) },
+                { "First Name", new Tuple<string, Type>("first_name",typeof(string)) },
+                { "Last Name", new Tuple<string, Type>("last_name",typeof(string)) },
+                { "Date of Birth", new Tuple<string, Type>("DOB", typeof(DateTime)) },
+                { "Gender", new Tuple<string, Type>("gender_name", typeof(string)) },
+                { "Blood Group", new Tuple<string, Type>("blood_group_name", typeof(string)) },
+                { "Mobile Number", new Tuple<string, Type>("contact_no", typeof(string)) },
+                { "Landline Number", new Tuple<string, Type>("landline_number", typeof(string)) },
+                { "Country", new Tuple<string, Type>("country_name", typeof(string)) },
+                { "State", new Tuple<string, Type>("state_name", typeof(string)) },
+                { "City", new Tuple<string, Type>("city_name", typeof(string)) },
+                { "Zipcode", new Tuple<string, Type>("zipcode", typeof(double)) },
+                { "Role", new Tuple<string, Type>("role_name", typeof(string)) },
+                { "Is Employee", new Tuple<string, Type>("isEmployee", typeof(string)) },
+                { "Joining Date", new Tuple<string, Type>("joiningDate", typeof(DateTime)) }
+            };
+            string query1 = $"SELECT file_path FROM uploadedfiles WHERE id = {file_id};";
+            DataTable dt1 = await Context.FetchData(query1).ConfigureAwait(false);
+            string path = Convert.ToString(dt1.Rows[0][0]);
+            string dir = Path.GetDirectoryName(path);
+            string filename = Path.GetFileName(path);
+
+            if (!Directory.Exists(dir))
+                m_errorLog.SetError($"Directory '{dir}' cannot be found");
+            else if (!File.Exists(path))
+                m_errorLog.SetError($"File '{filename}' cannot be found in directory '{dir}'"); 
+            else
+            {
+                FileInfo info = new FileInfo(path);
+                if (info.Extension != ".xlsx")
+                    m_errorLog.SetError("File is not an excel file");
+                else
+                {
+                    ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                    var excel = new ExcelPackage(path);
+                    var sheet = excel.Workbook.Worksheets["User"];
+                    if (sheet == null)
+                        m_errorLog.SetWarning("Sheet containing user info shold be named 'User'");
+                    else
+                    {
+                        DataTable dt2 = new DataTable();
+                        foreach (var header in sheet.Cells[1, 1, 1, sheet.Dimension.End.Column])
+                        {
+                            try
+                            {
+                                dt2.Columns.Add(columnNames[header.Text].Item1, columnNames[header.Text].Item2);
+                            }
+                            catch (KeyNotFoundException)
+                            {
+                                dt2.Columns.Add(header.Text);
+                            }
+                        }
+                        dt2.Columns.Add("gender_id", typeof(int));
+                        dt2.Columns.Add("blood_group_id", typeof(int));
+                        dt2.Columns.Add("country_id", typeof(int));
+                        dt2.Columns.Add("state_id", typeof(int));
+                        dt2.Columns.Add("city_id", typeof(int));
+                        dt2.Columns.Add("role_id", typeof(int));
+                        for (int rN = 4; rN <= sheet.Dimension.End.Row; rN++)
+                        {
+                            ExcelRange row = sheet.Cells[rN, 1, rN, sheet.Dimension.End.Column];
+                            DataRow newR = dt2.NewRow();
+                            foreach (var cell in row)
+                            {
+                                try
+                                {
+                                    if (cell.Text == null || cell.Text == "")
+                                        continue;
+                                    newR[cell.Start.Column - 1] = Convert.ChangeType(cell.Text, dt2.Columns[cell.Start.Column - 1].DataType);
+                                }
+                                catch (Exception ex)
+                                {
+                                    ex.GetType();
+                                    //+ ex.ToString();
+                                    //status = status.Substring(0, (status.IndexOf("Exception") + 8));
+                                    // m_ErrorLog.SetError("," + status);
+                                }
+                            }
+                            if (newR.IsEmpty())
+                            {
+                                m_errorLog.SetInformation($"Row {rN} is empty.");
+                                continue;
+                            }
+                            if (Convert.ToString(newR["user_name"]) == null || Convert.ToString(newR["user_name"]) == "")
+                                m_errorLog.SetError($"Login ID cannot be empty. [Row: {rN}]");
+                            else if (!Convert.ToString(newR["user_name"]).IsEmail())
+                                m_errorLog.SetError($"Invalid format for login ID. Should be in email address format. [Row: {rN}]");
+                            else
+                            {
+                                string loginIdQuery = "SELECT loginId FROM users;";
+                                DataTable dtLogin = await Context.FetchData(loginIdQuery).ConfigureAwait(false);
+                                List<string> loginList = dtLogin.GetColumn<string>("loginId");
+                                if (loginList.Contains(newR["user_name"]))
+                                    m_errorLog.SetError($"Login ID already exists. [Row: {rN}]");
+                            }
+                            if (Convert.ToString(newR["password"]) == null || Convert.ToString(newR["password"]) == "")
+                                m_errorLog.SetError($"Password cannot be empty. [Row: {rN}]");
+                            else if (Convert.ToString(newR["password"]).Length < 6)
+                                m_errorLog.SetError($"Password should have minimum 6 characters. [Row: {rN}]");
+                            if (Convert.ToString(newR["secondaryEmail"]) != null && Convert.ToString(newR["secondaryEmail"]) != "")
+                            {
+                                if (!Convert.ToString(newR["secondaryEmail"]).IsEmail())
+                                    m_errorLog.SetError($"Email ID is not valid. [Row: {rN}]");
+                            }
+                            if (Convert.ToString(newR["first_name"]) == null || Convert.ToString(newR["first_name"]) == "")
+                                m_errorLog.SetError($"First name cannot be empty. [Row: {rN}]");
+                            if (Convert.ToString(newR["last_name"]) == null || Convert.ToString(newR["last_name"]) == "")
+                                m_errorLog.SetError($"Last name cannot be empty. [Row: {rN}]");
+                            if (newR["DOB"] == DBNull.Value)
+                                m_errorLog.SetError($"Date of Birth should not be empty. [Row {rN}]");
+                            if (Convert.ToString(newR["contact_no"]) == null || Convert.ToString(newR["contact_no"]) == "")
+                                m_errorLog.SetError($"Mobile Number cannot be empty. [Row: {rN}]");
+                            else if (!Convert.ToString(newR["contact_no"]).IsContactNumber())
+                                m_errorLog.SetError($"Mobile number is not valid. [Row: {rN}]");
+                            if (Convert.ToString(newR["landline_number"]) != null && Convert.ToString(newR["landline_number"]) != "")
+                            {
+                                if (!Convert.ToString(newR["landline_number"]).IsContactNumber())
+                                    m_errorLog.SetError($"Landline number is not valid. [Row: {rN}]");
+                            }
+                            if (newR["zipcode"] == DBNull.Value)
+                                m_errorLog.SetError($"Zipcode cannot be empty or 0. [Row: {rN}]");
+                            else if (Convert.ToDouble(newR["zipcode"]) == 0)
+                                m_errorLog.SetError($"Zipcode cannot be empty or 0. [Row: {rN}]");
+                            try
+                            {
+                                newR["role_id"] = roles[Convert.ToString(newR["role_name"]).ToUpper()];
+                            }
+                            catch(KeyNotFoundException)
+                            {
+                                if (Convert.ToString(newR["role_name"]) == null || Convert.ToString(newR["role_name"]) == "")
+                                    m_errorLog.SetError($"Role Name cannot be empty. [Row: {rN}]");
+                                else
+                                    m_errorLog.SetError($"Invalid Role Name. [Row: {rN}]");
+                            }
+                            try
+                            {
+                                newR["gender_id"] = gender[Convert.ToString(newR["gender_name"]).ToUpper()];
+                            }
+                            catch (KeyNotFoundException)
+                            {
+                                if (Convert.ToString(newR["gender_name"]) == null || Convert.ToString(newR["gender_name"]) == "")
+                                    m_errorLog.SetError($"Gender field cannot be empty. [Row: {rN}]");
+                                else
+                                    m_errorLog.SetError($"Invalid Gender. [Row: {rN}]");
+                            }
+                            try
+                            {
+                                newR["blood_group_id"] = bloodGroups[Convert.ToString(newR["blood_group_name"]).ToUpper()];
+                            }
+                            catch(KeyNotFoundException)
+                            {
+                                if (Convert.ToString(newR["blood_group_name"]) == null || Convert.ToString(newR["blood_group_name"]) == "")
+                                    m_errorLog.SetError($"Blood group cannot be empty. [Row: {rN}]");
+                                else
+                                    m_errorLog.SetError($"Invalid Blood Group. [Row: {rN}]");
+                            }
+                            try
+                            {
+                                newR["country_id"] = countries[Convert.ToString(newR["country_name"]).ToUpper()];
+                                states.Clear();
+                                stateQry = $"SELECT id, UPPER(name) as name FROM states WHERE country_id = {newR["country_id"]};";
+                                dtState = await Context.FetchData(stateQry).ConfigureAwait(false);
+                                stateNames = dtState.GetColumn<string>("name");
+                                stateIds = dtState.GetColumn<int>("id");
+                                states.Merge(stateNames, stateIds);
+                                try
+                                {
+                                    newR["state_id"] = states[Convert.ToString(newR["state_name"]).ToUpper()];
+                                    cities.Clear();
+                                    cityQry = $"SELECT id, UPPER(name) as name FROM cities WHERE state_id = {newR["state_id"]};";
+                                    dtCity = await Context.FetchData(cityQry).ConfigureAwait(false);
+                                    cityNames = dtCity.GetColumn<string>("name");
+                                    cityIds = dtCity.GetColumn<int>("id");
+                                    cities.Merge(cityNames, cityIds);
+                                    try
+                                    {
+                                        newR["city_id"] = cities[Convert.ToString(newR["city_name"]).ToUpper()];
+                                    }
+                                    catch (KeyNotFoundException)
+                                    {
+                                        if (Convert.ToString(newR["city_name"]) == null || Convert.ToString(newR["city_name"]) == "")
+                                            m_errorLog.SetError($"City cannot be empty. [Row: {rN}]");
+                                        else
+                                            m_errorLog.SetError($"No city named {Convert.ToString(newR["city_name"])} found in state {Convert.ToString(newR["state_name"])}. [Row: {rN}]");
+                                    }
+                                }
+                                catch (KeyNotFoundException)
+                                {
+                                    if (Convert.ToString(newR["state_name"]) == null || Convert.ToString(newR["state_name"]) == "")
+                                        m_errorLog.SetError($"State cannot be empty. [Row: {rN}]");
+                                    else
+                                        m_errorLog.SetError($"No state named {Convert.ToString(newR["state_name"])} found in country {Convert.ToString(newR["country_name"])}. [Row: {rN}]");
+                                    m_errorLog.SetError($"Cannot access cities due to empty or invalid state name. [Row: {rN}]");
+                                }
+                            }
+                            catch (KeyNotFoundException)
+                            {
+                                if (Convert.ToString(newR["country_name"]) == null || Convert.ToString(newR["country_name"]) == "")
+                                    m_errorLog.SetError($"Country cannot be empty. [Row: {rN}]");
+                                else
+                                    m_errorLog.SetError($"No country named {Convert.ToString(newR["country_name"])} found. [Row: {rN}]");
+                                m_errorLog.SetError($"Cannot access states and cities due to empty or invalid country name. [Row: {rN}]");
+                            }
+                            if (Convert.ToString(newR["isEmployee"]) == null || Convert.ToString(newR["isEmployee"]) == "")
+                                newR["isEmployee"] = "No";
+                            int index = yesNo.IndexOf(Convert.ToString(newR["isEmployee"]).ToUpper());
+                            if (index == -1)
+                                m_errorLog.SetError($"Answer for Is Employee should be Yes or No. [Row: {rN}]");
+                            else
+                                newR["isEmployee"] = $"{index}";
+                            dt2.Rows.Add(newR);
+                        }
+                        if(m_errorLog.GetErrorCount() == 0)
+                        {
+                            dt2.ConvertColumnType("isEmployee", typeof(int));
+                            dt2.ConvertColumnType("zipcode", typeof(int));
+                            List<string> credCols = new List<string>()
+                            {
+                                "user_name", "password"
+                            };
+                            Tuple<DataTable, DataTable> splitDt = dt2.Split(credCols);
+                            List<CMCreateUser> userList = splitDt.Item2.MapTo<CMCreateUser>();
+                            List<CMUserCrentials> credList = splitDt.Item1.MapTo<CMUserCrentials>();
+                            for(int i = 0; i < userList.Count; i++)
+                                userList[i].credentials = credList[i];
+                            response = await CreateUser(userList, userID);
+                        }
+                    }
+                }
+            }
+            if (response == null)
+                response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, $"{string.Join("\r\n", m_errorLog.errorLog().ToArray())}");
+            else
+            {
+                m_errorLog.SetInformation(response.message);
+                response.message = $"{string.Join("\r\n", m_errorLog.errorLog().ToArray())}";
+            }
+                    //Import excel file
+                    //Create validation
+                    //use map function to convert datatable to model
+
+            return response;
         }
 
-        internal async Task<List<CMDefaultResponse>> CreateUser(List<CMCreateUser> request, int userID)
+        internal async Task<CMDefaultResponse> CreateUser(List<CMCreateUser> request, int userID)
         {
             /*
              * Read the required field for insert
              * Table - Users, UserNofication, UserAccess
              * Use existing functions to insert UserNotification and User Access in table
             */
-            List<CMDefaultResponse> responseList = new List<CMDefaultResponse>();
-            foreach(CMCreateUser user in request)
+            CMDefaultResponse response = null;
+            List<int> idList = new List<int>();
+            foreach (CMCreateUser user in request)
             {
-                ErrorLog err = new ErrorLog(_webHostEnvironment);
-                string.Join("\n", err.errorLog());
+                //string.Join("\n", err.errorLog());
+                int index = request.FindIndex(x => x == user);
                 string loginIdQuery = "SELECT loginId FROM users;";
                 DataTable dtLogin = await Context.FetchData(loginIdQuery).ConfigureAwait(false);
                 string[] loginList = dtLogin.GetColumn<string>("loginId").ToArray();
                 if (Array.Exists(loginList, loginId => loginId == user.credentials.user_name))
-                    err.SetError("Login ID already exists");
+                    m_errorLog.SetError($"Login ID already exists. [Index: {index}]");
                 string country, state, city;
                 string getCountryQry = $"SELECT name FROM countries WHERE id = {user.country_id};";
                 DataTable dtCountry = await Context.FetchData(getCountryQry).ConfigureAwait(false);
                 if (dtCountry.Rows.Count == 0)
-                    err.SetError("Invalid Country");
+                    m_errorLog.SetError($"Invalid Country. [Index: {index}]");
                 country = Convert.ToString(dtCountry.Rows[0][0]);
-                string getStateQry = $"SELECT name FROM states WHERE id = {user.state_id};";
+                string getStateQry = $"SELECT name, country_id FROM states WHERE id = {user.state_id};";
                 DataTable dtState = await Context.FetchData(getStateQry).ConfigureAwait(false);
                 if (dtState.Rows.Count == 0)
-                    err.SetError("Invalid State");
-                state = Convert.ToString(dtState.Rows[0][0]);
+                    m_errorLog.SetError($"Invalid State. [Index: {index}]");
+                state = Convert.ToString(dtState.Rows[0]["name"]);
                 string getCityQry = $"SELECT name FROM cities WHERE id = {user.city_id};";
                 DataTable dtCity = await Context.FetchData(getCityQry).ConfigureAwait(false);
                 if (dtCity.Rows.Count == 0)
-                    err.SetError("Invalid City");
+                    m_errorLog.SetError($"Invalid City. [Index: {index}]");
                 city = Convert.ToString(dtCity.Rows[0][0]);
                 string myQuery1 = $"SELECT * FROM states WHERE id = {user.state_id} AND country_id = {user.country_id};";
                 DataTable dt1 = await Context.FetchData(myQuery1).ConfigureAwait(false);
                 if (dt1.Rows.Count == 0)
-                    err.SetError($"{state} is not situated in {country}");
+                {
+                    m_errorLog.SetError($"{state} is not situated in {country}. [Index: {index}]");
+                    user.country_id = Convert.ToInt32(dtState.Rows[0]["country_id"]);
+                    dtCountry = null;
+                    getCountryQry = $"SELECT name FROM countries WHERE id = {user.country_id};";
+                    dtCountry = await Context.FetchData(getCountryQry).ConfigureAwait(false);
+                    country = Convert.ToString(dtCountry.Rows[0][0]);
+                }
                 string myQuery2 = $"SELECT * FROM cities WHERE id = {user.city_id} AND state_id = {user.state_id} AND country_id = {user.country_id};";
                 DataTable dt2 = await Context.FetchData(myQuery2).ConfigureAwait(false);
                 if (dt2.Rows.Count == 0)
-                    err.SetError($"{city} is not situated in {state}, {country}");
-                int index = request.FindIndex(x => x == user);
-                if(err.GetErrorCount() != 0)
-                {
-                    responseList.Add(new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, $"Errors found at line {index} \n{string.Join('\n',err.errorLog().ToArray()/**/)}"));
-                }
+                    m_errorLog.SetError($"{city} is not situated in {state}, {country}. [Index: {index}]");
             }
-            if(responseList.Count == 0)
+            if(m_errorLog.GetErrorCount() == 0)
             {
                 foreach (var user in request)
                 {
@@ -209,12 +495,16 @@ namespace CMMSAPIs.Repositories.Users
                     }
                     await SetUserAccess(userAccess, userID);
                     await SetUserNotifications(userNotifications, userID);
-                    CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "User Created");
-                    responseList.Add(response);
+                    idList.Add(id);
                 }
+                response = new CMDefaultResponse(idList, CMMS.RETRUNSTATUS.SUCCESS, $"{idList.Count} user(s) added successfully");
+            }
+            else
+            {
+                response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, $"{string.Join("\r\n", m_errorLog.errorLog().ToArray())/**/}");
             }
             /*    */
-            return responseList;
+            return response;
         }
         internal async Task<CMDefaultResponse> UpdateUser(CMUpdateUser request, int userID)
         {
