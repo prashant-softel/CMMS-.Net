@@ -39,7 +39,7 @@ namespace CMMSAPIs.Models.WC
         public int status{ get;  set; }
         public string lastModifiedDate { get; set; }
         public string approvedBy { get; set; }
-        public DateTime? approvedOn { get; set; }
+        public string approvedOn { get; set; }
         public string wcFacCode { get; set; }
         public DateTime? failureTime { get; set; }
         public int estimatedLoss { get; set; }
