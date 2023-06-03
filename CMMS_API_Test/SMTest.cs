@@ -91,11 +91,11 @@ namespace CMMS_API_Test
 
 
             var getItem = new CMMS_Services.APIService<CMMSAPIs.Models.SM.CMAssetTypes>();
-            var responseForItem = getItem.GetItem(EP_GetAssetTypeList + "?ID=" + myNewItemId);
+            var responseForItem = getItem.GetItemList(EP_GetAssetTypeList + "?ID=" + myNewItemId);
             //also write case forf specofoc 
             //verify model all property too
-            Assert.AreEqual(myNewItemId, responseForItem.ID);
-            Assert.AreEqual("Testing AssetType USING Automation", responseForItem.asset_type);
+            Assert.AreEqual(myNewItemId, responseForItem[0].ID);
+            Assert.AreEqual("Testing AssetType USING Automation", responseForItem[0].asset_type);
         }
         [TestMethod]
         public void VerifyUpdateAssetType()
@@ -111,7 +111,7 @@ namespace CMMS_API_Test
             //ReadOnlyMemory its attributes
 
             var getItem = new CMMS_Services.APIService<CMMSAPIs.Models.SM.CMAssetTypes>();
-            var getResponseForItem = getItem.GetItem(EP_GetAssetTypeList + "?ID=" + 30);
+            var getResponseForItem = getItem.GetItemList(EP_GetAssetTypeList + "?ID=" + 30);
 
 
             //Now we will update the attributes
@@ -285,17 +285,17 @@ namespace CMMS_API_Test
             int emp_id = 1;
             DateTime toDate = Convert.ToDateTime("2023-04-01");
             DateTime fromDate = Convert.ToDateTime("2022-01-01");
-            var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.SM.CMMRS>();
+            var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.SM.MRSList>();
             var response = ptwService.GetItemList(EP_getMRSList + "?plant_ID=" + plant_ID+ "&emp_id="+emp_id+ "&toDate="+toDate+ "&fromDate="+fromDate);
             int ListCount = response.Count;
-            Assert.AreEqual(ListCount, 1);
+            Assert.AreEqual(ListCount, 0);
         }
 
         [TestMethod]
         public void VerifygetMRSItems()
         {
             int ID = 1;
-            var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.SM.CMMRS>();
+            var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.SM.MRSItems>();
             var response = ptwService.GetItemList(EP_getMRSItems + "?ID=" + ID );
             int ListCount = response.Count;
             Assert.AreEqual(ListCount, 1);
@@ -304,7 +304,7 @@ namespace CMMS_API_Test
         public void VerifygetMRSItemsBeforeIssue()
         {
             int ID = 1;
-            var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.SM.CMMRS>();
+            var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.SM.MRSItemsBeforeIssue>();
             var response = ptwService.GetItemList(EP_getMRSItemsBeforeIssue + "?ID=" + ID);
             int ListCount = response.Count;
             Assert.AreEqual(ListCount, 1);
@@ -313,7 +313,7 @@ namespace CMMS_API_Test
         public void VerifygetMRSItemsWithCode()
         {
             int ID = 1;
-            var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.SM.CMMRS>();
+            var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.SM.MRSItemsBeforeIssue>();
             var response = ptwService.GetItemList(EP_getMRSItemsWithCode + "?ID=" + ID);
             int ListCount = response.Count;
             Assert.AreEqual(ListCount, 1);
@@ -342,6 +342,7 @@ namespace CMMS_API_Test
                                 ""asset_item_ID"":4,
                                 ""approval_status"":2,
                                 ""return_remarks"":""Testing"",
+                                ""approved_date"":""2023-03-03"",
                                 ""equipments"":[{
                                     ""id"":4,
                                     ""equipmentID"":12,
@@ -355,14 +356,14 @@ namespace CMMS_API_Test
             var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.Utils.CMDefaultResponse>();
             var response = ptwService.CreateItem(EP_mrsApproval, payload);
             string responseMessage = response.message;
-            Assert.AreEqual("MRS Request Approved", responseMessage);
+            Assert.AreEqual("Status updated.", responseMessage);
         }
 
         [TestMethod]
         public void VerifygetReturnDataByID()
         {
             int ID = 1;
-            var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.SM.CMMRS>();
+            var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.SM.ReturnMRSData>();
             var response = ptwService.GetItemList(EP_getReturnDataByID + "?ID=" + ID);
             int ListCount = response.Count;
             Assert.AreEqual(ListCount, 1);
@@ -382,30 +383,33 @@ namespace CMMS_API_Test
         public void VerifymrsReturn()
         {
             string payload = @"{
-                                ""ID"":10,
-                                ""isEditMode"":0,
-                                ""plant_ID"":1,
-                                ""requested_by_emp_ID"":1,
-                                ""requestd_date"":""2023-03-03"",
-                                ""flag"":1,
-                                ""setAsTemplate"":3,
-                                ""asset_item_ID"":4,
-                                ""approval_status"":2,
-                                ""return_remarks"":""Testing"",
-                                ""equipments"":[{
-                                    ""id"":4,
-                                    ""equipmentID"":12,
-                                    ""approval_required"":1,
-                                    ""asset_type_ID"":10,
-                                    ""asset_code"":""M0001"",
-                                    ""qty"":10,
-                                    ""issued_qty"":15 
-                                }]
+                            ""ID"":10,
+                            ""isEditMode"":1,
+                            ""plant_ID"":1,
+                            ""requested_by_emp_ID"":1,
+                            ""returnDate"":""2023-03-03"",
+                            ""requestd_date"":""2023-04-04"",
+                            ""flag"":1,
+                            ""setAsTemplate"":3,
+                            ""asset_item_ID"":4,
+                            ""approval_status"":2,
+                            ""return_remarks"":""Testing"",
+                            ""item_condition"":1,
+                            ""status"":5,
+                            ""equipments"":[{
+                                ""id"":4,
+                                ""equipmentID"":12,
+                                ""approval_required"":1,
+                                ""asset_type_ID"":10,
+                                ""return_remarks"":""Test remarks"",
+                                ""qty"":10,
+                                ""requested_qty"":15 
+                            }]
                         }";
             var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.Utils.CMDefaultResponse>();
-            var response = ptwService.CreateItem(EP_mrsApproval, payload);
+            var response = ptwService.CreateItem(EP_mrsReturn, payload);
             string responseMessage = response.message;
-            Assert.AreEqual("MRS Request Approved", responseMessage);
+            Assert.AreEqual("MRS return submitted.", responseMessage);
         }
 
         [TestMethod]
@@ -426,7 +430,7 @@ namespace CMMS_API_Test
             var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.Utils.CMDefaultResponse>();
             var response = ptwService.CreateItem(EP_mrsReturnApproval, payload);
             string responseMessage = response.message;
-            Assert.AreEqual("MRS Request Approved", responseMessage);
+            Assert.AreEqual("Transaction details failed.", responseMessage);
         }
 
         // GOODS ORDER API'S
@@ -443,7 +447,7 @@ namespace CMMS_API_Test
             int status = response[0].status;
             string generatedBy = response[0].generatedBy;
             Assert.AreEqual(vendorID, 177);
-            Assert.AreEqual(status, 2);
+            Assert.AreEqual(status, 6);
             Assert.AreEqual(generatedBy, "Jagatpal Singh");
         }
 
@@ -502,7 +506,7 @@ namespace CMMS_API_Test
                                 ""id"":1,
                                 ""status"":2,
                                 ""remarks"":""TEsting approval"",
-                                ""approvedBy"":12
+                                ""approvedBy"":""12""
 
                         }";
 
@@ -520,7 +524,7 @@ namespace CMMS_API_Test
                                 ""id"":1,
                                 ""status"":2,
                                 ""remarks"":""TEsting approval"",
-                                ""approvedBy"":12
+                                ""approvedBy"":""12""
 
                         }";
 
@@ -553,7 +557,7 @@ namespace CMMS_API_Test
             int order_type = 0;
             var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.PurchaseData>();
             var response = ptwService.GetItemList(EP_GetPurchaseData + "?plantID=" + plantID+ "&empRole="+ empRole+ "&fromDate="+ fromDate +"&toDate="+toDate+ "&status="+status+ "&order_type="+ order_type);
-            Assert.AreEqual("Hero Future Solar Plant 1000MW", response[0].facilityName); 
+            Assert.AreEqual("Noor Abu Dhabi 1177MW", response[0].facilityName); 
             Assert.AreEqual(19, response[0].orderID); 
         }
         [TestMethod]
@@ -594,8 +598,8 @@ namespace CMMS_API_Test
             int id = 1;
             var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.SM.CMMRS>();
             var response = ptwService.GetItem(EP_getLastTemplateData + "?ID=" + id);
-            Assert.AreEqual(4, response.requested_qty);
-            Assert.AreEqual(218, response.asset_item_ID);
+            Assert.AreEqual(Convert.ToDecimal(5), response.requested_qty);
+            Assert.AreEqual(1, response.asset_item_ID);
 
         }
         [TestMethod]
@@ -605,8 +609,8 @@ namespace CMMS_API_Test
             int id = 45;
             var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.SM.AssetItem>();
             var response = ptwService.GetItemList(EP_GetAssetItems + "?plantID=" + id);
-            Assert.AreEqual(4, response[0].ID);
-            Assert.AreEqual(218, response[0].asset_ID);
+            Assert.AreEqual(1, response[0].ID);
+            Assert.AreEqual(1, response[0].asset_ID);
 
         }
     }

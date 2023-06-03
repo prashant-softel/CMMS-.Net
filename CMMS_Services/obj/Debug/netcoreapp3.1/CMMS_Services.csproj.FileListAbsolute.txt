@@ -8,3 +8,16 @@ G:\CMMS-.Net\CMMS_Services\obj\Debug\netcoreapp3.1\CMMS_Services.AssemblyInfo.cs
 G:\CMMS-.Net\CMMS_Services\obj\Debug\netcoreapp3.1\CMMS_Services.csproj.CoreCompileInputs.cache
 G:\CMMS-.Net\CMMS_Services\obj\Debug\netcoreapp3.1\CMMS_Services.dll
 G:\CMMS-.Net\CMMS_Services\obj\Debug\netcoreapp3.1\CMMS_Services.pdb
+D:\Work\CMMS-.Net-master\CMMS-.Net-master\CMMS_Services\bin\Debug\netcoreapp3.1\CMMS_Services.deps.json
+D:\Work\CMMS-.Net-master\CMMS-.Net-master\CMMS_Services\bin\Debug\netcoreapp3.1\CMMS_Services.dll
+D:\Work\CMMS-.Net-master\CMMS-.Net-master\CMMS_Services\bin\Debug\netcoreapp3.1\CMMS_Services.pdb
+D:\Work\CMMS-.Net-master\CMMS-.Net-master\CMMS_Services\bin\Debug\netcoreapp3.1\CMMSAPIs.dll
+D:\Work\CMMS-.Net-master\CMMS-.Net-master\CMMS_Services\bin\Debug\netcoreapp3.1\CMMSAPIs.pdb
+D:\Work\CMMS-.Net-master\CMMS-.Net-master\CMMS_Services\obj\Debug\netcoreapp3.1\CMMS_Services.csproj.AssemblyReference.cache
+D:\Work\CMMS-.Net-master\CMMS-.Net-master\CMMS_Services\obj\Debug\netcoreapp3.1\CMMS_Services.GeneratedMSBuildEditorConfig.editorconfig
+D:\Work\CMMS-.Net-master\CMMS-.Net-master\CMMS_Services\obj\Debug\netcoreapp3.1\CMMS_Services.AssemblyInfoInputs.cache
+D:\Work\CMMS-.Net-master\CMMS-.Net-master\CMMS_Services\obj\Debug\netcoreapp3.1\CMMS_Services.AssemblyInfo.cs
+D:\Work\CMMS-.Net-master\CMMS-.Net-master\CMMS_Services\obj\Debug\netcoreapp3.1\CMMS_Services.csproj.CoreCompileInputs.cache
+D:\Work\CMMS-.Net-master\CMMS-.Net-master\CMMS_Services\obj\Debug\netcoreapp3.1\CMMS_Services.csproj.CopyComplete
+D:\Work\CMMS-.Net-master\CMMS-.Net-master\CMMS_Services\obj\Debug\netcoreapp3.1\CMMS_Services.dll
+D:\Work\CMMS-.Net-master\CMMS-.Net-master\CMMS_Services\obj\Debug\netcoreapp3.1\CMMS_Services.pdb

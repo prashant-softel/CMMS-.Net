@@ -83,7 +83,7 @@ namespace CMMSAPIs.Models.SM
 
         public int plant_ID { get; set; }
         public int approved_by_emp_ID { get; set; }
-        public DateTime? approved_date { get; set; }
+        public DateTime approved_date { get; set; }
         public int status { get; set; }
         public string reference { get; set; }
         public string referenceID { get; set; }
@@ -197,6 +197,71 @@ namespace CMMSAPIs.Models.SM
         public int Asset_master_id { get; set; }
         public int spare_multi_selection { get; set; }
 
+
+    }
+
+    public class MRSItemsBeforeIssue
+    {
+        public int ID { get; set; }
+        public string return_remarks { get; set; }
+        public int mrs_return_ID { get; set; }
+        public string finalRemark { get; set; }
+        public int asset_item_ID { get; set; }
+        public string asset_MDM_code { get; set; }
+        public decimal returned_qty { get; set; }
+        public decimal available_qty { get; set; }
+        public decimal used_qty { get; set; }
+        public decimal issued_qty { get; set; }
+        public int flag { get; set; }
+        public string returnDate { get; set; }
+        public int approval_status { get; set; }
+        public string approved_date { get; set; }
+        public string issued_date { get; set; }
+       
+        public decimal requested_qty { get; set; }
+        public string approval_required { get; set; }
+        public string asset_name { get; set; }
+        public string asset_type_ID { get; set; }
+        public string asset_type { get; set; }
+        public string file_path { get; set; }
+        public string Asset_master_id { get; set; }
+        public string spare_multi_selection { get; set; }
+
+    }
+
+    public class MRSList
+    {
+        public int ID { get; set; }
+        public int requested_by_emp_ID { get; set; }
+        public string approver_name { get; set; }
+        public string requestd_date { get; set; }
+        public string returnDate { get; set; }
+        public string approval_date { get; set; }
+        public string approval_status { get; set; }
+        public string approval_comment { get; set; }
+        public string emp_name { get; set; }
+        public int flag { get; set; }
+
+    }
+
+    public class ReturnMRSData
+    {
+        public int ID { get; set; }
+        public int mrs_ID { get; set; }
+        public int mrs_return_ID { get; set; }
+        public int asset_item_ID { get; set; }
+        public string asset_MDM_code { get; set; }
+        public decimal requested_qty { get; set; }
+        public decimal issued_qty { get; set; }
+        public decimal returned_qty { get; set; }
+        public decimal used_qty { get; set; }
+        public string return_remarks { get; set; }
+        public int approval_required { get; set; }
+        public int status { get; set; }
+        public int flag { get; set; }
+        public DateTime lastmodifieddate { get; set; }
+        public decimal   available_qty { get; set; }
+        public string finalRemark { get; set; }
 
     }
 }

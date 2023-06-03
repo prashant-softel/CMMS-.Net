@@ -86,7 +86,6 @@ namespace CMMS_Services
         {
             var content = response.Content.ToString();
             T dtoObject = JsonConvert.DeserializeObject<T>(content);
-            
 
             return dtoObject;
         }

@@ -13,12 +13,12 @@ namespace CMMSAPIs.BS.SM
     public interface IMRSBS
     {
         Task<CMDefaultResponse> requestMRS(CMMRS request);        
-        Task<List<CMMRS>> getMRSList(int plant_ID, int emp_id, DateTime toDate, DateTime fromDate);        
+        Task<List<MRSList>> getMRSList(int plant_ID, int emp_id, DateTime toDate, DateTime fromDate);        
         Task<List<MRSItems>> getMRSItems(int ID);        
-        Task<List<CMMRS>> getMRSItemsBeforeIssue(int ID);        
-        Task<List<CMMRS>> getMRSItemsWithCode(int ID);        
+        Task<List<MRSItemsBeforeIssue>> getMRSItemsBeforeIssue(int ID);        
+        Task<List<MRSItemsBeforeIssue>> getMRSItemsWithCode(int ID);        
         Task<List<CMMRS>> getMRSDetails(int ID);        
-        Task<List<CMMRS>> getReturnDataByID(int ID);        
+        Task<List<ReturnMRSData>> getReturnDataByID(int ID);        
         Task<List<CMMRS>> getAssetTypeByItemID(int ItemID);
         Task<CMDefaultResponse> mrsReturn(CMMRS request);        
         Task<CMDefaultResponse> mrsApproval(CMMRS request);        
@@ -51,7 +51,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<CMMRS>> getMRSList(int plant_ID, int emp_id, DateTime toDate, DateTime fromDate)
+        public async Task<List<MRSList>> getMRSList(int plant_ID, int emp_id, DateTime toDate, DateTime fromDate)
         {
             try
             {
@@ -81,7 +81,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
         
-        public async Task<List<CMMRS>> getMRSItemsBeforeIssue(int ID)
+        public async Task<List<MRSItemsBeforeIssue>> getMRSItemsBeforeIssue(int ID)
         {
             try
             {
@@ -96,7 +96,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<CMMRS>> getMRSItemsWithCode(int ID)
+        public async Task<List<MRSItemsBeforeIssue>> getMRSItemsWithCode(int ID)
         {
             try
             {
@@ -125,7 +125,7 @@ namespace CMMSAPIs.BS.SM
                 throw;
             }
         }
-        public async Task<List<CMMRS>> getReturnDataByID(int ID)
+        public async Task<List<ReturnMRSData>> getReturnDataByID(int ID)
         {
             try
             {

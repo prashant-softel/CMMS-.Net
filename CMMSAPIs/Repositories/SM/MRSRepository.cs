@@ -35,10 +35,10 @@ namespace CMMSAPIs.Repositories.SM
         {
         }
 
-        internal async Task<List<CMMRS>> getMRSList(int plant_ID, int emp_id, DateTime toDate, DateTime fromDate)
+        internal async Task<List<MRSList>> getMRSList(int plant_ID, int emp_id, DateTime toDate, DateTime fromDate)
         {
-            string stmt = "SELECT sm.ID,sm.requested_by_emp_ID,CONCAT(ed1.firstName,' ',ed1.lastName) as approver_name,DATE_FORMAT(sm.requested_date,'%Y-%m-%d') as requestd_date,DATE_FORMAT(sm.returnDate,'%Y-%m-%d') as returnDate,if(sm.approval_status != '',DATE_FORMAT(sm.approved_date,'%d-%m-%Y'),'') as approval_date,sm.approval_status,sm.approval_comment,CONCAT(ed.firstName,' ',ed.lastName) as emp_name, sm.flag FROM smmrs sm LEFT JOIN users ed ON ed.id = sm.requested_by_emp_ID LEFT JOIN users ed1 ON ed1.id = sm.approved_by_emp_ID WHERE sm.plant_ID = " + plant_ID + " AND ed.id = " + emp_id + " AND (DATE_FORMAT(sm.requested_date,'%Y-%m-%d') BETWEEN '" + toDate + "' AND '" + fromDate + "' OR DATE_FORMAT(sm.returnDate,'%Y-%m-%d') BETWEEN '" + toDate + "' AND '" + fromDate + "')";
-            List<CMMRS> _List = await Context.GetData<CMMRS>(stmt).ConfigureAwait(false);
+            string stmt = "SELECT sm.ID,sm.requested_by_emp_ID,CONCAT(ed1.firstName,' ',ed1.lastName) as approver_name,DATE_FORMAT(sm.requested_date,'%Y-%m-%d') as requestd_date,DATE_FORMAT(sm.returnDate,'%Y-%m-%d') as returnDate,if(sm.approval_status != '',DATE_FORMAT(sm.approved_date,'%d-%m-%Y'),'') as approval_date,sm.approval_status,sm.approval_comment,CONCAT(ed.firstName,' ',ed.lastName) as emp_name, sm.flag FROM smmrs sm LEFT JOIN users ed ON ed.id = sm.requested_by_emp_ID LEFT JOIN users ed1 ON ed1.id = sm.approved_by_emp_ID WHERE sm.plant_ID = " + plant_ID + " AND ed.id = " + emp_id + " AND (DATE_FORMAT(sm.requested_date,'%Y-%m-%d') BETWEEN '" + fromDate.ToString("yyyy-MM-dd") + "' AND '" +  toDate.ToString("yyyy-MM-dd") + "' OR DATE_FORMAT(sm.returnDate,'%Y-%m-%d') BETWEEN '" + fromDate.ToString("yyyy-MM-dd")  + "' AND '" + toDate.ToString("yyyy-MM-dd") + "')";
+            List<MRSList> _List = await Context.GetData<MRSList>(stmt).ConfigureAwait(false);
             return _List;
         }
 
@@ -195,7 +195,7 @@ namespace CMMSAPIs.Repositories.SM
             return _List;
         }
 
-        internal async Task<List<CMMRS>> getMRSItemsBeforeIssue(int ID)
+        internal async Task<List<MRSItemsBeforeIssue>> getMRSItemsBeforeIssue(int ID)
         {
 
             string stmt = "SELECT smi.ID,smi.return_remarks,smi.mrs_return_ID,smi.finalRemark,smi.asset_item_ID,smi.asset_MDM_code," +
@@ -208,12 +208,12 @@ namespace CMMSAPIs.Repositories.SM
                 "FROM smrsitems sai  LEFT JOIN smassetmasters sam ON sam.asset_code = sai.asset_MDM_code  LEFT JOIN smassetmasterfiles  file " +
                 "ON file.Asset_master_id =  sam.ID  LEFT JOIN smassettypes sat ON sat.ID = sam.asset_type_ID  LEFT JOIN smunitmeasurement f_sum " +
                 "ON  f_sum.id = sam.unit_of_measurement      ) as t1 ON t1.asset_MDM_code = smi.asset_MDM_code where smi.mrs_ID = "+ID+" GROUP BY smi.ID";
-            List<CMMRS> _List = await Context.GetData<CMMRS>(stmt).ConfigureAwait(false);
+            List<MRSItemsBeforeIssue> _List = await Context.GetData<MRSItemsBeforeIssue>(stmt).ConfigureAwait(false);
             return _List;
         }
 
 
-        internal async Task<List<CMMRS>> getMRSItemsWithCode(int ID)
+        internal async Task<List<MRSItemsBeforeIssue>> getMRSItemsWithCode(int ID)
         {
             string stmt = "SELECT smi.ID,smi.mrs_return_ID,smi.finalRemark,smi.asset_item_ID,smi.asset_MDM_code," +
                 "smi.returned_qty,smi.available_qty,smi.used_qty,smi.ID,smi.issued_qty,\r\nsm.flag," +
@@ -229,7 +229,7 @@ namespace CMMSAPIs.Repositories.SM
                 "LEFT JOIN smunitmeasurement f_sum ON  f_sum.id = sam.plant_ID\r\n        " +
                 "LEFT JOIN smassetitems sai ON  sai.ID = smi.asset_item_ID" +
                 " WHERE smi.mrs_ID = "+ID+" GROUP BY smi.asset_MDM_code";
-            List<CMMRS> _List = await Context.GetData<CMMRS>(stmt).ConfigureAwait(false);
+            List<MRSItemsBeforeIssue> _List = await Context.GetData<MRSItemsBeforeIssue>(stmt).ConfigureAwait(false);
             return _List;
         }
 
@@ -239,10 +239,10 @@ namespace CMMSAPIs.Repositories.SM
             List<CMMRS> _List = await Context.GetData<CMMRS>(stmt).ConfigureAwait(false);
             return _List;
         }
-        internal async Task<List<CMMRS>> getReturnDataByID(int ID)
+        internal async Task<List<ReturnMRSData>> getReturnDataByID(int ID)
         {
             string stmt = $"SELECT * FROM smrsitems WHERE ID = {ID}";
-            List<CMMRS> _List = await Context.GetData<CMMRS>(stmt).ConfigureAwait(false);
+            List<ReturnMRSData> _List = await Context.GetData<ReturnMRSData>(stmt).ConfigureAwait(false);
             return _List;
         }
 
@@ -332,8 +332,8 @@ namespace CMMSAPIs.Repositories.SM
             }
             else
             {
-                string stmt = $"UPDATE smmrs SET approved_by_emp_ID = {request.approved_by_emp_ID}, approved_date={request.approved_date},"+ 
-                               $"approval_status ={request.approval_status},approval_comment = {request.return_remarks},flag = 1 WHERE ID = {request.ID}";
+                string stmt = $"UPDATE smmrs SET approved_by_emp_ID = {request.approved_by_emp_ID}, approved_date='{request.approved_date.ToString("yyyy-MM-dd HH:mm")}',"+ 
+                               $"approval_status ={request.approval_status},approval_comment = '{request.return_remarks}',flag = 1 WHERE ID = {request.ID}";
                 await Context.ExecuteNonQry<int>(stmt);
                 response = new CMDefaultResponse(1, CMMS.RETRUNSTATUS.SUCCESS, "Status updated.");
             }
@@ -565,7 +565,7 @@ namespace CMMSAPIs.Repositories.SM
 
             if (Queryflag)
             {
-                var stmtUpdate = $"UPDATE smmrs SET approved_by_emp_ID = {request.approved_by_emp_ID}, approved_date = '{request.approved_date.Value.ToString("yyyy-MM-dd HH:mm")}'," + 
+                var stmtUpdate = $"UPDATE smmrs SET approved_by_emp_ID = {request.approved_by_emp_ID}, approved_date = '{request.approved_date.ToString("yyyy-MM-dd HH:mm")}'," + 
                 $"approval_status = {request.approval_status}, approval_comment = '{request.return_remarks}'"+
                 $"WHERE ID = {request.ID}";
                 try
