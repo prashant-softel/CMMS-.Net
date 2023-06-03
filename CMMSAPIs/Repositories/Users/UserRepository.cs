@@ -137,6 +137,13 @@ namespace CMMSAPIs.Repositories.Users
             Dictionary<string, int> countries = new Dictionary<string, int>();
             countries.Merge(countryNames, countryIds);
 
+            string plantQry = "SELECT id, UPPER(name) as name FROM facilities WHERE parentId = 0;";
+            DataTable dtPlant = await Context.FetchData(plantQry).ConfigureAwait(false);
+            List<string> plantNames = dtPlant.GetColumn<string>("name");
+            List<int> plantIds = dtPlant.GetColumn<int>("id");
+            Dictionary<string, int> plants = new Dictionary<string, int>();
+            plants.Merge(plantNames, plantIds);
+
             string stateQry = "";
             DataTable dtState = null;
             List<string> stateNames = null;
@@ -174,7 +181,8 @@ namespace CMMSAPIs.Repositories.Users
                 { "Zipcode", new Tuple<string, Type>("zipcode", typeof(double)) },
                 { "Role", new Tuple<string, Type>("role_name", typeof(string)) },
                 { "Is Employee", new Tuple<string, Type>("isEmployee", typeof(string)) },
-                { "Joining Date", new Tuple<string, Type>("joiningDate", typeof(DateTime)) }
+                { "Joining Date", new Tuple<string, Type>("joiningDate", typeof(DateTime)) },
+                { "Plant Associated", new Tuple<string, Type>("plant_name", typeof(string)) }
             };
             string query1 = $"SELECT file_path FROM uploadedfiles WHERE id = {file_id};";
             DataTable dt1 = await Context.FetchData(query1).ConfigureAwait(false);
@@ -218,6 +226,7 @@ namespace CMMSAPIs.Repositories.Users
                         dt2.Columns.Add("state_id", typeof(int));
                         dt2.Columns.Add("city_id", typeof(int));
                         dt2.Columns.Add("role_id", typeof(int));
+                        dt2.Columns.Add("plant_id", typeof(int));
                         for (int rN = 4; rN <= sheet.Dimension.End.Row; rN++)
                         {
                             ExcelRange row = sheet.Cells[rN, 1, rN, sheet.Dimension.End.Column];
@@ -312,9 +321,20 @@ namespace CMMSAPIs.Repositories.Users
                             catch(KeyNotFoundException)
                             {
                                 if (Convert.ToString(newR["blood_group_name"]) == null || Convert.ToString(newR["blood_group_name"]) == "")
-                                    m_errorLog.SetError($"Blood group cannot be empty. [Row: {rN}]");
+                                    newR["blood_group_id"] = 0;
                                 else
                                     m_errorLog.SetError($"Invalid Blood Group. [Row: {rN}]");
+                            }
+                            try
+                            {
+                                newR["plant_id"] = plants[Convert.ToString(newR["plant_name"]).ToUpper()];
+                            }
+                            catch(KeyNotFoundException)
+                            {
+                                if (Convert.ToString(newR["plant_name"]) == null || Convert.ToString(newR["plant_name"]) == "")
+                                    m_errorLog.SetError($"User should be linked to at least one plant. [Row: {rN}]");
+                                else
+                                    m_errorLog.SetError($"Invalid plant name. [Row: {rN}]");
                             }
                             try
                             {
@@ -384,7 +404,10 @@ namespace CMMSAPIs.Repositories.Users
                             List<CMCreateUser> userList = splitDt.Item2.MapTo<CMCreateUser>();
                             List<CMUserCrentials> credList = splitDt.Item1.MapTo<CMUserCrentials>();
                             for(int i = 0; i < userList.Count; i++)
+                            {
                                 userList[i].credentials = credList[i];
+                                userList[i].facilities = new List<int>() { Convert.ToInt32(dt2.Rows[i]["plant_id"]) };
+                            }
                             response = await CreateUser(userList, userID);
                         }
                     }
