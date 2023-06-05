@@ -567,7 +567,7 @@ namespace CMMSAPIs.Repositories.SM
             {
                 var stmtUpdate = $"UPDATE smmrs SET approved_by_emp_ID = {request.approved_by_emp_ID}, approved_date = '{request.approved_date.ToString("yyyy-MM-dd HH:mm")}'," + 
                 $"approval_status = {request.approval_status}, approval_comment = '{request.return_remarks}'"+
-                $"WHERE ID = {request.ID}";
+                $" WHERE ID = {request.ID}";
                 try
                 {
                     executeUpdateStmt = await Context.ExecuteNonQry<int>(stmtUpdate);
