@@ -263,31 +263,61 @@ namespace CMMSAPIs.Repositories.Masters
             return _Employee;
         }
 
+
+
         internal async Task<List<CMBusinessType>> GetBusinessTypeList()
         {
             string myQuery = $"SELECT id, name, description, status FROM businesstype";
             List<CMBusinessType> _Business = await Context.GetData<CMBusinessType>(myQuery).ConfigureAwait(false);
             return _Business;
         }
-        internal async Task<CMDefaultResponse> AddBusiness(List<CMBusiness> request)
+        internal async Task<CMDefaultResponse> AddBusiness(List<CMBusiness> request , int userId)
         {
+            foreach(var item in request) 
+            {
+                string country, state, city;
+                string getCountryQry = $"SELECT name FROM countries WHERE id = {item.countryId};";
+                DataTable dtCountry = await Context.FetchData(getCountryQry).ConfigureAwait(false);
+                if (dtCountry.Rows.Count == 0)
+                    throw new ArgumentException("Invalid Country");
+                country = Convert.ToString(dtCountry.Rows[0][0]);
+                string getStateQry = $"SELECT name FROM states WHERE id = {item.stateId};";
+                DataTable dtState = await Context.FetchData(getStateQry).ConfigureAwait(false);
+                if (dtState.Rows.Count == 0)
+                    throw new ArgumentException("Invalid State");
+                state = Convert.ToString(dtState.Rows[0][0]);
+                string getCityQry = $"SELECT name FROM cities WHERE id = {item.cityId};";
+                DataTable dtCity = await Context.FetchData(getCityQry).ConfigureAwait(false);
+                if (dtCity.Rows.Count == 0)
+                    throw new ArgumentException("Invalid City");
+                city = Convert.ToString(dtCity.Rows[0][0]);
+                string myQuery1 = $"SELECT * FROM states WHERE id = {item.stateId} AND country_id = {item.countryId};";
+                DataTable dt1 = await Context.FetchData(myQuery1).ConfigureAwait(false);
+                if (dt1.Rows.Count == 0)
+                    throw new ArgumentException($"{state} is not situated in {country}");
+                string myQuery2 = $"SELECT * FROM cities WHERE id = {item.cityId} AND state_id = {item.stateId} AND country_id = {item.countryId};";
+                DataTable dt2 = await Context.FetchData(myQuery2).ConfigureAwait(false);
+                if (dt2.Rows.Count == 0)
+                    throw new ArgumentException($"{city} is not situated in {state}, {country}");
+                item.country = country;
+                item.state = state;
+                item.city = city;
+            }
             int count = 0;
             int retID = 0;
             string businessName = "";
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.INVALID_ARG;
             string strRetMessage = "";
-            int useId = 11;     //pending : get from session
-            string qry = "insert into business ( name, email, contactPerson, contactNumber, website, location, address, city, state, country, zip, type, status, addedBy) values ";
+            string qry = "insert into business ( name, email, contactPerson, contactNumber, website, location, address, cityId, city, stateId, state, countryId, country, zip, type, status, addedBy) values ";
             foreach (var unit in request)
             {
                 count++;
                 businessName = unit.name;
-                qry += "('" + unit.name + "','" + unit.email + "','" + unit.contactPerson + "','" + unit.contactNumber+ "','" + unit.website + "','" + unit.location + "','" + unit.address + "','" + unit.city + "','" + unit.state + "','" + unit.country + "','" + unit.zip + "','" + unit.type + "','" + unit.status + "','" + useId + "'),";
+                qry += "('" + unit.name + "','" + unit.email + "','" + unit.contactPerson + "','" + unit.contactNumber+ "','" + unit.website + "','" + unit.location + "','" + unit.address + "','" + unit.cityId + "','" + unit.city + "','" + unit.stateId + "','" + unit.state + "','" + unit.countryId + "','" + unit.country + "','" + unit.zip + "','" + unit.type + "','" + unit.status + "','" + userId + "'),";
             }
             if (count > 0)
             {
                 qry = qry.Substring(0, (qry.Length - 1)) + ";" + "select LAST_INSERT_ID(); ";
-
                 //List<CMInventoryList> newInventory = await Context.GetData<CMInventoryList>(qry).ConfigureAwait(false);
                 DataTable dt = await Context.FetchData(qry).ConfigureAwait(false);
                 retID = Convert.ToInt32(dt.Rows[0][0]);
@@ -307,9 +337,102 @@ namespace CMMSAPIs.Repositories.Masters
             }
             return new CMDefaultResponse(retID, retCode, strRetMessage);
         }
+
+        internal async Task<CMDefaultResponse> UpdateBusiness(CMBusiness request, int userId)
+        {
+            /*
+             * Read property of CMModule and Update into Features table
+            */
+            if (request.id <= 0)
+                throw new ArgumentException("Invalid ");
+            string locationQry = $"SELECT countryId, stateId, cityId FROM facilities WHERE id = {request.id};";
+            DataTable dt0 = await Context.FetchData(locationQry).ConfigureAwait(false);
+            string country, state, city;
+            DataTable dtCountry, dtState, dtCity;
+            string getCountryQry = $"SELECT name FROM countries WHERE id = {request.countryId};";
+            dtCountry = await Context.FetchData(getCountryQry).ConfigureAwait(false);
+            if (dtCountry.Rows.Count == 0)
+            {
+                request.countryId = Convert.ToInt32(dt0.Rows[0]["countryId"]);
+                getCountryQry = $"SELECT name FROM countries WHERE id = {request.countryId};";
+                dtCountry = await Context.FetchData(getCountryQry).ConfigureAwait(false);
+            }
+            country = Convert.ToString(dtCountry.Rows[0][0]);
+            string getStateQry = $"SELECT name FROM states WHERE id = {request.stateId};";
+            dtState = await Context.FetchData(getStateQry).ConfigureAwait(false);
+            if (dtState.Rows.Count == 0)
+            {
+                request.stateId = Convert.ToInt32(dt0.Rows[0]["stateId"]);
+                getStateQry = $"SELECT name FROM states WHERE id = {request.stateId};";
+                dtState = await Context.FetchData(getStateQry).ConfigureAwait(false);
+            }
+            state = Convert.ToString(dtState.Rows[0][0]);
+            string getCityQry = $"SELECT name FROM cities WHERE id = {request.cityId};";
+            dtCity = await Context.FetchData(getCityQry).ConfigureAwait(false);
+            if (dtCity.Rows.Count == 0)
+            {
+                request.cityId = Convert.ToInt32(dt0.Rows[0]["cityId"]);
+                getCityQry = $"SELECT name FROM cities WHERE id = {request.cityId};";
+                dtCity = await Context.FetchData(getCityQry).ConfigureAwait(false);
+            }
+            city = Convert.ToString(dtCity.Rows[0][0]);
+            string myQuery1 = $"SELECT * FROM states WHERE id = {request.stateId} AND country_id = {request.countryId};";
+            DataTable dt1 = await Context.FetchData(myQuery1).ConfigureAwait(false);
+            if (dt1.Rows.Count == 0)
+                throw new ArgumentException($"{state} is not situated in {country}");
+            string myQuery2 = $"SELECT * FROM cities WHERE id = {request.cityId} AND state_id = {request.stateId} AND country_id = {request.countryId};";
+            DataTable dt2 = await Context.FetchData(myQuery2).ConfigureAwait(false);
+            if (dt2.Rows.Count == 0)
+                throw new ArgumentException($"{city} is not situated in {state}, {country}");
+            string myQuery = "UPDATE business SET ";
+
+            if (request.name != null && request.name != "")
+                myQuery += $"`name` = '{request.name}', ";
+            if (request.email != null && request.email != "")
+                myQuery += $"`email` = '{request.email}', ";
+            if (request.contactPerson != null && request.contactPerson != "")
+                myQuery += $"`contactPerson` = '{request.contactPerson}', ";
+            if (request.contactNumber != null && request.contactNumber != "")
+                myQuery += $"`contactNumber` = '{request.contactNumber}', "; 
+            if (request.website != null && request.website != "")
+                myQuery += $"`website` = '{request.website}', ";
+            if (request.location != null && request.location!= "")
+                myQuery += $"`location` = '{request.location}', "; 
+            if (request.address != null && request.address != "")
+                myQuery += $"`address` = '{request.address}', ";
+            if (request.cityId > 0)
+                myQuery += $"`cityId` = {request.cityId}, `city` = '{city}', ";
+            if (request.stateId > 0)
+                myQuery += $"`stateId` = {request.stateId}, `state` = '{state}', ";
+            if (request.countryId > 0)
+                myQuery += $"`countryId` = {request.countryId}, `country` = '{country}', ";
+            if (request.zip != null && request.zip != "")
+                myQuery += $"`zip` = '{request.zip}', ";
+            if (request.type >0)
+                myQuery += $"`type` = {request.type}, ";
+
+
+            myQuery += $"updatedBy = {userId} , updatedAt = '{UtilsRepository.GetUTCTime()}' WHERE id = {request.id};";
+            //myQuery += $" WHERE id={request.id};";
+            await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
+            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Business Updated Successfully");
+            return response;
+        }
+
+        internal async Task<CMDefaultResponse> DeleteBusiness(int id){
+            string deleteQuery = $"UPDATE business SET status = 0 WHERE id = {id};";
+            await Context.ExecuteNonQry<int>(deleteQuery).ConfigureAwait(false);
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Business Deleted");
+        }
         internal async Task<List<CMBusiness>> GetBusinessList(int businessType)
         {
-            string myQuery = $"SELECT id, name, email, contactPerson, contactNumber, website, location, address, city, state, country, zip, type, status, addedAt FROM Business ";
+            string myQuery = $"SELECT business.id, business. name, email, contactPerson, contactNumber, website, location, address, cities.id as cityId , cities.name as city, states.id as stateId, states.name as state, countries.id as countryId, countries.name as country, zip, type, status, addedAt FROM Business " +
+                             "LEFT JOIN " +
+                                    "cities as cities ON cities.id = business.cityId " +
+                             "LEFT JOIN " +
+                                    "states as states ON states.id = business.stateId and states.id = cities.state_id " +
+                             "LEFT JOIN " +
+                                    "countries as countries ON countries.id = business.countryId and countries.id = cities.country_id and countries.id = states.country_id " ;
             if(businessType > 0)
                 myQuery += $"where type = {businessType}";
             List<CMBusiness> _Business = await Context.GetData<CMBusiness>(myQuery).ConfigureAwait(false);

@@ -23,7 +23,10 @@ namespace CMMSAPIs.BS.Masters
         Task<List<CMDefaultList>> GetBloodGroupList();
         Task<List<CMDefaultList>> GetGenderList();
         Task<List<CMDefaultList>> GetSPVList();
-        Task<CMDefaultResponse> AddBusiness(List<CMBusiness> request);
+        Task<CMDefaultResponse> AddBusiness(List<CMBusiness> request, int userId);
+        Task<CMDefaultResponse> UpdateBusiness(CMBusiness request, int userId);
+        Task<CMDefaultResponse> DeleteBusiness(int id);
+
         Task<List<CMBusiness>> GetBusinessList(int businessType);
         Task<CMDefaultResponse> AddModule(CMModule request);
         Task<CMDefaultResponse> UpdateModule(CMModule request);
@@ -310,14 +313,44 @@ namespace CMMSAPIs.BS.Masters
             }
         }
 
-        public async Task<CMDefaultResponse> AddBusiness(List<CMBusiness> request)
+        public async Task<CMDefaultResponse> AddBusiness(List<CMBusiness> request,int userId)
         {
             try
             {
                 using (var repos = new CMMSRepository(getDB))
                 {
-                    return await repos.AddBusiness(request);
+                    return await repos.AddBusiness(request, userId); 
 
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> UpdateBusiness(CMBusiness request , int userId)
+        {
+            try
+            {
+                using (var repos = new CMMSRepository(getDB))
+                {
+                    return await repos.UpdateBusiness(request,userId);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> DeleteBusiness(int id)
+        {
+            try
+            {
+                using (var repos = new CMMSRepository(getDB))
+                {
+                    return await repos.DeleteBusiness(id);
                 }
             }
             catch (Exception ex)
