@@ -31,6 +31,8 @@ namespace CMMSAPIs.BS.Masters
         Task<CMModule> GetModuleDetail(int id);
         Task<List<CMModule>> GetModuleList();
         Task<List<CMFrequency>> GetFrequencyList();
+        Task<string> Print(int id, CMMS.CMMS_Modules moduleID);
+
     }
     public class CMMSBS : ICMMSBS
     {
@@ -41,7 +43,7 @@ namespace CMMSAPIs.BS.Masters
             databaseProvider = dbProvider;
         }
 
-
+        
         #region helper
 
         public async Task<CMDefaultResponse> AddModule(CMModule request)
@@ -335,6 +337,21 @@ namespace CMMSAPIs.BS.Masters
                 }
             }
             catch(Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<string> Print(int id, CMMS.CMMS_Modules moduleID)
+        {
+            try
+            {
+                using (var repos = new CMMSRepository(getDB))
+                {
+                    return await repos.Print(id, moduleID);
+                }
+            }
+            catch (Exception ex)
             {
                 throw;
             }
