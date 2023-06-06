@@ -147,6 +147,56 @@ namespace CMMSAPIs.Controllers.Masters
                 throw;
             }
         }
+
+        [Authorize]
+        [Route("AddBusinessType")]
+        [HttpPost]
+        public async Task<IActionResult> AddBusinessType(CMBusinessType request, int userId)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _CMMSBS.AddBusinessType(request, userId);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        [Authorize]
+        [Route("UpdateBusinessType")]
+        [HttpPatch]
+        public async Task<IActionResult> UpdateBusinessType(CMBusinessType request, int userId)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _CMMSBS.UpdateBusinessType(request, userId);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
+        [Route("DeleteBusinessType")]
+        [HttpDelete]
+        public async Task<IActionResult> DeleteBusinessType(int id)
+        {
+            try
+            {
+                var data = await _CMMSBS.DeleteBusinessType(id);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         [Authorize]
         [Route("AddBusiness")]
         [HttpPost]

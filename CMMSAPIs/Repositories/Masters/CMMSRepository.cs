@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
 using CMMSAPIs.Helper;
+using CMMSAPIs.Models.Inventory;
 using CMMSAPIs.Models.Masters;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Utils;
@@ -271,6 +272,37 @@ namespace CMMSAPIs.Repositories.Masters
             List<CMBusinessType> _Business = await Context.GetData<CMBusinessType>(myQuery).ConfigureAwait(false);
             return _Business;
         }
+        internal async Task<CMDefaultResponse> AddBusinessType(CMBusinessType request, int userId)
+        {
+            
+            //CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.INVALID_ARG;
+            //string strRetMessage = "";
+            string qry = "insert into businesstype ( name, description, status , addedBy ,addedAt) values " + $"('{request.name}' ,'{request.description}' , 1 ,{userId} , '{UtilsRepository.GetUTCTime()}');" + $"SELECT LAST_INSERT_ID();";
+            DataTable dt = await Context.FetchData(qry).ConfigureAwait(false);
+            int id = Convert.ToInt32(dt.Rows[0][0]);
+
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Business Type Added");
+        }
+
+        internal async Task<CMDefaultResponse> UpdateBusinessType(CMBusinessType request, int userID)
+        {
+            string updateQry = "UPDATE businesstype SET ";
+            if (request.name != null && request.name != "")
+                updateQry += $"name = '{request.name}', ";
+            if (request.description != null && request.description != "")
+                updateQry += $"description = '{request.description}', ";
+            updateQry += $"updatedBy = {userID}, updatedAt = '{UtilsRepository.GetUTCTime()}' WHERE id = {request.id};";
+            await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+            return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Business Type Updated");
+        }
+        internal async Task<CMDefaultResponse> DeleteBusinessType(int id)
+        {
+            string deleteQry = $"UPDATE businesstype SET status = 0 WHERE id = {id};";
+            await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Business Type Deleted");
+        }
+
+
         internal async Task<CMDefaultResponse> AddBusiness(List<CMBusiness> request , int userId)
         {
             foreach(var item in request) 
