@@ -7,6 +7,7 @@ namespace CMMSAPIs.Models.JC
 {
     public class CMJCCreate
     {
+        public int jc_id { get; set; }
         public int job_id { get; set; }
         public int ptw_id { get; set; }
         public List<CMEmpDetailsList> LstEmpDetails { get; set; }

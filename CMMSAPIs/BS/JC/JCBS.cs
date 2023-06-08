@@ -13,11 +13,13 @@ namespace CMMSAPIs.BS.JC
     {
         Task<List<CMJCList>> GetJCList(int facility_id);
         Task<List<CMJCDetail>> GetJCDetail(int jc_id);
-        Task<CMDefaultResponse> CreateJC(int job_id);
+        Task<CMDefaultResponse> CreateJC(int job_id, int userID);
         Task<CMDefaultResponse> UpdateJC(CMJCUpdate request, int userID);
-        Task<CMDefaultResponse> CloseJC(CMJCClose request);
-        Task<CMDefaultResponse> ApproveJC(CMJCApprove request);
-        Task<CMDefaultResponse> RejectJC(CMJCReject request);
+        Task<CMDefaultResponse> CloseJC(CMJCClose request, int userID);
+        Task<CMDefaultResponse> ApproveJC(CMJCApprove request, int userID);
+        Task<CMDefaultResponse> RejectJC(CMJCReject request, int userID);
+        Task<CMDefaultResponse> StartJC(int jc_id, int userID);
+        Task<CMDefaultResponse> CarryForwardJC(CMApproval request, int userID);
     }
 
     public class JCBS : IJCBS
@@ -59,13 +61,13 @@ namespace CMMSAPIs.BS.JC
             }
         }
 
-        public async Task<CMDefaultResponse> CreateJC(int job_id)
+        public async Task<CMDefaultResponse> CreateJC(int job_id, int userID)
         {
             try
             {
                 using (var repos = new JCRepository(getDB))
                 {
-                    return await repos.CreateJC(job_id);
+                    return await repos.CreateJC(job_id, userID);
                 }
             }
             catch (Exception ex)
@@ -89,13 +91,13 @@ namespace CMMSAPIs.BS.JC
             }
         }
 
-        public async Task<CMDefaultResponse> CloseJC(CMJCClose request)
+        public async Task<CMDefaultResponse> CloseJC(CMJCClose request, int userID)
         {
             try
             {
                 using (var repos = new JCRepository(getDB))
                 {
-                    return await repos.CloseJC(request);
+                    return await repos.CloseJC(request, userID);
                 }
             }
             catch (Exception ex)
@@ -104,13 +106,13 @@ namespace CMMSAPIs.BS.JC
             }
         }
 
-        public async Task<CMDefaultResponse> ApproveJC(CMJCApprove request)
+        public async Task<CMDefaultResponse> ApproveJC(CMJCApprove request, int userID)
         {
             try
             {
                 using (var repos = new JCRepository(getDB))
                 {
-                    return await repos.ApproveJC(request);
+                    return await repos.ApproveJC(request, userID);
                 }
             }
             catch (Exception ex)
@@ -119,13 +121,13 @@ namespace CMMSAPIs.BS.JC
             }
         }
 
-        public async Task<CMDefaultResponse> RejectJC(CMJCReject request)
+        public async Task<CMDefaultResponse> RejectJC(CMJCReject request, int userID)
         {
             try
             {
                 using (var repos = new JCRepository(getDB))
                 {
-                    return await repos.RejectJC(request);
+                    return await repos.RejectJC(request, userID);
                 }
             }
             catch (Exception ex)
@@ -134,6 +136,34 @@ namespace CMMSAPIs.BS.JC
             }
         }
 
+        public async Task<CMDefaultResponse> StartJC(int jc_id, int userID)
+        {
+            try
+            {
+                using (var repos = new JCRepository(getDB))
+                {
+                    return await repos.StartJC(jc_id, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<CMDefaultResponse> CarryForwardJC(CMApproval request, int userID)
+        {
+            try
+            {
+                using (var repos = new JCRepository(getDB))
+                {
+                    return await repos.CarryForwardJC(request, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
 
     }
 }

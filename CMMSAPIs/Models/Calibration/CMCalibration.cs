@@ -12,8 +12,12 @@ namespace CMMSAPIs.Models.Calibration
         public string asset_name { get; set; }
 		public string asset_serial { get; set; }
         public string category_name { get; set; }
+        public int statusID { get; set; }
         public string calibration_status { get; set; }
         public DateTime last_calibration_date { get; set; }
+        public DateTime next_calibration_due_date { get; set; }
+        public int frequency_id { get; set; }
+        public string frequency_name { get; set; }
         public string vendor_name { get; set; }
         public string responsible_person { get; set; }
         public DateTime received_date { get; set; }
@@ -23,7 +27,6 @@ namespace CMMSAPIs.Models.Calibration
     public class CMCalibrationDetails: CMCalibrationList
     {
         public int calibration_id { get; set; }
-        public int status { get; set; }
         public string request_approved_by { get; set; }
         public string request_rejected_by { get; set; }
         public DateTime request_approved_at { get; set; }
@@ -33,7 +36,6 @@ namespace CMMSAPIs.Models.Calibration
         public DateTime started_at { get; set; }
         public string status_short { get; set; }
         public string status_long { get; set; }
-        public DateTime next_calibration_due_date { get; set; }
         public DateTime requested_at { get; set; }
         public int requested_by { get; set; }
         public DateTime completed_at { get; set; }

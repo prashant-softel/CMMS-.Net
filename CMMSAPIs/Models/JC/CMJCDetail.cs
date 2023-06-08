@@ -6,31 +6,31 @@ namespace CMMSAPIs.Models.JC
 {
     public class CMJCDetail
     {
+        public int id { get; set; }
         public string plant_name { get; set; }
         public string asset_category_name { get; set; }
-        public string JC_Approved_By_Name { get; set; }
-        public string UpdatedByName { get; set; }
-        public int id { get; set; }
-        public int currentEmpID { get; set; }
-        public string current_status { get; set; }
-		public int status { get; set; }
-        public string JC_Closed_by_Name { get; set; }
-        public string JC_Rejected_By_Name { get; set; }
         public string title { get; set; }
         public string description { get; set; }
+        public int currentEmpID { get; set; }
         public int jobid { get; set; }
         public int ptwId { get; set; }
+        public dynamic created_at { get; set; }
+        public string created_by { get; set; }
+        public dynamic JC_Start_At { get; set; }
+        public string JC_Start_By_Name { get; set; }
+        public string JC_Approved_By_Name { get; set; }
+        public string JC_Rejected_By_Name { get; set; }
+        public string JC_Closed_by_Name { get; set; }
+        public string UpdatedByName { get; set; }
+        public int JC_Approved { get; set; }
+        public string current_status { get; set; }
+        public int status { get; set; }
         public string status_short { get; set; }
         public string status_long { get; set; }
-        public dynamic opened_at { get; set; }
-        public string opened_by { get; set; }
-
-
-
         public List<CMJCJobDetail> LstCMJCJobDetailList { get; set; }
         public List<CMJCPermitDetail> LstPermitDetailList { get; set; }
         public List<CMJCIsolatedDetail> LstCMJCIsolatedDetailList { get; set; }
-        public List<CMJCLotoDetail> LstCMJCLotoDetailList { get; set; }        
+        public List<CMJCLotoDetail> LstCMJCLotoDetailList { get; set; }
         public List<CMJCEmpDetail> LstCMJCEmpList { get; set; }
         public List<CMFileDetail> file_list { get; set; }
     }
@@ -46,7 +46,7 @@ public class CMFileDetail
     public string PTWFiles { get; set; }
 }
 public class CMJCJobDetail
-{  
+{
     public int job_id { get; set; }
     public string job_title { get; set; }
     public string job_assigned_employee_name { get; set; }
