@@ -14,19 +14,19 @@ namespace CMMSAPIs.Repositories.WC
     {
         private UtilsRepository _utilsRepo;
         private Dictionary<int, string> StatusDictionary = new Dictionary<int, string>() {
-            { 191, "Warranty Claim in Draft" },
+            { 191, "In Draft" },
          //   { 192, "Warranty Claim Created" },
-            { 192, "Warranty Claim Waiting for Submit Approval" },
-            { 193, "Warranty Claim Submit Request Rejected" },
-            { 194, "Warranty Claim Submitted" },
+            { 192, "Waiting for Submit Approval" },
+            { 193, "Submit Request Rejected" },
+            { 194, "Submitted" },
             { 195, "Asset Dispatched" },
-            { 196, "Warranty Claim Rejected By Manufacturer" },
-            { 197, "Warranty Claim Approved By Manufacturer" },
+            { 196, "Rejected By Manufacturer" },
+            { 197, "Approved By Manufacturer" },
             { 198, "Item Replenished" },
         //    { 199, "Warranty Claim Waiting for Close Approval" },
-            { 199, "Warranty Claim Close Request Rejected" },
-            { 200, "Warranty Claim Closed" },
-            { 201, "Warranty Claim Cancelled" }
+            { 199, "Close Request Rejected" },
+            { 200, "Claim Closed" },
+            { 201, "Cancelled" }
         };
         public WCRepository(MYSQLDBHelper sqlDBHelper) : base(sqlDBHelper)
         {
