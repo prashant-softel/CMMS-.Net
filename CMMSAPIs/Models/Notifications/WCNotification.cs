@@ -30,14 +30,14 @@ namespace CMMSAPIs.Models.Notifications
                     //description is sent at 1 index of arg for this notification, so developer fetch it and use to format the subject
                     retValue = String.Format("Warranty Claim <{0}><{1}> Draft", WCObj.wc_id, WCObj.warranty_claim_title);
                     break;
-                case CMMS.CMMS_Status.WC_CREATED:     //Assigned
-                    retValue = String.Format("Warranty Claim <{0}><{1}> Created", WCObj.wc_id, WCObj.warranty_claim_title);
+                case CMMS.CMMS_Status.WC_SUBMITTED:     //Assigned
+                    retValue = String.Format("Warranty Claim <{0}><{1}> Submitted", WCObj.wc_id, WCObj.warranty_claim_title);
                     break;
                 case CMMS.CMMS_Status.WC_SUBMIT_REJECTED:     //Linked
                     retValue = String.Format("Warranty Claim <{0}> Submit Rejected  ", WCObj.warranty_claim_title);
                     break;
-                case CMMS.CMMS_Status.WC_SUBMITTED:     //Closed
-                    retValue = String.Format("Warranty Claim <{0}> Submitted", WCObj.warranty_claim_title);
+                case CMMS.CMMS_Status.WC_SUBMIT_APPROVED:     //Closed
+                    retValue = String.Format("Warranty Claim <{0}> Submit Approved", WCObj.warranty_claim_title);
                     break;
                 case CMMS.CMMS_Status.WC_DISPATCHED:     //Cancelled
                     retValue = String.Format("Warranty Claim <{0}> Dispached", WCObj.warranty_claim_title);
@@ -85,13 +85,14 @@ namespace CMMSAPIs.Models.Notifications
             {
                 case CMMS.CMMS_Status.WC_DRAFT:
                     retValue += "</table>"; break;
-                case CMMS.CMMS_Status.WC_CREATED:
-                    retValue += "</table>"; break;
+                case CMMS.CMMS_Status.WC_SUBMITTED:
+                    retValue += String.Format(templateEnd, "Submitted By", WCObj.created_by);
+                    break;
                 case CMMS.CMMS_Status.WC_SUBMIT_REJECTED:
                     retValue += String.Format(templateEnd, "Rejected By", WCObj.created_by);
                     break;
-                case CMMS.CMMS_Status.WC_SUBMITTED:
-                    retValue += String.Format(templateEnd, "Submitted By", WCObj.created_by);
+                case CMMS.CMMS_Status.WC_SUBMIT_APPROVED:
+                    retValue += String.Format(templateEnd, "Approved By", WCObj.created_by);
                     break;
                 case CMMS.CMMS_Status.WC_DISPATCHED:
                     retValue += String.Format(template, "Dispached By", WCObj.created_by);
