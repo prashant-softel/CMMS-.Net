@@ -25,9 +25,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="BS\MC\" />
-    <Folder Include="Controllers\MC\" />
-    <Folder Include="Repositories\MC\" />
     <Folder Include="wwwroot\" />
     <Folder Include="wwwroot\Upload\" />
   </ItemGroup>
