@@ -6,6 +6,15 @@ using CMMSAPIs.Models.Masters;
 using CMMSAPIs.BS.Masters;
 using CMMSAPIs.Helper;
 using System.Reflection;
+using iTextSharp.text;
+using iTextSharp.text.pdf;
+using iTextSharp.tool.xml;
+using System.IO;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+
+
+
 
 namespace CMMSAPIs.Controllers.Masters
 {
@@ -17,8 +26,7 @@ namespace CMMSAPIs.Controllers.Masters
         public CMMSController(ICMMSBS cmms)
         {
             _CMMSBS = cmms;
-        }
-
+        }     
 
         #region helper
 
@@ -319,6 +327,37 @@ namespace CMMSAPIs.Controllers.Masters
             }
         }
 
+        [Route("Print")]
+        [HttpGet]
+        public async Task<FileResult> Print(int id, CMMS.CMMS_Modules moduleID)
+        {
+            try
+            {
+
+                //CMMSRepository obj = new CMMSRepository( );
+
+                var data = await _CMMSBS.Print(id, moduleID);
+                var body = data.ToString();
+
+                using (MemoryStream stream = new System.IO.MemoryStream())
+                {
+                    StringReader reader = new StringReader(body);
+                    Document PdfFile = new Document(PageSize.A4);
+                    PdfWriter writer = PdfWriter.GetInstance(PdfFile, stream);
+                    PdfFile.Open();
+                    XMLWorkerHelper.GetInstance().ParseXHtml(writer, PdfFile, reader);
+                    PdfFile.Close();
+                    return File(stream.ToArray(), "application/pdf", "Print.pdf");
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+
+        
         #endregion //helper functions
 
         /*

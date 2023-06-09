@@ -16,6 +16,8 @@ using CMMSAPIs.BS;
 using CMMSAPIs.BS.Mails;
 using CMMSAPIs.Repositories.Users;
 using CMMSAPIs.Models.Users;
+using System.IO;
+using IronPdf;
 
 //using CommonUtilities;
 //using CMMSAPIs.Models.Notifications;
@@ -25,12 +27,16 @@ namespace CMMSAPIs.Models.Notifications
 
     abstract public class CMMSNotification
     {
+        public static bool print = false;
+        public static string printBody = "";
+
         private CMMS.CMMS_Modules m_moduleID;
         protected CMMS.CMMS_Status m_notificationID;
+        
+        public string template = "<tr><td style=' text-align: left; padding:0.5rem; background-color:#77cae7;color:#000000;width:35%' ><b>&nbsp;&nbsp;{0}</b></td><td style='text-align: left; padding:0.5rem;'>&nbsp;&nbsp;{1}</td></tr>";
 
-        public string template = "<tr><td style=' text-align: left; padding:0.5rem; background-color:#31576D;color:#ffffff;width:35%' ><b>&nbsp;&nbsp;{0}</b></td><td style='text-align: left; padding:0.5rem;'>&nbsp;&nbsp;{1}</td></tr>";
+        public string templateEnd = "<tr><td style=' text-align: left; padding:0.5rem; background-color:#77cae7;color:#000000'><b>&nbsp;&nbsp;{0}</b></td><td style='text-align: left; padding:0.5rem;'>&nbsp;&nbsp;{1}</td></tr></table>";
 
-        public string templateEnd = "<tr><td style=' text-align: left; padding:0.5rem; background-color:#31576D;color:#ffffff'><b>&nbsp;&nbsp;{0}</b></td><td style='text-align: left; padding:0.5rem;'>&nbsp;&nbsp;{1}</td></tr></table>";
 
         protected CMMSNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID)
         {
@@ -96,8 +102,7 @@ namespace CMMSAPIs.Models.Notifications
             _settings.Host = MyConfig.GetValue<string>("MailSettings:Host");
             _settings.Port = MyConfig.GetValue<int>("MailSettings:Port");
 
-           // List<CMUser> emailList = GetUserByNotificationId(23);
-
+           //List<CMUser> emailList = GetUserByNotificationId(23);
             List<string> AddTo = new List<string>();
             List<string> AddCc = new List<string>();
            
@@ -142,8 +147,17 @@ namespace CMMSAPIs.Models.Notifications
             string HTMLHeader = getHTMLHeader(args);
             string HTMLFooter = getHTMLFooter(args);
             string HTMLSignature = getHTMLSignature(args);
+            printBody = getHTMLBody(args);
 
-            retValue = sendEmail(subject, HTMLBody, HTMLHeader, HTMLFooter, HTMLSignature);
+            if (print)
+            {
+                retValue = CMMS.RETRUNSTATUS.SUCCESS;
+            }
+            else
+            {
+                retValue = sendEmail(subject, HTMLBody, HTMLHeader, HTMLFooter, HTMLSignature);
+
+            }
             return retValue;
 
         }
@@ -159,6 +173,7 @@ namespace CMMSAPIs.Models.Notifications
             {
                 CMJobView _jobView = (CMJobView)args[0];
                 notificationObj = new JobNotification(moduleID, notificationID, _jobView);
+                
             }
             else if (moduleID == CMMS.CMMS_Modules.PTW)    //PTW
             {
@@ -194,5 +209,8 @@ namespace CMMSAPIs.Models.Notifications
             retValue = notificationObj.sendEmailNotification(moduleID, notificationID, args);
             return retValue;
         }
+
+       
+
     }
 }
