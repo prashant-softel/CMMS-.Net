@@ -331,10 +331,10 @@ namespace CMMSAPIs.Helper
             IR_UPDATED,
 
             WC_DRAFT = 191,
-            WC_CREATED,
+            WC_SUBMITTED,
             //WC_WAITING_FOR_SUBMIT_APPROVAL,
             WC_SUBMIT_REJECTED,
-            WC_SUBMITTED,
+            WC_SUBMIT_APPROVED,
             WC_DISPATCHED,
             WC_REJECTED_BY_MANUFACTURER,
             WC_APPROVED_BY_MANUFACTURER,
