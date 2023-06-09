@@ -85,8 +85,10 @@ namespace CMMSAPIs.Repositories.Calibration
             }
             statusOut += $"ELSE 'Invalid Status' END";
             string myQuery = "SELECT " +
-                                $"a_calibration.asset_id, assets.name as asset_name, assets.serialNumber as asset_serial, CASE WHEN categories.name is null THEN 'Others' ELSE categories.name END as category_name, {statusOut} as calibration_status, a_calibration.due_date as last_calibration_date, vendor.name as vendor_name, CONCAT(request_by.firstName,' ',request_by.lastName) as responsible_person, a_calibration.received_date, a_calibration.health_status as asset_health_status " +
+                                $"a_calibration.asset_id, assets.name as asset_name, assets.serialNumber as asset_serial, CASE WHEN categories.name is null THEN 'Others' ELSE categories.name END as category_name, frequency.id as frequency_id, frequency.name as frequency_name, a_calibration.status as statusID, {statusOut} as calibration_status, a_calibration.due_date as last_calibration_date, vendor.name as vendor_name, CONCAT(request_by.firstName,' ',request_by.lastName) as responsible_person, a_calibration.received_date, a_calibration.health_status as asset_health_status " +
                              "FROM assets " +
+                             "LEFT JOIN " +
+                                "frequency ON assets.calibrationFrequency = frequency.id " +
                              "JOIN " +
                                 "calibration as a_calibration on a_calibration.asset_id=assets.id " + 
                              "LEFT JOIN " +
@@ -107,6 +109,10 @@ namespace CMMSAPIs.Repositories.Calibration
             }
             myQuery += "GROUP BY a_calibration.asset_id ORDER BY a_calibration.id DESC;";
             List<CMCalibrationList> _calibrationList = await Context.GetData<CMCalibrationList>(myQuery).ConfigureAwait(false);
+            foreach (CMCalibrationList calib in _calibrationList)
+            {
+                calib.next_calibration_due_date = UtilsRepository.Reschedule(calib.last_calibration_date, calib.frequency_id);
+            }
             return _calibrationList;
         }
         internal async Task<List<CMCalibrationDetails>> GetCalibrationDetails(int id)
@@ -122,8 +128,10 @@ namespace CMMSAPIs.Repositories.Calibration
             }
             statusOut += $"ELSE 'Invalid Status' END";
             string myQuery = "SELECT " +
-                                $"a_calibration.asset_id, assets.name as asset_name, CASE WHEN categories.name is null THEN 'Others' ELSE categories.name END as category_name, {statusOut} as status_short,a_calibration.status, a_calibration.due_date as last_calibration_date, vendor.name as vendor_name, CONCAT(request_by.firstName,' ',request_by.lastName) as responsible_person, CONCAT(request_approved_by.firstName,' ',request_approved_by.lastName) as request_approved_by, CONCAT(request_rejected_by.firstName,' ',request_rejected_by.lastName) as request_rejected_by,CONCAT(completed_by.firstName,' ',completed_by.lastName) as completed_by, CONCAT(approved_by.firstName,' ',approved_by.lastName) as approved_by,CONCAT(rejected_by.firstName,' ',rejected_by.lastName) as rejected_by,CONCAT(close_by.firstName,' ',close_by.lastName) as Closed_by,a_calibration.received_date,a_calibration.requested_by,a_calibration.requested_at,a_calibration.request_approved_at,a_calibration.request_rejected_at,a_calibration.start_date as started_at,a_calibration.done_date as completed_at,a_calibration.rejected_at,a_calibration.health_status as asset_health_status " +
+                                $"a_calibration.asset_id, assets.name as asset_name, CASE WHEN categories.name is null THEN 'Others' ELSE categories.name END as category_name, {statusOut} as status_short,a_calibration.status as statusID, frequency.id as frequency_id, frequency.name as frequency_name, a_calibration.due_date as last_calibration_date, vendor.name as vendor_name, CONCAT(request_by.firstName,' ',request_by.lastName) as responsible_person, CONCAT(request_approved_by.firstName,' ',request_approved_by.lastName) as request_approved_by, CONCAT(request_rejected_by.firstName,' ',request_rejected_by.lastName) as request_rejected_by,CONCAT(completed_by.firstName,' ',completed_by.lastName) as completed_by, CONCAT(approved_by.firstName,' ',approved_by.lastName) as approved_by,CONCAT(rejected_by.firstName,' ',rejected_by.lastName) as rejected_by,CONCAT(close_by.firstName,' ',close_by.lastName) as Closed_by,a_calibration.received_date,a_calibration.requested_by,a_calibration.requested_at,a_calibration.request_approved_at,a_calibration.request_rejected_at,a_calibration.start_date as started_at,a_calibration.done_date as completed_at,a_calibration.rejected_at,a_calibration.health_status as asset_health_status " +
                              "FROM assets " +
+                             "LEFT JOIN " +
+                                "frequency ON assets.calibrationFrequency = frequency.id" +
                              "JOIN " +
                                 "calibration as a_calibration on a_calibration.asset_id=assets.id " +
                              "LEFT JOIN " +
@@ -150,10 +158,11 @@ namespace CMMSAPIs.Repositories.Calibration
             List<CMCalibrationDetails> _calibrationDetails = await Context.GetData<CMCalibrationDetails>(myQuery).ConfigureAwait(false);
 
 
-            CMMS.CMMS_Status _Status_long = (CMMS.CMMS_Status)(_calibrationDetails[0].status);
+            CMMS.CMMS_Status _Status_long = (CMMS.CMMS_Status)(_calibrationDetails[0].statusID);
             string _longStatus = getLongStatus( _Status_long, _calibrationDetails[0]);
             _calibrationDetails[0].status_long = _longStatus;
             _calibrationDetails[0].calibration_id = id;
+            _calibrationDetails[0].next_calibration_due_date = UtilsRepository.Reschedule(_calibrationDetails[0].last_calibration_date, _calibrationDetails[0].frequency_id);
             return _calibrationDetails;
         }
 

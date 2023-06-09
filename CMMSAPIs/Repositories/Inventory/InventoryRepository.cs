@@ -476,7 +476,7 @@ namespace CMMSAPIs.Repositories.Inventory
             return inventory;
         }
 
-        internal async Task<List<CMViewInventory>> GetInventoryDetails(int id)
+        internal async Task<CMViewInventory> GetInventoryDetails(int id)
         {
             /*
             * get all details mentioned in model
@@ -493,39 +493,32 @@ namespace CMMSAPIs.Repositories.Inventory
             //    "b3.name as manufacturer_name, a.currency FROM assets AS a JOIN assetstatus as s on s.id = a.statusId " +
             //    "JOIN facilities as f ON f.id = a.blockId JOIN assets as a2 ON a.parentId = a2.id " +
             //    "JOIN business AS b2 ON a.ownerId = b2.id JOIN business AS b3 ON a.manufacturerId = b3.id";
-            string myQuery = "SELECT a.id ,a.name, a.description, ast.name as type, b2.name as supplierName, manufacturertlb.name as manufacturerName, b5.name as operatorName, ac.name as categoryName, a.serialNumber, a.calibrationFrequency, a.calibrationFreqType, a.calibrationReminderDays, a.calibrationLastDate as calibrationLastDate, a.calibrationDueDate, a.model, a.currency, a.cost, a.acCapacity, a.dcCapacity, a.moduleQuantity" +
+            string myQuery = "SELECT a.id ,a.name, a.description, ast.id as typeId, ast.name as type, b2.id as supplierId, b2.name as supplierName, manufacturertlb.id as manufacturerId, manufacturertlb.name as manufacturerName, b5.id as operatorId, b5.name as operatorName, ac.id as categoryId, ac.name as categoryName, a.serialNumber, a.calibrationFrequency, a.calibrationFreqType, a.calibrationReminderDays, a.calibrationLastDate as calibrationLastDate, a.calibrationDueDate, a.model, a.currency, a.cost, a.acCapacity, a.dcCapacity, a.moduleQuantity, " +
             //a.firstDueDate as calibrationDueDate, 
-            ", f.name AS facilityName, bl.name AS blockName,a2.name as parentName,  custbl.name as customerName,owntbl.name as ownerName, s.name AS status, b5.name AS operatorName, a.specialTool, a.warrantyId" +     //use a.specialToolEmpId to put specialToolEmp,
-
-            " from assets as a " +
+            "f.id as facilityId, f.name AS facilityName, bl.id as blockId, bl.name AS blockName, a2.id as parentId, a2.name as parentName, a2.serialNumber as parentSerial, custbl.id as customerId, custbl.name as customerName, owntbl.id as ownerId, owntbl.name as ownerName, s.id as statusId, s.name AS status, a.specialTool, w.id as warrantyId, w.warranty_description, w.certificate_number, wt.id as warrantyTypeId, wt.name as warrantyTypeName, wut.id as warrantyTermTypeId, wut.name as warrantyTermTypeName, wp.id as warrantyProviderId, wp.name as warrantyProviderName " +     //use a.specialToolEmpId to put specialToolEmp,
+            "from assets as a " +
             "left join assettypes as ast on ast.id = a.typeId " +
-            "" +
             "left join assetcategories as ac on ac.id= a.categoryId " +
-            "" +
             "left join business as custbl on custbl.id = a.customerId " +
-            "" +
             "left join business as owntbl" + " on owntbl.id = a.ownerId " +
-            "" +
             "left JOIN business AS manufacturertlb ON a.ownerId = manufacturertlb.id " +
-            "" +
             "left JOIN business AS b2 ON a.ownerId = b2.id " +
-
             "left JOIN business as b5 ON b5.id = a.operatorId " +
-            "" +
             "left JOIN assets as a2 ON a.parentId = a2.id " +
-            "" +
             "left JOIN assetstatus as s on s.id = a.status " +
-            "" +
             "left JOIN facilities as f ON f.id = a.facilityId " +
-            "" +
-            "left JOIN facilities as bl ON bl.id = a.blockId";
+            "left JOIN facilities as bl ON bl.id = a.blockId " +
+            "left join assetwarranty as w ON a.warrantyId = w.id " +
+            "left join warrantytype as wt ON w.warranty_type = wt.id " +
+            "left join warrantyusageterm as wut ON w.warranty_term_type = wut.id " +
+            "left join business as wp ON w.warranty_provider = wp.id";
             if (id != 0)
             {
                 myQuery += " WHERE a.id= " + id;
             }
             List<CMViewInventory> _ViewInventoryList = await Context.GetData<CMViewInventory>(myQuery).ConfigureAwait(false);
 
-            return _ViewInventoryList;
+            return _ViewInventoryList[0];
 
 
         }
@@ -542,6 +535,7 @@ namespace CMMSAPIs.Repositories.Inventory
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.INVALID_ARG;
             string strRetMessage = "";
             int linkedToBlockId = 0;
+            List<int> idList = new List<int>();
             foreach (var unit in request)
             {
                 string qry = "insert into assets (name, description, parentId, acCapacity, dcCapacity, categoryId, typeId, statusId, facilityId, blockId, linkedToBlockId, customerId, ownerId,operatorId, manufacturerId,supplierId,serialNumber,createdBy,photoId,model,stockCount,moduleQuantity, cost,currency,specialTool,specialToolEmpId,calibrationDueDate,calibrationLastDate,calibrationFreqType,calibrationFrequency,calibrationReminderDays,retirementStatus,multiplier) values ";
@@ -588,7 +582,10 @@ string warrantyQry = "insert into assetwarranty
                     string warrantyQry = "insert into assetwarranty (warranty_type, warranty_description, warranty_term_type, asset_id, start_date, expiry_date, meter_limit, meter_unit, warranty_provider, certificate_number, addedAt, addedBy, status) VALUES ";
                     warrantyQry += $"({unit.warranty_type}, '{unit.warranty_description}', {unit.warrranty_term_type}, {retID}, '{((DateTime)unit.start_date).ToString("yyyy-MM-dd HH:mm:ss")}', '{((DateTime)unit.expiry_date).ToString("yyyy-MM-dd HH:mm:ss")}', {unit.meter_limit}, {unit.meter_unit}, {unit.warranty_provider_id}, '{unit.certificate_number}', '{UtilsRepository.GetUTCTime()}', {userID}, 1);" +
                         $" SELECT LAST_INSERT_ID();";
-                    await Context.ExecuteNonQry<int>(warrantyQry).ConfigureAwait(false);
+                    DataTable dt2 = await Context.FetchData(warrantyQry).ConfigureAwait(false);
+                    int warrantyId = Convert.ToInt32(dt2.Rows[0][0]);
+                    string addWarrantyId = $"UPDATE assets SET warrantyId = {warrantyId} WHERE id = {retID}";
+                    await Context.ExecuteNonQry<int>(addWarrantyId).ConfigureAwait(false);
                 }
             }
             if (count > 0)
@@ -609,15 +606,15 @@ string warrantyQry = "insert into assetwarranty
                 strRetMessage = "No assets to add";
             }
 
-            List<CMViewInventory> _inventoryAdded = await GetInventoryDetails(retID);
+            CMViewInventory _inventoryAdded = await GetInventoryDetails(retID);
 
             string _shortStatus = getShortStatus(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_ADDED);
-            _inventoryAdded[0].status_short = _shortStatus;
+            _inventoryAdded.status_short = _shortStatus;
 
-            string _longStatus = getLongStatus(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_ADDED, _inventoryAdded[0]);
-            _inventoryAdded[0].status_long = _longStatus;
+            string _longStatus = getLongStatus(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_ADDED, _inventoryAdded);
+            _inventoryAdded.status_long = _longStatus;
 
-            CMMSNotification.sendNotification(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_ADDED, _inventoryAdded[0]);
+            CMMSNotification.sendNotification(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_ADDED, _inventoryAdded);
             return new CMDefaultResponse(retID, retCode, strRetMessage);
         }
 
@@ -826,15 +823,15 @@ string warrantyQry = "insert into assetwarranty
             }
             CMDefaultResponse obj = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Inventory  <" + request.id + "> has been updated");
 
-            List<CMViewInventory> _inventoryAdded = await GetInventoryDetails(request.id);
+            CMViewInventory _inventoryAdded = await GetInventoryDetails(request.id);
 
             string _shortStatus = getShortStatus(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_UPDATED);
-            _inventoryAdded[0].status_short = _shortStatus;
+            _inventoryAdded.status_short = _shortStatus;
 
-            string _longStatus = getLongStatus(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_UPDATED, _inventoryAdded[0]);
-            _inventoryAdded[0].status_long = _longStatus;
+            string _longStatus = getLongStatus(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_UPDATED, _inventoryAdded);
+            _inventoryAdded.status_long = _longStatus;
 
-            CMMSNotification.sendNotification(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_UPDATED, _inventoryAdded[0]);
+            CMMSNotification.sendNotification(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_UPDATED, _inventoryAdded);
 
             return obj;
 
@@ -856,21 +853,21 @@ string warrantyQry = "insert into assetwarranty
 
             }
 
-            List<CMViewInventory> _inventoryAdded = await GetInventoryDetails(id);
+            CMViewInventory _inventoryAdded = await GetInventoryDetails(id);
 
-            string qry = $"SELECT CONCA(firstName,' ',lastName) as deleted_by FROM users WHERE id = {id}";
+            string qry = $"SELECT CONCAT(firstName,' ',lastName) as deleted_by FROM users WHERE id = {id}";
 
             List<CMViewInventory> deleted_by = await Context.GetData<CMViewInventory>(qry).ConfigureAwait(false);
 
-            _inventoryAdded[0].deleted_by = deleted_by[0].deleted_by;
+            _inventoryAdded.deleted_by = deleted_by[0].deleted_by;
 
             string _shortStatus = getShortStatus(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_DELETED);
-            _inventoryAdded[0].status_short = _shortStatus;
+            _inventoryAdded.status_short = _shortStatus;
 
-            string _longStatus = getLongStatus(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_DELETED, _inventoryAdded[0]);
-            _inventoryAdded[0].status_long = _longStatus;
+            string _longStatus = getLongStatus(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_DELETED, _inventoryAdded);
+            _inventoryAdded.status_long = _longStatus;
 
-            CMMSNotification.sendNotification(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_DELETED, _inventoryAdded[0]);
+            CMMSNotification.sendNotification(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_DELETED, _inventoryAdded);
 
             string delQuery1 = $"DELETE FROM assets WHERE id = {id}";
             string delQuery2 = $"DELETE FROM assetwarranty where asset_id = {id}";

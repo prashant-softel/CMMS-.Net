@@ -246,6 +246,7 @@ namespace CMMSAPIs.Helper
         {
             BreakdownMaintenance = 0,
             PreventiveMaintenance,
+            HOTO,
             Audit
         }
         [Flags]
@@ -302,13 +303,14 @@ namespace CMMSAPIs.Helper
             PTW_LINKED_TO_HOTO,
             PTW_EXPIRED,
 
-            JC_OPENED = 151,
-            JC_UPDADATED,
+            JC_CREATED = 151,
+            JC_STARTED,
             JC_CLOSED,
             JC_CARRRY_FORWARDED,
             JC_APPROVED,
             JC_REJECTED5,
             JC_PTW_TIMED_OUT,
+            JC_UPDATED,
 
 
             PM_START = 161,
@@ -368,9 +370,17 @@ namespace CMMSAPIs.Helper
             SM_ASSET_TYPE_SPARE ,
         }
 
+        public enum ApprovalStatus
+        {
+            WAITING_FOR_APPROVAL = 0,
+            APPROVED,
+            REJECTED
+        }
+
         public enum checklist_type
         {
             PM=1,
+            HOTO,
             Audit,
         }
 
