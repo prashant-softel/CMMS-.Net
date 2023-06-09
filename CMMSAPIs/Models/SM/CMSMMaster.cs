@@ -264,4 +264,19 @@ namespace CMMSAPIs.Models.SM
         public string finalRemark { get; set; }
 
     }
+
+    public class AssetMAsterList
+    {
+        public int ID { get; set; }
+        public int asset_type_ID { get; set; }
+        public string asset_code { get; set; }
+        public string asset_name { get; set; }
+        public string description { get; set; }
+        public string approval_required { get; set; }
+        public string asset_type { get; set; }
+        public string cat_name { get; set; }
+        public string measurement { get; set; }
+        public int decimal_status { get; set; }
+
+    }
 }

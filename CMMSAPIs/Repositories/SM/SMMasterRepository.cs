@@ -192,7 +192,7 @@ namespace CMMSAPIs.Repositories.SM
             return response;
         }
 
-        internal async Task<List<CMSMMaster>> GetAssetMasterList(int ID)
+        internal async Task<List<AssetMAsterList>> GetAssetMasterList(int ID)
         {
             /*
              * Return id, name, code, description, asset type, asset categroy, unit measurement, attached files  
@@ -215,7 +215,7 @@ namespace CMMSAPIs.Repositories.SM
     " LEFT JOIN smitemcategory sic ON sic.ID = sam.item_category_ID  LEFT JOIN smunitmeasurement sm ON sm.ID = sam.unit_of_measurement " +
     " WHERE sam.ID = "+ID+" AND sam.flag = 1;";
             }
-            List<CMSMMaster> _List = await Context.GetData<CMSMMaster>(myQuery).ConfigureAwait(false);
+            List<AssetMAsterList> _List = await Context.GetData<AssetMAsterList>(myQuery).ConfigureAwait(false);
             return _List;
         }
 
