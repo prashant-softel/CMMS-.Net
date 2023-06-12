@@ -27,13 +27,13 @@ namespace CMMSAPIs.BS.SM
         Task<CMDefaultResponse> UpdateUnitMeasurement(CMUnitMeasurement request, int userID);
         Task<CMDefaultResponse> DeleteUnitMeasurement(int umID, int userID);
 
-        Task<List<AssetMAsterList>> GetAssetMasterList(int ID);
+        Task<List<CMASSETMASTERLIST>> GetAssetMasterList(int ID);
         Task<CMDefaultResponse> AddAssetMaster(CMSMMaster request, CMAssetMasterFiles fileData, int UserID);
         Task<CMDefaultResponse> UpdateAssetMaster(CMSMMaster request, CMAssetMasterFiles fileData, int UserID);
         Task<CMDefaultResponse> DeleteAssetMaster(CMSMMaster request, int UserID);
         Task<List<CMAssetTypes>> GetAssetDataList(int facility_id);
-        Task<List<VendorList>> GetVendorList();
-        Task<AssetBySerialNo> GetAssetBySerialNo(string serial_number);
+        Task<List<CMVendorList>> GetVendorList();
+        Task<CMAssetBySerialNo> GetAssetBySerialNo(string serial_number);
 
     }
 
@@ -227,7 +227,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<AssetMAsterList>> GetAssetMasterList(int ID)
+        public async Task<List<CMASSETMASTERLIST>> GetAssetMasterList(int ID)
         {
             try
             {
@@ -302,7 +302,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<VendorList>> GetVendorList()
+        public async Task<List<CMVendorList>> GetVendorList()
         {
             try
             {
@@ -316,7 +316,7 @@ namespace CMMSAPIs.BS.SM
                 throw;
             }
         }
-        public async Task<AssetBySerialNo> GetAssetBySerialNo(string serial_number)
+        public async Task<CMAssetBySerialNo> GetAssetBySerialNo(string serial_number)
         {
             try
             {

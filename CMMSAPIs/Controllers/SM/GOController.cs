@@ -27,11 +27,11 @@ namespace CMMSAPIs.Controllers
         
         [Route("GetGOList")]
         [HttpGet]
-        public async Task<IActionResult> GetGOList(int plantID, DateTime fromDate, DateTime toDate)
+        public async Task<IActionResult> GetGOList(int plantID, DateTime fromDate, DateTime toDate, int Status)
         {
             try
             {
-                var data = await _GOBS.GetGOList(plantID, fromDate, toDate);
+                var data = await _GOBS.GetGOList(plantID, fromDate, toDate, Status);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -136,12 +136,11 @@ namespace CMMSAPIs.Controllers
 
         [Route("GOApproval")]
         [HttpPost]
-        public async Task<IActionResult> GOApproval(CMGO request)
+        public async Task<IActionResult> GOApproval(CMApproval request)
         {
             try
             {
-                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _GOBS.GOApproval(request, userID);
+                var data = await _GOBS.GOApproval(request);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -149,6 +148,21 @@ namespace CMMSAPIs.Controllers
                 throw;
             }
         }
+        [Route("RejectGO")]
+        [HttpPost]
+        public async Task<IActionResult> RejectGO(CMApproval request)
+        {
+            try
+            {
+                var data = await _GOBS.RejectGO(request);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
         [Route("GetPurchaseData")]
         [HttpGet]
         public async Task<IActionResult> GetPurchaseData(int plantID, string empRole, DateTime fromDate, DateTime toDate, string status, string order_type)
@@ -180,7 +194,7 @@ namespace CMMSAPIs.Controllers
         }
         [Route("SubmitPurchaseOrderData")]
         [HttpPost]
-        public async Task<IActionResult> SubmitPurchaseData(SubmitPurchaseData request)
+        public async Task<IActionResult> SubmitPurchaseData(CMSUBMITPURCHASEDATA request)
         {
             try
             {

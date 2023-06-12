@@ -13,17 +13,18 @@ namespace CMMSAPIs.BS
 {
     public interface IGOBS
     {
-        Task<List<CMGO>> GetGOList(int plantID, DateTime fromDate, DateTime toDate);
+        Task<List<CMGO>> GetGOList(int plantID, DateTime fromDate, DateTime toDate, int Status);
         Task<List<CMGO>> GetGOItemByID(int id);
         Task<List<CMGO>> GetAssetCodeDetails(int asset_code);
         Task<CMDefaultResponse> CreateGO(CMGO request, int userID);
         Task<CMDefaultResponse> UpdateGO(CMGO request, int userID);
         Task<CMDefaultResponse> DeleteGO(int GOid, int userID);
         Task<CMDefaultResponse> WithdrawGO(CMGO request, int userID);
-        Task<CMDefaultResponse> GOApproval(CMGO request, int userID);
-        Task<List<PurchaseData>> GetPurchaseData(int plantID, string empRole, DateTime fromDate, DateTime toDate, string status, string order_type);
-        Task<List<CMGO>> getPurchaseDetailsByID(int id);
-        Task<CMDefaultResponse> SubmitPurchaseData(SubmitPurchaseData request);
+        Task<CMDefaultResponse> GOApproval(CMApproval request);
+        Task<CMDefaultResponse> RejectGO(CMApproval request);
+        Task<List<CMPURCHASEDATA>> GetPurchaseData(int plantID, string empRole, DateTime fromDate, DateTime toDate, string status, string order_type);
+        Task<CMGOMaster> getPurchaseDetailsByID(int id);
+        Task<CMDefaultResponse> SubmitPurchaseData(CMSUBMITPURCHASEDATA request);
     }
 
     public class GOBS : IGOBS
@@ -35,13 +36,13 @@ namespace CMMSAPIs.BS
             databaseProvider = dbProvider;
         }
 
-        public async Task<List<CMGO>> GetGOList(int plantID, DateTime fromDate, DateTime toDate)
+        public async Task<List<CMGO>> GetGOList(int plantID, DateTime fromDate, DateTime toDate, int Status)
         {
             try
             {
                 using (var repos = new GORepository(getDB))
                 {
-                    return await repos.GetGOList(plantID, fromDate, toDate);
+                    return await repos.GetGOList(plantID, fromDate, toDate, Status);
 
                 }
             }
@@ -144,13 +145,28 @@ namespace CMMSAPIs.BS
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> GOApproval(CMGO request, int userID)
+        public async Task<CMDefaultResponse> GOApproval(CMApproval request)
         {
             try
             {
                 using (var repos = new GORepository(getDB))
                 {
-                    return await repos.GOApproval(request, userID);
+                    return await repos.ApproveGoodsOrder(request);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<CMDefaultResponse> RejectGO(CMApproval request)
+        {
+            try
+            {
+                using (var repos = new GORepository(getDB))
+                {
+                    return await repos.RejectGoodsOrder(request);
 
                 }
             }
@@ -160,7 +176,7 @@ namespace CMMSAPIs.BS
             }
         }
 
-        public async Task<List<PurchaseData>> GetPurchaseData(int plantID, string empRole, DateTime fromDate, DateTime toDate, string status, string order_type)
+        public async Task<List<CMPURCHASEDATA>> GetPurchaseData(int plantID, string empRole, DateTime fromDate, DateTime toDate, string status, string order_type)
         {
             try
             {
@@ -176,13 +192,13 @@ namespace CMMSAPIs.BS
             }
         }
 
-        public async Task<List<CMGO>> getPurchaseDetailsByID(int id)
+        public async Task<CMGOMaster> getPurchaseDetailsByID(int id)
         {
             try
             {
                 using (var repos = new GORepository(getDB))
                 {
-                    return await repos.getPurchaseDetailsByID(id);
+                    return await repos.getGoodsOrderDetailsByID(id);
 
                 }
             }
@@ -191,7 +207,7 @@ namespace CMMSAPIs.BS
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> SubmitPurchaseData(SubmitPurchaseData request)
+        public async Task<CMDefaultResponse> SubmitPurchaseData(CMSUBMITPURCHASEDATA request)
         {
             try
             {

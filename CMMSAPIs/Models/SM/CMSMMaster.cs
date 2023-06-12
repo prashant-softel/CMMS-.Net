@@ -131,14 +131,14 @@ namespace CMMSAPIs.Models.SM
         public decimal received_qty { get; set; }
     }
 
-    public class VendorList
+    public class CMVendorList
     {
         public int id { get; set; }
         public string name { get; set; }
         public string description { get; set; }
     }
 
-    public class MRSItems
+    public class CMMRSItems
     {
         public int ID { get; set; }
         public string return_remarks { get; set; }
@@ -166,7 +166,7 @@ namespace CMMSAPIs.Models.SM
 
     }
 
-    public class AssetBySerialNo
+    public class CMAssetBySerialNo
     {
         public int ID { get; set; }
         public int plant_ID { get; set; }
@@ -182,7 +182,7 @@ namespace CMMSAPIs.Models.SM
 
     }
 
-    public class AssetItem
+    public class CMAssetItem
     {
         public int asset_type_ID { get; set; }
         public int asset_ID { get; set; }
@@ -200,7 +200,7 @@ namespace CMMSAPIs.Models.SM
 
     }
 
-    public class MRSItemsBeforeIssue
+    public class CMMRSItemsBeforeIssue
     {
         public int ID { get; set; }
         public string return_remarks { get; set; }
@@ -229,7 +229,7 @@ namespace CMMSAPIs.Models.SM
 
     }
 
-    public class MRSList
+    public class CMMRSList
     {
         public int ID { get; set; }
         public int requested_by_emp_ID { get; set; }
@@ -244,7 +244,7 @@ namespace CMMSAPIs.Models.SM
 
     }
 
-    public class ReturnMRSData
+    public class CMRETURNMRSDATA
     {
         public int ID { get; set; }
         public int mrs_ID { get; set; }
@@ -265,7 +265,7 @@ namespace CMMSAPIs.Models.SM
 
     }
 
-    public class AssetMAsterList
+    public class CMASSETMASTERLIST
     {
         public int ID { get; set; }
         public int asset_type_ID { get; set; }

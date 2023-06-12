@@ -301,16 +301,35 @@ namespace CMMSAPIs.Helper
             SM_PO_DRAFT = 301,          //1         
             SM_PO_SUBMITTED,            //2
             SM_PO_IN_PROCESS,           //3
-            SM_PO_REJECTED,
-            SM_PO_S2S_SUBMITTED,        //7
-            SM_PO,
-            SM_ASSET_TYPE_CONSUMABLE,
+            SM_PO_CLOSED,
+            SM_PO_CLOSED_REJECTED,
+            SM_PO_CLOSED_APPROVED,
+            
+            
+            MRS_SUBMITTED=321,
+            MRS_REQUEST_REJECTED,
+            MRS_REQUEST_APPROVED,             
+            MRS_REQUEST_ISSUED ,
+            MRS_REQUEST_ISSUED_REJECTED ,
+            MRS_REQUEST_ISSUED_APPROVED ,
 
-            MRS_REQUEST_APPROVE = 321, 
-            MRS_REQUEST_REJECT ,
-            SM_ASSET_TYPE_SPARE ,
+            
+
+            GO_SAVE_BY_PURCHASE_MANAGER = 331,
+            GO_SUBMIT_BY_PURCHASE_MANAGER,
+            GO_SAVE_BY_STORE_KEEPER,
+            GO_RECEIVED_BY_STORE_KEEPER,
+            GO_APPROVED_BY_MANAGER,
+            GO_REJECTED_BY_MANAGER,
+            GO_SHORT_CLOSED_BY_STORE_KEEPER,
+            GO_WITHDRAW_BY_ADMINISTRATOR
         }
 
+        public enum SMAssetType
+        {
+            CONSUMABLE,
+            SPARE
+        }
         public enum checklist_type
         {
             PM=1,
@@ -331,5 +350,5 @@ namespace CMMSAPIs.Helper
         Engineer = 3,
         Inventory = 4
     }
-    }
+ }
 }

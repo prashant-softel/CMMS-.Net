@@ -192,7 +192,7 @@ namespace CMMSAPIs.Repositories.SM
             return response;
         }
 
-        internal async Task<List<AssetMAsterList>> GetAssetMasterList(int ID)
+        internal async Task<List<CMASSETMASTERLIST>> GetAssetMasterList(int ID)
         {
             /*
              * Return id, name, code, description, asset type, asset categroy, unit measurement, attached files  
@@ -215,7 +215,7 @@ namespace CMMSAPIs.Repositories.SM
     " LEFT JOIN smitemcategory sic ON sic.ID = sam.item_category_ID  LEFT JOIN smunitmeasurement sm ON sm.ID = sam.unit_of_measurement " +
     " WHERE sam.ID = "+ID+" AND sam.flag = 1;";
             }
-            List<AssetMAsterList> _List = await Context.GetData<AssetMAsterList>(myQuery).ConfigureAwait(false);
+            List<CMASSETMASTERLIST> _List = await Context.GetData<CMASSETMASTERLIST>(myQuery).ConfigureAwait(false);
             return _List;
         }
 
@@ -383,17 +383,17 @@ namespace CMMSAPIs.Repositories.SM
             List<CMAssetTypes> _checkList = await Context.GetData<CMAssetTypes>(myQuery).ConfigureAwait(false);
             return _checkList;
         }
-        internal async Task<List<VendorList>> GetVendorList()
+        internal async Task<List<CMVendorList>> GetVendorList()
         {
             string myQuery = "select * from businesstype;";
-            List<VendorList> list = await Context.GetData<VendorList>(myQuery).ConfigureAwait(false);
+            List<CMVendorList> list = await Context.GetData<CMVendorList>(myQuery).ConfigureAwait(false);
             return list;
         }
 
-        internal async Task<AssetBySerialNo> GetAssetBySerialNo(string serial_number)
+        internal async Task<CMAssetBySerialNo> GetAssetBySerialNo(string serial_number)
         {
             string myQuery = "SELECT * FROM SMAssetItems WHERE serial_number = '"+ serial_number + "';";
-            List<AssetBySerialNo> items = await Context.GetData<AssetBySerialNo>(myQuery).ConfigureAwait(false);
+            List<CMAssetBySerialNo> items = await Context.GetData<CMAssetBySerialNo>(myQuery).ConfigureAwait(false);
             return items[0];
         }
     }

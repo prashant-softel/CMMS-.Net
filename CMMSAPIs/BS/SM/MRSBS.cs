@@ -13,19 +13,19 @@ namespace CMMSAPIs.BS.SM
     public interface IMRSBS
     {
         Task<CMDefaultResponse> requestMRS(CMMRS request);        
-        Task<List<MRSList>> getMRSList(int plant_ID, int emp_id, DateTime toDate, DateTime fromDate);        
-        Task<List<MRSItems>> getMRSItems(int ID);        
-        Task<List<MRSItemsBeforeIssue>> getMRSItemsBeforeIssue(int ID);        
-        Task<List<MRSItemsBeforeIssue>> getMRSItemsWithCode(int ID);        
+        Task<List<CMMRSList>> getMRSList(int plant_ID, int emp_id, DateTime toDate, DateTime fromDate);        
+        Task<List<CMMRSItems>> getMRSItems(int ID);        
+        Task<List<CMMRSItemsBeforeIssue>> getMRSItemsBeforeIssue(int ID);        
+        Task<List<CMMRSItemsBeforeIssue>> getMRSItemsWithCode(int ID);        
         Task<List<CMMRS>> getMRSDetails(int ID);        
-        Task<List<ReturnMRSData>> getReturnDataByID(int ID);        
+        Task<List<CMRETURNMRSDATA>> getReturnDataByID(int ID);        
         Task<List<CMMRS>> getAssetTypeByItemID(int ItemID);
         Task<CMDefaultResponse> mrsReturn(CMMRS request);        
         Task<CMDefaultResponse> mrsApproval(CMMRS request);        
         Task<CMDefaultResponse> mrsReturnApproval(CMMRS request);
         void UpdateAssetStatus(int assetItemID, int status);
         Task<CMMRS> getLastTemplateData(int ID);
-        Task<List<AssetItem>> GetAssetItems(int plantID, bool isGroupByCode = false);
+        Task<List<CMAssetItem>> GetAssetItems(int plantID, bool isGroupByCode = false);
     }
     public class MRSBS : IMRSBS
     {
@@ -51,7 +51,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<MRSList>> getMRSList(int plant_ID, int emp_id, DateTime toDate, DateTime fromDate)
+        public async Task<List<CMMRSList>> getMRSList(int plant_ID, int emp_id, DateTime toDate, DateTime fromDate)
         {
             try
             {
@@ -66,7 +66,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
         
-        public async Task<List<MRSItems>> getMRSItems(int ID)
+        public async Task<List<CMMRSItems>> getMRSItems(int ID)
            {
             try
             {
@@ -81,7 +81,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
         
-        public async Task<List<MRSItemsBeforeIssue>> getMRSItemsBeforeIssue(int ID)
+        public async Task<List<CMMRSItemsBeforeIssue>> getMRSItemsBeforeIssue(int ID)
         {
             try
             {
@@ -96,7 +96,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<MRSItemsBeforeIssue>> getMRSItemsWithCode(int ID)
+        public async Task<List<CMMRSItemsBeforeIssue>> getMRSItemsWithCode(int ID)
         {
             try
             {
@@ -125,7 +125,7 @@ namespace CMMSAPIs.BS.SM
                 throw;
             }
         }
-        public async Task<List<ReturnMRSData>> getReturnDataByID(int ID)
+        public async Task<List<CMRETURNMRSDATA>> getReturnDataByID(int ID)
         {
             try
             {
@@ -228,7 +228,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<AssetItem>> GetAssetItems(int plantID, bool isGroupByCode = false)
+        public async Task<List<CMAssetItem>> GetAssetItems(int plantID, bool isGroupByCode = false)
         {
             try
             {

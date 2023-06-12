@@ -121,6 +121,9 @@ namespace CMMSAPIs.Models.Notifications
             {
                 CMSMMaster cMSMMaster = (CMSMMaster)args[0];
                 //notificationObj = new SMMasterNotification(moduleID, notificationID, cMSMMaster);
+            }else if(moduleID == CMMS.CMMS_Modules.SM_PO) {
+                CMGO _CmGO = (CMGO)args[0];
+                //notificationObj = new IncidentReportNotification(moduleID, notificationID, _CmGO);
             }
             //create else if block for your module and add Notification class for  your module to implement yous notification
             retValue = notificationObj.sendEmailNotification(moduleID, notificationID, args);

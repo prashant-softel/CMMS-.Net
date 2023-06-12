@@ -34,21 +34,21 @@ namespace CMMSAPIs.Repositories.SM
         {
         }
 
-        internal async Task<List<ReOrder>> GetReorderDataByID(int assetID, int plantID)
+        internal async Task<List<CMReOrder>> GetReorderDataByID(int assetID, int plantID)
         {
             string stmt = $"SELECT * FROM smreorderdata WHERE asset_code_ID = {assetID}  AND plant_ID = {plantID}";
-            List<ReOrder> _List = await Context.GetData<ReOrder>(stmt).ConfigureAwait(false);
+            List<CMReOrder> _List = await Context.GetData<CMReOrder>(stmt).ConfigureAwait(false);
             return _List;
         }
 
-        internal async Task<CMDefaultResponse> submitReorderForm(ReOrder request)
+        internal async Task<CMDefaultResponse> submitReorderForm(CMReOrder request)
         {
             int ID = 0;
             CMDefaultResponse response = null;
             try
             {
                 string stmtSelect = $"SELECT * FROM smreorderdata WHERE asset_code_ID = {request.asset_code_ID} AND plant_ID = {request.plant_ID};";
-                List<ReOrder> _List = await Context.GetData<ReOrder>(stmtSelect).ConfigureAwait(false);
+                List<CMReOrder> _List = await Context.GetData<CMReOrder>(stmtSelect).ConfigureAwait(false);
 
                 if (_List != null && _List.Count > 0)
                 {
@@ -74,7 +74,7 @@ namespace CMMSAPIs.Repositories.SM
             return response;
         }
 
-        internal async Task<CMDefaultResponse> updateReorderData(ReOrder request)
+        internal async Task<CMDefaultResponse> updateReorderData(CMReOrder request)
         {
             int ID = 0;
             CMDefaultResponse response = null;
@@ -82,7 +82,7 @@ namespace CMMSAPIs.Repositories.SM
             try
             {
                 string stmtSelect = $"SELECT * FROM smreorderdata WHERE asset_code = '{request.asset_code}' AND plant_ID = {request.plant_ID}";
-                List<ReOrder> _List = await Context.GetData<ReOrder>(stmtSelect).ConfigureAwait(false);
+                List<CMReOrder> _List = await Context.GetData<CMReOrder>(stmtSelect).ConfigureAwait(false);
                 if (_List != null && _List.Count > 0)
                 {
                     ID = _List[0].ID;
@@ -108,7 +108,7 @@ namespace CMMSAPIs.Repositories.SM
             return response;
         }
 
-        internal async Task<List<ReOrder>> getReorderAssetsData(int plantID)
+        internal async Task<List<CMReOrder>> getReorderAssetsData(int plantID)
         {
             string stmt = $"SELECT srd.*,sam.asset_name,sat.asset_type,sic.cat_name \r\n        " +
                 $"FROM smreorderdata srd\r\n        " +
@@ -116,11 +116,11 @@ namespace CMMSAPIs.Repositories.SM
                 $"LEFT JOIN smassettypes sat ON sat.ID = sam.asset_type_ID\r\n        " +
                 $"LEFT JOIN smitemcategory sic ON sic.ID = sam.item_category_ID\r\n       " +
                 $" WHERE srd.plant_ID = {plantID} ";
-            List<ReOrder> _List = await Context.GetData<ReOrder>(stmt).ConfigureAwait(false);
+            List<CMReOrder> _List = await Context.GetData<CMReOrder>(stmt).ConfigureAwait(false);
             return _List;
             
         }
-        internal async Task<List<ReOrderItems>> getReorderItems(int plantID)
+        internal async Task<List<CMReOrderItems>> getReorderItems(int plantID)
         {
             string stmt = $"SELECT fc.name as facilityName,fc.isBlock as Facility_Is_Block,'' as Facility_Is_Block_of_name," +
                 $"srd.plant_ID,t1.asset_name\r\n,sai.asset_code,t1.asset_type,t1.cat_name,(SUM(st.creditQty)-SUM(st.debitQty)) as availableQty," +
@@ -133,12 +133,12 @@ namespace CMMSAPIs.Repositories.SM
                 $" LEFT JOIN smitemcategory sic ON sic.ID = sam.item_category_ID\r\n        ) as t1 ON t1.asset_code = sai.asset_code\r\n      " +
                 $"  LEFT JOIN smreorderdata srd ON srd.asset_code = sai.asset_code AND srd.plant_ID = sai.plant_ID WHERE sai.plant_ID = {plantID} AND st.actorType = 2 " +
                 $"GROUP BY sai.asset_code";
-            List<ReOrderItems> _List = await Context.GetData<ReOrderItems>(stmt).ConfigureAwait(false);
+            List<CMReOrderItems> _List = await Context.GetData<CMReOrderItems>(stmt).ConfigureAwait(false);
             return _List;
             
         }
 
-        internal async Task<CMDefaultResponse> reorderAssets(ReOrder request)
+        internal async Task<CMDefaultResponse> reorderAssets(CMReOrder request)
         {
             int ID = 0;
             CMDefaultResponse response = null;

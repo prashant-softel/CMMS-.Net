@@ -50,11 +50,11 @@ namespace CMMSAPIs.Controllers.SM
         
         [Route("getMRSList")]
         [HttpGet]
-        public async Task<IActionResult> getMRSList(int plant_ID, int emp_id, DateTime toDate, DateTime fromDate)
+        public async Task<IActionResult> getMRSList(int plant_ID, int emp_id, string toDate, string fromDate)
         {
             try
             {
-                var data = await _MRSBS.getMRSList(plant_ID, emp_id, toDate, fromDate);
+                var data = await _MRSBS.getMRSList(plant_ID, emp_id, Convert.ToDateTime(toDate), Convert.ToDateTime(fromDate));
                 return Ok(data);
             }
             catch (Exception ex)

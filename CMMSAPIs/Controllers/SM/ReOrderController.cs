@@ -47,7 +47,7 @@ namespace CMMSAPIs.Controllers.SM
         }
         [Route("submitReorderForm")]
         [HttpPost]
-        public async Task<IActionResult> submitReorderForm(ReOrder request)
+        public async Task<IActionResult> submitReorderForm(CMReOrder request)
         {
             try
             {
@@ -62,7 +62,7 @@ namespace CMMSAPIs.Controllers.SM
         }
         [Route("updateReorderData")]
         [HttpPost]
-        public async Task<IActionResult> updateReorderData(ReOrder request)
+        public async Task<IActionResult> updateReorderData(CMReOrder request)
         {
             try
             {
@@ -108,7 +108,7 @@ namespace CMMSAPIs.Controllers.SM
         }
         [Route("reorderAssets")]
         [HttpPost]
-        public async Task<IActionResult> reorderAssets(ReOrder request)
+        public async Task<IActionResult> reorderAssets(CMReOrder request)
         {
             try
             {

@@ -35,10 +35,10 @@ namespace CMMSAPIs.Repositories.SM
         {
         }
 
-        internal async Task<List<MRSList>> getMRSList(int plant_ID, int emp_id, DateTime toDate, DateTime fromDate)
+        internal async Task<List<CMMRSList>> getMRSList(int plant_ID, int emp_id, DateTime toDate, DateTime fromDate)
         {
             string stmt = "SELECT sm.ID,sm.requested_by_emp_ID,CONCAT(ed1.firstName,' ',ed1.lastName) as approver_name,DATE_FORMAT(sm.requested_date,'%Y-%m-%d') as requestd_date,DATE_FORMAT(sm.returnDate,'%Y-%m-%d') as returnDate,if(sm.approval_status != '',DATE_FORMAT(sm.approved_date,'%d-%m-%Y'),'') as approval_date,sm.approval_status,sm.approval_comment,CONCAT(ed.firstName,' ',ed.lastName) as emp_name, sm.flag FROM smmrs sm LEFT JOIN users ed ON ed.id = sm.requested_by_emp_ID LEFT JOIN users ed1 ON ed1.id = sm.approved_by_emp_ID WHERE sm.plant_ID = " + plant_ID + " AND ed.id = " + emp_id + " AND (DATE_FORMAT(sm.requested_date,'%Y-%m-%d') BETWEEN '" + fromDate.ToString("yyyy-MM-dd") + "' AND '" +  toDate.ToString("yyyy-MM-dd") + "' OR DATE_FORMAT(sm.returnDate,'%Y-%m-%d') BETWEEN '" + fromDate.ToString("yyyy-MM-dd")  + "' AND '" + toDate.ToString("yyyy-MM-dd") + "')";
-            List<MRSList> _List = await Context.GetData<MRSList>(stmt).ConfigureAwait(false);
+            List<CMMRSList> _List = await Context.GetData<CMMRSList>(stmt).ConfigureAwait(false);
             return _List;
         }
 
@@ -179,7 +179,7 @@ namespace CMMSAPIs.Repositories.SM
             List<CMUnitMeasurement> _checkList = await Context.GetData<CMUnitMeasurement>(stmt).ConfigureAwait(false);
             return _checkList[0].spare_multi_selection;
         } 
-        internal async Task<List<MRSItems>> getMRSItems(int ID)
+        internal async Task<List<CMMRSItems>> getMRSItems(int ID)
         {
             string stmt = "SELECT smi.ID,smi.return_remarks,smi.mrs_return_ID,smi.finalRemark,smi.asset_item_ID,smi.asset_MDM_code," +
                 "t1.serial_number,smi.returned_qty,smi.available_qty,smi.used_qty,smi.ID,smi.issued_qty,sm.flag,DATE_FORMAT(sm.returnDate,'%Y-%m-%d') as returnDate," +
@@ -191,11 +191,11 @@ namespace CMMSAPIs.Repositories.SM
                 "LEFT JOIN smassetmasters sam ON sam.asset_code = sai.asset_code LEFT JOIN smassetmasterfiles  file ON file.Asset_master_id =  sam.ID " +
                 "LEFT JOIN smassettypes sat ON sat.ID = sam.asset_type_ID) as t1 ON t1.asset_item_ID = smi.asset_item_ID" +
                 "  WHERE smi.mrs_ID = "+ID+" /*GROUP BY smi.ID*/";
-            List<MRSItems> _List = await Context.GetData<MRSItems>(stmt).ConfigureAwait(false);
+            List<CMMRSItems> _List = await Context.GetData<CMMRSItems>(stmt).ConfigureAwait(false);
             return _List;
         }
 
-        internal async Task<List<MRSItemsBeforeIssue>> getMRSItemsBeforeIssue(int ID)
+        internal async Task<List<CMMRSItemsBeforeIssue>> getMRSItemsBeforeIssue(int ID)
         {
 
             string stmt = "SELECT smi.ID,smi.return_remarks,smi.mrs_return_ID,smi.finalRemark,smi.asset_item_ID,smi.asset_MDM_code," +
@@ -208,12 +208,12 @@ namespace CMMSAPIs.Repositories.SM
                 "FROM smrsitems sai  LEFT JOIN smassetmasters sam ON sam.asset_code = sai.asset_MDM_code  LEFT JOIN smassetmasterfiles  file " +
                 "ON file.Asset_master_id =  sam.ID  LEFT JOIN smassettypes sat ON sat.ID = sam.asset_type_ID  LEFT JOIN smunitmeasurement f_sum " +
                 "ON  f_sum.id = sam.unit_of_measurement      ) as t1 ON t1.asset_MDM_code = smi.asset_MDM_code where smi.mrs_ID = "+ID+" GROUP BY smi.ID";
-            List<MRSItemsBeforeIssue> _List = await Context.GetData<MRSItemsBeforeIssue>(stmt).ConfigureAwait(false);
+            List<CMMRSItemsBeforeIssue> _List = await Context.GetData<CMMRSItemsBeforeIssue>(stmt).ConfigureAwait(false);
             return _List;
         }
 
 
-        internal async Task<List<MRSItemsBeforeIssue>> getMRSItemsWithCode(int ID)
+        internal async Task<List<CMMRSItemsBeforeIssue>> getMRSItemsWithCode(int ID)
         {
             string stmt = "SELECT smi.ID,smi.mrs_return_ID,smi.finalRemark,smi.asset_item_ID,smi.asset_MDM_code," +
                 "smi.returned_qty,smi.available_qty,smi.used_qty,smi.ID,smi.issued_qty,\r\nsm.flag," +
@@ -229,7 +229,7 @@ namespace CMMSAPIs.Repositories.SM
                 "LEFT JOIN smunitmeasurement f_sum ON  f_sum.id = sam.plant_ID\r\n        " +
                 "LEFT JOIN smassetitems sai ON  sai.ID = smi.asset_item_ID" +
                 " WHERE smi.mrs_ID = "+ID+" GROUP BY smi.asset_MDM_code";
-            List<MRSItemsBeforeIssue> _List = await Context.GetData<MRSItemsBeforeIssue>(stmt).ConfigureAwait(false);
+            List<CMMRSItemsBeforeIssue> _List = await Context.GetData<CMMRSItemsBeforeIssue>(stmt).ConfigureAwait(false);
             return _List;
         }
 
@@ -239,10 +239,10 @@ namespace CMMSAPIs.Repositories.SM
             List<CMMRS> _List = await Context.GetData<CMMRS>(stmt).ConfigureAwait(false);
             return _List;
         }
-        internal async Task<List<ReturnMRSData>> getReturnDataByID(int ID)
+        internal async Task<List<CMRETURNMRSDATA>> getReturnDataByID(int ID)
         {
             string stmt = $"SELECT * FROM smrsitems WHERE ID = {ID}";
-            List<ReturnMRSData> _List = await Context.GetData<ReturnMRSData>(stmt).ConfigureAwait(false);
+            List<CMRETURNMRSDATA> _List = await Context.GetData<CMRETURNMRSDATA>(stmt).ConfigureAwait(false);
             return _List;
         }
 
@@ -648,7 +648,7 @@ namespace CMMSAPIs.Repositories.SM
             return mrsItem[0];
         }
 
-        public async Task<List<AssetItem>> GetAssetItems(int plantID, bool isGroupByCode = false)
+        public async Task<List<CMAssetItem>> GetAssetItems(int plantID, bool isGroupByCode = false)
         {
             //spare 
 
@@ -706,7 +706,7 @@ namespace CMMSAPIs.Repositories.SM
             }
 
             //echo $stmt;
-            List<AssetItem> Listitem = await Context.GetData<AssetItem>(stmt).ConfigureAwait(false);
+            List<CMAssetItem> Listitem = await Context.GetData<CMAssetItem>(stmt).ConfigureAwait(false);
             return Listitem;
         }
 
