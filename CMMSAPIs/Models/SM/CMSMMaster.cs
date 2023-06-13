@@ -115,6 +115,9 @@ namespace CMMSAPIs.Models.SM
         public int Asset_master_id { get; set; }
         public int isEditMode { get; set; }
         public int item_condition { get; set; }
+        public string activity { get; set; }
+        public int whereUsedType { get; set; }
+        public int whereUsedTypeId { get; set; }
 
         public List<CMEquipments> equipments { get; set;}
 
@@ -152,7 +155,7 @@ namespace CMMSAPIs.Models.SM
         public decimal used_qty { get; set; }
         public decimal issued_qty { get; set; }
         public int flag { get; set; }
-        public DateTime? returnDate { get; set; }
+        public string returnDate { get; set; }
         public int approval_status { get; set; }
         public string approved_date { get; set; }
         public string issued_date { get; set; }
@@ -163,6 +166,8 @@ namespace CMMSAPIs.Models.SM
         public string asset_type { get; set; }
         public string file_path { get; set; }
         public int Asset_master_id { get; set; }
+        public int status { get; set; }
+        public string status_short { get; set; }
 
     }
 
@@ -234,14 +239,18 @@ namespace CMMSAPIs.Models.SM
         public int ID { get; set; }
         public int requested_by_emp_ID { get; set; }
         public string approver_name { get; set; }
-        public string requestd_date { get; set; }
+        public string? requestd_date { get; set; }
         public string returnDate { get; set; }
         public string approval_date { get; set; }
-        public string approval_status { get; set; }
+        public int approval_status { get; set; }
         public string approval_comment { get; set; }
-        public string emp_name { get; set; }
-        public int flag { get; set; }
-
+        public string requested_by_name { get; set; }
+        public int status { get; set; }
+        public string status_short { get; set; }
+        public string activity { get; set; }
+        public int whereUsedType { get; set; }
+        public int whereUsedTypeId { get; set; }
+        public List<CMMRSItems> CMMRSItems { get; set; }
     }
 
     public class CMRETURNMRSDATA

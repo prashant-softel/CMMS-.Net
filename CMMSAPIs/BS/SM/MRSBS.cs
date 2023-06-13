@@ -12,8 +12,8 @@ namespace CMMSAPIs.BS.SM
 {
     public interface IMRSBS
     {
-        Task<CMDefaultResponse> requestMRS(CMMRS request);        
-        Task<List<CMMRSList>> getMRSList(int plant_ID, int emp_id, DateTime toDate, DateTime fromDate);        
+        Task<CMDefaultResponse> CreateMRS(CMMRS request);        
+        Task<List<CMMRSList>> getMRSList(int plant_ID, int emp_id, DateTime toDate, DateTime fromDate, int status);        
         Task<List<CMMRSItems>> getMRSItems(int ID);        
         Task<List<CMMRSItemsBeforeIssue>> getMRSItemsBeforeIssue(int ID);        
         Task<List<CMMRSItemsBeforeIssue>> getMRSItemsWithCode(int ID);        
@@ -36,13 +36,13 @@ namespace CMMSAPIs.BS.SM
             databaseProvider = dbProvider;
         }
 
-        public async Task<CMDefaultResponse> requestMRS(CMMRS request)
+        public async Task<CMDefaultResponse> CreateMRS(CMMRS request)
         {
             try
             {
                 using (var repos = new MRSRepository(getDB))
                 {
-                    return await repos.requestMRS(request);
+                    return await repos.CreateMRS(request);
                 }
             }
             catch (Exception ex)
@@ -51,13 +51,13 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<CMMRSList>> getMRSList(int plant_ID, int emp_id, DateTime toDate, DateTime fromDate)
+        public async Task<List<CMMRSList>> getMRSList(int plant_ID, int emp_id, DateTime toDate, DateTime fromDate, int status)
         {
             try
             {
                 using (var repos = new MRSRepository(getDB))
                 {
-                    return await repos.getMRSList(plant_ID, emp_id, toDate, fromDate);
+                    return await repos.getMRSList(plant_ID, emp_id, toDate, fromDate, status);
                 }
             }
             catch (Exception ex)

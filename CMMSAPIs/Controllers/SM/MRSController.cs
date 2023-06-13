@@ -31,13 +31,13 @@ namespace CMMSAPIs.Controllers.SM
         }
 
         // First 
-        [Route("requestMRS")]
+        [Route("CreateMRS")]
         [HttpPost]       
-        public async Task<IActionResult> requestMRS(CMMRS request)
+        public async Task<IActionResult> CreateMRS(CMMRS request)
         {
             try
             {
-                var data = await _MRSBS.requestMRS(request);
+                var data = await _MRSBS.CreateMRS(request);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -50,11 +50,11 @@ namespace CMMSAPIs.Controllers.SM
         
         [Route("getMRSList")]
         [HttpGet]
-        public async Task<IActionResult> getMRSList(int plant_ID, int emp_id, string toDate, string fromDate)
+        public async Task<IActionResult> getMRSList(int plant_ID, int emp_id, string toDate, string fromDate, int status)
         {
             try
             {
-                var data = await _MRSBS.getMRSList(plant_ID, emp_id, Convert.ToDateTime(toDate), Convert.ToDateTime(fromDate));
+                var data = await _MRSBS.getMRSList(plant_ID, emp_id, Convert.ToDateTime(toDate), Convert.ToDateTime(fromDate), status);
                 return Ok(data);
             }
             catch (Exception ex)

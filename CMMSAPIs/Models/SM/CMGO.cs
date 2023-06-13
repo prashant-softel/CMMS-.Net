@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -98,11 +99,10 @@ namespace CMMSAPIs.Models
     {
         public int purchaseID { get; set; }
         public int facilityId { get; set; }
-        public int vendor { get; set; }
-        public int empId { get; set; }
-        public DateTime purchaseDate { get; set; }
-        public int generateFlag { get; set; }
+ 
+
         public List<CMSUBMITITEMS> submitItems { get; set; }
+        public List<IFormFile> attachments { get; set; }
     }
     public class CMSUBMITITEMS
     {
