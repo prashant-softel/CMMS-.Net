@@ -40,6 +40,26 @@ namespace CMMSAPIs.Controllers.Calibration
         }
 
         [Authorize]
+        [Route("GetCalibrationDetails")]
+        [HttpGet]
+        public async Task<IActionResult> GetCalibrationDetails(int id)
+        {
+            try
+            {
+                var data = await _CalibrationBS.GetCalibrationDetails(id);
+                return Ok(data);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
         [Route("RequestCalibration")]
         [HttpPost]
         public async Task<IActionResult> RequestCalibration(CMRequestCalibration request)

@@ -8,6 +8,7 @@ namespace CMMSAPIs.Models.Calibration
 
     public class CMCalibrationList
     {
+        public int calibration_id { get; set; }
         public int asset_id { get; set; }
         public string asset_name { get; set; }
 		public string asset_serial { get; set; }
