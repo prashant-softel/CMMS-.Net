@@ -22,7 +22,6 @@ using CMMSAPIs.Models.Calibration;
 using CMMSAPIs.Models.Inventory;
 using CMMSAPIs.Models.Notifications;
 using System.IO;
-using IronPdf;
 using System.Web;
 using iTextSharp.text;
 using iTextSharp.text.pdf;
@@ -73,7 +72,7 @@ namespace CMMSAPIs.Repositories.Masters
             { CMMS.CMMS_Modules.INVENTORY, 28 },
             { CMMS.CMMS_Modules.WARRANTY_CLAIM, 30 },
             { CMMS.CMMS_Modules.CALIBRATION, 31 },
-            { CMMS.CMMS_Modules.MODULE_CLEANING, 32 },
+           // { CMMS.CMMS_Modules.MODULE_CLEANING, 32 },
             { CMMS.CMMS_Modules.VEGETATION, 33 }
         };
         public CMMSRepository(MYSQLDBHelper sqlDBHelper) : base(sqlDBHelper)
@@ -164,7 +163,6 @@ namespace CMMSAPIs.Repositories.Masters
             _FinancialYear.Add(new CMFinancialYear { financial_year = "2021-22" });
             _FinancialYear.Add(new CMFinancialYear { financial_year = "2022-23" });
             return _FinancialYear;
-
         }
 
         internal async Task<List<CMFacility>> GetFacilityList()
@@ -388,15 +386,15 @@ namespace CMMSAPIs.Repositories.Masters
                     break;
                 case CMMS.CMMS_Modules.CALIBRATION:
                     CalibrationRepository obj5 = new CalibrationRepository(getDB);
-                    List<CMCalibrationDetails> _Calibration = await obj5.GetCalibrationDetails(id);
-                    notificationID = (CMMS.CMMS_Status)(_Calibration[0].status + 100);
+                    CMCalibrationDetails _Calibration = await obj5.GetCalibrationDetails(id);
+                    notificationID = (CMMS.CMMS_Status)(_Calibration.statusID + 100);
                     CMMSNotification.sendNotification(moduleID, notificationID, _Calibration);
                     break;
                 case CMMS.CMMS_Modules.INVENTORY:
-                    InventoryRepository obj6 = new InventoryRepository(getDB, _environment);
-                    List<CMViewInventory> _Inventory = await obj6.GetInventoryDetails(id);
-                    notificationID = (CMMS.CMMS_Status)(_Inventory[0].status + 100);
-                    CMMSNotification.sendNotification(moduleID, notificationID, _Inventory[0]);
+                    //InventoryRepository obj6 = new InventoryRepository(getDB, _environment);
+                    //List<CMViewInventory> _Inventory = await obj6.GetInventoryDetails(id);
+                    //notificationID = (CMMS.CMMS_Status)(_Inventory[0].status + 100);
+                    //CMMSNotification.sendNotification(moduleID, notificationID, _Inventory[0]);
                     break;
                 default:
                     break;

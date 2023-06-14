@@ -15,7 +15,7 @@ namespace CMMSAPIs.BS.Calibration
     public interface ICalibrationBS
     {
         Task<List<CMCalibrationList>> GetCalibrationList(int facility_id);
-        Task<List<CMCalibrationDetails>> GetCalibrationDetails(int id);
+        Task<CMCalibrationDetails>GetCalibrationDetails(int id);
         Task<CMDefaultResponse> RequestCalibration(CMRequestCalibration request, int userID);
         Task<CMDefaultResponse> ApproveRequestCalibration(CMApproval request, int userID);
         Task<CMDefaultResponse> RejectRequestCalibration(CMApproval request, int userID);
@@ -50,7 +50,7 @@ namespace CMMSAPIs.BS.Calibration
             }
         }
 
-        public async Task<List<CMCalibrationDetails>> GetCalibrationDetails(int id)
+        public async Task<CMCalibrationDetails> GetCalibrationDetails(int id)
         {
             try
             {
