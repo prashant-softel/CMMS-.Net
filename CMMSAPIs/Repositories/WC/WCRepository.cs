@@ -228,7 +228,7 @@ namespace CMMSAPIs.Repositories.WC
                     {
                         u_id = 0;
                     }
-                    addMailQry += $"({id}, '{mail.email}', '{mail.name}', {u_id}, '{(u_id==0?"Internal":"External")}'), ";
+                    addMailQry += $"({id}, '{mail.email}', '{mail.name}', {u_id}, '{(u_id!=0?"Internal":"External")}'), ";
                 }
                 addMailQry = addMailQry.Substring(0, addMailQry.Length - 2) + ";";
                 await Context.ExecuteNonQry<int>(addMailQry).ConfigureAwait(false);
@@ -382,7 +382,7 @@ namespace CMMSAPIs.Repositories.WC
                 {
                     string deleteMail = $"DELETE FROM wc_emails WHERE wc_id = {request.id}";
                     await Context.ExecuteNonQry<int>(deleteMail).ConfigureAwait(false);
-                    string addMailQry = "INSERT INTO wc_emails (wc_id, email, name, type) VALUES ";
+                    string addMailQry = "INSERT INTO wc_emails (wc_id, email, name, user_id, type) VALUES ";
                     if (request.additionalEmailEmployees != null)
                     {
                         if (request.additionalEmailEmployees.Count > 0)
@@ -431,7 +431,7 @@ namespace CMMSAPIs.Repositories.WC
                                 {
                                     u_id = 0;
                                 }
-                                addMailQry += $"({request.id}, '{mail.email}', '{mail.name}', {u_id}, '{(u_id == 0 ? "Internal" : "External")}'), ";
+                                addMailQry += $"({request.id}, '{mail.email}', '{mail.name}', {u_id}, '{(u_id != 0 ? "Internal" : "External")}'), ";
                             }
                         }
                     }
