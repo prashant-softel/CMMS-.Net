@@ -17,7 +17,6 @@ using CMMSAPIs.BS.Mails;
 using CMMSAPIs.Repositories.Users;
 using CMMSAPIs.Models.Users;
 using System.IO;
-using IronPdf;
 
 //using CommonUtilities;
 //using CMMSAPIs.Models.Notifications;

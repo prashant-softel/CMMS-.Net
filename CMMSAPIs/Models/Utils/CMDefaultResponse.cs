@@ -11,6 +11,10 @@ namespace CMMSAPIs.Models.Utils
         public string message { get; set; }
        //public List<CMJobDetailsList> LstJobDetails { get; set; }
        //public List<CMEmpDetailsList> LstEmpDetails { get; set; }
+        public CMDefaultResponse()
+        {
+
+        }
         public CMDefaultResponse(int id,  CMMS.RETRUNSTATUS return_status, string message)
         {
             this.id = new List<int>();

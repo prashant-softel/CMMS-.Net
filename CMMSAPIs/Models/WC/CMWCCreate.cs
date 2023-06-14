@@ -49,6 +49,7 @@ namespace CMMSAPIs.Models.WC
 
     public class CMWCExternalEmail 
     {
+        public int user_id { get; set; }
         public string name { get; set; }
         public string email { get; set; }
     }
@@ -56,7 +57,7 @@ namespace CMMSAPIs.Models.WC
     public class CMWCSupplierActions 
     {
         public string name { get; set; }
-        public bool is_required { get; set; }
+        public int is_required { get; set; }
         public DateTime? required_by_date { get; set; }
 
     }

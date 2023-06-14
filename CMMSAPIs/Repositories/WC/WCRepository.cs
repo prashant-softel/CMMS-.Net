@@ -42,12 +42,12 @@ namespace CMMSAPIs.Repositories.WC
             {
                 case CMMS.CMMS_Status.WC_DRAFT:
                     retValue = "Draft"; break;
-                case CMMS.CMMS_Status.WC_CREATED:
-                    retValue = "Created"; break;
-                case CMMS.CMMS_Status.WC_SUBMIT_REJECTED:
-                    retValue = "Rejected"; break;
                 case CMMS.CMMS_Status.WC_SUBMITTED:
                     retValue = "Submitted"; break;
+                case CMMS.CMMS_Status.WC_SUBMIT_REJECTED:
+                    retValue = "Submit Rejected"; break;
+                case CMMS.CMMS_Status.WC_SUBMIT_APPROVED:
+                    retValue = "Submit Approved"; break;
                 case CMMS.CMMS_Status.WC_DISPATCHED:
                     retValue = "Dispatched"; break; 
                 case CMMS.CMMS_Status.WC_REJECTED_BY_MANUFACTURER:
@@ -80,14 +80,14 @@ namespace CMMSAPIs.Repositories.WC
                 case CMMS.CMMS_Status.WC_DRAFT:
                     retValue = String.Format("Warranty Claim in Draft by {0}", WCObj.created_by);
                     break;
-                case CMMS.CMMS_Status.WC_CREATED:
-                    retValue = String.Format("Warranty Claim created by {0}", WCObj.created_by);
+                case CMMS.CMMS_Status.WC_SUBMITTED:
+                    retValue = String.Format("Warranty Claim submitted by {0}", WCObj.created_by);
                     break;
                 case CMMS.CMMS_Status.WC_SUBMIT_REJECTED:
                     retValue = String.Format("Warranty Claim  Submit Rejected by {0}", WCObj.approved_by);
                     break;
-                case CMMS.CMMS_Status.WC_SUBMITTED:
-                    retValue = String.Format("Warranty Claim in Draft by {0}", WCObj.created_by);
+                case CMMS.CMMS_Status.WC_SUBMIT_APPROVED:
+                    retValue = String.Format("Warranty Claim Submit Approved by {0}", WCObj.created_by);
                     break;
                 case CMMS.CMMS_Status.WC_DISPATCHED:
                     //retValue = String.Format("Warranty Claim Dispachted by {0} at {1}", WCObj.dispatched_by, WCObj.dispatched_at);
@@ -172,7 +172,7 @@ namespace CMMSAPIs.Repositories.WC
             return GetWCData;
         }
 
-        internal async Task<CMDefaultResponse> CreateWC(List<CMWCCreate> set, int userID)
+        internal async Task<CMDefaultResponse>  CreateWC(List<CMWCCreate> set, int userID)
         {
             /*
              * Insert all data in WC table in their respective columns 
@@ -185,13 +185,18 @@ namespace CMMSAPIs.Repositories.WC
             
             foreach (CMWCCreate unit in set)
             {
+                CMMS.CMMS_Status draftStatus = (CMMS.CMMS_Status)(int)CMMS.CMMS_Status.WC_DRAFT;
+                if (unit.status == 1)
+                {
+                    draftStatus = (CMMS.CMMS_Status)(int)CMMS.CMMS_Status.WC_SUBMITTED;
+                }
                 string qry = "insert into wc(facilityId, equipment_id, good_order_id, affected_part, order_reference_number, affected_sr_no, " + 
                                 "cost_of_replacement, currencyId, warranty_start_date, warranty_end_date, warranty_claim_title, warranty_description, " + 
                                 "corrective_action_by_buyer, request_to_supplier, approver_id, status, wc_fac_code, failure_time, created_by) values" + 
                                 $"({unit.facilityId}, {unit.equipmentId}, '{unit.goodsOrderId}', '{unit.affectedPart}', '{unit.orderReference}', " + 
                                 $"'{unit.affectedSrNo}', '{unit.costOfReplacement}', {unit.currencyId}, '{((DateTime)unit.warrantyStartAt).ToString("yyyy'-'MM'-'dd")}', " + 
                                 $"'{((DateTime)unit.warrantyEndAt).ToString("yyyy'-'MM'-'dd")}', '{unit.warrantyClaimTitle}', '{unit.warrantyDescription}', " + 
-                                $"'{unit.correctiveActionByBuyer}', '{unit.requestToSupplier}', {unit.approverId}, {(int)CMMS.CMMS_Status.WC_CREATED}, " + 
+                                $"'{unit.correctiveActionByBuyer}', '{unit.requestToSupplier}', {unit.approverId},{(int)draftStatus}, " + 
                                 $"'FAC{1000 + unit.facilityId}', '{((DateTime)unit.failureTime).ToString("yyyy'-'MM'-'dd")}', {userID}); select LAST_INSERT_ID(); ";
                 DataTable dt = await Context.FetchData(qry).ConfigureAwait(false);
                 int id = Convert.ToInt32(dt.Rows[0][0]);
@@ -200,27 +205,37 @@ namespace CMMSAPIs.Repositories.WC
                                     $"supplier_id = (SELECT supplierId FROM assets WHERE assets.id = {unit.equipmentId}), " +
                                     $"currency = (SELECT code FROM currency WHERE currency.id = {unit.currencyId}) WHERE wc.id = {id};";
                 await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
-                string idToMail = $"SELECT loginId as email, CONCAT(firstName,' ',lastName) as name FROM users " +
+                string addMailQry = "INSERT INTO wc_emails (wc_id, email, name, user_id, type) VALUES ";
+                string idToMail = $"SELECT id, loginId as email, CONCAT(firstName,' ',lastName) as name FROM users " +
                                     $"WHERE id IN ({string.Join(',', unit.additionalEmailEmployees)});";
                 DataTable mailList = await Context.FetchData(idToMail).ConfigureAwait(false);
-                string addMailQry = "INSERT INTO wc_emails (wc_id, email, name, type) VALUES ";
                 foreach (DataRow mail in mailList.Rows)
                 {
-                    addMailQry += $"({id}, '{mail["email"]}', '{mail["name"]}', 'Internal'), ";
+                    addMailQry += $"({id}, '{mail["email"]}', '{mail["name"]}', {mail["id"]}, 'Internal'), ";
                 }
-                string getAllMails = "SELECT loginId FROM users;";
+                string getAllMails = "SELECT id, loginId FROM users;";
                 DataTable allMails = await Context.FetchData(getAllMails).ConfigureAwait(false);
+                Dictionary<string, int> mailToId = new Dictionary<string, int>();
+                mailToId.Merge(allMails.GetColumn<string>("loginId"), allMails.GetColumn<int>("id"));
                 foreach(var mail in unit.externalEmails)
                 {
-                    bool exists = allMails.GetColumn<string>("loginId").Contains(mail.email);
-                    addMailQry += $"({id}, '{mail.email}', '{mail.name}', '{(exists?"Internal":"External")}'), ";
+                    int u_id;
+                    try
+                    {
+                        u_id = mailToId[mail.email];
+                    }
+                    catch(KeyNotFoundException)
+                    {
+                        u_id = 0;
+                    }
+                    addMailQry += $"({id}, '{mail.email}', '{mail.name}', {u_id}, '{(u_id!=0?"Internal":"External")}'), ";
                 }
                 addMailQry = addMailQry.Substring(0, addMailQry.Length - 2) + ";";
                 await Context.ExecuteNonQry<int>(addMailQry).ConfigureAwait(false);
                 string addSupplierActions = "INSERT INTO wcschedules (warranty_id, supplier_action, input_value, input_date, created_at) VALUES ";
                 foreach (var action in unit.supplierActions)
                 {
-                    addSupplierActions += $"({id}, '{action.name}', {(action.is_required?1:0)}, '{((DateTime)action.required_by_date).ToString("yyyy-MM-dd")}', " +
+                    addSupplierActions += $"({id}, '{action.name}', {(action.is_required)}, '{((DateTime)action.required_by_date).ToString("yyyy-MM-dd")}', " +
                                             $"'{UtilsRepository.GetUTCTime()}'), ";
                 }
                 addSupplierActions = addSupplierActions.Substring(0, addSupplierActions.Length - 2) + ";";
@@ -228,7 +243,7 @@ namespace CMMSAPIs.Repositories.WC
 
                 count++;
                 idList.Add(id);
-                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.WARRANTY_CLAIM, id, 0, 0, "Warranty Claim Created", CMMS.CMMS_Status.WC_CREATED, userID);
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.WARRANTY_CLAIM, id, 0, 0, "Warranty Claim Created", draftStatus, userID);
             }
             if (count > 0)
             {
@@ -261,11 +276,11 @@ namespace CMMSAPIs.Repositories.WC
                 throw new ArgumentException("Invalid ID");
             }
 
-            string myQuery = "SELECT  wc.id as wc_id, wc.facilityId as facility_Id, f.name as facility_name, ac.name AS equipment_category, a.name AS equipment_name, equipment_sr_no," +
-            "b1.name AS supplier_name, good_order_id, affected_part, order_reference_number, affected_sr_no, cost_of_replacement,  wc.currency," + // add cost_of_replacement,
+            string myQuery = "SELECT  wc.id as wc_id, wc.facilityId as facility_Id, f.name as facility_name,ac.id AS equipment_category_id, ac.name AS equipment_category, a.id AS equipment_id, a.name AS equipment_name, equipment_sr_no," +
+            "b1.id AS supplier_id, b1.name AS supplier_name, good_order_id, affected_part, order_reference_number, affected_sr_no, cost_of_replacement, wc.currencyId,  wc.currency," + // add cost_of_replacement,
             " warranty_start_date, warranty_end_date, warranty_claim_title, warranty_description, " +
             "corrective_action_by_buyer, request_to_supplier, concat(user.firstName , ' ' , user.lastName) AS approver_name," +
-            " created_by, issued_on, wc.status, approved_by, wc_fac_code, failure_time " +
+            " created_by, issued_on, wc.status,approved_by, wc.created_at AS date_of_claim, wc_fac_code, failure_time" +
             " FROM wc " +
             "JOIN facilities as f ON f.id = wc.facilityId " +
             "JOIN assets as a ON a.id = wc.equipment_id " +
@@ -290,6 +305,22 @@ namespace CMMSAPIs.Repositories.WC
             string _longStatus = getLongStatus(CMMS.CMMS_Modules.WARRANTY_CLAIM, _Status_long, GetWCDetails[0]);
             GetWCDetails[0].status_long = _longStatus;
 
+            // Retrieve external emails associated with the warranty claim
+            string internalEmailsQuery = $"SELECT user_id, name, email  FROM wc_emails WHERE wc_id = {id} and type = 'Internal'";
+            List<CMWCExternalEmail> internalEmails = await Context.GetData<CMWCExternalEmail>(internalEmailsQuery).ConfigureAwait(false);
+            GetWCDetails[0].additionalEmailEmployees = internalEmails;
+
+            // Retrieve external emails associated with the warranty claim
+            string externalEmailsQuery = $"SELECT user_id, name, email FROM wc_emails WHERE wc_id = { id } and type = 'External'";
+            List<CMWCExternalEmail> externalEmails = await Context.GetData<CMWCExternalEmail>(externalEmailsQuery).ConfigureAwait(false);
+            GetWCDetails[0].externalEmails = externalEmails;
+
+            // Retrieve supplier actions associated with the warranty claim
+            string supplierActionsQuery = $"SELECT supplier_action as name, input_value AS is_required, input_date AS required_by_date FROM wcschedules WHERE warranty_id =  {id}";
+            List<CMWCSupplierActions> supplierActions = await Context.GetData<CMWCSupplierActions>(supplierActionsQuery).ConfigureAwait(false);
+            GetWCDetails[0].supplierActions = supplierActions;
+
+
 
             return GetWCDetails[0];
         }
@@ -312,6 +343,8 @@ namespace CMMSAPIs.Repositories.WC
                                 $"equipment_cat_id = (SELECT categoryId FROM assets WHERE assets.id = {request.equipmentId}), " +
                                 $"equipment_sr_no = (SELECT serialNumber FROM assets WHERE assets.id = {request.equipmentId}), " +
                                 $"supplier_id = (SELECT supplierId FROM assets WHERE assets.id = {request.equipmentId}), " ;
+            if (request.status == 1)
+                updateQry += $"status = {(int)CMMS.CMMS_Status.WC_SUBMITTED}, ";
             if (request.goodsOrderId > 0)
                 updateQry += $"good_order_id = {request.goodsOrderId}, ";
             if (request.affectedPart != null && request.affectedPart != "")
@@ -349,11 +382,12 @@ namespace CMMSAPIs.Repositories.WC
                 {
                     string deleteMail = $"DELETE FROM wc_emails WHERE wc_id = {request.id}";
                     await Context.ExecuteNonQry<int>(deleteMail).ConfigureAwait(false);
-                    string addMailQry = "INSERT INTO wc_emails (wc_id, email, name, type) VALUES ";
+                    string addMailQry = "INSERT INTO wc_emails (wc_id, email, name, user_id, type) VALUES ";
                     if (request.additionalEmailEmployees != null)
                     {
                         if (request.additionalEmailEmployees.Count > 0)
                         {
+                            /*
                             string idToMail = $"SELECT loginId as email, CONCAT(firstName,' ',lastName) as name FROM users " +
                                     $"WHERE id IN ({string.Join(',', request.additionalEmailEmployees)});";
                             DataTable mailList = await Context.FetchData(idToMail).ConfigureAwait(false);
@@ -361,18 +395,43 @@ namespace CMMSAPIs.Repositories.WC
                             {
                                 addMailQry += $"({request.id}, '{mail["email"]}', '{mail["name"]}', 'Internal'), ";
                             }
+                            /**/
+                            string idToMail = $"SELECT id, loginId as email, CONCAT(firstName,' ',lastName) as name FROM users " +
+                                    $"WHERE id IN ({string.Join(',', request.additionalEmailEmployees)});";
+                            DataTable mailList = await Context.FetchData(idToMail).ConfigureAwait(false);
+                            foreach (DataRow mail in mailList.Rows)
+                            {
+                                addMailQry += $"({request.id}, '{mail["email"]}', '{mail["name"]}', {mail["id"]}, 'Internal'), ";
+                            }
                         }
                     }
                     if (request.externalEmails != null)
                     {
                         if (request.externalEmails.Count > 0)
                         {
-                            string getAllMails = "SELECT loginId FROM users;";
+                            //string getAllMails = "SELECT loginId FROM users;";
+                            //DataTable allMails = await Context.FetchData(getAllMails).ConfigureAwait(false);
+                            //foreach (var mail in request.externalEmails)
+                            //{
+                            //    bool exists = allMails.GetColumn<string>("loginId").Contains(mail.email);
+                            //    addMailQry += $"({request.id}, '{mail.email}', '{mail.name}', '{(exists ? "Internal" : "External")}'), ";
+                            //}
+                            string getAllMails = "SELECT id, loginId FROM users;";
                             DataTable allMails = await Context.FetchData(getAllMails).ConfigureAwait(false);
+                            Dictionary<string, int> mailToId = new Dictionary<string, int>();
+                            mailToId.Merge(allMails.GetColumn<string>("loginId"), allMails.GetColumn<int>("id"));
                             foreach (var mail in request.externalEmails)
                             {
-                                bool exists = allMails.GetColumn<string>("loginId").Contains(mail.email);
-                                addMailQry += $"({request.id}, '{mail.email}', '{mail.name}', '{(exists ? "Internal" : "External")}'), ";
+                                int u_id;
+                                try
+                                {
+                                    u_id = mailToId[mail.email];
+                                }
+                                catch (KeyNotFoundException)
+                                {
+                                    u_id = 0;
+                                }
+                                addMailQry += $"({request.id}, '{mail.email}', '{mail.name}', {u_id}, '{(u_id != 0 ? "Internal" : "External")}'), ";
                             }
                         }
                     }
@@ -389,7 +448,7 @@ namespace CMMSAPIs.Repositories.WC
                     string addSupplierActions = "INSERT INTO wcschedules (warranty_id, supplier_action, input_value, input_date, created_at) VALUES ";
                     foreach (var action in request.supplierActions)
                     {
-                        addSupplierActions += $"({request.id}, '{action.name}', {(action.is_required ? 1 : 0)}, '{((DateTime)action.required_by_date).ToString("yyyy-MM-dd")}', " +
+                        addSupplierActions += $"({request.id}, '{action.name}', {(action.is_required)}, '{((DateTime)action.required_by_date).ToString("yyyy-MM-dd")}', " +
                                                 $"'{UtilsRepository.GetUTCTime()}'), ";
                     }
                     addSupplierActions = addSupplierActions.Substring(0, addSupplierActions.Length - 2) + ";";
