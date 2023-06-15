@@ -7,12 +7,35 @@ using CMMSAPIs.Models.Inventory;
 using CMMSAPIs.Models.Masters;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Utils;
+using CMMSAPIs.Repositories.Jobs;
+using CMMSAPIs.Repositories.Permits;
+using CMMSAPIs.Repositories.JC;
+using CMMSAPIs.Repositories.Incident_Reports;
+using CMMSAPIs.Repositories.WC;
+using CMMSAPIs.Repositories.Calibration;
+using CMMSAPIs.Repositories.Inventory;
+using CMMSAPIs.Models.Jobs;
+using CMMSAPIs.Models.Permits;
+using CMMSAPIs.Models.JC;
+using CMMSAPIs.Models.Incident_Reports;
+using CMMSAPIs.Models.WC;
+using CMMSAPIs.Models.Calibration;
+using CMMSAPIs.Models.Inventory;
+using CMMSAPIs.Models.Notifications;
+using System.IO;
+using System.Web;
+using iTextSharp.text;
+using iTextSharp.text.pdf;
+using iTextSharp.tool.xml;
+using Microsoft.AspNetCore.Mvc;
 
 namespace CMMSAPIs.Repositories.Masters
 {
-    public class CMMSRepository : GenericRepository
+    public class CMMSRepository : GenericRepository  
     {
         private UtilsRepository _utilsRepo;
+        public static Microsoft.AspNetCore.Hosting.IWebHostEnvironment _environment;
+        private MYSQLDBHelper getDB;
 
         public const string MA_Actual = "MA_Actual"; 
         public const string MA_Contractual = "MA_Contractual";
@@ -50,12 +73,13 @@ namespace CMMSAPIs.Repositories.Masters
             { CMMS.CMMS_Modules.INVENTORY, 28 },
             { CMMS.CMMS_Modules.WARRANTY_CLAIM, 30 },
             { CMMS.CMMS_Modules.CALIBRATION, 31 },
-            { CMMS.CMMS_Modules.MODULE_CLEANING, 32 },
+           // { CMMS.CMMS_Modules.MODULE_CLEANING, 32 },
             { CMMS.CMMS_Modules.VEGETATION, 33 }
         };
         public CMMSRepository(MYSQLDBHelper sqlDBHelper) : base(sqlDBHelper)
         {
             _utilsRepo = new UtilsRepository(sqlDBHelper);
+            getDB = sqlDBHelper;
         }
 
         internal async Task<CMDefaultResponse> AddModule(CMModule request)
@@ -140,7 +164,6 @@ namespace CMMSAPIs.Repositories.Masters
             _FinancialYear.Add(new CMFinancialYear { financial_year = "2021-22" });
             _FinancialYear.Add(new CMFinancialYear { financial_year = "2022-23" });
             return _FinancialYear;
-
         }
 
         internal async Task<List<CMFacility>> GetFacilityList()
@@ -476,6 +499,69 @@ namespace CMMSAPIs.Repositories.Masters
             string myQuery = $"SELECT id,name, days FROM Frequency where status = 1";
             List<CMFrequency> _FrequencyList = await Context.GetData<CMFrequency>(myQuery).ConfigureAwait(false);
             return _FrequencyList;
+        }
+
+        internal  async Task<string> Print(int id, CMMS.CMMS_Modules moduleID, params object[] args)
+        {
+            CMMSNotification.print = true;
+            CMMS.CMMS_Status notificationID;
+
+            switch (moduleID)
+            {
+
+                case CMMS.CMMS_Modules.JOB:
+                    JobRepository obj = new JobRepository(getDB);
+                    CMJobView _jobView = await obj.GetJobDetails(id);
+                    notificationID = (CMMS.CMMS_Status)(_jobView.status);
+                    CMMSNotification.sendNotification(moduleID, notificationID, _jobView);
+                    break;
+                case CMMS.CMMS_Modules.PTW:
+                    PermitRepository obj1 = new PermitRepository(getDB);
+                    CMPermitDetail _Permit = await obj1.GetPermitDetails(id);
+                     notificationID = (CMMS.CMMS_Status)(_Permit.ptwStatus);
+                    CMMSNotification.sendNotification(moduleID, notificationID, _Permit);
+                    break;
+                case CMMS.CMMS_Modules.JOBCARD:
+                    JCRepository obj2 = new JCRepository(getDB);
+                    List<CMJCDetail> _JobCard = await obj2.GetJCDetail(id);
+                    notificationID = (CMMS.CMMS_Status)(_JobCard[0].status);
+                    CMMSNotification.sendNotification(moduleID, notificationID, _JobCard[0]);
+                    break;
+                case CMMS.CMMS_Modules.INCIDENT_REPORT:
+                    IncidentReportRepository obj3 = new IncidentReportRepository(getDB);
+                    List<CMViewIncidentReport> _IncidentReport = await obj3.GetIncidentDetailsReport(id);
+                    notificationID = (CMMS.CMMS_Status)(_IncidentReport[0].status);
+                    CMMSNotification.sendNotification(moduleID, notificationID, _IncidentReport[0]);
+                    break;
+                case CMMS.CMMS_Modules.WARRANTY_CLAIM:
+                    WCRepository obj4 = new WCRepository(getDB);
+                    CMWCDetail _WC = await obj4.GetWCDetails(id);
+                    notificationID = (CMMS.CMMS_Status)(_WC.status);
+                    CMMSNotification.sendNotification(moduleID, notificationID, _WC);
+                    break;
+                case CMMS.CMMS_Modules.CALIBRATION:
+                    CalibrationRepository obj5 = new CalibrationRepository(getDB);
+                    CMCalibrationDetails _Calibration = await obj5.GetCalibrationDetails(id);
+                    notificationID = (CMMS.CMMS_Status)(_Calibration.statusID + 100);
+                    CMMSNotification.sendNotification(moduleID, notificationID, _Calibration);
+                    break;
+                case CMMS.CMMS_Modules.INVENTORY:
+                    //InventoryRepository obj6 = new InventoryRepository(getDB, _environment);
+                    //List<CMViewInventory> _Inventory = await obj6.GetInventoryDetails(id);
+                    //notificationID = (CMMS.CMMS_Status)(_Inventory[0].status + 100);
+                    //CMMSNotification.sendNotification(moduleID, notificationID, _Inventory[0]);
+                    break;
+                default:
+                    break;
+            }
+
+            string HTMLBody = "<html> <head> <style> table{ border:1px solid black; margin-left:auto; margin-right:auto; border-collapse:collapse; /*width:53rem;*/ text-align:left; font-size:16px; } th{ padding:0.5rem; background-color:rgba(119,202,231,.2); } td{ padding:0.5rem; } .title{  background-color:#31576d; border-bottom-left-radius:8rem; height:8rem; width:35rem; text-align:center; padding-top:2rem; color:#ffca5a } </style> </head> <body> <div> <div style='border:4px solid #77cae7 ;margin:1rem'> <div style='display:flex;justify-content:space-between'> <img style='padding:20px;height:8rem;width:10rem' src='https://i.ibb.co/FD60YSY/hfe.png' alt='hfe' /> <div class='title'> <h1>JOB RECIEPT</h1> </div> </div> <div style='align-content:center;padding:2rem'> ";
+
+            HTMLBody += CMMSNotification.printBody;
+
+            HTMLBody += "</table></div></div></div></body></html>";
+
+            return HTMLBody;
         }
     }
 

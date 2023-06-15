@@ -17,14 +17,16 @@ namespace CMMSAPIs.Repositories.GO
     {
         public GORepository(MYSQLDBHelper sqlDBHelper) : base(sqlDBHelper)
         {
-        }
 
+        }
 
         internal async Task<List<CMGO>> GetGOList(int plantID, DateTime fromDate, DateTime toDate)
         {
             /*
              * 
             */
+            string filter = " (DATE(po.purchaseDate) >= '" + fromDate.ToString("yyyy-MM-dd") + "'  and DATE(po.purchaseDate) <= '" + toDate.ToString("yyyy-MM-dd") + "')";
+
             var myQuery = "SELECT pod.ID as podID,pod.spare_status,pod.remarks,sai.orderflag,sam.asset_name,sam.asset_type_ID,pod.purchaseID," +
                           "pod.assetItemID,sai.serial_number,sai.location_ID,pod.cost,pod.ordered_qty,po.remarks as rejectedRemark,po.plantID,po.purchaseDate,sam.asset_type_ID,\n\t\t        po.vendorID,po.flag,sai.asset_code,t1.asset_type,t2.cat_name,pod.received_qty,pod.damaged_qty,pod.accepted_qty,po.received_on,po.approvedOn,\n\t\t\t\tCONCAT(ed.Emp_First_Name,' ',ed.Emp_Last_Name) as generatedBy," +
                           "CONCAT(ed1.Emp_First_Name,' ',ed1.Emp_Last_Name) as receivedBy,CONCAT(ed2.Emp_First_Name,' ',ed2.Emp_Last_Name) as approvedBy,\n\t\t\t\tbl.Business_Name as vendor_name\n\t\t        FROM smpurchaseorderdetails pod\n\t\t        LEFT JOIN smpurchaseorder po ON po.ID = pod.purchaseID\n\t\t        LEFT JOIN smassetitems sai ON sai.ID = pod.assetItemID" +
@@ -45,7 +47,7 @@ namespace CMMSAPIs.Repositories.GO
                 "  LEFT JOIN smassetmasters s2 ON s2.item_category_ID = sic.ID  )  t2 ON t2.master_ID = sam.ID " +
                 "LEFT JOIN employees ed ON ed.ID = po.generated_by\r\n\t\t        LEFT JOIN employees ed1 ON ed1.ID = po.receiverID\r\n\t\t\t\t " +
                 "LEFT JOIN employees ed2 ON ed2.ID = po.approved_by\r\n\t\t\t\t" +
-                "LEFT JOIN business bl ON bl.id = po.vendorID\r\n\r\n\t\t     " +
+                "LEFT JOIN business bl ON bl.id = po.vendorID \r\n\r\n\t\t    WHERE " + filter + 
                 "/*  WHERE po.ID =1 */";
             List<CMGO> _GOList = await Context.GetData<CMGO>(stmt).ConfigureAwait(false);
 

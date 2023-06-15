@@ -1,4 +1,4 @@
-﻿    using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Jobs;
@@ -37,11 +37,11 @@ namespace CMMSAPIs.Repositories.Jobs
                                             "users as user ON user.id = job.assignedId " +
                                       "WHERE job.id = " + jobID;
             List<CMJobView> _ViewJobList = await Context.GetData<CMJobView>(myQuery).ConfigureAwait(false);
-            CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_ViewJobList[0].status + 100);
+            CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_ViewJobList[0].status);
             string _shortStatus = getShortStatus(CMMS.CMMS_Modules.JOB, _Status);
             _ViewJobList[0].status_short = _shortStatus;
 
-            CMMS.CMMS_Status _Status_long = (CMMS.CMMS_Status)(_ViewJobList[0].status + 100);
+            CMMS.CMMS_Status _Status_long = (CMMS.CMMS_Status)(_ViewJobList[0].status);
             string _longStatus = getLongStatus(CMMS.CMMS_Modules.JOB, _Status_long, _ViewJobList[0]);
             _ViewJobList[0].status_long = _longStatus;
 

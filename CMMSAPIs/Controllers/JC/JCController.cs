@@ -61,7 +61,8 @@ namespace CMMSAPIs.Controllers.JC
         {
             try
             {
-                var data = await _JCBS.CreateJC(job_id);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _JCBS.CreateJC(job_id, userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -94,7 +95,8 @@ namespace CMMSAPIs.Controllers.JC
         {
             try
             {
-                var data = await _JCBS.CloseJC(request);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _JCBS.CloseJC(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -110,7 +112,8 @@ namespace CMMSAPIs.Controllers.JC
         {
             try
             {
-                var data = await _JCBS.ApproveJC(request);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _JCBS.ApproveJC(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -126,7 +129,44 @@ namespace CMMSAPIs.Controllers.JC
         {
             try
             {
-                var data = await _JCBS.RejectJC(request);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _JCBS.RejectJC(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
+        [Route("StartJC")]
+        [HttpPut]
+        public async Task<IActionResult> StartJC(int jc_id)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _JCBS.StartJC(jc_id, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+
+
+        [Authorize]
+        [Route("CarryForwardJC")]
+        [HttpPut]
+        public async Task<IActionResult> CarryForwardJC(CMApproval request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _JCBS.CarryForwardJC(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)

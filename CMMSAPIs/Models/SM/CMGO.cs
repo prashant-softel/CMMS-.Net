@@ -18,15 +18,15 @@ namespace CMMSAPIs.Models.GO
         public int vendorID { get; set; }
         public int status { get; set; }
         public string status_short { get; set; }
-        public int generatedBy { get; set; }
+        public string generatedBy { get; set; }
         public int receiverID { get; set; }
 
         public string vendor_name { get; set; }
         public int generate_flag { get; set; }
         public int location_ID { get; set; }
         public DateTime received_on { get; set; }
-        public int receivedBy { get; set; }
-        public int approvedBy { get; set; }
+        public string receivedBy { get; set; }
+        public string approvedBy { get; set; }
         public DateTime approvedOn { get; set; }
 
 
