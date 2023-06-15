@@ -102,7 +102,7 @@ namespace CMMSAPIs.Repositories.Utils
              * Fetch data from History table for requested module_type and id
              * Return Log
             */
-            string myQuery = "select history.Id as id, moduleType as module_type, moduleRefId as module_ref_id, secondaryModuleRefType as secondary_module, secondaryModuleRefId as secondary_module_ref_id, comment as comment, history.status as status, history.createdBy as created_by_id, CONCAT(created_user.firstName,' ',created_user.lastName) as created_by_name, history.createdAt as created_at, history.currentLatitude as current_latitude, history.currentLongitude as current_longitude from history join users as created_user on history.createdBy=created_user.id " +
+            string myQuery = "select history.Id as id, moduleType as module_type, moduleRefId as module_ref_id, secondaryModuleRefType as secondary_module, secondaryModuleRefId as secondary_module_ref_id, comment as comment, history.status as status, history.createdBy as created_by_id, CONCAT(created_user.firstName,' ',created_user.lastName) as created_by_name, history.createdAt as created_at, history.currentLatitude as current_latitude, history.currentLongitude as current_longitude from history left join users as created_user on history.createdBy=created_user.id " +
                 $"WHERE (moduleType = {(int)module_type} or secondaryModuleRefType = {(int)module_type}) AND (moduleRefId = {id} or secondaryModuleRefId = {id})";
             List<CMLog> _Log = await Context.GetData<CMLog>(myQuery).ConfigureAwait(false);
             return _Log;
