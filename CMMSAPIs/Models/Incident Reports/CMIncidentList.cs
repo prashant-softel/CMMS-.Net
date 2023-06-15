@@ -8,7 +8,7 @@ namespace CMMSAPIs.Models.Incident_Reports
         public string description { get; set; }
         public string equipment_name { get; set; }
         public string block_name { get; set; }
-        public string risk_level { get; set; }
+        public int risk_level { get; set; }
         public string approved_by { get; set; }
         public DateTime approved_at { get; set; }
         public string reported_by_name { get; set; }
