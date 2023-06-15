@@ -19,8 +19,11 @@ namespace CMMSAPIs.Models.Masters
         public string website { get; set; }
         public string location { get; set; }
         public string address { get; set; }
+        public int cityId { get; set; }
         public string city { get; set; }
+        public int stateId { get; set; }
         public string state { get; set; }
+        public int countryId { get; set; }
         public string country { get; set; }
         public string zip { get; set; }
         public int type { get; set; }

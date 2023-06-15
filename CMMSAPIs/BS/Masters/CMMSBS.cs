@@ -20,10 +20,15 @@ namespace CMMSAPIs.BS.Masters
         Task<List<CMAsset>> GetAssetList(int facility_id);
         Task<List<CMEmployee>> GetEmployeeList(int facility_id, CMMS.CMMS_Modules module, CMMS.CMMS_Access access);
         Task<List<CMBusinessType>> GetBusinessTypeList();
+        Task<CMDefaultResponse> AddBusinessType(CMBusinessType request, int userId);
+        Task<CMDefaultResponse> UpdateBusinessType(CMBusinessType request, int userId);
+        Task<CMDefaultResponse> DeleteBusinessType(int id, int userId);
+        Task<CMDefaultResponse> AddBusiness(List<CMBusiness> request, int userId);
+        Task<CMDefaultResponse> UpdateBusiness(CMBusiness request, int userId);
+        Task<CMDefaultResponse> DeleteBusiness(int id, int userId);
         Task<List<CMDefaultList>> GetBloodGroupList();
         Task<List<CMDefaultList>> GetGenderList();
         Task<List<CMDefaultList>> GetSPVList();
-        Task<CMDefaultResponse> AddBusiness(List<CMBusiness> request);
         Task<List<CMBusiness>> GetBusinessList(int businessType);
         Task<CMDefaultResponse> AddModule(CMModule request);
         Task<CMDefaultResponse> UpdateModule(CMModule request);
@@ -311,15 +316,89 @@ namespace CMMSAPIs.BS.Masters
                 throw;
             }
         }
-
-        public async Task<CMDefaultResponse> AddBusiness(List<CMBusiness> request)
+        public async Task<CMDefaultResponse> AddBusinessType(CMBusinessType request, int userId)
         {
             try
             {
                 using (var repos = new CMMSRepository(getDB))
                 {
-                    return await repos.AddBusiness(request);
+                    return await repos.AddBusinessType(request, userId);
 
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> UpdateBusinessType(CMBusinessType request, int userId)
+        {
+            try
+            {
+                using (var repos = new CMMSRepository(getDB))
+                {
+                    return await repos.UpdateBusinessType(request, userId);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> DeleteBusinessType(int id, int userId)
+        {
+            try
+            {
+                using (var repos = new CMMSRepository(getDB))
+                {
+                    return await repos.DeleteBusinessType(id, userId);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<CMDefaultResponse> AddBusiness(List<CMBusiness> request, int userId)
+        {
+            try
+            {
+                using (var repos = new CMMSRepository(getDB))
+                {
+                    return await repos.AddBusiness(request, userId);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> UpdateBusiness(CMBusiness request, int userId)
+        {
+            try
+            {
+                using (var repos = new CMMSRepository(getDB))
+                {
+                    return await repos.UpdateBusiness(request, userId);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> DeleteBusiness(int id, int userId)
+        {
+            try
+            {
+                using (var repos = new CMMSRepository(getDB))
+                {
+                    return await repos.DeleteBusiness(id, userId);
                 }
             }
             catch (Exception ex)
