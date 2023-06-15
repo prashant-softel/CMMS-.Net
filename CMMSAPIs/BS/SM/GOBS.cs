@@ -42,7 +42,7 @@ namespace CMMSAPIs.BS
             {
                 using (var repos = new GORepository(getDB))
                 {
-                    return await repos.GetGOList(plantID, fromDate, toDate, Status);
+                    return await repos.GetGOList(plantID, fromDate, toDate);
 
                 }
             }
