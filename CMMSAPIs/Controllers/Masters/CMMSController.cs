@@ -153,13 +153,96 @@ namespace CMMSAPIs.Controllers.Masters
                 throw;
             }
         }
-        [Route("AddBusiness")]
+        [Authorize]
+        [Route("AddBusinessType")]
         [HttpPost]
-        public async Task<IActionResult> AddBusiness(List<CMBusiness> request)
+        public async Task<IActionResult> AddBusinessType(CMBusinessType request, int userId)
         {
             try
             {
-                var data = await _CMMSBS.AddBusiness(request);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _CMMSBS.AddBusinessType(request, userId);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        [Authorize]
+        [Route("UpdateBusinessType")]
+        [HttpPatch]
+        public async Task<IActionResult> UpdateBusinessType(CMBusinessType request, int userId)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _CMMSBS.UpdateBusinessType(request, userId);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
+        [Route("DeleteBusinessType")]
+        [HttpDelete]
+        public async Task<IActionResult> DeleteBusinessType(int id, int userId)
+        {
+            try
+            {
+                var data = await _CMMSBS.DeleteBusinessType(id, userId);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
+        [Route("AddBusiness")]
+        [HttpPost]
+        public async Task<IActionResult> AddBusiness(List<CMBusiness> request, int userId)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _CMMSBS.AddBusiness(request, userId);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        [Authorize]
+        [Route("UpdateBusiness")]
+        [HttpPatch]
+        public async Task<IActionResult> UpdateBusiness(CMBusiness request, int userId)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _CMMSBS.UpdateBusiness(request, userId);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
+        [Route("DeleteBusiness")]
+        [HttpDelete]
+        public async Task<IActionResult> DeleteBusiness(int id, int userId)
+        {
+            try
+            {
+                var data = await _CMMSBS.DeleteBusiness(id, userId);
                 return Ok(data);
             }
             catch (Exception)

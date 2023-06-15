@@ -17,6 +17,14 @@ namespace CMMSAPIs.Repositories.Incident_Reports
             _utilsRepo = new UtilsRepository(sqlDBHelper);
         }
 
+        private Dictionary<int, string> StatusDictionary = new Dictionary<int, string>()
+        {
+            { 181, "Submitted" },
+            { 182, "Approved" },
+            { 183, "Rejected" },
+            { 184, "Updated" },
+        };
+
         internal static string getShortStatus(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status m_notificationID)
         {
             string retValue;
@@ -76,17 +84,22 @@ namespace CMMSAPIs.Repositories.Incident_Reports
              * Update the string value of status from constant defined for incident report
              * Your code goes here
             */
-            string filter = "";
-            if (start_date.IsNull() && end_date.IsNull() )
+            string filter = "incident.facility_id =" + facility_id + " ";
+
+            if (!start_date.IsNull() && !end_date.IsNull())
             {
-                filter += "(incident.facility_id =" + facility_id + " AND incident.incident_datetime >= '" + start_date + "' AND incident.incident_datetime <= '" + end_date + "')";
+                filter += "AND DATE(incident.incident_datetime) >= '" + start_date.ToString("yyyy-MM-dd") + "' AND DATE(incident.incident_datetime) <= '" + end_date.ToString("yyyy-MM-dd") + "'";
             }
 
-            filter += $"(incident.incident_datetime ='{UtilsRepository.GetUTCTime() }')";
+            string statusOut = "CASE ";
+            foreach (KeyValuePair<int, string> status in StatusDictionary)
+            {
+                statusOut += $"WHEN incident.status = {status.Key} THEN '{status.Value}' ";
+            }
+            statusOut += $"ELSE 'Invalid Status' END";
 
-            /*string filter = "(incident.facility_id =" + facility_id + " AND incident.incident_datetime >= '" + start_date + "' AND incident.incident_datetime <= '" + end_date + "')";*/
-            string selectqry = "SELECT incident.id as id,  incident.description as description , facilities.name as block_name, assets.name as equipment_name, incident.risk_level as risk_level, CONCAT(user.firstName + ' ' + user.lastName) as approved_by, incident.approved_at as approved_at, CONCAT(user1.firstName + ' ' + user1.lastName) as reported_by_name, incident.incident_datetime as created_at , incident.status as status FROM softel_cmms.incidents as incident JOIN softel_cmms.facilities AS facilities on facilities.id = incident.facility_id JOIN softel_cmms.assets as assets on incident.equipment_id = assets.id LEFT JOIN softel_cmms.users as user on incident.approved_by = user.id LEFT JOIN softel_cmms.users as user1 on incident.verified_by = user1.id where " + filter + "";
-         
+            string selectqry = $"SELECT incident.id as id,  incident.description as description , facilities.name as block_name, assets.name as equipment_name, incident.risk_level as risk_level, CONCAT(user.firstName + ' ' + user.lastName) as approved_by, incident.approved_at as approved_at, CONCAT(user1.firstName + ' ' + user1.lastName) as reported_by_name, incident.incident_datetime as created_at , {statusOut} as status FROM incidents as incident JOIN facilities AS facilities on facilities.id = incident.facility_id JOIN assets as assets on incident.equipment_id = assets.id LEFT JOIN users as user on incident.approved_by = user.id LEFT JOIN users as user1 on incident.verified_by = user1.id where " + filter + " order by incident.incident_datetime";
+
             List<CMIncidentList> getIncidentList = await Context.GetData<CMIncidentList>(selectqry).ConfigureAwait(false);
             return getIncidentList;
         }
