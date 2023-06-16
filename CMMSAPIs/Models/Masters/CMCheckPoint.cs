@@ -7,6 +7,7 @@
         public int checklist_id { get; set; }
         public string requirement { get; set; }
         public int? is_document_required { get; set; }
+        public string action_to_be_done { get; set; }
         public int? status { get; set; }
     }
 

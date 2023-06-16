@@ -21,6 +21,8 @@ namespace CMMSAPIs.BS.Masters
         Task<CMDefaultResponse> CreateCheckPoint(List<CMCreateCheckPoint> request, int userID);
         Task<CMDefaultResponse> UpdateCheckPoint(CMCreateCheckPoint request, int userID);
         Task<CMDefaultResponse> DeleteCheckPoint(int id, int userID);
+        Task<CMDefaultResponse> ValidateChecklist(int file_id);
+        Task<CMDefaultResponse> ImportChecklist(int file_id, int userID);
     }
     public class CheckListBS : ICheckListBS
     {
@@ -192,6 +194,36 @@ namespace CMMSAPIs.BS.Masters
                 using (var repos = new CheckListRepository(getDB))
                 {
                     return await repos.DeleteCheckPoint(id, userID);
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> ValidateChecklist(int file_id)
+        {
+            try
+            {
+                using (var repos = new CheckListRepository(getDB))
+                {
+                    return await repos.ValidateChecklist(file_id);
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> ImportChecklist(int file_id, int userID)
+        {
+            try
+            {
+                using (var repos = new CheckListRepository(getDB))
+                {
+                    return await repos.ImportChecklist(file_id, userID);
                 }
             }
             catch (Exception)

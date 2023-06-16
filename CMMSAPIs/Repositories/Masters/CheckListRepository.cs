@@ -6,18 +6,24 @@ using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Utils;
 using CMMSAPIs.Models.Notifications;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
+using OfficeOpenXml;
+using System.IO;
+using Microsoft.AspNetCore.Hosting;
 
 namespace CMMSAPIs.Repositories.Masters
 {
     public class CheckListRepository : GenericRepository
     {
         private UtilsRepository _utilsRepo;
-        public CheckListRepository(MYSQLDBHelper sqlDBHelper) : base(sqlDBHelper)
+        private ErrorLog m_errorLog;
+        public CheckListRepository(MYSQLDBHelper sqlDBHelper, IWebHostEnvironment webHostEnvironment = null) : base(sqlDBHelper)
         {
             _utilsRepo = new UtilsRepository(sqlDBHelper);
+            m_errorLog = new ErrorLog(webHostEnvironment);
         }
 
         #region checklist
@@ -73,7 +79,7 @@ namespace CMMSAPIs.Repositories.Masters
             {
                 string query = "INSERT INTO checklist_number(checklist_number, checklist_type, facility_id, status ,created_by ," +
                     " created_at , asset_category_id ,frequency_id ,manpower , duration)VALUES" +
-                            $"('{request.checklist_number}', {request.type}, {request.facility_id},{request.status},  {userID}," +
+                            $"('{request.checklist_number}', {request.type}, {request.facility_id}, 1, {userID}," +
                             $"'{UtilsRepository.GetUTCTime()}',{request.category_id},{request.frequency_id}, {request.manPower},{request.duration}); select LAST_INSERT_ID();";
 
                 DataTable dt = await Context.FetchData(query).ConfigureAwait(false);
@@ -82,7 +88,7 @@ namespace CMMSAPIs.Repositories.Masters
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.CHECKLIST_NUMBER, id, 0, 0, "Check List Created", CMMS.CMMS_Status.CREATED, userID);
                 id_list.Add(id);
             }
-            CMDefaultResponse response = new CMDefaultResponse(id_list, CMMS.RETRUNSTATUS.SUCCESS, "Check List Created Successfully");
+            CMDefaultResponse response = new CMDefaultResponse(id_list, CMMS.RETRUNSTATUS.SUCCESS, $"{id_list.Count} Checklist(s) Created Successfully");
 
             return response;
             
@@ -101,7 +107,7 @@ namespace CMMSAPIs.Repositories.Masters
                 updateQry += $" checklist_type = {request.type}, ";
             if (request.facility_id > 0)
                 updateQry += $" facility_id = {request.facility_id}, ";
-            if (request.status > 0)
+            if (request.status != null)
                 updateQry += $" status = {request.status}, ";
             if (request.category_id > 0)
                 updateQry += $" asset_category_id = {request.category_id}, ";
@@ -109,7 +115,7 @@ namespace CMMSAPIs.Repositories.Masters
                 updateQry += $" frequency_id = {request.frequency_id}, ";
             if (request.manPower > 0)
                 updateQry += $" manpower = {request.manPower}, ";
-            if (request.duration != null)
+            if (request.duration > 0)
                 updateQry += $" duration = {request.duration}, ";
             updateQry += $" updated_by = {userID}, updated_at = '{UtilsRepository.GetUTCTime()}' WHERE id = {request.id}; ";
             await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
@@ -342,5 +348,227 @@ namespace CMMSAPIs.Repositories.Masters
             return response;
         }
         #endregion
+
+        
+        private async Task<DataTable> ConvertExcelToChecklists(int file_id)
+        {
+            Dictionary<string, int> plants = new Dictionary<string, int>();
+            string plantQry = "SELECT id, UPPER(name) as name FROM facilities WHERE parentId = 0 GROUP BY name;";
+            DataTable dtPlant = await Context.FetchData(plantQry).ConfigureAwait(false);
+            plants.Merge(dtPlant.GetColumn<string>("name"), dtPlant.GetColumn<int>("id"));
+
+            Dictionary<string, int> categories = new Dictionary<string, int>();
+            string categoryQry = "SELECT id, UPPER(name) as name FROM assetcategories GROUP BY name;";
+            DataTable dtCategory = await Context.FetchData(categoryQry).ConfigureAwait(false);
+            categories.Merge(dtCategory.GetColumn<string>("name"), dtCategory.GetColumn<int>("id"));
+
+            Dictionary<string, int> frequencies = new Dictionary<string, int>();
+            string frequencyQry = "SELECT id, UPPER(name) as name FROM frequency GROUP BY name;";
+            DataTable dtFrequency = await Context.FetchData(frequencyQry).ConfigureAwait(false);
+            frequencies.Merge(dtFrequency.GetColumn<string>("name"), dtFrequency.GetColumn<int>("id"));
+
+            Dictionary<string, int> checklistTypes = new Dictionary<string, int>()
+            {
+                { "PM", 1 },
+                { "HOTO", 2 },
+                { "AUDIT", 3 }
+            };
+
+            /*
+            Facility_Name	CheckList	Type	Frequency	Category	Man Power	Duration
+            */
+            Dictionary<string, Tuple<string, Type>> columnNames = new Dictionary<string, Tuple<string, Type>>()
+            {
+                { "Facility_Name", new Tuple<string, Type>("facility_name", typeof(string)) },
+                { "CheckList", new Tuple<string, Type>("checklist_number", typeof(string)) },
+                { "Type", new Tuple<string, Type>("type_name", typeof(string)) },
+                { "Frequency", new Tuple<string, Type>("frequency_name", typeof(string)) },
+                { "Category", new Tuple<string, Type>("category_name", typeof(string)) },
+                { "Man Power", new Tuple<string, Type>("manPower", typeof(int)) },
+                { "Duration", new Tuple<string, Type>("duration", typeof(int)) },
+            };
+
+            string query1 = $"SELECT file_path FROM uploadedfiles WHERE id = {file_id};";
+            DataTable dt1 = await Context.FetchData(query1).ConfigureAwait(false);
+            string path = Convert.ToString(dt1.Rows[0][0]);
+            string dir = Path.GetDirectoryName(path);
+            string filename = Path.GetFileName(path);
+            if (!Directory.Exists(dir))
+                m_errorLog.SetError($"Directory '{dir}' cannot be found");
+            else if (!File.Exists(path))
+                m_errorLog.SetError($"File '{filename}' cannot be found in directory '{dir}'");
+            else
+            {
+                FileInfo info = new FileInfo(path);
+                if (info.Extension != ".xlsx")
+                    m_errorLog.SetError("File is not a .xlsx file");
+                else
+                {
+                    ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                    var excel = new ExcelPackage(path);
+                    var sheet = excel.Workbook.Worksheets["CheckList"];
+                    if (sheet == null)
+                        m_errorLog.SetWarning("The file must contain CheckList sheet");
+                    else
+                    {
+                        DataTable dt2 = new DataTable();
+                        foreach (var header in sheet.Cells[1, 1, 1, sheet.Dimension.End.Column])
+                        {
+                            try
+                            {
+                                dt2.Columns.Add(columnNames[header.Text].Item1, columnNames[header.Text].Item2);
+                            }
+                            catch (KeyNotFoundException)
+                            {
+                                dt2.Columns.Add(header.Text);
+                            }
+                        }
+                        dt2.Columns.Add("facility_id", typeof(int));
+                        dt2.Columns.Add("category_id", typeof(int));
+                        dt2.Columns.Add("frequency_id", typeof(int));
+                        dt2.Columns.Add("type", typeof(int));
+                        //Pending: Reasons for skipping 3 rows
+                        //
+                        for (int rN = 4; rN <= sheet.Dimension.End.Row; rN++)
+                        {
+                            ExcelRange row = sheet.Cells[rN, 1, rN, sheet.Dimension.End.Column];
+                            DataRow newR = dt2.NewRow();
+                            foreach (var cell in row)
+                            {
+                                try
+                                {
+                                    if (cell.Text == null || cell.Text == "")
+                                        continue;
+                                    newR[cell.Start.Column - 1] = Convert.ChangeType(cell.Text, dt2.Columns[cell.Start.Column - 1].DataType);
+                                }
+                                catch (Exception ex)
+                                {
+                                    string status = ex.ToString();
+                                    status = status.Substring(0, (status.IndexOf("Exception") + 8));
+                                    m_errorLog.SetError("," + status);
+                                }
+                            }
+                            if (newR.IsEmpty())
+                            {
+                                m_errorLog.SetInformation($"Row {rN} is empty.");
+                                continue;
+                            }
+                            try
+                            {
+                                newR["facility_id"] = plants[Convert.ToString(newR["facility_name"]).ToUpper()];
+                            }
+                            catch(KeyNotFoundException)
+                            {
+                                if (Convert.ToString(newR["facility_name"]) == null || Convert.ToString(newR["facility_name"]) == "")
+                                    m_errorLog.SetError($"[Row {rN}] Facility Name cannot be empty.");
+                                else
+                                    m_errorLog.SetError($"[Row {rN}] Invalid Facility '{newR["facility_name"]}'.");
+                            }
+                            if (Convert.ToString(newR["checklist_number"]) == null || Convert.ToString(newR["checklist_number"]) == "")
+                            {
+                                m_errorLog.SetError($"[Row {rN}] Checklist name cannot be empty.");
+                            }
+                            try
+                            {
+                                newR["type"] = checklistTypes[Convert.ToString(newR["type_name"]).ToUpper()];
+                            }
+                            catch (KeyNotFoundException)
+                            {
+                                if (Convert.ToString(newR["type_name"]) == null || Convert.ToString(newR["type_name"]) == "")
+                                    m_errorLog.SetError($"[Row {rN}] Checklist Type cannot be empty.");
+                                else
+                                    m_errorLog.SetError($"[Row {rN}] Invalid Checklist Type.");
+                            }
+                            try
+                            {
+                                newR["frequency_id"] = frequencies[Convert.ToString(newR["frequency_name"]).ToUpper()];
+                            }
+                            catch (KeyNotFoundException)
+                            {
+                                if (Convert.ToString(newR["frequency_name"]) == null || Convert.ToString(newR["frequency_name"]) == "")
+                                    m_errorLog.SetError($"[Row {rN}] Frequency Name cannot be empty.");
+                                else
+                                    m_errorLog.SetError($"[Row {rN}] Invalid Frequency.");
+                            }
+                            try
+                            {
+                                newR["category_id"] = categories[Convert.ToString(newR["category_name"]).ToUpper()];
+                            }
+                            catch (KeyNotFoundException)
+                            {
+                                if (Convert.ToString(newR["category_name"]) == null || Convert.ToString(newR["category_name"]) == "")
+                                    m_errorLog.SetError($"[Row {rN}] Asset Category Name cannot be empty.");
+                                else
+                                    m_errorLog.SetError($"[Row {rN}] Invalid Asset Category.");
+                            }
+                            if (newR["manPower"] == DBNull.Value)
+                                m_errorLog.SetError($"[Row {rN}] Manpower value cannot be empty or 0.");
+                            else if (Convert.ToDouble(newR["manPower"]) == 0)
+                                m_errorLog.SetError($"[Row {rN}] Manpower value cannot be empty or 0.");
+                            if (newR["duration"] == DBNull.Value)
+                                m_errorLog.SetError($"[Row {rN}] Duration cannot be empty or 0.");
+                            else if (Convert.ToDouble(newR["duration"]) == 0)
+                                m_errorLog.SetError($"[Row {rN}] Duration cannot be empty or 0.");
+                            dt2.Rows.Add(newR);
+                            /*
+                             { "Facility_Name", new Tuple<string, Type>("facility_name", typeof(string)) },
+                             { "CheckList", new Tuple<string, Type>("checklist_number", typeof(string)) },
+                             { "Type", new Tuple<string, Type>("type_name", typeof(string)) },
+                             { "Frequency", new Tuple<string, Type>("frequency_name", typeof(string)) },
+                             { "Category", new Tuple<string, Type>("category_name", typeof(string)) },
+                             { "Man Power", new Tuple<string, Type>("manPower", typeof(int)) },
+                             { "Duration", new Tuple<string, Type>("duration", typeof(int)) },
+                             dt2.Columns.Add("facility_id", typeof(int));
+                             dt2.Columns.Add("category_id", typeof(int));
+                             dt2.Columns.Add("frequency_id", typeof(int));
+                             dt2.Columns.Add("type", typeof(int));
+                             */
+                        }
+                        return dt2;
+                    }
+                }
+            }
+            return null;
+        }
+        
+        internal async Task<CMDefaultResponse> ValidateChecklist(int file_id)
+        {
+            CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
+            DataTable checklists = await ConvertExcelToChecklists(file_id);
+            if(checklists != null && m_errorLog.GetErrorCount() == 0)
+            {
+                m_errorLog.SetImportInformation("Checklist ready to Import");
+                retCode = CMMS.RETRUNSTATUS.SUCCESS;
+                string qry = $"UPDATE uploadedfiles SET valid = 1 WHERE id = {file_id};";
+                await Context.ExecuteNonQry<int>(qry).ConfigureAwait(false);
+            }
+            return new CMDefaultResponse(file_id, retCode, string.Join("\r\n", m_errorLog.errorLog().ToArray()));
+        }
+
+        internal async Task<CMDefaultResponse> ImportChecklist(int file_id, int userID)
+        {
+            CMDefaultResponse response;
+            string qry = $"SELECT valid FROM uploadedfiles WHERE id = {file_id}";
+            DataTable dt = await Context.FetchData(qry).ConfigureAwait(false);
+            int valid = Convert.ToInt32(dt.Rows[0][0]);
+            if(valid == 1)
+            {
+                DataTable dtChecklists = await ConvertExcelToChecklists(file_id);
+                if(dtChecklists != null && m_errorLog.GetErrorCount() == 0)
+                {
+                    List<CMCreateCheckList> checklists = dtChecklists.MapTo<CMCreateCheckList>();
+                    response = await CreateChecklist(checklists, userID);
+                }
+                else
+                {
+                    response = new CMDefaultResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, "Error while importing checklists. Please validate the file again.");
+                }
+            }
+            else
+            {
+                response = new CMDefaultResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, "Please validate the file before importing.");
+            }
+            return response;
+        }
     }
 }
