@@ -40,5 +40,48 @@ namespace CMMSAPIs.Controllers.SM
                 throw;
             }
         }
+        [Route("GetEmployeeStockReport")]
+        [HttpGet]
+        public async Task<IActionResult> GetEmployeeStockReport(int plant_ID, DateTime StartDate, DateTime EndDate)
+        {
+            try
+            {
+                var data = await _SMReportsBS.GetEmployeeStockReport(plant_ID, StartDate, EndDate);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        [Route("GetFaultyMaterialReport")]
+        [HttpGet]
+        public async Task<IActionResult> GetFaultyMaterialReport(int plant_ID, DateTime StartDate, DateTime EndDate)
+        {
+            try
+            {
+                var data = await _SMReportsBS.GetFaultyMaterialReport(plant_ID, StartDate, EndDate);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        [Route("GetEmployeeTransactionReport")]
+        [HttpGet]
+        public async Task<IActionResult> GetEmployeeTransactionReport(int isAllEmployees, int plant_ID, DateTime StartDate, DateTime EndDate)
+        {
+            try
+            {
+                var data = await _SMReportsBS.GetEmployeeTransactionReport(isAllEmployees, plant_ID, StartDate, EndDate);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
     }
 }

@@ -59,6 +59,13 @@ namespace CMMS_API_Test
         string EP_getPurchaseDetailsByID = "/api/GO/getPurchaseDetailsByID";
         string EP_SubmitPurchaseOrderData = "/api/GO/SubmitPurchaseOrderData";
 
+        //Reports
+
+        string EP_GetPlantStockReport = "/api/SMReports/GetPlantStockReport";
+        string EP_GetEmployeeStockReport = "/api/SMReports/GetEmployeeStockReport";
+        string EP_GetFaultyMaterialReport = "/api/SMReports/GetFaultyMaterialReport";
+        string EP_GetEmployeeTransactionReport = "/api/SMReports/GetEmployeeTransactionReport";
+
         [TestMethod]
         public void VerifyListofAssetType()
         {
@@ -285,7 +292,7 @@ namespace CMMS_API_Test
             int emp_id = 1;
             DateTime toDate = Convert.ToDateTime("2023-04-01");
             DateTime fromDate = Convert.ToDateTime("2022-01-01");
-            var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.SM.MRSList>();
+            var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.SM.CMMRSList>();
             var response = ptwService.GetItemList(EP_getMRSList + "?plant_ID=" + plant_ID+ "&emp_id="+emp_id+ "&toDate="+toDate+ "&fromDate="+fromDate);
             int ListCount = response.Count;
             Assert.AreEqual(ListCount, 0);
@@ -295,7 +302,7 @@ namespace CMMS_API_Test
         public void VerifygetMRSItems()
         {
             int ID = 1;
-            var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.SM.MRSItems>();
+            var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.SM.CMMRSItems>();
             var response = ptwService.GetItemList(EP_getMRSItems + "?ID=" + ID );
             int ListCount = response.Count;
             Assert.AreEqual(ListCount, 1);
@@ -304,7 +311,7 @@ namespace CMMS_API_Test
         public void VerifygetMRSItemsBeforeIssue()
         {
             int ID = 1;
-            var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.SM.MRSItemsBeforeIssue>();
+            var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.SM.CMMRSItemsBeforeIssue>();
             var response = ptwService.GetItemList(EP_getMRSItemsBeforeIssue + "?ID=" + ID);
             int ListCount = response.Count;
             Assert.AreEqual(ListCount, 1);
@@ -313,7 +320,7 @@ namespace CMMS_API_Test
         public void VerifygetMRSItemsWithCode()
         {
             int ID = 1;
-            var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.SM.MRSItemsBeforeIssue>();
+            var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.SM.CMMRSItemsBeforeIssue>();
             var response = ptwService.GetItemList(EP_getMRSItemsWithCode + "?ID=" + ID);
             int ListCount = response.Count;
             Assert.AreEqual(ListCount, 1);
@@ -363,7 +370,7 @@ namespace CMMS_API_Test
         public void VerifygetReturnDataByID()
         {
             int ID = 1;
-            var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.SM.ReturnMRSData>();
+            var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.SM.CMRETURNMRSDATA>();
             var response = ptwService.GetItemList(EP_getReturnDataByID + "?ID=" + ID);
             int ListCount = response.Count;
             Assert.AreEqual(ListCount, 1);
@@ -539,7 +546,7 @@ namespace CMMS_API_Test
         {
 
             string serial_number = "3000009";
-            var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.SM.AssetBySerialNo>();
+            var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.SM.CMAssetBySerialNo>();
             var response = ptwService.GetItem(EP_GetAssetBySerialNo + "?serial_number=" + serial_number);
             Assert.AreEqual("H41111955100001", response.asset_code);
             Assert.AreEqual(45, response.plant_ID);
@@ -555,10 +562,10 @@ namespace CMMS_API_Test
             DateTime toDate = Convert.ToDateTime("2022-01-01");
             int status = 1;
             int order_type = 0;
-            var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.PurchaseData>();
+            var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.CMGOList>();
             var response = ptwService.GetItemList(EP_GetPurchaseData + "?plantID=" + plantID+ "&empRole="+ empRole+ "&fromDate="+ fromDate +"&toDate="+toDate+ "&status="+status+ "&order_type="+ order_type);
             Assert.AreEqual("Noor Abu Dhabi 1177MW", response[0].facilityName); 
-            Assert.AreEqual(19, response[0].orderID); 
+            Assert.AreEqual(19, response[0].assetItemID); 
         }
         [TestMethod]
         public void GetPurchaseDetailsByID()
@@ -607,11 +614,60 @@ namespace CMMS_API_Test
         {
 
             int id = 45;
-            var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.SM.AssetItem>();
+            var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.SM.CMAssetItem>();
             var response = ptwService.GetItemList(EP_GetAssetItems + "?plantID=" + id);
             Assert.AreEqual(1, response[0].ID);
             Assert.AreEqual(1, response[0].asset_ID);
 
+        }
+
+        [TestMethod]
+        public void GetPlantStockReport()
+        {
+
+            int plantID = 45;
+            DateTime fromDate = Convert.ToDateTime("2000-01-01");
+            DateTime toDate = Convert.ToDateTime("2022-01-01");
+            var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.SM.CMPlantStockOpening>();
+            var response = ptwService.GetItemList(EP_GetPlantStockReport + "?plant_ID=" + plantID + "&StartDate=" + fromDate+ "&EndDate=" + toDate );
+            Assert.AreEqual("Noor Abu Dhabi 1177MW", response[0].plant_name);
+            Assert.AreEqual(15, response[0].assetItemID);
+        }
+        [TestMethod]
+        public void GetEmployeeStockReport()
+        {
+
+            int plantID = 45;
+            DateTime fromDate = Convert.ToDateTime("2000-01-01");
+            DateTime toDate = Convert.ToDateTime("2022-01-01");
+            var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.SM.CMEmployeeStockReport>();
+            var response = ptwService.GetItemList(EP_GetEmployeeStockReport + "?plant_ID=" + plantID + "&StartDate=" + fromDate + "&EndDate=" + toDate);
+            Assert.AreEqual(0, response.Count);
+        }
+        [TestMethod]
+        public void GetFaultyMaterialReport()
+        {
+
+            int plantID = 45;
+            DateTime fromDate = Convert.ToDateTime("2000-01-01");
+            DateTime toDate = Convert.ToDateTime("2022-01-01");
+            var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.SM.CMFaultyMaterialReport>();
+            var response = ptwService.GetItemList(EP_GetFaultyMaterialReport + "?plant_ID=" + plantID + "&StartDate=" + fromDate + "&EndDate=" + toDate);
+            Assert.AreEqual("3000001", response[0].replaceSerialNo);
+            Assert.AreEqual(192, response[0].ID);
+        }
+        [TestMethod]
+        public void GetEmployeeTransactionReport()
+        {
+
+            int isAllEmployees = 1;
+            int plantID = 45;
+            DateTime fromDate = Convert.ToDateTime("2020-01-01");
+            DateTime toDate = Convert.ToDateTime("2023-05-05");
+            var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.SM.CMEmployeeTransactionReport>();
+            var response = ptwService.GetItemList(EP_GetEmployeeTransactionReport + "?isAllEmployees="+ isAllEmployees + "&plant_ID=" + plantID + "&StartDate=" + fromDate + "&EndDate=" + toDate);
+            Assert.AreEqual(251, response[0].fromActorID);
+            Assert.AreEqual("3", response[0].fromActorType);
         }
     }
 }

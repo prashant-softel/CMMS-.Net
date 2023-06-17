@@ -15,6 +15,9 @@ namespace CMMSAPIs.BS.SM
     public interface ISMReportsBS
     {
         Task<List<CMPlantStockOpening>> GetPlantStockReport(int plant_ID, DateTime StartDate, DateTime EndDate);
+        Task<List<CMEmployeeStockReport>> GetEmployeeStockReport(int plant_ID, DateTime StartDate, DateTime EndDate);
+        Task<List<CMFaultyMaterialReport>> GetFaultyMaterialReport(int plant_ID, DateTime StartDate, DateTime EndDate);
+        Task<List<CMEmployeeTransactionReport>> GetEmployeeTransactionReport(int isAllEmployees, int plant_ID, DateTime StartDate, DateTime EndDate);
     }
     public class ReportsBS : ISMReportsBS
     {
@@ -41,6 +44,53 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
+        public async Task<List<CMEmployeeStockReport>> GetEmployeeStockReport(int plant_ID, DateTime StartDate, DateTime EndDate)
+        {
+            try
+            {
+                using (var repos = new ReportsRepository(getDB))
+                {
+                    return await repos.GetEmployeeStockReport(plant_ID, StartDate, EndDate);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+
+        public async Task<List<CMFaultyMaterialReport>> GetFaultyMaterialReport(int plant_ID, DateTime StartDate, DateTime EndDate)
+        {
+            try
+            {
+                using (var repos = new ReportsRepository(getDB))
+                {
+                    return await repos.GetFaultyMaterialReport(plant_ID, StartDate, EndDate);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<List<CMEmployeeTransactionReport>> GetEmployeeTransactionReport(int isAllEmployees, int plant_ID, DateTime StartDate, DateTime EndDate)
+        {
+            try
+            {
+                using (var repos = new ReportsRepository(getDB))
+                {
+                    return await repos.GetEmployeeTransactionReport(isAllEmployees, plant_ID, StartDate, EndDate);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
 
     }
 }
