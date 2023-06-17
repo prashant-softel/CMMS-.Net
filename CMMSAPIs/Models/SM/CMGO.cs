@@ -50,6 +50,7 @@ namespace CMMSAPIs.Models
         public string job_ref { get; set; }
         public int amount { get; set; }
         public string currency { get; set; }
+        public decimal cost { get; set; }
 
 
         public List<CMGO_ITEMS> go_items { get;set; }
