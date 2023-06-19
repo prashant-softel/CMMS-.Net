@@ -27,7 +27,7 @@ namespace CMMSAPIs.Models.Calibration
 
     public class CMCalibrationDetails: CMCalibrationList
     {
-        public int calibration_id { get; set; }
+        public DateTime calibration_due_date { get; set; }
         public string request_approved_by { get; set; }
         public string request_rejected_by { get; set; }
         public DateTime request_approved_at { get; set; }
