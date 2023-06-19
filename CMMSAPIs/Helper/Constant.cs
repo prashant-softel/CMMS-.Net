@@ -322,7 +322,13 @@ namespace CMMSAPIs.Helper
             GO_APPROVED_BY_MANAGER,
             GO_REJECTED_BY_MANAGER,
             GO_SHORT_CLOSED_BY_STORE_KEEPER,
-            GO_WITHDRAW_BY_ADMINISTRATOR
+            GO_WITHDRAW_BY_ADMINISTRATOR,
+
+         
+            SM_RO_SUBMITTED = 341,  
+            SM_RO_CLOSED,
+            SM_RO_CLOSED_REJECTED,
+            SM_RO_CLOSED_APPROVED,
         }
 
         public enum SMAssetType

@@ -283,7 +283,7 @@ namespace CMMSAPIs.Repositories.SM
             {
 
 
-                string stmt = $"INSERT INTO smpurchaseorder (plantID, vendorID, generated_by, purchaseDate, flag, generate_flag , challan_no, po_no, freight, transport, no_pkg_received, lr_no, condition_pkg_received, vehicle_no, gir_no,challan_date, po_date, job_ref, amount, currency, withdrawOn, order_type) " +
+                string stmt = $"INSERT INTO smpurchaseorder (plantID, vendorID, generated_by, purchaseDate, flag, generate_flag , challan_no, po_no, freight, transport, no_pkg_received, lr_no, condition_pkg_received, vehicle_no, gir_no,challan_date, requestdate, job_ref, amount, currency, withdrawOn, order_type) " +
                     $"VALUES ({plantID},{vendorID},{generatedBy},'{purchaseDate.Value.ToString("yyyy-MM-dd")}',{generateFlag},{generateFlag}," +
                     $"0,0,0, '','', '', '', '', '', '2000-01-01', '2000-01-01', '', 0, '', '2000-01-01',0 );  SELECT LAST_INSERT_ID();";
                 DataTable dtInsert = await Context.FetchData(stmt).ConfigureAwait(false);             
