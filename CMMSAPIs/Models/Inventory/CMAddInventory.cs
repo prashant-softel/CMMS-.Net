@@ -35,6 +35,7 @@ namespace CMMSAPIs.Models.Inventory
         public int stockCount { get; set; }
         public int moduleQuantity { get; set; }
         public int photoId { get; set; }
+        public int vendorId { get; set; }
         public DateTime? calibrationFirstDueDate { get; set; }
         public DateTime? calibrationLastDate { get; set; } //add this col to database if its not there
         public int calibrationFrequency { get; set; }
