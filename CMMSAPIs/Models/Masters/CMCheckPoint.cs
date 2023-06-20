@@ -19,6 +19,7 @@
         public string checklist_name { get; set; }
         public string requirement { get; set; }
         public int? is_document_required { get; set; }
+        public string action_to_be_done { get; set; }
         public int created_by_id { get; set; }
         public string created_by_name { get; set; }
         public dynamic created_at { get; set; }

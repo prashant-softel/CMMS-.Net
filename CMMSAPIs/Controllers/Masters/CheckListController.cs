@@ -217,13 +217,13 @@ namespace CMMSAPIs.Controllers.Masters
         }
 
         [Authorize]
-        [Route("ValidateChecklist")]
+        [Route("ValidateChecklistCheckpoint")]
         [HttpGet]
-        public async Task<IActionResult> ValidateChecklist(int file_id)
+        public async Task<IActionResult> ValidateChecklistCheckpoint(int file_id)
         {
             try
             {
-                var data = await _CheckListBS.ValidateChecklist(file_id);
+                var data = await _CheckListBS.ValidateChecklistCheckpoint(file_id);
                 return Ok(data);
             }
             catch (Exception)
@@ -233,14 +233,14 @@ namespace CMMSAPIs.Controllers.Masters
         }
 
         [Authorize]
-        [Route("ImportChecklist")]
+        [Route("ImportChecklistCheckpoint")]
         [HttpPost]
-        public async Task<IActionResult> ImportChecklist(int file_id)
+        public async Task<IActionResult> ImportChecklistCheckpoint(int file_id)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _CheckListBS.ImportChecklist(file_id, userID);
+                var data = await _CheckListBS.ImportChecklistCheckpoint(file_id, userID);
                 return Ok(data);
             }
             catch (Exception)
