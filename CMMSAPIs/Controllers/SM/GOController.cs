@@ -86,7 +86,7 @@ namespace CMMSAPIs.Controllers
             }
         }
 
-        [Route("UpdateGO")]
+        [Route("UpdateRO")]
         [HttpPost]
         public async Task<IActionResult> UpdateGO(CMGO request)
         {

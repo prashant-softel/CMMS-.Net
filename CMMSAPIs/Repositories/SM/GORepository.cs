@@ -313,8 +313,8 @@ namespace CMMSAPIs.Repositories
             }
 
             int userId = Utils.UtilsRepository.GetUserID();
-            string approveQuery = $"Update smpurchaseorder set status = {(int)CMMS.CMMS_Status.SM_PO_CLOSED_REJECTED} , reject_reccomendations = '{request.comment}'  " +
-                $" rejecctedBy = {userId}, rejectedAt = {DateTime.Now.ToString("yyyy-MM-dd")}" +
+            string approveQuery = $"Update smpurchaseorder set status = {(int)CMMS.CMMS_Status.SM_PO_CLOSED_REJECTED} , reject_reccomendations = '{request.comment}' , " +
+                $" rejecctedBy = {userId}, rejectedAt = '{DateTime.Now.ToString("yyyy-MM-dd")}'" +
                 $" where id = { request.id}";
             int reject_id = await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
 

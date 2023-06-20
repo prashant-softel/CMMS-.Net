@@ -36,7 +36,6 @@ namespace CMMSAPIs.Models.SM
         public int spare_status { get; set; }
         public DateTime? challan_date { get; set; }
         public DateTime? requestdate { get; set; }
-        public string po_no { get; set; }
         public string challan_no { get; set; }
         public string freight { get; set; }
         public string no_pkg_received { get; set; }

@@ -66,6 +66,15 @@ namespace CMMS_API_Test
         string EP_GetFaultyMaterialReport = "/api/SMReports/GetFaultyMaterialReport";
         string EP_GetEmployeeTransactionReport = "/api/SMReports/GetEmployeeTransactionReport";
 
+        //Request Order
+
+        string EP_CreateRequestOrder = "/api/RequestOrder/CreateRequestOrder";
+        string EP_UpdateRO = "/api/RequestOrder/UpdateRO";
+        string EP_DeleteRequestOrder = "/api/RequestOrder/DeleteRequestOrder";
+        string EP_ApproveRequestOrder = "/api/RequestOrder/ApproveRequestOrder";
+        string EP_RejectGoodsOrder = "/api/RequestOrder/RejectGoodsOrder";
+        string EP_GetRequestOrderList = "/api/RequestOrder/GetRequestOrderList";
+
         [TestMethod]
         public void VerifyListofAssetType()
         {
@@ -668,6 +677,119 @@ namespace CMMS_API_Test
             var response = ptwService.GetItemList(EP_GetEmployeeTransactionReport + "?isAllEmployees="+ isAllEmployees + "&plant_ID=" + plantID + "&StartDate=" + fromDate + "&EndDate=" + toDate);
             Assert.AreEqual(251, response[0].fromActorID);
             Assert.AreEqual("3", response[0].fromActorType);
+        }
+
+        [TestMethod]
+        public void GetRequestOrderList()
+        {
+            int plantID = 45;
+            string fromDate = "2020-01-01";
+            string toDate = "2023-06-23";
+            var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.SM.CMRequestOrder>();
+            var response = ptwService.GetItemList(EP_GetRequestOrderList + "?plantID=" + plantID + "&fromDate=" + fromDate + "&toDate=" + toDate);
+            Assert.AreEqual("Trinity Touch", response[0].vendor_name);
+            Assert.AreEqual(216, response[0].requestID);
+        }
+
+        [TestMethod]
+        public void CreateRequestOrder()
+        {
+
+            string payload = @"{
+                                ""plantID"":45,
+                                ""order_type"":1,
+                                ""location_ID"":1,
+                                ""vendorID"":108,
+                                ""requestDate"":""0001-01-01"",
+                                ""challan_no"":"""",   
+                                ""challan_date"":""0001-01-01"",
+                                ""freight"":"""",
+                                ""received_on"":""0001-01-01"",
+                                ""no_pkg_received"":"""",
+                                ""lr_no"":"""",
+                                ""condition_pkg_received"":"""",
+                                ""vehicle_no"":"""",
+                                ""gir_no"":"""",
+                                ""job_ref"":"""",
+                                ""amount"":0,
+                                ""currency"":"""",
+                                ""go_items"":[{""assetItemID"":3, ""cost"":1,""ordered_qty"":2, ""asset_type_ID"":1},
+                                              {""assetItemID"":4, ""cost"":1,""ordered_qty"":2, ""asset_type_ID"":3}]
+                              }";
+
+            var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.Utils.CMDefaultResponse>();
+            var response = ptwService.CreateItem(EP_CreateRequestOrder, payload);
+
+            Assert.AreEqual("Request order created successfully.", response.message);
+        }
+
+        [TestMethod]
+        public void UpdateRO()
+        {
+            string payload = @"{
+                                 ""id"":216,
+                                 ""vendorID"":21,
+                                 ""request_Date"":""2023-06-20"",
+                                 ""challan_no"":"""",   
+                                 ""challan_date"":""2023-06-21"",
+                                 ""freight"":"""",
+                                 ""received_on"":""2023-06-23"",
+                                 ""no_pkg_received"":"""",
+                                 ""lr_no"":"""",
+                                 ""condition_pkg_received"":"""",
+                                 ""vehicle_no"":"""",
+                                 ""gir_no"":"""",
+                                 ""job_ref"":"""",
+                                 ""amount"":0,
+                                 ""currency"":"""",
+                                   ""go_items"":[{""requestID"":1,""assetItemID"":3, ""cost"":1,""ordered_qty"":99},
+                                                 {""requestID"":2,""assetItemID"":4, ""cost"":1,""ordered_qty"":99}]
+                              }";
+
+            var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.Utils.CMDefaultResponse>();
+            var response = ptwService.CreateItem(EP_UpdateRO, payload);
+
+            Assert.AreEqual("Request order updated successfully.", response.message);
+        }
+
+        [TestMethod]
+        public void DeleteRequestOrder()
+        {
+            string payload = @"{
+                                 ""RO_ID"":216
+                              }";
+
+            var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.Utils.CMDefaultResponse>();
+            var response = ptwService.CreateItem(EP_DeleteRequestOrder, payload);
+
+            Assert.AreEqual("Request order deleted.", response.message);
+        }
+
+        [TestMethod]
+        public void ApproveRequestOrder()
+        {
+            string payload = @"{
+                                    ""id"":216,
+                                    ""comment"":""Test""
+                              }";
+
+            var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.Utils.CMDefaultResponse>();
+            var response = ptwService.CreateItem(EP_ApproveRequestOrder, payload);
+
+            Assert.AreEqual("Approved request order successfully.", response.message);
+        }
+        [TestMethod]
+        public void RejectGoodsOrder()
+        {
+            string payload = @"{
+                                    ""id"":216,
+                                    ""comment"":""Rejected""
+                              }";
+
+            var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.Utils.CMDefaultResponse>();
+            var response = ptwService.CreateItem(EP_RejectGoodsOrder, payload);
+
+            Assert.AreEqual("Rejected request order.", response.message);
         }
     }
 }

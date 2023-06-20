@@ -20,7 +20,7 @@ namespace CMMSAPIs.Controllers.SM
             _IRequestOrderBS = RO;
         }
         
-        [Route("GetGOList")]
+        [Route("GetRequestOrderList")]
         [HttpGet]
         public async Task<IActionResult> GetRequestOrderList(int plantID, DateTime fromDate, DateTime toDate)
         {
@@ -51,14 +51,14 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
-        [Route("UpdateGO")]
+        [Route("UpdateRO")]
         [HttpPost]
-        public async Task<IActionResult> UpdateGO(CMRequestOrder request)
+        public async Task<IActionResult> UpdateRO(CMRequestOrder request)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _IRequestOrderBS.UpdateGO(request, userID);
+                var data = await _IRequestOrderBS.UpdateRO(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)

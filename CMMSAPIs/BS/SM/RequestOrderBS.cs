@@ -14,7 +14,7 @@ namespace CMMSAPIs.BS.SM
     {
         Task<List<CMRequestOrder>> GetRequestOrderList(int plantID, DateTime fromDate, DateTime toDate);
         Task<CMDefaultResponse> CreateRequestOrder(CMRequestOrder request, int userID);
-        Task<CMDefaultResponse> UpdateGO(CMRequestOrder request, int userID);
+        Task<CMDefaultResponse> UpdateRO(CMRequestOrder request, int userID);
         Task<CMDefaultResponse> DeleteRequestOrder(int RO_ID, int userID);
         Task<CMDefaultResponse> ApproveRequestOrder(CMApproval request);
         Task<CMDefaultResponse> RejectGoodsOrder(CMApproval request);
@@ -58,13 +58,13 @@ namespace CMMSAPIs.BS.SM
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> UpdateGO(CMRequestOrder request, int userID)
+        public async Task<CMDefaultResponse> UpdateRO(CMRequestOrder request, int userID)
         {
             try
             {
                 using (var repos = new RequestOrderRepository(getDB))
                 {
-                    return await repos.UpdateGO(request, userID);
+                    return await repos.UpdateRO(request, userID);
 
                 }
             }
