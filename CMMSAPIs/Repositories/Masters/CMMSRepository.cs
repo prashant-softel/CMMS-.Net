@@ -405,19 +405,21 @@ namespace CMMSAPIs.Repositories.Masters
             if (dtCountry.Rows.Count == 0)
             {
                 //throw exception
-                throw new ArgumentException("Invalid Country");
+                throw new ArgumentException($"Their is no country in Database {request.countryId}");
 
             }
             country = Convert.ToString(dtCountry.Rows[0][0]);
 
-            string myQuery1 = $"SELECT * FROM states WHERE id = {request.stateId} AND country_id = {request.countryId};";
-            DataTable dt1 = await Context.FetchData(myQuery1).ConfigureAwait(false);
-            if (dt1.Rows.Count == 0)
+            string myQuery1 = $"SELECT name FROM states WHERE id = {request.stateId} AND country_id = {request.countryId};";
+            dtState = await Context.FetchData(myQuery1).ConfigureAwait(false);
+            if (dtState.Rows.Count == 0)
                 throw new ArgumentException($"StateId {request.stateId} is not situated in {country}");
-            string myQuery2 = $"SELECT * FROM cities WHERE id = {request.cityId} AND state_id = {request.stateId} AND country_id = {request.countryId};";
-            DataTable dt2 = await Context.FetchData(myQuery2).ConfigureAwait(false);
-            if (dt2.Rows.Count == 0)
+            state = Convert.ToString(dtState.Rows[0][0]);
+            string myQuery2 = $"SELECT name FROM cities WHERE id = {request.cityId} AND state_id = {request.stateId} AND country_id = {request.countryId};";
+            dtCity = await Context.FetchData(myQuery2).ConfigureAwait(false);
+            if (dtCity.Rows.Count == 0)
                 throw new ArgumentException($"CityId {request.cityId} is not situated in {request.stateId}, {country}");
+            city = Convert.ToString(dtCity.Rows[0][0]);
 
             string myQuery = "UPDATE business SET ";
             if (request.name != null && request.name != "")
@@ -434,14 +436,20 @@ namespace CMMSAPIs.Repositories.Masters
                 myQuery += $"`location` = '{request.location}', ";
             if (request.address != null && request.address != "")
                 myQuery += $"`address` = '{request.address}', ";
+            if (city != null && city != "")
+                myQuery += $"`city` = '{city}', ";
+            if (state != null && state != "")
+                myQuery += $"`state` = '{state}', ";
+            if (country != null && country != "")
+                myQuery += $"`country` = '{country}', ";
             if (request.cityId > 0)
-                myQuery += $"`cityId` = {request.cityId} ";
+                myQuery += $"`cityId` = {request.cityId}, ";
             if (request.stateId > 0)
-                myQuery += $"AND `stateId` = {request.stateId} ";
+                myQuery += $"`stateId` = {request.stateId}, ";
             if (request.countryId > 0)
-                myQuery += $"AND `countryId` = {request.countryId} ";
+                myQuery += $"`countryId` = {request.countryId}, ";
             if (request.zip != null && request.zip != "")
-                myQuery += $"AND `zip` = '{request.zip}', ";
+                myQuery += $"`zip` = '{request.zip}', ";
             if (request.type > 0)
                 myQuery += $"`type` = {request.type}, ";
 
