@@ -9,6 +9,16 @@ namespace CMMSAPIs.Models.Users
         public List<CMAccessList> access_list { get; set; }
     }
 
+
+    public class CMDesignation
+    {
+        public int id { get; set; }
+        public string name { get; set; }
+        public string description { get; set; }
+    }
+
+
+
     public class CMSetRoleAccess : CMRoleAccess
     {
         public bool set_existing_users { get; set; }
