@@ -686,7 +686,7 @@ namespace CMMSAPIs.Repositories.Masters
             return null;
         }
 
-        internal async Task<CMDefaultResponse> ValidateChecklistCheckpoint(int file_id)
+        internal async Task<CMImportFileResponse> ValidateChecklistCheckpoint(int file_id)
         {
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
             DataTable checklists = await ConvertExcelToChecklists(file_id);
@@ -703,12 +703,15 @@ namespace CMMSAPIs.Repositories.Masters
                 string qry = $"UPDATE uploadedfiles SET valid = 2 WHERE id = {file_id};";
                 await Context.ExecuteNonQry<int>(qry).ConfigureAwait(false);
             }
-            return new CMDefaultResponse(file_id, retCode, string.Join("\r\n", m_errorLog.errorLog().ToArray()));
+            string logPath = m_errorLog.SaveAsText($"ImportLog\\ImportChecklistFile{file_id}");
+            string logQry = $"UPDATE uploadedfiles SET logfile = '{logPath}' WHERE id = {file_id}";
+            await Context.ExecuteNonQry<int>(logQry).ConfigureAwait(false);
+            return new CMImportFileResponse(file_id, retCode, logPath, string.Join("\r\n", m_errorLog.errorLog().ToArray()));
         }
 
-        internal async Task<List<CMDefaultResponse>> ImportChecklist(int file_id, int userID)
+        internal async Task<List<object>> ImportChecklist(int file_id, int userID)
         {
-            List<CMDefaultResponse> responseList = new List<CMDefaultResponse>();
+            List<object> responseList = new List<object>();
             string qry = $"SELECT valid FROM uploadedfiles WHERE id = {file_id}";
             DataTable dt = await Context.FetchData(qry).ConfigureAwait(false);
             int valid = Convert.ToInt32(dt.Rows[0][0]);
@@ -736,15 +739,15 @@ namespace CMMSAPIs.Repositories.Masters
             {
                 CMDefaultResponse response4 = await ValidateChecklistCheckpoint(file_id);
                 responseList.Add(response4);
-                List<CMDefaultResponse> response5 = await ImportChecklist(file_id, userID);
+                List<object> response5 = await ImportChecklist(file_id, userID);
                 responseList.AddRange(response5);
             }
             return responseList;
         }
 
-        internal async Task<List<CMDefaultResponse>> ImportCheckpoint(int file_id, int userID)
+        internal async Task<List<object>> ImportCheckpoint(int file_id, int userID)
         {
-            List<CMDefaultResponse> responseList = new List<CMDefaultResponse>();
+            List<object> responseList = new List<object>();
             string qry = $"SELECT valid FROM uploadedfiles WHERE id = {file_id}";
             DataTable dt = await Context.FetchData(qry).ConfigureAwait(false);
             int valid = Convert.ToInt32(dt.Rows[0][0]);
@@ -772,17 +775,17 @@ namespace CMMSAPIs.Repositories.Masters
             {
                 CMDefaultResponse response4 = await ValidateChecklistCheckpoint(file_id);
                 responseList.Add(response4);
-                List<CMDefaultResponse> response5 = await ImportCheckpoint(file_id, userID);
+                List<object> response5 = await ImportCheckpoint(file_id, userID);
                 responseList.AddRange(response5);
             }
             return responseList;
         }
-        internal async Task<List<CMDefaultResponse>> ImportChecklistCheckpoint(int file_id, int userID)
+        internal async Task<List<object>> ImportChecklistCheckpoint(int file_id, int userID)
         {
-            List<CMDefaultResponse> responseList = new List<CMDefaultResponse>();
-            List<CMDefaultResponse> checklistResponse = await ImportChecklist(file_id, userID);
+            List<object> responseList = new List<object>();
+            List<object> checklistResponse = await ImportChecklist(file_id, userID);
             responseList.AddRange(checklistResponse);
-            List<CMDefaultResponse> checkpointResponse = await ImportCheckpoint(file_id, userID);
+            List<object> checkpointResponse = await ImportCheckpoint(file_id, userID);
             responseList.AddRange(checkpointResponse);
             return responseList;
         }
