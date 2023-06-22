@@ -57,6 +57,14 @@ namespace CMMSAPIs.Repositories.Users
             return roleList;
         }
 
+        internal async Task<List<CMDesignation>> GetDesignationList()
+        {
+            string designationQry = $"SELECT id, designationName as name, designationDescriptions as description FROM userdesignation where status=1 ";
+            
+            List<CMDesignation> designationList = await Context.GetData<CMDesignation>(designationQry).ConfigureAwait(false);
+            return designationList;
+        }
+
         internal async Task<CMDefaultResponse> SetRoleAccess(CMSetRoleAccess request, int userID)
         {
             try
