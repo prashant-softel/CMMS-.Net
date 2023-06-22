@@ -35,9 +35,17 @@ namespace CMMSAPIs.Repositories.SM
         {
         }
 
-        internal async Task<List<CMMRS>> getMRSList(int plant_ID, int emp_id, DateTime toDate, DateTime fromDate)
+        internal async Task<List<CMMRS>> getMRSList(int plant_ID, int emp_id, DateTime? toDate, DateTime? fromDate)
         {
-            string stmt = "SELECT sm.ID,sm.requested_by_emp_ID,CONCAT(ed1.firstName,' ',ed1.lastName) as approver_name,DATE_FORMAT(sm.requested_date,'%Y-%m-%d') as requestd_date,DATE_FORMAT(sm.returnDate,'%Y-%m-%d') as returnDate,if(sm.approval_status != '',DATE_FORMAT(sm.approved_date,'%d-%m-%Y'),'') as approval_date,sm.approval_status,sm.approval_comment,CONCAT(ed.firstName,' ',ed.lastName) as emp_name, sm.flag FROM smmrs sm LEFT JOIN users ed ON ed.id = sm.requested_by_emp_ID LEFT JOIN users ed1 ON ed1.id = sm.approved_by_emp_ID WHERE sm.plant_ID = " + plant_ID + " AND ed.id = " + emp_id + " AND (DATE_FORMAT(sm.requested_date,'%Y-%m-%d') BETWEEN '" + toDate + "' AND '" + fromDate + "' OR DATE_FORMAT(sm.returnDate,'%Y-%m-%d') BETWEEN '" + toDate + "' AND '" + fromDate + "')";
+            string stmt = "SELECT sm.ID,sm.requested_by_emp_ID,CONCAT(ed1.firstName,' ',ed1.lastName) as approver_name," +
+                            "sm.requested_date as requestd_date, sm.returnDate as returnDate," +
+                            "if(sm.approval_status != '',sm.approved_date,NULL) as approval_date,sm.approval_status," +
+                            "sm.approval_comment,CONCAT(ed.firstName,' ',ed.lastName) as emp_name, sm.flag " +
+                            "FROM smmrs sm LEFT JOIN users ed ON ed.id = sm.requested_by_emp_ID " +
+                            "LEFT JOIN users ed1 ON ed1.id = sm.approved_by_emp_ID " +
+                            "WHERE sm.plant_ID = " + plant_ID + " AND (sm.requested_by_emp_ID = " + emp_id + " OR sm.approved_by_emp_ID = " + emp_id +
+                            ") AND (DATE_FORMAT(sm.requested_date,'%Y-%m-%d') BETWEEN '" + ((DateTime)fromDate).ToString("yyyy-MM-dd") + "' AND '" + ((DateTime)toDate).ToString("yyyy-MM-dd") + 
+                            "' OR DATE_FORMAT(sm.returnDate,'%Y-%m-%d') BETWEEN '" + ((DateTime)fromDate).ToString("yyyy-MM-dd") + "' AND '" + ((DateTime)toDate).ToString("yyyy-MM-dd") + "')";
             List<CMMRS> _List = await Context.GetData<CMMRS>(stmt).ConfigureAwait(false);
             return _List;
         }
