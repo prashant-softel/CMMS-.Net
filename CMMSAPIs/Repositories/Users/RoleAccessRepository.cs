@@ -133,13 +133,6 @@ namespace CMMSAPIs.Repositories.Users
             }            
         }
 
-        internal async Task<List<CMDesignation>> GetDesignationList()
-        {
-            string desgnationQry = $"SELECT id, designationName as name , designationDescriptions as description FROM userdesignation WHERE status = 1 ";
-            List<CMDesignation> designationList = await Context.GetData<CMDesignation>(desgnationQry).ConfigureAwait(false);
-            return designationList;
-        }
-
         internal async Task<List<CMUserID>> getUsersByRoleId(int role_id) 
         {
             try

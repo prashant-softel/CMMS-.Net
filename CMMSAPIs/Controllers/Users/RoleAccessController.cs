@@ -35,21 +35,6 @@ namespace CMMSAPIs.Controllers.Users
             }
         }
 
-        [Route("GetDesignationList")]
-        [HttpGet]
-        public async Task<IActionResult> GetDesignationList()
-        {
-            try
-            {
-                var data = await _roleAcceesBs.GetDesignationList();
-                return Ok(data);
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        }
-
         [Route("GetRoleAccess")]
         [HttpGet]
         
