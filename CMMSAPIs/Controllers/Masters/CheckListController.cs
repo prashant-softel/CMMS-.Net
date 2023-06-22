@@ -215,5 +215,38 @@ namespace CMMSAPIs.Controllers.Masters
                 throw;
             }
         }
+
+        [Authorize]
+        [Route("ValidateChecklistCheckpoint")]
+        [HttpGet]
+        public async Task<IActionResult> ValidateChecklistCheckpoint(int file_id)
+        {
+            try
+            {
+                var data = await _CheckListBS.ValidateChecklistCheckpoint(file_id);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
+        [Route("ImportChecklistCheckpoint")]
+        [HttpPost]
+        public async Task<IActionResult> ImportChecklistCheckpoint(int file_id)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _CheckListBS.ImportChecklistCheckpoint(file_id, userID);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

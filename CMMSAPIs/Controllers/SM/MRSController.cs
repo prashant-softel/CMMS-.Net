@@ -50,7 +50,7 @@ namespace CMMSAPIs.Controllers.SM
         
         [Route("getMRSList")]
         [HttpGet]
-        public async Task<IActionResult> getMRSList(int plant_ID, int emp_id, DateTime toDate, DateTime fromDate)
+        public async Task<IActionResult> getMRSList(int plant_ID, int emp_id, DateTime? toDate, DateTime? fromDate)
         {
             try
             {
@@ -59,9 +59,9 @@ namespace CMMSAPIs.Controllers.SM
             }
             catch (Exception ex)
             {
-
-                _AddLog.ErrorLog(ex.ToString());
-                _AddLog.ErrorLog("Exception got using ILOGGER "+ex.ToString());
+                _logger.LogError(ex.ToString());
+                /*_AddLog.ErrorLog(ex.ToString());
+                _AddLog.ErrorLog("Exception got using ILOGGER "+ex.ToString());*/
                 throw ex;
             }
         }
@@ -77,7 +77,8 @@ namespace CMMSAPIs.Controllers.SM
             }
             catch (Exception ex)
             {
-                _AddLog.ErrorLog(ex.ToString());
+                _logger.LogError(ex.ToString());
+                //_AddLog.ErrorLog(ex.ToString());
                 throw ex;
             }
         }
@@ -92,7 +93,8 @@ namespace CMMSAPIs.Controllers.SM
             }
             catch (Exception ex)
             {
-                _AddLog.ErrorLog(ex.ToString());
+                _logger.LogError(ex.ToString());
+                //_AddLog.ErrorLog(ex.ToString());
                 throw ex;
             }
         }
@@ -107,7 +109,8 @@ namespace CMMSAPIs.Controllers.SM
             }
             catch (Exception ex)
             {
-                _AddLog.ErrorLog(ex.ToString());
+                _logger.LogError(ex.ToString());
+                //_AddLog.ErrorLog(ex.ToString());
                 throw ex;
             }
         }
@@ -123,7 +126,8 @@ namespace CMMSAPIs.Controllers.SM
             }
             catch (Exception ex)
             {
-                _AddLog.ErrorLog(ex.ToString());
+                _logger.LogError(ex.ToString());
+                //_AddLog.ErrorLog(ex.ToString());
                 throw ex;
             }
         }
@@ -140,7 +144,8 @@ namespace CMMSAPIs.Controllers.SM
             }
             catch(Exception ex)
             {
-                _AddLog.ErrorLog(ex.ToString());
+                _logger.LogError(ex.ToString());
+                //_AddLog.ErrorLog(ex.ToString());
                 throw ex;
             }
         }
@@ -156,7 +161,8 @@ namespace CMMSAPIs.Controllers.SM
             }
             catch (Exception ex)
             {
-                _AddLog.ErrorLog(ex.ToString());
+                _logger.LogError(ex.ToString());
+                //_AddLog.ErrorLog(ex.ToString());
                 throw ex;
             }
 
@@ -173,7 +179,8 @@ namespace CMMSAPIs.Controllers.SM
             }
             catch (Exception ex)
             {
-                _AddLog.ErrorLog(ex.ToString());
+                _logger.LogError(ex.ToString());
+                //_AddLog.ErrorLog(ex.ToString());
                 throw ex;
             }
         }
@@ -189,7 +196,8 @@ namespace CMMSAPIs.Controllers.SM
             }
             catch (Exception ex)
             {
-                _AddLog.ErrorLog(ex.ToString());
+                _logger.LogError(ex.ToString());
+                //_AddLog.ErrorLog(ex.ToString());
                 throw ex;
             }
         }
@@ -205,7 +213,8 @@ namespace CMMSAPIs.Controllers.SM
             }
             catch (Exception ex)
             {
-                _AddLog.ErrorLog(ex.ToString());
+                _logger.LogError(ex.ToString());
+                //_AddLog.ErrorLog(ex.ToString());
                 throw ex;
             }
         }

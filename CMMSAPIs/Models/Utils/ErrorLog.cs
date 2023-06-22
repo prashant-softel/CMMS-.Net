@@ -138,7 +138,7 @@ namespace CMMSAPIs.Models.Utils
 
         }
 
-        public void SaveToCSV(string csvPath)
+        public string SaveAsText(string csvPath)
         {
             string sMessage = "";
             StringBuilder content = new StringBuilder();
@@ -148,12 +148,21 @@ namespace CMMSAPIs.Models.Utils
                 sMessage = msg.Get_FormatedMessage(indexMsg);
                 content.AppendLine(sMessage);
             }
-            csvPath = env.ContentRootPath + @"\FileLog\" + csvPath;
+            sMessage = "Total errors <" + errorCount + ">";
+            content.AppendLine(sMessage);
+            string csvDir = env.WebRootPath + @"\LogFile\";
+            if (!Directory.Exists(csvDir))
+            {
+                Directory.CreateDirectory(csvDir);
+            }
+            csvPath = csvDir + csvPath + ".txt";
+            if (!Directory.Exists(csvPath.Substring(0, csvPath.LastIndexOf('\\')+1)))
+            {
+                Directory.CreateDirectory(csvPath.Substring(0, csvPath.LastIndexOf('\\') + 1));
+            }
             //csvPath = @"C:\LogFile\" + csvPath; 
             File.AppendAllText(csvPath, Convert.ToString(content));
-            sMessage = "Total errors <" + errorCount + ">";
-
-
+            return csvPath;
         }
 
         public ArrayList errorLog()

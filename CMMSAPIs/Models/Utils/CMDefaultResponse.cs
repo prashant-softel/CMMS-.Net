@@ -29,6 +29,17 @@ namespace CMMSAPIs.Models.Utils
             this.message = message;
         }
     }
-   
-
+    public class CMImportFileResponse : CMDefaultResponse
+    {
+        public string error_log_file_path { get; set; }
+        public CMImportFileResponse(int id, CMMS.RETRUNSTATUS return_status, string error_log_file_path, string message) : base(id, return_status, message)
+        {
+            this.error_log_file_path = error_log_file_path;
+        }
+        public CMImportFileResponse(List<int> id, CMMS.RETRUNSTATUS return_status, string error_log_file_path, string message) : base(id, return_status, message)
+        {
+            this.error_log_file_path = error_log_file_path;
+        }
     }
+
+}

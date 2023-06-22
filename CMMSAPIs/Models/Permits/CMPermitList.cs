@@ -17,10 +17,13 @@ namespace CMMSAPIs.Models.Permits
         public int workingAreaId { get; set; }
         public string workingAreaName { get; set; }
         public string description { get; set; }
+        public int request_by_id { get; set; }
         public string request_by_name { get; set; }
         public dynamic request_datetime { get; set; }
+        public int issued_by_id { get; set; }
         public string issued_by_name { get; set; }
         public dynamic issued_datetime { get; set; }
+        public int approved_by_id { get; set; }
         public string approved_by_name { get; set; }
         public dynamic approved_datetime { get; set; }
         public string current_status_short { get; set; }

@@ -9,7 +9,7 @@
         public int category_id { get; set; }
         public int frequency_id { get; set; }
         public int manPower { get; set; }
-        public int? duration { get; set; }
+        public int duration { get; set; }
         public int? status { get; set; }
     }
 

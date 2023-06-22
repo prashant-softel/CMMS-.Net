@@ -2,6 +2,7 @@
 using CMMSAPIs.Models.Masters;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Masters;
+using Microsoft.AspNetCore.Hosting;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -21,13 +22,17 @@ namespace CMMSAPIs.BS.Masters
         Task<CMDefaultResponse> CreateCheckPoint(List<CMCreateCheckPoint> request, int userID);
         Task<CMDefaultResponse> UpdateCheckPoint(CMCreateCheckPoint request, int userID);
         Task<CMDefaultResponse> DeleteCheckPoint(int id, int userID);
+        Task<CMImportFileResponse> ValidateChecklistCheckpoint(int file_id);
+        Task<List<object>> ImportChecklistCheckpoint(int file_id, int userID);
     }
     public class CheckListBS : ICheckListBS
     {
         private readonly DatabaseProvider databaseProvider;
+        public static IWebHostEnvironment _environment;
         private MYSQLDBHelper getDB => databaseProvider.SqlInstance();
-        public CheckListBS(DatabaseProvider dbProvider)
+        public CheckListBS(DatabaseProvider dbProvider, IWebHostEnvironment environment = null)
         {
+            _environment = environment;
             databaseProvider = dbProvider;
         }
 
@@ -192,6 +197,36 @@ namespace CMMSAPIs.BS.Masters
                 using (var repos = new CheckListRepository(getDB))
                 {
                     return await repos.DeleteCheckPoint(id, userID);
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMImportFileResponse> ValidateChecklistCheckpoint(int file_id)
+        {
+            try
+            {
+                using (var repos = new CheckListRepository(getDB, _environment))
+                {
+                    return await repos.ValidateChecklistCheckpoint(file_id);
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<object>> ImportChecklistCheckpoint(int file_id, int userID)
+        {
+            try
+            {
+                using (var repos = new CheckListRepository(getDB, _environment))
+                {
+                    return await repos.ImportChecklistCheckpoint(file_id, userID);
                 }
             }
             catch (Exception)
