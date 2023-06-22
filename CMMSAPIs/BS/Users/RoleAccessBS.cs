@@ -11,6 +11,7 @@ namespace CMMSAPIs.BS.Users
     public interface IRoleAccessBS
     {
         public Task<List<KeyValuePairs>> GetRoleList();
+        public Task<List<CMDesignation>> GetDesignationList();
         public Task<CMRoleAccess> GetRoleAccess(int role_id);
         public Task<CMDefaultResponse> SetRoleAccess(CMSetRoleAccess request, int userID);
         public Task<CMRoleNotifications> GetRoleNotifications(int role_id);
@@ -33,6 +34,21 @@ namespace CMMSAPIs.BS.Users
                 using (var repos = new RoleAccessRepository(getDB))
                 {
                     return await repos.GetRoleList();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<CMDesignation>> GetDesignationList()
+        {
+            try
+            {
+                using (var repos = new RoleAccessRepository(getDB))
+                {
+                    return await repos.GetDesignationList();
                 }
             }
             catch (Exception ex)

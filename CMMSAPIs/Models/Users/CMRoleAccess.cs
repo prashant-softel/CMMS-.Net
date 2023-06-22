@@ -21,6 +21,12 @@ namespace CMMSAPIs.Models.Users
         public string role_name { get; set; }
         public List<CMNotificationList> notification_list { get; set; }
     }
+    public class CMDesignation
+    {
+        public int id { get; set; }
+        public string name { get; set; }
+        public string description { get; set; }
+    }
 
     public class CMSetRoleNotifications : CMRoleNotifications 
     {
