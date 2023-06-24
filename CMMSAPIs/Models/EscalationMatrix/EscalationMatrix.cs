@@ -4,11 +4,12 @@ using System.Collections.Generic;
 
 namespace CMMSAPIs.Models.EscalationMatrix
 {
-    public class EscalationMatrixModel
+    public class CMEscalationMatrixModel
     {
         public int SrNo { get; set; }
         public string Module{ get; set; }
         public string Status{ get; set; }
+        public int Status_ID{ get; set; }
         public List<EscalationLevelwithDays> EscalationLevelList { get; set; }
   
         public int createdBy { get; set; }

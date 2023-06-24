@@ -26,7 +26,7 @@ namespace CMMSAPIs.Controllers.EscalationMatrix
 
         [Route("InsertEscalationMatrixData")]
         [HttpPost]
-        public async Task<IActionResult> InsertEscalationMatrixData(EscalationMatrixModel request)
+        public async Task<IActionResult> InsertEscalationMatrixData(CMEscalationMatrixModel request)
         {
             try
             {

@@ -31,6 +31,10 @@ using CMMSAPIs.BS.MC;
 using CMMSAPIs.BS.Calibration;
 using CMMSAPIs.BS.EscalationMatrix;
 using CMMSAPIs.BS;
+using Microsoft.OpenApi.Models;
+using Swashbuckle.AspNetCore.SwaggerGen;
+using System.IO;
+using System.Reflection;
 
 namespace CMMSAPIs
 {
@@ -46,6 +50,17 @@ namespace CMMSAPIs
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // Add Swagger
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Your API Title", Version = "v1" });
+
+                // Include comments from XML documentation file
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                c.IncludeXmlComments(xmlPath);
+            });
+
             services.AddAuthentication(authOption =>
             {
                 authOption.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -115,6 +130,8 @@ namespace CMMSAPIs
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+      
+
             app.UseCors(options => options.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
             if (env.IsDevelopment())
             {
@@ -135,6 +152,14 @@ namespace CMMSAPIs
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+            });
+            // Add Swagger middleware
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Your API Title v1");
+                // Optional: Add more Swagger endpoints for different versions
+                c.SwaggerEndpoint("/swagger/v2/swagger.json", "Your API Title v2");
             });
         }
     }

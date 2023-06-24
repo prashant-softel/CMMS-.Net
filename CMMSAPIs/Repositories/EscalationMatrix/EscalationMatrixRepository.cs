@@ -24,7 +24,7 @@ namespace CMMSAPIs.Repositories.EscalationMatrix
             _utilsRepo = new UtilsRepository(sqlDBHelper);
         }
 
-        internal async Task<CMDefaultResponse> InsertEscalationMatrixData(EscalationMatrixModel request, int userID)
+        internal async Task<CMDefaultResponse> InsertEscalationMatrixData(CMEscalationMatrixModel request, int userID)
         {
             /*
              * Primary Table - PMSchedule
@@ -68,13 +68,14 @@ namespace CMMSAPIs.Repositories.EscalationMatrix
 
         internal async Task<int> getEscalationLevel()
         {
-            string myQuery = "select * from (\r\nSELECT  DATEDIFF(NOW(), EM.CreatedAt) AS DayDifference, EM.Module, em.Status, EL.NoOfDays,el.Levels\r\nFROM escalationmatrix EM \r\nINNER JOIN escalationlevel EL ON EM.Module_Id = EL.Module_Id\r\nWHERE EM.isActive = 1) a\r\nwhere a.DayDifference = a.NoOfDays";
+            string myQuery = "select * from (\r\nSELECT  DATEDIFF(NOW(), EM.CreatedAt) AS DayDifference, em.Status as Status_ID, EL.NoOfDays,el.Levels\r\nFROM escalationmatrix EM \r\nINNER JOIN escalationlevelmapping EL ON EM.id = EL.Escalation_id\r\nWHERE EM.isActive = 1) a\r\nwhere a.DayDifference = a.NoOfDays;";
             try
             {
-                List<EscalationMatrixModel> _EscalatedList = await Context.GetData<EscalationMatrixModel>(myQuery).ConfigureAwait(false);
+                List<CMEscalationMatrixModel> _EscalatedList = await Context.GetData<CMEscalationMatrixModel>(myQuery).ConfigureAwait(false);
+                
                 if (_EscalatedList.Count != 0)
                 {
-                    CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOBCARD, CMMS.CMMS_Status.JC_OPENED, _EscalatedList[1]);
+                    CMMSNotification.sendNotification(CMMS.CMMS_Modules.Escalation_Matrix, CMMS.CMMS_Status.JC_OPENED, _EscalatedList[1]);
                 }
             }
             catch (Exception ex)

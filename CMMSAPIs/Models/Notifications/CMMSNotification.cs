@@ -8,6 +8,7 @@ using CMMSAPIs.Models.Permits;
 using CMMSAPIs.Models.JC;
 using CMMSAPIs.Models.Incident_Reports;
 using CMMSAPIs.Models.SM;
+using CMMSAPIs.Models.EscalationMatrix;
 
 //using CommonUtilities;
 //using CMMSAPIs.Models.Notifications;
@@ -124,6 +125,10 @@ namespace CMMSAPIs.Models.Notifications
             }else if(moduleID == CMMS.CMMS_Modules.SM_PO) {
                 CMGO _CmGO = (CMGO)args[0];
                 //notificationObj = new IncidentReportNotification(moduleID, notificationID, _CmGO);
+            }else if (moduleID == CMMS.CMMS_Modules.Escalation_Matrix)
+            {
+                CMEscalationMatrixModel _CMEM = (CMEscalationMatrixModel)args[0];
+                notificationObj = new EMNotification(moduleID, notificationID, _CMEM);
             }
             //create else if block for your module and add Notification class for  your module to implement yous notification
             retValue = notificationObj.sendEmailNotification(moduleID, notificationID, args);

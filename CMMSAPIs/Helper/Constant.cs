@@ -181,7 +181,9 @@ namespace CMMSAPIs.Helper
             USER_MODULE,
             USER_NOTIFICATIONS, 
             ROLE_DEFAULT_NOTIFICATIONS, 
-            ROLE_DEFAULT_ACCESS_MODULE
+            ROLE_DEFAULT_ACCESS_MODULE,
+
+            Escalation_Matrix=200
         }
 
         enum INCIDENT_RISK_LEVEL
@@ -329,6 +331,15 @@ namespace CMMSAPIs.Helper
             SM_RO_CLOSED,
             SM_RO_CLOSED_REJECTED,
             SM_RO_CLOSED_APPROVED,
+
+            EM_CREATED = 351,
+            EM_ASSIGNED,
+            EM_LINKED,
+            EM_IN_PROGRESS,
+            EM_CLOSED,
+            EM_CANCELLED,
+            EM_DELETED,
+
         }
 
         public enum SMAssetType

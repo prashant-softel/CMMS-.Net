@@ -10,6 +10,8 @@ namespace CMMSAPIs.Repositories.Audits
     {
         public AuditScheduleViewRepository(MYSQLDBHelper sqlDBHelper) : base(sqlDBHelper)
         {
+
+
         }
 
         internal async Task<List<CMAuditScheduleList>> GetAuditScheduleViewList(CMAuditListFilter request)

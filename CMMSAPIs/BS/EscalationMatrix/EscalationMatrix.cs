@@ -10,7 +10,7 @@ namespace CMMSAPIs.BS.EscalationMatrix
 {
     public interface iEM
     {
-        Task<CMDefaultResponse> InsertEscalationMatrixData(EscalationMatrixModel request, int userID);
+        Task<CMDefaultResponse> InsertEscalationMatrixData(CMEscalationMatrixModel request, int userID);
     }
     public class EscalationMatrix : iEM
     {
@@ -21,7 +21,7 @@ namespace CMMSAPIs.BS.EscalationMatrix
             databaseProvider = dbProvider;
         }
 
-        public async Task<CMDefaultResponse> InsertEscalationMatrixData(EscalationMatrixModel request, int userID)
+        public async Task<CMDefaultResponse> InsertEscalationMatrixData(CMEscalationMatrixModel request, int userID)
         {
             try
             {
