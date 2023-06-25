@@ -231,3 +231,8 @@ D:\Work\CMMS-.Net-master\CMMS-.Net-master\CMMS_API_Test\obj\Debug\netcoreapp3.1\
 D:\Work\CMMS-.Net-master\CMMS-.Net-master\CMMS_API_Test\obj\Debug\netcoreapp3.1\CMMS_API_Test.dll
 D:\Work\CMMS-.Net-master\CMMS-.Net-master\CMMS_API_Test\obj\Debug\netcoreapp3.1\CMMS_API_Test.pdb
 D:\Work\CMMS-.Net-master\CMMS-.Net-master\CMMS_API_Test\obj\Debug\netcoreapp3.1\CMMS_API_Test.genruntimeconfig.cache
+D:\Work\CMMS-.Net-master\CMMS-.Net-master\CMMS_API_Test\bin\Debug\netcoreapp3.1\Swashbuckle.AspNetCore.SwaggerGen.dll
+D:\Work\CMMS-.Net-master\CMMS-.Net-master\CMMS_API_Test\bin\Debug\netcoreapp3.1\Swashbuckle.AspNetCore.SwaggerUI.dll
+D:\Work\CMMS-.Net-master\CMMS-.Net-master\CMMS_API_Test\bin\Debug\netcoreapp3.1\Swashbuckle.AspNetCore.Swagger.dll
+D:\Work\CMMS-.Net-master\CMMS-.Net-master\CMMS_API_Test\bin\Debug\netcoreapp3.1\Microsoft.OpenApi.dll
+D:\Work\CMMS-.Net-master\CMMS-.Net-master\CMMS_API_Test\bin\Debug\netcoreapp3.1\CMMSAPIs.xml

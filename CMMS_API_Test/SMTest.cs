@@ -75,6 +75,10 @@ namespace CMMS_API_Test
         string EP_RejectGoodsOrder = "/api/RequestOrder/RejectGoodsOrder";
         string EP_GetRequestOrderList = "/api/RequestOrder/GetRequestOrderList";
 
+        //Escalation Matrix
+        string EP_InsertEscalationMatrixData = "/api/EscalationMatrix/InsertEscalationMatrixData";
+        string EP_UpdateEscalationMatrixStatus = "/api/EscalationMatrix/UpdateEscalationMatrixStatus";
+
         [TestMethod]
         public void VerifyListofAssetType()
         {
@@ -790,6 +794,36 @@ namespace CMMS_API_Test
             var response = ptwService.CreateItem(EP_RejectGoodsOrder, payload);
 
             Assert.AreEqual("Rejected request order.", response.message);
+        }
+
+        [TestMethod]
+        public void InsertEscalationMatrixData()
+        {
+            string payload = @"{
+                                ""Module"":""30"",
+                                ""Status"":""JOB_CREATED"",
+                                ""EscalationLevelList"":[{""Level"":1,""NoOfDays"":1}, {""Level"":4,""NoOfDays"":4}, {""Level"":2,""NoOfDays"":5}]
+                              }";
+
+            var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.Utils.CMDefaultResponse>();
+            var response = ptwService.CreateItem(EP_InsertEscalationMatrixData, payload);
+
+            Assert.AreEqual("Data saved successfully.", response.message);
+        }
+
+        [TestMethod]
+        public void UpdateEscalationMatrixStatus()
+        {
+            string payload = @"{
+                                 ""Id"":4,
+                                 ""Status"":""EM_LINKED"",
+                                 ""Levels"":1
+                              }";
+
+            var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.Utils.CMDefaultResponse>();
+            var response = ptwService.CreateItem(EP_UpdateEscalationMatrixStatus, payload);
+
+            Assert.AreEqual("Data updated successfully.", response.message);
         }
     }
 }

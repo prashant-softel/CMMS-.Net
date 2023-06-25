@@ -11,6 +11,7 @@ namespace CMMSAPIs.BS.EscalationMatrix
     public interface iEM
     {
         Task<CMDefaultResponse> InsertEscalationMatrixData(CMEscalationMatrixModel request, int userID);
+        Task<CMDefaultResponse> UpdateEscalationMatrixStatus(CMEscalationMatrixModel request, int userID);
     }
     public class EscalationMatrix : iEM
     {
@@ -28,6 +29,20 @@ namespace CMMSAPIs.BS.EscalationMatrix
                 using (var repos = new EscalationMatrixRepository(getDB))
                 {
                     return await repos.InsertEscalationMatrixData(request, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<CMDefaultResponse> UpdateEscalationMatrixStatus(CMEscalationMatrixModel request, int userID)
+        {
+            try
+            {
+                using (var repos = new EscalationMatrixRepository(getDB))
+                {
+                    return await repos.UpdateEscalationMatrixStatus(request, userID);
                 }
             }
             catch (Exception ex)

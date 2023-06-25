@@ -6,11 +6,12 @@ namespace CMMSAPIs.Models.EscalationMatrix
 {
     public class CMEscalationMatrixModel
     {
-        public int SrNo { get; set; }
+        public int Id { get; set; }
         public string Module{ get; set; }
         public string Status{ get; set; }
         public int Status_ID{ get; set; }
-        public List<EscalationLevelwithDays> EscalationLevelList { get; set; }
+        public List<CMEscalationLevelwithDays> EscalationLevelList { get; set; }
+        public List<CMEscalationMail> EscalationMail { get; set; }
   
         public int createdBy { get; set; }
         public DateTime? CreatedAt { get; set; }
@@ -23,10 +24,17 @@ namespace CMMSAPIs.Models.EscalationMatrix
         public long Levels { get; set; }
     }
 
-    public class EscalationLevelwithDays
+    public class CMEscalationLevelwithDays
     {
         public int Level { get; set; }
         public int NoOfDays { get; set; }
+    }
+
+    public class CMEscalationMail
+    {
+        public int Level { get; set; }
+        public string Role { get; set; }
+        public string MailTo { get; set; }
     }
 
 }

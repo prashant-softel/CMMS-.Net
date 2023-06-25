@@ -40,5 +40,21 @@ namespace CMMSAPIs.Controllers.EscalationMatrix
                 throw;
             }
         }
+        [Route("UpdateEscalationMatrixStatus")]
+        [HttpPost]
+        public async Task<IActionResult> UpdateEscalationMatrixStatus(CMEscalationMatrixModel request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _iEM.UpdateEscalationMatrixStatus(request, userID);
+
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }
