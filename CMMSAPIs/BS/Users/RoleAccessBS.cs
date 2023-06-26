@@ -14,6 +14,9 @@ namespace CMMSAPIs.BS.Users
     public interface IRoleAccessBS
     {
         public Task<List<KeyValuePairs>> GetRoleList();
+        public Task<CMDefaultResponse> AddRole(CMDefaultList request, int userId);
+        public Task<CMDefaultResponse> UpdateRole(CMDefaultList request, int userId);
+        public Task<CMDefaultResponse> DeleteRole(int id);
         public Task<List<CMDesignation>> GetDesignationList();
         public Task<CMDefaultResponse> AddDesignation(CMDesignation request, int userId);
         public Task<CMDefaultResponse> UpdateDesignation(CMDesignation request, int userId);
@@ -41,6 +44,51 @@ namespace CMMSAPIs.BS.Users
                 using (var repos = new RoleAccessRepository(getDB))
                 {
                     return await repos.GetRoleList();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> AddRole(CMDefaultList request, int userID)
+        {
+            try
+            {
+                using (var repos = new RoleAccessRepository(getDB))
+                {
+                    return await repos.AddRole(request, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> UpdateRole(CMDefaultList request, int userID)
+        {
+            try
+            {
+                using (var repos = new RoleAccessRepository(getDB))
+                {
+                    return await repos.UpdateRole(request, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> DeleteRole(int id)
+        {
+            try
+            {
+                using (var repos = new RoleAccessRepository(getDB))
+                {
+                    return await repos.DeleteRole(id);
                 }
             }
             catch (Exception ex)
