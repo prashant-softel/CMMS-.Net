@@ -53,8 +53,38 @@ namespace CMMSAPIs.Repositories.Users
             {
                 roleQry += $"WHERE id = {role_id}";
             }
+            else
+            {
+                roleQry += "WHERE status = 1";
+            }    
             List<KeyValuePairs> roleList = await Context.GetData<KeyValuePairs>(roleQry).ConfigureAwait(false);
             return roleList;
+        }
+        internal async Task<CMDefaultResponse> AddRole(CMDefaultList request, int userId)
+        {
+            string myQuery = $"INSERT INTO userroles(name, status, addedBy, addedAt) VALUES " +
+                                $"('{request.name}', 1, {userId}, '{UtilsRepository.GetUTCTime()}'); " +
+                                 $"SELECT LAST_INSERT_ID(); ";
+            DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
+            int id = Convert.ToInt32(dt.Rows[0][0]);
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Role Added");
+        }
+         
+        internal async Task<CMDefaultResponse> UpdateRole(CMDefaultList request, int userID)
+        {
+            string updateQry = "UPDATE userroles SET ";
+            if (request.name != null && request.name != "")
+                updateQry += $"name = '{request.name}', ";
+            updateQry += $"updatedBy = {userID}, updatedAt = '{UtilsRepository.GetUTCTime()}' WHERE id = {request.id};";
+            await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+            return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Role Updated");
+        }
+
+        internal async Task<CMDefaultResponse> DeleteRole(int id)
+        {
+            string deleteQry = $"UPDATE userroles SET status = 0 WHERE id = {id};";
+            await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Role Deleted");
         }
 
         internal async Task<List<CMDesignation>> GetDesignationList()
@@ -64,6 +94,39 @@ namespace CMMSAPIs.Repositories.Users
             List<CMDesignation> designationList = await Context.GetData<CMDesignation>(designationQry).ConfigureAwait(false);
             return designationList;
         }
+
+        internal async Task<CMDefaultResponse> AddDesignation(CMDesignation request , int userId)
+        {
+            string myQuery = $"INSERT INTO userdesignation(designationName, designationDescriptions, status, addedBy, addedAt) VALUES " +
+                                $"('{request.name}', '{request.description}', 1, {userId}, '{UtilsRepository.GetUTCTime()}');" +
+                                 $"SELECT LAST_INSERT_ID(); ";
+            DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
+            int id = Convert.ToInt32(dt.Rows[0][0]);
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Designation Added");
+        }
+
+        internal async Task<CMDefaultResponse> UpdateDesignation(CMDesignation request, int userID)
+        {
+            string updateQry = "UPDATE userdesignation SET ";
+            if (request.name != null && request.name != "")
+                updateQry += $"designationName = '{request.name}', ";
+            if (request.description != null && request.description != "")
+                updateQry += $"designationDescriptions = '{request.description}', ";
+            updateQry += $"updatedBy = {userID}, updatedAt = '{UtilsRepository.GetUTCTime()}' WHERE id = {request.id};";
+            await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+            return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Designation Details Updated");
+        }
+        
+        internal async Task<CMDefaultResponse> DeleteDesignation(int id)
+        {
+            string deleteQry = $"UPDATE userdesignation SET status = 0 WHERE id = {id};";
+            await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Designation Status Deleted");
+        }
+
+
+
+
 
         internal async Task<CMDefaultResponse> SetRoleAccess(CMSetRoleAccess request, int userID)
         {

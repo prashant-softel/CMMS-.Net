@@ -927,5 +927,44 @@ namespace CMMSAPIs.Repositories.Users
                 throw;
             }
         }
+    
+        internal async Task<List<CMCompetency>> GetCompetencyList()
+        {
+            string competencyQry = $"SELECT id, name, description FROM competencies where status=1 ";
+            List<CMCompetency> competencyList = await Context.GetData<CMCompetency>(competencyQry).ConfigureAwait(false);
+            return competencyList;
+        }
+    
+        internal async Task<CMDefaultResponse> AddCompetency(CMCompetency request, int userId)
+        {
+            string competencyQry = $"INSERT INTO competencies(name, description, status, addedBy, addedAt) VALUES " +
+            $"('{request.name}', '{request.description}', 1, {userId}, '{UtilsRepository.GetUTCTime()}');" +
+            $"SELECT LAST_INSERT_ID(); ";
+            DataTable dt = await Context.FetchData(competencyQry).ConfigureAwait(false);
+            int id = Convert.ToInt32(dt.Rows[0][0]);
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Competency Added");
+        }
+
+        internal async Task<CMDefaultResponse> UpdateCompetency(CMCompetency request, int userId)
+        {
+            string updateQry = "UPDATE competencies SET ";
+            if (request.name != null && request.name != "")
+                updateQry += $"name = '{request.name}', ";
+            if (request.description != null && request.description != "")
+                updateQry += $"description = '{request.description}', ";
+            updateQry += $"updatedBy = {userId}, updatedAt = '{UtilsRepository.GetUTCTime()}' WHERE id = {request.id};";
+            await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+            return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Competency Details Updated");
+        }
+
+        internal async Task<CMDefaultResponse> DeleteCompetency(int id)
+        {
+            string deleteQry = $"UPDATE competencies SET status = 0 WHERE id = {id};";
+            await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Competency Deleted");
+        }
+
+
+
     }
 }

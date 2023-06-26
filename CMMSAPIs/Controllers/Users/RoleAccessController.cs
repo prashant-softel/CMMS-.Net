@@ -6,6 +6,8 @@ using CMMSAPIs.BS.Users;
 using CMMSAPIs.Models.Users;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Authorization;
+using CMMSAPIs.Models.Inventory;
+using CMMSAPIs.Models.Utils;
 
 namespace CMMSAPIs.Controllers.Users
 {
@@ -34,7 +36,55 @@ namespace CMMSAPIs.Controllers.Users
                 throw;
             }
         }
+        [Authorize]
+        [Route("AddRole")]
+        [HttpPost]
+        public async Task<IActionResult> AddRole(CMDefaultList request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _roleAcceesBs.AddRole(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
 
+        [Authorize]
+        [Route("UpdateRole")]
+        [HttpPatch]
+        public async Task<IActionResult> UpdateRole(CMDefaultList request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _roleAcceesBs.UpdateRole(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
+        [Route("DeleteRole")]
+        [HttpDelete]
+        public async Task<IActionResult> DeleteRole(int id)
+        {
+            try
+            {
+                var data = await _roleAcceesBs.DeleteRole(id);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
 
         [Route("GetDesignationList")]
         [HttpGet]
@@ -50,7 +100,55 @@ namespace CMMSAPIs.Controllers.Users
                 throw;
             }
         }
+        [Authorize]
+        [Route("AddDesignation")]
+        [HttpPost]
+        public async Task<IActionResult> AddDesignation(CMDesignation request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _roleAcceesBs.AddDesignation(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
 
+        [Authorize]
+        [Route("UpdateDesignation")]
+        [HttpPatch]
+        public async Task<IActionResult> UpdateDesignation(CMDesignation request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _roleAcceesBs.UpdateDesignation(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
+        [Route("DeleteDesignation")]
+        [HttpDelete]
+        public async Task<IActionResult> DeleteDesignation(int id)
+        {
+            try
+            { 
+                var data = await _roleAcceesBs.DeleteDesignation(id);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
 
 
         [Route("GetRoleAccess")]

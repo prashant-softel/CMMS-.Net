@@ -25,6 +25,12 @@ namespace CMMSAPIs.BS.Users
         public Task<CMDefaultResponse> SetUserAccess(CMUserAccess request, int userID);
         public Task<CMUserNotifications> GetUserNotifications(int user_id);
         public Task<CMDefaultResponse> SetUserNotifications(CMUserNotifications request, int userID);
+        public Task<List<CMCompetency>> GetCompetencyList();
+        public Task<CMDefaultResponse> AddCompetency(CMCompetency request, int userID);
+        public Task<CMDefaultResponse> UpdateCompetency(CMCompetency request, int userID);
+        public Task<CMDefaultResponse> DeleteCompetency(int id);
+
+
     }
 
     public class UserAccessBS : IUserAccessBS
@@ -212,6 +218,65 @@ namespace CMMSAPIs.BS.Users
                 using (var repos = new UserAccessRepository(getDB))
                 {
                     return await repos.SetUserNotifications(request, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<List<CMCompetency>> GetCompetencyList()
+        {
+            try
+            {
+                using (var repos = new UserAccessRepository(getDB))
+                {
+                    return await repos.GetCompetencyList();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<CMDefaultResponse> AddCompetency(CMCompetency request, int userID)
+        {
+            try
+            {
+                using (var repos = new UserAccessRepository(getDB, _webHostEnvironment))
+                {
+                    return await repos.AddCompetency(request, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+
+        public async Task<CMDefaultResponse> UpdateCompetency(CMCompetency request, int userID)
+        {
+            try
+            {
+                using (var repos = new UserAccessRepository(getDB, _webHostEnvironment))
+                {
+                    return await repos.UpdateCompetency(request, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> DeleteCompetency(int id)
+        {
+            try
+            {
+                using (var repos = new UserAccessRepository(getDB))
+                {
+                    return await repos.DeleteCompetency(id);
                 }
             }
             catch (Exception ex)

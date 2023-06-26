@@ -87,4 +87,10 @@ namespace CMMSAPIs.Models.Users
         public int spv_id { get; set; }
         public string spv_name { get; set; }
     }
+    public class CMCompetency
+    {
+        public int id { get; set; }
+        public string name { get; set; }
+        public string description { get; set; } 
+    }
 }
