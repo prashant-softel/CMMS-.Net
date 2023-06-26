@@ -55,8 +55,14 @@ namespace CMMSAPIs.Models.Notifications
                 case CMMS.CMMS_Status.PTW_CANCELLED_BY_APPROVER:
                     retValue = String.Format("Permit <{0}> cancelled by approver Permit cancelled by approver Name <{1}> Permit Description <{2}>", m_permitObj.permitNo, m_permitObj.approvedByName,desc);
                     break;
-                case CMMS.CMMS_Status.PTW_EDIT: 
-                    retValue = String.Format("Permit <{0}> Updated Permit Updated By <{1}> Permit Description <{2}>", m_permitObj.permitNo,m_permitObj.issuedByName,desc);
+                case CMMS.CMMS_Status.PTW_CANCEL_REQUESTED:
+                    retValue = String.Format("Permit <{0}> Cancel Requested By Permit Cancel Requested By Name <{1}>Permit Description <{2}>", m_permitObj.permitNo, m_permitObj.issuedByName, desc);
+                    break;
+                case CMMS.CMMS_Status.PTW_CANCEL_REQUEST_APPROVED:
+                    retValue = String.Format("Permit <{0}> Cancel Request Approve Permit Cancel Requested Approve By Name <{1}> Permit Description <{2}>", m_permitObj.permitNo, m_permitObj.approvedByName, desc);
+                    break;
+                case CMMS.CMMS_Status.PTW_CANCEL_REQUEST_REJECTED:
+                    retValue = String.Format("Permit <{0}> Cancel Request Rejected Permit Cancel Request Rejected by name <{1}> Permit Description <{2}>", m_permitObj.permitNo, m_permitObj.cancelRequestByName, desc);
                     break;
                 case CMMS.CMMS_Status.PTW_EXTEND_REQUESTED:
                     retValue = String.Format("Permit <{0}> Extend Requested By Permit Extend Requested By Name <{1}>Permit Description <{2}>", m_permitObj.permitNo, m_permitObj.issuedByName, desc);
@@ -81,6 +87,9 @@ namespace CMMSAPIs.Models.Notifications
                     break;
                 case CMMS.CMMS_Status.PTW_EXPIRED:
                     retValue = String.Format("Permit <{0}> Expired Permit Description <{1}>", m_permitObj.permitNo,desc);
+                    break;
+                case CMMS.CMMS_Status.PTW_UPDATED:
+                    retValue = String.Format("Permit <{0}> Updated Permit Description <{1}>", m_permitObj.permitNo, desc);
                     break;
                 default:
                     break;
@@ -143,17 +152,23 @@ namespace CMMSAPIs.Models.Notifications
                 case CMMS.CMMS_Status.PTW_CANCELLED_BY_APPROVER:     //Linked to PTW
                     retValue += String.Format(templateEnd, "Cancelled By", m_permitObj.approvedByName);
                     break;
-                case CMMS.CMMS_Status.PTW_EDIT:     //Linked to PTW
-                    retValue += String.Format(templateEnd, "Edited By", m_permitObj.requestedByName);
+                case CMMS.CMMS_Status.PTW_CANCEL_REQUESTED:     //Linked to PTW
+                    retValue += String.Format(templateEnd, "Cancel Requested By", m_permitObj.requestedByName);
+                    break;
+                case CMMS.CMMS_Status.PTW_CANCEL_REQUEST_APPROVED:     //Linked to PTW
+                    retValue += String.Format(templateEnd, "Cancel Request Approved By", m_permitObj.approvedByName);
+                    break;
+                case CMMS.CMMS_Status.PTW_CANCEL_REQUEST_REJECTED:     //Linked to PTW
+                    retValue += String.Format(templateEnd, "Cancel Request Rejected by", m_permitObj.approvedByName);
                     break;
                 case CMMS.CMMS_Status.PTW_EXTEND_REQUESTED:     //Linked to PTW
-                    retValue += String.Format(templateEnd, "Extedend By", m_permitObj.requestedByName);
+                    retValue += String.Format(templateEnd, "Extend Requested By", m_permitObj.requestedByName);
                     break;
                 case CMMS.CMMS_Status.PTW_EXTEND_REQUEST_APPROVE:     //Linked to PTW
-                    retValue += String.Format(templateEnd, "Issued By", m_permitObj.approvedByName);
+                    retValue += String.Format(templateEnd, "Extend Request Approved By", m_permitObj.approvedByName);
                     break;
                 case CMMS.CMMS_Status.PTW_EXTEND_REQUEST_REJECTED:     //Linked to PTW
-                    retValue += String.Format(templateEnd, "Extend Request Approved by", m_permitObj.approvedByName);
+                    retValue += String.Format(templateEnd, "Extend Request Rejected by", m_permitObj.approvedByName);
                     break;
                 case CMMS.CMMS_Status.PTW_LINKED_TO_JOB:     //Linked to PTW
                     retValue += String.Format(template, "Linked Job", m_permitObj.job_type_id);
@@ -170,6 +185,10 @@ namespace CMMSAPIs.Models.Notifications
                     break;
                 case CMMS.CMMS_Status.PTW_EXPIRED:     //Linked to PTW
                     //retValue += String.Format("<tr><td style='text-align: left; padding:0.5rem; background-color:#31576D;color:#ffffff'><b>&nbsp;&nbsp;Closed by</b></td><td style='text-align: left; padding:0.5rem;'>&nbsp;&nbsp;{0}</td></table>", m_permitObj.JC_Closed_by_Name); break;
+                    break;
+                case CMMS.CMMS_Status.PTW_UPDATED:
+                    retValue += String.Format(templateEnd, "Permit Updated", m_permitObj.permitNo);
+                    break;
                 default:
                     break;
             }
@@ -224,10 +243,20 @@ namespace CMMSAPIs.Models.Notifications
                     template += String.Format("<p>Permit {0} is cancelled by Approver</p>", m_permitObj.permitNo);
                     template += String.Format("<p>Permit cancelled By approver Name :</b> {0}</p>", m_permitObj.approvedByName);
                     break;
-                case CMMS.CMMS_Status.PTW_EDIT:
-                    template += String.Format("<p><b>Permit status is : Permit Updated </p>");
-                    template += String.Format("<p>Permit {0} is Updated :</b> {0}</p>", m_permitObj.permitNo);
-                    template += String.Format("<p>Permit Updated by {0}</b> </p>", m_permitObj.issuedByName);
+                case CMMS.CMMS_Status.PTW_CANCEL_REQUESTED:
+                    template += String.Format("<p><b>Permit status is : Permit Cancel Requested </p>");
+                    template += String.Format("<p>Permit {0} is Cancel Requested </p>", m_permitObj.permitNo);
+                    template += String.Format("<p>Permit Cancel Request by name <{0}></p>", m_permitObj.issuedByName);
+                    break;
+                case CMMS.CMMS_Status.PTW_CANCEL_REQUEST_APPROVED:
+                    template += String.Format("<p><b>Permit status is : Permit Cancel Request Approved </p>");
+                    template += String.Format("<p>Permit {0} is Cancel Request Approved </p>", m_permitObj.permitNo);
+                    template += String.Format("<p>Permit Cancel Request approved by {0} </p>", m_permitObj.approvedByName);
+                    break;
+                case CMMS.CMMS_Status.PTW_CANCEL_REQUEST_REJECTED:
+                    template += String.Format("<p><b>Permit status is : Permit Extend Request Rejected </p>");
+                    template += String.Format("<p>Permit {0} is Extend Request Rejected</p>", m_permitObj.permitNo);
+                    template += String.Format("<p>Permit Extend Request rejected by Name {0}</p>", m_permitObj.cancelRequestByName);
                     break;
                 case CMMS.CMMS_Status.PTW_EXTEND_REQUESTED:
                     template += String.Format("<p><b>Permit status is : Permit Extend Requested </p>");
@@ -263,7 +292,11 @@ namespace CMMSAPIs.Models.Notifications
                     break;
                 case CMMS.CMMS_Status.PTW_EXPIRED:
                     template += String.Format("<p><b>Permit status is : Permit Expired </p>");
-                    template += String.Format("<p>Permit :<b> {0}</b> Expired>", m_permitObj.permitNo);
+                    template += String.Format("<p>Permit :<b> {0}</b> Expired</p>", m_permitObj.permitNo);
+                    break;
+                case CMMS.CMMS_Status.PTW_UPDATED:
+                    template += String.Format("<p><b>Permit status is : Permit Updated </p>");
+                    template += String.Format("<p>Permit :<b> {0}</b> Updated</p>", m_permitObj.permitNo);
                     break;
                 default:
                     break;

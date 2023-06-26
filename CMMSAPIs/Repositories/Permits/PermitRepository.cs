@@ -84,8 +84,8 @@ namespace CMMSAPIs.Repositories.Permits
                 case CMMS.CMMS_Status.PTW_CANCEL_REQUEST_REJECTED:
                     statusName = "Cancel Request Rejected for Permit";
 	                break;
-                case CMMS.CMMS_Status.PTW_EDIT:
-                    statusName = "Permit Edited";
+                case CMMS.CMMS_Status.PTW_CANCEL_REQUEST_APPROVED:
+                    statusName = "Cancel Approved for Permit";
                     break;
                 case CMMS.CMMS_Status.PTW_EXTEND_REQUESTED:
                     statusName = "Requested for Permit Extension";
@@ -110,6 +110,9 @@ namespace CMMSAPIs.Repositories.Permits
                     break;
                 case CMMS.CMMS_Status.PTW_EXPIRED:
                     statusName = "Permit Expired";
+                    break;
+                case CMMS.CMMS_Status.PTW_UPDATED:
+                    statusName = "Permit Updated";
                     break;
                 default:
                     statusName = "Invalid";
@@ -151,8 +154,14 @@ namespace CMMSAPIs.Repositories.Permits
                 case CMMS.CMMS_Status.PTW_CANCELLED_BY_APPROVER:
                     statusName = "Permit Cancelled By Approver";
                     break;
-                case CMMS.CMMS_Status.PTW_EDIT:
-                    statusName = "Permit Edited";
+                case CMMS.CMMS_Status.PTW_CANCEL_REQUESTED:
+                    statusName = "Cancel Requested for Permit";
+                    break;
+                case CMMS.CMMS_Status.PTW_CANCEL_REQUEST_REJECTED:
+                    statusName = "Cancel Request Rejected for Permit";
+                    break;
+                case CMMS.CMMS_Status.PTW_CANCEL_REQUEST_APPROVED:
+                    statusName = "Cancel Request Approved for Permit";
                     break;
                 case CMMS.CMMS_Status.PTW_EXTEND_REQUESTED:
                     statusName = "Requested for Permit Extension";
@@ -177,6 +186,9 @@ namespace CMMSAPIs.Repositories.Permits
                     break;
                 case CMMS.CMMS_Status.PTW_EXPIRED:
                     statusName = "Permit Expired";
+                    break;
+                case CMMS.CMMS_Status.PTW_UPDATED:
+                    statusName = "Permit Updated";
                     break;
                 default:
                     statusName = "Invalid";
@@ -733,7 +745,7 @@ namespace CMMSAPIs.Repositories.Permits
             return response;
         }
 
-        internal async Task<CMDefaultResponse> PermitExtendCancel(CMApproval request, int userID)
+        internal async Task<CMDefaultResponse> PermitExtendReject(CMApproval request, int userID)
         {
             string updateQry = $"update permits set extendStatus = 1, status = { (int)CMMS.CMMS_Status.PTW_EXTEND_REQUEST_REJECTED }, extendRejectReason = '{ request.comment }' where id = { request.id }";
             int retValue = await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
@@ -950,7 +962,7 @@ namespace CMMSAPIs.Repositories.Permits
              * Return Message Cancelled successfully
             */
 
-            string updateQry = $"update permits set cancelReccomendations = '{ request.comment }', cancelRequestStatus = 1, status = { (int)CMMS.CMMS_Status.PTW_CANCELLED_BY_ISSUER }, cancelRequestDate = '{ UtilsRepository.GetUTCTime() }', cancelRequestById = { userID }  where id = { request.id }";
+            string updateQry = $"update permits set cancelReccomendations = '{ request.comment }', cancelRequestStatus = 1, status = { (int)CMMS.CMMS_Status.PTW_CANCEL_REQUESTED }, cancelRequestDate = '{ UtilsRepository.GetUTCTime() }', cancelRequestById = { userID }  where id = { request.id }";
             int retValue = await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
 
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
@@ -1269,9 +1281,9 @@ namespace CMMSAPIs.Repositories.Permits
                 }
             }
 
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.permit_id, 0, 0, "Permit Updated", CMMS.CMMS_Status.PTW_EDIT);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.permit_id, 0, 0, "Permit Updated", CMMS.CMMS_Status.PTW_UPDATED);
 
-            CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_EDIT, permitDetails[0]);
+            CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_UPDATED, permitDetails[0]);
 
             CMDefaultResponse response = new CMDefaultResponse(request.permit_id, CMMS.RETRUNSTATUS.SUCCESS, "Permit Updated Successfully");
 
