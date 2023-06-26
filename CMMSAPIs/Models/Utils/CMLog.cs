@@ -31,6 +31,7 @@ namespace CMMSAPIs.Models.Utils
         public string created_by_name { get; set; }
         public dynamic created_at { get; set; }
         public CMMS.CMMS_Status status { get; set; }
+        public string status_name { get; set; }
         public string latitude { get; set; }
         public string longitude { get; set; }
     }

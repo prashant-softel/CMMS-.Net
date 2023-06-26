@@ -40,7 +40,7 @@ namespace CMMSAPIs.BS.Permits
         Task<CMDefaultResponse> PermitApprove(CMApproval request, int userID);
         Task<CMDefaultResponse> PermitExtend(CMApproval request, int userID);
         Task<CMDefaultResponse> PermitExtendApprove(CMApproval request, int userID);
-        Task<CMDefaultResponse> PermitExtendCancel(CMApproval request, int userID);
+        Task<CMDefaultResponse> PermitExtendReject(CMApproval request, int userID);
         Task<CMDefaultResponse> PermitClose(CMApproval request, int userID);
         Task<CMDefaultResponse> PermitReject(CMApproval request, int userID);
         Task<CMDefaultResponse> PermitIssue(CMApproval request, int userID);
@@ -408,13 +408,13 @@ namespace CMMSAPIs.BS.Permits
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> PermitExtendCancel(CMApproval request, int userID)
+        public async Task<CMDefaultResponse> PermitExtendReject(CMApproval request, int userID)
         {
             try
             {
                 using (var repos = new PermitRepository(getDB))
                 {
-                    return await repos.PermitExtendCancel(request, userID);
+                    return await repos.PermitExtendReject(request, userID);
                 }
             }
             catch (Exception ex)

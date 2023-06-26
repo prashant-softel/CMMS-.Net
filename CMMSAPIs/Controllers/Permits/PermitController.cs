@@ -480,14 +480,14 @@ namespace CMMSAPIs.Controllers.Permits
         }
 
         [Authorize]
-        [Route("PermitExtendCancel")]
+        [Route("PermitExtendReject")]
         [HttpPut]
-        public async Task<IActionResult> PermitExtendCancel([FromForm] CMApproval request)
+        public async Task<IActionResult> PermitExtendReject([FromForm] CMApproval request)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _PermitBS.PermitExtendCancel(request, userID);
+                var data = await _PermitBS.PermitExtendReject(request, userID);
                 return Ok(data);
             }
             catch (Exception)
