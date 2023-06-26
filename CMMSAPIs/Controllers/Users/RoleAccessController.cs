@@ -91,7 +91,7 @@ namespace CMMSAPIs.Controllers.Users
         public async Task<IActionResult> DeleteDesignation(int id)
         {
             try
-            {
+            { 
                 var data = await _roleAcceesBs.DeleteDesignation(id);
                 return Ok(data);
             }

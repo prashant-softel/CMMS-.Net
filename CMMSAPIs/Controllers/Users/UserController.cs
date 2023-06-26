@@ -238,5 +238,71 @@ namespace CMMSAPIs.Controllers.Users
                 throw;
             }
         }
+
+        [Route("GetCompetencyList")]
+        [HttpGet]
+        public async Task<IActionResult> GetCompetencyList()
+        {
+            try
+            {
+                var data = await _userAccessBs.GetCompetencyList();
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
+        [Route("AddCompetency")]
+        [HttpPost]
+        public async Task<IActionResult> AddCompetency(CMCompetency request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _userAccessBs.AddCompetency(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
+        [Route("UpdateCompetency")]
+        [HttpPatch]
+        public async Task<IActionResult> UpdateCompetency(CMCompetency request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _userAccessBs.UpdateCompetency(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+
+        [Authorize]
+        [Route("DeleteCompetency")]
+        [HttpDelete]
+        public async Task<IActionResult> DeleteCompetency(int id)
+        {
+            try
+            {
+                var data = await _userAccessBs.DeleteCompetency(id);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
     }
 }
