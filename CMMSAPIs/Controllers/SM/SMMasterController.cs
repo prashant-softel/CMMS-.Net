@@ -2,6 +2,7 @@
 using CMMSAPIs.Models.SM;
 using CMMSAPIs.Models.Users;
 using CMMSAPIs.Repositories.SM;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -32,7 +33,7 @@ namespace CMMSAPIs.Controllers.SM
         /*
          * Asset Type CRUD End Points
         */
-        
+        [Authorize]
         [Route("GetAssetTypeList")]
         [HttpGet]
         public async Task<IActionResult> GetAssetTypeList(int id)
@@ -48,6 +49,7 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
+        [Authorize]
         [Route("AddAssetType")]
         [HttpPost]
         public async Task<IActionResult> AddAssetType(CMSMMaster request)
@@ -64,6 +66,7 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
+        [Authorize]
         [Route("UpdateAssetType")]
         [HttpPost]
         public async Task<IActionResult> UpdateAssetType(CMSMMaster request)
@@ -80,6 +83,7 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
+        [Authorize]
         [Route("DeleteAssetType")]
         [HttpPost]
         public async Task<IActionResult> DeleteAssetType([FromForm] int id)
@@ -100,6 +104,7 @@ namespace CMMSAPIs.Controllers.SM
          * Asset Category CRUD End Points
         */
 
+        [Authorize]
         [Route("GetAssetCategoryList")]
         [HttpGet]
         public async Task<IActionResult> GetAssetCategoryList(int id)
@@ -115,6 +120,7 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
+        [Authorize]
         [Route("AddAssetCategory")]
         [HttpPost]
         public async Task<IActionResult> AddAssetCategory(CMItemCategory request)
@@ -131,6 +137,7 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
+        [Authorize]
         [Route("UpdateAssetCategory")]
         [HttpPost]
         public async Task<IActionResult> UpdateAssetCategory(CMItemCategory request)
@@ -147,6 +154,7 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
+        [Authorize]
         [Route("DeleteAssetCategory")]
         [HttpPost]
         public async Task<IActionResult> DeleteAssetCategory([FromForm] int id)
@@ -167,6 +175,7 @@ namespace CMMSAPIs.Controllers.SM
          * Asset Category CRUD End Points
         */
 
+        [Authorize]
         [Route("GetUnitMeasurementList")]
         [HttpGet]
         public async Task<IActionResult> GetUnitMeasurementList(int id)
@@ -182,6 +191,7 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
+        [Authorize]
         [Route("AddUnitMeasurement")]
         [HttpPost]
         public async Task<IActionResult> AddUnitMeasurement(CMUnitMeasurement request)
@@ -198,6 +208,7 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
+        [Authorize]
         [Route("UpdateUnitMeasurement")]
         [HttpPost]
         public async Task<IActionResult> UpdateUnitMeasurement(CMUnitMeasurement request)
@@ -214,6 +225,7 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
+        [Authorize]
         [Route("DeleteUnitMeasurement")]
         [HttpPost]
         public async Task<IActionResult> DeleteUnitMeasurement([FromForm] int id)
@@ -234,6 +246,7 @@ namespace CMMSAPIs.Controllers.SM
          * Asset Masters CRUD End Points
         */
 
+        [Authorize]
         [Route("GetAssetMasterList")]
         [HttpGet]
         public async Task<IActionResult> GetAssetMasterList(int id)
@@ -249,6 +262,7 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
+        [Authorize]
         [Route("AddAssetMaster")]
         [HttpPost]
         public async Task<IActionResult> AddAssetMaster(CMSMMaster request)
@@ -266,6 +280,7 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
+        [Authorize]
         [Route("UpdateAssetMaster")]
         [HttpPost]
         public async Task<IActionResult> UpdateAssetMaster(CMSMMaster request)
@@ -283,6 +298,7 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
+        [Authorize]
         [Route("DeleteAssetMaster")]
         [HttpPost]
         public async Task<IActionResult> DeleteAssetMaster(CMSMMaster request)
@@ -300,6 +316,7 @@ namespace CMMSAPIs.Controllers.SM
         }
 
         //Get Asset List by plant ID
+        [Authorize]
         [Route("GetAssetDataList")]
         [HttpGet]
         public async Task<IActionResult> GetAssetDataList(int facility_id)
@@ -314,6 +331,8 @@ namespace CMMSAPIs.Controllers.SM
                 throw;
             }
         }
+
+        [Authorize]
         [Route("GetVendorList")]
         [HttpGet]
         public async Task<IActionResult> GetVendorList()
@@ -329,6 +348,7 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
+        [Authorize]
         [Route("GetAssetBySerialNo")]
         [HttpGet]
         public async Task<IActionResult> GetAssetBySerialNo(string serial_number)

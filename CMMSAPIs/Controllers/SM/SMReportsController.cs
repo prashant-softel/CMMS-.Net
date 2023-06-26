@@ -4,6 +4,7 @@ using CMMSAPIs.Models.SM;
 using CMMSAPIs.Models.Users;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.SM;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -26,6 +27,7 @@ namespace CMMSAPIs.Controllers.SM
             _SMReportsBS = reportsBS;
         }
 
+        [Authorize]
         [Route("GetPlantStockReport")]
         [HttpGet]
         public async Task<IActionResult> GetPlantStockReport(int plant_ID, DateTime StartDate, DateTime EndDate)
@@ -40,6 +42,8 @@ namespace CMMSAPIs.Controllers.SM
                 throw;
             }
         }
+
+        [Authorize]
         [Route("GetEmployeeStockReport")]
         [HttpGet]
         public async Task<IActionResult> GetEmployeeStockReport(int plant_ID, DateTime StartDate, DateTime EndDate)
@@ -54,6 +58,8 @@ namespace CMMSAPIs.Controllers.SM
                 throw;
             }
         }
+
+        [Authorize]
         [Route("GetFaultyMaterialReport")]
         [HttpGet]
         public async Task<IActionResult> GetFaultyMaterialReport(int plant_ID, DateTime StartDate, DateTime EndDate)
@@ -69,6 +75,7 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
+        [Authorize]
         [Route("GetEmployeeTransactionReport")]
         [HttpGet]
         public async Task<IActionResult> GetEmployeeTransactionReport(int isAllEmployees, int plant_ID, DateTime StartDate, DateTime EndDate)

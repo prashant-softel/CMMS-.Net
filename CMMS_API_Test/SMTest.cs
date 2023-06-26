@@ -19,6 +19,7 @@ namespace CMMS_API_Test
         string EP_UpdateAssetType = "/api/SMMaster/UpdateAssetType";
         string EP_DeleteAssetType = "/api/SMMaster/DeleteAssetType";
         string EP_GetAssetBySerialNo = "/api/SMMaster/GetAssetBySerialNo";
+        string EP_GetAssetDataList = "/api/SMMaster/GetAssetDataList";
 
         //Asset Category Master
         string EP_GetAssetCategoryList = "/api/SMMaster/GetAssetCategoryList";
@@ -824,6 +825,16 @@ namespace CMMS_API_Test
             var response = ptwService.CreateItem(EP_UpdateEscalationMatrixStatus, payload);
 
             Assert.AreEqual("Data updated successfully.", response.message);
+        }
+
+        [TestMethod]
+        public void GetAssetDataList()
+        {
+            int facility_id = 45;
+            var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.SM.CMAssetTypes>();
+            var response = ptwService.GetItemList(EP_GetAssetDataList + "?facility_id=" + facility_id);
+            Assert.AreEqual(0, response[0].ID);
+            Assert.AreEqual("Consulmable", response[0].asset_type);
         }
     }
 }

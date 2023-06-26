@@ -7,6 +7,7 @@ using CMMSAPIs.Models.SM;
 using Microsoft.AspNetCore.Http;
 using static System.Reflection.Metadata.BlobBuilder;
 using CMMSAPIs.Models.Utils;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CMMSAPIs.Controllers.SM
 {
@@ -19,7 +20,8 @@ namespace CMMSAPIs.Controllers.SM
         {
             _IRequestOrderBS = RO;
         }
-        
+
+        [Authorize]
         [Route("GetRequestOrderList")]
         [HttpGet]
         public async Task<IActionResult> GetRequestOrderList(int plantID, DateTime fromDate, DateTime toDate)
@@ -35,6 +37,7 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
+        [Authorize]
         [Route("CreateRequestOrder")]
         [HttpPost]
         public async Task<IActionResult> CreateRequestOrder(CMRequestOrder request)
@@ -51,6 +54,7 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
+        [Authorize]
         [Route("UpdateRO")]
         [HttpPost]
         public async Task<IActionResult> UpdateRO(CMRequestOrder request)
@@ -67,6 +71,7 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
+        [Authorize]
         [Route("DeleteRequestOrder")]
         [HttpPost]
         public async Task<IActionResult> DeleteRequestOrder([FromForm] int RO_ID)
@@ -83,6 +88,7 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
+        [Authorize]
         [Route("ApproveRequestOrder")]
         [HttpPost]
         public async Task<IActionResult> ApproveRequestOrder(CMApproval request)
@@ -97,6 +103,8 @@ namespace CMMSAPIs.Controllers.SM
                 throw;
             }
         }
+
+        [Authorize]
         [Route("RejectGoodsOrder")]
         [HttpPost]
         public async Task<IActionResult> RejectGoodsOrder(CMApproval request)
