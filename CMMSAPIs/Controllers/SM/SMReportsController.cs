@@ -27,7 +27,7 @@ namespace CMMSAPIs.Controllers.SM
             _SMReportsBS = reportsBS;
         }
 
-        [Authorize]
+         
         [Route("GetPlantStockReport")]
         [HttpGet]
         public async Task<IActionResult> GetPlantStockReport(int plant_ID, DateTime StartDate, DateTime EndDate)
@@ -43,7 +43,7 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
-        [Authorize]
+         
         [Route("GetEmployeeStockReport")]
         [HttpGet]
         public async Task<IActionResult> GetEmployeeStockReport(int plant_ID, DateTime StartDate, DateTime EndDate)
@@ -59,7 +59,7 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
-        [Authorize]
+         
         [Route("GetFaultyMaterialReport")]
         [HttpGet]
         public async Task<IActionResult> GetFaultyMaterialReport(int plant_ID, DateTime StartDate, DateTime EndDate)
@@ -75,7 +75,7 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
-        [Authorize]
+         
         [Route("GetEmployeeTransactionReport")]
         [HttpGet]
         public async Task<IActionResult> GetEmployeeTransactionReport(int isAllEmployees, int plant_ID, DateTime StartDate, DateTime EndDate)

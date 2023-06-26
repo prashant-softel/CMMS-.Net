@@ -32,7 +32,7 @@ namespace CMMSAPIs.Controllers.SM
         }
 
         // First 
-        [Authorize]
+ 
         [Route("CreateMRS")]
         [HttpPost]       
         public async Task<IActionResult> CreateMRS(CMMRS request)
@@ -50,7 +50,7 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
-        [Authorize]
+         
         [Route("getMRSList")]
         [HttpGet]
         public async Task<IActionResult> getMRSList(int plant_ID, int emp_id, string toDate, string fromDate, int status)
@@ -69,7 +69,7 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
-        [Authorize]
+         
         [Route("getMRSItems")]
         [HttpGet]
         public async Task<IActionResult> getMRSItems(int ID)
@@ -85,7 +85,7 @@ namespace CMMSAPIs.Controllers.SM
                 throw ex;
             }
         }
-        [Authorize]
+         
         [Route("getMRSItemsBeforeIssue")]
         [HttpGet]
         public async Task<IActionResult> getMRSItemsBeforeIssue(int ID)
@@ -102,7 +102,7 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
-        [Authorize]
+         
         [Route("getMRSItemsWithCode")]
         [HttpGet]
         public async Task<IActionResult> getMRSItemsWithCode(int ID)
@@ -119,7 +119,7 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
-        [Authorize]
+         
         [Route("getMRSDetails")]
         [HttpGet]
         public async Task<IActionResult> getMRSDetails(int ID)
@@ -136,7 +136,7 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
-        [Authorize]
+         
         [Route("mrsApproval")]
         [HttpPost]
         public async Task<IActionResult> mrsApproval(CMMRS request)
@@ -154,7 +154,7 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
-        [Authorize]
+         
         [Route("getReturnDataByID")]
         [HttpGet]
         public async Task<IActionResult> getReturnDataByID(int ID)
@@ -172,7 +172,7 @@ namespace CMMSAPIs.Controllers.SM
 
         }
 
-        [Authorize]
+         
         [Route("getAssetTypeByItemID")]
         [HttpGet]
         public async Task<IActionResult> getAssetTypeByItemID(int ItemID)
@@ -189,7 +189,7 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
-        [Authorize]
+         
         [Route("mrsReturn")]
         [HttpPost] 
         public async Task<IActionResult> mrsReturn(CMMRS request)
@@ -206,7 +206,7 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
-        [Authorize]
+         
         [Route("mrsReturnApproval")]
         [HttpPost]
         public async Task<IActionResult> mrsReturnApproval(CMMRS request)
@@ -223,7 +223,7 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
-        [Authorize]
+         
         [Route("getLastTemplateData")]
         [HttpGet]
         public async Task<IActionResult> getLastTemplateData(int ID)
@@ -240,7 +240,7 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
-        [Authorize]
+         
         [Route("GetAssetItems")]
         [HttpGet]
         public async Task<IActionResult> GetAssetItems(int plantID, bool isGroupByCode = false)
