@@ -682,7 +682,11 @@ namespace CMMSAPIs.Repositories.Users
         internal async Task<List<CMUser>> GetUserByNotificationId(CMUserByNotificationId request)
         {
             // Pending convert user_ids into string for where condition
-            string user_ids_str = string.Join(",", request.user_ids.ToArray());
+            string user_ids_str = "";
+            if (request.user_ids != null)
+            {
+                user_ids_str += string.Join(",", request.user_ids.ToArray());
+            }
             string qry = $"SELECT " +
                             $"u.id as id, u.loginId as user_name, concat(firstName, ' ', lastName) as full_name, ur.id as role_id, ur.name as role_name, u.mobileNumber as contact_no " +
                          $"FROM " +
@@ -694,7 +698,7 @@ namespace CMMSAPIs.Repositories.Users
                          $"JOIN " +
                             $"UserRoles as ur ON ur.id = u.roleId " +
                          $"WHERE " +
-                            $"uf.facilityId = {request.facility_id} AND userPreference = 1 AND notificationId = {(int)request.notification_id} " +
+                            $" userPreference = 1 AND notificationId = {(int)request.notification_id} " +
                             $" ";
 
             if (!user_ids_str.IsNullOrEmpty())
@@ -705,7 +709,11 @@ namespace CMMSAPIs.Repositories.Users
             {
                 qry += $" AND self = 0";
             }
-            
+            if (request.facility_id != 0)
+            {
+                qry += $" AND uf.facilityId = {request.facility_id}";
+            }
+
 
             List<CMUser> user_list = await Context.GetData<CMUser>(qry).ConfigureAwait(false);
             /*
