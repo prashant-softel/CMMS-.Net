@@ -347,7 +347,7 @@ namespace CMMSAPIs.Repositories.Jobs
             if (request.jobType != null)
                 myQuery += $"JobType = {request.jobType}, ";
             if (request.breakdown_time != null)
-                myQuery += $"breakdownTime = '{request.breakdown_time.ToString("yyyy-MM-dd hh:mm:ss")}', ";
+                myQuery += $"breakdownTime = '{request.breakdown_time.ToString("yyyy-MM-dd HH:mm:ss")}', ";
             myQuery += $"updatedAt = '{UtilsRepository.GetUTCTime()}', updatedBy = {userId} WHERE id = {request.id};";
             await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
 

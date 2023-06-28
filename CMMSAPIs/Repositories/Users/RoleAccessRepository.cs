@@ -168,14 +168,8 @@ namespace CMMSAPIs.Repositories.Users
                                                     $"(roleId, featureId, `add`, `edit`, `view`, `delete`, `issue`, `approve`, `selfView`, `lastModifiedAt`, `lastModifiedBy`) " +
                                               $" VALUES {role_access_insert_str}";
                         await Context.GetData<List<int>>(insert_query).ConfigureAwait(false);
-
-                        // Add previous setting to log table
-                        CMLog _log = new CMLog();
-                        _log.module_type = CMMS.CMMS_Modules.ROLE_DEFAULT_ACCESS_MODULE;
-                        _log.module_ref_id = request.role_id;
-                        _log.comment = JsonSerializer.Serialize(old_access.access_list);
-                        _log.status = CMMS.CMMS_Status.UPDATED;
-                        await _utilsRepo.AddLog(_log);                        
+                        await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.ROLE_DEFAULT_ACCESS_MODULE, request.role_id, 0, 0, JsonSerializer.Serialize(old_access.access_list), CMMS.CMMS_Status.UPDATED, userID);
+                        // Add previous setting to log table                       
                     }
                 }
 
@@ -272,13 +266,8 @@ namespace CMMSAPIs.Repositories.Users
                                               $" VALUES {role_access_insert_str}";
                         await Context.GetData<List<int>>(insert_query).ConfigureAwait(false);
 
+                        await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.ROLE_DEFAULT_NOTIFICATIONS, role_id, 0, 0, JsonSerializer.Serialize(old_access_list), CMMS.CMMS_Status.UPDATED, userID);
                         // Add previous setting to log table
-                        CMLog _log = new CMLog();
-                        _log.module_type = CMMS.CMMS_Modules.ROLE_DEFAULT_NOTIFICATIONS;
-                        _log.module_ref_id = role_id;
-                        _log.comment = JsonSerializer.Serialize(old_access_list);
-                        _log.status = CMMS.CMMS_Status.UPDATED;
-                        await _utilsRepo.AddLog(_log);
                     }
                 }
 

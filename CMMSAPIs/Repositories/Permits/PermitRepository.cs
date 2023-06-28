@@ -507,7 +507,7 @@ namespace CMMSAPIs.Repositories.Permits
              * Return GetPermitDetails(permit_id);
             */
             string qryPermitBasic = "insert into permits(facilityId, blockId, LOTOId, startDate, endDate, title, description, jobTypeId, typeId, TBTId, issuedById, approvedById, acceptedById, acceptedDate, status, latitude, longitude) values" +
-             $"({ request.facility_id }, { request.blockId },{request.lotoId},'{ request.start_datetime.ToString("yyyy-MM-dd hh:mm:ss") }', '{ request.end_datetime.ToString("yyyy-MM-dd hh:mm:ss") }', '{request.title}', '{ request.description }', { request.job_type_id }, { request.permitTypeId }, { request.sop_type_id }, { request.issuer_id }, { request.approver_id }, {userID}, '{UtilsRepository.GetUTCTime()}', {(int)CMMS.CMMS_Status.PTW_CREATED}, {request.latitude}, {request.longitude}); " +
+             $"({ request.facility_id }, { request.blockId },{request.lotoId},'{ request.start_datetime.ToString("yyyy-MM-dd HH:mm:ss") }', '{ request.end_datetime.ToString("yyyy-MM-dd HH:mm:ss") }', '{request.title}', '{ request.description }', { request.job_type_id }, { request.permitTypeId }, { request.sop_type_id }, { request.issuer_id }, { request.approver_id }, {userID}, '{UtilsRepository.GetUTCTime()}', {(int)CMMS.CMMS_Status.PTW_CREATED}, {request.latitude}, {request.longitude}); " +
              $"SELECT LAST_INSERT_ID();";
             DataTable dt = await Context.FetchData(qryPermitBasic).ConfigureAwait(false);
             int insertedId = Convert.ToInt32(dt.Rows[0][0]);
@@ -1160,9 +1160,9 @@ namespace CMMSAPIs.Repositories.Permits
             if (request.blockId > 0)
                 updatePermitQry += $"blockId = { request.blockId }, ";
             if (request.start_date != null)
-                updatePermitQry += $"startDate = '{ ((DateTime)request.start_date).ToString("yyyy-MM-dd") }', ";
+                updatePermitQry += $"startDate = '{ ((DateTime)request.start_date).ToString("yyyy-MM-dd HH:mm:ss") }', ";
             if (request.end_date != null)
-                updatePermitQry += $"endDate = '{ ((DateTime)request.end_date).ToString("yyyy-MM-dd") }', ";
+                updatePermitQry += $"endDate = '{ ((DateTime)request.end_date).ToString("yyyy-MM-dd HH:mm:ss") }', ";
             if (request.description != null && request.description != "")
                 updatePermitQry += $"description = '{ request.description }', ";
             if (request.job_type_id > 0)
