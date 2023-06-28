@@ -486,7 +486,7 @@ namespace CMMSAPIs.Repositories.Users
                                        $"VALUES ('{user.credentials.user_name}', '{user.credentials.password}', '{user.secondaryEmail}', '{user.first_name}', '{user.last_name}', " +
                                        $"'{((DateTime)user.DOB).ToString("yyyy-MM-dd")}', {(int)user.gender_id}, '{user.gender_id}', {user.blood_group_id}, '{CMMS.BLOOD_GROUPS[user.blood_group_id]}', " +
                                        $"{user.photoId}, '{user.contact_no}','{user.landline_number}', {user.country_id}, {user.state_id}, {user.city_id}, {user.zipcode}, " +
-                                       $"{user.role_id}, {(user.isEmployee == null ? 0 : user.isEmployee)}, '{((DateTime)user.joiningDate).ToString("yyyy-MM-dd hh:mm:ss")}', " +
+                                       $"{user.role_id}, {(user.isEmployee == null ? 0 : user.isEmployee)}, '{((DateTime)user.joiningDate).ToString("yyyy-MM-dd HH:mm:ss")}', " +
                                        $"{userID}, '{UtilsRepository.GetUTCTime()}', 1); SELECT LAST_INSERT_ID(); ";
 
                     DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
@@ -615,7 +615,7 @@ namespace CMMSAPIs.Repositories.Users
             if (request.isEmployee != null)
                 updateQry += $"isEmployee = {request.isEmployee}, ";
             if (request.joiningDate != null)
-                updateQry += $"joiningDate = '{((DateTime)request.joiningDate).ToString("yyyy-MM-dd hh:mm:ss")}', ";
+                updateQry += $"joiningDate = '{((DateTime)request.joiningDate).ToString("yyyy-MM-dd HH:mm:ss")}', ";
             updateQry += $"updatedBy = {userID}, updatedAt = '{UtilsRepository.GetUTCTime()}' WHERE id = {request.id};";
             await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
             if(request.facilities != null)

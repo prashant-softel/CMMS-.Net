@@ -65,7 +65,7 @@ namespace CMMSAPIs.Repositories.Utils
                         "VALUES" +
                             "(" +
                                 $"{(int)log.module_type}, {log.module_ref_id}, {(int)log.secondary_module_type}, {log.secondary_module_ref_id}," +
-                                $"'{log.comment}', {(int)log.status}, '{log.latitude}', '{log.longitude}', {GetUserID()}, '{GetUTCTime()}'" +
+                                $"'{log.comment}', {(int)log.status}, '{log.latitude}', '{log.longitude}', {log.created_by_id}, '{GetUTCTime()}'" +
                             ")";
 
             await Context.GetData<List<int>>(qry).ConfigureAwait(false);
@@ -125,7 +125,7 @@ namespace CMMSAPIs.Repositories.Utils
         internal static string GetUTCTime()
         {
             DateTime Utc = DateTime.UtcNow;
-            return Utc.ToString("yyyy-MM-dd hh:mm:ss");
+            return Utc.ToString("yyyy-MM-dd HH:mm:ss");
         }
 
         internal static DateTime Reschedule(DateTime source, int frequencyID)
