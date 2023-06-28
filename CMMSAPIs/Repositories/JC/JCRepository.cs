@@ -170,7 +170,7 @@ namespace CMMSAPIs.Repositories.JC
 
         internal async Task<CMDefaultResponse> StartJC(int jc_id, int userID)
         {
-            string myQuery = $"UPDATE jobcards SET JC_Status = {(int)CMMS.CMMS_Status.JC_STARTED}, JC_Date_Start = '{UtilsRepository.GetUTCTime()}' JC_Start_By_id = {userID} WHERE id = {jc_id};";
+            string myQuery = $"UPDATE jobcards SET JC_Status = {(int)CMMS.CMMS_Status.JC_STARTED}, JC_Date_Start = '{UtilsRepository.GetUTCTime()}', JC_Start_By_id = {userID} WHERE id = {jc_id};";
             await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
 
             string myQuery1 = $"SELECT  jc.id as id , jc.PTW_id as ptwId, job.id as jobid, facilities.name as plant_name, asset_cat.name as asset_category_name, CONCAT(user.firstName + ' ' + user.lastName) as JC_Closed_by_Name, CONCAT(user1.firstName + ' ' + user1.lastName) as JC_Rejected_By_Name, jc.JC_Approved_By_Name as  JC_Approved_By_Name FROM jobs as job JOIN  jobmappingassets as mapAssets ON mapAssets.jobId = job.id join assetcategories as asset_cat ON mapAssets.categoryId = asset_cat.id JOIN facilities as facilities ON job.blockId = facilities.id LEFT JOIN jobcards as jc on jc.jobId = job.id LEFT JOIN users as user ON user.id = jc.JC_Update_by LEFT JOIN  users as user1 ON user1.id = jc.JC_Rejected_By_id where jc.id = {jc_id}";
