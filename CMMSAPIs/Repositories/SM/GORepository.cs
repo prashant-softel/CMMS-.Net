@@ -46,7 +46,7 @@ namespace CMMSAPIs.Repositories
                           "LEFT JOIN smassetmasters s2 ON s2.item_category_ID = sic.ID  )  t2 ON t2.master_ID = sam.ID LEFT JOIN employees ed ON ed.ID = po.generated_by\n\t\t        LEFT JOIN employees ed1 ON ed1.ID = po.receiverID\n\t\t\t\tLEFT JOIN employees ed2 ON ed2.ID = po.approved_by\n\t\t\t\tLEFT JOIN business bl ON bl.id = po.vendorID\n\t\t        /*LEFT JOIN FlexiMC_Emp_details ed ON ed.ID = po.generated_by\n\t\t        LEFT JOIN FlexiMC_Emp_details ed1 ON ed1.ID = po.receiverID\n\t\t\t\tLEFT JOIN FlexiMC_Emp_details ed2 ON ed2.ID = po.approved_by\n\t\t\t\tLEFT JOIN FlexiMC_Business_list bl ON bl.id = po.vendorID\n\t\t       WHERE po.ID =1 */";
 
             string stmt = "SELECT pod.ID as podID,pod.spare_status,pod.remarks,sai.orderflag,sam.asset_name,sam.asset_type_ID,pod.purchaseID," +
-                "pod.assetItemID,sai.serial_number,sai.location_ID,pod.cost ,pod.ordered_qty,po.remarks as rejectedRemark,po.plantID,po.purchaseDate," +
+                "pod.assetItemID,sai.serial_number,sai.location_ID,pod.cost ,pod.ordered_qty,po.remarks as rejectedRemark,po.plantID as facility_id,po.purchaseDate," +
                 "sam.asset_type_ID,\r\n\t\t        po.vendorID,po.status,sai.asset_code,t1.asset_type,t2.cat_name,pod.received_qty,pod.damaged_qty," +
                 "pod.accepted_qty,po.received_on,po.approvedOn,\r\n\t\t\t\tCONCAT(ed.firstName,' ',ed.lastName) as generatedBy," +
                 "CONCAT(ed1.firstName,' ',ed1.lastName) as receivedBy,CONCAT(ed2.firstName,' ',ed2.lastName) as approvedBy," +
@@ -93,12 +93,12 @@ namespace CMMSAPIs.Repositories
             {
                 string poInsertQuery = $" INSERT INTO smpurchaseorder (plantID,vendorID,receiverID,generated_by,purchaseDate,orderDate,status," +
                     $" challan_no,po_no, freight,transport, " +
-                    $"no_pkg_received,lr_no,condition_pkg_received,vehicle_no, gir_no, challan_date,requestdate, job_ref,amount, currency,withdraw_by,withdrawOn,order_type) " +
+                    $"no_pkg_received,lr_no,condition_pkg_received,vehicle_no, gir_no, challan_date,po_date, job_ref,amount, currency,withdraw_by,withdrawOn,order_type) " +
                     $"VALUES({request.plantID},{request.vendorID}, {request.receiverID}, {userID}, '{DateTime.Now.ToString("yyyy-MM-dd")}', '{DateTime.Now.ToString("yyyy-MM-dd")}', {request.status}," +
                     $"'{request.challan_no}','{request.po_no}','{request.freight}','', '{request.no_pkg_received}', '{request.lr_no}', '{request.condition_pkg_received}','{request.vehicle_no}','{request.gir_no}','{request.challan_date.Value.ToString("yyyy-MM-dd")}'," +
                     $"'{request.po_date.Value.ToString("yyyy-MM-dd")}','{request.job_ref}',{request.amount}, '{request.currency}',0,'0001-01-01',0);" + 
                     $" SELECT LAST_INSERT_ID();";
-                DataTable dt2 = await Context.FetchData(poInsertQuery).ConfigureAwait(false);
+                    DataTable dt2 = await Context.FetchData(poInsertQuery).ConfigureAwait(false);
                 int poid = Convert.ToInt32(dt2.Rows[0][0]);
 
                 for (var i = 0; i < request.go_items.Count; i++)
