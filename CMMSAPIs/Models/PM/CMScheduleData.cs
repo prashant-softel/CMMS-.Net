@@ -13,6 +13,8 @@ namespace CMMSAPIs.Models.PM
     {
         public int asset_id { get; set; }
         public string asset_name { get; set; }
+        public int block_id { get; set; }
+        public string block_name { get; set; }
         public int category_id { get; set; }
         public string category_name { get; set; }
         public List<ScheduleFrequencyData> frequency_dates { get; set; }

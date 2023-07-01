@@ -26,7 +26,8 @@ namespace CMMSAPIs.Repositories.PM
              * Read All properties mention in model and return list
              * Code goes here
             */
-            string myQuery = "SELECT Asset_id as asset_id, Asset_Name as asset_name, Asset_Category_id as category_id, Asset_Category_name as category_name from pm_schedule ";
+            string myQuery = "SELECT Asset_id as asset_id, Asset_Name as asset_name, Asset_Category_id as category_id, Block_Id as block_id, block.name as block_name, Asset_Category_name as category_name " +
+                                "from pm_schedule LEFT JOIN facilities as block ON pm_schedule.Block_Id = block.id ";
             if (facility_id > 0)
             {
                 myQuery += " WHERE Facility_id = " + facility_id;
@@ -78,9 +79,10 @@ namespace CMMSAPIs.Repositories.PM
                     responseList.Add(response);
                     continue;
                 }
-                string myQuery4 = $"SELECT serialNumber FROM assets WHERE id = {asset_schedule.asset_id};";
+                string myQuery4 = $"SELECT serialNumber, blockId FROM assets WHERE id = {asset_schedule.asset_id};";
                 DataTable dt = await Context.FetchData(myQuery4).ConfigureAwait(false);
-                string serialNumber = Convert.ToString(dt.Rows[0][0]);
+                string serialNumber = Convert.ToString(dt.Rows[0]["serialNumber"]);
+                string blockId = Convert.ToString(dt.Rows[0]["blockId"]);
                 string myQuery5 = $"SELECT id, name, description FROM assetcategories WHERE id = {asset[0].categoryId};";
                 List<CMAssetCategory> category = await Context.GetData<CMAssetCategory>(myQuery5).ConfigureAwait(false);
                 if (category.Count == 0)
@@ -125,11 +127,11 @@ namespace CMMSAPIs.Repositories.PM
                         if(frequency_schedule.schedule_date != null)
                         {
                             string mainQuery = $"INSERT INTO pm_schedule(PM_Schedule_Date, PM_Frequecy_Name, PM_Frequecy_id, PM_Frequecy_Code, " +
-                               $"Facility_id, Facility_Name, Facility_Code, Asset_Category_id, Asset_Category_Code, Asset_Category_name, " +
+                               $"Facility_id, Facility_Name, Facility_Code, Block_Id, Block_Code, Asset_Category_id, Asset_Category_Code, Asset_Category_name, " +
                                $"Asset_id, Asset_Code, Asset_Name, PM_Schedule_User_id, PM_Schedule_User_Name, PM_Schedule_Emp_id, PM_Schedule_Emp_name, " +
                                $"PM_Schedule_created_date, Asset_Sno, status) VALUES " +
                                $"('{((DateTime)frequency_schedule.schedule_date).ToString("yyyy'-'MM'-'dd")}', '{frequency[0].name}', {frequency[0].id}, 'FRC{frequency[0].id}', " +
-                               $"{facility[0].id}, '{facility[0].name}', 'FAC{facility[0].id + 1000}', {category[0].id}, 'AC{category[0].id + 1000}', '{category[0].name}', " +
+                               $"{facility[0].id}, '{facility[0].name}', 'FAC{facility[0].id + 1000}', {blockId}, 'BLOCK{blockId}', {category[0].id}, 'AC{category[0].id + 1000}', '{category[0].name}', " +
                                $"{asset[0].id}, 'INV{asset[0].id}', '{asset[0].name}', {user[0].id}, '{user[0].full_name}', {user[0].id}, '{user[0].full_name}', " +
                                $"'{UtilsRepository.GetUTCTime()}', '{serialNumber}', {(int)CMMS.CMMS_Status.PM_SUBMIT}); SELECT LAST_INSERT_ID();";
                             DataTable dt2 = await Context.FetchData(mainQuery).ConfigureAwait(false);
@@ -140,7 +142,7 @@ namespace CMMSAPIs.Repositories.PM
                         }
                         else
                         {
-                            response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.SUCCESS, "Date cannot be null");
+                            response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.INVALID_ARG, "Date cannot be null");
                             responseList.Add(response);
                         }
                     }

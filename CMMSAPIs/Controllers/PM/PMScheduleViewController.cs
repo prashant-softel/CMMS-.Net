@@ -24,7 +24,7 @@ namespace CMMSAPIs.Controllers.PM
         [Authorize]
         [Route("GetPMTaskList")]
         [HttpGet]
-        public async Task<IActionResult> GetPMTaskList(int facility_id, DateTime? start_date, DateTime? end_date, [FromQuery] List<int> categoryIds, [FromQuery] List<int> frequencyIds)
+        public async Task<IActionResult> GetPMTaskList(int facility_id, DateTime? start_date, DateTime? end_date, string categoryIds, string frequencyIds)
         {
             try
             {
