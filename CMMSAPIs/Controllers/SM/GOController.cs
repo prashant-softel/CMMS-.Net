@@ -28,11 +28,11 @@ namespace CMMSAPIs.Controllers
  
         [Route("GetGOList")]
         [HttpGet]
-        public async Task<IActionResult> GetGOList(int plantID, DateTime fromDate, DateTime toDate, int Status)
+        public async Task<IActionResult> GetGOList(int facility_id, DateTime fromDate, DateTime toDate, int Status)
         {
             try
             {
-                var data = await _GOBS.GetGOList(plantID, fromDate, toDate, Status);
+                var data = await _GOBS.GetGOList(facility_id, fromDate, toDate, Status);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -77,7 +77,7 @@ namespace CMMSAPIs.Controllers
  
         [Route("CreateGO")]
         [HttpPost]
-        public async Task<IActionResult> CreateGO(CMGO request)
+        public async Task<IActionResult> CreateGO(CMGoodsOrderList request)
         {
             try
             {
@@ -94,7 +94,7 @@ namespace CMMSAPIs.Controllers
  
         [Route("UpdateRO")]
         [HttpPost]
-        public async Task<IActionResult> UpdateGO(CMGO request)
+        public async Task<IActionResult> UpdateGO(CMGoodsOrderList request)
         {
             try
             {
@@ -128,7 +128,7 @@ namespace CMMSAPIs.Controllers
  
         [Route("WithdrawGO")]
         [HttpPost]
-        public async Task<IActionResult> WithdrawGO(CMGO request)
+        public async Task<IActionResult> WithdrawGO(CMGoodsOrderList request)
         {
             try
             {
@@ -145,7 +145,7 @@ namespace CMMSAPIs.Controllers
  
         [Route("GOApproval")]
         [HttpPost]
-        public async Task<IActionResult> GOApproval(CMApproval request)
+        public async Task<IActionResult> GOApproval([FromForm]  CMApproval request )
         {
             try
             {
@@ -161,7 +161,7 @@ namespace CMMSAPIs.Controllers
  
         [Route("RejectGO")]
         [HttpPost]
-        public async Task<IActionResult> RejectGO(CMApproval request)
+        public async Task<IActionResult> RejectGO([FromForm]  CMApproval request)
         {
             try
             {

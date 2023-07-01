@@ -17,10 +17,9 @@ namespace CMMSAPIs.Repositories.Audits
 
         internal async Task<List<CMAuditPlan>> GetAuditPlanList(int facility_id)
         {
-            /*
-             * Your Code goes here
-            */
-            return null;
+            string SelectQ = "select * from st_audit";
+            List<CMAuditPlan> auditPlanList = await Context.GetData<CMAuditPlan>(SelectQ).ConfigureAwait(false);
+            return auditPlanList;
         }
 
         internal async Task<CMDefaultResponse> CreateAuditPlan(CMCreateAuditPlan request)

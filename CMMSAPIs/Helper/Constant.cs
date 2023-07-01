@@ -303,6 +303,7 @@ namespace CMMSAPIs.Helper
             SM_PO_DRAFT = 301,          //1         
             SM_PO_SUBMITTED,            //2
             SM_PO_IN_PROCESS,           //3
+            SM_PO_DELETED,
             SM_PO_CLOSED,
             SM_PO_CLOSED_REJECTED,
             SM_PO_CLOSED_APPROVED,

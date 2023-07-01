@@ -174,7 +174,7 @@ namespace CMMSAPIs.Repositories.SM
 
 
             string myQuery = $"SELECT * from smrequestorder where id = {request.id}";
-            List<CMGO> _WCList = await Context.GetData<CMGO>(myQuery).ConfigureAwait(false);
+            List<CMGoodsOrderList> _WCList = await Context.GetData<CMGoodsOrderList>(myQuery).ConfigureAwait(false);
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Rejected request order.");
             return response;
         }

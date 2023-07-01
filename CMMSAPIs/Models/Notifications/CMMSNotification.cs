@@ -123,7 +123,7 @@ namespace CMMSAPIs.Models.Notifications
                 CMSMMaster cMSMMaster = (CMSMMaster)args[0];
                 //notificationObj = new SMMasterNotification(moduleID, notificationID, cMSMMaster);
             }else if(moduleID == CMMS.CMMS_Modules.SM_PO) {
-                CMGO _CmGO = (CMGO)args[0];
+                CMGoodsOrderList _CmGO = (CMGoodsOrderList)args[0];
                 //notificationObj = new IncidentReportNotification(moduleID, notificationID, _CmGO);
             }else if (moduleID == CMMS.CMMS_Modules.Escalation_Matrix)
             {
