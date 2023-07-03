@@ -333,13 +333,12 @@ namespace CMMSAPIs.Helper
             SM_RO_CLOSED_REJECTED,
             SM_RO_CLOSED_APPROVED,
 
-            EM_CREATED = 351,
-            EM_ASSIGNED,
-            EM_LINKED,
-            EM_IN_PROGRESS,
-            EM_CLOSED,
-            EM_CANCELLED,
-            EM_DELETED,
+            AUDIT_SCHEDULE = 351,
+            AUDIT_STARTED,
+            AUDIT_DELETED,
+            AUDIT_APPROVED,
+            AUDIT_REJECTED,
+            AUDIT_CLOSED
 
         }
 

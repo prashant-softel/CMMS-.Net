@@ -147,35 +147,8 @@ namespace CMMSAPIs.Repositories.EscalationMatrix
         }
         internal static string getShortStatus(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status m_notificationID)
         {
-            string retValue;
+            string retValue = "";
 
-            switch (m_notificationID)
-            {
-                case CMMS.CMMS_Status.EM_CREATED:
-                    retValue = "Created";
-                    break;
-                case CMMS.CMMS_Status.EM_ASSIGNED:
-                    retValue = "Assigned";
-                    break;
-                case CMMS.CMMS_Status.EM_LINKED:
-                    retValue = "Linked";
-                    break;
-                case CMMS.CMMS_Status.EM_IN_PROGRESS:
-                    retValue = "In Process";
-                    break;
-                case CMMS.CMMS_Status.EM_CLOSED:
-                    retValue = "Closed";
-                    break;
-                case CMMS.CMMS_Status.EM_CANCELLED:
-                    retValue = "Cancelled";
-                    break;
-                case CMMS.CMMS_Status.EM_DELETED:
-                    retValue = "Deleted";
-                    break;
-                default:
-                    retValue = "Unknown <" + m_notificationID + ">";
-                    break;
-            }
             return retValue;
 
         }
