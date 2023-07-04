@@ -92,7 +92,7 @@ namespace CMMSAPIs.Repositories.SM
                     int equipmentID = request.equipments[i].equipmentID;
                     decimal quantity = request.equipments[i].qty;
 
-                    string selectQuery = "SELECT sam.approval_required as approval_required_id, sat.asset_code, asset_type_ID FROM smassetitems sat " +
+                    string selectQuery = "SELECT sam.approval_required as approval_required_ID, sat.asset_code, asset_type_ID FROM smassetitems sat " +
                                "LEFT JOIN smassetmasters sam ON sam.asset_code = sat.asset_code " +
                                "WHERE sat.ID = " + equipmentID;
                     
