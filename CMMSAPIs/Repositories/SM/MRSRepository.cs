@@ -69,9 +69,9 @@ namespace CMMSAPIs.Repositories.SM
                 var lastMRSID = request.ID;
                 var refType = "MRSEdit";
                 var mailSub = "CMMRS Request Updated";
-                string updatestmt = $" START TRANSACTION; UPDATE smmrs SET plant_ID = {request.plant_ID}, requested_by_emp_ID = {request.requested_by_emp_ID}, requested_date = {request.requestd_date}," +
-                    $"status = '0', flag = {request.flag}, setAsTemplate = {request.setAsTemplate}, templateName = {request.templateName}, approval_status = {request.approval_status} WHERE ID = {request.ID}" +
-                    $"DELETE FROM smrsitems WHERE mrs_ID =  {lastMRSID} ;/* IF @@ERROR <> 0 THEN\r\n    ROLLBACK;\r\nELSE\r\n    COMMIT;\r\nEND IF;*/";
+                string updatestmt = $"\r\nSET autocommit = 0;\r\nSTART TRANSACTION;\r\n UPDATE smmrs SET plant_ID = {request.plant_ID}, requested_by_emp_ID = {request.requested_by_emp_ID}, requested_date = {request.requestd_date}," +
+                    $"status = '0', flag = {request.flag}, setAsTemplate = {request.setAsTemplate}, templateName = {request.templateName}, approval_status = {request.approval_status} WHERE ID = {request.ID};" +
+                    $"DELETE FROM smrsitems WHERE mrs_ID =  {lastMRSID} ;\r\nCALL MRS_transaction();\r\nCOMMIT;\r\nSELECT LAST_INSERT_ID();\r\n";
                 await Context.ExecuteNonQry<int>(updatestmt);
 
             }
@@ -79,9 +79,8 @@ namespace CMMSAPIs.Repositories.SM
             {
                 var refType = "MRS";
                 var mailSub = "MRS Request";
-                string insertStmt = $"START TRANSACTION; INSERT INTO smmrs (plant_ID,requested_by_emp_ID,requested_date," +
-                    $"status,flag,setAsTemplate,templateName, approved_by_emp_ID, approved_date)\r\n VALUES ({request.plant_ID},{request.requested_by_emp_ID},'{ request.requestd_date.Value.ToString("yyyy-MM-dd HH:mm")}'" +
-                    $",0,{request.flag},{request.setAsTemplate},'{request.templateName}',0,'2001-01-01 00:00'); SELECT LAST_INSERT_ID(); /*IF @@ERROR <> 0 THEN\r\n    ROLLBACK;\r\nELSE\r\n    COMMIT;\r\n END IF; */";
+               
+                string insertStmt = $"\r\nSET autocommit = 0;\r\nSTART TRANSACTION;\r\nINSERT INTO smmrs (plant_ID,requested_by_emp_ID,requested_date,status,flag,setAsTemplate,templateName)\r\n VALUES ({request.plant_ID},{request.requested_by_emp_ID},'{UtilsRepository.GetUTCTime()}',0,{request.flag},{request.setAsTemplate},'{request.templateName}');\r\nCALL MRS_transaction();\r\nCOMMIT;\r\nSELECT LAST_INSERT_ID();\r\n";
                 DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
                 request.ID = Convert.ToInt32(dt2.Rows[0][0]);
             }
@@ -93,12 +92,12 @@ namespace CMMSAPIs.Repositories.SM
                     int equipmentID = request.equipments[i].equipmentID;
                     decimal quantity = request.equipments[i].qty;
 
-                    string selectQuery = "SELECT sam.approval_required, sat.asset_code, asset_type_ID FROM smassetitems sat " +
+                    string selectQuery = "SELECT sam.approval_required as approval_required_id, sat.asset_code, asset_type_ID FROM smassetitems sat " +
                                "LEFT JOIN smassetmasters sam ON sam.asset_code = sat.asset_code " +
                                "WHERE sat.ID = " + equipmentID;
                     
                    List<CMSMMaster> assetList = await Context.GetData<CMSMMaster>(selectQuery).ConfigureAwait(false);
-                    var approval_required = assetList[0].approval_required;
+                    var approval_required = assetList[0].approval_required_ID;
                     var asset_type_ID = assetList[0].asset_type_ID;
                     var asset_code = assetList[0].asset_code;
                     var IsSpareSelectionEnable = await getMultiSpareSelectionStatus(asset_code, asset_type_ID);
@@ -106,10 +105,13 @@ namespace CMMSAPIs.Repositories.SM
                     {
                         try
                         {
-                            string insertStmt = $"START TRANSACTION; " +
-                            $"INSERT INTO smrsitems (mrs_ID,asset_item_ID,asset_MDM_code,requested_qty,status,flag,approval_required,mrs_return_ID)" +
-                            $"VALUES ({request.ID},{request.equipments[i].equipmentID},'{asset_code}',{request.equipments[i].qty},0,0,{approval_required},0)" +
-                            $"; SELECT LAST_INSERT_ID();/* IF @@ERROR <> 0 THEN\r\n    ROLLBACK;\r\nELSE\r\n    COMMIT;\r\n END IF;*/";
+                            //string insertStmt = $"/*START TRANSACTION;*/" +
+                            //$"INSERT INTO smrsitems (mrs_ID,asset_item_ID,asset_MDM_code,requested_qty,status,flag,approval_required,mrs_return_ID)" +
+                            //$"VALUES ({request.ID},{request.equipments[i].equipmentID},'{asset_code}',{request.equipments[i].qty},0,0,{approval_required},0)" +
+                            //$"; SELECT LAST_INSERT_ID();/* IF @@ERROR <> 0 THEN\r\n    ROLLBACK;\r\nELSE\r\n    COMMIT;\r\n END IF;*/";
+
+                            string insertStmt = $"\r\nSET autocommit = 0;\r\nSTART TRANSACTION;\r\nINSERT INTO smrsitems (mrs_ID,asset_item_ID,asset_MDM_code,requested_qty,status,flag,approval_required,mrs_return_ID) VALUES ({request.ID},{request.equipments[i].equipmentID},'{asset_code}',{request.equipments[i].qty},0,0,{approval_required},0);\r\nCALL MRS_transaction();\r\nCOMMIT;\r\nSELECT LAST_INSERT_ID();\r\n";
+
                             DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
                         }catch(Exception ex) 
                         { throw ex; }
@@ -118,10 +120,10 @@ namespace CMMSAPIs.Repositories.SM
                     {
                         try
                         {
-                            string insertStmt = $"START TRANSACTION; " +
+                            string insertStmt = $"\r\nSET autocommit = 0;\r\nSTART TRANSACTION;" +
                             $"INSERT INTO smrsitems (mrs_ID,asset_item_ID,asset_MDM_code,requested_qty,status,flag,approval_required,mrs_return_ID)" +
                             $"VALUES ({request.ID},{request.equipments[i].equipmentID},'{asset_code}',1,0,0,{approval_required},0)" +
-                            $"; SELECT LAST_INSERT_ID();/* IF @@ERROR <> 0 THEN\r\n    ROLLBACK;\r\nELSE\r\n    COMMIT;\r\n END IF;*/";
+                            $";\r\nCALL MRS_transaction();\r\nCOMMIT;\r\n SELECT LAST_INSERT_ID();";
                             DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
                         }catch (Exception ex)
                         { throw ex; }
