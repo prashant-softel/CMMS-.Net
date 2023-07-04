@@ -1,4 +1,4 @@
-﻿using CMMSAPIs.Helper;
+using CMMSAPIs.Helper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,18 +12,20 @@ namespace CMMSAPIs.BS.SM
 {
     public interface IMRSBS
     {
-        Task<CMDefaultResponse> requestMRS(CMMRS request);        
-        Task<List<CMMRS>> getMRSList(int plant_ID, int emp_id, DateTime? toDate, DateTime? fromDate);        
-        Task<List<CMMRS>> getMRSItems(int ID);        
-        Task<List<CMMRS>> getMRSItemsBeforeIssue(int ID);        
-        Task<List<CMMRS>> getMRSItemsWithCode(int ID);        
+        Task<CMDefaultResponse> CreateMRS(CMMRS request);        
+        Task<List<CMMRSList>> getMRSList(int plant_ID, int emp_id, DateTime toDate, DateTime fromDate, int status);        
+        Task<List<CMMRSItems>> getMRSItems(int ID);        
+        Task<List<CMMRSItemsBeforeIssue>> getMRSItemsBeforeIssue(int ID);        
+        Task<List<CMMRSItemsBeforeIssue>> getMRSItemsWithCode(int ID);        
         Task<List<CMMRS>> getMRSDetails(int ID);        
-        Task<List<CMMRS>> getReturnDataByID(int ID);        
+        Task<List<CMRETURNMRSDATA>> getReturnDataByID(int ID);        
         Task<List<CMMRS>> getAssetTypeByItemID(int ItemID);
         Task<CMDefaultResponse> mrsReturn(CMMRS request);        
         Task<CMDefaultResponse> mrsApproval(CMMRS request);        
         Task<CMDefaultResponse> mrsReturnApproval(CMMRS request);
         void UpdateAssetStatus(int assetItemID, int status);
+        Task<CMMRS> getLastTemplateData(int ID);
+        Task<List<CMAssetItem>> GetAssetItems(int plantID, bool isGroupByCode = false);
     }
     public class MRSBS : IMRSBS
     {
@@ -34,13 +36,13 @@ namespace CMMSAPIs.BS.SM
             databaseProvider = dbProvider;
         }
 
-        public async Task<CMDefaultResponse> requestMRS(CMMRS request)
+        public async Task<CMDefaultResponse> CreateMRS(CMMRS request)
         {
             try
             {
                 using (var repos = new MRSRepository(getDB))
                 {
-                    return await repos.requestMRS(request);
+                    return await repos.CreateMRS(request);
                 }
             }
             catch (Exception ex)
@@ -49,13 +51,13 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<CMMRS>> getMRSList(int plant_ID, int emp_id, DateTime? toDate, DateTime? fromDate)
+        public async Task<List<CMMRSList>> getMRSList(int plant_ID, int emp_id, DateTime toDate, DateTime fromDate, int status)
         {
             try
             {
                 using (var repos = new MRSRepository(getDB))
                 {
-                    return await repos.getMRSList(plant_ID, emp_id, toDate, fromDate);
+                    return await repos.getMRSList(plant_ID, emp_id, toDate, fromDate, status);
                 }
             }
             catch (Exception ex)
@@ -64,7 +66,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
         
-        public async Task<List<CMMRS>> getMRSItems(int ID)
+        public async Task<List<CMMRSItems>> getMRSItems(int ID)
            {
             try
             {
@@ -79,7 +81,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
         
-        public async Task<List<CMMRS>> getMRSItemsBeforeIssue(int ID)
+        public async Task<List<CMMRSItemsBeforeIssue>> getMRSItemsBeforeIssue(int ID)
         {
             try
             {
@@ -94,7 +96,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<CMMRS>> getMRSItemsWithCode(int ID)
+        public async Task<List<CMMRSItemsBeforeIssue>> getMRSItemsWithCode(int ID)
         {
             try
             {
@@ -123,7 +125,7 @@ namespace CMMSAPIs.BS.SM
                 throw;
             }
         }
-        public async Task<List<CMMRS>> getReturnDataByID(int ID)
+        public async Task<List<CMRETURNMRSDATA>> getReturnDataByID(int ID)
         {
             try
             {
@@ -211,6 +213,37 @@ namespace CMMSAPIs.BS.SM
                 throw;
             }
         }
+        public async Task<CMMRS> getLastTemplateData(int ID)
+        {
+            try
+            {
+                using (var repos = new MRSRepository(getDB))
+                {
+                   return await repos.getLastTemplateData(ID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<CMAssetItem>> GetAssetItems(int plantID, bool isGroupByCode = false)
+        {
+            try
+            {
+                using (var repos = new MRSRepository(getDB))
+                {
+                    return await repos.GetAssetItems(plantID, isGroupByCode);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        
     }
 
 }
