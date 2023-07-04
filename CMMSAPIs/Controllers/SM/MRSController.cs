@@ -1,9 +1,10 @@
-﻿using CMMSAPIs.BS.SM;
+using CMMSAPIs.BS.SM;
 using CMMSAPIs.Helper;
 using CMMSAPIs.Models.SM;
 using CMMSAPIs.Models.Users;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.SM;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -31,13 +32,14 @@ namespace CMMSAPIs.Controllers.SM
         }
 
         // First 
-        [Route("requestMRS")]
+ 
+        [Route("CreateMRS")]
         [HttpPost]       
-        public async Task<IActionResult> requestMRS(CMMRS request)
+        public async Task<IActionResult> CreateMRS(CMMRS request)
         {
             try
             {
-                var data = await _MRSBS.requestMRS(request);
+                var data = await _MRSBS.CreateMRS(request);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -47,25 +49,27 @@ namespace CMMSAPIs.Controllers.SM
                 throw ex;
             }
         }
-        
+
+         
         [Route("getMRSList")]
         [HttpGet]
-        public async Task<IActionResult> getMRSList(int plant_ID, int emp_id, DateTime? toDate, DateTime? fromDate)
+        public async Task<IActionResult> getMRSList(int plant_ID, int emp_id, string toDate, string fromDate, int status)
         {
             try
             {
-                var data = await _MRSBS.getMRSList(plant_ID, emp_id, toDate, fromDate);
+                var data = await _MRSBS.getMRSList(plant_ID, emp_id, Convert.ToDateTime(toDate), Convert.ToDateTime(fromDate), status);
                 return Ok(data);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.ToString());
-                /*_AddLog.ErrorLog(ex.ToString());
-                _AddLog.ErrorLog("Exception got using ILOGGER "+ex.ToString());*/
+
+                _AddLog.ErrorLog(ex.ToString());
+                _AddLog.ErrorLog("Exception got using ILOGGER "+ex.ToString());
                 throw ex;
             }
         }
-        
+
+         
         [Route("getMRSItems")]
         [HttpGet]
         public async Task<IActionResult> getMRSItems(int ID)
@@ -77,11 +81,11 @@ namespace CMMSAPIs.Controllers.SM
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.ToString());
-                //_AddLog.ErrorLog(ex.ToString());
+                _AddLog.ErrorLog(ex.ToString());
                 throw ex;
             }
         }
+         
         [Route("getMRSItemsBeforeIssue")]
         [HttpGet]
         public async Task<IActionResult> getMRSItemsBeforeIssue(int ID)
@@ -93,11 +97,12 @@ namespace CMMSAPIs.Controllers.SM
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.ToString());
-                //_AddLog.ErrorLog(ex.ToString());
+                _AddLog.ErrorLog(ex.ToString());
                 throw ex;
             }
         }
+
+         
         [Route("getMRSItemsWithCode")]
         [HttpGet]
         public async Task<IActionResult> getMRSItemsWithCode(int ID)
@@ -109,12 +114,12 @@ namespace CMMSAPIs.Controllers.SM
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.ToString());
-                //_AddLog.ErrorLog(ex.ToString());
+                _AddLog.ErrorLog(ex.ToString());
                 throw ex;
             }
         }
 
+         
         [Route("getMRSDetails")]
         [HttpGet]
         public async Task<IActionResult> getMRSDetails(int ID)
@@ -126,12 +131,12 @@ namespace CMMSAPIs.Controllers.SM
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.ToString());
-                //_AddLog.ErrorLog(ex.ToString());
+                _AddLog.ErrorLog(ex.ToString());
                 throw ex;
             }
         }
 
+         
         [Route("mrsApproval")]
         [HttpPost]
         public async Task<IActionResult> mrsApproval(CMMRS request)
@@ -144,12 +149,12 @@ namespace CMMSAPIs.Controllers.SM
             }
             catch(Exception ex)
             {
-                _logger.LogError(ex.ToString());
-                //_AddLog.ErrorLog(ex.ToString());
+                _AddLog.ErrorLog(ex.ToString());
                 throw ex;
             }
         }
-        
+
+         
         [Route("getReturnDataByID")]
         [HttpGet]
         public async Task<IActionResult> getReturnDataByID(int ID)
@@ -161,13 +166,13 @@ namespace CMMSAPIs.Controllers.SM
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.ToString());
-                //_AddLog.ErrorLog(ex.ToString());
+                _AddLog.ErrorLog(ex.ToString());
                 throw ex;
             }
 
         }
-        
+
+         
         [Route("getAssetTypeByItemID")]
         [HttpGet]
         public async Task<IActionResult> getAssetTypeByItemID(int ItemID)
@@ -179,12 +184,12 @@ namespace CMMSAPIs.Controllers.SM
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.ToString());
-                //_AddLog.ErrorLog(ex.ToString());
+                _AddLog.ErrorLog(ex.ToString());
                 throw ex;
             }
         }
-        
+
+         
         [Route("mrsReturn")]
         [HttpPost] 
         public async Task<IActionResult> mrsReturn(CMMRS request)
@@ -196,12 +201,12 @@ namespace CMMSAPIs.Controllers.SM
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.ToString());
-                //_AddLog.ErrorLog(ex.ToString());
+                _AddLog.ErrorLog(ex.ToString());
                 throw ex;
             }
         }
-        
+
+         
         [Route("mrsReturnApproval")]
         [HttpPost]
         public async Task<IActionResult> mrsReturnApproval(CMMRS request)
@@ -213,8 +218,41 @@ namespace CMMSAPIs.Controllers.SM
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.ToString());
-                //_AddLog.ErrorLog(ex.ToString());
+                _AddLog.ErrorLog(ex.ToString());
+                throw ex;
+            }
+        }
+
+         
+        [Route("getLastTemplateData")]
+        [HttpGet]
+        public async Task<IActionResult> getLastTemplateData(int ID)
+        {
+            try
+            {
+                var data = await _MRSBS.getLastTemplateData(ID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                _AddLog.ErrorLog(ex.ToString());
+                throw ex;
+            }
+        }
+
+         
+        [Route("GetAssetItems")]
+        [HttpGet]
+        public async Task<IActionResult> GetAssetItems(int plantID, bool isGroupByCode = false)
+        {
+            try
+            {
+                var data = await _MRSBS.GetAssetItems(plantID, isGroupByCode);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                _AddLog.ErrorLog(ex.ToString());
                 throw ex;
             }
         }
