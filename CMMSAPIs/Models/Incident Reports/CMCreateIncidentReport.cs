@@ -30,5 +30,7 @@ namespace CMMSAPIs.Models.Incident_Reports
         public int insurance_status { get; set; }
         public string insurance_remark { get; set; }
         public int approved_by { get; set; }
+        
+        
     }
 }

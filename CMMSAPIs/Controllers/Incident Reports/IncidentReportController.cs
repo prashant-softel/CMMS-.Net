@@ -34,11 +34,11 @@ namespace CMMSAPIs.Controllers.Incident_Reports
 
         [Route("CreateIncidentReport")]
         [HttpPost]
-        public async Task<IActionResult> CreateIncidentReport(CMCreateIncidentReport request)
+        public async Task<IActionResult> CreateIncidentReport(CMCreateIncidentReport request, int userId)
         {
             try
             {
-                var data = await _IncidentReportBS.CreateIncidentReport(request);
+                var data = await _IncidentReportBS.CreateIncidentReport(request,userId);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -64,11 +64,11 @@ namespace CMMSAPIs.Controllers.Incident_Reports
 
         [Route("UpdateIncidentReport")]
         [HttpPut]
-        public async Task<IActionResult> UpdateIncidentReport(CMCreateIncidentReport request)
+        public async Task<IActionResult> UpdateIncidentReport(CMCreateIncidentReport request, int userId)
         {
             try
             {
-                var data = await _IncidentReportBS.UpdateIncidentReport(request);
+                var data = await _IncidentReportBS.UpdateIncidentReport(request, userId);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -79,11 +79,11 @@ namespace CMMSAPIs.Controllers.Incident_Reports
 
         [Route("ApproveIncidentReport")]
         [HttpPut]
-        public async Task<IActionResult> ApproveIncidentReport(int id)
+        public async Task<IActionResult> ApproveIncidentReport(int incidentId,int userId)
         {
             try
             {
-                var data = await _IncidentReportBS.ApproveIncidentReport(id);
+                var data = await _IncidentReportBS.ApproveIncidentReport(incidentId,userId);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -94,11 +94,11 @@ namespace CMMSAPIs.Controllers.Incident_Reports
 
         [Route("RejectIncidentReport")]
         [HttpPut]
-        public async Task<IActionResult> RejectIncidentReport([FromForm] CMApproveIncident request)
+        public async Task<IActionResult> RejectIncidentReport([FromForm] CMApproveIncident request,int userId)
         {
             try
             {
-                var data = await _IncidentReportBS.RejectIncidentReport(request);
+                var data = await _IncidentReportBS.RejectIncidentReport(request,userId);
                 return Ok(data);
             }
             catch (Exception ex)
