@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using CMMSAPIs.Models.Notifications;
+using System.Data;
 
 namespace CMMSAPIs.Repositories.Incident_Reports
 {
@@ -113,6 +114,8 @@ namespace CMMSAPIs.Repositories.Incident_Reports
              * Your code goes here
             */
             //Add Log in history uncomment the below code
+            CMDefaultResponse response = new CMDefaultResponse();
+
             string qryIncident = "INSERT INTO incidents" +
                                      "(" +
                                              "facility_id, block_id, equipment_id, risk_level, incident_datetime, victim_id, action_taken_by, action_taken_datetime, inverstigated_by, verified_by, risk_type, esi_applicability, legal_applicability, rca_required, damaged_cost, generation_loss, job_id, description, is_insurance_applicable, insurance_status, insurance_remark, approved_by" +
@@ -120,48 +123,59 @@ namespace CMMSAPIs.Repositories.Incident_Reports
                                       "VALUES" +
                                      "(" +
                                             $"{ request.facility_id }, { request.block_id }, { request.equipment_id }, { request.risk_level }, '{ UtilsRepository.GetUTCTime() }',{request.victim_id}, {request.action_taken_by}, '{ UtilsRepository.GetUTCTime() }', {request.inverstigated_by}, {request.verified_by},{request.risk_type},{request.esi_applicability},{request.legal_applicability},{request.rca_required},{request.damaged_cost},{request.generation_loss},{request.job_id},'{request.description}',{request.is_insurance_applicable},{request.insurance_status},'{request.insurance_remark}', {request.approved_by}" +
-                                     ")";
+                                     ") ; SELECT LAST_INSERT_ID()";
 
-            int incident_id = await Context.ExecuteNonQry<int>(qryIncident).ConfigureAwait(false);
-            CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
+            DataTable dt2 = await Context.FetchData(qryIncident).ConfigureAwait(false);
+            int incident_id = Convert.ToInt32(dt2.Rows[0][0]);
 
+            //CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
+
+            //if (incident_id > 0)
+            //{
+            //    retCode = CMMS.RETRUNSTATUS.SUCCESS;
+            //}
+            //string strRiskType = "";
+            //string strParanthesis = "";
+
+            //foreach (var kvp in CMMS.INCIDENT_RISK_TYPE)
+            //{
+            //    strRiskType += $"If(risk_type = '{kvp.Key}', '{kvp.Value}',";
+            //    strParanthesis += ")";
+            //}
+            //strRiskType = strRiskType.Substring(0, (strRiskType.Length - 1)) + ",''" + strParanthesis + " as risk_type_name ";
+
+            //string myQuery = "SELECT " +
+            //                   "incident.id as id, facilities.id as facility_id, facilities.name as facility_name, blockName.id as block_id, blockName.name as block_name, assets.id as equipment_id,  assets.name as equipment_name, incident.risk_level as risk_level ,IF(risk_level = '1','high',IF(risk_level ='2','medium','Low')) as risk_level_name, incident.incident_datetime as incident_datetime, user.id as victim_id, user.firstName as victim_name , user1.id as action_taken_by,  CONCAT(user1.firstName, user1.lastName) as action_taken_by_name, user2.id as inverstigated_by ,  CONCAT(user2.firstName, user2.lastName) as inverstigated_by_name , user3.id as verified_by ,CONCAT(user3.firstName, user3.lastName) as verified_by_name, incident.risk_type as risk_type, " + strRiskType + ", IF(esi_applicability = '1', 'YES', 'NO') as esi_applicability_name, IF(legal_applicability = '1', 'YES', 'NO') as legal_applicability_name, IF(rca_required = '1', 'YES', 'NO') as rca_required_name, incident.damaged_cost AS damaged_cost, incident.generation_loss as generation_loss, job.id as job_id, job.title as job_name , job.description as description , IF(is_insurance_applicable = '1', 'YES', 'NO') as is_insurance_applicable_name, incident.insurance_status as insurance_status,  IF(incident.insurance_status ='1','YES','NO') as is_insurance_applicable_name, incident.insurance_remark as insurance_remark, user4.id as approved_by ,CONCAT(user4.firstName, user4.lastName) as approved_by_name, CONCAT(user5.firstName, user5.lastName) as created_by_name, CONCAT(user6.firstName, user6.lastName) as updated_by_name, incident.status as status, incident.approved_at as approved_at " +
+            //                   " FROM incidents as incident " +
+            //                   "JOIN facilities AS facilities on facilities.id = incident.facility_id " +
+            //                   "JOIN facilities AS blockName on blockName.id = incident.block_id  and blockName.isBlock = 1 " +
+            //                   "JOIN assets as assets on incident.equipment_id = assets.id " +
+            //                   "JOIN jobs AS job on incident.job_id = job.id " +
+            //                   "LEFT JOIN users as user on incident.victim_id = user.id " +
+            //                   "LEFT JOIN users as user1 on incident.action_taken_by = user1.id " +
+            //                   "LEFT JOIN users as user2 on incident.inverstigated_by = user2.id  " +
+            //                   "LEFT JOIN users as user3 on incident.verified_by = user3.id " +
+            //                   "LEFT JOIN users as user4 on incident.approved_by = user4.id " +
+            //                   "LEFT JOIN users as user5 on incident.created_by = user5.id " +
+            //                   "LEFT JOIN users as user6 on incident.updated_by = user6.id " +
+            //                   " order by incident.id desc limit 1";
+
+            //List<CMViewIncidentReport> _IncidentReportDetails = await Context.GetData<CMViewIncidentReport>(myQuery).ConfigureAwait(false);
             if (incident_id > 0)
             {
-                retCode = CMMS.RETRUNSTATUS.SUCCESS;
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INCIDENT_REPORT, incident_id, 0, 0, "Incident Report Created", CMMS.CMMS_Status.IR_CREATED);
+
+                List<CMViewIncidentReport> _IncidentReportDetails = await GetIncidentDetailsReport(incident_id);
+
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INCIDENT_REPORT, CMMS.CMMS_Status.IR_CREATED, _IncidentReportDetails[0]);
+
+                response = new CMDefaultResponse(incident_id, CMMS.RETRUNSTATUS.SUCCESS, "Added Incident Report");
             }
-            string strRiskType = "";
-            string strParanthesis = "";
+            else{
 
-            foreach (var kvp in CMMS.INCIDENT_RISK_TYPE)
-            {
-                strRiskType += $"If(risk_type = '{kvp.Key}', '{kvp.Value}',";
-                strParanthesis += ")";
+                response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Incident Report creation failed");
+
             }
-            strRiskType = strRiskType.Substring(0, (strRiskType.Length - 1)) + ",''" + strParanthesis + " as risk_type_name ";
-
-            string myQuery = "SELECT " +
-                               "incident.id as id, facilities.id as facility_id, facilities.name as facility_name, blockName.id as block_id, blockName.name as block_name, assets.id as equipment_id,  assets.name as equipment_name, incident.risk_level as risk_level ,IF(risk_level = '1','high',IF(risk_level ='2','medium','Low')) as risk_level_name, incident.incident_datetime as incident_datetime, user.id as victim_id, user.firstName as victim_name , user1.id as action_taken_by,  CONCAT(user1.firstName, user1.lastName) as action_taken_by_name, user2.id as inverstigated_by ,  CONCAT(user2.firstName, user2.lastName) as inverstigated_by_name , user3.id as verified_by ,CONCAT(user3.firstName, user3.lastName) as verified_by_name, incident.risk_type as risk_type, " + strRiskType + ", IF(esi_applicability = '1', 'YES', 'NO') as esi_applicability_name, IF(legal_applicability = '1', 'YES', 'NO') as legal_applicability_name, IF(rca_required = '1', 'YES', 'NO') as rca_required_name, incident.damaged_cost AS damaged_cost, incident.generation_loss as generation_loss, job.id as job_id, job.title as job_name , job.description as description , IF(is_insurance_applicable = '1', 'YES', 'NO') as is_insurance_applicable_name, incident.insurance_status as insurance_status,  IF(incident.insurance_status ='1','YES','NO') as is_insurance_applicable_name, incident.insurance_remark as insurance_remark, user4.id as approved_by ,CONCAT(user4.firstName, user4.lastName) as approved_by_name, CONCAT(user5.firstName, user5.lastName) as created_by_name, CONCAT(user6.firstName, user6.lastName) as updated_by_name, incident.status as status, incident.approved_at as approved_at " +
-                               " FROM incidents as incident " +
-                               "JOIN facilities AS facilities on facilities.id = incident.facility_id " +
-                               "JOIN facilities AS blockName on blockName.id = incident.block_id  and blockName.isBlock = 1 " +
-                               "JOIN assets as assets on incident.equipment_id = assets.id " +
-                               "JOIN jobs AS job on incident.job_id = job.id " +
-                               "LEFT JOIN users as user on incident.victim_id = user.id " +
-                               "LEFT JOIN users as user1 on incident.action_taken_by = user1.id " +
-                               "LEFT JOIN users as user2 on incident.inverstigated_by = user2.id  " +
-                               "LEFT JOIN users as user3 on incident.verified_by = user3.id " +
-                               "LEFT JOIN users as user4 on incident.approved_by = user4.id " +
-                               "LEFT JOIN users as user5 on incident.created_by = user5.id " +
-                               "LEFT JOIN users as user6 on incident.updated_by = user6.id " +
-                               " order by incident.id desc limit 1";
-
-            List<CMViewIncidentReport> _IncidentReportDetails = await Context.GetData<CMViewIncidentReport>(myQuery).ConfigureAwait(false);
-
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INCIDENT_REPORT, _IncidentReportDetails[0].id, 0, 0, "Incident Report Created", CMMS.CMMS_Status.IR_CREATED);
-
-            CMMSNotification.sendNotification(CMMS.CMMS_Modules.INCIDENT_REPORT, CMMS.CMMS_Status.IR_CREATED, _IncidentReportDetails[0]);
-
-            CMDefaultResponse response = new CMDefaultResponse(_IncidentReportDetails[0].id, CMMS.RETRUNSTATUS.SUCCESS, "Added Incident Report");
 
             return response;
         }
@@ -192,10 +206,10 @@ namespace CMMSAPIs.Repositories.Incident_Reports
             string myQuery = "SELECT " +
                                "incident.id as id, facilities.id as facility_id, facilities.name as facility_name, blockName.id as block_id, blockName.name as block_name, assets.id as equipment_id,  assets.name as equipment_name, incident.risk_level as risk_level ,IF(risk_level = '1','high',IF(risk_level ='2','medium','Low')) as risk_level_name, incident.incident_datetime as incident_datetime, user.id as victim_id, user.firstName as victim_name , user1.id as action_taken_by,  CONCAT(user1.firstName, user1.lastName) as action_taken_by_name, user2.id as inverstigated_by ,  CONCAT(user2.firstName, user2.lastName) as inverstigated_by_name , user3.id as verified_by ,CONCAT(user3.firstName, user3.lastName) as verified_by_name, incident.risk_type as risk_type, " + strRiskType + ", IF(esi_applicability = '1', 'YES', 'NO') as esi_applicability_name, IF(legal_applicability = '1', 'YES', 'NO') as legal_applicability_name, IF(rca_required = '1', 'YES', 'NO') as rca_required_name, incident.damaged_cost AS damaged_cost, incident.generation_loss as generation_loss, job.id as job_id, job.title as job_name , job.description as description , IF(is_insurance_applicable = '1', 'YES', 'NO') as is_insurance_applicable_name, incident.insurance_status as insurance_status,  IF(incident.insurance_status ='1','YES','NO') as is_insurance_applicable_name, incident.insurance_remark as insurance_remark, user4.id as approved_by ,CONCAT(user4.firstName, user4.lastName) as approved_by_name, CONCAT(user5.firstName, user5.lastName) as created_by_name, CONCAT(user6.firstName, user6.lastName) as updated_by_name, incident.status as status, incident.approved_at as approved_at " +
                                " FROM incidents as incident " +
-                               "JOIN facilities AS facilities on facilities.id = incident.facility_id " +
-                               "JOIN facilities AS blockName on blockName.id = incident.block_id  and blockName.isBlock = 1 " +
-                               "JOIN assets as assets on incident.equipment_id = assets.id " +
-                               "JOIN jobs AS job on incident.job_id = job.id " +
+                               "LEFT JOIN facilities AS facilities on facilities.id = incident.facility_id " +
+                               "LEFT JOIN facilities AS blockName on blockName.id = incident.block_id  and blockName.isBlock = 1 " +
+                               "LEFT JOIN assets as assets on incident.equipment_id = assets.id " +
+                               "LEFT JOIN jobs AS job on incident.job_id = job.id " +
                                "LEFT JOIN users as user on incident.victim_id = user.id " +
                                "LEFT JOIN users as user1 on incident.action_taken_by = user1.id " +
                                "LEFT JOIN users as user2 on incident.inverstigated_by = user2.id  " +
@@ -207,18 +221,22 @@ namespace CMMSAPIs.Repositories.Incident_Reports
 
             List<CMViewIncidentReport> _IncidentReportList = await Context.GetData<CMViewIncidentReport>(myQuery).ConfigureAwait(false);
 
-            string myQuery1 = "SELECT history.moduleRefId as moduleRefId, history.moduleType as moduleType, history.comment as comment FROM history as history left join incidents as incident on incident.id = history.moduleRefId AND history.moduleType = " + (int)CMMS.CMMS_Modules.INCIDENT_REPORT + " where history.id = " + _IncidentReportList[0].id;
-            List<CMHistoryLIST> _historyList = await Context.GetData<CMHistoryLIST>(myQuery1).ConfigureAwait(false);
+            if (_IncidentReportList.Count > 0)
+            {
 
-            _IncidentReportList[0].LstHistory = _historyList;
+                string myQuery1 = $"SELECT history.moduleRefId as moduleRefId, history.moduleType as moduleType, history.comment as comment FROM history as history left join incidents as incident on incident.id = history.moduleRefId AND history.moduleType = {(int)CMMS.CMMS_Modules.INCIDENT_REPORT} where incident.id= {id}";
+                List<CMHistoryLIST> _historyList = await Context.GetData<CMHistoryLIST>(myQuery1).ConfigureAwait(false);
 
-            CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_IncidentReportList[0].status);
-            string _shortStatus = getShortStatus(CMMS.CMMS_Modules.INCIDENT_REPORT, _Status);
-            _IncidentReportList[0].status_short = _shortStatus;
+                _IncidentReportList[0].LstHistory = _historyList;
 
-            CMMS.CMMS_Status _Status_long = (CMMS.CMMS_Status)(_IncidentReportList[0].status);
-            string _longStatus = getLongStatus(CMMS.CMMS_Modules.INCIDENT_REPORT, _Status_long, _IncidentReportList[0]);
-            _IncidentReportList[0].status_long = _longStatus;
+                CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_IncidentReportList[0].status);
+                string _shortStatus = getShortStatus(CMMS.CMMS_Modules.INCIDENT_REPORT, _Status);
+                _IncidentReportList[0].status_short = _shortStatus;
+
+                CMMS.CMMS_Status _Status_long = (CMMS.CMMS_Status)(_IncidentReportList[0].status);
+                string _longStatus = getLongStatus(CMMS.CMMS_Modules.INCIDENT_REPORT, _Status_long, _IncidentReportList[0]);
+                _IncidentReportList[0].status_long = _longStatus;
+            }
 
             return _IncidentReportList;
         }
@@ -274,7 +292,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INCIDENT_REPORT, updateId, 0, 0, "Incident Report Updated", CMMS.CMMS_Status.IR_UPDATED);
 
-            CMMSNotification.sendNotification(CMMS.CMMS_Modules.INCIDENT_REPORT, CMMS.CMMS_Status.IR_UPDATED, _IncidentReportList[0]);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INCIDENT_REPORT, CMMS.CMMS_Status.IR_UPDATED, _IncidentReportList[0]);
 
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Updated Incident Report Successfully");
 
@@ -329,7 +347,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
 
             List<CMViewIncidentReport> _IncidentReportList = await Context.GetData<CMViewIncidentReport>(myQuery).ConfigureAwait(false);
 
-            CMMSNotification.sendNotification(CMMS.CMMS_Modules.INCIDENT_REPORT, CMMS.CMMS_Status.IR_APPROVED, _IncidentReportList[0]);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INCIDENT_REPORT, CMMS.CMMS_Status.IR_APPROVED, _IncidentReportList[0]);
 
             CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Approved Incident Report Successfully");
             return response;
@@ -382,7 +400,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
 
             List<CMViewIncidentReport> _IncidentReportList = await Context.GetData<CMViewIncidentReport>(myQuery).ConfigureAwait(false);
 
-            CMMSNotification.sendNotification(CMMS.CMMS_Modules.INCIDENT_REPORT, CMMS.CMMS_Status.IR_REJECTED, _IncidentReportList[0]);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INCIDENT_REPORT, CMMS.CMMS_Status.IR_REJECTED, _IncidentReportList[0]);
 
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Rejected Incident Report Successfully");
 
