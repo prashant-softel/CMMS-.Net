@@ -9,7 +9,7 @@ using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Models.Users;
 using MailKit.Search;
 
-namespace CMMSAPIs.BS.GO
+namespace CMMSAPIs.BS.SM
 {
     public interface IGOBS
     {
@@ -20,8 +20,8 @@ namespace CMMSAPIs.BS.GO
         Task<CMDefaultResponse> UpdateGO(CMGoodsOrderList request, int userID);
         Task<CMDefaultResponse> DeleteGO(int GOid, int userID);
         Task<CMDefaultResponse> WithdrawGO(CMGoodsOrderList request, int userID);
-        Task<CMDefaultResponse> GOApproval(CMApproval request);
-        Task<CMDefaultResponse> RejectGO(CMApproval request);
+        Task<CMDefaultResponse> GOApproval(CMApproval request,int userId);
+        Task<CMDefaultResponse> RejectGO(CMApproval request,int userId);
         Task<List<CMPURCHASEDATA>> GetPurchaseData(int plantID, string empRole, DateTime fromDate, DateTime toDate, string status, string order_type);
         Task<CMGOMaster> getPurchaseDetailsByID(int id);
         Task<CMDefaultResponse> SubmitPurchaseData(CMSUBMITPURCHASEDATA request);
@@ -145,13 +145,13 @@ namespace CMMSAPIs.BS.GO
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> GOApproval(CMApproval request)
+        public async Task<CMDefaultResponse> GOApproval(CMApproval request,int userId)
         {
             try
             {
                 using (var repos = new GORepository(getDB))
                 {
-                    return await repos.ApproveGoodsOrder(request);
+                    return await repos.ApproveGoodsOrder(request, userId);
 
                 }
             }
@@ -160,13 +160,13 @@ namespace CMMSAPIs.BS.GO
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> RejectGO(CMApproval request)
+        public async Task<CMDefaultResponse> RejectGO(CMApproval request,int userId)
         {
             try
             {
                 using (var repos = new GORepository(getDB))
                 {
-                    return await repos.RejectGoodsOrder(request);
+                    return await repos.RejectGoodsOrder(request, userId);
 
                 }
             }

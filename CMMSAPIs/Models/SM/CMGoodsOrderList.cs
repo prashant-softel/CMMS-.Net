@@ -29,6 +29,8 @@ namespace CMMSAPIs.Models
         public DateTime? received_on { get; set; }
         public string receivedBy { get; set; }
         public string approvedBy { get; set; }
+
+        public int approved_by { get; set; }
         public DateTime? approvedOn { get; set; }
 
         public int receive_later { get; set; }

@@ -9,6 +9,7 @@ using CMMSAPIs.Helper;
 using CMMSAPIs.Models;
 using CMMSAPIs.Models.Notifications;
 using CMMSAPIs.Models.SM;
+using CMMSAPIs.Models.Users;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Models.WC;
 using CMMSAPIs.Repositories.Utils;
@@ -121,17 +122,19 @@ namespace CMMSAPIs.Repositories
         }
         internal async Task<CMDefaultResponse> UpdateGO(CMGoodsOrderList request, int userID)
         {
-            //string mainQuery = $"UPDATE smpurchaseorderdetails SET generate_flag = " +request.generate_flag + ",status = "+request.status+", vendorID = "+request.vendorID+" WHERE ID = "+request.id+"";
-
-            for (var i = 0; i < request.go_items.Count; i++)
-            {
-                string updateQ = $"UPDATE smpurchaseorderdetails SET assetItemID = {request.go_items[i].assetItemID},cost = {request.go_items[i].cost},ordered_qty = {request.go_items[i].ordered_qty},location_ID = {request.location_ID}" +
+            string OrderQuery = $"UPDATE smpurchaseorder SET " +
                     $"challan_no = '{request.challan_no}',po_no='{request.po_no}', freight='{request.freight}',no_pkg_received={request.no_pkg_received}," +
                     $"lr_no='{request.lr_no}',condition_pkg_received='{request.condition_pkg_received}',vehicle_no='{request.vehicle_no}', gir_no='{request.gir_no}', " +
                     $"challan_date = '{request.challan_date.Value.ToString("yyyy-MM-dd")}', " +
-                    $"job_ref='{request.job_ref}',amount='{request.amount}', currency='{request.currency}'" +
+                    $"job_ref='{request.job_ref}',amount='{request.amount}', currency='{request.currency}',updated_by = {userID},updatedOn = '{UtilsRepository.GetUTCTime()}' where ID={request.id}";
+
+            await Context.ExecuteNonQry<int>(OrderQuery);
+
+            for (var i = 0; i < request.go_items.Count; i++)
+            {
+                string itemsQuery = $"UPDATE smpurchaseorderdetails SET location_ID = {request.location_ID},assetItemID = {request.go_items[i].assetItemID},cost = {request.go_items[i].cost},ordered_qty = {request.go_items[i].ordered_qty}" +
                     $" WHERE ID = {request.go_items[i].poID}";
-                var result = await Context.ExecuteNonQry<int>(updateQ);
+                var result = await Context.ExecuteNonQry<int>(itemsQuery);
             }
 
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Goods order updated successfully.");
@@ -262,7 +265,7 @@ namespace CMMSAPIs.Repositories
         //    }
         //}
 
-        internal async Task<CMDefaultResponse> ApproveGoodsOrder(CMApproval request)
+        internal async Task<CMDefaultResponse> ApproveGoodsOrder(CMApproval request,int userId)
         {
             /*
              * Update the Incidents and also update the history table
@@ -275,8 +278,7 @@ namespace CMMSAPIs.Repositories
             {
                 throw new ArgumentException("Invalid argument id<" + request.id + ">");
             }
-            int userId = Utils.UtilsRepository.GetUserID();
-            string UpdatesqlQ = $" UPDATE smpurchaseorder SET approved_by = {userId}, status = {(int)CMMS.CMMS_Status.SM_PO_CLOSED_APPROVED}, remarks = '{request.comment}',approvedOn = '{DateTime.Now.ToString("yyyy-MM-dd")}' WHERE ID = {request.id}";
+            string UpdatesqlQ = $" UPDATE smpurchaseorder SET  status = {(int)CMMS.CMMS_Status.SM_PO_CLOSED_APPROVED}, remarks = '{request.comment}',approved_by = {userId},approvedOn = '{UtilsRepository.GetUTCTime()}' WHERE ID = {request.id}";
             int reject_id = await Context.ExecuteNonQry<int>(UpdatesqlQ).ConfigureAwait(false);
 
             retCode = CMMS.RETRUNSTATUS.SUCCESS;
@@ -313,7 +315,7 @@ namespace CMMSAPIs.Repositories
             return response;
         }
 
-        internal async Task<CMDefaultResponse> RejectGoodsOrder(CMApproval request)
+        internal async Task<CMDefaultResponse> RejectGoodsOrder(CMApproval request,int userId)
         {
 
             if (request.id <= 0)
@@ -321,9 +323,8 @@ namespace CMMSAPIs.Repositories
                 throw new ArgumentException("Invalid argument id<" + request.id + ">");
             }
 
-            int userId = Utils.UtilsRepository.GetUserID();
-            string approveQuery = $"Update smpurchaseorder set status = {(int)CMMS.CMMS_Status.SM_PO_CLOSED_REJECTED} , reject_reccomendations = '{request.comment}' , " +
-                $" rejecctedBy = {userId}, rejectedAt = '{DateTime.Now.ToString("yyyy-MM-dd")}'" +
+            string approveQuery = $"Update smpurchaseorder set status = {(int)CMMS.CMMS_Status.SM_PO_CLOSED_REJECTED} , remarks = '{request.comment}' ," +
+                $" approved_by = {userId}, approvedOn = '{DateTime.Now.ToString("yyyy-MM-dd")}'" +
                 $" where id = { request.id}";
             int reject_id = await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
 
@@ -577,7 +578,7 @@ namespace CMMSAPIs.Repositories
                     {
                         // Check if the asset item ID is already exists.
                         int assetItemId;
-                        if (item.assetItemID == null || item.assetItemID == 0)
+                        if (item.assetItemID == 0)
                         {
                             if (isMultiSelectionEnabled > 0)
                             {

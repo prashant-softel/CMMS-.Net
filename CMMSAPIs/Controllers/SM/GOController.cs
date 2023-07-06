@@ -1,4 +1,5 @@
-using CMMSAPIs.BS.GO;
+using CMMSAPIs.BS;
+using CMMSAPIs.BS.SM;
 using CMMSAPIs.Models;
 using CMMSAPIs.Models.Users;
 using CMMSAPIs.Models.Utils;
@@ -13,7 +14,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 
-namespace CMMSAPIs.Controllers
+namespace CMMSAPIs.Controllers.SM
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -92,7 +93,7 @@ namespace CMMSAPIs.Controllers
         }
 
  
-        [Route("UpdateRO")]
+        [Route("UpdateGO")]
         [HttpPost]
         public async Task<IActionResult> UpdateGO(CMGoodsOrderList request)
         {
@@ -111,7 +112,7 @@ namespace CMMSAPIs.Controllers
  
         [Route("DeleteGO")]
         [HttpPost]
-        public async Task<IActionResult> DeleteGO([FromForm] int id)
+        public async Task<IActionResult> DeleteGO(int id)
         {
             try
             {
@@ -145,11 +146,12 @@ namespace CMMSAPIs.Controllers
  
         [Route("GOApproval")]
         [HttpPost]
-        public async Task<IActionResult> GOApproval([FromForm]  CMApproval request )
+        public async Task<IActionResult> GOApproval(CMApproval request )
         {
             try
             {
-                var data = await _GOBS.GOApproval(request);
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _GOBS.GOApproval(request, userId);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -161,11 +163,12 @@ namespace CMMSAPIs.Controllers
  
         [Route("RejectGO")]
         [HttpPost]
-        public async Task<IActionResult> RejectGO([FromForm]  CMApproval request)
+        public async Task<IActionResult> RejectGO(CMApproval request)
         {
             try
             {
-                var data = await _GOBS.RejectGO(request);
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _GOBS.RejectGO(request, userId);
                 return Ok(data);
             }
             catch (Exception ex)
