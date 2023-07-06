@@ -511,9 +511,9 @@ namespace CMMSAPIs.Repositories.Masters
                     break;
                 case CMMS.CMMS_Modules.INCIDENT_REPORT:
                     IncidentReportRepository obj3 = new IncidentReportRepository(getDB);
-                    List<CMViewIncidentReport> _IncidentReport = await obj3.GetIncidentDetailsReport(id);
-                    notificationID = (CMMS.CMMS_Status)(_IncidentReport[0].status);
-                    CMMSNotification.sendNotification(moduleID, notificationID, _IncidentReport[0]);
+                    CMViewIncidentReport _IncidentReport = await obj3.GetIncidentDetailsReport(id);
+                    notificationID = (CMMS.CMMS_Status)(_IncidentReport.status);
+                    CMMSNotification.sendNotification(moduleID, notificationID, _IncidentReport);
                     break;
                 case CMMS.CMMS_Modules.WARRANTY_CLAIM:
                     WCRepository obj4 = new WCRepository(getDB);

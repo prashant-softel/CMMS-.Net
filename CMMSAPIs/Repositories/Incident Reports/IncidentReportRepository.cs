@@ -25,6 +25,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
             { 183, "Rejected" },
             { 184, "Updated" },
         };
+        
 
         internal static string getShortStatus(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status m_notificationID)
         {
@@ -126,9 +127,9 @@ namespace CMMSAPIs.Repositories.Incident_Reports
             {
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INCIDENT_REPORT, incident_id, 0, 0, "Incident Report Created", CMMS.CMMS_Status.IR_CREATED);
 
-                List<CMViewIncidentReport> _IncidentReportDetails = await GetIncidentDetailsReport(incident_id);
+                CMViewIncidentReport _IncidentReportDetails = await GetIncidentDetailsReport(incident_id);
 
-                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INCIDENT_REPORT, CMMS.CMMS_Status.IR_CREATED, _IncidentReportDetails[0]);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INCIDENT_REPORT, CMMS.CMMS_Status.IR_CREATED, _IncidentReportDetails);
 
                 response = new CMDefaultResponse(incident_id, CMMS.RETRUNSTATUS.SUCCESS, "Added Incident Report");
             }
@@ -141,7 +142,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
             return response;
         }
         
-        internal async Task<List<CMViewIncidentReport>> GetIncidentDetailsReport(int id)
+        internal async Task<CMViewIncidentReport> GetIncidentDetailsReport(int id)
         {
             /*risk_type
              * Fetch all the CMViewIncidentReport model data from Incidents table
@@ -199,7 +200,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
                 _IncidentReportList[0].status_long = _longStatus;
             }
 
-            return _IncidentReportList;
+            return _IncidentReportList[0];
         }
 
         internal async Task<CMDefaultResponse> UpdateIncidentReport(CMCreateIncidentReport request, int userId)
@@ -223,9 +224,9 @@ namespace CMMSAPIs.Repositories.Incident_Reports
 
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INCIDENT_REPORT, request.id, 0, 0, "Incident Report Updated", CMMS.CMMS_Status.IR_UPDATED);
 
-                List<CMViewIncidentReport> _IncidentReportDetails = await GetIncidentDetailsReport(request.id);
+                CMViewIncidentReport _IncidentReportDetails = await GetIncidentDetailsReport(request.id);
 
-                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INCIDENT_REPORT, CMMS.CMMS_Status.IR_UPDATED, _IncidentReportDetails[0]);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INCIDENT_REPORT, CMMS.CMMS_Status.IR_UPDATED, _IncidentReportDetails);
 
                 response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Updated Incident Report Successfully");
 
@@ -258,9 +259,9 @@ namespace CMMSAPIs.Repositories.Incident_Reports
             {
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INCIDENT_REPORT, incidentId, 0, 0, "Incident Report Approved", CMMS.CMMS_Status.IR_APPROVED);
 
-                List<CMViewIncidentReport> _IncidentReportDetails = await GetIncidentDetailsReport(incidentId);
+                CMViewIncidentReport _IncidentReportDetails = await GetIncidentDetailsReport(incidentId);
 
-                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INCIDENT_REPORT, CMMS.CMMS_Status.IR_APPROVED, _IncidentReportDetails[0]);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INCIDENT_REPORT, CMMS.CMMS_Status.IR_APPROVED, _IncidentReportDetails);
 
                 response = new CMDefaultResponse(incidentId, CMMS.RETRUNSTATUS.SUCCESS, " Incident Report Approved");
             }
@@ -287,9 +288,9 @@ namespace CMMSAPIs.Repositories.Incident_Reports
             {
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INCIDENT_REPORT, request.id, 0, 0, "Incident Report Rejected", CMMS.CMMS_Status.IR_REJECTED);
 
-                List<CMViewIncidentReport> _IncidentReportDetails = await GetIncidentDetailsReport(request.id);
+                CMViewIncidentReport _IncidentReportDetails = await GetIncidentDetailsReport(request.id);
 
-                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INCIDENT_REPORT, CMMS.CMMS_Status.IR_REJECTED, _IncidentReportDetails[0]);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INCIDENT_REPORT, CMMS.CMMS_Status.IR_REJECTED, _IncidentReportDetails);
 
                 response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Incident Report Rejected");
             }
