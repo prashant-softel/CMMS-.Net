@@ -32,7 +32,7 @@ namespace CMMS_Services
         //{
         //    this.token = token;
         //}
-        
+
         public RestClient SetUrl(string endpoint)
         {
             //var url = Path.Combine(baseUrl, endpoint);
@@ -40,34 +40,184 @@ namespace CMMS_Services
             restClient = new RestClient(url);
             return restClient;
         }
+        public RestSharp.RestRequest CreatePostRequestFromForm(Dictionary<string, Tuple<bool, List<string>>> payload)
+        {
+            restRequest = new RestRequest("", Method.Post);
+            if(token != null && token != "")
+                restRequest.AddHeader("Authorization", "Bearer " + token);
+            restRequest.AddHeader("Accept", "*/*");
+            restRequest.AddHeader("Content-Type", "multipart/form-data");
+            string boundary = "----WebKitFormBoundary" + DateTime.Now.Ticks.ToString("x");
+            restRequest.AddHeader("Content-Type", "multipart/form-data; boundary=" + boundary);
+            string requestBody = "";
+            foreach (var pair in payload)
+            {
+                if(pair.Value.Item1 == false)
+                {
+                    //if(pair.Value.Item2.Count == 1)
+                    //    requestBody += "--" + boundary + "\r\n" +
+                    //                    $"Content-Disposition: form-data; name=\"{pair.Key}\"\r\n" +
+                    //                    $"\r\n" +
+                    //                    $"{pair.Value.Item2[0]}\r\n";
+                    //else
+                    //{
+                        foreach(var item in pair.Value.Item2)
+                            requestBody += "--" + boundary + "\r\n" +
+                                            $"Content-Disposition: form-data; name=\"{pair.Key}\"\r\n" +
+                                            $"\r\n" +
+                                            $"{item}\r\n";
+                    //}
+                }
+                else
+                {
+                    foreach (var file in pair.Value.Item2)
+                    {
+                        // Read the file content
+                        byte[] fileBytes = File.ReadAllBytes(file);
 
+                        requestBody += "--" + boundary + "\r\n";
+                        requestBody += $"Content-Disposition: form-data; name=\"{pair.Key}\"; filename=\"{Path.GetFileName(file)}\"\r\n";
+                        requestBody += "Content-Type: application/octet-stream\r\n";
+                        requestBody += "\r\n";
+                        requestBody += Encoding.Default.GetString(fileBytes);
+                        requestBody += "\r\n";
+                    }
+                }
+            }
+            requestBody += "--" + boundary + "--\r\n";
+            restRequest.AddParameter("multipart/form-data", requestBody, ParameterType.RequestBody);
+            return restRequest;
+        }
+        public RestSharp.RestRequest CreatePostRequestFromForm(Dictionary<string, string> payload)
+        {
+            restRequest = new RestRequest("", Method.Post);
+            if (token != null && token != "")
+                restRequest.AddHeader("Authorization", "Bearer " + token);
+            restRequest.AddHeader("Accept", "*/*");
+            restRequest.AddHeader("Content-Type", "multipart/form-data");
+            string boundary = "----WebKitFormBoundary" + DateTime.Now.Ticks.ToString("x");
+            restRequest.AddHeader("Content-Type", "multipart/form-data; boundary=" + boundary);
+            string requestBody = "";
+            foreach (var pair in payload)
+            {
+                requestBody += "--" + boundary + "\r\n" +
+                                $"Content-Disposition: form-data; name=\"{pair.Key}\"\r\n" +
+                                $"\r\n" +
+                                $"{pair.Value}\r\n";
+            }
+            requestBody += "--" + boundary + "--\r\n";
+            restRequest.AddParameter("multipart/form-data", requestBody, ParameterType.RequestBody);
+            return restRequest;
+        }
+        public RestSharp.RestRequest CreatePutRequestFromForm(Dictionary<string, Tuple<bool, List<string>>> payload)
+        {
+            restRequest = new RestRequest("", Method.Put);
+            if (token != null && token != "")
+                restRequest.AddHeader("Authorization", "Bearer " + token);
+            restRequest.AddHeader("Accept", "*/*");
+            restRequest.AddHeader("Content-Type", "multipart/form-data");
+            string boundary = "----WebKitFormBoundary" + DateTime.Now.Ticks.ToString("x");
+            restRequest.AddHeader("Content-Type", "multipart/form-data; boundary=" + boundary);
+            string requestBody = "";
+            foreach (var pair in payload)
+            {
+                if (pair.Value.Item1 == false)
+                {
+                    if (pair.Value.Item2.Count == 1)
+                        requestBody += "--" + boundary + "\r\n" +
+                                        $"Content-Disposition: form-data; name=\"{pair.Key}\"\r\n" +
+                                        $"\r\n" +
+                                        $"{pair.Value.Item2[0]}\r\n";
+                    else
+                    {
+                        foreach (var item in pair.Value.Item2)
+                            requestBody += "--" + boundary + "\r\n" +
+                                            $"Content-Disposition: form-data; name=\"{pair.Key}[]\"\r\n" +
+                                            $"\r\n" +
+                                            $"{item}\r\n";
+                    }
+                }
+                else
+                {
+                    foreach (var file in pair.Value.Item2)
+                    {
+                        // Read the file content
+                        byte[] fileBytes = File.ReadAllBytes(file);
+
+                        requestBody += "--" + boundary + "\r\n";
+                        requestBody += $"Content-Disposition: form-data; name=\"{pair.Key}\"; filename=\"{Path.GetFileName(file)}\"\r\n";
+                        requestBody += "Content-Type: application/octet-stream\r\n";
+                        requestBody += "\r\n";
+                        requestBody += Encoding.Default.GetString(fileBytes);
+                        requestBody += "\r\n";
+                    }
+                }
+            }
+            requestBody += "--" + boundary + "--\r\n";
+            restRequest.AddParameter("multipart/form-data", requestBody, ParameterType.RequestBody);
+            return restRequest;
+        }
+        public RestSharp.RestRequest CreatePutRequestFromForm(Dictionary<string, string> payload)
+        {
+            restRequest = new RestRequest("", Method.Put);
+            if (token != null && token != "")
+                restRequest.AddHeader("Authorization", "Bearer " + token);
+            restRequest.AddHeader("Accept", "*/*");
+            restRequest.AddHeader("Content-Type", "multipart/form-data");
+            string boundary = "----WebKitFormBoundary" + DateTime.Now.Ticks.ToString("x");
+            restRequest.AddHeader("Content-Type", "multipart/form-data; boundary=" + boundary);
+            string requestBody = "";
+            foreach (var pair in payload)
+            {
+                requestBody += "--" + boundary + "\r\n" +
+                                $"Content-Disposition: form-data; name=\"{pair.Key}\"\r\n" +
+                                $"\r\n" +
+                                $"{pair.Value}\r\n";
+            }
+            requestBody += "--" + boundary + "--\r\n";
+            restRequest.AddParameter("multipart/form-data", requestBody, ParameterType.RequestBody);
+            return restRequest;
+        }
         public RestSharp.RestRequest CreatePostRequest(string payload)
         {
             restRequest = new RestRequest("", Method.Post);
-            restRequest.AddHeader("Authorization", "Bearer " + token);
+            if (token != null && token != "")
+                restRequest.AddHeader("Authorization", "Bearer " + token);
             restRequest.AddHeader("Accept", "application.json");
             restRequest.AddParameter("application/json", payload, ParameterType.RequestBody);
             return restRequest;
         }
-
         public RestSharp.RestRequest CreatePutRequest(string payload)
         {
             restRequest = new RestRequest("", Method.Put);
-            restRequest.AddHeader("Authorization", "Bearer " + token);
+            if (token != null && token != "")
+                restRequest.AddHeader("Authorization", "Bearer " + token);
+            restRequest.AddHeader("Accept", "application.json");
+            restRequest.AddParameter("application/json", payload, ParameterType.RequestBody);
+            return restRequest;
+        }
+        public RestSharp.RestRequest CreatePatchRequest(string payload)
+        {
+            restRequest = new RestRequest("", Method.Patch);
+            if (token != null && token != "")
+                restRequest.AddHeader("Authorization", "Bearer " + token);
             restRequest.AddHeader("Accept", "application.json");
             restRequest.AddParameter("application/json", payload, ParameterType.RequestBody);
             return restRequest;
         }
         public RestSharp.RestRequest CreateGetRequest()
         {
-            restRequest = new RestRequest("",Method.Get);
-            restRequest.AddHeader("Authorization", "Bearer " + token);
+            restRequest = new RestRequest("", Method.Get);
+            if (token != null && token != "")
+                restRequest.AddHeader("Authorization", "Bearer " + token);
             restRequest.AddHeader("Accept", "application.json");
             return restRequest;
         }
         public RestSharp.RestRequest CreateDeleteRequest(string payload)
         {
-            restRequest = new RestRequest("",Method.Delete);
+            restRequest = new RestRequest("", Method.Delete);
+            if (token != null && token != "")
+                restRequest.AddHeader("Authorization", "Bearer " + token);
             restRequest.AddHeader("Accept", "application.json");
             return restRequest;
         }
@@ -86,7 +236,7 @@ namespace CMMS_Services
         {
             var content = response.Content.ToString();
             T dtoObject = JsonConvert.DeserializeObject<T>(content);
-            
+
 
             return dtoObject;
         }

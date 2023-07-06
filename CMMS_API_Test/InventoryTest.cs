@@ -8,6 +8,6 @@ namespace CMMS_API_Test
     [TestClass]
     public class InventoryTest
     {
-
+        
     }
 }

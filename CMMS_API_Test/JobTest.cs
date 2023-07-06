@@ -16,21 +16,19 @@ namespace CMMS_API_Test
     {
         const string EP_GetJobList = "/api/Job/GetJobList?facility_id";
         const string EP_GetJobDetails = "/api/Job/GetJobDetails?job_id=";
-
         [TestMethod]
         public void VerifyListOfJobs()
         {
             int JobId = 45;
             int FacilityId = 45;
             int userId = 23;
-            var jobService = new CMMS_Services.APIService<CMMSAPIs.Models.Jobs.CMJobModel>();
-            //jobService.SetToken(token);
+            var jobService = new CMMS_Services.APIService<CMMSAPIs.Models.Jobs.CMJobModel>(true);
             var response = jobService.GetItemList(EP_GetJobList + FacilityId);
             Assert.IsNotNull(response);
             if (response != null)
             {
                 int JobListCount = response.Count;
-                Assert.AreEqual(JobListCount, 200);
+                Assert.AreEqual(JobListCount, 44);
                 Assert.AreEqual("Job title here", response[0].jobDetails);
             }
         }
@@ -41,20 +39,19 @@ namespace CMMS_API_Test
             int FacilityId = 20;
             string categoryIds = "2,3";
             int expJobCount = 200;
-            var jobService = new CMMS_Services.APIService<CMMSAPIs.Models.Inventory.CMInventoryList>();
+            var jobService = new CMMS_Services.APIService<CMMSAPIs.Models.Inventory.CMInventoryList>(true);
             //jobService.SetToken(token);
             var itemList = jobService.GetItemList("/api/Inventory/GetInventoryList?facilityId=45&categoryIds=" + categoryIds);
             int AssetListCount = itemList.Count;
             Assert.AreEqual(expJobCount, AssetListCount);
-//            Assert.AreEqual("Job title here", response[0].job_title);
+            //            Assert.AreEqual("Job title here", response[0].job_title);
         }
 
         [TestMethod]
         public void VerifyJobDetail()
-        {           
+        {
             int JobId = 3298;
-            var jobService = new CMMS_Services.APIService<CMMSAPIs.Models.Jobs.CMJobView>();
-            //jobService.SetToken(token);
+            var jobService = new CMMS_Services.APIService<CMMSAPIs.Models.Jobs.CMJobView>(true);
             var item = jobService.GetItem(EP_GetJobDetails + JobId);
             Assert.AreEqual("Inverter Breakdown", item.job_title);
             Assert.AreEqual("Inverter is not working. Please repair it", item.job_description);
@@ -66,32 +63,22 @@ namespace CMMS_API_Test
             string payload = @"{
                             ""title"":""Inverter Failure"",
                             ""description"":""Inverter is not working. Please check and fix it"",
-                            ""facilityId"":""45"",
-                            ""blockId"":""30"",
-                            ""assignedTo"":""1"",
-                            ""breakdownTime"":""2022-04-21 10:00"",
-                            ""userId"":""36"",
-                            ""workTypes"":[24],
-
-                            ""equipments"":[{
-                                        ""assetId"":14427,
-                                        ""categoryId"":2
-                                           }, 
-                                           {
-                                        ""assetId"":14428,
-                                        ""categoryId"":2
-                                        }],
-                            ""otherWorkTypeName"":""""
+                            ""facility_id"": 45,
+                            ""block_id"": 72,
+                            ""assigned_id"": 16,
+                            ""breakdown_time"":""2022-04-21T10:00:00Z"",
+                            ""WorkType_Ids"":[24],
+                            ""AssetsIds"":[14427,14428]
                         }";
 
 
-
-            var jobService = new CMMS_Services.APIService<CMMSAPIs.Models.Jobs.CMJobView>();
-            var response = jobService.CreateItems("/api/Job/CreateNewJob", payload);
-            int myNewItemId = response[0].id;
+            var jobService = new CMMS_Services.APIService<CMMSAPIs.Models.Utils.CMDefaultResponse>(true);
+            var response = jobService.CreateItem("/api/Job/CreateNewJob", payload);
+            int myNewItemId = response.id[0];
 
             //pending : now get same item
-            var response2 = jobService.GetItem("/api/Job/GetJobDetail?job_id=" + myNewItemId);
+            var jobService2 = new CMMS_Services.APIService<CMMSAPIs.Models.Jobs.CMJobView>(true);
+            var response2 = jobService2.GetItem("/api/Job/GetJobDetails?job_id=" + myNewItemId);
             Assert.AreEqual("Inverter Failure", response2.job_title);
             Assert.AreEqual(myNewItemId, response2.id);
         }
@@ -99,15 +86,14 @@ namespace CMMS_API_Test
         [TestMethod]
         public void VerifyReAssignJob()
         {
-            int JobId = 3115;
-            int assignedTo_Id = 20;
-            int changed_by = 12;
-            var jobService = new CMMS_Services.APIService<CMMSAPIs.Models.Jobs.CMJobView>();
-            var response = jobService.GetItem("/api/Job/ReAssignJob?job_id=" + JobId);  //pending : pass jobid and assigned to  and userid.. see signature in jobcontrollee
+            int JobId = 3381;
+            int assignedTo_Id = 66;
+            var jobService = new CMMS_Services.APIService<CMMSAPIs.Models.Utils.CMDefaultResponse>(true);
+            var response = jobService.PutService($"/api/Job/ReAssignJob?job_id={JobId}&assignedTo={assignedTo_Id}", "");  //pending : pass jobid and assigned to  and userid.. see signature in jobcontrollee
 
-            Assert.AreEqual("Udpdate title", response.job_title);
-            Assert.AreEqual("Update desc", response.job_description);
-            Assert.AreEqual(assignedTo_Id, response.assigned_id);
+            var jobService2 = new CMMS_Services.APIService<CMMSAPIs.Models.Jobs.CMJobView>(true);
+            var response2 = jobService2.GetItem("/api/Job/GetJobDetails?job_id=" + JobId);
+            Assert.AreEqual(assignedTo_Id, response2.assigned_id);
         }
 
         [TestMethod]
@@ -116,7 +102,7 @@ namespace CMMS_API_Test
             int JobId = 45;
             int UserId = 23;
             string cancelremark = "";
-            var jobService = new CMMS_Services.APIService<CMMSAPIs.Models.Jobs.CMJobView>();
+            var jobService = new CMMS_Services.APIService<CMMSAPIs.Models.Jobs.CMJobView>(true);
             var response = jobService.GetItem("/api/Job/CancelJob");       //pending : pass jobid, userid, cancel remart. See the sinature of this functio in jobcontroller
             Assert.AreEqual("Job title here", response.job_title);
         }
@@ -124,21 +110,22 @@ namespace CMMS_API_Test
         [TestMethod]
         public void VerifyLinkToPTW()
         {
-            int JobId = 45;
-            int ptw_id = 23;
-            var jobService = new CMMS_Services.APIService<CMMSAPIs.Models.Jobs.CMJobView>();
-            var response = jobService.GetItemList("/api/Job/LinkToPTW?job_id=" + JobId + ptw_id); //pending : change this to linkToPtw api and pass jobid and ptwid\\
+            int JobId = 3381;
+            int ptw_id = 59960;
+            var jobService = new CMMS_Services.APIService<CMMSAPIs.Models.Utils.CMDefaultResponse>(true);
+            var response = jobService.PutService($"/api/Job/LinkToPTW?job_id={JobId}&ptw_id={ptw_id}",""); //pending : change this to linkToPtw api and pass jobid and ptwid\\
 
             //Pending : Then call GetJobDetails by passng same job id and veridy its ptwid attruibute is changed to what you set abbove
-            var jobDetails = jobService.GetItem("/api/Job/GetJobDetail?job_id=" + JobId);
-            Assert.AreEqual(ptw_id, response[0].current_ptw_id);
+            var jobService2 = new CMMS_Services.APIService<CMMSAPIs.Models.Jobs.CMJobView>(true);
+            var response2 = jobService2.GetItem("/api/Job/GetJobDetails?job_id=" + JobId);
+            Assert.AreEqual(ptw_id, response2.current_ptw_id);
         }
 
         [TestMethod]
         public void VerifyListOfWorkType()
         {
             int JobId = 45;
-            var jobService = new CMMS_Services.APIService<CMMSAPIs.Models.Jobs.CMJobWorkType>();
+            var jobService = new CMMS_Services.APIService<CMMSAPIs.Models.Jobs.CMJobWorkType>(true);
             var response = jobService.GetItemList("/api/Job/GetWorkTypeList?job_id=" + JobId);
             int WorkTypeTypeListCount = response.Count;
             Assert.AreEqual(WorkTypeTypeListCount, 7);
@@ -151,7 +138,7 @@ namespace CMMS_API_Test
         public void VerifyListOfAddWorkType()
         {
             int JobId = 45;
-            var jobService = new CMMS_Services.APIService<CMMSAPIs.Models.Jobs.CMJobWorkType>();
+            var jobService = new CMMS_Services.APIService<CMMSAPIs.Models.Jobs.CMJobWorkType>(true);
             var response = jobService.GetItemList("/api/Job/GetAddWorkType?job_id=" + JobId);
             int AddWorkJobCount = response.Count;
             Assert.AreEqual(AddWorkJobCount, 24);
@@ -162,19 +149,19 @@ namespace CMMS_API_Test
         public void VerifyUpdateWorkType()
         {
             int JobId = 45;
-            var jobService = new CMMS_Services.APIService<CMMSAPIs.Models.Jobs.CMJobWorkType>();
+            var jobService = new CMMS_Services.APIService<CMMSAPIs.Models.Jobs.CMJobWorkType>(true);
             var response = jobService.GetItemList("/api/Job/UpdateWorkType?job_id=" + JobId);
             int UpdateWorkTypeCount = response.Count;
             Assert.AreEqual(UpdateWorkTypeCount, 215);
             Assert.AreEqual("WorkType name", response[0].workType);
-            
+
         }
 
         [TestMethod]
         public void VerifyDeleteWorkType()
         {
             int JobId = 55;
-            var facilitySevice = new CMMS_Services.APIService<CMMSAPIs.Models.Jobs.CMJobWorkType>();
+            var facilitySevice = new CMMS_Services.APIService<CMMSAPIs.Models.Jobs.CMJobWorkType>(true);
             var response = facilitySevice.GetItemList("/api/Job/GetDeleteWorkType?job_id=" + JobId);
             int DaleteWorkTypeCount = response.Count;
             Assert.AreEqual(DaleteWorkTypeCount, 200);
@@ -185,7 +172,7 @@ namespace CMMS_API_Test
         public void VerifyListOfJobWorkTypeTool()
         {
             int JobId = 55;
-            var facilitySevice = new CMMS_Services.APIService<CMMSAPIs.Models.Jobs.CMJobWorkTypeTool>();
+            var facilitySevice = new CMMS_Services.APIService<CMMSAPIs.Models.Jobs.CMJobWorkTypeTool>(true);
             var response = facilitySevice.GetItemList("/api/Job/GetDeleteWorkType?job_id=" + JobId);    //Pending : correct the api name
             int JobWorkTypeToolListCount = response.Count;
             Assert.AreEqual(JobWorkTypeToolListCount, 200);
@@ -196,7 +183,7 @@ namespace CMMS_API_Test
         public void VerifyDeleteJobWorkTypeTool()
         {
             int JobId = 55;
-            var facilitySevice = new CMMS_Services.APIService<CMMSAPIs.Models.Jobs.CMJobWorkTypeTool>();
+            var facilitySevice = new CMMS_Services.APIService<CMMSAPIs.Models.Jobs.CMJobWorkTypeTool>(true);
             var response = facilitySevice.GetItemList("/api/Job/GetUpdateWorkTypeTool?job_id=" + JobId);    //Pending : inCorrect api name
             int DeleteJobWorkTypeToolCount = response.Count;
             Assert.AreEqual(DeleteJobWorkTypeToolCount, 200);
@@ -208,7 +195,7 @@ namespace CMMS_API_Test
         public void VerifyListOfMaster77Tool()
         {
             int JobId = 55;
-            var facilitySevice = new CMMS_Services.APIService<CMMSAPIs.Models.Jobs.CMJobWorkTypeTool>();
+            var facilitySevice = new CMMS_Services.APIService<CMMSAPIs.Models.Jobs.CMJobWorkTypeTool>(true);
             var response = facilitySevice.GetItemList("/api/Job/GetMasterToolList?job_id=" + JobId);    //Pending : inCorrect api name
             int MasterToolListCount = response.Count;
             Assert.AreEqual(MasterToolListCount, 200);

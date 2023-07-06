@@ -82,7 +82,7 @@ namespace CMMSAPIs.Models.PM
         public int job_id { get; set; }
         public string job_title { get; set; }
         public string job_description { get; set;}
-        public DateTime job_date { get; set; }
+        public DateTime? job_date { get; set; }
         public string job_status { get; set; }
 
     }

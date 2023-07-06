@@ -7,7 +7,41 @@ namespace CMMSAPIs.Helper
     {
         // Token expiration time
         public const int TOKEN_EXPIRATION_TIME = 30;
-
+        public Dictionary<CMMS_Modules, int> module_dict = new Dictionary<CMMS_Modules, int>()
+        {
+            { CMMS_Modules.DASHBOARD, 1 },
+            { CMMS_Modules.JOB, 2 },
+            { CMMS_Modules.PTW, 3 },
+            { CMMS_Modules.JOBCARD, 4 },
+            { CMMS_Modules.CHECKLIST_NUMBER, 5 },
+            { CMMS_Modules.CHECKPOINTS, 6 },
+            { CMMS_Modules.CHECKLIST_MAPPING, 7 },
+            { CMMS_Modules.PM_SCHEDULE, 8 },
+            { CMMS_Modules.PM_SCEHDULE_VIEW, 9 },
+            { CMMS_Modules.PM_EXECUTION, 10 },
+            { CMMS_Modules.PM_SCHEDULE_REPORT, 11 },
+            { CMMS_Modules.PM_SUMMARY, 12 },
+            { CMMS_Modules.SM_MASTER, 13 },
+            { CMMS_Modules.SM_PO, 14 },
+            { CMMS_Modules.SM_MRS, 15 },
+            { CMMS_Modules.SM_MRS_RETURN, 16 },
+            { CMMS_Modules.SM_S2S, 17 },
+            { CMMS_Modules.AUDIT_PLAN, 18 },
+            { CMMS_Modules.AUDIT_SCHEDULE, 19 },
+            { CMMS_Modules.AUDIT_SCEHDULE_VIEW, 20 },
+            { CMMS_Modules.AUDIT_EXECUTION, 21 },
+            { CMMS_Modules.AUDIT_SUMMARY, 22 },
+            { CMMS_Modules.HOTO_PLAN, 23 },
+            { CMMS_Modules.HOTO_SCHEDULE, 24 },
+            { CMMS_Modules.HOTO_SCEHDULE_VIEW, 25 },
+            { CMMS_Modules.HOTO_EXECUTION, 26 },
+            { CMMS_Modules.HOTO_SUMMARY, 27 },
+            { CMMS_Modules.INVENTORY, 28 },
+            { CMMS_Modules.WARRANTY_CLAIM, 30 },
+            { CMMS_Modules.CALIBRATION, 31 },
+            { CMMS_Modules.MODULE_CLEANING, 32 },
+            { CMMS_Modules.VEGETATION, 33 }
+        };
         public enum RETRUNSTATUS
         {
             SUCCESS = 0,
@@ -209,6 +243,7 @@ namespace CMMSAPIs.Helper
             INCIDENT_REPORT = 131,
             INVENTORY = 141,
             PLANT = 151,
+            ESCALATION_MATRIX = 161,
 
             USER = 171,
             USER_MODULE,
