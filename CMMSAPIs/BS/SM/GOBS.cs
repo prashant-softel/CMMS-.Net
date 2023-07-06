@@ -9,7 +9,7 @@ using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Models.Users;
 using MailKit.Search;
 
-namespace CMMSAPIs.BS
+namespace CMMSAPIs.BS.GO
 {
     public interface IGOBS
     {

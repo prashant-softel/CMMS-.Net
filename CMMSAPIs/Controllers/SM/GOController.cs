@@ -1,4 +1,4 @@
-using CMMSAPIs.BS;
+using CMMSAPIs.BS.GO;
 using CMMSAPIs.Models;
 using CMMSAPIs.Models.Users;
 using CMMSAPIs.Models.Utils;

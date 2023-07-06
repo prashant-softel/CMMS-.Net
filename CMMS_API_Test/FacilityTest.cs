@@ -16,22 +16,23 @@ namespace CMMS_API_Test
         [TestMethod]
         public void VerifyListOfFacilities()
         {
-            int facilityId = 45;
-            var facilityService = new CMMS_Services.APIService<CMMSAPIs.Models.Masters.CMFacility>();
-            var response = facilityService.GetItemList("/api/CMMS/GetFacilityList");
+            //int facilityId = 45;
+            var facilityService = new CMMS_Services.APIService<CMMSAPIs.Models.Facility.CMFacilityList>();
+            var response = facilityService.GetItemList("/api/Facility/GetFacilityList");
             int facilityCount = response.Count;
-            Assert.AreEqual(facilityCount, 200);
-            Assert.AreEqual("Noor Abu Dhabi 1177MW", response[0].name);
+            Assert.AreEqual(facilityCount, 3);
+            Assert.AreEqual(response[0].id, 45);
+            Assert.AreEqual("Hero Future Solar Plant 1000MW", response[0].name);
         }
 
         [TestMethod]
         public void VerifyFacility()
         {
             int facilityId = 45;
-            var facilityService = new CMMS_Services.APIService<CMMSAPIs.Models.Masters.CMFacility>();
-            var response = facilityService.GetItem("/api/CMMS/GetFacility?facility_id=" + facilityId);
+            var facilityService = new CMMS_Services.APIService<CMMSAPIs.Models.Facility.CMFacilityDetails>();
+            var response = facilityService.GetItem("/api/Facility/GetFacilityDetails?id=" + facilityId);
             Assert.AreEqual(facilityId, response.id);
-            Assert.AreEqual("Hero Future Solar Plant 1000MW", response.name);
+            Assert.AreEqual("Hero Future Solar Plant 1000MW", response.blockName);
 
 
         }
@@ -79,7 +80,7 @@ namespace CMMS_API_Test
             var response = facilityService.GetItemList("/api/CMMS/GetAssetsList?facility_id=" + facilityId);
             int AssetCount = response.Count;
             Assert.AreEqual(3513, AssetCount);
-            Assert.AreEqual("HFE_Block_1_ACDB_1", response[0].name );
+            Assert.AreEqual("HFE_Block_1_ACDB_1", response[0].name);
         }
 
         [TestMethod]
@@ -113,7 +114,7 @@ namespace CMMS_API_Test
             int frequencyCount = response.Count;
             Assert.AreEqual(frequencyCount, 215);
             Assert.AreEqual("Frequency List", response[0].name);
-            
+
         }
     }
 }

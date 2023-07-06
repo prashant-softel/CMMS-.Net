@@ -158,7 +158,7 @@ namespace CMMSAPIs.Repositories.PM
                                 $"JOIN checklist_number as checklist ON checklist.id = checkpoint.check_list_id " +
                                 $"WHERE pm_execution.PM_Schedule_Id = {schedule_id};";
             List<CMDefaultList> checklist_collection = await Context.GetData<CMDefaultList>(myQuery2).ConfigureAwait(false);
-            string myQuery3 = "SELECT id as execution_id, Check_Point_id as check_point_id, Check_Point_Name as check_point_name, Check_Point_Requirement as requirement, PM_Schedule_Observation as observation, job_created as is_job_created, custom_checkpoint as is_custom_check_point, file_required as is_file_required " + 
+            string myQuery3 = "SELECT id as execution_id, Check_Point_id as check_point_id, Check_Point_Name as check_point_name, Check_Point_Requirement as requirement, PM_Schedule_Observation as observation, job_created as is_job_created, linked_job_id, custom_checkpoint as is_custom_check_point, file_required as is_file_required " + 
                                 $"FROM pm_execution WHERE PM_Schedule_Id = {schedule_id};";
             List<ScheduleCheckList> scheduleCheckList = await Context.GetData<ScheduleCheckList>(myQuery3).ConfigureAwait(false);
             if(scheduleCheckList.Count > 0)
@@ -171,6 +171,15 @@ namespace CMMSAPIs.Repositories.PM
                     scheduleCheckPoint.files = fileList;
                 }
             }
+            string jobStatusQry = "CASE ";
+            for (CMMS.CMMS_Status jobStatus = CMMS.CMMS_Status.JOB_CREATED; jobStatus <= CMMS.CMMS_Status.JOB_UPDATED; jobStatus++)
+                jobStatusQry += $"WHEN jobs.status={(int)jobStatus} THEN '{JobRepository.getShortStatus(CMMS.CMMS_Modules.JOB, jobStatus)}' ";
+            jobStatusQry += "ELSE 'Invalid Status' END ";
+            string myQuery4 = $"SELECT jobs.id as job_id, jobs.title as job_title, jobs.description as job_description, CASE WHEN jobs.createdAt = '0000-00-00 00:00:00' THEN NULL ELSE jobs.createdAt END as job_date, {jobStatusQry} as job_status " +
+                                $"FROM jobs " +
+                                $"JOIN pm_execution ON jobs.id = pm_execution.linked_job_id " +
+                                $"WHERE pm_execution.PM_Schedule_Id  = {schedule_id};";
+            List<ScheduleLinkJob> linked_jobs = await Context.GetData<ScheduleLinkJob>(myQuery4).ConfigureAwait(false);
             List<CMLog> log = await _utilsRepo.GetHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, schedule_id);
             if(checklist_collection.Count > 0)
             {
@@ -178,6 +187,7 @@ namespace CMMSAPIs.Repositories.PM
                 scheduleViewDetail[0].checklist_name = checklist_collection[0].name;
             }
             scheduleViewDetail[0].schedule_check_points = scheduleCheckList;
+            scheduleViewDetail[0].schedule_link_job = linked_jobs;
             scheduleViewDetail[0].history_log = log;
             return scheduleViewDetail[0];
         }
@@ -334,7 +344,7 @@ namespace CMMSAPIs.Repositories.PM
                             updateQry += $"PM_Schedule_Observation_added_by = {userID}, " +
                                         $"PM_Schedule_Observation_add_date = '{UtilsRepository.GetUTCTime()}', " +
                                         $"is_ok = {schedule_detail.isOK}, " +
-                                        $"PM_Schedule_Observation = '{(schedule_detail.isOK==1?"OK":schedule_detail.observation)}' ";
+                                        $"PM_Schedule_Observation = '{((schedule_detail.isOK==1)?"OK":schedule_detail.observation)}' ";
                             message = "Observation Added";
                             response = new CMDefaultResponse(schedule_detail.execution_id, CMMS.RETRUNSTATUS.SUCCESS, "Observation Added Successfully");
                         }
@@ -387,13 +397,27 @@ namespace CMMSAPIs.Repositories.PM
                     {
                         foreach(var file in schedule_detail.pm_files)
                         {
+                            string checkEventFiles = $"SELECT * FROM pm_schedule_files " +
+                                                        $"WHERE PM_Schedule_id = {request.schedule_id} " +
+                                                        $"AND PM_Execution_id = {schedule_detail.execution_id} " +
+                                                        $"AND PM_Event = {(int) file.pm_event}";
+                            DataTable dt2 = await Context.FetchData(checkEventFiles).ConfigureAwait(false);
+                            
+                            if (dt2.Rows.Count > 0)
+                            {
+                                string deleteQry = "DELETE FROM pm_schedule_files " +
+                                                        $"WHERE PM_Schedule_id = {request.schedule_id} " +
+                                                        $"AND PM_Execution_id = {schedule_detail.execution_id} " +
+                                                        $"AND PM_Event = {(int)file.pm_event}";
+                                await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
+                            }
                             string insertFile = "INSERT INTO pm_schedule_files(PM_Schedule_id, PM_Schedule_Code, PM_Execution_id, File_id, PM_Event, " +
                                                 "File_Discription, File_added_by, File_added_date, File_Server_id, File_Server_Path) VALUES " +
                                                 $"({request.schedule_id}, 'PMSCH{request.schedule_id}', {schedule_detail.execution_id}, {file.file_id}, " +
                                                 $"{(int)file.pm_event}, '{file.file_desc}', {userID}, '{UtilsRepository.GetUTCTime()}', 1, " +
                                                 $"'http://cms_test.com/' ); SELECT LAST_INSERT_ID();";
-                            DataTable dt2 = await Context.FetchData(insertFile).ConfigureAwait(false);
-                            int id = Convert.ToInt32(dt2.Rows[0][0]);
+                            DataTable dt3 = await Context.FetchData(insertFile).ConfigureAwait(false);
+                            int id = Convert.ToInt32(dt3.Rows[0][0]);
                             string otherDetailsQry = "UPDATE pm_schedule_files as pmf " +
                                                         "JOIN uploadedfiles as f ON pmf.File_id = f.id " +
                                                         "JOIN pm_schedule as pms ON pms.id = pmf.PM_Schedule_id " +
