@@ -3,6 +3,11 @@ using System.Threading.Tasks;
 using System;
 using CMMSAPIs.Models.Incident_Reports;
 using CMMSAPIs.BS.Incident_Reports;
+using Microsoft.AspNetCore.Http;
+using CMMSAPIs.Models.Utils;
+using Microsoft.AspNetCore.Authorization;
+
+
 
 namespace CMMSAPIs.Controllers.Incident_Reports
 {
@@ -32,12 +37,14 @@ namespace CMMSAPIs.Controllers.Incident_Reports
             }
         }
 
+        [Authorize]
         [Route("CreateIncidentReport")]
         [HttpPost]
-        public async Task<IActionResult> CreateIncidentReport(CMCreateIncidentReport request, int userId)
+        public async Task<IActionResult> CreateIncidentReport(CMCreateIncidentReport request)
         {
             try
             {
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
                 var data = await _IncidentReportBS.CreateIncidentReport(request,userId);
                 return Ok(data);
             }
@@ -62,12 +69,14 @@ namespace CMMSAPIs.Controllers.Incident_Reports
             }
         }
 
+        [Authorize]
         [Route("UpdateIncidentReport")]
         [HttpPut]
-        public async Task<IActionResult> UpdateIncidentReport(CMCreateIncidentReport request, int userId)
+        public async Task<IActionResult> UpdateIncidentReport(CMCreateIncidentReport request)
         {
             try
             {
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
                 var data = await _IncidentReportBS.UpdateIncidentReport(request, userId);
                 return Ok(data);
             }
@@ -77,12 +86,14 @@ namespace CMMSAPIs.Controllers.Incident_Reports
             }
         }
 
+        [Authorize]
         [Route("ApproveIncidentReport")]
         [HttpPut]
-        public async Task<IActionResult> ApproveIncidentReport(int incidentId,int userId)
+        public async Task<IActionResult> ApproveIncidentReport(int incidentId)
         {
             try
             {
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
                 var data = await _IncidentReportBS.ApproveIncidentReport(incidentId,userId);
                 return Ok(data);
             }
@@ -92,12 +103,14 @@ namespace CMMSAPIs.Controllers.Incident_Reports
             }
         }
 
+        [Authorize]
         [Route("RejectIncidentReport")]
         [HttpPut]
-        public async Task<IActionResult> RejectIncidentReport([FromForm] CMApproveIncident request,int userId)
+        public async Task<IActionResult> RejectIncidentReport([FromForm] CMApproveIncident request)
         {
             try
             {
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
                 var data = await _IncidentReportBS.RejectIncidentReport(request,userId);
                 return Ok(data);
             }

@@ -12,8 +12,7 @@ namespace CMMSAPIs.Models.Incident_Reports
         public string approved_by { get; set; }
         public DateTime approved_at { get; set; }
         public string reported_by_name { get; set; }
-        public string created_by { get; set; }
-        public DateTime created_at { get; set; }
+        public DateTime reported_at { get; set; }
         public string status { get; set; }
     }
 }
