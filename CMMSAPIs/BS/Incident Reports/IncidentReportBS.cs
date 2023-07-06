@@ -12,7 +12,7 @@ namespace CMMSAPIs.BS.Incident_Reports
     {
         Task<List<CMIncidentList>> GetIncidentList(int facility_id, DateTime start_date, DateTime end_date);
         Task<CMDefaultResponse> CreateIncidentReport(CMCreateIncidentReport request,int userId);
-        Task<List<CMViewIncidentReport>> GetIncidentDetailsReport(int id);
+        Task<CMViewIncidentReport> GetIncidentDetailsReport(int id);
         Task<CMDefaultResponse> UpdateIncidentReport(CMCreateIncidentReport request, int userId);
         Task<CMDefaultResponse> ApproveIncidentReport(int incidentId, int userId);
         Task<CMDefaultResponse> RejectIncidentReport(CMApproveIncident  request, int userId);
@@ -61,7 +61,7 @@ namespace CMMSAPIs.BS.Incident_Reports
 
         }
 
-        public async Task<List<CMViewIncidentReport>> GetIncidentDetailsReport(int id)
+        public async Task<CMViewIncidentReport>GetIncidentDetailsReport(int id)
         {
             try
             {
