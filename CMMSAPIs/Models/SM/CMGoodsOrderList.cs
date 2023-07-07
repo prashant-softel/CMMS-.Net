@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,13 +29,13 @@ namespace CMMSAPIs.Models
         public DateTime? received_on { get; set; }
         public string receivedBy { get; set; }
         public string approvedBy { get; set; }
-
-        public int approved_by { get; set; }
         public DateTime? approvedOn { get; set; }
 
         public int receive_later { get; set; }
         public int added_to_store { get; set; }
         public int assetItemID { get; set; }
+        public int asset_type_ID { get; set; }
+        public int asset_type_ID_OrderDetails { get; set; }
         public decimal accepted_qty { get; set; }
         public decimal ordered_qty { get; set; }
         public int spare_status { get; set; }
@@ -207,6 +207,7 @@ namespace CMMSAPIs.Models
         public string remarks { get; set; }
         //public int order_type { get; set; }
         public int receive_later { get; set; }
+        public int asset_type_ID { get; set; }
 
 
     }
