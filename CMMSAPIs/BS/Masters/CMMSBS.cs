@@ -28,7 +28,10 @@ namespace CMMSAPIs.BS.Masters
         Task<CMDefaultResponse> DeleteBusiness(int id, int userId);
         Task<List<CMDefaultList>> GetBloodGroupList();
         Task<List<CMDefaultList>> GetGenderList();
-        Task<List<CMDefaultList>> GetSPVList();
+        Task<List<CMSPV>> GetSPVList();
+        Task<CMDefaultResponse> CreateSPV(CMSPV request, int userId);
+        Task<CMDefaultResponse> UpdateSPV(CMSPV request, int userId);
+        Task<CMDefaultResponse> DeleteSPV(int id, int userId);
         Task<List<CMBusiness>> GetBusinessList(int businessType);
         Task<CMDefaultResponse> AddModule(CMModule request);
         Task<CMDefaultResponse> UpdateModule(CMModule request);
@@ -285,7 +288,7 @@ namespace CMMSAPIs.BS.Masters
             }
         }
 
-        public async Task<List<CMDefaultList>> GetSPVList()
+        public async Task<List<CMSPV>> GetSPVList()
         {
             try
             {
@@ -293,6 +296,52 @@ namespace CMMSAPIs.BS.Masters
                 {
                     return await repos.GetSPVList();
 
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> CreateSPV(CMSPV request, int userId)
+        {
+            try
+            {
+                using (var repos = new CMMSRepository(getDB))
+                {
+                    return await repos.CreateSPV(request, userId);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> UpdateSPV(CMSPV request, int userId)
+        {
+            try
+            {
+                using (var repos = new CMMSRepository(getDB))
+                {
+                    return await repos.UpdateSPV(request, userId);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> DeleteSPV(int id, int userId)
+        {
+            try
+            {
+                using (var repos = new CMMSRepository(getDB))
+                {
+                    return await repos.DeleteSPV(id, userId);
                 }
             }
             catch (Exception ex)

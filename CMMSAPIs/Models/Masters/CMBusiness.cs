@@ -7,7 +7,6 @@ namespace CMMSAPIs.Models.Masters
         public int id { get; set; }
         public string name { get; set; }
         public string description { get; set; }
-        public int status { get; set; }
     }
     public class CMBusiness
     {
@@ -27,7 +26,6 @@ namespace CMMSAPIs.Models.Masters
         public string country { get; set; }
         public string zip { get; set; }
         public int type { get; set; }
-        public int status { get; set; }
         public DateTime addedAt { get; set; }
     }
 }
