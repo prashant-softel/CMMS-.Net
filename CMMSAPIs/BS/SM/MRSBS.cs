@@ -19,7 +19,7 @@ namespace CMMSAPIs.BS.SM
         Task<List<CMMRSItemsBeforeIssue>> getMRSItemsWithCode(int ID);        
         Task<List<CMMRS>> getMRSDetails(int ID);        
         Task<List<CMRETURNMRSDATA>> getReturnDataByID(int ID);        
-        Task<List<CMMRS>> getAssetTypeByItemID(int ItemID);
+        Task<List<CMMRSAssetTypeList>> getAssetTypeByItemID(int ItemID);
         Task<CMDefaultResponse> mrsReturn(CMMRS request);        
         Task<CMDefaultResponse> mrsApproval(CMMRS request);        
         Task<CMDefaultResponse> mrsReturnApproval(CMMRS request);
@@ -139,7 +139,7 @@ namespace CMMSAPIs.BS.SM
                 throw;
             }
         }
-        public async Task<List<CMMRS>> getAssetTypeByItemID(int ItemID)
+        public async Task<List<CMMRSAssetTypeList>> getAssetTypeByItemID(int ItemID)
         {
             try
             {
