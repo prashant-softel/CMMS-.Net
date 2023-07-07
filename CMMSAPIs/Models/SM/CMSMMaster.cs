@@ -201,6 +201,7 @@ namespace CMMSAPIs.Models.SM
         public string file_path { get; set; }
         public int Asset_master_id { get; set; }
         public int spare_multi_selection { get; set; }
+        public decimal available_qty { get; set; }
 
 
     }
@@ -286,6 +287,24 @@ namespace CMMSAPIs.Models.SM
         public string cat_name { get; set; }
         public string measurement { get; set; }
         public int decimal_status { get; set; }
+
+    }
+
+    public class CMMRSAssetTypeList
+    {
+        public string asset_type { get; set; }
+        public string asset_code { get; set; }
+        public string asset_name { get; set; }
+        public int ID { get; set; }
+        public int item_ID { get; set; }
+        public int plant_ID { get; set; }
+        public string serial_number { get; set; }
+        public int asset_type_ID { get; set; }
+        public int decimal_status { get; set; }
+        public string file_path { get; set; }
+        public int Asset_master_id { get; set; }
+        public int spare_multi_selection { get; set; }
+        public decimal available_qty { get; set; }
 
     }
 }
