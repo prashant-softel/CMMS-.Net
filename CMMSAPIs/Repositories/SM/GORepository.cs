@@ -262,7 +262,7 @@ namespace CMMSAPIs.Repositories
         //    }
         //}
 
-        internal async Task<CMDefaultResponse> ApproveGoodsOrder(CMApproval request)
+        internal async Task<CMDefaultResponse> ApproveGoodsOrder(CMApproval request, int userId)
         {
             /*
              * Update the Incidents and also update the history table
@@ -275,7 +275,7 @@ namespace CMMSAPIs.Repositories
             {
                 throw new ArgumentException("Invalid argument id<" + request.id + ">");
             }
-            int userId = Utils.UtilsRepository.GetUserID();
+
             string UpdatesqlQ = $" UPDATE smpurchaseorder SET approved_by = {userId}, status = {(int)CMMS.CMMS_Status.SM_PO_CLOSED_APPROVED}, remarks = '{request.comment}',approvedOn = '{DateTime.Now.ToString("yyyy-MM-dd")}' WHERE ID = {request.id}";
             int reject_id = await Context.ExecuteNonQry<int>(UpdatesqlQ).ConfigureAwait(false);
 
@@ -313,7 +313,7 @@ namespace CMMSAPIs.Repositories
             return response;
         }
 
-        internal async Task<CMDefaultResponse> RejectGoodsOrder(CMApproval request)
+        internal async Task<CMDefaultResponse> RejectGoodsOrder(CMApproval request,int userId)
         {
 
             if (request.id <= 0)
@@ -321,7 +321,7 @@ namespace CMMSAPIs.Repositories
                 throw new ArgumentException("Invalid argument id<" + request.id + ">");
             }
 
-            int userId = Utils.UtilsRepository.GetUserID();
+
             string approveQuery = $"Update smpurchaseorder set status = {(int)CMMS.CMMS_Status.SM_PO_CLOSED_REJECTED} , reject_reccomendations = '{request.comment}' , " +
                 $" rejecctedBy = {userId}, rejectedAt = '{DateTime.Now.ToString("yyyy-MM-dd")}'" +
                 $" where id = { request.id}";
