@@ -404,8 +404,8 @@ namespace CMMSAPIs.Repositories.SM
                 if (dt2.Rows.Count > 0)
                 {
                     transaction_ID = Convert.ToInt32(dt2.Rows[0][0]);
-                    int debitTransactionID = await DebitTransation(transaction_ID, fromActorID, fromActorType, qty, assetItemID, mrsID);
-                    int creditTransactionID = await CreditTransation(transaction_ID, toActorID, toActorType, qty, assetItemID, mrsID);
+                    int debitTransactionID = await DebitTransation(transaction_ID, fromActorType, fromActorID,  qty, assetItemID, mrsID);
+                    int creditTransactionID = await CreditTransation(transaction_ID, toActorType, toActorID, qty, assetItemID, mrsID);
                     bool isValid = await VerifyTransactionDetails(transaction_ID, debitTransactionID, creditTransactionID, plantID, fromActorID, fromActorType, toActorID, toActorType, assetItemID, qty, refType, refID, remarks, mrsID);
                     if (isValid)
                     {
@@ -438,7 +438,7 @@ namespace CMMSAPIs.Repositories.SM
 
         private async Task<int> CreditTransation(int transactionID, int actorID, int actorType, int qty, int assetItemID, int mrsID)
         {
-            string query = $"INSERT INTO FlexiMC_SM_Transition (transactionID,actorType,actorID,creditQty,assetItemID,mrsID) VALUES ({transactionID},'{actorType}',{actorID},{qty},{assetItemID},{mrsID})";
+            string query = $"INSERT INTO smtransition (transactionID,actorType,actorID,creditQty,assetItemID,mrsID) VALUES ({transactionID},'{actorType}',{actorID},{qty},{assetItemID},{mrsID})";
             DataTable dt2 = await Context.FetchData(query).ConfigureAwait(false);
             int id = Convert.ToInt32(dt2.Rows[0][0]);
             return id;
@@ -638,7 +638,7 @@ namespace CMMSAPIs.Repositories.SM
             response = new CMDefaultResponse(1, CMMS.RETRUNSTATUS.SUCCESS, msg);
             return response;
         }
-        internal async Task<List<CMMRS>> getAssetTypeByItemID(int ItemID)
+        internal async Task<List<CMMRSAssetTypeList>> getAssetTypeByItemID(int ItemID)
         {
                    string stmt = "SELECT sat.asset_type,sam.asset_code,sam.asset_name,sat.ID,sai.ID as item_ID,sai.plant_ID,sai.serial_number,sam.asset_type_ID,sm.decimal_status,COALESCE(file.file_path,'') as file_path,file.Asset_master_id, f_sum.spare_multi_selection FROM smassetitems sai " +
                             "LEFT JOIN smassetmasters sam ON sam.asset_code = sai.asset_code " +
@@ -647,16 +647,16 @@ namespace CMMSAPIs.Repositories.SM
                             "LEFT JOIN smassettypes sat ON sat.ID = sam.asset_type_ID " +
                             "LEFT JOIN smunitmeasurement f_sum ON f_sum.ID = sam.unit_of_measurement " +
                             "WHERE(sai.ID = " +ItemID+ " OR sai.serial_number = " + ItemID + " OR  sai.asset_code = " + ItemID + ")";
-            List<CMMRS> _List = await Context.GetData<CMMRS>(stmt).ConfigureAwait(false);
+            List<CMMRSAssetTypeList> _List = await Context.GetData<CMMRSAssetTypeList>(stmt).ConfigureAwait(false);
             var isMultiSpareSelectionStatus = getMultiSpareSelectionStatus("", ItemID);
            
             if (_List[0].asset_type_ID == 2 || (_List[0].asset_type_ID == 3 && Convert.ToInt32(isMultiSpareSelectionStatus) == 0))
             {
-                _List[0].available_qty = await GetAvailableQty(_List[0].asset_item_ID, _List[0].plant_ID);
+                _List[0].available_qty = await GetAvailableQty(_List[0].item_ID, _List[0].plant_ID);
             }
             else
             {
-                _List[0].available_qty = await GetAvailableQtyByCode(_List[0].asset_MDM_code, _List[0].plant_ID);
+                _List[0].available_qty = await GetAvailableQtyByCode(_List[0].asset_code, _List[0].plant_ID);
             }
 
             return _List;
@@ -664,7 +664,8 @@ namespace CMMSAPIs.Repositories.SM
 
         public async Task<int> GetAvailableQty(int assetItemID, int plantID)
         {
-            string actorType = "Store";
+            // actor Type 2 : Store
+            string actorType = "2";
             string stmt = "SELECT SUM(debitQty) as drQty, SUM(creditQty) as crQty FROM smtransition WHERE assetItemID = " + assetItemID.ToString() + " AND actorType = '" + actorType + "' AND transactionID IN (SELECT ID FROM smtransactiondetails WHERE plantID = " + plantID.ToString() + ")";
             DataTable dt2 = await Context.FetchData(stmt).ConfigureAwait(false);
             int crQty = 0, drQty = 0;
@@ -678,7 +679,8 @@ namespace CMMSAPIs.Repositories.SM
         }
         public async Task<int> GetAvailableQtyByCode(string assetCode, int plantID)
         {
-            string actorType = "Store";
+            // actor Type 2 : Store
+            string actorType = "2";
             string stmt = "SELECT SUM(debitQty) as drQty, SUM(creditQty) as crQty FROM  smtransition WHERE assetItemID IN (SELECT ID FROM smassetitems WHERE asset_code = '" + assetCode + "' AND plant_ID = " + plantID.ToString() + ") AND actorType = '" + actorType + "' AND transactionID IN (SELECT ID FROM smtransactiondetails WHERE plantID = " + plantID.ToString() + ")";
             DataTable dt2 = await Context.FetchData(stmt).ConfigureAwait(false);
             int crQty = 0, drQty = 0;
@@ -759,6 +761,12 @@ namespace CMMSAPIs.Repositories.SM
 
             //echo $stmt;
             List<CMAssetItem> Listitem = await Context.GetData<CMAssetItem>(stmt).ConfigureAwait(false);
+
+            for(int i = 0; i < Listitem.Count; i++)
+            {
+                Listitem[i].available_qty = await GetAvailableQtyByCode(Listitem[i].asset_code, plantID);
+            }
+
             return Listitem;
         }
 
