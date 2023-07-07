@@ -9,7 +9,6 @@ using CMMSAPIs.Helper;
 using CMMSAPIs.Models;
 using CMMSAPIs.Models.Notifications;
 using CMMSAPIs.Models.SM;
-using CMMSAPIs.Models.Users;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Models.WC;
 using CMMSAPIs.Repositories.Utils;
@@ -122,19 +121,17 @@ namespace CMMSAPIs.Repositories
         }
         internal async Task<CMDefaultResponse> UpdateGO(CMGoodsOrderList request, int userID)
         {
-            string OrderQuery = $"UPDATE smpurchaseorder SET " +
-                    $"challan_no = '{request.challan_no}',po_no='{request.po_no}', freight='{request.freight}',no_pkg_received={request.no_pkg_received}," +
-                    $"lr_no='{request.lr_no}',condition_pkg_received='{request.condition_pkg_received}',vehicle_no='{request.vehicle_no}', gir_no='{request.gir_no}', " +
-                    $"challan_date = '{request.challan_date.Value.ToString("yyyy-MM-dd")}', " +
-                    $"job_ref='{request.job_ref}',amount='{request.amount}', currency='{request.currency}',updated_by = {userID},updatedOn = '{UtilsRepository.GetUTCTime()}' where ID={request.id}";
-
-            await Context.ExecuteNonQry<int>(OrderQuery);
+            //string mainQuery = $"UPDATE smpurchaseorderdetails SET generate_flag = " +request.generate_flag + ",status = "+request.status+", vendorID = "+request.vendorID+" WHERE ID = "+request.id+"";
 
             for (var i = 0; i < request.go_items.Count; i++)
             {
-                string itemsQuery = $"UPDATE smpurchaseorderdetails SET location_ID = {request.location_ID},assetItemID = {request.go_items[i].assetItemID},cost = {request.go_items[i].cost},ordered_qty = {request.go_items[i].ordered_qty}" +
+                string updateQ = $"UPDATE smpurchaseorderdetails SET assetItemID = {request.go_items[i].assetItemID},cost = {request.go_items[i].cost},ordered_qty = {request.go_items[i].ordered_qty},location_ID = {request.location_ID}" +
+                    $"challan_no = '{request.challan_no}',po_no='{request.po_no}', freight='{request.freight}',no_pkg_received={request.no_pkg_received}," +
+                    $"lr_no='{request.lr_no}',condition_pkg_received='{request.condition_pkg_received}',vehicle_no='{request.vehicle_no}', gir_no='{request.gir_no}', " +
+                    $"challan_date = '{request.challan_date.Value.ToString("yyyy-MM-dd")}', " +
+                    $"job_ref='{request.job_ref}',amount='{request.amount}', currency='{request.currency}'" +
                     $" WHERE ID = {request.go_items[i].poID}";
-                var result = await Context.ExecuteNonQry<int>(itemsQuery);
+                var result = await Context.ExecuteNonQry<int>(updateQ);
             }
 
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Goods order updated successfully.");
@@ -265,7 +262,7 @@ namespace CMMSAPIs.Repositories
         //    }
         //}
 
-        internal async Task<CMDefaultResponse> ApproveGoodsOrder(CMApproval request,int userId)
+        internal async Task<CMDefaultResponse> ApproveGoodsOrder(CMApproval request)
         {
             /*
              * Update the Incidents and also update the history table
@@ -278,7 +275,8 @@ namespace CMMSAPIs.Repositories
             {
                 throw new ArgumentException("Invalid argument id<" + request.id + ">");
             }
-            string UpdatesqlQ = $" UPDATE smpurchaseorder SET  status = {(int)CMMS.CMMS_Status.SM_PO_CLOSED_APPROVED}, remarks = '{request.comment}',approved_by = {userId},approvedOn = '{UtilsRepository.GetUTCTime()}' WHERE ID = {request.id}";
+            int userId = Utils.UtilsRepository.GetUserID();
+            string UpdatesqlQ = $" UPDATE smpurchaseorder SET approved_by = {userId}, status = {(int)CMMS.CMMS_Status.SM_PO_CLOSED_APPROVED}, remarks = '{request.comment}',approvedOn = '{DateTime.Now.ToString("yyyy-MM-dd")}' WHERE ID = {request.id}";
             int reject_id = await Context.ExecuteNonQry<int>(UpdatesqlQ).ConfigureAwait(false);
 
             retCode = CMMS.RETRUNSTATUS.SUCCESS;
@@ -315,7 +313,7 @@ namespace CMMSAPIs.Repositories
             return response;
         }
 
-        internal async Task<CMDefaultResponse> RejectGoodsOrder(CMApproval request,int userId)
+        internal async Task<CMDefaultResponse> RejectGoodsOrder(CMApproval request)
         {
 
             if (request.id <= 0)
@@ -323,8 +321,9 @@ namespace CMMSAPIs.Repositories
                 throw new ArgumentException("Invalid argument id<" + request.id + ">");
             }
 
-            string approveQuery = $"Update smpurchaseorder set status = {(int)CMMS.CMMS_Status.SM_PO_CLOSED_REJECTED} , remarks = '{request.comment}' ," +
-                $" approved_by = {userId}, approvedOn = '{DateTime.Now.ToString("yyyy-MM-dd")}'" +
+            int userId = Utils.UtilsRepository.GetUserID();
+            string approveQuery = $"Update smpurchaseorder set status = {(int)CMMS.CMMS_Status.SM_PO_CLOSED_REJECTED} , reject_reccomendations = '{request.comment}' , " +
+                $" rejecctedBy = {userId}, rejectedAt = '{DateTime.Now.ToString("yyyy-MM-dd")}'" +
                 $" where id = { request.id}";
             int reject_id = await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
 
@@ -578,7 +577,7 @@ namespace CMMSAPIs.Repositories
                     {
                         // Check if the asset item ID is already exists.
                         int assetItemId;
-                        if (item.assetItemID == 0)
+                        if (item.assetItemID == null || item.assetItemID == 0)
                         {
                             if (isMultiSelectionEnabled > 0)
                             {
@@ -716,7 +715,7 @@ namespace CMMSAPIs.Repositories
                 "pod.purchaseID,pod.assetItemID,sai.serial_number,sai.location_ID,pod.cost,pod.ordered_qty,\r\nbl.name as vendor_name,\r\n     " +
                 " po.purchaseDate,sam.asset_type_ID,sam.asset_name,po.receiverID,\r\n        " +
                 "po.vendorID,po.status,sai.asset_code,t1.asset_type,t2.cat_name,pod.received_qty,pod.damaged_qty,pod.accepted_qty," +
-                "f1.file_path,f1.Asset_master_id,sm.decimal_status,sm.spare_multi_selection,po.generated_by,pod.order_type, receive_later, " +
+                "f1.file_path,f1.Asset_master_id,sm.decimal_status,sm.spare_multi_selection,po.generated_by,pod.order_type as asset_type_ID_OrderDetails, receive_later, " +
                 "added_to_store,   \r\n      " +
                 "  po.challan_no, po.po_no, po.freight, po.transport, po.no_pkg_received, po.lr_no, po.condition_pkg_received, " +
                 "po.vehicle_no, po.gir_no, po.challan_date, po.job_ref, po.amount, po.currency\r\n      " +
@@ -738,8 +737,8 @@ namespace CMMSAPIs.Repositories
             {
                 Id = p.purchaseID,
                 facility_id = p.facility_id,
-               
-                asset_type_ID = p.order_by_type,
+                
+                asset_type_ID = p.asset_type_ID,
                 vendorID = p.vendorID,
                 status = p.status,               
                 accepted_qty = p.ordered_qty,                
@@ -748,6 +747,7 @@ namespace CMMSAPIs.Repositories
             {
                 id = p.podID,
                 cost = p.cost,
+                asset_type_ID = p.asset_type_ID_OrderDetails,
                 assetItemID = p.assetItemID,
                 location_ID = p.location_ID,              
                 accepted_qty = p.ordered_qty,
