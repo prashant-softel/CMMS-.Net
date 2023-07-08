@@ -319,6 +319,54 @@ namespace CMMSAPIs.Controllers.Masters
             }
         }
 
+        [Authorize]
+        [Route("CreateSPV")]
+        [HttpPost]
+        public async Task<IActionResult> CreateSPV(CMSPV request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _CMMSBS.CreateSPV(request, userID);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        [Authorize]
+        [Route("UpdateSPV")]
+        [HttpPatch]
+        public async Task<IActionResult> UpdateSPV(CMSPV request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _CMMSBS.UpdateSPV(request, userID);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        [Authorize]
+        [Route("DeleteSPV")]
+        [HttpDelete]
+        public async Task<IActionResult> DeleteSPV(int id)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _CMMSBS.DeleteSPV(id, userID);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
         // Module CRUD
         [Route("AddModule")]
         [HttpPost]

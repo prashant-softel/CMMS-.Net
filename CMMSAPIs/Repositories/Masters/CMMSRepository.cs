@@ -212,11 +212,38 @@ namespace CMMSAPIs.Repositories.Masters
             return _Gender;
         }
 
-        internal async Task<List<CMDefaultList>> GetSPVList()
+        internal async Task<List<CMSPV>> GetSPVList()
         {
-            string myQuery = "SELECT id, name FROM spv";
-            List<CMDefaultList> _SPV = await Context.GetData<CMDefaultList>(myQuery).ConfigureAwait(false);
+            string myQuery = "SELECT id, name, description FROM spv WHERE status=1 ";
+            List<CMSPV> _SPV = await Context.GetData<CMSPV>(myQuery).ConfigureAwait(false);
             return _SPV;
+        }
+        internal async Task<CMDefaultResponse> CreateSPV(CMSPV request, int userId)
+        {
+            string myQuery = $"INSERT INTO spv(name, description, status, addedBy, addedAt) VALUES " +
+                                $"('{request.name}','{request.description} ', 1, {userId}, '{UtilsRepository.GetUTCTime()}'); " +
+                                 $"SELECT LAST_INSERT_ID(); ";
+            DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
+            int id = Convert.ToInt32(dt.Rows[0][0]);
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "SPV Added");
+        }
+        internal async Task<CMDefaultResponse> UpdateSPV(CMSPV request, int userID)
+        {
+            string updateQry = "UPDATE spv SET ";
+            if (request.name != null && request.name != "")
+                updateQry += $"name = '{request.name}', ";
+            if (request.description != null && request.description != "")
+                updateQry += $"description = '{request.description}', ";
+            updateQry += $"updatedBy = '{userID}', updatedAt = '{UtilsRepository.GetUTCTime()}' WHERE id = {request.id};";
+            await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+            return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "SPV Updated");
+        }
+        internal async Task<CMDefaultResponse> DeleteSPV(int id, int userId)
+        {
+            string deleteQry = $"UPDATE spv " +
+                $" SET status = 0 , updatedBy = '{userId}' , updatedAt = '{UtilsRepository.GetUTCTime()}' WHERE id = {id};";
+            await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "SPV Deleted");
         }
 
         internal async Task<List<CMEmployee>> GetEmployeeList(int facility_id, CMMS.CMMS_Modules module, CMMS.CMMS_Access access)
@@ -288,7 +315,7 @@ namespace CMMSAPIs.Repositories.Masters
 
         internal async Task<List<CMBusinessType>> GetBusinessTypeList()
         {
-            string myQuery = $"SELECT id, name, description, status FROM businesstype";
+            string myQuery = $"SELECT id, name, description FROM businesstype WHERE status=1 ";
             List<CMBusinessType> _Business = await Context.GetData<CMBusinessType>(myQuery).ConfigureAwait(false);
             return _Business;
         }
@@ -364,7 +391,7 @@ namespace CMMSAPIs.Repositories.Masters
             {
                 count++;
                 businessName = unit.name;
-                qry += "('" + unit.name + "','" + unit.email + "','" + unit.contactPerson + "','" + unit.contactNumber + "','" + unit.website + "','" + unit.location + "','" + unit.address + "','" + unit.cityId + "','" + unit.city + "','" + unit.stateId + "','" + unit.state + "','" + unit.countryId + "','" + unit.country + "','" + unit.zip + "','" + unit.type + "','" + unit.status + "','" + userId + "'),";
+                qry += "('" + unit.name + "','" + unit.email + "','" + unit.contactPerson + "','" + unit.contactNumber + "','" + unit.website + "','" + unit.location + "','" + unit.address + "','" + unit.cityId + "','" + unit.city + "','" + unit.stateId + "','" + unit.state + "','" + unit.countryId + "','" + unit.country + "','" + unit.zip + "','" + unit.type + "','" + 1 + "','" + userId + "'),";
             }
             if (count > 0)
             {
@@ -469,9 +496,9 @@ namespace CMMSAPIs.Repositories.Masters
         }
         internal async Task<List<CMBusiness>> GetBusinessList(int businessType)
         {
-            string myQuery = $"SELECT id, name, email, contactPerson, contactNumber, website, location, address, city, state, country, zip, type, status, addedAt FROM Business ";
+            string myQuery = $"SELECT id, name, email, contactPerson, contactNumber, website, location, address, city, state, country, zip, type, addedAt FROM Business WHERE status=1 ";
             if(businessType > 0)
-                myQuery += $"where type = {businessType}";
+                myQuery += $"AND type = {businessType}";
             List<CMBusiness> _Business = await Context.GetData<CMBusiness>(myQuery).ConfigureAwait(false);
             return _Business;
         }
