@@ -5,6 +5,7 @@ using CMMSAPIs.Models.SM;
 using CMMSAPIs.Models.Users;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.SM;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -30,6 +31,7 @@ namespace CMMSAPIs.Controllers.SM
             _AddLog = new AddLog(configuration);
         }
 
+        [Authorize]
         [Route("GetReorderDataByID")]
         [HttpGet]
         public async Task<IActionResult> GetReorderDataByID(int assetID, int plantID)
@@ -45,9 +47,12 @@ namespace CMMSAPIs.Controllers.SM
                 throw ex;
             }
         }
+
+
+        [Authorize]
         [Route("submitReorderForm")]
         [HttpPost]
-        public async Task<IActionResult> submitReorderForm(ReOrder request)
+        public async Task<IActionResult> submitReorderForm(CMReOrder request)
         {
             try
             {
@@ -60,9 +65,11 @@ namespace CMMSAPIs.Controllers.SM
                 throw ex;
             }
         }
+
+        [Authorize]
         [Route("updateReorderData")]
         [HttpPost]
-        public async Task<IActionResult> updateReorderData(ReOrder request)
+        public async Task<IActionResult> updateReorderData(CMReOrder request)
         {
             try
             {
@@ -76,6 +83,7 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
+        [Authorize]
         [Route("getReorderAssetsData")]
         [HttpGet]
         public async Task<IActionResult> getReorderAssetsData(int plantID)
@@ -91,6 +99,8 @@ namespace CMMSAPIs.Controllers.SM
                 throw ex;
             }
         }
+
+        [Authorize]
         [Route("getReorderItems")]
         [HttpGet]
         public async Task<IActionResult> getReorderItems(int plantID)
@@ -106,9 +116,11 @@ namespace CMMSAPIs.Controllers.SM
                 throw ex;
             }
         }
+
+        [Authorize]
         [Route("reorderAssets")]
         [HttpPost]
-        public async Task<IActionResult> reorderAssets(ReOrder request)
+        public async Task<IActionResult> reorderAssets(CMReOrder request)
         {
             try
             {
