@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -35,9 +35,9 @@ namespace CMMSAPIs.Repositories.SM
         {
         }
 
-        internal async Task<List<CMMRSList>> getMRSList(int plant_ID, int emp_id, DateTime toDate, DateTime fromDate, int status)
+        internal async Task<List<CMMRSList>> getMRSList(int facility_ID, int emp_id, DateTime toDate, DateTime fromDate, int status)
         {
-            string filter = " WHERE sm.plant_ID = " + plant_ID + "  AND  (DATE_FORMAT(sm.lastmodifieddate,'%Y-%m-%d') BETWEEN '" + fromDate.ToString("yyyy-MM-dd") + "' AND '" + toDate.ToString("yyyy-MM-dd") + "' OR DATE_FORMAT(sm.returnDate,'%Y-%m-%d') BETWEEN '" + fromDate.ToString("yyyy-MM-dd") + "' AND '" + toDate.ToString("yyyy-MM-dd") + "')";
+            string filter = " WHERE sm.facility_ID = " + facility_ID + "  AND  (DATE_FORMAT(sm.lastmodifieddate,'%Y-%m-%d') BETWEEN '" + fromDate.ToString("yyyy-MM-dd") + "' AND '" + toDate.ToString("yyyy-MM-dd") + "' OR DATE_FORMAT(sm.returnDate,'%Y-%m-%d') BETWEEN '" + fromDate.ToString("yyyy-MM-dd") + "' AND '" + toDate.ToString("yyyy-MM-dd") + "')";
 
             
 
@@ -107,7 +107,7 @@ namespace CMMSAPIs.Repositories.SM
                 var lastMRSID = request.ID;
                 var refType = "MRSEdit";
                 var mailSub = "CMMRS Request Updated";
-                string updatestmt = $" START TRANSACTION; UPDATE smmrs SET plant_ID = {request.plant_ID}, requested_by_emp_ID = {request.requested_by_emp_ID}, requested_date = {request.requestd_date}," +
+                string updatestmt = $" START TRANSACTION; UPDATE smmrs SET facility_ID = {request.facility_ID}, requested_by_emp_ID = {request.requested_by_emp_ID}, requested_date = {request.requestd_date}," +
                     $"status = '{(int)CMMS.CMMS_Status.MRS_SUBMITTED}', flag = {(int)CMMS.CMMS_Status.MRS_SUBMITTED}, setAsTemplate = {request.setAsTemplate}, templateName = {request.templateName}, approval_status = {request.approval_status}, activity='{request.activity}',whereUsedType={request.whereUsedType},whereUsedTypeId={request.whereUsedTypeId} WHERE ID = {request.ID}" +
                     $"DELETE FROM smrsitems WHERE mrs_ID =  {lastMRSID} ;COMMIT;";
                 await Context.ExecuteNonQry<int>(updatestmt);
@@ -117,8 +117,8 @@ namespace CMMSAPIs.Repositories.SM
             {
                 var refType = "MRS";
                 var mailSub = "MRS Request";
-                string insertStmt = $"START TRANSACTION; INSERT INTO smmrs (plant_ID,requested_by_emp_ID,requested_date," +
-                    $"status,flag,setAsTemplate,templateName, approved_by_emp_ID, approved_date,activity,whereUsedType,whereUsedTypeId)\r\n VALUES ({request.plant_ID},{request.requested_by_emp_ID},'{ request.requestd_date.Value.ToString("yyyy-MM-dd HH:mm")}'" +
+                string insertStmt = $"START TRANSACTION; INSERT INTO smmrs (facility_ID,requested_by_emp_ID,requested_date," +
+                    $"status,flag,setAsTemplate,templateName, approved_by_emp_ID, approved_date,activity,whereUsedType,whereUsedTypeId)\r\n VALUES ({request.facility_ID},{request.requested_by_emp_ID},'{ request.requestd_date.Value.ToString("yyyy-MM-dd HH:mm")}'" +
                     $",{(int)CMMS.CMMS_Status.MRS_SUBMITTED},{(int)CMMS.CMMS_Status.MRS_SUBMITTED},{request.setAsTemplate},'{request.templateName}',0,'2001-01-01 00:00','{request.activity}',{request.whereUsedType},{request.whereUsedTypeId}); SELECT LAST_INSERT_ID(); COMMIT;";
                 DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
                 request.ID = Convert.ToInt32(dt2.Rows[0][0]);
@@ -277,8 +277,8 @@ namespace CMMSAPIs.Repositories.SM
                 " FROM smrsitems smi \r\n        LEFT JOIN smmrs sm ON sm.ID = smi.mrs_ID \r\n       " +
                 " LEFT JOIN smassetitems sam ON sam.asset_code = smi.asset_MDM_code \r\n       " +
                 " LEFT JOIN smassetmasterfiles file ON file.Asset_master_id = sam.ID \r\n        " +
-                "LEFT JOIN smassettypes sat ON sat.ID = sam.plant_ID\r\n        " +
-                "LEFT JOIN smunitmeasurement f_sum ON  f_sum.id = sam.plant_ID\r\n        " +
+                "LEFT JOIN smassettypes sat ON sat.ID = sam.facility_ID\r\n        " +
+                "LEFT JOIN smunitmeasurement f_sum ON  f_sum.id = sam.facility_ID\r\n        " +
                 "LEFT JOIN smassetitems sai ON  sai.ID = smi.asset_item_ID" +
                 " WHERE smi.mrs_ID = "+ID+" GROUP BY smi.asset_MDM_code";
             List<CMMRSItemsBeforeIssue> _List = await Context.GetData<CMMRSItemsBeforeIssue>(stmt).ConfigureAwait(false);
@@ -314,7 +314,7 @@ namespace CMMSAPIs.Repositories.SM
                 // equipmentID = 3 for SM_ASSET_TYPE_SPARE
                 if (request.equipments[i].equipmentID == 3)
                 {
-                    decimal availableQty = Convert.ToDecimal(GetAvailableQty(request.asset_item_ID, mrsList[0].plant_ID));
+                    decimal availableQty = Convert.ToDecimal(GetAvailableQty(request.asset_item_ID, mrsList[0].facility_ID));
 
                     if (availableQty < request.equipments[i].issued_qty)
                     {
@@ -364,7 +364,7 @@ namespace CMMSAPIs.Repositories.SM
                         remarks = "Prementive Maintainance : PM" + mrsList[0].referenceID;
                     }
                     var refID = mrsList[0].ID;
-                    var tResult = await TransactionDetails(mrsList[0].plant_ID, mrsList[0].plant_ID,2 , mrsList[0].requested_by_emp_ID,3, request.equipments[0].id, Convert.ToInt32(request.equipments[0].issued_qty), Convert.ToInt32(mrsList[0].reference), Convert.ToInt32(mrsList[0].referenceID),"", refID);
+                    var tResult = await TransactionDetails(mrsList[0].facility_ID, mrsList[0].facility_ID,2 , mrsList[0].requested_by_emp_ID,3, request.equipments[0].id, Convert.ToInt32(request.equipments[0].issued_qty), Convert.ToInt32(mrsList[0].reference), Convert.ToInt32(mrsList[0].referenceID),"", refID);
                     if (!tResult) {
 
                         throw new Exception("transaction details failed");
@@ -496,7 +496,7 @@ namespace CMMSAPIs.Repositories.SM
                 var lastMRSID = request.ID;
                 var refType = "MRSReturnEdit";
                 var mailSub = "MRS Return Request Updated.";
-                string updatestmt = $" START TRANSACTION; UPDATE smmrs SET plant_ID = {request.plant_ID}, requested_by_emp_ID = {request.requested_by_emp_ID}, requested_date = '{request.returnDate.Value.ToString("yyyy-MM-dd HH:mm")}'," +
+                string updatestmt = $" START TRANSACTION; UPDATE smmrs SET facility_ID = {request.facility_ID}, requested_by_emp_ID = {request.requested_by_emp_ID}, requested_date = '{request.returnDate.Value.ToString("yyyy-MM-dd HH:mm")}'," +
                     $"status = '0', flag = {request.flag}, approval_status = {request.approval_status},activity='{request.activity}',whereUsedType={request.whereUsedType},whereUsedTypeId={request.whereUsedTypeId} WHERE ID = {request.ID}" +
                     $" ; DELETE FROM smrsitems WHERE mrs_ID =  {lastMRSID} ; COMMIT;";
                 try
@@ -513,8 +513,8 @@ namespace CMMSAPIs.Repositories.SM
             {
                 var refType = "MRSReturn";
                 var mailSub = "MRS Return Request";
-                string insertStmt = $"START TRANSACTION; INSERT INTO smmrs (plant_ID,requested_by_emp_ID,requested_date," +
-                    $"returnDate,flag. activity,whereUsedType,whereUsedTypeId)\r\n VALUES ({request.plant_ID},{request.requested_by_emp_ID},'{request.requestd_date.Value.ToString("yyyy-MM-dd HH:mm")}'" +
+                string insertStmt = $"START TRANSACTION; INSERT INTO smmrs (facility_ID,requested_by_emp_ID,requested_date," +
+                    $"returnDate,flag. activity,whereUsedType,whereUsedTypeId)\r\n VALUES ({request.facility_ID},{request.requested_by_emp_ID},'{request.requestd_date.Value.ToString("yyyy-MM-dd HH:mm")}'" +
                     $",'{request.returnDate}',{request.flag}, '{request.activity}',{request.whereUsedType},{request.whereUsedTypeId}); SELECT LAST_INSERT_ID(); COMMIT;";
                 try
                 {
@@ -600,7 +600,7 @@ namespace CMMSAPIs.Repositories.SM
                 // MRS_REQUEST_APPROVE == 1 in constant.cs file
                 if (request.approval_status == 1)
                 {
-                    var tResult = await TransactionDetails(mrsList[0].plant_ID, mrsList[0].requested_by_emp_ID, 2, mrsList[0].plant_ID, 2, request.equipments[0].id, Convert.ToInt32(request.equipments[0].received_qty), Convert.ToInt32(mrsList[0].reference), request.ID, request.return_remarks, request.mrs_return_ID);
+                    var tResult = await TransactionDetails(mrsList[0].facility_ID, mrsList[0].requested_by_emp_ID, 2, mrsList[0].facility_ID, 2, request.equipments[0].id, Convert.ToInt32(request.equipments[0].received_qty), Convert.ToInt32(mrsList[0].reference), request.ID, request.return_remarks, request.mrs_return_ID);
                     if (!tResult)
                     {
                         return new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Transaction details failed.");                        
@@ -640,7 +640,7 @@ namespace CMMSAPIs.Repositories.SM
         }
         internal async Task<List<CMMRSAssetTypeList>> getAssetTypeByItemID(int ItemID)
         {
-                   string stmt = "SELECT sat.asset_type,sam.asset_code,sam.asset_name,sat.ID,sai.ID as item_ID,sai.plant_ID,sai.serial_number,sam.asset_type_ID,sm.decimal_status,COALESCE(file.file_path,'') as file_path,file.Asset_master_id, f_sum.spare_multi_selection FROM smassetitems sai " +
+                   string stmt = "SELECT sat.asset_type,sam.asset_code,sam.asset_name,sat.ID,sai.ID as item_ID,sai.facility_ID,sai.serial_number,sam.asset_type_ID,sm.decimal_status,COALESCE(file.file_path,'') as file_path,file.Asset_master_id, f_sum.spare_multi_selection FROM smassetitems sai " +
                             "LEFT JOIN smassetmasters sam ON sam.asset_code = sai.asset_code " +
                             "LEFT JOIN smunitmeasurement sm ON sm.ID = sam.unit_of_measurement " +
                             "LEFT JOIN smassetmasterfiles file ON file.Asset_master_id = sam.ID " +
@@ -702,13 +702,13 @@ namespace CMMSAPIs.Repositories.SM
             return mrsItem[0];
         }
 
-        public async Task<List<CMAssetItem>> GetAssetItems(int plantID, bool isGroupByCode = false)
+        public async Task<List<CMAssetItem>> GetAssetItems(int facility_ID, bool isGroupByCode = false)
         {
             //spare 
 
             string spareAssetIds = "SELECT sai.ID FROM smassetitems as sai JOIN smassetmasters as sam ON sai.asset_code = sam.asset_code " +
                 "JOIN smunitmeasurement as f_sum ON f_sum.ID = sam.unit_of_measurement WHERE f_sum.spare_multi_selection = 0 " +
-                "AND sam.asset_type_ID =2 AND sai.plant_ID = "+plantID+";";
+                "AND sam.asset_type_ID =2 AND sai.plant_ID = " + facility_ID + ";";
             DataTable dtSA = await Context.FetchData(spareAssetIds).ConfigureAwait(false);
             string spareAssetIdsString = "";
             if (dtSA.Rows.Count>0)
@@ -729,7 +729,7 @@ namespace CMMSAPIs.Repositories.SM
     LEFT JOIN smassetmasterfiles file ON file.Asset_master_id = sm.ID
     LEFT JOIN smitemcategory sic ON sic.ID = sm.item_category_ID
     LEFT JOIN smunitmeasurement f_sum ON f_sum.ID = sm.unit_of_measurement
-    WHERE sat.plant_ID = "+plantID+" AND sat.item_condition < 3 AND sat.status = 1 ";
+    WHERE sat.plant_ID = " + facility_ID + " AND sat.item_condition < 3 AND sat.status = 1 ";
 
 
 
@@ -756,7 +756,7 @@ namespace CMMSAPIs.Repositories.SM
                 + " LEFT JOIN smassetmasterfiles file ON file.Asset_master_id = sm.ID"
                 + " LEFT JOIN smitemcategory sic ON sic.ID = sm.item_category_ID"
                 + " LEFT JOIN smunitmeasurement f_sum ON f_sum.ID = sm.unit_of_measurement"
-                + " WHERE sat.plant_ID = "+plantID+" AND sat.item_condition < 3 AND sat.ID IN("+ spareAssetIdsString + ") AND sat.status = 1";
+                + " WHERE sat.plant_ID = " + facility_ID + " AND sat.item_condition < 3 AND sat.ID IN("+ spareAssetIdsString + ") AND sat.status = 1";
             }
 
             //echo $stmt;
@@ -764,7 +764,7 @@ namespace CMMSAPIs.Repositories.SM
 
             for(int i = 0; i < Listitem.Count; i++)
             {
-                Listitem[i].available_qty = await GetAvailableQtyByCode(Listitem[i].asset_code, plantID);
+                Listitem[i].available_qty = await GetAvailableQtyByCode(Listitem[i].asset_code, facility_ID);
             }
 
             return Listitem;
