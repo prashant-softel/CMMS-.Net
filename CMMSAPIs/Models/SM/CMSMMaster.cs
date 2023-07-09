@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -81,7 +81,7 @@ namespace CMMSAPIs.Models.SM
         public string emp_name { get; set; }
         public int flag { get; set; }
 
-        public int plant_ID { get; set; }
+        public int facility_ID { get; set; }
         public int approved_by_emp_ID { get; set; }
         public DateTime approved_date { get; set; }
         public int status { get; set; }
@@ -305,6 +305,18 @@ namespace CMMSAPIs.Models.SM
         public int Asset_master_id { get; set; }
         public int spare_multi_selection { get; set; }
         public decimal available_qty { get; set; }
+
+    }
+
+    public class CMGETASSETDATALIST
+    {
+        public int asset_ID { get; set; }
+        public string asset_code { get; set; }
+        public string CategoryName { get; set; }
+        public string serial_number { get; set; }
+        public string asset_name { get; set; }
+        public string asset_type { get; set; }
+        public string approval_required { get; set; }
 
     }
 }

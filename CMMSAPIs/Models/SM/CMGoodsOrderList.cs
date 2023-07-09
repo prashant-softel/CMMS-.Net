@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -185,7 +185,25 @@ namespace CMMSAPIs.Models
         public string status_short { get; set; }
         public decimal accepted_qty { get; set; }
 
-       public List<CMGODetails> GODetails { get; set; } 
+        public string currency { get; set; }
+        public decimal amount { get; set; }
+        public string job_ref { get; set; }
+        public string gir_no { get; set; }
+        public string vehicle_no { get; set; }
+        public string condition_pkg_received { get; set; }
+        public string lr_no { get; set; }
+        public string no_pkg_received { get; set; }
+        public DateTime? received_on { get; set; }
+        public string freight { get; set; }
+        public DateTime? po_date { get; set; }
+        public string po_no { get; set; }
+        public DateTime? challan_date { get; set; }
+        public string challan_no { get; set; }
+        public DateTime? purchaseDate { get; set; }
+        public int location_ID { get; set; }
+
+
+        public List<CMGODetails> GODetails { get; set; } 
     }
 
 
@@ -227,6 +245,7 @@ namespace CMMSAPIs.Models
         public decimal cost { get; set; }
         public decimal ordered_qty { get; set; }
         public string rejectedRemark { get; set; }
+        public string facility_name { get; set; }
         public int facility_id { get; set; }
         public DateTime? purchaseDate { get; set; }
 
