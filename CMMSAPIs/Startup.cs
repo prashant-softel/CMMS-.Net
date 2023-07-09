@@ -29,6 +29,7 @@ using CMMSAPIs.BS.PM;
 using CMMSAPIs.BS.Audits;
 using CMMSAPIs.BS.MC;
 using CMMSAPIs.BS.Calibration;
+using CMMSAPIs.BS;
 
 namespace CMMSAPIs
 {
