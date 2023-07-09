@@ -441,6 +441,19 @@ namespace CMMSAPIs.Helper
             HOTO,
             Audit,
         }
+        public enum SM_OrderByType
+        {
+            SM_OWNER = 1,
+            SM_OPERATOR
 
+        }
+
+    public enum SM_Types
+    {
+        Vendor = 1, 
+        Store = 2,
+        Engineer = 3,
+        Inventory = 4
+    }
     }
 }
