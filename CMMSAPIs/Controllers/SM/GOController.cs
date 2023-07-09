@@ -1,5 +1,4 @@
 using CMMSAPIs.BS;
-using CMMSAPIs.BS.SM;
 using CMMSAPIs.Models;
 using CMMSAPIs.Models.Users;
 using CMMSAPIs.Models.Utils;
@@ -14,7 +13,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 
-namespace CMMSAPIs.Controllers.SM
+namespace CMMSAPIs.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -26,7 +25,7 @@ namespace CMMSAPIs.Controllers.SM
             _GOBS = GO;
         }
 
- 
+        [Authorize]
         [Route("GetGOList")]
         [HttpGet]
         public async Task<IActionResult> GetGOList(int facility_id, DateTime fromDate, DateTime toDate, int Status)
@@ -42,7 +41,8 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
- 
+
+        [Authorize]
         [Route("GetGOItemByID")]
         [HttpGet]
         public async Task<IActionResult> GetGOItemByID(int id)
@@ -58,7 +58,8 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
- 
+
+        [Authorize]
         [Route("GetAssetCodeDetails")]
         [HttpGet]
         public async Task<IActionResult> GetAssetCodeDetails(int asset_code, int plantID, DateTime fromDate, DateTime toDate)
@@ -75,7 +76,8 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
- 
+
+        [Authorize]
         [Route("CreateGO")]
         [HttpPost]
         public async Task<IActionResult> CreateGO(CMGoodsOrderList request)
@@ -92,7 +94,8 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
- 
+
+        [Authorize]
         [Route("UpdateGO")]
         [HttpPost]
         public async Task<IActionResult> UpdateGO(CMGoodsOrderList request)
@@ -109,10 +112,11 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
- 
+
+        [Authorize]
         [Route("DeleteGO")]
         [HttpPost]
-        public async Task<IActionResult> DeleteGO(int id)
+        public async Task<IActionResult> DeleteGO([FromForm] int id)
         {
             try
             {
@@ -126,7 +130,8 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
- 
+
+        [Authorize]
         [Route("WithdrawGO")]
         [HttpPost]
         public async Task<IActionResult> WithdrawGO(CMGoodsOrderList request)
@@ -143,10 +148,11 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
- 
+
+        [Authorize]
         [Route("GOApproval")]
         [HttpPost]
-        public async Task<IActionResult> GOApproval(CMApproval request )
+        public async Task<IActionResult> GOApproval([FromForm]  CMApproval request )
         {
             try
             {
@@ -160,10 +166,11 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
- 
+
+        [Authorize]
         [Route("RejectGO")]
         [HttpPost]
-        public async Task<IActionResult> RejectGO(CMApproval request)
+        public async Task<IActionResult> RejectGO([FromForm]  CMApproval request)
         {
             try
             {
@@ -177,7 +184,8 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
- 
+
+        [Authorize]
         [Route("GetPurchaseData")]
         [HttpGet]
         public async Task<IActionResult> GetPurchaseData(int plantID, string empRole, DateTime fromDate, DateTime toDate, string status, string order_type)
@@ -193,14 +201,15 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
- 
-        [Route("GetPurchaseDetailsByID")]
+
+        [Authorize]
+        [Route("GetGODetailsByID")]
         [HttpGet]
-        public async Task<IActionResult> getPurchaseDetailsByID(int id)
+        public async Task<IActionResult> GetGODetailsByID(int id)
         {
             try
             {
-                var data = await _GOBS.getPurchaseDetailsByID(id);
+                var data = await _GOBS.GetGODetailsByID(id);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -209,7 +218,8 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
- 
+
+        [Authorize]
         [Route("SubmitPurchaseOrderData")]
         [HttpPost]
         public async Task<IActionResult> SubmitPurchaseData(CMSUBMITPURCHASEDATA request)
