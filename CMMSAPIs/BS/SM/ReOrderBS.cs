@@ -13,12 +13,12 @@ namespace CMMSAPIs.BS.SM
 {
     public interface IReOrderBS
     {
-        Task<List<ReOrder>> GetReorderDataByID(int assetID, int plantID);
-        Task<List<ReOrder>> getReorderAssetsData(int plantID);
-        Task<List<ReOrderItems>> getReorderItems(int plantID);
-        Task<CMDefaultResponse> submitReorderForm(ReOrder request);
-        Task<CMDefaultResponse> updateReorderData(ReOrder request);
-        Task<CMDefaultResponse> reorderAssets(ReOrder request);
+        Task<List<CMReOrder>> GetReorderDataByID(int assetID, int plantID);
+        Task<List<CMReOrder>> getReorderAssetsData(int plantID);
+        Task<List<CMReOrderItems>> getReorderItems(int plantID);
+        Task<CMDefaultResponse> submitReorderForm(CMReOrder request);
+        Task<CMDefaultResponse> updateReorderData(CMReOrder request);
+        Task<CMDefaultResponse> reorderAssets(CMReOrder request);
     }
         public class ReOrderBS: IReOrderBS
     {
@@ -29,7 +29,7 @@ namespace CMMSAPIs.BS.SM
             databaseProvider = dbProvider;
         }
 
-        public async Task<List<ReOrder>> GetReorderDataByID(int assetID, int plantID)
+        public async Task<List<CMReOrder>> GetReorderDataByID(int assetID, int plantID)
         {
             try
             {
@@ -44,7 +44,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<CMDefaultResponse> submitReorderForm(ReOrder request)
+        public async Task<CMDefaultResponse> submitReorderForm(CMReOrder request)
         {
             try
             {
@@ -59,7 +59,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
         
-        public async Task<CMDefaultResponse> updateReorderData(ReOrder request)
+        public async Task<CMDefaultResponse> updateReorderData(CMReOrder request)
         {
             try
             {
@@ -74,7 +74,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<ReOrder>> getReorderAssetsData(int plantID)
+        public async Task<List<CMReOrder>> getReorderAssetsData(int plantID)
         {
             try
             {
@@ -88,7 +88,7 @@ namespace CMMSAPIs.BS.SM
                 throw;
             }
         }
-        public async Task<List<ReOrderItems>> getReorderItems(int plantID)
+        public async Task<List<CMReOrderItems>> getReorderItems(int plantID)
         {
             try
             {
@@ -102,7 +102,7 @@ namespace CMMSAPIs.BS.SM
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> reorderAssets(ReOrder request)
+        public async Task<CMDefaultResponse> reorderAssets(CMReOrder request)
         {
             try
             {

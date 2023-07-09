@@ -1,4 +1,4 @@
-using CMMSAPIs.Helper;
+﻿using CMMSAPIs.Helper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +9,7 @@ using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Models.Users;
 using MailKit.Search;
 
-namespace CMMSAPIs.BS.SM
+namespace CMMSAPIs.BS
 {
     public interface IGOBS
     {
@@ -20,10 +20,10 @@ namespace CMMSAPIs.BS.SM
         Task<CMDefaultResponse> UpdateGO(CMGoodsOrderList request, int userID);
         Task<CMDefaultResponse> DeleteGO(int GOid, int userID);
         Task<CMDefaultResponse> WithdrawGO(CMGoodsOrderList request, int userID);
-        Task<CMDefaultResponse> GOApproval(CMApproval request,int userId);
-        Task<CMDefaultResponse> RejectGO(CMApproval request,int userId);
+        Task<CMDefaultResponse> GOApproval(CMApproval request, int userId);
+        Task<CMDefaultResponse> RejectGO(CMApproval request, int userId);
         Task<List<CMPURCHASEDATA>> GetPurchaseData(int plantID, string empRole, DateTime fromDate, DateTime toDate, string status, string order_type);
-        Task<CMGOMaster> getPurchaseDetailsByID(int id);
+        Task<CMGOMaster> GetGODetailsByID(int id);
         Task<CMDefaultResponse> SubmitPurchaseData(CMSUBMITPURCHASEDATA request);
     }
 
@@ -145,7 +145,7 @@ namespace CMMSAPIs.BS.SM
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> GOApproval(CMApproval request,int userId)
+        public async Task<CMDefaultResponse> GOApproval(CMApproval request, int userId)
         {
             try
             {
@@ -160,7 +160,7 @@ namespace CMMSAPIs.BS.SM
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> RejectGO(CMApproval request,int userId)
+        public async Task<CMDefaultResponse> RejectGO(CMApproval request, int userId)
         {
             try
             {
@@ -192,13 +192,13 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<CMGOMaster> getPurchaseDetailsByID(int id)
+        public async Task<CMGOMaster> GetGODetailsByID(int id)
         {
             try
             {
                 using (var repos = new GORepository(getDB))
                 {
-                    return await repos.getGoodsOrderDetailsByID(id);
+                    return await repos.GetGODetailsByID(id);
 
                 }
             }

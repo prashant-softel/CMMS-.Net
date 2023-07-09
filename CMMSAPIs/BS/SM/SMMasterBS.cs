@@ -27,10 +27,13 @@ namespace CMMSAPIs.BS.SM
         Task<CMDefaultResponse> UpdateUnitMeasurement(CMUnitMeasurement request, int userID);
         Task<CMDefaultResponse> DeleteUnitMeasurement(int umID, int userID);
 
-        Task<List<CMSMMaster>> GetAssetMasterList(int ID);
+        Task<List<CMASSETMASTERLIST>> GetAssetMasterList(int ID);
         Task<CMDefaultResponse> AddAssetMaster(CMSMMaster request, CMAssetMasterFiles fileData, int UserID);
         Task<CMDefaultResponse> UpdateAssetMaster(CMSMMaster request, CMAssetMasterFiles fileData, int UserID);
         Task<CMDefaultResponse> DeleteAssetMaster(CMSMMaster request, int UserID);
+        Task<List<CMGETASSETDATALIST>> GetAssetDataList(int facility_id);
+        Task<List<CMVendorList>> GetVendorList();
+        Task<CMAssetBySerialNo> GetAssetBySerialNo(string serial_number);
 
     }
 
@@ -224,7 +227,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<CMSMMaster>> GetAssetMasterList(int ID)
+        public async Task<List<CMASSETMASTERLIST>> GetAssetMasterList(int ID)
         {
             try
             {
@@ -283,5 +286,51 @@ namespace CMMSAPIs.BS.SM
                 throw;
             }
         }
+
+        public async Task<List<CMGETASSETDATALIST>> GetAssetDataList(int facility_id)
+        {
+            try
+            {
+                using (var repos = new SMMasterRepository(getDB))
+                {
+                    return await repos.GetAssetDataList(facility_id);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<CMVendorList>> GetVendorList()
+        {
+            try
+            {
+                using (var repos = new SMMasterRepository(getDB))
+                {
+                    return await repos.GetVendorList();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<CMAssetBySerialNo> GetAssetBySerialNo(string serial_number)
+        {
+            try
+            {
+                using (var repos = new SMMasterRepository(getDB))
+                {
+                    return await repos.GetAssetBySerialNo(serial_number);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        
+
     }
 }
