@@ -101,8 +101,8 @@ namespace CMMSAPIs.Repositories
                     $" challan_no,po_no, freight,transport, " +
                     $"no_pkg_received,lr_no,condition_pkg_received,vehicle_no, gir_no, challan_date,po_date, job_ref,amount, currency,withdraw_by,withdrawOn,order_type) " +
                     $"VALUES({request.facility_id},{request.vendorID}, {request.receiverID}, {userID}, '{DateTime.Now.ToString("yyyy-MM-dd")}', '{DateTime.Now.ToString("yyyy-MM-dd")}', {(int)CMMS.CMMS_Status.SM_PO_DRAFT}," +
-                    $"'{request.challan_no}','{request.po_no}','{request.freight}','', '{request.no_pkg_received}', '{request.lr_no}', '{request.condition_pkg_received}','{request.vehicle_no}','{request.gir_no}','{request.challan_date.Value.ToString("yyyy-MM-dd")}'," +
-                    $"'{request.po_date.Value.ToString("yyyy-MM-dd")}','{request.job_ref}',{request.amount}, '{request.currency}',0,'0001-01-01',0);" + 
+                    $"'{request.challan_no}','{request.po_no}','{request.freight}','', '{request.no_pkg_received}', '{request.lr_no}', '{request.condition_pkg_received}','{request.vehicle_no}','{request.gir_no}','{request.challan_date.ToString("yyyy-MM-dd")}'," +
+                    $"'{request.po_date.ToString("yyyy-MM-dd")}','{request.job_ref}',{request.amount}, '{request.currency}',0,'0001-01-01',0);" + 
                     $" SELECT LAST_INSERT_ID();";
                     DataTable dt2 = await Context.FetchData(poInsertQuery).ConfigureAwait(false);
                  poid = Convert.ToInt32(dt2.Rows[0][0]);
@@ -122,17 +122,19 @@ namespace CMMSAPIs.Repositories
         }
         internal async Task<CMDefaultResponse> UpdateGO(CMGoodsOrderList request, int userID)
         {
-            //string mainQuery = $"UPDATE smpurchaseorderdetails SET generate_flag = " +request.generate_flag + ",status = "+request.status+", vendorID = "+request.vendorID+" WHERE ID = "+request.id+"";
+            string OrderQuery = $"UPDATE smpurchaseorder SET " +
+                    $"challan_no = '{request.challan_no}',po_no='{request.po_no}', freight='{request.freight}',no_pkg_received='{request.no_pkg_received}'," +
+                    $"lr_no='{request.lr_no}',condition_pkg_received='{request.condition_pkg_received}',vehicle_no='{request.vehicle_no}', gir_no='{request.gir_no}', " +
+                    $"challan_date = '{request.challan_date.ToString("yyyy-MM-dd")}', " +
+                    $"job_ref='{request.job_ref}',amount='{request.amount}', currency='{request.currency}',updated_by = {userID},updatedOn = '{UtilsRepository.GetUTCTime()}' where ID={request.id}";
+
+            await Context.ExecuteNonQry<int>(OrderQuery);
 
             for (var i = 0; i < request.go_items.Count; i++)
             {
-                string updateQ = $"UPDATE smpurchaseorderdetails SET assetItemID = {request.go_items[i].assetItemID},cost = {request.go_items[i].cost},ordered_qty = {request.go_items[i].ordered_qty},location_ID = {request.location_ID}" +
-                    $"challan_no = '{request.challan_no}',po_no='{request.po_no}', freight='{request.freight}',no_pkg_received={request.no_pkg_received}," +
-                    $"lr_no='{request.lr_no}',condition_pkg_received='{request.condition_pkg_received}',vehicle_no='{request.vehicle_no}', gir_no='{request.gir_no}', " +
-                    $"challan_date = '{request.challan_date.Value.ToString("yyyy-MM-dd")}', " +
-                    $"job_ref='{request.job_ref}',amount='{request.amount}', currency='{request.currency}'" +
+                string itemsQuery = $"UPDATE smpurchaseorderdetails SET location_ID = {request.location_ID},assetItemID = {request.go_items[i].assetItemID},cost = {request.go_items[i].cost},ordered_qty = {request.go_items[i].ordered_qty}" +
                     $" WHERE ID = {request.go_items[i].poID}";
-                var result = await Context.ExecuteNonQry<int>(updateQ);
+                var result = await Context.ExecuteNonQry<int>(itemsQuery);
             }
 
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Goods order updated successfully.");
@@ -323,8 +325,8 @@ namespace CMMSAPIs.Repositories
             }
 
 
-            string approveQuery = $"Update smpurchaseorder set status = {(int)CMMS.CMMS_Status.SM_PO_CLOSED_REJECTED} , reject_reccomendations = '{request.comment}' , " +
-                $" rejecctedBy = {userId}, rejectedAt = '{DateTime.Now.ToString("yyyy-MM-dd")}'" +
+            string approveQuery = $"Update smpurchaseorder set status = {(int)CMMS.CMMS_Status.SM_PO_CLOSED_REJECTED} , remarks = '{request.comment}' , " +
+                $" rejected_by = {userId}, rejectedOn = '{DateTime.Now.ToString("yyyy-MM-dd")}'" +
                 $" where id = { request.id}";
             int reject_id = await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
 
