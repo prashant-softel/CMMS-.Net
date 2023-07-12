@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -652,11 +652,11 @@ namespace CMMSAPIs.Repositories.SM
            
             if (_List[0].asset_type_ID == 2 || (_List[0].asset_type_ID == 3 && Convert.ToInt32(isMultiSpareSelectionStatus) == 0))
             {
-                _List[0].available_qty = await GetAvailableQty(_List[0].item_ID, _List[0].plant_ID);
+                _List[0].available_qty = await GetAvailableQty(_List[0].item_ID, _List[0].facility_ID);
             }
             else
             {
-                _List[0].available_qty = await GetAvailableQtyByCode(_List[0].asset_code, _List[0].plant_ID);
+                _List[0].available_qty = await GetAvailableQtyByCode(_List[0].asset_code, _List[0].facility_ID);
             }
 
             return _List;
@@ -681,7 +681,7 @@ namespace CMMSAPIs.Repositories.SM
         {
             // actor Type 2 : Store
             string actorType = "2";
-            string stmt = "SELECT SUM(debitQty) as drQty, SUM(creditQty) as crQty FROM  smtransition WHERE assetItemID IN (SELECT ID FROM smassetitems WHERE asset_code = '" + assetCode + "' AND plant_ID = " + plantID.ToString() + ") AND actorType = '" + actorType + "' AND transactionID IN (SELECT ID FROM smtransactiondetails WHERE plantID = " + plantID.ToString() + ")";
+            string stmt = "SELECT SUM(debitQty) as drQty, SUM(creditQty) as crQty FROM  smtransition WHERE assetItemID IN (SELECT ID FROM smassetitems WHERE asset_code = '" + assetCode + "' AND facility_ID = " + plantID.ToString() + ") AND actorType = '" + actorType + "' AND transactionID IN (SELECT ID FROM smtransactiondetails WHERE plantID = " + plantID.ToString() + ")";
             DataTable dt2 = await Context.FetchData(stmt).ConfigureAwait(false);
             int crQty = 0, drQty = 0;
             if (dt2 != null && dt2.Rows.Count > 0)
@@ -708,7 +708,7 @@ namespace CMMSAPIs.Repositories.SM
 
             string spareAssetIds = "SELECT sai.ID FROM smassetitems as sai JOIN smassetmasters as sam ON sai.asset_code = sam.asset_code " +
                 "JOIN smunitmeasurement as f_sum ON f_sum.ID = sam.unit_of_measurement WHERE f_sum.spare_multi_selection = 0 " +
-                "AND sam.asset_type_ID =2 AND sai.plant_ID = " + facility_ID + ";";
+                "AND sam.asset_type_ID =2 AND sai.facility_ID = " + facility_ID + ";";
             DataTable dtSA = await Context.FetchData(spareAssetIds).ConfigureAwait(false);
             string spareAssetIdsString = "";
             if (dtSA.Rows.Count>0)
@@ -729,7 +729,7 @@ namespace CMMSAPIs.Repositories.SM
     LEFT JOIN smassetmasterfiles file ON file.Asset_master_id = sm.ID
     LEFT JOIN smitemcategory sic ON sic.ID = sm.item_category_ID
     LEFT JOIN smunitmeasurement f_sum ON f_sum.ID = sm.unit_of_measurement
-    WHERE sat.plant_ID = " + facility_ID + " AND sat.item_condition < 3 AND sat.status = 1 ";
+    WHERE sat.facility_ID = " + facility_ID + " AND sat.item_condition < 3 AND sat.status = 1 ";
 
 
 
@@ -756,7 +756,7 @@ namespace CMMSAPIs.Repositories.SM
                 + " LEFT JOIN smassetmasterfiles file ON file.Asset_master_id = sm.ID"
                 + " LEFT JOIN smitemcategory sic ON sic.ID = sm.item_category_ID"
                 + " LEFT JOIN smunitmeasurement f_sum ON f_sum.ID = sm.unit_of_measurement"
-                + " WHERE sat.plant_ID = " + facility_ID + " AND sat.item_condition < 3 AND sat.ID IN("+ spareAssetIdsString + ") AND sat.status = 1";
+                + " WHERE sat.facility_ID = " + facility_ID + " AND sat.item_condition < 3 AND sat.ID IN("+ spareAssetIdsString + ") AND sat.status = 1";
             }
 
             //echo $stmt;
