@@ -297,7 +297,7 @@ namespace CMMSAPIs.Models.SM
         public string asset_name { get; set; }
         public int ID { get; set; }
         public int item_ID { get; set; }
-        public int plant_ID { get; set; }
+        public int facility_ID { get; set; }
         public string serial_number { get; set; }
         public int asset_type_ID { get; set; }
         public int decimal_status { get; set; }
