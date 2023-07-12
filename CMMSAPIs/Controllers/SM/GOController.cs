@@ -116,7 +116,7 @@ namespace CMMSAPIs.Controllers
         [Authorize]
         [Route("DeleteGO")]
         [HttpPost]
-        public async Task<IActionResult> DeleteGO([FromForm] int id)
+        public async Task<IActionResult> DeleteGO( int id)
         {
             try
             {
@@ -152,7 +152,7 @@ namespace CMMSAPIs.Controllers
         [Authorize]
         [Route("GOApproval")]
         [HttpPost]
-        public async Task<IActionResult> GOApproval([FromForm]  CMApproval request )
+        public async Task<IActionResult> GOApproval( CMApproval request )
         {
             try
             {
@@ -170,7 +170,7 @@ namespace CMMSAPIs.Controllers
         [Authorize]
         [Route("RejectGO")]
         [HttpPost]
-        public async Task<IActionResult> RejectGO([FromForm]  CMApproval request)
+        public async Task<IActionResult> RejectGO( CMApproval request)
         {
             try
             {
