@@ -188,11 +188,11 @@ namespace CMMSAPIs.Controllers
         [Authorize]
         [Route("GetPurchaseData")]
         [HttpGet]
-        public async Task<IActionResult> GetPurchaseData(int plantID, string empRole, DateTime fromDate, DateTime toDate, string status, string order_type)
+        public async Task<IActionResult> GetPurchaseData(int facilityID, string empRole, DateTime fromDate, DateTime toDate, string status, string order_type)
         {
             try
             {
-                var data = await _GOBS.GetPurchaseData(plantID, empRole, fromDate, toDate, status, order_type);
+                var data = await _GOBS.GetPurchaseData(facilityID, empRole, fromDate, toDate, status, order_type);
                 return Ok(data);
             }
             catch (Exception ex)
