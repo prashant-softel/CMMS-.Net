@@ -95,7 +95,7 @@ namespace CMMSAPIs.Models
         public string receivedOn { get; set; }
         public string receivedDate { get; set; }
         public string approvedBy { get; set; }
-        public DateTime? approvedOn { get; set; }
+        public string approvedOn { get; set; }
         public int statusFlag { get; set; }
 
     }
