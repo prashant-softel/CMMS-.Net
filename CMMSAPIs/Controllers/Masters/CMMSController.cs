@@ -319,6 +319,23 @@ namespace CMMSAPIs.Controllers.Masters
             }
         }
 
+        [Route("GetInsuranceProviderList")]
+        [HttpGet]
+        public async Task<IActionResult> GetInsuranceProviderList()
+        {
+            try
+            {
+                var data = await _CMMSBS.GetInsuranceProviderList();
+                return Ok(data);
+
+            }
+            catch (Exception ex)
+            {
+
+                return BadRequest(ex.Message);
+            }
+        }
+
         [Route("GetSPVList")]
         [HttpGet]
         public async Task<IActionResult> GetSPVList()
