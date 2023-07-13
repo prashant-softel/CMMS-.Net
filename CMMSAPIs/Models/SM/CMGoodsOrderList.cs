@@ -180,9 +180,10 @@ namespace CMMSAPIs.Models
         public int facility_id { get; set; }
      
         public int asset_type_ID { get; set; }
-        public int vendorID { get; set; }
+        public string vendor_name { get; set; }
         public int status { get; set; }
         public string status_short { get; set; }
+        public string status_long { get; set; }
         public decimal accepted_qty { get; set; }
 
         public string currency { get; set; }
