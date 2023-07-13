@@ -29,6 +29,7 @@ namespace CMMSAPIs.BS.Masters
         Task<List<CMDefaultList>> GetBloodGroupList();
         Task<List<CMDefaultList>> GetGenderList();
         Task<List<CMSPV>> GetSPVList();
+        Task<List<CMIRRiskType>> GetRiskTypeList();
         Task<CMDefaultResponse> CreateSPV(CMSPV request, int userId);
         Task<CMDefaultResponse> UpdateSPV(CMSPV request, int userId);
         Task<CMDefaultResponse> DeleteSPV(int id, int userId);
@@ -287,6 +288,22 @@ namespace CMMSAPIs.BS.Masters
                 throw;
             }
         }
+        public async Task<List<CMIRRiskType>> GetRiskTypeList()
+        {
+            try
+            {
+                using (var repos = new CMMSRepository(getDB))
+                {
+                    return await repos.GetRiskTypeList();
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
 
         public async Task<List<CMSPV>> GetSPVList()
         {

@@ -302,6 +302,23 @@ namespace CMMSAPIs.Controllers.Masters
             }
         }
 
+        [Route("GetRiskTypeList")]
+        [HttpGet]
+        public async Task<IActionResult> GetRiskTypeList()
+        {
+            try
+            {
+                var data = await _CMMSBS.GetRiskTypeList();
+                return Ok(data);
+
+            }
+            catch (Exception ex)
+            {
+
+                return BadRequest(ex.Message);
+            }
+        }
+
         [Route("GetSPVList")]
         [HttpGet]
         public async Task<IActionResult> GetSPVList()

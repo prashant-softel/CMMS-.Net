@@ -31,6 +31,76 @@ namespace CMMSAPIs.Repositories
             _utilsRepo = new UtilsRepository(sqlDBHelper);
         }
 
+        internal static string getShortStatus(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status m_notificationID)
+        {
+            string retValue;
+
+            switch (m_notificationID)
+            {
+                case CMMS.CMMS_Status.SM_PO_DRAFT:
+                    retValue = "Drafted";
+                    break;
+                case CMMS.CMMS_Status.SM_PO_SUBMITTED:
+                    retValue = "Submitted";
+                    break;
+                case CMMS.CMMS_Status.SM_PO_IN_PROCESS:
+                    retValue = "In Process";
+                    break;
+                case CMMS.CMMS_Status.SM_PO_CLOSED:
+                    retValue = "Closed";
+                    break;
+                case CMMS.CMMS_Status.SM_PO_CLOSED_REJECTED:
+                    retValue = "After closed item rejected";
+                    break;
+                case CMMS.CMMS_Status.SM_PO_CLOSED_APPROVED:
+                    retValue = "After closed item approved";
+                    break;
+                case CMMS.CMMS_Status.SM_PO_DELETED:
+                    retValue = "Deleted";
+                    break;
+
+                default:
+                    retValue = "Unknown <" + m_notificationID + ">";
+                    break;
+            }
+            return retValue;
+
+        }
+
+        private static string getLongStatus(CMMS.CMMS_Status m_notificationID, CMGOMaster goObj)
+        {
+            CMMS.CMMS_Status status = (CMMS.CMMS_Status)m_notificationID;
+            string retValue = "";
+            switch (status)
+            {
+                case CMMS.CMMS_Status.SM_PO_DRAFT:
+                    retValue = $"Goods order {goObj.Id} Draft created";
+                    break;
+                case CMMS.CMMS_Status.SM_PO_SUBMITTED:
+                    retValue = $"Goods order {goObj.Id} Submitted";
+                    break;
+                case CMMS.CMMS_Status.SM_PO_IN_PROCESS:
+                    retValue = $"Goods order {goObj.Id} In Process";
+                    break;
+                case CMMS.CMMS_Status.SM_PO_CLOSED:
+                    retValue = $"Goods order {goObj.Id} Closed";
+                    break;
+                case CMMS.CMMS_Status.SM_PO_CLOSED_REJECTED:
+                    retValue = $"Goods order {goObj.Id} , After closed item rejected";
+                    break;
+                case CMMS.CMMS_Status.SM_PO_CLOSED_APPROVED:
+                    retValue = $"Goods order {goObj.Id},After closed item approved";
+                    break;
+                case CMMS.CMMS_Status.SM_PO_DELETED:
+                    retValue = "Deleted";
+                    break;
+
+                default:
+                    retValue = "Unknown <" + m_notificationID + ">";
+                    break;
+            }
+            return retValue;
+        }
 
         internal async Task<List<CMGoodsOrderDetailList>> GetGOList(int facility_id, DateTime fromDate, DateTime toDate)
         {
@@ -155,41 +225,6 @@ namespace CMMSAPIs.Repositories
             return response;
         }
 
-        internal static string getShortStatus(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status m_notificationID)
-        {
-            string retValue;
-
-            switch (m_notificationID)
-            {
-                case CMMS.CMMS_Status.SM_PO_DRAFT:     
-                    retValue = "Drafted";
-                    break;
-                case CMMS.CMMS_Status.SM_PO_SUBMITTED:     
-                    retValue = "Submitted";
-                    break;
-                case CMMS.CMMS_Status.SM_PO_IN_PROCESS:     
-                    retValue = "In Process";
-                    break;
-                case CMMS.CMMS_Status.SM_PO_CLOSED:     
-                    retValue = "Closed";
-                    break;
-                case CMMS.CMMS_Status.SM_PO_CLOSED_REJECTED:     
-                    retValue = "After closed item rejected";
-                    break;
-                case CMMS.CMMS_Status.SM_PO_CLOSED_APPROVED:
-                    retValue = "After closed item approved";
-                    break;
-                case CMMS.CMMS_Status.SM_PO_DELETED:
-                    retValue = "Deleted";
-                    break;
-                    
-                default:
-                    retValue = "Unknown <" + m_notificationID + ">";
-                    break;
-            }
-            return retValue;
-
-        }
 
         //public async Task<CMDefaultResponse> GOApproval(CMGoodsOrderList request, int userID)
         //{
@@ -714,8 +749,8 @@ namespace CMMSAPIs.Repositories
         }
         public async Task<CMGOMaster> GetGODetailsByID(int id)
         {
-            string query = "SELECT fc.name as facilityName,pod.ID as podID, facilityid as facility_id,pod.spare_status,pod.remarks,sai.orderflag,sam.asset_type_ID," +
-                "pod.purchaseID,pod.assetItemID,sai.serial_number,sai.location_ID,pod.cost,pod.ordered_qty,\r\nbl.name as vendor_name,\r\n     " +
+            string query = "SELECT fc.name as facilityName,pod.ID as podID, facilityid as       facility_id,pod.spare_status,pod.remarks,sai.orderflag,sam.asset_type_ID," +
+                "pod.purchaseID,pod.assetItemID,sai.serial_number,sai.location_ID,pod.cost,pod.ordered_qty,\r\nCONCAT(vendor.firstName, ' ' , vendor.lastName) as vendor_name,\r\n     " +
                 " po.purchaseDate,sam.asset_type_ID,sam.asset_name,po.receiverID,\r\n        " +
                 "po.vendorID,po.status,sai.asset_code,t1.asset_type,t2.cat_name,pod.received_qty,pod.damaged_qty,pod.accepted_qty," +
                 "f1.file_path,f1.Asset_master_id,sm.decimal_status,sm.spare_multi_selection,po.generated_by,pod.order_type as asset_type_ID_OrderDetails, receive_later, " +
@@ -733,7 +768,8 @@ namespace CMMSAPIs.Repositories
                 "      LEFT JOIN smassetmasters s1 ON s1.asset_type_ID = sat.ID\r\n        )  t1 ON t1.master_ID = sam.ID\r\n     " +
                 "   LEFT JOIN (\r\n            SELECT sic.cat_name,s2.ID as master_ID FROM smitemcategory sic\r\n          " +
                 "  LEFT JOIN smassetmasters s2 ON s2.item_category_ID = sic.ID\r\n        )  t2 ON t2.master_ID = sam.ID\r\n " +
-                "       LEFT JOIN facilities fc ON fc.id = po.facilityID\r\n        LEFT JOIN business bl ON bl.id = po.vendorID  WHERE po.ID = " + id + " /*GROUP BY pod.ID*/";
+                "       LEFT JOIN facilities fc ON fc.id = po.facilityID\r\nLEFT JOIN users as vendor on vendor.id=po.vendorID "+
+                "       LEFT JOIN business bl ON bl.id = po.vendorID  WHERE po.ID = " + id + " /*GROUP BY pod.ID*/";
             List<CMGoodsOrderList> _List = await Context.GetData<CMGoodsOrderList>(query).ConfigureAwait(false);
       
             CMGOMaster _MasterList = _List.Select(p => new CMGOMaster
@@ -741,7 +777,7 @@ namespace CMMSAPIs.Repositories
                 Id = p.purchaseID,
                 facility_id = p.facility_id,                
                 asset_type_ID = p.asset_type_ID,
-                vendorID = p.vendorID,
+                vendor_name = p.vendor_name,
                 status = p.status,               
                 accepted_qty = p.ordered_qty,
                 currency = p.currency,
@@ -779,7 +815,10 @@ namespace CMMSAPIs.Repositories
 
             CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_MasterList.status);
             string _shortStatus = getShortStatus(CMMS.CMMS_Modules.SM_PO, _Status);
+            string _longStatus = getLongStatus(_Status, _MasterList);
+
             _MasterList.status_short = _shortStatus;
+            _MasterList.status_long = _longStatus;
             return _MasterList;
         }
     }   
