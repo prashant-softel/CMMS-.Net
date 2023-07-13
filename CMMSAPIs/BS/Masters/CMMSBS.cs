@@ -28,11 +28,12 @@ namespace CMMSAPIs.BS.Masters
         Task<CMDefaultResponse> DeleteBusiness(int id, int userId);
         Task<List<CMDefaultList>> GetBloodGroupList();
         Task<List<CMDefaultList>> GetGenderList();
-        Task<List<CMSPV>> GetSPVList();
         Task<List<CMIRRiskType>> GetRiskTypeList();
         Task<CMDefaultResponse> CreateRiskType(CMIRRiskType request, int userId);
         Task<CMDefaultResponse> UpdateRiskType(CMIRRiskType request, int userId);
         Task<CMDefaultResponse> DeleteRiskType(int id, int userId);
+        Task<List<CMIRInsuranceProvider>> GetInsuranceProviderList();
+        Task<List<CMSPV>> GetSPVList();
         Task<CMDefaultResponse> CreateSPV(CMSPV request, int userId);
         Task<CMDefaultResponse> UpdateSPV(CMSPV request, int userId);
         Task<CMDefaultResponse> DeleteSPV(int id, int userId);
@@ -298,6 +299,21 @@ namespace CMMSAPIs.BS.Masters
                 using (var repos = new CMMSRepository(getDB))
                 {
                     return await repos.GetRiskTypeList();
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<List<CMIRInsuranceProvider>> GetInsuranceProviderList()
+        {
+            try
+            {
+                using (var repos = new CMMSRepository(getDB))
+                {
+                    return await repos.GetInsuranceProviderList();
 
                 }
             }
