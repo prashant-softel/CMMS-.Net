@@ -335,7 +335,54 @@ namespace CMMSAPIs.Controllers.Masters
                 return BadRequest(ex.Message);
             }
         }
-
+        [Authorize]
+        [Route("CreateRiskType")]
+        [HttpPost]
+        public async Task<IActionResult> CreateRiskType(CMIRRiskType request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _CMMSBS.CreateRiskType(request, userID);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        [Authorize]
+        [Route("UpdateRiskType")]
+        [HttpPatch]
+        public async Task<IActionResult> UpdateRiskType(CMIRRiskType request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _CMMSBS.UpdateRiskType(request, userID);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        [Authorize]
+        [Route("DeleteRiskType")]
+        [HttpDelete]
+        public async Task<IActionResult> DeleteRiskType(int id)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _CMMSBS.DeleteRiskType(id, userID);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
         [Authorize]
         [Route("CreateSPV")]
         [HttpPost]

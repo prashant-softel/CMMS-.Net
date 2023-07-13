@@ -30,6 +30,9 @@ namespace CMMSAPIs.BS.Masters
         Task<List<CMDefaultList>> GetGenderList();
         Task<List<CMSPV>> GetSPVList();
         Task<List<CMIRRiskType>> GetRiskTypeList();
+        Task<CMDefaultResponse> CreateRiskType(CMIRRiskType request, int userId);
+        Task<CMDefaultResponse> UpdateRiskType(CMIRRiskType request, int userId);
+        Task<CMDefaultResponse> DeleteRiskType(int id, int userId);
         Task<CMDefaultResponse> CreateSPV(CMSPV request, int userId);
         Task<CMDefaultResponse> UpdateSPV(CMSPV request, int userId);
         Task<CMDefaultResponse> DeleteSPV(int id, int userId);
@@ -296,6 +299,52 @@ namespace CMMSAPIs.BS.Masters
                 {
                     return await repos.GetRiskTypeList();
 
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> CreateRiskType(CMIRRiskType request, int userId)
+        {
+            try
+            {
+                using (var repos = new CMMSRepository(getDB))
+                {
+                    return await repos.CreateRiskType(request, userId);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> UpdateRiskType(CMIRRiskType request, int userId)
+        {
+            try
+            {
+                using (var repos = new CMMSRepository(getDB))
+                {
+                    return await repos.UpdateRiskType(request, userId);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> DeleteRiskType(int id, int userId)
+        {
+            try
+            {
+                using (var repos = new CMMSRepository(getDB))
+                {
+                    return await repos.DeleteRiskType(id, userId);
                 }
             }
             catch (Exception ex)

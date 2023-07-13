@@ -213,10 +213,39 @@ namespace CMMSAPIs.Repositories.Masters
         }
         internal async Task<List<CMIRRiskType>> GetRiskTypeList()
         {
-            string myQuery = "SELECT id, risktype as name FROM ir_risktype WHERE status=1 ";
+            string myQuery = "SELECT id, risktype as name, description FROM ir_risktype WHERE status=1 ";
             List<CMIRRiskType> _risktype = await Context.GetData<CMIRRiskType>(myQuery).ConfigureAwait(false);
             return _risktype;
         }
+
+        internal async Task<CMDefaultResponse> CreateRiskType(CMIRRiskType request, int userId)
+        {
+            string myQuery = $"INSERT INTO ir_risktype(risktype, description, status, addedBy, addedAt) VALUES " +
+                                $"('{request.name}','{request.description} ', 1, {userId}, '{UtilsRepository.GetUTCTime()}'); " +
+                                 $"SELECT LAST_INSERT_ID(); ";
+            DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
+            int id = Convert.ToInt32(dt.Rows[0][0]);
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Risk Type Added");
+        }
+        internal async Task<CMDefaultResponse> UpdateRiskType(CMIRRiskType request, int userID)
+        {
+            string updateQry = "UPDATE ir_risktype SET ";
+            if (request.name != null && request.name != "")
+                updateQry += $"risktype = '{request.name}', ";
+            if (request.description != null && request.description != "")
+                updateQry += $"description = '{request.description}', ";
+            updateQry += $"updatedBy = '{userID}', updatedAt = '{UtilsRepository.GetUTCTime()}' WHERE id = {request.id};";
+            await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+            return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Risk Type Updated");
+        }
+        internal async Task<CMDefaultResponse> DeleteRiskType(int id, int userId)
+        {
+            string deleteQry = $"UPDATE ir_risktype " +
+                $" SET status = 0 , updatedBy = '{userId}' , updatedAt = '{UtilsRepository.GetUTCTime()}' WHERE id = {id};";
+            await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Risk Type Deleted");
+        }
+
         internal async Task<List<CMSPV>> GetSPVList()
         {
             string myQuery = "SELECT id, name, description FROM spv WHERE status=1 ";
