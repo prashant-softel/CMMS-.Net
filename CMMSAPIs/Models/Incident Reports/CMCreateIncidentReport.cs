@@ -22,13 +22,16 @@ namespace CMMSAPIs.Models.Incident_Reports
         public bool legal_applicability { get; set; }
         public bool rca_required { get; set; }
         public double damaged_cost { get; set; }
+        public int damaged_cost_curr_id { get; set; }
         public int generation_loss { get; set; }
+        public int generation_loss_curr_id { get; set; }
 
         public int job_id { get; set; }
         public string title { get; set; }
         public string description { get; set; }
         public bool is_insurance_applicable { get; set; }
         public string insurance { get; set; }
+        public int insurance_id { get; set; }
         public int insurance_status { get; set; }
         public string insurance_remark { get; set; }
         public int approved_by { get; set; }
