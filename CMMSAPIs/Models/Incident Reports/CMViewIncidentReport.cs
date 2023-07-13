@@ -36,7 +36,10 @@ namespace CMMSAPIs.Models.Incident_Reports
         public int rca_required { get; set; }
         public string rca_required_name { get; set; }
         public double damaged_cost { get; set; }
+        public int damaged_cost_curr_id{ get; set; }
         public int generation_loss { get; set; }
+        public int generation_loss_curr_id { get; set; }
+
         public int job_id { get; set; }
         public string job_name { get; set; }
         public string title { get; set; }
