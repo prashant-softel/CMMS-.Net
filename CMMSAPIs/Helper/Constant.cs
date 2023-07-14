@@ -426,6 +426,28 @@ namespace CMMSAPIs.Helper
             SM_RO_CLOSED,
             SM_RO_CLOSED_REJECTED,
             SM_RO_CLOSED_APPROVED,
+
+            MC_PLAN_DRAFT = 350,
+            MC_PLAN_SUBMITTED,
+            MC_PLAN_REJECTED,
+            MC_PLAN_APPROVED,
+            MC_PLAN_DELETED,
+
+            MC_TASK_SCHEDULED = 360,
+            MC_TASK_STARTED,
+            MC_TASK_COMPLETED,
+            MC_TASK_ABANDONED,
+
+            VEG_PLAN_DRAFT = 370,
+            VEG_PLAN_SUBMITTED,
+            VEG_PLAN_REJECTED,
+            VEG_PLAN_APPROVED,
+            VEG_PLAN_DELETED,
+
+            VEG_TASK_SCHEDULED = 380,
+            VEG_TASK_STARTED,
+            VEG_TASK_COMPLETED,
+            VEG_TASK_ABANDONED,
         }
 
         public enum ApprovalStatus
@@ -447,8 +469,13 @@ namespace CMMSAPIs.Helper
             SM_OPERATOR
 
         }
+        public enum cleaningType
+        {
+            ModuleCleaning = 1,
+            Vegetation
+        }
 
-    public enum SM_Types
+        public enum SM_Types
     {
         Vendor = 1, 
         Store = 2,

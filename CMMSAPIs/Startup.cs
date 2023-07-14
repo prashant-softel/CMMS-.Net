@@ -27,9 +27,9 @@ using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Mails;
 using CMMSAPIs.BS.PM;
 using CMMSAPIs.BS.Audits;
-using CMMSAPIs.BS.MC;
 using CMMSAPIs.BS.Calibration;
 using CMMSAPIs.BS;
+using CMMSAPIs.BS.Cleaning;
 
 namespace CMMSAPIs
 {
@@ -98,13 +98,14 @@ namespace CMMSAPIs
             services.AddScoped<ICheckListBS, CheckListBS>();
             services.AddScoped<IPMScheduleViewBS, PMScheduleViewBS>();
             services.AddScoped<IAuditPlanBS, AuditPlanBS>();
-            services.AddScoped<IMCBS, MCBS>();
             services.AddScoped<ICalibrationBS, CalibrationBS>();
             services.AddScoped<IAuditScheduleViewBS, AuditScheduleViewBS>();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
              services.AddScoped<IMRSBS, MRSBS>();
             services.AddScoped<IGOBS, GOBS>();
-                    services.AddScoped<IReOrderBS, ReOrderBS>();    
+            services.AddScoped<IReOrderBS, ReOrderBS>();
+            services.AddScoped<ICleaningBS, CleaningBS>();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
