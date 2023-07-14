@@ -33,6 +33,7 @@ namespace CMMSAPIs.BS.Masters
         Task<CMDefaultResponse> UpdateRiskType(CMIRRiskType request, int userId);
         Task<CMDefaultResponse> DeleteRiskType(int id, int userId);
         Task<List<CMIRInsuranceProvider>> GetInsuranceProviderList();
+        Task<List<CMIRStatus>> GetInsuranceStatusList();
         Task<List<CMSPV>> GetSPVList();
         Task<CMDefaultResponse> CreateSPV(CMSPV request, int userId);
         Task<CMDefaultResponse> UpdateSPV(CMSPV request, int userId);
@@ -284,6 +285,21 @@ namespace CMMSAPIs.BS.Masters
                 using (var repos = new CMMSRepository(getDB))
                 {
                     return await repos.GetGenderList();
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<List<CMIRStatus>> GetInsuranceStatusList()
+        {
+            try
+            {
+                using (var repos = new CMMSRepository(getDB))
+                {
+                    return await repos.GetInsuranceStatusList();
 
                 }
             }
