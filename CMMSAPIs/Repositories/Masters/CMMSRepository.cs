@@ -217,6 +217,12 @@ namespace CMMSAPIs.Repositories.Masters
             List<CMIRRiskType> _risktype = await Context.GetData<CMIRRiskType>(myQuery).ConfigureAwait(false);
             return _risktype;
         }
+        internal async Task<List<CMIRStatus>> GetInsuranceStatusList()
+        {
+            string myQuery = "SELECT id, risktype as name, description FROM ir_status WHERE status=1 ";
+            List<CMIRStatus> _risktype = await Context.GetData<CMIRStatus>(myQuery).ConfigureAwait(false);
+            return _risktype;
+        }
 
         internal async Task<CMDefaultResponse> CreateRiskType(CMIRRiskType request, int userId)
         {
@@ -563,37 +569,37 @@ namespace CMMSAPIs.Repositories.Masters
                     JobRepository obj = new JobRepository(getDB);
                     CMJobView _jobView = await obj.GetJobDetails(id);
                     notificationID = (CMMS.CMMS_Status)(_jobView.status);
-                    CMMSNotification.sendNotification(moduleID, notificationID, _jobView);
+                    await CMMSNotification.sendNotification(moduleID, notificationID, _jobView);
                     break;
                 case CMMS.CMMS_Modules.PTW:
                     PermitRepository obj1 = new PermitRepository(getDB);
                     CMPermitDetail _Permit = await obj1.GetPermitDetails(id);
                      notificationID = (CMMS.CMMS_Status)(_Permit.ptwStatus);
-                    CMMSNotification.sendNotification(moduleID, notificationID, _Permit);
+                    await CMMSNotification.sendNotification(moduleID, notificationID, _Permit);
                     break;
                 case CMMS.CMMS_Modules.JOBCARD:
                     JCRepository obj2 = new JCRepository(getDB);
                     List<CMJCDetail> _JobCard = await obj2.GetJCDetail(id);
                     notificationID = (CMMS.CMMS_Status)(_JobCard[0].status);
-                    CMMSNotification.sendNotification(moduleID, notificationID, _JobCard[0]);
+                    await CMMSNotification.sendNotification(moduleID, notificationID, _JobCard[0]);
                     break;
                 case CMMS.CMMS_Modules.INCIDENT_REPORT:
                     IncidentReportRepository obj3 = new IncidentReportRepository(getDB);
                     CMViewIncidentReport _IncidentReport = await obj3.GetIncidentDetailsReport(id);
                     notificationID = (CMMS.CMMS_Status)(_IncidentReport.status);
-                    CMMSNotification.sendNotification(moduleID, notificationID, _IncidentReport);
+                   await CMMSNotification.sendNotification(moduleID, notificationID, _IncidentReport);
                     break;
                 case CMMS.CMMS_Modules.WARRANTY_CLAIM:
                     WCRepository obj4 = new WCRepository(getDB);
                     CMWCDetail _WC = await obj4.GetWCDetails(id);
                     notificationID = (CMMS.CMMS_Status)(_WC.status);
-                    CMMSNotification.sendNotification(moduleID, notificationID, _WC);
+                    await CMMSNotification.sendNotification(moduleID, notificationID, _WC);
                     break;
                 case CMMS.CMMS_Modules.CALIBRATION:
                     CalibrationRepository obj5 = new CalibrationRepository(getDB);
                     CMCalibrationDetails _Calibration = await obj5.GetCalibrationDetails(id);
                     notificationID = (CMMS.CMMS_Status)(_Calibration.statusID + 100);
-                    CMMSNotification.sendNotification(moduleID, notificationID, _Calibration);
+                    await CMMSNotification.sendNotification(moduleID, notificationID, _Calibration);
                     break;
                 case CMMS.CMMS_Modules.INVENTORY:
                     //InventoryRepository obj6 = new InventoryRepository(getDB, _environment);
