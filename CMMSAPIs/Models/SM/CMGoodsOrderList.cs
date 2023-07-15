@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -52,12 +52,14 @@ namespace CMMSAPIs.Models
 
         public string job_ref { get; set; }
         public int amount { get; set; }
+        public int currencyID { get; set; }
         public string currency { get; set; }
         public decimal cost { get; set; }
         public int podID { get; set; }
+        public string asset_type_Name { get; set; }
 
 
-        public List<CMGO_ITEMS> go_items { get;set; }
+        public List<CMGO_ITEMS> go_items { get; set; }
     }
     public class CMGO_ITEMS
     {
@@ -104,7 +106,7 @@ namespace CMMSAPIs.Models
     {
         public int purchaseID { get; set; }
         public int facilityId { get; set; }
- 
+
 
         public List<CMSUBMITITEMS> submitItems { get; set; }
         public List<IFormFile> attachments { get; set; }
@@ -178,7 +180,7 @@ namespace CMMSAPIs.Models
     {
         public int Id { get; set; }
         public int facility_id { get; set; }
-     
+
         public int asset_type_ID { get; set; }
         public string vendor_name { get; set; }
         public int status { get; set; }
@@ -186,6 +188,7 @@ namespace CMMSAPIs.Models
         public string status_long { get; set; }
         public decimal accepted_qty { get; set; }
 
+        public int currencyID { get; set; }
         public string currency { get; set; }
         public decimal amount { get; set; }
         public string job_ref { get; set; }
@@ -204,7 +207,7 @@ namespace CMMSAPIs.Models
         public int location_ID { get; set; }
 
 
-        public List<CMGODetails> GODetails { get; set; } 
+        public List<CMGODetails> GODetails { get; set; }
     }
 
 
@@ -227,6 +230,7 @@ namespace CMMSAPIs.Models
         //public int order_type { get; set; }
         public int receive_later { get; set; }
         public int asset_type_ID { get; set; }
+        public string asset_type_Name { get; set; }
 
 
     }
