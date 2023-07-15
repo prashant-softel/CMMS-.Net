@@ -258,8 +258,11 @@ namespace CMMSAPIs.Helper
             MEDIUM = 2,
             LOW = 3
         }
-
+        
         public static Dictionary<string, int> INCIDENT_RISK_TYPE =  new Dictionary<string, int>() { {"First-Aids Injury", 1 }, { "Electric Short", 2} };
+
+        public static Dictionary<string, int> INCIDENT_SEVERITY = new Dictionary<string, int>() 
+        { { "Critical", 1 }, { "High", 2 } , { "Medium", 3 }, { "Low", 4 } };
 
         /* Features Constant END */
 
