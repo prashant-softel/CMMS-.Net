@@ -245,7 +245,6 @@ namespace CMMSAPIs.Repositories.Incident_Reports
             if (request.action_taken_datetime != DateTime.Parse("01-01-0001 00:00:00"))
                 updateQry += $" action_taken_datetime = '{(request.action_taken_datetime).ToString("yyyy-MM-dd HH:mm:ss")}',";
             if (request.description != null && request.description != "")
-            if (request.description != null && request.description != "")
                 updateQry += $" description = '{request.description}',";
             if (request.victim_id > 0)
                 updateQry += $" victim_id = {request.victim_id},";
