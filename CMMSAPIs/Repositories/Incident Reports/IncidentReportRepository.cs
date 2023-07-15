@@ -242,6 +242,8 @@ namespace CMMSAPIs.Repositories.Incident_Reports
                 updateQry += $" equipment_id = {request.equipment_id},";
             if (request.incident_datetime == DateTime.Parse("01-01-0001 00:00:00"))
                 updateQry += $" incident_datetime = '{request.incident_datetime}',";
+            if (request.action_taken_datetime != DateTime.Parse("01-01-0001 00:00:00"))
+                updateQry += $" action_taken_datetime = '{request.action_taken_datetime}',";
             if (request.description != null && request.description != "")
                 updateQry += $" description = '{request.description}',";
             if (request.victim_id > 0)
