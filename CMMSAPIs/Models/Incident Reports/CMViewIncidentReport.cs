@@ -14,10 +14,12 @@ namespace CMMSAPIs.Models.Incident_Reports
         public string equipment_name { get; set; }
         public int risk_level { get; set; }
         public string risk_level_name { get; set; }
+        public string severity { get; set; }
         public string updated_by_name { get; set; }
         public string created_by_name { get; set; }
         public int created_by_id { get; set; }
         public DateTime incident_datetime { get; set; }
+        public DateTime reporting_datetime { get; set; }
         public int victim_id { get; set; }
         public string victim_name { get; set; }
         public int action_taken_by { get; set; }
@@ -58,7 +60,6 @@ namespace CMMSAPIs.Models.Incident_Reports
         public DateTime approved_at { get; set; }
         public string status_short { get; set; }
         public string status_long { get; set; }
-        public string severity { get; set; }
         public string reject_comment { get; set; }
 
 
