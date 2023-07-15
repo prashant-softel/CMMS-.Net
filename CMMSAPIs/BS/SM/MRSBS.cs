@@ -1,4 +1,4 @@
-﻿using CMMSAPIs.Helper;
+using CMMSAPIs.Helper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,17 +12,17 @@ namespace CMMSAPIs.BS.SM
 {
     public interface IMRSBS
     {
-        Task<CMDefaultResponse> CreateMRS(CMMRS request);        
+        Task<CMDefaultResponse> CreateMRS(CMMRS request, int UserID);        
         Task<List<CMMRSList>> getMRSList(int facility_ID, int emp_id, DateTime toDate, DateTime fromDate, int status);        
         Task<List<CMMRSItems>> getMRSItems(int ID);        
         Task<List<CMMRSItemsBeforeIssue>> getMRSItemsBeforeIssue(int ID);        
         Task<List<CMMRSItemsBeforeIssue>> getMRSItemsWithCode(int ID);        
-        Task<List<CMMRS>> getMRSDetails(int ID);        
+        Task<List<CMMRSList>> getMRSDetails(int ID);        
         Task<List<CMRETURNMRSDATA>> getReturnDataByID(int ID);        
         Task<List<CMMRSAssetTypeList>> getAssetTypeByItemID(int ItemID);
-        Task<CMDefaultResponse> mrsReturn(CMMRS request);        
-        Task<CMDefaultResponse> mrsApproval(CMMRS request);        
-        Task<CMDefaultResponse> mrsReturnApproval(CMMRS request);
+        Task<CMDefaultResponse> mrsReturn(CMMRS request, int UserID);        
+        Task<CMDefaultResponse> mrsApproval(CMApproval request, int userId);        
+        Task<CMDefaultResponse> mrsReturnApproval(CMMRS request, int UserID);
         void UpdateAssetStatus(int assetItemID, int status);
         Task<CMMRS> getLastTemplateData(int ID);
         Task<List<CMAssetItem>> GetAssetItems(int facility_ID, bool isGroupByCode = false);
@@ -36,13 +36,13 @@ namespace CMMSAPIs.BS.SM
             databaseProvider = dbProvider;
         }
 
-        public async Task<CMDefaultResponse> CreateMRS(CMMRS request)
+        public async Task<CMDefaultResponse> CreateMRS(CMMRS request, int UserID)
         {
             try
             {
                 using (var repos = new MRSRepository(getDB))
                 {
-                    return await repos.CreateMRS(request);
+                    return await repos.CreateMRS(request, UserID);
                 }
             }
             catch (Exception ex)
@@ -111,7 +111,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<CMMRS>> getMRSDetails(int ID)
+        public async Task<List<CMMRSList>> getMRSDetails(int ID)
         {
             try
             {
@@ -154,13 +154,13 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<CMDefaultResponse> mrsReturn(CMMRS request)
+        public async Task<CMDefaultResponse> mrsReturn(CMMRS request, int UserID)
         {
             try
             {
                 using (var repos = new MRSRepository(getDB))
                 {
-                    return await repos.mrsReturn(request);
+                    return await repos.mrsReturn(request, UserID);
                 }
             }
             catch (Exception ex)
@@ -169,13 +169,13 @@ namespace CMMSAPIs.BS.SM
             }
         }
         
-        public async Task<CMDefaultResponse> mrsApproval(CMMRS request)
+        public async Task<CMDefaultResponse> mrsApproval(CMApproval request, int userId)
         {
             try
             {
                 using (var repos = new MRSRepository(getDB))
                 {
-                    return await repos.mrsApproval(request);
+                    return await repos.mrsApproval(request, userId);
                 }
             }
             catch (Exception ex)
@@ -184,13 +184,13 @@ namespace CMMSAPIs.BS.SM
             }
         }
         
-        public async Task<CMDefaultResponse> mrsReturnApproval(CMMRS request)
+        public async Task<CMDefaultResponse> mrsReturnApproval(CMMRS request, int UserID)
         {
             try
             {
                 using (var repos = new MRSRepository(getDB))
                 {
-                    return await repos.mrsReturnApproval(request);
+                    return await repos.mrsReturnApproval(request, UserID);
                 }
             }
             catch (Exception ex)
