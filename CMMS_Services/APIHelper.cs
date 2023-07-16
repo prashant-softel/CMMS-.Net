@@ -18,10 +18,10 @@ namespace CMMS_Services
     {
         private RestClient restClient;
         private RestSharp.RestRequest restRequest;
-        public string baseUrl = "http://localhost:23835";
-        //public string baseUrl = "http://3.111.196.218/CMMS_API";
+        //public string baseUrl = "http://localhost:23835";
+        public string baseUrl = "http://65.0.20.19/CMMS_API";
 
-        string token = "";
+        string token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIyIiwibmJmIjoxNjg5NTM1NTg3LCJleHAiOjE2ODk1MzczODcsImlhdCI6MTY4OTUzNTU4N30.i15PoG34A2FkqgL0tHTyohBbcMf33fFso8Zdtqtf6X8";
 
         public APIHelper(string token)
         {

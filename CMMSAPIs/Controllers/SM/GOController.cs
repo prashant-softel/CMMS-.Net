@@ -25,7 +25,8 @@ namespace CMMSAPIs.Controllers
             _GOBS = GO;
         }
 
- 
+
+        [Authorize]
         [Route("GetGOList")]
         [HttpGet]
         public async Task<IActionResult> GetGOList(int facility_id, DateTime fromDate, DateTime toDate, int Status)
@@ -42,7 +43,8 @@ namespace CMMSAPIs.Controllers
         }
 
 
- 
+
+        [Authorize]
         [Route("GetGOItemByID")]
         [HttpGet]
         public async Task<IActionResult> GetGOItemByID(int id)
@@ -59,7 +61,8 @@ namespace CMMSAPIs.Controllers
         }
 
 
- 
+
+        [Authorize]
         [Route("GetAssetCodeDetails")]
         [HttpGet]
         public async Task<IActionResult> GetAssetCodeDetails(int asset_code, int plantID, DateTime fromDate, DateTime toDate)
@@ -77,7 +80,8 @@ namespace CMMSAPIs.Controllers
         }
 
 
- 
+
+        [Authorize]
         [Route("CreateGO")]
         [HttpPost]
         public async Task<IActionResult> CreateGO(CMGoodsOrderList request)
@@ -95,7 +99,8 @@ namespace CMMSAPIs.Controllers
         }
 
 
- 
+
+        [Authorize]
         [Route("UpdateGO")]
         [HttpPost]
         public async Task<IActionResult> UpdateGO(CMGoodsOrderList request)
@@ -113,7 +118,8 @@ namespace CMMSAPIs.Controllers
         }
 
 
- 
+
+        [Authorize]
         [Route("DeleteGO")]
         [HttpPost]
         public async Task<IActionResult> DeleteGO(CMApproval request)
@@ -131,7 +137,8 @@ namespace CMMSAPIs.Controllers
         }
 
 
- 
+
+        [Authorize]
         [Route("CloseGO")]
         [HttpPost]
         public async Task<IActionResult> CloseGO(CMGoodsOrderList request)
@@ -149,10 +156,11 @@ namespace CMMSAPIs.Controllers
         }
 
 
- 
+
+        [Authorize]
         [Route("GOApproval")]
         [HttpPost]
-        public async Task<IActionResult> GOApproval([FromForm]  CMApproval request )
+        public async Task<IActionResult> GOApproval(  CMApproval request )
         {
             try
             {
@@ -167,10 +175,11 @@ namespace CMMSAPIs.Controllers
         }
 
 
- 
+
+        [Authorize]
         [Route("RejectGO")]
         [HttpPost]
-        public async Task<IActionResult> RejectGO([FromForm]  CMApproval request)
+        public async Task<IActionResult> RejectGO(  CMApproval request)
         {
             try
             {
@@ -185,7 +194,8 @@ namespace CMMSAPIs.Controllers
         }
 
 
- 
+
+        [Authorize]
         [Route("GetPurchaseData")]
         [HttpGet]
         public async Task<IActionResult> GetPurchaseData(int facilityID, string empRole, DateTime fromDate, DateTime toDate, string status, string order_type)
@@ -202,7 +212,8 @@ namespace CMMSAPIs.Controllers
         }
 
 
- 
+
+        [Authorize]
         [Route("GetGODetailsByID")]
         [HttpGet]
         public async Task<IActionResult> GetGODetailsByID(int id)
@@ -219,7 +230,8 @@ namespace CMMSAPIs.Controllers
         }
 
 
- 
+
+        [Authorize]
         [Route("SubmitPurchaseOrderData")]
         [HttpPost]
         public async Task<IActionResult> SubmitPurchaseData(CMSUBMITPURCHASEDATA request)

@@ -16,7 +16,7 @@ namespace CMMSAPIs.Models
         public string remarks { get; set; }
         public string rejectedRemark { get; set; }
         public int plantID { get; set; }
-        public DateTime purchaseDate { get; set; }
+        public DateTime? purchaseDate { get; set; }
         public int vendorID { get; set; }
         public int status { get; set; }
         public string status_short { get; set; }
@@ -39,8 +39,8 @@ namespace CMMSAPIs.Models
         public decimal accepted_qty { get; set; }
         public decimal ordered_qty { get; set; }
         public int spare_status { get; set; }
-        public DateTime challan_date { get; set; }
-        public DateTime po_date { get; set; }
+        public DateTime? challan_date { get; set; }
+        public DateTime? po_date { get; set; }
         public string po_no { get; set; }
         public string challan_no { get; set; }
         public string freight { get; set; }

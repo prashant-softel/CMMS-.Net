@@ -14,7 +14,7 @@ namespace CMMSAPIs.BS
     public interface IGOBS
     {
         Task<List<CMGoodsOrderDetailList>> GetGOList(int facility_id, DateTime fromDate, DateTime toDate, int Status);
-        Task<List<CMGoodsOrderList>> GetGOItemByID(int id);
+        Task<CMGoodsOrderList> GetGOItemByID(int id);
         Task<List<CMGoodsOrderList>> GetAssetCodeDetails(int asset_code);
         Task<CMDefaultResponse> CreateGO(CMGoodsOrderList request, int userID);
         Task<CMDefaultResponse> UpdateGO(CMGoodsOrderList request, int userID);
@@ -52,7 +52,7 @@ namespace CMMSAPIs.BS
             }
         }
         
-        public async Task<List<CMGoodsOrderList>> GetGOItemByID(int id)
+        public async Task<CMGoodsOrderList> GetGOItemByID(int id)
         {
             try
             {

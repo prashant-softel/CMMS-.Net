@@ -169,6 +169,7 @@ namespace CMMSAPIs.Models.SM
         public int Asset_master_id { get; set; }
         public int status { get; set; }
         public string status_short { get; set; }
+        public string status_long { get; set; }
 
     }
 
@@ -249,6 +250,7 @@ namespace CMMSAPIs.Models.SM
         public string requested_by_name { get; set; }
         public int status { get; set; }
         public string status_short { get; set; }
+        public string status_long { get; set; }
         public string activity { get; set; }
         public int whereUsedType { get; set; }
         public int whereUsedTypeId { get; set; }

@@ -26,6 +26,7 @@ using System.Security.Cryptography.Xml;
 using static Org.BouncyCastle.Math.EC.ECCurve;
 using Microsoft.Extensions.Configuration;
 using Ubiety.Dns.Core;
+using CMMSAPIs.Models;
 
 namespace CMMSAPIs.Repositories.SM
 {
@@ -53,7 +54,9 @@ namespace CMMSAPIs.Repositories.SM
             {
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_List[i].status);
                 string _shortStatus = getShortStatus(CMMS.CMMS_Modules.SM_MRS, _Status);
+                string _status_long = getLongStatus(_Status, _List[i].ID);
                 _List[i].status_short = _shortStatus;
+                _List[i].status_long = _status_long;
                 _List[i].CMMRSItems = await getMRSItems(_List[i].ID);
             }
 
@@ -113,7 +116,7 @@ namespace CMMSAPIs.Repositories.SM
                 var mailSub = "CMMRS Request Updated";
                 string updatestmt = $" START TRANSACTION; UPDATE smmrs SET facility_ID = {request.facility_ID}, requested_by_emp_ID = {request.requested_by_emp_ID}, requested_date = {DateTime.Now.ToString("yyyy-MM-dd")}," +
                     $"status = '{(int)CMMS.CMMS_Status.MRS_SUBMITTED}', flag = {(int)CMMS.CMMS_Status.MRS_SUBMITTED}, setAsTemplate = {request.setAsTemplate}, templateName = {request.templateName}, approval_status = {request.approval_status}, activity='{request.activity}',whereUsedType={request.whereUsedType},whereUsedTypeId={request.whereUsedTypeId} WHERE ID = {request.ID}" +
-                    $"DELETE FROM smrsitems WHERE mrs_ID =  {lastMRSID} ;COMMIT;";
+                    $"DELETE FROM smrsitems WHERE mrs_ID =  {lastMRSID} ; COMMIT;";
                 await Context.ExecuteNonQry<int>(updatestmt);
 
             }
@@ -191,8 +194,8 @@ namespace CMMSAPIs.Repositories.SM
             request.requested_by_emp_ID = UserID;
             CMDefaultResponse response = null;
 
-            string updatestmt = $" START TRANSACTION; UPDATE smmrs SET facility_ID = {request.facility_ID}, requested_by_emp_ID = {request.requested_by_emp_ID}, requested_date = {DateTime.Now.ToString("yyyy-MM-dd")}," +
-                                $" setAsTemplate = {request.setAsTemplate}, templateName = {request.templateName}, approval_status = {request.approval_status}, activity='{request.activity}',whereUsedType={request.whereUsedType},whereUsedTypeId={request.whereUsedTypeId} WHERE ID = {request.ID}" +
+            string updatestmt = $" START TRANSACTION; UPDATE smmrs SET facility_ID = {request.facility_ID}, requested_by_emp_ID = {request.requested_by_emp_ID}, requested_date = '{DateTime.Now.ToString("yyyy-MM-dd")}'," +
+                                $" setAsTemplate = {request.setAsTemplate},  approval_status = {request.approval_status}, activity='{request.activity}',whereUsedType={request.whereUsedType},whereUsedTypeId={request.whereUsedTypeId} WHERE ID = {request.ID} ;" +
                                 $"DELETE FROM smrsitems WHERE mrs_ID =  {lastMRSID} ;COMMIT;";
             await Context.ExecuteNonQry<int>(updatestmt);
             for (var i = 0; i < request.equipments.Count; i++)
@@ -307,7 +310,9 @@ namespace CMMSAPIs.Repositories.SM
             {
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_List[i].status);
                 string _shortStatus = getShortStatus(CMMS.CMMS_Modules.SM_MRS, _Status);
+                string _status_long = getLongStatus(_Status, _List[i].ID);
                 _List[i].status_short = _shortStatus;
+                _List[i].status_long = _status_long;
             }
             return _List;
         }
@@ -371,17 +376,19 @@ namespace CMMSAPIs.Repositories.SM
             {
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_List[i].status);
                 string _shortStatus = getShortStatus(CMMS.CMMS_Modules.SM_MRS, _Status);
+                string _status_long = getLongStatus(_Status, _List[i].ID);
                 _List[i].status_short = _shortStatus;
+                _List[i].status_long = _status_long;
                 _List[i].CMMRSItems = await getMRSItems(_List[i].ID);
             }
 
             return _List;
         }
-        internal async Task<List<CMRETURNMRSDATA>> getReturnDataByID(int ID)
+        internal async Task<CMRETURNMRSDATA> getReturnDataByID(int ID)
         {
             string stmt = $"SELECT * FROM smrsitems WHERE ID = {ID}";
             List<CMRETURNMRSDATA> _List = await Context.GetData<CMRETURNMRSDATA>(stmt).ConfigureAwait(false);
-            return _List;
+            return _List[0];
         }
 
         //internal async Task<CMDefaultResponse> mrsApproval(CMMRS request)
@@ -481,12 +488,12 @@ namespace CMMSAPIs.Repositories.SM
         internal async Task<CMDefaultResponse> mrsApproval(CMApproval request, int userId)
         {
             CMDefaultResponse response = null;
-            string stmtSelect = $"SELECT * FROM smmrs WHERE ID = {request.id}";
+            string stmtSelect = $"SELECT ID FROM smmrs WHERE ID = {request.id}";
             List<CMMRS> mrsList = await Context.GetData<CMMRS>(stmtSelect).ConfigureAwait(false);
 
             if (mrsList.Count > 0)
             {
-                string stmt = $"UPDATE smmrs SET approved_by_emp_ID = {userId}, approved_date='{DateTime.Now.ToString("yyyy - MM - dd")}'," +
+                string stmt = $"UPDATE smmrs SET approved_by_emp_ID = {userId}, approved_date='{DateTime.Now.ToString("yyyy-MM-dd")}'," +
                                    $" status ={(int)CMMS.CMMS_Status.MRS_REQUEST_APPROVED} ,approval_status ={(int)CMMS.CMMS_Status.MRS_REQUEST_APPROVED},approval_comment = '{request.comment}' WHERE ID = {request.id}";
                 await Context.ExecuteNonQry<int>(stmt);
                 response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Status updated.");
@@ -503,12 +510,12 @@ namespace CMMSAPIs.Repositories.SM
         internal async Task<CMDefaultResponse> mrsReject(CMApproval request, int userId)
         {
             CMDefaultResponse response = null;
-            string stmtSelect = $"SELECT * FROM smmrs WHERE ID = {request.id}";
+            string stmtSelect = $"SELECT ID FROM smmrs WHERE ID = {request.id}";
             List<CMMRS> mrsList = await Context.GetData<CMMRS>(stmtSelect).ConfigureAwait(false);
 
             if (mrsList.Count > 0)
             {
-                string stmt = $"UPDATE smmrs SET rejected_by_emp_ID = {userId}, rejected_date='{DateTime.Now.ToString("yyyy - MM - dd")}'," +
+                string stmt = $"UPDATE smmrs SET rejected_by_emp_ID = {userId}, rejected_date='{DateTime.Now.ToString("yyyy-MM-dd")}'," +
                                    $" status ={(int)CMMS.CMMS_Status.MRS_REQUEST_REJECTED} , rejected_comment = '{request.comment}' WHERE ID = {request.id}";
                 await Context.ExecuteNonQry<int>(stmt);
                 response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Status updated.");
@@ -770,9 +777,9 @@ namespace CMMSAPIs.Repositories.SM
             response = new CMDefaultResponse(request.ID, CMMS.RETRUNSTATUS.SUCCESS, msg);
             return response;
         }
-        internal async Task<List<CMMRSAssetTypeList>> getAssetTypeByItemID(int ItemID)
+        internal async Task<CMMRSAssetTypeList> getAssetTypeByItemID(int ItemID)
         {
-                   string stmt = "SELECT sat.asset_type,sam.asset_code,sam.asset_name,sat.ID,sai.ID as item_ID,sai.facility_ID,sai.serial_number,sam.asset_type_ID,sm.decimal_status,COALESCE(file.file_path,'') as file_path,file.Asset_master_id, f_sum.spare_multi_selection FROM smassetitems sai " +
+                   string stmt = "SELECT sat.asset_type,sam.asset_code,sam.asset_name,sat.ID,sai.ID as item_ID,sai.facility_ID,COALESCE(sai.serial_number,'') serial_number,sam.asset_type_ID,sm.decimal_status,COALESCE(file.file_path,'') as file_path,file.Asset_master_id, f_sum.spare_multi_selection FROM smassetitems sai " +
                             "LEFT JOIN smassetmasters sam ON sam.asset_code = sai.asset_code " +
                             "LEFT JOIN smunitmeasurement sm ON sm.ID = sam.unit_of_measurement " +
                             "LEFT JOIN smassetmasterfiles file ON file.Asset_master_id = sam.ID " +
@@ -791,7 +798,7 @@ namespace CMMSAPIs.Repositories.SM
                 _List[0].available_qty = await GetAvailableQtyByCode(_List[0].asset_code, _List[0].facility_ID);
             }
 
-            return _List;
+            return _List[0];
         }
 
         public async Task<int> GetAvailableQty(int assetItemID, int plantID)
@@ -902,6 +909,38 @@ namespace CMMSAPIs.Repositories.SM
             return Listitem;
         }
 
+
+        private static string getLongStatus(CMMS.CMMS_Status m_notificationID, int Id)
+        {
+            CMMS.CMMS_Status status = (CMMS.CMMS_Status)m_notificationID;
+            string retValue = "";
+            switch (status)
+            {
+
+                case CMMS.CMMS_Status.MRS_SUBMITTED:
+                    retValue = $"MRS {Id} Submitted.";
+                    break;
+                case CMMS.CMMS_Status.MRS_REQUEST_REJECTED:
+                    retValue = $"MRS {Id} Request Rejected";
+                    break;
+                case CMMS.CMMS_Status.MRS_REQUEST_APPROVED:
+                    retValue = $"MRS {Id} Request Approved";
+                    break;
+                case CMMS.CMMS_Status.MRS_REQUEST_ISSUED:
+                    retValue = $"MRS {Id} Request Issued";
+                    break;
+                case CMMS.CMMS_Status.MRS_REQUEST_ISSUED_REJECTED:
+                    retValue = $"MRS {Id} Request Issued Rejected";
+                    break;
+                case CMMS.CMMS_Status.MRS_REQUEST_ISSUED_APPROVED:
+                    retValue = $"MRS {Id} Request Issued Approved";
+                    break;
+                default:
+                    retValue = "Unknown <" + m_notificationID + ">";
+                    break;
+            }
+            return retValue;
+        }
 
     }
 }
