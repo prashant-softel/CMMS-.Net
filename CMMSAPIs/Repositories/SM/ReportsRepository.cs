@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -19,6 +19,7 @@ using System.Diagnostics;
 using CMMSAPIs.Models.Jobs;
 using CMMSAPIs.Models.Notifications;
 using System.ComponentModel;
+using System.Runtime.InteropServices.WindowsRuntime;
 
 namespace CMMSAPIs.Repositories.SM
 {
