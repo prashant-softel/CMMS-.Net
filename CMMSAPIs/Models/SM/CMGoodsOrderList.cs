@@ -16,7 +16,7 @@ namespace CMMSAPIs.Models
         public string remarks { get; set; }
         public string rejectedRemark { get; set; }
         public int plantID { get; set; }
-        public DateTime purchaseDate { get; set; }
+        public DateTime? purchaseDate { get; set; }
         public int vendorID { get; set; }
         public int status { get; set; }
         public string status_short { get; set; }
@@ -39,8 +39,8 @@ namespace CMMSAPIs.Models
         public decimal accepted_qty { get; set; }
         public decimal ordered_qty { get; set; }
         public int spare_status { get; set; }
-        public DateTime challan_date { get; set; }
-        public DateTime po_date { get; set; }
+        public DateTime? challan_date { get; set; }
+        public DateTime? po_date { get; set; }
         public string po_no { get; set; }
         public string challan_no { get; set; }
         public string freight { get; set; }
@@ -57,6 +57,8 @@ namespace CMMSAPIs.Models
         public decimal cost { get; set; }
         public int podID { get; set; }
         public string asset_type_Name { get; set; }
+        public string asset_name { get; set; }
+        public string facilityName { get; set; }
 
 
         public List<CMGO_ITEMS> go_items { get; set; }
@@ -180,6 +182,7 @@ namespace CMMSAPIs.Models
     {
         public int Id { get; set; }
         public int facility_id { get; set; }
+        public int vendorID { get; set; }
 
         public int asset_type_ID { get; set; }
         public string vendor_name { get; set; }
@@ -205,6 +208,7 @@ namespace CMMSAPIs.Models
         public string challan_no { get; set; }
         public DateTime? purchaseDate { get; set; }
         public int location_ID { get; set; }
+        public string facilityName { get; set; }
 
 
         public List<CMGODetails> GODetails { get; set; }
@@ -215,6 +219,7 @@ namespace CMMSAPIs.Models
     {
         public int id { get; set; }
         public int assetItemID { get; set; }
+        public string assetItem_Name { get; set; }
         public int location_ID { get; set; }
         public decimal cost { get; set; }
         //public decimal ordered_qty { get; set; }
@@ -229,9 +234,7 @@ namespace CMMSAPIs.Models
         public string remarks { get; set; }
         //public int order_type { get; set; }
         public int receive_later { get; set; }
-        public int asset_type_ID { get; set; }
-        public string asset_type_Name { get; set; }
-
+        
 
     }
 
