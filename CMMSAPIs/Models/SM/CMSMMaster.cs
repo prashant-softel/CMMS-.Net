@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -85,6 +85,7 @@ namespace CMMSAPIs.Models.SM
         public int approved_by_emp_ID { get; set; }
         public DateTime approved_date { get; set; }
         public int status { get; set; }
+        public string status_short { get; set; }
         public string reference { get; set; }
         public string referenceID { get; set; }
         public DateTime? lastmodifieddate { get; set; }
@@ -168,6 +169,7 @@ namespace CMMSAPIs.Models.SM
         public int Asset_master_id { get; set; }
         public int status { get; set; }
         public string status_short { get; set; }
+        public string status_long { get; set; }
 
     }
 
@@ -248,6 +250,7 @@ namespace CMMSAPIs.Models.SM
         public string requested_by_name { get; set; }
         public int status { get; set; }
         public string status_short { get; set; }
+        public string status_long { get; set; }
         public string activity { get; set; }
         public int whereUsedType { get; set; }
         public int whereUsedTypeId { get; set; }
@@ -297,7 +300,7 @@ namespace CMMSAPIs.Models.SM
         public string asset_name { get; set; }
         public int ID { get; set; }
         public int item_ID { get; set; }
-        public int facility_ID { get; set; }
+
         public string serial_number { get; set; }
         public int asset_type_ID { get; set; }
         public int decimal_status { get; set; }
@@ -305,6 +308,7 @@ namespace CMMSAPIs.Models.SM
         public int Asset_master_id { get; set; }
         public int spare_multi_selection { get; set; }
         public decimal available_qty { get; set; }
+        public int facility_ID { get; set; }
 
     }
 
