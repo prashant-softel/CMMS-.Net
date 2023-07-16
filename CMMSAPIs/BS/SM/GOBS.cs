@@ -1,4 +1,4 @@
-﻿using CMMSAPIs.Helper;
+using CMMSAPIs.Helper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,12 +14,12 @@ namespace CMMSAPIs.BS
     public interface IGOBS
     {
         Task<List<CMGoodsOrderDetailList>> GetGOList(int facility_id, DateTime fromDate, DateTime toDate, int Status);
-        Task<List<CMGoodsOrderList>> GetGOItemByID(int id);
+        Task<CMGoodsOrderList> GetGOItemByID(int id);
         Task<List<CMGoodsOrderList>> GetAssetCodeDetails(int asset_code);
         Task<CMDefaultResponse> CreateGO(CMGoodsOrderList request, int userID);
         Task<CMDefaultResponse> UpdateGO(CMGoodsOrderList request, int userID);
-        Task<CMDefaultResponse> DeleteGO(int GOid, int userID);
-        Task<CMDefaultResponse> WithdrawGO(CMGoodsOrderList request, int userID);
+        Task<CMDefaultResponse> DeleteGO(CMApproval request, int userID);
+        Task<CMDefaultResponse> CloseGO(CMGoodsOrderList request, int userID);
         Task<CMDefaultResponse> GOApproval(CMApproval request, int userId);
         Task<CMDefaultResponse> RejectGO(CMApproval request, int userId);
         Task<List<CMPURCHASEDATA>> GetPurchaseData(int plantID, string empRole, DateTime fromDate, DateTime toDate, string status, string order_type);
@@ -52,7 +52,7 @@ namespace CMMSAPIs.BS
             }
         }
         
-        public async Task<List<CMGoodsOrderList>> GetGOItemByID(int id)
+        public async Task<CMGoodsOrderList> GetGOItemByID(int id)
         {
             try
             {
@@ -115,13 +115,13 @@ namespace CMMSAPIs.BS
             }
         }
 
-        public async Task<CMDefaultResponse> DeleteGO(int GOid, int userID)
+        public async Task<CMDefaultResponse> DeleteGO(CMApproval request, int userID)
         {
             try
             {
                 using (var repos = new GORepository(getDB))
                 {
-                    return await repos.DeleteGO(GOid, userID);
+                    return await repos.DeleteGO(request, userID);
 
                 }
             }
@@ -130,13 +130,13 @@ namespace CMMSAPIs.BS
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> WithdrawGO(CMGoodsOrderList request, int userID)
+        public async Task<CMDefaultResponse> CloseGO(CMGoodsOrderList request, int userID)
         {
             try
             {
                 using (var repos = new GORepository(getDB))
                 {
-                    return await repos.WithdrawGO(request, userID);
+                    return await repos.CloseGO(request, userID);
 
                 }
             }
