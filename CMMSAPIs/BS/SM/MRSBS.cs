@@ -13,15 +13,17 @@ namespace CMMSAPIs.BS.SM
     public interface IMRSBS
     {
         Task<CMDefaultResponse> CreateMRS(CMMRS request, int UserID);        
+        Task<CMDefaultResponse> updateMRS(CMMRS request, int UserID);        
         Task<List<CMMRSList>> getMRSList(int facility_ID, int emp_id, DateTime toDate, DateTime fromDate, int status);        
         Task<List<CMMRSItems>> getMRSItems(int ID);        
         Task<List<CMMRSItemsBeforeIssue>> getMRSItemsBeforeIssue(int ID);        
         Task<List<CMMRSItemsBeforeIssue>> getMRSItemsWithCode(int ID);        
         Task<List<CMMRSList>> getMRSDetails(int ID);        
-        Task<List<CMRETURNMRSDATA>> getReturnDataByID(int ID);        
-        Task<List<CMMRSAssetTypeList>> getAssetTypeByItemID(int ItemID);
+        Task<CMRETURNMRSDATA> getReturnDataByID(int ID);        
+        Task<CMMRSAssetTypeList> getAssetTypeByItemID(int ItemID);
         Task<CMDefaultResponse> mrsReturn(CMMRS request, int UserID);        
         Task<CMDefaultResponse> mrsApproval(CMApproval request, int userId);        
+        Task<CMDefaultResponse> mrsReject(CMApproval request, int userId);        
         Task<CMDefaultResponse> mrsReturnApproval(CMMRS request, int UserID);
         void UpdateAssetStatus(int assetItemID, int status);
         Task<CMMRS> getLastTemplateData(int ID);
@@ -43,6 +45,21 @@ namespace CMMSAPIs.BS.SM
                 using (var repos = new MRSRepository(getDB))
                 {
                     return await repos.CreateMRS(request, UserID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> updateMRS(CMMRS request, int UserID)
+        {
+            try
+            {
+                using (var repos = new MRSRepository(getDB))
+                {
+                    return await repos.updateMRS(request, UserID);
                 }
             }
             catch (Exception ex)
@@ -125,7 +142,7 @@ namespace CMMSAPIs.BS.SM
                 throw;
             }
         }
-        public async Task<List<CMRETURNMRSDATA>> getReturnDataByID(int ID)
+        public async Task<CMRETURNMRSDATA> getReturnDataByID(int ID)
         {
             try
             {
@@ -139,7 +156,7 @@ namespace CMMSAPIs.BS.SM
                 throw;
             }
         }
-        public async Task<List<CMMRSAssetTypeList>> getAssetTypeByItemID(int ItemID)
+        public async Task<CMMRSAssetTypeList> getAssetTypeByItemID(int ItemID)
         {
             try
             {
@@ -183,7 +200,22 @@ namespace CMMSAPIs.BS.SM
                 throw;
             }
         }
-        
+
+        public async Task<CMDefaultResponse> mrsReject(CMApproval request, int userId)
+        {
+            try
+            {
+                using (var repos = new MRSRepository(getDB))
+                {
+                    return await repos.mrsReject(request, userId);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
         public async Task<CMDefaultResponse> mrsReturnApproval(CMMRS request, int UserID)
         {
             try
