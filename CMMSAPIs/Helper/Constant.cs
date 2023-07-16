@@ -315,6 +315,7 @@ namespace CMMSAPIs.Helper
             MRS_REQUEST_ISSUED ,
             MRS_REQUEST_ISSUED_REJECTED ,
             MRS_REQUEST_ISSUED_APPROVED ,
+            MRS_REQUEST_RETURN ,
 
             
 

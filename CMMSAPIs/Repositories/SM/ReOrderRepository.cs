@@ -36,7 +36,7 @@ namespace CMMSAPIs.Repositories.SM
 
         internal async Task<List<CMReOrder>> GetReorderDataByID(int assetID, int plantID)
         {
-            string stmt = $"SELECT * FROM smreorderdata WHERE asset_code_ID = {assetID}  AND plant_ID = {plantID}";
+            string stmt = $"SELECT * FROM smreorderdata WHERE asset_code_ID = {assetID}  AND facility_ID = {plantID}";
             List<CMReOrder> _List = await Context.GetData<CMReOrder>(stmt).ConfigureAwait(false);
             return _List;
         }
@@ -47,7 +47,7 @@ namespace CMMSAPIs.Repositories.SM
             CMDefaultResponse response = null;
             try
             {
-                string stmtSelect = $"SELECT * FROM smreorderdata WHERE asset_code_ID = {request.asset_code_ID} AND plant_ID = {request.plant_ID};";
+                string stmtSelect = $"SELECT * FROM smreorderdata WHERE asset_code_ID = {request.asset_code_ID} AND facility_ID = {request.plant_ID};";
                 List<CMReOrder> _List = await Context.GetData<CMReOrder>(stmtSelect).ConfigureAwait(false);
 
                 if (_List != null && _List.Count > 0)
@@ -59,7 +59,7 @@ namespace CMMSAPIs.Repositories.SM
                 else
                 {
                     string stmtInsert = $" START TRANSACTION; " +
-                        $" INSERT INTO smreorderdata (asset_code_ID, asset_code, plant_ID, max_qty, min_qty)" +
+                        $" INSERT INTO smreorderdata (asset_code_ID, asset_code, facility_ID, max_qty, min_qty)" +
                         $" VALUES ({request.asset_code_ID}, '{request.asset_code}', {request.plant_ID}, {request.max_qty}, {request.min_qty}); SELECT LAST_INSERT_ID();/* IF @@ERROR <> 0 THEN\r\n    ROLLBACK;\r\nELSE\r\n    COMMIT;\r\n END IF;*/";
                     DataTable dt2 = await Context.FetchData(stmtInsert).ConfigureAwait(false);
                     ID = Convert.ToInt32(dt2.Rows[0][0]);
@@ -81,7 +81,7 @@ namespace CMMSAPIs.Repositories.SM
             bool QueryFlag = true;
             try
             {
-                string stmtSelect = $"SELECT * FROM smreorderdata WHERE asset_code = '{request.asset_code}' AND plant_ID = {request.plant_ID}";
+                string stmtSelect = $"SELECT * FROM smreorderdata WHERE asset_code = '{request.asset_code}' AND facility_ID = {request.plant_ID}";
                 List<CMReOrder> _List = await Context.GetData<CMReOrder>(stmtSelect).ConfigureAwait(false);
                 if (_List != null && _List.Count > 0)
                 {
@@ -92,7 +92,7 @@ namespace CMMSAPIs.Repositories.SM
                 else
                 {
                     string stmtInsert = $" START TRANSACTION; " +
-                        $" INSERT INTO smreorderdata (asset_code_ID, asset_code, plant_ID, max_qty, min_qty)" +
+                        $" INSERT INTO smreorderdata (asset_code_ID, asset_code, facility_ID, max_qty, min_qty)" +
                         $" VALUES ({request.asset_code_ID}, '{request.asset_code}', {request.plant_ID}, {request.max_qty}, {request.min_qty}); SELECT LAST_INSERT_ID();/* IF @@ERROR <> 0 THEN\r\n    ROLLBACK;\r\nELSE\r\n    COMMIT;\r\n END IF;*/";
                     DataTable dt2 = await Context.FetchData(stmtInsert).ConfigureAwait(false);
                     ID = Convert.ToInt32(dt2.Rows[0][0]);
@@ -115,7 +115,7 @@ namespace CMMSAPIs.Repositories.SM
                 $"LEFT JOIN smassetmasters sam ON sam.asset_code = srd.asset_code\r\n        " +
                 $"LEFT JOIN smassettypes sat ON sat.ID = sam.asset_type_ID\r\n        " +
                 $"LEFT JOIN smitemcategory sic ON sic.ID = sam.item_category_ID\r\n       " +
-                $" WHERE srd.plant_ID = {plantID} ";
+                $" WHERE srd.facility_ID = {plantID} ";
             List<CMReOrder> _List = await Context.GetData<CMReOrder>(stmt).ConfigureAwait(false);
             return _List;
             
@@ -123,15 +123,15 @@ namespace CMMSAPIs.Repositories.SM
         internal async Task<List<CMReOrderItems>> getReorderItems(int plantID)
         {
             string stmt = $"SELECT fc.name as facilityName,fc.isBlock as Facility_Is_Block,'' as Facility_Is_Block_of_name," +
-                $"srd.plant_ID,t1.asset_name\r\n,sai.asset_code,t1.asset_type,t1.cat_name,(SUM(st.creditQty)-SUM(st.debitQty)) as availableQty," +
+                $"srd.facility_ID,t1.asset_name\r\n,sai.asset_code,t1.asset_type,t1.cat_name,(SUM(st.creditQty)-SUM(st.debitQty)) as availableQty," +
                 $"srd.max_qty,srd.min_qty,srd.ID as reorderID,srd.ordered_qty \r\nFROM smtransition st \r\n        " +
                 $"LEFT JOIN smassetitems sai ON sai.ID = st.assetItemID\r\n        " +
-                $"LEFT JOIN facilities fc ON fc.id = sai.plant_ID\r\n        " +
+                $"LEFT JOIN facilities fc ON fc.id = sai.facility_ID\r\n        " +
                 $"LEFT JOIN (\r\n            " +
                 $"SELECT sam.asset_code,sat.asset_type,sic.cat_name,sam.asset_name FROM smassetmasters sam \r\n           " +
                 $" LEFT JOIN smassettypes sat ON sat.ID = sam.asset_type_ID\r\n           " +
                 $" LEFT JOIN smitemcategory sic ON sic.ID = sam.item_category_ID\r\n        ) as t1 ON t1.asset_code = sai.asset_code\r\n      " +
-                $"  LEFT JOIN smreorderdata srd ON srd.asset_code = sai.asset_code AND srd.plant_ID = sai.plant_ID WHERE sai.plant_ID = {plantID} AND st.actorType = 2 " +
+                $"  LEFT JOIN smreorderdata srd ON srd.asset_code = sai.asset_code AND srd.facility_ID = sai.facility_ID WHERE sai.facility_ID = {plantID} AND st.actorType = 2 " +
                 $"GROUP BY sai.asset_code";
             List<CMReOrderItems> _List = await Context.GetData<CMReOrderItems>(stmt).ConfigureAwait(false);
             return _List;
@@ -159,7 +159,7 @@ namespace CMMSAPIs.Repositories.SM
                     }
                     else
                     {
-                        string reorderInsert = $"INSERT INTO smreorderdata (asset_code,plant_ID,max_qty,min_qty,ordered_qty)" +
+                        string reorderInsert = $"INSERT INTO smreorderdata (asset_code,facility_ID,max_qty,min_qty,ordered_qty)" +
                                             $"VALUES('{request.ReOrderAsset[i].asset_code}',{request.plant_ID},{request.ReOrderAsset[i].max_qty},{request.ReOrderAsset[i].min_qty},{request.ReOrderAsset[i].ordered_qty}); SELECT LAST_INSERT_ID();";
                         DataTable dt2 = await Context.FetchData(reorderInsert).ConfigureAwait(false);
                         int reorderInsert_ID = Convert.ToInt32(dt2.Rows[0][0]);
@@ -170,7 +170,7 @@ namespace CMMSAPIs.Repositories.SM
                     {
                         for(var  j = 0; j < request.ReOrderAsset.Count; j++)
                         {
-                            string stmt = $"INSERT INTO smassetitems (plant_ID,asset_code,item_condition,status,location_ID)" + 
+                            string stmt = $"INSERT INTO smassetitems (facility_ID,asset_code,item_condition,status,location_ID)" + 
                                 $"VALUES({request.plant_ID}, '{request.ReOrderAsset[i].asset_code}', 1, 0,0);SELECT LAST_INSERT_ID();";
                             DataTable dt2 = await Context.FetchData(stmt).ConfigureAwait(false);
                             int asset_item_ID1 = Convert.ToInt32(dt2.Rows[0][0]);
@@ -205,7 +205,7 @@ namespace CMMSAPIs.Repositories.SM
         public async Task<int> GetAssetItemID(string asset_code, int facility_id, int location_ID)
         {
             int asset_item_ID = 0;
-            string stmt = $"SELECT ID FROM smassetitems WHERE asset_code = '{asset_code}' AND plant_ID = {facility_id} ORDER BY ID LIMIT 0,1";
+            string stmt = $"SELECT ID FROM smassetitems WHERE asset_code = '{asset_code}' AND facility_ID = {facility_id} ORDER BY ID LIMIT 0,1";
             DataTable dt2 = await Context.FetchData(stmt).ConfigureAwait(false);
             if(dt2.Rows.Count > 0)
             {
@@ -213,7 +213,7 @@ namespace CMMSAPIs.Repositories.SM
             }
             else
             {
-                string stmtInsert = $"INSERT INTO smassetitems (plant_ID,asset_code,location_ID,item_condition,status) VALUES ({facility_id},'{asset_code}',{location_ID},1,1);SELECT LAST_INSERT_ID(); ";
+                string stmtInsert = $"INSERT INTO smassetitems (facility_ID,asset_code,location_ID,item_condition,status) VALUES ({facility_id},'{asset_code}',{location_ID},1,1);SELECT LAST_INSERT_ID(); ";
                 DataTable dtInsert = await Context.FetchData(stmtInsert).ConfigureAwait(false);
                 asset_item_ID = Convert.ToInt32(dt2.Rows[0][0]);
             }

@@ -32,14 +32,15 @@ namespace CMMSAPIs.Controllers.SM
         }
 
         // First 
- 
+         
         [Route("CreateMRS")]
         [HttpPost]       
         public async Task<IActionResult> CreateMRS(CMMRS request)
         {
             try
             {
-                var data = await _MRSBS.CreateMRS(request);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _MRSBS.CreateMRS(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -50,14 +51,32 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
-         
-        [Route("getMRSList")]
-        [HttpGet]
-        public async Task<IActionResult> getMRSList(int plant_ID, int emp_id, string toDate, string fromDate, int status)
+        [Route("updateMRS")]
+        [HttpPost]
+        public async Task<IActionResult> updateMRS(CMMRS request)
         {
             try
             {
-                var data = await _MRSBS.getMRSList(plant_ID, emp_id, Convert.ToDateTime(toDate), Convert.ToDateTime(fromDate), status);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _MRSBS.updateMRS(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogInformation(ex.ToString());
+                _logger.LogError(ex.ToString());
+                throw ex;
+            }
+        }
+
+
+        [Route("getMRSList")]
+        [HttpGet]
+        public async Task<IActionResult> getMRSList(int facility_ID, int emp_id, string toDate, string fromDate, int status)
+        {
+            try
+            {
+                var data = await _MRSBS.getMRSList(facility_ID, emp_id, Convert.ToDateTime(toDate), Convert.ToDateTime(fromDate), status);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -85,6 +104,7 @@ namespace CMMSAPIs.Controllers.SM
                 throw ex;
             }
         }
+
          
         [Route("getMRSItemsBeforeIssue")]
         [HttpGet]
@@ -139,12 +159,12 @@ namespace CMMSAPIs.Controllers.SM
          
         [Route("mrsApproval")]
         [HttpPost]
-        public async Task<IActionResult> mrsApproval(CMMRS request)
+        public async Task<IActionResult> mrsApproval(CMApproval request)
         {
             try
             {
-                int ID = 0;
-                var data = await _MRSBS.mrsApproval(request);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _MRSBS.mrsApproval(request, userID);
                 return Ok(data);
             }
             catch(Exception ex)
@@ -153,6 +173,7 @@ namespace CMMSAPIs.Controllers.SM
                 throw ex;
             }
         }
+
 
          
         [Route("getReturnDataByID")]
@@ -172,6 +193,7 @@ namespace CMMSAPIs.Controllers.SM
 
         }
 
+
          
         [Route("getAssetTypeByItemID")]
         [HttpGet]
@@ -189,6 +211,7 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
+
          
         [Route("mrsReturn")]
         [HttpPost] 
@@ -196,7 +219,8 @@ namespace CMMSAPIs.Controllers.SM
         {
             try
             {
-                var data = await _MRSBS.mrsReturn(request);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _MRSBS.mrsReturn(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -206,6 +230,7 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
+
          
         [Route("mrsReturnApproval")]
         [HttpPost]
@@ -213,7 +238,8 @@ namespace CMMSAPIs.Controllers.SM
         {
             try
             {
-                var data = await _MRSBS.mrsReturnApproval(request);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _MRSBS.mrsReturnApproval(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -222,6 +248,7 @@ namespace CMMSAPIs.Controllers.SM
                 throw ex;
             }
         }
+
 
          
         [Route("getLastTemplateData")]
@@ -243,11 +270,11 @@ namespace CMMSAPIs.Controllers.SM
          
         [Route("GetAssetItems")]
         [HttpGet]
-        public async Task<IActionResult> GetAssetItems(int plantID, bool isGroupByCode = false)
+        public async Task<IActionResult> GetAssetItems(int facility_ID, bool isGroupByCode = false)
         {
             try
             {
-                var data = await _MRSBS.GetAssetItems(plantID, isGroupByCode);
+                var data = await _MRSBS.GetAssetItems(facility_ID, isGroupByCode);
                 return Ok(data);
             }
             catch (Exception ex)

@@ -14,10 +14,10 @@ namespace CMMSAPIs.BS.SM
 {
     public interface ISMReportsBS
     {
-        Task<List<CMPlantStockOpening>> GetPlantStockReport(int plant_ID, DateTime StartDate, DateTime EndDate);
-        Task<List<CMEmployeeStockReport>> GetEmployeeStockReport(int plant_ID, DateTime StartDate, DateTime EndDate);
-        Task<List<CMFaultyMaterialReport>> GetFaultyMaterialReport(int plant_ID, DateTime StartDate, DateTime EndDate);
-        Task<List<CMEmployeeTransactionReport>> GetEmployeeTransactionReport(int isAllEmployees, int plant_ID, DateTime StartDate, DateTime EndDate);
+        Task<List<CMPlantStockOpening>> GetPlantStockReport(string facility_id, DateTime StartDate, DateTime EndDate);
+        Task<List<CMEmployeeStockReport>> GetEmployeeStockReport(int facility_id, int Emp_id, DateTime StartDate, DateTime EndDate, string itemID);
+        Task<List<CMFaultyMaterialReport>> GetFaultyMaterialReport(string facility_id, string itemID, DateTime StartDate, DateTime EndDate);
+        Task<List<CMEmployeeTransactionReport>> GetEmployeeTransactionReport(int isAllEmployees, string facility_id, int Emp_ID, DateTime StartDate, DateTime EndDate);
     }
     public class ReportsBS : ISMReportsBS
     {
@@ -28,13 +28,13 @@ namespace CMMSAPIs.BS.SM
             databaseProvider = dbProvider;
         }
 
-        public async Task<List<CMPlantStockOpening>> GetPlantStockReport(int plant_ID, DateTime StartDate, DateTime EndDate)
+        public async Task<List<CMPlantStockOpening>> GetPlantStockReport(string facility_id, DateTime StartDate, DateTime EndDate)
         {
             try
             {
                 using (var repos = new ReportsRepository(getDB))
                 {
-                    return await repos.GetPlantStockReport(plant_ID, StartDate, EndDate);
+                    return await repos.GetPlantStockReport(facility_id, StartDate, EndDate);
 
                 }
             }
@@ -44,13 +44,13 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<CMEmployeeStockReport>> GetEmployeeStockReport(int plant_ID, DateTime StartDate, DateTime EndDate)
+        public async Task<List<CMEmployeeStockReport>> GetEmployeeStockReport(int facility_id, int Emp_id, DateTime StartDate, DateTime EndDate, string itemID)
         {
             try
             {
                 using (var repos = new ReportsRepository(getDB))
                 {
-                    return await repos.GetEmployeeStockReport(plant_ID, StartDate, EndDate);
+                    return await repos.GetEmployeeStockReport(facility_id, Emp_id, StartDate, EndDate, itemID);
 
                 }
             }
@@ -61,13 +61,13 @@ namespace CMMSAPIs.BS.SM
         }
 
 
-        public async Task<List<CMFaultyMaterialReport>> GetFaultyMaterialReport(int plant_ID, DateTime StartDate, DateTime EndDate)
+        public async Task<List<CMFaultyMaterialReport>> GetFaultyMaterialReport(string facility_id, string itemID, DateTime StartDate, DateTime EndDate)
         {
             try
             {
                 using (var repos = new ReportsRepository(getDB))
                 {
-                    return await repos.GetFaultyMaterialReport(plant_ID, StartDate, EndDate);
+                    return await repos.GetFaultyMaterialReport(facility_id, itemID, StartDate, EndDate);
 
                 }
             }
@@ -76,13 +76,13 @@ namespace CMMSAPIs.BS.SM
                 throw;
             }
         }
-        public async Task<List<CMEmployeeTransactionReport>> GetEmployeeTransactionReport(int isAllEmployees, int plant_ID, DateTime StartDate, DateTime EndDate)
+        public async Task<List<CMEmployeeTransactionReport>> GetEmployeeTransactionReport(int isAllEmployees, string facility_id, int Emp_ID, DateTime StartDate, DateTime EndDate)
         {
             try
             {
                 using (var repos = new ReportsRepository(getDB))
                 {
-                    return await repos.GetEmployeeTransactionReport(isAllEmployees, plant_ID, StartDate, EndDate);
+                    return await repos.GetEmployeeTransactionReport(isAllEmployees, facility_id, Emp_ID, StartDate, EndDate);
 
                 }
             }

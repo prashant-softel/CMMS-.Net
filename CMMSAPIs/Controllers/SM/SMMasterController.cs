@@ -33,6 +33,7 @@ namespace CMMSAPIs.Controllers.SM
         /*
          * Asset Type CRUD End Points
         */
+
          
         [Route("GetAssetTypeList")]
         [HttpGet]
@@ -48,6 +49,7 @@ namespace CMMSAPIs.Controllers.SM
                 throw;
             }
         }
+
 
          
         [Route("AddAssetType")]
@@ -66,6 +68,7 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
+
          
         [Route("UpdateAssetType")]
         [HttpPost]
@@ -82,6 +85,7 @@ namespace CMMSAPIs.Controllers.SM
                 throw;
             }
         }
+
 
          
         [Route("DeleteAssetType")]
@@ -120,6 +124,7 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
+
          
         [Route("AddAssetCategory")]
         [HttpPost]
@@ -137,6 +142,7 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
+
          
         [Route("UpdateAssetCategory")]
         [HttpPost]
@@ -153,6 +159,7 @@ namespace CMMSAPIs.Controllers.SM
                 throw;
             }
         }
+
 
          
         [Route("DeleteAssetCategory")]
@@ -175,6 +182,7 @@ namespace CMMSAPIs.Controllers.SM
          * Asset Category CRUD End Points
         */
 
+
          
         [Route("GetUnitMeasurementList")]
         [HttpGet]
@@ -190,6 +198,7 @@ namespace CMMSAPIs.Controllers.SM
                 throw;
             }
         }
+
 
          
         [Route("AddUnitMeasurement")]
@@ -208,6 +217,7 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
+
          
         [Route("UpdateUnitMeasurement")]
         [HttpPost]
@@ -224,6 +234,7 @@ namespace CMMSAPIs.Controllers.SM
                 throw;
             }
         }
+
 
          
         [Route("DeleteUnitMeasurement")]
@@ -246,6 +257,7 @@ namespace CMMSAPIs.Controllers.SM
          * Asset Masters CRUD End Points
         */
 
+
          
         [Route("GetAssetMasterList")]
         [HttpGet]
@@ -261,6 +273,7 @@ namespace CMMSAPIs.Controllers.SM
                 throw;
             }
         }
+
 
          
         [Route("AddAssetMaster")]
@@ -280,6 +293,7 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
+
          
         [Route("UpdateAssetMaster")]
         [HttpPost]
@@ -297,6 +311,7 @@ namespace CMMSAPIs.Controllers.SM
                 throw;
             }
         }
+
 
          
         [Route("DeleteAssetMaster")]
@@ -316,7 +331,8 @@ namespace CMMSAPIs.Controllers.SM
         }
 
         //Get Asset List by plant ID
-         
+
+        // 
         [Route("GetAssetDataList")]
         [HttpGet]
         public async Task<IActionResult> GetAssetDataList(int facility_id)
@@ -347,6 +363,7 @@ namespace CMMSAPIs.Controllers.SM
                 throw;
             }
         }
+
 
          
         [Route("GetAssetBySerialNo")]

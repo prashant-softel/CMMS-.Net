@@ -9,7 +9,7 @@ namespace CMMSAPIs.Models.SM
 
     public class CMPlantStockOpening
     {
-        public string plant_name { get; set; }
+
         public string facilityName { get; set; }
         public int Facility_Is_Block { get; set; }
         public string Facility_Is_Block_of_name { get; set; }
@@ -48,7 +48,7 @@ namespace CMMSAPIs.Models.SM
         public string toActorType { get; set; }
         public int assetItemID { get; set; }
         public decimal qty { get; set; }
-        public int plantID { get; set; }
+        public int facility_id { get; set; }
         public string referedby { get; set; }
         public int reference_ID { get; set; }
         public string remarks { get; set; }
@@ -80,7 +80,7 @@ namespace CMMSAPIs.Models.SM
         public string toActorType { get; set; }
         public int assetItemID { get; set; }
         public decimal qty { get; set; }
-        public int plantID { get; set; }
+        public int facility_id { get; set; }
         public string referedby { get; set; }
         public int reference_ID { get; set; }
         public string remarks { get; set; }

@@ -41,6 +41,7 @@ namespace CMMSAPIs.Controllers
             }
         }
 
+
  
         [Route("GetGOItemByID")]
         [HttpGet]
@@ -56,6 +57,7 @@ namespace CMMSAPIs.Controllers
                 throw;
             }
         }
+
 
  
         [Route("GetAssetCodeDetails")]
@@ -74,6 +76,7 @@ namespace CMMSAPIs.Controllers
             }
         }
 
+
  
         [Route("CreateGO")]
         [HttpPost]
@@ -91,8 +94,9 @@ namespace CMMSAPIs.Controllers
             }
         }
 
+
  
-        [Route("UpdateRO")]
+        [Route("UpdateGO")]
         [HttpPost]
         public async Task<IActionResult> UpdateGO(CMGoodsOrderList request)
         {
@@ -108,15 +112,16 @@ namespace CMMSAPIs.Controllers
             }
         }
 
+
  
         [Route("DeleteGO")]
         [HttpPost]
-        public async Task<IActionResult> DeleteGO([FromForm] int id)
+        public async Task<IActionResult> DeleteGO(CMApproval request)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _GOBS.DeleteGO(id, userID);
+                var data = await _GOBS.DeleteGO(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -125,15 +130,16 @@ namespace CMMSAPIs.Controllers
             }
         }
 
+
  
-        [Route("WithdrawGO")]
+        [Route("CloseGO")]
         [HttpPost]
-        public async Task<IActionResult> WithdrawGO(CMGoodsOrderList request)
+        public async Task<IActionResult> CloseGO(CMGoodsOrderList request)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _GOBS.WithdrawGO(request, userID);
+                var data = await _GOBS.CloseGO(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -141,6 +147,7 @@ namespace CMMSAPIs.Controllers
                 throw;
             }
         }
+
 
  
         [Route("GOApproval")]
@@ -149,7 +156,8 @@ namespace CMMSAPIs.Controllers
         {
             try
             {
-                var data = await _GOBS.GOApproval(request);
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _GOBS.GOApproval(request, userId);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -157,6 +165,7 @@ namespace CMMSAPIs.Controllers
                 throw;
             }
         }
+
 
  
         [Route("RejectGO")]
@@ -165,7 +174,8 @@ namespace CMMSAPIs.Controllers
         {
             try
             {
-                var data = await _GOBS.RejectGO(request);
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _GOBS.RejectGO(request, userId);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -173,15 +183,16 @@ namespace CMMSAPIs.Controllers
                 throw;
             }
         }
+
 
  
         [Route("GetPurchaseData")]
         [HttpGet]
-        public async Task<IActionResult> GetPurchaseData(int plantID, string empRole, DateTime fromDate, DateTime toDate, string status, string order_type)
+        public async Task<IActionResult> GetPurchaseData(int facilityID, string empRole, DateTime fromDate, DateTime toDate, string status, string order_type)
         {
             try
             {
-                var data = await _GOBS.GetPurchaseData(plantID, empRole, fromDate, toDate, status, order_type);
+                var data = await _GOBS.GetPurchaseData(facilityID, empRole, fromDate, toDate, status, order_type);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -190,14 +201,15 @@ namespace CMMSAPIs.Controllers
             }
         }
 
+
  
-        [Route("GetPurchaseDetailsByID")]
+        [Route("GetGODetailsByID")]
         [HttpGet]
-        public async Task<IActionResult> getPurchaseDetailsByID(int id)
+        public async Task<IActionResult> GetGODetailsByID(int id)
         {
             try
             {
-                var data = await _GOBS.getPurchaseDetailsByID(id);
+                var data = await _GOBS.GetGODetailsByID(id);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -205,6 +217,7 @@ namespace CMMSAPIs.Controllers
                 throw;
             }
         }
+
 
  
         [Route("SubmitPurchaseOrderData")]

@@ -79,8 +79,10 @@ namespace CMMS_Services
         public List<T> GetContentList(RestResponse response)
         {
             var content = response.Content;
+            var test = JsonConvert.DeserializeObject<List<T>>(content);
             List<T> dtoObject = JsonConvert.DeserializeObject<List<T>>(content);
             return dtoObject;
+           
         }
         public T GetContent(RestResponse response)
         {

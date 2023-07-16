@@ -18,12 +18,12 @@ namespace CMMSAPIs.BS
         Task<List<CMGoodsOrderList>> GetAssetCodeDetails(int asset_code);
         Task<CMDefaultResponse> CreateGO(CMGoodsOrderList request, int userID);
         Task<CMDefaultResponse> UpdateGO(CMGoodsOrderList request, int userID);
-        Task<CMDefaultResponse> DeleteGO(int GOid, int userID);
-        Task<CMDefaultResponse> WithdrawGO(CMGoodsOrderList request, int userID);
-        Task<CMDefaultResponse> GOApproval(CMApproval request);
-        Task<CMDefaultResponse> RejectGO(CMApproval request);
+        Task<CMDefaultResponse> DeleteGO(CMApproval request, int userID);
+        Task<CMDefaultResponse> CloseGO(CMGoodsOrderList request, int userID);
+        Task<CMDefaultResponse> GOApproval(CMApproval request, int userId);
+        Task<CMDefaultResponse> RejectGO(CMApproval request, int userId);
         Task<List<CMPURCHASEDATA>> GetPurchaseData(int plantID, string empRole, DateTime fromDate, DateTime toDate, string status, string order_type);
-        Task<CMGOMaster> getPurchaseDetailsByID(int id);
+        Task<CMGOMaster> GetGODetailsByID(int id);
         Task<CMDefaultResponse> SubmitPurchaseData(CMSUBMITPURCHASEDATA request);
     }
 
@@ -115,13 +115,13 @@ namespace CMMSAPIs.BS
             }
         }
 
-        public async Task<CMDefaultResponse> DeleteGO(int GOid, int userID)
+        public async Task<CMDefaultResponse> DeleteGO(CMApproval request, int userID)
         {
             try
             {
                 using (var repos = new GORepository(getDB))
                 {
-                    return await repos.DeleteGO(GOid, userID);
+                    return await repos.DeleteGO(request, userID);
 
                 }
             }
@@ -130,13 +130,13 @@ namespace CMMSAPIs.BS
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> WithdrawGO(CMGoodsOrderList request, int userID)
+        public async Task<CMDefaultResponse> CloseGO(CMGoodsOrderList request, int userID)
         {
             try
             {
                 using (var repos = new GORepository(getDB))
                 {
-                    return await repos.WithdrawGO(request, userID);
+                    return await repos.CloseGO(request, userID);
 
                 }
             }
@@ -145,13 +145,13 @@ namespace CMMSAPIs.BS
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> GOApproval(CMApproval request)
+        public async Task<CMDefaultResponse> GOApproval(CMApproval request, int userId)
         {
             try
             {
                 using (var repos = new GORepository(getDB))
                 {
-                    return await repos.ApproveGoodsOrder(request);
+                    return await repos.ApproveGoodsOrder(request, userId);
 
                 }
             }
@@ -160,13 +160,13 @@ namespace CMMSAPIs.BS
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> RejectGO(CMApproval request)
+        public async Task<CMDefaultResponse> RejectGO(CMApproval request, int userId)
         {
             try
             {
                 using (var repos = new GORepository(getDB))
                 {
-                    return await repos.RejectGoodsOrder(request);
+                    return await repos.RejectGoodsOrder(request, userId);
 
                 }
             }
@@ -192,13 +192,13 @@ namespace CMMSAPIs.BS
             }
         }
 
-        public async Task<CMGOMaster> getPurchaseDetailsByID(int id)
+        public async Task<CMGOMaster> GetGODetailsByID(int id)
         {
             try
             {
                 using (var repos = new GORepository(getDB))
                 {
-                    return await repos.getGoodsOrderDetailsByID(id);
+                    return await repos.GetGODetailsByID(id);
 
                 }
             }

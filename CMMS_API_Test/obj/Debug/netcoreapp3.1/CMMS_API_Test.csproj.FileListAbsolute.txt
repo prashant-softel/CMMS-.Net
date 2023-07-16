@@ -194,6 +194,8 @@ D:\Work\CMMS-.Net-master\CMMS-.Net-master\CMMS_API_Test\bin\Debug\netcoreapp3.1\
 D:\Work\CMMS-.Net-master\CMMS-.Net-master\CMMS_API_Test\bin\Debug\netcoreapp3.1\CMMS_Services.dll
 D:\Work\CMMS-.Net-master\CMMS-.Net-master\CMMS_API_Test\bin\Debug\netcoreapp3.1\Microsoft.Extensions.DependencyInjection.Abstractions.dll
 D:\Work\CMMS-.Net-master\CMMS-.Net-master\CMMS_API_Test\bin\Debug\netcoreapp3.1\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+D:\Work\CMMS-.Net-master\CMMS-.Net-master\CMMS_API_Test\bin\Debug\netcoreapp3.1\Swashbuckle.AspNetCore.SwaggerGen.dll
+D:\Work\CMMS-.Net-master\CMMS-.Net-master\CMMS_API_Test\bin\Debug\netcoreapp3.1\Swashbuckle.AspNetCore.SwaggerUI.dll
 D:\Work\CMMS-.Net-master\CMMS-.Net-master\CMMS_API_Test\bin\Debug\netcoreapp3.1\Google.Protobuf.dll
 D:\Work\CMMS-.Net-master\CMMS-.Net-master\CMMS_API_Test\bin\Debug\netcoreapp3.1\Microsoft.IdentityModel.Tokens.dll
 D:\Work\CMMS-.Net-master\CMMS-.Net-master\CMMS_API_Test\bin\Debug\netcoreapp3.1\System.IdentityModel.Tokens.Jwt.dll
@@ -206,6 +208,8 @@ D:\Work\CMMS-.Net-master\CMMS-.Net-master\CMMS_API_Test\bin\Debug\netcoreapp3.1\
 D:\Work\CMMS-.Net-master\CMMS-.Net-master\CMMS_API_Test\bin\Debug\netcoreapp3.1\MimeKit.dll
 D:\Work\CMMS-.Net-master\CMMS-.Net-master\CMMS_API_Test\bin\Debug\netcoreapp3.1\MailKit.dll
 D:\Work\CMMS-.Net-master\CMMS-.Net-master\CMMS_API_Test\bin\Debug\netcoreapp3.1\Microsoft.Extensions.Caching.Memory.dll
+D:\Work\CMMS-.Net-master\CMMS-.Net-master\CMMS_API_Test\bin\Debug\netcoreapp3.1\Swashbuckle.AspNetCore.Swagger.dll
+D:\Work\CMMS-.Net-master\CMMS-.Net-master\CMMS_API_Test\bin\Debug\netcoreapp3.1\Microsoft.OpenApi.dll
 D:\Work\CMMS-.Net-master\CMMS-.Net-master\CMMS_API_Test\bin\Debug\netcoreapp3.1\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
 D:\Work\CMMS-.Net-master\CMMS-.Net-master\CMMS_API_Test\bin\Debug\netcoreapp3.1\Microsoft.IdentityModel.Protocols.dll
 D:\Work\CMMS-.Net-master\CMMS-.Net-master\CMMS_API_Test\bin\Debug\netcoreapp3.1\Microsoft.IdentityModel.Logging.dll
@@ -222,6 +226,7 @@ D:\Work\CMMS-.Net-master\CMMS-.Net-master\CMMS_API_Test\bin\Debug\netcoreapp3.1\
 D:\Work\CMMS-.Net-master\CMMS-.Net-master\CMMS_API_Test\bin\Debug\netcoreapp3.1\System.Security.Cryptography.ProtectedData.dll
 D:\Work\CMMS-.Net-master\CMMS-.Net-master\CMMS_API_Test\bin\Debug\netcoreapp3.1\CMMS_Services.pdb
 D:\Work\CMMS-.Net-master\CMMS-.Net-master\CMMS_API_Test\bin\Debug\netcoreapp3.1\CMMSAPIs.pdb
+D:\Work\CMMS-.Net-master\CMMS-.Net-master\CMMS_API_Test\bin\Debug\netcoreapp3.1\CMMSAPIs.xml
 D:\Work\CMMS-.Net-master\CMMS-.Net-master\CMMS_API_Test\obj\Debug\netcoreapp3.1\CMMS_API_Test.csproj.AssemblyReference.cache
 D:\Work\CMMS-.Net-master\CMMS-.Net-master\CMMS_API_Test\obj\Debug\netcoreapp3.1\CMMS_API_Test.GeneratedMSBuildEditorConfig.editorconfig
 D:\Work\CMMS-.Net-master\CMMS-.Net-master\CMMS_API_Test\obj\Debug\netcoreapp3.1\CMMS_API_Test.AssemblyInfoInputs.cache
@@ -231,8 +236,3 @@ D:\Work\CMMS-.Net-master\CMMS-.Net-master\CMMS_API_Test\obj\Debug\netcoreapp3.1\
 D:\Work\CMMS-.Net-master\CMMS-.Net-master\CMMS_API_Test\obj\Debug\netcoreapp3.1\CMMS_API_Test.dll
 D:\Work\CMMS-.Net-master\CMMS-.Net-master\CMMS_API_Test\obj\Debug\netcoreapp3.1\CMMS_API_Test.pdb
 D:\Work\CMMS-.Net-master\CMMS-.Net-master\CMMS_API_Test\obj\Debug\netcoreapp3.1\CMMS_API_Test.genruntimeconfig.cache
-D:\Work\CMMS-.Net-master\CMMS-.Net-master\CMMS_API_Test\bin\Debug\netcoreapp3.1\Swashbuckle.AspNetCore.SwaggerGen.dll
-D:\Work\CMMS-.Net-master\CMMS-.Net-master\CMMS_API_Test\bin\Debug\netcoreapp3.1\Swashbuckle.AspNetCore.SwaggerUI.dll
-D:\Work\CMMS-.Net-master\CMMS-.Net-master\CMMS_API_Test\bin\Debug\netcoreapp3.1\Swashbuckle.AspNetCore.Swagger.dll
-D:\Work\CMMS-.Net-master\CMMS-.Net-master\CMMS_API_Test\bin\Debug\netcoreapp3.1\Microsoft.OpenApi.dll
-D:\Work\CMMS-.Net-master\CMMS-.Net-master\CMMS_API_Test\bin\Debug\netcoreapp3.1\CMMSAPIs.xml

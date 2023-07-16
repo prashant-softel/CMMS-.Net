@@ -27,14 +27,15 @@ namespace CMMSAPIs.Controllers.SM
             _SMReportsBS = reportsBS;
         }
 
+
          
         [Route("GetPlantStockReport")]
         [HttpGet]
-        public async Task<IActionResult> GetPlantStockReport(int plant_ID, DateTime StartDate, DateTime EndDate)
+        public async Task<IActionResult> GetPlantStockReport(string facility_id, DateTime StartDate, DateTime EndDate)
         {
             try
             {
-                var data = await _SMReportsBS.GetPlantStockReport(plant_ID, StartDate, EndDate);
+                var data = await _SMReportsBS.GetPlantStockReport(facility_id, StartDate, EndDate);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -42,15 +43,16 @@ namespace CMMSAPIs.Controllers.SM
                 throw;
             }
         }
+
 
          
         [Route("GetEmployeeStockReport")]
         [HttpGet]
-        public async Task<IActionResult> GetEmployeeStockReport(int plant_ID, DateTime StartDate, DateTime EndDate)
+        public async Task<IActionResult> GetEmployeeStockReport(int facility_id, int Emp_id, DateTime StartDate, DateTime EndDate, string itemID)
         {
             try
             {
-                var data = await _SMReportsBS.GetEmployeeStockReport(plant_ID, StartDate, EndDate);
+                var data = await _SMReportsBS.GetEmployeeStockReport(facility_id, Emp_id, StartDate, EndDate, itemID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -58,15 +60,16 @@ namespace CMMSAPIs.Controllers.SM
                 throw;
             }
         }
+
 
          
         [Route("GetFaultyMaterialReport")]
         [HttpGet]
-        public async Task<IActionResult> GetFaultyMaterialReport(int plant_ID, DateTime StartDate, DateTime EndDate)
+        public async Task<IActionResult> GetFaultyMaterialReport(string facility_id, string itemID, DateTime StartDate, DateTime EndDate)
         {
             try
             {
-                var data = await _SMReportsBS.GetFaultyMaterialReport(plant_ID, StartDate, EndDate);
+                var data = await _SMReportsBS.GetFaultyMaterialReport(facility_id, itemID, StartDate, EndDate);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -75,14 +78,15 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
+
          
         [Route("GetEmployeeTransactionReport")]
         [HttpGet]
-        public async Task<IActionResult> GetEmployeeTransactionReport(int isAllEmployees, int plant_ID, DateTime StartDate, DateTime EndDate)
+        public async Task<IActionResult> GetEmployeeTransactionReport(int isAllEmployees, string facility_id, int Emp_ID, DateTime StartDate, DateTime EndDate)
         {
             try
             {
-                var data = await _SMReportsBS.GetEmployeeTransactionReport(isAllEmployees, plant_ID, StartDate, EndDate);
+                var data = await _SMReportsBS.GetEmployeeTransactionReport(isAllEmployees, facility_id, Emp_ID, StartDate, EndDate);
                 return Ok(data);
             }
             catch (Exception ex)

@@ -31,7 +31,7 @@ namespace CMMSAPIs.Repositories.SM
             _utilsRepo = new UtilsRepository(sqlDBHelper);
         }
 
-        public async Task<List<CMPlantStockOpening>> GetPlantStockReport(int plant_ID,DateTime StartDate, DateTime EndDate)
+        public async Task<List<CMPlantStockOpening>> GetPlantStockReport(string facility_id, DateTime StartDate, DateTime EndDate)
         {
             List<string> Asset_Item_Ids = new List<string>();
             List<CMPlantStockOpening> Asset_Item_Opening_Balance_details = new List<CMPlantStockOpening>();
@@ -43,28 +43,29 @@ namespace CMMSAPIs.Repositories.SM
                 $"FROM smtransition as sm_trans " +
                 $"join smassetitems as a_item ON sm_trans.assetItemID = a_item.ID " +
                 $"JOIN smassetmasters as a_master ON a_master.asset_code = a_item.asset_code " +
-                $"LEFT JOIN facilities fc ON fc.id = a_item.plant_ID " +
-                $"where sm_trans.actorType = {(int)CMMS.SM_Types.Store} and a_item.plant_ID = {plant_ID} " +
+                $"LEFT JOIN facilities fc ON fc.id = a_item.facility_ID " +
+                $"where sm_trans.actorType = {(int)CMMS.SM_Types.Store} and a_item.facility_ID in ('{facility_id}') " +
                 $"and date_format(sm_trans.lastModifiedDate, '%Y-%m-%d') BETWEEN '{ StartDate.ToString("yyyy-MM-dd")}' AND '{ EndDate.ToString("yyyy-MM-dd")}'  " +
                 $"group by a_item.asset_code";
             List<CMPlantStockOpening> Plant_Stock_Opening_Details_Reader = await Context.GetData<CMPlantStockOpening>(Plant_Stock_Opening_Details_query).ConfigureAwait(false);
             
             foreach (var item in Plant_Stock_Opening_Details_Reader)
             {
-                string plant_name = "";
+                string facility_name = "";
                 if (Convert.ToInt32(item.Facility_Is_Block) == 0)
                 {
-                    plant_name = Convert.ToString(item.facilityName);
+                    facility_name = Convert.ToString(item.facilityName);
                 }
                 else
                 {
-                    plant_name = Convert.ToString(item.Facility_Is_Block_of_name);
+                    facility_name = Convert.ToString(item.Facility_Is_Block_of_name);
                 }
 
                 Asset_Item_Ids.Add(Convert.ToString(item.assetItemID));
 
                 CMPlantStockOpening openingBalance = new CMPlantStockOpening();
-                openingBalance.plant_name = plant_name;
+
+                openingBalance.facilityName = facility_name;
                 openingBalance.Opening = item.Opening;
                 openingBalance.assetItemID = item.assetItemID;
                 openingBalance.asset_name = item.asset_name;
@@ -80,9 +81,9 @@ namespace CMMSAPIs.Repositories.SM
 
         }
 
-        public async Task<List<CMEmployeeStockReport>> GetEmployeeStockReport(int plant_ID, DateTime StartDate, DateTime EndDate)
+        public async Task<List<CMEmployeeStockReport>> GetEmployeeStockReport(int facility_id, int Emp_id, DateTime StartDate, DateTime EndDate, string itemID)
         {
-            int Emp_id = Utils.UtilsRepository.GetUserID();
+            //int Emp_id = Utils.UtilsRepository.GetUserID();
             List<string> Asset_Item_Ids = new List<string>();
             List<CMEmployeeStockReport> EmployeeStockReportList = new List<CMEmployeeStockReport>();
 
@@ -92,10 +93,10 @@ namespace CMMSAPIs.Repositories.SM
                 "FROM smtransition as sm_trans " +
                 "JOIN smassetitems as a_item ON sm_trans.assetItemID = a_item.ID " +
                 "JOIN smassetmasters as a_master ON a_master.asset_code = a_item.asset_code " +
-                "LEFT JOIN facilities fc ON fc.id = a_item.plant_ID " +
+                "LEFT JOIN facilities fc ON fc.id = a_item.facility_ID " +
                 "LEFT JOIN employees ed ON sm_trans.actorID = ed.ID " +
-                "WHERE sm_trans.actorID = " + Emp_id + " AND sm_trans.actorType = '" + (int)CMMS.SM_Types.Engineer + "' AND a_item.plant_ID = '" + plant_ID + "' " +
-                "AND DATE_FORMAT(sm_trans.lastModifiedDate, '%Y-%m-%d') < '" + StartDate.ToString("yyyy-MM-dd") + "' GROUP BY a_item.asset_code";
+                "WHERE sm_trans.assetItemID in ("+ itemID + ") and sm_trans.actorID = " + Emp_id + " AND sm_trans.actorType = '" + (int)CMMS.SM_Types.Engineer + "' AND a_item.facility_ID = '" + facility_id + "' " +
+                "AND DATE_FORMAT(sm_trans.lastModifiedDate, '%Y-%m-%d') between '" + StartDate.ToString("yyyy-MM-dd") + "' and '"+ EndDate.ToString("yyyy-MM-dd") + "' GROUP BY a_item.asset_code";
 
             List<CMEmployeeStockReport> Plant_Stock_Opening_Details_Reader = await Context.GetData<CMEmployeeStockReport>(Plant_Stock_Opening_Details_query).ConfigureAwait(false);
 
@@ -131,9 +132,9 @@ namespace CMMSAPIs.Repositories.SM
             return EmployeeStockReportList;
         }
     
-        public async Task<List<CMFaultyMaterialReport>> GetFaultyMaterialReport(int plant_ID, DateTime StartDate, DateTime EndDate)
+        public async Task<List<CMFaultyMaterialReport>> GetFaultyMaterialReport(string facility_id,string itemID, DateTime StartDate, DateTime EndDate)
         {
-            string query = $"SELECT fmItemList.* FROM (SELECT sm_td.*,fc.name as facilityName,fc.isBlock as Facility_Is_Block," +
+            string query = $"SELECT fmItemList.* FROM (SELECT sm_td.*,fc.id as facility_id, fc.name as facilityName,fc.isBlock as Facility_Is_Block," +
                 $"'' as Facility_Is_Block_of_name,CONCAT(ed.firstName,' ',ed.lastName) as emp_name, a_item.asset_code," +
                 $"a_item.item_condition, a_item.serial_number, IF(a_item1.serial_number != '',a_item1.serial_number,'--')  as replaceSerialNo," +
                 $" a_master.asset_name,\r\n a_master.asset_type_ID,a_master.item_category_ID , smt.actorID" +
@@ -145,18 +146,18 @@ namespace CMMSAPIs.Repositories.SM
                 $"LEFT JOIN employees ed ON ed.ID = sm_td.toActorID " +
                 $"where (date_format(sm_td.lastInsetedDateTime, '%Y-%m-%d') between '{StartDate.ToString("yyyy-MM-dd")}' and '{EndDate.ToString("yyyy-MM-dd")}') and " +
                 $"sm_td.fromActorType = '{(int)CMMS.SM_Types.Inventory}' and sm_td.toActorType = '{(int)CMMS.SM_Types.Engineer}' and smt.actorType = '{(int)CMMS.SM_Types.Engineer}' and (sm_td.referedby = '4' OR sm_td.referedby = '{(int)CMMS.CMMS_Modules.SM_PO}') and a_item.item_condition IN (2,3,4)" +
-                $" and sm_td.plantID = '{plant_ID}' AND sm_td.Nature_Of_Transaction = 1 ORDER BY sm_td.ID DESC) as fmItemList GROUP BY fmItemList.assetItemID ORDER BY fmItemList.ID DESC";
+                $" and sm_td.plantID in ('{facility_id}') and a_item.ID in ('{itemID}') AND sm_td.Nature_Of_Transaction = 1 ORDER BY sm_td.ID DESC) as fmItemList GROUP BY fmItemList.assetItemID ORDER BY fmItemList.ID DESC";
 
             List<CMFaultyMaterialReport> result = await Context.GetData<CMFaultyMaterialReport>(query).ConfigureAwait(false);
             return result;
         }
 
-        public async Task<List<CMEmployeeTransactionReport>> GetEmployeeTransactionReport(int isAllEmployees, int plant_ID, DateTime StartDate, DateTime EndDate)
+        public async Task<List<CMEmployeeTransactionReport>> GetEmployeeTransactionReport(int isAllEmployees, string facility_id,int Emp_ID, DateTime StartDate, DateTime EndDate)
         {
-            int Emp_id = 187;// Utils.UtilsRepository.GetUserID();
+            //int Emp_id = 187;// Utils.UtilsRepository.GetUserID();
             List<CMEmployeeTransactionReport> EmployeeTransactionReportList = new List<CMEmployeeTransactionReport>();
 
-            string EmpStockTransactionDetailsQuery = $"SELECT sm_td.*,fc.name as facilityName,fc.isBlock as Facility_Is_Block," +
+            string EmpStockTransactionDetailsQuery = $"SELECT sm_td.*, fc.id as facility_id ,fc.name as facilityName,fc.isBlock as Facility_Is_Block," +
                 $"'' as Facility_Is_Block_of_name, CONCAT(ed.firstName,' ',ed.lastName) as requested_by_name, a_item.asset_code, " +
                 $"a_item.item_condition, a_item.serial_number,a_master.asset_name, a_master.asset_type_ID ,i.available_qty, " +
                 $" i.return_remarks, smt.actorID,i.mrs_return_ID  " +
@@ -172,10 +173,10 @@ namespace CMMSAPIs.Repositories.SM
 
             if (isAllEmployees != 1)
             {
-                EmpStockTransactionDetailsQuery += "sm_td.fromActorID = '" + Emp_id + "' AND smt.actorID = '" + Emp_id + "' AND ";
+                EmpStockTransactionDetailsQuery += " sm_td.fromActorID = '" + Emp_ID + "' AND smt.actorID = '" + Emp_ID + "' AND ";
             }
 
-            EmpStockTransactionDetailsQuery += "sm_td.fromActorType = '" + (int)CMMS.SM_Types.Engineer + "' AND smt.actorType = '" + (int)CMMS.SM_Types.Engineer + "' AND mrs.flag = 2 AND mrs.approval_status = 1 AND i.mrs_ID = sm_td.reference_ID AND sm_td.plantID = '" + plant_ID+ "'";
+            EmpStockTransactionDetailsQuery += "sm_td.fromActorType = '" + (int)CMMS.SM_Types.Engineer + "' AND smt.actorType = '" + (int)CMMS.SM_Types.Engineer + "' AND mrs.flag = 2 AND mrs.approval_status = 1 AND i.mrs_ID = sm_td.reference_ID AND sm_td.plantID in ( '" + facility_id+ "')";
 
             List<CMEmployeeTransactionReport> Plant_Stock_Opening_Details_Reader = await Context.GetData<CMEmployeeTransactionReport>(EmpStockTransactionDetailsQuery).ConfigureAwait(false);
 
@@ -200,7 +201,7 @@ namespace CMMSAPIs.Repositories.SM
                 openingBalance.toActorType = item.toActorType;
                 openingBalance.assetItemID = item.assetItemID;
                 openingBalance.qty = item.qty;
-                openingBalance.plantID = item.plantID;
+                openingBalance.facility_id = item.facility_id;
                 openingBalance.referedby = item.referedby;
                 openingBalance.reference_ID = item.reference_ID;
                 openingBalance.remarks = item.remarks;
@@ -220,11 +221,11 @@ namespace CMMSAPIs.Repositories.SM
                 openingBalance.return_remarks = item.return_remarks;
                 openingBalance.actorID = item.actorID;
                 openingBalance.mrs_return_ID = item.mrs_return_ID;
-                if (item.toActorID == Emp_id || item.toActorType == Convert.ToString((int)CMMS.SM_Types.Engineer))
+                if (item.toActorID == Emp_ID || item.toActorType == Convert.ToString((int)CMMS.SM_Types.Engineer))
                 {
                     openingBalance.InwardQty = item.qty;
                 }
-                 else if (item.fromActorID == Emp_id || item.fromActorType == Convert.ToString((int)CMMS.SM_Types.Engineer))
+                 else if (item.fromActorID == Emp_ID || item.fromActorType == Convert.ToString((int)CMMS.SM_Types.Engineer))
                 {
                     openingBalance.OutwardQty = item.qty;
                 }

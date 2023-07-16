@@ -233,7 +233,7 @@ namespace CMMSAPIs.Repositories.SM
             }
             else
             {
-                string insertQuery = @"INSERT INTO smassetmasters (plant_ID,asset_code, asset_name, description, asset_type_ID, item_category_ID, unit_of_measurement, approval_required, flag) " +
+                string insertQuery = @"INSERT INTO smassetmasters (facility_ID,asset_code, asset_name, description, asset_type_ID, item_category_ID, unit_of_measurement, approval_required, flag) " +
                     "VALUES (0,'" +request.asset_code+"', '"+request.asset_name+"', '"+request.asset_description + "', "+request.asset_type_ID+", "+request.item_category_ID + ", "+request.unit_measurement_ID + ", "+ request.approval_required_ID + ", 1); SELECT LAST_INSERT_ID()";
 
                 DataTable dt2 = await Context.FetchData(insertQuery).ConfigureAwait(false);
@@ -371,16 +371,16 @@ namespace CMMSAPIs.Repositories.SM
         }
 
 
-        internal async Task<List<CMAssetTypes>> GetAssetDataList(int facility_id)
+        internal async Task<List<CMGETASSETDATALIST>> GetAssetDataList(int facility_id)
         {
             
             string myQuery = "SELECT distinct sat.ID as asset_ID,sm.asset_code,sic.cat_name as CategoryName,sat.serial_number,sm.asset_name," +
                 "st.asset_type,if(sm.approval_required=1,'Yes','NO') as approval_required \r\n        FROM smassetitems sat\r\n       " +
                 " LEFT JOIN smassetmasters sm ON sm.asset_code = sat.asset_code\r\n        LEFT JOIN smassettypes st ON st.ID = sm.asset_type_ID" +
                 " LEFT JOIN smitemcategory sic ON sic.ID = sm.item_category_ID\r\n        " +
-                "WHERE sat.plant_ID = "+facility_id+" AND sat.item_condition < 3 AND sat.status >= 1";
+                "WHERE sat.facility_ID = "+facility_id+" AND sat.item_condition < 3 AND sat.status >= 1";
             
-            List<CMAssetTypes> _checkList = await Context.GetData<CMAssetTypes>(myQuery).ConfigureAwait(false);
+            List<CMGETASSETDATALIST> _checkList = await Context.GetData<CMGETASSETDATALIST>(myQuery).ConfigureAwait(false);
             return _checkList;
         }
         internal async Task<List<CMVendorList>> GetVendorList()
