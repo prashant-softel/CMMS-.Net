@@ -1,4 +1,4 @@
-using CMMSAPIs.BS.SM;
+﻿using CMMSAPIs.BS.SM;
 using CMMSAPIs.Helper;
 using CMMSAPIs.Models.SM;
 using CMMSAPIs.Models.Users;
@@ -32,7 +32,8 @@ namespace CMMSAPIs.Controllers.SM
         }
 
         // First 
-         
+
+        [Authorize]
         [Route("CreateMRS")]
         [HttpPost]       
         public async Task<IActionResult> CreateMRS(CMMRS request)
@@ -51,7 +52,28 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
-         
+
+        [Authorize]
+        [Route("updateMRS")]
+        [HttpPost]
+        public async Task<IActionResult> updateMRS(CMMRS request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _MRSBS.updateMRS(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogInformation(ex.ToString());
+                _logger.LogError(ex.ToString());
+                throw ex;
+            }
+        }
+
+
+        [Authorize]
         [Route("getMRSList")]
         [HttpGet]
         public async Task<IActionResult> getMRSList(int facility_ID, int emp_id, string toDate, string fromDate, int status)
@@ -70,7 +92,8 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
-         
+
+        [Authorize]
         [Route("getMRSItems")]
         [HttpGet]
         public async Task<IActionResult> getMRSItems(int ID)
@@ -87,7 +110,8 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
-         
+
+        [Authorize]
         [Route("getMRSItemsBeforeIssue")]
         [HttpGet]
         public async Task<IActionResult> getMRSItemsBeforeIssue(int ID)
@@ -104,7 +128,8 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
-         
+
+        [Authorize]
         [Route("getMRSItemsWithCode")]
         [HttpGet]
         public async Task<IActionResult> getMRSItemsWithCode(int ID)
@@ -121,7 +146,8 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
-         
+
+        [Authorize]
         [Route("getMRSDetails")]
         [HttpGet]
         public async Task<IActionResult> getMRSDetails(int ID)
@@ -138,7 +164,8 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
-         
+
+        [Authorize]
         [Route("mrsApproval")]
         [HttpPost]
         public async Task<IActionResult> mrsApproval(CMApproval request)
@@ -157,7 +184,26 @@ namespace CMMSAPIs.Controllers.SM
         }
 
 
-         
+        [Authorize]
+        [Route("mrsReject")]
+        [HttpPost]
+        public async Task<IActionResult> mrsReject(CMApproval request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _MRSBS.mrsReject(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                _AddLog.ErrorLog(ex.ToString());
+                throw ex;
+            }
+        }
+
+
+        [Authorize]
         [Route("getReturnDataByID")]
         [HttpGet]
         public async Task<IActionResult> getReturnDataByID(int ID)
@@ -176,7 +222,8 @@ namespace CMMSAPIs.Controllers.SM
         }
 
 
-         
+
+        [Authorize]
         [Route("getAssetTypeByItemID")]
         [HttpGet]
         public async Task<IActionResult> getAssetTypeByItemID(int ItemID)
@@ -194,7 +241,8 @@ namespace CMMSAPIs.Controllers.SM
         }
 
 
-         
+
+        [Authorize]
         [Route("mrsReturn")]
         [HttpPost] 
         public async Task<IActionResult> mrsReturn(CMMRS request)
@@ -213,7 +261,8 @@ namespace CMMSAPIs.Controllers.SM
         }
 
 
-         
+
+        [Authorize]
         [Route("mrsReturnApproval")]
         [HttpPost]
         public async Task<IActionResult> mrsReturnApproval(CMMRS request)
@@ -232,7 +281,8 @@ namespace CMMSAPIs.Controllers.SM
         }
 
 
-         
+
+        [Authorize]
         [Route("getLastTemplateData")]
         [HttpGet]
         public async Task<IActionResult> getLastTemplateData(int ID)
@@ -249,7 +299,8 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
-         
+
+        [Authorize]
         [Route("GetAssetItems")]
         [HttpGet]
         public async Task<IActionResult> GetAssetItems(int facility_ID, bool isGroupByCode = false)

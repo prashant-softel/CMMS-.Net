@@ -25,6 +25,7 @@ namespace CMMSAPIs.Controllers
             _GOBS = GO;
         }
 
+
         [Authorize]
         [Route("GetGOList")]
         [HttpGet]
@@ -42,6 +43,7 @@ namespace CMMSAPIs.Controllers
         }
 
 
+
         [Authorize]
         [Route("GetGOItemByID")]
         [HttpGet]
@@ -57,6 +59,7 @@ namespace CMMSAPIs.Controllers
                 throw;
             }
         }
+
 
 
         [Authorize]
@@ -77,6 +80,7 @@ namespace CMMSAPIs.Controllers
         }
 
 
+
         [Authorize]
         [Route("CreateGO")]
         [HttpPost]
@@ -93,6 +97,7 @@ namespace CMMSAPIs.Controllers
                 throw;
             }
         }
+
 
 
         [Authorize]
@@ -113,15 +118,16 @@ namespace CMMSAPIs.Controllers
         }
 
 
+
         [Authorize]
         [Route("DeleteGO")]
         [HttpPost]
-        public async Task<IActionResult> DeleteGO( int id)
+        public async Task<IActionResult> DeleteGO(CMApproval request)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _GOBS.DeleteGO(id, userID);
+                var data = await _GOBS.DeleteGO(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -129,17 +135,18 @@ namespace CMMSAPIs.Controllers
                 throw;
             }
         }
+
 
 
         [Authorize]
-        [Route("WithdrawGO")]
+        [Route("CloseGO")]
         [HttpPost]
-        public async Task<IActionResult> WithdrawGO(CMGoodsOrderList request)
+        public async Task<IActionResult> CloseGO(CMGoodsOrderList request)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _GOBS.WithdrawGO(request, userID);
+                var data = await _GOBS.CloseGO(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -147,12 +154,13 @@ namespace CMMSAPIs.Controllers
                 throw;
             }
         }
+
 
 
         [Authorize]
         [Route("GOApproval")]
         [HttpPost]
-        public async Task<IActionResult> GOApproval( CMApproval request )
+        public async Task<IActionResult> GOApproval(  CMApproval request )
         {
             try
             {
@@ -167,10 +175,11 @@ namespace CMMSAPIs.Controllers
         }
 
 
+
         [Authorize]
         [Route("RejectGO")]
         [HttpPost]
-        public async Task<IActionResult> RejectGO( CMApproval request)
+        public async Task<IActionResult> RejectGO(  CMApproval request)
         {
             try
             {
@@ -183,6 +192,7 @@ namespace CMMSAPIs.Controllers
                 throw;
             }
         }
+
 
 
         [Authorize]
@@ -202,6 +212,7 @@ namespace CMMSAPIs.Controllers
         }
 
 
+
         [Authorize]
         [Route("GetGODetailsByID")]
         [HttpGet]
@@ -217,6 +228,7 @@ namespace CMMSAPIs.Controllers
                 throw;
             }
         }
+
 
 
         [Authorize]
