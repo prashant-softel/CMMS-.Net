@@ -105,7 +105,8 @@ namespace CMMSAPIs
             services.AddScoped<IGOBS, GOBS>();
             services.AddScoped<IReOrderBS, ReOrderBS>();
             services.AddScoped<ICleaningBS, CleaningBS>();
-
+        services.AddScoped<ISMReportsBS, ReportsBS>();
+            services.AddScoped<IRequestOrderBS, RequestOrderBS>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
