@@ -31,7 +31,7 @@ namespace CMMSAPIs.Repositories.Facility
         {
             if (parent_id <= 0)
                 throw new ArgumentException("Invalid Parent ID");
-            string myQuery = $"SELECT facilities.id, facilities.name, spv.name as spv, facilities.address, facilities.city, facilities.state, facilities.country, facilities.zipcode as pin FROM Facilities JOIN spv ON facilities.spvId=spv.id WHERE isBlock = 1 and parentId = {parent_id} and facilities.status = 1;";
+            string myQuery = $"SELECT facilities.id, facilities.name, spv.name as spv, facilities.address, facilities.city, facilities.state, facilities.country, facilities.zipcode as pin FROM Facilities LEFT JOIN spv ON facilities.spvId=spv.id WHERE isBlock = 1 and parentId = {parent_id} and facilities.status = 1;";
             List<CMFacilityList> _Block = await Context.GetData<CMFacilityList>(myQuery).ConfigureAwait(false);
             return _Block;
         }
