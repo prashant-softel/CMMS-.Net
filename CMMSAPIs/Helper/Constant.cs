@@ -427,6 +427,7 @@ namespace CMMSAPIs.Helper
          
             SM_RO_SUBMITTED = 341,  
             SM_RO_CLOSED,
+	     SM_RO_DELETED,
             SM_RO_CLOSED_REJECTED,
             SM_RO_CLOSED_APPROVED,
 
