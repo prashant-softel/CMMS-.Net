@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System;
 
 namespace CMMSAPIs.Models.SM
@@ -24,10 +24,10 @@ namespace CMMSAPIs.Models.SM
         public string vendor_name { get; set; }
         public int generate_flag { get; set; }
         public int location_ID { get; set; }
-        public DateTime? received_on { get; set; }
+        public DateTime? receivedAt { get; set; }
         public string receivedBy { get; set; }
         public string approvedBy { get; set; }
-        public DateTime? approvedOn { get; set; }
+        public DateTime? approvedAt { get; set; }
 
         public int receive_later { get; set; }
         public int added_to_store { get; set; }
@@ -128,7 +128,8 @@ namespace CMMSAPIs.Models.SM
         public string generatedBy { get; set; }
         public string receivedBy { get; set; }
         public string approvedBy { get; set; }
-        public DateTime? approvedOn { get; set; }
+        public DateTime? approvedAt { get; set; }
+        public DateTime? receivedAt { get; set; }
 
     }
 
