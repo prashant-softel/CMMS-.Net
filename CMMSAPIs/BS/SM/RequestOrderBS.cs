@@ -1,4 +1,4 @@
-using CMMSAPIs.Helper;
+﻿using CMMSAPIs.Helper;
 using CMMSAPIs.Models;
 using CMMSAPIs.Repositories;
 using System.Collections.Generic;
@@ -16,12 +16,12 @@ namespace CMMSAPIs.BS.SM
         Task<List<CMRequestOrder>> GetRequestOrderList(int facilityID, DateTime fromDate, DateTime toDate);
         Task<CMRequestOrder> GetRODetailsByID(int id);
         Task<CMDefaultResponse> CreateRequestOrder(CMRequestOrder request, int userID);
-        Task<CMDefaultResponse> UpdateRO(CMRequestOrder request, int userID);
+        Task<CMDefaultResponse> UpdateRequestOrder(CMRequestOrder request, int userID);
         Task<CMDefaultResponse> DeleteRequestOrder(CMApproval request, int userID);
         Task<CMDefaultResponse> ApproveRequestOrder(CMApproval request, int userID);
-        Task<CMDefaultResponse> RejectGoodsOrder(CMApproval request, int userID);
+        Task<CMDefaultResponse> RejectRequestOrder(CMApproval request, int userID);
     }
-        public class RequestOrderBS : IRequestOrderBS
+    public class RequestOrderBS : IRequestOrderBS
     {
         private readonly DatabaseProvider databaseProvider;
         private MYSQLDBHelper getDB => databaseProvider.SqlInstance();
@@ -74,13 +74,13 @@ namespace CMMSAPIs.BS.SM
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> UpdateRO(CMRequestOrder request, int userID)
+        public async Task<CMDefaultResponse> UpdateRequestOrder(CMRequestOrder request, int userID)
         {
             try
             {
                 using (var repos = new RequestOrderRepository(getDB))
                 {
-                    return await repos.UpdateRO(request, userID);
+                    return await repos.UpdateRequestOrder(request, userID);
 
                 }
             }
@@ -121,13 +121,13 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<CMDefaultResponse> RejectGoodsOrder(CMApproval request, int userID)
+        public async Task<CMDefaultResponse> RejectRequestOrder(CMApproval request, int userID)
         {
             try
             {
                 using (var repos = new RequestOrderRepository(getDB))
                 {
-                    return await repos.RejectGoodsOrder(request, userID);
+                    return await repos.RejectRequestOrder(request, userID);
 
                 }
             }
