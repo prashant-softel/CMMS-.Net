@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using System;
 using CMMSAPIs.BS;
@@ -73,14 +73,14 @@ namespace CMMSAPIs.Controllers.SM
         }
 
         [Authorize]
-        [Route("UpdateRO")]
+        [Route("UpdateRequestOrder")]
         [HttpPost]
-        public async Task<IActionResult> UpdateRO(CMRequestOrder request)
+        public async Task<IActionResult> UpdateRequestOrder(CMRequestOrder request)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _IRequestOrderBS.UpdateRO(request, userID);
+                var data = await _IRequestOrderBS.UpdateRequestOrder(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -124,14 +124,14 @@ namespace CMMSAPIs.Controllers.SM
         }
 
         [Authorize]
-        [Route("RejectGoodsOrder")]
+        [Route("RejectRequestOrder")]
         [HttpPost]
         public async Task<IActionResult> RejectGoodsOrder(CMApproval request)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _IRequestOrderBS.RejectGoodsOrder(request, userID);
+                var data = await _IRequestOrderBS.RejectRequestOrder(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
