@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
@@ -58,7 +58,8 @@ namespace CMMSAPIs.Repositories.SM
                         int id = Convert.ToInt32(dtInsertPO.Rows[0][0]);
                     }
                 }
-            }catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, ex.Message);
             }
@@ -67,12 +68,12 @@ namespace CMMSAPIs.Repositories.SM
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_PO, ReturnID, 0, 0, "Request order created", CMMS.CMMS_Status.SM_RO_SUBMITTED);
             return response;
         }
-        internal async Task<CMDefaultResponse> UpdateRO(CMRequestOrder request, int userID)
+        internal async Task<CMDefaultResponse> UpdateRequestOrder(CMRequestOrder request, int userID)
         {
             //string mainQuery = $"UPDATE smpurchaseorderdetails SET generate_flag = " +request.generate_flag + ",status = "+request.status+", vendorID = "+request.vendorID+" WHERE ID = "+request.id+"";
 
             string updateRO = $" UPDATE smrequestorder SET vendorID = {request.vendorID},request_date = '{request.request_date.Value.ToString("yyyy-MM-dd")}', challan_no = '{request.challan_no}'," +
-                $"challan_date = '{request.challan_date.Value.ToString("yyyy-MM-dd")}', freight='{request.freight}', received_on='{request.received_on.Value.ToString("yyyy-MM-dd")}', no_pkg_received='{request.no_pkg_received}'," +
+                $"challan_date = '{request.challan_date.Value.ToString("yyyy-MM-dd")}', freight='{request.freight}', received_on='{DateTime.Now.ToString("yyyy-MM-dd")}', no_pkg_received='{request.no_pkg_received}'," +
                 $" lr_no='{request.lr_no}', condition_pkg_received='{request.condition_pkg_received}', vehicle_no = '{request.vehicle_no}', gir_no = '{request.gir_no}', " +
                 $"job_ref = '{request.job_ref}', amount = '{request.amount}', currency= {request.currencyID} where id = {request.id}";
             var ResultROQuery = await Context.ExecuteNonQry<int>(updateRO);
@@ -98,12 +99,12 @@ namespace CMMSAPIs.Repositories.SM
         internal async Task<List<CMRequestOrder>> GetRequestOrderList(int facilityID, DateTime fromDate, DateTime toDate)
         {
 
-            string filter = " facilityID = "+ facilityID + " and (DATE(po.request_date) >= '" + fromDate.ToString("yyyy-MM-dd") + "'  and DATE(po.request_date) <= '" + toDate.ToString("yyyy-MM-dd") + "')";
+            string filter = " facilityID = " + facilityID + " and (DATE(po.request_date) >= '" + fromDate.ToString("yyyy-MM-dd") + "'  and DATE(po.request_date) <= '" + toDate.ToString("yyyy-MM-dd") + "')";
 
             string stmt = "SELECT fc.name as facilityName,  pod.ID as requestID,pod.spare_status,pod.remarks,sai.orderflag,sam.asset_name,sam.asset_type_ID,pod.requestID," +
                 "pod.assetItemID,sai.serial_number,sai.location_ID,pod.cost ,pod.ordered_qty,po.remarks as rejectedRemark,po.facilityID,po.request_date," +
                 "sam.asset_type_ID,\r\n\t\t        po.vendorID,po.status,sai.asset_code,t1.asset_type,t2.cat_name,pod.received_qty,pod.damaged_qty," +
-                "pod.accepted_qty,po.received_on,po.approvedOn,\r\n\t\t\t\tCONCAT(ed.firstName,' ',ed.lastName) as generatedBy," +
+                "pod.accepted_qty,po.received_on as receivedAt,po.approvedOn as approvedAt,\r\n\t\t\t\tCONCAT(ed.firstName,' ',ed.lastName) as generatedBy," +
                 "CONCAT(ed1.firstName,' ',ed1.lastName) as receivedBy,CONCAT(ed2.firstName,' ',ed2.lastName) as approvedBy," +
                 "\r\n\t\t\t\tbl.name as vendor_name\r\n\t\t        FROM smrequestorderdetails pod\r\n\t\t       " +
                 " LEFT JOIN smrequestorder po ON po.ID = pod.requestID\r\n\t\t        LEFT JOIN smassetitems sai ON sai.ID = pod.assetItemID" +
@@ -118,7 +119,7 @@ namespace CMMSAPIs.Repositories.SM
                 " ";
             List<CMRequestOrder> _List = await Context.GetData<CMRequestOrder>(stmt).ConfigureAwait(false);
 
-            
+
             for (var i = 0; i < _List.Count; i++)
             {
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_List[i].status);
@@ -134,14 +135,14 @@ namespace CMMSAPIs.Repositories.SM
 
         internal async Task<CMDefaultResponse> ApproveRequestOrder(CMApproval request, int userId)
         {
- 
+
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
 
             if (request.id <= 0)
             {
                 throw new ArgumentException("Invalid argument id<" + request.id + ">");
             }
-         
+
             string UpdatesqlQ = $" UPDATE smrequestorder SET approved_by = {userId}, status = {(int)CMMS.CMMS_Status.SM_RO_CLOSED_APPROVED}, remarks = '{request.comment}',approvedOn = '{DateTime.Now.ToString("yyyy-MM-dd")}' WHERE ID = {request.id}";
             int reject_id = await Context.ExecuteNonQry<int>(UpdatesqlQ).ConfigureAwait(false);
 
@@ -151,7 +152,7 @@ namespace CMMSAPIs.Repositories.SM
             return response;
         }
 
-        internal async Task<CMDefaultResponse> RejectGoodsOrder(CMApproval request, int userId)
+        internal async Task<CMDefaultResponse> RejectRequestOrder(CMApproval request, int userId)
         {
 
             if (request.id <= 0)
@@ -187,7 +188,7 @@ namespace CMMSAPIs.Repositories.SM
                 "f1.Asset_master_id,sm.decimal_status,sm.spare_multi_selection,po.generated_by,pod.order_type as asset_type_ID_OrderDetails," +
                 " receive_later, added_to_store,reject_reccomendations as  rejectedRemark, \r\n        po.challan_no, po.freight, po.transport, po.no_pkg_received, po.lr_no," +
                 " po.condition_pkg_received, po.vehicle_no, po.gir_no, po.challan_date, po.job_ref, po.amount,  po.currency as currencyID" +
-                " , curr.name as currency , stt.asset_type as asset_type_Name, \r\n    CONCAT(ed.firstName,' ',ed.lastName) as generatedBy,approvedOn,CONCAT(ed1.firstName,' ',ed1.lastName) as receivedBy," +
+                " , curr.name as currency , stt.asset_type as asset_type_Name, \r\n    CONCAT(ed.firstName,' ',ed.lastName) as generatedBy,po.received_on as receivedAt,approvedOn as approvedAt,CONCAT(ed1.firstName,' ',ed1.lastName) as receivedBy," +
                 "CONCAT(ed2.firstName,' ',ed2.lastName) as approvedBy    FROM smrequestorderdetails pod\r\n      " +
                 "  LEFT JOIN smrequestorder po ON po.ID = pod.requestID\r\n       " +
                 " LEFT JOIN smassetitems sai ON sai.ID = pod.assetItemID\r\n     " +
@@ -204,7 +205,7 @@ namespace CMMSAPIs.Repositories.SM
                 " LEFT JOIN facilities fc ON fc.id = po.facilityID\r\nLEFT JOIN users as vendor on vendor.id=po.vendorID       \r\n " +
                 "LEFT JOIN business bl ON bl.id = po.vendorID left join smassettypes stt on stt.ID = pod.order_type\r\n " +
                 "LEFT JOIN currency curr ON curr.id = po.currency  LEFT JOIN employees ed2 ON ed2.ID = po.approved_by\r\n LEFT JOIN employees ed ON ed.ID = po.generated_by\r\n  LEFT JOIN employees ed1 ON ed1.ID = po.receiverID " +
-                "WHERE po.ID = "+id+" ;";
+                "WHERE po.ID = " + id + " ;";
             List<CMRequestOrderList> _List = await Context.GetData<CMRequestOrderList>(query).ConfigureAwait(false);
 
             CMRequestOrder _MasterList = _List.Select(p => new CMRequestOrder
@@ -215,7 +216,7 @@ namespace CMMSAPIs.Repositories.SM
                 assetItemID = p.assetItemID,
                 vendorID = p.vendorID,
                 vendor_name = p.vendor_name,
-                status = p.status,           
+                status = p.status,
                 currencyID = p.currencyID,
                 currency = p.currency,
                 amount = p.amount,
@@ -224,18 +225,18 @@ namespace CMMSAPIs.Repositories.SM
                 vehicle_no = p.vehicle_no,
                 condition_pkg_received = p.condition_pkg_received,
                 lr_no = p.lr_no,
-                no_pkg_received = p.no_pkg_received,         
-                freight = p.freight,               
+                no_pkg_received = p.no_pkg_received,
+                freight = p.freight,
                 challan_date = p.challan_date,
                 challan_no = p.challan_no,
                 request_date = p.request_date,
                 location_ID = p.location_ID,
                 remarks = p.remarks,
                 rejectedRemark = p.rejectedRemark,
-                approvedOn=p.approvedOn,
+                approvedAt = p.approvedAt,
                 generatedBy = p.generatedBy,
                 receivedBy = p.receivedBy,
-               
+                receivedAt = p.receivedAt
             }).FirstOrDefault();
             List<CMRequestOrder_ITEMS> _itemList = _List.Select(p => new CMRequestOrder_ITEMS
             {
@@ -243,7 +244,7 @@ namespace CMMSAPIs.Repositories.SM
                 requestID = p.requestID,
                 cost = p.cost,
                 asset_name = p.asset_name,
-                assetItemID = p.assetItemID,             
+                assetItemID = p.assetItemID,
                 ordered_qty = p.ordered_qty,
             }).ToList();
             _MasterList.go_items = _itemList;

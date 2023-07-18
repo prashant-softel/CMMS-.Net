@@ -120,7 +120,7 @@ namespace CMMSAPIs.Repositories
             string stmt = "SELECT pod.ID ,pod.spare_status,pod.remarks,sai.orderflag,sam.asset_name,sam.asset_type_ID,pod.purchaseID," +
                 "pod.assetItemID,sai.serial_number,sai.location_ID,pod.cost ,pod.ordered_qty,po.remarks as rejectedRemark,po.facilityID as facility_id,po.purchaseDate,fac.name as facility_name, " +
                 "sam.asset_type_ID,\r\n\t\t        po.vendorID,po.status,sai.asset_code,t1.asset_type,t2.cat_name,pod.received_qty,pod.damaged_qty," +
-                "pod.accepted_qty,po.received_on,po.approvedOn,\r\n\t\t\t\tCONCAT(ed.firstName,' ',ed.lastName) as generatedBy," +
+                "pod.accepted_qty,po.received_on as receivedAt,po.approvedOn as approvedAt,\r\n\t\t\t\tCONCAT(ed.firstName,' ',ed.lastName) as generatedBy," +
                 "CONCAT(ed1.firstName,' ',ed1.lastName) as receivedBy,CONCAT(ed2.firstName,' ',ed2.lastName) as approvedBy," +
                 "\r\n\t\t\t\tbl.name as vendor_name\r\n\t\t        FROM smpurchaseorderdetails pod\r\n\t\t       " +
                 " LEFT JOIN smpurchaseorder po ON po.ID = pod.purchaseID\r\n\t\t        LEFT JOIN smassetitems sai ON sai.ID = pod.assetItemID" +
@@ -221,8 +221,8 @@ namespace CMMSAPIs.Repositories
 
             for (var i = 0; i < request.go_items.Count; i++)
             {
-                string itemsQuery = $"UPDATE smpurchaseorderdetails SET location_ID = {request.location_ID},assetItemID = {request.go_items[i].assetItemID},cost = {request.go_items[i].cost},ordered_qty = {request.go_items[i].ordered_qty}" +
-                    $" WHERE ID = {request.go_items[i].poID}";
+                string itemsQuery = $"UPDATE smpurchaseorderdetails SET location_ID = {request.location_ID},assetItemID = {request.go_items[i].assetItemID},cost = {request.go_items[i].cost}, accepted_qty = {request.go_items[i].ordered_qty + request.go_items[i].received_qty},ordered_qty = {request.go_items[i].ordered_qty} , requested_qty = {request.go_items[i].requested_qty}, received_qty= {request.go_items[i].received_qty},lost_qty = {request.go_items[i].lost_qty}, damaged_qty={request.go_items[i].damaged_qty}" +
+                    $" WHERE ID = {request.go_items[i].goItemID}";
                 var result = await Context.ExecuteNonQry<int>(itemsQuery);
             }
 
@@ -802,7 +802,7 @@ namespace CMMSAPIs.Repositories
                 "f1.file_path,f1.Asset_master_id,sm.decimal_status,sm.spare_multi_selection,po.generated_by,pod.order_type as asset_type_ID_OrderDetails, receive_later, " +
                 "added_to_store,   \r\n      " +
                 "  po.challan_no, po.po_no, po.freight, po.transport, po.no_pkg_received, po.lr_no, po.condition_pkg_received, " +
-                "po.vehicle_no, po.gir_no, po.challan_date, po.job_ref, po.amount,  po.currency as currencyID , curr.name as currency , stt.asset_type as asset_type_Name,  po_no, po_date\r\n      " +
+                "po.vehicle_no, po.gir_no, po.challan_date, po.job_ref, po.amount,  po.currency as currencyID , curr.name as currency , stt.asset_type as asset_type_Name,  po_no, po_date, requested_qty,lost_qty, ordered_qty\r\n      " +
                 "  FROM smpurchaseorderdetails pod\r\n        LEFT JOIN smpurchaseorder po ON po.ID = pod.purchaseID\r\n     " +
                 "   LEFT JOIN smassetitems sai ON sai.ID = pod.assetItemID\r\n       " +
                 " LEFT JOIN smassetmasters sam ON sam.asset_code = sai.asset_code\r\n      " +
@@ -838,14 +838,15 @@ namespace CMMSAPIs.Repositories
                 condition_pkg_received = p.condition_pkg_received,
                 lr_no = p.lr_no,
                 no_pkg_received = p.no_pkg_received,
-                received_on = p.received_on,
+                receivedAt = p.receivedAt,
                 freight = p.freight,
                 po_date = p.po_date,
                 po_no = p.po_no,
                 challan_date = p.challan_date,
                 challan_no = p.challan_no,
                 purchaseDate = p.purchaseDate,
-                location_ID = p.location_ID
+                location_ID = p.location_ID,
+                
             }).FirstOrDefault();
             List<CMGODetails> _itemList = _List.Select(p => new CMGODetails
             {
@@ -854,12 +855,15 @@ namespace CMMSAPIs.Repositories
                 assetItem_Name = p.asset_name,
                 assetItemID = p.assetItemID,
                 location_ID = p.location_ID,
-                accepted_qty = p.ordered_qty,
+                accepted_qty = p.accepted_qty,
                 spare_status = p.spare_status,
                 remarks = p.remarks,
                 receive_later = p.receive_later,
-
-
+                requested_qty = p.requested_qty,
+                received_qty = p.received_qty,
+                lost_qty = p.lost_qty,
+                damaged_qty = p.damaged_qty,
+                ordered_qty = p.ordered_qty,
             }).ToList();
             _MasterList.GODetails = _itemList;
 
