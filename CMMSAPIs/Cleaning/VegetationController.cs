@@ -17,12 +17,13 @@ namespace CMMSAPIs.Controllers.Vegetation
     [ApiController]
     public class VegetationController : Controller
     {
-        private  ICleaningBS _CleaningBS;
+        private  CleaningBS _CleaningBS;
 
-        public VegetationController(ICleaningBS Cleaning)
-        {
+        public VegetationController(CleaningBS Cleaning)
+        {         
             _CleaningBS = Cleaning;
-           // _CleaningBS.cleaningModuleType = cleaningType.Vegetation; ;
+            _CleaningBS.setModuleType(cleaningType.Vegetation);
+
         }
 
         [Route("GetVegetationPlanList")]

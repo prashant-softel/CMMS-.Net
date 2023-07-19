@@ -8,12 +8,12 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Threading.Tasks;
+using static CMMSAPIs.Helper.CMMS;
 
 namespace CMMSAPIs.BS.Cleaning
 {
     public interface ICleaningBS
     {
-        public CMMS.cleaningType cleaningModuleType { get; set; }
         public Task<List<CMMCPlan>> GetPlanList(int facilityId);
         public Task<CMDefaultResponse> CreatePlan(List<CMMCPlan> request, int userId);
         public Task<CMMCPlan> GetPlanDetails(int planId);
@@ -35,16 +35,27 @@ namespace CMMSAPIs.BS.Cleaning
         private readonly DatabaseProvider databaseProvider;
         private MYSQLDBHelper getDB => databaseProvider.SqlInstance();
 
-
         private CleaningRepository repos;
 
         public CleaningBS(DatabaseProvider dbProvider)
         {
-            databaseProvider = dbProvider;
-            repos = new CleaningRepository(getDB);
+            databaseProvider = dbProvider;           
+
         }
-        public CMMS.cleaningType cleaningModuleType { get { return cleaningModuleType;}
-                                                     set { cleaningModuleType = value; } }
+
+        public int setModuleType(CMMS.cleaningType module) {
+
+            if (CMMS.cleaningType.ModuleCleaning == module)
+            {
+                repos = new MCRepository(getDB);
+            }
+            if (CMMS.cleaningType.Vegetation == module)
+            {
+                repos = new VegetationRepository(getDB);
+
+            }
+            return 1;
+        }
         public async Task<List<CMMCPlan>> GetPlanList(int facilityId)
         {
             try
