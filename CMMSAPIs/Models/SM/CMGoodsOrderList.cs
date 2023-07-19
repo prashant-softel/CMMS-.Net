@@ -26,10 +26,10 @@ namespace CMMSAPIs.Models
         public string vendor_name { get; set; }
         public int generate_flag { get; set; }
         public int location_ID { get; set; }
-        public DateTime received_on { get; set; }
+        public DateTime receivedAt { get; set; }
         public string receivedBy { get; set; }
         public string approvedBy { get; set; }
-        public DateTime approvedOn { get; set; }
+        public DateTime approvedAt { get; set; }
 
         public int receive_later { get; set; }
         public int added_to_store { get; set; }
@@ -57,15 +57,19 @@ namespace CMMSAPIs.Models
         public decimal cost { get; set; }
         public int podID { get; set; }
         public string asset_type_Name { get; set; }
-        public string asset_name { get; set; }
+        public string asset_name { get; set; }  
         public string facilityName { get; set; }
-
+        public decimal received_qty { get; set; }
+        public decimal lost_qty { get; set; }
+        public decimal requested_qty { get; set; }
+        public decimal damaged_qty { get; set; }
 
         public List<CMGO_ITEMS> go_items { get; set; }
     }
     public class CMGO_ITEMS
     {
         public int poID { get; set; }
+        public int goItemID { get; set; }
         public int assetItemID { get; set; }
         public double cost { get; set; }
         public double ordered_qty { get; set; }
@@ -78,6 +82,9 @@ namespace CMMSAPIs.Models
         public double received_qty { get; set; }
         public double damaged_qty { get; set; }
         public double accepted_qty { get; set; }
+        public double lost_qty { get; set; }
+        public double requested_qty { get; set; }
+
 
 
 
@@ -200,7 +207,7 @@ namespace CMMSAPIs.Models
         public string condition_pkg_received { get; set; }
         public string lr_no { get; set; }
         public string no_pkg_received { get; set; }
-        public DateTime? received_on { get; set; }
+        public DateTime? receivedAt { get; set; }
         public string freight { get; set; }
         public DateTime? po_date { get; set; }
         public string po_no { get; set; }
@@ -222,11 +229,11 @@ namespace CMMSAPIs.Models
         public string assetItem_Name { get; set; }
         public int location_ID { get; set; }
         public decimal cost { get; set; }
-        //public decimal ordered_qty { get; set; }
-        //public decimal received_qty { get; set; }
-        //public decimal lost_qty { get; set; }
-        //public decimal requested_qty { get; set; }
-        //public decimal damaged_qty { get; set; }
+        public decimal ordered_qty { get; set; }
+        public decimal received_qty { get; set; }
+        public decimal lost_qty { get; set; }
+        public decimal requested_qty { get; set; }
+        public decimal damaged_qty { get; set; }
         public decimal accepted_qty { get; set; }
         //public decimal manager_approve_qty { get; set; }
         //public DateTime lastModifiedDate { get; set; }
@@ -234,7 +241,7 @@ namespace CMMSAPIs.Models
         public string remarks { get; set; }
         //public int order_type { get; set; }
         public int receive_later { get; set; }
-        
+
 
     }
 
@@ -265,8 +272,8 @@ namespace CMMSAPIs.Models
         public decimal received_qty { get; set; }
         public decimal damaged_qty { get; set; }
         public decimal accepted_qty { get; set; }
-        public DateTime? received_on { get; set; }
-        public DateTime? approvedOn { get; set; }
+        public DateTime? receivedAt { get; set; }
+        public DateTime? approvedAt { get; set; }
         public string generatedBy { get; set; }
         public string receivedBy { get; set; }
         public string approvedBy { get; set; }

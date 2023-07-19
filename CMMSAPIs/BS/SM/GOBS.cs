@@ -20,7 +20,7 @@ namespace CMMSAPIs.BS
         Task<CMDefaultResponse> UpdateGO(CMGoodsOrderList request, int userID);
         Task<CMDefaultResponse> DeleteGO(CMApproval request, int userID);
         Task<CMDefaultResponse> CloseGO(CMGoodsOrderList request, int userID);
-        Task<CMDefaultResponse> GOApproval(CMApproval request, int userId);
+        Task<CMDefaultResponse> ApproveGO(CMApproval request, int userId);
         Task<CMDefaultResponse> RejectGO(CMApproval request, int userId);
         Task<List<CMPURCHASEDATA>> GetPurchaseData(int plantID, string empRole, DateTime fromDate, DateTime toDate, string status, string order_type);
         Task<CMGOMaster> GetGODetailsByID(int id);
@@ -51,7 +51,7 @@ namespace CMMSAPIs.BS
                 throw;
             }
         }
-        
+
         public async Task<CMGoodsOrderList> GetGOItemByID(int id)
         {
             try
@@ -145,7 +145,7 @@ namespace CMMSAPIs.BS
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> GOApproval(CMApproval request, int userId)
+        public async Task<CMDefaultResponse> ApproveGO(CMApproval request, int userId)
         {
             try
             {

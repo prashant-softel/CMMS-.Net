@@ -355,7 +355,7 @@ namespace CMMSAPIs.Repositories.SM
             return _List;
         }
 
-        internal async Task<List<CMMRSList>> getMRSDetails(int ID)
+        internal async Task<CMMRSList> getMRSDetails(int ID)
         {
             //string stmt = $"SELECT * FROM smmrs WHERE ID = {ID}";
             //List<CMMRS> _List = await Context.GetData<CMMRS>(stmt).ConfigureAwait(false);
@@ -382,7 +382,7 @@ namespace CMMSAPIs.Repositories.SM
                 _List[i].CMMRSItems = await getMRSItems(_List[i].ID);
             }
 
-            return _List;
+            return _List[0];
         }
         internal async Task<CMRETURNMRSDATA> getReturnDataByID(int ID)
         {

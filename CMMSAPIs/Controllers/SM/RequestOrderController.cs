@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using static System.Reflection.Metadata.BlobBuilder;
 using CMMSAPIs.Models.Utils;
 using Microsoft.AspNetCore.Authorization;
+using CMMSAPIs.BS.Facility;
 
 namespace CMMSAPIs.Controllers.SM
 {
@@ -24,11 +25,11 @@ namespace CMMSAPIs.Controllers.SM
         [Authorize]
         [Route("GetRequestOrderList")]
         [HttpGet]
-        public async Task<IActionResult> GetRequestOrderList(int plantID, DateTime fromDate, DateTime toDate)
+        public async Task<IActionResult> GetRequestOrderList(int facilityID, DateTime fromDate, DateTime toDate)
         {
             try
             {
-                var data = await _IRequestOrderBS.GetRequestOrderList(plantID, fromDate, toDate);
+                var data = await _IRequestOrderBS.GetRequestOrderList(facilityID, fromDate, toDate);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -36,6 +37,23 @@ namespace CMMSAPIs.Controllers.SM
                 throw;
             }
         }
+
+        [Authorize]
+        [Route("GetRODetailsByID")]
+        [HttpGet]
+        public async Task<IActionResult> GetRODetailsByID(int requestID)
+        {
+            try
+            {
+                var data = await _IRequestOrderBS.GetRODetailsByID(requestID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
 
         [Authorize]
         [Route("CreateRequestOrder")]
@@ -55,14 +73,14 @@ namespace CMMSAPIs.Controllers.SM
         }
 
         [Authorize]
-        [Route("UpdateRO")]
+        [Route("UpdateRequestOrder")]
         [HttpPost]
-        public async Task<IActionResult> UpdateRO(CMRequestOrder request)
+        public async Task<IActionResult> UpdateRequestOrder(CMRequestOrder request)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _IRequestOrderBS.UpdateRO(request, userID);
+                var data = await _IRequestOrderBS.UpdateRequestOrder(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -74,12 +92,12 @@ namespace CMMSAPIs.Controllers.SM
         [Authorize]
         [Route("DeleteRequestOrder")]
         [HttpPost]
-        public async Task<IActionResult> DeleteRequestOrder([FromForm] int RO_ID)
+        public async Task<IActionResult> DeleteRequestOrder(CMApproval request)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _IRequestOrderBS.DeleteRequestOrder(RO_ID, userID);
+                var data = await _IRequestOrderBS.DeleteRequestOrder(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -95,7 +113,8 @@ namespace CMMSAPIs.Controllers.SM
         {
             try
             {
-                var data = await _IRequestOrderBS.ApproveRequestOrder(request);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IRequestOrderBS.ApproveRequestOrder(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -105,13 +124,14 @@ namespace CMMSAPIs.Controllers.SM
         }
 
         [Authorize]
-        [Route("RejectGoodsOrder")]
+        [Route("RejectRequestOrder")]
         [HttpPost]
         public async Task<IActionResult> RejectGoodsOrder(CMApproval request)
         {
             try
             {
-                var data = await _IRequestOrderBS.RejectGoodsOrder(request);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IRequestOrderBS.RejectRequestOrder(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)

@@ -6,7 +6,7 @@ namespace CMMS_Services
 {
     public class APIService<T>
     {
-        string token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIyIiwibmJmIjoxNjg5NTM1NTg3LCJleHAiOjE2ODk1MzczODcsImlhdCI6MTY4OTUzNTU4N30.i15PoG34A2FkqgL0tHTyohBbcMf33fFso8Zdtqtf6X8";
+        string token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIyIiwibmJmIjoxNjg5NzkwNDM0LCJleHAiOjE2ODk3OTIyMzQsImlhdCI6MTY4OTc5MDQzNH0.KTKCc_-2xbd4jAKkoUIwnFnDTsAk6P4VgGEyde8f8mI";
         public string baseUrl = "http://65.0.20.19/CMMS_API";
         //public string baseUrl = "localhost";
 

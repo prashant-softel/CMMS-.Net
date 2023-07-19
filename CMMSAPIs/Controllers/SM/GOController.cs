@@ -158,14 +158,14 @@ namespace CMMSAPIs.Controllers
 
 
         [Authorize]
-        [Route("GOApproval")]
+        [Route("ApproveGO")]
         [HttpPost]
-        public async Task<IActionResult> GOApproval(  CMApproval request )
+        public async Task<IActionResult> ApproveGO(  CMApproval request )
         {
             try
             {
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _GOBS.GOApproval(request, userId);
+                var data = await _GOBS.ApproveGO(request, userId);
                 return Ok(data);
             }
             catch (Exception ex)

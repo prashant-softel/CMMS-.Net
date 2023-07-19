@@ -72,7 +72,7 @@ namespace CMMS_API_Test
         //Request Order
 
         string EP_CreateRequestOrder = "/api/RequestOrder/CreateRequestOrder";
-        string EP_UpdateRO = "/api/RequestOrder/UpdateRO";
+        string EP_UpdateRO = "/api/RequestOrder/UpdateRequestOrder";
         string EP_DeleteRequestOrder = "/api/RequestOrder/DeleteRequestOrder";
         string EP_ApproveRequestOrder = "/api/RequestOrder/ApproveRequestOrder";
         string EP_RejectGoodsOrder = "/api/GO/RejectGO";
@@ -341,7 +341,7 @@ namespace CMMS_API_Test
             var response = ptwService.GetItemList(EP_getMRSList + "?facility_ID=" + facility_ID + "&emp_id="+emp_id+ "&toDate="+toDate+ "&fromDate="+fromDate);
             int ListCount = response.Count;
             Assert.AreEqual(response[0].ID, 110);
-            Assert.AreEqual(response[0].status, 321);
+            Assert.AreEqual(response[0].status, 323);
             Assert.AreEqual(response[0].activity, "111222");
         }
 
@@ -356,7 +356,7 @@ namespace CMMS_API_Test
             Assert.AreEqual(response[0].asset_item_ID, 12);
             Assert.AreEqual(response[0].asset_MDM_code, "H39121703100011");
             Assert.AreEqual(response[0].asset_type_ID, 1);
-            Assert.AreEqual(response[0].approval_status, 2);
+            Assert.AreEqual(response[0].approval_status, 323);
             Assert.AreEqual(response[0].asset_name, "Cable Tie UV Protected 200MM");
         }
         [TestMethod]
@@ -380,18 +380,20 @@ namespace CMMS_API_Test
         [TestMethod]
         public void VerifygetMRSDetails()
         {
-            int ID = 1;
+            int ID = 122;
             var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.SM.CMMRSList>();
-            var response = ptwService.GetItemList(EP_getMRSDetails + "?ID=" + ID);
-            int ListCount = response.Count;
-            Assert.AreEqual(ListCount, 1);
+            var response = ptwService.GetItem(EP_getMRSDetails + "?ID=" + ID);
+           
+            Assert.AreEqual(response.ID, ID);
+            Assert.AreEqual(response.status, 321);
+            Assert.AreEqual(response.whereUsedTypeId, 35);
         }
 
         [TestMethod]
         public void VerifymrsApproval()
         {
             string payload = @"{
-                                  ""id"": 122,
+                                  ""id"": 110,
                                    ""comment"": ""MRS Approval""
                         }";
             var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.Utils.CMDefaultResponse>();
@@ -404,7 +406,7 @@ namespace CMMS_API_Test
         public void VerifymrsReject()
         {
             string payload = @"{
-                                  ""id"": 122,
+                                  ""id"": 110,
                                    ""comment"": ""MRS Rejected""
                         }";
             var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.Utils.CMDefaultResponse>();
@@ -513,26 +515,26 @@ namespace CMMS_API_Test
         public void createGO()
         {
             string payload = @"{
-                               ""facility_id"":45,
-                                 ""order_type"":10,
-                                 ""location_ID"":63,
-                                 ""vendorID"":3,
-                                 ""purchaseDate"":""2023-07-10"",
-                                 ""challan_no"":""CH55125"",   
-                                 ""challan_date"":""2023-07-15"",
-                                 ""po_no"":""PL784554"",
-                                 ""po_date"":""2023-07-16"",
-                                 ""freight"":""S4"",
-                                 ""received_on"":""2023-07-01"",
-                                 ""no_pkg_received"":""2"",
-                                 ""lr_no"":""56894655"",
-                                 ""condition_pkg_received"":""Bad condition"",
-                                 ""vehicle_no"":""MH01PL4512"",
-                                 ""gir_no"":""PL45454"",
-                                 ""amount"":1500,
-                                 ""currencyID"":1,
-                                 ""go_items"":[{""assetItemID"":3, ""cost"":100,""ordered_qty"":2},
-                                        {""assetItemID"":4, ""cost"":1530,""ordered_qty"":2}]
+                              ""facility_id"":45,
+                                ""order_type"":10,
+                                ""location_ID"":63,
+                                ""vendorID"":3,
+                                ""purchaseDate"":""2023-07-10"",
+                                ""challan_no"":""CH55125"",   
+                                ""challan_date"":""2023-07-15"",
+                                ""po_no"":""PL784554"",
+                                ""po_date"":""2023-07-16"",
+                                ""freight"":""S4"",
+                                ""received_on"":""2023-07-01"",
+                                ""no_pkg_received"":""2"",
+                                ""lr_no"":""56894655"",
+                                ""condition_pkg_received"":""Bad condition"",
+                                ""vehicle_no"":""MH01PL4512"",
+                                ""gir_no"":""PL45454"",
+                                ""amount"":1500,
+                                ""currencyID"":2,
+                                ""go_items"":[{""assetItemID"":3, ""cost"":100,""ordered_qty"":2},
+                                                {""assetItemID"":4, ""cost"":1530,""ordered_qty"":2}]
                         }";
 
             var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.Utils.CMDefaultResponse>();
@@ -648,13 +650,13 @@ namespace CMMS_API_Test
         public void GetPurchaseDetailsByID()
         {
 
-            int id = 225;
+            int id = 220;
             var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.CMGOMaster>();
             var response = ptwService.GetItem(EP_getPurchaseDetailsByID + "?id=" + id);           
             Assert.AreEqual(id, response.Id);
             Assert.AreEqual(45, response.facility_id);
             Assert.AreEqual(3, response.vendorID);
-            Assert.AreEqual(304, response.status);
+            Assert.AreEqual(301, response.status);
             Assert.AreEqual(2, response.accepted_qty);
             Assert.AreEqual(0, response.location_ID);
 
@@ -770,11 +772,11 @@ namespace CMMS_API_Test
         {
             int plantID = 45;
             string fromDate = "2020-01-01";
-            string toDate = "2023-06-23";
+            string toDate = "2023-07-23";
             var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.SM.CMRequestOrder>();
             var response = ptwService.GetItemList(EP_GetRequestOrderList + "?plantID=" + plantID + "&fromDate=" + fromDate + "&toDate=" + toDate);
-            Assert.AreEqual("Trinity Touch", response[0].vendor_name);
-            Assert.AreEqual(216, response[0].requestID);
+            Assert.AreEqual(0, response[0].facility_id);
+            Assert.AreEqual(1073, response[0].requestID);
         }
 
         [TestMethod]
@@ -813,23 +815,23 @@ namespace CMMS_API_Test
         public void UpdateRO()
         {
             string payload = @"{
-                                 ""id"":216,
-                                 ""vendorID"":21,
-                                 ""request_Date"":""2023-06-20"",
-                                 ""challan_no"":"""",   
-                                 ""challan_date"":""2023-06-21"",
-                                 ""freight"":"""",
-                                 ""received_on"":""2023-06-23"",
-                                 ""no_pkg_received"":"""",
-                                 ""lr_no"":"""",
-                                 ""condition_pkg_received"":"""",
-                                 ""vehicle_no"":"""",
-                                 ""gir_no"":"""",
-                                 ""job_ref"":"""",
-                                 ""amount"":0,
-                                 ""currency"":"""",
-                                   ""go_items"":[{""requestID"":1,""assetItemID"":3, ""cost"":1,""ordered_qty"":99},
-                                                 {""requestID"":2,""assetItemID"":4, ""cost"":1,""ordered_qty"":99}]
+    ""id"":231,
+    ""vendorID"":21,
+    ""request_Date"":""2023-05-25"",
+    ""challan_no"":""wew211"",   
+    ""challan_date"":""2023-05-25"",
+    ""freight"":""AS2"",
+    ""received_on"":""2023-05-25"",
+    ""no_pkg_received"":""12"",
+    ""lr_no"":""sdasdq123121"",
+    ""condition_pkg_received"":""test"",
+    ""vehicle_no"":""mh03po4512"",
+    ""gir_no"":""5455"",
+    ""job_ref"":""45545"",
+    ""amount"":250,
+    ""currencyID"":2,
+      ""go_items"":[{""requestID"":1096,""assetItemID"":3, ""cost"":1,""ordered_qty"":99},
+                {""requestID"":1095,""assetItemID"":4, ""cost"":1,""ordered_qty"":99}]
                               }";
 
             var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.Utils.CMDefaultResponse>();

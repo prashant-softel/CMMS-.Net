@@ -18,7 +18,7 @@ namespace CMMSAPIs.BS.SM
         Task<List<CMMRSItems>> getMRSItems(int ID);        
         Task<List<CMMRSItemsBeforeIssue>> getMRSItemsBeforeIssue(int ID);        
         Task<List<CMMRSItemsBeforeIssue>> getMRSItemsWithCode(int ID);        
-        Task<List<CMMRSList>> getMRSDetails(int ID);        
+        Task<CMMRSList> getMRSDetails(int ID);        
         Task<CMRETURNMRSDATA> getReturnDataByID(int ID);        
         Task<CMMRSAssetTypeList> getAssetTypeByItemID(int ItemID);
         Task<CMDefaultResponse> mrsReturn(CMMRS request, int UserID);        
@@ -128,7 +128,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<CMMRSList>> getMRSDetails(int ID)
+        public async Task<CMMRSList> getMRSDetails(int ID)
         {
             try
             {
