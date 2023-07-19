@@ -104,8 +104,8 @@ namespace CMMSAPIs
              services.AddScoped<IMRSBS, MRSBS>();
             services.AddScoped<IGOBS, GOBS>();
             services.AddScoped<IReOrderBS, ReOrderBS>();
-            services.AddScoped<ICleaningBS, CleaningBS>();
-        services.AddScoped<ISMReportsBS, ReportsBS>();
+            services.AddScoped<CleaningBS>();
+            services.AddScoped<ISMReportsBS, ReportsBS>();
             services.AddScoped<IRequestOrderBS, RequestOrderBS>();
         }
 

@@ -18,11 +18,11 @@ namespace CMMSAPIs.Controllers.MC
     [ApiController]
     public class MCController : ControllerBase
     {
-        private readonly ICleaningBS _CleaningBS;
-        public MCController(ICleaningBS Cleaning)
+        private readonly CleaningBS _CleaningBS;
+        public MCController(CleaningBS Cleaning)
         {
             _CleaningBS = Cleaning;
-            // _CleaningBS.cleaningModuleType = cleaningType.ModuleCleaning; ;
+            _CleaningBS.setModuleType(cleaningType.ModuleCleaning);
         }
 
         [Route("GetMCPlanList")]
