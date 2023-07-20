@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -184,7 +184,7 @@ namespace CMMSAPIs.Repositories.SM
             {
                 response = new CMDefaultResponse(request.ID, CMMS.RETRUNSTATUS.SUCCESS, "Request has been submitted.");
             }
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_PO, request.ID, 0, 0, "MRS Created.", CMMS.CMMS_Status.MRS_SUBMITTED);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_MRS, request.ID, 0, 0, "MRS Created.", CMMS.CMMS_Status.MRS_SUBMITTED);
             return response;
         }
 
@@ -502,7 +502,7 @@ namespace CMMSAPIs.Repositories.SM
             {
                 response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.FAILURE, "Invalid mrs updated.");
             }
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_PO, request.id, 0, 0, "MRS approved.", CMMS.CMMS_Status.MRS_REQUEST_APPROVED);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_MRS, request.id, 0, 0, "MRS approved.", CMMS.CMMS_Status.MRS_REQUEST_APPROVED);
 
             return response;
         }
@@ -524,7 +524,7 @@ namespace CMMSAPIs.Repositories.SM
             {
                 response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.FAILURE, "Invalid mrs updated.");
             }
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_PO, request.id, 0, 0, "MRS rejected.", CMMS.CMMS_Status.MRS_REQUEST_REJECTED);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_MRS, request.id, 0, 0, "MRS rejected.", CMMS.CMMS_Status.MRS_REQUEST_REJECTED);
 
             return response;
         }
@@ -700,7 +700,7 @@ namespace CMMSAPIs.Repositories.SM
             {
                 response = new CMDefaultResponse(request.ID, CMMS.RETRUNSTATUS.SUCCESS, "MRS return submitted.");
             }
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_PO, request.ID, 0, 0, "MRS return submitted.", CMMS.CMMS_Status.MRS_REQUEST_RETURN);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_MRS, request.ID, 0, 0, "MRS return submitted.", CMMS.CMMS_Status.MRS_REQUEST_RETURN);
 
             return response;
         }
