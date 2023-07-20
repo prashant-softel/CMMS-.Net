@@ -41,5 +41,24 @@ namespace CMMSAPIs.Models.Utils
             this.error_log_file_path = error_log_file_path;
         }
     }
-
+    public class CMRescheduleApprovalResponse : CMDefaultResponse
+    {
+        public List<int> new_id { get; set; }
+        public CMRescheduleApprovalResponse(int new_id, int id, CMMS.RETRUNSTATUS return_status, string message) : base(id, return_status, message)
+        {
+            this.new_id = new List<int>() { new_id };
+        }
+        public CMRescheduleApprovalResponse(int new_id, List<int> id, CMMS.RETRUNSTATUS return_status, string message) : base(id, return_status, message)
+        {
+            this.new_id = new List<int>() { new_id };
+        }
+        public CMRescheduleApprovalResponse(List<int> new_id, int id, CMMS.RETRUNSTATUS return_status, string message) : base(id, return_status, message)
+        {
+            this.new_id = new_id;
+        }
+        public CMRescheduleApprovalResponse(List<int> new_id, List<int> id, CMMS.RETRUNSTATUS return_status, string message) : base(id, return_status, message)
+        {
+            this.new_id = new_id;
+        }
+    }
 }

@@ -22,7 +22,7 @@ namespace CMMSAPIs.Repositories.Facility
      
         internal async Task<List<CMFacilityList>> GetFacilityList()
         {
-            string myQuery = "SELECT facilities.id, facilities.name, spv.name as spv, facilities.address, facilities.city, facilities.state, facilities.country, facilities.zipcode as pin FROM Facilities LEFT JOIN spv ON facilities.spvId=spv.id WHERE isBlock = 0 and status = 1;";
+            string myQuery = "SELECT facilities.id, facilities.name, spv.name as spv, facilities.address, facilities.city, facilities.state, facilities.country, facilities.zipcode as pin FROM Facilities LEFT JOIN spv ON facilities.spvId=spv.id WHERE isBlock = 0 and facilities.status = 1;";
             List<CMFacilityList> _Facility = await Context.GetData<CMFacilityList>(myQuery).ConfigureAwait(false);
             return _Facility;
         }

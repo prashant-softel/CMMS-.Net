@@ -23,7 +23,7 @@ namespace CMMSAPIs.BS.Calibration
         Task<CMDefaultResponse> StartCalibration(int calibration_id);
         Task<CMDefaultResponse> CompleteCalibration(CMCompleteCalibration request, int userID);
         Task<CMDefaultResponse> CloseCalibration(CMCloseCalibration request, int userID);
-        Task<CMDefaultResponse> ApproveCalibration(CMApproval request, int userID);
+        Task<CMRescheduleApprovalResponse> ApproveCalibration(CMApproval request, int userID);
         Task<CMDefaultResponse> RejectCalibration(CMApproval request, int userID);
     }
     public class CalibrationBS : ICalibrationBS
@@ -170,7 +170,7 @@ namespace CMMSAPIs.BS.Calibration
             }
         }
 
-        public async Task<CMDefaultResponse> ApproveCalibration(CMApproval request, int userID)
+        public async Task<CMRescheduleApprovalResponse> ApproveCalibration(CMApproval request, int userID)
         {
             try
             {

@@ -543,8 +543,14 @@ namespace CMMSAPIs.Repositories.Masters
         }
         internal async Task<List<CMBusiness>> GetBusinessList(int businessType)
         {
-            string myQuery = $"SELECT id, name, email, contactPerson, contactNumber, website, location, address, city, state, country, zip, type, addedAt FROM Business WHERE status=1 ";
-            if(businessType > 0)
+            string myQuery = $"SELECT business.id, business.name, email, contactPerson, contactNumber, website, location, address, cities.id as cityId, cities.name as city, states.id as stateId, states.name as state, countries.id as countryId, countries.name as country, zip, type.id as type, type.name as typeName, business.addedAt " +
+                                $"FROM Business " +
+                                $"LEFT JOIN businesstype as type ON business.type = type.id " +
+                                $"LEFT JOIN cities ON business.cityId = cities.id " +
+                                $"LEFT JOIN states ON business.stateId = states.id AND states.id = cities.state_id " +
+                                $"LEFT JOIN countries ON business.countryId = countries.id AND countries.id = cities.country_id AND countries.id = states.country_id " +
+                                $"WHERE business.status=1 ";
+            if (businessType > 0)
                 myQuery += $"AND type = {businessType}";
             List<CMBusiness> _Business = await Context.GetData<CMBusiness>(myQuery).ConfigureAwait(false);
             return _Business;

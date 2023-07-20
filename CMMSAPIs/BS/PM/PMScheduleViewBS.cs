@@ -18,7 +18,7 @@ namespace CMMSAPIs.BS.PM
         Task<CMDefaultResponse> SetPMTask(int schedule_id, int userID);
         Task<List<CMDefaultResponse>> UpdatePMTaskExecution(CMPMExecutionDetail request, int userID);
         Task<CMDefaultResponse> ClosePMTaskExecution(CMApproval request, int userID);
-        Task<CMDefaultResponse> ApprovePMTaskExecution(CMApproval request, int userID);
+        Task<CMRescheduleApprovalResponse> ApprovePMTaskExecution(CMApproval request, int userID);
         Task<CMDefaultResponse> RejectPMTaskExecution(CMApproval request, int userID);
         Task<CMDefaultResponse> LinkPermitToPMTask(int schedule_id, int permit_id, int userID);
 
@@ -152,7 +152,7 @@ namespace CMMSAPIs.BS.PM
             }
         }
 
-        public async Task<CMDefaultResponse> ApprovePMTaskExecution(CMApproval request, int userID)
+        public async Task<CMRescheduleApprovalResponse> ApprovePMTaskExecution(CMApproval request, int userID)
         {
             try
             {

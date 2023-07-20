@@ -47,6 +47,7 @@ namespace CMMSAPIs.Models.Inventory
         public int warranty_type { get; set; }
         public string warranty_description { get; set; }
         public int warrranty_term_type { get; set; }
+        public int warranty_certificate_file_id { get; set; }
         public DateTime? start_date { get; set; }
         public DateTime? expiry_date { get; set; }
         public int meter_limit { get; set; }

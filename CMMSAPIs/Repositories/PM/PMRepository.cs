@@ -47,7 +47,7 @@ namespace CMMSAPIs.Repositories.PM
                 string query2 = "SELECT a.id as schedule_id, a.PM_Frequecy_id as frequency_id, a.PM_Frequecy_Name as frequency_name, " +
                                     "a.PM_Schedule_date as schedule_date FROM pm_schedule as a WHERE a.PM_Schedule_date = (SELECT MAX(b.PM_Schedule_date) " +
                                     "FROM pm_schedule as b WHERE a.Asset_id = b.Asset_id AND a.PM_Frequecy_id = b.PM_Frequecy_id AND b.status NOT IN " +
-                                    $"({(int)CMMS.CMMS_Status.PM_REJECT}, {(int)CMMS.CMMS_Status.PM_PTW_TIMEOUT}, {(int)CMMS.CMMS_Status.PM_CANCELLED}) AND " +
+                                    $"({(int)CMMS.CMMS_Status.PM_PTW_TIMEOUT}, {(int)CMMS.CMMS_Status.PM_CANCELLED}) AND " +
                                     $"PM_Rescheduled = 0) AND a.Asset_id = {schedule.asset_id} GROUP BY PM_Frequecy_id ORDER BY PM_Frequecy_id;";
                 List<ScheduleFrequencyData> _freqData = await Context.GetData<ScheduleFrequencyData>(query2).ConfigureAwait(false);
                 schedule.frequency_dates = _freqData;
@@ -99,7 +99,7 @@ namespace CMMSAPIs.Repositories.PM
                     List<CMFrequency> frequency = await Context.GetData<CMFrequency>(myQuery6).ConfigureAwait(false);
                     string myQuery7 = "SELECT id as schedule_id, PM_Schedule_date as schedule_date, Facility_id as facility_id, Asset_id as asset_id, PM_Frequecy_id as frequency_id " +
                                         $"FROM pm_schedule WHERE Asset_id = {asset_schedule.asset_id} AND PM_Frequecy_id = {frequency_schedule.frequency_id} " +
-                                        $"AND status NOT IN ({(int)CMMS.CMMS_Status.PM_CANCELLED}, {(int)CMMS.CMMS_Status.PM_REJECT}) AND PM_Rescheduled = 0;";
+                                        $"AND status NOT IN ({(int)CMMS.CMMS_Status.PM_CANCELLED}, {(int)CMMS.CMMS_Status.PM_PTW_TIMEOUT}) AND PM_Rescheduled = 0;";
                     List<ScheduleIDData> scheduleData = await Context.GetData<ScheduleIDData>(myQuery7).ConfigureAwait(false);
                     if(scheduleData.Count > 0)
                     {
