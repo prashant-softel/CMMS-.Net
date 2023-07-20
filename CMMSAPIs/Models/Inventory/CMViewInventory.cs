@@ -47,6 +47,7 @@ namespace CMMSAPIs.Models.Inventory
         public int warrantyId { get; set; }
         public string warranty_description { get; set; }
         public string certificate_number { get; set; }
+        public int warranty_certificate_file_id { get; set; }
         public int warrantyTypeId { get; set; }
         public string warrantyTypeName { get; set; }
         public int warrantyProviderId { get; set; }

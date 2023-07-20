@@ -484,7 +484,7 @@ namespace CMMSAPIs.Repositories.PM
             return response;
         }
 
-        internal async Task<CMDefaultResponse> ApprovePMTaskExecution(CMApproval request, int userID)
+        internal async Task<CMRescheduleApprovalResponse> ApprovePMTaskExecution(CMApproval request, int userID)
         {
             /*
              * Primary Table - PMExecution
@@ -495,7 +495,7 @@ namespace CMMSAPIs.Repositories.PM
             DataTable dt1 = await Context.FetchData(statusQry).ConfigureAwait(false);
             CMMS.CMMS_Status status = (CMMS.CMMS_Status)Convert.ToInt32(dt1.Rows[0][0]);
             if (status != CMMS.CMMS_Status.PM_COMPLETED)
-                return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.FAILURE, "Only a closed PM schedule can be Approved");
+                return new CMRescheduleApprovalResponse(0, request.id, CMMS.RETRUNSTATUS.FAILURE, "Only a closed PM schedule can be Approved");
             string myQuery = "UPDATE pm_schedule SET " +
                                 $"PM_Schedule_Completed_by_id = {userID}, " +
                                 $"PM_Schedule_Completed_date = '{UtilsRepository.GetUTCTime()}', " +
@@ -519,7 +519,7 @@ namespace CMMSAPIs.Repositories.PM
             CMPMScheduleViewDetail _PMList = await GetPMTaskDetail(request.id);
             CMMSNotification.sendNotification(CMMS.CMMS_Modules.WARRANTY_CLAIM, CMMS.CMMS_Status.APPROVED, _PMList);
 
-            CMDefaultResponse response = new CMDefaultResponse(request.id, retCode, $"PM Schedule Approved to PMSCH{createResponse[0].id[0]}");
+            CMRescheduleApprovalResponse response = new CMRescheduleApprovalResponse(createResponse[0].id[0], request.id, retCode, $"PM Schedule Approved to PMSCH{createResponse[0].id[0]}");
             return response;
         }
 

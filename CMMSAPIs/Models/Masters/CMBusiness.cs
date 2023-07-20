@@ -13,6 +13,8 @@ namespace CMMSAPIs.Models.Masters
         public int id { get; set; }
         public string name { get; set; }
         public string email { get; set; }
+        public int type { get; set; }
+        public string typeName { get; set; }
         public string contactPerson { get; set; }
         public string contactNumber { get; set; }
         public string website { get; set; }
@@ -25,7 +27,6 @@ namespace CMMSAPIs.Models.Masters
         public int countryId { get; set; }
         public string country { get; set; }
         public string zip { get; set; }
-        public int type { get; set; }
         public DateTime addedAt { get; set; }
     }
 }
