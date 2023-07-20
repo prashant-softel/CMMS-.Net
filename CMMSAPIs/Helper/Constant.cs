@@ -40,7 +40,8 @@ namespace CMMSAPIs.Helper
             { CMMS_Modules.WARRANTY_CLAIM, 30 },
             { CMMS_Modules.CALIBRATION, 31 },
             { CMMS_Modules.MODULE_CLEANING, 32 },
-            { CMMS_Modules.VEGETATION, 33 }
+            { CMMS_Modules.VEGETATION, 33 },
+            { CMMS_Modules.INCIDENT_REPORT, 34 }
         };
         public enum RETRUNSTATUS
         {
