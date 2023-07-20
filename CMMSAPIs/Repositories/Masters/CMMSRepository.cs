@@ -219,7 +219,7 @@ namespace CMMSAPIs.Repositories.Masters
         }
         internal async Task<List<CMIRStatus>> GetInsuranceStatusList()
         {
-            string myQuery = "SELECT id, risktype as name, description FROM ir_status WHERE status=1 ";
+            string myQuery = "SELECT id, name  FROM ir_status WHERE status=1 ";
             List<CMIRStatus> _risktype = await Context.GetData<CMIRStatus>(myQuery).ConfigureAwait(false);
             return _risktype;
         }

@@ -46,8 +46,6 @@ namespace CMMSAPIs.Models.MC
         public int frequencyId { get; set; }
         public string frequency { get; set; }
         public int noOfCleaningDays { get; set; }
-        public string cleaningType { get; set; }
-        public DateTime startDate { get; set; }
         public int createdById { get; set; }
         public string createdBy { get; set; }
         public DateTime createdAt { get; set; }
@@ -101,11 +99,11 @@ namespace CMMSAPIs.Models.MC
         public Int64 smbs { get; set; }
         public decimal ScheduledModules { get; set; }
         public decimal ScheduledArea { get; set; }
-        public List<CMMCEquipment> equipments { get; set; }
         public DateTime plannedDate { get; set; }
         public int status { get; set; }
         public string status_short { get; set; }
-        public string status_long { get; set; }
+        public List<CMMCEquipment> equipments { get; set; }
+       
     }
 
 
@@ -131,6 +129,7 @@ namespace CMMSAPIs.Models.MC
         public string description { get; set; }
         public string frequency { get; set; }
         public DateTime startDate { get; set; }
+        public int noOfDays { get; set; }
         public int status { get; set; }     //Completed
         public string plannedBy { get; set; }
         public DateTime plannedAt { get; set; }
@@ -179,12 +178,13 @@ namespace CMMSAPIs.Models.MC
     public class CMMCTaskList
     {
         public int id { get; set; }
-        public int asset_id { get; set; }
-        public int module_quantity { get; set; }
-        public DateTime plan_start_date { get; set; }
-        public DateTime plan_end_date { get; set; }
-        public DateTime execution_start_date { get; set; }
-        public DateTime execution_end_date { get; set; }
+        public int planId { get; set; }
+        public string responsibility { get; set; }
+        public string frequency { get; set; }
+        public int noOfDays { get; set; }
+        public DateTime startDate { get; set; }
+        public DateTime doneDate { get; set; }
+        public string status_short { get; set; }
         public int water_used { get; set; }
     }
     public class CMMCExecutionList
