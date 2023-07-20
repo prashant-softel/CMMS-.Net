@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -89,7 +89,7 @@ namespace CMMSAPIs.Models.SM
         public string reference { get; set; }
         public string referenceID { get; set; }
         public DateTime? lastmodifieddate { get; set; }
-        public int setAsTemplate { get; set; }
+        public string setAsTemplate { get; set; }
         public string templateName { get; set; }
         public int approval_manager_ID { get; set; }
         public DateTime? approval_manager_date { get; set; }
@@ -119,8 +119,9 @@ namespace CMMSAPIs.Models.SM
         public string activity { get; set; }
         public int whereUsedType { get; set; }
         public int whereUsedTypeId { get; set; }
+        public string remarks { get; set; }
 
-        public List<CMEquipments> equipments { get; set;}
+        public List<CMEquipments> cmmrsItems { get; set;}
 
     }
     public class CMEquipments
@@ -133,6 +134,8 @@ namespace CMMSAPIs.Models.SM
         public string return_remarks { get; set; }
         public decimal returned_qty { get; set; }
         public decimal received_qty { get; set; }
+        public decimal used_qty { get; set; }
+        public decimal available_qty { get; set; }
     }
 
     public class CMVendorList
@@ -145,19 +148,19 @@ namespace CMMSAPIs.Models.SM
     public class CMMRSItems
     {
         public int ID { get; set; }
-        public string return_remarks { get; set; }
+        //public string return_remarks { get; set; }
         public int mrs_return_ID { get; set; }
-        public string finalRemark { get; set; }
+        //public string finalRemark { get; set; }
         public int asset_item_ID { get; set; }
         public string asset_MDM_code { get; set; }
-        public string serial_number { get; set; }
+        //public string serial_number { get; set; }
         public decimal returned_qty { get; set; }
         public decimal available_qty { get; set; }
         public decimal used_qty { get; set; }
         public decimal issued_qty { get; set; }
-        public int flag { get; set; }
-        public string returnDate { get; set; }
-        public int approval_status { get; set; }
+        //public int flag { get; set; }
+        //public string returnDate { get; set; }
+        //public int approval_status { get; set; }
         public string approved_date { get; set; }
         public string issued_date { get; set; }
         public decimal requested_qty { get; set; }
@@ -165,8 +168,8 @@ namespace CMMSAPIs.Models.SM
         public string asset_name { get; set; }
         public int asset_type_ID { get; set; }
         public string asset_type { get; set; }
-        public string file_path { get; set; }
-        public int Asset_master_id { get; set; }
+        //public string file_path { get; set; }
+        //public int Asset_master_id { get; set; }
         public int status { get; set; }
         public string status_short { get; set; }
         public string status_long { get; set; }
@@ -254,6 +257,7 @@ namespace CMMSAPIs.Models.SM
         public string activity { get; set; }
         public int whereUsedType { get; set; }
         public int whereUsedTypeId { get; set; }
+        public string remarks { get; set; }
         public List<CMMRSItems> CMMRSItems { get; set; }
     }
 
