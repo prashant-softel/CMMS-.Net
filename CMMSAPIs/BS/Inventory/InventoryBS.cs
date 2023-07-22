@@ -7,6 +7,7 @@ using System.Data;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
+using CMMSAPIs.Models.Calibration;
 
 namespace CMMSAPIs.BS.Inventory
 {
@@ -32,6 +33,9 @@ namespace CMMSAPIs.BS.Inventory
         Task<CMDefaultResponse> DeleteInventoryCategory(int id);
         Task<List<CMDefaultList>> GetWarrantyTypeList();
         Task<List<CMDefaultList>> GetWarrantyUsageTermList();
+        Task<List<CMWarrantyCertificate>> GetWarrantyCertificate();
+        Task<List<CMCalibrationAssets>> GetCalibrationList(int facilityId);
+
         Task<CMDefaultResponse> SetParentAsset(CMSetParentAsset parent_child_group, int userID);
     }
     public class InventoryBS : IInventoryBS
@@ -358,7 +362,42 @@ namespace CMMSAPIs.BS.Inventory
             {
                 using (var repos = new InventoryRepository(getDB, _environment))
                 {
-                    return await repos.GetWarrantyUsageTermList();
+                    return await repos.GetWarrantyUsageTermList
+                        
+                        
+                        ();
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<CMWarrantyCertificate>> GetWarrantyCertificate()
+        {
+            try
+            {
+                using (var repos = new InventoryRepository(getDB, _environment))
+                {
+                    return await repos.GetWarrantyCertificate();
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<CMCalibrationAssets>> GetCalibrationList(int facilityId)
+        {
+            try
+            {
+                using (var repos = new InventoryRepository(getDB, _environment))
+                {
+                    return await repos.GetCalibrationList( facilityId);
 
                 }
             }

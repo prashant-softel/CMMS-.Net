@@ -11,6 +11,7 @@ using System.IO;
 using Microsoft.AspNetCore.Hosting;
 using OfficeOpenXml;
 using CMMSAPIs.Models.Notifications;
+using CMMSAPIs.Models.Calibration;
 //using IronXL;
 
 namespace CMMSAPIs.Repositories.Inventory
@@ -1020,6 +1021,40 @@ string warrantyQry = "insert into assetwarranty
             warrentyUsageTermType.Add(new CMDefaultList() { id = 4, name = "Process completion" });
             return warrentyUsageTermType;
         }
+        internal async Task<List<CMWarrantyCertificate>> GetWarrantyCertificate()
+        {
+            string myQuery = "SELECT assets.id as asset_id, assets.name as asset_name, category.id as categoryId, category.name as categoryName, " +
+                "assetwarranty.warranty_description, warrantytype.id as warrantyTypeId, warrantytype.name as warrantyTypeName, " +
+                "warrantyusageterm.id as warrantyTermId, warrantyusageterm.name as warrantyTermName, assetwarranty.certificate_number, " +
+                "certificate.file_path AS warranty_certificate_file_path, CASE WHEN assetwarranty.start_date = '0000-00-00 00:00:00' " +
+                "THEN NULL ELSE assetwarranty.start_date END AS warrantyStartDate, CASE WHEN assetwarranty.expiry_date = '0000-00-00 00:00:00' " +
+                "THEN NULL ELSE assetwarranty.expiry_date END AS warrantyExpiryDate, provider.id as warrantyProviderId, " +
+                "provider.name as warrantyProviderName\r\nFROM assetwarranty \r\nJOIN assets ON assetwarranty.asset_id = assets.id\r\n" +
+                "LEFT JOIN warrantytype ON assetwarranty.warranty_type = warrantytype.id\r\nLEFT JOIN warrantyusageterm " +
+                "ON assetwarranty.warranty_term_type = warrantyusageterm.id\r\nLEFT JOIN business as provider " +
+                "ON assetwarranty.warranty_provider = provider.id\r\nLEFT JOIN assetcategories as category " +
+                "ON assets.categoryId = category.id\r\nLEFT JOIN uploadedfiles as certificate ON assetwarranty.certificate_file_id = certificate.id  WHERE provider.id > 0";
+            List<CMWarrantyCertificate> _AssetCategory = await Context.GetData<CMWarrantyCertificate>(myQuery).ConfigureAwait(false);
+            return _AssetCategory;
+        }
+        internal async Task<List<CMCalibrationAssets>> GetCalibrationList(int facilityId)
+        {
+            string myQuery = "SELECT assets.id, assets.name, category.id as categoryId, category.name as categoryName, " +
+            "vendor.id as vendorId, vendor.name as vendorName, assets.calibrationFreqType, " +
+            "frequency.id as frequencyId, frequency.name as frequencyName, CASE WHEN assets.calibrationLastDate = '0000-00-00 00:00:00' THEN NULL ELSE assets.calibrationLastDate END AS calibrationLastDate, " +
+            "CASE WHEN assets.calibrationDueDate = '0000-00-00 00:00:00' THEN NULL ELSE assets.calibrationDueDate END AS calibrationDueDate, assets.calibrationReminderDays " +
+            "FROM assets " +
+            "LEFT JOIN assetcategories as category ON category.id = assets.categoryId " +
+            "LEFT JOIN business as vendor ON vendor.id = assets.vendorId " +
+            "LEFT JOIN frequency ON assets.calibrationFrequency = frequency.id "+
+            $"WHERE category.calibrationStatus = 1 AND facilityId = {facilityId} ";
+            List<CMCalibrationAssets> _AssetCategory = await Context.GetData<CMCalibrationAssets>(myQuery).ConfigureAwait(false);
+            return _AssetCategory;
+              
+
+        }
+
         #endregion
+
     }
 }
