@@ -50,4 +50,44 @@ namespace CMMSAPIs.Models.Inventory
         public int? calibration_required { get; set; }
     }
 
+    public class CMWarrantyCertificate
+    { 
+
+        public int asset_id { get; set; }
+        public int categoryId { get; set; }
+        public string asset_name { get; set; }
+        public int warrantyTypeId { get; set; }
+        public int warranty_provider { get; set; }
+        public string categoryName { get; set; }
+        public string warranty_description { get; set; }
+        public string warrantyTypeName { get; set; }
+        public int warrantyTermId { get; set; }
+        public string warrantyTermName { get; set; }
+        public string certificate_number { get; set; }
+        public string warranty_certificate_file_path { get; set; }
+        public DateTime warrantyStartDate { get; set; }
+        public DateTime warrantyExpiryDate { get; set; }
+        public int warrantyProviderId { get; set; }
+        public string warrantyProviderName { get; set; }
+        public string warranty_term_type { get; set; }
+    }
+    public class CMCalibrationAssets
+    {
+        public int id { get; set; }
+        public string name { get; set; }
+        public int categoryId { get; set; }
+        public string categoryName { get; set; }
+        public int vendorId { get; set; }
+        public string vendorName { get; set; }
+        public string calibrationFreqType { get; set; }
+        public int frequencyId { get; set; }
+        public string frequencyName { get; set; }
+        public string description { get; set; }
+        public int calibrationFrequency { get; set; }
+        public int calibrationReminderDays { get; set; }
+        public DateTime calibrationLastDate { get; set; }
+        public DateTime calibrationDueDate { get; set; }
+        public string calibrationStatus { get; set; }
+    }
+
 }

@@ -386,6 +386,37 @@ namespace CMMSAPIs.Controllers.Inventory
                 throw;
             }
         }
-        
+        [Authorize]
+        [Route("GetWarrantyCertificate")]
+        [HttpGet]
+        public async Task<IActionResult> GetWarrantyCertificate()
+        {
+            try
+            {
+                var data = await _InventoryBS.GetWarrantyCertificate();
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
+        [Route("GetCalibrationList")]
+        [HttpGet]
+        public async Task<IActionResult> GetCalibrationList(int facilityId)
+        {
+            try
+            {
+                var data = await _InventoryBS.GetCalibrationList(facilityId);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
     }
 }
