@@ -24,7 +24,8 @@ namespace CMMSAPIs.BS.SM
         Task<CMDefaultResponse> ReturnMRS(CMMRS request, int UserID);        
         Task<CMDefaultResponse> mrsApproval(CMApproval request, int userId);        
         Task<CMDefaultResponse> mrsReject(CMApproval request, int userId);        
-        Task<CMDefaultResponse> mrsReturnApproval(CMMRS request, int UserID);
+        Task<CMDefaultResponse> ApproveMRSReturn(CMApproval request, int UserID);
+        Task<CMDefaultResponse> RejectMRSReturn(CMApproval request, int UserID);
         void UpdateAssetStatus(int assetItemID, int status);
         Task<CMMRS> getLastTemplateData(int ID);
         Task<List<CMAssetItem>> GetAssetItems(int facility_ID, bool isGroupByCode = false);
@@ -219,13 +220,28 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<CMDefaultResponse> mrsReturnApproval(CMMRS request, int UserID)
+        public async Task<CMDefaultResponse> ApproveMRSReturn(CMApproval request, int UserID)
         {
             try
             {
                 using (var repos = new MRSRepository(getDB))
                 {
-                    return await repos.mrsReturnApproval(request, UserID);
+                    return await repos.ApproveMRSReturn(request, UserID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> RejectMRSReturn(CMApproval request, int UserID)
+        {
+            try
+            {
+                using (var repos = new MRSRepository(getDB))
+                {
+                    return await repos.RejectMRSReturn(request, UserID);
                 }
             }
             catch (Exception ex)
