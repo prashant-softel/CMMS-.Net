@@ -1,4 +1,4 @@
-using CMMSAPIs.Helper;
+﻿using CMMSAPIs.Helper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +13,7 @@ namespace CMMSAPIs.BS
 {
     public interface IGOBS
     {
-        Task<List<CMGOMaster>> GetGOList(int facility_id, DateTime fromDate, DateTime toDate, int Status);
+        Task<List<CMGOListByFilter>> GetGOList(int facility_id, DateTime fromDate, DateTime toDate, int Status);
         Task<CMGoodsOrderList> GetGOItemByID(int id);
         Task<List<CMGoodsOrderList>> GetAssetCodeDetails(int asset_code);
         Task<CMDefaultResponse> CreateGO(CMGoodsOrderList request, int userID);
@@ -36,7 +36,7 @@ namespace CMMSAPIs.BS
             databaseProvider = dbProvider;
         }
 
-        public async Task<List<CMGOMaster>> GetGOList(int facility_id, DateTime fromDate, DateTime toDate, int Status)
+        public async Task<List<CMGOListByFilter>> GetGOList(int facility_id, DateTime fromDate, DateTime toDate, int Status)
         {
             try
             {

@@ -21,13 +21,16 @@ namespace CMMSAPIs.BS.SM
         Task<CMMRSList> getMRSDetails(int ID);        
         Task<CMRETURNMRSDATA> getReturnDataByID(int ID);        
         Task<CMMRSAssetTypeList> getAssetTypeByItemID(int ItemID);
-        Task<CMDefaultResponse> mrsReturn(CMMRS request, int UserID);        
+        Task<CMDefaultResponse> ReturnMRS(CMMRS request, int UserID);        
         Task<CMDefaultResponse> mrsApproval(CMApproval request, int userId);        
         Task<CMDefaultResponse> mrsReject(CMApproval request, int userId);        
         Task<CMDefaultResponse> mrsReturnApproval(CMMRS request, int UserID);
         void UpdateAssetStatus(int assetItemID, int status);
         Task<CMMRS> getLastTemplateData(int ID);
         Task<List<CMAssetItem>> GetAssetItems(int facility_ID, bool isGroupByCode = false);
+        Task<CMDefaultResponse> CreateMRSIssue(CMMRS request, int UserID);
+        Task<CMDefaultResponse> ApproveMRSIssue(CMApproval request, int userId);
+        Task<CMDefaultResponse> RejectMRSIssue(CMApproval request, int userId);
     }
     public class MRSBS : IMRSBS
     {
@@ -171,13 +174,13 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<CMDefaultResponse> mrsReturn(CMMRS request, int UserID)
+        public async Task<CMDefaultResponse> ReturnMRS(CMMRS request, int UserID)
         {
             try
             {
                 using (var repos = new MRSRepository(getDB))
                 {
-                    return await repos.mrsReturn(request, UserID);
+                    return await repos.ReturnMRS(request, UserID);
                 }
             }
             catch (Exception ex)
@@ -275,7 +278,51 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        
+        public async Task<CMDefaultResponse> CreateMRSIssue(CMMRS request, int UserID)
+        {
+            try
+            {
+                using (var repos = new MRSRepository(getDB))
+                {
+                    return await repos.CreateMRSIssue(request, UserID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> ApproveMRSIssue(CMApproval request, int userId)
+        {
+            try
+            {
+                using (var repos = new MRSRepository(getDB))
+                {
+                    return await repos.ApproveMRSIssue(request, userId);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> RejectMRSIssue(CMApproval request, int userId)
+        {
+            try
+            {
+                using (var repos = new MRSRepository(getDB))
+                {
+                    return await repos.RejectMRSIssue(request, userId);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
     }
 
 }
