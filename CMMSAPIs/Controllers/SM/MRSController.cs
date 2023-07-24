@@ -243,14 +243,14 @@ namespace CMMSAPIs.Controllers.SM
 
 
         [Authorize]
-        [Route("mrsReturn")]
+        [Route("ReturnMRS")]
         [HttpPost] 
-        public async Task<IActionResult> mrsReturn(CMMRS request)
+        public async Task<IActionResult> ReturnMRS(CMMRS request)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _MRSBS.mrsReturn(request, userID);
+                var data = await _MRSBS.ReturnMRS(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -316,5 +316,58 @@ namespace CMMSAPIs.Controllers.SM
                 throw ex;
             }
         }
+
+        [Authorize]
+        [Route("CreateMRSIssue")]
+        [HttpGet]
+        public async Task<IActionResult> CreateMRSIssue(CMMRS request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _MRSBS.CreateMRSIssue(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                _AddLog.ErrorLog(ex.ToString());
+                throw ex;
+            }
+        }
+
+        [Authorize]
+        [Route("ApproveMRSIssue")]
+        [HttpPost]
+        public async Task<IActionResult> ApproveMRSIssue(CMApproval request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _MRSBS.ApproveMRSIssue(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
+        [Route("RejectMRSIssue")]
+        [HttpPost]
+        public async Task<IActionResult> RejectMRSIssue(CMApproval request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _MRSBS.RejectMRSIssue(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
     }
 }
