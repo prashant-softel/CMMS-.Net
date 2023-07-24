@@ -136,6 +136,8 @@ namespace CMMSAPIs.Models.SM
         public decimal received_qty { get; set; }
         public decimal used_qty { get; set; }
         public decimal available_qty { get; set; }
+        public int isDamaged { get; set; }
+        public string issue_remarks { get; set; }
     }
 
     public class CMVendorList
@@ -207,6 +209,7 @@ namespace CMMSAPIs.Models.SM
         public int Asset_master_id { get; set; }
         public int spare_multi_selection { get; set; }
         public decimal available_qty { get; set; }
+        public long is_approval_required { get; set; }
 
 
     }

@@ -281,4 +281,40 @@ namespace CMMSAPIs.Models
         public string status_short { get; set; }
 
     }
+
+    public class CMGOListByFilter
+    {
+        public int Id { get; set; }
+        public int facility_id { get; set; }
+        public int vendorID { get; set; }
+
+        public int asset_type_ID { get; set; }
+        public string vendor_name { get; set; }
+        public int status { get; set; }
+        public string status_short { get; set; }
+        public string status_long { get; set; }
+        public decimal accepted_qty { get; set; }
+
+        public int currencyID { get; set; }
+        public string currency { get; set; }
+        public decimal amount { get; set; }
+        public string job_ref { get; set; }
+        public string gir_no { get; set; }
+        public string vehicle_no { get; set; }
+        public string condition_pkg_received { get; set; }
+        public string lr_no { get; set; }
+        public string no_pkg_received { get; set; }
+        public DateTime? receivedAt { get; set; }
+        public string freight { get; set; }
+        public DateTime? po_date { get; set; }
+        public string po_no { get; set; }
+        public DateTime? challan_date { get; set; }
+        public string challan_no { get; set; }
+        public DateTime? purchaseDate { get; set; }
+        public int location_ID { get; set; }
+        public string facilityName { get; set; }
+        public decimal cost { get; set; }
+        public string generatedBy { get; set; }
+
+    }
 }
