@@ -67,29 +67,29 @@ namespace CMMSAPIs.Repositories
 
         }
 
-        private static string getLongStatus(CMMS.CMMS_Status m_notificationID, CMGOMaster goObj)
+        private static string getLongStatus(CMMS.CMMS_Status m_notificationID, int Id)
         {
             CMMS.CMMS_Status status = (CMMS.CMMS_Status)m_notificationID;
             string retValue = "";
             switch (status)
             {
                 case CMMS.CMMS_Status.SM_PO_DRAFT:
-                    retValue = $"Goods order {goObj.Id} Draft created";
+                    retValue = $"Goods order {Id} Draft created";
                     break;
                 case CMMS.CMMS_Status.SM_PO_SUBMITTED:
-                    retValue = $"Goods order {goObj.Id} Submitted";
+                    retValue = $"Goods order {Id} Submitted";
                     break;
                 case CMMS.CMMS_Status.SM_PO_IN_PROCESS:
-                    retValue = $"Goods order {goObj.Id} In Process";
+                    retValue = $"Goods order {Id} In Process";
                     break;
                 case CMMS.CMMS_Status.SM_PO_CLOSED:
-                    retValue = $"Goods order {goObj.Id} Closed";
+                    retValue = $"Goods order {Id} Closed";
                     break;
                 case CMMS.CMMS_Status.SM_PO_CLOSED_REJECTED:
-                    retValue = $"Goods order {goObj.Id} , After closed item rejected";
+                    retValue = $"Goods order {Id} , After closed item rejected";
                     break;
                 case CMMS.CMMS_Status.SM_PO_CLOSED_APPROVED:
-                    retValue = $"Goods order {goObj.Id},After closed item approved";
+                    retValue = $"Goods order {Id},After closed item approved";
                     break;
                 case CMMS.CMMS_Status.SM_PO_DELETED:
                     retValue = "Deleted";
@@ -871,7 +871,7 @@ namespace CMMSAPIs.Repositories
 
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_MasterList.status);
                 string _shortStatus = getShortStatus(CMMS.CMMS_Modules.SM_PO, _Status);
-                string _longStatus = getLongStatus(_Status, _MasterList);
+                string _longStatus = getLongStatus(_Status, _MasterList.Id);
 
                 _MasterList.status_short = _shortStatus;
                 _MasterList.status_long = _longStatus;
@@ -879,20 +879,20 @@ namespace CMMSAPIs.Repositories
             return _MasterList;
         }
 
-        internal async Task<List<CMGOMaster>> GetGOList(int facility_id, DateTime fromDate, DateTime toDate)
+        internal async Task<List<CMGOListByFilter>> GetGOList(int facility_id, DateTime fromDate, DateTime toDate)
         {
 
             string filter = " (DATE(po.purchaseDate) >= '" + fromDate.ToString("yyyy-MM-dd") + "'  and DATE(po.purchaseDate) <= '" + toDate.ToString("yyyy-MM-dd") + "')";
 
             filter = filter + " and facilityID = " + facility_id + "";
             string query = "SELECT fc.name as facilityName,pod.ID as podID, facilityid as       facility_id,pod.spare_status,pod.remarks,sai.orderflag,sam.asset_type_ID," +
-                "pod.purchaseID,pod.assetItemID,sai.serial_number,sai.location_ID,pod.cost,pod.ordered_qty,\r\n bl.name as vendor_name,\r\n     " +
+                "pod.purchaseID,pod.assetItemID,sai.serial_number,sai.location_ID,(select sum(cost) from smpurchaseorderdetails where purchaseID = po.id) as cost,pod.ordered_qty,\r\n bl.name as vendor_name,\r\n     " +
                 " po.purchaseDate,sam.asset_type_ID,sam.asset_name,po.receiverID,\r\n        " +
                 "po.vendorID,po.status,sai.asset_code,t1.asset_type,t2.cat_name,pod.received_qty,pod.damaged_qty,pod.accepted_qty," +
                 "f1.file_path,f1.Asset_master_id,sm.decimal_status,sm.spare_multi_selection,po.generated_by,pod.order_type as asset_type_ID_OrderDetails, receive_later, " +
                 "added_to_store,   \r\n      " +
                 "  po.challan_no, po.po_no, po.freight, po.transport, po.no_pkg_received, po.lr_no, po.condition_pkg_received, " +
-                "po.vehicle_no, po.gir_no, po.challan_date, po.job_ref, po.amount,  po.currency as currencyID , curr.name as currency , stt.asset_type as asset_type_Name,  po_no, po_date, requested_qty,lost_qty, ordered_qty\r\n      " +
+                "po.vehicle_no, po.gir_no, po.challan_date, po.job_ref, po.amount,  po.currency as currencyID , curr.name as currency , stt.asset_type as asset_type_Name,  po_no, po_date, requested_qty,lost_qty, ordered_qty, CONCAT(ed.firstName,' ',ed.lastName) as generatedBy\r\n      " +
                 "  FROM smpurchaseorderdetails pod\r\n        LEFT JOIN smpurchaseorder po ON po.ID = pod.purchaseID\r\n     " +
                 "   LEFT JOIN smassetitems sai ON sai.ID = pod.assetItemID\r\n       " +
                 " LEFT JOIN smassetmasters sam ON sam.asset_code = sai.asset_code\r\n      " +
@@ -905,13 +905,13 @@ namespace CMMSAPIs.Repositories
                 "   LEFT JOIN (\r\n            SELECT sic.cat_name,s2.ID as master_ID FROM smitemcategory sic\r\n          " +
                 "  LEFT JOIN smassetmasters s2 ON s2.item_category_ID = sic.ID\r\n        )  t2 ON t2.master_ID = sam.ID\r\n " +
                 "       LEFT JOIN facilities fc ON fc.id = po.facilityID\r\nLEFT JOIN users as vendor on vendor.id=po.vendorID " +
-                "       LEFT JOIN business bl ON bl.id = po.vendorID left join smassettypes stt on stt.ID = pod.order_type LEFT JOIN currency curr ON curr.id = po.currency" +
+                "       LEFT JOIN business bl ON bl.id = po.vendorID left join smassettypes stt on stt.ID = pod.order_type LEFT JOIN currency curr ON curr.id = po.currency LEFT JOIN employees ed ON ed.ID = po.generated_by" +
                 " WHERE "+ filter + "";
 
 
             List<CMGoodsOrderList> _List = await Context.GetData<CMGoodsOrderList>(query).ConfigureAwait(false);
 
-            List<CMGOMaster> _MasterList = _List.Select(p => new CMGOMaster
+            List<CMGOListByFilter> _MasterList = _List.Select(p => new CMGOListByFilter
             {
                 Id = p.purchaseID,
                 facility_id = p.facility_id,
@@ -938,7 +938,8 @@ namespace CMMSAPIs.Repositories
                 challan_no = p.challan_no,
                 purchaseDate = p.purchaseDate,
                 location_ID = p.location_ID,
-
+                cost = p.cost,
+                generatedBy = p.generatedBy
             }).GroupBy(p => p.Id).Select(group => group.First()).ToList();
         
 
@@ -947,7 +948,7 @@ namespace CMMSAPIs.Repositories
                 {
                     CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_MasterList[i].status);
                     string _shortStatus = getShortStatus(CMMS.CMMS_Modules.SM_PO, _Status);
-                    string _longStatus = getLongStatus(_Status, _MasterList[i]);
+                    string _longStatus = getLongStatus(_Status, _MasterList[i].Id);
 
                     _MasterList[i].status_short = _shortStatus;
                     _MasterList[i].status_long = _longStatus;
