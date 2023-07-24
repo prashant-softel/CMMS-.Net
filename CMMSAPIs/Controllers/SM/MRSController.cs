@@ -263,14 +263,31 @@ namespace CMMSAPIs.Controllers.SM
 
 
         [Authorize]
-        [Route("mrsReturnApproval")]
+        [Route("ApproveMRSReturn")]
         [HttpPost]
-        public async Task<IActionResult> mrsReturnApproval(CMMRS request)
+        public async Task<IActionResult> ApproveMRSReturn(CMApproval request)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _MRSBS.mrsReturnApproval(request, userID);
+                var data = await _MRSBS.ApproveMRSReturn(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                _AddLog.ErrorLog(ex.ToString());
+                throw ex;
+            }
+        }
+        [Authorize]
+        [Route("RejectMRSReturn")]
+        [HttpPost]
+        public async Task<IActionResult> RejectMRSReturn(CMApproval request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _MRSBS.RejectMRSReturn(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -319,7 +336,7 @@ namespace CMMSAPIs.Controllers.SM
 
         [Authorize]
         [Route("CreateMRSIssue")]
-        [HttpGet]
+        [HttpPost]
         public async Task<IActionResult> CreateMRSIssue(CMMRS request)
         {
             try
