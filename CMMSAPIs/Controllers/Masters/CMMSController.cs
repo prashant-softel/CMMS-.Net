@@ -352,6 +352,53 @@ namespace CMMSAPIs.Controllers.Masters
             }
         }
 
+        [Route("CreateInsuranceProvider")]
+        [HttpPost]
+        public async Task<IActionResult> CreateInsuranceProvider(CMIRInsuranceProvider request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _CMMSBS.CreateInsuranceProvider(request, userID);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        [Route("UpdateInsuranceProvider")]
+        [HttpPatch]
+        public async Task<IActionResult> UpdateInsuranceProvider(CMIRInsuranceProvider request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _CMMSBS.UpdateInsuranceProvider(request, userID);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        [Authorize]
+        [Route("DeleteInsuranceProvider")]
+        [HttpDelete]
+        public async Task<IActionResult> DeleteInsuranceProvider(int id)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _CMMSBS.DeleteInsuranceProvider(id, userID);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         [Route("GetSPVList")]
         [HttpGet]
         public async Task<IActionResult> GetSPVList()

@@ -34,6 +34,9 @@ namespace CMMSAPIs.BS.Masters
         Task<CMDefaultResponse> DeleteRiskType(int id, int userId);
         Task<List<CMIRInsuranceProvider>> GetInsuranceProviderList();
         Task<List<CMIRStatus>> GetInsuranceStatusList();
+        Task<CMDefaultResponse> CreateInsuranceProvider(CMIRInsuranceProvider request, int userId);
+        Task<CMDefaultResponse> UpdateInsuranceProvider(CMIRInsuranceProvider request, int userId);
+        Task<CMDefaultResponse> DeleteInsuranceProvider(int id, int userId);
         Task<List<CMSPV>> GetSPVList();
         Task<CMDefaultResponse> CreateSPV(CMSPV request, int userId);
         Task<CMDefaultResponse> UpdateSPV(CMSPV request, int userId);
@@ -338,7 +341,51 @@ namespace CMMSAPIs.BS.Masters
                 throw;
             }
         }
+        public async Task<CMDefaultResponse> CreateInsuranceProvider(CMIRInsuranceProvider request, int userId)
+        {
+            try
+            {
+                using (var repos = new CMMSRepository(getDB))
+                {
+                    return await repos.CreateInsuranceProvider(request, userId);
 
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> UpdateInsuranceProvider(CMIRInsuranceProvider request, int userId)
+        {
+            try
+            {
+                using (var repos = new CMMSRepository(getDB))
+                {
+                    return await repos.UpdateInsuranceProvider(request, userId);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> DeleteInsuranceProvider(int id, int userId)
+        {
+            try
+            {
+                using (var repos = new CMMSRepository(getDB))
+                {
+                    return await repos.DeleteInsuranceProvider(id, userId);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
         public async Task<CMDefaultResponse> CreateRiskType(CMIRRiskType request, int userId)
         {
             try

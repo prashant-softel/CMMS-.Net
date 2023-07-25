@@ -223,7 +223,31 @@ namespace CMMSAPIs.Repositories.Masters
             List<CMIRStatus> _risktype = await Context.GetData<CMIRStatus>(myQuery).ConfigureAwait(false);
             return _risktype;
         }
-
+        internal async Task<CMDefaultResponse> CreateInsuranceProvider(CMIRInsuranceProvider request, int userId)
+        {
+            string myQuery = $"INSERT INTO ir_insuranceprovider(name, status, addedBy, addedAt) VALUES " +
+                                $"('{request.name}', 1, {userId}, '{UtilsRepository.GetUTCTime()}'); " +
+                                 $"SELECT LAST_INSERT_ID(); ";
+            DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
+            int id = Convert.ToInt32(dt.Rows[0][0]);
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "InsuranceProvider Added");
+        }
+        internal async Task<CMDefaultResponse> UpdateInsuranceProvider(CMIRInsuranceProvider request, int userID)
+        {
+            string updateQry = "UPDATE ir_insuranceprovider SET ";
+            if (request.name != null && request.name != "")
+                updateQry += $"name = '{request.name}', ";
+            updateQry += $"updatedBy = '{userID}', updatedAt = '{UtilsRepository.GetUTCTime()}' WHERE id = {request.id};";
+            await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+            return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "InsuranceProvider Updated");
+        }
+        internal async Task<CMDefaultResponse> DeleteInsuranceProvider(int id, int userId)
+        {
+            string deleteQry = $"UPDATE ir_insuranceprovider " +
+                $" SET status = 0 , updatedBy = '{userId}' , updatedAt = '{UtilsRepository.GetUTCTime()}' WHERE id = {id};";
+            await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "InsuranceProvider Deleted");
+        }
         internal async Task<CMDefaultResponse> CreateRiskType(CMIRRiskType request, int userId)
         {
             string myQuery = $"INSERT INTO ir_risktype(risktype, description, status, addedBy, addedAt) VALUES " +
