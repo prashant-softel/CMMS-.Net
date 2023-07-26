@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -63,6 +63,8 @@ namespace CMMSAPIs.Models
         public decimal lost_qty { get; set; }
         public decimal requested_qty { get; set; }
         public decimal damaged_qty { get; set; }
+        public string paid_by_name { get; set; }
+        public int paid_by_ID { get; set; }
 
         public List<CMGO_ITEMS> go_items { get; set; }
     }
@@ -84,7 +86,7 @@ namespace CMMSAPIs.Models
         public double accepted_qty { get; set; }
         public double lost_qty { get; set; }
         public double requested_qty { get; set; }
-
+        public int paid_by_ID { get; set; }
 
 
 
@@ -242,7 +244,8 @@ namespace CMMSAPIs.Models
         //public int order_type { get; set; }
         public int receive_later { get; set; }
 
-
+        public string paid_by_name { get; set; }
+        public int paid_by_ID { get; set; }
     }
 
     public class CMGoodsOrderDetailList
