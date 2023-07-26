@@ -34,7 +34,10 @@ namespace CMMSAPIs.BS.SM
         Task<List<CMGETASSETDATALIST>> GetAssetDataList(int facility_id);
         Task<List<CMVendorList>> GetVendorList();
         Task<CMAssetBySerialNo> GetAssetBySerialNo(string serial_number);
-
+        Task<List<CMPaidBy>> GetPaidByList(int ID);
+        Task<CMDefaultResponse> AddPaidBy(CMPaidBy request, int UserID);
+        Task<CMDefaultResponse> UpdatePaidBy(CMPaidBy request, int UserID);
+        Task<CMDefaultResponse> DeletePaidBy(CMPaidBy request, int UserID);
     }
 
     public class SMMasterBS : ISMMasterBS
@@ -330,7 +333,65 @@ namespace CMMSAPIs.BS.SM
                 throw;
             }
         }
-        
+         public async Task<List<CMPaidBy>> GetPaidByList(int ID)
+        {
+            try
+            {
+                using (var repos = new SMMasterRepository(getDB))
+                {
+                    return await repos.GetPaidByList(ID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> AddPaidBy(CMPaidBy request, int UserID)
+        {
+            try
+            {
+                using (var repos = new SMMasterRepository(getDB))
+                {
+                    return await repos.AddPaidBy(request, UserID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> UpdatePaidBy(CMPaidBy request, int UserID)
+        {
+            try
+            {
+                using (var repos = new SMMasterRepository(getDB))
+                {
+                    return await repos.UpdatePaidBy(request, UserID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> DeletePaidBy(CMPaidBy request, int UserID)
+        {
+            try
+            {
+                using (var repos = new SMMasterRepository(getDB))
+                {
+                    return await repos.DeletePaidBy(request, UserID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
 
     }
 }
