@@ -396,5 +396,46 @@ namespace CMMSAPIs.Repositories.SM
             List<CMAssetBySerialNo> items = await Context.GetData<CMAssetBySerialNo>(myQuery).ConfigureAwait(false);
             return items[0];
         }
+
+                internal async Task<List<CMPaidBy>> GetPaidByList(int ID)
+        {
+            string myQuery = "";
+            if (ID > 0)
+            {
+                myQuery = "select * from smpaidby where id = "+ID+" and status=1;";
+            }
+            else
+            {
+                myQuery = "select * from smpaidby where status = 1;";
+            }
+
+            List<CMPaidBy> list = await Context.GetData<CMPaidBy>(myQuery).ConfigureAwait(false);
+            return list;
+        }
+
+        internal async Task<CMDefaultResponse> AddPaidBy(CMPaidBy request, int userID)
+        {
+            string mainQuery = $"INSERT INTO smpaidby (paid_by,status,created_at, created_by) VALUES ('" + request.paid_by + "',1,'"+DateTime.Now.ToString("yyyy-MM-dd HH:mm") +"', "+userID+"); SELECT LAST_INSERT_ID();";
+            DataTable dt2 = await Context.FetchData(mainQuery).ConfigureAwait(false);
+            int id = Convert.ToInt32(dt2.Rows[0][0]);
+            CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Paid by added successfully.");
+            return response;
+        }
+
+        internal async Task<CMDefaultResponse> UpdatePaidBy(CMPaidBy request, int userID)
+        {
+            string mainQuery = $"UPDATE smpaidby SET paid_by = '" + request.paid_by + "',updated_at='"+DateTime.Now.ToString("yyyy-MM-dd HH:mm")+"', updated_by = " + userID + " WHERE ID = " + request.ID + "";
+            await Context.ExecuteNonQry<int>(mainQuery);
+            CMDefaultResponse response = new CMDefaultResponse(request.ID, CMMS.RETRUNSTATUS.SUCCESS, "Paid by updated successfully.");
+            return response;
+        }
+
+        internal async Task<CMDefaultResponse> DeletePaidBy(CMPaidBy request, int userID)
+        {
+            string mainQuery = $"UPDATE smpaidby SET status = 0 where ID = " + request.ID + "";
+            await Context.ExecuteNonQry<int>(mainQuery);
+            CMDefaultResponse response = new CMDefaultResponse(request.ID, CMMS.RETRUNSTATUS.SUCCESS, "Paid by deleted.");
+            return response;
+        }
     }
 }
