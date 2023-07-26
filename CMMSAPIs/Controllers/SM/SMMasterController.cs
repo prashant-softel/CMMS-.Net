@@ -380,5 +380,77 @@ namespace CMMSAPIs.Controllers.SM
                 throw;
             }
         }
+
+        
+        // Paid By API's
+        [Authorize]
+        [Route("GetPaidByList")]
+        [HttpGet]
+        public async Task<IActionResult> GetPaidByList(int id)
+        {
+            try
+            {
+                var data = await _SMMasterBS.GetPaidByList(id);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+
+        [Authorize]
+        [Route("AddPaidBy")]
+        [HttpPost]
+        public async Task<IActionResult> AddPaidBy(CMPaidBy request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _SMMasterBS.AddPaidBy(request,  userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+
+        [Authorize]
+        [Route("UpdatePaidBy")]
+        [HttpPost]
+        public async Task<IActionResult> UpdatePaidBy(CMPaidBy request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _SMMasterBS.UpdatePaidBy(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+
+        [Authorize]
+        [Route("DeletePaidBy")]
+        [HttpPost]
+        public async Task<IActionResult> DeletePaidBy(CMPaidBy request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _SMMasterBS.DeletePaidBy(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
     }
 }
