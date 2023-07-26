@@ -198,8 +198,8 @@ namespace CMMSAPIs.Repositories
 
                 for (var i = 0; i < request.go_items.Count; i++)
                 {
-                    string poDetailsQuery = $"INSERT INTO smpurchaseorderdetails (purchaseID,assetItemID,cost,ordered_qty,location_ID) " +
-                    "values(" + poid + ", " + request.go_items[i].assetItemID + ",  " + request.go_items[i].cost + ", " + request.go_items[i].ordered_qty + ", " + request.location_ID + ") ; SELECT LAST_INSERT_ID();";
+                    string poDetailsQuery = $"INSERT INTO smpurchaseorderdetails (purchaseID,assetItemID,cost,ordered_qty,location_ID, paid_by_ID) " +
+                    "values(" + poid + ", " + request.go_items[i].assetItemID + ",  " + request.go_items[i].cost + ", " + request.go_items[i].ordered_qty + ", " + request.location_ID + ", " + request.go_items[i].paid_by_ID +") ; SELECT LAST_INSERT_ID();";
                     DataTable dtInsertPO = await Context.FetchData(poDetailsQuery).ConfigureAwait(false);
                     int id = Convert.ToInt32(dtInsertPO.Rows[0][0]);
                 }
@@ -221,7 +221,7 @@ namespace CMMSAPIs.Repositories
 
             for (var i = 0; i < request.go_items.Count; i++)
             {
-                string itemsQuery = $"UPDATE smpurchaseorderdetails SET location_ID = {request.location_ID},assetItemID = {request.go_items[i].assetItemID},cost = {request.go_items[i].cost}, accepted_qty = {request.go_items[i].ordered_qty + request.go_items[i].received_qty},ordered_qty = {request.go_items[i].ordered_qty} , requested_qty = {request.go_items[i].requested_qty}, received_qty= {request.go_items[i].received_qty},lost_qty = {request.go_items[i].lost_qty}, damaged_qty={request.go_items[i].damaged_qty}" +
+                string itemsQuery = $"UPDATE smpurchaseorderdetails SET location_ID = {request.location_ID},assetItemID = {request.go_items[i].assetItemID},cost = {request.go_items[i].cost}, accepted_qty = {request.go_items[i].ordered_qty + request.go_items[i].received_qty},ordered_qty = {request.go_items[i].ordered_qty} , requested_qty = {request.go_items[i].requested_qty}, received_qty= {request.go_items[i].received_qty},lost_qty = {request.go_items[i].lost_qty}, damaged_qty={request.go_items[i].damaged_qty}, paid_by_ID = {request.go_items[i].paid_by_ID}" +
                     $" WHERE ID = {request.go_items[i].goItemID}";
                 var result = await Context.ExecuteNonQry<int>(itemsQuery);
             }
@@ -802,7 +802,7 @@ namespace CMMSAPIs.Repositories
                 "f1.file_path,f1.Asset_master_id,sm.decimal_status,sm.spare_multi_selection,po.generated_by,pod.order_type as asset_type_ID_OrderDetails, receive_later, " +
                 "added_to_store,   \r\n      " +
                 "  po.challan_no, po.po_no, po.freight, po.transport, po.no_pkg_received, po.lr_no, po.condition_pkg_received, " +
-                "po.vehicle_no, po.gir_no, po.challan_date, po.job_ref, po.amount,  po.currency as currencyID , curr.name as currency , stt.asset_type as asset_type_Name,  po_no, po_date, requested_qty,lost_qty, ordered_qty\r\n      " +
+                "po.vehicle_no, po.gir_no, po.challan_date, po.job_ref, po.amount,  po.currency as currencyID , curr.name as currency , stt.asset_type as asset_type_Name,  po_no, po_date, requested_qty,lost_qty, ordered_qty\r\n    ,paid_by_ID, smpaidby.paid_by paid_by_name " +
                 "  FROM smpurchaseorderdetails pod\r\n        LEFT JOIN smpurchaseorder po ON po.ID = pod.purchaseID\r\n     " +
                 "   LEFT JOIN smassetitems sai ON sai.ID = pod.assetItemID\r\n       " +
                 " LEFT JOIN smassetmasters sam ON sam.asset_code = sai.asset_code\r\n      " +
@@ -815,7 +815,7 @@ namespace CMMSAPIs.Repositories
                 "   LEFT JOIN (\r\n            SELECT sic.cat_name,s2.ID as master_ID FROM smitemcategory sic\r\n          " +
                 "  LEFT JOIN smassetmasters s2 ON s2.item_category_ID = sic.ID\r\n        )  t2 ON t2.master_ID = sam.ID\r\n " +
                 "       LEFT JOIN facilities fc ON fc.id = po.facilityID\r\nLEFT JOIN users as vendor on vendor.id=po.vendorID " +
-                "       LEFT JOIN business bl ON bl.id = po.vendorID left join smassettypes stt on stt.ID = pod.order_type LEFT JOIN currency curr ON curr.id = po.currency" +
+                "       LEFT JOIN business bl ON bl.id = po.vendorID left join smassettypes stt on stt.ID = pod.order_type LEFT JOIN currency curr ON curr.id = po.currency LEFT JOIN smpaidby as smpaidby on smpaidby.ID = pod.paid_by_ID " +
                 " WHERE po.ID = " + id + " /*GROUP BY pod.ID*/";
             List<CMGoodsOrderList> _List = await Context.GetData<CMGoodsOrderList>(query).ConfigureAwait(false);
 
@@ -866,6 +866,8 @@ namespace CMMSAPIs.Repositories
                     lost_qty = p.lost_qty,
                     damaged_qty = p.damaged_qty,
                     ordered_qty = p.ordered_qty,
+                    paid_by_name = p.paid_by_name,
+                    paid_by_ID = p.paid_by_ID
                 }).ToList();
                 _MasterList.GODetails = _itemList;
 
