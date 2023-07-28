@@ -101,7 +101,7 @@ namespace CMMSAPIs.Repositories.Masters
              * Update the changed value in CheckList_Number for requested id
              * Code goes here
             */
-            string updateQry = $"UPDATE  softel_cmms.checklist_number SET ";
+            string updateQry = $"UPDATE  checklist_number SET ";
             if (request.checklist_number != null && request.checklist_number != "")
                 updateQry += $" checklist_number = '{request.checklist_number}', ";
             if (request.type > 0)
@@ -133,7 +133,7 @@ namespace CMMSAPIs.Repositories.Masters
              * Set Status to 0 in CheckList_Number table for requested id
              * Code goes here
             */
-            string deleteQry = $"DELETE FROM  softel_cmms.checklist_number " +
+            string deleteQry = $"DELETE FROM  checklist_number " +
                $"WHERE  id  = {id};";
             await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.CHECKLIST_NUMBER, id, 0, 0, "Check List Deleted", CMMS.CMMS_Status.DELETED, userID);
