@@ -1,4 +1,6 @@
+using iTextSharp.text;
 using System;
+using System.Collections.Generic;
 
 namespace CMMSAPIs.Models.SM
 {
@@ -110,8 +112,8 @@ namespace CMMSAPIs.Models.SM
     {
         public int emp_ID { get; set; }
         public string emp_name { get; set; }
-
         public List<CMEmpStockItems> CMMRSItems { get; set; }
+
     }
 
     public class CMEmpStockItems
