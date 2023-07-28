@@ -32,6 +32,7 @@ namespace CMMSAPIs.BS.SM
         Task<CMDefaultResponse> CreateMRSIssue(CMMRS request, int UserID);
         Task<CMDefaultResponse> ApproveMRSIssue(CMApproval request, int userId);
         Task<CMDefaultResponse> RejectMRSIssue(CMApproval request, int userId);
+        Task<List<CMMRSList>> GetEmployeeStock(int facility_ID, int emp_id);
     }
     public class MRSBS : IMRSBS
     {
@@ -338,7 +339,20 @@ namespace CMMSAPIs.BS.SM
                 throw;
             }
         }
-
+        public async Task<List<CMMRSList>> GetEmployeeStock(int facility_ID, int emp_id)
+        {
+            try
+            {
+                using (var repos = new MRSRepository(getDB))
+                {
+                    return await repos.GetEmployeeStock(facility_ID, emp_id);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
     }
 
 }
