@@ -106,4 +106,19 @@ namespace CMMSAPIs.Models.SM
         public string remarks_in_short { get; set; }
 
     }
+        public class CMEmployeeStockList
+    {
+        public int emp_ID { get; set; }
+        public string emp_name { get; set; }
+
+        public List<CMEmpStockItems> CMMRSItems { get; set; }
+    }
+
+    public class CMEmpStockItems
+    {
+        public int ID { get; set; }
+        public string item_name { get; set; }
+        public decimal quantity { get; set; }
+
+    }
 }
