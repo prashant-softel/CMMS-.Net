@@ -386,5 +386,21 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
+        [Authorize]
+        [Route("GetEmployeeStock")]
+        [HttpGet]
+        public async Task<IActionResult> GetEmployeeStock(int facility_ID, int emp_id)
+        {
+            try
+            {
+                var data = await _MRSBS.GetEmployeeStock(facility_ID, emp_id);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                _AddLog.ErrorLog(ex.ToString());
+                throw ex;
+            }
+        }
     }
 }

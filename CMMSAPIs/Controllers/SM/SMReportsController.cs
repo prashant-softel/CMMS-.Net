@@ -1,4 +1,4 @@
-using CMMSAPIs.BS.SM;
+﻿using CMMSAPIs.BS.SM;
 using CMMSAPIs.Helper;
 using CMMSAPIs.Models.SM;
 using CMMSAPIs.Models.Users;
@@ -87,6 +87,22 @@ namespace CMMSAPIs.Controllers.SM
             try
             {
                 var data = await _SMReportsBS.GetEmployeeTransactionReport(isAllEmployees, facility_id, Emp_ID, StartDate, EndDate);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
+        [Route("GetEmployeeStock")]
+        [HttpGet]
+        public async Task<IActionResult> GetEmployeeStock(int facility_ID, int emp_id)
+        {
+            try
+            {
+                var data = await _SMReportsBS.GetEmployeeStock(facility_ID, emp_id);
                 return Ok(data);
             }
             catch (Exception ex)
