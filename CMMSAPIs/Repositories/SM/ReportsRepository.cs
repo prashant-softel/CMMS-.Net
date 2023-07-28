@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -247,6 +247,49 @@ namespace CMMSAPIs.Repositories.SM
             }
             return EmployeeTransactionReportList;
         }
+
+
+        internal async Task<CMEmployeeStockList> GetEmployeeStock(int facility_ID, int emp_id)
+        {
+            List<string> Asset_Item_Ids = new List<string>();
+            List<CMEmployeeStockReport> EmployeeStockReportList = new List<CMEmployeeStockReport>();
+
+            string Plant_Stock_Opening_Details_query = "SELECT fc.name as facilityName, fc.isBlock as Facility_Is_Block, '' as Facility_Is_Block_of_name," +
+                " CONCAT(ed.firstName, ' ', ed.lastName) as requested_by_name, sm_trans.assetItemID, a_master.asset_name, a_master.asset_code, a_master.asset_type_ID, " +
+                "SUM(sm_trans.creditQty) - SUM(sm_trans.debitQty) as Opening, SUM(sm_trans.creditQty) as inward, SUM(sm_trans.debitQty) as outward " +
+                "FROM smtransition as sm_trans " +
+                "JOIN smassetitems as a_item ON sm_trans.assetItemID = a_item.ID " +
+                "JOIN smassetmasters as a_master ON a_master.asset_code = a_item.asset_code " +
+                "LEFT JOIN facilities fc ON fc.id = a_item.facility_ID " +
+                "LEFT JOIN employees ed ON sm_trans.actorID = ed.ID " +
+                "WHERE  sm_trans.actorID = " + emp_id + " AND sm_trans.actorType = '" + (int)CMMS.SM_Types.Engineer + "' AND a_item.facility_ID = '" + facility_ID + "' " +
+                " GROUP BY a_item.asset_code";
+
+            List<CMEmployeeStockReport> Plant_Stock_Opening_Details_Reader = await Context.GetData<CMEmployeeStockReport>(Plant_Stock_Opening_Details_query).ConfigureAwait(false);
+
+            CMEmployeeStockList cMEmployeeStockList = new CMEmployeeStockList();
+            int cnt = 0;
+            string plant_name = "";
+            cMEmployeeStockList.emp_ID = emp_id;
+            cMEmployeeStockList.emp_name = Plant_Stock_Opening_Details_Reader[0].requested_by_name;
+            List<CMEmpStockItems> itemList = new List<CMEmpStockItems>();
+            foreach (var item in Plant_Stock_Opening_Details_Reader)
+            {
+                
+                CMEmpStockItems openingBalance = new CMEmpStockItems();
+                openingBalance.ID = item.assetItemID;
+                openingBalance.item_name = Convert.ToString(item.asset_name);
+                openingBalance.quantity = item.Opening;
+
+
+                itemList.Add(openingBalance);
+
+                cnt++;
+            }
+            cMEmployeeStockList.CMMRSItems = itemList;
+            return cMEmployeeStockList;
+        }
+
 
     }
 }
