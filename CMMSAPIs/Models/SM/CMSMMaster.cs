@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -136,7 +136,7 @@ namespace CMMSAPIs.Models.SM
         public decimal received_qty { get; set; }
         public decimal used_qty { get; set; }
         public decimal available_qty { get; set; }
-        public int isDamaged { get; set; }
+        public int is_faulty { get; set; }
         public string issue_remarks { get; set; }
     }
 
@@ -331,7 +331,7 @@ namespace CMMSAPIs.Models.SM
 
     }
 
-        public class CMPaidBy
+    public class CMPaidBy
     {
         public int ID { get; set; }
         public string paid_by { get; set; }
@@ -340,5 +340,21 @@ namespace CMMSAPIs.Models.SM
         public int created_by { get; set; }
         public DateTime updated_at { get; set; }
         public int updated_by { get; set; }
+    }
+    public class CMEmployeeStock
+    {
+        public int ID { get; set; }
+        public int emp_ID { get; set; }
+        public string emp_name { get; set; }
+
+        public List<CMStockItems> CMMRSItems { get; set; }
+    }
+
+    public class CMStockItems
+    {
+        public int ID { get; set; }
+        public int item_name { get; set; }
+        public decimal quantity { get; set; }
+
     }
 }
