@@ -197,24 +197,35 @@ namespace CMMSAPIs.Models.MC
 
     public class CMMCEquipmentList
     {
-        public int id { get; set; }
-        public int parentId { get; set; }
-        public string name { get; set; }
+        public int invId { get; set; }
+        public string invName { get; set; }
         public int moduleQuantity { get; set; }
+        public List<CMSMB> smbs { get; set; } = new List<CMSMB>();
+
+
         // public int area { get; set; }
+    }
+    public class CMSMB
+    {
+        public int parentId { get; set; }
+        public int smbId { get; set; }
+        public string smbName { get; set; }
+        public int moduleQuantity { get; set; }
+
     }
     public class CMVegEquipmentList
     {
         public int blockId { get; set; }
         public string blockName { get; set; }
-        public List<CMInv> invs { get; set; }
+        public int area { get; set; }
+        public List<CMInv> invs { get; set; } = new List<CMInv>();
 
     }
     public class CMInv
     {
-        public int id { get; set; }
         public int blockId { get; set; }
-        public string name { get; set; }
+        public int invId { get; set; }
+        public string invName { get; set; }
         public int area { get; set; }
 
     }
