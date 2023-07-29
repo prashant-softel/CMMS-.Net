@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -1121,7 +1121,7 @@ namespace CMMSAPIs.Repositories.SM
             return response;
         }
 
-        internal async Task<List<CMMRSList>> GetEmployeeStock(int facility_ID, int emp_id)
+        internal async Task<List<CMMRSList>> GetMRSReturnList(int facility_ID, int emp_id)
         {
             string stmt = "SELECT sm.ID,sm.requested_by_emp_ID as ,CONCAT(ed1.firstName,' ',ed1.lastName) as approver_name," +
     "DATE_FORMAT(sm.returnDate,'%Y-%m-%d') as returnDate,if(sm.approval_status != '',DATE_FORMAT(sm.approved_date,'%d-%m-%Y'),'') as approval_date,sm.approval_status," +
