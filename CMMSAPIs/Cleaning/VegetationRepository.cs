@@ -22,38 +22,38 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             moduleType = (int)cleaningType.Vegetation;
         }
 
-        internal new async Task<List<CMVegEquipmentList>> GetEquipmentList(int facilityId)
+        internal async Task<List<CMVegEquipmentList>> GetEquipmentList(int facilityId)
         {
-
+            string filter = "";
             string Query = $"select id as blockId,  name as blockName from facilities ";
 
             if (facilityId > 0)
             {
                 Query += $" where facilityId={facilityId} ";
+                filter += $" and facilityId={facilityId} ";
             }
 
             List<CMVegEquipmentList> blocks = await Context.GetData<CMVegEquipmentList>(Query).ConfigureAwait(false);
-            string blockId = "";
-            foreach (var block in blocks)
-            {
-                blockId += $"{block.blockId},";
-            }
 
-            blockId = blockId.Substring(0, blockId.Length - 1);
+            //string blockId = "";
+            //foreach (var block in blocks)
+            //{
+            //    blockId += $"{block.blockId},";
+            //}
 
-            string InvQuery = $"select id, name ,blockId ,area from assets where blockId IN ({blockId}) ";
+            //blockId = blockId.Substring(0, blockId.Length - 1);
+
+            string InvQuery = $"select id as invId, name as invName , blockId ,area from assets where categoryId = 2 {filter} ";
             List<CMInv> Invs = await Context.GetData<CMInv>(Query).ConfigureAwait(false);
 
 
             foreach (CMVegEquipmentList block in blocks)
             {
-                block.invs = new List<CMInv>();
-
-                foreach (CMInv Inv in Invs)
+                foreach (CMInv inv in Invs)
                 {
-                    if (block.blockId == Inv.blockId)
+                    if (block.blockId == inv.blockId)
                     {
-                        block.invs.Add(Inv);
+                        block.invs.Add(inv);
                     }
 
                 }

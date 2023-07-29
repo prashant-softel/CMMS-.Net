@@ -480,61 +480,73 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             return response;
         }
 
-        internal async Task<List<CMMCEquipmentList>> GetEquipmentList(int facilityId)
+        internal virtual async Task<List<CMMCEquipmentList>> GetEquipmentList(int facilityId)
         {
-
-            string Query = $"select id, name , parentId, moduleQuantity from assets ";
+            string filter = "";
 
             if (facilityId > 0)
             {
-                Query += $" where facilityId={facilityId} ";
+                filter += $" and facilityId={facilityId} ";
             }
 
-            List<CMMCEquipmentList> equipments = await Context.GetData<CMMCEquipmentList>(Query).ConfigureAwait(false);
+            string invQuery = $"select id as invId, name as invName from assets where categoryId = 2 {filter}";
 
-            return equipments;
+            List<CMMCEquipmentList> invs = await Context.GetData<CMMCEquipmentList>(invQuery).ConfigureAwait(false);
+
+
+            string smbQuery = $"select id as smbId, name as smbName , parentId, moduleQuantity from assets where categoryId = 4 {filter}";
+           
+            List<CMSMB> smbs = await Context.GetData<CMSMB>(smbQuery).ConfigureAwait(false);
+
+            //List<CMSMB> invSmbs = new List<CMSMB>;
+
+            foreach (CMMCEquipmentList inv in invs)
+            {   
+                foreach (CMSMB smb in smbs)
+                {
+                    if(inv.invId == smb.parentId)
+                    {
+                        inv.moduleQuantity += smb.moduleQuantity;
+                        inv?.smbs.Add(smb);
+                    }
+                }
+
+            }
+            return invs;
         }
 
         internal async Task<List<CMVegEquipmentList>> GetVegEquipmentList(int facilityId)
         {
-
-            string Query = $"select id as blockId,  name as blockName from facilities ";
+            string filter = "";
+            string Query = $"select id as blockId,  name as blockName from facilities  where isBlock = 1";
 
             if (facilityId > 0)
             {
-                Query += $" where facilityId={facilityId} ";
+                filter += $" and facilityId={facilityId} ";
             }
 
             List<CMVegEquipmentList> blocks = await Context.GetData<CMVegEquipmentList>(Query).ConfigureAwait(false);
-            string blockId = "";
-            foreach (var block in blocks)
-            {
-                blockId += $"{block.blockId},";
-            }
 
-            blockId = blockId.Substring(0, blockId.Length - 1);
 
-            string InvQuery = $"select id, name ,blockId ,area from assets where blockId IN ({blockId}) ";
-            List<CMInv> Invs = await Context.GetData<CMInv>(Query).ConfigureAwait(false);
+            string InvQuery = $"select id as invId, name as invName , blockId ,area from assets where categoryId = 2 {filter} ";
+
+            List<CMInv> Invs = await Context.GetData<CMInv>(InvQuery).ConfigureAwait(false);
 
 
             foreach (CMVegEquipmentList block in blocks)
             {
-                block.invs = new List<CMInv>();
-
-                foreach (CMInv Inv in Invs)
+                foreach (CMInv inv in Invs)
                 {
-                    if (block.blockId == Inv.blockId)
+                    if (block.blockId == inv.blockId)
                     {
-                        block.invs.Add(Inv);
+                        block.area += inv.area;
+                        block.invs.Add(inv);
                     }
 
                 }
             }
             return blocks;
         }
-
-
 
 
     }
