@@ -25,7 +25,7 @@ namespace CMMSAPIs.Models.Jobs
         public string breakdown_type { get; set; }
         public string job_title { get; set; }
         public string job_description { get; set; }
-        public dynamic breakdown_time { get; set; }
+        public DateTime? breakdown_time { get; set; }
         public int current_ptw_id { get; set; }
         public string current_ptw_title { get; set; }
 
