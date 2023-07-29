@@ -1123,7 +1123,7 @@ namespace CMMSAPIs.Repositories.SM
 
         internal async Task<List<CMMRSList>> GetMRSReturnList(int facility_ID, int emp_id)
         {
-            string stmt = "SELECT sm.ID,sm.requested_by_emp_ID as ,CONCAT(ed1.firstName,' ',ed1.lastName) as approver_name," +
+            string stmt = "SELECT sm.ID,sm.requested_by_emp_ID as requested_by_emp_ID,CONCAT(ed1.firstName,' ',ed1.lastName) as approver_name," +
     "DATE_FORMAT(sm.returnDate,'%Y-%m-%d') as returnDate,if(sm.approval_status != '',DATE_FORMAT(sm.approved_date,'%d-%m-%Y'),'') as approval_date,sm.approval_status," +
     "sm.approval_comment,CONCAT(ed.firstName,' ',ed.lastName) as requested_by_name, sm.status, sm.activity, sm.whereUsedType, sm.whereUsedTypeId, COALESCE(sm.remarks,'') as  remarks " +
     "FROM smmrs sm LEFT JOIN users ed ON ed.id = sm.requested_by_emp_ID LEFT JOIN users ed1 ON ed1.id = sm.approved_by_emp_ID " +
