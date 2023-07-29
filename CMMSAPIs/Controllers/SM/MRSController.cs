@@ -1,4 +1,4 @@
-﻿using CMMSAPIs.BS.SM;
+using CMMSAPIs.BS.SM;
 using CMMSAPIs.Helper;
 using CMMSAPIs.Models.SM;
 using CMMSAPIs.Models.Users;
@@ -387,13 +387,13 @@ namespace CMMSAPIs.Controllers.SM
         }
 
         [Authorize]
-        [Route("GetEmployeeStock")]
+        [Route("GetMRSReturnList")]
         [HttpGet]
-        public async Task<IActionResult> GetEmployeeStock(int facility_ID, int emp_id)
+        public async Task<IActionResult> GetMRSReturnList(int facility_ID, int emp_id)
         {
             try
             {
-                var data = await _MRSBS.GetEmployeeStock(facility_ID, emp_id);
+                var data = await _MRSBS.GetMRSReturnList(facility_ID, emp_id);
                 return Ok(data);
             }
             catch (Exception ex)
