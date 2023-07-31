@@ -83,11 +83,11 @@ namespace CMMSAPIs.Controllers.Users
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
                 var data = await _userAccessBs.ImportUsers(file_id, userID);
                 return Ok(data);
-            }
+            }/*
             catch (ArgumentException ex)
             {
                 return BadRequest(ex.Message);
-            }
+            }*/
             catch (Exception ex)
             {
                 throw;
