@@ -48,38 +48,47 @@ namespace CMMSAPIs.Repositories.EM
             }
             return new CMDefaultResponse(idList, CMMS.RETRUNSTATUS.SUCCESS, "Escalation Details Added");
         }
-        public async Task<CMSetMasterEM> GetEscalationMatrix(CMMS.CMMS_Modules module)
+        public async Task<List<CMSetMasterEM>> GetEscalationMatrix(CMMS.CMMS_Modules module)
         {
             /*
              * Gets the escalation matrix from EscalationMatrix table
              */
-            if (module == 0)
-                throw new ArgumentException("Module number is required");
-            CMSetMasterEM matrix = new CMSetMasterEM()
+
+            string moduleCase = "CASE ";
+            foreach (CMMS.CMMS_Modules mod in Enum.GetValues(typeof(CMMS.CMMS_Modules)))
             {
-                module_id = (int)module,
-                module_name = $"{module}"
-            };
-            string statusCase = "CASE ";
-            foreach(CMMS.CMMS_Status status in Enum.GetValues(typeof(CMMS.CMMS_Status)))
-            {
-                statusCase += $"WHEN statusId = {(int)status} THEN '{status}' ";
+                moduleCase += $"WHEN moduleId = {(int)mod} THEN '{mod}' ";
             }
-            statusCase += "ELSE 'Invalid' END";
-            string getStatusList = $"SELECT statusId as status_id, {statusCase} as status_name FROM escalationmatrix WHERE moduleId = {matrix.module_id} GROUP BY statusId;";
-            List<CMMasterEM> statusList = await Context.GetData<CMMasterEM>(getStatusList).ConfigureAwait(false);
-            foreach(CMMasterEM status in statusList)
+            moduleCase += "ELSE 'Invalid' END";
+            string getModuleList = $"SELECT moduleId as module_id, {moduleCase} as module_name FROM escalationmatrix ";
+            if (module > 0)
+                getModuleList += $"WHERE moduleId = {(int)module} ";
+            getModuleList += "GROUP BY moduleId;";
+            List<CMSetMasterEM> matrix = await Context.GetData<CMSetMasterEM>(getModuleList).ConfigureAwait(false);
+            foreach(CMSetMasterEM mod in matrix)
             {
-                string escalationQry = $"SELECT days, role.id as role_id, role.name as role_name FROM escalationmatrix " +
-                                        $"LEFT JOIN userroles as role ON role.id = escalationmatrix.roleId " +
-                                        $"WHERE statusId = {status.status_id};";
-                List<CMEscalation> escalation = await Context.GetData<CMEscalation>(escalationQry).ConfigureAwait(false);
-                status.escalation = escalation;
+                string statusCase = "CASE ";
+                foreach (CMMS.CMMS_Status status in Enum.GetValues(typeof(CMMS.CMMS_Status)))
+                {
+                    statusCase += $"WHEN statusId = {(int)status} THEN '{status}' ";
+                }
+                statusCase += "ELSE 'Invalid' END";
+                string getStatusList = $"SELECT statusId as status_id, {statusCase} as status_name FROM escalationmatrix WHERE moduleId = {mod.module_id} GROUP BY statusId;";
+                List<CMMasterEM> statusList = await Context.GetData<CMMasterEM>(getStatusList).ConfigureAwait(false);
+                foreach (CMMasterEM status in statusList)
+                {
+                    string escalationQry = $"SELECT days, role.id as role_id, role.name as role_name FROM escalationmatrix " +
+                                            $"LEFT JOIN userroles as role ON role.id = escalationmatrix.roleId " +
+                                            $"WHERE statusId = {status.status_id} ORDER BY days;";
+                    List<CMEscalation> escalation = await Context.GetData<CMEscalation>(escalationQry).ConfigureAwait(false);
+                    status.escalation = escalation;
+                }
+                mod.status_escalation = statusList;
             }
-            matrix.status_escalation = statusList;
+            
             return matrix;
         }
-        public async Task<CMDefaultResponse> Escalate(CMMS.CMMS_Modules module, int module_ref_id)
+        public async Task<CMEscalationResponse> Escalate(CMMS.CMMS_Modules module, int module_ref_id)
         {
             /*
              * Checks the current UTC time with the time since status was last updated
@@ -88,15 +97,68 @@ namespace CMMSAPIs.Repositories.EM
              * Also sends notification to all users under the plant
              * 
              */
+            CMEscalationResponse response = null;
+            string qry1 = $"SELECT status, CASE WHEN createdAt = '0000-00-00 00:00:00' THEN NULL ELSE createdAt END AS createDate " +
+                            $"FROM history WHERE (moduleType = {(int)module} OR secondaryModuleRefType = {(int)module}) " +
+                            $"AND (moduleRefId = {module_ref_id} OR secondaryModuleRefId = {module_ref_id}) ORDER BY createdAt DESC;";
+            DataTable dt1 = await Context.FetchData(qry1).ConfigureAwait(false);
+            int status = Convert.ToInt32(dt1.Rows[0]["status"]);
+            string qry2 = $"SELECT days, roleId FROM escalationmatrix WHERE moduleId = {(int)module} AND statusId = {status} " +
+                            $"ORDER BY days ASC;";
+            DataTable dt2 = await Context.FetchData(qry2).ConfigureAwait(false);
+            Dictionary<int, int> escalation = new Dictionary<int, int>();
+            escalation.Merge(dt2.GetColumn<int>("days"), dt2.GetColumn<int>("roleId"));
+            var diff = DateTime.UtcNow.Date - Convert.ToDateTime(dt1.Rows[0]["createDate"]).Date;
+            try
+            {
+                string qry3 = $"INSERT INTO escalationlog (moduleId, moduleRefId, moduleStatus, escalatedToRoleId, escalatedAt) VALUES " +
+                                $"({(int)module}, {module_ref_id}, {status}, {escalation[diff.Days]}, '{UtilsRepository.GetUTCTime()}'); " +
+                                $"SELECT LAST_INSERT_ID(); ";
+                DataTable dt3 = await Context.FetchData(qry3).ConfigureAwait(false);
+                int newId = Convert.ToInt32(dt3.Rows[0][0]);
+                string qry4 = $"SELECT id, loginId FROM users WHERE roleId >= {escalation[diff.Days]};";
+                DataTable dt4 = await Context.FetchData(qry4).ConfigureAwait(false);
+                List<int> userIds = dt4.GetColumn<int>("id");
+                string qry5 = "INSERT INTO escalationsentto (escalationLogId, notifSentTo) VALUES ";
+                foreach(int user in userIds)
+                {
+                    
+                    qry5 += $"({newId}, {user}), ";
+                }
+                qry5 = qry5.Substring(0, qry5.Length - 2);
+                await Context.ExecuteNonQry<int>(qry5).ConfigureAwait(false);
+                response = new CMEscalationResponse(module, module_ref_id, CMMS.RETRUNSTATUS.SUCCESS, "Escalation performed successfully");
+            }
+            catch (KeyNotFoundException)
+            {
 
-            return null;
+            }
+            return response;
         }
-        public async Task<CMEscalationLog> ShowEscalationLog(CMMS.CMMS_Modules module, int module_ref_id)
+        public async Task<List<CMEscalationLog>> ShowEscalationLog(CMMS.CMMS_Modules module, int module_ref_id)
         {
             /*
              * Returns the escalation log for the reference ID of module
              */
-            return null;
+            string statusCase = "CASE ";
+            foreach (CMMS.CMMS_Status status in Enum.GetValues(typeof(CMMS.CMMS_Status)))
+            {
+                statusCase += $"WHEN moduleStatus = {(int)status} THEN '{status}' ";
+            }
+            statusCase += "ELSE 'Invalid' END";
+            string moduleCase = "CASE ";
+            foreach (CMMS.CMMS_Modules modules in Enum.GetValues(typeof(CMMS.CMMS_Modules)))
+            {
+                moduleCase += $"WHEN moduleId = {(int)modules} THEN '{modules}' ";
+            }
+            moduleCase += "ELSE 'Invalid' END";
+            string myQuery = $"SELECT moduleId as module_id, {moduleCase} as module_name, moduleStatus as status_id, " +
+                                $"{statusCase} as status_name, moduleRefId as module_ref_id, escalatedAt as escalation_time, " +
+                                $"role.id as escalated_to_role_id, role.name as escalated_to_role_name " +
+                                $"FROM escalationlog as log LEFT JOIN userroles as role ON log.escalatedToRoleId = role.id " +
+                                $"WHERE moduleId = {(int)module} AND moduleRefId = {module_ref_id}";
+            List<CMEscalationLog> log = await Context.GetData<CMEscalationLog>(myQuery).ConfigureAwait(false);
+            return log;
         }
     }
 }
