@@ -64,12 +64,14 @@ namespace CMMSAPIs.Models.Users
         public DateTime? joiningDate { get; set; }
         public int blood_group_id { get; set; }
         public string blood_group_name { get; set; }
+        public CMUser report_to { get; set; }
         public List<CMPlantAccess> plant_list { get; set; }
     }
     public class CMUpdateUser : CMUserDetail
     {
         public List<int> facilities { get; set; }
         public CMUserCrentials credentials { get; set; }
+        public int report_to_id { get; set; }
         public bool flagUpdateAccess { get; set; }
         public bool flagUpdateNotifications { get; set; }
     }
@@ -77,6 +79,7 @@ namespace CMMSAPIs.Models.Users
     {
         public List<int> facilities { get; set; }
         public CMUserCrentials credentials { get; set; }
+        public int report_to_id { get; set; }
         public List<CMAccessList> access_list { get; set; }
         public List<CMNotificationList> notification_list { get; set; }
     }

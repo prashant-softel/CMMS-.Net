@@ -187,6 +187,26 @@ namespace CMMSAPIs.Helper
             return isEmailValid;
         }
 
+        public static IEnumerable<string> ToUpper(this IEnumerable<string> collection)
+        {
+            return collection.Select(element => element.ToUpper());
+        }
+
+        public static IEnumerable<string> ToLower(this IEnumerable<string> collection)
+        {
+            return collection.Select(element => element.ToLower());
+        }
+
+        public static bool Contains(this IEnumerable<string> collection, string item, StringComparison compareFactor)
+        {
+            foreach(string str in collection)
+            {
+                if(item.Equals(str, compareFactor))
+                    return true;
+            }
+            return false;
+        }
+
         public static List<string> GetColumnNames(this DataTable dt)
         {
             List<string> names = new List<string>();
@@ -195,7 +215,10 @@ namespace CMMSAPIs.Helper
             return names;
         }
 
-        public static Dictionary<dynamic, T> SetPrimaryKey<T>(this List<T> list, string propertyName)
+        public static IEnumerable<(T item, int index)> WithIndex<T>(this IEnumerable<T> self)
+                => self.Select((item, index) => (item, index));
+
+        public static Dictionary<dynamic, T> SetPrimaryKey<T>(this IEnumerable<T> list, string propertyName)
         {
             PropertyInfo primaryKey = null;
             foreach(PropertyInfo property in typeof(T).GetProperties())
