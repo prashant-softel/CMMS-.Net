@@ -137,7 +137,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
         
         internal async Task<CMDefaultResponse> CreatePlan(List<CMMCPlan> request, int userId)
         {                                     
-            string planIds = "";
+            int planIds = 0;
             int status = (int)CMMS.CMMS_Status.MC_PLAN_DRAFT;
             int cleaningType;
 
@@ -185,10 +185,10 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 equipmentQry += $"; update cleaning_plan_items left join assets on cleaning_plan_items.assetId = assets.id set cleaning_plan_items.{measure} = assets.{measure} where planId ={planId};";
 
                 await Context.GetData<CMMCPlan>(equipmentQry).ConfigureAwait(false);
-                planIds += $"{planId}, ";
+                planIds = planId;
             }
 
-            CMDefaultResponse response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.SUCCESS, $"Plan Created = {planIds}");
+            CMDefaultResponse response = new CMDefaultResponse(planIds, CMMS.RETRUNSTATUS.SUCCESS, $"Plan Created Successfully");
             return response;
         }
 
