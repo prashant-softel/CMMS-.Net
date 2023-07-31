@@ -12,9 +12,9 @@ namespace CMMSAPIs.BS.EM
     public interface IEMBS
     {
         Task<CMDefaultResponse> SetEscalationMatrix(List<CMSetMasterEM> request, int userID);
-        Task<CMSetMasterEM> GetEscalationMatrix(CMMS.CMMS_Modules module);
-        Task<CMDefaultResponse> Escalate(CMMS.CMMS_Modules module, int id); // change to run escalation
-        Task<CMEscalationLog> ShowEscalationLog(CMMS.CMMS_Modules module, int module_ref_id);
+        Task<List<CMSetMasterEM>> GetEscalationMatrix(CMMS.CMMS_Modules module);
+        Task<CMEscalationResponse> Escalate(CMMS.CMMS_Modules module, int id); // change to run escalation
+        Task<List<CMEscalationLog>> ShowEscalationLog(CMMS.CMMS_Modules module, int module_ref_id);
     }
     public class EMBS : IEMBS
     {
@@ -38,7 +38,7 @@ namespace CMMSAPIs.BS.EM
                 throw;
             }
         }
-        public async Task<CMSetMasterEM> GetEscalationMatrix(CMMS.CMMS_Modules module)
+        public async Task<List<CMSetMasterEM>> GetEscalationMatrix(CMMS.CMMS_Modules module)
         {
             try
             {
@@ -52,7 +52,7 @@ namespace CMMSAPIs.BS.EM
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> Escalate(CMMS.CMMS_Modules module, int id)
+        public async Task<CMEscalationResponse> Escalate(CMMS.CMMS_Modules module, int id)
         {
             try
             {
@@ -66,7 +66,7 @@ namespace CMMSAPIs.BS.EM
                 throw;
             }
         }
-        public async Task<CMEscalationLog> ShowEscalationLog(CMMS.CMMS_Modules module, int module_ref_id)
+        public async Task<List<CMEscalationLog>> ShowEscalationLog(CMMS.CMMS_Modules module, int module_ref_id)
         {
             try
             {

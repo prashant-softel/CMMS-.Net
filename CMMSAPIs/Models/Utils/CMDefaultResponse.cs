@@ -41,6 +41,18 @@ namespace CMMSAPIs.Models.Utils
             this.error_log_file_path = error_log_file_path;
         }
     }
+    public class CMEscalationResponse : CMDefaultResponse
+    {
+        public CMMS.CMMS_Modules module { get; set; }
+        public CMEscalationResponse(CMMS.CMMS_Modules module, int id, CMMS.RETRUNSTATUS return_status, string message) : base(id, return_status, message)
+        {
+            this.module = module;
+        }
+        public CMEscalationResponse(CMMS.CMMS_Modules module, List<int> id, CMMS.RETRUNSTATUS return_status, string message) : base(id, return_status, message)
+        {
+            this.module = module;
+        }
+    }
     public class CMRescheduleApprovalResponse : CMDefaultResponse
     {
         public List<int> new_id { get; set; }
