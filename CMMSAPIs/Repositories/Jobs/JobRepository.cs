@@ -65,15 +65,15 @@ namespace CMMSAPIs.Repositories.Jobs
                                  "job.id, job.facilityId as facilityId, facilities.name as facilityName, group_concat(distinct asset_cat.name order by asset_cat.id separator ', ') as equipmentCat, group_concat(distinct asset.name order by asset.id separator ', ') as workingArea, job.title as jobDetails, job.description as description, job.createdBy as raisedBy, CONCAT(rasiedByUser.firstName , ' ' , rasiedByUser.lastName) as raisedByName, job.createdAt as jobDate, CONCAT(user.firstName , ' ' , user.lastName) as assignedToName, user.id as assignedToId, job.status as status, DATE_FORMAT(job.breakdownTime, '%Y-%m-%d') as breakdown_time, IF(job.breakdownTime = '', 'Non Breakdown Maintenance', 'Breakdown Maintenance') as breakdownType, group_concat(distinct workType.workTypeName order by workType.id separator ', ') as workType, permit.code as permitId " + 
                                  " FROM " +
                                         "jobs as job " +
-                                "JOIN " +
+                                "LEFT JOIN  " +
                                         "facilities as facilities ON job.facilityId = facilities.id " +
                                 "LEFT JOIN " +
                                         "users as created_user ON created_user.id = job.createdBy " +
                                 "LEFT JOIN " +
                                         "jobmappingassets as mapAssets ON mapAssets.jobId = job.id " +
-                                 "JOIN " +
+                                 "LEFT JOIN " +
                                         "assets as asset ON mapAssets.assetId  =  asset.id " +
-                                 "JOIN " +
+                                 "LEFT JOIN " +
                                         "assetcategories as asset_cat ON mapAssets.categoryId = asset_cat.id " +
                                  "LEFT JOIN " +
                                         "permits as permit ON permit.id = job.linkedPermit " +
