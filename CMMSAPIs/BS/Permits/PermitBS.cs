@@ -35,7 +35,7 @@ namespace CMMSAPIs.BS.Permits
          * Permit Main End Points 
         */
         Task<CMDefaultResponse> CreatePermit(CMCreatePermit set, int userID);
-        Task<List<CMPermitList>> GetPermitList(int facility_id, int userID, bool self_view);
+        Task<List<CMPermitList>> GetPermitList(int facility_id, string startDate, string endDate, int userID, bool self_view);
         Task<CMPermitDetail> GetPermitDetails(int permit_id);    
         Task<CMDefaultResponse> PermitApprove(CMApproval request, int userID);
         Task<CMDefaultResponse> PermitExtend(CMApproval request, int userID);
@@ -50,7 +50,7 @@ namespace CMMSAPIs.BS.Permits
         Task<CMDefaultResponse> PermitCancelByApprover(CMApproval request, int userID);
         Task<CMDefaultResponse> PermitCancelByHSE(CMApproval request, int userID);
         Task<CMDefaultResponse> PermitCancelByIssuer(CMApproval request, int userID);
-        Task<CMDefaultResponse> UpdatePermit(CMUpdatePermit request, int userID);
+        Task<CMDefaultResponse> UpdatePermit(CMUpdatePermit request, bool resubmit, int userID);
     }
 
     public class PermitBS : IPermitBS
@@ -298,13 +298,13 @@ namespace CMMSAPIs.BS.Permits
          * Permit Main Feature End Points
         */
 
-        public async Task<List<CMPermitList>> GetPermitList(int facility_id, int userID, bool self_view)
+        public async Task<List<CMPermitList>> GetPermitList(int facility_id, string startDate, string endDate, int userID, bool self_view)
         {
             try
             {
                 using (var repos = new PermitRepository(getDB))
                 {
-                    return await repos.GetPermitList(facility_id, userID, self_view);
+                    return await repos.GetPermitList(facility_id,  startDate,  endDate, userID, self_view);
 
                 }
             }
@@ -331,13 +331,13 @@ namespace CMMSAPIs.BS.Permits
             }
         }
 
-        public async Task<CMDefaultResponse> UpdatePermit(CMUpdatePermit request, int userID)
+        public async Task<CMDefaultResponse> UpdatePermit(CMUpdatePermit request, bool resubmit, int userID)
         {
             try
             {
                 using (var repos = new PermitRepository(getDB))
                 {
-                    return await repos.UpdatePermit(request, userID);
+                    return await repos.UpdatePermit(request, resubmit, userID);
 
                 }
             }

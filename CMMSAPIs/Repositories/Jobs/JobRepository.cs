@@ -25,9 +25,9 @@ namespace CMMSAPIs.Repositories.Jobs
                                     "job.id as id, facilities.id as facility_id, facilities.name as facility_name, blocks.id as block_id, blocks.name as block_name, job.status as status, created_user.id as created_by_id, CONCAT(created_user.firstName, created_user.lastName) as created_by_name, user.id as assigned_id, CONCAT(user.firstName, user.lastName) as assigned_name, job.title as job_title, job.description as job_description, job.breakdownTime as breakdown_time, ptw.id as current_ptw_id, ptw.title as current_ptw_title " +
                                       "FROM " +
                                             "jobs as job " +
-                                      "JOIN " +
+                                      "LEFT JOIN " +
                                             "facilities as facilities ON job.facilityId = facilities.id " +
-                                      "JOIN " +
+                                      "LEFT JOIN " +
                                             "facilities as blocks ON job.blockId = blocks.id " +
                                       "LEFT JOIN " +
                                             "permits as ptw ON job.linkedPermit = ptw.id " +
@@ -196,9 +196,9 @@ namespace CMMSAPIs.Repositories.Jobs
                                     "job.id as id, facilities.id as facility_id, facilities.name as facility_name, blocks.id as block_id, blocks.name as block_name, job.status as status, created_user.id as created_by_id, CONCAT(created_user.firstName, created_user.lastName) as created_by_name, user.id as assigned_id, CONCAT(user.firstName, user.lastName) as assigned_name, job.title as job_title, job.description as job_description, job.breakdownTime as breakdown_time, ptw.id as current_ptw_id, ptw.title as current_ptw_title, ptw.description as current_ptw_desc " +
                                       "FROM " +
                                             "jobs as job " +
-                                      "JOIN " +
+                                      " LEFT JOIN " +
                                             "facilities as facilities ON job.facilityId = facilities.id " +
-                                      "JOIN " +
+                                      "LEFT JOIN " +
                                             "facilities as blocks ON job.blockId = blocks.id " +
                                       "LEFT JOIN " +
                                             "permits as ptw ON job.linkedPermit = ptw.id " +
@@ -312,15 +312,15 @@ namespace CMMSAPIs.Repositories.Jobs
 
             List<CMJobView> _ViewJobList = await GetJobView(newJobID);
 
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, newJobID, 0, 0, "Job Created", CMMS.CMMS_Status.CREATED);
-            CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_CREATED, _ViewJobList[0]);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, newJobID, 0, 0, "Job Created", CMMS.CMMS_Status.CREATED,userId);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_CREATED, _ViewJobList[0]);
 
             string strJobStatusMsg = $"Job {newJobID} Created";
             if (_ViewJobList[0].assigned_id > 0)
             {     
 				strJobStatusMsg = $"Job {newJobID} Created and Assigned to " + _ViewJobList[0].assigned_name;        
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, newJobID, 0, 0, "Job Assigned", CMMS.CMMS_Status.CREATED);
-                CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_ASSIGNED, _ViewJobList[0]);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_ASSIGNED, _ViewJobList[0]);
             }
 
             CMDefaultResponse response = new CMDefaultResponse(newJobID, CMMS.RETRUNSTATUS.SUCCESS, strJobStatusMsg);
@@ -383,7 +383,7 @@ namespace CMMSAPIs.Repositories.Jobs
             List<CMJobView> _ViewJobList = await GetJobView(jobID);
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, jobID, 0, 0, "Job Updated", CMMS.CMMS_Status.JOB_UPDATED, userId);
-            CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_UPDATED, _ViewJobList[0]);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_UPDATED, _ViewJobList[0]);
 
             string strJobStatusMsg = $"Job {jobID} Updated";
             CMDefaultResponse response = new CMDefaultResponse(jobID, CMMS.RETRUNSTATUS.SUCCESS, strJobStatusMsg);
@@ -412,7 +412,7 @@ namespace CMMSAPIs.Repositories.Jobs
 
             List<CMJobView> _ViewJobList = await GetJobView(job_id);
 
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, retVal, 0, 0, $"Job Assigned to {_ViewJobList[0].assigned_name}", CMMS.CMMS_Status.JOB_ASSIGNED);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, job_id, 0, 0, $"Job Assigned to {_ViewJobList[0].assigned_name}", CMMS.CMMS_Status.JOB_ASSIGNED, updatedBy);
 
             CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_ASSIGNED, _ViewJobList[0]);
 
@@ -434,9 +434,9 @@ namespace CMMSAPIs.Repositories.Jobs
             if(retVal > 0)
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
 
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, retVal, 0, 0, "Job Deleted", CMMS.CMMS_Status.JOB_DELETED);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, job_id, 0, 0, "Job Deleted", CMMS.CMMS_Status.JOB_DELETED, deleteBy);
 
-            CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_DELETED, _ViewJobList[0]);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_DELETED, _ViewJobList[0]);
 
             CMDefaultResponse response = new CMDefaultResponse(_ViewJobList[0].id, CMMS.RETRUNSTATUS.SUCCESS, $"Job {_ViewJobList[0].id} Deleted");
             return response;
@@ -457,9 +457,9 @@ namespace CMMSAPIs.Repositories.Jobs
 
             List<CMJobView> _ViewJobList = await GetJobView(job_id);
 
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, retValue, 0, 0, "Job Cancelled", CMMS.CMMS_Status.JOB_CANCELLED);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, job_id, 0, 0, "Job Cancelled", CMMS.CMMS_Status.JOB_CANCELLED, cancelledBy);
 
-            CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_CANCELLED, _ViewJobList[0]);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_CANCELLED, _ViewJobList[0]);
 
             CMDefaultResponse response = new CMDefaultResponse(_ViewJobList[0].id, CMMS.RETRUNSTATUS.SUCCESS, $"Job {_ViewJobList[0].id} Cancelled");
             return response;
@@ -484,7 +484,7 @@ namespace CMMSAPIs.Repositories.Jobs
 
             List<CMJobView> _ViewJobList = await GetJobView(job_id);
 
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, retVal, 0, 0, "Permit Assigned to Job", CMMS.CMMS_Status.JOB_LINKED);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, job_id, CMMS.CMMS_Modules.PTW, ptw_id, "Permit Assigned to Job", CMMS.CMMS_Status.JOB_LINKED, updatedBy);
 
             CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_LINKED, _ViewJobList[0]);
 

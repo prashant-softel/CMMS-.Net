@@ -1,4 +1,5 @@
-﻿using CMMSAPIs.BS.Permits;
+﻿
+using CMMSAPIs.BS.Permits;
 using CMMSAPIs.Models;
 using CMMSAPIs.Models.Permits;
 using CMMSAPIs.Models.Utils;
@@ -349,12 +350,12 @@ namespace CMMSAPIs.Controllers.Permits
         [Authorize]
         [Route("GetPermitList")]
         [HttpGet]
-        public async Task<IActionResult> GetPermitList(int facility_id, bool self_view)
+        public async Task<IActionResult> GetPermitList(int facility_id, string startDate, string endDate, bool self_view)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _PermitBS.GetPermitList(facility_id, userID, self_view);
+                var data = await _PermitBS.GetPermitList(facility_id,  startDate,  endDate, userID, self_view);
                 return Ok(data);
             }
             catch (ArgumentException ex)
@@ -637,12 +638,12 @@ namespace CMMSAPIs.Controllers.Permits
         [Authorize]
         [Route("UpdatePermit")]
         [HttpPatch]
-        public async Task<IActionResult> UpdatePermit(CMUpdatePermit request)
+        public async Task<IActionResult> UpdatePermit(CMUpdatePermit request, bool resubmit)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _PermitBS.UpdatePermit(request, userID);
+                var data = await _PermitBS.UpdatePermit(request,  resubmit, userID);
                 return Ok(data);
             }
             catch (AccessViolationException ex)

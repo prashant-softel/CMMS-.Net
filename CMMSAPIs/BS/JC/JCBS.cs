@@ -11,7 +11,8 @@ namespace CMMSAPIs.BS.JC
 {
     public interface IJCBS
     {
-        Task<List<CMJCList>> GetJCList(int facility_id);
+        Task<List<CMJCList>> GetJCList(int facility_id, int userID, bool self_view);
+        Task<List<CMJCList>> GetJCListByJobId(int jobId);
         Task<List<CMJCDetail>> GetJCDetail(int jc_id);
         Task<CMDefaultResponse> CreateJC(int job_id, int userID);
         Task<CMDefaultResponse> UpdateJC(CMJCUpdate request, int userID);
@@ -31,13 +32,28 @@ namespace CMMSAPIs.BS.JC
             databaseProvider = dbProvider;
         }
 
-        public async Task<List<CMJCList>> GetJCList(int facility_id)
+        public async Task<List<CMJCList>> GetJCList(int facility_id, int userID, bool self_view)
         {
             try
             {
                 using (var repos = new JCRepository(getDB))
                 {
-                    return await repos.GetJCList(facility_id);
+                    return await repos.GetJCList(facility_id,  userID,  self_view);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<CMJCList>> GetJCListByJobId(int jobId)
+        {
+            try
+            {
+                using (var repos = new JCRepository(getDB))
+                {
+                    return await repos.GetJCListByJobId(jobId);
                 }
             }
             catch (Exception ex)
