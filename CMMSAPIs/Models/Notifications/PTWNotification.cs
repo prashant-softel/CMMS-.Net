@@ -37,7 +37,7 @@ namespace CMMSAPIs.Models.Notifications
                 case CMMS.CMMS_Status.PTW_REJECTED_BY_ISSUER:     
                     retValue = String.Format("Permit <{0}> Rejected By Issuer Permit Rejected By Issuer<{1}> Permit Description <{2}>", m_permitObj.permitNo, m_permitObj.cancelRequestByName, desc);
                     break;
-                case CMMS.CMMS_Status.PTW_APPROVE:
+                case CMMS.CMMS_Status.PTW_APPROVED:
                     retValue = String.Format("Permit <{0}> Approved Permit Approved By Name <{1}> Permit Description <{2}>", m_permitObj.permitNo, m_permitObj.approvedByName, desc);
                     break;
                 case CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER:     
@@ -130,7 +130,7 @@ namespace CMMSAPIs.Models.Notifications
                 case CMMS.CMMS_Status.PTW_REJECTED_BY_ISSUER:     //Closed
                     retValue += String.Format(templateEnd, "Rejected By", m_permitObj.issuedByName);
                     break;
-                case CMMS.CMMS_Status.PTW_APPROVE:     //Linked to PTW
+                case CMMS.CMMS_Status.PTW_APPROVED:     //Linked to PTW
                     retValue += String.Format(templateEnd, "Approved By", m_permitObj.approvedByName);
                     break;
                 case CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER:     //Linked to PTW
@@ -214,7 +214,7 @@ namespace CMMSAPIs.Models.Notifications
                     template += String.Format("<p>Permit {0} Rejected by issuer </p>", m_permitObj.permitNo);
                     template += String.Format("<p><b>Permit Rejected by issuer :</b> {0}</p>",m_permitObj.cancelRequestByName);
                     break;
-                case CMMS.CMMS_Status.PTW_APPROVE:     
+                case CMMS.CMMS_Status.PTW_APPROVED:     
                     template += String.Format("<p><b>Permit status is : Permit approve </p>");
                     template += String.Format("<p>Permit {0} is closed </p>", m_permitObj.permitNo);
                     template += String.Format("<p>Permit Approve By:</b> {0}</p>",m_permitObj.approvedByName);

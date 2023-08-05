@@ -25,11 +25,28 @@ namespace CMMSAPIs.Controllers.JC
         [Authorize]
         [Route("GetJCList")]
         [HttpGet]
-        public async Task<IActionResult> GetJCList(int facility_id)
+        public async Task<IActionResult> GetJCList(int facility_id, bool self_view)
         {
             try
             {
-                var data = await _JCBS.GetJCList(facility_id);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _JCBS.GetJCList(facility_id,  userID,  self_view);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        [Route("GetJCListByJobId")]
+        [HttpGet]
+        public async Task<IActionResult> GetJCListByJobId(int jobId)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _JCBS.GetJCListByJobId(jobId);
                 return Ok(data);
             }
             catch (Exception ex)

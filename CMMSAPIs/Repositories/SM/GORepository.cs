@@ -525,7 +525,7 @@ namespace CMMSAPIs.Repositories
 
         private async Task<int> CreditTransation(int transactionID, int actorID, int actorType, double qty, int assetItemID, int mrsID)
         {
-            string query = $"INSERT INTO FlexiMC_SM_Transition (transactionID,actorType,actorID,creditQty,assetItemID,mrsID) VALUES ({transactionID},'{actorType}',{actorID},{qty},{assetItemID},{mrsID})";
+            string query = $"INSERT INTO smtransition (transactionID,actorType,actorID,creditQty,assetItemID,mrsID) VALUES ({transactionID},'{actorType}',{actorID},{qty},{assetItemID},{mrsID})";
             DataTable dt2 = await Context.FetchData(query).ConfigureAwait(false);
             int id = Convert.ToInt32(dt2.Rows[0][0]);
             return id;

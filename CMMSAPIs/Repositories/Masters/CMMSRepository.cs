@@ -167,7 +167,7 @@ namespace CMMSAPIs.Repositories.Masters
 
         internal async Task<List<CMFacility>> GetFacilityList()
         {
-            string myQuery = "SELECT id, name, address, city, state, country, zipcode as pin FROM Facilities WHERE isBlock = 0";
+            string myQuery = "SELECT id, name, address, city, state, country, zipcode as pin FROM Facilities WHERE isBlock = 0 and status = 1";
             List<CMFacility> _Facility = await Context.GetData<CMFacility>(myQuery).ConfigureAwait(false);
             return _Facility;
         }

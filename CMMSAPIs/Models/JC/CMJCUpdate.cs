@@ -8,7 +8,7 @@ namespace CMMSAPIs.Models.JC
     public class CMJCUpdate
     {
         public int id { get; set; }
-        public int status { get; set; }
+        //public int status { get; set; }
         public string comment { get; set; }
         public Boolean is_isolation_required { get; set; }
         public List<CMEmpList> employee_list { get; set; }

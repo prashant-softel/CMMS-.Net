@@ -1,4 +1,5 @@
-﻿using CMMSAPIs.BS.Permits;
+﻿
+using CMMSAPIs.BS.Permits;
 using CMMSAPIs.Models;
 using CMMSAPIs.Models.Permits;
 using CMMSAPIs.Models.Utils;
@@ -349,12 +350,12 @@ namespace CMMSAPIs.Controllers.Permits
         [Authorize]
         [Route("GetPermitList")]
         [HttpGet]
-        public async Task<IActionResult> GetPermitList(int facility_id, bool self_view)
+        public async Task<IActionResult> GetPermitList(int facility_id, string startDate, string endDate, bool self_view, bool non_expired)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _PermitBS.GetPermitList(facility_id, userID, self_view);
+                var data = await _PermitBS.GetPermitList(facility_id,  startDate,  endDate, userID, self_view, non_expired);
                 return Ok(data);
             }
             catch (ArgumentException ex)

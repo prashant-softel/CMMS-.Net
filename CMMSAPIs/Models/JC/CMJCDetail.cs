@@ -52,6 +52,8 @@ public class CMJCJobDetail
     public string job_assigned_employee_name { get; set; }
     public string job_description { get; set; }
     public string work_type { get; set; }
+    public int facility_id { get; set; }
+
 }
 public class CMJCPermitDetail
 {
