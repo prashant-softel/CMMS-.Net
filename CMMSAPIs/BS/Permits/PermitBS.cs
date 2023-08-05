@@ -35,7 +35,7 @@ namespace CMMSAPIs.BS.Permits
          * Permit Main End Points 
         */
         Task<CMDefaultResponse> CreatePermit(CMCreatePermit set, int userID);
-        Task<List<CMPermitList>> GetPermitList(int facility_id, string startDate, string endDate, int userID, bool self_view);
+        Task<List<CMPermitList>> GetPermitList(int facility_id, string startDate, string endDate, int userID, bool self_view, bool non_expired);
         Task<CMPermitDetail> GetPermitDetails(int permit_id);    
         Task<CMDefaultResponse> PermitApprove(CMApproval request, int userID);
         Task<CMDefaultResponse> PermitExtend(CMApproval request, int userID);
@@ -298,13 +298,13 @@ namespace CMMSAPIs.BS.Permits
          * Permit Main Feature End Points
         */
 
-        public async Task<List<CMPermitList>> GetPermitList(int facility_id, string startDate, string endDate, int userID, bool self_view)
+        public async Task<List<CMPermitList>> GetPermitList(int facility_id, string startDate, string endDate, int userID, bool self_view, bool non_expired)
         {
             try
             {
                 using (var repos = new PermitRepository(getDB))
                 {
-                    return await repos.GetPermitList(facility_id,  startDate,  endDate, userID, self_view);
+                    return await repos.GetPermitList(facility_id,  startDate,  endDate, userID, self_view, non_expired);
 
                 }
             }

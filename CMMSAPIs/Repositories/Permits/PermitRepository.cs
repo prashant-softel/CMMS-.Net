@@ -60,7 +60,7 @@ namespace CMMSAPIs.Repositories.Permits
                 case CMMS.CMMS_Status.PTW_REJECTED_BY_ISSUER:
                     statusName = "Permit Rejected By Issuer";
                     break;
-                case CMMS.CMMS_Status.PTW_APPROVE:
+                case CMMS.CMMS_Status.PTW_APPROVED:
                     statusName = "Permit Approved";
                     break;
                 case CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER:
@@ -136,7 +136,7 @@ namespace CMMSAPIs.Repositories.Permits
                 case CMMS.CMMS_Status.PTW_REJECTED_BY_ISSUER:
                     statusName = "Permit Rejected By Issuer";
                     break;
-                case CMMS.CMMS_Status.PTW_APPROVE:
+                case CMMS.CMMS_Status.PTW_APPROVED:
                     statusName = "Permit Approved";
                     break;
                 case CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER:
@@ -440,7 +440,7 @@ namespace CMMSAPIs.Repositories.Permits
             CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "SOP Deleted");
             return response;
         }
-        internal async Task<List<CMPermitList>> GetPermitList(int facility_id, string startDate, string endDate,int userID, bool self_view) //if current_time>end_time then status = expired
+        internal async Task<List<CMPermitList>> GetPermitList(int facility_id, string startDate, string endDate,int userID, bool self_view, bool non_expired) //if current_time>end_time then status = expired
         {
             /*
              * Return id as well as string value
@@ -494,6 +494,7 @@ namespace CMMSAPIs.Repositories.Permits
                 if (checkFilter == 0)
                 {
                     myQuery += " where ";
+                    checkFilter = 1;
                 }
                 else
                 {
@@ -503,6 +504,20 @@ namespace CMMSAPIs.Repositories.Permits
                 DateTime end = DateTime.Parse(endDate);
                 if (DateTime.Compare(start, end) < 0)
                     myQuery += " DATE_FORMAT(ptw.acceptedDate,'%Y-%m-%d') BETWEEN \'" + startDate + "\' AND \'" + endDate + "\'";
+            }
+            if(non_expired == true)
+            {
+                if (checkFilter == 0)
+                {
+                    myQuery += " where ";
+                    checkFilter = 1;
+                }
+                else
+                {
+                    myQuery += " and ";
+                }
+
+                myQuery += $" ptw.endDate > '{UtilsRepository.GetUTCTime()}' and ptw.status = {(int)CMMS.CMMS_Status.PTW_APPROVED} ";
             }
 
             myQuery += "GROUP BY ptw.id ORDER BY ptw.id DESC;";
@@ -648,7 +663,7 @@ namespace CMMSAPIs.Repositories.Permits
             List<CMLoto> _LotoList = await Context.GetData<CMLoto>(myQuery3).ConfigureAwait(false);
 
             //get upload file
-            string myQuery4 = "SELECT PTWFiles.File_Name as fileName, PTWFiles.File_Category_name as fileCategory,PTWFiles.File_Size as fileSize,PTWFiles.status as status FROM fleximc_ptw_files AS PTWFiles " +
+            string myQuery4 = "SELECT PTWFiles.File_Name as fileName, PTWFiles.File_Category_name as fileCategory,PTWFiles.File_Size as fileSize,PTWFiles.status as status FROM st_ptw_files AS PTWFiles " +
                                $"LEFT JOIN permits  as ptw on ptw.id = PTWFiles.PTW_id where ptw.id = { permit_id }";
             List<CMFileDetail> _UploadFileList = await Context.GetData<CMFileDetail>(myQuery4).ConfigureAwait(false);
 
@@ -661,7 +676,7 @@ namespace CMMSAPIs.Repositories.Permits
 
             //get Associated Job
             string myQuery6 = "SELECT job.id as JobId, jobCard.id as JobCardId, job.title as JobTitle , job.description as JobDes, job.createdAt as JobDate, job.status as JobStatus FROM jobs as job JOIN permits as ptw ON job.linkedPermit = ptw.id " +
-            " LEFT JOIN fleximc_jc_files as jobCard ON jobCard.JC_id = job.id " +
+            " LEFT JOIN st_jc_files as jobCard ON jobCard.JC_id = job.id " +
               $"where ptw.id = { permit_id }";
             List<CMAssociatedList> _AssociatedJobList = await Context.GetData<CMAssociatedList>(myQuery6).ConfigureAwait(false);
 
@@ -841,7 +856,7 @@ namespace CMMSAPIs.Repositories.Permits
             /*Update Permit Table reccomendationsByApprover, approvedStatus, approvedDate
                        * Return Message Approved successfully*/
 
-            string updateQry = $"update permits set reccomendationsByApprover = '{ request.comment }', approvedStatus = 1, status = { (int)CMMS.CMMS_Status.PTW_APPROVE }, approvedDate = '{ UtilsRepository.GetUTCTime() }', approvedById = { userID }  where id = { request.id }";
+            string updateQry = $"update permits set reccomendationsByApprover = '{ request.comment }', approvedStatus = 1, status = { (int)CMMS.CMMS_Status.PTW_APPROVED }, approvedDate = '{ UtilsRepository.GetUTCTime() }', approvedById = { userID }  where id = { request.id }";
             int retValue = await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
 
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
@@ -865,9 +880,9 @@ namespace CMMSAPIs.Repositories.Permits
 
             List<CMPermitDetail> permitDetails = await Context.GetData<CMPermitDetail>(myQuery).ConfigureAwait(false);
 
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.id, 0, 0, request.comment, CMMS.CMMS_Status.PTW_APPROVE,userID);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.id, 0, 0, request.comment, CMMS.CMMS_Status.PTW_APPROVED,userID);
 
-            CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_APPROVE, permitDetails[0]);
+            CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_APPROVED, permitDetails[0]);
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $" Permit  { request.id }  Approved");
             return response;
         }

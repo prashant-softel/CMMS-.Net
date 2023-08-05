@@ -61,8 +61,37 @@ namespace CMMSAPIs.Models.MC
         public List<CMMCSchedule> schedules { get; set; }
 
     }
+    public class CMMCPlanSummary
+    {
+        public int id { get; set; }
+        public List<CMMCPlanScheduleSummary> schedules { get; set; }
 
+    }
+    public class CMMCPlanScheduleSummary
+    {
+
+       // public UInt64 id { get; set; }
+        public int scheduleId { get; set; }
+        public int cleaningDay { get; set; }  //First, second etc day
+        public string cleaningType { get; set; }  //First, second etc day
+      // public string cleaningTypeName { get; set; }  //First, second etc day
+       // public Int64 totalBlocks { get; set; }
+        public Int64 totalInvs { get; set; }
+        public Int64 totalSmbs { get; set; }
+        public decimal totalModules { get; set; }
+        //public decimal ScheduledArea { get; set; }
+        public DateTime plannedDate { get; set; }
+       // public string status_short { get; set; }
+        public List<CMMCEquipment> equipments { get; set; }
+
+    }
     public class CMMCEquipment
+    {
+         public int id { get; set; }
+        public string equipName { get; set; }
+
+    }
+    public class CMMCEquipmentDetails
     {
         public int id { get; set; }
         public string equipmentName { get; set; }
@@ -102,7 +131,7 @@ namespace CMMSAPIs.Models.MC
         public DateTime plannedDate { get; set; }
         public int status { get; set; }
         public string status_short { get; set; }
-        public List<CMMCEquipment> equipments { get; set; }
+        public List<CMMCEquipmentDetails> equipments { get; set; }
        
     }
 
@@ -141,7 +170,7 @@ namespace CMMSAPIs.Models.MC
         public string status_long { get; set; }
 
         // public string siteName { get; set; }
-        //public List<CMMCEquipment> smbIds;
+        //public List<CMMCEquipmentDetails> smbIds;
         public List<CMMCExecutionSchedule> schedules { get; set; }
     }
 
