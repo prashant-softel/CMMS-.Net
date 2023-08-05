@@ -78,18 +78,16 @@ namespace CMMSAPIs.Repositories.Inventory
 
         }
 
-        internal async Task<CMDefaultResponse> SetParentAsset(CMSetParentAsset parent_child_group, int userID)
+        internal async Task<CMDefaultResponse> SetParentAsset(int parent, int child, int userID)
         {
-            string child_list = string.Join(", ", parent_child_group.childAssets);
-            string myQuery = $"UPDATE assets SET parentId = {parent_child_group.parentId} WHERE id IN ({child_list});";
+            string myQuery = $"UPDATE assets SET parentId = {parent} WHERE id = {child};";
             await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
-            foreach (int child in parent_child_group.childAssets)
-                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, child, 0, 0, "Parent assigned", CMMS.CMMS_Status.UPDATED, userID);
-            return new CMDefaultResponse(parent_child_group.childAssets, CMMS.RETRUNSTATUS.SUCCESS, $"Asset no. {parent_child_group.parentId} assigned as parent to {parent_child_group.childAssets.Count} child assets.");
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, child, 0, 0, "Parent assigned", CMMS.CMMS_Status.UPDATED, userID);
+            return new CMDefaultResponse(child, CMMS.RETRUNSTATUS.SUCCESS, $"Asset no. {parent} assigned as parent to Asset no. {child}.");
         }
-        internal async Task<List<CMDefaultResponse>> ImportInventories(int file_id, int userID)
+        internal async Task<CMImportFileResponse> ImportInventories(int file_id, int userID)
         {
-            List<CMDefaultResponse> responseList = new List<CMDefaultResponse>();
+            CMImportFileResponse response = null;
 
             string queryAsset = "SELECT id, name FROM assets GROUP BY name ORDER BY id ASC;";
             DataTable dtAsset = await Context.FetchData(queryAsset).ConfigureAwait(false);
@@ -232,6 +230,7 @@ namespace CMMSAPIs.Repositories.Inventory
                         dt2.Columns.Add("warranty_type", typeof(int));
                         dt2.Columns.Add("warrranty_term_type", typeof(int));
                         dt2.Columns.Add("warranty_provider_id", typeof(int));
+                        dt2.Columns.Add("row_no", typeof(int));
                         for (int rN = 2; rN <= sheet.Dimension.End.Row; rN++)
                         {
                             ExcelRange row = sheet.Cells[rN, 1, rN, sheet.Dimension.End.Column];
@@ -254,13 +253,14 @@ namespace CMMSAPIs.Repositories.Inventory
                             }
                             if (Convert.ToString(newR["name"]) == null || Convert.ToString(newR["name"]) == "")
                                 continue;
+                            newR["row_no"] = rN;
                             try
                             {
                                 newR["blockId"] = facilities[Convert.ToString(newR["Asset_Facility_Name"])];
                             }
                             catch (KeyNotFoundException)
                             {
-                                m_errorLog.SetError($"Invalid Block named '{newR["Asset_Facility_Name"]}'. [Reference: '{newR["name"]}']");
+                                m_errorLog.SetError($"[Row: {rN}] Invalid Block named '{newR["Asset_Facility_Name"]}'.");
                             }
                             try
                             {
@@ -268,7 +268,7 @@ namespace CMMSAPIs.Repositories.Inventory
                             }
                             catch (InvalidCastException)
                             {
-                                m_errorLog.SetError($"Facility cannot be linked to asset if block named '{newR["Asset_Facility_Name"]}' does not exist. [Reference: '{newR["name"]}']");
+                                m_errorLog.SetError($"[Row: {rN}] Facility cannot be linked to asset if block named '{newR["Asset_Facility_Name"]}' does not exist.");
                             }
                             try
                             {
@@ -276,16 +276,7 @@ namespace CMMSAPIs.Repositories.Inventory
                             }
                             catch (KeyNotFoundException)
                             {
-                                m_errorLog.SetError($"Invalid Asset Category named '{newR["Asset_category_name"]}'. [Reference: '{newR["name"]}']");
-                            }
-                            try
-                            {
-                                newR["parentId"] = assets[Convert.ToString(newR["Asset_Parent_Name"])];
-                            }
-                            catch (KeyNotFoundException)
-                            {
-                                m_errorLog.SetWarning($"Parent Asset named '{newR["Asset_Parent_Name"]}' not found. Setting parent ID as 0. [Reference: '{newR["name"]}']");
-                                newR["parentId"] = 0;
+                                m_errorLog.SetError($"[Row: {rN}] Invalid Asset Category named '{newR["Asset_category_name"]}'.");
                             }
                             try
                             {
@@ -293,7 +284,7 @@ namespace CMMSAPIs.Repositories.Inventory
                             }
                             catch (KeyNotFoundException)
                             {
-                                m_errorLog.SetError($"Customer business named '{newR["Asset_Customer_Name"]}' not found. [Reference: '{newR["name"]}']");
+                                m_errorLog.SetError($"[Row: {rN}] Customer business named '{newR["Asset_Customer_Name"]}' not found.");
                             }
                             try
                             {
@@ -301,7 +292,7 @@ namespace CMMSAPIs.Repositories.Inventory
                             }
                             catch (KeyNotFoundException)
                             {
-                                m_errorLog.SetError($"Owner business named '{newR["Asset_Owner_Name"]}' not found. [Reference: '{newR["name"]}']");
+                                m_errorLog.SetError($"[Row: {rN}] Owner business named '{newR["Asset_Owner_Name"]}' not found.");
                             }
                             try
                             {
@@ -309,7 +300,7 @@ namespace CMMSAPIs.Repositories.Inventory
                             }
                             catch (KeyNotFoundException)
                             {
-                                m_errorLog.SetError($"Operator business named '{newR["Asset_Operator_Name"]}' not found. [Reference: '{newR["name"]}']");
+                                m_errorLog.SetError($"[Row: {rN}] Operator business named '{newR["Asset_Operator_Name"]}' not found.");
                             }
                             try
                             {
@@ -317,7 +308,7 @@ namespace CMMSAPIs.Repositories.Inventory
                             }
                             catch (KeyNotFoundException)
                             {
-                                m_errorLog.SetError($"Supplier business named '{newR["Asset_Supplier_Name"]}' not found. [Reference: '{newR["name"]}']");
+                                m_errorLog.SetError($"[Row: {rN}] Supplier business named '{newR["Asset_Supplier_Name"]}' not found.");
                             }
                             try
                             {
@@ -325,7 +316,7 @@ namespace CMMSAPIs.Repositories.Inventory
                             }
                             catch (KeyNotFoundException)
                             {
-                                m_errorLog.SetError($"Manufacturer business named '{newR["Asset_Manufacturer_Name"]}' not found. [Reference: '{newR["name"]}']");
+                                m_errorLog.SetError($"[Row: {rN}] Manufacturer business named '{newR["Asset_Manufacturer_Name"]}' not found.");
                             }
                             try
                             {
@@ -333,7 +324,7 @@ namespace CMMSAPIs.Repositories.Inventory
                             }
                             catch (KeyNotFoundException)
                             {
-                                m_errorLog.SetError($"Currency with code '{newR["currency"]}' not found. [Reference: '{newR["name"]}']");
+                                m_errorLog.SetError($"[Row: {rN}] Currency with code '{newR["currency"]}' not found.");
                             }
                             try
                             {
@@ -341,7 +332,7 @@ namespace CMMSAPIs.Repositories.Inventory
                             }
                             catch (KeyNotFoundException)
                             {
-                                m_errorLog.SetError($"Asset type named '{newR["Asset_Type_Name"]}' not found. [Reference: '{newR["name"]}']");
+                                m_errorLog.SetError($"[Row: {rN}] Asset type named '{newR["Asset_Type_Name"]}' not found.");
                             }
                             try
                             {
@@ -349,7 +340,7 @@ namespace CMMSAPIs.Repositories.Inventory
                             }
                             catch (KeyNotFoundException)
                             {
-                                m_errorLog.SetError($"Asset status named '{newR["Asset_Status_Name"]}' not found. [Reference: '{newR["name"]}']");
+                                m_errorLog.SetError($"[Row: {rN}] Asset status named '{newR["Asset_Status_Name"]}' not found.");
                             }
                             try
                             {
@@ -357,7 +348,7 @@ namespace CMMSAPIs.Repositories.Inventory
                             }
                             catch (KeyNotFoundException)
                             {
-                                m_errorLog.SetWarning($"Warranty Type named '{newR["Warranty Type"]}' not found. Setting warranty Type ID as 0.");
+                                m_errorLog.SetWarning($"[Row: {rN}] Warranty Type named '{newR["Warranty Type"]}' not found. Setting warranty Type ID as 0.");
                                 newR["warranty_type"] = 0;
                             }
                             try
@@ -366,7 +357,7 @@ namespace CMMSAPIs.Repositories.Inventory
                             }
                             catch (KeyNotFoundException)
                             {
-                                m_errorLog.SetWarning($"Warranty Term named '{newR["Asset_Warranty_Term"]}' not found. Setting warranty term ID as 0.");
+                                m_errorLog.SetWarning($"[Row: {rN}] Warranty Term named '{newR["Asset_Warranty_Term"]}' not found. Setting warranty term ID as 0.");
                                 newR["warrranty_term_type"] = 0;
                             }
                             try
@@ -375,8 +366,12 @@ namespace CMMSAPIs.Repositories.Inventory
                             }
                             catch (KeyNotFoundException)
                             {
-                                m_errorLog.SetWarning($"Warranty Provider named '{newR["Asset_warranty_Provider"]}' not found. Setting warranty provider ID as 0.");
+                                m_errorLog.SetWarning($"[Row: {rN}] Warranty Provider named '{newR["Asset_warranty_Provider"]}' not found. Setting warranty provider ID as 0.");
                                 newR["warranty_provider_id"] = 0;
+                            }
+                            if (Convert.ToString(newR["Asset_Parent_Name"]) == null || Convert.ToString(newR["Asset_Parent_Name"]) == "")
+                            {
+                                newR["Asset_Parent_Name"] = "";
                             }
                             /*
                         dt2.Columns.Add("warranty_type", typeof(int));
@@ -386,9 +381,49 @@ namespace CMMSAPIs.Repositories.Inventory
                         }
                         if (m_errorLog.GetErrorCount() == 0)
                         {
-                            List<CMAddInventory> importAssets = dt2.MapTo<CMAddInventory>();
-                            CMDefaultResponse res = await AddInventory(importAssets, userID);
-                            responseList.Add(res);
+                            string assetQry = "SELECT name FROM assets";
+                            DataTable assetDt = await Context.FetchData(assetQry).ConfigureAwait(false);
+
+                            List<List<string>> assetList = new List<List<string>>() { assetDt.GetColumn<string>("name") };
+
+                            List<DataTable> assetPriority = new List<DataTable>();
+
+                            List<string> assetnames = new List<string>();
+                            assetnames.AddRange(assetDt.GetColumn<string>("name"));
+                            assetnames.AddRange(dt2.GetColumn<string>("name"));
+                            assetnames.Contains("");
+                            DataRow[] filterRows = dt2.AsEnumerable()
+                                       .Where(row => !assetnames.Contains(row.Field<string>("Asset_Parent_Name"), StringComparison.OrdinalIgnoreCase))
+                                       .ToArray();
+                            if (filterRows.Length > 0)
+                            {
+                                assetPriority.Insert(0, filterRows.CopyToDataTable());
+                                assetList.Insert(0, assetPriority[assetPriority.Count - 1].GetColumn<string>("name"));
+                            }
+
+                            foreach (var item in assetList)
+                            {
+                                List<string> temp = item;
+                                do
+                                {
+                                    filterRows = dt2.AsEnumerable()
+                                       .Where(row => temp.Contains(row.Field<string>("Asset_Parent_Name"), StringComparison.OrdinalIgnoreCase))
+                                       .ToArray();
+                                    if (filterRows.Length == 0)
+                                        continue;
+                                    assetPriority.Add(filterRows.CopyToDataTable());
+                                    temp = assetPriority[assetPriority.Count - 1].GetColumn<string>("name");
+                                } while (filterRows.Length != 0);
+                            }
+                            List<int> idList = new List<int>();
+
+                            foreach (DataTable dtUsers in assetPriority)
+                            {
+                                idList.AddRange((await AddInventoryWithParent(dtUsers, userID)).id);
+                            }
+
+                            response = new CMImportFileResponse(idList, CMMS.RETRUNSTATUS.SUCCESS, null, null, $"{idList.Count} new assets added.");
+
                         }
                     }
                 }
@@ -397,13 +432,47 @@ namespace CMMSAPIs.Repositories.Inventory
                     m_errorLog.SetError("File is not an excel file");
                 }
             }
-            foreach (var message in m_errorLog.errorLog())
+            string logPath = m_errorLog.SaveAsText($"ImportLog\\ImportInventories_File{file_id}_{DateTime.UtcNow.ToString("yyyyMMdd_HHmmss")}");
+            string logQry = $"UPDATE uploadedfiles SET logfile = '{logPath}' WHERE id = {file_id}";
+            await Context.ExecuteNonQry<int>(logQry).ConfigureAwait(false);
+            logPath = logPath.Replace("\\\\", "\\");
+            if (response == null)
+                response = new CMImportFileResponse(0, CMMS.RETRUNSTATUS.FAILURE, logPath, m_errorLog.errorLog(), "Errors found while importing file.");
+            else
             {
-                CMDefaultResponse resp = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, message.ToString());
-                responseList.Add(resp);
+                m_errorLog.SetImportInformation("File imported successfully");
+                response.error_log_file_path = logPath;
+                response.import_log = m_errorLog.errorLog();
             }
-            return responseList;
+            
+            return response;
             //return response;*/
+        }
+
+        internal async Task<CMDefaultResponse> AddInventoryWithParent(DataTable assets, int userID)
+        {
+            string assetQry = "SELECT id, UPPER(name) as name FROM assets GROUP BY name ORDER BY id;";
+            DataTable dtAsset = await Context.FetchData(assetQry).ConfigureAwait(false);
+            List<string> assetNames = dtAsset.GetColumn<string>("name");
+            List<int> assetIds = dtAsset.GetColumn<int>("id");
+            Dictionary<string, int> assetDict = new Dictionary<string, int>();
+            assetDict.Merge(assetNames, assetIds);
+
+            foreach (DataRow row in assets.Rows)
+            {
+                try
+                {
+                    row["parentId"] = assetDict[Convert.ToString(row["Asset_Parent_Name"]).ToUpper()];
+                }
+                catch (KeyNotFoundException)
+                {
+                    m_errorLog.SetWarning($"[Row: {row["row_no"]}] Asset named '{Convert.ToString(row["Asset_Parent_Name"])}' not found. Setting parent ID as 0.");
+                    row["parentId"] = 0;
+                }
+            }
+            List<CMAddInventory> importAssets = assets.MapTo<CMAddInventory>();
+            CMDefaultResponse response = await AddInventory(importAssets, userID);
+            return response;
         }
 
         internal async Task<List<CMInventoryList>> GetInventoryList(int facilityId, int linkedToBlockId, int status, string categoryIds)
@@ -593,6 +662,16 @@ string warrantyQry = "insert into assetwarranty
                     string addWarrantyId = $"UPDATE assets SET warrantyId = {warrantyId} WHERE id = {retID}";
                     await Context.ExecuteNonQry<int>(addWarrantyId).ConfigureAwait(false);
                 }
+                idList.Add(retID);
+                CMViewInventory _inventoryAdded = await GetInventoryDetails(retID);
+
+                string _shortStatus = getShortStatus(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_ADDED);
+                _inventoryAdded.status_short = _shortStatus;
+
+                string _longStatus = getLongStatus(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_ADDED, _inventoryAdded);
+                _inventoryAdded.status_long = _longStatus;
+
+                CMMSNotification.sendNotification(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_ADDED, _inventoryAdded);
             }
             if (count > 0)
             {
@@ -612,16 +691,8 @@ string warrantyQry = "insert into assetwarranty
                 strRetMessage = "No assets to add";
             }
 
-            CMViewInventory _inventoryAdded = await GetInventoryDetails(retID);
-
-            string _shortStatus = getShortStatus(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_ADDED);
-            _inventoryAdded.status_short = _shortStatus;
-
-            string _longStatus = getLongStatus(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_ADDED, _inventoryAdded);
-            _inventoryAdded.status_long = _longStatus;
-
-            CMMSNotification.sendNotification(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_ADDED, _inventoryAdded);
-            return new CMDefaultResponse(retID, retCode, strRetMessage);
+            
+            return new CMDefaultResponse(idList, retCode, strRetMessage);
         }
 
         internal async Task<CMDefaultResponse> UpdateInventory(CMAddInventory request, int userID)

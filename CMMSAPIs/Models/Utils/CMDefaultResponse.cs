@@ -4,7 +4,12 @@ using System.Collections.Generic;
 
 namespace CMMSAPIs.Models.Utils
 {
-    public class CMDefaultResponse
+    public interface IResponse
+    {
+        public List<int> id { get; set; }
+        public string message { get; set; }
+    }
+    public class CMDefaultResponse : IResponse
     {
         public List<int> id { get; set; }
         public CMMS.RETRUNSTATUS return_status;
@@ -32,13 +37,16 @@ namespace CMMSAPIs.Models.Utils
     public class CMImportFileResponse : CMDefaultResponse
     {
         public string error_log_file_path { get; set; }
-        public CMImportFileResponse(int id, CMMS.RETRUNSTATUS return_status, string error_log_file_path, string message) : base(id, return_status, message)
+        public IEnumerable<string> import_log { get; set; }
+        public CMImportFileResponse(int id, CMMS.RETRUNSTATUS return_status, string error_log_file_path, IEnumerable<string> import_log, string message) : base(id, return_status, message)
         {
             this.error_log_file_path = error_log_file_path;
+            this.import_log = import_log;
         }
-        public CMImportFileResponse(List<int> id, CMMS.RETRUNSTATUS return_status, string error_log_file_path, string message) : base(id, return_status, message)
+        public CMImportFileResponse(List<int> id, CMMS.RETRUNSTATUS return_status, string error_log_file_path, IEnumerable<string> import_log, string message) : base(id, return_status, message)
         {
             this.error_log_file_path = error_log_file_path;
+            this.import_log = import_log;
         }
     }
     public class CMEscalationResponse : CMDefaultResponse

@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Hosting.Internal;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
@@ -162,13 +163,14 @@ namespace CMMSAPIs.Models.Utils
             }
             //csvPath = @"C:\LogFile\" + csvPath; 
             File.AppendAllText(csvPath, Convert.ToString(content));
+            csvPath = csvPath.Replace(@"\", @"\\");
             return csvPath;
         }
 
-        public ArrayList errorLog()
+        public List<string> errorLog()
         {
             string sMessage = "";
-            ArrayList messageList = new ArrayList();
+            List<string> messageList = new List<string>();
             foreach (cMessage msg in messageArray)
             {
                 string indexMsg = msg.Get_Message();

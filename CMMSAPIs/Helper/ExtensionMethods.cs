@@ -103,6 +103,13 @@ namespace CMMSAPIs.Helper
             }
         }
 
+        public static List<object?> ToList(this ArrayList arr)
+        {
+            List<object?> list = new List<object?>();
+            list.CopyTo(arr.ToArray());
+            return list;
+        }
+
         public static System.Tuple<DataTable, DataTable> Split(this DataTable dt, List<string> lhsColumns)
         {
             DataTable firstPart = dt.DefaultView.ToTable(false, lhsColumns.ToArray());

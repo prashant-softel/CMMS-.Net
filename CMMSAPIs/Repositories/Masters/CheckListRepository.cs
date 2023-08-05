@@ -691,30 +691,44 @@ namespace CMMSAPIs.Repositories.Masters
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
             DataTable checklists = await ConvertExcelToChecklists(file_id);
             DataTable checkpoints = await ConvertExcelToCheckpoints(file_id);
+            string message;
             if (checklists != null && checkpoints != null && m_errorLog.GetErrorCount() == 0)
             {
                 m_errorLog.SetImportInformation("File ready to Import");
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
                 string qry = $"UPDATE uploadedfiles SET valid = 1 WHERE id = {file_id};";
                 await Context.ExecuteNonQry<int>(qry).ConfigureAwait(false);
+                message = "No errors found during validation";
             }
             else
             {
                 string qry = $"UPDATE uploadedfiles SET valid = 2 WHERE id = {file_id};";
                 await Context.ExecuteNonQry<int>(qry).ConfigureAwait(false);
+                message = "Errors found during validation";
             }
-            string logPath = m_errorLog.SaveAsText($"ImportLog\\ImportChecklistFile{file_id}");
+            string logPath = m_errorLog.SaveAsText($"ImportLog\\ImportChecklist_File{file_id}_{DateTime.UtcNow.ToString("yyyyMMdd_HHmmss")}");
             string logQry = $"UPDATE uploadedfiles SET logfile = '{logPath}' WHERE id = {file_id}";
             await Context.ExecuteNonQry<int>(logQry).ConfigureAwait(false);
-            return new CMImportFileResponse(file_id, retCode, logPath, string.Join("\r\n", m_errorLog.errorLog().ToArray()));
+            return new CMImportFileResponse(file_id, retCode, logPath, m_errorLog.errorLog(), message);
         }
 
-        internal async Task<List<object>> ImportChecklist(int file_id, int userID)
+        internal async Task<CMImportFileResponse> ImportChecklist(int file_id, int userID)
         {
-            List<object> responseList = new List<object>();
-            string qry = $"SELECT valid FROM uploadedfiles WHERE id = {file_id}";
+            CMImportFileResponse response;
+            string qry = $"SELECT valid, logfile FROM uploadedfiles WHERE id = {file_id}";
             DataTable dt = await Context.FetchData(qry).ConfigureAwait(false);
-            int valid = Convert.ToInt32(dt.Rows[0][0]);
+            int valid = Convert.ToInt32(dt.Rows[0]["valid"]);
+            string logfile = Convert.ToString(dt.Rows[0]["logfile"]);
+            IEnumerable<string> log;
+            try
+            {
+                log = File.ReadAllLines(logfile);
+            }
+            catch
+            {
+                log = null;
+                logfile = null;
+            }
             if (valid == 1)
             {
                 DataTable dtChecklists = await ConvertExcelToChecklists(file_id);
@@ -722,71 +736,81 @@ namespace CMMSAPIs.Repositories.Masters
                 {
                     List<CMCreateCheckList> checklists = dtChecklists.MapTo<CMCreateCheckList>();
                     CMDefaultResponse response1 = await CreateChecklist(checklists, userID);
-                    responseList.Add(response1);
+                    response = new CMImportFileResponse(response1.id, response1.return_status, logfile, log, response1.message);
                 }
                 else
                 {
-                    CMDefaultResponse response2 = new CMDefaultResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, "Error while importing checklists. Please validate the file again.");
-                    responseList.Add(response2);
+                    CMImportFileResponse response2 = new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, logfile, log, "Error while importing checklists. Please validate the file again.");
+                    response = response2;
                 }
             }
             else if (valid == 2)
             {
-                CMDefaultResponse response3 = new CMDefaultResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, "Cannot import checklists as file has some errors. Please correct the file and re-validate it");
-                responseList.Add(response3);
+                CMImportFileResponse response3 = new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, logfile, log, "Cannot import checklists as file has some errors. Please correct the file and re-validate it");
+                response = response3;
             }
             else
             {
-                CMDefaultResponse response4 = await ValidateChecklistCheckpoint(file_id);
-                responseList.Add(response4);
-                List<object> response5 = await ImportChecklist(file_id, userID);
-                responseList.AddRange(response5);
+                await ValidateChecklistCheckpoint(file_id);
+                CMImportFileResponse response4 = await ImportChecklist(file_id, userID);
+                response = response4;
             }
-            return responseList;
+            return response;
         }
 
-        internal async Task<List<object>> ImportCheckpoint(int file_id, int userID)
+        internal async Task<CMImportFileResponse> ImportCheckpoint(int file_id, int userID)
         {
-            List<object> responseList = new List<object>();
-            string qry = $"SELECT valid FROM uploadedfiles WHERE id = {file_id}";
+            CMImportFileResponse response;
+            string qry = $"SELECT valid, logfile FROM uploadedfiles WHERE id = {file_id}";
             DataTable dt = await Context.FetchData(qry).ConfigureAwait(false);
-            int valid = Convert.ToInt32(dt.Rows[0][0]);
+            int valid = Convert.ToInt32(dt.Rows[0]["valid"]);
+            string logfile = Convert.ToString(dt.Rows[0]["logfile"]);
+            IEnumerable<string> log;
+            try
+            {
+                log = File.ReadAllLines(logfile);
+            }
+            catch
+            {
+                log = null;
+                logfile = null;
+            }
             if (valid == 1)
             {
                 DataTable dtCheckpoints = await ConvertExcelToCheckpoints(file_id);
                 if (dtCheckpoints != null && m_errorLog.GetErrorCount() == 0)
                 {
+
                     List<CMCreateCheckPoint> checkpoints = dtCheckpoints.MapTo<CMCreateCheckPoint>();
                     CMDefaultResponse response1 = await CreateCheckPoint(checkpoints, userID);
-                    responseList.Add(response1);
+                    response = new CMImportFileResponse(response1.id, response1.return_status, logfile, log, response1.message);
                 }
                 else
                 {
-                    CMDefaultResponse response2 = new CMDefaultResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, "Error while importing checkpoints. Please validate the file again.");
-                    responseList.Add(response2);
+                    CMImportFileResponse response2 = new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, logfile, log, "Error while importing checkpoints. Please validate the file again.");
+                    response = response2;
                 }
             }
             else if (valid == 2)
             {
-                CMDefaultResponse response3 = new CMDefaultResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, "Cannot import checkpoints as file has some errors. Please correct the file and re-validate it");
-                responseList.Add(response3);
+                CMImportFileResponse response3 = new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, logfile, log, "Cannot import checkpoints as file has some errors. Please correct the file and re-validate it");
+                response = response3;
             }
             else
             {
-                CMDefaultResponse response4 = await ValidateChecklistCheckpoint(file_id);
-                responseList.Add(response4);
-                List<object> response5 = await ImportCheckpoint(file_id, userID);
-                responseList.AddRange(response5);
+                await ValidateChecklistCheckpoint(file_id);
+                CMImportFileResponse response4 = await ImportCheckpoint(file_id, userID);
+                response = response4;
             }
-            return responseList;
+            return response;
         }
-        internal async Task<List<object>> ImportChecklistCheckpoint(int file_id, int userID)
+        internal async Task<List<CMImportFileResponse>> ImportChecklistCheckpoint(int file_id, int userID)
         {
-            List<object> responseList = new List<object>();
-            List<object> checklistResponse = await ImportChecklist(file_id, userID);
-            responseList.AddRange(checklistResponse);
-            List<object> checkpointResponse = await ImportCheckpoint(file_id, userID);
-            responseList.AddRange(checkpointResponse);
+            List<CMImportFileResponse> responseList = new List<CMImportFileResponse>();
+            CMImportFileResponse checklistResponse = await ImportChecklist(file_id, userID);
+            responseList.Add(checklistResponse);
+            CMImportFileResponse checkpointResponse = await ImportCheckpoint(file_id, userID);
+            responseList.Add(checkpointResponse);
             return responseList;
         }
     }

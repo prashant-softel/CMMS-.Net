@@ -312,14 +312,14 @@ namespace CMMSAPIs.Repositories.Jobs
 
             List<CMJobView> _ViewJobList = await GetJobView(newJobID);
 
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, newJobID, 0, 0, "Job Created", CMMS.CMMS_Status.CREATED);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, newJobID, 0, 0, "Job Created", CMMS.CMMS_Status.JOB_CREATED);
             CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_CREATED, _ViewJobList[0]);
 
             string strJobStatusMsg = $"Job {newJobID} Created";
             if (_ViewJobList[0].assigned_id > 0)
             {     
 				strJobStatusMsg = $"Job {newJobID} Created and Assigned to " + _ViewJobList[0].assigned_name;        
-                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, newJobID, 0, 0, "Job Assigned", CMMS.CMMS_Status.CREATED);
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, newJobID, 0, 0, "Job Assigned", CMMS.CMMS_Status.JOB_ASSIGNED);
                 CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_ASSIGNED, _ViewJobList[0]);
             }
 

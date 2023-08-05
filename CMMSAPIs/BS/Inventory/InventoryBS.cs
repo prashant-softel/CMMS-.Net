@@ -16,7 +16,7 @@ namespace CMMSAPIs.BS.Inventory
         Task<List<CMInventoryList>> GetInventoryList(int facilityId, int linkedToBlockId, int status, string categoryIds);
         Task<CMViewInventory> GetInventoryDetails(int id);
         Task<CMDefaultResponse> AddInventory(List<CMAddInventory> request, int userID);
-        Task<List<CMDefaultResponse>> ImportInventories(int file_id, int userID);
+        Task<CMImportFileResponse> ImportInventories(int file_id, int userID);
         Task<CMDefaultResponse> UpdateInventory(CMAddInventory request, int userID);
         Task<CMDefaultResponse> DeleteInventory(int id, int userID);
         Task<List<CMInventoryTypeList>> GetInventoryTypeList();
@@ -36,7 +36,7 @@ namespace CMMSAPIs.BS.Inventory
         Task<List<CMWarrantyCertificate>> GetWarrantyCertificate();
         Task<List<CMCalibrationAssets>> GetCalibrationList(int facilityId);
 
-        Task<CMDefaultResponse> SetParentAsset(CMSetParentAsset parent_child_group, int userID);
+        Task<CMDefaultResponse> SetParentAsset(int parentID, int childID, int userID);
     }
     public class InventoryBS : IInventoryBS
     {
@@ -129,7 +129,7 @@ namespace CMMSAPIs.BS.Inventory
             }
         }
 
-        public async Task<List<CMDefaultResponse>> ImportInventories(int file_id, int userID)
+        public async Task<CMImportFileResponse> ImportInventories(int file_id, int userID)
         {
             try
             {
@@ -144,13 +144,13 @@ namespace CMMSAPIs.BS.Inventory
             }
         }
 
-        public async Task<CMDefaultResponse> SetParentAsset(CMSetParentAsset parent_child_group, int userID)
+        public async Task<CMDefaultResponse> SetParentAsset(int parentID, int childID, int userID)
         {
             try
             {
                 using (var repos = new InventoryRepository(getDB, _environment))
                 {
-                    return await repos.SetParentAsset(parent_child_group, userID);
+                    return await repos.SetParentAsset(parentID, childID, userID);
                 }
             }
             catch (Exception)
