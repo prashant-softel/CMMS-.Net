@@ -638,12 +638,12 @@ namespace CMMSAPIs.Controllers.Permits
         [Authorize]
         [Route("UpdatePermit")]
         [HttpPatch]
-        public async Task<IActionResult> UpdatePermit(CMUpdatePermit request, bool resubmit)
+        public async Task<IActionResult> UpdatePermit(CMUpdatePermit request)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _PermitBS.UpdatePermit(request,  resubmit, userID);
+                var data = await _PermitBS.UpdatePermit(request, userID);
                 return Ok(data);
             }
             catch (AccessViolationException ex)

@@ -605,7 +605,7 @@ namespace CMMSAPIs.Repositories.Permits
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, insertedId, 0, 0, "Permit Created", CMMS.CMMS_Status.PTW_CREATED,userID);
 
-            CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_CREATED, permitDetails[0]);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_CREATED, permitDetails[0]);
 
             CMDefaultResponse response = new CMDefaultResponse(insertedId, CMMS.RETRUNSTATUS.SUCCESS, "Permit Created Successfully");
 
@@ -1179,7 +1179,7 @@ namespace CMMSAPIs.Repositories.Permits
             return response;
         }
 
-        internal async Task<CMDefaultResponse> UpdatePermit(CMUpdatePermit request, bool resubmit , int userID)
+        internal async Task<CMDefaultResponse> UpdatePermit(CMUpdatePermit request, int userID)
         {
             string requesterQuery = $"SELECT acceptedById FROM permits WHERE id = {request.permit_id};";
             DataTable requesterDt = await Context.FetchData(requesterQuery).ConfigureAwait(false);
@@ -1209,7 +1209,7 @@ namespace CMMSAPIs.Repositories.Permits
                 updatePermitQry += $"issuedById = { request.issuer_id }, ";
             if (request.approver_id > 0)
                 updatePermitQry += $"approvedById = { request.approver_id }, ";
-            if (resubmit == true)
+            if (request.resubmit == true)
                 updatePermitQry += $"status = {(int)CMMS.CMMS_Status.PTW_CREATED}, ";
             updatePermitQry = updatePermitQry.Substring(0, updatePermitQry.Length - 2);
             updatePermitQry += $" where id = { request.permit_id }; ";
@@ -1317,7 +1317,7 @@ namespace CMMSAPIs.Repositories.Permits
                 }
             }
             CMDefaultResponse response = new CMDefaultResponse();
-            if (resubmit == true)
+            if (request.resubmit == true)
             {
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.permit_id, 0, 0, "Permit Resubmitted for Approval", CMMS.CMMS_Status.PTW_CREATED,userID);
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_CREATED, permitDetails[0]);

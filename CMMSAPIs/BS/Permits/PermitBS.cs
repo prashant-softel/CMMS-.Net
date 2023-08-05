@@ -50,7 +50,7 @@ namespace CMMSAPIs.BS.Permits
         Task<CMDefaultResponse> PermitCancelByApprover(CMApproval request, int userID);
         Task<CMDefaultResponse> PermitCancelByHSE(CMApproval request, int userID);
         Task<CMDefaultResponse> PermitCancelByIssuer(CMApproval request, int userID);
-        Task<CMDefaultResponse> UpdatePermit(CMUpdatePermit request, bool resubmit, int userID);
+        Task<CMDefaultResponse> UpdatePermit(CMUpdatePermit request, int userID);
     }
 
     public class PermitBS : IPermitBS
@@ -331,13 +331,13 @@ namespace CMMSAPIs.BS.Permits
             }
         }
 
-        public async Task<CMDefaultResponse> UpdatePermit(CMUpdatePermit request, bool resubmit, int userID)
+        public async Task<CMDefaultResponse> UpdatePermit(CMUpdatePermit request, int userID)
         {
             try
             {
                 using (var repos = new PermitRepository(getDB))
                 {
-                    return await repos.UpdatePermit(request, resubmit, userID);
+                    return await repos.UpdatePermit(request, userID);
 
                 }
             }
