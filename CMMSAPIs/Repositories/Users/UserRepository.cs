@@ -122,9 +122,9 @@ namespace CMMSAPIs.Repositories.Users
             return null;
         }
         
-        internal async Task<CMDefaultResponse> ImportUsers(int file_id, int userID)
+        internal async Task<CMImportFileResponse> ImportUsers(int file_id, int userID)
         {
-            CMDefaultResponse response = null;
+            CMImportFileResponse response = null;
 
             string bloodGroupQry = "SELECT UPPER(name) as name, blood_group_id FROM bloodgroupaltnames";
             DataTable dtBloodGroups = await Context.FetchData(bloodGroupQry).ConfigureAwait(false);
@@ -467,17 +467,22 @@ namespace CMMSAPIs.Repositories.Users
                             {
                                 idList.AddRange((await AddUsers(dtUsers, userID)).id);
                             }
-                            response = new CMDefaultResponse(idList, CMMS.RETRUNSTATUS.SUCCESS, $"{idList.Count} user(s) added successfully");
+                            response = new CMImportFileResponse(idList, CMMS.RETRUNSTATUS.SUCCESS, null, null, $"{idList.Count} user(s) added successfully");
                         }
                     }
                 }
             }
+            string logPath = m_errorLog.SaveAsText($"ImportLog\\ImportUsers_File{file_id}_{DateTime.UtcNow.ToString("yyyyMMdd_HHmmss")}");
+            string logQry = $"UPDATE uploadedfiles SET logfile = '{logPath}' WHERE id = {file_id}";
+            await Context.ExecuteNonQry<int>(logQry).ConfigureAwait(false);
+            logPath = logPath.Replace("\\\\", "\\");
             if (response == null)
-                response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, $"{string.Join("\r\n", m_errorLog.errorLog().ToArray())}");
+                response = new CMImportFileResponse(0, CMMS.RETRUNSTATUS.FAILURE, logPath, m_errorLog.errorLog(), "Errors found while importing file.");
             else
             {
-                m_errorLog.SetInformation(response.message);
-                response.message = $"{string.Join("\r\n", m_errorLog.errorLog().ToArray())}";
+                m_errorLog.SetImportInformation("File imported successfully");
+                response.error_log_file_path = logPath;
+                response.import_log = m_errorLog.errorLog();
             }
                     //Import excel file
                     //Create validation

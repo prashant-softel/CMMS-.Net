@@ -16,7 +16,7 @@ namespace CMMSAPIs.BS.Users
         Task<UserToken> Authenticate(CMUserCrentials userCrentials);
         public Task<CMUserDetail> GetUserDetail(int user_id);
         public Task<List<CMUser>> GetUserList(int facility_id);
-        public Task<CMDefaultResponse> ImportUsers(int file_id, int userID);
+        public Task<CMImportFileResponse> ImportUsers(int file_id, int userID);
         public Task<CMDefaultResponse> CreateUser(List<CMCreateUser> request, int userID);
         public Task<CMDefaultResponse> UpdateUser(CMUpdateUser request, int userID);
         public Task<CMDefaultResponse> DeleteUser(int id, int userID);
@@ -91,7 +91,7 @@ namespace CMMSAPIs.BS.Users
             }
         }
 
-        public async Task<CMDefaultResponse> ImportUsers(int file_id, int userID)
+        public async Task<CMImportFileResponse> ImportUsers(int file_id, int userID)
         {
             try
             {

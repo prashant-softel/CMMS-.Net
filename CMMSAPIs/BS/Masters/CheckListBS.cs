@@ -23,7 +23,7 @@ namespace CMMSAPIs.BS.Masters
         Task<CMDefaultResponse> UpdateCheckPoint(CMCreateCheckPoint request, int userID);
         Task<CMDefaultResponse> DeleteCheckPoint(int id, int userID);
         Task<CMImportFileResponse> ValidateChecklistCheckpoint(int file_id);
-        Task<List<object>> ImportChecklistCheckpoint(int file_id, int userID);
+        Task<List<CMImportFileResponse>> ImportChecklistCheckpoint(int file_id, int userID);
     }
     public class CheckListBS : ICheckListBS
     {
@@ -220,7 +220,7 @@ namespace CMMSAPIs.BS.Masters
             }
         }
 
-        public async Task<List<object>> ImportChecklistCheckpoint(int file_id, int userID)
+        public async Task<List<CMImportFileResponse>> ImportChecklistCheckpoint(int file_id, int userID)
         {
             try
             {

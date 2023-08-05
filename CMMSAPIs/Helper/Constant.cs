@@ -223,6 +223,8 @@ namespace CMMSAPIs.Helper
             SM_MRS,
             SM_MRS_RETURN,
             SM_S2S,
+            SM_GO,
+            SM_RO,
 
             AUDIT_PLAN = 41,
             AUDIT_SCHEDULE,

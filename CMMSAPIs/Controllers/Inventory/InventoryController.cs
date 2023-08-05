@@ -73,12 +73,12 @@ namespace CMMSAPIs.Controllers.Inventory
         [Authorize]
         [Route("SetParentAsset")]
         [HttpPut]
-        public async Task<IActionResult> SetParentAsset(CMSetParentAsset parent_child_group)
+        public async Task<IActionResult> SetParentAsset(int parentID, int childID)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _InventoryBS.SetParentAsset(parent_child_group, userID);
+                var data = await _InventoryBS.SetParentAsset(parentID, childID, userID);
                 return Ok(data);
             }
             catch (Exception ex)
