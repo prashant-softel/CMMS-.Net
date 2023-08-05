@@ -325,7 +325,7 @@ namespace CMMSAPIs.Helper
             PTW_REJECTED_BY_ISSUER,
             PTW_ISSUED,
             PTW_REJECTED_BY_APPROVER,
-            PTW_APPROVE,
+            PTW_APPROVED,
             PTW_CLOSED,
             PTW_CANCELLED_BY_ISSUER,
             PTW_CANCELLED_BY_HSE,
@@ -347,10 +347,9 @@ namespace CMMSAPIs.Helper
             JC_STARTED,
             JC_CLOSED,
             JC_CARRRY_FORWARDED,
+            JC_REJECTED,
             JC_APPROVED,
-            JC_REJECTED5,
-            JC_PTW_TIMED_OUT,
-            JC_UPDATED,
+            JC_UPDATED,                 //only for notification purpose
 
 
             PM_START = 161,

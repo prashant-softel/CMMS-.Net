@@ -225,7 +225,7 @@ namespace CMMSAPIs.Repositories.Jobs
             //get Associated permits
             string myQuery3 = "SELECT ptw.id as permitId, ptw.title as title, ptw.code as sitePermitNo, ptw.startDate, ptw.endDate,  CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, ptw.status as ptwStatus FROM permits as ptw JOIN jobs as job ON ptw.id = job.linkedPermit " +
                 "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
-                "LEFT JOIN fleximc_jc_files as jobCard ON jobCard.JC_id = ptw.id " +
+                "LEFT JOIN st_jc_files as jobCard ON jobCard.JC_id = ptw.id " +
             "WHERE job.id= " + job_id;
             List<CMAssociatedPermitList> _AssociatedpermitList = await Context.GetData<CMAssociatedPermitList>(myQuery3).ConfigureAwait(false);
             if(_AssociatedpermitList.Count > 0)
