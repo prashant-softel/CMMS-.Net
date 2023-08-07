@@ -103,7 +103,6 @@ namespace CMMSAPIs.Models.PM
     public class AddObservation
     {
         public int execution_id { get; set; }
-        public int isOK { get; set; }
         public string observation { get; set; }
         public int job_create { get; set; }
         public List<PMFileUpload> pm_files { get; set; }

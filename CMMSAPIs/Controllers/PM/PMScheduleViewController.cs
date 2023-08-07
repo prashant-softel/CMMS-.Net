@@ -163,7 +163,9 @@ namespace CMMSAPIs.Controllers.PM
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
                 var data = await _PMScheduleViewBS.ClosePMTaskExecution(request, userID);
-                return Ok(data);
+                request.comment = "Approved";
+                var data2 = _PMScheduleViewBS.ApprovePMTaskExecution(request, userID);
+                return Ok(data2);
             }
             catch (Exception)
             {

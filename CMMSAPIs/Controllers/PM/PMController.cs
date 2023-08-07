@@ -51,11 +51,11 @@ namespace CMMSAPIs.Controllers.PM
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
                 var data = await _PMBS.SetScheduleData(request, userID);
                 return Ok(data);
-            }
+            }/*
             catch (ArgumentException ex)
             {
                 return BadRequest(ex.Message);
-            }
+            }*/
             catch (Exception)
             {
                 throw;
