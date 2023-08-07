@@ -125,7 +125,7 @@ namespace CMMSAPIs.Controllers.JC
         [Authorize]
         [Route("ApproveJC")]
         [HttpPut]
-        public async Task<IActionResult> ApproveJC([FromForm] CMJCApprove request)
+        public async Task<IActionResult> ApproveJC(CMJCApprove request)
         {
             try
             {
@@ -142,7 +142,7 @@ namespace CMMSAPIs.Controllers.JC
         [Authorize]
         [Route("RejectJC")]
         [HttpPut]
-        public async Task<IActionResult> RejectJC([FromForm] CMJCReject request)
+        public async Task<IActionResult> RejectJC(CMJCReject request)
         {
             try
             {
