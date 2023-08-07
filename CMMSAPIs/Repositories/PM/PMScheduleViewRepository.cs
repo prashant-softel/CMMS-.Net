@@ -205,9 +205,7 @@ namespace CMMSAPIs.Repositories.PM
             string permitQuery = "SELECT ptw.id as ptw_id, ptw.code as ptw_code, ptw.title as ptw_title, ptw.status as ptw_status " + 
                                     "FROM " + 
                                         "permits as ptw " +
-                                    "LEFT JOIN " +
-                                        "permitlotoassets as loto on ptw.id = loto.PTW_id " +
-                                    $"WHERE ptw.id = {permit_id} AND ptw.facilityId = {scheduleData[0].facility_id} AND loto.Loto_Asset_id = {scheduleData[0].asset_id};";
+                                    $"WHERE ptw.id = {permit_id} AND ptw.facilityId = {scheduleData[0].facility_id};";
             List<ScheduleLinkedPermit> permit = await Context.GetData<ScheduleLinkedPermit>(permitQuery).ConfigureAwait(false);
             string myQuery = "UPDATE pm_schedule SET " +
                                 $"PTW_id = {permit[0].ptw_id}, " +
@@ -332,7 +330,7 @@ namespace CMMSAPIs.Repositories.PM
                 if(executeIds.Contains(schedule_detail.execution_id))
                 {
                     int changeFlag = 0;
-                    string myQuery1 = "SELECT id as execution_id, is_ok as isOK, PM_Schedule_Observation as observation, job_created as job_create " +
+                    string myQuery1 = "SELECT id as execution_id, PM_Schedule_Observation as observation, job_created as job_create " +
                                         $"FROM pm_execution WHERE id = {schedule_detail.execution_id};";
                     List<AddObservation> execution_details = await Context.GetData<AddObservation>(myQuery1).ConfigureAwait(false);
                     if(schedule_detail.observation != null && schedule_detail.observation != "" && !schedule_detail.observation.Equals(execution_details[0].observation))
@@ -343,15 +341,13 @@ namespace CMMSAPIs.Repositories.PM
                         {
                             updateQry += $"PM_Schedule_Observation_added_by = {userID}, " +
                                         $"PM_Schedule_Observation_add_date = '{UtilsRepository.GetUTCTime()}', " +
-                                        $"is_ok = {schedule_detail.isOK}, " +
-                                        $"PM_Schedule_Observation = '{((schedule_detail.isOK==1)?"OK":schedule_detail.observation)}' ";
+                                        $"PM_Schedule_Observation = '{schedule_detail.observation}' ";
                             message = "Observation Added";
                             response = new CMDefaultResponse(schedule_detail.execution_id, CMMS.RETRUNSTATUS.SUCCESS, "Observation Added Successfully");
                         }
                         else
                         {
-                            if (execution_details[0].isOK == 0)
-                                updateQry += $"PM_Schedule_Observation = '{schedule_detail.observation}', ";
+                            updateQry += $"PM_Schedule_Observation = '{schedule_detail.observation}', ";
                             updateQry += $"PM_Schedule_Observation_update_by = {userID}, " +
                                         $"PM_Schedule_Observation_update_date = '{UtilsRepository.GetUTCTime()}' " ;
                             message = "Observation Updated";
@@ -393,54 +389,57 @@ namespace CMMSAPIs.Repositories.PM
                         responseList.Add(response);
                         changeFlag++;
                     }
-                    if (schedule_detail.pm_files.Count != 0)
+                    if (schedule_detail.pm_files != null)
                     {
-                        foreach(var file in schedule_detail.pm_files)
+                        if (schedule_detail.pm_files.Count != 0)
                         {
-                            string checkEventFiles = $"SELECT * FROM pm_schedule_files " +
-                                                        $"WHERE PM_Schedule_id = {request.schedule_id} " +
-                                                        $"AND PM_Execution_id = {schedule_detail.execution_id} " +
-                                                        $"AND PM_Event = {(int) file.pm_event}";
-                            DataTable dt2 = await Context.FetchData(checkEventFiles).ConfigureAwait(false);
-                            
-                            if (dt2.Rows.Count > 0)
+                            foreach (var file in schedule_detail.pm_files)
                             {
-                                string deleteQry = "DELETE FROM pm_schedule_files " +
-                                                        $"WHERE PM_Schedule_id = {request.schedule_id} " +
-                                                        $"AND PM_Execution_id = {schedule_detail.execution_id} " +
-                                                        $"AND PM_Event = {(int)file.pm_event}";
-                                await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
+                                string checkEventFiles = $"SELECT * FROM pm_schedule_files " +
+                                                            $"WHERE PM_Schedule_id = {request.schedule_id} " +
+                                                            $"AND PM_Execution_id = {schedule_detail.execution_id} " +
+                                                            $"AND PM_Event = {(int)file.pm_event}";
+                                DataTable dt2 = await Context.FetchData(checkEventFiles).ConfigureAwait(false);
+
+                                if (dt2.Rows.Count > 0)
+                                {
+                                    string deleteQry = "DELETE FROM pm_schedule_files " +
+                                                            $"WHERE PM_Schedule_id = {request.schedule_id} " +
+                                                            $"AND PM_Execution_id = {schedule_detail.execution_id} " +
+                                                            $"AND PM_Event = {(int)file.pm_event}";
+                                    await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
+                                }
+                                string insertFile = "INSERT INTO pm_schedule_files(PM_Schedule_id, PM_Schedule_Code, PM_Execution_id, File_id, PM_Event, " +
+                                                    "File_Discription, File_added_by, File_added_date, File_Server_id, File_Server_Path) VALUES " +
+                                                    $"({request.schedule_id}, 'PMSCH{request.schedule_id}', {schedule_detail.execution_id}, {file.file_id}, " +
+                                                    $"{(int)file.pm_event}, '{file.file_desc}', {userID}, '{UtilsRepository.GetUTCTime()}', 1, " +
+                                                    $"'http://cms_test.com/' ); SELECT LAST_INSERT_ID();";
+                                DataTable dt3 = await Context.FetchData(insertFile).ConfigureAwait(false);
+                                int id = Convert.ToInt32(dt3.Rows[0][0]);
+                                string otherDetailsQry = "UPDATE pm_schedule_files as pmf " +
+                                                            "JOIN uploadedfiles as f ON pmf.File_id = f.id " +
+                                                            "JOIN pm_schedule as pms ON pms.id = pmf.PM_Schedule_id " +
+                                                            "JOIN pm_execution as pme ON pme.id = pmf.PM_Execution_id " +
+                                                         "SET " +
+                                                            "pmf.PM_Schedule_Title = pms.PM_Schedule_Name, " +
+                                                            "pmf.Check_Point_id = pme.Check_Point_id, " +
+                                                            "pmf.Check_Point_Code = pme.Check_Point_Code, " +
+                                                            "pmf.Check_Point_Name = pme.Check_Point_Name, " +
+                                                            "pmf.File_Name = SUBSTRING_INDEX(f.file_path, '\\\\', -1), " +
+                                                            "pmf.File_Path = f.file_path, " +
+                                                            "pmf.File_Type_name = f.file_type, " +
+                                                            "pmf.File_Size = f.file_size, " +
+                                                            "pmf.File_Size_Units = f.file_size_units, " +
+                                                            "pmf.File_Size_bytes = f.file_size_bytes, " +
+                                                            "pmf.File_Type_ext = SUBSTRING_INDEX(f.file_path, '.', -1) " +
+                                                         $"WHERE pmf.id = {id};";
+                                await Context.ExecuteNonQry<int>(otherDetailsQry).ConfigureAwait(false);
                             }
-                            string insertFile = "INSERT INTO pm_schedule_files(PM_Schedule_id, PM_Schedule_Code, PM_Execution_id, File_id, PM_Event, " +
-                                                "File_Discription, File_added_by, File_added_date, File_Server_id, File_Server_Path) VALUES " +
-                                                $"({request.schedule_id}, 'PMSCH{request.schedule_id}', {schedule_detail.execution_id}, {file.file_id}, " +
-                                                $"{(int)file.pm_event}, '{file.file_desc}', {userID}, '{UtilsRepository.GetUTCTime()}', 1, " +
-                                                $"'http://cms_test.com/' ); SELECT LAST_INSERT_ID();";
-                            DataTable dt3 = await Context.FetchData(insertFile).ConfigureAwait(false);
-                            int id = Convert.ToInt32(dt3.Rows[0][0]);
-                            string otherDetailsQry = "UPDATE pm_schedule_files as pmf " +
-                                                        "JOIN uploadedfiles as f ON pmf.File_id = f.id " +
-                                                        "JOIN pm_schedule as pms ON pms.id = pmf.PM_Schedule_id " +
-                                                        "JOIN pm_execution as pme ON pme.id = pmf.PM_Execution_id " +
-                                                     "SET " +
-                                                        "pmf.PM_Schedule_Title = pms.PM_Schedule_Name, " +
-                                                        "pmf.Check_Point_id = pme.Check_Point_id, " +  
-                                                        "pmf.Check_Point_Code = pme.Check_Point_Code, " +
-                                                        "pmf.Check_Point_Name = pme.Check_Point_Name, " +
-                                                        "pmf.File_Name = SUBSTRING_INDEX(f.file_path, '\\\\', -1), " +
-                                                        "pmf.File_Path = f.file_path, " +
-                                                        "pmf.File_Type_name = f.file_type, " +
-                                                        "pmf.File_Size = f.file_size, " +
-                                                        "pmf.File_Size_Units = f.file_size_units, " +
-                                                        "pmf.File_Size_bytes = f.file_size_bytes, " +
-                                                        "pmf.File_Type_ext = SUBSTRING_INDEX(f.file_path, '.', -1) " +
-                                                     $"WHERE pmf.id = {id};";
-                            await Context.ExecuteNonQry<int>(otherDetailsQry).ConfigureAwait(false);
+                            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, request.schedule_id, CMMS.CMMS_Modules.PM_EXECUTION, schedule_detail.execution_id, $"{schedule_detail.pm_files.Count} file(s) attached to PMSCH{request.schedule_id}", CMMS.CMMS_Status.PM_UPDATE, userID);
+                            response = new CMDefaultResponse(schedule_detail.execution_id, CMMS.RETRUNSTATUS.SUCCESS, $"{schedule_detail.pm_files.Count} file(s) attached to PM Successfully");
+                            responseList.Add(response);
+                            changeFlag++;
                         }
-                        await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, request.schedule_id, CMMS.CMMS_Modules.PM_EXECUTION, schedule_detail.execution_id, $"{schedule_detail.pm_files.Count} file(s) attached to PMSCH{request.schedule_id}", CMMS.CMMS_Status.PM_UPDATE, userID);
-                        response = new CMDefaultResponse(schedule_detail.execution_id, CMMS.RETRUNSTATUS.SUCCESS, $"{schedule_detail.pm_files.Count} file(s) attached to PM Successfully");
-                        responseList.Add(response);
-                        changeFlag++;
                     }
                     if(changeFlag == 0)
                     {

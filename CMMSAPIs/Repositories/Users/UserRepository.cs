@@ -156,7 +156,7 @@ namespace CMMSAPIs.Repositories.Users
             Dictionary<string, int> countries = new Dictionary<string, int>();
             countries.Merge(countryNames, countryIds);
 
-            string plantQry = "SELECT id, UPPER(name) as name FROM facilities WHERE parentId = 0;";
+            string plantQry = "SELECT id, UPPER(name) as name FROM facilities WHERE parentId = 0 GROUP BY name;";
             DataTable dtPlant = await Context.FetchData(plantQry).ConfigureAwait(false);
             List<string> plantNames = dtPlant.GetColumn<string>("name");
             List<int> plantIds = dtPlant.GetColumn<int>("id");
