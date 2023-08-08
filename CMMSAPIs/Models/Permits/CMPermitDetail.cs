@@ -6,6 +6,7 @@ namespace CMMSAPIs.Models.Permits
 {
     public class CMPermitDetail
     {
+        public Int64 isExpired { get; set; }
         public int insertedId { get; set; }
         public int permitNo { get; set; }
         public int sitePermitNo { get; set; }

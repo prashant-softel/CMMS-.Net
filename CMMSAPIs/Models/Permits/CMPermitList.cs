@@ -8,6 +8,7 @@ namespace CMMSAPIs.Models.Permits
 {
     public class CMPermitList
     {
+        public int isExpired { get; set; }
         public int permitId { get; set; }
         public int ptwStatus { get; set; }
         public int permit_site_no { get; set; }

@@ -82,16 +82,16 @@ namespace CMMSAPIs.Models.MC
         //public decimal ScheduledArea { get; set; }
         public DateTime plannedDate { get; set; }
        // public string status_short { get; set; }
-        public List<CMMCEquipment> equipments { get; set; }
+        public List<CMMCEquipmentDetails> equipments { get; set; }
 
     }
-    public class CMMCEquipment
+    public class CMMCEquipmentDetails
     {
          public int id { get; set; }
         public string equipName { get; set; }
 
     }
-    public class CMMCEquipmentDetails
+    public class CMMCEquipment
     {
         public int id { get; set; }
         public string equipmentName { get; set; }
@@ -131,7 +131,7 @@ namespace CMMSAPIs.Models.MC
         public DateTime plannedDate { get; set; }
         public int status { get; set; }
         public string status_short { get; set; }
-        public List<CMMCEquipmentDetails> equipments { get; set; }
+        public List<CMMCEquipment> equipments { get; set; }
        
     }
 
