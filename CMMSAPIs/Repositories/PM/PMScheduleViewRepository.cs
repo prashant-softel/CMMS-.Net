@@ -207,6 +207,8 @@ namespace CMMSAPIs.Repositories.PM
                                         "permits as ptw " +
                                     $"WHERE ptw.id = {permit_id} AND ptw.facilityId = {scheduleData[0].facility_id};";
             List<ScheduleLinkedPermit> permit = await Context.GetData<ScheduleLinkedPermit>(permitQuery).ConfigureAwait(false);
+            if (permit.Count == 0)
+                return new CMDefaultResponse(schedule_id, CMMS.RETRUNSTATUS.FAILURE, $"Permit {permit_id} does not exist.");
             string myQuery = "UPDATE pm_schedule SET " +
                                 $"PTW_id = {permit[0].ptw_id}, " +
                                 $"PTW_Code = '{permit[0].ptw_code}', " +
