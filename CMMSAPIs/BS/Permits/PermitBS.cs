@@ -38,7 +38,7 @@ namespace CMMSAPIs.BS.Permits
         Task<List<CMPermitList>> GetPermitList(int facility_id, string startDate, string endDate, int userID, bool self_view, bool non_expired);
         Task<CMPermitDetail> GetPermitDetails(int permit_id);    
         Task<CMDefaultResponse> PermitApprove(CMApproval request, int userID);
-        Task<CMDefaultResponse> PermitExtend(CMApproval request, int userID);
+        Task<CMDefaultResponse> PermitExtend(CMPermitExtend request, int userID);
         Task<CMDefaultResponse> PermitExtendApprove(CMApproval request, int userID);
         Task<CMDefaultResponse> PermitExtendReject(CMApproval request, int userID);
         Task<CMDefaultResponse> PermitClose(CMApproval request, int userID);
@@ -380,7 +380,7 @@ namespace CMMSAPIs.BS.Permits
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> PermitExtend(CMApproval request, int userID)
+        public async Task<CMDefaultResponse> PermitExtend(CMPermitExtend request, int userID)
         {
             try
             {

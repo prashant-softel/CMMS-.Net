@@ -96,4 +96,12 @@ namespace CMMSAPIs.Models.Permits
         public int input { get; set; }
     }
 
+    public class CMPermitExtend
+    {
+        public int id { get; set; }
+        public int extend_by_minutes { get; set; }
+        public string comment { get; set; }
+
+    }
+
 }

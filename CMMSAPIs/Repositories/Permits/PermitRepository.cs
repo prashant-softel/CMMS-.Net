@@ -709,9 +709,15 @@ namespace CMMSAPIs.Repositories.Permits
 
         /*         * Permit Issue/Approval/Rejection/Cancel End Points
         */
-        internal async Task<CMDefaultResponse> PermitExtend(CMApproval request, int userID)
+        internal async Task<CMDefaultResponse> PermitExtend(CMPermitExtend request, int userID)
         {
-            string updateQry = $"update permits set extendReason = '{ request.comment }', extendTime = '{ UtilsRepository.GetUTCTime() }', extendStatus = 1, status = { (int)CMMS.CMMS_Status.PTW_EXTEND_REQUESTED }  where id = { request.id }";
+            int extendMinutes = 60;
+
+            if(request.extend_by_minutes > 0) {
+                extendMinutes = request.extend_by_minutes;
+            }
+
+            string updateQry = $"update permits set extendReason = '{ request.comment }', extendByMinutes = '{extendMinutes}', extendTime = '{ UtilsRepository.GetUTCTime() }', extendStatus = 1, status = { (int)CMMS.CMMS_Status.PTW_EXTEND_REQUESTED } where id = { request.id }";
             int retValue = await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
 
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
@@ -736,16 +742,18 @@ namespace CMMSAPIs.Repositories.Permits
 
             List<CMPermitDetail> permitDetails = await Context.GetData<CMPermitDetail>(myQuery).ConfigureAwait(false);
 
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.id, 0, 0, "Permit extension requested. Reason:" + request.comment, CMMS.CMMS_Status.PTW_EXTEND_REQUESTED, userID);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.id, 0, 0, $"Permit extension requested [{extendMinutes} Mins]. Reason:" + request.comment, CMMS.CMMS_Status.PTW_EXTEND_REQUESTED, userID);
 
-            CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_EXTEND_REQUESTED, permitDetails[0]);
-            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $" Permit { request.id } Extension requested. Reason:" + request.comment);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_EXTEND_REQUESTED, permitDetails[0]);
+            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $" Permit { request.id } Extension requested [{extendMinutes} Mins]. Reason:" + request.comment);
             return response;
         }
 
         internal async Task<CMDefaultResponse> PermitExtendApprove(CMApproval request, int userID)
         {
-            string updateQry = $"update permits set extendStatus = 1, status = { (int)CMMS.CMMS_Status.PTW_EXTEND_REQUEST_APPROVE }, extendApproveTime = '{ UtilsRepository.GetUTCTime() }', endDate = ADDDATE(endDate, INTERVAL 1 HOUR) where id = { request.id }";
+
+            
+            string updateQry = $"update permits set extendStatus = 1, status = { (int)CMMS.CMMS_Status.PTW_EXTEND_REQUEST_APPROVE }, extendApproveTime = '{ UtilsRepository.GetUTCTime() }', endDate = ADDDATE(endDate, INTERVAL extendByMinutes MINUTE) where id = { request.id }";
             List<CMDefaultResp> _Employee = await Context.GetData<CMDefaultResp>(updateQry).ConfigureAwait(false);
             int retValue = await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
 
@@ -755,27 +763,13 @@ namespace CMMSAPIs.Repositories.Permits
             {
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
             }
-
-
-            string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as start_datetime, ptw.endDate as end_datetime, facilities.id as facility_id, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, blocks.id as blockId, blocks.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.title as title, ptw.description as description, ptw.jobTypeId as job_type_id, jobType.title as job_type_name, ptw.TBTId as sop_type_id, sop.title as sop_type_name, user1.id as issuer_id, CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, user2.id as approver_id, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, user3.id as requester_id, CONCAT(user3.firstName,' ',user3.lastName) as requestedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, CONCAT(user5.firstName,' ',user5.lastName) as closedByName, ptw.cancelRequestDate as cancel_at " +
-              "FROM permits as ptw " +
-              "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
-              "LEFT JOIN permitjobtypelist as jobType ON ptw.jobTypeId = jobType.id " +
-              "LEFT JOIN permittbtjoblist as sop ON ptw.TBTId = sop.id " +
-              "JOIN facilities as facilities  ON ptw.facilityId = facilities.id " +
-              "JOIN facilities as blocks  ON ptw.blockId = blocks.id " +
-              "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
-              "LEFT JOIN users as user2 ON user2.id = ptw.approvedById " +
-              "LEFT JOIN users as user3 ON user3.id = ptw.acceptedById " +
-              "LEFT JOIN users as user4 ON user4.id = ptw.cancelRequestById " +
-              $"LEFT JOIN users as user5 ON user5.id = ptw.completedById where ptw.id = {request.id};";
-
-            List<CMPermitDetail> permitDetails = await Context.GetData<CMPermitDetail>(myQuery).ConfigureAwait(false);
+              
+            CMPermitDetail permitDetails = await GetPermitDetails(request.id);
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.id, 0, 0, "Permit Extended for 1 hour", CMMS.CMMS_Status.PTW_EXTEND_REQUEST_APPROVE, userID);
 
-            CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_EXTEND_REQUEST_APPROVE, permitDetails[0]);
-            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $" Permit  { request.id } Extended for 1 hour");
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_EXTEND_REQUEST_APPROVE, permitDetails);
+            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $" Permit  { request.id } Extended for {permitDetails} hour");
             return response;
         }
 
@@ -808,7 +802,7 @@ namespace CMMSAPIs.Repositories.Permits
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.id, 0, 0, "Permit Extension cancelled. Reason:"+request.comment, CMMS.CMMS_Status.PTW_EXTEND_REQUEST_REJECTED, userID);
 
-            CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_EXTEND_REQUEST_REJECTED, permitDetails[0]);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_EXTEND_REQUEST_REJECTED, permitDetails[0]);
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $" Permit  { request.id } Extend Canceled. Reason:"+request.comment);
             return response;
         }
@@ -846,7 +840,7 @@ namespace CMMSAPIs.Repositories.Permits
             // return permitDetails[0];
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.id, 0, 0, request.comment, CMMS.CMMS_Status.PTW_ISSUED,userID);
 
-            CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_ISSUED, permitDetails[0]);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_ISSUED, permitDetails[0]);
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $" Permit  { request.id } Issued");
             return response;
         }
@@ -882,7 +876,7 @@ namespace CMMSAPIs.Repositories.Permits
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.id, 0, 0, request.comment, CMMS.CMMS_Status.PTW_APPROVED,userID);
 
-            CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_APPROVED, permitDetails[0]);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_APPROVED, permitDetails[0]);
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $" Permit  { request.id }  Approved");
             return response;
         }
@@ -916,7 +910,7 @@ namespace CMMSAPIs.Repositories.Permits
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.id, 0, 0, "Permit Closed", CMMS.CMMS_Status.PTW_CLOSED,userID);
 
-            CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_CLOSED, permitDetails[0]);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_CLOSED, permitDetails[0]);
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $" Permit  { request.id } Closed");
             return response;
         }
@@ -950,7 +944,7 @@ namespace CMMSAPIs.Repositories.Permits
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.id, 0, 0, "Permit Rejected by Issuer", CMMS.CMMS_Status.PTW_REJECTED_BY_ISSUER,userID);
 
-            CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_REJECTED_BY_ISSUER, permitDetails[0]);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_REJECTED_BY_ISSUER, permitDetails[0]);
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Issue of Permit  { request.id } Rejected ");
             return response;
         }
@@ -984,7 +978,7 @@ namespace CMMSAPIs.Repositories.Permits
 
 			await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.id, 0, 0, "Permit rejected by Approver. Reason :  " + request.comment, CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER,userID);
 
-            CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER, permitDetails[0]);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER, permitDetails[0]);
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $" Permit  { request.id } Rejected");
             return response;
         }
@@ -1060,7 +1054,7 @@ namespace CMMSAPIs.Repositories.Permits
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.id, 0, 0, request.comment, CMMS.CMMS_Status.PTW_CANCELLED_BY_ISSUER,userID);
 
-            CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_CANCELLED_BY_ISSUER, permitDetails[0]);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_CANCELLED_BY_ISSUER, permitDetails[0]);
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $" Permit  { request.id } Cancelled By Issuer {permitDetails[0].issuedByName}");
             return response;
         }
@@ -1098,7 +1092,7 @@ namespace CMMSAPIs.Repositories.Permits
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.id, 0, 0, request.comment, CMMS.CMMS_Status.PTW_CANCELLED_BY_APPROVER,userID);
 
-            CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_CANCELLED_BY_APPROVER, permitDetails[0]);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_CANCELLED_BY_APPROVER, permitDetails[0]);
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $" Permit  { request.id } Cancelled By Approver {permitDetails[0].approvedByName}");
             return response;
         }
@@ -1136,7 +1130,7 @@ namespace CMMSAPIs.Repositories.Permits
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.id, 0, 0, request.comment, CMMS.CMMS_Status.PTW_CANCELLED_BY_HSE,userID);
 
-            CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_CANCELLED_BY_HSE, permitDetails[0]);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_CANCELLED_BY_HSE, permitDetails[0]);
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $" Permit  { request.id } Cancelled By HSE");
             return response;
         }
@@ -1174,7 +1168,7 @@ namespace CMMSAPIs.Repositories.Permits
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.id, 0, 0, "Permit Cancel Request Rejected", CMMS.CMMS_Status.PTW_CANCEL_REQUEST_REJECTED,userID);
 
-            CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_CANCEL_REQUEST_REJECTED, permitDetails[0]);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_CANCEL_REQUEST_REJECTED, permitDetails[0]);
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Cancel Request Rejected for Permit **PTW{ request.id }** ");
             return response;
         }
