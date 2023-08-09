@@ -30,7 +30,7 @@ namespace CMMSAPIs.Models.Notifications
                 case CMMS.CMMS_Status.PM_START:     //Created                  
                     retValue = String.Format("Maintenance Order <{0}> Equipment <{1}> Started", m_pmObj.maintenance_order_number, m_pmObj.equipment_name);
                     break;
-                case CMMS.CMMS_Status.PM_UPDATE:     //Assigned
+                case CMMS.CMMS_Status.PM_UPDATED:     //Assigned
                     retValue = String.Format("Maintenance Order <{0}> Equipment <{1}> Updated", m_pmObj.maintenance_order_number, m_pmObj.equipment_name);
                     break;
                 case CMMS.CMMS_Status.PM_SUBMIT:     //Linked
@@ -42,17 +42,14 @@ namespace CMMSAPIs.Models.Notifications
                 case CMMS.CMMS_Status.PM_COMPLETED:     //Cancelled
                     retValue = String.Format("Maintenance Order <{0}> Equipment <{1}> Completed", m_pmObj.maintenance_order_number, m_pmObj.equipment_name);
                     break;
-                case CMMS.CMMS_Status.PM_APPROVE:     //Closed
+                case CMMS.CMMS_Status.PM_APPROVED:     //Closed
                     retValue = String.Format("Maintenance Order <{0}> Equipment <{1}> Approved", m_pmObj.maintenance_order_number, m_pmObj.equipment_name);
                     break;
-                case CMMS.CMMS_Status.PM_REJECT:     //Cancelled
+                case CMMS.CMMS_Status.PM_REJECTED:     //Cancelled
                     retValue = String.Format("Maintenance Order <{0}> Equipment <{1}> Rejected", m_pmObj.maintenance_order_number, m_pmObj.equipment_name);
                     break;
                 case CMMS.CMMS_Status.PM_CANCELLED:     //Closed
                     retValue = String.Format("Maintenance Order <{0}> Equipment <{1}> Cancelled", m_pmObj.maintenance_order_number, m_pmObj.equipment_name);
-                    break;
-                case CMMS.CMMS_Status.PM_PTW_TIMEOUT:     //Cancelled
-                    retValue = String.Format("Maintenance Order <{0}> Equipment <{1}> PTW <{2}> Timed Out", m_pmObj.maintenance_order_number, m_pmObj.equipment_name, m_pmObj.permit_id);
                     break;
                 case CMMS.CMMS_Status.PM_DELETED:     //Cancelled
                     retValue = String.Format("Maintenance Order <{0}> Equipment <{1}> Deleted", m_pmObj.maintenance_order_number, m_pmObj.equipment_name);
@@ -99,7 +96,7 @@ namespace CMMSAPIs.Models.Notifications
                     retValue += String.Format(template, "Started By", m_pmObj.started_by);
                     retValue += String.Format(templateEnd, "Started At", m_pmObj.started_at);
                     break;
-                case CMMS.CMMS_Status.PM_UPDATE:
+                case CMMS.CMMS_Status.PM_UPDATED:
                     retValue += String.Format(template, "Updated By", m_pmObj.updated_by);
                     retValue += String.Format(templateEnd, "Updated At", m_pmObj.updated_at);
                     break;
@@ -112,11 +109,11 @@ namespace CMMSAPIs.Models.Notifications
                 case CMMS.CMMS_Status.PM_COMPLETED:
                     retValue += String.Format(templateEnd, "Completed At", m_pmObj.completed_at);
                     break;
-                case CMMS.CMMS_Status.PM_APPROVE:
+                case CMMS.CMMS_Status.PM_APPROVED:
                     retValue += String.Format(template, "Approved By", m_pmObj.approved_by);
                     retValue += String.Format(templateEnd, "Approved At", m_pmObj.approved_at);
                     break;
-                case CMMS.CMMS_Status.PM_REJECT:
+                case CMMS.CMMS_Status.PM_REJECTED:
                     retValue += String.Format(template, "Rejected By", m_pmObj.rejected_by);
                     retValue += String.Format(templateEnd, "Rejected At", m_pmObj.rejected_at);
                     break;
@@ -124,8 +121,6 @@ namespace CMMSAPIs.Models.Notifications
                     retValue += String.Format(template, "Cancelled By", m_pmObj.cancelled_by);
                     retValue += String.Format(templateEnd, "Cancelled At", m_pmObj.cancelled_at);
                     break;
-                case CMMS.CMMS_Status.PM_PTW_TIMEOUT:
-                    retValue += "</table>"; break;
                 case CMMS.CMMS_Status.PM_DELETED:
                     retValue += String.Format(template, "Deleted By", m_pmObj.deleted_by);
                     retValue += String.Format(templateEnd, "Deleted At", m_pmObj.deleted_at); break;
