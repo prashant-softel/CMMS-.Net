@@ -540,6 +540,21 @@ namespace CMMSAPIs.Controllers.Masters
             }
         }
 
+        [Route("GetStatusList")]
+        [HttpGet]
+        public async Task<IActionResult> GetStatusList(CMMS.CMMS_Modules module)
+        {
+            try
+            {
+                var data = await _CMMSBS.GetStatusList(module);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         [Route("GetFrequencyList")]
         [HttpGet]
         public async Task<IActionResult> GetFrequencyList()

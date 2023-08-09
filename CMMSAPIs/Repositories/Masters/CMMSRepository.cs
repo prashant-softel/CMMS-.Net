@@ -156,6 +156,21 @@ namespace CMMSAPIs.Repositories.Masters
             return _moduleList;
         }
 
+        internal async Task<List<CMStatus>> GetStatusList(CMMS.CMMS_Modules module)
+        {
+            string myQuery = "SELECT module_a.id as module_id, module_a.softwareId as module_software_id, module_a.featureName as module_name, " +
+                                "status_a.softwareId as status_id, status_a.statusName as status_name " +
+                                "FROM features as module_a LEFT JOIN statuses AS status_a ON status_a.moduleId = " +
+                                "(SELECT CASE WHEN module_b.softwareId IN (SELECT DISTINCT status_b.moduleId FROM statuses as status_b) THEN " +
+                                "module_b.softwareId ELSE 0 END AS moduleId FROM features as module_b WHERE module_a.softwareId = module_b.softwareId) " +
+                                "WHERE module_a.softwareId > 0 ";
+            if (module > 0)
+                myQuery += $"AND module_a.softwareId = {(int)module} ";
+            myQuery += "ORDER BY module_a.softwareId ASC, status_a.softwareId ASC;";
+            List<CMStatus> _statusList = await Context.GetData<CMStatus>(myQuery).ConfigureAwait(false);
+            return _statusList;
+        }
+
         internal async Task<List<CMFinancialYear>> GetFinancialYear()
         {
             List<CMFinancialYear> _FinancialYear = new List<CMFinancialYear>();

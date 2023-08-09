@@ -62,9 +62,11 @@ namespace CMMSAPIs.Repositories.Jobs
             /*Your code goes here*/
             string myQuery = "SELECT " +
                                  //                                 "job.id, job.facilityId, user.id, facilities.name as plantName, job.status as status, job.createdAt as jobDate, DATE_FORMAT(job.breakdownTime, '%Y-%m-%d') as breakdown_time, job.id as id, asset_cat.name as equipmentCat, asset.name as workingArea, job.title as jobDetails, workType.workTypeName as workType, permit.code as permitId, job.createdBy as raisedBy, CONCAT(user.firstName , ' ' , user.lastName) as assignedToName, user.id as assignedToId, IF(job.breakdownTime = '', 'Non Breakdown Maintenance', 'Breakdown Maintenance') as breakdownType , job.description as description" +
-                                 "job.id, job.facilityId as facilityId, facilities.name as facilityName, group_concat(distinct asset_cat.name order by asset_cat.id separator ', ') as equipmentCat, group_concat(distinct asset.name order by asset.id separator ', ') as workingArea, job.title as jobDetails, job.description as description, job.createdBy as raisedBy, CONCAT(rasiedByUser.firstName , ' ' , rasiedByUser.lastName) as raisedByName, job.createdAt as jobDate, CONCAT(user.firstName , ' ' , user.lastName) as assignedToName, user.id as assignedToId, job.status as status, DATE_FORMAT(job.breakdownTime, '%Y-%m-%d') as breakdown_time, IF(job.breakdownTime = '', 'Non Breakdown Maintenance', 'Breakdown Maintenance') as breakdownType, group_concat(distinct workType.workTypeName order by workType.id separator ', ') as workType, permit.code as permitId " + 
+                                 "job.id, job.facilityId as facilityId, facilities.name as facilityName, group_concat(distinct asset_cat.name order by asset_cat.id separator ', ') as equipmentCat, group_concat(distinct asset.name order by asset.id separator ', ') as workingArea, job.title as jobDetails, job.description as description, job.createdBy as raisedBy, CONCAT(rasiedByUser.firstName , ' ' , rasiedByUser.lastName) as raisedByName, job.createdAt as jobDate, CONCAT(user.firstName , ' ' , user.lastName) as assignedToName, user.id as assignedToId, job.status as status, jc.JC_Status as latestJCStatus, DATE_FORMAT(job.breakdownTime, '%Y-%m-%d') as breakdown_time, IF(job.breakdownTime = '', 'Non Breakdown Maintenance', 'Breakdown Maintenance') as breakdownType, group_concat(distinct workType.workTypeName order by workType.id separator ', ') as workType, permit.code as permitId " + 
                                  " FROM " +
                                         "jobs as job " +
+                                "LEFT JOIN " +
+                                        "jobcards as jc ON job.id = jc.jobId " +
                                 "LEFT JOIN  " +
                                         "facilities as facilities ON job.facilityId = facilities.id " +
                                 "LEFT JOIN " +
@@ -84,10 +86,12 @@ namespace CMMSAPIs.Repositories.Jobs
                                  "LEFT JOIN " +
                                         "users as rasiedByUser ON rasiedByUser.id = job.createdBy " + 
                                  "LEFT JOIN " +
-                                        "users as user ON user.id = job.assignedId";
+                                        "users as user ON user.id = job.assignedId " +
+                                "WHERE (jc.id = (SELECT jc2.id FROM jobcards as jc2 WHERE jc2.JC_Added_Date = " +
+                                        "(SELECT MAX(jc3.JC_Added_Date) FROM jobcards as jc3 WHERE jc2.id=jc3.id) AND jc.id = jc2.id) OR jc.id = 0 or jc.id IS NULL) ";
             if (facility_id > 0)
             {
-                myQuery += " WHERE job.facilityId = " + facility_id + " AND job.JobType = " + (int)jobType;
+                myQuery += " AND job.facilityId = " + facility_id + " AND job.JobType = " + (int)jobType;
                 if (startDate?.Length > 0 && endDate?.Length > 0)
                 {
                     DateTime start = DateTime.Parse(startDate);
@@ -281,8 +285,8 @@ namespace CMMSAPIs.Repositories.Jobs
             //int created_by = Utils.UtilsRepository.GetUserID();
             if (request.jobType == null)
                 request.jobType = CMMS.CMMS_JobType.BreakdownMaintenance;
-            string qryJobBasic = "insert into jobs(facilityId, blockId, title, description, createdAt, createdBy, breakdownTime, JobType, status, assignedId, linkedPermit) values" +
-            $"({ request.facility_id }, { request.block_id }, '{ request.title }', '{ request.description }', '{UtilsRepository.GetUTCTime() }',{ userId},'{  request.breakdown_time.ToString("yyyy-MM-dd HH:mm:ss")}',{(int)request.jobType},{ status },{ request.assigned_id },{ (request.permit_id==null?0:request.permit_id) })";
+            string qryJobBasic = "insert into jobs(facilityId, blockId, title, description, statusUpdatedAt, createdAt, createdBy, breakdownTime, JobType, status, assignedId, linkedPermit) values" +
+            $"({ request.facility_id }, { request.block_id }, '{ request.title }', '{ request.description }', '{UtilsRepository.GetUTCTime() }','{UtilsRepository.GetUTCTime() }',{ userId},'{  request.breakdown_time.ToString("yyyy-MM-dd HH:mm:ss")}',{(int)request.jobType},{ status },{ request.assigned_id },{ (request.permit_id==null?0:request.permit_id) })";
             qryJobBasic = qryJobBasic + ";" + "select LAST_INSERT_ID(); ";
 
             DataTable dt = await Context.FetchData(qryJobBasic).ConfigureAwait(false);
@@ -400,7 +404,7 @@ namespace CMMSAPIs.Repositories.Jobs
              * AssignedID/PermitID/CancelJob. Out of 3 we can update any one fields based on request
              * Re-assigned employee/ link permit / Cancel Permit. 3 different end points call this function.
              * return boolean true/false*/
-            string updateQry = $"update jobs set assignedId = { assignedTo }, status = { (int)CMMS.CMMS_Status.JOB_ASSIGNED }, updatedBy = { updatedBy } where id = { job_id } ";
+            string updateQry = $"update jobs set assignedId = { assignedTo }, statusUpdatedAt = '{UtilsRepository.GetUTCTime()}', status = { (int)CMMS.CMMS_Status.JOB_ASSIGNED }, updatedBy = { updatedBy } where id = { job_id } ";
             int retVal = await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
 
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
@@ -446,7 +450,7 @@ namespace CMMSAPIs.Repositories.Jobs
         internal async Task<CMDefaultResponse> CancelJob(int job_id, int cancelledBy, string Cancelremark)
         {
             /*Your code goes here*/
-            string updateQry = $"update jobs set updatedBy = { cancelledBy },  cancellationRemarks = '{ Cancelremark }',  cancelStatus = { (int)CMMS.CMMS_Status.JOB_CANCELLED }  where id = { job_id };";
+            string updateQry = $"update jobs set updatedBy = { cancelledBy }, statusUpdatedAt = '{UtilsRepository.GetUTCTime()}', cancellationRemarks = '{ Cancelremark }',  status = { (int)CMMS.CMMS_Status.JOB_CANCELLED }, cancelStatus = 'N'  where id = { job_id };";
             int retValue = await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
 
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
@@ -474,7 +478,7 @@ namespace CMMSAPIs.Repositories.Jobs
                  * return boolean true / false    
                  Your code goes here
             */
-            string updateQry = $"update jobs set updatedBy = { updatedBy },status = { (int) CMMS.CMMS_Status.JOB_LINKED }, linkedPermit = { ptw_id }  where id =  { job_id };";
+            string updateQry = $"update jobs set updatedBy = { updatedBy },status = { (int) CMMS.CMMS_Status.JOB_LINKED }, statusUpdatedAt = '{UtilsRepository.GetUTCTime()}', linkedPermit = { ptw_id }  where id =  { job_id };";
             int retVal = await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
 
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;

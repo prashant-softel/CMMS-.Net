@@ -24,6 +24,7 @@ namespace CMMSAPIs.Models.Jobs
         public string assignedToName { get; set; }
         public int assignedToId { get; set; }
         public int status { get; set; }
+        public int latestJCStatus { get; set; }
     }
 
 }
