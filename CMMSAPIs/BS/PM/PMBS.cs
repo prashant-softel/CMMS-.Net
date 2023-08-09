@@ -10,7 +10,7 @@ namespace CMMSAPIs.BS.PM
 {
     public interface IPMBS
     {
-        Task<List<CMScheduleData>> GetScheduleData(int facility_id, int? category_id);
+        Task<List<CMScheduleData>> GetScheduleData(int facility_id, int category_id);
         Task<List<CMDefaultResponse>> SetScheduleData(CMSetScheduleData request, int userID);
 
     }
@@ -23,7 +23,7 @@ namespace CMMSAPIs.BS.PM
             databaseProvider = dbProvider;
         }
 
-        public async Task<List<CMScheduleData>> GetScheduleData(int facility_id, int? category_id)
+        public async Task<List<CMScheduleData>> GetScheduleData(int facility_id, int category_id)
         {
             try
             {

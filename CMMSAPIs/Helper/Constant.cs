@@ -318,6 +318,7 @@ namespace CMMSAPIs.Helper
             JOB_ASSIGNED,
             JOB_LINKED,
             JOB_IN_PROGRESS,
+            JOB_CARRY_FORWARDED,
             JOB_CLOSED,
             JOB_CANCELLED,
             JOB_DELETED,
@@ -347,23 +348,22 @@ namespace CMMSAPIs.Helper
 
             JC_CREATED = 151,
             JC_STARTED,
-            JC_CLOSED,
             JC_CARRRY_FORWARDED,
+            JC_CLOSED,
             JC_REJECTED,
             JC_APPROVED,
             JC_UPDATED,                 //only for notification purpose
 
 
-            PM_START = 161,
-            PM_UPDATE,
-            PM_SUBMIT,
+            PM_SUBMIT = 161,
             PM_LINK_PTW,
+            PM_START,
             PM_COMPLETED,
-            PM_APPROVE,
-            PM_REJECT,
+            PM_REJECTED,
+            PM_APPROVED,
             PM_CANCELLED,
-            PM_PTW_TIMEOUT,
             PM_DELETED,
+            PM_UPDATED,
 
 
             IR_CREATED = 181,

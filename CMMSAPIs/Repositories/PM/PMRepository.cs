@@ -19,36 +19,45 @@ namespace CMMSAPIs.Repositories.PM
             _utilsRepo = new UtilsRepository(sqlDBHelper);
         }
 
-        internal async Task<List<CMScheduleData>> GetScheduleData(int facility_id, int? category_id)
+        internal async Task<List<CMScheduleData>> GetScheduleData(int facility_id, int category_id)
         {
             /*
              * Primary Table - PMSchedule
              * Read All properties mention in model and return list
              * Code goes here
             */
-            string myQuery = "SELECT Asset_id as asset_id, Asset_Name as asset_name, Asset_Category_id as category_id, Block_Id as block_id, block.name as block_name, Asset_Category_name as category_name " +
-                                "from pm_schedule LEFT JOIN facilities as block ON pm_schedule.Block_Id = block.id ";
+
+            string myQuery = "SELECT assets.id as asset_id, assets.name as asset_name, category.id as category_id, category.name as category_name, block.id as block_id, block.name as block_name " +
+                                "FROM assets " +
+                                "LEFT JOIN assetcategories as category ON assets.categoryId = category.id " +
+                                "LEFT JOIN facilities as block ON assets.blockId = block.id ";
             if (facility_id > 0)
             {
-                myQuery += " WHERE Facility_id = " + facility_id;
-                if (category_id != null)
+                myQuery += " WHERE assets.facilityId = " + facility_id;
+                if (category_id > 0)
                 {
-                    myQuery += " AND  Asset_Category_id = " + category_id;
+                    myQuery += " AND category.id = " + category_id;
+                }
+                else
+                {
+                    throw new ArgumentException("Invalid Category ID");
                 }
             }
             else
             {
                 throw new ArgumentException("Invalid Facility ID");
             }
-            myQuery += " GROUP BY Asset_id ORDER BY Asset_Category_id ASC;";
+            myQuery += " ORDER BY assets.id ASC;";
             List<CMScheduleData> _scheduleList = await Context.GetData<CMScheduleData>(myQuery).ConfigureAwait(false);
             foreach(CMScheduleData schedule in _scheduleList)
             {
-                string query2 = "SELECT a.id as schedule_id, a.PM_Frequecy_id as frequency_id, a.PM_Frequecy_Name as frequency_name, " +
-                                    "a.PM_Schedule_date as schedule_date FROM pm_schedule as a WHERE a.PM_Schedule_date = (SELECT MAX(b.PM_Schedule_date) " +
+                string query2 = "SELECT a.id as schedule_id, frequency.id as frequency_id, frequency.name as frequency_name, " +
+                                    "a.PM_Schedule_date as schedule_date FROM pm_schedule as a " +
+                                    "RIGHT JOIN frequency ON a.PM_Frequecy_id = frequency.id " +
+                                    "WHERE a.PM_Schedule_date = (SELECT CASE WHEN MAX(b.PM_Schedule_date) IS NOT NULL THEN MAX(b.PM_Schedule_date) ELSE NULL END AS schdate " +
                                     "FROM pm_schedule as b WHERE a.Asset_id = b.Asset_id AND a.PM_Frequecy_id = b.PM_Frequecy_id AND b.status NOT IN " +
-                                    $"({(int)CMMS.CMMS_Status.PM_PTW_TIMEOUT}, {(int)CMMS.CMMS_Status.PM_CANCELLED}) AND " +
-                                    $"PM_Rescheduled = 0) AND a.Asset_id = {schedule.asset_id} GROUP BY PM_Frequecy_id ORDER BY PM_Frequecy_id;";
+                                    $"({(int)CMMS.CMMS_Status.PM_CANCELLED}, {(int)CMMS.CMMS_Status.PM_APPROVED}) AND " +
+                                    $"PM_Rescheduled = 0) AND a.Asset_id = {schedule.asset_id} GROUP BY frequency.id ORDER BY frequency.id;";
                 List<ScheduleFrequencyData> _freqData = await Context.GetData<ScheduleFrequencyData>(query2).ConfigureAwait(false);
                 schedule.frequency_dates = _freqData;
             }
@@ -99,7 +108,7 @@ namespace CMMSAPIs.Repositories.PM
                     List<CMFrequency> frequency = await Context.GetData<CMFrequency>(myQuery6).ConfigureAwait(false);
                     string myQuery7 = "SELECT id as schedule_id, PM_Schedule_date as schedule_date, Facility_id as facility_id, Asset_id as asset_id, PM_Frequecy_id as frequency_id " +
                                         $"FROM pm_schedule WHERE Asset_id = {asset_schedule.asset_id} AND PM_Frequecy_id = {frequency_schedule.frequency_id} " +
-                                        $"AND status NOT IN ({(int)CMMS.CMMS_Status.PM_CANCELLED}, {(int)CMMS.CMMS_Status.PM_PTW_TIMEOUT}) AND PM_Rescheduled = 0;";
+                                        $"AND status NOT IN ({(int)CMMS.CMMS_Status.PM_CANCELLED}) AND PM_Rescheduled = 0;";
                     List<ScheduleIDData> scheduleData = await Context.GetData<ScheduleIDData>(myQuery7).ConfigureAwait(false);
                     if(scheduleData.Count > 0)
                     {
@@ -109,7 +118,7 @@ namespace CMMSAPIs.Repositories.PM
                                                 $"PM_Schedule_updated_by = {userID}, PM_Schedule_updated_date = '{UtilsRepository.GetUTCTime()}' " + 
                                                 $"WHERE id = {scheduleData[0].schedule_id};";
                             await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
-                            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, scheduleData[0].schedule_id, 0, 0, "PM Schedule Details Updated", CMMS.CMMS_Status.PM_UPDATE, userID);
+                            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, scheduleData[0].schedule_id, 0, 0, "PM Schedule Details Updated", CMMS.CMMS_Status.PM_UPDATED, userID);
                             response = new CMDefaultResponse(scheduleData[0].schedule_id, CMMS.RETRUNSTATUS.SUCCESS, "Schedule date updated successfully");
                             responseList.Add(response);
                         }

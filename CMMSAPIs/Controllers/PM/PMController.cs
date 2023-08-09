@@ -24,7 +24,7 @@ namespace CMMSAPIs.Controllers.PM
         [Authorize]
         [Route("GetScheduleData")]
         [HttpGet]
-        public async Task<IActionResult> GetScheduleData(int facility_id, int? category_id)
+        public async Task<IActionResult> GetScheduleData(int facility_id, int category_id)
         {
             try
             {
