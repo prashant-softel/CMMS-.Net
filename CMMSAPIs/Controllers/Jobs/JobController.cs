@@ -116,12 +116,12 @@ namespace CMMSAPIs.Controllers.Jobs
         [Authorize]
         [Route("CancelJob")]
         [HttpPut]
-        public async Task<IActionResult> CancelJob(int job_id, int user_id, string Cancelremark)
+        public async Task<IActionResult> CancelJob(int job_id, string Cancelremark)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _JobBS.CancelJob(job_id, user_id, Cancelremark);
+                var data = await _JobBS.CancelJob(job_id, userID, Cancelremark);
                 return Ok(data);
 
             }
@@ -130,7 +130,7 @@ namespace CMMSAPIs.Controllers.Jobs
                 throw;
             }
         }
-
+        /*
         [Authorize]
         [Route("DeleteJob")]
         [HttpDelete]
@@ -148,7 +148,7 @@ namespace CMMSAPIs.Controllers.Jobs
                 throw;
             }
         }
-
+        /**/
         [Authorize]
         [Route("LinkToPTW")]
         [HttpPut]

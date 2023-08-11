@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Jobs;
+using CMMSAPIs.Repositories.JC;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Utils;
 using CMMSAPIs.Models.Notifications;
@@ -13,13 +14,14 @@ namespace CMMSAPIs.Repositories.Jobs
     public class JobRepository : GenericRepository
     {
         private UtilsRepository _utilsRepo;
-
+        private MYSQLDBHelper _conn;
         public JobRepository(MYSQLDBHelper sqlDBHelper) : base(sqlDBHelper)
         {
             _utilsRepo = new UtilsRepository(sqlDBHelper);
+            _conn = sqlDBHelper;
         }
 
-        private async Task<List<CMJobView>> GetJobView(int jobID)
+        internal async Task<List<CMJobView>> GetJobView(int jobID)
         {
             string myQuery = "SELECT " +
                                     "job.id as id, facilities.id as facility_id, facilities.name as facility_name, blocks.id as block_id, blocks.name as block_name, job.status as status, created_user.id as created_by_id, CONCAT(created_user.firstName, created_user.lastName) as created_by_name, user.id as assigned_id, CONCAT(user.firstName, user.lastName) as assigned_name, job.title as job_title, job.description as job_description, job.breakdownTime as breakdown_time, ptw.id as current_ptw_id, ptw.title as current_ptw_title " +
@@ -62,11 +64,11 @@ namespace CMMSAPIs.Repositories.Jobs
             /*Your code goes here*/
             string myQuery = "SELECT " +
                                  //                                 "job.id, job.facilityId, user.id, facilities.name as plantName, job.status as status, job.createdAt as jobDate, DATE_FORMAT(job.breakdownTime, '%Y-%m-%d') as breakdown_time, job.id as id, asset_cat.name as equipmentCat, asset.name as workingArea, job.title as jobDetails, workType.workTypeName as workType, permit.code as permitId, job.createdBy as raisedBy, CONCAT(user.firstName , ' ' , user.lastName) as assignedToName, user.id as assignedToId, IF(job.breakdownTime = '', 'Non Breakdown Maintenance', 'Breakdown Maintenance') as breakdownType , job.description as description" +
-                                 "job.id, job.facilityId as facilityId, facilities.name as facilityName, group_concat(distinct asset_cat.name order by asset_cat.id separator ', ') as equipmentCat, group_concat(distinct asset.name order by asset.id separator ', ') as workingArea, job.title as jobDetails, job.description as description, job.createdBy as raisedBy, CONCAT(rasiedByUser.firstName , ' ' , rasiedByUser.lastName) as raisedByName, job.createdAt as jobDate, CONCAT(user.firstName , ' ' , user.lastName) as assignedToName, user.id as assignedToId, job.status as status, jc.JC_Status as latestJCStatus, DATE_FORMAT(job.breakdownTime, '%Y-%m-%d') as breakdown_time, IF(job.breakdownTime = '', 'Non Breakdown Maintenance', 'Breakdown Maintenance') as breakdownType, group_concat(distinct workType.workTypeName order by workType.id separator ', ') as workType, permit.code as permitId " + 
+                                 "job.id, job.facilityId as facilityId, facilities.name as facilityName, group_concat(distinct asset_cat.name order by asset_cat.id separator ', ') as equipmentCat, group_concat(distinct asset.name order by asset.id separator ', ') as workingArea, job.title as jobDetails, job.description as description, job.createdBy as raisedBy, CONCAT(rasiedByUser.firstName , ' ' , rasiedByUser.lastName) as raisedByName, job.createdAt as jobDate, CONCAT(user.firstName , ' ' , user.lastName) as assignedToName, user.id as assignedToId, job.status as status, jc.id as latestJCid, jc.JC_Status as latestJCStatus, jc.JC_Approved as latestJCApproval, DATE_FORMAT(job.breakdownTime, '%Y-%m-%d') as breakdown_time, IF(job.breakdownTime = '', 'Non Breakdown Maintenance', 'Breakdown Maintenance') as breakdownType, group_concat(distinct workType.workTypeName order by workType.id separator ', ') as workType, permit.code as permitId " +
                                  " FROM " +
                                         "jobs as job " +
                                 "LEFT JOIN " +
-                                        "jobcards as jc ON job.id = jc.jobId " +
+                                        "jobcards as jc ON job.latestJC = jc.id " +
                                 "LEFT JOIN  " +
                                         "facilities as facilities ON job.facilityId = facilities.id " +
                                 "LEFT JOIN " +
@@ -84,14 +86,12 @@ namespace CMMSAPIs.Repositories.Jobs
                                  "LEFT JOIN " +
                                         "jobworktypes as workType ON workType.equipmentCategoryId = asset_cat.id " +
                                  "LEFT JOIN " +
-                                        "users as rasiedByUser ON rasiedByUser.id = job.createdBy " + 
+                                        "users as rasiedByUser ON rasiedByUser.id = job.createdBy " +
                                  "LEFT JOIN " +
-                                        "users as user ON user.id = job.assignedId " +
-                                "WHERE (jc.id = (SELECT jc2.id FROM jobcards as jc2 WHERE jc2.JC_Added_Date = " +
-                                        "(SELECT MAX(jc3.JC_Added_Date) FROM jobcards as jc3 WHERE jc2.id=jc3.id) AND jc.id = jc2.id) OR jc.id = 0 or jc.id IS NULL) ";
+                                        "users as user ON user.id = job.assignedId ";
             if (facility_id > 0)
             {
-                myQuery += " AND job.facilityId = " + facility_id + " AND job.JobType = " + (int)jobType;
+                myQuery += " WHERE job.facilityId = " + facility_id + " AND job.JobType = " + (int)jobType;
                 if (startDate?.Length > 0 && endDate?.Length > 0)
                 {
                     DateTime start = DateTime.Parse(startDate);
@@ -113,6 +113,12 @@ namespace CMMSAPIs.Repositories.Jobs
             myQuery += " GROUP BY job.id DESC;";
 
             List<CMJobModel> _JobList = await Context.GetData<CMJobModel>(myQuery).ConfigureAwait(false);
+
+            foreach(CMJobModel _Job in _JobList)
+            {
+                _Job.latestJCStatusName = JCRepository.getShortStatus(CMMS.CMMS_Modules.JOBCARD, (CMMS.CMMS_Status) _Job.latestJCStatus, (CMMS.ApprovalStatus) _Job.latestJCApproval);
+            }
+
             return _JobList;
         }
 
@@ -130,9 +136,6 @@ namespace CMMSAPIs.Repositories.Jobs
                     break;
                 case CMMS.CMMS_Status.JOB_LINKED:     //Linked
                     retValue = "Job Linked to PTW";
-                    break;
-                case CMMS.CMMS_Status.JOB_IN_PROGRESS:
-                    retValue = "Job In Progress";
                     break;
                 case CMMS.CMMS_Status.JOB_CLOSED:     //Closed
                     retValue = "Job Closed";
@@ -424,6 +427,7 @@ namespace CMMSAPIs.Repositories.Jobs
             CMDefaultResponse response = new CMDefaultResponse(_ViewJobList[0].id, CMMS.RETRUNSTATUS.SUCCESS, $"Job {_ViewJobList[0].id} Assigned");
             return response;
         }
+        /*
         internal async Task<CMDefaultResponse> DeleteJob(int job_id, int deleteBy)
         {
             string deleteQry = $"delete from jobs where id = {job_id}; " + 
@@ -446,7 +450,7 @@ namespace CMMSAPIs.Repositories.Jobs
             CMDefaultResponse response = new CMDefaultResponse(_ViewJobList[0].id, CMMS.RETRUNSTATUS.SUCCESS, $"Job {_ViewJobList[0].id} Deleted");
             return response;
         }
-
+        /**/
         internal async Task<CMDefaultResponse> CancelJob(int job_id, int cancelledBy, string Cancelremark)
         {
             /*Your code goes here*/

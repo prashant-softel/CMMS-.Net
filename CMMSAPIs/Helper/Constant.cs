@@ -317,11 +317,10 @@ namespace CMMSAPIs.Helper
             JOB_CREATED = 101,
             JOB_ASSIGNED,
             JOB_LINKED,
-            JOB_IN_PROGRESS,
-            JOB_CARRY_FORWARDED,
+            //JOB_IN_PROGRESS,
+            //JOB_CARRY_FORWARDED,
             JOB_CLOSED,
             JOB_CANCELLED,
-            JOB_DELETED,
             JOB_UPDATED,    //For notification purpose. Do not update JOB_UPDATED in databbase.
 
             PTW_CREATED = 121,
