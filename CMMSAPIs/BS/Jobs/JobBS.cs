@@ -16,7 +16,7 @@ namespace CMMSAPIs.BS.Jobs
         Task<CMDefaultResponse> UpdateJob(CMCreateJob request, int userId);
         Task<CMDefaultResponse> ReAssignJob(int job_id, int assignedTo, int userId);
         Task<CMDefaultResponse> CancelJob(int job_id, int cancelledBy, string Cancelremark);
-        Task<CMDefaultResponse> DeleteJob(int job_id, int userId);
+        //Task<CMDefaultResponse> DeleteJob(int job_id, int userId);
         Task<CMDefaultResponse> LinkToPTW(int job_id, int ptw_id, int userId);
     }
 
@@ -117,6 +117,7 @@ namespace CMMSAPIs.BS.Jobs
                 throw;
             }
         }
+        /*
         public async Task<CMDefaultResponse> DeleteJob(int job_id, int updatedBy)
         {
             try
@@ -131,7 +132,7 @@ namespace CMMSAPIs.BS.Jobs
                 throw;
             }
         }
-
+        */
         public async Task<CMDefaultResponse> LinkToPTW(int job_id, int ptw_id, int updatedBy)
         {
             try

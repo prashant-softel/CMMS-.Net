@@ -17,7 +17,7 @@ namespace CMMSAPIs.BS.JC
         Task<CMDefaultResponse> CreateJC(int job_id, int userID);
         Task<CMDefaultResponse> UpdateJC(CMJCUpdate request, int userID);
         Task<CMDefaultResponse> CloseJC(CMJCClose request, int userID);
-        Task<CMDefaultResponse> ApproveJC(CMJCApprove request, int userID);
+        Task<List<CMDefaultResponse>> ApproveJC(CMJCApprove request, int userID);
         Task<CMDefaultResponse> RejectJC(CMJCReject request, int userID);
         Task<CMDefaultResponse> StartJC(int jc_id, int userID);
         Task<CMDefaultResponse> CarryForwardJC(CMApproval request, int userID);
@@ -122,7 +122,7 @@ namespace CMMSAPIs.BS.JC
             }
         }
 
-        public async Task<CMDefaultResponse> ApproveJC(CMJCApprove request, int userID)
+        public async Task<List<CMDefaultResponse>> ApproveJC(CMJCApprove request, int userID)
         {
             try
             {
