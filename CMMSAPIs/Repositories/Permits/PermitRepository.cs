@@ -306,10 +306,10 @@ namespace CMMSAPIs.Repositories.Permits
             /*
              * return id, title from PermitJobTypeList table for requested facility_id
             */
-            string myQuery = $"SELECT id as id, title as name FROM permitjobtypelist ";
+            string myQuery = $"SELECT id as id, title as name FROM permitjobtypelist where status = 1  ";
             if (facility_id <= 0)
                 throw new ArgumentException("Invalid Facility ID");
-            myQuery += $"WHERE facilityId =  { facility_id } ";
+            myQuery += $" and facilityId =  { facility_id } ";
             List<CMDefaultList> _JobTypeList = await Context.GetData<CMDefaultList>(myQuery).ConfigureAwait(false);
             return _JobTypeList;
         }
