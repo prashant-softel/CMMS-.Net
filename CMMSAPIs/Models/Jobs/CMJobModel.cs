@@ -18,6 +18,7 @@ namespace CMMSAPIs.Models.Jobs
         public string workType { get; set; }
         public dynamic breakdownTime { get; set; }
         public string breakdownType { get; set; }
+        public int ptw_id { get; set; }
         public string permitId { get; set; }
         public int raisedBy { get; set; }
         public string raisedByName { get; set; }
@@ -27,7 +28,7 @@ namespace CMMSAPIs.Models.Jobs
         public int latestJCid { get; set; }
         public int latestJCStatus { get; set; }
         public int latestJCApproval { get; set; }
-        public string latestJCStatusName { get; set; }
+        public string latestJCStatusShort { get; set; }
     }
 
 }
