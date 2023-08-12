@@ -64,7 +64,7 @@ namespace CMMSAPIs.Repositories.Jobs
             /*Your code goes here*/
             string myQuery = "SELECT " +
                                  //                                 "job.id, job.facilityId, user.id, facilities.name as plantName, job.status as status, job.createdAt as jobDate, DATE_FORMAT(job.breakdownTime, '%Y-%m-%d') as breakdown_time, job.id as id, asset_cat.name as equipmentCat, asset.name as workingArea, job.title as jobDetails, workType.workTypeName as workType, permit.code as permitId, job.createdBy as raisedBy, CONCAT(user.firstName , ' ' , user.lastName) as assignedToName, user.id as assignedToId, IF(job.breakdownTime = '', 'Non Breakdown Maintenance', 'Breakdown Maintenance') as breakdownType , job.description as description" +
-                                 "job.id, job.facilityId as facilityId, facilities.name as facilityName, group_concat(distinct asset_cat.name order by asset_cat.id separator ', ') as equipmentCat, group_concat(distinct asset.name order by asset.id separator ', ') as workingArea, job.title as jobDetails, job.description as description, job.createdBy as raisedBy, CONCAT(rasiedByUser.firstName , ' ' , rasiedByUser.lastName) as raisedByName, job.createdAt as jobDate, CONCAT(user.firstName , ' ' , user.lastName) as assignedToName, user.id as assignedToId, job.status as status, jc.id as latestJCid, jc.JC_Status as latestJCStatus, jc.JC_Approved as latestJCApproval, DATE_FORMAT(job.breakdownTime, '%Y-%m-%d') as breakdown_time, IF(job.breakdownTime = '', 'Non Breakdown Maintenance', 'Breakdown Maintenance') as breakdownType, group_concat(distinct workType.workTypeName order by workType.id separator ', ') as workType, permit.code as permitId " +
+                                 "job.id, job.facilityId as facilityId, facilities.name as facilityName, group_concat(distinct asset_cat.name order by asset_cat.id separator ', ') as equipmentCat, group_concat(distinct asset.name order by asset.id separator ', ') as workingArea, job.title as jobDetails, job.description as description, job.createdBy as raisedBy, CONCAT(rasiedByUser.firstName , ' ' , rasiedByUser.lastName) as raisedByName, job.createdAt as jobDate, CONCAT(user.firstName , ' ' , user.lastName) as assignedToName, user.id as assignedToId, job.status as status, jc.id as latestJCid, jc.JC_Status as latestJCStatus, jc.JC_Approved as latestJCApproval, DATE_FORMAT(job.breakdownTime, '%Y-%m-%d') as breakdown_time, IF(job.breakdownTime = '', 'Non Breakdown Maintenance', 'Breakdown Maintenance') as breakdownType, group_concat(distinct workType.workTypeName order by workType.id separator ', ') as workType, permit.id as ptw_id, permit.code as permitId " +
                                  " FROM " +
                                         "jobs as job " +
                                 "LEFT JOIN " +
@@ -116,7 +116,18 @@ namespace CMMSAPIs.Repositories.Jobs
 
             foreach(CMJobModel _Job in _JobList)
             {
-                _Job.latestJCStatusName = JCRepository.getShortStatus(CMMS.CMMS_Modules.JOBCARD, (CMMS.CMMS_Status) _Job.latestJCStatus, (CMMS.ApprovalStatus) _Job.latestJCApproval);
+                if (_Job.ptw_id == 0)
+                {
+                    _Job.latestJCStatusShort = "Permit not linked";
+                }
+                else if (_Job.latestJCid == 0)
+                {
+                    _Job.latestJCStatusShort = "No job card created";
+                }
+                else
+                {
+                    _Job.latestJCStatusShort = JCRepository.getShortStatus(CMMS.CMMS_Modules.JOBCARD, (CMMS.CMMS_Status)_Job.latestJCStatus, (CMMS.ApprovalStatus)_Job.latestJCApproval);
+                }
             }
 
             return _JobList;
