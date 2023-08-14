@@ -97,7 +97,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                     retValue = String.Format("Vegetation Plan <{0}> Deleted by {1} ", planObj.planId, planObj.deletedBy);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_SCHEDULED:
-                    retValue = String.Format("Vegetation Task <{0}> Execution started by {1} ", executionObj.id, executionObj.startedBy);
+                    retValue = String.Format("Vegetation Task <{0}> Execution started by {1} ", executionObj.executionId, executionObj.startedBy);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_STARTED:
                     retValue = String.Format("Vegetation Task <{0}> Execution started by {1} ", executionObj.id, executionObj.startedBy);
@@ -264,12 +264,12 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
             string equipmentQuery = $"select assets.id,assets.parentId as parentId, assets.name as equipmentName,assets.moduleQuantity as moduleQuantity,assets.area ,item.plannedDay as noOfPlanDay  from cleaning_plan_items as item  LEFT JOIN assets  on assets.id = item.assetId where item.planId={planId} ORDER BY item.plannedDay ASC ";
 
-            List<CMMCEquipment> _Equipments = await Context.GetData<CMMCEquipment>(equipmentQuery).ConfigureAwait(false);
+            List<CMMCEquipmentDetails> _Equipments = await Context.GetData<CMMCEquipmentDetails>(equipmentQuery).ConfigureAwait(false);
 
-            foreach(CMMCSchedule Schedules in _Schedules)
+            foreach (CMMCSchedule Schedules in _Schedules)
             {
-                Schedules.equipments = new List<CMMCEquipment>();
-                foreach (CMMCEquipment equip in _Equipments)
+                Schedules.equipments = new List<CMMCEquipmentDetails>();
+                foreach (CMMCEquipmentDetails equip in _Equipments)
                 { 
                     if(Schedules.cleaningDay == equip.noOfPlanDay)
                     {
@@ -282,12 +282,53 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             _ViewMCPlan[0].schedules = _Schedules;
 
             CMMS.CMMS_Status _Status_long = (CMMS.CMMS_Status)(_ViewMCPlan[0].status);
-            string _longStatus = getLongStatus(CMMS.CMMS_Modules.INCIDENT_REPORT, _Status_long, _ViewMCPlan[0],null);
+            string _longStatus = getLongStatus(CMMS.CMMS_Modules.MODULE_CLEANING, _Status_long, _ViewMCPlan[0],null);
             _ViewMCPlan[0].status_long = _longStatus;
 
 
             return _ViewMCPlan[0];
         }
+
+        internal async Task<CMMCPlanSummary> GetPlanDetailsSummary(int planId)
+        {
+
+            string equipSummary = ", count(distinct assets.parentId ) as totalInvs ,count(item.assetId) as totalSmbs ,sum(assets.moduleQuantity) as totalModules ,CASE schedule.cleaningType WHEN 1 then 'Wet' When 2 then 'Dry' else 'Wet 'end as cleaningType ";
+
+            if (moduleType == 2)
+            {
+                equipSummary = ", count(distinct assets.blockId) as blocks, count(assets.id) as totalInvs, sum(assets.area) as scheduledArea ";
+            }
+
+            string scheduleQuery = $"select schedule.scheduleId, schedule.plannedDay as cleaningDay {equipSummary} from cleaning_plan_schedules as schedule  LEFT JOIN cleaning_plan_items as item on schedule.scheduleId = item.scheduleId LEFT JOIN assets on assets.id = item.assetId where schedule.planId={planId} group by schedule.scheduleId ORDER BY schedule.scheduleId ASC";
+
+
+            List<CMMCPlanScheduleSummary> _Schedules = await Context.GetData<CMMCPlanScheduleSummary>(scheduleQuery).ConfigureAwait(false);
+
+            string equipmentQuery = $"select assets.id as id , assets.name as equipName, item.plannedDay as cleaningDay from cleaning_plan_items as item  LEFT JOIN assets  on assets.id = item.assetId where item.planId={planId} ORDER BY item.plannedDay ASC ";
+
+            List<CMMCEquipment> _Equipments = await Context.GetData<CMMCEquipment>(equipmentQuery).ConfigureAwait(false);
+
+            foreach (CMMCPlanScheduleSummary Schedules in _Schedules)
+            {
+                Schedules.equipments = new List<CMMCEquipment>();
+                foreach (CMMCEquipment equip in _Equipments)
+                {
+                    if (Schedules.cleaningDay == equip.cleaningDay)
+                    {
+                        Schedules.equipments.Add(equip);
+                    }
+
+                }
+            }
+
+            CMMCPlanSummary _ViewMCPlan = new CMMCPlanSummary();
+
+            _ViewMCPlan.id = planId;
+            _ViewMCPlan.schedules = _Schedules;
+
+            return _ViewMCPlan;
+        }
+
         internal async Task<CMDefaultResponse> ApprovePlan(CMApproval request, int userID)
         {
             string approveQuery = $"Update cleaning_plan set isApproved = 1,status=343 ,approvedById={userID}, ApprovalReason='{request.comment}', approvedAt='{UtilsRepository.GetUTCTime()}' where planId = {request.id}";
@@ -368,37 +409,59 @@ namespace CMMSAPIs.Repositories.CleaningRepository
         }
 
         internal async Task<CMMCExecution> GetExecutionDetails(int exectionId)
-        {
+            {
 
-            string statusOut = "CASE ";
+            string statusEx = "CASE ";
             foreach (KeyValuePair<int, string> status in StatusDictionary)
             {
-                statusOut += $"WHEN ex.status = {status.Key} THEN '{status.Value}' ";
+                statusEx += $"WHEN ex.status = {status.Key} THEN '{status.Value}' ";
             }
-            statusOut += $"ELSE 'Invalid Status' END";
+            statusEx += $"ELSE 'Invalid Status' END";
 
-            string executionQuery = $"select plan.title, CONCAT(createdBy.firstName, createdBy.lastName) as plannedBy , plan.createdAt as plannedAt,freq.name as frequency, CONCAT(startedBy.firstName, startedBy.lastName) as startedBy , ex.executionStartedAt as startedAt , {statusOut} as status_short from cleaning_execution as ex JOIN cleaning_plan as plan on ex.planId = plan.planId LEFT JOIN Frequency as freq on freq.id = plan.frequencyId LEFT JOIN users as createdBy ON createdBy.id = plan.createdById LEFT JOIN users as startedBy ON startedBy.id = ex.executedById where ex.id={exectionId};";
+            string statusSc = "CASE ";
+            foreach (KeyValuePair<int, string> status in StatusDictionary)
+            {
+                statusSc += $"WHEN schedule.status = {status.Key} THEN '{status.Value}' ";
+            }
+            statusSc += $"ELSE 'Invalid Status' END";
+
+            string statusEquip = "CASE ";
+            foreach (KeyValuePair<int, string> status in StatusDictionary)
+            {
+                statusEquip += $"WHEN item.status = {status.Key} THEN '{status.Value}' ";
+            }
+            statusEquip += $"ELSE 'Invalid Status' END";
+
+            string executionQuery = $"select ex.id as executionId,ex.status , plan.title, CONCAT(createdBy.firstName, createdBy.lastName) as plannedBy , plan.createdAt as plannedAt,freq.name as frequency, CONCAT(startedBy.firstName, startedBy.lastName) as startedBy , ex.executionStartedAt as startedAt , {statusEx} as status_short from cleaning_execution as ex JOIN cleaning_plan as plan on ex.planId = plan.planId LEFT JOIN Frequency as freq on freq.id = plan.frequencyId LEFT JOIN users as createdBy ON createdBy.id = plan.createdById LEFT JOIN users as startedBy ON startedBy.id = ex.executedById where ex.id={exectionId};";
+
 
             List<CMMCExecution> _ViewExecution = await Context.GetData<CMMCExecution>(executionQuery).ConfigureAwait(false);
 
-            string scheduleQuery = $"select schedule.scheduleId as id ,schedule.actualDay as cleaningDay ,count(as scheduledModules, as cleanedModules , as abandonedModules , as pendingModules ,schedule.waterUsed, schedule.remark ,{statusOut} as status from cleaning_execution_schedules as schedule join cleaning_execution_items as item on schedule.exectionId = item.exectionId where schedule.exectionId = {exectionId} groub by items.scheduleId;";
+            string scheduleQuery = $"select schedule.scheduleId as scheduleId ,schedule.executionId, schedule.actualDay as cleaningDay ,CASE schedule.cleaningType WHEN 1 then 'Wet' When 2 then 'Dry' else 'Wet 'end as cleaningTypeName, SUM(CASE WHEN item.status = {(int)CMMS.CMMS_Status.MC_TASK_SCHEDULED} THEN moduleQuantity ELSE 0 END) as scheduledModules, SUM(CASE WHEN item.status = {(int)CMMS.CMMS_Status.MC_TASK_COMPLETED} THEN moduleQuantity ELSE 0 END) as cleanedModules , SUM(CASE WHEN item.status = {(int)CMMS.CMMS_Status.MC_TASK_ABANDONED} THEN moduleQuantity ELSE 0 END) as abandonedModules ,SUM(CASE WHEN item.status = {(int)CMMS.CMMS_Status.MC_TASK_SCHEDULED} THEN moduleQuantity ELSE 0 END) as pendingModules ,schedule.waterUsed, schedule.remark ,{statusSc} as status_short from cleaning_execution_schedules as schedule join cleaning_execution_items as item on schedule.executionId = item.executionId where schedule.executionId = {exectionId} group by item.scheduleId;";    
 
             List<CMMCExecutionSchedule> _ViewSchedule = await Context.GetData<CMMCExecutionSchedule>(scheduleQuery).ConfigureAwait(false);
 
-            string equipmentQuery = $"select equipment.id ,schedule.actualDay as cleaningDay ,count(as scheduledModules, as cleanedModules , as abandonedModules , as pendingModules ,schedule.waterUsed, schedule.remark ,{statusOut} as status from cleaning_execution_schedules as schedule join cleaning_execution_items as item on ///schedule.exectionId = item.exectionId where schedule.exectionId = {exectionId} groub by items.scheduleId;";
+            string equipmentQuery = $"select item.id ,assets.name as equipmentName, item.moduleQuantity, item.plannedDay as cleaningDay ,{statusEquip} as short_status from cleaning_execution_items as item left join cleaning_execution_schedules as schedule on schedule.executionId = item.executionId left join assets on item.id = assets.id where schedule.executionId = {exectionId} ;";
 
-            List<CMMCEquipment> _ViewEquipment = await Context.GetData<CMMCEquipment>(equipmentQuery).ConfigureAwait(false);
-
-            _ViewExecution[0].schedules= _ViewSchedule;
+            List<CMMCExecutionEquipment> _ViewEquipment = await Context.GetData<CMMCExecutionEquipment>(equipmentQuery).ConfigureAwait(false);
 
             foreach(var schedule in _ViewSchedule)
             {
-                foreach(var equipment in _ViewEquipment)
+                schedule.equipments = new List<CMMCExecutionEquipment>();
+
+                foreach (var equipment in _ViewEquipment)
                 {
-                    if(schedule.cleaningDay == equipment.noOfPlanDay)
+                    if(schedule.cleaningDay == equipment.cleaningDay)
                         schedule.equipments.Add(equipment);
                 }
             }
+
+            _ViewExecution[0].noOfDays = _ViewSchedule.Count;
+            _ViewExecution[0].schedules = _ViewSchedule;
+
+            CMMS.CMMS_Status _Status_long = (CMMS.CMMS_Status)(_ViewExecution[0].status);
+            string _longStatus = getLongStatus(CMMS.CMMS_Modules.MODULE_CLEANING, _Status_long, null, _ViewExecution[0]);
+            _ViewExecution[0].status_long = _longStatus;
 
             return _ViewExecution[0];
         }
@@ -438,7 +501,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
             string Query = $"Update cleaning_execution_schedules set status = {status},{field} remark='{request.remark}',endedById={userId},endedAt='{UtilsRepository.GetUTCTime()}' where scheduleId = {request.scheduleId}; ";
 
-            foreach (CMMCEquipment equipment in request.equipments)
+            foreach (CMMCExecutionEquipment equipment in request.equipments)
             {
                 equipIds += $"{equipment.id},";
             }
