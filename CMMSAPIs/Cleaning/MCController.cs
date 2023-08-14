@@ -70,6 +70,21 @@ namespace CMMSAPIs.Controllers.MC
             }
         }
 
+        [Route("GetMCPlanDetailsSummary")]
+        [HttpGet]
+        public async Task<IActionResult> GetMCPlanDetailsSummary(int planId)
+        {
+            try
+            {
+                var data = await _CleaningBS.GetPlanDetailsSummary(planId);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
         [Route("CreateMCPlan")]
         [HttpPost]
         public async Task<IActionResult> CreateMCPlan(List<CMMCPlan> request)

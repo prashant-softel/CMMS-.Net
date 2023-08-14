@@ -63,6 +63,7 @@ namespace CMMSAPIs.Models.MC
     }
     public class CMMCPlanSummary
     {
+        bool save { get; set; }
         public int id { get; set; }
         public List<CMMCPlanScheduleSummary> schedules { get; set; }
 
@@ -70,28 +71,29 @@ namespace CMMSAPIs.Models.MC
     public class CMMCPlanScheduleSummary
     {
 
-       // public UInt64 id { get; set; }
+        // public UInt64 id { get; set; }
         public int scheduleId { get; set; }
         public int cleaningDay { get; set; }  //First, second etc day
         public string cleaningType { get; set; }  //First, second etc day
-      // public string cleaningTypeName { get; set; }  //First, second etc day
-       // public Int64 totalBlocks { get; set; }
+                                                  // public string cleaningTypeName { get; set; }  //First, second etc day
+                                                  // public Int64 totalBlocks { get; set; }
         public Int64 totalInvs { get; set; }
         public Int64 totalSmbs { get; set; }
         public decimal totalModules { get; set; }
         //public decimal ScheduledArea { get; set; }
-        public DateTime plannedDate { get; set; }
-       // public string status_short { get; set; }
-        public List<CMMCEquipmentDetails> equipments { get; set; }
-
-    }
-    public class CMMCEquipmentDetails
-    {
-         public int id { get; set; }
-        public string equipName { get; set; }
+        // public DateTime plannedDate { get; set; }
+        // public string status_short { get; set; }
+        public List<CMMCEquipment> equipments { get; set; }
 
     }
     public class CMMCEquipment
+    {
+        public int id { get; set; }
+        public string equipName { get; set; }
+        public int cleaningDay { get; set; }
+
+    }
+    public class CMMCEquipmentDetails
     {
         public int id { get; set; }
         public string equipmentName { get; set; }
@@ -100,7 +102,7 @@ namespace CMMSAPIs.Models.MC
         public int noOfPlanDay { get; set; }
         public DateTime scheduledCleaningDate { get; set; }
         public DateTime actualCleaningDate { get; set; }
-        public int status { get; set; } //Cleaned or Abandoned
+        public string short_status { get; set; } //Cleaned or Abandoned
 
         public bool isCleaned = false;//Cleaned or Abandoned
         public bool isAbandoned = false; //Cleaned or Abandoned
@@ -131,24 +133,46 @@ namespace CMMSAPIs.Models.MC
         public DateTime plannedDate { get; set; }
         public int status { get; set; }
         public string status_short { get; set; }
-        public List<CMMCEquipment> equipments { get; set; }
-       
+        public List<CMMCEquipmentDetails> equipments { get; set; }
+
     }
 
 
-    public class CMMCExecutionSchedule : CMMCSchedule
+    public class CMMCExecutionSchedule 
     {
-        public int cleanedModules { get; set; }
-        public int abandonedModules { get; set; }
-        public int pendingModules { get; set; }
+        public UInt64 id { get; set; }
+        public int scheduleId { get; set; }
+        public int executionId { get; set; }
+        public int cleaningDay { get; set; }  //First, second etc day
+        //public int cleaningType { get; set; }  //First, second etc day
+        public string cleaningTypeName { get; set; }
+        public decimal ScheduledModules { get; set; }
+        public decimal cleanedModules { get; set; }
+        public decimal abandonedModules { get; set; }
+        public decimal pendingModules { get; set; }
         public int waterUsed { get; set; }
         public DateTime execution_date { get; set; }
         public string remark { get; set; }
+        public string status_short { get; set; }
+        public List<CMMCExecutionEquipment> equipments { get; set; }
 
 
     }
 
+    public class CMMCExecutionEquipment
+    {
+        public int id { get; set; }
+        public string equipmentName { get; set; }
+        public int parentId { get; set; }
+        public int cleaningDay { get; set; }
+        public int moduleQuantity { get; set; }
+        public string short_status { get; set; } //Cleaned or Abandoned
 
+        //public bool isCleaned = false;//Cleaned or Abandoned
+        //public bool isAbandoned = false; //Cleaned or Abandoned
+        //public int updatedById { get; set; }
+        //0public int grassCuttingArea { get; set; }
+    }
 
     public class CMMCExecution
     {
@@ -157,15 +181,15 @@ namespace CMMSAPIs.Models.MC
         public string title { get; set; }
         public string description { get; set; }
         public string frequency { get; set; }
-        public DateTime startDate { get; set; }
+        //public DateTime startDate { get; set; }
         public int noOfDays { get; set; }
-        public int status { get; set; }     //Completed
         public string plannedBy { get; set; }
         public DateTime plannedAt { get; set; }
         public string startedBy { get; set; }
         public DateTime startedAt { get; set; }
         public string abandonedBy { get; set; }
         public DateTime abandonedAt { get; set; }
+        public int status { get; set; }     //Completed
         public string status_short { get; set; }
         public string status_long { get; set; }
 
