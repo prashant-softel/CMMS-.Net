@@ -17,7 +17,7 @@ namespace CMMSAPIs.BS.Cleaning
         public Task<List<CMMCPlan>> GetPlanList(int facilityId);
         public Task<CMDefaultResponse> CreatePlan(List<CMMCPlan> request, int userId);
         public Task<CMMCPlan> GetPlanDetails(int planId);
-        public Task<CMMCPlanSummary> GetPlanDetailsSummary(int planId);
+        public Task<CMMCPlanSummary> GetPlanDetailsSummary(int planId, CMMCPlanSummary request);
 
         public Task<CMDefaultResponse> ApprovePlan(CMApproval request, int userId);
         public Task<CMDefaultResponse> RejectPlan(CMApproval request, int userId);
@@ -104,13 +104,13 @@ namespace CMMSAPIs.BS.Cleaning
             }
         }
 
-        public async Task<CMMCPlanSummary> GetPlanDetailsSummary(int planId)
+        public async Task<CMMCPlanSummary> GetPlanDetailsSummary(int planId, CMMCPlanSummary request )
         {
             try
             {
                 //using (var repos = new MCRepository(getDB))
                 {
-                    return await repos.GetPlanDetailsSummary(planId);
+                    return await repos.GetPlanDetailsSummary(planId,request);
                 }
             }
             catch (Exception ex)

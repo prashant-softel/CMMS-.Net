@@ -63,8 +63,8 @@ namespace CMMSAPIs.Models.MC
     }
     public class CMMCPlanSummary
     {
-        bool save { get; set; }
-        public int id { get; set; }
+        public int save { get; set; }
+        public int planId { get; set; }
         public List<CMMCPlanScheduleSummary> schedules { get; set; }
 
     }
@@ -73,10 +73,10 @@ namespace CMMSAPIs.Models.MC
 
         // public UInt64 id { get; set; }
         public int scheduleId { get; set; }
-        public int cleaningDay { get; set; }  //First, second etc day
+        public long cleaningDay { get; set; }  //First, second etc day
         public string cleaningType { get; set; }  //First, second etc day
-                                                  // public string cleaningTypeName { get; set; }  //First, second etc day
-                                                  // public Int64 totalBlocks { get; set; }
+        // public string cleaningTypeName { get; set; }  //First, second etc day
+        // public Int64 totalBlocks { get; set; }
         public Int64 totalInvs { get; set; }
         public Int64 totalSmbs { get; set; }
         public decimal totalModules { get; set; }
@@ -90,6 +90,7 @@ namespace CMMSAPIs.Models.MC
     {
         public int id { get; set; }
         public string equipName { get; set; }
+        public int moduleQuantity { get; set; }
         public int cleaningDay { get; set; }
 
     }
