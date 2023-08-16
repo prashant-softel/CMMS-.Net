@@ -12,6 +12,10 @@ namespace CMMSAPIs.Models.Jobs
         public string facility_name { get; set; }
         public int block_id { get; set; }
         public string block_name { get; set; }
+        public int latestJCid { get; set; }
+        public int latestJCStatus { get; set; }
+        public int latestJCApproval { get; set; }
+        public string latestJCStatusShort { get; set; }
         public int status { get; set; }
         public string status_short { get; set; }
         public string status_long { get; set; }
