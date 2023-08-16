@@ -72,11 +72,11 @@ namespace CMMSAPIs.Controllers.MC
 
         [Route("GetMCPlanDetailsSummary")]
         [HttpGet]
-        public async Task<IActionResult> GetMCPlanDetailsSummary(int planId)
+        public async Task<IActionResult> GetMCPlanDetailsSummary(int planId, CMMCPlanSummary request)
         {
             try
             {
-                var data = await _CleaningBS.GetPlanDetailsSummary(planId);
+                var data = await _CleaningBS.GetPlanDetailsSummary(planId,request);
                 return Ok(data);
             }
             catch (Exception ex)

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System;
 using CMMSAPIs.BS.Facility;
 using CMMSAPIs.Models.SM;
+using System.Linq;
 
 namespace CMMSAPIs.Repositories.CleaningRepository
 {
@@ -289,7 +290,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             return _ViewMCPlan[0];
         }
 
-        internal async Task<CMMCPlanSummary> GetPlanDetailsSummary(int planId)
+        internal async Task<CMMCPlanSummary> GetPlanDetailsSummary(int planId, CMMCPlanSummary request)
         {
 
             string equipSummary = ", count(distinct assets.parentId ) as totalInvs ,count(item.assetId) as totalSmbs ,sum(assets.moduleQuantity) as totalModules ,CASE schedule.cleaningType WHEN 1 then 'Wet' When 2 then 'Dry' else 'Wet 'end as cleaningType ";
@@ -299,12 +300,13 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 equipSummary = ", count(distinct assets.blockId) as blocks, count(assets.id) as totalInvs, sum(assets.area) as scheduledArea ";
             }
 
+
             string scheduleQuery = $"select schedule.scheduleId, schedule.plannedDay as cleaningDay {equipSummary} from cleaning_plan_schedules as schedule  LEFT JOIN cleaning_plan_items as item on schedule.scheduleId = item.scheduleId LEFT JOIN assets on assets.id = item.assetId where schedule.planId={planId} group by schedule.scheduleId ORDER BY schedule.scheduleId ASC";
 
 
             List<CMMCPlanScheduleSummary> _Schedules = await Context.GetData<CMMCPlanScheduleSummary>(scheduleQuery).ConfigureAwait(false);
 
-            string equipmentQuery = $"select assets.id as id , assets.name as equipName, item.plannedDay as cleaningDay from cleaning_plan_items as item  LEFT JOIN assets  on assets.id = item.assetId where item.planId={planId} ORDER BY item.plannedDay ASC ";
+            string equipmentQuery = $"select assets.id as id , assets.name as equipName,assets.moduleQuantity, item.plannedDay as cleaningDay from cleaning_plan_items as item  LEFT JOIN assets  on assets.id = item.assetId where item.planId={planId} ORDER BY item.plannedDay ASC ";
 
             List<CMMCEquipment> _Equipments = await Context.GetData<CMMCEquipment>(equipmentQuery).ConfigureAwait(false);
 
@@ -323,9 +325,36 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
             CMMCPlanSummary _ViewMCPlan = new CMMCPlanSummary();
 
-            _ViewMCPlan.id = planId;
+            _ViewMCPlan.planId = planId;
             _ViewMCPlan.schedules = _Schedules;
 
+            if(request.save == 1)
+            {
+                string equipSummary2 = "";
+                var cnt = 1;
+
+                foreach (var schedule in request.schedules)
+                {
+                    string result = String.Join(",", (schedule.equipments).Select(item => item.id));
+                    equipSummary2 += $" select {cnt} as cleaningDay, count(distinct parentId ) as totalInvs ,count(id) as totalSmbs ,sum(moduleQuantity) as totalModules from assets ";
+
+                    if (moduleType == 2)
+                    {
+                        equipSummary2 += $" select {cnt} as cleaningDay, count(distinct parentId ) as totalInvs ,count(id) as totalSmbs ,sum(moduleQuantity) as totalModules from assets ";
+                    }
+
+                    equipSummary2 += $" where id IN ( {result} ) UNION ";
+
+                    cnt++;
+                }
+
+                equipSummary2 = equipSummary2.Substring(0, (equipSummary2.Length - 6));
+                List<CMMCPlanScheduleSummary> _Schedules2 = await Context.GetData<CMMCPlanScheduleSummary>(equipSummary2).ConfigureAwait(false);
+
+                _ViewMCPlan.save = 1;
+                _ViewMCPlan.schedules = _Schedules2;
+
+            }
             return _ViewMCPlan;
         }
 
