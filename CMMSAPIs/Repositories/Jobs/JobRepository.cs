@@ -211,9 +211,11 @@ namespace CMMSAPIs.Repositories.Jobs
             /*Your code goes here*/
 
             string myQuery = "SELECT " +
-                                    "job.id as id, facilities.id as facility_id, facilities.name as facility_name, blocks.id as block_id, blocks.name as block_name, job.status as status, created_user.id as created_by_id, CONCAT(created_user.firstName, created_user.lastName) as created_by_name, user.id as assigned_id, CONCAT(user.firstName, user.lastName) as assigned_name, job.title as job_title, job.description as job_description, job.breakdownTime as breakdown_time, ptw.id as current_ptw_id, ptw.title as current_ptw_title, ptw.description as current_ptw_desc " +
+                                    "job.id as id, facilities.id as facility_id, facilities.name as facility_name, blocks.id as block_id, blocks.name as block_name, job.status as status, created_user.id as created_by_id, CONCAT(created_user.firstName, created_user.lastName) as created_by_name, user.id as assigned_id, CONCAT(user.firstName, user.lastName) as assigned_name, job.title as job_title, job.description as job_description, job.breakdownTime as breakdown_time, ptw.id as current_ptw_id, ptw.title as current_ptw_title, ptw.description as current_ptw_desc, jc.id as latestJCid, jc.JC_Status as latestJCStatus, jc.JC_Approved as latestJCApproval " +
                                       "FROM " +
                                             "jobs as job " +
+                                      "LEFT JOIN " +
+                                            "jobcards as jc ON job.latestJC = jc.id " +
                                       " LEFT JOIN " +
                                             "facilities as facilities ON job.facilityId = facilities.id " +
                                       "LEFT JOIN " +
@@ -229,6 +231,20 @@ namespace CMMSAPIs.Repositories.Jobs
 
             string _shortStatus = getShortStatus(CMMS.CMMS_Modules.JOB, (CMMS.CMMS_Status)_ViewJobList[0].status);
             _ViewJobList[0].status_short = _shortStatus;
+            _ViewJobList[0].breakdown_type = $"{(CMMS.CMMS_JobType)_ViewJobList[0].job_type}";
+
+            if (_ViewJobList[0].current_ptw_id == 0)
+            {
+                _ViewJobList[0].latestJCStatusShort = "Permit not linked";
+            }
+            else if (_ViewJobList[0].latestJCid == 0)
+            {
+                _ViewJobList[0].latestJCStatusShort = "No job card created";
+            }
+            else
+            {
+                _ViewJobList[0].latestJCStatusShort = JCRepository.getShortStatus(CMMS.CMMS_Modules.JOBCARD, (CMMS.CMMS_Status)_ViewJobList[0].latestJCStatus, (CMMS.ApprovalStatus)_ViewJobList[0].latestJCApproval);
+            }
 
             //get equipmentCat list
             string myQuery1 = "SELECT asset_cat.id as equipmentCat_id, asset_cat.name as equipmentCat_name  FROM assetcategories as asset_cat " +
@@ -254,18 +270,19 @@ namespace CMMSAPIs.Repositories.Jobs
                 "JOIN jobmappingassets AS mapAssets ON mapAssets.jobId = job.id " +
                 "JOIN assetcategories AS asset_cat ON mapAssets.categoryId = asset_cat.id " +
                 "LEFT JOIN jobassociatedworktypes as mapWorkTypes on mapWorkTypes.jobId = job.id " +
-                "LEFT JOIN jobworktypes AS workType ON (workType.equipmentCategoryId = asset_cat.id OR mapWorkTypes.workTypeId = workType.id) " +
-                $"WHERE job.id = {job_id} GROUP BY workTypeId";
+                "LEFT JOIN jobworktypes AS workType ON mapWorkTypes.workTypeId = workType.id " +
+                $"WHERE job.id = {job_id} GROUP BY workType.id";
             List<CMWorkType> _WorkType = await Context.GetData<CMWorkType>(myQuery4).ConfigureAwait(false);
 
             string myQuery5 = "SELECT tools.id as toolId, tools.assetName as toolName FROM jobs AS job " + 
                 "JOIN jobmappingassets AS mapAssets ON mapAssets.jobId = job.id " +
-                "JOIN assetcategories AS asset_cat ON mapAssets.categoryId = asset_cat.id " +
+                "JOIN assets ON mapAssets.assetId = assets.id " +
+                "JOIN assetcategories AS asset_cat ON assets.categoryId = asset_cat.id " +
                 "LEFT JOIN jobassociatedworktypes as mapWorkTypes on mapWorkTypes.jobId = job.id " + 
-                "LEFT JOIN jobworktypes AS workType ON (workType.equipmentCategoryId = asset_cat.id OR mapWorkTypes.workTypeId = workType.id) " +
+                "LEFT JOIN jobworktypes AS workType ON mapWorkTypes.workTypeId = workType.id " +
                 "LEFT JOIN worktypeassociatedtools AS mapTools ON mapTools.workTypeId=workType.id " + 
                 "LEFT JOIN worktypemasterassets AS tools ON tools.id=mapTools.ToolId " +
-                $"WHERE job.id = {job_id} GROUP BY toolId";
+                $"WHERE job.id = {job_id} GROUP BY tools.id";
             List<CMWorkTypeTool> _Tools = await Context.GetData<CMWorkTypeTool>(myQuery5).ConfigureAwait(false);
 
             _ViewJobList[0].equipment_cat_list = _equipmentCatList;
