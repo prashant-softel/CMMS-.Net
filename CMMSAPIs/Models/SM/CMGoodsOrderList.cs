@@ -65,7 +65,7 @@ namespace CMMSAPIs.Models
         public decimal damaged_qty { get; set; }
         public string paid_by_name { get; set; }
         public int paid_by_ID { get; set; }
-
+ public int is_submit { get; set; }
         public List<CMGO_ITEMS> go_items { get; set; }
     }
     public class CMGO_ITEMS
