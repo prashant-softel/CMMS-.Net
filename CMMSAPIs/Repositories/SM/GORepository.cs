@@ -209,14 +209,25 @@ namespace CMMSAPIs.Repositories
             CMDefaultResponse response = new CMDefaultResponse(poid, CMMS.RETRUNSTATUS.SUCCESS, "Goods order created successfully.");
             return response;
         }
-        internal async Task<CMDefaultResponse> UpdateGO(CMGoodsOrderList request, int userID)
+          internal async Task<CMDefaultResponse> UpdateGO(CMGoodsOrderList request, int userID)
         {
-            string OrderQuery = $"UPDATE smpurchaseorder SET " +
-                    $"challan_no = '{request.challan_no}',po_no='{request.po_no}', freight='{request.freight}',no_pkg_received='{request.no_pkg_received}'," +
-                    $"lr_no='{request.lr_no}',condition_pkg_received='{request.condition_pkg_received}',vehicle_no='{request.vehicle_no}', gir_no='{request.gir_no}', " +
-                    $"challan_date = '{request.challan_date.Value.ToString("yyyy-MM-dd")}', " +
-                    $"job_ref='{request.job_ref}',amount='{request.amount}', currency={request.currencyID},updated_by = {userID},updatedOn = '{UtilsRepository.GetUTCTime()}' where ID={request.id}";
-
+            string OrderQuery = "";
+            if (request.is_submit == 0)
+            {
+                OrderQuery = $"UPDATE smpurchaseorder SET " +
+                        $"challan_no = '{request.challan_no}',po_no='{request.po_no}', freight='{request.freight}',no_pkg_received='{request.no_pkg_received}'," +
+                        $"lr_no='{request.lr_no}',condition_pkg_received='{request.condition_pkg_received}',vehicle_no='{request.vehicle_no}', gir_no='{request.gir_no}', " +
+                        $"challan_date = '{request.challan_date.Value.ToString("yyyy-MM-dd")}', " +
+                        $"job_ref='{request.job_ref}',amount='{request.amount}', currency={request.currencyID},updated_by = {userID},updatedOn = '{UtilsRepository.GetUTCTime()}' where ID={request.id}";
+            }
+            else
+            {
+                OrderQuery = $"UPDATE smpurchaseorder SET " +
+                        $"challan_no = '{request.challan_no}',po_no='{request.po_no}', freight='{request.freight}',no_pkg_received='{request.no_pkg_received}'," +
+                        $"lr_no='{request.lr_no}',condition_pkg_received='{request.condition_pkg_received}',vehicle_no='{request.vehicle_no}', gir_no='{request.gir_no}', " +
+                        $"challan_date = '{request.challan_date.Value.ToString("yyyy-MM-dd")}', " +
+                        $"job_ref='{request.job_ref}',amount='{request.amount}', currency={request.currencyID},updated_by = {userID},updatedOn = '{UtilsRepository.GetUTCTime()}', status = {(int)CMMS.CMMS_Status.SM_PO_DRAFT} where ID={request.id}";
+            }
             await Context.ExecuteNonQry<int>(OrderQuery);
 
             for (var i = 0; i < request.go_items.Count; i++)
