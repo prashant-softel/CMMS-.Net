@@ -586,16 +586,16 @@ namespace CMMSAPIs.Repositories
         public async Task<List<CMPURCHASEDATA>> GetPurchaseData(int plantID, string empRole, DateTime fromDate, DateTime toDate, string status, string order_type)
         {
             var stmt = $"SELECT fc.Name as facilityName, po.ID as orderID,po.purchaseDate,po.generate_flag,po.received_on,po.status,bl.name as vendor_name,po.vendorID," +
-                $"ed.id as generatedByID,po.remarks, CONCAT(ed.Firstname,' ',ed.lastname) as generatedBy, CONCAT(ed1.Firstname,' ',ed1.lastname) as receivedOn, DATE_FORMAT(po.lastModifiedDate,'%Y-%m-%d') as receivedDate," +
+                $"ed.id as generatedByID,po.remarks, CONCAT(ed.firstName,' ',ed.lastName) as generatedBy, CONCAT(ed1.firstName,' ',ed1.lastName) as receivedOn, DATE_FORMAT(po.lastModifiedDate,'%Y-%m-%d') as receivedDate," +
                 $" CONCAT(ed2.Firstname,' ',ed2.lastname) as approvedBy,   DATE_FORMAT(po.approvedOn,'%Y-%m-%d') as approvedOn,    po.status as statusFlag " +
                 //$" CASE WHEN po.flag = {GO_SAVE_BY_PURCHASE_MANAGER} THEN 'Draft' WHEN po.flag = {GO_SUBMIT_BY_PURCHASE_MANAGER} THEN 'Submitted' " +
                 //$"WHEN po.flag = {GO_SAVE_BY_STORE_KEEPER} THEN 'In Process' ELSE 'Received' END" +
 
                 $"FROM smpurchaseorder po " +
                 $"LEFT JOIN business bl ON bl.id = po.vendorID " +
-                $"LEFT JOIN employees ed ON ed.ID = po.generated_by " +
-                $"LEFT JOIN employees ed1 ON ed1.ID = po.receiverID " +
-                $"LEFT JOIN employees ed2 ON ed2.ID = po.approved_by " +
+                $"LEFT JOIN users ed ON ed.id = po.generated_by " +
+                $"LEFT JOIN users ed1 ON ed1.id = po.receiverID " +
+                $"LEFT JOIN users ed2 ON ed2.id = po.approved_by " +
                 $"LEFT JOIN facilities fc ON fc.id = po.facilityID WHERE po.facilityID = {plantID} ";
             if (!string.IsNullOrEmpty(status))
             {
@@ -918,7 +918,7 @@ namespace CMMSAPIs.Repositories
                 "   LEFT JOIN (\r\n            SELECT sic.cat_name,s2.ID as master_ID FROM smitemcategory sic\r\n          " +
                 "  LEFT JOIN smassetmasters s2 ON s2.item_category_ID = sic.ID\r\n        )  t2 ON t2.master_ID = sam.ID\r\n " +
                 "       LEFT JOIN facilities fc ON fc.id = po.facilityID\r\nLEFT JOIN users as vendor on vendor.id=po.vendorID " +
-                "       LEFT JOIN business bl ON bl.id = po.vendorID left join smassettypes stt on stt.ID = pod.order_type LEFT JOIN currency curr ON curr.id = po.currency LEFT JOIN employees ed ON ed.ID = po.generated_by" +
+                "       LEFT JOIN business bl ON bl.id = po.vendorID left join smassettypes stt on stt.ID = pod.order_type LEFT JOIN currency curr ON curr.id = po.currency LEFT JOIN users ed ON ed.id = po.generated_by" +
                 " WHERE "+ filter + "";
 
 

@@ -114,10 +114,10 @@ namespace CMMSAPIs.Repositories.SM
                 "LEFT JOIN smassetmasters s1 ON s1.asset_type_ID = sat.ID\r\n\t\t        )  t1 ON t1.master_ID = sam.ID\r\n\t\t        " +
                 "LEFT JOIN (\r\n\t\t      SELECT sic.cat_name,s2.ID as master_ID FROM smitemcategory sic \r\n            " +
                 "  LEFT JOIN smassetmasters s2 ON s2.item_category_ID = sic.ID  )  t2 ON t2.master_ID = sam.ID " +
-                "LEFT JOIN employees ed ON ed.ID = po.generated_by\r\n\t\t   " +
+                "LEFT JOIN users ed ON ed.id = po.generated_by\r\n\t\t   " +
                 " Left join currency curr ON curr.id = po.currency " +
-                "     LEFT JOIN employees ed1 ON ed1.ID = po.receiverID\r\n\t\t\t\t " +
-                "LEFT JOIN employees ed2 ON ed2.ID = po.approved_by\r\n\t\t\t\t" +
+                "     LEFT JOIN users ed1 ON ed1.id = po.receiverID\r\n\t\t\t\t " +
+                "LEFT JOIN users ed2 ON ed2.id = po.approved_by\r\n\t\t\t\t" +
                 "LEFT JOIN business bl ON bl.id = po.vendorID \r\n\r\n\t\t LEFT JOIN facilities fc ON fc.id = po.facilityID    WHERE " + filter +
                 " ";
             List<CMRequestOrder> _List = await Context.GetData<CMRequestOrder>(stmt).ConfigureAwait(false);
@@ -208,7 +208,7 @@ namespace CMMSAPIs.Repositories.SM
                 "         LEFT JOIN smassetmasters s2 ON s2.item_category_ID = sic.ID\r\n        )  t2 ON t2.master_ID = sam.ID\r\n       " +
                 " LEFT JOIN facilities fc ON fc.id = po.facilityID\r\nLEFT JOIN users as vendor on vendor.id=po.vendorID       \r\n " +
                 "LEFT JOIN business bl ON bl.id = po.vendorID left join smassettypes stt on stt.ID = pod.order_type\r\n " +
-                "LEFT JOIN currency curr ON curr.id = po.currency  LEFT JOIN employees ed2 ON ed2.ID = po.approved_by\r\n LEFT JOIN employees ed ON ed.ID = po.generated_by\r\n  LEFT JOIN employees ed1 ON ed1.ID = po.receiverID " +
+                "LEFT JOIN currency curr ON curr.id = po.currency  LEFT JOIN users ed2 ON ed2.id = po.approved_by\r\n LEFT JOIN users ed ON ed.id = po.generated_by\r\n  LEFT JOIN users ed1 ON ed1.id = po.receiverID " +
                 "WHERE po.ID = " + id + " ;";
             List<CMRequestOrderList> _List = await Context.GetData<CMRequestOrderList>(query).ConfigureAwait(false);
 
