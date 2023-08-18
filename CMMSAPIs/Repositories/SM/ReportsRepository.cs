@@ -94,7 +94,7 @@ namespace CMMSAPIs.Repositories.SM
                 "JOIN smassetitems as a_item ON sm_trans.assetItemID = a_item.ID " +
                 "JOIN smassetmasters as a_master ON a_master.asset_code = a_item.asset_code " +
                 "LEFT JOIN facilities fc ON fc.id = a_item.facility_ID " +
-                "LEFT JOIN employees ed ON sm_trans.actorID = ed.ID " +
+                "LEFT JOIN users ed ON sm_trans.actorID = ed.id " +
                 "WHERE sm_trans.assetItemID in ("+ itemID + ") and sm_trans.actorID = " + Emp_id + " AND sm_trans.actorType = '" + (int)CMMS.SM_Types.Engineer + "' AND a_item.facility_ID = '" + facility_id + "' " +
                 "AND DATE_FORMAT(sm_trans.lastModifiedDate, '%Y-%m-%d') between '" + StartDate.ToString("yyyy-MM-dd") + "' and '"+ EndDate.ToString("yyyy-MM-dd") + "' GROUP BY a_item.asset_code";
 
@@ -139,11 +139,11 @@ namespace CMMSAPIs.Repositories.SM
                 $"a_item.item_condition, a_item.serial_number, IF(a_item1.serial_number != '',a_item1.serial_number,'--')  as replaceSerialNo," +
                 $" a_master.asset_name,\r\n a_master.asset_type_ID,a_master.item_category_ID , smt.actorID" +
                 $"  FROM smtransactiondetails as sm_td \r\n\tJOIN smtransition as smt ON sm_td.ID = smt.transactionID " +
-                $"JOIN smassetitems as a_item ON sm_td.assetItemID = a_item.ID " +
+                $"LEFT JOIN smassetitems as a_item ON sm_td.assetItemID = a_item.ID " +
                 $"LEFT JOIN smassetitems as a_item1 ON a_item1.ID = a_item.replaced_asset_id " +
-                $"JOIN smassetmasters as a_master ON  a_item.asset_code = a_master.asset_code  " +
+                $"LEFT JOIN smassetmasters as a_master ON  a_item.asset_code = a_master.asset_code  " +
                 $"LEFT JOIN facilities fc ON fc.id = sm_td.plantID  " +
-                $"LEFT JOIN employees ed ON ed.ID = sm_td.toActorID " +
+                $"LEFT JOIN users ed ON ed.id = sm_td.toActorID " +
                 $"where (date_format(sm_td.lastInsetedDateTime, '%Y-%m-%d') between '{StartDate.ToString("yyyy-MM-dd")}' and '{EndDate.ToString("yyyy-MM-dd")}') and " +
                 $"sm_td.fromActorType = '{(int)CMMS.SM_Types.Inventory}' and sm_td.toActorType = '{(int)CMMS.SM_Types.Engineer}' and smt.actorType = '{(int)CMMS.SM_Types.Engineer}' and (sm_td.referedby = '4' OR sm_td.referedby = '{(int)CMMS.CMMS_Modules.SM_PO}') and a_item.item_condition IN (2,3,4)" +
                 $" and sm_td.plantID in ('{facility_id}') and a_item.ID in ('{itemID}') AND sm_td.Nature_Of_Transaction = 1 ORDER BY sm_td.ID DESC) as fmItemList GROUP BY fmItemList.assetItemID ORDER BY fmItemList.ID DESC";
@@ -168,7 +168,7 @@ namespace CMMSAPIs.Repositories.SM
                 $"LEFT JOIN smrsitems as i ON i.mrs_return_ID = smt.mrsID  " +
                 $"LEFT JOIN smmrs as mrs ON  mrs.ID = sm_td.reference_ID " +
                 $" LEFT JOIN facilities fc ON fc.id = sm_td.plantID " +
-                $" LEFT JOIN employees ed ON ed.ID = sm_td.fromActorID"+
+                $" LEFT JOIN users ed ON ed.id = sm_td.fromActorID"+
                 $" WHERE (DATE_FORMAT(sm_td.lastInsetedDateTime, '%Y-%m-%d') BETWEEN '" + StartDate.ToString("yyyy-MM-dd") + "' AND '" + EndDate.ToString("yyyy-MM-dd") + "') AND ";
 
             if (isAllEmployees != 1)
@@ -261,7 +261,7 @@ namespace CMMSAPIs.Repositories.SM
                 "JOIN smassetitems as a_item ON sm_trans.assetItemID = a_item.ID " +
                 "JOIN smassetmasters as a_master ON a_master.asset_code = a_item.asset_code " +
                 "LEFT JOIN facilities fc ON fc.id = a_item.facility_ID " +
-                "LEFT JOIN employees ed ON sm_trans.actorID = ed.ID " +
+                "LEFT JOIN users ed ON sm_trans.actorID = ed.id " +
                 "WHERE  sm_trans.actorID = " + emp_id + " AND sm_trans.actorType = '" + (int)CMMS.SM_Types.Engineer + "' AND a_item.facility_ID = '" + facility_ID + "' " +
                 " GROUP BY a_item.asset_code";
 
