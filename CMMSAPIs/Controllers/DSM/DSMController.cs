@@ -39,21 +39,22 @@ namespace CMMSAPIs.Controllers.DSM
             }
         }
 
-        //    [Authorize]
-        //    [Route("GetEscalationMatrix")]
-        //    [HttpGet]
-        //    public async Task<IActionResult> GetEscalationMatrix(CMMS.CMMS_Modules module)
-        //    {
-        //        try
-        //        {
-        //            var data = await _EMBS.GetEscalationMatrix(module);
-        //            return Ok(data);
-        //        }
-        //        catch (Exception)
-        //        {
-        //            throw;
-        //        }
-        //    }
+        //[Authorize]
+        [Route("importDSMFile")]
+        [HttpPost]
+        public async Task<IActionResult> importDSMFile(int file_id)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _DSMBS.importDSMFile(file_id, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
 
         //    [Authorize]
         //    [Route("Escalate")]

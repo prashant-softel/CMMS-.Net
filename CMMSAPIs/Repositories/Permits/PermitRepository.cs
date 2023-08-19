@@ -205,7 +205,7 @@ namespace CMMSAPIs.Repositories.Permits
             string myQuery = $"SELECT id, title as name FROM permittypelists ";
             if (facility_id <= 0)
                 throw new ArgumentException("Invalid Facility ID");
-            myQuery += $"WHERE facilityId = { facility_id } ORDER BY id DESC;";
+            myQuery += $"WHERE facilityId = { facility_id } and status = 1  ORDER BY id DESC;";
             List<CMDefaultList> _PermitTypeList = await Context.GetData<CMDefaultList>(myQuery).ConfigureAwait(false);
             return _PermitTypeList;
         }
@@ -360,7 +360,7 @@ namespace CMMSAPIs.Repositories.Permits
                                 $"LEFT JOIN filecategory as sopcat ON tbtlist.fileCategoryId = sopcat.id " +
                                 $"LEFT JOIN filecategory as jsacat ON tbtlist.JSAFileCategoryId = jsacat.id ";
             if (job_type_id > 0)
-                myQuery += $"WHERE tbtlist.jobTypeId =  { job_type_id } ";
+                myQuery += $"WHERE tbtlist.jobTypeId =  { job_type_id } and tbtlist.status = 1 ";
             myQuery += "ORDER BY jobtypes.id ASC, tbtlist.id ASC;";
             List<CMSOPList> _JobTypeList = await Context.GetData<CMSOPList>(myQuery).ConfigureAwait(false);
             return _JobTypeList;
