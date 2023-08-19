@@ -213,7 +213,7 @@ namespace CMMSAPIs.Controllers.MC
         }
 
         [Route("GetMCExecutionDetails")]
-        [HttpPost]
+        [HttpGet]
         public async Task<IActionResult> GetMCExecutionDetails(int executionId)
         {
             try
