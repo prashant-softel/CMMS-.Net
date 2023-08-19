@@ -6,35 +6,60 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Hosting;
+
 
 namespace CMMSAPIs.BS.DSM
 {
     public interface IDSMBS
     {
         Task<List<CMDSMData>> getDSMData(CMDSMFilter request);
-       
+        Task<CMImportFileResponse> importDSMFile(int file_id, int userID);
     }
-    public class DSMBS : IDSMBS
-    {
-        private readonly DatabaseProvider databaseProvider;
-        private MYSQLDBHelper getDB => databaseProvider.SqlInstance();
-        public DSMBS(DatabaseProvider dbProvider)
+        public class DSMBS : IDSMBS
         {
-            databaseProvider = dbProvider;
-        }
+            private readonly DatabaseProvider databaseProvider;
+            private MYSQLDBHelper getDB => databaseProvider.SqlInstance();
 
-        public async Task<List<CMDSMData>> getDSMData(CMDSMFilter request)
-        {
-            try
+            public static IWebHostEnvironment _environment;
+
+            public DSMBS(DatabaseProvider dbProvider, IWebHostEnvironment environment)
             {
-                using (var repos = new DSMRepository(getDB))
+                databaseProvider = dbProvider;
+                _environment = environment;
+
+            }
+
+            public async Task<List<CMDSMData>> getDSMData(CMDSMFilter request)
+            {
+                try
                 {
-                    return await repos.getDSMData(request);
+                    using (var repos = new DSMRepository(getDB, _environment))
+                    {
+                        return await repos.getDSMData(request);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw;
                 }
             }
-            catch (Exception ex)
+
+            public async Task<CMImportFileResponse> importDSMFile(int file_id, int userID)
             {
-                throw;
+
+                try
+                {
+                    using (var repos = new DSMRepository(getDB, _environment))
+                    {
+                        return await repos.importDSMFile(file_id , userID);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw;
+                }
+
             }
         }
         //    public async Task<CMEscalationResponse> Escalate(CMMS.CMMS_Modules module, int id)
@@ -66,6 +91,6 @@ namespace CMMSAPIs.BS.DSM
         //        }
         //    }
         //}
-        }
-    }
+}
+    
         
