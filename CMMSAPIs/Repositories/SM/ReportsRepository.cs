@@ -31,12 +31,14 @@ namespace CMMSAPIs.Repositories.SM
             _utilsRepo = new UtilsRepository(sqlDBHelper);
         }
 
-        public async Task<List<CMPlantStockOpening>> GetPlantStockReport(string facility_id, DateTime StartDate, DateTime EndDate)
+        public async Task<List<CMPlantStockOpeningResponse>> GetPlantStockReport(string facility_id, DateTime StartDate, DateTime EndDate)
         {
             List<string> Asset_Item_Ids = new List<string>();
             List<CMPlantStockOpening> Asset_Item_Opening_Balance_details = new List<CMPlantStockOpening>();
+            List<CMPlantStockOpeningResponse> Response = new List<CMPlantStockOpeningResponse>();
+          
             //Actors.Store
-            string Plant_Stock_Opening_Details_query = $"SELECT fc.name as facilityName,fc.isBlock as Facility_Is_Block," +
+            string Plant_Stock_Opening_Details_query = $"SELECT  a_item.facility_ID as facilityID, fc.name as facilityName,fc.isBlock as Facility_Is_Block," +
                 $"'' as Facility_Is_Block_of_name," +
                 $"sm_trans.assetItemID, a_master.asset_name, a_master.asset_code, a_master.asset_type_ID, " +
                 $"sum(sm_trans.creditQty)-sum(sm_trans.debitQty) as Opening ,sum(sm_trans.creditQty) as inward, sum(sm_trans.debitQty) as outward " +
@@ -48,7 +50,7 @@ namespace CMMSAPIs.Repositories.SM
                 $"and date_format(sm_trans.lastModifiedDate, '%Y-%m-%d') BETWEEN '{ StartDate.ToString("yyyy-MM-dd")}' AND '{ EndDate.ToString("yyyy-MM-dd")}'  " +
                 $"group by a_item.asset_code";
             List<CMPlantStockOpening> Plant_Stock_Opening_Details_Reader = await Context.GetData<CMPlantStockOpening>(Plant_Stock_Opening_Details_query).ConfigureAwait(false);
-            
+            List<CMPlantStockOpeningItemWiseResponse> itemWiseResponse = new List<CMPlantStockOpeningItemWiseResponse>();
             foreach (var item in Plant_Stock_Opening_Details_Reader)
             {
                 string facility_name = "";
@@ -65,6 +67,7 @@ namespace CMMSAPIs.Repositories.SM
 
                 CMPlantStockOpening openingBalance = new CMPlantStockOpening();
 
+                openingBalance.facilityID = item.facilityID;
                 openingBalance.facilityName = facility_name;
                 openingBalance.Opening = item.Opening;
                 openingBalance.assetItemID = item.assetItemID;
@@ -73,11 +76,47 @@ namespace CMMSAPIs.Repositories.SM
                 openingBalance.asset_type_ID = item.asset_type_ID;
                 openingBalance.inward = item.inward;
                 openingBalance.outward = item.outward;
+                openingBalance.balance = item.Opening + item.inward - item.outward;
+                Asset_Item_Opening_Balance_details.Add(openingBalance);        
+            }
 
-                Asset_Item_Opening_Balance_details.Add(openingBalance);
+  
+            var uniqueValues = Asset_Item_Opening_Balance_details.GroupBy(p => p.facilityID)
+            .Select(g => g.First())
+            .ToList();
+            foreach (var item in uniqueValues)
+            {
+                CMPlantStockOpeningResponse cMPlantStockOpeningResponse = new CMPlantStockOpeningResponse();
+                cMPlantStockOpeningResponse.facilityID = item.facilityID;
+                cMPlantStockOpeningResponse.facilityName = item.facilityName;
+                Response.Add(cMPlantStockOpeningResponse);
+            }
+            foreach (var item in Response)
+            {
+                List<CMPlantStockOpeningItemWiseResponse> itemResponseList = new List<CMPlantStockOpeningItemWiseResponse>();
+                CMPlantStockOpeningResponse cMPlantStockOpeningResponse = new CMPlantStockOpeningResponse();
+                cMPlantStockOpeningResponse.facilityID = item.facilityID;
+                cMPlantStockOpeningResponse.facilityName = item.facilityName;
+                var itemResponse = Asset_Item_Opening_Balance_details.Where(item => item.facilityID == item.facilityID).ToList();
+                foreach(var itemDetail in itemResponse)
+                {
+                    CMPlantStockOpeningItemWiseResponse itemWise = new CMPlantStockOpeningItemWiseResponse();
+                    itemWise.Facility_Is_Block = itemDetail.Facility_Is_Block;
+                    itemWise.Facility_Is_Block_of_name = itemDetail.Facility_Is_Block_of_name;
+                    itemWise.assetItemID = itemDetail.assetItemID;
+                    itemWise.asset_name = itemDetail.asset_name;
+                    itemWise.asset_code = itemDetail.asset_code;
+                    itemWise.asset_type_ID = itemDetail.asset_type_ID;
+                    itemWise.Opening = itemDetail.Opening;
+                    itemWise.inward = itemDetail.inward;
+                    itemWise.outward = itemDetail.outward;
+                    itemWise.balance = itemDetail.balance;
+                    itemResponseList.Add(itemWise);
+                }
+                item.stockDetails = itemResponseList;
         
             }
-            return Asset_Item_Opening_Balance_details;
+            return Response;
 
         }
 
@@ -89,7 +128,7 @@ namespace CMMSAPIs.Repositories.SM
 
             string Plant_Stock_Opening_Details_query = "SELECT fc.name as facilityName, fc.isBlock as Facility_Is_Block, '' as Facility_Is_Block_of_name," +
                 " CONCAT(ed.firstName, ' ', ed.lastName) as requested_by_name, sm_trans.assetItemID, a_master.asset_name, a_master.asset_code, a_master.asset_type_ID, " +
-                "SUM(sm_trans.creditQty) - SUM(sm_trans.debitQty) as Opening, SUM(sm_trans.creditQty) as inward, SUM(sm_trans.debitQty) as outward " +
+                "SUM(sm_trans.debitQty) - SUM(sm_trans.creditQty) as Opening, SUM(sm_trans.creditQty) as inward, SUM(sm_trans.debitQty) as outward " +
                 "FROM smtransition as sm_trans " +
                 "JOIN smassetitems as a_item ON sm_trans.assetItemID = a_item.ID " +
                 "JOIN smassetmasters as a_master ON a_master.asset_code = a_item.asset_code " +
@@ -123,7 +162,7 @@ namespace CMMSAPIs.Repositories.SM
                 openingBalance.asset_name = item.asset_name;
                 openingBalance.asset_code = item.asset_code;
                 openingBalance.asset_type_ID = item.asset_type_ID;
-
+                openingBalance.balance = item.Opening + item.inward - item.outward;
                 EmployeeStockReportList.Add(openingBalance);
 
                 cnt++;
@@ -243,7 +282,6 @@ namespace CMMSAPIs.Repositories.SM
                 }
 
                 EmployeeTransactionReportList.Add(openingBalance);
-
             }
             return EmployeeTransactionReportList;
         }
@@ -256,13 +294,13 @@ namespace CMMSAPIs.Repositories.SM
 
             string Plant_Stock_Opening_Details_query = "SELECT fc.name as facilityName, fc.isBlock as Facility_Is_Block, '' as Facility_Is_Block_of_name," +
                 " CONCAT(ed.firstName, ' ', ed.lastName) as requested_by_name, sm_trans.assetItemID, a_master.asset_name, a_master.asset_code, a_master.asset_type_ID, " +
-                "SUM(sm_trans.creditQty) - SUM(sm_trans.debitQty) as Opening, SUM(sm_trans.creditQty) as inward, SUM(sm_trans.debitQty) as outward " +
+                " SUM(sm_trans.debitQty) - SUM(sm_trans.creditQty)  as Opening, SUM(sm_trans.creditQty) as inward, SUM(sm_trans.debitQty) as outward " +
                 "FROM smtransition as sm_trans " +
                 "JOIN smassetitems as a_item ON sm_trans.assetItemID = a_item.ID " +
                 "JOIN smassetmasters as a_master ON a_master.asset_code = a_item.asset_code " +
                 "LEFT JOIN facilities fc ON fc.id = a_item.facility_ID " +
                 "LEFT JOIN users ed ON sm_trans.actorID = ed.id " +
-                "WHERE  sm_trans.actorID = " + emp_id + " AND sm_trans.actorType = '" + (int)CMMS.SM_Types.Engineer + "' AND a_item.facility_ID = '" + facility_ID + "' " +
+                "WHERE  sm_trans.actorID = " + emp_id + "  AND a_item.facility_ID = '" + facility_ID + "' " +
                 " GROUP BY a_item.asset_code";
 
             List<CMEmployeeStockReport> Plant_Stock_Opening_Details_Reader = await Context.GetData<CMEmployeeStockReport>(Plant_Stock_Opening_Details_query).ConfigureAwait(false);
@@ -275,16 +313,19 @@ namespace CMMSAPIs.Repositories.SM
             List<CMEmpStockItems> itemList = new List<CMEmpStockItems>();
             foreach (var item in Plant_Stock_Opening_Details_Reader)
             {
-                
-                CMEmpStockItems openingBalance = new CMEmpStockItems();
-                openingBalance.ID = item.assetItemID;
-                openingBalance.item_name = Convert.ToString(item.asset_name);
-                openingBalance.quantity = item.Opening;
+
+                if (item.Opening != 0)
+                {
+                    CMEmpStockItems openingBalance = new CMEmpStockItems();
+                    openingBalance.ID = item.assetItemID;
+                    openingBalance.item_name = Convert.ToString(item.asset_name);
+                    openingBalance.quantity = item.Opening;
 
 
-                itemList.Add(openingBalance);
+                    itemList.Add(openingBalance);
 
-                cnt++;
+                    cnt++;
+                }
             }
             cMEmployeeStockList.CMMRSItems = itemList;
             return cMEmployeeStockList;

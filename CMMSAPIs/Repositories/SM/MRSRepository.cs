@@ -384,10 +384,25 @@ namespace CMMSAPIs.Repositories.SM
 
             return _List[0];
         }
-        internal async Task<CMRETURNMRSDATA> getReturnDataByID(int ID)
+        internal async Task<CMMRSList> getReturnDataByID(int ID)
         {
-            string stmt = $"SELECT * FROM smrsitems WHERE ID = {ID}";
-            List<CMRETURNMRSDATA> _List = await Context.GetData<CMRETURNMRSDATA>(stmt).ConfigureAwait(false);
+            string stmt = "SELECT sm.ID,sm.requested_by_emp_ID as requested_by_emp_ID,CONCAT(ed1.firstName,' ',ed1.lastName) as approver_name," +
+    "DATE_FORMAT(sm.returnDate,'%Y-%m-%d') as returnDate,if(sm.approval_status != '',DATE_FORMAT(sm.approved_date,'%d-%m-%Y'),'') as approval_date,sm.approval_status," +
+    "sm.approval_comment,CONCAT(ed.firstName,' ',ed.lastName) as requested_by_name, sm.status, sm.activity, sm.whereUsedType, sm.whereUsedTypeId, COALESCE(sm.remarks,'') as  remarks " +
+    "FROM smmrs sm LEFT JOIN users ed ON ed.id = sm.requested_by_emp_ID LEFT JOIN users ed1 ON ed1.id = sm.approved_by_emp_ID " +
+    " WHERE sm.ID = " + ID + "  and sm.flag = 2";
+            List<CMMRSList> _List = await Context.GetData<CMMRSList>(stmt).ConfigureAwait(false);
+            for (var i = 0; i < _List.Count; i++)
+            {
+                CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_List[i].status);
+                string _shortStatus = getShortStatus(CMMS.CMMS_Modules.SM_MRS, _Status);
+                string _status_long = getLongStatus(_Status, _List[i].ID);
+                _List[i].status_short = _shortStatus;
+                _List[i].status_long = _status_long;
+                _List[i].CMMRSItems = await getMRSReturnItems(_List[i].ID);
+            }
+
+
             return _List[0];
         }
 
@@ -677,8 +692,8 @@ namespace CMMSAPIs.Repositories.SM
                         try
                         {
                             string insertStmt = $"START TRANSACTION; " +
-                            $"INSERT INTO smrsitems (mrs_ID,mrs_return_ID,asset_item_ID,available_qty,requested_qty,return_remarks,flag, is_faulty)" +
-                            $"VALUES ({request.ID},{MRS_ReturnID},{request.cmmrsItems[i].equipmentID},{request.cmmrsItems[i].qty}, {request.cmmrsItems[i].requested_qty}, '{request.cmmrsItems[i].return_remarks}', 2, {request.cmmrsItems[i].is_faulty})" +
+                            $"INSERT INTO smrsitems (mrs_ID,mrs_return_ID,asset_item_ID,available_qty,requested_qty,returned_qty,return_remarks,flag, is_faulty)" +
+                            $"VALUES ({request.ID},{MRS_ReturnID},{request.cmmrsItems[i].equipmentID},{request.cmmrsItems[i].qty}, {request.cmmrsItems[i].requested_qty}, {request.cmmrsItems[i].returned_qty}, '{request.cmmrsItems[i].return_remarks}', 2, {request.cmmrsItems[i].is_faulty})" +
                             $"; SELECT LAST_INSERT_ID(); COMMIT;";
                             DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
 
