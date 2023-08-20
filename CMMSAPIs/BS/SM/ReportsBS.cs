@@ -14,7 +14,7 @@ namespace CMMSAPIs.BS.SM
 {
     public interface ISMReportsBS
     {
-        Task<List<CMPlantStockOpening>> GetPlantStockReport(string facility_id, DateTime StartDate, DateTime EndDate);
+        Task<List<CMPlantStockOpeningResponse>> GetPlantStockReport(string facility_id, DateTime StartDate, DateTime EndDate);
         Task<List<CMEmployeeStockReport>> GetEmployeeStockReport(int facility_id, int Emp_id, DateTime StartDate, DateTime EndDate, string itemID);
         Task<List<CMFaultyMaterialReport>> GetFaultyMaterialReport(string facility_id, string itemID, DateTime StartDate, DateTime EndDate);
         Task<List<CMEmployeeTransactionReport>> GetEmployeeTransactionReport(int isAllEmployees, string facility_id, int Emp_ID, DateTime StartDate, DateTime EndDate);
@@ -29,7 +29,7 @@ namespace CMMSAPIs.BS.SM
             databaseProvider = dbProvider;
         }
 
-        public async Task<List<CMPlantStockOpening>> GetPlantStockReport(string facility_id, DateTime StartDate, DateTime EndDate)
+        public async Task<List<CMPlantStockOpeningResponse>> GetPlantStockReport(string facility_id, DateTime StartDate, DateTime EndDate)
         {
             try
             {
