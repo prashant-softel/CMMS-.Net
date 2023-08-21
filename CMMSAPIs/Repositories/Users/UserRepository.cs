@@ -794,20 +794,22 @@ namespace CMMSAPIs.Repositories.Users
             string qry = $"SELECT " +
                             $"u.id as id, u.loginId as user_name, concat(firstName, ' ', lastName) as full_name, ur.id as role_id, ur.name as role_name, u.mobileNumber as contact_no " +
                          $"FROM " +
-                            $"Users as u " +
-                         $"JOIN " +
-                            $"UserNotifications as un ON u.id = un.userId " +
-                         $"JOIN " +
+                            $"UserNotifications as un  " +
+                         $"LEFT JOIN " +
+                            $"Users as u ON u.id = un.userId " +
+                         $"LEFT JOIN " +
                             $"UserFacilities as uf ON uf.userId = u.id " +
-                         $"JOIN " +
+                         $"LEFT JOIN " +
                             $"UserRoles as ur ON ur.id = u.roleId " +
+                         $"LEFT JOIN " +
+                            $"notifications as nt ON nt.id = un.notificationId " +
                          $"WHERE " +
-                            $" userPreference = 1 AND notificationId = {(int)request.notification_id} " +
+                            $" userPreference = 1 AND softwareId = {(int)request.notification_id} " +
                             $" ";
 
             if (!user_ids_str.IsNullOrEmpty())
             {
-                qry += $" AND (self = 0 OR u.id IN({user_ids_str}))";
+                qry += $" AND (self = 0 and u.id IN({user_ids_str}))";
             }
             else 
             {
@@ -818,6 +820,7 @@ namespace CMMSAPIs.Repositories.Users
                 qry += $" AND uf.facilityId = {request.facility_id}";
             }
 
+            qry += " group by un.userId ";
 
             List<CMUser> user_list = await Context.GetData<CMUser>(qry).ConfigureAwait(false);
             /*

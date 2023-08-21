@@ -793,8 +793,8 @@ namespace CMMSAPIs.Repositories.SM
             bool Queryflag = false;
             string comment = "";
 
-            string stmtSelect = "SELECT * FROM smmrs WHERE ID = " + request.id + "";
-            List<CMMRS> mrsList = await Context.GetData<CMMRS>(stmtSelect).ConfigureAwait(false);
+            //string stmtSelect = "SELECT * FROM smmrs WHERE ID = " + request.id + "";
+            //List<CMMRS> mrsList = await Context.GetData<CMMRS>(stmtSelect).ConfigureAwait(false);
             //for (int i = 0; i < request.cmmrsItems.Count; i++)
             //{
             //    decimal req_qty = request.cmmrsItems[i].returned_qty;                
