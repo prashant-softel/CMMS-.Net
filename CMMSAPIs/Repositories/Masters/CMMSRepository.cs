@@ -590,37 +590,37 @@ namespace CMMSAPIs.Repositories.Masters
                     JobRepository obj = new JobRepository(getDB);
                     CMJobView _jobView = await obj.GetJobDetails(id);
                     notificationID = (CMMS.CMMS_Status)(_jobView.status);
-                    await CMMSNotification.sendNotification(moduleID, notificationID, _jobView);
+                    await CMMSNotification.sendNotification(moduleID, notificationID,null, _jobView);
                     break;
                 case CMMS.CMMS_Modules.PTW:
                     PermitRepository obj1 = new PermitRepository(getDB);
                     CMPermitDetail _Permit = await obj1.GetPermitDetails(id);
                      notificationID = (CMMS.CMMS_Status)(_Permit.ptwStatus);
-                    await CMMSNotification.sendNotification(moduleID, notificationID, _Permit);
+                    await CMMSNotification.sendNotification(moduleID, notificationID, null, _Permit);
                     break;
                 case CMMS.CMMS_Modules.JOBCARD:
                     JCRepository obj2 = new JCRepository(getDB);
                     List<CMJCDetail> _JobCard = await obj2.GetJCDetail(id);
                     notificationID = (CMMS.CMMS_Status)(_JobCard[0].status);
-                    await CMMSNotification.sendNotification(moduleID, notificationID, _JobCard[0]);
+                    await CMMSNotification.sendNotification(moduleID, notificationID, null, _JobCard[0]);
                     break;
                 case CMMS.CMMS_Modules.INCIDENT_REPORT:
                     IncidentReportRepository obj3 = new IncidentReportRepository(getDB);
                     CMViewIncidentReport _IncidentReport = await obj3.GetIncidentDetailsReport(id);
                     notificationID = (CMMS.CMMS_Status)(_IncidentReport.status);
-                   await CMMSNotification.sendNotification(moduleID, notificationID, _IncidentReport);
+                   await CMMSNotification.sendNotification(moduleID, notificationID, null, _IncidentReport);
                     break;
                 case CMMS.CMMS_Modules.WARRANTY_CLAIM:
                     WCRepository obj4 = new WCRepository(getDB);
                     CMWCDetail _WC = await obj4.GetWCDetails(id);
                     notificationID = (CMMS.CMMS_Status)(_WC.status);
-                    await CMMSNotification.sendNotification(moduleID, notificationID, _WC);
+                    await CMMSNotification.sendNotification(moduleID, notificationID, null, _WC);
                     break;
                 case CMMS.CMMS_Modules.CALIBRATION:
                     CalibrationRepository obj5 = new CalibrationRepository(getDB);
                     CMCalibrationDetails _Calibration = await obj5.GetCalibrationDetails(id);
                     notificationID = (CMMS.CMMS_Status)(_Calibration.statusID + 100);
-                    await CMMSNotification.sendNotification(moduleID, notificationID, _Calibration);
+                    await CMMSNotification.sendNotification(moduleID, notificationID, null, _Calibration);
                     break;
                 case CMMS.CMMS_Modules.INVENTORY:
                     //InventoryRepository obj6 = new InventoryRepository(getDB, _environment);

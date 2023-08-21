@@ -52,6 +52,6 @@ namespace CMMSAPIs.Models.Users
     {
         public int facility_id { get; set; }
         public CMMS.CMMS_Status notification_id { get; set; }
-        public List<int> user_ids { get; set; }
+        public int[] user_ids { get; set; }
     }
 }
