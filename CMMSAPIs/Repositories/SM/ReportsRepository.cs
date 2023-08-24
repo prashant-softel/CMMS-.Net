@@ -185,7 +185,7 @@ namespace CMMSAPIs.Repositories.SM
                 $"LEFT JOIN users ed ON ed.id = sm_td.toActorID " +
                 $"where (date_format(sm_td.lastInsetedDateTime, '%Y-%m-%d') between '{StartDate.ToString("yyyy-MM-dd")}' and '{EndDate.ToString("yyyy-MM-dd")}') and " +
                 $"sm_td.fromActorType = '{(int)CMMS.SM_Types.Inventory}' and sm_td.toActorType = '{(int)CMMS.SM_Types.Engineer}' and smt.actorType = '{(int)CMMS.SM_Types.Engineer}' and (sm_td.referedby = '4' OR sm_td.referedby = '{(int)CMMS.CMMS_Modules.SM_PO}') and a_item.item_condition IN (2,3,4)" +
-                $" and sm_td.plantID in ('{facility_id}') and a_item.ID in ('{itemID}') AND sm_td.Nature_Of_Transaction = 1 ORDER BY sm_td.ID DESC) as fmItemList GROUP BY fmItemList.assetItemID ORDER BY fmItemList.ID DESC";
+                $" and sm_td.plantID in ('{facility_id}')  AND sm_td.Nature_Of_Transaction = 1 ORDER BY sm_td.ID DESC) as fmItemList GROUP BY fmItemList.assetItemID ORDER BY fmItemList.ID DESC";
 
             List<CMFaultyMaterialReport> result = await Context.GetData<CMFaultyMaterialReport>(query).ConfigureAwait(false);
             return result;
@@ -317,7 +317,7 @@ namespace CMMSAPIs.Repositories.SM
                 if (item.Opening != 0)
                 {
                     CMEmpStockItems openingBalance = new CMEmpStockItems();
-                    openingBalance.ID = item.assetItemID;
+                    openingBalance.asset_item_ID = item.assetItemID;
                     openingBalance.item_name = Convert.ToString(item.asset_name);
                     openingBalance.quantity = item.Opening;
 
