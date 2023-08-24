@@ -122,7 +122,7 @@ namespace CMMSAPIs.Models.SM
 
     public class CMEmpStockItems
     {
-        public int ID { get; set; }
+        public int asset_item_ID { get; set; }
         public string item_name { get; set; }
         public decimal quantity { get; set; }
 

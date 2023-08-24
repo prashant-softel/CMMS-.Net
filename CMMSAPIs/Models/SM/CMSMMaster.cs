@@ -127,7 +127,7 @@ namespace CMMSAPIs.Models.SM
     public class CMEquipments
     {
         public int id { get; set; }
-        public int equipmentID { get; set; }
+        public int asset_item_ID { get; set; }
         public decimal qty { get; set; }
         public decimal requested_qty { get; set; }
         public decimal issued_qty { get; set; }
