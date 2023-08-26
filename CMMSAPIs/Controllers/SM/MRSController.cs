@@ -92,6 +92,24 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
+        [Route("CMMRSListByModule")]
+        [HttpGet]
+        public async Task<IActionResult> CMMRSListByModule(int jobId, int pmId)
+        {
+            try
+            {
+                var data = await _MRSBS.CMMRSListByModule(jobId, pmId);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+
+                _AddLog.ErrorLog(ex.ToString());
+                _AddLog.ErrorLog("Exception got using ILOGGER " + ex.ToString());
+                throw ex;
+            }
+        }
+
 
         [Authorize]
         [Route("getMRSItems")]

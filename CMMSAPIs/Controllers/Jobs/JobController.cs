@@ -42,6 +42,26 @@ namespace CMMSAPIs.Controllers.Jobs
         }
 
         [Authorize]
+        [Route("GetJobListByPermitId")]
+        [HttpGet]
+        public async Task<IActionResult> GetJobListByPermitId(int permitId)
+        {
+            try
+            {
+                var data = await _JobBS.GetJobListByPermitId(permitId);
+                return Ok(data);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
         [Route("GetJobDetails")]
         [HttpGet]
         public async Task<IActionResult> GetJobDetails(int job_id)

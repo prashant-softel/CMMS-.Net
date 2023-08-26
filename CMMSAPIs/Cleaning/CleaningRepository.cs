@@ -71,16 +71,16 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                     retValue = String.Format("Module Cleaning Plan <{0}> Deleted by {1} ", planObj.planId, planObj.deletedBy);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_SCHEDULED:
-                    retValue = String.Format("Module Cleaning Task <{0}> Execution started by {1} ", executionObj.id, executionObj.startedBy);
+                    retValue = String.Format("Module Cleaning Task <{0}> Execution started by {1} ", executionObj.executionId, executionObj.startedBy);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_STARTED:
-                    retValue = String.Format("Module Cleaning Task <{0}> Execution started by {1} ", executionObj.id, executionObj.startedBy);
+                    retValue = String.Format("Module Cleaning Task <{0}> Execution started by {1} ", executionObj.executionId, executionObj.startedBy);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_COMPLETED:
-                    retValue = String.Format("Module Cleaning Task <{0}> Execution Completed by {1} ", executionObj.id, executionObj.startedBy);
+                    retValue = String.Format("Module Cleaning Task <{0}> Execution Completed by {1} ", executionObj.executionId, executionObj.startedBy);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_ABANDONED:
-                    retValue = String.Format("Module Cleaning Task <{0}>  Execution Abandoned by {1} ", executionObj.id, executionObj.abandonedBy);
+                    retValue = String.Format("Module Cleaning Task <{0}>  Execution Abandoned by {1} ", executionObj.executionId, executionObj.abandonedBy);
                     break;
                 case CMMS.CMMS_Status.VEG_PLAN_DRAFT:
                     retValue = String.Format("Vegetation Plan <{0}> Draft by {1} ", planObj.planId, planObj.createdBy);
@@ -101,13 +101,13 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                     retValue = String.Format("Vegetation Task <{0}> Execution started by {1} ", executionObj.executionId, executionObj.startedBy);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_STARTED:
-                    retValue = String.Format("Vegetation Task <{0}> Execution started by {1} ", executionObj.id, executionObj.startedBy);
+                    retValue = String.Format("Vegetation Task <{0}> Execution started by {1} ", executionObj.executionId, executionObj.startedBy);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_COMPLETED:
-                    retValue = String.Format("Vegetation Cleaning Task <{0}> Execution Completed by {1} ", executionObj.id, executionObj.startedBy);
+                    retValue = String.Format("Vegetation Cleaning Task <{0}> Execution Completed by {1} ", executionObj.executionId, executionObj.startedBy);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_ABANDONED:
-                    retValue = String.Format("Vegetation Task <{0}>  Execution Abandoned by {1} ", executionObj.id, executionObj.abandonedBy);
+                    retValue = String.Format("Vegetation Task <{0}>  Execution Abandoned by {1} ", executionObj.executionId, executionObj.abandonedBy);
                     break;
                 default:
                     break;
@@ -404,11 +404,21 @@ namespace CMMSAPIs.Repositories.CleaningRepository
         }
         internal async Task<CMDefaultResponse> StartExecution(int planId, int userId)
         {
+            CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
+
+            int status = (int)CMMS.CMMS_Status.MC_TASK_STARTED;
+
+
+            if (moduleType == 2)
+            {
+                status = (int)CMMS.CMMS_Status.VEG_TASK_STARTED;
+            }
+
             string days = $"SELECT durationDays as noOfDays from cleaning_plan where planId = {planId}";
             List<CMMCExecution> _days = await Context.GetData<CMMCExecution>(days).ConfigureAwait(false);
 
             string qry = "INSERT INTO `cleaning_execution` (`planId`,`moduleType`,`noOfDays`,`executedById`,`executionStartedAt`,`status`) VALUES " +
-                          $"('{planId}',{moduleType},{_days[0].noOfDays},'{userId}','{UtilsRepository.GetUTCTime()}',{(int)CMMS.CMMS_Status.VEG_TASK_SCHEDULED});" +
+                          $"('{planId}',{moduleType},{_days[0].noOfDays},'{userId}','{UtilsRepository.GetUTCTime()}',{status});" +
                           $"SELECT LAST_INSERT_ID() as id ; ";
 
             List<CMMCExecution> ExecutionQry = await Context.GetData<CMMCExecution>(qry).ConfigureAwait(false);
@@ -423,7 +433,11 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
             var retVal = await Context.ExecuteNonQry<int>(equipmentQry).ConfigureAwait(false);
 
-            CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
+            //if(retCode == CMMS.RETRUNSTATUS.SUCCESS)
+            //{
+            //    string updateQry = $"UPDATE cleaning_execution_items (`executionId`,`moduleType`,`scheduleId`,`assetId`,`{measure}";
+            //    var retVal = await Context.ExecuteNonQry<int>(equipmentQry).ConfigureAwait(false);
+            //}
 
             if (retVal > 0)
             {

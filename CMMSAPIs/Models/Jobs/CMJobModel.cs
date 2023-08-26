@@ -31,4 +31,17 @@ namespace CMMSAPIs.Models.Jobs
         public string latestJCStatusShort { get; set; }
     }
 
+    public class CMJobList
+    {
+        public int jobId { get; set; }
+        public int permitId { get; set; }
+        public string title { get; set; }
+        public string equipmentCat { get; set; }
+        public string equipment { get; set; }
+        public dynamic breakdownTime { get; set; }
+        public string assignedTo { get; set; }
+        public int status { get; set; }
+        public string status_short { get; set; }
+
+    }
 }

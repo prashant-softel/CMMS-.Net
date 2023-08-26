@@ -11,6 +11,7 @@ namespace CMMSAPIs.BS.Jobs
     public interface IJobBS
     {
 		Task<List<CMJobModel>> GetJobList(int facility_id, string startDate, string endDate, CMMS.CMMS_JobType jobType, int selfView, int userId, string status);
+        Task<List<CMJobList>> GetJobListByPermitId(int permitId);
         Task<CMJobView> GetJobDetails(int job_id);
         Task<CMDefaultResponse> CreateNewJob(CMCreateJob request, int userId);
         Task<CMDefaultResponse> UpdateJob(CMCreateJob request, int userId);
@@ -36,6 +37,21 @@ namespace CMMSAPIs.BS.Jobs
                 using (var repos = new JobRepository(getDB))
                 {
                     return await repos.GetJobList(facility_id, startDate, endDate, jobType, selfView, userId, status);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<CMJobList>> GetJobListByPermitId(int permitId)
+        {
+            try
+            {
+                using (var repos = new JobRepository(getDB))
+                {
+                    return await repos.GetJobListByPermitId(permitId);
                 }
             }
             catch (Exception ex)
