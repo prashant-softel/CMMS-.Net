@@ -62,6 +62,24 @@ namespace CMMSAPIs.Repositories.SM
 
             return _List;
         }
+
+        internal async Task<List<CMMRSListByModule>> CMMRSListByModule(int jobId, int pmId)
+        {
+
+            string stmt = $"SELECT sm.ID, job.id as jobId, sm.whereUsedTypeId as jobCardId, sm.status as status FROM smmrs sm Left Join jobcards jc on jc.id = sm.ID  where jc.jobId = {jobId} ";
+
+            List<CMMRSListByModule> _List = await Context.GetData<CMMRSListByModule>(stmt).ConfigureAwait(false);
+
+            for (var i = 0; i < _List.Count; i++)
+            {
+                CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_List[i].status);
+                string _shortStatus = getShortStatus(CMMS.CMMS_Modules.SM_MRS, _Status);
+                _List[i].status_short = _shortStatus;
+                //_List[i].CMMRSItems = await getMRSItems(_List[i].ID);
+            }
+
+            return _List;
+        }
         internal static string getShortStatus(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status m_notificationID)
         {
             string retValue;

@@ -85,6 +85,7 @@ namespace CMMSAPIs.Controllers.MC
             }
         }
 
+        [Authorize]
         [Route("CreateMCPlan")]
         [HttpPost]
         public async Task<IActionResult> CreateMCPlan(List<CMMCPlan> request)
@@ -101,6 +102,7 @@ namespace CMMSAPIs.Controllers.MC
             }
         }
 
+        [Authorize]
         [Route("UpdateMCPlan")]
         [HttpPost]
         public async Task<IActionResult> UpdateMCPlan(CMMCPlan request)
@@ -117,6 +119,7 @@ namespace CMMSAPIs.Controllers.MC
             }
         }
 
+        [Authorize]
         [Route("ApproveMCPlan")]
         [HttpPut]
         public async Task<IActionResult> ApproveMCPlan(CMApproval request)
@@ -133,6 +136,7 @@ namespace CMMSAPIs.Controllers.MC
             }
         }
 
+        [Authorize]
         [Route("RejectMCPlan")]
         [HttpPut]
         public async Task<IActionResult> RejectMCPlan(CMApproval request)
@@ -149,6 +153,7 @@ namespace CMMSAPIs.Controllers.MC
             }
         }
 
+        [Authorize]
         [Route("DeleteMCPlan")]
         [HttpPut]
         public async Task<IActionResult> DeleteMCPlan(int planId)
@@ -165,6 +170,7 @@ namespace CMMSAPIs.Controllers.MC
             }
         }
 
+        [Authorize]
         [Route("StartMCExecution")]
         [HttpPut]
         public async Task<IActionResult> StartMCExecution(int planId)
@@ -181,6 +187,7 @@ namespace CMMSAPIs.Controllers.MC
             }
         }
 
+        [Authorize]
         [Route("StartMCScheduleExecution")]
         [HttpPut]
         public async Task<IActionResult> StartMCScheduleExecution(int scheduleId)
@@ -196,6 +203,8 @@ namespace CMMSAPIs.Controllers.MC
                 throw;
             }
         }
+
+        [Authorize]
         [Route("EndMCScheduleExecution")]
         [HttpPut]
         public async Task<IActionResult> EndMCScheduleExecution(CMMCExecutionSchedule schedule)
@@ -227,6 +236,7 @@ namespace CMMSAPIs.Controllers.MC
             }
         }
 
+        [Authorize]
         [Route("AbandonMcExecution")]
         [HttpPut]
         public async Task<IActionResult> AbandonMcExecution(CMApproval request)
@@ -242,6 +252,8 @@ namespace CMMSAPIs.Controllers.MC
                 throw;
             }
         }
+
+        [Authorize]
         [Route("GetMCEquipmentList")]
         [HttpGet]
         public async Task<IActionResult> GetMCEquipmentList(int facilityId)

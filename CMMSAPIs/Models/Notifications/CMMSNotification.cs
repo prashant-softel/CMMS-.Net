@@ -44,12 +44,22 @@ namespace CMMSAPIs.Models.Notifications
         public string templateEnd = "<tr><td style=' text-align: left; padding:0.5rem; background-color:#31576D;color:#000000'><b>&nbsp;&nbsp;{0}</b></td><td style='text-align: left; padding:0.5rem;'>&nbsp;&nbsp;{1}</td></tr></table>";
 
         private static MYSQLDBHelper sqlDBHelper;
+        private MYSQLDBHelper _conn;
 
-        public CMMSNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID): base(sqlDBHelper)
+        private UserAccessRepository _userAccessRepository;
+
+        public CMMSNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID):base(sqlDBHelper)
         {
             m_moduleID = moduleID;
             m_notificationID = notificationID;
         }
+        public CMMSNotification(MYSQLDBHelper sqlDBHelper, IWebHostEnvironment webHostEnvironment = null, IConfiguration configuration = null) : base(sqlDBHelper)
+        {
+            _conn = sqlDBHelper;
+            _userAccessRepository = new UserAccessRepository(sqlDBHelper, webHostEnvironment, configuration);
+
+        }
+
         protected virtual string getModuleName(params object[] args)
         {
             return Convert.ToString(m_moduleID);
@@ -164,7 +174,9 @@ namespace CMMSAPIs.Models.Notifications
             List<CMUser> users = new List<CMUser>();
             try
             {
-                users = await GetUserByNotificationId(notification);
+                //CMMSNotification objc = new CMMSNotification(_conn);
+                UserAccessRepository obj = new UserAccessRepository(_conn);
+                users = await obj.GetUserByNotificationId(notification);
             }
             catch (Exception e) { 
 

@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Hosting;
 using OfficeOpenXml;
 using CMMSAPIs.Models.Notifications;
 using CMMSAPIs.Models.Calibration;
+//using static System.Net.WebRequestMethods;
 //using IronXL;
 
 namespace CMMSAPIs.Repositories.Inventory
@@ -513,35 +514,12 @@ namespace CMMSAPIs.Repositories.Inventory
                 "" +
                 "JOIN facilities as linkedbl ON linkedbl.id = a.linkedToBlockId " +
                 "" +
-                "JOIN facilities as bl ON bl.id = a.blockId";
-            if (facilityId > 0 || linkedToBlockId > 0)
-            {
-                if (linkedToBlockId > 0)
-                {
-                    myQuery += " WHERE a.linkedToBlockId= " + linkedToBlockId;
-                }
-                else
-                {
-                    myQuery += " WHERE a.facilityId= " + facilityId;
-                }
-                if (categoryIds?.Length > 0)
-                {
-                    myQuery += " AND a.categoryId IN (" + categoryIds + ")";
-                }
-                if (status > 0)
-                {
-                    myQuery += " AND a.status = " + status;
-                }
-            }
-            else
-            {
-                if (status > 0)
-                {
-                    myQuery += " WHERE a.status = " + status;
-                }
+                "JOIN facilities as bl ON bl.id = a.blockId   WHERE a.status = " + status ;
 
-                //                throw new ArgumentException("FacilityId or linkedToBlockId cannot be 0");
-            }
+            myQuery += (facilityId > 0 ? " AND a.facilityId= " + facilityId  + "" : " ");
+            myQuery += (linkedToBlockId > 0 ? " AND a.linkedToBlockId= " + linkedToBlockId + "" : " ");
+            myQuery += (categoryIds?.Length > 0 ? " AND a.categoryId IN (" + categoryIds + ")" : " ");
+
             List<CMInventoryList> inventory = await Context.GetData<CMInventoryList>(myQuery).ConfigureAwait(false);
             return inventory;
         }

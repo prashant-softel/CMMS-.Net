@@ -51,6 +51,25 @@ namespace CMMSAPIs.Repositories.Jobs
             return _ViewJobList;
         }
 
+        internal async Task<List<CMJobList>> GetJobListByPermitId(int permitId)
+        {
+            string myQuery = "SELECT " +
+                                   "job.id as id, job.status as status, CONCAT(user.firstName, user.lastName) as assignedTo, job.title as job_title,  job.breakdownTime , ptw.linkedPermit as permitId  " +
+                                     "FROM " +
+                                           "jobs as job " +                                                                     
+                                     "LEFT JOIN " +
+                                           "users as user ON user.id = job.assignedId " +
+                                     "WHERE job.linkedPermit = " + permitId;
+
+            List<CMJobList> _ViewJobList = await Context.GetData<CMJobList>(myQuery).ConfigureAwait(false);
+            CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_ViewJobList[0].status);
+            string _shortStatus = getShortStatus(CMMS.CMMS_Modules.JOB, _Status);
+            _ViewJobList[0].status_short = _shortStatus;
+
+            return _ViewJobList;
+
+        }
+
         //internal async Task<List<CMJobModel>> GetJobList(int facility_id, int userId)
         internal async Task<List<CMJobModel>> GetJobList(int facility_id, string startDate, string endDate, CMMS.CMMS_JobType jobType, int selfView, int userId, string status)
 
