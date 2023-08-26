@@ -14,7 +14,7 @@ namespace CMMSAPIs.BS.Masters
         //sTask<int> eQry(string qry); 
         Task<List<CMFinancialYear>> GetFinancialYear();
         Task<List<CMFacility>> GetFacility(int facility_id);
-        Task<List<CMFacility>> GetFacilityList();
+        Task<List<CMFacilityList>> GetFacilityList();
         Task<List<CMFacility>> GetBlockList(int facility_id);
         Task<List<CMAssetCategory>> GetAssetCategoryList();
         Task<List<CMAsset>> GetAssetList(int facility_id);
@@ -184,7 +184,7 @@ namespace CMMSAPIs.BS.Masters
             }
         }
 
-        public async Task<List<CMFacility>> GetFacilityList()
+        public async Task<List<CMFacilityList>> GetFacilityList()
         {
             try
             {

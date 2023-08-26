@@ -15,7 +15,7 @@ namespace CMMSAPIs.BS.SM
         Task<CMDefaultResponse> CreateMRS(CMMRS request, int UserID);        
         Task<CMDefaultResponse> updateMRS(CMMRS request, int UserID);        
         Task<List<CMMRSList>> getMRSList(int facility_ID, int emp_id, DateTime toDate, DateTime fromDate, int status);
-        Task<List<CMMRSListByModule>> CMMRSListByModule(int jobId, int pmId);
+        Task<List<CMMRSListByModule>> getMRSListByModule(int jobId, int pmId);
         Task<List<CMMRSItems>> getMRSItems(int ID);        
         Task<List<CMMRSItemsBeforeIssue>> getMRSItemsBeforeIssue(int ID);        
         Task<List<CMMRSItemsBeforeIssue>> getMRSItemsWithCode(int ID);        
@@ -89,13 +89,13 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public  async Task<List<CMMRSListByModule>> CMMRSListByModule(int jobId, int pmId)
+        public  async Task<List<CMMRSListByModule>> getMRSListByModule(int jobId, int pmId)
         { 
             try
             {
                 using (var repos = new MRSRepository(getDB))
                 {
-                    return await repos.CMMRSListByModule( jobId, pmId);
+                    return await repos.getMRSListByModule( jobId, pmId);
                 }
             }
             catch (Exception ex)

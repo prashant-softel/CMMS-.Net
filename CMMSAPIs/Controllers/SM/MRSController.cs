@@ -92,13 +92,13 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
-        [Route("CMMRSListByModule")]
+        [Route("getMRSListByModule")]
         [HttpGet]
-        public async Task<IActionResult> CMMRSListByModule(int jobId, int pmId)
+        public async Task<IActionResult> getMRSListByModule(int jobId, int pmId)
         {
             try
             {
-                var data = await _MRSBS.CMMRSListByModule(jobId, pmId);
+                var data = await _MRSBS.getMRSListByModule(jobId, pmId);
                 return Ok(data);
             }
             catch (Exception ex)
