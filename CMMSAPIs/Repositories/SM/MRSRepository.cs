@@ -65,8 +65,7 @@ namespace CMMSAPIs.Repositories.SM
 
         internal async Task<List<CMMRSListByModule>> getMRSListByModule(int jobId, int pmId)
         {
-
-            string stmt = $"SELECT sm.ID, jc.jobId as jobId, sm.whereUsedTypeId as jobCardId, sm.status as status FROM smmrs sm  Left Join jobcards jc on jc.id = sm.whereUsedTypeId  where jc.jobId = {jobId} ";
+            string stmt = $"SELECT sm.ID as mrsId , jc.jobId as jobId, sm.whereUsedTypeId as jobCardId, sm.status as status,group_concat(distinct assets.name order by assets.id separator ', ') as mrsItems FROM smmrs sm left join smrsitems on smrsitems.mrs_ID = sm.ID left join assets on smrsitems.asset_item_ID = assets.id Left Join jobcards jc on jc.id = sm.whereUsedTypeId  where jc.jobId = {jobId} group by mrsId";
 
             List<CMMRSListByModule> _List = await Context.GetData<CMMRSListByModule>(stmt).ConfigureAwait(false);
 

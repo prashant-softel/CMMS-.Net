@@ -9,6 +9,7 @@ using CMMSAPIs.Models.Notifications;
 using System.Data;
 using System;
 using CMMSAPIs.Models.Users;
+using System.Linq;
 
 namespace CMMSAPIs.Repositories.Jobs
 {
@@ -53,22 +54,51 @@ namespace CMMSAPIs.Repositories.Jobs
 
         internal async Task<List<CMJobList>> GetJobListByPermitId(int permitId)
         {
-            string myQuery = "SELECT " +
-                                   "job.id as jobId, job.status as status, CONCAT(user.firstName, user.lastName) as assignedTo, job.title as title,  job.breakdownTime , job.linkedPermit as permitId  " +
-                                     "FROM " +
-                                           "jobs as job " +                                                                     
-                                     "LEFT JOIN " +
-                                           "users as user ON user.id = job.assignedId " +
-                                     "WHERE job.linkedPermit = " + permitId;
+            string myQuery = "Select job.id as jobid, job.status as status, concat(user.firstname, ' ', user.lastname) as assignedto, job.title as title,  job.breakdowntime, job.linkedpermit as permitid, group_concat(distinct asset_cat.name order by asset_cat.id separator ', ') as equipmentcat, group_concat(distinct assets.name order by assets.id separator ', ') as equipment from jobs as job left join jobmappingassets as jobassets on job.id = jobassets.jobid left join assetcategories as asset_cat on asset_cat.id = jobassets.categoryid left join assets on assets.id = jobassets.assetid left join users as user on user.id = job.assignedid where job.linkedpermit = 59989 group by job.id; ";
 
             List<CMJobList> _ViewJobList = await Context.GetData<CMJobList>(myQuery).ConfigureAwait(false);
 
-            for (var i = 0; i < _ViewJobList.Count; i++)
+            //int[] jobIds = _ViewJobList.Select(job => job.jobId).ToArray();
+
+            //string filter = (jobIds?.Length > 0 ? "(" + string.Join(",", jobIds) + ")" : string.Empty);
+
+            //string assetQry = "SELECT jobId, assets.name as asset from jobmappingassets left join assets on assets.id = assetId  where jobId IN " + filter;
+
+            //DataTable assets = await Context.FetchData(assetQry).ConfigureAwait(false);
+
+            //string assetCatQry = "SELECT jobId, assetcategories.name as category from jobmappingassets left join assetcategories on assetcategories.id = categoryId  where jobId IN " + filter;
+
+            //DataTable assetcat = await Context.FetchData(assetCatQry).ConfigureAwait(false);
+
+            //int jobId = 0;
+
+            foreach (var job in _ViewJobList)
             {
-                CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_ViewJobList[i].status);
+                //    job.equipment = new string[100];
+                //    job.equipmentCat = new string[100];
+
+                //    foreach (DataRow asset in assets.Rows)
+                //    {
+                //        jobId = Convert.ToInt32(asset["jobId"]);
+                //        if (job.jobId == jobId)
+                //        {
+                //            job.equipment.Append(Convert.ToString(asset["asset"]));
+                //        }
+                //    }
+
+                //    foreach (DataRow cat in assetcat.Rows)
+                //    {
+                //        jobId = Convert.ToInt32(cat["jobId"]);
+                //        if (job.jobId == jobId)
+                //        {
+                //            job.equipmentCat.Append(Convert.ToString(cat["category"]));
+                //        }
+                //    }
+                CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(job.status);
                 string _shortStatus = getShortStatus(CMMS.CMMS_Modules.JOB, _Status);
-                _ViewJobList[i].status_short = _shortStatus;
+                job.status_short = _shortStatus;
             }
+
             return _ViewJobList;
 
         }
