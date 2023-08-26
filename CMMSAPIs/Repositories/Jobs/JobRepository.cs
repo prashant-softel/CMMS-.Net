@@ -54,7 +54,7 @@ namespace CMMSAPIs.Repositories.Jobs
         internal async Task<List<CMJobList>> GetJobListByPermitId(int permitId)
         {
             string myQuery = "SELECT " +
-                                   "job.id as id, job.status as status, CONCAT(user.firstName, user.lastName) as assignedTo, job.title as job_title,  job.breakdownTime , ptw.linkedPermit as permitId  " +
+                                   "job.id as jobId, job.status as status, CONCAT(user.firstName, user.lastName) as assignedTo, job.title as title,  job.breakdownTime , job.linkedPermit as permitId  " +
                                      "FROM " +
                                            "jobs as job " +                                                                     
                                      "LEFT JOIN " +
@@ -62,10 +62,13 @@ namespace CMMSAPIs.Repositories.Jobs
                                      "WHERE job.linkedPermit = " + permitId;
 
             List<CMJobList> _ViewJobList = await Context.GetData<CMJobList>(myQuery).ConfigureAwait(false);
-            CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_ViewJobList[0].status);
-            string _shortStatus = getShortStatus(CMMS.CMMS_Modules.JOB, _Status);
-            _ViewJobList[0].status_short = _shortStatus;
 
+            for (var i = 0; i < _ViewJobList.Count; i++)
+            {
+                CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_ViewJobList[i].status);
+                string _shortStatus = getShortStatus(CMMS.CMMS_Modules.JOB, _Status);
+                _ViewJobList[i].status_short = _shortStatus;
+            }
             return _ViewJobList;
 
         }

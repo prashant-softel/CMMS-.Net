@@ -180,10 +180,13 @@ namespace CMMSAPIs.Repositories.Masters
             return _FinancialYear;
         }
 
-        internal async Task<List<CMFacility>> GetFacilityList()
+        internal async Task<List<CMFacilityList>> GetFacilityList()
         {
-            string myQuery = "SELECT id, name, address, city, state, country, zipcode as pin FROM Facilities WHERE isBlock = 0 and status = 1";
-            List<CMFacility> _Facility = await Context.GetData<CMFacility>(myQuery).ConfigureAwait(false);
+            string myQuery = "SELECT facilities.id, facilities.name, spv.name as spv, facilities.address, facilities.city, facilities.state, facilities.country, facilities.zipcode as pin " +
+                ", CONCAT(u.firstName , ' ' , u.lastName) as customer ,CONCAT(u2.firstName , ' ' , u2.lastName) as owner,CONCAT(u3.firstName , ' ' , u3.lastName) as Operator" +
+                " FROM Facilities LEFT JOIN spv ON facilities.spvId=spv.id LEFT JOIN users as u ON u.id = facilities.customerId LEFT JOIN users as u2 ON u2.id = facilities.ownerId LEFT JOIN users as u3 ON u3.id = facilities.operatorId WHERE isBlock = 0 and facilities.status = 1;"; 
+            
+            List<CMFacilityList> _Facility = await Context.GetData<CMFacilityList>(myQuery).ConfigureAwait(false);
             return _Facility;
         }
 
