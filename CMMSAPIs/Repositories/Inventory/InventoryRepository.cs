@@ -494,9 +494,9 @@ namespace CMMSAPIs.Repositories.Inventory
                 ", f.name AS facilityName, f.id AS facilityId, bl.id AS blockId, bl.name AS blockName, linkedbl.id AS linkedToBlockId, linkedbl.name AS linkedToBlockName, a.parentId, a2.name as parentName, custbl.name as customerName, owntbl.name as ownerName, s.name AS status, b5.name AS operatorName" +
 
                 " from assets as a " +
-                "join assettypes as ast on ast.id = a.typeId " +
+                "left join assettypes as ast on ast.id = a.typeId " +
                 "" +
-                "join assetcategories as ac on ac.id= a.categoryId " +
+                "left join assetcategories as ac on ac.id= a.categoryId " +
                 "" +
                 "left join business as custbl on custbl.id = a.customerId " +
                 "" +
@@ -510,11 +510,11 @@ namespace CMMSAPIs.Repositories.Inventory
 
                 "left JOIN business as b5 ON b5.id = a.operatorId " +
                 "" +
-                "JOIN facilities as f ON f.id = a.facilityId " +
+                "left JOIN facilities as f ON f.id = a.facilityId " +
                 "" +
-                "JOIN facilities as linkedbl ON linkedbl.id = a.linkedToBlockId " +
+                "left JOIN facilities as linkedbl ON linkedbl.id = a.linkedToBlockId " +
                 "" +
-                "JOIN facilities as bl ON bl.id = a.blockId   WHERE a.status = " + status ;
+                "left JOIN facilities as bl ON bl.id = a.blockId   WHERE a.statusId = " + status ;
 
             myQuery += (facilityId > 0 ? " AND a.facilityId= " + facilityId  + "" : " ");
             myQuery += (linkedToBlockId > 0 ? " AND a.linkedToBlockId= " + linkedToBlockId + "" : " ");
