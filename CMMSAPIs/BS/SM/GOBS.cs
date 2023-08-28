@@ -25,6 +25,7 @@ namespace CMMSAPIs.BS
         Task<List<CMPURCHASEDATA>> GetPurchaseData(int plantID, string empRole, DateTime fromDate, DateTime toDate, string status, string order_type);
         Task<CMGOMaster> GetGODetailsByID(int id);
         Task<CMDefaultResponse> SubmitPurchaseData(CMSUBMITPURCHASEDATA request);
+                Task<List<CMGOListByFilter>> GetSubmitPurchaseOrderList(int facility_id, DateTime fromDate, DateTime toDate, int Status);
     }
 
     public class GOBS : IGOBS
@@ -42,8 +43,8 @@ namespace CMMSAPIs.BS
             {
                 using (var repos = new GORepository(getDB))
                 {
-                    return await repos.GetGOList(facility_id, fromDate, toDate);
-
+                   int is_purchaseorder = 0;
+                    return await repos.GetGOList(facility_id, fromDate, toDate, is_purchaseorder);
                 }
             }
             catch (Exception ex)
@@ -214,6 +215,23 @@ namespace CMMSAPIs.BS
                 using (var repos = new GORepository(getDB))
                 {
                     return await repos.SubmitPurchaseData(request);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+                public async Task<List<CMGOListByFilter>> GetSubmitPurchaseOrderList(int facility_id, DateTime fromDate, DateTime toDate, int Status)
+        {
+            try
+            {
+                using (var repos = new GORepository(getDB))
+                {
+                    int is_purchaseorder = 1;
+                    return await repos.GetGOList(facility_id, fromDate, toDate, is_purchaseorder);
 
                 }
             }
