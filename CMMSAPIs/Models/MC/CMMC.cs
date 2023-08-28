@@ -68,6 +68,8 @@ namespace CMMSAPIs.Models.MC
         public List<CMMCPlanScheduleSummary> schedules { get; set; }
 
     }
+
+    
     public class CMMCPlanScheduleSummary
     {
 
@@ -156,8 +158,18 @@ namespace CMMSAPIs.Models.MC
         public string remark { get; set; }
         public string status_short { get; set; }
         public List<CMMCExecutionEquipment> equipments { get; set; }
+    }
 
-
+    public class CMMCGetScheduleExecution
+    {
+        public int executionId { get; set; }
+        public int scheduleId { get; set; }
+        public int scheduledModules { get; set; }
+        public int cleaningDay { get; set; }
+        public int waterUsed { get; set; }
+        public string remark { get; set; }
+        public int[] cleanedEquipmentIds { get; set; }
+        public int[] abandonedEquipmentIds { get; set; }
     }
 
     public class CMMCExecutionEquipment
