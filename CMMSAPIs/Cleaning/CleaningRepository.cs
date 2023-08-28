@@ -614,9 +614,9 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
             int val = await Context.ExecuteNonQry<int>(Query).ConfigureAwait(false);
 
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MODULE_CLEANING, request.id, 0, 0, "Mc schedule Completed", CMMS.CMMS_Status.MC_TASK_ABANDONED);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MODULE_CLEANING, request.id, 0, 0, "Schedule Execution abanded", CMMS.CMMS_Status.MC_TASK_ABANDONED);
 
-            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Execution abonded");
+            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Schedule Execution abanded");
             return response;
         }
         internal async Task<CMDefaultResponse> AbandonExecution(CMApproval request, int userId)
@@ -638,7 +638,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MODULE_CLEANING, request.id, 0, 0, "Mc schedule Completed", CMMS.CMMS_Status.MC_TASK_ABANDONED);
 
-            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Execution abonded");
+            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Execution abanded");
             return response;
         }
 
