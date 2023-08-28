@@ -267,7 +267,7 @@ namespace CMMSAPIs.Models.SM
     public class CMMRSListByModule
     {
         public int mrsId { get; set; }
-        public int JobId { get; set; }
+        public int jobId { get; set; }
         public int jobCardId { get; set; }
         public int pmId { get; set; }
         public string mrsItems { get; set; }

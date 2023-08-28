@@ -205,14 +205,30 @@ namespace CMMSAPIs.Controllers.MC
         }
 
         [Authorize]
-        [Route("EndMCScheduleExecution")]
+        [Route("UpdateMCScheduleExecution")]
         [HttpPut]
-        public async Task<IActionResult> EndMCScheduleExecution(CMMCExecutionSchedule schedule)
+        public async Task<IActionResult> UpdateMCScheduleExecution(CMMCGetScheduleExecution schedule)
         {
             try
             {
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _CleaningBS.EndScheduleExecution(schedule, userId);
+                var data = await _CleaningBS.UpdateScheduleExecution(schedule, userId);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
+        [Route("GetMCScheduleExecutionSummary")]
+        [HttpPut]
+        public async Task<IActionResult> GetMCScheduleExecutionSummary(CMMCGetScheduleExecution schedule)
+        {
+            try
+            {
+                var data = await _CleaningBS.GetScheduleExecutionSummary(schedule);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -245,6 +261,23 @@ namespace CMMSAPIs.Controllers.MC
             {
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
                 var data = await _CleaningBS.AbandonExecution(request, userId);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
+        [Route("AbandonMcSchedule")]
+        [HttpPut]
+        public async Task<IActionResult> AbandonMcSchedule(CMApproval request)
+        {
+            try
+            {
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _CleaningBS.AbandonSchedule(request, userId);
                 return Ok(data);
             }
             catch (Exception ex)
