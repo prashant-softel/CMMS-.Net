@@ -892,12 +892,22 @@ namespace CMMSAPIs.Repositories
             return _MasterList;
         }
 
-        internal async Task<List<CMGOListByFilter>> GetGOList(int facility_id, DateTime fromDate, DateTime toDate)
+        internal async Task<List<CMGOListByFilter>> GetGOList(int facility_id, DateTime fromDate, DateTime toDate, int is_purchaseorder)
         {
 
             string filter = " (DATE(po.purchaseDate) >= '" + fromDate.ToString("yyyy-MM-dd") + "'  and DATE(po.purchaseDate) <= '" + toDate.ToString("yyyy-MM-dd") + "')";
 
             filter = filter + " and facilityID = " + facility_id + "";
+
+            if (is_purchaseorder == 0)
+            {
+                filter = filter + " and (is_purchaseorder = 0 OR is_purchaseorder is null) ";
+            }
+            else
+            {
+                filter = filter + " and is_purchaseorder = 1 ";
+            } 
+
             string query = "SELECT fc.name as facilityName,pod.ID as podID, facilityid as       facility_id,pod.spare_status,pod.remarks,sai.orderflag,sam.asset_type_ID," +
                 "pod.purchaseID,pod.assetItemID,sai.serial_number,sai.location_ID,(select sum(cost) from smpurchaseorderdetails where purchaseID = po.id) as cost,pod.ordered_qty,\r\n bl.name as vendor_name,\r\n     " +
                 " po.purchaseDate,sam.asset_type_ID,sam.asset_name,po.receiverID,\r\n        " +
