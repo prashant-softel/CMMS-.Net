@@ -58,42 +58,10 @@ namespace CMMSAPIs.Repositories.Jobs
 
             List<CMJobList> _ViewJobList = await Context.GetData<CMJobList>(myQuery).ConfigureAwait(false);
 
-            //int[] jobIds = _ViewJobList.Select(job => job.jobId).ToArray();
-
-            //string filter = (jobIds?.Length > 0 ? "(" + string.Join(",", jobIds) + ")" : string.Empty);
-
-            //string assetQry = "SELECT jobId, assets.name as asset from jobmappingassets left join assets on assets.id = assetId  where jobId IN " + filter;
-
-            //DataTable assets = await Context.FetchData(assetQry).ConfigureAwait(false);
-
-            //string assetCatQry = "SELECT jobId, assetcategories.name as category from jobmappingassets left join assetcategories on assetcategories.id = categoryId  where jobId IN " + filter;
-
-            //DataTable assetcat = await Context.FetchData(assetCatQry).ConfigureAwait(false);
-
-            //int jobId = 0;
-
+            
             foreach (var job in _ViewJobList)
             {
-                //    job.equipment = new string[100];
-                //    job.equipmentCat = new string[100];
-
-                //    foreach (DataRow asset in assets.Rows)
-                //    {
-                //        jobId = Convert.ToInt32(asset["jobId"]);
-                //        if (job.jobId == jobId)
-                //        {
-                //            job.equipment.Append(Convert.ToString(asset["asset"]));
-                //        }
-                //    }
-
-                //    foreach (DataRow cat in assetcat.Rows)
-                //    {
-                //        jobId = Convert.ToInt32(cat["jobId"]);
-                //        if (job.jobId == jobId)
-                //        {
-                //            job.equipmentCat.Append(Convert.ToString(cat["category"]));
-                //        }
-                //    }
+                
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(job.status);
                 string _shortStatus = getShortStatus(CMMS.CMMS_Modules.JOB, _Status);
                 job.status_short = _shortStatus;
@@ -574,11 +542,11 @@ namespace CMMSAPIs.Repositories.Jobs
 
             List<CMJobView> _ViewJobList = await GetJobView(job_id);
 
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, job_id, CMMS.CMMS_Modules.PTW, ptw_id, "Permit Assigned to Job", CMMS.CMMS_Status.JOB_LINKED, updatedBy);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, job_id, CMMS.CMMS_Modules.PTW, ptw_id, $"Permit <{ptw_id}> Assigned to Job <{job_id}>", CMMS.CMMS_Status.JOB_LINKED, updatedBy);
 
             await CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_LINKED, new[] { _ViewJobList[0].assigned_id}, _ViewJobList[0]);
 
-            CMDefaultResponse response = new CMDefaultResponse(_ViewJobList[0].id, CMMS.RETRUNSTATUS.SUCCESS, $"Job {_ViewJobList[0].id} Linked To Permit");
+            CMDefaultResponse response = new CMDefaultResponse(_ViewJobList[0].id, CMMS.RETRUNSTATUS.SUCCESS, $"Job <{_ViewJobList[0].id}> Linked To Permit <{ptw_id}> ");
 
             return response;        
         }

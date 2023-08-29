@@ -156,15 +156,15 @@ namespace CMMSAPIs.Repositories.Masters
             return _moduleList;
         }
 
-        internal async Task<List<CMModule>> GetFeatureList()
-        {
-            /*
-             * Return List of modules from Features table
-            */
-            string myQuery = "SELECT * FROM features; ";
-            List<CMModule> _moduleList = await Context.GetData<CMModule>(myQuery).ConfigureAwait(false);
-            return _moduleList;
-        }
+        //internal async Task<List<CMModule>> GetFeatureList()
+        //{
+        //    /*
+        //     * Return List of modules from Features table
+        //    */
+        //    string myQuery = "SELECT * FROM features; ";
+        //    List<CMModule> _moduleList = await Context.GetData<CMModule>(myQuery).ConfigureAwait(false);
+        //    return _moduleList;
+        //}
 
         internal async Task<List<CMStatus>> GetStatusList(CMMS.CMMS_Modules module)
         {

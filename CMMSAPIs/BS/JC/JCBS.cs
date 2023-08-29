@@ -12,7 +12,7 @@ namespace CMMSAPIs.BS.JC
     public interface IJCBS
     {
         Task<List<CMJCList>> GetJCList(int facility_id, int userID, bool self_view);
-        Task<List<CMJCList>> GetJCListByJobId(int jobId);
+        Task<List<CMJCListForJob>> GetJCListByJobId(int jobId);
         Task<List<CMJCDetail>> GetJCDetail(int jc_id);
         Task<CMDefaultResponse> CreateJC(int job_id, int userID);
         Task<CMDefaultResponse> UpdateJC(CMJCUpdate request, int userID);
@@ -47,7 +47,7 @@ namespace CMMSAPIs.BS.JC
             }
         }
 
-        public async Task<List<CMJCList>> GetJCListByJobId(int jobId)
+        public async Task<List<CMJCListForJob>> GetJCListByJobId(int jobId)
         {
             try
             {
