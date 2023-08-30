@@ -191,10 +191,10 @@ namespace CMMSAPIs.Repositories.WC
                 {
                     draftStatus = (CMMS.CMMS_Status)(int)CMMS.CMMS_Status.WC_SUBMITTED;
                 }
-                string qry = "insert into wc(facilityId, equipment_id, good_order_id, affected_part, order_reference_number, affected_sr_no, " + 
+                string qry = "insert into wc(status_updated_at, facilityId, equipment_id, good_order_id, affected_part, order_reference_number, affected_sr_no, " + 
                                 "cost_of_replacement, currencyId, warranty_start_date, warranty_end_date, warranty_claim_title, warranty_description, " + 
                                 "corrective_action_by_buyer, request_to_supplier, approver_id, status, wc_fac_code, failure_time, created_by) values" + 
-                                $"({unit.facilityId}, {unit.equipmentId}, '{unit.goodsOrderId}', '{unit.affectedPart}', '{unit.orderReference}', " + 
+                                $"({UtilsRepository.GetUTCTime()}, {unit.facilityId}, {unit.equipmentId}, '{unit.goodsOrderId}', '{unit.affectedPart}', '{unit.orderReference}', " + 
                                 $"'{unit.affectedSrNo}', '{unit.costOfReplacement}', {unit.currencyId}, '{((DateTime)unit.warrantyStartAt).ToString("yyyy'-'MM'-'dd")}', " + 
                                 $"'{((DateTime)unit.warrantyEndAt).ToString("yyyy'-'MM'-'dd")}', '{unit.warrantyClaimTitle}', '{unit.warrantyDescription}', " + 
                                 $"'{unit.correctiveActionByBuyer}', '{unit.requestToSupplier}', {unit.approverId},{(int)draftStatus}, " + 
@@ -459,7 +459,7 @@ namespace CMMSAPIs.Repositories.WC
             return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "WC Details Updated Successfully");
         }
 
-        internal async Task<CMDefaultResponse> ApproveWC(CMApproval request)
+        internal async Task<CMDefaultResponse> ApproveWC(CMApproval request, int userId)
         {
             /*
              * Update the Incidents and also update the history table
@@ -472,10 +472,10 @@ namespace CMMSAPIs.Repositories.WC
             {
                 throw new ArgumentException("Invalid argument id<" + request.id + ">");
             }
-            int userId = Utils.UtilsRepository.GetUserID();
-            string approveQuery = $"Update wc set status = {(int)CMMS.CMMS_Status.APPROVED}, approval_reccomendations = '{request.comment}'  " +
-                " approveddBy = {userId}, approvedAt = {Utils.UtilsRepository.GetUTCTime}" +
-                " where id = { request.id}";
+            string approveQuery = $"Update wc set status = {(int)CMMS.CMMS_Status.APPROVED}, status_updated_at = '{UtilsRepository.GetUTCTime()}', " +
+                $"approval_reccomendations = '{request.comment}',  " +
+                $" approveddBy = {userId}, approvedAt = {UtilsRepository.GetUTCTime()}" +
+                $" where id = { request.id}";
             int reject_id = await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
 
             retCode = CMMS.RETRUNSTATUS.SUCCESS;
@@ -487,7 +487,7 @@ namespace CMMSAPIs.Repositories.WC
             return response;
         }
 
-        internal async Task<CMDefaultResponse> RejectWC(CMApproval request)
+        internal async Task<CMDefaultResponse> RejectWC(CMApproval request, int userId)
         {
             /*
              * Update the Incidents and also update the history table
@@ -499,10 +499,10 @@ namespace CMMSAPIs.Repositories.WC
                 throw new ArgumentException("Invalid argument id<" + request.id + ">");
             }
 
-            int userId = Utils.UtilsRepository.GetUserID();
-            string approveQuery = $"Update wc set status = {(int)CMMS.CMMS_Status.REJECTED} , reject_reccomendations = '{request.comment}'  " + 
-                " rejecctedBy = {userId}, rejectedAt = {Utils.UtilsRepository.GetUTCTime}" + 
-                " where id = { request.id}";
+            string approveQuery = $"Update wc set status = {(int)CMMS.CMMS_Status.REJECTED}, status_updated_at = '{UtilsRepository.GetUTCTime()}' , " +
+                $"reject_reccomendations = '{request.comment}',  " + 
+                $" rejecctedBy = {userId}, rejectedAt = {UtilsRepository.GetUTCTime()} " + 
+                $" where id = { request.id}";
             int reject_id = await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
 
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;

@@ -90,42 +90,49 @@ namespace CMMSAPIs.Repositories.Inventory
         {
             CMImportFileResponse response = null;
 
-            string queryAsset = "SELECT id, name FROM assets GROUP BY name ORDER BY id ASC;";
+            string queryAsset = "SELECT id, UPPER(name) as name FROM assets GROUP BY name ORDER BY id ASC;";
             DataTable dtAsset = await Context.FetchData(queryAsset).ConfigureAwait(false);
             List<string> assetNames = dtAsset.GetColumn<string>("name");
             List<int> assetIDs = dtAsset.GetColumn<int>("id");
             Dictionary<string, int> assets = new Dictionary<string, int>();
             assets.Merge(assetNames, assetIDs);
 
-            string queryCat = "SELECT id, name FROM assetcategories GROUP BY name ORDER BY id ASC;";
+            string queryCat = "SELECT id, UPPER(name) as name FROM assetcategories GROUP BY name ORDER BY id ASC;";
             DataTable dtCat = await Context.FetchData(queryCat).ConfigureAwait(false);
             List<string> catNames = dtCat.GetColumn<string>("name");
             List<int> catIDs = dtCat.GetColumn<int>("id");
             Dictionary<string, int> categories = new Dictionary<string, int>();
             categories.Merge(catNames, catIDs);
 
-            string queryBusiness = "SELECT id, name FROM business GROUP BY name ORDER BY id ASC;";
+            string queryBusiness = "SELECT id, UPPER(name) as name FROM business GROUP BY name ORDER BY id ASC;";
             DataTable dtBusiness = await Context.FetchData(queryBusiness).ConfigureAwait(false);
             List<string> businessNames = dtBusiness.GetColumn<string>("name");
             List<int> businessIDs = dtBusiness.GetColumn<int>("id");
             Dictionary<string, int> businesses = new Dictionary<string, int>();
             businesses.Merge(businessNames, businessIDs);
 
-            string queryFacility = "SELECT id, name FROM facilities GROUP BY name ORDER BY id ASC;";
+            string queryBusinessType = "SELECT id, UPPER(name) as name FROM businesstype GROUP BY name ORDER BY id ASC;";
+            DataTable dtBusinessType = await Context.FetchData(queryBusinessType).ConfigureAwait(false);
+            List<string> businessTypeNames = dtBusinessType.GetColumn<string>("name");
+            List<int> businessTypeIDs = dtBusinessType.GetColumn<int>("id");
+            Dictionary<string, int> businessTypes = new Dictionary<string, int>();
+            businessTypes.Merge(businessTypeNames, businessTypeIDs);
+
+            string queryFacility = "SELECT id, UPPER(name) as name FROM facilities GROUP BY name ORDER BY id ASC;";
             DataTable dtFacility = await Context.FetchData(queryFacility).ConfigureAwait(false);
             List<string> facilityNames = dtFacility.GetColumn<string>("name");
             List<int> facilityIDs = dtFacility.GetColumn<int>("id");
             Dictionary<string, int> facilities = new Dictionary<string, int>();
             facilities.Merge(facilityNames, facilityIDs);
 
-            string queryAssetStatus = "SELECT id, name FROM assetstatus GROUP BY name ORDER BY id ASC;";
+            string queryAssetStatus = "SELECT id, UPPER(name) as name FROM assetstatus GROUP BY name ORDER BY id ASC;";
             DataTable dtAssetStatus = await Context.FetchData(queryAssetStatus).ConfigureAwait(false);
             List<string> assetStatusNames = dtAssetStatus.GetColumn<string>("name");
             List<int> assetStatusIDs = dtAssetStatus.GetColumn<int>("id");
             Dictionary<string, int> assetStatuses = new Dictionary<string, int>();
             assetStatuses.Merge(assetStatusNames, assetStatusIDs);
 
-            string queryAssetType = "SELECT id, name FROM assettypes GROUP BY name ORDER BY id ASC;";
+            string queryAssetType = "SELECT id, UPPER(name) as name FROM assettypes GROUP BY name ORDER BY id ASC;";
             DataTable dtAssetType = await Context.FetchData(queryAssetType).ConfigureAwait(false);
             List<string> assetTypeNames = dtAssetType.GetColumn<string>("name");
             List<int> assetTypeIDs = dtAssetType.GetColumn<int>("id");
@@ -146,14 +153,14 @@ namespace CMMSAPIs.Repositories.Inventory
             Dictionary<int, int> mapBlockToParent = new Dictionary<int, int>();
             mapBlockToParent.Merge(blockIDs, blockParents);
 
-            string queryWarrantyType = "SELECT id, name FROM warrantytype;";
+            string queryWarrantyType = "SELECT id, UPPER(name) as name FROM warrantytype GROUP BY name ORDER BY id ASC;";
             DataTable dtWarrantyTypes = await Context.FetchData(queryWarrantyType).ConfigureAwait(false);
             List<string> warrantyTypeNames = dtWarrantyTypes.GetColumn<string>("name");
             List<int> warrantyTypesIDs = dtWarrantyTypes.GetColumn<int>("id");
             Dictionary<string, int> warrantyTypes = new Dictionary<string, int>();
             warrantyTypes.Merge(warrantyTypeNames, warrantyTypesIDs);
 
-            string queryWarrantyTerm = "SELECT id, name FROM warrantyusageterm;";
+            string queryWarrantyTerm = "SELECT id, UPPER(name) as name FROM warrantyusageterm GROUP BY name ORDER BY id ASC;";
             DataTable dtWarrantyTerms = await Context.FetchData(queryWarrantyTerm).ConfigureAwait(false);
             List<string> warrantyTermNames = dtWarrantyTerms.GetColumn<string>("name");
             List<int> warrantyTermIDs = dtWarrantyTerms.GetColumn<int>("id");
@@ -179,9 +186,38 @@ namespace CMMSAPIs.Repositories.Inventory
                 { "Warranty_Description", new Tuple<string, Type>("warranty_description", typeof(string)) },
                 { "Asset_Warranty_Start_Date", new Tuple<string, Type>("start_date", typeof(DateTime)) },
                 { "Asset_Warranty_Expiry_Date", new Tuple<string, Type>("expiry_date", typeof(DateTime)) },
-                { "Asset_Warranty_Certificate_No", new Tuple<string, Type>("certificate_number", typeof(string)) }
+                { "Asset_Warranty_Certificate_No", new Tuple<string, Type>("certificate_number", typeof(string)) },
+                { "Asset_Facility_Name", new Tuple<string, Type>("blockName", typeof (string)) },
+                { "Asset_category_name", new Tuple<string, Type>("categoryName", typeof(string)) },
+                { "Asset_Parent_Name", new Tuple<string, Type>("parentName", typeof(string)) },
+                { "Asset_Customer_Name", new Tuple<string, Type>("customerName", typeof(string)) },
+                { "Asset_Owner_Name", new Tuple<string, Type>("ownerName", typeof(string)) },
+                { "Asset_Operator_Name", new Tuple<string, Type>("operatorName", typeof(string)) },
+                { "Asset_Supplier_Name", new Tuple<string, Type>("supplierName", typeof(string)) },
+                { "Asset_Manufacturer_Name", new Tuple<string, Type>("manufacturerName", typeof(string)) },
+                { "Asset_Type_Name", new Tuple<string, Type>("typeName", typeof(string)) },
+                { "Asset_Status_Name", new Tuple<string, Type>("statusName", typeof(string)) },
+                { "Warranty Type", new Tuple<string, Type>("warranty_type_name", typeof(string)) },
+                { "Asset_Warranty_Term", new Tuple<string, Type>("warrranty_term_type_name", typeof(string)) },
+                { "Asset_warranty_Provider", new Tuple<string, Type>("warranty_provider_name", typeof(string)) }
             };
-
+            /*
+                        dt2.Columns.Add("facilityId", typeof(int));
+                        dt2.Columns.Add("blockId", typeof(int));
+                        dt2.Columns.Add("categoryId", typeof(int));
+                        dt2.Columns.Add("parentId", typeof(int));
+                        dt2.Columns.Add("customerId", typeof(int));
+                        dt2.Columns.Add("ownerId", typeof(int));
+                        dt2.Columns.Add("operatorId", typeof(int));
+                        dt2.Columns.Add("supplierId", typeof(int));
+                        dt2.Columns.Add("manufacturerId", typeof(int));
+                        dt2.Columns.Add("currencyId", typeof(int));
+                        dt2.Columns.Add("typeId", typeof(int));
+                        dt2.Columns.Add("statusId", typeof(int));
+                        dt2.Columns.Add("warranty_type", typeof(int));
+                        dt2.Columns.Add("warrranty_term_type", typeof(int));
+                        dt2.Columns.Add("warranty_provider_id", typeof(int));
+            /**/
             //CMDefaultResponse response = null;
             string query1 = $"SELECT file_path FROM uploadedfiles WHERE id = {file_id};";
             DataTable dt1 = await Context.FetchData(query1).ConfigureAwait(false);
@@ -214,6 +250,14 @@ namespace CMMSAPIs.Repositories.Inventory
                             catch (KeyNotFoundException)
                             {
                                 dt2.Columns.Add(header.Text);
+                            }
+                        }
+                        List<string> headers = dt2.GetColumnNames();
+                        foreach(var item in columnNames.Values)
+                        {
+                            if(!headers.Contains(item.Item1))
+                            {
+                                dt2.Columns.Add(item.Item1, item.Item2);
                             }
                         }
                         dt2.Columns.Add("facilityId", typeof(int));
@@ -252,16 +296,21 @@ namespace CMMSAPIs.Repositories.Inventory
                                     // m_ErrorLog.SetError("," + status);
                                 }
                             }
-                            if (Convert.ToString(newR["name"]) == null || Convert.ToString(newR["name"]) == "")
+                            if(newR.IsEmpty())
+                            {
+                                m_errorLog.SetInformation($"Row {rN} is empty.");
                                 continue;
+                            }
                             newR["row_no"] = rN;
+                            if (Convert.ToString(newR["name"]) == null || Convert.ToString(newR["name"]) == "")
+                                m_errorLog.SetError($"[Row: {rN}] Name cannot be null.");
                             try
                             {
-                                newR["blockId"] = facilities[Convert.ToString(newR["Asset_Facility_Name"])];
+                                newR["blockId"] = facilities[Convert.ToString(newR["blockName"]).ToUpper()];
                             }
                             catch (KeyNotFoundException)
                             {
-                                m_errorLog.SetError($"[Row: {rN}] Invalid Block named '{newR["Asset_Facility_Name"]}'.");
+                                m_errorLog.SetError($"[Row: {rN}] Invalid Block named '{newR["blockName"]}'.");
                             }
                             try
                             {
@@ -269,55 +318,134 @@ namespace CMMSAPIs.Repositories.Inventory
                             }
                             catch (InvalidCastException)
                             {
-                                m_errorLog.SetError($"[Row: {rN}] Facility cannot be linked to asset if block named '{newR["Asset_Facility_Name"]}' does not exist.");
-                            }
-                            try
-                            {
-                                newR["categoryId"] = categories[Convert.ToString(newR["Asset_category_name"])];
+                                m_errorLog.SetError($"[Row: {rN}] Facility cannot be linked to asset if block named '{newR["blockName"]}' does not exist.");
                             }
                             catch (KeyNotFoundException)
                             {
-                                m_errorLog.SetError($"[Row: {rN}] Invalid Asset Category named '{newR["Asset_category_name"]}'.");
+                                m_errorLog.SetError($"[Row: {rN}] Facility cannot be linked to asset if block named '{newR["blockName"]}' does not exist.");
                             }
                             try
                             {
-                                newR["customerId"] = businesses[Convert.ToString(newR["Asset_Customer_Name"])];
+                                newR["categoryId"] = categories[Convert.ToString(newR["categoryName"]).ToUpper()];
                             }
                             catch (KeyNotFoundException)
                             {
-                                m_errorLog.SetError($"[Row: {rN}] Customer business named '{newR["Asset_Customer_Name"]}' not found.");
+                                m_errorLog.SetError($"[Row: {rN}] Invalid Asset Category named '{newR["categoryName"]}'.");
                             }
                             try
                             {
-                                newR["ownerId"] = businesses[Convert.ToString(newR["Asset_Owner_Name"])];
+                                newR["customerId"] = businesses[Convert.ToString(newR["customerName"]).ToUpper()];
                             }
                             catch (KeyNotFoundException)
                             {
-                                m_errorLog.SetError($"[Row: {rN}] Owner business named '{newR["Asset_Owner_Name"]}' not found.");
+                                string name = Convert.ToString(newR["customerName"]);
+                                try
+                                {
+                                    string addBusinessQry = $"INSERT INTO business(name, type) VALUES " +
+                                                        $"('{name}', {businessTypes["CUSTOMER"]}); " +
+                                                        $"SELECT LAST_INSERT_ID();";
+                                    DataTable dt = await Context.FetchData(addBusinessQry).ConfigureAwait(false);
+                                    int id = Convert.ToInt32(dt.Rows[0][0]);
+                                    businesses.Add(name.ToUpper(), id);
+                                    newR["customerId"] = id;
+                                    m_errorLog.SetInformation($"New business '{name}' added.");
+                                }
+                                catch(KeyNotFoundException)
+                                {
+                                    m_errorLog.SetError($"[Row: {rN}] Customer business named '{name}' not found.");
+                                }
                             }
                             try
                             {
-                                newR["operatorId"] = businesses[Convert.ToString(newR["Asset_Operator_Name"])];
+                                newR["ownerId"] = businesses[Convert.ToString(newR["ownerName"]).ToUpper()];
                             }
                             catch (KeyNotFoundException)
                             {
-                                m_errorLog.SetError($"[Row: {rN}] Operator business named '{newR["Asset_Operator_Name"]}' not found.");
+                                string name = Convert.ToString(newR["ownerName"]);
+                                try
+                                {
+                                    string addBusinessQry = $"INSERT INTO business(name, type) VALUES " +
+                                                        $"('{name}', {businessTypes["OWNER"]}); " +
+                                                        $"SELECT LAST_INSERT_ID();";
+                                    DataTable dt = await Context.FetchData(addBusinessQry).ConfigureAwait(false);
+                                    int id = Convert.ToInt32(dt.Rows[0][0]);
+                                    businesses.Add(name.ToUpper(), id);
+                                    newR["ownerId"] = id;
+                                    m_errorLog.SetInformation($"New business '{name}' added.");
+                                }
+                                catch (KeyNotFoundException)
+                                {
+                                    m_errorLog.SetError($"[Row: {rN}] Owner business named '{name}' not found.");
+                                }
                             }
                             try
                             {
-                                newR["supplierId"] = businesses[Convert.ToString(newR["Asset_Supplier_Name"])];
+                                newR["operatorId"] = businesses[Convert.ToString(newR["operatorName"]).ToUpper()];
                             }
                             catch (KeyNotFoundException)
                             {
-                                m_errorLog.SetError($"[Row: {rN}] Supplier business named '{newR["Asset_Supplier_Name"]}' not found.");
+                                string name = Convert.ToString(newR["operatorName"]);
+                                try
+                                {
+                                    string addBusinessQry = $"INSERT INTO business(name, type) VALUES " +
+                                                        $"('{name}', {businessTypes["OPERATOR"]}); " +
+                                                        $"SELECT LAST_INSERT_ID();";
+                                    DataTable dt = await Context.FetchData(addBusinessQry).ConfigureAwait(false);
+                                    int id = Convert.ToInt32(dt.Rows[0][0]);
+                                    businesses.Add(name.ToUpper(), id);
+                                    newR["operatorId"] = id;
+                                    m_errorLog.SetInformation($"New business '{name}' added.");
+                                }
+                                catch (KeyNotFoundException)
+                                {
+                                    m_errorLog.SetError($"[Row: {rN}] Operator business named '{name}' not found."); 
+                                }
                             }
                             try
                             {
-                                newR["manufacturerId"] = businesses[Convert.ToString(newR["Asset_Manufacturer_Name"])];
+                                newR["supplierId"] = businesses[Convert.ToString(newR["supplierName"]).ToUpper()];
                             }
                             catch (KeyNotFoundException)
                             {
-                                m_errorLog.SetError($"[Row: {rN}] Manufacturer business named '{newR["Asset_Manufacturer_Name"]}' not found.");
+                                string name = Convert.ToString(newR["supplierName"]);
+                                try
+                                {
+                                    string addBusinessQry = $"INSERT INTO business(name, type) VALUES " +
+                                                        $"('{name}', {businessTypes["SUPPLIER"]}); " +
+                                                        $"SELECT LAST_INSERT_ID();";
+                                    DataTable dt = await Context.FetchData(addBusinessQry).ConfigureAwait(false);
+                                    int id = Convert.ToInt32(dt.Rows[0][0]);
+                                    businesses.Add(name.ToUpper(), id);
+                                    newR["supplierId"] = id;
+                                    m_errorLog.SetInformation($"New business '{name}' added.");
+                                }
+                                catch (KeyNotFoundException)
+                                {
+                                    m_errorLog.SetError($"[Row: {rN}] Supplier business named '{name}' not found.");
+                                }
+                            }
+                            try
+                            {
+                                newR["manufacturerId"] = businesses[Convert.ToString(newR["manufacturerName"]).ToUpper()];
+                            }
+                            catch (KeyNotFoundException)
+                            {
+                                string name = Convert.ToString(newR["manufacturerName"]);
+                                try
+                                {
+                                    string addBusinessQry = $"INSERT INTO business(name, type) VALUES " +
+                                                        $"('{name}', {businessTypes["MANUFACTURER"]}); " +
+                                                        $"SELECT LAST_INSERT_ID();";
+                                    DataTable dt = await Context.FetchData(addBusinessQry).ConfigureAwait(false);
+                                    int id = Convert.ToInt32(dt.Rows[0][0]);
+                                    businesses.Add(name.ToUpper(), id);
+                                    newR["manufacturerId"] = id;
+                                    m_errorLog.SetInformation($"New business '{name}' added.");
+                                }
+                                catch (KeyNotFoundException)
+                                {
+                                    m_errorLog.SetError($"[Row: {rN}] Manufacturer business named '{name}' not found.");
+                                }
                             }
                             try
                             {
@@ -325,54 +453,78 @@ namespace CMMSAPIs.Repositories.Inventory
                             }
                             catch (KeyNotFoundException)
                             {
-                                m_errorLog.SetError($"[Row: {rN}] Currency with code '{newR["currency"]}' not found.");
+                                if (newR["currency"] != null && (Convert.ToString(newR["currency"]) != ""))
+                                    m_errorLog.SetError($"[Row: {rN}] Currency with code '{newR["currency"]}' not found.");
+                                else
+                                    newR["currencyId"] = 0;
                             }
                             try
                             {
-                                newR["typeId"] = assetTypes[Convert.ToString(newR["Asset_Type_Name"])];
+                                newR["typeId"] = assetTypes[Convert.ToString(newR["typeName"]).ToUpper()];
                             }
                             catch (KeyNotFoundException)
                             {
-                                m_errorLog.SetError($"[Row: {rN}] Asset type named '{newR["Asset_Type_Name"]}' not found.");
+                                if (Convert.ToString(newR["typeName"]) == "" || Convert.ToString(newR["typeName"]) == null || newR["typeName"] == null)
+                                    newR["typeId"] = assetTypes["MAIN INVENTRY"];
+                                else
+                                    m_errorLog.SetError($"[Row: {rN}] Asset type named '{newR["typeName"]}' not found.");
                             }
                             try
                             {
-                                newR["statusId"] = assetStatuses[Convert.ToString(newR["Asset_Status_Name"])];
+                                newR["statusId"] = assetStatuses[Convert.ToString(newR["statusName"]).ToUpper()];
                             }
                             catch (KeyNotFoundException)
                             {
-                                m_errorLog.SetError($"[Row: {rN}] Asset status named '{newR["Asset_Status_Name"]}' not found.");
+                                if (Convert.ToString(newR["statusName"]) == "" || Convert.ToString(newR["statusName"]) == null || newR["statusName"] == null)
+                                    newR["statusId"] = assetStatuses["IN OPERATION"];
+                                else
+                                    m_errorLog.SetError($"[Row: {rN}] Asset status named '{newR["statusName"]}' not found.");
                             }
                             try
                             {
-                                newR["warranty_type"] = warrantyTypes[Convert.ToString(newR["Warranty Type"])];
+                                newR["warranty_type"] = warrantyTypes[Convert.ToString(newR["warranty_type_name"]).ToUpper()];
                             }
                             catch (KeyNotFoundException)
                             {
-                                m_errorLog.SetWarning($"[Row: {rN}] Warranty Type named '{newR["Warranty Type"]}' not found. Setting warranty Type ID as 0.");
+                                m_errorLog.SetWarning($"[Row: {rN}] Warranty Type named '{newR["warranty_type_name"]}' not found. Setting warranty Type ID as 0.");
                                 newR["warranty_type"] = 0;
                             }
                             try
                             {
-                                newR["warrranty_term_type"] = warrantyTerms[Convert.ToString(newR["Asset_Warranty_Term"])];
+                                newR["warrranty_term_type"] = warrantyTerms[Convert.ToString(newR["warrranty_term_type_name"]).ToUpper()];
                             }
                             catch (KeyNotFoundException)
                             {
-                                m_errorLog.SetWarning($"[Row: {rN}] Warranty Term named '{newR["Asset_Warranty_Term"]}' not found. Setting warranty term ID as 0.");
+                                m_errorLog.SetWarning($"[Row: {rN}] Warranty Term named '{newR["warrranty_term_type_name"]}' not found. Setting warranty term ID as 0.");
                                 newR["warrranty_term_type"] = 0;
                             }
                             try
                             {
-                                newR["warranty_provider_id"] = businesses[Convert.ToString(newR["Asset_warranty_Provider"])];
+                                newR["warranty_provider_id"] = businesses[Convert.ToString(newR["warranty_provider_name"]).ToUpper()];
                             }
                             catch (KeyNotFoundException)
                             {
-                                m_errorLog.SetWarning($"[Row: {rN}] Warranty Provider named '{newR["Asset_warranty_Provider"]}' not found. Setting warranty provider ID as 0.");
-                                newR["warranty_provider_id"] = 0;
+                                string name = Convert.ToString(newR["warranty_provider_name"]);
+                                try
+                                {
+                                    string addBusinessQry = $"INSERT INTO business(name, type) VALUES " +
+                                                        $"('{name}', {businessTypes["MANUFACTURER"]}); " +
+                                                        $"SELECT LAST_INSERT_ID();";
+                                    DataTable dt = await Context.FetchData(addBusinessQry).ConfigureAwait(false);
+                                    int id = Convert.ToInt32(dt.Rows[0][0]);
+                                    businesses.Add(name.ToUpper(), id);
+                                    newR["warranty_provider_id"] = id;
+                                    m_errorLog.SetInformation($"New business '{name}' added.");
+                                }
+                                catch (KeyNotFoundException)
+                                {
+                                    m_errorLog.SetWarning($"[Row: {rN}] Warranty Provider named '{name}' not found. Setting warranty provider ID as 0.");
+                                    newR["warranty_provider_id"] = 0;
+                                }
                             }
-                            if (Convert.ToString(newR["Asset_Parent_Name"]) == null || Convert.ToString(newR["Asset_Parent_Name"]) == "")
+                            if (Convert.ToString(newR["parentName"]) == null || Convert.ToString(newR["parentName"]) == "")
                             {
-                                newR["Asset_Parent_Name"] = "";
+                                newR["parentName"] = "";
                             }
                             /*
                         dt2.Columns.Add("warranty_type", typeof(int));
@@ -394,7 +546,7 @@ namespace CMMSAPIs.Repositories.Inventory
                             assetnames.AddRange(dt2.GetColumn<string>("name"));
                             assetnames.Contains("");
                             DataRow[] filterRows = dt2.AsEnumerable()
-                                       .Where(row => !assetnames.Contains(row.Field<string>("Asset_Parent_Name"), StringComparison.OrdinalIgnoreCase))
+                                       .Where(row => !assetnames.Contains(row.Field<string>("parentName"), StringComparison.OrdinalIgnoreCase))
                                        .ToArray();
                             if (filterRows.Length > 0)
                             {
@@ -408,7 +560,7 @@ namespace CMMSAPIs.Repositories.Inventory
                                 do
                                 {
                                     filterRows = dt2.AsEnumerable()
-                                       .Where(row => temp.Contains(row.Field<string>("Asset_Parent_Name"), StringComparison.OrdinalIgnoreCase))
+                                       .Where(row => temp.Contains(row.Field<string>("parentName"), StringComparison.OrdinalIgnoreCase))
                                        .ToArray();
                                     if (filterRows.Length == 0)
                                         continue;
@@ -463,11 +615,11 @@ namespace CMMSAPIs.Repositories.Inventory
             {
                 try
                 {
-                    row["parentId"] = assetDict[Convert.ToString(row["Asset_Parent_Name"]).ToUpper()];
+                    row["parentId"] = assetDict[Convert.ToString(row["parentName"]).ToUpper()];
                 }
                 catch (KeyNotFoundException)
                 {
-                    m_errorLog.SetWarning($"[Row: {row["row_no"]}] Asset named '{Convert.ToString(row["Asset_Parent_Name"])}' not found. Setting parent ID as 0.");
+                    m_errorLog.SetWarning($"[Row: {row["row_no"]}] Asset named '{Convert.ToString(row["parentName"])}' not found. Setting parent ID as 0.");
                     row["parentId"] = 0;
                 }
             }

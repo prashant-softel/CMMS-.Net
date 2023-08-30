@@ -98,9 +98,22 @@ namespace CMMSAPIs.Repositories.EM
              * 
              */
             CMEscalationResponse response = null;
-            string qry1 = $"SELECT status, CASE WHEN createdAt = '0000-00-00 00:00:00' THEN NULL ELSE createdAt END AS createDate " +
-                            $"FROM history WHERE (moduleType = {(int)module} OR secondaryModuleRefType = {(int)module}) " +
-                            $"AND (moduleRefId = {module_ref_id} OR secondaryModuleRefId = {module_ref_id}) ORDER BY createdAt DESC;";
+            string qry0 = $"SELECT tableName, updateTimeColumn, statusColumn FROM moduletables WHERE softwareId = {(int)module};";
+            DataTable dt0 = await Context.FetchData(qry0).ConfigureAwait(false);
+            string qry1;
+            if(dt0.Rows.Count > 0)
+            {
+                string table = Convert.ToString(dt0.Rows[0]["tableName"]);
+                string timeCol = Convert.ToString(dt0.Rows[0]["updateTimeColumn"]);
+                string statCol = Convert.ToString(dt0.Rows[0]["statusColumn"]);
+                qry1 = $"SELECT {table}.{statCol} as status, {table}.{timeCol} as updateDate FROM {table} WHERE {table}.id = {module_ref_id};";
+            }
+            else
+            {
+                qry1 = $"SELECT status, CASE WHEN createdAt = '0000-00-00 00:00:00' THEN NULL ELSE createdAt END AS updateDate " +
+                                $"FROM history WHERE (moduleType = {(int)module} OR secondaryModuleRefType = {(int)module}) " +
+                                $"AND (moduleRefId = {module_ref_id} OR secondaryModuleRefId = {module_ref_id}) ORDER BY createdAt DESC;";
+            }
             DataTable dt1 = await Context.FetchData(qry1).ConfigureAwait(false);
             int status = Convert.ToInt32(dt1.Rows[0]["status"]);
             string qry2 = $"SELECT days, roleId FROM escalationmatrix WHERE moduleId = {(int)module} AND statusId = {status} " +
@@ -108,10 +121,10 @@ namespace CMMSAPIs.Repositories.EM
             DataTable dt2 = await Context.FetchData(qry2).ConfigureAwait(false);
             Dictionary<int, int> escalation = new Dictionary<int, int>();
             escalation.Merge(dt2.GetColumn<int>("days"), dt2.GetColumn<int>("roleId"));
-            var diff = DateTime.UtcNow.Date - Convert.ToDateTime(dt1.Rows[0]["createDate"]).Date;
+            var diff = DateTime.UtcNow.Date - Convert.ToDateTime(dt1.Rows[0]["updateDate"]).Date;
             try
             {
-                string qry3 = $"INSERT INTO escalationlog (moduleId, moduleRefId, moduleStatus, escalatedToRoleId, escalatedAt) VALUES " +
+                string qry3 = $"INSERT INTO escalationlog (moduleId, moduleRefId, moduleStatus, notifSentToId, notifSentAt) VALUES " +
                                 $"({(int)module}, {module_ref_id}, {status}, {escalation[diff.Days]}, '{UtilsRepository.GetUTCTime()}'); " +
                                 $"SELECT LAST_INSERT_ID(); ";
                 DataTable dt3 = await Context.FetchData(qry3).ConfigureAwait(false);

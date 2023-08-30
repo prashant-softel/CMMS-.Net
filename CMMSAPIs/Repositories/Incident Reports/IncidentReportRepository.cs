@@ -120,11 +120,11 @@ namespace CMMSAPIs.Repositories.Incident_Reports
 
             string qryIncident = "INSERT INTO incidents" +
                                      "(" +
-                                             "facility_id, block_id, equipment_id,severity, risk_level, incident_datetime,victim_id, action_taken_by, action_taken_datetime, inverstigated_by, verified_by, risk_type, esi_applicability, legal_applicability, rca_required, damaged_cost, generation_loss, damaged_cost_curr_id, generation_loss_curr_id, title, description, is_insurance_applicable,insurance, insurance_status, insurance_remark, status,created_by,created_at" +
+                                             "facility_id, block_id, equipment_id,severity, risk_level, incident_datetime,victim_id, action_taken_by, action_taken_datetime, inverstigated_by, verified_by, risk_type, esi_applicability, legal_applicability, rca_required, damaged_cost, generation_loss, damaged_cost_curr_id, generation_loss_curr_id, title, description, is_insurance_applicable,insurance, insurance_status, insurance_remark, status,created_by,created_at, status_updated_at" +
                                       ")" +
                                       "VALUES" +
                                      "(" +
-                                            $"{ request.facility_id }, { request.block_id }, { request.equipment_id },{request.severity_id}, { request.risk_level }, '{(request.incident_datetime).ToString("yyyy-MM-dd HH:mm:ss")}',{request.victim_id}, {request.action_taken_by}, '{(request.action_taken_datetime).ToString("yyyy-MM-dd HH:mm:ss")}', {request.inverstigated_by}, {request.verified_by},{request.risk_type},{request.esi_applicability},{request.legal_applicability},{request.rca_required},{request.damaged_cost},{request.generation_loss},{request.damaged_cost_curr_id},{request.generation_loss_curr_id},'{request.title}','{request.description}',{request.is_insurance_applicable},'{request.insurance}',{request.insurance_status},'{request.insurance_remark}',{(int)CMMS.CMMS_Status.IR_CREATED}, {userId},'{UtilsRepository.GetUTCTime()}'" +
+                                            $"{ request.facility_id }, { request.block_id }, { request.equipment_id },{request.severity_id}, { request.risk_level }, '{(request.incident_datetime).ToString("yyyy-MM-dd HH:mm:ss")}',{request.victim_id}, {request.action_taken_by}, '{(request.action_taken_datetime).ToString("yyyy-MM-dd HH:mm:ss")}', {request.inverstigated_by}, {request.verified_by},{request.risk_type},{request.esi_applicability},{request.legal_applicability},{request.rca_required},{request.damaged_cost},{request.generation_loss},{request.damaged_cost_curr_id},{request.generation_loss_curr_id},'{request.title}','{request.description}',{request.is_insurance_applicable},'{request.insurance}',{request.insurance_status},'{request.insurance_remark}',{(int)CMMS.CMMS_Status.IR_CREATED}, {userId},'{UtilsRepository.GetUTCTime()}','{UtilsRepository.GetUTCTime()}' " +
                                      ") ; SELECT LAST_INSERT_ID()";
 
             DataTable dt2 = await Context.FetchData(qryIncident).ConfigureAwait(false);
@@ -317,7 +317,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
             */
             CMDefaultResponse response = new CMDefaultResponse();
 
-            string approveQuery = $"Update incidents set status = {(int)CMMS.CMMS_Status.IR_APPROVED},is_approved = 1,approved_by={userId},approved_at= '{UtilsRepository.GetUTCTime()}'  where id = " + incidentId;
+            string approveQuery = $"Update incidents set status = {(int)CMMS.CMMS_Status.IR_APPROVED},status_updated_at='{UtilsRepository.GetUTCTime()}',is_approved = 1,approved_by={userId},approved_at= '{UtilsRepository.GetUTCTime()}'  where id = " + incidentId;
             int approve_id= await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
 
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
@@ -346,7 +346,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
              * check create function for history update
              * Your code goes here
             */
-            string approveQuery = $"Update incidents set status = {(int)CMMS.CMMS_Status.IR_REJECTED} ,is_approved = 2,approved_by={userId},approved_at= '{UtilsRepository.GetUTCTime()}',  reject_reccomendations = '{request.comment}'  where id = { request.id}";
+            string approveQuery = $"Update incidents set status = {(int)CMMS.CMMS_Status.IR_REJECTED}, status_updated_at = '{UtilsRepository.GetUTCTime()}',is_approved = 2,approved_by={userId},approved_at= '{UtilsRepository.GetUTCTime()}',  reject_reccomendations = '{request.comment}'  where id = { request.id}";
             int reject_id= await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
 
             CMDefaultResponse response = new CMDefaultResponse();
