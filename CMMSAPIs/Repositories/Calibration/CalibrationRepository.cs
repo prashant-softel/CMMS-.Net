@@ -229,7 +229,7 @@ namespace CMMSAPIs.Repositories.Calibration
 
                 CMCalibrationDetails _ViewCalibration = await GetCalibrationDetails(id);
 
-                CMMSNotification.sendNotification(CMMS.CMMS_Modules.CALIBRATION, CMMS.CMMS_Status.CALIBRATION_REQUEST, _ViewCalibration);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.CALIBRATION, CMMS.CMMS_Status.CALIBRATION_REQUEST, new[] { userID }, _ViewCalibration);
                 CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Calibration requested successfully");
                 return response;
             }
@@ -264,7 +264,7 @@ namespace CMMSAPIs.Repositories.Calibration
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, assetID, CMMS.CMMS_Modules.CALIBRATION, request.id, "Calibration Request Approved", CMMS.CMMS_Status.CALIBRATION_REQUEST_APPROVED, userID);
                 CMCalibrationDetails _ViewCalibration = await GetCalibrationDetails(request.id);
 
-                CMMSNotification.sendNotification(CMMS.CMMS_Modules.CALIBRATION, CMMS.CMMS_Status.CALIBRATION_REQUEST_APPROVED, _ViewCalibration);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.CALIBRATION, CMMS.CMMS_Status.CALIBRATION_REQUEST_APPROVED, new[] { userID }, _ViewCalibration);
                 response = new CMDefaultResponse(request.id, returnStatus, "Calibration Request Approved Successfully");
             }
             else
@@ -296,7 +296,7 @@ namespace CMMSAPIs.Repositories.Calibration
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, assetID, CMMS.CMMS_Modules.CALIBRATION, request.id, "Calibration Request Rejected", CMMS.CMMS_Status.CALIBRATION_REQUEST_REJECTED, userID);
                 CMCalibrationDetails _ViewCalibration = await GetCalibrationDetails(request.id);
 
-                CMMSNotification.sendNotification(CMMS.CMMS_Modules.CALIBRATION, CMMS.CMMS_Status.CALIBRATION_REQUEST_REJECTED, _ViewCalibration);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.CALIBRATION, CMMS.CMMS_Status.CALIBRATION_REQUEST_REJECTED, new[] { userID }, _ViewCalibration);
                 response = new CMDefaultResponse(request.id, returnStatus, "Calibration Request Rejected Successfully");
             }
             else
@@ -347,7 +347,7 @@ namespace CMMSAPIs.Repositories.Calibration
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, assetID, CMMS.CMMS_Modules.CALIBRATION, calibration_id, "Calibration Started", CMMS.CMMS_Status.CALIBRATION_STARTED, userID);
                 CMCalibrationDetails _ViewCalibration = await GetCalibrationDetails(calibration_id);
 
-                CMMSNotification.sendNotification(CMMS.CMMS_Modules.CALIBRATION, CMMS.CMMS_Status.CALIBRATION_STARTED, _ViewCalibration);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.CALIBRATION, CMMS.CMMS_Status.CALIBRATION_STARTED, new[] { userID }, _ViewCalibration);
 
                 response = new CMDefaultResponse(calibration_id, returnStatus, $"Calibration Started for Asset {assetID}");
             }
@@ -381,7 +381,7 @@ namespace CMMSAPIs.Repositories.Calibration
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, assetID, CMMS.CMMS_Modules.CALIBRATION, request.calibration_id, "Calibration Completed", CMMS.CMMS_Status.CALIBRATION_COMPLETED, userID);
                 CMCalibrationDetails _ViewCalibration = await GetCalibrationDetails(request.calibration_id);
 
-                CMMSNotification.sendNotification(CMMS.CMMS_Modules.CALIBRATION, CMMS.CMMS_Status.CALIBRATION_COMPLETED, _ViewCalibration);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.CALIBRATION, CMMS.CMMS_Status.CALIBRATION_COMPLETED, new[] { userID }, _ViewCalibration);
                 response = new CMDefaultResponse(request.calibration_id, returnStatus, "Calibration Completed");
             }
             else
@@ -415,7 +415,7 @@ namespace CMMSAPIs.Repositories.Calibration
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, assetID, CMMS.CMMS_Modules.CALIBRATION, request.calibration_id, "Calibration Closed", CMMS.CMMS_Status.CALIBRATION_CLOSED, userID);
                 CMCalibrationDetails _ViewCalibration = await GetCalibrationDetails(request.calibration_id);
 
-                CMMSNotification.sendNotification(CMMS.CMMS_Modules.CALIBRATION, CMMS.CMMS_Status.CALIBRATION_CLOSED, _ViewCalibration);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.CALIBRATION, CMMS.CMMS_Status.CALIBRATION_CLOSED, new[] { userID }, _ViewCalibration);
                 response = new CMDefaultResponse(request.calibration_id, returnStatus, "Calibration Closed");
             }
             else
@@ -462,7 +462,7 @@ namespace CMMSAPIs.Repositories.Calibration
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, nextRequest[0].asset_id, CMMS.CMMS_Modules.CALIBRATION, request.id, $"Calibration Approved to ID {newCalibration.id[0]}", CMMS.CMMS_Status.CALIBRATION_COMPLETED, userID);
                 CMCalibrationDetails _ViewCalibration = await GetCalibrationDetails(request.id);
 
-                CMMSNotification.sendNotification(CMMS.CMMS_Modules.CALIBRATION, CMMS.CMMS_Status.CALIBRATION_APPROVED, _ViewCalibration);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.CALIBRATION, CMMS.CMMS_Status.CALIBRATION_APPROVED, new[] { userID }, _ViewCalibration);
                 response = new CMRescheduleApprovalResponse(newCalibration.id[0], request.id, returnStatus, $"Calibration Approved. Next Calibration with ID {newCalibration.id[0]} on '{nextRequest[0].next_calibration_date.ToString("yyyy'-'MM'-'dd")}'");
             }
             else
@@ -494,7 +494,7 @@ namespace CMMSAPIs.Repositories.Calibration
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, assetID, CMMS.CMMS_Modules.CALIBRATION, request.id, "Calibration Rejected", CMMS.CMMS_Status.CALIBRATION_REJECTED, userID);
                 CMCalibrationDetails _ViewCalibration = await GetCalibrationDetails(request.id);
 
-                CMMSNotification.sendNotification(CMMS.CMMS_Modules.CALIBRATION, CMMS.CMMS_Status.CALIBRATION_REJECTED, _ViewCalibration);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.CALIBRATION, CMMS.CMMS_Status.CALIBRATION_REJECTED, new[] { userID }, _ViewCalibration);
                 response = new CMDefaultResponse(request.id, returnStatus, "Calibration Rejected");
             }
             else

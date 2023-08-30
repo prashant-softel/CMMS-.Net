@@ -246,5 +246,21 @@ namespace CMMSAPIs.Controllers
                 throw;
             }
         }
+
+         [Authorize]
+        [Route("GetSubmitPurchaseOrderList")]
+        [HttpGet]
+        public async Task<IActionResult> GetSubmitPurchaseOrderList(int facility_id, DateTime fromDate, DateTime toDate, int Status)
+        {
+            try
+            {
+                var data = await _GOBS.GetSubmitPurchaseOrderList(facility_id, fromDate, toDate, Status);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
     }
 }

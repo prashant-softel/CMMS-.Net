@@ -70,6 +70,22 @@ namespace CMMSAPIs.Controllers.MC
             }
         }
 
+        [Route("GetMCPlanDetailsSummary")]
+        [HttpGet]
+        public async Task<IActionResult> GetMCPlanDetailsSummary(int planId, CMMCPlanSummary request)
+        {
+            try
+            {
+                var data = await _CleaningBS.GetPlanDetailsSummary(planId,request);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
         [Route("CreateMCPlan")]
         [HttpPost]
         public async Task<IActionResult> CreateMCPlan(List<CMMCPlan> request)
@@ -86,6 +102,7 @@ namespace CMMSAPIs.Controllers.MC
             }
         }
 
+        [Authorize]
         [Route("UpdateMCPlan")]
         [HttpPost]
         public async Task<IActionResult> UpdateMCPlan(CMMCPlan request)
@@ -102,6 +119,7 @@ namespace CMMSAPIs.Controllers.MC
             }
         }
 
+        [Authorize]
         [Route("ApproveMCPlan")]
         [HttpPut]
         public async Task<IActionResult> ApproveMCPlan(CMApproval request)
@@ -118,6 +136,7 @@ namespace CMMSAPIs.Controllers.MC
             }
         }
 
+        [Authorize]
         [Route("RejectMCPlan")]
         [HttpPut]
         public async Task<IActionResult> RejectMCPlan(CMApproval request)
@@ -134,6 +153,7 @@ namespace CMMSAPIs.Controllers.MC
             }
         }
 
+        [Authorize]
         [Route("DeleteMCPlan")]
         [HttpPut]
         public async Task<IActionResult> DeleteMCPlan(int planId)
@@ -150,6 +170,7 @@ namespace CMMSAPIs.Controllers.MC
             }
         }
 
+        [Authorize]
         [Route("StartMCExecution")]
         [HttpPut]
         public async Task<IActionResult> StartMCExecution(int planId)
@@ -166,6 +187,7 @@ namespace CMMSAPIs.Controllers.MC
             }
         }
 
+        [Authorize]
         [Route("StartMCScheduleExecution")]
         [HttpPut]
         public async Task<IActionResult> StartMCScheduleExecution(int scheduleId)
@@ -181,14 +203,32 @@ namespace CMMSAPIs.Controllers.MC
                 throw;
             }
         }
-        [Route("EndMCScheduleExecution")]
+
+        [Authorize]
+        [Route("UpdateMCScheduleExecution")]
         [HttpPut]
-        public async Task<IActionResult> EndMCScheduleExecution(CMMCExecutionSchedule schedule)
+        public async Task<IActionResult> UpdateMCScheduleExecution(CMMCGetScheduleExecution schedule)
         {
             try
             {
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _CleaningBS.EndScheduleExecution(schedule, userId);
+                var data = await _CleaningBS.UpdateScheduleExecution(schedule, userId);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
+        [Route("GetMCScheduleExecutionSummary")]
+        [HttpPut]
+        public async Task<IActionResult> GetMCScheduleExecutionSummary(CMMCGetScheduleExecution schedule)
+        {
+            try
+            {
+                var data = await _CleaningBS.GetScheduleExecutionSummary(schedule);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -198,7 +238,7 @@ namespace CMMSAPIs.Controllers.MC
         }
 
         [Route("GetMCExecutionDetails")]
-        [HttpPost]
+        [HttpGet]
         public async Task<IActionResult> GetMCExecutionDetails(int executionId)
         {
             try
@@ -212,6 +252,7 @@ namespace CMMSAPIs.Controllers.MC
             }
         }
 
+        [Authorize]
         [Route("AbandonMcExecution")]
         [HttpPut]
         public async Task<IActionResult> AbandonMcExecution(CMApproval request)
@@ -227,6 +268,25 @@ namespace CMMSAPIs.Controllers.MC
                 throw;
             }
         }
+
+        [Authorize]
+        [Route("AbandonMcSchedule")]
+        [HttpPut]
+        public async Task<IActionResult> AbandonMcSchedule(CMApproval request)
+        {
+            try
+            {
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _CleaningBS.AbandonSchedule(request, userId);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
         [Route("GetMCEquipmentList")]
         [HttpGet]
         public async Task<IActionResult> GetMCEquipmentList(int facilityId)

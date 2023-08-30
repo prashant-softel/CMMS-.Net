@@ -41,7 +41,8 @@ namespace CMMSAPIs.Helper
             { CMMS_Modules.CALIBRATION, 31 },
             { CMMS_Modules.MODULE_CLEANING, 32 },
             { CMMS_Modules.VEGETATION, 33 },
-            { CMMS_Modules.INCIDENT_REPORT, 34 }
+            { CMMS_Modules.INCIDENT_REPORT, 34 },
+            { CMMS_Modules.DSM, 35 }
         };
         public enum RETRUNSTATUS
         {
@@ -252,7 +253,9 @@ namespace CMMSAPIs.Helper
             USER_MODULE,
             USER_NOTIFICATIONS, 
             ROLE_DEFAULT_NOTIFICATIONS, 
-            ROLE_DEFAULT_ACCESS_MODULE
+            ROLE_DEFAULT_ACCESS_MODULE,
+
+            DSM = 181,
         }
 
         public enum INCIDENT_RISK_LEVEL

@@ -14,12 +14,13 @@ namespace CMMSAPIs.BS.SM
     {
         Task<CMDefaultResponse> CreateMRS(CMMRS request, int UserID);        
         Task<CMDefaultResponse> updateMRS(CMMRS request, int UserID);        
-        Task<List<CMMRSList>> getMRSList(int facility_ID, int emp_id, DateTime toDate, DateTime fromDate, int status);        
+        Task<List<CMMRSList>> getMRSList(int facility_ID, int emp_id, DateTime toDate, DateTime fromDate, int status);
+        Task<List<CMMRSListByModule>> getMRSListByModule(int jobId, int pmId);
         Task<List<CMMRSItems>> getMRSItems(int ID);        
         Task<List<CMMRSItemsBeforeIssue>> getMRSItemsBeforeIssue(int ID);        
         Task<List<CMMRSItemsBeforeIssue>> getMRSItemsWithCode(int ID);        
         Task<CMMRSList> getMRSDetails(int ID);        
-        Task<CMRETURNMRSDATA> getReturnDataByID(int ID);        
+        Task<CMMRSList> getReturnDataByID(int ID);        
         Task<CMMRSAssetTypeList> getAssetTypeByItemID(int ItemID);
         Task<CMDefaultResponse> ReturnMRS(CMMRS request, int UserID);        
         Task<CMDefaultResponse> mrsApproval(CMApproval request, int userId);        
@@ -87,7 +88,22 @@ namespace CMMSAPIs.BS.SM
                 throw;
             }
         }
-        
+
+        public  async Task<List<CMMRSListByModule>> getMRSListByModule(int jobId, int pmId)
+        { 
+            try
+            {
+                using (var repos = new MRSRepository(getDB))
+                {
+                    return await repos.getMRSListByModule( jobId, pmId);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
         public async Task<List<CMMRSItems>> getMRSItems(int ID)
            {
             try
@@ -147,7 +163,7 @@ namespace CMMSAPIs.BS.SM
                 throw;
             }
         }
-        public async Task<CMRETURNMRSDATA> getReturnDataByID(int ID)
+        public async Task<CMMRSList> getReturnDataByID(int ID)
         {
             try
             {

@@ -4,6 +4,7 @@ using System.Data;
 using System.Threading.Tasks;
 using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Notifications;
+using CMMSAPIs.Models.Users;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Models.WC;
 using CMMSAPIs.Repositories.Utils;
@@ -481,7 +482,7 @@ namespace CMMSAPIs.Repositories.WC
 
             string myQuery = "SELECT * from wc where id = {request.id}";
             List<CMWCDetail> _WCList = await Context.GetData<CMWCDetail>(myQuery).ConfigureAwait(false);
-            CMMSNotification.sendNotification(CMMS.CMMS_Modules.WARRANTY_CLAIM, CMMS.CMMS_Status.APPROVED, _WCList[0]);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.WARRANTY_CLAIM, CMMS.CMMS_Status.APPROVED, new[] { _WCList[0].created_by }, _WCList[0]);
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Approved warranty claim Successfully");
             return response;
         }
@@ -516,7 +517,7 @@ namespace CMMSAPIs.Repositories.WC
 
             string myQuery = "SELECT * from wc where id = {request.id}";
             List<CMWCDetail> _WCList = await Context.GetData<CMWCDetail>(myQuery).ConfigureAwait(false);
-            CMMSNotification.sendNotification(CMMS.CMMS_Modules.WARRANTY_CLAIM, CMMS.CMMS_Status.REJECTED, _WCList[0]);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.WARRANTY_CLAIM, CMMS.CMMS_Status.REJECTED, new[] { _WCList[0].created_by }, _WCList[0]);
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Rejected warranty claim Successfully");
             return response;
         }

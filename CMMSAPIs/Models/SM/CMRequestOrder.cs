@@ -6,11 +6,11 @@ namespace CMMSAPIs.Models.SM
     
     public class CMRequestOrder
     {
-        public int id { get; set; }
+public int id { get; set; }
         public int requestID { get; set; }
         public int facilityID { get; set; }
         public string facilityName { get; set; }
-        public int order_by_type { get; set; }
+        //public int order_by_type { get; set; }
         public string remarks { get; set; }
         public string rejectedRemark { get; set; }
      
@@ -35,7 +35,7 @@ namespace CMMSAPIs.Models.SM
         public decimal accepted_qty { get; set; }
         public int spare_status { get; set; }
         public DateTime? challan_date { get; set; }
-        public DateTime? requestdate { get; set; }
+        //public DateTime? requestdate { get; set; }
         public string challan_no { get; set; }
         public string freight { get; set; }
         public string no_pkg_received { get; set; }

@@ -156,6 +156,16 @@ namespace CMMSAPIs.Repositories.Masters
             return _moduleList;
         }
 
+        //internal async Task<List<CMModule>> GetFeatureList()
+        //{
+        //    /*
+        //     * Return List of modules from Features table
+        //    */
+        //    string myQuery = "SELECT * FROM features; ";
+        //    List<CMModule> _moduleList = await Context.GetData<CMModule>(myQuery).ConfigureAwait(false);
+        //    return _moduleList;
+        //}
+
         internal async Task<List<CMStatus>> GetStatusList(CMMS.CMMS_Modules module)
         {
             string myQuery = "SELECT module_a.id as module_id, module_a.softwareId as module_software_id, module_a.featureName as module_name, " +
@@ -180,10 +190,13 @@ namespace CMMSAPIs.Repositories.Masters
             return _FinancialYear;
         }
 
-        internal async Task<List<CMFacility>> GetFacilityList()
+        internal async Task<List<CMFacilityList>> GetFacilityList()
         {
-            string myQuery = "SELECT id, name, address, city, state, country, zipcode as pin FROM Facilities WHERE isBlock = 0 and status = 1";
-            List<CMFacility> _Facility = await Context.GetData<CMFacility>(myQuery).ConfigureAwait(false);
+            string myQuery = "SELECT facilities.id, facilities.name, spv.name as spv, facilities.address, facilities.city, facilities.state, facilities.country, facilities.zipcode as pin " +
+                ", CONCAT(u.firstName , ' ' , u.lastName) as customer ,CONCAT(u2.firstName , ' ' , u2.lastName) as owner,CONCAT(u3.firstName , ' ' , u3.lastName) as Operator" +
+                " FROM Facilities LEFT JOIN spv ON facilities.spvId=spv.id LEFT JOIN users as u ON u.id = facilities.customerId LEFT JOIN users as u2 ON u2.id = facilities.ownerId LEFT JOIN users as u3 ON u3.id = facilities.operatorId WHERE isBlock = 0 and facilities.status = 1;"; 
+            
+            List<CMFacilityList> _Facility = await Context.GetData<CMFacilityList>(myQuery).ConfigureAwait(false);
             return _Facility;
         }
 
@@ -590,37 +603,37 @@ namespace CMMSAPIs.Repositories.Masters
                     JobRepository obj = new JobRepository(getDB);
                     CMJobView _jobView = await obj.GetJobDetails(id);
                     notificationID = (CMMS.CMMS_Status)(_jobView.status);
-                    await CMMSNotification.sendNotification(moduleID, notificationID, _jobView);
+                    await CMMSNotification.sendNotification(moduleID, notificationID,null, _jobView);
                     break;
                 case CMMS.CMMS_Modules.PTW:
                     PermitRepository obj1 = new PermitRepository(getDB);
                     CMPermitDetail _Permit = await obj1.GetPermitDetails(id);
                      notificationID = (CMMS.CMMS_Status)(_Permit.ptwStatus);
-                    await CMMSNotification.sendNotification(moduleID, notificationID, _Permit);
+                    await CMMSNotification.sendNotification(moduleID, notificationID, null, _Permit);
                     break;
                 case CMMS.CMMS_Modules.JOBCARD:
                     JCRepository obj2 = new JCRepository(getDB);
                     List<CMJCDetail> _JobCard = await obj2.GetJCDetail(id);
                     notificationID = (CMMS.CMMS_Status)(_JobCard[0].status);
-                    await CMMSNotification.sendNotification(moduleID, notificationID, _JobCard[0]);
+                    await CMMSNotification.sendNotification(moduleID, notificationID, null, _JobCard[0]);
                     break;
                 case CMMS.CMMS_Modules.INCIDENT_REPORT:
                     IncidentReportRepository obj3 = new IncidentReportRepository(getDB);
                     CMViewIncidentReport _IncidentReport = await obj3.GetIncidentDetailsReport(id);
                     notificationID = (CMMS.CMMS_Status)(_IncidentReport.status);
-                   await CMMSNotification.sendNotification(moduleID, notificationID, _IncidentReport);
+                   await CMMSNotification.sendNotification(moduleID, notificationID, null, _IncidentReport);
                     break;
                 case CMMS.CMMS_Modules.WARRANTY_CLAIM:
                     WCRepository obj4 = new WCRepository(getDB);
                     CMWCDetail _WC = await obj4.GetWCDetails(id);
                     notificationID = (CMMS.CMMS_Status)(_WC.status);
-                    await CMMSNotification.sendNotification(moduleID, notificationID, _WC);
+                    await CMMSNotification.sendNotification(moduleID, notificationID, null, _WC);
                     break;
                 case CMMS.CMMS_Modules.CALIBRATION:
                     CalibrationRepository obj5 = new CalibrationRepository(getDB);
                     CMCalibrationDetails _Calibration = await obj5.GetCalibrationDetails(id);
                     notificationID = (CMMS.CMMS_Status)(_Calibration.statusID + 100);
-                    await CMMSNotification.sendNotification(moduleID, notificationID, _Calibration);
+                    await CMMSNotification.sendNotification(moduleID, notificationID, null, _Calibration);
                     break;
                 case CMMS.CMMS_Modules.INVENTORY:
                     //InventoryRepository obj6 = new InventoryRepository(getDB, _environment);

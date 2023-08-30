@@ -136,7 +136,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
 
                 CMViewIncidentReport _IncidentReportDetails = await GetIncidentDetailsReport(incident_id);
 
-                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INCIDENT_REPORT, CMMS.CMMS_Status.IR_CREATED, _IncidentReportDetails);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INCIDENT_REPORT, CMMS.CMMS_Status.IR_CREATED, new[] { userId }, _IncidentReportDetails);
 
                 response = new CMDefaultResponse(incident_id, CMMS.RETRUNSTATUS.SUCCESS, "Created Incident Report");
             }
@@ -293,7 +293,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
 
                 CMViewIncidentReport _IncidentReportDetails = await GetIncidentDetailsReport(request.id);
 
-                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INCIDENT_REPORT, CMMS.CMMS_Status.IR_UPDATED, _IncidentReportDetails);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INCIDENT_REPORT, CMMS.CMMS_Status.IR_UPDATED, new[] { userId }, _IncidentReportDetails);
 
                 response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Updated Incident Report Successfully");
 
@@ -328,7 +328,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
 
                CMViewIncidentReport _IncidentReportDetails = await GetIncidentDetailsReport(incidentId);
 
-                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INCIDENT_REPORT, CMMS.CMMS_Status.IR_APPROVED, _IncidentReportDetails);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INCIDENT_REPORT, CMMS.CMMS_Status.IR_APPROVED,new[] { userId }, _IncidentReportDetails);
 
                 response = new CMDefaultResponse(incidentId, CMMS.RETRUNSTATUS.SUCCESS, " Incident Report Approved");
             }
@@ -357,7 +357,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
 
                 CMViewIncidentReport _IncidentReportDetails = await GetIncidentDetailsReport(request.id);
 
-                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INCIDENT_REPORT, CMMS.CMMS_Status.IR_REJECTED, _IncidentReportDetails);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INCIDENT_REPORT, CMMS.CMMS_Status.IR_REJECTED, new[] { userId }, _IncidentReportDetails);
 
                 response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Incident Report Rejected");
             }

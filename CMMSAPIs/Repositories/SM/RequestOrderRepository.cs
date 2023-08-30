@@ -101,20 +101,23 @@ namespace CMMSAPIs.Repositories.SM
 
             string filter = " facilityID = " + facilityID + " and (DATE(po.request_date) >= '" + fromDate.ToString("yyyy-MM-dd") + "'  and DATE(po.request_date) <= '" + toDate.ToString("yyyy-MM-dd") + "')";
 
-            string stmt = "SELECT fc.name as facilityName,  pod.ID as requestID,pod.spare_status,pod.remarks,sai.orderflag,sam.asset_name,sam.asset_type_ID,pod.requestID," +
+            string stmt = "SELECT fc.name as facilityName,  pod.ID as requestID,pod.spare_status,pod.remarks,sai.orderflag,sam.asset_name,sam.asset_type_ID,pod.requestID as ID," +
                 "pod.assetItemID,sai.serial_number,sai.location_ID,pod.cost ,pod.ordered_qty,po.remarks as rejectedRemark,po.facilityID,po.request_date," +
                 "sam.asset_type_ID,\r\n\t\t        po.vendorID,po.status,sai.asset_code,t1.asset_type,t2.cat_name,pod.received_qty,pod.damaged_qty," +
                 "pod.accepted_qty,po.received_on as receivedAt,po.approvedOn as approvedAt,\r\n\t\t\t\tCONCAT(ed.firstName,' ',ed.lastName) as generatedBy," +
                 "CONCAT(ed1.firstName,' ',ed1.lastName) as receivedBy,CONCAT(ed2.firstName,' ',ed2.lastName) as approvedBy," +
-                "\r\n\t\t\t\tbl.name as vendor_name\r\n\t\t        FROM smrequestorderdetails pod\r\n\t\t       " +
+                "\r\n\t\t\t\tbl.name as vendor_name, po.currency  as currencyID,curr.name currency, amount, job_ref, gir_no,vehicle_no, condition_pkg_received, lr_no, no_pkg_received, received_on, freight,  challan_date, challan_no" +
+                " \r\n\t\t        FROM smrequestorderdetails pod\r\n\t\t       " +
                 " LEFT JOIN smrequestorder po ON po.ID = pod.requestID\r\n\t\t        LEFT JOIN smassetitems sai ON sai.ID = pod.assetItemID" +
                 " LEFT JOIN smassetmasters sam ON sam.asset_code = sai.asset_code   " +
                 " LEFT JOIN (    SELECT sat.asset_type,s1.ID as master_ID FROM smassettypes sat\r\n\t\t            " +
                 "LEFT JOIN smassetmasters s1 ON s1.asset_type_ID = sat.ID\r\n\t\t        )  t1 ON t1.master_ID = sam.ID\r\n\t\t        " +
                 "LEFT JOIN (\r\n\t\t      SELECT sic.cat_name,s2.ID as master_ID FROM smitemcategory sic \r\n            " +
                 "  LEFT JOIN smassetmasters s2 ON s2.item_category_ID = sic.ID  )  t2 ON t2.master_ID = sam.ID " +
-                "LEFT JOIN employees ed ON ed.ID = po.generated_by\r\n\t\t        LEFT JOIN employees ed1 ON ed1.ID = po.receiverID\r\n\t\t\t\t " +
-                "LEFT JOIN employees ed2 ON ed2.ID = po.approved_by\r\n\t\t\t\t" +
+                "LEFT JOIN users ed ON ed.id = po.generated_by\r\n\t\t   " +
+                " Left join currency curr ON curr.id = po.currency " +
+                "     LEFT JOIN users ed1 ON ed1.id = po.receiverID\r\n\t\t\t\t " +
+                "LEFT JOIN users ed2 ON ed2.id = po.approved_by\r\n\t\t\t\t" +
                 "LEFT JOIN business bl ON bl.id = po.vendorID \r\n\r\n\t\t LEFT JOIN facilities fc ON fc.id = po.facilityID    WHERE " + filter +
                 " ";
             List<CMRequestOrder> _List = await Context.GetData<CMRequestOrder>(stmt).ConfigureAwait(false);
@@ -132,6 +135,7 @@ namespace CMMSAPIs.Repositories.SM
 
             return _List;
         }
+
 
         internal async Task<CMDefaultResponse> ApproveRequestOrder(CMApproval request, int userId)
         {
@@ -204,7 +208,7 @@ namespace CMMSAPIs.Repositories.SM
                 "         LEFT JOIN smassetmasters s2 ON s2.item_category_ID = sic.ID\r\n        )  t2 ON t2.master_ID = sam.ID\r\n       " +
                 " LEFT JOIN facilities fc ON fc.id = po.facilityID\r\nLEFT JOIN users as vendor on vendor.id=po.vendorID       \r\n " +
                 "LEFT JOIN business bl ON bl.id = po.vendorID left join smassettypes stt on stt.ID = pod.order_type\r\n " +
-                "LEFT JOIN currency curr ON curr.id = po.currency  LEFT JOIN employees ed2 ON ed2.ID = po.approved_by\r\n LEFT JOIN employees ed ON ed.ID = po.generated_by\r\n  LEFT JOIN employees ed1 ON ed1.ID = po.receiverID " +
+                "LEFT JOIN currency curr ON curr.id = po.currency  LEFT JOIN users ed2 ON ed2.id = po.approved_by\r\n LEFT JOIN users ed ON ed.id = po.generated_by\r\n  LEFT JOIN users ed1 ON ed1.id = po.receiverID " +
                 "WHERE po.ID = " + id + " ;";
             List<CMRequestOrderList> _List = await Context.GetData<CMRequestOrderList>(query).ConfigureAwait(false);
 

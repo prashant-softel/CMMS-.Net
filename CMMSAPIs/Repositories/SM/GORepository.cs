@@ -209,14 +209,25 @@ namespace CMMSAPIs.Repositories
             CMDefaultResponse response = new CMDefaultResponse(poid, CMMS.RETRUNSTATUS.SUCCESS, "Goods order created successfully.");
             return response;
         }
-        internal async Task<CMDefaultResponse> UpdateGO(CMGoodsOrderList request, int userID)
+          internal async Task<CMDefaultResponse> UpdateGO(CMGoodsOrderList request, int userID)
         {
-            string OrderQuery = $"UPDATE smpurchaseorder SET " +
-                    $"challan_no = '{request.challan_no}',po_no='{request.po_no}', freight='{request.freight}',no_pkg_received='{request.no_pkg_received}'," +
-                    $"lr_no='{request.lr_no}',condition_pkg_received='{request.condition_pkg_received}',vehicle_no='{request.vehicle_no}', gir_no='{request.gir_no}', " +
-                    $"challan_date = '{request.challan_date.Value.ToString("yyyy-MM-dd")}', " +
-                    $"job_ref='{request.job_ref}',amount='{request.amount}', currency={request.currencyID},updated_by = {userID},updatedOn = '{UtilsRepository.GetUTCTime()}' where ID={request.id}";
-
+            string OrderQuery = "";
+            if (request.is_submit == 0)
+            {
+                OrderQuery = $"UPDATE smpurchaseorder SET " +
+                        $"challan_no = '{request.challan_no}',po_no='{request.po_no}', freight='{request.freight}',no_pkg_received='{request.no_pkg_received}'," +
+                        $"lr_no='{request.lr_no}',condition_pkg_received='{request.condition_pkg_received}',vehicle_no='{request.vehicle_no}', gir_no='{request.gir_no}', " +
+                        $"challan_date = '{request.challan_date.Value.ToString("yyyy-MM-dd")}', " +
+                        $"job_ref='{request.job_ref}',amount='{request.amount}', currency={request.currencyID},updated_by = {userID},updatedOn = '{UtilsRepository.GetUTCTime()}' where ID={request.id}";
+            }
+            else
+            {
+                OrderQuery = $"UPDATE smpurchaseorder SET " +
+                        $"challan_no = '{request.challan_no}',po_no='{request.po_no}', freight='{request.freight}',no_pkg_received='{request.no_pkg_received}'," +
+                        $"lr_no='{request.lr_no}',condition_pkg_received='{request.condition_pkg_received}',vehicle_no='{request.vehicle_no}', gir_no='{request.gir_no}', " +
+                        $"challan_date = '{request.challan_date.Value.ToString("yyyy-MM-dd")}', " +
+                        $"job_ref='{request.job_ref}',amount='{request.amount}', currency={request.currencyID},updated_by = {userID},updatedOn = '{UtilsRepository.GetUTCTime()}', status = {(int)CMMS.CMMS_Status.SM_PO_DRAFT} where ID={request.id}";
+            }
             await Context.ExecuteNonQry<int>(OrderQuery);
 
             for (var i = 0; i < request.go_items.Count; i++)
@@ -575,16 +586,16 @@ namespace CMMSAPIs.Repositories
         public async Task<List<CMPURCHASEDATA>> GetPurchaseData(int plantID, string empRole, DateTime fromDate, DateTime toDate, string status, string order_type)
         {
             var stmt = $"SELECT fc.Name as facilityName, po.ID as orderID,po.purchaseDate,po.generate_flag,po.received_on,po.status,bl.name as vendor_name,po.vendorID," +
-                $"ed.id as generatedByID,po.remarks, CONCAT(ed.Firstname,' ',ed.lastname) as generatedBy, CONCAT(ed1.Firstname,' ',ed1.lastname) as receivedOn, DATE_FORMAT(po.lastModifiedDate,'%Y-%m-%d') as receivedDate," +
+                $"ed.id as generatedByID,po.remarks, CONCAT(ed.firstName,' ',ed.lastName) as generatedBy, CONCAT(ed1.firstName,' ',ed1.lastName) as receivedOn, DATE_FORMAT(po.lastModifiedDate,'%Y-%m-%d') as receivedDate," +
                 $" CONCAT(ed2.Firstname,' ',ed2.lastname) as approvedBy,   DATE_FORMAT(po.approvedOn,'%Y-%m-%d') as approvedOn,    po.status as statusFlag " +
                 //$" CASE WHEN po.flag = {GO_SAVE_BY_PURCHASE_MANAGER} THEN 'Draft' WHEN po.flag = {GO_SUBMIT_BY_PURCHASE_MANAGER} THEN 'Submitted' " +
                 //$"WHEN po.flag = {GO_SAVE_BY_STORE_KEEPER} THEN 'In Process' ELSE 'Received' END" +
 
                 $"FROM smpurchaseorder po " +
                 $"LEFT JOIN business bl ON bl.id = po.vendorID " +
-                $"LEFT JOIN employees ed ON ed.ID = po.generated_by " +
-                $"LEFT JOIN employees ed1 ON ed1.ID = po.receiverID " +
-                $"LEFT JOIN employees ed2 ON ed2.ID = po.approved_by " +
+                $"LEFT JOIN users ed ON ed.id = po.generated_by " +
+                $"LEFT JOIN users ed1 ON ed1.id = po.receiverID " +
+                $"LEFT JOIN users ed2 ON ed2.id = po.approved_by " +
                 $"LEFT JOIN facilities fc ON fc.id = po.facilityID WHERE po.facilityID = {plantID} ";
             if (!string.IsNullOrEmpty(status))
             {
@@ -881,12 +892,22 @@ namespace CMMSAPIs.Repositories
             return _MasterList;
         }
 
-        internal async Task<List<CMGOListByFilter>> GetGOList(int facility_id, DateTime fromDate, DateTime toDate)
+        internal async Task<List<CMGOListByFilter>> GetGOList(int facility_id, DateTime fromDate, DateTime toDate, int is_purchaseorder)
         {
 
             string filter = " (DATE(po.purchaseDate) >= '" + fromDate.ToString("yyyy-MM-dd") + "'  and DATE(po.purchaseDate) <= '" + toDate.ToString("yyyy-MM-dd") + "')";
 
             filter = filter + " and facilityID = " + facility_id + "";
+
+            if (is_purchaseorder == 0)
+            {
+                filter = filter + " and (is_purchaseorder = 0 OR is_purchaseorder is null) ";
+            }
+            else
+            {
+                filter = filter + " and is_purchaseorder = 1 ";
+            } 
+
             string query = "SELECT fc.name as facilityName,pod.ID as podID, facilityid as       facility_id,pod.spare_status,pod.remarks,sai.orderflag,sam.asset_type_ID," +
                 "pod.purchaseID,pod.assetItemID,sai.serial_number,sai.location_ID,(select sum(cost) from smpurchaseorderdetails where purchaseID = po.id) as cost,pod.ordered_qty,\r\n bl.name as vendor_name,\r\n     " +
                 " po.purchaseDate,sam.asset_type_ID,sam.asset_name,po.receiverID,\r\n        " +
@@ -907,7 +928,7 @@ namespace CMMSAPIs.Repositories
                 "   LEFT JOIN (\r\n            SELECT sic.cat_name,s2.ID as master_ID FROM smitemcategory sic\r\n          " +
                 "  LEFT JOIN smassetmasters s2 ON s2.item_category_ID = sic.ID\r\n        )  t2 ON t2.master_ID = sam.ID\r\n " +
                 "       LEFT JOIN facilities fc ON fc.id = po.facilityID\r\nLEFT JOIN users as vendor on vendor.id=po.vendorID " +
-                "       LEFT JOIN business bl ON bl.id = po.vendorID left join smassettypes stt on stt.ID = pod.order_type LEFT JOIN currency curr ON curr.id = po.currency LEFT JOIN employees ed ON ed.ID = po.generated_by" +
+                "       LEFT JOIN business bl ON bl.id = po.vendorID left join smassettypes stt on stt.ID = pod.order_type LEFT JOIN currency curr ON curr.id = po.currency LEFT JOIN users ed ON ed.id = po.generated_by" +
                 " WHERE "+ filter + "";
 
 

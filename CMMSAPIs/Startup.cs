@@ -31,6 +31,7 @@ using CMMSAPIs.BS.Calibration;
 using CMMSAPIs.BS;
 using CMMSAPIs.BS.Cleaning;
 using CMMSAPIs.BS.EM;
+using CMMSAPIs.BS.DSM;
 
 namespace CMMSAPIs
 {
@@ -109,6 +110,8 @@ namespace CMMSAPIs
             services.AddScoped<ISMReportsBS, ReportsBS>();
             services.AddScoped<IRequestOrderBS, RequestOrderBS>();
             services.AddScoped<IEMBS, EMBS>();
+            services.AddScoped<IDSMBS, DSMBS>();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

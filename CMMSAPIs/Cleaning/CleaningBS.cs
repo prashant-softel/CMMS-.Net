@@ -17,6 +17,8 @@ namespace CMMSAPIs.BS.Cleaning
         public Task<List<CMMCPlan>> GetPlanList(int facilityId);
         public Task<CMDefaultResponse> CreatePlan(List<CMMCPlan> request, int userId);
         public Task<CMMCPlan> GetPlanDetails(int planId);
+        public Task<CMMCPlanSummary> GetPlanDetailsSummary(int planId, CMMCPlanSummary request);
+
         public Task<CMDefaultResponse> ApprovePlan(CMApproval request, int userId);
         public Task<CMDefaultResponse> RejectPlan(CMApproval request, int userId);
         public Task<CMDefaultResponse> DeletePlan(int planId, int userId);
@@ -24,9 +26,11 @@ namespace CMMSAPIs.BS.Cleaning
         public Task<List<CMMCTaskList>> GetTaskList(int facilityId);
         public Task<CMDefaultResponse> StartExecution(int planId, int userId);
         public Task<CMDefaultResponse> StartScheduleExecution(int scheduleId, int userId);
-        public Task<CMDefaultResponse> EndScheduleExecution(CMMCExecutionSchedule schedule, int userId);
+        public Task<CMDefaultResponse> UpdateScheduleExecution(CMMCGetScheduleExecution schedule, int userId);
+        public Task<CMMCExecutionSchedule> GetScheduleExecutionSummary(CMMCGetScheduleExecution schedule);
         public Task<CMMCExecution> GetExecutionDetails(int id);
         public Task<CMDefaultResponse> AbandonExecution(CMApproval request, int userId);
+        public Task<CMDefaultResponse> AbandonSchedule(CMApproval request, int userId);
         public Task<List<CMMCEquipmentList>> GetEquipmentList(int facilityId);
         public Task<List<CMVegEquipmentList>> GetVegEquipmentList(int facilityId);
     }
@@ -102,6 +106,20 @@ namespace CMMSAPIs.BS.Cleaning
             }
         }
 
+        public async Task<CMMCPlanSummary> GetPlanDetailsSummary(int planId, CMMCPlanSummary request )
+        {
+            try
+            {
+                //using (var repos = new MCRepository(getDB))
+                {
+                    return await repos.GetPlanDetailsSummary(planId,request);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
         public async Task<CMDefaultResponse> CreatePlan(List<CMMCPlan> request, int userId)
         {
             try
@@ -204,13 +222,27 @@ namespace CMMSAPIs.BS.Cleaning
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> EndScheduleExecution(CMMCExecutionSchedule schedule, int userId)
+        public async Task<CMDefaultResponse> UpdateScheduleExecution(CMMCGetScheduleExecution schedule, int userId)
         {
             try
             {
                 // using (var repos = new MCRepository(getDB))
                 {
-                    return await repos.EndScheduleExecution(schedule, userId);
+                    return await repos.UpdateScheduleExecution(schedule, userId);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<CMMCExecutionSchedule> GetScheduleExecutionSummary(CMMCGetScheduleExecution schedule)
+        {
+            try
+            {
+                // using (var repos = new MCRepository(getDB))
+                {
+                    return await repos.GetScheduleExecutionSummary(schedule);
                 }
             }
             catch (Exception ex)
@@ -225,6 +257,21 @@ namespace CMMSAPIs.BS.Cleaning
                 // using (var repos = new MCRepository(getDB))
                 {
                     return await repos.AbandonExecution(request, userId);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> AbandonSchedule(CMApproval request, int userId)
+        {
+            try
+            {
+                // using (var repos = new MCRepository(getDB))
+                {
+                    return await repos.AbandonSchedule(request, userId);
                 }
             }
             catch (Exception ex)

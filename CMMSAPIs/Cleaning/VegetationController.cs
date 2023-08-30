@@ -181,14 +181,14 @@ namespace CMMSAPIs.Controllers.Vegetation
                 throw;
             }
         }
-        [Route("EndVegScheduleExecution")]
+        [Route("UpadateVegScheduleExecution")]
         [HttpPut]
-        public async Task<IActionResult> EndVegScheduleExecution(CMMCExecutionSchedule schedule)
+        public async Task<IActionResult> UpadateVegScheduleExecution(CMMCGetScheduleExecution schedule)
         {
             try
             {
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _CleaningBS.EndScheduleExecution(schedule, userId);
+                var data = await _CleaningBS.UpdateScheduleExecution(schedule, userId);
                 return Ok(data);
             }
             catch (Exception ex)

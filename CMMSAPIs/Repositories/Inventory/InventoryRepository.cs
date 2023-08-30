@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Hosting;
 using OfficeOpenXml;
 using CMMSAPIs.Models.Notifications;
 using CMMSAPIs.Models.Calibration;
+//using static System.Net.WebRequestMethods;
 //using IronXL;
 
 namespace CMMSAPIs.Repositories.Inventory
@@ -645,9 +646,9 @@ namespace CMMSAPIs.Repositories.Inventory
                 ", f.name AS facilityName, f.id AS facilityId, bl.id AS blockId, bl.name AS blockName, linkedbl.id AS linkedToBlockId, linkedbl.name AS linkedToBlockName, a.parentId, a2.name as parentName, custbl.name as customerName, owntbl.name as ownerName, s.name AS status, b5.name AS operatorName" +
 
                 " from assets as a " +
-                "join assettypes as ast on ast.id = a.typeId " +
+                "left join assettypes as ast on ast.id = a.typeId " +
                 "" +
-                "join assetcategories as ac on ac.id= a.categoryId " +
+                "left join assetcategories as ac on ac.id= a.categoryId " +
                 "" +
                 "left join business as custbl on custbl.id = a.customerId " +
                 "" +
@@ -661,39 +662,16 @@ namespace CMMSAPIs.Repositories.Inventory
 
                 "left JOIN business as b5 ON b5.id = a.operatorId " +
                 "" +
-                "JOIN facilities as f ON f.id = a.facilityId " +
+                "left JOIN facilities as f ON f.id = a.facilityId " +
                 "" +
-                "JOIN facilities as linkedbl ON linkedbl.id = a.linkedToBlockId " +
+                "left JOIN facilities as linkedbl ON linkedbl.id = a.linkedToBlockId " +
                 "" +
-                "JOIN facilities as bl ON bl.id = a.blockId";
-            if (facilityId > 0 || linkedToBlockId > 0)
-            {
-                if (linkedToBlockId > 0)
-                {
-                    myQuery += " WHERE a.linkedToBlockId= " + linkedToBlockId;
-                }
-                else
-                {
-                    myQuery += " WHERE a.facilityId= " + facilityId;
-                }
-                if (categoryIds?.Length > 0)
-                {
-                    myQuery += " AND a.categoryId IN (" + categoryIds + ")";
-                }
-                if (status > 0)
-                {
-                    myQuery += " AND a.status = " + status;
-                }
-            }
-            else
-            {
-                if (status > 0)
-                {
-                    myQuery += " WHERE a.status = " + status;
-                }
+                "left JOIN facilities as bl ON bl.id = a.blockId   WHERE a.statusId = " + status ;
 
-                //                throw new ArgumentException("FacilityId or linkedToBlockId cannot be 0");
-            }
+            myQuery += (facilityId > 0 ? " AND a.facilityId= " + facilityId  + "" : " ");
+            myQuery += (linkedToBlockId > 0 ? " AND a.linkedToBlockId= " + linkedToBlockId + "" : " ");
+            myQuery += (categoryIds?.Length > 0 ? " AND a.categoryId IN (" + categoryIds + ")" : " ");
+
             List<CMInventoryList> inventory = await Context.GetData<CMInventoryList>(myQuery).ConfigureAwait(false);
             return inventory;
         }
@@ -823,7 +801,7 @@ string warrantyQry = "insert into assetwarranty
                 string _longStatus = getLongStatus(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_ADDED, _inventoryAdded);
                 _inventoryAdded.status_long = _longStatus;
 
-                CMMSNotification.sendNotification(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_ADDED, _inventoryAdded);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_ADDED, new[] { userID }, _inventoryAdded);
             }
             if (count > 0)
             {
@@ -1060,7 +1038,7 @@ string warrantyQry = "insert into assetwarranty
             string _longStatus = getLongStatus(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_UPDATED, _inventoryAdded);
             _inventoryAdded.status_long = _longStatus;
 
-            CMMSNotification.sendNotification(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_UPDATED, _inventoryAdded);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_UPDATED, new[] { userID } ,_inventoryAdded);
 
             return obj;
 
@@ -1096,7 +1074,7 @@ string warrantyQry = "insert into assetwarranty
             string _longStatus = getLongStatus(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_DELETED, _inventoryAdded);
             _inventoryAdded.status_long = _longStatus;
 
-            CMMSNotification.sendNotification(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_DELETED, _inventoryAdded);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_DELETED, new[] { userID }, _inventoryAdded);
 
             string delQuery1 = $"DELETE FROM assets WHERE id = {id}";
             string delQuery2 = $"DELETE FROM assetwarranty where asset_id = {id}";

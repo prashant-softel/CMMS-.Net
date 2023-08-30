@@ -449,7 +449,7 @@ namespace CMMSAPIs.Controllers.Permits
         [Authorize]
         [Route("PermitExtend")]
         [HttpPut]
-        public async Task<IActionResult> PermitExtend([FromForm] CMApproval request)
+        public async Task<IActionResult> PermitExtend(CMPermitExtend request)
         {
             try
             {

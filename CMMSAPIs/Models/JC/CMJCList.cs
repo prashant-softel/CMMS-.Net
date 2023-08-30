@@ -18,7 +18,24 @@ namespace CMMSAPIs.Models.JC
         public dynamic end_time { get; set; }
         public List<equipmentCatList> LstequipmentCatList { get; set; }
     }
-   
+
+    public class CMJCListForJob
+    {
+        public int jobCardId { get; set; }
+        public string jobCardNo { get; set; }
+        public int jobId { get; set; }
+        public int permitId { get; set; }
+        public string permitNo { get; set; }
+        public string jobAssingedTo { get; set; }
+        public dynamic jobCardDate { get; set; }
+        public dynamic endTime { get; set; }
+        public int status { get; set; }
+        public int approvedStatus { get; set; }
+        public string status_short { get; set; }
+
+
+    }
+
 }
 public class equipmentCatList
 {

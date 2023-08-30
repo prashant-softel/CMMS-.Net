@@ -44,12 +44,22 @@ namespace CMMSAPIs.Models.Notifications
         public string templateEnd = "<tr><td style=' text-align: left; padding:0.5rem; background-color:#31576D;color:#000000'><b>&nbsp;&nbsp;{0}</b></td><td style='text-align: left; padding:0.5rem;'>&nbsp;&nbsp;{1}</td></tr></table>";
 
         private static MYSQLDBHelper sqlDBHelper;
+        private MYSQLDBHelper _conn;
 
-        public CMMSNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID): base(sqlDBHelper)
+        private UserAccessRepository _userAccessRepository;
+
+        public CMMSNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID):base(sqlDBHelper)
         {
             m_moduleID = moduleID;
             m_notificationID = notificationID;
         }
+        public CMMSNotification(MYSQLDBHelper sqlDBHelper, IWebHostEnvironment webHostEnvironment = null, IConfiguration configuration = null) : base(sqlDBHelper)
+        {
+            _conn = sqlDBHelper;
+            _userAccessRepository = new UserAccessRepository(sqlDBHelper, webHostEnvironment, configuration);
+
+        }
+
         protected virtual string getModuleName(params object[] args)
         {
             return Convert.ToString(m_moduleID);
@@ -142,7 +152,7 @@ namespace CMMSAPIs.Models.Notifications
 
             return retValue;
         }
-        public async Task<CMDefaultResponse> sendEmailNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, int facilityId, params object[] args)
+        public async Task<CMDefaultResponse> sendEmailNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, int facilityId,int[] userID, params object[] args)
         {
             CMDefaultResponse response = new CMDefaultResponse();
 
@@ -159,11 +169,14 @@ namespace CMMSAPIs.Models.Notifications
             CMUserByNotificationId notification = new CMUserByNotificationId();
             notification.facility_id = facilityId;
             notification.notification_id = notificationID;
+            notification.user_ids = userID;
 
             List<CMUser> users = new List<CMUser>();
             try
             {
-                users = await GetUserByNotificationId(notification);
+                //CMMSNotification objc = new CMMSNotification(_conn);
+                UserAccessRepository obj = new UserAccessRepository(_conn);
+                users = await obj.GetUserByNotificationId(notification);
             }
             catch (Exception e) { 
 
@@ -197,7 +210,7 @@ namespace CMMSAPIs.Models.Notifications
 
         //create else if block for your module and add Notification class for  your module to implement yous notification
         /*    public static CMMS.RETRUNSTATUS sendNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, params object[] args)*/
-        public static async Task<CMDefaultResponse> sendNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, params object[] args)
+        public static async Task<CMDefaultResponse> sendNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, int[] userID, params object[] args)
         {
             CMDefaultResponse retValue = new CMDefaultResponse();
             CMMSNotification notificationObj = null;
@@ -246,7 +259,7 @@ namespace CMMSAPIs.Models.Notifications
                 //facilityId = _Inventory.facility_id;
             }
             //create else if block for your module and add Notification class for  your module to implement yous notification
-            retValue = await notificationObj.sendEmailNotification(moduleID, notificationID, facilityId, args);
+            retValue = await notificationObj.sendEmailNotification(moduleID, notificationID, facilityId, userID, args);
             return retValue;
         }
 

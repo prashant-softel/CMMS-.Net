@@ -51,19 +51,22 @@ namespace CMMSAPIs.Models.Permits
         public List<CMLoto> Loto_list { get; set; }
         public List<CMEMPLIST> employee_list { get; set; }
         public List<CMIsolationList> LstIsolation { get; set; }
-        public List<CMAssociatedList> LstAssociatedJob { get; set; }
+        public List<CMAssociatedList> LstAssociatedJobs { get; set; }
         public int ptwStatus { get; set; }
         public string current_status_short { get; set; }
         public string current_status_long { get; set; }
     }
     public class CMAssociatedList
     {
-        public int JobId { get; set; }
-        public int JobCardId { get; set; }
-        public string JobTitle { get; set; }
-        public string JobDes { get; set; }
-        public DateTime? JobDate { get; set; }
-        public int JobStatus { get; set; }
+        public int jobId { get; set; }
+        public int permitId { get; set; }
+        public string title { get; set; }
+        public string equipmentCat { get; set; }
+        public string equipment { get; set; }
+        public dynamic breakdownTime { get; set; }
+        public string assignedTo { get; set; }
+        public int status { get; set; }
+        public string status_short { get; set; }
     }
     public class CMLoto
     {
@@ -94,6 +97,14 @@ namespace CMMSAPIs.Models.Permits
         public int saftyQuestionId { get; set; }
         public string SaftyQuestionName { get; set; }
         public int input { get; set; }
+    }
+
+    public class CMPermitExtend
+    {
+        public int id { get; set; }
+        public int extend_by_minutes { get; set; }
+        public string comment { get; set; }
+
     }
 
 }

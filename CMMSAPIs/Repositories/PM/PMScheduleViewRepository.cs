@@ -521,7 +521,7 @@ namespace CMMSAPIs.Repositories.PM
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, request.id, 0, 0, $"PM Schedule Approved to PMSCH{createResponse[0].id[0]}", CMMS.CMMS_Status.PM_APPROVED, userID);
             CMPMScheduleViewDetail _PMList = await GetPMTaskDetail(request.id);
-            CMMSNotification.sendNotification(CMMS.CMMS_Modules.PM_SCHEDULE, CMMS.CMMS_Status.PM_APPROVED, _PMList);
+            //CMMSNotification.sendNotification(CMMS.CMMS_Modules.PM_SCHEDULE, CMMS.CMMS_Status.PM_APPROVED, _PMList);
 
             CMRescheduleApprovalResponse response = new CMRescheduleApprovalResponse(createResponse[0].id[0], request.id, retCode, $"PM Schedule Approved to PMSCH{createResponse[0].id[0]}");
             return response;

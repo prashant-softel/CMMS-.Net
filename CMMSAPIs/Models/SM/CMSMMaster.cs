@@ -87,7 +87,7 @@ namespace CMMSAPIs.Models.SM
         public int status { get; set; }
         public string status_short { get; set; }
         public string reference { get; set; }
-        public string referenceID { get; set; }
+        public int referenceID { get; set; }
         public DateTime? lastmodifieddate { get; set; }
         public string setAsTemplate { get; set; }
         public string templateName { get; set; }
@@ -127,7 +127,7 @@ namespace CMMSAPIs.Models.SM
     public class CMEquipments
     {
         public int id { get; set; }
-        public int equipmentID { get; set; }
+        public int asset_item_ID { get; set; }
         public decimal qty { get; set; }
         public decimal requested_qty { get; set; }
         public decimal issued_qty { get; set; }
@@ -262,6 +262,18 @@ namespace CMMSAPIs.Models.SM
         public int whereUsedTypeId { get; set; }
         public string remarks { get; set; }
         public List<CMMRSItems> CMMRSItems { get; set; }
+    }
+
+    public class CMMRSListByModule
+    {
+        public int mrsId { get; set; }
+        public int jobId { get; set; }
+        public int jobCardId { get; set; }
+        public int pmId { get; set; }
+        public string mrsItems { get; set; }
+        public int status { get; set; }
+        public string status_short { get; set; }
+
     }
 
     public class CMRETURNMRSDATA
