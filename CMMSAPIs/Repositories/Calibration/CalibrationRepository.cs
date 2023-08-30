@@ -219,9 +219,9 @@ namespace CMMSAPIs.Repositories.Calibration
                 string facilityQuery = $"SELECT facilityId FROM assets WHERE assets.id = {request.asset_id};";
                 DataTable dt1 = await Context.FetchData(facilityQuery).ConfigureAwait(false);
                 int facilityId = Convert.ToInt32(dt1.Rows[0][0]);
-                string myQuery = "INSERT INTO calibration(asset_id, facility_id, vendor_id, due_date, requested_by, requested_at, status) " +
+                string myQuery = "INSERT INTO calibration(asset_id, facility_id, vendor_id, due_date, requested_by, requested_at, status, status_updated_at) " +
                                 $"VALUES({request.asset_id}, {facilityId}, {request.vendor_id}, '{request.next_calibration_date.ToString("yyyy'-'MM'-'dd")}', " +
-                                $"{userID}, '{UtilsRepository.GetUTCTime()}', {(int)CMMS.CMMS_Status.CALIBRATION_REQUEST}); SELECT LAST_INSERT_ID();";
+                                $"{userID}, '{UtilsRepository.GetUTCTime()}', {(int)CMMS.CMMS_Status.CALIBRATION_REQUEST}, '{UtilsRepository.GetUTCTime()}'); SELECT LAST_INSERT_ID();";
                 DataTable dt2 = await Context.FetchData(myQuery).ConfigureAwait(false);
                 int id = Convert.ToInt32(dt2.Rows[0][0]);
                 string setDueDate = $"UPDATE assets SET calibrationDueDate = '{request.next_calibration_date.ToString("yyyy-MM-dd HH:mm:ss")}' WHERE id = {request.asset_id};";
@@ -248,8 +248,8 @@ namespace CMMSAPIs.Repositories.Calibration
              * Your Code goes here
              * 
             */
-            string myQuery = $"UPDATE calibration SET status = {(int)CMMS.CMMS_Status.CALIBRATION_REQUEST_APPROVED}, request_approved_by = {userID}, " +
-                                $"request_approved_at = '{UtilsRepository.GetUTCTime()}', request_approve_remark = '{request.comment}' " +
+            string myQuery = $"UPDATE calibration SET status = {(int)CMMS.CMMS_Status.CALIBRATION_REQUEST_APPROVED}, status_updated_at = '{UtilsRepository.GetUTCTime()}', " +
+                                $"request_approved_by = {userID}, request_approved_at = '{UtilsRepository.GetUTCTime()}', request_approve_remark = '{request.comment}' " +
                                 $"WHERE id = {request.id} AND status IN ({(int)CMMS.CMMS_Status.CALIBRATION_REQUEST}, {(int)CMMS.CMMS_Status.CALIBRATION_REQUEST_REJECTED});";
             int retVal = await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
             string assetIDQuery = $"SELECT asset_id FROM calibration where id = {request.id};";
@@ -280,8 +280,8 @@ namespace CMMSAPIs.Repositories.Calibration
              * Update the status in Calibration table and update history log
              * Your Code goes here
             */
-            string myQuery = $"UPDATE calibration SET status = {(int)CMMS.CMMS_Status.CALIBRATION_REQUEST_REJECTED}, request_rejected_by = {userID}, " +
-                                $"request_rejected_at = '{UtilsRepository.GetUTCTime()}', request_reject_remark = '{request.comment}' " +
+            string myQuery = $"UPDATE calibration SET status = {(int)CMMS.CMMS_Status.CALIBRATION_REQUEST_REJECTED}, status_updated_at = '{UtilsRepository.GetUTCTime()}', " +
+                                $"request_rejected_by = {userID}, request_rejected_at = '{UtilsRepository.GetUTCTime()}', request_reject_remark = '{request.comment}' " +
                                 $"WHERE id = {request.id} AND status = {(int)CMMS.CMMS_Status.CALIBRATION_REQUEST};";
             int retVal = await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
             string assetIDQuery = $"SELECT asset_id FROM calibration where id = {request.id};";
@@ -328,6 +328,7 @@ namespace CMMSAPIs.Repositories.Calibration
             */
             DateTime start_date = DateTime.Parse(UtilsRepository.GetUTCTime());
             string myQuery = $"UPDATE calibration SET status = {(int)CMMS.CMMS_Status.CALIBRATION_STARTED}, " +
+                                $"status_updated_at = {UtilsRepository.GetUTCTime()}, " +
                                 $"start_date = '{start_date.ToString("yyyy'-'MM'-'dd")}' " +
                                 $"WHERE id = {calibration_id} AND status = {(int)CMMS.CMMS_Status.CALIBRATION_REQUEST_APPROVED};";
             int retVal = await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
@@ -364,7 +365,8 @@ namespace CMMSAPIs.Repositories.Calibration
              * Your Code goes here
             */
             string myQuery = $"UPDATE calibration SET done_date = '{DateTime.UtcNow.ToString("yyyy'-'MM'-'dd")}', completed_by = {userID}, " +
-                                $"completed_remark = '{request.comment}', status = {(int)CMMS.CMMS_Status.CALIBRATION_COMPLETED} " +
+                                $"completed_remark = '{request.comment}', status = {(int)CMMS.CMMS_Status.CALIBRATION_COMPLETED}, " +
+                                $"status_updated_at = '{UtilsRepository.GetUTCTime()}' " +
                                 $"WHERE id = {request.calibration_id} AND status = {(int)CMMS.CMMS_Status.CALIBRATION_STARTED};";
             int retVal = await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
             string assetIDQuery = $"SELECT asset_id FROM calibration where id = {request.calibration_id};";
@@ -397,7 +399,8 @@ namespace CMMSAPIs.Repositories.Calibration
             string myQuery = $"UPDATE calibration SET close_by = {userID}, received_date = '{DateTime.UtcNow.ToString("yyyy'-'MM'-'dd")}', " +
                                 $"close_remark = '{request.comment}', is_damaged = {(request.is_damaged == null ? 0 : request.is_damaged)}, " +
                                 $"calibration_certificate_file_id = {request.calibration_certificate_file_id}, " +
-                                $"status = {(int)CMMS.CMMS_Status.CALIBRATION_CLOSED} WHERE id = {request.calibration_id} " +
+                                $"status = {(int)CMMS.CMMS_Status.CALIBRATION_CLOSED}, status_updated_at = '{UtilsRepository.GetUTCTime()}' " +
+                                $"WHERE id = {request.calibration_id} " +
                                 $"AND status IN ({(int)CMMS.CMMS_Status.CALIBRATION_COMPLETED}, {(int)CMMS.CMMS_Status.CALIBRATION_REJECTED});";
             int retVal = await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
             string assetIDQuery = $"SELECT asset_id FROM calibration where id = {request.calibration_id};";
@@ -439,7 +442,8 @@ namespace CMMSAPIs.Repositories.Calibration
             DateTime nextDate = UtilsRepository.Reschedule(nextRequest[0].next_calibration_date, frequencyId);
             nextRequest[0].next_calibration_date = nextDate;
             string myQuery4 = $"UPDATE calibration SET approved_by = {userID}, approved_at = '{UtilsRepository.GetUTCTime()}', " +
-                                $"approve_remark = '{request.comment}', status = {(int)CMMS.CMMS_Status.CALIBRATION_APPROVED} " +
+                                $"approve_remark = '{request.comment}', status = {(int)CMMS.CMMS_Status.CALIBRATION_APPROVED}, " +
+                                $"status_updated_at = '{UtilsRepository.GetUTCTime()}' " +
                                 $"WHERE id = {request.id} AND status = {(int)CMMS.CMMS_Status.CALIBRATION_CLOSED};";
             int retVal = await Context.ExecuteNonQry<int>(myQuery4).ConfigureAwait(false);
             CMDefaultResponse newCalibration = await RequestCalibration(nextRequest[0], userID);
@@ -474,7 +478,8 @@ namespace CMMSAPIs.Repositories.Calibration
              * Your Code goes here
             */
             string myQuery = $"UPDATE calibration SET rejected_by = {userID}, rejected_at = '{UtilsRepository.GetUTCTime()}', " +
-                                $"reject_remark = '{request.comment}', status = {(int)CMMS.CMMS_Status.CALIBRATION_REJECTED} " +
+                                $"reject_remark = '{request.comment}', status = {(int)CMMS.CMMS_Status.CALIBRATION_REJECTED}, " +
+                                $"status_updated_at = '{UtilsRepository.GetUTCTime()}' " +
                                 $"WHERE id = {request.id} AND status = {(int)CMMS.CMMS_Status.CALIBRATION_CLOSED};";
             int retVal = await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
             CMMS.RETRUNSTATUS returnStatus = CMMS.RETRUNSTATUS.FAILURE;

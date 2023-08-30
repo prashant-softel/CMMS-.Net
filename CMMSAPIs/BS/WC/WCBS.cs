@@ -14,8 +14,8 @@ namespace CMMSAPIs.BS.WC
         Task<CMDefaultResponse> CreateWC(List<CMWCCreate> request, int userID);
         Task<CMWCDetail> GetWCDetails(int wc_id);
         Task<CMDefaultResponse> UpdateWC(CMWCCreate request);
-        Task<CMDefaultResponse> ApproveWC(CMApproval request);
-        Task<CMDefaultResponse> RejectWC(CMApproval request);
+        Task<CMDefaultResponse> ApproveWC(CMApproval request, int userID);
+        Task<CMDefaultResponse> RejectWC(CMApproval request, int userID);
 
 
         //  Add those methods here and in WCcontroller
@@ -90,13 +90,13 @@ namespace CMMSAPIs.BS.WC
             }
         }
 
-        public async Task<CMDefaultResponse> ApproveWC(CMApproval request)
+        public async Task<CMDefaultResponse> ApproveWC(CMApproval request, int userID)
         {
             try
             {
                 using (var repos = new WCRepository(getDB))
                 {
-                    return await repos.ApproveWC(request);
+                    return await repos.ApproveWC(request, userID);
                 }
             }
             catch (Exception ex)
@@ -105,13 +105,13 @@ namespace CMMSAPIs.BS.WC
             }
         }
 
-        public async Task<CMDefaultResponse> RejectWC(CMApproval request)
+        public async Task<CMDefaultResponse> RejectWC(CMApproval request, int userID)
         {
             try
             {
                 using (var repos = new WCRepository(getDB))
                 {
-                    return await repos.RejectWC(request);
+                    return await repos.RejectWC(request, userID);
                 }
             }
             catch (Exception ex)

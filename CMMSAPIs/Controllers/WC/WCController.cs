@@ -104,7 +104,8 @@ namespace CMMSAPIs.Controllers.WC
         {
             try
             {
-                var data = await _WCBS.ApproveWC(request);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _WCBS.ApproveWC(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -120,7 +121,8 @@ namespace CMMSAPIs.Controllers.WC
         {
             try
             {
-                var data = await _WCBS.RejectWC(request);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _WCBS.RejectWC(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)

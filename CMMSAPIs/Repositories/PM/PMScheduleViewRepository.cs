@@ -116,7 +116,8 @@ namespace CMMSAPIs.Repositories.PM
                                 $"PM_Schedule_cancel_by_id = {userID}, " +  
                                 $"PM_Schedule_cancel_date = '{UtilsRepository.GetUTCTime()}', " + 
                                 $"PM_Schedule_cancel_Recomendations = '{request.comment}', " +
-                                $"status = {(int)CMMS.CMMS_Status.PM_CANCELLED} " + 
+                                $"status = {(int)CMMS.CMMS_Status.PM_CANCELLED}, " +
+                                $"status_updated_at = '{UtilsRepository.GetUTCTime()}' " + 
                                 $"WHERE id = {request.id} AND status IN ({(int)CMMS.CMMS_Status.PM_LINK_PTW},{(int)CMMS.CMMS_Status.PM_SUBMIT});";
             int retVal = await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
@@ -215,7 +216,8 @@ namespace CMMSAPIs.Repositories.PM
                                 $"PTW_by_id = {userID}, " +
                                 $"PTW_Status = {permit[0].status}, " +
                                 $"PTW_Attached_At = '{UtilsRepository.GetUTCTime()}', " +
-                                $"status = {(int)CMMS.CMMS_Status.PM_LINK_PTW} " +
+                                $"status = {(int)CMMS.CMMS_Status.PM_LINK_PTW}, " +
+                                $"status_updated_at = '{UtilsRepository.GetUTCTime()}' " +
                                 $"WHERE id = {schedule_id};";
             int retVal = await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
@@ -292,7 +294,7 @@ namespace CMMSAPIs.Repositories.PM
                     int id = Convert.ToInt32(dt2.Rows[0][0]);
                     idList.Add(id);
                 }
-                string startQry = $"UPDATE pm_schedule SET PM_Execution_Started_by_id = {userID}, PM_Execution_Started_date = '{UtilsRepository.GetUTCTime()}', status = {(int)CMMS.CMMS_Status.PM_START} WHERE id = {schedule_id};";
+                string startQry = $"UPDATE pm_schedule SET PM_Execution_Started_by_id = {userID}, PM_Execution_Started_date = '{UtilsRepository.GetUTCTime()}', status = {(int)CMMS.CMMS_Status.PM_START}, status_updated_at = '{UtilsRepository.GetUTCTime()}' WHERE id = {schedule_id};";
                 await Context.ExecuteNonQry<int>(startQry).ConfigureAwait(false);
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, schedule_id, CMMS.CMMS_Modules.INVENTORY, schedule_details[0].asset_id, "PM Execution Started", CMMS.CMMS_Status.PM_START, userID);
                 response = new CMDefaultResponse(idList, CMMS.RETRUNSTATUS.SUCCESS, $"Execution PMSCH{schedule_id} Started Successfully");
@@ -473,7 +475,8 @@ namespace CMMSAPIs.Repositories.PM
                                 $"PM_Schedule_Completed_by_id = {userID}, " +
                                 $"PM_Schedule_Completed_date = '{UtilsRepository.GetUTCTime()}', " +
                                 $"PM_Schedule_Complete_Recomendations = '{request.comment}', " +
-                                $"status = {(int)CMMS.CMMS_Status.PM_COMPLETED} " +
+                                $"status = {(int)CMMS.CMMS_Status.PM_COMPLETED}, " +
+                                $"status_updated_at = '{UtilsRepository.GetUTCTime()}' " +
                                 $"WHERE id = {request.id} AND status IN ({(int)CMMS.CMMS_Status.PM_START}, {(int)CMMS.CMMS_Status.PM_REJECTED});";
             int retVal = await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
@@ -500,7 +503,8 @@ namespace CMMSAPIs.Repositories.PM
                                 $"PM_Schedule_Completed_by_id = {userID}, " +
                                 $"PM_Schedule_Completed_date = '{UtilsRepository.GetUTCTime()}', " +
                                 $"PM_Schedule_Complete_Recomendations = '{request.comment}', " +
-                                $"status = {(int)CMMS.CMMS_Status.PM_APPROVED} ," +
+                                $"status = {(int)CMMS.CMMS_Status.PM_APPROVED}, " +
+                                $"status_updated_at = '{UtilsRepository.GetUTCTime()}', " +
                                 $"PM_Rescheduled = 1 " +
                                 $"WHERE id = {request.id} AND status = {(int)CMMS.CMMS_Status.PM_COMPLETED};";
             int retVal = await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
@@ -540,7 +544,8 @@ namespace CMMSAPIs.Repositories.PM
                                 $"PM_Schedule_Completed_by_id = {userID}, " +
                                 $"PM_Schedule_Completed_date = '{UtilsRepository.GetUTCTime()}', " +
                                 $"PM_Schedule_Complete_Recomendations = '{request.comment}', " +
-                                $"status = {(int)CMMS.CMMS_Status.PM_REJECTED} " +
+                                $"status = {(int)CMMS.CMMS_Status.PM_REJECTED}, " +
+                                $"status_updated_at = '{UtilsRepository.GetUTCTime()}' " +
                                 $"WHERE id = {request.id} AND status = {(int)CMMS.CMMS_Status.PM_COMPLETED};";
             int retVal = await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
