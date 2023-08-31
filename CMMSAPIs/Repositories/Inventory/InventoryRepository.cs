@@ -628,7 +628,7 @@ namespace CMMSAPIs.Repositories.Inventory
             return response;
         }
 
-        internal async Task<List<CMInventoryList>> GetInventoryList(int facilityId, int linkedToBlockId, int status, string categoryIds)
+        internal async Task<List<CMInventoryList>> GetInventoryList(int facilityId, int linkedToBlockId, int status, string categoryIds )
         {
             /*
              * get all details mentioned in model
@@ -666,7 +666,7 @@ namespace CMMSAPIs.Repositories.Inventory
                 "" +
                 "left JOIN facilities as linkedbl ON linkedbl.id = a.linkedToBlockId " +
                 "" +
-                "left JOIN facilities as bl ON bl.id = a.blockId   WHERE a.statusId = " + status ;
+                "left JOIN facilities as bl ON bl.id = a.blockId   WHERE a.statusId = 1";
 
             myQuery += (facilityId > 0 ? " AND a.facilityId= " + facilityId  + "" : " ");
             myQuery += (linkedToBlockId > 0 ? " AND a.linkedToBlockId= " + linkedToBlockId + "" : " ");
