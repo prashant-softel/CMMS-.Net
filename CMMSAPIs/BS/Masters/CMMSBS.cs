@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using CMMSAPIs.Repositories.Masters;
 using CMMSAPIs.Models.Masters;
 using CMMSAPIs.Models.Utils;
+using Microsoft.AspNetCore.Hosting;
 
 namespace CMMSAPIs.BS.Masters
 {
@@ -24,6 +25,7 @@ namespace CMMSAPIs.BS.Masters
         Task<CMDefaultResponse> UpdateBusinessType(CMBusinessType request, int userId);
         Task<CMDefaultResponse> DeleteBusinessType(int id, int userId);
         Task<CMDefaultResponse> AddBusiness(List<CMBusiness> request, int userId);
+        Task<CMImportFileResponse> ImportBusiness(int file_id, int userID);
         Task<CMDefaultResponse> UpdateBusiness(CMBusiness request, int userId);
         Task<CMDefaultResponse> DeleteBusiness(int id, int userId);
         Task<List<CMDefaultList>> GetBloodGroupList();
@@ -53,9 +55,12 @@ namespace CMMSAPIs.BS.Masters
     {
         private readonly DatabaseProvider databaseProvider;
         private MYSQLDBHelper getDB => databaseProvider.SqlInstance();
-        public CMMSBS(DatabaseProvider dbProvider)
+        public static IWebHostEnvironment _environment;
+        public CMMSBS(DatabaseProvider dbProvider, IWebHostEnvironment environment)
         {
             databaseProvider = dbProvider;
+            _environment = environment;
+
         }
 
         
@@ -569,6 +574,22 @@ namespace CMMSAPIs.BS.Masters
                 throw;
             }
         }
+
+        public async Task<CMImportFileResponse> ImportBusiness(int file_id, int userID)
+        {
+            try
+            {
+                using (var repos = new CMMSRepository(getDB, _environment))
+                {
+                    return await repos.ImportBusiness(file_id, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
         public async Task<List<CMFrequency>> GetFrequencyList()
         {
             try
