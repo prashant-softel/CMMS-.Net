@@ -27,6 +27,8 @@ using iTextSharp.text;
 using iTextSharp.text.pdf;
 using iTextSharp.tool.xml;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Hosting;
+using OfficeOpenXml;
 
 namespace CMMSAPIs.Repositories.Masters
 {
@@ -35,6 +37,7 @@ namespace CMMSAPIs.Repositories.Masters
         private UtilsRepository _utilsRepo;
         public static Microsoft.AspNetCore.Hosting.IWebHostEnvironment _environment;
         private MYSQLDBHelper getDB;
+        private ErrorLog m_errorLog;
 
         public const string MA_Actual = "MA_Actual"; 
         public const string MA_Contractual = "MA_Contractual";
@@ -75,9 +78,10 @@ namespace CMMSAPIs.Repositories.Masters
            // { CMMS.CMMS_Modules.MODULE_CLEANING, 32 },
             { CMMS.CMMS_Modules.VEGETATION, 33 }
         };
-        public CMMSRepository(MYSQLDBHelper sqlDBHelper) : base(sqlDBHelper)
+        public CMMSRepository(MYSQLDBHelper sqlDBHelper, IWebHostEnvironment _webHost = null) : base(sqlDBHelper)
         {
             _utilsRepo = new UtilsRepository(sqlDBHelper);
+            m_errorLog = new ErrorLog(_webHost);
             getDB = sqlDBHelper;
         }
 
@@ -652,6 +656,287 @@ namespace CMMSAPIs.Repositories.Masters
             HTMLBody += "</table></div></div></div></body></html>";
 
             return HTMLBody;
+        }
+
+        private async Task<DataTable> ConvertExcelToBusinesses(int file_id)
+        {
+            Dictionary<string, int> countries = new Dictionary<string, int>();
+            string countryQry = "SELECT id, UPPER(name) as name FROM countries;";
+            DataTable dtCountry = await Context.FetchData(countryQry).ConfigureAwait(false);
+            countries.Merge(dtCountry.GetColumn<string>("name"), dtCountry.GetColumn<int>("id"));
+
+            string stateQry = "";
+            DataTable dtState = null;
+            List<string> stateNames = null;
+            List<int> stateIds = null;
+            Dictionary<string, int> states = new Dictionary<string, int>();
+
+            string cityQry = "";
+            DataTable dtCity = null;
+            List<string> cityNames = null;
+            List<int> cityIds = null;
+            Dictionary<string, int> cities = new Dictionary<string, int>();
+
+            Dictionary<string, int> businessTypes = new Dictionary<string, int>();
+            string businessTypeQry = "SELECT id, UPPER(name) as name FROM businesstype GROUP BY name ORDER BY id;";
+            DataTable dtBusinessType = await Context.FetchData(businessTypeQry).ConfigureAwait(false);
+            businessTypes.Merge(dtBusinessType.GetColumn<string>("name"), dtBusinessType.GetColumn<int>("id"));
+
+
+            /*
+            Facility_Name	CheckList	Type	Frequency	Category	Man Power	Duration
+            */
+            Dictionary<string, Tuple<string, Type>> columnNames = new Dictionary<string, Tuple<string, Type>>()
+            {
+                { "Name", new Tuple<string, Type>("name", typeof(string)) },
+                { "Email", new Tuple<string, Type>("email", typeof(string)) },
+                { "Type", new Tuple<string, Type>("typeName", typeof(string)) },
+                { "Contact Person", new Tuple<string, Type>("contactPerson", typeof(string)) },
+                { "Contact Number", new Tuple<string, Type>("contactNumber", typeof(string)) },
+                { "Website", new Tuple<string, Type>("website", typeof(string)) },
+                { "Location", new Tuple<string, Type>("location", typeof(string)) },
+                { "Address", new Tuple<string, Type>("address", typeof(string)) },
+                { "City", new Tuple<string, Type>("city", typeof(string)) },
+                { "State", new Tuple<string, Type>("state", typeof(string)) },
+                { "Country", new Tuple<string, Type>("country", typeof(string)) },
+                { "ZIP", new Tuple<string, Type>("zip", typeof(string)) }
+            };
+
+            string query1 = $"SELECT file_path FROM uploadedfiles WHERE id = {file_id};";
+            DataTable dt1 = await Context.FetchData(query1).ConfigureAwait(false);
+            string path = Convert.ToString(dt1.Rows[0][0]);
+            string dir = Path.GetDirectoryName(path);
+            string filename = Path.GetFileName(path);
+            if (!Directory.Exists(dir))
+                m_errorLog.SetError($"Directory '{dir}' cannot be found");
+            else if (!File.Exists(path))
+                m_errorLog.SetError($"File '{filename}' cannot be found in directory '{dir}'");
+            else
+            {
+                FileInfo info = new FileInfo(path);
+                if (info.Extension != ".xlsx")
+                    m_errorLog.SetError("File is not a .xlsx file");
+                else
+                {
+                    ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                    var excel = new ExcelPackage(path);
+                    var sheet = excel.Workbook.Worksheets["Businesses"];
+                    if (sheet == null)
+                        m_errorLog.SetWarning("The file must contain Businesses sheet");
+                    else
+                    {
+                        DataTable dt2 = new DataTable();
+                        foreach (var header in sheet.Cells[1, 1, 1, sheet.Dimension.End.Column])
+                        {
+                            try
+                            {
+                                dt2.Columns.Add(columnNames[header.Text].Item1, columnNames[header.Text].Item2);
+                            }
+                            catch (KeyNotFoundException)
+                            {
+                                dt2.Columns.Add(header.Text);
+                            }
+                        }
+                        dt2.Columns.Add("cityId", typeof(int));
+                        dt2.Columns.Add("stateId", typeof(int));
+                        dt2.Columns.Add("countryId", typeof(int));
+                        dt2.Columns.Add("type", typeof(int));
+                        //Pending: Reasons for skipping 3 rows
+                        //
+                        for (int rN = 4; rN <= sheet.Dimension.End.Row; rN++)
+                        {
+                            ExcelRange row = sheet.Cells[rN, 1, rN, sheet.Dimension.End.Column];
+                            DataRow newR = dt2.NewRow();
+                            foreach (var cell in row)
+                            {
+                                try
+                                {
+                                    if (cell.Text == null || cell.Text == "")
+                                        continue;
+                                    newR[cell.Start.Column - 1] = Convert.ChangeType(cell.Text, dt2.Columns[cell.Start.Column - 1].DataType);
+                                }
+                                catch (Exception ex)
+                                {
+                                    string status = ex.ToString();
+                                    status = status.Substring(0, (status.IndexOf("Exception") + 8));
+                                    m_errorLog.SetError("," + status);
+                                }
+                            }
+                            if (newR.IsEmpty())
+                            {
+                                m_errorLog.SetInformation($"Row {rN} is empty.");
+                                continue;
+                            }
+                            if (Convert.ToString(newR["name"]) == null || Convert.ToString(newR["name"]) == "")
+                            {
+                                m_errorLog.SetError($"[Row {rN}] Business name cannot be empty.");
+                            }
+                            if (Convert.ToString(newR["email"]) == null || Convert.ToString(newR["email"]) == "")
+                            {
+                                m_errorLog.SetError($"[Row {rN}] Business email cannot be empty.");
+                            }
+                            if (Convert.ToString(newR["contactPerson"]) == null || Convert.ToString(newR["contactPerson"]) == "")
+                            {
+                                m_errorLog.SetError($"[Row {rN}] Contact Person name cannot be empty.");
+                            }
+                            if (Convert.ToString(newR["contactNumber"]) == null || Convert.ToString(newR["contactNumber"]) == "")
+                            {
+                                m_errorLog.SetError($"[Row {rN}] Contact number cannot be empty.");
+                            }
+                            if (Convert.ToString(newR["website"]) == null || Convert.ToString(newR["website"]) == "")
+                            {
+                                m_errorLog.SetError($"[Row {rN}] Website cannot be empty.");
+                            }
+                            if (Convert.ToString(newR["location"]) == null || Convert.ToString(newR["location"]) == "")
+                            {
+                                m_errorLog.SetError($"[Row {rN}] Location details cannot be empty.");
+                            }
+                            if (Convert.ToString(newR["address"]) == null || Convert.ToString(newR["address"]) == "")
+                            {
+                                m_errorLog.SetError($"[Row {rN}] Address cannot be empty.");
+                            }
+                            if (Convert.ToString(newR["zip"]) == null || Convert.ToString(newR["zip"]) == "")
+                            {
+                                m_errorLog.SetError($"[Row {rN}] ZIP code cannot be empty.");
+                            }
+                            try
+                            {
+                                newR["type"] = businessTypes[Convert.ToString(newR["typeName"]).ToUpper()];
+                            }
+                            catch (KeyNotFoundException)
+                            {
+                                if (Convert.ToString(newR["typeName"]) == null || Convert.ToString(newR["typeName"]) == "")
+                                    m_errorLog.SetError($"[Row {rN}] Business Type cannot be empty.");
+                                else
+                                    m_errorLog.SetError($"[Row {rN}] Invalid Business Type.");
+                            }
+                            try
+                            {
+                                newR["countryId"] = countries[Convert.ToString(newR["country"]).ToUpper()];
+                                states.Clear();
+                                stateQry = $"SELECT id, UPPER(name) as name FROM states WHERE country_id = {newR["countryId"]};";
+                                dtState = await Context.FetchData(stateQry).ConfigureAwait(false);
+                                stateNames = dtState.GetColumn<string>("name");
+                                stateIds = dtState.GetColumn<int>("id");
+                                states.Merge(stateNames, stateIds);
+                                try
+                                {
+                                    newR["stateId"] = states[Convert.ToString(newR["state"]).ToUpper()];
+                                    cities.Clear();
+                                    cityQry = $"SELECT id, UPPER(name) as name FROM cities WHERE state_id = {newR["stateId"]};";
+                                    dtCity = await Context.FetchData(cityQry).ConfigureAwait(false);
+                                    cityNames = dtCity.GetColumn<string>("name");
+                                    cityIds = dtCity.GetColumn<int>("id");
+                                    cities.Merge(cityNames, cityIds);
+                                    try
+                                    {
+                                        newR["cityId"] = cities[Convert.ToString(newR["city"]).ToUpper()];
+                                    }
+                                    catch (KeyNotFoundException)
+                                    {
+                                        if (Convert.ToString(newR["city"]) == null || Convert.ToString(newR["city"]) == "")
+                                            m_errorLog.SetError($"City cannot be empty. [Row: {rN}]");
+                                        else
+                                            m_errorLog.SetError($"No city named {Convert.ToString(newR["city"])} found in state {Convert.ToString(newR["state"])}. [Row: {rN}]");
+                                    }
+                                }
+                                catch (KeyNotFoundException)
+                                {
+                                    if (Convert.ToString(newR["state"]) == null || Convert.ToString(newR["state"]) == "")
+                                        m_errorLog.SetError($"State cannot be empty. [Row: {rN}]");
+                                    else
+                                        m_errorLog.SetError($"No state named {Convert.ToString(newR["state"])} found in country {Convert.ToString(newR["country"])}. [Row: {rN}]");
+                                    m_errorLog.SetError($"Cannot access cities due to empty or invalid state name. [Row: {rN}]");
+                                }
+                            }
+                            catch (KeyNotFoundException)
+                            {
+                                if (Convert.ToString(newR["country"]) == null || Convert.ToString(newR["country"]) == "")
+                                    m_errorLog.SetError($"Country cannot be empty. [Row: {rN}]");
+                                else
+                                    m_errorLog.SetError($"No country named {Convert.ToString(newR["country"])} found. [Row: {rN}]");
+                                m_errorLog.SetError($"Cannot access states and cities due to empty or invalid country name. [Row: {rN}]");
+                            }
+                            dt2.Rows.Add(newR);
+
+                        }
+
+                        return dt2;
+                    }
+                }
+            }
+            return null;
+        }
+
+        internal async Task<CMImportFileResponse> ValidateBusiness(int file_id)
+        {
+            CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
+            DataTable businesses = await ConvertExcelToBusinesses(file_id);
+            string message;
+            if (businesses != null && businesses != null && m_errorLog.GetErrorCount() == 0)
+            {
+                m_errorLog.SetImportInformation("File ready to Import");
+                retCode = CMMS.RETRUNSTATUS.SUCCESS;
+                string qry = $"UPDATE uploadedfiles SET valid = 1 WHERE id = {file_id};";
+                await Context.ExecuteNonQry<int>(qry).ConfigureAwait(false);
+                message = "No errors found during validation";
+            }
+            else
+            {
+                string qry = $"UPDATE uploadedfiles SET valid = 2 WHERE id = {file_id};";
+                await Context.ExecuteNonQry<int>(qry).ConfigureAwait(false);
+                message = "Errors found during validation";
+            }
+            string logPath = m_errorLog.SaveAsText($"ImportLog\\ImportBusiness_File{file_id}_{DateTime.UtcNow.ToString("yyyyMMdd_HHmmss")}");
+            string logQry = $"UPDATE uploadedfiles SET logfile = '{logPath}' WHERE id = {file_id}";
+            await Context.ExecuteNonQry<int>(logQry).ConfigureAwait(false);
+            return new CMImportFileResponse(file_id, retCode, logPath, m_errorLog.errorLog(), message);
+        }
+
+        internal async Task<CMImportFileResponse> ImportBusiness(int file_id, int userID)
+        {
+            CMImportFileResponse response;
+            string qry = $"SELECT valid, logfile FROM uploadedfiles WHERE id = {file_id}";
+            DataTable dt = await Context.FetchData(qry).ConfigureAwait(false);
+            int valid = Convert.ToInt32(dt.Rows[0]["valid"]);
+            string logfile = Convert.ToString(dt.Rows[0]["logfile"]);
+            IEnumerable<string> log;
+            try
+            {
+                log = File.ReadAllLines(logfile);
+            }
+            catch
+            {
+                log = null;
+                logfile = null;
+            }
+            if (valid == 1)
+            {
+                DataTable dtBusinesses = await ConvertExcelToBusinesses(file_id);
+                if (dtBusinesses != null && m_errorLog.GetErrorCount() == 0)
+                {
+                    List<CMBusiness> businesses = dtBusinesses.MapTo<CMBusiness>();
+                    CMDefaultResponse response1 = await AddBusiness(businesses, userID);
+                    response = new CMImportFileResponse(response1.id, response1.return_status, logfile, log, response1.message);
+                }
+                else
+                {
+                    CMImportFileResponse response2 = new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, logfile, log, "Error while importing businesses. Please validate the file again.");
+                    response = response2;
+                }
+            }
+            else if (valid == 2)
+            {
+                CMImportFileResponse response3 = new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, logfile, log, "Cannot import businesses as file has some errors. Please correct the file and re-validate it");
+                response = response3;
+            }
+            else
+            {
+                await ValidateBusiness(file_id);
+                CMImportFileResponse response4 = await ImportBusiness(file_id, userID);
+                response = response4;
+            }
+            return response;
         }
     }
 

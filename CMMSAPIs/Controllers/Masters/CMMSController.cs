@@ -251,6 +251,23 @@ namespace CMMSAPIs.Controllers.Masters
             }
         }
 
+        [Authorize]
+        [Route("ImportBusiness")]
+        [HttpPost]
+        public async Task<IActionResult> ImportBusiness(int file_id)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _CMMSBS.ImportBusiness(file_id, userID);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         [Route("GetFinancialYear")]
         [HttpGet]
         public async Task<IActionResult> GetFinancialYear()
