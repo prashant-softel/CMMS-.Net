@@ -1,4 +1,4 @@
-﻿using CMMSAPIs.BS.SM;
+using CMMSAPIs.BS.SM;
 using CMMSAPIs.Helper;
 using CMMSAPIs.Models.SM;
 using CMMSAPIs.Models.Users;
@@ -40,7 +40,10 @@ namespace CMMSAPIs.Controllers.SM
             }
             catch (Exception ex)
             {
-                throw;
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid facility id is sent.";
+                return Ok(item);
             }
         }
 
@@ -57,7 +60,10 @@ namespace CMMSAPIs.Controllers.SM
             }
             catch (Exception ex)
             {
-                throw;
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid employee id or facility id is sent.";
+                return Ok(item);
             }
         }
 
@@ -74,7 +80,10 @@ namespace CMMSAPIs.Controllers.SM
             }
             catch (Exception ex)
             {
-                throw;
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Data failed while fetching.";
+                return Ok(item);
             }
         }
 
@@ -91,7 +100,10 @@ namespace CMMSAPIs.Controllers.SM
             }
             catch (Exception ex)
             {
-                throw;
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid employee id or facility id is sent.";
+                return Ok(item);
             }
         }
 
@@ -107,7 +119,10 @@ namespace CMMSAPIs.Controllers.SM
             }
             catch (Exception ex)
             {
-                throw;
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid employee id or facility id is sent.";
+                return Ok(item);
             }
         }
     }
