@@ -46,7 +46,8 @@ namespace CMMSAPIs.Repositories.SM
 
             string stmt = "SELECT sm.ID,sm.requested_by_emp_ID,CONCAT(ed1.firstName,' ',ed1.lastName) as approver_name,DATE_FORMAT(sm.requested_date,'%Y-%m-%d') as requestd_date," +
                 "DATE_FORMAT(sm.returnDate,'%Y-%m-%d') as returnDate,if(sm.approval_status != '',DATE_FORMAT(sm.approved_date,'%d-%m-%Y'),'') as approval_date,sm.approval_status," +
-                "sm.approval_comment,CONCAT(ed.firstName,' ',ed.lastName) as requested_by_name, sm.status, sm.activity, sm.whereUsedType, sm.whereUsedTypeId, sm.remarks " +
+                "sm.approval_comment,CONCAT(ed.firstName,' ',ed.lastName) as requested_by_name, sm.status, sm.activity, sm.whereUsedType, " +
+                " case when sm.whereUsedType = 1 then 'Job' when sm.whereUsedType = 2 then 'PM' else 'Invalid' end as whereUsedTypeName, sm.whereUsedRefID, sm.remarks " +
                 "FROM smmrs sm LEFT JOIN users ed ON ed.id = sm.requested_by_emp_ID LEFT JOIN users ed1 ON ed1.id = sm.approved_by_emp_ID " +
                 ""+ filter + "";
             List<CMMRSList> _List = await Context.GetData<CMMRSList>(stmt).ConfigureAwait(false);
@@ -77,7 +78,7 @@ namespace CMMSAPIs.Repositories.SM
                 Id = _pm[0].jobId;
             }
 
-            string stmt = $"SELECT sm.ID as mrsId , jc.jobId as jobId, sm.whereUsedTypeId as jobCardId, sm.status as status,group_concat(distinct assets.name order by assets.id separator ', ') as mrsItems FROM smmrs sm left join smrsitems on smrsitems.mrs_ID = sm.ID left join assets on smrsitems.asset_item_ID = assets.id Left Join jobcards jc on jc.id = sm.whereUsedTypeId  where jc.jobId = {Id} group by mrsId";
+            string stmt = $"SELECT sm.ID as mrsId , jc.jobId as jobId, sm.whereUsedRefID as jobCardId, sm.status as status,group_concat(distinct assets.name order by assets.id separator ', ') as mrsItems FROM smmrs sm left join smrsitems on smrsitems.mrs_ID = sm.ID left join assets on smrsitems.asset_item_ID = assets.id Left Join jobcards jc on jc.id = sm.whereUsedRefID  where jc.jobId = {Id} group by mrsId";
 
             List<CMMRSListByModule> _List = await Context.GetData<CMMRSListByModule>(stmt).ConfigureAwait(false);
 
@@ -145,7 +146,7 @@ namespace CMMSAPIs.Repositories.SM
                 var refType = "MRSEdit";
                 var mailSub = "CMMRS Request Updated";
                 string updatestmt = $" START TRANSACTION; UPDATE smmrs SET facility_ID = {request.facility_ID}, requested_by_emp_ID = {request.requested_by_emp_ID}, requested_date = {DateTime.Now.ToString("yyyy-MM-dd")}," +
-                    $" setAsTemplate = '{request.setAsTemplate}', templateName = {request.templateName}, approval_status = {request.approval_status}, activity='{request.activity}',whereUsedType={request.whereUsedType},whereUsedTypeId={request.whereUsedTypeId}, remarks = '{request.remarks}' WHERE ID = {request.ID}" +
+                    $" setAsTemplate = '{request.setAsTemplate}', templateName = {request.templateName}, approval_status = {request.approval_status}, activity='{request.activity}',whereUsedType={request.whereUsedType},whereUsedRefID={request.whereUsedRefID}, remarks = '{request.remarks}' WHERE ID = {request.ID}" +
                     $"DELETE FROM smrsitems WHERE mrs_ID =  {lastMRSID} ; COMMIT;";
                 await Context.ExecuteNonQry<int>(updatestmt);
 
@@ -155,8 +156,8 @@ namespace CMMSAPIs.Repositories.SM
                 var refType = "MRS";
                 var mailSub = "MRS Request";
                 string insertStmt = $"START TRANSACTION; INSERT INTO smmrs (facility_ID,requested_by_emp_ID,requested_date," +
-                    $"status,flag,setAsTemplate,templateName, approved_by_emp_ID, approved_date,activity,whereUsedType,whereUsedTypeId,remarks)\r\n VALUES ({request.facility_ID},{request.requested_by_emp_ID},'{DateTime.Now.ToString("yyyy-MM-dd")}'" +
-                    $",{(int)CMMS.CMMS_Status.MRS_SUBMITTED},{1},'{request.setAsTemplate}','{request.templateName}',0,'2001-01-01 00:00','{request.activity}',{request.whereUsedType},{request.whereUsedTypeId}, '{request.remarks}'); SELECT LAST_INSERT_ID(); COMMIT;";
+                    $"status,flag,setAsTemplate,templateName, approved_by_emp_ID, approved_date,activity,whereUsedType,whereUsedRefID,remarks)\r\n VALUES ({request.facility_ID},{request.requested_by_emp_ID},'{DateTime.Now.ToString("yyyy-MM-dd")}'" +
+                    $",{(int)CMMS.CMMS_Status.MRS_SUBMITTED},{1},'{request.setAsTemplate}','{request.templateName}',0,'2001-01-01 00:00','{request.activity}',{request.whereUsedType},{request.whereUsedRefID}, '{request.remarks}'); SELECT LAST_INSERT_ID(); COMMIT;";
                 DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
                 request.ID = Convert.ToInt32(dt2.Rows[0][0]);
             }
@@ -225,7 +226,7 @@ namespace CMMSAPIs.Repositories.SM
             CMDefaultResponse response = null;
 
             string updatestmt = $" START TRANSACTION; UPDATE smmrs SET facility_ID = {request.facility_ID}, requested_by_emp_ID = {request.requested_by_emp_ID}, requested_date = '{DateTime.Now.ToString("yyyy-MM-dd")}'," +
-                                $" setAsTemplate = '{request.setAsTemplate}',  approval_status = {request.approval_status}, activity='{request.activity}',whereUsedType={request.whereUsedType},whereUsedTypeId={request.whereUsedTypeId}, remarks = '{request.remarks}' WHERE ID = {request.ID} ;" +
+                                $" setAsTemplate = '{request.setAsTemplate}',  approval_status = {request.approval_status}, activity='{request.activity}',whereUsedType={request.whereUsedType},whereUsedRefID={request.whereUsedRefID}, remarks = '{request.remarks}' WHERE ID = {request.ID} ;" +
                                 $"DELETE FROM smrsitems WHERE mrs_ID =  {lastMRSID} ;COMMIT;";
             await Context.ExecuteNonQry<int>(updatestmt);
             for (var i = 0; i < request.cmmrsItems.Count; i++)
@@ -398,7 +399,8 @@ namespace CMMSAPIs.Repositories.SM
             //return _List;
             string stmt = "SELECT sm.ID,sm.requested_by_emp_ID,CONCAT(ed1.firstName,' ',ed1.lastName) as approver_name,DATE_FORMAT(sm.requested_date,'%Y-%m-%d') as requestd_date," +
     "DATE_FORMAT(sm.returnDate,'%Y-%m-%d') as returnDate,if(sm.approval_status != '',DATE_FORMAT(sm.approved_date,'%d-%m-%Y'),'') as approval_date,sm.approval_status," +
-    "sm.approval_comment,CONCAT(ed.firstName,' ',ed.lastName) as requested_by_name, sm.status, sm.activity, sm.whereUsedType, sm.whereUsedTypeId, sm.remarks " +
+    "sm.approval_comment,CONCAT(ed.firstName,' ',ed.lastName) as requested_by_name, sm.status, sm.activity, sm.whereUsedType," +
+    " case when sm.whereUsedType = 1 then 'Job' when sm.whereUsedType = 2 then 'PM' else 'Invalid' end as whereUsedTypeName,  sm.whereUsedRefID, sm.remarks " +
     "FROM smmrs sm LEFT JOIN users ed ON ed.id = sm.requested_by_emp_ID LEFT JOIN users ed1 ON ed1.id = sm.approved_by_emp_ID " +
     "WHERE sm.id = "+ID+"";
             List<CMMRSList> _List = await Context.GetData<CMMRSList>(stmt).ConfigureAwait(false);
@@ -418,7 +420,8 @@ namespace CMMSAPIs.Repositories.SM
         {
             string stmt = "SELECT sm.ID,sm.requested_by_emp_ID as requested_by_emp_ID,CONCAT(ed1.firstName,' ',ed1.lastName) as approver_name," +
     "DATE_FORMAT(sm.returnDate,'%Y-%m-%d') as returnDate,if(sm.approval_status != '',DATE_FORMAT(sm.approved_date,'%d-%m-%Y'),'') as approval_date,sm.approval_status," +
-    "sm.approval_comment,CONCAT(ed.firstName,' ',ed.lastName) as requested_by_name, sm.status, sm.activity, sm.whereUsedType, sm.whereUsedTypeId, COALESCE(sm.remarks,'') as  remarks " +
+    "sm.approval_comment,CONCAT(ed.firstName,' ',ed.lastName) as requested_by_name, sm.status, sm.activity, sm.whereUsedType, " +
+    " case when sm.whereUsedType = 1 then 'Job' when sm.whereUsedType = 2 then 'PM' else 'Invalid' end as whereUsedTypeName, sm.whereUsedRefID, COALESCE(sm.remarks,'') as  remarks " +
     "FROM smmrs sm LEFT JOIN users ed ON ed.id = sm.requested_by_emp_ID LEFT JOIN users ed1 ON ed1.id = sm.approved_by_emp_ID " +
     " WHERE sm.ID = " + ID + "  and sm.flag = 2";
             List<CMMRSList> _List = await Context.GetData<CMMRSList>(stmt).ConfigureAwait(false);
@@ -680,7 +683,7 @@ namespace CMMSAPIs.Repositories.SM
                 var refType = "MRSReturnEdit";
                 var mailSub = "MRS Return Request Updated.";
                 string updatestmt = $" START TRANSACTION; UPDATE smmrs SET facility_ID = {request.facility_ID}, requested_by_emp_ID = {UserID}, requested_date = '{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}'," +
-                    $" activity='{request.activity}',whereUsedType={request.whereUsedType},whereUsedTypeId={request.whereUsedTypeId} WHERE ID = {request.ID}" +
+                    $" activity='{request.activity}',whereUsedType={request.whereUsedType},whereUsedRefID={request.whereUsedRefID} WHERE ID = {request.ID}" +
                     $" ; DELETE FROM smrsitems WHERE mrs_ID =  {lastMRSID} ; COMMIT;";
                 try
                 {
@@ -697,8 +700,8 @@ namespace CMMSAPIs.Repositories.SM
                 var refType = "MRSReturn";
                 var mailSub = "MRS Return Request";
                 string insertStmt = $"START TRANSACTION; INSERT INTO smmrs (facility_ID,requested_by_emp_ID,requested_date," +
-                    $"returnDate,status,flag, activity,whereUsedType,whereUsedTypeId)\r\n VALUES ({request.facility_ID},{UserID},'{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}'" +
-                    $",'{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}',{(int)CMMS.CMMS_Status.MRS_SUBMITTED}, {2},'{request.activity}',{request.whereUsedType},{request.whereUsedTypeId}); SELECT LAST_INSERT_ID(); COMMIT;";
+                    $"returnDate,status,flag, activity,whereUsedType,whereUsedRefID)\r\n VALUES ({request.facility_ID},{UserID},'{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}'" +
+                    $",'{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}',{(int)CMMS.CMMS_Status.MRS_SUBMITTED}, {2},'{request.activity}',{request.whereUsedType},{request.whereUsedRefID}); SELECT LAST_INSERT_ID(); COMMIT;";
                 try
                 {
                     DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
@@ -1170,7 +1173,7 @@ namespace CMMSAPIs.Repositories.SM
         {
             string stmt = "SELECT sm.ID,sm.requested_by_emp_ID as requested_by_emp_ID,CONCAT(ed1.firstName,' ',ed1.lastName) as approver_name," +
     "DATE_FORMAT(sm.returnDate,'%Y-%m-%d') as returnDate,if(sm.approval_status != '',DATE_FORMAT(sm.approved_date,'%d-%m-%Y'),'') as approval_date,sm.approval_status," +
-    "sm.approval_comment,CONCAT(ed.firstName,' ',ed.lastName) as requested_by_name, sm.status, sm.activity, sm.whereUsedType, sm.whereUsedTypeId, COALESCE(sm.remarks,'') as  remarks " +
+    "sm.approval_comment,CONCAT(ed.firstName,' ',ed.lastName) as requested_by_name, sm.status, sm.activity, sm.whereUsedType, sm.whereUsedRefID, COALESCE(sm.remarks,'') as  remarks " +
     "FROM smmrs sm LEFT JOIN users ed ON ed.id = sm.requested_by_emp_ID LEFT JOIN users ed1 ON ed1.id = sm.approved_by_emp_ID " +
     " WHERE sm.facility_ID = " + facility_ID + "  and sm.requested_by_emp_ID = "+ emp_id + " and sm.flag = 2";
             List<CMMRSList> _List = await Context.GetData<CMMRSList>(stmt).ConfigureAwait(false);
