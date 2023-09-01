@@ -86,16 +86,16 @@ namespace CMMSAPIs.Repositories.Inventory
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, child, 0, 0, "Parent assigned", CMMS.CMMS_Status.UPDATED, userID);
             return new CMDefaultResponse(child, CMMS.RETRUNSTATUS.SUCCESS, $"Asset no. {parent} assigned as parent to Asset no. {child}.");
         }
-        internal async Task<CMImportFileResponse> ImportInventories(int file_id, int userID)
+        internal async Task<CMImportFileResponse> ImportInventories(int file_id, int facility_id, int userID)
         {
             CMImportFileResponse response = null;
-
+            /*
             string queryAsset = "SELECT id, UPPER(name) as name FROM assets GROUP BY name ORDER BY id ASC;";
             DataTable dtAsset = await Context.FetchData(queryAsset).ConfigureAwait(false);
             List<string> assetNames = dtAsset.GetColumn<string>("name");
             List<int> assetIDs = dtAsset.GetColumn<int>("id");
             Dictionary<string, int> assets = new Dictionary<string, int>();
-            assets.Merge(assetNames, assetIDs);
+            assets.Merge(assetNames, assetIDs);/**/
 
             string queryCat = "SELECT id, UPPER(name) as name FROM assetcategories GROUP BY name ORDER BY id ASC;";
             DataTable dtCat = await Context.FetchData(queryCat).ConfigureAwait(false);
@@ -118,12 +118,19 @@ namespace CMMSAPIs.Repositories.Inventory
             Dictionary<string, int> businessTypes = new Dictionary<string, int>();
             businessTypes.Merge(businessTypeNames, businessTypeIDs);
 
-            string queryFacility = "SELECT id, UPPER(name) as name FROM facilities GROUP BY name ORDER BY id ASC;";
+            string queryFacility = $"SELECT id, UPPER(name) as name FROM facilities WHERE parentId = {facility_id} OR id = {facility_id} GROUP BY name ORDER BY id ASC;";
             DataTable dtFacility = await Context.FetchData(queryFacility).ConfigureAwait(false);
             List<string> facilityNames = dtFacility.GetColumn<string>("name");
             List<int> facilityIDs = dtFacility.GetColumn<int>("id");
             Dictionary<string, int> facilities = new Dictionary<string, int>();
             facilities.Merge(facilityNames, facilityIDs);
+
+            string queryPlant = "SELECT id, UPPER(name) as name FROM facilities WHERE parentId = 0 GROUP BY name ORDER BY id ASC;";
+            DataTable dtPlant = await Context.FetchData(queryPlant).ConfigureAwait(false);
+            List<string> plantNames = dtPlant.GetColumn<string>("name");
+            List<int> plantIDs = dtPlant.GetColumn<int>("id");
+            Dictionary<int, string> plants = new Dictionary<int, string>();
+            plants.Merge(plantIDs, plantNames);
 
             string queryAssetStatus = "SELECT id, UPPER(name) as name FROM assetstatus GROUP BY name ORDER BY id ASC;";
             DataTable dtAssetStatus = await Context.FetchData(queryAssetStatus).ConfigureAwait(false);
@@ -146,12 +153,12 @@ namespace CMMSAPIs.Repositories.Inventory
             Dictionary<string, int> currencies = new Dictionary<string, int>();
             currencies.Merge(currencyCodes, currencyIDs);
 
-            string queryMapBlocks = "SELECT id, CASE WHEN parentId=0 THEN id ELSE parentId END as parent FROM facilities;";
+            /*string queryMapBlocks = "SELECT id, CASE WHEN parentId=0 THEN id ELSE parentId END as parent FROM facilities;";
             DataTable dtMapBlocks = await Context.FetchData(queryMapBlocks).ConfigureAwait(false);
             List<int> blockParents = dtMapBlocks.GetColumn<int>("parent");
             List<int> blockIDs = dtMapBlocks.GetColumn<int>("id");
             Dictionary<int, int> mapBlockToParent = new Dictionary<int, int>();
-            mapBlockToParent.Merge(blockIDs, blockParents);
+            mapBlockToParent.Merge(blockIDs, blockParents);/**/
 
             string queryWarrantyType = "SELECT id, UPPER(name) as name FROM warrantytype GROUP BY name ORDER BY id ASC;";
             DataTable dtWarrantyTypes = await Context.FetchData(queryWarrantyType).ConfigureAwait(false);
@@ -307,22 +314,11 @@ namespace CMMSAPIs.Repositories.Inventory
                             try
                             {
                                 newR["blockId"] = facilities[Convert.ToString(newR["blockName"]).ToUpper()];
+                                newR["facilityId"] = facility_id;
                             }
                             catch (KeyNotFoundException)
                             {
-                                m_errorLog.SetError($"[Row: {rN}] Invalid Block named '{newR["blockName"]}'.");
-                            }
-                            try
-                            {
-                                newR["facilityId"] = mapBlockToParent[Convert.ToInt32(newR["blockId"])];
-                            }
-                            catch (InvalidCastException)
-                            {
-                                m_errorLog.SetError($"[Row: {rN}] Facility cannot be linked to asset if block named '{newR["blockName"]}' does not exist.");
-                            }
-                            catch (KeyNotFoundException)
-                            {
-                                m_errorLog.SetError($"[Row: {rN}] Facility cannot be linked to asset if block named '{newR["blockName"]}' does not exist.");
+                                m_errorLog.SetError($"[Row: {rN}] Block named '{newR["blockName"]}' does not exist in plant '{plants[facility_id]}'.");
                             }
                             try
                             {
@@ -534,7 +530,7 @@ namespace CMMSAPIs.Repositories.Inventory
                         }
                         if (m_errorLog.GetErrorCount() == 0)
                         {
-                            string assetQry = "SELECT name FROM assets";
+                            string assetQry = $"SELECT name FROM assets WHERE facilityId = {facility_id};";
                             DataTable assetDt = await Context.FetchData(assetQry).ConfigureAwait(false);
 
                             List<List<string>> assetList = new List<List<string>>() { assetDt.GetColumn<string>("name") };
@@ -572,7 +568,7 @@ namespace CMMSAPIs.Repositories.Inventory
 
                             foreach (DataTable dtUsers in assetPriority)
                             {
-                                idList.AddRange((await AddInventoryWithParent(dtUsers, userID)).id);
+                                idList.AddRange((await AddInventoryWithParent(dtUsers, facility_id, userID)).id);
                             }
 
                             response = new CMImportFileResponse(idList, CMMS.RETRUNSTATUS.SUCCESS, null, null, $"{idList.Count} new assets added.");
@@ -602,9 +598,9 @@ namespace CMMSAPIs.Repositories.Inventory
             //return response;*/
         }
 
-        internal async Task<CMDefaultResponse> AddInventoryWithParent(DataTable assets, int userID)
+        internal async Task<CMDefaultResponse> AddInventoryWithParent(DataTable assets, int facility_id, int userID)
         {
-            string assetQry = "SELECT id, UPPER(name) as name FROM assets GROUP BY name ORDER BY id;";
+            string assetQry = $"SELECT id, UPPER(name) as name FROM assets WHERE facilityId = {facility_id} GROUP BY name ORDER BY id;";
             DataTable dtAsset = await Context.FetchData(assetQry).ConfigureAwait(false);
             List<string> assetNames = dtAsset.GetColumn<string>("name");
             List<int> assetIds = dtAsset.GetColumn<int>("id");
@@ -666,7 +662,7 @@ namespace CMMSAPIs.Repositories.Inventory
                 "" +
                 "left JOIN facilities as linkedbl ON linkedbl.id = a.linkedToBlockId " +
                 "" +
-                "left JOIN facilities as bl ON bl.id = a.blockId   WHERE a.statusId = 1";
+                "left JOIN facilities as bl ON bl.id = a.blockId   WHERE a.statusId != 0 AND a.status = 1 ";
 
             myQuery += (facilityId > 0 ? " AND a.facilityId= " + facilityId  + "" : " ");
             myQuery += (linkedToBlockId > 0 ? " AND a.linkedToBlockId= " + linkedToBlockId + "" : " ");
@@ -1076,8 +1072,8 @@ string warrantyQry = "insert into assetwarranty
 
             await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_DELETED, new[] { userID }, _inventoryAdded);
 
-            string delQuery1 = $"DELETE FROM assets WHERE id = {id}";
-            string delQuery2 = $"DELETE FROM assetwarranty where asset_id = {id}";
+            string delQuery1 = $"UPDATE assets SET statusId = 0, status = 0 WHERE id = {id}";
+            string delQuery2 = $"UPDATE assetwarranty SET status = 0 where asset_id = {id}";
             await Context.GetData<List<int>>(delQuery1).ConfigureAwait(false);
             await Context.GetData<List<int>>(delQuery2).ConfigureAwait(false);
 

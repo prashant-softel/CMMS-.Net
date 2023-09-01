@@ -1,0 +1,63 @@
+Error : [Checklist: Row 5] Facility Name cannot be empty.
+Error : [Checklist: Row 5] Checklist Type cannot be empty.
+Error : [Checklist: Row 5] Frequency Name cannot be empty.
+Error : [Checklist: Row 5] Asset Category Name cannot be empty.
+Error : [Checklist: Row 5] Manpower value cannot be empty or 0.
+Error : [Checklist: Row 5] Duration cannot be empty or 0.
+Error : [Checklist: Row 6] Checklist name cannot be empty.
+Error : [Checklist: Row 6] Checklist Type cannot be empty.
+Error : [Checklist: Row 6] Frequency Name cannot be empty.
+Error : [Checklist: Row 6] Asset Category Name cannot be empty.
+Error : [Checklist: Row 6] Manpower value cannot be empty or 0.
+Error : [Checklist: Row 6] Duration cannot be empty or 0.
+Error : [Checklist: Row 7] Facility Name cannot be empty.
+Error : [Checklist: Row 7] Checklist name cannot be empty.
+Error : [Checklist: Row 7] Frequency Name cannot be empty.
+Error : [Checklist: Row 7] Asset Category Name cannot be empty.
+Error : [Checklist: Row 7] Manpower value cannot be empty or 0.
+Error : [Checklist: Row 7] Duration cannot be empty or 0.
+Error : [Checklist: Row 8] Facility Name cannot be empty.
+Error : [Checklist: Row 8] Checklist name cannot be empty.
+Error : [Checklist: Row 8] Checklist Type cannot be empty.
+Error : [Checklist: Row 8] Asset Category Name cannot be empty.
+Error : [Checklist: Row 8] Manpower value cannot be empty or 0.
+Error : [Checklist: Row 8] Duration cannot be empty or 0.
+Error : [Checklist: Row 9] Facility Name cannot be empty.
+Error : [Checklist: Row 9] Checklist name cannot be empty.
+Error : [Checklist: Row 9] Checklist Type cannot be empty.
+Error : [Checklist: Row 9] Frequency Name cannot be empty.
+Error : [Checklist: Row 9] Manpower value cannot be empty or 0.
+Error : [Checklist: Row 9] Duration cannot be empty or 0.
+Error : [Checklist: Row 10] Facility Name cannot be empty.
+Error : [Checklist: Row 10] Checklist name cannot be empty.
+Error : [Checklist: Row 10] Checklist Type cannot be empty.
+Error : [Checklist: Row 10] Frequency Name cannot be empty.
+Error : [Checklist: Row 10] Asset Category Name cannot be empty.
+Error : [Checklist: Row 10] Duration cannot be empty or 0.
+Information : [Checklist] Row 11 is empty.
+Error : [Checklist: Row 12] Facility Name cannot be empty.
+Error : [Checklist: Row 12] Checklist name cannot be empty.
+Error : [Checklist: Row 12] Checklist Type cannot be empty.
+Error : [Checklist: Row 12] Frequency Name cannot be empty.
+Error : [Checklist: Row 12] Asset Category Name cannot be empty.
+Error : [Checklist: Row 12] Manpower value cannot be empty or 0.
+Error : [Checkpoint: Row 6] Checkpoint name cannot be empty.
+Error : [Checkpoint: Row 6] Checklist 'Checklist_FPS_003' not found.
+Error : [Checkpoint: Row 6] Requirement cannot be empty.
+Information : [Checkpoint: Row 6] Is Document Required set to False by default
+Error : [Checkpoint: Row 7] Checklist Name cannot be empty.
+Error : [Checkpoint: Row 7] Requirement cannot be empty.
+Information : [Checkpoint: Row 7] Is Document Required set to False by default
+Error : [Checkpoint: Row 8] Checkpoint name cannot be empty.
+Error : [Checkpoint: Row 8] Checklist Name cannot be empty.
+Information : [Checkpoint: Row 8] Is Document Required set to False by default
+Error : [Checkpoint: Row 9] Checkpoint name cannot be empty.
+Error : [Checkpoint: Row 9] Checklist Name cannot be empty.
+Error : [Checkpoint: Row 9] Requirement cannot be empty.
+Error : [Checkpoint: Row 9] Invalid answer '!!'
+Information : [Checkpoint] Row 10 is empty.
+Error : [Checkpoint: Row 11] Checkpoint name cannot be empty.
+Error : [Checkpoint: Row 11] Checklist Name cannot be empty.
+Error : [Checkpoint: Row 11] Requirement cannot be empty.
+Information : [Checkpoint: Row 11] Is Document Required set to False by default
+Total errors <56>

@@ -16,7 +16,7 @@ namespace CMMSAPIs.BS.Inventory
         Task<List<CMInventoryList>> GetInventoryList(int facilityId, int linkedToBlockId, int status, string categoryIds);
         Task<CMViewInventory> GetInventoryDetails(int id);
         Task<CMDefaultResponse> AddInventory(List<CMAddInventory> request, int userID);
-        Task<CMImportFileResponse> ImportInventories(int file_id, int userID);
+        Task<CMImportFileResponse> ImportInventories(int file_id, int facility_id, int userID);
         Task<CMDefaultResponse> UpdateInventory(CMAddInventory request, int userID);
         Task<CMDefaultResponse> DeleteInventory(int id, int userID);
         Task<List<CMInventoryTypeList>> GetInventoryTypeList();
@@ -129,13 +129,13 @@ namespace CMMSAPIs.BS.Inventory
             }
         }
 
-        public async Task<CMImportFileResponse> ImportInventories(int file_id, int userID)
+        public async Task<CMImportFileResponse> ImportInventories(int file_id, int facility_id, int userID)
         {
             try
             {
                 using (var repos = new InventoryRepository(getDB, _environment))
                 {
-                    return await repos.ImportInventories(file_id, userID);
+                    return await repos.ImportInventories(file_id, facility_id, userID);
                 }
             }
             catch (Exception)

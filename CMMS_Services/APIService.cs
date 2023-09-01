@@ -9,7 +9,7 @@ namespace CMMS_Services
     public class APIService<T>
     {
         private string token;
-        public string baseUrl = "http://3.111.196.218/CMMS_API";
+        public string baseUrl = "http://65.0.20.19/CMMS_API";
         private static string username = "sujit@softeltech.in";
         private static string password = "Sujit123";
         //public string baseUrl = "http://localhost:23835";
@@ -89,7 +89,7 @@ namespace CMMS_Services
             }
         }
 
-        public List<T> GetItemList(string endPoint)
+        public List<T> GetItemList(string endPoint) // to get multiple items in a GET Request
         {
             //SetToken();
             var apiHelper = new APIHelper<T>(token);
@@ -100,7 +100,7 @@ namespace CMMS_Services
             return content;
         }
 
-        public T GetItem(string endPoint)
+        public T GetItem(string endPoint) // to get a single item in a GET Request
         {
             //SetToken();
             var apiHelper = new APIHelper<T>(token);
@@ -114,7 +114,7 @@ namespace CMMS_Services
 
         }
 
-        public T CreateItem(string endPoint, dynamic payload)
+        public T CreateItem(string endPoint, dynamic payload) // to get a single response after sending a POST request
         {
             //SetToken();
             var apiHelper = new APIHelper<T>(token);
@@ -124,7 +124,7 @@ namespace CMMS_Services
             T content = apiHelper.GetContent(response);
             return content;
         }
-        public List<T> CreateItems(string endPoint, dynamic payload)
+        public List<T> CreateItems(string endPoint, dynamic payload) // to get multiple responses after sending POST request
         {
             //SetToken();
             var apiHelper = new APIHelper<T>(token);
@@ -135,7 +135,7 @@ namespace CMMS_Services
             return content;
         }
 
-        public List<T> PostService(string endPoint, dynamic payload)
+        public List<T> PostService(string endPoint, dynamic payload) // for running POST requests (accept JSON data)
         {
             //SetToken();
             var apiHelper = new APIHelper<T>(token);
@@ -146,7 +146,10 @@ namespace CMMS_Services
             content.Add(apiHelper.GetContent(response));
             return content;
         }
-        public List<T> FormPostService(string endPoint, Dictionary<string, Tuple<bool,List<string>>> payload)
+
+
+        // also for running POST requests (accept form data, for accepting files)
+        public List<T> FormPostService(string endPoint, Dictionary<string, Tuple<bool,List<string>>> payload) 
         {
             var apiHelper = new APIHelper<T>(token);
             var url = apiHelper.SetUrl(endPoint);
@@ -156,6 +159,8 @@ namespace CMMS_Services
             content.Add(apiHelper.GetContent(response));
             return content;
         }
+
+        // also for running POST requests (accept form data, without accepting any file)
         public List<T> FormPostService(string endPoint, Dictionary<string, string> payload)
         {
             //SetToken();
@@ -167,6 +172,8 @@ namespace CMMS_Services
             content.Add(apiHelper.GetContent(response));
             return content;
         }
+
+        // for running PUT requests (accepting JSON data)
         public List<T> PutService(string endPoint, dynamic payload)
         {
             //SetToken();
@@ -178,6 +185,7 @@ namespace CMMS_Services
             content.Add(apiHelper.GetContent(response));
             return content;
         }
+
         public List<T> FormPutService(string endPoint, Dictionary<string, Tuple<bool, List<string>>> payload)
         {
             var apiHelper = new APIHelper<T>(token);

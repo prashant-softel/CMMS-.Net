@@ -18,7 +18,114 @@ namespace CMMSAPIs.Repositories.PM
         {
             _utilsRepo = new UtilsRepository(sqlDBHelper);
         }
+        internal async Task<CMDefaultResponse> CreatePMPlan(CMPMPlanDetail pm_plan, int userID)
+        {
+            string checklistIDsQry = $"SELECT id FROM checklist_number WHERE facility_id = {pm_plan.facility_id} " +
+                                        $"AND asset_category_id = {pm_plan.category_id} AND frequency_id = {pm_plan.plan_freq_id} " +
+                                        $"AND checklist_type = 1; ";
+            DataTable dt1 = await Context.FetchData(checklistIDsQry).ConfigureAwait(false);
+            List<int> checklistIDs = dt1.GetColumn<int>("id");
+            string assetIDsQry = $"SELECT id FROM assets WHERE facilityId = {pm_plan.facility_id} AND categoryId = {pm_plan.category_id}; ";
+            DataTable dt2 = await Context.FetchData(assetIDsQry).ConfigureAwait(false);
+            List<int> assetIDs = dt2.GetColumn<int>("id");
+            List<int> invalidChecklists = new List<int>();
+            List<int> invalidAssets = new List<int>();
+            foreach (var map in pm_plan.mapAssetChecklist)
+            {
+                if(!checklistIDs.Contains(map.checklist_id))
+                    invalidChecklists.Add(map.checklist_id);
+                if(!assetIDs.Contains(map.asset_id))
+                    invalidAssets.Add(map.asset_id);
+            }
+            if (invalidChecklists.Count > 0 || invalidAssets.Count > 0)
+                return new CMDefaultResponse(0, CMMS.RETRUNSTATUS.INVALID_ARG,
+                    $"{invalidChecklists.Count} invalid checklists [{string.Join(',', invalidChecklists)}] " +
+                    $"and {invalidAssets.Count} invalid assets [{string.Join(',', invalidAssets)}] linked");
 
+            string addPlanQry = $"INSERT INTO pm_plan(plan_name, facility_id, category_id, frequency_id, " +
+                                $"status, plan_date, created_by, created_at, updated_by, updated_at) VALUES " +
+                                $"('{pm_plan.plan_name}', {pm_plan.facility_id}, {pm_plan.category_id}, {pm_plan.plan_freq_id}, " +
+                                $"{(int)CMMS.CMMS_Status.PM_PLAN_CREATED}, '{pm_plan.plan_date.ToString("yyyy-MM-dd")}', " +
+                                $"{userID}, '{UtilsRepository.GetUTCTime()}', {userID}, '{UtilsRepository.GetUTCTime()}'); " +
+                                $"SELECT LAST_INSERT_ID(); ";
+            DataTable dt3 = await Context.FetchData(addPlanQry).ConfigureAwait(false);
+            int id = Convert.ToInt32(dt3.Rows[0][0]);
+
+            string mapChecklistQry = "INSERT INTO pmplanassetchecklist(planId, assetId, checklistId) VALUES ";
+            foreach(var map in pm_plan.mapAssetChecklist)
+            {
+                mapChecklistQry += $"({id}, {map.asset_id}, {map.checklist_id}), ";
+            }
+            mapChecklistQry = mapChecklistQry.Substring(0, mapChecklistQry.Length - 2) + ";";
+            await Context.ExecuteNonQry<int>(mapChecklistQry).ConfigureAwait(false);
+
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_PLAN, id, 0, 0, "PM Plan added", CMMS.CMMS_Status.PM_PLAN_CREATED, userID);
+            CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Plan added successfully");
+            return response;
+        }
+        
+        internal async Task<List<CMPMPlanList>> GetPMPlanList(int facility_id, int category_id, int frequency_id, DateTime? start_date, DateTime? end_date)
+        {
+            if (facility_id <= 0)
+                throw new ArgumentException("Invalid Facility ID");
+            string planListQry = $"SELECT plan.id as plan_id, plan.plan_name, plan.status as status_id, statuses.statusName as status_name, plan.plan_date, " +
+                                    $"facilities.id as facility_id, facilities.name as facility_name, category.id as category_id, category.name as category_name, " +
+                                    $"frequency.id as plan_freq_id, frequency.name as plan_freq_name, createdBy.id as created_by_id, " +
+                                    $"CONCAT(createdBy.firstName, ' ', createdBy.lastName) as created_by_name, plan.created_at, " +
+                                    $"updatedBy.id as updated_by_id, CONCAT(updatedBy.firstName, ' ', updatedBy.lastName) as updated_by_name, plan.updated_at " +
+                                    $"FROM pm_plan as plan " +
+                                    $"LEFT JOIN statuses ON plan.status = statuses.softwareId " +
+                                    $"JOIN facilities ON plan.facility_id = facilities.id " +
+                                    $"LEFT JOIN assetcategories as category ON plan.category_id = category.id " +
+                                    $"LEFT JOIN frequency ON plan.frequency_id = frequency.id " +
+                                    $"LEFT JOIN users as createdBy ON createdBy.id = plan.created_by " +
+                                    $"LEFT JOIN users as updatedBy ON updatedBy.id = plan.updated_by " +
+                                    $"WHERE facilities.id = {facility_id} ";
+            if (category_id > 0)
+                planListQry += $"AND category.id = {category_id} ";
+            if (frequency_id > 0)
+                planListQry += $"AND frequency.id = {frequency_id} ";
+            if (start_date != null)
+                planListQry += $"AND plan.plan_date >= {((DateTime)start_date).ToString("yyyy-MM-dd")} ";
+            if (end_date != null)
+                planListQry += $"AND plan.plan_date <= {((DateTime)start_date).ToString("yyyy-MM-dd")} ";
+            planListQry += $";";
+            List<CMPMPlanList> plan_list = await Context.GetData<CMPMPlanList>(planListQry).ConfigureAwait(false);
+            return plan_list;
+        }
+
+        internal async Task<CMPMPlanDetail> GetPMPlanDetail(int id)
+        {
+            if (id <= 0)
+                throw new ArgumentException("Invalid Facility ID");
+            string planListQry = $"SELECT plan.id as plan_id, plan.plan_name, plan.status as status_id, statuses.statusName as status_name, plan.plan_date, " +
+                                    $"facilities.id as facility_id, facilities.name as facility_name, category.id as category_id, category.name as category_name, " +
+                                    $"frequency.id as plan_freq_id, frequency.name as plan_freq_name, createdBy.id as created_by_id, " +
+                                    $"CONCAT(createdBy.firstName, ' ', createdBy.lastName) as created_by_name, plan.created_at, " +
+                                    $"updatedBy.id as updated_by_id, CONCAT(updatedBy.firstName, ' ', updatedBy.lastName) as updated_by_name, plan.updated_at " +
+                                    $"FROM pm_plan as plan " +
+                                    $"LEFT JOIN statuses ON plan.status = statuses.softwareId " +
+                                    $"JOIN facilities ON plan.facility_id = facilities.id " +
+                                    $"LEFT JOIN assetcategories as category ON plan.category_id = category.id " +
+                                    $"LEFT JOIN frequency ON plan.frequency_id = frequency.id " +
+                                    $"LEFT JOIN users as createdBy ON createdBy.id = plan.created_by " +
+                                    $"LEFT JOIN users as updatedBy ON updatedBy.id = plan.updated_by " +
+                                    $"WHERE plan.id = {id} ";
+            List<CMPMPlanDetail>  planDetails = await Context.GetData<CMPMPlanDetail>(planListQry).ConfigureAwait(false);
+
+            if (planDetails.Count == 0)
+                return null;
+
+            string assetChecklistsQry = $"SELECT assets.id as asset_id, assets.name as asset_name, parent.id as parent_id, parent.name as parent_name, assets.moduleQuantity as module_qty, checklist.id as checklist_id, checklist.checklist_number as checklist_name " +
+                                        $"FROM pmplanassetchecklist as planmap " +
+                                        $"LEFT JOIN assets ON assets.id = planmap.assetId " +
+                                        $"LEFT JOIN assets as parent ON assets.parentId = parent.id " +
+                                        $"LEFT JOIN checklist_number as checklist ON checklist.id = planmap.checklistId " +
+                                        $"WHERE planmap.planId = {id};";
+            List<AssetCheckList> assetCheckLists = await Context.GetData<AssetCheckList>(assetChecklistsQry).ConfigureAwait(false);
+            planDetails[0].mapAssetChecklist = assetCheckLists;
+            return planDetails[0];
+        }
         internal async Task<List<CMScheduleData>> GetScheduleData(int facility_id, int category_id)
         {
             /*

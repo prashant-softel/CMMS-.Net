@@ -137,7 +137,7 @@ namespace CMMS_API_Test
             var response = ptwService.FormPutService("/api/Permit/PermitApprove", approval);
             var ptwService2 = new CMMS_Services.APIService<CMMSAPIs.Models.Permits.CMPermitDetail>(true);
             var response2 = ptwService2.GetItem("/api/Permit/GetPermitDetails?permit_id=" + approval["id"]);
-            Assert.AreEqual(response2.ptwStatus, (int)CMMSAPIs.Helper.CMMS.CMMS_Status.PTW_APPROVE);
+            Assert.AreEqual(response2.ptwStatus, (int)CMMSAPIs.Helper.CMMS.CMMS_Status.PTW_APPROVED);
         }
         [TestMethod]
         public void VerifyPermitExtend()
