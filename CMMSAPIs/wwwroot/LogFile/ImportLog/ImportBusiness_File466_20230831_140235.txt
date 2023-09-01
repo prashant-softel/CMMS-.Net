@@ -1,0 +1,34 @@
+Error : [Row 4] Invalid Business Type.
+Error : [Row 5] Business name cannot be empty.
+Error : [Row 5] Business email cannot be empty.
+Error : [Row 5] Contact Person name cannot be empty.
+Error : [Row 5] Contact number cannot be empty.
+Error : [Row 5] Website cannot be empty.
+Error : [Row 5] Location details cannot be empty.
+Error : [Row 5] Address cannot be empty.
+Error : [Row 5] ZIP code cannot be empty.
+Error : [Row 5] Business Type cannot be empty.
+Error : No city named Vapi found in state Goa. [Row: 5]
+Error : [Row 6] Business name cannot be empty.
+Error : [Row 6] Business email cannot be empty.
+Error : [Row 6] Contact Person name cannot be empty.
+Error : [Row 6] Contact number cannot be empty.
+Error : [Row 6] Website cannot be empty.
+Error : [Row 6] Location details cannot be empty.
+Error : [Row 6] Address cannot be empty.
+Error : [Row 6] ZIP code cannot be empty.
+Error : [Row 6] Business Type cannot be empty.
+Error : No state named New York found in country India. [Row: 6]
+Error : Cannot access cities due to empty or invalid state name. [Row: 6]
+Error : [Row 7] Business name cannot be empty.
+Error : [Row 7] Business email cannot be empty.
+Error : [Row 7] Contact Person name cannot be empty.
+Error : [Row 7] Contact number cannot be empty.
+Error : [Row 7] Website cannot be empty.
+Error : [Row 7] Location details cannot be empty.
+Error : [Row 7] Address cannot be empty.
+Error : [Row 7] ZIP code cannot be empty.
+Error : [Row 7] Invalid Business Type.
+Error : No country named Sample found. [Row: 7]
+Error : Cannot access states and cities due to empty or invalid country name. [Row: 7]
+Total errors <33>

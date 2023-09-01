@@ -22,6 +22,67 @@ namespace CMMSAPIs.Controllers.PM
         }
 
         [Authorize]
+        [Route("CreatePMPlan")]
+        [HttpPost]
+        public async Task<IActionResult> CreatePMPlan(CMPMPlanDetail pm_plan)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _PMBS.CreatePMPlan(pm_plan, userID);
+                return Ok(data);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
+        [Route("GetPMPlanList")]
+        [HttpGet]
+        public async Task<IActionResult> GetPMPlanList(int facility_id, int category_id, int frequency_id, DateTime? start_date, DateTime? end_date)
+        {
+            try
+            {
+                var data = await _PMBS.GetPMPlanList(facility_id, category_id, frequency_id, start_date, end_date);
+                return Ok(data);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
+        [Route("GetPMPlanDetail")]
+        [HttpGet]
+        public async Task<IActionResult> GetScheduleData(int id)
+        {
+            try
+            {
+                var data = await _PMBS.GetPMPlanDetail(id);
+                return Ok(data);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
         [Route("GetScheduleData")]
         [HttpGet]
         public async Task<IActionResult> GetScheduleData(int facility_id, int category_id)

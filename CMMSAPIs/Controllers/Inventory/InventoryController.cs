@@ -24,12 +24,12 @@ namespace CMMSAPIs.Controllers.Inventory
         [Authorize]
         [Route("ImportInventories")]
         [HttpPost]
-        public async Task<IActionResult> ImportInventories(int file_id)
+        public async Task<IActionResult> ImportInventories(int file_id, int facility_id)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _InventoryBS.ImportInventories(file_id, userID);
+                var data = await _InventoryBS.ImportInventories(file_id, facility_id, userID);
                 return Ok(data);
             }/*
             catch (ArgumentException ex)

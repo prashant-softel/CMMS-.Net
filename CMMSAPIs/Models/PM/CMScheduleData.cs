@@ -3,6 +3,40 @@ using System.Collections.Generic;
 
 namespace CMMSAPIs.Models.PM
 {
+    public class CMPMPlanList
+    {
+        public int plan_id { get; set; }
+        public string plan_name { get; set; }
+        public int status_id { get; set; }
+        public string status_name { get; set; }
+        public DateTime plan_date { get; set; }
+        public int facility_id { get; set; }
+        public string facility_name { get; set; }   
+        public int category_id { get; set; }
+        public string category_name { get; set; }
+        public int plan_freq_id { get; set; }
+        public string plan_freq_name { get; set; }
+        public int created_by_id { get; set; }
+        public string created_by_name { get; set; }
+        public DateTime created_at { get; set; }
+        public int updated_by_id { get; set; }
+        public string updated_by_name { get; set; }
+        public DateTime updated_at { get; set; }
+    }
+    public class CMPMPlanDetail : CMPMPlanList
+    {
+        public List<AssetCheckList> mapAssetChecklist { get; set; }
+    }
+    public class AssetCheckList
+    {
+        public int asset_id { get; set; }
+        public string asset_name { get; set; }
+        public int parent_id { get; set; }
+        public string parent_name { get; set; }
+        public int module_qty { get; set; }
+        public int checklist_id { get; set; }
+        public string checklist_name { get; set; }
+    }
     public class CMSetScheduleData
     {
         public int facility_id { get; set; }

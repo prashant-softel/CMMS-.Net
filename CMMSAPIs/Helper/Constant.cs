@@ -218,6 +218,7 @@ namespace CMMSAPIs.Helper
             PM_EXECUTION,
             PM_SCHEDULE_REPORT,
             PM_SUMMARY,
+            PM_PLAN,
 
             SM_MASTER = 31,
             SM_PO,
@@ -456,6 +457,10 @@ namespace CMMSAPIs.Helper
             VEG_TASK_STARTED,
             VEG_TASK_COMPLETED,
             VEG_TASK_ABANDONED,
+
+            PM_PLAN_CREATED = 401,
+            PM_PLAN_UPDATED,
+            PM_PLAN_DELETED
         }
 
         public enum ApprovalStatus
