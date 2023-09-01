@@ -57,6 +57,7 @@ public int id { get; set; }
     public class CMRequestOrder_ITEMS
     {
         public int ID { get; set; }
+        public int itemID { get; set; }
         public int requestID { get; set; }
         public int assetItemID { get; set; }
         public decimal cost { get; set; }

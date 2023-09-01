@@ -118,7 +118,8 @@ namespace CMMSAPIs.Models.SM
         public int item_condition { get; set; }
         public string activity { get; set; }
         public int whereUsedType { get; set; }
-        public int whereUsedTypeId { get; set; }
+        public string whereUsedTypeName { get; set; }
+        public int whereUsedRefID { get; set; }
         public string remarks { get; set; }
 
         public List<CMEquipments> cmmrsItems { get; set;}
@@ -258,8 +259,9 @@ namespace CMMSAPIs.Models.SM
         public string status_short { get; set; }
         public string status_long { get; set; }
         public string activity { get; set; }
-        public int whereUsedType { get; set; }
-        public int whereUsedTypeId { get; set; }
+        //public int whereUsedType { get; set; }
+        public string whereUsedTypeName { get; set; }
+        public int whereUsedRefID { get; set; }
         public string remarks { get; set; }
         public List<CMMRSItems> CMMRSItems { get; set; }
     }
