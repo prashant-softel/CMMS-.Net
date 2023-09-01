@@ -48,7 +48,10 @@ namespace CMMSAPIs.Controllers.SM
             {
                 _logger.LogInformation(ex.ToString());
                 _logger.LogError(ex.ToString());
-                throw ex;
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid data sent.";
+                return Ok(item);
             }
         }
 
@@ -68,7 +71,10 @@ namespace CMMSAPIs.Controllers.SM
             {
                 _logger.LogInformation(ex.ToString());
                 _logger.LogError(ex.ToString());
-                throw ex;
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid data sent.";
+                return Ok(item);
             }
         }
 
@@ -88,7 +94,10 @@ namespace CMMSAPIs.Controllers.SM
 
                 _AddLog.ErrorLog(ex.ToString());
                 _AddLog.ErrorLog("Exception got using ILOGGER "+ex.ToString());
-                throw ex;
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid data sent.";
+                return Ok(item);
             }
         }
 
@@ -106,7 +115,10 @@ namespace CMMSAPIs.Controllers.SM
 
                 _AddLog.ErrorLog(ex.ToString());
                 _AddLog.ErrorLog("Exception got using ILOGGER " + ex.ToString());
-                throw ex;
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid data sent.";
+                return Ok(item);
             }
         }
 
@@ -124,7 +136,10 @@ namespace CMMSAPIs.Controllers.SM
             catch (Exception ex)
             {
                 _AddLog.ErrorLog(ex.ToString());
-                throw ex;
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid data sent.";
+                return Ok(item);
             }
         }
 
@@ -142,7 +157,10 @@ namespace CMMSAPIs.Controllers.SM
             catch (Exception ex)
             {
                 _AddLog.ErrorLog(ex.ToString());
-                throw ex;
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid data sent.";
+                return Ok(item);
             }
         }
 
@@ -160,7 +178,10 @@ namespace CMMSAPIs.Controllers.SM
             catch (Exception ex)
             {
                 _AddLog.ErrorLog(ex.ToString());
-                throw ex;
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid data sent.";
+                return Ok(item);
             }
         }
 
@@ -178,7 +199,10 @@ namespace CMMSAPIs.Controllers.SM
             catch (Exception ex)
             {
                 _AddLog.ErrorLog(ex.ToString());
-                throw ex;
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid data sent.";
+                return Ok(item);
             }
         }
 
@@ -197,7 +221,10 @@ namespace CMMSAPIs.Controllers.SM
             catch(Exception ex)
             {
                 _AddLog.ErrorLog(ex.ToString());
-                throw ex;
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid data sent.";
+                return Ok(item);
             }
         }
 
@@ -216,7 +243,10 @@ namespace CMMSAPIs.Controllers.SM
             catch (Exception ex)
             {
                 _AddLog.ErrorLog(ex.ToString());
-                throw ex;
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid data sent.";
+                return Ok(item);
             }
         }
 
@@ -234,7 +264,10 @@ namespace CMMSAPIs.Controllers.SM
             catch (Exception ex)
             {
                 _AddLog.ErrorLog(ex.ToString());
-                throw ex;
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid data sent.";
+                return Ok(item);
             }
 
         }
@@ -254,7 +287,10 @@ namespace CMMSAPIs.Controllers.SM
             catch (Exception ex)
             {
                 _AddLog.ErrorLog(ex.ToString());
-                throw ex;
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid data sent.";
+                return Ok(item);
             }
         }
 
@@ -274,7 +310,10 @@ namespace CMMSAPIs.Controllers.SM
             catch (Exception ex)
             {
                 _AddLog.ErrorLog(ex.ToString());
-                throw ex;
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid data sent.";
+                return Ok(item);
             }
         }
 
@@ -294,7 +333,10 @@ namespace CMMSAPIs.Controllers.SM
             catch (Exception ex)
             {
                 _AddLog.ErrorLog(ex.ToString());
-                throw ex;
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid data sent.";
+                return Ok(item);
             }
         }
         [Authorize]
@@ -311,7 +353,10 @@ namespace CMMSAPIs.Controllers.SM
             catch (Exception ex)
             {
                 _AddLog.ErrorLog(ex.ToString());
-                throw ex;
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid data sent.";
+                return Ok(item);
             }
         }
 
@@ -330,7 +375,10 @@ namespace CMMSAPIs.Controllers.SM
             catch (Exception ex)
             {
                 _AddLog.ErrorLog(ex.ToString());
-                throw ex;
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid data sent.";
+                return Ok(item);
             }
         }
 
@@ -348,7 +396,10 @@ namespace CMMSAPIs.Controllers.SM
             catch (Exception ex)
             {
                 _AddLog.ErrorLog(ex.ToString());
-                throw ex;
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid data sent.";
+                return Ok(item);
             }
         }
 
@@ -366,7 +417,10 @@ namespace CMMSAPIs.Controllers.SM
             catch (Exception ex)
             {
                 _AddLog.ErrorLog(ex.ToString());
-                throw ex;
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid data sent.";
+                return Ok(item);
             }
         }
 
@@ -383,7 +437,10 @@ namespace CMMSAPIs.Controllers.SM
             }
             catch (Exception ex)
             {
-                throw;
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid data sent.";
+                return Ok(item);
             }
         }
 
@@ -400,7 +457,10 @@ namespace CMMSAPIs.Controllers.SM
             }
             catch (Exception ex)
             {
-                throw;
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid data sent.";
+                return Ok(item);
             }
         }
 
@@ -417,7 +477,10 @@ namespace CMMSAPIs.Controllers.SM
             catch (Exception ex)
             {
                 _AddLog.ErrorLog(ex.ToString());
-                throw ex;
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid data sent.";
+                return Ok(item);
             }
         }
     }
