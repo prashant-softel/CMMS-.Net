@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
@@ -81,7 +81,7 @@ namespace CMMSAPIs.Repositories.SM
             {
 
                 string updateQ = $"UPDATE smrequestorderdetails SET assetItemID = {request.go_items[i].assetItemID} , cost = {request.go_items[i].cost} , ordered_qty = {request.go_items[i].ordered_qty}" +
-                    $" WHERE ID = {request.go_items[i].requestID}";
+                    $" WHERE ID = {request.go_items[i].itemID}";
                 var result = await Context.ExecuteNonQry<int>(updateQ);
             }
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Request order updated successfully.");
