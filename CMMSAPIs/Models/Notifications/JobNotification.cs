@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web;
 using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Jobs;
 using CMMSAPIs.Models.Utils;
@@ -57,8 +58,9 @@ namespace CMMSAPIs.Models.Notifications
             int jobID = m_jobObj.id; //jobid
             var jobTitle = m_jobObj.job_title;//job title
             var jobDesc = m_jobObj.job_description;//job desc
+            string encodedStatusLong = HttpUtility.HtmlEncode(m_jobObj.status_long);
 
-            retValue = String.Format("<h3><b style='color:#31576D'>Status:</b>{0}</h3><br>", m_jobObj.status_long);
+            retValue = String.Format("<h3><b style='color:#31576D'>Status: </b>{0}</h3><br>", encodedStatusLong);
 
             retValue += String.Format("<table style='width: 50%; margin:0 auto; border-collapse: collapse ; border-spacing: 10px; ' border='1'>");
             retValue += String.Format(template, "ID", m_jobObj.id);

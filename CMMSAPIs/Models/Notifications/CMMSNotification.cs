@@ -24,6 +24,8 @@ using CMMSAPIs.Models.Utils;
 using System.Drawing;
 using Microsoft.AspNetCore.Hosting;
 using System.Configuration;
+using CMMSAPIs.Repositories;
+using CMMSAPIs.Repositories.Utils;
 
 //using CommonUtilities;
 //using CMMSAPIs.Models.Notifications;
@@ -31,7 +33,7 @@ using System.Configuration;
 namespace CMMSAPIs.Models.Notifications
 {
 
-    abstract public class CMMSNotification : UserAccessRepository
+    abstract public class CMMSNotification 
     {
         public static bool print = false;
         public static string printBody = "";
@@ -39,26 +41,30 @@ namespace CMMSAPIs.Models.Notifications
         private CMMS.CMMS_Modules m_moduleID;
         protected CMMS.CMMS_Status m_notificationID;
 
-        public string template = "<tr><td style=' text-align: left; padding:0.5rem; background-color:#31576D;color:#000000;width:35%' ><b>&nbsp;&nbsp;{0}</b></td><td style='text-align: left; padding:0.5rem;'>&nbsp;&nbsp;{1}</td></tr>";
+        public string template = "<tr><td style=' text-align: left; padding:0.5rem; background-color:#31576D;color:#ffffff;width:35%' ><b>&nbsp;&nbsp;{0}</b></td><td style='text-align: left; padding:0.5rem;'>&nbsp;&nbsp;{1}</td></tr>";
 
-        public string templateEnd = "<tr><td style=' text-align: left; padding:0.5rem; background-color:#31576D;color:#000000'><b>&nbsp;&nbsp;{0}</b></td><td style='text-align: left; padding:0.5rem;'>&nbsp;&nbsp;{1}</td></tr></table>";
+        public string templateEnd = "<tr><td style=' text-align: left; padding:0.5rem; background-color:#31576D;color:#ffffff'><b>&nbsp;&nbsp;{0}</b></td><td style='text-align: left; padding:0.5rem;'>&nbsp;&nbsp;{1}</td></tr></table>";
 
-        private static MYSQLDBHelper sqlDBHelper;
-        private MYSQLDBHelper _conn;
+        private static IConfigurationRoot MyConfig; 
+        private static string _conString; 
+        public static MYSQLDBHelper _conn; 
 
         private UserAccessRepository _userAccessRepository;
-
-        public CMMSNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID):base(sqlDBHelper)
-        {
+        public CMMSNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID) 
+        {            
             m_moduleID = moduleID;
             m_notificationID = notificationID;
-        }
-        public CMMSNotification(MYSQLDBHelper sqlDBHelper, IWebHostEnvironment webHostEnvironment = null, IConfiguration configuration = null) : base(sqlDBHelper)
-        {
-            _conn = sqlDBHelper;
-            _userAccessRepository = new UserAccessRepository(sqlDBHelper, webHostEnvironment, configuration);
 
+            MyConfig = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
+            _conString = MyConfig.GetValue<string>("ConnectionStrings:Con");
+            _conn = new MYSQLDBHelper(_conString);
+
+            IWebHostEnvironment webHostEnvironment = null;
+            IConfiguration configuration = null;
+            _userAccessRepository = new UserAccessRepository(_conn, webHostEnvironment, configuration);
         }
+
+
 
         protected virtual string getModuleName(params object[] args)
         {
@@ -175,8 +181,8 @@ namespace CMMSAPIs.Models.Notifications
             try
             {
                 //CMMSNotification objc = new CMMSNotification(_conn);
-                UserAccessRepository obj = new UserAccessRepository(_conn);
-                users = await obj.GetUserByNotificationId(notification);
+               // UserAccessRepository obj = new UserAccessRepository(_conn);
+                users = await _userAccessRepository.GetUserByNotificationId(notification);
             }
             catch (Exception e) { 
 
