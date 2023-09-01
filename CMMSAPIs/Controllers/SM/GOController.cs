@@ -1,5 +1,6 @@
-﻿using CMMSAPIs.BS;
+using CMMSAPIs.BS;
 using CMMSAPIs.Models;
+using CMMSAPIs.Models.SM;
 using CMMSAPIs.Models.Users;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories;
@@ -25,7 +26,9 @@ namespace CMMSAPIs.Controllers
             _GOBS = GO;
         }
 
-
+        /// <summary>
+        /// This API will return 
+        /// </summary>
         [Authorize]
         [Route("GetGOList")]
         [HttpGet]
@@ -38,7 +41,10 @@ namespace CMMSAPIs.Controllers
             }
             catch (Exception ex)
             {
-                throw;
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid facility_id is sent.";
+                return Ok(item);
             }
         }
 
@@ -56,7 +62,10 @@ namespace CMMSAPIs.Controllers
             }
             catch (Exception ex)
             {
-                throw;
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid id is sent.";
+                return Ok(item);
             }
         }
 
@@ -75,7 +84,10 @@ namespace CMMSAPIs.Controllers
             }
             catch (Exception ex)
             {
-                throw;
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Error while fetching data.";
+                return Ok(item);
             }
         }
 
@@ -94,7 +106,10 @@ namespace CMMSAPIs.Controllers
             }
             catch (Exception ex)
             {
-                throw;
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid data sent.";
+                return Ok(item);
             }
         }
 
@@ -113,7 +128,10 @@ namespace CMMSAPIs.Controllers
             }
             catch (Exception ex)
             {
-                throw;
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid data sent.";
+                return Ok(item);
             }
         }
 
@@ -132,7 +150,10 @@ namespace CMMSAPIs.Controllers
             }
             catch (Exception ex)
             {
-                throw;
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid data sent.";
+                return Ok(item);
             }
         }
 
@@ -151,7 +172,10 @@ namespace CMMSAPIs.Controllers
             }
             catch (Exception ex)
             {
-                throw;
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid data sent.";
+                return Ok(item);
             }
         }
 
@@ -170,7 +194,10 @@ namespace CMMSAPIs.Controllers
             }
             catch (Exception ex)
             {
-                throw;
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid data sent.";
+                return Ok(item);
             }
         }
 
@@ -189,7 +216,10 @@ namespace CMMSAPIs.Controllers
             }
             catch (Exception ex)
             {
-                throw;
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid data sent.";
+                return Ok(item);
             }
         }
 
@@ -207,7 +237,10 @@ namespace CMMSAPIs.Controllers
             }
             catch (Exception ex)
             {
-                throw;
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid data sent.";
+                return Ok(item);
             }
         }
 
@@ -225,7 +258,10 @@ namespace CMMSAPIs.Controllers
             }
             catch (Exception ex)
             {
-                throw;
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid data sent.";
+                return Ok(item);
             }
         }
 
@@ -243,7 +279,10 @@ namespace CMMSAPIs.Controllers
             }
             catch (Exception ex)
             {
-                throw;
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid data sent.";
+                return Ok(item);
             }
         }
 
@@ -259,7 +298,10 @@ namespace CMMSAPIs.Controllers
             }
             catch (Exception ex)
             {
-                throw;
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid data sent.";
+                return Ok(item);
             }
         }
     }
