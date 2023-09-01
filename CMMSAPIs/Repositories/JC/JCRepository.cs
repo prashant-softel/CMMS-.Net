@@ -208,11 +208,13 @@ namespace CMMSAPIs.Repositories.JC
 
             List<CMJCListForJob> _ViewJobCardList = await Context.GetData<CMJCListForJob>(myQuery1).ConfigureAwait(false);
 
-            CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_ViewJobCardList[0].status);
-            CMMS.ApprovalStatus _Approval = (CMMS.ApprovalStatus)(_ViewJobCardList[0].approvedStatus);
-            string _shortStatus = getShortStatus(CMMS.CMMS_Modules.JOBCARD, _Status, _Approval);
-            _ViewJobCardList[0].status_short = _shortStatus;
-
+            foreach (var jc in _ViewJobCardList)
+            {
+                CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(jc.status);
+                CMMS.ApprovalStatus _Approval = (CMMS.ApprovalStatus)(jc.approvedStatus);
+                string _shortStatus = getShortStatus(CMMS.CMMS_Modules.JOBCARD, _Status, _Approval);
+                jc.status_short = _shortStatus;
+            }
             //job equipment category
             /* string myQuery2 = $"SELECT asset_cat.id as equipmentCat_id, asset_cat.name as equipmentCat_name  FROM assetcategories as asset_cat JOIN jobmappingassets as mapAssets ON mapAssets.categoryId = asset_cat.id JOIN jobs as job ON mapAssets.jobId = job.id WHERE job.id = {_ViewJobCardList[0].jobid } and job.facilityId = { facility_id }";
              List<equipmentCatList> _equipmentCatList = await Context.GetData<equipmentCatList>(myQuery2).ConfigureAwait(false);
