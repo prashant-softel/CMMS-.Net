@@ -191,5 +191,39 @@ namespace CMMSAPIs.Controllers.JC
                 throw;
             }
         }
+
+        [Authorize]
+        [Route("ApproveJCCF")]
+        [HttpPut]
+        public async Task<IActionResult> ApproveJCCF(CMJCApprove request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _JCBS.ApproveJCCF(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
+        [Route("RejectJCCF")]
+        [HttpPut]
+        public async Task<IActionResult> RejectJCCF(CMJCReject request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _JCBS.RejectJCCF(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
     }
 }

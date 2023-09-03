@@ -64,6 +64,10 @@ public class CMJCPermitDetail
     public string job_created_by_name { get; set; }
     public string permit_issued_by_name { get; set; }
     public string permit_approved_by_name { get; set; }
+    public int status { get; set; }
+    public string status_short { get; set; }
+
+
 }
 public class CMJCIsolatedDetail
 {

@@ -21,6 +21,8 @@ namespace CMMSAPIs.BS.JC
         Task<CMDefaultResponse> RejectJC(CMJCReject request, int userID);
         Task<CMDefaultResponse> StartJC(int jc_id, int userID);
         Task<CMDefaultResponse> CarryForwardJC(CMApproval request, int userID);
+        Task<CMDefaultResponse> RejectJCCF(CMJCReject request, int userID);
+        Task<CMDefaultResponse> ApproveJCCF(CMJCApprove request, int userID);
     }
 
     public class JCBS : IJCBS
@@ -173,6 +175,35 @@ namespace CMMSAPIs.BS.JC
                 using (var repos = new JCRepository(getDB))
                 {
                     return await repos.CarryForwardJC(request, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<CMDefaultResponse> ApproveJCCF(CMJCApprove request, int userID)
+        {
+            try
+            {
+                using (var repos = new JCRepository(getDB))
+                {
+                    return await repos.ApproveJCCF(request, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> RejectJCCF(CMJCReject request, int userID)
+        {
+            try
+            {
+                using (var repos = new JCRepository(getDB))
+                {
+                    return await repos.RejectJCCF(request, userID);
                 }
             }
             catch (Exception ex)

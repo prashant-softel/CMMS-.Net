@@ -30,22 +30,22 @@ namespace CMMSAPIs.Repositories.JC
             switch (m_notificationID)
             {
                 case CMMS.CMMS_Status.JC_CREATED:     
-                    retValue = "Created";
+                    retValue = "JC Created";
                     break;
                 case CMMS.CMMS_Status.JC_STARTED:     
-                    retValue = "Started";
+                    retValue = "JC Started";
                     break;
                 case CMMS.CMMS_Status.JC_CLOSED: 
                     switch(approval_id)
                     {
                         case CMMS.ApprovalStatus.WAITING_FOR_APPROVAL:
-                            retValue = "Close Request Waiting for Approval";
+                            retValue = "JC Closed - Waiting for Approval";
                             break;
                         case CMMS.ApprovalStatus.APPROVED:
-                            retValue = "Close Request Approved";
+                            retValue = "JC Closed";
                             break;
                         case CMMS.ApprovalStatus.REJECTED:
-                            retValue = "Close Request Rejected";
+                            retValue = "JC Closed - Rejected";
                             break;
                         default:
                             retValue = $"Unknown approval status: {approval_id}";
@@ -53,41 +53,116 @@ namespace CMMSAPIs.Repositories.JC
                     }
                     break;
                 case CMMS.CMMS_Status.JC_CARRRY_FORWARDED:     
-                    retValue = "Carry Forwarded";
-                    switch (approval_id)
-                    {
-                        case CMMS.ApprovalStatus.WAITING_FOR_APPROVAL:
-                            retValue = "Carry Forward Request Waiting for Approval";
-                            break;
-                        case CMMS.ApprovalStatus.APPROVED:
-                            retValue = "Carry Forward Approved";
-                            break;
-                        case CMMS.ApprovalStatus.REJECTED:
-                            retValue = "Carry Forward Rejected";
-                            break;
-                        default:
-                            retValue = $"Unknown approval status: {approval_id}";
-                            break;
-                    }
+                    retValue = "JC Carry FWD - Waiting for Approval";
+                    //switch (approval_id)
+                    //{
+                    //    case CMMS.ApprovalStatus.WAITING_FOR_APPROVAL:
+                    //        retValue = "JC Carry FWD - Waiting for Approval";
+                    //        break;
+                    //    case CMMS.ApprovalStatus.APPROVED:
+                    //        retValue = "JC Carry Forwarded";
+                    //        break;
+                    //    case CMMS.ApprovalStatus.REJECTED:
+                    //        retValue = "JC Carry FWD - Rejected";
+                    //        break;
+                    //    default:
+                    //        retValue = $"Unknown approval status: {approval_id}";
+                    //        break;
+                    //}
                     break;
-                    /*
-                case CMMS.CMMS_Status.JC_APPROVED:     
-                    retValue = "Approved";
+
+                case CMMS.CMMS_Status.JC_CF_APPROVED:
+                    retValue = "JC Carry Forwarded";
                     break;
-                case CMMS.CMMS_Status.JC_REJECTED5:     
-                    retValue = "Rejected";
+                case CMMS.CMMS_Status.JC_CF_REJECTED:
+                    retValue = "JC Carry FWD - Rejected";
                     break;
-                    */
+
                 //case CMMS.CMMS_Status.JC_PTW_TIMED_OUT:     
                 //    retValue = "PTW Timed Out";
                 //    break;
-                    
+
                 default:
                     retValue = "Unknown <" + m_notificationID + ">";
                     break;
             }
             return retValue;
 
+        }
+        private static string Status(int statusID)
+        {
+            CMMS.CMMS_Status status = (CMMS.CMMS_Status)statusID;
+            string statusName = "";
+            switch (status)
+            {
+                case CMMS.CMMS_Status.PTW_CREATED:
+                    statusName = "Waiting for Approval";
+                    break;
+                case CMMS.CMMS_Status.PTW_ISSUED:
+                    statusName = "Issued";
+                    break;
+                case CMMS.CMMS_Status.PTW_REJECTED_BY_ISSUER:
+                    statusName = "Rejected By Issuer";
+                    break;
+                case CMMS.CMMS_Status.PTW_APPROVED:
+                    statusName = "Approved";
+                    break;
+                case CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER:
+                    statusName = "Rejected By Approver";
+                    break;
+                case CMMS.CMMS_Status.PTW_CLOSED:
+                    statusName = "Closed";
+                    break;
+                case CMMS.CMMS_Status.PTW_CANCELLED_BY_ISSUER:
+                    statusName = "Cancelled BY Issuer";
+                    break;
+                case CMMS.CMMS_Status.PTW_CANCELLED_BY_HSE:
+                    statusName = "Cancelled By HSE";
+                    break;
+                case CMMS.CMMS_Status.PTW_CANCELLED_BY_APPROVER:
+                    statusName = "Cancelled By Approver";
+                    break;
+                case CMMS.CMMS_Status.PTW_CANCEL_REQUESTED:
+                    statusName = "Cancel Requested";
+                    break;
+                case CMMS.CMMS_Status.PTW_CANCEL_REQUEST_REJECTED:
+                    statusName = "Cancel Request Rejected";
+                    break;
+                case CMMS.CMMS_Status.PTW_CANCEL_REQUEST_APPROVED:
+                    statusName = "Cancel Approved";
+                    break;
+                case CMMS.CMMS_Status.PTW_EXTEND_REQUESTED:
+                    statusName = "Requested for Extension";
+                    break;
+                case CMMS.CMMS_Status.PTW_EXTEND_REQUEST_APPROVE:
+                    statusName = "Approved Extension";
+                    break;
+                case CMMS.CMMS_Status.PTW_EXTEND_REQUEST_REJECTED:
+                    statusName = "Rejected Extension";
+                    break;
+                case CMMS.CMMS_Status.PTW_LINKED_TO_JOB:
+                    statusName = "Linked to Job";
+                    break;
+                case CMMS.CMMS_Status.PTW_LINKED_TO_PM:
+                    statusName = "Linked to PM";
+                    break;
+                case CMMS.CMMS_Status.PTW_LINKED_TO_AUDIT:
+                    statusName = "Linked to Audit";
+                    break;
+                case CMMS.CMMS_Status.PTW_LINKED_TO_HOTO:
+                    statusName = "Linked to HOTO";
+                    break;
+                case CMMS.CMMS_Status.PTW_EXPIRED:
+                    statusName = "Expired";
+                    break;
+                case CMMS.CMMS_Status.PTW_UPDATED:
+                    statusName = "Updated";
+                    break;
+                default:
+                    statusName = "Invalid";
+                    break;
+            }
+            return statusName;
         }
 
 
@@ -240,25 +315,7 @@ namespace CMMSAPIs.Repositories.JC
 
             return response;
         }
-
-        internal async Task<CMDefaultResponse> CarryForwardJC(CMApproval request, int userID)
-        {
-            string myQuery = $"UPDATE jobcards SET JC_Status = {(int)CMMS.CMMS_Status.JC_CARRRY_FORWARDED}, JC_Approved = {(int)CMMS.ApprovalStatus.WAITING_FOR_APPROVAL}, status_updated_at = '{UtilsRepository.GetUTCTime()}', JC_Carry_Forward = {userID} WHERE id = {request.id};";
-            await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
-
-            //string myQuery1 = $"SELECT  jc.id as id , jc.PTW_id as ptwId, job.id as jobid, facilities.name as plant_name, asset_cat.name as asset_category_name, CONCAT(user.firstName + ' ' + user.lastName) as JC_Closed_by_Name, CONCAT(user1.firstName + ' ' + user1.lastName) as JC_Rejected_By_Name, jc.JC_Approved_By_Name as  JC_Approved_By_Name FROM jobs as job JOIN  jobmappingassets as mapAssets ON mapAssets.jobId = job.id join assetcategories as asset_cat ON mapAssets.categoryId = asset_cat.id JOIN facilities as facilities ON job.blockId = facilities.id LEFT JOIN jobcards as jc on jc.jobId = job.id LEFT JOIN users as user ON user.id = jc.JC_Update_by LEFT JOIN  users as user1 ON user1.id = jc.JC_Rejected_By_id where jc.id = {request.id}";
-
-            List<CMJCDetail> _jcDetails = await GetJCDetail(request.id);
-
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOBCARD, request.id, 0, 0, "Job Card Carried forward", CMMS.CMMS_Status.JC_CARRRY_FORWARDED,userID);
-
-            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOBCARD, CMMS.CMMS_Status.JC_CARRRY_FORWARDED, new[] { userID }, _jcDetails[0]);
-
-            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Job Card Carried forward");
-
-            return response;
-        }
-
+       
         internal async Task<List<CMJCDetail>> GetJCDetail(int jc_id)
         {
             /*
@@ -298,8 +355,13 @@ namespace CMMSAPIs.Repositories.JC
             List<CMJCJobDetail> _jobDetails = await Context.GetData<CMJCJobDetail>(myQuery2).ConfigureAwait(false);
 
             //permit details
-            string myQuery3 = $"SELECT ptw.id as permit_id, ptw.permitNumber as site_permit_no, permitType.title as permit_type, ptw.description as permit_description, CONCAT(user.firstName, user.lastName) as job_created_by_name, CONCAT(user1.firstName + ' ' + user1.lastName) as permit_issued_by_name, CONCAT(user2.firstName + ' ' + user2.lastName) as permit_approved_by_name FROM permits as ptw LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId JOIN jobs as job ON ptw.id = job.linkedPermit LEFT JOIN users as user ON user.id = job.assignedId LEFT JOIN users as user1 ON user1.id = ptw.issuedById LEFT JOIN users as user2 ON user2.id = ptw.approvedById JOIN jobcards as jc on jc.PTW_id = ptw.id where jc.id = { jc_id}";
+            string myQuery3 = $"SELECT ptw.id as permit_id,ptw.status as status, ptw.permitNumber as site_permit_no, permitType.title as permit_type, ptw.description as permit_description, CONCAT(user.firstName, user.lastName) as job_created_by_name, CONCAT(user1.firstName + ' ' + user1.lastName) as permit_issued_by_name, CONCAT(user2.firstName + ' ' + user2.lastName) as permit_approved_by_name FROM permits as ptw LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId JOIN jobs as job ON ptw.id = job.linkedPermit LEFT JOIN users as user ON user.id = job.assignedId LEFT JOIN users as user1 ON user1.id = ptw.issuedById LEFT JOIN users as user2 ON user2.id = ptw.approvedById JOIN jobcards as jc on jc.PTW_id = ptw.id where jc.id = { jc_id}";
              List<CMJCPermitDetail> _permitDetails = await Context.GetData<CMJCPermitDetail>(myQuery3).ConfigureAwait(false);
+            
+            foreach (var permit in _permitDetails)
+            {
+                permit.status_short = Status(permit.status);
+            }
 
             // isolated details
             string myQuery4 = $"SELECT asset_cat.name as isolated_assestName FROM permitisolatedassetcategories AS ptwISOCat LEFT JOIN assetcategories as asset_cat  ON ptwISOCat.assetCategoryId = asset_cat.id JOIN jobcards as jc on ptwISOCat.permitId = jc.PTW_id  where jc.id = { jc_id }";
@@ -578,5 +640,63 @@ namespace CMMSAPIs.Repositories.JC
 
         }
         //carry forward jobcard?
+        internal async Task<CMDefaultResponse> CarryForwardJC(CMApproval request, int userID)
+        {
+            string myQuery = $"UPDATE jobcards SET JC_Status = {(int)CMMS.CMMS_Status.JC_CARRRY_FORWARDED}, JC_Approved = {(int)CMMS.ApprovalStatus.WAITING_FOR_APPROVAL}, status_updated_at = '{UtilsRepository.GetUTCTime()}', JC_Carry_Forward = {userID} WHERE id = {request.id};";
+            await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
+
+            //string myQuery1 = $"SELECT  jc.id as id , jc.PTW_id as ptwId, job.id as jobid, facilities.name as plant_name, asset_cat.name as asset_category_name, CONCAT(user.firstName + ' ' + user.lastName) as JC_Closed_by_Name, CONCAT(user1.firstName + ' ' + user1.lastName) as JC_Rejected_By_Name, jc.JC_Approved_By_Name as  JC_Approved_By_Name FROM jobs as job JOIN  jobmappingassets as mapAssets ON mapAssets.jobId = job.id join assetcategories as asset_cat ON mapAssets.categoryId = asset_cat.id JOIN facilities as facilities ON job.blockId = facilities.id LEFT JOIN jobcards as jc on jc.jobId = job.id LEFT JOIN users as user ON user.id = jc.JC_Update_by LEFT JOIN  users as user1 ON user1.id = jc.JC_Rejected_By_id where jc.id = {request.id}";
+
+            List<CMJCDetail> _jcDetails = await GetJCDetail(request.id);
+
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOBCARD, request.id, 0, 0, "Job Card Carry forward Requested", CMMS.CMMS_Status.JC_CARRRY_FORWARDED, userID);
+
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOBCARD, CMMS.CMMS_Status.JC_CARRRY_FORWARDED, new[] { userID }, _jcDetails[0]);
+
+            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Job Card Carry forward Requested");
+
+            return response;
+        }
+
+        internal async Task<CMDefaultResponse> ApproveJCCF(CMJCApprove request, int userID)
+        {
+            CMDefaultResponse responseList = new CMDefaultResponse();
+            string approveQuery = $"Update jobcards set JC_Status = {(int)CMMS.CMMS_Status.JC_CF_APPROVED},JC_Approved = 1, status_updated_at = '{UtilsRepository.GetUTCTime()}', JC_CF_Approved_by={userID}, JC_CF_Reason='{request.comment}', JC_CF_Approved_at ='{UtilsRepository.GetUTCTime()}' where id = {request.id} ";
+            await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
+          
+            List<CMJCDetail> _jcDetails = await GetJCDetail(request.id);
+
+            if (_jcDetails.Count == 0)
+                throw new MissingMemberException($"Job Card with ID {request.id} not found");
+
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOBCARD, request.id, 0, 0, request.comment, CMMS.CMMS_Status.JC_CF_APPROVED, userID);
+
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOBCARD, CMMS.CMMS_Status.JC_CF_APPROVED, new[] { userID }, _jcDetails[0]);
+
+            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, request.comment);
+            return response;
+        }
+
+        internal async Task<CMDefaultResponse> RejectJCCF(CMJCReject request, int userID)
+        {
+            
+            string approveQuery = $"Update jobcards set JC_Status = {(int)CMMS.CMMS_Status.JC_CF_REJECTED}, JC_Approved = 2, status_updated_at = '{UtilsRepository.GetUTCTime()}', JC_CF_Rejected_by={userID}, JC_CF_Reason='{request.comment}', JC_CF_Rejected_at ='{UtilsRepository.GetUTCTime()}' where id = {request.id} ";
+            await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
+           
+
+            List<CMJCDetail> _jcDetails = await GetJCDetail(request.id);
+
+            if (_jcDetails.Count == 0)
+                throw new MissingMemberException($"Job Card with ID {request.id} not found");
+
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOBCARD, request.id, 0, 0, request.comment, CMMS.CMMS_Status.JC_CF_REJECTED, userID);
+
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOBCARD, CMMS.CMMS_Status.JC_CF_REJECTED, new[] { userID }, _jcDetails[0]);
+
+            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, request.comment);
+
+            return response;
+
+        }
     }
 }
