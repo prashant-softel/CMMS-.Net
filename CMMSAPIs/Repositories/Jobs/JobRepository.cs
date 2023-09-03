@@ -16,6 +16,7 @@ namespace CMMSAPIs.Repositories.Jobs
     public class JobRepository : GenericRepository
     {
         private UtilsRepository _utilsRepo;
+
         private MYSQLDBHelper _conn;
         public JobRepository(MYSQLDBHelper sqlDBHelper) : base(sqlDBHelper)
         {
@@ -60,8 +61,7 @@ namespace CMMSAPIs.Repositories.Jobs
 
             
             foreach (var job in _ViewJobList)
-            {
-                
+            {          
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(job.status);
                 string _shortStatus = getShortStatus(CMMS.CMMS_Modules.JOB, _Status);
                 job.status_short = _shortStatus;
@@ -252,20 +252,7 @@ namespace CMMSAPIs.Repositories.Jobs
 
             string _shortStatus = getShortStatus(CMMS.CMMS_Modules.JOB, (CMMS.CMMS_Status)_ViewJobList[0].status);
             _ViewJobList[0].status_short = _shortStatus;
-            _ViewJobList[0].breakdown_type = $"{(CMMS.CMMS_JobType)_ViewJobList[0].job_type}";
-
-            if (_ViewJobList[0].current_ptw_id == 0)
-            {
-                _ViewJobList[0].latestJCStatusShort = "Permit not linked";
-            }
-            else if (_ViewJobList[0].latestJCid == 0)
-            {
-                _ViewJobList[0].latestJCStatusShort = "No job card created";
-            }
-            else
-            {
-                _ViewJobList[0].latestJCStatusShort = JCRepository.getShortStatus(CMMS.CMMS_Modules.JOBCARD, (CMMS.CMMS_Status)_ViewJobList[0].latestJCStatus, (CMMS.ApprovalStatus)_ViewJobList[0].latestJCApproval);
-            }
+            _ViewJobList[0].breakdown_type = $"{(CMMS.CMMS_JobType)_ViewJobList[0].job_type}";           
 
             //get equipmentCat list
             string myQuery1 = "SELECT asset_cat.id as equipmentCat_id, asset_cat.name as equipmentCat_name  FROM assetcategories as asset_cat " +
@@ -278,7 +265,7 @@ namespace CMMSAPIs.Repositories.Jobs
             List<CMworkingAreaNameList> _WorkingAreaNameList = await Context.GetData<CMworkingAreaNameList>(myQuery2).ConfigureAwait(false);
 
             //get Associated permits
-            string myQuery3 = "SELECT ptw.id as permitId, ptw.title as title, ptw.code as sitePermitNo, ptw.startDate, ptw.endDate,  CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, ptw.status as ptwStatus FROM permits as ptw JOIN jobs as job ON ptw.id = job.linkedPermit " +
+            string myQuery3 = "SELECT ptw.id as permitId,ptw.status as ptwStatus ,ptw.title as title, ptw.code as sitePermitNo, ptw.startDate, ptw.endDate,  CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, ptw.status as ptwStatus FROM permits as ptw JOIN jobs as job ON ptw.id = job.linkedPermit " +
                 "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
                 "LEFT JOIN st_jc_files as jobCard ON jobCard.JC_id = ptw.id " +
             "WHERE job.id= " + job_id;
@@ -305,6 +292,27 @@ namespace CMMSAPIs.Repositories.Jobs
                 "LEFT JOIN worktypemasterassets AS tools ON tools.id=mapTools.ToolId " +
                 $"WHERE job.id = {job_id} GROUP BY tools.id";
             List<CMWorkTypeTool> _Tools = await Context.GetData<CMWorkTypeTool>(myQuery5).ConfigureAwait(false);
+
+            if (_ViewJobList[0].current_ptw_id == 0)
+            {
+                _ViewJobList[0].latestJCStatusShort = "Permit not linked";
+            }
+            else if (_ViewJobList[0].latestJCid == 0)
+            {
+                //if permit status is not yet approved
+                if (_AssociatedpermitList[0].ptwStatus == (int)CMMS.CMMS_Status.PTW_APPROVED)
+                {
+                    _ViewJobList[0].latestJCStatusShort = "job card created";
+                }
+                else
+                {
+                    _ViewJobList[0].latestJCStatusShort = "Permit reject";
+                }
+            }
+            else
+            {
+                _ViewJobList[0].latestJCStatusShort = JCRepository.getShortStatus(CMMS.CMMS_Modules.JOBCARD, (CMMS.CMMS_Status)_ViewJobList[0].latestJCStatus, (CMMS.ApprovalStatus)_ViewJobList[0].latestJCApproval);
+            }
 
             _ViewJobList[0].equipment_cat_list = _equipmentCatList;
             _ViewJobList[0].working_area_name_list = _WorkingAreaNameList;

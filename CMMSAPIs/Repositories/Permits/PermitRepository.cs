@@ -55,67 +55,67 @@ namespace CMMSAPIs.Repositories.Permits
             switch (status)
             {
                 case CMMS.CMMS_Status.PTW_CREATED:
-                    statusName = "Permit Waiting for Approval";
+                    statusName = "Waiting for Approval";
                     break;
                 case CMMS.CMMS_Status.PTW_ISSUED:
-                    statusName = "Permit Issued";   
+                    statusName = "Issued";   
                     break;
                 case CMMS.CMMS_Status.PTW_REJECTED_BY_ISSUER:
-                    statusName = "Permit Rejected By Issuer";
+                    statusName = "Rejected By Issuer";
                     break;
                 case CMMS.CMMS_Status.PTW_APPROVED:
-                    statusName = "Permit Approved";
+                    statusName = "Approved";
                     break;
                 case CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER:
-                    statusName = "Permit Rejected By Approver";
+                    statusName = "Rejected By Approver";
                     break;
                 case CMMS.CMMS_Status.PTW_CLOSED:
-                    statusName = "Permit Closed";
+                    statusName = "Closed";
                     break;
                 case CMMS.CMMS_Status.PTW_CANCELLED_BY_ISSUER:
-                    statusName = "Permit Cancelled BY Issuer";
+                    statusName = "Cancelled BY Issuer";
                     break;
                 case CMMS.CMMS_Status.PTW_CANCELLED_BY_HSE:
-                    statusName = "Permit Cancelled By HSE";
+                    statusName = "Cancelled By HSE";
                     break;
                 case CMMS.CMMS_Status.PTW_CANCELLED_BY_APPROVER:
-                    statusName = "Permit Cancelled By Approver";
+                    statusName = "Cancelled By Approver";
                     break;
 				case CMMS.CMMS_Status.PTW_CANCEL_REQUESTED:
-                    statusName = "Cancel Requested for Permit";
+                    statusName = "Cancel Requested";
                     break;
                 case CMMS.CMMS_Status.PTW_CANCEL_REQUEST_REJECTED:
-                    statusName = "Cancel Request Rejected for Permit";
+                    statusName = "Cancel Request Rejected";
 	                break;
                 case CMMS.CMMS_Status.PTW_CANCEL_REQUEST_APPROVED:
-                    statusName = "Cancel Approved for Permit";
+                    statusName = "Cancel Approved";
                     break;
                 case CMMS.CMMS_Status.PTW_EXTEND_REQUESTED:
-                    statusName = "Requested for Permit Extension";
+                    statusName = "Requested for Extension";
                     break;
                 case CMMS.CMMS_Status.PTW_EXTEND_REQUEST_APPROVE:
-                    statusName = "Approved Extension for Permit";
+                    statusName = "Approved Extension";
                     break;
                 case CMMS.CMMS_Status.PTW_EXTEND_REQUEST_REJECTED:
-                    statusName = "Rejected Extension for Permit";
+                    statusName = "Rejected Extension";
                     break;
                 case CMMS.CMMS_Status.PTW_LINKED_TO_JOB:
-                    statusName = "Permit Linked to Job";
+                    statusName = "Linked to Job";
                     break;
                 case CMMS.CMMS_Status.PTW_LINKED_TO_PM:
-                    statusName = "Permit Linked to PM";
+                    statusName = "Linked to PM";
                     break;
                 case CMMS.CMMS_Status.PTW_LINKED_TO_AUDIT:
-                    statusName = "Permit Linked to Audit";
+                    statusName = "Linked to Audit";
                     break;
                 case CMMS.CMMS_Status.PTW_LINKED_TO_HOTO:
-                    statusName = "Permit Linked to HOTO";
+                    statusName = "Linked to HOTO";
                     break;
                 case CMMS.CMMS_Status.PTW_EXPIRED:
-                    statusName = "Permit Expired";
+                    statusName = "Expired";
                     break;
                 case CMMS.CMMS_Status.PTW_UPDATED:
-                    statusName = "Permit Updated";
+                    statusName = "Updated";
                     break;
                 default:
                     statusName = "Invalid";

@@ -349,25 +349,37 @@ namespace CMMSAPIs.Helper
             PTW_EXPIRED,
             PTW_UPDATED,
 
+            //JC_CREATED = 151,
+            //JC_STARTED,
+            //JC_CARRRY_FORWARDED,
+            //JC_CLOSED,
+            //JC_REJECTED,
+            //JC_APPROVED,
+            //JC_UPDATED,                 //only for notification purpose
+
             JC_CREATED = 151,
             JC_STARTED,
             JC_CARRRY_FORWARDED,
+            JC_CF_REJECTED,
+            JC_CF_APPROVED,
             JC_CLOSED,
             JC_REJECTED,
             JC_APPROVED,
             JC_UPDATED,                 //only for notification purpose
 
-
-            PM_SUBMIT = 161,
-            PM_LINK_PTW,
+            PM_SCHEDULED = 161,
+            PM_ASSIGNED,
+            PM_LINKED_TO_PTW,
             PM_START,
             PM_COMPLETED,
             PM_REJECTED,
             PM_APPROVED,
             PM_CANCELLED,
             PM_DELETED,
-            PM_UPDATED,
-
+            PM_UPDATED, //Only for notification purpose
+            
+            PM_SUBMIT,//for temp only
+            PM_LINK_PTW,
 
             IR_CREATED = 181,
             IR_APPROVED,
