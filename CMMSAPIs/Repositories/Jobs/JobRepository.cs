@@ -244,7 +244,7 @@ namespace CMMSAPIs.Repositories.Jobs
             /*Your code goes here*/
 
             string myQuery = "SELECT " +
-                                    "job.id as id, facilities.id as facility_id, facilities.name as facility_name, blocks.id as block_id, blocks.name as block_name, job.status as status, created_user.id as created_by_id, CONCAT(created_user.firstName, created_user.lastName) as created_by_name, user.id as assigned_id, CONCAT(user.firstName, user.lastName) as assigned_name, job.title as job_title, job.description as job_description, job.breakdownTime as breakdown_time, ptw.id as current_ptw_id, ptw.title as current_ptw_title, ptw.description as current_ptw_desc, jc.id as latestJCid, jc.JC_Status as latestJCStatus, jc.JC_Approved as latestJCApproval " +
+                                    "job.id as id, facilities.id as facility_id, facilities.name as facility_name, blocks.id as block_id, blocks.name as block_name, job.status as status, job.createdAt as created_at,created_user.id as created_by_id, CONCAT(created_user.firstName, created_user.lastName) as created_by_name, user.id as assigned_id, CONCAT(user.firstName, user.lastName) as assigned_name, job.title as job_title, job.description as job_description, job.breakdownTime as breakdown_time, ptw.id as current_ptw_id, ptw.title as current_ptw_title, ptw.description as current_ptw_desc, jc.id as latestJCid, jc.JC_Status as latestJCStatus, jc.JC_Approved as latestJCApproval " +
                                       "FROM " +
                                             "jobs as job " +
                                       "LEFT JOIN " +
@@ -386,22 +386,22 @@ namespace CMMSAPIs.Repositories.Jobs
             foreach (var data in request.WorkType_Ids)
             {
                string qryCategoryIds = $"insert into jobassociatedworktypes(jobId, workTypeId ) value ( { newJobID }, { data } );";
-                await Context.ExecuteNonQry<int>(qryCategoryIds).ConfigureAwait(false);
+               await Context.ExecuteNonQry<int>(qryCategoryIds).ConfigureAwait(false);
             }
 
 
-            List<CMJobView> _ViewJobList = await GetJobView(newJobID);
+            CMJobView _ViewJobList = await GetJobDetails(newJobID);
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, newJobID, 0, 0, "Job Created", CMMS.CMMS_Status.JOB_CREATED,userId);
-            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_CREATED, new[] { userId },_ViewJobList[0]);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_CREATED, new[] { userId },_ViewJobList);
 
             string strJobStatusMsg = $"Job {newJobID} Created";
-            if (_ViewJobList[0].assigned_id > 0)
+            if (_ViewJobList.assigned_id > 0)
             {     
-				        strJobStatusMsg = $"Job {newJobID} Created and Assigned to " + _ViewJobList[0].assigned_name;        
+				        strJobStatusMsg = $"Job {newJobID} Created and Assigned to " + _ViewJobList.assigned_name;        
         
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, newJobID, 0, 0, "Job Assigned", CMMS.CMMS_Status.JOB_ASSIGNED, userId);
-                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_ASSIGNED, new[]{ userId },_ViewJobList[0]);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_ASSIGNED, new[]{ userId },_ViewJobList);
             }
 
             CMDefaultResponse response = new CMDefaultResponse(newJobID, CMMS.RETRUNSTATUS.SUCCESS, strJobStatusMsg);
@@ -445,6 +445,7 @@ namespace CMMSAPIs.Repositories.Jobs
                     }
                 }
             }
+
             string setCat = $"UPDATE jobmappingassets, assets SET jobmappingassets.categoryId = assets.categoryId WHERE jobmappingassets.assetId = assets.id;";
             await Context.ExecuteNonQry<int>(setCat).ConfigureAwait(false);
             if (request.WorkType_Ids != null)
@@ -461,10 +462,10 @@ namespace CMMSAPIs.Repositories.Jobs
                 }
             }
             int jobID = request.id;
-            List<CMJobView> _ViewJobList = await GetJobView(jobID);
+            CMJobView _ViewJobList = await GetJobDetails(jobID);
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, jobID, 0, 0, "Job Updated", CMMS.CMMS_Status.JOB_UPDATED, userId);
-            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_UPDATED, new[] {userId}, _ViewJobList[0]);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_UPDATED, new[] {userId}, _ViewJobList);
 
             string strJobStatusMsg = $"Job {jobID} Updated";
             CMDefaultResponse response = new CMDefaultResponse(jobID, CMMS.RETRUNSTATUS.SUCCESS, strJobStatusMsg);
@@ -491,13 +492,13 @@ namespace CMMSAPIs.Repositories.Jobs
 
 
 
-            List<CMJobView> _ViewJobList = await GetJobView(job_id);
+            CMJobView _ViewJobList = await GetJobDetails(job_id);
 
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, job_id, 0, 0, $"Job Assigned to {_ViewJobList[0].assigned_name}", CMMS.CMMS_Status.JOB_ASSIGNED, updatedBy);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, job_id, 0, 0, $"Job Assigned to {_ViewJobList.assigned_name}", CMMS.CMMS_Status.JOB_ASSIGNED, updatedBy);
 
-            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_ASSIGNED, new[] {assignedTo}, _ViewJobList[0]);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_ASSIGNED, new[] {assignedTo}, _ViewJobList);
 
-            CMDefaultResponse response = new CMDefaultResponse(_ViewJobList[0].id, CMMS.RETRUNSTATUS.SUCCESS, $"Job {_ViewJobList[0].id} Assigned");
+            CMDefaultResponse response = new CMDefaultResponse(_ViewJobList.id, CMMS.RETRUNSTATUS.SUCCESS, $"Job {_ViewJobList.id} Assigned");
             return response;
         }
         /*
@@ -507,7 +508,7 @@ namespace CMMSAPIs.Repositories.Jobs
             $"delete from jobassociatedworktypes where jobassociatedworktypes.jobId = {job_id}; " + 
             $"delete from jobmappingassets where jobmappingassets.jobId = {job_id}; ";
             
-            List<CMJobView> _ViewJobList = await GetJobView(job_id);
+            List<CMJobView> _ViewJobList = await GetJobDetails(job_id);
             _ViewJobList[0].status = (int)CMMS.CMMS_Status.DELETED;
 
             int retVal = await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
@@ -537,13 +538,13 @@ namespace CMMSAPIs.Repositories.Jobs
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
             }
 
-            List<CMJobView> _ViewJobList = await GetJobView(job_id);
+            CMJobView _ViewJobList = await GetJobDetails(job_id);
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, job_id, 0, 0, "Job Cancelled", CMMS.CMMS_Status.JOB_CANCELLED, cancelledBy);
 
-            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_CANCELLED,new[] { _ViewJobList[0].assigned_id }, _ViewJobList[0]);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_CANCELLED,new[] { _ViewJobList.assigned_id }, _ViewJobList);
 
-            CMDefaultResponse response = new CMDefaultResponse(_ViewJobList[0].id, CMMS.RETRUNSTATUS.SUCCESS, $"Job {_ViewJobList[0].id} Cancelled");
+            CMDefaultResponse response = new CMDefaultResponse(_ViewJobList.id, CMMS.RETRUNSTATUS.SUCCESS, $"Job {_ViewJobList.id} Cancelled");
             return response;
         }
         internal async Task<CMDefaultResponse> LinkToPTW(int job_id, int ptw_id, int updatedBy)
@@ -564,13 +565,13 @@ namespace CMMSAPIs.Repositories.Jobs
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
             }
 
-            List<CMJobView> _ViewJobList = await GetJobView(job_id);
+            CMJobView _ViewJobList = await GetJobDetails(job_id);
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, job_id, CMMS.CMMS_Modules.PTW, ptw_id, $"Permit <{ptw_id}> Assigned to Job <{job_id}>", CMMS.CMMS_Status.JOB_LINKED, updatedBy);
 
-            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_LINKED, new[] { _ViewJobList[0].assigned_id}, _ViewJobList[0]);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_LINKED, new[] { _ViewJobList.assigned_id}, _ViewJobList);
 
-            CMDefaultResponse response = new CMDefaultResponse(_ViewJobList[0].id, CMMS.RETRUNSTATUS.SUCCESS, $"Job <{_ViewJobList[0].id}> Linked To Permit <{ptw_id}> ");
+            CMDefaultResponse response = new CMDefaultResponse(_ViewJobList.id, CMMS.RETRUNSTATUS.SUCCESS, $"Job <{_ViewJobList.id}> Linked To Permit <{ptw_id}> ");
 
             return response;        
         }

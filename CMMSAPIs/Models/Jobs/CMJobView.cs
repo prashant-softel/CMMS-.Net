@@ -21,6 +21,7 @@ namespace CMMSAPIs.Models.Jobs
         public string status_long { get; set; }
         public int created_by_id { get; set; }
         public string created_by_name { get; set; }
+        public DateTime? created_at { get; set; }
         public int assigned_id { get; set; }
         public string assigned_name { get; set; }
         public int job_type { get; set; }
