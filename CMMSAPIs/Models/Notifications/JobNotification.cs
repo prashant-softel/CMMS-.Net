@@ -63,31 +63,40 @@ namespace CMMSAPIs.Models.Notifications
             retValue = String.Format("<h3><b style='color:#31576D'>Status: </b>{0}</h3><br>", encodedStatusLong);
 
             retValue += String.Format("<table style='width: 50%; margin:0 auto; border-collapse: collapse ; border-spacing: 10px; ' border='1'>");
-            retValue += String.Format(template, "ID", m_jobObj.id);
-            retValue += String.Format(template, "Status", m_jobObj.status_short);
+            retValue += String.Format(template, "Job ID", m_jobObj.id);
+            retValue += String.Format(template, "Job Status", m_jobObj.status_short);
             retValue += String.Format(template, "Job Title", m_jobObj.job_title);
             retValue += String.Format(template, "Job Description", m_jobObj.job_description);
+            retValue += String.Format(template, "PTW Id",m_jobObj.current_ptw_id);
+            retValue += String.Format(template, "PTW Title", m_jobObj.current_ptw_title);
             retValue += String.Format(template, "Created by", m_jobObj.created_by_name);
-        
-            switch (m_notificationID)
-            {
-                case CMMS.CMMS_Status.JOB_CREATED:
-                    retValue += "</table>";            //Created
-                    break;
-                case CMMS.CMMS_Status.JOB_ASSIGNED:     //Assigned
-                    retValue += String.Format(templateEnd, "Assigned To", m_jobObj.assigned_name);
-                    break;
-                case CMMS.CMMS_Status.JOB_CLOSED:     //Closed
-                    retValue += String.Format(templateEnd, "Closed At", m_jobObj.closed_at);
+            retValue += String.Format(template, "Created At", m_jobObj.created_at);
+            retValue += String.Format(template, "Assigned To", m_jobObj.assigned_name);
+            //retValue += String.Format(template, "Assigned At", m_jobObj.created_by_name);
+            //retValue += String.Format(template, "Closed By", m_jobObj.assigned_name);
+            retValue += String.Format(templateEnd, "Closed At", m_jobObj.closed_at);
 
-                    break;
-                case CMMS.CMMS_Status.JOB_LINKED:     //Linked to PTW
-                    retValue += String.Format(template, "PTW Id", m_jobObj.current_ptw_id);
-                    retValue += String.Format(templateEnd, "PTW Title", m_jobObj.current_ptw_title);
-                    break;
-                default:
-                    break;
-            }
+
+
+            //switch (m_notificationID)
+            //{
+            //    case CMMS.CMMS_Status.JOB_CREATED:
+            //        retValue += "</table>";            //Created
+            //        break;
+            //    case CMMS.CMMS_Status.JOB_ASSIGNED:     //Assigned
+            //        retValue += String.Format(templateEnd, "Assigned To", m_jobObj.assigned_name);
+            //        break;
+            //    case CMMS.CMMS_Status.JOB_CLOSED:     //Closed
+            //        retValue += String.Format(templateEnd, "Closed At", m_jobObj.closed_at);
+
+            //        break;
+            //    case CMMS.CMMS_Status.JOB_LINKED:     //Linked to PTW
+            //        retValue += String.Format(template, "PTW Id", m_jobObj.current_ptw_id);
+            //        retValue += String.Format(templateEnd, "PTW Title", m_jobObj.current_ptw_title);
+            //        break;
+            //    default:
+            //        break;
+            //}
 
             return retValue;
         }

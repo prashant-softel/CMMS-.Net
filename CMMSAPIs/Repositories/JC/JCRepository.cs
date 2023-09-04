@@ -8,6 +8,7 @@ using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Models.JC;
 using CMMSAPIs.Models.Jobs;
 using CMMSAPIs.Repositories.Jobs;
+using CMMSAPIs.Repositories.Permits;
 using CMMSAPIs.Repositories.Utils;
 using CMMSAPIs.Models.Notifications;
 
@@ -88,83 +89,7 @@ namespace CMMSAPIs.Repositories.JC
             }
             return retValue;
 
-        }
-        private static string Status(int statusID)
-        {
-            CMMS.CMMS_Status status = (CMMS.CMMS_Status)statusID;
-            string statusName = "";
-            switch (status)
-            {
-                case CMMS.CMMS_Status.PTW_CREATED:
-                    statusName = "Waiting for Approval";
-                    break;
-                case CMMS.CMMS_Status.PTW_ISSUED:
-                    statusName = "Issued";
-                    break;
-                case CMMS.CMMS_Status.PTW_REJECTED_BY_ISSUER:
-                    statusName = "Rejected By Issuer";
-                    break;
-                case CMMS.CMMS_Status.PTW_APPROVED:
-                    statusName = "Approved";
-                    break;
-                case CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER:
-                    statusName = "Rejected By Approver";
-                    break;
-                case CMMS.CMMS_Status.PTW_CLOSED:
-                    statusName = "Closed";
-                    break;
-                case CMMS.CMMS_Status.PTW_CANCELLED_BY_ISSUER:
-                    statusName = "Cancelled BY Issuer";
-                    break;
-                case CMMS.CMMS_Status.PTW_CANCELLED_BY_HSE:
-                    statusName = "Cancelled By HSE";
-                    break;
-                case CMMS.CMMS_Status.PTW_CANCELLED_BY_APPROVER:
-                    statusName = "Cancelled By Approver";
-                    break;
-                case CMMS.CMMS_Status.PTW_CANCEL_REQUESTED:
-                    statusName = "Cancel Requested";
-                    break;
-                case CMMS.CMMS_Status.PTW_CANCEL_REQUEST_REJECTED:
-                    statusName = "Cancel Request Rejected";
-                    break;
-                case CMMS.CMMS_Status.PTW_CANCEL_REQUEST_APPROVED:
-                    statusName = "Cancel Approved";
-                    break;
-                case CMMS.CMMS_Status.PTW_EXTEND_REQUESTED:
-                    statusName = "Requested for Extension";
-                    break;
-                case CMMS.CMMS_Status.PTW_EXTEND_REQUEST_APPROVE:
-                    statusName = "Approved Extension";
-                    break;
-                case CMMS.CMMS_Status.PTW_EXTEND_REQUEST_REJECTED:
-                    statusName = "Rejected Extension";
-                    break;
-                case CMMS.CMMS_Status.PTW_LINKED_TO_JOB:
-                    statusName = "Linked to Job";
-                    break;
-                case CMMS.CMMS_Status.PTW_LINKED_TO_PM:
-                    statusName = "Linked to PM";
-                    break;
-                case CMMS.CMMS_Status.PTW_LINKED_TO_AUDIT:
-                    statusName = "Linked to Audit";
-                    break;
-                case CMMS.CMMS_Status.PTW_LINKED_TO_HOTO:
-                    statusName = "Linked to HOTO";
-                    break;
-                case CMMS.CMMS_Status.PTW_EXPIRED:
-                    statusName = "Expired";
-                    break;
-                case CMMS.CMMS_Status.PTW_UPDATED:
-                    statusName = "Updated";
-                    break;
-                default:
-                    statusName = "Invalid";
-                    break;
-            }
-            return statusName;
-        }
-
+        }       
 
         internal string getLongStatus(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMJCDetail jobObj)
         {
@@ -351,16 +276,20 @@ namespace CMMSAPIs.Repositories.JC
                 throw new MissingMemberException($"Job Card with ID {jc_id} not found");
 
             //job details
-            string myQuery2 = $"SELECT job.id as job_id , job.title as job_title , CONCAT(user.firstName, user.lastName) as job_assigned_employee_name , job.description as job_description , workType.workTypeName as work_type FROM jobs as job JOIN jobmappingassets as mapAssets ON mapAssets.jobId = job.id JOIN assetcategories as asset_cat ON mapAssets.categoryId = asset_cat.id LEFT JOIN jobworktypes as workType ON workType.equipmentCategoryId = asset_cat.id JOIN facilities as facilities ON job.facilityId = facilities.id LEFT JOIN users as user ON user.id = job.assignedId JOIN jobcards as jc on jc.jobId = job.id where jc.id = {jc_id}";
+            string myQuery2 = $"SELECT job.id as job_id ,job.status as status, job.title as job_title , CONCAT(user.firstName, user.lastName) as job_assigned_employee_name , job.description as job_description , workType.workTypeName as work_type FROM jobs as job JOIN jobmappingassets as mapAssets ON mapAssets.jobId = job.id JOIN assetcategories as asset_cat ON mapAssets.categoryId = asset_cat.id LEFT JOIN jobworktypes as workType ON workType.equipmentCategoryId = asset_cat.id JOIN facilities as facilities ON job.facilityId = facilities.id LEFT JOIN users as user ON user.id = job.assignedId JOIN jobcards as jc on jc.jobId = job.id where jc.id = {jc_id}";
             List<CMJCJobDetail> _jobDetails = await Context.GetData<CMJCJobDetail>(myQuery2).ConfigureAwait(false);
 
+            foreach (var job in _jobDetails)
+            {
+                job.status_short = JobRepository.getShortStatus(CMMS.CMMS_Modules.JOB, (CMMS.CMMS_Status)job.status);
+            }
             //permit details
             string myQuery3 = $"SELECT ptw.id as permit_id,ptw.status as status, ptw.permitNumber as site_permit_no, permitType.title as permit_type, ptw.description as permit_description, CONCAT(user.firstName, user.lastName) as job_created_by_name, CONCAT(user1.firstName + ' ' + user1.lastName) as permit_issued_by_name, CONCAT(user2.firstName + ' ' + user2.lastName) as permit_approved_by_name FROM permits as ptw LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId JOIN jobs as job ON ptw.id = job.linkedPermit LEFT JOIN users as user ON user.id = job.assignedId LEFT JOIN users as user1 ON user1.id = ptw.issuedById LEFT JOIN users as user2 ON user2.id = ptw.approvedById JOIN jobcards as jc on jc.PTW_id = ptw.id where jc.id = { jc_id}";
              List<CMJCPermitDetail> _permitDetails = await Context.GetData<CMJCPermitDetail>(myQuery3).ConfigureAwait(false);
             
             foreach (var permit in _permitDetails)
             {
-                permit.status_short = Status(permit.status);
+                permit.status_short = PermitRepository.Status(permit.status);
             }
 
             // isolated details
