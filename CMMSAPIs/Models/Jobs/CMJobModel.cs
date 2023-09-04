@@ -27,6 +27,7 @@ namespace CMMSAPIs.Models.Jobs
         public int status { get; set; }
         public int latestJCid { get; set; }
         public int latestJCStatus { get; set; }
+        public int latestJCPTWStatus { get; set; }
         public int latestJCApproval { get; set; }
         public string latestJCStatusShort { get; set; }
     }
