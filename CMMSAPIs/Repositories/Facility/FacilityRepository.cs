@@ -58,27 +58,31 @@ namespace CMMSAPIs.Repositories.Facility
             string country, state, city;
             string getCountryQry = $"SELECT name FROM countries WHERE id = {request.countryId};";
             DataTable dtCountry = await Context.FetchData(getCountryQry).ConfigureAwait(false);
-            if (dtCountry.Rows.Count == 0)
-                throw new ArgumentException("Invalid Country");
-            country = Convert.ToString(dtCountry.Rows[0][0]);
+            //if (dtCountry.Rows.Count == 0)
+            //    throw new ArgumentException("Invalid Country");
+            country = dtCountry.Rows.Count == 0 ? "" : Convert.ToString(dtCountry.Rows[0][0]);
+
             string getStateQry = $"SELECT name FROM states WHERE id = {request.stateId};";
             DataTable dtState = await Context.FetchData(getStateQry).ConfigureAwait(false);
-            if (dtState.Rows.Count == 0)
-                throw new ArgumentException("Invalid State");
-            state = Convert.ToString(dtState.Rows[0][0]);
+            //if (dtState.Rows.Count == 0)
+            //    throw new ArgumentException("Invalid State");
+            state = dtState.Rows.Count == 0 ? "" : Convert.ToString(dtState.Rows[0][0]);
+
             string getCityQry = $"SELECT name FROM cities WHERE id = {request.cityId};";
             DataTable dtCity = await Context.FetchData(getCityQry).ConfigureAwait(false);
-            if (dtCity.Rows.Count == 0)
-                throw new ArgumentException("Invalid City");
-            city = Convert.ToString(dtCity.Rows[0][0]);
-            string myQuery1 = $"SELECT * FROM states WHERE id = {request.stateId} AND country_id = {request.countryId};";
-            DataTable dt1 = await Context.FetchData(myQuery1).ConfigureAwait(false);
-            if (dt1.Rows.Count == 0)
-                throw new ArgumentException($"{state} is not situated in {country}");
-            string myQuery2 = $"SELECT * FROM cities WHERE id = {request.cityId} AND state_id = {request.stateId} AND country_id = {request.countryId};";
-            DataTable dt2 = await Context.FetchData(myQuery2).ConfigureAwait(false);
-            if (dt2.Rows.Count == 0)
-                throw new ArgumentException($"{city} is not situated in {state}, {country}");
+            //if (dtCity.Rows.Count == 0)
+            //    throw new ArgumentException("Invalid City");
+            city = dtCity.Rows.Count == 0 ? "" : Convert.ToString(dtCity.Rows[0][0]);
+
+            //string myQuery1 = $"SELECT * FROM states WHERE id = {request.stateId} AND country_id = {request.countryId};";
+            //DataTable dt1 = await Context.FetchData(myQuery1).ConfigureAwait(false);
+            ////if (dt1.Rows.Count == 0)
+            ////    throw new ArgumentException($"{state} is not situated in {country}");
+            //string myQuery2 = $"SELECT * FROM cities WHERE id = {request.cityId} AND state_id = {request.stateId} AND country_id = {request.countryId};";
+            //DataTable dt2 = await Context.FetchData(myQuery2).ConfigureAwait(false);
+            ////if (dt2.Rows.Count == 0)
+            ////    throw new ArgumentException($"{city} is not situated in {state}, {country}");
+           
             string qryFacilityInsert = "insert into facilities(name, spvId, customerId, ownerId, operatorId, isBlock, parentId, " +
                                         "address, country, state, city, zipcode, countryId, stateId, cityId, latitude, longitude, " +
                                         "createdBy, createdAt, status, photoId, description, timezone, startDate, endDate) " + 
