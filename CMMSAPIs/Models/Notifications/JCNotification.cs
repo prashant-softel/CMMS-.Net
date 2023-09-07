@@ -36,13 +36,13 @@ namespace CMMSAPIs.Models.Notifications
                 case CMMS.CMMS_Status.JC_CLOSED:
                     retValue = String.Format("Job Card <{0}> Closed of Job JC<{1}> Job Card Closed By<{2}>", m_JCObj.id, m_JCObj.jobid, m_JCObj.JC_Closed_by_Name);
                     break;
-                case CMMS.CMMS_Status.JC_CARRRY_FORWARDED:
+                case CMMS.CMMS_Status.JC_CARRY_FORWARDED:
                     retValue = String.Format("Job Card <{0}> Carry forward", m_JCObj.id);
                     break;
-                case CMMS.CMMS_Status.JC_APPROVED:   //approved name   permit issuer = jc  approver
+                case CMMS.CMMS_Status.JC_CLOSE_APPROVED:   //approved name   permit issuer = jc  approver
                     retValue = String.Format("Job Card <{0}> Approved , Job Card Approved By Name <{1}>", m_JCObj.id, m_JCObj.JC_Approved_By_Name);
                     break;
-                case CMMS.CMMS_Status.JC_REJECTED:
+                case CMMS.CMMS_Status.JC_CLOSE_REJECTED:
                     retValue = String.Format("Job Card <{0}> Rejected , Job Card Rejected By Name <{1}>", m_JCObj.id, m_JCObj.JC_Rejected_By_Name);
                     break;
                 //case CMMS.CMMS_Status.JC_PTW_TIMED_OUT:
@@ -80,13 +80,13 @@ namespace CMMSAPIs.Models.Notifications
                 case CMMS.CMMS_Status.JC_CLOSED:
                     retValue += String.Format(templateEnd, "Closed By", m_JCObj.JC_Closed_by_Name);
                     break;
-                case CMMS.CMMS_Status.JC_CARRRY_FORWARDED:
+                case CMMS.CMMS_Status.JC_CARRY_FORWARDED:
                     retValue += "</table>";
                     break;
-                case CMMS.CMMS_Status.JC_APPROVED:
+                case CMMS.CMMS_Status.JC_CLOSE_APPROVED:
                     retValue += String.Format(templateEnd, "Approved By", m_JCObj.JC_Approved_By_Name);
                     break;
-                case CMMS.CMMS_Status.JC_REJECTED:
+                case CMMS.CMMS_Status.JC_CLOSE_REJECTED:
                     retValue += String.Format(templateEnd, "Rejected By", m_JCObj.JC_Rejected_By_Name);
                     break;
                 //case CMMS.CMMS_Status.JC_PTW_TIMED_OUT:
@@ -116,15 +116,15 @@ namespace CMMSAPIs.Models.Notifications
                     template += String.Format("<p><b>Job Card status is : Job Card Closed</p>");
                     template += String.Format("<p><b>Job Card No :</b> {0}</p><p>Job Card Closed By{1}</p>", m_JCObj.id, m_JCObj.JC_Closed_by_Name);
                     break;
-                case CMMS.CMMS_Status.JC_CARRRY_FORWARDED:
+                case CMMS.CMMS_Status.JC_CARRY_FORWARDED:
                     template += String.Format("<p><b>Job Card  status is : Job Card Carry Forwarded </p>");
                     template += String.Format("<p>Job Card No:</b> {0}</p>", m_JCObj.id);
                     break;
-                case CMMS.CMMS_Status.JC_APPROVED:
+                case CMMS.CMMS_Status.JC_CLOSE_APPROVED:
                     template += String.Format("<p><b>Job Card status is : Job Card approved </p>");
                     template += String.Format("<p>Job Card No {0}</p><p>Job Card Approved </b> {1}</p>", m_JCObj.id, m_JCObj.JC_Approved_By_Name);
                     break;
-                case CMMS.CMMS_Status.JC_REJECTED:
+                case CMMS.CMMS_Status.JC_CLOSE_REJECTED:
                     template += String.Format("<p><b>Job Card status is : Job Card Rejected </p>");
                     template += String.Format("<p>Job Card No {0} Job Card Rejected By :</b> {1}</p>", m_JCObj.id, m_JCObj.JC_Rejected_By_Name);
                     break;
