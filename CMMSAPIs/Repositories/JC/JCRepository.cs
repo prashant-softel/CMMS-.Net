@@ -162,7 +162,7 @@ namespace CMMSAPIs.Repositories.JC
             var checkFilter = 0;
 
             /*Your code goes here*/
-            string myQuery1 = $"select jc.id as jobCardId, jc.JC_Date_Start as job_card_date, jc.JC_Date_Stop as end_time, job.id as jobid, job.title as description, CONCAT(user.firstName, user.lastName) as job_assinged_to,  ptw.id as permit_id, ptw.code as permit_no,JC_Status as current_status  from jobcards as jc JOIN jobs as job ON JC.jobid = job.id JOIN permits as ptw ON JC.PTW_id = PTW.ID LEFT JOIN users as user ON user.id = job.assignedId ";
+            string myQuery1 = $"select jc.id as jobCardId,jc.JC_Status as status ,jc.JC_Approved as approvedStatus, jc.JC_Date_Start as job_card_date, jc.JC_Date_Start as start_time,jc.JC_Date_Stop as end_time, job.id as jobid, job.title as description, CONCAT(user.firstName, user.lastName) as job_assinged_to,  ptw.id as permit_id, ptw.code as permit_no,JC_Status as current_status  from jobcards as jc JOIN jobs as job ON JC.jobid = job.id JOIN permits as ptw ON JC.PTW_id = PTW.ID LEFT JOIN users as user ON user.id = job.assignedId ";
                                 //$"LEFT JOIN  users as user2 ON user2.id = jc.JC_Added_by " +
                                 //$"LEFT JOIN  users as user3 ON user3.id = jc.JC_Start_By_id " ;
 
@@ -179,14 +179,22 @@ namespace CMMSAPIs.Repositories.JC
                 throw new ArgumentException("Invalid Facility ID");
             }
             
+
             List<CMJCList> _ViewJobCardList = await Context.GetData<CMJCList>(myQuery1).ConfigureAwait(false);
 
+            foreach (var jc in _ViewJobCardList)
+            {
+                CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(jc.status);
+                CMMS.ApprovalStatus _Approval = (CMMS.ApprovalStatus)(jc.approvedStatus);
+                string _shortStatus = getShortStatus(CMMS.CMMS_Modules.JOBCARD, _Status, _Approval);
+                jc.status_short = _shortStatus;       
+            }
             //job equipment category
-           /* string myQuery2 = $"SELECT asset_cat.id as equipmentCat_id, asset_cat.name as equipmentCat_name  FROM assetcategories as asset_cat JOIN jobmappingassets as mapAssets ON mapAssets.categoryId = asset_cat.id JOIN jobs as job ON mapAssets.jobId = job.id WHERE job.id = {_ViewJobCardList[0].jobid } and job.facilityId = { facility_id }";
-            List<equipmentCatList> _equipmentCatList = await Context.GetData<equipmentCatList>(myQuery2).ConfigureAwait(false);
+            /* string myQuery2 = $"SELECT asset_cat.id as equipmentCat_id, asset_cat.name as equipmentCat_name  FROM assetcategories as asset_cat JOIN jobmappingassets as mapAssets ON mapAssets.categoryId = asset_cat.id JOIN jobs as job ON mapAssets.jobId = job.id WHERE job.id = {_ViewJobCardList[0].jobid } and job.facilityId = { facility_id }";
+             List<equipmentCatList> _equipmentCatList = await Context.GetData<equipmentCatList>(myQuery2).ConfigureAwait(false);
 
-            _ViewJobCardList[0].LstequipmentCatList = _equipmentCatList;*/
-             return _ViewJobCardList;
+             _ViewJobCardList[0].LstequipmentCatList = _equipmentCatList;*/
+            return _ViewJobCardList;
         }
         internal async Task<List<CMJCListForJob>> GetJCListByJobId(int jobId)
         {

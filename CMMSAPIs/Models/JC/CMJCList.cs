@@ -16,6 +16,10 @@ namespace CMMSAPIs.Models.JC
         public dynamic job_card_date { get; set; }
         public dynamic start_time { get; set; }
         public dynamic end_time { get; set; }
+        public int status { get; set; }
+        public int approvedStatus { get; set; }
+        public string status_short { get; set; }
+        public string status_long { get; set; }
         public List<equipmentCatList> LstequipmentCatList { get; set; }
     }
 

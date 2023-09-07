@@ -67,18 +67,22 @@ namespace CMMSAPIs.Repositories.SM
         internal async Task<List<CMMRSListByModule>> getMRSListByModule(int jobId, int pmId)
         {
             int Id = 0;
+            string filter = "";
             if (jobId > 0)
             {
                 Id = jobId;
+                filter = " and whereUsedType = 4 ";
             }
             if (pmId > 0)
             {
                 string pmQry = $"SELECT id as pmId , linked_job_id as jobId from pm_execution where id ={pmId} ";
                 List<CMMRSListByModule> _pm = await Context.GetData<CMMRSListByModule>(pmQry).ConfigureAwait(false);
                 Id = _pm[0].jobId;
+                filter = " and whereUsedType = 10 ";
+
             }
 
-            string stmt = $"SELECT sm.ID as mrsId , jc.jobId as jobId, sm.whereUsedRefID as jobCardId, sm.status as status,group_concat(distinct assets.name order by assets.id separator ', ') as mrsItems FROM smmrs sm left join smrsitems on smrsitems.mrs_ID = sm.ID left join assets on smrsitems.asset_item_ID = assets.id Left Join jobcards jc on jc.id = sm.whereUsedRefID  where jc.jobId = {Id} group by mrsId";
+            string stmt = $"SELECT \r\n    sm.ID AS mrsId,\r\n    jc.jobId AS jobId,\r\n    sm.whereUsedRefID AS jobCardId,\r\n    sm.status AS status,\r\n    GROUP_CONCAT(DISTINCT items.name\r\n        ORDER BY items.id\r\n        SEPARATOR ', ') AS mrsItems\r\nFROM\r\n    smmrs sm\r\n        LEFT JOIN\r\n    (SELECT \r\n        sai.ID AS id, si.mrs_ID, sam.asset_name as name\r\n    FROM smrsitems si left join\r\n        smassetitems sai on si.asset_item_ID = sai.ID\r\n    LEFT JOIN smassetmasters sam ON sam.asset_code = sai.asset_code) AS items ON items.mrs_ID = sm.ID\r\n        LEFT JOIN\r\n    jobcards jc ON jc.id = sm.whereUsedRefID\r\nWHERE\r\n    jc.jobId = {Id} {filter} group by mrsId;";
 
             List<CMMRSListByModule> _List = await Context.GetData<CMMRSListByModule>(stmt).ConfigureAwait(false);
 
