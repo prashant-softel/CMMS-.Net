@@ -85,7 +85,7 @@ namespace CMMSAPIs.Repositories.Jobs
             /*Your code goes here*/
             string myQuery = "SELECT " +
                                  //                                 "job.id, job.facilityId, user.id, facilities.name as plantName, job.status as status, job.createdAt as jobDate, DATE_FORMAT(job.breakdownTime, '%Y-%m-%d') as breakdown_time, job.id as id, asset_cat.name as equipmentCat, asset.name as workingArea, job.title as jobDetails, workType.workTypeName as workType, permit.code as permitId, job.createdBy as raisedBy, CONCAT(user.firstName , ' ' , user.lastName) as assignedToName, user.id as assignedToId, IF(job.breakdownTime = '', 'Non Breakdown Maintenance', 'Breakdown Maintenance') as breakdownType , job.description as description" +
-                                 "job.id, job.facilityId as facilityId, facilities.name as facilityName, group_concat(distinct asset_cat.name order by asset_cat.id separator ', ') as equipmentCat, group_concat(distinct asset.name order by asset.id separator ', ') as workingArea, job.title as jobDetails, job.description as description, job.createdBy as raisedBy, CONCAT(rasiedByUser.firstName , ' ' , rasiedByUser.lastName) as raisedByName, job.createdAt as jobDate, CONCAT(user.firstName , ' ' , user.lastName) as assignedToName, user.id as assignedToId, job.status as status, jc.id as latestJCid, jc.JC_Status as latestJCStatus, jc.JC_Approved as latestJCApproval, DATE_FORMAT(job.breakdownTime, '%Y-%m-%d') as breakdown_time, IF(job.breakdownTime = '', 'Non Breakdown Maintenance', 'Breakdown Maintenance') as breakdownType, group_concat(distinct workType.workTypeName order by workType.id separator ', ') as workType, permit.id as ptw_id, permit.code as permitId, permit.status as  latestJCPTWstatus" +
+                                 "job.id, job.facilityId as facilityId, facilities.name as facilityName, group_concat(distinct asset_cat.name order by asset_cat.id separator ', ') as equipmentCat, group_concat(distinct asset.name order by asset.id separator ', ') as workingArea, job.title as jobDetails, job.description as description, job.createdBy as raisedBy, CONCAT(rasiedByUser.firstName , ' ' , rasiedByUser.lastName) as raisedByName, job.createdAt as jobDate, CONCAT(user.firstName , ' ' , user.lastName) as assignedToName, user.id as assignedToId, job.status as status, jc.id as latestJCid, jc.JC_Status as latestJCStatus, jc.JC_Approved as latestJCApproval, job.breakdownTime as breakdownTime, IF(job.breakdownTime = '', 'Non Breakdown Maintenance', 'Breakdown Maintenance') as breakdownType, group_concat(distinct workType.workTypeName order by workType.id separator ', ') as workType, permit.id as ptw_id, permit.code as permitId, permit.status as  latestJCPTWstatus" +
                                  " FROM " +
                                         "jobs as job " +
                                 "LEFT JOIN " +
@@ -146,7 +146,7 @@ namespace CMMSAPIs.Repositories.Jobs
                     //if permit status is not yet approved
                     if (_Job.latestJCPTWStatus == (int)CMMS.CMMS_Status.PTW_APPROVED)
                     {
-                        _Job.latestJCStatusShort = "job card created";
+                        _Job.latestJCStatusShort = JCRepository.getShortStatus(CMMS.CMMS_Modules.JOBCARD, (CMMS.CMMS_Status)_Job.latestJCStatus, (CMMS.ApprovalStatus)_Job.latestJCApproval);
                     }
                     else if (_Job.latestJCPTWStatus == (int)CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER)
                     {
@@ -159,7 +159,19 @@ namespace CMMSAPIs.Repositories.Jobs
                 }
                 else
                 {
-                    _Job.latestJCStatusShort = JCRepository.getShortStatus(CMMS.CMMS_Modules.JOBCARD, (CMMS.CMMS_Status)_Job.latestJCStatus, (CMMS.ApprovalStatus)_Job.latestJCApproval);
+                    if (_Job.latestJCPTWStatus == (int)CMMS.CMMS_Status.PTW_APPROVED)
+                    {
+                        
+                        _Job.latestJCStatusShort = "Permit - Approved";
+                    }
+                    else if (_Job.latestJCPTWStatus == (int)CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER)
+                    {
+                        _Job.latestJCStatusShort = "Permit - rejected";
+                    }
+                    else
+                    {
+                        _Job.latestJCStatusShort = "Permit - Pending";
+                    }
                 }
             }
 
@@ -287,11 +299,11 @@ namespace CMMSAPIs.Repositories.Jobs
 				_AssociatedpermitList[0].ptwStatus_short = "Linked";    //temp till JOIN is made
 			}
             string myQuery4 = "SELECT workType.id AS workTypeId, workType.workTypeName as workTypeName FROM jobs AS job " +
-                "JOIN jobmappingassets AS mapAssets ON mapAssets.jobId = job.id " +
-                "JOIN assetcategories AS asset_cat ON mapAssets.categoryId = asset_cat.id " +
+                "left JOIN jobmappingassets AS mapAssets ON mapAssets.jobId = job.id " +
+                "left JOIN assetcategories AS asset_cat ON mapAssets.categoryId = asset_cat.id " +
                 "LEFT JOIN jobassociatedworktypes as mapWorkTypes on mapWorkTypes.jobId = job.id " +
                 "LEFT JOIN jobworktypes AS workType ON mapWorkTypes.workTypeId = workType.id " +
-                $"WHERE job.id = {job_id} GROUP BY workType.id";
+                $"WHERE job.id = {job_id} ";
             List<CMWorkType> _WorkType = await Context.GetData<CMWorkType>(myQuery4).ConfigureAwait(false);
 
             string myQuery5 = "SELECT tools.id as toolId, tools.assetName as toolName FROM jobs AS job " + 
@@ -314,7 +326,7 @@ namespace CMMSAPIs.Repositories.Jobs
                 //if permit status is not yet approved
                 if (_AssociatedpermitList[0].ptwStatus == (int)CMMS.CMMS_Status.PTW_APPROVED)
                 {
-                    _ViewJobList[0].latestJCStatusShort = "job card created";
+                    _ViewJobList[0].latestJCStatusShort = JCRepository.getShortStatus(CMMS.CMMS_Modules.JOBCARD, (CMMS.CMMS_Status)_ViewJobList[0].latestJCStatus, (CMMS.ApprovalStatus)_ViewJobList[0].latestJCApproval);
                 }
                 else if (_AssociatedpermitList[0].ptwStatus == (int)CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER)
                 {
@@ -327,7 +339,19 @@ namespace CMMSAPIs.Repositories.Jobs
             }
             else
             {
-                _ViewJobList[0].latestJCStatusShort = JCRepository.getShortStatus(CMMS.CMMS_Modules.JOBCARD, (CMMS.CMMS_Status)_ViewJobList[0].latestJCStatus, (CMMS.ApprovalStatus)_ViewJobList[0].latestJCApproval);
+                if (_AssociatedpermitList[0].ptwStatus == (int)CMMS.CMMS_Status.PTW_APPROVED)
+                {
+
+                    _ViewJobList[0].latestJCStatusShort = "Permit - Approved";
+                }
+                else if (_AssociatedpermitList[0].ptwStatus == (int)CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER)
+                {
+                    _ViewJobList[0].latestJCStatusShort = "Permit - rejected";
+                }
+                else
+                {
+                    _ViewJobList[0].latestJCStatusShort = "Permit - Pending";
+                }
             }
 
             _ViewJobList[0].equipment_cat_list = _equipmentCatList;
