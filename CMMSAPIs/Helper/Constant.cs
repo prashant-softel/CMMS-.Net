@@ -359,12 +359,12 @@ namespace CMMSAPIs.Helper
 
             JC_CREATED = 151,
             JC_STARTED,
-            JC_CARRRY_FORWARDED,
+            JC_CARRY_FORWARDED,
             JC_CF_REJECTED,
             JC_CF_APPROVED,
             JC_CLOSED,
-            JC_REJECTED,
-            JC_APPROVED,
+            JC_CLOSE_REJECTED,
+            JC_CLOSE_APPROVED,
             JC_UPDATED,                 //only for notification purpose
 
             PM_SCHEDULED = 161,
