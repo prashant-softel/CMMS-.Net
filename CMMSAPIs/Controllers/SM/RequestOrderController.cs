@@ -58,7 +58,7 @@ namespace CMMSAPIs.Controllers.SM
         [Authorize]
         [Route("CreateRequestOrder")]
         [HttpPost]
-        public async Task<IActionResult> CreateRequestOrder(CMRequestOrder request)
+        public async Task<IActionResult> CreateRequestOrder(CMCreateRequestOrder request)
         {
             try
             {
@@ -75,7 +75,7 @@ namespace CMMSAPIs.Controllers.SM
         [Authorize]
         [Route("UpdateRequestOrder")]
         [HttpPost]
-        public async Task<IActionResult> UpdateRequestOrder(CMRequestOrder request)
+        public async Task<IActionResult> UpdateRequestOrder(CMCreateRequestOrder request)
         {
             try
             {
