@@ -6,7 +6,7 @@ namespace CMMSAPIs.Models.SM
     
     public class CMRequestOrder
     {
-public int id { get; set; }
+        public int id { get; set; }
         public int requestID { get; set; }
         public int facilityID { get; set; }
         public string facilityName { get; set; }
@@ -56,7 +56,6 @@ public int id { get; set; }
     }
     public class CMRequestOrder_ITEMS
     {
-        public int ID { get; set; }
         public int itemID { get; set; }
         public int requestID { get; set; }
         public int assetItemID { get; set; }
@@ -72,6 +71,7 @@ public int id { get; set; }
         //public decimal damaged_qty { get; set; }
         public decimal accepted_qty { get; set; }
 
+        public string comment { get; set; }
 
 
     }
@@ -131,7 +131,29 @@ public int id { get; set; }
         public string approvedBy { get; set; }
         public DateTime? approvedAt { get; set; }
         public DateTime? receivedAt { get; set; }
+        public string itemcomment { get; set; }
+        public string rejectedBy { get; set; }
+        public DateTime? rejectedAt { get; set; }
+    }
 
+    public class CMCreateRequestOrder
+    {
+        public int request_order_id { get; set; }
+        public int facilityID { get; set; }
+        public string facilityName { get; set; }
+        public string comment { get; set; }
+        public int status { get; set; }
+        public string status_short { get; set; }
+        public string status_long { get; set; }
+        public string rejectedRemark { get; set; }
+        public string generatedBy { get; set; }
+
+        public string rejectedBy { get; set; }
+        public DateTime? rejectedAt { get; set; }
+        public string approvedBy { get; set; }      
+        public DateTime? approvedAt { get; set; }
+        public DateTime? generatedAt { get; set; }
+        public List<CMRequestOrder_ITEMS> request_order_items { get; set; }
     }
 
 }
