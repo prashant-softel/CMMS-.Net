@@ -13,10 +13,10 @@ namespace CMMSAPIs.BS.SM
 {
     public interface IRequestOrderBS
     {
-        Task<List<CMRequestOrder>> GetRequestOrderList(int facilityID, DateTime fromDate, DateTime toDate);
-        Task<CMRequestOrder> GetRODetailsByID(int id);
-        Task<CMDefaultResponse> CreateRequestOrder(CMRequestOrder request, int userID);
-        Task<CMDefaultResponse> UpdateRequestOrder(CMRequestOrder request, int userID);
+        Task<List<CMCreateRequestOrder>> GetRequestOrderList(int facilityID, DateTime fromDate, DateTime toDate);
+        Task<CMCreateRequestOrder> GetRODetailsByID(int id);
+        Task<CMDefaultResponse> CreateRequestOrder(CMCreateRequestOrder request, int userID);
+        Task<CMDefaultResponse> UpdateRequestOrder(CMCreateRequestOrder request, int userID);
         Task<CMDefaultResponse> DeleteRequestOrder(CMApproval request, int userID);
         Task<CMDefaultResponse> ApproveRequestOrder(CMApproval request, int userID);
         Task<CMDefaultResponse> RejectRequestOrder(CMApproval request, int userID);
@@ -29,7 +29,7 @@ namespace CMMSAPIs.BS.SM
         {
             databaseProvider = dbProvider;
         }
-        public async Task<List<CMRequestOrder>> GetRequestOrderList(int facilityID, DateTime fromDate, DateTime toDate)
+        public async Task<List<CMCreateRequestOrder>> GetRequestOrderList(int facilityID, DateTime fromDate, DateTime toDate)
         {
             try
             {
@@ -44,7 +44,7 @@ namespace CMMSAPIs.BS.SM
                 throw;
             }
         }
-        public async Task<CMRequestOrder> GetRODetailsByID(int id)
+        public async Task<CMCreateRequestOrder> GetRODetailsByID(int id)
         {
             try
             {
@@ -59,7 +59,7 @@ namespace CMMSAPIs.BS.SM
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> CreateRequestOrder(CMRequestOrder request, int userID)
+        public async Task<CMDefaultResponse> CreateRequestOrder(CMCreateRequestOrder request, int userID)
         {
             try
             {
@@ -74,7 +74,7 @@ namespace CMMSAPIs.BS.SM
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> UpdateRequestOrder(CMRequestOrder request, int userID)
+        public async Task<CMDefaultResponse> UpdateRequestOrder(CMCreateRequestOrder request, int userID)
         {
             try
             {
