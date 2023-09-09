@@ -32,28 +32,24 @@ namespace CMMSAPIs.Repositories.SM
             _utilsRepo = new UtilsRepository(sqlDBHelper);
         }
 
-        internal async Task<CMDefaultResponse> CreateRequestOrder(CMRequestOrder request, int userID)
+        internal async Task<CMDefaultResponse> CreateRequestOrder(CMCreateRequestOrder request, int userID)
         {
             CMDefaultResponse response = null;
             int ReturnID = 0;
             try
             {
-                if (request.go_items != null)
+                if (request.request_order_items != null)
                 {
-                    string poInsertQuery = $" INSERT INTO smrequestorder (facilityID,vendorID,receiverID,generated_by,request_date,status," +
-                        $" challan_no, freight,transport, request_no, " +
-                        $"no_pkg_received,lr_no,condition_pkg_received,vehicle_no, gir_no, challan_date, job_ref,amount, currency,withdraw_by,withdrawOn,order_type) " +
-                        $"VALUES({request.facilityID},{request.vendorID}, {request.receiverID}, {userID}, '{DateTime.Now.ToString("yyyy-MM-dd")}', {(int)CMMS.CMMS_Status.SM_RO_SUBMITTED}," +
-                        $"'{request.challan_no}','{request.freight}','','', '{request.no_pkg_received}', '{request.lr_no}', '{request.condition_pkg_received}','{request.vehicle_no}','{request.gir_no}','{request.challan_date.Value.ToString("yyyy-MM-dd")}'," +
-                        $"'{request.job_ref}',{request.amount}, {request.currencyID},0,'0001-01-01',0);" +
+                    string poInsertQuery = $" INSERT INTO smrequestorder (facilityID,generated_by,request_date,status,remarks)" +
+                       $"VALUES({request.facilityID},  {userID}, '{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}', {(int)CMMS.CMMS_Status.SM_RO_SUBMITTED}, '{request.comment}');" +
                         $" SELECT LAST_INSERT_ID();";
                     DataTable dt2 = await Context.FetchData(poInsertQuery).ConfigureAwait(false);
                     int roid = Convert.ToInt32(dt2.Rows[0][0]);
                     ReturnID = roid;
-                    for (var i = 0; i < request.go_items.Count; i++)
+                    for (var i = 0; i < request.request_order_items.Count; i++)
                     {
-                        string poDetailsQuery = $"INSERT INTO smrequestorderdetails (requestID,assetItemID,cost,ordered_qty) " +
-                        "values(" + roid + ", " + request.go_items[i].assetItemID + ",  " + request.go_items[i].cost + ", " + request.go_items[i].ordered_qty + ") ; SELECT LAST_INSERT_ID();";
+                        string poDetailsQuery = $"INSERT INTO smrequestorderdetails (requestID,assetItemID,cost,ordered_qty,remarks) " +
+                        "values(" + roid + ", " + request.request_order_items[i].assetItemID + ",  " + request.request_order_items[i].cost + ", " + request.request_order_items[i].ordered_qty + ", '" + request.request_order_items[i].comment + "') ; SELECT LAST_INSERT_ID();";
                         DataTable dtInsertPO = await Context.FetchData(poDetailsQuery).ConfigureAwait(false);
                         int id = Convert.ToInt32(dtInsertPO.Rows[0][0]);
                     }
@@ -68,23 +64,30 @@ namespace CMMSAPIs.Repositories.SM
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_PO, ReturnID, 0, 0, "Request order created", CMMS.CMMS_Status.SM_RO_SUBMITTED);
             return response;
         }
-        internal async Task<CMDefaultResponse> UpdateRequestOrder(CMRequestOrder request, int userID)
+        internal async Task<CMDefaultResponse> UpdateRequestOrder(CMCreateRequestOrder request, int userID)
         {
             //string mainQuery = $"UPDATE smpurchaseorderdetails SET generate_flag = " +request.generate_flag + ",status = "+request.status+", vendorID = "+request.vendorID+" WHERE ID = "+request.id+"";
 
-            string updateRO = $" UPDATE smrequestorder SET vendorID = {request.vendorID},request_date = '{request.request_date.Value.ToString("yyyy-MM-dd")}', challan_no = '{request.challan_no}'," +
-                $"challan_date = '{request.challan_date.Value.ToString("yyyy-MM-dd")}', freight='{request.freight}', received_on='{DateTime.Now.ToString("yyyy-MM-dd")}', no_pkg_received='{request.no_pkg_received}'," +
-                $" lr_no='{request.lr_no}', condition_pkg_received='{request.condition_pkg_received}', vehicle_no = '{request.vehicle_no}', gir_no = '{request.gir_no}', " +
-                $"job_ref = '{request.job_ref}', amount = '{request.amount}', currency= {request.currencyID} where id = {request.id}";
+            string updateRO = $" UPDATE smrequestorder SET facilityID = '{request.facilityID}'," +
+                $" remarks = '{request.comment}', updated_by = {userID},updated_at='{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}' where id = {request.request_order_id}";
             var ResultROQuery = await Context.ExecuteNonQry<int>(updateRO);
-            for (var i = 0; i < request.go_items.Count; i++)
+            for (var i = 0; i < request.request_order_items.Count; i++)
             {
-
-                string updateQ = $"UPDATE smrequestorderdetails SET assetItemID = {request.go_items[i].assetItemID} , cost = {request.go_items[i].cost} , ordered_qty = {request.go_items[i].ordered_qty}" +
-                    $" WHERE ID = {request.go_items[i].itemID}";
-                var result = await Context.ExecuteNonQry<int>(updateQ);
+                if (request.request_order_items[i].itemID > 0)
+                {
+                    string updateQ = $"UPDATE smrequestorderdetails SET assetItemID = {request.request_order_items[i].assetItemID} , cost = {request.request_order_items[i].cost} , ordered_qty = {request.request_order_items[i].ordered_qty}, remarks = '{request.request_order_items[i].comment}'" +
+                        $" WHERE ID = {request.request_order_items[i].itemID}";
+                    var result = await Context.ExecuteNonQry<int>(updateQ);
+                }
+                else
+                {
+                    string poDetailsQuery = $"INSERT INTO smrequestorderdetails (requestID,assetItemID,cost,ordered_qty,remarks) " +
+                       "values(" + request.request_order_id + ", " + request.request_order_items[i].assetItemID + ",  " + request.request_order_items[i].cost + ", " + request.request_order_items[i].ordered_qty + ", '" + request.request_order_items[i].comment + "') ; SELECT LAST_INSERT_ID();";
+                    DataTable dtInsertPO = await Context.FetchData(poDetailsQuery).ConfigureAwait(false);
+                    int id = Convert.ToInt32(dtInsertPO.Rows[0][0]);
+                }
             }
-            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Request order updated successfully.");
+            CMDefaultResponse response = new CMDefaultResponse(request.request_order_id, CMMS.RETRUNSTATUS.SUCCESS, "Request order updated successfully.");
             return response;
         }
         internal async Task<CMDefaultResponse> DeleteRequestOrder(CMApproval request, int userID)
@@ -96,45 +99,135 @@ namespace CMMSAPIs.Repositories.SM
             return response;
         }
 
-        internal async Task<List<CMRequestOrder>> GetRequestOrderList(int facilityID, DateTime fromDate, DateTime toDate)
+        internal async Task<List<CMCreateRequestOrder>> GetRequestOrderList(int facilityID, DateTime fromDate, DateTime toDate) 
         {
+            string filter = " facilityID = " + facilityID + " and  DATE_FORMAT(po.request_date, '%Y-%m-%d') >= '" + fromDate.ToString("yyyy-MM-dd") + "'  and  DATE_FORMAT(po.request_date, '%Y-%m-%d') <= '" + toDate.ToString("yyyy-MM-dd") + "'";
 
-            string filter = " facilityID = " + facilityID + " and (DATE(po.request_date) >= '" + fromDate.ToString("yyyy-MM-dd") + "'  and DATE(po.request_date) <= '" + toDate.ToString("yyyy-MM-dd") + "')";
+            string query = "SELECT fc.name as facilityName,pod.ID as requestDetailsID, facilityid as      " +
+                " facility_id,pod.spare_status,po.remarks,sai.orderflag,sam.asset_type_ID,pod.requestID,pod.assetItemID," +
+                "sai.serial_number,sai.location_ID,pod.cost,pod.ordered_qty,\r\n bl.name as vendor_name,\r\n  " +
+                "    po.request_date,sam.asset_type_ID,sam.asset_name,po.receiverID,\r\n        po.vendorID,po.status," +
+                "sai.asset_code,t1.asset_type,t2.cat_name,pod.received_qty,pod.damaged_qty,pod.accepted_qty,f1.file_path," +
+                "f1.Asset_master_id,sm.decimal_status,sm.spare_multi_selection,po.generated_by,pod.order_type as asset_type_ID_OrderDetails," +
+                " receive_later, added_to_store,reject_reccomendations as  rejectedRemark, \r\n        po.challan_no, po.freight, po.transport, po.no_pkg_received, po.lr_no," +
+                " po.condition_pkg_received, po.vehicle_no, po.gir_no,  po.job_ref, po.amount,  po.currency as currencyID" +
+                " , curr.name as currency , stt.asset_type as asset_type_Name, \r\n    CONCAT(ed.firstName,' ',ed.lastName) as generatedBy,po.received_on as generatedAt,approvedOn as approvedAt,CONCAT(ed1.firstName,' ',ed1.lastName) as receivedBy, pod.remarks as itemcomment, " +
+                "CONCAT(ed2.firstName,' ',ed2.lastName) as approvedBy , \t\t\t\tCONCAT(ed3.firstName,' ',ed3.lastName) as rejectedBy , po.rejected_at as rejectedAt" +
+                "    FROM smrequestorderdetails pod\r\n      " +
+                "  LEFT JOIN smrequestorder po ON po.ID = pod.requestID\r\n       " +
+                " LEFT JOIN smassetitems sai ON sai.ID = pod.assetItemID\r\n     " +
+                "   LEFT JOIN smassetmasters sam ON sam.asset_code = sai.asset_code\r\n      " +
+                "  LEFT JOIN smunitmeasurement sm ON sm.ID = sam.unit_of_measurement\r\n     " +
+                "   LEFT JOIN (\r\n            SELECT file.file_path,file.Asset_master_id as Asset_master_id " +
+                "FROM smassetmasterfiles file \r\n           " +
+                " LEFT join smassetmasters sam on file.Asset_master_id =  sam.id )\r\n          " +
+                "  f1 ON f1.Asset_master_id = sam.id\r\n        " +
+                "LEFT JOIN (\r\n            SELECT sat.asset_type,s1.ID as master_ID FROM smassettypes sat\r\n      " +
+                "      LEFT JOIN smassetmasters s1 ON s1.asset_type_ID = sat.ID\r\n        )  t1 ON t1.master_ID = sam.ID\r\n " +
+                "       LEFT JOIN (\r\n            SELECT sic.cat_name,s2.ID as master_ID FROM smitemcategory sic\r\n   " +
+                "         LEFT JOIN smassetmasters s2 ON s2.item_category_ID = sic.ID\r\n        )  t2 ON t2.master_ID = sam.ID\r\n       " +
+                " LEFT JOIN facilities fc ON fc.id = po.facilityID\r\nLEFT JOIN users as vendor on vendor.id=po.vendorID       \r\n " +
+                "LEFT JOIN business bl ON bl.id = po.vendorID left join smassettypes stt on stt.ID = pod.order_type\r\n " +
+                "LEFT JOIN currency curr ON curr.id = po.currency  LEFT JOIN users ed2 ON ed2.id = po.approved_by\r\n LEFT JOIN users ed ON ed.id = po.generated_by\r\n" +
+                "  LEFT JOIN users ed1 ON ed1.id = po.receiverID     LEFT JOIN users ed3 ON ed3.id = po.rejeccted_by\t " +
+                " WHERE "+ filter;
+            List<CMRequestOrderList> _List = await Context.GetData<CMRequestOrderList>(query).ConfigureAwait(false);
 
-            string stmt = "SELECT fc.name as facilityName,  pod.ID as requestID,pod.spare_status,pod.remarks,sai.orderflag,sam.asset_name,sam.asset_type_ID,pod.requestID as ID," +
-                "pod.assetItemID,sai.serial_number,sai.location_ID,pod.cost ,pod.ordered_qty,po.remarks as rejectedRemark,po.facilityID,po.request_date," +
-                "sam.asset_type_ID,\r\n\t\t        po.vendorID,po.status,sai.asset_code,t1.asset_type,t2.cat_name,pod.received_qty,pod.damaged_qty," +
-                "pod.accepted_qty,po.received_on as receivedAt,po.approvedOn as approvedAt,\r\n\t\t\t\tCONCAT(ed.firstName,' ',ed.lastName) as generatedBy," +
-                "CONCAT(ed1.firstName,' ',ed1.lastName) as receivedBy,CONCAT(ed2.firstName,' ',ed2.lastName) as approvedBy," +
-                "\r\n\t\t\t\tbl.name as vendor_name, po.currency  as currencyID,curr.name currency, amount, job_ref, gir_no,vehicle_no, condition_pkg_received, lr_no, no_pkg_received, received_on, freight,  challan_date, challan_no" +
-                " \r\n\t\t        FROM smrequestorderdetails pod\r\n\t\t       " +
-                " LEFT JOIN smrequestorder po ON po.ID = pod.requestID\r\n\t\t        LEFT JOIN smassetitems sai ON sai.ID = pod.assetItemID" +
-                " LEFT JOIN smassetmasters sam ON sam.asset_code = sai.asset_code   " +
-                " LEFT JOIN (    SELECT sat.asset_type,s1.ID as master_ID FROM smassettypes sat\r\n\t\t            " +
-                "LEFT JOIN smassetmasters s1 ON s1.asset_type_ID = sat.ID\r\n\t\t        )  t1 ON t1.master_ID = sam.ID\r\n\t\t        " +
-                "LEFT JOIN (\r\n\t\t      SELECT sic.cat_name,s2.ID as master_ID FROM smitemcategory sic \r\n            " +
-                "  LEFT JOIN smassetmasters s2 ON s2.item_category_ID = sic.ID  )  t2 ON t2.master_ID = sam.ID " +
-                "LEFT JOIN users ed ON ed.id = po.generated_by\r\n\t\t   " +
-                " Left join currency curr ON curr.id = po.currency " +
-                "     LEFT JOIN users ed1 ON ed1.id = po.receiverID\r\n\t\t\t\t " +
-                "LEFT JOIN users ed2 ON ed2.id = po.approved_by\r\n\t\t\t\t" +
-                "LEFT JOIN business bl ON bl.id = po.vendorID \r\n\r\n\t\t LEFT JOIN facilities fc ON fc.id = po.facilityID    WHERE " + filter +
-                " ";
-            List<CMRequestOrder> _List = await Context.GetData<CMRequestOrder>(stmt).ConfigureAwait(false);
-
-
-            for (var i = 0; i < _List.Count; i++)
+            List<CMCreateRequestOrder> _MasterList = _List.Select(p => new CMCreateRequestOrder
             {
-                CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_List[i].status);
+                request_order_id = p.requestID,
+                facilityID = p.facility_id,
+                facilityName = p.facilityName,
+                status = p.status,
+                comment = p.remarks,
+                rejectedRemark = p.rejectedRemark,
+                approvedAt = p.approvedAt,
+                generatedBy = p.generatedBy,
+                generatedAt = p.request_date,
+                approvedBy = p.approvedBy,
+                rejectedBy = p.rejectedBy,
+                rejectedAt = p.rejectedAt
+            }).GroupBy(p => p.request_order_id).Select(group => group.First()).ToList();
+            for (var i = 0; i < _MasterList.Count; i++)
+            {
+                List<CMRequestOrder_ITEMS> _itemList = _List.Select(p => new CMRequestOrder_ITEMS
+                {
+                    itemID = p.requestDetailsID,
+                    requestID = p.requestID,
+                    cost = p.cost,
+                    asset_name = p.asset_name,
+                    assetItemID = p.assetItemID,
+                    ordered_qty = p.ordered_qty,
+                    comment = p.itemcomment
+                }).ToList();
+                
+                _MasterList[i].request_order_items = _itemList.Where(group => group.requestID == _MasterList[i].request_order_id).ToList();
+                CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_MasterList[i].status);
                 string _shortStatus = getShortStatus(CMMS.CMMS_Modules.SM_PO, _Status);
-                string status_long = getLongStatus(_List[i].requestID, _Status);
-                _List[i].status_short = _shortStatus;
-                _List[i].status_long = status_long;
+                string _longStatus = getLongStatus(_MasterList[i].request_order_id, _Status);
+
+                _MasterList[i].status_short = _shortStatus;
+                _MasterList[i].status_long = _longStatus;
             }
-
-
-            return _List;
+          
+            return _MasterList;
         }
+        //internal async Task<List<CMRequestOrder>> GetRequestOrderList(int facilityID, DateTime fromDate, DateTime toDate)
+        //{
+
+        //    string filter = " facilityID = " + facilityID + " and  DATE_FORMAT(po.request_date, '%Y-%m-%d') >= '" + fromDate.ToString("yyyy-MM-dd") + "'  and  DATE_FORMAT(po.request_date, '%Y-%m-%d') <= '" + toDate.ToString("yyyy-MM-dd") + "'";
+
+        //    //string stmt = "SELECT fc.name as facilityName,  pod.ID as requestID,pod.spare_status,pod.remarks,sai.orderflag,sam.asset_name,sam.asset_type_ID,pod.requestID as ID," +
+        //    //    "pod.assetItemID,sai.serial_number,sai.location_ID,pod.cost ,pod.ordered_qty,po.remarks as rejectedRemark,po.facilityID,po.request_date," +
+        //    //    "sam.asset_type_ID,\r\n\t\t        po.vendorID,po.status,sai.asset_code,t1.asset_type,t2.cat_name,pod.received_qty,pod.damaged_qty," +
+        //    //    "pod.accepted_qty,po.received_on as generatedAt,po.approvedOn as approvedAt,\r\n\t\t\t\tCONCAT(ed.firstName,' ',ed.lastName) as generatedBy," +
+        //    //    "CONCAT(ed1.firstName,' ',ed1.lastName) as receivedBy,CONCAT(ed2.firstName,' ',ed2.lastName) as approvedBy," +
+        //    //    "\r\n\t\t\t\tbl.name as vendor_name, po.currency  as currencyID,curr.name currency, amount, job_ref, gir_no,vehicle_no, condition_pkg_received, lr_no, no_pkg_received, received_on, freight,  challan_date, challan_no" +
+        //    //    " \r\n\t\t        FROM smrequestorderdetails pod\r\n\t\t       " +
+        //    //    " LEFT JOIN smrequestorder po ON po.ID = pod.requestID\r\n\t\t        LEFT JOIN smassetitems sai ON sai.ID = pod.assetItemID" +
+        //    //    " LEFT JOIN smassetmasters sam ON sam.asset_code = sai.asset_code   " +
+        //    //    " LEFT JOIN (    SELECT sat.asset_type,s1.ID as master_ID FROM smassettypes sat\r\n\t\t            " +
+        //    //    "LEFT JOIN smassetmasters s1 ON s1.asset_type_ID = sat.ID\r\n\t\t        )  t1 ON t1.master_ID = sam.ID\r\n\t\t        " +
+        //    //    "LEFT JOIN (\r\n\t\t      SELECT sic.cat_name,s2.ID as master_ID FROM smitemcategory sic \r\n            " +
+        //    //    "  LEFT JOIN smassetmasters s2 ON s2.item_category_ID = sic.ID  )  t2 ON t2.master_ID = sam.ID " +
+        //    //    "LEFT JOIN users ed ON ed.id = po.generated_by\r\n\t\t   " +
+        //    //    " Left join currency curr ON curr.id = po.currency " +
+        //    //    "     LEFT JOIN users ed1 ON ed1.id = po.receiverID\r\n\t\t\t\t " +
+        //    //    "LEFT JOIN users ed2 ON ed2.id = po.approved_by\r\n\t\t\t\t" +
+        //    //    "LEFT JOIN business bl ON bl.id = po.vendorID \r\n\r\n\t\t LEFT JOIN facilities fc ON fc.id = po.facilityID    WHERE " + filter +
+        //    //    " ";
+
+        //    string stmt = "SELECT fc.name as facilityName,  pod.ID as requestID,pod.remarks,sam.asset_name,sam.asset_type_ID,pod.requestID as ID,pod.assetItemID," +
+        //        "pod.cost ,pod.ordered_qty,po.remarks as rejectedRemark,po.facilityID,po.request_date,sam.asset_type_ID," +
+        //        " po.status,sai.asset_code,t1.asset_type,t2.cat_name,pod.received_qty,pod.damaged_qty,pod.accepted_qty,po.received_on as generatedAt,po.approvedOn as approvedAt," +
+        //        " CONCAT(ed.firstName,' ',ed.lastName) as generatedBy,CONCAT(ed1.firstName,' ',ed1.lastName) as receivedBy,CONCAT(ed2.firstName,' ',ed2.lastName) as approvedBy" +
+        //        "  FROM smrequestorderdetails pod" +
+        //        " LEFT JOIN smrequestorder po ON po.ID = pod.requestID " +
+        //        " LEFT JOIN smassetitems sai ON sai.ID = pod.assetItemID LEFT JOIN smassetmasters sam ON sam.asset_code = sai.asset_code   " +
+        //        " LEFT JOIN (    SELECT sat.asset_type,s1.ID as master_ID FROM smassettypes sat" +
+        //        "            LEFT JOIN smassetmasters s1 ON s1.asset_type_ID = sat.ID" +
+        //        "        )  t1 ON t1.master_ID = sam.ID" +
+        //        "        LEFT JOIN (" +
+        //        "      SELECT sic.cat_name,s2.ID as master_ID FROM smitemcategory sic " +
+        //        "              LEFT JOIN smassetmasters s2 ON s2.item_category_ID = sic.ID  )  t2 ON t2.master_ID = sam.ID LEFT JOIN users ed ON ed.id = po.generated_by" +
+        //        "         LEFT JOIN users ed1 ON ed1.id = po.receiverID " +
+        //        " LEFT JOIN users ed2 ON ed2.id = po.approved_by" +
+        //        " LEFT JOIN facilities fc ON fc.id = po.facilityID    WHERE "+ filter;
+        //    List<CMRequestOrder> _List = await Context.GetData<CMRequestOrder>(stmt).ConfigureAwait(false);
+
+
+        //    for (var i = 0; i < _List.Count; i++)
+        //    {
+        //        CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_List[i].status);
+        //        string _shortStatus = getShortStatus(CMMS.CMMS_Modules.SM_PO, _Status);
+        //        string status_long = getLongStatus(_List[i].requestID, _Status);
+        //        _List[i].status_short = _shortStatus;
+        //        _List[i].status_long = status_long;
+        //    }
+
+
+        //    return _List;
+        //}
 
 
         internal async Task<CMDefaultResponse> ApproveRequestOrder(CMApproval request, int userId)
@@ -165,7 +258,7 @@ namespace CMMSAPIs.Repositories.SM
             }
 
             string approveQuery = $"Update smrequestorder set status = {(int)CMMS.CMMS_Status.SM_RO_CLOSED_REJECTED} , reject_reccomendations = '{request.comment}',  " +
-                $" rejecctedBy = {userId}, rejectedAt = '{DateTime.Now.ToString("yyyy-MM-dd")}'" +
+                $" rejeccted_by = {userId}, rejected_at = '{DateTime.Now.ToString("yyyy-MM-dd")}'" +
                 $" where id = {request.id}";
             int reject_id = await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
 
@@ -182,18 +275,19 @@ namespace CMMSAPIs.Repositories.SM
             return response;
         }
 
-        public async Task<CMRequestOrder> GetRODetailsByID(int id)
+        public async Task<CMCreateRequestOrder> GetRODetailsByID(int id)
         {
             string query = "SELECT fc.name as facilityName,pod.ID as requestDetailsID, facilityid as      " +
-                " facility_id,pod.spare_status,pod.remarks,sai.orderflag,sam.asset_type_ID,pod.requestID,pod.assetItemID," +
+                " facility_id,pod.spare_status,po.remarks,sai.orderflag,sam.asset_type_ID,pod.requestID,pod.assetItemID," +
                 "sai.serial_number,sai.location_ID,pod.cost,pod.ordered_qty,\r\n bl.name as vendor_name,\r\n  " +
                 "    po.request_date,sam.asset_type_ID,sam.asset_name,po.receiverID,\r\n        po.vendorID,po.status," +
                 "sai.asset_code,t1.asset_type,t2.cat_name,pod.received_qty,pod.damaged_qty,pod.accepted_qty,f1.file_path," +
                 "f1.Asset_master_id,sm.decimal_status,sm.spare_multi_selection,po.generated_by,pod.order_type as asset_type_ID_OrderDetails," +
                 " receive_later, added_to_store,reject_reccomendations as  rejectedRemark, \r\n        po.challan_no, po.freight, po.transport, po.no_pkg_received, po.lr_no," +
-                " po.condition_pkg_received, po.vehicle_no, po.gir_no, po.challan_date, po.job_ref, po.amount,  po.currency as currencyID" +
-                " , curr.name as currency , stt.asset_type as asset_type_Name, \r\n    CONCAT(ed.firstName,' ',ed.lastName) as generatedBy,po.received_on as receivedAt,approvedOn as approvedAt,CONCAT(ed1.firstName,' ',ed1.lastName) as receivedBy," +
-                "CONCAT(ed2.firstName,' ',ed2.lastName) as approvedBy    FROM smrequestorderdetails pod\r\n      " +
+                " po.condition_pkg_received, po.vehicle_no, po.gir_no, po.job_ref, po.amount,  po.currency as currencyID" +
+                " , curr.name as currency , stt.asset_type as asset_type_Name, \r\n    CONCAT(ed.firstName,' ',ed.lastName) as generatedBy,po.received_on as generatedAt,approvedOn as approvedAt,CONCAT(ed1.firstName,' ',ed1.lastName) as receivedBy, pod.remarks as itemcomment, " +
+                "CONCAT(ed2.firstName,' ',ed2.lastName) as approvedBy , \t\t\t\tCONCAT(ed3.firstName,' ',ed3.lastName) as rejectedBy , po.rejected_at as rejectedAt" +
+                "    FROM smrequestorderdetails pod\r\n      " +
                 "  LEFT JOIN smrequestorder po ON po.ID = pod.requestID\r\n       " +
                 " LEFT JOIN smassetitems sai ON sai.ID = pod.assetItemID\r\n     " +
                 "   LEFT JOIN smassetmasters sam ON sam.asset_code = sai.asset_code\r\n      " +
@@ -208,54 +302,42 @@ namespace CMMSAPIs.Repositories.SM
                 "         LEFT JOIN smassetmasters s2 ON s2.item_category_ID = sic.ID\r\n        )  t2 ON t2.master_ID = sam.ID\r\n       " +
                 " LEFT JOIN facilities fc ON fc.id = po.facilityID\r\nLEFT JOIN users as vendor on vendor.id=po.vendorID       \r\n " +
                 "LEFT JOIN business bl ON bl.id = po.vendorID left join smassettypes stt on stt.ID = pod.order_type\r\n " +
-                "LEFT JOIN currency curr ON curr.id = po.currency  LEFT JOIN users ed2 ON ed2.id = po.approved_by\r\n LEFT JOIN users ed ON ed.id = po.generated_by\r\n  LEFT JOIN users ed1 ON ed1.id = po.receiverID " +
-                "WHERE po.ID = " + id + " ;";
+                "LEFT JOIN currency curr ON curr.id = po.currency  LEFT JOIN users ed2 ON ed2.id = po.approved_by\r\n LEFT JOIN users ed ON ed.id = po.generated_by\r\n" +
+                "  LEFT JOIN users ed1 ON ed1.id = po.receiverID     LEFT JOIN users ed3 ON ed3.id = po.rejeccted_by\t " +
+                " WHERE po.ID = " + id + " ;";
             List<CMRequestOrderList> _List = await Context.GetData<CMRequestOrderList>(query).ConfigureAwait(false);
 
-            CMRequestOrder _MasterList = _List.Select(p => new CMRequestOrder
+            CMCreateRequestOrder _MasterList = _List.Select(p => new CMCreateRequestOrder
             {
-                requestID = p.requestID,
+                request_order_id = p.requestID,
                 facilityID = p.facility_id,
-                facilityName = p.facilityName,
-                assetItemID = p.assetItemID,
-                vendorID = p.vendorID,
-                vendor_name = p.vendor_name,
-                status = p.status,
-                currencyID = p.currencyID,
-                currency = p.currency,
-                amount = p.amount,
-                job_ref = p.job_ref,
-                gir_no = p.gir_no,
-                vehicle_no = p.vehicle_no,
-                condition_pkg_received = p.condition_pkg_received,
-                lr_no = p.lr_no,
-                no_pkg_received = p.no_pkg_received,
-                freight = p.freight,
-                challan_date = p.challan_date,
-                challan_no = p.challan_no,
-                request_date = p.request_date,
-                location_ID = p.location_ID,
-                remarks = p.remarks,
+                facilityName = p.facilityName,                
+                status = p.status,                
+                comment = p.remarks,
                 rejectedRemark = p.rejectedRemark,
                 approvedAt = p.approvedAt,
                 generatedBy = p.generatedBy,
-                receivedBy = p.receivedBy,
-                receivedAt = p.receivedAt
+            
+                generatedAt = p.request_date,
+                approvedBy = p.approvedBy,
+                rejectedBy = p.rejectedBy,
+                rejectedAt = p.rejectedAt
             }).FirstOrDefault();
             List<CMRequestOrder_ITEMS> _itemList = _List.Select(p => new CMRequestOrder_ITEMS
             {
-                ID = p.requestDetailsID,
+                itemID = p.requestDetailsID,
                 requestID = p.requestID,
                 cost = p.cost,
                 asset_name = p.asset_name,
                 assetItemID = p.assetItemID,
                 ordered_qty = p.ordered_qty,
+                comment = p.itemcomment
             }).ToList();
-            _MasterList.go_items = _itemList;
+            _MasterList.request_order_items = _itemList;
 
             CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_MasterList.status);
             string _shortStatus = getShortStatus(CMMS.CMMS_Modules.SM_PO, _Status);
-            string _longStatus = getLongStatus(_MasterList.requestID, _Status);
+            string _longStatus = getLongStatus(_MasterList.request_order_id, _Status);
 
             _MasterList.status_short = _shortStatus;
             _MasterList.status_long = _longStatus;
