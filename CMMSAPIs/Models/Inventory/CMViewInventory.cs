@@ -70,4 +70,9 @@ namespace CMMSAPIs.Models.Inventory
         public string deleted_by { get; set; }
 
     }
+    public class CMItem
+    {
+        public int id { get; set; }
+        public string name { get; set; }
+    }
 }
