@@ -132,6 +132,16 @@ namespace CMMSAPIs.Repositories.SM
         internal async Task<CMDefaultResponse> CreateMRS(CMMRS request, int UserID)
         {
             /* isEditMode =0 for creating new MRS*/
+
+            // added validation for issue_qty > 0 and issue_qty < requested_qty for each item
+            for (var j=0; j<request.cmmrsItems.Count; j++)
+            {
+                if (request.cmmrsItems[j].issued_qty < 0)
+                {
+                    return new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Issued quantity should be less than 0 for asset item "+ request.cmmrsItems[j].asset_item_ID + ".");
+                }
+            }
+
             request.isEditMode = 0;
             request.requested_by_emp_ID = UserID;
             bool Queryflag = false;
@@ -200,7 +210,8 @@ namespace CMMSAPIs.Repositories.SM
                         {
                             string insertStmt = $"START TRANSACTION; " +
                             $"INSERT INTO smrsitems (mrs_ID,asset_item_ID,asset_MDM_code,requested_qty,status,flag,approval_required,mrs_return_ID,issued_qty,returned_qty,used_qty,available_qty)" +
-                            $"VALUES ({request.ID},{request.cmmrsItems[i].asset_item_ID},'{asset_code}',1,0,0,{approval_required},0,{request.cmmrsItems[i].issued_qty}, {request.cmmrsItems[i].returned_qty}, {request.cmmrsItems[i].used_qty}, {request.cmmrsItems[i].available_qty})" +
+                            $"VALUES ({request.ID},{request.cmmrsItems[i].asset_item_ID},'{asset_code}',1,0,0,{approval_required},0,{request.cmmrsItems[i].issued_qty}," +
+                            $" {request.cmmrsItems[i].returned_qty}, {request.cmmrsItems[i].used_qty}, {request.cmmrsItems[i].available_qty})" +
                             $"; SELECT LAST_INSERT_ID();COMMIT;";
                             DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
                         }catch (Exception ex)
@@ -225,6 +236,13 @@ namespace CMMSAPIs.Repositories.SM
 
         public async Task<CMDefaultResponse> updateMRS(CMMRS request, int UserID)
         {
+            for (var j = 0; j < request.cmmrsItems.Count; j++)
+            {
+                if (request.cmmrsItems[j].issued_qty < 0)
+                {
+                    return new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Issued quantity should be less than 0 for asset item " + request.cmmrsItems[j].asset_item_ID + ".");
+                }
+            }
             var lastMRSID = request.ID;
             request.requested_by_emp_ID = UserID;
             CMDefaultResponse response = null;
