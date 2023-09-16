@@ -99,7 +99,7 @@ namespace CMMSAPIs.Repositories.Users
                 string facilitiesQry = $"SELECT facilities.id as plant_id, facilities.name as plant_name, spv.id as spv_id, spv.name as spv_name FROM userfacilities JOIN facilities ON userfacilities.facilityId = facilities.id LEFT JOIN spv ON facilities.spvId=spv.id WHERE userfacilities.userId = {user_id};";
                 List<CMPlantAccess> facilities = await Context.GetData<CMPlantAccess>(facilitiesQry).ConfigureAwait(false);
                 user_detail[0].plant_list = facilities;
-                string reportToQuery = $"SELECT reportToId FROM users WHERE id = {user_id};";
+                string reportToQuery = $"SELECT reportToId FROM users WHERE id = {user_id}  and userfacilities.status = 1;";
                 DataTable dt = await Context.FetchData(reportToQuery).ConfigureAwait(false);
                 int reportTo = Convert.ToInt32(dt.Rows[0][0]);
                 string reportToDetailsQry = $"SELECT " +
@@ -599,7 +599,7 @@ namespace CMMSAPIs.Repositories.Users
                         foreach (int facility in user.facilities)
                         {
                             string addFacility = $"INSERT INTO userfacilities(userId, facilityId, createdAt, createdBy, status) " +
-                                                    $"VALUES ({id}, {facility}, '{UtilsRepository.GetUTCTime()}', {userID}, 0);";
+                                                    $"VALUES ({id}, {facility}, '{UtilsRepository.GetUTCTime()}', {userID}, 1);";
                             await Context.ExecuteNonQry<int>(addFacility).ConfigureAwait(false);
                         }
                     }
@@ -731,7 +731,7 @@ namespace CMMSAPIs.Repositories.Users
                     foreach (int facility in request.facilities)
                     {
                         string addFacility = $"INSERT INTO userfacilities(userId, facilityId, createdAt, createdBy, status) " +
-                                                $"VALUES ({request.id}, {facility}, '{UtilsRepository.GetUTCTime()}', {userID}, 0);";
+                                                $"VALUES ({request.id}, {facility}, '{UtilsRepository.GetUTCTime()}', {userID}, 1);";
                         await Context.ExecuteNonQry<int>(addFacility).ConfigureAwait(false);
                     }
                 }
