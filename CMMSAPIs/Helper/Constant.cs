@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System;
 
 namespace CMMSAPIs.Helper
@@ -413,38 +413,45 @@ namespace CMMSAPIs.Helper
             INVENTORY_ADDED,
             INVENTORY_UPDATED,
             INVENTORY_DELETED,
-			
-            SM_PO_DRAFT = 301,          //1         
-            SM_PO_SUBMITTED,            //2
-            SM_PO_IN_PROCESS,           //3
-            SM_PO_DELETED,
-            SM_PO_CLOSED,
-            SM_PO_CLOSED_REJECTED,
-            SM_PO_CLOSED_APPROVED,
 
 
- 	    MRS_SUBMITTED=321,
+            GO_DRAFT = 301,
+            GO_SUBMITTED,
+            GO_DELETED,
+            GO_CLOSED,
+            GO_REJECTED,
+            GO_APPROVED,
+            GO_RECEIVE_DRAFT,
+            GO_RECEIVED_SUBMITTED,
+            GO_RECEIVED_REJECTED,
+            GO_RECEIVED_APPROVED,
+            //SM_PO_DRAFT = 301,          //1         
+            //SM_PO_SUBMITTED,            //2
+            //SM_PO_IN_PROCESS,           //3
+            //SM_PO_DELETED,              //4
+            //SM_PO_CLOSED,               //5
+            //SM_PO_CLOSED_REJECTED,      //6
+            //SM_PO_CLOSED_APPROVED,      //7
+
+
+            MRS_SUBMITTED =321,
             MRS_REQUEST_REJECTED,
             MRS_REQUEST_APPROVED,             
             MRS_REQUEST_ISSUED ,
             MRS_REQUEST_ISSUED_REJECTED ,
             MRS_REQUEST_ISSUED_APPROVED ,
-	MRS_REQUEST_RETURN,
+	        MRS_REQUEST_RETURN,
             
 
-            GO_SAVE_BY_PURCHASE_MANAGER = 331,
-            GO_SUBMIT_BY_PURCHASE_MANAGER,
-            GO_SAVE_BY_STORE_KEEPER,
-            GO_RECEIVED_BY_STORE_KEEPER,
-            GO_APPROVED_BY_MANAGER,
-            GO_REJECTED_BY_MANAGER,
-            GO_SHORT_CLOSED_BY_STORE_KEEPER,
+   
+            
+            //GO_SHORT_CLOSED_BY_STORE_KEEPER,
             GO_WITHDRAW_BY_ADMINISTRATOR,
 
          
             SM_RO_SUBMITTED = 341,  
             SM_RO_CLOSED,
-	     SM_RO_DELETED,
+	        SM_RO_DELETED,
             SM_RO_CLOSED_REJECTED,
             SM_RO_CLOSED_APPROVED,
 
