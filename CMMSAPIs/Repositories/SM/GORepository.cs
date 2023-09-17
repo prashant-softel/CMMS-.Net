@@ -232,8 +232,10 @@ namespace CMMSAPIs.Repositories
 
             for (var i = 0; i < request.go_items.Count; i++)
             {
-                string itemsQuery = $"UPDATE smpurchaseorderdetails SET location_ID = {request.location_ID},assetItemID = {request.go_items[i].assetItemID},cost = {request.go_items[i].cost}, accepted_qty = {request.go_items[i].ordered_qty + request.go_items[i].received_qty},ordered_qty = {request.go_items[i].ordered_qty} , requested_qty = {request.go_items[i].requested_qty}, received_qty= {request.go_items[i].received_qty},lost_qty = {request.go_items[i].lost_qty}, damaged_qty={request.go_items[i].damaged_qty}, paid_by_ID = {request.go_items[i].paid_by_ID}" +
+                string itemsQuery = $"UPDATE smpurchaseorderdetails SET location_ID = {request.location_ID},assetItemID = {request.go_items[i].assetItemID},cost = {request.go_items[i].cost}, accepted_qty = {request.go_items[i].accepted_qty},ordered_qty = {request.go_items[i].ordered_qty} , requested_qty = {request.go_items[i].requested_qty}, received_qty= {request.go_items[i].received_qty},lost_qty = {request.go_items[i].lost_qty}, damaged_qty={request.go_items[i].damaged_qty}, paid_by_ID = {request.go_items[i].paid_by_ID}" +
                     $" WHERE ID = {request.go_items[i].goItemID}";
+                //string itemsQuery = $"UPDATE smpurchaseorderdetails SET location_ID = {request.location_ID},assetItemID = {request.go_items[i].assetItemID},cost = {request.go_items[i].cost}, accepted_qty = {request.go_items[i].ordered_qty + request.go_items[i].received_qty},ordered_qty = {request.go_items[i].ordered_qty} , requested_qty = {request.go_items[i].requested_qty}, received_qty= {request.go_items[i].received_qty},lost_qty = {request.go_items[i].lost_qty}, damaged_qty={request.go_items[i].damaged_qty}, paid_by_ID = {request.go_items[i].paid_by_ID}" +
+                //    $" WHERE ID = {request.go_items[i].goItemID}";
                 var result = await Context.ExecuteNonQry<int>(itemsQuery);
             }
 
