@@ -160,7 +160,7 @@ namespace CMMSAPIs.Repositories.SM
                     ordered_qty = p.ordered_qty,
                     comment = p.itemcomment
                 }).ToList();
-                
+                _MasterList[i].cost = _itemList.Where(group => group.requestID == _MasterList[i].request_order_id).Sum(x => x.cost);
                 _MasterList[i].request_order_items = _itemList.Where(group => group.requestID == _MasterList[i].request_order_id).ToList();
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_MasterList[i].status);
                 string _shortStatus = getShortStatus(CMMS.CMMS_Modules.SM_PO, _Status);
@@ -333,6 +333,7 @@ namespace CMMSAPIs.Repositories.SM
                 ordered_qty = p.ordered_qty,
                 comment = p.itemcomment
             }).ToList();
+            _MasterList.cost = _itemList.Sum(x=> x.cost);
             _MasterList.request_order_items = _itemList;
 
             CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_MasterList.status);
