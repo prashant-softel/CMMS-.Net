@@ -1,4 +1,4 @@
-﻿using CMMSAPIs.Helper;
+using CMMSAPIs.Helper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,7 +25,11 @@ namespace CMMSAPIs.BS
         Task<List<CMPURCHASEDATA>> GetPurchaseData(int plantID, string empRole, DateTime fromDate, DateTime toDate, string status, string order_type);
         Task<CMGOMaster> GetGODetailsByID(int id);
         Task<CMDefaultResponse> SubmitPurchaseData(CMSUBMITPURCHASEDATA request);
-                Task<List<CMGOListByFilter>> GetSubmitPurchaseOrderList(int facility_id, DateTime fromDate, DateTime toDate, int Status);
+        Task<List<CMGOListByFilter>> GetSubmitPurchaseOrderList(int facility_id, DateTime fromDate, DateTime toDate, int Status);
+
+        Task<CMDefaultResponse> UpdateGOReceive(CMGoodsOrderList request, int userID);
+        Task<CMDefaultResponse> ApproveGOReceive(CMApproval request, int userId);
+        Task<CMDefaultResponse> RejectGOReceive(CMApproval request, int userId);
     }
 
     public class GOBS : IGOBS
@@ -232,6 +236,52 @@ namespace CMMSAPIs.BS
                 {
                     int is_purchaseorder = 1;
                     return await repos.GetGOList(facility_id, fromDate, toDate, is_purchaseorder);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> UpdateGOReceive(CMGoodsOrderList request, int userID)
+        {
+            try
+            {
+                using (var repos = new GORepository(getDB))
+                {
+                    return await repos.UpdateGOReceive(request, userID);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<CMDefaultResponse> ApproveGOReceive(CMApproval request, int userId)
+        {
+            try
+            {
+                using (var repos = new GORepository(getDB))
+                {
+                    return await repos.ApproveGoodsOrderReceive(request, userId);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<CMDefaultResponse> RejectGOReceive(CMApproval request, int userId)
+        {
+            try
+            {
+                using (var repos = new GORepository(getDB))
+                {
+                    return await repos.RejectGoodsOrderReceive(request, userId);
 
                 }
             }
