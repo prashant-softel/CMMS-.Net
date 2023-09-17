@@ -268,9 +268,9 @@ namespace CMMSAPIs.Controllers
 
 
         [Authorize]
-        [Route("SubmitPurchaseOrderData")]
+        [Route("SubmitGoodsOrderData")]
         [HttpPost]
-        public async Task<IActionResult> SubmitPurchaseData(CMSUBMITPURCHASEDATA request)
+        public async Task<IActionResult> SubmitGoodsOrderData(CMSUBMITPURCHASEDATA request)
         {
             try
             {
@@ -286,14 +286,81 @@ namespace CMMSAPIs.Controllers
             }
         }
 
-         [Authorize]
-        [Route("GetSubmitPurchaseOrderList")]
+        [Authorize]
+        [Route("GetSubmitGoodsOrderList")]
         [HttpGet]
-        public async Task<IActionResult> GetSubmitPurchaseOrderList(int facility_id, DateTime fromDate, DateTime toDate, int Status)
+        public async Task<IActionResult> GetSubmitGoodsOrderList(int facility_id, DateTime fromDate, DateTime toDate, int Status)
         {
             try
             {
                 var data = await _GOBS.GetSubmitPurchaseOrderList(facility_id, fromDate, toDate, Status);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid data sent.";
+                return Ok(item);
+            }
+        }
+
+        // GOODS ORDER RECEIVE MODULE
+
+
+        [Authorize]
+        [Route("UpdateGOReceive")]
+        [HttpPost]
+        public async Task<IActionResult> UpdateGOReceive(CMGoodsOrderList request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _GOBS.UpdateGOReceive(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid data sent.";
+                return Ok(item);
+            }
+        }
+
+
+
+        [Authorize]
+        [Route("ApproveGOReceive")]
+        [HttpPost]
+        public async Task<IActionResult> ApproveGOReceive(CMApproval request)
+        {
+            try
+            {
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _GOBS.ApproveGOReceive(request, userId);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid data sent.";
+                return Ok(item);
+            }
+        }
+
+
+
+        [Authorize]
+        [Route("RejectGOReceive")]
+        [HttpPost]
+        public async Task<IActionResult> RejectGOReceive(CMApproval request)
+        {
+            try
+            {
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _GOBS.RejectGOReceive(request, userId);
                 return Ok(data);
             }
             catch (Exception ex)
