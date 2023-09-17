@@ -269,7 +269,7 @@ namespace CMMSAPIs.Repositories.SM
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
             }
 
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_PO, request.id, 0, 0, "Rejected request order", CMMS.CMMS_Status.SM_PO_CLOSED_REJECTED);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_PO, request.id, 0, 0, "Rejected request order", CMMS.CMMS_Status.SM_RO_CLOSED_REJECTED);
 
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Rejected request order.");
             return response;
