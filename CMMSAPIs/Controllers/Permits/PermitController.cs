@@ -46,7 +46,7 @@ namespace CMMSAPIs.Controllers.Permits
                 throw;
             }
         }
-        
+
         [Authorize]
         [Route("CreatePermitType")]
         [HttpPost]
@@ -355,7 +355,7 @@ namespace CMMSAPIs.Controllers.Permits
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _PermitBS.GetPermitList(facility_id,  startDate,  endDate, userID, self_view, non_expired);
+                var data = await _PermitBS.GetPermitList(facility_id, startDate, endDate, userID, self_view, non_expired);
                 return Ok(data);
             }
             catch (ArgumentException ex)
@@ -500,7 +500,7 @@ namespace CMMSAPIs.Controllers.Permits
         [Authorize]
         [Route("PermitClose")]
         [HttpPut]
-        public async Task<IActionResult> PermitClose([FromForm] CMApproval request)
+        public async Task<IActionResult> PermitClose(CMPermitApproval request)
         {
             try
             {
@@ -553,7 +553,7 @@ namespace CMMSAPIs.Controllers.Permits
         [Authorize]
         [Route("PermitCancelRequest")]
         [HttpPut]
-        public async Task<IActionResult> PermitCancelRequest([FromForm] CMApproval request)
+        public async Task<IActionResult> PermitCancelRequest(CMPermitApproval request)
         {
             try
             {
@@ -653,6 +653,22 @@ namespace CMMSAPIs.Controllers.Permits
             catch (MissingFieldException ex)
             {
                 return NotFound(ex.Message);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
+        [Route("GetPermitConditionList")]
+        [HttpGet]
+        public async Task<IActionResult> GetPermitConditionList(int permit_type_id, int isClose, int isCancle, int isExtend)
+        {
+            try
+            {
+                var data = await _PermitBS.GetPermitConditionList(permit_type_id, isClose, isCancle, isExtend);
+                return Ok(data);
             }
             catch (Exception)
             {

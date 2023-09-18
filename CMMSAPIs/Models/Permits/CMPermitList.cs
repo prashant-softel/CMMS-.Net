@@ -38,6 +38,13 @@ namespace CMMSAPIs.Models.Permits
         public string inputName { get; set; }
         public string permitType { get; set; }
     }
+
+    public class CMPermitConditions
+    {
+        public int id { get; set; }
+        public string name { get; set; }
+
+    }
     public class CMSOPList
     {
         public int id { get; set; }
