@@ -36,21 +36,23 @@ namespace CMMSAPIs.BS.Permits
         */
         Task<CMDefaultResponse> CreatePermit(CMCreatePermit set, int userID);
         Task<List<CMPermitList>> GetPermitList(int facility_id, string startDate, string endDate, int userID, bool self_view, bool non_expired);
-        Task<CMPermitDetail> GetPermitDetails(int permit_id);    
+        Task<CMPermitDetail> GetPermitDetails(int permit_id);
         Task<CMDefaultResponse> PermitApprove(CMApproval request, int userID);
         Task<CMDefaultResponse> PermitExtend(CMPermitExtend request, int userID);
         Task<CMDefaultResponse> PermitExtendApprove(CMApproval request, int userID);
         Task<CMDefaultResponse> PermitExtendReject(CMApproval request, int userID);
-        Task<CMDefaultResponse> PermitClose(CMApproval request, int userID);
+        Task<CMDefaultResponse> PermitClose(CMPermitApproval request, int userID);
         Task<CMDefaultResponse> PermitReject(CMApproval request, int userID);
         Task<CMDefaultResponse> PermitIssue(CMApproval request, int userID);
         Task<CMDefaultResponse> PermitIssueReject(CMApproval request, int userID);
-        Task<CMDefaultResponse> PermitCancelRequest(CMApproval request, int userID);
+        Task<CMDefaultResponse> PermitCancelRequest(CMPermitApproval request, int userID);
         Task<CMDefaultResponse> PermitCancelReject(CMApproval request, int userID);
         Task<CMDefaultResponse> PermitCancelByApprover(CMApproval request, int userID);
         Task<CMDefaultResponse> PermitCancelByHSE(CMApproval request, int userID);
         Task<CMDefaultResponse> PermitCancelByIssuer(CMApproval request, int userID);
         Task<CMDefaultResponse> UpdatePermit(CMUpdatePermit request, int userID);
+        Task<List<CMPermitConditions>> GetPermitConditionList(int permit_type_id, int isClose, int isCancle, int isExtend);
+
     }
 
     public class PermitBS : IPermitBS
@@ -137,6 +139,7 @@ namespace CMMSAPIs.BS.Permits
                 throw;
             }
         }
+
 
         public async Task<CMDefaultResponse> CreateSafetyMeasure(CMCreateSafetyMeasures request, int userID)
         {
@@ -304,7 +307,7 @@ namespace CMMSAPIs.BS.Permits
             {
                 using (var repos = new PermitRepository(getDB))
                 {
-                    return await repos.GetPermitList(facility_id,  startDate,  endDate, userID, self_view, non_expired);
+                    return await repos.GetPermitList(facility_id, startDate, endDate, userID, self_view, non_expired);
 
                 }
             }
@@ -422,7 +425,7 @@ namespace CMMSAPIs.BS.Permits
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> PermitClose(CMApproval request, int userID)
+        public async Task<CMDefaultResponse> PermitClose(CMPermitApproval request, int userID)
         {
             try
             {
@@ -481,7 +484,7 @@ namespace CMMSAPIs.BS.Permits
             }
         }
 
-        public async Task<CMDefaultResponse> PermitCancelRequest(CMApproval request, int userID)
+        public async Task<CMDefaultResponse> PermitCancelRequest(CMPermitApproval request, int userID)
         {
             try
             {
@@ -556,6 +559,19 @@ namespace CMMSAPIs.BS.Permits
             }
         }
 
-
+        public async Task<List<CMPermitConditions>> GetPermitConditionList(int permit_type_id, int isClose, int isCancle, int isExtend)
+        {
+            try
+            {
+                using (var repos = new PermitRepository(getDB))
+                {
+                    return await repos.GetPermitConditionList(permit_type_id, isClose, isCancle, isExtend);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
     }
 }

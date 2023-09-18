@@ -43,7 +43,7 @@ namespace CMMSAPIs.Models.Permits
         public DateTime? approve_at { get; set; }
         public int rejecter_id { get; set; }
         public string rejectedByName { get; set; }
-        public DateTime? rejected_at { get; set; }        
+        public DateTime? rejected_at { get; set; }
         public int cancelRequestby_id { get; set; }
         public string cancelRequestByName { get; set; }
         public DateTime? cancel_at { get; set; }
@@ -116,7 +116,18 @@ namespace CMMSAPIs.Models.Permits
         public int id { get; set; }
         public int extend_by_minutes { get; set; }
         public string comment { get; set; }
+        public int[] conditionIds { get; set; }
+        public int fileId { get; set; }
 
+    }
+
+    public class CMPermitApproval
+    {
+        public int id { get; set; }
+        public string comment { get; set; }
+        public int[] conditionIds { get; set; }
+        public int fileId { get; set; }
+        //public string filePath { get; set; }
     }
 
 }
