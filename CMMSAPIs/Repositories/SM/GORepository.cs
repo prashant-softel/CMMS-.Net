@@ -89,7 +89,7 @@ namespace CMMSAPIs.Repositories
                     retValue = $" Goods order {Id} Drafted";
                     break;
                 case CMMS.CMMS_Status.GO_SUBMITTED:
-                    retValue = $"Goods order {Id} Submitted";
+                    retValue = $"Goods order {Id} Waiting for Appoval";
                     break;
 
                 case CMMS.CMMS_Status.GO_CLOSED:
@@ -210,10 +210,10 @@ namespace CMMSAPIs.Repositories
             {
                 string poInsertQuery = $" INSERT INTO smpurchaseorder (facilityID,vendorID,receiverID,generated_by,purchaseDate,orderDate,status," +
                     $" challan_no,po_no, freight,transport, " +
-                    $"no_pkg_received,lr_no,condition_pkg_received,vehicle_no, gir_no, challan_date,po_date, job_ref,amount, currency,withdraw_by,withdrawOn,order_type) " +
+                    $"no_pkg_received,lr_no,condition_pkg_received,vehicle_no, gir_no, challan_date,po_date, job_ref,amount, currency,withdraw_by,withdrawOn,order_type,received_on) " +
                     $"VALUES({request.facility_id},{request.vendorID}, {request.receiverID}, {userID}, '{DateTime.Now.ToString("yyyy-MM-dd")}', '{DateTime.Now.ToString("yyyy-MM-dd")}', {(int)CMMS.CMMS_Status.GO_SUBMITTED}," +
                     $"'{request.challan_no}','{request.po_no}','{request.freight}','', '{request.no_pkg_received}', '{request.lr_no}', '{request.condition_pkg_received}','{request.vehicle_no}','{request.gir_no}','{request.challan_date.Value.ToString("yyyy-MM-dd")}'," +
-                    $"'{request.po_date.Value.ToString("yyyy-MM-dd")}','{request.job_ref}',{request.amount}, {request.currencyID},0,'0001-01-01',0);" +
+                    $"'{request.po_date.Value.ToString("yyyy-MM-dd")}','{request.job_ref}',{request.amount}, {request.currencyID},0,'0001-01-01',0,'{request.receivedAt.ToString("yyyy-MM-dd")}');" +
                     $" SELECT LAST_INSERT_ID();";
                 DataTable dt2 = await Context.FetchData(poInsertQuery).ConfigureAwait(false);
                 poid = Convert.ToInt32(dt2.Rows[0][0]);
@@ -240,7 +240,7 @@ namespace CMMSAPIs.Repositories
                         $"challan_no = '{request.challan_no}',po_no='{request.po_no}', freight='{request.freight}',no_pkg_received='{request.no_pkg_received}'," +
                         $"lr_no='{request.lr_no}',condition_pkg_received='{request.condition_pkg_received}',vehicle_no='{request.vehicle_no}', gir_no='{request.gir_no}', " +
                         $"challan_date = '{request.challan_date.Value.ToString("yyyy-MM-dd")}', " +
-                        $"job_ref='{request.job_ref}',amount='{request.amount}', currency={request.currencyID},updated_by = {userID},updatedOn = '{UtilsRepository.GetUTCTime()}', status = {(int)CMMS.CMMS_Status.GO_DRAFT} where ID={request.id}";
+                        $"job_ref='{request.job_ref}',amount='{request.amount}', currency={request.currencyID},updated_by = {userID},updatedOn = '{UtilsRepository.GetUTCTime()}', status = {(int)CMMS.CMMS_Status.GO_DRAFT}, received_on = '{request.receivedAt.ToString("yyyy-MM-dd")}', po_date = '{request.po_date.Value.ToString("yyyy-MM-dd")}', purchaseDate= '{request.purchaseDate.Value.ToString("yyyy-MM-dd")}' where ID={request.id}";
             }
             else
             {
@@ -248,7 +248,7 @@ namespace CMMSAPIs.Repositories
                         $"challan_no = '{request.challan_no}',po_no='{request.po_no}', freight='{request.freight}',no_pkg_received='{request.no_pkg_received}'," +
                         $"lr_no='{request.lr_no}',condition_pkg_received='{request.condition_pkg_received}',vehicle_no='{request.vehicle_no}', gir_no='{request.gir_no}', " +
                         $"challan_date = '{request.challan_date.Value.ToString("yyyy-MM-dd")}', " +
-                        $"job_ref='{request.job_ref}',amount='{request.amount}', currency={request.currencyID},updated_by = {userID},updatedOn = '{UtilsRepository.GetUTCTime()}', status = {(int)CMMS.CMMS_Status.GO_SUBMITTED} where ID={request.id}";
+                        $"job_ref='{request.job_ref}',amount='{request.amount}', currency={request.currencyID},updated_by = {userID},updatedOn = '{UtilsRepository.GetUTCTime()}', status = {(int)CMMS.CMMS_Status.GO_SUBMITTED}, received_on = '{request.receivedAt.ToString("yyyy-MM-dd")}', po_date = '{request.po_date.Value.ToString("yyyy-MM-dd")}', purchaseDate= '{request.purchaseDate.Value.ToString("yyyy-MM-dd")}' where ID={request.id}";
             }
             await Context.ExecuteNonQry<int>(OrderQuery);
 
@@ -415,7 +415,7 @@ namespace CMMSAPIs.Repositories
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_PO, request.id, 0, 0, "Goods order approved.", CMMS.CMMS_Status.GO_APPROVED);
 
-            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Approved goods order successfully.");
+            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Goods Order {request.id} approved successfully.");
             return response;
         }
 
@@ -457,7 +457,7 @@ namespace CMMSAPIs.Repositories
 
             
 
-            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Rejected goods order.");
+            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Goods Order {request.id} rejected successfully.");
             
             return response;
         }
@@ -837,7 +837,7 @@ namespace CMMSAPIs.Repositories
                 "f1.file_path,f1.Asset_master_id,sm.decimal_status,sm.spare_multi_selection,po.generated_by,pod.order_type as asset_type_ID_OrderDetails, receive_later, " +
                 "added_to_store,   \r\n      " +
                 "  po.challan_no, po.po_no, po.freight, po.transport, po.no_pkg_received, po.lr_no, po.condition_pkg_received, " +
-                "po.vehicle_no, po.gir_no, po.challan_date, po.job_ref, po.amount,  po.currency as currencyID , curr.name as currency , stt.asset_type as asset_type_Name,  po_no, po_date, requested_qty,lost_qty, ordered_qty\r\n    ,paid_by_ID, smpaidby.paid_by paid_by_name " +
+                "po.vehicle_no, po.gir_no, po.challan_date, po.job_ref, po.amount,  po.currency as currencyID , curr.name as currency , stt.asset_type as asset_type_Name,  po_no, po_date, requested_qty,lost_qty, ordered_qty\r\n    ,paid_by_ID, smpaidby.paid_by paid_by_name , po.received_on as receivedAt" +
                 "  FROM smpurchaseorderdetails pod\r\n        LEFT JOIN smpurchaseorder po ON po.ID = pod.purchaseID\r\n     " +
                 "   LEFT JOIN smassetitems sai ON sai.ID = pod.assetItemID\r\n       " +
                 " LEFT JOIN smassetmasters sam ON sam.asset_code = sai.asset_code\r\n      " +
@@ -909,10 +909,11 @@ namespace CMMSAPIs.Repositories
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_MasterList.status);
                 string _shortStatus = getShortStatus(CMMS.CMMS_Modules.SM_PO, _Status);
                 string _longStatus = getLongStatus(_Status, _MasterList.Id);
-
+                _MasterList.amount = _List.Sum(x => x.cost * x.ordered_qty);
                 _MasterList.status_short = _shortStatus;
                 _MasterList.status_long = _longStatus;
             }
+         
             return _MasterList;
         }
 
@@ -939,7 +940,7 @@ namespace CMMSAPIs.Repositories
                 "f1.file_path,f1.Asset_master_id,sm.decimal_status,sm.spare_multi_selection,po.generated_by,pod.order_type as asset_type_ID_OrderDetails, receive_later, " +
                 "added_to_store,   \r\n      " +
                 "  po.challan_no, po.po_no, po.freight, po.transport, po.no_pkg_received, po.lr_no, po.condition_pkg_received, " +
-                "po.vehicle_no, po.gir_no, po.challan_date, po.job_ref, po.amount,  po.currency as currencyID , curr.name as currency , stt.asset_type as asset_type_Name,  po_no, po_date, requested_qty,lost_qty, ordered_qty, CONCAT(ed.firstName,' ',ed.lastName) as generatedBy\r\n      " +
+                "po.vehicle_no, po.gir_no, po.challan_date, po.job_ref, po.amount,  po.currency as currencyID , curr.name as currency , stt.asset_type as asset_type_Name,  po_no, po_date, requested_qty,lost_qty, ordered_qty, CONCAT(ed.firstName,' ',ed.lastName) as generatedBy\r\n  ,po.received_on as receivedAt    " +
                 "  FROM smpurchaseorderdetails pod\r\n        LEFT JOIN smpurchaseorder po ON po.ID = pod.purchaseID\r\n     " +
                 "   LEFT JOIN smassetitems sai ON sai.ID = pod.assetItemID\r\n       " +
                 " LEFT JOIN smassetmasters sam ON sam.asset_code = sai.asset_code\r\n      " +
@@ -987,7 +988,7 @@ namespace CMMSAPIs.Repositories
                 location_ID = p.location_ID,
                 cost = p.cost,
                 generatedBy = p.generatedBy
-            }).GroupBy(p => p.Id).Select(group => group.First()).ToList();
+            }).GroupBy(p => p.Id).Select(group => group.First()).OrderBy(p => p.Id).ToList();
         
 
 
@@ -1088,7 +1089,7 @@ namespace CMMSAPIs.Repositories
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_PO, request.id, 0, 0, "Goods order receive approved.", CMMS.CMMS_Status.GO_RECEIVED_APPROVED);
 
-            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Approved goods order receive successfully.");
+            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Goods order receive {request.id} approved successfully");
             return response;
         }
 
@@ -1130,7 +1131,8 @@ namespace CMMSAPIs.Repositories
 
 
 
-            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Rejected goods order receive.");
+            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Goods order receive {request.id} rejected successfully.");
+     
 
             return response;
         }
