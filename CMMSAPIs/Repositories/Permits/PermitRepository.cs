@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Data;
@@ -632,6 +632,16 @@ namespace CMMSAPIs.Repositories.Permits
                 await Context.ExecuteNonQry<int>(qryPermitSaftyQuestion).ConfigureAwait(false);
             }
             //file_upload_form pending 
+            // file upload code
+            if (request.uploadfile_ids != null && request.uploadfile_ids.Count > 0)
+            {
+                foreach (int data in request.uploadfile_ids)
+                {
+                    string qryuploadFiles = $"UPDATE uploadedfiles SET facility_id = {request.facility_id}, module_type={(int)CMMS.CMMS_Modules.PTW},module_ref_id={insertedId} where id = {data}";
+                    await Context.ExecuteNonQry<int>(qryuploadFiles).ConfigureAwait(false);
+                }
+            }
+
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, insertedId, 0, 0, "Permit Created", CMMS.CMMS_Status.PTW_CREATED,userID);
 
