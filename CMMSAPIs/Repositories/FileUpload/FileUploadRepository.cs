@@ -1,4 +1,4 @@
-﻿using CMMSAPIs.Helper;
+using CMMSAPIs.Helper;
 using CMMSAPIs.Models.FileUpload;
 using CMMSAPIs.Models.Utils;
 using Microsoft.AspNetCore.Hosting;
@@ -27,7 +27,10 @@ namespace CMMSAPIs.Repositories.FileUpload
         {
             try
             {
-                string UploadPath = $"{ _environment.WebRootPath }\\Upload\\{ request.facility_id }\\{ (int)request.module_type }\\{ request.module_ref_id }\\";
+                //string UploadPath = $"{ _environment.WebRootPath }\\Upload\\{ request.facility_id }\\{ (int)request.module_type }\\{ request.module_ref_id }\\";
+                // This is for Current Root path
+                //string UploadPath = $"{ _environment.ContentRootPath}\\Upload\\{ request.facility_id }\\{ (int)request.module_type }\\{ request.module_ref_id }\\";
+                string UploadPath = $"Upload\\{ request.facility_id }\\{ (int)request.module_type }\\{ request.module_ref_id }\\";
                 if (!Directory.Exists(UploadPath))
                 {
                     Directory.CreateDirectory(UploadPath);
@@ -42,10 +45,11 @@ namespace CMMSAPIs.Repositories.FileUpload
                             file.CopyTo(filestream);
                             filestream.Flush();
                             string path = filestream.Name.Replace(@"\", @"\\");
+                            string relativeFilePath = Path.Combine(UploadPath, file.FileName);
                             //TODO Implement CreateThumbnail Function
                             //CreateThumbnail(filePath);
                             string myQuery = "INSERT INTO uploadedfiles(facility_id, module_type, module_ref_id, file_category, file_path, file_type, created_by, created_at, file_size, file_size_units, file_size_bytes)" + 
-                                $"VALUES ({request.facility_id}, {(int)request.module_type}, {request.module_ref_id}, {request.file_category}, '{path}', '{file.ContentType}', {userID}, " +
+                                $"VALUES ({request.facility_id}, {(int)request.module_type}, {request.module_ref_id}, {request.file_category}, '{relativeFilePath.Replace(@"\", @"\\")}', '{file.ContentType}', {userID}, " +
                                 $"'{Utils.UtilsRepository.GetUTCTime()}', {file.Length}, 'B', {file.Length}); " +
                                 "SELECT LAST_INSERT_ID();";
                             DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
