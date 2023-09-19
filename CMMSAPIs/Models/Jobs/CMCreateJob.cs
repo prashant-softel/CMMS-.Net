@@ -23,6 +23,7 @@ namespace CMMSAPIs.Models.Jobs
 //        public string cancellation_remark { get; set; }
         public List<int> WorkType_Ids { get; set; }
         public List<int> AssetsIds { get; set; }
+              public List<int> uploadfile_ids { get; set; }
     }
 }
 
