@@ -28,6 +28,7 @@ namespace CMMSAPIs.Models.Permits
         public List<CMPermitLotoList> Loto_list { get; set; }
         public List<CMPermitEmpList> employee_list { get; set; }
         public List<CMPermitSaftyQueList> safety_question_list { get; set; }
+        public List<int> uploadfile_ids { get; set; }
     }
     /*public class CMPermitLotoList
     {
