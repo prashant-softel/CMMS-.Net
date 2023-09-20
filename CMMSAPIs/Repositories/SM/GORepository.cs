@@ -837,10 +837,10 @@ namespace CMMSAPIs.Repositories
                 "f1.file_path,f1.Asset_master_id,sm.decimal_status,sm.spare_multi_selection,po.generated_by,pod.order_type as asset_type_ID_OrderDetails, receive_later, " +
                 "added_to_store,   \r\n      " +
                 "  po.challan_no, po.po_no, po.freight, po.transport, po.no_pkg_received, po.lr_no, po.condition_pkg_received, " +
-                "po.vehicle_no, po.gir_no, po.challan_date, po.job_ref, po.amount,  po.currency as currencyID , curr.name as currency , stt.asset_type as asset_type_Name,  po_no, po_date, requested_qty,lost_qty, ordered_qty\r\n    ,paid_by_ID, smpaidby.paid_by paid_by_name , po.received_on as receivedAt" +
+                "po.vehicle_no, po.gir_no, po.challan_date, po.job_ref, po.amount,  po.currency as currencyID , curr.name as currency , stt.asset_type as asset_type_Name,  po_no, po_date, requested_qty,lost_qty, ordered_qty\r\n    ,paid_by_ID, smpaidby.paid_by paid_by_name , po.received_on as receivedAt,sam.asset_type_ID,sam.asset_code,sam.asset_name" +
                 "  FROM smpurchaseorderdetails pod\r\n        LEFT JOIN smpurchaseorder po ON po.ID = pod.purchaseID\r\n     " +
                 "   LEFT JOIN smassetitems sai ON sai.ID = pod.assetItemID\r\n       " +
-                " LEFT JOIN smassetmasters sam ON sam.asset_code = sai.asset_code\r\n      " +
+                " LEFT JOIN smassetmasters sam ON sam.ID = pod.assetItemID\r\n      " +
                 "  LEFT JOIN smunitmeasurement sm ON sm.ID = sam.unit_of_measurement\r\n    " +
                 "    LEFT JOIN (\r\n            SELECT file.file_path,file.Asset_master_id as Asset_master_id FROM smassetmasterfiles file \r\n " +
                 "           LEFT join smassetmasters sam on file.Asset_master_id =  sam.id )\r\n        " +
@@ -902,7 +902,11 @@ namespace CMMSAPIs.Repositories
                     damaged_qty = p.damaged_qty,
                     ordered_qty = p.ordered_qty,
                     paid_by_name = p.paid_by_name,
-                    paid_by_ID = p.paid_by_ID
+                    paid_by_ID = p.paid_by_ID,
+                    asset_type_ID = p.asset_type_ID,
+                    asset_code = p.asset_code
+
+
                 }).ToList();
                 _MasterList.GODetails = _itemList;
 
