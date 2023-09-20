@@ -33,7 +33,7 @@ namespace CMMSAPIs.Models.Permits
         public string issuedByName { get; set; }
         public DateTime? issue_at { get; set; }
         public int issueRejectedby_id { get; set; }
-        public string issueRejectedByName{ get; set; }
+        public string issueRejectedByName { get; set; }
         public DateTime? issueRejected_at { get; set; }
         public int closedby_id { get; set; }
         public string closedByName { get; set; }
@@ -67,6 +67,12 @@ namespace CMMSAPIs.Models.Permits
         public int ptwStatus { get; set; }
         public string current_status_short { get; set; }
         public string current_status_long { get; set; }
+        public CMPermitConditionDetails closeDetails { get; set; }
+
+        public CMPermitConditionDetails cancelDetails { get; set; }
+
+        public CMPermitConditionDetails extendDetails { get; set; }
+
     }
     public class CMAssociatedList
     {
@@ -117,7 +123,8 @@ namespace CMMSAPIs.Models.Permits
         public int extend_by_minutes { get; set; }
         public string comment { get; set; }
         public int[] conditionIds { get; set; }
-        public int fileId { get; set; }
+        public string otherCondition { get; set; }
+        public int[] fileIds { get; set; }
 
     }
 
@@ -126,8 +133,28 @@ namespace CMMSAPIs.Models.Permits
         public int id { get; set; }
         public string comment { get; set; }
         public int[] conditionIds { get; set; }
-        public int fileId { get; set; }
+        public string otherCondition { get; set; }
+        public int[] fileIds { get; set; }
         //public string filePath { get; set; }
+    }
+    public class CMPermitConditions
+    {
+        public int id { get; set; }
+        public int value { get; set; }
+        public string name { get; set; }
+
+    }
+
+    public class CMPermitConditionDetails
+    {
+        public List<CMPermitConditions> conditions { get; set; }
+        public List<files> files { get; set; }
+
+    }
+    public class files
+    {
+        public int fileId { get; set; }
+        public string path { get; set; }
     }
 
 }

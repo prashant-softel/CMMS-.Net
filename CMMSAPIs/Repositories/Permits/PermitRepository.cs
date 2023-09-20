@@ -13,7 +13,7 @@ using CMMSAPIs.Repositories.Utils;
 using CMMSAPIs.Models.Notifications;
 using CMMSAPIs.Models.Jobs;
 using CMMSAPIs.Repositories.Jobs;
-
+using Google.Protobuf.WellKnownTypes;
 
 namespace CMMSAPIs.Repositories.Permits
 {
@@ -280,7 +280,7 @@ namespace CMMSAPIs.Repositories.Permits
             */
 
             string inputTypeOut = "CASE ";
-            foreach (CMMS.CMMS_Input input in Enum.GetValues(typeof(CMMS.CMMS_Input)))
+            foreach (CMMS.CMMS_Input input in System.Enum.GetValues(typeof(CMMS.CMMS_Input)))
             {
                 inputTypeOut += $"WHEN permitsaftymea.input = {(int)input} THEN '{input}' ";
             }
@@ -716,6 +716,138 @@ namespace CMMSAPIs.Repositories.Permits
 
             List<CMAssociatedList> _AssociatedJobList = await Context.GetData<CMAssociatedList>(joblist).ConfigureAwait(false);
 
+            string closeQry = $"select `1`,`2`,`3`,`4`,closeOther from permits where id = {permit_id}  ";
+            DataTable dt1 = await Context.FetchData(closeQry).ConfigureAwait(false);
+          
+            string conQry = $"select id, title as name from permitconditionmaster where type = 1 ";
+            List<CMPermitConditions> closeConditions = await Context.GetData<CMPermitConditions>(conQry).ConfigureAwait(false);
+
+            foreach (CMPermitConditions condition in closeConditions)
+            {
+                DataColumn column = dt1.Columns[condition.id.ToString()];
+
+                if (column != null)
+                {
+                    foreach (DataRow row in dt1.Rows)
+                    {
+                        int? value = row.Field<int?>(column);
+
+                        if (value.HasValue)
+                        {
+                            condition.value = value.Value;
+                        }
+                        
+                    }
+                }
+                
+            }
+            if (!string.IsNullOrEmpty(dt1.Rows[0]["closeOther"].ToString()))
+            {
+                CMPermitConditions other = new CMPermitConditions();
+                other.value = 1;
+                other.name = dt1.Rows[0]["closeOther"].ToString();
+                closeConditions.Add(other);
+            }
+            string query1 = $"SELECT closeFile FROM permits WHERE id = {permit_id};";
+            DataTable dt2 = await Context.FetchData(query1).ConfigureAwait(false);
+            string fileIds = Convert.ToString(dt2.Rows[0][0]);
+
+            string files = $"SELECT id as fileId, file_path as path FROM uploadedFiles WHERE id IN ( {fileIds} );";
+            List<files> closeFiles = await Context.GetData<files>(files).ConfigureAwait(false);
+
+
+            _PermitDetailsList[0].closeDetails = new CMPermitConditionDetails();
+            _PermitDetailsList[0].closeDetails.conditions = closeConditions;
+            _PermitDetailsList[0].closeDetails.files = closeFiles;
+
+            string cancleQry = $"select `5`,`6`,`7`,cancelOther from permits where id = {permit_id}  ";
+            DataTable dt3 = await Context.FetchData(cancleQry).ConfigureAwait(false);
+
+            string conQry2 = $"select id, title as name from permitconditionmaster where type = 2 ";
+            List<CMPermitConditions> cancleConditions = await Context.GetData<CMPermitConditions>(conQry2).ConfigureAwait(false);
+
+            foreach (CMPermitConditions condition in cancleConditions)
+            {
+                DataColumn column = dt3.Columns[condition.id.ToString()];
+
+                if (column != null)
+                {
+                    foreach (DataRow row in dt3.Rows)
+                    {
+                        int? value = row.Field<int?>(column);
+
+                        if (value.HasValue)
+                        {
+                            condition.value = value.Value;
+                        }
+
+                    }
+                }
+
+            }
+            if (!string.IsNullOrEmpty(dt3.Rows[0]["cancelOther"].ToString()))
+            {
+                CMPermitConditions other = new CMPermitConditions();
+                other.value = 1;
+                other.name = dt3.Rows[0]["cancelOther"].ToString();
+                cancleConditions.Add(other);
+            }
+
+            string query2 = $"SELECT cancelFile FROM permits WHERE id = {permit_id};";
+            DataTable dt4 = await Context.FetchData(query2).ConfigureAwait(false);
+            string fileIds2 = Convert.ToString(dt4.Rows[0][0]);
+
+            string files2 = $"SELECT id as fileId, file_path as path FROM uploadedFiles WHERE id IN ( {fileIds2} );";
+            List<files> cancleFiles = await Context.GetData<files>(files2).ConfigureAwait(false);
+
+
+            _PermitDetailsList[0].cancelDetails = new CMPermitConditionDetails();
+            _PermitDetailsList[0].cancelDetails.conditions = cancleConditions;
+            _PermitDetailsList[0].cancelDetails.files = cancleFiles;
+
+            string extendQry = $"select `8`,`9`,extendOther from permits where id = {permit_id}  ";
+            DataTable dt5 = await Context.FetchData(extendQry).ConfigureAwait(false);
+
+            string conQry3 = $"select id, title as name from permitconditionmaster where type = 3 ";
+            List<CMPermitConditions> extendConditions = await Context.GetData<CMPermitConditions>(conQry3).ConfigureAwait(false);
+
+            foreach (CMPermitConditions condition in extendConditions)
+            {
+                DataColumn column = dt5.Columns[condition.id.ToString()];
+
+                if (column != null)
+                {
+                    foreach (DataRow row in dt5.Rows)
+                    {
+                        int? value = row.Field<int?>(column);
+
+                        if (value.HasValue)
+                        {
+                            condition.value = value.Value;
+                        }
+
+                    }
+                }
+
+            }
+            if (!string.IsNullOrEmpty(dt5.Rows[0]["extendOther"].ToString()))
+            {
+                CMPermitConditions other = new CMPermitConditions();
+                other.value = 1;
+                other.name = dt5.Rows[0]["extendOther"].ToString();
+                extendConditions.Add(other);
+            }
+            string query3 = $"SELECT closeFile FROM permits WHERE id = {permit_id};";
+            DataTable dt7 = await Context.FetchData(query3).ConfigureAwait(false);
+            string fileIds3 = Convert.ToString(dt7.Rows[0][0]);
+
+            string files3 = $"SELECT id as fileId, file_path as path FROM uploadedFiles WHERE id IN ( {fileIds3} );";
+            List<files> extendFiles = await Context.GetData<files>(files3).ConfigureAwait(false);
+
+
+            _PermitDetailsList[0].extendDetails = new CMPermitConditionDetails();
+            _PermitDetailsList[0].extendDetails.conditions = extendConditions;
+            _PermitDetailsList[0].extendDetails.files = extendFiles;
 
             foreach (var job in _AssociatedJobList)
             {
@@ -763,7 +895,10 @@ namespace CMMSAPIs.Repositories.Permits
                 extendMinutes = request.extend_by_minutes;
             }
 
-            string updateQry = $"update permits set extendReason = '{request.comment}', extendByMinutes = '{extendMinutes}', extendTime = '{UtilsRepository.GetUTCTime()}',extendFile = {request.fileId}, extendStatus = 1, status = {(int)CMMS.CMMS_Status.PTW_EXTEND_REQUESTED} where id = {request.id}";
+            string fileIds = "";
+            fileIds += (request?.fileIds?.Length > 0 ? " " + string.Join(" , ", request.fileIds) + " " : string.Empty);
+
+            string updateQry = $"update permits set extendReason = '{request.comment}', extendByMinutes = '{extendMinutes}', extendTime = '{UtilsRepository.GetUTCTime()}',extendFile = '{fileIds}', extendStatus = 1, status = {(int)CMMS.CMMS_Status.PTW_EXTEND_REQUESTED} where id = {request.id}";
 
             await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
 
@@ -778,14 +913,23 @@ namespace CMMSAPIs.Repositories.Permits
 
             CMPermitDetail permitDetails = await GetPermitDetails(request.id);
 
-            string qryConditiom = $"insert into permitconditions (permitId, conditionId , conditionType ) values ";
-            foreach (var data in request.conditionIds)
+            string conditions = "";
+            foreach (var column in request.conditionIds)
             {
-                qryConditiom += $" ({request.id}, {data} ,3 ), ";
+                conditions += $" `{column}` = 1, ";
             }
 
-            qryConditiom = qryConditiom.Substring(0, qryConditiom.Length - 2);
-            await Context.ExecuteNonQry<int>(qryConditiom).ConfigureAwait(false);
+            conditions = conditions.Substring(0, conditions.Length - 2);
+
+            string other = "";
+
+            if (!string.IsNullOrEmpty(request.otherCondition))
+            {
+                other = $" , extendOther = '{request.otherCondition}' ";
+            }
+            string qryCondition = $"update permits set {conditions} {other} where id = {request.id}";
+
+            await Context.ExecuteNonQry<int>(qryCondition).ConfigureAwait(false);
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.id, 0, 0, $"Permit extension requested [{extendMinutes} Mins]. Reason:" + request.comment, CMMS.CMMS_Status.PTW_EXTEND_REQUESTED, userID);
 
@@ -892,8 +1036,10 @@ namespace CMMSAPIs.Repositories.Permits
 
         internal async Task<CMDefaultResponse> PermitClose(CMPermitApproval request, int userID)
         {
+            string fileIds = "";
+            fileIds +=  (request?.fileIds?.Length > 0 ? " " + string.Join(" , ", request.fileIds) + " " : string.Empty);
 
-            string updateQry = $"update permits set completedDate = '{UtilsRepository.GetUTCTime()}',closeFile={request.fileId}, completedStatus = 1, status = {(int)CMMS.CMMS_Status.PTW_CLOSED}, status_updated_at = '{UtilsRepository.GetUTCTime()}', completedById = {userID}  where id = {request.id}";
+            string updateQry = $"update permits set completedDate = '{UtilsRepository.GetUTCTime()}',closeFile= '{fileIds}' , completedStatus = 1, status = {(int)CMMS.CMMS_Status.PTW_CLOSED}, status_updated_at = '{UtilsRepository.GetUTCTime()}', completedById = {userID}  where id = {request.id}";
             int retValue = await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
 
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
@@ -905,14 +1051,22 @@ namespace CMMSAPIs.Repositories.Permits
 
             CMPermitDetail permitDetails = await GetPermitDetails(request.id);
 
-            string qryConditiom = $"insert into permitconditions (permitId, conditionId , conditionType ) values ";
-            foreach (var data in request.conditionIds)
+            string conditions = "";
+            foreach (var column in request.conditionIds)
             {
-                qryConditiom += $" ({request.id}, {data} ,1 ), ";
+                conditions += $" `{column}` = 1, ";
             }
 
-            qryConditiom = qryConditiom.Substring(0, qryConditiom.Length - 2);
-            await Context.ExecuteNonQry<int>(qryConditiom).ConfigureAwait(false);
+            conditions = conditions.Substring(0, conditions.Length - 2);
+
+            string other = "";
+
+            if (!string.IsNullOrEmpty(request.otherCondition)){
+                other = $" , closeOther = '{request.otherCondition}' ";
+            }
+            string qryCondition = $"update permits set {conditions} {other} where id = {request.id}";
+
+            await Context.ExecuteNonQry<int>(qryCondition).ConfigureAwait(false);
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.id, 0, 0, "Permit Closed", CMMS.CMMS_Status.PTW_CLOSED, userID);
 
@@ -970,7 +1124,10 @@ namespace CMMSAPIs.Repositories.Permits
              * Return Message Cancelled successfully
             */
 
-            string updateQry = $"update permits set cancelReccomendations = '{request.comment}', cancelFile ={request.fileId},cancelRequestStatus = 1, status = {(int)CMMS.CMMS_Status.PTW_CANCEL_REQUESTED}, status_updated_at = '{UtilsRepository.GetUTCTime()}', cancelRequestDate = '{UtilsRepository.GetUTCTime()}', cancelRequestById = {userID}  where id = {request.id}";
+            string fileIds = "";
+            fileIds += (request?.fileIds?.Length > 0 ? " " + string.Join(" , ", request.fileIds) + " " : string.Empty);
+
+            string updateQry = $"update permits set cancelReccomendations = '{request.comment}', cancelFile ='{fileIds}',cancelRequestStatus = 1, status = {(int)CMMS.CMMS_Status.PTW_CANCEL_REQUESTED}, status_updated_at = '{UtilsRepository.GetUTCTime()}', cancelRequestDate = '{UtilsRepository.GetUTCTime()}', cancelRequestById = {userID}  where id = {request.id}";
             int retValue = await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
 
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
@@ -982,14 +1139,23 @@ namespace CMMSAPIs.Repositories.Permits
 
             CMPermitDetail permitDetails = await GetPermitDetails(request.id);
 
-            string qryConditiom = $"insert into permitconditions (permitId, conditionId , conditionType ) values ";
-            foreach (var data in request.conditionIds)
+            string conditions = "";
+            foreach (var column in request.conditionIds)
             {
-                qryConditiom += $" ({request.id}, {data} ,2 ), ";
+                conditions += $" `{column}` = 1, ";
             }
 
-            qryConditiom = qryConditiom.Substring(0, qryConditiom.Length - 2);
-            await Context.ExecuteNonQry<int>(qryConditiom).ConfigureAwait(false);
+            conditions = conditions.Substring(0, conditions.Length - 2);
+
+            string other = "";
+
+            if (!string.IsNullOrEmpty(request.otherCondition))
+            {
+                other = $" , cancelOther = '{request.otherCondition}' ";
+            }
+            string qryCondition = $"update permits set {conditions} {other} where id = {request.id}";
+
+            await Context.ExecuteNonQry<int>(qryCondition).ConfigureAwait(false);
 
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.id, 0, 0, request.comment, CMMS.CMMS_Status.PTW_CANCEL_REQUESTED, userID);
