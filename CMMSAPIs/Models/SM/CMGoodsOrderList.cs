@@ -58,6 +58,7 @@ namespace CMMSAPIs.Models
         public int podID { get; set; }
         public string asset_type_Name { get; set; }
         public string asset_name { get; set; }  
+        public string asset_code { get; set; }  
         public string facilityName { get; set; }
         public decimal received_qty { get; set; }
         public decimal lost_qty { get; set; }
@@ -225,7 +226,9 @@ namespace CMMSAPIs.Models
     public class CMGODetails
     {
         public int id { get; set; }
-        public int assetItemID { get; set; }
+        public int assetItemID { get; set; }       
+        public int asset_type_ID { get; set; }
+        public string asset_code { get; set; }
         public string assetItem_Name { get; set; }
         public int location_ID { get; set; }
         public decimal cost { get; set; }
