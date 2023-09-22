@@ -838,9 +838,9 @@ namespace CMMSAPIs.Repositories
                 "added_to_store,   \r\n      " +
                 "  po.challan_no, po.po_no, po.freight, po.transport, po.no_pkg_received, po.lr_no, po.condition_pkg_received, " +
                 "po.vehicle_no, po.gir_no, po.challan_date, po.job_ref, po.amount,  po.currency as currencyID , curr.name as currency , stt.asset_type as asset_type_Name,  po_no, po_date, requested_qty,lost_qty, ordered_qty\r\n    ,paid_by_ID, smpaidby.paid_by paid_by_name , po.received_on as receivedAt,sam.asset_type_ID,sam.asset_code,sam.asset_name" +
-                "  FROM smpurchaseorderdetails pod\r\n        LEFT JOIN smpurchaseorder po ON po.ID = pod.purchaseID\r\n     " +
+                " , sic.cat_name,smat.asset_type FROM smpurchaseorderdetails pod\r\n        LEFT JOIN smpurchaseorder po ON po.ID = pod.purchaseID\r\n     " +
                 "   LEFT JOIN smassetitems sai ON sai.ID = pod.assetItemID\r\n       " +
-                " LEFT JOIN smassetmasters sam ON sam.ID = pod.assetItemID\r\n      " +
+                " LEFT JOIN smassetmasters sam ON  sam.asset_code = sai.asset_code\r\n      " +
                 "  LEFT JOIN smunitmeasurement sm ON sm.ID = sam.unit_of_measurement\r\n    " +
                 "    LEFT JOIN (\r\n            SELECT file.file_path,file.Asset_master_id as Asset_master_id FROM smassetmasterfiles file \r\n " +
                 "           LEFT join smassetmasters sam on file.Asset_master_id =  sam.id )\r\n        " +
@@ -851,6 +851,7 @@ namespace CMMSAPIs.Repositories
                 "  LEFT JOIN smassetmasters s2 ON s2.item_category_ID = sic.ID\r\n        )  t2 ON t2.master_ID = sam.ID\r\n " +
                 "       LEFT JOIN facilities fc ON fc.id = po.facilityID\r\nLEFT JOIN users as vendor on vendor.id=po.vendorID " +
                 "       LEFT JOIN business bl ON bl.id = po.vendorID left join smassettypes stt on stt.ID = pod.order_type LEFT JOIN currency curr ON curr.id = po.currency LEFT JOIN smpaidby as smpaidby on smpaidby.ID = pod.paid_by_ID " +
+                " LEFT JOIN smitemcategory sic ON sic.ID = sam.item_category_ID\r\n    LEFT JOIN smassettypes smat ON smat.ID = sam.asset_type_ID " +
                 " WHERE po.ID = " + id + " /*GROUP BY pod.ID*/";
             List<CMGoodsOrderList> _List = await Context.GetData<CMGoodsOrderList>(query).ConfigureAwait(false);
 
@@ -904,10 +905,12 @@ namespace CMMSAPIs.Repositories
                     paid_by_name = p.paid_by_name,
                     paid_by_ID = p.paid_by_ID,
                     asset_type_ID = p.asset_type_ID,
-                    asset_code = p.asset_code
+                    asset_code = p.asset_code,
+                    cat_name = p.cat_name,
+                    asset_type = p.asset_type
 
 
-                }).ToList();
+    }).ToList();
                 _MasterList.GODetails = _itemList;
 
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_MasterList.status);
