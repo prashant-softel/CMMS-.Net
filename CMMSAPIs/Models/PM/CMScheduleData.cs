@@ -8,7 +8,8 @@ namespace CMMSAPIs.Models.PM
         public int plan_id { get; set; }
         public string plan_name { get; set; }
         public int status_id { get; set; }
-        public string status_name { get; set; }
+        public string status_short { get; set; }
+        public string status_long { get; set; }
         public DateTime plan_date { get; set; }
         public int facility_id { get; set; }
         public string facility_name { get; set; }   
@@ -25,6 +26,7 @@ namespace CMMSAPIs.Models.PM
     }
     public class CMPMPlanDetail : CMPMPlanList
     {
+        public int isDraft { get; set; }
         public List<AssetCheckList> mapAssetChecklist { get; set; }
     }
     public class AssetCheckList

@@ -8,6 +8,8 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
+using CMMSAPIs.Models.Notifications;
+using System.Numerics;
 
 namespace CMMSAPIs.Repositories.PM
 {
@@ -18,8 +20,36 @@ namespace CMMSAPIs.Repositories.PM
         {
             _utilsRepo = new UtilsRepository(sqlDBHelper);
         }
+
+        internal static string getShortStatus(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status m_notificationID)
+        {
+            string retValue;
+            retValue = "";
+
+            switch (m_notificationID)
+            {
+                case CMMS.CMMS_Status.PM_PLAN_DRAFT:
+                    retValue = "Draft"; break;
+                case CMMS.CMMS_Status.PM_PLAN_CREATED:
+                    retValue = "Waiting For Approval"; break;
+                case CMMS.CMMS_Status.PM_PLAN_REJECTED:
+                    retValue = "Rejected"; break;
+                case CMMS.CMMS_Status.PM_PLAN_UPDATED:
+                    retValue = "Updated"; break;
+                case CMMS.CMMS_Status.PM_PLAN_DELETED:
+                    retValue = "Deleted"; break;
+                case CMMS.CMMS_Status.PM_PLAN_APPROVED:
+                    retValue = "Approved"; break;
+                default:
+                    break;
+            }
+            return retValue;
+
+        }
         internal async Task<CMDefaultResponse> CreatePMPlan(CMPMPlanDetail pm_plan, int userID)
         {
+            int status = pm_plan.isDraft > 0 ? (int)CMMS.CMMS_Status.PM_PLAN_DRAFT : (int)CMMS.CMMS_Status.PM_PLAN_CREATED;
+
             string checklistIDsQry = $"SELECT id FROM checklist_number WHERE facility_id = {pm_plan.facility_id} " +
                                         $"AND asset_category_id = {pm_plan.category_id} AND frequency_id = {pm_plan.plan_freq_id} " +
                                         $"AND checklist_type = 1; ";
@@ -45,7 +75,7 @@ namespace CMMSAPIs.Repositories.PM
             string addPlanQry = $"INSERT INTO pm_plan(plan_name, facility_id, category_id, frequency_id, " +
                                 $"status, plan_date, created_by, created_at, updated_by, updated_at) VALUES " +
                                 $"('{pm_plan.plan_name}', {pm_plan.facility_id}, {pm_plan.category_id}, {pm_plan.plan_freq_id}, " +
-                                $"{(int)CMMS.CMMS_Status.PM_PLAN_CREATED}, '{pm_plan.plan_date.ToString("yyyy-MM-dd")}', " +
+                                $"{status}, '{pm_plan.plan_date.ToString("yyyy-MM-dd")}', " +
                                 $"{userID}, '{UtilsRepository.GetUTCTime()}', {userID}, '{UtilsRepository.GetUTCTime()}'); " +
                                 $"SELECT LAST_INSERT_ID(); ";
             DataTable dt3 = await Context.FetchData(addPlanQry).ConfigureAwait(false);
@@ -68,7 +98,7 @@ namespace CMMSAPIs.Repositories.PM
         {
             if (facility_id <= 0)
                 throw new ArgumentException("Invalid Facility ID");
-            string planListQry = $"SELECT plan.id as plan_id, plan.plan_name, plan.status as status_id, statuses.statusName as status_name, plan.plan_date, " +
+            string planListQry = $"SELECT plan.id as plan_id, plan.plan_name, plan.status as status_id, statuses.statusName as status_short, plan.plan_date, " +
                                     $"facilities.id as facility_id, facilities.name as facility_name, category.id as category_id, category.name as category_name, " +
                                     $"frequency.id as plan_freq_id, frequency.name as plan_freq_name, createdBy.id as created_by_id, " +
                                     $"CONCAT(createdBy.firstName, ' ', createdBy.lastName) as created_by_name, plan.created_at, " +
@@ -90,7 +120,16 @@ namespace CMMSAPIs.Repositories.PM
             if (end_date != null)
                 planListQry += $"AND plan.plan_date <= {((DateTime)start_date).ToString("yyyy-MM-dd")} ";
             planListQry += $";";
+
             List<CMPMPlanList> plan_list = await Context.GetData<CMPMPlanList>(planListQry).ConfigureAwait(false);
+
+            foreach (var plan in plan_list)
+            {
+                CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(plan.status_id);
+                string _shortStatus = getShortStatus(CMMS.CMMS_Modules.PM_PLAN, _Status);
+                plan.status_short = _shortStatus;
+            }
+
             return plan_list;
         }
 
@@ -98,7 +137,7 @@ namespace CMMSAPIs.Repositories.PM
         {
             if (id <= 0)
                 throw new ArgumentException("Invalid Facility ID");
-            string planListQry = $"SELECT plan.id as plan_id, plan.plan_name, plan.status as status_id, statuses.statusName as status_name, plan.plan_date, " +
+            string planListQry = $"SELECT plan.id as plan_id, plan.plan_name, plan.status as status_id, statuses.statusName as status_short, plan.plan_date, " +
                                     $"facilities.id as facility_id, facilities.name as facility_name, category.id as category_id, category.name as category_name, " +
                                     $"frequency.id as plan_freq_id, frequency.name as plan_freq_name, createdBy.id as created_by_id, " +
                                     $"CONCAT(createdBy.firstName, ' ', createdBy.lastName) as created_by_name, plan.created_at, " +
@@ -124,6 +163,11 @@ namespace CMMSAPIs.Repositories.PM
                                         $"WHERE planmap.planId = {id};";
             List<AssetCheckList> assetCheckLists = await Context.GetData<AssetCheckList>(assetChecklistsQry).ConfigureAwait(false);
             planDetails[0].mapAssetChecklist = assetCheckLists;
+
+            CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(planDetails[0].status_id);
+            string _shortStatus = getShortStatus(CMMS.CMMS_Modules.PM_PLAN, _Status);
+            planDetails[0].status_short = _shortStatus;
+
             return planDetails[0];
         }
         internal async Task<List<CMScheduleData>> GetScheduleData(int facility_id, int category_id)
@@ -272,6 +316,69 @@ namespace CMMSAPIs.Repositories.PM
                                         "PM_Maintenance_Order_Number = CONCAT('PMSCH',id);";
             await Context.ExecuteNonQry<int>(setCodeNameQuery);
             return responseList;
+        }
+
+        internal async Task<CMDefaultResponse> ApprovePMPlan(CMApproval request, int userId)
+        {
+          
+            CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
+
+            if (request.id <= 0)
+            {
+                throw new ArgumentException("Invalid argument id<" + request.id + ">");
+            }
+            string approveQuery = $"Update pm_plan set status = {(int)CMMS.CMMS_Status.PM_PLAN_APPROVED}, approved_at = '{UtilsRepository.GetUTCTime()}', " +
+                $" remarks = '{request.comment}',  " +
+                $" approved_by = {userId}" +
+                $" where id = {request.id}";
+            int reject_id = await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
+
+            retCode = CMMS.RETRUNSTATUS.SUCCESS;
+
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_PLAN, request.id, 0, 0, "PM Plan Approved ", CMMS.CMMS_Status.PM_PLAN_APPROVED);
+
+            //await CMMSNotification.sendNotification(CMMS.CMMS_Modules.WARRANTY_CLAIM, CMMS.CMMS_Status.APPROVED, new[] { _WCList[0].created_by }, _WCList[0]);
+            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "PM Plan Approved Successfully");
+            return response;
+        }
+
+        internal async Task<CMDefaultResponse> RejectPMPlan(CMApproval request, int userId)
+        {
+           
+            if (request.id <= 0)
+            {
+                throw new ArgumentException("Invalid argument id<" + request.id + ">");
+            }
+
+            string approveQuery = $"Update pm_plan set status = {(int)CMMS.CMMS_Status.PM_PLAN_REJECTED} , " +
+                $"remarks = '{request.comment}',  " +
+                $" rejeccted_by = {userId}, rejected_at = {UtilsRepository.GetUTCTime()} " +
+                $" where id = {request.id}";
+            int reject_id = await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
+
+            CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
+
+            if (reject_id > 0)
+            {
+                retCode = CMMS.RETRUNSTATUS.SUCCESS;
+            }
+
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_PLAN, request.id, 0, 0, "PM Plan Rejected ", CMMS.CMMS_Status.PM_PLAN_REJECTED);
+
+            //await CMMSNotification.sendNotification(CMMS.CMMS_Modules.WARRANTY_CLAIM, CMMS.CMMS_Status.REJECTED, new[] { _WCList[0].created_by }, _WCList[0]);
+            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "PM Plan Rejected Successfully");
+            return response;
+        }
+
+        internal async Task<CMDefaultResponse> DeletePMPlan(int planId, int userID)
+        {
+            string approveQuery = $"Delete from pm_plan where id ={planId}";
+            await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
+
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_PLAN, planId, 0, 0, $"PM Plan Deleted by user {userID}", CMMS.CMMS_Status.PM_PLAN_DELETED);
+
+            CMDefaultResponse response = new CMDefaultResponse(planId, CMMS.RETRUNSTATUS.SUCCESS, $" PM Plan Deleted");
+            return response;
         }
     }
 }

@@ -26,6 +26,7 @@ namespace CMMSAPIs.Models.Inventory
         public int warrantyId { get; set; }
         public dynamic calibrationDueDate { get; set; }
         public string status { get; set; }
+        public int moduleQuantity { get; set; }
     }
 
     public class CMInventoryTypeList

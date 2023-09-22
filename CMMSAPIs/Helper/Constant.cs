@@ -380,7 +380,8 @@ namespace CMMSAPIs.Helper
             
             PM_SUBMIT,//for temp only
             PM_LINK_PTW,
-
+           
+           
             IR_CREATED = 181,
             IR_APPROVED,
             IR_REJECTED,
@@ -478,8 +479,11 @@ namespace CMMSAPIs.Helper
             VEG_TASK_ABANDONED,
 
             PM_PLAN_CREATED = 401,
+            PM_PLAN_DRAFT,
             PM_PLAN_UPDATED,
-            PM_PLAN_DELETED
+            PM_PLAN_DELETED,
+            PM_PLAN_APPROVED,
+            PM_PLAN_REJECTED,
         }
 
         public enum ApprovalStatus
