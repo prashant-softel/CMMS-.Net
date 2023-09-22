@@ -7,6 +7,7 @@ using System;
 using CMMSAPIs.Models.PM;
 using CMMSAPIs.BS.PM;
 using System.Collections.Generic;
+using CMMSAPIs.Models.Utils;
 
 namespace CMMSAPIs.Controllers.PM
 {
@@ -121,6 +122,63 @@ namespace CMMSAPIs.Controllers.PM
             {
                 throw;
             }
+        }
+
+        [Authorize]
+        [Route("ApprovePMPlan")]
+        [HttpPut]
+        internal async Task<IActionResult> ApprovePMPlan(CMApproval request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _PMBS.ApprovePMPlan(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
+        [Route("RejectPMPlan")]
+        [HttpPut]
+        internal async Task<IActionResult> RejectPMPlan(CMApproval request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _PMBS.RejectPMPlan(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+
+        }
+
+        [Authorize]
+        [Route("DeletePMPlan")]
+        [HttpPut]
+        internal async Task<IActionResult> DeletePMPlan(int planId)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _PMBS.DeletePMPlan(planId, userID);
+                return Ok(data);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
         }
     }
 }
