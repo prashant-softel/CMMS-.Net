@@ -28,7 +28,7 @@ namespace CMMSAPIs.Repositories.Masters
         }
 
         #region checklist
-        internal async Task<List<CMCheckList>> GetCheckList(int facility_id, string type)
+        internal async Task<List<CMCheckList>> GetCheckList(int facility_id, int type, int frequency_id, int category_id)
         {
             /* Table - CheckList_Number
              * supporting table - AssetCategory - to get Category Name, Frequency - To get Frequency Name
@@ -48,11 +48,11 @@ namespace CMMSAPIs.Repositories.Masters
                              "LEFT JOIN "+
                                 "users as created_user ON created_user.id=checklist_number.created_by " +
                              "LEFT JOIN "+
-                                "users as updated_user ON updated_user.id=checklist_number.updated_by ";
+                                "users as updated_user ON updated_user.id=checklist_number.updated_by where 1 ";
             if (facility_id > 0)
             {
-                myQuery += $" WHERE checklist_number.facility_id= { facility_id } ";
-                if (type != null)
+                myQuery += $" and checklist_number.facility_id= { facility_id } ";
+                if (type > 0)
                     myQuery += $" and  checklist_number.checklist_type in ({ type }) ";
                 else
                 {
@@ -63,6 +63,12 @@ namespace CMMSAPIs.Repositories.Masters
             {
                 throw new ArgumentException("Facility ID cannot be empty or zero");
             }
+            if (frequency_id > 0)
+                myQuery += $" and  checklist_number.frequency_id = {frequency_id} ";
+
+            if (category_id > 0)
+                myQuery += $" and  checklist_number.asset_category_id = {category_id} ";
+
             myQuery += " ORDER BY checklist_number.id DESC ";
             List<CMCheckList> _checkList = await Context.GetData<CMCheckList>(myQuery).ConfigureAwait(false);
             return _checkList;

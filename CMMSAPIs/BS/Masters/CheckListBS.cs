@@ -11,7 +11,7 @@ namespace CMMSAPIs.BS.Masters
 {
     public interface ICheckListBS
     {
-        Task<List<CMCheckList>> GetCheckList(int facility_id, string type);
+        Task<List<CMCheckList>> GetCheckList(int facility_id, int type, int frequency_id, int category_id);
         Task<CMDefaultResponse> CreateChecklist(List<CMCreateCheckList> request, int userID);      
         Task<CMDefaultResponse> UpdateCheckList(CMCreateCheckList request, int userID);
         Task<CMDefaultResponse> DeleteChecklist(int id, int userID);
@@ -36,13 +36,13 @@ namespace CMMSAPIs.BS.Masters
             databaseProvider = dbProvider;
         }
 
-        public async Task<List<CMCheckList>> GetCheckList(int facility_id, string type)
+        public async Task<List<CMCheckList>> GetCheckList(int facility_id, int type, int frequency_id, int category_id)
         {
             try
             {
                 using (var repos = new CheckListRepository(getDB))
                 {
-                    return await repos.GetCheckList(facility_id, type);
+                    return await repos.GetCheckList(facility_id, type, frequency_id, category_id);
 
                 }
             }
