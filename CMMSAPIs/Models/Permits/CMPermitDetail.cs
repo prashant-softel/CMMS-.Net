@@ -29,28 +29,55 @@ namespace CMMSAPIs.Models.Permits
         public string sop_type_name { get; set; }
         public int requester_id { get; set; }
         public string requestedByName { get; set; }
+        public string requesterDesignation { get; set; }
+        public string requesterCompany { get; set; }
+
         public int issuer_id { get; set; }
         public string issuedByName { get; set; }
+        public string issuerDesignation { get; set; }
+        public string issuerCompany { get; set; }
+
         public DateTime? issue_at { get; set; }
         public int issueRejectedby_id { get; set; }
         public string issueRejectedByName { get; set; }
+        public string issueRejecterDesignation { get; set; }
+        public string issueRejecterCompany { get; set; }
+
         public DateTime? issueRejected_at { get; set; }
         public int closedby_id { get; set; }
         public string closedByName { get; set; }
+        public string closedByDesignation { get; set; }
+        public string closedByCompany { get; set; }
+
         public DateTime? close_at { get; set; }
         public int approver_id { get; set; }
         public string approvedByName { get; set; }
+        public string approverDesignation { get; set; }
+        public string approverCompany { get; set; }
+
         public DateTime? approve_at { get; set; }
         public int rejecter_id { get; set; }
         public string rejectedByName { get; set; }
+        public string rejecterDesignation { get; set; }
+        public string rejecterCompany { get; set; }
+
         public DateTime? rejected_at { get; set; }
         public int cancelRequestby_id { get; set; }
         public string cancelRequestByName { get; set; }
+        public string cancelRequestByDesignation { get; set; }
+        public string cancelRequestByCompany { get; set; }
+
         public DateTime? cancel_at { get; set; }
         public int cancelRequestApprovedby_id { get; set; }
         public string cancelRequestApprovedByName { get; set; }
+        public string cancelRequestApprovedByDesignation { get; set; }
+        public string cancelRequestApprovedByCompany { get; set; }
+
         public int cancelRequestRejectedby_id { get; set; }
         public string cancelRequestRejectedByName { get; set; }
+        public string cancelRequestRejectedByDesignation { get; set; }
+        public string cancelRequestRejectedByCompany{ get; set; }
+
         public double latitude { get; set; }
         public double longitude { get; set; }
         public List<int> category_ids { get; set; }

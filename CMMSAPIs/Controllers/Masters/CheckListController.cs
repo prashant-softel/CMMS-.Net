@@ -24,11 +24,11 @@ namespace CMMSAPIs.Controllers.Masters
         [Authorize]
         [Route("GetCheckList")]
         [HttpGet]
-        public async Task<IActionResult> GetCheckList(int facility_id, string type)
+        public async Task<IActionResult> GetCheckList(int facility_id, int type,int frequency_id,int category_id)
         {
             try
             {
-                var data = await _CheckListBS.GetCheckList(facility_id, type);
+                var data = await _CheckListBS.GetCheckList(facility_id, type,  frequency_id,  category_id);
                 return Ok(data);
             }
             catch (ArgumentException ex)

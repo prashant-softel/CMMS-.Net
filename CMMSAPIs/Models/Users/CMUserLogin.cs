@@ -62,6 +62,8 @@ namespace CMMSAPIs.Models.Users
         public int zipcode { get; set; }
         public int? isEmployee { get; set; }
         public DateTime? joiningDate { get; set; }
+        public int company_id { get; set; }
+        public string company_name { get; set; }
         public int blood_group_id { get; set; }
         public string blood_group_name { get; set; }
         public CMUser report_to { get; set; }
