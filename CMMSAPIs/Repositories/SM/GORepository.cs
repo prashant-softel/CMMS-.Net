@@ -1066,10 +1066,11 @@ namespace CMMSAPIs.Repositories
             var data = await this.getPurchaseDetailsByID(request.id);
             for (int i = 0; i < data.Count; i++)
             {
-                if (data[i].receive_later == 0 && data[i].added_to_store == 0)
+                if (data[i].added_to_store == 0)
                 {
 
-                    var tResult = await TransactionDetails(data[i].plantID, data[i].vendorID, 1, data[i].plantID, 2, data[i].assetItemID, (double)data[i].accepted_qty, 6, request.id, "Goods Order");
+                    decimal stock_qty = data[i].ordered_qty + data[i].received_qty;
+                    var tResult = await TransactionDetails(data[i].facility_id, data[i].vendorID, (int)CMMS.SM_Types.Vendor, data[i].facility_id, (int)CMMS.SM_Types.Store, data[i].assetItemID, (double)stock_qty, (int)CMMS.CMMS_Modules.SM_GO, request.id, "Goods Order");
 
                     // Update the order type.
                     var update_order_type = await updateGOType(data[i].order_by_type, data[i].id);
