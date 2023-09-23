@@ -21,7 +21,7 @@ namespace CMMSAPIs.Controllers.Masters
             _CheckListBS = checklist;
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("GetCheckList")]
         [HttpGet]
         public async Task<IActionResult> GetCheckList(int facility_id, int type,int frequency_id,int category_id)
@@ -41,7 +41,7 @@ namespace CMMSAPIs.Controllers.Masters
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("CreateChecklist")]
         [HttpPost]
         public async Task<IActionResult> CreateChecklist(List<CMCreateCheckList> request)
@@ -58,7 +58,7 @@ namespace CMMSAPIs.Controllers.Masters
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("UpdateCheckList")]
         [HttpPatch]
         public async Task<IActionResult> UpdateCheckList(CMCreateCheckList request)
@@ -75,7 +75,7 @@ namespace CMMSAPIs.Controllers.Masters
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("DeleteChecklist")]
         [HttpDelete]
         public async Task<IActionResult> DeleteChecklist(int id)
@@ -92,7 +92,7 @@ namespace CMMSAPIs.Controllers.Masters
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("GetCheckListMap")]
         [HttpGet]
         public async Task<IActionResult> GetCheckListMap(int facility_id, int category_id, int? type)
@@ -112,7 +112,7 @@ namespace CMMSAPIs.Controllers.Masters
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("CreateChecklistMap")]
         [HttpPost]
         public async Task<IActionResult> CreateChecklistMap(CMCreateCheckListMap request)
@@ -129,7 +129,7 @@ namespace CMMSAPIs.Controllers.Masters
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("UpdateCheckListMap")]
         [HttpPut]
         public async Task<IActionResult> UpdateCheckListMap(CMCreateCheckListMap request)
@@ -145,7 +145,7 @@ namespace CMMSAPIs.Controllers.Masters
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("GetCheckPointList")]
         [HttpGet]
         public async Task<IActionResult> GetCheckPointList(int checklist_id)
@@ -165,7 +165,7 @@ namespace CMMSAPIs.Controllers.Masters
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("CreateCheckPoint")]
         [HttpPost]
         public async Task<IActionResult> CreateCheckPoint(List<CMCreateCheckPoint> request)
@@ -182,7 +182,7 @@ namespace CMMSAPIs.Controllers.Masters
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("UpdateCheckPoint")]
         [HttpPatch]
         public async Task<IActionResult> UpdateCheckPoint(CMCreateCheckPoint request)
@@ -199,7 +199,7 @@ namespace CMMSAPIs.Controllers.Masters
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("DeleteCheckPoint")]
         [HttpDelete]
         public async Task<IActionResult> DeleteCheckPoint(int id)
@@ -216,7 +216,7 @@ namespace CMMSAPIs.Controllers.Masters
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("ValidateChecklistCheckpoint")]
         [HttpGet]
         public async Task<IActionResult> ValidateChecklistCheckpoint(int file_id)
@@ -232,7 +232,7 @@ namespace CMMSAPIs.Controllers.Masters
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("ImportChecklistCheckpoint")]
         [HttpPost]
         public async Task<IActionResult> ImportChecklistCheckpoint(int file_id)

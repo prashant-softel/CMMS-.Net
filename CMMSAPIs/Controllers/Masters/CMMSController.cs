@@ -153,7 +153,7 @@ namespace CMMSAPIs.Controllers.Masters
                 throw;
             }
         }
-        [Authorize]
+        //[Authorize]
         [Route("AddBusinessType")]
         [HttpPost]
         public async Task<IActionResult> AddBusinessType(CMBusinessType request, int userId)
@@ -169,7 +169,7 @@ namespace CMMSAPIs.Controllers.Masters
                 throw;
             }
         }
-        [Authorize]
+        //[Authorize]
         [Route("UpdateBusinessType")]
         [HttpPatch]
         public async Task<IActionResult> UpdateBusinessType(CMBusinessType request, int userId)
@@ -186,7 +186,7 @@ namespace CMMSAPIs.Controllers.Masters
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("DeleteBusinessType")]
         [HttpDelete]
         public async Task<IActionResult> DeleteBusinessType(int id, int userId)
@@ -202,7 +202,7 @@ namespace CMMSAPIs.Controllers.Masters
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("AddBusiness")]
         [HttpPost]
         public async Task<IActionResult> AddBusiness(List<CMBusiness> request, int userId)
@@ -218,7 +218,7 @@ namespace CMMSAPIs.Controllers.Masters
                 throw;
             }
         }
-        [Authorize]
+        //[Authorize]
         [Route("UpdateBusiness")]
         [HttpPatch]
         public async Task<IActionResult> UpdateBusiness(CMBusiness request, int userId)
@@ -235,7 +235,7 @@ namespace CMMSAPIs.Controllers.Masters
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("DeleteBusiness")]
         [HttpDelete]
         public async Task<IActionResult> DeleteBusiness(int id, int userId)
@@ -251,7 +251,7 @@ namespace CMMSAPIs.Controllers.Masters
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("ImportBusiness")]
         [HttpPost]
         public async Task<IActionResult> ImportBusiness(int file_id)
@@ -385,7 +385,7 @@ namespace CMMSAPIs.Controllers.Masters
                 return BadRequest(ex.Message);
             }
         }
-        [Authorize]
+        //[Authorize]
         [Route("CreateRiskType")]
         [HttpPost]
         public async Task<IActionResult> CreateRiskType(CMIRRiskType request)
@@ -401,7 +401,7 @@ namespace CMMSAPIs.Controllers.Masters
                 throw;
             }
         }
-        [Authorize]
+        //[Authorize]
         [Route("UpdateRiskType")]
         [HttpPatch]
         public async Task<IActionResult> UpdateRiskType(CMIRRiskType request)
@@ -417,7 +417,7 @@ namespace CMMSAPIs.Controllers.Masters
                 throw;
             }
         }
-        [Authorize]
+        //[Authorize]
         [Route("DeleteRiskType")]
         [HttpDelete]
         public async Task<IActionResult> DeleteRiskType(int id)
@@ -433,7 +433,7 @@ namespace CMMSAPIs.Controllers.Masters
                 throw;
             }
         }
-        [Authorize]
+        //[Authorize]
         [Route("CreateSPV")]
         [HttpPost]
         public async Task<IActionResult> CreateSPV(CMSPV request)
@@ -449,7 +449,7 @@ namespace CMMSAPIs.Controllers.Masters
                 throw;
             }
         }
-        [Authorize]
+        //[Authorize]
         [Route("UpdateSPV")]
         [HttpPatch]
         public async Task<IActionResult> UpdateSPV(CMSPV request)
@@ -465,7 +465,7 @@ namespace CMMSAPIs.Controllers.Masters
                 throw;
             }
         }
-        [Authorize]
+        //[Authorize]
         [Route("DeleteSPV")]
         [HttpDelete]
         public async Task<IActionResult> DeleteSPV(int id)
