@@ -383,7 +383,7 @@ namespace CMMSAPIs.Repositories
             var data = await this.getPurchaseDetailsByID(request.id);
             for (int i = 0; i < data.Count; i++)
             {
-                if (data[i].receive_later == 0 && data[i].added_to_store == 0)
+                if (data[i].receive_later == 1 && data[i].added_to_store == 0)
                 {
 
                     decimal stock_qty = data[i].ordered_qty + data[i].received_qty;
