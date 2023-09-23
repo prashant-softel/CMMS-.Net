@@ -1,4 +1,4 @@
-﻿using CMMSAPIs.Helper;
+using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Authentication;
 using CMMSAPIs.Models.Users;
 using CMMSAPIs.Models.Utils;
@@ -31,10 +31,39 @@ namespace CMMSAPIs.Repositories.Users
             m_errorLog = new ErrorLog(webHostEnvironment);
             _configuration = configuration;
             _conn = sqlDBHelper;
-            
+
             //_roleAccessRepo = new RoleAccessRepository(sqlDBHelper);
         }
 
+        //internal async Task<UserToken> Authenticate(CMUserCrentials userCrentials)
+        //{
+        //    string myQuery = "SELECT id FROM Users WHERE loginId = '" + userCrentials.user_name + "' AND password = '" + userCrentials.password + "'";
+        //    List<CMUser> _List = await Context.GetData<CMUser>(myQuery).ConfigureAwait(false);
+        //    if (_List.Count == 0)
+        //    {
+        //        return null;
+        //    }
+        //    var user_id = _List[0].id;
+        //    var key = _configuration.GetValue<string>("JwtConfig:Key");
+        //    var keyBytes = Encoding.ASCII.GetBytes(key);
+
+        //    var tokenHandler = new JwtSecurityTokenHandler();
+
+        //    var tokenDescriptor = new SecurityTokenDescriptor()
+        //    {
+        //        Subject = new ClaimsIdentity(new Claim[] {
+        //                new Claim(ClaimTypes.NameIdentifier, ""+user_id)
+        //            }),
+        //        Expires = DateTime.UtcNow.AddMinutes(CMMS.TOKEN_EXPIRATION_TIME),
+        //        SigningCredentials = new SigningCredentials(
+        //        new SymmetricSecurityKey(keyBytes), SecurityAlgorithms.HmacSha256Signature)
+        //    };
+
+        //    CMUserDetail userDetail = await GetUserDetail(user_id);
+        //    var token = tokenHandler.CreateToken(tokenDescriptor);
+        //    UserToken user_token = new UserToken(tokenHandler.WriteToken(token), userDetail);
+        //    return user_token;
+        //}
         internal async Task<UserToken> Authenticate(CMUserCrentials userCrentials)
         {
             string myQuery = "SELECT id FROM Users WHERE loginId = '" + userCrentials.user_name + "' AND password = '" + userCrentials.password + "'";
@@ -61,6 +90,11 @@ namespace CMMSAPIs.Repositories.Users
 
             CMUserDetail userDetail = await GetUserDetail(user_id);
             var token = tokenHandler.CreateToken(tokenDescriptor);
+
+            // Update token in db
+            string logQuery = $"INSERT INTO userlog(customtoken, tokenIssueTime, tokenExpiryTime, tokenRefreshCount, userID) " +
+                $"VALUES ( '{tokenHandler.WriteToken(token)}', '{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}', '{DateTime.Now.AddMinutes((int)CMMS.TOKEN_EXPIRATION_TIME).ToString("yyyy-MM-dd HH:mm:ss")}', 0, {user_id});";
+            var updateResult = await Context.ExecuteNonQry<int>(logQuery).ConfigureAwait(false);
             UserToken user_token = new UserToken(tokenHandler.WriteToken(token), userDetail);
             return user_token;
         }
@@ -74,18 +108,18 @@ namespace CMMSAPIs.Repositories.Users
                             "Users as u " +
                          "LEFT JOIN " +
                             "gender ON u.genderId = gender.id " +
-                         "LEFT JOIN " + 
-                            "bloodgroup ON u.bloodGroupId = bloodgroup.id " + 
+                         "LEFT JOIN " +
+                            "bloodgroup ON u.bloodGroupId = bloodgroup.id " +
                          "LEFT JOIN " +
                             "uploadedfiles as photo ON photo.id = u.photoId " +
                          "LEFT JOIN " +
                             "uploadedfiles as sign ON sign.id = u.signatureId " +
                          "LEFT JOIN " +
-                            "cities as cities ON cities.id = u.cityId " + 
+                            "cities as cities ON cities.id = u.cityId " +
                          "LEFT JOIN " +
-                            "states as states ON states.id = u.stateId and states.id = cities.state_id " + 
+                            "states as states ON states.id = u.stateId and states.id = cities.state_id " +
                          "LEFT JOIN " +
-                            "countries as countries ON countries.id = u.countryId and countries.id = cities.country_id and countries.id = states.country_id " + 
+                            "countries as countries ON countries.id = u.countryId and countries.id = cities.country_id and countries.id = states.country_id " +
                          "LEFT JOIN " +
                             "UserRoles as r ON u.roleId = r.id " +
                          "LEFT JOIN " +
@@ -95,7 +129,7 @@ namespace CMMSAPIs.Repositories.Users
 
             List<CMUserDetail> user_detail = await Context.GetData<CMUserDetail>(qry).ConfigureAwait(false);
 
-            
+
             if (user_detail.Count > 0)
             {
                 string facilitiesQry = $"SELECT facilities.id as plant_id, facilities.name as plant_name, spv.id as spv_id, spv.name as spv_name FROM userfacilities JOIN facilities ON userfacilities.facilityId = facilities.id LEFT JOIN spv ON facilities.spvId=spv.id WHERE userfacilities.userId = {user_id}  and userfacilities.status = 1;";
@@ -115,15 +149,15 @@ namespace CMMSAPIs.Repositories.Users
                                             $"LEFT JOIN " +
                                                 $"uploadedfiles as sign ON sign.id = u.signatureId " +
                                             $"WHERE " +
-                                                $"u.id = {reportTo}"; 
+                                                $"u.id = {reportTo}";
                 List<CMUser> reportToDetails = await Context.GetData<CMUser>(reportToDetailsQry).ConfigureAwait(false);
-                if(reportToDetails.Count > 0)
+                if (reportToDetails.Count > 0)
                     user_detail[0].report_to = reportToDetails[0];
                 return user_detail[0];
             }
             return null;
         }
-        
+
         internal async Task<CMImportFileResponse> ImportUsers(int file_id, int userID)
         {
             CMImportFileResponse response = null;
@@ -215,7 +249,7 @@ namespace CMMSAPIs.Repositories.Users
             if (!Directory.Exists(dir))
                 m_errorLog.SetError($"Directory '{dir}' cannot be found");
             else if (!File.Exists(path))
-                m_errorLog.SetError($"File '{filename}' cannot be found in directory '{dir}'"); 
+                m_errorLog.SetError($"File '{filename}' cannot be found in directory '{dir}'");
             else
             {
                 FileInfo info = new FileInfo(path);
@@ -328,7 +362,7 @@ namespace CMMSAPIs.Repositories.Users
                             {
                                 newR["role_id"] = roles[Convert.ToString(newR["role_name"]).ToUpper()];
                             }
-                            catch(KeyNotFoundException)
+                            catch (KeyNotFoundException)
                             {
                                 if (Convert.ToString(newR["role_name"]) == null || Convert.ToString(newR["role_name"]) == "")
                                     m_errorLog.SetError($"Role Name cannot be empty. [Row: {rN}]");
@@ -350,7 +384,7 @@ namespace CMMSAPIs.Repositories.Users
                             {
                                 newR["blood_group_id"] = bloodGroups[Convert.ToString(newR["blood_group_name"]).ToUpper()];
                             }
-                            catch(KeyNotFoundException)
+                            catch (KeyNotFoundException)
                             {
                                 if (Convert.ToString(newR["blood_group_name"]) == null || Convert.ToString(newR["blood_group_name"]) == "")
                                     newR["blood_group_id"] = 0;
@@ -361,7 +395,7 @@ namespace CMMSAPIs.Repositories.Users
                             {
                                 newR["plant_id"] = plants[Convert.ToString(newR["plant_name"]).ToUpper()];
                             }
-                            catch(KeyNotFoundException)
+                            catch (KeyNotFoundException)
                             {
                                 if (Convert.ToString(newR["plant_name"]) == null || Convert.ToString(newR["plant_name"]) == "")
                                     m_errorLog.SetError($"User should be linked to at least one plant. [Row: {rN}]");
@@ -424,7 +458,7 @@ namespace CMMSAPIs.Repositories.Users
                                 newR["isEmployee"] = $"{index}";
                             dt2.Rows.Add(newR);
                         }
-                        if(m_errorLog.GetErrorCount() == 0)
+                        if (m_errorLog.GetErrorCount() == 0)
                         {
                             dt2.ConvertColumnType("isEmployee", typeof(int));
                             dt2.ConvertColumnType("zipcode", typeof(int));
@@ -486,9 +520,9 @@ namespace CMMSAPIs.Repositories.Users
                 response.error_log_file_path = logPath;
                 response.import_log = m_errorLog.errorLog();
             }
-                    //Import excel file
-                    //Create validation
-                    //use map function to convert datatable to model
+            //Import excel file
+            //Create validation
+            //use map function to convert datatable to model
 
             return response;
         }
@@ -508,7 +542,7 @@ namespace CMMSAPIs.Repositories.Users
                 {
                     row["report_to_id"] = userDict[Convert.ToString(row["report_to_email"]).ToUpper()];
                 }
-                catch(KeyNotFoundException)
+                catch (KeyNotFoundException)
                 {
                     m_errorLog.SetWarning($"User with login ID '{Convert.ToString(row["report_to_email"])}' not found. Setting reporting to ID as 0. [Row: {row["row_no"]}]");
                     row["report_to_id"] = 0;
@@ -581,7 +615,7 @@ namespace CMMSAPIs.Repositories.Users
                 if (dt2.Rows.Count == 0)
                     m_errorLog.SetError($"{city} is not situated in {state}, {country}. [Index: {index}]");
             }
-            if(m_errorLog.GetErrorCount() == 0)
+            if (m_errorLog.GetErrorCount() == 0)
             {
                 foreach (var user in request)
                 {
@@ -679,9 +713,9 @@ namespace CMMSAPIs.Repositories.Users
             DataTable dt2 = await Context.FetchData(myQuery2).ConfigureAwait(false);
             if (dt2.Rows.Count == 0)
                 throw new ArgumentException($"{city} is not situated in {state}, {country}");
-            
+
             string updateQry = "UPDATE users SET ";
-            if(request.credentials != null)
+            if (request.credentials != null)
             {
                 if (request.credentials.user_name != null && request.credentials.user_name != "")
                     updateQry += $"loginId = '{request.credentials.user_name}', ";
@@ -726,9 +760,9 @@ namespace CMMSAPIs.Repositories.Users
                 updateQry += $"reportToId = {request.report_to_id}, ";
             updateQry += $"updatedBy = {userID}, updatedAt = '{UtilsRepository.GetUTCTime()}' WHERE id = {request.id};";
             await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
-            if(request.facilities != null)
+            if (request.facilities != null)
             {
-                if(request.facilities.Count > 0)
+                if (request.facilities.Count > 0)
                 {
                     string deleteFacilities = $"DELETE FROM userfacilities WHERE userId = {request.id};";
                     await Context.ExecuteNonQry<int>(deleteFacilities).ConfigureAwait(false);
@@ -815,7 +849,7 @@ namespace CMMSAPIs.Repositories.Users
             {
                 qry += $" AND (self = 0 and u.id IN({user_ids_str}))";
             }
-            else 
+            else
             {
                 qry += $" AND self = 0";
             }
@@ -835,7 +869,7 @@ namespace CMMSAPIs.Repositories.Users
         }
 
 
-        internal async Task<List<CMUser>> GetUserList(int facility_id) 
+        internal async Task<List<CMUser>> GetUserList(int facility_id)
         {
             string qry = $"SELECT " +
                             $"u.id, CONCAT(firstName, ' ', lastName) as full_name, loginId as user_name, mobileNumber as contact_no, r.id as role_id, r.name as role_name, CASE WHEN u.status=0 THEN 'Inactive' ELSE 'Active' END AS status, photo.id AS photoId, photo.file_path AS photoPath, sign.id AS signatureId, sign.file_path AS signaturePath " +
@@ -851,13 +885,13 @@ namespace CMMSAPIs.Repositories.Users
                             $"uploadedfiles as sign ON sign.id = u.signatureId " +
                          $"WHERE " +
                             $"uf.facilityId = {facility_id}";
-            
+
             List<CMUser> user_list = await Context.GetData<CMUser>(qry).ConfigureAwait(false);
             return user_list;
         }
 
         internal async Task<CMUserAccess> GetUserAccess(int user_id)
-        {           
+        {
             string qry = $"SELECT " +
                             $"featureId as feature_id, f.featureName as feature_name, f.menuimage as menu_image, u.add, u.edit, u.delete, u.view, u.issue, u.approve, u.selfView " +
                          $"FROM " +
@@ -867,11 +901,11 @@ namespace CMMSAPIs.Repositories.Users
                             $"userId = {user_id}";
 
             List<CMAccessList> access_list = await Context.GetData<CMAccessList>(qry).ConfigureAwait(false);
-            CMUserDetail user_detail       = await GetUserDetail(user_id);
-            CMUserAccess user_access       = new CMUserAccess();
-            user_access.user_id            = user_id;
-            user_access.user_name          = user_detail.full_name;
-            user_access.access_list        = access_list;
+            CMUserDetail user_detail = await GetUserDetail(user_id);
+            CMUserAccess user_access = new CMUserAccess();
+            user_access.user_id = user_id;
+            user_access.user_name = user_detail.full_name;
+            user_access.access_list = access_list;
             return user_access;
         }
 
@@ -882,7 +916,7 @@ namespace CMMSAPIs.Repositories.Users
                 // Get previous settings
                 int user_id = request.user_id;
                 List<CMAccessList> default_user_access = (await GetUserAccess(user_id)).access_list;
-                if(default_user_access == null)
+                if (default_user_access == null)
                 {
                     string roleQry = $"SELECT roleId FROM users WHERE id = {request.user_id};";
                     DataTable dt = await Context.FetchData(roleQry).ConfigureAwait(false);
@@ -895,7 +929,7 @@ namespace CMMSAPIs.Repositories.Users
                 }
                 else
                 {
-                    if(default_user_access.Count == 0)
+                    if (default_user_access.Count == 0)
                     {
                         string roleQry = $"SELECT roleId FROM users WHERE id = {request.user_id};";
                         DataTable dt = await Context.FetchData(roleQry).ConfigureAwait(false);
@@ -908,16 +942,16 @@ namespace CMMSAPIs.Repositories.Users
                     }
                 }
                 Dictionary<dynamic, CMAccessList> old_access = default_user_access.SetPrimaryKey("feature_id");
-                if(request.access_list != null)
+                if (request.access_list != null)
                 {
-                    if(request.access_list.Count > 0)
+                    if (request.access_list.Count > 0)
                     {
                         Dictionary<dynamic, CMAccessList> new_access = request.access_list.SetPrimaryKey("feature_id");
                         foreach (var access in new_access)
                             old_access[access.Key] = access.Value;
                     }
                 }
-                
+
                 // Delete the previous setting
                 string delete_qry = $" DELETE FROM UsersAccess WHERE UserId = {user_id}";
                 await Context.GetData<List<int>>(delete_qry).ConfigureAwait(false);
@@ -962,11 +996,11 @@ namespace CMMSAPIs.Repositories.Users
                             $"un.userId = {user_id}";
 
             List<CMNotificationList> notification_list = await Context.GetData<CMNotificationList>(qry).ConfigureAwait(false);
-            CMUserDetail user_detail              = await GetUserDetail(user_id);
+            CMUserDetail user_detail = await GetUserDetail(user_id);
             CMUserNotifications user_notification = new CMUserNotifications();
-            user_notification.user_id             = user_id;
-            user_notification.user_name           = user_detail.full_name;
-            user_notification.notification_list   = notification_list;
+            user_notification.user_id = user_id;
+            user_notification.user_name = user_detail.full_name;
+            user_notification.notification_list = notification_list;
             return user_notification;
         }
 
@@ -978,7 +1012,7 @@ namespace CMMSAPIs.Repositories.Users
                     request.notification_list = new List<CMNotificationList>();
                 // Get previous settings
                 int user_id = request.user_id;
-                List<CMNotificationList> default_notifications = null; 
+                List<CMNotificationList> default_notifications = null;
                 string roleQry = $"SELECT roleId FROM users WHERE id = {request.user_id};";
                 DataTable dt = await Context.FetchData(roleQry).ConfigureAwait(false);
                 int role = Convert.ToInt32(dt.Rows[0][0]);
@@ -997,7 +1031,7 @@ namespace CMMSAPIs.Repositories.Users
 
                 foreach (var notif in old_notif)
                 {
-                    if(def_notif.ContainsKey(notif.Key))
+                    if (def_notif.ContainsKey(notif.Key))
                     {
                         if (def_notif[notif.Key].can_change == 0)
                             def_notif[notif.Key].user_flag = def_notif[notif.Key].default_flag;
@@ -1028,7 +1062,7 @@ namespace CMMSAPIs.Repositories.Users
                 await Context.ExecuteNonQry<int>(delete_qry).ConfigureAwait(false);
 
                 // Insert the new setting
-                
+
                 List<string> user_access = new List<string>();
 
                 foreach (var access in def_notif.Values)
@@ -1038,34 +1072,34 @@ namespace CMMSAPIs.Repositories.Users
                 }
                 string user_access_insert_str = string.Join(',', user_access);
 
-                if(user_access_insert_str != "" && user_access_insert_str != null)
+                if (user_access_insert_str != "" && user_access_insert_str != null)
                 {
                     string insert_query = $"INSERT INTO UserNotifications" +
                                         $"(userId, notificationId, `canChange`, `userPreference`, `lastModifiedAt`, `lastModifiedBy`) " +
                                         $" VALUES {user_access_insert_str}";
                     await Context.ExecuteNonQry<int>(insert_query).ConfigureAwait(false);
                 }
-                
-                using(var repos = new UtilsRepository(_conn))
+
+                using (var repos = new UtilsRepository(_conn))
                 {
                     await repos.AddHistoryLog(CMMS.CMMS_Modules.USER_NOTIFICATIONS, user_id, 0, 0, "User Notifications Set", CMMS.CMMS_Status.UPDATED, userID);
                 }
                 CMDefaultResponse response = new CMDefaultResponse(user_id, CMMS.RETRUNSTATUS.SUCCESS, "Updated User Notifications Successfully");
-                return response;             
+                return response;
             }
             catch (Exception)
             {
                 throw;
             }
         }
-    
+
         internal async Task<List<CMCompetency>> GetCompetencyList()
         {
             string competencyQry = $"SELECT id, name, description FROM competencies where status=1 ";
             List<CMCompetency> competencyList = await Context.GetData<CMCompetency>(competencyQry).ConfigureAwait(false);
             return competencyList;
         }
-    
+
         internal async Task<CMDefaultResponse> AddCompetency(CMCompetency request, int userId)
         {
             string competencyQry = $"INSERT INTO competencies(name, description, status, addedBy, addedAt) VALUES " +
