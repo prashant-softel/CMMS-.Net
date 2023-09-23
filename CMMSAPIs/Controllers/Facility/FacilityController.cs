@@ -84,7 +84,7 @@ namespace CMMSAPIs.Controllers.Facility
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("CreateNewFacility")]
         [HttpPost]
         public async Task<IActionResult> CreateNewFacility(CMCreateFacility request)
@@ -105,7 +105,7 @@ namespace CMMSAPIs.Controllers.Facility
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("UpdateFacility")]
         [HttpPatch]
         public async Task<IActionResult> UpdateFacility(CMCreateFacility request)
@@ -126,7 +126,7 @@ namespace CMMSAPIs.Controllers.Facility
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("DeleteFacility")]
         [HttpDelete]
         public async Task<IActionResult> DeleteFacility(int facility_id)
@@ -142,7 +142,7 @@ namespace CMMSAPIs.Controllers.Facility
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("CreateNewBlock")]
         [HttpPost]
         public async Task<IActionResult> CreateNewBlock(CMCreateBlock request)
@@ -163,7 +163,7 @@ namespace CMMSAPIs.Controllers.Facility
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("UpdateBlock")]
         [HttpPatch]
         public async Task<IActionResult> UpdateBlock(CMCreateBlock request)
@@ -180,7 +180,7 @@ namespace CMMSAPIs.Controllers.Facility
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("DeleteBlock")]
         [HttpDelete]
         public async Task<IActionResult> DeleteBlock(int block_id)
