@@ -18,7 +18,7 @@ namespace CMMSAPIs.Controllers.FileUpload
             _FileUploadBS = fileUpload;            
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("UploadFile")]
         [HttpPost]
         public async Task<IActionResult> UploadFile([FromForm] CMFileUpload request)
