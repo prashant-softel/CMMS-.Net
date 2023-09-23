@@ -27,7 +27,7 @@ namespace CMMSAPIs.Controllers.Permits
         /* 
          * Permit Create Form Required End Points 
          */
-        [Authorize]
+        //[Authorize]
         [Route("GetPermitTypeList")]
         [HttpGet]
         public async Task<IActionResult> GetPermitTypeList(int facility_id)
@@ -47,7 +47,7 @@ namespace CMMSAPIs.Controllers.Permits
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("CreatePermitType")]
         [HttpPost]
         public async Task<IActionResult> CreatePermitType(CMCreatePermitType request)
@@ -68,7 +68,7 @@ namespace CMMSAPIs.Controllers.Permits
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("UpdatePermitType")]
         [HttpPatch]
         public async Task<IActionResult> UpdatePermitType(CMCreatePermitType request)
@@ -89,7 +89,7 @@ namespace CMMSAPIs.Controllers.Permits
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("DeletePermitType")]
         [HttpDelete]
         public async Task<IActionResult> DeletePermitType(int id)
@@ -109,7 +109,7 @@ namespace CMMSAPIs.Controllers.Permits
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("GetSafetyMeasurementQuestionList")]
         [HttpGet]
         public async Task<IActionResult> GetSafetyMeasurementQuestionList(int permit_type_id)
@@ -125,7 +125,7 @@ namespace CMMSAPIs.Controllers.Permits
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("CreateSafetyMeasure")]
         [HttpPost]
         public async Task<IActionResult> CreateSafetyMeasure(CMCreateSafetyMeasures request)
@@ -146,7 +146,7 @@ namespace CMMSAPIs.Controllers.Permits
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("UpdateSafetyMeasure")]
         [HttpPatch]
         public async Task<IActionResult> UpdateSafetyMeasure(CMCreateSafetyMeasures request)
@@ -167,7 +167,7 @@ namespace CMMSAPIs.Controllers.Permits
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("DeleteSafetyMeasure")]
         [HttpDelete]
         public async Task<IActionResult> DeleteSafetyMeasure(int id)
@@ -187,7 +187,7 @@ namespace CMMSAPIs.Controllers.Permits
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("GetJobTypeList")]
         [HttpGet]
         public async Task<IActionResult> GetJobTypeList(int facility_id)
@@ -207,7 +207,7 @@ namespace CMMSAPIs.Controllers.Permits
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("CreateJobType")]
         [HttpPost]
         public async Task<IActionResult> CreateJobType(CMCreateJobType request)
@@ -228,7 +228,7 @@ namespace CMMSAPIs.Controllers.Permits
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("UpdateJobType")]
         [HttpPatch]
         public async Task<IActionResult> UpdateJobType(CMCreateJobType request)
@@ -249,7 +249,7 @@ namespace CMMSAPIs.Controllers.Permits
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("DeleteJobType")]
         [HttpDelete]
         public async Task<IActionResult> DeleteJobType(int id)
@@ -269,7 +269,7 @@ namespace CMMSAPIs.Controllers.Permits
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("GetSOPList")]
         [HttpGet]
         public async Task<IActionResult> GetSOPList(int job_type_id)
@@ -285,7 +285,7 @@ namespace CMMSAPIs.Controllers.Permits
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("CreateSOP")]
         [HttpPost]
         public async Task<IActionResult> CreateSOP(CMCreateSOP request)
@@ -305,7 +305,7 @@ namespace CMMSAPIs.Controllers.Permits
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("UpdateSOP")]
         [HttpPatch]
         public async Task<IActionResult> UpdateSOP(CMCreateSOP request)
@@ -325,7 +325,7 @@ namespace CMMSAPIs.Controllers.Permits
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("DeleteSOP")]
         [HttpDelete]
         public async Task<IActionResult> DeleteSOP(int id)
@@ -347,7 +347,7 @@ namespace CMMSAPIs.Controllers.Permits
         /*
          * Permit Main Feature End Points
         */
-        [Authorize]
+        //[Authorize]
         [Route("GetPermitList")]
         [HttpGet]
         public async Task<IActionResult> GetPermitList(int facility_id, string startDate, string endDate, bool self_view, bool non_expired)
@@ -368,7 +368,7 @@ namespace CMMSAPIs.Controllers.Permits
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("CreatePermit")]
         [HttpPost]
         public async Task<IActionResult> CreatePermit(CMCreatePermit request)
@@ -385,7 +385,7 @@ namespace CMMSAPIs.Controllers.Permits
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("GetPermitDetails")]
         [HttpGet]
         public async Task<IActionResult> GetPermitDetails(int permit_id)
@@ -412,7 +412,7 @@ namespace CMMSAPIs.Controllers.Permits
         /*
          * Permit Issue/Approval/Rejection/Cancel End Points
         */
-        [Authorize]
+        //[Authorize]
         [Route("PermitIssue")]
         [HttpPut]
         public async Task<IActionResult> PermitIssue([FromForm] CMApproval request)
@@ -429,7 +429,7 @@ namespace CMMSAPIs.Controllers.Permits
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("PermitApprove")]
         [HttpPut]
         public async Task<IActionResult> PermitApprove([FromForm] CMApproval request)
@@ -446,7 +446,7 @@ namespace CMMSAPIs.Controllers.Permits
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("PermitExtend")]
         [HttpPut]
         public async Task<IActionResult> PermitExtend(CMPermitExtend request)
@@ -463,7 +463,7 @@ namespace CMMSAPIs.Controllers.Permits
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("PermitExtendApprove")]
         [HttpPut]
         public async Task<IActionResult> PermitExtendApprove([FromForm] CMApproval request)
@@ -480,7 +480,7 @@ namespace CMMSAPIs.Controllers.Permits
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("PermitExtendReject")]
         [HttpPut]
         public async Task<IActionResult> PermitExtendReject([FromForm] CMApproval request)
@@ -497,7 +497,7 @@ namespace CMMSAPIs.Controllers.Permits
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("PermitClose")]
         [HttpPut]
         public async Task<IActionResult> PermitClose(CMPermitApproval request)
@@ -514,7 +514,7 @@ namespace CMMSAPIs.Controllers.Permits
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("PermitReject")]
         [HttpPut]
         public async Task<IActionResult> PermitReject([FromForm] CMApproval request)
@@ -532,7 +532,7 @@ namespace CMMSAPIs.Controllers.Permits
 
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("PermitIssueReject")]
         [HttpPut]
         public async Task<IActionResult> PermitIssueReject([FromForm] CMApproval request)
@@ -550,7 +550,7 @@ namespace CMMSAPIs.Controllers.Permits
 
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("PermitCancelRequest")]
         [HttpPut]
         public async Task<IActionResult> PermitCancelRequest(CMPermitApproval request)
@@ -567,7 +567,7 @@ namespace CMMSAPIs.Controllers.Permits
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("PermitCancelReject")]
         [HttpPut]
         public async Task<IActionResult> PermitCancelReject([FromForm] CMApproval request)
@@ -584,7 +584,7 @@ namespace CMMSAPIs.Controllers.Permits
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("PermitCancelByApprover")]
         [HttpPut]
         public async Task<IActionResult> PermitCancelByApprover([FromForm] CMApproval request)
@@ -601,7 +601,7 @@ namespace CMMSAPIs.Controllers.Permits
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("PermitCancelByHSE")]
         [HttpPut]
         public async Task<IActionResult> PermitCancelByHSE([FromForm] CMApproval request)
@@ -618,7 +618,7 @@ namespace CMMSAPIs.Controllers.Permits
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("PermitCancelByIssuer")]
         [HttpPut]
         public async Task<IActionResult> PermitCancelByIssuer([FromForm] CMApproval request)
@@ -635,7 +635,7 @@ namespace CMMSAPIs.Controllers.Permits
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("UpdatePermit")]
         [HttpPatch]
         public async Task<IActionResult> UpdatePermit(CMUpdatePermit request)
@@ -660,7 +660,7 @@ namespace CMMSAPIs.Controllers.Permits
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("GetPermitConditionList")]
         [HttpGet]
         public async Task<IActionResult> GetPermitConditionList(int permit_type_id, int isClose, int isCancle, int isExtend)

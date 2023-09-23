@@ -22,7 +22,7 @@ namespace CMMSAPIs.Controllers.EM
             _EMBS = em;
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("SetEscalationMatrix")]
         [HttpPost]
         public async Task<IActionResult> SetEscalationMatrix(List<CMSetMasterEM> request)
@@ -39,7 +39,7 @@ namespace CMMSAPIs.Controllers.EM
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("GetEscalationMatrix")]
         [HttpGet]
         public async Task<IActionResult> GetEscalationMatrix(CMMS.CMMS_Modules module)
@@ -55,7 +55,7 @@ namespace CMMSAPIs.Controllers.EM
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("Escalate")]
         [HttpPost]
         public async Task<IActionResult> Escalate(CMMS.CMMS_Modules module, int id)
@@ -72,7 +72,7 @@ namespace CMMSAPIs.Controllers.EM
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("ShowEscalationLog")]
         [HttpGet]
         public async Task<IActionResult> ShowEscalationLog(CMMS.CMMS_Modules module, int id)

@@ -22,7 +22,7 @@ namespace CMMSAPIs.Controllers.SM
             _IRequestOrderBS = RO;
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("GetRequestOrderList")]
         [HttpGet]
         public async Task<IActionResult> GetRequestOrderList(int facilityID, DateTime fromDate, DateTime toDate)
@@ -38,7 +38,7 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("GetRODetailsByID")]
         [HttpGet]
         public async Task<IActionResult> GetRODetailsByID(int requestID)
@@ -55,7 +55,7 @@ namespace CMMSAPIs.Controllers.SM
         }
 
 
-        [Authorize]
+        //[Authorize]
         [Route("CreateRequestOrder")]
         [HttpPost]
         public async Task<IActionResult> CreateRequestOrder(CMCreateRequestOrder request)
@@ -72,7 +72,7 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("UpdateRequestOrder")]
         [HttpPost]
         public async Task<IActionResult> UpdateRequestOrder(CMCreateRequestOrder request)
@@ -89,7 +89,7 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("DeleteRequestOrder")]
         [HttpPost]
         public async Task<IActionResult> DeleteRequestOrder(CMApproval request)
@@ -106,7 +106,7 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("ApproveRequestOrder")]
         [HttpPost]
         public async Task<IActionResult> ApproveRequestOrder(CMApproval request)
@@ -123,7 +123,7 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("RejectRequestOrder")]
         [HttpPost]
         public async Task<IActionResult> RejectGoodsOrder(CMApproval request)

@@ -19,7 +19,7 @@ namespace CMMSAPIs.Controllers.Calibration
             _CalibrationBS = calibration;
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("GetCalibrationList")]
         [HttpGet]
         public async Task<IActionResult> GetCalibrationList(int facility_id)
@@ -39,7 +39,7 @@ namespace CMMSAPIs.Controllers.Calibration
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("GetCalibrationDetails")]
         [HttpGet]
         public async Task<IActionResult> GetCalibrationDetails(int id)
@@ -59,7 +59,7 @@ namespace CMMSAPIs.Controllers.Calibration
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("RequestCalibration")]
         [HttpPost]
         public async Task<IActionResult> RequestCalibration(CMRequestCalibration request)
@@ -80,7 +80,7 @@ namespace CMMSAPIs.Controllers.Calibration
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("ApproveRequestCalibration")]
         [HttpPut]
         public async Task<IActionResult> ApproveRequestCalibration(CMApproval request)
@@ -97,7 +97,7 @@ namespace CMMSAPIs.Controllers.Calibration
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("RejectRequestCalibration")]
         [HttpPut]
         public async Task<IActionResult> RejectRequestCalibration(CMApproval request)
@@ -114,7 +114,7 @@ namespace CMMSAPIs.Controllers.Calibration
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("GetPreviousCalibration")]
         [HttpGet]
         public async Task<IActionResult> GetPreviousCalibration(int asset_id)
@@ -134,7 +134,7 @@ namespace CMMSAPIs.Controllers.Calibration
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("StartCalibration")]
         [HttpPut]
         public async Task<IActionResult> StartCalibration(int calibration_id)
@@ -150,7 +150,7 @@ namespace CMMSAPIs.Controllers.Calibration
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("CompleteCalibration")]
         [HttpPut]
         public async Task<IActionResult> CompleteCalibration(CMCompleteCalibration request)
@@ -167,7 +167,7 @@ namespace CMMSAPIs.Controllers.Calibration
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("CloseCalibration")]
         [HttpPut]
         public async Task<IActionResult> CloseCalibration(CMCloseCalibration request)
@@ -184,7 +184,7 @@ namespace CMMSAPIs.Controllers.Calibration
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("ApproveCalibration")]
         [HttpPut]
         public async Task<IActionResult> ApproveCalibration(CMApproval request)
@@ -201,7 +201,7 @@ namespace CMMSAPIs.Controllers.Calibration
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("RejectCalibration")]
         [HttpPut]
         public async Task<IActionResult> RejectCalibration(CMApproval request)

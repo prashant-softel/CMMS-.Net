@@ -20,7 +20,7 @@ namespace CMMSAPIs.Controllers.WC
             _WCBS = wc;            
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("GetWCList")]
         [HttpGet]
         public async Task<IActionResult> GetWCList(int facilityId, string startDate, string endDate, int statusId)
@@ -40,7 +40,7 @@ namespace CMMSAPIs.Controllers.WC
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("CreateWC")]
         [HttpPost]
         public async Task<IActionResult> CreateWC(List<CMWCCreate> request)
@@ -57,7 +57,7 @@ namespace CMMSAPIs.Controllers.WC
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("GetWCDetails")]
         [HttpGet]
         public async Task<IActionResult> GetWCDetails(int wc_id)
@@ -81,7 +81,7 @@ namespace CMMSAPIs.Controllers.WC
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("UpdateWC")]
         [HttpPatch]
         public async Task<IActionResult> UpdateWC(CMWCCreate request)
@@ -97,7 +97,7 @@ namespace CMMSAPIs.Controllers.WC
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("ApproveWC")]
         [HttpPut]
         internal async Task<IActionResult> ApproveWC(CMApproval request)
@@ -114,7 +114,7 @@ namespace CMMSAPIs.Controllers.WC
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("RejectWC")]
         [HttpPut]
         internal async Task<IActionResult> RejectWC(CMApproval request)

@@ -21,7 +21,7 @@ namespace CMMSAPIs.Controllers.PM
             _PMScheduleViewBS = pm_schedule_view;
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("GetPMTaskList")]
         [HttpGet]
         public async Task<IActionResult> GetPMTaskList(int facility_id, DateTime? start_date, DateTime? end_date, int[] frequencyIds)
@@ -41,7 +41,7 @@ namespace CMMSAPIs.Controllers.PM
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("CancelPMTask")]
         [HttpPut]
         public async Task<IActionResult> CancelPMTask(CMApproval request)
@@ -58,7 +58,7 @@ namespace CMMSAPIs.Controllers.PM
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("GetPMTaskDetail")]
         [HttpGet]
         public async Task<IActionResult> GetPMTaskDetail(int schedule_id)
@@ -82,7 +82,7 @@ namespace CMMSAPIs.Controllers.PM
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("LinkPermitToPMTask")]
         [HttpPut]
         public async Task<IActionResult> LinkPermitToPMTask(int schedule_id, int permit_id)
@@ -99,7 +99,7 @@ namespace CMMSAPIs.Controllers.PM
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("AddCustomCheckpoint")]
         [HttpPost]
         public async Task<IActionResult> AddCustomCheckpoint(CMCustomCheckPoint request)
@@ -116,7 +116,7 @@ namespace CMMSAPIs.Controllers.PM
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("SetPMTask")]
         [HttpPost]
         public async Task<IActionResult> SetPMTask(int schedule_id)
@@ -137,7 +137,7 @@ namespace CMMSAPIs.Controllers.PM
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("UpdatePMTaskExecution")]
         [HttpPatch]
         public async Task<IActionResult> UpdatePMTaskExecution(CMPMExecutionDetail request)
@@ -154,7 +154,7 @@ namespace CMMSAPIs.Controllers.PM
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("ClosePMTaskExecution")]
         [HttpPut]
         public async Task<IActionResult> ClosePMTaskExecution(CMApproval request)
@@ -173,7 +173,7 @@ namespace CMMSAPIs.Controllers.PM
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("ApprovePMTaskExecution")]
         [HttpPut]
         public async Task<IActionResult> ApprovePMTaskExecution(CMApproval request)
@@ -190,7 +190,7 @@ namespace CMMSAPIs.Controllers.PM
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("RejectPMTaskExecution")]
         [HttpPut]
         public async Task<IActionResult> RejectPMTaskExecution(CMApproval request)

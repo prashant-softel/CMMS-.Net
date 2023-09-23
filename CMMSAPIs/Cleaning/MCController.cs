@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using System;
@@ -85,7 +85,7 @@ namespace CMMSAPIs.Controllers.MC
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("CreateMCPlan")]
         [HttpPost]
         public async Task<IActionResult> CreateMCPlan(List<CMMCPlan> request)
@@ -102,7 +102,7 @@ namespace CMMSAPIs.Controllers.MC
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("UpdateMCPlan")]
         [HttpPost]
         public async Task<IActionResult> UpdateMCPlan(CMMCPlan request)
@@ -119,7 +119,7 @@ namespace CMMSAPIs.Controllers.MC
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("ApproveMCPlan")]
         [HttpPut]
         public async Task<IActionResult> ApproveMCPlan(CMApproval request)
@@ -136,7 +136,7 @@ namespace CMMSAPIs.Controllers.MC
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("RejectMCPlan")]
         [HttpPut]
         public async Task<IActionResult> RejectMCPlan(CMApproval request)
@@ -153,7 +153,7 @@ namespace CMMSAPIs.Controllers.MC
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("DeleteMCPlan")]
         [HttpPut]
         public async Task<IActionResult> DeleteMCPlan(int planId)
@@ -170,7 +170,7 @@ namespace CMMSAPIs.Controllers.MC
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("StartMCExecution")]
         [HttpPut]
         public async Task<IActionResult> StartMCExecution(int planId)
@@ -187,7 +187,7 @@ namespace CMMSAPIs.Controllers.MC
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("StartMCScheduleExecution")]
         [HttpPut]
         public async Task<IActionResult> StartMCScheduleExecution(int scheduleId)
@@ -204,7 +204,7 @@ namespace CMMSAPIs.Controllers.MC
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("UpdateMCScheduleExecution")]
         [HttpPut]
         public async Task<IActionResult> UpdateMCScheduleExecution(CMMCGetScheduleExecution schedule)
@@ -221,7 +221,7 @@ namespace CMMSAPIs.Controllers.MC
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("GetMCScheduleExecutionSummary")]
         [HttpPut]
         public async Task<IActionResult> GetMCScheduleExecutionSummary(CMMCGetScheduleExecution schedule)
@@ -252,7 +252,7 @@ namespace CMMSAPIs.Controllers.MC
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("AbandonMcExecution")]
         [HttpPut]
         public async Task<IActionResult> AbandonMcExecution(CMApproval request)
@@ -269,7 +269,7 @@ namespace CMMSAPIs.Controllers.MC
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("AbandonMcSchedule")]
         [HttpPut]
         public async Task<IActionResult> AbandonMcSchedule(CMApproval request)
@@ -286,7 +286,7 @@ namespace CMMSAPIs.Controllers.MC
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("GetMCEquipmentList")]
         [HttpGet]
         public async Task<IActionResult> GetMCEquipmentList(int facilityId)

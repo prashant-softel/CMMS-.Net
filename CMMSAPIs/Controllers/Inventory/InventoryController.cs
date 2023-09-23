@@ -21,7 +21,7 @@ namespace CMMSAPIs.Controllers.Inventory
             _InventoryBS = inventory;
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("ImportInventories")]
         [HttpPost]
         public async Task<IActionResult> ImportInventories(int file_id, int facility_id)
@@ -54,7 +54,7 @@ namespace CMMSAPIs.Controllers.Inventory
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("GetInventoryList")]
         [HttpGet]
         public async Task<IActionResult> GetInventoryList(int facilityId, int linkedToBlockId, int status, string categoryIds)
@@ -70,7 +70,7 @@ namespace CMMSAPIs.Controllers.Inventory
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("SetParentAsset")]
         [HttpPut]
         public async Task<IActionResult> SetParentAsset(int parentID, int childID)
@@ -87,7 +87,7 @@ namespace CMMSAPIs.Controllers.Inventory
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("GetInventoryDetails")]
         [HttpGet]
         public async Task<IActionResult> GetInventoryDetails(int id)
@@ -103,7 +103,7 @@ namespace CMMSAPIs.Controllers.Inventory
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("AddInventory")]
         [HttpPost]
         public async Task<IActionResult> AddInventory(List<CMAddInventory> request, int userID)
@@ -124,7 +124,7 @@ namespace CMMSAPIs.Controllers.Inventory
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("UpdateInventory")]
         [HttpPut]
         public async Task<IActionResult> UpdateInventory(CMAddInventory request)
@@ -141,7 +141,7 @@ namespace CMMSAPIs.Controllers.Inventory
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("DeleteInventory")]
         [HttpDelete]
         public async Task<IActionResult> DeleteInventory(int id)
@@ -158,7 +158,7 @@ namespace CMMSAPIs.Controllers.Inventory
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("GetInventoryCategoryList")]
         [HttpGet]
         public async Task<IActionResult> GetInventoryCategoryList()
@@ -174,7 +174,7 @@ namespace CMMSAPIs.Controllers.Inventory
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("AddInventoryCategory")]
         [HttpPost]
         public async Task<IActionResult> AddInventoryCategory(CMInventoryCategoryList request)
@@ -191,7 +191,7 @@ namespace CMMSAPIs.Controllers.Inventory
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("UpdateInventoryCategory")]
         [HttpPatch]
         public async Task<IActionResult> UpdateInventoryCategory(CMInventoryCategoryList request)
@@ -208,7 +208,7 @@ namespace CMMSAPIs.Controllers.Inventory
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("DeleteInventoryCategory")]
         [HttpDelete]
         public async Task<IActionResult> DeleteInventoryCategory(int id)
@@ -224,7 +224,7 @@ namespace CMMSAPIs.Controllers.Inventory
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("GetInventoryTypeList")]
         [HttpGet]
         public async Task<IActionResult> GetInventoryTypeList()
@@ -240,7 +240,7 @@ namespace CMMSAPIs.Controllers.Inventory
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("AddInventoryType")]
         [HttpPost]
         public async Task<IActionResult> AddInventoryType(CMInventoryTypeList request)
@@ -257,7 +257,7 @@ namespace CMMSAPIs.Controllers.Inventory
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("UpdateInventoryType")]
         [HttpPatch]
         public async Task<IActionResult> UpdateInventoryType(CMInventoryTypeList request)
@@ -274,7 +274,7 @@ namespace CMMSAPIs.Controllers.Inventory
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("DeleteInventoryType")]
         [HttpDelete]
         public async Task<IActionResult> DeleteInventoryType(int id)
@@ -290,7 +290,7 @@ namespace CMMSAPIs.Controllers.Inventory
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("GetInventoryStatusList")]
         [HttpGet]
         public async Task<IActionResult> GetInventoryStatusList()
@@ -306,7 +306,7 @@ namespace CMMSAPIs.Controllers.Inventory
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("AddInventoryStatus")]
         [HttpPost]
         public async Task<IActionResult> AddInventoryStatus(CMInventoryStatusList request)
@@ -323,7 +323,7 @@ namespace CMMSAPIs.Controllers.Inventory
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("UpdateInventoryStatus")]
         [HttpPatch]
         public async Task<IActionResult> UpdateInventoryStatus(CMInventoryStatusList request)
@@ -340,7 +340,7 @@ namespace CMMSAPIs.Controllers.Inventory
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("DeleteInventoryStatus")]
         [HttpDelete]
         public async Task<IActionResult> DeleteInventoryStatus(int id)
@@ -356,7 +356,7 @@ namespace CMMSAPIs.Controllers.Inventory
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("GetWarrantyTypeList")]
         [HttpGet]
         public async Task<IActionResult> GetWarrantyTypeList()
@@ -371,7 +371,7 @@ namespace CMMSAPIs.Controllers.Inventory
                 throw;
             }
         }
-        [Authorize]
+        //[Authorize]
         [Route("GetWarrantyUsageTermList")]
         [HttpGet]
         public async Task<IActionResult> GetWarrantyUsageTermList()
@@ -386,7 +386,7 @@ namespace CMMSAPIs.Controllers.Inventory
                 throw;
             }
         }
-        [Authorize]
+        //[Authorize]
         [Route("GetWarrantyCertificate")]
         [HttpGet]
         public async Task<IActionResult> GetWarrantyCertificate()
@@ -402,7 +402,7 @@ namespace CMMSAPIs.Controllers.Inventory
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("GetCalibrationList")]
         [HttpGet]
         public async Task<IActionResult> GetCalibrationList(int facilityId)

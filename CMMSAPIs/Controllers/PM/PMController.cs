@@ -22,7 +22,7 @@ namespace CMMSAPIs.Controllers.PM
             _PMBS = pm;
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("CreatePMPlan")]
         [HttpPost]
         public async Task<IActionResult> CreatePMPlan(CMPMPlanDetail pm_plan)
@@ -84,7 +84,7 @@ namespace CMMSAPIs.Controllers.PM
                 throw;
             }
         }
-
+        
         [Authorize]
         [Route("RejectPMPlan")]
         [HttpPut]
@@ -106,10 +106,13 @@ namespace CMMSAPIs.Controllers.PM
             }
         }
 
+
+
         [Authorize]
         [Route("DeletePMPlan")]
-        [HttpPut]
+        [HttpGet]
         public async Task<IActionResult> DeletePMPlan(int planId)
+
         {
             try
             {
@@ -128,7 +131,7 @@ namespace CMMSAPIs.Controllers.PM
         }
 
         [Authorize]
-        [Route("GetPMPlanList")]
+        [Route("GetPMPlanList")]    
         [HttpGet]
         public async Task<IActionResult> GetPMPlanList(int facility_id, int category_id, int frequency_id, DateTime? start_date, DateTime? end_date)
         {
@@ -147,7 +150,7 @@ namespace CMMSAPIs.Controllers.PM
             }
         }      
 
-        [Authorize]
+        //[Authorize]
         [Route("GetScheduleData")]
         [HttpGet]
         public async Task<IActionResult> GetScheduleData(int facility_id, int category_id)
@@ -167,7 +170,7 @@ namespace CMMSAPIs.Controllers.PM
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("SetScheduleData")]
         [HttpPost]
         public async Task<IActionResult> SetScheduleData(CMSetScheduleData request)
@@ -188,7 +191,7 @@ namespace CMMSAPIs.Controllers.PM
             }
         }       
 
-        //[Authorize]
+        ////[Authorize]
         //[Route("RejectPMPlan")]
         //[HttpPut]
         //internal async Task<IActionResult> RejectPMPlan(CMApproval request)
@@ -206,7 +209,7 @@ namespace CMMSAPIs.Controllers.PM
 
         //}
 
-        //[Authorize]
+        ////[Authorize]
         //[Route("deleteHaresh")]
         //[HttpPut]
         //internal async Task<IActionResult> DeletePMPlan(int planId)

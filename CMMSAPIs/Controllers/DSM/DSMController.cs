@@ -22,7 +22,7 @@ namespace CMMSAPIs.Controllers.DSM
             _DSMBS = dsm;
         }
 
-        //[Authorize]
+        ////[Authorize]
         [Route("getDSMData")]
         [HttpGet]
         public async Task<IActionResult> getDSMData(CMDSMFilter request)
@@ -39,7 +39,7 @@ namespace CMMSAPIs.Controllers.DSM
             }
         }
 
-        //[Authorize]
+        ////[Authorize]
         [Route("importDSMFile")]
         [HttpPost]
         public async Task<IActionResult> importDSMFile(int file_id)
@@ -56,7 +56,7 @@ namespace CMMSAPIs.Controllers.DSM
             }
         }
 
-        //    [Authorize]
+        //    //[Authorize]
         //    [Route("Escalate")]
         //    [HttpPost]
         //    public async Task<IActionResult> Escalate(CMMS.CMMS_Modules module, int id)
@@ -73,7 +73,7 @@ namespace CMMSAPIs.Controllers.DSM
         //        }
         //    }
 
-        //    [Authorize]
+        //    //[Authorize]
         //    [Route("ShowEscalationLog")]
         //    [HttpGet]
         //    public async Task<IActionResult> ShowEscalationLog(CMMS.CMMS_Modules module, int id)

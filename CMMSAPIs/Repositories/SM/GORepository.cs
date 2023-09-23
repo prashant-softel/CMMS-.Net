@@ -211,9 +211,9 @@ namespace CMMSAPIs.Repositories
                 string poInsertQuery = $" INSERT INTO smpurchaseorder (facilityID,vendorID,receiverID,generated_by,purchaseDate,orderDate,status," +
                     $" challan_no,po_no, freight,transport, " +
                     $"no_pkg_received,lr_no,condition_pkg_received,vehicle_no, gir_no, challan_date,po_date, job_ref,amount, currency,withdraw_by,withdrawOn,order_type,received_on) " +
-                    $"VALUES({request.facility_id},{request.vendorID}, {request.receiverID}, {userID}, '{DateTime.Now.ToString("yyyy-MM-dd")}', '{DateTime.Now.ToString("yyyy-MM-dd")}', {(int)CMMS.CMMS_Status.GO_SUBMITTED}," +
-                    $"'{request.challan_no}','{request.po_no}','{request.freight}','', '{request.no_pkg_received}', '{request.lr_no}', '{request.condition_pkg_received}','{request.vehicle_no}','{request.gir_no}','{request.challan_date.Value.ToString("yyyy-MM-dd")}'," +
-                    $"'{request.po_date.Value.ToString("yyyy-MM-dd")}','{request.job_ref}',{request.amount}, {request.currencyID},0,'0001-01-01',0,'{request.receivedAt.ToString("yyyy-MM-dd")}');" +
+                    $"VALUES({request.facility_id},{request.vendorID}, {request.receiverID}, {userID}, '{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}', '{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}', {(int)CMMS.CMMS_Status.GO_SUBMITTED}," +
+                    $"'{request.challan_no}','{request.po_no}','{request.freight}','', '{request.no_pkg_received}', '{request.lr_no}', '{request.condition_pkg_received}','{request.vehicle_no}','{request.gir_no}','{request.challan_date.Value.ToString("yyyy-MM-dd HH:mm:ss")}'," +
+                    $"'{request.po_date.Value.ToString("yyyy-MM-dd HH:mm:ss")}','{request.job_ref}',{request.amount}, {request.currencyID},0,'0001-01-01',0,'{request.receivedAt.ToString("yyyy-MM-dd HH:mm:ss")}');" +
                     $" SELECT LAST_INSERT_ID();";
                 DataTable dt2 = await Context.FetchData(poInsertQuery).ConfigureAwait(false);
                 poid = Convert.ToInt32(dt2.Rows[0][0]);
@@ -240,15 +240,15 @@ namespace CMMSAPIs.Repositories
                         $"challan_no = '{request.challan_no}',po_no='{request.po_no}', freight='{request.freight}',no_pkg_received='{request.no_pkg_received}'," +
                         $"lr_no='{request.lr_no}',condition_pkg_received='{request.condition_pkg_received}',vehicle_no='{request.vehicle_no}', gir_no='{request.gir_no}', " +
                         $"challan_date = '{request.challan_date.Value.ToString("yyyy-MM-dd")}', " +
-                        $"job_ref='{request.job_ref}',amount='{request.amount}', currency={request.currencyID},updated_by = {userID},updatedOn = '{UtilsRepository.GetUTCTime()}', status = {(int)CMMS.CMMS_Status.GO_DRAFT}, received_on = '{request.receivedAt.ToString("yyyy-MM-dd")}', po_date = '{request.po_date.Value.ToString("yyyy-MM-dd")}', purchaseDate= '{request.purchaseDate.Value.ToString("yyyy-MM-dd")}' where ID={request.id}";
+                        $"job_ref='{request.job_ref}',amount='{request.amount}', currency={request.currencyID},updated_by = {userID},updatedOn = '{UtilsRepository.GetUTCTime()}', status = {(int)CMMS.CMMS_Status.GO_DRAFT}, received_on = '{request.receivedAt.ToString("yyyy-MM-dd HH:mm:ss")}', po_date = '{request.po_date.Value.ToString("yyyy-MM-dd HH:mm:ss")}', purchaseDate= '{request.purchaseDate.Value.ToString("yyyy-MM-dd HH:mm:ss")}' where ID={request.id}";
             }
             else
             {
                 OrderQuery = $"UPDATE smpurchaseorder SET " +
                         $"challan_no = '{request.challan_no}',po_no='{request.po_no}', freight='{request.freight}',no_pkg_received='{request.no_pkg_received}'," +
                         $"lr_no='{request.lr_no}',condition_pkg_received='{request.condition_pkg_received}',vehicle_no='{request.vehicle_no}', gir_no='{request.gir_no}', " +
-                        $"challan_date = '{request.challan_date.Value.ToString("yyyy-MM-dd")}', " +
-                        $"job_ref='{request.job_ref}',amount='{request.amount}', currency={request.currencyID},updated_by = {userID},updatedOn = '{UtilsRepository.GetUTCTime()}', status = {(int)CMMS.CMMS_Status.GO_SUBMITTED}, received_on = '{request.receivedAt.ToString("yyyy-MM-dd")}', po_date = '{request.po_date.Value.ToString("yyyy-MM-dd")}', purchaseDate= '{request.purchaseDate.Value.ToString("yyyy-MM-dd")}' where ID={request.id}";
+                        $"challan_date = '{request.challan_date.Value.ToString("yyyy-MM-dd HH:mm:ss")}', " +
+                        $"job_ref='{request.job_ref}',amount='{request.amount}', currency={request.currencyID},updated_by = {userID},updatedOn = '{UtilsRepository.GetUTCTime()}', status = {(int)CMMS.CMMS_Status.GO_SUBMITTED}, received_on = '{request.receivedAt.ToString("yyyy-MM-dd HH:mm:ss")}', po_date = '{request.po_date.Value.ToString("yyyy-MM-dd HH:mm:ss")}', purchaseDate= '{request.purchaseDate.Value.ToString("yyyy-MM-dd HH:mm:ss")}' where ID={request.id}";
             }
             await Context.ExecuteNonQry<int>(OrderQuery);
 
@@ -383,10 +383,11 @@ namespace CMMSAPIs.Repositories
             var data = await this.getPurchaseDetailsByID(request.id);
             for (int i = 0; i < data.Count; i++)
             {
-                if (data[i].receive_later == 0 && data[i].added_to_store == 0)
+                if (data[i].receive_later == 1 && data[i].added_to_store == 0)
                 {
 
-                    var tResult = await TransactionDetails(data[i].plantID, data[i].vendorID, 1, data[i].plantID, 2, data[i].assetItemID, (double)data[i].accepted_qty, 6, request.id, "Goods Order");
+                    decimal stock_qty = data[i].ordered_qty + data[i].received_qty;
+                    var tResult = await TransactionDetails(data[i].facility_id, data[i].vendorID, (int)CMMS.SM_Types.Vendor, data[i].facility_id, (int)CMMS.SM_Types.Store, data[i].assetItemID, (double)stock_qty, (int)CMMS.CMMS_Modules.SM_GO, request.id, "Goods Order");
 
                     // Update the order type.
                     var update_order_type = await updateGOType(data[i].order_by_type, data[i].id);
@@ -495,10 +496,11 @@ namespace CMMSAPIs.Repositories
             try
             {
                 string stmt = "INSERT INTO smtransactiondetails (plantID,fromActorID,fromActorType,toActorID,toActorType,assetItemID,qty,referedby,reference_ID,remarks,Nature_Of_Transaction,Asset_Item_Status)" +
-                              $"VALUES ({plantID},{fromActorID},{fromActorType},{toActorID},{toActorType},{assetItemID},{qty},{refType},{refID},'{remarks}',{natureOfTransaction},{assetItemStatus})";
+                              $"VALUES ({plantID},{fromActorID},{fromActorType},{toActorID},{toActorType},{assetItemID},{qty},{refType},{refID},'{remarks}',{natureOfTransaction},{assetItemStatus}) ; SELECT LAST_INSERT_ID();";
 
                 DataTable dt2 = await Context.FetchData(stmt).ConfigureAwait(false);
                 int transaction_ID = 0;
+         
                 if (dt2.Rows.Count > 0)
                 {
                     transaction_ID = Convert.ToInt32(dt2.Rows[0][0]);
@@ -550,9 +552,9 @@ namespace CMMSAPIs.Repositories
             return 1;
         }
 
-        private async Task<int> DebitTransation(int transactionID, int actorType, int actorID, double debitQty, int assetItemID, int mrsID)
+        private async Task<int> DebitTransation(int transactionID, int actorID, int  actorType, double debitQty, int assetItemID, int mrsID)
         {
-            string stmt = $"INSERT INTO smtransition (transactionID, actorType, actorID, debitQty, assetItemID, mrsID) VALUES ({transactionID}, '{actorType}', {actorID}, {debitQty}, {assetItemID}, {mrsID})";
+            string stmt = $"INSERT INTO smtransition (transactionID, actorType, actorID, debitQty, assetItemID, mrsID) VALUES ({transactionID}, '{actorType}', {actorID}, {debitQty}, {assetItemID}, {mrsID}); SELECT LAST_INSERT_ID();";
             DataTable dt2 = await Context.FetchData(stmt).ConfigureAwait(false);
             int id = Convert.ToInt32(dt2.Rows[0][0]);
             return id;
@@ -560,7 +562,7 @@ namespace CMMSAPIs.Repositories
 
         private async Task<int> CreditTransation(int transactionID, int actorID, int actorType, double qty, int assetItemID, int mrsID)
         {
-            string query = $"INSERT INTO smtransition (transactionID,actorType,actorID,creditQty,assetItemID,mrsID) VALUES ({transactionID},'{actorType}',{actorID},{qty},{assetItemID},{mrsID})";
+            string query = $"INSERT INTO smtransition (transactionID,actorType,actorID,creditQty,assetItemID,mrsID) VALUES ({transactionID},'{actorType}',{actorID},{qty},{assetItemID},{mrsID}) ; SELECT LAST_INSERT_ID();";
             DataTable dt2 = await Context.FetchData(query).ConfigureAwait(false);
             int id = Convert.ToInt32(dt2.Rows[0][0]);
             return id;
@@ -577,7 +579,7 @@ namespace CMMSAPIs.Repositories
             }
             else
             {
-                qry2 = $"SELECT ID FROM smtransition WHERE ID = '{debitTransactionID}' AND actorType = '{fromActorType}' AND actorID = '{fromActorID}' AND debitQty = '{qty}' AND assetItemID = '{assetItemID}'";
+                qry2 = $"SELECT ID FROM smtransition WHERE ID = '{debitTransactionID}' AND actorType = '{fromActorID}' AND actorID = '{fromActorType}' AND debitQty = '{qty}' AND assetItemID = '{assetItemID}'";
             }
 
             string qry3 = $"SELECT ID FROM smtransition WHERE ID = '{creditTransactionID}' AND actorType = '{toActorType}' AND actorID = '{toActorID}' AND creditQty = '{qty}' AND assetItemID = '{assetItemID}'";
@@ -916,7 +918,7 @@ namespace CMMSAPIs.Repositories
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_MasterList.status);
                 string _shortStatus = getShortStatus(CMMS.CMMS_Modules.SM_PO, _Status);
                 string _longStatus = getLongStatus(_Status, _MasterList.Id);
-                _MasterList.amount = _List.Sum(x => x.cost * x.ordered_qty);
+                
                 _MasterList.status_short = _shortStatus;
                 _MasterList.status_long = _longStatus;
             }
@@ -1064,10 +1066,11 @@ namespace CMMSAPIs.Repositories
             var data = await this.getPurchaseDetailsByID(request.id);
             for (int i = 0; i < data.Count; i++)
             {
-                if (data[i].receive_later == 0 && data[i].added_to_store == 0)
+                if (data[i].added_to_store == 0)
                 {
 
-                    var tResult = await TransactionDetails(data[i].plantID, data[i].vendorID, 1, data[i].plantID, 2, data[i].assetItemID, (double)data[i].accepted_qty, 6, request.id, "Goods Order");
+                    decimal stock_qty = data[i].ordered_qty + data[i].received_qty;
+                    var tResult = await TransactionDetails(data[i].facility_id, data[i].vendorID, (int)CMMS.SM_Types.Vendor, data[i].facility_id, (int)CMMS.SM_Types.Store, data[i].assetItemID, (double)stock_qty, (int)CMMS.CMMS_Modules.SM_GO, request.id, "Goods Order");
 
                     // Update the order type.
                     var update_order_type = await updateGOType(data[i].order_by_type, data[i].id);
@@ -1110,7 +1113,7 @@ namespace CMMSAPIs.Repositories
 
 
             string approveQuery = $"Update smpurchaseorder set status = {(int)CMMS.CMMS_Status.GO_RECEIVED_REJECTED} , remarks = '{request.comment}' , " +
-                $" rejected_by = {userId}, rejectedOn = '{DateTime.Now.ToString("yyyy-MM-dd")}'" +
+                $" rejected_by = {userId}, rejectedOn = '{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}'" +
                 $" where id = {request.id}";
             int reject_id = await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
 
@@ -1135,7 +1138,6 @@ namespace CMMSAPIs.Repositories
        $" \r\nFROM smpurchaseorder where id = {request.id}";
             List<CMGoodsOrderList> _WCList = await Context.GetData<CMGoodsOrderList>(myQuery).ConfigureAwait(false);
             //CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_PO, CMMS.CMMS_Status.SM_PO_CLOSED_REJECTED, _WCList[0]);
-
 
 
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Goods order receive {request.id} rejected successfully.");

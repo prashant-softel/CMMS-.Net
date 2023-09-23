@@ -33,7 +33,7 @@ namespace CMMSAPIs.Controllers.SM
 
         // First 
 
-        [Authorize]
+        //[Authorize]
         [Route("CreateMRS")]
         [HttpPost]       
         public async Task<IActionResult> CreateMRS(CMMRS request)
@@ -56,7 +56,7 @@ namespace CMMSAPIs.Controllers.SM
         }
 
 
-        [Authorize]
+        //[Authorize]
         [Route("updateMRS")]
         [HttpPost]
         public async Task<IActionResult> updateMRS(CMMRS request)
@@ -79,7 +79,7 @@ namespace CMMSAPIs.Controllers.SM
         }
 
 
-        [Authorize]
+        //[Authorize]
         [Route("getMRSList")]
         [HttpGet]
         public async Task<IActionResult> getMRSList(int facility_ID, int emp_id, string toDate, string fromDate, int status)
@@ -123,7 +123,7 @@ namespace CMMSAPIs.Controllers.SM
         }
 
 
-        [Authorize]
+        //[Authorize]
         [Route("getMRSItems")]
         [HttpGet]
         public async Task<IActionResult> getMRSItems(int ID)
@@ -144,7 +144,7 @@ namespace CMMSAPIs.Controllers.SM
         }
 
 
-        [Authorize]
+        //[Authorize]
         [Route("getMRSItemsBeforeIssue")]
         [HttpGet]
         public async Task<IActionResult> getMRSItemsBeforeIssue(int ID)
@@ -165,7 +165,7 @@ namespace CMMSAPIs.Controllers.SM
         }
 
 
-        [Authorize]
+        //[Authorize]
         [Route("getMRSItemsWithCode")]
         [HttpGet]
         public async Task<IActionResult> getMRSItemsWithCode(int ID)
@@ -186,7 +186,7 @@ namespace CMMSAPIs.Controllers.SM
         }
 
 
-        [Authorize]
+        //[Authorize]
         [Route("getMRSDetails")]
         [HttpGet]
         public async Task<IActionResult> getMRSDetails(int ID)
@@ -207,7 +207,7 @@ namespace CMMSAPIs.Controllers.SM
         }
 
 
-        [Authorize]
+        //[Authorize]
         [Route("mrsApproval")]
         [HttpPost]
         public async Task<IActionResult> mrsApproval(CMApproval request)
@@ -229,7 +229,7 @@ namespace CMMSAPIs.Controllers.SM
         }
 
 
-        [Authorize]
+        //[Authorize]
         [Route("mrsReject")]
         [HttpPost]
         public async Task<IActionResult> mrsReject(CMApproval request)
@@ -251,7 +251,7 @@ namespace CMMSAPIs.Controllers.SM
         }
 
 
-        [Authorize]
+        //[Authorize]
         [Route("getReturnDataByID")]
         [HttpGet]
         public async Task<IActionResult> getReturnDataByID(int ID)
@@ -274,7 +274,7 @@ namespace CMMSAPIs.Controllers.SM
 
 
 
-        [Authorize]
+        //[Authorize]
         [Route("getAssetTypeByItemID")]
         [HttpGet]
         public async Task<IActionResult> getAssetTypeByItemID(int ItemID)
@@ -296,7 +296,7 @@ namespace CMMSAPIs.Controllers.SM
 
 
 
-        [Authorize]
+        //[Authorize]
         [Route("ReturnMRS")]
         [HttpPost] 
         public async Task<IActionResult> ReturnMRS(CMMRS request)
@@ -319,7 +319,7 @@ namespace CMMSAPIs.Controllers.SM
 
 
 
-        [Authorize]
+        //[Authorize]
         [Route("ApproveMRSReturn")]
         [HttpPost]
         public async Task<IActionResult> ApproveMRSReturn(CMApproval request)
@@ -339,7 +339,7 @@ namespace CMMSAPIs.Controllers.SM
                 return Ok(item);
             }
         }
-        [Authorize]
+        //[Authorize]
         [Route("RejectMRSReturn")]
         [HttpPost]
         public async Task<IActionResult> RejectMRSReturn(CMApproval request)
@@ -362,7 +362,7 @@ namespace CMMSAPIs.Controllers.SM
 
 
 
-        [Authorize]
+        //[Authorize]
         [Route("getLastTemplateData")]
         [HttpGet]
         public async Task<IActionResult> getLastTemplateData(int ID)
@@ -383,7 +383,7 @@ namespace CMMSAPIs.Controllers.SM
         }
 
 
-        [Authorize]
+        //[Authorize]
         [Route("GetAssetItems")]
         [HttpGet]
         public async Task<IActionResult> GetAssetItems(int facility_ID, bool isGroupByCode = false)
@@ -403,7 +403,7 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("CreateMRSIssue")]
         [HttpPost]
         public async Task<IActionResult> CreateMRSIssue(CMMRS request)
@@ -424,7 +424,7 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("ApproveMRSIssue")]
         [HttpPost]
         public async Task<IActionResult> ApproveMRSIssue(CMApproval request)
@@ -444,7 +444,7 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("RejectMRSIssue")]
         [HttpPost]
         public async Task<IActionResult> RejectMRSIssue(CMApproval request)
@@ -464,7 +464,7 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("GetMRSReturnList")]
         [HttpGet]
         public async Task<IActionResult> GetMRSReturnList(int facility_ID, int emp_id)

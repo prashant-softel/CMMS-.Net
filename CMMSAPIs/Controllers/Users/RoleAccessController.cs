@@ -11,7 +11,7 @@ using CMMSAPIs.Models.Utils;
 
 namespace CMMSAPIs.Controllers.Users
 {
-    [Authorize]
+    //[Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class RoleAccessController : ControllerBase
@@ -36,7 +36,7 @@ namespace CMMSAPIs.Controllers.Users
                 throw;
             }
         }
-        [Authorize]
+        //[Authorize]
         [Route("AddRole")]
         [HttpPost]
         public async Task<IActionResult> AddRole(CMDefaultList request)
@@ -53,7 +53,7 @@ namespace CMMSAPIs.Controllers.Users
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("UpdateRole")]
         [HttpPatch]
         public async Task<IActionResult> UpdateRole(CMDefaultList request)
@@ -70,7 +70,7 @@ namespace CMMSAPIs.Controllers.Users
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("DeleteRole")]
         [HttpDelete]
         public async Task<IActionResult> DeleteRole(int id)
@@ -100,7 +100,7 @@ namespace CMMSAPIs.Controllers.Users
                 throw;
             }
         }
-        [Authorize]
+        //[Authorize]
         [Route("AddDesignation")]
         [HttpPost]
         public async Task<IActionResult> AddDesignation(CMDesignation request)
@@ -117,7 +117,7 @@ namespace CMMSAPIs.Controllers.Users
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("UpdateDesignation")]
         [HttpPatch]
         public async Task<IActionResult> UpdateDesignation(CMDesignation request)
@@ -134,7 +134,7 @@ namespace CMMSAPIs.Controllers.Users
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("DeleteDesignation")]
         [HttpDelete]
         public async Task<IActionResult> DeleteDesignation(int id)
@@ -167,7 +167,7 @@ namespace CMMSAPIs.Controllers.Users
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("SetRoleAccess")]
         [HttpPost]
         public async Task<IActionResult> SetRoleAccess(CMSetRoleAccess request)

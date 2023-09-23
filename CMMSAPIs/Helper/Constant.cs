@@ -7,6 +7,7 @@ namespace CMMSAPIs.Helper
     {
         // Token expiration time
         public const int TOKEN_EXPIRATION_TIME = 30;
+	public const int TOKEN_RENEW_TIME = 30;
         public Dictionary<CMMS_Modules, int> module_dict = new Dictionary<CMMS_Modules, int>()
         {
             { CMMS_Modules.DASHBOARD, 1 },
