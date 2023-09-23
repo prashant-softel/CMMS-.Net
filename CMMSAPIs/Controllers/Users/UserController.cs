@@ -73,7 +73,7 @@ namespace CMMSAPIs.Controllers.Users
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("ImportUsers")]
         [HttpPost]
         public async Task<IActionResult> ImportUsers(int file_id)
@@ -95,7 +95,7 @@ namespace CMMSAPIs.Controllers.Users
         }
 
         // Create User
-        [Authorize]
+        //[Authorize]
         [Route("CreateUser")]
         [HttpPost]
 
@@ -118,7 +118,7 @@ namespace CMMSAPIs.Controllers.Users
         }
 
         // Update User
-        [Authorize]
+        //[Authorize]
         [Route("UpdateUser")]
         [HttpPatch]
 
@@ -137,7 +137,7 @@ namespace CMMSAPIs.Controllers.Users
         }
 
         // Delete User
-        [Authorize]
+        //[Authorize]
         [Route("DeleteUser")]
         [HttpDelete]
 
@@ -189,7 +189,7 @@ namespace CMMSAPIs.Controllers.Users
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("SetUserAccess")]
         [HttpPost]
         public async Task<IActionResult> SetUserAccess(CMUserAccess request)
@@ -222,7 +222,7 @@ namespace CMMSAPIs.Controllers.Users
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("SetUserNotifications")]
         [HttpPost]
         public async Task<IActionResult> SetUserNotifications(CMUserNotifications request)
@@ -254,7 +254,7 @@ namespace CMMSAPIs.Controllers.Users
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("AddCompetency")]
         [HttpPost]
         public async Task<IActionResult> AddCompetency(CMCompetency request)
@@ -271,7 +271,7 @@ namespace CMMSAPIs.Controllers.Users
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("UpdateCompetency")]
         [HttpPatch]
         public async Task<IActionResult> UpdateCompetency(CMCompetency request)
@@ -289,7 +289,7 @@ namespace CMMSAPIs.Controllers.Users
         }
 
 
-        [Authorize]
+        //[Authorize]
         [Route("DeleteCompetency")]
         [HttpDelete]
         public async Task<IActionResult> DeleteCompetency(int id)
