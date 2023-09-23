@@ -24,7 +24,7 @@ namespace CMMSAPIs.Controllers.Jobs
             _JobWorkTypeBS = jobWorkTypeBS;
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("GetJobList")]
         [HttpGet]
         public async Task<IActionResult> GetJobList(int facility_id, string startDate, string endDate, CMMS.CMMS_JobType jobType, int selfView, string status)
@@ -41,7 +41,7 @@ namespace CMMSAPIs.Controllers.Jobs
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("GetJobListByPermitId")]
         [HttpGet]
         public async Task<IActionResult> GetJobListByPermitId(int permitId)
@@ -61,7 +61,7 @@ namespace CMMSAPIs.Controllers.Jobs
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("GetJobDetails")]
         [HttpGet]
         public async Task<IActionResult> GetJobDetails(int job_id)
@@ -77,7 +77,7 @@ namespace CMMSAPIs.Controllers.Jobs
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("CreateNewJob")]
         [HttpPost]
         public async Task<IActionResult> CreateNewJob(CMCreateJob request)
@@ -94,7 +94,7 @@ namespace CMMSAPIs.Controllers.Jobs
             }
         }
         
-        [Authorize]
+        //[Authorize]
         [Route("UpdateJob")]
         [HttpPatch]
         public async Task<IActionResult> UpdateJob(CMCreateJob request)
@@ -113,7 +113,7 @@ namespace CMMSAPIs.Controllers.Jobs
         /*
          * WorkType Crud Operation
         */
-        [Authorize]
+        //[Authorize]
         [Route("ReAssignJob")]
         [HttpPut]
         public async Task<IActionResult> ReAssignJob(int job_id, int assignedTo)
@@ -133,7 +133,7 @@ namespace CMMSAPIs.Controllers.Jobs
 
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("CancelJob")]
         [HttpPut]
         public async Task<IActionResult> CancelJob(int job_id, string Cancelremark)
@@ -151,7 +151,7 @@ namespace CMMSAPIs.Controllers.Jobs
             }
         }
         /*
-        [Authorize]
+        //[Authorize]
         [Route("DeleteJob")]
         [HttpDelete]
         public async Task<IActionResult> DeleteJob(int job_id)
@@ -169,7 +169,7 @@ namespace CMMSAPIs.Controllers.Jobs
             }
         }
         /**/
-        [Authorize]
+        //[Authorize]
         [Route("LinkToPTW")]
         [HttpPut]
         public async Task<IActionResult> LinkToPTW(int job_id, int ptw_id)

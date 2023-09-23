@@ -45,7 +45,7 @@ namespace CMMSAPIs.Controllers.Jobs
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("CreateJobWorkType")]
         [HttpPost]
         public async Task<IActionResult> CreateJobWorkType(CMADDJobWorkType request)
@@ -62,7 +62,7 @@ namespace CMMSAPIs.Controllers.Jobs
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("UpdateJobWorkType")]
         [HttpPatch]
         public async Task<IActionResult> UpdateJobWorkType(CMADDJobWorkType request)
@@ -79,7 +79,7 @@ namespace CMMSAPIs.Controllers.Jobs
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("DeleteJobWorkType")]
         [HttpDelete]
         public async Task<IActionResult> DeleteJobWorkType(int id)
@@ -133,7 +133,7 @@ namespace CMMSAPIs.Controllers.Jobs
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("CreateMasterTool")]
         [HttpPost]
         public async Task<IActionResult> CreateMasterTool(string name)
@@ -150,7 +150,7 @@ namespace CMMSAPIs.Controllers.Jobs
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("UpdateMasterTool")]
         [HttpPatch]
         public async Task<IActionResult> UpdateMasterTool(CMDefaultList tool)
@@ -167,7 +167,7 @@ namespace CMMSAPIs.Controllers.Jobs
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("DeleteMasterTool")]
         [HttpDelete]
         public async Task<IActionResult> DeleteMasterTool(int id)
@@ -184,7 +184,7 @@ namespace CMMSAPIs.Controllers.Jobs
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("CreateJobWorkTypeTool")]
         [HttpPost]
         public async Task<IActionResult> CreateJobWorkTypeTool(CMAddJobWorkTypeTool request)
@@ -200,7 +200,7 @@ namespace CMMSAPIs.Controllers.Jobs
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("UpdateJobWorkTypeTool")]
         [HttpPut]
         public async Task<IActionResult> UpdateJobWorkTypeTool(CMUpdateJobWorkTypeTool request)
@@ -216,7 +216,7 @@ namespace CMMSAPIs.Controllers.Jobs
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("DeleteJobWorkTypeTool")]
         [HttpDelete]
         public async Task<IActionResult> DeleteJobWorkTypeTool(int id)
