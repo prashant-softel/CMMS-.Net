@@ -44,6 +44,27 @@ namespace CMMSAPIs.Controllers.PM
         }
 
         [Authorize]
+        [Route("GetPMPlanDetail")]
+        [HttpGet]
+        public async Task<IActionResult> GetPMPlanDetail(int planId)
+        {
+            try
+            {
+               // int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _PMBS.GetPMPlanDetail(planId);
+                return Ok(data);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
         [Route("ApprovePMPlan")]
         [HttpPut]
         public async Task<IActionResult> ApprovePMPlan(CMApproval request)
@@ -124,27 +145,7 @@ namespace CMMSAPIs.Controllers.PM
             {
                 throw;
             }
-        }
-
-        [Authorize]
-        [Route("GetPMPlanDetail")]
-        [HttpGet]
-        public async Task<IActionResult> GetScheduleData(int id)
-        {
-            try
-            {
-                var data = await _PMBS.GetPMPlanDetail(id);
-                return Ok(data);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
+        }      
 
         [Authorize]
         [Route("GetScheduleData")]
