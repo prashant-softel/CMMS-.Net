@@ -18,7 +18,7 @@ namespace CMMSAPIs.Controllers.Audits
             _AuditPlanBS = audit_plan;
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("GetAuditPlanList")]
         [HttpGet]
         public async Task<IActionResult> GetAuditPlanList(int facility_id)
@@ -34,7 +34,7 @@ namespace CMMSAPIs.Controllers.Audits
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("CreateAuditPlan")]
         [HttpGet]
         public async Task<IActionResult> CreateAuditPlan(CMCreateAuditPlan request)
@@ -50,7 +50,7 @@ namespace CMMSAPIs.Controllers.Audits
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("UpdateAuditPlan")]
         [HttpGet]
         public async Task<IActionResult> UpdateAuditPlan(CMCreateAuditPlan request)
@@ -66,7 +66,7 @@ namespace CMMSAPIs.Controllers.Audits
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("DeleteAuditPlan")]
         [HttpGet]
         public async Task<IActionResult> DeleteAuditPlan(int audit_plan_id)

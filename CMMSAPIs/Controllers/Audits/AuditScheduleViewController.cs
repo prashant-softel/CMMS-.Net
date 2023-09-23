@@ -19,7 +19,7 @@ namespace CMMSAPIs.Controllers.Audits
             _AuditScheduleViewBS = audit_schedule_view;
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("GetAuditScheduleViewList")]
         [HttpGet]
         public async Task<IActionResult> GetAuditScheduleViewList(CMAuditListFilter request)
@@ -35,7 +35,7 @@ namespace CMMSAPIs.Controllers.Audits
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("GetAuditScheduleDetail")]
         [HttpGet]
         public async Task<IActionResult> GetAuditScheduleDetail(int audit_id)
@@ -51,7 +51,7 @@ namespace CMMSAPIs.Controllers.Audits
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("ExecuteAuditSchedule")]
         [HttpPost]
         public async Task<IActionResult> ExecuteAuditSchedule(CMExecuteAuditSchedule request)
@@ -67,7 +67,7 @@ namespace CMMSAPIs.Controllers.Audits
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("ApproveAuditSchedule")]
         [HttpPut]
         public async Task<IActionResult> ApproveAuditSchedule(CMApproval request)
@@ -83,7 +83,7 @@ namespace CMMSAPIs.Controllers.Audits
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("RejectAuditSchedule")]
         [HttpPut]
         public async Task<IActionResult> RejectAuditSchedule(CMApproval request)
