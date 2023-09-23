@@ -22,7 +22,7 @@ namespace CMMSAPIs.Controllers.utils
             _AddLog = new AddLog(configuration);
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("GetCountryList")]
         [HttpGet]
         public async Task<IActionResult> GetCountryList()
