@@ -24,11 +24,11 @@ namespace CMMSAPIs.Controllers.PM
         [Authorize]
         [Route("GetPMTaskList")]
         [HttpGet]
-        public async Task<IActionResult> GetPMTaskList(int facility_id, DateTime? start_date, DateTime? end_date, string categoryIds, string frequencyIds)
+        public async Task<IActionResult> GetPMTaskList(int facility_id, DateTime? start_date, DateTime? end_date, int[] frequencyIds)
         {
             try
             {
-                var data = await _PMScheduleViewBS.GetPMTaskList(facility_id, start_date, end_date, categoryIds, frequencyIds);
+                var data = await _PMScheduleViewBS.GetPMTaskList(facility_id, start_date, end_date, frequencyIds);
                 return Ok(data);
             }
             catch (ArgumentException ex)

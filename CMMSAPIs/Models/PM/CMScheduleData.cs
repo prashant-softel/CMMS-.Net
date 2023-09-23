@@ -15,6 +15,8 @@ namespace CMMSAPIs.Models.PM
         public string facility_name { get; set; }   
         public int category_id { get; set; }
         public string category_name { get; set; }
+        public int assign_to_id { get; set; }
+        public string assign_to_name { get; set; }
         public int plan_freq_id { get; set; }
         public string plan_freq_name { get; set; }
         public int created_by_id { get; set; }
