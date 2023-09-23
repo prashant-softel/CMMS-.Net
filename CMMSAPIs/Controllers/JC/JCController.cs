@@ -22,7 +22,7 @@ namespace CMMSAPIs.Controllers.JC
         /*
          * JobCard Basic End Points
         */
-        [Authorize]
+        //[Authorize]
         [Route("GetJCList")]
         [HttpGet]
         public async Task<IActionResult> GetJCList(int facility_id, bool self_view)
@@ -55,7 +55,7 @@ namespace CMMSAPIs.Controllers.JC
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("GetJCDetail")]
         [HttpGet]
         public async Task<IActionResult> GetJCDetail(int jc_id)
@@ -71,7 +71,7 @@ namespace CMMSAPIs.Controllers.JC
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("CreateJC")]
         [HttpPost]
         public async Task<IActionResult> CreateJC(int job_id)
@@ -88,7 +88,7 @@ namespace CMMSAPIs.Controllers.JC
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("UpdateJC")]
         [HttpPut]
         public async Task<IActionResult> UpdateJC(CMJCUpdate request)
@@ -105,7 +105,7 @@ namespace CMMSAPIs.Controllers.JC
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("CloseJC")]
         [HttpPut]
         public async Task<IActionResult> CloseJC(CMJCClose request)
@@ -122,7 +122,7 @@ namespace CMMSAPIs.Controllers.JC
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("ApproveJC")]
         [HttpPut]
         public async Task<IActionResult> ApproveJC(CMJCApprove request)
@@ -139,7 +139,7 @@ namespace CMMSAPIs.Controllers.JC
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("RejectJC")]
         [HttpPut]
         public async Task<IActionResult> RejectJC(CMJCReject request)
@@ -156,7 +156,7 @@ namespace CMMSAPIs.Controllers.JC
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("StartJC")]
         [HttpPut]
         public async Task<IActionResult> StartJC(int jc_id)
@@ -175,7 +175,7 @@ namespace CMMSAPIs.Controllers.JC
 
 
 
-        [Authorize]
+        //[Authorize]
         [Route("CarryForwardJC")]
         [HttpPut]
         public async Task<IActionResult> CarryForwardJC(CMApproval request)
@@ -192,7 +192,7 @@ namespace CMMSAPIs.Controllers.JC
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("ApproveJCCF")]
         [HttpPut]
         public async Task<IActionResult> ApproveJCCF(CMJCApprove request)
@@ -209,7 +209,7 @@ namespace CMMSAPIs.Controllers.JC
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("RejectJCCF")]
         [HttpPut]
         public async Task<IActionResult> RejectJCCF(CMJCReject request)
