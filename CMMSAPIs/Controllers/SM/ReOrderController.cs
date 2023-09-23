@@ -31,7 +31,7 @@ namespace CMMSAPIs.Controllers.SM
             _AddLog = new AddLog(configuration);
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("GetReorderDataByID")]
         [HttpGet]
         public async Task<IActionResult> GetReorderDataByID(int assetID, int plantID)
@@ -49,7 +49,7 @@ namespace CMMSAPIs.Controllers.SM
         }
 
 
-        [Authorize]
+        //[Authorize]
         [Route("submitReorderForm")]
         [HttpPost]
         public async Task<IActionResult> submitReorderForm(CMReOrder request)
@@ -66,7 +66,7 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("updateReorderData")]
         [HttpPost]
         public async Task<IActionResult> updateReorderData(CMReOrder request)
@@ -83,7 +83,7 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("getReorderAssetsData")]
         [HttpGet]
         public async Task<IActionResult> getReorderAssetsData(int plantID)
@@ -100,7 +100,7 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("getReorderItems")]
         [HttpGet]
         public async Task<IActionResult> getReorderItems(int plantID)
@@ -117,7 +117,7 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("reorderAssets")]
         [HttpPost]
         public async Task<IActionResult> reorderAssets(CMReOrder request)

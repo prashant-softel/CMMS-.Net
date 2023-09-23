@@ -34,7 +34,7 @@ namespace CMMSAPIs.Controllers.SM
          * Asset Type CRUD End Points
         */
 
-        [Authorize]
+        //[Authorize]
         [Route("GetAssetTypeList")]
         [HttpGet]
         public async Task<IActionResult> GetAssetTypeList(int id)
@@ -54,7 +54,7 @@ namespace CMMSAPIs.Controllers.SM
         }
 
 
-        [Authorize]
+        //[Authorize]
         [Route("AddAssetType")]
         [HttpPost]
         public async Task<IActionResult> AddAssetType(CMSMMaster request)
@@ -75,7 +75,7 @@ namespace CMMSAPIs.Controllers.SM
         }
 
 
-        [Authorize]
+        //[Authorize]
         [Route("UpdateAssetType")]
         [HttpPost]
         public async Task<IActionResult> UpdateAssetType(CMSMMaster request)
@@ -96,7 +96,7 @@ namespace CMMSAPIs.Controllers.SM
         }
 
 
-        [Authorize]
+        //[Authorize]
         [Route("DeleteAssetType")]
         [HttpPost]
         public async Task<IActionResult> DeleteAssetType([FromForm] int id)
@@ -120,7 +120,7 @@ namespace CMMSAPIs.Controllers.SM
          * Asset Category CRUD End Points
         */
 
-        [Authorize]
+        //[Authorize]
         [Route("GetAssetCategoryList")]
         [HttpGet]
         public async Task<IActionResult> GetAssetCategoryList(int id)
@@ -140,7 +140,7 @@ namespace CMMSAPIs.Controllers.SM
         }
 
 
-        [Authorize]
+        //[Authorize]
         [Route("AddAssetCategory")]
         [HttpPost]
         public async Task<IActionResult> AddAssetCategory(CMItemCategory request)
@@ -161,7 +161,7 @@ namespace CMMSAPIs.Controllers.SM
         }
 
 
-        [Authorize]
+        //[Authorize]
         [Route("UpdateAssetCategory")]
         [HttpPost]
         public async Task<IActionResult> UpdateAssetCategory(CMItemCategory request)
@@ -182,7 +182,7 @@ namespace CMMSAPIs.Controllers.SM
         }
 
 
-        [Authorize]
+        //[Authorize]
         [Route("DeleteAssetCategory")]
         [HttpPost]
         public async Task<IActionResult> DeleteAssetCategory([FromForm] int id)
@@ -207,7 +207,7 @@ namespace CMMSAPIs.Controllers.SM
         */
 
 
-        [Authorize]
+        //[Authorize]
         [Route("GetUnitMeasurementList")]
         [HttpGet]
         public async Task<IActionResult> GetUnitMeasurementList(int id)
@@ -227,7 +227,7 @@ namespace CMMSAPIs.Controllers.SM
         }
 
 
-        [Authorize]
+        //[Authorize]
         [Route("AddUnitMeasurement")]
         [HttpPost]
         public async Task<IActionResult> AddUnitMeasurement(CMUnitMeasurement request)
@@ -248,7 +248,7 @@ namespace CMMSAPIs.Controllers.SM
         }
 
 
-        [Authorize]
+        //[Authorize]
         [Route("UpdateUnitMeasurement")]
         [HttpPost]
         public async Task<IActionResult> UpdateUnitMeasurement(CMUnitMeasurement request)
@@ -269,7 +269,7 @@ namespace CMMSAPIs.Controllers.SM
         }
 
 
-        [Authorize]
+        //[Authorize]
         [Route("DeleteUnitMeasurement")]
         [HttpPost]
         public async Task<IActionResult> DeleteUnitMeasurement([FromForm] int id)
@@ -294,7 +294,7 @@ namespace CMMSAPIs.Controllers.SM
         */
 
 
-        [Authorize]
+        //[Authorize]
         [Route("GetAssetMasterList")]
         [HttpGet]
         public async Task<IActionResult> GetAssetMasterList(int id)
@@ -314,7 +314,7 @@ namespace CMMSAPIs.Controllers.SM
         }
 
 
-        [Authorize]
+        //[Authorize]
         [Route("AddAssetMaster")]
         [HttpPost]
         public async Task<IActionResult> AddAssetMaster(CMSMMaster request)
@@ -336,7 +336,7 @@ namespace CMMSAPIs.Controllers.SM
         }
 
 
-        [Authorize]
+        //[Authorize]
         [Route("UpdateAssetMaster")]
         [HttpPost]
         public async Task<IActionResult> UpdateAssetMaster(CMSMMaster request)
@@ -358,7 +358,7 @@ namespace CMMSAPIs.Controllers.SM
         }
 
 
-        [Authorize]
+        //[Authorize]
         [Route("DeleteAssetMaster")]
         [HttpPost]
         public async Task<IActionResult> DeleteAssetMaster(CMSMMaster request)
@@ -380,7 +380,7 @@ namespace CMMSAPIs.Controllers.SM
 
         //Get Asset List by plant ID
 
-        [Authorize]
+        //[Authorize]
         [Route("GetAssetDataList")]
         [HttpGet]
         public async Task<IActionResult> GetAssetDataList(int facility_id)
@@ -399,7 +399,7 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("GetVendorList")]
         [HttpGet]
         public async Task<IActionResult> GetVendorList()
@@ -419,7 +419,7 @@ namespace CMMSAPIs.Controllers.SM
         }
 
 
-        [Authorize]
+        //[Authorize]
         [Route("GetAssetBySerialNo")]
         [HttpGet]
         public async Task<IActionResult> GetAssetBySerialNo(string serial_number)
@@ -440,7 +440,7 @@ namespace CMMSAPIs.Controllers.SM
 
         
         // Paid By API's
-        [Authorize]
+        //[Authorize]
         [Route("GetPaidByList")]
         [HttpGet]
         public async Task<IActionResult> GetPaidByList(int id)
@@ -460,7 +460,7 @@ namespace CMMSAPIs.Controllers.SM
         }
 
 
-        [Authorize]
+        //[Authorize]
         [Route("AddPaidBy")]
         [HttpPost]
         public async Task<IActionResult> AddPaidBy(CMPaidBy request)
@@ -481,7 +481,7 @@ namespace CMMSAPIs.Controllers.SM
         }
 
 
-        [Authorize]
+        //[Authorize]
         [Route("UpdatePaidBy")]
         [HttpPost]
         public async Task<IActionResult> UpdatePaidBy(CMPaidBy request)
@@ -502,7 +502,7 @@ namespace CMMSAPIs.Controllers.SM
         }
 
 
-        [Authorize]
+        //[Authorize]
         [Route("DeletePaidBy")]
         [HttpPost]
         public async Task<IActionResult> DeletePaidBy(CMPaidBy request)

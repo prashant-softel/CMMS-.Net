@@ -28,7 +28,7 @@ namespace CMMSAPIs.Controllers.SM
         }
 
 
-        [Authorize] 
+        //[Authorize] 
         [Route("GetPlantStockReport")]
         [HttpGet]
         public async Task<IActionResult> GetPlantStockReport(string facility_id, DateTime StartDate, DateTime EndDate)
@@ -48,7 +48,7 @@ namespace CMMSAPIs.Controllers.SM
         }
 
 
-        [Authorize]
+        //[Authorize]
         [Route("GetEmployeeStockReport")]
         [HttpGet]
         public async Task<IActionResult> GetEmployeeStockReport(int facility_id, int Emp_id, DateTime StartDate, DateTime EndDate, string itemID)
@@ -68,7 +68,7 @@ namespace CMMSAPIs.Controllers.SM
         }
 
 
-        [Authorize]
+        //[Authorize]
         [Route("GetFaultyMaterialReport")]
         [HttpGet]
         public async Task<IActionResult> GetFaultyMaterialReport(string facility_id, string itemID, DateTime StartDate, DateTime EndDate)
@@ -88,7 +88,7 @@ namespace CMMSAPIs.Controllers.SM
         }
 
 
-        [Authorize]
+        //[Authorize]
         [Route("GetEmployeeTransactionReport")]
         [HttpGet]
         public async Task<IActionResult> GetEmployeeTransactionReport(int isAllEmployees, string facility_id, int Emp_ID, DateTime StartDate, DateTime EndDate)
@@ -107,7 +107,7 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("GetEmployeeStock")]
         [HttpGet]
         public async Task<IActionResult> GetEmployeeStock(int facility_ID, int emp_id)
