@@ -1,4 +1,4 @@
-﻿using CMMSAPIs.Helper;
+using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Masters;
 using CMMSAPIs.Models.PM;
 using CMMSAPIs.Models.Utils;
@@ -101,7 +101,7 @@ namespace CMMSAPIs.Repositories.PM
             string planListQry = $"SELECT plan.id as plan_id, plan.plan_name, plan.status as status_id, statuses.statusName as status_short, plan.plan_date, " +
                                     $"facilities.id as facility_id, facilities.name as facility_name, category.id as category_id, category.name as category_name, " +
                                     $"frequency.id as plan_freq_id, frequency.name as plan_freq_name, createdBy.id as created_by_id, " +
-                                    $"CONCAT(createdBy.firstName, ' ', createdBy.lastName) as created_by_name, plan.created_at,CONCAT(assignedTo.firstName, ' ', assignedTo.lastName) as assigned_to_name " +
+                                    $"CONCAT(createdBy.firstName, ' ', createdBy.lastName) as created_by_name, plan.created_at,CONCAT(assignedTo.firstName, ' ', assignedTo.lastName) as assigned_to_name , " +
                                     $"updatedBy.id as updated_by_id, CONCAT(updatedBy.firstName, ' ', updatedBy.lastName) as updated_by_name, plan.updated_at " +
                                     $"FROM pm_plan as plan " +
                                     $"LEFT JOIN statuses ON plan.status = statuses.softwareId " +
