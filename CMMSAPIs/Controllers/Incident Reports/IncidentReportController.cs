@@ -37,7 +37,7 @@ namespace CMMSAPIs.Controllers.Incident_Reports
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("CreateIncidentReport")]
         [HttpPost]
         public async Task<IActionResult> CreateIncidentReport(CMCreateIncidentReport request)
@@ -69,7 +69,7 @@ namespace CMMSAPIs.Controllers.Incident_Reports
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("UpdateIncidentReport")]
         [HttpPut]
         public async Task<IActionResult> UpdateIncidentReport(CMCreateIncidentReport request)
@@ -86,7 +86,7 @@ namespace CMMSAPIs.Controllers.Incident_Reports
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("ApproveIncidentReport")]
         [HttpPut]
         public async Task<IActionResult> ApproveIncidentReport(int incidentId)
@@ -103,7 +103,7 @@ namespace CMMSAPIs.Controllers.Incident_Reports
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("RejectIncidentReport")]
         [HttpPut]
         public async Task<IActionResult> RejectIncidentReport([FromForm] CMApproveIncident request)
