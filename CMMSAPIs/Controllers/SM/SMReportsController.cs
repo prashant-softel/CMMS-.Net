@@ -28,7 +28,7 @@ namespace CMMSAPIs.Controllers.SM
         }
 
 
-        //[Authorize] 
+        ////[Authorize] 
         [Route("GetPlantStockReport")]
         [HttpGet]
         public async Task<IActionResult> GetPlantStockReport(string facility_id, DateTime StartDate, DateTime EndDate)
