@@ -22,6 +22,12 @@ namespace CMMSAPIs.Models.PM
         public int created_by_id { get; set; }
         public string created_by_name { get; set; }
         public DateTime created_at { get; set; }
+        public int approved_by_id { get; set; }
+        public string approved_by_name { get; set; }
+        public DateTime approved_at { get; set; }
+        public int rejected_by_id { get; set; }
+        public string rejected_by_name { get; set; }
+        public DateTime rejected_at { get; set; }
         public int updated_by_id { get; set; }
         public string updated_by_name { get; set; }
         public DateTime updated_at { get; set; }

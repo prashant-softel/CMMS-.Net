@@ -10,6 +10,7 @@ using System.Data;
 using System.Threading.Tasks;
 using CMMSAPIs.Models.Notifications;
 using System.Numerics;
+using CMMSAPIs.Models.WC;
 
 namespace CMMSAPIs.Repositories.PM
 {
@@ -40,6 +41,37 @@ namespace CMMSAPIs.Repositories.PM
                     retValue = "Deleted"; break;
                 case CMMS.CMMS_Status.PM_PLAN_APPROVED:
                     retValue = "Approved"; break;
+                default:
+                    break;
+            }
+            return retValue;
+
+        }
+
+        internal string getLongStatus(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMPMPlanDetail PlanObj)
+        {
+            string retValue = " ";
+
+
+            switch (notificationID)
+            {
+                case CMMS.CMMS_Status.PM_PLAN_DRAFT:
+                    retValue = String.Format("PM Plan in Draft by {0}", PlanObj.created_by_name);
+                    break;
+                case CMMS.CMMS_Status.PM_PLAN_CREATED:
+                    retValue = String.Format("PM Plan submitted by {0}", PlanObj.created_by_name);
+                    break;
+                case CMMS.CMMS_Status.PM_PLAN_REJECTED:
+                    retValue = String.Format("PM Plan Rejected by {0}", PlanObj.rejected_by_name);
+                    break;
+                case CMMS.CMMS_Status.PM_PLAN_APPROVED:
+                    retValue = String.Format("PM Plan Approved by {0}", PlanObj.approved_by_name);
+                    break;
+                case CMMS.CMMS_Status.PM_PLAN_DELETED:
+                    //retValue = String.Format("Warranty Claim Dispachted by {0} at {1}", WCObj.dispatched_by, WCObj.dispatched_at);
+                    retValue = String.Format("PM Plan Deleted by {0} ", PlanObj.created_by_name);
+                    break;
+               
                 default:
                     break;
             }
@@ -101,7 +133,7 @@ namespace CMMSAPIs.Repositories.PM
             string planListQry = $"SELECT plan.id as plan_id, plan.plan_name, plan.status as status_id, statuses.statusName as status_short, plan.plan_date, " +
                                     $"facilities.id as facility_id, facilities.name as facility_name, category.id as category_id, category.name as category_name, " +
                                     $"frequency.id as plan_freq_id, frequency.name as plan_freq_name, createdBy.id as created_by_id, " +
-                                    $"CONCAT(createdBy.firstName, ' ', createdBy.lastName) as created_by_name, plan.created_at,CONCAT(assignedTo.firstName, ' ', assignedTo.lastName) as assigned_to_name , " +
+                                    $"CONCAT(createdBy.firstName, ' ', createdBy.lastName) as created_by_name, plan.created_at,CONCAT(assignedTo.firstName, ' ', assignedTo.lastName) as assigned_to_name, " +
                                     $"updatedBy.id as updated_by_id, CONCAT(updatedBy.firstName, ' ', updatedBy.lastName) as updated_by_name, plan.updated_at " +
                                     $"FROM pm_plan as plan " +
                                     $"LEFT JOIN statuses ON plan.status = statuses.softwareId " +
@@ -141,7 +173,7 @@ namespace CMMSAPIs.Repositories.PM
             string planListQry = $"SELECT plan.id as plan_id, plan.plan_name, plan.status as status_id, statuses.statusName as status_short, plan.plan_date, " +
                                     $"facilities.id as facility_id, facilities.name as facility_name, category.id as category_id, category.name as category_name, " +
                                     $"frequency.id as plan_freq_id, frequency.name as plan_freq_name, createdBy.id as created_by_id, " +
-                                    $"CONCAT(createdBy.firstName, ' ', createdBy.lastName) as created_by_name, plan.created_at,CONCAT(assignedTo.firstName, ' ', assignedTo.lastName) as assigned_to_name " +
+                                    $"CONCAT(createdBy.firstName, ' ', createdBy.lastName) as created_by_name, plan.created_at,approvedBy.id as approved_by_id, CONCAT(approvedBy.firstName, ' ', approvedBy.lastName) as approved_by_name, plan.approved_at, rejectedBy.id as rejected_by_id, CONCAT(rejectedBy.firstName, ' ', rejectedBy.lastName) as rejected_by_name, plan.rejected_at,CONCAT(assignedTo.firstName, ' ', assignedTo.lastName) as assigned_to_name, " +
                                     $"updatedBy.id as updated_by_id, CONCAT(updatedBy.firstName, ' ', updatedBy.lastName) as updated_by_name, plan.updated_at " +
                                     $"FROM pm_plan as plan " +
                                     $"LEFT JOIN statuses ON plan.status = statuses.softwareId " +
@@ -150,6 +182,8 @@ namespace CMMSAPIs.Repositories.PM
                                     $"LEFT JOIN frequency ON plan.frequency_id = frequency.id " +
                                     $"LEFT JOIN users as createdBy ON createdBy.id = plan.created_by " +
                                     $"LEFT JOIN users as updatedBy ON updatedBy.id = plan.updated_by " +
+                                    $"LEFT JOIN users as approvedBy ON approvedBy.id = plan.approved_by " +
+                                    $"LEFT JOIN users as rejectedBy ON rejectedBy.id = plan.rejected_by " +
                                     $"LEFT JOIN users as assignedTo ON assignedTo.id = plan.assigned_to " +
 
                                     $"WHERE plan.id = {id} ";
@@ -170,6 +204,10 @@ namespace CMMSAPIs.Repositories.PM
             CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(planDetails[0].status_id);
             string _shortStatus = getShortStatus(CMMS.CMMS_Modules.PM_PLAN, _Status);
             planDetails[0].status_short = _shortStatus;
+
+            CMMS.CMMS_Status _Status_long = (CMMS.CMMS_Status)(planDetails[0].status_id);
+            string _longStatus = getLongStatus(CMMS.CMMS_Modules.WARRANTY_CLAIM, _Status_long, planDetails[0]);
+            planDetails[0].status_long = _longStatus;
 
             return planDetails[0];
         }

@@ -43,7 +43,28 @@ namespace CMMSAPIs.Controllers.PM
             }
         }
 
-        //[Authorize]
+        [Authorize]
+        [Route("GetPMPlanDetail")]
+        [HttpGet]
+        public async Task<IActionResult> GetPMPlanDetail(int planId)
+        {
+            try
+            {
+               // int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _PMBS.GetPMPlanDetail(planId);
+                return Ok(data);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
         [Route("ApprovePMPlan")]
         [HttpPut]
         public async Task<IActionResult> ApprovePMPlan(CMApproval request)
@@ -63,8 +84,8 @@ namespace CMMSAPIs.Controllers.PM
                 throw;
             }
         }
-
-        //[Authorize]
+        
+        [Authorize]
         [Route("RejectPMPlan")]
         [HttpPut]
         public async Task<IActionResult> RejectPMPlan(CMApproval request)
@@ -85,10 +106,13 @@ namespace CMMSAPIs.Controllers.PM
             }
         }
 
-        //[Authorize]
+
+
+        [Authorize]
         [Route("DeletePMPlan")]
-        [HttpPut]
+        [HttpGet]
         public async Task<IActionResult> DeletePMPlan(int planId)
+
         {
             try
             {
@@ -106,8 +130,8 @@ namespace CMMSAPIs.Controllers.PM
             }
         }
 
-        //[Authorize]
-        [Route("GetPMPlanList")]
+        [Authorize]
+        [Route("GetPMPlanList")]    
         [HttpGet]
         public async Task<IActionResult> GetPMPlanList(int facility_id, int category_id, int frequency_id, DateTime? start_date, DateTime? end_date)
         {
@@ -124,27 +148,7 @@ namespace CMMSAPIs.Controllers.PM
             {
                 throw;
             }
-        }
-
-        //[Authorize]
-        [Route("GetPMPlanDetail")]
-        [HttpGet]
-        public async Task<IActionResult> GetScheduleData(int id)
-        {
-            try
-            {
-                var data = await _PMBS.GetPMPlanDetail(id);
-                return Ok(data);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
+        }      
 
         //[Authorize]
         [Route("GetScheduleData")]
