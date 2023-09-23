@@ -73,9 +73,9 @@ namespace CMMSAPIs.Repositories.PM
                     $"and {invalidAssets.Count} invalid assets [{string.Join(',', invalidAssets)}] linked");
 
             string addPlanQry = $"INSERT INTO pm_plan(plan_name, facility_id, category_id, frequency_id, " +
-                                $"status, plan_date, created_by, created_at, updated_by, updated_at) VALUES " +
+                                $"status, plan_date,assigned_to, created_by, created_at, updated_by, updated_at) VALUES " +
                                 $"('{pm_plan.plan_name}', {pm_plan.facility_id}, {pm_plan.category_id}, {pm_plan.plan_freq_id}, " +
-                                $"{status}, '{pm_plan.plan_date.ToString("yyyy-MM-dd")}', " +
+                                $"{status}, '{pm_plan.plan_date.ToString("yyyy-MM-dd")}',{pm_plan.assign_to_id}, " +
                                 $"{userID}, '{UtilsRepository.GetUTCTime()}', {userID}, '{UtilsRepository.GetUTCTime()}'); " +
                                 $"SELECT LAST_INSERT_ID(); ";
             DataTable dt3 = await Context.FetchData(addPlanQry).ConfigureAwait(false);
@@ -101,7 +101,7 @@ namespace CMMSAPIs.Repositories.PM
             string planListQry = $"SELECT plan.id as plan_id, plan.plan_name, plan.status as status_id, statuses.statusName as status_short, plan.plan_date, " +
                                     $"facilities.id as facility_id, facilities.name as facility_name, category.id as category_id, category.name as category_name, " +
                                     $"frequency.id as plan_freq_id, frequency.name as plan_freq_name, createdBy.id as created_by_id, " +
-                                    $"CONCAT(createdBy.firstName, ' ', createdBy.lastName) as created_by_name, plan.created_at, " +
+                                    $"CONCAT(createdBy.firstName, ' ', createdBy.lastName) as created_by_name, plan.created_at,CONCAT(assignedTo.firstName, ' ', assignedTo.lastName) as assigned_to_name " +
                                     $"updatedBy.id as updated_by_id, CONCAT(updatedBy.firstName, ' ', updatedBy.lastName) as updated_by_name, plan.updated_at " +
                                     $"FROM pm_plan as plan " +
                                     $"LEFT JOIN statuses ON plan.status = statuses.softwareId " +
@@ -110,6 +110,7 @@ namespace CMMSAPIs.Repositories.PM
                                     $"LEFT JOIN frequency ON plan.frequency_id = frequency.id " +
                                     $"LEFT JOIN users as createdBy ON createdBy.id = plan.created_by " +
                                     $"LEFT JOIN users as updatedBy ON updatedBy.id = plan.updated_by " +
+                                    $"LEFT JOIN users as assignedTo ON assignedTo.id = plan.assigned_to " +
                                     $"WHERE facilities.id = {facility_id} ";
             if (category_id > 0)
                 planListQry += $"AND category.id = {category_id} ";
@@ -140,7 +141,7 @@ namespace CMMSAPIs.Repositories.PM
             string planListQry = $"SELECT plan.id as plan_id, plan.plan_name, plan.status as status_id, statuses.statusName as status_short, plan.plan_date, " +
                                     $"facilities.id as facility_id, facilities.name as facility_name, category.id as category_id, category.name as category_name, " +
                                     $"frequency.id as plan_freq_id, frequency.name as plan_freq_name, createdBy.id as created_by_id, " +
-                                    $"CONCAT(createdBy.firstName, ' ', createdBy.lastName) as created_by_name, plan.created_at, " +
+                                    $"CONCAT(createdBy.firstName, ' ', createdBy.lastName) as created_by_name, plan.created_at,CONCAT(assignedTo.firstName, ' ', assignedTo.lastName) as assigned_to_name " +
                                     $"updatedBy.id as updated_by_id, CONCAT(updatedBy.firstName, ' ', updatedBy.lastName) as updated_by_name, plan.updated_at " +
                                     $"FROM pm_plan as plan " +
                                     $"LEFT JOIN statuses ON plan.status = statuses.softwareId " +
@@ -149,6 +150,8 @@ namespace CMMSAPIs.Repositories.PM
                                     $"LEFT JOIN frequency ON plan.frequency_id = frequency.id " +
                                     $"LEFT JOIN users as createdBy ON createdBy.id = plan.created_by " +
                                     $"LEFT JOIN users as updatedBy ON updatedBy.id = plan.updated_by " +
+                                    $"LEFT JOIN users as assignedTo ON assignedTo.id = plan.assigned_to " +
+
                                     $"WHERE plan.id = {id} ";
             List<CMPMPlanDetail>  planDetails = await Context.GetData<CMPMPlanDetail>(planListQry).ConfigureAwait(false);
 
@@ -333,7 +336,25 @@ namespace CMMSAPIs.Repositories.PM
                 $" where id = {request.id}";
             int reject_id = await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
 
+            string mainQuery = $"INSERT INTO pm_task(plan_id,facility_id,category_id,frequency_id,plan_Date,assigned_to,status)  " +
+                               $"select id as plan_id,facility_id,category_id,frequency_id,plan_Date,assigned_to,{(int)CMMS.CMMS_Status.PM_SCHEDULED} as status from pm_plan where id = {request.id}; " +
+                               $"SELECT LAST_INSERT_ID(); ";
+            DataTable dt3 = await Context.FetchData(mainQuery).ConfigureAwait(false);
+            int id = Convert.ToInt32(dt3.Rows[0][0]);
+
+            string scheduleQry = $"INSERT INTO pm_schedule(task_id,plan_id,Asset_id,checklist_id,status) " +
+                                $"select {id} as task_id,planId as plan_id, assetId as Asset_id, checklistId as checklist_id,{(int)CMMS.CMMS_Status.PM_SCHEDULED} as status from pmplanassetchecklist where planId = {request.id}";
+            await Context.ExecuteNonQry<int>(scheduleQry);
+            
+            string setCodeNameQuery = "UPDATE pm_schedule " +
+                                        "SET PM_Schedule_Code = CONCAT(id,Facility_Code,Asset_Category_Code,Asset_Code,PM_Frequecy_Code), " +
+                                        "PM_Schedule_Name = CONCAT(id,' ',Facility_Name,' ',Asset_Category_name,' ',Asset_Name), " +
+                                        "PM_Schedule_Number = CONCAT('SCH',id), " +
+                                        "PM_Maintenance_Order_Number = CONCAT('PMSCH',id);";
+            await Context.ExecuteNonQry<int>(setCodeNameQuery);
+
             retCode = CMMS.RETRUNSTATUS.SUCCESS;
+
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_PLAN, request.id, 0, 0, "PM Plan Approved ", CMMS.CMMS_Status.PM_PLAN_APPROVED);
 
@@ -352,8 +373,8 @@ namespace CMMSAPIs.Repositories.PM
 
             string approveQuery = $"Update pm_plan set status = {(int)CMMS.CMMS_Status.PM_PLAN_REJECTED} , " +
                 $"remarks = '{request.comment}',  " +
-                $" rejeccted_by = {userId}, rejected_at = {UtilsRepository.GetUTCTime()} " +
-                $" where id = {request.id}";
+                $"rejected_by = {userId}, rejected_at = '{UtilsRepository.GetUTCTime()}' " +
+                $" where id = {request.id} ";
             int reject_id = await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
 
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
@@ -372,7 +393,7 @@ namespace CMMSAPIs.Repositories.PM
 
         internal async Task<CMDefaultResponse> DeletePMPlan(int planId, int userID)
         {
-            string approveQuery = $"Delete from pm_plan where id ={planId}";
+            string approveQuery = $"Delete from pm_plan where id = {planId}; Delete from pmplanassetchecklist where planId = {planId}; ";
             await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_PLAN, planId, 0, 0, $"PM Plan Deleted by user {userID}", CMMS.CMMS_Status.PM_PLAN_DELETED);

@@ -266,7 +266,7 @@ namespace CMMSAPIs.Repositories.Masters
              * Code goes here
             */
             string myQuery = "SELECT " +
-                                "checkpoint.id as id, check_point, check_list_id as checklist_id, checklist_number.checklist_number as checklist_name, requirement, is_document_required, action_to_be_done, checkpoint.created_by as created_by_id, CONCAT(created_user.firstName,' ',created_user.lastName) as created_by_name, checkpoint.created_at, checkpoint.updated_by as updated_by_id, CONCAT(updated_user.firstName,' ',updated_user.lastName) as updated_by_name, checkpoint.updated_at, checkpoint.status " +
+                                "checkpoint.id as id, check_point, check_list_id as checklist_id, checklist_number.checklist_number as checklist_name, requirement, is_document_required, action_to_be_done, checkpoint.created_by as created_by_id, CONCAT(created_user.firstName,' ',created_user.lastName) as created_by_name, checkpoint.created_at, checkpoint.updated_by as updated_by_id, CONCAT(updated_user.firstName,' ',updated_user.lastName) as updated_by_name, checkpoint.updated_at, checkpoint.status ,checkpoint.failure_weightage,CASE WHEN checkpoint.type = 1 then 'Bool' WHEN checkpoint.type = 2 then 'Range' ELSE 'Unknown Type' END as checkpoint_type , checkpoint.min_range as min ,checkpoint.max_range as max " +
                              "FROM " + 
                                 "checkpoint " + 
                              "LEFT JOIN " + 
@@ -300,9 +300,9 @@ namespace CMMSAPIs.Repositories.Masters
             foreach (CMCreateCheckPoint request in requestList)
             {
                 string query = "INSERT INTO  checkpoint (check_point, check_list_id, requirement, is_document_required, " +
-                                "action_to_be_done, created_by, created_at, status) VALUES " +
+                                "action_to_be_done,failure_weightage,type,min_range,max_range ,created_by, created_at, status) VALUES " +
                                 $"('{request.check_point}', {request.checklist_id}, '{request.requirement}', " +
-                                $"{(request.is_document_required==null?0: request.is_document_required)}, '{request.action_to_be_done}', " +
+                                $"{(request.is_document_required==null?0 : request.is_document_required)}, '{request.action_to_be_done}', '{request.failure_weightage}', '{request.checkpoint_type.id}', '{request.checkpoint_type.min}','{request.checkpoint_type.max}'," +
                                 $"{userID}, '{UtilsRepository.GetUTCTime()}', 1); select LAST_INSERT_ID();";
 
                 DataTable dt = await Context.FetchData(query).ConfigureAwait(false);
@@ -336,6 +336,10 @@ namespace CMMSAPIs.Repositories.Masters
                 updateQry += $"action_to_be_done = '{request.action_to_be_done}', ";
             if (request.status != null)
                 updateQry += $"status = {request.status}, ";
+            if (request.checkpoint_type != null)
+                updateQry += $"type = '{request.checkpoint_type.id}', min_range = '{request.checkpoint_type.min}',max_range = '{request.checkpoint_type.max}', ";
+            if (request.failure_weightage != 0)
+                updateQry += $"failure_weightage = {request.failure_weightage}, ";
             updateQry += $"updated_by = {userID}, updated_at='{UtilsRepository.GetUTCTime()}' WHERE id = {request.id};";
             await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.CHECKPOINTS, request.id, 0, 0, "Check Point Updated", CMMS.CMMS_Status.UPDATED, userID);

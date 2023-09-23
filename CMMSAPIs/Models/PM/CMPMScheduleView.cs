@@ -24,6 +24,25 @@ namespace CMMSAPIs.Models.PM
         public string status_name { get; set; }
     }
 
+    public class CMPMTaskList
+    {
+        public int id { get; set; }
+        public int facility_id { get; set; }
+        public string task_id { get; set; }
+        public string plan_title { get; set; }
+        public DateTime? last_done_date { get; set; }
+        public DateTime? due_date { get; set; }
+        public DateTime? done_date { get; set; }
+        public int frequency_id { get; set; }
+        public string frequency_name { get; set; }
+        public int assigned_to_id { get; set; }
+        public string assigned_to_name { get; set; }                
+        public int permit_id { get; set; }
+        public string permit_code { get; set; }
+        public int status { get; set; }
+        public string status_short { get; set; }
+    }
+
     public class CMPMScheduleViewDetail : CMPMScheduleView
     {   
         public int facility_id { get; set; }

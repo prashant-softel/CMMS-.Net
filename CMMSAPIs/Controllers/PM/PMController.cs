@@ -44,6 +44,69 @@ namespace CMMSAPIs.Controllers.PM
         }
 
         [Authorize]
+        [Route("ApprovePMPlan")]
+        [HttpPut]
+        public async Task<IActionResult> ApprovePMPlan(CMApproval request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _PMBS.ApprovePMPlan(request, userID);
+                return Ok(data);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
+        [Route("RejectPMPlan")]
+        [HttpPut]
+        public async Task<IActionResult> RejectPMPlan(CMApproval request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _PMBS.RejectPMPlan(request, userID);
+                return Ok(data);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
+        [Route("DeletePMPlan")]
+        [HttpPut]
+        public async Task<IActionResult> DeletePMPlan(int planId)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _PMBS.DeletePMPlan(planId,userID);
+                return Ok(data);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [Authorize]
         [Route("GetPMPlanList")]
         [HttpGet]
         public async Task<IActionResult> GetPMPlanList(int facility_id, int category_id, int frequency_id, DateTime? start_date, DateTime? end_date)
@@ -122,63 +185,46 @@ namespace CMMSAPIs.Controllers.PM
             {
                 throw;
             }
-        }
+        }       
 
-        [Authorize]
-        [Route("ApprovePMPlan")]
-        [HttpPut]
-        internal async Task<IActionResult> ApprovePMPlan(CMApproval request)
-        {
-            try
-            {
-                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _PMBS.ApprovePMPlan(request, userID);
-                return Ok(data);
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        }
+        //[Authorize]
+        //[Route("RejectPMPlan")]
+        //[HttpPut]
+        //internal async Task<IActionResult> RejectPMPlan(CMApproval request)
+        //{
+        //    try
+        //    {
+        //        int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+        //        var data = await _PMBS.RejectPMPlan(request, userID);
+        //        return Ok(data);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        throw;
+        //    }
 
-        [Authorize]
-        [Route("RejectPMPlan")]
-        [HttpPut]
-        internal async Task<IActionResult> RejectPMPlan(CMApproval request)
-        {
-            try
-            {
-                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _PMBS.RejectPMPlan(request, userID);
-                return Ok(data);
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
+        //}
 
-        }
+        //[Authorize]
+        //[Route("deleteHaresh")]
+        //[HttpPut]
+        //internal async Task<IActionResult> DeletePMPlan(int planId)
+        //{
+        //    try
+        //    {
+        //        int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+        //        var data = await _PMBS.DeletePMPlan(planId, userID);
+        //        return Ok(data);
+        //    }
+        //    catch (ArgumentException ex)
+        //    {
+        //        return BadRequest(ex.Message);
+        //    }
+        //    catch (Exception)
+        //    {
+        //        throw;
+        //    }
 
-        [Authorize]
-        [Route("DeletePMPlan")]
-        [HttpPut]
-        internal async Task<IActionResult> DeletePMPlan(int planId)
-        {
-            try
-            {
-                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _PMBS.DeletePMPlan(planId, userID);
-                return Ok(data);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-
-        }
+        //}
     }
 }

@@ -11,7 +11,7 @@ namespace CMMSAPIs.BS.PM
 {
     public interface IPMScheduleViewBS
     {
-        Task<List<CMPMScheduleView>> GetPMTaskList(int facility_id, DateTime? start_date, DateTime? end_date, string categoryIds, string frequencyIds);
+        Task<List<CMPMTaskList>> GetPMTaskList(int facility_id, DateTime? start_date, DateTime? end_date, int[] frequencyIds);
         Task<CMDefaultResponse> CancelPMTask(CMApproval request, int userID);
         Task<CMPMScheduleViewDetail> GetPMTaskDetail(int schedule_id);
         Task<CMDefaultResponse> AddCustomCheckpoint(CMCustomCheckPoint request, int userID);
@@ -32,13 +32,13 @@ namespace CMMSAPIs.BS.PM
             databaseProvider = dbProvider;
         }
 
-        public async Task<List<CMPMScheduleView>> GetPMTaskList(int facility_id, DateTime? start_date, DateTime? end_date, string categoryIds, string frequencyIds)
+        public async Task<List<CMPMTaskList>> GetPMTaskList(int facility_id, DateTime? start_date, DateTime? end_date, int[] frequencyIds)
         {
             try
             {
                 using (var repos = new PMScheduleViewRepository(getDB))
                 {
-                    return await repos.GetPMTaskList(facility_id, start_date, end_date, categoryIds, frequencyIds);
+                    return await repos.GetPMTaskList(facility_id, start_date, end_date, frequencyIds);
                 }
             }
             catch (Exception)
