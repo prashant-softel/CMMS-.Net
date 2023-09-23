@@ -22,7 +22,7 @@ namespace CMMSAPIs.Controllers.PM
             _PMBS = pm;
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("CreatePMPlan")]
         [HttpPost]
         public async Task<IActionResult> CreatePMPlan(CMPMPlanDetail pm_plan)
@@ -43,7 +43,7 @@ namespace CMMSAPIs.Controllers.PM
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("ApprovePMPlan")]
         [HttpPut]
         public async Task<IActionResult> ApprovePMPlan(CMApproval request)
@@ -64,7 +64,7 @@ namespace CMMSAPIs.Controllers.PM
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("RejectPMPlan")]
         [HttpPut]
         public async Task<IActionResult> RejectPMPlan(CMApproval request)
@@ -85,7 +85,7 @@ namespace CMMSAPIs.Controllers.PM
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("DeletePMPlan")]
         [HttpPut]
         public async Task<IActionResult> DeletePMPlan(int planId)
@@ -106,7 +106,7 @@ namespace CMMSAPIs.Controllers.PM
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("GetPMPlanList")]
         [HttpGet]
         public async Task<IActionResult> GetPMPlanList(int facility_id, int category_id, int frequency_id, DateTime? start_date, DateTime? end_date)
@@ -126,7 +126,7 @@ namespace CMMSAPIs.Controllers.PM
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("GetPMPlanDetail")]
         [HttpGet]
         public async Task<IActionResult> GetScheduleData(int id)
@@ -146,7 +146,7 @@ namespace CMMSAPIs.Controllers.PM
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("GetScheduleData")]
         [HttpGet]
         public async Task<IActionResult> GetScheduleData(int facility_id, int category_id)
@@ -166,7 +166,7 @@ namespace CMMSAPIs.Controllers.PM
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("SetScheduleData")]
         [HttpPost]
         public async Task<IActionResult> SetScheduleData(CMSetScheduleData request)
@@ -187,7 +187,7 @@ namespace CMMSAPIs.Controllers.PM
             }
         }       
 
-        //[Authorize]
+        ////[Authorize]
         //[Route("RejectPMPlan")]
         //[HttpPut]
         //internal async Task<IActionResult> RejectPMPlan(CMApproval request)
@@ -205,7 +205,7 @@ namespace CMMSAPIs.Controllers.PM
 
         //}
 
-        //[Authorize]
+        ////[Authorize]
         //[Route("deleteHaresh")]
         //[HttpPut]
         //internal async Task<IActionResult> DeletePMPlan(int planId)
