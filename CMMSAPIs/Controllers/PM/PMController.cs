@@ -43,7 +43,7 @@ namespace CMMSAPIs.Controllers.PM
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("GetPMPlanDetail")]
         [HttpGet]
         public async Task<IActionResult> GetPMPlanDetail(int planId)
@@ -64,7 +64,7 @@ namespace CMMSAPIs.Controllers.PM
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("ApprovePMPlan")]
         [HttpPut]
         public async Task<IActionResult> ApprovePMPlan(CMApproval request)
@@ -85,7 +85,7 @@ namespace CMMSAPIs.Controllers.PM
             }
         }
         
-        [Authorize]
+        //[Authorize]
         [Route("RejectPMPlan")]
         [HttpPut]
         public async Task<IActionResult> RejectPMPlan(CMApproval request)
@@ -108,7 +108,7 @@ namespace CMMSAPIs.Controllers.PM
 
 
 
-        [Authorize]
+        //[Authorize]
         [Route("DeletePMPlan")]
         [HttpGet]
         public async Task<IActionResult> DeletePMPlan(int planId)
@@ -130,7 +130,7 @@ namespace CMMSAPIs.Controllers.PM
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [Route("GetPMPlanList")]    
         [HttpGet]
         public async Task<IActionResult> GetPMPlanList(int facility_id, int category_id, int frequency_id, DateTime? start_date, DateTime? end_date)
