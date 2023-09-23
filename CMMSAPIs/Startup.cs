@@ -47,24 +47,24 @@ namespace CMMSAPIs
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddAuthentication(authOption =>
-            {
-                authOption.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                authOption.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            }).AddJwtBearer(jwtOption =>
-            {
-                var key = Configuration.GetValue<string>("JwtConfig:Key");
-                var keyBytes = Encoding.ASCII.GetBytes(key);
-                jwtOption.SaveToken = true;
-                jwtOption.TokenValidationParameters = new TokenValidationParameters
-                {
-                    IssuerSigningKey = new SymmetricSecurityKey(keyBytes),
-                    ValidateLifetime = true,
-                    ValidateAudience = false,
-                    ValidateIssuer = false,
-                    ClockSkew = TimeSpan.Zero
-                };
-            });
+         //services.AddAuthentication(authOption =>
+            //{
+            //    authOption.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            //    authOption.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            //}).AddJwtBearer(jwtOption =>
+            //{
+            //    var key = Configuration.GetValue<string>("JwtConfig:Key");
+            //    var keyBytes = Encoding.ASCII.GetBytes(key);
+            //    jwtOption.SaveToken = true;
+            //    jwtOption.TokenValidationParameters = new TokenValidationParameters
+            //    {
+            //        IssuerSigningKey = new SymmetricSecurityKey(keyBytes),
+            //        ValidateLifetime = true,
+            //        ValidateAudience = false,
+            //        ValidateIssuer = false,
+            //        ClockSkew = TimeSpan.Zero
+            //    };
+            //});
 
             services.AddDistributedMemoryCache();
             services.AddSession(options => {
