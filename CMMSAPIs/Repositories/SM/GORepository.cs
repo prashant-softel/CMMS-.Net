@@ -220,8 +220,8 @@ namespace CMMSAPIs.Repositories
 
                 for (var i = 0; i < request.go_items.Count; i++)
                 {
-                    string poDetailsQuery = $"INSERT INTO smpurchaseorderdetails (purchaseID,assetItemID,cost,ordered_qty,location_ID, paid_by_ID) " +
-                    "values(" + poid + ", " + request.go_items[i].assetItemID + ",  " + request.go_items[i].cost + ", " + request.go_items[i].ordered_qty + ", " + request.location_ID + ", " + request.go_items[i].paid_by_ID +") ; SELECT LAST_INSERT_ID();";
+                    string poDetailsQuery = $"INSERT INTO smpurchaseorderdetails (purchaseID,assetItemID,cost,ordered_qty,location_ID, paid_by_ID, requested_qty) " +
+                    "values(" + poid + ", " + request.go_items[i].assetItemID + ",  " + request.go_items[i].cost + ", " + request.go_items[i].ordered_qty + ", " + request.location_ID + ", " + request.go_items[i].paid_by_ID +", " + request.go_items[i].requested_qty +") ; SELECT LAST_INSERT_ID();";
                     DataTable dtInsertPO = await Context.FetchData(poDetailsQuery).ConfigureAwait(false);
                     int id = Convert.ToInt32(dtInsertPO.Rows[0][0]);
                 }
