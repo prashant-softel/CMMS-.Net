@@ -2,6 +2,7 @@
 using CMMSAPIs.Helper;
 using System;
 using System.Collections.Generic;
+using CMMSAPIs.Models.Masters;
 
 namespace CMMSAPIs.Models.PM
 {
@@ -28,13 +29,15 @@ namespace CMMSAPIs.Models.PM
     {
         public int id { get; set; }
         public int facility_id { get; set; }
-        public string task_id { get; set; }
+        public string task_code { get; set; }
         public string plan_title { get; set; }
         public DateTime? last_done_date { get; set; }
         public DateTime? due_date { get; set; }
         public DateTime? done_date { get; set; }
         public int frequency_id { get; set; }
         public string frequency_name { get; set; }
+        public int category_id { get; set; }
+        public string category_name { get; set; }
         public int assigned_to_id { get; set; }
         public string assigned_to_name { get; set; }                
         public int permit_id { get; set; }
@@ -43,6 +46,21 @@ namespace CMMSAPIs.Models.PM
         public string status_short { get; set; }
     }
 
+    public class CMPMScheduleExecutionDetail
+    {
+        public int schedule_id { get; set; }
+        public string asset_name { get; set; }
+        public string checklist_name { get; set; }
+        public List<ScheduleCheckList> checklist_observation { get; set; }
+        public List<ScheduleLinkJob> schedule_link_job { get; set; }
+
+    }
+    public class CMPMTaskView: CMPMTaskList
+    {
+       public List<CMPMScheduleExecutionDetail> schedules { get; set; }
+
+
+    }
     public class CMPMScheduleViewDetail : CMPMScheduleView
     {   
         public int facility_id { get; set; }
@@ -75,18 +93,23 @@ namespace CMMSAPIs.Models.PM
 
 
     }
-
+    
     public class ScheduleCheckList 
     {
         public int execution_id { get; set; }
         public int check_point_id { get; set; }
         public string check_point_name { get; set; }
         public string requirement { get; set; }
+        public int failure_waightage { get; set; }
+        public List<ScheduleFiles> files { get; set; }
+        public int check_point_type { get; set; }
+        public int type_range { get; set; }
+        public int type_bool { get; set; }
+        public string type_text { get; set; }
         public string observation { get; set; }
         public int linked_job_id { get; set; }
         public int is_custom_check_point { get; set; }
         public int is_file_required { get; set; }
-        public List<ScheduleFiles> files { get; set; }
     }
 
     public class ScheduleFiles

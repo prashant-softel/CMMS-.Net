@@ -220,6 +220,7 @@ namespace CMMSAPIs.Helper
             PM_SCHEDULE_REPORT,
             PM_SUMMARY,
             PM_PLAN,
+            PM_TASK,
 
             SM_MASTER = 31,
             SM_PO,

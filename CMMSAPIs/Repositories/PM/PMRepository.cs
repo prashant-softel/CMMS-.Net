@@ -380,8 +380,8 @@ namespace CMMSAPIs.Repositories.PM
             DataTable dt3 = await Context.FetchData(mainQuery).ConfigureAwait(false);
             int id = Convert.ToInt32(dt3.Rows[0][0]);
 
-            string scheduleQry = $"INSERT INTO pm_schedule(task_id,plan_id,Asset_id,checklist_id,status) " +
-                                $"select {id} as task_id,planId as plan_id, assetId as Asset_id, checklistId as checklist_id,{(int)CMMS.CMMS_Status.PM_SCHEDULED} as status from pmplanassetchecklist where planId = {request.id}";
+            string scheduleQry = $"INSERT INTO pm_schedule(task_id,plan_id,Asset_id,checklist_id,PM_Schedule_date,status) " +
+                                $"select {id} as task_id,planId as plan_id, assetId as Asset_id, checklistId as checklist_id,plan_date as PM_Schedule_date,{(int)CMMS.CMMS_Status.PM_SCHEDULED} as status from pmplanassetchecklist where planId = {request.id}";
             await Context.ExecuteNonQry<int>(scheduleQry);
             
             string setCodeNameQuery = "UPDATE pm_schedule " +
