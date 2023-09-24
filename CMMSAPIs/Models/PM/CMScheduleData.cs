@@ -74,6 +74,7 @@ namespace CMMSAPIs.Models.PM
 
     public class ScheduleIDData
     {
+        public int task_id { get; set; }
         public int schedule_id { get; set; }
         public int facility_id { get; set; }
         public int block_id { get; set; }

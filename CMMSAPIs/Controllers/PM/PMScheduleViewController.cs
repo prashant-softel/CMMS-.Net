@@ -22,26 +22,6 @@ namespace CMMSAPIs.Controllers.PM
         }
 
         //[Authorize]
-        [Route("GetPMTaskList")]
-        [HttpGet]
-        public async Task<IActionResult> GetPMTaskList(int facility_id, DateTime? start_date, DateTime? end_date, int[] frequencyIds)
-        {
-            try
-            {
-                var data = await _PMScheduleViewBS.GetPMTaskList(facility_id, start_date, end_date, frequencyIds);
-                return Ok(data);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        //[Authorize]
         [Route("CancelPMTask")]
         [HttpPut]
         public async Task<IActionResult> CancelPMTask(CMApproval request)
@@ -61,11 +41,11 @@ namespace CMMSAPIs.Controllers.PM
         //[Authorize]
         [Route("GetPMTaskDetail")]
         [HttpGet]
-        public async Task<IActionResult> GetPMTaskDetail(int schedule_id)
+        public async Task<IActionResult> GetPMTaskDetail(int task_id)
         {
             try
             {
-                var data = await _PMScheduleViewBS.GetPMTaskDetail(schedule_id);
+                var data = await _PMScheduleViewBS.GetPMTaskDetail(task_id);
                 return Ok(data);
             }
             catch (ArgumentException ex)
@@ -73,6 +53,30 @@ namespace CMMSAPIs.Controllers.PM
                 return BadRequest(ex.Message);
             }
             catch(MissingMemberException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        //[Authorize]
+        [Route("GetPMTaskList")]
+        [HttpGet]
+        public async Task<IActionResult> GetPMTaskList(int facility_id, DateTime? start_date, DateTime? end_date, string frequencyIds, string categoryIds)
+        {
+            try
+            {
+                var data = await _PMScheduleViewBS.GetPMTaskList(facility_id,  start_date,  end_date, frequencyIds, categoryIds);
+                return Ok(data);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (MissingMemberException ex)
             {
                 return NotFound(ex.Message);
             }
@@ -117,14 +121,14 @@ namespace CMMSAPIs.Controllers.PM
         }
 
         //[Authorize]
-        [Route("SetPMTask")]
+        [Route("StartPMTask")]
         [HttpPost]
-        public async Task<IActionResult> SetPMTask(int schedule_id)
+        public async Task<IActionResult> StartPMTask(int task_id)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _PMScheduleViewBS.SetPMTask(schedule_id, userID);
+                var data = await _PMScheduleViewBS.StartPMTask(task_id, userID);
                 return Ok(data);
             }
             catch (FieldAccessException ex)

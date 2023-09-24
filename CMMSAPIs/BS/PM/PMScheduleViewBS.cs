@@ -11,11 +11,11 @@ namespace CMMSAPIs.BS.PM
 {
     public interface IPMScheduleViewBS
     {
-        Task<List<CMPMTaskList>> GetPMTaskList(int facility_id, DateTime? start_date, DateTime? end_date, int[] frequencyIds);
+        Task<List<CMPMTaskList>> GetPMTaskList(int facility_id, DateTime? start_date, DateTime? end_date, string frequencyIds, string categoryIds);
         Task<CMDefaultResponse> CancelPMTask(CMApproval request, int userID);
-        Task<CMPMScheduleViewDetail> GetPMTaskDetail(int schedule_id);
+        Task<CMPMTaskView> GetPMTaskDetail(int task_id);
         Task<CMDefaultResponse> AddCustomCheckpoint(CMCustomCheckPoint request, int userID);
-        Task<CMDefaultResponse> SetPMTask(int schedule_id, int userID);
+        Task<CMDefaultResponse> StartPMTask(int task_id, int userID);
         Task<List<CMDefaultResponse>> UpdatePMTaskExecution(CMPMExecutionDetail request, int userID);
         Task<CMDefaultResponse> ClosePMTaskExecution(CMApproval request, int userID);
         Task<CMRescheduleApprovalResponse> ApprovePMTaskExecution(CMApproval request, int userID);
@@ -32,13 +32,13 @@ namespace CMMSAPIs.BS.PM
             databaseProvider = dbProvider;
         }
 
-        public async Task<List<CMPMTaskList>> GetPMTaskList(int facility_id, DateTime? start_date, DateTime? end_date, int[] frequencyIds)
+        public async Task<List<CMPMTaskList>> GetPMTaskList(int facility_id, DateTime? start_date, DateTime? end_date, string frequencyIds, string categoryIds)
         {
             try
             {
                 using (var repos = new PMScheduleViewRepository(getDB))
                 {
-                    return await repos.GetPMTaskList(facility_id, start_date, end_date, frequencyIds);
+                    return await repos.GetPMTaskList(facility_id, start_date, end_date, frequencyIds, categoryIds);
                 }
             }
             catch (Exception)
@@ -62,13 +62,13 @@ namespace CMMSAPIs.BS.PM
             }
         }
 
-        public async Task<CMPMScheduleViewDetail> GetPMTaskDetail(int schedule_id)
+        public async Task<CMPMTaskView> GetPMTaskDetail(int task_id)
         {
             try
             {
                 using (var repos = new PMScheduleViewRepository(getDB))
                 {
-                    return await repos.GetPMTaskDetail(schedule_id);
+                    return await repos.GetPMTaskDetail(task_id);
                 }
             }
             catch (Exception)
@@ -107,13 +107,13 @@ namespace CMMSAPIs.BS.PM
             }
         }
 
-        public async Task<CMDefaultResponse> SetPMTask(int schedule_id, int userID)
+        public async Task<CMDefaultResponse> StartPMTask(int task_id, int userID)
         {
             try
             {
                 using (var repos = new PMScheduleViewRepository(getDB))
                 {
-                    return await repos.SetPMTask(schedule_id, userID);
+                    return await repos.StartPMTask(task_id, userID);
                 }
             }
             catch (Exception)
