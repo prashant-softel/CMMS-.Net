@@ -23,7 +23,7 @@ namespace CMMSAPIs.Helper
             { CMMS_Modules.PM_SCHEDULE_REPORT, 11 },
             { CMMS_Modules.PM_SUMMARY, 12 },
             { CMMS_Modules.SM_MASTER, 13 },
-            { CMMS_Modules.SM_PO, 14 },
+            { CMMS_Modules.SM_GO, 14 },
             { CMMS_Modules.SM_MRS, 15 },
             { CMMS_Modules.SM_MRS_RETURN, 16 },
             { CMMS_Modules.SM_S2S, 17 },
@@ -223,11 +223,10 @@ namespace CMMSAPIs.Helper
             PM_TASK,
 
             SM_MASTER = 31,
-            SM_PO,
+            SM_GO,
             SM_MRS,
             SM_MRS_RETURN,
-            SM_S2S,
-            SM_GO,
+            SM_S2S,          
             SM_RO,
 
             AUDIT_PLAN = 41,
