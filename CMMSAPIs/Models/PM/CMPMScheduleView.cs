@@ -49,6 +49,8 @@ namespace CMMSAPIs.Models.PM
     public class CMPMScheduleExecutionDetail
     {
         public int schedule_id { get; set; }
+        public int clone_of_asset { get; set; }
+        public string clone_of_name { get; set; }
         public string asset_name { get; set; }
         public string checklist_name { get; set; }
         public List<ScheduleCheckList> checklist_observation { get; set; }
@@ -139,14 +141,24 @@ namespace CMMSAPIs.Models.PM
 
     public class CMPMExecutionDetail
     {
+        public int task_id { get; set; }
+        public List<CMPMScheduleObservation> schedules { get; set; }
+        public string comment { get; set; }
+
+    }
+    public class CMPMScheduleObservation
+    {
         public int schedule_id { get; set; }
         public List<AddObservation> add_observations { get; set; }
     }
     public class AddObservation
     {
+        public int job_create { get; set; }
         public int execution_id { get; set; }
         public string observation { get; set; }
-        public int job_create { get; set; }
+        public int range { get; set; }
+        public int boolean { get; set; }
+        public string text { get; set; }
         public List<PMFileUpload> pm_files { get; set; }
     }
     public class PMFileUpload
