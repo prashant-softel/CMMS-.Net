@@ -153,24 +153,26 @@ namespace CMMSAPIs.Repositories.PM
              * Delete the requested id from primary table
              * Code goes here
             */
-            string statusQry = $"SELECT status FROM pm_schedule WHERE id = {request.id};";
+            string statusQry = $"SELECT status FROM pm_task WHERE id = {request.id};";
             DataTable dt1 = await Context.FetchData(statusQry).ConfigureAwait(false);
             CMMS.CMMS_Status status = (CMMS.CMMS_Status)Convert.ToInt32(dt1.Rows[0][0]);
-            if (status != CMMS.CMMS_Status.PM_LINK_PTW && status != CMMS.CMMS_Status.PM_SUBMIT)
-                return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.FAILURE, "Only a PM schedule that has not been executed can be cancelled.");
-            string myQuery = "UPDATE pm_schedule SET " + 
-                                $"PM_Schedule_cancel_by_id = {userID}, " +  
-                                $"PM_Schedule_cancel_date = '{UtilsRepository.GetUTCTime()}', " + 
-                                $"PM_Schedule_cancel_Recomendations = '{request.comment}', " +
+            //if (status != CMMS.CMMS_Status.PM_LINK_PTW && status != CMMS.CMMS_Status.PM_SUBMIT)
+            //    return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.FAILURE, "Only a PM Task that has not been executed can be cancelled.");
+            string myQuery = "UPDATE pm_task SET " + 
+                                $"cancelled_by = {userID}, " +  
+                                $"cancelled_at = '{UtilsRepository.GetUTCTime()}', " + 
+                                $"cancel_remarks = '{request.comment}', " +
                                 $"status = {(int)CMMS.CMMS_Status.PM_CANCELLED}, " +
-                                $"status_updated_at = '{UtilsRepository.GetUTCTime()}' " + 
-                                $"WHERE id = {request.id} AND status IN ({(int)CMMS.CMMS_Status.PM_LINK_PTW},{(int)CMMS.CMMS_Status.PM_SUBMIT});";
+                                $"status_updated_at = '{UtilsRepository.GetUTCTime()}', " +
+                                $"status_updated_by = {userID} " +
+                                $"WHERE id = {request.id} ";
+
             int retVal = await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
             if(retVal > 0)
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, request.id, 0, 0, "PM Schedule Cancelled", CMMS.CMMS_Status.PM_CANCELLED, userID);
-            CMDefaultResponse response = new CMDefaultResponse(request.id, retCode, "PM Schedule cancelled successfully");
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_TASK, request.id, 0, 0, "PM Task Cancelled", CMMS.CMMS_Status.PM_CANCELLED, userID);
+            CMDefaultResponse response = new CMDefaultResponse(request.id, retCode, "PM Task cancelled successfully");
             return response;
         }
 
@@ -596,24 +598,27 @@ namespace CMMSAPIs.Repositories.PM
              * Set the required field in primary table for completion
              * Code goes here
             */
-            string statusQry = $"SELECT status FROM pm_schedule WHERE id = {request.id};";
+            string statusQry = $"SELECT status FROM pm_task WHERE id = {request.id};";
             DataTable dt1 = await Context.FetchData(statusQry).ConfigureAwait(false);
             CMMS.CMMS_Status status = (CMMS.CMMS_Status)Convert.ToInt32(dt1.Rows[0][0]);
-            if (status != CMMS.CMMS_Status.PM_START && status != CMMS.CMMS_Status.PM_REJECTED)
-                return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.FAILURE, "Only a rejected PM schedule or one under execution can be closed");
-            string myQuery = "UPDATE pm_schedule SET " +
-                                $"PM_Schedule_Completed_by_id = {userID}, " +
-                                $"PM_Schedule_Completed_date = '{UtilsRepository.GetUTCTime()}', " +
-                                $"PM_Schedule_Complete_Recomendations = '{request.comment}', " +
+
+            //if (status != CMMS.CMMS_Status.PM_START && status != CMMS.CMMS_Status.PM_REJECTED)
+            //    return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.FAILURE, "Only a rejected PM Task or one under execution can be closed");
+
+            string myQuery = "UPDATE pm_task SET " +
+                                $"closed_by = {userID}, " +
+                                $"closed_at = '{UtilsRepository.GetUTCTime()}', " +
+                                $"close_remarks = '{request.comment}', " +
                                 $"status = {(int)CMMS.CMMS_Status.PM_COMPLETED}, " +
-                                $"status_updated_at = '{UtilsRepository.GetUTCTime()}' " +
-                                $"WHERE id = {request.id} AND status IN ({(int)CMMS.CMMS_Status.PM_START}, {(int)CMMS.CMMS_Status.PM_REJECTED});";
+                                $"status_updated_at = '{UtilsRepository.GetUTCTime()}', " +
+                                $"status_updated_by = {userID} " +
+                                $"WHERE id = {request.id};";
             int retVal = await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
             if (retVal > 0)
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, request.id, 0, 0, "PM Schedule Closed", CMMS.CMMS_Status.PM_COMPLETED, userID);
-            CMDefaultResponse response = new CMDefaultResponse(request.id, retCode, "PM Schedule Closed successfully");
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_TASK, request.id, 0, 0, "PM Task Closed", CMMS.CMMS_Status.PM_COMPLETED, userID);
+            CMDefaultResponse response = new CMDefaultResponse(request.id, retCode, "PM Task Closed successfully");
             return response;
         }
 
@@ -624,36 +629,57 @@ namespace CMMSAPIs.Repositories.PM
              * Set the required field in primary table for approval
              * Code goes here
             */
-            string statusQry = $"SELECT status FROM pm_schedule WHERE id = {request.id};";
+            string statusQry = $"SELECT status FROM pm_task WHERE id = {request.id};";
             DataTable dt1 = await Context.FetchData(statusQry).ConfigureAwait(false);
             CMMS.CMMS_Status status = (CMMS.CMMS_Status)Convert.ToInt32(dt1.Rows[0][0]);
             if (status != CMMS.CMMS_Status.PM_COMPLETED)
-                return new CMRescheduleApprovalResponse(0, request.id, CMMS.RETRUNSTATUS.FAILURE, "Only a closed PM schedule can be Approved");
-            string myQuery = "UPDATE pm_schedule SET " +
-                                $"PM_Schedule_Completed_by_id = {userID}, " +
-                                $"PM_Schedule_Completed_date = '{UtilsRepository.GetUTCTime()}', " +
-                                $"PM_Schedule_Complete_Recomendations = '{request.comment}', " +
+                return new CMRescheduleApprovalResponse(0, request.id, CMMS.RETRUNSTATUS.FAILURE, "Only a closed PM Task can be Approved");
+
+            string myQuery = "UPDATE pm_task SET " +
+                                $"approved_by = {userID}, " +
+                                $"approved_at = '{UtilsRepository.GetUTCTime()}', " +
+                                $"approve_remarks = '{request.comment}', " +
                                 $"status = {(int)CMMS.CMMS_Status.PM_APPROVED}, " +
                                 $"status_updated_at = '{UtilsRepository.GetUTCTime()}', " +
-                                $"PM_Rescheduled = 1 " +
-                                $"WHERE id = {request.id} AND status = {(int)CMMS.CMMS_Status.PM_COMPLETED};";
+                                $"status_updated_by = {userID} , " +
+                                $"rescheduled = 1 " +
+                                $"WHERE id = {request.id};";
             int retVal = await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
-            string scheduleQuery = "SELECT PM_Schedule_date as schedule_date, Facility_id as facility_id, Asset_id as asset_id, PM_Frequecy_id as frequency_id " +
-                                    $"FROM pm_schedule WHERE id = {request.id};";
-            List<ScheduleIDData> scheduleData = await Context.GetData<ScheduleIDData>(scheduleQuery).ConfigureAwait(false);
-            scheduleData[0].schedule_date = UtilsRepository.Reschedule(scheduleData[0].schedule_date, scheduleData[0].frequency_id);
-            CMSetScheduleData newData = CreateScheduleData(scheduleData[0]);
-            List<CMDefaultResponse> createResponse = await _pmScheduleRepo.SetScheduleData(newData, userID);
-            string prevScheduleQry = $"UPDATE pm_schedule SET Prev_Schedule_id = {request.id} WHERE id = {createResponse[0].id[0]}";
-            await Context.ExecuteNonQry<int>(prevScheduleQry).ConfigureAwait(false);
+
+            //string scheduleQuery = "SELECT plan_date as schedule_date, facility_id as facility_id, Asset_id as asset_id, PM_Frequecy_id as frequency_id " +
+            //                        $"FROM pm_task WHERE id = {request.id};";
+            //List<ScheduleIDData> scheduleData = await Context.GetData<ScheduleIDData>(scheduleQuery).ConfigureAwait(false);
+            //scheduleData[0].schedule_date = UtilsRepository.Reschedule(scheduleData[0].schedule_date, scheduleData[0].frequency_id);
+            //CMSetScheduleData newData = CreateScheduleData(scheduleData[0]);
+            //List<CMDefaultResponse> createResponse = await _pmScheduleRepo.SetScheduleData(newData, userID);
+            //string prevScheduleQry = $"UPDATE pm_schedule SET Prev_Schedule_id = {request.id} WHERE id = {createResponse[0].id[0]}";
+            //await Context.ExecuteNonQry<int>(prevScheduleQry).ConfigureAwait(false);
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
+
+            string mainQuery = $"INSERT INTO pm_task(plan_id,facility_id,category_id,frequency_id,plan_Date,assigned_to,status,prev_task_id,prev_task_done_date)  " +
+                               $"select plan_id as plan_id,facility_id,category_id,frequency_id,plan_Date,assigned_to,{(int)CMMS.CMMS_Status.PM_SCHEDULED} as status,{request.id} as prev_task_id, '{UtilsRepository.GetUTCTime()}' as prev_task_done_date from pm_task where id = {request.id}; " +
+                               $"SELECT LAST_INSERT_ID(); ";
+            DataTable dt3 = await Context.FetchData(mainQuery).ConfigureAwait(false);
+            int id = Convert.ToInt32(dt3.Rows[0][0]);
+
+            string scheduleQry = $"INSERT INTO pm_schedule(task_id,plan_id,Asset_id,checklist_id,PM_Schedule_date,status) " +
+                                $"select {id} as task_id, plan_id, Asset_id, checklist_id, PM_Schedule_date,{(int)CMMS.CMMS_Status.PM_SCHEDULED} as status from pm_schedule where task_id = {request.id}";
+            await Context.ExecuteNonQry<int>(scheduleQry);
+
+            string setCodeNameQuery = "UPDATE pm_schedule " +
+                                        "SET PM_Schedule_Code = CONCAT(id,Facility_Code,Asset_Category_Code,Asset_Code,PM_Frequecy_Code), " +
+                                        "PM_Schedule_Name = CONCAT(id,' ',Facility_Name,' ',Asset_Category_name,' ',Asset_Name), " +
+                                        "PM_Schedule_Number = CONCAT('SCH',id), " +
+                                        "PM_Maintenance_Order_Number = CONCAT('PMSCH',id);";
+            await Context.ExecuteNonQry<int>(setCodeNameQuery);
+
             if (retVal > 0)
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, request.id, 0, 0, $"PM Schedule Approved to PMSCH{createResponse[0].id[0]}", CMMS.CMMS_Status.PM_APPROVED, userID);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_TASK, request.id, 0, 0, $"PM Task Approved", CMMS.CMMS_Status.PM_APPROVED, userID);
             //CMPMScheduleViewDetail _PMList = await GetPMTaskDetail(request.id);
             //CMMSNotification.sendNotification(CMMS.CMMS_Modules.PM_SCHEDULE, CMMS.CMMS_Status.PM_APPROVED, _PMList);
 
-            CMRescheduleApprovalResponse response = new CMRescheduleApprovalResponse(createResponse[0].id[0], request.id, retCode, $"PM Schedule Approved to PMSCH{createResponse[0].id[0]}");
+            CMRescheduleApprovalResponse response = new CMRescheduleApprovalResponse(id, request.id, retCode, $"PM Schedule Approved to PMTASK{id}");
             return response;
         }
 
@@ -665,24 +691,27 @@ namespace CMMSAPIs.Repositories.PM
              * Code goes here
             */
 
-            string statusQry = $"SELECT status FROM pm_schedule WHERE id = {request.id};";
+            string statusQry = $"SELECT status FROM pm_task WHERE id = {request.id};";
             DataTable dt1 = await Context.FetchData(statusQry).ConfigureAwait(false);
             CMMS.CMMS_Status status = (CMMS.CMMS_Status)Convert.ToInt32(dt1.Rows[0][0]);
+
             if (status != CMMS.CMMS_Status.PM_COMPLETED)
-                return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.FAILURE, "Only a closed PM schedule can be Rejected");
-            string myQuery = "UPDATE pm_schedule SET " +
-                                $"PM_Schedule_Completed_by_id = {userID}, " +
-                                $"PM_Schedule_Completed_date = '{UtilsRepository.GetUTCTime()}', " +
-                                $"PM_Schedule_Complete_Recomendations = '{request.comment}', " +
+                return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.FAILURE, "Only a closed PM Task can be Rejected");
+
+            string myQuery = "UPDATE pm_task SET " +
+                                $"rejected_by = {userID}, " +
+                                $"rejected_at = '{UtilsRepository.GetUTCTime()}', " +
+                                $"reject_remarks = '{request.comment}', " +
                                 $"status = {(int)CMMS.CMMS_Status.PM_REJECTED}, " +
-                                $"status_updated_at = '{UtilsRepository.GetUTCTime()}' " +
+                                $"status_updated_at = '{UtilsRepository.GetUTCTime()}', " +
+                                $"status_updated_by = {userID}  " +
                                 $"WHERE id = {request.id} AND status = {(int)CMMS.CMMS_Status.PM_COMPLETED};";
             int retVal = await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
             if (retVal > 0)
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, request.id, 0, 0, "PM Schedule Rejected", CMMS.CMMS_Status.PM_REJECTED, userID);
-            CMDefaultResponse response = new CMDefaultResponse(request.id, retCode, "PM Schedule Rejected");
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_TASK, request.id, 0, 0, "PM Task Rejected", CMMS.CMMS_Status.PM_REJECTED, userID);
+            CMDefaultResponse response = new CMDefaultResponse(request.id, retCode, "PM Task Rejected");
             return response;
         }
         private CMSetScheduleData CreateScheduleData(ScheduleIDData scheduleData)
