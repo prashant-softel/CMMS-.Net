@@ -97,7 +97,7 @@ namespace CMMSAPIs.Middlewares
                     DataTable dt = new DataTable();
                     using (MySqlConnection conn = TheConnection)
                     {
-                        using (MySqlCommand cmd = getQryCommand("select * from userlog where userID = " + userId + " and customToken = "+ strlist[1] + " order by id desc;", conn))
+                        using (MySqlCommand cmd = getQryCommand("select * from userlog where userID = " + userId + " and customToken = '"+ strlist[1] + "' order by id desc;", conn))
                         {
                             await conn.OpenAsync();
                             cmd.CommandTimeout = 99999;
