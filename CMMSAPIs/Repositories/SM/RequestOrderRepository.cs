@@ -61,7 +61,7 @@ namespace CMMSAPIs.Repositories.SM
             }
 
             response = new CMDefaultResponse(ReturnID, CMMS.RETRUNSTATUS.SUCCESS, "Request order created successfully.");
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_PO, ReturnID, 0, 0, "Request order created", CMMS.CMMS_Status.SM_RO_SUBMITTED);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_RO, ReturnID, 0, 0, "Request order created", CMMS.CMMS_Status.SM_RO_SUBMITTED);
             return response;
         }
         internal async Task<CMDefaultResponse> UpdateRequestOrder(CMCreateRequestOrder request, int userID)
@@ -95,7 +95,7 @@ namespace CMMSAPIs.Repositories.SM
             string mainQuery = $"UPDATE smrequestorder SET status = {(int)CMMS.CMMS_Status.SM_RO_DELETED}, remarks= '{request.comment}' WHERE ID = " + request.id + "";
             await Context.ExecuteNonQry<int>(mainQuery);
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Request order deleted.");
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_PO, request.id, 0, 0, "Request order deleted", CMMS.CMMS_Status.SM_RO_DELETED);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_RO, request.id, 0, 0, "Request order deleted", CMMS.CMMS_Status.SM_RO_DELETED);
             return response;
         }
 
@@ -163,7 +163,7 @@ namespace CMMSAPIs.Repositories.SM
                 _MasterList[i].cost = _itemList.Where(group => group.requestID == _MasterList[i].request_order_id).Sum(x => x.cost);
                 _MasterList[i].request_order_items = _itemList.Where(group => group.requestID == _MasterList[i].request_order_id).ToList();
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_MasterList[i].status);
-                string _shortStatus = getShortStatus(CMMS.CMMS_Modules.SM_PO, _Status);
+                string _shortStatus = getShortStatus(CMMS.CMMS_Modules.SM_RO, _Status);
                 string _longStatus = getLongStatus(_MasterList[i].request_order_id, _Status);
 
                 _MasterList[i].status_short = _shortStatus;
@@ -219,7 +219,7 @@ namespace CMMSAPIs.Repositories.SM
         //    for (var i = 0; i < _List.Count; i++)
         //    {
         //        CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_List[i].status);
-        //        string _shortStatus = getShortStatus(CMMS.CMMS_Modules.SM_PO, _Status);
+        //        string _shortStatus = getShortStatus(CMMS.CMMS_Modules.SM_GO, _Status);
         //        string status_long = getLongStatus(_List[i].requestID, _Status);
         //        _List[i].status_short = _shortStatus;
         //        _List[i].status_long = status_long;
@@ -245,7 +245,7 @@ namespace CMMSAPIs.Repositories.SM
 
             retCode = CMMS.RETRUNSTATUS.SUCCESS;
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Approved request order successfully.");
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_PO, request.id, 0, 0, "Approved request order", CMMS.CMMS_Status.SM_RO_CLOSED_APPROVED);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_RO, request.id, 0, 0, "Approved request order", CMMS.CMMS_Status.SM_RO_CLOSED_APPROVED);
             return response;
         }
 
@@ -269,7 +269,7 @@ namespace CMMSAPIs.Repositories.SM
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
             }
 
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_PO, request.id, 0, 0, "Rejected request order", CMMS.CMMS_Status.SM_RO_CLOSED_REJECTED);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_RO, request.id, 0, 0, "Rejected request order", CMMS.CMMS_Status.SM_RO_CLOSED_REJECTED);
 
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Rejected request order.");
             return response;
@@ -337,7 +337,7 @@ namespace CMMSAPIs.Repositories.SM
             _MasterList.request_order_items = _itemList;
 
             CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_MasterList.status);
-            string _shortStatus = getShortStatus(CMMS.CMMS_Modules.SM_PO, _Status);
+            string _shortStatus = getShortStatus(CMMS.CMMS_Modules.SM_RO, _Status);
             string _longStatus = getLongStatus(_MasterList.request_order_id, _Status);
 
             _MasterList.status_short = _shortStatus;
