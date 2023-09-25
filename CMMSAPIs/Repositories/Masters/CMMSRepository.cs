@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
@@ -58,7 +58,7 @@ namespace CMMSAPIs.Repositories.Masters
             { CMMS.CMMS_Modules.PM_SCHEDULE_REPORT, 11 },
             { CMMS.CMMS_Modules.PM_SUMMARY, 12 },
             { CMMS.CMMS_Modules.SM_MASTER, 13 },
-            { CMMS.CMMS_Modules.SM_PO, 14 },
+            { CMMS.CMMS_Modules.SM_GO, 14 },
             { CMMS.CMMS_Modules.SM_MRS, 15 },
             { CMMS.CMMS_Modules.SM_MRS_RETURN, 16 },
             { CMMS.CMMS_Modules.SM_S2S, 17 },
