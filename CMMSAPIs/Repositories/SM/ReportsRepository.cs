@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -199,7 +199,7 @@ public async Task<List<CMEmployeeStockReport>> GetEmployeeStockReport(int facili
                 $"LEFT JOIN facilities fc ON fc.id = sm_td.plantID  " +
                 $"LEFT JOIN users ed ON ed.id = sm_td.toActorID " +
                 $"where (date_format(sm_td.lastInsetedDateTime, '%Y-%m-%d') between '{StartDate.ToString("yyyy-MM-dd")}' and '{EndDate.ToString("yyyy-MM-dd")}') and " +
-                $"sm_td.fromActorType = '{(int)CMMS.SM_Types.Inventory}' and sm_td.toActorType = '{(int)CMMS.SM_Types.Engineer}' and smt.actorType = '{(int)CMMS.SM_Types.Engineer}' and (sm_td.referedby = '4' OR sm_td.referedby = '{(int)CMMS.CMMS_Modules.SM_PO}') and a_item.item_condition IN (2,3,4)" +
+                $"sm_td.fromActorType = '{(int)CMMS.SM_Types.Inventory}' and sm_td.toActorType = '{(int)CMMS.SM_Types.Engineer}' and smt.actorType = '{(int)CMMS.SM_Types.Engineer}' and (sm_td.referedby = '4' OR sm_td.referedby = '{(int)CMMS.CMMS_Modules.SM_GO}') and a_item.item_condition IN (2,3,4)" +
                 $" and sm_td.plantID in ('{facility_id}')  AND sm_td.Nature_Of_Transaction = 1 ORDER BY sm_td.ID DESC) as fmItemList GROUP BY fmItemList.assetItemID ORDER BY fmItemList.ID DESC";
 
             List<CMFaultyMaterialReport> result = await Context.GetData<CMFaultyMaterialReport>(query).ConfigureAwait(false);
