@@ -381,7 +381,7 @@ namespace CMMSAPIs.Repositories.PM
             int id = Convert.ToInt32(dt3.Rows[0][0]);
 
             string scheduleQry = $"INSERT INTO pm_schedule(task_id,plan_id,Asset_id,checklist_id,PM_Schedule_date,status) " +
-                                $"select {id} as task_id,planId as plan_id, assetId as Asset_id, checklistId as checklist_id,plan_date as PM_Schedule_date,{(int)CMMS.CMMS_Status.PM_SCHEDULED} as status from pmplanassetchecklist where planId = {request.id}";
+                                $"select {id} as task_id,planId as plan_id, assetId as Asset_id, checklistId as checklist_id,PP.plan_date  as PM_Schedule_date,{(int)CMMS.CMMS_Status.PM_SCHEDULED} as status from pmplanassetchecklist  P inner join pm_plan PP on PP.Id = P.planId where planId = {request.id}";
             await Context.ExecuteNonQry<int>(scheduleQry);
             
             string setCodeNameQuery = "UPDATE pm_schedule " +
