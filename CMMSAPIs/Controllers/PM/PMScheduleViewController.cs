@@ -89,12 +89,12 @@ namespace CMMSAPIs.Controllers.PM
         //[Authorize]
         [Route("LinkPermitToPMTask")]
         [HttpPut]
-        public async Task<IActionResult> LinkPermitToPMTask(int schedule_id, int permit_id)
+        public async Task<IActionResult> LinkPermitToPMTask(int task_id, int permit_id)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _PMScheduleViewBS.LinkPermitToPMTask(schedule_id, permit_id, userID);
+                var data = await _PMScheduleViewBS.LinkPermitToPMTask(task_id, permit_id, userID);
                 return Ok(data);
             }
             catch(Exception)

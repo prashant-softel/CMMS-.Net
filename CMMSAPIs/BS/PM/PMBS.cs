@@ -12,7 +12,7 @@ namespace CMMSAPIs.BS.PM
     public interface IPMBS
     {
         Task<CMDefaultResponse> CreatePMPlan(CMPMPlanDetail pm_plan, int userID);
-        Task<List<CMPMPlanList>> GetPMPlanList(int facility_id, int category_id, int frequency_id, DateTime? start_date, DateTime? end_date);
+        Task<List<CMPMPlanList>> GetPMPlanList(int facility_id, string category_id, string frequency_id, DateTime? start_date, DateTime? end_date);
         Task<CMPMPlanDetail> GetPMPlanDetail(int id);
         Task<List<CMScheduleData>> GetScheduleData(int facility_id, int category_id);
         Task<List<CMDefaultResponse>> SetScheduleData(CMSetScheduleData request, int userID);
@@ -44,7 +44,7 @@ namespace CMMSAPIs.BS.PM
                 throw;
             }
         }
-        public async Task<List<CMPMPlanList>> GetPMPlanList(int facility_id, int category_id, int frequency_id, DateTime? start_date, DateTime? end_date)
+        public async Task<List<CMPMPlanList>> GetPMPlanList(int facility_id, string category_id, string frequency_id, DateTime? start_date, DateTime? end_date)
         {
             try
             {

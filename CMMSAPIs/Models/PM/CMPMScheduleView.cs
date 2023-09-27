@@ -59,8 +59,26 @@ namespace CMMSAPIs.Models.PM
     }
     public class CMPMTaskView: CMPMTaskList
     {
-       public List<CMPMScheduleExecutionDetail> schedules { get; set; }
+        public List<CMPMScheduleExecutionDetail> schedules { get; set; }
 
+        public int started_by_id { get; set; }
+        public string started_by_name { get; set; }
+        public DateTime started_at { get; set; }
+        public int closed_by_id { get; set; }
+        public string closed_by_name { get; set; }
+        public DateTime closed_at { get; set; }
+        public int cancelled_by_id { get; set; }
+        public string cancelled_by_name { get; set; }
+        public DateTime cancelled_at { get; set; }
+        public int approved_by_id { get; set; }
+        public string approved_by_name { get; set; }
+        public DateTime approved_at { get; set; }
+        public int rejected_by_id { get; set; }
+        public string rejected_by_name { get; set; }
+        public DateTime rejected_at { get; set; }
+        public int updated_by_id { get; set; }
+        public string updated_by_name { get; set; }
+        public DateTime updated_at { get; set; }
 
     }
     public class CMPMScheduleViewDetail : CMPMScheduleView

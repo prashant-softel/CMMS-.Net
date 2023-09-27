@@ -20,7 +20,7 @@ namespace CMMSAPIs.BS.PM
         Task<CMDefaultResponse> ClosePMTaskExecution(CMApproval request, int userID);
         Task<CMRescheduleApprovalResponse> ApprovePMTaskExecution(CMApproval request, int userID);
         Task<CMDefaultResponse> RejectPMTaskExecution(CMApproval request, int userID);
-        Task<CMDefaultResponse> LinkPermitToPMTask(int schedule_id, int permit_id, int userID);
+        Task<CMDefaultResponse> LinkPermitToPMTask(int task_id, int permit_id, int userID);
 
     }
     public class PMScheduleViewBS : IPMScheduleViewBS
@@ -77,13 +77,13 @@ namespace CMMSAPIs.BS.PM
             }
         }
 
-        public async Task<CMDefaultResponse> LinkPermitToPMTask(int schedule_id, int permit_id, int userID)
+        public async Task<CMDefaultResponse> LinkPermitToPMTask(int task_id, int permit_id, int userID)
         {
             try
             {
                 using(var repos = new PMScheduleViewRepository(getDB))
                 {
-                    return await repos.LinkPermitToPMTask(schedule_id, permit_id, userID);
+                    return await repos.LinkPermitToPMTask(task_id, permit_id, userID);
                 }
             }
             catch(Exception)
