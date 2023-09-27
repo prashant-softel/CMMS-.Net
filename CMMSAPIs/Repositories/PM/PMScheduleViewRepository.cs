@@ -87,7 +87,7 @@ namespace CMMSAPIs.Repositories.PM
             //    statusQry += $"WHEN pm_schedule.status = {(int)status.Key} THEN '{status.Value}' ";
             //statusQry += "ELSE 'Unknown Status' END";
 
-            string myQuery = $"SELECT pm_task.id,pm_task.category_id,cat.name as category_name,  CONCAT('PMTASK',pm_task.id) as task_code,pm_plan.plan_name as plan_title,pm_task.facility_id, pm_task.frequency_id as frequency_id, freq.name as frequency_name, pm_task.plan_date as due_date,prev_task_done_date as done_date, CONCAT(assignedTo.firstName,' ',assignedTo.lastName)  as assigned_to_name, pm_task.PTW_id as permit_id, CONCAT('PTW',pm_task.PTW_id) as permit_code, PM_task.status " +
+            string myQuery = $"SELECT pm_task.id,pm_task.category_id,cat.name as category_name,  CONCAT('PMTASK',pm_task.id) as task_code,pm_plan.plan_name as plan_title,pm_task.facility_id, pm_task.frequency_id as frequency_id, freq.name as frequency_name, pm_task.plan_date as due_date,prev_task_done_date as last_done_date, closed_at as done_date, CONCAT(assignedTo.firstName,' ',assignedTo.lastName)  as assigned_to_name, pm_task.PTW_id as permit_id, CONCAT('PTW',pm_task.PTW_id) as permit_code, PM_task.status " +
                                "FROM pm_task " +
                                $"left join users as assignedTo on pm_task.assigned_to = assignedTo.id " +
                                $"left join pm_plan  on pm_task.plan_id = pm_plan.id " +
@@ -202,9 +202,14 @@ namespace CMMSAPIs.Repositories.PM
             //string myQuery1 = $"SELECT id, PM_Maintenance_Order_Number as maintenance_order_number, PM_Schedule_date as schedule_date, PM_Schedule_Completed_date as completed_date, Asset_id as equipment_id, Asset_Name as equipment_name, Asset_Category_id as category_id, Asset_Category_name as category_name, PM_Frequecy_id as frequency_id, PM_Frequecy_Name as frequency_name, PM_Schedule_Emp_name as assigned_to_name, PTW_id as permit_id, status, {statusQry} as status_name, Facility_id as facility_id, Facility_Name as facility_name " +
             //                    $"FROM pm_schedule WHERE id = {schedule_id};";
 
-            string myQuery = $"SELECT pm_task.id, CONCAT('PMTASK',pm_task.id) as task_code,pm_task.category_id,cat.name as category_name, pm_plan.plan_name as plan_title, pm_task.facility_id, pm_task.frequency_id as frequency_id, freq.name as frequency_name, pm_task.plan_date as due_date,prev_task_done_date as done_date, CONCAT(assignedTo.firstName,' ',assignedTo.lastName)  as assigned_to_name, pm_task.PTW_id as permit_id, CONCAT('PTW',pm_task.PTW_id) as permit_code, PM_task.status, {statusQry} as status_short " +
+            string myQuery = $"SELECT pm_task.id, CONCAT('PMTASK',pm_task.id) as task_code,pm_task.category_id,cat.name as category_name, pm_plan.plan_name as plan_title, pm_task.facility_id, pm_task.frequency_id as frequency_id, freq.name as frequency_name, pm_task.plan_date as due_date,prev_task_done_date as done_date, CONCAT(assignedTo.firstName,' ',assignedTo.lastName)  as assigned_to_name, CONCAT(closedBy.firstName,' ',closedBy.lastName)  as closed_by_name, pm_task.closed_at , CONCAT(approvedBy.firstName,' ',approvedBy.lastName)  as approved_by_name, pm_task.approved_at ,CONCAT(rejectedBy.firstName,' ',rejectedBy.lastName)  as rejected_by_name, pm_task.rejected_at ,CONCAT(cancelledBy.firstName,' ',cancelledBy.lastName)  as cancelled_by_name, pm_task.cancelled_at , pm_task.rejected_at ,CONCAT(startedBy.firstName,' ',startedBy.lastName)  as started_by_name, pm_task.started_at , pm_task.PTW_id as permit_id, CONCAT('PTW',pm_task.PTW_id) as permit_code, PM_task.status, {statusQry} as status_short " +
                                "FROM pm_task " +
                                $"left join users as assignedTo on pm_task.assigned_to = assignedTo.id " +
+                               $"left join users as closedBy on pm_task.closed_by = closedBy.id " +
+                               $"left join users as approvedBy on pm_task.approved_by = approvedBy.id " +
+                               $"left join users as rejectedBy on pm_task.rejected_by = rejectedBy.id " +
+                               $"left join users as cancelledBy on pm_task.cancelled_by = cancelledBy.id " +
+                               $"left join users as startedBy on pm_task.started_by = startedBy.id " +
                                $"left join pm_plan  on pm_task.plan_id = pm_plan.id " +
                                $"left join assetcategories as cat  on pm_task.category_id = cat.id " +
                                $"left join frequency as freq on pm_task.frequency_id = freq.id where pm_task.id = {task_id} ";
@@ -279,39 +284,35 @@ namespace CMMSAPIs.Repositories.PM
             return taskViewDetail[0];
         }
 
-        internal async Task<CMDefaultResponse> LinkPermitToPMTask(int schedule_id, int permit_id, int userID)
+        internal async Task<CMDefaultResponse> LinkPermitToPMTask(int task_id, int permit_id, int userID)
         {
             /*
              * Primary Table - PMSchedule
              * Set the required fields in primary table for linling permit to PM
              * Code goes here
             */
-            string scheduleQuery = "SELECT PM_Schedule_date as schedule_date, Facility_id as facility_id, Asset_id as asset_id, PM_Frequecy_id as frequency_id " +
-                                    $"FROM pm_schedule WHERE id = {schedule_id};";
-            List<ScheduleIDData> scheduleData = await Context.GetData<ScheduleIDData>(scheduleQuery).ConfigureAwait(false);
+            //string scheduleQuery = "SELECT PM_Schedule_date as schedule_date, Facility_id as facility_id, Asset_id as asset_id, PM_Frequecy_id as frequency_id " +
+            //                        $"FROM pm_task WHERE id = {task_id};";
+            //List<ScheduleIDData> scheduleData = await Context.GetData<ScheduleIDData>(scheduleQuery).ConfigureAwait(false);
             string permitQuery = "SELECT ptw.id as ptw_id, ptw.code as ptw_code, ptw.title as ptw_title, ptw.status as ptw_status " + 
                                     "FROM " + 
                                         "permits as ptw " +
-                                    $"WHERE ptw.id = {permit_id} AND ptw.facilityId = {scheduleData[0].facility_id};";
+                                    $"WHERE ptw.id = {permit_id} ;";
             List<ScheduleLinkedPermit> permit = await Context.GetData<ScheduleLinkedPermit>(permitQuery).ConfigureAwait(false);
             if (permit.Count == 0)
-                return new CMDefaultResponse(schedule_id, CMMS.RETRUNSTATUS.FAILURE, $"Permit {permit_id} does not exist.");
-            string myQuery = "UPDATE pm_schedule SET " +
-                                $"PTW_id = {permit[0].ptw_id}, " +
-                                $"PTW_Code = '{permit[0].ptw_code}', " +
-                                $"PTW_Ttitle = '{permit[0].ptw_title}', " +
-                                $"PTW_by_id = {userID}, " +
-                                $"PTW_Status = {permit[0].status}, " +
-                                $"PTW_Attached_At = '{UtilsRepository.GetUTCTime()}', " +
-                                $"status = {(int)CMMS.CMMS_Status.PM_LINK_PTW}, " +
-                                $"status_updated_at = '{UtilsRepository.GetUTCTime()}' " +
-                                $"WHERE id = {schedule_id};";
+                return new CMDefaultResponse(task_id, CMMS.RETRUNSTATUS.FAILURE, $"Permit {permit_id} does not exist.");
+            string myQuery = "UPDATE pm_task SET " +
+                                $"ptw_id = {permit[0].ptw_id}, " +              
+                                $"status = {(int)CMMS.CMMS_Status.PM_LINKED_TO_PTW}, " +
+                                $"status_updated_at = '{UtilsRepository.GetUTCTime()}', " +
+                                $"status_updated_by = '{userID}' " +
+                                $"WHERE id = {task_id};";
             int retVal = await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
             if (retVal > 0)
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, schedule_id, CMMS.CMMS_Modules.PTW, permit_id, "PTW linked to PM", CMMS.CMMS_Status.PM_LINK_PTW, userID);
-            CMDefaultResponse response = new CMDefaultResponse(schedule_id, CMMS.RETRUNSTATUS.SUCCESS, $"Permit {permit_id} linked to schedule {schedule_id}");
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_TASK, task_id, CMMS.CMMS_Modules.PTW, permit_id, "PTW linked to PM", CMMS.CMMS_Status.PM_LINK_PTW, userID);
+            CMDefaultResponse response = new CMDefaultResponse(task_id, CMMS.RETRUNSTATUS.SUCCESS, $"Permit {permit_id} linked to Task {task_id}");
             return response;
         }
         internal async Task<CMDefaultResponse> AddCustomCheckpoint(CMCustomCheckPoint request, int userID)
@@ -657,7 +658,8 @@ namespace CMMSAPIs.Repositories.PM
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
 
             string mainQuery = $"INSERT INTO pm_task(plan_id,facility_id,category_id,frequency_id,plan_Date,assigned_to,status,prev_task_id,prev_task_done_date)  " +
-                               $"select plan_id as plan_id,facility_id,category_id,frequency_id,plan_Date,assigned_to,{(int)CMMS.CMMS_Status.PM_SCHEDULED} as status,{request.id} as prev_task_id, '{UtilsRepository.GetUTCTime()}' as prev_task_done_date from pm_task where id = {request.id}; " +
+                               $"select plan_id as plan_id,facility_id,category_id,frequency_id,DATE_ADD(plan_date, INTERVAL freq.days DAY) as plan_date,assigned_to,{(int)CMMS.CMMS_Status.PM_SCHEDULED} as status,{request.id} as prev_task_id, '{UtilsRepository.GetUTCTime()}' as prev_task_done_date from pm_task " +
+                               $"left join frequency as freq on pm_task.frequency_id = freq.id where pm_task.id = {request.id}; " +
                                $"SELECT LAST_INSERT_ID(); ";
             DataTable dt3 = await Context.FetchData(mainQuery).ConfigureAwait(false);
             int id = Convert.ToInt32(dt3.Rows[0][0]);

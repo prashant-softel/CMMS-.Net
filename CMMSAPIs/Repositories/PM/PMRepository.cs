@@ -107,7 +107,7 @@ namespace CMMSAPIs.Repositories.PM
             string addPlanQry = $"INSERT INTO pm_plan(plan_name, facility_id, category_id, frequency_id, " +
                                 $"status, plan_date,assigned_to, created_by, created_at, updated_by, updated_at) VALUES " +
                                 $"('{pm_plan.plan_name}', {pm_plan.facility_id}, {pm_plan.category_id}, {pm_plan.plan_freq_id}, " +
-                                $"{status}, '{pm_plan.plan_date.ToString("yyyy-MM-dd")}',{pm_plan.assign_to_id}, " +
+                                $"{status}, '{pm_plan.plan_date.ToString("yyyy-MM-dd")}',{pm_plan.assigned_to_id}, " +
                                 $"{userID}, '{UtilsRepository.GetUTCTime()}', {userID}, '{UtilsRepository.GetUTCTime()}'); " +
                                 $"SELECT LAST_INSERT_ID(); ";
             DataTable dt3 = await Context.FetchData(addPlanQry).ConfigureAwait(false);
@@ -126,7 +126,7 @@ namespace CMMSAPIs.Repositories.PM
             return response;
         }
         
-        internal async Task<List<CMPMPlanList>> GetPMPlanList(int facility_id, int category_id, int frequency_id, DateTime? start_date, DateTime? end_date)
+        internal async Task<List<CMPMPlanList>> GetPMPlanList(int facility_id, string category_id, string frequency_id, DateTime? start_date, DateTime? end_date)
         {
             if (facility_id <= 0)
                 throw new ArgumentException("Invalid Facility ID");
@@ -143,15 +143,16 @@ namespace CMMSAPIs.Repositories.PM
                                     $"LEFT JOIN users as createdBy ON createdBy.id = plan.created_by " +
                                     $"LEFT JOIN users as updatedBy ON updatedBy.id = plan.updated_by " +
                                     $"LEFT JOIN users as assignedTo ON assignedTo.id = plan.assigned_to " +
-                                    $"WHERE facilities.id = {facility_id} ";
-            if (category_id > 0)
-                planListQry += $"AND category.id = {category_id} ";
-            if (frequency_id > 0)
-                planListQry += $"AND frequency.id = {frequency_id} ";
+                                    $"WHERE facilities.id = {facility_id} and status_id = 1 ";
+
+            if (category_id != null && category_id != "")
+                planListQry += $"AND category.id IN ( {category_id} )";
+            if (frequency_id != null && category_id != "")
+                planListQry += $"AND frequency.id IN ( {frequency_id} )";
             if (start_date != null)
-                planListQry += $"AND plan.plan_date >= {((DateTime)start_date).ToString("yyyy-MM-dd")} ";
+                planListQry += $"AND plan.plan_date >= '{((DateTime)start_date).ToString("yyyy-MM-dd")}' ";
             if (end_date != null)
-                planListQry += $"AND plan.plan_date <= {((DateTime)start_date).ToString("yyyy-MM-dd")} ";
+                planListQry += $"AND plan.plan_date <= '{((DateTime)end_date).ToString("yyyy-MM-dd")}' ";
             planListQry += $";";
 
             List<CMPMPlanList> plan_list = await Context.GetData<CMPMPlanList>(planListQry).ConfigureAwait(false);
@@ -431,7 +432,7 @@ namespace CMMSAPIs.Repositories.PM
 
         internal async Task<CMDefaultResponse> DeletePMPlan(int planId, int userID)
         {
-            string approveQuery = $"Delete from pm_plan where id = {planId}; Delete from pmplanassetchecklist where planId = {planId}; ";
+            string approveQuery = $"update pm_plan set status_id = 0 where id = {planId}; ";
             await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_PLAN, planId, 0, 0, $"PM Plan Deleted by user {userID}", CMMS.CMMS_Status.PM_PLAN_DELETED);

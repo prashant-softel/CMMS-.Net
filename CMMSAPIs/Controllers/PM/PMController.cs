@@ -110,7 +110,7 @@ namespace CMMSAPIs.Controllers.PM
 
         //[Authorize]
         [Route("DeletePMPlan")]
-        [HttpGet]
+        [HttpPut]
         public async Task<IActionResult> DeletePMPlan(int planId)
 
         {
@@ -133,7 +133,7 @@ namespace CMMSAPIs.Controllers.PM
         //[Authorize]
         [Route("GetPMPlanList")]    
         [HttpGet]
-        public async Task<IActionResult> GetPMPlanList(int facility_id, int category_id, int frequency_id, DateTime? start_date, DateTime? end_date)
+        public async Task<IActionResult> GetPMPlanList(int facility_id, string category_id, string frequency_id, DateTime? start_date, DateTime? end_date)
         {
             try
             {
