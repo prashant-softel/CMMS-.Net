@@ -30,6 +30,7 @@ namespace CMMSAPIs.BS
         Task<CMDefaultResponse> UpdateGOReceive(CMGoodsOrderList request, int userID);
         Task<CMDefaultResponse> ApproveGOReceive(CMApproval request, int userId);
         Task<CMDefaultResponse> RejectGOReceive(CMApproval request, int userId);
+        Task<CMDefaultResponse> CloseRO(CMGoodsOrderList request, int userID);
     }
 
     public class GOBS : IGOBS
@@ -282,6 +283,22 @@ namespace CMMSAPIs.BS
                 using (var repos = new GORepository(getDB))
                 {
                     return await repos.RejectGoodsOrderReceive(request, userId);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> CloseRO(CMGoodsOrderList request, int userID)
+        {
+            try
+            {
+                using (var repos = new GORepository(getDB))
+                {
+                    return await repos.CloseRO(request, userID);
 
                 }
             }
