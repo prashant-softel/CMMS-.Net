@@ -179,7 +179,7 @@ namespace CMMSAPIs.Repositories
           "po.vehicle_no, po.gir_no, po.challan_date,  po.job_ref, po.amount, po.currency as currencyID , curr.name as currency \r\n      " +
           "  FROM smpurchaseorderdetails pod\r\n        LEFT JOIN smpurchaseorder po ON po.ID = pod.purchaseID\r\n     " +
           "   LEFT JOIN smassetitems sai ON sai.ID = pod.assetItemID\r\n       " +
-          " LEFT JOIN smassetmasters sam ON sam.asset_code = sai.asset_code\r\n      " +
+          " LEFT JOIN smassetmasters sam ON sam.ID = pod.assetItemID\r\n      " +
           "  LEFT JOIN smunitmeasurement sm ON sm.ID = sam.unit_of_measurement\r\n    " +
           "    LEFT JOIN (\r\n            SELECT file.file_path,file.Asset_master_id as Asset_master_id FROM smassetmasterfiles file \r\n " +
           "           LEFT join smassetmasters sam on file.Asset_master_id =  sam.id )\r\n        " +
@@ -221,7 +221,7 @@ namespace CMMSAPIs.Repositories
                 for (var i = 0; i < request.go_items.Count; i++)
                 {
                     string poDetailsQuery = $"INSERT INTO smpurchaseorderdetails (purchaseID,assetItemID,cost,ordered_qty,location_ID, paid_by_ID, requested_qty) " +
-                    "values(" + poid + ", " + request.go_items[i].assetItemID + ",  " + request.go_items[i].cost + ", " + request.go_items[i].ordered_qty + ", " + request.location_ID + ", " + request.go_items[i].paid_by_ID +", " + request.go_items[i].requested_qty +") ; SELECT LAST_INSERT_ID();";
+                    "values(" + poid + ", " + request.go_items[i].assetMasterItemID + ",  " + request.go_items[i].cost + ", " + request.go_items[i].ordered_qty + ", " + request.location_ID + ", " + request.go_items[i].paid_by_ID +", " + request.go_items[i].requested_qty +") ; SELECT LAST_INSERT_ID();";
                     DataTable dtInsertPO = await Context.FetchData(poDetailsQuery).ConfigureAwait(false);
                     int id = Convert.ToInt32(dtInsertPO.Rows[0][0]);
                 }
@@ -254,7 +254,7 @@ namespace CMMSAPIs.Repositories
 
             for (var i = 0; i < request.go_items.Count; i++)
             {
-                string itemsQuery = $"UPDATE smpurchaseorderdetails SET location_ID = {request.location_ID},assetItemID = {request.go_items[i].assetItemID},cost = {request.go_items[i].cost}, accepted_qty = {request.go_items[i].accepted_qty},ordered_qty = {request.go_items[i].ordered_qty} , requested_qty = {request.go_items[i].requested_qty}, received_qty= {request.go_items[i].received_qty},lost_qty = {request.go_items[i].lost_qty}, damaged_qty={request.go_items[i].damaged_qty}, paid_by_ID = {request.go_items[i].paid_by_ID}" +
+                string itemsQuery = $"UPDATE smpurchaseorderdetails SET location_ID = {request.location_ID},assetItemID = {request.go_items[i].assetMasterItemID},cost = {request.go_items[i].cost}, accepted_qty = {request.go_items[i].accepted_qty},ordered_qty = {request.go_items[i].ordered_qty} , requested_qty = {request.go_items[i].requested_qty}, received_qty= {request.go_items[i].received_qty},lost_qty = {request.go_items[i].lost_qty}, damaged_qty={request.go_items[i].damaged_qty}, paid_by_ID = {request.go_items[i].paid_by_ID}" +
                     $" WHERE ID = {request.go_items[i].goItemID}";
                 //string itemsQuery = $"UPDATE smpurchaseorderdetails SET location_ID = {request.location_ID},assetItemID = {request.go_items[i].assetItemID},cost = {request.go_items[i].cost}, accepted_qty = {request.go_items[i].ordered_qty + request.go_items[i].received_qty},ordered_qty = {request.go_items[i].ordered_qty} , requested_qty = {request.go_items[i].requested_qty}, received_qty= {request.go_items[i].received_qty},lost_qty = {request.go_items[i].lost_qty}, damaged_qty={request.go_items[i].damaged_qty}, paid_by_ID = {request.go_items[i].paid_by_ID}" +
                 //    $" WHERE ID = {request.go_items[i].goItemID}";
@@ -277,7 +277,7 @@ namespace CMMSAPIs.Repositories
             string mainQuery = $"UPDATE smpurchaseorder SET withdraw_by = " + userID + ", status = " + (int)CMMS.CMMS_Status.GO_CLOSED + ", remarks = '" + request.remarks + "', withdrawOn = '" + DateTime.Now.ToString("yyyy-MM-dd") + "' WHERE ID = " + request.id + "";
             await Context.ExecuteNonQry<int>(mainQuery);
 
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_GO, request.id, 0, 0, "Goods order withdrawn.", CMMS.CMMS_Status.GO_CLOSED);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_GO, request.id, 0, 0, request.remarks, CMMS.CMMS_Status.GO_CLOSED);
 
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Goods order withdrawn successfully.");
             return response;
@@ -947,7 +947,7 @@ namespace CMMSAPIs.Repositories
                 "po.vehicle_no, po.gir_no, po.challan_date, po.job_ref, po.amount,  po.currency as currencyID , curr.name as currency , stt.asset_type as asset_type_Name,  po_no, po_date, requested_qty,lost_qty, ordered_qty\r\n    ,paid_by_ID, smpaidby.paid_by paid_by_name , po.received_on as receivedAt,sam.asset_type_ID,sam.asset_code,sam.asset_name" +
                 " , sic.cat_name,smat.asset_type FROM smpurchaseorderdetails pod\r\n        LEFT JOIN smpurchaseorder po ON po.ID = pod.purchaseID\r\n     " +
                 "   LEFT JOIN smassetitems sai ON sai.ID = pod.assetItemID\r\n       " +
-                " LEFT JOIN smassetmasters sam ON  sam.asset_code = sai.asset_code\r\n      " +
+                " LEFT JOIN smassetmasters sam ON  sam.ID = pod.assetItemID\r\n      " +
                 "  LEFT JOIN smunitmeasurement sm ON sm.ID = sam.unit_of_measurement\r\n    " +
                 "    LEFT JOIN (\r\n            SELECT file.file_path,file.Asset_master_id as Asset_master_id FROM smassetmasterfiles file \r\n " +
                 "           LEFT join smassetmasters sam on file.Asset_master_id =  sam.id )\r\n        " +
@@ -998,7 +998,7 @@ namespace CMMSAPIs.Repositories
                     id = p.podID,
                     cost = p.cost,
                     assetItem_Name = p.asset_name,
-                    assetItemID = p.assetItemID,
+                    assetMasterItemID = p.assetItemID,
                     location_ID = p.location_ID,
                     accepted_qty = p.accepted_qty,
                     spare_status = p.spare_status,
@@ -1057,7 +1057,7 @@ namespace CMMSAPIs.Repositories
                 "po.vehicle_no, po.gir_no, po.challan_date, po.job_ref, po.amount,  po.currency as currencyID , curr.name as currency , stt.asset_type as asset_type_Name,  po_no, po_date, requested_qty,lost_qty, ordered_qty, CONCAT(ed.firstName,' ',ed.lastName) as generatedBy\r\n  ,po.received_on as receivedAt    " +
                 "  FROM smpurchaseorderdetails pod\r\n        LEFT JOIN smpurchaseorder po ON po.ID = pod.purchaseID\r\n     " +
                 "   LEFT JOIN smassetitems sai ON sai.ID = pod.assetItemID\r\n       " +
-                " LEFT JOIN smassetmasters sam ON sam.asset_code = sai.asset_code\r\n      " +
+                " LEFT JOIN smassetmasters sam ON sam.ID = pod.assetItemID\r\n      " +
                 "  LEFT JOIN smunitmeasurement sm ON sm.ID = sam.unit_of_measurement\r\n    " +
                 "    LEFT JOIN (\r\n            SELECT file.file_path,file.Asset_master_id as Asset_master_id FROM smassetmasterfiles file \r\n " +
                 "           LEFT join smassetmasters sam on file.Asset_master_id =  sam.id )\r\n        " +
@@ -1137,7 +1137,7 @@ namespace CMMSAPIs.Repositories
 
             for (var i = 0; i < request.go_items.Count; i++)
             {
-                string itemsQuery = $"UPDATE smpurchaseorderdetails SET location_ID = {request.location_ID},assetItemID = {request.go_items[i].assetItemID},cost = {request.go_items[i].cost}, accepted_qty = {request.go_items[i].accepted_qty},ordered_qty = {request.go_items[i].ordered_qty} , requested_qty = {request.go_items[i].requested_qty}, received_qty= {request.go_items[i].received_qty},lost_qty = {request.go_items[i].lost_qty}, damaged_qty={request.go_items[i].damaged_qty}, paid_by_ID = {request.go_items[i].paid_by_ID}" +
+                string itemsQuery = $"UPDATE smpurchaseorderdetails SET location_ID = {request.location_ID},assetItemID = {request.go_items[i].assetMasterItemID},cost = {request.go_items[i].cost}, accepted_qty = {request.go_items[i].accepted_qty},ordered_qty = {request.go_items[i].ordered_qty} , requested_qty = {request.go_items[i].requested_qty}, received_qty= {request.go_items[i].received_qty},lost_qty = {request.go_items[i].lost_qty}, damaged_qty={request.go_items[i].damaged_qty}, paid_by_ID = {request.go_items[i].paid_by_ID}" +
                     $" WHERE ID = {request.go_items[i].goItemID}";
                 var result = await Context.ExecuteNonQry<int>(itemsQuery);
             }
@@ -1250,5 +1250,17 @@ namespace CMMSAPIs.Repositories
 
             return response;
         }
+
+        internal async Task<CMDefaultResponse> CloseRO(CMGoodsOrderList request, int userID)
+        {
+            string mainQuery = $"UPDATE smpurchaseorder SET withdraw_by = " + userID + ", status = " + (int)CMMS.CMMS_Status.SM_RO_CLOSED + ", remarks = '" + request.remarks + "', withdrawOn = '" + DateTime.Now.ToString("yyyy-MM-dd") + "' WHERE ID = " + request.id + "";
+            await Context.ExecuteNonQry<int>(mainQuery);
+
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_GO, request.id, 0, 0, request.remarks, CMMS.CMMS_Status.SM_RO_CLOSED);
+
+            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Goods order withdrawn successfully.");
+            return response;
+        }
+
     }
 }
