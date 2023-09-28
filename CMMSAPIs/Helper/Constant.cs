@@ -451,11 +451,12 @@ namespace CMMSAPIs.Helper
             GO_WITHDRAW_BY_ADMINISTRATOR,
 
          
-            SM_RO_SUBMITTED = 341,  
+            SM_RO_DRAFT = 341,
+            SM_RO_SUBMITTED,
+            SM_RO_SUBMIT_REJECTED,
+            SM_RO_SUBMIT_APPROVED,
+            SM_RO_DELETED,
             SM_RO_CLOSED,
-	        SM_RO_DELETED,
-            SM_RO_CLOSED_REJECTED,
-            SM_RO_CLOSED_APPROVED,
 
             MC_PLAN_DRAFT = 350,
             MC_PLAN_SUBMITTED,
