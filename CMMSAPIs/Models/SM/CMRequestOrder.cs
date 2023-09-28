@@ -58,7 +58,7 @@ namespace CMMSAPIs.Models.SM
     {
         public int itemID { get; set; }
         public int requestID { get; set; }
-        public int assetItemID { get; set; }
+        public int assetMasterItemID { get; set; }
         public decimal cost { get; set; }
         public decimal ordered_qty { get; set; }
         public string asset_name { get; set; }
@@ -154,6 +154,8 @@ namespace CMMSAPIs.Models.SM
         public string approvedBy { get; set; }      
         public DateTime? approvedAt { get; set; }
         public DateTime? generatedAt { get; set; }
+        public int number_of_masters { get; set; }
+        public int number_of_item_count { get; set; }
         public List<CMRequestOrder_ITEMS> request_order_items { get; set; }
     }
 

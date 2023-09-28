@@ -75,7 +75,7 @@ namespace CMMSAPIs.Models
     {
         public int poID { get; set; }
         public int goItemID { get; set; }
-        public int assetItemID { get; set; }
+        public int assetMasterItemID { get; set; }
         public double cost { get; set; }
         public double ordered_qty { get; set; }
         public string asset_name { get; set; }
@@ -228,7 +228,7 @@ namespace CMMSAPIs.Models
     public class CMGODetails
     {
         public int id { get; set; }
-        public int assetItemID { get; set; }       
+        public int assetMasterItemID { get; set; }       
         public int asset_type_ID { get; set; }
         public string asset_code { get; set; }
         public string assetItem_Name { get; set; }
