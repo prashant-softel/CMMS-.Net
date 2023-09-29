@@ -448,8 +448,8 @@ namespace CMMSAPIs.Repositories
                         assetItemId = Convert.ToInt32(dtInsert.Rows[0][0]);
                         //assetItemIDByCode[assetCode] = assetItemId;
                         stmtI = "";
-                        stmtI = $"INSERT INTO smpurchaseorderdetails (purchaseID,assetItemID,order_type,cost,ordered_qty,location_ID,received_qty)" +
-                                    $"VALUES({item.purchaseID},{assetItemId},{item.asset_type_ID},{item.cost},1,0,{item.requested_qty}); SELECT LAST_INSERT_ID();";
+                        stmtI = $"INSERT INTO smpurchaseorderdetails (purchaseID,assetItemID,order_type,cost,ordered_qty,location_ID,received_qty,paid_by_ID)" +
+                                    $"VALUES({item.purchaseID},{item.assetItemID},{item.asset_type_ID},{item.cost},1,0,{item.requested_qty},{item.paid_by_ID}); SELECT LAST_INSERT_ID();";
                         DataTable dtInsertOD = await Context.FetchData(stmtI).ConfigureAwait(false);
                         purchaseOrderDetailsID = Convert.ToInt32(dtInsertOD.Rows[0][0]);
                     }
@@ -578,7 +578,7 @@ namespace CMMSAPIs.Repositories
                 "f1.file_path,f1.Asset_master_id,sm.decimal_status,sm.spare_multi_selection,po.generated_by,pod.order_type, receive_later, " +
                 "added_to_store,   \r\n      " +
                 "  po.challan_no, po.po_no, po.freight, po.transport, po.no_pkg_received, po.lr_no, po.condition_pkg_received, " +
-                "po.vehicle_no, po.gir_no, po.challan_date,  po.job_ref, po.amount, po.currency as currencyID , curr.name as currency \r\n      " +
+                "po.vehicle_no, po.gir_no, po.challan_date,  po.job_ref, po.amount, po.currency as currencyID , curr.name as currency ,pod.paid_by_ID\r\n      " +
                 "  FROM smpurchaseorderdetails pod\r\n        LEFT JOIN smpurchaseorder po ON po.ID = pod.purchaseID\r\n     " +
                 "   LEFT JOIN smassetitems sai ON sai.ID = pod.assetItemID\r\n       " +
                 " LEFT JOIN smassetmasters sam ON sam.asset_code = sai.asset_code\r\n      " +
