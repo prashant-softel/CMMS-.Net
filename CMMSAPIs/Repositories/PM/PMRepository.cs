@@ -376,8 +376,12 @@ namespace CMMSAPIs.Repositories.PM
             int reject_id = await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
 
             string mainQuery = $"INSERT INTO pm_task(plan_id,facility_id,category_id,frequency_id,plan_Date,assigned_to,status)  " +
-                               $"select id as plan_id,facility_id,category_id,frequency_id,plan_Date,assigned_to,{(int)CMMS.CMMS_Status.PM_SCHEDULED} as status from pm_plan where id = {request.id}; " +
+                               $"select id as plan_id,facility_id,category_id,frequency_id,plan_Date,assigned_to," +
+                               $"CASE WHEN assigned_to = '' or assigned_to IS NULL THEN {(int)CMMS.CMMS_Status.PM_SCHEDULED} " +
+                               $"ELSE {(int)CMMS.CMMS_Status.PM_ASSIGNED} END as status " +
+                               $"from pm_plan where id = {request.id}; " +
                                $"SELECT LAST_INSERT_ID(); ";
+
             DataTable dt3 = await Context.FetchData(mainQuery).ConfigureAwait(false);
             int id = Convert.ToInt32(dt3.Rows[0][0]);
 

@@ -124,7 +124,7 @@ namespace CMMSAPIs.Repositories.Permits
             return statusName;
         }
 
-        private static string LongStatus(int statusID, CMPermitDetail permitObj)
+        public static string LongStatus(int statusID, CMPermitDetail permitObj)
         {
             CMMS.CMMS_Status status = (CMMS.CMMS_Status)statusID;
             string statusName = "";

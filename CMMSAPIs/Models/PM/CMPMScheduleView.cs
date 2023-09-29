@@ -43,6 +43,7 @@ namespace CMMSAPIs.Models.PM
         public int permit_id { get; set; }
         public string permit_code { get; set; }
         public int status { get; set; }
+        public int ptw_status { get; set; }
         public string status_short { get; set; }
     }
 
@@ -79,6 +80,7 @@ namespace CMMSAPIs.Models.PM
         public int updated_by_id { get; set; }
         public string updated_by_name { get; set; }
         public DateTime updated_at { get; set; }
+        public string status_long { get; set; }
 
     }
     public class CMPMScheduleViewDetail : CMPMScheduleView
@@ -134,6 +136,7 @@ namespace CMMSAPIs.Models.PM
 
     public class ScheduleFiles
     {
+        public int file_id { get; set; }
         public string _event { get; set; }
         public string file_path { get; set; }
         public string file_description { get; set; }
@@ -166,6 +169,7 @@ namespace CMMSAPIs.Models.PM
     }
     public class CMPMScheduleObservation
     {
+        public int task_id { get; set; }
         public int schedule_id { get; set; }
         public List<AddObservation> add_observations { get; set; }
     }

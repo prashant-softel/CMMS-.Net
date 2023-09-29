@@ -211,5 +211,68 @@ namespace CMMSAPIs.Controllers.PM
             }
         }
 
+        [Route("AssignPMTask")]
+        [HttpPut]
+        public async Task<IActionResult> AssignPMTask(int task_id, int assign_to)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _PMScheduleViewBS.AssignPMTask(task_id, assign_to, userID);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [Route("UpdatePMScheduleExecution")]
+        [HttpPatch]
+        public async Task<IActionResult> UpdatePMScheduleExecution(CMPMScheduleObservation request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _PMScheduleViewBS.UpdatePMScheduleExecution(request, userID);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [Route("GetPMTaskScheduleDetail")]
+        [HttpGet]
+        public async Task<IActionResult> GetPMTaskScheduleDetail(int task_id, int schedule_id)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _PMScheduleViewBS.GetPMTaskScheduleDetail(task_id, schedule_id);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [Route("cloneSchedule")]
+        [HttpPatch]
+        public async Task<IActionResult> cloneSchedule(int facility_id, int task_id, int from_schedule_id, int to_schedule_id)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _PMScheduleViewBS.cloneSchedule(facility_id, task_id, from_schedule_id, to_schedule_id, userID);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }
