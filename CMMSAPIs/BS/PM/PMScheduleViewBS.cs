@@ -21,6 +21,10 @@ namespace CMMSAPIs.BS.PM
         Task<CMRescheduleApprovalResponse> ApprovePMTaskExecution(CMApproval request, int userID);
         Task<CMDefaultResponse> RejectPMTaskExecution(CMApproval request, int userID);
         Task<CMDefaultResponse> LinkPermitToPMTask(int task_id, int permit_id, int userID);
+        Task<CMDefaultResponse> AssignPMTask(int task_id, int assign_to, int userID);
+        Task<List<CMDefaultResponse>> UpdatePMScheduleExecution(CMPMScheduleObservation request, int userID);
+        Task<CMPMScheduleExecutionDetail> GetPMTaskScheduleDetail(int task_id, int schedule_id);
+        Task<List<CMDefaultResponse>> cloneSchedule(int facility_id,int task_id, int from_schedule_id, int to_schedule_id,int userID);
 
     }
     public class PMScheduleViewBS : IPMScheduleViewBS
@@ -174,6 +178,64 @@ namespace CMMSAPIs.BS.PM
                 using (var repos = new PMScheduleViewRepository(getDB))
                 {
                     return await repos.RejectPMTaskExecution(request, userID);
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> AssignPMTask(int task_id, int assign_to, int userID)
+        {
+            try
+            {
+                using (var repos = new PMScheduleViewRepository(getDB))
+                {
+                    return await repos.AssignPMTask(task_id, assign_to, userID);
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMPMScheduleExecutionDetail> GetPMTaskScheduleDetail(int task_id, int schedule_id)
+        {
+            try
+            {
+                using (var repos = new PMScheduleViewRepository(getDB))
+                {
+                    return await repos.GetPMTaskScheduleDetail(task_id, schedule_id);
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        public async Task<List<CMDefaultResponse>> UpdatePMScheduleExecution(CMPMScheduleObservation request, int userID)
+        {
+            try
+            {
+                using (var repos = new PMScheduleViewRepository(getDB))
+                {
+                    return await repos.UpdatePMScheduleExecution(request, userID);
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        public async Task<List<CMDefaultResponse>> cloneSchedule(int facility_id, int task_id, int from_schedule_id, int to_schedule_id, int userID)
+        {
+            try
+            {
+                using (var repos = new PMScheduleViewRepository(getDB))
+                {
+                    return await repos.cloneSchedule( facility_id,  task_id,  from_schedule_id,  to_schedule_id,  userID);
                 }
             }
             catch (Exception)

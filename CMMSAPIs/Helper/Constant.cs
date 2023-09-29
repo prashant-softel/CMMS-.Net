@@ -375,6 +375,8 @@ namespace CMMSAPIs.Helper
             PM_COMPLETED,
             PM_REJECTED,
             PM_APPROVED,
+            PM_CLOSE_REJECTED,
+            PM_CLOSE_APPROVED,
             PM_CANCELLED,
             PM_DELETED,
             PM_UPDATED, //Only for notification purpose

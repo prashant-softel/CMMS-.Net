@@ -53,6 +53,7 @@ namespace CMMSAPIs.BS.Permits
         Task<CMDefaultResponse> UpdatePermit(CMUpdatePermit request, int userID);
         Task<List<CMPermitConditions>> GetPermitConditionList(int permit_type_id, int isClose, int isCancle, int isExtend);
 
+
     }
 
     public class PermitBS : IPermitBS
