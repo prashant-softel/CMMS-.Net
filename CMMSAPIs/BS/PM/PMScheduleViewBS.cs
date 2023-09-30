@@ -22,7 +22,7 @@ namespace CMMSAPIs.BS.PM
         Task<CMDefaultResponse> RejectPMTaskExecution(CMApproval request, int userID);
         Task<CMDefaultResponse> LinkPermitToPMTask(int task_id, int permit_id, int userID);
         Task<CMDefaultResponse> AssignPMTask(int task_id, int assign_to, int userID);
-        Task<List<CMDefaultResponse>> UpdatePMScheduleExecution(CMPMScheduleObservation request, int userID);
+        Task<List<CMDefaultResponse>> UpdatePMScheduleExecution(CMPMExecutionDetail request, int userID);
         Task<CMPMScheduleExecutionDetail> GetPMTaskScheduleDetail(int task_id, int schedule_id);
         Task<List<CMDefaultResponse>> cloneSchedule(int facility_id,int task_id, int from_schedule_id, int to_schedule_id,int userID);
 
@@ -215,7 +215,7 @@ namespace CMMSAPIs.BS.PM
                 throw;
             }
         }
-        public async Task<List<CMDefaultResponse>> UpdatePMScheduleExecution(CMPMScheduleObservation request, int userID)
+        public async Task<List<CMDefaultResponse>> UpdatePMScheduleExecution(CMPMExecutionDetail request, int userID)
         {
             try
             {
