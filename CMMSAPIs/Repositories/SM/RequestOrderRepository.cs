@@ -61,7 +61,7 @@ namespace CMMSAPIs.Repositories.SM
             }
 
             response = new CMDefaultResponse(ReturnID, CMMS.RETRUNSTATUS.SUCCESS, "Request order created successfully.");
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_RO, ReturnID, 0, 0, "Request order created", CMMS.CMMS_Status.SM_RO_SUBMITTED);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_RO, ReturnID, 0, 0, request.comment, CMMS.CMMS_Status.SM_RO_SUBMITTED);
             return response;
         }
         internal async Task<CMDefaultResponse> UpdateRequestOrder(CMCreateRequestOrder request, int userID)
@@ -69,7 +69,7 @@ namespace CMMSAPIs.Repositories.SM
             //string mainQuery = $"UPDATE smpurchaseorderdetails SET generate_flag = " +request.generate_flag + ",status = "+request.status+", vendorID = "+request.vendorID+" WHERE ID = "+request.id+"";
 
             string updateRO = $" UPDATE smrequestorder SET facilityID = '{request.facilityID}'," +
-                $" remarks = '{request.comment}', updated_by = {userID},updated_at='{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}' where id = {request.request_order_id}";
+                $" remarks = '{request.comment}', updated_by = {userID},updated_at='{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}', status={(int)CMMS.CMMS_Status.SM_RO_SUBMITTED} where id = {request.request_order_id}";
             var ResultROQuery = await Context.ExecuteNonQry<int>(updateRO);
             for (var i = 0; i < request.request_order_items.Count; i++)
             {
@@ -95,7 +95,7 @@ namespace CMMSAPIs.Repositories.SM
             string mainQuery = $"UPDATE smrequestorder SET status = {(int)CMMS.CMMS_Status.SM_RO_DELETED}, remarks= '{request.comment}' WHERE ID = " + request.id + "";
             await Context.ExecuteNonQry<int>(mainQuery);
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Request order deleted.");
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_RO, request.id, 0, 0, "Request order deleted", CMMS.CMMS_Status.SM_RO_DELETED);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_RO, request.id, 0, 0, request.comment, CMMS.CMMS_Status.SM_RO_DELETED);
             return response;
         }
         internal async Task<CMDefaultResponse> CloseRequestOrder(CMApproval request, int userID)
@@ -261,7 +261,7 @@ namespace CMMSAPIs.Repositories.SM
 
             retCode = CMMS.RETRUNSTATUS.SUCCESS;
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Approved request order {request.id} successfully.");
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_RO, request.id, 0, 0, "Approved request order {request.id}", CMMS.CMMS_Status.SM_RO_SUBMIT_APPROVED);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_RO, request.id, 0, 0, request.comment, CMMS.CMMS_Status.SM_RO_SUBMIT_APPROVED);
             return response;
         }
 
@@ -285,7 +285,7 @@ namespace CMMSAPIs.Repositories.SM
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
             }
 
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_RO, request.id, 0, 0, "Rejected request order", CMMS.CMMS_Status.SM_RO_SUBMIT_REJECTED);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_RO, request.id, 0, 0, request.comment, CMMS.CMMS_Status.SM_RO_SUBMIT_REJECTED);
 
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Rejected request order.");
             return response;
