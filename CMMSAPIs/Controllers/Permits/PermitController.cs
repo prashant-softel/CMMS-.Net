@@ -415,7 +415,7 @@ namespace CMMSAPIs.Controllers.Permits
         //[Authorize]
         [Route("PermitIssue")]
         [HttpPut]
-        public async Task<IActionResult> PermitIssue([FromForm] CMApproval request)
+        public async Task<IActionResult> PermitIssue( CMApproval request)
         {
             try
             {
@@ -432,7 +432,7 @@ namespace CMMSAPIs.Controllers.Permits
         //[Authorize]
         [Route("PermitApprove")]
         [HttpPut]
-        public async Task<IActionResult> PermitApprove([FromForm] CMApproval request)
+        public async Task<IActionResult> PermitApprove( CMApproval request)
         {
             try
             {
@@ -466,7 +466,7 @@ namespace CMMSAPIs.Controllers.Permits
         //[Authorize]
         [Route("PermitExtendApprove")]
         [HttpPut]
-        public async Task<IActionResult> PermitExtendApprove([FromForm] CMApproval request)
+        public async Task<IActionResult> PermitExtendApprove(CMApproval request)
         {
             try
             {
@@ -483,7 +483,7 @@ namespace CMMSAPIs.Controllers.Permits
         //[Authorize]
         [Route("PermitExtendReject")]
         [HttpPut]
-        public async Task<IActionResult> PermitExtendReject([FromForm] CMApproval request)
+        public async Task<IActionResult> PermitExtendReject(CMApproval request)
         {
             try
             {
@@ -517,7 +517,7 @@ namespace CMMSAPIs.Controllers.Permits
         //[Authorize]
         [Route("PermitReject")]
         [HttpPut]
-        public async Task<IActionResult> PermitReject([FromForm] CMApproval request)
+        public async Task<IActionResult> PermitReject(CMApproval request)
         {
             try
             {
@@ -535,7 +535,7 @@ namespace CMMSAPIs.Controllers.Permits
         //[Authorize]
         [Route("PermitIssueReject")]
         [HttpPut]
-        public async Task<IActionResult> PermitIssueReject([FromForm] CMApproval request)
+        public async Task<IActionResult> PermitIssueReject(CMApproval request)
         {
             try
             {
@@ -570,7 +570,7 @@ namespace CMMSAPIs.Controllers.Permits
         //[Authorize]
         [Route("PermitCancelReject")]
         [HttpPut]
-        public async Task<IActionResult> PermitCancelReject([FromForm] CMApproval request)
+        public async Task<IActionResult> PermitCancelReject(CMApproval request)
         {
             try
             {
@@ -587,7 +587,7 @@ namespace CMMSAPIs.Controllers.Permits
         //[Authorize]
         [Route("PermitCancelByApprover")]
         [HttpPut]
-        public async Task<IActionResult> PermitCancelByApprover([FromForm] CMApproval request)
+        public async Task<IActionResult> PermitCancelByApprover(CMApproval request)
         {
             try
             {
@@ -604,7 +604,7 @@ namespace CMMSAPIs.Controllers.Permits
         //[Authorize]
         [Route("PermitCancelByHSE")]
         [HttpPut]
-        public async Task<IActionResult> PermitCancelByHSE([FromForm] CMApproval request)
+        public async Task<IActionResult> PermitCancelByHSE(CMApproval request)
         {
             try
             {
@@ -621,7 +621,7 @@ namespace CMMSAPIs.Controllers.Permits
         //[Authorize]
         [Route("PermitCancelByIssuer")]
         [HttpPut]
-        public async Task<IActionResult> PermitCancelByIssuer([FromForm] CMApproval request)
+        public async Task<IActionResult> PermitCancelByIssuer(CMApproval request)
         {
             try
             {
