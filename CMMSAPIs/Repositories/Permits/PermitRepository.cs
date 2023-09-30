@@ -486,7 +486,7 @@ namespace CMMSAPIs.Repositories.Permits
             }
             statusSubQuery += $"ELSE '{Status(0)}' END";
             string myQuery = "SELECT " +
-                                 $"ptw.id as permitId, CASE when ptw.endDate < '{UtilsRepository.GetUTCTime()}' and ptw.status = {(int)CMMS.CMMS_Status.PTW_APPROVED} then 1 else 0 END as isExpired, ptw.code, ptw.status as ptwStatus, ptw.permitNumber as permit_site_no, permitType.id as permit_type, permitType.title as PermitTypeName, group_concat(distinct asset_cat.name order by asset_cat.id separator ', ') as equipment_categories, facilities.id as workingAreaId, facilities.name as workingAreaName, ptw.title as title, ptw.description as description, acceptedUser.id as request_by_id, CONCAT(acceptedUser.firstName , ' ' , acceptedUser.lastName) as request_by_name, ptw.acceptedDate as request_datetime, issuedUser.id as issued_by_id, CONCAT(issuedUser.firstName , ' ' , issuedUser.lastName) as issued_by_name, ptw.issuedDate as issue_datetime, approvedUser.id as approved_by_id, CONCAT(approvedUser.firstName , ' ' , approvedUser.lastName) as approved_by_name, ptw.approvedDate as approved_datetime, {statusSubQuery} as current_status_short " +
+                                 $"ptw.id as permitId, CASE when ptw.endDate < '{UtilsRepository.GetUTCTime()}' and ptw.status = {(int)CMMS.CMMS_Status.PTW_APPROVED} then 0 else 1 END as isExpired, ptw.code, ptw.status as ptwStatus, ptw.permitNumber as permit_site_no, permitType.id as permit_type, permitType.title as PermitTypeName, group_concat(distinct asset_cat.name order by asset_cat.id separator ', ') as equipment_categories, facilities.id as workingAreaId, facilities.name as workingAreaName, ptw.title as title, ptw.description as description, acceptedUser.id as request_by_id, CONCAT(acceptedUser.firstName , ' ' , acceptedUser.lastName) as request_by_name, ptw.acceptedDate as request_datetime, issuedUser.id as issued_by_id, CONCAT(issuedUser.firstName , ' ' , issuedUser.lastName) as issued_by_name, ptw.issuedDate as issue_datetime, approvedUser.id as approved_by_id, CONCAT(approvedUser.firstName , ' ' , approvedUser.lastName) as approved_by_name, ptw.approvedDate as approved_datetime, {statusSubQuery} as current_status_short " +
                                  " FROM " +
                                         "permits as ptw " +
                                   "JOIN " +
@@ -667,9 +667,9 @@ namespace CMMSAPIs.Repositories.Permits
             }
             statusSubQuery += $"ELSE '{Status(0)}' END";
             if (permit_id <= 0)
-                throw new ArgumentException("Invalid Permit ID");
+                throw new MissingMemberException($"Invalid Permit ID {permit_id}");
 
-            string myQuery = $"SELECT ptw.id as insertedId,CASE when ptw.endDate < '{UtilsRepository.GetUTCTime()}' and ptw.status = {(int)CMMS.CMMS_Status.PTW_APPROVED} then 1 else 0 END as isExpired, ptw.status as ptwStatus, {statusSubQuery} as current_status_short, ptw.startDate as start_datetime, ptw.endDate as end_datetime, facilities.id as facility_id, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, blocks.id as blockId, blocks.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.title as title, ptw.description as description, ptw.jobTypeId as job_type_id, jobType.title as job_type_name, ptw.TBTId as sop_type_id, sop.title as sop_type_name, user1.id as issuer_id, CONCAT(user1.firstName,' ',user1.lastName) as issuedByName,ud1.name as issuerDesignation,co1.name as issuerCompany, ptw.issuedDate as issue_at, user6.id as issueRejectedby_id, CONCAT(user6.firstName,' ',user6.lastName) as issueRejectedByName,co6.name as issueRejecterCompany,ud6.name as issueRejecterDesignation, ptw.rejectedDate as issueRejected_at, user2.id as approver_id, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName,ud2.name as approverDesignation,co2.name as approverCompany, ptw.approvedDate as approve_at,user7.id as rejecter_id, CONCAT(user7.firstName,' ',user7.lastName) as rejectedByName,ud7.name as rejecterDesignation,co7.name as rejecterCompany, ptw.rejectedDate as rejected_at, user3.id as requester_id, CONCAT(user3.firstName,' ',user3.lastName) as requestedByName,ud3.name as requesterDesignation,co3.name as requesterCompany, ptw.completedDate as close_at, user4.id as cancelRequestby_id, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName,ud4.name as cancelRequestByDesignation,co4.name as cancelRequestByCompany,user8.id as cancelRequestApprovedby_id, CONCAT(user8.firstName,' ',user8.lastName) as cancelRequestApprovedByName,ud8.name as cancelRequestApprovedByDesignation,co8.name as cancelRequestApprovedByCompany, user9.id as cancelRequestRejectedby_id, CONCAT(user9.firstName,' ',user9.lastName) as cancelRequestRejectedByName, ud9.name as cancelRequestRejectedByDesignation,co9.name as cancelRequestRejectedByCompany,user5.id as closedby_id, CONCAT(user5.firstName,' ',user5.lastName) as closedByName, ud5.name as closedByDesignation,co5.name as closedByCompany,ptw.cancelRequestDate as cancel_at " +
+            string myQuery = $"SELECT ptw.id as insertedId,CASE when ptw.endDate < '{UtilsRepository.GetUTCTime()}' and ptw.status = {(int)CMMS.CMMS_Status.PTW_APPROVED} then 0 else 1 END as isExpired,ptw.extendStatus as isExtended, ptw.status as ptwStatus, {statusSubQuery} as current_status_short, ptw.startDate as start_datetime, ptw.endDate as end_datetime, facilities.id as facility_id, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, blocks.id as blockId, blocks.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.title as title, ptw.description as description, ptw.jobTypeId as job_type_id, jobType.title as job_type_name, ptw.TBTId as sop_type_id, sop.title as sop_type_name, user1.id as issuer_id, CONCAT(user1.firstName,' ',user1.lastName) as issuedByName,ud1.name as issuerDesignation,co1.name as issuerCompany, ptw.issuedDate as issue_at, user6.id as issueRejectedby_id, CONCAT(user6.firstName,' ',user6.lastName) as issueRejectedByName,co6.name as issueRejecterCompany,ud6.name as issueRejecterDesignation, ptw.rejectedDate as issueRejected_at, user2.id as approver_id, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName,ud2.name as approverDesignation,co2.name as approverCompany, ptw.approvedDate as approve_at,user7.id as rejecter_id, CONCAT(user7.firstName,' ',user7.lastName) as rejectedByName,ud7.name as rejecterDesignation,co7.name as rejecterCompany, ptw.rejectedDate as rejected_at, user3.id as requester_id, CONCAT(user3.firstName,' ',user3.lastName) as requestedByName,ud3.name as requesterDesignation,co3.name as requesterCompany, ptw.completedDate as close_at, user4.id as cancelRequestby_id, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName,ud4.name as cancelRequestByDesignation,co4.name as cancelRequestByCompany,user8.id as cancelRequestApprovedby_id, CONCAT(user8.firstName,' ',user8.lastName) as cancelRequestApprovedByName,ud8.name as cancelRequestApprovedByDesignation,co8.name as cancelRequestApprovedByCompany, user9.id as cancelRequestRejectedby_id, CONCAT(user9.firstName,' ',user9.lastName) as cancelRequestRejectedByName, ud9.name as cancelRequestRejectedByDesignation,co9.name as cancelRequestRejectedByCompany,user5.id as closedby_id, CONCAT(user5.firstName,' ',user5.lastName) as closedByName, ud5.name as closedByDesignation,co5.name as closedByCompany,ptw.cancelRequestDate as cancel_at " +
               "FROM permits as ptw " +
               "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
               "LEFT JOIN permitjobtypelist as jobType ON ptw.jobTypeId = jobType.id " +
@@ -759,17 +759,25 @@ namespace CMMSAPIs.Repositories.Permits
                 other.name = dt1.Rows[0]["closeOther"].ToString();
                 closeConditions.Add(other);
             }
+
+            _PermitDetailsList[0].closeDetails = new CMPermitConditionDetails();
+            _PermitDetailsList[0].closeDetails.conditions = closeConditions;
+
             string query1 = $"SELECT closeFile FROM permits WHERE id = {permit_id};";
             DataTable dt2 = await Context.FetchData(query1).ConfigureAwait(false);
             string fileIds = Convert.ToString(dt2.Rows[0][0]);
 
-            string files = $"SELECT id as fileId, file_path as path FROM uploadedFiles WHERE id IN ( {fileIds} );";
-            List<files> closeFiles = await Context.GetData<files>(files).ConfigureAwait(false);
+
+            if (!string.IsNullOrEmpty(fileIds))
+            {
+                string files = $"SELECT id as fileId, file_path as path FROM uploadedFiles WHERE id IN ( {fileIds} );";
+                List<files> closeFiles = await Context.GetData<files>(files).ConfigureAwait(false);
+                _PermitDetailsList[0].closeDetails.files = closeFiles;
+
+            }
 
 
-            _PermitDetailsList[0].closeDetails = new CMPermitConditionDetails();
-            _PermitDetailsList[0].closeDetails.conditions = closeConditions;
-            _PermitDetailsList[0].closeDetails.files = closeFiles;
+            
 
             string cancleQry = $"select `5`,`6`,`7`,cancelOther from permits where id = {permit_id}  ";
             DataTable dt3 = await Context.FetchData(cancleQry).ConfigureAwait(false);
@@ -804,17 +812,23 @@ namespace CMMSAPIs.Repositories.Permits
                 cancleConditions.Add(other);
             }
 
+            _PermitDetailsList[0].cancelDetails = new CMPermitConditionDetails();
+            _PermitDetailsList[0].cancelDetails.conditions = cancleConditions;
+
             string query2 = $"SELECT cancelFile FROM permits WHERE id = {permit_id};";
             DataTable dt4 = await Context.FetchData(query2).ConfigureAwait(false);
             string fileIds2 = Convert.ToString(dt4.Rows[0][0]);
 
-            string files2 = $"SELECT id as fileId, file_path as path FROM uploadedFiles WHERE id IN ( {fileIds2} );";
-            List<files> cancleFiles = await Context.GetData<files>(files2).ConfigureAwait(false);
+            if (!string.IsNullOrEmpty(fileIds2))
+            {
+                string files2 = $"SELECT id as fileId, file_path as path FROM uploadedFiles WHERE id IN ( {fileIds2} );";
+                List<files> cancleFiles = await Context.GetData<files>(files2).ConfigureAwait(false);
+                _PermitDetailsList[0].cancelDetails.files = cancleFiles;
+
+            }
 
 
-            _PermitDetailsList[0].cancelDetails = new CMPermitConditionDetails();
-            _PermitDetailsList[0].cancelDetails.conditions = cancleConditions;
-            _PermitDetailsList[0].cancelDetails.files = cancleFiles;
+           
 
             string extendQry = $"select `8`,`9`,extendOther from permits where id = {permit_id}  ";
             DataTable dt5 = await Context.FetchData(extendQry).ConfigureAwait(false);
@@ -848,18 +862,23 @@ namespace CMMSAPIs.Repositories.Permits
                 other.name = dt5.Rows[0]["extendOther"].ToString();
                 extendConditions.Add(other);
             }
+
+            _PermitDetailsList[0].extendDetails = new CMPermitConditionDetails();
+            _PermitDetailsList[0].extendDetails.conditions = extendConditions;
+
             string query3 = $"SELECT closeFile FROM permits WHERE id = {permit_id};";
             DataTable dt7 = await Context.FetchData(query3).ConfigureAwait(false);
             string fileIds3 = Convert.ToString(dt7.Rows[0][0]);
 
-            string files3 = $"SELECT id as fileId, file_path as path FROM uploadedFiles WHERE id IN ( {fileIds3} );";
-            List<files> extendFiles = await Context.GetData<files>(files3).ConfigureAwait(false);
+            if (!string.IsNullOrEmpty(fileIds3))
+            {
+                string files3 = $"SELECT id as fileId, file_path as path FROM uploadedFiles WHERE id IN ( {fileIds3} );";
+                List<files> extendFiles = await Context.GetData<files>(files3).ConfigureAwait(false);
+                _PermitDetailsList[0].extendDetails.files = extendFiles;
 
+            }
 
-            _PermitDetailsList[0].extendDetails = new CMPermitConditionDetails();
-            _PermitDetailsList[0].extendDetails.conditions = extendConditions;
-            _PermitDetailsList[0].extendDetails.files = extendFiles;
-
+           
             foreach (var job in _AssociatedJobList)
             {
 
@@ -901,7 +920,7 @@ namespace CMMSAPIs.Repositories.Permits
         {
             CMDefaultResponse response = new CMDefaultResponse();
 
-            int extendMinutes = 60;
+            int extendMinutes = 240;
 
             if (request.extend_by_minutes > 0)
             {
@@ -915,7 +934,7 @@ namespace CMMSAPIs.Repositories.Permits
                 string fileIds = "";
                 fileIds += (request?.fileIds?.Length > 0 ? " " + string.Join(" , ", request.fileIds) + " " : string.Empty);
 
-                string updateQry = $"update permits set extendReason = '{request.comment}', extendByMinutes = '{extendMinutes}', extendTime = '{UtilsRepository.GetUTCTime()}',extendFile = '{fileIds}', extendStatus = 1, status = {(int)CMMS.CMMS_Status.PTW_EXTEND_REQUESTED} where id = {request.id}";
+                string updateQry = $"update permits set extendReason = '{request.comment}', extendByMinutes = '{extendMinutes}', extendTime = '{UtilsRepository.GetUTCTime()}',extendFile = '{fileIds}', extendStatus = 0, status = {(int)CMMS.CMMS_Status.PTW_EXTEND_REQUESTED} where id = {request.id}";
 
                 await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
 
@@ -978,16 +997,16 @@ namespace CMMSAPIs.Repositories.Permits
               
             CMPermitDetail permitDetails = await GetPermitDetails(request.id);
 
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.id, 0, 0, "Permit Extended for 1 hour", CMMS.CMMS_Status.PTW_EXTEND_REQUEST_APPROVE, userID);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.id, 0, 0, "Permit Extended for 4 hours", CMMS.CMMS_Status.PTW_EXTEND_REQUEST_APPROVE, userID);
 
             await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_EXTEND_REQUEST_APPROVE, new[] { userID }, permitDetails);
-            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $" Permit  { request.id } Extended for {permitDetails} hour");
+            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $" Permit  { request.id } Extended for 4 hours");
             return response;
         }
 
         internal async Task<CMDefaultResponse> PermitExtendReject(CMApproval request, int userID)
         {
-            string updateQry = $"update permits set extendStatus = 1, status = { (int)CMMS.CMMS_Status.PTW_EXTEND_REQUEST_REJECTED }, status_updated_at = '{UtilsRepository.GetUTCTime()}', extendRejectReason = '{ request.comment }' where id = { request.id }";
+            string updateQry = $"update permits set extendStatus = 0, status = { (int)CMMS.CMMS_Status.PTW_EXTEND_REQUEST_REJECTED }, status_updated_at = '{UtilsRepository.GetUTCTime()}', extendRejectReason = '{ request.comment }' where id = { request.id }";
             int retValue = await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
 
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
