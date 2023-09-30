@@ -229,7 +229,7 @@ namespace CMMSAPIs.Controllers.PM
 
         [Route("UpdatePMScheduleExecution")]
         [HttpPatch]
-        public async Task<IActionResult> UpdatePMScheduleExecution(CMPMScheduleObservation request)
+        public async Task<IActionResult> UpdatePMScheduleExecution(CMPMExecutionDetail request)
         {
             try
             {

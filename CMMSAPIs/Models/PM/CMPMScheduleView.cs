@@ -167,6 +167,7 @@ namespace CMMSAPIs.Models.PM
         public string comment { get; set; }
 
     }
+
     public class CMPMScheduleObservation
     {
         public int task_id { get; set; }
@@ -179,7 +180,7 @@ namespace CMMSAPIs.Models.PM
         public int execution_id { get; set; }
         public string observation { get; set; }
         public int range { get; set; }
-        public int boolean { get; set; }
+        public int cp_ok { get; set; }
         public string text { get; set; }
         public List<PMFileUpload> pm_files { get; set; }
     }
