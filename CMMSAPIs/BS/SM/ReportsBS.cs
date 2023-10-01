@@ -14,11 +14,12 @@ namespace CMMSAPIs.BS.SM
 {
     public interface ISMReportsBS
     {
-        Task<List<CMPlantStockOpeningResponse>> GetPlantStockReport(string facility_id, DateTime StartDate, DateTime EndDate);
+        Task<List<CMPlantStockOpeningResponse>> GetPlantStockReport(string facility_id, DateTime StartDate, DateTime EndDate, string assetMasterIDs);
         Task<List<CMEmployeeStockReport>> GetEmployeeStockReport(int facility_id, int Emp_id, DateTime StartDate, DateTime EndDate, string itemID);
         Task<List<CMFaultyMaterialReport>> GetFaultyMaterialReport(string facility_id, string itemID, DateTime StartDate, DateTime EndDate);
         Task<List<CMEmployeeTransactionReport>> GetEmployeeTransactionReport(int isAllEmployees, string facility_id, int Emp_ID, DateTime StartDate, DateTime EndDate);
         Task<CMEmployeeStockList> GetEmployeeStock(int facility_ID, int emp_id);
+        Task<List<CMEmployeeStockTransactionReport>> GetEmployeeStockTransactionReport(int facility_ID, int emp_id);
     }
     public class ReportsBS : ISMReportsBS
     {
@@ -29,13 +30,13 @@ namespace CMMSAPIs.BS.SM
             databaseProvider = dbProvider;
         }
 
-        public async Task<List<CMPlantStockOpeningResponse>> GetPlantStockReport(string facility_id, DateTime StartDate, DateTime EndDate)
+        public async Task<List<CMPlantStockOpeningResponse>> GetPlantStockReport(string facility_id, DateTime StartDate, DateTime EndDate, string assetMasterIDs)
         {
             try
             {
                 using (var repos = new ReportsRepository(getDB))
                 {
-                    return await repos.GetPlantStockReport(facility_id, StartDate, EndDate);
+                    return await repos.GetPlantStockReport(facility_id, StartDate, EndDate, assetMasterIDs);
 
                 }
             }
@@ -107,6 +108,20 @@ namespace CMMSAPIs.BS.SM
                 throw;
             }
         }
+        public async Task<List<CMEmployeeStockTransactionReport>> GetEmployeeStockTransactionReport(int facility_ID, int emp_id)
+        {
+            try
+            {
+                using (var repos = new ReportsRepository(getDB))
+                {
+                    return await repos.GetEmployeeStockTransactionReport(facility_ID, emp_id);
 
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
     }
 }
