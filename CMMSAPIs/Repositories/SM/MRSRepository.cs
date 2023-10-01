@@ -183,9 +183,9 @@ namespace CMMSAPIs.Repositories.SM
                     int equipmentID = request.cmmrsItems[i].asset_item_ID;
                     decimal quantity = request.cmmrsItems[i].qty;
 
-                    string selectQuery = "SELECT sam.approval_required as approval_required_ID, sat.asset_code, asset_type_ID FROM smassetitems sat " +
-                               "LEFT JOIN smassetmasters sam ON sam.asset_code = sat.asset_code " +
-                               "WHERE sat.ID = " + equipmentID;
+                    string selectQuery = "SELECT approval_required, asset_code, asset_type_ID FROM  " +
+                               " smassetmasters  " +
+                               "WHERE ID = " + equipmentID;
                     
                    List<CMSMMaster> assetList = await Context.GetData<CMSMMaster>(selectQuery).ConfigureAwait(false);
                     var approval_required = assetList[0].approval_required;
@@ -230,7 +230,7 @@ namespace CMMSAPIs.Repositories.SM
             {
                 response = new CMDefaultResponse(request.ID, CMMS.RETRUNSTATUS.SUCCESS, "Request has been submitted.");
             }
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_MRS, request.ID, 0, 0, "MRS Created.", CMMS.CMMS_Status.MRS_SUBMITTED);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_MRS, request.ID, 0, 0, request.remarks, CMMS.CMMS_Status.MRS_SUBMITTED);
             return response;
         }
 
@@ -558,7 +558,7 @@ namespace CMMSAPIs.Repositories.SM
         internal async Task<CMDefaultResponse> mrsApproval(CMApproval request, int userId)
         {
             CMDefaultResponse response = null;
-            string stmtSelect = $"SELECT ID FROM smmrs WHERE ID = {request.id}";
+            string stmtSelect = $"SELECT ID,facility_ID, requested_by_emp_ID,reference FROM smmrs WHERE ID = {request.id}";
             List<CMMRS> mrsList = await Context.GetData<CMMRS>(stmtSelect).ConfigureAwait(false);
 
             if (mrsList.Count > 0)
@@ -572,7 +572,29 @@ namespace CMMSAPIs.Repositories.SM
             {
                 response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.FAILURE, "Invalid mrs updated.");
             }
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_MRS, request.id, 0, 0, "MRS approved.", CMMS.CMMS_Status.MRS_REQUEST_APPROVED);
+
+            string stmtSelectItems = "SELECT ID,requested_qty,asset_item_ID FROM smrsitems WHERE mrs_ID = " + request.id + "";
+            List<CMMRSItems> mrsItemList = await Context.GetData<CMMRSItems>(stmtSelectItems).ConfigureAwait(false);
+
+            for (var i = 0; i < mrsItemList.Count(); i++)
+            {
+                var tResult = await TransactionDetails(mrsList[0].facility_ID, mrsList[0].facility_ID, (int)CMMS.SM_Types.Store, mrsList[0].requested_by_emp_ID, (int)CMMS.SM_Types.Engineer, mrsItemList[i].asset_item_ID, Convert.ToInt32(mrsItemList[i].requested_qty), (int)CMMS.CMMS_Modules.SM_MRS, request.id, request.comment, mrsList[0].ID);
+                if (!tResult)
+                {
+                    return new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Transaction details failed.");
+                }
+            }
+
+            string historyComment = "";
+            if(request.comment != "")
+            {
+                historyComment = request.comment;
+            }
+            else
+            {
+                historyComment = "";
+            }
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_MRS, request.id, 0, 0, request.comment, CMMS.CMMS_Status.MRS_REQUEST_APPROVED);
 
             return response;
         }
@@ -599,21 +621,21 @@ namespace CMMSAPIs.Repositories.SM
             return response;
         }
 
-        public async Task<bool> TransactionDetails(int plantID, int fromActorID, int fromActorType, int toActorID, int toActorType, int assetItemID, int qty, int refType, int refID, string remarks, int mrsID = 0, int natureOfTransaction = 0, int assetItemStatus = 0)
+        public async Task<bool> TransactionDetails(int facilityID, int fromActorID, int fromActorType, int toActorID, int toActorType, int assetItemID, int qty, int refType, int refID, string remarks, int mrsID = 0, int natureOfTransaction = 0, int assetItemStatus = 0)
         {
             try
             {
                 string stmt = "INSERT INTO smtransactiondetails (plantID,fromActorID,fromActorType,toActorID,toActorType,assetItemID,qty,referedby,reference_ID,remarks,Nature_Of_Transaction,Asset_Item_Status)" +
-                              $"VALUES ({plantID},{fromActorID},{fromActorType},{toActorID},{toActorType},{assetItemID},{qty},{refType},{refID},'{remarks}',{natureOfTransaction},{assetItemStatus}); SELECT LAST_INSERT_ID(); ";
+                              $"VALUES ({facilityID},{fromActorID},{fromActorType},{toActorID},{toActorType},{assetItemID},{qty},{refType},{refID},'{remarks}',{natureOfTransaction},{assetItemStatus}); SELECT LAST_INSERT_ID(); ";
       
                 DataTable dt2 = await Context.FetchData(stmt).ConfigureAwait(false);
                 int transaction_ID = 0;
                 if (dt2.Rows.Count > 0)
                 {
                     transaction_ID = Convert.ToInt32(dt2.Rows[0][0]);
-                    int debitTransactionID = await DebitTransation(transaction_ID, fromActorType, fromActorID,  qty, assetItemID, mrsID);
-                    int creditTransactionID = await CreditTransation(transaction_ID, toActorType, toActorID, qty, assetItemID, mrsID);
-                    bool isValid = await VerifyTransactionDetails(transaction_ID, debitTransactionID, creditTransactionID, plantID, fromActorID, fromActorType, toActorID, toActorType, assetItemID, qty, refType, refID, remarks, mrsID);
+                    int debitTransactionID = await DebitTransation(facilityID,transaction_ID, fromActorType, fromActorID,  qty, assetItemID, mrsID);
+                    int creditTransactionID = await CreditTransation(facilityID,transaction_ID, toActorType, toActorID, qty, assetItemID, mrsID);
+                    bool isValid = await VerifyTransactionDetails(transaction_ID, debitTransactionID, creditTransactionID, facilityID, fromActorID, fromActorType, toActorID, toActorType, assetItemID, qty, refType, refID, remarks, mrsID);
                     if (isValid)
                     {
                         //minQtyReminder(assetItemID, plantID);
@@ -635,17 +657,17 @@ namespace CMMSAPIs.Repositories.SM
             }
         }
 
-        private async Task<int> DebitTransation(int transactionID, int actorType, int actorID, int debitQty, int assetItemID, int mrsID)
+        private async Task<int> DebitTransation(int facilityID,int transactionID, int actorType, int actorID, int debitQty, int assetItemID, int mrsID)
         {
-            string stmt = $"INSERT INTO smtransition (transactionID, actorType, actorID, debitQty, assetItemID, mrsID) VALUES ({transactionID}, '{actorType}', {actorID}, {debitQty}, {assetItemID}, {mrsID}); SELECT LAST_INSERT_ID();";
+            string stmt = $"INSERT INTO smtransition (facilityID, transactionID, actorType, actorID, debitQty, assetItemID, mrsID) VALUES ({facilityID},{transactionID}, '{actorType}', {actorID}, {debitQty}, {assetItemID}, {mrsID}); SELECT LAST_INSERT_ID();";
             DataTable dt2 = await Context.FetchData(stmt).ConfigureAwait(false);
             int id = Convert.ToInt32(dt2.Rows[0][0]);
             return id;
         }
 
-        private async Task<int> CreditTransation(int transactionID, int actorType , int actorID, int qty, int assetItemID, int mrsID)
+        private async Task<int> CreditTransation(int facilityID, int transactionID, int actorType , int actorID, int qty, int assetItemID, int mrsID)
         {
-            string query = $"INSERT INTO smtransition (transactionID,actorType,actorID,creditQty,assetItemID,mrsID) VALUES ({transactionID},'{actorType}',{actorID},{qty},{assetItemID},{mrsID});SELECT LAST_INSERT_ID();";
+            string query = $"INSERT INTO smtransition (facilityID, transactionID,actorType,actorID,creditQty,assetItemID,mrsID) VALUES ({facilityID},{transactionID},'{actorType}',{actorID},{qty},{assetItemID},{mrsID});SELECT LAST_INSERT_ID();";
             DataTable dt2 = await Context.FetchData(query).ConfigureAwait(false);
             int id = Convert.ToInt32(dt2.Rows[0][0]);
             return id;
@@ -845,7 +867,7 @@ namespace CMMSAPIs.Repositories.SM
 
             for (var i = 0; i < mrsItemList.Count(); i++)
             {
-                var tResult = await TransactionDetails(mrsList[0].facility_ID, mrsList[0].requested_by_emp_ID, (int)CMMS.SM_Types.Store, mrsList[0].facility_ID, (int)CMMS.SM_Types.Store, mrsItemList[i].ID, Convert.ToInt32(mrsItemList[i].returned_qty), Convert.ToInt32(mrsList[0].reference), request.id, request.comment, mrsList[0].ID);
+                var tResult = await TransactionDetails(mrsList[0].facility_ID, mrsList[0].requested_by_emp_ID, (int)CMMS.SM_Types.Engineer, mrsList[0].facility_ID, (int)CMMS.SM_Types.Inventory, mrsItemList[i].ID, Convert.ToInt32(mrsItemList[i].returned_qty), (int)CMMS.CMMS_Modules.SM_MRS_RETURN, request.id, request.comment, mrsList[0].ID);
                 if (!tResult)
                 {
                     return new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Transaction details failed.");

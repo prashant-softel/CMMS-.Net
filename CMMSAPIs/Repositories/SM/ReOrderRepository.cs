@@ -146,7 +146,7 @@ namespace CMMSAPIs.Repositories.SM
             try
             {
                 var purchaseID = await PurchaseOrder(request.plant_ID, 0, request.emp_ID, request.purchase_date, 1);
-                var poUpdate = "UPDATE smpurchaseorder SET reorder_flag = 1 WHERE ID = " + purchaseID + "";
+                var poUpdate = "UPDATE smgoodsorder SET reorder_flag = 1 WHERE ID = " + purchaseID + "";
                 await Context.ExecuteNonQry<int>(poUpdate);
                 for(var  i = 0; i < request.ReOrderAsset.Count; i++)
                 {
@@ -228,7 +228,7 @@ namespace CMMSAPIs.Repositories.SM
 
             try
             {
-                string stmt = $"INSERT INTO smpurchaseorderdetails (purchaseID, assetItemID, order_type, cost, ordered_qty, location_ID) " +
+                string stmt = $"INSERT INTO smgoodsorderdetails (purchaseID, assetItemID, order_type, cost, ordered_qty, location_ID) " +
                               $"VALUES ({purchaseID}, {assetitemID}, {type}, {cost}, {o_qty}, {location}); SELECT LAST_INSERT_ID();";
                 
                 DataTable dt2 = await Context.FetchData(stmt).ConfigureAwait(false);
@@ -271,19 +271,19 @@ namespace CMMSAPIs.Repositories.SM
         {
             int purchaseID = 0;
 
-            string stmtSelect = $"SELECT * FROM smpurchaseorder WHERE plantID = {plantID} AND vendorID = {vendorID} AND generated_by = {generatedBy} AND purchaseDate = '{purchaseDate.Value.ToString("yyyy-MM-dd")}' LIMIT 0,1";
+            string stmtSelect = $"SELECT * FROM smgoodsorder WHERE plantID = {plantID} AND vendorID = {vendorID} AND generated_by = {generatedBy} AND purchaseDate = '{purchaseDate.Value.ToString("yyyy-MM-dd")}' LIMIT 0,1";
             DataTable dt2 = await Context.FetchData(stmtSelect).ConfigureAwait(false);
             if (dt2 != null && dt2.Rows.Count > 0)
             {
                 purchaseID = Convert.ToInt32(dt2.Rows[0]["ID"]);
-                string stmtUpdate = $"UPDATE smpurchaseorder SET generate_flag = {generateFlag}, flag = {generateFlag}, vendorID = {vendorID} WHERE ID = {purchaseID}";
+                string stmtUpdate = $"UPDATE smgoodsorder SET generate_flag = {generateFlag}, flag = {generateFlag}, vendorID = {vendorID} WHERE ID = {purchaseID}";
                 await Context.ExecuteNonQry<int>(stmtUpdate);
             }
             else
             {
 
 
-                string stmt = $"INSERT INTO smpurchaseorder (plantID, vendorID, generated_by, purchaseDate, flag, generate_flag , challan_no, po_no, freight, transport, no_pkg_received, lr_no, condition_pkg_received, vehicle_no, gir_no,challan_date, requestdate, job_ref, amount, currency, withdrawOn, order_type) " +
+                string stmt = $"INSERT INTO smgoodsorder (plantID, vendorID, generated_by, purchaseDate, flag, generate_flag , challan_no, po_no, freight, transport, no_pkg_received, lr_no, condition_pkg_received, vehicle_no, gir_no,challan_date, requestdate, job_ref, amount, currency, withdrawOn, order_type) " +
                     $"VALUES ({plantID},{vendorID},{generatedBy},'{purchaseDate.Value.ToString("yyyy-MM-dd")}',{generateFlag},{generateFlag}," +
                     $"0,0,0, '','', '', '', '', '', '2000-01-01', '2000-01-01', '', 0, '', '2000-01-01',0 );  SELECT LAST_INSERT_ID();";
                 DataTable dtInsert = await Context.FetchData(stmt).ConfigureAwait(false);             

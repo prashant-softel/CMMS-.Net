@@ -66,7 +66,7 @@ namespace CMMSAPIs.Repositories.SM
         }
         internal async Task<CMDefaultResponse> UpdateRequestOrder(CMCreateRequestOrder request, int userID)
         {
-            //string mainQuery = $"UPDATE smpurchaseorderdetails SET generate_flag = " +request.generate_flag + ",status = "+request.status+", vendorID = "+request.vendorID+" WHERE ID = "+request.id+"";
+            //string mainQuery = $"UPDATE smgoodsorderdetails SET generate_flag = " +request.generate_flag + ",status = "+request.status+", vendorID = "+request.vendorID+" WHERE ID = "+request.id+"";
 
             string updateRO = $" UPDATE smrequestorder SET facilityID = '{request.facilityID}'," +
                 $" remarks = '{request.comment}', updated_by = {userID},updated_at='{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}', status={(int)CMMS.CMMS_Status.SM_RO_SUBMITTED} where id = {request.request_order_id}";
