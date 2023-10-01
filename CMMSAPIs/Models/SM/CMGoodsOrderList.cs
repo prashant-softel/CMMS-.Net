@@ -121,7 +121,7 @@ namespace CMMSAPIs.Models
         public int purchaseID { get; set; }
         public int facilityId { get; set; }
 
-
+        public string remarks { get; set; }
         public List<CMSUBMITITEMS> submitItems { get; set; }
         public List<IFormFile> attachments { get; set; }
     }

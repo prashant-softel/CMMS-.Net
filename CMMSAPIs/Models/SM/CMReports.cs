@@ -19,6 +19,7 @@ namespace CMMSAPIs.Models.SM
         public string asset_name { get; set; }
         public string asset_code { get; set; }
         public int asset_type_ID { get; set; }
+        public string asset_type { get; set; }
         public decimal Opening { get; set; }
         public decimal inward { get; set; }
         public decimal outward { get; set; }
@@ -143,9 +144,29 @@ namespace CMMSAPIs.Models.SM
         public string asset_name { get; set; }
         public string asset_code { get; set; }
         public int asset_type_ID { get; set; }
+        public string asset_type { get; set; }
         public decimal Opening { get; set; }
         public decimal inward { get; set; }
         public decimal outward { get; set; }
         public decimal balance { get; set; }
+    }
+
+    public class CMEmployeeStockTransactionReport
+    {
+        public int fromActorID { get; set; }
+        public string fromActorType { get; set; }
+        public string FromActorName { get; set; }
+        public int toActorID { get; set; }
+        public string toActorType { get; set; }
+        public string toActorName { get; set; }
+        public int assetItemID { get; set; }
+        public string assetItemName { get; set; }
+        public decimal qty { get; set; }
+        public string facilityName { get; set; }
+        public string remarks { get; set; }
+        public DateTime? LastUpdated { get; set; }
+        public string CreatedBy { get; set; }
+        public DateTime? createdAt { get; set; }
+
     }
 }
