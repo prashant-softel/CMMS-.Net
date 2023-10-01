@@ -31,11 +31,11 @@ namespace CMMSAPIs.Controllers.SM
         ////[Authorize] 
         [Route("GetPlantStockReport")]
         [HttpGet]
-        public async Task<IActionResult> GetPlantStockReport(string facility_id, DateTime StartDate, DateTime EndDate)
+        public async Task<IActionResult> GetPlantStockReport(string facility_id, DateTime StartDate, DateTime EndDate, string assetMasterIDs)
         {
             try
             {
-                var data = await _SMReportsBS.GetPlantStockReport(facility_id, StartDate, EndDate);
+                var data = await _SMReportsBS.GetPlantStockReport(facility_id, StartDate, EndDate, assetMasterIDs);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -115,6 +115,24 @@ namespace CMMSAPIs.Controllers.SM
             try
             {
                 var data = await _SMReportsBS.GetEmployeeStock(facility_ID, emp_id);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid employee id or facility id is sent.";
+                return Ok(item);
+            }
+        }
+
+        [Route("GetEmployeeStockTransactionReport")]
+        [HttpGet]
+        public async Task<IActionResult> GetEmployeeStockTransactionReport(int facility_ID, int emp_id)
+        {
+            try
+            {
+                var data = await _SMReportsBS.GetEmployeeStockTransactionReport(facility_ID, emp_id);
                 return Ok(data);
             }
             catch (Exception ex)
