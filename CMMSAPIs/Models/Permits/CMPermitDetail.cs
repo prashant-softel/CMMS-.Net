@@ -100,7 +100,8 @@ namespace CMMSAPIs.Models.Permits
         public CMPermitConditionDetails cancelDetails { get; set; }
 
         public CMPermitConditionDetails extendDetails { get; set; }
-
+        public string TBT_Done_By { get; set; }
+        public DateTime? TBT_Done_At { get; set; }
     }
     public class CMAssociatedList
     {
