@@ -522,5 +522,12 @@ namespace CMMSAPIs.Helper
         Engineer = 3,
         Inventory = 4
     }
+	            public enum SM_AssetTypes
+        {
+            Consumable = 1,
+            Spare,
+            Tools,
+            SpecialTools
+        }
     }
 }
