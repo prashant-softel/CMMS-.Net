@@ -139,6 +139,21 @@ namespace CMMSAPIs.Controllers.SM
                 throw;
             }
         }
+        [Route("CloseRequestOrder")]
+        [HttpPost]
+        public async Task<IActionResult> CloseRequestOrder(CMApproval request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IRequestOrderBS.CloseRequestOrder(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
 
     }
 }
