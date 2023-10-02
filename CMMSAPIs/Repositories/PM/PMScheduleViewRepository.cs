@@ -228,7 +228,7 @@ namespace CMMSAPIs.Repositories.PM
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
             if(retVal > 0)
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_TASK, request.id, 0, 0, "PM Task Cancelled", CMMS.CMMS_Status.PM_CANCELLED, userID);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_TASK, request.id, 0, 0, string.IsNullOrEmpty(request.comment) ? "PM Task Cancelled" : request.comment, CMMS.CMMS_Status.PM_CANCELLED, userID);
             CMDefaultResponse response = new CMDefaultResponse(request.id, retCode, "PM Task cancelled successfully");
             return response;
         }
@@ -689,7 +689,17 @@ namespace CMMSAPIs.Repositories.PM
 
             //}
             string taskQry = $"update pm_task set updated_by = {userID},updated_at = '{UtilsRepository.GetUTCTime()}', update_remarks = '{request.comment}' WHERE id = {request.task_id};";
-            int val = await Context.ExecuteNonQry<int>(taskQry).ConfigureAwait(false);
+            int retVal = await Context.ExecuteNonQry<int>(taskQry).ConfigureAwait(false);
+
+            CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
+            if (retVal > 0)
+                retCode = CMMS.RETRUNSTATUS.SUCCESS;
+
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_TASK, request.task_id, 0, 0, string.IsNullOrEmpty(request.comment) ? "PM Task Updated" : request.comment, CMMS.CMMS_Status.PM_UPDATED, userID);
+
+            CMDefaultResponse response = new CMDefaultResponse(request.task_id, retCode, "PM Task Updated successfully");
+            responseList.Add(response);
+
             return responseList;
         }
 
@@ -719,8 +729,8 @@ namespace CMMSAPIs.Repositories.PM
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
             if (retVal > 0)
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_TASK, request.id, 0, 0, "PM Task Closed", CMMS.CMMS_Status.PM_COMPLETED, userID);
-            CMDefaultResponse response = new CMDefaultResponse(request.id, retCode, "PM Task Closed successfully");
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_TASK, request.id, 0, 0,string.IsNullOrEmpty(request.comment)?"PM Task Close Requested ": request.comment, CMMS.CMMS_Status.PM_COMPLETED, userID);
+            CMDefaultResponse response = new CMDefaultResponse(request.id, retCode, "PM Task Close Requested successfully");
             return response;
         }
 
@@ -778,7 +788,7 @@ namespace CMMSAPIs.Repositories.PM
 
             if (retVal > 0)
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_TASK, request.id, 0, 0, $"PM Task Close Approved", CMMS.CMMS_Status.PM_APPROVED, userID);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_TASK, request.id, 0, 0, string.IsNullOrEmpty(request.comment) ? $"PM Task Close Approved" : request.comment, CMMS.CMMS_Status.PM_APPROVED, userID);
             //CMPMScheduleViewDetail _PMList = await GetPMTaskDetail(request.id);
             //CMMSNotification.sendNotification(CMMS.CMMS_Modules.PM_SCHEDULE, CMMS.CMMS_Status.PM_APPROVED, _PMList);
 
@@ -813,7 +823,7 @@ namespace CMMSAPIs.Repositories.PM
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
             if (retVal > 0)
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_TASK, request.id, 0, 0, "PM Task Close Rejected", CMMS.CMMS_Status.PM_REJECTED, userID);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_TASK, request.id, 0, 0, string.IsNullOrEmpty(request.comment) ? "PM Task Close Rejected" : request.comment, CMMS.CMMS_Status.PM_REJECTED, userID);
             CMDefaultResponse response = new CMDefaultResponse(request.id, retCode, "PM Task Close Rejected");
             return response;
         }
@@ -1355,6 +1365,21 @@ namespace CMMSAPIs.Repositories.PM
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, to_schedule_id, 0, 0, $"PM Task {to_schedule_id} cloned from {from_schedule_id}", CMMS.CMMS_Status.PM_ASSIGNED, userID);
             return responseList;
+        }
+
+        internal async Task<List<AssetList>> getAssetListForClone( int task_id, int schedule_id)
+        {
+            string qry = $"SELECT pm_schedule.id as schedule_id, assets.name as asset_name,checklist.checklist_number as checklist_name  FROM pm_schedule " +
+                $"left join assets on pm_schedule.asset_id = assets.id " +
+                $"left join checklist_number as checklist on pm_schedule.checklist_id = checklist.id " +
+                $" WHERE task_id = {task_id} and checklist_id = (SELECT checklist_id FROM pm_schedule WHERE pm_schedule.id = {schedule_id}) ;";
+            
+            List<AssetList> list = await Context.GetData<AssetList>(qry).ConfigureAwait(false);
+
+            if (list.Count == 0)
+                throw new MissingMemberException($"Schedule Id {schedule_id} not Found");            
+            
+            return list;
         }
     }
 
