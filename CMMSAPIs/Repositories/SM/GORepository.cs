@@ -453,7 +453,7 @@ namespace CMMSAPIs.Repositories
                 int isMultiSelectionEnabled = await getMultiSpareSelectionStatus(item.asset_code);
                 // Check if the asset type is Spare.
                 // assetTypeId == 2 is Spare
-                if (assetTypeId == 2 || assetTypeId == 3 || assetTypeId == 4)
+                if (assetTypeId == (int)CMMS.SM_AssetTypes.Spare || assetTypeId == (int)CMMS.SM_AssetTypes.Tools || assetTypeId == (int)CMMS.SM_AssetTypes.SpecialTools)
                 {
                       int assetItemId;
                     for (var i = 0; i < item.ordered_qty; i++)
@@ -465,7 +465,7 @@ namespace CMMSAPIs.Repositories
                         //assetItemIDByCode[assetCode] = assetItemId;
                         stmtI = "";
                         stmtI = $"INSERT INTO smgoodsorderdetails (purchaseID,assetItemID,order_type,cost,ordered_qty,location_ID,received_qty,paid_by_ID)" +
-                                    $"VALUES({item.purchaseID},{item.assetItemID},{item.asset_type_ID},{item.cost},1,0,{item.requested_qty},{item.paid_by_ID}); SELECT LAST_INSERT_ID();";
+                                    $"VALUES({item.purchaseID},{item.assetItemID},{item.asset_type_ID},{item.cost},1,0,1,{item.paid_by_ID}); SELECT LAST_INSERT_ID();";
                         DataTable dtInsertOD = await Context.FetchData(stmtI).ConfigureAwait(false);
                         purchaseOrderDetailsID = Convert.ToInt32(dtInsertOD.Rows[0][0]);
                     }
@@ -515,25 +515,25 @@ namespace CMMSAPIs.Repositories
 
                     // Insert the Goods Order detail.
                 }
-                else
-                {
-                    // Get the asset item ID.
-                    //int assetItemId = 0;
-                    //assetItemId = await getAssetItemID(item.asset_code, item.facility_id, 0);
-                    //if (assetItemId == 0)
-                    //{
-                    //    throw new Exception("asset_item_ID is empty");
-                    //}
-                    //else
-                    //{
-                       
-                    //}
-                    string stmtI = $"INSERT INTO smgoodsorderdetails (purchaseID,assetItemID,order_type,cost,ordered_qty,location_ID, received_qty)" +
-                                   $"VALUES({item.purchaseID},{item.assetItemID},{item.asset_type_ID},{item.cost},0,0,{item.requested_qty}); SELECT LAST_INSERT_ID();";
-                    DataTable dtInsertOD = await Context.FetchData(stmtI).ConfigureAwait(false);
-                    purchaseOrderDetailsID = Convert.ToInt32(dtInsertOD.Rows[0][0]);
+                //else
+                //{
+                //    // Get the asset item ID.
+                //    //int assetItemId = 0;
+                //    //assetItemId = await getAssetItemID(item.asset_code, item.facility_id, 0);
+                //    //if (assetItemId == 0)
+                //    //{
+                //    //    throw new Exception("asset_item_ID is empty");
+                //    //}
+                //    //else
+                //    //{
 
-                }
+                //    //}
+                //    string stmtI = $"INSERT INTO smgoodsorderdetails (purchaseID,assetItemID,order_type,cost,ordered_qty,location_ID, received_qty)" +
+                //                   $"VALUES({item.purchaseID},{item.assetItemID},{item.asset_type_ID},{item.cost},0,0,{item.requested_qty}); SELECT LAST_INSERT_ID();";
+                //    DataTable dtInsertOD = await Context.FetchData(stmtI).ConfigureAwait(false);
+                //    purchaseOrderDetailsID = Convert.ToInt32(dtInsertOD.Rows[0][0]);
+
+                //}
             }
 
             string historyRemark = "";
@@ -597,26 +597,28 @@ namespace CMMSAPIs.Repositories
         // Get order Item Lists
         public async Task<List<CMGoodsOrderList>> getPurchaseDetailsByID(int id)
         {
-            string query = "SELECT fc.name as facilityName,pod.ID as podID,pod.spare_status,pod.remarks,sai.orderflag,sam.asset_type_ID," +
-                "pod.purchaseID,pod.assetItemID,sai.serial_number,sai.location_ID,pod.cost,pod.ordered_qty,\r\nbl.name as vendor_name,\r\n     " +
-                "   po.facilityID as facility_id,po.purchaseDate,sam.asset_type_ID,sam.asset_name,po.receiverID,\r\n        " +
-                "po.vendorID,po.status,sai.asset_code,t1.asset_type,t2.cat_name,pod.received_qty,pod.damaged_qty,pod.accepted_qty,pod.requested_qty," +
-                "f1.file_path,f1.Asset_master_id,sm.decimal_status,sm.spare_multi_selection,po.generated_by,pod.order_type, receive_later, " +
-                "added_to_store,   \r\n      " +
-                "  po.challan_no, po.po_no, po.freight, po.transport, po.no_pkg_received, po.lr_no, po.condition_pkg_received, " +
-                "po.vehicle_no, po.gir_no, po.challan_date,  po.job_ref, po.amount, po.currency as currencyID , curr.name as currency ,pod.paid_by_ID\r\n      " +
-                "  FROM smgoodsorderdetails pod\r\n        LEFT JOIN smgoodsorder po ON po.ID = pod.purchaseID\r\n     " +
-                "   LEFT JOIN smassetitems sai ON sai.ID = pod.assetItemID\r\n       " +
-                " LEFT JOIN smassetmasters sam ON sam.asset_code = sai.asset_code\r\n      " +
-                "  LEFT JOIN smunitmeasurement sm ON sm.ID = sam.unit_of_measurement\r\n    " +
-                "    LEFT JOIN (\r\n            SELECT file.file_path,file.Asset_master_id as Asset_master_id FROM smassetmasterfiles file \r\n " +
-                "           LEFT join smassetmasters sam on file.Asset_master_id =  sam.id )\r\n        " +
-                "    f1 ON f1.Asset_master_id = sam.id\r\n        LEFT JOIN (\r\n         " +
-                "   SELECT sat.asset_type,s1.ID as master_ID FROM smassettypes sat\r\n      " +
-                "      LEFT JOIN smassetmasters s1 ON s1.asset_type_ID = sat.ID\r\n        )  t1 ON t1.master_ID = sam.ID\r\n     " +
-                "   LEFT JOIN (\r\n            SELECT sic.cat_name,s2.ID as master_ID FROM smitemcategory sic\r\n          " +
-                "  LEFT JOIN smassetmasters s2 ON s2.item_category_ID = sic.ID\r\n        )  t2 ON t2.master_ID = sam.ID\r\n " +
-                "       LEFT JOIN facilities fc ON fc.id = po.facilityID\r\n        LEFT JOIN business bl ON bl.id = po.vendorID   LEFT JOIN currency curr ON curr.id = po.currency WHERE po.ID = " + id + " /*GROUP BY pod.ID*/";
+            string query = "";
+
+            query = "SELECT fc.name as facilityName,pod.ID as podID,pod.spare_status,pod.remarks,sam.asset_type_ID,pod.purchaseID,assetItemID,sam.asset_code," +
+                " pod.cost,pod.ordered_qty, bl.name as vendor_name, po.facilityID as facility_id,po.purchaseDate,sam.asset_type_ID," +
+                " sam.asset_name,po.receiverID, po.vendorID,po.status,t1.asset_type,t2.cat_name,pod.received_qty,pod.damaged_qty, " +
+                " pod.accepted_qty,pod.requested_qty,f1.file_path,f1.Asset_master_id,sm.decimal_status,sm.spare_multi_selection,po.generated_by," +
+                " pod.order_type, receive_later, added_to_store, po.challan_no, po.po_no, po.freight, po.transport, po.no_pkg_received, " +
+                " po.lr_no, po.condition_pkg_received, po.vehicle_no, po.gir_no, po.challan_date,  po.job_ref, po.amount, po.currency as currencyID ," +
+                " curr.name as currency ,pod.paid_by_ID       " +
+                " FROM smgoodsorderdetails pod  LEFT JOIN smgoodsorder po ON po.ID = pod.purchaseID     " +
+                " LEFT JOIN smassetmasters sam ON sam.id = pod.assetItemID       " +
+                " LEFT JOIN smunitmeasurement sm ON sm.ID = sam.unit_of_measurement       " +
+                " LEFT JOIN ( SELECT file.file_path,file.Asset_master_id as Asset_master_id FROM " +
+                " smassetmasterfiles file LEFT join smassetmasters sam on file.Asset_master_id =  sam.id ) f1 ON f1.Asset_master_id = sam.id" +
+                " LEFT JOIN ( SELECT sat.asset_type,s1.ID as master_ID FROM smassettypes sat " +
+                " LEFT JOIN smassetmasters s1 ON s1.asset_type_ID = sat.ID )  t1 ON t1.master_ID = sam.ID  " +
+                " LEFT JOIN ( SELECT sic.cat_name,s2.ID as master_ID FROM smitemcategory sic " +
+                " LEFT JOIN smassetmasters s2 ON s2.item_category_ID = sic.ID )  t2 ON t2.master_ID = sam.ID " +
+                " LEFT JOIN facilities fc ON fc.id = po.facilityID  LEFT JOIN business bl ON bl.id = po.vendorID  " +
+                " LEFT JOIN currency curr ON curr.id = po.currency " +
+                " WHERE po.ID = "+id+"";
+            
             List<CMGoodsOrderList> _List = await Context.GetData<CMGoodsOrderList>(query).ConfigureAwait(false);
             return _List;
         }
@@ -1172,8 +1174,8 @@ namespace CMMSAPIs.Repositories
 
             for (var i = 0; i < request.go_items.Count; i++)
             {
-                string itemsQuery = $"UPDATE smgoodsorderdetails SET location_ID = {request.location_ID},assetItemID = {request.go_items[i].assetMasterItemID},cost = {request.go_items[i].cost}, accepted_qty = {request.go_items[i].accepted_qty},ordered_qty = {request.go_items[i].ordered_qty} , requested_qty = {request.go_items[i].requested_qty}, received_qty= {request.go_items[i].received_qty},lost_qty = {request.go_items[i].lost_qty}, damaged_qty={request.go_items[i].damaged_qty}, paid_by_ID = {request.go_items[i].paid_by_ID}" +
-                    $" WHERE ID = {request.go_items[i].goItemID}";
+                string itemsQuery = $"UPDATE smgoodsorderdetails SET location_ID = {request.location_ID},assetItemID = {request.go_items[i].assetMasterItemID},cost = {request.go_items[i].cost}, accepted_qty = {request.go_items[i].accepted_qty}, received_qty= {request.go_items[i].received_qty},lost_qty = {request.go_items[i].lost_qty}, damaged_qty={request.go_items[i].damaged_qty}," +
+                    $" sr_no = '{request.go_items[i].sr_no}' WHERE ID = {request.go_items[i].goItemID}";
                 var result = await Context.ExecuteNonQry<int>(itemsQuery);
             }
 

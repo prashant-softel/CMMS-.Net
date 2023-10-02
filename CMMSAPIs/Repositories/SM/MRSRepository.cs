@@ -47,7 +47,7 @@ namespace CMMSAPIs.Repositories.SM
             string stmt = "SELECT sm.ID,sm.requested_by_emp_ID,CONCAT(ed1.firstName,' ',ed1.lastName) as approver_name,DATE_FORMAT(sm.requested_date,'%Y-%m-%d') as requestd_date," +
                 "DATE_FORMAT(sm.returnDate,'%Y-%m-%d') as returnDate,if(sm.approval_status != '',DATE_FORMAT(sm.approved_date,'%d-%m-%Y'),'') as approval_date,sm.approval_status," +
                 "sm.approval_comment,CONCAT(ed.firstName,' ',ed.lastName) as requested_by_name, sm.status, sm.activity, sm.whereUsedType, " +
-                " case when sm.whereUsedType = 1 then 'Job' when sm.whereUsedType = 27 then 'PM Task' else 'Invalid' end as whereUsedTypeName, sm.whereUsedRefID, sm.remarks " +
+    " case when sm.whereUsedType = 1 then 'Job' when sm.whereUsedType = 27 then 'PM Task' else 'Invalid' end as whereUsedTypeName, sm.whereUsedRefID, sm.remarks " +
                 "FROM smmrs sm LEFT JOIN users ed ON ed.id = sm.requested_by_emp_ID LEFT JOIN users ed1 ON ed1.id = sm.approved_by_emp_ID " +
                 ""+ filter + "";
             List<CMMRSList> _List = await Context.GetData<CMMRSList>(stmt).ConfigureAwait(false);
@@ -438,6 +438,7 @@ namespace CMMSAPIs.Repositories.SM
 
             return _List[0];
         }
+
         internal async Task<CMMRSList> getReturnDataByID(int ID)
         {
             string stmt = "SELECT sm.ID,sm.requested_by_emp_ID as requested_by_emp_ID,CONCAT(ed1.firstName,' ',ed1.lastName) as approver_name," +
@@ -582,6 +583,54 @@ namespace CMMSAPIs.Repositories.SM
                 if (!tResult)
                 {
                     return new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Transaction details failed.");
+                }
+            }
+
+            var data = await getMRSItems(request.id);
+            foreach (var item in data)
+            {
+                var assetCode = item.asset_MDM_code;
+                var orderedQty = item.requested_qty;
+                var type = item.asset_type;
+             
+                // Get the asset type ID.
+                int assetTypeId = 0;
+                string stmtAssetType = $"SELECT asset_type_ID FROM smassetmasters WHERE asset_code = '{item.asset_MDM_code}'";
+                DataTable dtAssetType = await Context.FetchData(stmtAssetType).ConfigureAwait(false);
+
+                if (dtAssetType == null && dtAssetType.Rows.Count == 0)
+                {
+                    throw new Exception("Asset type ID not found");
+                }
+                else
+                {
+                    assetTypeId = Convert.ToInt32(dtAssetType.Rows[0][0]);
+                }
+                int isMultiSelectionEnabled = await getMultiSpareSelectionStatus(item.asset_MDM_code);
+                // Check if the asset type is Spare.
+                // assetTypeId == 2 is Spare
+                if (assetTypeId == (int)CMMS.SM_AssetTypes.Spare || assetTypeId == (int)CMMS.SM_AssetTypes.Tools || assetTypeId == (int)CMMS.SM_AssetTypes.SpecialTools)
+                {
+                    int assetItemId;
+                    for (var i = 0; i < item.requested_qty; i++)
+                    {
+                      
+                        try
+                        {
+                            var stmtI = $"INSERT INTO smassetitems (facility_ID,asset_code,item_condition,status) VALUES ({mrsList[0].facility_ID},'{assetCode}',1,0); SELECT LAST_INSERT_ID();";
+                            DataTable dtInsert = await Context.FetchData(stmtI).ConfigureAwait(false);
+                            assetItemId = Convert.ToInt32(dtInsert.Rows[0][0]);
+
+                            string insertStmt = $"START TRANSACTION; " +
+                            $"INSERT INTO smrsitems (mrs_ID,asset_item_ID,asset_MDM_code,requested_qty,status,flag,approval_required,mrs_return_ID,issued_qty,returned_qty,used_qty,available_qty)" +
+                            $"VALUES ({request.id},{item.asset_item_ID},'{item.asset_MDM_code}',1,0,0,1,0,0,0, 1, 0)" +
+                            $"; SELECT LAST_INSERT_ID();COMMIT;";
+                            DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
+                        }
+                        catch (Exception ex)
+                        { throw ex; }
+                    }
+                 
                 }
             }
 

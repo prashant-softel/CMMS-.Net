@@ -103,8 +103,8 @@ namespace CMMSAPIs.Repositories.SM
             //validate request.id
             string mainQuery = $"UPDATE smrequestorder SET status = {(int)CMMS.CMMS_Status.SM_RO_CLOSED}, remarks= '{request.comment}' WHERE ID = " + request.id + "";
             await Context.ExecuteNonQry<int>(mainQuery);
-            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Request order {request.id} closed.");
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_RO, request.id, 0, 0, "Request order {request.id} closed", CMMS.CMMS_Status.SM_RO_CLOSED);
+            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Request order {"+request.id+"} closed.");
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_RO, request.id, 0, 0, request.comment, CMMS.CMMS_Status.SM_RO_CLOSED);
             return response;
         }
 
@@ -377,6 +377,9 @@ namespace CMMSAPIs.Repositories.SM
 
             switch (m_notificationID)
             {
+                case CMMS.CMMS_Status.SM_RO_DRAFT:
+                    retValue = "Drafted";
+                    break;
                 case CMMS.CMMS_Status.SM_RO_SUBMITTED:
                     retValue = "Waiting for approval";
                     break;
@@ -406,6 +409,9 @@ namespace CMMSAPIs.Repositories.SM
 
             switch (m_notificationID)
             {
+                case CMMS.CMMS_Status.SM_RO_DRAFT:
+                    retValue = $"Request order {ID} drafted";
+                    break;
                 case CMMS.CMMS_Status.SM_RO_SUBMITTED:
                     retValue = $"Request order {ID} submitted and waiting for approval";
                     break;
