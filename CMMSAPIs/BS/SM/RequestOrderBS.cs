@@ -20,6 +20,7 @@ namespace CMMSAPIs.BS.SM
         Task<CMDefaultResponse> DeleteRequestOrder(CMApproval request, int userID);
         Task<CMDefaultResponse> ApproveRequestOrder(CMApproval request, int userID);
         Task<CMDefaultResponse> RejectRequestOrder(CMApproval request, int userID);
+        Task<CMDefaultResponse> CloseRequestOrder(CMApproval request, int userID);
     }
     public class RequestOrderBS : IRequestOrderBS
     {
@@ -96,6 +97,22 @@ namespace CMMSAPIs.BS.SM
                 using (var repos = new RequestOrderRepository(getDB))
                 {
                     return await repos.DeleteRequestOrder(request, userID);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> CloseRequestOrder(CMApproval request, int userID)
+        {
+            try
+            {
+                using (var repos = new RequestOrderRepository(getDB))
+                {
+                    return await repos.CloseRequestOrder(request, userID);
 
                 }
             }
