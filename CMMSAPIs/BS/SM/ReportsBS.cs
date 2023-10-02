@@ -1,4 +1,4 @@
-﻿using CMMSAPIs.Helper;
+using CMMSAPIs.Helper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,6 +20,7 @@ namespace CMMSAPIs.BS.SM
         Task<List<CMEmployeeTransactionReport>> GetEmployeeTransactionReport(int isAllEmployees, string facility_id, int Emp_ID, DateTime StartDate, DateTime EndDate);
         Task<CMEmployeeStockList> GetEmployeeStock(int facility_ID, int emp_id);
         Task<List<CMEmployeeStockTransactionReport>> GetEmployeeStockTransactionReport(int facility_ID, int emp_id);
+        Task<List<CMAssetMasterStockItems>> GetAssetMasterStockItems(int assetID);
     }
     public class ReportsBS : ISMReportsBS
     {
@@ -115,6 +116,22 @@ namespace CMMSAPIs.BS.SM
                 using (var repos = new ReportsRepository(getDB))
                 {
                     return await repos.GetEmployeeStockTransactionReport(facility_ID, emp_id);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<CMAssetMasterStockItems>> GetAssetMasterStockItems(int assetID)
+        {
+            try
+            {
+                using (var repos = new ReportsRepository(getDB))
+                {
+                    return await repos.GetAssetMasterStockItems(assetID);
 
                 }
             }
