@@ -198,4 +198,11 @@ namespace CMMSAPIs.Models.PM
         public int status { get; set; }
     }
 
+    public class AssetList
+    {
+        public int schedule_id { get; set; }
+        public string asset_name { get; set; }
+        public string checklist_name { get; set; }
+    }
+
 }

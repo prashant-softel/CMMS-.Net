@@ -25,6 +25,7 @@ namespace CMMSAPIs.BS.PM
         Task<List<CMDefaultResponse>> UpdatePMScheduleExecution(CMPMExecutionDetail request, int userID);
         Task<CMPMScheduleExecutionDetail> GetPMTaskScheduleDetail(int task_id, int schedule_id);
         Task<List<CMDefaultResponse>> cloneSchedule(int facility_id,int task_id, int from_schedule_id, int to_schedule_id,int userID);
+        Task<List<AssetList>> getAssetListForClone(int task_id, int schedule_id);
 
     }
     public class PMScheduleViewBS : IPMScheduleViewBS
@@ -236,6 +237,23 @@ namespace CMMSAPIs.BS.PM
                 using (var repos = new PMScheduleViewRepository(getDB))
                 {
                     return await repos.cloneSchedule( facility_id,  task_id,  from_schedule_id,  to_schedule_id,  userID);
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<AssetList>> getAssetListForClone(int task_id, int schedule_id)
+        {
+            try
+            {
+                using (var repos = new PMScheduleViewRepository(getDB))
+                {
+                    return await repos.getAssetListForClone(task_id, schedule_id);
+
+      
                 }
             }
             catch (Exception)

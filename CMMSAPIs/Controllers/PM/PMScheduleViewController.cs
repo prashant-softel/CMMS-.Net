@@ -52,7 +52,7 @@ namespace CMMSAPIs.Controllers.PM
             {
                 return BadRequest(ex.Message);
             }
-            catch(MissingMemberException ex)
+            catch (MissingMemberException ex)
             {
                 return NotFound(ex.Message);
             }
@@ -69,7 +69,7 @@ namespace CMMSAPIs.Controllers.PM
         {
             try
             {
-                var data = await _PMScheduleViewBS.GetPMTaskList(facility_id,  start_date,  end_date, frequencyIds, categoryIds);
+                var data = await _PMScheduleViewBS.GetPMTaskList(facility_id, start_date, end_date, frequencyIds, categoryIds);
                 return Ok(data);
             }
             catch (ArgumentException ex)
@@ -97,7 +97,7 @@ namespace CMMSAPIs.Controllers.PM
                 var data = await _PMScheduleViewBS.LinkPermitToPMTask(task_id, permit_id, userID);
                 return Ok(data);
             }
-            catch(Exception)
+            catch (Exception)
             {
                 throw;
             }
@@ -272,6 +272,24 @@ namespace CMMSAPIs.Controllers.PM
             catch (Exception)
             {
                 throw;
+            }
+        }
+
+        [Route("getAssetListForClone")]
+        [HttpPatch]
+        public async Task<IActionResult> getAssetListForClone(int task_id, int schedule_id)
+        {
+            {
+                try
+                {
+                    int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                    var data = await _PMScheduleViewBS.getAssetListForClone(task_id, schedule_id);
+                    return Ok(data);
+                }
+                catch (Exception)
+                {
+                    throw;
+                }
             }
         }
     }
