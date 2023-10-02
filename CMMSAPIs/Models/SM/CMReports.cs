@@ -169,4 +169,17 @@ namespace CMMSAPIs.Models.SM
         public DateTime? createdAt { get; set; }
 
     }
+
+    public class CMAssetMasterStockItems
+    {
+        public string asset_code { get; set; }
+        public string serial_number { get; set; }
+        public int asset_type_id { get; set; }
+        public string asset_type { get; set; }
+        public int item_category_ID { get; set; }
+        public string item_category { get; set; }
+        public int unit_of_measurement_ID { get; set; }
+        public string unit_of_measurement { get; set; }
+
+    }
 }
