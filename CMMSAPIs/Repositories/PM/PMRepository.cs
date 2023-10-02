@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using CMMSAPIs.Models.Notifications;
 using System.Numerics;
 using CMMSAPIs.Models.WC;
+using OfficeOpenXml.VBA;
 
 namespace CMMSAPIs.Repositories.PM
 {
@@ -125,7 +126,44 @@ namespace CMMSAPIs.Repositories.PM
             CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Plan added successfully");
             return response;
         }
-        
+        internal async Task<CMDefaultResponse> UpdatePMPlan(CMPMPlanDetail request, int userID)
+        {
+
+            string myQuery = "UPDATE pm_plan SET ";
+            if (request.plan_name != null && request.plan_name != "")
+                myQuery += $"plan_name = '{request.plan_name}', ";
+            if (request.plan_date != null)
+                myQuery += $"plan_date = '{request.plan_date.ToString("yyyy-MM-dd")}', ";
+            if (request.plan_freq_id > 0)
+                myQuery += $"frequency_id = {request.plan_freq_id}, ";
+            if (request.facility_id > 0)
+                myQuery += $"facility_id = {request.facility_id}, ";
+            if (request.category_id > 0)
+                myQuery += $"category_id = {request.category_id}, ";
+            if (request.assigned_to_id > 0)
+                myQuery += $"assigned_to = {request.assigned_to_id}, ";
+
+            myQuery += $"updated_at = '{UtilsRepository.GetUTCTime()}', updated_by = {userID} WHERE id = {request.plan_id};";
+         
+            string myQuery2 = $"Delete from pmplanassetchecklist where planId = {request.plan_id};";
+            await Context.ExecuteNonQry<int>(myQuery2).ConfigureAwait(false);
+
+            string mapChecklistQry = "INSERT INTO pmplanassetchecklist(planId, assetId, checklistId) VALUES ";
+            foreach (var map in request.mapAssetChecklist)
+            {
+                mapChecklistQry += $"({request.plan_id}, {map.asset_id}, {map.checklist_id}), ";
+            }
+            mapChecklistQry = mapChecklistQry.Substring(0, mapChecklistQry.Length - 2) + ";";
+            await Context.ExecuteNonQry<int>(mapChecklistQry).ConfigureAwait(false);
+
+            await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
+
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_PLAN, request.plan_id, 0, 0, "PM Plan Updated ", CMMS.CMMS_Status.PM_PLAN_UPDATED);
+
+            CMDefaultResponse response = new CMDefaultResponse(request.plan_id, CMMS.RETRUNSTATUS.SUCCESS, $"Plan Updated Successfully ");
+            return response;
+        }
+
         internal async Task<List<CMPMPlanList>> GetPMPlanList(int facility_id, string category_id, string frequency_id, DateTime? start_date, DateTime? end_date)
         {
             if (facility_id <= 0)
@@ -399,7 +437,7 @@ namespace CMMSAPIs.Repositories.PM
             retCode = CMMS.RETRUNSTATUS.SUCCESS;
 
 
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_PLAN, request.id, 0, 0, "PM Plan Approved ", CMMS.CMMS_Status.PM_PLAN_APPROVED);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_PLAN, request.id, 0, 0, string.IsNullOrEmpty(request.comment) ? "PM Plan Approved " : request.comment, CMMS.CMMS_Status.PM_PLAN_APPROVED);
 
             //await CMMSNotification.sendNotification(CMMS.CMMS_Modules.WARRANTY_CLAIM, CMMS.CMMS_Status.APPROVED, new[] { _WCList[0].created_by }, _WCList[0]);
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "PM Plan Approved Successfully");
@@ -427,7 +465,7 @@ namespace CMMSAPIs.Repositories.PM
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
             }
 
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_PLAN, request.id, 0, 0, "PM Plan Rejected ", CMMS.CMMS_Status.PM_PLAN_REJECTED);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_PLAN, request.id, 0, 0, string.IsNullOrEmpty(request.comment) ? "PM Plan Rejected ": request.comment, CMMS.CMMS_Status.PM_PLAN_REJECTED);
 
             //await CMMSNotification.sendNotification(CMMS.CMMS_Modules.WARRANTY_CLAIM, CMMS.CMMS_Status.REJECTED, new[] { _WCList[0].created_by }, _WCList[0]);
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "PM Plan Rejected Successfully");

@@ -43,6 +43,26 @@ namespace CMMSAPIs.Controllers.PM
             }
         }
 
+        [Route("UpdatePMPlan")]
+        [HttpPost]
+        public async Task<IActionResult> UpdatePMPlan(CMPMPlanDetail request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _PMBS.UpdatePMPlan(request, userID);
+                return Ok(data);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         //[Authorize]
         [Route("GetPMPlanDetail")]
         [HttpGet]
