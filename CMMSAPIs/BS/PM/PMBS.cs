@@ -19,6 +19,8 @@ namespace CMMSAPIs.BS.PM
         Task<CMDefaultResponse> ApprovePMPlan(CMApproval request, int userID);
         Task<CMDefaultResponse> RejectPMPlan(CMApproval request, int userID);
         Task<CMDefaultResponse> DeletePMPlan(int planId, int userID);
+        Task<CMDefaultResponse> UpdatePMPlan(CMPMPlanDetail request, int userID);
+
 
     }
     public class PMBS : IPMBS
@@ -140,6 +142,21 @@ namespace CMMSAPIs.BS.PM
                 using (var repos = new PMRepository(getDB))
                 {
                     return await repos.DeletePMPlan(planId, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<CMDefaultResponse> UpdatePMPlan(CMPMPlanDetail request, int userID)
+
+        {
+            try
+            {
+                using (var repos = new PMRepository(getDB))
+                {
+                    return await repos.UpdatePMPlan(request, userID);
                 }
             }
             catch (Exception ex)
