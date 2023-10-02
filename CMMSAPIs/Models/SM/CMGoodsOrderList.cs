@@ -66,7 +66,7 @@ namespace CMMSAPIs.Models
         public decimal damaged_qty { get; set; }
         public string paid_by_name { get; set; }
         public int paid_by_ID { get; set; }
- public int is_submit { get; set; }
+        public int is_submit { get; set; }
         public string cat_name { get; set; }
         public string asset_type { get; set; }
         public List<CMGO_ITEMS> go_items { get; set; }
@@ -90,7 +90,7 @@ namespace CMMSAPIs.Models
         public double lost_qty { get; set; }
         public double requested_qty { get; set; }
         public int paid_by_ID { get; set; }
-
+        public string sr_no { get; set; }
 
 
     }
