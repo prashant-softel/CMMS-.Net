@@ -421,5 +421,19 @@ public async Task<List<CMEmployeeStockReport>> GetEmployeeStockReport(int facili
             List<CMEmployeeStockTransactionReport> result = await Context.GetData<CMEmployeeStockTransactionReport>(Plant_Stock_Opening_Details_query).ConfigureAwait(false);
             return result;
         }
+        internal async Task<List<CMAssetMasterStockItems>> GetAssetMasterStockItems(int assetID)
+        {
+          string query = "select SI.asset_code,serial_number, asset_type_id, st.asset_type ,item_category_ID, sc.cat_name item_category, " +
+                "unit_of_measurement as unit_of_measurement_ID , su.name unit_of_measurement  " +
+                "from smassetitems SI " +
+                "inner join smassetmasters SM on SM.asset_code = SI.asset_code " +
+                "LEFT JOIN smunitmeasurement su on su.ID = SM.unit_of_measurement " +
+                "LEFT JOIN smitemcategory sc on sc.ID = SM.item_category_ID " +
+                "LEFT JOIN smassettypes st on st.ID = SM.asset_type_id " +
+                "where SM.ID = "+ assetID + " and item_condition=1;";
+
+            List<CMAssetMasterStockItems> result = await Context.GetData<CMAssetMasterStockItems>(query).ConfigureAwait(false);
+            return result;
+        }
     }
 }
