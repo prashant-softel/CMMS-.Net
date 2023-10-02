@@ -143,5 +143,23 @@ namespace CMMSAPIs.Controllers.SM
                 return Ok(item);
             }
         }
+
+        [Route("GetAssetMasterStockItems")]
+        [HttpGet]
+        public async Task<IActionResult> GetAssetMasterStockItems(int assetMasterID)
+        {
+            try
+            {
+                var data = await _SMReportsBS.GetAssetMasterStockItems(assetMasterID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Master id sent.";
+                return Ok(item);
+            }
+        }
     }
 }
