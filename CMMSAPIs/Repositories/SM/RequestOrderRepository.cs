@@ -425,7 +425,7 @@ namespace CMMSAPIs.Repositories.SM
                     retValue = $"Request order {ID} deleted";
                     break;
                 case CMMS.CMMS_Status.SM_RO_CLOSED:
-                    retValue = $"Request order {ID} closed and waiting for approval";
+                    retValue = $"Request order {ID} closed";
                     break;
                 default:
                     retValue = "Unknown <" + m_notificationID + ">";
