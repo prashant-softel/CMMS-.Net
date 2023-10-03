@@ -817,6 +817,11 @@ namespace CMMSAPIs.Repositories.Permits
             DataTable dt4 = await Context.FetchData(query2).ConfigureAwait(false);
             string fileIds2 = Convert.ToString(dt4.Rows[0][0]);
 
+            if(fileIds2 == "")
+            {
+                fileIds2 = "0";
+            }
+
             string files2 = $"SELECT id as fileId, file_path as path FROM uploadedFiles WHERE id IN ( {fileIds2} );";
             List<files> cancleFiles = await Context.GetData<files>(files2).ConfigureAwait(false);
 
