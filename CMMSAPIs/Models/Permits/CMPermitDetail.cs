@@ -10,7 +10,7 @@ namespace CMMSAPIs.Models.Permits
         public int isExtended { get; set; }
         public int insertedId { get; set; }
         public int permitNo { get; set; }
-        public string sitePermitNo { get; set; }
+        public int sitePermitNo { get; set; }
         public int permitTypeid { get; set; }
         public string PermitTypeName { get; set; }
         public string title { get; set; }
