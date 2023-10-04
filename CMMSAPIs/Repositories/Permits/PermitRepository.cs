@@ -285,12 +285,13 @@ namespace CMMSAPIs.Repositories.Permits
                 inputTypeOut += $"WHEN permitsaftymea.input = {(int)input} THEN '{input}' ";
             }
             inputTypeOut += $"ELSE 'Invalid Input Type' END";
-            string myQuery5 = $"SELECT permitsaftymea.id as id, permitsaftymea.title as name, permitsaftymea.input as inputID, { inputTypeOut } as inputName, ptw.title as permitType FROM permitsafetyquestions  as  permitsaftyques " +
-                             "LEFT JOIN permittypesafetymeasures as permitsaftymea ON permitsaftyques.safetyMeasureId = permitsaftymea.id " +
-                             "JOIN permittypelists as ptw ON ptw.id = permitsaftymea.permitTypeId ";
+            string myQuery5 = $"SELECT distinct permitsaftymea.id as id, permitsaftymea.title as name, permitsaftymea.input as inputID, { inputTypeOut } as inputName, ptw.title as permitType FROM permittypesafetymeasures as permitsaftymea " +
+                             "LEFT JOIN permitsafetyquestions  as  permitsaftyques ON permitsaftyques.safetyMeasureId = permitsaftymea.id " +
+                             "LEFT JOIN permittypelists as ptw ON ptw.id = permitsaftymea.permitTypeId ";
             if (permit_type_id > 0)
                 myQuery5 += $"where ptw.id =  { permit_type_id } ";
-            myQuery5 += "GROUP BY permitsaftyques.safetyMeasureId ORDER BY ptw.id ASC;";
+            //myQuery5 += "GROUP BY permitsaftyques.safetyMeasureId ORDER BY ptw.id ASC;";
+            myQuery5 += "ORDER BY permitsaftymea.id desc;";
             List<CMSafetyMeasurementQuestionList> _QuestionList = await Context.GetData<CMSafetyMeasurementQuestionList>(myQuery5).ConfigureAwait(false);
             return _QuestionList;
         }
