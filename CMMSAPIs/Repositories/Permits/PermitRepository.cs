@@ -291,7 +291,7 @@ namespace CMMSAPIs.Repositories.Permits
             if (permit_type_id > 0)
                 myQuery5 += $"where ptw.id =  { permit_type_id } ";
             //myQuery5 += "GROUP BY permitsaftyques.safetyMeasureId ORDER BY ptw.id ASC;";
-            myQuery5 += "ORDER BY permitsaftymea.id desc;";
+            myQuery5 += "ORDER BY ptw.id ASC;";
             List<CMSafetyMeasurementQuestionList> _QuestionList = await Context.GetData<CMSafetyMeasurementQuestionList>(myQuery5).ConfigureAwait(false);
             return _QuestionList;
         }
