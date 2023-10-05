@@ -32,6 +32,7 @@ using CMMSAPIs.BS;
 using CMMSAPIs.BS.Cleaning;
 using CMMSAPIs.BS.EM;
 using CMMSAPIs.BS.DSM;
+using CMMSAPIs.BS.MISMasters;
 
 namespace CMMSAPIs
 {
@@ -111,6 +112,7 @@ namespace CMMSAPIs
             services.AddScoped<IRequestOrderBS, RequestOrderBS>();
             services.AddScoped<IEMBS, EMBS>();
             services.AddScoped<IDSMBS, DSMBS>();
+            services.AddScoped<IMISMasterBS, MISMasterBS>();
 
         }
 
