@@ -1070,7 +1070,7 @@ namespace CMMSAPIs.Repositories.SM
 
             //var_dump(spareAssetIds);
 
-            var stmt = @"SELECT sm.asset_type_ID, sat.ID as asset_ID, sm.asset_code, sic.cat_name, sat.serial_number, sat.ID, sm.asset_name, st.asset_type, if(sm.approval_required = 1, 'Yes', 'NO') as approval_required, COALESCE(file.file_path, '') as file_path, file.Asset_master_id, f_sum.spare_multi_selection,if(sm.approval_required = 1, 1, 0) as is_approval_required
+            var stmt = @"SELECT sm.asset_type_ID, sm.ID as asset_ID, sm.asset_code, sic.cat_name, sat.serial_number, sat.ID, sm.asset_name, st.asset_type, if(sm.approval_required = 1, 'Yes', 'NO') as approval_required, COALESCE(file.file_path, '') as file_path, file.Asset_master_id, f_sum.spare_multi_selection,if(sm.approval_required = 1, 1, 0) as is_approval_required
     FROM smassetitems sat
     LEFT JOIN smassetmasters sm ON sm.asset_code = sat.asset_code
     LEFT JOIN smassettypes st ON st.ID = sm.asset_type_ID
@@ -1097,7 +1097,7 @@ namespace CMMSAPIs.Repositories.SM
 
             if (!spareAssetIdsString.IsNullOrEmpty())
             {
-                stmt += "  UNION ALL SELECT sm.asset_type_ID, sat.ID as asset_ID, sm.asset_code, sic.cat_name, sat.serial_number, sat.ID, sm.asset_name, st.asset_type, if(sm.approval_required = 1, 'Yes', 'NO') as approval_required, COALESCE(file.file_path, '') as file_path, file.Asset_master_id, f_sum.spare_multi_selection, if(sm.approval_required = 1, 1, 0) as is_approval_required"
+                stmt += "  UNION ALL SELECT sm.asset_type_ID, sm.ID as asset_ID, sm.asset_code, sic.cat_name, sat.serial_number, sat.ID, sm.asset_name, st.asset_type, if(sm.approval_required = 1, 'Yes', 'NO') as approval_required, COALESCE(file.file_path, '') as file_path, file.Asset_master_id, f_sum.spare_multi_selection, if(sm.approval_required = 1, 1, 0) as is_approval_required"
                 + " FROM smassetitems sat"
                 + " LEFT JOIN smassetmasters sm ON sm.asset_code = sat.asset_code"
                 + " LEFT JOIN smassettypes st ON st.ID = sm.asset_type_ID"
@@ -1306,5 +1306,7 @@ namespace CMMSAPIs.Repositories.SM
             }
             return _List;
         }
+
+
     }
 }
