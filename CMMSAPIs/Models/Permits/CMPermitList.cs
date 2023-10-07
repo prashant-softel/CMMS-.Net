@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using CMMSAPIs.Models.Utils;
 using System.Linq;
@@ -37,6 +37,8 @@ namespace CMMSAPIs.Models.Permits
         public int inputID { get; set; }
         public string inputName { get; set; }
         public string permitType { get; set; }
+        public string discription { get; set; }
+        public int isRequired { get; set; }
     }
 
     public class CMSOPList
