@@ -285,7 +285,8 @@ namespace CMMSAPIs.Repositories.Permits
                 inputTypeOut += $"WHEN permitsaftymea.input = {(int)input} THEN '{input}' ";
             }
             inputTypeOut += $"ELSE 'Invalid Input Type' END";
-            string myQuery5 = $"SELECT distinct permitsaftymea.id as id, permitsaftymea.title as name, permitsaftymea.input as inputID, { inputTypeOut } as inputName, ptw.title as permitType FROM permittypesafetymeasures as permitsaftymea " +
+            string myQuery5 = $"SELECT distinct permitsaftymea.id as id, permitsaftymea.title as name, permitsaftymea.input as inputID, { inputTypeOut } as inputName, ptw.title as permitType" +
+                $", permitsaftymea.discription, permitsaftymea.required as isRequired FROM permittypesafetymeasures as permitsaftymea " +
                              "LEFT JOIN permitsafetyquestions  as  permitsaftyques ON permitsaftyques.safetyMeasureId = permitsaftymea.id " +
                              "LEFT JOIN permittypelists as ptw ON ptw.id = permitsaftymea.permitTypeId ";
             if (permit_type_id > 0)
