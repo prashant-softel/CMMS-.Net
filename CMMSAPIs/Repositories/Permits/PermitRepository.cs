@@ -14,6 +14,7 @@ using CMMSAPIs.Models.Notifications;
 using CMMSAPIs.Models.Jobs;
 using CMMSAPIs.Repositories.Jobs;
 using Google.Protobuf.WellKnownTypes;
+using System.Collections;
 
 namespace CMMSAPIs.Repositories.Permits
 {
@@ -607,19 +608,34 @@ namespace CMMSAPIs.Repositories.Permits
                 await Context.ExecuteNonQry<int>(qryPermitCategory).ConfigureAwait(false);
             }
 
-            if (request.is_isolation_required == true)
+            if (request.is_grid_isolation_required == true)
+            {
+                string qryPermit1= $"Update permits set gridIsolation = 1 ,gridStartDate = '{request.grid_start_datetime.ToString("yyyy-MM-dd HH:mm:ss")}',gridStopDate = '{request.grid_stop_datetime.ToString("yyyy-MM-dd HH:mm:ss")}' ,gridRemark = '{request.grid_remark}' where id = {insertedId}";
+                await Context.ExecuteNonQry<int>(qryPermit1).ConfigureAwait(false);
+            }
+
+            if (request.is_loto_required == true)
             {
                 foreach (int data in request.isolated_category_ids)
                 {
                     string qryPermitisolatedCategory = $"insert into permitisolatedassetcategories (permitId , assetCategoryId ) value ({ insertedId  },{ data })";
                     await Context.ExecuteNonQry<int>(qryPermitisolatedCategory).ConfigureAwait(false);
                 }
-            }
 
-            foreach (var data in request.Loto_list)
+                foreach (var data in request.Loto_list)
+                {
+                    string qryPermitlotoAssets = $"Update permits set lotoRequired = 1,lotoRemark = '{request.loto_remark}' where id = {insertedId} ;insert into permitlotoassets ( PTW_id, Loto_Asset_id, Loto_Key,lotoLockNo,emp_id ) value ({insertedId},{data.equipment_id}, '{data.Loto_Key}',{data.Loto_lock_number},{data.employee_id})";
+                    await Context.ExecuteNonQry<int>(qryPermitlotoAssets).ConfigureAwait(false);
+                }
+
+            }
+            string ids = "";
+            if (request.is_physical_iso_required == true)
             {
-                string qryPermitlotoAssets = $"insert into permitlotoassets ( PTW_id, Loto_Asset_id, Loto_Key ) value ({ insertedId },{ data.Loto_id }, '{ data.Loto_Key }')";
-                await Context.ExecuteNonQry<int>(qryPermitlotoAssets).ConfigureAwait(false);
+                 ids += (request?.physical_iso_equip_ids?.Length > 0 ? " , physicalIsoEquips = '" + string.Join(" , ", request.physical_iso_equip_ids) + " '" : string.Empty);
+
+                string qryPermit1 = $"Update permits set physicalIsolation = 1 ,physicalIsoRemark = '{request.physical_iso_remark}' {ids} where id = {insertedId}";
+                await Context.ExecuteNonQry<int>(qryPermit1).ConfigureAwait(false);
             }
 
             foreach (var data in request.employee_list)
@@ -671,7 +687,7 @@ namespace CMMSAPIs.Repositories.Permits
             if (permit_id <= 0)
                 throw new ArgumentException("Invalid Permit ID");
 
-            string myQuery = $"SELECT ptw.id as insertedId,CONCAT(userTBT.firstName,' ',userTBT.lastName) as TBT_Done_By,TBT_Done_At,CASE when ptw.endDate < '{UtilsRepository.GetUTCTime()}' and ptw.status = {(int)CMMS.CMMS_Status.PTW_APPROVED} then 1 else 0 END as isExpired, ptw.status as ptwStatus, {statusSubQuery} as current_status_short, ptw.startDate as start_datetime, ptw.endDate as end_datetime, facilities.id as facility_id, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, blocks.id as blockId, blocks.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.title as title, ptw.description as description, ptw.jobTypeId as job_type_id, jobType.title as job_type_name, ptw.TBTId as sop_type_id, sop.title as sop_type_name, user1.id as issuer_id, CONCAT(user1.firstName,' ',user1.lastName) as issuedByName,ud1.name as issuerDesignation,co1.name as issuerCompany, ptw.issuedDate as issue_at, user6.id as issueRejectedby_id, CONCAT(user6.firstName,' ',user6.lastName) as issueRejectedByName,co6.name as issueRejecterCompany,ud6.name as issueRejecterDesignation, ptw.rejectedDate as issueRejected_at, user2.id as approver_id, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName,ud2.name as approverDesignation,co2.name as approverCompany, ptw.approvedDate as approve_at,user7.id as rejecter_id, CONCAT(user7.firstName,' ',user7.lastName) as rejectedByName,ud7.name as rejecterDesignation,co7.name as rejecterCompany, ptw.rejectedDate as rejected_at, user3.id as requester_id, CONCAT(user3.firstName,' ',user3.lastName) as requestedByName,ud3.name as requesterDesignation,co3.name as requesterCompany, ptw.completedDate as close_at, user4.id as cancelRequestby_id, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName,ud4.name as cancelRequestByDesignation,co4.name as cancelRequestByCompany,user8.id as cancelRequestApprovedby_id, CONCAT(user8.firstName,' ',user8.lastName) as cancelRequestApprovedByName,ud8.name as cancelRequestApprovedByDesignation,co8.name as cancelRequestApprovedByCompany, user9.id as cancelRequestRejectedby_id, CONCAT(user9.firstName,' ',user9.lastName) as cancelRequestRejectedByName, ud9.name as cancelRequestRejectedByDesignation,co9.name as cancelRequestRejectedByCompany,user5.id as closedby_id, CONCAT(user5.firstName,' ',user5.lastName) as closedByName, ud5.name as closedByDesignation,co5.name as closedByCompany,ptw.cancelRequestDate as cancel_at " +
+            string myQuery = $"SELECT ptw.id as insertedId,CONCAT(userTBT.firstName,' ',userTBT.lastName) as TBT_Done_By,CONCAT('HFE/PTW/',ptw.id) as sitePermitNo,TBT_Done_At,CASE when ptw.endDate < '{UtilsRepository.GetUTCTime()}' and ptw.status = {(int)CMMS.CMMS_Status.PTW_APPROVED} then 1 else 0 END as isExpired, ptw.status as ptwStatus, {statusSubQuery} as current_status_short, ptw.startDate as start_datetime, ptw.endDate as end_datetime, facilities.id as facility_id, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, blocks.id as blockId, blocks.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.title as title, ptw.description as description, ptw.jobTypeId as job_type_id, jobType.title as job_type_name, ptw.TBTId as sop_type_id, sop.title as sop_type_name, user1.id as issuer_id, CONCAT(user1.firstName,' ',user1.lastName) as issuedByName,ud1.name as issuerDesignation,co1.name as issuerCompany, ptw.issuedDate as issue_at, user6.id as issueRejectedby_id, CONCAT(user6.firstName,' ',user6.lastName) as issueRejectedByName,co6.name as issueRejecterCompany,ud6.name as issueRejecterDesignation, ptw.rejectedDate as issueRejected_at, user2.id as approver_id, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName,ud2.name as approverDesignation,co2.name as approverCompany, ptw.approvedDate as approve_at,user7.id as rejecter_id, CONCAT(user7.firstName,' ',user7.lastName) as rejectedByName,ud7.name as rejecterDesignation,co7.name as rejecterCompany, ptw.rejectedDate as rejected_at, user3.id as requester_id, CONCAT(user3.firstName,' ',user3.lastName) as requestedByName,ud3.name as requesterDesignation,co3.name as requesterCompany, ptw.completedDate as close_at, user4.id as cancelRequestby_id, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName,ud4.name as cancelRequestByDesignation,co4.name as cancelRequestByCompany,user8.id as cancelRequestApprovedby_id, CONCAT(user8.firstName,' ',user8.lastName) as cancelRequestApprovedByName,ud8.name as cancelRequestApprovedByDesignation,co8.name as cancelRequestApprovedByCompany, user9.id as cancelRequestRejectedby_id, CONCAT(user9.firstName,' ',user9.lastName) as cancelRequestRejectedByName, ud9.name as cancelRequestRejectedByDesignation,co9.name as cancelRequestRejectedByCompany,user5.id as closedby_id, CONCAT(user5.firstName,' ',user5.lastName) as closedByName, ud5.name as closedByDesignation,co5.name as closedByCompany,ptw.cancelRequestDate as cancel_at,ptw.gridIsolation as is_grid_isolation_required,gridStartDate as grid_start_datetime,gridStopDate  as grid_stop_datetime, gridRemark as grid_remark,physicalIsolation as is_physical_iso_required , physicalIsoRemark as physical_iso_remark,lotoRequired as is_loto_required, lotoRemark as loto_remark " +
               "FROM permits as ptw " +
               "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
               "LEFT JOIN permitjobtypelist as jobType ON ptw.jobTypeId = jobType.id " +
@@ -701,17 +717,23 @@ namespace CMMSAPIs.Repositories.Permits
                               $"LEFT JOIN users as user ON user.id = ptwEmpList.employeeId where ptw.id = {permit_id}";
             List<CMEMPLIST> _EmpList = await Context.GetData<CMEMPLIST>(myQuery1).ConfigureAwait(false);
 
+            string myQuery11 = $"SELECT physicalIsoEquips FROM permits where id = {permit_id}";
+            DataTable dt = await Context.FetchData(myQuery11).ConfigureAwait(false);
+            string id = Convert.ToString(dt.Rows[0][0]);
+            string myQuery10 = $"SELECT assets.id as id, assets.name as name FROM assets where id IN ({id}) ";                         
+            List<CMDefaultList> _physical_iso_equips = await Context.GetData<CMDefaultList>(myQuery10).ConfigureAwait(false);
+
             //get isolation list
             string myQuery2 = $"SELECT asset_cat.id as IsolationAssetsCatID, asset_cat.name as IsolationAssetsCatName FROM permitisolatedassetcategories AS ptwISOCat LEFT JOIN assetcategories as asset_cat  ON ptwISOCat.assetCategoryId = asset_cat.id where ptwISOCat.permitId =  {permit_id} GROUP BY asset_cat.id ;";
             List<CMIsolationList> _IsolationList = await Context.GetData<CMIsolationList>(myQuery2).ConfigureAwait(false);
 
             //get loto
-            string myQuery3 = "SELECT assets_cat.id as asset_id, assets_cat.name as asset_name, ptw.lockSrNo as locksrno FROM assetcategories as assets_cat " +
-                               "JOIN assets on assets.categoryId = assets_cat.id " +
-                               "JOIN permitlotoassets AS LOTOAssets on LOTOAssets.Loto_Asset_id = assets.id " +
-                               "JOIN permits as ptw ON LOTOAssets.PTW_id=ptw.id " +
-                               $"where ptw.id =  {permit_id}";
-            List<CMLoto> _LotoList = await Context.GetData<CMLoto>(myQuery3).ConfigureAwait(false);
+            string myQuery3 = "SELECT cat.name as equipment_cat, assets.name as equipment_name, CONCAT(emp.firstName,' ',emp.lastName) as employee_name,loto.Loto_key as Loto_Key,loto.lotoLockNo as Loto_lock_number FROM permitlotoassets as loto " +
+                               "JOIN assets on assets.id = loto.Loto_Asset_id " +
+                               "JOIN users AS emp on emp.id = loto.emp_id " +
+                               "JOIN assetcategories as cat ON assets.categoryId = cat.id " +
+                               $"where PTW_id =  {permit_id}";
+            List<CMLotoListDetail> _LotoList = await Context.GetData<CMLotoListDetail>(myQuery3).ConfigureAwait(false);
 
             //get upload file
             //string myQuery4 = "SELECT PTWFiles.File_Name as fileName, PTWFiles.File_Category_name as fileCategory,PTWFiles.File_Size as fileSize,PTWFiles.status as status FROM st_ptw_files AS PTWFiles " +
@@ -908,6 +930,8 @@ namespace CMMSAPIs.Repositories.Permits
             _PermitDetailsList[0].LstAssociatedJobs = _AssociatedJobList;
             _PermitDetailsList[0].LstCategory = _CategoryList;
             _PermitDetailsList[0].category_ids = _CategoryIDList;
+            _PermitDetailsList[0].physical_iso_equips = _physical_iso_equips;
+
             return _PermitDetailsList[0];
         }
 
@@ -1450,9 +1474,6 @@ namespace CMMSAPIs.Repositories.Permits
                  response = new CMDefaultResponse(request.permit_id, CMMS.RETRUNSTATUS.SUCCESS, $"Permit Updated Successfully");
 
             }
-
-
-
             return response;
 
         }
@@ -1473,5 +1494,11 @@ namespace CMMSAPIs.Repositories.Permits
             return _conditionList;
         }
 
+        internal async Task<List<CMDefaultList>> GetIsolationTypeList()
+        {
+            string myQuery = $"SELECT id as id, name as name FROM permitisolationtypes ";
+            List<CMDefaultList> _TypeList = await Context.GetData<CMDefaultList>(myQuery).ConfigureAwait(false);
+            return _TypeList;
+        }
     }
 }
