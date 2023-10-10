@@ -10,7 +10,7 @@ namespace CMMSAPIs.Models.Permits
         public int isExtended { get; set; }
         public int insertedId { get; set; }
         public int permitNo { get; set; }
-        public int sitePermitNo { get; set; }
+        public string sitePermitNo { get; set; }
         public int permitTypeid { get; set; }
         public string PermitTypeName { get; set; }
         public string title { get; set; }
@@ -83,12 +83,21 @@ namespace CMMSAPIs.Models.Permits
         public double longitude { get; set; }
         public List<int> category_ids { get; set; }
         public List<CMCategory> LstCategory { get; set; }
-        public Boolean is_isolation_required { get; set; }
-        public List<int> isolated_category_ids { get; set; }
+        public int is_grid_isolation_required { get; set; }
+        public DateTime grid_start_datetime { get; set; }
+        public DateTime grid_stop_datetime { get; set; }
+        public string grid_remark { get; set; }
+        public int is_physical_iso_required { get; set; }
+        public List<CMDefaultList> physical_iso_equips { get; set; }
+        public string physical_iso_remark { get; set; }
+        public int is_loto_required { get; set; }
+        public List<CMLotoListDetail> Loto_list { get; set; }
+        public string loto_remark { get; set; }
+        //public List<int> isolated_category_ids { get; set; }
         public List<CMDefaultList> LstIsolationCategory { get; set; }
         public List<CMSaftyQuestion> safety_question_list { get; set; }
         public List<CMFileDetail> file_list { get; set; }
-        public List<CMLoto> Loto_list { get; set; }
+        //public List<CMLoto> Loto_list { get; set; }
         public List<CMEMPLIST> employee_list { get; set; }
         public List<CMIsolationList> LstIsolation { get; set; }
         public List<CMAssociatedList> LstAssociatedJobs { get; set; }
@@ -102,6 +111,15 @@ namespace CMMSAPIs.Models.Permits
         public CMPermitConditionDetails extendDetails { get; set; }
         public string TBT_Done_By { get; set; }
         public DateTime? TBT_Done_At { get; set; }
+    }
+
+    public class CMLotoListDetail
+    {
+        public string equipment_name { get; set; }
+        public string equipment_cat { get; set; }
+        public string Loto_Key { get; set; }
+        public int Loto_lock_number { get; set; }
+        public string employee_name { get; set; }
     }
     public class CMAssociatedList
     {

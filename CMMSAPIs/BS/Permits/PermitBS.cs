@@ -52,6 +52,8 @@ namespace CMMSAPIs.BS.Permits
         Task<CMDefaultResponse> PermitCancelByIssuer(CMApproval request, int userID);
         Task<CMDefaultResponse> UpdatePermit(CMUpdatePermit request, int userID);
         Task<List<CMPermitConditions>> GetPermitConditionList(int permit_type_id, int isClose, int isCancle, int isExtend);
+        Task<List<CMDefaultList>> GetIsolationTypeList();
+
 
 
     }
@@ -567,6 +569,22 @@ namespace CMMSAPIs.BS.Permits
                 using (var repos = new PermitRepository(getDB))
                 {
                     return await repos.GetPermitConditionList(permit_type_id, isClose, isCancle, isExtend);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<CMDefaultList>> GetIsolationTypeList()
+
+        {
+            try
+            {
+                using (var repos = new PermitRepository(getDB))
+                {
+                    return await repos.GetIsolationTypeList();
                 }
             }
             catch (Exception ex)

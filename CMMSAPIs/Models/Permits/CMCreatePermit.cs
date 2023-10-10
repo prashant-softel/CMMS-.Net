@@ -23,9 +23,19 @@ namespace CMMSAPIs.Models.Permits
         public double longitude { get; set; }
         //public List<int> block_ids { get; set; }
         public List<int> category_ids { get; set; }
-        public Boolean is_isolation_required { get; set; }
+        public Boolean is_grid_isolation_required { get; set; }
+        public DateTime grid_start_datetime { get; set; }
+        public DateTime grid_stop_datetime { get; set; }
+        public string grid_remark { get; set; }
+        public Boolean is_loto_required { get; set; }
         public List<int> isolated_category_ids { get; set; }
-        public List<CMPermitLotoList> Loto_list { get; set; }
+        //public List<CMPermitLotoList> Loto_list { get; set; }
+        public List<CMLotoList> Loto_list { get; set; }
+
+        public string loto_remark { get; set; }
+        public Boolean is_physical_iso_required { get; set; }
+        public int[] physical_iso_equip_ids { get; set; }
+        public string physical_iso_remark { get; set; }
         public List<CMPermitEmpList> employee_list { get; set; }
         public List<CMPermitSaftyQueList> safety_question_list { get; set; }
         public List<int> uploadfile_ids { get; set; }
@@ -46,6 +56,14 @@ namespace CMMSAPIs.Models.Permits
         public int Loto_id { get; set; }
         public string Loto_Key { get; set; }
     }
+    public class CMLotoList
+    {
+        public int equipment_id { get; set; }
+        public string Loto_Key { get; set; }
+        public int Loto_lock_number { get; set; }
+        public int employee_id { get; set; }
+    }
+
     public class CMPermitEmpList
     {
         public int employeeId { get; set; }

@@ -675,5 +675,20 @@ namespace CMMSAPIs.Controllers.Permits
                 throw;
             }
         }
+
+        [Route("GetIsolationTypeList")]
+        [HttpGet]
+        public async Task<IActionResult> GetIsolationTypeList()
+        {
+            try
+            {
+                var data = await _PermitBS.GetIsolationTypeList();
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }
