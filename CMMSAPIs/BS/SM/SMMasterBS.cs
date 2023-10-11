@@ -1,4 +1,4 @@
-﻿using CMMSAPIs.Helper;
+using CMMSAPIs.Helper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,6 +7,8 @@ using CMMSAPIs.Repositories.SM;
 using CMMSAPIs.Models.SM;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Models.Users;
+using CMMSAPIs.Repositories.Inventory;
+using Microsoft.Extensions.Hosting;
 
 namespace CMMSAPIs.BS.SM
 {
@@ -38,6 +40,7 @@ namespace CMMSAPIs.BS.SM
         Task<CMDefaultResponse> AddPaidBy(CMPaidBy request, int UserID);
         Task<CMDefaultResponse> UpdatePaidBy(CMPaidBy request, int UserID);
         Task<CMDefaultResponse> DeletePaidBy(CMPaidBy request, int UserID);
+        Task<CMImportFileResponse> ImportMaterialFile(int file_id, int facility_id, int userID);
     }
 
     public class SMMasterBS : ISMMasterBS
@@ -392,6 +395,19 @@ namespace CMMSAPIs.BS.SM
                 throw;
             }
         }
-
+        public async Task<CMImportFileResponse> ImportMaterialFile(int file_id, int facility_id, int userID)
+        {
+            try
+            {
+                using (var repos = new SMMasterRepository(getDB))
+                {
+                    return await repos.ImportMaterialFile(file_id, facility_id, userID);
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }
