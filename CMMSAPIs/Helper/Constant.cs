@@ -40,7 +40,7 @@ namespace CMMSAPIs.Helper
             { CMMS_Modules.INVENTORY, 28 },
             { CMMS_Modules.WARRANTY_CLAIM, 30 },
             { CMMS_Modules.CALIBRATION, 31 },
-            { CMMS_Modules.MODULE_CLEANING, 32 },
+            { CMMS_Modules.MC_TASK, 32 },
             { CMMS_Modules.VEGETATION, 33 },
             { CMMS_Modules.INCIDENT_REPORT, 34 },
             { CMMS_Modules.DSM, 35 }
@@ -241,7 +241,8 @@ namespace CMMSAPIs.Helper
             HOTO_EXECUTION,
             HOTO_SUMMARY,
 
-            MODULE_CLEANING = 81,
+            MC_TASK = 81,
+            MC_PLAN = 82,
             CORRECTIVE_MAINTENANCE = 91,
             CALIBRATION = 101,
             VEGETATION = 111,
@@ -465,6 +466,7 @@ namespace CMMSAPIs.Helper
             MC_PLAN_REJECTED,
             MC_PLAN_APPROVED,
             MC_PLAN_DELETED,
+            MC_PLAN_UPDATED,
 
             MC_TASK_SCHEDULED = 360,
             MC_TASK_STARTED,

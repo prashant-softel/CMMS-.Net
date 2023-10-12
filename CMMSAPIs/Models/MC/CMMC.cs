@@ -38,6 +38,7 @@ namespace CMMSAPIs.Models.MC
     public class CMMCPlan
     {
         public UInt64 id { get; set; }
+        
         public int planId { get; set; }
         public int facilityId { get; set; }
         //public int blockId { get; set; }
@@ -45,6 +46,9 @@ namespace CMMSAPIs.Models.MC
         public string description { get; set; }
         public int frequencyId { get; set; }
         public string frequency { get; set; }
+        public int assignedToId { get; set; }
+        public string assignedTo { get; set; }
+        public DateTime startDate { get; set; }
         public int noOfCleaningDays { get; set; }
         public int createdById { get; set; }
         public string createdBy { get; set; }
