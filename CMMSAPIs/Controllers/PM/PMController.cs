@@ -1,4 +1,4 @@
-﻿using CMMSAPIs.BS.Masters;
+using CMMSAPIs.BS.Masters;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -209,7 +209,7 @@ namespace CMMSAPIs.Controllers.PM
             {
                 throw;
             }
-        }       
+        }
 
         ////[Authorize]
         //[Route("RejectPMPlan")]
@@ -250,5 +250,21 @@ namespace CMMSAPIs.Controllers.PM
         //    }
 
         //}
+
+        [Route("ImportPMPlanFile")]
+        [HttpPost]
+        public async Task<IActionResult> ImportPMPlanFile(int file_id)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _PMBS.ImportPMPlanFile(file_id, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
     }
 }
