@@ -1,7 +1,8 @@
-﻿using CMMSAPIs.Helper;
+using CMMSAPIs.Helper;
 using CMMSAPIs.Models.PM;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.PM;
+using CMMSAPIs.Repositories.SM;
 using CMMSAPIs.Repositories.WC;
 using System;
 using System.Collections.Generic;
@@ -21,7 +22,7 @@ namespace CMMSAPIs.BS.PM
         Task<CMDefaultResponse> DeletePMPlan(int planId, int userID);
         Task<CMDefaultResponse> UpdatePMPlan(CMPMPlanDetail request, int userID);
 
-
+        Task<CMImportFileResponse> ImportPMPlanFile(int file_id, int userID);
     }
     public class PMBS : IPMBS
     {
@@ -160,6 +161,21 @@ namespace CMMSAPIs.BS.PM
                 }
             }
             catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMImportFileResponse> ImportPMPlanFile(int file_id, int userID)
+        {
+            try
+            {
+                using (var repos = new PMRepository(getDB))
+                {
+                    return await repos.ImportPMPlanFile(file_id, userID);
+                }
+            }
+            catch (Exception)
             {
                 throw;
             }
