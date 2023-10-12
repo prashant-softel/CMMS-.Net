@@ -376,8 +376,8 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             string approveQuery = $"Update cleaning_plan set isApproved = 1,status= {(int)CMMS.CMMS_Status.MC_PLAN_APPROVED} ,approvedById={userID}, ApprovalReason='{request.comment}', approvedAt='{UtilsRepository.GetUTCTime()}' where planId = {request.id}";
             await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
 
-            string mainQuery = $"INSERT INTO cleaning_execution(planId,facilityId,frequencyId,noOfDays,startDate,assignedTo,status)  " +
-                              $"select planId as planId,facilityId,frequencyId,durationDays as noOfDays ,startDate,assignedTo," +
+            string mainQuery = $"INSERT INTO cleaning_execution(planId,moduleType,facilityId,frequencyId,noOfDays,startDate,assignedTo,status)  " +
+                              $"select planId as planId,{moduleType} as moduleType,facilityId,frequencyId,durationDays as noOfDays ,startDate,assignedTo," +
                               $"{(int)CMMS.CMMS_Status.MC_TASK_SCHEDULED} as status " +
                               $"from cleaning_plan where planId = {request.id}; " +
                               $"SELECT LAST_INSERT_ID(); ";
@@ -586,6 +586,26 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             }
 
             string scheduleQuery = $"Update cleaning_execution_schedules set status = {status},startedById={userId},startedAt='{UtilsRepository.GetUTCTime()}' where scheduleId = {scheduleId}; " +
+                 $"Update cleaning_execution_items set status = {status} where scheduleId = {scheduleId}";
+
+            await Context.GetData<CMMCExecutionSchedule>(scheduleQuery).ConfigureAwait(false);
+
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MC_TASK, scheduleId, 0, 0, "Mc schedule Started", CMMS.CMMS_Status.MC_TASK_STARTED);
+
+            CMDefaultResponse response = new CMDefaultResponse(scheduleId, CMMS.RETRUNSTATUS.SUCCESS, $"Schedule started");
+            return response;
+        }
+
+        internal async Task<CMDefaultResponse> EndScheduleExecution(int scheduleId, int userId)
+        {
+            int status = (int)CMMS.CMMS_Status.MC_TASK_COMPLETED;
+
+            if (moduleType == 2)
+            {
+                status = (int)CMMS.CMMS_Status.VEG_TASK_COMPLETED;
+            }
+
+            string scheduleQuery = $"Update cleaning_execution_schedules set status = {status},endedById={userId},endedAt='{UtilsRepository.GetUTCTime()}' where scheduleId = {scheduleId}; " +
                  $"Update cleaning_execution_items set status = {status} where scheduleId = {scheduleId}";
 
             await Context.GetData<CMMCExecutionSchedule>(scheduleQuery).ConfigureAwait(false);

@@ -720,6 +720,11 @@ namespace CMMSAPIs.Repositories.Permits
             string myQuery11 = $"SELECT physicalIsoEquips FROM permits where id = {permit_id}";
             DataTable dt = await Context.FetchData(myQuery11).ConfigureAwait(false);
             string id = Convert.ToString(dt.Rows[0][0]);
+
+            if (id == "")
+            {
+                id = "0";
+            }
             string myQuery10 = $"SELECT assets.id as id, assets.name as name FROM assets where id IN ({id}) ";                         
             List<CMDefaultList> _physical_iso_equips = await Context.GetData<CMDefaultList>(myQuery10).ConfigureAwait(false);
 
@@ -796,6 +801,10 @@ namespace CMMSAPIs.Repositories.Permits
             DataTable dt2 = await Context.FetchData(query1).ConfigureAwait(false);
             string fileIds = Convert.ToString(dt2.Rows[0][0]);
 
+            if (fileIds == "")
+            {
+                fileIds = "0";
+            }
             string files = $"SELECT id as fileId, file_path as path FROM uploadedFiles WHERE id IN ( {fileIds} );";
             List<files> closeFiles = await Context.GetData<files>(files).ConfigureAwait(false);
 
@@ -890,6 +899,10 @@ namespace CMMSAPIs.Repositories.Permits
             DataTable dt7 = await Context.FetchData(query3).ConfigureAwait(false);
             string fileIds3 = Convert.ToString(dt7.Rows[0][0]);
 
+            if (fileIds3 == "")
+            {
+                fileIds3 = "0";
+            }
             string files3 = $"SELECT id as fileId, file_path as path FROM uploadedFiles WHERE id IN ( {fileIds3} );";
             List<files> extendFiles = await Context.GetData<files>(files3).ConfigureAwait(false);
 
