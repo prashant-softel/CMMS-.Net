@@ -483,5 +483,24 @@ namespace CMMSAPIs.Controllers.SM
                 return Ok(item);
             }
         }
+
+        [Route("TransferItems")]
+        [HttpPost]
+        public async Task<IActionResult> TransferItems(CMTransferItems request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _MRSBS.TransactionDetails(request);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid data sent.";
+                return Ok(item);
+            }
+        }
     }
 }
