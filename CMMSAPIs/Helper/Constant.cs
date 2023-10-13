@@ -472,6 +472,10 @@ namespace CMMSAPIs.Helper
             MC_TASK_STARTED,
             MC_TASK_COMPLETED,
             MC_TASK_ABANDONED,
+            MC_TASK_APPROVED,
+            MC_TASK_REJECTED,
+            MC_TASK_UPDATED,
+
 
             VEG_PLAN_DRAFT = 370,
             VEG_PLAN_SUBMITTED,
@@ -483,6 +487,8 @@ namespace CMMSAPIs.Helper
             VEG_TASK_STARTED,
             VEG_TASK_COMPLETED,
             VEG_TASK_ABANDONED,
+            VEG_TASK_APPROVED,
+            VEG_TASK_REJECTED,
 
             PM_PLAN_CREATED = 401,
             PM_PLAN_DRAFT,
