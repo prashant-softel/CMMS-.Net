@@ -34,6 +34,7 @@ namespace CMMSAPIs.BS.SM
         Task<CMDefaultResponse> ApproveMRSIssue(CMApproval request, int userId);
         Task<CMDefaultResponse> RejectMRSIssue(CMApproval request, int userId);
         Task<List<CMMRSList>> GetMRSReturnList(int facility_ID, int emp_id);
+        Task<CMDefaultResponse> TransactionDetails(CMTransferItems request);
     }
     public class MRSBS : IMRSBS
     {
@@ -362,6 +363,31 @@ namespace CMMSAPIs.BS.SM
                 using (var repos = new MRSRepository(getDB))
                 {
                     return await repos.GetMRSReturnList(facility_ID, emp_id);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> TransactionDetails(CMTransferItems request)
+        {
+            try
+            {
+                using (var repos = new MRSRepository(getDB))
+                {
+                    CMDefaultResponse response = new CMDefaultResponse();
+                    var result = await repos.TransactionDetails(request.facilityID, request.fromActorID, request.fromActorType, request.toActorID, request.toActorType, request.assetItemID, request.qty, request.refType, request.refID, request.remarks, request.mrsID);
+                    if (result)
+                    {
+                        response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.SUCCESS, "Item transferred.");
+                    }
+                    else
+                    {
+                        response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.FAILURE, "Item failed to transfer.");
+                    }
+                    return response;  
                 }
             }
             catch (Exception ex)
