@@ -173,12 +173,12 @@ namespace CMMSAPIs.Controllers.MC
         //[Authorize]
         [Route("StartMCExecution")]
         [HttpPut]
-        public async Task<IActionResult> StartMCExecution(int planId)
+        public async Task<IActionResult> StartMCExecution(int executionId)
         {
             try
             {
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _CleaningBS.StartExecution(planId, userId);
+                var data = await _CleaningBS.StartExecution(executionId, userId);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -302,5 +302,70 @@ namespace CMMSAPIs.Controllers.MC
             }
         }
 
+        [Route("ApproveMCExecution")]
+        [HttpPut]
+        public async Task<IActionResult> ApproveMCExecution(CMApproval request)
+        {
+            try
+            {
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _CleaningBS.ApproveExecution(request, userId);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        //[Authorize]
+        [Route("RejectMCPExecution")]
+        [HttpPut]
+        public async Task<IActionResult> RejectMCPExecution(CMApproval request)
+        {
+            try
+            {
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _CleaningBS.RejectExecution(request, userId);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        //[Authorize]
+        [Route("EndMCScheduleExecution")]
+        [HttpPut]
+        public async Task<IActionResult> EndMCScheduleExecution(int scheduleId)
+        {
+            try
+            {
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _CleaningBS.EndScheduleExecution(scheduleId, userId);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        [Route("EndMCExecution")]
+        [HttpPut]
+        public async Task<IActionResult> EndMCExecution(int executionId)
+        {
+            try
+            {
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _CleaningBS.EndExecution(executionId, userId);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
     }
 }

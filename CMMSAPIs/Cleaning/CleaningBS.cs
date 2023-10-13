@@ -24,7 +24,7 @@ namespace CMMSAPIs.BS.Cleaning
         public Task<CMDefaultResponse> DeletePlan(int planId, int userId);
         public Task<CMDefaultResponse> UpdatePlan(CMMCPlan request, int userId);
         public Task<List<CMMCTaskList>> GetTaskList(int facilityId);
-        public Task<CMDefaultResponse> StartExecution(int planId, int userId);
+        public Task<CMDefaultResponse> StartExecution(int executionId, int userId);
         public Task<CMDefaultResponse> StartScheduleExecution(int scheduleId, int userId);
         public Task<CMDefaultResponse> UpdateScheduleExecution(CMMCGetScheduleExecution schedule, int userId);
         public Task<CMMCExecutionSchedule> GetScheduleExecutionSummary(CMMCGetScheduleExecution schedule);
@@ -33,6 +33,12 @@ namespace CMMSAPIs.BS.Cleaning
         public Task<CMDefaultResponse> AbandonSchedule(CMApproval request, int userId);
         public Task<List<CMMCEquipmentList>> GetEquipmentList(int facilityId);
         public Task<List<CMVegEquipmentList>> GetVegEquipmentList(int facilityId);
+        public Task<CMDefaultResponse> EndScheduleExecution(int scheduleId, int userId);
+        public Task<CMDefaultResponse> EndExecution(int executionId, int userId);
+        public Task<CMDefaultResponse> ApproveExecution(CMApproval request, int userID);
+        public Task<CMDefaultResponse> RejectExecution(CMApproval request, int userID);
+
+
     }
     public class CleaningBS : ICleaningBS
     {
@@ -194,13 +200,13 @@ namespace CMMSAPIs.BS.Cleaning
             }
         }
 
-        public async Task<CMDefaultResponse> StartExecution(int planId, int userId)
+        public async Task<CMDefaultResponse> StartExecution(int executionId, int userId)
         {
             try
             {
                 // using (var repos = new MCRepository(getDB))
                 {
-                    return await repos.StartExecution(planId, userId);
+                    return await repos.StartExecution(executionId, userId);
                 }
             }
             catch (Exception ex)
@@ -324,7 +330,64 @@ namespace CMMSAPIs.BS.Cleaning
             }
         }
 
+        public async Task<CMDefaultResponse> ApproveExecution(CMApproval request, int userID)
+        {
+            try
+            {
+                // using (var repos = new MCRepository(getDB))
+                {
+                    return await repos.ApproveExecution(request, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
 
+        public async Task<CMDefaultResponse> RejectExecution(CMApproval request, int userID)
+        {
+            try
+            {
+                // using (var repos = new MCRepository(getDB))
+                {
+                    return await repos.RejectExecution(request, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> EndScheduleExecution(int scheduleId, int userId) { 
+            try
+            {
+                // using (var repos = new MCRepository(getDB))
+                {
+                    return await repos.EndScheduleExecution(scheduleId, userId);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> EndExecution(int executionId, int userId)
+        {
+            try
+            {
+                // using (var repos = new MCRepository(getDB))
+                {
+                    return await repos.EndExecution(executionId, userId);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
 
 
     }

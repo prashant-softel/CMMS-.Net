@@ -160,6 +160,8 @@ namespace CMMSAPIs.Models.MC
         public int waterUsed { get; set; }
         public DateTime execution_date { get; set; }
         public string remark { get; set; }
+        public int status { get; set; }
+
         public string status_short { get; set; }
         public List<CMMCExecutionEquipment> equipments { get; set; }
     }
@@ -254,6 +256,7 @@ namespace CMMSAPIs.Models.MC
         public int noOfDays { get; set; }
         public DateTime startDate { get; set; }
         public DateTime doneDate { get; set; }
+        public int status { get; set; }
         public string status_short { get; set; }
         public int water_used { get; set; }
     }
