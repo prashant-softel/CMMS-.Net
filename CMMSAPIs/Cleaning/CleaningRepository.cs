@@ -41,6 +41,8 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             { (int)CMMS.CMMS_Status.MC_TASK_STARTED, "In Progress" },
             { (int)CMMS.CMMS_Status.MC_TASK_COMPLETED, "Completed" },
             { (int)CMMS.CMMS_Status.MC_TASK_ABANDONED, "Abandoned" },
+            { (int)CMMS.CMMS_Status.MC_TASK_APPROVED, "Approved" },
+            { (int)CMMS.CMMS_Status.MC_TASK_REJECTED, "Rejected" },
             { (int)CMMS.CMMS_Status.VEG_PLAN_DRAFT, "Draft" },
             { (int)CMMS.CMMS_Status.VEG_PLAN_SUBMITTED, "Waiting for Approval" },
             { (int)CMMS.CMMS_Status.VEG_PLAN_APPROVED, "Approved" },
@@ -50,6 +52,8 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             { (int)CMMS.CMMS_Status.VEG_TASK_STARTED, "In Progress" },
             { (int)CMMS.CMMS_Status.VEG_TASK_COMPLETED, "Completed" },
             { (int)CMMS.CMMS_Status.VEG_TASK_ABANDONED, "Abandoned" },
+            { (int)CMMS.CMMS_Status.VEG_TASK_APPROVED, "Approved" },
+            { (int)CMMS.CMMS_Status.VEG_TASK_REJECTED, "Rejected" },
         };
 
         internal string getLongStatus(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMMCPlan planObj, CMMCExecution executionObj)
@@ -85,6 +89,12 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 case CMMS.CMMS_Status.MC_TASK_ABANDONED:
                     retValue = String.Format("Module Cleaning Task <{0}>  Execution Abandoned ", executionObj.executionId, executionObj.abandonedBy);
                     break;
+                case CMMS.CMMS_Status.MC_TASK_REJECTED:
+                    retValue = String.Format("Module Cleaning Task <{0}> Rejected ", executionObj.executionId);
+                    break;
+                case CMMS.CMMS_Status.MC_TASK_APPROVED:
+                    retValue = String.Format("Module Cleaning Task <{0}> Approved ", executionObj.executionId);
+                    break;
                 case CMMS.CMMS_Status.VEG_PLAN_DRAFT:
                     retValue = String.Format("Vegetation Plan <{0}> Draft by {1} ", planObj.planId, planObj.createdBy);
                     break;
@@ -111,6 +121,12 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_ABANDONED:
                     retValue = String.Format("Vegetation Task <{0}>  Execution Abandoned by {1} ", executionObj.executionId, executionObj.abandonedBy);
+                    break;
+                case CMMS.CMMS_Status.VEG_TASK_REJECTED:
+                    retValue = String.Format("Vegetation Task <{0}> Rejected ", executionObj.executionId);
+                    break;
+                case CMMS.CMMS_Status.VEG_TASK_APPROVED:
+                    retValue = String.Format("Vegetation Task <{0}> Approved ", executionObj.executionId);
                     break;
                 default:
                     break;
@@ -757,7 +773,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             string mainQuery = $"INSERT INTO cleaning_execution(planId,moduleType,facilityId,frequencyId,noOfDays,startDate,assignedTo,status,prevTaskId,prevTaskDoneDate)  " +
                               $"select planId as planId,{moduleType} as moduleType,facilityId,frequencyId, noOfDays ,DATE_ADD(startDate, INTERVAL freq.days DAY),assignedTo," +
                               $"{status2} as status, {request.id} as prevTaskId, '{UtilsRepository.GetUTCTime()}' as prevTaskDoneDate " +
-                              $" from cleaning_execution left join frequency as freq on cleaning_execution.frequencyId = freq.id where id = {request.id}; " +
+                              $" from cleaning_execution left join frequency as freq on cleaning_execution.frequencyId = freq.id where  cleaning_execution.id = {request.id}; " +
                               $"SELECT LAST_INSERT_ID(); ";
 
             DataTable dt3 = await Context.FetchData(mainQuery).ConfigureAwait(false);
@@ -767,7 +783,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                                 $"select {taskid} as executionId,planId as planId, actualDay,cleaningType,{status2} as status from cleaning_execution_schedules where executionId = {request.id}";
             await Context.ExecuteNonQry<int>(scheduleQry);
 
-            string equipmentQry = $"INSERT INTO cleaning_execution_items (`executionId`,`moduleType`,`scheduleId`,`assetId`,`{measure}`,`plannedDate`,`plannedDay`,`createdById`,`createdAt`) SELECT '{taskid}' as executionId,item.moduleType,schedule.scheduleId,item.assetId,{measure},DATE_ADD('{DateTime.Now.ToString("yyyy-MM-dd")}',interval item.actualDay DAY) as plannedDate,item.actualDay,schedule.createdById,schedule.createdAt from cleaning_execution_items as item join cleaning_execution_schedules as schedule on item.planId = schedule.planId and item.plannedDay = schedule.actualDay where schedule.executionId = {taskid}";
+            string equipmentQry = $"INSERT INTO cleaning_execution_items (`executionId`,`moduleType`,`scheduleId`,`assetId`,`{measure}`,`plannedDate`,`plannedDay`,`createdById`,`createdAt`) SELECT '{taskid}' as executionId,item.moduleType,schedule.scheduleId,item.assetId,{measure},DATE_ADD('{DateTime.Now.ToString("yyyy-MM-dd")}',interval schedule.actualDay DAY) as plannedDate,schedule.actualDay,schedule.createdById,schedule.createdAt from cleaning_execution_items as item join cleaning_execution_schedules as schedule on item.executionId = schedule.executionId and item.plannedDay = schedule.actualDay where schedule.executionId = {taskid}";
 
             var retVal = await Context.ExecuteNonQry<int>(equipmentQry).ConfigureAwait(false);
 
