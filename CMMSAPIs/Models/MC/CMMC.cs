@@ -200,7 +200,8 @@ namespace CMMSAPIs.Models.MC
         public string title { get; set; }
         public string description { get; set; }
         public string frequency { get; set; }
-        //public DateTime startDate { get; set; }
+        public string assignedTo { get; set; }
+        public DateTime startDate { get; set; }
         public int noOfDays { get; set; }
         public string plannedBy { get; set; }
         public DateTime plannedAt { get; set; }
@@ -256,6 +257,7 @@ namespace CMMSAPIs.Models.MC
         public int noOfDays { get; set; }
         public DateTime startDate { get; set; }
         public DateTime doneDate { get; set; }
+        public DateTime lastDoneDate { get; set; }
         public int status { get; set; }
         public string status_short { get; set; }
         public int water_used { get; set; }
