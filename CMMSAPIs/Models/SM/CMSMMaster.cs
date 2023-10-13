@@ -121,6 +121,10 @@ namespace CMMSAPIs.Models.SM
         public string whereUsedTypeName { get; set; }
         public int whereUsedRefID { get; set; }
         public string remarks { get; set; }
+        public int from_actor_type_id { get; set; }
+        public int from_actor_id { get; set; }
+        public int to_actor_type_id { get; set; }
+        public int to_actor_id { get; set; }
 
         public List<CMEquipments> cmmrsItems { get; set;}
 
@@ -372,5 +376,20 @@ namespace CMMSAPIs.Models.SM
         public int item_name { get; set; }
         public decimal quantity { get; set; }
 
+    }
+
+    public class CMTransferItems
+    {
+        public int facilityID { get; set; }
+        public int fromActorID { get; set; }
+        public int fromActorType { get; set; }
+        public int toActorID { get; set; }
+        public int toActorType { get; set; }
+        public int assetItemID { get; set; }
+        public int qty { get; set; }
+        public int refType { get; set; }
+        public int refID { get; set; }
+        public string remarks { get; set; }
+        public int mrsID { get; set; }
     }
 }
