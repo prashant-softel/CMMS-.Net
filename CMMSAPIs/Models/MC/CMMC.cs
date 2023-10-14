@@ -182,9 +182,13 @@ namespace CMMSAPIs.Models.MC
     {
         public int id { get; set; }
         public string equipmentName { get; set; }
-        public int parentId { get; set; }
-        public int cleaningDay { get; set; }
+        public int parentId { get; set; }       
         public int moduleQuantity { get; set; }
+        public int cleaningDay { get; set; }
+        public dynamic scheduledAt { get; set; }
+        public dynamic cleanedAt { get; set; }
+        public dynamic abandonedAt { get; set; }
+        public int status { get; set; } //Cleaned or Abandoned
         public string short_status { get; set; } //Cleaned or Abandoned
 
         //public bool isCleaned = false;//Cleaned or Abandoned
