@@ -474,8 +474,7 @@ namespace CMMSAPIs.Helper
             MC_TASK_ABANDONED,
             MC_TASK_APPROVED,
             MC_TASK_REJECTED,
-            MC_TASK_UPDATED,
-
+            MC_TASK_UPDATED,            
 
             VEG_PLAN_DRAFT = 370,
             VEG_PLAN_SUBMITTED,
@@ -496,6 +495,10 @@ namespace CMMSAPIs.Helper
             PM_PLAN_DELETED,
             PM_PLAN_APPROVED,
             PM_PLAN_REJECTED,
+
+            EQUIP_CLEANED,
+            EQUIP_ABANDONED,
+            EQUIP_SCHEDULED,
         }
 
         public enum ApprovalStatus
