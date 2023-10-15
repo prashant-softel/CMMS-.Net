@@ -241,8 +241,10 @@ namespace CMMSAPIs.Helper
             HOTO_EXECUTION,
             HOTO_SUMMARY,
 
-            MC_TASK = 81,
-            MC_PLAN = 82,
+           
+
+            MC_PLAN = 81,
+            MC_TASK = 82,
             CORRECTIVE_MAINTENANCE = 91,
             CALIBRATION = 101,
             VEGETATION = 111,
