@@ -179,7 +179,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
                 if (plan.startDate != null && plan.startDate != Convert.ToDateTime("01-01-0001 00:00:00"))
                 {
-                    startDate = plan.startDate.ToString("yyyy-MM-dd");
+                    startDate = " '" + plan.startDate.ToString("yyyy-MM-dd")+"' ";
                 
                 }
                 string qry = "insert into `cleaning_plan` (`moduleType`,`facilityId`,`title`,`description`, `durationDays`,`frequencyId`,`startDate`,`assignedTo`,`status`,`createdById`,`createdAt`) VALUES " +
