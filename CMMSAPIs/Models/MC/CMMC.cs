@@ -105,6 +105,8 @@ namespace CMMSAPIs.Models.MC
         public int id { get; set; }
         public string equipmentName { get; set; }
         public int parentId { get; set; }
+        public string parentName { get; set; }
+
         public int moduleQuantity { get; set; }
         public int noOfPlanDay { get; set; }
         public DateTime scheduledCleaningDate { get; set; }
@@ -182,7 +184,9 @@ namespace CMMSAPIs.Models.MC
     {
         public int id { get; set; }
         public string equipmentName { get; set; }
-        public int parentId { get; set; }       
+        public int parentId { get; set; }
+        public string parentName { get; set; }
+
         public int moduleQuantity { get; set; }
         public int cleaningDay { get; set; }
         public dynamic scheduledAt { get; set; }

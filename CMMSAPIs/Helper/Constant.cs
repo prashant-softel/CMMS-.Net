@@ -498,9 +498,9 @@ namespace CMMSAPIs.Helper
             PM_PLAN_APPROVED,
             PM_PLAN_REJECTED,
 
+            EQUIP_SCHEDULED,
             EQUIP_CLEANED,
             EQUIP_ABANDONED,
-            EQUIP_SCHEDULED,
         }
 
         public enum ApprovalStatus

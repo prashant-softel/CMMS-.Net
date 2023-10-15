@@ -166,6 +166,8 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             int status = (int)CMMS.CMMS_Status.MC_PLAN_SUBMITTED;
             int cleaningType;
 
+
+            
             if (moduleType == 2)
             {
                 status = (int)CMMS.CMMS_Status.VEG_PLAN_SUBMITTED;
@@ -173,8 +175,15 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
             foreach(CMMCPlan plan in request)
             {
+                string startDate = "NULL";
+
+                if (plan.startDate != null && plan.startDate != Convert.ToDateTime("01-01-0001 00:00:00"))
+                {
+                    startDate = plan.startDate.ToString("yyyy-MM-dd");
+                
+                }
                 string qry = "insert into `cleaning_plan` (`moduleType`,`facilityId`,`title`,`description`, `durationDays`,`frequencyId`,`startDate`,`assignedTo`,`status`,`createdById`,`createdAt`) VALUES " +
-                            $"({moduleType},'{plan.facilityId}','{plan.title}','{plan.description}','{plan.noOfCleaningDays}','{plan.frequencyId}','{plan.startDate.ToString("yyyy-MM-dd")}','{plan.assignedToId}',{status},'{userId}','{UtilsRepository.GetUTCTime()}');" +
+                            $"({moduleType},'{plan.facilityId}','{plan.title}','{plan.description}','{plan.noOfCleaningDays}','{plan.frequencyId}',{startDate},'{plan.assignedToId}',{status},'{userId}','{UtilsRepository.GetUTCTime()}');" +
                              "SELECT LAST_INSERT_ID() as id ;";
 
                 List<CMMCPlan> planQry = await Context.GetData<CMMCPlan>(qry).ConfigureAwait(false);
@@ -303,7 +312,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             }
             statusOut += $"ELSE 'Invalid Status' END";
 
-            string planQuery = $"select plan.planId,plan.title,plan.startDate ,plan.facilityId, CONCAT(createdBy.firstName, createdBy.lastName) as createdBy , plan.createdAt,freq.name as frequency,plan.durationDays as noOfCleaningDays, CONCAT(approvedBy.firstName, approvedBy.lastName) as approvedBy , plan.approvedAt as approvedAt,CONCAT(assignedTo.firstName, ' ', assignedTo.lastName) as assignedTo,plan.status,{statusOut} as status_short from cleaning_plan as plan  LEFT JOIN Frequency as freq on freq.id = plan.frequencyId LEFT JOIN users as createdBy ON createdBy.id = plan.createdById LEFT JOIN users as approvedBy ON approvedBy.id = plan.approvedById " +
+            string planQuery = $"select plan.planId,plan.title,plan.startDate ,plan.frequencyId,plan.assignedTo as assignedToId ,plan.approvedById,plan.createdById,plan.facilityId, CONCAT(createdBy.firstName, createdBy.lastName) as createdBy , plan.createdAt,freq.name as frequency,plan.durationDays as noOfCleaningDays, CONCAT(approvedBy.firstName, approvedBy.lastName) as approvedBy , plan.approvedAt as approvedAt,CONCAT(assignedTo.firstName, ' ', assignedTo.lastName) as assignedTo,plan.status,{statusOut} as status_short from cleaning_plan as plan  LEFT JOIN Frequency as freq on freq.id = plan.frequencyId LEFT JOIN users as createdBy ON createdBy.id = plan.createdById LEFT JOIN users as approvedBy ON approvedBy.id = plan.approvedById " +
               $"LEFT JOIN users as assignedTo ON assignedTo.id = plan.assignedTo where plan.planId = {planId}  ;";
           
             List<CMMCPlan> _ViewMCPlan = await Context.GetData<CMMCPlan>(planQuery).ConfigureAwait(false);
@@ -320,7 +329,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
             List<CMMCSchedule> _Schedules = await Context.GetData<CMMCSchedule>(scheduleQuery).ConfigureAwait(false);
 
-            string equipmentQuery = $"select assets.id,assets.parentId as parentId, assets.name as equipmentName,assets.moduleQuantity as moduleQuantity,assets.area ,item.plannedDay as noOfPlanDay  from cleaning_plan_items as item  LEFT JOIN assets  on assets.id = item.assetId where item.planId={planId} ORDER BY item.plannedDay ASC ";
+            string equipmentQuery = $"select assets.id,assets.parentId as parentId,parent.name as parentName, assets.name as equipmentName,assets.moduleQuantity as moduleQuantity,assets.area ,item.plannedDay as noOfPlanDay  from cleaning_plan_items as item  LEFT JOIN assets  on assets.id = item.assetId left join assets as parent on assets.parentId = parent.id where item.planId={planId} ORDER BY item.plannedDay ASC ";
 
             List<CMMCEquipmentDetails> _Equipments = await Context.GetData<CMMCEquipmentDetails>(equipmentQuery).ConfigureAwait(false);
 
@@ -607,7 +616,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
             List<CMMCExecutionSchedule> _ViewSchedule = await Context.GetData<CMMCExecutionSchedule>(scheduleQuery).ConfigureAwait(false);
 
-            string equipmentQuery = $"select item.id ,DATE_ADD(execution.startDate,interval item.plannedDay - 1  DAY) as scheduledAt ,item.cleanedAt,item.abandonedAt,item.status,assets.name as equipmentName,item.abandonedAt, item.moduleQuantity, item.plannedDay as cleaningDay ,{statusEquip} as short_status from cleaning_execution_items as item left join cleaning_execution_schedules as schedule on schedule.executionId = item.executionId left join cleaning_execution as execution on execution.id = item.executionId left join assets on item.id = assets.id where schedule.executionId = {exectionId} ;";
+            string equipmentQuery = $"select item.assetId as id ,assets.parentId, parent.name as parentName,DATE_ADD(execution.startDate,interval item.plannedDay - 1  DAY) as scheduledAt ,item.cleanedAt,item.abandonedAt,item.status,assets.name as equipmentName,item.abandonedAt, item.moduleQuantity, item.plannedDay as cleaningDay ,{statusEquip} as short_status from cleaning_execution_items as item left join cleaning_execution_schedules as schedule on schedule.executionId = item.executionId left join cleaning_execution as execution on execution.id = item.executionId left join assets on item.assetId = assets.id left join assets as parent on assets.parentId = parent.id  where schedule.executionId = {exectionId} group by item.assetId ;";
 
             List<CMMCExecutionEquipment> _ViewEquipment = await Context.GetData<CMMCExecutionEquipment>(equipmentQuery).ConfigureAwait(false);
 
