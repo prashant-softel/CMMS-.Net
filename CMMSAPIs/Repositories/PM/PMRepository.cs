@@ -485,7 +485,7 @@ namespace CMMSAPIs.Repositories.PM
             return response;
         }
 
-        internal async Task<CMImportFileResponse> ImportPMPlanFile(int file_id, int userID)
+     internal async Task<CMImportFileResponse> ImportPMPlanFile(int file_id, int userID)
         {
             CMImportFileResponse response = null;
             DataTable dt2 = new DataTable();
@@ -511,7 +511,7 @@ namespace CMMSAPIs.Repositories.PM
             Dictionary<string, int> frequency = new Dictionary<string, int>();
             frequency.Merge(frequency_Names, frequency_IDs);
 
-            string queryusers = "SELECT id, UPPER(CONCAT(assignedTo.firstName, ' ', assignedTo.lastName)) as name FROM users GROUP BY name ORDER BY id ASC;";
+            string queryusers = "SELECT id, UPPER(CONCAT(firstName, ' ', lastName)) as name FROM users GROUP BY name ORDER BY id ASC;";
             DataTable dtqueryusers = await Context.FetchData(queryusers).ConfigureAwait(false);
             List<string> users_Names = dtqueryusers.GetColumn<string>("name");
             List<int> users_IDs = dtqueryusers.GetColumn<int>("id");
@@ -626,7 +626,7 @@ namespace CMMSAPIs.Repositories.PM
                             }
                             try
                             {
-                                newR["categoryID"] = facilities[Convert.ToString(newR[2]).ToUpper()];
+                                newR["categoryID"] = assetcategories[Convert.ToString(newR[2]).ToUpper()];
                             }
                             catch (KeyNotFoundException)
                             {
@@ -634,7 +634,7 @@ namespace CMMSAPIs.Repositories.PM
                             }
                             try
                             {
-                                newR["frequencyID"] = facilities[Convert.ToString(newR[6]).ToUpper()];
+                                newR["frequencyID"] = frequency[Convert.ToString(newR[6]).ToUpper()];
                             }
                             catch (KeyNotFoundException)
                             {
@@ -642,7 +642,7 @@ namespace CMMSAPIs.Repositories.PM
                             }
                             try
                             {
-                                newR["assignedToID"] = facilities[Convert.ToString(newR[7]).ToUpper()];
+                                newR["assignedToID"] = users[Convert.ToString(newR[7]).ToUpper()];
                             }
                             catch (KeyNotFoundException)
                             {
@@ -685,8 +685,8 @@ namespace CMMSAPIs.Repositories.PM
                             " remarks,status_id)";
                         foreach (DataRow row in dt2.Rows)
                         {
-                            insertQuery = insertQuery + $"Select '{row.ItemArray[1]}',{row.ItemArray[10]}, {row.ItemArray[11]}, {row.ItemArray[12]}," +
-                                $" '{Convert.ToDateTime(row.ItemArray[5]).ToString("yyyy-MM-dd HH:mm")}', {row.ItemArray[13]}, {(int)CMMS.CMMS_Status.PM_PLAN_APPROVED}, {userID}, '{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}'," +
+                            insertQuery = insertQuery + $"Select '{row.ItemArray[1]}',{row.ItemArray[12]}, {row.ItemArray[13]}, {row.ItemArray[14]}," +
+                                $" '{Convert.ToDateTime(row.ItemArray[5]).ToString("yyyy-MM-dd HH:mm")}', {row.ItemArray[15]}, {(int)CMMS.CMMS_Status.PM_PLAN_APPROVED}, {userID}, '{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}'," +
                                 $" {userID},'{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}', 'Approved', 1 UNION ALL ";
                         }
                         int lastIndex = insertQuery.LastIndexOf("UNION ALL ");
