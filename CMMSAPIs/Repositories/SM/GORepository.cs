@@ -431,52 +431,7 @@ namespace CMMSAPIs.Repositories
 
             // Entry in TransactionDetails
           
-            for (int i = 0; i < data.Count; i++)
-            {
-                // Check if it is spare/ consumable ,  aacording to this split items in transaction details
-                if (data[i].asset_type_ID == (int)CMMS.SM_AssetTypes.Spare)
-                {
-                    for(var j=0; j < data[i].ordered_qty; j++)
-                    {
-                        decimal stock_qty = 1;
-                        var tResult = await TransactionDetails(data[i].facility_id, data[i].vendorID, (int)CMMS.SM_Actor_Types.Vendor, data[i].facility_id, (int)CMMS.SM_Actor_Types.Store, data[i].assetItemID, (double)stock_qty, (int)CMMS.CMMS_Modules.SM_GO, request.id, "Goods Order");
-
-                        // Update the order type.
-                        var update_order_type = await updateGOType(data[i].order_by_type, data[i].id);
-
-                        // Update the asset status.
-                        if (data[i].spare_status == 2)
-                        {
-                            await updateAssetStatus(data[i].assetItemID, 4);
-                        }
-                        else
-                        {
-                            await updateAssetStatus(data[i].assetItemID, 1);
-                        }
-                    }
-                }
-                else {
-                    if (data[i].receive_later == 1 && data[i].added_to_store == 0)
-                    {
-
-                        decimal stock_qty = data[i].ordered_qty + data[i].received_qty;
-                        var tResult = await TransactionDetails(data[i].facility_id, data[i].vendorID, (int)CMMS.SM_Actor_Types.Vendor, data[i].facility_id, (int)CMMS.SM_Actor_Types.Store, data[i].assetItemID, (double)stock_qty, (int)CMMS.CMMS_Modules.SM_GO, request.id, "Goods Order");
-
-                        // Update the order type.
-                        var update_order_type = await updateGOType(data[i].order_by_type, data[i].id);
-
-                        // Update the asset status.
-                        if (data[i].spare_status == 2)
-                        {
-                            await updateAssetStatus(data[i].assetItemID, 4);
-                        }
-                        else
-                        {
-                            await updateAssetStatus(data[i].assetItemID, 1);
-                        }
-                    }
-                }               
-            }
+           
             string myQuery = $"SELECT   ID ,facilityID ,vendorID ,receiverID ,generated_by ,purchaseDate ,orderDate ,challan_no ,po_no ,\r\n     " +
                 $" freight ,transport ,no_pkg_received ,lr_no ,\r\n      " +
                 $"condition_pkg_received ,vehicle_no ,gir_no ,challan_date ,po_date ,\r\n      " +
@@ -531,7 +486,7 @@ namespace CMMSAPIs.Repositories
 
                         //assetItemIDByCode[assetCode] = assetItemId;
                         stmtI = "";
-                        stmtI = $"INSERT INTO smgoodsorderdetails (purchaseID,assetItemID,order_type,cost,ordered_qty,location_ID,received_qty,paid_by_ID,is_splited)" +
+                        stmtI = $"INSERT INTO smgoodsorderdetails (purchaseID,assetItemID,spare_status,cost,ordered_qty,location_ID,received_qty,paid_by_ID,is_splited)" +
                                     $"VALUES({item.purchaseID},{item.assetItemID},{item.asset_type_ID},{item.cost},1,0,1,{item.paid_by_ID},1); SELECT LAST_INSERT_ID();";
                         DataTable dtInsertOD = await Context.FetchData(stmtI).ConfigureAwait(false);
                         purchaseOrderDetailsID = Convert.ToInt32(dtInsertOD.Rows[0][0]);
@@ -679,7 +634,7 @@ namespace CMMSAPIs.Repositories
                 " pod.accepted_qty,pod.requested_qty,f1.file_path,f1.Asset_master_id,sm.decimal_status,sm.spare_multi_selection,po.generated_by," +
                 " pod.order_type, receive_later, added_to_store, po.challan_no, po.po_no, po.freight, po.transport, po.no_pkg_received, " +
                 " po.lr_no, po.condition_pkg_received, po.vehicle_no, po.gir_no, po.challan_date,  po.job_ref, po.amount, po.currency as currencyID ," +
-                " curr.name as currency ,pod.paid_by_ID       " +
+                " curr.name as currency ,pod.paid_by_ID ,pod.is_splited      " +
                 " FROM smgoodsorderdetails pod  LEFT JOIN smgoodsorder po ON po.ID = pod.purchaseID     " +
                 " LEFT JOIN smassetmasters sam ON sam.id = pod.assetItemID       " +
                 " LEFT JOIN smunitmeasurement sm ON sm.ID = sam.unit_of_measurement       " +
@@ -1281,28 +1236,78 @@ namespace CMMSAPIs.Repositories
 
             // Entry in TransactionDetails
             var data = await this.getPurchaseDetailsByID(request.id);
+
             for (int i = 0; i < data.Count; i++)
             {
-                if (data[i].added_to_store == 0)
+                // Check if it is spare/ consumable ,  aacording to this split items in transaction details
+                if (data[i].asset_type_ID == (int)CMMS.SM_AssetTypes.Spare && data[i].is_splited == 1)
                 {
-
-                    decimal stock_qty = data[i].ordered_qty + data[i].received_qty;
-                    var tResult = await TransactionDetails(data[i].facility_id, data[i].vendorID, (int)CMMS.SM_Actor_Types.Vendor, data[i].facility_id, (int)CMMS.SM_Actor_Types.Store, data[i].assetItemID, (double)stock_qty, (int)CMMS.CMMS_Modules.SM_GO, request.id, "Goods Order");
-
-                    // Update the order type.
-                    var update_order_type = await updateGOType(data[i].order_by_type, data[i].id);
-
-                    // Update the asset status.
-                    if (data[i].spare_status == 2)
+                    for (var j = 0; j < data[i].ordered_qty; j++)
                     {
-                        await updateAssetStatus(data[i].assetItemID, 4);
+                        decimal stock_qty = 1;
+                        var tResult = await TransactionDetails(data[i].facility_id, data[i].vendorID, (int)CMMS.SM_Actor_Types.Vendor, data[i].facility_id, (int)CMMS.SM_Actor_Types.Store, data[i].assetItemID, (double)stock_qty, (int)CMMS.CMMS_Modules.SM_GO, request.id, "Goods Order");
+
+                        // Update the order type.
+                        var update_order_type = await updateGOType(data[i].order_by_type, data[i].id);
+
+                        // Update the asset status.
+                        if (data[i].spare_status == 2)
+                        {
+                            await updateAssetStatus(data[i].assetItemID, 4);
+                        }
+                        else
+                        {
+                            await updateAssetStatus(data[i].assetItemID, 1);
+                        }
                     }
-                    else
+                }
+                else
+                {
+                    if (data[i].added_to_store == 0 && data[i].is_splited == 1)
                     {
-                        await updateAssetStatus(data[i].assetItemID, 1);
+
+                        //decimal stock_qty = data[i].ordered_qty + data[i].received_qty;
+                        decimal stock_qty = data[i].received_qty;
+                        var tResult = await TransactionDetails(data[i].facility_id, data[i].vendorID, (int)CMMS.SM_Actor_Types.Vendor, data[i].facility_id, (int)CMMS.SM_Actor_Types.Store, data[i].assetItemID, (double)stock_qty, (int)CMMS.CMMS_Modules.SM_GO, request.id, "Goods Order");
+
+                        // Update the order type.
+                        var update_order_type = await updateGOType(data[i].order_by_type, data[i].id);
+
+                        // Update the asset status.
+                        if (data[i].spare_status == 2)
+                        {
+                            await updateAssetStatus(data[i].assetItemID, 4);
+                        }
+                        else
+                        {
+                            await updateAssetStatus(data[i].assetItemID, 1);
+                        }
                     }
                 }
             }
+
+            //for (int i = 0; i < data.Count; i++)
+            //{
+            //    if (data[i].added_to_store == 0)
+            //    {
+
+            //        decimal stock_qty = data[i].ordered_qty + data[i].received_qty;
+            //        var tResult = await TransactionDetails(data[i].facility_id, data[i].vendorID, (int)CMMS.SM_Actor_Types.Vendor, data[i].facility_id, (int)CMMS.SM_Actor_Types.Store, data[i].assetItemID, (double)stock_qty, (int)CMMS.CMMS_Modules.SM_GO, request.id, "Goods Order");
+
+            //        // Update the order type.
+            //        var update_order_type = await updateGOType(data[i].order_by_type, data[i].id);
+
+            //        // Update the asset status.
+            //        if (data[i].spare_status == 2)
+            //        {
+            //            await updateAssetStatus(data[i].assetItemID, 4);
+            //        }
+            //        else
+            //        {
+            //            await updateAssetStatus(data[i].assetItemID, 1);
+            //        }
+            //    }
+            //}
             string myQuery = $"SELECT   ID ,facilityID ,vendorID ,receiverID ,generated_by ,purchaseDate ,orderDate ,challan_no ,po_no ,\r\n     " +
                 $" freight ,transport ,no_pkg_received ,lr_no ,\r\n      " +
                 $"condition_pkg_received ,vehicle_no ,gir_no ,challan_date ,po_date ,\r\n      " +

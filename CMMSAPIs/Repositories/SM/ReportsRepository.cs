@@ -435,5 +435,113 @@ public async Task<List<CMEmployeeStockReport>> GetEmployeeStockReport(int facili
             List<CMAssetMasterStockItems> result = await Context.GetData<CMAssetMasterStockItems>(query).ConfigureAwait(false);
             return result;
         }
+
+        public async Task<List<CMPlantStockOpeningResponse>> GetStockReport(string facility_id, int actorTypeID, int actorID, DateTime StartDate, DateTime EndDate, string assetMasterIDs)
+        {
+            List<string> Asset_Item_Ids = new List<string>();
+            List<CMPlantStockOpening> Asset_Item_Opening_Balance_details = new List<CMPlantStockOpening>();
+            List<CMPlantStockOpeningResponse> Response = new List<CMPlantStockOpeningResponse>();
+            string itemCondition = "";
+            string Plant_Stock_Opening_Details_query = "";
+            if (assetMasterIDs != null && assetMasterIDs != "")
+            {
+                itemCondition = " AND  a_master.ID  in (" + assetMasterIDs + ") ";
+            }
+
+            Plant_Stock_Opening_Details_query = $"SELECT  sm_trans.facilityID as facilityID, fc.name as facilityName," +
+                $"fc.isBlock as Facility_Is_Block, " +
+                $" '' as Facility_Is_Block_of_name,sm_trans.assetItemID, a_master.asset_name, a_master.asset_code," +
+                $" a_master.asset_type_ID, AST.asset_type,  " +
+                $" IFNULL((select sum(ST.creditQty)-sum(ST.debitQty)  FROM smtransition as ST  JOIN smassetmasters as SM ON SM.ID = ST.assetItemID  " +
+                $" LEFT JOIN facilities fcc ON fcc.id = ST.facilityID   where   ST.actorType = {actorTypeID} and SM.ID=a_master.ID  and ST.facilityID in ('{facility_id}')" +
+                $" and sm_trans.actorID = {actorID} and date_format(ST.lastModifiedDate, '%Y-%m-%d') < '{StartDate.ToString("yyyy-MM-dd")}'  group by SM.asset_code),0) Opening," +
+                $" sum(sm_trans.creditQty) as inward, sum(sm_trans.debitQty) as outward " +
+                $" FROM smtransition as sm_trans " +
+                $" JOIN smassetmasters as a_master ON a_master.ID = sm_trans.assetItemID " +
+                $" LEFT JOIN facilities fc ON fc.id = sm_trans.facilityID " +
+                $" Left join smassettypes AST on AST.id = a_master.asset_type_ID " +
+                $" where sm_trans.actorType = {actorTypeID} and sm_trans.facilityID in ('{facility_id}') and " +
+                $" sm_trans.actorID in ({actorID}) and date_format(sm_trans.lastModifiedDate, '%Y-%m-%d') " +
+                $" BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}'  ";
+
+            Plant_Stock_Opening_Details_query = Plant_Stock_Opening_Details_query + itemCondition;
+            Plant_Stock_Opening_Details_query = Plant_Stock_Opening_Details_query + " group by a_master.asset_code;";
+
+            List<CMPlantStockOpening> Plant_Stock_Opening_Details_Reader = await Context.GetData<CMPlantStockOpening>(Plant_Stock_Opening_Details_query).ConfigureAwait(false);
+
+
+
+            List<CMPlantStockOpeningItemWiseResponse> itemWiseResponse = new List<CMPlantStockOpeningItemWiseResponse>();
+            foreach (var item in Plant_Stock_Opening_Details_Reader)
+            {
+                string facility_name = "";
+                if (Convert.ToInt32(item.Facility_Is_Block) == 0)
+                {
+                    facility_name = Convert.ToString(item.facilityName);
+                }
+                else
+                {
+                    facility_name = Convert.ToString(item.Facility_Is_Block_of_name);
+                }
+
+                Asset_Item_Ids.Add(Convert.ToString(item.assetItemID));
+
+                CMPlantStockOpening openingBalance = new CMPlantStockOpening();
+
+                openingBalance.facilityID = item.facilityID;
+                openingBalance.facilityName = facility_name;
+                openingBalance.Opening = item.Opening;
+                openingBalance.assetItemID = item.assetItemID;
+                openingBalance.asset_name = item.asset_name;
+                openingBalance.asset_code = item.asset_code;
+                openingBalance.asset_type_ID = item.asset_type_ID;
+                openingBalance.asset_type = item.asset_type;
+                openingBalance.inward = item.inward;
+                openingBalance.outward = item.outward;
+                openingBalance.balance = item.Opening + item.inward - item.outward;
+                Asset_Item_Opening_Balance_details.Add(openingBalance);
+            }
+
+
+            var uniqueValues = Asset_Item_Opening_Balance_details.GroupBy(p => p.facilityID)
+            .Select(g => g.First())
+            .ToList();
+            foreach (var item in uniqueValues)
+            {
+                CMPlantStockOpeningResponse cMPlantStockOpeningResponse = new CMPlantStockOpeningResponse();
+                cMPlantStockOpeningResponse.facilityID = item.facilityID;
+                cMPlantStockOpeningResponse.facilityName = item.facilityName;
+                Response.Add(cMPlantStockOpeningResponse);
+            }
+            foreach (var item in Response)
+            {
+                List<CMPlantStockOpeningItemWiseResponse> itemResponseList = new List<CMPlantStockOpeningItemWiseResponse>();
+                CMPlantStockOpeningResponse cMPlantStockOpeningResponse = new CMPlantStockOpeningResponse();
+                cMPlantStockOpeningResponse.facilityID = item.facilityID;
+                cMPlantStockOpeningResponse.facilityName = item.facilityName;
+                var itemResponse = Asset_Item_Opening_Balance_details.Where(item => item.facilityID == item.facilityID).ToList();
+                foreach (var itemDetail in itemResponse)
+                {
+                    CMPlantStockOpeningItemWiseResponse itemWise = new CMPlantStockOpeningItemWiseResponse();
+                    itemWise.Facility_Is_Block = itemDetail.Facility_Is_Block;
+                    itemWise.Facility_Is_Block_of_name = itemDetail.Facility_Is_Block_of_name;
+                    itemWise.assetItemID = itemDetail.assetItemID;
+                    itemWise.asset_name = itemDetail.asset_name;
+                    itemWise.asset_code = itemDetail.asset_code;
+                    itemWise.asset_type_ID = itemDetail.asset_type_ID;
+                    itemWise.asset_type = itemDetail.asset_type;
+                    itemWise.Opening = itemDetail.Opening;
+                    itemWise.inward = itemDetail.inward;
+                    itemWise.outward = itemDetail.outward;
+                    itemWise.balance = itemDetail.balance;
+                    itemResponseList.Add(itemWise);
+                }
+                item.stockDetails = itemResponseList;
+
+            }
+            return Response;
+
+        }
+
     }
 }
