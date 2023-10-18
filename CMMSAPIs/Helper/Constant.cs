@@ -528,14 +528,19 @@ namespace CMMSAPIs.Helper
             Vegetation
         }
 
-        public enum SM_Types
+
+        public enum SM_Actor_Types
     {
         Vendor = 1, 
-        Store = 2,
-        Engineer = 3,
-        Inventory = 4
+        Store,
+        PM_Task,
+        JobCard,
+        Engineer,
+        Inventory,
+        Scrap
+        
     }
-	            public enum SM_AssetTypes
+        public enum SM_AssetTypes
         {
             Consumable = 1,
             Spare,
