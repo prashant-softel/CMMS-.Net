@@ -161,5 +161,23 @@ namespace CMMSAPIs.Controllers.SM
                 return Ok(item);
             }
         }
+
+        [Route("GetStockReport")]
+        [HttpGet]
+        public async Task<IActionResult> GetStockReport(string facility_id, int actorTypeID, int actorID, DateTime StartDate, DateTime EndDate, string assetMasterIDs)
+        {
+            try
+            {
+                var data = await _SMReportsBS.GetStockReport(facility_id, actorTypeID, actorID, StartDate, EndDate, assetMasterIDs);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Some error occured.";
+                return Ok(item);
+            }
+        }
     }
 }
