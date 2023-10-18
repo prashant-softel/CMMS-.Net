@@ -23,18 +23,19 @@ namespace CMMSAPIs.BS.SM
         Task<CMMRSList> getReturnDataByID(int ID);        
         Task<CMMRSAssetTypeList> getAssetTypeByItemID(int ItemID);
         Task<CMDefaultResponse> ReturnMRS(CMMRS request, int UserID);        
-        Task<CMDefaultResponse> mrsApproval(CMApproval request, int userId);        
+        Task<CMDefaultResponse> mrsApproval(CMMrsApproval request, int userId);        
         Task<CMDefaultResponse> mrsReject(CMApproval request, int userId);        
         Task<CMDefaultResponse> ApproveMRSReturn(CMApproval request, int UserID);
         Task<CMDefaultResponse> RejectMRSReturn(CMApproval request, int UserID);
         void UpdateAssetStatus(int assetItemID, int status);
         Task<CMMRS> getLastTemplateData(int ID);
         Task<List<CMAssetItem>> GetAssetItems(int facility_ID, bool isGroupByCode = false);
-        Task<CMDefaultResponse> CreateMRSIssue(CMMRS request, int UserID);
+        Task<CMDefaultResponse> MRSIssue(CMMRS request, int UserID);
         Task<CMDefaultResponse> ApproveMRSIssue(CMApproval request, int userId);
         Task<CMDefaultResponse> RejectMRSIssue(CMApproval request, int userId);
         Task<List<CMMRSList>> GetMRSReturnList(int facility_ID, int emp_id);
         Task<CMDefaultResponse> TransactionDetails(CMTransferItems request);
+        Task<CMIssuedAssetItems> getIssuedAssetItems(int id);
     }
     public class MRSBS : IMRSBS
     {
@@ -208,7 +209,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
         
-        public async Task<CMDefaultResponse> mrsApproval(CMApproval request, int userId)
+        public async Task<CMDefaultResponse> mrsApproval(CMMrsApproval request, int userId)
         {
             try
             {
@@ -312,13 +313,13 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<CMDefaultResponse> CreateMRSIssue(CMMRS request, int UserID)
+        public async Task<CMDefaultResponse> MRSIssue(CMMRS request, int UserID)
         {
             try
             {
                 using (var repos = new MRSRepository(getDB))
                 {
-                    return await repos.CreateMRSIssue(request, UserID);
+                    return await repos.MRSIssue(request, UserID);
                 }
             }
             catch (Exception ex)
@@ -370,7 +371,6 @@ namespace CMMSAPIs.BS.SM
                 throw;
             }
         }
-
         public async Task<CMDefaultResponse> TransactionDetails(CMTransferItems request)
         {
             try
@@ -387,7 +387,22 @@ namespace CMMSAPIs.BS.SM
                     {
                         response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.FAILURE, "Item failed to transfer.");
                     }
-                    return response;  
+                    return response;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMIssuedAssetItems> getIssuedAssetItems(int id)
+        {
+            try
+            {
+                using (var repos = new MRSRepository(getDB))
+                {
+                    return await repos.getIssuedAssetItems(id);
                 }
             }
             catch (Exception ex)
