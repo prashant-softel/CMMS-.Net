@@ -69,6 +69,7 @@ namespace CMMSAPIs.Models
         public int is_submit { get; set; }
         public string cat_name { get; set; }
         public string asset_type { get; set; }
+        public int is_splited { get; set; }
         public List<CMGO_ITEMS> go_items { get; set; }
     }
     public class CMGO_ITEMS
@@ -251,6 +252,7 @@ namespace CMMSAPIs.Models
         public int paid_by_ID { get; set; }
         public string cat_name { get; set; }
         public string asset_type { get; set; }
+        public int is_splited { get; set; }
     }
 
     public class CMGoodsOrderDetailList

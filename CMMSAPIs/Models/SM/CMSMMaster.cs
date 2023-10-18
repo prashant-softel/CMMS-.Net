@@ -125,6 +125,7 @@ namespace CMMSAPIs.Models.SM
         public int from_actor_id { get; set; }
         public int to_actor_type_id { get; set; }
         public int to_actor_id { get; set; }
+        public int is_submit { get; set; }
 
         public List<CMEquipments> cmmrsItems { get; set;}
 
@@ -132,6 +133,8 @@ namespace CMMSAPIs.Models.SM
     public class CMEquipments
     {
         public int id { get; set; }
+        public int mrs_item_id { get; set; }
+        public int material_id { get; set; }
         public int asset_item_ID { get; set; }
         public decimal qty { get; set; }
         public decimal requested_qty { get; set; }
@@ -267,6 +270,7 @@ namespace CMMSAPIs.Models.SM
         public string whereUsedTypeName { get; set; }
         public int whereUsedRefID { get; set; }
         public string remarks { get; set; }
+        public int is_splited { get; set; }
         public List<CMMRSItems> CMMRSItems { get; set; }
     }
 
@@ -392,4 +396,44 @@ namespace CMMSAPIs.Models.SM
         public string remarks { get; set; }
         public int mrsID { get; set; }
     }
+
+    public class CMIssuedItems
+    {
+        public int facility_ID { get; set; }
+        public int assetMasterID { get; set; }
+        public int asset_type_ID { get; set; }
+        public string asset_type { get; set; }
+        public string asset_name { get; set; }
+        public string serial_number { get; set; }
+        public int materialID { get; set; }
+    }
+
+    public class CMIssuedAssetItems
+    {
+        public int facility_ID { get; set; }
+        public int assetMasterID { get; set; }
+        public int asset_type_ID { get; set; }
+        public string asset_type { get; set; }
+        public string asset_name { get; set; }    
+        public List<CMIssuedAssetItemsWithSerialNo> CMIssuedAssetItemsWithSerialNo { get; set; }
+    }
+
+    public class CMIssuedAssetItemsWithSerialNo
+    {
+        public string serial_number { get; set; }
+        public int materialID { get; set; }
+    }
+
+    public class CMMrsApproval
+    {
+        public int id { get; set; }
+        public string comment { get; set; }
+        public List<CMMrsApprovalItems> cmmrsItems { get; set; }
+    }
+    public class CMMrsApprovalItems
+    {
+        public int mrs_item_id { get; set; }
+        public decimal approval_qty { get; set; }
+    }
+
 }
