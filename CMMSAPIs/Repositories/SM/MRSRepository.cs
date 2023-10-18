@@ -134,6 +134,9 @@ namespace CMMSAPIs.Repositories.SM
             /* isEditMode =0 for creating new MRS*/
 
             // added validation for issue_qty > 0 and issue_qty < requested_qty for each item
+
+            bool isApproval_required = false;
+
             for (var j = 0; j < request.cmmrsItems.Count; j++)
             {
                 if (request.cmmrsItems[j].issued_qty < 0)
@@ -178,7 +181,7 @@ namespace CMMSAPIs.Repositories.SM
                 DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
                 request.ID = Convert.ToInt32(dt2.Rows[0][0]);
             }
-
+            int is_splited = 0;
             if (request.ID != null)
             {
                 for (var i = 0; i < request.cmmrsItems.Count; i++)
@@ -196,13 +199,26 @@ namespace CMMSAPIs.Repositories.SM
                     var asset_type_ID = assetList[0].asset_type_ID;
                     var asset_code = assetList[0].asset_code;
                     var IsSpareSelectionEnable = await getMultiSpareSelectionStatus(asset_code, asset_type_ID);
+                    if (approval_required == 1)
+                    {
+                        isApproval_required = true;
+                    }
+                    
+                    if (asset_type_ID == (int)CMMS.SM_AssetTypes.Spare && request.cmmrsItems[i].requested_qty > 0)
+                    {
+                        is_splited = 0;
+                    }
+                    else
+                    {
+                        is_splited = 1;
+                    }
                     if (Convert.ToInt32(IsSpareSelectionEnable) == 0 || asset_type_ID != 0)
                     {
                         try
                         {
                             string insertStmt = $"START TRANSACTION; " +
-                            $"INSERT INTO smrsitems (mrs_ID,asset_item_ID,asset_MDM_code,requested_qty,status,flag,approval_required,mrs_return_ID,issued_qty,returned_qty,used_qty,available_qty)" +
-                            $"VALUES ({request.ID},{request.cmmrsItems[i].asset_item_ID},'{asset_code}',{request.cmmrsItems[i].requested_qty},0,0,{approval_required},0,{request.cmmrsItems[i].issued_qty}, {request.cmmrsItems[i].returned_qty}, {request.cmmrsItems[i].used_qty}, {request.cmmrsItems[i].available_qty})" +
+                            $"INSERT INTO smrsitems (mrs_ID,asset_item_ID,asset_MDM_code,requested_qty,status,flag,approval_required,mrs_return_ID,issued_qty,returned_qty,used_qty,available_qty,is_splited)" +
+                            $"VALUES ({request.ID},{request.cmmrsItems[i].asset_item_ID},'{asset_code}',{request.cmmrsItems[i].requested_qty},0,0,{approval_required},0,{request.cmmrsItems[i].issued_qty}, {request.cmmrsItems[i].returned_qty}, {request.cmmrsItems[i].used_qty}, {request.cmmrsItems[i].available_qty},{is_splited})" +
                             $"; SELECT LAST_INSERT_ID();COMMIT;";
                             DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
                         }
@@ -214,9 +230,9 @@ namespace CMMSAPIs.Repositories.SM
                         try
                         {
                             string insertStmt = $"START TRANSACTION; " +
-                            $"INSERT INTO smrsitems (mrs_ID,asset_item_ID,asset_MDM_code,requested_qty,status,flag,approval_required,mrs_return_ID,issued_qty,returned_qty,used_qty,available_qty)" +
+                            $"INSERT INTO smrsitems (mrs_ID,asset_item_ID,asset_MDM_code,requested_qty,status,flag,approval_required,mrs_return_ID,issued_qty,returned_qty,used_qty,available_qty,is_splited)" +
                             $"VALUES ({request.ID},{request.cmmrsItems[i].asset_item_ID},'{asset_code}',1,0,0,{approval_required},0,{request.cmmrsItems[i].issued_qty}," +
-                            $" {request.cmmrsItems[i].returned_qty}, {request.cmmrsItems[i].used_qty}, {request.cmmrsItems[i].available_qty})" +
+                            $" {request.cmmrsItems[i].returned_qty}, {request.cmmrsItems[i].used_qty}, {request.cmmrsItems[i].available_qty}, {is_splited})" +
                             $"; SELECT LAST_INSERT_ID();COMMIT;";
                             DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
                         }
@@ -238,22 +254,32 @@ namespace CMMSAPIs.Repositories.SM
             {
                 response = new CMDefaultResponse(request.ID, CMMS.RETRUNSTATUS.SUCCESS, "Request has been submitted.");
             }
-
-            for (var i = 0; i < request.cmmrsItems.Count; i++)
-            {
-                var tResult = await TransactionDetails(request.facility_ID, request.from_actor_id, request.from_actor_type_id, request.to_actor_id, request.to_actor_type_id, request.cmmrsItems[i].asset_item_ID, Convert.ToInt32(request.cmmrsItems[i].requested_qty), (int)CMMS.CMMS_Modules.SM_MRS, 1, request.remarks, request.ID);
-                if (!tResult)
-                {
-                    return new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Transaction details failed.");
-                }
-            }
-
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_MRS, request.ID, 0, 0, request.remarks, CMMS.CMMS_Status.MRS_SUBMITTED);
+            // Adding code for isApproval_required=0 then go for MRS approval automatically.
+            if (isApproval_required == false) 
+            {
+                CMMrsApproval approve_request = new CMMrsApproval();
+                approve_request.id = request.ID;
+                approve_request.comment = "MRS approval not required.";
+                var mrsApproved = await mrsApproval(approve_request, UserID);
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_MRS, request.ID, 0, 0, approve_request.comment, CMMS.CMMS_Status.MRS_REQUEST_APPROVED);
+            }
+         
             return response;
         }
 
         public async Task<CMDefaultResponse> updateMRS(CMMRS request, int UserID)
         {
+            int status = 0;
+            if (request.is_submit == 0) 
+            {
+                status = (int)CMMS.CMMS_Status.MRS_SUBMITTED;
+            }
+            else
+            {
+                status = (int)CMMS.CMMS_Status.MRS_SUBMITTED;
+            }
+
             for (var j = 0; j < request.cmmrsItems.Count; j++)
             {
                 if (request.cmmrsItems[j].issued_qty < 0)
@@ -268,7 +294,7 @@ namespace CMMSAPIs.Repositories.SM
             string updatestmt = $" START TRANSACTION; UPDATE smmrs SET facility_ID = {request.facility_ID}, requested_by_emp_ID = {request.requested_by_emp_ID}, requested_date = '{DateTime.Now.ToString("yyyy-MM-dd")}'," +
                                 $" setAsTemplate = '{request.setAsTemplate}',  approval_status = {request.approval_status}, activity='{request.activity}',whereUsedType={request.whereUsedType},whereUsedRefID={request.whereUsedRefID}, remarks = '{request.remarks}'" +
                                 $" , from_actor_type_id = {request.from_actor_type_id}, from_actor_id = {request.from_actor_id}, to_actor_type_id = {request.to_actor_type_id} " +
-                                $" , to_actor_id = {request.to_actor_id} WHERE ID = {request.ID} ;" +
+                                $" , to_actor_id = {request.to_actor_id}, status={status} WHERE ID = {request.ID} ;" +
                                 $"DELETE FROM smrsitems WHERE mrs_ID =  {lastMRSID} ;COMMIT;";
             await Context.ExecuteNonQry<int>(updatestmt);
             for (var i = 0; i < request.cmmrsItems.Count; i++)
@@ -576,17 +602,39 @@ namespace CMMSAPIs.Repositories.SM
         //    return response;
         //}
 
-        internal async Task<CMDefaultResponse> mrsApproval(CMApproval request, int userId)
+        internal async Task<CMDefaultResponse> mrsApproval(CMMrsApproval request, int userId)
         {
             CMDefaultResponse response = null;
             string stmtSelect = $"SELECT ID,facility_ID, requested_by_emp_ID,reference,from_actor_type_id,from_actor_id,to_actor_type_id,to_actor_id FROM smmrs WHERE ID = {request.id}";
             List<CMMRS> mrsList = await Context.GetData<CMMRS>(stmtSelect).ConfigureAwait(false);
+            
+            string stmtSelectItems = "SELECT ID,requested_qty,asset_item_ID FROM smrsitems WHERE mrs_ID = " + request.id + "";
+            List<CMMRSItems> mrsItemList = await Context.GetData<CMMRSItems>(stmtSelectItems).ConfigureAwait(false);
+
 
             if (mrsList.Count > 0)
             {
                 string stmt = $"UPDATE smmrs SET approved_by_emp_ID = {userId}, approved_date='{DateTime.Now.ToString("yyyy-MM-dd")}'," +
-                                   $" status ={(int)CMMS.CMMS_Status.MRS_REQUEST_APPROVED} ,approval_status ={(int)CMMS.CMMS_Status.MRS_REQUEST_APPROVED},approval_comment = '{request.comment}' WHERE ID = {request.id}";
+                                   $" status ={(int)CMMS.CMMS_Status.MRS_REQUEST_APPROVED} ,approval_status = 1,approval_comment = '{request.comment}' WHERE ID = {request.id}";
                 await Context.ExecuteNonQry<int>(stmt);
+                // update approval quantity in mrsitems
+                if (request.cmmrsItems != null)
+                {
+                    for (int i = 0; i < request.cmmrsItems.Count; i++)
+                    {
+                        decimal approved_qty = 0;
+                        if (request.cmmrsItems[i].approval_qty == 0 && request.cmmrsItems[i].approval_qty == null)
+                        {
+                            approved_qty = mrsItemList.Where(item => item.ID == request.cmmrsItems[i].mrs_item_id).Select(item => item.requested_qty).FirstOrDefault();
+                        }
+                        else
+                        {
+                            approved_qty = request.cmmrsItems[i].approval_qty;
+                        }
+                        string updateStatement = $"update smrsitems set approved_qty = {approved_qty} where id= {request.cmmrsItems[i].mrs_item_id};";
+                        await Context.ExecuteNonQry<int>(updateStatement);
+                    }
+                }
                 response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Status updated.");
             }
             else
@@ -594,35 +642,41 @@ namespace CMMSAPIs.Repositories.SM
                 response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.FAILURE, "Invalid mrs updated.");
             }
 
-            string stmtSelectItems = "SELECT ID,requested_qty,asset_item_ID FROM smrsitems WHERE mrs_ID = " + request.id + "";
-            List<CMMRSItems> mrsItemList = await Context.GetData<CMMRSItems>(stmtSelectItems).ConfigureAwait(false);
+          
 
             // Adding code to 
 
-            if (mrsList[0].from_actor_id > 0 && mrsList[0].from_actor_type_id > 0 && mrsList[0].to_actor_type_id > 0 && mrsList[0].to_actor_id > 0)
-            {
-                for (var i = 0; i < mrsItemList.Count(); i++)
-                {
-                    var tResult = await TransactionDetails(mrsList[0].facility_ID, mrsList[0].from_actor_id, mrsList[0].from_actor_type_id, mrsList[0].to_actor_id, mrsList[0].to_actor_type_id, mrsItemList[i].asset_item_ID, Convert.ToInt32(mrsItemList[i].requested_qty), (int)CMMS.CMMS_Modules.SM_MRS, request.id, request.comment, mrsList[0].ID);
-                    if (!tResult)
-                    {
-                        return new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Transaction details failed.");
-                    }
-                }
-            }
-            else
-            {
-                for (var i = 0; i < mrsItemList.Count(); i++)
-                {
-                    var tResult = await TransactionDetails(mrsList[0].facility_ID, mrsList[0].facility_ID, (int)CMMS.SM_Types.Store, mrsList[0].requested_by_emp_ID, (int)CMMS.SM_Types.Engineer, mrsItemList[i].asset_item_ID, Convert.ToInt32(mrsItemList[i].requested_qty), (int)CMMS.CMMS_Modules.SM_MRS, request.id, request.comment, mrsList[0].ID);
-                    if (!tResult)
-                    {
-                        return new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Transaction details failed.");
-                    }
-                }
-            }
+            //if (mrsList[0].from_actor_id > 0 && mrsList[0].from_actor_type_id > 0 && mrsList[0].to_actor_type_id > 0 && mrsList[0].to_actor_id > 0)
+            //{
+            //    for (var i = 0; i < mrsItemList.Count(); i++)
+            //    {
+            //        var tResult = await TransactionDetails(mrsList[0].facility_ID, mrsList[0].from_actor_id, mrsList[0].from_actor_type_id, mrsList[0].to_actor_id, mrsList[0].to_actor_type_id, mrsItemList[i].asset_item_ID, Convert.ToInt32(mrsItemList[i].requested_qty), (int)CMMS.CMMS_Modules.SM_MRS, request.id, request.comment, mrsList[0].ID);
+            //        if (!tResult)
+            //        {
+            //            return new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Transaction details failed.");
+            //        }
+            //    }
+            //}
+            //else
+            //{
+            //    for (var i = 0; i < mrsItemList.Count(); i++)
+            //    {
+            //        var tResult = await TransactionDetails(mrsList[0].facility_ID, mrsList[0].facility_ID, (int)CMMS.SM_Actor_Types.Store, mrsList[0].requested_by_emp_ID, (int)CMMS.SM_Actor_Types.Engineer, mrsItemList[i].asset_item_ID, Convert.ToInt32(mrsItemList[i].requested_qty), (int)CMMS.CMMS_Modules.SM_MRS, request.id, request.comment, mrsList[0].ID);
+            //        if (!tResult)
+            //        {
+            //            return new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Transaction details failed.");
+            //        }
+            //    }
+            //}
 
-
+            //for (var i = 0; i < mrsItemList.Count(); i++)
+            //{
+            //    var tResult = await TransactionDetails(mrsList[0].facility_ID, mrsList[0].facility_ID, (int)CMMS.SM_Actor_Types.Store, mrsList[0].requested_by_emp_ID, (int)CMMS.SM_Actor_Types.Task, mrsItemList[i].asset_item_ID, Convert.ToInt32(mrsItemList[i].requested_qty), (int)CMMS.CMMS_Modules.SM_MRS, request.id, request.comment, mrsList[0].ID);
+            //    if (!tResult)
+            //    {
+            //        return new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Transaction details failed.");
+            //    }
+            //}
 
 
             var data = await getMRSItems(request.id);
@@ -653,16 +707,18 @@ namespace CMMSAPIs.Repositories.SM
                     int assetItemId;
                     for (var i = 0; i < item.requested_qty; i++)
                     {
-
+                        int assetMasterID = item.asset_item_ID;
                         try
                         {
-                            var stmtI = $"INSERT INTO smassetitems (facility_ID,asset_code,item_condition,status) VALUES ({mrsList[0].facility_ID},'{assetCode}',1,0); SELECT LAST_INSERT_ID();";
+                            var stmtI = $"INSERT INTO smassetitems (facility_ID,asset_code,item_condition,status,assetMasterID,asset_type) VALUES ({mrsList[0].facility_ID},'{assetCode}',1,0,{assetMasterID}, {assetTypeId}); SELECT LAST_INSERT_ID();";
                             DataTable dtInsert = await Context.FetchData(stmtI).ConfigureAwait(false);
                             assetItemId = Convert.ToInt32(dtInsert.Rows[0][0]);
+                            var stmtU = $"UPDATE smassetitems set materialID = {assetItemId} where id = {assetItemId}";
+                            int resultU = await Context.ExecuteNonQry<int>(stmtU).ConfigureAwait(false);
 
                             string insertStmt = $"START TRANSACTION; " +
-                            $"INSERT INTO smrsitems (mrs_ID,asset_item_ID,asset_MDM_code,requested_qty,status,flag,approval_required,mrs_return_ID,issued_qty,returned_qty,used_qty,available_qty)" +
-                            $"VALUES ({request.id},{item.asset_item_ID},'{item.asset_MDM_code}',1,0,0,1,0,0,0, 1, 0)" +
+                            $"INSERT INTO smrsitems (mrs_ID,asset_item_ID,asset_MDM_code,requested_qty,status,flag,approval_required,mrs_return_ID,issued_qty,returned_qty,used_qty,available_qty, is_splited,approved_qty)" +
+                            $"VALUES ({request.id},{item.asset_item_ID},'{item.asset_MDM_code}',1,0,0,1,0,0,0, 1, 0,1,1)" +
                             $"; SELECT LAST_INSERT_ID();COMMIT;";
                             DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
                         }
@@ -671,6 +727,14 @@ namespace CMMSAPIs.Repositories.SM
                     }
 
                 }
+                else {
+                    int assetMasterID = 0;
+                    assetMasterID = item.asset_item_ID;
+                    var stmtI = $"INSERT INTO smassetitems (facility_ID,asset_code,item_condition,status,assetMasterID,materialID,asset_type) VALUES ({mrsList[0].facility_ID},'{assetCode}',1,0,{assetMasterID},{assetMasterID}, {assetTypeId}); SELECT LAST_INSERT_ID();";
+                    DataTable dtInsert = await Context.FetchData(stmtI).ConfigureAwait(false);
+                    var assetItemId = Convert.ToInt32(dtInsert.Rows[0][0]);
+                }
+
             }
 
             string historyComment = "";
@@ -680,7 +744,7 @@ namespace CMMSAPIs.Repositories.SM
             }
             else
             {
-                historyComment = "";
+                historyComment = "MRS Approved";
             }
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_MRS, request.id, 0, 0, request.comment, CMMS.CMMS_Status.MRS_REQUEST_APPROVED);
 
@@ -958,7 +1022,7 @@ namespace CMMSAPIs.Repositories.SM
 
             for (var i = 0; i < mrsItemList.Count(); i++)
             {
-                var tResult = await TransactionDetails(mrsList[0].facility_ID, mrsList[0].requested_by_emp_ID, (int)CMMS.SM_Types.Engineer, mrsList[0].facility_ID, (int)CMMS.SM_Types.Inventory, mrsItemList[i].ID, Convert.ToInt32(mrsItemList[i].returned_qty), (int)CMMS.CMMS_Modules.SM_MRS_RETURN, request.id, request.comment, mrsList[0].ID);
+                var tResult = await TransactionDetails(mrsList[0].facility_ID, mrsList[0].requested_by_emp_ID, (int)CMMS.SM_Actor_Types.Engineer, mrsList[0].facility_ID, (int)CMMS.SM_Actor_Types.Inventory, mrsItemList[i].ID, Convert.ToInt32(mrsItemList[i].returned_qty), (int)CMMS.CMMS_Modules.SM_MRS_RETURN, request.id, request.comment, mrsList[0].ID);
                 if (!tResult)
                 {
                     return new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Transaction details failed.");
@@ -1192,7 +1256,7 @@ namespace CMMSAPIs.Repositories.SM
             return retValue;
         }
 
-        internal async Task<CMDefaultResponse> CreateMRSIssue(CMMRS request, int UserID)
+        internal async Task<CMDefaultResponse> MRSIssue(CMMRS request, int UserID)
         {
             CMDefaultResponse response = null;
             bool Queryflag = false;
@@ -1220,7 +1284,10 @@ namespace CMMSAPIs.Repositories.SM
                     for (var i = 0; i < request.cmmrsItems.Count; i++)
                     {
 
-                        string updateStmtForItemList = $"update smrsitems set issued_qty = {request.cmmrsItems[i].issued_qty}, issue_remarks = '{request.cmmrsItems[i].issue_remarks}' where ID = {request.cmmrsItems[i].id}";
+                        string updateStmtForItemList = $"update smrsitems set issued_qty = {request.cmmrsItems[i].issued_qty}, issue_remarks = '{request.cmmrsItems[i].issue_remarks}' where ID = {request.cmmrsItems[i].id};";
+
+                        updateStmtForItemList = updateStmtForItemList + $" update smassetitems set item_issued_mrs = {request.ID} where id = {request.cmmrsItems[i].material_id};";
+
                         try
                         {
                             Queryflag = true;
@@ -1242,11 +1309,12 @@ namespace CMMSAPIs.Repositories.SM
                 {
                     response = new CMDefaultResponse(request.ID, CMMS.RETRUNSTATUS.SUCCESS, "MRS Request Issued.");
                 }
-                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_MRS, request.ID, 0, 0, "MRS Request Issued.", CMMS.CMMS_Status.MRS_REQUEST_ISSUED);
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_MRS, request.ID, 0, 0, request.approval_comment, CMMS.CMMS_Status.MRS_REQUEST_ISSUED);
 
                 for (var i = 0; i < request.cmmrsItems.Count; i++)
                 {
-                    var tResult = await TransactionDetails(mrsList[0].facility_ID, UserID, (int)CMMS.SM_Types.Store, mrsList[0].facility_ID, (int)CMMS.SM_Types.Engineer, request.cmmrsItems[i].id, Convert.ToInt32(request.cmmrsItems[i].issued_qty), Convert.ToInt32(mrsList[0].reference), request.ID, "", request.ID);
+
+                    var tResult = await TransactionDetails(mrsList[0].facility_ID, mrsList[0].from_actor_id, mrsList[0].from_actor_type_id, mrsList[0].to_actor_id, mrsList[0].to_actor_type_id, Convert.ToInt32(request.cmmrsItems[i].asset_item_ID), Convert.ToInt32(request.cmmrsItems[i].issued_qty), Convert.ToInt32(mrsList[0].reference), request.ID, "", request.ID);
                     if (!tResult)
                     {
                         return new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Transaction details failed.");
@@ -1349,6 +1417,39 @@ namespace CMMSAPIs.Repositories.SM
             return _List;
         }
 
+        internal async Task<CMIssuedAssetItems> getIssuedAssetItems(int ID)
+        {
+            string stmt = "SELECT item_issued_mrs, assetMasterID,materialID,sat.asset_type,sam.asset_name,sai.facility_ID, " +
+                "COALESCE(sai.serial_number,'') serial_number,sam.asset_type_ID, f_sum.spare_multi_selection " +
+                "FROM smassetitems sai  " +
+                "LEFT JOIN smassetmasters sam ON sam.asset_code = sai.asset_code  " +
+                "LEFT JOIN smunitmeasurement sm ON sm.ID = sam.unit_of_measurement  " +
+                "LEFT JOIN smassettypes sat ON sat.ID = sam.asset_type_ID  " +
+                "LEFT JOIN smunitmeasurement f_sum ON f_sum.ID = sam.unit_of_measurement  " +
+                "WHERE sai.assetMasterID = " + ID + " and item_issued_mrs = 0;";
+            List<CMIssuedItems> _List = await Context.GetData<CMIssuedItems>(stmt).ConfigureAwait(false);
+            CMIssuedAssetItems _MasterList = _List.Select(p => new CMIssuedAssetItems
+            {
+                facility_ID = p.facility_ID,
+                assetMasterID = p.assetMasterID,
+                asset_type_ID = p.asset_type_ID,
+                asset_type = p.asset_type,
+                asset_name = p.asset_name
 
+
+            }).FirstOrDefault();
+            if (_List.Count > 0)
+            {
+                List<CMIssuedAssetItemsWithSerialNo> _itemList = _List.Select(p => new CMIssuedAssetItemsWithSerialNo
+                {
+                    serial_number = p.serial_number,
+                    materialID = p.materialID,
+                }).ToList();
+                _MasterList.CMIssuedAssetItemsWithSerialNo = _itemList;
+               
+            }
+
+            return _MasterList;
+        }
     }
 }

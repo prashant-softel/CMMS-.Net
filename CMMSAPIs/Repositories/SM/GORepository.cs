@@ -20,6 +20,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Org.BouncyCastle.Utilities.Collections;
 using static Google.Protobuf.Reflection.SourceCodeInfo.Types;
+using static iTextSharp.text.pdf.AcroFields;
 
 namespace CMMSAPIs.Repositories
 {
@@ -206,7 +207,7 @@ namespace CMMSAPIs.Repositories
         internal async Task<CMDefaultResponse> CreateGO(CMGoodsOrderList request, int userID)
         {
             int goid = 0;
-       
+            int assetTypeId = 0;
             if (request.go_items != null)
             {
                 int status = 0;
@@ -218,7 +219,11 @@ namespace CMMSAPIs.Repositories
                 {
                     status = (int)CMMS.CMMS_Status.GO_SUBMITTED;
                 }
-                    string poInsertQuery = $" INSERT INTO smgoodsorder (facilityID,vendorID,receiverID,generated_by,purchaseDate,orderDate,status," +
+
+                
+
+
+                string poInsertQuery = $" INSERT INTO smgoodsorder (facilityID,vendorID,receiverID,generated_by,purchaseDate,orderDate,status," +
                     $" challan_no,po_no, freight,transport, " +
                     $"no_pkg_received,lr_no,condition_pkg_received,vehicle_no, gir_no, challan_date,po_date, job_ref,amount, currency,withdraw_by,withdrawOn,order_type,received_on) " +
                     $"VALUES({request.facility_id},{request.vendorID}, {request.receiverID}, {userID}, '{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}', '{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}', {status}," +
@@ -227,11 +232,32 @@ namespace CMMSAPIs.Repositories
                     $" SELECT LAST_INSERT_ID();";
                 DataTable dt2 = await Context.FetchData(poInsertQuery).ConfigureAwait(false);
                 goid = Convert.ToInt32(dt2.Rows[0][0]);
-
+                int is_splited = 0; 
                 for (var i = 0; i < request.go_items.Count; i++)
                 {
-                    string poDetailsQuery = $"INSERT INTO smgoodsorderdetails (purchaseID,assetItemID,cost,ordered_qty,location_ID, paid_by_ID, requested_qty) " +
-                    "values(" + goid + ", " + request.go_items[i].assetMasterItemID + ",  " + request.go_items[i].cost + ", " + request.go_items[i].ordered_qty + ", " + request.location_ID + ", " + request.go_items[i].paid_by_ID +", " + request.go_items[i].requested_qty +") ; SELECT LAST_INSERT_ID();";
+                    string stmtAssetType = $"SELECT asset_type_ID FROM smassetmasters WHERE id = '{request.go_items[i].assetMasterItemID}'";
+                    DataTable dtAssetType = await Context.FetchData(stmtAssetType).ConfigureAwait(false);
+
+                    if (dtAssetType == null && dtAssetType.Rows.Count == 0)
+                    {
+                        throw new Exception("Asset type ID not found");
+                    }
+                    else
+                    {
+                        assetTypeId = Convert.ToInt32(dtAssetType.Rows[0][0]);
+                    }
+
+                    if(assetTypeId == (int)CMMS.SM_AssetTypes.Spare && request.go_items[i].ordered_qty > 0)
+                    {
+                        is_splited = 0;
+                    }
+                    else
+                    {
+                        is_splited = 1;
+                    }
+
+                    string poDetailsQuery = $"INSERT INTO smgoodsorderdetails (purchaseID,assetItemID,cost,ordered_qty,location_ID, paid_by_ID, requested_qty,sr_no,spare_status,is_splited) " +
+                    "values(" + goid + ", " + request.go_items[i].assetMasterItemID + ",  " + request.go_items[i].cost + ", " + request.go_items[i].ordered_qty + ", " + request.location_ID + ", " + request.go_items[i].paid_by_ID +", " + request.go_items[i].requested_qty +", '" + request.go_items[i].sr_no +"', "+ assetTypeId + ", "+ is_splited + ") ; SELECT LAST_INSERT_ID();";
                     DataTable dtInsertPO = await Context.FetchData(poDetailsQuery).ConfigureAwait(false);
                     int id = Convert.ToInt32(dtInsertPO.Rows[0][0]);
                 }
@@ -268,7 +294,7 @@ namespace CMMSAPIs.Repositories
                 if (request.go_items[i].ordered_qty > 0)
                 {
                     itemsQuery = $"UPDATE smgoodsorderdetails SET location_ID = {request.location_ID},cost = {request.go_items[i].cost}, accepted_qty = {request.go_items[i].accepted_qty},ordered_qty = {request.go_items[i].ordered_qty} , requested_qty = {request.go_items[i].requested_qty}, received_qty= {request.go_items[i].received_qty},lost_qty = {request.go_items[i].lost_qty}, damaged_qty={request.go_items[i].damaged_qty}, paid_by_ID = {request.go_items[i].paid_by_ID}" +
-                        $" WHERE ID = {request.go_items[i].goItemID}";
+                        $" , sr_no = '{request.go_items[i].sr_no}' WHERE ID = {request.go_items[i].goItemID}";
                 }
                 else
                 {
@@ -382,6 +408,14 @@ namespace CMMSAPIs.Repositories
              * Your code goes here
             */
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
+            var data = await this.getPurchaseDetailsByID(request.id);
+
+            if (data[0].status != (int)CMMS.CMMS_Status.GO_SUBMITTED)
+            {
+                return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.FAILURE, $"Store keeper not updated quantity for Goods Order {request.id}.");                
+            }
+
+         
 
             if (request.id <= 0)
             {
@@ -396,28 +430,52 @@ namespace CMMSAPIs.Repositories
 
 
             // Entry in TransactionDetails
-            var data = await this.getPurchaseDetailsByID(request.id);
+          
             for (int i = 0; i < data.Count; i++)
             {
-                if (data[i].receive_later == 1 && data[i].added_to_store == 0)
+                // Check if it is spare/ consumable ,  aacording to this split items in transaction details
+                if (data[i].asset_type_ID == (int)CMMS.SM_AssetTypes.Spare)
                 {
-
-                    decimal stock_qty = data[i].ordered_qty + data[i].received_qty;
-                    var tResult = await TransactionDetails(data[i].facility_id, data[i].vendorID, (int)CMMS.SM_Types.Vendor, data[i].facility_id, (int)CMMS.SM_Types.Store, data[i].assetItemID, (double)stock_qty, (int)CMMS.CMMS_Modules.SM_GO, request.id, "Goods Order");
-
-                    // Update the order type.
-                    var update_order_type = await updateGOType(data[i].order_by_type, data[i].id);
-
-                    // Update the asset status.
-                    if (data[i].spare_status == 2)
+                    for(var j=0; j < data[i].ordered_qty; j++)
                     {
-                        await updateAssetStatus(data[i].assetItemID, 4);
-                    }
-                    else
-                    {
-                        await updateAssetStatus(data[i].assetItemID, 1);
+                        decimal stock_qty = 1;
+                        var tResult = await TransactionDetails(data[i].facility_id, data[i].vendorID, (int)CMMS.SM_Actor_Types.Vendor, data[i].facility_id, (int)CMMS.SM_Actor_Types.Store, data[i].assetItemID, (double)stock_qty, (int)CMMS.CMMS_Modules.SM_GO, request.id, "Goods Order");
+
+                        // Update the order type.
+                        var update_order_type = await updateGOType(data[i].order_by_type, data[i].id);
+
+                        // Update the asset status.
+                        if (data[i].spare_status == 2)
+                        {
+                            await updateAssetStatus(data[i].assetItemID, 4);
+                        }
+                        else
+                        {
+                            await updateAssetStatus(data[i].assetItemID, 1);
+                        }
                     }
                 }
+                else {
+                    if (data[i].receive_later == 1 && data[i].added_to_store == 0)
+                    {
+
+                        decimal stock_qty = data[i].ordered_qty + data[i].received_qty;
+                        var tResult = await TransactionDetails(data[i].facility_id, data[i].vendorID, (int)CMMS.SM_Actor_Types.Vendor, data[i].facility_id, (int)CMMS.SM_Actor_Types.Store, data[i].assetItemID, (double)stock_qty, (int)CMMS.CMMS_Modules.SM_GO, request.id, "Goods Order");
+
+                        // Update the order type.
+                        var update_order_type = await updateGOType(data[i].order_by_type, data[i].id);
+
+                        // Update the asset status.
+                        if (data[i].spare_status == 2)
+                        {
+                            await updateAssetStatus(data[i].assetItemID, 4);
+                        }
+                        else
+                        {
+                            await updateAssetStatus(data[i].assetItemID, 1);
+                        }
+                    }
+                }               
             }
             string myQuery = $"SELECT   ID ,facilityID ,vendorID ,receiverID ,generated_by ,purchaseDate ,orderDate ,challan_no ,po_no ,\r\n     " +
                 $" freight ,transport ,no_pkg_received ,lr_no ,\r\n      " +
@@ -459,13 +517,22 @@ namespace CMMSAPIs.Repositories
                     for (var i = 0; i < item.ordered_qty; i++)
                     {
                         // Insert the asset item.
-                        var stmtI = $"INSERT INTO smassetitems (facility_ID,asset_code,item_condition,status) VALUES ({item.facility_id},'{assetCode}',1,0); SELECT LAST_INSERT_ID();";
+
+                        int assetMasterID = 0;
+            
+                        assetMasterID = item.assetItemID;
+
+                        var stmtI = $"INSERT INTO smassetitems (facility_ID,asset_code,item_condition,status,assetMasterID,asset_type,goods_order_ID) VALUES ({item.facility_id},'{assetCode}',1,0, {assetMasterID}, {assetTypeId}, {request.id}); SELECT LAST_INSERT_ID();";
                         DataTable dtInsert = await Context.FetchData(stmtI).ConfigureAwait(false);
                         assetItemId = Convert.ToInt32(dtInsert.Rows[0][0]);
+
+                        var stmtU = $"UPDATE smassetitems set materialID = {assetItemId} where id = {assetItemId}";                    
+                        int resultU = await Context.ExecuteNonQry<int>(stmtU).ConfigureAwait(false);
+
                         //assetItemIDByCode[assetCode] = assetItemId;
                         stmtI = "";
-                        stmtI = $"INSERT INTO smgoodsorderdetails (purchaseID,assetItemID,order_type,cost,ordered_qty,location_ID,received_qty,paid_by_ID)" +
-                                    $"VALUES({item.purchaseID},{item.assetItemID},{item.asset_type_ID},{item.cost},1,0,1,{item.paid_by_ID}); SELECT LAST_INSERT_ID();";
+                        stmtI = $"INSERT INTO smgoodsorderdetails (purchaseID,assetItemID,order_type,cost,ordered_qty,location_ID,received_qty,paid_by_ID,is_splited)" +
+                                    $"VALUES({item.purchaseID},{item.assetItemID},{item.asset_type_ID},{item.cost},1,0,1,{item.paid_by_ID},1); SELECT LAST_INSERT_ID();";
                         DataTable dtInsertOD = await Context.FetchData(stmtI).ConfigureAwait(false);
                         purchaseOrderDetailsID = Convert.ToInt32(dtInsertOD.Rows[0][0]);
                     }
@@ -515,25 +582,32 @@ namespace CMMSAPIs.Repositories
 
                     // Insert the Goods Order detail.
                 }
-                //else
-                //{
-                //    // Get the asset item ID.
-                //    //int assetItemId = 0;
-                //    //assetItemId = await getAssetItemID(item.asset_code, item.facility_id, 0);
-                //    //if (assetItemId == 0)
-                //    //{
-                //    //    throw new Exception("asset_item_ID is empty");
-                //    //}
-                //    //else
-                //    //{
+                else
+                {
+                    // Get the asset item ID.
+                    //int assetItemId = 0;
+                    //assetItemId = await getAssetItemID(item.asset_code, item.facility_id, 0);
+                    //if (assetItemId == 0)
+                    //{
+                    //    throw new Exception("asset_item_ID is empty");
+                    //}
+                    //else
+                    //{
 
-                //    //}
-                //    string stmtI = $"INSERT INTO smgoodsorderdetails (purchaseID,assetItemID,order_type,cost,ordered_qty,location_ID, received_qty)" +
-                //                   $"VALUES({item.purchaseID},{item.assetItemID},{item.asset_type_ID},{item.cost},0,0,{item.requested_qty}); SELECT LAST_INSERT_ID();";
-                //    DataTable dtInsertOD = await Context.FetchData(stmtI).ConfigureAwait(false);
-                //    purchaseOrderDetailsID = Convert.ToInt32(dtInsertOD.Rows[0][0]);
+                    //}
+                    //string stmtI = $"INSERT INTO smgoodsorderdetails (purchaseID,assetItemID,order_type,cost,ordered_qty,location_ID, received_qty)" +
+                    //               $"VALUES({item.purchaseID},{item.assetItemID},{item.asset_type_ID},{item.cost},0,0,{item.requested_qty}); SELECT LAST_INSERT_ID();";
+                    //DataTable dtInsertOD = await Context.FetchData(stmtI).ConfigureAwait(false);
+                    //purchaseOrderDetailsID = Convert.ToInt32(dtInsertOD.Rows[0][0]);
+                    int assetMasterID = 0;
+                    assetMasterID = item.assetItemID;
 
-                //}
+                    var stmtI = $"INSERT INTO smassetitems (facility_ID,asset_code,item_condition,status,assetMasterID,materialID,asset_type,goods_order_ID) VALUES ({item.facility_id},'{assetCode}',1,0, {assetMasterID},{assetMasterID},{assetTypeId}, {request.id}); SELECT LAST_INSERT_ID();";
+                    DataTable dtInsert = await Context.FetchData(stmtI).ConfigureAwait(false);
+                    var assetItemId = Convert.ToInt32(dtInsert.Rows[0][0]);
+
+
+                }
             }
 
             string historyRemark = "";
@@ -982,7 +1056,7 @@ namespace CMMSAPIs.Repositories
                 "added_to_store,   \r\n      " +
                 "  po.challan_no, po.po_no, po.freight, po.transport, po.no_pkg_received, po.lr_no, po.condition_pkg_received, " +
                 "po.vehicle_no, po.gir_no, po.challan_date, po.job_ref, po.amount,  po.currency as currencyID , curr.name as currency , stt.asset_type as asset_type_Name,  po_no, po_date, requested_qty,lost_qty, ordered_qty\r\n    ,paid_by_ID, smpaidby.paid_by paid_by_name , po.received_on as receivedAt,sam.asset_type_ID,sam.asset_code,sam.asset_name" +
-                " , sic.cat_name,smat.asset_type FROM smgoodsorderdetails pod\r\n        LEFT JOIN smgoodsorder po ON po.ID = pod.purchaseID\r\n     " +
+                " , sic.cat_name,smat.asset_type, pod.is_splited FROM smgoodsorderdetails pod\r\n        LEFT JOIN smgoodsorder po ON po.ID = pod.purchaseID\r\n     " +
                 "   LEFT JOIN smassetitems sai ON sai.ID = pod.assetItemID\r\n       " +
                 " LEFT JOIN smassetmasters sam ON  sam.ID = pod.assetItemID\r\n      " +
                 "  LEFT JOIN smunitmeasurement sm ON sm.ID = sam.unit_of_measurement\r\n    " +
@@ -1051,10 +1125,11 @@ namespace CMMSAPIs.Repositories
                     asset_type_ID = p.asset_type_ID,
                     asset_code = p.asset_code,
                     cat_name = p.cat_name,
-                    asset_type = p.asset_type
+                    asset_type = p.asset_type,
+                    is_splited = p.is_splited,
 
 
-    }).ToList();
+                }).ToList();
                 _MasterList.GODetails = _itemList;
 
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_MasterList.status);
@@ -1212,7 +1287,7 @@ namespace CMMSAPIs.Repositories
                 {
 
                     decimal stock_qty = data[i].ordered_qty + data[i].received_qty;
-                    var tResult = await TransactionDetails(data[i].facility_id, data[i].vendorID, (int)CMMS.SM_Types.Vendor, data[i].facility_id, (int)CMMS.SM_Types.Store, data[i].assetItemID, (double)stock_qty, (int)CMMS.CMMS_Modules.SM_GO, request.id, "Goods Order");
+                    var tResult = await TransactionDetails(data[i].facility_id, data[i].vendorID, (int)CMMS.SM_Actor_Types.Vendor, data[i].facility_id, (int)CMMS.SM_Actor_Types.Store, data[i].assetItemID, (double)stock_qty, (int)CMMS.CMMS_Modules.SM_GO, request.id, "Goods Order");
 
                     // Update the order type.
                     var update_order_type = await updateGOType(data[i].order_by_type, data[i].id);
