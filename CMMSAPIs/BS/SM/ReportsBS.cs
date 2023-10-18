@@ -21,6 +21,7 @@ namespace CMMSAPIs.BS.SM
         Task<CMEmployeeStockList> GetEmployeeStock(int facility_ID, int emp_id);
         Task<List<CMEmployeeStockTransactionReport>> GetEmployeeStockTransactionReport(int facility_ID, int emp_id);
         Task<List<CMAssetMasterStockItems>> GetAssetMasterStockItems(int assetID);
+        Task<List<CMPlantStockOpeningResponse>> GetStockReport(string facility_id, int actorTypeID,int actorID,  DateTime StartDate, DateTime EndDate, string assetMasterIDs);
     }
     public class ReportsBS : ISMReportsBS
     {
@@ -132,6 +133,22 @@ namespace CMMSAPIs.BS.SM
                 using (var repos = new ReportsRepository(getDB))
                 {
                     return await repos.GetAssetMasterStockItems(assetID);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<CMPlantStockOpeningResponse>> GetStockReport(string facility_id, int actorTypeID,int actorID, DateTime StartDate, DateTime EndDate, string assetMasterIDs)
+        {
+            try
+            {
+                using (var repos = new ReportsRepository(getDB))
+                {
+                    return await repos.GetStockReport(facility_id, actorTypeID, actorID, StartDate, EndDate, assetMasterIDs);
 
                 }
             }
