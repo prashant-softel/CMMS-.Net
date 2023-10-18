@@ -183,6 +183,7 @@ namespace CMMSAPIs.Models.SM
         public int status { get; set; }
         public string status_short { get; set; }
         public string status_long { get; set; }
+        public int is_splited { get; set; }
 
     }
 
