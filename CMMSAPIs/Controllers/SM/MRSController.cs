@@ -210,7 +210,7 @@ namespace CMMSAPIs.Controllers.SM
         //[Authorize]
         [Route("mrsApproval")]
         [HttpPost]
-        public async Task<IActionResult> mrsApproval(CMApproval request)
+        public async Task<IActionResult> mrsApproval(CMMrsApproval request)
         {
             try
             {
@@ -404,14 +404,14 @@ namespace CMMSAPIs.Controllers.SM
         }
 
         //[Authorize]
-        [Route("CreateMRSIssue")]
+        [Route("MRSIssue")]
         [HttpPost]
-        public async Task<IActionResult> CreateMRSIssue(CMMRS request)
+        public async Task<IActionResult> MRSIssue(CMMRS request)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _MRSBS.CreateMRSIssue(request, userID);
+                var data = await _MRSBS.MRSIssue(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -502,5 +502,25 @@ namespace CMMSAPIs.Controllers.SM
                 return Ok(item);
             }
         }
+
+        [Route("getIssuedAssetItems")]
+        [HttpGet]
+        public async Task<IActionResult> getIssuedAssetItems(int asset_ID)
+        {
+            try
+            {
+                var data = await _MRSBS.getIssuedAssetItems(asset_ID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                _AddLog.ErrorLog(ex.ToString());
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid data sent.";
+                return Ok(item);
+            }
+        }
+
     }
-}
+}   
