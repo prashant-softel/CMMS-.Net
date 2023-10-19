@@ -126,13 +126,13 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
-        [Route("GetEmployeeStockTransactionReport")]
+        [Route("GetTransactionReport")]
         [HttpGet]
-        public async Task<IActionResult> GetEmployeeStockTransactionReport(int facility_ID, int emp_id)
+        public async Task<IActionResult> GetTransactionReport(string facility_ID, int actorType, int actorID, DateTime fromDate, DateTime toDate)
         {
             try
             {
-                var data = await _SMReportsBS.GetEmployeeStockTransactionReport(facility_ID, emp_id);
+                var data = await _SMReportsBS.GetTransactionReport(facility_ID, actorType, actorID, fromDate, toDate);
                 return Ok(data);
             }
             catch (Exception ex)
