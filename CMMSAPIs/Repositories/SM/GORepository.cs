@@ -302,7 +302,14 @@ namespace CMMSAPIs.Repositories
                 }
                 var result = await Context.ExecuteNonQry<int>(itemsQuery);
             }
-
+            if (request.is_submit == 0)
+            {
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_GO, request.id, 0, 0, request.remarks, CMMS.CMMS_Status.GO_DRAFT);
+            }
+            else
+            {
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_GO, request.id, 0, 0, request.remarks, CMMS.CMMS_Status.GO_SUBMITTED);
+            }
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Goods order updated successfully.");
             return response;
         }
@@ -1025,7 +1032,7 @@ namespace CMMSAPIs.Repositories
                 "       LEFT JOIN facilities fc ON fc.id = po.facilityID\r\nLEFT JOIN users as vendor on vendor.id=po.vendorID " +
                 "       LEFT JOIN business bl ON bl.id = po.vendorID left join smassettypes stt on stt.ID = pod.order_type LEFT JOIN currency curr ON curr.id = po.currency LEFT JOIN smpaidby as smpaidby on smpaidby.ID = pod.paid_by_ID " +
                 " LEFT JOIN smitemcategory sic ON sic.ID = sam.item_category_ID\r\n    LEFT JOIN smassettypes smat ON smat.ID = sam.asset_type_ID " +
-                " WHERE po.ID = " + id + " /*GROUP BY pod.ID*/";
+                " WHERE po.ID = " + id + " and pod.is_splited = 1 /*GROUP BY pod.ID*/";
             List<CMGoodsOrderList> _List = await Context.GetData<CMGoodsOrderList>(query).ConfigureAwait(false);
 
             CMGOMaster _MasterList = _List.Select(p => new CMGOMaster

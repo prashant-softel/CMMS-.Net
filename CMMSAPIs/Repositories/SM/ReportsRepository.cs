@@ -393,7 +393,7 @@ public async Task<List<CMEmployeeStockReport>> GetEmployeeStockReport(int facili
             return cMEmployeeStockList;
         }
 
-        internal async Task<List<CMEmployeeStockTransactionReport>> GetEmployeeStockTransactionReport(int facility_ID, int emp_id)
+        internal async Task<List<CMEmployeeStockTransactionReport>> GetTransactionReport(string facility_ID, int actorType, int actorID, DateTime fromDate, DateTime toDate)
         {
 
             List<CMEmployeeStockTransactionReport> EmployeeStockReportList = new List<CMEmployeeStockTransactionReport>();
@@ -413,10 +413,17 @@ public async Task<List<CMEmployeeStockReport>> GetEmployeeStockReport(int facili
                 " WHEN toActorType in (3,4) then (select CONCAT(firstName, ' ', lastName)   from users u where u.ID = ST.toActorID) End AS toActorName," +
                 " ST.assetItemID,am.asset_name as assetItemName, qty , FF.name as facilityName, remarks, lastInsetedDateTime as LastUpdated, " +
                 " CONCAT(C.firstName, ' ', C.lastName) CreatedBy, ST.createdAt " +
-                " from smtransactiondetails ST " +
+                " from smtransactiondetails ST  inner join smtransition smt on smt.transactionID = ST.ID" +
                 " inner join smassetmasters am on am.ID = ST.assetItemID left join facilities FF on FF.id = ST.plantID " +
                 " left join users C on C.id = ST.createdBy " +
-                " where (fromActorID = "+ emp_id + " or toActorID = "+ emp_id + ") and ST.plantID = "+facility_ID+" order by ST.id desc; ";
+                " where smt.actorType = "+actorType+ " and  smt.actorID = "+actorID+ "  and  date_format(smt.lastModifiedDate, '%Y-%m-%d')  BETWEEN '"+ fromDate.ToString("yyyy-MM-dd") + "' AND '"+ toDate.ToString("yyyy-MM-dd") + "' ";
+
+            if(facility_ID != "" && facility_ID != null)
+            {
+                Plant_Stock_Opening_Details_query = Plant_Stock_Opening_Details_query + " AND ST.plantID in (" + facility_ID + ")";
+            }
+
+            Plant_Stock_Opening_Details_query = Plant_Stock_Opening_Details_query + " group by St.id order by ST.id desc;";
 
             List<CMEmployeeStockTransactionReport> result = await Context.GetData<CMEmployeeStockTransactionReport>(Plant_Stock_Opening_Details_query).ConfigureAwait(false);
             return result;
