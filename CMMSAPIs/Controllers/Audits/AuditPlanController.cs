@@ -18,14 +18,31 @@ namespace CMMSAPIs.Controllers.Audits
             _AuditPlanBS = audit_plan;
         }
 
+
         //[Authorize]
         [Route("GetAuditPlanList")]
         [HttpGet]
-        public async Task<IActionResult> GetAuditPlanList(int facility_id)
+        public async Task<IActionResult> GetAuditPlanList(int facility_id, DateTime fromDate, DateTime toDate)
         {
             try
             {
-                var data = await _AuditPlanBS.GetAuditPlanList(facility_id);
+                var data = await _AuditPlanBS.GetAuditPlanList(facility_id, fromDate, toDate);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        //[Authorize]
+        [Route("GetAuditPlanByID")]
+        [HttpGet]
+        public async Task<IActionResult> GetAuditPlanByID(int id)
+        {
+            try
+            {
+                var data = await _AuditPlanBS.GetAuditPlanByID(id);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -36,7 +53,7 @@ namespace CMMSAPIs.Controllers.Audits
 
         //[Authorize]
         [Route("CreateAuditPlan")]
-        [HttpGet]
+        [HttpPost]
         public async Task<IActionResult> CreateAuditPlan(CMCreateAuditPlan request)
         {
             try
@@ -52,7 +69,7 @@ namespace CMMSAPIs.Controllers.Audits
 
         //[Authorize]
         [Route("UpdateAuditPlan")]
-        [HttpGet]
+        [HttpPost]
         public async Task<IActionResult> UpdateAuditPlan(CMCreateAuditPlan request)
         {
             try
@@ -68,8 +85,8 @@ namespace CMMSAPIs.Controllers.Audits
 
         //[Authorize]
         [Route("DeleteAuditPlan")]
-        [HttpGet]
-        public async Task<IActionResult> DeleteAuditPlan(int audit_plan_id)
+        [HttpPost]
+        public async Task<IActionResult> DeleteAuditPlan([FromForm] int audit_plan_id)
         {
             try
             {
