@@ -501,6 +501,13 @@ namespace CMMSAPIs.Helper
             EQUIP_SCHEDULED,
             EQUIP_CLEANED,
             EQUIP_ABANDONED,
+
+	    AUDIT_SCHEDULE = 421,
+            AUDIT_STARTED,
+            AUDIT_DELETED,
+            AUDIT_APPROVED,
+            AUDIT_REJECTED,
+            AUDIT_CLOSED
         }
 
         public enum ApprovalStatus
