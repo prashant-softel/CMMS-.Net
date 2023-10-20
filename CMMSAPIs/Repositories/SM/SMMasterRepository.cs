@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -18,6 +18,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.Diagnostics;
 using CMMSAPIs.Models.Jobs;
 using CMMSAPIs.Models.Notifications;
+using OfficeOpenXml;
+using System.IO;
 
 namespace CMMSAPIs.Repositories.SM
 {
@@ -436,6 +438,209 @@ namespace CMMSAPIs.Repositories.SM
             await Context.ExecuteNonQry<int>(mainQuery);
             CMDefaultResponse response = new CMDefaultResponse(request.ID, CMMS.RETRUNSTATUS.SUCCESS, "Paid by deleted.");
             return response;
+        }
+
+        internal async Task<CMImportFileResponse> ImportMaterialFile(int file_id, int facility_id, int userID)
+        {
+            CMImportFileResponse response = null;
+            DataTable dt2 = new DataTable();
+
+            string queryCat = "SELECT id, UPPER(name) as name FROM smunitmeasurement GROUP BY name ORDER BY id ASC;";
+            DataTable dtCat = await Context.FetchData(queryCat).ConfigureAwait(false);
+            List<string> catNames = dtCat.GetColumn<string>("name");
+            List<int> catIDs = dtCat.GetColumn<int>("id");
+            Dictionary<string, int> unitmeasurement = new Dictionary<string, int>();
+            unitmeasurement.Merge(catNames, catIDs);
+
+            string queryType = "SELECT id, UPPER(asset_type) as name FROM smassettypes GROUP BY name ORDER BY id ASC;";
+            DataTable dtType = await Context.FetchData(queryType).ConfigureAwait(false);
+            List<string> TypeNames = dtType.GetColumn<string>("name");
+            List<int> TypeIDs = dtType.GetColumn<int>("id");
+            Dictionary<string, int> assettypes = new Dictionary<string, int>();
+            assettypes.Merge(TypeNames, TypeIDs);
+
+            string queryCategory = "SELECT id, UPPER(cat_name) as name FROM smitemcategory GROUP BY name ORDER BY id ASC;";
+            DataTable dtCategory = await Context.FetchData(queryCategory).ConfigureAwait(false);
+            List<string> CategoryNames = dtCategory.GetColumn<string>("name");
+            List<int> CategoryIDs = dtCategory.GetColumn<int>("id");
+            Dictionary<string, int> itemcategory = new Dictionary<string, int>();
+            itemcategory.Merge(CategoryNames, CategoryIDs);
+
+
+            Dictionary<string, Tuple<string, Type>> columnNames = new Dictionary<string, Tuple<string, Type>>()
+            {
+                { "Material", new Tuple<string, Type>("name", typeof(string)) },
+                { "Material Description", new Tuple<string, Type>("description", typeof(string)) },
+                { "Plant", new Tuple<string, Type>("plantID", typeof(string)) },
+                { "Name 1", new Tuple<string, Type>("Name1", typeof(string)) },
+                { "Base Unit of Measure", new Tuple<string, Type>("unit_of_measurement", typeof(string)) },
+                { "Unrestricted", new Tuple<string, Type>("unrestricted", typeof(int)) },
+                { "Value Unrestricted", new Tuple<string, Type>("value_unrestricted", typeof(string)) },
+                { "Type", new Tuple<string, Type>("Type", typeof(string)) },
+                { "Category", new Tuple<string, Type>("Category", typeof(string)) },
+                { "ApprovalRequired", new Tuple<string, Type>("ApprovalRequired", typeof(int)) }
+
+            };
+
+            string query1 = $"SELECT file_path FROM uploadedfiles WHERE id = {file_id};";
+            DataTable dt1 = await Context.FetchData(query1).ConfigureAwait(false);
+            string path = Convert.ToString(dt1.Rows[0][0]);
+            string dir = Path.GetDirectoryName(path);
+            string filename = Path.GetFileName(path);
+            if (!Directory.Exists(dir))
+                return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"Directory '{dir}' cannot be found");
+            else if (!File.Exists(path))
+                return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"File '{filename}' cannot be found in directory '{dir}'");
+            else
+            {
+                FileInfo info = new FileInfo(path);
+                if (info.Extension == ".xlsx")
+                {
+                    ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                    var excel = new ExcelPackage(path);
+                    var sheet = excel.Workbook.Worksheets["Sheet1"];
+                    if (sheet == null)
+                    {
+                        return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, "Invalid sheet");
+                    }
+                    else
+                    {
+
+                        foreach (var header in sheet.Cells[1, 1, 1, sheet.Dimension.End.Column])
+                        {
+                            try
+                            {
+                                dt2.Columns.Add(columnNames[header.Text].Item1, columnNames[header.Text].Item2);
+                            }
+                            catch (KeyNotFoundException)
+                            {
+                                dt2.Columns.Add(header.Text);
+                            }
+                        }
+                        List<string> headers = dt2.GetColumnNames();
+                        foreach (var item in columnNames.Values)
+                        {
+                            if (!headers.Contains(item.Item1))
+                            {
+                                dt2.Columns.Add(item.Item1, item.Item2);
+                            }
+                        }
+
+                        dt2.Columns.Add("row_no", typeof(int));
+                        dt2.Columns.Add("TypeID", typeof(int));
+                        dt2.Columns.Add("CategoryID", typeof(int));
+                        for (int rN = 2; rN <= sheet.Dimension.End.Row; rN++)
+                        {
+
+                            ExcelRange row = sheet.Cells[rN, 1, rN, sheet.Dimension.End.Column];
+                            DataRow newR = dt2.NewRow();
+                            foreach (var cell in row)
+                            {
+                                try
+                                {
+                                    if (cell.Text == null || cell.Text == "")
+                                        continue;
+                                    newR[cell.Start.Column - 1] = Convert.ChangeType(cell.Text, dt2.Columns[cell.Start.Column - 1].DataType);
+                                }
+                                catch (Exception ex)
+                                {
+                                    ex.GetType();
+                                    //+ ex.ToString();
+                                    //status = status.Substring(0, (status.IndexOf("Exception") + 8));
+                                    // m_ErrorLog.SetError("," + status);
+                                }
+                            }
+                            if (newR.IsEmpty())
+                            {
+
+                                continue;
+                            }
+                            newR["name"] = newR[0];
+                            newR["description"] = newR[1];
+                            newR["plantID"] = newR[2];
+                            newR["Name1"] = newR[3];
+                            if (Convert.ToString(newR["description"]) == null || Convert.ToString(newR["description"]) == "")
+                            {
+                                return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] Material Description cannot be null.");
+                            }
+
+                            if (Convert.ToString(newR["plantID"]) == null || Convert.ToString(newR["plantID"]) == "")
+                            {
+                                return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] Plant cannot be null.");
+                            }
+
+                            try
+                            {
+                                newR["unit_of_measurement"] = unitmeasurement[Convert.ToString(newR[4]).ToUpper()];
+
+                            }
+                            catch (KeyNotFoundException)
+                            {
+
+                                return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] unit measurement named '{newR[4]}' does not exist.");
+                            }
+                            try
+                            {
+                                newR["TypeID"] = assettypes[Convert.ToString(newR[7]).ToUpper()];
+
+                            }
+                            catch (KeyNotFoundException)
+                            {
+
+                                return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] asset type '{newR[7]}' does not exist.");
+                            }
+                            try
+                            {
+                                newR["CategoryID"] = itemcategory[Convert.ToString(newR[8]).ToUpper()];
+
+                            }
+                            catch (KeyNotFoundException)
+                            {
+
+                                return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] asset category '{newR[8]}' does not exist.");
+                            }
+                            newR["unrestricted"] = newR[5];
+                            newR["value_unrestricted"] = newR[6];
+                            newR["row_no"] = rN;
+
+                         
+                          
+
+                            dt2.Rows.Add(newR);
+                        }
+                        string insertQuery = "INSERT INTO smassetmasters (plant_ID, asset_code, asset_name,description, " +
+                            "unit_of_measurement, flag, lastmodifieddate, asset_type_ID, item_category_ID, approval_required)";
+                        foreach (DataRow row in dt2.Rows)
+                        {
+                            insertQuery = insertQuery + $"Select {row.ItemArray[2]},'{row.ItemArray[0]}', '{row.ItemArray[1]}', '{row.ItemArray[1]}'," +
+                                $"{row.ItemArray[4]}, 1, '{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}', {row.ItemArray[11]},{row.ItemArray[12]},{row.ItemArray[9]} UNION ALL ";
+                        }
+                        int lastIndex = insertQuery.LastIndexOf("UNION ALL ");
+                        insertQuery = insertQuery.Remove(lastIndex, "UNION ALL ".Length);
+                        var insertedResult = await Context.ExecuteNonQry<int>(insertQuery).ConfigureAwait(false);
+                    }
+                }
+                else //
+                {
+                    return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, "File is not an excel file");
+
+                }
+            }
+            //string logPath = m_errorLog.SaveAsText($"ImportLog\\ImportMaterial_File{file_id}_{DateTime.UtcNow.ToString("yyyyMMdd_HHmmss")}");
+            //string logQry = $"UPDATE uploadedfiles SET logfile = '{logPath}' WHERE id = {file_id}";
+            //await Context.ExecuteNonQry<int>(logQry).ConfigureAwait(false);
+            //logPath = logPath.Replace("\\\\", "\\");
+            //if (response == null)
+            //    response = new CMImportFileResponse(0, CMMS.RETRUNSTATUS.FAILURE, logPath, null, "Errors found while importing file.");
+            //else
+            //{
+
+            //   response.error_log_file_path = null;
+            //   response.import_log = null;
+            //}
+
+            return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.SUCCESS, null, null, "File imported successfully."); 
+            //return response;*/
         }
     }
 }
