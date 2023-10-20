@@ -10,7 +10,8 @@ namespace CMMSAPIs.BS.Audits
 {
     public interface IAuditPlanBS
     {
-        Task<List<CMAuditPlan>> GetAuditPlanList(int facility_id);
+        Task<List<CMAuditPlanList>> GetAuditPlanList(int facility_id, DateTime fromDate, DateTime toDate);
+        Task<CMAuditPlanList> GetAuditPlanByID(int id);
         Task<CMDefaultResponse> CreateAuditPlan(CMCreateAuditPlan request);
         Task<CMDefaultResponse> UpdateAuditPlan(CMCreateAuditPlan request);
         Task<CMDefaultResponse> DeleteAuditPlan(int audit_plan_id);
@@ -24,13 +25,29 @@ namespace CMMSAPIs.BS.Audits
             databaseProvider = dbProvider;
         }
 
-        public async Task<List<CMAuditPlan>> GetAuditPlanList(int facility_id)
+        public async Task<List<CMAuditPlanList>> GetAuditPlanList(int facility_id, DateTime fromDate, DateTime toDate)
         {
             try
             {
                 using (var repos = new AuditPlanRepository(getDB))
                 {
-                    return await repos.GetAuditPlanList(facility_id);
+                    return await repos.GetAuditPlanList(facility_id, fromDate, toDate);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMAuditPlanList> GetAuditPlanByID(int id)
+        {
+            try
+            {
+                using (var repos = new AuditPlanRepository(getDB))
+                {
+                    return await repos.GetAuditPlanByID(id);
 
                 }
             }
