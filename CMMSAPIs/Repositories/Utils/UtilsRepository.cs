@@ -177,6 +177,15 @@ namespace CMMSAPIs.Repositories.Utils
                 case 15:
                     return source.AddMonths(2);
 
+                case 16:
+                    return source.AddDays(10); 
+
+                case 17:
+                    return source.AddDays(20);
+
+                case 18:
+                    return source.AddDays(45);
+
                 default:
                     return source;
             }
