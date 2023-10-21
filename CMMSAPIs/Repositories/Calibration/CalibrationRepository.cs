@@ -328,7 +328,7 @@ namespace CMMSAPIs.Repositories.Calibration
             */
             DateTime start_date = DateTime.Parse(UtilsRepository.GetUTCTime());
             string myQuery = $"UPDATE calibration SET status = {(int)CMMS.CMMS_Status.CALIBRATION_STARTED}, " +
-                                $"status_updated_at = {UtilsRepository.GetUTCTime()}, " +
+                                $"status_updated_at = '{UtilsRepository.GetUTCTime()}', " +
                                 $"start_date = '{start_date.ToString("yyyy'-'MM'-'dd")}' " +
                                 $"WHERE id = {calibration_id} AND status = {(int)CMMS.CMMS_Status.CALIBRATION_REQUEST_APPROVED};";
             int retVal = await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
@@ -437,10 +437,10 @@ namespace CMMSAPIs.Repositories.Calibration
                                 $"WHERE id = {nextRequest[0].asset_id};";
             DataTable dt = await Context.FetchData(myQuery2).ConfigureAwait(false);
             int frequencyId = Convert.ToInt32(dt.Rows[0][0]);
-            string myQuery3 = $"UPDATE assets SET vendorId = {nextRequest[0].vendor_id}, calibrationLastDate = '{nextRequest[0].next_calibration_date.ToString("yyyy-MM-dd HH:mm:ss")}' WHERE id = {nextRequest[0].asset_id};";
-            await Context.ExecuteNonQry<int>(myQuery3).ConfigureAwait(false);
             DateTime nextDate = UtilsRepository.Reschedule(nextRequest[0].next_calibration_date, frequencyId);
+            string myQuery3 = $"UPDATE assets SET vendorId = {nextRequest[0].vendor_id}, calibrationDueDate = '{nextDate.ToString("yyyy-MM-dd HH:mm:ss")}', calibrationLastDate = '{nextRequest[0].next_calibration_date.ToString("yyyy-MM-dd HH:mm:ss")}' WHERE id = {nextRequest[0].asset_id};";
             nextRequest[0].next_calibration_date = nextDate;
+            await Context.ExecuteNonQry<int>(myQuery3).ConfigureAwait(false);
             string myQuery4 = $"UPDATE calibration SET approved_by = {userID}, approved_at = '{UtilsRepository.GetUTCTime()}', " +
                                 $"approve_remark = '{request.comment}', status = {(int)CMMS.CMMS_Status.CALIBRATION_APPROVED}, " +
                                 $"status_updated_at = '{UtilsRepository.GetUTCTime()}' " +

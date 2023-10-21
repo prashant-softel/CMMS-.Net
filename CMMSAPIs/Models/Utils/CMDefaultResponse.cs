@@ -38,6 +38,11 @@ namespace CMMSAPIs.Models.Utils
     {
         public string error_log_file_path { get; set; }
         public IEnumerable<string> import_log { get; set; }
+
+        public CMImportFileResponse()
+        {
+
+        }
         public CMImportFileResponse(int id, CMMS.RETRUNSTATUS return_status, string error_log_file_path, IEnumerable<string> import_log, string message) : base(id, return_status, message)
         {
             this.error_log_file_path = error_log_file_path;
@@ -52,6 +57,10 @@ namespace CMMSAPIs.Models.Utils
     public class CMEscalationResponse : CMDefaultResponse
     {
         public CMMS.CMMS_Modules module { get; set; }
+        public CMEscalationResponse()
+        {
+
+        }
         public CMEscalationResponse(CMMS.CMMS_Modules module, int id, CMMS.RETRUNSTATUS return_status, string message) : base(id, return_status, message)
         {
             this.module = module;
@@ -64,6 +73,10 @@ namespace CMMSAPIs.Models.Utils
     public class CMRescheduleApprovalResponse : CMDefaultResponse
     {
         public List<int> new_id { get; set; }
+        public CMRescheduleApprovalResponse()
+        {
+
+        }
         public CMRescheduleApprovalResponse(int new_id, int id, CMMS.RETRUNSTATUS return_status, string message) : base(id, return_status, message)
         {
             this.new_id = new List<int>() { new_id };

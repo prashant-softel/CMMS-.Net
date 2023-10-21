@@ -166,9 +166,9 @@ namespace CMMSAPIs.Repositories.EM
             }
             moduleCase += "ELSE 'Invalid' END";
             string myQuery = $"SELECT moduleId as module_id, {moduleCase} as module_name, moduleStatus as status_id, " +
-                                $"{statusCase} as status_name, moduleRefId as module_ref_id, escalatedAt as escalation_time, " +
+                                $"{statusCase} as status_name, moduleRefId as module_ref_id, notifSentAt as escalation_time, " +
                                 $"role.id as escalated_to_role_id, role.name as escalated_to_role_name " +
-                                $"FROM escalationlog as log LEFT JOIN userroles as role ON log.escalatedToRoleId = role.id " +
+                                $"FROM escalationlog as log LEFT JOIN userroles as role ON log.notifSentToId = role.id " +
                                 $"WHERE moduleId = {(int)module} AND moduleRefId = {module_ref_id}";
             List<CMEscalationLog> log = await Context.GetData<CMEscalationLog>(myQuery).ConfigureAwait(false);
             return log;
