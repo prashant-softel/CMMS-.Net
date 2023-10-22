@@ -1284,7 +1284,7 @@ namespace CMMSAPIs.Repositories.SM
                 + " LEFT JOIN smassetmasterfiles file ON file.Asset_master_id = sm.ID"
                 + " LEFT JOIN smitemcategory sic ON sic.ID = sm.item_category_ID"
                 + " LEFT JOIN smunitmeasurement f_sum ON f_sum.ID = sm.unit_of_measurement"
-                + " WHERE sat.facility_ID = " + facility_ID + " AND sat.ID IN(" + spareAssetIdsString + ") sm.asset_type_ID is not null";
+                + " WHERE sat.facility_ID = " + facility_ID + " AND sat.ID IN(" + spareAssetIdsString + ") and sm.asset_type_ID is not null";
             }
 
             //echo $stmt;
