@@ -256,8 +256,8 @@ namespace CMMSAPIs.Repositories
                         is_splited = 1;
                     }
 
-                    string poDetailsQuery = $"INSERT INTO smgoodsorderdetails (purchaseID,assetItemID,cost,ordered_qty,location_ID, paid_by_ID, requested_qty,sr_no,spare_status,is_splited) " +
-                    "values(" + goid + ", " + request.go_items[i].assetMasterItemID + ",  " + request.go_items[i].cost + ", " + request.go_items[i].ordered_qty + ", " + request.location_ID + ", " + request.go_items[i].paid_by_ID +", " + request.go_items[i].requested_qty +", '" + request.go_items[i].sr_no +"', "+ assetTypeId + ", "+ is_splited + ") ; SELECT LAST_INSERT_ID();";
+                    string poDetailsQuery = $"INSERT INTO smgoodsorderdetails (purchaseID,assetItemID,cost,ordered_qty,location_ID, paid_by_ID, requested_qty,sr_no,spare_status,is_splited, requestOrderId, requestOrderItemID) " +
+                    "values(" + goid + ", " + request.go_items[i].assetMasterItemID + ",  " + request.go_items[i].cost + ", " + request.go_items[i].ordered_qty + ", " + request.location_ID + ", " + request.go_items[i].paid_by_ID +", " + request.go_items[i].requested_qty +", '" + request.go_items[i].sr_no +"', "+ assetTypeId + ", 1, " + request.go_items[i].requestOrderId + ","+ request.go_items[i].requestOrderItemID + ") ; SELECT LAST_INSERT_ID();";
                     DataTable dtInsertPO = await Context.FetchData(poDetailsQuery).ConfigureAwait(false);
                     int id = Convert.ToInt32(dtInsertPO.Rows[0][0]);
                 }
@@ -276,7 +276,9 @@ namespace CMMSAPIs.Repositories
                         $"challan_no = '{request.challan_no}',po_no='{request.po_no}', freight='{request.freight}',no_pkg_received='{request.no_pkg_received}'," +
                         $"lr_no='{request.lr_no}',condition_pkg_received='{request.condition_pkg_received}',vehicle_no='{request.vehicle_no}', gir_no='{request.gir_no}', " +
                         $"challan_date = '{request.challan_date.Value.ToString("yyyy-MM-dd")}', " +
-                        $"job_ref='{request.job_ref}',amount='{request.amount}', currency={request.currencyID},updated_by = {userID},updatedOn = '{UtilsRepository.GetUTCTime()}', status = {(int)CMMS.CMMS_Status.GO_DRAFT}, received_on = '{request.receivedAt.ToString("yyyy-MM-dd HH:mm:ss")}', po_date = '{request.po_date.Value.ToString("yyyy-MM-dd HH:mm:ss")}', purchaseDate= '{request.purchaseDate.Value.ToString("yyyy-MM-dd HH:mm:ss")}' where ID={request.id}";
+                        $"job_ref='{request.job_ref}',amount='{request.amount}', currency={request.currencyID},updated_by = {userID},updatedOn = '{UtilsRepository.GetUTCTime()}', status = {(int)CMMS.CMMS_Status.GO_DRAFT}," +
+                        $" received_on = '{request.receivedAt.ToString("yyyy-MM-dd HH:mm:ss")}', po_date = '{request.po_date.Value.ToString("yyyy-MM-dd HH:mm:ss")}', purchaseDate= '{request.purchaseDate.Value.ToString("yyyy-MM-dd HH:mm:ss")}'" +
+                        $"  where ID={request.id}";
             }
             else
             {
@@ -294,7 +296,7 @@ namespace CMMSAPIs.Repositories
                 if (request.go_items[i].ordered_qty > 0)
                 {
                     itemsQuery = $"UPDATE smgoodsorderdetails SET location_ID = {request.location_ID},cost = {request.go_items[i].cost}, accepted_qty = {request.go_items[i].accepted_qty},ordered_qty = {request.go_items[i].ordered_qty} , requested_qty = {request.go_items[i].requested_qty}, received_qty= {request.go_items[i].received_qty},lost_qty = {request.go_items[i].lost_qty}, damaged_qty={request.go_items[i].damaged_qty}, paid_by_ID = {request.go_items[i].paid_by_ID}" +
-                        $" , sr_no = '{request.go_items[i].sr_no}' WHERE ID = {request.go_items[i].goItemID}";
+                        $" , sr_no = '{request.go_items[i].sr_no}', requestOrderId= {request.go_items[i].requestOrderId}, requestOrderItemID = {request.go_items[i].requestOrderItemID}  WHERE ID = {request.go_items[i].goItemID}";
                 }
                 else
                 {
@@ -673,8 +675,8 @@ namespace CMMSAPIs.Repositories
                 if (dt2.Rows.Count > 0)
                 {
                     transaction_ID = Convert.ToInt32(dt2.Rows[0][0]);
-                    int debitTransactionID = await DebitTransation(transaction_ID, fromActorID, fromActorType, qty, assetItemID, mrsID, facilityID);
-                    int creditTransactionID = await CreditTransation(transaction_ID, toActorID, toActorType, qty, assetItemID, mrsID, facilityID);
+                    int debitTransactionID = await DebitTransation(transaction_ID, fromActorID, fromActorType, qty, assetItemID, refID, facilityID);
+                    int creditTransactionID = await CreditTransation(transaction_ID, toActorID, toActorType, qty, assetItemID, refID, facilityID);
                     bool isValid = await VerifyTransactionDetails(transaction_ID, debitTransactionID, creditTransactionID, facilityID, fromActorID, fromActorType, toActorID, toActorType, assetItemID, qty, refType, refID, remarks, mrsID);
                     if (isValid)
                     {
@@ -723,7 +725,7 @@ namespace CMMSAPIs.Repositories
 
         private async Task<int> DebitTransation(int transactionID, int actorID, int  actorType, double debitQty, int assetItemID, int mrsID, int facilityID)
         {
-            string stmt = $"INSERT INTO smtransition (transactionID, actorType, actorID, debitQty, assetItemID, mrsID, facilityID) VALUES ({transactionID}, '{actorType}', {actorID}, {debitQty}, {assetItemID}, {mrsID}, {facilityID}); SELECT LAST_INSERT_ID();";
+            string stmt = $"INSERT INTO smtransition (transactionID, actorType, actorID, debitQty, assetItemID, goID, facilityID) VALUES ({transactionID}, '{actorType}', {actorID}, {debitQty}, {assetItemID}, {mrsID}, {facilityID}); SELECT LAST_INSERT_ID();";
             DataTable dt2 = await Context.FetchData(stmt).ConfigureAwait(false);
             int id = Convert.ToInt32(dt2.Rows[0][0]);
             return id;
@@ -731,7 +733,7 @@ namespace CMMSAPIs.Repositories
 
         private async Task<int> CreditTransation(int transactionID, int actorID, int actorType, double qty, int assetItemID, int mrsID, int facilityID)
         {
-            string query = $"INSERT INTO smtransition (transactionID,actorType,actorID,creditQty,assetItemID,mrsID, facilityID) VALUES ({transactionID},'{actorType}',{actorID},{qty},{assetItemID},{mrsID}, {facilityID}) ; SELECT LAST_INSERT_ID();";
+            string query = $"INSERT INTO smtransition (transactionID,actorType,actorID,creditQty,assetItemID,goID, facilityID) VALUES ({transactionID},'{actorType}',{actorID},{qty},{assetItemID},{mrsID}, {facilityID}) ; SELECT LAST_INSERT_ID();";
             DataTable dt2 = await Context.FetchData(query).ConfigureAwait(false);
             int id = Convert.ToInt32(dt2.Rows[0][0]);
             return id;
@@ -1089,7 +1091,8 @@ namespace CMMSAPIs.Repositories
                     cat_name = p.cat_name,
                     asset_type = p.asset_type,
                     is_splited = p.is_splited,
-
+                    requestOrderId = p.requestOrderId,
+                    requestOrderItemID= p.requestOrderItemID
 
                 }).ToList();
                 _MasterList.GODetails = _itemList;
