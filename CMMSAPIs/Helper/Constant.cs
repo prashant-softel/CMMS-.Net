@@ -502,7 +502,7 @@ namespace CMMSAPIs.Helper
             EQUIP_CLEANED,
             EQUIP_ABANDONED,
 
-	    AUDIT_SCHEDULE = 421,
+            AUDIT_SCHEDULE = 421,
             AUDIT_STARTED,
             AUDIT_DELETED,
             AUDIT_APPROVED,
@@ -529,24 +529,23 @@ namespace CMMSAPIs.Helper
             SM_OPERATOR
 
         }
+
         public enum cleaningType
         {
             ModuleCleaning = 1,
             Vegetation
         }
 
-
         public enum SM_Actor_Types
-    {
-        Vendor = 1, 
-        Store,
-        PM_Task,
-        JobCard,
-        Engineer,
-        Inventory,
-        Scrap
-        
-    }
+        {
+            Vendor = 1, 
+            Store,
+            PM_Task,
+            JobCard,
+            Engineer,
+            Inventory,
+            NonOperational        
+        }
         public enum SM_AssetTypes
         {
             Consumable = 1,
@@ -554,5 +553,14 @@ namespace CMMSAPIs.Helper
             Tools,
             SpecialTools
         }
+
+        public enum SM_NonOperationalTypes
+        {
+            ForRepair = 1,
+            Damaged,
+            Retired,
+            Scrap
+        }
+
     }
 }
