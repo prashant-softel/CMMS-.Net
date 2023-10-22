@@ -10,7 +10,7 @@ namespace CMMSAPIs.BS.Facility
 {
     public interface IFacilityBS
     {
-        Task<List<CMFacilityList>> GetFacilityList();
+        Task<List<CMFacilityList>> GetFacilityList(int userID);
         Task<List<CMFacilityList>> GetBlockList(int parent_id);
         Task<CMFacilityDetails> GetFacilityDetails(int id);
         Task<CMDefaultResponse> CreateNewFacility(CMCreateFacility request, int userID);
@@ -30,13 +30,13 @@ namespace CMMSAPIs.BS.Facility
             databaseProvider = dbProvider;
         }
 
-        public async Task<List<CMFacilityList>> GetFacilityList()
+        public async Task<List<CMFacilityList>> GetFacilityList(int userID)
         {
             try
             {
                 using (var repos = new FacilityRepository(getDB))
                 {
-                    return await repos.GetFacilityList();
+                    return await repos.GetFacilityList(userID);
                 }
             }
             catch (Exception)
