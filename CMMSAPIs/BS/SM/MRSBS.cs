@@ -23,6 +23,7 @@ namespace CMMSAPIs.BS.SM
         Task<CMMRSList> getReturnDataByID(int ID);        
         Task<CMMRSAssetTypeList> getAssetTypeByItemID(int ItemID);
         Task<CMDefaultResponse> ReturnMRS(CMMRS request, int UserID);        
+        Task<CMDefaultResponse> UpdateReturnMRS(CMMRS request, int UserID);        
         Task<CMDefaultResponse> mrsApproval(CMMrsApproval request, int userId);        
         Task<CMDefaultResponse> mrsReject(CMApproval request, int userId);        
         Task<CMDefaultResponse> ApproveMRSReturn(CMApproval request, int UserID);
@@ -208,7 +209,21 @@ namespace CMMSAPIs.BS.SM
                 throw;
             }
         }
-        
+
+        public async Task<CMDefaultResponse> UpdateReturnMRS(CMMRS request, int UserID)
+        {
+            try
+            {
+                using (var repos = new MRSRepository(getDB))
+                {
+                    return await repos.UpdateReturnMRS(request, UserID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
         public async Task<CMDefaultResponse> mrsApproval(CMMrsApproval request, int userId)
         {
             try
