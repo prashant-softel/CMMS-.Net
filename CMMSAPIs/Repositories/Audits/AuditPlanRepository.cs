@@ -71,7 +71,7 @@ namespace CMMSAPIs.Repositories.Audits
         {
             CMDefaultResponse response = null;
             int InsertedValue = 0;
-            string SelectQ = "select * from st_audit where plan_number = '" + request.plan_number + "'";
+            string SelectQ = "select id from st_audit where plan_number = '" + request.plan_number + "'";
             List<CMCreateAuditPlan> auditPlanList = await Context.GetData<CMCreateAuditPlan>(SelectQ).ConfigureAwait(false);
 
             if (auditPlanList != null && auditPlanList.Count > 0)
