@@ -29,7 +29,8 @@ namespace CMMSAPIs.Controllers.Facility
         {
             try
             {
-                var data = await _FacilityBS.GetFacilityList();
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _FacilityBS.GetFacilityList(userID);
                 return Ok(data);
             }
             catch (Exception)
