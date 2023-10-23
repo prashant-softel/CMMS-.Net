@@ -235,7 +235,7 @@ namespace CMMSAPIs.Repositories.SM
             }
             else
             {
-                string insertQuery = @"INSERT INTO smassetmasters (facility_ID,asset_code, asset_name, description, asset_type_ID, item_category_ID, unit_of_measurement, approval_required, flag) " +
+                string insertQuery = @"INSERT INTO smassetmasters (plant_ID,asset_code, asset_name, description, asset_type_ID, item_category_ID, unit_of_measurement, approval_required, flag) " +
                     "VALUES (0,'" +request.asset_code+"', '"+request.asset_name+"', '"+request.asset_description + "', "+request.asset_type_ID+", "+request.item_category_ID + ", "+request.unit_measurement_ID + ", "+ request.approval_required_ID + ", 1); SELECT LAST_INSERT_ID()";
 
                 DataTable dt2 = await Context.FetchData(insertQuery).ConfigureAwait(false);
