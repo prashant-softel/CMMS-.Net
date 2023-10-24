@@ -17,16 +17,31 @@ namespace CMMSAPIs.BS.MISMasters
         Task<CMDefaultResponse> AddSourceOfObservation(MISSourceOfObservation request, int userId);
         Task<CMDefaultResponse> UpdateSourceOfObservation(MISSourceOfObservation request, int userId);
         Task<CMDefaultResponse> DeleteSourceOfObservation(int id, int userId);
-        Task<MISTypeObservation> GetTypeOfObservation(int type_id);
+        Task<MISTypeObservation> GetTypeOfObservation(int id);
         Task<List<MISTypeObservation>> GetTypeOfObservationList();
         Task<CMDefaultResponse> AddTypeOfObservation(MISTypeObservation request, int userId);
         Task<CMDefaultResponse> UpdateTypeOfObservation(MISTypeObservation request, int userId);
         Task<CMDefaultResponse> DeleteTypeOfObservation(int id, int userId);
+        Task<MISGrievanceType> GetGrievanceType(int id);
+        Task<List<MISGrievanceType>> GetGrievanceTypeList();
+        Task<CMDefaultResponse> AddGrievanceType(MISGrievanceType request, int userId);
+        Task<CMDefaultResponse> UpdateGrievanceType(MISGrievanceType request, int userId);
+        Task<CMDefaultResponse> DeleteGrievanceType(int id, int userId);
+        Task<MISResolutionLevel> GetResolutionLevel(int id);
+        Task<List<MISResolutionLevel>> GetResolutionLevelList();
+        Task<CMDefaultResponse> AddResolutionLevel(MISResolutionLevel request, int userId);
+        Task<CMDefaultResponse> UpdateResolutionLevel(MISResolutionLevel request, int userId);
+        Task<CMDefaultResponse> DeleteResolutionLevel(int id, int userId);
         Task<MISRiskType> GetRiskType(int risk_id);
         Task<List<MISRiskType>> GetRiskTypeList();
         Task<CMDefaultResponse> CreateRiskType(MISRiskType request, int userId);
         Task<CMDefaultResponse> UpdateRiskType(MISRiskType request, int userId);
         Task<CMDefaultResponse> DeleteRiskType(int id, int userId);
+        Task<MISCostType> GetCostType(int risk_id);
+        Task<List<MISCostType>> GetCostTypeList();
+        Task<CMDefaultResponse> CreateCostType(MISCostType request, int userId);
+        Task<CMDefaultResponse> UpdateCostType(MISCostType request, int userId);
+        Task<CMDefaultResponse> DeleteCostType(int id, int userId);
     }
     public class MISMasterBS : IMISMasterBS
     {
@@ -203,6 +218,166 @@ namespace CMMSAPIs.BS.MISMasters
 
         #endregion  //type of observation
 
+        #region Resolution level
+        public async Task<MISResolutionLevel> GetResolutionLevel(int id)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.GetResolutionLevel(id);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<MISResolutionLevel>> GetResolutionLevelList()
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.GetResolutionLevelList();
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<CMDefaultResponse> AddResolutionLevel(MISResolutionLevel request, int userId)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.AddResolutionLevel(request, userId);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> UpdateResolutionLevel(MISResolutionLevel request, int userId)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.UpdateResolutionLevel(request, userId);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> DeleteResolutionLevel(int id, int userId)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.DeleteResolutionLevel(id, userId);
+                }
+            }
+            catch (Exception ex)
+            {  
+                throw;
+            }
+        }
+
+        #endregion  //Resolution leve
+
+        #region GrievanceType
+        public async Task<MISGrievanceType> GetGrievanceType(int id)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.GetGrievanceType(id);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<MISGrievanceType>> GetGrievanceTypeList()
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.GetGrievanceTypeList();
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<CMDefaultResponse> AddGrievanceType(MISGrievanceType request, int userId)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.AddGrievanceType(request, userId);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> UpdateGrievanceType(MISGrievanceType request, int userId)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.UpdateGrievanceType(request, userId);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> DeleteGrievanceType(int id, int userId)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.DeleteGrievanceType(id, userId);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        #endregion  //grievance type
+
 
         #region risk type
         public async Task<MISRiskType> GetRiskType(int risk_id)
@@ -282,7 +457,83 @@ namespace CMMSAPIs.BS.MISMasters
             }
         }
 
-      
+
+        public async Task<MISCostType> GetCostType(int cost_id)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.GetCostType(cost_id);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<List<MISCostType>> GetCostTypeList()
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.GetCostTypeList();
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> CreateCostType(MISCostType request, int userId)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.CreateCostType(request, userId);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> UpdateCostType(MISCostType request, int userId)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.UpdateCostType(request, userId);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> DeleteCostType(int id, int userId)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.DeleteCostType(id, userId);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
 
         #endregion //risk type 
 

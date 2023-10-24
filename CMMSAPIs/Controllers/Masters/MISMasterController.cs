@@ -194,6 +194,175 @@ namespace CMMSAPIs.Controllers.Masters
             }
         }
 
+        /***********************************************************************************************************************************/
+        /***********************************************************************************************************************************/
+        /************************************************* GrievanceType *************************************************************/
+        /***********************************************************************************************************************************/
+        /***********************************************************************************************************************************/
+
+        [Route("GetGrievanceType")]
+        [HttpGet]
+        public async Task<IActionResult> GetGrievanceType(int id)
+        {
+            try
+            {
+                var data = await _IMISMasterBS.GetGrievanceType(id);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        [Route("GetGrievanceTypeList")]
+        [HttpGet]
+        public async Task<IActionResult> GetGrievanceTypeList()
+        {
+            try
+            {
+                var data = await _IMISMasterBS.GetGrievanceTypeList();
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
+        //[Authorize]
+        [Route("AddGrievanceType")]
+        [HttpPost]
+        public async Task<IActionResult> AddGrievanceType(MISGrievanceType request, int userId)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.AddGrievanceType(request, userId);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        //[Authorize]
+        [Route("UpdateGrievanceType")]
+        [HttpPatch]
+        public async Task<IActionResult> UpdateGrievanceType(MISGrievanceType request, int userId)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.UpdateGrievanceType(request, userId);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        //[Authorize]
+        [Route("DeleteGrievanceType")]
+        [HttpDelete]
+        public async Task<IActionResult> DeleteGrievanceType(int id, int userId)
+        {
+            try
+            {
+                var data = await _IMISMasterBS.DeleteGrievanceType(id, userId);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        /***********************************************************************************************************************************/
+        /***********************************************************************************************************************************/
+        /************************************************* ResolutionLevel *************************************************************/
+        /***********************************************************************************************************************************/
+        /***********************************************************************************************************************************/
+
+        [Route("GetResolutionLevel")]
+        [HttpGet]
+        public async Task<IActionResult> GetResolutionLevel(int id)
+        {
+            try
+            {
+                var data = await _IMISMasterBS.GetResolutionLevel(id);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        [Route("GetResolutionLevelList")]
+        [HttpGet]
+        public async Task<IActionResult> GetResolutionLevelList()
+        {
+            try
+            {
+                var data = await _IMISMasterBS.GetResolutionLevelList();
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
+        //[Authorize]
+        [Route("AddResolutionLevel")]
+        [HttpPost]
+        public async Task<IActionResult> AddResolutionLevel(MISResolutionLevel request, int userId)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.AddResolutionLevel(request, userId);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        //[Authorize]
+        [Route("UpdateResolutionLevel")]
+        [HttpPatch]
+        public async Task<IActionResult> UpdateResolutionLevel(MISResolutionLevel request, int userId)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.UpdateResolutionLevel(request, userId);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        //[Authorize]
+        [Route("DeleteResolutionLevel")]
+        [HttpDelete]
+        public async Task<IActionResult> DeleteResolutionLevel(int id, int userId)
+        {
+            try
+            {
+                var data = await _IMISMasterBS.DeleteResolutionLevel(id, userId);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
 
         /***********************************************************************************************************************************/
         /***********************************************************************************************************************************/
@@ -282,9 +451,95 @@ namespace CMMSAPIs.Controllers.Masters
                 throw;
             }
         }
-       
 
-        
+
+        /***********************************************************************************************************************************/
+        /***********************************************************************************************************************************/
+        /************************************************* COST TYPE *************************************************************/
+        /***********************************************************************************************************************************/
+        /***********************************************************************************************************************************/
+        [Route("GetCostType")]
+        [HttpGet]
+        public async Task<IActionResult> GetCostType(int cost_id)
+        {
+            try
+            {
+                var data = await _IMISMasterBS.GetCostType(cost_id);
+                return Ok(data);
+
+            }
+            catch (Exception ex)
+            {
+
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [Route("GetCostTypeList")]
+        [HttpGet]
+        public async Task<IActionResult> GetCostTypeList()
+        {
+            try
+            {
+                var data = await _IMISMasterBS.GetCostTypeList();
+                return Ok(data);
+
+            }
+            catch (Exception ex)
+            {
+
+                return BadRequest(ex.Message);
+            }
+        }
+
+        //[Authorize]
+        [Route("CreateCostType")]
+        [HttpPost]
+        public async Task<IActionResult> CreateCostType(MISCostType request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.CreateCostType(request, userID);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        //[Authorize]
+        [Route("UpdateCostType")]
+        [HttpPatch]
+        public async Task<IActionResult> UpdateCostType(MISCostType request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.UpdateCostType(request, userID);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        //[Authorize]
+        [Route("DeleteCostType")]
+        [HttpDelete]
+        public async Task<IActionResult> DeleteCostType(int id)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.DeleteCostType(id, userID);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
         #endregion //helper functions
 
         /*
