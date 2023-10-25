@@ -1020,7 +1020,7 @@ namespace CMMSAPIs.Repositories
                 "added_to_store,   \r\n      " +
                 "  po.challan_no, po.po_no, po.freight, po.transport, po.no_pkg_received, po.lr_no, po.condition_pkg_received, " +
                 "po.vehicle_no, po.gir_no, po.challan_date, po.job_ref, po.amount,  po.currency as currencyID , curr.name as currency , stt.asset_type as asset_type_Name,  po_no, po_date, requested_qty,lost_qty, ordered_qty\r\n    ,paid_by_ID, smpaidby.paid_by paid_by_name , po.received_on as receivedAt,sam.asset_type_ID,sam.asset_code,sam.asset_name" +
-                " , sic.cat_name,smat.asset_type, pod.is_splited FROM smgoodsorderdetails pod\r\n        LEFT JOIN smgoodsorder po ON po.ID = pod.purchaseID\r\n     " +
+                " , sic.cat_name,smat.asset_type, pod.is_splited, pod.sr_no FROM smgoodsorderdetails pod\r\n        LEFT JOIN smgoodsorder po ON po.ID = pod.purchaseID\r\n     " +
                 "   LEFT JOIN smassetitems sai ON sai.ID = pod.assetItemID\r\n       " +
                 " LEFT JOIN smassetmasters sam ON  sam.ID = pod.assetItemID\r\n      " +
                 "  LEFT JOIN smunitmeasurement sm ON sm.ID = sam.unit_of_measurement\r\n    " +
@@ -1063,7 +1063,8 @@ namespace CMMSAPIs.Repositories
                 challan_date = p.challan_date,
                 challan_no = p.challan_no,
                 purchaseDate = p.purchaseDate,
-                location_ID = p.location_ID,
+                location_ID = p.location_ID
+          
 
             }).FirstOrDefault();
             if (_List.Count > 0)
@@ -1092,8 +1093,8 @@ namespace CMMSAPIs.Repositories
                     asset_type = p.asset_type,
                     is_splited = p.is_splited,
                     requestOrderId = p.requestOrderId,
-                    requestOrderItemID= p.requestOrderItemID
-
+                    requestOrderItemID= p.requestOrderItemID,
+                    sr_no = p.sr_no
                 }).ToList();
                 _MasterList.GODetails = _itemList;
 
