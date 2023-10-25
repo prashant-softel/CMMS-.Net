@@ -1,4 +1,6 @@
-﻿namespace CMMSAPIs.Models.Audit
+﻿using System;
+
+namespace CMMSAPIs.Models.Audit
 {
     public class CMAuditPlan
     {
@@ -10,7 +12,10 @@
         public int auditor_id { get; set; }
         public int Status { get; set; }
         public int ApplyFrequency { get; set; }
+        public int Checklist_id { get; set; }
         public string auditor_name { get; set; }
+        public string Description { get; set; }
+        public DateTime Schedule_Date { get; set; }
     }
 
     public class CMCreateAuditPlan : CMAuditPlan
@@ -29,6 +34,8 @@
         public int status { get; set; }
         public string short_status { get; set; }
         public string FrequencyApplicable { get; set; }
-
+        public int Checklist_id { get; set; }
+        public string Description { get; set; }
+        public DateTime Schedule_Date { get; set; }
     }
 }
