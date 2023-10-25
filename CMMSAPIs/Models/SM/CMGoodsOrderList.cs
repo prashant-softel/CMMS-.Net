@@ -72,6 +72,7 @@ namespace CMMSAPIs.Models
         public int is_splited { get; set; }
         public int requestOrderId { get; set; }
         public int requestOrderItemID { get; set; }
+        public string sr_no { get; set; }
         public List<CMGO_ITEMS> go_items { get; set; }
     }
     public class CMGO_ITEMS
@@ -259,6 +260,7 @@ namespace CMMSAPIs.Models
         public int is_splited { get; set; }
         public int requestOrderId { get; set; }
         public int requestOrderItemID { get; set; }
+        public string sr_no { get; set; }
     }
 
     public class CMGoodsOrderDetailList
