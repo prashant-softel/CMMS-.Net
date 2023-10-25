@@ -51,7 +51,7 @@ namespace CMMSAPIs.Repositories.Audits
 
 
             string SelectQ = "select st.id,plan_number,  f.name as facility_name, concat(au.firstName, ' ', au.lastName)  Auditee_Emp_Name, " +
-                "concat(u.firstName, ' ', u.lastName) Auditor_Emp_Name , st.frequency, st.status, case when st.frequency = 0 then 'False' else 'True' end as FrequencyApplicable, st.Description,st.Schedule_Date " +
+                "concat(u.firstName, ' ', u.lastName) Auditor_Emp_Name , st.frequency, st.status, case when st.frequency = 0 then 'False' else 'True' end as FrequencyApplicable, st.Description,st.Schedule_Date, st.checklist_id " +
                 "from st_audit st " +
                 "inner join facilities f ON st.Facility_id = f.id " +
                 "left join users au on au.id = st.Auditee_Emp_ID " +
