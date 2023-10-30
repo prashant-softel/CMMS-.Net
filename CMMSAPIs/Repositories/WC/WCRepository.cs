@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
@@ -194,7 +194,7 @@ namespace CMMSAPIs.Repositories.WC
                 string qry = "insert into wc(status_updated_at, facilityId, equipment_id, good_order_id, affected_part, order_reference_number, affected_sr_no, " + 
                                 "cost_of_replacement, currencyId, warranty_start_date, warranty_end_date, warranty_claim_title, warranty_description, " + 
                                 "corrective_action_by_buyer, request_to_supplier, approver_id, status, wc_fac_code, failure_time, created_by) values" + 
-                                $"({UtilsRepository.GetUTCTime()}, {unit.facilityId}, {unit.equipmentId}, '{unit.goodsOrderId}', '{unit.affectedPart}', '{unit.orderReference}', " + 
+                                $"('{UtilsRepository.GetUTCTime()}', {unit.facilityId}, {unit.equipmentId}, '{unit.goodsOrderId}', '{unit.affectedPart}', '{unit.orderReference}', " + 
                                 $"'{unit.affectedSrNo}', '{unit.costOfReplacement}', {unit.currencyId}, '{((DateTime)unit.warrantyStartAt).ToString("yyyy'-'MM'-'dd")}', " + 
                                 $"'{((DateTime)unit.warrantyEndAt).ToString("yyyy'-'MM'-'dd")}', '{unit.warrantyClaimTitle}', '{unit.warrantyDescription}', " + 
                                 $"'{unit.correctiveActionByBuyer}', '{unit.requestToSupplier}', {unit.approverId},{(int)draftStatus}, " + 
@@ -474,13 +474,13 @@ namespace CMMSAPIs.Repositories.WC
             }
             string approveQuery = $"Update wc set status = {(int)CMMS.CMMS_Status.APPROVED}, status_updated_at = '{UtilsRepository.GetUTCTime()}', " +
                 $"approval_reccomendations = '{request.comment}',  " +
-                $" approveddBy = {userId}, approvedAt = {UtilsRepository.GetUTCTime()}" +
+                $" approveddBy = {userId}, approvedAt = '{UtilsRepository.GetUTCTime()}'" +
                 $" where id = { request.id}";
             int reject_id = await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
 
             retCode = CMMS.RETRUNSTATUS.SUCCESS;
 
-            string myQuery = "SELECT * from wc where id = {request.id}";
+            string myQuery = $"SELECT * from wc where id = {request.id}";
             List<CMWCDetail> _WCList = await Context.GetData<CMWCDetail>(myQuery).ConfigureAwait(false);
             await CMMSNotification.sendNotification(CMMS.CMMS_Modules.WARRANTY_CLAIM, CMMS.CMMS_Status.APPROVED, new[] { _WCList[0].created_by }, _WCList[0]);
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Approved warranty claim Successfully");
@@ -501,7 +501,7 @@ namespace CMMSAPIs.Repositories.WC
 
             string approveQuery = $"Update wc set status = {(int)CMMS.CMMS_Status.REJECTED}, status_updated_at = '{UtilsRepository.GetUTCTime()}' , " +
                 $"reject_reccomendations = '{request.comment}',  " + 
-                $" rejecctedBy = {userId}, rejectedAt = {UtilsRepository.GetUTCTime()} " + 
+                $" rejecctedBy = {userId}, rejectedAt = '{UtilsRepository.GetUTCTime()}' " + 
                 $" where id = { request.id}";
             int reject_id = await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
 
@@ -515,7 +515,7 @@ namespace CMMSAPIs.Repositories.WC
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.WARRANTY_CLAIM, request.id, 0, 0, "Rejected warranty claim", CMMS.CMMS_Status.REJECTED);
 
 
-            string myQuery = "SELECT * from wc where id = {request.id}";
+            string myQuery = $"SELECT * from wc where id = {request.id}";
             List<CMWCDetail> _WCList = await Context.GetData<CMWCDetail>(myQuery).ConfigureAwait(false);
             await CMMSNotification.sendNotification(CMMS.CMMS_Modules.WARRANTY_CLAIM, CMMS.CMMS_Status.REJECTED, new[] { _WCList[0].created_by }, _WCList[0]);
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Rejected warranty claim Successfully");
