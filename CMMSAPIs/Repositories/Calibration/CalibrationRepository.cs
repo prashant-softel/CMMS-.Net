@@ -1,4 +1,4 @@
-﻿using CMMSAPIs.Helper;
+using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Audit;
 using CMMSAPIs.Models.Calibration;
 using CMMSAPIs.Models.Utils;
@@ -85,7 +85,9 @@ namespace CMMSAPIs.Repositories.Calibration
             }
             statusOut += $"ELSE 'Invalid Status' END";
             string myQuery = "SELECT " +
-                                $"a_calibration.id as calibration_id, assets.id as asset_id, assets.name as asset_name, assets.serialNumber as asset_serial, CASE WHEN categories.name is null THEN 'Others' ELSE categories.name END as category_name, frequency.id as frequency_id, frequency.name as frequency_name, a_calibration.status as statusID, {statusOut} as calibration_status, assets.calibrationLastDate as last_calibration_date, assets.calibrationDueDate as next_calibration_due_date, vendor.id as vendor_id, vendor.name as vendor_name, CONCAT(request_by.firstName,' ',request_by.lastName) as responsible_person, a_calibration.received_date, a_calibration.health_status as asset_health_status " +
+                                $" a_calibration.id as calibration_id, assets.id as asset_id, assets.name as asset_name, assets.serialNumber as asset_serial, CASE WHEN categories.name is null THEN 'Others' ELSE categories.name END as category_name, frequency.id as frequency_id, frequency.name as frequency_name, a_calibration.status as statusID, {statusOut} as calibration_status, " +
+                                $" IF(assets.calibrationLastDate = '0000-00-00 00:00:00', CAST( '0001-01-01 00:00:01' as datetime), CAST(assets.calibrationLastDate AS DATETIME)) AS last_calibration_date, " +
+                                $"IF(assets.calibrationDueDate = '0000-00-00 00:00:00', CAST( '0001-01-01 00:00:01' as datetime), CAST(assets.calibrationDueDate AS DATETIME)) AS next_calibration_due_date, vendor.id as vendor_id, vendor.name as vendor_name, CONCAT(request_by.firstName,' ',request_by.lastName) as responsible_person, a_calibration.received_date, a_calibration.health_status as asset_health_status " +
                              "FROM assets " +
                              "LEFT JOIN " +
                                 "frequency ON assets.calibrationFrequency = frequency.id " +
