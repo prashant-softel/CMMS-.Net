@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
 using System;
@@ -99,8 +99,8 @@ namespace CMMSAPIs.Controllers.WC
 
         //[Authorize]
         [Route("ApproveWC")]
-        [HttpPut]
-        internal async Task<IActionResult> ApproveWC(CMApproval request)
+        [HttpPost]
+        public async Task<IActionResult> ApproveWC(CMApproval request)
         {
             try
             {
@@ -117,7 +117,7 @@ namespace CMMSAPIs.Controllers.WC
         //[Authorize]
         [Route("RejectWC")]
         [HttpPut]
-        internal async Task<IActionResult> RejectWC(CMApproval request)
+        public async Task<IActionResult> RejectWC(CMApproval request)
         {
             try
             {
