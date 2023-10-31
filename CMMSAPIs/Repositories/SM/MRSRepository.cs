@@ -88,11 +88,21 @@ namespace CMMSAPIs.Repositories.SM
 
             for (var i = 0; i < _List.Count; i++)
             {
+                string assetItemNames = "";
                 _List[i].pmId = pmId;
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_List[i].status);
                 string _shortStatus = getShortStatus(CMMS.CMMS_Modules.SM_MRS, _Status);
                 _List[i].status_short = _shortStatus;
-                //_List[i].CMMRSItems = await getMRSItems(_List[i].ID);
+                _List[i].CMMRSItems = await getMRSItems(_List[i].mrsId);
+                for(var j=0;j < _List[i].CMMRSItems.Count; j++)
+                {
+                    assetItemNames = assetItemNames + _List[i].CMMRSItems[j].asset_name + ", ";
+                }
+                if(assetItemNames.Count() > 0)
+                {
+                    assetItemNames = assetItemNames.Substring(0, assetItemNames.Length - 2);
+                }
+                _List[i].mrsItems = assetItemNames;
             }
 
             return _List;
@@ -484,7 +494,7 @@ namespace CMMSAPIs.Repositories.SM
             string stmt = "SELECT sm.ID,sm.requested_by_emp_ID,CONCAT(ed1.firstName,' ',ed1.lastName) as approver_name,DATE_FORMAT(sm.requested_date,'%Y-%m-%d') as requestd_date," +
     "DATE_FORMAT(sm.returnDate,'%Y-%m-%d') as returnDate,if(sm.approval_status != '',DATE_FORMAT(sm.approved_date,'%d-%m-%Y'),'') as approval_date,sm.approval_status," +
     "sm.approval_comment,CONCAT(ed.firstName,' ',ed.lastName) as requested_by_name, sm.status, sm.activity, sm.whereUsedType," +
-    " case when sm.whereUsedType = 1 then 'Job' when sm.whereUsedType = 2 then 'PM' else 'Invalid' end as whereUsedTypeName,  sm.whereUsedRefID, sm.remarks " +
+    " case when sm.whereUsedType = 1 then 'Job' when sm.whereUsedType = 2 then 'PM' when sm.whereUsedType = 4 then 'JOBCARD' else 'Invalid' end as whereUsedTypeName,  sm.whereUsedRefID, sm.remarks " +
     "FROM smmrs sm LEFT JOIN users ed ON ed.id = sm.requested_by_emp_ID LEFT JOIN users ed1 ON ed1.id = sm.approved_by_emp_ID " +
     "WHERE sm.id = " + ID + "";
             List<CMMRSList> _List = await Context.GetData<CMMRSList>(stmt).ConfigureAwait(false);
