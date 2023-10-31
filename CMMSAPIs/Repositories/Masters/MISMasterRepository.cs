@@ -191,7 +191,7 @@ namespace CMMSAPIs.Repositories.Masters
         /************************************************* TYPE OF OBSERVATION *************************************************************/
         /***********************************************************************************************************************************/
         /***********************************************************************************************************************************/
-        internal async Task<MISTypeObservation> GetTypeOfObservation(int type_id)
+        internal async Task<MISTypeObservation> GetTypeOfObservation(int type_id)   
         {
             string myQuery = $"SELECT id, name, description, status FROM mis_m_typeofobservation WHERE id = " + type_id;
             List<MISTypeObservation> _Typeofobs = await Context.GetData<MISTypeObservation>(myQuery).ConfigureAwait(false);
@@ -236,6 +236,166 @@ namespace CMMSAPIs.Repositories.Masters
             await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
             //Add history
             return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Type Observation Deleted");
+        }
+
+
+        /***********************************************************************************************************************************/
+        /***********************************************************************************************************************************/
+        /************************************************* GRIEVANCE TYPE *************************************************************/
+        /***********************************************************************************************************************************/
+        /***********************************************************************************************************************************/
+        internal async Task<MISGrievanceType> GetGrievanceType(int id)
+        {
+            string myQuery = $"SELECT id, name, description, status FROM mis_m_grievancetype WHERE id = " + id;
+            List<MISGrievanceType> _grivType = await Context.GetData<MISGrievanceType>(myQuery).ConfigureAwait(false);
+            //Add history
+            return _grivType[0];
+        }
+
+        internal async Task<List<MISGrievanceType>> GetGrievanceTypeList()
+        {
+            string myQuery = $"SELECT id, name, description FROM mis_m_grievancetype WHERE status = 1 ";
+            List<MISGrievanceType> _grivType = await Context.GetData<MISGrievanceType>(myQuery).ConfigureAwait(false);
+            //Add history
+            return _grivType;
+
+        }
+        internal async Task<CMDefaultResponse> AddGrievanceType(MISGrievanceType request, int userId)
+        {
+
+            //CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.INVALID_ARG;
+            //string strRetMessage = "";
+            string qry = "insert into mis_m_grievancetype ( name, description, status , addedBy ,addedAt) values " + $"('{request.name}' ,'{request.description}' , 1 ,'{userId}' , '{UtilsRepository.GetUTCTime()}');" + $"SELECT LAST_INSERT_ID();";
+            DataTable dt = await Context.FetchData(qry).ConfigureAwait(false);
+            int id = Convert.ToInt32(dt.Rows[0][0]);
+            //Add history
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Greivance Type Added");
+        }
+
+        internal async Task<CMDefaultResponse> UpdateGrievanceType(MISGrievanceType request, int userID)
+        {
+            string updateQry = "UPDATE mis_m_grievancetype SET ";
+            if (request.name != null && request.name != "")
+                updateQry += $"name = '{request.name}', ";
+            if (request.description != null && request.description != "")
+                updateQry += $"description = '{request.description}', ";
+            updateQry += $"updatedBy = '{userID}', updatedAt = '{UtilsRepository.GetUTCTime()}' WHERE id = {request.id};";
+            await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+            //Add history
+            return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Greivance Type Updated");
+        }
+        internal async Task<CMDefaultResponse> DeleteGrievanceType(int id, int userId)
+        {
+            string deleteQry = $"UPDATE mis_m_grievancetype SET status = 0 , updatedBy = '{userId}' , updatedAt = '{UtilsRepository.GetUTCTime()}' WHERE id = {id};";
+            await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
+            //Add history
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Greivance Type Deleted");
+        }
+
+        /***********************************************************************************************************************************/
+        /***********************************************************************************************************************************/
+        /************************************************* ResolutionLevel *************************************************************/
+        /***********************************************************************************************************************************/
+        /***********************************************************************************************************************************/
+        internal async Task<MISResolutionLevel> GetResolutionLevel(int id)
+        {
+            string myQuery = $"SELECT id, name, description, status FROM mis_m_resolutionlevel WHERE id = " + id;
+            List<MISResolutionLevel> _ResLevel = await Context.GetData<MISResolutionLevel>(myQuery).ConfigureAwait(false);
+            //Add history
+            return _ResLevel[0];
+        }
+
+        internal async Task<List<MISResolutionLevel>> GetResolutionLevelList()
+        {
+            string myQuery = $"SELECT id, name, description FROM mis_m_resolutionlevel WHERE status = 1 ";
+            List<MISResolutionLevel> _ResLevel = await Context.GetData<MISResolutionLevel>(myQuery).ConfigureAwait(false);
+            //Add history
+            return _ResLevel;
+
+        }
+        internal async Task<CMDefaultResponse> AddResolutionLevel(MISResolutionLevel request, int userId)
+        {
+
+            //CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.INVALID_ARG;
+            //string strRetMessage = "";
+            string qry = "insert into mis_m_resolutionlevel ( name, description, status , addedBy ,addedAt) values " + $"('{request.name}' ,'{request.description}' , 1 ,'{userId}' , '{UtilsRepository.GetUTCTime()}');" + $"SELECT LAST_INSERT_ID();";
+            DataTable dt = await Context.FetchData(qry).ConfigureAwait(false);
+            int id = Convert.ToInt32(dt.Rows[0][0]);
+            //Add history
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "ResLevel Added");
+        }
+
+        internal async Task<CMDefaultResponse> UpdateResolutionLevel(MISResolutionLevel request, int userID)
+        {
+            string updateQry = "UPDATE mis_m_resolutionlevel SET ";
+            if (request.name != null && request.name != "")
+                updateQry += $"name = '{request.name}', ";
+            if (request.description != null && request.description != "")
+                updateQry += $"description = '{request.description}', ";
+            updateQry += $"updatedBy = '{userID}', updatedAt = '{UtilsRepository.GetUTCTime()}' WHERE id = {request.id};";
+            await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+            //Add history
+            return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "ResLevel Updated");
+        }
+        internal async Task<CMDefaultResponse> DeleteResolutionLevel(int id, int userId)
+        {
+            string deleteQry = $"UPDATE mis_m_resolutionlevel SET status = 0 , updatedBy = '{userId}' , updatedAt = '{UtilsRepository.GetUTCTime()}' WHERE id = {id};";
+            await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
+            //Add history
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "_ResLevel Deleted");
+        }
+
+
+        /***********************************************************************************************************************************/
+        /***********************************************************************************************************************************/
+        /************************************************* COST TYPE  *************************************************************/
+        /***********************************************************************************************************************************/
+        /***********************************************************************************************************************************/
+        internal async Task<MISCostType> GetCostType(int cost_id)
+        {
+            string myQuery = $"SELECT id, name, description, status FROM mis_m_costtype WHERE id = " + cost_id;
+            List<MISCostType> _Typeofobs = await Context.GetData<MISCostType>(myQuery).ConfigureAwait(false);
+            //Add history
+            return _Typeofobs[0];
+        }
+
+        internal async Task<List<MISCostType>> GetCostTypeList()
+        {
+            string myQuery = $"SELECT id, name, description FROM mis_m_costtype WHERE status = 1 ";
+            List<MISCostType> _Sourceofobs = await Context.GetData<MISCostType>(myQuery).ConfigureAwait(false);
+            //Add history
+            return _Sourceofobs;
+        }
+        internal async Task<CMDefaultResponse> CreateCostType(MISCostType request, int userId)
+        {
+
+            //CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.INVALID_ARG;
+            //string strRetMessage = "";
+            string qry = "insert into mis_m_costtype ( name, description, status , addedBy ,addedAt) values " + $"('{request.name}' ,'{request.description}' , 1 ,'{userId}' , '{UtilsRepository.GetUTCTime()}');" + $"SELECT LAST_INSERT_ID();";
+            DataTable dt = await Context.FetchData(qry).ConfigureAwait(false);
+            int id = Convert.ToInt32(dt.Rows[0][0]);
+            //Add history
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Cost Type Added");
+        }
+
+        internal async Task<CMDefaultResponse> UpdateCostType(MISCostType request, int userID)
+        {
+            string updateQry = "UPDATE mis_m_costtype SET ";
+            if (request.name != null && request.name != "")
+                updateQry += $"name = '{request.name}', ";
+            if (request.description != null && request.description != "")
+                updateQry += $"description = '{request.description}', ";
+            updateQry += $"updatedBy = '{userID}', updatedAt = '{UtilsRepository.GetUTCTime()}' WHERE id = {request.id};";
+            await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+            //Add history
+            return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Cost Type Updated");
+        }
+        internal async Task<CMDefaultResponse> DeleteCostType(int id, int userId)
+        {
+            string deleteQry = $"UPDATE mis_m_costtype SET status = 0 , updatedBy = '{userId}' , updatedAt = '{UtilsRepository.GetUTCTime()}' WHERE id = {id};";
+            await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
+            //Add history
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Cost Type Deleted");
         }
 
     }
