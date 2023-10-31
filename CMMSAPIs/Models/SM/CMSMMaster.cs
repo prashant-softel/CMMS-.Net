@@ -284,6 +284,7 @@ namespace CMMSAPIs.Models.SM
         public string mrsItems { get; set; }
         public int status { get; set; }
         public string status_short { get; set; }
+        public List<CMMRSItems> CMMRSItems { get; set; }
 
     }
 
