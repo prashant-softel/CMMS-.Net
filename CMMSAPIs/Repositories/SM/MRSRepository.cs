@@ -68,23 +68,28 @@ namespace CMMSAPIs.Repositories.SM
         {
             int Id = 0;
             string filter = "";
+            List<CMMRSListByModule> _List = null;
             if (jobId > 0)
             {
                 Id = jobId;
                 filter = " and whereUsedType = 4 ";
+                string stmt = $"SELECT \r\n    sm.ID AS mrsId,\r\n    jc.jobId AS jobId,\r\n    sm.whereUsedRefID AS jobCardId,\r\n    sm.status AS status,\r\n    GROUP_CONCAT(DISTINCT items.name\r\n        ORDER BY items.id\r\n        SEPARATOR ', ') AS mrsItems\r\nFROM\r\n    smmrs sm\r\n        LEFT JOIN\r\n    (SELECT \r\n        sai.ID AS id, si.mrs_ID, sam.asset_name as name\r\n    FROM smrsitems si left join\r\n        smassetitems sai on si.asset_item_ID = sai.ID\r\n    LEFT JOIN smassetmasters sam ON sam.asset_code = sai.asset_code) AS items ON items.mrs_ID = sm.ID\r\n        LEFT JOIN\r\n    jobcards jc ON jc.id = sm.whereUsedRefID\r\nWHERE\r\n    jc.jobId = {Id} {filter} group by mrsId;";
+
+                _List = await Context.GetData<CMMRSListByModule>(stmt).ConfigureAwait(false);
             }
             if (pmId > 0)
             {
-                string pmQry = $"SELECT id as pmId , linked_job_id as jobId from pm_execution where id ={pmId} ";
-                List<CMMRSListByModule> _pm = await Context.GetData<CMMRSListByModule>(pmQry).ConfigureAwait(false);
-                Id = _pm[0].jobId;
+                //string pmQry = $"SELECT id as pmId , linked_job_id as jobId from pm_execution where task_id ={pmId} ";
+                //List<CMMRSListByModule> _pm = await Context.GetData<CMMRSListByModule>(pmQry).ConfigureAwait(false);
+                //Id = _pm[0].pmId;
+                Id = pmId;
                 filter = " and whereUsedType = 10 ";
+                string stmt = $"    select m.ID AS mrsId,\r\n    m.whereUsedType AS whereUsedType,\r\n    m.whereUsedRefID AS jobCardId,\r\n    m.status AS status from smmrs m\r\n     inner join pm_task t on t.id = m.whereUsedRefID\r\n     where m.whereUsedType = 27 and m.whereUsedRefID  = {pmId} order by m.id desc;";
 
+                _List = await Context.GetData<CMMRSListByModule>(stmt).ConfigureAwait(false);
             }
 
-            string stmt = $"SELECT \r\n    sm.ID AS mrsId,\r\n    jc.jobId AS jobId,\r\n    sm.whereUsedRefID AS jobCardId,\r\n    sm.status AS status,\r\n    GROUP_CONCAT(DISTINCT items.name\r\n        ORDER BY items.id\r\n        SEPARATOR ', ') AS mrsItems\r\nFROM\r\n    smmrs sm\r\n        LEFT JOIN\r\n    (SELECT \r\n        sai.ID AS id, si.mrs_ID, sam.asset_name as name\r\n    FROM smrsitems si left join\r\n        smassetitems sai on si.asset_item_ID = sai.ID\r\n    LEFT JOIN smassetmasters sam ON sam.asset_code = sai.asset_code) AS items ON items.mrs_ID = sm.ID\r\n        LEFT JOIN\r\n    jobcards jc ON jc.id = sm.whereUsedRefID\r\nWHERE\r\n    jc.jobId = {Id} {filter} group by mrsId;";
 
-            List<CMMRSListByModule> _List = await Context.GetData<CMMRSListByModule>(stmt).ConfigureAwait(false);
 
             for (var i = 0; i < _List.Count; i++)
             {
