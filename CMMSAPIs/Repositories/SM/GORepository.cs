@@ -247,14 +247,7 @@ namespace CMMSAPIs.Repositories
                         assetTypeId = Convert.ToInt32(dtAssetType.Rows[0][0]);
                     }
 
-                    if(assetTypeId == (int)CMMS.SM_AssetTypes.Spare && request.go_items[i].ordered_qty > 0)
-                    {
-                        is_splited = 0;
-                    }
-                    else
-                    {
-                        is_splited = 1;
-                    }
+
 
                     string poDetailsQuery = $"INSERT INTO smgoodsorderdetails (purchaseID,assetItemID,cost,ordered_qty,location_ID, paid_by_ID, requested_qty,sr_no,spare_status,is_splited, requestOrderId, requestOrderItemID) " +
                     "values(" + goid + ", " + request.go_items[i].assetMasterItemID + ",  " + request.go_items[i].cost + ", " + request.go_items[i].ordered_qty + ", " + request.location_ID + ", " + request.go_items[i].paid_by_ID +", " + request.go_items[i].requested_qty +", '" + request.go_items[i].sr_no +"', "+ assetTypeId + ", 1, " + request.go_items[i].requestOrderId + ","+ request.go_items[i].requestOrderItemID + ") ; SELECT LAST_INSERT_ID();";
@@ -421,10 +414,10 @@ namespace CMMSAPIs.Repositories
 
             if (data[0].status != (int)CMMS.CMMS_Status.GO_SUBMITTED)
             {
-                return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.FAILURE, $"Store keeper not updated quantity for Goods Order {request.id}.");                
+                return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.FAILURE, $"Store keeper not updated quantity for Goods Order {request.id}.");
             }
 
-         
+
 
             if (request.id <= 0)
             {
@@ -439,8 +432,8 @@ namespace CMMSAPIs.Repositories
 
 
             // Entry in TransactionDetails
-          
-           
+
+
             string myQuery = $"SELECT   ID ,facilityID ,vendorID ,receiverID ,generated_by ,purchaseDate ,orderDate ,challan_no ,po_no ,\r\n     " +
                 $" freight ,transport ,no_pkg_received ,lr_no ,\r\n      " +
                 $"condition_pkg_received ,vehicle_no ,gir_no ,challan_date ,po_date ,\r\n      " +
@@ -452,6 +445,18 @@ namespace CMMSAPIs.Repositories
             List<CMGoodsOrderList> _List = await Context.GetData<CMGoodsOrderList>(myQuery).ConfigureAwait(false);
             //CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_GO, CMMS.CMMS_Status.SM_PO_CLOSED_APPROVED, _List[0]);
             // Entry for stock items
+
+
+            foreach (var item in data)
+            {
+                if (item.spare_status == (int)CMMS.SM_AssetTypes.Spare)
+                {
+                    var stmtU = $"UPDATE smgoodsorderdetails set is_splited = 0 where id = {item.podID}";
+                    int resultU = await Context.ExecuteNonQry<int>(stmtU).ConfigureAwait(false);
+                }
+            }
+
+
             foreach (var item in data)
             {
                 var assetCode = item.asset_code;
@@ -495,8 +500,8 @@ namespace CMMSAPIs.Repositories
 
                         //assetItemIDByCode[assetCode] = assetItemId;
                         stmtI = "";
-                        stmtI = $"INSERT INTO smgoodsorderdetails (purchaseID,assetItemID,spare_status,cost,ordered_qty,location_ID,received_qty,paid_by_ID,is_splited)" +
-                                    $"VALUES({item.purchaseID},{item.assetItemID},{item.asset_type_ID},{item.cost},1,0,1,{item.paid_by_ID},1); SELECT LAST_INSERT_ID();";
+                        stmtI = $"INSERT INTO smgoodsorderdetails (purchaseID,assetItemID,spare_status,cost,ordered_qty,location_ID,received_qty,paid_by_ID,is_splited, requested_qty)" +
+                                    $"VALUES({item.purchaseID},{item.assetItemID},{item.asset_type_ID},{item.cost},1,0,1,{item.paid_by_ID},1,1); SELECT LAST_INSERT_ID();";
                         DataTable dtInsertOD = await Context.FetchData(stmtI).ConfigureAwait(false);
                         purchaseOrderDetailsID = Convert.ToInt32(dtInsertOD.Rows[0][0]);
                     }

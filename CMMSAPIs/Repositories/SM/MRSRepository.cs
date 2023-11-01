@@ -233,7 +233,7 @@ namespace CMMSAPIs.Repositories.SM
                         {
                             string insertStmt = $"START TRANSACTION; " +
                             $"INSERT INTO smrsitems (mrs_ID,asset_item_ID,asset_MDM_code,requested_qty,status,flag,approval_required,mrs_return_ID,issued_qty,returned_qty,used_qty,available_qty,is_splited)" +
-                            $"VALUES ({request.ID},{request.cmmrsItems[i].asset_item_ID},'{asset_code}',{request.cmmrsItems[i].requested_qty},0,0,{approval_required},0,{request.cmmrsItems[i].issued_qty}, {request.cmmrsItems[i].returned_qty}, {request.cmmrsItems[i].used_qty}, {request.cmmrsItems[i].available_qty},{is_splited})" +
+                            $"VALUES ({request.ID},{request.cmmrsItems[i].asset_item_ID},'{asset_code}',{request.cmmrsItems[i].requested_qty},0,0,{approval_required},0,{request.cmmrsItems[i].issued_qty}, {request.cmmrsItems[i].returned_qty}, {request.cmmrsItems[i].used_qty}, {request.cmmrsItems[i].available_qty},1)" +
                             $"; SELECT LAST_INSERT_ID();COMMIT;";
                             DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
                         }
@@ -247,7 +247,7 @@ namespace CMMSAPIs.Repositories.SM
                             string insertStmt = $"START TRANSACTION; " +
                             $"INSERT INTO smrsitems (mrs_ID,asset_item_ID,asset_MDM_code,requested_qty,status,flag,approval_required,mrs_return_ID,issued_qty,returned_qty,used_qty,available_qty,is_splited)" +
                             $"VALUES ({request.ID},{request.cmmrsItems[i].asset_item_ID},'{asset_code}',1,0,0,{approval_required},0,{request.cmmrsItems[i].issued_qty}," +
-                            $" {request.cmmrsItems[i].returned_qty}, {request.cmmrsItems[i].used_qty}, {request.cmmrsItems[i].available_qty}, {is_splited})" +
+                            $" {request.cmmrsItems[i].returned_qty}, {request.cmmrsItems[i].used_qty}, {request.cmmrsItems[i].available_qty}, 1)" +
                             $"; SELECT LAST_INSERT_ID();COMMIT;";
                             DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
                         }
@@ -711,6 +711,28 @@ namespace CMMSAPIs.Repositories.SM
 
 
             var data = await getMRSItems(request.id);
+
+            foreach (var item in data)
+            {
+                int assetTypeId = 0;
+                string stmtAssetType = $"SELECT asset_type_ID FROM smassetmasters WHERE asset_code = '{item.asset_MDM_code}'";
+                DataTable dtAssetType = await Context.FetchData(stmtAssetType).ConfigureAwait(false);
+
+                if (dtAssetType == null && dtAssetType.Rows.Count == 0)
+                {
+                    throw new Exception("Asset type ID not found");
+                }
+                else
+                {
+                    assetTypeId = Convert.ToInt32(dtAssetType.Rows[0][0]);
+                }
+                if (assetTypeId == (int)CMMS.SM_AssetTypes.Spare)
+                {
+                    var stmtU = $"UPDATE smgoodsorderdetails set is_splited = 0 where id = {item.ID}";
+                    int resultU = await Context.ExecuteNonQry<int>(stmtU).ConfigureAwait(false);
+                }
+            }
+
             foreach (var item in data)
             {
                 var assetCode = item.asset_MDM_code;
