@@ -440,16 +440,32 @@ namespace CMMSAPIs.Repositories.PM
 
            // List<CMPMTaskList> taskDetails = await Context.GetData<CMPMTaskList>(statusQry).ConfigureAwait(false);
             DataTable dt1 = await Context.FetchData(statusQry).ConfigureAwait(false);
-            CMMS.CMMS_Status status = (CMMS.CMMS_Status)Convert.ToInt32(dt1.Rows[0][0]);
+            CMMS.CMMS_Status ptw_status = (CMMS.CMMS_Status)Convert.ToInt32(dt1.Rows[0][2]);
 
-            if (status !=  CMMS.CMMS_Status.PM_APPROVED)
+            if (ptw_status == CMMS.CMMS_Status.PTW_APPROVED)
+            {
+                string updateQ = $"UPDATE pm_task SET  status = {(int)CMMS.CMMS_Status.PM_APPROVED} WHERE id = {task_id};";
+                await Context.ExecuteNonQry<int>(updateQ).ConfigureAwait(false);
+            }
+            else
             {
                 return new CMDefaultResponse(task_id, CMMS.RETRUNSTATUS.FAILURE, "Cannot start execution due to following reasons:" +
-                    " \n 1. Permit is not linked to PM" +
-                    "\n 2. Permit is not Approved" +
-                    " \n 3. Execution has already been started" +
-                    " \n 4. Execution is completed");
+             " \n 1. Permit is not linked to PM" +
+             "\n 2. Permit is not Approved" +
+             " \n 3. Execution has already been started" +
+             " \n 4. Execution is completed");
             }
+
+            CMMS.CMMS_Status status = (CMMS.CMMS_Status)Convert.ToInt32(dt1.Rows[0][0]);
+
+            //if (status !=  CMMS.CMMS_Status.PM_APPROVED)
+            //{
+            //    return new CMDefaultResponse(task_id, CMMS.RETRUNSTATUS.FAILURE, "Cannot start execution due to following reasons:" +
+            //        " \n 1. Permit is not linked to PM" +
+            //        "\n 2. Permit is not Approved" +
+            //        " \n 3. Execution has already been started" +
+            //        " \n 4. Execution is completed");
+            //}
             DateTime expDate = Convert.ToDateTime(dt1.Rows[0]["endDate"]);
 
             if (expDate <= Convert.ToDateTime(UtilsRepository.GetUTCTime()))
