@@ -184,7 +184,9 @@ namespace CMMSAPIs.Models.SM
         public string status_short { get; set; }
         public string status_long { get; set; }
         public int is_splited { get; set; }
-
+        public int materialID { get; set; }
+        public int assetMasterID { get; set; }
+      
     }
 
     public class CMAssetBySerialNo
