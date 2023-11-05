@@ -400,17 +400,20 @@ public async Task<List<CMEmployeeStockReport>> GetEmployeeStockReport(int facili
 
             string Plant_Stock_Opening_Details_query = "select ST.fromActorID, CASE WHEN fromActorType = 1 then 'Vendor'" +
                 " WHEN fromActorType = 2 then 'Store' " +
-                " WHEN fromActorType = 3 then 'Engineer' " +
+                " WHEN fromActorType = 5 then 'Engineer' " +
+                " WHEN fromActorType = 3 then 'Task' " +
                 " WHEN fromActorType = 4 then 'Inventory' End AS fromActorType, " +
                 " CASE WHEN fromActorType = 1 then (select Name from business B where B.ID = ST.fromActorID) " +
                 " WHEN fromActorType = 2 then (select name  from facilities F where F.ID = ST.fromActorID) " +
-                " WHEN fromActorType in (3,4) then (select CONCAT(firstName, ' ', lastName)   from users u where u.ID = ST.fromActorID) " +
+                " WHEN fromActorType = 3 then (select concat(p.plan_name,' - Task',T.id) actorName from pm_task T inner join pm_plan P on P.id = T.plan_id where T.id = ST.fromActorID) " +
+                " WHEN fromActorType in (5,4) then (select CONCAT(firstName, ' ', lastName)   from users u where u.ID = ST.fromActorID) " +
                 " End AS FromActorName , toActorID as toActorID," +
-                " CASE WHEN toActorType = 1 then 'Vendor'  WHEN toActorType = 2 then 'Store' " +
-                " WHEN toActorType = 3 then 'Engineer'  WHEN toActorType = 4 then 'Inventory' End AS toActorType, " +
+                " CASE WHEN toActorType = 1 then 'Vendor'  WHEN toActorType = 2 then 'Store' WHEN toActorType = 3 then 'Task' " +
+                " WHEN toActorType = 5 then 'Engineer'  WHEN toActorType = 4 then 'Inventory' End AS toActorType, " +
                 " CASE WHEN toActorType = 1 then (select Name from business B where B.ID = ST.toActorID) " +
                 " WHEN toActorType = 2 then (select name  from facilities F where F.ID = ST.toActorID) " +
-                " WHEN toActorType in (3,4) then (select CONCAT(firstName, ' ', lastName)   from users u where u.ID = ST.toActorID) End AS toActorName," +
+                " WHEN toActorType = 3 then (select concat(p.plan_name,' - Task',T.id) actorName from pm_task T inner join pm_plan P on P.id = T.plan_id where T.id = ST.toActorID) " +
+                " WHEN toActorType in (5,4) then (select CONCAT(firstName, ' ', lastName)   from users u where u.ID = ST.toActorID) End AS toActorName," +
                 " ST.assetItemID,am.asset_name as assetItemName, qty , FF.name as facilityName, remarks, lastInsetedDateTime as LastUpdated, " +
                 " CONCAT(C.firstName, ' ', C.lastName) CreatedBy, ST.createdAt " +
                 " from smtransactiondetails ST  inner join smtransition smt on smt.transactionID = ST.ID" +

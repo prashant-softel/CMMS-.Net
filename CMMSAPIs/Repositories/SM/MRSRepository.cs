@@ -427,7 +427,7 @@ namespace CMMSAPIs.Repositories.SM
                 "DATE_FORMAT(sm.requested_date,'%Y-%m-%d') as issued_date,DATE_FORMAT(sm.returnDate, '%Y-%m-%d') as returnDate, smi.requested_qty, " +
                 "if(smi.approval_required = 1,'Yes','No') as approval_required, smi.is_splited, sam.ID as asset_item_ID," +
                 " sai.serial_number, sam.asset_name, sam.asset_type_ID,sat.asset_type,COALESCE(file.file_path,'') as file_path," +
-                "file.Asset_master_id " +
+                "file.Asset_master_id,sai.materialID, sai.assetMasterID " +
                 " FROM smrsitems smi " +
                 " LEFT JOIN smmrs sm ON sm.ID = smi.mrs_ID " +
                 " left join smassetmasters sam ON sam.id = smi.asset_item_ID " +
@@ -1411,7 +1411,7 @@ namespace CMMSAPIs.Repositories.SM
                     for (var i = 0; i < request.cmmrsItems.Count; i++)
                     {
 
-                        string updateStmtForItemList = $"update smrsitems set issued_qty = {request.cmmrsItems[i].issued_qty}, issue_remarks = '{request.cmmrsItems[i].issue_remarks}' where ID = {request.cmmrsItems[i].id};";
+                        string updateStmtForItemList = $"update smrsitems set issued_qty = {request.cmmrsItems[i].issued_qty}, issue_remarks = '{request.cmmrsItems[i].issue_remarks}' where ID = {request.cmmrsItems[i].mrs_item_id};";
 
                         updateStmtForItemList = updateStmtForItemList + $" update smassetitems set item_issued_mrs = {request.ID} where id = {request.cmmrsItems[i].material_id};";
 
