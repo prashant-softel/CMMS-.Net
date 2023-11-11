@@ -1,4 +1,4 @@
-﻿using CMMSAPIs.Helper;
+using CMMSAPIs.Helper;
 using CMMSAPIs.Models.PM;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.PM;
@@ -239,9 +239,9 @@ namespace CMMSAPIs.BS.PM
                     return await repos.cloneSchedule( facility_id,  task_id,  from_schedule_id,  to_schedule_id,  userID);
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                throw ex;
             }
         }
 
