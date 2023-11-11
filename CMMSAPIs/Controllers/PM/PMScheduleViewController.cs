@@ -1,4 +1,4 @@
-﻿using CMMSAPIs.BS.PM;
+using CMMSAPIs.BS.PM;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -269,9 +269,12 @@ namespace CMMSAPIs.Controllers.PM
                 var data = await _PMScheduleViewBS.cloneSchedule(facility_id, task_id, from_schedule_id, to_schedule_id, userID);
                 return Ok(data);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                return new JsonResult(new { error = ex.Message })
+                {
+                    StatusCode = 200 
+                };
             }
         }
 
