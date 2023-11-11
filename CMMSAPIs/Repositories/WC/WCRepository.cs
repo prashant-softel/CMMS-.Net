@@ -281,13 +281,13 @@ namespace CMMSAPIs.Repositories.WC
             "b1.id AS supplier_id, b1.name AS supplier_name, good_order_id, affected_part, order_reference_number, affected_sr_no, cost_of_replacement, wc.currencyId,  wc.currency," + // add cost_of_replacement,
             " warranty_start_date, warranty_end_date, warranty_claim_title, warranty_description, " +
             "corrective_action_by_buyer, request_to_supplier, concat(user.firstName , ' ' , user.lastName) AS approver_name," +
-            " created_by, issued_on, wc.status,approved_by, wc.created_at AS date_of_claim, wc_fac_code, failure_time" +
+            " created_by, issued_on, wc.status,approved_by, wc.created_at AS date_of_claim, wc_fac_code, failure_time, startDate warrantyStartDate,  endDate warrantyEndDate" +
             " FROM wc " +
-            "JOIN facilities as f ON f.id = wc.facilityId " +
-            "JOIN assets as a ON a.id = wc.equipment_id " +
-            "JOIN business as b1 ON b1.id = wc.supplier_id " +
-            "JOIN assetcategories AS ac ON ac.id = wc.equipment_cat_id  " +
-            "JOIN users as user ON user.id = wc.approver_id";
+            "LEFT JOIN facilities as f ON f.id = wc.facilityId " +
+            "LEFT JOIN assets as a ON a.id = wc.equipment_id " +
+            "LEFT JOIN business as b1 ON b1.id = wc.supplier_id " +
+            "LEFT JOIN assetcategories AS ac ON ac.id = wc.equipment_cat_id  " +
+            "LEFT JOIN users as user ON user.id = wc.approver_id";
 
             if (id != 0)
             {
