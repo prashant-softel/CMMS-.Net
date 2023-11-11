@@ -1,4 +1,4 @@
-﻿using CMMSAPIs.Models.Utils;
+using CMMSAPIs.Models.Utils;
 using System;
 using System.Collections.Generic;
 
@@ -44,6 +44,8 @@ namespace CMMSAPIs.Models.WC
         public List<CMLog> log { get; set; }
         public string status_short { get; set; }
         public string status_long { get; set; }
+        public DateTime warrantyStartDate { get; set; }
+        public DateTime warrantyEndDate { get; set; }
         public List<CMWCExternalEmail> additionalEmailEmployees { get; set; }
         public List<CMWCExternalEmail> externalEmails { get; set; }
         public List<CMWCSupplierActions> supplierActions { get; set; }
