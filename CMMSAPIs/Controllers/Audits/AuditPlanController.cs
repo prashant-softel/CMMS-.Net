@@ -4,6 +4,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using System;
+using CMMSAPIs.Models.SM;
+using Microsoft.AspNetCore.Http;
+using CMMSAPIs.Models.Utils;
 
 namespace CMMSAPIs.Controllers.Audits
 {
@@ -96,6 +99,44 @@ namespace CMMSAPIs.Controllers.Audits
             catch (Exception ex)
             {
                 throw;
+            }
+        }
+
+        [Route("ApproveAuditPlan")]
+        [HttpPost]
+        public async Task<IActionResult> ApproveAuditPlan(CMApproval request)
+        {
+            try
+            {
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _AuditPlanBS.ApproveAuditPlan(request, userId);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid data sent.";
+                return Ok(item);
+            }
+        }
+
+        [Route("RejectAuditPlan")]
+        [HttpPost]
+        public async Task<IActionResult> RejectAuditPlan(CMApproval request)
+        {
+            try
+            {
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _AuditPlanBS.RejectAuditPlan(request, userId);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid data sent.";
+                return Ok(item);
             }
         }
     }
