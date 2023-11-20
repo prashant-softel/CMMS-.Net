@@ -12,18 +12,22 @@ using MySql.Data.MySqlClient;
 using CMMSAPIs.Helper;
 using System.Data.Common;
 using System.Data;
+using Microsoft.Extensions.Configuration;
 
 namespace CMMSAPIs.Middlewares
 {
     public class SessionMiddlerware
     {
         private readonly RequestDelegate _next;
+        private readonly IConfiguration _configuration;
+        private readonly string MainConnection;
 
-        public SessionMiddlerware(RequestDelegate next)
+        public SessionMiddlerware(RequestDelegate next, IConfiguration configuration)
         {
             _next = next;
+            MainConnection = configuration.GetConnectionString("Con");
         }
-        public MySqlConnection TheConnection => new MySqlConnection("server=65.0.20.19;User Id=root;password=root123;database=softel_cmms_new1;");
+       //public MySqlConnection TheConnection => new MySqlConnection("server=172.20.43.9;User Id=hfeadmin;password=SDG%edg*&;database=hfe_cmms_latest;default command timeout=0;");
         //public async Task Invoke(HttpContext httpContext)
         //{
         //    var headers = httpContext.Request.Headers;           
@@ -95,7 +99,7 @@ namespace CMMSAPIs.Middlewares
                     var tokenS = jsonToken as JwtSecurityToken;
                     var userId = tokenS.Claims.First(claim => claim.Type == "nameid").Value;
                     DataTable dt = new DataTable();
-                    using (MySqlConnection conn = TheConnection)
+                    using (MySqlConnection conn = new MySqlConnection(MainConnection))
                     {
                         using (MySqlCommand cmd = getQryCommand("select * from userlog where userID = " + userId + " and customToken = '"+ strlist[1] + "' order by id desc;", conn))
                         {
@@ -136,7 +140,7 @@ namespace CMMSAPIs.Middlewares
                     int remainingMinutes = (int)remainingTime.TotalMinutes;
                     if (remainingMinutes < (int)CMMS.TOKEN_RENEW_TIME && remainingMinutes > 0)
                     {
-                        using (MySqlConnection conn = TheConnection)
+                        using (MySqlConnection conn = new MySqlConnection(MainConnection))
                         {
                             using (MySqlCommand cmd = getQryCommand("update userlog set tokenExpiryTime = '" + DateTime.Now.AddMinutes((int)CMMS.TOKEN_EXPIRATION_TIME).ToString("yyyy-MM-dd HH:mm:ss") + "', tokenRefreshCount = " + (tokenRefreshCount + 1) + "  where id = " + tokenLogID + "", conn))
                             {
@@ -155,7 +159,7 @@ namespace CMMSAPIs.Middlewares
                     }
 
                     // Log Endpoint of user requested
-                    using (MySqlConnection conn = TheConnection)
+                    using (MySqlConnection conn = new MySqlConnection(MainConnection))
                     {
                         string query = $"INSERT INTO loguserrequest(tokenLogID,userID, requestMethod, apiEndPoint, apiPayLoad, apiHitTime) VALUES( {tokenLogID}, {userId}, '{httpRequestMethod}', '{endpointAddress}','{requestBody}',  '{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}' );";
                         using (MySqlCommand cmd = getQryCommand(query, conn))
