@@ -9,13 +9,17 @@ using System.ComponentModel.Design;
 using System.Data;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
+using CMMSAPIs.Repositories.Utils;
 
 namespace CMMSAPIs.Repositories.Audits
 {
     public class AuditPlanRepository : GenericRepository
     {
+        private UtilsRepository _utilsRepo;
         public AuditPlanRepository(MYSQLDBHelper sqlDBHelper) : base(sqlDBHelper)
         {
+
+            _utilsRepo = new UtilsRepository(sqlDBHelper);
         }
 
         internal async Task<List<CMAuditPlanList>> GetAuditPlanList(int facility_id, DateTime fromDate, DateTime toDate)
@@ -85,6 +89,8 @@ namespace CMMSAPIs.Repositories.Audits
                 DataTable dt2 = await Context.FetchData(InsertQ).ConfigureAwait(false);
                 InsertedValue = Convert.ToInt32(dt2.Rows[0][0]);
                 response = new CMDefaultResponse(InsertedValue, CMMS.RETRUNSTATUS.SUCCESS, "Audit plan with plan number : " + request.plan_number + " created successfully.");
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.AUDIT_PLAN, request.id, 0, 0, " Audit plan schduled ", CMMS.CMMS_Status.AUDIT_SCHEDULE);
+
             }
 
             return response;
@@ -133,6 +139,8 @@ namespace CMMSAPIs.Repositories.Audits
                  $"where ID = {audit_plan_id}";
                 var result = await Context.ExecuteNonQry<int>(UpdateQ);
                 response = new CMDefaultResponse(audit_plan_id, CMMS.RETRUNSTATUS.SUCCESS, "Audit plan with plan number : " + auditPlanList[0].plan_number + " deleted.");
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.AUDIT_PLAN, audit_plan_id, 0, 0, " Audit plan deleted ", CMMS.CMMS_Status.AUDIT_DELETED);
+
             }
             else
             {
@@ -174,5 +182,51 @@ namespace CMMSAPIs.Repositories.Audits
 
         }
 
+        internal async Task<CMDefaultResponse> ApproveAuditPlan(CMApproval request, int userId)
+        {
+            CMDefaultResponse response = null;
+            string SelectQ = "select id from st_audit where ID = '" + request.id + "'";
+            List<CMCreateAuditPlan> auditPlanList = await Context.GetData<CMCreateAuditPlan>(SelectQ).ConfigureAwait(false);
+
+            if (auditPlanList != null && auditPlanList.Count > 0)
+            {
+                string UpdateQ = $"update st_audit " +
+                 $"set Status = '{(int)CMMS.CMMS_Status.AUDIT_APPROVED}' , approved_by = {userId}, approved_Date = '{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}', approved_Comment = '{request.comment}'" +
+                 $"where ID = {request.id}";
+                var result = await Context.ExecuteNonQry<int>(UpdateQ);
+                response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Audit plan with plan number : " + auditPlanList[0].plan_number + " approved successfully.");
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.AUDIT_PLAN, request.id, 0, 0, request.comment, CMMS.CMMS_Status.AUDIT_APPROVED);
+
+            }
+            else
+            {
+                response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Audit plan does not exists to approve.");
+            }
+
+            return response;
+        }
+        internal async Task<CMDefaultResponse> RejectAuditPlan(CMApproval request, int userId)
+        {
+            CMDefaultResponse response = null;
+            string SelectQ = "select id from st_audit where ID = '" + request.id + "'";
+            List<CMCreateAuditPlan> auditPlanList = await Context.GetData<CMCreateAuditPlan>(SelectQ).ConfigureAwait(false);
+
+            if (auditPlanList != null && auditPlanList.Count > 0)
+            {
+                string UpdateQ = $"update st_audit " +
+                 $"set Status = '{(int)CMMS.CMMS_Status.AUDIT_REJECTED}' , rejected_by = {userId}, rejected_Date = '{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}', rejected_Comment = '{request.comment}'" +
+                 $"where ID = {request.id}";
+                var result = await Context.ExecuteNonQry<int>(UpdateQ);
+                response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Audit plan with plan number : " + auditPlanList[0].plan_number + " rejected successfully.");
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.AUDIT_PLAN, request.id, 0, 0, request.comment, CMMS.CMMS_Status.AUDIT_REJECTED);
+
+            }
+            else
+            {
+                response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Audit plan does not exists to reject.");
+            }
+
+            return response;
+        }
     }
 }
