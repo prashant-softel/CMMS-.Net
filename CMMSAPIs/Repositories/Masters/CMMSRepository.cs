@@ -198,7 +198,7 @@ namespace CMMSAPIs.Repositories.Masters
         {
             string myQuery = "SELECT facilities.id, facilities.name, spv.name as spv, facilities.address, facilities.city, facilities.state, facilities.country, facilities.zipcode as pin " +
                 ", CONCAT(u.firstName , ' ' , u.lastName) as customer ,CONCAT(u2.firstName , ' ' , u2.lastName) as owner,CONCAT(u3.firstName , ' ' , u3.lastName) as Operator" +
-                " FROM Facilities LEFT JOIN spv ON facilities.spvId=spv.id LEFT JOIN users as u ON u.id = facilities.customerId LEFT JOIN users as u2 ON u2.id = facilities.ownerId LEFT JOIN users as u3 ON u3.id = facilities.operatorId WHERE isBlock = 0 and facilities.status = 1;"; 
+                " FROM Facilities LEFT JOIN spv ON facilities.spvId=spv.id LEFT JOIN business as u ON u.id = facilities.customerId LEFT JOIN business as u2 ON u2.id = facilities.ownerId LEFT JOIN business as u3 ON u3.id = facilities.operatorId WHERE isBlock = 0 and facilities.status = 1;"; 
             
             List<CMFacilityList> _Facility = await Context.GetData<CMFacilityList>(myQuery).ConfigureAwait(false);
             return _Facility;
