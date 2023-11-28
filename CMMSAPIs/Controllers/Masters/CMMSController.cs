@@ -616,8 +616,42 @@ namespace CMMSAPIs.Controllers.Masters
             }
         }
 
+        [Route("DownloadFile")]
+        [HttpGet]
+        public async Task<FileResult> DownloadFile(int id, string filePath)
+        {
+            try
+            {
+                // Replace the following line with logic to get the template file path
+                string path = "";
+                if ((filePath == "" || filePath == null) && id > 0)
+                {
+                    path = await _CMMSBS.DownloadFile(id);
+                }
+                else if(filePath != null || filePath != "")
+                {
+                    path = filePath;
+                }
+                else
+                {
+                    Response.StatusCode = StatusCodes.Status404NotFound;
+                    Response.WriteAsync("File not found.");
+                }
+     
+                //string templateFilePath = $"./Upload/Templates/Bellary_Material.xlsx";
+                string templateFilePath = path;
+                byte[] fileContent = await System.IO.File.ReadAllBytesAsync(templateFilePath);
+                string fileName = Path.GetFileName(templateFilePath);
+                // Set the file response
+                return File(fileContent, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
 
-        
+
         #endregion //helper functions
 
         /*

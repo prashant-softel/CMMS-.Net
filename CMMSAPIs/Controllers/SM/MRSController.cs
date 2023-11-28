@@ -504,7 +504,7 @@ namespace CMMSAPIs.Controllers.SM
 
         [Route("TransferItems")]
         [HttpPost]
-        public async Task<IActionResult> TransferItems(CMTransferItems request)
+        public async Task<IActionResult> TransferItems(List<CMTransferItems> request)
         {
             try
             {
