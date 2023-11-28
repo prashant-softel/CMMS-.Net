@@ -43,5 +43,6 @@
         public string updated_by_name { get; set; }
         public dynamic updated_at { get; set; }
         public int? status { get; set; }
+        public int? type { get; set; }
     }
 }
