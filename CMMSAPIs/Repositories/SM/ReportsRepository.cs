@@ -413,7 +413,9 @@ public async Task<List<CMEmployeeStockReport>> GetEmployeeStockReport(int facili
                 " CASE WHEN toActorType = 1 then (select Name from business B where B.ID = ST.toActorID) " +
                 " WHEN toActorType = 2 then (select name  from facilities F where F.ID = ST.toActorID) " +
                 " WHEN toActorType = 3 then (select concat(p.plan_name,' - Task',T.id) actorName from pm_task T inner join pm_plan P on P.id = T.plan_id where T.id = ST.toActorID) " +
-                " WHEN toActorType in (5,4) then (select CONCAT(firstName, ' ', lastName)   from users u where u.ID = ST.toActorID) End AS toActorName," +
+                " WHEN toActorType in (5) then (select CONCAT(firstName, ' ', lastName)   from users u where u.ID = ST.toActorID) " +
+                " When toActorType = 4 then (select JC_title from jobcards j where j.id= st.toActorID) " +
+                " When toActorType = 6 then (select a.name from assets a where a.id= st.toActorID)  End AS toActorName," +
                 " ST.assetItemID,am.asset_name as assetItemName, qty , FF.name as facilityName, remarks, lastInsetedDateTime as LastUpdated, " +
                 " CONCAT(C.firstName, ' ', C.lastName) CreatedBy, ST.createdAt " +
                 " from smtransactiondetails ST  inner join smtransition smt on smt.transactionID = ST.ID" +

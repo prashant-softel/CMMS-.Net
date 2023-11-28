@@ -306,12 +306,12 @@ namespace CMMSAPIs.Repositories.SM
                 " po.amount,  po.currency as currencyID , curr.name as currency ,  \r\n    CONCAT(ed.firstName,' ',ed.lastName) as generatedBy, " +
                 " po.received_on as generatedAt,approvedOn as approvedAt,CONCAT(ed1.firstName,' ',ed1.lastName) as receivedBy, " +
                 " pod.remarks as itemcomment, CONCAT(ed2.firstName,' ',ed2.lastName) as approvedBy , " +
-                " CONCAT(ed3.firstName,' ',ed3.lastName) as rejectedBy , po.rejected_at as rejectedAt " +
+                " CONCAT(ed3.firstName,' ',ed3.lastName) as rejectedBy , po.rejected_at as rejectedAt, sic.cat_name asset_type_Name" +
                 " FROM smrequestorderdetails pod" +
                 " LEFT JOIN smrequestorder po ON po.ID = pod.requestID" +
                 " LEFT JOIN smassetitems sai ON sai.ID = pod.assetItemID" +
                 " LEFT JOIN smassetmasters sam ON sam.id = pod.assetItemID" +
-                " LEFT JOIN smunitmeasurement sm ON sm.ID = sam.unit_of_measurement" +
+                " LEFT JOIN smunitmeasurement sm ON sm.ID = sam.unit_of_measurement LEFT JOIN smitemcategory sic ON sic.ID = sam.item_category_ID" +
                 " LEFT JOIN ( SELECT file.file_path,file.Asset_master_id as Asset_master_id FROM smassetmasterfiles file" +
                 "            LEFT join smassetmasters sam on file.Asset_master_id =  sam.id )" +
                 "   f1 ON f1.Asset_master_id = sam.id" +
@@ -354,7 +354,10 @@ namespace CMMSAPIs.Repositories.SM
                 asset_name = p.asset_name,
                 assetMasterItemID = p.assetItemID,
                 ordered_qty = p.ordered_qty,
-                comment = p.itemcomment
+                comment = p.itemcomment,
+                asset_code = p.asset_code,
+                asset_type = p.asset_type,
+                asset_cat = p.asset_type_Name
             }).ToList();
             _MasterList.cost = _itemList.Sum(x=> x.cost);
             _MasterList.request_order_items = _itemList;

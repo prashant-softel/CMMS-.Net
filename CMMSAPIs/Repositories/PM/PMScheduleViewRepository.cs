@@ -277,7 +277,7 @@ namespace CMMSAPIs.Repositories.PM
             if (taskViewDetail.Count == 0)
                 throw new MissingMemberException("PM Task not found");
 
-            string myQuery2 = $"SELECT pm_schedule.id as schedule_id, assets.name as asset_name, checklist.checklist_number as checklist_name from pm_schedule " +
+            string myQuery2 = $"SELECT pm_schedule.id as schedule_id,assets.id as assetsID, assets.name as asset_name, checklist.checklist_number as checklist_name from pm_schedule " +
                 $"left join assets on pm_schedule.asset_id = assets.id " +
                 $"left join checklist_number as checklist on pm_schedule.checklist_id = checklist.id " +
                 $"where task_id = {task_id};";
@@ -293,7 +293,7 @@ namespace CMMSAPIs.Repositories.PM
             //List<CMDefaultList> checklist_collection = await Context.GetData<CMDefaultList>(myQuery2).ConfigureAwait(false);
             foreach (var schedule in checklist_collection)
             {
-                string myQuery3 = "SELECT pm_execution.id as execution_id,checkpoint.type as check_point_type ,pm_execution.range as type_range,pm_execution.text as type_text,pm_execution.is_ok as type_bool, Check_Point_id as check_point_id, Check_Point_Name as check_point_name, Check_Point_Requirement as requirement, PM_Schedule_Observation as observation, job_created as is_job_created, linked_job_id, custom_checkpoint as is_custom_check_point, file_required as is_file_required " +
+                string myQuery3 = "SELECT is_ok as cp_ok, boolean as type_bool, failure_weightage as failure_waightage,type as check_point_type,pm_execution.range as type_range, pm_execution.text as type_text,pm_execution.id as execution_id,checkpoint.type as check_point_type ,pm_execution.range as type_range,pm_execution.text as type_text,pm_execution.is_ok as type_bool, Check_Point_id as check_point_id, Check_Point_Name as check_point_name, Check_Point_Requirement as requirement, PM_Schedule_Observation as observation, job_created as is_job_created, linked_job_id, custom_checkpoint as is_custom_check_point, file_required as is_file_required " +
                                     $"FROM pm_execution " +
                                     $"left join checkpoint on checkpoint.id = pm_execution.Check_Point_id WHERE PM_Schedule_Id = {schedule.schedule_id}  ;";
 
@@ -473,7 +473,7 @@ namespace CMMSAPIs.Repositories.PM
                 return new CMDefaultResponse(task_id, CMMS.RETRUNSTATUS.FAILURE, "Cannot start execution : Permit has been expired");
             }
 
-            string getParamsQry = "SELECT pm_schedule.task_id , pm_schedule.id as schedule_id, plan.frequency_id as frequency_id, plan.facility_id as facility_id, assets.categoryId as category_id, Asset_id as asset_id, PM_Schedule_date as schedule_date " +
+            string getParamsQry = "SELECT checklist_id, pm_schedule.task_id , pm_schedule.id as schedule_id, plan.frequency_id as frequency_id, plan.facility_id as facility_id, assets.categoryId as category_id, Asset_id as asset_id, PM_Schedule_date as schedule_date " +
                                 $"FROM pm_schedule "+
                                 $"left join pm_plan as plan on pm_schedule.plan_id = plan.id " +
                                 $"left join assets on pm_schedule.Asset_id = assets.id " +
@@ -493,7 +493,8 @@ namespace CMMSAPIs.Repositories.PM
                                             "FROM checkpoint " +
                                             "left JOIN checklist_mapping as map ON map.checklist_id = checkpoint.check_list_id " +
                                             "left JOIN checklist_number as checklist ON checklist.id = map.checklist_id " +
-                                            $"WHERE map.facility_id IN ({schedule.facility_id}) AND map.category_id IN ( {schedule.category_id}) AND checklist.frequency_id IN ({schedule.frequency_id});";
+                                            //$"WHERE map.facility_id IN ({schedule.facility_id}) AND map.category_id IN ( {schedule.category_id}) AND checklist.frequency_id IN ({schedule.frequency_id});";
+                                            $"WHERE checkpoint.check_list_id in ({schedule.checklist_id});";
 
                 List<CMCreateCheckPoint> checkpointList = await Context.GetData<CMCreateCheckPoint>(checkpointsQuery).ConfigureAwait(false);
                 if (checkpointList.Count == 0)
@@ -542,168 +543,173 @@ namespace CMMSAPIs.Repositories.PM
             string statusQry = $"SELECT status FROM pm_task WHERE id = {request.task_id};";
             DataTable dt1 = await Context.FetchData(statusQry).ConfigureAwait(false);
             CMMS.CMMS_Status status = (CMMS.CMMS_Status)Convert.ToInt32(dt1.Rows[0][0]);
-            //if (status == CMMS.CMMS_Status.PM_SCHEDULED || status == CMMS.CMMS_Status.PM_REJECTED)
-            //{
-            //    responseList.Add(new CMDefaultResponse(request.task_id, CMMS.RETRUNSTATUS.FAILURE, 
-            //        "Execution must be rejected or in progress to modify execution details"));
-            //    return responseList;
-            //}
-            //foreach(var schedule in request.schedules) { 
+            if (status == CMMS.CMMS_Status.PM_SCHEDULED || status == CMMS.CMMS_Status.PM_REJECTED)
+            {
+                responseList.Add(new CMDefaultResponse(request.task_id, CMMS.RETRUNSTATUS.FAILURE,
+                    "Execution must be rejected or in progress to modify execution details"));
+                return responseList;
+            }
+            foreach (var schedule in request.schedules)
+            {
 
-            //string executeQuery = $"SELECT id FROM pm_execution WHERE PM_Schedule_Id = {schedule.schedule_id};";
-            //DataTable dt = await Context.FetchData(executeQuery).ConfigureAwait(false);
-            //List<int> executeIds = dt.GetColumn<int>("id");
+                string executeQuery = $"SELECT id FROM pm_execution WHERE PM_Schedule_Id = {schedule.schedule_id};";
+                DataTable dt = await Context.FetchData(executeQuery).ConfigureAwait(false);
+                List<int> executeIds = dt.GetColumn<int>("id");
 
-            //    foreach (var schedule_detail in schedule.add_observations)
-            //    {
-            //        CMDefaultResponse response;
-            //        if (executeIds.Contains(schedule_detail.execution_id))
-            //        {
-            //            int changeFlag = 0;
-            //            string myQuery1 = "SELECT id as execution_id, PM_Schedule_Observation as observation, job_created as job_create " +
-            //                                $"FROM pm_execution WHERE id = {schedule_detail.execution_id};";
-            //            List<AddObservation> execution_details = await Context.GetData<AddObservation>(myQuery1).ConfigureAwait(false);
+                foreach (var schedule_detail in schedule.add_observations)
+                {
+                    CMDefaultResponse response;
+                    if (executeIds.Contains(schedule_detail.execution_id))
+                    {
+                        int changeFlag = 0;
+                        string myQuery1 = "SELECT id as execution_id, PM_Schedule_Observation as observation, job_created as job_create " +
+                                            $"FROM pm_execution WHERE id = {schedule_detail.execution_id};";
+                        List<AddObservation> execution_details = await Context.GetData<AddObservation>(myQuery1).ConfigureAwait(false);
 
-            //            string myQuery2 = $"SELECT checkpoint.type from pm_execution left join checkpoint on pm_execution.check_point_id = checkpoint.id WHERE pm_execution.id = {schedule_detail.execution_id};";
+                        string myQuery2 = $"SELECT checkpoint.type from pm_execution left join checkpoint on pm_execution.check_point_id = checkpoint.id WHERE pm_execution.id = {schedule_detail.execution_id};";
 
-            //            DataTable dtType = await Context.FetchData(myQuery2).ConfigureAwait(false);
-            //            string CPtypeValue = "";
-            //            if (Convert.ToInt32(dtType.Rows[0][0]) == 0)
-            //            {
-            //                CPtypeValue = $" , `text` = '{schedule_detail.text}' ";
+                        DataTable dtType = await Context.FetchData(myQuery2).ConfigureAwait(false);
+                        string CPtypeValue = "";
+                        if (Convert.ToInt32(dtType.Rows[0][0]) == 0)
+                        {
+                            CPtypeValue = $" , `text` = '{schedule_detail.text}' ";
 
-            //            }else if (Convert.ToInt32(dtType.Rows[0][0]) == 1)
-            //            {
-            //                CPtypeValue = $" , is_ok = {schedule_detail.boolean} ";
+                        }
+                     
+                        else if (Convert.ToInt32(dtType.Rows[0][0]) == 1)
+                        {
+                            CPtypeValue = $" , boolean = {schedule_detail.boolean} ";
 
-            //            }
-            //            else if (Convert.ToInt32(dtType.Rows[0][0]) == 2)
-            //            {
-            //                CPtypeValue = $" , `range` = {schedule_detail.range} ";
+                        }
+                        else if (Convert.ToInt32(dtType.Rows[0][0]) == 2)
+                        {
+                            CPtypeValue = $" , `range` = {schedule_detail.range} ";
 
-            //            }
-            //            if (schedule_detail.observation != null  || !schedule_detail.observation.Equals(execution_details[0].observation))
-            //            {
-            //                string updateQry = "UPDATE pm_execution SET ";
-            //                string message;
-            //                if (execution_details[0].observation == null || execution_details[0].observation == "")
-            //                {
-            //                    updateQry += $"PM_Schedule_Observation_added_by = {userID}, " +
-            //                                $"PM_Schedule_Observation_add_date = '{UtilsRepository.GetUTCTime()}', " +
-            //                                $"PM_Schedule_Observation = '{schedule_detail.observation}' {CPtypeValue} ";
-            //                    message = "Observation Added";
-            //                    response = new CMDefaultResponse(schedule_detail.execution_id, CMMS.RETRUNSTATUS.SUCCESS, "Observation Added Successfully");
-            //                }
-            //                else
-            //                {
-            //                    updateQry += $"PM_Schedule_Observation = '{schedule_detail.observation}', ";
-            //                    updateQry += $"PM_Schedule_Observation_update_by = {userID}, " +
-            //                                $"PM_Schedule_Observation_update_date = '{UtilsRepository.GetUTCTime()}' {CPtypeValue} ";
-            //                    message = "Observation Updated";
-            //                    response = new CMDefaultResponse(schedule_detail.execution_id, CMMS.RETRUNSTATUS.SUCCESS, "Observation Updated Successfully");
-            //                }
-            //                updateQry += $"WHERE id = {schedule_detail.execution_id};";
-            //                await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
-            //                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, schedule.schedule_id, CMMS.CMMS_Modules.PM_EXECUTION, schedule_detail.execution_id, message, CMMS.CMMS_Status.PM_UPDATED, userID);
-            //                responseList.Add(response);
-            //                changeFlag++;
-            //            }
-            //            if (schedule_detail.job_create == 1 && execution_details[0].job_create == 0)
-            //            {
+                        }
 
-            //                string facilityQry = $"SELECT pm_task.facility_id as block, CASE WHEN facilities.parentId=0 THEN facilities.id ELSE facilities.parentId END AS parent " +
-            //                                    $"FROM pm_schedule Left join pm_task on pm_task.id = pm_schedule.task_id LEFT JOIN facilities ON pm_task.facility_id=facilities.id " +
-            //                                    $"WHERE pm_schedule.id = {schedule.schedule_id}  group by pm_task.id ;";
-            //                DataTable dtFacility = await Context.FetchData(facilityQry).ConfigureAwait(false);
-            //                string titleDescQry = $"SELECT CONCAT('PMSCH{schedule.schedule_id}', Check_Point_Name, ': ', Check_Point_Requirement) as title, " +
-            //                                        $"PM_Schedule_Observation as description FROM pm_execution WHERE id = {schedule_detail.execution_id};";
-            //                DataTable dtTitleDesc = await Context.FetchData(titleDescQry).ConfigureAwait(false);
-            //                string assetsPMQry = $"SELECT Asset_id FROM pm_schedule WHERE id = {schedule.schedule_id};";
-            //                DataTable dtPMAssets = await Context.FetchData(assetsPMQry).ConfigureAwait(false);
-            //                CMCreateJob newJob = new CMCreateJob()
-            //                {
-            //                    title = dtTitleDesc.GetColumn<string>("title")[0],
-            //                    description = dtTitleDesc.GetColumn<string>("description")[0],
-            //                    facility_id = dtFacility.GetColumn<int>("parent")[0],
-            //                    block_id = dtFacility.GetColumn<int>("block")[0],
-            //                    breakdown_time = DateTime.UtcNow,
-            //                    AssetsIds = dtPMAssets.GetColumn<int>("Asset_id"),
-            //                    jobType = CMMS.CMMS_JobType.PreventiveMaintenance
-            //                };
-            //                CMDefaultResponse jobResp = await _jobRepo.CreateNewJob(newJob, userID);
-            //                string updateQry = $"UPDATE pm_execution SET job_created = 1, linked_job_id = {jobResp.id[0]} WHERE id = {schedule_detail.execution_id};";
-            //                await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
-            //                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, schedule.schedule_id, CMMS.CMMS_Modules.PM_EXECUTION, schedule_detail.execution_id, $"Job {jobResp.id[0]} Created for PM", CMMS.CMMS_Status.PM_UPDATED, userID);
-            //                response = new CMDefaultResponse(schedule_detail.execution_id, CMMS.RETRUNSTATUS.SUCCESS, $"Job {jobResp.id[0]} Created for PM Successfully");
-            //                responseList.Add(response);
-            //                changeFlag++;
-            //            }
-            //            if (schedule_detail.pm_files != null)
-            //            {
-            //                if (schedule_detail.pm_files.Count != 0)
-            //                {
-            //                    foreach (var file in schedule_detail.pm_files)
-            //                    {
-            //                        string checkEventFiles = $"SELECT * FROM pm_schedule_files " +
-            //                                                    $"WHERE PM_Schedule_id = {schedule.schedule_id} " +
-            //                                                    $"AND PM_Execution_id = {schedule_detail.execution_id} " +
-            //                                                    $"AND PM_Event = {(int)file.pm_event}";
-            //                        DataTable dt2 = await Context.FetchData(checkEventFiles).ConfigureAwait(false);
+                        CPtypeValue = CPtypeValue +  $" , is_ok = {schedule_detail.is_ok} ";
+                        if (schedule_detail.observation != null || !schedule_detail.observation.Equals(execution_details[0].observation))
+                        {
+                            string updateQry = "UPDATE pm_execution SET ";
+                            string message;
+                            if (execution_details[0].observation == null || execution_details[0].observation == "")
+                            {
+                                updateQry += $"PM_Schedule_Observation_added_by = {userID}, " +
+                                            $"PM_Schedule_Observation_add_date = '{UtilsRepository.GetUTCTime()}', " +
+                                            $"PM_Schedule_Observation = '{schedule_detail.observation}' {CPtypeValue} ";
+                                message = "Observation Added";
+                                response = new CMDefaultResponse(schedule_detail.execution_id, CMMS.RETRUNSTATUS.SUCCESS, "Observation Added Successfully");
+                            }
+                            else
+                            {
+                                updateQry += $"PM_Schedule_Observation = '{schedule_detail.observation}', ";
+                                updateQry += $"PM_Schedule_Observation_update_by = {userID}, " +
+                                            $"PM_Schedule_Observation_update_date = '{UtilsRepository.GetUTCTime()}' {CPtypeValue} ";
+                                message = "Observation Updated";
+                                response = new CMDefaultResponse(schedule_detail.execution_id, CMMS.RETRUNSTATUS.SUCCESS, "Observation Updated Successfully");
+                            }
+                            updateQry += $"WHERE id = {schedule_detail.execution_id};";
+                            await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+                            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, schedule.schedule_id, CMMS.CMMS_Modules.PM_EXECUTION, schedule_detail.execution_id, message, CMMS.CMMS_Status.PM_UPDATED, userID);
+                            responseList.Add(response);
+                            changeFlag++;
+                        }
+                        if (schedule_detail.job_create == 1 && execution_details[0].job_create == 0)
+                        {
 
-            //                        if (dt2.Rows.Count > 0)
-            //                        {
-            //                            string deleteQry = "DELETE FROM pm_schedule_files " +
-            //                                                    $"WHERE PM_Schedule_id = {schedule.schedule_id} " +
-            //                                                    $"AND PM_Execution_id = {schedule_detail.execution_id} " +
-            //                                                    $"AND PM_Event = {(int)file.pm_event}";
-            //                            await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
-            //                        }
-            //                        string insertFile = "INSERT INTO pm_schedule_files(PM_Schedule_id, PM_Schedule_Code, PM_Execution_id, File_id, PM_Event, " +
-            //                                            "File_Discription, File_added_by, File_added_date, File_Server_id, File_Server_Path) VALUES " +
-            //                                            $"({schedule.schedule_id}, 'PMSCH{schedule.schedule_id}', {schedule_detail.execution_id}, {file.file_id}, " +
-            //                                            $"{(int)file.pm_event}, '{file.file_desc}', {userID}, '{UtilsRepository.GetUTCTime()}', 1, " +
-            //                                            $"'http://cms_test.com/' ); SELECT LAST_INSERT_ID();";
-            //                        DataTable dt3 = await Context.FetchData(insertFile).ConfigureAwait(false);
-            //                        int id = Convert.ToInt32(dt3.Rows[0][0]);
-            //                        string otherDetailsQry = "UPDATE pm_schedule_files as pmf " +
-            //                                                    "JOIN uploadedfiles as f ON pmf.File_id = f.id " +
-            //                                                    "JOIN pm_schedule as pms ON pms.id = pmf.PM_Schedule_id " +
-            //                                                    "JOIN pm_execution as pme ON pme.id = pmf.PM_Execution_id " +
-            //                                                 "SET " +
-            //                                                    "pmf.PM_Schedule_Title = pms.PM_Schedule_Name, " +
-            //                                                    "pmf.Check_Point_id = pme.Check_Point_id, " +
-            //                                                    "pmf.Check_Point_Code = pme.Check_Point_Code, " +
-            //                                                    "pmf.Check_Point_Name = pme.Check_Point_Name, " +
-            //                                                    "pmf.File_Name = SUBSTRING_INDEX(f.file_path, '\\\\', -1), " +
-            //                                                    "pmf.File_Path = f.file_path, " +
-            //                                                    "pmf.File_Type_name = f.file_type, " +
-            //                                                    "pmf.File_Size = f.file_size, " +
-            //                                                    "pmf.File_Size_Units = f.file_size_units, " +
-            //                                                    "pmf.File_Size_bytes = f.file_size_bytes, " +
-            //                                                    "pmf.File_Type_ext = SUBSTRING_INDEX(f.file_path, '.', -1) " +
-            //                                                 $"WHERE pmf.id = {id};";
-            //                        await Context.ExecuteNonQry<int>(otherDetailsQry).ConfigureAwait(false);
-            //                    }
-            //                    await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, schedule.schedule_id, CMMS.CMMS_Modules.PM_EXECUTION, schedule_detail.execution_id, $"{schedule_detail.pm_files.Count} file(s) attached to PMSCH{schedule.schedule_id}", CMMS.CMMS_Status.PM_UPDATED, userID);
-            //                    response = new CMDefaultResponse(schedule_detail.execution_id, CMMS.RETRUNSTATUS.SUCCESS, $"{schedule_detail.pm_files.Count} file(s) attached to PM Successfully");
-            //                    responseList.Add(response);
-            //                    changeFlag++;
-            //                }
-            //            }
-            //            if (changeFlag == 0)
-            //            {
-            //                response = new CMDefaultResponse(schedule_detail.execution_id, CMMS.RETRUNSTATUS.SUCCESS, "No changes");
-            //                responseList.Add(response);
-            //            }
-            //        }
-            //        else
-            //        {
-            //            response = new CMDefaultResponse(schedule_detail.execution_id, CMMS.RETRUNSTATUS.INVALID_ARG, $"Execution ID {schedule_detail.execution_id} not associated with PMSCH{schedule.schedule_id}");
-            //            responseList.Add(response);
-            //        }
-            //    }
+                            string facilityQry = $"SELECT pm_task.facility_id as block, CASE WHEN facilities.parentId=0 THEN facilities.id ELSE facilities.parentId END AS parent " +
+                                                $"FROM pm_schedule Left join pm_task on pm_task.id = pm_schedule.task_id LEFT JOIN facilities ON pm_task.facility_id=facilities.id " +
+                                                $"WHERE pm_schedule.id = {schedule.schedule_id}  group by pm_task.id ;";
+                            DataTable dtFacility = await Context.FetchData(facilityQry).ConfigureAwait(false);
+                            string titleDescQry = $"SELECT CONCAT('PMSCH{schedule.schedule_id}', Check_Point_Name, ': ', Check_Point_Requirement) as title, " +
+                                                    $"PM_Schedule_Observation as description FROM pm_execution WHERE id = {schedule_detail.execution_id};";
+                            DataTable dtTitleDesc = await Context.FetchData(titleDescQry).ConfigureAwait(false);
+                            string assetsPMQry = $"SELECT Asset_id FROM pm_schedule WHERE id = {schedule.schedule_id};";
+                            DataTable dtPMAssets = await Context.FetchData(assetsPMQry).ConfigureAwait(false);
+                            CMCreateJob newJob = new CMCreateJob()
+                            {
+                                title = dtTitleDesc.GetColumn<string>("title")[0],
+                                description = dtTitleDesc.GetColumn<string>("description")[0],
+                                facility_id = dtFacility.GetColumn<int>("parent")[0],
+                                block_id = dtFacility.GetColumn<int>("block")[0],
+                                breakdown_time = DateTime.UtcNow,
+                                AssetsIds = dtPMAssets.GetColumn<int>("Asset_id"),
+                                jobType = CMMS.CMMS_JobType.PreventiveMaintenance
+                            };
+                            CMDefaultResponse jobResp = await _jobRepo.CreateNewJob(newJob, userID);
+                            string updateQry = $"UPDATE pm_execution SET job_created = 1, linked_job_id = {jobResp.id[0]} WHERE id = {schedule_detail.execution_id};";
+                            await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+                            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, schedule.schedule_id, CMMS.CMMS_Modules.PM_EXECUTION, schedule_detail.execution_id, $"Job {jobResp.id[0]} Created for PM", CMMS.CMMS_Status.PM_UPDATED, userID);
+                            response = new CMDefaultResponse(schedule_detail.execution_id, CMMS.RETRUNSTATUS.SUCCESS, $"Job {jobResp.id[0]} Created for PM Successfully");
+                            responseList.Add(response);
+                            changeFlag++;
+                        }
+                        if (schedule_detail.pm_files != null)
+                        {
+                            if (schedule_detail.pm_files.Count != 0)
+                            {
+                                foreach (var file in schedule_detail.pm_files)
+                                {
+                                    string checkEventFiles = $"SELECT * FROM pm_schedule_files " +
+                                                                $"WHERE PM_Schedule_id = {schedule.schedule_id} " +
+                                                                $"AND PM_Execution_id = {schedule_detail.execution_id} " +
+                                                                $"AND PM_Event = {(int)file.pm_event}";
+                                    DataTable dt2 = await Context.FetchData(checkEventFiles).ConfigureAwait(false);
 
-            //}
+                                    if (dt2.Rows.Count > 0)
+                                    {
+                                        string deleteQry = "DELETE FROM pm_schedule_files " +
+                                                                $"WHERE PM_Schedule_id = {schedule.schedule_id} " +
+                                                                $"AND PM_Execution_id = {schedule_detail.execution_id} " +
+                                                                $"AND PM_Event = {(int)file.pm_event}";
+                                        await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
+                                    }
+                                    string insertFile = "INSERT INTO pm_schedule_files(PM_Schedule_id, PM_Schedule_Code, PM_Execution_id, File_id, PM_Event, " +
+                                                        "File_Discription, File_added_by, File_added_date, File_Server_id, File_Server_Path) VALUES " +
+                                                        $"({schedule.schedule_id}, 'PMSCH{schedule.schedule_id}', {schedule_detail.execution_id}, {file.file_id}, " +
+                                                        $"{(int)file.pm_event}, '{file.file_desc}', {userID}, '{UtilsRepository.GetUTCTime()}', 1, " +
+                                                        $"'http://cms_test.com/' ); SELECT LAST_INSERT_ID();";
+                                    DataTable dt3 = await Context.FetchData(insertFile).ConfigureAwait(false);
+                                    int id = Convert.ToInt32(dt3.Rows[0][0]);
+                                    string otherDetailsQry = "UPDATE pm_schedule_files as pmf " +
+                                                                "JOIN uploadedfiles as f ON pmf.File_id = f.id " +
+                                                                "JOIN pm_schedule as pms ON pms.id = pmf.PM_Schedule_id " +
+                                                                "JOIN pm_execution as pme ON pme.id = pmf.PM_Execution_id " +
+                                                             "SET " +
+                                                                "pmf.PM_Schedule_Title = pms.PM_Schedule_Name, " +
+                                                                "pmf.Check_Point_id = pme.Check_Point_id, " +
+                                                                "pmf.Check_Point_Code = pme.Check_Point_Code, " +
+                                                                "pmf.Check_Point_Name = pme.Check_Point_Name, " +
+                                                                "pmf.File_Name = SUBSTRING_INDEX(f.file_path, '\\\\', -1), " +
+                                                                "pmf.File_Path = f.file_path, " +
+                                                                "pmf.File_Type_name = f.file_type, " +
+                                                                "pmf.File_Size = f.file_size, " +
+                                                                "pmf.File_Size_Units = f.file_size_units, " +
+                                                                "pmf.File_Size_bytes = f.file_size_bytes, " +
+                                                                "pmf.File_Type_ext = SUBSTRING_INDEX(f.file_path, '.', -1) " +
+                                                             $"WHERE pmf.id = {id};";
+                                    await Context.ExecuteNonQry<int>(otherDetailsQry).ConfigureAwait(false);
+                                }
+                                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, schedule.schedule_id, CMMS.CMMS_Modules.PM_EXECUTION, schedule_detail.execution_id, $"{schedule_detail.pm_files.Count} file(s) attached to PMSCH{schedule.schedule_id}", CMMS.CMMS_Status.PM_UPDATED, userID);
+                                response = new CMDefaultResponse(schedule_detail.execution_id, CMMS.RETRUNSTATUS.SUCCESS, $"{schedule_detail.pm_files.Count} file(s) attached to PM Successfully");
+                                responseList.Add(response);
+                                changeFlag++;
+                            }
+                        }
+                        if (changeFlag == 0)
+                        {
+                            response = new CMDefaultResponse(schedule_detail.execution_id, CMMS.RETRUNSTATUS.SUCCESS, "No changes");
+                            responseList.Add(response);
+                        }
+                    }
+                    else
+                    {
+                        response = new CMDefaultResponse(schedule_detail.execution_id, CMMS.RETRUNSTATUS.INVALID_ARG, $"Execution ID {schedule_detail.execution_id} not associated with PMSCH{schedule.schedule_id}");
+                        responseList.Add(response);
+                    }
+                }
+
+            }
             string taskQry = $"update pm_task set updated_by = {userID},updated_at = '{UtilsRepository.GetUTCTime()}', update_remarks = '{request.comment}' WHERE id = {request.task_id};";
             int retVal = await Context.ExecuteNonQry<int>(taskQry).ConfigureAwait(false);
 
@@ -713,8 +719,8 @@ namespace CMMSAPIs.Repositories.PM
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_TASK, request.task_id, 0, 0, string.IsNullOrEmpty(request.comment) ? "PM Task Updated" : request.comment, CMMS.CMMS_Status.PM_UPDATED, userID);
 
-            CMDefaultResponse response = new CMDefaultResponse(request.task_id, retCode, "PM Task Updated successfully");
-            responseList.Add(response);
+            CMDefaultResponse responseResult = new CMDefaultResponse(request.task_id, retCode, "PM Task Updated successfully");
+            responseList.Add(responseResult);
 
             return responseList;
         }

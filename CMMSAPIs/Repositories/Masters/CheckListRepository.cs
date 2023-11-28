@@ -266,7 +266,7 @@ namespace CMMSAPIs.Repositories.Masters
              * Code goes here
             */
             string myQuery = "SELECT " +
-                                "checkpoint.id as id, check_point, check_list_id as checklist_id, checklist_number.checklist_number as checklist_name, requirement, is_document_required, action_to_be_done, checkpoint.created_by as created_by_id, CONCAT(created_user.firstName,' ',created_user.lastName) as created_by_name, checkpoint.created_at, checkpoint.updated_by as updated_by_id, CONCAT(updated_user.firstName,' ',updated_user.lastName) as updated_by_name, checkpoint.updated_at, checkpoint.status ,checkpoint.failure_weightage,CASE WHEN checkpoint.type = 1 then 'Bool' WHEN checkpoint.type = 2 then 'Range' ELSE 'Unknown Type' END as checkpoint_type , checkpoint.min_range as min ,checkpoint.max_range as max " +
+                                "checkpoint.id as id, check_point, check_list_id as checklist_id, checklist_number.checklist_number as checklist_name, requirement, is_document_required, action_to_be_done, checkpoint.created_by as created_by_id, CONCAT(created_user.firstName,' ',created_user.lastName) as created_by_name, checkpoint.created_at, checkpoint.updated_by as updated_by_id, CONCAT(updated_user.firstName,' ',updated_user.lastName) as updated_by_name, checkpoint.updated_at, checkpoint.status ,checkpoint.failure_weightage,checkpoint.type as type,CASE WHEN checkpoint.type = 1 then 'Bool'  WHEN checkpoint.type = 0 then 'Text' WHEN checkpoint.type = 2 then 'Range' ELSE 'Unknown Type' END as checkpoint_type , checkpoint.min_range as min ,checkpoint.max_range as max " +
                              "FROM " + 
                                 "checkpoint " + 
                              "LEFT JOIN " + 

@@ -816,7 +816,7 @@ namespace CMMSAPIs.Repositories.Inventory
             //    "b3.name as manufacturer_name, a.currency FROM assets AS a JOIN assetstatus as s on s.id = a.statusId " +
             //    "JOIN facilities as f ON f.id = a.blockId JOIN assets as a2 ON a.parentId = a2.id " +
             //    "JOIN business AS b2 ON a.ownerId = b2.id JOIN business AS b3 ON a.manufacturerId = b3.id";
-            string myQuery = "SELECT a.id ,a.name, a.description, ast.id as typeId, ast.name as type, b2.id as supplierId, b2.name as supplierName, manufacturertlb.id as manufacturerId, manufacturertlb.name as manufacturerName, b5.id as operatorId, b5.name as operatorName, ac.id as categoryId, ac.name as categoryName, a.serialNumber, a.calibrationFrequency, a.calibrationFreqType, a.calibrationReminderDays, CASE WHEN a.calibrationLastDate = '0000-00-00 00:00:00' THEN NULL ELSE a.calibrationLastDate END as calibrationLastDate, CASE WHEN a.calibrationDueDate = '0000-00-00 00:00:00' THEN NULL ELSE a.calibrationDueDate END AS calibrationDueDate, a.model, a.currency, a.cost, a.acCapacity, a.dcCapacity, a.moduleQuantity, " +
+            string myQuery = "SELECT a.id ,a.name, a.description, ast.id as typeId, ast.name as type, b2.id as supplierId, b2.name as supplierName, manufacturertlb.id as manufacturerId, manufacturertlb.name as manufacturerName, b5.id as operatorId, b5.name as operatorName, ac.id as categoryId, ac.name as categoryName, a.serialNumber, a.calibrationFrequency,frequency.name as calibrationFreqType, a.calibrationReminderDays, CASE WHEN a.calibrationLastDate = '0000-00-00 00:00:00' THEN NULL ELSE a.calibrationLastDate END as calibrationLastDate, CASE WHEN a.calibrationDueDate = '0000-00-00 00:00:00' THEN NULL ELSE a.calibrationDueDate END AS calibrationDueDate, a.model, a.currency, a.cost, a.acCapacity, a.dcCapacity, a.moduleQuantity, " +
             //a.firstDueDate as calibrationDueDate, 
             "f.id as facilityId, f.name AS facilityName, bl.id as blockId, bl.name AS blockName, a2.id as parentId, a2.name as parentName, a2.serialNumber as parentSerial, custbl.id as customerId, custbl.name as customerName, owntbl.id as ownerId, owntbl.name as ownerName, s.id as statusId, s.name AS status, a.specialTool, w.id as warrantyId, w.warranty_description, w.certificate_number, wt.id as warrantyTypeId, wt.name as warrantyTypeName, wut.id as warrantyTermTypeId, wut.name as warrantyTermTypeName, wp.id as warrantyProviderId, wp.name as warrantyProviderName, files.file_path as warranty_certificate_path " +     //use a.specialToolEmpId to put specialToolEmp,
             "from assets as a " +
@@ -835,7 +835,8 @@ namespace CMMSAPIs.Repositories.Inventory
             "left join uploadedfiles as files ON files.id = w.certificate_file_id " +
             "left join warrantytype as wt ON w.warranty_type = wt.id " +
             "left join warrantyusageterm as wut ON w.warranty_term_type = wut.id " +
-            "left join business as wp ON w.warranty_provider = wp.id";
+            "left join business as wp ON w.warranty_provider = wp.id " +
+            "left join frequency as frequency ON frequency.id = a.calibrationFrequency ";
             if (id != 0)
             {
                 myQuery += " WHERE a.id= " + id;

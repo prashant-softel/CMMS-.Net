@@ -1025,7 +1025,7 @@ namespace CMMSAPIs.Repositories
                 "added_to_store,   \r\n      " +
                 "  po.challan_no, po.po_no, po.freight, po.transport, po.no_pkg_received, po.lr_no, po.condition_pkg_received, " +
                 "po.vehicle_no, po.gir_no, po.challan_date, po.job_ref, po.amount,  po.currency as currencyID , curr.name as currency , stt.asset_type as asset_type_Name,  po_no, po_date, requested_qty,lost_qty, ordered_qty\r\n    ,paid_by_ID, smpaidby.paid_by paid_by_name , po.received_on as receivedAt,sam.asset_type_ID,sam.asset_code,sam.asset_name" +
-                " , sic.cat_name,smat.asset_type, pod.is_splited, pod.sr_no FROM smgoodsorderdetails pod\r\n        LEFT JOIN smgoodsorder po ON po.ID = pod.purchaseID\r\n     " +
+                " , sic.cat_name,smat.asset_type, pod.is_splited, pod.sr_no, requestOrderId, requestOrderItemID FROM smgoodsorderdetails pod\r\n        LEFT JOIN smgoodsorder po ON po.ID = pod.purchaseID\r\n     " +
                 "   LEFT JOIN smassetitems sai ON sai.ID = pod.assetItemID\r\n       " +
                 " LEFT JOIN smassetmasters sam ON  sam.ID = pod.assetItemID\r\n      " +
                 "  LEFT JOIN smunitmeasurement sm ON sm.ID = sam.unit_of_measurement\r\n    " +
@@ -1221,7 +1221,8 @@ namespace CMMSAPIs.Repositories
             for (var i = 0; i < request.go_items.Count; i++)
             {
                 string itemsQuery = $"UPDATE smgoodsorderdetails SET location_ID = {request.location_ID},assetItemID = {request.go_items[i].assetMasterItemID},cost = {request.go_items[i].cost}, accepted_qty = {request.go_items[i].accepted_qty}, received_qty= {request.go_items[i].received_qty},lost_qty = {request.go_items[i].lost_qty}, damaged_qty={request.go_items[i].damaged_qty}," +
-                    $" sr_no = '{request.go_items[i].sr_no}' WHERE ID = {request.go_items[i].goItemID}";
+                    $" sr_no = '{request.go_items[i].sr_no}' WHERE ID = {request.go_items[i].goItemID} ;";
+                itemsQuery = itemsQuery + $"update smassetitems set serial_number = '{request.go_items[i].sr_no}' where materialID = {request.go_items[i].assetMasterItemID}";
                 var result = await Context.ExecuteNonQry<int>(itemsQuery);
             }
 

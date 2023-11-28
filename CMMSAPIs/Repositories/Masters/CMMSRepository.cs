@@ -32,14 +32,14 @@ using OfficeOpenXml;
 
 namespace CMMSAPIs.Repositories.Masters
 {
-    public class CMMSRepository : GenericRepository  
+    public class CMMSRepository : GenericRepository
     {
         private UtilsRepository _utilsRepo;
         public static Microsoft.AspNetCore.Hosting.IWebHostEnvironment _environment;
         private MYSQLDBHelper getDB;
         private ErrorLog m_errorLog;
 
-        public const string MA_Actual = "MA_Actual"; 
+        public const string MA_Actual = "MA_Actual";
         public const string MA_Contractual = "MA_Contractual";
         public const string Internal_Grid = "Internal_Grid";
         public const string External_Grid = "External_Grid";
@@ -90,8 +90,8 @@ namespace CMMSAPIs.Repositories.Masters
             /*
              * Read property of CMModule and insert into Features table
             */
-            string myQuery = "INSERT INTO features(`moduleName`, `featureName`, `menuImage`, `add`, `edit`, `delete`, `view`, `issue`, `approve`, `selfView`) " + 
-                $"VALUES('{request.moduleName}', '{request.featureName}', '{request.menuImage}', {request.add}, {request.edit}, " + 
+            string myQuery = "INSERT INTO features(`moduleName`, `featureName`, `menuImage`, `add`, `edit`, `delete`, `view`, `issue`, `approve`, `selfView`) " +
+                $"VALUES('{request.moduleName}', '{request.featureName}', '{request.menuImage}', {request.add}, {request.edit}, " +
                 $"{request.delete}, {request.view}, {request.issue}, {request.approve}, {request.selfView}); SELECT LAST_INSERT_ID();";
             DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
             int id = Convert.ToInt32(dt.Rows[0][0]);
@@ -198,8 +198,8 @@ namespace CMMSAPIs.Repositories.Masters
         {
             string myQuery = "SELECT facilities.id, facilities.name, spv.name as spv, facilities.address, facilities.city, facilities.state, facilities.country, facilities.zipcode as pin " +
                 ", u.name as customer ,u2.name as owner,u3.name as Operator" +
-                " FROM Facilities LEFT JOIN spv ON facilities.spvId=spv.id LEFT JOIN business as u ON u.id = facilities.customerId LEFT JOIN business as u2 ON u2.id = facilities.ownerId LEFT JOIN business as u3 ON u3.id = facilities.operatorId WHERE isBlock = 0 and facilities.status = 1;"; 
-            
+                " FROM Facilities LEFT JOIN spv ON facilities.spvId=spv.id LEFT JOIN business as u ON u.id = facilities.customerId LEFT JOIN business as u2 ON u2.id = facilities.ownerId LEFT JOIN business as u3 ON u3.id = facilities.operatorId WHERE isBlock = 0 and facilities.status = 1;";
+
             List<CMFacilityList> _Facility = await Context.GetData<CMFacilityList>(myQuery).ConfigureAwait(false);
             return _Facility;
         }
@@ -341,12 +341,12 @@ namespace CMMSAPIs.Repositories.Masters
                              "LEFT JOIN " +
                                     "countries as countries ON countries.id = u.countryId and countries.id = cities.country_id and countries.id = states.country_id " +
                              "LEFT JOIN " +
-                                    "usersaccess as access ON u.id = access.userId " + 
+                                    "usersaccess as access ON u.id = access.userId " +
                              "WHERE " +
                                     $"u.status = 1 AND uf.status = 1 AND isEmployee = 1 AND uf.facilityId = {facility_id} ";
             if (facility_id < 0)
                 throw new ArgumentException("Invalid Facility ID");
-            if(module != 0 && access != 0)
+            if (module != 0 && access != 0)
             {
                 myQuery += $"AND access.featureId = {module_dict[module]} AND ( ";
                 if ((access & CMMS.CMMS_Access.ADD) == CMMS.CMMS_Access.ADD)
@@ -595,7 +595,7 @@ namespace CMMSAPIs.Repositories.Masters
             return _FrequencyList;
         }
 
-        internal  async Task<string> Print(int id, CMMS.CMMS_Modules moduleID, params object[] args)
+        internal async Task<string> Print(int id, CMMS.CMMS_Modules moduleID, params object[] args)
         {
             CMMSNotification.print = true;
             CMMS.CMMS_Status notificationID;
@@ -607,12 +607,12 @@ namespace CMMSAPIs.Repositories.Masters
                     JobRepository obj = new JobRepository(getDB);
                     CMJobView _jobView = await obj.GetJobDetails(id);
                     notificationID = (CMMS.CMMS_Status)(_jobView.status);
-                    await CMMSNotification.sendNotification(moduleID, notificationID,null, _jobView);
+                    await CMMSNotification.sendNotification(moduleID, notificationID, null, _jobView);
                     break;
                 case CMMS.CMMS_Modules.PTW:
                     PermitRepository obj1 = new PermitRepository(getDB);
                     CMPermitDetail _Permit = await obj1.GetPermitDetails(id);
-                     notificationID = (CMMS.CMMS_Status)(_Permit.ptwStatus);
+                    notificationID = (CMMS.CMMS_Status)(_Permit.ptwStatus);
                     await CMMSNotification.sendNotification(moduleID, notificationID, null, _Permit);
                     break;
                 case CMMS.CMMS_Modules.JOBCARD:
@@ -625,7 +625,7 @@ namespace CMMSAPIs.Repositories.Masters
                     IncidentReportRepository obj3 = new IncidentReportRepository(getDB);
                     CMViewIncidentReport _IncidentReport = await obj3.GetIncidentDetailsReport(id);
                     notificationID = (CMMS.CMMS_Status)(_IncidentReport.status);
-                   await CMMSNotification.sendNotification(moduleID, notificationID, null, _IncidentReport);
+                    await CMMSNotification.sendNotification(moduleID, notificationID, null, _IncidentReport);
                     break;
                 case CMMS.CMMS_Modules.WARRANTY_CLAIM:
                     WCRepository obj4 = new WCRepository(getDB);
@@ -937,6 +937,14 @@ namespace CMMSAPIs.Repositories.Masters
                 response = response4;
             }
             return response;
+        }
+        public async Task<string> DownloadFile(int id)
+        {
+            string query1 = $"SELECT file_path FROM templatefile WHERE id = {id};";
+            DataTable dt1 = await Context.FetchData(query1).ConfigureAwait(false);
+            string path = Convert.ToString(dt1.Rows[0][0]);
+            return path;
+
         }
     }
 

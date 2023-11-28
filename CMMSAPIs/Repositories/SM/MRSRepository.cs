@@ -201,7 +201,8 @@ namespace CMMSAPIs.Repositories.SM
             {
                 for (var i = 0; i < request.cmmrsItems.Count; i++)
                 {
-
+                    int available_qty = await GetAvailableQty(request.cmmrsItems[i].asset_item_ID, request.facility_ID);
+                    request.cmmrsItems[i].available_qty = available_qty - request.cmmrsItems[i].requested_qty;
                     int equipmentID = request.cmmrsItems[i].asset_item_ID;
                     decimal quantity = request.cmmrsItems[i].qty;
 
@@ -426,7 +427,7 @@ namespace CMMSAPIs.Repositories.SM
                 "DATE_FORMAT(sm.returnDate,'%Y-%m-%d') as returnDate,sm.approval_status,DATE_FORMAT(sm.approved_date,'%Y-%m-%d') as approved_date," +
                 "DATE_FORMAT(sm.requested_date,'%Y-%m-%d') as issued_date,DATE_FORMAT(sm.returnDate, '%Y-%m-%d') as returnDate, smi.requested_qty, " +
                 "if(smi.approval_required = 1,'Yes','No') as approval_required, smi.is_splited, sam.ID as asset_item_ID," +
-                " sai.serial_number, sam.asset_name, sam.asset_type_ID,sat.asset_type,COALESCE(file.file_path,'') as file_path," +
+                " smi.serial_number, sam.asset_name, sam.asset_type_ID,sat.asset_type,COALESCE(file.file_path,'') as file_path," +
                 "file.Asset_master_id,sai.materialID, sai.assetMasterID " +
                 " FROM smrsitems smi " +
                 " LEFT JOIN smmrs sm ON sm.ID = smi.mrs_ID " +
@@ -434,7 +435,7 @@ namespace CMMSAPIs.Repositories.SM
                 " left join smassetitems sai on sai.assetMasterID =  sam.id " +
                 " LEFT JOIN smassetmasterfiles  file ON file.Asset_master_id =  sam.ID    " +
                 " LEFT JOIN smassettypes sat ON sat.ID = sam.asset_type_ID     " +
-                " WHERE smi.mrs_ID = "+ID+" GROUP BY smi.ID";
+                " WHERE smi.mrs_ID = "+ID+ "  and smi.is_splited = 1 GROUP BY smi.ID";
             List<CMMRSItems> _List = await Context.GetData<CMMRSItems>(stmt).ConfigureAwait(false);
             for (var i = 0; i < _List.Count; i++)
             {
@@ -501,7 +502,7 @@ namespace CMMSAPIs.Repositories.SM
     "sm.approval_comment,CONCAT(ed.firstName,' ',ed.lastName) as requested_by_name, sm.status, sm.activity, sm.whereUsedType," +
     " case when sm.whereUsedType = 1 then 'Job' when sm.whereUsedType = 2 then 'PM' when sm.whereUsedType = 4 then 'JOBCARD' when sm.whereUsedType = 27 then 'PMTASK' else 'Invalid' end as whereUsedTypeName,  sm.whereUsedRefID, sm.remarks " +
     "FROM smmrs sm LEFT JOIN users ed ON ed.id = sm.requested_by_emp_ID LEFT JOIN users ed1 ON ed1.id = sm.approved_by_emp_ID " +
-    "WHERE sm.id = " + ID + "";
+    "WHERE sm.id = " + ID + ";";
             List<CMMRSList> _List = await Context.GetData<CMMRSList>(stmt).ConfigureAwait(false);
             for (var i = 0; i < _List.Count; i++)
             {
@@ -728,7 +729,7 @@ namespace CMMSAPIs.Repositories.SM
                 }
                 if (assetTypeId == (int)CMMS.SM_AssetTypes.Spare)
                 {
-                    var stmtU = $"UPDATE smgoodsorderdetails set is_splited = 0 where id = {item.ID}";
+                    var stmtU = $"UPDATE smrsitems set is_splited = 0 where id = {item.ID}";
                     int resultU = await Context.ExecuteNonQry<int>(stmtU).ConfigureAwait(false);
                 }
             }
@@ -737,6 +738,7 @@ namespace CMMSAPIs.Repositories.SM
             {
                 var assetCode = item.asset_MDM_code;
                 var orderedQty = item.requested_qty;
+                var available_qty = item.available_qty;
                 var type = item.asset_type;
 
                 // Get the asset type ID.
@@ -771,7 +773,7 @@ namespace CMMSAPIs.Repositories.SM
 
                             string insertStmt = $"START TRANSACTION; " +
                             $"INSERT INTO smrsitems (mrs_ID,asset_item_ID,asset_MDM_code,requested_qty,status,flag,approval_required,mrs_return_ID,issued_qty,returned_qty,used_qty,available_qty, is_splited,approved_qty)" +
-                            $"VALUES ({request.id},{item.asset_item_ID},'{item.asset_MDM_code}',1,0,0,1,0,0,0, 1, 0,1,1)" +
+                            $"VALUES ({request.id},{item.asset_item_ID},'{item.asset_MDM_code}',1,0,0,1,0,0,0, 1, {available_qty},1,1)" +
                             $"; SELECT LAST_INSERT_ID();COMMIT;";
                             DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
                         }
@@ -1250,7 +1252,7 @@ namespace CMMSAPIs.Repositories.SM
             string stmt = "SELECT SUM(debitQty) as drQty, SUM(creditQty) as crQty FROM smtransition WHERE assetItemID = " + assetItemID.ToString() + " AND actorType = '" + actorType + "' AND transactionID IN (SELECT ID FROM smtransactiondetails WHERE plantID = " + plantID.ToString() + ")";
             DataTable dt2 = await Context.FetchData(stmt).ConfigureAwait(false);
             int crQty = 0, drQty = 0;
-            while (dt2 != null && dt2.Rows.Count > 0)
+            if (dt2 != null && dt2.Rows.Count > 0)
             {
                 crQty = Convert.ToInt32(dt2.Rows[0]["crQty"]);
                 drQty = Convert.ToInt32(dt2.Rows[0]["drQty"]);
@@ -1303,14 +1305,15 @@ namespace CMMSAPIs.Repositories.SM
 
             //var_dump(spareAssetIds);
 
-            var stmt = @"SELECT sm.asset_type_ID, sm.ID as asset_ID, sm.asset_code, sic.cat_name, sat.serial_number, sat.ID, sm.asset_name, st.asset_type, if(sm.approval_required = 1, 'Yes', 'NO') as approval_required, COALESCE(file.file_path, '') as file_path, file.Asset_master_id, f_sum.spare_multi_selection,if(sm.approval_required = 1, 1, 0) as is_approval_required
-    FROM smassetitems sat
-    LEFT JOIN smassetmasters sm ON sm.id = sat.assetMasterID
-    LEFT JOIN smassettypes st ON st.ID = sm.asset_type_ID
-    LEFT JOIN smassetmasterfiles file ON file.Asset_master_id = sm.ID
-    LEFT JOIN smitemcategory sic ON sic.ID = sm.item_category_ID
-    LEFT JOIN smunitmeasurement f_sum ON f_sum.ID = sm.unit_of_measurement
-    WHERE sat.facility_ID = " + facility_ID + " AND sm.asset_type_ID is not null  ";
+            var stmt = @"SELECT sm.asset_type_ID, sm.ID as asset_ID, sm.asset_code, sic.cat_name, sat.serial_number, sat.ID, sm.asset_name, st.asset_type, if(sm.approval_required = 1, 'Yes', 'NO') as approval_required, COALESCE(file.file_path, '') as file_path, file.Asset_master_id, f_sum.spare_multi_selection,if(sm.approval_required = 1, 1, 0) as is_approval_required,
+                        sat.materialID
+                        FROM smassetitems sat
+                        LEFT JOIN smassetmasters sm ON sm.id = sat.assetMasterID
+                        LEFT JOIN smassettypes st ON st.ID = sm.asset_type_ID
+                        LEFT JOIN smassetmasterfiles file ON file.Asset_master_id = sm.ID
+                        LEFT JOIN smitemcategory sic ON sic.ID = sm.item_category_ID
+                        LEFT JOIN smunitmeasurement f_sum ON f_sum.ID = sm.unit_of_measurement
+                        WHERE sat.facility_ID = " + facility_ID + " AND sm.asset_type_ID is not null  ";
 
 
 
@@ -1330,7 +1333,7 @@ namespace CMMSAPIs.Repositories.SM
 
             if (!spareAssetIdsString.IsNullOrEmpty())
             {
-                stmt += "  UNION ALL SELECT sm.asset_type_ID, sm.ID as asset_ID, sm.asset_code, sic.cat_name, sat.serial_number, sat.ID, sm.asset_name, st.asset_type, if(sm.approval_required = 1, 'Yes', 'NO') as approval_required, COALESCE(file.file_path, '') as file_path, file.Asset_master_id, f_sum.spare_multi_selection, if(sm.approval_required = 1, 1, 0) as is_approval_required"
+                stmt += "  UNION ALL SELECT sm.asset_type_ID, sm.ID as asset_ID, sm.asset_code, sic.cat_name, sat.serial_number, sat.ID, sm.asset_name, st.asset_type, if(sm.approval_required = 1, 'Yes', 'NO') as approval_required, COALESCE(file.file_path, '') as file_path, file.Asset_master_id, f_sum.spare_multi_selection, if(sm.approval_required = 1, 1, 0) as is_approval_required, sat.materialID"
                 + " FROM smassetitems sat"
                 + " LEFT JOIN smassetmasters sm ON sm.id = sat.assetMasterID"
                 + " LEFT JOIN smassettypes st ON st.ID = sm.asset_type_ID"
@@ -1411,10 +1414,18 @@ namespace CMMSAPIs.Repositories.SM
                     for (var i = 0; i < request.cmmrsItems.Count; i++)
                     {
 
-                        string updateStmtForItemList = $"update smrsitems set issued_qty = {request.cmmrsItems[i].issued_qty}, issue_remarks = '{request.cmmrsItems[i].issue_remarks}' where ID = {request.cmmrsItems[i].mrs_item_id};";
+                        string getassetitemIDQ = $"select id from smassetitems where serial_number = '{request.cmmrsItems[i].serial_number}'";
 
-                        updateStmtForItemList = updateStmtForItemList + $" update smassetitems set item_issued_mrs = {request.ID} where id = {request.cmmrsItems[i].material_id};";
+                        string updateStmtForItemList = $"update smrsitems set serial_number= '{request.cmmrsItems[i].serial_number}', issued_qty = {request.cmmrsItems[i].issued_qty}, issue_remarks = '{request.cmmrsItems[i].issue_remarks}' where ID = {request.cmmrsItems[i].mrs_item_id};";
 
+                       
+                        DataTable dt = await Context.FetchData(getassetitemIDQ).ConfigureAwait(false);
+                        int smassetitemsID = 0;
+                        if(dt.Rows.Count > 0)
+                        {
+                            smassetitemsID = Convert.ToInt32(dt.Rows[0]["id"]);
+                        }
+                        updateStmtForItemList = updateStmtForItemList + $" update smassetitems set  item_issued_mrs = {request.ID} where id = "+ smassetitemsID + ";";
                         try
                         {
                             Queryflag = true;
