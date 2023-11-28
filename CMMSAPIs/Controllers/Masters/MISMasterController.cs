@@ -565,5 +565,144 @@ namespace CMMSAPIs.Controllers.Masters
         }
         */
 
+        [Route("GetBodyPartsList")]
+        [HttpGet]
+        public async Task<IActionResult> GetBodyPartsList()
+        {
+            try
+            {
+                var data = await _IMISMasterBS.GetBodyPartsList();
+                return Ok(data);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+        [Route("CreateBodyParts")]
+        [HttpPost]
+        public async Task<IActionResult> CreateBodyParts(BODYPARTS request, int Userid)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.CreateBodyParts(request, userID);
+                return Ok(data);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+        [Route("UpdateBodyParts")]
+        [HttpPut]
+        public async Task<IActionResult> UpdateBodyParts(BODYPARTS request, int UserId)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("UserId"));
+                var data = await _IMISMasterBS.UpdateBodyParts(request, userID);
+                return Ok(data);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+        [Route("DeleteBodyParts")]
+        [HttpDelete]
+        public async Task<IActionResult> DeleteBodyParts(int id, int UserId)
+        {
+            try
+            {
+                var data = await _IMISMasterBS.DeleteBodyParts(id, UserId);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        [Route("GetResponsibilityList")]
+        [HttpGet]
+        public async Task<IActionResult> GetResponsibilityList()
+        {
+            try
+            {
+                var data = await _IMISMasterBS.GetResponsibilityList();
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        [Route("GetResponsibilityID")]
+        [HttpGet]
+        public async Task<IActionResult> GetResponsibilityID(int id)
+        {
+            try
+            {
+                var data = await _IMISMasterBS.GetResponsibilityID(id);
+                return Ok(data);
+
+            }
+            catch (Exception ex)
+            {
+
+                return BadRequest(ex.Message);
+            }
+
+        }
+        [Route("CreateResponsibility")]
+        [HttpPost]
+        public async Task<IActionResult> CreateResponsibility(Responsibility request, int UserID)
+        {
+
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.CreateResponsibility(request, UserID);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+        }
+        [Route("UpdateResponsibility")]
+        [HttpPut]
+        public async Task<IActionResult> UpdateResponsibility(Responsibility request, int UserID)
+        {
+
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.UpdateResponsibility(request, UserID);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+        }
+        [Route("DeleteResponsibility")]
+        public async Task<IActionResult> DeleteResponsibility(int id)
+        {
+            try
+            {
+                var data = await _IMISMasterBS.DeleteResponsibility(id);
+                return Ok(data);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+
+
+
     }
 }
