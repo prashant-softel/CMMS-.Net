@@ -49,6 +49,7 @@ namespace CMMSAPIs.BS.Masters
         Task<List<CMStatus>> GetStatusList(CMMS.CMMS_Modules module);
         Task<List<CMFrequency>> GetFrequencyList();
         Task<string> Print(int id, CMMS.CMMS_Modules moduleID);
+        Task<string> DownloadFile(int id);
 
     }
     public class CMMSBS : ICMMSBS
@@ -619,6 +620,22 @@ namespace CMMSAPIs.BS.Masters
                 throw;
             }
         }
+        public async Task<string> DownloadFile(int id)
+        {
+            try
+            {
+                using (var repos = new CMMSRepository(getDB))
+                {
+                    return await repos.DownloadFile(id);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        
+
         #endregion //helper functions
 
 
