@@ -119,6 +119,14 @@ namespace CMMSAPIs.Middlewares
                             }
                         }
                     }
+
+                    if(dt.Rows.Count == 0)
+                    {
+                        httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                        await httpContext.Response.WriteAsync("Token has expired.");
+                        return;
+                    }
+
                     // fetching latest record
                     tokenLogID = Convert.ToInt32(dt.Rows[0]["id"]);
                     savedToken = Convert.ToString(dt.Rows[0]["customToken"]);
