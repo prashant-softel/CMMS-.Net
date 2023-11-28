@@ -81,6 +81,7 @@ namespace CMMSAPIs.Models.PM
         public int asset_id { get; set; }
         public int category_id { get; set; }
         public int frequency_id { get; set; }
+        public int checklist_id { get; set; }
         public DateTime schedule_date { get; set; }
     }
 }

@@ -52,6 +52,7 @@ namespace CMMSAPIs.Models.PM
         public int schedule_id { get; set; }
         public int clone_of_asset { get; set; }
         public string clone_of_name { get; set; }
+        public int assetsID { get; set; }
         public string asset_name { get; set; }
         public string checklist_name { get; set; }
         public List<ScheduleCheckList> checklist_observation { get; set; }
@@ -125,6 +126,7 @@ namespace CMMSAPIs.Models.PM
         public int failure_waightage { get; set; }
         public List<ScheduleFiles> files { get; set; }
         public int check_point_type { get; set; }
+        public int cp_ok { get; set; }
         public int type_range { get; set; }
         public int type_bool { get; set; }
         public string type_text { get; set; }
@@ -132,6 +134,7 @@ namespace CMMSAPIs.Models.PM
         public int linked_job_id { get; set; }
         public int is_custom_check_point { get; set; }
         public int is_file_required { get; set; }
+        public int failure_score { get; set; }
     }
 
     public class ScheduleFiles
@@ -181,6 +184,8 @@ namespace CMMSAPIs.Models.PM
         public string observation { get; set; }
         public int range { get; set; }
         public int cp_ok { get; set; }
+        public int is_ok { get; set; }
+        public int boolean { get; set; }
         public string text { get; set; }
         public List<PMFileUpload> pm_files { get; set; }
     }
