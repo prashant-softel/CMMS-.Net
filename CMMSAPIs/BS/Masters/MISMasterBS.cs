@@ -38,10 +38,19 @@ namespace CMMSAPIs.BS.MISMasters
         Task<CMDefaultResponse> UpdateRiskType(MISRiskType request, int userId);
         Task<CMDefaultResponse> DeleteRiskType(int id, int userId);
         Task<MISCostType> GetCostType(int risk_id);
-        Task<List<MISCostType>> GetCostTypeList();
+       Task<List<MISCostType>> GetCostTypeList();
         Task<CMDefaultResponse> CreateCostType(MISCostType request, int userId);
         Task<CMDefaultResponse> UpdateCostType(MISCostType request, int userId);
         Task<CMDefaultResponse> DeleteCostType(int id, int userId);
+		Task<List<BODYPARTS>>GetBodyPartsList();
+        Task<CMDefaultResponse> CreateBodyParts(BODYPARTS request, int UserId);
+        Task<CMDefaultResponse> UpdateBodyParts(BODYPARTS request, int UserId);
+        Task<CMDefaultResponse> DeleteBodyParts(int id, int UserId);
+        Task<List<Responsibility>> GetResponsibilityList();
+        Task<Responsibility>GetResponsibilityID(int id);
+        Task<CMDefaultResponse> CreateResponsibility(Responsibility request, int UserId);
+        Task<CMDefaultResponse> UpdateResponsibility(Responsibility request, int UserId);
+        Task<CMDefaultResponse> DeleteResponsibility(int id);
     }
     public class MISMasterBS : IMISMasterBS
     {
@@ -557,5 +566,119 @@ namespace CMMSAPIs.BS.MISMasters
         */
 
 
+        public async Task<List<BODYPARTS>> GetBodyPartsList()
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.GetBodyPartsList();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<CMDefaultResponse> CreateBodyParts(BODYPARTS requset, int UserId)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                    return await repos.CreateBodyParts(requset, UserId);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<CMDefaultResponse> UpdateBodyParts(BODYPARTS requset, int UserId)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                    return await repos.UpdateBodyParts(requset, UserId);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+        public async Task<CMDefaultResponse> DeleteBodyParts(int id, int UserId)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                    return await repos.DeleteBodyParts(id, UserId);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+        public async Task<List<Responsibility>>GetResponsibilityList()
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.GetResponsibilityList();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<Responsibility> GetResponsibilityID(int id)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.GetResponsibilityID(id);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<CMDefaultResponse> CreateResponsibility(Responsibility request, int UserID)
+        {
+            try
+            {
+                using (var response = new MISMasterRepository(getDB))
+                    return await response.CreateResponsibility(request, UserID);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+        public async Task<CMDefaultResponse> UpdateResponsibility(Responsibility request, int UserID)
+        {
+            try
+            {
+                using (var response = new MISMasterRepository(getDB))
+                    return await response.UpdateResponsibility(request, UserID);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+        public async Task<CMDefaultResponse> DeleteResponsibility(int id)
+        {
+            try
+            {
+                using (var response = new MISMasterRepository(getDB))
+                    return await response.DeleteResponsibility(id);
+            }
+            catch
+            {
+                throw;
+            }
+        }
     }
 }
