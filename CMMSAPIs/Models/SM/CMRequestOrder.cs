@@ -64,8 +64,9 @@ namespace CMMSAPIs.Models.SM
         public string asset_name { get; set; }
         //public int asset_type_ID { get; set; }
         //public string serial_number { get; set; }
-        //public string asset_code { get; set; }
-        //public string asset_type { get; set; }
+        public string asset_code { get; set; }
+        public string asset_type { get; set; }
+        public string asset_cat { get; set; }
         //public string cat_name { get; set; }
         //public decimal received_qty { get; set; }
         //public decimal damaged_qty { get; set; }

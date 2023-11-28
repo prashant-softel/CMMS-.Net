@@ -100,7 +100,7 @@ namespace CMMSAPIs.Models.SM
         public string finalRemark { get; set; }
         public int asset_item_ID { get; set; }
         public string asset_MDM_code { get; set; }
-        public long serial_number { get; set; }
+        public string serial_number { get; set; }
         public string returned_qty { get; set; }
         public decimal available_qty { get; set; }
         public decimal used_qty { get; set; }
@@ -146,6 +146,7 @@ namespace CMMSAPIs.Models.SM
         public decimal available_qty { get; set; }
         public int is_faulty { get; set; }
         public string issue_remarks { get; set; }
+        public string serial_number { get; set; }
     }
 
     public class CMVendorList
@@ -186,6 +187,7 @@ namespace CMMSAPIs.Models.SM
         public int is_splited { get; set; }
         public int materialID { get; set; }
         public int assetMasterID { get; set; }
+        public string serial_number { get; set; }
       
     }
 
@@ -209,6 +211,7 @@ namespace CMMSAPIs.Models.SM
     {
         public int asset_type_ID { get; set; }
         public int asset_ID { get; set; }
+        public int materialID { get; set; }
         public string asset_code { get; set; }
         public string cat_name { get; set; }
         public string serial_number { get; set; }
