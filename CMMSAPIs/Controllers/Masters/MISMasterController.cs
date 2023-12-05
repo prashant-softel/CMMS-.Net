@@ -564,7 +564,6 @@ namespace CMMSAPIs.Controllers.Masters
             }
         }
         */
-
         [Route("GetBodyPartsList")]
         [HttpGet]
         public async Task<IActionResult> GetBodyPartsList()
@@ -579,14 +578,14 @@ namespace CMMSAPIs.Controllers.Masters
                 throw;
             }
         }
-        [Route("CreateBodyParts")]
+        [Route("CreateBodyPart")]
         [HttpPost]
-        public async Task<IActionResult> CreateBodyParts(BODYPARTS request, int Userid)
+        public async Task<IActionResult> CreateBodyPart(BODYPARTS request, int Userid)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _IMISMasterBS.CreateBodyParts(request, userID);
+                var data = await _IMISMasterBS.CreateBodyPart(request, userID);
                 return Ok(data);
             }
             catch
@@ -594,14 +593,14 @@ namespace CMMSAPIs.Controllers.Masters
                 throw;
             }
         }
-        [Route("UpdateBodyParts")]
+        [Route("UpdateBodyPart")]
         [HttpPut]
-        public async Task<IActionResult> UpdateBodyParts(BODYPARTS request, int UserId)
+        public async Task<IActionResult> UpdateBodyPart(BODYPARTS request, int UserId)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("UserId"));
-                var data = await _IMISMasterBS.UpdateBodyParts(request, userID);
+                var data = await _IMISMasterBS.UpdateBodyPart(request, userID);
                 return Ok(data);
             }
             catch
@@ -609,100 +608,100 @@ namespace CMMSAPIs.Controllers.Masters
                 throw;
             }
         }
-        [Route("DeleteBodyParts")]
+        [Route("DeleteBodyPart")]
         [HttpDelete]
-        public async Task<IActionResult> DeleteBodyParts(int id, int UserId)
+        public async Task<IActionResult> DeleteBodyPart(int id, int UserId)
         {
             try
             {
-                var data = await _IMISMasterBS.DeleteBodyParts(id, UserId);
+                var data = await _IMISMasterBS.DeleteBodyPart(id, UserId);
                 return Ok(data);
             }
             catch (Exception)
             {
                 throw;
             }
-        [Route("GetResponsibilityList")]
-        [HttpGet]
-        public async Task<IActionResult> GetResponsibilityList()
-        {
-            try
-            {
-                var data = await _IMISMasterBS.GetResponsibilityList();
-                return Ok(data);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
         }
-        [Route("GetResponsibilityID")]
-        [HttpGet]
-        public async Task<IActionResult> GetResponsibilityID(int id)
-        {
-            try
+            [Route("GetResponsibilityList")]
+            [HttpGet]
+            public async Task<IActionResult> GetResponsibilityList()
             {
-                var data = await _IMISMasterBS.GetResponsibilityID(id);
-                return Ok(data);
+                try
+                {
+                    var data = await _IMISMasterBS.GetResponsibilityList();
+                    return Ok(data);
+                }
+                catch (Exception ex)
+                {
+                    return BadRequest(ex.Message);
+                }
+            }
+            [Route("GetResponsibilityID")]
+            [HttpGet]
+            public async Task<IActionResult> GetResponsibilityID(int id)
+            {
+                try
+                {
+                    var data = await _IMISMasterBS.GetResponsibilityID(id);
+                    return Ok(data);
+
+                }
+                catch (Exception ex)
+                {
+
+                    return BadRequest(ex.Message);
+                }
 
             }
-            catch (Exception ex)
+            [Route("CreateResponsibility")]
+            [HttpPost]
+            public async Task<IActionResult> CreateResponsibility(Responsibility request, int UserID)
             {
 
-                return BadRequest(ex.Message);
+                try
+                {
+                    int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                    var data = await _IMISMasterBS.CreateResponsibility(request, UserID);
+                    return Ok(data);
+                }
+                catch (Exception)
+                {
+                    throw;
+                }
+
             }
+            [Route("UpdateResponsibility")]
+            [HttpPut]
+            public async Task<IActionResult> UpdateResponsibility(Responsibility request, int UserID)
+            {
+
+                try
+                {
+                    int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                    var data = await _IMISMasterBS.UpdateResponsibility(request, UserID);
+                    return Ok(data);
+                }
+                catch (Exception)
+                {
+                    throw;
+                }
+
+            }
+            [Route("DeleteResponsibility")]
+            public async Task<IActionResult> DeleteResponsibility(int id)
+            {
+                try
+                {
+                    var data = await _IMISMasterBS.DeleteResponsibility(id);
+                    return Ok(data);
+                }
+                catch
+                {
+                    throw;
+                }
+            }
+
+
 
         }
-        [Route("CreateResponsibility")]
-        [HttpPost]
-        public async Task<IActionResult> CreateResponsibility(Responsibility request, int UserID)
-        {
-
-            try
-            {
-                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _IMISMasterBS.CreateResponsibility(request, UserID);
-                return Ok(data);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-
-        }
-        [Route("UpdateResponsibility")]
-        [HttpPut]
-        public async Task<IActionResult> UpdateResponsibility(Responsibility request, int UserID)
-        {
-
-            try
-            {
-                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _IMISMasterBS.UpdateResponsibility(request, UserID);
-                return Ok(data);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-
-        }
-        [Route("DeleteResponsibility")]
-        public async Task<IActionResult> DeleteResponsibility(int id)
-        {
-            try
-            {
-                var data = await _IMISMasterBS.DeleteResponsibility(id);
-                return Ok(data);
-            }
-            catch
-            {
-                throw;
-            }
-        }
-
-
-
-
     }
-}

@@ -38,16 +38,16 @@ namespace CMMSAPIs.BS.MISMasters
         Task<CMDefaultResponse> UpdateRiskType(MISRiskType request, int userId);
         Task<CMDefaultResponse> DeleteRiskType(int id, int userId);
         Task<MISCostType> GetCostType(int risk_id);
-       Task<List<MISCostType>> GetCostTypeList();
+        Task<List<MISCostType>> GetCostTypeList();
         Task<CMDefaultResponse> CreateCostType(MISCostType request, int userId);
         Task<CMDefaultResponse> UpdateCostType(MISCostType request, int userId);
         Task<CMDefaultResponse> DeleteCostType(int id, int userId);
-		Task<List<BODYPARTS>>GetBodyPartsList();
-        Task<CMDefaultResponse> CreateBodyParts(BODYPARTS request, int UserId);
-        Task<CMDefaultResponse> UpdateBodyParts(BODYPARTS request, int UserId);
-        Task<CMDefaultResponse> DeleteBodyParts(int id, int UserId);
+        Task<List<BODYPARTS>> GetBodyPartsList();
+        Task<CMDefaultResponse> CreateBodyPart(BODYPARTS request, int UserId);
+        Task<CMDefaultResponse> UpdateBodyPart(BODYPARTS request, int UserId);
+        Task<CMDefaultResponse> DeleteBodyPart(int id, int UserId);
         Task<List<Responsibility>> GetResponsibilityList();
-        Task<Responsibility>GetResponsibilityID(int id);
+        Task<Responsibility> GetResponsibilityID(int id);
         Task<CMDefaultResponse> CreateResponsibility(Responsibility request, int UserId);
         Task<CMDefaultResponse> UpdateResponsibility(Responsibility request, int UserId);
         Task<CMDefaultResponse> DeleteResponsibility(int id);
@@ -564,8 +564,6 @@ namespace CMMSAPIs.BS.MISMasters
             }
         }
         */
-
-
         public async Task<List<BODYPARTS>> GetBodyPartsList()
         {
             try
@@ -580,19 +578,19 @@ namespace CMMSAPIs.BS.MISMasters
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> CreateBodyParts(BODYPARTS requset, int UserId)
+        public async Task<CMDefaultResponse> CreateBodyPart(BODYPARTS requset, int UserId)
         {
             try
             {
                 using (var repos = new MISMasterRepository(getDB))
-                    return await repos.CreateBodyParts(requset, UserId);
+                    return await repos.CreateBodyPart(requset, UserId);
             }
             catch (Exception ex)
             {
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> UpdateBodyParts(BODYPARTS requset, int UserId)
+        public async Task<CMDefaultResponse> UpdateBodyPart(BODYPARTS requset, int UserId)
         {
             try
             {
@@ -604,19 +602,19 @@ namespace CMMSAPIs.BS.MISMasters
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> DeleteBodyParts(int id, int UserId)
+        public async Task<CMDefaultResponse> DeleteBodyPart(int id, int UserId)
         {
             try
             {
                 using (var repos = new MISMasterRepository(getDB))
-                    return await repos.DeleteBodyParts(id, UserId);
+                    return await repos.DeleteBodyPart(id, UserId);
             }
             catch
             {
                 throw;
             }
         }
-        public async Task<List<Responsibility>>GetResponsibilityList()
+        public async Task<List<Responsibility>> GetResponsibilityList()
         {
             try
             {
@@ -680,5 +678,6 @@ namespace CMMSAPIs.BS.MISMasters
                 throw;
             }
         }
+
     }
 }
