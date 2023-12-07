@@ -15,15 +15,20 @@ using CMMSAPIs.Models.Jobs;
 using CMMSAPIs.Repositories.Jobs;
 using Google.Protobuf.WellKnownTypes;
 using System.Collections;
+using System.IO;
+using Microsoft.Extensions.Hosting;
+using Microsoft.AspNetCore.Hosting;
 
 namespace CMMSAPIs.Repositories.Permits
 {
     public class PermitRepository : GenericRepository
     {
         private UtilsRepository _utilsRepo;
-        public PermitRepository(MYSQLDBHelper sqlDBHelper) : base(sqlDBHelper)
+        public static IWebHostEnvironment _environment;
+        public PermitRepository(MYSQLDBHelper sqlDBHelper, IWebHostEnvironment environment) : base(sqlDBHelper)
         {
             _utilsRepo = new UtilsRepository(sqlDBHelper);
+            _environment = environment;
         }
 
         /* 
@@ -387,11 +392,20 @@ namespace CMMSAPIs.Repositories.Permits
             CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Job Type Deleted");
             return response;
         }
+
+        internal string getFullPath(string path)
+        {
+            string baseDirectory = _environment.WebRootPath;
+            string uploadPath = Path.Combine(baseDirectory, path);
+            return uploadPath;
+        }
+
         internal async Task<List<CMSOPList>> GetSOPList(int job_type_id)
         {
             /*
              * return * from PermitTBTJobList table for requested job_type_id
             */
+            
             string myQuery = $"SELECT tbtlist.id as id, tbtlist.title as name, tbtlist.description, jobtypes.title as jobTypeName, tbtlist.fileId as sop_file_id, tbtlist.fileName as sop_file_name, tbtlist.filePath as sop_file_path, sopcat.id as sop_file_cat_id, sopcat.name as sop_file_cat_name, tbtlist.JSAFileId as jsa_file_id, tbtlist.JSAFileName as jsa_file_name, tbtlist.JSAFilePath as jsa_file_path, jsacat.id as jsa_file_cat_id, jsacat.name as jsa_file_cat_name, tbtlist.TBTRemarks as tbt_remarks " +
                                 $"FROM permittbtjoblist as tbtlist " +
                                 $"LEFT JOIN permitjobtypelist as jobtypes ON tbtlist.jobTypeId = jobtypes.id " +
@@ -401,6 +415,16 @@ namespace CMMSAPIs.Repositories.Permits
                 myQuery += $"WHERE tbtlist.jobTypeId =  { job_type_id } and tbtlist.status = 1 ";
             myQuery += "ORDER BY jobtypes.id ASC, tbtlist.id ASC;";
             List<CMSOPList> _JobTypeList = await Context.GetData<CMSOPList>(myQuery).ConfigureAwait(false);
+
+            foreach(var  _JobType in _JobTypeList)
+            {  
+                if(_JobType.sop_file_path != null)
+                   _JobType.sop_file_path = getFullPath(_JobType.sop_file_path);
+
+                if (_JobType.jsa_file_path != null)
+                    _JobType.jsa_file_path = getFullPath(_JobType.jsa_file_path);
+            }
+
             return _JobTypeList;
         }
         internal async Task<CMDefaultResponse> CreateSOP(CMCreateSOP request)
