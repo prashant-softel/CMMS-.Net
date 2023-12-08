@@ -622,6 +622,7 @@ namespace CMMSAPIs.Controllers.Masters
             {
                 throw;
             }
+        }
         [Route("GetResponsibilityList")]
         [HttpGet]
         public async Task<IActionResult> GetResponsibilityList()

@@ -447,7 +447,7 @@ internal async Task<List<Responsibility>> GetResponsibilityList()
         internal async Task<CMDefaultResponse> CreateResponsibility(Responsibility request, int UserID)
         {
             string myQuery = $"INSERT INTO Responsibility(name, description, status, CreatedAt, CreatedBy) VALUES " +
-                                $"('{request.Name}','{request.Description} ',' Created', '{UtilsRepository.GetUTCTime()}', '{userID}'); " +
+                                $"('{request.Name}','{request.Description} ',' Created', '{UtilsRepository.GetUTCTime()}', '{UserID}'); " +
                                  $"SELECT LAST_INSERT_ID(); ";
 
             DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
@@ -461,7 +461,7 @@ internal async Task<List<Responsibility>> GetResponsibilityList()
                 updateQry += $"name = '{request.Name}', ";
             if (request.Description != null && request.Description != "")
                 updateQry += $"description = '{request.Description}', ";
-            updateQry += $"updatedAt = '{UtilsRepository.GetUTCTime()}', updatedBy = '{userID}' WHERE id = {request.Id};";
+            updateQry += $"updatedAt = '{UtilsRepository.GetUTCTime()}', updatedBy = '{UserID}' WHERE id = {request.Id};";
             await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
             return new CMDefaultResponse(request.Id, CMMS.RETRUNSTATUS.SUCCESS, "Responsibility updated");
         }
