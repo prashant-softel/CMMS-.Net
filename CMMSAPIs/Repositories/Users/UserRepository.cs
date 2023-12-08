@@ -893,12 +893,11 @@ namespace CMMSAPIs.Repositories.Users
         internal async Task<CMUserAccess> GetUserAccess(int user_id)
         {
             string qry = $"SELECT " +
-                            $"featureId as feature_id, f.featureName as feature_name, f.menuimage as menu_image, u.add, u.edit, u.delete, u.view, u.issue, u.approve, u.selfView " +
+                            $"f.id as feature_id, f.featureName as feature_name, f.menuimage as menu_image, u.add, u.edit, u.delete, u.view, u.issue, u.approve, u.selfView " +
                          $"FROM " +
-                            $"UsersAccess as u " +
-                            $"JOIN Features as f ON u.featureId = f.id " +
-                         $"WHERE " +
-                            $"userId = {user_id}";
+                            $"features as f " +
+                            $"left JOIN UsersAccess as u ON u.featureId = f.id and userId = {user_id}";
+                         
 
             List<CMAccessList> access_list = await Context.GetData<CMAccessList>(qry).ConfigureAwait(false);
             CMUserDetail user_detail = await GetUserDetail(user_id);
