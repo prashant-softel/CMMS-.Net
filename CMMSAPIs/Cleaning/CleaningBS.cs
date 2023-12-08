@@ -3,6 +3,7 @@ using CMMSAPIs.Models.MC;
 using CMMSAPIs.Models.Users;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.CleaningRepository;
+using CMMSAPIs.Repositories.PM;
 using CMMSAPIs.Repositories.Users;
 using System;
 using System.Collections.Generic;
@@ -37,6 +38,8 @@ namespace CMMSAPIs.BS.Cleaning
         public Task<CMDefaultResponse> EndExecution(int executionId, int userId);
         public Task<CMDefaultResponse> ApproveExecution(CMApproval request, int userID);
         public Task<CMDefaultResponse> RejectExecution(CMApproval request, int userID);
+        public Task<CMImportFileResponse> ImportMCPlanFile(int file_id, int userID);
+
 
 
     }
@@ -388,6 +391,21 @@ namespace CMMSAPIs.BS.Cleaning
                 throw;
             }
         }
+        public async Task<CMImportFileResponse> ImportMCPlanFile(int file_id, int userID)
+        {
+            try
+            {
+                using (var repos = new CleaningRepository(getDB))
+                {
+                    return await repos.ImportMCPlanFile(file_id, userID);
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
 
 
     }

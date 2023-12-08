@@ -367,5 +367,22 @@ namespace CMMSAPIs.Controllers.MC
                 throw;
             }
         }
+        [Route("importMCPlanFile")]
+        [HttpPost]
+        public async Task<IActionResult> ImportMCPlanFile(int file_id, int userID)
+        {
+            try
+            {
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _CleaningBS.ImportMCPlanFile( file_id,  userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+
     }
 }
