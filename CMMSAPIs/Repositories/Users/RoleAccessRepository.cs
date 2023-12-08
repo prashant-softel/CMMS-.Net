@@ -28,12 +28,11 @@ namespace CMMSAPIs.Repositories.Users
         internal async Task<CMRoleAccess> GetRoleAccess(int role_id)
         {
             string qry = $"SELECT " +
-                            $"featureId as feature_id, f.featureName as feature_name, r.add, r.edit, r.delete, r.view, r.issue, r.approve, r.selfView " +
+                            $"f.id as feature_id, f.featureName as feature_name, r.add, r.edit, r.delete, r.view, r.issue, r.approve, r.selfView " +
                          $"FROM " +
-                            $"`RoleAccess` r " +
-                            $"JOIN Features as f ON r.featureId = f.id " +
-                         $"WHERE " +
-                            $"roleId = {role_id}";
+                            $"features f " +
+                            $"left JOIN RoleAccess as r ON r.featureId = f.id  and roleId = {role_id}";
+                         
 
             List<CMAccessList> access_list = await Context.GetData<CMAccessList>(qry).ConfigureAwait(false);
 
