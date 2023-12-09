@@ -562,5 +562,16 @@ namespace CMMSAPIs.Helper
             Scrap
         }
 
+        public enum TemplateFileTypes
+        {
+            ImportChecklist = 1,
+            ImportUser,
+            ImportMaterial,
+            ImportAsset,
+            ImportPMPlan,
+            ImportMCPlan,
+            ImportBussiness
+        }
+
     }
 }

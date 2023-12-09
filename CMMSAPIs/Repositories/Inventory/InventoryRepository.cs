@@ -131,7 +131,7 @@ namespace CMMSAPIs.Repositories.Inventory
             Dictionary<string, int> facilities = new Dictionary<string, int>();
             facilities.Merge(facilityNames, facilityIDs);
 
-            string queryPlant = $"SELECT id, UPPER(name) as name FROM facilities WHERE id = {facility_id} GROUP BY name ORDER BY id ASC;";
+            string queryPlant = "SELECT id, UPPER(name) as name FROM facilities WHERE parentId = 0 GROUP BY name ORDER BY id ASC;";
             DataTable dtPlant = await Context.FetchData(queryPlant).ConfigureAwait(false);
             List<string> plantNames = dtPlant.GetColumn<string>("name");
             List<int> plantIDs = dtPlant.GetColumn<int>("id");
@@ -182,7 +182,6 @@ namespace CMMSAPIs.Repositories.Inventory
 
             Dictionary<string, Tuple<string, Type>> columnNames = new Dictionary<string, Tuple<string, Type>>()
             {
-                { "Site_Name", new Tuple<string, Type>("siteName", typeof(string)) },
                 { "Asset_Name", new Tuple<string, Type>("name", typeof(string)) },
                 { "Asset_Description", new Tuple<string, Type>("description", typeof(string)) },
                 { "Asset_Serial_no", new Tuple<string, Type>("serialNumber", typeof(string)) },
@@ -201,7 +200,7 @@ namespace CMMSAPIs.Repositories.Inventory
                 { "Asset_Warranty_Start_Date", new Tuple<string, Type>("start_date", typeof(DateTime)) },
                 { "Asset_Warranty_Expiry_Date", new Tuple<string, Type>("expiry_date", typeof(DateTime)) },
                 { "Asset_Warranty_Certificate_No", new Tuple<string, Type>("certificate_number", typeof(string)) },
-                { "Asset_Facility_Name", new Tuple<string, Type>("blockName", typeof (string)) },
+                { "Site_Name", new Tuple<string, Type>("blockName", typeof (string)) },
                 { "Asset_category_name", new Tuple<string, Type>("categoryName", typeof(string)) },
                 { "Asset_Parent_Name", new Tuple<string, Type>("parentName", typeof(string)) },
                 { "Asset_Customer_Name", new Tuple<string, Type>("customerName", typeof(string)) },
@@ -251,25 +250,36 @@ namespace CMMSAPIs.Repositories.Inventory
                     var excel = new ExcelPackage(path);
                     var sheet = excel.Workbook.Worksheets["Assets"];
                     if (sheet == null)
+                    {
                         m_errorLog.SetWarning("Sheet containing assets should be named 'Assets'");
+                        return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"Sheet containing assets should be named Assets");
+
+                    }
                     else
                     {
                         DataTable dt2 = new DataTable();
-                        foreach (var header in sheet.Cells[1, 1, 1, sheet.Dimension.End.Column])
+                        try
                         {
-                            try
+                            foreach (var header in sheet.Cells[1, 1, 1, sheet.Dimension.End.Column])
                             {
-                                dt2.Columns.Add(columnNames[header.Text].Item1, columnNames[header.Text].Item2);
-                            }
-                            catch (KeyNotFoundException)
-                            {
-                                dt2.Columns.Add(header.Text);
+                                try
+                                {
+                                    dt2.Columns.Add(columnNames[header.Text].Item1, columnNames[header.Text].Item2);
+                                }
+                                catch (KeyNotFoundException)
+                                {
+                                    dt2.Columns.Add(header.Text);
+                                }
                             }
                         }
-                        List<string> headers = dt2.GetColumnNames();
-                        foreach(var item in columnNames.Values)
+                        catch (Exception ex)
                         {
-                            if(!headers.Contains(item.Item1))
+                            return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, ex.Message);
+                        }
+                        List<string> headers = dt2.GetColumnNames();
+                        foreach (var item in columnNames.Values)
+                        {
+                            if (!headers.Contains(item.Item1))
                             {
                                 dt2.Columns.Add(item.Item1, item.Item2);
                             }
@@ -315,33 +325,13 @@ namespace CMMSAPIs.Repositories.Inventory
                                 m_errorLog.SetInformation($"Row {rN} is empty.");
                                 continue;
                             }
-
-                            string siteName = Convert.ToString(newR["siteName"]).ToUpper();
-
-                            // Check if the key exists in the dictionary before accessing it
-                            
                             newR["row_no"] = rN;
-
-                            if (plants.ContainsValue(siteName))
-                            {
-
-                            }
-                            else
-                            {
-                                m_errorLog.SetError($"[Row: {rN}] Invalid Site Name '{newR["siteName"]}'.");
-                                newR.Delete();
-                                continue;
-
-                            }
-
-
                             if (Convert.ToString(newR["name"]) == null || Convert.ToString(newR["name"]) == "")
                             {
-                                m_errorLog.SetError($"[Row: {rN}] Name cannot be null.");
-                                newR.Delete();
-                                continue;
+                               
+                                return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] Name cannot be null.");
                             }
-
+                               
                             try
                             {
                                 newR["blockId"] = facilities[Convert.ToString(newR["blockName"]).ToUpper()];
@@ -349,20 +339,7 @@ namespace CMMSAPIs.Repositories.Inventory
                             }
                             catch (KeyNotFoundException)
                             {
-                                string name = Convert.ToString(newR["blockName"]);
-
-                                string addNewBlock = $"INSERT INTO facilities(name,isBlock, parentId, status, createdBy, createdAt) VALUES " +
-                                                        $"('{name}',1, {facility_id},1,{userID},'{UtilsRepository.GetUTCTime()}'); " +
-                                                        $"SELECT LAST_INSERT_ID();";
-                                DataTable dt = await Context.FetchData(addNewBlock).ConfigureAwait(false);
-                                int id = Convert.ToInt32(dt.Rows[0][0]);
-                               
-                                facilities.Add(name.ToUpper(), id);
-                                newR["blockId"] = id;
-                                newR["facilityId"] = facility_id;
-
-                                m_errorLog.SetInformation($"[Row: {rN}] New Block named '{newR["blockName"]}' added in plant '{plants[facility_id]}'.");
-
+                                return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] Block named '{newR["blockName"]}' does not exist in plant '{plants[facility_id]}'.");
                             }
                             try
                             {
@@ -370,34 +347,34 @@ namespace CMMSAPIs.Repositories.Inventory
                             }
                             catch (KeyNotFoundException)
                             {
-                                m_errorLog.SetError($"[Row: {rN}] Invalid Asset Category named '{newR["categoryName"]}'.");
-                                newR.Delete();
-                                continue;
-                                //string name = Convert.ToString(newR["categoryName"]);
-                                //string queryCat2 = $"SELECT id, UPPER(name) as name FROM assetcategories where name = '{name}' GROUP BY name ;";
-                                //List<CMItem> _cat = await Context.GetData<CMItem>(queryCat2).ConfigureAwait(false);
-                                //if (_cat.Count > 0)
-                                //{
-                                //    newR["categoryId"] = _cat[0].id;
-                                //}
-                                //else
-                                //{
-                                //    try
-                                //    {
-                                //        string addCategoryQry = $"INSERT INTO assetcategories(name, description, createdAt, createdBy, status) VALUES " +
-                                //                            $"('{name}', '{name}','{UtilsRepository.GetUTCTime()}',{userID}, 1); " +
-                                //                            $"SELECT LAST_INSERT_ID();";
-                                //        DataTable dt = await Context.FetchData(addCategoryQry).ConfigureAwait(false);
-                                //        int id = Convert.ToInt32(dt.Rows[0][0]);
-                                //        businesses.Add(name.ToUpper(), id);
-                                //        newR["categoryId"] = id;
-                                //        m_errorLog.SetInformation($"New Asset Category '{name}' added.");
-                                //    }
-                                //    catch (KeyNotFoundException)
-                                //    {
-                                //        m_errorLog.SetError($"[Row: {rN}] Asset Category named '{name}' not found.");
-                                //    }
-                                //}
+                                //m_errorLog.SetError($"[Row: {rN}] Invalid Asset Category named '{newR["categoryName"]}'.");
+                                string name = Convert.ToString(newR["categoryName"]);
+                                string queryCat2 = $"SELECT id, UPPER(name) as name FROM assetcategories where name = '{name}' GROUP BY name ;";
+                                List<CMItem> _cat = await Context.GetData<CMItem>(queryCat2).ConfigureAwait(false);
+                                if (_cat.Count > 0)
+                                {
+                                    newR["categoryId"] = _cat[0].id;
+                                }
+                                else
+                                {
+                                    try
+                                    {
+                                        string addCategoryQry = $"INSERT INTO assetcategories(name, description, createdAt, createdBy, status) VALUES " +
+                                                            $"('{name}', '{name}','{UtilsRepository.GetUTCTime()}',{userID}, 1); " +
+                                                            $"SELECT LAST_INSERT_ID();";
+                                        DataTable dt = await Context.FetchData(addCategoryQry).ConfigureAwait(false);
+                                        int id = Convert.ToInt32(dt.Rows[0][0]);
+                                        businesses.Add(name.ToUpper(), id);
+                                        newR["categoryId"] = id;
+                                        m_errorLog.SetInformation($"New Asset Category '{name}' added.");
+                                    }
+                                    catch (KeyNotFoundException)
+                                    {
+                                        m_errorLog.SetError($"[Row: {rN}] Asset Category named '{name}' not found.");
+                                        return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] Asset Category named '{name}' not found.");
+
+                                    }
+                                }
                             }
                             try
                             {
@@ -420,6 +397,8 @@ namespace CMMSAPIs.Repositories.Inventory
                                 catch (KeyNotFoundException)
                                 {
                                     m_errorLog.SetError($"[Row: {rN}] Customer business named '{name}' not found.");
+                                    return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] Customer business named '{name}' not found.");
+
                                 }
                             }
                             try
@@ -443,6 +422,8 @@ namespace CMMSAPIs.Repositories.Inventory
                                 catch (KeyNotFoundException)
                                 {
                                     m_errorLog.SetError($"[Row: {rN}] Owner business named '{name}' not found.");
+                                    return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] Owner business named '{name}' not found.");
+
                                 }
                             }
                             try
@@ -466,8 +447,8 @@ namespace CMMSAPIs.Repositories.Inventory
                                 catch (KeyNotFoundException)
                                 {
                                     m_errorLog.SetError($"[Row: {rN}] Operator business named '{name}' not found.");
-                                    newR.Delete();
-                                    continue;
+                                    return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] Operator business named '{name}' not found.");
+
                                 }
                             }
                             try
@@ -491,8 +472,8 @@ namespace CMMSAPIs.Repositories.Inventory
                                 catch (KeyNotFoundException)
                                 {
                                     m_errorLog.SetError($"[Row: {rN}] Supplier business named '{name}' not found.");
-                                    newR.Delete();
-                                    continue;
+                                    return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] Supplier business named '{name}' not found.");
+
                                 }
                             }
                             try
@@ -516,6 +497,8 @@ namespace CMMSAPIs.Repositories.Inventory
                                 catch (KeyNotFoundException)
                                 {
                                     m_errorLog.SetError($"[Row: {rN}] Manufacturer business named '{name}' not found.");
+                                    return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] Manufacturer business named '{name}' not found.");
+
                                 }
                             }
                             try
@@ -539,10 +522,10 @@ namespace CMMSAPIs.Repositories.Inventory
                                     newR["typeId"] = assetTypes["MAIN INVENTRY"];
                                 else
                                 {
-                                    m_errorLog.SetError($"[Row: {rN}] Asset type named '{newR["typeName"]}' not found.");
-                                    newR.Delete();
-                                    continue;
+                                    return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] Asset type named '{newR["typeName"]}' not found.");
+
                                 }
+                             
                             }
                             try
                             {
@@ -554,10 +537,10 @@ namespace CMMSAPIs.Repositories.Inventory
                                     newR["statusId"] = assetStatuses["IN OPERATION"];
                                 else
                                 {
-                                    m_errorLog.SetError($"[Row: {rN}] Asset status named '{newR["statusName"]}' not found.");
-                                    newR.Delete();
-                                    continue;
+                                    return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] Asset status named '{newR["statusName"]}' not found.");
+
                                 }
+                               
                             }
                             try
                             {
@@ -609,132 +592,125 @@ namespace CMMSAPIs.Repositories.Inventory
                         dt2.Columns.Add("warranty_type", typeof(int));
                         dt2.Columns.Add("warrranty_term_type", typeof(int));
                         dt2.Columns.Add("warranty_provider_id", typeof(int));*/
-                            
-                                dt2.Rows.Add(newR);
+                            dt2.Rows.Add(newR);
                         }
+                        if (m_errorLog.GetErrorCount() == 0)
+                        {
+                            int childListCount = 1;
+                            List<int> idList = new List<int>();
+                            DataTable insertedTable = dt2.Clone();
 
-                        string updateQry = $"UPDATE facilities as blocks JOIN facilities as plants ON blocks.parentId = plants.id SET " +
-                               $"blocks.customerId = plants.customerId,blocks.spvId = plants.spvId, blocks.ownerId = plants.ownerId, blocks.operatorId = plants.operatorId, " +
-                               $"blocks.countryId = plants.countryId, blocks.stateId = plants.stateId, blocks.cityId = plants.cityId, blocks.address = plants.name, " +
-                               $"blocks.country = plants.country, blocks.state = plants.state, blocks.city = plants.city, blocks.timezone = plants.timezone, " +
-                               $"blocks.zipcode = plants.zipcode, blocks.latitude = plants.latitude, blocks.longitude = plants.longitude;";
-                        await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+                            string filter = "";
+                            string ids = "";
+                            string assetQry = "";
 
-                            
-                                int childListCount = 1;
-                                List<int> idList = new List<int>();
-                                DataTable insertedTable = dt2.Clone();
-
-                                string filter = "";
-                                string ids = "";
-                                string assetQry = "";
-
-                                for (int i = 0; i < childListCount; i++)
+                            for (int i = 0; i < childListCount; i++)
+                            {
+                                if (i == 0)
                                 {
-                                    if (i == 0)
-                                    {
-                                        assetQry = $"SELECT REPLACE(UPPER(name), '_', '')  as name FROM facilities WHERE parentId = {facility_id} union SELECT REPLACE(UPPER(name), '_', '')  as name FROM assets WHERE facilityId = {facility_id} {filter};";
-                                    }
-                                    else
-                                    {
-                                        assetQry = $"SELECT REPLACE(UPPER(name), '_', '')  as name FROM assets WHERE facilityId = {facility_id} {filter};";
-                                    }
-
-                                    DataTable assetDt = await Context.FetchData(assetQry).ConfigureAwait(false);
-
-                                    List<List<string>> assetList = new List<List<string>>() { assetDt.GetColumn<string>("name") };
-
-                                    List<DataTable> assetPriority = new List<DataTable>();
-
-                                    List<string> assetnames = new List<string>();
-                                    assetnames.AddRange(assetDt.GetColumn<string>("name"));
-                                    //assetnames.AddRange(dt2.GetColumn<string>("name"));
-                                    assetnames.Contains("");
-                                    DataRow[] filterRows = dt2.AsEnumerable()
-                                               .Where(row => assetnames.Contains(row.Field<string>("parentName").Replace("_", "").ToUpper(), StringComparison.OrdinalIgnoreCase) ||
-                                                assetnames.Contains(ConvertString(row.Field<string>("parentName")).Replace("_", "").ToUpper(), StringComparison.OrdinalIgnoreCase))
-                                               .ToArray();
-
-
-                                    if (filterRows.Length <= 0)
-                                    {
-                                        List<string> assetnames2 = new List<string>();
-                                        assetnames2.AddRange(insertedTable.GetColumn<string>("name"));
-                                        DataRow[] notInserted = dt2.AsEnumerable()
-                                               .Where(row => !assetnames2.Contains(row.Field<string>("name")))
-                                               .ToArray();
-
-                                        DataTable notInsertedTable = dt2.Clone();
-
-                                        foreach (DataRow row1 in notInserted)
-                                        {
-                                            notInsertedTable.ImportRow(row1);
-                                        }
-                                        List<int> ids_ = (await AddInventoryWithParent(notInsertedTable, facility_id, userID)).id;
-                                        idList.AddRange(ids_);
-
-                                        //foreach (DataRow row in notInserted)
-                                        //{
-                                        //    m_errorLog.SetInformation($"Asset <{row.Field<string>("name")}> not inserted");
-                                        //}
-
-                                        break;
-                                    }
-                                    else
-                                    {
-                                        DataTable filteredDataTable = dt2.Clone();
-
-                                        foreach (DataRow row1 in filterRows)
-                                        {
-                                            filteredDataTable.ImportRow(row1);
-                                        }
-                                        List<int> ids_ = (await AddInventoryWithParent(filteredDataTable, facility_id, userID)).id;
-                                        insertedTable.Merge(filteredDataTable);
-                                        childListCount++;
-                                        ids = string.Join(", ", ids_.Select(x => x.ToString()));
-                                        filter = $" and id IN ({ids})";
-
-                                        idList.AddRange(ids_);
-
-                                    }
-                                    //if (filterRows.Length > 0)
-                                    //{
-                                    //    assetPriority.Insert(0, filterRows.CopyToDataTable());
-                                    //    assetList.Insert(0, assetPriority[assetPriority.Count - 1].GetColumn<string>("name"));
-                                    //}
-
-                                    //foreach (var item in assetList)
-                                    //{
-                                    //    List<string> temp = item;
-                                    //    do
-                                    //    {
-                                    //        filterRows = dt2.AsEnumerable()
-                                    //           .Where(row => temp.Contains(row.Field<string>("parentName"), StringComparison.OrdinalIgnoreCase))
-                                    //           .ToArray();
-                                    //        if (filterRows.Length == 0)
-                                    //            continue;
-                                    //        assetPriority.Add(filterRows.CopyToDataTable());
-                                    //        temp = assetPriority[assetPriority.Count - 1].GetColumn<string>("name");
-                                    //    } while (filterRows.Length != 0);
-                                    //}
-                                    //List<int> idList = new List<int>();
-
-
-                                    //foreach (DataTable dtUsers in assetPriority)
-                                    //{
-                                    //    idList.AddRange((await AddInventoryWithParent(dtUsers, facility_id, userID)).id);
-                                    //}
+                                    assetQry = $"SELECT UPPER(name) as name FROM facilities WHERE parentId = {facility_id} union SELECT UPPER(name) as name FROM assets WHERE facilityId = {facility_id} {filter};";
                                 }
+                                else
+                                {
+                                    assetQry = $"SELECT UPPER(name) as name FROM assets WHERE facilityId = {facility_id} {filter};";
+                                }
+
+                                DataTable assetDt = await Context.FetchData(assetQry).ConfigureAwait(false);
+
+                                List<List<string>> assetList = new List<List<string>>() { assetDt.GetColumn<string>("name") };
+
+                                List<DataTable> assetPriority = new List<DataTable>();
+
+                                List<string> assetnames = new List<string>();
+                                assetnames.AddRange(assetDt.GetColumn<string>("name"));
+                                //assetnames.AddRange(dt2.GetColumn<string>("name"));
+                                assetnames.Contains("");
+                                DataRow[] filterRows = dt2.AsEnumerable()
+                                           .Where(row => assetnames.Contains(row.Field<string>("parentName").ToUpper(), StringComparison.OrdinalIgnoreCase) ||
+                                            assetnames.Contains(ConvertString(row.Field<string>("parentName")).ToUpper(), StringComparison.OrdinalIgnoreCase))
+                                           .ToArray();
+
+
+                                if (filterRows.Length <= 0)
+                                {
+                                    List<string> assetnames2 = new List<string>();
+                                    assetnames2.AddRange(insertedTable.GetColumn<string>("name"));
+                                    DataRow[] notInserted = dt2.AsEnumerable()
+                                           .Where(row => !assetnames2.Contains(row.Field<string>("name")))
+                                           .ToArray();
+
+                                    DataTable notInsertedTable = dt2.Clone();
+
+                                    foreach (DataRow row in notInserted)
+                                    {
+                                        notInsertedTable.ImportRow(row);
+                                    }
+                                    List<int> ids_ = (await AddInventoryWithParent(notInsertedTable, facility_id, userID)).id;
+                                    idList.AddRange(ids_);
+
+                                    //foreach (DataRow row in notInserted)
+                                    //{
+                                    //    m_errorLog.SetInformation($"Asset <{row.Field<string>("name")}> not inserted");
+                                    //}
+
+                                    break;
+                                }
+                                else
+                                {
+                                    DataTable filteredDataTable = dt2.Clone();
+
+                                    foreach (DataRow row in filterRows)
+                                    {
+                                        filteredDataTable.ImportRow(row);
+                                    }
+                                    List<int> ids_ = (await AddInventoryWithParent(filteredDataTable, facility_id, userID)).id;
+                                    insertedTable.Merge(filteredDataTable);
+                                    childListCount++;
+                                    ids = string.Join(", ", ids_.Select(x => x.ToString()));
+                                    filter = $" and id IN ({ids})";
+
+                                    idList.AddRange(ids_);
+
+                                }
+                                //if (filterRows.Length > 0)
+                                //{
+                                //    assetPriority.Insert(0, filterRows.CopyToDataTable());
+                                //    assetList.Insert(0, assetPriority[assetPriority.Count - 1].GetColumn<string>("name"));
+                                //}
+
+                                //foreach (var item in assetList)
+                                //{
+                                //    List<string> temp = item;
+                                //    do
+                                //    {
+                                //        filterRows = dt2.AsEnumerable()
+                                //           .Where(row => temp.Contains(row.Field<string>("parentName"), StringComparison.OrdinalIgnoreCase))
+                                //           .ToArray();
+                                //        if (filterRows.Length == 0)
+                                //            continue;
+                                //        assetPriority.Add(filterRows.CopyToDataTable());
+                                //        temp = assetPriority[assetPriority.Count - 1].GetColumn<string>("name");
+                                //    } while (filterRows.Length != 0);
+                                //}
+                                //List<int> idList = new List<int>();
+
+
+                                //foreach (DataTable dtUsers in assetPriority)
+                                //{
+                                //    idList.AddRange((await AddInventoryWithParent(dtUsers, facility_id, userID)).id);
+                                //}
+                            }
 
                             response = new CMImportFileResponse(idList, CMMS.RETRUNSTATUS.SUCCESS, null, null, $"{idList.Count} new assets added.");
 
                         }
-
-                                  
+                    }
                 }
                 else //
                 {
                     m_errorLog.SetError("File is not an excel file");
+                    return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, "File is not an excel file");
+
                 }
             }
             string logPath = m_errorLog.SaveAsText($"ImportLog\\ImportInventories_File{file_id}_{DateTime.UtcNow.ToString("yyyyMMdd_HHmmss")}");
@@ -780,7 +756,7 @@ namespace CMMSAPIs.Repositories.Inventory
 
         internal async Task<CMDefaultResponse> AddInventoryWithParent(DataTable assets, int facility_id, int userID)
         {
-            string assetQry = $"SELECT id, REPLACE(UPPER(name), '_', '')  as name FROM facilities WHERE parentId = {facility_id}  union SELECT id, REPLACE(UPPER(name), '_', '')  as name FROM assets WHERE facilityId = {facility_id} GROUP BY name ORDER BY id;";
+            string assetQry = $"SELECT id, UPPER(name) as name FROM facilities WHERE parentId = {facility_id}  union SELECT id, UPPER(name) as name FROM assets WHERE facilityId = {facility_id} GROUP BY name ORDER BY id;";
             DataTable dtAsset = await Context.FetchData(assetQry).ConfigureAwait(false);
             List<string> assetNames = dtAsset.GetColumn<string>("name");
             List<int> assetIds = dtAsset.GetColumn<int>("id");
@@ -791,13 +767,13 @@ namespace CMMSAPIs.Repositories.Inventory
             {
                 try
                 {
-                    row["parentId"] = assetDict[Convert.ToString(row["parentName"]).Replace("_", "").ToUpper()];
+                    row["parentId"] = assetDict[Convert.ToString(row["parentName"]).ToUpper()];
                 }
                 catch (KeyNotFoundException)
                 {
                     try
                     {
-                        row["parentId"] = assetDict[ConvertString(Convert.ToString(row["parentName"])).Replace("_", "").ToUpper()];
+                        row["parentId"] = assetDict[ConvertString(Convert.ToString(row["parentName"])).ToUpper()];
                     }
                     catch
                     {

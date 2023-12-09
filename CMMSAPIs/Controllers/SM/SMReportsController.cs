@@ -49,22 +49,24 @@ namespace CMMSAPIs.Controllers.SM
 
 
         //[Authorize]
+        [Obsolete("This API is obsoleted, use this api/SMReports/GetStockReport?!", true)]
         [Route("GetEmployeeStockReport")]
         [HttpGet]
         public async Task<IActionResult> GetEmployeeStockReport(int facility_id, int Emp_id, DateTime StartDate, DateTime EndDate, string itemID)
         {
-            try
-            {
-                var data = await _SMReportsBS.GetEmployeeStockReport(facility_id, Emp_id, StartDate, EndDate, itemID);
-                return Ok(data);
-            }
-            catch (Exception ex)
-            {
-                ExceptionResponse item = new ExceptionResponse();
-                item.Status = 400;
-                item.Message = "Invalid employee id or facility id is sent.";
-                return Ok(item);
-            }
+            //try
+            //{
+            //    var data = await _SMReportsBS.GetEmployeeStockReport(facility_id, Emp_id, StartDate, EndDate, itemID);
+            //    return Ok(data);
+            //}
+            //catch (Exception ex)
+            //{
+            //    ExceptionResponse item = new ExceptionResponse();
+            //    item.Status = 400;
+            //    item.Message = "Invalid employee id or facility id is sent.";
+            //    return Ok(item);
+            //}
+            throw new NotImplementedException();
         }
 
 

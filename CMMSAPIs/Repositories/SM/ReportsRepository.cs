@@ -366,27 +366,32 @@ public async Task<List<CMEmployeeStockReport>> GetEmployeeStockReport(int facili
                 " GROUP BY a_item.asset_code";
 
             List<CMEmployeeStockReport> Plant_Stock_Opening_Details_Reader = await Context.GetData<CMEmployeeStockReport>(Plant_Stock_Opening_Details_query).ConfigureAwait(false);
-
             CMEmployeeStockList cMEmployeeStockList = new CMEmployeeStockList();
-            int cnt = 0;
-            string plant_name = "";
-            cMEmployeeStockList.emp_ID = emp_id;
-            cMEmployeeStockList.emp_name = Plant_Stock_Opening_Details_Reader[0].requested_by_name;
             List<CMEmpStockItems> itemList = new List<CMEmpStockItems>();
-            foreach (var item in Plant_Stock_Opening_Details_Reader)
+            cMEmployeeStockList.emp_ID = emp_id;
+            if (Plant_Stock_Opening_Details_Reader.Count > 0)
             {
-
-                if (item.Opening != 0)
+              
+                int cnt = 0;
+                string plant_name = "";
+            
+                cMEmployeeStockList.emp_name = Plant_Stock_Opening_Details_Reader[0].requested_by_name;
+            
+                foreach (var item in Plant_Stock_Opening_Details_Reader)
                 {
-                    CMEmpStockItems openingBalance = new CMEmpStockItems();
-                    openingBalance.asset_item_ID = item.assetItemID;
-                    openingBalance.item_name = Convert.ToString(item.asset_name);
-                    openingBalance.quantity = item.Opening;
+
+                    if (item.Opening != 0)
+                    {
+                        CMEmpStockItems openingBalance = new CMEmpStockItems();
+                        openingBalance.asset_item_ID = item.assetItemID;
+                        openingBalance.item_name = Convert.ToString(item.asset_name);
+                        openingBalance.quantity = item.Opening;
 
 
-                    itemList.Add(openingBalance);
+                        itemList.Add(openingBalance);
 
-                    cnt++;
+                        cnt++;
+                    }
                 }
             }
             cMEmployeeStockList.CMMRSItems = itemList;

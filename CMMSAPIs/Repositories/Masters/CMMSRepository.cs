@@ -610,7 +610,7 @@ namespace CMMSAPIs.Repositories.Masters
                     await CMMSNotification.sendNotification(moduleID, notificationID, null, _jobView);
                     break;
                 case CMMS.CMMS_Modules.PTW:
-                    PermitRepository obj1 = new PermitRepository(getDB, _environment);
+                    PermitRepository obj1 = new PermitRepository(getDB);
                     CMPermitDetail _Permit = await obj1.GetPermitDetails(id);
                     notificationID = (CMMS.CMMS_Status)(_Permit.ptwStatus);
                     await CMMSNotification.sendNotification(moduleID, notificationID, null, _Permit);

@@ -165,6 +165,7 @@ namespace CMMSAPIs.Models.SM
         public int asset_item_ID { get; set; }
         public string asset_MDM_code { get; set; }
         //public string serial_number { get; set; }
+        public decimal requested_qty { get; set; }
         public decimal returned_qty { get; set; }
         public decimal available_qty { get; set; }
         public decimal used_qty { get; set; }
@@ -174,7 +175,7 @@ namespace CMMSAPIs.Models.SM
         //public int approval_status { get; set; }
         public string approved_date { get; set; }
         public string issued_date { get; set; }
-        public decimal requested_qty { get; set; }
+     
         public string approval_required { get; set; }
         public string asset_name { get; set; }
         public int asset_type_ID { get; set; }

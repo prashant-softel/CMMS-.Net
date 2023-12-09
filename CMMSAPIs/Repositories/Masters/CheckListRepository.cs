@@ -447,7 +447,7 @@ namespace CMMSAPIs.Repositories.Masters
                         dt2.Columns.Add("type", typeof(int));
                         //Pending: Reasons for skipping 3 rows
                         //
-                        for (int rN = 4; rN <= sheet.Dimension.End.Row; rN++)
+                        for (int rN = 2; rN <= sheet.Dimension.End.Row; rN++)
                         {
                             ExcelRange row = sheet.Cells[rN, 1, rN, sheet.Dimension.End.Column];
                             DataRow newR = dt2.NewRow();
@@ -571,13 +571,24 @@ namespace CMMSAPIs.Repositories.Masters
             }
             List<string> yesNo = new List<string>() { "NO", "YES" };
 
+            Dictionary<string, int> checkpoint_types = new Dictionary<string, int>()
+            {
+                { "text", 0 },
+                { "bool", 1 },
+                { "range", 2 }
+            };
+
+
             Dictionary<string, Tuple<string, Type>> columnNames = new Dictionary<string, Tuple<string, Type>>()
             {
                 { "CheckPoint Name", new Tuple<string, Type>("check_point", typeof(string)) },
                 { "Checklist_Name", new Tuple<string, Type>("checklist_name", typeof(string)) },
                 { "Requirement", new Tuple<string, Type>("requirement", typeof(string)) },
                 { "Is document required", new Tuple<string, Type>("is_document_required", typeof(string)) },
-                { "Action to be taken", new Tuple<string, Type>("action_to_be_done", typeof(string)) }
+                { "Action to be taken", new Tuple<string, Type>("action_to_be_done", typeof(string)) },
+                { "failure_weightage", new Tuple<string, Type>("failure_weightage", typeof(int)) },
+                { "checkpoint_type", new Tuple<string, Type>("checkpoint_type", typeof(string)) },
+                { "checkpoint type value", new Tuple<string, Type>("checkpoint_type_value", typeof(string)) }
             };
             string query1 = $"SELECT file_path FROM uploadedfiles WHERE id = {file_id};";
             DataTable dt1 = await Context.FetchData(query1).ConfigureAwait(false);
@@ -615,10 +626,10 @@ namespace CMMSAPIs.Repositories.Masters
                             }
                         }
                         dt2.Columns.Add("checklist_id", typeof(int));
-                        
+                        dt2.Columns.Add("checkpoint_type_id", typeof(int));
                         //Pending: Reasons for skipping 3 rows
                         //
-                        for (int rN = 4; rN <= sheet.Dimension.End.Row; rN++)
+                        for (int rN = 2; rN <= sheet.Dimension.End.Row; rN++)
                         {
                             ExcelRange row = sheet.Cells[rN, 1, rN, sheet.Dimension.End.Column];
                             DataRow newR = dt2.NewRow();
@@ -676,6 +687,25 @@ namespace CMMSAPIs.Repositories.Masters
                                 }
                             }
                             newR["is_document_required"] = $"{yesNoIndex}";
+                            try
+                            {
+                                newR["checkpoint_type_id"] = checkpoint_types[Convert.ToString(newR["checkpoint_type"]).ToLower()];
+                            }
+                            catch (KeyNotFoundException)
+                            {
+                                m_errorLog.SetError($"[Checkpoint: Row {rN}] Invalid checkpoint type.");
+                            }
+                           
+                               
+                          if(Convert.ToInt32(newR["failure_weightage"]) > 100)
+                            {
+                                m_errorLog.SetError($"[Checkpoint: Row {rN}] failure weightage cannot be greater than 100.");
+                            }
+                            else
+                            {
+                                newR["failure_weightage"] = Convert.ToInt32(newR["failure_weightage"]);
+                            }
+                            newR["checkpoint_type_value"] = Convert.ToString(newR["checkpoint_type_value"]);
                             dt2.Rows.Add(newR);
                             /*
                             Dictionary<string, Tuple<string, Type>> columnNames = new Dictionary<string, Tuple<string, Type>>()
@@ -790,8 +820,35 @@ namespace CMMSAPIs.Repositories.Masters
                 DataTable dtCheckpoints = await ConvertExcelToCheckpoints(file_id);
                 if (dtCheckpoints != null && m_errorLog.GetErrorCount() == 0)
                 {
+                    List<CMCreateCheckPoint> checkpoints = new List<CMCreateCheckPoint>();
+                    foreach (DataRow row in dtCheckpoints.Rows)
+                    {
+                        CMCPType checkpoint_type = new CMCPType();
+                        checkpoint_type.id = Convert.ToInt32(row["checkpoint_type_id"]);
+                        checkpoint_type.min = 0;
+                        checkpoint_type.max = 0;
+                        CMCreateCheckPoint checkpoint = new CMCreateCheckPoint
+                        {
+                          
+                            check_point = Convert.ToString(row["check_point"]),
+                            checklist_id = Convert.ToInt32(row["checklist_id"]),
+                            requirement = Convert.ToString(row["requirement"]),
+                            is_document_required = row["is_document_required"] == DBNull.Value
+                                ? (int?)null
+                                : Convert.ToInt32(row["is_document_required"]),
+                            action_to_be_done = Convert.ToString(row["action_to_be_done"]),
+                            failure_weightage = row["failure_weightage"] == DBNull.Value
+                                ? (int?)null
+                                : Convert.ToInt32(row["failure_weightage"]),                           
+                            checkpoint_type = checkpoint_type
+                        };
 
-                    List<CMCreateCheckPoint> checkpoints = dtCheckpoints.MapTo<CMCreateCheckPoint>();
+                        checkpoints.Add(checkpoint);
+                    }
+
+
+   
+                 
                     CMDefaultResponse response1 = await CreateCheckPoint(checkpoints, userID);
                     response = new CMImportFileResponse(response1.id, response1.return_status, logfile, log, response1.message);
                 }

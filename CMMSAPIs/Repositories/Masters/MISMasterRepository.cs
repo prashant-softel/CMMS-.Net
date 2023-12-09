@@ -359,39 +359,6 @@ namespace CMMSAPIs.Repositories.Masters
             return _Typeofobs[0];
         }
 
- internal async Task<List<BODYPARTS>> GetBodyPartsList()
-        {
-            string myQuery = "SELECT * FROM  bodyparts ";
-            List<BODYPARTS> Data = await Context.GetData<BODYPARTS>(myQuery).ConfigureAwait(false);
-            return Data;
-        }
-      
-        internal async Task<CMDefaultResponse> CreateBodyParts(BODYPARTS request, int UserId)
-        {
-            String myqry = $"INSERT INTO BODYPARTS(sequence_no,id,bodyparts, description,status, Createdby,Createdat) VALUES " +
-                                $"('{request.sequence_no}','{request.id}','{request.bodyparts}','{request.description}','{request.Status} ',  {UserId}, '{UtilsRepository.GetUTCTime()}'); " +
-                                 $"SELECT LAST_INSERT_ID(); ";
-            DataTable dt = await Context.FetchData(myqry).ConfigureAwait(false);
-            int id = Convert.ToInt32(dt.Rows[0][0]);
-            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "RECORD Added");
-        }
-        internal async Task<CMDefaultResponse> UpdateBodyParts(BODYPARTS request, int UserId)
-        {
-            string updateQry = "UPDATE BODYPARTS SET ";
-            if (request.sequence_no >= 0)
-                updateQry += $"Sequence_no = '{request.sequence_no}', ";
-            if (request.description != null && request.description != "")
-                updateQry += $"description = '{request.description}', ";
-            updateQry += $"updatedAt ='{UtilsRepository.GetUTCTime()}' , updatedBy = '{UserId}' WHERE Sequence_no = {request.sequence_no};";
-            await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
-            return new CMDefaultResponse(request.sequence_no, CMMS.RETRUNSTATUS.SUCCESS, "Record Updated");
-        }
-        internal async Task<CMDefaultResponse> DeleteBodyParts(int id, int Userid)
-        {
-            string delqry = $"Delete From BODYPARTS where id={id};";
-            await Context.ExecuteNonQry<int>(delqry).ConfigureAwait(false);
-            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "status deleted");
-        }
         internal async Task<List<MISCostType>> GetCostTypeList()
         {
             string myQuery = $"SELECT id, name, description FROM mis_m_costtype WHERE status = 1 ";
@@ -430,24 +397,58 @@ namespace CMMSAPIs.Repositories.Masters
             //Add history
             return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Cost Type Deleted");
         }
-internal async Task<List<Responsibility>> GetResponsibilityList()
+        internal async Task<List<BODYPARTS>> GetBodyPartsList()
+        {
+            string myQuery = "SELECT * FROM  bodyparts ";
+            List<BODYPARTS> Data = await Context.GetData<BODYPARTS>(myQuery).ConfigureAwait(false);
+            return Data;
+        }
+
+        internal async Task<CMDefaultResponse> CreateBodyParts(BODYPARTS request, int UserId)
+        {
+            String myqry = $"INSERT INTO BODYPARTS(sequence_no,id,bodyparts, description,status, Createdby,Createdat) VALUES " +
+                                $"('{request.sequence_no}','{request.id}','{request.bodyparts}','{request.description}','{request.Status} ',  {UserId}, '{UtilsRepository.GetUTCTime()}'); " +
+                                 $"SELECT LAST_INSERT_ID(); ";
+            DataTable dt = await Context.FetchData(myqry).ConfigureAwait(false);
+            int id = Convert.ToInt32(dt.Rows[0][0]);
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "RECORD Added");
+        }
+        internal async Task<CMDefaultResponse> UpdateBodyParts(BODYPARTS request, int UserId)
+        {
+            string updateQry = "UPDATE BODYPARTS SET ";
+            if (request.sequence_no >= 0)
+                updateQry += $"Sequence_no = '{request.sequence_no}', ";
+            if (request.description != null && request.description != "")
+                updateQry += $"description = '{request.description}', ";
+            updateQry += $"updatedAt ='{UtilsRepository.GetUTCTime()}' , updatedBy = '{UserId}' WHERE Sequence_no = {request.sequence_no};";
+            await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+            return new CMDefaultResponse(request.sequence_no, CMMS.RETRUNSTATUS.SUCCESS, "Record Updated");
+        }
+        internal async Task<CMDefaultResponse> DeleteBodyParts(int id, int Userid)
+        {
+            string delqry = $"Delete From BODYPARTS where id={id};";
+            await Context.ExecuteNonQry<int>(delqry).ConfigureAwait(false);
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "status deleted");
+        }
+
+        internal async Task<List<Responsibility>> GetResponsibilityList()
         {
             string getqry = $"Select id,name,description from Responsibility";
             List<Responsibility> Data = await Context.GetData<Responsibility>(getqry).ConfigureAwait(false);
             return Data;
         }
-        internal async Task<Responsibility>GetResponsibilityID(int id)
+        internal async Task<Responsibility> GetResponsibilityID(int id)
         {
             String getqry = $"Select * from   Responsibility where id =" + (id);
             List<Responsibility> Body = await Context.GetData<Responsibility>(getqry).ConfigureAwait(false);
             return Body[0];
 
-               
+
         }
         internal async Task<CMDefaultResponse> CreateResponsibility(Responsibility request, int UserID)
         {
             string myQuery = $"INSERT INTO Responsibility(name, description, status, CreatedAt, CreatedBy) VALUES " +
-                                $"('{request.Name}','{request.Description} ',' Created', '{UtilsRepository.GetUTCTime()}', '{UserID}'); " +
+            $"('{request.Name}','{request.Description} ',' Created', '{UtilsRepository.GetUTCTime()}', '{UserID}'); " +
                                  $"SELECT LAST_INSERT_ID(); ";
 
             DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
@@ -472,8 +473,6 @@ internal async Task<List<Responsibility>> GetResponsibilityList()
             return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Responsibility deleted");
 
         }
-
-
 
 
 

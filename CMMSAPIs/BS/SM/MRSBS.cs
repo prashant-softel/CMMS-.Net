@@ -36,6 +36,7 @@ namespace CMMSAPIs.BS.SM
         Task<CMDefaultResponse> RejectMRSIssue(CMApproval request, int userId);
         Task<List<CMMRSList>> GetMRSReturnList(int facility_ID, int emp_id);
         Task<CMDefaultResponse> TransactionDetails(List<CMTransferItems> request);
+        Task<CMDefaultResponse> updateUsedQty(List<CMTransferItems> request);
         Task<CMIssuedAssetItems> getIssuedAssetItems(int id);
     }
     public class MRSBS : IMRSBS
@@ -415,6 +416,35 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
+        public async Task<CMDefaultResponse> updateUsedQty(List<CMTransferItems> requestList)
+        {
+            try
+            {
+                using (var repos = new MRSRepository(getDB))
+                {
+
+                    CMDefaultResponse response = new CMDefaultResponse();
+                    foreach (var request in requestList)
+                    {
+                        var result = await repos.updateUsedQty(request.facilityID, request.fromActorID, request.fromActorType, request.toActorID, request.toActorType, request.assetItemID, request.qty, request.refType, request.refID, request.remarks, request.mrsID);
+                        if (result)
+                        {
+                            response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.SUCCESS, "Item updated.");
+                        }
+                        else
+                        {
+                            response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.FAILURE, "Item requesting more than available quantity.");
+                        }
+                    }
+                    return response;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        
         public async Task<CMIssuedAssetItems> getIssuedAssetItems(int id)
         {
             try

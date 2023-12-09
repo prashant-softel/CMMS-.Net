@@ -1284,7 +1284,7 @@ namespace CMMSAPIs.Repositories
                     {
 
                         //decimal stock_qty = data[i].ordered_qty + data[i].received_qty;
-                        decimal stock_qty = data[i].received_qty;
+                        decimal stock_qty = data[i].accepted_qty;
                         var tResult = await TransactionDetails(data[i].facility_id, data[i].vendorID, (int)CMMS.SM_Actor_Types.Vendor, data[i].facility_id, (int)CMMS.SM_Actor_Types.Store, data[i].assetItemID, (double)stock_qty, (int)CMMS.CMMS_Modules.SM_GO, request.id, "Goods Order");
 
                         // Update the order type.

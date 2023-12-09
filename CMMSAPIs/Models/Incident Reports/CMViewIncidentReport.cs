@@ -61,11 +61,28 @@ namespace CMMSAPIs.Models.Incident_Reports
         public string status_short { get; set; }
         public string status_long { get; set; }
         public string reject_comment { get; set; }
+        public string esi_applicability_remark { get; set; }
+        public string legal_applicability_remark { get; set; }
+        public string location_of_incident { get; set; }
+        public string type_of_job { get; set; }
+        public string is_activities_trained { get; set; }
+        public string is_person_authorized { get; set; }
+        public string instructions_given { get; set; }
+        public string safety_equipments { get; set; }
+        public string safe_procedure_observed { get; set; }
+        public string unsafe_condition_contributed { get; set; }
+        public string unsafe_act_cause { get; set; }
 
 
         public List<CMHistoryLIST> LstHistory { get; set; }
 
         public AttachmentByReporter attachments { get; set; }
+        public List<CMInjured_person> Injured_person { get; set; }
+        public List<CMWhy_why_analysis> why_why_analysis { get; set; }
+        public List<CMRoot_cause> root_cause { get; set; }
+        public List<CMImmediate_correction> immediate_correction { get; set; }
+        public List<CMProposed_action_plan> proposed_action_plan { get; set; }
+        public List<CMInvestigation_team> investigation_team { get; set; }
     }
     public class CMHistoryLIST
     {

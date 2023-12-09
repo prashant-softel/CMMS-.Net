@@ -293,7 +293,7 @@ namespace CMMSAPIs.Repositories.PM
             //List<CMDefaultList> checklist_collection = await Context.GetData<CMDefaultList>(myQuery2).ConfigureAwait(false);
             foreach (var schedule in checklist_collection)
             {
-                string myQuery3 = "SELECT is_ok as cp_ok, boolean as type_bool, failure_weightage as failure_waightage,type as check_point_type,pm_execution.range as type_range, pm_execution.text as type_text,pm_execution.id as execution_id,checkpoint.type as check_point_type ,pm_execution.range as type_range,pm_execution.text as type_text,pm_execution.is_ok as type_bool, Check_Point_id as check_point_id, Check_Point_Name as check_point_name, Check_Point_Requirement as requirement, PM_Schedule_Observation as observation, job_created as is_job_created, linked_job_id, custom_checkpoint as is_custom_check_point, file_required as is_file_required " +
+                string myQuery3 = "SELECT checkpoint.min_range,checkpoint.max_range,is_ok as cp_ok, boolean as type_bool, failure_weightage as failure_waightage,type as check_point_type,pm_execution.range as type_range, pm_execution.text as type_text,pm_execution.id as execution_id,checkpoint.type as check_point_type ,pm_execution.range as type_range,pm_execution.text as type_text,pm_execution.is_ok as type_bool, Check_Point_id as check_point_id, Check_Point_Name as check_point_name, Check_Point_Requirement as requirement, PM_Schedule_Observation as observation, job_created as is_job_created, linked_job_id, custom_checkpoint as is_custom_check_point, file_required as is_file_required " +
                                     $"FROM pm_execution " +
                                     $"left join checkpoint on checkpoint.id = pm_execution.Check_Point_id WHERE PM_Schedule_Id = {schedule.schedule_id}  ;";
 
@@ -578,12 +578,14 @@ namespace CMMSAPIs.Repositories.PM
                      
                         else if (Convert.ToInt32(dtType.Rows[0][0]) == 1)
                         {
-                            CPtypeValue = $" , boolean = {schedule_detail.boolean} ";
+                            //CPtypeValue = $" , boolean = {schedule_detail.boolean} ";
+                            CPtypeValue = $" , boolean = {Convert.ToInt32(schedule_detail.text)} ";
 
                         }
                         else if (Convert.ToInt32(dtType.Rows[0][0]) == 2)
                         {
-                            CPtypeValue = $" , `range` = {schedule_detail.range} ";
+                            //CPtypeValue = $" , `range` = {schedule_detail.range} ";
+                            CPtypeValue = $" , `range` = {Convert.ToInt32(schedule_detail.text)} ";
 
                         }
 

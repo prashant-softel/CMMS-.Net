@@ -690,8 +690,16 @@ namespace CMMSAPIs.Repositories.PM
                                 $" {userID},'{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}', 'Approved', 1 UNION ALL ";
                         }
                         int lastIndex = insertQuery.LastIndexOf("UNION ALL ");
-                        insertQuery = insertQuery.Remove(lastIndex, "UNION ALL ".Length);
-                        var insertedResult = await Context.ExecuteNonQry<int>(insertQuery).ConfigureAwait(false);
+                        if (lastIndex > 0)
+                        {
+                            insertQuery = insertQuery.Remove(lastIndex, "UNION ALL ".Length);
+                            var insertedResult = await Context.ExecuteNonQry<int>(insertQuery).ConfigureAwait(false);
+                        }
+
+                        if (!insertQuery.Contains("Select"))
+                        {
+                            return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, "Import failed, file has empty rows.");
+                        }
                     }
                 }
                 else //

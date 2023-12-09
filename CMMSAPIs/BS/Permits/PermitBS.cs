@@ -6,8 +6,6 @@ using System.Threading.Tasks;
 using CMMSAPIs.Repositories.Permits;
 using CMMSAPIs.Models.Permits;
 using CMMSAPIs.Models.Utils;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Hosting;
 
 namespace CMMSAPIs.BS.Permits
 {
@@ -63,13 +61,10 @@ namespace CMMSAPIs.BS.Permits
     public class PermitBS : IPermitBS
     {
         private readonly DatabaseProvider databaseProvider;
-        public static IWebHostEnvironment _environment;
-
         private MYSQLDBHelper getDB => databaseProvider.SqlInstance();
-        public PermitBS(DatabaseProvider dbProvider, IWebHostEnvironment environment)
+        public PermitBS(DatabaseProvider dbProvider)
         {
             databaseProvider = dbProvider;
-            _environment = environment;
         }
 
         /* 
@@ -80,7 +75,7 @@ namespace CMMSAPIs.BS.Permits
         {
             try
             {
-                using (var repos = new PermitRepository(getDB, _environment))
+                using (var repos = new PermitRepository(getDB))
                 {
                     return await repos.GetPermitTypeList(facility_id);
                 }
@@ -94,7 +89,7 @@ namespace CMMSAPIs.BS.Permits
         {
             try
             {
-                using (var repos = new PermitRepository(getDB, _environment))
+                using (var repos = new PermitRepository(getDB))
                 {
                     return await repos.CreatePermitType(request, userID);
                 }
@@ -108,7 +103,7 @@ namespace CMMSAPIs.BS.Permits
         {
             try
             {
-                using (var repos = new PermitRepository(getDB, _environment))
+                using (var repos = new PermitRepository(getDB))
                 {
                     return await repos.UpdatePermitType(request, userID);
                 }
@@ -122,7 +117,7 @@ namespace CMMSAPIs.BS.Permits
         {
             try
             {
-                using (var repos = new PermitRepository(getDB, _environment))
+                using (var repos = new PermitRepository(getDB))
                 {
                     return await repos.DeletePermitType(id);
                 }
@@ -137,7 +132,7 @@ namespace CMMSAPIs.BS.Permits
         {
             try
             {
-                using (var repos = new PermitRepository(getDB, _environment))
+                using (var repos = new PermitRepository(getDB))
                 {
                     return await repos.GetSafetyMeasurementQuestionList(permit_type_id);
                 }
@@ -153,7 +148,7 @@ namespace CMMSAPIs.BS.Permits
         {
             try
             {
-                using (var repos = new PermitRepository(getDB, _environment))
+                using (var repos = new PermitRepository(getDB))
                 {
                     return await repos.CreateSafetyMeasure(request, userID);
                 }
@@ -167,7 +162,7 @@ namespace CMMSAPIs.BS.Permits
         {
             try
             {
-                using (var repos = new PermitRepository(getDB, _environment))
+                using (var repos = new PermitRepository(getDB))
                 {
                     return await repos.UpdateSafetyMeasure(request, userID);
                 }
@@ -181,7 +176,7 @@ namespace CMMSAPIs.BS.Permits
         {
             try
             {
-                using (var repos = new PermitRepository(getDB, _environment))
+                using (var repos = new PermitRepository(getDB))
                 {
                     return await repos.DeleteSafetyMeasure(id);
                 }
@@ -195,7 +190,7 @@ namespace CMMSAPIs.BS.Permits
         {
             try
             {
-                using (var repos = new PermitRepository(getDB, _environment))
+                using (var repos = new PermitRepository(getDB))
                 {
                     return await repos.GetJobTypeList(facility_id);
                 }
@@ -210,7 +205,7 @@ namespace CMMSAPIs.BS.Permits
         {
             try
             {
-                using (var repos = new PermitRepository(getDB, _environment))
+                using (var repos = new PermitRepository(getDB))
                 {
                     return await repos.CreateJobType(request, userID);
                 }
@@ -224,7 +219,7 @@ namespace CMMSAPIs.BS.Permits
         {
             try
             {
-                using (var repos = new PermitRepository(getDB, _environment))
+                using (var repos = new PermitRepository(getDB))
                 {
                     return await repos.UpdateJobType(request, userID);
                 }
@@ -238,7 +233,7 @@ namespace CMMSAPIs.BS.Permits
         {
             try
             {
-                using (var repos = new PermitRepository(getDB, _environment))
+                using (var repos = new PermitRepository(getDB))
                 {
                     return await repos.DeleteJobType(id);
                 }
@@ -252,7 +247,7 @@ namespace CMMSAPIs.BS.Permits
         {
             try
             {
-                using (var repos = new PermitRepository(getDB, _environment))
+                using (var repos = new PermitRepository(getDB))
                 {
                     return await repos.GetSOPList(job_type_id);
                 }
@@ -266,7 +261,7 @@ namespace CMMSAPIs.BS.Permits
         {
             try
             {
-                using (var repos = new PermitRepository(getDB, _environment))
+                using (var repos = new PermitRepository(getDB))
                 {
                     return await repos.CreateSOP(request);
                 }
@@ -280,7 +275,7 @@ namespace CMMSAPIs.BS.Permits
         {
             try
             {
-                using (var repos = new PermitRepository(getDB,_environment))
+                using (var repos = new PermitRepository(getDB))
                 {
                     return await repos.UpdateSOP(request);
                 }
@@ -294,7 +289,7 @@ namespace CMMSAPIs.BS.Permits
         {
             try
             {
-                using (var repos = new PermitRepository(getDB,_environment))
+                using (var repos = new PermitRepository(getDB))
                 {
                     return await repos.DeleteSOP(id);
                 }
@@ -313,7 +308,7 @@ namespace CMMSAPIs.BS.Permits
         {
             try
             {
-                using (var repos = new PermitRepository(getDB,_environment))
+                using (var repos = new PermitRepository(getDB))
                 {
                     return await repos.GetPermitList(facility_id, startDate, endDate, userID, self_view, non_expired);
 
@@ -330,7 +325,7 @@ namespace CMMSAPIs.BS.Permits
         {
             try
             {
-                using (var repos = new PermitRepository(getDB,_environment))
+                using (var repos = new PermitRepository(getDB))
                 {
                     return await repos.CreatePermit(request, userID);
 
@@ -346,7 +341,7 @@ namespace CMMSAPIs.BS.Permits
         {
             try
             {
-                using (var repos = new PermitRepository(getDB,_environment))
+                using (var repos = new PermitRepository(getDB))
                 {
                     return await repos.UpdatePermit(request, userID);
 
@@ -362,7 +357,7 @@ namespace CMMSAPIs.BS.Permits
         {
             try
             {
-                using (var repos = new PermitRepository(getDB,_environment))
+                using (var repos = new PermitRepository(getDB))
                 {
                     return await repos.GetPermitDetails(permit_id);
                 }
@@ -381,7 +376,7 @@ namespace CMMSAPIs.BS.Permits
         {
             try
             {
-                using (var repos = new PermitRepository(getDB,_environment))
+                using (var repos = new PermitRepository(getDB))
                 {
                     return await repos.PermitApprove(request, userID);
                 }
@@ -395,7 +390,7 @@ namespace CMMSAPIs.BS.Permits
         {
             try
             {
-                using (var repos = new PermitRepository(getDB,_environment))
+                using (var repos = new PermitRepository(getDB))
                 {
                     return await repos.PermitExtend(request, userID);
                 }
@@ -409,7 +404,7 @@ namespace CMMSAPIs.BS.Permits
         {
             try
             {
-                using (var repos = new PermitRepository(getDB,_environment))
+                using (var repos = new PermitRepository(getDB))
                 {
                     return await repos.PermitExtendApprove(request, userID);
                 }
@@ -423,7 +418,7 @@ namespace CMMSAPIs.BS.Permits
         {
             try
             {
-                using (var repos = new PermitRepository(getDB,_environment))
+                using (var repos = new PermitRepository(getDB))
                 {
                     return await repos.PermitExtendReject(request, userID);
                 }
@@ -437,7 +432,7 @@ namespace CMMSAPIs.BS.Permits
         {
             try
             {
-                using (var repos = new PermitRepository(getDB,_environment))
+                using (var repos = new PermitRepository(getDB))
                 {
                     return await repos.PermitClose(request, userID);
                 }
@@ -452,7 +447,7 @@ namespace CMMSAPIs.BS.Permits
         {
             try
             {
-                using (var repos = new PermitRepository(getDB,_environment))
+                using (var repos = new PermitRepository(getDB))
                 {
                     return await repos.PermitReject(request, userID);
                 }
@@ -467,7 +462,7 @@ namespace CMMSAPIs.BS.Permits
         {
             try
             {
-                using (var repos = new PermitRepository(getDB,_environment))
+                using (var repos = new PermitRepository(getDB))
                 {
                     return await repos.PermitIssue(request, userID);
                 }
@@ -481,7 +476,7 @@ namespace CMMSAPIs.BS.Permits
         {
             try
             {
-                using (var repos = new PermitRepository(getDB,_environment))
+                using (var repos = new PermitRepository(getDB))
                 {
                     return await repos.PermitIssueReject(request, userID);
                 }
@@ -496,7 +491,7 @@ namespace CMMSAPIs.BS.Permits
         {
             try
             {
-                using (var repos = new PermitRepository(getDB,_environment))
+                using (var repos = new PermitRepository(getDB))
                 {
                     return await repos.PermitCancelRequest(request, userID);
                 }
@@ -511,7 +506,7 @@ namespace CMMSAPIs.BS.Permits
         {
             try
             {
-                using (var repos = new PermitRepository(getDB,_environment))
+                using (var repos = new PermitRepository(getDB))
                 {
                     return await repos.PermitCancelByApprover(request, userID);
                 }
@@ -526,7 +521,7 @@ namespace CMMSAPIs.BS.Permits
         {
             try
             {
-                using (var repos = new PermitRepository(getDB,_environment))
+                using (var repos = new PermitRepository(getDB))
                 {
                     return await repos.PermitCancelByHSE(request, userID);
                 }
@@ -541,7 +536,7 @@ namespace CMMSAPIs.BS.Permits
         {
             try
             {
-                using (var repos = new PermitRepository(getDB,_environment))
+                using (var repos = new PermitRepository(getDB))
                 {
                     return await repos.PermitCancelByIssuer(request, userID);
                 }
@@ -556,7 +551,7 @@ namespace CMMSAPIs.BS.Permits
         {
             try
             {
-                using (var repos = new PermitRepository(getDB,_environment))
+                using (var repos = new PermitRepository(getDB))
                 {
                     return await repos.PermitCancelReject(request, userID);
                 }
@@ -571,7 +566,7 @@ namespace CMMSAPIs.BS.Permits
         {
             try
             {
-                using (var repos = new PermitRepository(getDB,_environment))
+                using (var repos = new PermitRepository(getDB))
                 {
                     return await repos.GetPermitConditionList(permit_type_id, isClose, isCancle, isExtend);
                 }
@@ -587,7 +582,7 @@ namespace CMMSAPIs.BS.Permits
         {
             try
             {
-                using (var repos = new PermitRepository(getDB,_environment))
+                using (var repos = new PermitRepository(getDB))
                 {
                     return await repos.GetIsolationTypeList();
                 }

@@ -53,24 +53,25 @@ namespace CMMSAPIs.Models.Incident_Reports
         public string safe_procedure_observed { get; set; } 
         public string unsafe_condition_contributed { get; set; } 
         public string unsafe_act_cause { get; set; } 
-        public List<CMinjured_person> injured_person { get; set; }
-        public List<CMwhy_why_analysis> why_why_analysis { get; set; }
-        public List<CMroot_cause> root_cause { get; set; }
-        public List<CMimmediate_correction> immediate_correction { get; set; }
-        public List<CMproposed_action_plan> proposed_action_plan { get; set; }
-        public List<CMinvestigation_team> investigation_team { get; set; }
+        public List<CMInjured_person> injured_person { get; set; }
+        public List<CMWhy_why_analysis> why_why_analysis { get; set; }
+        public List<CMRoot_cause> root_cause { get; set; }
+        public List<CMImmediate_correction> immediate_correction { get; set; }
+        public List<CMProposed_action_plan> proposed_action_plan { get; set; }
+        public List<CMInvestigation_team> investigation_team { get; set; }
     }
 
-    public class CMinvestigation_team
+    public class CMInvestigation_team
     {
         public int investigation_item_id { get; set; }
         public int incidents_id { get; set; }
         public string person_id { get; set; }
+        public string person_name { get; set; }
         public int person_type { get; set; }
         public string designation { get; set; } 
         public DateTime? investigation_date { get; set; }
     }
-    public class CMproposed_action_plan
+    public class CMProposed_action_plan
     {
         public int proposed_item_id { get; set; }
         public int incidents_id { get; set; }
@@ -80,20 +81,20 @@ namespace CMMSAPIs.Models.Incident_Reports
         public string remarks { get; set; }
     }
 
-    public class CMimmediate_correction
+    public class CMImmediate_correction
     {
         public int ic_item_id { get; set; }
         public int incidents_id { get; set; }
         public string details { get; set; }
     }
 
-    public class CMroot_cause
+    public class CMRoot_cause
     {
         public int root_item_id { get; set; }
         public int incidents_id { get; set; }
         public string cause { get; set; }
     }
-    public class CMwhy_why_analysis
+    public class CMWhy_why_analysis
     {
         public int why_item_id { get; set; }
         public int incidents_id { get; set; }
@@ -102,7 +103,7 @@ namespace CMMSAPIs.Models.Incident_Reports
     }
 
 
-    public class CMinjured_person
+    public class CMInjured_person
     {
         public int injured_item_id { get; set; }
         public int incidents_id { get; set; }

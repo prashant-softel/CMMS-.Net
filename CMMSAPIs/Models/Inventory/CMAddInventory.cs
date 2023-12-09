@@ -56,6 +56,7 @@ namespace CMMSAPIs.Models.Inventory
         public string certificate_number { get; set; }
         public int warranty_status { get; set; }
         public int multiplier { get; set; }
+
     }
 
     public class CMSetParentAsset

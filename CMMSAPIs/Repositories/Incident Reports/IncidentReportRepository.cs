@@ -108,7 +108,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
             }
             severityName += $"ELSE 'Invalid severity' END";
 
-            string selectqry = $"SELECT incident.id as id,{severityName} as severity,  incident.description as description , facilities.name as facility_name,blockName.name as block_name, assets.name as equipment_name, incident.risk_level as risk_level, CONCAT(created_by.firstName ,' ' , created_by.lastName) as reported_by_name, incident.created_at as reported_at,CONCAT(user.firstName ,' ' , user.lastName) as approved_by, incident.approved_at as approved_at, CONCAT(user1.firstName , ' ' , user1.lastName) as reported_by_name , {statusOut} as status FROM incidents as incident left JOIN facilities AS facilities on facilities.id = incident.facility_id LEFT JOIN facilities AS blockName on blockName.id = incident.block_id  and blockName.isBlock = 1 JOIN assets as assets on incident.equipment_id = assets.id LEFT JOIN users as user on incident.approved_by = user.id LEFT JOIN users as created_by on incident.created_by = created_by.id LEFT JOIN users as user1 on incident.verified_by = user1.id where " + filter + " order by incident.id asc";
+            string selectqry = $"SELECT incident.id as id,{severityName} as severity,  incident.description as description , facilities.name as facility_name,blockName.name as block_name, assets.name as equipment_name, incident.risk_level as risk_level, CONCAT(created_by.firstName ,' ' , created_by.lastName) as reported_by_name, incident.created_at as reported_at,CONCAT(user.firstName ,' ' , user.lastName) as approved_by, incident.approved_at as approved_at, CONCAT(user1.firstName , ' ' , user1.lastName) as reported_by_name , {statusOut} as status FROM incidents as incident left JOIN facilities AS facilities on facilities.id = incident.facility_id LEFT JOIN facilities AS blockName on blockName.id = incident.block_id  and blockName.isBlock = 1 LEFT JOIN assets as assets on incident.equipment_id = assets.id LEFT JOIN users as user on incident.approved_by = user.id LEFT JOIN users as created_by on incident.created_by = created_by.id LEFT JOIN users as user1 on incident.verified_by = user1.id where " + filter + " order by incident.id asc";
 
             List<CMIncidentList> getIncidentList = await Context.GetData<CMIncidentList>(selectqry).ConfigureAwait(false);
             return getIncidentList;
@@ -299,7 +299,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
 
             string myQuery = $"SELECT " +
                                $"incident.id as id,incident.title, incident.description,facilities.id as facility_id, facilities.name as facility_name, blockName.id as block_id, blockName.name as block_name, assets.id as equipment_id,  assets.name as equipment_name,{severityName} as severity,incident.risk_level as risk_level ,IF(risk_level = '1','high',IF(risk_level ='2','medium','Low')) as risk_level_name, incident.incident_datetime as incident_datetime, incident.created_at as reporting_datetime,incident.action_taken_datetime ,user.id as victim_id, user.firstName as victim_name , user1.id as action_taken_by,  CONCAT(user1.firstName, user1.lastName) as action_taken_by_name, user2.id as inverstigated_by ,  CONCAT(user2.firstName, user2.lastName) as inverstigated_by_name , user3.id as verified_by ,CONCAT(user3.firstName, user3.lastName) as verified_by_name, incident.risk_type as risk_type, " + strRiskType + ", IF(esi_applicability = '1', 'YES', 'NO') as esi_applicability_name, IF(legal_applicability = '1', 'YES', 'NO') as legal_applicability_name, IF(rca_required = '1', 'YES', 'NO') as rca_required_name, incident.damaged_cost AS damaged_cost, incident.generation_loss as generation_loss,incident.damaged_cost_curr_id, incident.generation_loss_curr_id, job.id as job_id, job.title as job_name , job.description as description , IF(is_insurance_applicable = '1', 'YES', 'NO') as is_insurance_applicable_name, incident.insurance_status as insurance_status, incident.insurance as insurance_name, incident.insurance_remark as insurance_remark, user4.id as approved_by ,CONCAT(user4.firstName, user4.lastName) as approved_by_name, CONCAT(user5.firstName, user5.lastName) as created_by_name, CONCAT(user6.firstName, user6.lastName) as updated_by_name, incident.status as status, incident.approved_at as approved_at,incident.reject_reccomendations as reject_comment " +
-                               " FROM incidents as incident " +
+                               " ,esi_applicability_remark\r\n,legal_applicability_remark\r\n,location_of_incident\r\n,type_of_job\r\n,is_activities_trained\r\n,is_person_authorized\r\n,instructions_given\r\n,safety_equipments\r\n,safe_procedure_observed\r\n,unsafe_condition_contributed\r\n,unsafe_act_cause FROM incidents as incident " +
                                "LEFT JOIN facilities AS facilities on facilities.id = incident.facility_id " +
                                "LEFT JOIN facilities AS blockName on blockName.id = incident.block_id  and blockName.isBlock = 1 " +
                                "LEFT JOIN assets as assets on incident.equipment_id = assets.id " +
@@ -331,7 +331,12 @@ namespace CMMSAPIs.Repositories.Incident_Reports
                 string _longStatus = getLongStatus(CMMS.CMMS_Modules.INCIDENT_REPORT, _Status_long, _IncidentReportList[0]);
                 _IncidentReportList[0].status_long = _longStatus;
             }
-
+            _IncidentReportList[0].Injured_person = await Getinjured_person(id);
+            _IncidentReportList[0].why_why_analysis = await Getwhy_why_analysis(id);
+            _IncidentReportList[0].root_cause = await Getroot_cause(id);
+            _IncidentReportList[0].immediate_correction = await Getimmediate_correction(id);
+            _IncidentReportList[0].proposed_action_plan = await Getproposed_action_plan(id);
+            _IncidentReportList[0].investigation_team = await Getinvestigation_team(id);
             return _IncidentReportList[0];
         }
 
@@ -630,43 +635,43 @@ namespace CMMSAPIs.Repositories.Incident_Reports
             return response;
         }
 
-        internal async Task<List<CMinjured_person>> Getinjured_person(int incidents_id)
+        internal async Task<List<CMInjured_person>> Getinjured_person(int incidents_id)
         {
             string selectqry = "select * from injured_person where incidents_id = "+ incidents_id + ";";
-            List<CMinjured_person> result = await Context.GetData<CMinjured_person>(selectqry).ConfigureAwait(false);
+            List<CMInjured_person> result = await Context.GetData<CMInjured_person>(selectqry).ConfigureAwait(false);
             return result;
         }
 
-        internal async Task<List<CMwhy_why_analysis>> Getwhy_why_analysis(int incidents_id)
+        internal async Task<List<CMWhy_why_analysis>> Getwhy_why_analysis(int incidents_id)
         {
             string selectqry = "select * from why_why_analysis where incidents_id = " + incidents_id + ";";
-            List<CMwhy_why_analysis> result = await Context.GetData<CMwhy_why_analysis>(selectqry).ConfigureAwait(false);
+            List<CMWhy_why_analysis> result = await Context.GetData<CMWhy_why_analysis>(selectqry).ConfigureAwait(false);
             return result;
         }
 
-        internal async Task<List<CMroot_cause>> Getroot_cause(int incidents_id)
+        internal async Task<List<CMRoot_cause>> Getroot_cause(int incidents_id)
         {
             string selectqry = "select * from root_cause where incidents_id = " + incidents_id + ";";
-            List<CMroot_cause> result = await Context.GetData<CMroot_cause>(selectqry).ConfigureAwait(false);
+            List<CMRoot_cause> result = await Context.GetData<CMRoot_cause>(selectqry).ConfigureAwait(false);
             return result;
         }
-        internal async Task<List<CMimmediate_correction>> Getimmediate_correction(int incidents_id)
+        internal async Task<List<CMImmediate_correction>> Getimmediate_correction(int incidents_id)
         {
             string selectqry = "select * from immediate_correction where incidents_id = " + incidents_id + ";";
-            List<CMimmediate_correction> result = await Context.GetData<CMimmediate_correction>(selectqry).ConfigureAwait(false);
+            List<CMImmediate_correction> result = await Context.GetData<CMImmediate_correction>(selectqry).ConfigureAwait(false);
             return result;
         }
 
-        internal async Task<List<CMproposed_action_plan>> Getproposed_action_plan(int incidents_id)
+        internal async Task<List<CMProposed_action_plan>> Getproposed_action_plan(int incidents_id)
         {
             string selectqry = "select * from proposed_action_plan where incidents_id = " + incidents_id + ";";
-            List<CMproposed_action_plan> result = await Context.GetData<CMproposed_action_plan>(selectqry).ConfigureAwait(false);
+            List<CMProposed_action_plan> result = await Context.GetData<CMProposed_action_plan>(selectqry).ConfigureAwait(false);
             return result;
         }
-        internal async Task<List<CMinvestigation_team>> Getinvestigation_team(int incidents_id)
+        internal async Task<List<CMInvestigation_team>> Getinvestigation_team(int incidents_id)
         {
-            string selectqry = "select * from investigation_team where incidents_id = " + incidents_id + ";";
-            List<CMinvestigation_team> result = await Context.GetData<CMinvestigation_team>(selectqry).ConfigureAwait(false);
+            string selectqry = "select i.id, incidents_id, person_id, person_type, designation, investigation_date, concat(u.firstName, ' ', u.lastname) as person_name from investigation_team i\r\nleft join users u on u.id = i.person_id  where incidents_id = " + incidents_id + ";";
+            List<CMInvestigation_team> result = await Context.GetData<CMInvestigation_team>(selectqry).ConfigureAwait(false);
             return result;
         }
     }

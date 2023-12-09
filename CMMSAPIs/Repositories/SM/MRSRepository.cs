@@ -27,6 +27,7 @@ using static Org.BouncyCastle.Math.EC.ECCurve;
 using Microsoft.Extensions.Configuration;
 using Ubiety.Dns.Core;
 using CMMSAPIs.Models;
+using System.Reflection;
 
 namespace CMMSAPIs.Repositories.SM
 {
@@ -47,7 +48,7 @@ namespace CMMSAPIs.Repositories.SM
             string stmt = "SELECT sm.ID,sm.requested_by_emp_ID,CONCAT(ed1.firstName,' ',ed1.lastName) as approver_name,DATE_FORMAT(sm.requested_date,'%Y-%m-%d') as requestd_date," +
                 "DATE_FORMAT(sm.returnDate,'%Y-%m-%d') as returnDate,if(sm.approval_status != '',DATE_FORMAT(sm.approved_date,'%d-%m-%Y'),'') as approval_date,sm.approval_status," +
                 "sm.approval_comment,CONCAT(ed.firstName,' ',ed.lastName) as requested_by_name, sm.status, sm.activity, sm.whereUsedType, " +
-    " case when sm.whereUsedType = 1 then 'Job' when sm.whereUsedType = 27 then 'PM Task' else 'Invalid' end as whereUsedTypeName, sm.whereUsedRefID, sm.remarks " +
+    " case when sm.whereUsedType = 1 then 'Job' when sm.whereUsedType = 2 then 'PM' when sm.whereUsedType = 4 then 'JOBCARD' when sm.whereUsedType = 27 then 'PMTASK' else 'Invalid' end as whereUsedTypeName, sm.whereUsedRefID, sm.remarks " +
                 "FROM smmrs sm LEFT JOIN users ed ON ed.id = sm.requested_by_emp_ID LEFT JOIN users ed1 ON ed1.id = sm.approved_by_emp_ID " +
                 "" + filter + "";
             List<CMMRSList> _List = await Context.GetData<CMMRSList>(stmt).ConfigureAwait(false);
@@ -99,6 +100,13 @@ namespace CMMSAPIs.Repositories.SM
                 string _shortStatus = getShortStatus(CMMS.CMMS_Modules.SM_MRS, _Status);
                 _List[i].status_short = _shortStatus;
                 _List[i].CMMRSItems = await getMRSItems(_List[i].mrsId);
+                if (_List[i].CMMRSItems.Count > 0)
+                {
+                    for(var k=0;k< _List[i].CMMRSItems.Count; k++)
+                    {
+                        _List[i].CMMRSItems[k].available_qty = _List[i].CMMRSItems[k].available_qty - _List[i].CMMRSItems[k].issued_qty;
+                    }
+                }
                 for(var j=0;j < _List[i].CMMRSItems.Count; j++)
                 {
                     assetItemNames = assetItemNames + _List[i].CMMRSItems[j].asset_name + ", ";
@@ -536,8 +544,16 @@ namespace CMMSAPIs.Repositories.SM
                 _List[i].CMMRSItems = await getMRSReturnItems(_List[i].ID);
             }
 
+            if (_List.Count > 0)
+            {
+                return _List[0];
+            }
+            else
+            {
+                return null;
+            }
 
-            return _List[0];
+          
         }
 
         //internal async Task<CMDefaultResponse> mrsApproval(CMMRS request)
@@ -863,7 +879,44 @@ namespace CMMSAPIs.Repositories.SM
                 return false;
             }
         }
+        public async Task<bool> updateUsedQty(int facilityID, int fromActorID, int fromActorType, int toActorID, int toActorType, int assetItemID, int qty, int refType, int refID, string remarks, int mrsID = 0, int natureOfTransaction = 0, int assetItemStatus = 0)
+        {
+            try
+            {
+                string stmt = " select i.id,i.available_qty,i.issued_qty from smrsitems i inner join smmrs m on m.ID = i.mrs_ID where i.mrs_ID = "+mrsID+" and asset_item_ID = "+assetItemID+"; ";
+                DataTable dt2 = await Context.FetchData(stmt).ConfigureAwait(false);
+                int mrsitem_ID = 0;
+                decimal available_qty = 0;
+                decimal issued_qty = 0;
+                if (dt2.Rows.Count > 0)
+                {
+                    mrsitem_ID = Convert.ToInt32(dt2.Rows[0][0]);
+                    available_qty = Convert.ToInt32(dt2.Rows[0][1]);
+                    issued_qty = Convert.ToInt32(dt2.Rows[0][2]);
+                    if (available_qty >= qty)
+                    {
+                        string stmt_update = " update smrsitems set used_qty=" + qty + " where id = " + mrsitem_ID + ";";
+                        var result = await Context.ExecuteNonQry<int>(stmt_update);
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                  
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            catch (Exception e)
+            {
+                return false;
+            }
+        }
 
+        
         private async Task<int> DebitTransation(int facilityID, int transactionID, int actorType, int actorID, int debitQty, int assetItemID, int mrsID)
         {
             string stmt = $"INSERT INTO smtransition (facilityID, transactionID, actorType, actorID, debitQty, assetItemID, mrsID) VALUES ({facilityID},{transactionID}, '{actorType}', {actorID}, {debitQty}, {assetItemID}, {mrsID}); SELECT LAST_INSERT_ID();";
@@ -952,8 +1005,8 @@ namespace CMMSAPIs.Repositories.SM
                 var refType = "MRSReturn";
                 var mailSub = "MRS Return Request";
                 string insertStmt = $"START TRANSACTION; INSERT INTO smmrs (facility_ID,requested_by_emp_ID,requested_date," +
-                    $"returnDate,status,flag, activity,whereUsedType,whereUsedRefID,is_mrs_return)\r\n VALUES ({request.facility_ID},{UserID},'{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}'" +
-                    $",'{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}',{(int)CMMS.CMMS_Status.MRS_SUBMITTED}, {2},'{request.activity}',{request.whereUsedType},{request.whereUsedRefID},1); SELECT LAST_INSERT_ID(); COMMIT;";
+                    $"returnDate,status,flag, activity,whereUsedType,whereUsedRefID,is_mrs_return,from_actor_type_id,from_actor_id,to_actor_type_id,to_actor_id)\r\n VALUES ({request.facility_ID},{UserID},'{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}'" +
+                    $",'{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}',{(int)CMMS.CMMS_Status.MRS_SUBMITTED}, {2},'{request.activity}',{request.whereUsedType},{request.whereUsedRefID},1,{request.from_actor_type_id},{request.from_actor_id},{request.to_actor_type_id},{request.to_actor_id}); SELECT LAST_INSERT_ID(); COMMIT;";
                 try
                 {
                     DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
@@ -1089,7 +1142,7 @@ namespace CMMSAPIs.Repositories.SM
             bool Queryflag = false;
             string comment = "";
 
-            string stmtSelect = "SELECT ID,facility_ID,requested_by_emp_ID, reference FROM smmrs WHERE ID = " + request.id + "";
+            string stmtSelect = "SELECT ID,facility_ID,requested_by_emp_ID, reference,from_actor_id,from_actor_type_id,to_actor_id,to_actor_type_id FROM smmrs WHERE ID = " + request.id + "";
             List<CMMRS> mrsList = await Context.GetData<CMMRS>(stmtSelect).ConfigureAwait(false);
             //for (int i = 0; i < request.cmmrsItems.Count; i++)
             //{
@@ -1149,9 +1202,10 @@ namespace CMMSAPIs.Repositories.SM
             string stmtSelectItems = "SELECT * FROM smrsitems WHERE mrs_return_ID = " + request.id + "";
             List<CMMRSItems> mrsItemList = await Context.GetData<CMMRSItems>(stmtSelectItems).ConfigureAwait(false);
 
+
             for (var i = 0; i < mrsItemList.Count(); i++)
             {
-                var tResult = await TransactionDetails(mrsList[0].facility_ID, mrsList[0].requested_by_emp_ID, (int)CMMS.SM_Actor_Types.Engineer, mrsList[0].facility_ID, (int)CMMS.SM_Actor_Types.Inventory, mrsItemList[i].ID, Convert.ToInt32(mrsItemList[i].returned_qty), (int)CMMS.CMMS_Modules.SM_MRS_RETURN, request.id, request.comment, mrsList[0].ID);
+                var tResult = await TransactionDetails(mrsList[0].facility_ID, mrsList[0].from_actor_id, mrsList[0].from_actor_type_id, mrsList[0].to_actor_id, mrsList[0].to_actor_type_id, mrsItemList[i].asset_item_ID, Convert.ToInt32(mrsItemList[i].returned_qty), (int)CMMS.CMMS_Modules.SM_MRS_RETURN, request.id, request.comment, mrsList[0].ID);
                 if (!tResult)
                 {
                     return new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Transaction details failed.");

@@ -285,7 +285,7 @@ namespace CMMSAPIs.Repositories.Users
                         dt2.Columns.Add("plant_id", typeof(int));
                         dt2.Columns.Add("report_to_id", typeof(int));
                         dt2.Columns.Add("row_no", typeof(int));
-                        for (int rN = 4; rN <= sheet.Dimension.End.Row; rN++)
+                        for (int rN = 2; rN <= sheet.Dimension.End.Row; rN++)
                         {
                             ExcelRange row = sheet.Cells[rN, 1, rN, sheet.Dimension.End.Column];
                             DataRow newR = dt2.NewRow();
@@ -508,7 +508,7 @@ namespace CMMSAPIs.Repositories.Users
                     }
                 }
             }
-            string logPath = m_errorLog.SaveAsText($"ImportLog\\ImportUsers_File{file_id}_{DateTime.UtcNow.ToString("yyyyMMdd_HHmmss")}");
+                string logPath = m_errorLog.SaveAsText($"ImportLog\\ImportUsers_File{file_id}_{DateTime.UtcNow.ToString("yyyyMMdd_HHmmss")}");
             string logQry = $"UPDATE uploadedfiles SET logfile = '{logPath}' WHERE id = {file_id}";
             await Context.ExecuteNonQry<int>(logQry).ConfigureAwait(false);
             logPath = logPath.Replace("\\\\", "\\");
@@ -893,11 +893,12 @@ namespace CMMSAPIs.Repositories.Users
         internal async Task<CMUserAccess> GetUserAccess(int user_id)
         {
             string qry = $"SELECT " +
-                            $"f.id as feature_id, f.featureName as feature_name, f.menuimage as menu_image, u.add, u.edit, u.delete, u.view, u.issue, u.approve, u.selfView " +
+                            $"featureId as feature_id, f.featureName as feature_name, f.menuimage as menu_image, u.add, u.edit, u.delete, u.view, u.issue, u.approve, u.selfView " +
                          $"FROM " +
-                            $"features as f " +
-                            $"left JOIN UsersAccess as u ON u.featureId = f.id and userId = {user_id}";
-                         
+                            $"UsersAccess as u " +
+                            $"JOIN Features as f ON u.featureId = f.id " +
+                         $"WHERE " +
+                            $"userId = {user_id}";
 
             List<CMAccessList> access_list = await Context.GetData<CMAccessList>(qry).ConfigureAwait(false);
             CMUserDetail user_detail = await GetUserDetail(user_id);
@@ -960,16 +961,23 @@ namespace CMMSAPIs.Repositories.Users
 
                 foreach (var access in old_access.Values)
                 {
-                    user_access.Add($"({user_id}, {access.feature_id}, {access.add}, {access.edit}, " +
+                    user_access.Add($"union all  Select {user_id}, {access.feature_id}, {access.add}, {access.edit}, " +
                                     $"{access.view},{access.delete}, {access.issue}, {access.approve}, {access.selfView}, " +
-                                    $"'{UtilsRepository.GetUTCTime()}', {userID})");
+                                    $"'{UtilsRepository.GetUTCTime()}', {userID} ");
                 }
-                string user_access_insert_str = string.Join(',', user_access);
+                if(user_access.Count > 0)
+                {
+                    user_access[0] = user_access[0].Substring(9);
+                }
+                string user_access_insert_str = string.Join("", user_access);
 
                 string insert_query = $"INSERT INTO UsersAccess" +
                                         $"(userId, featureId, `add`, `edit`, `view`, `delete`, `issue`, `approve`, `selfView`, `lastModifiedAt`, `lastModifiedBy`) " +
-                                        $" VALUES {user_access_insert_str}";
-                await Context.GetData<List<int>>(insert_query).ConfigureAwait(false);
+                                        $" {user_access_insert_str}";
+                if (user_access_insert_str != "")
+                {
+                    await Context.GetData<List<int>>(insert_query).ConfigureAwait(false);
+                }
                 using (var repos = new UtilsRepository(_conn))
                 {
                     await repos.AddHistoryLog(CMMS.CMMS_Modules.USER_MODULE, user_id, 0, 0, "User Access Set", CMMS.CMMS_Status.UPDATED, userID);
