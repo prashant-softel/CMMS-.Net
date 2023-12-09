@@ -36,6 +36,8 @@ namespace CMMSAPIs.Models.Permits
         public Boolean is_physical_iso_required { get; set; }
         public int[] physical_iso_equip_ids { get; set; }
         public string physical_iso_remark { get; set; }
+        public int TBT_Done_By { get; set; }
+        public DateTime TBT_Done_At { get; set; }
         public List<CMPermitEmpList> employee_list { get; set; }
         public List<CMPermitSaftyQueList> safety_question_list { get; set; }
         public List<int> uploadfile_ids { get; set; }
