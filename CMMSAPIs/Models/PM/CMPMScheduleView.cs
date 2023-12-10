@@ -45,6 +45,7 @@ namespace CMMSAPIs.Models.PM
         public int status { get; set; }
         public int ptw_status { get; set; }
         public string status_short { get; set; }
+        public long ptw_tbt_done { get; set; }
     }
 
     public class CMPMScheduleExecutionDetail

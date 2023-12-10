@@ -33,6 +33,9 @@ using CMMSAPIs.BS.Cleaning;
 using CMMSAPIs.BS.EM;
 using CMMSAPIs.BS.DSM;
 using CMMSAPIs.BS.MISMasters;
+using Microsoft.Extensions.FileProviders;
+using System.IO;
+using Microsoft.AspNetCore.StaticFiles;
 
 namespace CMMSAPIs
 {
@@ -114,32 +117,45 @@ namespace CMMSAPIs
             services.AddScoped<IDSMBS, DSMBS>();
             services.AddScoped<IMISMasterBS, MISMasterBS>();
 
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             app.UseCors(options => options.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
             else
             {
-
                 app.UseHsts();
             }
-            //  app.UseHttpsRedirection();
-            //app.UseMvc();
+
+            app.UseStaticFiles();
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseSession();
+
             app.UseMyMiddleware();
+
+            // Use FileServer to serve static files
+            app.UseFileServer(new FileServerOptions
+            {
+                FileProvider = new PhysicalFileProvider(
+                    Path.Combine(Directory.GetCurrentDirectory(), "Upload", "Templates")),
+                RequestPath = "/Upload/Templates",
+                EnableDirectoryBrowsing = true  // Enable this if you want directory browsing
+            });
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
             });
         }
+
     }
 }

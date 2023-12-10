@@ -55,8 +55,8 @@ namespace CMMSAPIs.Models.Incident_Reports
         public int approved_by { get; set; }
         public string approved_by_name { get; set; }
         public int status { get; set; }
-        public int historyId { get; set; }
-        public string status_name { get; set; }
+        //public int historyId { get; set; }
+        //public string status_name { get; set; }
         public DateTime approved_at { get; set; }
         public string status_short { get; set; }
         public string status_long { get; set; }
@@ -74,9 +74,10 @@ namespace CMMSAPIs.Models.Incident_Reports
         public string unsafe_act_cause { get; set; }
 
 
-        public List<CMHistoryLIST> LstHistory { get; set; }
+        //public List<CMHistoryLIST> LstHistory { get; set; }
 
-        public AttachmentByReporter attachments { get; set; }
+        //public AttachmentByReporter attachments { get; set; }
+        public List<AttachmentByReporter> attachments { get; set; }
         public List<CMInjured_person> Injured_person { get; set; }
         public List<CMWhy_why_analysis> why_why_analysis { get; set; }
         public List<CMRoot_cause> root_cause { get; set; }

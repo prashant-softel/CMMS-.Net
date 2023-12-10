@@ -68,6 +68,7 @@ namespace CMMSAPIs.Models.Incident_Reports
         public string person_id { get; set; }
         public string person_name { get; set; }
         public int person_type { get; set; }
+        public string person_type_name { get; set; }
         public string designation { get; set; } 
         public DateTime? investigation_date { get; set; }
     }
@@ -109,8 +110,10 @@ namespace CMMSAPIs.Models.Incident_Reports
         public int incidents_id { get; set; }
         public string person_id { get; set; }
         public int person_type { get; set; }
+        public string person_type_name { get; set; }
         public int age { get; set; }
         public int sex { get; set; }
+        public string gender_name { get; set; }
         public string designation { get; set; }
         public string address { get; set; }
         public string name_contractor { get; set; }

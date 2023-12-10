@@ -573,5 +573,11 @@ namespace CMMSAPIs.Helper
             ImportBussiness
         }
 
+        public enum PersonTypes
+        {
+            Employee = 1,
+            Contractor,
+            Other
+        }
     }
 }

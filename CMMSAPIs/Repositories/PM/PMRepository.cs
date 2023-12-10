@@ -678,28 +678,50 @@ namespace CMMSAPIs.Repositories.PM
 
                             dt2.Rows.Add(newR);
                         }
+                        if (dt2.Rows.Count == 0)
+                        {
+                            return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, "Import failed, file has empty rows.");
+                        }
                         string insertQuery = "INSERT INTO pm_plan " +
                             "(plan_name, facility_id, category_id, frequency_id, " +
                             " plan_date, assigned_to, status, created_by, created_at, " +
                             " approved_by, approved_at,  " +
                             " remarks,status_id)";
+                        //foreach (DataRow row in dt2.Rows)
+                        //{
+                        //    insertQuery = insertQuery + $"Select '{row.ItemArray[1]}',{row.ItemArray[12]}, {row.ItemArray[13]}, {row.ItemArray[14]}," +
+                        //        $" '{Convert.ToDateTime(row.ItemArray[5]).ToString("yyyy-MM-dd HH:mm")}', {row.ItemArray[15]}, {(int)CMMS.CMMS_Status.PM_PLAN_APPROVED}, {userID}, '{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}'," +
+                        //        $" {userID},'{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}', 'Approved', 1 UNION ALL ";
+                        //}
+
                         foreach (DataRow row in dt2.Rows)
                         {
+                            insertQuery = "INSERT INTO pm_plan " +
+                                        "(plan_name, facility_id, category_id, frequency_id, " +
+                                        " plan_date, assigned_to, status, created_by, created_at, " +
+                                        " approved_by, approved_at,  " +
+                                        " remarks,status_id)";
                             insertQuery = insertQuery + $"Select '{row.ItemArray[1]}',{row.ItemArray[12]}, {row.ItemArray[13]}, {row.ItemArray[14]}," +
                                 $" '{Convert.ToDateTime(row.ItemArray[5]).ToString("yyyy-MM-dd HH:mm")}', {row.ItemArray[15]}, {(int)CMMS.CMMS_Status.PM_PLAN_APPROVED}, {userID}, '{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}'," +
-                                $" {userID},'{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}', 'Approved', 1 UNION ALL ";
+                                $" {userID},'{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}', 'Approved', 1 ; SELECT LAST_INSERT_ID(); ";
+                            DataTable dt_insert = await Context.FetchData(insertQuery).ConfigureAwait(false);
+                            int id = Convert.ToInt32(dt_insert.Rows[0][0]);
+                            CMApproval approval = new CMApproval();
+                            approval.id = id;
+                            approval.comment = "Approved";
+                            var approvePlan = await ApprovePMPlan(approval, userID);
                         }
-                        int lastIndex = insertQuery.LastIndexOf("UNION ALL ");
-                        if (lastIndex > 0)
-                        {
-                            insertQuery = insertQuery.Remove(lastIndex, "UNION ALL ".Length);
-                            var insertedResult = await Context.ExecuteNonQry<int>(insertQuery).ConfigureAwait(false);
-                        }
+                        //int lastIndex = insertQuery.LastIndexOf("UNION ALL ");
+                        //if (lastIndex > 0)
+                        //{
+                        //    insertQuery = insertQuery.Remove(lastIndex, "UNION ALL ".Length);
+                        //    var insertedResult = await Context.ExecuteNonQry<int>(insertQuery).ConfigureAwait(false);
+                        //}
 
-                        if (!insertQuery.Contains("Select"))
-                        {
-                            return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, "Import failed, file has empty rows.");
-                        }
+                        //if (!insertQuery.Contains("Select"))
+                        //{
+                        //    return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, "Import failed, file has empty rows.");
+                        //}
                     }
                 }
                 else //
