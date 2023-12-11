@@ -581,14 +581,16 @@ namespace CMMSAPIs.Repositories.Masters
 
             Dictionary<string, Tuple<string, Type>> columnNames = new Dictionary<string, Tuple<string, Type>>()
             {
-                { "CheckPoint Name", new Tuple<string, Type>("check_point", typeof(string)) },
-                { "Checklist_Name", new Tuple<string, Type>("checklist_name", typeof(string)) },
+                { "Checkpoint Name", new Tuple<string, Type>("check_point", typeof(string)) },
+                { "Checklist Name", new Tuple<string, Type>("checklist_name", typeof(string)) },
                 { "Requirement", new Tuple<string, Type>("requirement", typeof(string)) },
-                { "Is document required", new Tuple<string, Type>("is_document_required", typeof(string)) },
+                { "Is Image Required", new Tuple<string, Type>("is_document_required", typeof(string)) },
                 { "Action to be taken", new Tuple<string, Type>("action_to_be_done", typeof(string)) },
-                { "failure_weightage", new Tuple<string, Type>("failure_weightage", typeof(int)) },
-                { "checkpoint_type", new Tuple<string, Type>("checkpoint_type", typeof(string)) },
-                { "checkpoint type value", new Tuple<string, Type>("checkpoint_type_value", typeof(string)) }
+                { "Failure Weightage", new Tuple<string, Type>("failure_weightage", typeof(int)) },
+                { "Checkpoint Type", new Tuple<string, Type>("checkpoint_type", typeof(string)) },
+               
+                { "Range Min", new Tuple<string, Type>("range_min", typeof(string)) },
+                { "Range Max", new Tuple<string, Type>("range_max", typeof(string)) }
             };
             string query1 = $"SELECT file_path FROM uploadedfiles WHERE id = {file_id};";
             DataTable dt1 = await Context.FetchData(query1).ConfigureAwait(false);
@@ -705,7 +707,9 @@ namespace CMMSAPIs.Repositories.Masters
                             {
                                 newR["failure_weightage"] = Convert.ToInt32(newR["failure_weightage"]);
                             }
-                            newR["checkpoint_type_value"] = Convert.ToString(newR["checkpoint_type_value"]);
+                          
+                            newR["range_min"] = Convert.ToInt32(newR["range_min"]);
+                            newR["range_max"] = Convert.ToInt32(newR["range_max"]);
                             dt2.Rows.Add(newR);
                             /*
                             Dictionary<string, Tuple<string, Type>> columnNames = new Dictionary<string, Tuple<string, Type>>()
@@ -825,8 +829,8 @@ namespace CMMSAPIs.Repositories.Masters
                     {
                         CMCPType checkpoint_type = new CMCPType();
                         checkpoint_type.id = Convert.ToInt32(row["checkpoint_type_id"]);
-                        checkpoint_type.min = 0;
-                        checkpoint_type.max = 0;
+                        checkpoint_type.min = Convert.ToInt32(row["range_min"]);
+                        checkpoint_type.max = Convert.ToInt32(row["range_max"]);
                         CMCreateCheckPoint checkpoint = new CMCreateCheckPoint
                         {
                           
@@ -836,7 +840,7 @@ namespace CMMSAPIs.Repositories.Masters
                             is_document_required = row["is_document_required"] == DBNull.Value
                                 ? (int?)null
                                 : Convert.ToInt32(row["is_document_required"]),
-                            action_to_be_done = Convert.ToString(row["action_to_be_done"]),
+                            action_to_be_done = null,
                             failure_weightage = row["failure_weightage"] == DBNull.Value
                                 ? (int?)null
                                 : Convert.ToInt32(row["failure_weightage"]),                           

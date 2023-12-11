@@ -146,8 +146,8 @@ namespace CMMSAPIs
             app.UseFileServer(new FileServerOptions
             {
                 FileProvider = new PhysicalFileProvider(
-                    Path.Combine(Directory.GetCurrentDirectory(), "Upload", "Templates")),
-                RequestPath = "/Upload/Templates",
+                    Path.Combine(Directory.GetCurrentDirectory(), "Upload")),
+                RequestPath = "/Upload",
                 EnableDirectoryBrowsing = true  // Enable this if you want directory browsing
             });
 

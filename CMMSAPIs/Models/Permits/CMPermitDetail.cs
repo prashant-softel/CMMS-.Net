@@ -49,8 +49,8 @@ namespace CMMSAPIs.Models.Permits
         public string closedByName { get; set; }
         public string closedByDesignation { get; set; }
         public string closedByCompany { get; set; }
-        public DateTime? close_at { get; set; }
 
+        public DateTime? close_at { get; set; }
         public int approver_id { get; set; }
         public string approvedByName { get; set; }
         public string approverDesignation { get; set; }
