@@ -37,6 +37,7 @@ namespace CMMSAPIs.Models.Inventory
         public int photoId { get; set; }
         public int vendorId { get; set; }
         public DateTime? calibrationFirstDueDate { get; set; }
+        public DateTime? calibrationNextDueDate { get; set; }
         public DateTime? calibrationLastDate { get; set; } //add this col to database if its not there
         public int calibrationFrequency { get; set; }
         public int calibrationFrequencyType { get; set; }
@@ -55,7 +56,16 @@ namespace CMMSAPIs.Models.Inventory
         public int warranty_provider_id { get; set; }
         public string certificate_number { get; set; }
         public int warranty_status { get; set; }
+
         public int multiplier { get; set; }
+        public string acRating { get; set; }
+        public string dcRating { get; set; }
+        public string descMaintenace { get; set; }
+        public int warrantyTenture { get; set; }
+        public string barcode  { get; set; }
+        public string unspCode { get; set; }
+        public string purchaseCode { get; set; }
+
 
     }
 
