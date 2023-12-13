@@ -55,11 +55,16 @@ namespace CMMSAPIs.Repositories.Audits
 
 
             string SelectQ = "select st.id,plan_number,  f.name as facility_name, concat(au.firstName, ' ', au.lastName)  Auditee_Emp_Name, " +
-                "concat(u.firstName, ' ', u.lastName) Auditor_Emp_Name , st.frequency, st.status, case when st.frequency = 0 then 'False' else 'True' end as FrequencyApplicable, st.Description,st.Schedule_Date, st.checklist_id " +
+                "concat(u.firstName, ' ', u.lastName) Auditor_Emp_Name , st.frequency, st.status, case when st.frequency = 0 then 'False' else 'True' end as FrequencyApplicable, st.Description,st.Schedule_Date, st.checklist_id, " +
+                " checklist_number as checklist_name, frequency.name as frequency_name, st.created_at, concat(created.firstName, ' ', created.lastName) created_by" +
                 "from st_audit st " +
                 "inner join facilities f ON st.Facility_id = f.id " +
                 "left join users au on au.id = st.Auditee_Emp_ID " +
-                "left join users u on u.id = st.Auditor_Emp_ID  " + filter;
+                "left join users u on u.id = st.Auditor_Emp_ID " +
+                " left join checklist_number checklist_number on checklist_number.id = st.Checklist_id " +
+                "left join frequency frequency on frequency.id = st.Frequency " +
+                " left join users u on u.id = st.Auditor_Emp_ID   " +
+                "left join users created on created.id = st.created_by   " + filter;
 
             List<CMAuditPlanList> auditPlanList = await Context.GetData<CMAuditPlanList>(SelectQ).ConfigureAwait(false);
             for (var i = 0; i < auditPlanList.Count; i++)
@@ -71,7 +76,7 @@ namespace CMMSAPIs.Repositories.Audits
             return auditPlanList[0];
         }
 
-        internal async Task<CMDefaultResponse> CreateAuditPlan(CMCreateAuditPlan request)
+        internal async Task<CMDefaultResponse> CreateAuditPlan(CMCreateAuditPlan request, int userID)
         {
             CMDefaultResponse response = null;
             int InsertedValue = 0;
@@ -84,8 +89,8 @@ namespace CMMSAPIs.Repositories.Audits
             }
             else
             {
-                string InsertQ = $"insert into st_audit(plan_number, Facility_id, Audit_Added_date, Status, Auditee_Emp_ID, Auditor_Emp_ID, Frequency, Description, Schedule_Date, Checklist_id) " +
-                                $"values('{request.plan_number}', {request.Facility_id}, '{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}', {((int)CMMS.CMMS_Status.AUDIT_SCHEDULE)}, {request.auditee_id}, {request.auditor_id}, {request.ApplyFrequency},'{request.Description}','{request.Schedule_Date.ToString("yyyy-MM-dd HH:mm:ss")}', {request.Checklist_id}) ; SELECT LAST_INSERT_ID();";
+                string InsertQ = $"insert into st_audit(plan_number, Facility_id, Audit_Added_date, Status, Auditee_Emp_ID, Auditor_Emp_ID, Frequency, Description, Schedule_Date, Checklist_id, created_by, created_at) " +
+                                $"values('{request.plan_number}', {request.Facility_id}, '{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}', {((int)CMMS.CMMS_Status.AUDIT_SCHEDULE)}, {request.auditee_id}, {request.auditor_id}, {request.ApplyFrequency},'{request.Description}','{request.Schedule_Date.ToString("yyyy-MM-dd HH:mm:ss")}', {request.Checklist_id}, {userID},'{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}') ; SELECT LAST_INSERT_ID();";
                 DataTable dt2 = await Context.FetchData(InsertQ).ConfigureAwait(false);
                 InsertedValue = Convert.ToInt32(dt2.Rows[0][0]);
                 response = new CMDefaultResponse(InsertedValue, CMMS.RETRUNSTATUS.SUCCESS, "Audit plan with plan number : " + request.plan_number + " created successfully.");

@@ -602,8 +602,7 @@ namespace CMMSAPIs.Repositories.PM
                                 }
                             }
                             if (newR.IsEmpty())
-                            {
-                            
+                            {                           
                                 continue;
                             }
                             newR["PlantName"] = newR[0];
@@ -615,6 +614,11 @@ namespace CMMSAPIs.Repositories.PM
                             newR["Frequency"] = newR[6];
                             newR["AssignedTo"] = newR[7];
                             newR["CheckList"] = newR[8];
+
+                            if(Convert.ToDateTime(newR[5]) <= DateTime.Now)
+                            {
+                                return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] start date '{newR[5]}' is invalid.");
+                            }
 
                             try
                             {
