@@ -57,13 +57,13 @@ namespace CMMSAPIs.Repositories.Audits
             string SelectQ = "select st.id,plan_number,  f.name as facility_name, concat(au.firstName, ' ', au.lastName)  Auditee_Emp_Name, " +
                 "concat(u.firstName, ' ', u.lastName) Auditor_Emp_Name , st.frequency, st.status, case when st.frequency = 0 then 'False' else 'True' end as FrequencyApplicable, st.Description,st.Schedule_Date, st.checklist_id, " +
                 " checklist_number as checklist_name, frequency.name as frequency_name, st.created_at, concat(created.firstName, ' ', created.lastName) created_by" +
-                "from st_audit st " +
+                " from st_audit st " +
                 "inner join facilities f ON st.Facility_id = f.id " +
                 "left join users au on au.id = st.Auditee_Emp_ID " +
                 "left join users u on u.id = st.Auditor_Emp_ID " +
                 " left join checklist_number checklist_number on checklist_number.id = st.Checklist_id " +
                 "left join frequency frequency on frequency.id = st.Frequency " +
-                " left join users u on u.id = st.Auditor_Emp_ID   " +
+          
                 "left join users created on created.id = st.created_by   " + filter;
 
             List<CMAuditPlanList> auditPlanList = await Context.GetData<CMAuditPlanList>(SelectQ).ConfigureAwait(false);
