@@ -151,6 +151,20 @@ namespace CMMSAPIs.Repositories.Users
                                             $"WHERE " +
                                                 $"u.id = {reportTo}";
                 List<CMUser> reportToDetails = await Context.GetData<CMUser>(reportToDetailsQry).ConfigureAwait(false);
+                CMResposibility reponsibility1 = new CMResposibility();
+                reponsibility1.id = 1;
+                reponsibility1.name = "Testing";
+                reponsibility1.since = DateTime.Parse("12-02-2020");
+                reponsibility1.experianceYears = 2;
+
+                CMResposibility reponsibility2 = new CMResposibility();
+                reponsibility2.id = 2;
+                reponsibility2.name = "Plumber";
+                reponsibility2.since = DateTime.Parse("12-12-2018");
+                reponsibility2.experianceYears = 4;
+                user_detail[0].responsibility = new List<CMResposibility>();
+                user_detail[0].responsibility.Add(reponsibility1);
+                user_detail[0].responsibility.Add(reponsibility2);
                 if (reportToDetails.Count > 0)
                     user_detail[0].report_to = reportToDetails[0];
                 return user_detail[0];

@@ -388,7 +388,32 @@ namespace CMMSAPIs.Repositories.Masters
                 }
             }
             myQuery += " GROUP BY u.id ORDER BY u.id;";
+
+            
             List<CMEmployee> _Employee = await Context.GetData<CMEmployee>(myQuery).ConfigureAwait(false);
+
+            foreach(CMEmployee emp in _Employee)
+            {
+                CMResposibility reponsibility1 = new CMResposibility();
+                reponsibility1.id = 1;
+                reponsibility1.name = "Testing";
+                reponsibility1.since = DateTime.Parse("12-02-2020");
+                reponsibility1.experianceYears = 2;
+
+                CMResposibility reponsibility2 = new CMResposibility();
+                reponsibility2.id = 2;
+                reponsibility2.name = "Plumber";
+                reponsibility2.since = DateTime.Parse("12-12-2018");
+                reponsibility2.experianceYears = 4;
+                emp.responsibility = new List<CMResposibility> () ;
+                emp.responsibility.Add(reponsibility1);
+                emp.responsibility.Add(reponsibility2);
+
+                emp.responsibilityIds = new int[2];
+                emp.responsibilityIds[0] = 1;
+                emp.responsibilityIds[1] = 2;
+
+            }
             return _Employee;
         }
 

@@ -4,6 +4,8 @@ using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.PM;
 using CMMSAPIs.Repositories.SM;
 using CMMSAPIs.Repositories.WC;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -28,16 +30,19 @@ namespace CMMSAPIs.BS.PM
     {
         private readonly DatabaseProvider databaseProvider;
         private MYSQLDBHelper getDB => databaseProvider.SqlInstance();
-        public PMBS(DatabaseProvider dbProvider)
+        public static IWebHostEnvironment _environment;
+
+        public PMBS(DatabaseProvider dbProvider, IWebHostEnvironment environment)
         {
             databaseProvider = dbProvider;
+            _environment = environment;
         }
 
         public async Task<CMDefaultResponse> CreatePMPlan(CMPMPlanDetail pm_plan, int userID)
         {
             try
             {
-                using (var repos = new PMRepository(getDB))
+                using (var repos = new PMRepository(getDB, _environment))
                 {
                     return await repos.CreatePMPlan(pm_plan, userID);
                 }
@@ -51,7 +56,7 @@ namespace CMMSAPIs.BS.PM
         {
             try
             {
-                using (var repos = new PMRepository(getDB))
+                using (var repos = new PMRepository(getDB, _environment))
                 {
                     return await repos.GetPMPlanList(facility_id, category_id, frequency_id, start_date, end_date);
                 }
@@ -65,7 +70,7 @@ namespace CMMSAPIs.BS.PM
         {
             try
             {
-                using (var repos = new PMRepository(getDB))
+                using (var repos = new PMRepository(getDB, _environment))
                 {
                     return await repos.GetPMPlanDetail(id);
                 }
@@ -80,7 +85,7 @@ namespace CMMSAPIs.BS.PM
         {
             try
             {
-                using (var repos = new PMRepository(getDB))
+                using (var repos = new PMRepository(getDB, _environment))
                 {
                     return await repos.GetScheduleData(facility_id, category_id);
                 }
@@ -95,7 +100,7 @@ namespace CMMSAPIs.BS.PM
         {
             try
             {
-                using (var repos = new PMRepository(getDB))
+                using (var repos = new PMRepository(getDB, _environment))
                 {
                     return await repos.SetScheduleData(request, userID);
                 }
@@ -110,7 +115,7 @@ namespace CMMSAPIs.BS.PM
         {
             try
             {
-                using (var repos = new PMRepository(getDB))
+                using (var repos = new PMRepository(getDB, _environment))
                 {
                     return await repos.ApprovePMPlan(request, userID);
                 }
@@ -125,7 +130,7 @@ namespace CMMSAPIs.BS.PM
         {
             try
             {
-                using (var repos = new PMRepository(getDB))
+                using (var repos = new PMRepository(getDB, _environment))
                 {
                     return await repos.RejectPMPlan(request, userID);
                 }
@@ -140,7 +145,7 @@ namespace CMMSAPIs.BS.PM
         {
             try
             {
-                using (var repos = new PMRepository(getDB))
+                using (var repos = new PMRepository(getDB, _environment))
                 {
                     return await repos.DeletePMPlan(planId, userID);
                 }
@@ -155,7 +160,7 @@ namespace CMMSAPIs.BS.PM
         {
             try
             {
-                using (var repos = new PMRepository(getDB))
+                using (var repos = new PMRepository(getDB, _environment))
                 {
                     return await repos.UpdatePMPlan(request, userID);
                 }
@@ -170,7 +175,7 @@ namespace CMMSAPIs.BS.PM
         {
             try
             {
-                using (var repos = new PMRepository(getDB))
+                using (var repos = new PMRepository(getDB, _environment))
                 {
                     return await repos.ImportPMPlanFile(file_id, userID);
                 }
