@@ -63,7 +63,7 @@ namespace CMMSAPIs.Repositories.Audits
                 "left join users u on u.id = st.Auditor_Emp_ID " +
                 " left join checklist_number checklist_number on checklist_number.id = st.Checklist_id " +
                 "left join frequency frequency on frequency.id = st.Frequency " +
-                " left join users u on u.id = st.Auditor_Emp_ID   " +
+          
                 "left join users created on created.id = st.created_by   " + filter;
 
             List<CMAuditPlanList> auditPlanList = await Context.GetData<CMAuditPlanList>(SelectQ).ConfigureAwait(false);

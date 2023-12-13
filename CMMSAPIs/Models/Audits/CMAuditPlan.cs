@@ -31,11 +31,15 @@ namespace CMMSAPIs.Models.Audit
         public string Auditee_Emp_Name { get; set; }
         public string Auditor_Emp_Name { get; set; }
         public int frequency { get; set; }
+        public string frequency_name { get; set; }
         public int status { get; set; }
         public string short_status { get; set; }
         public string FrequencyApplicable { get; set; }
         public int Checklist_id { get; set; }
+        public string checklist_name { get; set; }
         public string Description { get; set; }
         public DateTime Schedule_Date { get; set; }
+        public DateTime created_at { get; set; }
+        public string created_by { get; set; }
     }
 }
