@@ -61,7 +61,8 @@ namespace CMMSAPIs.Controllers.Audits
         {
             try
             {
-                var data = await _AuditPlanBS.CreateAuditPlan(request);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _AuditPlanBS.CreateAuditPlan(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
