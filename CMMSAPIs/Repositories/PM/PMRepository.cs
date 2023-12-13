@@ -858,7 +858,10 @@ namespace CMMSAPIs.Repositories.PM
                                 $" '{Convert.ToDateTime(row["StartDate"]).ToString("yyyy-MM-dd HH:mm")}', {assigned_to}, {(int)CMMS.CMMS_Status.PM_PLAN_CREATED}, {userID}, '{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}'," +
                                 $"  1 ; SELECT LAST_INSERT_ID(); ";
                             DataTable dt_insert = await Context.FetchData(insertQuery).ConfigureAwait(false);
+
                             int id = Convert.ToInt32(dt_insert.Rows[0][0]);
+                            plan.Add(plan_name1.ToUpper(), id);
+
                             int approvalFlag = Convert.ToInt32(row["Approval"]);
                             if (approvalFlag == 1)
                             {
