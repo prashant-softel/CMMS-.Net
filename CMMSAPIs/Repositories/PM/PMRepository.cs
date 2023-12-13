@@ -668,10 +668,7 @@ namespace CMMSAPIs.Repositories.PM
                             DateTime startDate = (DateTime)newR["StartDate"];
                             DateTime currentDate = DateTime.Now;
 
-                            if(Convert.ToDateTime(newR[5]) <= DateTime.Now)
-                            {
-                                return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] start date '{newR[5]}' is invalid.");
-                            }
+
 
                             try
                             {
