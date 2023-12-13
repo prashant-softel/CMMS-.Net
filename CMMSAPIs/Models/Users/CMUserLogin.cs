@@ -68,6 +68,17 @@ namespace CMMSAPIs.Models.Users
         public string blood_group_name { get; set; }
         public CMUser report_to { get; set; }
         public List<CMPlantAccess> plant_list { get; set; }
+        public List<CMResposibility> responsibility { get; set; }
+
+    }
+
+    public class CMResposibility
+    {
+        public int id { get; set; }
+        public string name { get; set; }
+        public DateTime since { get; set; }
+        public int experianceYears { get; set; }
+
     }
     public class CMUpdateUser : CMUserDetail
     {

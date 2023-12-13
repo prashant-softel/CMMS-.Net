@@ -17,6 +17,8 @@ using static iTextSharp.text.pdf.AcroFields;
 using Ubiety.Dns.Core;
 using Org.BouncyCastle.Asn1.Ocsp;
 using CMMSAPIs.Repositories.Permits;
+using Microsoft.Extensions.Hosting;
+using Microsoft.AspNetCore.Hosting;
 
 namespace CMMSAPIs.Repositories.PM
 {
@@ -25,10 +27,12 @@ namespace CMMSAPIs.Repositories.PM
         private UtilsRepository _utilsRepo;
         private PMRepository _pmScheduleRepo;
         private JobRepository _jobRepo;
+        public static IWebHostEnvironment _environment;
+
         public PMScheduleViewRepository(MYSQLDBHelper sqlDBHelper) : base(sqlDBHelper)
         {
             _utilsRepo = new UtilsRepository(sqlDBHelper);
-            _pmScheduleRepo = new PMRepository(sqlDBHelper);
+            _pmScheduleRepo = new PMRepository(sqlDBHelper, _environment);
             _jobRepo = new JobRepository(sqlDBHelper);
         }
         Dictionary<CMMS.CMMS_Status, string> statusList = new Dictionary<CMMS.CMMS_Status, string>()

@@ -14,15 +14,21 @@ using CMMSAPIs.Models.WC;
 using OfficeOpenXml.VBA;
 using System.IO;
 using OfficeOpenXml;
+using MySqlX.XDevAPI.Relational;
+using Microsoft.AspNetCore.Hosting;
 
 namespace CMMSAPIs.Repositories.PM
 {
     public class PMRepository : GenericRepository
     {
         private UtilsRepository _utilsRepo;
-        public PMRepository(MYSQLDBHelper sqlDBHelper) : base(sqlDBHelper)
+        ErrorLog m_errorLog;
+
+        public PMRepository(MYSQLDBHelper sqlDBHelper, IWebHostEnvironment iwebhostobj) : base(sqlDBHelper)
         {
             _utilsRepo = new UtilsRepository(sqlDBHelper);
+            m_errorLog = new ErrorLog(iwebhostobj);
+
         }
 
         internal static string getShortStatus(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status m_notificationID)
@@ -149,14 +155,16 @@ namespace CMMSAPIs.Repositories.PM
          
             string myQuery2 = $"Delete from pmplanassetchecklist where planId = {request.plan_id};";
             await Context.ExecuteNonQry<int>(myQuery2).ConfigureAwait(false);
-
-            string mapChecklistQry = "INSERT INTO pmplanassetchecklist(planId, assetId, checklistId) VALUES ";
-            foreach (var map in request.mapAssetChecklist)
+            if (request.mapAssetChecklist != null)
             {
-                mapChecklistQry += $"({request.plan_id}, {map.asset_id}, {map.checklist_id}), ";
+                string mapChecklistQry = "INSERT INTO pmplanassetchecklist(planId, assetId, checklistId) VALUES ";
+                foreach (var map in request.mapAssetChecklist)
+                {
+                    mapChecklistQry += $"({request.plan_id}, {map.asset_id}, {map.checklist_id}), ";
+                }
+                mapChecklistQry = mapChecklistQry.Substring(0, mapChecklistQry.Length - 2) + ";";
+                await Context.ExecuteNonQry<int>(mapChecklistQry).ConfigureAwait(false);
             }
-            mapChecklistQry = mapChecklistQry.Substring(0, mapChecklistQry.Length - 2) + ";";
-            await Context.ExecuteNonQry<int>(mapChecklistQry).ConfigureAwait(false);
 
             await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
 
@@ -487,8 +495,10 @@ namespace CMMSAPIs.Repositories.PM
 
      internal async Task<CMImportFileResponse> ImportPMPlanFile(int file_id, int userID)
         {
-            CMImportFileResponse response = null;
+            CMImportFileResponse response = new CMImportFileResponse();
             DataTable dt2 = new DataTable();
+            DataTable dt3 = new DataTable();
+
 
             string queryfacilities = "SELECT id, UPPER(name) as name FROM facilities GROUP BY name ORDER BY id ASC;";
             DataTable dtqueryfacilities = await Context.FetchData(queryfacilities).ConfigureAwait(false);
@@ -518,18 +528,41 @@ namespace CMMSAPIs.Repositories.PM
             Dictionary<string, int> users = new Dictionary<string, int>();
             users.Merge(users_Names, users_IDs);
 
+            string querychecklist = "SELECT id, UPPER(checklist_number) as name FROM checklist_number GROUP BY name ORDER BY id ASC;";
+            DataTable dtchecklist = await Context.FetchData(querychecklist).ConfigureAwait(false);
+            List<string> checklist_name = dtchecklist.GetColumn<string>("name");
+            List<int> checklist_id = dtchecklist.GetColumn<int>("id");
+            Dictionary<string, int> checklist = new Dictionary<string, int>();
+            checklist.Merge(checklist_name, checklist_id);
+
+            string queryasset = "SELECT id, UPPER(name) as name FROM assets GROUP BY name ORDER BY id ASC;";
+            DataTable dtasset = await Context.FetchData(queryasset).ConfigureAwait(false);
+            List<string> asset_name = dtasset.GetColumn<string>("name");
+            List<int> asset_id = dtasset.GetColumn<int>("id");
+            Dictionary<string, int> asset = new Dictionary<string, int>();
+            asset.Merge(asset_name, asset_id);
+
+            string queryplan = "SELECT id, UPPER(plan_name) as name FROM pm_plan GROUP BY name ORDER BY id ASC;";
+            DataTable dtplan = await Context.FetchData(queryplan).ConfigureAwait(false);
+            List<string> plan_name = dtplan.GetColumn<string>("name");
+            List<int> plan_id = dtplan.GetColumn<int>("id");
+            Dictionary<string, int> plan = new Dictionary<string, int>();
+            plan.Merge(plan_name, plan_id);
+
 
             Dictionary<string, Tuple<string, Type>> columnNames = new Dictionary<string, Tuple<string, Type>>()
             {
                 { "Plant Name", new Tuple<string, Type>("PlantName", typeof(string)) },
                 { "Plan Name", new Tuple<string, Type>("PlanName", typeof(string)) },
                 { "Equipment Category", new Tuple<string, Type>("EquipmentCategory", typeof(string)) },
-                { "Eq_Location", new Tuple<string, Type>("Eq_Location", typeof(string)) },
-                { "EquipmentName", new Tuple<string, Type>("EquipmentName", typeof(string)) },
-                { "Start date", new Tuple<string, Type>("StartDate", typeof(string)) },
+                //{ "Eq_Location", new Tuple<string, Type>("Eq_Location", typeof(string)) },
+                //{ "EquipmentName", new Tuple<string, Type>("EquipmentName", typeof(string)) },
+                { "Start date", new Tuple<string, Type>("StartDate", typeof(DateTime)) },
                 { "Frequency", new Tuple<string, Type>("Frequency", typeof(string)) },
                 { "AssignedTo", new Tuple<string, Type>("AssignedTo", typeof(string)) },
-                { "CheckList", new Tuple<string, Type>("CheckList", typeof(string)) }
+                //{ "CheckList", new Tuple<string, Type>("CheckList", typeof(string)) }
+                { "Approval", new Tuple<string, Type>("Approval", typeof(string)) },
+
 
             };
 
@@ -538,6 +571,9 @@ namespace CMMSAPIs.Repositories.PM
             string path = Convert.ToString(dt1.Rows[0][0]);
             string dir = Path.GetDirectoryName(path);
             string filename = Path.GetFileName(path);
+
+            
+
             if (!Directory.Exists(dir))
                 return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"Directory '{dir}' cannot be found");
             else if (!File.Exists(path))
@@ -550,9 +586,14 @@ namespace CMMSAPIs.Repositories.PM
                 {
                     ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
                     var excel = new ExcelPackage(path);
-                    var sheet = excel.Workbook.Worksheets["Sheet1"];
+                    var sheet = excel.Workbook.Worksheets["PMPlan"];
+                    var sheet2 = excel.Workbook.Worksheets["PlanEquipments"];
+
+
                     if (sheet == null)
-                        return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, "Invalid sheet");              
+                        return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, "The file must contain PMPlan sheet");
+                    else if (sheet2 == null)
+                        return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, "The file must contain PlanEquipment sheet");
                     else
                     {
 
@@ -581,6 +622,14 @@ namespace CMMSAPIs.Repositories.PM
                         dt2.Columns.Add("categoryID", typeof(int));
                         dt2.Columns.Add("frequencyID", typeof(int));
                         dt2.Columns.Add("assignedToID", typeof(int));
+                        dt2.Columns.Add("planID", typeof(int));
+
+                        //dt2.Columns.Add("checklistID", typeof(int));
+                        //dt2.Columns.Add("equipmentID", typeof(int));
+
+                        List<CMApproval> approval = new List<CMApproval>();
+                        int updateCount = 0;
+
                         for (int rN = 2; rN <= sheet.Dimension.End.Row; rN++)
                         {
                             ExcelRange row = sheet.Cells[rN, 1, rN, sheet.Dimension.End.Column];
@@ -602,18 +651,22 @@ namespace CMMSAPIs.Repositories.PM
                                 }
                             }
                             if (newR.IsEmpty())
-                            {                           
+                            {
+                   
                                 continue;
                             }
                             newR["PlantName"] = newR[0];
                             newR["PlanName"] = newR[1];
                             newR["EquipmentCategory"] = newR[2];
-                            newR["Eq_Location"] = newR[3];
-                            newR["EquipmentName"] = newR[4];
-                            newR["StartDate"] = newR[5];
-                            newR["Frequency"] = newR[6];
-                            newR["AssignedTo"] = newR[7];
-                            newR["CheckList"] = newR[8];
+                            //newR["Eq_Location"] = newR[3];
+                            //newR["EquipmentName"] = newR[4];
+                            newR["StartDate"] = newR[3];
+                            newR["Frequency"] = newR[4];
+                            newR["AssignedTo"] = newR[5];
+                            newR["Approval"] = newR[6];
+
+                            DateTime startDate = (DateTime)newR["StartDate"];
+                            DateTime currentDate = DateTime.Now;
 
                             if(Convert.ToDateTime(newR[5]) <= DateTime.Now)
                             {
@@ -622,69 +675,162 @@ namespace CMMSAPIs.Repositories.PM
 
                             try
                             {
-                                newR["plantID"] = facilities[Convert.ToString(newR[0]).ToUpper()];
+                                newR["plantID"] = facilities[Convert.ToString(newR["PlantName"]).ToUpper()];
                             }
                             catch (KeyNotFoundException)
                             {
-                                return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] plant named '{newR[0]}' does not exist.");
-                            }
-                            try
-                            {
-                                newR["categoryID"] = assetcategories[Convert.ToString(newR[2]).ToUpper()];
-                            }
-                            catch (KeyNotFoundException)
-                            {
-                                return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] equipment category named '{newR[2]}' does not exist.");
-                            }
-                            try
-                            {
-                                newR["frequencyID"] = frequency[Convert.ToString(newR[6]).ToUpper()];
-                            }
-                            catch (KeyNotFoundException)
-                            {
-                                return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] frequency named '{newR[6]}' does not exist.");
-                            }
-                            try
-                            {
-                                newR["assignedToID"] = users[Convert.ToString(newR[7]).ToUpper()];
-                            }
-                            catch (KeyNotFoundException)
-                            {
-                                return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] assigned to named '{newR[7]}' does not exist.");
-                            }
-                            newR["row_no"] = rN;
-
-                            if (Convert.ToString(newR["PlantName"]) == null || Convert.ToString(newR["PlantName"]) == "")
-                            {
-                                return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] plant name cannot be null.");
+                                m_errorLog.SetError($"[Row: {rN}] Invalid Plant Name '{newR["PlantName"]}'.");
+                                newR.Delete();
+                                continue;
+                                // return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] Plant named '{newR[0]}' does not exist.");
                             }
 
                             if (Convert.ToString(newR["PlanName"]) == null || Convert.ToString(newR["PlanName"]) == "")
                             {
-                                return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] Plan cannot be null.");
+                                m_errorLog.SetError($"[Row: {rN}] Plan Name cannot be null.");
+                                newR.Delete();
+                                continue;
+                                //return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] Plan N cannot be null.");
                             }
-                            if (Convert.ToString(newR["EquipmentCategory"]) == null || Convert.ToString(newR["EquipmentCategory"]) == "")
+
+                            if (startDate < currentDate)
                             {
-                                return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] equipment category cannot be null.");
+                                m_errorLog.SetError($"[Row: {rN}] Invalid Start Date '{newR["StartDate"]}'.");
+                                newR.Delete();
+                                continue;
+                                //return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] Invalid Start date {newR["StartDate"]}.");
+
                             }
-                            if (Convert.ToString(newR["Frequency"]) == null || Convert.ToString(newR["Frequency"]) == "")
+                           
+                            try
                             {
-                                return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] frequency cannot be null.");
+                                newR["categoryID"] = assetcategories[Convert.ToString(newR["EquipmentCategory"]).ToUpper()];
                             }
-                            if (Convert.ToString(newR["Frequency"]) == null || Convert.ToString(newR["Frequency"]) == "")
+                            catch (KeyNotFoundException)
                             {
-                                return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] frequency cannot be null.");
+                                m_errorLog.SetError($"[Row: {rN}] Equipment category named '{newR["EquipmentCategory"]}' does not exist.");
+                                newR.Delete();
+                                continue;
+                                //return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] equipment category named '{newR[2]}' does not exist.");
                             }
-                            if (Convert.ToString(newR["AssignedTo"]) == null || Convert.ToString(newR["AssignedTo"]) == "")
+                            try
                             {
-                                return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] assigned to cannot be null.");
+                                newR["frequencyID"] = frequency[Convert.ToString(newR["Frequency"]).ToUpper()];
                             }
+                            catch (KeyNotFoundException)
+                            {
+                                m_errorLog.SetError($"[Row: {rN}] Frequency named '{newR["Frequency"]}' does not exist.");
+                                newR.Delete();
+                                continue;
+                                //return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] frequency named '{newR[6]}' does not exist.");
+                            }
+                            try
+                            {
+                                newR["assignedToID"] = users[Convert.ToString(newR["AssignedTo"]).ToUpper()];
+                            }
+                            catch (KeyNotFoundException)
+                            {
+                                m_errorLog.SetError($"[Row: {rN}] Assigned to named user '{newR["AssignedTo"]}' does not exist.");
+                                newR.Delete();
+                                continue;
+                                //return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] assigned to named '{newR[7]}' does not exist.");
+                            }
+                            try
+                            {
+                                newR["planID"] = plan[Convert.ToString(newR["PlanName"]).ToUpper()];
+
+                                CMPMPlanDetail updatePlan = new CMPMPlanDetail();
+
+                                updatePlan.plan_id = Convert.ToInt32(newR["planID"]);
+                                updatePlan.plan_name = Convert.ToString(newR["PlanName"]);
+                                updatePlan.plan_date = startDate;
+                                updatePlan.plan_freq_id = Convert.ToInt32(newR["frequencyID"]);
+                                updatePlan.facility_id = Convert.ToInt32(newR["plantID"]);
+                                updatePlan.category_id = Convert.ToInt32(newR["categoryID"]);
+                                updatePlan.assigned_to_id = Convert.ToInt32(newR["assignedToID"]);
+                                var resPlan = await UpdatePMPlan(updatePlan, userID);
+                                updateCount++;
+                                string myQuery2 = $"Update pm_plan set status = {(int)CMMS.CMMS_Status.PM_PLAN_CREATED},approved_by = null where id = {updatePlan.plan_id};";
+                                await Context.ExecuteNonQry<int>(myQuery2).ConfigureAwait(false);
+                                int app = Convert.ToInt32(newR["Approval"]);
+                                if (app == 1)
+                                {
+                                    CMApproval planApproval = new CMApproval
+                                    {
+                                        id = Convert.ToInt32(newR["planID"]),
+                                        comment = "Approved"
+                                    };
+
+                                    approval.Add(planApproval);
+                                }
+                                newR.Delete();
+                                continue;
+
+                            }
+                            catch (KeyNotFoundException)
+                            {
+                                
+                                //return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] Equipment named '{newR["EquipmentName"]}' does not exist.");
+                            }
+                            
+                            
+                            //try
+                            //{
+                            //    newR["checklistID"] = checklist[Convert.ToString(newR[8]).ToUpper()];
+                            //}
+                            //catch (KeyNotFoundException)
+                            //{
+                            //    return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] Checklist named '{newR[8]}' does not exist.");
+                            //}
+
+                            //try
+                            //{
+                            //    newR["equipmentID"] = asset[Convert.ToString(newR[4]).ToUpper()];
+                            //}
+                            //catch (KeyNotFoundException)
+                            //{
+                            //    return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] Equipment named '{newR[4]}' does not exist.");
+                            //}
+
+                            
+
+                            newR["row_no"] = rN;
+
+                            //if (Convert.ToString(newR["PlantName"]) == null || Convert.ToString(newR["PlantName"]) == "")
+                            //{
+                            //    return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] plant name cannot be null.");
+                            //}
+
+                            //if (Convert.ToString(newR["EquipmentCategory"]) == null || Convert.ToString(newR["EquipmentCategory"]) == "")
+                            //{
+                            //    return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] equipment category cannot be null.");
+                            //}
+                            //if (Convert.ToString(newR["Frequency"]) == null || Convert.ToString(newR["Frequency"]) == "")
+                            //{
+                            //    return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] frequency cannot be null.");
+                            //}
+                            //if (Convert.ToString(newR["Frequency"]) == null || Convert.ToString(newR["Frequency"]) == "")
+                            //{
+                            //    return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] frequency cannot be null.");
+                            //}
+                            //if (Convert.ToString(newR["AssignedTo"]) == null || Convert.ToString(newR["AssignedTo"]) == "")
+                            //{
+                            //    return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] assigned to cannot be null.");
+                            //}
 
                             dt2.Rows.Add(newR);
                         }
-                        if (dt2.Rows.Count == 0)
+                        if (dt2.Rows.Count == 0 && updateCount ==0)
                         {
-                            return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, "Import failed, file has empty rows.");
+                            string logPath1 = m_errorLog.SaveAsText($"ImportLog\\ImportPMPlan_File{file_id}_{DateTime.UtcNow.ToString("yyyyMMdd_HHmmss")}");
+                            string logQry1 = $"UPDATE uploadedfiles SET logfile = '{logPath1}' WHERE id = {file_id}";
+                            await Context.ExecuteNonQry<int>(logQry1).ConfigureAwait(false);
+                            logPath1 = logPath1.Replace("\\\\", "\\");
+
+                            m_errorLog.SetImportInformation("File has invalid rows.");
+                           // response.error_log_file_path = logPath1;
+                           // response.import_log = m_errorLog.errorLog();
+                            return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, logPath1, m_errorLog.errorLog(), "Import failed, file has empty rows.");
                         }
                         string insertQuery = "INSERT INTO pm_plan " +
                             "(plan_name, facility_id, category_id, frequency_id, " +
@@ -698,23 +844,46 @@ namespace CMMSAPIs.Repositories.PM
                         //        $" {userID},'{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}', 'Approved', 1 UNION ALL ";
                         //}
 
+                       
                         foreach (DataRow row in dt2.Rows)
                         {
+                            string plan_name1 = Convert.ToString(row["PlanName"]);
+                            int facility_id = Convert.ToInt32(row["plantID"]);
+                            int category_id = Convert.ToInt32(row["categoryID"]);
+                            int frequency_id = Convert.ToInt32(row["frequencyID"]);
+                            int assigned_to = Convert.ToInt32(row["assignedToID"]);
+
                             insertQuery = "INSERT INTO pm_plan " +
                                         "(plan_name, facility_id, category_id, frequency_id, " +
                                         " plan_date, assigned_to, status, created_by, created_at, " +
-                                        " approved_by, approved_at,  " +
-                                        " remarks,status_id)";
-                            insertQuery = insertQuery + $"Select '{row.ItemArray[1]}',{row.ItemArray[12]}, {row.ItemArray[13]}, {row.ItemArray[14]}," +
-                                $" '{Convert.ToDateTime(row.ItemArray[5]).ToString("yyyy-MM-dd HH:mm")}', {row.ItemArray[15]}, {(int)CMMS.CMMS_Status.PM_PLAN_APPROVED}, {userID}, '{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}'," +
-                                $" {userID},'{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}', 'Approved', 1 ; SELECT LAST_INSERT_ID(); ";
+                                        " status_id)";
+                            insertQuery = insertQuery + $"Select '{plan_name1}',{facility_id}, {category_id}, {frequency_id}," +
+                                $" '{Convert.ToDateTime(row["StartDate"]).ToString("yyyy-MM-dd HH:mm")}', {assigned_to}, {(int)CMMS.CMMS_Status.PM_PLAN_CREATED}, {userID}, '{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}'," +
+                                $"  1 ; SELECT LAST_INSERT_ID(); ";
                             DataTable dt_insert = await Context.FetchData(insertQuery).ConfigureAwait(false);
                             int id = Convert.ToInt32(dt_insert.Rows[0][0]);
-                            CMApproval approval = new CMApproval();
-                            approval.id = id;
-                            approval.comment = "Approved";
-                            var approvePlan = await ApprovePMPlan(approval, userID);
+                            int approvalFlag = Convert.ToInt32(row["Approval"]);
+                            if (approvalFlag == 1)
+                            {
+                                CMApproval planApproval = new CMApproval
+                                {
+                                    id = id,
+                                    comment = "Approved"
+                                };
+
+                                approval.Add(planApproval); 
+                            }
+
+                            //string mapChecklistQry = "INSERT INTO pmplanassetchecklist(planId, assetId, checklistId) VALUES ";
+                            ////foreach (var map in pm_plan.mapAssetChecklist)
+                            ////{
+                            //mapChecklistQry += $"({id}, {row.ItemArray[17]}, {row.ItemArray[16]}), ";
+                            ////}
+                            //mapChecklistQry = mapChecklistQry.Substring(0, mapChecklistQry.Length - 2) + ";";
+                            //await Context.ExecuteNonQry<int>(mapChecklistQry).ConfigureAwait(false);
                         }
+
+
                         //int lastIndex = insertQuery.LastIndexOf("UNION ALL ");
                         //if (lastIndex > 0)
                         //{
@@ -726,17 +895,158 @@ namespace CMMSAPIs.Repositories.PM
                         //{
                         //    return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, "Import failed, file has empty rows.");
                         //}
+
+                        Dictionary<string, Tuple<string, Type>> equipColumnNames = new Dictionary<string, Tuple<string, Type>>()
+                        {
+                           { "Plan Name", new Tuple<string, Type>("PlanName", typeof(string)) },
+                           { "Equipment Name", new Tuple<string, Type>("EquipmentName", typeof(string)) },
+                           { "CheckList", new Tuple<string, Type>("CheckList", typeof(string)) }
+
+                        };
+
+                        foreach (var header in sheet2.Cells[1, 1, 1, sheet2.Dimension.End.Column])
+                        {
+                            try
+                            {
+                                dt3.Columns.Add(equipColumnNames[header.Text].Item1, equipColumnNames[header.Text].Item2);
+                            }
+                            catch (KeyNotFoundException)
+                            {
+                                dt3.Columns.Add(header.Text);
+                            }
+                        }
+                        List<string> headers1 = dt3.GetColumnNames();
+                        foreach (var item in equipColumnNames.Values)
+                        {
+                            if (!headers1.Contains(item.Item1))
+                            {
+                                dt3.Columns.Add(item.Item1, item.Item2);
+                            }
+                        }
+
+                        dt3.Columns.Add("row_no", typeof(int));
+                        dt3.Columns.Add("planID", typeof(int));
+                        dt3.Columns.Add("equipmentID", typeof(int));
+                        dt3.Columns.Add("checklistID", typeof(int));
+
+
+                        for (int rN = 2; rN <= sheet2.Dimension.End.Row; rN++)
+                        {
+                            ExcelRange row = sheet2.Cells[rN, 1, rN, sheet2.Dimension.End.Column];
+                            DataRow newR = dt3.NewRow();
+                            foreach (var cell in row)
+                            {
+                                try
+                                {
+                                    if (cell.Text == null || cell.Text == "")
+                                        continue;
+                                    newR[cell.Start.Column - 1] = Convert.ChangeType(cell.Text, dt3.Columns[cell.Start.Column - 1].DataType);
+                                }
+                                catch (Exception ex)
+                                {
+                                    ex.GetType();
+                                    //+ ex.ToString();
+                                    //status = status.Substring(0, (status.IndexOf("Exception") + 8));
+                                    // m_ErrorLog.SetError("," + status);
+                                }
+                            }
+                            if (newR.IsEmpty())
+                            {
+
+                                continue;
+                            }
+
+                            newR["PlanName"] = newR[0];
+                            newR["EquipmentName"] = newR[1];
+                            newR["CheckList"] = newR[2];
+
+
+                            try
+                            {
+                                newR["planID"] = plan[Convert.ToString(newR["PlanName"]).ToUpper()];
+                            }
+                            catch (KeyNotFoundException)
+                            {
+                                m_errorLog.SetError($"[Row: {rN}] Plan  named '{newR["PlanName"]}' does not exist.");
+                                newR.Delete();
+                                continue;
+                                //return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] Equipment named '{newR["EquipmentName"]}' does not exist.");
+                            }
+                            try
+                            {
+                                newR["equipmentID"] = asset[Convert.ToString(newR["EquipmentName"]).ToUpper()];
+                            }
+                            catch (KeyNotFoundException)
+                            {
+                                m_errorLog.SetError($"[Row: {rN}] Equipment  named '{newR["EquipmentName"]}' does not exist.");
+                                newR.Delete();
+                                continue;
+                                //return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] Equipment named '{newR["EquipmentName"]}' does not exist.");
+                            }
+                            try
+                            {
+                                newR["checklistID"] = checklist[Convert.ToString(newR["CheckList"]).ToUpper()];
+                            }
+                            catch (KeyNotFoundException)
+                            {
+                                m_errorLog.SetError($"[Row: {rN}] CheckList named'{newR["CheckList"]}' does not exist.");
+                                newR.Delete();
+                                continue;
+                                //return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] Checklist named '{newR[""]}' does not exist.");
+                            }
+                            dt3.Rows.Add(newR);
+                        }
+
+                        if (dt3.Rows.Count == 0)
+                        {
+                            string logPath1 = m_errorLog.SaveAsText($"ImportLog\\ImportPMPlan_File{file_id}_{DateTime.UtcNow.ToString("yyyyMMdd_HHmmss")}");
+                            string logQry1 = $"UPDATE uploadedfiles SET logfile = '{logPath1}' WHERE id = {file_id}";
+                            await Context.ExecuteNonQry<int>(logQry1).ConfigureAwait(false);
+                            logPath1 = logPath1.Replace("\\\\", "\\");
+
+                            m_errorLog.SetImportInformation("File sheet[PlanEquipments] has invalid rows.");
+                            // response.error_log_file_path = logPath1;
+                            // response.import_log = m_errorLog.errorLog();
+                            return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, logPath1, m_errorLog.errorLog(), "Import failed, file sheet[PlanEquipments] no rows to Insert.");
+                        }
+
+                        string mapChecklistQry = "INSERT INTO pmplanassetchecklist(planId, assetId, checklistId) VALUES ";
+
+                        foreach (DataRow row in dt3.Rows)
+                        {
+
+                            int planID = Convert.ToInt32(row["planID"]);
+                            int equipmentID = Convert.ToInt32(row["equipmentID"]);
+                            int checklistID = Convert.ToInt32(row["checklistID"]);
+
+                            
+                            mapChecklistQry += $"({planID}, {equipmentID}, {checklistID}), ";
+                                                       
+                        }
+                        mapChecklistQry = mapChecklistQry.Substring(0, mapChecklistQry.Length - 2) + ";";
+
+                        await Context.ExecuteNonQry<int>(mapChecklistQry).ConfigureAwait(false);
+
+
+                        foreach (var plans in approval) {
+                            var approvePlan = await ApprovePMPlan(plans, userID); 
+                        }
                     }
                 }
                 else //
                 {
+                    
                     return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, "File is not an excel file");
 
                 }
             }
+            string logPath = m_errorLog.SaveAsText($"ImportLog\\ImportPMPlan_File{file_id}_{DateTime.UtcNow.ToString("yyyyMMdd_HHmmss")}");
+            string logQry = $"UPDATE uploadedfiles SET logfile = '{logPath}' WHERE id = {file_id}";
+            await Context.ExecuteNonQry<int>(logQry).ConfigureAwait(false);
+            logPath = logPath.Replace("\\\\", "\\");
 
-
-            return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.SUCCESS, null, null, "File imported successfully."); ;
+            m_errorLog.SetImportInformation("File imported successfully");          
+            return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.SUCCESS, logPath, m_errorLog.errorLog(), "File imported successfully."); ;
             //return response;*/
         }
     }
