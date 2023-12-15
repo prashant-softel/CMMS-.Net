@@ -549,6 +549,9 @@ namespace CMMSAPIs.Repositories.PM
             Dictionary<string, int> plan = new Dictionary<string, int>();
             plan.Merge(plan_name, plan_id);
 
+            List<int> idList = new List<int>();
+            List<int> updatedIdList = new List<int>();
+
 
             Dictionary<string, Tuple<string, Type>> columnNames = new Dictionary<string, Tuple<string, Type>>()
             {
@@ -676,7 +679,7 @@ namespace CMMSAPIs.Repositories.PM
                             }
                             catch (KeyNotFoundException)
                             {
-                                m_errorLog.SetError($"[Row: {rN}] Invalid Plant Name '{newR["PlantName"]}'.");
+                                m_errorLog.SetError($"[Row: {rN}] Invalid Plant Name '{newR["PlantName"]}'. Plan '{newR["PlanName"]}' not Inserted.");
                                 newR.Delete();
                                 continue;
                                 // return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] Plant named '{newR[0]}' does not exist.");
@@ -684,7 +687,7 @@ namespace CMMSAPIs.Repositories.PM
 
                             if (Convert.ToString(newR["PlanName"]) == null || Convert.ToString(newR["PlanName"]) == "")
                             {
-                                m_errorLog.SetError($"[Row: {rN}] Plan Name cannot be null.");
+                                m_errorLog.SetError($"[Row: {rN}] Plan Name cannot be null. Row not Inserted");
                                 newR.Delete();
                                 continue;
                                 //return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] Plan N cannot be null.");
@@ -692,7 +695,7 @@ namespace CMMSAPIs.Repositories.PM
 
                             if (startDate < currentDate)
                             {
-                                m_errorLog.SetError($"[Row: {rN}] Invalid Start Date '{newR["StartDate"]}'.");
+                                m_errorLog.SetError($"[Row: {rN}] Start Date '{newR["StartDate"]}' is less than Current Date . Plan '{newR["PlanName"]}' not Inserted.");
                                 newR.Delete();
                                 continue;
                                 //return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] Invalid Start date {newR["StartDate"]}.");
@@ -705,7 +708,7 @@ namespace CMMSAPIs.Repositories.PM
                             }
                             catch (KeyNotFoundException)
                             {
-                                m_errorLog.SetError($"[Row: {rN}] Equipment category named '{newR["EquipmentCategory"]}' does not exist.");
+                                m_errorLog.SetError($"[Row: {rN}] Equipment category named '{newR["EquipmentCategory"]}' does not exist. Plan '{newR["PlanName"]}' not Inserted.");
                                 newR.Delete();
                                 continue;
                                 //return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] equipment category named '{newR[2]}' does not exist.");
@@ -716,7 +719,7 @@ namespace CMMSAPIs.Repositories.PM
                             }
                             catch (KeyNotFoundException)
                             {
-                                m_errorLog.SetError($"[Row: {rN}] Frequency named '{newR["Frequency"]}' does not exist.");
+                                m_errorLog.SetError($"[Row: {rN}] Frequency named '{newR["Frequency"]}' does not exist. Plan '{newR["PlanName"]}' not Inserted.");
                                 newR.Delete();
                                 continue;
                                 //return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] frequency named '{newR[6]}' does not exist.");
@@ -727,7 +730,7 @@ namespace CMMSAPIs.Repositories.PM
                             }
                             catch (KeyNotFoundException)
                             {
-                                m_errorLog.SetError($"[Row: {rN}] Assigned to named user '{newR["AssignedTo"]}' does not exist.");
+                                m_errorLog.SetError($"[Row: {rN}] Assigned to named user '{newR["AssignedTo"]}' does not exist. Plan '{newR["PlanName"]}' not Inserted.");
                                 newR.Delete();
                                 continue;
                                 //return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] assigned to named '{newR[7]}' does not exist.");
@@ -760,6 +763,8 @@ namespace CMMSAPIs.Repositories.PM
 
                                     approval.Add(planApproval);
                                 }
+                                //m_errorLog.SetWarning($"[Row: {rN}] Updated Plan '{newR["PlanName"]}'. Plan ID :{newR["planID"]}. ");
+                                updatedIdList.Add(updatePlan.plan_id);
                                 newR.Delete();
                                 continue;
 
@@ -861,7 +866,7 @@ namespace CMMSAPIs.Repositories.PM
 
                             int id = Convert.ToInt32(dt_insert.Rows[0][0]);
                             plan.Add(plan_name1.ToUpper(), id);
-
+                            idList.Add(id);
                             int approvalFlag = Convert.ToInt32(row["Approval"]);
                             if (approvalFlag == 1)
                             {
@@ -967,7 +972,7 @@ namespace CMMSAPIs.Repositories.PM
                             }
                             catch (KeyNotFoundException)
                             {
-                                m_errorLog.SetError($"[Row: {rN}] Plan  named '{newR["PlanName"]}' does not exist.");
+                                m_errorLog.SetError($"[Row: {rN}] Plan  named '{newR["PlanName"]}' does not exist. Row not Inserted.");
                                 newR.Delete();
                                 continue;
                                 //return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] Equipment named '{newR["EquipmentName"]}' does not exist.");
@@ -978,7 +983,7 @@ namespace CMMSAPIs.Repositories.PM
                             }
                             catch (KeyNotFoundException)
                             {
-                                m_errorLog.SetError($"[Row: {rN}] Equipment  named '{newR["EquipmentName"]}' does not exist.");
+                                m_errorLog.SetError($"[Row: {rN}] Equipment  named '{newR["EquipmentName"]}' does not exist. Row not Inserted.");
                                 newR.Delete();
                                 continue;
                                 //return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] Equipment named '{newR["EquipmentName"]}' does not exist.");
@@ -989,7 +994,7 @@ namespace CMMSAPIs.Repositories.PM
                             }
                             catch (KeyNotFoundException)
                             {
-                                m_errorLog.SetError($"[Row: {rN}] CheckList named'{newR["CheckList"]}' does not exist.");
+                                m_errorLog.SetError($"[Row: {rN}] CheckList named'{newR["CheckList"]}' does not exist. Row not Inserted.");
                                 newR.Delete();
                                 continue;
                                 //return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] Checklist named '{newR[""]}' does not exist.");
@@ -1045,8 +1050,8 @@ namespace CMMSAPIs.Repositories.PM
             await Context.ExecuteNonQry<int>(logQry).ConfigureAwait(false);
             logPath = logPath.Replace("\\\\", "\\");
 
-            m_errorLog.SetImportInformation("File imported successfully");          
-            return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.SUCCESS, logPath, m_errorLog.errorLog(), "File imported successfully."); ;
+            m_errorLog.SetImportInformation($"Total Errors <{m_errorLog.GetErrorCount()}>");          
+            return new CMImportFileResponse(file_id,idList, updatedIdList, CMMS.RETRUNSTATUS.SUCCESS, logPath, m_errorLog.errorLog(), $"{idList.Count} Plan(s) created, {updatedIdList.Count} Plan(s) updated."); 
             //return response;*/
         }
     }
