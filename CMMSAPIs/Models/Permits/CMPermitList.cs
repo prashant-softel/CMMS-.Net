@@ -29,6 +29,7 @@ namespace CMMSAPIs.Models.Permits
         public dynamic approved_datetime { get; set; }
         public string current_status_short { get; set; }
         public string current_status_long { get; set; }
+        public int TBT_Done_By_id { get; set; }
     }
     public class CMSafetyMeasurementQuestionList
     {

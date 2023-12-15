@@ -707,9 +707,17 @@ namespace CMMSAPIs.Repositories.Masters
                             {
                                 newR["failure_weightage"] = Convert.ToInt32(newR["failure_weightage"]);
                             }
-                          
-                            newR["range_min"] = Convert.ToInt32(newR["range_min"]);
-                            newR["range_max"] = Convert.ToInt32(newR["range_max"]);
+
+                            if (Convert.ToString(newR["range_min"]) == null || Convert.ToString(newR["range_min"]) == "")                               
+                                newR["range_min"] = 0;
+                            else
+                                newR["range_min"] = Convert.ToInt32(newR["range_min"]);
+
+                            if (Convert.ToString(newR["range_max"]) == null || Convert.ToString(newR["range_max"]) == "")
+                                 newR["range_max"] = 0;
+                            else
+                                newR["range_min"] = Convert.ToInt32(newR["range_min"]);
+
                             dt2.Rows.Add(newR);
                             /*
                             Dictionary<string, Tuple<string, Type>> columnNames = new Dictionary<string, Tuple<string, Type>>()

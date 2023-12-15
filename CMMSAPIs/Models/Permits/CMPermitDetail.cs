@@ -101,6 +101,8 @@ namespace CMMSAPIs.Models.Permits
         public List<CMEMPLIST> employee_list { get; set; }
         public List<CMIsolationList> LstIsolation { get; set; }
         public List<CMAssociatedList> LstAssociatedJobs { get; set; }
+        public List<CMAssociatedPMList> LstAssociatedPM { get; set; }
+
         public int ptwStatus { get; set; }
         public string current_status_short { get; set; }
         public string current_status_long { get; set; }
@@ -109,6 +111,7 @@ namespace CMMSAPIs.Models.Permits
         public CMPermitConditionDetails cancelDetails { get; set; }
 
         public CMPermitConditionDetails extendDetails { get; set; }
+        public int TBT_Done_By_id { get; set; }
         public string TBT_Done_By { get; set; }
         public DateTime? TBT_Done_At { get; set; }
     }
@@ -129,6 +132,18 @@ namespace CMMSAPIs.Models.Permits
         public string equipmentCat { get; set; }
         public string equipment { get; set; }
         public dynamic breakdownTime { get; set; }
+        public string assignedTo { get; set; }
+        public int status { get; set; }
+        public string status_short { get; set; }
+    }
+    public class CMAssociatedPMList
+    {
+        public int pmId { get; set; }
+        public int permitId { get; set; }
+        public string title { get; set; }
+        public string equipmentCat { get; set; }
+        public string equipment { get; set; }
+        public dynamic startDate { get; set; }
         public string assignedTo { get; set; }
         public int status { get; set; }
         public string status_short { get; set; }
