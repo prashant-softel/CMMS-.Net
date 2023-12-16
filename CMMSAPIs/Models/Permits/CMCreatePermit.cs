@@ -39,6 +39,8 @@ namespace CMMSAPIs.Models.Permits
         public List<CMPermitEmpList> employee_list { get; set; }
         public List<CMPermitSaftyQueList> safety_question_list { get; set; }
         public List<int> uploadfile_ids { get; set; }
+        public int TBT_Done_By { get; set; }
+        public DateTime TBT_Done_At { get; set; }
     }
     /*public class CMPermitLotoList
     {

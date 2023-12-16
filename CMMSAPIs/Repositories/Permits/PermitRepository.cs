@@ -88,13 +88,13 @@ namespace CMMSAPIs.Repositories.Permits
                     statusName = "Cancelled By Approver";
                     break;
 				case CMMS.CMMS_Status.PTW_CANCEL_REQUESTED:
-                    statusName = "Cancel Requested";
+                    statusName = "Cancelled";
                     break;
                 case CMMS.CMMS_Status.PTW_CANCEL_REQUEST_REJECTED:
                     statusName = "Cancel Request Rejected";
 	                break;
                 case CMMS.CMMS_Status.PTW_CANCEL_REQUEST_APPROVED:
-                    statusName = "Cancel Approved";
+                    statusName = "Cancelled";
                     break;
                 case CMMS.CMMS_Status.PTW_EXTEND_REQUESTED:
                     statusName = "Requested for Extension";
@@ -164,13 +164,13 @@ namespace CMMSAPIs.Repositories.Permits
                     statusName = "Permit Cancelled By Approver";
                     break;
                 case CMMS.CMMS_Status.PTW_CANCEL_REQUESTED:
-                    statusName = "Cancel Requested for Permit";
+                    statusName = "Permit Cancelled";
                     break;
                 case CMMS.CMMS_Status.PTW_CANCEL_REQUEST_REJECTED:
                     statusName = "Cancel Request Rejected for Permit";
                     break;
                 case CMMS.CMMS_Status.PTW_CANCEL_REQUEST_APPROVED:
-                    statusName = "Cancel Request Approved for Permit";
+                    statusName = "Permit Cancelled";
                     break;
                 case CMMS.CMMS_Status.PTW_EXTEND_REQUESTED:
                     statusName = "Requested for Permit Extension";
@@ -509,7 +509,9 @@ namespace CMMSAPIs.Repositories.Permits
                                   "LEFT JOIN " +
                                         "assets ON assets.id = loto.Loto_Asset_id " +
                                   "LEFT JOIN " +
-                                        "assetcategories as asset_cat ON assets.categoryId = asset_cat.id " +
+                                        "permitassetlists as cat ON cat.ptwId = ptw.id " +
+                                  "LEFT JOIN " +
+                                        "assetcategories as asset_cat ON cat.assetId = asset_cat.id " +
                                   "LEFT JOIN " +
                                          "permittypelists as permitType ON ptw.typeId = permitType.id " +
                                   "LEFT JOIN " +
@@ -589,8 +591,8 @@ namespace CMMSAPIs.Repositories.Permits
              * Once you saved the records
              * Return GetPermitDetails(permit_id);
             */
-            string qryPermitBasic = "insert into permits(facilityId, blockId, LOTOId, startDate, endDate, title, description, jobTypeId, typeId, TBTId, issuedById, approvedById, acceptedById, acceptedDate, status, status_updated_at, latitude, longitude) values" +
-             $"({ request.facility_id }, { request.blockId },{request.lotoId},'{ request.start_datetime.ToString("yyyy-MM-dd HH:mm:ss") }', '{ request.end_datetime.ToString("yyyy-MM-dd HH:mm:ss") }', '{request.title}', '{ request.description }', { request.job_type_id }, { request.permitTypeId }, { request.sop_type_id }, { request.issuer_id }, { request.approver_id }, {userID}, '{UtilsRepository.GetUTCTime()}', {(int)CMMS.CMMS_Status.PTW_CREATED}, '{UtilsRepository.GetUTCTime()}', {request.latitude}, {request.longitude}); " +
+            string qryPermitBasic = "insert into permits(facilityId, blockId, LOTOId, startDate, endDate, title, description, jobTypeId, typeId, TBTId, issuedById, approvedById, acceptedById, acceptedDate, status, status_updated_at, latitude, longitude,TBT_Done_by,TBT_Done_at) values" +
+             $"({ request.facility_id }, { request.blockId },{request.lotoId},'{ request.start_datetime.ToString("yyyy-MM-dd HH:mm:ss") }', '{ request.end_datetime.ToString("yyyy-MM-dd HH:mm:ss") }', '{request.title}', '{ request.description }', { request.job_type_id }, { request.permitTypeId }, { request.sop_type_id }, { request.issuer_id }, { request.approver_id }, {userID}, '{UtilsRepository.GetUTCTime()}', {(int)CMMS.CMMS_Status.PTW_CREATED}, '{UtilsRepository.GetUTCTime()}', {request.latitude}, {request.longitude},{request.TBT_Done_By},'{request.TBT_Done_At.ToString("yyyy-MM-dd HH:mm:ss")}'); " +
              $"SELECT LAST_INSERT_ID();";
             DataTable dt = await Context.FetchData(qryPermitBasic).ConfigureAwait(false);
             int insertedId = Convert.ToInt32(dt.Rows[0][0]);
@@ -953,18 +955,17 @@ namespace CMMSAPIs.Repositories.Permits
             }
 
             //get category list
-            string myQuery7 = "SELECT assets_cat.name as equipmentCat FROM assetcategories as assets_cat " +
-                               "JOIN assets on assets.categoryId = assets_cat.id " +
-                               "JOIN permitassetlists AS assetList on assetList.assetId = assets.id " +
-                               "JOIN permits as ptw ON assetList.ptwId=ptw.id " +
-                               $"where ptw.id =  {permit_id}";
+            string myQuery7 = "SELECT assetcategories.name as equipmentCat FROM permitassetlists as cat " +
+                               "left JOIN assetcategories on assetcategories.id = cat.assetId " +                            
+                               $"where cat.ptwId =  {permit_id}";
             List<CMCategory> _CategoryList = await Context.GetData<CMCategory>(myQuery7).ConfigureAwait(false);
 
-            string myQuery8 = "SELECT assets_cat.id as catID FROM assetcategories as assets_cat " +
-                               "JOIN assets on assets.categoryId = assets_cat.id " +
-                               "JOIN permitassetlists AS assetList on assetList.assetId = assets.id " +
-                               "JOIN permits as ptw ON assetList.ptwId=ptw.id " +
-                               $"where ptw.id =  {permit_id}";
+            string myQuery8 = $"SELECT assetId as catID FROM permitassetlists where ptwId = {permit_id} ";
+            //string myQuery8 = "SELECT assets_cat.id as catID FROM assetcategories as assets_cat " +
+            //                   "JOIN assets on assets.categoryId = assets_cat.id " +
+            //                   "JOIN permitassetlists AS assetList on assetList.assetId = assets.id " +
+            //                   "JOIN permits as ptw ON assetList.ptwId=ptw.id " +
+            //                   $"where ptw.id =  {permit_id}";
             DataTable catIDdt = await Context.FetchData(myQuery8).ConfigureAwait(false);
             List<int> _CategoryIDList = catIDdt.GetColumn<int>("catID");
 
@@ -978,9 +979,15 @@ namespace CMMSAPIs.Repositories.Permits
             _PermitDetailsList[0].LstCategory = _CategoryList;
             _PermitDetailsList[0].category_ids = _CategoryIDList;
             _PermitDetailsList[0].physical_iso_equips = _physical_iso_equips;
+            _PermitDetailsList[0].current_status_long = LongStatus(_PermitDetailsList[0].ptwStatus, _PermitDetailsList[0]);
+
 
             if (_PermitDetailsList[0].ptwStatus == (int)CMMS.CMMS_Status.PTW_APPROVED && _PermitDetailsList[0].TBT_Done_By_id <= 0)
+            {
                 _PermitDetailsList[0].current_status_short = "Approved But TBT not done";
+                _PermitDetailsList[0].current_status_long = "Permit Approved But TBT not done";
+
+            }
 
             return _PermitDetailsList[0];
         }
@@ -1241,7 +1248,7 @@ namespace CMMSAPIs.Repositories.Permits
             string fileIds = "";
             fileIds += (request?.fileIds?.Length > 0 ? " " + string.Join(" , ", request.fileIds) + " " : string.Empty);
 
-            string updateQry = $"update permits set cancelReccomendations = '{request.comment}', cancelFile ='{fileIds}',cancelRequestStatus = 1, status = {(int)CMMS.CMMS_Status.PTW_CANCEL_REQUESTED}, status_updated_at = '{UtilsRepository.GetUTCTime()}', cancelRequestDate = '{UtilsRepository.GetUTCTime()}', cancelRequestById = {userID}  where id = {request.id}";
+            string updateQry = $"update permits set cancelReccomendations = '{request.comment}', cancelFile ='{fileIds}',cancelRequestStatus = 1, status = {(int)CMMS.CMMS_Status.PTW_CANCEL_REQUEST_APPROVED}, status_updated_at = '{UtilsRepository.GetUTCTime()}', cancelRequestDate = '{UtilsRepository.GetUTCTime()}', cancelRequestById = {userID}  where id = {request.id}";
             int retValue = await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
 
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
@@ -1272,10 +1279,10 @@ namespace CMMSAPIs.Repositories.Permits
             await Context.ExecuteNonQry<int>(qryCondition).ConfigureAwait(false);
 
 
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.id, 0, 0, request.comment, CMMS.CMMS_Status.PTW_CANCEL_REQUESTED, userID);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.id, 0, 0, request.comment, CMMS.CMMS_Status.PTW_CANCEL_REQUEST_APPROVED, userID);
 
-            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_CANCEL_REQUESTED, new[] { userID }, permitDetails);
-            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Cancel Requested for Permit  PTW{request.id}");
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_CANCEL_REQUEST_APPROVED, new[] { userID }, permitDetails);
+            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $" Permit  PTW{request.id} Cancelled");
             return response;
         }
 
