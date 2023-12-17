@@ -301,6 +301,20 @@ namespace CMMSAPIs.Controllers.MC
                 throw;
             }
         }
+        [Route("GetMCTaskEquipmentList")]
+        [HttpGet]
+        public async Task<IActionResult> GetMCTaskEquipmentList(int taskId)
+        {
+            try
+            {
+                var data = await _CleaningBS.GetTaskEquipmentList(taskId);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
 
         [Route("ApproveMCExecution")]
         [HttpPut]
