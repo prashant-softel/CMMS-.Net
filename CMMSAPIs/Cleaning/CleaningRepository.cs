@@ -683,8 +683,8 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 status = (int)CMMS.CMMS_Status.VEG_TASK_STARTED;
             }
 
-            string scheduleQuery = $"Update cleaning_execution_schedules set status = {status},startedById={userId},startedAt='{UtilsRepository.GetUTCTime()}' where scheduleId = {scheduleId}; " +
-                 $"Update cleaning_execution_items set status = {status} where scheduleId = {scheduleId}";
+            string scheduleQuery = $"Update cleaning_execution_schedules set status = {status},startedById={userId},startedAt='{UtilsRepository.GetUTCTime()}' where scheduleId = {scheduleId}; ";
+                 //$"Update cleaning_execution_items set status = {status} where scheduleId = {scheduleId}";
 
             await Context.GetData<CMMCExecutionSchedule>(scheduleQuery).ConfigureAwait(false);
 
@@ -703,8 +703,8 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 status = (int)CMMS.CMMS_Status.VEG_TASK_COMPLETED;
             }
 
-            string scheduleQuery = $"Update cleaning_execution_schedules set status = {status},endedById={userId},endedAt='{UtilsRepository.GetUTCTime()}' where scheduleId = {scheduleId}; " +
-                 $"Update cleaning_execution_items set status = {status} where scheduleId = {scheduleId}";
+            string scheduleQuery = $"Update cleaning_execution_schedules set status = {status},endedById={userId},endedAt='{UtilsRepository.GetUTCTime()}' where scheduleId = {scheduleId}; ";
+                 //$"Update cleaning_execution_items set status = {status} where scheduleId = {scheduleId}";
 
             await Context.GetData<CMMCExecutionSchedule>(scheduleQuery).ConfigureAwait(false);
 
@@ -761,6 +761,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
         internal async Task<CMDefaultResponse> AbandonSchedule(CMApproval request, int userId)
         {
             int status = (int)CMMS.CMMS_Status.MC_TASK_ABANDONED;
+            int equipstatus = (int)CMMS.CMMS_Status.EQUIP_ABANDONED;
             int notStatus = (int)CMMS.CMMS_Status.MC_TASK_COMPLETED;
             if (moduleType == 2)
             {
@@ -769,7 +770,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             }
 
             string Query = $"Update cleaning_execution_schedules set status = {status}, abandonedById={userId},abandonedAt='{UtilsRepository.GetUTCTime()}' ,remark = '{request.comment}' where scheduleId = {request.id} ;" +
-                 $"Update cleaning_execution_items set status = {status}, abandonedById={userId},abandonedAt='{UtilsRepository.GetUTCTime()}'  where scheduleId = {request.id} and  status NOT IN ( {notStatus} );";
+                 $"Update cleaning_execution_items set status = {equipstatus}, abandonedById={userId},abandonedAt='{UtilsRepository.GetUTCTime()}'  where scheduleId = {request.id} and  status NOT IN ( {notStatus} );";
 
 
             int val = await Context.ExecuteNonQry<int>(Query).ConfigureAwait(false);
@@ -790,8 +791,8 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             }
 
             string Query = $"Update cleaning_execution set status = {status},abandonedById={userId},abandonedAt='{UtilsRepository.GetUTCTime()}' ,reasonForAbandon = '{request.comment}' where id = {request.id};" +
-                 $"Update cleaning_execution_schedules set status = {status} where executionId = {request.id} and  status NOT IN ( {notStatus} ) ;" +
-                 $"Update cleaning_execution_items set status = {status} where executionId = {request.id} and  status NOT IN ( {notStatus} ) ;";
+                 $"Update cleaning_execution_schedules set status = {status} where executionId = {request.id} and  status NOT IN ( {notStatus} ) ;";
+                 //$"Update cleaning_execution_items set status = {status} where executionId = {request.id} and  status NOT IN ( {notStatus} ) ;";
 
 
             await Context.GetData<CMMCExecutionSchedule>(Query).ConfigureAwait(false);
@@ -896,7 +897,46 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             return invs;
         }
 
-        internal async Task<List<CMVegEquipmentList>> GetVegEquipmentList(int facilityId)
+        internal virtual async Task<List<CMMCEquipmentList>> GetTaskEquipmentList(int taskId)
+        {
+
+            string status = "";
+
+            status = $" case WHEN task.status = {(int)CMMS.CMMS_Status.EQUIP_SCHEDULED} THEN 1 ELSE 0 END as isPending , " +
+                $"case WHEN task.status = {(int)CMMS.CMMS_Status.EQUIP_CLEANED} THEN 1 ELSE 0 END as isCleaned," +
+                $"case WHEN task.status = {(int)CMMS.CMMS_Status.EQUIP_ABANDONED} THEN 1 ELSE 0 END as isAbandoned , ";
+           
+
+            string smbQuery = $"select task.assetId as smbId, assets.name as smbName , assets.parentId as parentId , task.moduleQuantity, {status} " +
+                $"IF(plannedDate = '0000-00-00 00:00:00', CAST( '0001-01-01 00:00:01' as datetime) , CAST(plannedDate AS DATETIME)) as scheduledAt," +
+                $"IF(cleanedAt = '0000-00-00 00:00:00', CAST( '0001-01-01 00:00:01' as datetime) , CAST(cleanedAt AS DATETIME)) as cleanedAt," +
+                $"IF(abandonedAt = '0000-00-00 00:00:00', CAST( '0001-01-01 00:00:01' as datetime), CAST(abandonedAt AS DATETIME))  as abandonedAt " +
+                $"from cleaning_execution_items as task left join assets on assets.id = task.assetId where task.executionId ={taskId}";
+
+            List<CMSMB> smbs = await Context.GetData<CMSMB>(smbQuery).ConfigureAwait(false);
+
+            string invQuery = $"select parent.id as invId, parent.name as invName,sum(task.moduleQuantity) as moduleQuantity from cleaning_execution_items as task left join assets on assets.id = task.assetId left join assets as parent on parent.id = assets.parentId where task.executionId ={taskId} group by assets.parentId";
+
+            List<CMMCEquipmentList> invs = await Context.GetData<CMMCEquipmentList>(invQuery).ConfigureAwait(false);
+
+            //List<CMSMB> invSmbs = new List<CMSMB>;
+
+            foreach (CMMCEquipmentList inv in invs)
+            {
+                foreach (CMSMB smb in smbs)
+                {
+                    if (inv.invId == smb.parentId)
+                    {
+                        inv.moduleQuantity += smb.moduleQuantity;
+                        inv?.smbs.Add(smb);
+                    }
+                }
+
+            }
+            return invs;
+        }
+
+        internal async Task<List<CMVegEquipmentList>> GetVegEquipmentList(int facilityId )
         {
             string filter = "";
             string Query = $"select id as blockId,  name as blockName from facilities  where isBlock = 1";

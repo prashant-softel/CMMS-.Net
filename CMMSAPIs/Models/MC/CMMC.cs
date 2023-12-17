@@ -282,9 +282,8 @@ namespace CMMSAPIs.Models.MC
     {
         public int invId { get; set; }
         public string invName { get; set; }
-        public int moduleQuantity { get; set; }
+        public dynamic moduleQuantity { get; set; }       
         public List<CMSMB> smbs { get; set; } = new List<CMSMB>();
-
 
         // public int area { get; set; }
     }
@@ -294,6 +293,13 @@ namespace CMMSAPIs.Models.MC
         public int smbId { get; set; }
         public string smbName { get; set; }
         public int moduleQuantity { get; set; }
+        public dynamic isPending { get; set; }
+        public int scheduledAt { get; set; }
+        public dynamic isCleaned { get; set; }
+        public int cleanedAt { get; set; }
+        public dynamic isAbandoned { get; set; }
+        public int abandonedAt { get; set; }
+
 
     }
     public class CMVegEquipmentList
