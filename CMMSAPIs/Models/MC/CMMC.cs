@@ -294,11 +294,11 @@ namespace CMMSAPIs.Models.MC
         public string smbName { get; set; }
         public int moduleQuantity { get; set; }
         public dynamic isPending { get; set; }
-        public int scheduledAt { get; set; }
+        public DateTime scheduledAt { get; set; }
         public dynamic isCleaned { get; set; }
-        public int cleanedAt { get; set; }
+        public DateTime cleanedAt { get; set; }
         public dynamic isAbandoned { get; set; }
-        public int abandonedAt { get; set; }
+        public DateTime abandonedAt { get; set; }
 
 
     }
