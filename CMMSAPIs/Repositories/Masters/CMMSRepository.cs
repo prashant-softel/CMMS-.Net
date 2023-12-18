@@ -768,7 +768,7 @@ namespace CMMSAPIs.Repositories.Masters
                         dt2.Columns.Add("type", typeof(int));
                         //Pending: Reasons for skipping 3 rows
                         //
-                        for (int rN = 4; rN <= sheet.Dimension.End.Row; rN++)
+                        for (int rN = 2; rN <= sheet.Dimension.End.Row; rN++)
                         {
                             ExcelRange row = sheet.Cells[rN, 1, rN, sheet.Dimension.End.Column];
                             DataRow newR = dt2.NewRow();
