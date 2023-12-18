@@ -212,7 +212,7 @@ namespace CMMSAPIs.Repositories.Inventory
                 { "Asset_Type_Name", new Tuple<string, Type>("typeName", typeof(string)) },
                 { "Asset_Status_Name", new Tuple<string, Type>("statusName", typeof(string)) },
                 { "Warranty Type", new Tuple<string, Type>("warranty_type_name", typeof(string)) },
-                { "Asset_Warranty_Term", new Tuple<string, Type>("warrranty_term_type_name", typeof(string)) },
+                { "Asset_Warranty_Term", new Tuple<string, Type>("warranty_term_type_name", typeof(string)) },
                 { "Asset_warranty_Provider", new Tuple<string, Type>("warranty_provider_name", typeof(string)) },
 
 
@@ -314,7 +314,7 @@ namespace CMMSAPIs.Repositories.Inventory
                         dt2.Columns.Add("typeId", typeof(int));
                         dt2.Columns.Add("statusId", typeof(int));
                         dt2.Columns.Add("warranty_type", typeof(int));
-                        dt2.Columns.Add("warrranty_term_type", typeof(int));
+                        dt2.Columns.Add("warranty_term_type", typeof(int));
                         dt2.Columns.Add("warranty_provider_id", typeof(int));
                         dt2.Columns.Add("row_no", typeof(int));
                         for (int rN = 2; rN <= sheet.Dimension.End.Row; rN++)
@@ -597,17 +597,17 @@ namespace CMMSAPIs.Repositories.Inventory
                             }
                             catch (KeyNotFoundException)
                             {
-                                m_errorLog.SetWarning($"[Row: {rN}] Warranty Type named '{newR["warranty_type_name"]}' not found. Setting warranty Type ID as 0.");
+                                //m_errorLog.SetWarning($"[Row: {rN}] Warranty Type named '{newR["warranty_type_name"]}' not found. Setting warranty Type ID as 0.");
                                 newR["warranty_type"] = 0;
                             }
                             try
                             {
-                                newR["warrranty_term_type"] = warrantyTerms[Convert.ToString(newR["warrranty_term_type_name"]).ToUpper()];
+                                newR["warranty_term_type"] = warrantyTerms[Convert.ToString(newR["warranty_term_type_name"]).ToUpper()];
                             }
                             catch (KeyNotFoundException)
                             {
-                                m_errorLog.SetWarning($"[Row: {rN}] Warranty Term named '{newR["warrranty_term_type_name"]}' not found. Setting warranty term ID as 0.");
-                                newR["warrranty_term_type"] = 0;
+                                //m_errorLog.SetWarning($"[Row: {rN}] Warranty Term named '{newR["warranty_term_type_name"]}' not found. Setting warranty term ID as 0.");
+                                newR["warranty_term_type"] = 0;
                             }
                             try
                             {
@@ -910,7 +910,9 @@ namespace CMMSAPIs.Repositories.Inventory
             //    "b3.name as manufacturer_name, a.currency FROM assets AS a JOIN assetstatus as s on s.id = a.statusId " +
             //    "JOIN facilities as f ON f.id = a.blockId JOIN assets as a2 ON a.parentId = a2.id " +
             //    "JOIN business AS b2 ON a.ownerId = b2.id JOIN business AS b3 ON a.manufacturerId = b3.id";
-            string myQuery = "SELECT a.id ,a.name, a.description, ast.id as typeId, ast.name as type, b2.id as supplierId, b2.name as supplierName, manufacturertlb.id as manufacturerId, manufacturertlb.name as manufacturerName, b5.id as operatorId, b5.name as operatorName, ac.id as categoryId, ac.name as categoryName, a.serialNumber, a.calibrationFrequency,frequency.name as calibrationFreqType, a.calibrationReminderDays, CASE WHEN a.calibrationLastDate = '0000-00-00 00:00:00' THEN NULL ELSE a.calibrationLastDate END as calibrationLastDate, CASE WHEN a.calibrationDueDate = '0000-00-00 00:00:00' THEN NULL ELSE a.calibrationDueDate END AS calibrationDueDate, a.model, a.currency, a.cost, a.acCapacity, a.dcCapacity, a.moduleQuantity, " +
+            string myQuery = "SELECT a.id ,a.name, a.description, ast.id as typeId, ast.name as type, b2.id as supplierId, b2.name as supplierName, manufacturertlb.id as manufacturerId, manufacturertlb.name as manufacturerName, b5.id as operatorId, b5.name as operatorName, ac.id as categoryId, ac.name as categoryName, a.serialNumber, a.calibrationFrequency,frequency.name as calibrationFreqType, a.calibrationReminderDays, " +
+                //"CASE WHEN a.calibrationLastDate = '0000-00-00 00:00:00' THEN NULL ELSE a.calibrationLastDate END as calibrationLastDate, CASE WHEN a.calibrationDueDate = '0000-00-00 00:00:00' THEN NULL ELSE a.calibrationDueDate END AS calibrationDueDate," +
+                " a.model, a.currency, a.cost, a.acCapacity, a.dcCapacity, a.moduleQuantity, " +
             //a.firstDueDate as calibrationDueDate, 
             "f.id as facilityId, f.name AS facilityName, bl.id as blockId, bl.name AS blockName, a2.id as parentId, a2.name as parentName, a2.serialNumber as parentSerial, custbl.id as customerId, custbl.name as customerName, owntbl.id as ownerId, owntbl.name as ownerName, s.id as statusId, s.name AS status, a.specialTool, w.id as warrantyId, w.warranty_description, w.certificate_number, wt.id as warrantyTypeId, wt.name as warrantyTypeName, wut.id as warrantyTermTypeId, wut.name as warrantyTermTypeName, wp.id as warrantyProviderId, wp.name as warrantyProviderName, files.file_path as warranty_certificate_path " +     //use a.specialToolEmpId to put specialToolEmp,
             "from assets as a " +
@@ -1002,10 +1004,10 @@ string warrantyQry = "insert into assetwarranty
                 //List<CMInventoryList> newInventory = await Context.GetData<CMInventoryList>(qry).ConfigureAwait(false);
                 DataTable dt = await Context.FetchData(qry).ConfigureAwait(false);
                 retID = Convert.ToInt32(dt.Rows[0][0]);
-                if (unit.warranty_type > 0 && unit.warrranty_term_type > 0 && unit.warranty_provider_id > 0)
+                if (unit.warranty_type > 0 && unit.warranty_term_type > 0 && unit.warranty_provider_id > 0)
                 {
                     string warrantyQry = "insert into assetwarranty (certificate_file_id, warranty_type, warranty_description, warranty_term_type, asset_id, start_date, expiry_date, meter_limit, meter_unit, warranty_provider, certificate_number, addedAt, addedBy, status,warrantyTenture) VALUES ";
-                    warrantyQry += $"({unit.warranty_certificate_file_id}, {unit.warranty_type}, '{unit.warranty_description}', {unit.warrranty_term_type}, {retID}, '{((DateTime)unit.start_date).ToString("yyyy-MM-dd HH:mm:ss")}', '{((DateTime)unit.expiry_date).ToString("yyyy-MM-dd HH:mm:ss")}', {unit.meter_limit}, {unit.meter_unit}, {unit.warranty_provider_id}, '{unit.certificate_number}', '{UtilsRepository.GetUTCTime()}', {userID}, 1,{unit.warrantyTenture});" +
+                    warrantyQry += $"({unit.warranty_certificate_file_id}, {unit.warranty_type}, '{unit.warranty_description}', {unit.warranty_term_type}, {retID}, '{((DateTime)unit.start_date).ToString("yyyy-MM-dd HH:mm:ss")}', '{((DateTime)unit.expiry_date).ToString("yyyy-MM-dd HH:mm:ss")}', {unit.meter_limit}, {unit.meter_unit}, {unit.warranty_provider_id}, '{unit.certificate_number}', '{UtilsRepository.GetUTCTime()}', {userID}, 1,{unit.warrantyTenture});" +
                         $" SELECT LAST_INSERT_ID();";
                     DataTable dt2 = await Context.FetchData(warrantyQry).ConfigureAwait(false);
                     int warrantyId = Convert.ToInt32(dt2.Rows[0][0]);
