@@ -668,10 +668,6 @@ namespace CMMSAPIs.Repositories.PM
                             newR["AssignedTo"] = newR[5];
                             newR["Approval"] = newR[6];
 
-                            DateTime startDate = (DateTime)newR["StartDate"];
-                            DateTime currentDate = DateTime.Now;
-
-
 
                             try
                             {
@@ -693,7 +689,10 @@ namespace CMMSAPIs.Repositories.PM
                                 //return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] Plan N cannot be null.");
                             }
 
-                            if (startDate < currentDate)
+                            DateTime startDate = (DateTime)newR["StartDate"];
+                            DateTime currentDate = DateTime.Now;
+
+                            if (startDate.Date < currentDate.Date)
                             {
                                 m_errorLog.SetError($"[Row: {rN}] Start Date '{newR["StartDate"]}' is less than Current Date . Plan '{newR["PlanName"]}' not Inserted.");
                                 newR.Delete();

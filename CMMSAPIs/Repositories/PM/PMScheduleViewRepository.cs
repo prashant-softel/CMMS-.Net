@@ -326,9 +326,17 @@ namespace CMMSAPIs.Repositories.PM
                                     $"FROM jobs " +
                                     $"JOIN pm_execution ON jobs.id = pm_execution.linked_job_id " +
                                     $"WHERE pm_execution.PM_Schedule_Id  = {schedule.schedule_id};";
-                List<ScheduleLinkJob> linked_jobs = await Context.GetData<ScheduleLinkJob>(myQuery4).ConfigureAwait(false);
-                List<CMLog> log = await _utilsRepo.GetHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, schedule.schedule_id);
+                try
+                {
+                    List<ScheduleLinkJob> linked_jobs = await Context.GetData<ScheduleLinkJob>(myQuery4).ConfigureAwait(false);
+                    List<CMLog> log = await _utilsRepo.GetHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, schedule.schedule_id);
+                    schedule.schedule_link_job = linked_jobs;
 
+                }
+                catch(Exception e)
+                {
+
+                }
                 //if (checklist_collection.Count > 0)
                 //{
                 //    taskViewDetail[0].checklist_id = checklist_collection[0].id;
@@ -337,7 +345,6 @@ namespace CMMSAPIs.Repositories.PM
                 //taskViewDetail[0].schedule_check_points = scheduleCheckList;
                 //taskViewDetail[0].history_log = log; 
 
-                schedule.schedule_link_job = linked_jobs;
                 schedule.checklist_observation = scheduleCheckList;
             }
             taskViewDetail[0].schedules = checklist_collection;

@@ -18,6 +18,9 @@ using Org.BouncyCastle.Asn1.X500;
 using System.Drawing;
 using System.Text.RegularExpressions;
 using MySqlX.XDevAPI.Relational;
+using CMMSAPIs.Models.PM;
+using Org.BouncyCastle.Crypto;
+using iTextSharp.tool.xml.html.table;
 //using static System.Net.WebRequestMethods;
 //using IronXL;
 
@@ -180,6 +183,13 @@ namespace CMMSAPIs.Repositories.Inventory
             Dictionary<string, int> warrantyTerms = new Dictionary<string, int>();
             warrantyTerms.Merge(warrantyTermNames, warrantyTermIDs);
 
+            string queryAsset = $"SELECT id, REPLACE(UPPER(name), '_', '') as name FROM assets where facilityId = {facility_id} GROUP BY name  ORDER BY id ASC ;";
+            DataTable dtAsset = await Context.FetchData(queryAsset).ConfigureAwait(false);
+            List<string> assetNames = dtAsset.GetColumn<string>("name");
+            List<int> assetIDs = dtAsset.GetColumn<int>("id");
+            Dictionary<string, int> assets = new Dictionary<string, int>();
+            assets.Merge(assetNames, assetIDs);
+
             Dictionary<string, Tuple<string, Type>> columnNames = new Dictionary<string, Tuple<string, Type>>()
             {
                 { "Asset_Name", new Tuple<string, Type>("name", typeof(string)) },
@@ -316,7 +326,14 @@ namespace CMMSAPIs.Repositories.Inventory
                         dt2.Columns.Add("warranty_type", typeof(int));
                         dt2.Columns.Add("warranty_term_type", typeof(int));
                         dt2.Columns.Add("warranty_provider_id", typeof(int));
+                        dt2.Columns.Add("id", typeof(int));
+
                         dt2.Columns.Add("row_no", typeof(int));
+
+                        int updateCount = 0;
+                        List<int> idList = new List<int>();
+                        List<int> updatedIdList = new List<int>();
+
                         for (int rN = 2; rN <= sheet.Dimension.End.Row; rN++)
                         {
                             ExcelRange row = sheet.Cells[rN, 1, rN, sheet.Dimension.End.Column];
@@ -364,7 +381,11 @@ namespace CMMSAPIs.Repositories.Inventory
                                 continue;
                                 //return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] Name cannot be null.");
                             }
-                               
+                            //else if (assets.Contains(Convert.ToString(newR["name"]).ToUpper()))
+                            //{
+                            //    m_errorLog.SetError($"[Checklist: Row {rN}] Checklist name cannot be duplicate.");
+                            //}
+
                             try
                             {
                                 newR["blockId"] = facilities[Convert.ToString(newR["blockName"]).ToUpper()];
@@ -633,9 +654,84 @@ namespace CMMSAPIs.Repositories.Inventory
                                     newR["warranty_provider_id"] = 0;
                                 }
                             }
-                            if (Convert.ToString(newR["parentName"]) == null || Convert.ToString(newR["parentName"]) == "")
+
+                            if (!(Convert.ToInt32(newR["warranty_type"]) > 0 && Convert.ToInt32(newR["warranty_term_type"]) > 0 && Convert.ToInt32(newR["warranty_provider_id"]) > 0)) {
+                                m_errorLog.SetWarning($"[Row: {rN}] Warranty data does not exist. ");
+                            }
+                           
+                                if (Convert.ToString(newR["parentName"]) == null || Convert.ToString(newR["parentName"]) == "")
                             {
                                 newR["parentName"] = "";
+                            }
+                            try
+                            {
+                                newR["id"] = assets[Convert.ToString(newR["name"]).Replace("_", "").ToUpper()];
+                                try
+                                    {
+                                    newR["parentID"] = assets[Convert.ToString(newR["parentName"]).Replace("_", "").ToUpper()];
+                                }
+                                catch
+                                {
+                                    newR["parentID"] = 0;
+                                }
+
+                                string myQuery = $"Select id from assets where id = {newR["id"]} and parentId = {newR["parentID"]}";
+                                DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
+                                //int id = Convert.ToInt32(dt.Rows[0][0]);
+                                //int retVal = await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
+                                    if (dt.Rows.Count > 0 && Convert.ToInt32(dt.Rows[0][0]) > 0) {
+
+                                    DataTable updateTable = dt2.Clone();
+                                    DataRow newRow = updateTable.NewRow();
+
+
+                                    newRow.ItemArray = newR.ItemArray;
+                                    updateTable.Rows.Add(newRow);
+
+
+                                    //CMAddInventory updateAsset = new CMAddInventory();    
+                                    List<CMAddInventory> updateAsset = updateTable.MapTo<CMAddInventory>();                                     
+
+                                    var resPlan = await UpdateInventory(updateAsset[0], userID);
+                                    updateCount++;
+                                    updatedIdList.Add(Convert.ToInt32(newR["id"]));
+                                    newR.Delete();
+                                    continue;
+
+                                }
+
+                                //CMPMPlanDetail updatePlan = new CMPMPlanDetail();
+
+                                //updatePlan.plan_id = Convert.ToInt32(newR["planID"]);
+                                //updatePlan.plan_name = Convert.ToString(newR["PlanName"]);
+                                //updatePlan.plan_date = startDate;
+                                //updatePlan.plan_freq_id = Convert.ToInt32(newR["frequencyID"]);
+                                //updatePlan.facility_id = Convert.ToInt32(newR["plantID"]);
+                                //updatePlan.category_id = Convert.ToInt32(newR["categoryID"]);
+                                //updatePlan.assigned_to_id = Convert.ToInt32(newR["assignedToID"]);
+                                //var resPlan = await UpdatePMPlan(updatePlan, userID);
+                                //updateCount++;
+                                //string myQuery2 = $"Update pm_plan set status = {(int)CMMS.CMMS_Status.PM_PLAN_CREATED},approved_by = null where id = {updatePlan.plan_id};";
+                                //await Context.ExecuteNonQry<int>(myQuery2).ConfigureAwait(false);
+                                //int app = Convert.ToInt32(newR["Approval"]);
+                                //if (app == 1)
+                                //{
+                                //    CMApproval planApproval = new CMApproval
+                                //    {
+                                //        id = Convert.ToInt32(newR["planID"]),
+                                //        comment = "Approved"
+                                //    };
+
+                                //    approval.Add(planApproval);
+                                //}
+                                ////m_errorLog.SetWarning($"[Row: {rN}] Updated Plan '{newR["PlanName"]}'. Plan ID :{newR["planID"]}. ");
+
+
+                            }
+                            catch (KeyNotFoundException)
+                            {
+
+                                //return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] Equipment named '{newR["EquipmentName"]}' does not exist.");
                             }
                             /*
                         dt2.Columns.Add("warranty_type", typeof(int));
@@ -654,7 +750,6 @@ namespace CMMSAPIs.Repositories.Inventory
                         //if (m_errorLog.GetErrorCount() == 0)
                         //{
                         int childListCount = 1;
-                            List<int> idList = new List<int>();
                             DataTable insertedTable = dt2.Clone();
 
                             string filter = "";
@@ -665,7 +760,7 @@ namespace CMMSAPIs.Repositories.Inventory
                             {
                                 if (i == 0)
                                 {
-                                    assetQry = $"SELECT UPPER(name) as name FROM facilities WHERE parentId = {facility_id} union SELECT UPPER(name) as name FROM assets WHERE facilityId = {facility_id} {filter};";
+                                    assetQry = $"SELECT REPLACE(UPPER(name), '_', '') as name FROM facilities WHERE parentId = {facility_id} union SELECT REPLACE(UPPER(name), '_', '') as name FROM assets WHERE facilityId = {facility_id} {filter};";
                                 }
                                 else
                                 {
@@ -683,8 +778,8 @@ namespace CMMSAPIs.Repositories.Inventory
                                 //assetnames.AddRange(dt2.GetColumn<string>("name"));
                                 assetnames.Contains("");
                                 DataRow[] filterRows = dt2.AsEnumerable()
-                                           .Where(row => assetnames.Contains(row.Field<string>("parentName").ToUpper(), StringComparison.OrdinalIgnoreCase) ||
-                                            assetnames.Contains(ConvertString(row.Field<string>("parentName")).ToUpper(), StringComparison.OrdinalIgnoreCase))
+                                           .Where(row => assetnames.Contains(row.Field<string>("parentName").Replace("_", "").ToUpper(), StringComparison.OrdinalIgnoreCase) ||
+                                            assetnames.Contains(ConvertString(row.Field<string>("parentName")).Replace("_", "").ToUpper(), StringComparison.OrdinalIgnoreCase))
                                            .ToArray();
 
 
@@ -758,7 +853,7 @@ namespace CMMSAPIs.Repositories.Inventory
                                 //}
                             }
 
-                            response = new CMImportFileResponse(idList, CMMS.RETRUNSTATUS.SUCCESS, null, null, $"{idList.Count} new assets added.");
+                            response = new CMImportFileResponse(file_id, idList, updatedIdList, CMMS.RETRUNSTATUS.SUCCESS, null, null, $"{idList.Count} new assets added.{updatedIdList.Count} assets Updated.");
 
                        // }
                     }
@@ -813,12 +908,19 @@ namespace CMMSAPIs.Repositories.Inventory
 
         internal async Task<CMDefaultResponse> AddInventoryWithParent(DataTable assets, int facility_id, int userID)
         {
-            string assetQry = $"SELECT id, REPLACE(UPPER(name), '_', '') as name FROM facilities WHERE parentId = {facility_id}  union SELECT id, REPLACE(UPPER(name), '_', '') as name FROM assets WHERE facilityId = {facility_id} GROUP BY name ORDER BY id;";
+            string assetQry = $" SELECT id, REPLACE(UPPER(name), '_', '') as name FROM assets WHERE facilityId = {facility_id} GROUP BY name ORDER BY id;";
             DataTable dtAsset = await Context.FetchData(assetQry).ConfigureAwait(false);
             List<string> assetNames = dtAsset.GetColumn<string>("name");
             List<int> assetIds = dtAsset.GetColumn<int>("id");
             Dictionary<string, int> assetDict = new Dictionary<string, int>();
             assetDict.Merge(assetNames, assetIds);
+
+            string assetQry2 = $"SELECT id, REPLACE(UPPER(name), '_', '') as name FROM facilities WHERE parentId = {facility_id} GROUP BY name ORDER BY id;";
+            DataTable dtAsset2 = await Context.FetchData(assetQry2).ConfigureAwait(false);
+            List<string> assetNames2 = dtAsset2.GetColumn<string>("name");
+            List<int> assetIds2 = dtAsset2.GetColumn<int>("id");
+            Dictionary<string, int> assetDict2 = new Dictionary<string, int>();
+            assetDict2.Merge(assetNames2, assetIds2);
 
             foreach (DataRow row in assets.Rows)
             {
@@ -830,11 +932,12 @@ namespace CMMSAPIs.Repositories.Inventory
                 {
                     try
                     {
-                        row["parentId"] = assetDict[ConvertString(Convert.ToString(row["parentName"])).Replace("_", "").ToUpper()];
+                        row["parentId"] = assetDict2[Convert.ToString(row["parentName"]).Replace("_", "").ToUpper()];
+                        row["parentId"] = 0;
                     }
                     catch
                     {
-                        m_errorLog.SetWarning($"[Row: {row["row_no"]}] Asset named '{Convert.ToString(row["parentName"])}' not found. Setting parent ID as 0.");
+                        m_errorLog.SetWarning($"[Row: {row["row_no"]}] Asset named '{Convert.ToString(row["parentName"])}' '{Convert.ToString(row["parentName"]).Replace("_", "").ToUpper()}'not found. Setting parent ID as 0.");
                         row["parentId"] = 0;
                     }
                 }
@@ -893,6 +996,7 @@ namespace CMMSAPIs.Repositories.Inventory
             return inventory;
         }
 
+
         internal async Task<CMViewInventory> GetInventoryDetails(int id)
         {
             /*
@@ -911,9 +1015,9 @@ namespace CMMSAPIs.Repositories.Inventory
             //    "JOIN facilities as f ON f.id = a.blockId JOIN assets as a2 ON a.parentId = a2.id " +
             //    "JOIN business AS b2 ON a.ownerId = b2.id JOIN business AS b3 ON a.manufacturerId = b3.id";
             string myQuery = "SELECT a.id ,a.name, a.description, ast.id as typeId, ast.name as type, b2.id as supplierId, b2.name as supplierName, manufacturertlb.id as manufacturerId, manufacturertlb.name as manufacturerName, b5.id as operatorId, b5.name as operatorName, ac.id as categoryId, ac.name as categoryName, a.serialNumber, a.calibrationFrequency,frequency.name as calibrationFreqType, a.calibrationReminderDays, " +
-                //"CASE WHEN a.calibrationLastDate = '0000-00-00 00:00:00' THEN NULL ELSE a.calibrationLastDate END as calibrationLastDate, CASE WHEN a.calibrationDueDate = '0000-00-00 00:00:00' THEN NULL ELSE a.calibrationDueDate END AS calibrationDueDate," +
-                " a.model, a.currency, a.cost, a.acCapacity, a.dcCapacity, a.moduleQuantity, " +
-            //a.firstDueDate as calibrationDueDate, 
+            //      "CASE WHEN a.calibrationLastDate = '0000-00-00 00:00:00' THEN NULL ELSE a.calibrationLastDate END as calibrationLastDate, CASE WHEN a.calibrationDueDate = '0000-00-00 00:00:00' THEN NULL ELSE a.calibrationDueDate END AS calibrationDueDate," +
+            //    " a.model, a.currency, a.cost, a.acCapacity, a.dcCapacity, a.moduleQuantity, " +
+            //"a.firstDueDate as calibrationDueDate, "+
             "f.id as facilityId, f.name AS facilityName, bl.id as blockId, bl.name AS blockName, a2.id as parentId, a2.name as parentName, a2.serialNumber as parentSerial, custbl.id as customerId, custbl.name as customerName, owntbl.id as ownerId, owntbl.name as ownerName, s.id as statusId, s.name AS status, a.specialTool, w.id as warrantyId, w.warranty_description, w.certificate_number, wt.id as warrantyTypeId, wt.name as warrantyTypeName, wut.id as warrantyTermTypeId, wut.name as warrantyTermTypeName, wp.id as warrantyProviderId, wp.name as warrantyProviderName, files.file_path as warranty_certificate_path " +     //use a.specialToolEmpId to put specialToolEmp,
             "from assets as a " +
             "left join assettypes as ast on ast.id = a.typeId " +
@@ -1013,6 +1117,10 @@ string warrantyQry = "insert into assetwarranty
                     int warrantyId = Convert.ToInt32(dt2.Rows[0][0]);
                     string addWarrantyId = $"UPDATE assets SET warrantyId = {warrantyId} WHERE id = {retID}";
                     await Context.ExecuteNonQry<int>(addWarrantyId).ConfigureAwait(false);
+                }
+                else
+                {
+                    strRetMessage = "Warranty data for <" + assetName + "> does not exist. ";
                 }
                 idList.Add(retID);
                 CMViewInventory _inventoryAdded = await GetInventoryDetails(retID);
@@ -1260,11 +1368,11 @@ string warrantyQry = "insert into assetwarranty
             string _longStatus = getLongStatus(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_UPDATED, _inventoryAdded);
             _inventoryAdded.status_long = _longStatus;
 
-            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_UPDATED, new[] { userID } ,_inventoryAdded);
+            //await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_UPDATED, new[] { userID } ,_inventoryAdded);
 
             return obj;
 
-
+            
 
 
 
@@ -1311,6 +1419,34 @@ string warrantyQry = "insert into assetwarranty
             return obj;
             // DELETE t1, t2 FROM t1 INNER JOIN t2 INNER JOIN t3
             //WHERE t1.id = t2.id AND t2.id = t3.id;
+        }
+
+        internal async Task<CMDefaultResponse> DeleteInventoryByFacilityId(int facilityId, int userID)
+        {
+            /*?ID=34
+             * delete from assets and warranty table
+            */
+            /*Your code goes here*/
+            if (facilityId <= 0)
+            {
+                throw new ArgumentException("Invalid argument <" + facilityId + ">");
+
+            }         
+
+            string delQuery1 = $"UPDATE assets SET statusId = 0, status = 0 WHERE facilityId = {facilityId}";
+            string delQuery2 = $"UPDATE assetwarranty left join assets on assetwarranty.asset_id =  assets.id SET assetwarranty.status = 0 where facilityId = {facilityId}";
+            await Context.GetData<List<int>>(delQuery1).ConfigureAwait(false);
+            await Context.GetData<List<int>>(delQuery2).ConfigureAwait(false);
+
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, facilityId, 0, 0, $"Deleted Inventory of facility Id {facilityId}.", CMMS.CMMS_Status.INVENTORY_DELETED, userID);
+
+            CMDefaultResponse obj = null;
+            //if (retVal1 && retVal2)
+            {
+                obj = new CMDefaultResponse(facilityId, CMMS.RETRUNSTATUS.SUCCESS, "Inventory of facility Id <" + facilityId + "> has been deleted");
+            }
+            return obj;
+            
         }
 
         #region Inventory Masters

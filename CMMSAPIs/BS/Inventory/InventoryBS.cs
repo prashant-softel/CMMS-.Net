@@ -19,6 +19,7 @@ namespace CMMSAPIs.BS.Inventory
         Task<CMImportFileResponse> ImportInventories(int file_id, int facility_id, int userID);
         Task<CMDefaultResponse> UpdateInventory(CMAddInventory request, int userID);
         Task<CMDefaultResponse> DeleteInventory(int id, int userID);
+        Task<CMDefaultResponse> DeleteInventoryByFacilityId(int facilityId, int userID);
         Task<List<CMInventoryTypeList>> GetInventoryTypeList();
         Task<CMDefaultResponse> AddInventoryType(CMInventoryTypeList request, int userID);
         Task<CMDefaultResponse> UpdateInventoryType(CMInventoryTypeList request, int userID);
@@ -129,6 +130,21 @@ namespace CMMSAPIs.BS.Inventory
             }
         }
 
+        public async Task<CMDefaultResponse> DeleteInventoryByFacilityId(int facilityId, int userID)
+        {
+            try
+            {
+                using (var repos = new InventoryRepository(getDB, _environment))
+                {
+                    return await repos.DeleteInventoryByFacilityId(facilityId, userID);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
         public async Task<CMImportFileResponse> ImportInventories(int file_id, int facility_id, int userID)
         {
             try

@@ -158,6 +158,22 @@ namespace CMMSAPIs.Controllers.Inventory
             }
         }
 
+        [Route("DeleteInventoryByFacilityId")]
+        [HttpDelete]
+        public async Task<IActionResult> DeleteInventoryByFacilityId(int facilityId)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _InventoryBS.DeleteInventoryByFacilityId(facilityId, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
         //[Authorize]
         [Route("GetInventoryCategoryList")]
         [HttpGet]
