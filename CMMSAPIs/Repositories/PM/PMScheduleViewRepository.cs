@@ -987,7 +987,7 @@ namespace CMMSAPIs.Repositories.PM
                         }
                         else if (Convert.ToInt32(dtType.Rows[0][0]) == 2)
                         {
-                            CPtypeValue = $" , `range` = {schedule_detail.range} ";
+                            CPtypeValue = $" , `text` = {schedule_detail.text} ";
                         }
                     CPtypeValue = CPtypeValue + $" , is_ok = {schedule_detail.cp_ok} ";
                         if (schedule_detail.observation != null || !schedule_detail.observation.Equals(execution_details[0].observation))
