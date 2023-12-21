@@ -977,21 +977,19 @@ namespace CMMSAPIs.Repositories.PM
 
                         DataTable dtType = await Context.FetchData(myQuery2).ConfigureAwait(false);
                         string CPtypeValue = "";
-                        if (Convert.ToInt32(dtType.Rows[0][0]) == 0)
+                           if (Convert.ToInt32(dtType.Rows[0][0]) == 0)
                         {
                             CPtypeValue = $" , `text` = '{schedule_detail.text}' ";
-
                         }
                         else if (Convert.ToInt32(dtType.Rows[0][0]) == 1)
                         {
-                            CPtypeValue = $" , is_ok = {schedule_detail.cp_ok} ";
-
+                            CPtypeValue = $" , `text` = {schedule_detail.text} ";
                         }
                         else if (Convert.ToInt32(dtType.Rows[0][0]) == 2)
                         {
                             CPtypeValue = $" , `range` = {schedule_detail.range} ";
-
                         }
+                    CPtypeValue = CPtypeValue + $" , is_ok = {schedule_detail.cp_ok} ";
                         if (schedule_detail.observation != null || !schedule_detail.observation.Equals(execution_details[0].observation))
                         {
                             string updateQry = "UPDATE pm_execution SET ";
