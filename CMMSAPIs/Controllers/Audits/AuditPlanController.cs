@@ -140,5 +140,120 @@ namespace CMMSAPIs.Controllers.Audits
                 return Ok(item);
             }
         }
+                [Route("CreatePlan")]
+        [HttpPost]
+        public async Task<IActionResult> CreatePlan(CMPMPlanDetail request)
+        {
+            try
+            {
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _AuditPlanBS.CreateAuditPlan(request, userId);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid data sent.";
+                return Ok(item);
+            }
+        }
+
+        [Route("StartAuditTask")]
+        [HttpPost]
+        public async Task<IActionResult> StartAuditTask(int task_id)
+        {
+            try
+            {
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _AuditPlanBS.StartAuditTask(task_id, userId);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid task id sent.";
+                return Ok(item);
+            }
+        }
+
+        [Route("UpdateAuditTaskExecution")]
+        [HttpPost]
+        public async Task<IActionResult> UpdateAuditTaskExecution(CMPMExecutionDetail request)
+        {
+            try
+            {
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _AuditPlanBS.UpdateAuditTaskExecution(request, userId);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid data sent.";
+                return Ok(item);
+            }
+        }
+
+        [Route("ApprovePlan")]
+        [HttpPost]
+        public async Task<IActionResult> ApprovePlan(CMApproval request)
+        {
+            try
+            {
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _AuditPlanBS.ApprovePlan(request, userId);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid data sent.";
+                return Ok(item);
+            }
+        }
+
+        [Route("RejectPlan")]
+        [HttpPost]
+        public async Task<IActionResult> RejectPlan(CMApproval request)
+        {
+            try
+            {
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _AuditPlanBS.RejectPlan(request, userId);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid data sent.";
+                return Ok(item);
+            }
+        }
+
+        [Route("DeletePlan")]
+        [HttpPut]
+        public async Task<IActionResult> DeletePlan(int planId)
+
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _AuditPlanBS.DeletePlan(planId, userID);
+                return Ok(data);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }
