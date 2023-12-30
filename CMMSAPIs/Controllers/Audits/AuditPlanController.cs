@@ -1,4 +1,4 @@
-﻿using CMMSAPIs.BS.Audits;
+using CMMSAPIs.BS.Audits;
 using CMMSAPIs.Models.Audit;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -7,6 +7,7 @@ using System;
 using CMMSAPIs.Models.SM;
 using Microsoft.AspNetCore.Http;
 using CMMSAPIs.Models.Utils;
+using CMMSAPIs.Models.PM;
 
 namespace CMMSAPIs.Controllers.Audits
 {
