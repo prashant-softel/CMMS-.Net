@@ -35,6 +35,7 @@ namespace CMMSAPIs.Models.PM
     public class CMPMPlanDetail : CMPMPlanList
     {
         public int isDraft { get; set; }
+            public int type_id { get; set; }
         public List<AssetCheckList> mapAssetChecklist { get; set; }
     }
     public class AssetCheckList
