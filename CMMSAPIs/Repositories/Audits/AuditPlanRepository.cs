@@ -1,4 +1,4 @@
-﻿using CMMSAPIs.Helper;
+using CMMSAPIs.Helper;
 using CMMSAPIs.Models;
 using CMMSAPIs.Models.Audit;
 using CMMSAPIs.Models.SM;
@@ -10,6 +10,12 @@ using System.Data;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 using CMMSAPIs.Repositories.Utils;
+using CMMSAPIs.Models.Jobs;
+using CMMSAPIs.Models.PM;
+using CMMSAPIs.Models.Masters;
+using CMMSAPIs.Models.Notifications;
+using CMMSAPIs.Repositories.JC;
+
 
 namespace CMMSAPIs.Repositories.Audits
 {
