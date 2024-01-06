@@ -256,5 +256,44 @@ namespace CMMSAPIs.Controllers.Audits
                 throw;
             }
         }
+        [Route("GetPlanDetail")]
+        [HttpGet]
+        public async Task<IActionResult> GetPlanDetail(int planId)
+        {
+            try
+            {
+                // int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _AuditPlanBS.GetPlanDetail(planId);
+                return Ok(data);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [Route("GetPlanList")]
+        [HttpGet]
+        public async Task<IActionResult> GetPlanList(int facility_id, string category_id, string frequency_id, DateTime? start_date, DateTime? end_date)
+        {
+            try
+            {
+                var data = await _AuditPlanBS.GetPlanList(facility_id, category_id, frequency_id, start_date, end_date);
+                return Ok(data);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
     }
 }
