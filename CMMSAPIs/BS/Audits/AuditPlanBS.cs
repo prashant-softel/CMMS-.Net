@@ -18,12 +18,15 @@ namespace CMMSAPIs.BS.Audits
         Task<CMDefaultResponse> DeleteAuditPlan(int audit_plan_id);
         Task<CMDefaultResponse> ApproveAuditPlan(CMApproval request, int userId);
         Task<CMDefaultResponse> RejectAuditPlan(CMApproval request, int userId);
-         Task<CMDefaultResponse> CreateAuditPlan(CMPMPlanDetail pm_plan, int userID);
+        Task<CMDefaultResponse> CreateAuditPlan(CMPMPlanDetail pm_plan, int userID);
         Task<CMDefaultResponse> StartAuditTask(int task_id, int userID);
         Task<List<CMDefaultResponse>> UpdateAuditTaskExecution(CMPMExecutionDetail request, int userID);
         Task<CMDefaultResponse> DeletePlan(int planId, int userID);
         Task<CMDefaultResponse> ApprovePlan(CMApproval request, int userId);
         Task<CMDefaultResponse> RejectPlan(CMApproval request, int userId);
+        Task<List<CMPMPlanList>> GetPlanList(int facility_id, string category_id, string frequency_id, DateTime? start_date, DateTime? end_date);
+        Task<CMPMPlanDetail> GetPlanDetail(int id);
+
     }
     public class AuditPlanBS : IAuditPlanBS
     {
@@ -231,6 +234,37 @@ namespace CMMSAPIs.BS.Audits
                 using (var repos = new AuditPlanRepository(getDB))
                 {
                     return await repos.DeletePlan(planId, userID);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<List<CMPMPlanList>> GetPlanList(int facility_id, string category_id, string frequency_id, DateTime? start_date, DateTime? end_date)
+        {
+            try
+            {
+                using (var repos = new AuditPlanRepository(getDB))
+                {
+                    return await repos.GetAuditPlanList(facility_id, category_id, frequency_id, start_date, end_date);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMPMPlanDetail> GetPlanDetail(int id)
+        {
+            try
+            {
+                using (var repos = new AuditPlanRepository(getDB))
+                {
+                    return await repos.GetAuditPlanDetail(id);
 
                 }
             }
