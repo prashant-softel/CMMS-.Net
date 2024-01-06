@@ -910,5 +910,125 @@ namespace CMMSAPIs.Repositories.Audits
             CMDefaultResponse response = new CMDefaultResponse(planId, CMMS.RETRUNSTATUS.SUCCESS, $" PM Plan Deleted");
             return response;
         }
+
+                internal async Task<List<CMPMPlanList>> GetAuditPlanList(int facility_id, string category_id, string frequency_id, DateTime? start_date, DateTime? end_date)
+        {
+            if (facility_id <= 0)
+                throw new ArgumentException("Invalid Facility ID");
+            string planListQry = $"SELECT plan.id as plan_id, plan.plan_name, plan.status as status_id, statuses.statusName as status_short, plan.plan_date, " +
+                                    $"facilities.id as facility_id, facilities.name as facility_name, category.id as category_id, category.name as category_name, " +
+                                    $"frequency.id as plan_freq_id, frequency.name as plan_freq_name, createdBy.id as created_by_id, " +
+                                    $"CONCAT(createdBy.firstName, ' ', createdBy.lastName) as created_by_name, plan.created_at,CONCAT(assignedTo.firstName, ' ', assignedTo.lastName) as assigned_to_name, " +
+                                    $"updatedBy.id as updated_by_id, CONCAT(updatedBy.firstName, ' ', updatedBy.lastName) as updated_by_name, plan.updated_at " +
+                                    $"FROM pm_plan as plan " +
+                                    $"LEFT JOIN statuses ON plan.status = statuses.softwareId " +
+                                    $"JOIN facilities ON plan.facility_id = facilities.id " +
+                                    $"LEFT JOIN assetcategories as category ON plan.category_id = category.id " +
+                                    $"LEFT JOIN frequency ON plan.frequency_id = frequency.id " +
+                                    $"LEFT JOIN users as createdBy ON createdBy.id = plan.created_by " +
+                                    $"LEFT JOIN users as updatedBy ON updatedBy.id = plan.updated_by " +
+                                    $"LEFT JOIN users as assignedTo ON assignedTo.id = plan.assigned_to " +
+                                    $"WHERE facilities.id = {facility_id}  ";
+
+            if (category_id != null && category_id != "")
+                planListQry += $"AND category.id IN ( {category_id} )";
+            if (frequency_id != null && category_id != "")
+                planListQry += $"AND frequency.id IN ( {frequency_id} )";
+            if (start_date != null)
+                planListQry += $"AND plan.plan_date >= '{((DateTime)start_date).ToString("yyyy-MM-dd")}' ";
+            if (end_date != null)
+                planListQry += $"AND plan.plan_date <= '{((DateTime)end_date).ToString("yyyy-MM-dd")}' ";
+            planListQry += $";";
+
+            List<CMPMPlanList> plan_list = await Context.GetData<CMPMPlanList>(planListQry).ConfigureAwait(false);
+
+            foreach (var plan in plan_list)
+            {
+                CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(plan.status_id);
+                string _shortStatus = getShortStatus(CMMS.CMMS_Modules.PM_PLAN, _Status);
+                plan.status_short = _shortStatus;
+            }
+
+            return plan_list;
+        }
+
+        internal async Task<CMPMPlanDetail> GetAuditPlanDetail(int id)
+        {
+            if (id <= 0)
+                throw new ArgumentException("Invalid Facility ID");
+            string planListQry = $"SELECT plan.id as plan_id, plan.plan_name, plan.status as status_id, statuses.statusName as status_short, plan.plan_date, " +
+                                    $"facilities.id as facility_id, facilities.name as facility_name, category.id as category_id, category.name as category_name, " +
+                                    $"frequency.id as plan_freq_id, frequency.name as plan_freq_name, createdBy.id as created_by_id, " +
+                                    $"CONCAT(createdBy.firstName, ' ', createdBy.lastName) as created_by_name, plan.created_at,approvedBy.id as approved_by_id, CONCAT(approvedBy.firstName, ' ', approvedBy.lastName) as approved_by_name, plan.approved_at, rejectedBy.id as rejected_by_id, CONCAT(rejectedBy.firstName, ' ', rejectedBy.lastName) as rejected_by_name, plan.rejected_at,CONCAT(assignedTo.firstName, ' ', assignedTo.lastName) as assigned_to_name, " +
+                                    $"updatedBy.id as updated_by_id, CONCAT(updatedBy.firstName, ' ', updatedBy.lastName) as updated_by_name, plan.updated_at " +
+                                    $"FROM pm_plan as plan " +
+                                    $"LEFT JOIN statuses ON plan.status = statuses.softwareId " +
+                                    $"JOIN facilities ON plan.facility_id = facilities.id " +
+                                    $"LEFT JOIN assetcategories as category ON plan.category_id = category.id " +
+                                    $"LEFT JOIN frequency ON plan.frequency_id = frequency.id " +
+                                    $"LEFT JOIN users as createdBy ON createdBy.id = plan.created_by " +
+                                    $"LEFT JOIN users as updatedBy ON updatedBy.id = plan.updated_by " +
+                                    $"LEFT JOIN users as approvedBy ON approvedBy.id = plan.approved_by " +
+                                    $"LEFT JOIN users as rejectedBy ON rejectedBy.id = plan.rejected_by " +
+                                    $"LEFT JOIN users as assignedTo ON assignedTo.id = plan.assigned_to " +
+
+                                    $"WHERE plan.id = {id} ";
+            List<CMPMPlanDetail> planDetails = await Context.GetData<CMPMPlanDetail>(planListQry).ConfigureAwait(false);
+
+            if (planDetails.Count == 0)
+                return null;
+
+            string assetChecklistsQry = $"SELECT assets.id as asset_id, assets.name as asset_name, parent.id as parent_id, parent.name as parent_name, assets.moduleQuantity as module_qty, checklist.id as checklist_id, checklist.checklist_number as checklist_name " +
+                                        $"FROM pmplanassetchecklist as planmap " +
+                                        $"LEFT JOIN assets ON assets.id = planmap.assetId " +
+                                        $"LEFT JOIN assets as parent ON assets.parentId = parent.id " +
+                                        $"LEFT JOIN checklist_number as checklist ON checklist.id = planmap.checklistId " +
+                                        $"WHERE planmap.planId = {id};";
+            List<AssetCheckList> assetCheckLists = await Context.GetData<AssetCheckList>(assetChecklistsQry).ConfigureAwait(false);
+            planDetails[0].mapAssetChecklist = assetCheckLists;
+
+            CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(planDetails[0].status_id);
+            string _shortStatus = getShortStatus(CMMS.CMMS_Modules.PM_PLAN, _Status);
+            planDetails[0].status_short = _shortStatus;
+
+            CMMS.CMMS_Status _Status_long = (CMMS.CMMS_Status)(planDetails[0].status_id);
+            string _longStatus = getLongStatus_Details(CMMS.CMMS_Modules.AUDIT_PLAN, _Status_long, planDetails[0]);
+            planDetails[0].status_long = _longStatus;
+
+            return planDetails[0];
+        }
+        internal string getLongStatus_Details(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMPMPlanDetail PlanObj)
+        {
+            string retValue = " ";
+
+
+            switch (notificationID)
+            {
+               
+                case CMMS.CMMS_Status.AUDIT_STARTED:
+                    retValue = String.Format("Audit Plan submitted by {0}", PlanObj.created_by_name);
+                    break;
+                case CMMS.CMMS_Status.AUDIT_REJECTED:
+                    retValue = String.Format("Audit Plan Rejected by {0}", PlanObj.rejected_by_name);
+                    break;
+                case CMMS.CMMS_Status.AUDIT_APPROVED:
+                    retValue = String.Format("Audit Plan Approved by {0}", PlanObj.approved_by_name);
+                    break;
+                case CMMS.CMMS_Status.AUDIT_DELETED:
+                    retValue = String.Format("Audit Plan Deleted by {0} ", PlanObj.created_by_name);
+                    break;
+                case CMMS.CMMS_Status.AUDIT_CLOSED:
+                   retValue = String.Format("Audit Plan Closed by {0} ", PlanObj.created_by_name);
+                    break;
+                case CMMS.CMMS_Status.AUDIT_SCHEDULE:
+                    retValue = String.Format("Audit Plan scheduled by {0} ", PlanObj.created_by_name);
+                    break;
+                default:
+                    break;
+            }
+            return retValue;
+
+        }
+   
     }
 }
