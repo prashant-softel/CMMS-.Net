@@ -1,4 +1,4 @@
-﻿using CMMSAPIs.Models.Utils;
+using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Authentication;
 using System;
@@ -75,9 +75,9 @@ namespace CMMSAPIs.Models.Users
     public class CMResposibility
     {
         public int id { get; set; }
-        public string name { get; set; }
-        public DateTime since { get; set; }
-        public int experianceYears { get; set; }
+        public int user_id { get; set; }
+        public string responsibility { get; set; }
+        public DateTime since_when { get; set; }
 
     }
     public class CMUpdateUser : CMUserDetail
@@ -87,6 +87,7 @@ namespace CMMSAPIs.Models.Users
         public int report_to_id { get; set; }
         public bool flagUpdateAccess { get; set; }
         public bool flagUpdateNotifications { get; set; }
+        public List<CMUserResponsibilityList> user_responsibility_list { get; set; }
     }
     public class CMCreateUser : CMUserDetail
     {
@@ -95,6 +96,13 @@ namespace CMMSAPIs.Models.Users
         public int report_to_id { get; set; }
         public List<CMAccessList> access_list { get; set; }
         public List<CMNotificationList> notification_list { get; set; }
+        public List<CMUserResponsibilityList> user_responsibility_list { get; set; }
+    }
+    public class CMUserResponsibilityList
+    {
+        public int responsibility_id { get; set; }
+        public string responsibility { get; set; }
+        public DateTime since_when { get; set; }
     }
     public class CMPlantAccess
     {
