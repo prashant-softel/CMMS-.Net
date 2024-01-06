@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Data;
@@ -192,6 +192,7 @@ namespace CMMSAPIs.Repositories.Inventory
 
             Dictionary<string, Tuple<string, Type>> columnNames = new Dictionary<string, Tuple<string, Type>>()
             {
+                 { "Site_Name", new Tuple<string, Type>("siteName", typeof (string)) },
                 { "Asset_Name", new Tuple<string, Type>("name", typeof(string)) },
                 { "Asset_Description", new Tuple<string, Type>("description", typeof(string)) },
                 { "Asset_Serial_no", new Tuple<string, Type>("serialNumber", typeof(string)) },
@@ -211,7 +212,6 @@ namespace CMMSAPIs.Repositories.Inventory
                 { "Asset_Warranty_Expiry_Date", new Tuple<string, Type>("expiry_date", typeof(DateTime)) },
                 { "Asset_Warranty_Certificate_No", new Tuple<string, Type>("certificate_number", typeof(string)) },
                 { "Asset_Facility_Name", new Tuple<string, Type>("blockName", typeof (string)) },
-                { "Site_Name", new Tuple<string, Type>("siteName", typeof (string)) },
                 { "Asset_category_name", new Tuple<string, Type>("categoryName", typeof(string)) },
                 { "Asset_Parent_Name", new Tuple<string, Type>("parentName", typeof(string)) },
                 { "Asset_Customer_Name", new Tuple<string, Type>("customerName", typeof(string)) },
@@ -360,7 +360,7 @@ namespace CMMSAPIs.Repositories.Inventory
                                 continue;
                             }
                             newR["row_no"] = rN;
-
+                            
                             string siteName = Convert.ToString(newR["siteName"]).ToUpper();
                             if (plants.ContainsValue(siteName))
                             {
@@ -739,7 +739,7 @@ namespace CMMSAPIs.Repositories.Inventory
                         dt2.Columns.Add("warranty_provider_id", typeof(int));*/
                             dt2.Rows.Add(newR);
                         }
-
+                        //excel data exctrat complete
                         string updateQry = $"UPDATE facilities as blocks JOIN facilities as plants ON blocks.parentId = plants.id SET " +
                                $"blocks.customerId = plants.customerId,blocks.spvId = plants.spvId, blocks.ownerId = plants.ownerId, blocks.operatorId = plants.operatorId, " +
                                $"blocks.countryId = plants.countryId, blocks.stateId = plants.stateId, blocks.cityId = plants.cityId, blocks.address = plants.name, " +
@@ -777,13 +777,17 @@ namespace CMMSAPIs.Repositories.Inventory
                                 assetnames.AddRange(assetDt.GetColumn<string>("name"));
                                 //assetnames.AddRange(dt2.GetColumn<string>("name"));
                                 assetnames.Contains("");
-                                DataRow[] filterRows = dt2.AsEnumerable()
-                                           .Where(row => assetnames.Contains(row.Field<string>("parentName").Replace("_", "").ToUpper(), StringComparison.OrdinalIgnoreCase) ||
-                                            assetnames.Contains(ConvertString(row.Field<string>("parentName")).Replace("_", "").ToUpper(), StringComparison.OrdinalIgnoreCase))
-                                           .ToArray();
+                                //DataRow[] filterRows = dt2.AsEnumerable()
+                                //           .Where(row => assetnames.Contains(row.Field<string>("parentName").Replace("_", "").ToUpper(), StringComparison.OrdinalIgnoreCase) ||
+                                //            assetnames.Contains(ConvertString(row.Field<string>("parentName")).Replace("_", "").ToUpper(), StringComparison.OrdinalIgnoreCase))
+                                //           .ToArray();
 
+                            DataRow[] filterRows = dt2.AsEnumerable()
+                                        .Where(row => assetnames.Contains(row.Field<string>("parentName").Replace("_", "").ToUpper(), StringComparison.OrdinalIgnoreCase))
+                                        .ToArray();
 
-                                if (filterRows.Length <= 0)
+                  
+                            if (filterRows.Length <= 0)
                                 {
                                     List<string> assetnames2 = new List<string>();
                                     assetnames2.AddRange(insertedTable.GetColumn<string>("name"));
@@ -815,7 +819,8 @@ namespace CMMSAPIs.Repositories.Inventory
                                     {
                                         filteredDataTable.ImportRow(row);
                                     }
-                                    List<int> ids_ = (await AddInventoryWithParent(filteredDataTable, facility_id, userID)).id;
+                                    //List<int> ids_ = (await AddInventoryWithParent(filteredDataTable, facility_id, userID)).id;
+                                    List<int> ids_ = (await UpdateInventoryWithParent(filteredDataTable, facility_id, userID)).id;
                                     insertedTable.Merge(filteredDataTable);
                                     childListCount++;
                                     ids = string.Join(", ", ids_.Select(x => x.ToString()));
@@ -945,6 +950,48 @@ namespace CMMSAPIs.Repositories.Inventory
 
             List<CMAddInventory> importAssets = assets.MapTo<CMAddInventory>();
             CMDefaultResponse response = await AddInventory(importAssets, userID);
+            return response;
+        }
+        //update
+        internal async Task<CMDefaultResponse> UpdateInventoryWithParent(DataTable assets, int facility_id, int userID)
+        {
+            string assetQry = $" SELECT id, REPLACE(UPPER(name), '_', '') as name FROM assets WHERE facilityId = {facility_id} GROUP BY name ORDER BY id;";
+            DataTable dtAsset = await Context.FetchData(assetQry).ConfigureAwait(false);
+            List<string> assetNames = dtAsset.GetColumn<string>("name");
+            List<int> assetIds = dtAsset.GetColumn<int>("id");
+            Dictionary<string, int> assetDict = new Dictionary<string, int>();
+            assetDict.Merge(assetNames, assetIds);
+
+            string assetQry2 = $"SELECT id, REPLACE(UPPER(name), '_', '') as name FROM facilities WHERE parentId = {facility_id} GROUP BY name ORDER BY id;";
+            DataTable dtAsset2 = await Context.FetchData(assetQry2).ConfigureAwait(false);
+            List<string> assetNames2 = dtAsset2.GetColumn<string>("name");
+            List<int> assetIds2 = dtAsset2.GetColumn<int>("id");
+            Dictionary<string, int> assetDict2 = new Dictionary<string, int>();
+            assetDict2.Merge(assetNames2, assetIds2);
+
+            foreach (DataRow row in assets.Rows)
+            {
+                try
+                {
+                    row["parentId"] = assetDict[Convert.ToString(row["parentName"]).Replace("_", "").ToUpper()];
+                }
+                catch (KeyNotFoundException)
+                {
+                    try
+                    {
+                        row["parentId"] = assetDict2[Convert.ToString(row["parentName"]).Replace("_", "").ToUpper()];
+                        row["parentId"] = 0;
+                    }
+                    catch
+                    {
+                        m_errorLog.SetWarning($"[Row: {row["row_no"]}] Asset named '{Convert.ToString(row["parentName"])}' '{Convert.ToString(row["parentName"]).Replace("_", "").ToUpper()}'not found. Setting parent ID as 0.");
+                        row["parentId"] = 0;
+                    }
+                }
+            }
+
+            List<CMAddInventory> importAssets = assets.MapTo<CMAddInventory>();
+            CMDefaultResponse response = await UpdateInventory(importAssets, userID);
             return response;
         }
 
@@ -1152,6 +1199,75 @@ string warrantyQry = "insert into assetwarranty
             }
 
             
+            return new CMDefaultResponse(idList, retCode, strRetMessage);
+        }
+        //update
+        internal async Task<CMDefaultResponse> UpdateInventory(List<CMAddInventory> request, int userID)
+        {
+            /*
+             * Add all data in assets table and warranty table
+            */
+
+            int count = 0;
+            int retID = 0;
+            string assetName = "";
+            CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.INVALID_ARG;
+            string strRetMessage = "";
+            int linkedToBlockId = 0;
+            List<int> idList = new List<int>();
+            foreach (var unit in request)
+            {
+                
+                count++;
+                assetName = unit.name;
+                if (assetName.Length <= 0)
+                {
+                    throw new ArgumentException($"name of asset cannot be empty on line {count}");
+                }
+                string firstCalibrationDate = (unit.calibrationFirstDueDate == null) ? "NULL" : "'" + ((DateTime)unit.calibrationFirstDueDate).ToString("yyyy-MM-dd") + "'";
+                string lastCalibrationDate = (unit.calibrationLastDate == null) ? "NULL" : "'" + ((DateTime)unit.calibrationLastDate).ToString("yyyy-MM-dd") + "'";
+                string nextCalibrationDate = (unit.calibrationNextDueDate == null) ? "NULL" : "'" + ((DateTime)unit.calibrationNextDueDate).ToString("yyyy-MM-dd") + "'";
+
+                if (unit.blockId > 0)
+                {
+                    linkedToBlockId = unit.blockId;
+                    //pending :validate if blockId exist
+                }
+                else if (unit.facilityId > 0)
+                {
+                    linkedToBlockId = unit.facilityId;
+                    //pending :validate if blockId exist
+                }
+                else
+                {
+                    throw new ArgumentException($"{assetName} does not have facility or block mapping on line {count}");
+                }
+                if (unit.categoryId <= 0)
+                {
+                    throw new ArgumentException($"{assetName} does not have category mapping on line {count}");
+                    //pending :validate if category id exist
+                }
+                if (unit.vendorId <= 0)
+                {
+                    unit.vendorId = unit.manufacturerId;
+                }
+                string qry = "update  assets set description='" + unit.description + "', parentId='" + unit.parentId+ "', acCapacity='" + unit.acCapacity + "', dcCapacity='" + unit.dcCapacity + "', categoryId='" + unit.categoryId + "', typeId='" + unit.typeId + "', statusId='" + unit.statusId + "', facilityId='" + unit.facilityId + "', blockId='" + unit.blockId + "', linkedToBlockId='" + unit.blockId + "', customerId='" + unit.customerId + "', ownerId='" + unit.ownerId + "',operatorId='" + unit.operatorId + "', manufacturerId='" + unit.manufacturerId + "',supplierId='" + unit.supplierId + "',serialNumber='" + unit.serialNumber + "',createdBy='" + userID + "',photoId='" + unit.photoId + "',model='" + unit.model + "',stockCount='" + unit.stockCount + "',moduleQuantity='" + unit.moduleQuantity + "', cost='" + unit.cost + "',currency='" + unit.currency + "',specialTool='" + unit.specialToolId + "',specialToolEmpId='" + unit.specialToolEmpId + "',calibrationDueDate=" + firstCalibrationDate + ",calibrationLastDate=" + lastCalibrationDate + ",calibrationFreqType='" + unit.calibrationFrequencyType + "',calibrationFrequency='" + unit.calibrationFrequency + "',calibrationReminderDays='" + unit.calibrationReminderDays + "',retirementStatus='" + unit.retirementStatus + "',multiplier='" + unit.multiplier + "',vendorId='" + unit.vendorId + "',calibrationNextDueDate='" + unit.calibrationNextDueDate + "',acRating='" + unit.acRating + "',dcRating='" + unit.dcRating + "',descMaintenace='" + unit.descMaintenace + "',barcode='" + unit.barcode + "',unspCode='" + unit.unspCode + "'" +
+                    ",purchaseCode='" + unit.purchaseCode + "' where name = '" + unit.name + "' and facilityid='" + unit.facilityId+ "' ";
+                //qry += "('" + unit.name + "','" + unit.description + "','" + unit.parentId + "','" + unit.acCapacity + "','" + unit.dcCapacity + "','" + unit.categoryId + "','" + unit.typeId + "','" + unit.statusId + "','" + unit.facilityId + "','" + unit.blockId + "','" + unit.blockId + "','" + unit.customerId + "','" + unit.ownerId + "','" + unit.operatorId + "','" + unit.manufacturerId + "','" + unit.supplierId + "','" + unit.serialNumber + "','" + userID + "','" + unit.photoId + "','" + unit.model + "','" + unit.stockCount + "','" + unit.moduleQuantity + "','" + unit.cost + "','" + unit.currency + "','" + unit.specialToolId + "','" + unit.specialToolEmpId + "'," + firstCalibrationDate + "," + lastCalibrationDate + ",'" + unit.calibrationFrequencyType + "','" + unit.calibrationFrequency + "','" + unit.calibrationReminderDays + "','" + unit.retirementStatus + "','" + unit.multiplier + "','" + unit.vendorId + "'," + nextCalibrationDate + ",'" + unit.acRating + "','" + unit.dcRating + "','" + unit.descMaintenace + "','" + unit.barcode + "','" + unit.unspCode + "','" + unit.purchaseCode + "'); ";
+              
+
+                //List<CMInventoryList> newInventory = await Context.GetData<CMInventoryList>(qry).ConfigureAwait(false);
+                DataTable dt = await Context.FetchData(qry).ConfigureAwait(false);
+           
+               
+
+
+
+                //await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_ADDED, new[] { userID }, _inventoryAdded);
+            }
+           
+
+
             return new CMDefaultResponse(idList, retCode, strRetMessage);
         }
 
