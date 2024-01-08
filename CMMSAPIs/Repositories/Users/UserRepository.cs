@@ -1169,15 +1169,17 @@ namespace CMMSAPIs.Repositories.Users
         internal async Task<CMDefaultResponse> SetUserResponsibility(List<CMUserResponsibilityList> request, int userID, int addedBy)
         {
             CMDefaultResponse response = new CMDefaultResponse();
-            foreach(var item in request)
+            if (request != null)
             {
-                string competencyQry = $"INSERT INTO user_responsibility(user_id, responsibility, since_when, added_by, added_at) VALUES " +
-                         $"({userID}, '{item.responsibility}', '{((DateTime)item.since_when).ToString("yyyy-MM-dd HH:mm:ss")}', {addedBy}, '{UtilsRepository.GetUTCTime()}');" +
-                         $"SELECT LAST_INSERT_ID(); ";
-                DataTable dt = await Context.FetchData(competencyQry).ConfigureAwait(false);
-                int id = Convert.ToInt32(dt.Rows[0][0]);
+                foreach (var item in request)
+                {
+                    string competencyQry = $"INSERT INTO user_responsibility(user_id, responsibility, since_when, added_by, added_at) VALUES " +
+                             $"({userID}, '{item.responsibility}', '{((DateTime)item.since_when).ToString("yyyy-MM-dd HH:mm:ss")}', {addedBy}, '{UtilsRepository.GetUTCTime()}');" +
+                             $"SELECT LAST_INSERT_ID(); ";
+                    DataTable dt = await Context.FetchData(competencyQry).ConfigureAwait(false);
+                    int id = Convert.ToInt32(dt.Rows[0][0]);
+                }
             }
-          
             response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.SUCCESS, "Responsibility Added");
             return response;
         }
