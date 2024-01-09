@@ -477,10 +477,11 @@ namespace CMMSAPIs.Repositories.Masters
                             }
                             catch(KeyNotFoundException)
                             {
-                                if (Convert.ToString(newR["facility_name"]) == null || Convert.ToString(newR["facility_name"]) == "")
-                                    m_errorLog.SetError($"[Checklist: Row {rN}] Facility Name cannot be empty.");
-                                else
-                                    m_errorLog.SetError($"[Checklist: Row {rN}] Invalid Facility '{newR["facility_name"]}'.");
+                                //if (Convert.ToString(newR["facility_name"]) == null || Convert.ToString(newR["facility_name"]) == "")
+                                //    m_errorLog.SetError($"[Checklist: Row {rN}] Facility Name cannot be empty.");
+                                //else
+                                //    m_errorLog.SetError($"[Checklist: Row {rN}] Invalid Facility '{newR["facility_name"]}'.");
+                                newR["facility_id"] = 0;
                             }
                             if (Convert.ToString(newR["checklist_number"]) == null || Convert.ToString(newR["checklist_number"]) == "")
                             {
