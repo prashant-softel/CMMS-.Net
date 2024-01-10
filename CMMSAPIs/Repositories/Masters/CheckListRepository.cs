@@ -1,4 +1,4 @@
-﻿using CMMSAPIs.BS.Masters;
+using CMMSAPIs.BS.Masters;
 using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Jobs;
 using CMMSAPIs.Models.Masters;
@@ -42,16 +42,16 @@ namespace CMMSAPIs.Repositories.Masters
                              "LEFT JOIN "+
                                 "facilities on facilities.id=checklist_number.facility_id "+
                              "LEFT JOIN "+
-                                "assetcategories as asset_cat ON asset_cat.id=checklist_number.asset_category_id "+
+                                "assetcategories as asset_cat ON asset_cat.id = checklist_number.asset_category_id "+
                              "LEFT JOIN "+
                                 "frequency ON frequency.id=checklist_number.frequency_id "+
                              "LEFT JOIN "+
-                                "users as created_user ON created_user.id=checklist_number.created_by " +
+                                "users as created_user ON created_user.id = checklist_number.created_by " +
                              "LEFT JOIN "+
-                                "users as updated_user ON updated_user.id=checklist_number.updated_by where 1 ";
+                                "users as updated_user ON updated_user.id = checklist_number.updated_by where 1 ";
             if (facility_id > 0)
             {
-                myQuery += $" and checklist_number.facility_id= { facility_id } ";
+                myQuery += $" and ( checklist_number.facility_id = { facility_id } or checklist_number.facility_id = 0)";
                 if (type > 0)
                     myQuery += $" and  checklist_number.checklist_type in ({ type }) ";
                 else
@@ -489,7 +489,10 @@ namespace CMMSAPIs.Repositories.Masters
                             }
                             else if (checklistNames.Contains(Convert.ToString(newR["checklist_number"]).ToUpper()))
                             {
-                                m_errorLog.SetError($"[Checklist: Row {rN}] Checklist name cannot be duplicate.");
+                                string checklist_Validation_Q = "select ifnull(f.name,'') as name from checklist_number left join facilities f on f.id = checklist_number.facility_id where checklist_number='" + Convert.ToString(newR["checklist_number"]) + "';";
+                                DataTable dt = await Context.FetchData(checklist_Validation_Q).ConfigureAwait(false);
+                                string facility_name = Convert.ToString(dt.Rows[0][0]);
+                                m_errorLog.SetError($"[Checklist: Row {rN}] Checklist name : {Convert.ToString(newR["checklist_number"])} already present in plant {facility_name}.");
                             }
                             else
                             {
@@ -788,6 +791,7 @@ namespace CMMSAPIs.Repositories.Masters
                 if (dtChecklists != null && m_errorLog.GetErrorCount() == 0)
                 {
                     List<CMCreateCheckList> checklists = dtChecklists.MapTo<CMCreateCheckList>();
+                  
                     CMDefaultResponse response1 = await CreateChecklist(checklists, userID);
                     response = new CMImportFileResponse(response1.id, response1.return_status, logfile, log, response1.message);
                 }
