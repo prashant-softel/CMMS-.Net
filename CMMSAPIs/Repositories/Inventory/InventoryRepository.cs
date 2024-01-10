@@ -1077,7 +1077,7 @@ namespace CMMSAPIs.Repositories.Inventory
             "left JOIN business AS b2 ON a.ownerId = b2.id " +
             "left JOIN business as b5 ON b5.id = a.operatorId " +
             "left JOIN assets as a2 ON a.parentId = a2.id " +
-            "left JOIN assetstatus as s on s.id = a.status " +
+            "left JOIN assetstatus as s on s.id = a.statusId " +
             "left JOIN facilities as f ON f.id = a.facilityId " +
             "left JOIN facilities as bl ON bl.id = a.blockId " +
             "left join assetwarranty as w ON a.warrantyId = w.id " +
