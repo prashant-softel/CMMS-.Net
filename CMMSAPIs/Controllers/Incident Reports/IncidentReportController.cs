@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using System;
 using CMMSAPIs.Models.Incident_Reports;
@@ -46,6 +46,21 @@ namespace CMMSAPIs.Controllers.Incident_Reports
             {
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
                 var data = await _IncidentReportBS.CreateIncidentReport(request,userId);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        [Route("CreateIncidentInvestigationReport")]
+        [HttpPost]
+        public async Task<IActionResult> CreateIncidentInvestigationReport(CMCreateIncidentReport request)
+        {
+            try
+            {
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IncidentReportBS.CreateIncidentInvestigationReport(request, userId);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -120,5 +135,37 @@ namespace CMMSAPIs.Controllers.Incident_Reports
             }
         }
 
+        [Route("ApproveIncidentInvestigationReport")]
+        [HttpPut]
+        public async Task<IActionResult> ApproveIncidentInvestigationReport(int incidentId)
+        {
+            try
+            {
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IncidentReportBS.ApproveIncidentInvestigationReport(incidentId, userId);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        //[Authorize]
+        [Route("RejectIncidentInvestigationReport")]
+        [HttpPut]
+        public async Task<IActionResult> RejectIncidentInvestigationReport([FromForm] CMApproveIncident request)
+        {
+            try
+            {
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IncidentReportBS.RejectIncidentInvestigationReport(request, userId);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
     }
 }
