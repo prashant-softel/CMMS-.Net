@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -27,17 +27,17 @@ namespace CMMSAPIs.Models.Notifications
 
             switch (m_notificationID)
             {
-                case CMMS.CMMS_Status.IR_CREATED:
+                case CMMS.CMMS_Status.IR_CREATED_INITIAL:
                     //description is sent at 1 index of arg for this notification, so developer fetch it and use to format the subject
                     retValue = String.Format("Incident Report <{0}> created , Incident Report Created By <{1}>, Incident Report Description <{2}>", m_incidentReportId, m_IncidentReportObj.created_by_name, desc);
                     break;
                 case CMMS.CMMS_Status.IR_UPDATED:
                     retValue = String.Format("Incident Report <{0}> Updated , Incident Report Updated By<{1}> Incident Report Description <{2}>", m_incidentReportId, m_IncidentReportObj.updated_by_name, desc);
                     break;
-                case CMMS.CMMS_Status.IR_APPROVED:
+                case CMMS.CMMS_Status.IR_APPROVED_INITIAL:
                     retValue = String.Format("Incident Report <{0}> Approved,  Incident Report approved by name <{1}> Incident Report Description <{2}>", m_incidentReportId, m_IncidentReportObj.approved_by_name, desc);
                     break;
-                case CMMS.CMMS_Status.IR_REJECTED://namr
+                case CMMS.CMMS_Status.IR_REJECTED_INITIAL://namr
                     retValue = String.Format("Incident Report <{0}> Rejected, Incident Report Rejected By Name <{1}> Incident Report Description <{2}>", m_incidentReportId, m_IncidentReportObj.approved_by_name, desc);
                     break;
                 default:
@@ -74,15 +74,15 @@ namespace CMMSAPIs.Models.Notifications
 
             switch (m_notificationID)
             {
-                case CMMS.CMMS_Status.IR_CREATED:
+                case CMMS.CMMS_Status.IR_CREATED_INITIAL:
                     retValue += "</table>"; break;
                 case CMMS.CMMS_Status.IR_UPDATED:
                     retValue += String.Format(templateEnd, "Updated By", m_IncidentReportObj.updated_by_name);
                     break;
-                case CMMS.CMMS_Status.IR_APPROVED:
+                case CMMS.CMMS_Status.IR_APPROVED_INITIAL:
                     retValue += String.Format(templateEnd, "Approved By", m_IncidentReportObj.approved_by_name);
                     break;
-                case CMMS.CMMS_Status.IR_REJECTED:
+                case CMMS.CMMS_Status.IR_REJECTED_INITIAL:
                     retValue += String.Format(templateEnd, "Rejected By", m_IncidentReportObj.inverstigated_by_name);
                     break;
                 default:
@@ -97,7 +97,7 @@ namespace CMMSAPIs.Models.Notifications
             string template = String.Format("<h1>This is Incident Report Title {0}</h1>", m_IncidentReportObj.description);
             switch (m_notificationID)
             {
-                case CMMS.CMMS_Status.IR_CREATED:
+                case CMMS.CMMS_Status.IR_CREATED_INITIAL:
                     template += String.Format("<p><b>Incident Report status is :</b> Created</p> Incident Report No {0} Incident Report Created by Name<{1}>", m_IncidentReportObj.id, m_IncidentReportObj.created_by_name);
                     break;
                 case CMMS.CMMS_Status.IR_UPDATED:
@@ -105,12 +105,12 @@ namespace CMMSAPIs.Models.Notifications
                     template += String.Format("<p>Incident Report {0} is Updated </p>", m_IncidentReportObj.id);
                     template += String.Format("<p><b>Incident Report Updated By:</b> {0}</p>", m_IncidentReportObj.updated_by_name);
                     break;
-                case CMMS.CMMS_Status.IR_APPROVED:
+                case CMMS.CMMS_Status.IR_APPROVED_INITIAL:
                     template += String.Format("<p><b>Incident Report status is : Approved Incident Report</p>");
                     template += String.Format("<p>Incident Report {0} Approved </p>", m_IncidentReportObj.id);
                     template += String.Format("<p><b>Incident Report approved By :</b> {0}</p>", m_IncidentReportObj.approved_by_name);
                     break;
-                case CMMS.CMMS_Status.IR_REJECTED:
+                case CMMS.CMMS_Status.IR_REJECTED_INITIAL:
                     template += String.Format("<p><b>Incident Report status is : Incident Report rejected </p>");
                     template += String.Format("<p>Incident Report {0} is rejected </p>", m_IncidentReportObj.inverstigated_by_name);
                     template += String.Format("<p>Incident Report rejected By:</b> {0}</p>", m_IncidentReportObj.inverstigated_by_name);
