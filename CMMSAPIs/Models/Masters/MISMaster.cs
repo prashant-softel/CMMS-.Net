@@ -68,4 +68,15 @@ namespace CMMSAPIs.Models.Masters
         public DateTime UpdatedAt { get; set; }
         public string UpdatedBy { get; set; }
     }
+
+    public class CMIncidentType
+    {
+        public int id { get; set; }
+        public string incidenttype { get; set; }
+        public int status { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public string CreatedBy { get; set; }
+        public DateTime UpdatedAt { get; set; }
+        public string UpdatedBy { get; set; }
+    }
 }
