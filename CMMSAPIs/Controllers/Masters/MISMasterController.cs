@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
@@ -701,7 +701,90 @@ namespace CMMSAPIs.Controllers.Masters
                 }
             }
 
+        // Incident type CRUD APIS
+        [Route("GetIncidentType")]
+        [HttpGet]
+        public async Task<IActionResult> GetIncidentType(int risk_id)
+        {
+            try
+            {
+                var data = await _IMISMasterBS.GetIncidentType(risk_id);
+                return Ok(data);
 
+            }
+            catch (Exception ex)
+            {
 
+                return BadRequest(ex.Message);
+            }
         }
+
+        [Route("GetIncidentTypeList")]
+        [HttpGet]
+        public async Task<IActionResult> GetIncidentTypeList()
+        {
+            try
+            {
+                var data = await _IMISMasterBS.GetIncidentTypeList();
+                return Ok(data);
+
+            }
+            catch (Exception ex)
+            {
+
+                return BadRequest(ex.Message);
+            }
+        }
+
+        //[Authorize]
+        [Route("CreateIncidentType")]
+        [HttpPost]
+        public async Task<IActionResult> CreateIncidentType(CMIncidentType request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.CreateIncidentType(request, userID);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        //[Authorize]
+        [Route("UpdateIncidentType")]
+        [HttpPatch]
+        public async Task<IActionResult> UpdateIncidentType(CMIncidentType request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.UpdateIncidentType(request, userID);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        //[Authorize]
+        [Route("DeleteIncidentType")]
+        [HttpDelete]
+        public async Task<IActionResult> DeleteIncidentType(int id)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.DeleteIncidentType(id, userID);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
     }
+}
