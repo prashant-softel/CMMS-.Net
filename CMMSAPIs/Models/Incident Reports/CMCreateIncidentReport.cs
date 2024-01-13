@@ -80,6 +80,8 @@ namespace CMMSAPIs.Models.Incident_Reports
         public string responsibility { get; set; }
         public DateTime? target_date { get; set; }
         public string remarks { get; set; }
+        public string hse_remark { get; set; }
+        public int id_Status { get; set; }
     }
 
     public class CMImmediate_correction
