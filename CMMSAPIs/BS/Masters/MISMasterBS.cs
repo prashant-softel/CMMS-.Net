@@ -1,4 +1,4 @@
-﻿using CMMSAPIs.Helper;
+using CMMSAPIs.Helper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -51,6 +51,11 @@ namespace CMMSAPIs.BS.MISMasters
         Task<CMDefaultResponse> CreateResponsibility(Responsibility request, int UserId);
         Task<CMDefaultResponse> UpdateResponsibility(Responsibility request, int UserId);
         Task<CMDefaultResponse> DeleteResponsibility(int id);
+        Task<CMIncidentType> GetIncidentType(int id);
+        Task<List<CMIncidentType>> GetIncidentTypeList();
+        Task<CMDefaultResponse> CreateIncidentType(CMIncidentType request, int userId);
+        Task<CMDefaultResponse> UpdateIncidentType(CMIncidentType request, int userId);
+        Task<CMDefaultResponse> DeleteIncidentType(int id, int userId);
     }
     public class MISMasterBS : IMISMasterBS
     {
@@ -674,6 +679,85 @@ namespace CMMSAPIs.BS.MISMasters
                     return await response.DeleteResponsibility(id);
             }
             catch
+            {
+                throw;
+            }
+        }
+
+
+        // Incident type master
+        public async Task<CMIncidentType> GetIncidentType(int id)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.GetIncidentType(id);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<List<CMIncidentType>> GetIncidentTypeList()
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.GetIncidentTypeList();
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> CreateIncidentType(CMIncidentType request, int userId)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.CreateIncidentType(request, userId);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> UpdateIncidentType(CMIncidentType request, int userId)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.UpdateIncidentType(request, userId);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> DeleteIncidentType(int id, int userId)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.DeleteIncidentType(id, userId);
+                }
+            }
+            catch (Exception ex)
             {
                 throw;
             }
