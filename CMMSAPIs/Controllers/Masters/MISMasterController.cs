@@ -704,11 +704,11 @@ namespace CMMSAPIs.Controllers.Masters
         // Incident type CRUD APIS
         [Route("GetIncidentType")]
         [HttpGet]
-        public async Task<IActionResult> GetIncidentType(int risk_id)
+        public async Task<IActionResult> GetIncidentType(int id)
         {
             try
             {
-                var data = await _IMISMasterBS.GetIncidentType(risk_id);
+                var data = await _IMISMasterBS.GetIncidentType(id);
                 return Ok(data);
 
             }
