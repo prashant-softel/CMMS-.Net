@@ -53,14 +53,14 @@ namespace CMMSAPIs.Controllers.Incident_Reports
                 throw;
             }
         }
-        [Route("CreateIncidentInvestigationReport")]
+        [Route("UpdateIncidentInvestigationReport")]
         [HttpPost]
-        public async Task<IActionResult> CreateIncidentInvestigationReport(CMCreateIncidentReport request)
+        public async Task<IActionResult> UpdateIncidentInvestigationReport(CMCreateIncidentReport request)
         {
             try
             {
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _IncidentReportBS.CreateIncidentInvestigationReport(request, userId);
+                var data = await _IncidentReportBS.UpdateIncidentInvestigationReport(request, userId);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -135,14 +135,14 @@ namespace CMMSAPIs.Controllers.Incident_Reports
             }
         }
 
-        [Route("ApproveIncidentInvestigationReport")]
+        [Route("ApproveCreateIR")]
         [HttpPut]
-        public async Task<IActionResult> ApproveIncidentInvestigationReport(int incidentId)
+        public async Task<IActionResult> ApproveCreateIR([FromForm] CMApproveIncident request)
         {
             try
             {
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _IncidentReportBS.ApproveIncidentInvestigationReport(incidentId, userId);
+                var data = await _IncidentReportBS.ApproveCreateIR(request, userId);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -152,14 +152,30 @@ namespace CMMSAPIs.Controllers.Incident_Reports
         }
 
         //[Authorize]
-        [Route("RejectIncidentInvestigationReport")]
+        [Route("RejectCreateIR")]
         [HttpPut]
-        public async Task<IActionResult> RejectIncidentInvestigationReport([FromForm] CMApproveIncident request)
+        public async Task<IActionResult> RejectCreateIR([FromForm] CMApproveIncident request)
         {
             try
             {
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _IncidentReportBS.RejectIncidentInvestigationReport(request, userId);
+                var data = await _IncidentReportBS.RejectCreateIR(request, userId);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        [Route("CancelIR")]
+        [HttpPut]
+        public async Task<IActionResult> CancelIR([FromForm] CMApproveIncident request)
+        {
+            try
+            {
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IncidentReportBS.CancelIR(request, userId);
                 return Ok(data);
             }
             catch (Exception ex)
