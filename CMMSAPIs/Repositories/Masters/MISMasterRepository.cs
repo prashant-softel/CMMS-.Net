@@ -474,6 +474,48 @@ namespace CMMSAPIs.Repositories.Masters
 
         }
 
+        // Incident type CRUD 
+        internal async Task<CMIncidentType> GetIncidentType(int id)
+        {
+            string myQuery = $"SELECT id, incidenttype,  status FROM incidenttype WHERE id = " + id+" and status=1;";
+            List<CMIncidentType> result = await Context.GetData<CMIncidentType>(myQuery).ConfigureAwait(false);
+            //Add history
+            return result[0];
+        }
+        internal async Task<List<CMIncidentType>> GetIncidentTypeList()
+        {
+            string myQuery = "SELECT id, incidenttype, description FROM incidenttype WHERE status=1 ";
+            List<CMIncidentType> result = await Context.GetData<CMIncidentType>(myQuery).ConfigureAwait(false);
+            return result;
+        }
+
+
+
+        internal async Task<CMDefaultResponse> CreateIncidentType(CMIncidentType request, int userId)
+        {
+            string myQuery = $"INSERT INTO incidenttype(incidenttype,  status, addedBy, addedAt) VALUES " +
+                                $"('{request.incidenttype}', 1, {userId}, '{UtilsRepository.GetUTCTime()}'); " +
+                                 $"SELECT LAST_INSERT_ID(); ";
+            DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
+            int id = Convert.ToInt32(dt.Rows[0][0]);
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Incident Type Added.");
+        }
+        internal async Task<CMDefaultResponse> UpdateIncidentType(CMIncidentType request, int userID)
+        {
+            string updateQry = "UPDATE incidenttype SET ";
+            if (request.incidenttype != null && request.incidenttype != "")
+                updateQry += $"incidenttype = '{request.incidenttype}', ";
+            updateQry += $"updatedBy = '{userID}', updatedAt = '{UtilsRepository.GetUTCTime()}' WHERE id = {request.id};";
+            await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+            return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Incident Type Updated.");
+        }
+        internal async Task<CMDefaultResponse> DeleteIncidentType(int id, int userId)
+        {
+            string deleteQry = $"UPDATE incidenttype " +
+                $" SET status = 0 , updatedBy = '{userId}' , updatedAt = '{UtilsRepository.GetUTCTime()}' WHERE id = {id};";
+            await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Incident Type Deleted.");
+        }
 
 
     }
