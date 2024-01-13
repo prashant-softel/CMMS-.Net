@@ -484,7 +484,7 @@ namespace CMMSAPIs.Repositories.Masters
         }
         internal async Task<List<CMIncidentType>> GetIncidentTypeList()
         {
-            string myQuery = "SELECT id, incidenttype, description FROM incidenttype WHERE status=1 ";
+            string myQuery = "SELECT id, incidenttype FROM incidenttype WHERE status=1 ";
             List<CMIncidentType> result = await Context.GetData<CMIncidentType>(myQuery).ConfigureAwait(false);
             return result;
         }
