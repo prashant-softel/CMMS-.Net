@@ -388,13 +388,16 @@ namespace CMMSAPIs.Helper
             PM_LINK_PTW,
            
            
-            IR_CREATED_INITIAL = 181,
-            IR_CREATED_INVESTIGATION,
-            IR_APPROVED_INITIAL,
+            IR_CREATED_INITIAL = 181,         
             IR_REJECTED_INITIAL,
-            IR_APPROVED_INVESTIGATION,
+            IR_APPROVED_INITIAL,
+
+            IR_CREATED_INVESTIGATION,
             IR_REJECTED_INVESTIGATION,
-            IR_UPDATED,
+            IR_APPROVED_INVESTIGATION,           
+            IR_UPDATED, // Only for notification purpose
+            IR_Cancel,
+
 
             WC_DRAFT = 191,
             WC_SUBMITTED,
