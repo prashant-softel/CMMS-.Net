@@ -755,7 +755,7 @@ namespace CMMSAPIs.Controllers.Masters
         }
         //[Authorize]
         [Route("UpdateIncidentType")]
-        [HttpPatch]
+        [HttpPost]
         public async Task<IActionResult> UpdateIncidentType(CMIncidentType request)
         {
             try
