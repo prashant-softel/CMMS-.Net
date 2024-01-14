@@ -15,7 +15,7 @@ namespace CMMSAPIs.BS.Incident_Reports
         Task<CMDefaultResponse> UpdateIncidentInvestigationReport(CMCreateIncidentReport request,int userId);
         Task<CMViewIncidentReport> GetIncidentDetailsReport(int id);
         Task<CMDefaultResponse> UpdateIncidentReport(CMCreateIncidentReport request, int userId);
-        Task<CMDefaultResponse> ApproveIncidentReport(int incidentId, int userId);
+        Task<CMDefaultResponse> ApproveIncidentReport(CMApproveIncident request, int userId);
         Task<CMDefaultResponse> RejectIncidentReport(CMApproveIncident  request, int userId);
         Task<CMDefaultResponse> ApproveCreateIR(CMApproveIncident request, int userId);
         Task<CMDefaultResponse> RejectCreateIR(CMApproveIncident request, int userId);
@@ -115,13 +115,13 @@ namespace CMMSAPIs.BS.Incident_Reports
             }
         }
 
-        public async Task<CMDefaultResponse> ApproveIncidentReport(int incidentId,int userId)
+        public async Task<CMDefaultResponse> ApproveIncidentReport(CMApproveIncident request, int userId)
         {
             try
             {
                 using (var repos = new IncidentReportRepository(getDB))
                 {
-                    return await repos.ApproveIncidentReport(incidentId, userId);
+                    return await repos.ApproveIncidentReport(request, userId);
 
                 }
             }
