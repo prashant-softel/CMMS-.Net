@@ -295,5 +295,43 @@ namespace CMMSAPIs.Controllers.Audits
             }
         }
 
+        [Route("GetTaskDetail")]
+        [HttpGet]
+        public async Task<IActionResult> GetTaskDetail(int task_id)
+        {
+            try
+            {
+                var data = await _AuditPlanBS.GetTaskDetail(task_id);
+                return Ok(data);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [Route("GetTaskList")]
+        [HttpGet]
+        public async Task<IActionResult> GetTaskList(int facility_id, DateTime? start_date, DateTime? end_date, string frequencyIds)
+        {
+            try
+            {
+                var data = await _AuditPlanBS.GetTaskList(facility_id, start_date, end_date, frequencyIds);
+                return Ok(data);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
     }
 }
