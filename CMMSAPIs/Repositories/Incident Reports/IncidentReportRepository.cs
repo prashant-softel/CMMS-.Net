@@ -21,10 +21,14 @@ namespace CMMSAPIs.Repositories.Incident_Reports
 
         private Dictionary<int, string> StatusDictionary = new Dictionary<int, string>()
         {
-            { 181, "Submitted" },
-            { 182, "Approved" },
-            { 183, "Rejected" },
-            { 184, "Updated" },
+            { 181, "Created-waiting for approval" },
+            { 182, "Create-Rejected" },
+            { 183, "Created" },
+            { 184, "Investigation-waiting for approval" },
+            { 185, "Investigation-Rejected" },
+            { 186, "Investigation-Completed" },
+            { 187, "Updated" },
+            { 188, "Cancelled" },
         };
         private bool _IncidentReportDetails;
 
@@ -132,7 +136,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
             }
             severityName += $"ELSE 'Invalid severity' END";
 
-            string selectqry = $"SELECT incident.id as id,{severityName} as severity,  incident.description as description , facilities.name as facility_name,blockName.name as block_name, assets.name as equipment_name, incident.risk_level as risk_level, CONCAT(created_by.firstName ,' ' , created_by.lastName) as reported_by_name, incident.created_at as reported_at,CONCAT(user.firstName ,' ' , user.lastName) as approved_by, incident.approved_at as approved_at, CONCAT(user1.firstName , ' ' , user1.lastName) as reported_by_name , {statusOut} as status FROM incidents as incident left JOIN facilities AS facilities on facilities.id = incident.facility_id LEFT JOIN facilities AS blockName on blockName.id = incident.block_id  and blockName.isBlock = 1 LEFT JOIN assets as assets on incident.equipment_id = assets.id LEFT JOIN users as user on incident.approved_by = user.id LEFT JOIN users as created_by on incident.created_by = created_by.id LEFT JOIN users as user1 on incident.verified_by = user1.id where " + filter + " order by incident.id asc";
+            string selectqry = $"SELECT incident.id as id,{severityName} as severity,  incident.description as description , facilities.name as facility_name,blockName.name as block_name, assets.name as equipment_name, incident.risk_level as risk_level, CONCAT(created_by.firstName ,' ' , created_by.lastName) as reported_by_name, incident.created_at as reported_at,CONCAT(user.firstName ,' ' , user.lastName) as approved_by, incident.approved_at as approved_at, CONCAT(user1.firstName , ' ' , user1.lastName) as reported_by_name , {statusOut} as status_short , incident.location_of_incident, incident_datetime, type_of_job,title,\r\nincident.status FROM incidents as incident left JOIN facilities AS facilities on facilities.id = incident.facility_id LEFT JOIN facilities AS blockName on blockName.id = incident.block_id  and blockName.isBlock = 1 LEFT JOIN assets as assets on incident.equipment_id = assets.id LEFT JOIN users as user on incident.approved_by = user.id LEFT JOIN users as created_by on incident.created_by = created_by.id LEFT JOIN users as user1 on incident.verified_by = user1.id where " + filter + " order by incident.id asc";
 
             List<CMIncidentList> getIncidentList = await Context.GetData<CMIncidentList>(selectqry).ConfigureAwait(false);
             return getIncidentList;
@@ -154,12 +158,12 @@ namespace CMMSAPIs.Repositories.Incident_Reports
 
             string qryIncident = "INSERT INTO incidents" +
                      "(" +
-                         "facility_id, block_id, equipment_id, severity, risk_level, incident_datetime, victim_id, action_taken_by, action_taken_datetime, inverstigated_by, verified_by, risk_type, esi_applicability, legal_applicability, rca_required, damaged_cost, generation_loss, damaged_cost_curr_id, generation_loss_curr_id, title, description, is_insurance_applicable, insurance, insurance_status, insurance_remark, status, created_by, created_at, status_updated_at, location_of_incident, type_of_job, is_activities_trained, is_person_authorized, instructions_given, safety_equipments, safe_procedure_observed, unsafe_condition_contributed, unsafe_act_cause, incidet_type_id,esi_applicability_remark,legal_applicability_remark,rca_required_remark" +
+                         "facility_id, block_id, equipment_id, severity, risk_level, incident_datetime, victim_id, action_taken_by, action_taken_datetime, inverstigated_by, verified_by, risk_type, esi_applicability, legal_applicability, rca_required, damaged_cost, generation_loss, damaged_cost_curr_id, generation_loss_curr_id, title, description, is_insurance_applicable, insurance, insurance_status, insurance_remark, status, created_by, created_at, status_updated_at, location_of_incident, type_of_job, is_activities_trained, is_person_authorized, instructions_given, safety_equipments, safe_procedure_observed, unsafe_condition_contributed, unsafe_act_cause, incidet_type_id,esi_applicability_remark,legal_applicability_remark,rca_required_remark,is_person_involved" +
                      ")" +
                      "VALUES" +
                      "(" +
                          $"{request.facility_id}, {request.block_id}, {request.equipment_id}, {request.severity_id}, {request.risk_level}, '{request.incident_datetime.ToString("yyyy-MM-dd HH:mm:ss")}', {request.victim_id}, {request.action_taken_by}, '{request.action_taken_datetime.ToString("yyyy-MM-dd HH:mm:ss")}', {request.inverstigated_by}, {request.verified_by}, {request.risk_type}, {request.esi_applicability}, {request.legal_applicability}, {request.rca_required}, {request.damaged_cost}, {request.generation_loss}, {request.damaged_cost_curr_id}, {request.generation_loss_curr_id}, '{request.title}', '{request.description}', {request.is_insurance_applicable}, '{request.insurance}', {request.insurance_status}, '{request.insurance_remark}', {(int)CMMS.CMMS_Status.IR_CREATED_INITIAL}, {userId}, '{UtilsRepository.GetUTCTime()}', '{UtilsRepository.GetUTCTime()}', '{request.location_of_incident}', '{request.type_of_job}', '{request.is_activities_trained}'," +
-                         $" '{request.is_person_authorized}', '{request.instructions_given}', '{request.safety_equipments}', '{request.safe_procedure_observed}', '{request.unsafe_condition_contributed}', '{request.unsafe_act_cause}', {request.incidet_type_id}, '{request.esi_applicability_remark}','{request.legal_applicability_remark}','{request.rca_required_remark}' " +
+                         $" '{request.is_person_authorized}', '{request.instructions_given}', '{request.safety_equipments}', '{request.safe_procedure_observed}', '{request.unsafe_condition_contributed}', '{request.unsafe_act_cause}', {request.incidet_type_id}, '{request.esi_applicability_remark}','{request.legal_applicability_remark}','{request.rca_required_remark}','{request.is_person_involved}' " +
                      ") ; SELECT LAST_INSERT_ID()";
 
 
@@ -483,7 +487,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
 
             string myQuery = $"SELECT " +
                                $"incident.id as id,incident.title, incident.description,facilities.id as facility_id, facilities.name as facility_name, blockName.id as block_id, blockName.name as block_name, assets.id as equipment_id,  assets.name as equipment_name,{severityName} as severity,incident.risk_level as risk_level ,IF(risk_level = '1','high',IF(risk_level ='2','medium','Low')) as risk_level_name, incident.incident_datetime as incident_datetime, incident.created_at as reporting_datetime,incident.action_taken_datetime ,user.id as victim_id, user.firstName as victim_name , user1.id as action_taken_by,  CONCAT(user1.firstName, user1.lastName) as action_taken_by_name, user2.id as inverstigated_by ,  CONCAT(user2.firstName, user2.lastName) as inverstigated_by_name , user3.id as verified_by ,CONCAT(user3.firstName, user3.lastName) as verified_by_name, incident.risk_type as risk_type, " + strRiskType + ",esi_applicability as esi_applicability,IF(esi_applicability = '1', 'YES', 'NO') as esi_applicability_name,legal_applicability as legal_applicability, IF(legal_applicability = '1', 'YES', 'NO') as legal_applicability_name, rca_required , IF(rca_required = '1', 'YES', 'NO') as rca_required_name, incident.damaged_cost AS damaged_cost, incident.generation_loss as generation_loss,incident.damaged_cost_curr_id, incident.generation_loss_curr_id, job.id as job_id, job.title as job_name , job.description as description , IF(is_insurance_applicable = '1', 'YES', 'NO') as is_insurance_applicable_name, incident.insurance_status as insurance_status, incident.insurance as insurance_name, incident.insurance_remark as insurance_remark, user4.id as approved_by ,CONCAT(user4.firstName, user4.lastName) as approved_by_name, CONCAT(user5.firstName, user5.lastName) as created_by_name,created_by as created_by_id, CONCAT(user6.firstName, user6.lastName) as updated_by_name, incident.status as status, incident.approved_at as approved_at,incident.reject_reccomendations as reject_comment " +
-                               " ,esi_applicability_remark\r\n,legal_applicability_remark\r\n,location_of_incident\r\n,type_of_job\r\n,is_activities_trained\r\n,is_person_authorized\r\n,instructions_given\r\n,safety_equipments\r\n,safe_procedure_observed\r\n,unsafe_condition_contributed\r\n,unsafe_act_cause,incident.cancel_remarks FROM incidents as incident " +
+                               " ,esi_applicability_remark\r\n,legal_applicability_remark\r\n,location_of_incident\r\n,type_of_job\r\n,is_activities_trained\r\n,is_person_authorized\r\n,instructions_given\r\n,safety_equipments\r\n,safe_procedure_observed\r\n,unsafe_condition_contributed\r\n,unsafe_act_cause,incident.cancel_remarks, incident.is_person_involved, incident.approved_remarks FROM incidents as incident " +
                                "LEFT JOIN facilities AS facilities on facilities.id = incident.facility_id " +
                                "LEFT JOIN facilities AS blockName on blockName.id = incident.block_id  and blockName.isBlock = 1 " +
                                "LEFT JOIN assets as assets on incident.equipment_id = assets.id " +
@@ -588,7 +592,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
             updateQry += $" updated_by = {userId}, update_at = '{UtilsRepository.GetUTCTime()}', " +
                 $" location_of_incident = '{request.location_of_incident}', type_of_job= '{request.type_of_job}', is_activities_trained='{request.is_activities_trained}', " +
                 $" is_person_authorized = '{request.is_person_authorized}', instructions_given = '{request.instructions_given}', safety_equipments = '{request.safety_equipments}', safe_procedure_observed='{request.safe_procedure_observed}' , " +
-                $" unsafe_condition_contributed = '{request.unsafe_condition_contributed}', unsafe_act_cause= '{request.unsafe_act_cause}', esi_applicability_remark='{request.esi_applicability_remark}', legal_applicability_remark='{request.legal_applicability_remark}', rca_required_remark = '{request.rca_required_remark}' WHERE id = {request.id};";
+                $" unsafe_condition_contributed = '{request.unsafe_condition_contributed}', unsafe_act_cause= '{request.unsafe_act_cause}', esi_applicability_remark='{request.esi_applicability_remark}', legal_applicability_remark='{request.legal_applicability_remark}', rca_required_remark = '{request.rca_required_remark}', is_person_involved = '{request.is_person_involved}' WHERE id = {request.id};";
 
             //string updateqry = $"Update incidents" +
             //                      $" set facility_id = { request.facility_id }, block_id={request.block_id}, equipment_id={ request.equipment_id }, risk_level= {request.risk_level}, incident_datetime='{request.incident_datetime }',victim_id={request.victim_id},action_taken_by= {request.action_taken_by},action_taken_datetime = '{ request.action_taken_datetime }', inverstigated_by= {request.inverstigated_by}, verified_by={request.verified_by}, risk_type={request.risk_type},esi_applicability={request.esi_applicability},legal_applicability={request.legal_applicability},rca_required={request.rca_required},damaged_cost={request.damaged_cost},generation_loss={request.generation_loss},job_id= {request.job_id},title='{request.job_id}',description='{request.description}',is_insurance_applicable={request.is_insurance_applicable},insurance='{request.insurance_id}',insurance_status={request.insurance_status},insurance_remark= '{request.insurance_remark}',updated_by={userId},update_at= '{UtilsRepository.GetUTCTime()}'" +
@@ -771,7 +775,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
         }
 
 
-        internal async Task<CMDefaultResponse> ApproveIncidentReport(int incidentId, int userId)
+        internal async Task<CMDefaultResponse> ApproveIncidentReport(CMApproveIncident request, int userId)
         {
             /*
              * Update the Incidents and also update the history table
@@ -780,24 +784,24 @@ namespace CMMSAPIs.Repositories.Incident_Reports
             */
             CMDefaultResponse response = new CMDefaultResponse();
 
-            string approveQuery = $"Update incidents set status = {(int)CMMS.CMMS_Status.IR_APPROVED_INITIAL},status_updated_at='{UtilsRepository.GetUTCTime()}',is_approved = 1,approved_by={userId},approved_at= '{UtilsRepository.GetUTCTime()}'  where id = " + incidentId;
+            string approveQuery = $"Update incidents set status = {(int)CMMS.CMMS_Status.IR_APPROVED_INITIAL},status_updated_at='{UtilsRepository.GetUTCTime()}',is_approved = 1,approved_by={userId},approved_at= '{UtilsRepository.GetUTCTime()}',approved_remarks='{request.comment}'  where id = " + request.id;
             int approve_id= await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
 
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
 
             if (approve_id > 0)
             {
-                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INCIDENT_REPORT, incidentId, 0, 0, "Incident Report Approved", CMMS.CMMS_Status.IR_APPROVED_INITIAL, userId);
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INCIDENT_REPORT, request.id, 0, 0, request.comment, CMMS.CMMS_Status.IR_APPROVED_INITIAL, userId);
 
-               CMViewIncidentReport _IncidentReportDetails = await GetIncidentDetailsReport(incidentId);
+               CMViewIncidentReport _IncidentReportDetails = await GetIncidentDetailsReport(request.id);
 
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INCIDENT_REPORT, CMMS.CMMS_Status.IR_APPROVED_INITIAL,new[] { userId }, _IncidentReportDetails);
 
-                response = new CMDefaultResponse(incidentId, CMMS.RETRUNSTATUS.SUCCESS, " Incident Report Approved");
+                response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, " Incident Report Approved");
             }
             else
             {
-                 response = new CMDefaultResponse(incidentId, CMMS.RETRUNSTATUS.FAILURE, " Incident Report approval failed");
+                 response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.FAILURE, " Incident Report approval failed");
             }
             return response;
         }
