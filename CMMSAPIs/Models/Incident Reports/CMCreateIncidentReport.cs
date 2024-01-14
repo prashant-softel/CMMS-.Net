@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 
@@ -53,6 +53,7 @@ namespace CMMSAPIs.Models.Incident_Reports
         public string safe_procedure_observed { get; set; } 
         public string unsafe_condition_contributed { get; set; } 
         public string unsafe_act_cause { get; set; } 
+        public string is_person_involved { get; set; } 
         public List<CMInjured_person> injured_person { get; set; }
         public List<CMWhy_why_analysis> why_why_analysis { get; set; }
         public List<CMRoot_cause> root_cause { get; set; }
