@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace CMMSAPIs.Models.Masters
 {
@@ -55,7 +55,7 @@ namespace CMMSAPIs.Models.Masters
         public int id { get; set; }
         public string bodyparts { get; set; }
         public string description { get; set; }
-        public string Status { get; set; }
+        public int Status { get; set; }
     }
     public class Responsibility
     {
