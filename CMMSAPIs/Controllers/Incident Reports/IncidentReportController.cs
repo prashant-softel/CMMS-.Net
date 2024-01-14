@@ -103,13 +103,13 @@ namespace CMMSAPIs.Controllers.Incident_Reports
 
         //[Authorize]
         [Route("ApproveIncidentReport")]
-        [HttpPut]
-        public async Task<IActionResult> ApproveIncidentReport(int incidentId)
+        [HttpPost]
+        public async Task<IActionResult> ApproveIncidentReport(CMApproveIncident request)
         {
             try
             {
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _IncidentReportBS.ApproveIncidentReport(incidentId,userId);
+                var data = await _IncidentReportBS.ApproveIncidentReport(request, userId);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -120,8 +120,8 @@ namespace CMMSAPIs.Controllers.Incident_Reports
 
         //[Authorize]
         [Route("RejectIncidentReport")]
-        [HttpPut]
-        public async Task<IActionResult> RejectIncidentReport([FromForm] CMApproveIncident request)
+        [HttpPost]
+        public async Task<IActionResult> RejectIncidentReport(CMApproveIncident request)
         {
             try
             {
@@ -136,8 +136,8 @@ namespace CMMSAPIs.Controllers.Incident_Reports
         }
 
         [Route("ApproveCreateIR")]
-        [HttpPut]
-        public async Task<IActionResult> ApproveCreateIR([FromForm] CMApproveIncident request)
+        [HttpPost]
+        public async Task<IActionResult> ApproveCreateIR(CMApproveIncident request)
         {
             try
             {
@@ -153,8 +153,8 @@ namespace CMMSAPIs.Controllers.Incident_Reports
 
         //[Authorize]
         [Route("RejectCreateIR")]
-        [HttpPut]
-        public async Task<IActionResult> RejectCreateIR([FromForm] CMApproveIncident request)
+        [HttpPost]
+        public async Task<IActionResult> RejectCreateIR(CMApproveIncident request)
         {
             try
             {
@@ -169,8 +169,8 @@ namespace CMMSAPIs.Controllers.Incident_Reports
         }
 
         [Route("CancelIR")]
-        [HttpPut]
-        public async Task<IActionResult> CancelIR([FromForm] CMApproveIncident request)
+        [HttpPost]
+        public async Task<IActionResult> CancelIR(CMApproveIncident request)
         {
             try
             {
