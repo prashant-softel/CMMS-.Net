@@ -610,11 +610,12 @@ namespace CMMSAPIs.Controllers.Masters
         }
         [Route("DeleteBodyParts")]
         [HttpDelete]
-        public async Task<IActionResult> DeleteBodyParts(int id, int UserId)
+        public async Task<IActionResult> DeleteBodyParts(int id)
         {
             try
             {
-                var data = await _IMISMasterBS.DeleteBodyParts(id, UserId);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("UserId"));
+                var data = await _IMISMasterBS.DeleteBodyParts(id, userID);
                 return Ok(data);
             }
             catch (Exception)
