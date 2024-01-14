@@ -27,6 +27,15 @@ namespace CMMSAPIs.Repositories.Audits
 
             _utilsRepo = new UtilsRepository(sqlDBHelper);
         }
+        Dictionary<CMMS.CMMS_Status, string> statusList = new Dictionary<CMMS.CMMS_Status, string>()
+        {
+            { CMMS.CMMS_Status.AUDIT_SCHEDULE, "Scheduled" },
+            { CMMS.CMMS_Status.AUDIT_STARTED, "Started" },
+            { CMMS.CMMS_Status.AUDIT_DELETED, "Deleted" },
+            { CMMS.CMMS_Status.AUDIT_APPROVED, "Approved" },
+            { CMMS.CMMS_Status.AUDIT_REJECTED, "Rejected" },
+            { CMMS.CMMS_Status.AUDIT_CLOSED, "Closed" }
+        };
 
         internal async Task<List<CMAuditPlanList>> GetAuditPlanList(int facility_id, DateTime fromDate, DateTime toDate)
         {
@@ -1029,6 +1038,237 @@ namespace CMMSAPIs.Repositories.Audits
             return retValue;
 
         }
-   
+
+
+        internal async Task<List<CMPMTaskList>> GetTaskList(int facility_id, DateTime? start_date, DateTime? end_date, string frequencyIds)
+        {
+            /*
+             * Primary Table - PMExecution & PMSchedule
+             * Read All properties mention in model and return list
+             * Code goes here
+            */
+
+            //string statusQry = "CASE ";
+            //foreach (KeyValuePair<CMMS.CMMS_Status, string> status in statusList)
+            //    statusQry += $"WHEN pm_schedule.status = {(int)status.Key} THEN '{status.Value}' ";
+            //statusQry += "ELSE 'Unknown Status' END";
+
+            string myQuery = $"SELECT pm_task.id,pm_task.category_id,cat.name as category_name,  CONCAT('AuditTASK',pm_task.id) as task_code,pm_plan.plan_name as plan_title,pm_task.facility_id, pm_task.frequency_id as frequency_id, freq.name as frequency_name, pm_task.plan_date as due_date,prev_task_done_date as last_done_date, closed_at as done_date, CONCAT(assignedTo.firstName,' ',assignedTo.lastName)  as assigned_to_name, pm_task.PTW_id as permit_id, CONCAT('PTW',pm_task.PTW_id) as permit_code,permit.status as ptw_status, PM_task.status " +
+                               "FROM pm_task " +
+                               $"left join users as assignedTo on pm_task.assigned_to = assignedTo.id " +
+                               $"left join pm_plan  on pm_task.plan_id = pm_plan.id " +
+                               $"left join assetcategories as cat  on pm_task.category_id = cat.id " +
+                               $"left join permits as permit on pm_task.PTW_id = permit.id " +
+                               $"left join frequency as freq on pm_task.frequency_id = freq.id where 1 ";
+
+            // myQuery += (frequencyIds.Length > 0 ? " AND freq.id IN ( '" + string.Join("' , '", frequencyIds) + "' )" : string.Empty);
+
+            List<CMPMTaskList> scheduleViewList = new List<CMPMTaskList>();
+            if (facility_id > 0)
+            {
+                myQuery += $" and pm_task.Facility_id = {facility_id} ";
+                if (start_date != null && end_date != null)
+                {
+                    string start = ((DateTime)start_date).ToString("yyyy'-'MM'-'dd");
+                    myQuery += $"AND pm_task.plan_date >= '{start}' ";
+                    string end = ((DateTime)end_date).ToString("yyyy'-'MM'-'dd");
+                    myQuery += $"AND pm_task.plan_date <= '{end}' ";
+                }
+                //if (categories.Count > 0)
+                //{
+                //    string catList = string.Join(", ", categories);
+                //    myQuery += $"AND Asset_Category_id in ({catList}) ";
+                //}
+                if (frequencyIds != "" && frequencyIds != null)
+                {
+
+                    myQuery += $"AND pm_task.frequency_id in ({frequencyIds}) ";
+                }
+
+
+                scheduleViewList = await Context.GetData<CMPMTaskList>(myQuery).ConfigureAwait(false);
+
+
+                foreach (var task in scheduleViewList)
+                {
+                    if (task.status == (int)CMMS.CMMS_Status.PM_LINKED_TO_PTW)
+                    {
+                        if (task.ptw_status == (int)CMMS.CMMS_Status.PTW_APPROVED)
+                        {
+                            string startQry2 = $"UPDATE pm_task SET  status = {(int)CMMS.CMMS_Status.AUDIT_APPROVED} WHERE id = {task.id};";
+                            await Context.ExecuteNonQry<int>(startQry2).ConfigureAwait(false);
+                        }
+                        CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(task.ptw_status);
+                        task.status_short = "Audit - " + getShortStatus(CMMS.CMMS_Modules.AUDIT_SCHEDULE, _Status);
+                    }
+                    else
+                    {
+                        CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(task.status);
+                        string _shortStatus = getShortStatus(CMMS.CMMS_Modules.PM_PLAN, _Status);
+                        task.status_short = _shortStatus;
+                    }
+
+                }
+            }
+            else
+            {
+                throw new ArgumentException("Invalid Facility ID");
+            }
+
+            return scheduleViewList;
+        }
+
+
+        internal async Task<CMPMTaskView> GetTaskDetail(int task_id)
+        {
+            /*
+             * Primary Table - PMExecution & PMSchedule
+             * Other supporting tables - Facility, Asset, AssetCategory, Users
+             * Read All properties mention in model and return list
+             * Code goes here
+            */
+            if (task_id <= 0)
+                throw new ArgumentException("Invalid Task ID");
+
+            string statusQry = "CASE ";
+            foreach (KeyValuePair<CMMS.CMMS_Status, string> status in statusList)
+                statusQry += $"WHEN pm_task.Status = {(int)status.Key} THEN '{status.Value}' ";
+            statusQry += "ELSE 'Unknown Status' END ";
+
+            string eventQry = "CASE ";
+            foreach (CMMS.CMMS_Events _event in Enum.GetValues(typeof(CMMS.CMMS_Events)))
+            {
+                eventQry += $"WHEN pm_schedule_files.PM_Event = {(int)_event} THEN '{_event}' ";
+            }
+            eventQry += "ELSE 'Unknown Event' END ";
+
+            //string myQuery1 = $"SELECT id, PM_Maintenance_Order_Number as maintenance_order_number, PM_Schedule_date as schedule_date, PM_Schedule_Completed_date as completed_date, Asset_id as equipment_id, Asset_Name as equipment_name, Asset_Category_id as category_id, Asset_Category_name as category_name, PM_Frequecy_id as frequency_id, PM_Frequecy_Name as frequency_name, PM_Schedule_Emp_name as assigned_to_name, PTW_id as permit_id, status, {statusQry} as status_name, Facility_id as facility_id, Facility_Name as facility_name " +
+            //                    $"FROM pm_schedule WHERE id = {schedule_id};";
+
+            string myQuery = $"SELECT pm_task.id, CONCAT('AUDITTASK',pm_task.id) as task_code,pm_task.category_id,cat.name as category_name, pm_plan.plan_name as plan_title, pm_task.facility_id, pm_task.frequency_id as frequency_id, freq.name as frequency_name, pm_task.plan_date as due_date,prev_task_done_date as done_date, CONCAT(assignedTo.firstName,' ',assignedTo.lastName)  as assigned_to_name, CONCAT(closedBy.firstName,' ',closedBy.lastName)  as closed_by_name, pm_task.closed_at , CONCAT(approvedBy.firstName,' ',approvedBy.lastName)  as approved_by_name, pm_task.approved_at ,CONCAT(rejectedBy.firstName,' ',rejectedBy.lastName)  as rejected_by_name, pm_task.rejected_at ,CONCAT(cancelledBy.firstName,' ',cancelledBy.lastName)  as cancelled_by_name, pm_task.cancelled_at , pm_task.rejected_at ,CONCAT(startedBy.firstName,' ',startedBy.lastName)  as started_by_name, pm_task.started_at , pm_task.PTW_id as permit_id, CONCAT('PTW',pm_task.PTW_id) as permit_code,permit.status as ptw_status, PM_task.status, {statusQry} as status_short " +
+                               ",  CONCAT(tbtDone.firstName,' ',tbtDone.lastName)  as tbt_by_name, Case when permit.TBT_Done_By is null then 0 else 1 end ptw_tbt_done " +
+                               " FROM pm_task " +
+                               $"left join users as assignedTo on pm_task.assigned_to = assignedTo.id " +
+                               $"left join users as closedBy on pm_task.closed_by = closedBy.id " +
+                               $"left join users as approvedBy on pm_task.approved_by = approvedBy.id " +
+                               $"left join users as rejectedBy on pm_task.rejected_by = rejectedBy.id " +
+                               $"left join users as cancelledBy on pm_task.cancelled_by = cancelledBy.id " +
+                               $"left join users as startedBy on pm_task.started_by = startedBy.id " +
+                               $"left join permits as permit on pm_task.PTW_id = permit.id " +
+                               $"left join pm_plan  on pm_task.plan_id = pm_plan.id " +
+                               $"left join assetcategories as cat  on pm_task.category_id = cat.id " +
+                               $"left join frequency as freq on pm_task.frequency_id = freq.id " +
+                               $"  left join users as tbtDone on permit.TBT_Done_By = tbtDone.id " +
+                               $" where pm_task.id = {task_id} ";
+
+            List<CMPMTaskView> taskViewDetail = await Context.GetData<CMPMTaskView>(myQuery).ConfigureAwait(false);
+
+            if (taskViewDetail.Count == 0)
+                throw new MissingMemberException("PM Task not found");
+
+            string myQuery2 = $"SELECT pm_schedule.id as schedule_id,assets.id as assetsID, assets.name as asset_name, checklist.checklist_number as checklist_name from pm_schedule " +
+                $"left join assets on pm_schedule.asset_id = assets.id " +
+                $"left join checklist_number as checklist on pm_schedule.checklist_id = checklist.id " +
+                $"where task_id = {task_id};";
+
+            List<CMPMScheduleExecutionDetail> checklist_collection = await Context.GetData<CMPMScheduleExecutionDetail>(myQuery2).ConfigureAwait(false);
+
+
+            //string myQuery2 = $"SELECT DISTINCT checklist.id, checklist.checklist_number AS name FROM pm_execution " + 
+            //                    $"JOIN checkpoint on pm_execution.Check_Point_id = checkpoint.id " + 
+            //                    $"JOIN checklist_number as checklist ON checklist.id = checkpoint.check_list_id " +
+            //                    $"WHERE pm_execution.PM_Schedule_Id = {schedule_id};";
+
+            //List<CMDefaultList> checklist_collection = await Context.GetData<CMDefaultList>(myQuery2).ConfigureAwait(false);
+            foreach (var schedule in checklist_collection)
+            {
+                string myQuery3 = "SELECT checkpoint.min_range,checkpoint.max_range,is_ok as cp_ok, boolean as type_bool, failure_weightage as failure_waightage,type as check_point_type,pm_execution.range as type_range, pm_execution.text as type_text,pm_execution.id as execution_id,checkpoint.type as check_point_type ,pm_execution.range as type_range,pm_execution.text as type_text,pm_execution.is_ok as type_bool, Check_Point_id as check_point_id, Check_Point_Name as check_point_name, Check_Point_Requirement as requirement, PM_Schedule_Observation as observation, job_created as is_job_created, linked_job_id, custom_checkpoint as is_custom_check_point, file_required as is_file_required " +
+                                    $"FROM pm_execution " +
+                                    $"left join checkpoint on checkpoint.id = pm_execution.Check_Point_id WHERE PM_Schedule_Id = {schedule.schedule_id}  ;";
+
+                List<ScheduleCheckList> scheduleCheckList = await Context.GetData<ScheduleCheckList>(myQuery3).ConfigureAwait(false);
+
+                if (scheduleCheckList.Count > 0)
+                {
+                    foreach (ScheduleCheckList scheduleCheckPoint in scheduleCheckList)
+                    {
+                        string fileQry = $"SELECT {eventQry} AS _event, File_Path as file_path, File_Discription as file_description " +
+                                            $"FROM pm_schedule_files WHERE PM_Execution_id = {scheduleCheckPoint.execution_id}; ";
+                        List<ScheduleFiles> fileList = await Context.GetData<ScheduleFiles>(fileQry).ConfigureAwait(false);
+                        scheduleCheckPoint.files = fileList;
+                    }
+                }
+
+                string jobStatusQry = "CASE ";
+                for (CMMS.CMMS_Status jobStatus = CMMS.CMMS_Status.JOB_CREATED; jobStatus <= CMMS.CMMS_Status.JOB_UPDATED; jobStatus++)
+                    jobStatusQry += $"WHEN jobs.status={(int)jobStatus} THEN '' ";
+                jobStatusQry += "ELSE 'Invalid Status' END ";
+
+                string myQuery4 = $"SELECT jobs.id as job_id, jobs.title as job_title, jobs.description as job_description, CASE WHEN jobs.createdAt = '0000-00-00 00:00:00' THEN NULL ELSE jobs.createdAt END as job_date, {jobStatusQry} as job_status " +
+                                    $"FROM jobs " +
+                                    $"JOIN pm_execution ON jobs.id = pm_execution.linked_job_id " +
+                                    $"WHERE pm_execution.PM_Schedule_Id  = {schedule.schedule_id};";
+                try
+                {
+                    List<ScheduleLinkJob> linked_jobs = await Context.GetData<ScheduleLinkJob>(myQuery4).ConfigureAwait(false);
+                    List<CMLog> log = await _utilsRepo.GetHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, schedule.schedule_id);
+                    schedule.schedule_link_job = linked_jobs;
+
+                }
+                catch (Exception e)
+                {
+
+                }
+                //if (checklist_collection.Count > 0)
+                //{
+                //    taskViewDetail[0].checklist_id = checklist_collection[0].id;
+                //    taskViewDetail[0].checklist_name = checklist_collection[0].name;
+                //}
+                //taskViewDetail[0].schedule_check_points = scheduleCheckList;
+                //taskViewDetail[0].history_log = log; 
+
+                schedule.checklist_observation = scheduleCheckList;
+            }
+            taskViewDetail[0].schedules = checklist_collection;
+
+            CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(taskViewDetail[0].status);
+            string _shortStatus = getShortStatus(CMMS.CMMS_Modules.AUDIT_SCHEDULE, _Status);
+            taskViewDetail[0].status_short = _shortStatus;
+
+            string _longStatus = getLongStatus_taskview(CMMS.CMMS_Modules.AUDIT_SCHEDULE, _Status, taskViewDetail[0]);
+            taskViewDetail[0].status_long = _longStatus;
+
+
+
+            return taskViewDetail[0];
+        }
+
+        internal string getLongStatus_taskview(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMPMTaskView Obj)
+        {
+            string retValue = " ";
+
+
+            switch (notificationID)
+            {
+                case CMMS.CMMS_Status.AUDIT_SCHEDULE:
+                    retValue = $"Audit Scheduled "; break;
+                case CMMS.CMMS_Status.AUDIT_STARTED:
+                    retValue = $"Audit Started By {Obj.started_by_name} "; break;
+                case CMMS.CMMS_Status.AUDIT_DELETED:
+                    retValue = $"Audit Deleted "; break;
+                case CMMS.CMMS_Status.AUDIT_APPROVED:
+                    retValue = $"Audit Approved By {Obj.approved_by_name}"; break;
+                case CMMS.CMMS_Status.AUDIT_REJECTED:
+                    retValue = $"Audit Rejected By {Obj.rejected_by_name}"; break;
+                case CMMS.CMMS_Status.AUDIT_CLOSED:
+                    retValue = $"Audit Closed By {Obj.closed_by_name}"; break;
+
+                default:
+                    break;
+            }
+            return retValue;
+
+        }
+
     }
 }
