@@ -58,6 +58,7 @@ namespace CMMSAPIs.Models.Incident_Reports
         //public int historyId { get; set; }
         //public string status_name { get; set; }
         public DateTime approved_at { get; set; }
+        public string approved_remarks { get; set; }
         public string status_short { get; set; }
         public string status_long { get; set; }
         public string reject_comment { get; set; }
@@ -67,6 +68,7 @@ namespace CMMSAPIs.Models.Incident_Reports
         public string type_of_job { get; set; }
         public string is_activities_trained { get; set; }
         public string is_person_authorized { get; set; }
+        public string is_person_involved { get; set; }
         public string instructions_given { get; set; }
         public string safety_equipments { get; set; }
         public string safe_procedure_observed { get; set; }
