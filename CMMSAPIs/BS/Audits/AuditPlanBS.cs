@@ -26,6 +26,8 @@ namespace CMMSAPIs.BS.Audits
         Task<CMDefaultResponse> RejectPlan(CMApproval request, int userId);
         Task<List<CMPMPlanList>> GetPlanList(int facility_id, string category_id, string frequency_id, DateTime? start_date, DateTime? end_date);
         Task<CMPMPlanDetail> GetPlanDetail(int id);
+        Task<List<CMPMTaskList>> GetTaskList(int facility_id, DateTime? start_date, DateTime? end_date, string frequencyIds);
+        Task<CMPMTaskView> GetTaskDetail(int task_id);
 
     }
     public class AuditPlanBS : IAuditPlanBS
@@ -265,6 +267,38 @@ namespace CMMSAPIs.BS.Audits
                 using (var repos = new AuditPlanRepository(getDB))
                 {
                     return await repos.GetAuditPlanDetail(id);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<CMPMTaskList>> GetTaskList(int facility_id, DateTime? start_date, DateTime? end_date, string frequencyIds)
+        {
+            try
+            {
+                using (var repos = new AuditPlanRepository(getDB))
+                {
+                    return await repos.GetTaskList(facility_id, start_date, end_date, frequencyIds);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMPMTaskView> GetTaskDetail(int task_id)
+        {
+            try
+            {
+                using (var repos = new AuditPlanRepository(getDB))
+                {
+                    return await repos.GetTaskDetail(task_id);
 
                 }
             }
