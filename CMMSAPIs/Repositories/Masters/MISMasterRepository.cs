@@ -407,7 +407,7 @@ namespace CMMSAPIs.Repositories.Masters
         internal async Task<CMDefaultResponse> CreateBodyParts(BODYPARTS request, int UserId)
         {
             String myqry = $"INSERT INTO BODYPARTS(sequence_no,id,bodyparts, description,status, Createdby,Createdat) VALUES " +
-                                $"('{request.sequence_no}','{request.id}','{request.bodyparts}','{request.description}','{request.Status} ',  {UserId}, '{UtilsRepository.GetUTCTime()}'); " +
+                                $"('{request.sequence_no}','{request.id}','{request.bodyparts}','{request.description}',1,  {UserId}, '{UtilsRepository.GetUTCTime()}'); " +
                                  $"SELECT LAST_INSERT_ID(); ";
             DataTable dt = await Context.FetchData(myqry).ConfigureAwait(false);
             int id = Convert.ToInt32(dt.Rows[0][0]);
@@ -417,10 +417,10 @@ namespace CMMSAPIs.Repositories.Masters
         {
             string updateQry = "UPDATE BODYPARTS SET ";
             if (request.sequence_no >= 0)
-                updateQry += $"Sequence_no = '{request.sequence_no}', ";
+                updateQry += $"Sequence_no = {request.sequence_no}, ";
             if (request.description != null && request.description != "")
                 updateQry += $"description = '{request.description}', ";
-            updateQry += $"updatedAt ='{UtilsRepository.GetUTCTime()}' , updatedBy = '{UserId}' WHERE Sequence_no = {request.sequence_no};";
+            updateQry += $"updatedAt ='{UtilsRepository.GetUTCTime()}' , updatedBy = '{UserId}' WHERE id = {request.id};";
             await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
             return new CMDefaultResponse(request.sequence_no, CMMS.RETRUNSTATUS.SUCCESS, "Record Updated");
         }
