@@ -1,4 +1,4 @@
-﻿using CMMSAPIs.Helper;
+using CMMSAPIs.Helper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,7 +22,7 @@ namespace CMMSAPIs.BS.Permits
         Task<CMDefaultResponse> CreateSafetyMeasure(CMCreateSafetyMeasures request, int userID);
         Task<CMDefaultResponse> UpdateSafetyMeasure(CMCreateSafetyMeasures request, int userID);
         Task<CMDefaultResponse> DeleteSafetyMeasure(int id);
-        Task<List<CMDefaultList>> GetJobTypeList(int facility_id);
+        Task<List<CMCreateJobType>> GetJobTypeList(int facility_id);
         Task<CMDefaultResponse> CreateJobType(CMCreateJobType request, int userID);
         Task<CMDefaultResponse> UpdateJobType(CMCreateJobType request, int userID);
         Task<CMDefaultResponse> DeleteJobType(int id);
@@ -186,7 +186,7 @@ namespace CMMSAPIs.BS.Permits
                 throw;
             }
         }
-        public async Task<List<CMDefaultList>> GetJobTypeList(int facility_id)
+        public async Task<List<CMCreateJobType>> GetJobTypeList(int facility_id)
         {
             try
             {
