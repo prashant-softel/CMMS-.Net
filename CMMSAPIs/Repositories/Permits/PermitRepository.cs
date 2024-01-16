@@ -344,16 +344,16 @@ namespace CMMSAPIs.Repositories.Permits
             CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Safety Measure Deleted");
             return response;
         }
-        internal async Task<List<CMDefaultList>> GetJobTypeList(int facility_id)
+        internal async Task<List<CMCreateJobType>> GetJobTypeList(int facility_id)
         {
             /*
              * return id, title from PermitJobTypeList table for requested facility_id
             */
-            string myQuery = $"SELECT id as id, title as name FROM permitjobtypelist where status = 1  ";
+            string myQuery = $"SELECT id, title, description, status, createdBy, createdAt, updatedBy, updatedAt, facilityId, requireSOPJSA as requires_SOP_JSA FROM permitjobtypelist where status = 1  ";
             if (facility_id <= 0)
                 throw new ArgumentException("Invalid Facility ID");
             myQuery += $" and facilityId =  { facility_id } ";
-            List<CMDefaultList> _JobTypeList = await Context.GetData<CMDefaultList>(myQuery).ConfigureAwait(false);
+            List<CMCreateJobType> _JobTypeList = await Context.GetData<CMCreateJobType>(myQuery).ConfigureAwait(false);
             return _JobTypeList;
         }
 
