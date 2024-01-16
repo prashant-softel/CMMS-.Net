@@ -75,6 +75,8 @@ namespace CMMSAPIs.Models.Incident_Reports
         public string unsafe_condition_contributed { get; set; }
         public string unsafe_act_cause { get; set; }
         public string cancel_remarks { get; set; }
+        public int is_why_why_required { get; set; }
+        public int is_investigation_required { get; set; }
 
 
         //public List<CMHistoryLIST> LstHistory { get; set; }

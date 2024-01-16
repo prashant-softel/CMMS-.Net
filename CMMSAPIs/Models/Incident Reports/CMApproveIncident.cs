@@ -9,5 +9,7 @@ namespace CMMSAPIs.Models.Incident_Reports
     {
         public int id { get; set; }
         public string comment { get; set; }
+        public int is_why_why_required { get; set; }
+        public int is_investigation_required { get; set; }
     }
 }
