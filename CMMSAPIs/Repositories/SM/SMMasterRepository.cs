@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -466,6 +466,13 @@ namespace CMMSAPIs.Repositories.SM
             Dictionary<string, int> itemcategory = new Dictionary<string, int>();
             itemcategory.Merge(CategoryNames, CategoryIDs);
 
+            string queryPlant = "SELECT id, UPPER(name) as name FROM facilities GROUP BY name ORDER BY id ASC;";
+            DataTable dtPlant = await Context.FetchData(queryPlant).ConfigureAwait(false);
+            List<string> PlantNames = dtPlant.GetColumn<string>("name");
+            List<int> PlantIDs = dtPlant.GetColumn<int>("id");
+            Dictionary<string, int> itemPlant = new Dictionary<string, int>();
+            itemPlant.Merge(PlantNames, PlantIDs);
+
 
             Dictionary<string, Tuple<string, Type>> columnNames = new Dictionary<string, Tuple<string, Type>>()
             {
@@ -557,7 +564,17 @@ namespace CMMSAPIs.Repositories.SM
                             }
                             newR["name"] = newR[0];
                             newR["description"] = newR[1];
-                            newR["plantID"] = newR[2];
+                            try
+                            {
+                                newR["plantID"] = itemPlant[Convert.ToString(newR[2]).ToUpper()];
+                            
+                            }
+                            catch (KeyNotFoundException)
+                            {
+
+                                newR["plantID"] = 0;
+                            }
+                       
                             newR["Name1"] = newR[3];
                             if (Convert.ToString(newR["description"]) == null || Convert.ToString(newR["description"]) == "")
                             {
