@@ -278,7 +278,7 @@ namespace CMMSAPIs.Repositories.Inventory
                     var sheet = excel.Workbook.Worksheets["Assets"];
                     if (sheet == null)
                     {
-                        m_errorLog.SetWarning("Sheet containing assets should be named 'Assets'");
+                        //m_errorLog.SetWarning("Sheet containing assets should be named 'Assets'");
                         return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"Sheet containing assets should be named Assets");
 
                     }
@@ -361,14 +361,14 @@ namespace CMMSAPIs.Repositories.Inventory
                             }
                             newR["row_no"] = rN;
                             
-                            string siteName = Convert.ToString(newR["siteName"]).ToUpper();
+                            string siteName = Convert.ToString(newR[0]).ToUpper();
                             if (plants.ContainsValue(siteName))
                             {
 
                             }
                             else
                             {
-                                m_errorLog.SetError($"[Row: {rN}] Invalid Site Name '{newR["siteName"]}'.");
+                                m_errorLog.SetError($"[Row: {rN}] Invalid Site Name '{newR[0]}'.");
                                 newR.Delete();
                                 continue;
 
@@ -393,20 +393,30 @@ namespace CMMSAPIs.Repositories.Inventory
                             }
                             catch (KeyNotFoundException)
                             {
-                                string name = Convert.ToString(newR["blockName"]);
+                                string name = Convert.ToString(newR["blockName"]).Replace("_", "");
+                                string chk_isBlock_added = "select * from facilities where name = '"+name+"'";
+                                DataTable dt_block_chk = await Context.FetchData(chk_isBlock_added).ConfigureAwait(false);
 
-                                string addNewBlock = $"INSERT INTO facilities(name,isBlock, parentId, status, createdBy, createdAt) VALUES " +
-                                                        $"('{name}',1, {facility_id},1,{userID},'{UtilsRepository.GetUTCTime()}'); " +
-                                                        $"SELECT LAST_INSERT_ID();";
-                                DataTable dt = await Context.FetchData(addNewBlock).ConfigureAwait(false);
-                                int id = Convert.ToInt32(dt.Rows[0][0]);
+                                if (dt_block_chk.Rows.Count == 0)
+                                {
 
-                                facilities.Add(name.ToUpper(), id);
-                                newR["blockId"] = id;
-                                newR["facilityId"] = facility_id;
+                                    string addNewBlock = $"INSERT INTO facilities(name,isBlock, parentId, status, createdBy, createdAt) VALUES " +
+                                                            $"('{name}',1, {facility_id},1,{userID},'{UtilsRepository.GetUTCTime()}'); " +
+                                                            $"SELECT LAST_INSERT_ID();";
+                                    DataTable dt = await Context.FetchData(addNewBlock).ConfigureAwait(false);
+                                    int id = Convert.ToInt32(dt.Rows[0][0]);
 
-                                m_errorLog.SetInformation($"[Row: {rN}] New Block named '{newR["blockName"]}' added in plant '{plants[facility_id]}'.");
+                                    facilities.Add(name.ToUpper(), id);
+                                    newR["blockId"] = id;
+                                    newR["facilityId"] = facility_id;
 
+                                    //m_errorLog.SetInformation($"[Row: {rN}] New Block named '{newR["blockName"]}' added in plant '{plants[facility_id]}'.");
+                                }
+                                else
+                                {
+                                    newR["blockId"] = Convert.ToInt32(dt_block_chk.Rows[0][0]); ;
+                                    newR["facilityId"] = facility_id;
+                                }
                                 //return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] Block named '{newR["blockName"]}' does not exist in plant '{plants[facility_id]}'.");
                             }
                             try
@@ -462,7 +472,7 @@ namespace CMMSAPIs.Repositories.Inventory
                                     int id = Convert.ToInt32(dt.Rows[0][0]);
                                     businesses.Add(name.ToUpper(), id);
                                     newR["customerId"] = id;
-                                    m_errorLog.SetInformation($"New business '{name}' added.");
+                                    //m_errorLog.SetInformation($"New business '{name}' added.");
                                 }
                                 catch (KeyNotFoundException)
                                 {
@@ -487,7 +497,7 @@ namespace CMMSAPIs.Repositories.Inventory
                                     int id = Convert.ToInt32(dt.Rows[0][0]);
                                     businesses.Add(name.ToUpper(), id);
                                     newR["ownerId"] = id;
-                                    m_errorLog.SetInformation($"New business '{name}' added.");
+                                    //m_errorLog.SetInformation($"New business '{name}' added.");
                                 }
                                 catch (KeyNotFoundException)
                                 {
@@ -512,7 +522,7 @@ namespace CMMSAPIs.Repositories.Inventory
                                     int id = Convert.ToInt32(dt.Rows[0][0]);
                                     businesses.Add(name.ToUpper(), id);
                                     newR["operatorId"] = id;
-                                    m_errorLog.SetInformation($"New business '{name}' added.");
+                                    //m_errorLog.SetInformation($"New business '{name}' added.");
                                 }
                                 catch (KeyNotFoundException)
                                 {
@@ -537,7 +547,7 @@ namespace CMMSAPIs.Repositories.Inventory
                                     int id = Convert.ToInt32(dt.Rows[0][0]);
                                     businesses.Add(name.ToUpper(), id);
                                     newR["supplierId"] = id;
-                                    m_errorLog.SetInformation($"New business '{name}' added.");
+                                    //m_errorLog.SetInformation($"New business '{name}' added.");
                                 }
                                 catch (KeyNotFoundException)
                                 {
@@ -562,7 +572,7 @@ namespace CMMSAPIs.Repositories.Inventory
                                     int id = Convert.ToInt32(dt.Rows[0][0]);
                                     businesses.Add(name.ToUpper(), id);
                                     newR["manufacturerId"] = id;
-                                    m_errorLog.SetInformation($"New business '{name}' added.");
+                                    //m_errorLog.SetInformation($"New business '{name}' added.");
                                 }
                                 catch (KeyNotFoundException)
                                 {
@@ -646,17 +656,17 @@ namespace CMMSAPIs.Repositories.Inventory
                                     int id = Convert.ToInt32(dt.Rows[0][0]);
                                     businesses.Add(name.ToUpper(), id);
                                     newR["warranty_provider_id"] = id;
-                                    m_errorLog.SetInformation($"New business '{name}' added.");
+                                    //m_errorLog.SetInformation($"New business '{name}' added.");
                                 }
                                 catch (KeyNotFoundException)
                                 {
-                                    m_errorLog.SetWarning($"[Row: {rN}] Warranty Provider named '{name}' not found. Setting warranty provider ID as 0.");
+                                    //m_errorLog.SetWarning($"[Row: {rN}] Warranty Provider named '{name}' not found. Setting warranty provider ID as 0.");
                                     newR["warranty_provider_id"] = 0;
                                 }
                             }
 
                             if (!(Convert.ToInt32(newR["warranty_type"]) > 0 && Convert.ToInt32(newR["warranty_term_type"]) > 0 && Convert.ToInt32(newR["warranty_provider_id"]) > 0)) {
-                                m_errorLog.SetWarning($"[Row: {rN}] Warranty data does not exist. ");
+                                //m_errorLog.SetWarning($"[Row: {rN}] Warranty data does not exist. ");
                             }
                            
                                 if (Convert.ToString(newR["parentName"]) == null || Convert.ToString(newR["parentName"]) == "")
@@ -922,7 +932,7 @@ namespace CMMSAPIs.Repositories.Inventory
             Dictionary<string, int> assetDict = new Dictionary<string, int>();
             assetDict.Merge(assetNames, assetIds);
 
-            string assetQry2 = $"SELECT id, REPLACE(UPPER(name), '_', '') as name FROM facilities WHERE parentId = {facility_id} GROUP BY name ORDER BY id;";
+            string assetQry2 = $"SELECT id, REPLACE(UPPER(name), '_', '') as name FROM facilities WHERE parentId = {facility_id}  GROUP BY name ORDER BY id;";
             DataTable dtAsset2 = await Context.FetchData(assetQry2).ConfigureAwait(false);
             List<string> assetNames2 = dtAsset2.GetColumn<string>("name");
             List<int> assetIds2 = dtAsset2.GetColumn<int>("id");
@@ -944,7 +954,7 @@ namespace CMMSAPIs.Repositories.Inventory
                     }
                     catch
                     {
-                        m_errorLog.SetWarning($"[Row: {row["row_no"]}] Asset named '{Convert.ToString(row["parentName"])}' '{Convert.ToString(row["parentName"]).Replace("_", "").ToUpper()}'not found. Setting parent ID as 0.");
+                        //m_errorLog.SetWarning($"[Row: {row["row_no"]}] Asset named '{Convert.ToString(row["parentName"])}' '{Convert.ToString(row["parentName"]).Replace("_", "").ToUpper()}'not found. Setting parent ID as 0.");
                         row["parentId"] = 0;
                     }
                 }
@@ -986,7 +996,7 @@ namespace CMMSAPIs.Repositories.Inventory
                     }
                     catch
                     {
-                        m_errorLog.SetWarning($"[Row: {row["row_no"]}] Asset named '{Convert.ToString(row["parentName"])}' '{Convert.ToString(row["parentName"]).Replace("_", "").ToUpper()}'not found. Setting parent ID as 0.");
+                        //m_errorLog.SetWarning($"[Row: {row["row_no"]}] Asset named '{Convert.ToString(row["parentName"])}' '{Convert.ToString(row["parentName"]).Replace("_", "").ToUpper()}'not found. Setting parent ID as 0.");
                         row["parentId"] = 0;
                     }
                 }
