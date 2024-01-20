@@ -97,6 +97,9 @@ namespace CMMSAPIs.Repositories.Inventory
         }
         internal async Task<CMImportFileResponse> ImportInventories(int file_id, int facility_id, int userID)
         {
+            int Total_no_row_excel = 0;
+            int Total_Inserted_Rows = 0;
+
             CMImportFileResponse response = null;
             /*
             string queryAsset = "SELECT id, UPPER(name) as name FROM assets GROUP BY name ORDER BY id ASC;";
@@ -334,6 +337,8 @@ namespace CMMSAPIs.Repositories.Inventory
                         List<int> idList = new List<int>();
                         List<int> updatedIdList = new List<int>();
 
+                        Total_no_row_excel = sheet.Dimension.End.Row;
+
                         for (int rN = 2; rN <= sheet.Dimension.End.Row; rN++)
                         {
                             ExcelRange row = sheet.Cells[rN, 1, rN, sheet.Dimension.End.Column];
@@ -394,7 +399,7 @@ namespace CMMSAPIs.Repositories.Inventory
                             catch (KeyNotFoundException)
                             {
                                 string name = Convert.ToString(newR["blockName"]).Replace("_", "");
-                                string chk_isBlock_added = "select * from facilities where name = '"+name+"'";
+                                string chk_isBlock_added = "select * from facilities where (name = '" + name + "' or name = '" + Convert.ToString(newR["blockName"]) + "')";
                                 DataTable dt_block_chk = await Context.FetchData(chk_isBlock_added).ConfigureAwait(false);
 
                                 if (dt_block_chk.Rows.Count == 0)
@@ -869,8 +874,8 @@ namespace CMMSAPIs.Repositories.Inventory
                                 //    idList.AddRange((await AddInventoryWithParent(dtUsers, facility_id, userID)).id);
                                 //}
                             }
-
-                            response = new CMImportFileResponse(file_id, idList, updatedIdList, CMMS.RETRUNSTATUS.SUCCESS, null, null, $"{idList.Count} new assets added.{updatedIdList.Count} assets Updated.");
+                        Total_Inserted_Rows = updatedIdList.Count + idList.Count;
+                        response = new CMImportFileResponse(file_id, idList, updatedIdList, CMMS.RETRUNSTATUS.SUCCESS, null, null, $"{idList.Count} new assets added.{updatedIdList.Count} assets Updated.");
 
                        // }
                     }
@@ -890,7 +895,8 @@ namespace CMMSAPIs.Repositories.Inventory
                 response = new CMImportFileResponse(0, CMMS.RETRUNSTATUS.FAILURE, logPath, m_errorLog.errorLog(), "Errors found while importing file.");
             else
             {
-                m_errorLog.SetImportInformation("File imported successfully");
+                //m_errorLog.SetImportInformation("File imported successfully");
+                m_errorLog.SetImportInformation("Total Rows Inserted-Updated " + Total_Inserted_Rows + " Out of  Total Excel Record  " + Total_no_row_excel);
                 response.error_log_file_path = logPath;
                 response.import_log = m_errorLog.errorLog();
             }
@@ -1169,10 +1175,11 @@ string warrantyQry = "insert into assetwarranty
                 retID = Convert.ToInt32(dt.Rows[0][0]);
                 if (unit.warranty_type > 0 && unit.warranty_term_type > 0 && unit.warranty_provider_id > 0)
                 {
+                    string start_date = unit.start_date != null ? ((DateTime)unit.start_date).ToString("yyyy-MM-dd HH:mm:ss") : UtilsRepository.GetUTCTime().ToString();
                     string warranty_description = unit.warranty_description == null ? "" : unit.warranty_description;
                     string expiry_date = unit.expiry_date == null ?"": ((DateTime)unit.expiry_date).ToString("yyyy-MM-dd HH:mm:ss");
                     string warrantyQry = "insert into assetwarranty (certificate_file_id, warranty_type, warranty_description, warranty_term_type, asset_id, start_date, expiry_date, meter_limit, meter_unit, warranty_provider, certificate_number, addedAt, addedBy, status,warrantyTenture) VALUES ";
-                    warrantyQry += $"({unit.warranty_certificate_file_id}, {unit.warranty_type}, '{warranty_description}', {unit.warranty_term_type}, {retID}, '{((DateTime)unit.start_date).ToString("yyyy-MM-dd HH:mm:ss")}', '{expiry_date}', {unit.meter_limit}, {unit.meter_unit}, {unit.warranty_provider_id}, '{unit.certificate_number}', '{UtilsRepository.GetUTCTime()}', {userID}, 1,{unit.warrantyTenture});" +
+                    warrantyQry += $"({unit.warranty_certificate_file_id}, {unit.warranty_type}, '{warranty_description}', {unit.warranty_term_type}, {retID}, '{start_date}', '{expiry_date}', {unit.meter_limit}, {unit.meter_unit}, {unit.warranty_provider_id}, '{unit.certificate_number}', '{UtilsRepository.GetUTCTime()}', {userID}, 1,{unit.warrantyTenture});" +
                         $" SELECT LAST_INSERT_ID();";
                     DataTable dt2 = await Context.FetchData(warrantyQry).ConfigureAwait(false);
                     int warrantyId = Convert.ToInt32(dt2.Rows[0][0]);
