@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -22,7 +22,7 @@ namespace CMMSAPIs.Repositories.Facility
      
         internal async Task<List<CMFacilityList>> GetFacilityList(int userID)
         {
-            string myQuery = "SELECT facilities.id, facilities.name, spv.name as spv, facilities.address, facilities.city, facilities.state, facilities.country, facilities.zipcode as pin FROM Facilities  inner join userfacilities uf on uf.facilityId = Facilities.id LEFT JOIN spv ON facilities.spvId=spv.id WHERE isBlock = 0 and facilities.status = 1 and uf.userId = "+userID+";";
+            string myQuery = "SELECT facilities.id, facilities.name, spv.name as spv, facilities.address, facilities.city, facilities.state, facilities.country, facilities.zipcode as pin, Facilities.description FROM Facilities  inner join userfacilities uf on uf.facilityId = Facilities.id LEFT JOIN spv ON facilities.spvId=spv.id WHERE isBlock = 0 and facilities.status = 1 and uf.userId = " + userID+";";
             List<CMFacilityList> _Facility = await Context.GetData<CMFacilityList>(myQuery).ConfigureAwait(false);
             return _Facility;
         }
