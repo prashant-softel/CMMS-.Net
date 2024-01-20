@@ -301,7 +301,7 @@ namespace CMMSAPIs.Repositories.Masters
             {
                 string query = "INSERT INTO  checkpoint (check_point, check_list_id, requirement, is_document_required, " +
                                 "action_to_be_done,failure_weightage,type,min_range,max_range ,created_by, created_at, status) VALUES " +
-                                $"('{request.check_point}', {request.checklist_id}, '{request.requirement}', " +
+                                $"('{request.check_point.Replace("'", "")}', {request.checklist_id}, '{request.requirement.Replace("'", "")}', " +
                                 $"{(request.is_document_required==null?0 : request.is_document_required)}, '{request.action_to_be_done}', '{request.failure_weightage}', '{request.checkpoint_type.id}', '{request.checkpoint_type.min}','{request.checkpoint_type.max}'," +
                                 $"{userID}, '{UtilsRepository.GetUTCTime()}', 1); select LAST_INSERT_ID();";
 
@@ -709,18 +709,18 @@ namespace CMMSAPIs.Repositories.Masters
                             }
                             else
                             {
-                                newR["failure_weightage"] = Convert.ToInt32(newR["failure_weightage"]);
+                                newR["failure_weightage"] = newR["failure_weightage"].ToInt();
                             }
 
                             if (Convert.ToString(newR["range_min"]) == null || Convert.ToString(newR["range_min"]) == "")                               
                                 newR["range_min"] = 0;
                             else
-                                newR["range_min"] = Convert.ToInt32(newR["range_min"]);
+                                newR["range_min"] = newR["range_min"].ToInt();
 
                             if (Convert.ToString(newR["range_max"]) == null || Convert.ToString(newR["range_max"]) == "")
                                  newR["range_max"] = 0;
                             else
-                                newR["range_min"] = Convert.ToInt32(newR["range_min"]);
+                                newR["range_min"] = newR["range_min"].ToInt();
 
                             dt2.Rows.Add(newR);
                             /*
