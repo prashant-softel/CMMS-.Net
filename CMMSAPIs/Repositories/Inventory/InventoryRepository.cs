@@ -337,7 +337,7 @@ namespace CMMSAPIs.Repositories.Inventory
                         List<int> idList = new List<int>();
                         List<int> updatedIdList = new List<int>();
 
-                        Total_no_row_excel = sheet.Dimension.End.Row;
+                        Total_no_row_excel = sheet.Dimension.End.Row-1;
 
                         for (int rN = 2; rN <= sheet.Dimension.End.Row; rN++)
                         {
