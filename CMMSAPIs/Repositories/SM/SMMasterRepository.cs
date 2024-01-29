@@ -481,8 +481,8 @@ namespace CMMSAPIs.Repositories.SM
                 { "Plant", new Tuple<string, Type>("plantID", typeof(string)) },
                 { "Name 1", new Tuple<string, Type>("Name1", typeof(string)) },
                 { "Base Unit of Measure", new Tuple<string, Type>("unit_of_measurement", typeof(string)) },
-                { "Unrestricted", new Tuple<string, Type>("unrestricted", typeof(int)) },
-                { "Value Unrestricted", new Tuple<string, Type>("value_unrestricted", typeof(string)) },
+                //{ "Unrestricted", new Tuple<string, Type>("unrestricted", typeof(int)) },
+                //{ "Value Unrestricted", new Tuple<string, Type>("value_unrestricted", typeof(string)) },
                 { "Type", new Tuple<string, Type>("Type", typeof(string)) },
                 { "Category", new Tuple<string, Type>("Category", typeof(string)) },
                 { "ApprovalRequired", new Tuple<string, Type>("ApprovalRequired", typeof(int)) }
@@ -598,26 +598,26 @@ namespace CMMSAPIs.Repositories.SM
                             }
                             try
                             {
-                                newR["TypeID"] = assettypes[Convert.ToString(newR[7]).ToUpper()];
+                                newR["TypeID"] = assettypes[Convert.ToString(newR[5]).ToUpper()];
 
                             }
                             catch (KeyNotFoundException)
                             {
 
-                                return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] asset type '{newR[7]}' does not exist.");
+                                return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] asset type '{newR[5]}' does not exist.");
                             }
                             try
                             {
-                                newR["CategoryID"] = itemcategory[Convert.ToString(newR[8]).ToUpper()];
+                                newR["CategoryID"] = itemcategory[Convert.ToString(newR[6]).ToUpper()];
 
                             }
                             catch (KeyNotFoundException)
                             {
 
-                                return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] asset category '{newR[8]}' does not exist.");
+                                return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] asset category '{newR[6]}' does not exist.");
                             }
-                            newR["unrestricted"] = newR[5];
-                            newR["value_unrestricted"] = newR[6];
+                            //newR["unrestricted"] = newR[5];
+                            //newR["value_unrestricted"] = newR[6];
                             newR["row_no"] = rN;
 
                          
@@ -627,10 +627,14 @@ namespace CMMSAPIs.Repositories.SM
                         }
                         string insertQuery = "INSERT INTO smassetmasters (plant_ID, asset_code, asset_name,description, " +
                             "unit_of_measurement, flag, lastmodifieddate, asset_type_ID, item_category_ID, approval_required)";
+                      
                         foreach (DataRow row in dt2.Rows)
                         {
+                            //insertQuery = insertQuery + $"Select {row.ItemArray[2]},'{row.ItemArray[0]}', '{row.ItemArray[1]}', '{row.ItemArray[1]}'," +
+                              //  $"{row.ItemArray[4]}, 1, '{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}', {row.ItemArray[11]},{row.ItemArray[12]},{row.ItemArray[9]} UNION ALL ";
+                           
                             insertQuery = insertQuery + $"Select {row.ItemArray[2]},'{row.ItemArray[0]}', '{row.ItemArray[1]}', '{row.ItemArray[1]}'," +
-                                $"{row.ItemArray[4]}, 1, '{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}', {row.ItemArray[11]},{row.ItemArray[12]},{row.ItemArray[9]} UNION ALL ";
+                               $"{row.ItemArray[4]}, 1, '{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}', {row.ItemArray[9]},{row.ItemArray[10]},{row.ItemArray[7]} UNION ALL ";
                         }
                         int lastIndex = insertQuery.LastIndexOf("UNION ALL ");
                         insertQuery = insertQuery.Remove(lastIndex, "UNION ALL ".Length);
