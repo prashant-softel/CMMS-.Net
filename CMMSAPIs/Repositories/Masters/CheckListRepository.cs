@@ -711,17 +711,53 @@ namespace CMMSAPIs.Repositories.Masters
                             {
                                 newR["failure_weightage"] = newR["failure_weightage"].ToInt();
                             }
-
-                            if (Convert.ToString(newR["range_min"]) == null || Convert.ToString(newR["range_min"]) == "")                               
-                                newR["range_min"] = 0;
+                            if (string.IsNullOrEmpty(Convert.ToString(newR["range_min"])))
+                            {
+                                newR["range_min"] = 0.0; // Default value for double
+                            }
                             else
-                                newR["range_min"] = newR["range_min"].ToInt();
+                            {
+                                double rangeMin;
+                                if (double.TryParse(Convert.ToString(newR["range_min"]), out rangeMin))
+                                {
+                                    newR["range_min"] = rangeMin;
+                                }
+                                else
+                                {
+                                    // Handle the case where conversion fails
+                                    // You can throw an exception, set a default value, or take any other appropriate action.
+                                }
+                            }
 
-                            if (Convert.ToString(newR["range_max"]) == null || Convert.ToString(newR["range_max"]) == "")
-                                 newR["range_max"] = 0;
+                            if (string.IsNullOrEmpty(Convert.ToString(newR["range_max"])))
+                            {
+                                newR["range_max"] = 0.0; // Default value for double
+                            }
                             else
-                                newR["range_min"] = newR["range_min"].ToInt();
+                            {
+                                double rangeMax;
+                                if (double.TryParse(Convert.ToString(newR["range_max"]), out rangeMax))
+                                {
+                                    newR["range_max"] = rangeMax;
+                                }
+                                else
+                                {
+                                    // Handle the case where conversion fails
+                                    // You can throw an exception, set a default value, or take any other appropriate action.
+                                }
+                            }
 
+                            /*
+                              if (Convert.ToString(newR["range_min"]) == null || Convert.ToString(newR["range_min"]) == "")                               
+                                  newR["range_min"] = 0;
+                              else
+                                  newR["range_min"] = newR["range_min"].ToInt();
+
+                              if (Convert.ToString(newR["range_max"]) == null || Convert.ToString(newR["range_max"]) == "")
+                                   newR["range_max"] = 0;
+                              else
+                                  newR["range_max"] = newR["range_max"].ToInt();
+                            */
                             dt2.Rows.Add(newR);
                             /*
                             Dictionary<string, Tuple<string, Type>> columnNames = new Dictionary<string, Tuple<string, Type>>()
@@ -842,8 +878,8 @@ namespace CMMSAPIs.Repositories.Masters
                     {
                         CMCPType checkpoint_type = new CMCPType();
                         checkpoint_type.id = Convert.ToInt32(row["checkpoint_type_id"]);
-                        checkpoint_type.min = Convert.ToInt32(row["range_min"]);
-                        checkpoint_type.max = Convert.ToInt32(row["range_max"]);
+                        checkpoint_type.min = (int)Convert.ToDouble(row["range_min"]);
+                        checkpoint_type.max =(int) Convert.ToDouble(row["range_max"]);
                         CMCreateCheckPoint checkpoint = new CMCreateCheckPoint
                         {
                           
