@@ -640,13 +640,24 @@ namespace CMMSAPIs.Repositories.Incident_Reports
             {
                 try
                 {
-                   
+
+                    /*  foreach (var item in request.why_why_analysis)
+                      {
+                          StringBuilder why_why_UQuery = new StringBuilder();
+                          why_why_UQuery.Append("UPDATE why_why_analysis ");
+                          why_why_UQuery.Append("SET why = '" + item.why + "', ");
+                          why_why_UQuery.Append("incidents_id = '" + incident_id + "', ");
+                          why_why_UQuery.Append("cause = '" +item.cause + "' ");
+                          why_why_UQuery.Append("WHERE id = " + item.why_item_id);
+                          var why_why_Query_result = await Context.ExecuteNonQry<int>(why_why_UQuery.ToString()).ConfigureAwait(false);
+                      }*/
                     foreach (var item in request.why_why_analysis)
                     {
                         StringBuilder why_why_UQuery = new StringBuilder();
                         why_why_UQuery.Append("UPDATE why_why_analysis ");
                         why_why_UQuery.Append("SET why = '" + item.why + "', ");
-                        why_why_UQuery.Append("cause = '" +item.cause + "' ");
+                        why_why_UQuery.Append("incidents_id = '" + incident_id + "', ");
+                        why_why_UQuery.Append("cause = '" + item.cause + "' ");
                         why_why_UQuery.Append("WHERE id = " + item.why_item_id);
                         var why_why_Query_result = await Context.ExecuteNonQry<int>(why_why_UQuery.ToString()).ConfigureAwait(false);
                     }
@@ -703,8 +714,6 @@ namespace CMMSAPIs.Repositories.Incident_Reports
             {
                 try
                 {
-                    
-
 
                     foreach (var item in request.proposed_action_plan)
                     {
@@ -713,8 +722,8 @@ namespace CMMSAPIs.Repositories.Incident_Reports
                         proposedActionPlanUQuery.Append("SET actions_as_per_plan = '"+item.actions_as_per_plan+"', ");
                         proposedActionPlanUQuery.Append("responsibility = '"+item.responsibility+"', ");
                         proposedActionPlanUQuery.Append("target_date = '"+item.target_date.Value.ToString("yyyy-MM-dd HH:mm:ss")+"', ");
-                        proposedActionPlanUQuery.Append("remarks = '"+item.remarks+"' ");
-                        proposedActionPlanUQuery.Append("hse_remark = '" + item.hse_remark + "' ");
+                        proposedActionPlanUQuery.Append("remarks = '"+item.remarks+"', ");
+                        proposedActionPlanUQuery.Append("hse_remark = '" + item.hse_remark + "', ");
                         proposedActionPlanUQuery.Append("id_Status = " + item.id_Status + " ");
                         proposedActionPlanUQuery.Append("WHERE id = " + item.proposed_item_id);
                         var proposedActionPlanQuery_result = await Context.ExecuteNonQry<int>(proposedActionPlanUQuery.ToString()).ConfigureAwait(false);
@@ -730,9 +739,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
             {
                 try
                 {
-                  
-
-
+                 
                     foreach (var item in request.investigation_team)
                     {
                         StringBuilder investigation_UQuery = new StringBuilder();
