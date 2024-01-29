@@ -485,7 +485,8 @@ namespace CMMSAPIs.Repositories.SM
                 { "Value Unrestricted", new Tuple<string, Type>("value_unrestricted", typeof(string)) },
                 { "Type", new Tuple<string, Type>("Type", typeof(string)) },
                 { "Category", new Tuple<string, Type>("Category", typeof(string)) },
-                { "ApprovalRequired", new Tuple<string, Type>("ApprovalRequired", typeof(int)) }
+                { "ApprovalRequired", new Tuple<string, Type>("ApprovalRequired", typeof(int)) },
+                { "Section", new Tuple<string, Type>("Section", typeof(string)) }
 
             };
 
@@ -618,6 +619,7 @@ namespace CMMSAPIs.Repositories.SM
                             }
                             newR["unrestricted"] = newR[5];
                             newR["value_unrestricted"] = newR[6];
+                            newR["Section"] = newR[8];
                             newR["row_no"] = rN;
 
                          
@@ -626,11 +628,11 @@ namespace CMMSAPIs.Repositories.SM
                             dt2.Rows.Add(newR);
                         }
                         string insertQuery = "INSERT INTO smassetmasters (plant_ID, asset_code, asset_name,description, " +
-                            "unit_of_measurement, flag, lastmodifieddate, asset_type_ID, item_category_ID, approval_required)";
+                            "unit_of_measurement, flag, lastmodifieddate, asset_type_ID, item_category_ID, approval_required,Section)";
                         foreach (DataRow row in dt2.Rows)
                         {
                             insertQuery = insertQuery + $"Select {row.ItemArray[2]},'{row.ItemArray[0]}', '{row.ItemArray[1]}', '{row.ItemArray[1]}'," +
-                                $"{row.ItemArray[4]}, 1, '{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}', {row.ItemArray[11]},{row.ItemArray[12]},{row.ItemArray[9]} UNION ALL ";
+                                $"{row.ItemArray[4]}, 1, '{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}', {row.ItemArray[11]},{row.ItemArray[12]},{row.ItemArray[10]},'{row.ItemArray[8]}' UNION ALL ";
                         }
                         int lastIndex = insertQuery.LastIndexOf("UNION ALL ");
                         insertQuery = insertQuery.Remove(lastIndex, "UNION ALL ".Length);
