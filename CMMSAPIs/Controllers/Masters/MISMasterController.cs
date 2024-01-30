@@ -786,6 +786,90 @@ namespace CMMSAPIs.Controllers.Masters
             }
         }
 
+        // MIS Water Data APIS
 
+        [Route("GetWaterDataById")]
+        [HttpGet]
+        public async Task<IActionResult> GetWaterDataById(int id)
+        {
+            try
+            {
+                var data = await _IMISMasterBS.GetWaterDataById(id);
+                return Ok(data);
+
+            }
+            catch (Exception ex)
+            {
+
+                return BadRequest(ex.Message);
+            }
+
+        }
+
+        [Route("GetWaterDataList")]
+        [HttpGet]
+        public async Task<IActionResult> GetWaterDataList(DateTime fromDate, DateTime toDate)
+        {
+            try
+            {
+                var data = await _IMISMasterBS.GetWaterDataList(fromDate, toDate);
+                return Ok(data);
+
+            }
+            catch (Exception ex)
+            {
+
+                return BadRequest(ex.Message);
+            }
+
+        }
+        [Route("CreateWaterData")]
+        [HttpPost]
+        public async Task<IActionResult> CreateWaterData(CMMisWaterData request)
+        {
+
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.CreateWaterData(request, userID);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+        }
+        [Route("UpdateWaterData")]
+        [HttpPut]
+        public async Task<IActionResult> UpdateWaterData(CMMisWaterData request)
+        {
+
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.UpdateWaterData(request, userID);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+        }
+        [Route("DeleteWaterData")]
+        public async Task<IActionResult> DeleteWaterData(int id)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.DeleteWaterData(id, userID);
+                return Ok(data);
+            }
+            catch
+            {
+                throw;
+            }
+        }
     }
 }
