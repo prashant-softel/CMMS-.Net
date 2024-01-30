@@ -517,6 +517,57 @@ namespace CMMSAPIs.Repositories.Masters
             return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Incident Type Deleted.");
         }
 
+        internal async Task<CMGetMisWaterData> GetWaterDataById(int id)
+        {
+            CMGetMisWaterData item = new CMGetMisWaterData();
+            string myQuery = "SELECT M.id, M.plantId, f.name as PlantName , date, waterTypeId, M.description, debitQty, creditQty, concat(added.firstname,' ',added.lastname)  as addedBy, addedAt,concat(updated.firstname,' ',updated.lastname)  as updatedBy, M.updatedAt FROM mis_waterdata M left join users added on added.id = M.addedBy " +
+                " left join users updated on updated.id = M.updatedBy left join facilities f on f.id = M.plantId  where M.isActive = 1 and M.id = " + id+";";
+            List<CMGetMisWaterData> result = await Context.GetData<CMGetMisWaterData>(myQuery).ConfigureAwait(false);
+            if(result.Count == 0)
+            {
+                return item;
+            }
+            return result[0];
+        }
+
+        internal async Task<List<CMGetMisWaterData>> GetWaterDataList(DateTime fromDate, DateTime toDate)
+        {
+            string myQuery = "SELECT M.id, M.plantId,f.name as PlantName, date, waterTypeId, M.description, sum(debitQty) as debitQty, sum(creditQty) as creditQty, concat(added.firstname,' ',added.lastname)  as addedBy, addedAt,concat(updated.firstname,' ',updated.lastname)  as updatedBy, M.updatedAt FROM mis_waterdata M left join users added on added.id = M.addedBy " +
+                " left join users updated on updated.id = M.updatedBy left join facilities f on f.id = M.plantId  where isActive = 1 and date between '" + fromDate.ToString("yyyy-MM-dd") +"' and '"+ toDate.ToString("yyyy-MM-dd") + "' ;";
+            List<CMGetMisWaterData> result = await Context.GetData<CMGetMisWaterData>(myQuery).ConfigureAwait(false);
+            return result;
+        }
+        internal async Task<CMDefaultResponse> CreateWaterData(CMMisWaterData request, int userId)
+        {
+            string myQuery = $"INSERT INTO mis_waterdata(plantId, date, waterTypeId, description, debitQty, creditQty, addedBy, addedAt) VALUES " +
+                             $"({request.PlantId}, '{request.Date.ToString("yyyy-MM-dd")}', {request.WaterTypeId}, '{request.Description}', {request.DebitQty}, {request.CreditQty}, {userId}, '{UtilsRepository.GetUTCTime()}'); " +
+                             $"SELECT LAST_INSERT_ID();";
+            DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
+            int id = Convert.ToInt32(dt.Rows[0][0]);
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Water Data Added.");
+        }
+
+        internal async Task<CMDefaultResponse> UpdateWaterData(CMMisWaterData request, int userId)
+        {
+            string updateQry = "UPDATE mis_waterdata SET ";
+            if (request.PlantId != null) updateQry += $"plantId = {request.PlantId}, ";
+            if (request.Date != null) updateQry += $"date = '{request.Date.ToString("yyyy-MM-dd")}', ";
+            if (request.WaterTypeId != null) updateQry += $"waterTypeId = {request.WaterTypeId}, ";
+            if (request.Description != null) updateQry += $"description = '{request.Description}', ";
+            if (request.DebitQty != null) updateQry += $"debitQty = {request.DebitQty}, ";
+            if (request.CreditQty != null) updateQry += $"creditQty = {request.CreditQty}, ";
+            updateQry += $"updatedBy = {userId}, updatedAt = '{UtilsRepository.GetUTCTime()}' WHERE id = {request.Id};";
+            await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+            return new CMDefaultResponse(request.Id, CMMS.RETRUNSTATUS.SUCCESS, "Water Data Updated.");
+        }
+
+        internal async Task<CMDefaultResponse> DeleteWaterData(int id, int userId)
+        {
+            string deleteQry = $"UPDATE mis_waterdata SET isActive = 0 , updatedBy = {userId}, updatedAt = '{UtilsRepository.GetUTCTime()}' WHERE id = {id};";
+            await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Water Data Deleted.");
+        }
+
 
     }
 
