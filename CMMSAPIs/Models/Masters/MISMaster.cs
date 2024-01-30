@@ -79,4 +79,35 @@ namespace CMMSAPIs.Models.Masters
         public DateTime UpdatedAt { get; set; }
         public string UpdatedBy { get; set; }
     }
+
+    public class CMMisWaterData
+    {
+        public int Id { get; set; } 
+        public int PlantId { get; set; } 
+        public DateTime Date { get; set; } 
+        public int WaterTypeId { get; set; }
+        public string Description { get; set; }
+        public decimal DebitQty { get; set; } 
+        public decimal CreditQty { get; set; } 
+        public int AddedBy { get; set; } 
+        public DateTime AddedAt { get; set; }
+        public int UpdatedBy { get; set; } 
+        public DateTime UpdatedAt { get; set; }
+    }
+
+    public class CMGetMisWaterData
+    {
+        public int Id { get; set; }
+        public int PlantId { get; set; }
+        public string PlantName { get; set; }
+        public DateTime Date { get; set; }
+        public int WaterTypeId { get; set; }
+        public string Description { get; set; }
+        public decimal DebitQty { get; set; }
+        public decimal CreditQty { get; set; }
+        public string AddedBy { get; set; }
+        public DateTime? AddedAt { get; set; }
+        public string UpdatedBy { get; set; }
+        public DateTime? UpdatedAt { get; set; }
+    }
 }
