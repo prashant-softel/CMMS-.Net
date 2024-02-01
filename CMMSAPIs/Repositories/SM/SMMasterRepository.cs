@@ -620,23 +620,61 @@ namespace CMMSAPIs.Repositories.SM
                             newR["unrestricted"] = newR[5];
                             newR["value_unrestricted"] = newR[6];
                             newR["Section"] = newR[8];
-                            newR["row_no"] = rN;
-
-                         
-                          
-
+                            newR["row_no"] = rN;                       
                             dt2.Rows.Add(newR);
                         }
-                        string insertQuery = "INSERT INTO smassetmasters (plant_ID, asset_code, asset_name,description, " +
-                            "unit_of_measurement, flag, lastmodifieddate, asset_type_ID, item_category_ID, approval_required,Section)";
+                        //string insertQuery = "INSERT INTO smassetmasters (plant_ID, asset_code, asset_name,description, " +
+                        //    "unit_of_measurement, flag, lastmodifieddate, asset_type_ID, item_category_ID, approval_required,Section)";
+                        //foreach (DataRow row in dt2.Rows)
+                        //{
+                        //    insertQuery = insertQuery + $"Select {row.ItemArray[2]},'{row.ItemArray[0]}', '{row.ItemArray[1]}', '{row.ItemArray[1]}'," +
+                        //        $"{row.ItemArray[4]}, 1, '{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}', {row.ItemArray[11]},{row.ItemArray[12]},{row.ItemArray[10]},'{row.ItemArray[8]}' UNION ALL ";
+                        //}
+                        //int lastIndex = insertQuery.LastIndexOf("UNION ALL ");
+                        //insertQuery = insertQuery.Remove(lastIndex, "UNION ALL ".Length);
+                        //var insertedResult = await Context.ExecuteNonQry<int>(insertQuery).ConfigureAwait(false);
+
                         foreach (DataRow row in dt2.Rows)
                         {
+                            object value = row.ItemArray[5];
+                            int qty;
+
+                            if (value != DBNull.Value && !string.IsNullOrEmpty(value.ToString()))
+                            {
+                                qty = Convert.ToInt32(value);
+                            }
+                            else
+                            {
+                                qty = 0;
+                            }
+                            string insertQuery = "INSERT INTO smassetmasters (plant_ID, asset_code, asset_name,description, " +
+                           "unit_of_measurement, flag, lastmodifieddate, asset_type_ID, item_category_ID, approval_required,Section)";
+                       
                             insertQuery = insertQuery + $"Select {row.ItemArray[2]},'{row.ItemArray[0]}', '{row.ItemArray[1]}', '{row.ItemArray[1]}'," +
-                                $"{row.ItemArray[4]}, 1, '{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}', {row.ItemArray[11]},{row.ItemArray[12]},{row.ItemArray[10]},'{row.ItemArray[8]}' UNION ALL ";
+                                $"{row.ItemArray[4]}, 1, '{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}', {row.ItemArray[11]},{row.ItemArray[12]},{row.ItemArray[10]},'{row.ItemArray[8]}' ; SELECT LAST_INSERT_ID();";
+
+                            DataTable dt_asset = await Context.FetchData(insertQuery).ConfigureAwait(false);
+                            int asset_id = Convert.ToInt32(dt_asset.Rows[0][0]);
+                          
+                            string insertTransDetail = $"INSERT INTO smtransactiondetails (fromActorID, fromActorType, toActorID, toActorType, " +
+                                $" assetItemID, qty, plantID, referedby, reference_ID, remarks, lastInsetedDateTime, createdBy, createdAt) VALUES (" +
+                                $" {userID},{(int)CMMS.SM_Actor_Types.Vendor},{row.ItemArray[2]},{(int)CMMS.SM_Actor_Types.Store}," +
+                                $" {asset_id}, {qty},{row.ItemArray[2]}, 32,{(int)CMMS.CMMS_Modules.SM_RO},'Material Import','{UtilsRepository.GetUTCTime()}', {userID}, '{UtilsRepository.GetUTCTime()}' );SELECT LAST_INSERT_ID();";
+                            DataTable dt_TransDetail = await Context.FetchData(insertTransDetail).ConfigureAwait(false);
+                            int asset_TransDetail = Convert.ToInt32(dt_TransDetail.Rows[0][0]);
+
+
+
+                            string insertTransition = $"INSERT INTO smtransition (transactionID, facilityID, goID, mrsID, assetItemID, actorType, actorID, " +
+                                $" debitQty, creditQty, lastModifiedDate) " +
+                                $" select {asset_TransDetail}, {row.ItemArray[2]},0,0, {asset_id},{(int)CMMS.SM_Actor_Types.Vendor}, {userID}, " +
+                                $" {qty},0, '{UtilsRepository.GetUTCTime()}' union all " +
+                                $" select {asset_TransDetail}, {row.ItemArray[2]},0,0, {asset_id},{(int)CMMS.SM_Actor_Types.Store}, {row.ItemArray[2]}," +
+                                $" 0, {qty}, '{UtilsRepository.GetUTCTime()}';";
+                            var insertedResult = await Context.ExecuteNonQry<int>(insertTransition).ConfigureAwait(false);
                         }
-                        int lastIndex = insertQuery.LastIndexOf("UNION ALL ");
-                        insertQuery = insertQuery.Remove(lastIndex, "UNION ALL ".Length);
-                        var insertedResult = await Context.ExecuteNonQry<int>(insertQuery).ConfigureAwait(false);
+
+                    
                     }
                 }
                 else //
