@@ -871,7 +871,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 filter += $" and facilityId={facilityId} ";
             }
 
-            string invQuery = $"select id as invId, name as invName from assets where categoryId = 2 {filter}";
+            string invQuery = $"select id as invId, name as invName ,moduleQuantity  from assets where categoryId = 2 {filter}";
 
             List<CMMCEquipmentList> invs = await Context.GetData<CMMCEquipmentList>(invQuery).ConfigureAwait(false);
 
@@ -881,9 +881,10 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             List<CMSMB> smbs = await Context.GetData<CMSMB>(smbQuery).ConfigureAwait(false);
 
             //List<CMSMB> invSmbs = new List<CMSMB>;
-
+            
             foreach (CMMCEquipmentList inv in invs)
-            {   
+            {
+                inv.moduleQuantity = 0;
                 foreach (CMSMB smb in smbs)
                 {
                     if(inv.invId == smb.parentId)

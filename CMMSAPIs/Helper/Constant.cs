@@ -261,6 +261,9 @@ namespace CMMSAPIs.Helper
             ROLE_DEFAULT_ACCESS_MODULE,
 
             DSM = 181,
+            JobCard=182,
+
+
         }
 
         public enum INCIDENT_RISK_LEVEL

@@ -90,12 +90,19 @@ namespace CMMSAPIs.Repositories.Masters
             /*
              * Read property of CMModule and insert into Features table
             */
-            string myQuery = "INSERT INTO features(`moduleName`, `featureName`, `menuImage`, `add`, `edit`, `delete`, `view`, `issue`, `approve`, `selfView`) " +
-                $"VALUES('{request.moduleName}', '{request.featureName}', '{request.menuImage}', {request.add}, {request.edit}, " +
+            CMDefaultResponse response = new CMDefaultResponse();
+            if (request.software_id == 0)
+            {
+                throw new ArgumentException("ModuleName <" +request.moduleName+ "> For This Module Name Software Id Is Not Present Please contact Backend Team For Adding Software_id");
+              // response = new CMDefaultResponse(request.software_id, CMMS.RETRUNSTATUS.FAILURE, "For This Module Name <" + request.moduleName + "> Software Id Is Not Present Please contact Backend Team For Adding Software_id");
+               // return response;
+            }
+            string myQuery = "INSERT INTO features(`moduleName`,softwareid, `featureName`, `menuImage`, `add`, `edit`, `delete`, `view`, `issue`, `approve`, `selfView`) " +
+                $"VALUES('{request.moduleName}',{request.software_id}, '{request.featureName}', '{request.menuImage}', {request.add}, {request.edit}, " +
                 $"{request.delete}, {request.view}, {request.issue}, {request.approve}, {request.selfView}); SELECT LAST_INSERT_ID();";
             DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
             int id = Convert.ToInt32(dt.Rows[0][0]);
-            CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Module Added Successfully");
+             response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Module Added Successfully");
             return response;
         }
 
