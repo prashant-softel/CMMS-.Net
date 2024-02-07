@@ -245,10 +245,12 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             return response;
         }
 
-        internal async Task<CMDefaultResponse> UpdatePlan(CMMCPlan request, int userId)
+        internal async Task<CMDefaultResponse> UpdatePlan(List<CMMCPlan> requests, int userId)
         {
-           
-            string Query = "UPDATE cleaning_plan SET ";
+            int planId = 0;
+            foreach (CMMCPlan request in requests)
+            {
+                string Query = "UPDATE cleaning_plan SET ";
                 if (request.title != null && request.title != "")
                     Query += $"title = '{request.title}', ";
                 if (request.assignedToId > 0)
@@ -264,47 +266,49 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
                 Query += $"updatedAt = '{UtilsRepository.GetUTCTime()}', updatedById = {userId} WHERE planId = {request.planId};";
 
-            await Context.ExecuteNonQry<int>(Query).ConfigureAwait(false);
+                await Context.ExecuteNonQry<int>(Query).ConfigureAwait(false);
 
-            string myQuery = "";
-
-            if (request.schedules.Count > 0)
-            {
-
-                foreach (var schedule in request.schedules)
+                string myQuery = "";
+               
+                if (request.schedules.Count > 0)
                 {
 
-                    if (moduleType == 1)
+                    foreach (var schedule in request.schedules)
                     {
-                        //(CASE WHEN { schedule.cleaningType} = 'Wet' then 1 else WHEN { schedule.cleaningType} = 'Dry' then 2 end)
-                        if (schedule.cleaningType != 0)
-                            myQuery += $"UPDATE cleaning_plan_schedules SET cleaningType = {schedule.cleaningType},updatedAt = '{UtilsRepository.GetUTCTime()}', updatedById = {userId} where plannedDay ={schedule.cleaningDay} and planId={request.planId};";
-                    }
 
-                    myQuery += $"Delete from cleaning_plan_items where scheduleId = {schedule.scheduleId};";
-
-                    if (schedule.equipments.Count > 0)
-                    {
-                        myQuery += $"insert into `cleaning_plan_items` (`planId`,`scheduleId`,`assetId`,`{measure}`,`plannedDay`,`updatedById`,`updatedAt`,`createdById`,`createdAt`) VALUES ";
-
-
-                        foreach (var equipment in schedule.equipments)
+                        if (moduleType == 1)
                         {
-                            myQuery += $"({request.planId},{schedule.scheduleId},{equipment.id},(select moduleQuantity from assets where id={equipment.id}),{schedule.cleaningDay},{userId},'{UtilsRepository.GetUTCTime()}',(select createdById from cleaning_plan where planId={request.planId}),(select createdAt from cleaning_plan where planId={request.planId})),";
-                            // if (equipment.noOfPlanDay > 0)
-                            //myQuery += $"UPDATE cleaning_plan_items SET plannedDay ={equipment.noOfPlanDay},updatedAt = '{UtilsRepository.GetUTCTime()}', updatedBy = {userId} where assetId = {equipment.id} and scheduleId={schedule.scheduleId};";
+                            //(CASE WHEN { schedule.cleaningType} = 'Wet' then 1 else WHEN { schedule.cleaningType} = 'Dry' then 2 end)
+                            if (schedule.cleaningType != 0)
+                                myQuery += $"UPDATE cleaning_plan_schedules SET cleaningType = {schedule.cleaningType},updatedAt = '{UtilsRepository.GetUTCTime()}', updatedById = {userId} where plannedDay ={schedule.cleaningDay} and planId={request.planId};";
                         }
-                        myQuery = myQuery.Substring(0, myQuery.Length - 1);
-                        myQuery += ";";
+
+                        myQuery += $"Delete from cleaning_plan_items where scheduleId = {schedule.scheduleId};";
+
+                        if (schedule.equipments.Count > 0)
+                        {
+                            myQuery += $"insert into `cleaning_plan_items` (`planId`,`scheduleId`,`assetId`,`{measure}`,`plannedDay`,`updatedById`,`updatedAt`,`createdById`,`createdAt`) VALUES ";
+
+
+                            foreach (var equipment in schedule.equipments)
+                            {
+                                myQuery += $"({request.planId},{schedule.scheduleId},{equipment.id},(select moduleQuantity from assets where id={equipment.id}),{schedule.cleaningDay},{userId},'{UtilsRepository.GetUTCTime()}',(select createdById from cleaning_plan where planId={request.planId}),(select createdAt from cleaning_plan where planId={request.planId})),";
+                                // if (equipment.noOfPlanDay > 0)
+                                //myQuery += $"UPDATE cleaning_plan_items SET plannedDay ={equipment.noOfPlanDay},updatedAt = '{UtilsRepository.GetUTCTime()}', updatedBy = {userId} where assetId = {equipment.id} and scheduleId={schedule.scheduleId};";
+                            }
+                            myQuery = myQuery.Substring(0, myQuery.Length - 1);
+                            myQuery += ";";
+                            planId =request.planId;
+                        }
+
                     }
-
+                    await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
                 }
-                await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
+
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MC_PLAN, request.planId, 0, 0, "Plan Updated", CMMS.CMMS_Status.MC_PLAN_UPDATED, userId);
             }
-
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MC_PLAN, request.planId, 0, 0, "Plan Updated", CMMS.CMMS_Status.MC_PLAN_UPDATED,userId);
-
-            CMDefaultResponse response = new CMDefaultResponse(request.planId, CMMS.RETRUNSTATUS.SUCCESS, $"Plan Updated Successfully ");
+            
+            CMDefaultResponse response = new CMDefaultResponse(planId, CMMS.RETRUNSTATUS.SUCCESS, $"Plan Updated Successfully ");
             return response;
         }
 

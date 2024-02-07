@@ -73,7 +73,7 @@ namespace CMMSAPIs.Controllers.Vegetation
 
         [Route("UpdateVegetationPlan")]
         [HttpPost]
-        public async Task<IActionResult> UpdateVegetationPlan(CMMCPlan request)
+        public async Task<IActionResult> UpdateVegetationPlan(List<CMMCPlan> request)
         {
             try
             {

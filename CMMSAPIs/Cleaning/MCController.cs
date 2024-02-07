@@ -105,7 +105,7 @@ namespace CMMSAPIs.Controllers.MC
         //[Authorize]
         [Route("UpdateMCPlan")]
         [HttpPost]
-        public async Task<IActionResult> UpdateMCPlan(CMMCPlan request)
+        public async Task<IActionResult> UpdateMCPlan(List<CMMCPlan> request)
         {
             try
             {

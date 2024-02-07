@@ -22,7 +22,7 @@ namespace CMMSAPIs.BS.Cleaning
         public Task<CMDefaultResponse> ApprovePlan(CMApproval request, int userId);
         public Task<CMDefaultResponse> RejectPlan(CMApproval request, int userId);
         public Task<CMDefaultResponse> DeletePlan(int planId, int userId);
-        public Task<CMDefaultResponse> UpdatePlan(CMMCPlan request, int userId);
+        public Task<CMDefaultResponse> UpdatePlan(List<CMMCPlan> request, int userId);
         public Task<List<CMMCTaskList>> GetTaskList(int facilityId);
         public Task<CMDefaultResponse> StartExecution(int executionId, int userId);
         public Task<CMDefaultResponse> StartScheduleExecution(int scheduleId, int userId);
@@ -141,7 +141,7 @@ namespace CMMSAPIs.BS.Cleaning
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> UpdatePlan(CMMCPlan request, int userId)
+        public async Task<CMDefaultResponse> UpdatePlan(List<CMMCPlan> request, int userId)
         {
             try
             {
