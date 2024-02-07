@@ -182,13 +182,13 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             {
                 string startDate = "NULL";
 
-                if (plan.startDate != null && plan.startDate != Convert.ToDateTime("01-01-0001 00:00:00"))
+               /* if (plan.startDate != null && plan.startDate != Convert.ToDateTime("01-01-0001 00:00:00"))
                 {
-                    startDate = " '" + plan.startDate.ToString("yyyy-MM-dd")+"' ";
+                    startDate = " '" + plan.startDate.ToString("yyyy-MM-dd hh:MM:ss")+"' ";
                 
-                }
+                }*/
                 string qry = "insert into `cleaning_plan` (`moduleType`,`facilityId`,`title`,`description`, `durationDays`,`frequencyId`,`startDate`,`assignedTo`,`status`,`createdById`,`createdAt`) VALUES " +
-                            $"({moduleType},'{plan.facilityId}','{plan.title}','{plan.description}','{plan.noOfCleaningDays}','{plan.frequencyId}',{startDate},'{plan.assignedToId}',{status},'{userId}','{UtilsRepository.GetUTCTime()}');" +
+                            $"({moduleType},'{plan.facilityId}','{plan.title}','{plan.description}','{plan.noOfCleaningDays}','{plan.frequencyId}','{plan.startDate}','{plan.assignedToId}',{status},'{userId}','{UtilsRepository.GetUTCTime()}');" +
                              "SELECT LAST_INSERT_ID() as id ;";
 
                 List<CMMCPlan> planQry = await Context.GetData<CMMCPlan>(qry).ConfigureAwait(false);
