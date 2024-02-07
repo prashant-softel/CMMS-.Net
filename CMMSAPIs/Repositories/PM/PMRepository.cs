@@ -91,7 +91,7 @@ namespace CMMSAPIs.Repositories.PM
         {
             int status = pm_plan.isDraft > 0 ? (int)CMMS.CMMS_Status.PM_PLAN_DRAFT : (int)CMMS.CMMS_Status.PM_PLAN_CREATED;
 
-            string checklistIDsQry = $"SELECT id FROM checklist_number WHERE facility_id = {pm_plan.facility_id} " +
+            string checklistIDsQry = $"SELECT id FROM checklist_number WHERE facility_id IN ({pm_plan.facility_id},0) " +
                                         $"AND asset_category_id = {pm_plan.category_id} AND frequency_id = {pm_plan.plan_freq_id} " +
                                         $"AND checklist_type = 1; ";
             DataTable dt1 = await Context.FetchData(checklistIDsQry).ConfigureAwait(false);
@@ -182,7 +182,7 @@ namespace CMMSAPIs.Repositories.PM
                                     $"facilities.id as facility_id, facilities.name as facility_name, category.id as category_id, category.name as category_name, " +
                                     $"frequency.id as plan_freq_id, frequency.name as plan_freq_name, createdBy.id as created_by_id, " +
                                     $"CONCAT(createdBy.firstName, ' ', createdBy.lastName) as created_by_name, plan.created_at,CONCAT(assignedTo.firstName, ' ', assignedTo.lastName) as assigned_to_name, " +
-                                    $"updatedBy.id as updated_by_id, CONCAT(updatedBy.firstName, ' ', updatedBy.lastName) as updated_by_name, plan.updated_at " +
+                                    $"updatedBy.id as updated_by_id, CONCAT(updatedBy.firstName, ' ', updatedBy.lastName) as updated_by_name, plan.updated_at, plan.next_schedule_date " +
                                     $"FROM pm_plan as plan " +
                                     $"LEFT JOIN statuses ON plan.status = statuses.softwareId " +
                                     $"JOIN facilities ON plan.facility_id = facilities.id " +
