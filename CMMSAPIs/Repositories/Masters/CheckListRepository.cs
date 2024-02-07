@@ -257,7 +257,7 @@ namespace CMMSAPIs.Repositories.Masters
         #endregion
 
         #region CheckPoint
-        internal async Task<List<CMCheckPointList>> GetCheckPointList(int checklist_id)
+        internal async Task<List<CMCheckPointList>> GetCheckPointList(int checklist_id, int facility_id)
         {
             /*
              * Primary Table - CheckPoint
@@ -275,7 +275,17 @@ namespace CMMSAPIs.Repositories.Masters
                                 "users as created_user ON created_user.id=checkpoint.created_by " +
                              "LEFT JOIN " +
                                 "users as updated_user ON updated_user.id=checkpoint.updated_by ";
-            if (checklist_id > 0)
+
+            if (checklist_id > 0 && facility_id ==0)
+            {
+                myQuery += $" WHERE check_list_id = {checklist_id} ";
+            }
+            else if (facility_id > 0 && checklist_id == 0)
+            {
+               // checklist_number.facility_id in(1798, 0)
+                myQuery += $" WHERE checklist_number.facility_id in ({facility_id},0) ";
+            }
+            else if(checklist_id > 0 && facility_id > 0)
             {
                 myQuery += $" WHERE check_list_id = {checklist_id} ";
             }
