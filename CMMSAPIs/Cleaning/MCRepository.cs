@@ -37,13 +37,13 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
             string smbQuery = $"select id as smbId, name as smbName , parentId, moduleQuantity from assets where categoryId = 4 {filter}";
 
-            List<CMSMB> smbs = await Context.GetData<CMSMB>(smbQuery).ConfigureAwait(false);
+            List<CMPlanSMB> smbs = await Context.GetData<CMPlanSMB>(smbQuery).ConfigureAwait(false);
 
             //List<CMSMB> invSmbs = new List<CMSMB>;
 
             foreach (CMMCEquipmentList inv in invs)
             {
-                foreach (CMSMB smb in smbs)
+                foreach (CMPlanSMB smb in smbs)
                 {
                     if (inv.invId == smb.parentId)
                     {

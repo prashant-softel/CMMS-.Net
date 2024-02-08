@@ -32,7 +32,7 @@ namespace CMMSAPIs.BS.Cleaning
         public Task<CMDefaultResponse> AbandonExecution(CMApproval request, int userId);
         public Task<CMDefaultResponse> AbandonSchedule(CMApproval request, int userId);
         public Task<List<CMMCEquipmentList>> GetEquipmentList(int facilityId);
-        public Task<List<CMMCEquipmentList>> GetTaskEquipmentList(int taskId);
+        public Task<List<CMMCTaskEquipmentList>> GetTaskEquipmentList(int taskId);
         public Task<List<CMVegEquipmentList>> GetVegEquipmentList(int facilityId);
         public Task<CMDefaultResponse> EndScheduleExecution(int scheduleId, int userId);
         public Task<CMDefaultResponse> EndExecution(int executionId, int userId);
@@ -315,7 +315,7 @@ namespace CMMSAPIs.BS.Cleaning
                 throw;
             }
         }
-        public async Task<List<CMMCEquipmentList>> GetTaskEquipmentList(int taskId)
+        public async Task<List<CMMCTaskEquipmentList>> GetTaskEquipmentList(int taskId)
         {
             try
             {

@@ -88,7 +88,7 @@ namespace CMMSAPIs.Controllers.Vegetation
         }
 
         [Route("GetVegetationPlanDetails")]
-        [HttpPost]
+        [HttpGet]
         public async Task<IActionResult> GetVegetationPlanDetails(int planId)
         {
             try
