@@ -882,14 +882,14 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
             string smbQuery = $"select id as smbId, name as smbName , parentId, moduleQuantity from assets where categoryId = 4 {filter}";
            
-            List<CMSMB> smbs = await Context.GetData<CMSMB>(smbQuery).ConfigureAwait(false);
+            List<CMPlanSMB> smbs = await Context.GetData<CMPlanSMB>(smbQuery).ConfigureAwait(false);
 
             //List<CMSMB> invSmbs = new List<CMSMB>;
             
             foreach (CMMCEquipmentList inv in invs)
             {
                 inv.moduleQuantity = 0;
-                foreach (CMSMB smb in smbs)
+                foreach (CMPlanSMB smb in smbs)
                 {
                     if(inv.invId == smb.parentId)
                     {
@@ -902,7 +902,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             return invs;
         }
 
-        internal virtual async Task<List<CMMCEquipmentList>> GetTaskEquipmentList(int taskId)
+        internal virtual async Task<List<CMMCTaskEquipmentList>> GetTaskEquipmentList(int taskId)
         {
 
             string status = "";
@@ -916,17 +916,17 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 $"IF(plannedDate = '0000-00-00 00:00:00', CAST( '0001-01-01 00:00:01' as datetime) , CAST(plannedDate AS DATETIME)) as scheduledAt," +
                 $"IF(cleanedAt = '0000-00-00 00:00:00', CAST( '0001-01-01 00:00:01' as datetime) , CAST(cleanedAt AS DATETIME)) as cleanedAt," +
                 $"IF(abandonedAt = '0000-00-00 00:00:00', CAST( '0001-01-01 00:00:01' as datetime), CAST(abandonedAt AS DATETIME))  as abandonedAt " +
-                $"from cleaning_execution_items as task left join assets on assets.id = task.assetId where task.executionId ={taskId}";
+                $", plannedDay as scheduledDay, executionDay as executedDay from cleaning_execution_items as task left join assets on assets.id = task.assetId where task.executionId ={taskId}";
 
             List<CMSMB> smbs = await Context.GetData<CMSMB>(smbQuery).ConfigureAwait(false);
 
             string invQuery = $"select parent.id as invId, parent.name as invName,sum(task.moduleQuantity) as moduleQuantity from cleaning_execution_items as task left join assets on assets.id = task.assetId left join assets as parent on parent.id = assets.parentId where task.executionId ={taskId} group by assets.parentId";
 
-            List<CMMCEquipmentList> invs = await Context.GetData<CMMCEquipmentList>(invQuery).ConfigureAwait(false);
+            List<CMMCTaskEquipmentList> invs = await Context.GetData<CMMCTaskEquipmentList>(invQuery).ConfigureAwait(false);
 
             //List<CMSMB> invSmbs = new List<CMSMB>;
 
-            foreach (CMMCEquipmentList inv in invs)
+            foreach (CMMCTaskEquipmentList inv in invs)
             {
                 foreach (CMSMB smb in smbs)
                 {
