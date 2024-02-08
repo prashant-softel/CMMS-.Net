@@ -306,7 +306,8 @@ namespace CMMSAPIs.Models.MC
         public DateTime scheduledAt { get; set; }
         public int scheduledDay{ get; set; }
         public dynamic isCleaned { get; set; }
-        public int executededDay { get; set; }
+        public DateTime cleanedAt { get; set; }
+        public int executedDay { get; set; }
         public dynamic isAbandoned { get; set; }
         public DateTime abandonedAt { get; set; }
 
