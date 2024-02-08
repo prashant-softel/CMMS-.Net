@@ -198,7 +198,7 @@ namespace CMMSAPIs.Controllers.Vegetation
         }
 
         [Route("GetVegExecutionDetails")]
-        [HttpPost]
+        [HttpGet]
         public async Task<IActionResult> GetVegExecutionDetails(int executionId)
         {
             try
