@@ -730,7 +730,7 @@ namespace CMMSAPIs.Repositories.Masters
                             if (Convert.ToString(newR["range_max"]) == null || Convert.ToString(newR["range_max"]) == "")
                                  newR["range_max"] = 0;
                             else
-                                newR["range_min"] = newR["range_min"].ToInt();
+                                newR["range_max"] = newR["range_max"].ToInt();
 
                             dt2.Rows.Add(newR);
                             /*
@@ -852,8 +852,10 @@ namespace CMMSAPIs.Repositories.Masters
                     {
                         CMCPType checkpoint_type = new CMCPType();
                         checkpoint_type.id = Convert.ToInt32(row["checkpoint_type_id"]);
-                        checkpoint_type.min = Convert.ToInt32(row["range_min"]);
-                        checkpoint_type.max = Convert.ToInt32(row["range_max"]);
+                        //  checkpoint_type.min = Convert.ToInt32(row["range_min"]);
+                        checkpoint_type.min = row["range_min"].ToInt();
+                        // checkpoint_type.max = Convert.ToInt32(row["range_max"]);
+                        checkpoint_type.max = row["range_max"].ToInt();
                         CMCreateCheckPoint checkpoint = new CMCreateCheckPoint
                         {
                           
