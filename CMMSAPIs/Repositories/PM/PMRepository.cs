@@ -182,8 +182,10 @@ namespace CMMSAPIs.Repositories.PM
                                     $"facilities.id as facility_id, facilities.name as facility_name, category.id as category_id, category.name as category_name, " +
                                     $"frequency.id as plan_freq_id, frequency.name as plan_freq_name, createdBy.id as created_by_id, " +
                                     $"CONCAT(createdBy.firstName, ' ', createdBy.lastName) as created_by_name, plan.created_at,CONCAT(assignedTo.firstName, ' ', assignedTo.lastName) as assigned_to_name, " +
-                                    $"updatedBy.id as updated_by_id, CONCAT(updatedBy.firstName, ' ', updatedBy.lastName) as updated_by_name, plan.updated_at, plan.next_schedule_date " +
-                                    $"FROM pm_plan as plan " +
+                                    $"updatedBy.id as updated_by_id, CONCAT(updatedBy.firstName, ' ', updatedBy.lastName) as updated_by_name, plan.updated_at," +
+                                    $" (select task.plan_date from pm_task task where task.id = (select max(id) from pm_task where pm_task.plan_id = plan.id  ) ) as next_schedule_date,  " +
+                                    $" (select task1.id from pm_task task1 where task1.id = (select max(id) from pm_task where pm_task.plan_id = plan.id  ) ) as next_task_id " +
+                                    $" FROM pm_plan as plan " +
                                     $"LEFT JOIN statuses ON plan.status = statuses.softwareId " +
                                     $"JOIN facilities ON plan.facility_id = facilities.id " +
                                     $"LEFT JOIN assetcategories as category ON plan.category_id = category.id " +
