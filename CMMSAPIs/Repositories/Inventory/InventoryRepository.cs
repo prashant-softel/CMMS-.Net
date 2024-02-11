@@ -398,7 +398,8 @@ namespace CMMSAPIs.Repositories.Inventory
                             }
                             catch (KeyNotFoundException)
                             {
-                                string name = Convert.ToString(newR["blockName"]).Replace("_", "");
+                                //string name = Convert.ToString(newR["blockName"]).Replace("_", "");
+                                string name = Convert.ToString(newR["blockName"]);
                                 string chk_isBlock_added = "select * from facilities where (name = '" + name + "' or name = '" + Convert.ToString(newR["blockName"]) + "')";
                                 DataTable dt_block_chk = await Context.FetchData(chk_isBlock_added).ConfigureAwait(false);
 
@@ -604,10 +605,20 @@ namespace CMMSAPIs.Repositories.Inventory
                             catch (KeyNotFoundException)
                             {
                                 if (Convert.ToString(newR["typeName"]) == "" || Convert.ToString(newR["typeName"]) == null || newR["typeName"] == null)
+                                {
                                     newR["typeId"] = assetTypes["MAIN INVENTRY"];
+                                }
+                                    
                                 else
                                 {
-                                    return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] Asset type named '{newR["typeName"]}' not found.");
+                                    string addAssetsType = $"INSERT INTO assettypes(name, description, addedAt, Status, AddedBy) VALUES " +
+                                             $"('{Convert.ToString(newR["typeName"]).ToUpper()}','{Convert.ToString(newR["typeName"]).ToUpper()}','{UtilsRepository.GetUTCTime()}',1, {userID}); " +
+                                             $"SELECT LAST_INSERT_ID();";
+                                    DataTable dt = await Context.FetchData(addAssetsType).ConfigureAwait(false);
+                                    int id = Convert.ToInt32(dt.Rows[0][0]);
+                                    assetTypes.Add(Convert.ToString(newR["typeName"]).ToUpper(), id);
+                                    newR["typeId"] = id;
+                                    //return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] Asset type named '{newR["typeName"]}' not found.");
 
                                 }
                              
@@ -622,7 +633,15 @@ namespace CMMSAPIs.Repositories.Inventory
                                     newR["statusId"] = assetStatuses["IN OPERATION"];
                                 else
                                 {
-                                    return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] Asset status named '{newR["statusName"]}' not found.");
+                                    string addAssets = $"INSERT INTO assetstatus(name, description, addedAt, Status, AddedBy) VALUES " +
+                                                    $"('{Convert.ToString(newR["statusName"]).ToUpper()}','{Convert.ToString(newR["statusName"]).ToUpper()}','{UtilsRepository.GetUTCTime()}',1, {userID}); " +
+                                                    $"SELECT LAST_INSERT_ID();";
+                                    DataTable dt = await Context.FetchData(addAssets).ConfigureAwait(false);
+                                    int id = Convert.ToInt32(dt.Rows[0][0]);
+                                    assetStatuses.Add(Convert.ToString(newR["statusName"]).ToUpper(), id);
+                                    newR["statusId"] = id;
+
+                                   // return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] Asset status named '{newR["statusName"]}' not found.");
 
                                 }
                                
@@ -874,6 +893,41 @@ namespace CMMSAPIs.Repositories.Inventory
                                 //    idList.AddRange((await AddInventoryWithParent(dtUsers, facility_id, userID)).id);
                                 //}
                             }
+
+                        string checkParentID = $"select id,name from assets  where parentId = 0 and facilityId = {facility_id} GROUP BY name  ORDER BY id ASC ";
+                        DataTable dt_checkingParentID = await Context.FetchData(checkParentID).ConfigureAwait(false);
+                        List<string> assetParentName = dt_checkingParentID.GetColumn<string>("name");
+                        List<int> assetParentIDs = dt_checkingParentID.GetColumn<int>("id");
+                        Dictionary<string, int> diccheckParentID = new Dictionary<string, int>();
+                        diccheckParentID.Merge(assetParentName, assetParentIDs);
+
+                        string queryAssetWithParent = $"SELECT id, REPLACE(UPPER(name), '_', '') as name FROM assets where facilityId = {facility_id} GROUP BY name  ORDER BY id ASC ;";
+                        DataTable dtAssetWithParent = await Context.FetchData(queryAssetWithParent).ConfigureAwait(false);
+                        List<string> assetNamesWithParent = dtAssetWithParent.GetColumn<string>("name");
+                        List<int> assetIDsWithParent = dtAssetWithParent.GetColumn<int>("id");
+                        Dictionary<string, int> assetsWithParent = new Dictionary<string, int>();
+                        assetsWithParent.Merge(assetNames, assetIDs);
+
+                        DataTable dt_updateParentIDs = new DataTable();
+
+                        var result = from parentName in dt2.AsEnumerable()
+                                     join row2 in dtAssetWithParent.AsEnumerable() on parentName.Field<string>("parentName") equals row2.Field<string>("name") into gj
+                                     from subRow in gj.DefaultIfEmpty()
+                                     where subRow == null
+                                     select parentName;
+
+                        // Create the third DataTable
+                        DataTable dt3 = dt2.Clone(); // Clone the structure of dt1
+                        foreach (DataRow row in result)
+                        {
+                            dt3.ImportRow(row);
+                        }
+                        for(int i = 0; i < diccheckParentID.Count; i++)
+                        {
+
+                        }
+
+
                         Total_Inserted_Rows = updatedIdList.Count + idList.Count;
                         response = new CMImportFileResponse(file_id, idList, updatedIdList, CMMS.RETRUNSTATUS.SUCCESS, null, null, $"{idList.Count} new assets added.{updatedIdList.Count} assets Updated.");
 
