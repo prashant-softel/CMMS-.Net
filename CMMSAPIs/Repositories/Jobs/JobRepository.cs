@@ -112,7 +112,12 @@ namespace CMMSAPIs.Repositories.Jobs
                                         "users as user ON user.id = job.assignedId ";
             if (facility_id > 0)
             {
-                myQuery += " WHERE job.facilityId = " + facility_id + " AND job.JobType = " + (int)jobType;
+                myQuery += " WHERE job.facilityId = " + facility_id ;
+                if ((int)jobType > 0)
+                {
+                    myQuery += " AND job.JobType = " + (int)jobType;
+                }
+                   
                 if (startDate?.Length > 0 && endDate?.Length > 0)
                 {
                     DateTime start = DateTime.Parse(startDate);
