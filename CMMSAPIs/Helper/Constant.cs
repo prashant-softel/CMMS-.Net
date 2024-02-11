@@ -296,8 +296,9 @@ namespace CMMSAPIs.Helper
         */
         public enum CMMS_JobType
         {
-            BreakdownMaintenance = 0,
+            ALL = 0,
             PreventiveMaintenance,
+            BreakdownMaintenance,
             HOTO,
             Audit
         }
