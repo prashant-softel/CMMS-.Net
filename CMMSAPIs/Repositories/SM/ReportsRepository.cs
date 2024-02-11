@@ -50,14 +50,16 @@ namespace CMMSAPIs.Repositories.SM
                 $" IFNULL((select sum(ST.creditQty)-sum(ST.debitQty)  FROM smtransition as ST  JOIN smassetmasters as SM ON SM.ID = ST.assetItemID  " +
                 $" LEFT JOIN facilities fcc ON fcc.id = ST.facilityID   where   ST.actorType = {(int)CMMS.SM_Actor_Types.Store} and SM.ID=a_master.ID  and ST.facilityID in ('{facility_id}')" +
                 $" and sm_trans.actorID = {facility_id} and date_format(ST.lastModifiedDate, '%Y-%m-%d') < '{StartDate.ToString("yyyy-MM-dd")}'  group by SM.asset_code),0) Opening," +
-                $" sum(sm_trans.creditQty) as inward, sum(sm_trans.debitQty) as outward " +
+                $"  IFNULL((select sum(si.creditQty) from smtransition si where si.id = sm_trans.id and  date_format(sm_trans.lastModifiedDate, '%Y-%m-%d') " +
+                $" BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}' ),0) as inward as inward, " +
+                $"   IFNULL((select sum(so.debitQty) from smtransition so where so.id = sm_trans.id and  date_format(sm_trans.lastModifiedDate, '%Y-%m-%d') " +
+                $" BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}' ),0) as outward  as outward " +
                 $" FROM smtransition as sm_trans " +
                 $" JOIN smassetmasters as a_master ON a_master.ID = sm_trans.assetItemID " +
                 $" LEFT JOIN facilities fc ON fc.id = sm_trans.facilityID " +
                 $" Left join smassettypes AST on AST.id = a_master.asset_type_ID " +
                 $" where sm_trans.actorType = {(int)CMMS.SM_Actor_Types.Store} and sm_trans.facilityID in ('{facility_id}') and " +
-                $" sm_trans.actorID in ({facility_id}) and date_format(sm_trans.lastModifiedDate, '%Y-%m-%d') " +
-                $" BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}'  ";
+                $" sm_trans.actorID in ({facility_id}) ";
 
             Plant_Stock_Opening_Details_query = Plant_Stock_Opening_Details_query + itemCondition;
             Plant_Stock_Opening_Details_query = Plant_Stock_Opening_Details_query + " group by a_master.asset_code;";
@@ -154,13 +156,16 @@ public async Task<List<CMEmployeeStockReport>> GetEmployeeStockReport(int facili
                     $" JOIN smassetmasters as SM ON SM.ID = ST.assetItemID  LEFT JOIN facilities fcc ON fcc.id = ST.facilityID  " +
                     $" where   ST.actorType = {(int)CMMS.SM_Actor_Types.Engineer} and SM.ID=a_master.ID  and ST.facilityID in ('{facility_id}') and sm_trans.actorID = {Emp_id} and" +
                     $" date_format(ST.lastModifiedDate, '%Y-%m-%d') < '{StartDate.ToString("yyyy-MM-dd")}'  group by SM.asset_code),0) Opening," +
-                    $" sum(sm_trans.creditQty) as inward, sum(sm_trans.debitQty) as outward" +
+                    $"  IFNULL((select sum(si.creditQty) from smtransition si where si.id = sm_trans.id and  date_format(sm_trans.lastModifiedDate, '%Y-%m-%d') " +
+                    $" BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}' ),0) as inward as inward, " +
+                    $"   IFNULL((select sum(so.debitQty) from smtransition so where so.id = sm_trans.id and  date_format(sm_trans.lastModifiedDate, '%Y-%m-%d') " +
+                    $" BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}' ),0) as outward  as outward " +
                     $" FROM smtransition as sm_trans " +
                     $" JOIN smassetmasters as a_master ON a_master.ID = sm_trans.assetItemID" +
                     $" LEFT JOIN facilities fc ON fc.id = sm_trans.facilityID " +
                     $" Left join smassettypes AST on AST.id = a_master.asset_type_ID " +
                     $" where sm_trans.actorType = {(int)CMMS.SM_Actor_Types.Engineer} and sm_trans.facilityID in ('{facility_id}') and sm_trans.actorID in ({Emp_id})" +
-                    $" and date_format(sm_trans.lastModifiedDate, '%Y-%m-%d')  BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}' and a_master.id in ({itemID}) group by a_master.asset_code;";
+                    $" and a_master.id in ({itemID}) group by a_master.asset_code;";
 
 
             }
@@ -173,13 +178,16 @@ public async Task<List<CMEmployeeStockReport>> GetEmployeeStockReport(int facili
                     $" JOIN smassetmasters as SM ON SM.ID = ST.assetItemID  LEFT JOIN facilities fcc ON fcc.id = ST.facilityID  " +
                     $" where   ST.actorType = {(int)CMMS.SM_Actor_Types.Engineer} and SM.ID=a_master.ID  and ST.facilityID in ('{facility_id}') and sm_trans.actorID = {Emp_id} and" +
                     $" date_format(ST.lastModifiedDate, '%Y-%m-%d') < '{StartDate.ToString("yyyy-MM-dd")}'  group by SM.asset_code),0) Opening," +
-                    $" sum(sm_trans.creditQty) as inward, sum(sm_trans.debitQty) as outward" +
+                    $"  IFNULL((select sum(si.creditQty) from smtransition si where si.id = sm_trans.id and  date_format(sm_trans.lastModifiedDate, '%Y-%m-%d') " +
+                    $" BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}' ),0) as inward as inward, " +
+                    $"   IFNULL((select sum(so.debitQty) from smtransition so where so.id = sm_trans.id and  date_format(sm_trans.lastModifiedDate, '%Y-%m-%d') " +
+                    $" BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}' ),0) as outward  as outward " +
                     $" FROM smtransition as sm_trans " +
                     $" JOIN smassetmasters as a_master ON a_master.ID = sm_trans.assetItemID" +
                     $" LEFT JOIN facilities fc ON fc.id = sm_trans.facilityID " +
                     $" Left join smassettypes AST on AST.id = a_master.asset_type_ID " +
                     $" where sm_trans.actorType = {(int)CMMS.SM_Actor_Types.Engineer} and sm_trans.facilityID in ('{facility_id}') and sm_trans.actorID in ({Emp_id})" +
-                    $" and date_format(sm_trans.lastModifiedDate, '%Y-%m-%d')  BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}'  group by a_master.asset_code;";
+                    $" group by a_master.asset_code;";
 
             }
             List<CMEmployeeStockReport> Plant_Stock_Opening_Details_Reader = await Context.GetData<CMEmployeeStockReport>(Plant_Stock_Opening_Details_query).ConfigureAwait(false);
@@ -471,15 +479,17 @@ public async Task<List<CMEmployeeStockReport>> GetEmployeeStockReport(int facili
                 $" a_master.asset_type_ID, AST.asset_type,  " +
                 $" IFNULL((select sum(ST.creditQty)-sum(ST.debitQty)  FROM smtransition as ST  JOIN smassetmasters as SM ON SM.ID = ST.assetItemID  " +
                 $" LEFT JOIN facilities fcc ON fcc.id = ST.facilityID   where   ST.actorType = {actorTypeID} and SM.ID=a_master.ID  and ST.facilityID in ('{facility_id}')" +
-                $" and sm_trans.actorID = {actorID} and date_format(ST.lastModifiedDate, '%Y-%m-%d') < '{StartDate.ToString("yyyy-MM-dd")}'  group by SM.asset_code),0) Opening," +
-                $" sum(sm_trans.creditQty) as inward, sum(sm_trans.debitQty) as outward " +
+                $" and sm_trans.actorID = {actorID} and date_format(ST.lastModifiedDate, '%Y-%m-%d') <= '{StartDate.ToString("yyyy-MM-dd")}'  group by SM.asset_code),0) Opening," +
+                $"  IFNULL((select sum(si.creditQty) from smtransition si where si.id = sm_trans.id and  date_format(sm_trans.lastModifiedDate, '%Y-%m-%d') " +
+                $" BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}' ),0) as inward as inward, " +
+                $"   IFNULL((select sum(so.debitQty) from smtransition so where so.id = sm_trans.id and  date_format(sm_trans.lastModifiedDate, '%Y-%m-%d') " +
+                $" BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}' ),0) as outward  as outward " +
                 $" FROM smtransition as sm_trans " +
                 $" JOIN smassetmasters as a_master ON a_master.ID = sm_trans.assetItemID " +
                 $" LEFT JOIN facilities fc ON fc.id = sm_trans.facilityID " +
                 $" Left join smassettypes AST on AST.id = a_master.asset_type_ID " +
                 $" where sm_trans.actorType = {actorTypeID} and sm_trans.facilityID in ('{facility_id}') and " +
-                $" sm_trans.actorID in ({actorID}) and date_format(sm_trans.lastModifiedDate, '%Y-%m-%d') " +
-                $" BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}'  ";
+                $" sm_trans.actorID in ({actorID}) ";
 
             Plant_Stock_Opening_Details_query = Plant_Stock_Opening_Details_query + itemCondition;
             Plant_Stock_Opening_Details_query = Plant_Stock_Opening_Details_query + " group by a_master.asset_code;";

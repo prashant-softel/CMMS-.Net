@@ -647,30 +647,75 @@ namespace CMMSAPIs.Repositories.SM
                             {
                                 qty = 0;
                             }
-                            string insertQuery = "INSERT INTO smassetmasters (plant_ID, asset_code, asset_name,description, " +
-                           "unit_of_measurement, flag, lastmodifieddate, asset_type_ID, item_category_ID, approval_required,Section)";
-                       
-                            insertQuery = insertQuery + $"Select {row.ItemArray[2]},'{row.ItemArray[0]}', '{row.ItemArray[1]}', '{row.ItemArray[1]}'," +
-                                $"{row.ItemArray[4]}, 1, '{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}', {row.ItemArray[11]},{row.ItemArray[12]},{row.ItemArray[10]},'{row.ItemArray[8]}' ; SELECT LAST_INSERT_ID();";
+                            string insertQuery = "";
+                            string checkAssetCode = "select id, plant_ID from smassetmasters where asset_code='"+ row.ItemArray[0] + "';";
+                            DataTable dt_checkAssetCode = await Context.FetchData(checkAssetCode).ConfigureAwait(false);
+                            if (dt_checkAssetCode.Rows.Count > 0)
+                            {
+                                // Check if material already stored in db and has same plant id then make plantID as 0 to use all plants
+                                int plantID = 0;
+                                if (Convert.ToInt32(dt_checkAssetCode.Rows[0][1]) != Convert.ToInt32(row.ItemArray[2]))
+                                {
+                                    plantID = 0;
+                                }
+                                else
+                                {
+                                    plantID = Convert.ToInt32(row.ItemArray[2]);
+                                }
+
+                                insertQuery = $" UPDATE smassetmasters set plant_ID = {plantID}, asset_code = '{row.ItemArray[0]}', asset_name = '{row.ItemArray[1]}', " +
+                                    $" description = '{row.ItemArray[1]}', unit_of_measurement = {row.ItemArray[4]}, flag = 1, lastmodifieddate = '{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}', " +
+                                    $" asset_type_ID = {row.ItemArray[13]}, item_category_ID = {row.ItemArray[14]}, approval_required = {row.ItemArray[10]},Section = '{row.ItemArray[8]}' " +
+                                    $" where id = {Convert.ToInt32(dt_checkAssetCode.Rows[0][0])}; Select {Convert.ToInt32(dt_checkAssetCode.Rows[0][0])};";
+
+                            }
+                            else
+                            {
+                                insertQuery = "INSERT INTO smassetmasters (plant_ID, asset_code, asset_name,description, " +
+                                    "unit_of_measurement, flag, lastmodifieddate, asset_type_ID, item_category_ID, approval_required,Section)";
+                                insertQuery = insertQuery + $"Select {row.ItemArray[2]},'{row.ItemArray[0]}', '{row.ItemArray[1]}', '{row.ItemArray[1]}'," +
+                                    $"{row.ItemArray[4]}, 1, '{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}', {row.ItemArray[13]},{row.ItemArray[14]},{row.ItemArray[10]},'{row.ItemArray[8]}' ; SELECT LAST_INSERT_ID();";
+
+                            }
+
+
 
                             DataTable dt_asset = await Context.FetchData(insertQuery).ConfigureAwait(false);
                             int asset_id = Convert.ToInt32(dt_asset.Rows[0][0]);
-                          
+
+                            // Entry in GO
+                            string goInsertQuery = $" INSERT INTO smgoodsorder (facilityID,vendorID,receiverID,generated_by,purchaseDate,orderDate,status," +
+                                                   $" challan_no,po_no, freight,transport, " +
+                                                   $"no_pkg_received,lr_no,condition_pkg_received,vehicle_no, gir_no, challan_date,po_date, job_ref,amount, currency,withdraw_by,withdrawOn,order_type,received_on) " +
+                                                   $"VALUES({row.ItemArray[2]},0, 0, {userID}, '{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}', '{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}', {(int)CMMS.CMMS_Status.GO_APPROVED}," +
+                                                   $"'','','','', '0', '', '','','',''," +
+                                                   $"'{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}','',{row.ItemArray[11]}, 0,0,'0001-01-01',0,'0001-01-01');" +
+                                                   $" SELECT LAST_INSERT_ID();";
+                            DataTable dt2_GO = await Context.FetchData(goInsertQuery).ConfigureAwait(false);
+                            int go_id = Convert.ToInt32(dt2_GO.Rows[0][0]);
+
+                            string poDetailsQuery = $"INSERT INTO smgoodsorderdetails (purchaseID,assetItemID,cost,ordered_qty,location_ID, paid_by_ID, requested_qty,sr_no,spare_status,is_splited, requestOrderId, requestOrderItemID) " +
+                                "values(" + go_id + ", " + asset_id + ",  " + row.ItemArray[11] + ", " + qty + ", 0,0, " + qty + ", '', 0, 1, 0,0) ; SELECT LAST_INSERT_ID();";
+                            DataTable dtInsertPO = await Context.FetchData(poDetailsQuery).ConfigureAwait(false);
+                            int id = Convert.ToInt32(dtInsertPO.Rows[0][0]);
+
+                            // NOTE: cureently assets are importing date of '2023-03-31'
+
                             string insertTransDetail = $"INSERT INTO smtransactiondetails (fromActorID, fromActorType, toActorID, toActorType, " +
                                 $" assetItemID, qty, plantID, referedby, reference_ID, remarks, lastInsetedDateTime, createdBy, createdAt) VALUES (" +
                                 $" {userID},{(int)CMMS.SM_Actor_Types.Vendor},{row.ItemArray[2]},{(int)CMMS.SM_Actor_Types.Store}," +
-                                $" {asset_id}, {qty},{row.ItemArray[2]}, 32,{(int)CMMS.CMMS_Modules.SM_RO},'Material Import','{UtilsRepository.GetUTCTime()}', {userID}, '{UtilsRepository.GetUTCTime()}' );SELECT LAST_INSERT_ID();";
+                                $" {asset_id}, {qty},{row.ItemArray[2]}, 32,{(int)CMMS.CMMS_Modules.SM_RO},'Material Import','2023-03-31 00:00:00', {userID}, '{UtilsRepository.GetUTCTime()}' );SELECT LAST_INSERT_ID();";
                             DataTable dt_TransDetail = await Context.FetchData(insertTransDetail).ConfigureAwait(false);
                             int asset_TransDetail = Convert.ToInt32(dt_TransDetail.Rows[0][0]);
 
-
+                            
 
                             string insertTransition = $"INSERT INTO smtransition (transactionID, facilityID, goID, mrsID, assetItemID, actorType, actorID, " +
                                 $" debitQty, creditQty, lastModifiedDate) " +
-                                $" select {asset_TransDetail}, {row.ItemArray[2]},0,0, {asset_id},{(int)CMMS.SM_Actor_Types.Vendor}, {userID}, " +
-                                $" {qty},0, '{UtilsRepository.GetUTCTime()}' union all " +
-                                $" select {asset_TransDetail}, {row.ItemArray[2]},0,0, {asset_id},{(int)CMMS.SM_Actor_Types.Store}, {row.ItemArray[2]}," +
-                                $" 0, {qty}, '{UtilsRepository.GetUTCTime()}';";
+                                $" select {asset_TransDetail}, {row.ItemArray[2]},{go_id},0, {asset_id},{(int)CMMS.SM_Actor_Types.Vendor}, {userID}, " +
+                                $" {qty},0, '2023-03-31 00:00:00' union all " +
+                                $" select {asset_TransDetail}, {row.ItemArray[2]},{go_id},0, {asset_id},{(int)CMMS.SM_Actor_Types.Store}, {row.ItemArray[2]}," +
+                                $" 0, {qty}, '2023-03-31 00:00:00';";
                             var insertedResult = await Context.ExecuteNonQry<int>(insertTransition).ConfigureAwait(false);
                         }
 
