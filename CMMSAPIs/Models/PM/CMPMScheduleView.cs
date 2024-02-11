@@ -1,4 +1,4 @@
-﻿using CMMSAPIs.Models.Utils;
+using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Helper;
 using System;
 using System.Collections.Generic;
@@ -136,8 +136,8 @@ namespace CMMSAPIs.Models.PM
         public int is_custom_check_point { get; set; }
         public int is_file_required { get; set; }
         public int failure_score { get; set; }
-        public int min_range { get; set; }
-        public int max_range { get; set; }
+        public double min_range { get; set; }
+        public double max_range { get; set; }
     }
 
     public class ScheduleFiles
