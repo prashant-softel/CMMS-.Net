@@ -863,7 +863,7 @@ namespace CMMSAPIs.Repositories.PM
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
 
             string mainQuery = $"INSERT INTO pm_task(plan_id,facility_id,category_id,frequency_id,plan_Date,assigned_to,status,prev_task_id,prev_task_done_date)  " +
-                               $"select plan_id as plan_id,facility_id,category_id,frequency_id,DATE_ADD(plan_date, INTERVAL freq.days DAY) as plan_date,assigned_to,{(int)CMMS.CMMS_Status.PM_SCHEDULED} as status,{request.id} as prev_task_id, '{UtilsRepository.GetUTCTime()}' as prev_task_done_date from pm_task " +
+                               $"select plan_id as plan_id,facility_id,category_id,frequency_id,CASE when  pm_task.frequency_id in( 4,5,6)  then\r\nDATE_ADD(plan_date, INTERVAL freq.months MONTH) \r\n  WHEN pm_task.frequency_id = 7 THEN \r\n DATE_ADD(plan_date, INTERVAL 1 YEAR)\r\nelse DATE_ADD(plan_date, INTERVAL freq.days DAY) end as plan_date,assigned_to,{(int)CMMS.CMMS_Status.PM_SCHEDULED} as status,{request.id} as prev_task_id, '{UtilsRepository.GetUTCTime()}' as prev_task_done_date from pm_task " +
                                $"left join frequency as freq on pm_task.frequency_id = freq.id where pm_task.id = {request.id}; " +
                                $"SELECT LAST_INSERT_ID(); ";
             DataTable dt3 = await Context.FetchData(mainQuery).ConfigureAwait(false);
