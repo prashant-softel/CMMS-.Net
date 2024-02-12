@@ -34,8 +34,8 @@
         public string action_to_be_done { get; set; }
         public int? failure_weightage { get; set; } // in per
         public string? checkpoint_type { get; set; } // bool,renge
-        public int? min { get; set; } // bool,renge
-        public int? max { get; set; } // bool,renge
+        public double? min { get; set; } // bool,renge
+        public double? max { get; set; } // bool,renge
         public int created_by_id { get; set; }
         public string created_by_name { get; set; }
         public dynamic created_at { get; set; }
