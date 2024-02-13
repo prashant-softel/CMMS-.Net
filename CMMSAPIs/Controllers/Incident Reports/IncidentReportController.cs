@@ -183,5 +183,21 @@ namespace CMMSAPIs.Controllers.Incident_Reports
                 throw;
             }
         }
+
+        [Route("CloseIR")]
+        [HttpPost]
+        public async Task<IActionResult> CloseIR(CMApproveIncident request)
+        {
+            try
+            {
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IncidentReportBS.CloseIR(request, userId);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
     }
 }
