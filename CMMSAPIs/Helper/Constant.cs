@@ -401,6 +401,7 @@ namespace CMMSAPIs.Helper
             IR_APPROVED_INVESTIGATION,           
             IR_UPDATED, // Only for notification purpose
             IR_Cancel,
+            IR_Close,
 
 
             WC_DRAFT = 191,
