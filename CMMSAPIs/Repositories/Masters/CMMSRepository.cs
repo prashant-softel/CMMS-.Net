@@ -93,9 +93,12 @@ namespace CMMSAPIs.Repositories.Masters
             CMDefaultResponse response = new CMDefaultResponse();
             if (request.software_id == 0)
             {
-                throw new ArgumentException("ModuleName <" +request.moduleName+ "> For This Module Name Software Id Is Not Present Please contact Backend Team For Adding Software_id");
-              // response = new CMDefaultResponse(request.software_id, CMMS.RETRUNSTATUS.FAILURE, "For This Module Name <" + request.moduleName + "> Software Id Is Not Present Please contact Backend Team For Adding Software_id");
-               // return response;
+                //throw new ArgumentException("ModuleName <" +request.moduleName+ "> For This Module Name Software Id Is Not Present Please contact Backend Team For Adding Software_id");
+                // response = new CMDefaultResponse(request.software_id, CMMS.RETRUNSTATUS.FAILURE, "For This Module Name <" + request.moduleName + "> Software Id Is Not Present Please contact Backend Team For Adding Software_id");
+                // return response;
+                string Q = "select max(softwareid)+1 from features ; ";
+                DataTable dt_software = await Context.FetchData(Q).ConfigureAwait(false);
+                request.software_id = Convert.ToInt32(dt_software.Rows[0][0]);
             }
             string myQuery = "INSERT INTO features(`moduleName`,softwareid, `featureName`, `menuImage`, `add`, `edit`, `delete`, `view`, `issue`, `approve`, `selfView`) " +
                 $"VALUES('{request.moduleName}',{request.software_id}, '{request.featureName}', '{request.menuImage}', {request.add}, {request.edit}, " +
