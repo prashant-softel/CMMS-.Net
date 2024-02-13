@@ -62,6 +62,9 @@ namespace CMMSAPIs.Repositories.Incident_Reports
                 case CMMS.CMMS_Status.IR_Cancel:
                     retValue = "Cancelled";
                     break;
+                case CMMS.CMMS_Status.IR_Close:
+                    retValue = "Closed";
+                    break;
                 default:
                     retValue = "Unknown <" + m_notificationID + ">";
                     break;
@@ -100,6 +103,9 @@ namespace CMMSAPIs.Repositories.Incident_Reports
                     break;
                 case CMMS.CMMS_Status.IR_Cancel:
                     retValue = String.Format("Incident Report <{0}> Cancelled by {1} ", IRObj.id, IRObj.updated_by_name);
+                    break;
+                case CMMS.CMMS_Status.IR_Close:
+                    retValue = String.Format("Incident Report <{0}> Closed by {1} ", IRObj.id, IRObj.updated_by_name);
                     break;
                 default:
                     break;
@@ -974,5 +980,31 @@ namespace CMMSAPIs.Repositories.Incident_Reports
             List<CMInvestigation_team> result = await Context.GetData<CMInvestigation_team>(selectqry).ConfigureAwait(false);
             return result;
         }
+        internal async Task<CMDefaultResponse> CloseIR(CMApproveIncident request, int userId)
+        {
+
+            string approveQuery = $"Update incidents set status = {(int)CMMS.CMMS_Status.IR_Close}, status_updated_at = '{UtilsRepository.GetUTCTime()}', close_remarks = '{request.comment}'  where id = {request.id}";
+            int close_id = await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
+
+            CMDefaultResponse response = new CMDefaultResponse();
+
+            if (close_id > 0)
+            {
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INCIDENT_REPORT, request.id, 0, 0, request.comment, CMMS.CMMS_Status.IR_Close, userId);
+
+                CMViewIncidentReport _IncidentReportDetails = await GetIncidentDetailsReport(request.id);
+
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INCIDENT_REPORT, CMMS.CMMS_Status.IR_Close, new[] { userId }, _IncidentReportDetails);
+
+                response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Incident Report Closed.");
+            }
+            else
+            {
+                response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.FAILURE, "Incident Report close failed.");
+            }
+
+            return response;
+        }
+
     }
 }
