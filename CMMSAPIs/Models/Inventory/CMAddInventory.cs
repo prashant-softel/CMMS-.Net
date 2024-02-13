@@ -66,7 +66,7 @@ namespace CMMSAPIs.Models.Inventory
         public string unspCode { get; set; }
         public string purchaseCode { get; set; }
 
-
+        public int num_of_module { get; set; }
     }
 
     public class CMSetParentAsset
