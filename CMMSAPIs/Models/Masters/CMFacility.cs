@@ -25,6 +25,8 @@ namespace CMMSAPIs.Models.Masters
         public string spv { get; set; }
         public string address { get; set; }
         public string description { get; set; }
+
+        public string timezone { get; set; }
         public string city { get; set; }
         public string state { get; set; }
         public string country { get; set; }
@@ -32,6 +34,7 @@ namespace CMMSAPIs.Models.Masters
         public string owner { get; set; }
         public string Operator { get; set; }
         public string customer { get; set; }
+
 
     }
 }

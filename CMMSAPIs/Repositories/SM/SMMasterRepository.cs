@@ -609,13 +609,13 @@ namespace CMMSAPIs.Repositories.SM
                             }
                             try
                             {
-                                newR["CategoryID"] = itemcategory[Convert.ToString(newR[8]).ToUpper()];
+                                newR["CategoryID"] = itemcategory[Convert.ToString(newR[9]).ToUpper()];
 
                             }
                             catch (KeyNotFoundException)
                             {
 
-                                return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] asset category '{newR[8]}' does not exist.");
+                                return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] asset category '{newR[9]}' does not exist.");
                             }
                             newR["unrestricted"] = newR[5];
                             newR["value_unrestricted"] = newR[6];
@@ -665,7 +665,7 @@ namespace CMMSAPIs.Repositories.SM
 
                                 insertQuery = $" UPDATE smassetmasters set plant_ID = {plantID}, asset_code = '{row.ItemArray[0]}', asset_name = '{row.ItemArray[1]}', " +
                                     $" description = '{row.ItemArray[1]}', unit_of_measurement = {row.ItemArray[4]}, flag = 1, lastmodifieddate = '{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}', " +
-                                    $" asset_type_ID = {row.ItemArray[13]}, item_category_ID = {row.ItemArray[14]}, approval_required = {row.ItemArray[10]},Section = '{row.ItemArray[8]}' " +
+                                    $" asset_type_ID = {row.ItemArray[13]}, item_category_ID = '{row.ItemArray[9]}', approval_required = {row.ItemArray[10]},Section = '{row.ItemArray[8]}' " +
                                     $" where id = {Convert.ToInt32(dt_checkAssetCode.Rows[0][0])}; Select {Convert.ToInt32(dt_checkAssetCode.Rows[0][0])};";
 
                             }
@@ -673,12 +673,15 @@ namespace CMMSAPIs.Repositories.SM
                             {
                                 insertQuery = "INSERT INTO smassetmasters (plant_ID, asset_code, asset_name,description, " +
                                     "unit_of_measurement, flag, lastmodifieddate, asset_type_ID, item_category_ID, approval_required,Section)";
-                                insertQuery = insertQuery + $"Select {row.ItemArray[2]},'{row.ItemArray[0]}', '{row.ItemArray[1]}', '{row.ItemArray[1]}'," +
-                                    $"{row.ItemArray[4]}, 1, '{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}', {row.ItemArray[13]},{row.ItemArray[14]},{row.ItemArray[10]},'{row.ItemArray[8]}' ; SELECT LAST_INSERT_ID();";
+                               
+                                    insertQuery = insertQuery + $"Select {row.ItemArray[2]},'{row.ItemArray[0]}', '{row.ItemArray[1]}', '{row.ItemArray[1]}'," +
+                                    $"{row.ItemArray[4]}, 1, '{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}', {row.ItemArray[13]},'{row.ItemArray[9]}',{row.ItemArray[10]},'{row.ItemArray[8]}' ; SELECT LAST_INSERT_ID();";
 
+                                
+               
                             }
 
-
+                     
 
                             DataTable dt_asset = await Context.FetchData(insertQuery).ConfigureAwait(false);
                             int asset_id = Convert.ToInt32(dt_asset.Rows[0][0]);
