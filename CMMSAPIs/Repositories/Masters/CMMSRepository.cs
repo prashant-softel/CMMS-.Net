@@ -207,7 +207,7 @@ namespace CMMSAPIs.Repositories.Masters
         internal async Task<List<CMFacilityList>> GetFacilityList()
         {
             string myQuery = "SELECT facilities.id, facilities.name, spv.name as spv, facilities.address, facilities.city, facilities.state, facilities.country, facilities.zipcode as pin " +
-                ", u.name as customer ,u2.name as owner,u3.name as Operator, Facilities.description" +
+                ", u.name as customer ,u2.name as owner,u3.name as Operator, Facilities.description,Facilities.timezone" +
                 " FROM Facilities LEFT JOIN spv ON facilities.spvId=spv.id LEFT JOIN business as u ON u.id = facilities.customerId LEFT JOIN business as u2 ON u2.id = facilities.ownerId LEFT JOIN business as u3 ON u3.id = facilities.operatorId WHERE isBlock = 0 and facilities.status = 1;";
 
             List<CMFacilityList> _Facility = await Context.GetData<CMFacilityList>(myQuery).ConfigureAwait(false);
