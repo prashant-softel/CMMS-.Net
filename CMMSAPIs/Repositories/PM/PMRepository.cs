@@ -1055,5 +1055,16 @@ namespace CMMSAPIs.Repositories.PM
             return new CMImportFileResponse(file_id,idList, updatedIdList, CMMS.RETRUNSTATUS.SUCCESS, logPath, m_errorLog.errorLog(), $"{idList.Count} Plan(s) created, {updatedIdList.Count} Plan(s) updated."); 
             //return response;*/
         }
+
+        internal async Task<CMDefaultResponse> DeletePMTask(CMApproval request, int userID)
+        {
+            string approveQuery = $"update pm_task set status = {CMMS.CMMS_Status.PM_TASK_DELETED}, update_remarks = '{request.comment}' where id = {request.id}; ";
+            await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
+
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_TASK, request.id, 0, 0, request.comment, CMMS.CMMS_Status.PM_TASK_DELETED);
+
+            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $" PM Plan Deleted");
+            return response;
+        }
     }
 }
