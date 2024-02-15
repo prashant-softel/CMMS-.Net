@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Threading.Tasks;
 
 namespace CMMSAPIs.BS.PM
@@ -25,6 +26,7 @@ namespace CMMSAPIs.BS.PM
         Task<CMDefaultResponse> UpdatePMPlan(CMPMPlanDetail request, int userID);
 
         Task<CMImportFileResponse> ImportPMPlanFile(int file_id, int userID);
+        Task<CMDefaultResponse> DeletePMTask(CMApproval request, int userID);
     }
     public class PMBS : IPMBS
     {
@@ -185,5 +187,21 @@ namespace CMMSAPIs.BS.PM
                 throw;
             }
         }
+
+        public async Task<CMDefaultResponse> DeletePMTask(CMApproval request, int userID)
+        {
+            try
+            {
+                using (var repos = new PMRepository(getDB, _environment))
+                {
+                    return await repos.DeletePMTask(request, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
     }
 }
