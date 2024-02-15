@@ -266,5 +266,21 @@ namespace CMMSAPIs.Controllers.PM
                 throw;
             }
         }
+
+        [Route("DeletePMTask")]
+        [HttpPost]
+        public async Task<IActionResult> DeletePMTask(CMApproval request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _PMBS.DeletePMTask(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
     }
 }
