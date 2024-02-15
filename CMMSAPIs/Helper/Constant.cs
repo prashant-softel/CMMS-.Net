@@ -390,6 +390,7 @@ namespace CMMSAPIs.Helper
             
             PM_SUBMIT,//for temp only
             PM_LINK_PTW,
+            PM_TASK_DELETED,
            
            
             IR_CREATED_INITIAL = 181,         
