@@ -1058,7 +1058,7 @@ namespace CMMSAPIs.Repositories.PM
 
         internal async Task<CMDefaultResponse> DeletePMTask(CMApproval request, int userID)
         {
-            string approveQuery = $"update pm_task set status = {CMMS.CMMS_Status.PM_TASK_DELETED}, update_remarks = '{request.comment}' where id = {request.id}; ";
+            string approveQuery = $"update pm_task set status = {(int)CMMS.CMMS_Status.PM_TASK_DELETED}, update_remarks = '{request.comment}' where id = {request.id}; ";
             await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_TASK, request.id, 0, 0, request.comment, CMMS.CMMS_Status.PM_TASK_DELETED);
