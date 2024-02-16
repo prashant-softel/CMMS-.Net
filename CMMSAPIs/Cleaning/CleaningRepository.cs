@@ -875,12 +875,13 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 filter += $" and facilityId={facilityId} ";
             }
 
-            string invQuery = $"select id as invId, name as invName ,moduleQuantity  from assets where categoryId = 2 {filter}";
+            string invQuery = $"SELECT assets.id AS invId, assets.name AS invName, assets.moduleQuantity FROM assets JOIN assetcategories ON assets.categoryId = assetcategories.id WHERE assetcategories.name =\"Inverter\" {filter}";
+        
 
             List<CMMCEquipmentList> invs = await Context.GetData<CMMCEquipmentList>(invQuery).ConfigureAwait(false);
 
 
-            string smbQuery = $"select id as smbId, name as smbName , parentId, moduleQuantity from assets where categoryId = 4 {filter}";
+            string smbQuery = $"SELECT assets.id as smbId, assets.name as smbName , assets.parentId, assets.moduleQuantity from assets  join assetcategories on  assets.categoryId =assetcategories.id where assetcategories.name = \"SMB\" {filter}";
            
             List<CMPlanSMB> smbs = await Context.GetData<CMPlanSMB>(smbQuery).ConfigureAwait(false);
 
