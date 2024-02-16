@@ -269,6 +269,8 @@ namespace CMMSAPIs.Models.MC
         public int status { get; set; }
         public string status_short { get; set; }
         public int water_used { get; set; }
+
+        public string title { get; set; }
     }
     public class CMMCExecutionList
     {

@@ -493,7 +493,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             }
             statusOut += $"ELSE 'Invalid Status' END";
 
-            string myQuery1 = $"select mc.id as id ,mc.planId,mc.status, CONCAT(createdBy.firstName, createdBy.lastName) as responsibility , mc.startDate, mc.endedAt as doneDate,mc.prevTaskDoneDate as lastDoneDate,freq.name as frequency,mc.noOfDays, {statusOut} as status_short from cleaning_execution as mc left join cleaning_plan as mp on mp.planId = mc.planId LEFT JOIN Frequency as freq on freq.id = mp.frequencyId LEFT JOIN users as createdBy ON createdBy.id = mc.assignedTo LEFT JOIN users as approvedBy ON approvedBy.id = mc.approvedByID where mc.moduleType={moduleType} and rescheduled = 0";
+            string myQuery1 = $"select mc.id as id ,mp.title,mc.planId,mc.status, CONCAT(createdBy.firstName, createdBy.lastName) as responsibility , mc.startDate, mc.endedAt as doneDate,mc.prevTaskDoneDate as lastDoneDate,freq.name as frequency,mc.noOfDays, {statusOut} as status_short from cleaning_execution as mc left join cleaning_plan as mp on mp.planId = mc.planId LEFT JOIN Frequency as freq on freq.id = mp.frequencyId LEFT JOIN users as createdBy ON createdBy.id = mc.assignedTo LEFT JOIN users as approvedBy ON approvedBy.id = mc.approvedByID where mc.moduleType={moduleType} and rescheduled = 0";
 
             if (facilityId > 0)
             {
@@ -875,12 +875,13 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 filter += $" and facilityId={facilityId} ";
             }
 
-            string invQuery = $"select id as invId, name as invName ,moduleQuantity  from assets where categoryId = 2 {filter}";
+            string invQuery = $"SELECT assets.id AS invId, assets.name AS invName, assets.moduleQuantity FROM assets JOIN assetcategories ON assets.categoryId = assetcategories.id WHERE assetcategories.name =\"Inverter\" {filter}";
+        
 
             List<CMMCEquipmentList> invs = await Context.GetData<CMMCEquipmentList>(invQuery).ConfigureAwait(false);
 
 
-            string smbQuery = $"select id as smbId, name as smbName , parentId, moduleQuantity from assets where categoryId = 4 {filter}";
+            string smbQuery = $"SELECT assets.id as smbId, assets.name as smbName , assets.parentId, assets.moduleQuantity from assets  join assetcategories on  assets.categoryId =assetcategories.id where assetcategories.name = \"SMB\" {filter}";
            
             List<CMPlanSMB> smbs = await Context.GetData<CMPlanSMB>(smbQuery).ConfigureAwait(false);
 
