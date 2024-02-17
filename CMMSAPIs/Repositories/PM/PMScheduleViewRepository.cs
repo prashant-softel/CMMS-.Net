@@ -79,6 +79,8 @@ namespace CMMSAPIs.Repositories.PM
                     retValue = "Deleted"; break;
                 case CMMS.CMMS_Status.PM_UPDATED:
                     retValue = "Updated"; break;
+                case CMMS.CMMS_Status.PM_TASK_DELETED:
+                    retValue = "Deleted"; break;
                 default:
                     break;
             }
@@ -117,6 +119,8 @@ namespace CMMSAPIs.Repositories.PM
                     retValue = $"PM Task Deleted "; break;
                 case CMMS.CMMS_Status.PM_UPDATED:
                     retValue = $"PM Task Updated By {Obj.updated_by_name} "; break;
+                case CMMS.CMMS_Status.PM_TASK_DELETED:
+                    retValue = $"PM Task Deleted "; break;
                 default:
                     break;
             }
