@@ -1058,13 +1058,46 @@ namespace CMMSAPIs.Repositories.PM
 
         internal async Task<CMDefaultResponse> DeletePMTask(CMApproval request, int userID)
         {
-            //string approveQuery = $"update pm_task set status = {(int)CMMS.CMMS_Status.PM_TASK_DELETED}, update_remarks = '{request.comment}' where id = {request.id}; ";
-            string approveQuery = $"update pm_task set status = {(int)CMMS.CMMS_Status.PM_TASK_DELETED} where id = {request.id}; ";
+            CMDefaultResponse response = null;
+            string mrsQ = "select status,id from smmrs where whereUsedRefID = " + request.id+";";
+            DataTable dt_insert = await Context.FetchData(mrsQ).ConfigureAwait(false);
+
+            string taskQ = "select ptw_id from pm_task where id = " + request.id + ";";
+            DataTable dt_task = await Context.FetchData(taskQ).ConfigureAwait(false);
+
+            int mrs_status = 0;
+            int mrs_id = 0;
+            int permit_id = 0;
+            if (dt_insert.Rows.Count > 0)
+            {
+                mrs_status = Convert.ToInt32(dt_insert.Rows[0][0]);
+                mrs_id = Convert.ToInt32(dt_insert.Rows[0][1]);
+            }
+
+            if (dt_task.Rows.Count > 0)
+            {
+                if(Convert.ToString(dt_task.Rows[0][0]) != "")
+                {
+                    permit_id = Convert.ToInt32(dt_insert.Rows[0][0]);
+                }
+               
+            }
+
+            if ((CMMS.CMMS_Status)mrs_status == CMMS.CMMS_Status.MRS_REQUEST_ISSUED)
+            {
+                response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.FAILURE, $" PM Plan With MRS "+mrs_id+ " Is Issued. Please Return MRS To Proceed Further.");
+                return response;
+            }
+
+            string approveQuery = $"update pm_task set status = {(int)CMMS.CMMS_Status.PM_TASK_DELETED}, update_remarks = '{request.comment}' where id = {request.id}; ";
+            approveQuery = approveQuery + $" update smmrs set status = {(int)CMMS.CMMS_Status.MRS_REQUEST_REJECTED}, issue_rejected_comment = '{request.comment}', issue_rejected_date = '{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}' where id = {mrs_id}; ";
+            approveQuery = approveQuery + $" update permits set rejectReason = '{request.comment}', rejectStatus = 1, status = {(int)CMMS.CMMS_Status.PTW_REJECTED_BY_ISSUER}, status_updated_at = '{UtilsRepository.GetUTCTime()}', rejectedDate ='{UtilsRepository.GetUTCTime()}', rejectedById = {userID}  where id = {permit_id};";
+            //string approveQuery = $"update pm_task set status = {(int)CMMS.CMMS_Status.PM_TASK_DELETED} where id = {request.id}; ";
             await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_TASK, request.id, 0, 0, request.comment, CMMS.CMMS_Status.PM_TASK_DELETED);
 
-            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $" PM Plan Deleted");
+            response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $" PM Task Deleted With MRS : "+mrs_id+"");
             return response;
         }
     }
