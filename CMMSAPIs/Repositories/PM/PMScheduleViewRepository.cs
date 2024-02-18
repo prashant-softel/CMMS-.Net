@@ -269,6 +269,7 @@ namespace CMMSAPIs.Repositories.PM
 
             string myQuery = $"SELECT pm_task.id, CONCAT('PMTASK',pm_task.id) as task_code,pm_task.category_id,cat.name as category_name, pm_plan.plan_name as plan_title, pm_task.facility_id, pm_task.frequency_id as frequency_id, freq.name as frequency_name, pm_task.plan_date as due_date,closed_at as done_date, CONCAT(assignedTo.firstName,' ',assignedTo.lastName)  as assigned_to_name, CONCAT(closedBy.firstName,' ',closedBy.lastName)  as closed_by_name, pm_task.closed_at , CONCAT(approvedBy.firstName,' ',approvedBy.lastName)  as approved_by_name, pm_task.approved_at ,CONCAT(rejectedBy.firstName,' ',rejectedBy.lastName)  as rejected_by_name, pm_task.rejected_at ,CONCAT(cancelledBy.firstName,' ',cancelledBy.lastName)  as cancelled_by_name, pm_task.cancelled_at , pm_task.rejected_at ,CONCAT(startedBy.firstName,' ',startedBy.lastName)  as started_by_name, pm_task.started_at , pm_task.PTW_id as permit_id, CONCAT('PTW',pm_task.PTW_id) as permit_code,permit.status as ptw_status, PM_task.status, {statusQry} as status_short " +
                                ",  CONCAT(tbtDone.firstName,' ',tbtDone.lastName)  as tbt_by_name, Case when permit.TBT_Done_By is null then 0 else 1 end ptw_tbt_done " +
+                               " , permittypelists.title as permit_type " +
                                " FROM pm_task " +
                                $"left join users as assignedTo on pm_task.assigned_to = assignedTo.id " +
                                $"left join users as closedBy on pm_task.closed_by = closedBy.id " +
@@ -281,6 +282,7 @@ namespace CMMSAPIs.Repositories.PM
                                $"left join assetcategories as cat  on pm_task.category_id = cat.id " +
                                $"left join frequency as freq on pm_task.frequency_id = freq.id " +
                                $"  left join users as tbtDone on permit.TBT_Done_By = tbtDone.id " +
+                               $" left join permittypelists on permittypelists.id = permit.typeId  " +
                                $" where pm_task.id = {task_id} ";
 
             List<CMPMTaskView> taskViewDetail = await Context.GetData<CMPMTaskView>(myQuery).ConfigureAwait(false);
@@ -361,8 +363,9 @@ namespace CMMSAPIs.Repositories.PM
                     await Context.ExecuteNonQry<int>(startQry2).ConfigureAwait(false);
                 }               
                     taskViewDetail[0].status_short = "Permit - " + PermitRepository.Status(taskViewDetail[0].ptw_status);
-                    taskViewDetail[0].status_short = PermitRepository.LongStatus(taskViewDetail[0].ptw_status, null);          
-
+                    taskViewDetail[0].status_short = PermitRepository.LongStatus(taskViewDetail[0].ptw_status, null);
+                string _shortStatus_PTW = Status_PTW(taskViewDetail[0].ptw_status);
+                taskViewDetail[0].status_short_ptw = _shortStatus_PTW;
             }
             else
             {
