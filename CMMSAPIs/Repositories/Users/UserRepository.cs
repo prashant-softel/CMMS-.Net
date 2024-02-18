@@ -132,7 +132,7 @@ namespace CMMSAPIs.Repositories.Users
 
             if (user_detail.Count > 0)
             {
-                string facilitiesQry = $"SELECT facilities.id as plant_id, facilities.name as plant_name, spv.id as spv_id, spv.name as spv_name FROM userfacilities JOIN facilities ON userfacilities.facilityId = facilities.id LEFT JOIN spv ON facilities.spvId=spv.id WHERE userfacilities.userId = {user_id}  and userfacilities.status = 1;";
+                string facilitiesQry = $"SELECT facilities.id as id, facilities.name as name, spv.id as spv_id, spv.name as spv FROM userfacilities JOIN facilities ON userfacilities.facilityId = facilities.id LEFT JOIN spv ON facilities.spvId=spv.id WHERE userfacilities.userId = {user_id}  and userfacilities.status = 1;";
                 List<CMPlantAccess> facilities = await Context.GetData<CMPlantAccess>(facilitiesQry).ConfigureAwait(false);
                 user_detail[0].plant_list = facilities;
                 string reportToQuery = $"SELECT reportToId FROM users WHERE id = {user_id};";
