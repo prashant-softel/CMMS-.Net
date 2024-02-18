@@ -710,8 +710,8 @@ namespace CMMSAPIs.Repositories.Permits
               "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
               "LEFT JOIN permitjobtypelist as jobType ON ptw.jobTypeId = jobType.id " +
               "LEFT JOIN permittbtjoblist as sop ON ptw.TBTId = sop.id " +
-              "JOIN facilities as facilities  ON ptw.facilityId = facilities.id " +
-              "JOIN facilities as blocks  ON ptw.blockId = blocks.id " +
+              "LEFT JOIN facilities as facilities  ON ptw.facilityId = facilities.id " +
+              "LEFT JOIN facilities as blocks  ON ptw.blockId = blocks.id " +
               "LEFT JOIN users as user1 ON user1.id = ptw.issuedById left join userroles as ud1 on  user1.roleId = ud1.id left join business as co1 on  user1.companyId = co1.id  " +
               "LEFT JOIN users as user2 ON user2.id = ptw.approvedById left join userroles as ud2 on  user2.roleId = ud2.id left join business as co2 on  user2.companyId = co2.id  " +
               "LEFT JOIN users as user3 ON user3.id = ptw.acceptedById left join userroles as ud3 on  user3.roleId = ud3.id left join business as co3 on  user3.companyId = co3.id  " +
