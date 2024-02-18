@@ -93,19 +93,21 @@ namespace CMMSAPIs.Repositories.Masters
             CMDefaultResponse response = new CMDefaultResponse();
             if (request.software_id == 0)
             {
-                //throw new ArgumentException("ModuleName <" +request.moduleName+ "> For This Module Name Software Id Is Not Present Please contact Backend Team For Adding Software_id");
-                // response = new CMDefaultResponse(request.software_id, CMMS.RETRUNSTATUS.FAILURE, "For This Module Name <" + request.moduleName + "> Software Id Is Not Present Please contact Backend Team For Adding Software_id");
-                // return response;
-                string Q = "select max(softwareid)+1 from features ; ";
-                DataTable dt_software = await Context.FetchData(Q).ConfigureAwait(false);
-                request.software_id = Convert.ToInt32(dt_software.Rows[0][0]);
+                response = new CMDefaultResponse(request.software_id, CMMS.RETRUNSTATUS.FAILURE, "For Module Name <" + request.moduleName + "> Software Id Is Not Passed. Please contact Backend Team For Getting Software_id For This Module.");
+                return response;
             }
             string myQuery = "INSERT INTO features(`moduleName`,softwareid, `featureName`, `menuImage`, `add`, `edit`, `delete`, `view`, `issue`, `approve`, `selfView`) " +
                 $"VALUES('{request.moduleName}',{request.software_id}, '{request.featureName}', '{request.menuImage}', {request.add}, {request.edit}, " +
                 $"{request.delete}, {request.view}, {request.issue}, {request.approve}, {request.selfView}); SELECT LAST_INSERT_ID();";
             DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
             int id = Convert.ToInt32(dt.Rows[0][0]);
-             response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Module Added Successfully");
+
+            string insertIntoRoles = $"INSERT INTO roleaccess(roleId , featureId , `add` , edit , `delete` , `view` , issue , approve , selfView , " +
+                $"lastModifiedAt , lastModifiedBy ) " +
+                $" select id ,{id},0,0,0,0,0,0,0,NOW(),0 from userroles; ";
+            DataTable dt_Roles = await Context.FetchData(insertIntoRoles).ConfigureAwait(false);
+
+            response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Module Added Successfully");
             return response;
         }
 
