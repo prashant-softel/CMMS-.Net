@@ -106,10 +106,10 @@ namespace CMMSAPIs.Models.Users
     }
     public class CMPlantAccess
     {
-        public int plant_id { get; set; }
-        public string plant_name { get; set; }
+        public int id { get; set; }
+        public string name { get; set; }
         public int spv_id { get; set; }
-        public string spv_name { get; set; }
+        public string spv { get; set; }
     }
     public class CMCompetency
     {
