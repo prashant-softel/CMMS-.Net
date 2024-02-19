@@ -265,10 +265,12 @@ namespace CMMSAPIs.Models.SM
         public string approver_name { get; set; }
         public string? requestd_date { get; set; }
         public string returnDate { get; set; }
+        public string? issued_date { get; set; }
         public string approval_date { get; set; }
         public int approval_status { get; set; }
         public string approval_comment { get; set; }
         public string requested_by_name { get; set; }
+        public string issued_name { get; set; }
         public int status { get; set; }
         public string status_short { get; set; }
         public string status_long { get; set; }
