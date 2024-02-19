@@ -329,7 +329,7 @@ namespace CMMSAPIs.Repositories.SM
 
                 string selectQuery = "SELECT sam.approval_required as approval_required_ID, sat.asset_code, asset_type_ID FROM smassetitems sat " +
                            "LEFT JOIN smassetmasters sam ON sam.asset_code = sat.asset_code " +
-                           "WHERE sat.ID = " + equipmentID;
+                           "WHERE sam.ID = " + equipmentID;
 
                 List<CMSMMaster> assetList = await Context.GetData<CMSMMaster>(selectQuery).ConfigureAwait(false);
                 var approval_required = assetList[0].approval_required;
@@ -341,8 +341,8 @@ namespace CMMSAPIs.Repositories.SM
                     try
                     {
                         string insertStmt = $"START TRANSACTION; " +
-                        $"INSERT INTO smrsitems (mrs_ID,asset_item_ID,asset_MDM_code,requested_qty,status,flag,approval_required,mrs_return_ID,issued_qty,returned_qty,used_qty,available_qty)" +
-                        $"VALUES ({request.ID},{request.cmmrsItems[i].asset_item_ID},'{asset_code}',{request.cmmrsItems[i].requested_qty},0,0,{approval_required},0,{request.cmmrsItems[i].issued_qty}, {request.cmmrsItems[i].returned_qty}, {request.cmmrsItems[i].used_qty}, {request.cmmrsItems[i].available_qty})" +
+                        $"INSERT INTO smrsitems (mrs_ID,asset_item_ID,asset_MDM_code,requested_qty,status,flag,approval_required,mrs_return_ID,issued_qty,returned_qty,used_qty,available_qty, is_splited)" +
+                        $"VALUES ({request.ID},{request.cmmrsItems[i].asset_item_ID},'{asset_code}',{request.cmmrsItems[i].requested_qty},0,0,{approval_required},0,{request.cmmrsItems[i].issued_qty}, {request.cmmrsItems[i].returned_qty}, {request.cmmrsItems[i].used_qty}, {request.cmmrsItems[i].available_qty},1)" +
                         $"; SELECT LAST_INSERT_ID();COMMIT;";
                         DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
                     }
@@ -354,8 +354,8 @@ namespace CMMSAPIs.Repositories.SM
                     try
                     {
                         string insertStmt = $"START TRANSACTION; " +
-                        $"INSERT INTO smrsitems (mrs_ID,asset_item_ID,asset_MDM_code,requested_qty,status,flag,approval_required,mrs_return_ID,issued_qty,returned_qty,used_qty,available_qty)" +
-                        $"VALUES ({request.ID},{request.cmmrsItems[i].asset_item_ID},'{asset_code}',1,0,0,{approval_required},0,{request.cmmrsItems[i].issued_qty}, {request.cmmrsItems[i].returned_qty}, {request.cmmrsItems[i].used_qty}, {request.cmmrsItems[i].available_qty})" +
+                        $"INSERT INTO smrsitems (mrs_ID,asset_item_ID,asset_MDM_code,requested_qty,status,flag,approval_required,mrs_return_ID,issued_qty,returned_qty,used_qty,available_qty,is_splited)" +
+                        $"VALUES ({request.ID},{request.cmmrsItems[i].asset_item_ID},'{asset_code}',1,0,0,{approval_required},0,{request.cmmrsItems[i].issued_qty}, {request.cmmrsItems[i].returned_qty}, {request.cmmrsItems[i].used_qty}, {request.cmmrsItems[i].available_qty},1)" +
                         $"; SELECT LAST_INSERT_ID();COMMIT;";
                         DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
                     }
@@ -376,7 +376,7 @@ namespace CMMSAPIs.Repositories.SM
         {
             string stmt = "SELECT sam.asset_type_ID FROM smassetitems sai " +
                           "LEFT JOIN smassetmasters sam ON sam.asset_code = sai.asset_code " +
-                          $"WHERE sai.ID = {assetItemID}";
+                          $"WHERE sam.ID = {assetItemID}";
             List<CMMRS> _List = await Context.GetData<CMMRS>(stmt).ConfigureAwait(false);
             if (_List != null && _List[0].asset_type_ID > 0)
             {
@@ -509,7 +509,10 @@ namespace CMMSAPIs.Repositories.SM
     "DATE_FORMAT(sm.returnDate,'%Y-%m-%d') as returnDate,if(sm.approval_status != '',DATE_FORMAT(sm.approved_date,'%d-%m-%Y'),'') as approval_date,sm.approval_status," +
     "sm.approval_comment,CONCAT(ed.firstName,' ',ed.lastName) as requested_by_name, sm.status, sm.activity, sm.whereUsedType," +
     " case when sm.whereUsedType = 1 then 'Job' when sm.whereUsedType = 2 then 'PM' when sm.whereUsedType = 4 then 'JOBCARD' when sm.whereUsedType = 27 then 'PMTASK' else 'Invalid' end as whereUsedTypeName,  sm.whereUsedRefID, sm.remarks " +
-    "FROM smmrs sm LEFT JOIN users ed ON ed.id = sm.requested_by_emp_ID LEFT JOIN users ed1 ON ed1.id = sm.approved_by_emp_ID " +
+    ", DATE_FORMAT(sm.issuedAt,'%Y-%m-%d') as issued_date, CONCAT(issuedUser.firstName,' ',issuedUser.lastName) as issued_name " +
+    " FROM smmrs sm LEFT JOIN users ed ON ed.id = sm.requested_by_emp_ID " +
+    " LEFT JOIN users ed1 ON ed1.id = sm.approved_by_emp_ID " +
+    " LEFT JOIN users issuedUser ON issuedUser.id = sm.issued_by_emp_ID " +
     "WHERE sm.id = " + ID + ";";
             List<CMMRSList> _List = await Context.GetData<CMMRSList>(stmt).ConfigureAwait(false);
             for (var i = 0; i < _List.Count; i++)
