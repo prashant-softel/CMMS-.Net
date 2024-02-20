@@ -301,13 +301,13 @@ namespace CMMSAPIs.BS.Cleaning
                 throw;
             }
         }
-        public async Task<List<CMMCEquipmentList>> GetEquipmentList(int facilityId)
+        public async Task<List<CMMCEquipmentList>> GetEquipmentList(int facility_Id)
         {
             try
             {
                 // using (var repos = new MCRepository(getDB))
                 {
-                    return await repos.GetEquipmentList(facilityId);
+                    return await repos.GetEquipmentList(facility_Id);
                 }
             }
             catch (Exception ex)
