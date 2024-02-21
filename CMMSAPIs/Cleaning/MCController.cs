@@ -289,11 +289,11 @@ namespace CMMSAPIs.Controllers.MC
         //[Authorize]
         [Route("GetMCEquipmentList")]
         [HttpGet]
-        public async Task<IActionResult> GetMCEquipmentList(int facilityId)
+        public async Task<IActionResult> GetMCEquipmentList(int facility_Id)
         {
             try
             {
-                var data = await _CleaningBS.GetEquipmentList(facilityId);
+                var data = await _CleaningBS.GetEquipmentList(facility_Id);
                 return Ok(data);
             }
             catch (Exception ex)

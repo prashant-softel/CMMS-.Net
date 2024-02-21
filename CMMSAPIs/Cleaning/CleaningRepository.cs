@@ -866,13 +866,13 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Execution Rejected");
             return response;
         }
-        internal virtual async Task<List<CMMCEquipmentList>> GetEquipmentList(int facilityId)
+        internal virtual async Task<List<CMMCEquipmentList>> GetEquipmentList(int facility_Id)
         {
             string filter = "";
 
-            if (facilityId > 0)
+            if (facility_Id > 0)
             {
-                filter += $" and facilityId={facilityId} ";
+                filter += $" and facilityId={facility_Id} ";
             }
 
             string invQuery = $"SELECT assets.id AS invId, assets.name AS invName, assets.moduleQuantity FROM assets JOIN assetcategories ON assets.categoryId = assetcategories.id WHERE assetcategories.name =\"Inverter\" {filter}";
