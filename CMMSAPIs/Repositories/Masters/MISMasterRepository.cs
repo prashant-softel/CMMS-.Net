@@ -406,8 +406,8 @@ namespace CMMSAPIs.Repositories.Masters
 
         internal async Task<CMDefaultResponse> CreateBodyParts(BODYPARTS request, int UserId)
         {
-            String myqry = $"INSERT INTO BODYPARTS(sequence_no,id,bodyparts, description,status, Createdby,Createdat) VALUES " +
-                                $"('{request.sequence_no}','{request.id}','{request.bodyparts}','{request.description}',1,  {UserId}, '{UtilsRepository.GetUTCTime()}'); " +
+            String myqry = $"INSERT INTO BODYPARTS(sequence_no,id,name,description,status, Createdby,Createdat) VALUES " +
+                                $"('{request.sequence_no}','{request.id}','{request.name}','{request.description}',1,  {UserId}, '{UtilsRepository.GetUTCTime()}'); " +
                                  $"SELECT LAST_INSERT_ID(); ";
             DataTable dt = await Context.FetchData(myqry).ConfigureAwait(false);
             int id = Convert.ToInt32(dt.Rows[0][0]);
@@ -416,6 +416,7 @@ namespace CMMSAPIs.Repositories.Masters
         internal async Task<CMDefaultResponse> UpdateBodyParts(BODYPARTS request, int UserId)
         {
             string updateQry = "UPDATE BODYPARTS SET ";
+               updateQry += $"name = '{request.name}', ";
             if (request.sequence_no >= 0)
                 updateQry += $"Sequence_no = {request.sequence_no}, ";
             if (request.description != null && request.description != "")
@@ -484,7 +485,8 @@ namespace CMMSAPIs.Repositories.Masters
         }
         internal async Task<List<CMIncidentType>> GetIncidentTypeList()
         {
-            string myQuery = "SELECT id, incidenttype FROM incidenttype WHERE status=1 ";
+            // string myQuery = "SELECT * FROM incidenttype WHERE status=1 ";
+            string myQuery = "SELECT id,incidenttype,status,addedAt,addedBy,UpdatedAt,UpdatedBy FROM incidenttype WHERE status = 1";
             List<CMIncidentType> result = await Context.GetData<CMIncidentType>(myQuery).ConfigureAwait(false);
             return result;
         }
@@ -493,7 +495,7 @@ namespace CMMSAPIs.Repositories.Masters
 
         internal async Task<CMDefaultResponse> CreateIncidentType(CMIncidentType request, int userId)
         {
-            string myQuery = $"INSERT INTO incidenttype(incidenttype,  status, addedBy, addedAt) VALUES " +
+            string myQuery = $"INSERT INTO incidenttype(incidenttype,status, addedBy, addedAt) VALUES " +
                                 $"('{request.incidenttype}', 1, {userId}, '{UtilsRepository.GetUTCTime()}'); " +
                                  $"SELECT LAST_INSERT_ID(); ";
             DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
