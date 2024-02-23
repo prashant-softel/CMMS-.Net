@@ -476,7 +476,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
             
             foreach (var kvp in CMMS.INCIDENT_RISK_TYPE)
             {
-                strRiskType += $"If(risk_type = '{kvp.Key}', '{kvp.Value}',";
+                strRiskType += $"If(risk_type = '{kvp.Value}', '{kvp.Key}',";
                 strParanthesis += ")";
             }
 
