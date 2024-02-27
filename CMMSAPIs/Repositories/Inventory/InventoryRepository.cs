@@ -1133,7 +1133,7 @@ namespace CMMSAPIs.Repositories.Inventory
             //    "b3.name as manufacturer_name, a.currency FROM assets AS a JOIN assetstatus as s on s.id = a.statusId " +
             //    "JOIN facilities as f ON f.id = a.blockId JOIN assets as a2 ON a.parentId = a2.id " +
             //    "JOIN business AS b2 ON a.ownerId = b2.id JOIN business AS b3 ON a.manufacturerId = b3.id";
-            string myQuery = "SELECT a.id ,a.name, a.description, ast.id as typeId, ast.name as type, b2.id as supplierId, b2.name as supplierName, manufacturertlb.id as manufacturerId, manufacturertlb.name as manufacturerName, b5.id as operatorId, b5.name as operatorName, ac.id as categoryId, ac.name as categoryName, a.serialNumber, a.calibrationFrequency,frequency.name as calibrationFreqType, a.calibrationReminderDays, " +
+            string myQuery = "SELECT a.id ,a.name, a.description,a.moduleQuantity, ast.id as typeId, ast.name as type, b2.id as supplierId, b2.name as supplierName, manufacturertlb.id as manufacturerId, manufacturertlb.name as manufacturerName, b5.id as operatorId, b5.name as operatorName, ac.id as categoryId, ac.name as categoryName, a.serialNumber, a.calibrationFrequency,frequency.name as calibrationFreqType, a.calibrationReminderDays, " +
             //      "CASE WHEN a.calibrationLastDate = '0000-00-00 00:00:00' THEN NULL ELSE a.calibrationLastDate END as calibrationLastDate, CASE WHEN a.calibrationDueDate = '0000-00-00 00:00:00' THEN NULL ELSE a.calibrationDueDate END AS calibrationDueDate," +
             //    " a.model, a.currency, a.cost, a.acCapacity, a.dcCapacity, a.moduleQuantity, " +
             //"a.firstDueDate as calibrationDueDate, "+
@@ -1396,7 +1396,6 @@ string warrantyQry = "insert into assetwarranty
             if (request.moduleQuantity != 0)
             {
                 updateQry += $" moduleQuantity= '{request.moduleQuantity}',";
-
             }
             if (request.categoryId != 0)
             {
@@ -1484,6 +1483,11 @@ string warrantyQry = "insert into assetwarranty
             if (request.stockCount != 0)
             {
                 updateQry += $" stockCount= '{request.stockCount}',";
+
+            }
+            if (request.moduleQuantity != 0)
+            {
+                updateQry += $" moduleQuantity= '{request.moduleQuantity}',";
 
             }
             if (request.specialToolId != 0)
