@@ -126,8 +126,9 @@ namespace CMMSAPIs.Repositories.Jobs
             string myQuery = $"INSERT INTO worktypemasterassets (assetName, status, createdAt, createdBy) " +
                                 $"VALUES ('{tool_name}', 1, '{UtilsRepository.GetUTCTime()}', {userID});";
 
-            DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
-            int insertedId = Convert.ToInt32(dt.Rows[0][0]);
+            //DataTable dt = 
+            int insertedId =await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
+            //int insertedId = Convert.ToInt32(dt.Rows[0][0]);
 
             return new CMDefaultResponse(insertedId, CMMS.RETRUNSTATUS.SUCCESS, "Master tool created");
         }

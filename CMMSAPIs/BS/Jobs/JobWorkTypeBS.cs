@@ -140,13 +140,13 @@ namespace CMMSAPIs.BS.Jobs
             }
         }
 
-        public async Task<CMDefaultResponse> CreateMasterTool(string name, int userID)
+        public async Task<CMDefaultResponse> CreateMasterTool(string tool_name, int userID)
         {
             try
             {
                 using (var repos = new JobWorkTypeRepository(getDB))
                 {
-                    return await repos.CreateMasterTool(name, userID);
+                    return await repos.CreateMasterTool(tool_name, userID);
                 }
             }
             catch (Exception ex)

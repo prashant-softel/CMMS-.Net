@@ -260,7 +260,7 @@ namespace CMMSAPIs.Repositories.SM
             int reject_id = await Context.ExecuteNonQry<int>(UpdatesqlQ).ConfigureAwait(false);
 
             retCode = CMMS.RETRUNSTATUS.SUCCESS;
-            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Approved request order {request.id} successfully.");
+            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Approved request order  " + request.id + "  successfully.");
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_RO, request.id, 0, 0, request.comment, CMMS.CMMS_Status.SM_RO_SUBMIT_APPROVED);
             return response;
         }
@@ -293,8 +293,6 @@ namespace CMMSAPIs.Repositories.SM
 
         public async Task<CMCreateRequestOrder> GetRODetailsByID(int id)
         {
- 
-
 
             string query = "SELECT fc.name as facilityName,pod.ID as requestDetailsID, facilityid as      " +
                 " facility_id,pod.spare_status,po.remarks,sai.orderflag," +
