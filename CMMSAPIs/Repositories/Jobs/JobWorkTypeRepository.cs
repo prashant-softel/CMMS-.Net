@@ -34,7 +34,7 @@ namespace CMMSAPIs.Repositories.Jobs
             {
                 myQuery += "and jwt.equipmentCategoryId IN (" + categoryIds + ")";
             }
-            
+
             List<CMJobWorkType> _WorkType = await Context.GetData<CMJobWorkType>(myQuery).ConfigureAwait(false);
             return _WorkType;
         }
@@ -107,46 +107,82 @@ namespace CMMSAPIs.Repositories.Jobs
         {
             /*
              * Fetch id, workType, ToolName (if more than 1 tool linked concat then return) from WorkTypeAssociatedTools table 
-             * and JOIN WorkTypeMasterAssets to get ToolName
+             * and JOIN WorkTypeMaster  Assets to get ToolName
             */
-            string myQuery = "SELECT wt.id as id, jwt.workTypeName as workTypeName, a.assetName as linkedToolName FROM worktypeassociatedtools as wt JOIN jobworktypes as jwt ON jwt.id = wt.workTypeId JOIN worktypemasterassets as a ON a.id = wt.ToolId ";
-            if (worktypeIds != "" && worktypeIds != null)
+            String myQuery;
+            if (worktypeIds=="0" || worktypeIds == null)
             {
-                myQuery += "where wt.workTypeId IN (" + worktypeIds + ");";
+                myQuery = "SELECT a.id as id,jws.name as Equipment_name,wt.WorkTypeId ,jwt.equipmentCategoryId as equipmentCategoryId,jwt.workTypeName as workTypeName, a.assetName as linkedToolName FROM worktypeassociatedtools as wt JOIN jobworktypes as jwt ON jwt.id= wt.workTypeId JOIN worktypemasterassets as a ON a.id = wt.ToolId LEFT join assetcategories as jws ON jws.id=jwt.equipmentCategoryId where a.status =1 ";
+                   // "a ON a.id = wt.ToolId LEFT join assetcategories as jws ON jws.id=jwt.equipmentCategoryId where a.status =1 ";
             }
-            /*     string myQuery = "SELECT wt.id as id, jwt.workTypeName as workTypeName, group_concat(a.assetName SEPARATOR ', ') as linkedToolName FROM worktypeassociatedtools as wt LEFT JOIN jobworktypes as jwt ON jwt.id = wt.workTypeId LEFT JOIN worktypemasterassets as a ON FIND_IN_SET(a.id, wt.ToolId) where wt.id = " + id + " group by wt.workTypeId";*/
-
             
+            else 
+            {
+                myQuery = "SELECT a.id as id,jws.name as Equipment_name,wt.WorkTypeId ,jwt.equipmentCategoryId as equipmentCategoryId,jwt.workTypeName as workTypeName, a.assetName as linkedToolName FROM worktypeassociatedtools as wt JOIN jobworktypes as jwt ON jwt.id= wt.workTypeId JOIN worktypemasterassets as a ON a.id = wt.ToolId LEFT join assetcategories as jws ON jws.id=jwt.equipmentCategoryId";
+                myQuery += " where wt.workTypeId IN  (" + worktypeIds + ") and a.status =1;";
+            }
+        
             List<CMMasterTool> _MasterToolList = await Context.GetData<CMMasterTool>(myQuery).ConfigureAwait(false);
             return _MasterToolList;
         }
 
-        internal async Task<CMDefaultResponse> CreateMasterTool(string tool_name, int userID)
+        internal async Task<CMDefaultResponse> CreateMasterTool(CMADDJobWorkTypeTool request, int userID)
         {
             string myQuery = $"INSERT INTO worktypemasterassets (assetName, status, createdAt, createdBy) " +
                                 $"VALUES ('{tool_name}', 1, '{UtilsRepository.GetUTCTime()}', {userID});";
 
-            DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
-            int insertedId = Convert.ToInt32(dt.Rows[0][0]);
+            //DataTable dt = 
+            int insertedId =await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
+            //int insertedId = Convert.ToInt32(dt.Rows[0][0]);
 
+=======
+            string myQuery = $"INSERT INTO worktypemasterassets (assetName,workTypeId,equipmentCategoryId,status, createdAt, createdBy) " +
+                                $"VALUES ('{request.Toolname}',{request.workTypeId},{request.equipmentCategoryId}, 1, '{UtilsRepository.GetUTCTime()}', { userID } );" +
+                                $"SELECT LAST_INSERT_ID();";
+            DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
+            int insertedId = Convert.ToInt32(dt.Rows[0][0]); 
+            string qryAssetsIds = $"insert into worktypeassociatedtools(workTypeId,status, ToolId, createdAt, createdBy ) value ";
+            qryAssetsIds += $" ({ request.workTypeId },1,{insertedId},'{ UtilsRepository.GetUTCTime() }', { UtilsRepository.GetUserID() })";
+            await Context.FetchData(qryAssetsIds).ConfigureAwait(false);
+            //int insertedId1 = Convert.ToInt32(dt.Rows[0][0]);
+>>>>>>> Stashed changes
             return new CMDefaultResponse(insertedId, CMMS.RETRUNSTATUS.SUCCESS, "Master tool created");
         }
+        /*{   
+            try
+            {
+                string myQuery = $"INSERT INTO worktypemasterassets (assetName, status, createdAt, createdBy) " +
+                                 $"VALUES ('{name}', 1, '{UtilsRepository.GetUTCTime()}', {userID}) SELECT LAST_INSERT_ID();";
 
+                DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
 
-        internal async Task<CMDefaultResponse> UpdateMasterTool(CMDefaultList tool, int userID)
+                if (dt.Rows.Count > 0)
+                {
+                    int insertedId = Convert.ToInt32(dt.Rows[0][0]);
+                    return new CMDefaultResponse(insertedId, CMMS.RETRUNSTATUS.SUCCESS, "Master tool created");
+                }
+            }
+            catch (Exception ex)
+            {
+
+                return ex.Message);
+            }*/
+    
+        //s}
+         internal async Task<CMDefaultResponse> UpdateMasterTool(CMADDJobWorkTypeTool request, int userID)
         {
-            string myQuery = $"UPDATE worktypemasterassets SET assetName = '{tool.name}', updatedAt = '{UtilsRepository.GetUTCTime()}', updatedBy = {userID} WHERE id = {tool.id} ";
-
+            string myQuery = $"UPDATE worktypemasterassets SET  assetName='{request.Toolname}',workTypeId={request.workTypeId},equipmentCategoryId={request.equipmentCategoryId},updatedAt = '{UtilsRepository.GetUTCTime()}', updatedBy = {userID} WHERE id = {request.id} ";
 
             await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
 
-            return new CMDefaultResponse(tool.id, CMMS.RETRUNSTATUS.SUCCESS, "Master tool details updated");
+            string qryAssetsIds = $"UPDATE  worktypeassociatedtools SET  workTypeId={ request.workTypeId },updatedAt='{ UtilsRepository.GetUTCTime()}',updatedBy={userID} where ToolId={request.id}";
+            await Context.ExecuteNonQry<int>(qryAssetsIds).ConfigureAwait(false);
+            return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Master tool details updated");
         }
 
         internal async Task<CMDefaultResponse> DeleteMasterTool(int id)
         {
-            string myQuery = $"UPDATE worktypemasterassets SET status =  0 WHERE id = {id} ";
-
+            string myQuery = $"UPDATE worktypemasterassets SET status =0 WHERE id = {id} ";
 
             await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
 

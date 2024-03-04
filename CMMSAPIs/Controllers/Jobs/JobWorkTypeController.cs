@@ -152,13 +152,13 @@ namespace CMMSAPIs.Controllers.Jobs
 
         //[Authorize]
         [Route("UpdateMasterTool")]
-        [HttpPatch]
-        public async Task<IActionResult> UpdateMasterTool(CMDefaultList tool)
+        [HttpPut]
+        public async Task<IActionResult> UpdateMasterTool(CMADDJobWorkTypeTool request)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _JobWorkTypeBS.UpdateMasterTool(tool, userID);
+                var data = await _JobWorkTypeBS.UpdateMasterTool(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
