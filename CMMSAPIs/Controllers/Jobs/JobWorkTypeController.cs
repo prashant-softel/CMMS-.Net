@@ -136,12 +136,12 @@ namespace CMMSAPIs.Controllers.Jobs
         //[Authorize]
         [Route("CreateMasterTool")]
         [HttpPost]
-        public async Task<IActionResult> CreateMasterTool(string name)
+        public async Task<IActionResult> CreateMasterTool(CMADDJobWorkTypeTool request)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _JobWorkTypeBS.CreateMasterTool(name, userID);
+                var data = await _JobWorkTypeBS.CreateMasterTool(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
