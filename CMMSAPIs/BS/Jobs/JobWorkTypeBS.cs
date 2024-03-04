@@ -23,9 +23,9 @@ namespace CMMSAPIs.BS.Jobs
          * Tools Associated to Work Type CRUD Operation
         */
         Task<List<CMJobWorkTypeTool>> GetJobWorkTypeToolList(int jobId);
-        Task<List<CMMasterTool>> GetMasterToolList(string worktypeIds);
-        Task<CMDefaultResponse> CreateMasterTool(string tool_name, int userID);
-        Task<CMDefaultResponse> UpdateMasterTool(CMDefaultList tool, int userID);
+        Task<List<CMMasterTool>> GetMasterToolList(string worktypeIds );
+        Task<CMDefaultResponse> CreateMasterTool(CMADDJobWorkTypeTool request, int userID);
+        Task<CMDefaultResponse> UpdateMasterTool(CMADDJobWorkTypeTool request , int userID);
         Task<CMDefaultResponse> DeleteMasterTool(int id);
         Task<CMDefaultResponse> CreateJobWorkTypeTool(CMAddJobWorkTypeTool request);
         Task<CMDefaultResponse> UpdateJobWorkTypeTool(CMUpdateJobWorkTypeTool request);
@@ -140,13 +140,13 @@ namespace CMMSAPIs.BS.Jobs
             }
         }
 
-        public async Task<CMDefaultResponse> CreateMasterTool(string tool_name, int userID)
+        public async Task<CMDefaultResponse> CreateMasterTool(string name, int userID)
         {
             try
             {
                 using (var repos = new JobWorkTypeRepository(getDB))
                 {
-                    return await repos.CreateMasterTool(tool_name, userID);
+                    return await repos.CreateMasterTool(name, userID);
                 }
             }
             catch (Exception ex)
@@ -155,13 +155,13 @@ namespace CMMSAPIs.BS.Jobs
             }
         }
 
-        public async Task<CMDefaultResponse> UpdateMasterTool(CMDefaultList tool, int userID)
+        public async Task<CMDefaultResponse> UpdateMasterTool(CMADDJobWorkTypeTool request, int userID)
         {
             try
             {
                 using (var repos = new JobWorkTypeRepository(getDB))
                 {
-                    return await repos.UpdateMasterTool(tool, userID);
+                    return await repos.UpdateMasterTool( request, userID);
                 }
             }
             catch (Exception ex)

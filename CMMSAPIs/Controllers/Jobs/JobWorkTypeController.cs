@@ -136,12 +136,12 @@ namespace CMMSAPIs.Controllers.Jobs
         //[Authorize]
         [Route("CreateMasterTool")]
         [HttpPost]
-        public async Task<IActionResult> CreateMasterTool(string tool_name)
+        public async Task<IActionResult> CreateMasterTool(string name)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _JobWorkTypeBS.CreateMasterTool(tool_name, userID);
+                var data = await _JobWorkTypeBS.CreateMasterTool(name, userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -152,13 +152,13 @@ namespace CMMSAPIs.Controllers.Jobs
 
         //[Authorize]
         [Route("UpdateMasterTool")]
-        [HttpPatch]
-        public async Task<IActionResult> UpdateMasterTool(CMDefaultList tool)
+        [HttpPut]
+        public async Task<IActionResult> UpdateMasterTool(CMADDJobWorkTypeTool request)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _JobWorkTypeBS.UpdateMasterTool(tool, userID);
+                var data = await _JobWorkTypeBS.UpdateMasterTool(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
