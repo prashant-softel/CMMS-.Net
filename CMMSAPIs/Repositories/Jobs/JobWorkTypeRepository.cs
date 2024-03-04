@@ -128,14 +128,13 @@ namespace CMMSAPIs.Repositories.Jobs
 
         internal async Task<CMDefaultResponse> CreateMasterTool(CMADDJobWorkTypeTool request, int userID)
         {
-            string myQuery = $"INSERT INTO worktypemasterassets (assetName, status, createdAt, createdBy) " +
-                                $"VALUES ('{tool_name}', 1, '{UtilsRepository.GetUTCTime()}', {userID});";
+           // string myQuery = $"INSERT INTO worktypemasterassets (assetName, status, createdAt, createdBy) " +
+             //                   $"VALUES ('{tool_name}', 1, '{UtilsRepository.GetUTCTime()}', {userID});";
 
             //DataTable dt = 
-            int insertedId =await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
+         //   int insertedId =await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
             //int insertedId = Convert.ToInt32(dt.Rows[0][0]);
 
-=======
             string myQuery = $"INSERT INTO worktypemasterassets (assetName,workTypeId,equipmentCategoryId,status, createdAt, createdBy) " +
                                 $"VALUES ('{request.Toolname}',{request.workTypeId},{request.equipmentCategoryId}, 1, '{UtilsRepository.GetUTCTime()}', { userID } );" +
                                 $"SELECT LAST_INSERT_ID();";
@@ -145,7 +144,6 @@ namespace CMMSAPIs.Repositories.Jobs
             qryAssetsIds += $" ({ request.workTypeId },1,{insertedId},'{ UtilsRepository.GetUTCTime() }', { UtilsRepository.GetUserID() })";
             await Context.FetchData(qryAssetsIds).ConfigureAwait(false);
             //int insertedId1 = Convert.ToInt32(dt.Rows[0][0]);
->>>>>>> Stashed changes
             return new CMDefaultResponse(insertedId, CMMS.RETRUNSTATUS.SUCCESS, "Master tool created");
         }
         /*{   
