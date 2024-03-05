@@ -183,7 +183,7 @@ namespace CMMSAPIs.Repositories.Grievance
             int count = 0;
             int retID = 0;
             string concern = "";
-            CMMS.RETURNSTATUS retCode = CMMS.RETURNSTATUS.FAILURE;
+            CMMS.RETRUNSTATUS    retCode = CMMS.RETRUNSTATUS.FAILURE; // RETURN is defined as RETRUN
             string strRetMessage = "";
             int statusId = (int)CMMS.CMMS_Status.GRIEVANCE_ONGOING;
 
@@ -233,7 +233,7 @@ namespace CMMSAPIs.Repositories.Grievance
             if (count > 0)
             {
 
-                retCode = CMMS.RETURNSTATUS.SUCCESS;
+                retCode = CMMS.RETRUNSTATUS.SUCCESS;
                 if (count == 1)
                 {
                     strRetMessage = "New grievance <" + concern + "> created";
@@ -309,7 +309,7 @@ namespace CMMSAPIs.Repositories.Grievance
                 // Remove the trailing comma and add the WHERE clause
                 updateQry = updateQry.TrimEnd(',', ' ') + $" WHERE id = '{request.id}'";
 
-                CMDefaultResponse obj = new CMDefaultResponse(request.id, CMMS.RETURNSTATUS.SUCCESS, $"Grievance <{request.id}> has been updated");
+                CMDefaultResponse obj = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Grievance <{request.id}> has been updated");
 
                 CMGrievance _GrievanceUpdated = await GetGrievanceDetails(request.id);
 
@@ -370,7 +370,7 @@ namespace CMMSAPIs.Repositories.Grievance
         CMDefaultResponse obj = null;
         //if (retVal1 && retVal2)
         {
-            obj = new CMDefaultResponse(id, CMMS.RETURNSTATUS.SUCCESS, "Grievance <" + id + "> has been deleted");
+            obj = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Grievance <" + id + "> has been deleted");
         }
         return obj;
         // DELETE t1, t2 FROM t1 INNER JOIN t2 INNER JOIN t3

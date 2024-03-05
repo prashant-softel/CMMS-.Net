@@ -44,6 +44,7 @@ namespace CMMSAPIs.Helper
             { CMMS_Modules.VEGETATION, 33 },
             { CMMS_Modules.INCIDENT_REPORT, 34 },
             { CMMS_Modules.DSM, 35 }
+
         };
         public enum RETRUNSTATUS
         {
@@ -263,6 +264,8 @@ namespace CMMSAPIs.Helper
             DSM = 181,
             JobCard=182,
 
+            Grievance = 301,
+
 
         }
 
@@ -432,6 +435,12 @@ namespace CMMSAPIs.Helper
             INVENTORY_ADDED,
             INVENTORY_UPDATED,
             INVENTORY_DELETED,
+
+            Grievance_ADDED,
+            Grievance_UPDATED,
+            Grievance_DELETED,
+
+            GRIEVANCE_ONGOING,
 
 
             GO_DRAFT = 301,
