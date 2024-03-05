@@ -43,7 +43,9 @@ namespace CMMSAPIs.Helper
             { CMMS_Modules.MC_TASK, 32 },
             { CMMS_Modules.VEGETATION, 33 },
             { CMMS_Modules.INCIDENT_REPORT, 34 },
-            { CMMS_Modules.DSM, 35 }
+            { CMMS_Modules.DSM, 35 },
+            { CMMS_Modules.Grievance, 36 },
+
 
         };
         public enum RETRUNSTATUS
