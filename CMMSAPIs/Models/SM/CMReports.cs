@@ -128,6 +128,15 @@ namespace CMMSAPIs.Models.SM
         public decimal quantity { get; set; }
 
     }
+    public class CMTaskStockItems
+    {
+       
+        public int assetItemID { get; set; }
+        public string asset_name { get; set; }
+        public int facilityID { get; set; }
+        public decimal available_qty { get; set; }
+
+    }
 
     public class CMPlantStockOpeningResponse
     {

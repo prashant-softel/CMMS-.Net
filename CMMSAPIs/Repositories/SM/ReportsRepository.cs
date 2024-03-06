@@ -405,7 +405,13 @@ public async Task<List<CMEmployeeStockReport>> GetEmployeeStockReport(int facili
             cMEmployeeStockList.CMMRSItems = itemList;
             return cMEmployeeStockList;
         }
-
+        internal async Task<List<CMTaskStockItems>> GetpmTaskStock(int facility_ID, int task_id)
+          {
+            string Plant_Stock_Opening_Details_querys= "SELECT sm_trans.assetItemID, sm.asset_name, sm_trans.facilityID,smrsitems.available_qty FROM smtransition AS sm_trans LEFT JOIN smassetmasters AS sm ON sm_trans.assetitemID = sm.ID left  join smrsitems on  smrsitems.mrs_ID=sm_trans.mrsID  " +
+              "WHERE actorID = " + task_id + " AND sm_trans.facilityID = '" + facility_ID + "' ";
+            List<CMTaskStockItems> result = await Context.GetData<CMTaskStockItems>(Plant_Stock_Opening_Details_querys).ConfigureAwait(false);
+            return result;
+          }
         internal async Task<List<CMEmployeeStockTransactionReport>> GetTransactionReport(string facility_ID, int actorType, int actorID, DateTime fromDate, DateTime toDate)
         {
 
