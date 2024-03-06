@@ -7,6 +7,7 @@ using CMMSAPIs.Models.Utils;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using ExpressTimezone;
 
 namespace CMMSAPIs.Repositories.Utils
 {
@@ -121,6 +122,41 @@ namespace CMMSAPIs.Repositories.Utils
             return 232;
         }
 
+        /*   internal static string gettimeZone(int facility_id)
+           {   
+               string timeZone = $"SELECT timezone from facilities where id="+facility_id+"";
+               string timezone1 = "";
+               string sqlQuery = "";
+               if (timeZone =="hardcoded")
+               {
+                   timezone1 = "Asia/Kolkata";
+                   sqlQuery = $"SELECT CONVERT_TZ(UTC_TIMESTAMP(), '+00:00', 'UTC+05:30');";
+               }
+               else {
+                   sqlQuery = $"SELECT CONVERT_TZ(UTC_TIMESTAMP(), '+00:00', '{timeZone}');";
+               }
+               return sqlQuery;
+           }*/
+       // internal  static DateTime Contvertime(int facility_id, string datetimeof)
+       public async Task<DateTime> Contvertime(int facility_id, DateTime datetime)
+        {
+            // var utcTime =DateTime.Parse(datetime);
+            var utcTime = datetime;
+            string qry = $"SELECT timezone,id as facility_id from facilities where id=" + facility_id ;
+             var data=  await Context.GetData<TimeZonedate>(qry).ConfigureAwait(false);
+           // await context.FetchData<string>(qry).ConfigureAwait(false);
+            string timezone ="" ;
+            if (data[0].timezone == "" && data[0].timezone == "default_hardcoded")
+            {
+                timezone = "Asia/Kolkata";
+            }
+            else
+            {
+                timezone = data[0].timezone;
+            }
+            var returnTime = utcTime.UTCToRegionalTime(timezone);
+            return returnTime;
+        }
         // Return UTC time
         internal static string GetUTCTime()
         {
