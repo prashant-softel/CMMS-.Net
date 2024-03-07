@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using ExpressTimezone;
+using TimeZoneConverter;
 
 namespace CMMSAPIs.Repositories.Utils
 {
@@ -156,6 +157,30 @@ namespace CMMSAPIs.Repositories.Utils
             }
             var returnTime = utcTime.UTCToRegionalTime(timezone);
             return returnTime;
+        }
+
+        public async Task<DateTime> ConvertToUTCDTC(string destinationTimeZoneId,DateTime utcTime)
+        {
+
+
+            //// Define the source time zone (UTC)
+            //TimeZoneInfo sourceTimeZone = TimeZoneInfo.Utc;
+
+            //// Define the destination time zone
+            //destinationTimeZoneId = "Eastern Standard Time"; // For example, Eastern Time Zone
+            //TimeZoneInfo destinationTimeZone = TimeZoneInfo.FindSystemTimeZoneById(destinationTimeZoneId);
+
+            //// Convert the UTC time to the destination time zone
+            ////
+
+            string sourceTimeZoneId = "UTC"; // Fixed source time zone
+         
+            string windowsTimeZoneId = TZConvert.IanaToWindows(destinationTimeZoneId);
+
+            // Convert the source time to the destination time zone
+            DateTime destinationTime = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(utcTime, sourceTimeZoneId, windowsTimeZoneId);
+
+            return destinationTime;
         }
         // Return UTC time
         internal static string GetUTCTime()
