@@ -23,6 +23,7 @@ namespace CMMSAPIs.Repositories.PM
     {
         private UtilsRepository _utilsRepo;
         ErrorLog m_errorLog;
+        private MYSQLDBHelper sqlDBHelper;
 
         public PMRepository(MYSQLDBHelper sqlDBHelper, IWebHostEnvironment iwebhostobj) : base(sqlDBHelper)
         {
@@ -219,13 +220,15 @@ namespace CMMSAPIs.Repositories.PM
 
         internal async Task<CMPMPlanDetail> GetPMPlanDetail(int id)
         {
+            int facility_Id =1798; // Assuming you have a method to get facility ID for a plan
+            
             if (id <= 0)
                 throw new ArgumentException("Invalid Facility ID");
             string planListQry = $"SELECT plan.id as plan_id, plan.plan_name, plan.status as status_id, statuses.statusName as status_short, plan.plan_date, " +
                                     $"facilities.id as facility_id, facilities.name as facility_name, category.id as category_id, category.name as category_name, " +
                                     $"frequency.id as plan_freq_id, frequency.name as plan_freq_name, createdBy.id as created_by_id, " +
                                     $"CONCAT(createdBy.firstName, ' ', createdBy.lastName) as created_by_name, plan.created_at,approvedBy.id as approved_by_id, CONCAT(approvedBy.firstName, ' ', approvedBy.lastName) as approved_by_name, plan.approved_at, rejectedBy.id as rejected_by_id, CONCAT(rejectedBy.firstName, ' ', rejectedBy.lastName) as rejected_by_name, plan.rejected_at,CONCAT(assignedTo.firstName, ' ', assignedTo.lastName) as assigned_to_name, " +
-                                    $"updatedBy.id as updated_by_id, CONCAT(updatedBy.firstName, ' ', updatedBy.lastName) as updated_by_name, plan.updated_at " +
+                                    $"updatedBy.id as updated_by_id, CONCAT(updatedBy.firstName, ' ', updatedBy.lastName) as updated_by_name,plan.updated_at " +
                                     $"FROM pm_plan as plan " +
                                     $"LEFT JOIN statuses ON plan.status = statuses.softwareId " +
                                     $"JOIN facilities ON plan.facility_id = facilities.id " +
@@ -236,13 +239,18 @@ namespace CMMSAPIs.Repositories.PM
                                     $"LEFT JOIN users as approvedBy ON approvedBy.id = plan.approved_by " +
                                     $"LEFT JOIN users as rejectedBy ON rejectedBy.id = plan.rejected_by " +
                                     $"LEFT JOIN users as assignedTo ON assignedTo.id = plan.assigned_to " +
-
                                     $"WHERE plan.id = {id} ";
-            List<CMPMPlanDetail>  planDetails = await Context.GetData<CMPMPlanDetail>(planListQry).ConfigureAwait(false);
-
+           
+            List <CMPMPlanDetail>  planDetails = await Context.GetData<CMPMPlanDetail>(planListQry).ConfigureAwait(false);
+            foreach (var detail in planDetails)
+            {
+               
+                detail.updated_at = await _utilsRepo.Contvertime(facility_Id, detail.updated_at);   
+                detail.created_at = await _utilsRepo.Contvertime(facility_Id, detail.created_at);
+                detail.approved_at = await _utilsRepo.Contvertime(facility_Id, detail.approved_at);
+            }
             if (planDetails.Count == 0)
                 return null;
-
             string assetChecklistsQry = $"SELECT assets.id as asset_id, assets.name as asset_name, parent.id as parent_id, parent.name as parent_name, assets.moduleQuantity as module_qty, checklist.id as checklist_id, checklist.checklist_number as checklist_name " +
                                         $"FROM pmplanassetchecklist as planmap " +
                                         $"LEFT JOIN assets ON assets.id = planmap.assetId " +

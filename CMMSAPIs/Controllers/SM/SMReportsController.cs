@@ -127,6 +127,48 @@ namespace CMMSAPIs.Controllers.SM
                 return Ok(item);
             }
         }
+        //changes
+        [Route("GetTaskStock")]
+        [HttpGet]
+        public async Task<IActionResult> GetpmTaskStock(int facility_ID, int task_id)
+        {
+            try
+            {
+                var data = await _SMReportsBS.GetpmTaskStock(facility_ID,task_id);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid employee id or facility id is sent.";
+                return Ok(item);
+            }
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         [Route("GetTransactionReport")]
         [HttpGet]

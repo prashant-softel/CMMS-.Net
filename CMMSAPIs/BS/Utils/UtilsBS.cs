@@ -14,9 +14,11 @@ namespace CMMSAPIs.BS.Utils
         Task<List<CMDefaultList>> GetStateList(int country_id);
         Task<List<CMDefaultList>> GetCityList(int state_id);
         Task<List<CMCurrency>> GetCurrencyList();
-       // Task<List<double>> GetConversionRate(int currency_id_from, int currency_id_to);
+        // Task<List<double>> GetConversionRate(int currency_id_from, int currency_id_to);
         Task<List<TZone>> GetTimeZoneList();
-       // Task<List<TZone>> GetTimeZone(int facility_id);
+        // Task<List<TZone>> GetTimeZone(int facility_id);
+        //Changes
+        Task<DateTime> Contvertime(int facility_id, DateTime datetime);
         Task<List<CMDefaultResponse>> AddLog(CMLog log);
         Task<List<CMLog>> GetHistoryLog(CMMS.CMMS_Modules module_type, int id);
     }
@@ -118,6 +120,8 @@ namespace CMMSAPIs.BS.Utils
                 throw;
             }
         }
+
+       
         //public async Task<List<TZone>> GetTimeZone(int facility_id)
         //{
         //    try
@@ -160,6 +164,22 @@ namespace CMMSAPIs.BS.Utils
             {
                 throw;
             }
+        }
+        //Changes
+        async Task<DateTime> IUtilsBS.Contvertime(int facility_id, DateTime datetime)
+        {
+            try
+            {
+                using (var repos = new UtilsRepository(getDB))
+                {
+                    return await repos.Contvertime( facility_id,datetime);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+
         }
     }
 }
