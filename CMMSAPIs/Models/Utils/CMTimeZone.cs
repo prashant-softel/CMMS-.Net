@@ -1,4 +1,4 @@
-﻿namespace CMMSAPIs.Models.Utils
+namespace CMMSAPIs.Models.Utils
 {
     public class TZone
     {
@@ -6,12 +6,17 @@
         public string display_name { get; set; }
         public string offset { get; set; }
     }
-    public class TimeZonedate
+    public class CMTimeZone
     {
-        public string datetime { get; set; }
         public int facility_id { get; set; }
+        public string timezone { get; set; }     
+    }
+
+    public class CMFacilityInfo
+    {
+        public int facility_id { get; set; }
+        public string facility_name { get; set; }
         public string timezone { get; set; }
-      
     }
 
 }
