@@ -188,7 +188,23 @@ namespace CMMSAPIs.Repositories.Utils
             DateTime Utc = DateTime.UtcNow;
             return Utc.ToString("yyyy-MM-dd HH:mm:ss");
         }
+        public async Task<DateTime> ConvertToUTCDTC(string destinationTimeZone, DateTime utcTime)
+        {
+            if (utcTime != null)
+            {
+                string sourceTimeZoneId = "UTC"; // Fixed source time zone
+                string windowsTimeZoneId = TZConvert.IanaToWindows(destinationTimeZone);
 
+                // Convert the source time to the destination time zone
+                DateTime destinationTime = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(utcTime, sourceTimeZoneId, windowsTimeZoneId);
+
+                return destinationTime;
+            }
+            else
+            {
+                return utcTime;
+            }
+        }
         internal static DateTime Reschedule(DateTime source, int frequencyID)
         {
             switch(frequencyID)
