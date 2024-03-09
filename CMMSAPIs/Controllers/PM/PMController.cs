@@ -64,14 +64,17 @@ namespace CMMSAPIs.Controllers.PM
         }
 
         //[Authorize]
-        [Route("GetPMPlanDetail")]
+         [Route("GetPMPlanDetail")]
         [HttpGet]
-        public async Task<IActionResult> GetPMPlanDetail(int planId)
+        public async Task<IActionResult> GetPMPlanDetail(int facility_id,int planId)
         {
             try
             {
-               // int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _PMBS.GetPMPlanDetail(planId);
+        
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+ 
+
+                var data = await _PMBS.GetPMPlanDetail(planId, facilitytimeZone);
                 return Ok(data);
             }
             catch (ArgumentException ex)
@@ -83,7 +86,6 @@ namespace CMMSAPIs.Controllers.PM
                 throw;
             }
         }
-
         //[Authorize]
         [Route("ApprovePMPlan")]
         [HttpPut]
