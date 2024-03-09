@@ -218,7 +218,7 @@ namespace CMMSAPIs.Repositories.PM
             return plan_list;
         }
 
-        internal async Task<CMPMPlanDetail> GetPMPlanDetail(int id)
+            internal async Task<CMPMPlanDetail> GetPMPlanDetail(int id, string facilitytimeZone)
         {
             int facility_Id =1798; // Assuming you have a method to get facility ID for a plan
             
@@ -245,9 +245,9 @@ namespace CMMSAPIs.Repositories.PM
             foreach (var detail in planDetails)
             {
                
-                detail.updated_at = await _utilsRepo.Contvertime(facility_Id, detail.updated_at);   
-                detail.created_at = await _utilsRepo.Contvertime(facility_Id, detail.created_at);
-                detail.approved_at = await _utilsRepo.Contvertime(facility_Id, detail.approved_at);
+                detail.updated_at = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, detail.updated_at);   
+                detail.created_at = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, detail.created_at);
+                detail.approved_at = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, detail.approved_at);
             }
             if (planDetails.Count == 0)
                 return null;
