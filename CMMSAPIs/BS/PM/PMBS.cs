@@ -17,7 +17,7 @@ namespace CMMSAPIs.BS.PM
     {
         Task<CMDefaultResponse> CreatePMPlan(CMPMPlanDetail pm_plan, int userID);
         Task<List<CMPMPlanList>> GetPMPlanList(int facility_id, string category_id, string frequency_id, DateTime? start_date, DateTime? end_date);
-        Task<CMPMPlanDetail> GetPMPlanDetail(int id);
+         Task<CMPMPlanDetail> GetPMPlanDetail(int id, string facilitytime);
         Task<List<CMScheduleData>> GetScheduleData(int facility_id, int category_id);
         Task<List<CMDefaultResponse>> SetScheduleData(CMSetScheduleData request, int userID);
         Task<CMDefaultResponse> ApprovePMPlan(CMApproval request, int userID);
@@ -68,13 +68,13 @@ namespace CMMSAPIs.BS.PM
                 throw;
             }
         }
-        public async Task<CMPMPlanDetail> GetPMPlanDetail(int id)
+        public async Task<CMPMPlanDetail> GetPMPlanDetail(int id, string facilitytime)
         {
             try
             {
                 using (var repos = new PMRepository(getDB, _environment))
                 {
-                    return await repos.GetPMPlanDetail(id);
+                    return await repos.GetPMPlanDetail(id, facilitytime);
                 }
             }
             catch (Exception ex)
