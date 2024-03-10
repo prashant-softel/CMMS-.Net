@@ -59,6 +59,7 @@ namespace CMMSAPIs.BS.MISMasters
 
         Task<CMGetMisWaterData> GetWaterDataById(int id);
         Task<List<CMGetMisWaterData>> GetWaterDataList(DateTime fromDate, DateTime toDate);
+        Task<List<CMWaterDataReport>> GetWaterDataReport(DateTime fromDate, DateTime toDate);
         Task<CMDefaultResponse> CreateWaterData(CMMisWaterData request, int userId);
         Task<CMDefaultResponse> UpdateWaterData(CMMisWaterData request, int userId);
         Task<CMDefaultResponse> DeleteWaterData(int id, int userId);
@@ -841,6 +842,22 @@ namespace CMMSAPIs.BS.MISMasters
                 using (var repos = new MISMasterRepository(getDB))
                 {
                     return await repos.DeleteWaterData(id, userId);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<CMWaterDataReport>> GetWaterDataReport(DateTime fromDate, DateTime toDate)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.GetWaterDataReport(fromDate, toDate);
+
                 }
             }
             catch (Exception ex)
