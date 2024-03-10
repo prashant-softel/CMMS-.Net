@@ -144,7 +144,7 @@ namespace CMMSAPIs.Repositories.Utils
             // var utcTime =DateTime.Parse(datetime);
             var utcTime = datetime;
             string qry = $"SELECT timezone,id as facility_id from facilities where id=" + facility_id ;
-             var data=  await Context.GetData<TimeZonedate>(qry).ConfigureAwait(false);
+             var data=  await Context.GetData<CMTimeZone>(qry).ConfigureAwait(false);
            // await context.FetchData<string>(qry).ConfigureAwait(false);
             string timezone ="" ;
             if (data[0].timezone == "" && data[0].timezone == "default_hardcoded")
@@ -159,29 +159,29 @@ namespace CMMSAPIs.Repositories.Utils
             return returnTime;
         }
 
-        public async Task<DateTime> ConvertToUTCDTC(string destinationTimeZoneId,DateTime utcTime)
-        {
+        //public async Task<DateTime> ConvertToUTCDTC(string destinationTimeZoneId,DateTime utcTime)
+        //{
 
 
-            //// Define the source time zone (UTC)
-            //TimeZoneInfo sourceTimeZone = TimeZoneInfo.Utc;
+        //    //// Define the source time zone (UTC)
+        //    //TimeZoneInfo sourceTimeZone = TimeZoneInfo.Utc;
 
-            //// Define the destination time zone
-            //destinationTimeZoneId = "Eastern Standard Time"; // For example, Eastern Time Zone
-            //TimeZoneInfo destinationTimeZone = TimeZoneInfo.FindSystemTimeZoneById(destinationTimeZoneId);
+        //    //// Define the destination time zone
+        //    //destinationTimeZoneId = "Eastern Standard Time"; // For example, Eastern Time Zone
+        //    //TimeZoneInfo destinationTimeZone = TimeZoneInfo.FindSystemTimeZoneById(destinationTimeZoneId);
 
-            //// Convert the UTC time to the destination time zone
-            ////
+        //    //// Convert the UTC time to the destination time zone
+        //    ////
 
-            string sourceTimeZoneId = "UTC"; // Fixed source time zone
+        //    string sourceTimeZoneId = "UTC"; // Fixed source time zone
          
-            string windowsTimeZoneId = TZConvert.IanaToWindows(destinationTimeZoneId);
+        //    string windowsTimeZoneId = TZConvert.IanaToWindows(destinationTimeZoneId);
 
-            // Convert the source time to the destination time zone
-            DateTime destinationTime = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(utcTime, sourceTimeZoneId, windowsTimeZoneId);
+        //    // Convert the source time to the destination time zone
+        //    DateTime destinationTime = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(utcTime, sourceTimeZoneId, windowsTimeZoneId);
 
-            return destinationTime;
-        }
+        //    return destinationTime;
+        //}
         // Return UTC time
         internal static string GetUTCTime()
         {
