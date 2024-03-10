@@ -808,11 +808,30 @@ namespace CMMSAPIs.Controllers.Masters
 
         [Route("GetWaterDataList")]
         [HttpGet]
+
         public async Task<IActionResult> GetWaterDataList(DateTime fromDate, DateTime toDate)
         {
             try
             {
                 var data = await _IMISMasterBS.GetWaterDataList(fromDate, toDate);
+                return Ok(data);
+
+            }
+            catch (Exception ex)
+            {
+
+                return BadRequest(ex.Message);
+            }
+
+        }
+
+        [Route("GetWaterDataReport")]
+        [HttpGet]
+        public async Task<IActionResult> GetWaterDataReport(DateTime fromDate, DateTime toDate)
+        {
+            try
+            {
+                var data = await _IMISMasterBS.GetWaterDataReport(fromDate, toDate);
                 return Ok(data);
 
             }
