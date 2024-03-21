@@ -238,7 +238,7 @@ namespace CMMSAPIs.Repositories.Permits
             /*
              * return permit_type_id, name from PermitTypeLists table for requsted facility_id 
             */
-            string myQuery = $"SELECT id, title as name FROM permittypelists ";
+            string myQuery = $"SELECT id,description, title as name FROM permittypelists ";
             if (facility_id <= 0)
                 throw new ArgumentException("Invalid Facility ID");
             myQuery += $"WHERE facilityId = { facility_id } and status = 1  ORDER BY id DESC;";
