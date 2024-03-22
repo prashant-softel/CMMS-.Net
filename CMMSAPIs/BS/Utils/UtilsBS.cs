@@ -18,7 +18,7 @@ namespace CMMSAPIs.BS.Utils
         Task<List<TZone>> GetTimeZoneList();
        // Task<List<TZone>> GetTimeZone(int facility_id);
         Task<List<CMDefaultResponse>> AddLog(CMLog log);
-        Task<List<CMLog>> GetHistoryLog(CMMS.CMMS_Modules module_type, int id);
+        Task<List<CMLog>> GetHistoryLog(CMMS.CMMS_Modules module_type, int id,string facilitytime);
     }
     public class UtilsBS : IUtilsBS
     {
@@ -147,13 +147,13 @@ namespace CMMSAPIs.BS.Utils
             }
         }
 
-        public async Task<List<CMLog>> GetHistoryLog(CMMS.CMMS_Modules module_type, int id)
+        public async Task<List<CMLog>> GetHistoryLog(CMMS.CMMS_Modules module_type, int id, string facilitytime)
         {
             try
             {
                 using (var repos = new UtilsRepository(getDB))
                 {
-                    return await repos.GetHistoryLog(module_type, id);
+                    return await repos.GetHistoryLog(module_type, id, facilitytime);
                 }
             }
             catch (Exception ex)

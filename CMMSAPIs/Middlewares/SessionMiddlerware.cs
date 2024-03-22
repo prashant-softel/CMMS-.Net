@@ -13,6 +13,9 @@ using CMMSAPIs.Helper;
 using System.Data.Common;
 using System.Data;
 using Microsoft.Extensions.Configuration;
+using CMMSAPIs.Models.Utils;
+using Newtonsoft.Json;
+using System.Collections.Generic;
 
 namespace CMMSAPIs.Middlewares
 {
@@ -180,11 +183,40 @@ namespace CMMSAPIs.Middlewares
                     httpContext.Session.SetString("_User_Id", userId);
                 }
             }
+            List<CMFacilityInfo> timeZone = new List<CMFacilityInfo>();
+            DataTable dt_timeZones = new DataTable();
+            using (MySqlConnection conn = new MySqlConnection(MainConnection))
+            {
+                using (MySqlCommand cmd = getQryCommand("SELECT case when timezone = 'default_hardcoded' then 'Asia/Kolkata' else timezone end as timezone,id as facility_id from facilities where parentId = 0;", conn))
+                {
+                    await conn.OpenAsync();
+                    cmd.CommandTimeout = 99999;
+                    cmd.CommandType = CommandType.Text;
 
+                    using (DbDataReader dataReader = await cmd.ExecuteReaderAsync(CommandBehavior.CloseConnection))
+                    {
+                        DataSet ds = new DataSet();
 
+                        ds.Tables.Add(dt_timeZones);
+                        dt_timeZones.DataSet.EnforceConstraints = false;
+                        dt_timeZones.Load(dataReader);
+                        cmd.Parameters.Clear();
 
+                    }
+                }
+            }
+            if (dt_timeZones.Rows.Count > 0)
+            {
+                for (var i = 0; i < dt_timeZones.Rows.Count; i++)
+                {
+                    CMFacilityInfo item = new CMFacilityInfo();
+                    item.facility_id = Convert.ToInt32(dt_timeZones.Rows[i]["facility_id"]);
+                    item.timezone = Convert.ToString(dt_timeZones.Rows[i]["timezone"]);
+                    timeZone.Add(item);
+                }
+            }
+            httpContext.Session.SetString("FacilitiesInfo", JsonConvert.SerializeObject(timeZone));
             await _next(httpContext); // calling next middleware
-
         }
 
         internal MySqlCommand getQryCommand(string qry, MySqlConnection conn)

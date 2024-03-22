@@ -6,6 +6,9 @@ using System;
 using CMMSAPIs.Models.JC;
 using CMMSAPIs.Models.Utils;
 using Microsoft.AspNetCore.Authorization;
+using Newtonsoft.Json;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace CMMSAPIs.Controllers.JC
 {
@@ -29,8 +32,11 @@ namespace CMMSAPIs.Controllers.JC
         {
             try
             {
+
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _JCBS.GetJCList(facility_id,  userID,  self_view);
+                var data = await _JCBS.GetJCList(facility_id,  userID,  self_view, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -41,12 +47,14 @@ namespace CMMSAPIs.Controllers.JC
 
         [Route("GetJCListByJobId")]
         [HttpGet]
-        public async Task<IActionResult> GetJCListByJobId(int jobId)
+        public async Task<IActionResult> GetJCListByJobId(int jobId,int facility_id)
         {
             try
             {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _JCBS.GetJCListByJobId(jobId);
+                var data = await _JCBS.GetJCListByJobId(jobId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)

@@ -8,6 +8,7 @@ using MailKit.Search;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,7 +37,9 @@ namespace CMMSAPIs.Controllers
         {
             try
             {
-                var data = await _GOBS.GetGOList(facility_id, fromDate, toDate, Status);
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+
+                var data = await _GOBS.GetGOList(facility_id, fromDate, toDate, Status, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -53,11 +56,13 @@ namespace CMMSAPIs.Controllers
         //[Authorize]
         [Route("GetGOItemByID")]
         [HttpGet]
-        public async Task<IActionResult> GetGOItemByID(int id)
+        public async Task<IActionResult> GetGOItemByID(int id,int facility_id)
         {
             try
             {
-                var data = await _GOBS.GetGOItemByID(id);
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+
+                var data = await _GOBS.GetGOItemByID(id, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -232,7 +237,9 @@ namespace CMMSAPIs.Controllers
         {
             try
             {
-                var data = await _GOBS.GetGoodsOrderData(facilityID, empRole, fromDate, toDate, status, order_type);
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityID)?.timezone;
+
+                var data = await _GOBS.GetGoodsOrderData(facilityID, empRole, fromDate, toDate, status, order_type, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -293,7 +300,10 @@ namespace CMMSAPIs.Controllers
         {
             try
             {
-                var data = await _GOBS.GetSubmitPurchaseOrderList(facility_id, fromDate, toDate, Status);
+
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+
+                var data = await _GOBS.GetSubmitPurchaseOrderList(facility_id, fromDate, toDate, Status, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)

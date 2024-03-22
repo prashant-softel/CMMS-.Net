@@ -174,7 +174,7 @@ namespace CMMSAPIs.Repositories.PM
             return response;
         }
 
-        internal async Task<List<CMPMPlanList>> GetPMPlanList(int facility_id, string category_id, string frequency_id, DateTime? start_date, DateTime? end_date)
+        internal async Task<List<CMPMPlanList>> GetPMPlanList(int facility_id, string category_id, string frequency_id, DateTime? start_date, DateTime? end_date,string facilitytimeZone)
         {
             if (facility_id <= 0)
                 throw new ArgumentException("Invalid Facility ID");
@@ -204,6 +204,7 @@ namespace CMMSAPIs.Repositories.PM
             planListQry += $";";
 
             List<CMPMPlanList> plan_list = await Context.GetData<CMPMPlanList>(planListQry).ConfigureAwait(false);
+            
 
             foreach (var plan in plan_list)
             {
@@ -211,11 +212,19 @@ namespace CMMSAPIs.Repositories.PM
                 string _shortStatus = getShortStatus(CMMS.CMMS_Modules.PM_PLAN, _Status);
                 plan.status_short = _shortStatus;
             }
+            foreach (var detail in plan_list)
+            {
+                detail.approved_at = (DateTime)await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, detail.approved_at);
+                detail.created_at = (DateTime)await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, detail.created_at);
+                detail.plan_date = (DateTime)await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, detail.plan_date);
+                detail.rejected_at = (DateTime)await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, detail.rejected_at);
+                detail.updated_at = (DateTime)await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, detail.updated_at);
+            }
 
             return plan_list;
         }
 
-        internal async Task<CMPMPlanDetail> GetPMPlanDetail(int id)
+        internal async Task<CMPMPlanDetail> GetPMPlanDetail(int id,string facilitytimeZone)
         {
             if (id <= 0)
                 throw new ArgumentException("Invalid Facility ID");
@@ -257,10 +266,17 @@ namespace CMMSAPIs.Repositories.PM
             CMMS.CMMS_Status _Status_long = (CMMS.CMMS_Status)(planDetails[0].status_id);
             string _longStatus = getLongStatus(CMMS.CMMS_Modules.WARRANTY_CLAIM, _Status_long, planDetails[0]);
             planDetails[0].status_long = _longStatus;
+            foreach (var detail in planDetails)
+            {
+                detail.updated_at = (DateTime)await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, detail.updated_at);
+                detail.created_at = (DateTime)await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, detail.created_at);
+                detail.approved_at = (DateTime)await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, detail.approved_at);
+            }
+
 
             return planDetails[0];
         }
-        internal async Task<List<CMScheduleData>> GetScheduleData(int facility_id, int category_id)
+        internal async Task<List<CMScheduleData>> GetScheduleData(int facility_id, int category_id,string facilitytimeZone)
         {
             /*
              * Primary Table - PMSchedule
@@ -301,7 +317,16 @@ namespace CMMSAPIs.Repositories.PM
                                     $"PM_Rescheduled = 0) AND a.Asset_id = {schedule.asset_id} GROUP BY frequency.id ORDER BY frequency.id;";
                 List<ScheduleFrequencyData> _freqData = await Context.GetData<ScheduleFrequencyData>(query2).ConfigureAwait(false);
                 schedule.frequency_dates = _freqData;
+                foreach (var detail in _freqData)
+                {
+                    detail.schedule_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime) detail.schedule_date);
+                   
+                }
+
+
             }
+            
+
             return _scheduleList;
         }
 

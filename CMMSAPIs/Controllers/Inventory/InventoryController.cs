@@ -7,6 +7,9 @@ using System.IO;
 using Microsoft.AspNetCore.Authorization;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json;
+using CMMSAPIs.Models.Utils;
+using System.Linq;
 
 namespace CMMSAPIs.Controllers.Inventory
 {
@@ -61,7 +64,9 @@ namespace CMMSAPIs.Controllers.Inventory
         {
             try
             {
-                var data = await _InventoryBS.GetInventoryList(facilityId, linkedToBlockId, status, categoryIds);
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
+
+                var data = await _InventoryBS.GetInventoryList(facilityId, linkedToBlockId, status, categoryIds, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -90,11 +95,12 @@ namespace CMMSAPIs.Controllers.Inventory
         //[Authorize]
         [Route("GetInventoryDetails")]
         [HttpGet]
-        public async Task<IActionResult> GetInventoryDetails(int id)
+        public async Task<IActionResult> GetInventoryDetails(int id, int facility_id)
         {
             try
             {
-                var data = await _InventoryBS.GetInventoryDetails(id);
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+                var data = await _InventoryBS.GetInventoryDetails(id, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -425,7 +431,9 @@ namespace CMMSAPIs.Controllers.Inventory
         {
             try
             {
-                var data = await _InventoryBS.GetCalibrationList(facilityId);
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
+
+                var data = await _InventoryBS.GetCalibrationList(facilityId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)

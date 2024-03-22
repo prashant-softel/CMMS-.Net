@@ -39,8 +39,10 @@ namespace CMMSAPIs.Repositories.SM
             _utilsRepo = new UtilsRepository(sqlDBHelper);
         }
 
-        internal async Task<List<CMMRSList>> getMRSList(int facility_ID, int emp_id, DateTime toDate, DateTime fromDate, int status)
+        internal async Task<List<CMMRSList>> getMRSList(int facility_ID, int emp_id, DateTime toDate, DateTime fromDate, int status,string facilitytimeZone)
+
         {
+            
             string filter = " WHERE sm.facility_ID = " + facility_ID + "  AND  (DATE_FORMAT(sm.lastmodifieddate,'%Y-%m-%d') BETWEEN '" + fromDate.ToString("yyyy-MM-dd") + "' AND '" + toDate.ToString("yyyy-MM-dd") + "' OR DATE_FORMAT(sm.returnDate,'%Y-%m-%d') BETWEEN '" + fromDate.ToString("yyyy-MM-dd") + "' AND '" + toDate.ToString("yyyy-MM-dd") + "')";
 
 
@@ -52,6 +54,8 @@ namespace CMMSAPIs.Repositories.SM
                 "FROM smmrs sm LEFT JOIN users ed ON ed.id = sm.requested_by_emp_ID LEFT JOIN users ed1 ON ed1.id = sm.approved_by_emp_ID " +
                 "" + filter + "";
             List<CMMRSList> _List = await Context.GetData<CMMRSList>(stmt).ConfigureAwait(false);
+           
+
             for (var i = 0; i < _List.Count; i++)
             {
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_List[i].status);
@@ -59,13 +63,36 @@ namespace CMMSAPIs.Repositories.SM
                 string _status_long = getLongStatus(_Status, _List[i].ID);
                 _List[i].status_short = _shortStatus;
                 _List[i].status_long = _status_long;
-                _List[i].CMMRSItems = await getMRSItems(_List[i].ID);
+                _List[i].CMMRSItems = await getMRSItems(_List[i].ID,facilitytimeZone);
             }
-
+           foreach(var list in _List)
+            {
+             
+               
+                if (list != null && list.requestd_date != null && list.requestd_date!="")
+                {
+                    DateTime requestd_date = Convert.ToDateTime(list.requestd_date);
+                    requestd_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, requestd_date);
+                    list.requestd_date = requestd_date.ToString();
+                }
+                if (list != null && list.returnDate != null && list.returnDate != "")
+                {
+                    DateTime returnDate = DateTime.Parse(list.returnDate);
+                    returnDate = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, returnDate);
+                    list.returnDate = returnDate.ToString();
+                }
+                if (list != null && list.requestd_date != null && list.requestd_date != "")
+                {
+                    DateTime issued_date = DateTime.Parse(list.requestd_date);
+                    issued_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, issued_date);
+                    list.requestd_date = issued_date.ToString();
+                }
+            }
+           
             return _List;
         }
 
-        internal async Task<List<CMMRSListByModule>> getMRSListByModule(int jobId, int pmId)
+        internal async Task<List<CMMRSListByModule>> getMRSListByModule(int jobId, int pmId,string facilitytimeZone)
         {
             int Id = 0;
             string filter = "";
@@ -99,7 +126,7 @@ namespace CMMSAPIs.Repositories.SM
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_List[i].status);
                 string _shortStatus = getShortStatus(CMMS.CMMS_Modules.SM_MRS, _Status);
                 _List[i].status_short = _shortStatus;
-                _List[i].CMMRSItems = await getMRSItems(_List[i].mrsId);
+                _List[i].CMMRSItems = await getMRSItems(_List[i].mrsId, facilitytimeZone);
                 if (_List[i].CMMRSItems.Count > 0)
                 {
                     for(var k=0;k< _List[i].CMMRSItems.Count; k++)
@@ -117,7 +144,7 @@ namespace CMMSAPIs.Repositories.SM
                 }
                 _List[i].mrsItems = assetItemNames;
             }
-
+           
             return _List;
         }
         internal static string getShortStatus(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status m_notificationID)
@@ -416,7 +443,7 @@ namespace CMMSAPIs.Repositories.SM
             List<CMUnitMeasurement> _checkList = await Context.GetData<CMUnitMeasurement>(stmt).ConfigureAwait(false);
             return _checkList[0].spare_multi_selection;
         }
-        internal async Task<List<CMMRSItems>> getMRSItems(int ID)
+        internal async Task<List<CMMRSItems>> getMRSItems(int ID,string facilitytimeZone)
         {
             //string stmt = "SELECT smi.ID,smi.return_remarks,smi.mrs_return_ID,smi.finalRemark,smi.asset_item_ID,smi.asset_MDM_code," +
             //    "t1.serial_number,smi.returned_qty,smi.available_qty,smi.used_qty,smi.ID,smi.issued_qty,sm.flag as status,DATE_FORMAT(sm.returnDate,'%Y-%m-%d') as returnDate," +
@@ -453,10 +480,26 @@ namespace CMMSAPIs.Repositories.SM
                 _List[i].status_short = _shortStatus;
                 _List[i].status_long = _status_long;
             }
+            foreach (var list in _List)
+            {
+                if (list != null && list.approved_date != null && list.approved_date != "0000-00-00")
+                {
+                    DateTime approved_date = Convert.ToDateTime(list.approved_date);
+                    var approved_date1 = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, approved_date);
+                    list.approved_date = approved_date1.ToString();
+                }
+                if (list != null && list.issued_date != null && list.issued_date != "0000-00-00")
+                {
+                    DateTime issued_date = Convert.ToDateTime(list.issued_date);
+                    var issued_date1 = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, issued_date);
+                    list.approved_date = issued_date1.ToString();
+                }
+            }
             return _List;
+           
         }
 
-        internal async Task<List<CMMRSItemsBeforeIssue>> getMRSItemsBeforeIssue(int ID)
+        internal async Task<List<CMMRSItemsBeforeIssue>> getMRSItemsBeforeIssue(int ID,string facilitytimeZone)
         {
 
             string stmt = "SELECT smi.ID,smi.return_remarks,smi.mrs_return_ID,smi.finalRemark,smi.asset_item_ID,smi.asset_MDM_code," +
@@ -470,11 +513,32 @@ namespace CMMSAPIs.Repositories.SM
                 "ON file.Asset_master_id =  sam.ID  LEFT JOIN smassettypes sat ON sat.ID = sam.asset_type_ID  LEFT JOIN smunitmeasurement f_sum " +
                 "ON  f_sum.id = sam.unit_of_measurement      ) as t1 ON t1.asset_MDM_code = smi.asset_MDM_code where smi.mrs_ID = " + ID + " GROUP BY smi.ID";
             List<CMMRSItemsBeforeIssue> _List = await Context.GetData<CMMRSItemsBeforeIssue>(stmt).ConfigureAwait(false);
-            return _List;
+            foreach (var list in _List)
+            {
+                if (list != null && list.approved_date != null && list.approved_date != "0000-00-00")
+                {
+                    DateTime approved_date = DateTime.Parse(list.approved_date);
+                    approved_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, approved_date);
+                    list.approved_date = approved_date.ToString();
+                }
+                if (list != null && list.issued_date != null && list.issued_date != "0000-00-00")
+                {
+                    DateTime issued_date = DateTime.Parse(list.issued_date);
+                    issued_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, issued_date);
+                    list.issued_date = issued_date.ToString();
+                }
+                if (list != null && list.returnDate != null && list.returnDate != "0000-00-00")
+                {
+                    DateTime returnDate = DateTime.Parse(list.returnDate);
+                    returnDate = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, returnDate);
+                    list.issued_date = returnDate.ToString();
+                }
+            }
+                return _List;
         }
 
 
-        internal async Task<List<CMMRSItemsBeforeIssue>> getMRSItemsWithCode(int ID)
+        internal async Task<List<CMMRSItemsBeforeIssue>> getMRSItemsWithCode(int ID,string facilitytimeZone)
         {
             string stmt = "SELECT smi.ID,smi.mrs_return_ID,smi.finalRemark,smi.asset_item_ID,smi.asset_MDM_code," +
                 "smi.returned_qty,smi.available_qty,smi.used_qty,smi.ID,smi.issued_qty,\r\nsm.flag," +
@@ -490,11 +554,34 @@ namespace CMMSAPIs.Repositories.SM
                 "LEFT JOIN smunitmeasurement f_sum ON  f_sum.id = sam.facility_ID\r\n        " +
                 "LEFT JOIN smassetitems sai ON  sai.ID = smi.asset_item_ID" +
                 " WHERE smi.mrs_ID = " + ID + " GROUP BY smi.asset_MDM_code";
+
             List<CMMRSItemsBeforeIssue> _List = await Context.GetData<CMMRSItemsBeforeIssue>(stmt).ConfigureAwait(false);
+            foreach (var list in _List)
+            {
+                if (list != null && list.approved_date != null && list.approved_date!="0000-00-00")
+                {
+                    DateTime approved_date = DateTime.Parse(list.approved_date);
+                    approved_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, approved_date);
+                    list.approved_date = approved_date.ToString();
+                }
+                if (list != null && list.issued_date != null && list.issued_date != "0000-00-00")
+                {
+                    DateTime issued_date = DateTime.Parse(list.issued_date);
+                    issued_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, issued_date);
+                    list.issued_date = issued_date.ToString();
+                }
+                if (list != null && list.returnDate != null && list.returnDate != "0000-00-00")
+                {
+                    DateTime returnDate = DateTime.Parse(list.returnDate);
+                    returnDate = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, returnDate);
+                    list.issued_date = returnDate.ToString();
+                }
+
+            }
             return _List;
         }
 
-        internal async Task<CMMRSList> getMRSDetails(int ID)
+        internal async Task<CMMRSList> getMRSDetails(int ID,string facilitytimeZone)
         {
             //string stmt = $"SELECT * FROM smmrs WHERE ID = {ID}";
             //List<CMMRS> _List = await Context.GetData<CMMRS>(stmt).ConfigureAwait(false);
@@ -512,6 +599,28 @@ namespace CMMSAPIs.Repositories.SM
     "FROM smmrs sm LEFT JOIN users ed ON ed.id = sm.requested_by_emp_ID LEFT JOIN users ed1 ON ed1.id = sm.approved_by_emp_ID " +
     "WHERE sm.id = " + ID + ";";
             List<CMMRSList> _List = await Context.GetData<CMMRSList>(stmt).ConfigureAwait(false);
+            foreach (var list in _List)
+             {
+                 if (list != null && list.approval_date != null && list.approval_date != "" &&list.approval_date!="0000-00-00")
+                 {
+
+                     DateTime approval_date = DateTime.Parse(list.approval_date);
+                     approval_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, approval_date);
+                     list.approval_date = approval_date.ToString();
+                 }
+                 if (list != null && list.requestd_date != null && list.requestd_date != "" &&list.requestd_date != "0000-00-00")
+                 {
+                     DateTime issued_date = DateTime.Parse(list.requestd_date);
+                     issued_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, issued_date);
+                     list.requestd_date = issued_date.ToString();
+                 }
+                 if (list != null && list.returnDate != null && list.returnDate!="" &&list.returnDate!="0000-00-00")
+                 {
+                     DateTime returnDate = DateTime.Parse(list.returnDate);
+                     returnDate = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, returnDate);
+                     list.requestd_date = returnDate.ToString();
+                 }
+             }
             for (var i = 0; i < _List.Count; i++)
             {
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_List[i].status);
@@ -519,13 +628,12 @@ namespace CMMSAPIs.Repositories.SM
                 string _status_long = getLongStatus(_Status, _List[i].ID);
                 _List[i].status_short = _shortStatus;
                 _List[i].status_long = _status_long;
-                _List[i].CMMRSItems = await getMRSItems(_List[i].ID);
+                _List[i].CMMRSItems = await getMRSItems(_List[i].ID,facilitytimeZone);
             }
-
             return _List[0];
         }
 
-        internal async Task<CMMRSList> getReturnDataByID(int ID)
+        internal async Task<CMMRSList> getReturnDataByID(int ID,string facilitytimeZone)
         {
             string stmt = "SELECT sm.ID,sm.requested_by_emp_ID as requested_by_emp_ID,CONCAT(ed1.firstName,' ',ed1.lastName) as approver_name," +
     "DATE_FORMAT(sm.returnDate,'%Y-%m-%d') as returnDate,if(sm.approval_status != '',DATE_FORMAT(sm.approved_date,'%d-%m-%Y'),'') as approval_date,sm.approval_status," +
@@ -534,6 +642,27 @@ namespace CMMSAPIs.Repositories.SM
     "FROM smmrs sm LEFT JOIN users ed ON ed.id = sm.requested_by_emp_ID LEFT JOIN users ed1 ON ed1.id = sm.approved_by_emp_ID " +
     " WHERE sm.ID = " + ID + "  and sm.flag = 2";
             List<CMMRSList> _List = await Context.GetData<CMMRSList>(stmt).ConfigureAwait(false);
+          /*  foreach (var list in _List)
+              {
+                  if (list != null && list.approval_date != null && list.approval_date != ""  &&list.approval_date!="0000-00-00" )
+                  {
+                      DateTime approval_date = DateTime.Parse(list.approval_date);
+                      approval_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, approval_date);
+                      list.approval_date = approval_date.ToString();
+                  }
+                  if (list != null && list.requestd_date != null && list.requestd_date != "" && list.requestd_date != "0000-00-00")
+                  {
+                      DateTime issued_date = DateTime.Parse(list.requestd_date);
+                      issued_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, issued_date);
+                      list.requestd_date = issued_date.ToString();
+                  }
+                  if (list != null && list.returnDate != null && list.returnDate!= "" &&list.returnDate!="0000-00-00")
+                { 
+                      DateTime returnDate = DateTime.Parse(list.returnDate);
+                      returnDate = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, returnDate);
+                      list.returnDate = returnDate.ToString();
+                  }
+              }*/
             for (var i = 0; i < _List.Count; i++)
             {
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_List[i].status);
@@ -541,7 +670,7 @@ namespace CMMSAPIs.Repositories.SM
                 string _status_long = getLongStatus(_Status, _List[i].ID);
                 _List[i].status_short = _shortStatus;
                 _List[i].status_long = _status_long;
-                _List[i].CMMRSItems = await getMRSReturnItems(_List[i].ID);
+                _List[i].CMMRSItems = await getMRSReturnItems(_List[i].ID, facilitytimeZone);
             }
 
             if (_List.Count > 0)
@@ -727,7 +856,7 @@ namespace CMMSAPIs.Repositories.SM
             //}
 
 
-            var data = await getMRSItems(request.id);
+            var data = await getMRSItems(request.id,"");
 
             foreach (var item in data)
             {
@@ -1564,7 +1693,7 @@ namespace CMMSAPIs.Repositories.SM
             return response;
         }
 
-        internal async Task<List<CMMRSList>> GetMRSReturnList(int facility_ID, int emp_id)
+        internal async Task<List<CMMRSList>> GetMRSReturnList(int facility_ID, int emp_id,string facilitytimeZone)
         {
             string stmt = "SELECT sm.ID,sm.requested_by_emp_ID as requested_by_emp_ID,CONCAT(ed1.firstName,' ',ed1.lastName) as approver_name," +
     "DATE_FORMAT(sm.returnDate,'%Y-%m-%d') as returnDate,if(sm.approval_status != '',DATE_FORMAT(sm.approved_date,'%d-%m-%Y'),'') as approval_date,sm.approval_status," +
@@ -1572,6 +1701,27 @@ namespace CMMSAPIs.Repositories.SM
     "FROM smmrs sm LEFT JOIN users ed ON ed.id = sm.requested_by_emp_ID LEFT JOIN users ed1 ON ed1.id = sm.approved_by_emp_ID " +
     " WHERE sm.facility_ID = " + facility_ID + "  and sm.requested_by_emp_ID = " + emp_id + " and sm.flag = 2";
             List<CMMRSList> _List = await Context.GetData<CMMRSList>(stmt).ConfigureAwait(false);
+          /*   foreach (var list in _List)
+             {
+                 if (list!= null && list.approval_date!=null && list.approval_date!="" &&list.approval_date!="0000-00-00")
+                 {
+                     DateTime approval_date = DateTime.Parse(list.approval_date);
+                     approval_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, approval_date);
+                     list.approval_date = approval_date.ToString();
+                 }
+                 if (list!=null && list.requestd_date!=null && list.requestd_date != "" && list.requestd_date != "0000-00-00")
+                 {
+                     DateTime issued_date = DateTime.Parse(list.requestd_date);
+                     issued_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, issued_date);
+                     list.requestd_date = issued_date.ToString();
+                 }
+                 if (list!=null && list.returnDate!=null && list.returnDate != "" && list.returnDate!="0000-00-00")
+                 {
+                     DateTime returnDate = DateTime.Parse(list.returnDate);
+                     returnDate = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, returnDate);
+                     list.returnDate = returnDate.ToString();
+                 }
+             }*/
             for (var i = 0; i < _List.Count; i++)
             {
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_List[i].status);
@@ -1579,13 +1729,13 @@ namespace CMMSAPIs.Repositories.SM
                 string _status_long = getLongStatus(_Status, _List[i].ID);
                 _List[i].status_short = _shortStatus;
                 _List[i].status_long = _status_long;
-                _List[i].CMMRSItems = await getMRSReturnItems(_List[i].ID);
+                _List[i].CMMRSItems = await getMRSReturnItems(_List[i].ID, facilitytimeZone);
             }
-
+          
             return _List;
         }
 
-        internal async Task<List<CMMRSItems>> getMRSReturnItems(int ID)
+        internal async Task<List<CMMRSItems>> getMRSReturnItems(int ID,string facilitytimeZone)
         {
             string stmt = "SELECT smi.ID,smi.return_remarks,smi.mrs_return_ID,smi.finalRemark,smi.asset_item_ID,smi.asset_MDM_code," +
                 "t1.serial_number,smi.returned_qty,smi.available_qty,smi.used_qty,smi.ID,smi.issued_qty,sm.flag as status,DATE_FORMAT(sm.returnDate,'%Y-%m-%d') as returnDate," +
@@ -1598,6 +1748,21 @@ namespace CMMSAPIs.Repositories.SM
                 "LEFT JOIN smassettypes sat ON sat.ID = sam.asset_type_ID) as t1 ON t1.asset_item_ID = smi.asset_item_ID" +
                 "  WHERE smi.mrs_return_ID = " + ID + " /*GROUP BY smi.ID*/";
             List<CMMRSItems> _List = await Context.GetData<CMMRSItems>(stmt).ConfigureAwait(false);
+            foreach (var list in _List)
+            {
+                if (list != null && list.approved_date != null && list.approved_date!="" && list.approved_date!="0000-00-00")
+                {
+                    DateTime approved_date = DateTime.Parse(list.approved_date);
+                    approved_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, approved_date);
+                    list.approved_date = approved_date.ToString();
+                }
+                if (list != null && list.issued_date != null && list.issued_date != "")
+                {
+                    DateTime issued_date = DateTime.Parse(list.issued_date);
+                    issued_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, issued_date);
+                    list.approved_date = issued_date.ToString();
+                }
+            }
             for (var i = 0; i < _List.Count; i++)
             {
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_List[i].status);

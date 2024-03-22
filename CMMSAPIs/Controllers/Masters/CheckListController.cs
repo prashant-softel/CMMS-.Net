@@ -7,6 +7,9 @@ using CMMSAPIs.Models.Masters;
 using System.Collections.Generic;
 
 using System;
+using Newtonsoft.Json;
+using System.Linq;
+using CMMSAPIs.Models.Utils;
 
 namespace CMMSAPIs.Controllers.Masters
 {
@@ -28,7 +31,9 @@ namespace CMMSAPIs.Controllers.Masters
         {
             try
             {
-                var data = await _CheckListBS.GetCheckList(facility_id, type,  frequency_id,  category_id);
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+
+                var data = await _CheckListBS.GetCheckList(facility_id, type,  frequency_id,  category_id, facilitytimeZone);
                 return Ok(data);
             }
             catch (ArgumentException ex)
@@ -148,11 +153,12 @@ namespace CMMSAPIs.Controllers.Masters
         //[Authorize]
         [Route("GetCheckPointList")]
         [HttpGet]
-        public async Task<IActionResult> GetCheckPointList(int checklist_id)
+        public async Task<IActionResult> GetCheckPointList(int checklist_id, int facility_id)
         {
             try
             {
-                var data = await _CheckListBS.GetCheckPointList(checklist_id);
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+                var data = await _CheckListBS.GetCheckPointList(checklist_id, facilitytimeZone);
                 return Ok(data);
             }
             catch (ArgumentException ex)

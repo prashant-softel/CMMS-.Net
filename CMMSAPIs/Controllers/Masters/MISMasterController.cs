@@ -13,6 +13,9 @@ using System.IO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using CMMSAPIs.BS.MISMasters;
+using Newtonsoft.Json;
+using CMMSAPIs.Models.Utils;
+using System.Linq;
 
 namespace CMMSAPIs.Controllers.Masters
 {
@@ -24,7 +27,7 @@ namespace CMMSAPIs.Controllers.Masters
         public MISMasterController(IMISMasterBS cmms)
         {
             _IMISMasterBS = cmms;
-        }     
+        }
 
         #region helper
 
@@ -402,7 +405,7 @@ namespace CMMSAPIs.Controllers.Masters
                 return BadRequest(ex.Message);
             }
         }
-        
+
         //[Authorize]
         [Route("CreateRiskType")]
         [HttpPost]
@@ -623,84 +626,86 @@ namespace CMMSAPIs.Controllers.Masters
                 throw;
             }
         }
-            [Route("GetResponsibilityList")]
-            [HttpGet]
-            public async Task<IActionResult> GetResponsibilityList()
+        [Route("GetResponsibilityList")]
+        [HttpGet]
+        public async Task<IActionResult> GetResponsibilityList()
+        {
+            try
             {
-                try
-                {
-                    var data = await _IMISMasterBS.GetResponsibilityList();
-                    return Ok(data);
-                }
-                catch (Exception ex)
-                {
-                    return BadRequest(ex.Message);
-                }
+                var data = await _IMISMasterBS.GetResponsibilityList();
+                return Ok(data);
             }
-            [Route("GetResponsibilityID")]
-            [HttpGet]
-            public async Task<IActionResult> GetResponsibilityID(int id)
+            catch (Exception ex)
             {
-                try
-                {
-                    var data = await _IMISMasterBS.GetResponsibilityID(id);
-                    return Ok(data);
+                return BadRequest(ex.Message);
+            }
+        }
+        [Route("GetResponsibilityID")]
+        [HttpGet]
+        public async Task<IActionResult> GetResponsibilityID(int id, int facility_id)
+        {
+            try
+            {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
 
-                }
-                catch (Exception ex)
-                {
-
-                    return BadRequest(ex.Message);
-                }
+                var data = await _IMISMasterBS.GetResponsibilityID(id, facilitytimeZone);
+                return Ok(data);
 
             }
-            [Route("CreateResponsibility")]
-            [HttpPost]
-            public async Task<IActionResult> CreateResponsibility(Responsibility request, int UserID)
+            catch (Exception ex)
             {
 
-                try
-                {
-                    int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                    var data = await _IMISMasterBS.CreateResponsibility(request, UserID);
-                    return Ok(data);
-                }
-                catch (Exception)
-                {
-                    throw;
-                }
-
+                return BadRequest(ex.Message);
             }
-            [Route("UpdateResponsibility")]
-            [HttpPut]
-            public async Task<IActionResult> UpdateResponsibility(Responsibility request, int UserID)
+
+        }
+        [Route("CreateResponsibility")]
+        [HttpPost]
+        public async Task<IActionResult> CreateResponsibility(Responsibility request, int UserID)
+        {
+
+            try
             {
-
-                try
-                {
-                    int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                    var data = await _IMISMasterBS.UpdateResponsibility(request, UserID);
-                    return Ok(data);
-                }
-                catch (Exception)
-                {
-                    throw;
-                }
-
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.CreateResponsibility(request, UserID);
+                return Ok(data);
             }
-            [Route("DeleteResponsibility")]
-            public async Task<IActionResult> DeleteResponsibility(int id)
+            catch (Exception)
             {
-                try
-                {
-                    var data = await _IMISMasterBS.DeleteResponsibility(id);
-                    return Ok(data);
-                }
-                catch
-                {
-                    throw;
-                }
+                throw;
             }
+
+        }
+        [Route("UpdateResponsibility")]
+        [HttpPut]
+        public async Task<IActionResult> UpdateResponsibility(Responsibility request, int UserID)
+        {
+
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.UpdateResponsibility(request, UserID);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+        }
+        [Route("DeleteResponsibility")]
+        public async Task<IActionResult> DeleteResponsibility(int id)
+        {
+            try
+            {
+                var data = await _IMISMasterBS.DeleteResponsibility(id);
+                return Ok(data);
+            }
+            catch
+            {
+                throw;
+            }
+        }
 
         // Incident type CRUD APIS
         [Route("GetIncidentType")]
@@ -722,11 +727,13 @@ namespace CMMSAPIs.Controllers.Masters
 
         [Route("GetIncidentTypeList")]
         [HttpGet]
-        public async Task<IActionResult> GetIncidentTypeList()
+        public async Task<IActionResult> GetIncidentTypeList(int facility_id)
         {
             try
             {
-                var data = await _IMISMasterBS.GetIncidentTypeList();
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+
+                var data = await _IMISMasterBS.GetIncidentTypeList(facilitytimeZone);
                 return Ok(data);
 
             }
@@ -786,6 +793,61 @@ namespace CMMSAPIs.Controllers.Masters
             }
         }
 
+        // MIS Water Data APIS
 
+        [Route("GetWaterDataById")]
+        [HttpGet]
+        public async Task<IActionResult> GetWaterDataById(int id, string facilitytime)
+        {
+            try
+            {
+                var data = await _IMISMasterBS.GetWaterDataById(id, facilitytime);
+                return Ok(data);
+
+            }
+            catch (Exception ex)
+            {
+
+                return BadRequest(ex.Message);
+            }
+
+        }
+
+        [Route("GetWaterDataList")]
+        [HttpGet]
+
+        public async Task<IActionResult> GetWaterDataList(DateTime fromDate, DateTime toDate, string facilitytime)
+        {
+            try
+            {
+                var data = await _IMISMasterBS.GetWaterDataList(fromDate, toDate,facilitytime);
+                return Ok(data);
+
+            }
+            catch (Exception ex)
+            {
+
+                return BadRequest(ex.Message);
+            }
+
+        }
+
+        [Route("GetWaterDataReport")]
+        [HttpGet]
+        public async Task<IActionResult> GetWaterDataReport(DateTime fromDate, DateTime toDate)
+        {
+            try
+            {
+                var data = await _IMISMasterBS.GetWaterDataReport(fromDate, toDate);
+                return Ok(data);
+
+            }
+            catch (Exception ex)
+            {
+
+                return BadRequest(ex.Message);
+            }
+
+        }
     }
 }

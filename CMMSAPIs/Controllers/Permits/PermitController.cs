@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Newtonsoft.Json;
 
 namespace CMMSAPIs.Controllers.Permits
 {
@@ -34,6 +35,8 @@ namespace CMMSAPIs.Controllers.Permits
         {
             try
             {
+       
+
                 var data = await _PermitBS.GetPermitTypeList(facility_id);
                 return Ok(data);
             }
@@ -194,7 +197,10 @@ namespace CMMSAPIs.Controllers.Permits
         {
             try
             {
-                var data = await _PermitBS.GetJobTypeList(facility_id);
+
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+
+                var data = await _PermitBS.GetJobTypeList(facility_id, facilitytimeZone);
                 return Ok(data);
             }
             catch (ArgumentException ex)
@@ -354,8 +360,10 @@ namespace CMMSAPIs.Controllers.Permits
         {
             try
             {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _PermitBS.GetPermitList(facility_id, startDate, endDate, userID, self_view, non_expired);
+                var data = await _PermitBS.GetPermitList(facility_id, startDate, endDate, userID, self_view, non_expired, facilitytimeZone);
                 return Ok(data);
             }
             catch (ArgumentException ex)
@@ -388,11 +396,13 @@ namespace CMMSAPIs.Controllers.Permits
         //[Authorize]
         [Route("GetPermitDetails")]
         [HttpGet]
-        public async Task<IActionResult> GetPermitDetails(int permit_id)
+        public async Task<IActionResult> GetPermitDetails(int permit_id,int facility_id)
         {
             try
             {
-                var data = await _PermitBS.GetPermitDetails(permit_id);
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+
+                var data = await _PermitBS.GetPermitDetails(permit_id, facilitytimeZone);
                 return Ok(data);
             }
             catch (ArgumentException ex)
@@ -663,11 +673,13 @@ namespace CMMSAPIs.Controllers.Permits
         //[Authorize]
         [Route("GetPermitConditionList")]
         [HttpGet]
-        public async Task<IActionResult> GetPermitConditionList(int permit_type_id, int isClose, int isCancle, int isExtend)
+        public async Task<IActionResult> GetPermitConditionList(int permit_type_id, int isClose, int isCancle, int isExtend,int facility_id)
         {
             try
             {
-                var data = await _PermitBS.GetPermitConditionList(permit_type_id, isClose, isCancle, isExtend);
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+
+                var data = await _PermitBS.GetPermitConditionList(permit_type_id, isClose, isCancle, isExtend,facility_id,facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception)

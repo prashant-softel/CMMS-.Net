@@ -513,7 +513,8 @@ namespace CMMSAPIs.Helper
             AUDIT_DELETED,
             AUDIT_APPROVED,
             AUDIT_REJECTED,
-            AUDIT_CLOSED
+            AUDIT_CLOSED,
+            IR_Close
         }
 
         public enum ApprovalStatus

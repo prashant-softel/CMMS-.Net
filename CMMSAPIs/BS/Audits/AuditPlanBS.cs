@@ -3,6 +3,8 @@ using CMMSAPIs.Models.Audit;
 using CMMSAPIs.Models.PM;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Audits;
+using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -11,8 +13,8 @@ namespace CMMSAPIs.BS.Audits
 {
     public interface IAuditPlanBS
     {
-        Task<List<CMAuditPlanList>> GetAuditPlanList(int facility_id, DateTime fromDate, DateTime toDate);
-        Task<CMAuditPlanList> GetAuditPlanByID(int id);
+        Task<List<CMAuditPlanList>> GetAuditPlanList(int facility_id, DateTime fromDate, DateTime toDate,string facilitytime);
+        Task<CMAuditPlanList> GetAuditPlanByID(int id,string facilitytime);
         Task<CMDefaultResponse> CreateAuditPlan(CMCreateAuditPlan request, int userID);
         Task<CMDefaultResponse> UpdateAuditPlan(CMCreateAuditPlan request);
         Task<CMDefaultResponse> DeleteAuditPlan(int audit_plan_id);
@@ -24,10 +26,10 @@ namespace CMMSAPIs.BS.Audits
         Task<CMDefaultResponse> DeletePlan(int planId, int userID);
         Task<CMDefaultResponse> ApprovePlan(CMApproval request, int userId);
         Task<CMDefaultResponse> RejectPlan(CMApproval request, int userId);
-        Task<List<CMPMPlanList>> GetPlanList(int facility_id, string category_id, string frequency_id, DateTime? start_date, DateTime? end_date);
-        Task<CMPMPlanDetail> GetPlanDetail(int id);
-        Task<List<CMPMTaskList>> GetTaskList(int facility_id, DateTime? start_date, DateTime? end_date, string frequencyIds);
-        Task<CMPMTaskView> GetTaskDetail(int task_id);
+        Task<List<CMPMPlanList>> GetPlanList(int facility_id, string category_id, string frequency_id, DateTime? start_date, DateTime? end_date, string facilitytime);
+        Task<CMPMPlanDetail> GetPlanDetail(int id, string facilitytime);
+        Task<List<CMPMTaskList>> GetTaskList(int facility_id, DateTime? start_date, DateTime? end_date, string frequencyIds, string facilitytime);
+        Task<CMPMTaskView> GetTaskDetail(int task_id,string facilitytime);
 
     }
     public class AuditPlanBS : IAuditPlanBS
@@ -39,13 +41,13 @@ namespace CMMSAPIs.BS.Audits
             databaseProvider = dbProvider;
         }
 
-        public async Task<List<CMAuditPlanList>> GetAuditPlanList(int facility_id, DateTime fromDate, DateTime toDate)
+        public async Task<List<CMAuditPlanList>> GetAuditPlanList(int facility_id, DateTime fromDate, DateTime toDate, string facilitytime)
         {
             try
             {
                 using (var repos = new AuditPlanRepository(getDB))
                 {
-                    return await repos.GetAuditPlanList(facility_id, fromDate, toDate);
+                    return await repos.GetAuditPlanList(facility_id, fromDate, toDate, facilitytime);
 
                 }
             }
@@ -55,13 +57,13 @@ namespace CMMSAPIs.BS.Audits
             }
         }
 
-        public async Task<CMAuditPlanList> GetAuditPlanByID(int id)
+        public async Task<CMAuditPlanList> GetAuditPlanByID(int id, string facilitytime)
         {
             try
             {
                 using (var repos = new AuditPlanRepository(getDB))
                 {
-                    return await repos.GetAuditPlanByID(id);
+                    return await repos.GetAuditPlanByID(id, facilitytime);
 
                 }
             }
@@ -244,13 +246,14 @@ namespace CMMSAPIs.BS.Audits
                 throw;
             }
         }
-        public async Task<List<CMPMPlanList>> GetPlanList(int facility_id, string category_id, string frequency_id, DateTime? start_date, DateTime? end_date)
+        public async Task<List<CMPMPlanList>> GetPlanList(int facility_id, string category_id, string frequency_id, DateTime? start_date, DateTime? end_date, string facilitytime)
         {
             try
             {
                 using (var repos = new AuditPlanRepository(getDB))
                 {
-                    return await repos.GetAuditPlanList(facility_id, category_id, frequency_id, start_date, end_date);
+                    
+                    return await repos.GetAuditPlanList(facility_id, category_id, frequency_id, start_date, end_date, facilitytime);
 
                 }
             }
@@ -260,13 +263,13 @@ namespace CMMSAPIs.BS.Audits
             }
         }
 
-        public async Task<CMPMPlanDetail> GetPlanDetail(int id)
+        public async Task<CMPMPlanDetail> GetPlanDetail(int id,string facilitytime)
         {
             try
             {
                 using (var repos = new AuditPlanRepository(getDB))
                 {
-                    return await repos.GetAuditPlanDetail(id);
+                    return await repos.GetAuditPlanDetail(id, facilitytime);
 
                 }
             }
@@ -276,13 +279,13 @@ namespace CMMSAPIs.BS.Audits
             }
         }
 
-        public async Task<List<CMPMTaskList>> GetTaskList(int facility_id, DateTime? start_date, DateTime? end_date, string frequencyIds)
+        public async Task<List<CMPMTaskList>> GetTaskList(int facility_id, DateTime? start_date, DateTime? end_date, string frequencyIds, string facilitytime)
         {
             try
             {
                 using (var repos = new AuditPlanRepository(getDB))
                 {
-                    return await repos.GetTaskList(facility_id, start_date, end_date, frequencyIds);
+                    return await repos.GetTaskList(facility_id, start_date, end_date, frequencyIds, facilitytime);
 
                 }
             }
@@ -292,13 +295,13 @@ namespace CMMSAPIs.BS.Audits
             }
         }
 
-        public async Task<CMPMTaskView> GetTaskDetail(int task_id)
+        public async Task<CMPMTaskView> GetTaskDetail(int task_id,string facilitytime)
         {
             try
             {
                 using (var repos = new AuditPlanRepository(getDB))
                 {
-                    return await repos.GetTaskDetail(task_id);
+                    return await repos.GetTaskDetail(task_id, facilitytime);
 
                 }
             }

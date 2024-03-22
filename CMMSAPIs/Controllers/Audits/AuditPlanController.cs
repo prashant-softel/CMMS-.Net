@@ -8,6 +8,9 @@ using CMMSAPIs.Models.SM;
 using Microsoft.AspNetCore.Http;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Models.PM;
+using Newtonsoft.Json;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace CMMSAPIs.Controllers.Audits
 {
@@ -30,7 +33,9 @@ namespace CMMSAPIs.Controllers.Audits
         {
             try
             {
-                var data = await _AuditPlanBS.GetAuditPlanList(facility_id, fromDate, toDate);
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+
+                var data = await _AuditPlanBS.GetAuditPlanList(facility_id, fromDate, toDate, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -42,11 +47,12 @@ namespace CMMSAPIs.Controllers.Audits
         //[Authorize]
         [Route("GetAuditPlanByID")]
         [HttpGet]
-        public async Task<IActionResult> GetAuditPlanByID(int id)
+        public async Task<IActionResult> GetAuditPlanByID(int id,int facility_id)
         {
             try
             {
-                var data = await _AuditPlanBS.GetAuditPlanByID(id);
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+                var data = await _AuditPlanBS.GetAuditPlanByID(id, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -258,12 +264,14 @@ namespace CMMSAPIs.Controllers.Audits
         }
         [Route("GetPlanDetail")]
         [HttpGet]
-        public async Task<IActionResult> GetPlanDetail(int planId)
+        public async Task<IActionResult> GetPlanDetail(int planId,int facility_id)
         {
             try
             {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+
                 // int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _AuditPlanBS.GetPlanDetail(planId);
+                var data = await _AuditPlanBS.GetPlanDetail(planId, facilitytimeZone);
                 return Ok(data);
             }
             catch (ArgumentException ex)
@@ -282,7 +290,8 @@ namespace CMMSAPIs.Controllers.Audits
         {
             try
             {
-                var data = await _AuditPlanBS.GetPlanList(facility_id, category_id, frequency_id, start_date, end_date);
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+                var data = await _AuditPlanBS.GetPlanList(facility_id, category_id, frequency_id, start_date, end_date, facilitytimeZone);
                 return Ok(data);
             }
             catch (ArgumentException ex)
@@ -297,11 +306,13 @@ namespace CMMSAPIs.Controllers.Audits
 
         [Route("GetTaskDetail")]
         [HttpGet]
-        public async Task<IActionResult> GetTaskDetail(int task_id)
+        public async Task<IActionResult> GetTaskDetail(int task_id,int facility_id)
         {
             try
             {
-                var data = await _AuditPlanBS.GetTaskDetail(task_id);
+
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+                var data = await _AuditPlanBS.GetTaskDetail(task_id, facilitytimeZone);
                 return Ok(data);
             }
             catch (ArgumentException ex)
@@ -320,7 +331,8 @@ namespace CMMSAPIs.Controllers.Audits
         {
             try
             {
-                var data = await _AuditPlanBS.GetTaskList(facility_id, start_date, end_date, frequencyIds);
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+                var data = await _AuditPlanBS.GetTaskList(facility_id, start_date, end_date, frequencyIds, facilitytimeZone);
                 return Ok(data);
             }
             catch (ArgumentException ex)

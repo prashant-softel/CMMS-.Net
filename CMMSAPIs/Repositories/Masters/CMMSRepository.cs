@@ -414,6 +414,7 @@ namespace CMMSAPIs.Repositories.Masters
                 emp.responsibilityIds[1] = 2;
 
             }
+           
             return _Employee;
         }
 
@@ -598,7 +599,7 @@ namespace CMMSAPIs.Repositories.Masters
             await Context.ExecuteNonQry<int>(deleteQuery).ConfigureAwait(false);
             return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Business Deleted");
         }
-        internal async Task<List<CMBusiness>> GetBusinessList(int businessType)
+        internal async Task<List<CMBusiness>> GetBusinessList(int businessType,string facilitytimeZone)
         {
             string myQuery = $"SELECT business.id, business.name, email, contactPerson, contactNumber, website, location, address, cities.id as cityId, cities.name as city, states.id as stateId, states.name as state, countries.id as countryId, countries.name as country, zip, type.id as type, type.name as typeName, business.addedAt " +
                                 $"FROM Business " +
@@ -610,6 +611,12 @@ namespace CMMSAPIs.Repositories.Masters
             if (businessType > 0)
                 myQuery += $"AND type = {businessType}";
             List<CMBusiness> _Business = await Context.GetData<CMBusiness>(myQuery).ConfigureAwait(false);
+            foreach (var business in _Business)
+            {
+                if (business!= null && business.addedAt != null)
+                    business.addedAt = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, business.addedAt);
+                
+            }
             return _Business;
         }
 
@@ -630,13 +637,13 @@ namespace CMMSAPIs.Repositories.Masters
 
                 case CMMS.CMMS_Modules.JOB:
                     JobRepository obj = new JobRepository(getDB);
-                    CMJobView _jobView = await obj.GetJobDetails(id);
+                    CMJobView _jobView = await obj.GetJobDetails(id,"");
                     notificationID = (CMMS.CMMS_Status)(_jobView.status);
                     await CMMSNotification.sendNotification(moduleID, notificationID, null, _jobView);
                     break;
                 case CMMS.CMMS_Modules.PTW:
                     PermitRepository obj1 = new PermitRepository(getDB);
-                    CMPermitDetail _Permit = await obj1.GetPermitDetails(id);
+                    CMPermitDetail _Permit = await obj1.GetPermitDetails(id,"");
                     notificationID = (CMMS.CMMS_Status)(_Permit.ptwStatus);
                     await CMMSNotification.sendNotification(moduleID, notificationID, null, _Permit);
                     break;
@@ -648,7 +655,7 @@ namespace CMMSAPIs.Repositories.Masters
                     break;
                 case CMMS.CMMS_Modules.INCIDENT_REPORT:
                     IncidentReportRepository obj3 = new IncidentReportRepository(getDB);
-                    CMViewIncidentReport _IncidentReport = await obj3.GetIncidentDetailsReport(id);
+                    CMViewIncidentReport _IncidentReport = await obj3.GetIncidentDetailsReport(id,"");
                     notificationID = (CMMS.CMMS_Status)(_IncidentReport.status);
                     await CMMSNotification.sendNotification(moduleID, notificationID, null, _IncidentReport);
                     break;
@@ -660,7 +667,7 @@ namespace CMMSAPIs.Repositories.Masters
                     break;
                 case CMMS.CMMS_Modules.CALIBRATION:
                     CalibrationRepository obj5 = new CalibrationRepository(getDB);
-                    CMCalibrationDetails _Calibration = await obj5.GetCalibrationDetails(id);
+                    CMCalibrationDetails _Calibration = await obj5.GetCalibrationDetails(id,"");
                     notificationID = (CMMS.CMMS_Status)(_Calibration.statusID + 100);
                     await CMMSNotification.sendNotification(moduleID, notificationID, null, _Calibration);
                     break;

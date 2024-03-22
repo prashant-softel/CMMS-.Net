@@ -168,7 +168,7 @@ namespace CMMSAPIs.Repositories
 
         //    return _GOList;
         //}
-        internal async Task<CMGoodsOrderList> GetGOItemByID(int id)
+        internal async Task<CMGoodsOrderList> GetGOItemByID(int id,string facilitytimeZone)
         {
             string query = "SELECT fc.name as facilityName,pod.ID as podID,pod.spare_status,pod.remarks,sai.orderflag,sam.asset_type_ID," +
           "pod.purchaseID,pod.assetItemID,sai.serial_number,sai.location_ID,pod.cost,pod.ordered_qty,\r\nbl.name as vendor_name,\r\n     " +
@@ -191,7 +191,19 @@ namespace CMMSAPIs.Repositories
           "  LEFT JOIN smassetmasters s2 ON s2.item_category_ID = sic.ID\r\n        )  t2 ON t2.master_ID = sam.ID\r\n " +
           "       LEFT JOIN facilities fc ON fc.id = po.facilityID\r\n        LEFT JOIN business bl ON bl.id = po.vendorID   LEFT JOIN currency curr ON curr.id = po.currency WHERE po.ID = " + id + " /*GROUP BY pod.ID*/";
             List<CMGoodsOrderList> _List = await Context.GetData<CMGoodsOrderList>(query).ConfigureAwait(false);
+            foreach(var list in _List)
+            {
+                if(list!=null && list.approvedAt!=null)
+                    list.approvedAt= await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.approvedAt);
+                if (list != null && list.challan_date != null)
+                    list.challan_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)list.challan_date);
+                if (list != null && list.po_date != null)
+                    list.po_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)list.po_date);
+                if (list != null && list.receivedAt != null)
+                    list.receivedAt = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)list.receivedAt);
+            }
             return _List[0];
+
         }
 
 
@@ -785,7 +797,7 @@ namespace CMMSAPIs.Repositories
 
         // Get Goods Order List Data
 
-        public async Task<List<CMPURCHASEDATA>> GetGoodsOrderData(int plantID, string empRole, DateTime fromDate, DateTime toDate, string status, string order_type)
+        public async Task<List<CMPURCHASEDATA>> GetGoodsOrderData(int plantID, string empRole, DateTime fromDate, DateTime toDate, string status, string order_type,string facilitytimeZone)
         {
             var stmt = $"SELECT fc.Name as facilityName, po.ID as orderID,po.purchaseDate,po.generate_flag,po.received_on,po.status,bl.name as vendor_name,po.vendorID," +
                 $"ed.id as generatedByID,po.remarks, CONCAT(ed.firstName,' ',ed.lastName) as generatedBy, CONCAT(ed1.firstName,' ',ed1.lastName) as receivedOn, DATE_FORMAT(po.lastModifiedDate,'%Y-%m-%d') as receivedDate," +
@@ -811,6 +823,13 @@ namespace CMMSAPIs.Repositories
 
 
             List<CMPURCHASEDATA> _List = await Context.GetData<CMPURCHASEDATA>(stmt).ConfigureAwait(false);
+            foreach (var list in _List)
+            {
+                if (list != null && list.purchaseDate != null)
+                    list.purchaseDate = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime) list.purchaseDate);
+                 if (list != null && list.receivedDate!=null)
+                list.received_on = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime) list.received_on);
+            }
             return _List;
         }
 
@@ -1114,7 +1133,7 @@ namespace CMMSAPIs.Repositories
             return _MasterList;
         }
 
-        internal async Task<List<CMGOListByFilter>> GetGOList(int facility_id, DateTime fromDate, DateTime toDate, int is_purchaseorder)
+        internal async Task<List<CMGOListByFilter>> GetGOList(int facility_id, DateTime fromDate, DateTime toDate, int is_purchaseorder,string facilitytimeZone)
         {
 
             string filter = " (DATE(po.purchaseDate) >= '" + fromDate.ToString("yyyy-MM-dd") + "'  and DATE(po.purchaseDate) <= '" + toDate.ToString("yyyy-MM-dd") + "')";
@@ -1198,6 +1217,17 @@ namespace CMMSAPIs.Repositories
                     _MasterList[i].status_short = _shortStatus;
                     _MasterList[i].status_long = _longStatus;
                 }
+            foreach (var list in _MasterList)
+            {
+                if (list != null && list.challan_date != null)
+                    list.challan_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)list.challan_date);
+                if (list != null && list.po_date != null)
+                    list.po_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)list.po_date);
+                if (list != null && list.receivedAt != null)
+                    list.receivedAt = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)list.receivedAt);
+
+
+            }
    
             return _MasterList;
         }

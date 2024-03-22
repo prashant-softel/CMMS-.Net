@@ -12,7 +12,7 @@ namespace CMMSAPIs.BS.Facility
     {
         Task<List<CMFacilityList>> GetFacilityList(int userID);
         Task<List<CMFacilityList>> GetBlockList(int parent_id);
-        Task<CMFacilityDetails> GetFacilityDetails(int id);
+        Task<CMFacilityDetails> GetFacilityDetails(int id,string facilitytime);
         Task<CMDefaultResponse> CreateNewFacility(CMCreateFacility request, int userID);
         Task<CMDefaultResponse> UpdateFacility(CMCreateFacility request, int userID);
         Task<CMDefaultResponse> DeleteFacility(int facility_id);
@@ -60,13 +60,13 @@ namespace CMMSAPIs.BS.Facility
             }
         }
 
-        public async Task<CMFacilityDetails> GetFacilityDetails(int id)
+        public async Task<CMFacilityDetails> GetFacilityDetails(int id, string facilitytime)
         {
             try
             {
                 using (var repos = new FacilityRepository(getDB))
                 {
-                    return await repos.GetFacilityDetails(id);
+                    return await repos.GetFacilityDetails(id, facilitytime);
 
                 }
             }

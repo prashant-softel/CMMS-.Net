@@ -1013,7 +1013,7 @@ namespace CMMSAPIs.Repositories.Inventory
             return response;
         }
 
-        internal async Task<List<CMInventoryList>> GetInventoryList(int facilityId, int linkedToBlockId, int status, string categoryIds )
+        internal async Task<List<CMInventoryList>> GetInventoryList(int facilityId, int linkedToBlockId, int status, string categoryIds,string facilitytimeZone)
         {
             /*
              * get all details mentioned in model
@@ -1058,11 +1058,18 @@ namespace CMMSAPIs.Repositories.Inventory
             myQuery += (categoryIds?.Length > 0 ? " AND a.categoryId IN (" + categoryIds + ")" : " ");
 
             List<CMInventoryList> inventory = await Context.GetData<CMInventoryList>(myQuery).ConfigureAwait(false);
+            foreach (var a in inventory)
+            {
+                if (a != null && a.calibrationDueDate != null)
+                    a.calibrationDueDate = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, a.calibrationDueDate);
+               
+                    
+            }
             return inventory;
         }
 
 
-        internal async Task<CMViewInventory> GetInventoryDetails(int id)
+        internal async Task<CMViewInventory> GetInventoryDetails(int id,string facilitytimeZone)
         {
             /*
             * get all details mentioned in model
@@ -1107,6 +1114,29 @@ namespace CMMSAPIs.Repositories.Inventory
                 myQuery += " WHERE a.id= " + id;
             }
             List<CMViewInventory> _ViewInventoryList = await Context.GetData<CMViewInventory>(myQuery).ConfigureAwait(false);
+            foreach (var a in _ViewInventoryList)
+            {
+                if (a != null && a.added_at != null)
+                    a.added_at = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime) a.added_at);
+                if (a != null && a.calibrationDueDate != null)
+                    a.calibrationDueDate = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)a.calibrationDueDate);
+                if (a != null && a.calibrationLastDate != null)
+                    a.calibrationLastDate = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)a.calibrationLastDate);
+                if (a != null && a.deleted_at != null)
+                    a.deleted_at = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)a.deleted_at);
+                if (a != null && a.Imported_at != null)
+                    a.Imported_at = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)a.Imported_at);
+                if (a != null && a.updated_at != null)
+                    a.updated_at = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)a.updated_at);
+                
+
+
+
+
+
+                    
+            }
+            
 
             return _ViewInventoryList[0];
 
@@ -1191,7 +1221,7 @@ string warrantyQry = "insert into assetwarranty
                     strRetMessage = "Warranty data for <" + assetName + "> does not exist. ";
                 }
                 idList.Add(retID);
-                CMViewInventory _inventoryAdded = await GetInventoryDetails(retID);
+                CMViewInventory _inventoryAdded = await GetInventoryDetails(retID,"");
 
                 string _shortStatus = getShortStatus(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_ADDED);
                 _inventoryAdded.status_short = _shortStatus;
@@ -1234,7 +1264,7 @@ string warrantyQry = "insert into assetwarranty
             string assetName = "";
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.INVALID_ARG;
             string strRetMessage = "";
-            int linkedToBlockId = 0;
+            int linkedToBlockId = 0; 
             List<int> idList = new List<int>();
             foreach (var unit in request)
             {
@@ -1245,9 +1275,11 @@ string warrantyQry = "insert into assetwarranty
                 {
                     throw new ArgumentException($"name of asset cannot be empty on line {count}");
                 }
-                string firstCalibrationDate = (unit.calibrationFirstDueDate == null) ? "NULL" : "'" + ((DateTime)unit.calibrationFirstDueDate).ToString("yyyy-MM-dd") + "'";
-                string lastCalibrationDate = (unit.calibrationLastDate == null) ? "NULL" : "'" + ((DateTime)unit.calibrationLastDate).ToString("yyyy-MM-dd") + "'";
-                string nextCalibrationDate = (unit.calibrationNextDueDate == null) ? "NULL" : "'" + ((DateTime)unit.calibrationNextDueDate).ToString("yyyy-MM-dd") + "'";
+                string firstCalibrationDate = (unit.calibrationFirstDueDate == null) ? "NULL" : "'" + ((DateTime)unit.calibrationFirstDueDate.Value).ToString("yyyy-MM-dd") + "'";
+                string lastCalibrationDate = (unit.calibrationLastDate == null) ? "NULL" : "'" + ((DateTime)unit.calibrationLastDate.Value).ToString("yyyy-MM-dd") + "'";
+                string nextCalibrationDate = (unit.calibrationNextDueDate == null) ? "NULL" : "'" + ((DateTime)unit.calibrationNextDueDate.Value).ToString("yyyy-MM-dd") + "'";
+
+                
 
                 if (unit.blockId > 0)
                 {
@@ -1497,7 +1529,7 @@ string warrantyQry = "insert into assetwarranty
             }
             CMDefaultResponse obj = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Inventory  <" + request.id + "> has been updated");
 
-            CMViewInventory _inventoryAdded = await GetInventoryDetails(request.id);
+            CMViewInventory _inventoryAdded = await GetInventoryDetails(request.id,"");
 
             string _shortStatus = getShortStatus(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_UPDATED);
             _inventoryAdded.status_short = _shortStatus;
@@ -1527,7 +1559,7 @@ string warrantyQry = "insert into assetwarranty
 
             }
 
-            CMViewInventory _inventoryAdded = await GetInventoryDetails(id);
+            CMViewInventory _inventoryAdded = await GetInventoryDetails(id,"");
 
             string qry = $"SELECT CONCAT(firstName,' ',lastName) as deleted_by FROM users WHERE id = {id}";
 
@@ -1733,7 +1765,7 @@ string warrantyQry = "insert into assetwarranty
             List<CMWarrantyCertificate> _AssetCategory = await Context.GetData<CMWarrantyCertificate>(myQuery).ConfigureAwait(false);
             return _AssetCategory;
         }
-        internal async Task<List<CMCalibrationAssets>> GetCalibrationList(int facilityId)
+        internal async Task<List<CMCalibrationAssets>> GetCalibrationList(int facilityId,string facilitytimeZone)
         {
             string myQuery = "SELECT assets.id, assets.name, category.id as categoryId, category.name as categoryName, " +
             "vendor.id as vendorId, vendor.name as vendorName, assets.calibrationFreqType, " +
@@ -1745,6 +1777,15 @@ string warrantyQry = "insert into assetwarranty
             "LEFT JOIN frequency ON assets.calibrationFrequency = frequency.id "+
             $"WHERE category.calibrationStatus = 1 AND facilityId = {facilityId} ";
             List<CMCalibrationAssets> _AssetCategory = await Context.GetData<CMCalibrationAssets>(myQuery).ConfigureAwait(false);
+            foreach (var a in _AssetCategory)
+            {
+
+                if (a != null && a.calibrationDueDate != null)
+                    a.calibrationDueDate = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)a.calibrationDueDate);
+                if (a != null && a.calibrationLastDate != null)
+                    a.calibrationLastDate = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)a.calibrationLastDate);
+
+            }
             return _AssetCategory;
               
 

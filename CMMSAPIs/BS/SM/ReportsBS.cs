@@ -19,7 +19,7 @@ namespace CMMSAPIs.BS.SM
         Task<List<CMFaultyMaterialReport>> GetFaultyMaterialReport(string facility_id, string itemID, DateTime StartDate, DateTime EndDate);
         Task<List<CMEmployeeTransactionReport>> GetEmployeeTransactionReport(int isAllEmployees, string facility_id, int Emp_ID, DateTime StartDate, DateTime EndDate);
         Task<CMEmployeeStockList> GetEmployeeStock(int facility_ID, int emp_id);
-        Task<List<CMEmployeeStockTransactionReport>> GetTransactionReport(string facility_ID, int actorType, int actorID, DateTime fromDate, DateTime toDate);
+        Task<List<CMEmployeeStockTransactionReport>> GetTransactionReport(string facility_ID, int actorType, int actorID, DateTime fromDate, DateTime toDate,string facilitytime);
         Task<List<CMAssetMasterStockItems>> GetAssetMasterStockItems(int assetID);
         Task<List<CMPlantStockOpeningResponse>> GetStockReport(string facility_id, int actorTypeID,int actorID,  DateTime StartDate, DateTime EndDate, string assetMasterIDs);
     }
@@ -110,13 +110,36 @@ namespace CMMSAPIs.BS.SM
                 throw;
             }
         }
-        public async Task<List<CMEmployeeStockTransactionReport>> GetTransactionReport(string facility_ID, int actorType, int actorID, DateTime fromDate, DateTime toDate)
+        //changes
+        public async Task<List<CMTaskStockItems>> GetpmTaskStock(int facility_ID, int task_id)
         {
             try
             {
                 using (var repos = new ReportsRepository(getDB))
                 {
-                    return await repos.GetTransactionReport(facility_ID, actorType, actorID, fromDate, toDate);
+                    return await repos.GetpmTaskStock(facility_ID, task_id);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+
+
+
+
+
+
+        public async Task<List<CMEmployeeStockTransactionReport>> GetTransactionReport(string facility_ID, int actorType, int actorID, DateTime fromDate, DateTime toDate,string facilitytime)
+        {
+            try
+            {
+                using (var repos = new ReportsRepository(getDB))
+                {
+                    return await repos.GetTransactionReport(facility_ID, actorType, actorID, fromDate, toDate,facilitytime);
 
                 }
             }

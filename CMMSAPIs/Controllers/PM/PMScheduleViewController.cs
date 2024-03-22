@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Models.PM;
+using Newtonsoft.Json;
+using System.Linq;
 
 namespace CMMSAPIs.Controllers.PM
 {
@@ -41,11 +43,13 @@ namespace CMMSAPIs.Controllers.PM
         //[Authorize]
         [Route("GetPMTaskDetail")]
         [HttpGet]
-        public async Task<IActionResult> GetPMTaskDetail(int task_id)
+        public async Task<IActionResult> GetPMTaskDetail(int task_id, int facility_id)
         {
+           
             try
             {
-                var data = await _PMScheduleViewBS.GetPMTaskDetail(task_id);
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+                var data = await _PMScheduleViewBS.GetPMTaskDetail(task_id, facilitytimeZone);
                 return Ok(data);
             }
             catch (ArgumentException ex)
@@ -69,7 +73,9 @@ namespace CMMSAPIs.Controllers.PM
         {
             try
             {
-                var data = await _PMScheduleViewBS.GetPMTaskList(facility_id, start_date, end_date, frequencyIds, categoryIds);
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+
+                var data = await _PMScheduleViewBS.GetPMTaskList(facility_id, start_date, end_date, frequencyIds, categoryIds, facilitytimeZone);
                 return Ok(data);
             }
             catch (ArgumentException ex)
@@ -245,12 +251,14 @@ namespace CMMSAPIs.Controllers.PM
 
         [Route("GetPMTaskScheduleDetail")]
         [HttpGet]
-        public async Task<IActionResult> GetPMTaskScheduleDetail(int task_id, int schedule_id)
+        public async Task<IActionResult> GetPMTaskScheduleDetail(int task_id, int schedule_id,int facility_id)
         {
             try
             {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _PMScheduleViewBS.GetPMTaskScheduleDetail(task_id, schedule_id);
+                var data = await _PMScheduleViewBS.GetPMTaskScheduleDetail(task_id, schedule_id, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception)

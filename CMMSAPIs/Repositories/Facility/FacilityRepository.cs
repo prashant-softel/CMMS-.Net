@@ -36,7 +36,7 @@ namespace CMMSAPIs.Repositories.Facility
             return _Block;
         }
 
-        internal async Task<CMFacilityDetails> GetFacilityDetails(int id)
+        internal async Task<CMFacilityDetails> GetFacilityDetails(int id,string facilitytimeZone)
         {
             string myQuery = $"SELECT facility.id as id, block.name as parentName, facility.name AS blockName, b.name as ownerName, spv.name as spvName, facility.customerId as customerId, facility.ownerId as ownerId, facility.operatorId as operatorId, facility.isBlock as isBlock, facility.parentId as parentId, facility.address as address, facility.city as city, facility.state as state, facility.country as country, facility.zipcode as zipcode, facility.latitude as latitude, facility.longitude as longitude, facility.createdBy as createdById, facility.createdAt as createdAt, facility.status as status, facility.photoId as photoId, facility.description as description, facility.timezone as timezone, facility.startDate as startDate, facility.endDate as endDate, CONCAT(u.firstName + ' ' + u.lastName) as createdByName FROM facilities as facility LEFT JOIN facilities as block on block.id = facility.parentId LEFT JOIN business AS b ON facility.ownerId = b.id LEFT JOIN spv ON facility.spvId=spv.id LEFT JOIN users as u ON u.id = facility.createdBy ";
             if (id > 0)
@@ -48,6 +48,17 @@ namespace CMMSAPIs.Repositories.Facility
                 throw new ArgumentException("Invalid facility ID");
             }
             List<CMFacilityDetails> _GetFacilityDetails = await Context.GetData<CMFacilityDetails>(myQuery).ConfigureAwait(false);
+            foreach (var detail in _GetFacilityDetails)
+            {
+                if(detail!=null && detail.createdAt!=null)
+                detail.createdAt = (DateTime)await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, detail.createdAt);
+                if (detail != null && detail.endDate != null)
+                    detail.endDate = (DateTime) await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, detail.endDate);
+                if (detail != null && detail.startDate != null)
+                    detail.startDate = (DateTime) await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, detail.startDate);
+
+            }
+
             if (_GetFacilityDetails.Count == 0)
                 throw new NullReferenceException($"Facility with ID {id} not found");
             return _GetFacilityDetails[0];

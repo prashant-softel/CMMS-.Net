@@ -124,7 +124,7 @@ namespace CMMSAPIs.Repositories.PM
 
         }
 
-        internal async Task<List<CMPMTaskList>> GetPMTaskList(int facility_id, DateTime? start_date, DateTime? end_date, string frequencyIds, string categoryIds)
+        internal async Task<List<CMPMTaskList>> GetPMTaskList(int facility_id, DateTime? start_date, DateTime? end_date, string frequencyIds, string categoryIds, string facilitytimeZone)
         {
             /*
              * Primary Table - PMExecution & PMSchedule
@@ -201,11 +201,25 @@ namespace CMMSAPIs.Repositories.PM
             {
                 throw new ArgumentException("Invalid Facility ID");
             }
-            
+            foreach (var detail in scheduleViewList)
+            {
+                if (detail != null && detail.due_date != null) {
+                    detail.due_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)detail.due_date);
+                }
+                if (detail != null && detail.done_date != null)
+                {
+                    detail.done_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)detail.done_date);
+                }
+                if (detail != null && detail.last_done_date != null)
+                {
+                    detail.last_done_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)detail.last_done_date);
+                }
+            }
+
             return scheduleViewList;
         }
 
-        
+
 
         internal async Task<CMDefaultResponse> CancelPMTask(CMApproval request, int userID)
         {
@@ -237,7 +251,7 @@ namespace CMMSAPIs.Repositories.PM
             return response;
         }
 
-        internal async Task<CMPMTaskView> GetPMTaskDetail(int task_id)
+        internal async Task<CMPMTaskView> GetPMTaskDetail(int task_id, string facilitytimeZone)
         {
             /*
              * Primary Table - PMExecution & PMSchedule
@@ -329,11 +343,11 @@ namespace CMMSAPIs.Repositories.PM
                 try
                 {
                     List<ScheduleLinkJob> linked_jobs = await Context.GetData<ScheduleLinkJob>(myQuery4).ConfigureAwait(false);
-                    List<CMLog> log = await _utilsRepo.GetHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, schedule.schedule_id);
+                    List<CMLog> log = await _utilsRepo.GetHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, schedule.schedule_id,"");
                     schedule.schedule_link_job = linked_jobs;
 
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
 
                 }
@@ -368,10 +382,47 @@ namespace CMMSAPIs.Repositories.PM
 
                 string _longStatus = getLongStatus(CMMS.CMMS_Modules.PM_SCHEDULE, _Status, taskViewDetail[0]);
                 taskViewDetail[0].status_long = _longStatus;
+
+
+
+                string _shortStatus_PTW = Status_PTW(taskViewDetail[0].ptw_status);
+                taskViewDetail[0].status_short_ptw = _shortStatus_PTW;
+
             }
+            foreach (var detail in taskViewDetail)
+            {
+                if (detail != null && detail.done_date != null) {
+                    detail.done_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)detail.done_date); }
+                if (detail != null && detail.last_done_date != null)
+                {
+                    detail.last_done_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)detail.last_done_date);
+                }
+                if (detail != null && detail.approved_at != null)
+                {
+                    detail.approved_at = (DateTime)await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, detail.approved_at);
+                }
+                if (detail != null && detail.cancelled_at != null)
+                {
+                    detail.cancelled_at = (DateTime)await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, detail.cancelled_at);
+                }
 
-            
-
+               if (detail != null && detail.closed_at != null)
+               {
+                detail.closed_at = (DateTime)await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, detail.closed_at);
+               }
+               if (detail != null && detail.due_date != null)
+              {
+                detail.due_date = (DateTime) await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime) detail.due_date);}
+                if (detail != null && detail.rejected_at != null)
+                {
+                detail.rejected_at = (DateTime) await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, detail.rejected_at);}
+                if (detail != null && detail.started_at != null)
+                {
+                detail.started_at = (DateTime)await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, detail.started_at);}
+                 if (detail != null && detail.updated_at != null)
+                {
+                detail.updated_at = (DateTime)await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, detail.updated_at);}
+                 }
             return taskViewDetail[0];
         }
 
@@ -1119,7 +1170,7 @@ namespace CMMSAPIs.Repositories.PM
             return responseList;
         }
 
-        internal async Task<CMPMScheduleExecutionDetail> GetPMTaskScheduleDetail(int task_id,int schedule_id)
+        internal async Task<CMPMScheduleExecutionDetail> GetPMTaskScheduleDetail(int task_id,int schedule_id,string facilitytimeZone)
         {
             /*
              * Primary Table - PMExecution & PMSchedule
@@ -1154,6 +1205,7 @@ namespace CMMSAPIs.Repositories.PM
                 $"where pm_schedule.id = {schedule_id} and task_id = {task_id};";
 
             List<CMPMScheduleExecutionDetail> scheduleDetails = await Context.GetData<CMPMScheduleExecutionDetail>(myQuery2).ConfigureAwait(false);
+
 
             if (scheduleDetails.Count == 0)
                 throw new MissingMemberException($"PM Schedule PMSCH{schedule_id} associated with PM Task PMTASK{task_id} not found");
@@ -1194,7 +1246,8 @@ namespace CMMSAPIs.Repositories.PM
                                     $"JOIN pm_execution ON jobs.id = pm_execution.linked_job_id " +
                                     $"WHERE pm_execution.PM_Schedule_Id  = {schedule_id};";
                 List<ScheduleLinkJob> linked_jobs = await Context.GetData<ScheduleLinkJob>(myQuery4).ConfigureAwait(false);
-                List<CMLog> log = await _utilsRepo.GetHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, schedule_id);
+            
+                List<CMLog> log = await _utilsRepo.GetHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, schedule_id,"");
 
             //if (checklist_collection.Count > 0)
             //{
@@ -1214,7 +1267,12 @@ namespace CMMSAPIs.Repositories.PM
 
             //string _longStatus = getLongStatus(CMMS.CMMS_Modules.PM_SCHEDULE, _Status, taskViewDetail[0]);
             //taskViewDetail[0].status_long = _longStatus;
-
+             foreach (var detail in linked_jobs)
+             {
+                if(detail!=null && detail.job_date!=null)
+                 detail.job_date= await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)detail.job_date);
+             }
+            
             return scheduleDetails[0];
         }
         internal async Task<List<CMDefaultResponse>> cloneSchedule(int facility_id, int task_id, int from_schedule_id,int to_schedule_id,int userID)
@@ -1228,7 +1286,7 @@ namespace CMMSAPIs.Repositories.PM
             if (Convert.ToInt32(dt1.Rows[0][0]) != Convert.ToInt32(dt1.Rows[1][0]))
                 throw new MissingMemberException("Checklists Should be same.");
 
-            CMPMScheduleExecutionDetail from_schedule = await GetPMTaskScheduleDetail(task_id, from_schedule_id);
+            CMPMScheduleExecutionDetail from_schedule = await GetPMTaskScheduleDetail(task_id, from_schedule_id,"");
 
             string executeQuery = $"SELECT Check_Point_id FROM pm_execution WHERE PM_Schedule_Id = {from_schedule_id} and task_id = {task_id} ;";
             DataTable dt = await Context.FetchData(executeQuery).ConfigureAwait(false);
@@ -1397,7 +1455,7 @@ namespace CMMSAPIs.Repositories.PM
             }
 
                 //CMDefaultResponse response = new CMDefaultResponse();
-            CMPMScheduleExecutionDetail to_schedule = await GetPMTaskScheduleDetail(task_id, from_schedule_id);
+            CMPMScheduleExecutionDetail to_schedule = await GetPMTaskScheduleDetail(task_id, from_schedule_id,"");
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, to_schedule_id, 0, 0, $"PM Task {to_schedule_id} cloned from {from_schedule_id}", CMMS.CMMS_Status.PM_ASSIGNED, userID);
             return responseList;
@@ -1416,6 +1474,81 @@ namespace CMMSAPIs.Repositories.PM
                 throw new MissingMemberException($"Schedule Id {schedule_id} not Found");            
             
             return list;
+        }
+        public static string Status_PTW(int statusID)
+        {
+            CMMS.CMMS_Status status = (CMMS.CMMS_Status)statusID;
+            string statusName = "";
+            switch (status)
+            {
+                case CMMS.CMMS_Status.PTW_CREATED:
+                    statusName = "Waiting for Approval";
+                    break;
+                case CMMS.CMMS_Status.PTW_ISSUED:
+                    statusName = "Issued";
+                    break;
+                case CMMS.CMMS_Status.PTW_REJECTED_BY_ISSUER:
+                    statusName = "Rejected By Issuer";
+                    break;
+                case CMMS.CMMS_Status.PTW_APPROVED:
+                    statusName = "Approved";
+                    break;
+                case CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER:
+                    statusName = "Rejected By Approver";
+                    break;
+                case CMMS.CMMS_Status.PTW_CLOSED:
+                    statusName = "Closed";
+                    break;
+                case CMMS.CMMS_Status.PTW_CANCELLED_BY_ISSUER:
+                    statusName = "Cancelled BY Issuer";
+                    break;
+                case CMMS.CMMS_Status.PTW_CANCELLED_BY_HSE:
+                    statusName = "Cancelled By HSE";
+                    break;
+                case CMMS.CMMS_Status.PTW_CANCELLED_BY_APPROVER:
+                    statusName = "Cancelled By Approver";
+                    break;
+                case CMMS.CMMS_Status.PTW_CANCEL_REQUESTED:
+                    statusName = "Cancelled";
+                    break;
+                case CMMS.CMMS_Status.PTW_CANCEL_REQUEST_REJECTED:
+                    statusName = "Cancel Request Rejected";
+                    break;
+                case CMMS.CMMS_Status.PTW_CANCEL_REQUEST_APPROVED:
+                    statusName = "Cancelled";
+                    break;
+                case CMMS.CMMS_Status.PTW_EXTEND_REQUESTED:
+                    statusName = "Requested for Extension";
+                    break;
+                case CMMS.CMMS_Status.PTW_EXTEND_REQUEST_APPROVE:
+                    statusName = "Approved Extension";
+                    break;
+                case CMMS.CMMS_Status.PTW_EXTEND_REQUEST_REJECTED:
+                    statusName = "Rejected Extension";
+                    break;
+                case CMMS.CMMS_Status.PTW_LINKED_TO_JOB:
+                    statusName = "Linked to Job";
+                    break;
+                case CMMS.CMMS_Status.PTW_LINKED_TO_PM:
+                    statusName = "Linked to PM";
+                    break;
+                case CMMS.CMMS_Status.PTW_LINKED_TO_AUDIT:
+                    statusName = "Linked to Audit";
+                    break;
+                case CMMS.CMMS_Status.PTW_LINKED_TO_HOTO:
+                    statusName = "Linked to HOTO";
+                    break;
+                case CMMS.CMMS_Status.PTW_EXPIRED:
+                    statusName = "Expired";
+                    break;
+                case CMMS.CMMS_Status.PTW_UPDATED:
+                    statusName = "Updated";
+                    break;
+                default:
+                    statusName = "Invalid";
+                    break;
+            }
+            return statusName;
         }
     }
 

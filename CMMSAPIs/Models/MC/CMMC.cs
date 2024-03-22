@@ -287,7 +287,16 @@ namespace CMMSAPIs.Models.MC
 
         // public int area { get; set; }
     }
-    public class CMSMB
+    public class CMMCTaskEquipmentList
+    {
+        public int invId { get; set; }
+        public string invName { get; set; }
+        public dynamic moduleQuantity { get; set; }
+        public List<CMSMB> smbs { get; set; } = new List<CMSMB>();
+
+        // public int area { get; set; }
+    }
+        public class CMSMB
     {
         public int parentId { get; set; }
         public int smbId { get; set; }
@@ -316,6 +325,14 @@ namespace CMMSAPIs.Models.MC
         public int invId { get; set; }
         public string invName { get; set; }
         public int area { get; set; }
+
+    }
+    public class CMPlanSMB
+    {
+        public int parentId { get; set; }
+        public int smbId { get; set; }
+        public string smbName { get; set; }
+        public int moduleQuantity { get; set; }
 
     }
 

@@ -10,9 +10,9 @@ namespace CMMSAPIs.BS.Jobs
 {
     public interface IJobBS
     {
-		Task<List<CMJobModel>> GetJobList(int facility_id, string startDate, string endDate, CMMS.CMMS_JobType jobType, int selfView, int userId, string status);
-        Task<List<CMJobList>> GetJobListByPermitId(int permitId);
-        Task<CMJobView> GetJobDetails(int job_id);
+		Task<List<CMJobModel>> GetJobList(int facility_id, string startDate, string endDate, CMMS.CMMS_JobType jobType, int selfView, int userId, string status,string facilitytime);
+        Task<List<CMJobList>> GetJobListByPermitId(int permitId, string facilitytime);
+        Task<CMJobView> GetJobDetails(int job_id,string facilitytime);
         Task<CMDefaultResponse> CreateNewJob(CMCreateJob request, int userId);
         Task<CMDefaultResponse> UpdateJob(CMCreateJob request, int userId);
         Task<CMDefaultResponse> ReAssignJob(int job_id, int assignedTo, int userId);
@@ -30,13 +30,13 @@ namespace CMMSAPIs.BS.Jobs
             databaseProvider = dbProvider;
         }
 
-        public async Task<List<CMJobModel>> GetJobList(int facility_id, string startDate, string endDate, CMMS.CMMS_JobType jobType, int selfView, int userId, string status)
+        public async Task<List<CMJobModel>> GetJobList(int facility_id, string startDate, string endDate, CMMS.CMMS_JobType jobType, int selfView, int userId, string status, string facilitytime)
         {
             try
             {
                 using (var repos = new JobRepository(getDB))
                 {
-                    return await repos.GetJobList(facility_id, startDate, endDate, jobType, selfView, userId, status);
+                    return await repos.GetJobList(facility_id, startDate, endDate, jobType, selfView, userId, status,facilitytime);
                 }
             }
             catch (Exception ex)
@@ -45,13 +45,13 @@ namespace CMMSAPIs.BS.Jobs
             }
         }
 
-        public async Task<List<CMJobList>> GetJobListByPermitId(int permitId)
+        public async Task<List<CMJobList>> GetJobListByPermitId(int permitId, string facilitytime)
         {
             try
             {
                 using (var repos = new JobRepository(getDB))
                 {
-                    return await repos.GetJobListByPermitId(permitId);
+                    return await repos.GetJobListByPermitId(permitId, facilitytime);
                 }
             }
             catch (Exception ex)
@@ -60,13 +60,13 @@ namespace CMMSAPIs.BS.Jobs
             }
         }
 
-        public async Task<CMJobView> GetJobDetails(int job_id)
+        public async Task<CMJobView> GetJobDetails(int job_id, string facilitytime)
         {
             try
             {
                 using (var repos = new JobRepository(getDB))
                 {
-                    return await repos.GetJobDetails(job_id);
+                    return await repos.GetJobDetails(job_id,facilitytime);
                 }
             }
             catch (Exception ex)

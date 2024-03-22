@@ -13,8 +13,8 @@ namespace CMMSAPIs.BS.Inventory
 {
     public interface IInventoryBS
     {
-        Task<List<CMInventoryList>> GetInventoryList(int facilityId, int linkedToBlockId, int status, string categoryIds);
-        Task<CMViewInventory> GetInventoryDetails(int id);
+        Task<List<CMInventoryList>> GetInventoryList(int facilityId, int linkedToBlockId, int status, string categoryIds,string facilitytime);
+        Task<CMViewInventory> GetInventoryDetails(int id, string facilitytime);
         Task<CMDefaultResponse> AddInventory(List<CMAddInventory> request, int userID);
         Task<CMImportFileResponse> ImportInventories(int file_id, int facility_id, int userID);
         Task<CMDefaultResponse> UpdateInventory(CMAddInventory request, int userID);
@@ -35,7 +35,7 @@ namespace CMMSAPIs.BS.Inventory
         Task<List<CMDefaultList>> GetWarrantyTypeList();
         Task<List<CMDefaultList>> GetWarrantyUsageTermList();
         Task<List<CMWarrantyCertificate>> GetWarrantyCertificate();
-        Task<List<CMCalibrationAssets>> GetCalibrationList(int facilityId);
+        Task<List<CMCalibrationAssets>> GetCalibrationList(int facilityId,string facilitytime);
 
         Task<CMDefaultResponse> SetParentAsset(int parentID, int childID, int userID);
     }
@@ -50,13 +50,13 @@ namespace CMMSAPIs.BS.Inventory
             _environment = environment;
         }
 
-        public async Task<List<CMInventoryList>> GetInventoryList(int facilityId, int linkedToBlockId, int status, string categoryIds)
+        public async Task<List<CMInventoryList>> GetInventoryList(int facilityId, int linkedToBlockId, int status, string categoryIds,string facilitytime)
         {
             try
             {
                 using (var repos = new InventoryRepository(getDB, _environment))
                 {
-                    return await repos.GetInventoryList(facilityId, linkedToBlockId, status, categoryIds);
+                    return await repos.GetInventoryList(facilityId, linkedToBlockId, status, categoryIds,facilitytime);
 
                 }
             }
@@ -66,13 +66,13 @@ namespace CMMSAPIs.BS.Inventory
             }
         }
 
-        public async Task<CMViewInventory> GetInventoryDetails(int id)
+        public async Task<CMViewInventory> GetInventoryDetails(int id, string facilitytime)
         {
             try
             {
                 using (var repos = new InventoryRepository(getDB, _environment))
                 {
-                    return await repos.GetInventoryDetails(id);
+                    return await repos.GetInventoryDetails(id,  facilitytime);
 
                 }
             }
@@ -407,13 +407,13 @@ namespace CMMSAPIs.BS.Inventory
             }
         }
 
-        public async Task<List<CMCalibrationAssets>> GetCalibrationList(int facilityId)
+        public async Task<List<CMCalibrationAssets>> GetCalibrationList(int facilityId,string facilitytime)
         {
             try
             {
                 using (var repos = new InventoryRepository(getDB, _environment))
                 {
-                    return await repos.GetCalibrationList( facilityId);
+                    return await repos.GetCalibrationList( facilityId,facilitytime);
 
                 }
             }

@@ -47,15 +47,22 @@ namespace CMMSAPIs.BS.MISMasters
         Task<CMDefaultResponse> UpdateBodyParts(BODYPARTS request, int UserId);
         Task<CMDefaultResponse> DeleteBodyParts(int id, int UserId);
         Task<List<Responsibility>> GetResponsibilityList();
-        Task<Responsibility> GetResponsibilityID(int id);
+        Task<Responsibility> GetResponsibilityID(int id,string facilitytime);
         Task<CMDefaultResponse> CreateResponsibility(Responsibility request, int UserId);
         Task<CMDefaultResponse> UpdateResponsibility(Responsibility request, int UserId);
         Task<CMDefaultResponse> DeleteResponsibility(int id);
         Task<CMIncidentType> GetIncidentType(int id);
-        Task<List<CMIncidentType>> GetIncidentTypeList();
+        Task<List<CMIncidentType>> GetIncidentTypeList(string facilitytime);
         Task<CMDefaultResponse> CreateIncidentType(CMIncidentType request, int userId);
         Task<CMDefaultResponse> UpdateIncidentType(CMIncidentType request, int userId);
         Task<CMDefaultResponse> DeleteIncidentType(int id, int userId);
+
+        Task<CMGetMisWaterData> GetWaterDataById(int id, string facilitytime);
+        Task<List<CMGetMisWaterData>> GetWaterDataList(DateTime fromDate, DateTime toDate, string facilitytime);
+        Task<List<CMWaterDataReport>> GetWaterDataReport(DateTime fromDate, DateTime toDate);
+        Task<CMDefaultResponse> CreateWaterData(CMMisWaterData request, int userId);
+        Task<CMDefaultResponse> UpdateWaterData(CMMisWaterData request, int userId);
+        Task<CMDefaultResponse> DeleteWaterData(int id, int userId);
     }
     public class MISMasterBS : IMISMasterBS
     {
@@ -633,13 +640,13 @@ namespace CMMSAPIs.BS.MISMasters
                 throw;
             }
         }
-        public async Task<Responsibility> GetResponsibilityID(int id)
+        public async Task<Responsibility> GetResponsibilityID(int id, string facilitytime)
         {
             try
             {
                 using (var repos = new MISMasterRepository(getDB))
                 {
-                    return await repos.GetResponsibilityID(id);
+                    return await repos.GetResponsibilityID (id,  facilitytime);
                 }
             }
             catch (Exception ex)
@@ -701,13 +708,13 @@ namespace CMMSAPIs.BS.MISMasters
                 throw;
             }
         }
-        public async Task<List<CMIncidentType>> GetIncidentTypeList()
+        public async Task<List<CMIncidentType>> GetIncidentTypeList(string facilitytime)
         {
             try
             {
                 using (var repos = new MISMasterRepository(getDB))
                 {
-                    return await repos.GetIncidentTypeList();
+                    return await repos.GetIncidentTypeList(facilitytime);
 
                 }
             }
@@ -763,5 +770,101 @@ namespace CMMSAPIs.BS.MISMasters
             }
         }
 
+
+        // MIS Water data
+
+        public async Task<CMGetMisWaterData> GetWaterDataById(int id, string facilitytime)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.GetWaterDataById(id,facilitytime);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<List<CMGetMisWaterData>> GetWaterDataList(DateTime fromDate, DateTime toDate, string facilitytime)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.GetWaterDataList(fromDate, toDate,facilitytime);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> CreateWaterData(CMMisWaterData request, int userId)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.CreateWaterData(request, userId);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> UpdateWaterData(CMMisWaterData request, int userId)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.UpdateWaterData(request, userId);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> DeleteWaterData(int id, int userId)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.DeleteWaterData(id, userId);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<CMWaterDataReport>> GetWaterDataReport(DateTime fromDate, DateTime toDate)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.GetWaterDataReport(fromDate, toDate);
+                   
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
     }
 }

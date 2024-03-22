@@ -114,7 +114,7 @@ namespace CMMSAPIs.Repositories.JC
 
         }
 
-        internal async Task<List<CMJCList>> GetJCList(int facility_id, int userID, bool self_view)
+        internal async Task<List<CMJCList>> GetJCList(int facility_id, int userID, bool self_view,string facilitytimeZone)
         {
             /* Return all field mentioned in JCListModel model
             *  tables are JobCards, Jobs, Permit, Users
@@ -154,9 +154,16 @@ namespace CMMSAPIs.Repositories.JC
              List<equipmentCatList> _equipmentCatList = await Context.GetData<equipmentCatList>(myQuery2).ConfigureAwait(false);
 
              _ViewJobCardList[0].LstequipmentCatList = _equipmentCatList;*/
+            foreach (var v in _ViewJobCardList)
+            {
+                
+                    if (v != null && v.job_card_date != null)
+                    v.job_card_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, v.job_card_date);
+                
+            }
             return _ViewJobCardList;
         }
-        internal async Task<List<CMJCListForJob>> GetJCListByJobId(int jobId)
+        internal async Task<List<CMJCListForJob>> GetJCListByJobId(int jobId,string facilitytimeZone)
         {
            
 
@@ -188,7 +195,15 @@ namespace CMMSAPIs.Repositories.JC
              List<equipmentCatList> _equipmentCatList = await Context.GetData<equipmentCatList>(myQuery2).ConfigureAwait(false);
 
              _ViewJobCardList[0].LstequipmentCatList = _equipmentCatList;*/
+            foreach (var list in _ViewJobCardList)
+            {
+                if (list != null && list.endTime != null)
+                    list.endTime = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone,list.endTime);
+                if (list != null && list.jobCardDate != null)
+                    list.jobCardDate = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.jobCardDate);
+            }
             return _ViewJobCardList;
+
         }
 
         internal async Task<CMDefaultResponse> StartJC(int jc_id, int userID)
@@ -491,7 +506,7 @@ namespace CMMSAPIs.Repositories.JC
                 List<CMJobView> job = new List<CMJobView>();
                 using (var repos = new JobRepository(_conn))
                 {
-                    job = await repos.GetJobView(_jcDetails[0].jobid);
+                    job = await repos.GetJobView(_jcDetails[0].jobid,"");
                 }
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, _jcDetails[0].jobid, 0, 0, "Job Closed", CMMS.CMMS_Status.JOB_CLOSED, userID);
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_CLOSED, new[] { userID }, job[0]);

@@ -12,9 +12,9 @@ using iTextSharp.tool.xml;
 using System.IO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
-
-
-
+using Newtonsoft.Json;
+using System.Linq;
+using CMMSAPIs.Models.Utils;
 
 namespace CMMSAPIs.Controllers.Masters
 {
@@ -111,6 +111,7 @@ namespace CMMSAPIs.Controllers.Masters
         {
             try
             {
+
                 var data = await _CMMSBS.GetEmployeeList(facility_id, module, access);
                 return Ok(data);
             }
@@ -141,11 +142,12 @@ namespace CMMSAPIs.Controllers.Masters
 
         [Route("GetBusinessList")]
         [HttpGet]
-        public async Task<IActionResult> GetBusinessList(int businessType)
+        public async Task<IActionResult> GetBusinessList(int businessType,int facility_id)
         {
             try
             {
-                var data = await _CMMSBS.GetBusinessList(businessType);
+                    var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+                var data = await _CMMSBS.GetBusinessList(businessType, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception)

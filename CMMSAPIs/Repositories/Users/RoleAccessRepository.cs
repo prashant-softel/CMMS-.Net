@@ -124,10 +124,6 @@ namespace CMMSAPIs.Repositories.Users
             return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Designation Status Deleted");
         }
 
-
-
-
-
         internal async Task<CMDefaultResponse> SetRoleAccess(CMSetRoleAccess request, int userID)
         {
             try

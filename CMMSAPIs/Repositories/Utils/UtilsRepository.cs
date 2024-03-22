@@ -7,6 +7,7 @@ using CMMSAPIs.Models.Utils;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using TimeZoneConverter;
 
 namespace CMMSAPIs.Repositories.Utils
 {
@@ -96,7 +97,7 @@ namespace CMMSAPIs.Repositories.Utils
         }
 
 
-        internal async Task<List<CMLog>> GetHistoryLog(CMMS.CMMS_Modules module_type, int id)
+        internal async Task<List<CMLog>> GetHistoryLog(CMMS.CMMS_Modules module_type, int id,string facilitytimezone)
         {
             /*
              * Fetch data from History table for requested module_type and id
@@ -111,6 +112,10 @@ namespace CMMSAPIs.Repositories.Utils
             string myQuery = $"select history.Id as id, moduleType as module_type, moduleRefId as module_ref_id, secondaryModuleRefType as secondary_module, secondaryModuleRefId as secondary_module_ref_id, comment as comment, history.status as status, {statusCase} as status_cmms,(SELECT REPLACE(CONCAT(UPPER(SUBSTRING(status_cmms, 1, 1)),LOWER(SUBSTRING(status_cmms, 2, LENGTH(status_cmms) - 1))) , '_', ' ') ) as status_name, history.createdBy as created_by_id, CONCAT(created_user.firstName,' ',created_user.lastName) as created_by_name, history.createdAt as created_at, history.currentLatitude as current_latitude, history.currentLongitude as current_longitude from history left join users as created_user on history.createdBy=created_user.id " +
                 $"WHERE (moduleType = {(int)module_type} AND moduleRefId = {id}) OR (secondaryModuleRefType = {(int)module_type} AND secondaryModuleRefId = {id}) ORDER BY history.createdAt DESC";
             List<CMLog> _Log = await Context.GetData<CMLog>(myQuery).ConfigureAwait(false);
+            foreach (var list in _Log)
+            {
+                list.created_at = ConvertToUTCDTC(facilitytimezone,list.created_at);                    
+            }
             return _Log;
         }
 
@@ -122,6 +127,24 @@ namespace CMMSAPIs.Repositories.Utils
         }
 
         // Return UTC time
+
+        public async Task<DateTime> ConvertToUTCDTC(string destinationTimeZone, DateTime utcTime)
+        {
+            if (utcTime != null)
+            {
+                string sourceTimeZoneId = "UTC"; // Fixed source time zone
+                string windowsTimeZoneId = TZConvert.IanaToWindows(destinationTimeZone);
+
+                // Convert the source time to the destination time zone
+                DateTime destinationTime = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(utcTime, sourceTimeZoneId, windowsTimeZoneId);
+
+                return destinationTime;
+            }
+            else
+            {
+                return utcTime;
+            }
+        }
         internal static string GetUTCTime()
         {
             DateTime Utc = DateTime.UtcNow;
