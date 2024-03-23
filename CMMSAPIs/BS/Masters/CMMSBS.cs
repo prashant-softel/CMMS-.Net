@@ -50,6 +50,7 @@ namespace CMMSAPIs.BS.Masters
         Task<List<CMFrequency>> GetFrequencyList();
         Task<string> Print(int id, CMMS.CMMS_Modules moduleID);
         Task<string> DownloadFile(int id);
+          Task<CMDashboadDetails> getDashboadDetails(int facilityId,string moduleName);
 
     }
     public class CMMSBS : ICMMSBS
@@ -634,7 +635,21 @@ namespace CMMSAPIs.BS.Masters
                 throw;
             }
         }
-        
+                public async Task<CMDashboadDetails> getDashboadDetails(int facilityId, string moduleName)
+        {
+            try
+            {
+                using (var repos = new CMMSRepository(getDB))
+                {
+                    return await repos.getDashboadDetails(facilityId, moduleName);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
 
         #endregion //helper functions
 
