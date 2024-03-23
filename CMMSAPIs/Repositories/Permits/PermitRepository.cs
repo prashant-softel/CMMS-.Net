@@ -595,7 +595,7 @@ namespace CMMSAPIs.Repositories.Permits
             return _PermitList;
         }
 
-        internal async Task<CMDefaultResponse> CreatePermit(CMCreatePermit request, int userID)
+           internal async Task<CMDefaultResponse> CreatePermit(CMCreatePermit request, int userID)
         {
             /*
              * Create Form data will go in several tables
@@ -614,9 +614,11 @@ namespace CMMSAPIs.Repositories.Permits
             {
                 TBT_Done_At = request.TBT_Done_At.Value.ToString("yyyy-MM-dd HH:mm:ss");
             }
+           
+             
 
             string qryPermitBasic = "insert into permits(facilityId, blockId, LOTOId, startDate, endDate, title, description, jobTypeId, typeId, TBTId, issuedById, approvedById, acceptedById, acceptedDate, status, status_updated_at, latitude, longitude,TBT_Done_by,TBT_Done_at) values" +
-             $"({ request.facility_id }, { request.blockId },{request.lotoId},'{ request.start_datetime.ToString("yyyy-MM-dd HH:mm:ss") }', '{ request.end_datetime.ToString("yyyy-MM-dd HH:mm:ss") }', '{request.title}', '{ request.description }', { request.job_type_id }, { request.permitTypeId }, { request.sop_type_id }, { request.issuer_id }, { request.approver_id }, {userID}, '{UtilsRepository.GetUTCTime()}', {(int)CMMS.CMMS_Status.PTW_CREATED}, '{UtilsRepository.GetUTCTime()}', {request.latitude}, {request.longitude},{request.TBT_Done_By},'{request.TBT_Done_At}'); " +
+             $"({ request.facility_id }, { request.blockId },{request.lotoId},'{ request.start_datetime.ToString("yyyy-MM-dd HH:mm:ss") }', '{ request.end_datetime.ToString("yyyy-MM-dd HH:mm:ss") }', '{request.title}', '{ request.description }', { request.job_type_id }, { request.permitTypeId }, { request.sop_type_id }, { request.issuer_id }, { request.approver_id }, {userID}, '{UtilsRepository.GetUTCTime()}', {(int)CMMS.CMMS_Status.PTW_CREATED}, '{UtilsRepository.GetUTCTime()}', {request.latitude}, {request.longitude},{request.TBT_Done_By},'{TBT_Done_At}'); " +
              $"SELECT LAST_INSERT_ID();";
             DataTable dt = await Context.FetchData(qryPermitBasic).ConfigureAwait(false);
             int insertedId = Convert.ToInt32(dt.Rows[0][0]);
@@ -707,6 +709,14 @@ namespace CMMSAPIs.Repositories.Permits
                 }
             }
 
+            if(request.LotoOtherDetails != null)
+            {
+                foreach (var item in request.LotoOtherDetails)
+                {
+                    string qry = $"insert into permitlotootherdetail ( permitId , employee_name, contact_number,responsibility) value ({insertedId}, '{item.employee_name}', {item.contact_number}, '{item.responsibility}')";
+                    await Context.ExecuteNonQry<int>(qry).ConfigureAwait(false);
+                }
+            }
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, insertedId, 0, 0, "Permit Created", CMMS.CMMS_Status.PTW_CREATED,userID);
 
@@ -716,7 +726,6 @@ namespace CMMSAPIs.Repositories.Permits
 
             return response;
         }
-
         internal async Task<CMPermitDetail> GetPermitDetails(int permit_id,string facilitytimeZone)
         {
             /*
@@ -1010,6 +1019,11 @@ namespace CMMSAPIs.Repositories.Permits
             DataTable catIDdt = await Context.FetchData(myQuery8).ConfigureAwait(false);
             List<int> _CategoryIDList = catIDdt.GetColumn<int>("catID");
 
+   // Loto other details
+            string myQuery_LotoOther = "SELECT employee_name, contact_number, responsibility FROM permitlotootherdetail " +
+                           $"where permitId =  {permit_id}";
+            List<CMPermitLotoOtherList> _LotoOtherList = await Context.GetData<CMPermitLotoOtherList>(myQuery_LotoOther).ConfigureAwait(false);
+     		 _PermitDetailsList[0].LotoOtherDetails = _LotoOtherList;
             _PermitDetailsList[0].Loto_list = _LotoList;
             _PermitDetailsList[0].employee_list = _EmpList;
             _PermitDetailsList[0].LstIsolation = _IsolationList;
@@ -1021,7 +1035,15 @@ namespace CMMSAPIs.Repositories.Permits
             _PermitDetailsList[0].category_ids = _CategoryIDList;
             _PermitDetailsList[0].physical_iso_equips = _physical_iso_equips;
             _PermitDetailsList[0].current_status_long = LongStatus(_PermitDetailsList[0].ptwStatus, _PermitDetailsList[0]);
-
+            if (_PermitDetailsList[0].start_datetime.Value < DateTime.Now.AddHours(-1))
+            {
+                _PermitDetailsList[0].is_TBT_Expire = true;
+            }
+            else
+            {
+                _PermitDetailsList[0].is_TBT_Expire = false;
+            }
+         
 
             if (_PermitDetailsList[0].ptwStatus == (int)CMMS.CMMS_Status.PTW_APPROVED && _PermitDetailsList[0].TBT_Done_By_id <= 0)
             {
@@ -1574,6 +1596,14 @@ namespace CMMSAPIs.Repositories.Permits
                         string qryPermitSaftyQuestion = $"insert into permitsafetyquestions ( permitId , safetyMeasureId, safetyMeasureValue) value ({ updatePrimaryKey }, { data.safetyMeasureId }, '{ data.safetyMeasureValue }')";
                         await Context.ExecuteNonQry<int>(qryPermitSaftyQuestion).ConfigureAwait(false);
                     }
+                }
+            }
+	         if (request.LotoOtherDetails != null)
+            {
+                foreach (var item in request.LotoOtherDetails)
+                {
+                    string qry = $"delete from permitlotootherdetail where permitId = {request.permit_id}; insert into permitlotootherdetail ( permitId , employee_name, contact_number,responsibility) value ({request.permit_id}, '{item.employee_name}', {item.contact_number}, '{item.responsibility}')";
+                    await Context.ExecuteNonQry<int>(qry).ConfigureAwait(false);
                 }
             }
             CMDefaultResponse response = new CMDefaultResponse();
