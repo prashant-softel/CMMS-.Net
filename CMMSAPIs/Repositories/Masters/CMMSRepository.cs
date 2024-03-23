@@ -990,6 +990,86 @@ namespace CMMSAPIs.Repositories.Masters
             return path;
 
         }
+                public async Task<CMDashboadDetails> getDashboadDetails(int facilityId, string moduleName)
+        {
+            CMDashboadDetails result = new CMDashboadDetails();
+            switch (moduleName.ToUpper())
+            {
+                case "JOB":
+                    result = await getJobDashboardDetails(facilityId);
+                    break;
+                default:
+                    // code block
+                    break;
+            }
+            return result;
+        }
+
+        public async Task<CMDashboadDetails> getJobDashboardDetails(int facilityId)
+        {
+            CMDashboadDetails result = new CMDashboadDetails();
+
+            string myQuery = $"SELECT job.id  wo_number, job.facilityId as facility_id, facilities.name as facility_name, job.status," +
+                $" group_concat(distinct asset_cat.name order by asset_cat.id separator ', ') as asset_category, " +
+                $" group_concat(distinct asset.name order by asset.id separator ', ') as asset_name, permit.startDate, permit.endDate," +
+                $" jc.JC_Status as latestJCStatus,  jc.JC_Approved as latestJCApproval, permit.id as ptw_id,jc.id as latestJCid,permit.status as  latestJCPTWStatus" +
+                $" FROM jobs as job " +
+                $" LEFT JOIN jobcards as jc ON job.latestJC = jc.id " +
+                $" LEFT JOIN  facilities as facilities ON job.facilityId = facilities.id " +
+                $" LEFT JOIN jobmappingassets as mapAssets ON mapAssets.jobId = job.id " +
+                $" LEFT JOIN assets as asset ON mapAssets.assetId  =  asset.id " +
+                $" LEFT JOIN assetcategories as asset_cat ON mapAssets.categoryId = asset_cat.id " +
+                $" LEFT JOIN permits as permit ON permit.id = job.linkedPermit " +
+                $" WHERE job.facilityId = {facilityId} " +
+                $" GROUP BY job.id order by job.id DESC;";
+            List<CMDashboadItemList> itemList = await Context.GetData<CMDashboadItemList>(myQuery).ConfigureAwait(false);
+                 foreach(CMDashboadItemList _Job in itemList)
+            {
+                if (_Job.ptw_id == 0)
+                {
+                    _Job.status_long = "Permit not linked";
+                }
+                else if (_Job.latestJCid != 0)
+                {
+                    //if permit status is not yet approved
+                    if (_Job.latestJCPTWStatus == (int)CMMS.CMMS_Status.PTW_APPROVED)
+                    {
+                        _Job.status_long = JCRepository.getShortStatus(CMMS.CMMS_Modules.JOBCARD, (CMMS.CMMS_Status)_Job.latestJCStatus, (CMMS.ApprovalStatus)_Job.latestJCApproval);
+                    }
+                    else if (_Job.latestJCPTWStatus == (int)CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER)
+                    {
+                        _Job.status_long = "Permit - rejected";
+                    }
+                    else
+                    {
+                        _Job.status_long = "Permit - Waiting For Approval";
+                    }
+                }
+                else
+                {
+                    if (_Job.latestJCPTWStatus == (int)CMMS.CMMS_Status.PTW_APPROVED)
+                    {
+                        
+                        _Job.status_long = "Permit - Approved";
+                    }
+                    else if (_Job.latestJCPTWStatus == (int)CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER)
+                    {
+                        _Job.status_long = "Permit - rejected";
+                    }
+                    else
+                    {
+                        _Job.status_long = "Permit - Pending";
+                    }
+                }
+            }
+
+            result.total = itemList.Count;
+            result.completed = itemList.Where(x=>x.latestJCPTWStatus == (int)CMMS.CMMS_Status.PTW_APPROVED).ToList().Count;
+            //result.pending = result.total - itemList.Where(x => x.latestJCPTWStatus != (int)CMMS.CMMS_Status.PTW_APPROVED).ToList().Count;
+            result.pending = result.total - result.completed;
+            result.item_list = itemList;
+            return result;
+        }
     }
 
 }
