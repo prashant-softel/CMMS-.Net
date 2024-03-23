@@ -41,7 +41,16 @@ namespace CMMSAPIs.Models.Permits
         public List<int> uploadfile_ids { get; set; }
         public int TBT_Done_By { get; set; }
         public DateTime? TBT_Done_At { get; set; }
+        public List<CMPermitLotoOtherList> LotoOtherDetails { get; set; }
     }
+
+    public class CMPermitLotoOtherList
+    {
+        public string employee_name { get; set; }
+        public long contact_number { get; set; }
+        public string responsibility { get; set; }
+    }
+
     /*public class CMPermitLotoList
     {
         public int Loto_id { get; set; }
