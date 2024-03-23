@@ -10,6 +10,8 @@ using Microsoft.AspNetCore.Http;
 using CMMSAPIs.Helper;
 using Org.BouncyCastle.Crypto.Modes.Gcm;
 using static CMMSAPIs.Helper.CMMS;
+using Newtonsoft.Json;
+using System.Linq;
 
 namespace CMMSAPIs.Controllers.Vegetation
 {
@@ -32,7 +34,8 @@ namespace CMMSAPIs.Controllers.Vegetation
         {
             try
             {
-                var data = await _CleaningBS.GetPlanList(facilityId);
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
+                var data = await _CleaningBS.GetPlanList(facilityId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -46,7 +49,9 @@ namespace CMMSAPIs.Controllers.Vegetation
         {
             try
             {
-                var data = await _CleaningBS.GetTaskList(facilityId);
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
+
+                var data = await _CleaningBS.GetTaskList(facilityId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -89,11 +94,14 @@ namespace CMMSAPIs.Controllers.Vegetation
 
         [Route("GetVegetationPlanDetails")]
         [HttpGet]
-        public async Task<IActionResult> GetVegetationPlanDetails(int planId)
+        public async Task<IActionResult> GetVegetationPlanDetails(int planId, int  facility_id)
         {
             try
             {
-                var data = await _CleaningBS.GetPlanDetails(planId);
+              
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+
+                var data = await _CleaningBS.GetPlanDetails(planId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -199,11 +207,12 @@ namespace CMMSAPIs.Controllers.Vegetation
 
         [Route("GetVegExecutionDetails")]
         [HttpGet]
-        public async Task<IActionResult> GetVegExecutionDetails(int executionId)
+        public async Task<IActionResult> GetVegExecutionDetails(int executionId,int facility_id)
         {
             try
             {
-                var data = await _CleaningBS.GetExecutionDetails(executionId);
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+                var data = await _CleaningBS.GetExecutionDetails(executionId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)

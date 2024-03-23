@@ -40,7 +40,7 @@ namespace CMMSAPIs.BS.Masters
         Task<CMDefaultResponse> CreateSPV(CMSPV request, int userId);
         Task<CMDefaultResponse> UpdateSPV(CMSPV request, int userId);
         Task<CMDefaultResponse> DeleteSPV(int id, int userId);
-        Task<List<CMBusiness>> GetBusinessList(int businessType);
+        Task<List<CMBusiness>> GetBusinessList(int businessType,string facilitytime);
         Task<CMDefaultResponse> AddModule(CMModule request);
         Task<CMDefaultResponse> UpdateModule(CMModule request);
         Task<CMDefaultResponse> DeleteModule(int id);
@@ -386,7 +386,7 @@ namespace CMMSAPIs.BS.Masters
                     return await repos.UpdateRiskType(request, userId);
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
@@ -470,13 +470,13 @@ namespace CMMSAPIs.BS.Masters
             }
         }
 
-        public async Task<List<CMBusiness>> GetBusinessList(int businessType)
+        public async Task<List<CMBusiness>> GetBusinessList(int businessType, string facilitytime)
         {
             try
             {
                 using (var repos = new CMMSRepository(getDB))
                 {
-                    return await repos.GetBusinessList(businessType);
+                    return await repos.GetBusinessList(businessType, facilitytime);
 
                 }
             }

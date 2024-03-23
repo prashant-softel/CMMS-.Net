@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -38,7 +39,10 @@ namespace CMMSAPIs.Controllers.SM
         {
             try
             {
-                var data = await _ReOrderBS.GetReorderDataByID(assetID, plantID);
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == plantID)?.timezone;
+              
+
+               var data = await _ReOrderBS.GetReorderDataByID(assetID, plantID, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -90,7 +94,8 @@ namespace CMMSAPIs.Controllers.SM
         {
             try
             {
-                var data = await _ReOrderBS.getReorderAssetsData(plantID);
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == plantID)?.timezone;
+                var data = await _ReOrderBS.getReorderAssetsData(plantID, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)

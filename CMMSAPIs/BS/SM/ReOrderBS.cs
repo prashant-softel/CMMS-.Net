@@ -13,8 +13,8 @@ namespace CMMSAPIs.BS.SM
 {
     public interface IReOrderBS
     {
-        Task<List<CMReOrder>> GetReorderDataByID(int assetID, int plantID);
-        Task<List<CMReOrder>> getReorderAssetsData(int plantID);
+        Task<List<CMReOrder>> GetReorderDataByID(int assetID, int plantID,string faciltytime);
+        Task<List<CMReOrder>> getReorderAssetsData(int plantID, string faciltytime);
         Task<List<CMReOrderItems>> getReorderItems(int plantID);
         Task<CMDefaultResponse> submitReorderForm(CMReOrder request);
         Task<CMDefaultResponse> updateReorderData(CMReOrder request);
@@ -29,13 +29,13 @@ namespace CMMSAPIs.BS.SM
             databaseProvider = dbProvider;
         }
 
-        public async Task<List<CMReOrder>> GetReorderDataByID(int assetID, int plantID)
+        public async Task<List<CMReOrder>> GetReorderDataByID(int assetID, int plantID,string facilitytime)
         {
             try
             {
                 using (var repos = new ReOrderRepository(getDB))
                 {
-                    return await repos.GetReorderDataByID(assetID, plantID);
+                    return await repos.GetReorderDataByID(assetID, plantID, facilitytime);
                 }
             }
             catch (Exception ex)
@@ -74,13 +74,13 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<CMReOrder>> getReorderAssetsData(int plantID)
+        public async Task<List<CMReOrder>> getReorderAssetsData(int plantID, string faciltytime)
         {
             try
             {
                 using (var repos = new ReOrderRepository(getDB))
                 {
-                    return await repos.getReorderAssetsData(plantID);
+                    return await repos.getReorderAssetsData(plantID,  faciltytime);
                 }
             }
             catch (Exception ex)

@@ -13,8 +13,8 @@ namespace CMMSAPIs.BS.SM
 {
     public interface IRequestOrderBS
     {
-        Task<List<CMCreateRequestOrder>> GetRequestOrderList(int facilityID, DateTime fromDate, DateTime toDate);
-        Task<CMCreateRequestOrder> GetRODetailsByID(int id);
+        Task<List<CMCreateRequestOrder>> GetRequestOrderList(int facilityID, DateTime fromDate, DateTime toDate,string facilitytime);
+        Task<CMCreateRequestOrder> GetRODetailsByID(int id, string facilitytime);
         Task<CMDefaultResponse> CreateRequestOrder(CMCreateRequestOrder request, int userID);
         Task<CMDefaultResponse> UpdateRequestOrder(CMCreateRequestOrder request, int userID);
         Task<CMDefaultResponse> DeleteRequestOrder(CMApproval request, int userID);
@@ -30,13 +30,13 @@ namespace CMMSAPIs.BS.SM
         {
             databaseProvider = dbProvider;
         }
-        public async Task<List<CMCreateRequestOrder>> GetRequestOrderList(int facilityID, DateTime fromDate, DateTime toDate)
+        public async Task<List<CMCreateRequestOrder>> GetRequestOrderList(int facilityID, DateTime fromDate, DateTime toDate, string facilitytime)
         {
             try
             {
                 using (var repos = new RequestOrderRepository(getDB))
                 {
-                    return await repos.GetRequestOrderList(facilityID, fromDate, toDate);
+                    return await repos.GetRequestOrderList(facilityID, fromDate, toDate, facilitytime);
 
                 }
             }
@@ -45,13 +45,13 @@ namespace CMMSAPIs.BS.SM
                 throw;
             }
         }
-        public async Task<CMCreateRequestOrder> GetRODetailsByID(int id)
+        public async Task<CMCreateRequestOrder> GetRODetailsByID(int id, string facilitytime)
         {
             try
             {
                 using (var repos = new RequestOrderRepository(getDB))
                 {
-                    return await repos.GetRODetailsByID(id);
+                    return await repos.GetRODetailsByID(id,  facilitytime);
 
                 }
             }

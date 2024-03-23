@@ -22,7 +22,7 @@ namespace CMMSAPIs.BS.Permits
         Task<CMDefaultResponse> CreateSafetyMeasure(CMCreateSafetyMeasures request, int userID);
         Task<CMDefaultResponse> UpdateSafetyMeasure(CMCreateSafetyMeasures request, int userID);
         Task<CMDefaultResponse> DeleteSafetyMeasure(int id);
-        Task<List<CMCreateJobType>> GetJobTypeList(int facility_id);
+        Task<List<CMCreateJobType>> GetJobTypeList(int facility_id,string facilitytime);
         Task<CMDefaultResponse> CreateJobType(CMCreateJobType request, int userID);
         Task<CMDefaultResponse> UpdateJobType(CMCreateJobType request, int userID);
         Task<CMDefaultResponse> DeleteJobType(int id);
@@ -35,8 +35,8 @@ namespace CMMSAPIs.BS.Permits
          * Permit Main End Points 
         */
         Task<CMDefaultResponse> CreatePermit(CMCreatePermit set, int userID);
-        Task<List<CMPermitList>> GetPermitList(int facility_id, string startDate, string endDate, int userID, bool self_view, bool non_expired);
-        Task<CMPermitDetail> GetPermitDetails(int permit_id);
+        Task<List<CMPermitList>> GetPermitList(int facility_id, string startDate, string endDate, int userID, bool self_view, bool non_expired, string facilitytime);
+        Task<CMPermitDetail> GetPermitDetails(int permit_id, string facilitytime);
         Task<CMDefaultResponse> PermitApprove(CMApproval request, int userID);
         Task<CMDefaultResponse> PermitExtend(CMPermitExtend request, int userID);
         Task<CMDefaultResponse> PermitExtendApprove(CMApproval request, int userID);
@@ -51,7 +51,7 @@ namespace CMMSAPIs.BS.Permits
         Task<CMDefaultResponse> PermitCancelByHSE(CMApproval request, int userID);
         Task<CMDefaultResponse> PermitCancelByIssuer(CMApproval request, int userID);
         Task<CMDefaultResponse> UpdatePermit(CMUpdatePermit request, int userID);
-        Task<List<CMPermitConditions>> GetPermitConditionList(int permit_type_id, int isClose, int isCancle, int isExtend);
+        Task<List<CMPermitConditions>> GetPermitConditionList(int permit_type_id, int isClose, int isCancle, int isExtend,int facility_id, string facilitytime);
         Task<List<CMDefaultList>> GetIsolationTypeList();
 
 
@@ -186,13 +186,13 @@ namespace CMMSAPIs.BS.Permits
                 throw;
             }
         }
-        public async Task<List<CMCreateJobType>> GetJobTypeList(int facility_id)
+        public async Task<List<CMCreateJobType>> GetJobTypeList(int facility_id, string facilitytime)
         {
             try
             {
                 using (var repos = new PermitRepository(getDB))
                 {
-                    return await repos.GetJobTypeList(facility_id);
+                    return await repos.GetJobTypeList(facility_id,  facilitytime);
                 }
             }
             catch (Exception ex)
@@ -304,13 +304,13 @@ namespace CMMSAPIs.BS.Permits
          * Permit Main Feature End Points
         */
 
-        public async Task<List<CMPermitList>> GetPermitList(int facility_id, string startDate, string endDate, int userID, bool self_view, bool non_expired)
+        public async Task<List<CMPermitList>> GetPermitList(int facility_id, string startDate, string endDate, int userID, bool self_view, bool non_expired, string facilitytime)
         {
             try
             {
                 using (var repos = new PermitRepository(getDB))
                 {
-                    return await repos.GetPermitList(facility_id, startDate, endDate, userID, self_view, non_expired);
+                    return await repos.GetPermitList(facility_id, startDate, endDate, userID, self_view, non_expired,  facilitytime);
 
                 }
             }
@@ -353,13 +353,13 @@ namespace CMMSAPIs.BS.Permits
             }
         }
 
-        public async Task<CMPermitDetail> GetPermitDetails(int permit_id)
+        public async Task<CMPermitDetail> GetPermitDetails(int permit_id,string facilitytime)
         {
             try
             {
                 using (var repos = new PermitRepository(getDB))
                 {
-                    return await repos.GetPermitDetails(permit_id);
+                    return await repos.GetPermitDetails(permit_id, facilitytime);
                 }
             }
             catch (Exception ex)
@@ -562,13 +562,13 @@ namespace CMMSAPIs.BS.Permits
             }
         }
 
-        public async Task<List<CMPermitConditions>> GetPermitConditionList(int permit_type_id, int isClose, int isCancle, int isExtend)
+        public async Task<List<CMPermitConditions>> GetPermitConditionList(int permit_type_id, int isClose, int isCancle, int isExtend,int facility_id ,string facilitytime)
         {
             try
             {
                 using (var repos = new PermitRepository(getDB))
                 {
-                    return await repos.GetPermitConditionList(permit_type_id, isClose, isCancle, isExtend);
+                    return await repos.GetPermitConditionList(permit_type_id, isClose, isCancle, isExtend, facility_id, facilitytime);
                 }
             }
             catch (Exception ex)

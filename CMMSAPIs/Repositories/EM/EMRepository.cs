@@ -81,6 +81,7 @@ namespace CMMSAPIs.Repositories.EM
                                             $"LEFT JOIN userroles as role ON role.id = escalationmatrix.roleId " +
                                             $"WHERE statusId = {status.status_id} ORDER BY days;";
                     List<CMEscalation> escalation = await Context.GetData<CMEscalation>(escalationQry).ConfigureAwait(false);
+                   
                     status.escalation = escalation;
                 }
                 mod.status_escalation = statusList;

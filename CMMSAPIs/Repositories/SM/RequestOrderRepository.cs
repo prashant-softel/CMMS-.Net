@@ -108,7 +108,7 @@ namespace CMMSAPIs.Repositories.SM
             return response;
         }
 
-        internal async Task<List<CMCreateRequestOrder>> GetRequestOrderList(int facilityID, DateTime fromDate, DateTime toDate) 
+        internal async Task<List<CMCreateRequestOrder>> GetRequestOrderList(int facilityID, DateTime fromDate, DateTime toDate,string facilitytimeZone)
         {
             string filter = " facilityID = " + facilityID + " and  DATE_FORMAT(po.request_date, '%Y-%m-%d') >= '" + fromDate.ToString("yyyy-MM-dd") + "'  and  DATE_FORMAT(po.request_date, '%Y-%m-%d') <= '" + toDate.ToString("yyyy-MM-dd") + "'";
 
@@ -146,7 +146,6 @@ namespace CMMSAPIs.Repositories.SM
                            "  WHERE " + filter;
           
             List<CMRequestOrderList> _List = await Context.GetData<CMRequestOrderList>(query).ConfigureAwait(false);
-
             List<CMCreateRequestOrder> _MasterList = _List.Select(p => new CMCreateRequestOrder
             {
                 request_order_id = p.requestID,
@@ -181,11 +180,19 @@ namespace CMMSAPIs.Repositories.SM
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_MasterList[i].status);
                 string _shortStatus = getShortStatus(CMMS.CMMS_Modules.SM_RO, _Status);
                 string _longStatus = getLongStatus(_MasterList[i].request_order_id, _Status);
-
                 _MasterList[i].status_short = _shortStatus;
                 _MasterList[i].status_long = _longStatus;
             }
-          
+            foreach (var list in _MasterList)
+            {
+                if(list!=null && list.approvedAt!=null)
+                    list.approvedAt= await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)list.approvedAt);
+                if (list != null && list.generatedAt!= null)
+                    list.generatedAt =await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)list.generatedAt);
+                if (list != null && list.rejectedAt!= null)
+                    list.rejectedAt  = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)list.rejectedAt);
+               
+            }
             return _MasterList;
         }
         //internal async Task<List<CMRequestOrder>> GetRequestOrderList(int facilityID, DateTime fromDate, DateTime toDate)
@@ -291,7 +298,7 @@ namespace CMMSAPIs.Repositories.SM
             return response;
         }
 
-        public async Task<CMCreateRequestOrder> GetRODetailsByID(int id)
+        public async Task<CMCreateRequestOrder> GetRODetailsByID(int id,string facilitytimeZone)
         {
 
             string query = "SELECT fc.name as facilityName,pod.ID as requestDetailsID, facilityid as      " +
@@ -369,7 +376,20 @@ namespace CMMSAPIs.Repositories.SM
 
             _MasterList.status_short = _shortStatus;
             _MasterList.status_long = _longStatus;
+
+            foreach (var list in _List)
+            {
+                if (list != null && list.approvedAt != null)
+                    list.approvedAt = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)list.approvedAt);
+                if (list != null && list.challan_date != null)
+                    list.challan_date = (DateTime)(list.approvedAt = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.challan_date));
+                if (list != null && list.receivedAt != null)
+                    list.receivedAt = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)list.receivedAt);
+                if (list != null && list.request_date != null)
+                    list.request_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)list.request_date);
+            }
             return _MasterList;
+
         }
 
         internal static string getShortStatus(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status m_notificationID)

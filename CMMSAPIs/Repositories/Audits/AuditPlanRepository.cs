@@ -37,7 +37,7 @@ namespace CMMSAPIs.Repositories.Audits
             { CMMS.CMMS_Status.AUDIT_CLOSED, "Closed" }
         };
 
-        internal async Task<List<CMAuditPlanList>> GetAuditPlanList(int facility_id, DateTime fromDate, DateTime toDate)
+        internal async Task<List<CMAuditPlanList>> GetAuditPlanList(int facility_id, DateTime fromDate, DateTime toDate,string facilitytimeZone)
         {
 
             string filter = "Where (DATE(st.Audit_Added_date) >= '" + fromDate.ToString("yyyy-MM-dd") + "'  and DATE(st.Audit_Added_date) <= '" + toDate.ToString("yyyy-MM-dd") + "')";
@@ -58,17 +58,21 @@ namespace CMMSAPIs.Repositories.Audits
                 string _shortStatus = getShortStatus(CMMS.CMMS_Modules.AUDIT_PLAN, _Status);
                 auditPlanList[i].short_status = _shortStatus;
             }
+            foreach (var list in auditPlanList)
+            {
+                list.created_at= await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.created_at);
+                list.Schedule_Date= await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.Schedule_Date);
+
+            }
 
 
-            return auditPlanList;
+                return auditPlanList;
         }
 
-        internal async Task<CMAuditPlanList> GetAuditPlanByID(int id)
+        internal async Task<CMAuditPlanList> GetAuditPlanByID(int id,string facilitytimeZone)
         {
 
             string filter = " where st.id = " + id + "";
-
-
             string SelectQ = "select st.id,plan_number,  f.name as facility_name, concat(au.firstName, ' ', au.lastName)  Auditee_Emp_Name, " +
                 "concat(u.firstName, ' ', u.lastName) Auditor_Emp_Name , st.frequency, st.status, case when st.frequency = 0 then 'False' else 'True' end as FrequencyApplicable, st.Description,st.Schedule_Date, st.checklist_id, " +
                 " checklist_number as checklist_name, frequency.name as frequency_name, st.created_at, concat(created.firstName, ' ', created.lastName) created_by" +
@@ -88,6 +92,12 @@ namespace CMMSAPIs.Repositories.Audits
                 string _shortStatus = getShortStatus(CMMS.CMMS_Modules.AUDIT_PLAN, _Status);
                 auditPlanList[i].short_status = _shortStatus;
             }
+            foreach (var list in auditPlanList)
+            {
+                list.created_at = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.created_at);
+                list.Schedule_Date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.Schedule_Date);
+            }
+
             return auditPlanList[0];
         }
 
@@ -649,7 +659,7 @@ namespace CMMSAPIs.Repositories.Audits
             }
 
 
-            CMJobView _ViewJobList = await GetJobDetails(newJobID);
+            CMJobView _ViewJobList = await GetJobDetails(newJobID,"");
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, newJobID, 0, 0, "Job Created", CMMS.CMMS_Status.JOB_CREATED, userId);
             await CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_CREATED, new[] { userId }, _ViewJobList);
@@ -678,7 +688,7 @@ namespace CMMSAPIs.Repositories.Audits
             return response;
         }
 
-        internal async Task<CMJobView> GetJobDetails(int job_id)
+        internal async Task<CMJobView> GetJobDetails(int job_id,string facilitytimeZone)
         {
             /*
              * Fetch data from Job table and joins these table for relationship using ids Users, Assets, AssetCategory, Facility
@@ -795,6 +805,20 @@ namespace CMMSAPIs.Repositories.Audits
             CMMS.CMMS_Status _Status_long = (CMMS.CMMS_Status)(_ViewJobList[0].status + 100);
             string _longStatus = getLongStatus(CMMS.CMMS_Modules.JOB, _Status_long, _ViewJobList[0]);
             _ViewJobList[0].status_long = _longStatus;
+
+            foreach (var vlt in _ViewJobList)
+            {
+                if (vlt.breakdown_time!= null && vlt.breakdown_time != null)
+                    vlt.breakdown_time = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)vlt.breakdown_time);
+                if (vlt.closed_at != null && vlt.closed_at != null)
+                    vlt.closed_at = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, vlt.closed_at);
+                if (vlt.created_at!= null && vlt.created_at!= null)
+                    vlt.created_at =  await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)vlt.created_at );
+
+                
+                  
+                    
+            }
             return _ViewJobList[0];
         }
         internal string getLongStatus(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMJobView jobObj)
@@ -920,7 +944,7 @@ namespace CMMSAPIs.Repositories.Audits
             return response;
         }
 
-                internal async Task<List<CMPMPlanList>> GetAuditPlanList(int facility_id, string category_id, string frequency_id, DateTime? start_date, DateTime? end_date)
+                internal async Task<List<CMPMPlanList>> GetAuditPlanList(int facility_id, string category_id, string frequency_id, DateTime? start_date, DateTime? end_date,string facilitytimeZone)
         {
             if (facility_id <= 0)
                 throw new ArgumentException("Invalid Facility ID");
@@ -957,11 +981,24 @@ namespace CMMSAPIs.Repositories.Audits
                 string _shortStatus = getShortStatus(CMMS.CMMS_Modules.PM_PLAN, _Status);
                 plan.status_short = _shortStatus;
             }
+            foreach (var list in plan_list)
+            {
+                if (list != null && list.approved_at != null)
+                    list.approved_at = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.approved_at);
+                if (list.created_at != null && list.created_at != null)
+                    list.created_at = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.created_at);
+                if (list.plan_date != null && list.plan_date != null)
+                    list.plan_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.plan_date);
+                if (list.rejected_at != null && list.rejected_at != null)
+                    list.rejected_at = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.rejected_at);
+                if (list.updated_at != null && list.updated_at != null)
+                     list.updated_at = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.updated_at);
 
+            }
             return plan_list;
         }
 
-        internal async Task<CMPMPlanDetail> GetAuditPlanDetail(int id)
+        internal async Task<CMPMPlanDetail> GetAuditPlanDetail(int id,string facilitytimeZone)
         {
             if (id <= 0)
                 throw new ArgumentException("Invalid Facility ID");
@@ -1003,7 +1040,20 @@ namespace CMMSAPIs.Repositories.Audits
             CMMS.CMMS_Status _Status_long = (CMMS.CMMS_Status)(planDetails[0].status_id);
             string _longStatus = getLongStatus_Details(CMMS.CMMS_Modules.AUDIT_PLAN, _Status_long, planDetails[0]);
             planDetails[0].status_long = _longStatus;
+            foreach (var pd in planDetails)
+            {
+                if (pd != null && pd.approved_at != null)
+                    pd.approved_at = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, pd.approved_at);
+                if (pd != null && pd.created_at != null)
+                    pd.created_at = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, pd.created_at);
+                if (pd != null && pd.plan_date!= null)
+                    pd.plan_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, pd.plan_date);
+                if (pd != null && pd.rejected_at != null)
+                    pd.rejected_at = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, pd.rejected_at);
 
+
+               
+            }
             return planDetails[0];
         }
         internal string getLongStatus_Details(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMPMPlanDetail PlanObj)
@@ -1040,7 +1090,7 @@ namespace CMMSAPIs.Repositories.Audits
         }
 
 
-        internal async Task<List<CMPMTaskList>> GetTaskList(int facility_id, DateTime? start_date, DateTime? end_date, string frequencyIds)
+        internal async Task<List<CMPMTaskList>> GetTaskList(int facility_id, DateTime? start_date, DateTime? end_date, string frequencyIds,string facilitytimeZone)
         {
             /*
              * Primary Table - PMExecution & PMSchedule
@@ -1119,7 +1169,7 @@ namespace CMMSAPIs.Repositories.Audits
         }
 
 
-        internal async Task<CMPMTaskView> GetTaskDetail(int task_id)
+        internal async Task<CMPMTaskView> GetTaskDetail(int task_id, string facilitytimeZone)
         {
             /*
              * Primary Table - PMExecution & PMSchedule
@@ -1211,7 +1261,7 @@ namespace CMMSAPIs.Repositories.Audits
                 try
                 {
                     List<ScheduleLinkJob> linked_jobs = await Context.GetData<ScheduleLinkJob>(myQuery4).ConfigureAwait(false);
-                    List<CMLog> log = await _utilsRepo.GetHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, schedule.schedule_id);
+                    List<CMLog> log = await _utilsRepo.GetHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, schedule.schedule_id,"");
                     schedule.schedule_link_job = linked_jobs;
 
                 }
@@ -1238,7 +1288,29 @@ namespace CMMSAPIs.Repositories.Audits
             string _longStatus = getLongStatus_taskview(CMMS.CMMS_Modules.AUDIT_SCHEDULE, _Status, taskViewDetail[0]);
             taskViewDetail[0].status_long = _longStatus;
 
-
+            foreach ( var task in taskViewDetail)
+            {
+                if (task != null && task.approved_at!= null)
+                    task.approved_at = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, task.approved_at);
+                if (task != null && task.cancelled_at != null)
+                    task.cancelled_at = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, task.cancelled_at);
+                if (task != null && task.closed_at!= null)
+                    task.closed_at = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, task.closed_at);
+                if (task != null && task.done_date!= null)
+                    task.done_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)task.done_date);
+                if (task != null && task.due_date!= null)
+                    task.due_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)task.due_date);
+                if (task != null && task.last_done_date != null)
+                    task.last_done_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)task.last_done_date);
+                if (task != null && task.due_date != null)
+                    task.due_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)task.due_date);
+                if (task != null && task.rejected_at != null)
+                    task.rejected_at = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, task.rejected_at);
+                if (task != null && task.started_at != null)
+                    task.started_at = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, task.started_at);
+                if (task != null && task.updated_at != null)
+                    task.updated_at = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, task.updated_at);
+            }
 
             return taskViewDetail[0];
         }

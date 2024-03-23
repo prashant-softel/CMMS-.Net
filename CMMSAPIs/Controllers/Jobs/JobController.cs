@@ -9,6 +9,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Newtonsoft.Json;
+using CMMSAPIs.Models.Utils;
 
 namespace CMMSAPIs.Controllers.Jobs
 {
@@ -31,8 +33,9 @@ namespace CMMSAPIs.Controllers.Jobs
         {
             try
             {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _JobBS.GetJobList(facility_id,startDate, endDate, jobType, selfView, userID, status);
+                var data = await _JobBS.GetJobList(facility_id,startDate, endDate, jobType, selfView, userID, status, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -44,11 +47,13 @@ namespace CMMSAPIs.Controllers.Jobs
         //[Authorize]
         [Route("GetJobListByPermitId")]
         [HttpGet]
-        public async Task<IActionResult> GetJobListByPermitId(int permitId)
+        public async Task<IActionResult> GetJobListByPermitId(int permitId,int facility_id)
         {
             try
             {
-                var data = await _JobBS.GetJobListByPermitId(permitId);
+
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+                var data = await _JobBS.GetJobListByPermitId(permitId, facilitytimeZone);
                 return Ok(data);
             }
             catch (ArgumentException ex)
@@ -64,11 +69,14 @@ namespace CMMSAPIs.Controllers.Jobs
         //[Authorize]
         [Route("GetJobDetails")]
         [HttpGet]
-        public async Task<IActionResult> GetJobDetails(int job_id)
+        public async Task<IActionResult> GetJobDetails(int job_id,int facility_id)
         {
+
             try
             {
-                var data = await _JobBS.GetJobDetails(job_id);
+                
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+                var data = await _JobBS.GetJobDetails(job_id,facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)

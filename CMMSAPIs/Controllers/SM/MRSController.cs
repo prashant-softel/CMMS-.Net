@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -86,7 +87,9 @@ namespace CMMSAPIs.Controllers.SM
         {
             try
             {
-                var data = await _MRSBS.getMRSList(facility_ID, emp_id, Convert.ToDateTime(toDate), Convert.ToDateTime(fromDate), status);
+
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_ID)?.timezone;
+                var data = await _MRSBS.getMRSList(facility_ID, emp_id, Convert.ToDateTime(toDate), Convert.ToDateTime(fromDate), status, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -103,11 +106,13 @@ namespace CMMSAPIs.Controllers.SM
 
         [Route("getMRSListByModule")]
         [HttpGet]
-        public async Task<IActionResult> getMRSListByModule(int jobId, int pmId)
+        public async Task<IActionResult> getMRSListByModule(int jobId, int pmId,int facility_id)
         {
             try
             {
-                var data = await _MRSBS.getMRSListByModule(jobId, pmId);
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+
+                var data = await _MRSBS.getMRSListByModule(jobId, pmId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -126,11 +131,13 @@ namespace CMMSAPIs.Controllers.SM
         //[Authorize]
         [Route("getMRSItems")]
         [HttpGet]
-        public async Task<IActionResult> getMRSItems(int ID)
+        public async Task<IActionResult> getMRSItems(int ID,int facility_id)
         {
             try
             {
-                var data = await _MRSBS.getMRSItems(ID);
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+
+                var data = await _MRSBS.getMRSItems(ID, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -147,11 +154,13 @@ namespace CMMSAPIs.Controllers.SM
         //[Authorize]
         [Route("getMRSItemsBeforeIssue")]
         [HttpGet]
-        public async Task<IActionResult> getMRSItemsBeforeIssue(int ID)
+        public async Task<IActionResult> getMRSItemsBeforeIssue(int ID,int facility_id)
         {
             try
             {
-                var data = await _MRSBS.getMRSItemsBeforeIssue(ID);
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+
+                var data = await _MRSBS.getMRSItemsBeforeIssue(ID, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -168,11 +177,12 @@ namespace CMMSAPIs.Controllers.SM
         //[Authorize]
         [Route("getMRSItemsWithCode")]
         [HttpGet]
-        public async Task<IActionResult> getMRSItemsWithCode(int ID)
+        public async Task<IActionResult> getMRSItemsWithCode(int ID,int facility_id)
         {
             try
             {
-                var data = await _MRSBS.getMRSItemsWithCode(ID);
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+                var data = await _MRSBS.getMRSItemsWithCode(ID, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -189,11 +199,12 @@ namespace CMMSAPIs.Controllers.SM
         //[Authorize]
         [Route("getMRSDetails")]
         [HttpGet]
-        public async Task<IActionResult> getMRSDetails(int ID)
+        public async Task<IActionResult> getMRSDetails(int ID,int facility_id)
         {
             try
             {
-                var data = await _MRSBS.getMRSDetails(ID);
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+                var data = await _MRSBS.getMRSDetails(ID, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -254,11 +265,12 @@ namespace CMMSAPIs.Controllers.SM
         //[Authorize]
         [Route("getReturnDataByID")]
         [HttpGet]
-        public async Task<IActionResult> getReturnDataByID(int ID)
+        public async Task<IActionResult> getReturnDataByID(int ID,int facility_id)
         {
             try
             {
-                var data = await _MRSBS.getReturnDataByID(ID);
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+                var data = await _MRSBS.getReturnDataByID(ID, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -489,7 +501,9 @@ namespace CMMSAPIs.Controllers.SM
         {
             try
             {
-                var data = await _MRSBS.GetMRSReturnList(facility_ID, emp_id);
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_ID)?.timezone;
+
+                var data = await _MRSBS.GetMRSReturnList(facility_ID, emp_id,facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)

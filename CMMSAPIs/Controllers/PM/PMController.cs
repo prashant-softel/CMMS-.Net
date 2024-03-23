@@ -161,7 +161,8 @@ namespace CMMSAPIs.Controllers.PM
         {
             try
             {
-                var data = await _PMBS.GetPMPlanList(facility_id, category_id, frequency_id, start_date, end_date);
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+                var data = await _PMBS.GetPMPlanList(facility_id, category_id, frequency_id, start_date, end_date, facilitytimeZone);
                 return Ok(data);
             }
             catch (ArgumentException ex)
@@ -173,7 +174,7 @@ namespace CMMSAPIs.Controllers.PM
                 throw;
             }
         }      
-
+        
         //[Authorize]
         [Route("GetScheduleData")]
         [HttpGet]
@@ -181,7 +182,9 @@ namespace CMMSAPIs.Controllers.PM
         {
             try
             {
-                var data = await _PMBS.GetScheduleData(facility_id, category_id);
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+
+                var data = await _PMBS.GetScheduleData(facility_id, category_id, facilitytimeZone);
                 return Ok(data);
             }
             catch (ArgumentException ex)

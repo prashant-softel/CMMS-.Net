@@ -6,8 +6,9 @@ using CMMSAPIs.BS.Incident_Reports;
 using Microsoft.AspNetCore.Http;
 using CMMSAPIs.Models.Utils;
 using Microsoft.AspNetCore.Authorization;
-
-
+using Newtonsoft.Json;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace CMMSAPIs.Controllers.Incident_Reports
 {
@@ -28,7 +29,9 @@ namespace CMMSAPIs.Controllers.Incident_Reports
         {
             try
             {
-                var data = await _IncidentReportBS.GetIncidentList(facility_id, start_date, end_date);
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+
+                var data = await _IncidentReportBS.GetIncidentList(facility_id, start_date, end_date, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -71,11 +74,12 @@ namespace CMMSAPIs.Controllers.Incident_Reports
 
         [Route("GetIncidentDetailsReport")]
         [HttpGet]
-        public async Task<IActionResult> GetIncidentDetailsReport(int id)
+        public async Task<IActionResult> GetIncidentDetailsReport(int id,int facility_id)
         {
             try
             {
-                var data = await _IncidentReportBS.GetIncidentDetailsReport(id);
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+                var data = await _IncidentReportBS.GetIncidentDetailsReport(id, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)

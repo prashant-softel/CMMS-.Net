@@ -30,14 +30,24 @@ namespace CMMSAPIs.Repositories.SM
 {
     public class ReOrderRepository : GenericRepository
     {
+        private UtilsRepository _utilsRepo;
         public ReOrderRepository(MYSQLDBHelper sqlDBHelper) : base(sqlDBHelper)
         {
+            _utilsRepo = new UtilsRepository(sqlDBHelper);
         }
 
-        internal async Task<List<CMReOrder>> GetReorderDataByID(int assetID, int plantID)
+        internal async Task<List<CMReOrder>> GetReorderDataByID(int assetID, int plantID,string facilitytimeZone)
         {
-            string stmt = $"SELECT * FROM smreorderdata WHERE asset_code_ID = {assetID}  AND facility_ID = {plantID}";
+            string stmt = $"SELECT * FROM smreorderdata WHERE asset_code_ID = {assetID}  AND plant_ID = {plantID}";
             List<CMReOrder> _List = await Context.GetData<CMReOrder>(stmt).ConfigureAwait(false);
+            foreach(var list in _List)
+            {
+                if (list != null && list.lastModifiedTIme != null)
+                    list.lastModifiedTIme = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)list.lastModifiedTIme);
+                if (list != null && list.purchase_date != null)
+                    list.purchase_date= await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)list.purchase_date);
+
+            }
             return _List;
         }
 
@@ -108,7 +118,7 @@ namespace CMMSAPIs.Repositories.SM
             return response;
         }
 
-        internal async Task<List<CMReOrder>> getReorderAssetsData(int plantID)
+        internal async Task<List<CMReOrder>> getReorderAssetsData(int plantID, string facilitytimeZone)
         {
             string stmt = $"SELECT srd.*,sam.asset_name,sat.asset_type,sic.cat_name \r\n        " +
                 $"FROM smreorderdata srd\r\n        " +
@@ -117,6 +127,14 @@ namespace CMMSAPIs.Repositories.SM
                 $"LEFT JOIN smitemcategory sic ON sic.ID = sam.item_category_ID\r\n       " +
                 $" WHERE srd.facility_ID = {plantID} ";
             List<CMReOrder> _List = await Context.GetData<CMReOrder>(stmt).ConfigureAwait(false);
+            foreach (var list in _List)
+            {
+                if(list!=null && list.lastModifiedTIme!=null)
+                list.lastModifiedTIme = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)list.lastModifiedTIme);
+                if(list!=null && list.lastModifiedTIme!=null)
+                list.purchase_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)list.purchase_date);
+
+            }
             return _List;
             
         }

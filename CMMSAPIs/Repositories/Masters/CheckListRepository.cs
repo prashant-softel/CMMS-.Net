@@ -28,26 +28,26 @@ namespace CMMSAPIs.Repositories.Masters
         }
 
         #region checklist
-        internal async Task<List<CMCheckList>> GetCheckList(int facility_id, int type, int frequency_id, int category_id)
+        internal async Task<List<CMCheckList>> GetCheckList(int facility_id, int type, int frequency_id, int category_id, string facilitytimeZone)
         {
             /* Table - CheckList_Number
              * supporting table - AssetCategory - to get Category Name, Frequency - To get Frequency Name
              * Read All properties from above table and return the list
              * Code goes here
             */
-            string myQuery = "SELECT "+
-                                "checklist_number.id , checklist_number.checklist_number , checklist_number.checklist_type as type, checklist_number.status, checklist_number.created_by as createdById, CONCAT(created_user.firstName, ' ', created_user.lastName) as createdByName, checklist_number.created_at as createdAt, checklist_number.updated_by as updatedById, CONCAT(updated_user.firstName, ' ', updated_user.lastName) as updatedByName, checklist_number.updated_at as updatedAt, checklist_number.asset_category_id as category_id, asset_cat.name as category_name, checklist_number.frequency_id, frequency.name as frequency_name, checklist_number.manpower as manPower, checklist_number.duration, checklist_number.facility_id as facility_id, facilities.name as facility_name " + 
-                             "FROM "+
-                                "checklist_number "+
-                             "LEFT JOIN "+
-                                "facilities on facilities.id=checklist_number.facility_id "+
-                             "LEFT JOIN "+
-                                "assetcategories as asset_cat ON asset_cat.id = checklist_number.asset_category_id "+
-                             "LEFT JOIN "+
-                                "frequency ON frequency.id=checklist_number.frequency_id "+
-                             "LEFT JOIN "+
+            string myQuery = "SELECT " +
+                                "checklist_number.id , checklist_number.checklist_number , checklist_number.checklist_type as type, checklist_number.status, checklist_number.created_by as createdById, CONCAT(created_user.firstName, ' ', created_user.lastName) as createdByName, checklist_number.created_at as createdAt, checklist_number.updated_by as updatedById, CONCAT(updated_user.firstName, ' ', updated_user.lastName) as updatedByName, checklist_number.updated_at as updatedAt, checklist_number.asset_category_id as category_id, asset_cat.name as category_name, checklist_number.frequency_id, frequency.name as frequency_name, checklist_number.manpower as manPower, checklist_number.duration, checklist_number.facility_id as facility_id, facilities.name as facility_name " +
+                             "FROM " +
+                                "checklist_number " +
+                             "LEFT JOIN " +
+                                "facilities on facilities.id=checklist_number.facility_id " +
+                             "LEFT JOIN " +
+                                "assetcategories as asset_cat ON asset_cat.id = checklist_number.asset_category_id " +
+                             "LEFT JOIN " +
+                                "frequency ON frequency.id=checklist_number.frequency_id " +
+                             "LEFT JOIN " +
                                 "users as created_user ON created_user.id = checklist_number.created_by " +
-                             "LEFT JOIN "+
+                             "LEFT JOIN " +
                                 "users as updated_user ON updated_user.id = checklist_number.updated_by where 1 ";
             if (facility_id > 0)
             {
@@ -71,9 +71,20 @@ namespace CMMSAPIs.Repositories.Masters
 
             myQuery += " ORDER BY checklist_number.id DESC ";
             List<CMCheckList> _checkList = await Context.GetData<CMCheckList>(myQuery).ConfigureAwait(false);
-            return _checkList;
-        }
-
+            foreach (var checkList in _checkList)
+            {
+                if (checkList != null && checkList.createdAt != null)
+                {
+                    checkList.createdAt = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, checkList.createdAt);
+                }
+                if (checkList != null && checkList.updatedAt != null)
+                {
+                    checkList.updatedAt = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, checkList.createdAt);
+                }
+             }
+                return _checkList;
+            }
+        
         internal async Task<CMDefaultResponse> CreateChecklist(List<CMCreateCheckList> request_list, int userID)
         {
             /*
@@ -257,7 +268,7 @@ namespace CMMSAPIs.Repositories.Masters
         #endregion
 
         #region CheckPoint
-        internal async Task<List<CMCheckPointList>> GetCheckPointList(int checklist_id, int facility_id)
+        internal async Task<List<CMCheckPointList>> GetCheckPointList(int checklist_id, int facility_id, string facilitytimeZone)
         {
             /*
              * Primary Table - CheckPoint
@@ -296,6 +307,17 @@ namespace CMMSAPIs.Repositories.Masters
             myQuery += "ORDER BY checkpoint.id DESC";
 
             List<CMCheckPointList> _checkList = await Context.GetData<CMCheckPointList>(myQuery).ConfigureAwait(false);
+
+            foreach (var checkList in _checkList)
+            {
+                if (checkList != null && checkList.created_at != null)
+                {
+                    checkList.created_at = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, checkList.created_at);
+                }
+                if (checkList != null && checkList.updated_at != null)
+
+                    checkList.updated_at= await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, checkList.updated_at);
+            }
             return _checkList;
         }
 
@@ -502,8 +524,7 @@ namespace CMMSAPIs.Repositories.Masters
                                 string checklist_Validation_Q = "select ifnull(f.name,'') as name from checklist_number left join facilities f on f.id = checklist_number.facility_id where checklist_number='" + Convert.ToString(newR["checklist_number"]) + "';";
                                 DataTable dt = await Context.FetchData(checklist_Validation_Q).ConfigureAwait(false);
                                 string facility_name = Convert.ToString(dt.Rows[0][0]);
-                                //m_errorLog.SetError($"[Checklist: Row {rN}] Checklist name : {Convert.ToString(newR["checklist_number"])} already present in plant {facility_name}.");
-                                newR["facility_id"] = 0;
+                                m_errorLog.SetError($"[Checklist: Row {rN}] Checklist name : {Convert.ToString(newR["checklist_number"])} already present in plant {facility_name}.");
                             }
                             else
                             {

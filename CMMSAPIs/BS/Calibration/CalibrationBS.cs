@@ -14,12 +14,12 @@ namespace CMMSAPIs.BS.Calibration
 {
     public interface ICalibrationBS
     {
-        Task<List<CMCalibrationList>> GetCalibrationList(int facility_id);
-        Task<CMCalibrationDetails>GetCalibrationDetails(int id);
+        Task<List<CMCalibrationList>> GetCalibrationList(int facility_id,string facilitytime);
+        Task<CMCalibrationDetails>GetCalibrationDetails(int id,string facilitytime);
         Task<CMDefaultResponse> RequestCalibration(CMRequestCalibration request, int userID);
         Task<CMDefaultResponse> ApproveRequestCalibration(CMApproval request, int userID);
         Task<CMDefaultResponse> RejectRequestCalibration(CMApproval request, int userID);
-        Task<CMPreviousCalibration> GetPreviousCalibration(int asset_id);
+        Task<CMPreviousCalibration> GetPreviousCalibration(int asset_id,string facilitytime);
         Task<CMDefaultResponse> StartCalibration(int calibration_id);
         Task<CMDefaultResponse> CompleteCalibration(CMCompleteCalibration request, int userID);
         Task<CMDefaultResponse> CloseCalibration(CMCloseCalibration request, int userID);
@@ -35,13 +35,13 @@ namespace CMMSAPIs.BS.Calibration
             databaseProvider = dbProvider;
         }
 
-        public async Task<List<CMCalibrationList>> GetCalibrationList(int facility_id)
+        public async Task<List<CMCalibrationList>> GetCalibrationList(int facility_id,string facilitytime)
         {
             try
             {
                 using (var repos = new CalibrationRepository(getDB))
                 {
-                    return await repos.GetCalibrationList(facility_id);
+                    return await repos.GetCalibrationList(facility_id,  facilitytime);
                 }
             }
             catch (Exception ex)
@@ -50,13 +50,13 @@ namespace CMMSAPIs.BS.Calibration
             }
         }
 
-        public async Task<CMCalibrationDetails> GetCalibrationDetails(int id)
+        public async Task<CMCalibrationDetails> GetCalibrationDetails(int id,string facilitytime)
         {
             try
             {
                 using (var repos = new CalibrationRepository(getDB))
                 {
-                    return await repos.GetCalibrationDetails(id);
+                    return await repos.GetCalibrationDetails(id, facilitytime);
                 }
             }
             catch (Exception ex)
@@ -110,13 +110,13 @@ namespace CMMSAPIs.BS.Calibration
             }
         }
 
-        public async Task<CMPreviousCalibration> GetPreviousCalibration(int asset_id)
+        public async Task<CMPreviousCalibration> GetPreviousCalibration(int asset_id, string facilitytime)
         {
             try
             {
                 using (var repos = new CalibrationRepository(getDB))
                 {
-                    return await repos.GetPreviousCalibration(asset_id);
+                    return await repos.GetPreviousCalibration(asset_id, facilitytime);
                 }
             }
             catch (Exception ex)

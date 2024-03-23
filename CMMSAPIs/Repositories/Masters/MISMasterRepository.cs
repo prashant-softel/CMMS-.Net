@@ -438,13 +438,20 @@ namespace CMMSAPIs.Repositories.Masters
             List<Responsibility> Data = await Context.GetData<Responsibility>(getqry).ConfigureAwait(false);
             return Data;
         }
-        internal async Task<Responsibility> GetResponsibilityID(int id)
+        internal async Task<Responsibility> GetResponsibilityID(int id, string facilitytimeZone) 
         {
             String getqry = $"Select * from   Responsibility where id =" + (id);
             List<Responsibility> Body = await Context.GetData<Responsibility>(getqry).ConfigureAwait(false);
+            foreach (var body in Body)
+            {
+                if (body != null && body.CreatedAt != null)
+                {
+                    body.CreatedAt = (DateTime)await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, body.CreatedAt);
+                }
+                
+            }
+
             return Body[0];
-
-
         }
         internal async Task<CMDefaultResponse> CreateResponsibility(Responsibility request, int UserID)
         {
@@ -483,11 +490,18 @@ namespace CMMSAPIs.Repositories.Masters
             //Add history
             return result[0];
         }
-        internal async Task<List<CMIncidentType>> GetIncidentTypeList()
+        internal async Task<List<CMIncidentType>> GetIncidentTypeList(string facilitytimeZone)
         {
             // string myQuery = "SELECT * FROM incidenttype WHERE status=1 ";
             string myQuery = "SELECT id,incidenttype,status,addedAt,addedBy,UpdatedAt,UpdatedBy FROM incidenttype WHERE status = 1";
             List<CMIncidentType> result = await Context.GetData<CMIncidentType>(myQuery).ConfigureAwait(false);
+            foreach (var Result in result)
+            {
+                if(Result!=null &&   Result.addedAt!=null)
+                Result.addedAt = (DateTime) await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, Result.addedAt);
+                if (Result != null && Result.updatedAt != null)
+                    Result.updatedAt= (DateTime)await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, Result.updatedAt);
+            }
             return result;
         }
 
@@ -519,7 +533,7 @@ namespace CMMSAPIs.Repositories.Masters
             return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Incident Type Deleted.");
         }
 
-        internal async Task<CMGetMisWaterData> GetWaterDataById(int id)
+        internal async Task<CMGetMisWaterData> GetWaterDataById(int id,string facilitytimeZone)
         {
             CMGetMisWaterData item = new CMGetMisWaterData();
             string myQuery = "SELECT M.id, M.plantId as facilityID, f.name as facilityName , date, waterTypeId, M.description, debitQty, creditQty, concat(added.firstname,' ',added.lastname)  as addedBy, addedAt,concat(updated.firstname,' ',updated.lastname)  as updatedBy, M.updatedAt FROM mis_waterdata M left join users added on added.id = M.addedBy " +
@@ -529,14 +543,33 @@ namespace CMMSAPIs.Repositories.Masters
             {
                 return item;
             }
+            foreach ( var results in result)
+            {
+                if(results!=null && results.AddedAt!=null) 
+                results.AddedAt= (DateTime)await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)results.AddedAt);
+                if (results != null && results.Date != null)
+                    results.Date= (DateTime)await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, results.Date);
+                if (results != null && results.UpdatedAt != null)
+                    results.UpdatedAt= (DateTime)await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)results.UpdatedAt);
+            }
             return result[0];
         }
 
-        internal async Task<List<CMGetMisWaterData>> GetWaterDataList(DateTime fromDate, DateTime toDate)
+        internal async Task<List<CMGetMisWaterData>> GetWaterDataList(DateTime fromDate, DateTime toDate, string facilitytimeZone)
         {
             string myQuery = "SELECT M.id, M.plantId as facilityID,f.name as facilityName, date, waterTypeId, M.description, debitQty, creditQty, concat(added.firstname,' ',added.lastname)  as addedBy, addedAt,concat(updated.firstname,' ',updated.lastname)  as updatedBy, M.updatedAt FROM mis_waterdata M left join users added on added.id = M.addedBy " +
                 " left join users updated on updated.id = M.updatedBy left join facilities f on f.id = M.plantId  where isActive = 1 and date between '" + fromDate.ToString("yyyy-MM-dd") +"' and '"+ toDate.ToString("yyyy-MM-dd") + "' ;";
+
             List<CMGetMisWaterData> result = await Context.GetData<CMGetMisWaterData>(myQuery).ConfigureAwait(false);
+            foreach(var results in result)
+            {
+                if (results != null && results.AddedAt != null)
+                    results.AddedAt= (DateTime)await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)results.AddedAt);
+                if (results != null && results.Date != null)
+                    results.Date= (DateTime)await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, results.Date);
+                if (results != null && results.UpdatedAt != null)
+                    results.UpdatedAt= (DateTime)await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)results.UpdatedAt);
+            }
             return result;
         }
         internal async Task<CMDefaultResponse> CreateWaterData(CMMisWaterData request, int userId)

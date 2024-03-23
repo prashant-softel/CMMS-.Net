@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -176,7 +177,11 @@ namespace CMMSAPIs.Controllers.SM
         {
             try
             {
-                var data = await _SMReportsBS.GetTransactionReport(facility_ID, actorType, actorID, fromDate, toDate);
+                int facility_IDs = facility_ID.ToInt();
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_IDs)?.timezone;
+                
+
+              var data = await _SMReportsBS.GetTransactionReport(facility_ID, actorType, actorID, fromDate, toDate, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)

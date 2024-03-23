@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Newtonsoft.Json;
 
 namespace CMMSAPIs.Controllers.Facility
 {
@@ -45,7 +46,9 @@ namespace CMMSAPIs.Controllers.Facility
         {
             try
             {
-                var data = await _FacilityBS.GetFacilityDetails(id);
+                int facility_id = id;
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+                var data = await _FacilityBS.GetFacilityDetails(id, facilitytimeZone);
                 return Ok(data);
             }
             catch(ArgumentException ex)

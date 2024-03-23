@@ -23,8 +23,8 @@ namespace CMMSAPIs.Repositories.Jobs
             _utilsRepo = new UtilsRepository(sqlDBHelper);
             _conn = sqlDBHelper;
         }
-
-        internal async Task<List<CMJobView>> GetJobView(int jobID)
+        
+        internal async Task<List<CMJobView>> GetJobView(int jobID,string facilitytimeZone)
         {
             string myQuery = "SELECT " +
                                     "job.id as id, facilities.id as facility_id, facilities.name as facility_name, blocks.id as block_id, blocks.name as block_name, job.status as status, created_user.id as created_by_id, CONCAT(created_user.firstName, created_user.lastName) as created_by_name, user.id as assigned_id, CONCAT(user.firstName, user.lastName) as assigned_name, job.title as job_title, job.description as job_description, job.breakdownTime as breakdown_time, ptw.id as current_ptw_id, ptw.title as current_ptw_title " +
@@ -49,11 +49,21 @@ namespace CMMSAPIs.Repositories.Jobs
             CMMS.CMMS_Status _Status_long = (CMMS.CMMS_Status)(_ViewJobList[0].status);
             string _longStatus = getLongStatus(CMMS.CMMS_Modules.JOB, _Status_long, _ViewJobList[0]);
             _ViewJobList[0].status_long = _longStatus;
+            foreach (var list in _ViewJobList)
+            {
+                if (list != null && list.breakdown_time != null)
+                    list.breakdown_time = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)list.breakdown_time);
+                if (list != null && list.closed_at != null)
+                    list.breakdown_time = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.closed_at);
+                if (list != null && list.created_at != null)
+                    list.breakdown_time = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)list.created_at);
+                
 
+            }
             return _ViewJobList;
         }
 
-        internal async Task<List<CMJobList>> GetJobListByPermitId(int permitId)
+        internal async Task<List<CMJobList>> GetJobListByPermitId(int permitId,string facilitytimeZone)
         {
             string myQuery = $"Select job.id as jobid, job.status as status, concat(user.firstname, ' ', user.lastname) as assignedto, job.title as title,  job.breakdowntime, job.linkedpermit as permitid, group_concat(distinct asset_cat.name order by asset_cat.id separator ', ') as equipmentcat, group_concat(distinct assets.name order by assets.id separator ', ') as equipment from jobs as job left join jobmappingassets as jobassets on job.id = jobassets.jobid left join assetcategories as asset_cat on asset_cat.id = jobassets.categoryid left join assets on assets.id = jobassets.assetid left join users as user on user.id = job.assignedid where job.linkedpermit = {permitId} group by job.id; ";
 
@@ -66,13 +76,20 @@ namespace CMMSAPIs.Repositories.Jobs
                 string _shortStatus = getShortStatus(CMMS.CMMS_Modules.JOB, _Status);
                 job.status_short = _shortStatus;
             }
+            foreach (var list in _ViewJobList)
+            {
+                if (list != null && list.breakdownTime != null)
+                    list.breakdownTime = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.breakdownTime);
+               
+
+            }
 
             return _ViewJobList;
 
         }
 
         //internal async Task<List<CMJobModel>> GetJobList(int facility_id, int userId)
-        internal async Task<List<CMJobModel>> GetJobList(int facility_id, string startDate, string endDate, CMMS.CMMS_JobType jobType, int selfView, int userId, string status)
+        internal async Task<List<CMJobModel>> GetJobList(int facility_id, string startDate, string endDate, CMMS.CMMS_JobType jobType, int selfView, int userId, string status, string facilitytimeZone)
 
         {
             /*
@@ -179,7 +196,14 @@ namespace CMMSAPIs.Repositories.Jobs
                     }
                 }
             }
+            foreach (var list in _JobList)
+            {
+                if(list!=null && list.breakdownTime!=null)
+                list.breakdownTime = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone,list.breakdownTime);
+                if (list != null && list.jobDate != null)
+                    list.jobDate= await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.jobDate);
 
+            }
             return _JobList;
         }
 
@@ -251,7 +275,7 @@ namespace CMMSAPIs.Repositories.Jobs
 
             }
 
-            internal async Task<CMJobView> GetJobDetails(int job_id)
+            internal async Task<CMJobView> GetJobDetails(int job_id,string  facilitytimeZone)
             {
             /*
              * Fetch data from Job table and joins these table for relationship using ids Users, Assets, AssetCategory, Facility
@@ -368,6 +392,17 @@ namespace CMMSAPIs.Repositories.Jobs
             CMMS.CMMS_Status _Status_long = (CMMS.CMMS_Status)(_ViewJobList[0].status + 100);
             string _longStatus = getLongStatus(CMMS.CMMS_Modules.JOB, _Status_long, _ViewJobList[0]);
             _ViewJobList[0].status_long = _longStatus;
+            foreach (var list in _ViewJobList)
+            {
+                 if (list != null && list.breakdown_time != null)
+                    list.breakdown_time = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)list.breakdown_time);
+                    if(list != null && list.closed_at != null)
+                    list.closed_at = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.closed_at);
+                if (list != null && list.created_at != null)
+                    list.created_at = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)list.created_at);
+                
+            }
+            
             return _ViewJobList[0];
         }
 
@@ -419,7 +454,8 @@ namespace CMMSAPIs.Repositories.Jobs
             }
 
 
-            CMJobView _ViewJobList = await GetJobDetails(newJobID);
+           
+            CMJobView _ViewJobList = await GetJobDetails(newJobID,"");
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, newJobID, 0, 0, "Job Created", CMMS.CMMS_Status.JOB_CREATED,userId);
             await CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_CREATED, new[] { userId },_ViewJobList);
@@ -501,7 +537,7 @@ namespace CMMSAPIs.Repositories.Jobs
                 }
             }
             int jobID = request.id;
-            CMJobView _ViewJobList = await GetJobDetails(jobID);
+            CMJobView _ViewJobList = await GetJobDetails(jobID,"");
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, jobID, 0, 0, "Job Updated", CMMS.CMMS_Status.JOB_UPDATED, userId);
             await CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_UPDATED, new[] {userId}, _ViewJobList);
@@ -531,7 +567,7 @@ namespace CMMSAPIs.Repositories.Jobs
 
 
 
-            CMJobView _ViewJobList = await GetJobDetails(job_id);
+            CMJobView _ViewJobList = await GetJobDetails(job_id,"");
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, job_id, 0, 0, $"Job Assigned to {_ViewJobList.assigned_name}", CMMS.CMMS_Status.JOB_ASSIGNED, updatedBy);
 
@@ -577,7 +613,7 @@ namespace CMMSAPIs.Repositories.Jobs
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
             }
 
-            CMJobView _ViewJobList = await GetJobDetails(job_id);
+            CMJobView _ViewJobList = await GetJobDetails(job_id,"");
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, job_id, 0, 0, "Job Cancelled", CMMS.CMMS_Status.JOB_CANCELLED, cancelledBy);
 
@@ -604,7 +640,7 @@ namespace CMMSAPIs.Repositories.Jobs
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
             }
 
-            CMJobView _ViewJobList = await GetJobDetails(job_id);
+            CMJobView _ViewJobList = await GetJobDetails(job_id,"");
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, job_id, CMMS.CMMS_Modules.PTW, ptw_id, $"Permit <{ptw_id}> Assigned to Job <{job_id}>", CMMS.CMMS_Status.JOB_LINKED, updatedBy);
 

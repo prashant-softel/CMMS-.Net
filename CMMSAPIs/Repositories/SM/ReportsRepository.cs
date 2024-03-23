@@ -412,7 +412,7 @@ public async Task<List<CMEmployeeStockReport>> GetEmployeeStockReport(int facili
             List<CMTaskStockItems> result = await Context.GetData<CMTaskStockItems>(Plant_Stock_Opening_Details_querys).ConfigureAwait(false);
             return result;
           }
-        internal async Task<List<CMEmployeeStockTransactionReport>> GetTransactionReport(string facility_ID, int actorType, int actorID, DateTime fromDate, DateTime toDate)
+        internal async Task<List<CMEmployeeStockTransactionReport>> GetTransactionReport(string facility_ID, int actorType, int actorID, DateTime fromDate, DateTime toDate,string facilitytimeZone)
         {
 
             List<CMEmployeeStockTransactionReport> EmployeeStockReportList = new List<CMEmployeeStockTransactionReport>();
@@ -450,6 +450,14 @@ public async Task<List<CMEmployeeStockReport>> GetEmployeeStockReport(int facili
             Plant_Stock_Opening_Details_query = Plant_Stock_Opening_Details_query + " group by St.id order by ST.id desc;";
 
             List<CMEmployeeStockTransactionReport> result = await Context.GetData<CMEmployeeStockTransactionReport>(Plant_Stock_Opening_Details_query).ConfigureAwait(false);
+            foreach (var detail in result)
+            {
+                if(detail!=null && detail.createdAt!=null)
+                detail.createdAt = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)detail.createdAt);
+                if (detail != null && detail.LastUpdated != null)
+                    detail.LastUpdated= await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime) detail.LastUpdated);
+            }
+
             return result;
         }
         internal async Task<List<CMAssetMasterStockItems>> GetAssetMasterStockItems(int assetID)

@@ -13,6 +13,9 @@ using System.IO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using CMMSAPIs.BS.MISMasters;
+using Newtonsoft.Json;
+using CMMSAPIs.Models.Utils;
+using System.Linq;
 
 namespace CMMSAPIs.Controllers.Masters
 {
@@ -639,11 +642,13 @@ namespace CMMSAPIs.Controllers.Masters
             }
             [Route("GetResponsibilityID")]
             [HttpGet]
-            public async Task<IActionResult> GetResponsibilityID(int id)
+            public async Task<IActionResult> GetResponsibilityID(int id ,int facility_id)
             {
                 try
                 {
-                    var data = await _IMISMasterBS.GetResponsibilityID(id);
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+
+                var data = await _IMISMasterBS.GetResponsibilityID(id,facilitytimeZone);
                     return Ok(data);
 
                 }
@@ -722,11 +727,13 @@ namespace CMMSAPIs.Controllers.Masters
 
         [Route("GetIncidentTypeList")]
         [HttpGet]
-        public async Task<IActionResult> GetIncidentTypeList()
+        public async Task<IActionResult> GetIncidentTypeList(int facility_id)
         {
             try
             {
-                var data = await _IMISMasterBS.GetIncidentTypeList();
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+
+                var data = await _IMISMasterBS.GetIncidentTypeList(facilitytimeZone);
                 return Ok(data);
 
             }
@@ -790,11 +797,13 @@ namespace CMMSAPIs.Controllers.Masters
 
         [Route("GetWaterDataById")]
         [HttpGet]
-        public async Task<IActionResult> GetWaterDataById(int id)
+        public async Task<IActionResult> GetWaterDataById(int id,int facility_id)
         {
             try
             {
-                var data = await _IMISMasterBS.GetWaterDataById(id);
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+
+                var data = await _IMISMasterBS.GetWaterDataById(id, facilitytimeZone);
                 return Ok(data);
 
             }
@@ -809,11 +818,12 @@ namespace CMMSAPIs.Controllers.Masters
         [Route("GetWaterDataList")]
         [HttpGet]
 
-        public async Task<IActionResult> GetWaterDataList(DateTime fromDate, DateTime toDate)
+        public async Task<IActionResult> GetWaterDataList(DateTime fromDate, DateTime toDate,int facility_id)
         {
             try
             {
-                var data = await _IMISMasterBS.GetWaterDataList(fromDate, toDate);
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+                var data = await _IMISMasterBS.GetWaterDataList(fromDate, toDate, facilitytimeZone);
                 return Ok(data);
 
             }

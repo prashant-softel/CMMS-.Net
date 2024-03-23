@@ -10,10 +10,10 @@ namespace CMMSAPIs.BS.Incident_Reports
 {
     public interface IIncidentReportBS
     {
-        Task<List<CMIncidentList>> GetIncidentList(int facility_id, DateTime start_date, DateTime end_date);
+        Task<List<CMIncidentList>> GetIncidentList(int facility_id, DateTime start_date, DateTime end_date,string facilitytime);
         Task<CMDefaultResponse> CreateIncidentReport(CMCreateIncidentReport request,int userId);
         Task<CMDefaultResponse> UpdateIncidentInvestigationReport(CMCreateIncidentReport request,int userId);
-        Task<CMViewIncidentReport> GetIncidentDetailsReport(int id);
+        Task<CMViewIncidentReport> GetIncidentDetailsReport(int id, string facilitytime);
         Task<CMDefaultResponse> UpdateIncidentReport(CMCreateIncidentReport request, int userId);
         Task<CMDefaultResponse> ApproveIncidentReport(CMApproveIncident request, int userId);
         Task<CMDefaultResponse> RejectIncidentReport(CMApproveIncident  request, int userId);
@@ -32,13 +32,13 @@ namespace CMMSAPIs.BS.Incident_Reports
             databaseProvider = dbProvider;
         }
 
-        public async Task<List<CMIncidentList>> GetIncidentList(int facility_id, DateTime start_date, DateTime end_date)
+        public async Task<List<CMIncidentList>> GetIncidentList(int facility_id, DateTime start_date, DateTime end_date, string facilitytime)
         {
             try
             {
                 using (var repos = new IncidentReportRepository(getDB))
                 {
-                    return await repos.GetIncidentList(facility_id, start_date, end_date);
+                    return await repos.GetIncidentList(facility_id, start_date, end_date,  facilitytime);
 
                 }
             }
@@ -83,13 +83,13 @@ namespace CMMSAPIs.BS.Incident_Reports
 
         }
 
-        public async Task<CMViewIncidentReport>GetIncidentDetailsReport(int id)
+        public async Task<CMViewIncidentReport>GetIncidentDetailsReport(int id,string facilitytime)
         {
             try
             {
                 using (var repos = new IncidentReportRepository(getDB))
                 {
-                    return await repos.GetIncidentDetailsReport(id);
+                    return await repos.GetIncidentDetailsReport(id, facilitytime);
 
                 }
             }

@@ -14,13 +14,13 @@ namespace CMMSAPIs.BS.SM
     {
         Task<CMDefaultResponse> CreateMRS(CMMRS request, int UserID);        
         Task<CMDefaultResponse> updateMRS(CMMRS request, int UserID);        
-        Task<List<CMMRSList>> getMRSList(int facility_ID, int emp_id, DateTime toDate, DateTime fromDate, int status);
-        Task<List<CMMRSListByModule>> getMRSListByModule(int jobId, int pmId);
-        Task<List<CMMRSItems>> getMRSItems(int ID);        
-        Task<List<CMMRSItemsBeforeIssue>> getMRSItemsBeforeIssue(int ID);        
-        Task<List<CMMRSItemsBeforeIssue>> getMRSItemsWithCode(int ID);        
-        Task<CMMRSList> getMRSDetails(int ID);        
-        Task<CMMRSList> getReturnDataByID(int ID);        
+        Task<List<CMMRSList>> getMRSList(int facility_ID, int emp_id, DateTime toDate, DateTime fromDate, int status,string facilitytime);
+        Task<List<CMMRSListByModule>> getMRSListByModule(int jobId, int pmId, string facilitytime);
+        Task<List<CMMRSItems>> getMRSItems(int ID, string facilitytime);        
+        Task<List<CMMRSItemsBeforeIssue>> getMRSItemsBeforeIssue(int ID, string facilitytime);        
+        Task<List<CMMRSItemsBeforeIssue>> getMRSItemsWithCode(int ID, string facilitytime);        
+        Task<CMMRSList> getMRSDetails(int ID,string facilitytime );        
+        Task<CMMRSList> getReturnDataByID(int ID, string facilitytime);        
         Task<CMMRSAssetTypeList> getAssetTypeByItemID(int ItemID);
         Task<CMDefaultResponse> ReturnMRS(CMMRS request, int UserID);        
         Task<CMDefaultResponse> UpdateReturnMRS(CMMRS request, int UserID);        
@@ -34,7 +34,7 @@ namespace CMMSAPIs.BS.SM
         Task<CMDefaultResponse> MRSIssue(CMMRS request, int UserID);
         Task<CMDefaultResponse> ApproveMRSIssue(CMApproval request, int userId);
         Task<CMDefaultResponse> RejectMRSIssue(CMApproval request, int userId);
-        Task<List<CMMRSList>> GetMRSReturnList(int facility_ID, int emp_id);
+        Task<List<CMMRSList>> GetMRSReturnList(int facility_ID, int emp_id, string facilitytime);
         Task<CMDefaultResponse> TransactionDetails(List<CMTransferItems> request);
         Task<CMDefaultResponse> updateUsedQty(List<CMTransferItems> request);
         Task<CMIssuedAssetItems> getIssuedAssetItems(int id);
@@ -78,13 +78,13 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<CMMRSList>> getMRSList(int facility_ID, int emp_id, DateTime toDate, DateTime fromDate, int status)
+        public async Task<List<CMMRSList>> getMRSList(int facility_ID, int emp_id, DateTime toDate, DateTime fromDate, int status, string facilitytime)
         {
             try
             {
                 using (var repos = new MRSRepository(getDB))
                 {
-                    return await repos.getMRSList(facility_ID, emp_id, toDate, fromDate, status);
+                    return await repos.getMRSList(facility_ID, emp_id, toDate, fromDate, status,facilitytime);
                 }
             }
             catch (Exception ex)
@@ -93,13 +93,13 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public  async Task<List<CMMRSListByModule>> getMRSListByModule(int jobId, int pmId)
+        public  async Task<List<CMMRSListByModule>> getMRSListByModule(int jobId, int pmId, string facilitytime)
         { 
             try
             {
                 using (var repos = new MRSRepository(getDB))
                 {
-                    return await repos.getMRSListByModule( jobId, pmId);
+                    return await repos.getMRSListByModule( jobId, pmId, facilitytime);
                 }
             }
             catch (Exception ex)
@@ -108,13 +108,13 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<CMMRSItems>> getMRSItems(int ID)
+        public async Task<List<CMMRSItems>> getMRSItems(int ID,string facilitytime)
            {
             try
             {
                 using (var repos = new MRSRepository(getDB))
                 {
-                    return await repos.getMRSItems(ID);
+                    return await repos.getMRSItems(ID, facilitytime);
                 }
             }
             catch (Exception ex)
@@ -123,13 +123,13 @@ namespace CMMSAPIs.BS.SM
             }
         }
         
-        public async Task<List<CMMRSItemsBeforeIssue>> getMRSItemsBeforeIssue(int ID)
+        public async Task<List<CMMRSItemsBeforeIssue>> getMRSItemsBeforeIssue(int ID,string facilitytime)
         {
             try
             {
                 using (var repos = new MRSRepository(getDB))
                 {
-                    return await repos.getMRSItemsBeforeIssue(ID);
+                    return await repos.getMRSItemsBeforeIssue(ID, facilitytime);
                 }
             }
             catch (Exception ex)
@@ -138,13 +138,13 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<CMMRSItemsBeforeIssue>> getMRSItemsWithCode(int ID)
+        public async Task<List<CMMRSItemsBeforeIssue>> getMRSItemsWithCode(int ID,string facilitytime)
         {
             try
             {
                 using (var repos = new MRSRepository(getDB))
                 {
-                    return await repos.getMRSItemsWithCode(ID);
+                    return await repos.getMRSItemsWithCode(ID, facilitytime);
                 }
             }
             catch (Exception ex)
@@ -153,13 +153,13 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<CMMRSList> getMRSDetails(int ID)
+        public async Task<CMMRSList> getMRSDetails(int ID, string facilitytime)
         {
             try
             {
                 using (var repos = new MRSRepository(getDB))
                 {
-                    return await repos.getMRSDetails(ID);
+                    return await repos.getMRSDetails(ID, facilitytime);
                 }
             }
             catch (Exception ex)
@@ -167,13 +167,13 @@ namespace CMMSAPIs.BS.SM
                 throw;
             }
         }
-        public async Task<CMMRSList> getReturnDataByID(int ID)
+        public async Task<CMMRSList> getReturnDataByID(int ID, string facilitytime)
         {
             try
             {
                 using (var repos = new MRSRepository(getDB))
                 {
-                    return await repos.getReturnDataByID(ID);
+                    return await repos.getReturnDataByID(ID, facilitytime);
                 }
             }
             catch (Exception ex)
@@ -373,13 +373,13 @@ namespace CMMSAPIs.BS.SM
                 throw;
             }
         }
-        public async Task<List<CMMRSList>> GetMRSReturnList(int facility_ID, int emp_id)
+        public async Task<List<CMMRSList>> GetMRSReturnList(int facility_ID, int emp_id, string facilitytime)
         {
             try
             {
                 using (var repos = new MRSRepository(getDB))
                 {
-                    return await repos.GetMRSReturnList(facility_ID, emp_id);
+                    return await repos.GetMRSReturnList(facility_ID, emp_id, facilitytime);
                 }
             }
             catch (Exception ex)

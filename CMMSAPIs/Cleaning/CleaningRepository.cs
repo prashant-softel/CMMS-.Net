@@ -138,7 +138,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
         }
 
-        internal async Task<List<CMMCPlan>> GetPlanList(int facilityId)
+        internal async Task<List<CMMCPlan>> GetPlanList(int facilityId,string facilitytimeZone)
         {
             string statusOut = "CASE ";
             foreach (KeyValuePair<int, string> status in StatusDictionary)
@@ -162,6 +162,15 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             }
 
             List<CMMCPlan> _ViewMCPlanList = await Context.GetData<CMMCPlan>(myQuery1).ConfigureAwait(false);
+            foreach (var mclist in _ViewMCPlanList)
+            {
+                if (mclist != null && mclist.approvedAt != null)
+                    mclist.approvedAt = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone,mclist.approvedAt);
+                if (mclist != null && mclist.createdAt != null)
+                    mclist.createdAt= await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, mclist.createdAt);
+                if (mclist != null && mclist.startDate != null)
+                    mclist.startDate = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, mclist.startDate);
+            }
             return _ViewMCPlanList;
         }
         
@@ -312,7 +321,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             return response;
         }
 
-        internal async Task<CMMCPlan> GetPlanDetails(int planId)
+        internal async Task<CMMCPlan> GetPlanDetails(int planId,string facilitytimeZone)
         {
             string statusOut = "CASE ";
             foreach (KeyValuePair<int, string> status in StatusDictionary)
@@ -360,7 +369,17 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             CMMS.CMMS_Status _Status_long = (CMMS.CMMS_Status)(_ViewMCPlan[0].status);
             string _longStatus = getLongStatus(CMMS.CMMS_Modules.MC_PLAN, _Status_long, _ViewMCPlan[0],null);
             _ViewMCPlan[0].status_long = _longStatus;
+            foreach (var list in _ViewMCPlan)
+            {
+                if (list != null && list.approvedAt != null)
+                    list.approvedAt = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.approvedAt);
 
+                if (list != null && list.createdAt != null)
+                    list.createdAt= await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.createdAt);
+                if (list != null && list.startDate != null)
+                    list.startDate= await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.startDate);
+                
+            }
 
             return _ViewMCPlan[0];
         }
@@ -399,11 +418,11 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             }
 
             CMMCPlanSummary _ViewMCPlan = new CMMCPlanSummary();
-
+           
             _ViewMCPlan.planId = planId;
             _ViewMCPlan.schedules = _Schedules;
 
-            if(request.save == 1)
+            if (request.save == 1)
             {
                 string equipSummary2 = "";
                 var cnt = 1;
@@ -430,6 +449,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 _ViewMCPlan.schedules = _Schedules2;
 
             }
+           
             return _ViewMCPlan;
         }
 
@@ -484,7 +504,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             CMDefaultResponse response = new CMDefaultResponse(planid, CMMS.RETRUNSTATUS.SUCCESS, $"Plan Deleted");
             return response;
         }
-        internal async Task<List<CMMCTaskList>> GetTaskList(int facilityId)
+        internal async Task<List<CMMCTaskList>> GetTaskList(int facilityId,string facilitytimeZone)
         {
             string statusOut = "CASE ";
             foreach (KeyValuePair<int, string> status in StatusDictionary)
@@ -500,6 +520,16 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 myQuery1 += $" and facilityId = {facilityId} ";
             }
             List<CMMCTaskList> _ViewMCTaskList = await Context.GetData<CMMCTaskList>(myQuery1).ConfigureAwait(false);
+            foreach ( var ViewMCTaskList in _ViewMCTaskList)
+            {
+                if (ViewMCTaskList!= null && ViewMCTaskList.doneDate != null)
+                    ViewMCTaskList.doneDate = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, ViewMCTaskList.doneDate);
+                if (ViewMCTaskList != null && ViewMCTaskList.startDate != null)
+                    ViewMCTaskList.startDate = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, ViewMCTaskList.startDate);
+                if (ViewMCTaskList != null && ViewMCTaskList.lastDoneDate != null)
+                    ViewMCTaskList.lastDoneDate = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, ViewMCTaskList.lastDoneDate);
+
+            }
             return _ViewMCTaskList;
         }
         internal async Task<CMDefaultResponse> StartExecution(int executionId, int userId)
@@ -591,7 +621,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             return response;
         }
 
-        internal async Task<CMMCExecution> GetExecutionDetails(int exectionId)
+        internal async Task<CMMCExecution> GetExecutionDetails(int exectionId,string facilitytimeZone)
             {
 
             string statusEx = "CASE ";
@@ -628,6 +658,16 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             string equipmentQuery = $"select item.assetId as id ,assets.parentId, parent.name as parentName,DATE_ADD(execution.startDate,interval item.plannedDay - 1  DAY) as scheduledAt ,item.cleanedAt,item.abandonedAt,item.status,assets.name as equipmentName,item.abandonedAt, item.moduleQuantity, item.plannedDay as cleaningDay ,{statusEquip} as short_status from cleaning_execution_items as item left join cleaning_execution_schedules as schedule on schedule.executionId = item.executionId left join cleaning_execution as execution on execution.id = item.executionId left join assets on item.assetId = assets.id left join assets as parent on assets.parentId = parent.id  where schedule.executionId = {exectionId} group by item.assetId ;";
 
             List<CMMCExecutionEquipment> _ViewEquipment = await Context.GetData<CMMCExecutionEquipment>(equipmentQuery).ConfigureAwait(false);
+            foreach(var equiment in _ViewEquipment)
+            {
+                if(equiment!=null && equiment.abandonedAt!=null)
+                equiment.abandonedAt = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, equiment.abandonedAt);
+                if (equiment != null && equiment.cleanedAt != null)
+                    equiment.cleanedAt = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, equiment.cleanedAt);
+                if (equiment != null && equiment.scheduledAt != null)
+                    equiment.scheduledAt= await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, equiment.scheduledAt);
+                
+            }
 
             foreach(var schedule in _ViewSchedule)
             {
@@ -646,11 +686,22 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             CMMS.CMMS_Status _Status_long = (CMMS.CMMS_Status)(_ViewExecution[0].status);
             string _longStatus = getLongStatus(CMMS.CMMS_Modules.MC_TASK, _Status_long, null, _ViewExecution[0]);
             _ViewExecution[0].status_long = _longStatus;
+            foreach (var view in _ViewExecution)
+            {
+                if (view!= null && view.abandonedAt!= null)
+                    view.abandonedAt= await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, view.abandonedAt);
+                if (view != null && view.plannedAt != null)
+                    view.plannedAt= await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, view.plannedAt);
+                if (view != null && view.startDate != null)
+                    view.startDate= await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, view.startDate);
+                if (view != null && view.startedAt != null)
+                    view.startedAt = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, view.startedAt);
 
+            }
             return _ViewExecution[0];
         }
 
-        internal async Task<CMMCExecutionSchedule> GetScheduleExecutionSummary(CMMCGetScheduleExecution request)
+        internal async Task<CMMCExecutionSchedule> GetScheduleExecutionSummary(CMMCGetScheduleExecution request,string facilitytimeZone)
         {
 
             //string equipSummary = ", count(distinct assets.parentId ) as totalInvs ,count(item.assetId) as totalSmbs ,sum(assets.moduleQuantity) as totalModules ,CASE schedule.cleaningType WHEN 1 then 'Wet' When 2 then 'Dry' else 'Wet 'end as cleaningType ";
@@ -675,7 +726,11 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             _Schedules[0].cleaningDay = request.cleaningDay;
             _Schedules[0].ScheduledModules = request.scheduledModules;
 
-
+            foreach(var a in _Schedules)
+            {
+                if(a!=null && a.execution_date!=null )
+                a.execution_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, a.execution_date);
+            }
             return _Schedules[0];
         }
         internal async Task<CMDefaultResponse> StartScheduleExecution(int scheduleId, int userId)
@@ -903,7 +958,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             return invs;
         }
 
-        internal virtual async Task<List<CMMCTaskEquipmentList>> GetTaskEquipmentList(int taskId)
+        internal virtual async Task<List<CMMCTaskEquipmentList>> GetTaskEquipmentList(int taskId,string facilitytimeZone)
         {
 
             string status = "";
@@ -938,6 +993,15 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                     }
                 }
 
+            }
+            foreach (var smb in smbs)
+            {
+                if (smb!= null && smb.abandonedAt!= null)
+                    smb.abandonedAt = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, smb.abandonedAt);
+                if (smb != null && smb.cleanedAt != null)
+                    smb.cleanedAt = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, smb.cleanedAt);
+                if (smb != null && smb.scheduledAt != null)
+                    smb.scheduledAt = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, smb.scheduledAt);
             }
             return invs;
         }

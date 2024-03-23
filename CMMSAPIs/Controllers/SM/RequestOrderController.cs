@@ -9,6 +9,9 @@ using static System.Reflection.Metadata.BlobBuilder;
 using CMMSAPIs.Models.Utils;
 using Microsoft.AspNetCore.Authorization;
 using CMMSAPIs.BS.Facility;
+using Newtonsoft.Json;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace CMMSAPIs.Controllers.SM
 {
@@ -29,7 +32,8 @@ namespace CMMSAPIs.Controllers.SM
         {
             try
             {
-                var data = await _IRequestOrderBS.GetRequestOrderList(facilityID, fromDate, toDate);
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityID)?.timezone;
+                var data = await _IRequestOrderBS.GetRequestOrderList(facilityID, fromDate, toDate, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -41,11 +45,13 @@ namespace CMMSAPIs.Controllers.SM
         //[Authorize]
         [Route("GetRODetailsByID")]
         [HttpGet]
-        public async Task<IActionResult> GetRODetailsByID(int requestID)
+        public async Task<IActionResult> GetRODetailsByID(int requestID,int facility_id)
         {
             try
             {
-                var data = await _IRequestOrderBS.GetRODetailsByID(requestID);
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+
+                var data = await _IRequestOrderBS.GetRODetailsByID(requestID,facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)

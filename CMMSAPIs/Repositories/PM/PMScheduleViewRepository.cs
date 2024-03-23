@@ -128,14 +128,14 @@ namespace CMMSAPIs.Repositories.PM
 
         }
 
-        internal async Task<List<CMPMTaskList>> GetPMTaskList(int facility_id, DateTime? start_date, DateTime? end_date, string frequencyIds, string categoryIds)
+        internal async Task<List<CMPMTaskList>> GetPMTaskList(int facility_id, DateTime? start_date, DateTime? end_date, string frequencyIds, string categoryIds, string facilitytimeZone)
         {
             /*
              * Primary Table - PMExecution & PMSchedule
              * Read All properties mention in model and return list
              * Code goes here
-            */           
-            
+            */
+
             //string statusQry = "CASE ";
             //foreach (KeyValuePair<CMMS.CMMS_Status, string> status in statusList)
             //    statusQry += $"WHEN pm_schedule.status = {(int)status.Key} THEN '{status.Value}' ";
@@ -149,9 +149,9 @@ namespace CMMSAPIs.Repositories.PM
                                $"left join permits as permit on pm_task.PTW_id = permit.id " +
                                $"left join frequency as freq on pm_task.frequency_id = freq.id where 1 ";
 
-           // myQuery += (frequencyIds.Length > 0 ? " AND freq.id IN ( '" + string.Join("' , '", frequencyIds) + "' )" : string.Empty);
+            // myQuery += (frequencyIds.Length > 0 ? " AND freq.id IN ( '" + string.Join("' , '", frequencyIds) + "' )" : string.Empty);
 
-            List<CMPMTaskList> scheduleViewList = new List<CMPMTaskList> ();
+            List<CMPMTaskList> scheduleViewList = new List<CMPMTaskList>();
             if (facility_id > 0)
             {
                 myQuery += $" and pm_task.Facility_id = {facility_id} ";
@@ -169,7 +169,7 @@ namespace CMMSAPIs.Repositories.PM
                 //}
                 if (frequencyIds != "" && frequencyIds != null)
                 {
-                    
+
                     myQuery += $"AND pm_task.frequency_id in ({frequencyIds}) ";
                 }
 
@@ -189,8 +189,8 @@ namespace CMMSAPIs.Repositories.PM
                         {
                             string startQry2 = $"UPDATE pm_task SET  status = {(int)CMMS.CMMS_Status.PM_APPROVED} WHERE id = {task.id};";
                             await Context.ExecuteNonQry<int>(startQry2).ConfigureAwait(false);
-                        }                       
-                            task.status_short = "Permit - " + PermitRepository.Status(task.ptw_status);
+                        }
+                        task.status_short = "Permit - " + PermitRepository.Status(task.ptw_status);
                     }
                     else
                     {
@@ -205,11 +205,25 @@ namespace CMMSAPIs.Repositories.PM
             {
                 throw new ArgumentException("Invalid Facility ID");
             }
-            
+            foreach (var detail in scheduleViewList)
+            {
+                if (detail != null && detail.due_date != null) {
+                    detail.due_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)detail.due_date);
+                }
+                if (detail != null && detail.done_date != null)
+                {
+                    detail.done_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)detail.done_date);
+                }
+                if (detail != null && detail.last_done_date != null)
+                {
+                    detail.last_done_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)detail.last_done_date);
+                }
+            }
+
             return scheduleViewList;
         }
 
-        
+
 
         internal async Task<CMDefaultResponse> CancelPMTask(CMApproval request, int userID)
         {
@@ -241,7 +255,7 @@ namespace CMMSAPIs.Repositories.PM
             return response;
         }
 
-        internal async Task<CMPMTaskView> GetPMTaskDetail(int task_id)
+        internal async Task<CMPMTaskView> GetPMTaskDetail(int task_id, string facilitytimeZone)
         {
             /*
              * Primary Table - PMExecution & PMSchedule
@@ -335,7 +349,7 @@ namespace CMMSAPIs.Repositories.PM
                 try
                 {
                     List<ScheduleLinkJob> linked_jobs = await Context.GetData<ScheduleLinkJob>(myQuery4).ConfigureAwait(false);
-                    List<CMLog> log = await _utilsRepo.GetHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, schedule.schedule_id);
+                    List<CMLog> log = await _utilsRepo.GetHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, schedule.schedule_id,"");
                     schedule.schedule_link_job = linked_jobs;
 
                 }
@@ -382,9 +396,40 @@ namespace CMMSAPIs.Repositories.PM
                 taskViewDetail[0].status_short_ptw = _shortStatus_PTW;
 
             }
+            foreach (var detail in taskViewDetail)
+            {
+                if (detail != null && detail.done_date != null) {
+                    detail.done_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)detail.done_date); }
+                if (detail != null && detail.last_done_date != null)
+                {
+                    detail.last_done_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)detail.last_done_date);
+                }
+                if (detail != null && detail.approved_at != null)
+                {
+                    detail.approved_at = (DateTime)await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, detail.approved_at);
+                }
+                if (detail != null && detail.cancelled_at != null)
+                {
+                    detail.cancelled_at = (DateTime)await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, detail.cancelled_at);
+                }
 
-            
-
+               if (detail != null && detail.closed_at != null)
+               {
+                detail.closed_at = (DateTime)await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, detail.closed_at);
+               }
+               if (detail != null && detail.due_date != null)
+              {
+                detail.due_date = (DateTime) await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime) detail.due_date);}
+                if (detail != null && detail.rejected_at != null)
+                {
+                detail.rejected_at = (DateTime) await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, detail.rejected_at);}
+                if (detail != null && detail.started_at != null)
+                {
+                detail.started_at = (DateTime)await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, detail.started_at);}
+                 if (detail != null && detail.updated_at != null)
+                {
+                detail.updated_at = (DateTime)await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, detail.updated_at);}
+                 }
             return taskViewDetail[0];
         }
 
@@ -1188,7 +1233,7 @@ namespace CMMSAPIs.Repositories.PM
             return responseList;
         }
 
-        internal async Task<CMPMScheduleExecutionDetail> GetPMTaskScheduleDetail(int task_id,int schedule_id)
+        internal async Task<CMPMScheduleExecutionDetail> GetPMTaskScheduleDetail(int task_id,int schedule_id,string facilitytimeZone)
         {
             /*
              * Primary Table - PMExecution & PMSchedule
@@ -1224,6 +1269,7 @@ namespace CMMSAPIs.Repositories.PM
 
             List<CMPMScheduleExecutionDetail> scheduleDetails = await Context.GetData<CMPMScheduleExecutionDetail>(myQuery2).ConfigureAwait(false);
 
+
             if (scheduleDetails.Count == 0)
                 throw new MissingMemberException($"PM Schedule PMSCH{schedule_id} associated with PM Task PMTASK{task_id} not found");
 
@@ -1241,8 +1287,8 @@ namespace CMMSAPIs.Repositories.PM
                                     $"left join checkpoint on checkpoint.id = pm_execution.Check_Point_id WHERE PM_Schedule_Id = {schedule_id}  ;";
 
                 List<ScheduleCheckList> scheduleCheckList = await Context.GetData<ScheduleCheckList>(myQuery3).ConfigureAwait(false);
-
-                if (scheduleCheckList.Count > 0)
+            
+            if (scheduleCheckList.Count > 0)
                 {
                     foreach (ScheduleCheckList scheduleCheckPoint in scheduleCheckList)
                     {
@@ -1263,7 +1309,7 @@ namespace CMMSAPIs.Repositories.PM
                                     $"JOIN pm_execution ON jobs.id = pm_execution.linked_job_id " +
                                     $"WHERE pm_execution.PM_Schedule_Id  = {schedule_id};";
                 List<ScheduleLinkJob> linked_jobs = await Context.GetData<ScheduleLinkJob>(myQuery4).ConfigureAwait(false);
-                List<CMLog> log = await _utilsRepo.GetHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, schedule_id);
+                List<CMLog> log = await _utilsRepo.GetHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, schedule_id,"");
 
             //if (checklist_collection.Count > 0)
             //{
@@ -1275,7 +1321,7 @@ namespace CMMSAPIs.Repositories.PM
 
             scheduleDetails[0].schedule_link_job = linked_jobs;
             scheduleDetails[0].checklist_observation = scheduleCheckList;
-            
+
 
             //CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(taskViewDetail[0].status);
             //string _shortStatus = getShortStatus(CMMS.CMMS_Modules.PM_SCHEDULE, _Status);
@@ -1283,7 +1329,12 @@ namespace CMMSAPIs.Repositories.PM
 
             //string _longStatus = getLongStatus(CMMS.CMMS_Modules.PM_SCHEDULE, _Status, taskViewDetail[0]);
             //taskViewDetail[0].status_long = _longStatus;
-
+             foreach (var detail in linked_jobs)
+             {
+                if(detail!=null && detail.job_date!=null)
+                 detail.job_date= await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)detail.job_date);
+             }
+            
             return scheduleDetails[0];
         }
         internal async Task<List<CMDefaultResponse>> cloneSchedule(int facility_id, int task_id, int from_schedule_id,int to_schedule_id,int userID)
@@ -1297,7 +1348,7 @@ namespace CMMSAPIs.Repositories.PM
             if (Convert.ToInt32(dt1.Rows[0][0]) != Convert.ToInt32(dt1.Rows[1][0]))
                 throw new MissingMemberException("Checklists Should be same.");
 
-            CMPMScheduleExecutionDetail from_schedule = await GetPMTaskScheduleDetail(task_id, from_schedule_id);
+            CMPMScheduleExecutionDetail from_schedule = await GetPMTaskScheduleDetail(task_id, from_schedule_id,"");
 
             string executeQuery = $"SELECT Check_Point_id FROM pm_execution WHERE PM_Schedule_Id = {from_schedule_id} and task_id = {task_id} ;";
             DataTable dt = await Context.FetchData(executeQuery).ConfigureAwait(false);
@@ -1466,7 +1517,7 @@ namespace CMMSAPIs.Repositories.PM
             }
 
                 //CMDefaultResponse response = new CMDefaultResponse();
-            CMPMScheduleExecutionDetail to_schedule = await GetPMTaskScheduleDetail(task_id, from_schedule_id);
+            CMPMScheduleExecutionDetail to_schedule = await GetPMTaskScheduleDetail(task_id, from_schedule_id,"");
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, to_schedule_id, 0, 0, $"PM Task {to_schedule_id} cloned from {from_schedule_id}", CMMS.CMMS_Status.PM_ASSIGNED, userID);
             return responseList;

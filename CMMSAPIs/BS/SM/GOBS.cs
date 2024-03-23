@@ -13,8 +13,8 @@ namespace CMMSAPIs.BS
 {
     public interface IGOBS
     {
-        Task<List<CMGOListByFilter>> GetGOList(int facility_id, DateTime fromDate, DateTime toDate, int Status);
-        Task<CMGoodsOrderList> GetGOItemByID(int id);
+        Task<List<CMGOListByFilter>> GetGOList(int facility_id, DateTime fromDate, DateTime toDate, int Status, string facilitytime);
+        Task<CMGoodsOrderList> GetGOItemByID(int id,string facilitytime);
         Task<List<CMGoodsOrderList>> GetAssetCodeDetails(int asset_code);
         Task<CMDefaultResponse> CreateGO(CMGoodsOrderList request, int userID);
         Task<CMDefaultResponse> UpdateGO(CMGoodsOrderList request, int userID);
@@ -22,10 +22,10 @@ namespace CMMSAPIs.BS
         Task<CMDefaultResponse> CloseGO(CMGoodsOrderList request, int userID);
         Task<CMDefaultResponse> ApproveGO(CMApproval request, int userId);
         Task<CMDefaultResponse> RejectGO(CMApproval request, int userId);
-        Task<List<CMPURCHASEDATA>> GetGoodsOrderData(int plantID, string empRole, DateTime fromDate, DateTime toDate, string status, string order_type);
+        Task<List<CMPURCHASEDATA>> GetGoodsOrderData(int plantID, string empRole, DateTime fromDate, DateTime toDate, string status, string order_type,string facilitytime);
         Task<CMGOMaster> GetGODetailsByID(int id);
         Task<CMDefaultResponse> SubmitPurchaseData(CMSUBMITPURCHASEDATA request);
-        Task<List<CMGOListByFilter>> GetSubmitPurchaseOrderList(int facility_id, DateTime fromDate, DateTime toDate, int Status);
+        Task<List<CMGOListByFilter>> GetSubmitPurchaseOrderList(int facility_id, DateTime fromDate, DateTime toDate, int Status, string facilitytime);
 
         Task<CMDefaultResponse> UpdateGOReceive(CMGoodsOrderList request, int userID);
         Task<CMDefaultResponse> ApproveGOReceive(CMApproval request, int userId);
@@ -42,14 +42,14 @@ namespace CMMSAPIs.BS
             databaseProvider = dbProvider;
         }
 
-        public async Task<List<CMGOListByFilter>> GetGOList(int facility_id, DateTime fromDate, DateTime toDate, int Status)
+        public async Task<List<CMGOListByFilter>> GetGOList(int facility_id, DateTime fromDate, DateTime toDate, int Status, string facilitytime)
         {
             try
             {
                 using (var repos = new GORepository(getDB))
                 {
                    int is_purchaseorder = 0;
-                    return await repos.GetGOList(facility_id, fromDate, toDate, is_purchaseorder);
+                    return await repos.GetGOList(facility_id, fromDate, toDate, is_purchaseorder,  facilitytime);
                 }
             }
             catch (Exception ex)
@@ -58,13 +58,13 @@ namespace CMMSAPIs.BS
             }
         }
 
-        public async Task<CMGoodsOrderList> GetGOItemByID(int id)
+        public async Task<CMGoodsOrderList> GetGOItemByID(int id, string facilitytime)
         {
             try
             {
                 using (var repos = new GORepository(getDB))
                 {
-                    return await repos.GetGOItemByID(id);
+                    return await repos.GetGOItemByID(id, facilitytime);
 
                 }
             }
@@ -182,13 +182,13 @@ namespace CMMSAPIs.BS
             }
         }
 
-        public async Task<List<CMPURCHASEDATA>> GetGoodsOrderData(int plantID, string empRole, DateTime fromDate, DateTime toDate, string status, string order_type)
+        public async Task<List<CMPURCHASEDATA>> GetGoodsOrderData(int plantID, string empRole, DateTime fromDate, DateTime toDate, string status, string order_type, string facilitytime)
         {
             try
             {
                 using (var repos = new GORepository(getDB))
                 {
-                    return await repos.GetGoodsOrderData(plantID, empRole, fromDate, toDate, status, order_type);
+                    return await repos.GetGoodsOrderData(plantID, empRole, fromDate, toDate, status, order_type,  facilitytime);
 
                 }
             }
@@ -229,14 +229,14 @@ namespace CMMSAPIs.BS
             }
         }
 
-                public async Task<List<CMGOListByFilter>> GetSubmitPurchaseOrderList(int facility_id, DateTime fromDate, DateTime toDate, int Status)
+                public async Task<List<CMGOListByFilter>> GetSubmitPurchaseOrderList(int facility_id, DateTime fromDate, DateTime toDate, int Status, string facilitytime)
         {
             try
             {
                 using (var repos = new GORepository(getDB))
                 {
                     int is_purchaseorder = 1;
-                    return await repos.GetGOList(facility_id, fromDate, toDate, is_purchaseorder);
+                    return await repos.GetGOList(facility_id, fromDate, toDate, is_purchaseorder,  facilitytime);
 
                 }
             }

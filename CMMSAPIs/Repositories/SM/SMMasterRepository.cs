@@ -383,6 +383,7 @@ namespace CMMSAPIs.Repositories.SM
                 "WHERE sat.facility_ID = "+facility_id+" AND sat.item_condition < 3 AND sat.status >= 1";
             
             List<CMGETASSETDATALIST> _checkList = await Context.GetData<CMGETASSETDATALIST>(myQuery).ConfigureAwait(false);
+            
             return _checkList;
         }
         internal async Task<List<CMVendorList>> GetVendorList()

@@ -6,6 +6,9 @@ using System;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Models.Calibration;
 using CMMSAPIs.BS.Calibration;
+using Newtonsoft.Json;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace CMMSAPIs.Controllers.Calibration
 {
@@ -26,7 +29,8 @@ namespace CMMSAPIs.Controllers.Calibration
         {
             try
             {
-                var data = await _CalibrationBS.GetCalibrationList(facility_id);
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+                var data = await _CalibrationBS.GetCalibrationList(facility_id, facilitytimeZone);
                 return Ok(data);
             }
             catch (ArgumentException ex)
@@ -42,11 +46,12 @@ namespace CMMSAPIs.Controllers.Calibration
         //[Authorize]
         [Route("GetCalibrationDetails")]
         [HttpGet]
-        public async Task<IActionResult> GetCalibrationDetails(int id)
+        public async Task<IActionResult> GetCalibrationDetails(int id,int facilty_id)
         {
             try
             {
-                var data = await _CalibrationBS.GetCalibrationDetails(id);
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilty_id)?.timezone;
+                var data = await _CalibrationBS.GetCalibrationDetails(id, facilitytimeZone);
                 return Ok(data);
             }
             catch (ArgumentException ex)
@@ -117,11 +122,13 @@ namespace CMMSAPIs.Controllers.Calibration
         //[Authorize]
         [Route("GetPreviousCalibration")]
         [HttpGet]
-        public async Task<IActionResult> GetPreviousCalibration(int asset_id)
+        public async Task<IActionResult> GetPreviousCalibration(int asset_id,int facility_id)
         {
             try
             {
-                var data = await _CalibrationBS.GetPreviousCalibration(asset_id);
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+
+                var data = await _CalibrationBS.GetPreviousCalibration(asset_id, facilitytimeZone);
                 return Ok(data);
             }
             catch(NullReferenceException ex)

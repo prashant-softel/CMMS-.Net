@@ -16,9 +16,9 @@ namespace CMMSAPIs.BS.PM
     public interface IPMBS
     {
         Task<CMDefaultResponse> CreatePMPlan(CMPMPlanDetail pm_plan, int userID);
-        Task<List<CMPMPlanList>> GetPMPlanList(int facility_id, string category_id, string frequency_id, DateTime? start_date, DateTime? end_date);
+        Task<List<CMPMPlanList>> GetPMPlanList(int facility_id, string category_id, string frequency_id, DateTime? start_date, DateTime? end_date, string facilitytime);
          Task<CMPMPlanDetail> GetPMPlanDetail(int id, string facilitytime);
-        Task<List<CMScheduleData>> GetScheduleData(int facility_id, int category_id);
+        Task<List<CMScheduleData>> GetScheduleData(int facility_id, int category_id, string facilitytime);
         Task<List<CMDefaultResponse>> SetScheduleData(CMSetScheduleData request, int userID);
         Task<CMDefaultResponse> ApprovePMPlan(CMApproval request, int userID);
         Task<CMDefaultResponse> RejectPMPlan(CMApproval request, int userID);
@@ -54,13 +54,13 @@ namespace CMMSAPIs.BS.PM
                 throw;
             }
         }
-        public async Task<List<CMPMPlanList>> GetPMPlanList(int facility_id, string category_id, string frequency_id, DateTime? start_date, DateTime? end_date)
+        public async Task<List<CMPMPlanList>> GetPMPlanList(int facility_id, string category_id, string frequency_id, DateTime? start_date, DateTime? end_date, string facilitytime)
         {
             try
             {
                 using (var repos = new PMRepository(getDB, _environment))
                 {
-                    return await repos.GetPMPlanList(facility_id, category_id, frequency_id, start_date, end_date);
+                    return await repos.GetPMPlanList(facility_id, category_id, frequency_id, start_date, end_date,  facilitytime);
                 }
             }
             catch (Exception ex)
@@ -83,13 +83,13 @@ namespace CMMSAPIs.BS.PM
             }
         }
 
-        public async Task<List<CMScheduleData>> GetScheduleData(int facility_id, int category_id)
+        public async Task<List<CMScheduleData>> GetScheduleData(int facility_id, int category_id, string facilitytime)
         {
             try
             {
                 using (var repos = new PMRepository(getDB, _environment))
                 {
-                    return await repos.GetScheduleData(facility_id, category_id);
+                    return await repos.GetScheduleData(facility_id, category_id,facilitytime);
                 }
             }
             catch (Exception ex)
