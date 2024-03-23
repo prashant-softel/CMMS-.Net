@@ -1,4 +1,7 @@
-﻿namespace CMMSAPIs.Models.Masters
+using System;
+using System.Collections.Generic;
+
+namespace CMMSAPIs.Models.Masters
 {
     public class CMModule
     {
@@ -22,5 +25,31 @@
         public string module_name { get; set; }
         public int status_id { get; set; } // only software id will be shown
         public string status_name { get; set; }
+    }
+
+    public class CMDashboadDetails
+    {
+        public int total { get; set; }
+        public int completed { get; set; }
+        public int pending { get; set; }
+        public List<CMDashboadItemList> item_list { get; set; }
+    }
+
+    public class CMDashboadItemList
+    {
+        public int facility_id { get; set; }
+        public string facility_name { get; set; }
+        public int wo_number { get; set; }
+        public int status { get; set; }
+        public string status_long { get; set; }
+        public string asset_category { get; set; }
+        public string asset_name { get; set; }
+        public DateTime start_date { get; set; }
+        public DateTime end_date { get; set; }
+        public int ptw_id { get; set; }
+        public int latestJCStatus { get; set; }
+        public int latestJCid { get; set; }
+        public int latestJCPTWStatus { get; set; }
+        public int latestJCApproval { get; set; }
     }
 }
