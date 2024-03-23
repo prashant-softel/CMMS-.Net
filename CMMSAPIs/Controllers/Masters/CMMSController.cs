@@ -653,6 +653,20 @@ namespace CMMSAPIs.Controllers.Masters
             }
         }
 
+        [Route("getDashboadDetails")]
+        [HttpGet]
+        public async Task<IActionResult> getDashboadDetails(int facilityId,string moduleName)
+        {
+            try
+            {
+                var data = await _CMMSBS.getDashboadDetails(facilityId,moduleName);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
 
         #endregion //helper functions
 
