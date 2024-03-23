@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using CMMSAPIs.Models.Utils;
 
@@ -114,6 +114,8 @@ namespace CMMSAPIs.Models.Permits
         public int TBT_Done_By_id { get; set; }
         public string TBT_Done_By { get; set; }
         public DateTime? TBT_Done_At { get; set; }
+        public bool is_TBT_Expire { get; set; }
+        public List<CMPermitLotoOtherList> LotoOtherDetails { get; set; }   
     }
 
     public class CMLotoListDetail
