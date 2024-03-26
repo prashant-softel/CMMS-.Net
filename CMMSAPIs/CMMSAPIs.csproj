@@ -23,6 +23,8 @@
     <PackageReference Include="MySql.Data" Version="8.0.28" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.25.1" />
+    <PackageReference Include="TimeZoneConverter" Version="6.1.0" />
+    <PackageReference Include="Twileloop.ExpressTimezone" Version="1.0.0" />
   </ItemGroup>
 
   <ItemGroup>
