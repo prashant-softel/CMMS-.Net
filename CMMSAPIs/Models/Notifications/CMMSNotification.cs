@@ -26,6 +26,7 @@ using Microsoft.AspNetCore.Hosting;
 using System.Configuration;
 using CMMSAPIs.Repositories;
 using CMMSAPIs.Repositories.Utils;
+using CMMSAPIs.Models.Grievance;
 
 //using CommonUtilities;
 //using CMMSAPIs.Models.Notifications;
@@ -33,7 +34,7 @@ using CMMSAPIs.Repositories.Utils;
 namespace CMMSAPIs.Models.Notifications
 {
 
-    abstract public class CMMSNotification 
+    abstract public class CMMSNotification
     {
         public static bool print = false;
         public static string printBody = "";
@@ -45,13 +46,13 @@ namespace CMMSAPIs.Models.Notifications
 
         public string templateEnd = "<tr><td style=' text-align: left; padding:0.5rem; background-color:#31576D;color:#ffffff'><b>&nbsp;&nbsp;{0}</b></td><td style='text-align: left; padding:0.5rem;'>&nbsp;&nbsp;{1}</td></tr></table>";
 
-        private static IConfigurationRoot MyConfig; 
-        private static string _conString; 
-        public static MYSQLDBHelper _conn; 
+        private static IConfigurationRoot MyConfig;
+        private static string _conString;
+        public static MYSQLDBHelper _conn;
 
         private UserAccessRepository _userAccessRepository;
-        public CMMSNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID) 
-        {            
+        public CMMSNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID)
+        {
             m_moduleID = moduleID;
             m_notificationID = notificationID;
 
@@ -158,7 +159,7 @@ namespace CMMSAPIs.Models.Notifications
 
             return retValue;
         }
-        public async Task<CMDefaultResponse> sendEmailNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, int facilityId,int[] userID, params object[] args)
+        public async Task<CMDefaultResponse> sendEmailNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, int facilityId, int[] userID, params object[] args)
         {
             CMDefaultResponse response = new CMDefaultResponse();
 
@@ -181,16 +182,17 @@ namespace CMMSAPIs.Models.Notifications
             try
             {
                 //CMMSNotification objc = new CMMSNotification(_conn);
-               // UserAccessRepository obj = new UserAccessRepository(_conn);
+                // UserAccessRepository obj = new UserAccessRepository(_conn);
                 users = await _userAccessRepository.GetUserByNotificationId(notification);
             }
-            catch (Exception e) { 
+            catch (Exception e)
+            {
 
-               if(users == null || users.Count==0)
+                if (users == null || users.Count == 0)
                 {
                     return response = new CMDefaultResponse(2, CMMS.RETRUNSTATUS.INVALID_ARG, "Email List is empty "); ;
                 }
-            } 
+            }
             List<string> EmailTo = new List<string>();
             // List<CMUser> EmailTo = users;
             foreach (var email in users)
@@ -203,7 +205,7 @@ namespace CMMSAPIs.Models.Notifications
 
             if (print)
             {
-                response = new CMDefaultResponse(1, CMMS.RETRUNSTATUS.SUCCESS, ""); 
+                response = new CMDefaultResponse(1, CMMS.RETRUNSTATUS.SUCCESS, "");
             }
             else
             {
@@ -262,6 +264,13 @@ namespace CMMSAPIs.Models.Notifications
             {
                 CMViewInventory _Inventory = (CMViewInventory)args[0];
                 notificationObj = new InventoryNotification(moduleID, notificationID, _Inventory);
+                //facilityId = _Inventory.facility_id;
+            }
+
+            else if (moduleID == CMMS.CMMS_Modules.GRIEVANCE)
+            {
+                CMGrievance _Grievance = (CMGrievance)args[0];
+                notificationObj = new GrievanceNotification(moduleID, notificationID, _Grievance);
                 //facilityId = _Inventory.facility_id;
             }
             //create else if block for your module and add Notification class for  your module to implement yous notification

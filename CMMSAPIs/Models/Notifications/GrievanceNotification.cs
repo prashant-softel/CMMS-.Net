@@ -28,13 +28,16 @@ namespace CMMSAPIs.Models.Notifications
             {
                 
                 case CMMS.CMMS_Status.Grievance_ADDED:
-                    retValue += String.Format("Asset {0} Added by {1} at {2}</p>", m_InvObj.name, m_InvObj.added_by, m_InvObj.added_at);
+                    retValue += String.Format("Asset {0} Added by {1} at {2}</p>", m_InvObj.concern, m_InvObj.createdBy, m_InvObj.createdAt);
                     break;
                 case CMMS.CMMS_Status.Grievance_UPDATED:
-                    retValue += String.Format("Asset {0} Updated by {1} at {2}</p>", m_InvObj.name, m_InvObj.updatedBy, m_InvObj.updated_at);
-                    break;
+                    retValue += String.Format("Asset {0} Updated by {1} at {2}</p>", m_InvObj.concern, m_InvObj.updatedBy, m_InvObj.updatedAt);
+                     break;
                 case CMMS.CMMS_Status.Grievance_DELETED:
-                    retValue += String.Format("Asset {0} Deleted by {1} at {2}</p>", m_InvObj.name, m_InvObj.deleted_by, m_InvObj.deleted_at);
+                    retValue += String.Format("Asset {0} Deleted by {1} at {2}</p>", m_InvObj.concern, m_InvObj.deletedBy, m_InvObj.deletedAt);
+                    break;
+                case CMMS.CMMS_Status.GRIEVANCE_CLOSED:
+                    retValue += String.Format("Asset {0} Added by {1} at {2}</p>", m_InvObj.concern, m_InvObj.createdBy, m_InvObj.createdAt);
                     break;
                 default:
                     break;
@@ -46,7 +49,7 @@ namespace CMMSAPIs.Models.Notifications
         {
             string retValue = "";
 
-            retValue = String.Format("<h3><b style='color:#31576D'>Status:</b>{0}</h3><br>", m_InvObj.status_long);
+            retValue = String.Format("<h3><b style='color:#31576D'>Status:</b>{0}</h3><br>", m_InvObj.statusLong);
 
             
             switch (m_notificationID)
@@ -55,18 +58,18 @@ namespace CMMSAPIs.Models.Notifications
                
                 case CMMS.CMMS_Status.Grievance_ADDED:
                     //   retValue += String.Format(template, "Added By", m_InvObj.added_by);
-                    retValue += String.Format(templateEnd, "Added By", m_InvObj.added_by);
+                    retValue += String.Format(templateEnd, "Added By", m_InvObj.createdBy);
                     break;
                 case CMMS.CMMS_Status.Grievance_UPDATED:
-                    retValue += String.Format(template, "Added By", m_InvObj.added_by);
+                    retValue += String.Format(template, "Added By", m_InvObj.createdBy);
                     //   retValue += String.Format(template, "Added At", m_InvObj.added_by);
                     retValue += String.Format(templateEnd, "Updated By", m_InvObj.updatedBy);
                     //   retValue += String.Format(templateEnd, "Updated At", m_InvObj.updated_at);
                     break;
                 case CMMS.CMMS_Status.Grievance_DELETED:
-                    retValue += String.Format(template, "Added By", m_InvObj.added_by);
+                    retValue += String.Format(template, "Added By", m_InvObj.createdBy);
                     //   retValue += String.Format(template, "Added At", m_InvObj.added_by);
-                    retValue += String.Format(templateEnd, "Deleted By", m_InvObj.deleted_by);
+                    retValue += String.Format(templateEnd, "Deleted By", m_InvObj.deletedBy);
                     //   retValue += String.Format(templateEnd, "Deleted At", m_InvObj.updated_at);
                     break;
                 default:

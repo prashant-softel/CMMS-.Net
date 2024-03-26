@@ -30,6 +30,7 @@ using CMMSAPIs.BS.Audits;
 using CMMSAPIs.BS.Calibration;
 using CMMSAPIs.BS;
 using CMMSAPIs.BS.Cleaning;
+using CMMSAPIs.BS.Grievance;
 using CMMSAPIs.BS.EM;
 using CMMSAPIs.BS.DSM;
 using CMMSAPIs.BS.MISMasters;
@@ -116,6 +117,7 @@ namespace CMMSAPIs
             services.AddScoped<IEMBS, EMBS>();
             services.AddScoped<IDSMBS, DSMBS>();
             services.AddScoped<IMISMasterBS, MISMasterBS>();
+            services.AddScoped<IGrievanceBS, GrievanceBS >();
 
 
         }
