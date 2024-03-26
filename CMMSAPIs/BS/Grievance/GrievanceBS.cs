@@ -14,11 +14,13 @@ namespace CMMSAPIs.BS.Grievance
 {
     public interface IGrievanceBS
     {
-        Task<List<CMGrievance>> GetGrievanceList(string facilityId, string status, string startDate, string endDate, int selfView, int userID);
-        Task<CMGrievance> GetGrievanceDetails(int id);
-        Task<CMDefaultResponse> CreateGrievance(CMCreateGrievance request, int userID);
-        Task<CMDefaultResponse> UpdateGrievance(CMUpdateGrievance request, int userID);
-        Task<CMDefaultResponse> DeleteGrievance(int id, int userID);
+        Task<List<CMGrievance>> GetGrievanceList(string facilityId, string status, string startDate, string endDate, int selfView, string facilityTimeZone);
+        Task<CMGrievance> GetGrievanceDetails(int id, int facilityId, string facilityTimeZone);
+        Task<CMDefaultResponse> CreateGrievance(CMCreateGrievance request,int userID, string facilityId, string facilityTimeZone);
+        Task<CMDefaultResponse> UpdateGrievance(CMUpdateGrievance request, int userID, string facilityId, string facilityTimeZone);
+        Task<CMDefaultResponse> DeleteGrievance(int id, int userID, string facilityId, string facilityTimezone);
+        Task<CMDefaultResponse> CloseGrievance(CMGrievance request, int userID, string facilityId, string facilityTimezone);
+
     }
     public class GrievanceBS : IGrievanceBS
     {
@@ -31,13 +33,13 @@ namespace CMMSAPIs.BS.Grievance
             _environment = environment;
         }
 
-        public async Task<List<CMGrievance>> GetGrievanceList(string facilityId, string status, string startDate, string endDate, int selfView, int userID)
+        public async Task<List<CMGrievance>> GetGrievanceList(string facilityId, string status, string startDate, string endDate, int selfView, string facilityTime)
         {
             try
             {
                 using (var repos = new GrievanceRepository(getDB, _environment))
                 {
-                    return await repos.GetGrievanceList(facilityId, status, startDate, endDate, selfView, userID);
+                    return await repos.GetGrievanceList(facilityId, status, startDate, endDate, selfView, facilityTime);
                 }
             }
             catch (Exception ex)
@@ -45,9 +47,9 @@ namespace CMMSAPIs.BS.Grievance
                 throw;
             }
         }
-      
 
-        public async Task<CMGrievance> GetGrievanceDetails(int id)
+
+        public async Task<CMGrievance> GetGrievanceDetails(int id, int facilityId, string facilityTime)
         {
             try
             {
@@ -63,7 +65,7 @@ namespace CMMSAPIs.BS.Grievance
             }
         }
 
-        public async Task<CMDefaultResponse> CreateGrievance(CMCreateGrievance request, int userID)
+        public async Task<CMDefaultResponse> CreateGrievance(CMCreateGrievance request, int userID, string facilityId, string facilityTime)
         {
             try
             {
@@ -79,7 +81,7 @@ namespace CMMSAPIs.BS.Grievance
             }
         }
 
-        public async Task<CMDefaultResponse> UpdateGrievance(CMUpdateGrievance request, int userID)
+        public async Task<CMDefaultResponse> UpdateGrievance(CMUpdateGrievance request, int userID, string facilityId, string facilityTime)
         {
             try
             {
@@ -95,7 +97,7 @@ namespace CMMSAPIs.BS.Grievance
             }
         }
 
-        public async Task<CMDefaultResponse> DeleteGrievance(int id, int userID)
+        public async Task<CMDefaultResponse> DeleteGrievance(int id, int userID, string facilityId, string facilityTime)
         {
             try
             {
@@ -111,7 +113,23 @@ namespace CMMSAPIs.BS.Grievance
             }
         }
 
+        public async Task<CMDefaultResponse> CloseGrievance(CMGrievance request, int userID, string facilityId, string facilityTime)
+        {
+            try
+            {
+                using (var repos = new GrievanceRepository(getDB, _environment))
+                {
+                    return await repos.CloseGrievance(request, userID);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
         }
+
+    }
 
     }
 
