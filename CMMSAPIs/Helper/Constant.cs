@@ -44,7 +44,7 @@ namespace CMMSAPIs.Helper
             { CMMS_Modules.VEGETATION, 33 },
             { CMMS_Modules.INCIDENT_REPORT, 34 },
             { CMMS_Modules.DSM, 35 },
-            { CMMS_Modules.Grievance, 36 },
+            { CMMS_Modules.GRIEVANCE, 36 },
 
 
         };
@@ -266,7 +266,7 @@ namespace CMMSAPIs.Helper
             DSM = 181,
             JobCard=182,
 
-            Grievance = 301,
+            GRIEVANCE = 301,
 
 
         }
@@ -438,11 +438,11 @@ namespace CMMSAPIs.Helper
             INVENTORY_UPDATED,
             INVENTORY_DELETED,
 
-            Grievance_ADDED,
-            Grievance_UPDATED,
-            Grievance_DELETED,
-
+            Grievance_ADDED = 231,
             GRIEVANCE_ONGOING,
+            GRIEVANCE_CLOSED,
+            Grievance_DELETED,
+            Grievance_UPDATED,      //only for notification purpose
 
 
             GO_DRAFT = 301,
