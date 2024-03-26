@@ -285,10 +285,10 @@ namespace CMMSAPIs.Repositories.Permits
              * input 1 - checkbox, 2 - radio, 3 - text, 4 - Ok
             */
 
-            if(permit_type_id == 0)
-            {
-             return new List<CMSafetyMeasurementQuestionList>();
-            }
+            //if(permit_type_id == 0)
+            //{
+            // return new List<CMSafetyMeasurementQuestionList>();
+            //}
 
             string inputTypeOut = "CASE ";
             foreach (CMMS.CMMS_Input input in System.Enum.GetValues(typeof(CMMS.CMMS_Input)))
@@ -301,7 +301,10 @@ namespace CMMSAPIs.Repositories.Permits
                              "LEFT JOIN permitsafetyquestions  as  permitsaftyques ON permitsaftyques.safetyMeasureId = permitsaftymea.id " +
                              "LEFT JOIN permittypelists as ptw ON ptw.id = permitsaftymea.permitTypeId ";
             if (permit_type_id > 0)
-                myQuery5 += $"where ptw.id =  { permit_type_id } ";
+            {
+                myQuery5 += $"where ptw.id =  {permit_type_id} ";
+            }
+               
             //myQuery5 += "GROUP BY permitsaftyques.safetyMeasureId ORDER BY ptw.id ASC;";
             myQuery5 += "ORDER BY ptw.id ASC;";
             List<CMSafetyMeasurementQuestionList> _QuestionList = await Context.GetData<CMSafetyMeasurementQuestionList>(myQuery5).ConfigureAwait(false);
@@ -1051,6 +1054,8 @@ namespace CMMSAPIs.Repositories.Permits
                 _PermitDetailsList[0].current_status_long = "Permit Approved But TBT not done";
 
             }
+
+
             foreach (var list in _PermitDetailsList  )
             {
                 if(list!=null && list.approve_at!=null) 
