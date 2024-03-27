@@ -69,7 +69,7 @@ namespace CMMSAPIs.Models.Permits
     }
     public class CMLotoList
     {
-        public int equipment_id { get; set; }
+        public int Loto_id { get; set; }
         public string Loto_Key { get; set; }
         public int Loto_lock_number { get; set; }
         public int employee_id { get; set; }

@@ -1064,7 +1064,7 @@ namespace CMMSAPIs.Repositories.Masters
             }
 
             result.total = itemList.Count;
-            result.completed = itemList.Where(x=>x.latestJCPTWStatus == (int)CMMS.CMMS_Status.PTW_APPROVED).ToList().Count;
+           // result.completed = itemList.Where(x=>x.latestJCPTWStatus == (int)CMMS.CMMS_Status.PTW_APPROVED).ToList().Count;
             //result.pending = result.total - itemList.Where(x => x.latestJCPTWStatus != (int)CMMS.CMMS_Status.PTW_APPROVED).ToList().Count;
             result.pending = result.total - result.completed;
             result.item_list = itemList;
