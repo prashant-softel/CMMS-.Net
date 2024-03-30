@@ -251,7 +251,22 @@ namespace CMMSAPIs.Controllers.Vegetation
                 throw;
             }
         }
+        [Route("GetVegitationTaskEquipmentList")]
+        [HttpGet]
+        public async Task<IActionResult> GetVegitationTaskEquipmentList(int taskId, int facility_id)
+        {
+            try
+            {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
 
+                var data = await _CleaningBS.GetVegitationTaskEquipmentList(taskId, facilitytimeZone);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
         //[Route("StartMCExecution")]
         //[HttpPost]
         //public async Task<IActionResult> StartMCExecution(int id)
