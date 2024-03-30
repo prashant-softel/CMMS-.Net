@@ -29,6 +29,9 @@ using iTextSharp.tool.xml;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Hosting;
 using OfficeOpenXml;
+using System.Linq;
+using CMMSAPIs.Models;
+
 
 namespace CMMSAPIs.Repositories.Masters
 {
