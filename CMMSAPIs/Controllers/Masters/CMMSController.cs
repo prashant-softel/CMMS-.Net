@@ -655,11 +655,11 @@ namespace CMMSAPIs.Controllers.Masters
 
         [Route("getDashboadDetails")]
         [HttpGet]
-        public async Task<IActionResult> getDashboadDetails(int facilityId,string moduleName)
+        public async Task<IActionResult> getDashboadDetails(string facilityId, CMMS.CMMS_Modules moduleID)
         {
             try
             {
-                var data = await _CMMSBS.getDashboadDetails(facilityId,moduleName);
+                var data = await _CMMSBS.getDashboadDetails(facilityId, moduleID);
                 return Ok(data);
             }
             catch (Exception)
