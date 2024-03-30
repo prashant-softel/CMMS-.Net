@@ -1,4 +1,4 @@
-﻿using CMMSAPIs.Helper;
+using CMMSAPIs.Helper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -50,7 +50,7 @@ namespace CMMSAPIs.BS.Masters
         Task<List<CMFrequency>> GetFrequencyList();
         Task<string> Print(int id, CMMS.CMMS_Modules moduleID);
         Task<string> DownloadFile(int id);
-          Task<CMDashboadDetails> getDashboadDetails(int facilityId,string moduleName);
+        Task<List<CMDashboadModuleWiseList>> getDashboadDetails(string facilityId, CMMS.CMMS_Modules moduleID);
 
     }
     public class CMMSBS : ICMMSBS
@@ -635,13 +635,13 @@ namespace CMMSAPIs.BS.Masters
                 throw;
             }
         }
-                public async Task<CMDashboadDetails> getDashboadDetails(int facilityId, string moduleName)
+        public async Task<List<CMDashboadModuleWiseList>> getDashboadDetails(string facilityId, CMMS.CMMS_Modules moduleID)
         {
             try
             {
                 using (var repos = new CMMSRepository(getDB))
                 {
-                    return await repos.getDashboadDetails(facilityId, moduleName);
+                    return await repos.getDashboadDetails(facilityId, moduleID);
 
                 }
             }
