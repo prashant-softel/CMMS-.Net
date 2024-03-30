@@ -254,7 +254,7 @@ namespace CMMSAPIs.Repositories.PM
            
             if (planDetails.Count == 0)
                 return null;
-            string assetChecklistsQry = $"SELECT assets.id as asset_id, assets.name as asset_name, parent.id as parent_id, parent.name as parent_name, assets.moduleQuantity as module_qty, checklist.id as checklist_id, checklist.checklist_number as checklist_name " +
+            string assetChecklistsQry = $"SELECT distinct assets.id as asset_id, assets.name as asset_name, parent.id as parent_id, parent.name as parent_name, assets.moduleQuantity as module_qty, checklist.id as checklist_id, checklist.checklist_number as checklist_name " +
                                         $"FROM pmplanassetchecklist as planmap " +
                                         $"LEFT JOIN assets ON assets.id = planmap.assetId " +
                                         $"LEFT JOIN assets as parent ON assets.parentId = parent.id " +
