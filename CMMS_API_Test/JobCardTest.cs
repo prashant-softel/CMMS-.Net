@@ -114,7 +114,7 @@ namespace CMMS_API_Test
             int jc_id = response[0].id[0];
             var jcService2 = new CMMS_Services.APIService<CMMSAPIs.Models.JC.CMJCDetail>(true);
             var response2 = jcService2.GetItemList("/api/JC/GetJCDetail?jc_id=" + jc_id);
-            Assert.AreEqual(response2[0].status, (int)CMMSAPIs.Helper.CMMS.CMMS_Status.JC_CARRRY_FORWARDED);
+            Assert.AreEqual(response2[0].status, (int)CMMSAPIs.Helper.CMMS.CMMS_Status.JC_CARRY_FORWARDED);
         }
         /**/
     }

@@ -177,7 +177,7 @@ namespace CMMS_API_Test
             Assert.AreEqual((int)CMMS.CMMS_Status.CALIBRATION_REQUEST_APPROVED, response20.statusID);
             var calibService21 = new CMMS_Services.APIService<CMPreviousCalibration>(true);
             var response21 = calibService21.GetItem("/api/Calibration/GetPreviousCalibration?asset_id=" + requestCalib.asset_id);
-            Assert.IsNotNull(response20);
+            Assert.IsNotNull(response21);
             Assert.AreEqual(requestCalib.asset_id, response21.asset_id);
             Assert.AreEqual(requestCalib.vendor_id, response21.vendor_id);
             Assert.AreEqual(requestCalib.next_calibration_date, response21.previous_calibration_date);
