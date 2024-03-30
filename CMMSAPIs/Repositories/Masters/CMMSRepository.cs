@@ -990,22 +990,84 @@ namespace CMMSAPIs.Repositories.Masters
             return path;
 
         }
-                public async Task<CMDashboadDetails> getDashboadDetails(int facilityId, string moduleName)
+             public async Task<List<CMDashboadModuleWiseList>> getDashboadDetails(string facilityId,CMMS.CMMS_Modules moduleID)
         {
+            List<CMDashboadModuleWiseList> countResult = new List<CMDashboadModuleWiseList>();
+            CMDashboadModuleWiseList modulewiseDetail = new CMDashboadModuleWiseList();
             CMDashboadDetails result = new CMDashboadDetails();
-            switch (moduleName.ToUpper())
+            switch (moduleID)
             {
-                case "JOB":
+                case CMMS.CMMS_Modules.JOB:
+                    modulewiseDetail.module_name = "Breakdown Maintenance";
                     result = await getJobDashboardDetails(facilityId);
+                    modulewiseDetail.CMDashboadDetails = result;
+                    countResult.Add(modulewiseDetail);
+                    break;
+                case CMMS.CMMS_Modules.PM_PLAN:
+                    modulewiseDetail.module_name = "Preventive Maintenance";
+                    result = await getPMPlanDashboardDetails(facilityId);
+                    modulewiseDetail.CMDashboadDetails = result;
+                    countResult.Add(modulewiseDetail);
+                    break;
+                case CMMS.CMMS_Modules.MC_PLAN:
+                    modulewiseDetail.module_name = "Module Cleaning";
+                    result = await getMCPlanDashboardDetails(facilityId);
+                    modulewiseDetail.CMDashboadDetails = result;
+                    countResult.Add(modulewiseDetail);
+                    break;
+                case CMMS.CMMS_Modules.INCIDENT_REPORT:
+                    modulewiseDetail.module_name = "Incident Report";
+                    result = await getIRDashboardDetails(facilityId);
+                    modulewiseDetail.CMDashboadDetails = result;
+                    countResult.Add(modulewiseDetail);
+                    break;
+                case CMMS.CMMS_Modules.SM_GO:
+                    modulewiseDetail.module_name = "Stock Management";
+                    result = await getSMDashboardDetails(facilityId);
+                    modulewiseDetail.CMDashboadDetails = result;
+                    countResult.Add(modulewiseDetail);
                     break;
                 default:
-                    // code block
+                    CMDashboadModuleWiseList modulewiseDetail_Job = new CMDashboadModuleWiseList();
+                    CMDashboadDetails result_job = new CMDashboadDetails();
+                    modulewiseDetail_Job.module_name = "Breakdown Maintenance";
+                    result_job = await getJobDashboardDetails(facilityId);
+                    modulewiseDetail_Job.CMDashboadDetails = result_job;
+                    countResult.Add(modulewiseDetail_Job);
+
+                    CMDashboadModuleWiseList modulewiseDetail_PM = new CMDashboadModuleWiseList();
+                    CMDashboadDetails result_PM = new CMDashboadDetails();
+                    modulewiseDetail_PM.module_name = "Preventive Maintenance";
+                    result_PM = await getPMPlanDashboardDetails(facilityId);
+                    modulewiseDetail_PM.CMDashboadDetails = result_PM;
+                    countResult.Add(modulewiseDetail_PM);
+
+                    CMDashboadModuleWiseList modulewiseDetail_MC = new CMDashboadModuleWiseList();
+                    CMDashboadDetails result_MC = new CMDashboadDetails();
+                    modulewiseDetail_MC.module_name = "Module Cleaning";
+                    result_MC = await getMCPlanDashboardDetails(facilityId);
+                    modulewiseDetail_MC.CMDashboadDetails = result_MC;
+                    countResult.Add(modulewiseDetail_MC);
+
+                    CMDashboadModuleWiseList modulewiseDetail_IR = new CMDashboadModuleWiseList();
+                    CMDashboadDetails result_IR = new CMDashboadDetails();
+                    modulewiseDetail_IR.module_name = "Incident Report";
+                    result_IR = await getIRDashboardDetails(facilityId);
+                    modulewiseDetail_IR.CMDashboadDetails = result_IR;
+                    countResult.Add(modulewiseDetail_IR);
+
+                    CMDashboadModuleWiseList modulewiseDetail_SM = new CMDashboadModuleWiseList();
+                    CMDashboadDetails result_SM = new CMDashboadDetails();
+                    modulewiseDetail_SM.module_name = "Stock Management";
+                    result_SM = await getSMDashboardDetails(facilityId);
+                    modulewiseDetail_SM.CMDashboadDetails = result_SM;
+                    countResult.Add(modulewiseDetail_SM);
                     break;
             }
-            return result;
+            return countResult;
         }
 
-        public async Task<CMDashboadDetails> getJobDashboardDetails(int facilityId)
+        public async Task<CMDashboadDetails> getJobDashboardDetails(string facilityId)
         {
             CMDashboadDetails result = new CMDashboadDetails();
 
@@ -1020,7 +1082,7 @@ namespace CMMSAPIs.Repositories.Masters
                 $" LEFT JOIN assets as asset ON mapAssets.assetId  =  asset.id " +
                 $" LEFT JOIN assetcategories as asset_cat ON mapAssets.categoryId = asset_cat.id " +
                 $" LEFT JOIN permits as permit ON permit.id = job.linkedPermit " +
-                $" WHERE job.facilityId = {facilityId} " +
+                $" WHERE job.facilityId in ({facilityId}) " +
                 $" GROUP BY job.id order by job.id DESC;";
             List<CMDashboadItemList> itemList = await Context.GetData<CMDashboadItemList>(myQuery).ConfigureAwait(false);
                  foreach(CMDashboadItemList _Job in itemList)
@@ -1063,9 +1125,318 @@ namespace CMMSAPIs.Repositories.Masters
                 }
             }
 
+            result.created = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.JOB_CREATED).ToList().Count;
+            result.rejected = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.JOB_CANCELLED).ToList().Count;
+            result.assigned = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.JOB_ASSIGNED).ToList().Count;
+
+
             result.total = itemList.Count;
-           // result.completed = itemList.Where(x=>x.latestJCPTWStatus == (int)CMMS.CMMS_Status.PTW_APPROVED).ToList().Count;
+            result.completed = itemList.Where(x=>x.latestJCStatus == (int)CMMS.CMMS_Status.PTW_APPROVED).ToList().Count;
             //result.pending = result.total - itemList.Where(x => x.latestJCPTWStatus != (int)CMMS.CMMS_Status.PTW_APPROVED).ToList().Count;
+            result.pending = result.total - result.completed;
+            result.item_list = itemList;
+            return result;
+        }
+
+        public async Task<CMDashboadDetails> getPMPlanDashboardDetails(string facilityId)
+        {
+            CMDashboadDetails result = new CMDashboadDetails();
+
+            string myQuery = $"SELECT facilities.name as facility_name, plan.id as wo_number, plan.plan_name, " +
+                $" plan.status as status,category.name as asset_category,category.id as category_id, " +
+                $" plan.plan_date as start_date," +
+                $"  (select task.plan_date from pm_task task where task.id = (select max(id) from pm_task where pm_task.plan_id = plan.id  ) ) as end_date" +
+                $"  FROM pm_plan as plan " +
+                $" LEFT JOIN statuses ON plan.status = statuses.softwareId " +
+                $" JOIN facilities ON plan.facility_id = facilities.id " +
+                $" LEFT JOIN assetcategories as category ON plan.category_id = category.id " +
+                $" LEFT JOIN frequency ON plan.frequency_id = frequency.id " +
+                $" LEFT JOIN users as createdBy ON createdBy.id = plan.created_by " +
+                $" LEFT JOIN users as updatedBy ON updatedBy.id = plan.updated_by " +
+                $" LEFT JOIN users as assignedTo ON assignedTo.id = plan.assigned_to " +
+                $" WHERE facilities.id in ({facilityId})  and status_id = 1 ;";
+            List<CMDashboadItemList> itemList = await Context.GetData<CMDashboadItemList>(myQuery).ConfigureAwait(false);
+
+            foreach (var plan in itemList)
+            {
+                CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(plan.status);
+                string _shortStatus = getShortStatus_PM_Plan(CMMS.CMMS_Modules.PM_PLAN, _Status);
+                plan.status_long = _shortStatus;
+            }
+            result.created = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.PM_PLAN_CREATED).ToList().Count;
+            result.rejected = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.PM_REJECTED || x.status == (int)CMMS.CMMS_Status.PM_CLOSE_REJECTED || x.status == (int)CMMS.CMMS_Status.PM_PLAN_REJECTED).ToList().Count;
+            result.assigned = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.PM_ASSIGNED).ToList().Count;
+            result.submitted = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.PM_SUBMIT).ToList().Count;
+            result.approved = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.PM_APPROVED || x.status == (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED || x.status == (int)CMMS.CMMS_Status.PM_PLAN_APPROVED).ToList().Count;
+
+
+            result.total = itemList.Count;
+            result.completed = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.PM_APPROVED || x.status == (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED || x.status == (int)CMMS.CMMS_Status.PM_PLAN_APPROVED).ToList().Count;
+            //result.pending = result.total - itemList.Where(x => x.latestJCPTWStatus != (int)CMMS.CMMS_Status.PTW_APPROVED).ToList().Count;
+            result.pending = result.total - result.completed;
+            result.item_list = itemList;
+            return result;
+        }
+        internal static string getShortStatus_PM_Plan(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status m_notificationID)
+        {
+            string retValue;
+            retValue = "";
+
+            switch (m_notificationID)
+            {
+                case CMMS.CMMS_Status.PM_PLAN_DRAFT:
+                    retValue = "Draft"; break;
+                case CMMS.CMMS_Status.PM_PLAN_CREATED:
+                    retValue = "Waiting For Approval"; break;
+                case CMMS.CMMS_Status.PM_PLAN_REJECTED:
+                    retValue = "Rejected"; break;
+                case CMMS.CMMS_Status.PM_PLAN_UPDATED:
+                    retValue = "Updated"; break;
+                case CMMS.CMMS_Status.PM_PLAN_DELETED:
+                    retValue = "Deleted"; break;
+                case CMMS.CMMS_Status.PM_PLAN_APPROVED:
+                    retValue = "Approved"; break;
+                default:
+                    break;
+            }
+            return retValue;
+
+        }
+
+        private Dictionary<int, string> StatusDictionary_MC_Plan = new Dictionary<int, string>()
+        {
+            { (int)CMMS.CMMS_Status.MC_PLAN_DRAFT, "Draft" },
+            { (int)CMMS.CMMS_Status.MC_PLAN_SUBMITTED, "Waiting for Approval" },
+            { (int)CMMS.CMMS_Status.MC_PLAN_APPROVED, "Approved" },
+            { (int)CMMS.CMMS_Status.MC_PLAN_REJECTED, "Rejected" },
+            { (int)CMMS.CMMS_Status.MC_PLAN_DELETED, "Deleted" },
+            { (int)CMMS.CMMS_Status.MC_TASK_SCHEDULED, "Scheduled" },
+            { (int)CMMS.CMMS_Status.MC_TASK_STARTED, "In Progress" },
+            { (int)CMMS.CMMS_Status.MC_TASK_COMPLETED, "Completed" },
+            { (int)CMMS.CMMS_Status.MC_TASK_ABANDONED, "Abandoned" },
+            { (int)CMMS.CMMS_Status.MC_TASK_APPROVED, "Approved" },
+            { (int)CMMS.CMMS_Status.MC_TASK_REJECTED, "Rejected" },
+            { (int)CMMS.CMMS_Status.VEG_PLAN_DRAFT, "Draft" },
+            { (int)CMMS.CMMS_Status.VEG_PLAN_SUBMITTED, "Waiting for Approval" },
+            { (int)CMMS.CMMS_Status.VEG_PLAN_APPROVED, "Approved" },
+            { (int)CMMS.CMMS_Status.VEG_PLAN_REJECTED, "Rejected" },
+            { (int)CMMS.CMMS_Status.VEG_PLAN_DELETED, "Deleted" },
+            { (int)CMMS.CMMS_Status.VEG_TASK_SCHEDULED, "Scheduled" },
+            { (int)CMMS.CMMS_Status.VEG_TASK_STARTED, "In Progress" },
+            { (int)CMMS.CMMS_Status.VEG_TASK_COMPLETED, "Completed" },
+            { (int)CMMS.CMMS_Status.VEG_TASK_ABANDONED, "Abandoned" },
+            { (int)CMMS.CMMS_Status.VEG_TASK_APPROVED, "Approved" },
+            { (int)CMMS.CMMS_Status.VEG_TASK_REJECTED, "Rejected" },
+            { (int)CMMS.CMMS_Status.EQUIP_CLEANED, "Cleaned" },
+            { (int)CMMS.CMMS_Status.EQUIP_ABANDONED, "Abandoned" },
+            { (int)CMMS.CMMS_Status.EQUIP_SCHEDULED, "Scheduled" },
+        };
+        public async Task<CMDashboadDetails> getMCPlanDashboardDetails(string facilityId)
+        {
+            CMDashboadDetails result = new CMDashboadDetails();
+
+            string statusOut = "CASE ";
+            foreach (KeyValuePair<int, string> status in StatusDictionary_MC_Plan)
+            {
+                statusOut += $"WHEN mc.status = {status.Key} THEN '{status.Value}' ";
+            }
+            statusOut += $"ELSE 'Invalid Status' END";
+
+            string myQuery1 = $"select mc.facilityId,F.name as facility_name," +
+                $" mc.planId as wo_number,mc.status as status, mc.frequencyId,mc.assignedTo as assignedToId, case when mc.startDate = '0000-00-00 00:00:00' then null else mc.startDate end as start_date,mc.durationDays as noOfCleaningDays, mc.title," +
+                $" CONCAT(createdBy.firstName, createdBy.lastName) as createdBy , mc.createdAt, " +
+                $" CONCAT(approvedBy.firstName, approvedBy.lastName) as approvedBy,mc.approvedAt,freq.name as frequency," +
+                $" CONCAT(assignedTo.firstName, ' ', assignedTo.lastName) as assignedTo,mc.durationDays,{statusOut} as status_long" +
+                $" from cleaning_plan as mc LEFT JOIN Frequency as freq on freq.id = mc.frequencyId " +
+             $" left join facilities as F on F.id = mc.facilityId " +
+             $"LEFT JOIN users as assignedTo ON assignedTo.id = mc.assignedTo " +
+            $"LEFT JOIN users as createdBy ON createdBy.id = mc.createdById " +
+            $"LEFT JOIN users as approvedBy ON approvedBy.id = mc.approvedById where moduleType=1 ";
+       
+            
+                myQuery1 += $" and facilityId in ({facilityId}) ";
+            
+            List<CMDashboadItemList> itemList = await Context.GetData<CMDashboadItemList>(myQuery1).ConfigureAwait(false);
+
+            result.created = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.MC_PLAN_DRAFT).ToList().Count;
+            result.rejected = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.MC_PLAN_REJECTED).ToList().Count;
+
+            result.submitted = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.MC_PLAN_SUBMITTED).ToList().Count;
+            result.approved = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.MC_PLAN_APPROVED).ToList().Count;
+
+
+            result.total = itemList.Count;
+            result.completed = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.MC_PLAN_APPROVED).ToList().Count;
+            //result.pending = result.total - itemList.Where(x => x.latestJCPTWStatus != (int)CMMS.CMMS_Status.PTW_APPROVED).ToList().Count;
+            result.pending = result.total - result.completed;
+            result.item_list = itemList;
+            return result;
+        }
+
+        private Dictionary<int, string> StatusDictionary_IR = new Dictionary<int, string>()
+        {
+            { 181, "Created-waiting for approval" },
+            { 182, "Create-Rejected" },
+            { 183, "Created" },
+            { 184, "Investigation-waiting for approval" },
+            { 185, "Investigation-Rejected" },
+            { 186, "Investigation-Completed" },
+            { 187, "Updated" },
+            { 188, "Cancelled" },
+        };
+        public async Task<CMDashboadDetails> getIRDashboardDetails(string facilityId)
+        {
+            CMDashboadDetails result = new CMDashboadDetails();
+
+            string filter = " incident.facility_id in (" + facilityId + ") ";
+
+            string statusOut = "CASE ";
+            foreach (KeyValuePair<int, string> status in StatusDictionary_IR)
+            {
+                statusOut += $"WHEN incident.status = {status.Key} THEN '{status.Value}' ";
+            }
+            statusOut += $"ELSE 'Invalid Status' END";
+
+
+            string selectqry = $"SELECT incident.id as wo_number, incident.description as description , facilities.name as facility_name,blockName.name as block_name, assets.name as asset_name, incident.risk_level as risk_level, CONCAT(created_by.firstName ,' ' , created_by.lastName) as reported_by_name, incident.created_at as reported_at,CONCAT(user.firstName ,' ' , user.lastName) as approved_by, incident.approved_at as approved_at, CONCAT(user1.firstName , ' ' , user1.lastName) as reported_by_name , {statusOut} as status_long ,incident.status, incident.location_of_incident, incident_datetime, type_of_job,title," +
+                $" incident.status, incident.is_why_why_required, incident.is_investigation_required " +
+                $" FROM incidents as incident " +
+                $" left JOIN facilities AS facilities on facilities.id = incident.facility_id " +
+                $" LEFT JOIN facilities AS blockName on blockName.id = incident.block_id  and blockName.isBlock = 1 " +
+                $" LEFT JOIN assets as assets on incident.equipment_id = assets.id " +
+                $" LEFT JOIN users as user on incident.approved_by = user.id " +
+                $" LEFT JOIN users as created_by on incident.created_by = created_by.id " +
+                $" LEFT JOIN users as user1 on incident.verified_by = user1.id " +
+                $" where " + filter + " order by incident.id asc";
+
+            List<CMIncidentList> getIncidentList = await Context.GetData<CMIncidentList>(selectqry).ConfigureAwait(false);
+
+
+            List<CMDashboadItemList> itemList = await Context.GetData<CMDashboadItemList>(selectqry).ConfigureAwait(false);
+
+            result.created = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.IR_CREATED_INITIAL).ToList().Count;
+            result.rejected = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.IR_REJECTED_INITIAL || x.status == (int)CMMS.CMMS_Status.IR_REJECTED_INVESTIGATION).ToList().Count;
+
+            result.submitted = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.IR_CREATED_INVESTIGATION).ToList().Count;
+            result.approved = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.IR_APPROVED_INITIAL || x.status == (int)CMMS.CMMS_Status.IR_APPROVED_INVESTIGATION).ToList().Count;
+
+
+            result.total = itemList.Count;
+            result.completed = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.IR_APPROVED_INITIAL || x.status == (int)CMMS.CMMS_Status.IR_APPROVED_INVESTIGATION).ToList().Count;
+            //result.pending = result.total - itemList.Where(x => x.latestJCPTWStatus != (int)CMMS.CMMS_Status.PTW_APPROVED).ToList().Count;
+            result.pending = result.total - result.completed;
+            result.item_list = itemList;
+            return result;
+        }
+        internal static string getShortStatus_GO(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status m_notificationID)
+        {
+            string retValue;
+
+            switch (m_notificationID)
+            {
+                case CMMS.CMMS_Status.GO_DRAFT:
+                    retValue = "Drafted";
+                    break;
+                case CMMS.CMMS_Status.GO_SUBMITTED:
+                    retValue = "Waiting for approval";
+                    break;
+
+                case CMMS.CMMS_Status.GO_CLOSED:
+                    retValue = "Closed";
+                    break;
+
+                case CMMS.CMMS_Status.GO_DELETED:
+                    retValue = "Deleted";
+                    break;
+
+
+                case CMMS.CMMS_Status.GO_REJECTED:
+                    retValue = "Rejected";
+                    break;
+                case CMMS.CMMS_Status.GO_APPROVED:
+                    retValue = "Approved";
+                    break;
+                case CMMS.CMMS_Status.GO_RECEIVE_DRAFT:
+                    retValue = "Receive draft";
+                    break;
+                case CMMS.CMMS_Status.GO_RECEIVED_SUBMITTED:
+                    retValue = "Receive submitted";
+                    break;
+                case CMMS.CMMS_Status.GO_RECEIVED_REJECTED:
+                    retValue = "Receive rejected";
+                    break;
+                case CMMS.CMMS_Status.GO_RECEIVED_APPROVED:
+                    retValue = "Receive approved";
+                    break;
+                default:
+                    retValue = "Unknown <" + m_notificationID + ">";
+                    break;
+            }
+            return retValue;
+
+        }
+        public async Task<CMDashboadDetails> getSMDashboardDetails(string facilityId)
+        {
+            CMDashboadDetails result = new CMDashboadDetails();
+
+           
+            string filter = " facilityID in (" + facilityId + ")";
+
+            string query = "SELECT fc.name as facilityName,pod.ID as podID, facilityid as       facility_id,pod.spare_status,pod.remarks,sai.orderflag,sam.asset_type_ID," +
+                "pod.purchaseID,pod.assetItemID,sai.serial_number,sai.location_ID,(select sum(cost) from smgoodsorderdetails where purchaseID = po.id) as cost,pod.ordered_qty,\r\n bl.name as vendor_name,\r\n     " +
+                " po.purchaseDate,sam.asset_type_ID,sam.asset_name,po.receiverID,\r\n        " +
+                "po.vendorID,po.status,sai.asset_code,t1.asset_type,t2.cat_name,pod.received_qty,pod.damaged_qty,pod.accepted_qty," +
+                "f1.file_path,f1.Asset_master_id,sm.decimal_status,sm.spare_multi_selection,po.generated_by,pod.order_type as asset_type_ID_OrderDetails, receive_later, " +
+                "added_to_store,   \r\n      " +
+                "  po.challan_no, po.po_no, po.freight, po.transport, po.no_pkg_received, po.lr_no, po.condition_pkg_received, " +
+                "po.vehicle_no, po.gir_no, po.job_ref, po.amount,  po.currency as currencyID , curr.name as currency , stt.asset_type as asset_type_Name,  po_no, requested_qty,lost_qty, ordered_qty, CONCAT(ed.firstName,' ',ed.lastName) as generatedBy\r\n  ,po.received_on as receivedAt    " +
+                "  FROM smgoodsorderdetails pod\r\n        LEFT JOIN smgoodsorder po ON po.ID = pod.purchaseID\r\n     " +
+                "   LEFT JOIN smassetitems sai ON sai.ID = pod.assetItemID\r\n       " +
+                " LEFT JOIN smassetmasters sam ON sam.ID = pod.assetItemID\r\n      " +
+                "  LEFT JOIN smunitmeasurement sm ON sm.ID = sam.unit_of_measurement\r\n    " +
+                "    LEFT JOIN (\r\n            SELECT file.file_path,file.Asset_master_id as Asset_master_id FROM smassetmasterfiles file \r\n " +
+                "           LEFT join smassetmasters sam on file.Asset_master_id =  sam.id )\r\n        " +
+                "    f1 ON f1.Asset_master_id = sam.id\r\n        LEFT JOIN (\r\n         " +
+                "   SELECT sat.asset_type,s1.ID as master_ID FROM smassettypes sat\r\n      " +
+                "      LEFT JOIN smassetmasters s1 ON s1.asset_type_ID = sat.ID\r\n        )  t1 ON t1.master_ID = sam.ID\r\n     " +
+                "   LEFT JOIN (\r\n            SELECT sic.cat_name,s2.ID as master_ID FROM smitemcategory sic\r\n          " +
+                "  LEFT JOIN smassetmasters s2 ON s2.item_category_ID = sic.ID\r\n        )  t2 ON t2.master_ID = sam.ID\r\n " +
+                "       LEFT JOIN facilities fc ON fc.id = po.facilityID\r\nLEFT JOIN users as vendor on vendor.id=po.vendorID " +
+                "       LEFT JOIN business bl ON bl.id = po.vendorID left join smassettypes stt on stt.ID = pod.order_type LEFT JOIN currency curr ON curr.id = po.currency LEFT JOIN users ed ON ed.id = po.generated_by" +
+                " WHERE " + filter + "";
+
+
+            List<CMGoodsOrderList> _List = await Context.GetData<CMGoodsOrderList>(query).ConfigureAwait(false);
+
+            List<CMDashboadItemList> itemList = _List.Select(p => new CMDashboadItemList
+            {
+                wo_number = p.purchaseID,
+                facility_id = p.facility_id,
+                facility_name = p.facilityName,
+                asset_name = p.asset_name,
+                status = p.status,
+                start_date = p.purchaseDate
+               
+            }).GroupBy(p => p.wo_number).Select(group => group.First()).OrderBy(p => p.wo_number).ToList();
+
+
+            for (var i = 0; i < _List.Count; i++)
+            {
+                CMDashboadItemList item = new CMDashboadItemList();
+                CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(itemList[i].status);
+                string _longStatus = getShortStatus_GO(CMMS.CMMS_Modules.SM_GO, _Status);
+                item.status_long = _longStatus;              
+            }
+
+            result.created = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.GO_DRAFT).ToList().Count;
+            result.rejected = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.GO_REJECTED).ToList().Count;
+
+            result.submitted = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.GO_SUBMITTED).ToList().Count;
+            result.approved = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.GO_APPROVED).ToList().Count;
+
+
+            result.total = itemList.Count;
+            result.completed = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.GO_APPROVED).ToList().Count;
             result.pending = result.total - result.completed;
             result.item_list = itemList;
             return result;
