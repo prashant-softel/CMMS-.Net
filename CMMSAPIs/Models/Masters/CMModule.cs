@@ -27,8 +27,19 @@ namespace CMMSAPIs.Models.Masters
         public string status_name { get; set; }
     }
 
+    public class CMDashboadModuleWiseList
+    {
+        public string module_name { get; set; }
+        public CMDashboadDetails CMDashboadDetails { get; set; }
+    }
     public class CMDashboadDetails
     {
+        public int created { get; set; }
+        public int submitted { get; set; }
+        public int assigned { get; set; }
+        public int rejected { get; set; }
+        public int approved { get; set; }        
+        public int issued { get; set; }
         public int total { get; set; }
         public int completed { get; set; }
         public int pending { get; set; }
@@ -44,8 +55,8 @@ namespace CMMSAPIs.Models.Masters
         public string status_long { get; set; }
         public string asset_category { get; set; }
         public string asset_name { get; set; }
-        public DateTime start_date { get; set; }
-        public DateTime end_date { get; set; }
+        public DateTime? start_date { get; set; }
+        public DateTime? end_date { get; set; }
         public int ptw_id { get; set; }
         public int latestJCStatus { get; set; }
         public int latestJCid { get; set; }
