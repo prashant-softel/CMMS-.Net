@@ -614,11 +614,11 @@ namespace CMMSAPIs.Repositories.Permits
             */
             string TBT_Done_At = "";
             if (request.TBT_Done_At != null)
-            {
-                TBT_Done_At = request.TBT_Done_At.Value.ToString("yyyy-MM-dd HH:mm:ss");
-            }
-           
-             
+             {
+                 TBT_Done_At = ((DateTime)request.TBT_Done_At.Value).ToString("yyyy-MM-dd HH:mm:ss");
+             }
+
+             TBT_Done_At = (request.TBT_Done_At == null) ? "0000-00-00 00:00:00" : "'" + ((DateTime)request.TBT_Done_At).ToString("yyyy-MM-dd HH:mm:ss") + "'";
 
             string qryPermitBasic = "insert into permits(facilityId, blockId, LOTOId, startDate, endDate, title, description, jobTypeId, typeId, TBTId, issuedById, approvedById, acceptedById, acceptedDate, status, status_updated_at, latitude, longitude,TBT_Done_by,TBT_Done_at) values" +
              $"({ request.facility_id }, { request.blockId },{request.lotoId},'{ request.start_datetime.ToString("yyyy-MM-dd HH:mm:ss") }', '{ request.end_datetime.ToString("yyyy-MM-dd HH:mm:ss") }', '{request.title}', '{ request.description }', { request.job_type_id }, { request.permitTypeId }, { request.sop_type_id }, { request.issuer_id }, { request.approver_id }, {userID}, '{UtilsRepository.GetUTCTime()}', {(int)CMMS.CMMS_Status.PTW_CREATED}, '{UtilsRepository.GetUTCTime()}', {request.latitude}, {request.longitude},{request.TBT_Done_By},'{TBT_Done_At}'); " +
@@ -1070,11 +1070,9 @@ namespace CMMSAPIs.Repositories.Permits
                     list.issue_at= await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime) list.issue_at);
                 if (list != null && list.rejected_at != null)
                     list.rejected_at= await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime) list.rejected_at);
-                if (list != null && list.start_datetime != null)
-                    list.start_datetime= await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime) list.start_datetime);
                 if (list != null && list.TBT_Done_At != null)
                     list.TBT_Done_At= await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime) list.TBT_Done_At);
-
+                
             }
             return _PermitDetailsList[0];
         }
