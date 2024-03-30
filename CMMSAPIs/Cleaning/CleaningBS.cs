@@ -39,7 +39,7 @@ namespace CMMSAPIs.BS.Cleaning
         public Task<CMDefaultResponse> EndExecution(int executionId, int userId);
         public Task<CMDefaultResponse> ApproveExecution(CMApproval request, int userID);
         public Task<CMDefaultResponse> RejectExecution(CMApproval request, int userID);
-
+        public Task<List<CMMCTaskEquipmentList>> GetVegitationTaskEquipmentList(int taskId, string facilitytime);
 
     }
     public class CleaningBS : ICleaningBS
@@ -406,6 +406,19 @@ namespace CMMSAPIs.BS.Cleaning
             }
         }
 
-
+        public async Task<List<CMMCTaskEquipmentList>> GetVegitationTaskEquipmentList(int taskId, string facilitytime)
+        {
+            try
+            {
+                // using (var repos = new MCRepository(getDB))
+                {
+                    return await repos.GetVegitationTaskEquipmentList(taskId, facilitytime);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
     }
 }
