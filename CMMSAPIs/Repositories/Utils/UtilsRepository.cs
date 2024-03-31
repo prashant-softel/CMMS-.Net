@@ -194,7 +194,7 @@ namespace CMMSAPIs.Repositories.Utils
         }
         public async Task<DateTime> ConvertToUTCDTC(string destinationTimeZone, DateTime utcTime)
         {
-            if (utcTime != null && destinationTimeZone != "")
+            if (utcTime != null && destinationTimeZone != "" && destinationTimeZone != null)
             {
                 string sourceTimeZoneId = "UTC"; // Fixed source time zone
                 string windowsTimeZoneId = TZConvert.IanaToWindows(destinationTimeZone);
