@@ -49,7 +49,7 @@ namespace CMMSAPIs.Models.WC
         public List<CMWCExternalEmail> additionalEmailEmployees { get; set; }
         public List<CMWCExternalEmail> externalEmails { get; set; }
         public List<CMWCSupplierActions> supplierActions { get; set; }
-        public List<string> affectedParts { get; set; }
+        public List<affectedParts> affectedParts { get; set; }
 
     }
 }

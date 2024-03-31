@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
+using System.Reflection.Metadata.Ecma335;
 
 namespace CMMSAPIs.Models.WC
 {
@@ -45,9 +46,13 @@ namespace CMMSAPIs.Models.WC
         public int estimatedLoss { get; set; }
         public int estimatedLossCurrencyId { get; set; } 
         public int quantity { get; set; }
-        public List<string> affectedParts { get; set; }
+        public List<affectedParts> affectedParts { get; set; }
     }
 
+    public class affectedParts
+    {
+        public string name { get; set; }
+    }
     public class CMWCExternalEmail 
     {
         public int user_id { get; set; }
