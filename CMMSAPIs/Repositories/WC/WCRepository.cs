@@ -254,7 +254,7 @@ namespace CMMSAPIs.Repositories.WC
                     string InsertAffectedPart = $" insert into wc_parts(wc_id, affected_part)";
                     foreach (var item in unit.affectedParts)
                     {
-                        InsertAffectedPart = InsertAffectedPart + $" Select {id}, '{item}'  union all";
+                        InsertAffectedPart = InsertAffectedPart + $" Select {id}, '{item.name}'  union all";
                     }
 
                     InsertAffectedPart = InsertAffectedPart.Substring(0, InsertAffectedPart.Length - 10);
@@ -339,18 +339,10 @@ namespace CMMSAPIs.Repositories.WC
             GetWCDetails[0].supplierActions = supplierActions;
 
             // Retrieve affected parts
-            string affectedParts_Q = $"SELECT affected_part as affectedParts FROM wc_parts WHERE wc_id =  {id}";
-            DataTable dt = await Context.FetchData(affectedParts_Q).ConfigureAwait(false);
-            List<string> affectedParts = new List<string>();
-            if(dt.Rows.Count  > 0)
-            {
-                for(var i=0; i<dt.Rows.Count; i++)
-                {
-                  string part = Convert.ToString(dt.Rows[i][0]);
-                    affectedParts.Add(part);
-                }
-            }
-      
+            string affectedParts_Q = $"SELECT affected_part as name FROM wc_parts WHERE wc_id =  {id}";     
+            List<affectedParts> affectedParts = await Context.GetData<affectedParts>(affectedParts_Q).ConfigureAwait(false);
+
+
             GetWCDetails[0].affectedParts = affectedParts;
             GetWCDetails[0].supplierActions = supplierActions;
 
@@ -493,7 +485,7 @@ namespace CMMSAPIs.Repositories.WC
                 string InsertAffectedPart = $" delete from wc_parts where wc_id = {request.id};  insert into wc_parts(wc_id, affected_part)";
                 foreach (var item in request.affectedParts)
                 {
-                    InsertAffectedPart = InsertAffectedPart + $" Select {request.id}, '{item}'  union all";
+                    InsertAffectedPart = InsertAffectedPart + $" Select {request.id}, '{item.name}'  union all";
                 }
 
                 InsertAffectedPart = InsertAffectedPart.Substring(0, InsertAffectedPart.Length - 10);
