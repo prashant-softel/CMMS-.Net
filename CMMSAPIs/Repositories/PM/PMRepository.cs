@@ -229,10 +229,10 @@ namespace CMMSAPIs.Repositories.PM
 
             internal async Task<CMPMPlanDetail> GetPMPlanDetail(int id, string facilitytimeZone)
         {
-            int facility_Id =1798; // Assuming you have a method to get facility ID for a plan
+     
             
             if (id <= 0)
-                throw new ArgumentException("Invalid Facility ID");
+                throw new ArgumentException("Invalid Plan ID");
             string planListQry = $"SELECT plan.id as plan_id, plan.plan_name, plan.status as status_id, statuses.statusName as status_short, plan.plan_date, " +
                                     $"facilities.id as facility_id, facilities.name as facility_name, category.id as category_id, category.name as category_name, " +
                                     $"frequency.id as plan_freq_id, frequency.name as plan_freq_name, createdBy.id as created_by_id, " +
