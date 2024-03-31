@@ -45,6 +45,7 @@ namespace CMMSAPIs.Models.WC
         public int estimatedLoss { get; set; }
         public int estimatedLossCurrencyId { get; set; } 
         public int quantity { get; set; }
+        public List<string> affectedParts { get; set; }
     }
 
     public class CMWCExternalEmail 
