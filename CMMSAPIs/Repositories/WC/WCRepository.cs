@@ -206,33 +206,37 @@ namespace CMMSAPIs.Repositories.WC
                                     $"supplier_id = (SELECT supplierId FROM assets WHERE assets.id = {unit.equipmentId}), " +
                                     $"currency = (SELECT code FROM currency WHERE currency.id = {unit.currencyId}) WHERE wc.id = {id};";
                 await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
-                string addMailQry = "INSERT INTO wc_emails (wc_id, email, name, user_id, type) VALUES ";
-                string idToMail = $"SELECT id, loginId as email, CONCAT(firstName,' ',lastName) as name FROM users " +
-                                    $"WHERE id IN ({string.Join(',', unit.additionalEmailEmployees)});";
-                DataTable mailList = await Context.FetchData(idToMail).ConfigureAwait(false);
-                foreach (DataRow mail in mailList.Rows)
+
+                if (unit.additionalEmailEmployees.Count > 0)
                 {
-                    addMailQry += $"({id}, '{mail["email"]}', '{mail["name"]}', {mail["id"]}, 'Internal'), ";
-                }
-                string getAllMails = "SELECT id, loginId FROM users;";
-                DataTable allMails = await Context.FetchData(getAllMails).ConfigureAwait(false);
-                Dictionary<string, int> mailToId = new Dictionary<string, int>();
-                mailToId.Merge(allMails.GetColumn<string>("loginId"), allMails.GetColumn<int>("id"));
-                foreach(var mail in unit.externalEmails)
-                {
-                    int u_id;
-                    try
+                    string addMailQry = "INSERT INTO wc_emails (wc_id, email, name, user_id, type) VALUES ";
+                    string idToMail = $"SELECT id, loginId as email, CONCAT(firstName,' ',lastName) as name FROM users " +
+                                        $"WHERE id IN ({string.Join(',', unit.additionalEmailEmployees)});";
+                    DataTable mailList = await Context.FetchData(idToMail).ConfigureAwait(false);
+                    foreach (DataRow mail in mailList.Rows)
                     {
-                        u_id = mailToId[mail.email];
+                        addMailQry += $"({id}, '{mail["email"]}', '{mail["name"]}', {mail["id"]}, 'Internal'), ";
                     }
-                    catch(KeyNotFoundException)
+                    string getAllMails = "SELECT id, loginId FROM users;";
+                    DataTable allMails = await Context.FetchData(getAllMails).ConfigureAwait(false);
+                    Dictionary<string, int> mailToId = new Dictionary<string, int>();
+                    mailToId.Merge(allMails.GetColumn<string>("loginId"), allMails.GetColumn<int>("id"));
+                    foreach (var mail in unit.externalEmails)
                     {
-                        u_id = 0;
+                        int u_id;
+                        try
+                        {
+                            u_id = mailToId[mail.email];
+                        }
+                        catch (KeyNotFoundException)
+                        {
+                            u_id = 0;
+                        }
+                        addMailQry += $"({id}, '{mail.email}', '{mail.name}', {u_id}, '{(u_id != 0 ? "Internal" : "External")}'), ";
                     }
-                    addMailQry += $"({id}, '{mail.email}', '{mail.name}', {u_id}, '{(u_id!=0?"Internal":"External")}'), ";
+                    addMailQry = addMailQry.Substring(0, addMailQry.Length - 2) + ";";
+                    await Context.ExecuteNonQry<int>(addMailQry).ConfigureAwait(false);
                 }
-                addMailQry = addMailQry.Substring(0, addMailQry.Length - 2) + ";";
-                await Context.ExecuteNonQry<int>(addMailQry).ConfigureAwait(false);
                 string addSupplierActions = "INSERT INTO wcschedules (warranty_id, supplier_action, input_value, input_date, created_at) VALUES ";
                 foreach (var action in unit.supplierActions)
                 {
@@ -244,6 +248,19 @@ namespace CMMSAPIs.Repositories.WC
 
                 count++;
                 idList.Add(id);
+
+                if(unit.affectedParts.Count > 0)
+                {
+                    string InsertAffectedPart = $" insert into wc_parts(wc_id, affected_part)";
+                    foreach (var item in unit.affectedParts)
+                    {
+                        InsertAffectedPart = InsertAffectedPart + $" Select {id}, '{item}'  union all";
+                    }
+
+                    InsertAffectedPart = InsertAffectedPart.Substring(0, InsertAffectedPart.Length - 10);
+                    await Context.ExecuteNonQry<int>(InsertAffectedPart).ConfigureAwait(false);
+                }
+
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.WARRANTY_CLAIM, id, 0, 0, "Warranty Claim Created", draftStatus, userID);
             }
             if (count > 0)
@@ -321,7 +338,21 @@ namespace CMMSAPIs.Repositories.WC
             List<CMWCSupplierActions> supplierActions = await Context.GetData<CMWCSupplierActions>(supplierActionsQuery).ConfigureAwait(false);
             GetWCDetails[0].supplierActions = supplierActions;
 
-
+            // Retrieve affected parts
+            string affectedParts_Q = $"SELECT affected_part as affectedParts FROM wc_parts WHERE wc_id =  {id}";
+            DataTable dt = await Context.FetchData(affectedParts_Q).ConfigureAwait(false);
+            List<string> affectedParts = new List<string>();
+            if(dt.Rows.Count  > 0)
+            {
+                for(var i=0; i<dt.Rows.Count; i++)
+                {
+                  string part = Convert.ToString(dt.Rows[i][0]);
+                    affectedParts.Add(part);
+                }
+            }
+      
+            GetWCDetails[0].affectedParts = affectedParts;
+            GetWCDetails[0].supplierActions = supplierActions;
 
             return GetWCDetails[0];
         }
@@ -455,6 +486,18 @@ namespace CMMSAPIs.Repositories.WC
                     addSupplierActions = addSupplierActions.Substring(0, addSupplierActions.Length - 2) + ";";
                     await Context.ExecuteNonQry<int>(addSupplierActions).ConfigureAwait(false);
                 }
+            }
+
+            if (request.affectedParts.Count > 0)
+            {
+                string InsertAffectedPart = $" delete from wc_parts where wc_id = {request.id};  insert into wc_parts(wc_id, affected_part)";
+                foreach (var item in request.affectedParts)
+                {
+                    InsertAffectedPart = InsertAffectedPart + $" Select {request.id}, '{item}'  union all";
+                }
+
+                InsertAffectedPart = InsertAffectedPart.Substring(0, InsertAffectedPart.Length - 10);
+                await Context.ExecuteNonQry<int>(InsertAffectedPart).ConfigureAwait(false);
             }
             return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "WC Details Updated Successfully");
         }
