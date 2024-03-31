@@ -928,7 +928,7 @@ namespace CMMSAPIs.Repositories.Users
                             $"UsersAccess as u " +
                             $"JOIN Features as f ON u.featureId = f.id " +
                          $"WHERE " +
-                            $"userId = {user_id}";
+                            $"userId = {user_id} and isActive = 1 order by serialNo";
 
             List<CMAccessList> access_list = await Context.GetData<CMAccessList>(qry).ConfigureAwait(false);
             CMUserDetail user_detail = await GetUserDetail(user_id);
