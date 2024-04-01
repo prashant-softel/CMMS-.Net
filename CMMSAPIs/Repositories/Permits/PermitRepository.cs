@@ -1509,12 +1509,13 @@ namespace CMMSAPIs.Repositories.Permits
                 updatePermitQry += $"approvedById = { request.approver_id }, ";
             if (request.resubmit == true)
                 updatePermitQry += $"status = {(int)CMMS.CMMS_Status.PTW_CREATED}, ";
+            
+            
             updatePermitQry += $" TBT_Done_By = {request.TBT_Done_By},";
 
             string TBT_Done_At = (request.TBT_Done_At == null) ? "'0001-01-01 00:00:00'" : "'" + ((DateTime)request.TBT_Done_At).ToString("yyyy-MM-dd HH:mm:ss") + "'";
-            updatePermitQry = $"TBT_Done_At = {TBT_Done_At}, ";
-           // string TBT_Done_At = (request.TBT_Done_At == null) ? "NULL" : $"'{((DateTime)request.TBT_Done_At).ToString("yyyy-MM-dd HH:mm:ss")}'";
-           // updatePermitQry = $"TBT_Done_At = {TBT_Done_At}, ";
+            updatePermitQry += $"TBT_Done_At = {TBT_Done_At}, ";
+
 
 
             updatePermitQry = updatePermitQry.Substring(0, updatePermitQry.Length - 2);
