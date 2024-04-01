@@ -84,8 +84,8 @@ namespace CMMSAPIs.Models.Permits
         public List<int> category_ids { get; set; }
         public List<CMCategory> LstCategory { get; set; }
         public int is_grid_isolation_required { get; set; }
-        public DateTime grid_start_datetime { get; set; }
-        public DateTime grid_stop_datetime { get; set; }
+        public DateTime? grid_start_datetime { get; set; }
+        public DateTime? grid_stop_datetime { get; set; }
         public string grid_remark { get; set; }
         public int is_physical_iso_required { get; set; }
         public List<CMDefaultList> physical_iso_equips { get; set; }
@@ -123,7 +123,7 @@ namespace CMMSAPIs.Models.Permits
         public string equipment_name { get; set; }
         public string equipment_cat { get; set; }
         public string Loto_Key { get; set; }
-        public int Loto_lock_number { get; set; }
+        public string Loto_lock_number { get; set; }
         public string employee_name { get; set; }
     }
     public class CMAssociatedList

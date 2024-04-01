@@ -612,6 +612,7 @@ namespace CMMSAPIs.Repositories.Permits
              * Once you saved the records
              * Return GetPermitDetails(permit_id);
             */
+            
             string TBT_Done_At = "";
             if (request.TBT_Done_At != null)
              {
@@ -671,7 +672,7 @@ namespace CMMSAPIs.Repositories.Permits
 
                 foreach (var data in request.Loto_list)
                 {
-                    string qryPermitlotoAssets = $"Update permits set lotoRequired = 1,lotoRemark = '{request.loto_remark}' where id = {insertedId} ;insert into permitlotoassets ( PTW_id, Loto_Asset_id, Loto_Key,lotoLockNo,emp_id ) value ({insertedId},{data.Loto_id}, '{data.Loto_Key}',{data.Loto_lock_number},{data.employee_id})";
+                    string qryPermitlotoAssets = $"Update permits set lotoRequired = 1,lotoRemark = '{request.loto_remark}' where id = {insertedId} ;insert into permitlotoassets ( PTW_id, Loto_Asset_id, Loto_Key,lotoLockNo,emp_id ) value ({insertedId},{data.Loto_id}, '{data.Loto_Key}','{data.Loto_lock_number}',{data.user_id})";
                     await Context.ExecuteNonQry<int>(qryPermitlotoAssets).ConfigureAwait(false);
                 }
 
@@ -698,6 +699,7 @@ namespace CMMSAPIs.Repositories.Permits
 
             foreach (var data in request.safety_question_list)
             {
+
                 string qryPermitSaftyQuestion = $"insert into permitsafetyquestions ( permitId , safetyMeasureId, safetyMeasureValue) value ({ insertedId  }, { data.safetyMeasureId }, '{ data.safetyMeasureValue }')";
                 await Context.ExecuteNonQry<int>(qryPermitSaftyQuestion).ConfigureAwait(false);
             }
@@ -1070,8 +1072,7 @@ namespace CMMSAPIs.Repositories.Permits
                     list.issue_at= await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime) list.issue_at);
                 if (list != null && list.rejected_at != null)
                     list.rejected_at= await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime) list.rejected_at);
-                if (list != null && list.TBT_Done_At != null)
-                    list.TBT_Done_At= await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime) list.TBT_Done_At);
+               
                 
             }
             return _PermitDetailsList[0];
@@ -1508,7 +1509,14 @@ namespace CMMSAPIs.Repositories.Permits
                 updatePermitQry += $"approvedById = { request.approver_id }, ";
             if (request.resubmit == true)
                 updatePermitQry += $"status = {(int)CMMS.CMMS_Status.PTW_CREATED}, ";
-	    updatePermitQry += $" TBT_Done_By = {request.TBT_Done_By}, TBT_Done_At = '{request.TBT_Done_At.ToString("yyyy-MM-dd HH:mm:ss")}', ";
+            updatePermitQry += $" TBT_Done_By = {request.TBT_Done_By},";
+
+            string TBT_Done_At = (request.TBT_Done_At == null) ? "'0001-01-01 00:00:00'" : "'" + ((DateTime)request.TBT_Done_At).ToString("yyyy-MM-dd HH:mm:ss") + "'";
+            updatePermitQry = $"TBT_Done_At = {TBT_Done_At}, ";
+           // string TBT_Done_At = (request.TBT_Done_At == null) ? "NULL" : $"'{((DateTime)request.TBT_Done_At).ToString("yyyy-MM-dd HH:mm:ss")}'";
+           // updatePermitQry = $"TBT_Done_At = {TBT_Done_At}, ";
+
+
             updatePermitQry = updatePermitQry.Substring(0, updatePermitQry.Length - 2);
             updatePermitQry += $" where id = { request.permit_id }; ";
 
@@ -1568,7 +1576,9 @@ namespace CMMSAPIs.Repositories.Permits
                     await Context.ExecuteNonQry<int>(DeleteQry3).ConfigureAwait(false);
                     foreach (var data in request.Loto_list)
                     {
-                        string qryPermitlotoAssets = $"insert into permitlotoassets ( PTW_id , Loto_Asset_id, Loto_Key ) value ({ updatePrimaryKey }, { data.Loto_id }, '{ data.Loto_Key }')";
+                        string qryPermitlotoAssets = $"insert into permitlotoassets(PTW_id, Loto_Asset_id, Loto_Key, lotoLockNo, emp_id) value({request.permit_id},{ data.Loto_id}, '{data.Loto_Key}','{data.Loto_lock_number}',{ data.user_id})";
+
+                       // string qryPermitlotoAssets = $"insert into permitlotoassets ( PTW_id , Loto_Asset_id, Loto_Key ) value ({ updatePrimaryKey }, { data.Loto_id }, '{ data.Loto_Key }')";
                         await Context.ExecuteNonQry<int>(qryPermitlotoAssets).ConfigureAwait(false);
                     }
                 }
