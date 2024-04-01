@@ -282,7 +282,7 @@ namespace CMMSAPIs.Repositories.PM
             //                    $"FROM pm_schedule WHERE id = {schedule_id};";
 
             string myQuery = $"SELECT pm_task.id, CONCAT('PMTASK',pm_task.id) as task_code,pm_task.category_id,cat.name as category_name, pm_plan.plan_name as plan_title, pm_task.facility_id, pm_task.frequency_id as frequency_id, freq.name as frequency_name, pm_task.plan_date as due_date,closed_at as done_date, CONCAT(assignedTo.firstName,' ',assignedTo.lastName)  as assigned_to_name, CONCAT(closedBy.firstName,' ',closedBy.lastName)  as closed_by_name, pm_task.closed_at , CONCAT(approvedBy.firstName,' ',approvedBy.lastName)  as approved_by_name, pm_task.approved_at ,CONCAT(rejectedBy.firstName,' ',rejectedBy.lastName)  as rejected_by_name, pm_task.rejected_at ,CONCAT(cancelledBy.firstName,' ',cancelledBy.lastName)  as cancelled_by_name, pm_task.cancelled_at , pm_task.rejected_at ,CONCAT(startedBy.firstName,' ',startedBy.lastName)  as started_by_name, pm_task.started_at , pm_task.PTW_id as permit_id, CONCAT('PTW',pm_task.PTW_id) as permit_code,permit.status as ptw_status, PM_task.status, {statusQry} as status_short " +
-                               ",  CONCAT(tbtDone.firstName,' ',tbtDone.lastName)  as tbt_by_name, Case when permit.TBT_Done_By is null then 0 else 1 end ptw_tbt_done " +
+                               ",  CONCAT(tbtDone.firstName,' ',tbtDone.lastName)  as tbt_by_name, Case when permit.TBT_Done_By is null or  permit.TBT_Done_By =0 then 0 else 1 end ptw_tbt_done " +
                                " , permittypelists.title as permit_type " +
                                " FROM pm_task " +
                                $"left join users as assignedTo on pm_task.assigned_to = assignedTo.id " +
@@ -445,13 +445,21 @@ namespace CMMSAPIs.Repositories.PM
             //List<ScheduleIDData> scheduleData = await Context.GetData<ScheduleIDData>(scheduleQuery).ConfigureAwait(false);
 
             CMDefaultResponse response;
-            string statusQry = $"SELECT status FROM pm_task WHERE id = {task_id}";
+            string statusQry = $"SELECT status,ifnull(assigned_to,0) assigned_to, ifnull(ptw_id,0) ptw_id FROM pm_task WHERE id = {task_id}";
             DataTable dt1 = await Context.FetchData(statusQry).ConfigureAwait(false);
             CMMS.CMMS_Status status = (CMMS.CMMS_Status)Convert.ToInt32(dt1.Rows[0][0]);
-            if (status != CMMS.CMMS_Status.PM_ASSIGNED && status != CMMS.CMMS_Status.PM_LINKED_TO_PTW)
+            int assigned_to = Convert.ToInt32(dt1.Rows[0][1]);
+            int ptw_id = Convert.ToInt32(dt1.Rows[0][2]);
+            if (assigned_to <= 0)
             {
-                    return new CMDefaultResponse(task_id, CMMS.RETRUNSTATUS.FAILURE, "PM Task is Not Assigned or Task is already Linked to Permit");
+                return new CMDefaultResponse(task_id, CMMS.RETRUNSTATUS.FAILURE, "PM Task is Not Assigned.");
             }
+
+            if (ptw_id > 0)
+            {
+                return new CMDefaultResponse(task_id, CMMS.RETRUNSTATUS.FAILURE, "PM Task is already Linked to Permit");
+            }
+
 
             string permitQuery = "SELECT ptw.id as ptw_id, ptw.code as ptw_code, ptw.title as ptw_title, ptw.status as ptw_status " + 
                                     "FROM " + 
