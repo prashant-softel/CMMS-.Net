@@ -700,7 +700,7 @@ namespace CMMSAPIs.Repositories.Permits
             foreach (var data in request.safety_question_list)
             {
 
-                string qryPermitSaftyQuestion = $"insert into permitsafetyquestions ( permitId , safetyMeasureId, safetyMeasureValue) value ({ insertedId  }, { data.safetyMeasureId }, '{ data.safetyMeasureValue }')";
+                string qryPermitSaftyQuestion = $"insert into permitsafetyquestions ( permitId , safetyMeasureId, safetyMeasureValue,ischeck) value ({ insertedId  }, { data.safetyMeasureId }, '{ data.safetyMeasureValue }',{data.ischeck})";
                 await Context.ExecuteNonQry<int>(qryPermitSaftyQuestion).ConfigureAwait(false);
             }
             //file_upload_form pending 
@@ -748,7 +748,7 @@ namespace CMMSAPIs.Repositories.Permits
             if (permit_id <= 0)
                 throw new ArgumentException("Invalid Permit ID");
 
-            string myQuery = $"SELECT ptw.id as insertedId,CONCAT(userTBT.firstName,' ',userTBT.lastName) as TBT_Done_By,TBT_Done_By as TBT_Done_By_id ,CONCAT('PTW ',ptw.id) as sitePermitNo,TBT_Done_At,CASE when ptw.endDate < '{UtilsRepository.GetUTCTime()}' and ptw.status = {(int)CMMS.CMMS_Status.PTW_APPROVED} then 1 else 0 END as isExpired, ptw.status as ptwStatus, {statusSubQuery} as current_status_short, ptw.startDate as start_datetime, ptw.endDate as end_datetime, facilities.id as facility_id, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, blocks.id as blockId, blocks.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.title as title, ptw.description as description, ptw.jobTypeId as job_type_id, jobType.title as job_type_name, ptw.TBTId as sop_type_id, sop.title as sop_type_name, user1.id as issuer_id, CONCAT(user1.firstName,' ',user1.lastName) as issuedByName,ud1.name as issuerDesignation,co1.name as issuerCompany, ptw.issuedDate as issue_at, user6.id as issueRejectedby_id, CONCAT(user6.firstName,' ',user6.lastName) as issueRejectedByName,co6.name as issueRejecterCompany,ud6.name as issueRejecterDesignation, ptw.rejectedDate as issueRejected_at, user2.id as approver_id, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName,ud2.name as approverDesignation,co2.name as approverCompany, ptw.approvedDate as approve_at,user7.id as rejecter_id, CONCAT(user7.firstName,' ',user7.lastName) as rejectedByName,ud7.name as rejecterDesignation,co7.name as rejecterCompany, ptw.rejectedDate as rejected_at, user3.id as requester_id, CONCAT(user3.firstName,' ',user3.lastName) as requestedByName,ud3.name as requesterDesignation,co3.name as requesterCompany, ptw.completedDate as close_at, user4.id as cancelRequestby_id, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName,ud4.name as cancelRequestByDesignation,co4.name as cancelRequestByCompany,user8.id as cancelRequestApprovedby_id, CONCAT(user8.firstName,' ',user8.lastName) as cancelRequestApprovedByName,ud8.name as cancelRequestApprovedByDesignation,co8.name as cancelRequestApprovedByCompany, user9.id as cancelRequestRejectedby_id, CONCAT(user9.firstName,' ',user9.lastName) as cancelRequestRejectedByName, ud9.name as cancelRequestRejectedByDesignation,co9.name as cancelRequestRejectedByCompany,user5.id as closedby_id, CONCAT(user5.firstName,' ',user5.lastName) as closedByName, ud5.name as closedByDesignation,co5.name as closedByCompany,ptw.cancelRequestDate as cancel_at,ptw.gridIsolation as is_grid_isolation_required,gridStartDate as grid_start_datetime,gridStopDate  as grid_stop_datetime, gridRemark as grid_remark,physicalIsolation as is_physical_iso_required , physicalIsoRemark as physical_iso_remark,lotoRequired as is_loto_required, lotoRemark as loto_remark " +
+            string myQuery = $"SELECT ptw.id as insertedId,CONCAT(userTBT.firstName,' ',userTBT.lastName) as TBT_Done_By,TBT_Done_By as TBT_Done_By_id ,CONCAT('PTW ',ptw.id) as sitePermitNo,TBT_Done_At,CASE when ptw.endDate < '{UtilsRepository.GetUTCTime()}' and ptw.status = {(int)CMMS.CMMS_Status.PTW_APPROVED} then 1 else 0 END as isExpired, ptw.status as ptwStatus, {statusSubQuery} as current_status_short, ptw.startDate as start_datetime, ptw.endDate as end_datetime, facilities.id as facility_id, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, blocks.id as blockId, blocks.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.title as title, ptw.description as description, ptw.jobTypeId as job_type_id, jobType.title as job_type_name, ptw.TBTId as sop_type_id, sop.title as sop_type_name, user1.id as issuer_id, CONCAT(user1.firstName,' ',user1.lastName) as issuedByName,ud1.name as issuerDesignation,co1.name as issuerCompany,ptw.acceptedDate as request_datetime, ptw.issuedDate as issue_at, user6.id as issueRejectedby_id, CONCAT(user6.firstName,' ',user6.lastName) as issueRejectedByName,co6.name as issueRejecterCompany,ud6.name as issueRejecterDesignation, ptw.rejectedDate as issueRejected_at, user2.id as approver_id, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName,ud2.name as approverDesignation,co2.name as approverCompany, ptw.approvedDate as approve_at,user7.id as rejecter_id, CONCAT(user7.firstName,' ',user7.lastName) as rejectedByName,ud7.name as rejecterDesignation,co7.name as rejecterCompany, ptw.rejectedDate as rejected_at, user3.id as requester_id, CONCAT(user3.firstName,' ',user3.lastName) as requestedByName,ud3.name as requesterDesignation,co3.name as requesterCompany, ptw.completedDate as close_at, user4.id as cancelRequestby_id, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName,ud4.name as cancelRequestByDesignation,co4.name as cancelRequestByCompany,user8.id as cancelRequestApprovedby_id, CONCAT(user8.firstName,' ',user8.lastName) as cancelRequestApprovedByName,ud8.name as cancelRequestApprovedByDesignation,co8.name as cancelRequestApprovedByCompany, user9.id as cancelRequestRejectedby_id, CONCAT(user9.firstName,' ',user9.lastName) as cancelRequestRejectedByName, ud9.name as cancelRequestRejectedByDesignation,co9.name as cancelRequestRejectedByCompany,user5.id as closedby_id, CONCAT(user5.firstName,' ',user5.lastName) as closedByName, ud5.name as closedByDesignation,co5.name as closedByCompany,ptw.cancelRequestDate as cancel_at,ptw.gridIsolation as is_grid_isolation_required,gridStartDate as grid_start_datetime,gridStopDate  as grid_stop_datetime, gridRemark as grid_remark,physicalIsolation as is_physical_iso_required , physicalIsoRemark as physical_iso_remark,lotoRequired as is_loto_required, lotoRemark as loto_remark " +
               "FROM permits as ptw " +
               "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
               "LEFT JOIN permitjobtypelist as jobType ON ptw.jobTypeId = jobType.id " +
@@ -794,7 +794,7 @@ namespace CMMSAPIs.Repositories.Permits
             List<CMIsolationList> _IsolationList = await Context.GetData<CMIsolationList>(myQuery2).ConfigureAwait(false);
 
             //get loto
-            string myQuery3 = "SELECT cat.name as equipment_cat, assets.name as equipment_name, CONCAT(emp.firstName,' ',emp.lastName) as employee_name,loto.Loto_key as Loto_Key,loto.lotoLockNo as Loto_lock_number FROM permitlotoassets as loto " +
+            string myQuery3 = "SELECT cat.name as equipment_cat, assets.name as equipment_name, CONCAT(emp.firstName,' ',emp.lastName) as employee_name,loto.Loto_key as Loto_Key,loto.Loto_Asset_id as Loto_id,loto.lotoLockNo as Loto_lock_number FROM permitlotoassets as loto " +
                                "JOIN assets on assets.id = loto.Loto_Asset_id " +
                                "JOIN users AS emp on emp.id = loto.emp_id " +
                                "JOIN assetcategories as cat ON assets.categoryId = cat.id " +
@@ -810,16 +810,18 @@ namespace CMMSAPIs.Repositories.Permits
                               " where ptw.id = " + permit_id + " and U.module_type = " + (int)CMMS.CMMS_Modules.PTW + ";";
 
             List<CMFileDetail> _UploadFileList = await Context.GetData<CMFileDetail>(myQuery4).ConfigureAwait(false);
-            
+
 
             //get safty question
-            string myQuery5 = "SELECT permitsaftymea.id as saftyQuestionId, permitsaftymea.title as SaftyQuestionName, permitsaftymea.input as input FROM permitsafetyquestions  as permitsaftyques " +
-                               "LEFT JOIN permittypesafetymeasures as permitsaftymea ON permitsaftyques.safetyMeasureId = permitsaftymea.id " +
-                               "JOIN permits as ptw ON ptw.typeId = permitsaftymea.permitTypeId " +
-                               $"where ptw.id = {permit_id} GROUP BY saftyQuestionId";
-
-
-
+            /* string myQuery5 = "SELECT permitsaftymea.id as saftyQuestionId, permitsaftymea.title as SaftyQuestionName, permitsaftymea.input as input FROM permitsafetyquestions  as permitsaftyques " +
+                                "LEFT JOIN permittypesafetymeasures as permitsaftymea ON permitsaftyques.safetyMeasureId = permitsaftymea.id " +
+                                "JOIN permits as ptw ON ptw.typeId = permitsaftymea.permitTypeId " +
+                                $"where ptw.id = {permit_id} GROUP BY saftyQuestionId";*/
+            //permitsaftymea.input as input
+            string myQuery5 = "SELECT permitsaftymea.id as saftyQuestionId,permitsaftyques.permitId, permitsaftymea.title as SaftyQuestionName,permitsaftyques.ischeck   FROM permitsafetyquestions  as permitsaftyques" +
+                              " LEFT JOIN permittypesafetymeasures as permitsaftymea ON permitsaftyques.safetyMeasureId = permitsaftymea.id " +
+                             " LEFT JOIN permits as ptw ON ptw.Id = permitsaftyques.permitId " +
+                              $"where ptw.id ={permit_id}";
             List<CMSaftyQuestion> _QuestionList = await Context.GetData<CMSaftyQuestion>(myQuery5).ConfigureAwait(false);
           
             //get Associated Job
@@ -1057,6 +1059,12 @@ namespace CMMSAPIs.Repositories.Permits
 
             }
 
+          /*  if (_PermitDetailsList[0].ptwStatus == (int)CMMS.CMMS_Status.PTW_APPROVED && _PermitDetailsList[0].TBT_Done_At!=null)
+            {
+                _PermitDetailsList[0].current_status_short = "Approved";
+                _PermitDetailsList[0].current_status_long = "Permit Approved TBT  done";
+
+            }*/
 
             foreach (var list in _PermitDetailsList  )
             {
@@ -1072,8 +1080,10 @@ namespace CMMSAPIs.Repositories.Permits
                     list.issue_at= await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime) list.issue_at);
                 if (list != null && list.rejected_at != null)
                     list.rejected_at= await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime) list.rejected_at);
-               
-                
+                if (list != null && list.request_datetime != null)
+                {
+                    list.request_datetime = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)list.request_datetime);
+                }
             }
             return _PermitDetailsList[0];
         }
@@ -1515,9 +1525,6 @@ namespace CMMSAPIs.Repositories.Permits
 
             string TBT_Done_At = (request.TBT_Done_At == null) ? "'0001-01-01 00:00:00'" : "'" + ((DateTime)request.TBT_Done_At).ToString("yyyy-MM-dd HH:mm:ss") + "'";
             updatePermitQry += $"TBT_Done_At = {TBT_Done_At}, ";
-
-
-
             updatePermitQry = updatePermitQry.Substring(0, updatePermitQry.Length - 2);
             updatePermitQry += $" where id = { request.permit_id }; ";
 
