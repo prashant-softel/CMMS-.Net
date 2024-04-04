@@ -37,7 +37,7 @@ namespace CMMSAPIs.Models.Permits
         public string issuedByName { get; set; }
         public string issuerDesignation { get; set; }
         public string issuerCompany { get; set; }
-
+        public DateTime? request_datetime { get; set; }
         public DateTime? issue_at { get; set; }
         public int issueRejectedby_id { get; set; }
         public string issueRejectedByName { get; set; }
@@ -125,6 +125,8 @@ namespace CMMSAPIs.Models.Permits
         public string Loto_Key { get; set; }
         public string Loto_lock_number { get; set; }
         public string employee_name { get; set; }
+
+       public int Loto_id { get; set; }
     }
     public class CMAssociatedList
     {
@@ -179,6 +181,7 @@ namespace CMMSAPIs.Models.Permits
         public int saftyQuestionId { get; set; }
         public string SaftyQuestionName { get; set; }
         public int input { get; set; }
+        public int ischeck { get; set; }
     }
 
     public class CMPermitExtend

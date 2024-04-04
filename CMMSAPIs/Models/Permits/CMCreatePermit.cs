@@ -61,6 +61,7 @@ namespace CMMSAPIs.Models.Permits
     {
         public int safetyMeasureId { get; set; }
         public string safetyMeasureValue { get; set; }
+        public int ischeck { get; set; }
     }
     public class CMPermitLotoList
     {
