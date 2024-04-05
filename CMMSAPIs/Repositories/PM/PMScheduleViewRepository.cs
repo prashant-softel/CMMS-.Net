@@ -1098,19 +1098,34 @@ namespace CMMSAPIs.Repositories.PM
                         string myQuery2 = $"SELECT checkpoint.type from pm_execution left join checkpoint on pm_execution.check_point_id = checkpoint.id WHERE pm_execution.id = {schedule_detail.execution_id};";
 
                         DataTable dtType = await Context.FetchData(myQuery2).ConfigureAwait(false);
-                        string CPtypeValue = "";
-                           if (Convert.ToInt32(dtType.Rows[0][0]) == 0)
+                    object valueFromDatabase = dtType.Rows[0][0];
+                    string CPtypeValue = "";
+                    /*    if (Convert.ToInt32(dtType.Rows[0][0]) == 0)
+                     {
+                         CPtypeValue = $" , `text` = '{schedule_detail.text}' ";
+                     }
+                     else if (Convert.ToInt32(dtType.Rows[0][0]) == 1)
+                     {
+                         CPtypeValue = $" , `text` = {schedule_detail.text} ";
+                     }
+                     else if (Convert.ToInt32(dtType.Rows[0][0]) == 2)
+                     {
+                         CPtypeValue = $" , `text` = {schedule_detail.text} ";
+                     }*/
+                    if (valueFromDatabase != DBNull.Value)
+                    {
+                        int typeValue = Convert.ToInt32(valueFromDatabase);
+
+                        // Now use typeValue in your logic
+                        if (typeValue == 0)
                         {
                             CPtypeValue = $" , `text` = '{schedule_detail.text}' ";
                         }
-                        else if (Convert.ToInt32(dtType.Rows[0][0]) == 1)
+                        else if (typeValue == 1 || typeValue == 2)
                         {
                             CPtypeValue = $" , `text` = {schedule_detail.text} ";
                         }
-                        else if (Convert.ToInt32(dtType.Rows[0][0]) == 2)
-                        {
-                            CPtypeValue = $" , `text` = {schedule_detail.text} ";
-                        }
+                    }
                     CPtypeValue = CPtypeValue + $" , is_ok = {schedule_detail.cp_ok} ";
                         if (schedule_detail.observation != null || !schedule_detail.observation.Equals(execution_details[0].observation))
                         {

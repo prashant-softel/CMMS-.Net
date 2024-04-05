@@ -30,6 +30,7 @@ namespace CMMSAPIs.Models.Permits
         public string current_status_short { get; set; }
         public string current_status_long { get; set; }
         public int TBT_Done_By_id { get; set; }
+        public int TBT_Done_Check { get; set; }
     }
     public class CMSafetyMeasurementQuestionList
     {
