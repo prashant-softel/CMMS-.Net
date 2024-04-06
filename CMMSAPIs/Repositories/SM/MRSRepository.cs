@@ -242,7 +242,7 @@ namespace CMMSAPIs.Repositories.SM
                 for (var i = 0; i < request.cmmrsItems.Count; i++)
                 {
                     int available_qty = await GetAvailableQty(request.cmmrsItems[i].asset_item_ID, request.facility_ID);
-                    request.cmmrsItems[i].available_qty = available_qty; //- request.cmmrsItems[i].requested_qty;
+                    request.cmmrsItems[i].available_qty = available_qty;  //- request.cmmrsItems[i].requested_qty;
                     int equipmentID = request.cmmrsItems[i].asset_item_ID;
                     decimal quantity = request.cmmrsItems[i].qty;
 
