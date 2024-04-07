@@ -1098,19 +1098,34 @@ namespace CMMSAPIs.Repositories.PM
                         string myQuery2 = $"SELECT checkpoint.type from pm_execution left join checkpoint on pm_execution.check_point_id = checkpoint.id WHERE pm_execution.id = {schedule_detail.execution_id};";
 
                         DataTable dtType = await Context.FetchData(myQuery2).ConfigureAwait(false);
-                        string CPtypeValue = "";
-                           if (Convert.ToInt32(dtType.Rows[0][0]) == 0)
+                    object valueFromDatabase = dtType.Rows[0][0];
+                    string CPtypeValue = "";
+                    /*    if (Convert.ToInt32(dtType.Rows[0][0]) == 0)
+                     {
+                         CPtypeValue = $" , `text` = '{schedule_detail.text}' ";
+                     }
+                     else if (Convert.ToInt32(dtType.Rows[0][0]) == 1)
+                     {
+                         CPtypeValue = $" , `text` = {schedule_detail.text} ";
+                     }
+                     else if (Convert.ToInt32(dtType.Rows[0][0]) == 2)
+                     {
+                         CPtypeValue = $" , `text` = {schedule_detail.text} ";
+                     }*/
+                    if (valueFromDatabase != DBNull.Value)
+                    {
+                        int typeValue = Convert.ToInt32(valueFromDatabase);
+
+                        // Now use typeValue in your logic
+                        if (typeValue == 0)
                         {
                             CPtypeValue = $" , `text` = '{schedule_detail.text}' ";
                         }
-                        else if (Convert.ToInt32(dtType.Rows[0][0]) == 1)
+                        else if (typeValue == 1 || typeValue == 2)
                         {
                             CPtypeValue = $" , `text` = {schedule_detail.text} ";
                         }
-                        else if (Convert.ToInt32(dtType.Rows[0][0]) == 2)
-                        {
-                            CPtypeValue = $" , `text` = {schedule_detail.text} ";
-                        }
+                    }
                     CPtypeValue = CPtypeValue + $" , is_ok = {schedule_detail.cp_ok} ";
                         if (schedule_detail.observation != null || !schedule_detail.observation.Equals(execution_details[0].observation))
                         {
@@ -1400,6 +1415,33 @@ namespace CMMSAPIs.Repositories.PM
                         if (!schedule_detail.observation.Equals(execution_details[0].observation))
                         {
                             string updateQry = "UPDATE pm_execution SET ";
+                            updateQry += $"PM_Schedule_Observation = '{schedule_detail.observation}', " +
+                                        $"is_ok = '{schedule_detail.type_bool}', ";
+                            /*+
+                                        $"text = '{schedule_detail.type_text}', " +
+                                        $"boolean = '{schedule_detail.type_bool}', " +
+                                        $"range = '{schedule_detail.type_range}'";*/
+                            string message;
+                            if (execution_details[0].observation == null || execution_details[0].observation == "")
+                            {
+                                updateQry += $"PM_Schedule_Observation_added_by = {userID}, " +
+                                            $"PM_Schedule_Observation_add_date = '{UtilsRepository.GetUTCTime()}' {CPtypeValue} ";
+                                message = "Observation Added";
+                                response = new CMDefaultResponse(schedule_detail.execution_id, CMMS.RETRUNSTATUS.SUCCESS, "Observation Added Successfully");
+                            }
+                            else
+                            {
+                                updateQry += $"PM_Schedule_Observation_update_by = {userID}, " +
+                                            $"PM_Schedule_Observation_update_date = '{UtilsRepository.GetUTCTime()}' {CPtypeValue} ";
+                                message = "Observation Updated";
+                                response = new CMDefaultResponse(schedule_detail.execution_id, CMMS.RETRUNSTATUS.SUCCESS, "Observation Updated Successfully");
+                            }
+                            updateQry += $"WHERE id = {executionId};";
+
+                         /*
+                            if (!schedule_detail.observation.Equals(execution_details[0].observation))
+                        {
+                            string updateQry = "UPDATE pm_execution SET ";
                             string message;
                             if (execution_details[0].observation == null || execution_details[0].observation == "")
                             {
@@ -1417,7 +1459,7 @@ namespace CMMSAPIs.Repositories.PM
                                 message = "Observation Updated";
                                 response = new CMDefaultResponse(schedule_detail.execution_id, CMMS.RETRUNSTATUS.SUCCESS, "Observation Updated Successfully");
                             }
-                            updateQry += $"WHERE id = {executionId};";
+                            updateQry += $"WHERE id = {executionId};";*/
                             await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
                             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, to_schedule_id, CMMS.CMMS_Modules.PM_EXECUTION, schedule_detail.execution_id, message, CMMS.CMMS_Status.PM_UPDATED, userID);
                             responseList.Add(response);

@@ -115,6 +115,7 @@ namespace CMMSAPIs.Models.Permits
         public string TBT_Done_By { get; set; }
         public DateTime? TBT_Done_At { get; set; }
         public bool is_TBT_Expire { get; set; }
+        public int TBT_Done_Check { get; set; }
         public List<CMPermitLotoOtherList> LotoOtherDetails { get; set; }   
     }
 

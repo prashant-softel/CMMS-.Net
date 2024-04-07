@@ -921,22 +921,21 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Execution Rejected");
             return response;
         }
+      
         internal virtual async Task<List<CMMCEquipmentList>> GetEquipmentList(int facility_Id)
         {
             string filter = "";
+            List<CMMCEquipmentList> invs = new List<CMMCEquipmentList>();
 
             if (facility_Id > 0)
             {
-                filter += $" and facilityId={facility_Id} ";
-            }
-
-            string invQuery = $"SELECT assets.id AS invId, assets.name AS invName, assets.moduleQuantity FROM assets JOIN assetcategories ON assets.categoryId = assetcategories.id WHERE assetcategories.name =\"Inverter\" {filter}";
+            string invQuery = $"SELECT assets.id AS invId, assets.name AS invName, assets.moduleQuantity FROM assets JOIN assetcategories ON assets.categoryId = assetcategories.id WHERE assetcategories.name=\"Inverter\" and facilityId={facility_Id}  ";
         
 
-            List<CMMCEquipmentList> invs = await Context.GetData<CMMCEquipmentList>(invQuery).ConfigureAwait(false);
+             invs = await Context.GetData<CMMCEquipmentList>(invQuery).ConfigureAwait(false);
 
 
-            string smbQuery = $"SELECT assets.id as smbId, assets.name as smbName , assets.parentId, assets.moduleQuantity from assets  join assetcategories on  assets.categoryId =assetcategories.id where assetcategories.name = \"SMB\" {filter}";
+            string smbQuery = $"SELECT assets.id as smbId, assets.name as smbName , assets.parentId, assets.moduleQuantity from assets  join assetcategories on  assets.categoryId =assetcategories.id where assetcategories.name = \"SMB\" and facilityId={facility_Id}  ";
            
             List<CMPlanSMB> smbs = await Context.GetData<CMPlanSMB>(smbQuery).ConfigureAwait(false);
 
@@ -951,13 +950,12 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                     {
                         inv.moduleQuantity += smb.moduleQuantity;
                         inv?.smbs.Add(smb);
+                        }
                     }
                 }
-
             }
             return invs;
         }
-
         internal virtual async Task<List<CMMCTaskEquipmentList>> GetTaskEquipmentList(int taskId,string facilitytimeZone)
         {
 

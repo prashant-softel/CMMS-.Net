@@ -48,8 +48,8 @@ namespace CMMSAPIs.Repositories.FileUpload
                             string relativeFilePath = Path.Combine(UploadPath, file.FileName);
                             //TODO Implement CreateThumbnail Function
                             //CreateThumbnail(filePath);
-                            string myQuery = "INSERT INTO uploadedfiles(facility_id, module_type, module_ref_id, file_category, file_path, file_type, created_by, created_at, file_size, file_size_units, file_size_bytes)" + 
-                                $"VALUES ({request.facility_id}, {(int)request.module_type}, {request.module_ref_id}, {request.file_category}, '{relativeFilePath.Replace(@"\", @"\\")}', '{file.ContentType}', {userID}, " +
+                            string myQuery = "INSERT INTO uploadedfiles(facility_id, module_type, module_ref_id, file_category, file_path,description, file_type, created_by, created_at, file_size, file_size_units, file_size_bytes)" + 
+                                $"VALUES ({request.facility_id}, {(int)request.module_type}, {request.module_ref_id}, {request.file_category},'{relativeFilePath.Replace(@"\", @"\\")}','{request.description}','{file.ContentType}', {userID}, " +
                                 $"'{Utils.UtilsRepository.GetUTCTime()}', {file.Length}, 'B', {file.Length}); " +
                                 "SELECT LAST_INSERT_ID();";
                             DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);

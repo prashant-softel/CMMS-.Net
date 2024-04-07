@@ -33,7 +33,7 @@ namespace CMMSAPIs.Models.Permits
         public List<CMFileUploadForm> file_upload_form { get; set; }
         public List<CMUpdatePermit> PermitHistory { get; set; }
         public int TBT_Done_By { get; set; }
-        public DateTime TBT_Done_At { get; set; }
+        public DateTime? TBT_Done_At  { get; set; }
         public List<CMPermitLotoOtherList> LotoOtherDetails { get; set; }
     }
 }

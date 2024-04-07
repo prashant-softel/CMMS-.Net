@@ -44,6 +44,7 @@ public class CMFileDetail
     public double fileSize { get; set; }
     public int status { get; set; }
     public string PTWFiles { get; set; }
+    public string description { get; set; }
 }
 public class CMJCJobDetail
 {
