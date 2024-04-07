@@ -6,6 +6,8 @@ namespace CMMSAPIs.Models.FileUpload
 {
     public class CMFileUpload
     {
+        public  string description { get; set; }
+
         public List<IFormFile>? files { get; set; }
         public int facility_id { get; set; }
         public CMMS.CMMS_Modules module_type { get; set; }
