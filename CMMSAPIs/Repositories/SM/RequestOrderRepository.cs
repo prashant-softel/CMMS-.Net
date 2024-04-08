@@ -36,13 +36,16 @@ namespace CMMSAPIs.Repositories.SM
         {
             CMDefaultResponse response = null;
             int ReturnID = 0;
+          
             try
             {
                 if (request.request_order_items != null)
                 {
+
                     string poInsertQuery = $" INSERT INTO smrequestorder (facilityID,generated_by,request_date,status,remarks)" +
                        $"VALUES({request.facilityID},  {userID}, '{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}', {(int)CMMS.CMMS_Status.SM_RO_SUBMITTED}, '{request.comment}');" +
                         $" SELECT LAST_INSERT_ID();";
+                   
                     DataTable dt2 = await Context.FetchData(poInsertQuery).ConfigureAwait(false);
                     int roid = Convert.ToInt32(dt2.Rows[0][0]);
                     ReturnID = roid;
@@ -53,6 +56,7 @@ namespace CMMSAPIs.Repositories.SM
                         DataTable dtInsertPO = await Context.FetchData(poDetailsQuery).ConfigureAwait(false);
                         int id = Convert.ToInt32(dtInsertPO.Rows[0][0]);
                     }
+                    response = new CMDefaultResponse(ReturnID, CMMS.RETRUNSTATUS.SUCCESS, "Request order created successfully.");
                 }
             }
             catch (Exception ex)
@@ -60,7 +64,6 @@ namespace CMMSAPIs.Repositories.SM
                 response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, ex.Message);
             }
 
-            response = new CMDefaultResponse(ReturnID, CMMS.RETRUNSTATUS.SUCCESS, "Request order created successfully.");
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_RO, ReturnID, 0, 0, request.comment, CMMS.CMMS_Status.SM_RO_SUBMITTED);
             return response;
         }

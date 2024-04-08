@@ -59,6 +59,8 @@ namespace CMMSAPIs.Models.PM
         public string checklist_name { get; set; }
         public List<ScheduleCheckList> checklist_observation { get; set; }
         public List<ScheduleLinkJob> schedule_link_job { get; set; }
+        public int completedBy_id { get; set; }
+        public string completedBy_name { get; set; }
 
     }
     public class CMPMTaskView: CMPMTaskList

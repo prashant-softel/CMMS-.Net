@@ -304,8 +304,9 @@ namespace CMMSAPIs.Repositories.PM
             if (taskViewDetail.Count == 0)
                 throw new MissingMemberException("PM Task not found");
 
-            string myQuery2 = $"SELECT pm_schedule.id as schedule_id,assets.id as assetsID, assets.name as asset_name, checklist.checklist_number as checklist_name from pm_schedule " +
+            string myQuery2 = $"SELECT pm_schedule.id as schedule_id,assets.id as assetsID, assets.name as asset_name,PM_Schedule_Completed_by_id as completedBy_id,  CONCAT(users.firstName, users.lastName) as   completedBy_name , checklist.checklist_number as checklist_name from pm_schedule " +
                 $"left join assets on pm_schedule.asset_id = assets.id " +
+                 $"left join users on pm_schedule.PM_Schedule_Completed_by_id = users.id " +
                 $"left join checklist_number as checklist on pm_schedule.checklist_id = checklist.id " +
                 $"where task_id = {task_id};";
 
@@ -1240,7 +1241,19 @@ namespace CMMSAPIs.Repositories.PM
                             response = new CMDefaultResponse(schedule_detail.execution_id, CMMS.RETRUNSTATUS.SUCCESS, "No changes");
                             responseList.Add(response);
                         }
+                    else
+                    {
+                        string pmScheduleUpdate = $"UPDATE pm_schedule as pms " +
+                                                  $"SET pms.PM_Schedule_Completed_by_id = {userID}, " +
+                                                  $"pms.PM_Schedule_Completed_date = '{UtilsRepository.GetUTCTime()}' " +
+                                                  $"WHERE pms.id = {schedule.schedule_id};";
+                        await Context.ExecuteNonQry<int>(pmScheduleUpdate).ConfigureAwait(false);
+
+                        CMDefaultResponse responseSchedule = new CMDefaultResponse(schedule.schedule_id, CMMS.RETRUNSTATUS.SUCCESS, $"Schedule Execution Updated Successfully.");
+
+                        responseList.Add(responseSchedule);
                     }
+                }
                     else
                     {
                         response = new CMDefaultResponse(schedule_detail.execution_id, CMMS.RETRUNSTATUS.INVALID_ARG, $"Execution ID {schedule_detail.execution_id} is not associated with PMSCH{schedule.schedule_id}");
@@ -1250,9 +1263,10 @@ namespace CMMSAPIs.Repositories.PM
 
             //string taskQry = $"update pm_task set updated_by = {userID},updated_at = '{UtilsRepository.GetUTCTime()}', update_remarks = '{request.comment}' WHERE id = {request.task_id};";
             //int val = await Context.ExecuteNonQry<int>(taskQry).ConfigureAwait(false);
-            CMDefaultResponse responseSchedule = new CMDefaultResponse(schedule.schedule_id, CMMS.RETRUNSTATUS.SUCCESS, $"Schedule Execution Updated Successfully.");
+            //CMDefaultResponse responseSchedule = new CMDefaultResponse(schedule.schedule_id, CMMS.RETRUNSTATUS.SUCCESS, $"Schedule Execution Updated Successfully.");
 
-            responseList.Add(responseSchedule);
+            //responseList.Add(responseSchedule);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE,request.task_id, 0, 0, $"PM Task {request.task_id} updated.", CMMS.CMMS_Status.PM_UPDATED, userID);
             return responseList;
         }
 
@@ -1360,7 +1374,7 @@ namespace CMMSAPIs.Repositories.PM
             
             return scheduleDetails[0];
         }
-        internal async Task<List<CMDefaultResponse>> cloneSchedule(int facility_id, int task_id, int from_schedule_id,int to_schedule_id,int userID)
+        internal async Task<List<CMDefaultResponse>>cloneSchedule(int facility_id, int task_id, int from_schedule_id,int to_schedule_id,int cloneJobs, int userID)
         {
             string statusQry = $"SELECT checklist_id FROM pm_schedule WHERE task_id = {task_id} and id IN ({from_schedule_id},{to_schedule_id});";
             DataTable dt1 = await Context.FetchData(statusQry).ConfigureAwait(false);
@@ -1465,36 +1479,44 @@ namespace CMMSAPIs.Repositories.PM
                             responseList.Add(response);
                             changeFlag++;
                         }
-                        if (schedule_detail.linked_job_id > 0 && execution_details[0].job_create == 0)
+                        if (cloneJobs == 1)
                         {
-
-                            string facilityQry = $"SELECT pm_task.facility_id as block, CASE WHEN facilities.parentId=0 THEN facilities.id ELSE facilities.parentId END AS parent " +
-                                                $"FROM pm_schedule Left join pm_task on pm_task.id = pm_schedule.task_id LEFT JOIN facilities ON pm_task.facility_id=facilities.id " +
-                                                $"WHERE pm_schedule.id = {to_schedule_id}  group by pm_task.id ;";
-                            DataTable dtFacility = await Context.FetchData(facilityQry).ConfigureAwait(false);
-                            string titleDescQry = $"SELECT CONCAT('PMSCH{to_schedule_id}', Check_Point_Name, ': ', Check_Point_Requirement) as title, " +
-                                                    $"PM_Schedule_Observation as description FROM pm_execution WHERE id = {executionId};";
-                            DataTable dtTitleDesc = await Context.FetchData(titleDescQry).ConfigureAwait(false);
-                            string assetsPMQry = $"SELECT Asset_id FROM pm_schedule WHERE id = {to_schedule_id};";
-                            DataTable dtPMAssets = await Context.FetchData(assetsPMQry).ConfigureAwait(false);
-                            CMCreateJob newJob = new CMCreateJob()
+                            if (schedule_detail.linked_job_id > 0 && execution_details[0].job_create == 0)
                             {
-                                title = dtTitleDesc.GetColumn<string>("title")[0],
-                                description = dtTitleDesc.GetColumn<string>("description")[0],
-                                facility_id = dtFacility.GetColumn<int>("parent")[0],
-                                block_id = dtFacility.GetColumn<int>("block")[0],
-                                breakdown_time = DateTime.UtcNow,
-                                AssetsIds = dtPMAssets.GetColumn<int>("Asset_id"),
-                                jobType = CMMS.CMMS_JobType.PreventiveMaintenance
-                            };
-                            CMDefaultResponse jobResp = await _jobRepo.CreateNewJob(newJob, userID);
-                            string updateQry = $"UPDATE pm_execution SET job_created = 1, linked_job_id = {jobResp.id[0]} WHERE id = {executionId};";
-                            await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
-                            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, to_schedule_id, CMMS.CMMS_Modules.PM_EXECUTION, schedule_detail.execution_id, $"Job {jobResp.id[0]} Created for PM", CMMS.CMMS_Status.PM_UPDATED, userID);
-                            response = new CMDefaultResponse(schedule_detail.execution_id, CMMS.RETRUNSTATUS.SUCCESS, $"Job {jobResp.id[0]} Created for PM Successfully");
-                            responseList.Add(response);
-                            changeFlag++;
+
+                                string facilityQry = $"SELECT pm_task.facility_id as block, CASE WHEN facilities.parentId=0 THEN facilities.id ELSE facilities.parentId END AS parent " +
+                                                    $"FROM pm_schedule Left join pm_task on pm_task.id = pm_schedule.task_id LEFT JOIN facilities ON pm_task.facility_id=facilities.id " +
+                                                    $"WHERE pm_schedule.id = {to_schedule_id}  group by pm_task.id ;";
+                                DataTable dtFacility = await Context.FetchData(facilityQry).ConfigureAwait(false);
+                                string titleDescQry = $"SELECT CONCAT('PMSCH{to_schedule_id}', Check_Point_Name, ': ', Check_Point_Requirement) as title, " +
+                                                        $"PM_Schedule_Observation as description FROM pm_execution WHERE id = {executionId};";
+                                DataTable dtTitleDesc = await Context.FetchData(titleDescQry).ConfigureAwait(false);
+                                string assetsPMQry = $"SELECT Asset_id FROM pm_schedule WHERE id = {to_schedule_id};";
+                                DataTable dtPMAssets = await Context.FetchData(assetsPMQry).ConfigureAwait(false);
+                                CMCreateJob newJob = new CMCreateJob()
+                                {
+                                    title = dtTitleDesc.GetColumn<string>("title")[0],
+                                    description = dtTitleDesc.GetColumn<string>("description")[0],
+                                    facility_id = dtFacility.GetColumn<int>("parent")[0],
+                                    block_id = dtFacility.GetColumn<int>("block")[0],
+                                    breakdown_time = DateTime.UtcNow,
+                                    AssetsIds = dtPMAssets.GetColumn<int>("Asset_id"),
+                                    jobType = CMMS.CMMS_JobType.PreventiveMaintenance
+                                };
+                                CMDefaultResponse jobResp = await _jobRepo.CreateNewJob(newJob, userID);
+                                string updateQry = $"UPDATE pm_execution SET job_created = 1, linked_job_id = {jobResp.id[0]} WHERE id = {executionId};";
+                                await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+                                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, to_schedule_id, CMMS.CMMS_Modules.PM_EXECUTION, schedule_detail.execution_id, $"Job {jobResp.id[0]} Created for PM", CMMS.CMMS_Status.PM_UPDATED, userID);
+                                response = new CMDefaultResponse(schedule_detail.execution_id, CMMS.RETRUNSTATUS.SUCCESS, $"Job {jobResp.id[0]} Created for PM Successfully");
+                                responseList.Add(response);
+                                changeFlag++;
+                            }
                         }
+                        else
+                        {
+                            //job creatiojn skipped
+                        }
+
                         if (schedule_detail.files != null)
                         {
                             if (schedule_detail.files.Count != 0)
@@ -1557,7 +1579,20 @@ namespace CMMSAPIs.Repositories.PM
                             response = new CMDefaultResponse(execution_details[0].execution_id, CMMS.RETRUNSTATUS.SUCCESS, "No changes");
                             responseList.Add(response);
                         }
+                        else
+                        {
+                            string pmScheduleUpdate = $"UPDATE pm_schedule as pms " +
+                                                  $"SET pms.PM_Schedule_Completed_by_id = {userID}, " +
+                                                  $"pms.PM_Schedule_Completed_date = '{UtilsRepository.GetUTCTime()}' " +
+                                                  $"WHERE pms.id = {to_schedule_id};";
+                            await Context.ExecuteNonQry<int>(pmScheduleUpdate).ConfigureAwait(false);
+
+                            CMDefaultResponse responseSchedule = new CMDefaultResponse(schedule_detail.execution_id, CMMS.RETRUNSTATUS.SUCCESS, $"Schedule Execution Updated Successfully.");
+
+                            responseList.Add(responseSchedule);
+                        }
                     }
+ 
                 }
                 else
                 {
@@ -1569,7 +1604,7 @@ namespace CMMSAPIs.Repositories.PM
                 //CMDefaultResponse response = new CMDefaultResponse();
             CMPMScheduleExecutionDetail to_schedule = await GetPMTaskScheduleDetail(task_id, from_schedule_id,"");
 
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, to_schedule_id, 0, 0, $"PM Task {to_schedule_id} cloned from {from_schedule_id}", CMMS.CMMS_Status.PM_ASSIGNED, userID);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, to_schedule_id, 0, 0, $"PM Task {task_id} schedule {to_schedule_id} is cloned from {from_schedule_id}", CMMS.CMMS_Status.PM_ASSIGNED, userID);
             return responseList;
         }
 

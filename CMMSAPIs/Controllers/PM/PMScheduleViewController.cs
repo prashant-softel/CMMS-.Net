@@ -269,12 +269,12 @@ namespace CMMSAPIs.Controllers.PM
 
         [Route("cloneSchedule")]
         [HttpPatch]
-        public async Task<IActionResult> cloneSchedule(int facility_id, int task_id, int from_schedule_id, int to_schedule_id)
+        public async Task<IActionResult> cloneSchedule(int facility_id, int task_id, int from_schedule_id, int to_schedule_id, int cloneJobs)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _PMScheduleViewBS.cloneSchedule(facility_id, task_id, from_schedule_id, to_schedule_id, userID);
+                var data = await _PMScheduleViewBS.cloneSchedule(facility_id, task_id, from_schedule_id, to_schedule_id, cloneJobs, userID);
                 return Ok(data);
             }
             catch (Exception ex)

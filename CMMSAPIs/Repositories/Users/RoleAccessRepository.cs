@@ -33,7 +33,7 @@ namespace CMMSAPIs.Repositories.Users
                             $"`RoleAccess` r " +
                             $"JOIN Features as f ON r.featureId = f.id " +
                          $"WHERE " +
-                            $"roleId = {role_id}";
+                            $"roleId = {role_id} ";
 
             List<CMAccessList> access_list = await Context.GetData<CMAccessList>(qry).ConfigureAwait(false);
 
