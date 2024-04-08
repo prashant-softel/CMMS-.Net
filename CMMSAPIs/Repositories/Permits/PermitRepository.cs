@@ -1614,7 +1614,7 @@ namespace CMMSAPIs.Repositories.Permits
                     await Context.ExecuteNonQry<int>(DeleteQry5).ConfigureAwait(false);
                     foreach (var data in request.safety_question_list)
                     {
-                        string qryPermitSaftyQuestion = $"insert into permitsafetyquestions ( permitId , safetyMeasureId, safetyMeasureValue) value ({ updatePrimaryKey }, { data.safetyMeasureId }, '{ data.safetyMeasureValue }')";
+                        string qryPermitSaftyQuestion = $"insert into permitsafetyquestions ( permitId , safetyMeasureId, safetyMeasureValue,ischeck) value ({ updatePrimaryKey }, { data.safetyMeasureId }, '{ data.safetyMeasureValue }',{data.ischeck})";
                         await Context.ExecuteNonQry<int>(qryPermitSaftyQuestion).ConfigureAwait(false);
                     }
                 }

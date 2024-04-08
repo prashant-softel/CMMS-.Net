@@ -24,7 +24,7 @@ namespace CMMSAPIs.BS.PM
         Task<CMDefaultResponse> AssignPMTask(int task_id, int assign_to, int userID);
         Task<List<CMDefaultResponse>> UpdatePMScheduleExecution(CMPMExecutionDetail request, int userID);
         Task<CMPMScheduleExecutionDetail> GetPMTaskScheduleDetail(int task_id, int schedule_id, string facilitytime);
-        Task<List<CMDefaultResponse>> cloneSchedule(int facility_id,int task_id, int from_schedule_id, int to_schedule_id,int userID);
+        Task<List<CMDefaultResponse>> cloneSchedule(int facility_id,int task_id, int from_schedule_id, int to_schedule_id,int cloneJobs, int userID);
         Task<List<AssetList>> getAssetListForClone(int task_id, int schedule_id);
 
     }
@@ -230,13 +230,13 @@ namespace CMMSAPIs.BS.PM
                 throw;
             }
         }
-        public async Task<List<CMDefaultResponse>> cloneSchedule(int facility_id, int task_id, int from_schedule_id, int to_schedule_id, int userID)
+        public async Task<List<CMDefaultResponse>> cloneSchedule(int facility_id, int task_id, int from_schedule_id, int to_schedule_id,int cloneJobs, int userID)
         {
             try
             {
                 using (var repos = new PMScheduleViewRepository(getDB))
                 {
-                    return await repos.cloneSchedule( facility_id,  task_id,  from_schedule_id,  to_schedule_id,  userID);
+                    return await repos.cloneSchedule( facility_id,  task_id,  from_schedule_id,  to_schedule_id, cloneJobs, userID);
                 }
             }
             catch (Exception ex)

@@ -230,7 +230,7 @@ namespace CMMSAPIs.Repositories.SM
                     $"status,flag,setAsTemplate,templateName, approved_by_emp_ID, approved_date,activity,whereUsedType,whereUsedRefID,remarks," +
                     $"from_actor_type_id,from_actor_id,to_actor_type_id,to_actor_id)" +
                     $" VALUES ({request.facility_ID},{request.requested_by_emp_ID},'{DateTime.Now.ToString("yyyy-MM-dd")}'" +
-                    $",{(int)CMMS.CMMS_Status.MRS_SUBMITTED},{1},'{request.setAsTemplate}','{request.templateName}',0,'2001-01-01 00:00','{request.activity}',{request.whereUsedType},{request.whereUsedRefID}, '{request.remarks}'," +
+                    $",{(int)CMMS.CMMS_Status.MRS_SUBMITTED},{1},'{request.setAsTemplate}','{request.templateName}',0,'{UtilsRepository.GetUTCTime()}','{request.activity}',{request.whereUsedType},{request.whereUsedRefID}, '{request.remarks}'," +
                     $" {request.from_actor_type_id}, {request.from_actor_id},{request.to_actor_type_id}, {request.to_actor_id}); SELECT LAST_INSERT_ID(); COMMIT;";
                 DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
                 request.ID = Convert.ToInt32(dt2.Rows[0][0]);
@@ -485,21 +485,7 @@ namespace CMMSAPIs.Repositories.SM
                 _List[i].status_short = _shortStatus;
                 _List[i].status_long = _status_long;
             }
-            foreach (var list in _List)
-            {
-                if (list != null && list.approved_date != null && list.approved_date != "0000-00-00")
-                {
-                    DateTime approved_date = Convert.ToDateTime(list.approved_date);
-                    var approved_date1 = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, approved_date);
-                    list.approved_date = approved_date1.ToString();
-                }
-                if (list != null && list.issued_date != null && list.issued_date != "0000-00-00")
-                {
-                    DateTime issued_date = Convert.ToDateTime(list.issued_date);
-                    var issued_date1 = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, issued_date);
-                    list.approved_date = issued_date1.ToString();
-                }
-            }
+           
             return _List;
            
         }
@@ -598,7 +584,7 @@ namespace CMMSAPIs.Repositories.SM
             //}
             //return _List;
             string stmt = "SELECT sm.ID,sm.requested_by_emp_ID,CONCAT(ed1.firstName,' ',ed1.lastName) as approver_name,DATE_FORMAT(sm.requested_date,'%Y-%m-%d') as requestd_date," +
-    "DATE_FORMAT(sm.returnDate,'%Y-%m-%d') as returnDate,if(sm.approval_status != '',DATE_FORMAT(sm.approved_date,'%d-%m-%Y'),'') as approval_date,sm.approval_status," +
+    "DATE_FORMAT(sm.returnDate,'%Y-%m-%d') as returnDate,if(sm.approval_status != '',DATE_FORMAT(sm.approved_date,'%Y-%m-%d'),'') as approval_date,sm.approval_status," +
     "sm.approval_comment,CONCAT(ed.firstName,' ',ed.lastName) as requested_by_name, sm.status, sm.activity, sm.whereUsedType," +
     " case when sm.whereUsedType = 1 then 'Job' when sm.whereUsedType = 2 then 'PM' when sm.whereUsedType = 4 then 'JOBCARD' when sm.whereUsedType = 27 then 'PMTASK' else 'Invalid' end as whereUsedTypeName,  sm.whereUsedRefID, sm.remarks " +
     ", DATE_FORMAT(sm.issuedAt,'%Y-%m-%d') as issued_date, CONCAT(issuedUser.firstName,' ',issuedUser.lastName) as issued_name " +
@@ -607,28 +593,7 @@ namespace CMMSAPIs.Repositories.SM
     " LEFT JOIN users issuedUser ON issuedUser.id = sm.issued_by_emp_ID " +
     "WHERE sm.id = " + ID + ";";
             List<CMMRSList> _List = await Context.GetData<CMMRSList>(stmt).ConfigureAwait(false);
-            foreach (var list in _List)
-             {
-                 if (list != null && list.approval_date != null && list.approval_date != "" &&list.approval_date!="0000-00-00")
-                 {
-
-                     DateTime approval_date = DateTime.Parse(list.approval_date);
-                     approval_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, approval_date);
-                     list.approval_date = approval_date.ToString();
-                 }
-                 if (list != null && list.issued_date != null && list.issued_date != "" &&list.issued_date!="0000-00-00")
-                 {
-                     DateTime issued_date = DateTime.Parse(list.issued_date);
-                     issued_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, issued_date);
-                     list.issued_date = issued_date.ToString();
-                 }
-                 if (list != null && list.returnDate != null && list.returnDate!="" &&list.returnDate!="0000-00-00")
-                 {
-                     DateTime returnDate = DateTime.Parse(list.returnDate);
-                     returnDate = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, returnDate);
-                     list.issued_date = returnDate.ToString();
-                 }
-             }
+            
             for (var i = 0; i < _List.Count; i++)
             {
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_List[i].status);
@@ -644,7 +609,7 @@ namespace CMMSAPIs.Repositories.SM
         internal async Task<CMMRSList> getReturnDataByID(int ID,string facilitytimeZone)
         {
             string stmt = "SELECT sm.ID,sm.requested_by_emp_ID as requested_by_emp_ID,CONCAT(ed1.firstName,' ',ed1.lastName) as approver_name," +
-    "DATE_FORMAT(sm.returnDate,'%Y-%m-%d') as returnDate,if(sm.approval_status != '',DATE_FORMAT(sm.approved_date,'%d-%m-%Y'),'') as approval_date,sm.approval_status," +
+    "DATE_FORMAT(sm.returnDate,'%Y-%m-%d') as returnDate,if(sm.approval_status != '',DATE_FORMAT(sm.approved_date,'%Y-%m-%d'),'') as approval_date,sm.approval_status," +
     "sm.approval_comment,CONCAT(ed.firstName,' ',ed.lastName) as requested_by_name, sm.status, sm.activity, sm.whereUsedType, " +
     " case when sm.whereUsedType = 1 then 'Job' when sm.whereUsedType = 2 then 'PM' else 'Invalid' end as whereUsedTypeName, sm.whereUsedRefID, COALESCE(sm.remarks,'') as  remarks " +
     "FROM smmrs sm LEFT JOIN users ed ON ed.id = sm.requested_by_emp_ID LEFT JOIN users ed1 ON ed1.id = sm.approved_by_emp_ID " +
