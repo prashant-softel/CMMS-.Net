@@ -716,7 +716,10 @@ namespace CMMSAPIs.Repositories.PM
                                 continue;
                                 //return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] Plan N cannot be null.");
                             }
-
+                            if (newR["StartDate"] == DBNull.Value)
+                            {
+                                continue;
+                            }
                             DateTime startDate = (DateTime)newR["StartDate"];
                             DateTime currentDate = DateTime.Now;
 

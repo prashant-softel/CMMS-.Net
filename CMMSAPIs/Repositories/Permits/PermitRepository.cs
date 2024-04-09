@@ -605,7 +605,7 @@ namespace CMMSAPIs.Repositories.Permits
              * Permits, PermitBlocks, PermitIsolatedAssetCategories, PermitLOTOAssets, PermitEmployeeLists, PermitSafetyQuestions
              * Permits                       - Basic details
              * PermitBlocks                  - One Pemrit can be created for multiple blocks
-             * PermitIsolatedAssetCategories - If Isolation is required. They can select multiple Equipment Categories
+             * PermitIsolatedAssetCategories - If gequired. They can select multiple Equipment Categories
              * PermitLOTOAssets              - List of assets 
              * PermitEmployeeLists           - Employee list those going to work on Permit
              * PermitSafetyQuestions         - Safety question they answered while creating Permit
@@ -843,13 +843,7 @@ namespace CMMSAPIs.Repositories.Permits
                 $"left join users as user on user.id = pm.assigned_to where pm.ptw_id = {permit_id} group by pm.id; ";
 
             List<CMAssociatedPMList> _AssociatedPMList = await Context.GetData<CMAssociatedPMList>(pmlist).ConfigureAwait(false);
-            foreach(var list in _AssociatedPMList)
-            {
-                if (list != null && list.startDate != null)
-                    list.startDate = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.startDate);
-                
-            }
-
+           
             foreach (var task in _AssociatedPMList)
             {
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(task.status);
@@ -1517,14 +1511,16 @@ namespace CMMSAPIs.Repositories.Permits
             
             
             updatePermitQry += $" TBT_Done_By = {request.TBT_Done_By},";
+            int id = request.TBT_Done_By;
+            if (id != null && id !=0)
+            {
+
+                updatePermitQry += $"TBT_Done_Check=1,";
+            }
 
             string TBT_Done_At = (request.TBT_Done_At == null) ? "'0001-01-01 00:00:00'" : "'" + ((DateTime)request.TBT_Done_At).ToString("yyyy-MM-dd HH:mm:ss") + "'";
-            updatePermitQry += $"TBT_Done_At = {TBT_Done_At}, ";
-            if(TBT_Done_At!=null && TBT_Done_At!= "0000-00-00 00:00:00")
-            {
-                
-                updatePermitQry += $"TBT_Done_Check=1 ";
-            }
+            updatePermitQry += $"TBT_Done_At = {TBT_Done_At} ";
+           
             updatePermitQry = updatePermitQry.Substring(0, updatePermitQry.Length - 1);
             updatePermitQry += $" where id = { request.permit_id }; ";
 

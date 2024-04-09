@@ -47,8 +47,8 @@ namespace CMMSAPIs.Repositories.SM
 
 
 
-            string stmt = "SELECT sm.ID,sm.requested_by_emp_ID,CONCAT(ed1.firstName,' ',ed1.lastName) as approver_name,DATE_FORMAT(sm.requested_date,'%Y-%m-%d') as requestd_date," +
-                "DATE_FORMAT(sm.returnDate,'%Y-%m-%d') as returnDate,if(sm.approval_status != '',DATE_FORMAT(sm.approved_date,'%d-%m-%Y'),'') as approval_date,sm.approval_status," +
+            string stmt = "SELECT sm.ID,sm.requested_by_emp_ID,CONCAT(ed1.firstName,' ',ed1.lastName) as approver_name,DATE_FORMAT(sm.requested_date,'%Y-%m-%d %H:%i') as requestd_date," +
+                "DATE_FORMAT(sm.returnDate,'%Y-%m-%d %H:%i') as returnDate,if(sm.approval_status != '',DATE_FORMAT(sm.approved_date,'%Y-%m-%d %H:%i'),'') as approval_date,sm.approval_status," +
                 "sm.approval_comment,CONCAT(ed.firstName,' ',ed.lastName) as requested_by_name, sm.status, sm.activity, sm.whereUsedType, " +
     " case when sm.whereUsedType = 1 then 'Job' when sm.whereUsedType = 2 then 'PM' when sm.whereUsedType = 4 then 'JOBCARD' when sm.whereUsedType = 27 then 'PMTASK' else 'Invalid' end as whereUsedTypeName, sm.whereUsedRefID, sm.remarks " +
                 "FROM smmrs sm LEFT JOIN users ed ON ed.id = sm.requested_by_emp_ID LEFT JOIN users ed1 ON ed1.id = sm.approved_by_emp_ID " +
@@ -216,7 +216,7 @@ namespace CMMSAPIs.Repositories.SM
                 var lastMRSID = request.ID;
                 var refType = "MRSEdit";
                 var mailSub = "CMMRS Request Updated";
-                string updatestmt = $" START TRANSACTION; UPDATE smmrs SET facility_ID = {request.facility_ID}, requested_by_emp_ID = {request.requested_by_emp_ID}, requested_date = {DateTime.Now.ToString("yyyy-MM-dd")}," +
+                string updatestmt = $" START TRANSACTION; UPDATE smmrs SET facility_ID = {request.facility_ID}, requested_by_emp_ID = {request.requested_by_emp_ID}, requested_date = {DateTime.Now.ToString("yyyy-MM-dd  HH:mm")}," +
                     $" setAsTemplate = '{request.setAsTemplate}', templateName = {request.templateName}, approval_status = {request.approval_status}, activity='{request.activity}',whereUsedType={request.whereUsedType},whereUsedRefID={request.whereUsedRefID}, remarks = '{request.remarks}' WHERE ID = {request.ID}" +
                     $"DELETE FROM smrsitems WHERE mrs_ID =  {lastMRSID} ; COMMIT;";
                 await Context.ExecuteNonQry<int>(updatestmt);
@@ -229,8 +229,8 @@ namespace CMMSAPIs.Repositories.SM
                 string insertStmt = $"START TRANSACTION; INSERT INTO smmrs (facility_ID,requested_by_emp_ID,requested_date," +
                     $"status,flag,setAsTemplate,templateName, approved_by_emp_ID, approved_date,activity,whereUsedType,whereUsedRefID,remarks," +
                     $"from_actor_type_id,from_actor_id,to_actor_type_id,to_actor_id)" +
-                    $" VALUES ({request.facility_ID},{request.requested_by_emp_ID},'{DateTime.Now.ToString("yyyy-MM-dd")}'" +
-                    $",{(int)CMMS.CMMS_Status.MRS_SUBMITTED},{1},'{request.setAsTemplate}','{request.templateName}',0,'{UtilsRepository.GetUTCTime()}','{request.activity}',{request.whereUsedType},{request.whereUsedRefID}, '{request.remarks}'," +
+                    $" VALUES ({request.facility_ID},{request.requested_by_emp_ID},'{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}'" +
+                    $",{(int)CMMS.CMMS_Status.MRS_SUBMITTED},{1},'{request.setAsTemplate}','{request.templateName}',0,'{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}','{request.activity}',{request.whereUsedType},{request.whereUsedRefID}, '{request.remarks}'," +
                     $" {request.from_actor_type_id}, {request.from_actor_id},{request.to_actor_type_id}, {request.to_actor_id}); SELECT LAST_INSERT_ID(); COMMIT;";
                 DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
                 request.ID = Convert.ToInt32(dt2.Rows[0][0]);
@@ -347,7 +347,7 @@ namespace CMMSAPIs.Repositories.SM
             request.requested_by_emp_ID = UserID;
             CMDefaultResponse response = null;
 
-            string updatestmt = $" START TRANSACTION; UPDATE smmrs SET facility_ID = {request.facility_ID}, requested_by_emp_ID = {request.requested_by_emp_ID}, requested_date = '{DateTime.Now.ToString("yyyy-MM-dd")}'," +
+            string updatestmt = $" START TRANSACTION; UPDATE smmrs SET facility_ID = {request.facility_ID}, requested_by_emp_ID = {request.requested_by_emp_ID}, requested_date = '{DateTime.Now.ToString("yyyy-MM-dd  HH:mm")}'," +
                                 $" setAsTemplate = '{request.setAsTemplate}',  approval_status = {request.approval_status}, activity='{request.activity}',whereUsedType={request.whereUsedType},whereUsedRefID={request.whereUsedRefID}, remarks = '{request.remarks}'" +
                                 $" , from_actor_type_id = {request.from_actor_type_id}, from_actor_id = {request.from_actor_id}, to_actor_type_id = {request.to_actor_type_id} " +
                                 $" , to_actor_id = {request.to_actor_id}, status={status} WHERE ID = {request.ID} ;" +
@@ -464,8 +464,8 @@ namespace CMMSAPIs.Repositories.SM
             string stmt = "SELECT smi.ID,smi.return_remarks,smi.mrs_return_ID,smi.finalRemark,smi.asset_item_ID," +
                 "smi.asset_MDM_code,smi.returned_qty," +
                 "smi.available_qty,smi.used_qty,smi.ID,smi.issued_qty,sm.flag as status, " +
-                "DATE_FORMAT(sm.returnDate,'%Y-%m-%d') as returnDate,sm.approval_status,DATE_FORMAT(sm.approved_date,'%Y-%m-%d') as approved_date," +
-                "DATE_FORMAT(sm.requested_date,'%Y-%m-%d') as issued_date,DATE_FORMAT(sm.returnDate, '%Y-%m-%d') as returnDate, smi.requested_qty, " +
+                "DATE_FORMAT(sm.returnDate,'%Y-%m-%d %H:%i') as returnDate,sm.approval_status,DATE_FORMAT(sm.approved_date,'%Y-%m-%d %H:%i') as approved_date," +
+                "DATE_FORMAT(sm.requested_date,'%Y-%m-%d %H:%i') as issued_date,DATE_FORMAT(sm.returnDate, '%Y-%m-%d %H:%i') as returnDate, smi.requested_qty, " +
                 "if(smi.approval_required = 1,'Yes','No') as approval_required, smi.is_splited, sam.ID as asset_item_ID," +
                 " smi.serial_number, sam.asset_name, sam.asset_type_ID,sat.asset_type,COALESCE(file.file_path,'') as file_path," +
                 "file.Asset_master_id,sai.materialID, sai.assetMasterID " +
@@ -494,8 +494,8 @@ namespace CMMSAPIs.Repositories.SM
         {
 
             string stmt = "SELECT smi.ID,smi.return_remarks,smi.mrs_return_ID,smi.finalRemark,smi.asset_item_ID,smi.asset_MDM_code," +
-                "smi.returned_qty,smi.available_qty,smi.used_qty,smi.ID,smi.issued_qty,sm.flag,DATE_FORMAT(sm.returnDate,'%Y-%m-%d') as returnDate," +
-                "sm.approval_status,DATE_FORMAT(sm.approved_date,'%Y-%m-%d') as approved_date,DATE_FORMAT(sm.requested_date,'%Y-%m-%d') as issued_date," +
+                "smi.returned_qty,smi.available_qty,smi.used_qty,smi.ID,smi.issued_qty,sm.flag,DATE_FORMAT(sm.returnDate,'%Y-%m-%d %H:%i') as returnDate," +
+                "sm.approval_status,DATE_FORMAT(sm.approved_date,'%Y-%m-%d %H:%i') as approved_date,DATE_FORMAT(sm.requested_date,'%Y-%m-%d %H:%i') as issued_date," +
                 "DATE_FORMAT(sm.returnDate, '%Y-%m-%d') as returnDate, smi.requested_qty,if(smi.approval_required = 1,'Yes','No') as approval_required," +
                 "\r\n        t1.asset_name,t1.asset_type_ID,t1.asset_type,COALESCE(t1.file_path,'') as file_path,t1.Asset_master_id, t1.spare_multi_selection" +
                 "     FROM smrsitems smi\r\n        LEFT JOIN smmrs sm ON sm.ID = smi.mrs_ID   LEFT JOIN (SELECT sai.ID as asset_item_ID, sai.asset_MDM_code, " +
@@ -504,27 +504,7 @@ namespace CMMSAPIs.Repositories.SM
                 "ON file.Asset_master_id =  sam.ID  LEFT JOIN smassettypes sat ON sat.ID = sam.asset_type_ID  LEFT JOIN smunitmeasurement f_sum " +
                 "ON  f_sum.id = sam.unit_of_measurement      ) as t1 ON t1.asset_MDM_code = smi.asset_MDM_code where smi.mrs_ID = " + ID + " GROUP BY smi.ID";
             List<CMMRSItemsBeforeIssue> _List = await Context.GetData<CMMRSItemsBeforeIssue>(stmt).ConfigureAwait(false);
-            foreach (var list in _List)
-            {
-                if (list != null && list.approved_date != null && list.approved_date != "0000-00-00")
-                {
-                    DateTime approved_date = DateTime.Parse(list.approved_date);
-                    approved_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, approved_date);
-                    list.approved_date = approved_date.ToString();
-                }
-                if (list != null && list.issued_date != null && list.issued_date != "0000-00-00")
-                {
-                    DateTime issued_date = DateTime.Parse(list.issued_date);
-                    issued_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, issued_date);
-                    list.issued_date = issued_date.ToString();
-                }
-                if (list != null && list.returnDate != null && list.returnDate != "0000-00-00")
-                {
-                    DateTime returnDate = DateTime.Parse(list.returnDate);
-                    returnDate = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, returnDate);
-                    list.issued_date = returnDate.ToString();
-                }
-            }
+           
                 return _List;
         }
 
@@ -533,8 +513,8 @@ namespace CMMSAPIs.Repositories.SM
         {
             string stmt = "SELECT smi.ID,smi.mrs_return_ID,smi.finalRemark,smi.asset_item_ID,smi.asset_MDM_code," +
                 "smi.returned_qty,smi.available_qty,smi.used_qty,smi.ID,smi.issued_qty,\r\nsm.flag," +
-                "DATE_FORMAT(sm.returnDate,'%Y-%m-%d') as returnDate,sm.approval_status,DATE_FORMAT(sm.approved_date,'%Y-%m-%d') as approved_date," +
-                "\r\nDATE_FORMAT(sm.requested_date,'%Y-%m-%d') as issued_date,DATE_FORMAT(sm.returnDate, '%Y-%m-%d') as returnDate," +
+                "DATE_FORMAT(sm.returnDate,'%Y-%m-%d %H:%i') as returnDate,sm.approval_status,DATE_FORMAT(sm.approved_date,'%Y-%m-%d %H:%i') as approved_date," +
+                "\r\nDATE_FORMAT(sm.requested_date,'%Y-%m-%d %H:%i') as issued_date,DATE_FORMAT(sm.returnDate, '%Y-%m-%d %H:%i') as returnDate," +
                 " sum(smi.requested_qty) as requested_qty,if(smi.approval_required = 1,'Yes','No') as approval_required, " +
                 "\r\n        '' as asset_name, sam.ID as asset_type_ID,sat.asset_type,COALESCE(file.file_path,'') as file_path," +
                 "file.Asset_master_id, f_sum.spare_multi_selection, sai.serial_number \r\n       " +
@@ -547,28 +527,7 @@ namespace CMMSAPIs.Repositories.SM
                 " WHERE smi.mrs_ID = " + ID + " GROUP BY smi.asset_MDM_code";
 
             List<CMMRSItemsBeforeIssue> _List = await Context.GetData<CMMRSItemsBeforeIssue>(stmt).ConfigureAwait(false);
-            foreach (var list in _List)
-            {
-                if (list != null && list.approved_date != null && list.approved_date!="0000-00-00")
-                {
-                    DateTime approved_date = DateTime.Parse(list.approved_date);
-                    approved_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, approved_date);
-                    list.approved_date = approved_date.ToString();
-                }
-                if (list != null && list.issued_date != null && list.issued_date != "0000-00-00")
-                {
-                    DateTime issued_date = DateTime.Parse(list.issued_date);
-                    issued_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, issued_date);
-                    list.issued_date = issued_date.ToString();
-                }
-                if (list != null && list.returnDate != null && list.returnDate != "0000-00-00")
-                {
-                    DateTime returnDate = DateTime.Parse(list.returnDate);
-                    returnDate = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, returnDate);
-                    list.issued_date = returnDate.ToString();
-                }
-
-            }
+           
             return _List;
         }
 
@@ -583,11 +542,11 @@ namespace CMMSAPIs.Repositories.SM
             //    _List[i].status_short = _shortStatus;
             //}
             //return _List;
-            string stmt = "SELECT sm.ID,sm.requested_by_emp_ID,CONCAT(ed1.firstName,' ',ed1.lastName) as approver_name,DATE_FORMAT(sm.requested_date,'%Y-%m-%d') as requestd_date," +
-    "DATE_FORMAT(sm.returnDate,'%Y-%m-%d') as returnDate,if(sm.approval_status != '',DATE_FORMAT(sm.approved_date,'%Y-%m-%d'),'') as approval_date,sm.approval_status," +
+            string stmt = "SELECT sm.ID,sm.requested_by_emp_ID,CONCAT(ed1.firstName,' ',ed1.lastName) as approver_name,DATE_FORMAT(sm.requested_date,'%Y-%m-%d %H:%i') as requestd_date," +
+    "DATE_FORMAT(sm.returnDate,'%Y-%m-%d %H:%i') as returnDate,if(sm.approval_status != '',DATE_FORMAT(sm.approved_date,'%Y-%m-%d %H:%i'),'') as approval_date,sm.approval_status," +
     "sm.approval_comment,CONCAT(ed.firstName,' ',ed.lastName) as requested_by_name, sm.status, sm.activity, sm.whereUsedType," +
     " case when sm.whereUsedType = 1 then 'Job' when sm.whereUsedType = 2 then 'PM' when sm.whereUsedType = 4 then 'JOBCARD' when sm.whereUsedType = 27 then 'PMTASK' else 'Invalid' end as whereUsedTypeName,  sm.whereUsedRefID, sm.remarks " +
-    ", DATE_FORMAT(sm.issuedAt,'%Y-%m-%d') as issued_date, CONCAT(issuedUser.firstName,' ',issuedUser.lastName) as issued_name " +
+    ", DATE_FORMAT(sm.issuedAt,'%Y-%m-%d %H:%i') as issued_date, CONCAT(issuedUser.firstName,' ',issuedUser.lastName) as issued_name " +
     " FROM smmrs sm LEFT JOIN users ed ON ed.id = sm.requested_by_emp_ID " +
     " LEFT JOIN users ed1 ON ed1.id = sm.approved_by_emp_ID " +
     " LEFT JOIN users issuedUser ON issuedUser.id = sm.issued_by_emp_ID " +
@@ -603,39 +562,21 @@ namespace CMMSAPIs.Repositories.SM
                 _List[i].status_long = _status_long;
                 _List[i].CMMRSItems = await getMRSItems(_List[i].ID,facilitytimeZone);
             }
-            return _List[0];
+           
+                return _List[0];
         }
 
         internal async Task<CMMRSList> getReturnDataByID(int ID,string facilitytimeZone)
         {
             string stmt = "SELECT sm.ID,sm.requested_by_emp_ID as requested_by_emp_ID,CONCAT(ed1.firstName,' ',ed1.lastName) as approver_name," +
-    "DATE_FORMAT(sm.returnDate,'%Y-%m-%d') as returnDate,if(sm.approval_status != '',DATE_FORMAT(sm.approved_date,'%Y-%m-%d'),'') as approval_date,sm.approval_status," +
+    "DATE_FORMAT(sm.returnDate,'%Y-%m-%d %H:%i') as returnDate,if(sm.approval_status != '',DATE_FORMAT(sm.approved_date,'%Y-%m-%d %H:%i'),'') as approval_date,sm.approval_status," +
     "sm.approval_comment,CONCAT(ed.firstName,' ',ed.lastName) as requested_by_name, sm.status, sm.activity, sm.whereUsedType, " +
     " case when sm.whereUsedType = 1 then 'Job' when sm.whereUsedType = 2 then 'PM' else 'Invalid' end as whereUsedTypeName, sm.whereUsedRefID, COALESCE(sm.remarks,'') as  remarks " +
     "FROM smmrs sm LEFT JOIN users ed ON ed.id = sm.requested_by_emp_ID LEFT JOIN users ed1 ON ed1.id = sm.approved_by_emp_ID " +
     " WHERE sm.ID = " + ID + "  and sm.flag = 2";
             List<CMMRSList> _List = await Context.GetData<CMMRSList>(stmt).ConfigureAwait(false);
-            foreach (var list in _List)
-              {
-                  if (list != null && list.approval_date != null && list.approval_date != ""  &&list.approval_date!="0000-00-00" )
-                  {
-                      DateTime approval_date = DateTime.Parse(list.approval_date);
-                      approval_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, approval_date);
-                      list.approval_date = approval_date.ToString();
-                  }
-                  if (list != null && list.issued_date != null && list.issued_date != "" && list.issued_date!="0000-00-00")
-                  {
-                      DateTime issued_date = DateTime.Parse(list.issued_date);
-                      issued_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, issued_date);
-                      list.issued_date = issued_date.ToString();
-                  }
-                  if (list != null && list.returnDate != null && list.returnDate!= "" &&list.returnDate!="0000-00-00")
-                { 
-                      DateTime returnDate = DateTime.Parse(list.returnDate);
-                      returnDate = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, returnDate);
-                      list.issued_date = returnDate.ToString();
-                  }
-              }
+           
+              
             for (var i = 0; i < _List.Count; i++)
             {
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_List[i].status);
@@ -764,7 +705,7 @@ namespace CMMSAPIs.Repositories.SM
 
             if (mrsList.Count > 0)
             {
-                string stmt = $"UPDATE smmrs SET approved_by_emp_ID = {userId}, approved_date='{DateTime.Now.ToString("yyyy-MM-dd")}'," +
+                string stmt = $"UPDATE smmrs SET approved_by_emp_ID = {userId}, approved_date='{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}'," +
                                    $" status ={(int)CMMS.CMMS_Status.MRS_REQUEST_APPROVED} ,approval_status = 1,approval_comment = '{request.comment}' WHERE ID = {request.id}";
                 await Context.ExecuteNonQry<int>(stmt);
                 // update approval quantity in mrsitems
@@ -932,7 +873,7 @@ namespace CMMSAPIs.Repositories.SM
 
             if (mrsList.Count > 0)
             {
-                string stmt = $"UPDATE smmrs SET rejected_by_emp_ID = {userId}, rejected_date='{DateTime.Now.ToString("yyyy-MM-dd")}'," +
+                string stmt = $"UPDATE smmrs SET rejected_by_emp_ID = {userId}, rejected_date='{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}'," +
                                    $" status ={(int)CMMS.CMMS_Status.MRS_REQUEST_REJECTED} , rejected_comment = '{request.comment}' WHERE ID = {request.id}";
                 await Context.ExecuteNonQry<int>(stmt);
                 response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Status updated.");
@@ -1410,8 +1351,8 @@ namespace CMMSAPIs.Repositories.SM
             int crQty = 0, drQty = 0;
             if (dt2 != null && dt2.Rows.Count > 0)
             {
-                crQty = Convert.ToInt32(dt2.Rows[0]["crQty"]);
-                drQty = Convert.ToInt32(dt2.Rows[0]["drQty"]);
+                crQty = (dt2.Rows[0]["crQty"].ToInt());
+                drQty = (dt2.Rows[0]["drQty"].ToInt());
             }
             int availableQty = crQty - drQty;
             return availableQty;
@@ -1631,7 +1572,7 @@ namespace CMMSAPIs.Repositories.SM
 
             if (mrsList.Count > 0)
             {
-                string stmt = $"UPDATE smmrs SET issue_approved_by_emp_ID = {userId}, issue_approved_date='{DateTime.Now.ToString("yyyy-MM-dd")}'," +
+                string stmt = $"UPDATE smmrs SET issue_approved_by_emp_ID = {userId}, issue_approved_date='{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}'," +
                                    $" status ={(int)CMMS.CMMS_Status.MRS_REQUEST_ISSUED_APPROVED} , issue_approval_comment = '{request.comment}' WHERE ID = {request.id}";
                 await Context.ExecuteNonQry<int>(stmt);
                 response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Status updated.");
@@ -1652,7 +1593,7 @@ namespace CMMSAPIs.Repositories.SM
 
             if (mrsList.Count > 0)
             {
-                string stmt = $"UPDATE smmrs SET issue_rejected_by_emp_ID = {userId}, issue_rejected_date='{DateTime.Now.ToString("yyyy-MM-dd")}'," +
+                string stmt = $"UPDATE smmrs SET issue_rejected_by_emp_ID = {userId}, issue_rejected_date='{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}'," +
                                    $" status ={(int)CMMS.CMMS_Status.MRS_REQUEST_ISSUED_REJECTED} , issue_rejected_comment = '{request.comment}' WHERE ID = {request.id}";
                 await Context.ExecuteNonQry<int>(stmt);
                 response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Status updated.");
@@ -1669,12 +1610,12 @@ namespace CMMSAPIs.Repositories.SM
         internal async Task<List<CMMRSList>> GetMRSReturnList(int facility_ID, int emp_id,string facilitytimeZone)
         {
             string stmt = "SELECT sm.ID,sm.requested_by_emp_ID as requested_by_emp_ID,CONCAT(ed1.firstName,' ',ed1.lastName) as approver_name," +
-    "DATE_FORMAT(sm.returnDate,'%Y-%m-%d') as returnDate,if(sm.approval_status != '',DATE_FORMAT(sm.approved_date,'%d-%m-%Y'),'') as approval_date,sm.approval_status," +
+    "DATE_FORMAT(sm.returnDate,'%Y-%m-%d %H:%i') as returnDate,if(sm.approval_status != '',DATE_FORMAT(sm.approved_date,'%Y-%m-%d %H:%i'),'') as approval_date,sm.approval_status," +
     "sm.approval_comment,CONCAT(ed.firstName,' ',ed.lastName) as requested_by_name, sm.status, sm.activity, sm.whereUsedType, sm.whereUsedRefID, COALESCE(sm.remarks,'') as  remarks " +
     "FROM smmrs sm LEFT JOIN users ed ON ed.id = sm.requested_by_emp_ID LEFT JOIN users ed1 ON ed1.id = sm.approved_by_emp_ID " +
     " WHERE sm.facility_ID = " + facility_ID + "  and sm.requested_by_emp_ID = " + emp_id + " and sm.flag = 2";
             List<CMMRSList> _List = await Context.GetData<CMMRSList>(stmt).ConfigureAwait(false);
-             foreach (var list in _List)
+            /* foreach (var list in _List)
              {
                  if (list!= null && list.approval_date!=null && list.approval_date!="" &&list.approval_date!="0000-00-00")
                  {
@@ -1694,7 +1635,7 @@ namespace CMMSAPIs.Repositories.SM
                      returnDate = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, returnDate);
                      list.issued_date = returnDate.ToString();
                  }
-             }
+             }*/
             for (var i = 0; i < _List.Count; i++)
             {
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_List[i].status);
@@ -1711,9 +1652,9 @@ namespace CMMSAPIs.Repositories.SM
         internal async Task<List<CMMRSItems>> getMRSReturnItems(int ID,string facilitytimeZone)
         {
             string stmt = "SELECT smi.ID,smi.return_remarks,smi.mrs_return_ID,smi.finalRemark,smi.asset_item_ID,smi.asset_MDM_code," +
-                "t1.serial_number,smi.returned_qty,smi.available_qty,smi.used_qty,smi.ID,smi.issued_qty,sm.flag as status,DATE_FORMAT(sm.returnDate,'%Y-%m-%d') as returnDate," +
-                "sm.approval_status,DATE_FORMAT(sm.approved_date,'%Y-%m-%d') as approved_date,DATE_FORMAT(sm.requested_date,'%Y-%m-%d') as issued_date," +
-                "DATE_FORMAT(sm.returnDate, '%Y-%m-%d') as returnDate, smi.requested_qty,if(smi.approval_required = 1,'Yes','No') as approval_required,\r\n " +
+                "t1.serial_number,smi.returned_qty,smi.available_qty,smi.used_qty,smi.ID,smi.issued_qty,sm.flag as status,DATE_FORMAT(sm.returnDate,'%Y-%m-%d %H:%i') as returnDate," +
+                "sm.approval_status,DATE_FORMAT(sm.approved_date,'%Y-%m-%d %H:%i') as approved_date,DATE_FORMAT(sm.requested_date,'%Y-%m-%d %H:%i') as issued_date," +
+                "DATE_FORMAT(sm.returnDate, '%Y-%m-%d %H:%i') as returnDate, smi.requested_qty,if(smi.approval_required = 1,'Yes','No') as approval_required,\r\n " +
                 "t1.asset_name,t1.asset_type_ID,t1.asset_type,COALESCE(t1.file_path,'') as file_path,t1.Asset_master_id\r\n        FROM smrsitems smi\r\n " +
                 " LEFT JOIN smmrs sm ON sm.ID = smi.mrs_return_ID         \r\n        LEFT JOIN (SELECT sai.ID as asset_item_ID, sai.serial_number, sam.asset_name, " +
                 "sam.asset_type_ID,sat.asset_type,COALESCE(file.file_path,'') as file_path,file.Asset_master_id\r\n        FROM smassetitems sai  " +
@@ -1721,7 +1662,7 @@ namespace CMMSAPIs.Repositories.SM
                 "LEFT JOIN smassettypes sat ON sat.ID = sam.asset_type_ID) as t1 ON t1.asset_item_ID = smi.asset_item_ID" +
                 "  WHERE smi.mrs_return_ID = " + ID + " /*GROUP BY smi.ID*/";
             List<CMMRSItems> _List = await Context.GetData<CMMRSItems>(stmt).ConfigureAwait(false);
-            foreach (var list in _List)
+          /*  foreach (var list in _List)
             {
                 if (list != null && list.approved_date != null && list.approved_date!="" && list.approved_date!="0000-00-00")
                 {
@@ -1735,11 +1676,7 @@ namespace CMMSAPIs.Repositories.SM
                     issued_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, issued_date);
                     list.approved_date = issued_date.ToString();
                 }
-                
-               
-
-
-            }
+            }*/
             for (var i = 0; i < _List.Count; i++)
             {
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_List[i].status);
