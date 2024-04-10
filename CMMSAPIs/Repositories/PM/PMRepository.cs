@@ -118,7 +118,7 @@ namespace CMMSAPIs.Repositories.PM
                                 $"status, plan_date,assigned_to, created_by, created_at, updated_by, updated_at,next_schedule_date) VALUES " +
                                 $"('{pm_plan.plan_name}', {pm_plan.facility_id}, {pm_plan.category_id}, {pm_plan.plan_freq_id}, " +
                                 $"{status}, '{pm_plan.plan_date.ToString("yyyy-MM-dd")}',{pm_plan.assigned_to_id}, " +
-                                $"{userID}, '{UtilsRepository.GetUTCTime()}', {userID}, '{UtilsRepository.GetUTCTime()}','{pm_plan.plan_date.ToString("yyyy-MM-dd")}'); " +
+                                $"{userID}, '{UtilsRepository.GetUTCTime()}', {userID}, '{UtilsRepository.GetUTCTime()}','{pm_plan.plan_date.ToString("yyyy-MM-dd HH:mm")}'); " +
                                 $"SELECT LAST_INSERT_ID(); ";
             DataTable dt3 = await Context.FetchData(addPlanQry).ConfigureAwait(false);
             int id = Convert.ToInt32(dt3.Rows[0][0]);
@@ -283,7 +283,7 @@ namespace CMMSAPIs.Repositories.PM
         {
             /*
              * Primary Table - PMSchedule
-             * Read All properties mention in model and return list
+             * Read All properties mention in model and return 
              * Code goes here
             */
 
