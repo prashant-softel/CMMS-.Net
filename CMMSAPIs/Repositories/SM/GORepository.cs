@@ -232,9 +232,9 @@ namespace CMMSAPIs.Repositories
                     status = (int)CMMS.CMMS_Status.GO_SUBMITTED;
                 }
 
-                string purchaseDate = (request.purchaseDate == null) ? "'0001-01-01 00:00:00'" : ((DateTime)request.purchaseDate).ToString("yyyy-MM-dd HH:mm:ss");
-                string po_date = (request.po_date == null) ? "'0001-01-01 00:00:00'" : ((DateTime)request.po_date).ToString("yyyy-MM-dd HH:mm:ss");
-                string challan_date = (request.challan_date == null) ? "'0001-01-01 00:00:00'" : ((DateTime)request.challan_date).ToString("yyyy-MM-dd HH:mm:ss");
+                string purchaseDate = (request.purchaseDate == null) ? "0001-01-01 00:00:00" : ((DateTime)request.purchaseDate).ToString("yyyy-MM-dd HH:mm:ss");
+                string po_date = (request.po_date == null) ? "0001-01-01 00:00:00" : ((DateTime)request.po_date).ToString("yyyy-MM-dd HH:mm:ss");
+                string challan_date = (request.challan_date == null) ? "0001-01-01 00:00:00" : ((DateTime)request.challan_date).ToString("yyyy-MM-dd HH:mm:ss");
                 
 
 
