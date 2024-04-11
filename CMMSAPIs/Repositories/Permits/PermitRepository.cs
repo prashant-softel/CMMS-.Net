@@ -1635,7 +1635,7 @@ namespace CMMSAPIs.Repositories.Permits
             {
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.permit_id, 0, 0, "Permit Updated", CMMS.CMMS_Status.PTW_UPDATED,userID);
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_UPDATED, new[] { userID }, permitDetails);
-                 response = new CMDefaultResponse(request.permit_id, CMMS.RETRUNSTATUS.SUCCESS, $"Permit Updated Successfully");
+                 response = new CMDefaultResponse(request.permit_id, CMMS.RETRUNSTATUS.SUCCESS, $"Permit Updated Successfully with tbt {request.TBT_Done_By}.");
 
             }
             return response;
