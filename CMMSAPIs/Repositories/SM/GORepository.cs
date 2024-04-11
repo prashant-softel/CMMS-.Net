@@ -232,16 +232,21 @@ namespace CMMSAPIs.Repositories
                     status = (int)CMMS.CMMS_Status.GO_SUBMITTED;
                 }
 
+                string purchaseDate = (request.purchaseDate == null) ? "'0001-01-01 00:00:00'" : ((DateTime)request.purchaseDate).ToString("yyyy-MM-dd HH:mm:ss");
+                string po_date = (request.po_date == null) ? "'0001-01-01 00:00:00'" : ((DateTime)request.po_date).ToString("yyyy-MM-dd HH:mm:ss");
+                string challan_date = (request.challan_date == null) ? "'0001-01-01 00:00:00'" : ((DateTime)request.challan_date).ToString("yyyy-MM-dd HH:mm:ss");
                 
+
 
 
                 string poInsertQuery = $" INSERT INTO smgoodsorder (facilityID,vendorID,receiverID,generated_by,purchaseDate,orderDate,status," +
                     $" challan_no,po_no, freight,transport, " +
                     $"no_pkg_received,lr_no,condition_pkg_received,vehicle_no, gir_no, challan_date,po_date, job_ref,amount, currency,withdraw_by,withdrawOn,order_type,received_on) " +
-                    $"VALUES({request.facility_id},{request.vendorID}, {request.receiverID}, {userID}, '{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}', '{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}', {status}," +
-                    $"'{request.challan_no}','{request.po_no}','{request.freight}','', '{request.no_pkg_received}', '{request.lr_no}', '{request.condition_pkg_received}','{request.vehicle_no}','{request.gir_no}','{request.challan_date.Value.ToString("yyyy-MM-dd HH:mm:ss")}'," +
-                    $"'{request.po_date.Value.ToString("yyyy-MM-dd HH:mm:ss")}','{request.job_ref}',{request.amount}, {request.currencyID},0,'0001-01-01',0,'{request.receivedAt.ToString("yyyy-MM-dd HH:mm:ss")}');" +
+                    $"VALUES({request.facility_id},{request.vendorID}, {request.receiverID}, {userID}, '{purchaseDate}', '{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}', '{status}'," +
+                    $"'{request.challan_no}','{request.po_no}','{request.freight}','', '{request.no_pkg_received}', '{request.lr_no}', '{request.condition_pkg_received}','{request.vehicle_no}','{request.gir_no}','{challan_date}'," +
+                    $"'{po_date}','{ request.job_ref}','{request.amount}', '{request.currencyID}',0,'0001-01-01',0,'{request.receivedAt.ToString("yyyy-MM-dd HH:mm:ss")}');" +
                     $" SELECT LAST_INSERT_ID();";
+
                 DataTable dt2 = await Context.FetchData(poInsertQuery).ConfigureAwait(false);
                 goid = Convert.ToInt32(dt2.Rows[0][0]);
                 int is_splited = 0; 
