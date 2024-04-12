@@ -100,7 +100,7 @@ namespace CMMSAPIs.Repositories.Grievance
             }
 
             string myQuery =
-                "SELECT g.id, g.facilityId, g.grievanceType AS grievanceTypeId, t.name AS grievanceType, g.concern, g.actionTaken, g.resolutionLevel, g.closedDate, g.status_id as statusId " +
+                "SELECT g.id, g.facilityId, g.grievanceType AS grievanceTypeId, t.name AS grievanceType, g.concern, g.actionTaken, g.resolutionLevel, g.closedDate as closedAt, g.status_id as statusId " +
                 ", g.createdAt, g.createdBy, g.updatedBy, t.description, t.status, t.addedBy, t.addedAt " +
                 ", t.updatedBy, t.updatedAt " +
                 " FROM mis_grievance g " +
