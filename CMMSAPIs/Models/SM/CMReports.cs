@@ -20,6 +20,7 @@ namespace CMMSAPIs.Models.SM
         public string asset_code { get; set; }
         public int asset_type_ID { get; set; }
         public string asset_type { get; set; }
+        public string serial_no { get; set; }
         public decimal Opening { get; set; }
         public decimal inward { get; set; }
         public decimal outward { get; set; }
@@ -173,6 +174,7 @@ namespace CMMSAPIs.Models.SM
         public decimal qty { get; set; }
         public string facilityName { get; set; }
         public string remarks { get; set; }
+        public string asset_type { get; set; }
         public DateTime? LastUpdated { get; set; }
         public string CreatedBy { get; set; }
         public DateTime? createdAt { get; set; }
@@ -190,5 +192,28 @@ namespace CMMSAPIs.Models.SM
         public int unit_of_measurement_ID { get; set; }
         public string unit_of_measurement { get; set; }
 
+    }
+
+    public class CMPlantStockOpeningResponse_MRSRetrun
+    {
+        public int facilityID { get; set; }
+        public string facilityName { get; set; }
+        public List<CMPlantStockOpeningItemWiseResponse_MRSReturn> stockDetails { get; set; }
+    }
+
+    public class CMPlantStockOpeningItemWiseResponse_MRSReturn
+    {
+        public int Facility_Is_Block { get; set; }
+        public string Facility_Is_Block_of_name { get; set; }
+        public int assetItemID { get; set; }
+        public string asset_name { get; set; }
+        public string asset_code { get; set; }
+        public int asset_type_ID { get; set; }
+        public string asset_type { get; set; }
+        public string serial_no { get; set; }
+        public decimal Opening { get; set; }
+        public decimal inward { get; set; }
+        public decimal outward { get; set; }
+        public decimal balance { get; set; }
     }
 }

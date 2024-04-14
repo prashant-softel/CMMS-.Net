@@ -26,10 +26,10 @@ namespace CMMSAPIs.Models
         public string vendor_name { get; set; }
         public int generate_flag { get; set; }
         public int location_ID { get; set; }
-        public DateTime receivedAt { get; set; }
+        public DateTime? receivedAt { get; set; }
         public string receivedBy { get; set; }
         public string approvedBy { get; set; }
-        public DateTime approvedAt { get; set; }
+        public DateTime? approvedAt { get; set; }
 
         public int receive_later { get; set; }
         public int added_to_store { get; set; }
@@ -73,6 +73,8 @@ namespace CMMSAPIs.Models
         public int requestOrderId { get; set; }
         public int requestOrderItemID { get; set; }
         public string sr_no { get; set; }
+        public string freight_value { get; set; }
+        public string inspection_report { get; set; }
         public List<CMGO_ITEMS> go_items { get; set; }
     }
     public class CMGO_ITEMS
@@ -226,6 +228,8 @@ namespace CMMSAPIs.Models
         public DateTime? purchaseDate { get; set; }
         public int location_ID { get; set; }
         public string facilityName { get; set; }
+        public string freight_value { get; set; }
+        public string inspection_report { get; set; }
 
         public List<CMGODetails> GODetails { get; set; }
     }
