@@ -449,12 +449,11 @@ namespace CMMSAPIs.Repositories.Jobs
 
             foreach (var data in request.WorkType_Ids)
             {
-               string qryCategoryIds = $"insert into jobassociatedworktypes(jobId, workTypeId ) value ( { newJobID }, { data } );";
+               string qryCategoryIds = $"insert into jobassociatedworktypes(jobId, workTypeId ) value ( { newJobID }, { data });";
                await Context.ExecuteNonQry<int>(qryCategoryIds).ConfigureAwait(false);
             }
-
-
            
+
             CMJobView _ViewJobList = await GetJobDetails(newJobID,"");
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, newJobID, 0, 0, "Job Created", CMMS.CMMS_Status.JOB_CREATED,userId);
