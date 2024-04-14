@@ -194,7 +194,7 @@ namespace CMMSAPIs.Repositories
             foreach(var list in _List)
             {
                 if(list!=null && list.approvedAt!=null)
-                    list.approvedAt= await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.approvedAt);
+                    list.approvedAt= await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.approvedAt.Value);
                 if (list != null && list.challan_date != null)
                     list.challan_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)list.challan_date);
                 if (list != null && list.po_date != null)
@@ -235,6 +235,7 @@ namespace CMMSAPIs.Repositories
                 string purchaseDate = (request.purchaseDate == null) ? "0001-01-01 00:00:00" : ((DateTime)request.purchaseDate).ToString("yyyy-MM-dd HH:mm:ss");
                 string po_date = (request.po_date == null) ? "0001-01-01 00:00:00" : ((DateTime)request.po_date).ToString("yyyy-MM-dd HH:mm:ss");
                 string challan_date = (request.challan_date == null) ? "0001-01-01 00:00:00" : ((DateTime)request.challan_date).ToString("yyyy-MM-dd HH:mm:ss");
+                string received_date = (request.receivedAt == null) ? "0001-01-01 00:00:00" : ((DateTime)request.receivedAt).ToString("yyyy-MM-dd HH:mm:ss");
                 
 
 
@@ -244,7 +245,7 @@ namespace CMMSAPIs.Repositories
                     $"no_pkg_received,lr_no,condition_pkg_received,vehicle_no, gir_no, challan_date,po_date, job_ref,amount, currency,withdraw_by,withdrawOn,order_type,received_on) " +
                     $"VALUES({request.facility_id},{request.vendorID}, {request.receiverID}, {userID}, '{purchaseDate}', '{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}', '{status}'," +
                     $"'{request.challan_no}','{request.po_no}','{request.freight}','', '{request.no_pkg_received}', '{request.lr_no}', '{request.condition_pkg_received}','{request.vehicle_no}','{request.gir_no}','{challan_date}'," +
-                    $"'{po_date}','{ request.job_ref}','{request.amount}', '{request.currencyID}',0,'0001-01-01',0,'{request.receivedAt.ToString("yyyy-MM-dd HH:mm:ss")}');" +
+                    $"'{po_date}','{ request.job_ref}','{request.amount}', '{request.currencyID}',0,'0001-01-01',0,'{received_date}');" +
                     $" SELECT LAST_INSERT_ID();";
 
                 DataTable dt2 = await Context.FetchData(poInsertQuery).ConfigureAwait(false);
@@ -280,14 +281,17 @@ namespace CMMSAPIs.Repositories
           internal async Task<CMDefaultResponse> UpdateGO(CMGoodsOrderList request, int userID)
         {
             string OrderQuery = "";
+            string received_date = (request.receivedAt == null) ? "0001-01-01 00:00:00" : ((DateTime)request.receivedAt).ToString("yyyy-MM-dd HH:mm:ss");
+
             if (request.is_submit == 0)
             {
+              
                 OrderQuery = $"UPDATE smgoodsorder SET " +
                         $"challan_no = '{request.challan_no}',po_no='{request.po_no}', freight='{request.freight}',no_pkg_received='{request.no_pkg_received}'," +
                         $"lr_no='{request.lr_no}',condition_pkg_received='{request.condition_pkg_received}',vehicle_no='{request.vehicle_no}', gir_no='{request.gir_no}', " +
                         $"challan_date = '{request.challan_date.Value.ToString("yyyy-MM-dd")}', " +
                         $"job_ref='{request.job_ref}',amount='{request.amount}', currency={request.currencyID},updated_by = {userID},updatedOn = '{UtilsRepository.GetUTCTime()}', status = {(int)CMMS.CMMS_Status.GO_DRAFT}," +
-                        $" received_on = '{request.receivedAt.ToString("yyyy-MM-dd HH:mm:ss")}', po_date = '{request.po_date.Value.ToString("yyyy-MM-dd HH:mm:ss")}', purchaseDate= '{request.purchaseDate.Value.ToString("yyyy-MM-dd HH:mm:ss")}'" +
+                        $" received_on = '{received_date}', po_date = '{request.po_date.Value.ToString("yyyy-MM-dd HH:mm:ss")}', purchaseDate= '{request.purchaseDate.Value.ToString("yyyy-MM-dd HH:mm:ss")}'" +
                         $"  where ID={request.id}";
             }
             else
@@ -296,7 +300,7 @@ namespace CMMSAPIs.Repositories
                         $"challan_no = '{request.challan_no}',po_no='{request.po_no}', freight='{request.freight}',no_pkg_received='{request.no_pkg_received}'," +
                         $"lr_no='{request.lr_no}',condition_pkg_received='{request.condition_pkg_received}',vehicle_no='{request.vehicle_no}', gir_no='{request.gir_no}', " +
                         $"challan_date = '{request.challan_date.Value.ToString("yyyy-MM-dd HH:mm:ss")}', " +
-                        $"job_ref='{request.job_ref}',amount='{request.amount}', currency={request.currencyID},updated_by = {userID},updatedOn = '{UtilsRepository.GetUTCTime()}', status = {(int)CMMS.CMMS_Status.GO_SUBMITTED}, received_on = '{request.receivedAt.ToString("yyyy-MM-dd HH:mm:ss")}', po_date = '{request.po_date.Value.ToString("yyyy-MM-dd HH:mm:ss")}', purchaseDate= '{request.purchaseDate.Value.ToString("yyyy-MM-dd HH:mm:ss")}' where ID={request.id}";
+                        $"job_ref='{request.job_ref}',amount='{request.amount}', currency={request.currencyID},updated_by = {userID},updatedOn = '{UtilsRepository.GetUTCTime()}', status = {(int)CMMS.CMMS_Status.GO_SUBMITTED}, received_on = '{received_date}', po_date = '{request.po_date.Value.ToString("yyyy-MM-dd HH:mm:ss")}', purchaseDate= '{request.purchaseDate.Value.ToString("yyyy-MM-dd HH:mm:ss")}' where ID={request.id}";
             }
             await Context.ExecuteNonQry<int>(OrderQuery);
 
@@ -455,7 +459,7 @@ namespace CMMSAPIs.Repositories
                 $" freight ,transport ,no_pkg_received ,lr_no ,\r\n      " +
                 $"condition_pkg_received ,vehicle_no ,gir_no ,challan_date ,po_date ,\r\n      " +
                 $"job_ref ,amount ,currency as currencyID,status ,\r\n     " +
-                $" lastModifiedDate ,generate_flag ,s2s_generated_by ,received_on ,invoice_copy ,issued_by ,issued_on ,\r\n    " +
+                $" lastModifiedDate ,generate_flag ,s2s_generated_by ,case when received_on = '0000-00-00 00:00:00' then null else received_on end as received_on ,invoice_copy ,issued_by ,issued_on ,\r\n    " +
                 $"  approved_by ,approvedOn ,withdraw_by ,withdrawOn ,reorder_flag ,\r\n     " +
                 $" order_type ,remarks ,updated_by ,updatedOn ,rejected_by ,rejectedOn" +
                 $" \r\nFROM smgoodsorder where id = {request.id}";
@@ -640,7 +644,7 @@ namespace CMMSAPIs.Repositories
        $" freight ,transport ,no_pkg_received ,lr_no ,\r\n      " +
        $"condition_pkg_received ,vehicle_no ,gir_no ,challan_date ,po_date ,\r\n      " +
        $"job_ref ,amount ,currency as currencyID,status ,\r\n     " +
-       $" lastModifiedDate ,generate_flag ,s2s_generated_by ,received_on ,invoice_copy ,issued_by ,issued_on ,\r\n    " +
+       $" lastModifiedDate ,generate_flag ,s2s_generated_by ,case when received_on = '0000-00-00 00:00:00' then null else received_on end as received_on ,invoice_copy ,issued_by ,issued_on ,\r\n    " +
        $"  approved_by ,approvedOn ,withdraw_by ,withdrawOn ,reorder_flag ,\r\n     " +
        $" order_type ,remarks ,updated_by ,updatedOn ,rejected_by ,rejectedOn" +
        $" \r\nFROM smgoodsorder where id = {request.id}";
@@ -804,7 +808,7 @@ namespace CMMSAPIs.Repositories
 
         public async Task<List<CMPURCHASEDATA>> GetGoodsOrderData(int plantID, string empRole, DateTime fromDate, DateTime toDate, string status, string order_type,string facilitytimeZone)
         {
-            var stmt = $"SELECT fc.Name as facilityName, po.ID as orderID,po.purchaseDate,po.generate_flag,po.received_on,po.status,bl.name as vendor_name,po.vendorID," +
+            var stmt = $"SELECT fc.Name as facilityName, po.ID as orderID,po.purchaseDate,po.generate_flag,case when po.received_on = '0000-00-00 00:00:00' then null else po.received_on end as received_on,po.status,bl.name as vendor_name,po.vendorID," +
                 $"ed.id as generatedByID,po.remarks, CONCAT(ed.firstName,' ',ed.lastName) as generatedBy, CONCAT(ed1.firstName,' ',ed1.lastName) as receivedOn, DATE_FORMAT(po.lastModifiedDate,'%Y-%m-%d') as receivedDate," +
                 $" CONCAT(ed2.Firstname,' ',ed2.lastname) as approvedBy,   DATE_FORMAT(po.approvedOn,'%Y-%m-%d') as approvedOn,    po.status as statusFlag " +
                 //$" CASE WHEN po.flag = {GO_SAVE_BY_PURCHASE_MANAGER} THEN 'Draft' WHEN po.flag = {GO_SUBMIT_BY_PURCHASE_MANAGER} THEN 'Submitted' " +
@@ -1044,12 +1048,12 @@ namespace CMMSAPIs.Repositories
             string query = "SELECT fc.name as facilityName,pod.ID as podID, facilityid as       facility_id,pod.spare_status,pod.remarks,sai.orderflag,sam.asset_type_ID," +
                 "pod.purchaseID,pod.assetItemID,sai.serial_number,sai.location_ID,pod.cost,pod.ordered_qty,\r\n bl.name as vendor_name,\r\n     " +
                 " po.purchaseDate,sam.asset_type_ID,sam.asset_name,po.receiverID,\r\n        " +
-                "po.vendorID,po.status,sai.asset_code,t1.asset_type,t2.cat_name,pod.received_qty,pod.damaged_qty,pod.accepted_qty," +
+                "po.vendorID,po.status,sam.asset_code,t1.asset_type,t2.cat_name,pod.received_qty,pod.damaged_qty,pod.accepted_qty," +
                 "f1.file_path,f1.Asset_master_id,sm.decimal_status,sm.spare_multi_selection,po.generated_by,pod.order_type as asset_type_ID_OrderDetails, receive_later, " +
                 "added_to_store,   \r\n      " +
                 "  po.challan_no, po.po_no, po.freight, po.transport, po.no_pkg_received, po.lr_no, po.condition_pkg_received, " +
-                "po.vehicle_no, po.gir_no, po.challan_date, po.job_ref, po.amount,  po.currency as currencyID , curr.name as currency , stt.asset_type as asset_type_Name,  po_no, po_date, requested_qty,lost_qty, ordered_qty\r\n    ,paid_by_ID, smpaidby.paid_by paid_by_name , po.received_on as receivedAt,sam.asset_type_ID,sam.asset_code,sam.asset_name" +
-                " , sic.cat_name,smat.asset_type, pod.is_splited, pod.sr_no, requestOrderId, requestOrderItemID FROM smgoodsorderdetails pod\r\n        LEFT JOIN smgoodsorder po ON po.ID = pod.purchaseID\r\n     " +
+                "po.vehicle_no, po.gir_no, po.challan_date, po.job_ref, po.amount,  po.currency as currencyID , curr.name as currency , stt.asset_type as asset_type_Name,  po_no, po_date, requested_qty,lost_qty, ordered_qty\r\n    ,paid_by_ID, smpaidby.paid_by paid_by_name , case when po.received_on = '0000-00-00 00:00:00' then null else po.received_on end as receivedAt,sam.asset_type_ID,sam.asset_code,sam.asset_name" +
+                " , sic.cat_name,smat.asset_type, pod.is_splited, pod.sr_no, requestOrderId, requestOrderItemID, freight_value,inspection_report  FROM smgoodsorderdetails pod\r\n        LEFT JOIN smgoodsorder po ON po.ID = pod.purchaseID\r\n     " +
                 "   LEFT JOIN smassetitems sai ON sai.ID = pod.assetItemID\r\n       " +
                 " LEFT JOIN smassetmasters sam ON  sam.ID = pod.assetItemID\r\n      " +
                 "  LEFT JOIN smunitmeasurement sm ON sm.ID = sam.unit_of_measurement\r\n    " +
@@ -1092,8 +1096,9 @@ namespace CMMSAPIs.Repositories
                 challan_date = p.challan_date,
                 challan_no = p.challan_no,
                 purchaseDate = p.purchaseDate,
-                location_ID = p.location_ID
-          
+                location_ID = p.location_ID,
+                freight_value=p.freight_value,
+                inspection_report = p.inspection_report
 
             }).FirstOrDefault();
             if (_List.Count > 0)
@@ -1141,7 +1146,7 @@ namespace CMMSAPIs.Repositories
         internal async Task<List<CMGOListByFilter>> GetGOList(int facility_id, DateTime fromDate, DateTime toDate, int is_purchaseorder,string facilitytimeZone)
         {
 
-            string filter = " (DATE(po.purchaseDate) >= '" + fromDate.ToString("yyyy-MM-dd") + "'  and DATE(po.purchaseDate) <= '" + toDate.ToString("yyyy-MM-dd") + "')";
+            string filter = " (DATE(po.po_date) >= '" + fromDate.ToString("yyyy-MM-dd") + "'  and DATE(po.po_date) <= '" + toDate.ToString("yyyy-MM-dd") + "')";
 
             filter = filter + " and facilityID = " + facility_id + "";
 
@@ -1161,7 +1166,7 @@ namespace CMMSAPIs.Repositories
                 "f1.file_path,f1.Asset_master_id,sm.decimal_status,sm.spare_multi_selection,po.generated_by,pod.order_type as asset_type_ID_OrderDetails, receive_later, " +
                 "added_to_store,   \r\n      " +
                 "  po.challan_no, po.po_no, po.freight, po.transport, po.no_pkg_received, po.lr_no, po.condition_pkg_received, " +
-                "po.vehicle_no, po.gir_no, po.challan_date, po.job_ref, po.amount,  po.currency as currencyID , curr.name as currency , stt.asset_type as asset_type_Name,  po_no, po_date, requested_qty,lost_qty, ordered_qty, CONCAT(ed.firstName,' ',ed.lastName) as generatedBy\r\n  ,po.received_on as receivedAt    " +
+                "po.vehicle_no, po.gir_no, po.challan_date, po.job_ref, po.amount,  po.currency as currencyID , curr.name as currency , stt.asset_type as asset_type_Name,  po_no, po_date, requested_qty,lost_qty, ordered_qty, CONCAT(ed.firstName,' ',ed.lastName) as generatedBy\r\n  ,case when po.received_on = '0000-00-00 00:00:00' then null else po.received_on end as receivedAt    " +
                 "  FROM smgoodsorderdetails pod\r\n        LEFT JOIN smgoodsorder po ON po.ID = pod.purchaseID\r\n     " +
                 "   LEFT JOIN smassetitems sai ON sai.ID = pod.assetItemID\r\n       " +
                 " LEFT JOIN smassetmasters sam ON sam.ID = pod.assetItemID\r\n      " +
@@ -1241,15 +1246,27 @@ namespace CMMSAPIs.Repositories
         internal async Task<CMDefaultResponse> UpdateGOReceive(CMGoodsOrderList request, int userID)
         {
             string OrderQuery = "";
+            string received_date = (request.receivedAt == null) ? "0001-01-01 00:00:00" : ((DateTime)request.receivedAt).ToString("yyyy-MM-dd HH:mm:ss");
             if (request.is_submit == 0)
             {
+          
                 OrderQuery = $"UPDATE smgoodsorder SET " +
-                    $"status= updated_by = {userID},updatedOn = '{UtilsRepository.GetUTCTime()}', status = {(int)CMMS.CMMS_Status.GO_RECEIVE_DRAFT} where ID={request.id}";
+                          $"challan_no = '{request.challan_no}',po_no='{request.po_no}', freight='{request.freight}',no_pkg_received='{request.no_pkg_received}'," +
+                          $"lr_no='{request.lr_no}',condition_pkg_received='{request.condition_pkg_received}',vehicle_no='{request.vehicle_no}', gir_no='{request.gir_no}', " +
+                          $"challan_date = '{request.challan_date.Value.ToString("yyyy-MM-dd")}', " +
+                          $"job_ref='{request.job_ref}',amount='{request.amount}', currency={request.currencyID},updated_by = {userID},updatedOn = '{UtilsRepository.GetUTCTime()}', status = {(int)CMMS.CMMS_Status.GO_RECEIVE_DRAFT}," +
+                          $" received_on = '{received_date}', po_date = '{request.po_date.Value.ToString("yyyy-MM-dd HH:mm:ss")}', purchaseDate= '{request.purchaseDate.Value.ToString("yyyy-MM-dd HH:mm:ss")}', freight_value='{request.freight_value}', inspection_report='{request.inspection_report}'" +
+                          $"  where ID={request.id}";
             }
             else
             {
                 OrderQuery = $"UPDATE smgoodsorder SET " +
-                    $"status= updated_by = {userID},updatedOn = '{UtilsRepository.GetUTCTime()}', status = {(int)CMMS.CMMS_Status.GO_RECEIVED_SUBMITTED} where ID={request.id}";
+                        $"challan_no = '{request.challan_no}',po_no='{request.po_no}', freight='{request.freight}',no_pkg_received='{request.no_pkg_received}'," +
+                        $"lr_no='{request.lr_no}',condition_pkg_received='{request.condition_pkg_received}',vehicle_no='{request.vehicle_no}', gir_no='{request.gir_no}', " +
+                        $"challan_date = '{request.challan_date.Value.ToString("yyyy-MM-dd")}', " +
+                        $"job_ref='{request.job_ref}',amount='{request.amount}', currency={request.currencyID},updated_by = {userID},updatedOn = '{UtilsRepository.GetUTCTime()}', status = {(int)CMMS.CMMS_Status.GO_RECEIVED_SUBMITTED}," +
+                        $" received_on = '{received_date}', po_date = '{request.po_date.Value.ToString("yyyy-MM-dd HH:mm:ss")}', purchaseDate= '{request.purchaseDate.Value.ToString("yyyy-MM-dd HH:mm:ss")}',  freight_value='{request.freight_value}', inspection_report='{request.inspection_report}'" +
+                        $"  where ID={request.id}";
             }
             await Context.ExecuteNonQry<int>(OrderQuery);
 
@@ -1364,7 +1381,7 @@ namespace CMMSAPIs.Repositories
                 $" freight ,transport ,no_pkg_received ,lr_no ,\r\n      " +
                 $"condition_pkg_received ,vehicle_no ,gir_no ,challan_date ,po_date ,\r\n      " +
                 $"job_ref ,amount ,currency as currencyID,status ,\r\n     " +
-                $" lastModifiedDate ,generate_flag ,s2s_generated_by ,received_on ,invoice_copy ,issued_by ,issued_on ,\r\n    " +
+                $" lastModifiedDate ,generate_flag ,s2s_generated_by ,case when received_on = '0000-00-00 00:00:00' then null else received_on end as received_on ,invoice_copy ,issued_by ,issued_on ,\r\n    " +
                 $"  approved_by ,approvedOn ,withdraw_by ,withdrawOn ,reorder_flag ,\r\n     " +
                 $" order_type ,remarks ,updated_by ,updatedOn ,rejected_by ,rejectedOn" +
                 $" \r\nFROM smgoodsorder where id = {request.id}";

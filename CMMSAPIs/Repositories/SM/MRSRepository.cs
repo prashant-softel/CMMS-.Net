@@ -962,7 +962,7 @@ namespace CMMSAPIs.Repositories.SM
         
         private async Task<int> DebitTransation(int facilityID, int transactionID, int actorType, int actorID, int debitQty, int assetItemID, int mrsID)
         {
-            string stmt = $"INSERT INTO smtransition (facilityID, transactionID, actorType, actorID, debitQty, assetItemID, mrsID) VALUES ({facilityID},{transactionID}, '{actorType}', {actorID}, {debitQty}, {assetItemID}, {mrsID}); SELECT LAST_INSERT_ID();";
+            string stmt = $"INSERT INTO smtransition (facilityID, transactionID, actorType, actorID,creditQty, debitQty, assetItemID, mrsID) VALUES ({facilityID},{transactionID}, '{actorType}', {actorID},0, {debitQty}, {assetItemID}, {mrsID}); SELECT LAST_INSERT_ID();";
             DataTable dt2 = await Context.FetchData(stmt).ConfigureAwait(false);
             int id = Convert.ToInt32(dt2.Rows[0][0]);
             return id;
@@ -970,7 +970,7 @@ namespace CMMSAPIs.Repositories.SM
 
         private async Task<int> CreditTransation(int facilityID, int transactionID, int actorType, int actorID, int qty, int assetItemID, int mrsID)
         {
-            string query = $"INSERT INTO smtransition (facilityID, transactionID,actorType,actorID,creditQty,assetItemID,mrsID) VALUES ({facilityID},{transactionID},'{actorType}',{actorID},{qty},{assetItemID},{mrsID});SELECT LAST_INSERT_ID();";
+            string query = $"INSERT INTO smtransition (facilityID, transactionID,actorType,actorID,creditQty,debitQty,assetItemID,mrsID) VALUES ({facilityID},{transactionID},'{actorType}',{actorID},{qty},0,{assetItemID},{mrsID});SELECT LAST_INSERT_ID();";
             DataTable dt2 = await Context.FetchData(query).ConfigureAwait(false);
             int id = Convert.ToInt32(dt2.Rows[0][0]);
             return id;
@@ -1722,5 +1722,112 @@ namespace CMMSAPIs.Repositories.SM
 
             return _MasterList;
         }
+
+          public async Task<List<CMPlantStockOpeningResponse_MRSRetrun>> getMRSReturnStockItems(string facility_id, int actorTypeID, int actorID,int mrs_id)
+        {
+            List<string> Asset_Item_Ids = new List<string>();
+            List<CMPlantStockOpening> Asset_Item_Opening_Balance_details = new List<CMPlantStockOpening>();
+            List<CMPlantStockOpeningResponse_MRSRetrun> Response = new List<CMPlantStockOpeningResponse_MRSRetrun>();
+            string itemCondition = "";
+            string Plant_Stock_Opening_Details_query = "";
+
+            Plant_Stock_Opening_Details_query = $"SELECT  sm_trans.facilityID as facilityID, fc.name as facilityName," +
+                $"fc.isBlock as Facility_Is_Block, " +
+                $" '' as Facility_Is_Block_of_name,sm_trans.assetItemID, a_master.asset_name, a_master.asset_code," +
+                $" a_master.asset_type_ID, AST.asset_type,  " +
+                $" IFNULL((select sum(ST.creditQty)-sum(ST.debitQty)  FROM smtransition as ST  JOIN smassetmasters as SM ON SM.ID = ST.assetItemID  " +
+                $" LEFT JOIN facilities fcc ON fcc.id = ST.facilityID   where   ST.actorType = {actorTypeID} and SM.ID=a_master.ID  and ST.facilityID in ('{facility_id}')" +
+                $" and sm_trans.actorID = {actorID}   group by SM.asset_code),0) Opening," +
+                $"  IFNULL((select sum(si.creditQty) from smtransition si where si.id = sm_trans.id ),0) as inward, " +
+                $"   IFNULL((select sum(so.debitQty) from smtransition so where so.id = sm_trans.id ),0) as outward , serial_number as  serial_no" +
+                $" from smrsitems  " +
+                $" join smtransition as sm_trans  on sm_trans.assetItemID = smrsitems.asset_item_ID  " +
+                $" JOIN smassetmasters as a_master ON a_master.ID = sm_trans.assetItemID  " +
+                $" LEFT JOIN facilities fc ON fc.id = sm_trans.facilityID " +
+                $" Left join smassettypes AST on AST.id = a_master.asset_type_ID " +
+                $" where (sm_trans.actorType = {actorTypeID} and sm_trans.facilityID in ('{facility_id}') and " +
+                $" sm_trans.actorID in ({actorID}) ) or (mrs_ID = {mrs_id} and is_splited = 1)";
+
+            Plant_Stock_Opening_Details_query = Plant_Stock_Opening_Details_query + itemCondition;
+            Plant_Stock_Opening_Details_query = Plant_Stock_Opening_Details_query + " group by a_master.asset_code;";
+
+            List<CMPlantStockOpening> Plant_Stock_Opening_Details_Reader = await Context.GetData<CMPlantStockOpening>(Plant_Stock_Opening_Details_query).ConfigureAwait(false);
+
+
+
+            List<CMPlantStockOpeningItemWiseResponse_MRSReturn> itemWiseResponse = new List<CMPlantStockOpeningItemWiseResponse_MRSReturn>();
+            foreach (var item in Plant_Stock_Opening_Details_Reader)
+            {
+                string facility_name = "";
+                if (Convert.ToInt32(item.Facility_Is_Block) == 0)
+                {
+                    facility_name = Convert.ToString(item.facilityName);
+                }
+                else
+                {
+                    facility_name = Convert.ToString(item.Facility_Is_Block_of_name);
+                }
+
+                Asset_Item_Ids.Add(Convert.ToString(item.assetItemID));
+
+                CMPlantStockOpening openingBalance = new CMPlantStockOpening();
+
+                openingBalance.facilityID = item.facilityID;
+                openingBalance.facilityName = facility_name;
+                openingBalance.Opening = item.Opening;
+                openingBalance.assetItemID = item.assetItemID;
+                openingBalance.asset_name = item.asset_name;
+                openingBalance.asset_code = item.asset_code;
+                openingBalance.asset_type_ID = item.asset_type_ID;
+                openingBalance.asset_type = item.asset_type;
+                openingBalance.serial_no = item.serial_no;
+                openingBalance.inward = item.inward;
+                openingBalance.outward = item.outward;
+                openingBalance.balance =  item.outward;
+                Asset_Item_Opening_Balance_details.Add(openingBalance);
+            }
+
+
+            var uniqueValues = Asset_Item_Opening_Balance_details.GroupBy(p => p.facilityID)
+            .Select(g => g.First())
+            .ToList();
+            foreach (var item in uniqueValues)
+            {
+                CMPlantStockOpeningResponse_MRSRetrun cMPlantStockOpeningResponse = new CMPlantStockOpeningResponse_MRSRetrun();
+                cMPlantStockOpeningResponse.facilityID = item.facilityID;
+                cMPlantStockOpeningResponse.facilityName = item.facilityName;
+                Response.Add(cMPlantStockOpeningResponse);
+            }
+            foreach (var item in Response)
+            {
+                List<CMPlantStockOpeningItemWiseResponse_MRSReturn> itemResponseList = new List<CMPlantStockOpeningItemWiseResponse_MRSReturn>();
+                CMPlantStockOpeningResponse_MRSRetrun cMPlantStockOpeningResponse = new CMPlantStockOpeningResponse_MRSRetrun();
+                cMPlantStockOpeningResponse.facilityID = item.facilityID;
+                cMPlantStockOpeningResponse.facilityName = item.facilityName;
+                var itemResponse = Asset_Item_Opening_Balance_details.Where(item => item.facilityID == item.facilityID).ToList();
+                foreach (var itemDetail in itemResponse)
+                {
+                    CMPlantStockOpeningItemWiseResponse_MRSReturn itemWise = new CMPlantStockOpeningItemWiseResponse_MRSReturn();
+                    itemWise.Facility_Is_Block = itemDetail.Facility_Is_Block;
+                    itemWise.Facility_Is_Block_of_name = itemDetail.Facility_Is_Block_of_name;
+                    itemWise.assetItemID = itemDetail.assetItemID;
+                    itemWise.asset_name = itemDetail.asset_name;
+                    itemWise.asset_code = itemDetail.asset_code;
+                    itemWise.asset_type_ID = itemDetail.asset_type_ID;
+                    itemWise.asset_type = itemDetail.asset_type;
+                    itemWise.serial_no = itemDetail.serial_no;
+                    itemWise.Opening = itemDetail.Opening;
+                    itemWise.inward = itemDetail.inward;
+                    itemWise.outward = itemDetail.outward;
+                    itemWise.balance = itemDetail.balance;
+                    itemResponseList.Add(itemWise);
+                }
+                item.stockDetails = itemResponseList;
+
+            }
+            return Response;
+
+        }
+
     }
 }

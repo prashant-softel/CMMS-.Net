@@ -436,10 +436,10 @@ public async Task<List<CMEmployeeStockReport>> GetEmployeeStockReport(int facili
                 " When toActorType = 4 then (select JC_title from jobcards j where j.id= st.toActorID) " +
                 " When toActorType = 6 then (select a.name from assets a where a.id= st.toActorID)  End AS toActorName," +
                 " ST.assetItemID,am.asset_name as assetItemName, qty , FF.name as facilityName, remarks, lastInsetedDateTime as LastUpdated, " +
-                " CONCAT(C.firstName, ' ', C.lastName) CreatedBy, ST.createdAt " +
+                " CONCAT(C.firstName, ' ', C.lastName) CreatedBy, ST.createdAt, smtypes.asset_type " +
                 " from smtransactiondetails ST  inner join smtransition smt on smt.transactionID = ST.ID" +
                 " inner join smassetmasters am on am.ID = ST.assetItemID left join facilities FF on FF.id = ST.plantID " +
-                " left join users C on C.id = ST.createdBy " +
+                " left join users C on C.id = ST.createdBy left join smassettypes smtypes on smtypes.ID = am.asset_type_ID " +
                 " where smt.actorType = "+actorType+ " and  smt.actorID = "+actorID+ "  and  date_format(smt.lastModifiedDate, '%Y-%m-%d')  BETWEEN '"+ fromDate.ToString("yyyy-MM-dd") + "' AND '"+ toDate.ToString("yyyy-MM-dd") + "' ";
 
             if(facility_ID != "" && facility_ID != null)

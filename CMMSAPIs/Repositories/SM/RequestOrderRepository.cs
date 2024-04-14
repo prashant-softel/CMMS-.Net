@@ -308,7 +308,7 @@ namespace CMMSAPIs.Repositories.SM
                 " facility_id,pod.spare_status,po.remarks,sai.orderflag," +
                 " sam.asset_type_ID,pod.requestID,pod.assetItemID,sai.serial_number,sai.location_ID,pod.cost,pod.ordered_qty," +
                 " po.request_date,sam.asset_type_ID,sam.asset_name,po.receiverID," +
-                " po.status,sai.asset_code,t1.asset_type,t2.cat_name,pod.received_qty,pod.damaged_qty,pod.accepted_qty, " +
+                " po.status,sam.asset_code,t1.asset_type,t2.cat_name,pod.received_qty,pod.damaged_qty,pod.accepted_qty, " +
                 " f1.file_path,f1.Asset_master_id,sm.decimal_status,sm.spare_multi_selection,po.generated_by, " +
                 " pod.order_type as asset_type_ID_OrderDetails, receive_later, added_to_store,reject_reccomendations as  rejectedRemark, " +
                 " po.amount,  po.currency as currencyID , curr.name as currency ,  \r\n    CONCAT(ed.firstName,' ',ed.lastName) as generatedBy, " +
