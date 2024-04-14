@@ -41,10 +41,12 @@ namespace CMMSAPIs.Helper
             { CMMS_Modules.WARRANTY_CLAIM, 30 },
             { CMMS_Modules.CALIBRATION, 31 },
             { CMMS_Modules.MC_TASK, 32 },
-            { CMMS_Modules.VEGETATION, 33 },
-            { CMMS_Modules.INCIDENT_REPORT, 34 },
-            { CMMS_Modules.DSM, 35 },
-            { CMMS_Modules.GRIEVANCE, 36 },
+            { CMMS_Modules.MC_PLAN, 33 },
+            { CMMS_Modules.VEGETATION_TASK, 34 },
+            { CMMS_Modules.VEGETATION_PLAN, 35 },
+            { CMMS_Modules.INCIDENT_REPORT, 36 },
+            { CMMS_Modules.DSM, 37 },
+            { CMMS_Modules.GRIEVANCE, 38 },
 
 
         };
@@ -267,7 +269,8 @@ namespace CMMSAPIs.Helper
             JobCard=182,
 
             GRIEVANCE = 301,
-
+            VEGETATION_TASK = 311,
+            VEGETATION_PLAN = 321
 
         }
 
