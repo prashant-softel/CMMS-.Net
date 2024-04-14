@@ -99,11 +99,14 @@ namespace CMMSAPIs.Repositories.Masters
                 response = new CMDefaultResponse(request.software_id, CMMS.RETRUNSTATUS.FAILURE, "For Module Name <" + request.moduleName + "> Software Id Is Not Passed. Please contact Backend Team For Getting Software_id For This Module.");
                 return response;
             }
-            string myQuery = "INSERT INTO features(`moduleName`,softwareid, `featureName`, `menuImage`, `add`, `edit`, `delete`, `view`, `issue`, `approve`, `selfView`) " +
+            string myQuery = "INSERT INTO features(`moduleName`,softwareid, `featureName`, `menuImage`, `add`, `edit`, `delete`, `view`, `issue`, `approve`, `selfView`,isactive,serialNo) " +
                 $"VALUES('{request.moduleName}',{request.software_id}, '{request.featureName}', '{request.menuImage}', {request.add}, {request.edit}, " +
-                $"{request.delete}, {request.view}, {request.issue}, {request.approve}, {request.selfView}); SELECT LAST_INSERT_ID();";
+                $"{request.delete}, {request.view}, {request.issue}, {request.approve}, {request.selfView},1, id*100); SELECT LAST_INSERT_ID();";
             DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
             int id = Convert.ToInt32(dt.Rows[0][0]);
+
+            myQuery = "update features set serialNo = " + id * 100 + " where id = " + id + "";
+            await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
 
             string insertIntoRoles = $"INSERT INTO roleaccess(roleId , featureId , `add` , edit , `delete` , `view` , issue , approve , selfView , " +
                 $"lastModifiedAt , lastModifiedBy ) " +
@@ -170,7 +173,7 @@ namespace CMMSAPIs.Repositories.Masters
             /*
              * Return List of modules from Features table
             */
-            string myQuery = "SELECT * FROM features; ";
+            string myQuery = "SELECT * FROM features where isActive=1; ";
             List<CMModule> _moduleList = await Context.GetData<CMModule>(myQuery).ConfigureAwait(false);
             return _moduleList;
         }
