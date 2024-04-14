@@ -563,6 +563,23 @@ namespace CMMSAPIs.Controllers.SM
                 return Ok(item);
             }
         }
-
+        [Route("getMRSReturnStockItems")]
+        [HttpGet]
+        public async Task<IActionResult> getMRSReturnStockItems(string facility_id, int actorTypeID, int actorID, int mrs_id)
+        {
+            try
+            {
+                var data = await _MRSBS.getMRSReturnStockItems(facility_id, actorTypeID, actorID, mrs_id);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                _AddLog.ErrorLog(ex.ToString());
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid data sent.";
+                return Ok(item);
+            }
+        }
     }
 }   
