@@ -1623,6 +1623,16 @@ namespace CMMSAPIs.Repositories.Permits
                     await Context.ExecuteNonQry<int>(qry).ConfigureAwait(false);
                 }
             }
+
+            if (request.uploadfile_ids != null && request.uploadfile_ids.Count > 0)
+            {
+                foreach (int data in request.uploadfile_ids)
+                {
+                    string qryuploadFiles = $"UPDATE uploadedfiles SET facility_id = {request.facility_id}, module_type={(int)CMMS.CMMS_Modules.PTW},module_ref_id={request.permit_id} where id = {data}";
+                    await Context.ExecuteNonQry<int>(qryuploadFiles).ConfigureAwait(false);
+                }
+            }
+
             CMDefaultResponse response = new CMDefaultResponse();
             string responseText = "";
             if(request.TBT_Done_By != 0)
