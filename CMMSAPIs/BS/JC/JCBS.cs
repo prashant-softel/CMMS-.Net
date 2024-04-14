@@ -1,216 +1,49 @@
-using CMMSAPIs.Helper;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using CMMSAPIs.Repositories.JC;
-using CMMSAPIs.Models.JC;
 using CMMSAPIs.Models.Utils;
+using Microsoft.AspNetCore.Http;
+using System.Collections.Generic;
 
-namespace CMMSAPIs.BS.JC
+namespace CMMSAPIs.Models.JC
 {
-    public interface IJCBS
+    public class CMJCUpdate
     {
-        Task<List<CMJCList>> GetJCList(int facility_id, int userID, bool self_view, string facilitytime);
-        Task<List<CMJCListForJob>> GetJCListByJobId(int jobId, string facilitytime);
-        Task<List<CMJCDetail>> GetJCDetail(int jc_id);
-        Task<CMDefaultResponse> CreateJC(int job_id, int userID);
-        Task<CMDefaultResponse> UpdateJC(CMJCUpdate request, int userID);
-        Task<CMDefaultResponse> CloseJC(CMJCClose request, int userID);
-        Task<List<CMDefaultResponse>> ApproveJC(CMJCApprove request, int userID);
-        Task<CMDefaultResponse> RejectJC(CMJCReject request, int userID);
-        Task<CMDefaultResponse> StartJC(int jc_id, CMJCDetail request, int userID);
-        Task<CMDefaultResponse> CarryForwardJC(CMApproval request, int userID);
-        Task<CMDefaultResponse> RejectJCCF(CMJCReject request, int userID);
-        Task<CMDefaultResponse> ApproveJCCF(CMJCApprove request, int userID);
+        public int id { get; set; }
+        //public int status { get; set; }
+        public string comment { get; set; }
+        public Boolean is_isolation_required { get; set; }
+        public List<CMEmpList> employee_list { get; set; }
+        public List<CMIsolatedCategoryId> isolated_list { get; set; }
+        public List<CMLotoList> loto_list { get; set; }
+        public List<CMFileUploadForm> file_upload_form { get; set; }
+        public List<CMHistoryList> history_list { get; set; }
+        public List<IFormFile> Attachments { get; set; }
+        public List<int> uploadfile_ids { get; set; }
     }
-
-    public class JCBS : IJCBS
+    public class CMIsolatedCategoryId
     {
-        private readonly DatabaseProvider databaseProvider;
-        private MYSQLDBHelper getDB => databaseProvider.SqlInstance();
-        public JCBS(DatabaseProvider dbProvider)
-        {
-            databaseProvider = dbProvider;
-        }
+        public int isolation_id { get; set; }
+        public int normalisedStatus { get; set; }
+        public DateTime normalisedDate { get; set; }
+    }
+    public class CMLotoList
+    {
+        public int loto_id { get; set; }
+        public int lotoRemovedStatus { get; set; }
+        public DateTime lotoRemovedDate { get; set; }
+    }    
+    public class CMEmpList
+    {
+        public int empId { get; set; }
+        public int employeeId { get; set; }
+        public string responsibility { get; set; }
+    }
+    public class file_upload_form
+    {
 
-        public async Task<List<CMJCList>> GetJCList(int facility_id, int userID, bool self_view, string facilitytime)
-        {
-            try
-            {
-                using (var repos = new JCRepository(getDB))
-                {
-                    return await repos.GetJCList(facility_id, userID, self_view, facilitytime);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        }
-
-        public async Task<List<CMJCListForJob>> GetJCListByJobId(int jobId, string facilitytime)
-        {
-            try
-            {
-                using (var repos = new JCRepository(getDB))
-                {
-                    return await repos.GetJCListByJobId(jobId, facilitytime);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        }
-
-        public async Task<List<CMJCDetail>> GetJCDetail(int jc_id)
-        {
-            try
-            {
-                using (var repos = new JCRepository(getDB))
-                {
-                    return await repos.GetJCDetail(jc_id);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        }
-
-        public async Task<CMDefaultResponse> CreateJC(int job_id, int userID)
-        {
-            try
-            {
-                using (var repos = new JCRepository(getDB))
-                {
-                    return await repos.CreateJC(job_id, userID);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        }
-
-        public async Task<CMDefaultResponse> UpdateJC(CMJCUpdate request, int userID)
-        {
-            try
-            {
-                using (var repos = new JCRepository(getDB))
-                {
-                    return await repos.UpdateJC(request, userID);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        }
-
-        public async Task<CMDefaultResponse> CloseJC(CMJCClose request, int userID)
-        {
-            try
-            {
-                using (var repos = new JCRepository(getDB))
-                {
-                    return await repos.CloseJC(request, userID);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        }
-
-        public async Task<List<CMDefaultResponse>> ApproveJC(CMJCApprove request, int userID)
-        {
-            try
-            {
-                using (var repos = new JCRepository(getDB))
-                {
-                    return await repos.ApproveJC(request, userID);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        }
-
-        public async Task<CMDefaultResponse> RejectJC(CMJCReject request, int userID)
-        {
-            try
-            {
-                using (var repos = new JCRepository(getDB))
-                {
-                    return await repos.RejectJC(request, userID);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        }
-
-        public async Task<CMDefaultResponse> StartJC(int jc_id, CMJCDetail request, int userID)
-        {
-            try
-            {
-                using (var repos = new JCRepository(getDB))
-                {
-                    return await repos.StartJC(jc_id, request, userID);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        }
-        public async Task<CMDefaultResponse> CarryForwardJC(CMApproval request, int userID)
-        {
-            try
-            {
-                using (var repos = new JCRepository(getDB))
-                {
-                    return await repos.CarryForwardJC(request, userID);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        }
-        public async Task<CMDefaultResponse> ApproveJCCF(CMJCApprove request, int userID)
-        {
-            try
-            {
-                using (var repos = new JCRepository(getDB))
-                {
-                    return await repos.ApproveJCCF(request, userID);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        }
-
-        public async Task<CMDefaultResponse> RejectJCCF(CMJCReject request, int userID)
-        {
-            try
-            {
-                using (var repos = new JCRepository(getDB))
-                {
-                    return await repos.RejectJCCF(request, userID);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        }
-
+    }
+    public class CMHistoryList
+    {
+        public int ModuleRefId { get; set; }
+        public string Comment { get; set; }
     }
 }
