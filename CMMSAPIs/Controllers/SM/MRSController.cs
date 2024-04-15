@@ -565,11 +565,11 @@ namespace CMMSAPIs.Controllers.SM
         }
         [Route("getMRSReturnStockItems")]
         [HttpGet]
-        public async Task<IActionResult> getMRSReturnStockItems(string facility_id, int actorTypeID, int actorID, int mrs_id)
+        public async Task<IActionResult> getMRSReturnStockItems(int mrs_id)
         {
             try
             {
-                var data = await _MRSBS.getMRSReturnStockItems(facility_id, actorTypeID, actorID, mrs_id);
+                var data = await _MRSBS.getMRSReturnStockItems(mrs_id);
                 return Ok(data);
             }
             catch (Exception ex)
