@@ -38,7 +38,7 @@ namespace CMMSAPIs.BS.SM
         Task<CMDefaultResponse> TransactionDetails(List<CMTransferItems> request);
         Task<CMDefaultResponse> updateUsedQty(List<CMTransferItems> request);
         Task<CMIssuedAssetItems> getIssuedAssetItems(int id);
-        Task<List<CMPlantStockOpeningResponse_MRSRetrun>> getMRSReturnStockItems(string facility_id, int actorTypeID, int actorID, int mrs_id);
+        Task<List<CMPlantStockOpeningResponse_MRSRetrun>> getMRSReturnStockItems(int mrs_id);
     }
     public class MRSBS : IMRSBS
     {
@@ -461,13 +461,13 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<CMPlantStockOpeningResponse_MRSRetrun>> getMRSReturnStockItems(string facility_id, int actorTypeID, int actorID, int mrs_id)
+        public async Task<List<CMPlantStockOpeningResponse_MRSRetrun>> getMRSReturnStockItems(int mrs_id)
         {
             try
             {
                 using (var repos = new MRSRepository(getDB))
                 {
-                    return await repos.getMRSReturnStockItems(facility_id, actorTypeID, actorID, mrs_id);
+                    return await repos.getMRSReturnStockItems(mrs_id);
                 }
             }
             catch (Exception ex)
