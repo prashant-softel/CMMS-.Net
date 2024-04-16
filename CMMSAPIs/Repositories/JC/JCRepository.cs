@@ -206,15 +206,37 @@ namespace CMMSAPIs.Repositories.JC
 
         }
 
-        internal async Task<CMDefaultResponse> StartJC(int jc_id, int userID)
+        internal async Task<CMDefaultResponse> StartJC(int jc_id, CMJCDetail request, int userID)
         {
             string myQuery = $"UPDATE jobcards SET JC_Status = {(int)CMMS.CMMS_Status.JC_STARTED}, status_updated_at = '{UtilsRepository.GetUTCTime()}', JC_Date_Start = '{UtilsRepository.GetUTCTime()}', JC_Start_By_id = {userID} WHERE id = {jc_id};";
             await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
 
+            //EMP LIST
+          
+           
+
             //string myQuery1 = $"SELECT  jc.id as id , jc.PTW_id as ptwId, job.id as jobid, facilities.name as plant_name, asset_cat.name as asset_category_name, CONCAT(user.firstName + ' ' + user.lastName) as JC_Closed_by_Name, CONCAT(user1.firstName + ' ' + user1.lastName) as JC_Rejected_By_Name, jc.JC_Approved_By_Name as  JC_Approved_By_Name FROM jobs as job JOIN  jobmappingassets as mapAssets ON mapAssets.jobId = job.id join assetcategories as asset_cat ON mapAssets.categoryId = asset_cat.id JOIN facilities as facilities ON job.blockId = facilities.id LEFT JOIN jobcards as jc on jc.jobId = job.id LEFT JOIN users as user ON user.id = jc.JC_Update_by LEFT JOIN  users as user1 ON user1.id = jc.JC_Rejected_By_id where jc.id = {jc_id}";
 
             List<CMJCDetail> _jcDetails = await GetJCDetail(jc_id);
+            //upload Images
+            if (request.uploadfile_ids != null)
+            {
+                foreach (int data in request.uploadfile_ids)
+                {
+                    int facility_id =1779;
+                    string qryuploadFiles = $"UPDATE uploadedfiles SET facility_id = {facility_id}, module_type={(int)CMMS.CMMS_Modules.JobCard},module_ref_id={jc_id} where id = {data}";
+                    await Context.ExecuteNonQry<int>(qryuploadFiles).ConfigureAwait(false);
+                }
+            }
+          
 
+            foreach (var data in request.LstCMJCEmpList)
+            {
+                string mapChecklistQry = $"insert into  permitemployeelists (employeeId,responsibility,JC_id) VALUES ";
+
+                mapChecklistQry += $"({data.empId}, {data.responsibility}, {jc_id})";
+                await Context.ExecuteNonQry<int>(mapChecklistQry).ConfigureAwait(false);
+            }
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOBCARD, jc_id, 0, 0, "Job Card Started", CMMS.CMMS_Status.JC_STARTED,userID);
 
             await CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOBCARD, CMMS.CMMS_Status.JC_STARTED, new[] { userID }, _jcDetails[0]);
@@ -284,7 +306,8 @@ namespace CMMSAPIs.Repositories.JC
             List<CMJCLotoDetail> _lotoList = await Context.GetData<CMJCLotoDetail>(myQuery5).ConfigureAwait(false);
 
             // emp list
-            string myQuery6 = $" SELECT CONCAT(user.firstName,' ',user.lastName) as empName, ptwEmpList.responsibility as resp FROM permitemployeelists as ptwEmpList JOIN permits as ptw ON ptw.id = ptwEmpList.pwtId LEFT JOIN users as user ON user.id = ptwEmpList.employeeId JOIN jobcards as jc on jc.PTW_id = ptw.id where jc.id = { jc_id }";
+            //string myQuery6 = $" SELECT CONCAT(user.firstName,' ',user.lastName) as empName, ptwEmpList.responsibility as resp FROM permitemployeelists as ptwEmpList JOIN permits as ptw ON ptw.id = ptwEmpList.pwtId LEFT JOIN users as user ON user.id = ptwEmpList.employeeId JOIN jobcards as jc on jc.PTW_id = ptw.id where jc.id = { jc_id }";
+              string myQuery6 = $" SELECT CONCAT(user.firstName,' ',user.lastName) as empName,ptwEmpList.employeeId as empid ,ptwEmpList.responsibility as resp FROM permitemployeelists as ptwEmpList  LEFT JOIN users as user ON user.id = ptwEmpList.employeeId  where ptwEmpList.JC_id ={ jc_id }";
             List<CMJCEmpDetail> _empList = await Context.GetData<CMJCEmpDetail>(myQuery6).ConfigureAwait(false);
 
             // file upload 
@@ -313,7 +336,7 @@ namespace CMMSAPIs.Repositories.JC
             return _plantDetails;
         }
 
-        internal async Task<CMDefaultResponse> CreateJC(int job_id, int userID)
+        internal async Task<CMDefaultResponse> CreateJC(int job_id, Files request, int userID)
         {
             /* 
              * Data will be inserted in Following tables
@@ -333,7 +356,7 @@ namespace CMMSAPIs.Repositories.JC
             string jobQuery = $"SELECT title as job_title, description as job_description,facilityId as facility_id FROM jobs where id = {job_id}";
             List<CMJCJobDetail> job1 = await Context.GetData<CMJCJobDetail>(jobQuery).ConfigureAwait(false);
             //_JobList.Count(); pending: add check for only one record is returned
-
+           
             foreach (var data in _JobList)
             {
                 int ptw_id = data.ptw_id;
@@ -375,6 +398,17 @@ namespace CMMSAPIs.Repositories.JC
                 //string myQuery1 = $"SELECT  jc.id as id , jc.PTW_id as ptwId, job.id as jobid, facilities.name as plant_name, asset_cat.name as asset_category_name, CONCAT(user.firstName + ' ' + user.lastName) as JC_Closed_by_Name, CONCAT(user1.firstName + ' ' + user1.lastName) as JC_Rejected_By_Name, jc.JC_Approved_By_Name as  JC_Approved_By_Name FROM jobs as job JOIN  jobmappingassets as mapAssets ON mapAssets.jobId = job.id join assetcategories as asset_cat ON mapAssets.categoryId = asset_cat.id JOIN facilities as facilities ON job.blockId = facilities.id LEFT JOIN jobcards as jc on jc.jobId = job.id LEFT JOIN users as user ON user.id = jc.JC_Update_by LEFT JOIN  users as user1 ON user1.id = jc.JC_Rejected_By_id order by jc.id desc limit 1";
 
                 List<CMJCDetail> _jcDetails = await GetJCDetail(jc_id);
+
+                
+                if (request.uploadfile_ids != null)
+                {
+                    foreach (int data in request.uploadfile_ids)
+                    {
+                        int facility_id = 1779;
+                        string qryuploadFiles = $"UPDATE uploadedfiles SET facility_id = {facility_id}, module_type={(int)CMMS.CMMS_Modules.JobCard},module_ref_id={jc_id} where id = {data}";
+                        await Context.ExecuteNonQry<int>(qryuploadFiles).ConfigureAwait(false);
+                    }
+                }
 
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOBCARD, jc_id, CMMS.CMMS_Modules.JOB, job_id, "Job Card Created", CMMS.CMMS_Status.JC_CREATED,userID);
 
@@ -420,7 +454,7 @@ namespace CMMSAPIs.Repositories.JC
             //EMP LIST
             foreach (var data in request.employee_list)
             {
-                string qryPermitEmpList = $"update permitemployeelists set employeeId ={data.employeeId } , responsibility ='{ data.responsibility }' where id ={data.empId}";
+                string qryPermitEmpList = $"update permitemployeelists set employeeId ={data.employeeId } , responsibility ='{ data.responsibility }' where id ={request.id}";
                 await Context.ExecuteNonQry<int>(qryPermitEmpList).ConfigureAwait(false);
             }
 
@@ -437,6 +471,16 @@ namespace CMMSAPIs.Repositories.JC
             var result = await Context.ExecuteNonQry<int>(myQuery1);
             //who updated it means = current emp id and name
             List<CMJCDetail> _jcDetails = await GetJCDetail(request.id);
+
+            if (request.uploadfile_ids != null)
+            {
+                foreach (int data in request.uploadfile_ids)
+                {
+                    int facility_id = 1779;
+                    string qryuploadFiles = $"UPDATE uploadedfiles SET facility_id = {facility_id}, module_type={(int)CMMS.CMMS_Modules.JobCard},module_ref_id={request.id} where id = {data}";
+                    await Context.ExecuteNonQry<int>(qryuploadFiles).ConfigureAwait(false);
+                }
+            }
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOBCARD, request.id, 0, 0, comment, CMMS.CMMS_Status.JC_UPDATED,userID);
 
@@ -468,6 +512,16 @@ namespace CMMSAPIs.Repositories.JC
             //string myQuery1 = $"SELECT  jc.id as id , jc.PTW_id as ptwId, job.id as jobid, facilities.name as plant_name, asset_cat.name as asset_category_name, CONCAT(user.firstName + ' ' + user.lastName) as JC_Closed_by_Name, CONCAT(user1.firstName + ' ' + user1.lastName) as JC_Rejected_By_Name, jc.JC_Approved_By_Name as  JC_Approved_By_Name FROM jobs as job JOIN  jobmappingassets as mapAssets ON mapAssets.jobId = job.id join assetcategories as asset_cat ON mapAssets.categoryId = asset_cat.id JOIN facilities as facilities ON job.blockId = facilities.id LEFT JOIN jobcards as jc on jc.jobId = job.id LEFT JOIN users as user ON user.id = jc.JC_Update_by LEFT JOIN  users as user1 ON user1.id = jc.JC_Rejected_By_id where jc.id = {request.id}";
 
             List<CMJCDetail> _jcDetails = await GetJCDetail(request.id);
+
+            if (request.uploadfile_ids != null)
+            {
+                foreach (int data in request.uploadfile_ids)
+                {
+                    int facility_id = 1779;
+                    string qryuploadFiles = $"UPDATE uploadedfiles SET facility_id = {facility_id}, module_type={(int)CMMS.CMMS_Modules.JobCard},module_ref_id={request.id} where id = {data}";
+                    await Context.ExecuteNonQry<int>(qryuploadFiles).ConfigureAwait(false);
+                }
+            }
 
             if (_jcDetails.Count == 0)
                 return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.FAILURE, $"Job Card with ID {request.id} not found");
@@ -542,6 +596,7 @@ namespace CMMSAPIs.Repositories.JC
 
             List<CMJCDetail> _jcDetails = await GetJCDetail(request.id);
 
+
             if (_jcDetails.Count == 0)
                 throw new MissingMemberException($"Job Card with ID {request.id} not found");
 
@@ -564,6 +619,15 @@ namespace CMMSAPIs.Repositories.JC
 
             List<CMJCDetail> _jcDetails = await GetJCDetail(request.id);
 
+            if (request.uploadfile_ids != null)
+            {
+                foreach (int data in request.uploadfile_ids)
+                {
+                    int facility_id = 1779;
+                    string qryuploadFiles = $"UPDATE uploadedfiles SET facility_id = {facility_id}, module_type={(int)CMMS.CMMS_Modules.JobCard},module_ref_id={request.id} where id = {data}";
+                    await Context.ExecuteNonQry<int>(qryuploadFiles).ConfigureAwait(false);
+                }
+            }
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOBCARD, request.id, 0, 0, "Job Card Carry forward Requested", CMMS.CMMS_Status.JC_CARRY_FORWARDED, userID);
 
             await CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOBCARD, CMMS.CMMS_Status.JC_CARRY_FORWARDED, new[] { userID }, _jcDetails[0]);

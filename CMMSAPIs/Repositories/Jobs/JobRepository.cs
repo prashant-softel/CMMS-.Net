@@ -327,7 +327,7 @@ namespace CMMSAPIs.Repositories.Jobs
 			{
 				_AssociatedpermitList[0].ptwStatus_short = "Linked";    //temp till JOIN is made
 			}
-            string myQuery4 = "SELECT workType.id AS workTypeId, workType.workTypeName as workTypeName FROM jobs AS job " +
+            string myQuery4 = "SELECT distinct(workType.id) AS workTypeId, workType.workTypeName as workTypeName FROM jobs AS job " +
                 "left JOIN jobmappingassets AS mapAssets ON mapAssets.jobId = job.id " +
                 "left JOIN assetcategories AS asset_cat ON mapAssets.categoryId = asset_cat.id " +
                 "LEFT JOIN jobassociatedworktypes as mapWorkTypes on mapWorkTypes.jobId = job.id " +
@@ -445,7 +445,7 @@ namespace CMMSAPIs.Repositories.Jobs
             string setCat = $"UPDATE jobmappingassets, assets SET jobmappingassets.categoryId = assets.categoryId WHERE jobmappingassets.assetId = assets.id;";
             await Context.ExecuteNonQry<int>(setCat).ConfigureAwait(false);
             if (request.WorkType_Ids == null)
-                request.WorkType_Ids = new List<int>();
+              request.WorkType_Ids = new List<int>();
 
             foreach (var data in request.WorkType_Ids)
             {

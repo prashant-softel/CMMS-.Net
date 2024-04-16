@@ -17,6 +17,8 @@ namespace CMMSAPIs.Models.JC
         public List<CMFileUploadForm> file_upload_form { get; set; }
         public List<CMHistoryList> history_list { get; set; }
         public List<IFormFile> Attachments { get; set; }
+
+        public List<int> uploadfile_ids { get; set; }
     }
     public class CMIsolatedCategoryId
     {

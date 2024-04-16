@@ -82,12 +82,13 @@ namespace CMMSAPIs.Controllers.JC
         //[Authorize]
         [Route("CreateJC")]
         [HttpPost]
-        public async Task<IActionResult> CreateJC(int job_id)
+        public async Task<IActionResult> CreateJC(int job_id, Files request)
+
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _JCBS.CreateJC(job_id, userID);
+                var data = await _JCBS.CreateJC( job_id,  request,  userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -167,12 +168,12 @@ namespace CMMSAPIs.Controllers.JC
         //[Authorize]
         [Route("StartJC")]
         [HttpPut]
-        public async Task<IActionResult> StartJC(int jc_id)
+        public async Task<IActionResult> StartJC(int jc_id, CMJCDetail request)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _JCBS.StartJC(jc_id, userID);
+                var data = await _JCBS.StartJC( jc_id,  request,  userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -180,9 +181,6 @@ namespace CMMSAPIs.Controllers.JC
                 throw;
             }
         }
-
-
-
         //[Authorize]
         [Route("CarryForwardJC")]
         [HttpPut]
