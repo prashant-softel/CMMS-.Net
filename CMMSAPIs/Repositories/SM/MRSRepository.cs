@@ -832,7 +832,7 @@ namespace CMMSAPIs.Repositories.SM
 
                             string insertStmt = $"START TRANSACTION; " +
                             $"INSERT INTO smrsitems (mrs_ID,asset_item_ID,asset_MDM_code,requested_qty,status,flag,approval_required,mrs_return_ID,issued_qty,returned_qty,used_qty,available_qty, is_splited,approved_qty)" +
-                            $"VALUES ({request.id},{item.asset_item_ID},'{item.asset_MDM_code}',1,0,0,1,0,0,0, 1, {available_qty},1,1)" +
+                            $"VALUES ({request.id},{item.asset_item_ID},'{item.asset_MDM_code}',1,0,0,1,0,0,0, 0, {available_qty},1,1)" +
                             $"; SELECT LAST_INSERT_ID();COMMIT;";
                             DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
                         }
