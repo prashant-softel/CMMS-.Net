@@ -6,6 +6,7 @@ namespace CMMSAPIs.Models.JC
 {
     public class CMJCDetail
     {
+        
         public int id { get; set; }
         public string plant_name { get; set; }
         public string asset_category_name { get; set; }
@@ -33,6 +34,9 @@ namespace CMMSAPIs.Models.JC
         public List<CMJCLotoDetail> LstCMJCLotoDetailList { get; set; }
         public List<CMJCEmpDetail> LstCMJCEmpList { get; set; }
         public List<CMFileDetail> file_list { get; set; }
+       
+        public List<CMWorkTypeTools> tool_List { get; set; }
+        public List<int> uploadfile_ids { get; set; }
     }
 }
 
@@ -84,8 +88,19 @@ public class CMJCLotoDetail
 
 public class CMJCEmpDetail
 {
+    public int empId { get; set; }
+
     public string empName { get; set; }
-    public string resp { get; set; }
+    public string responsibility { get; set; }
+}
+public class Files
+{
+    public List<int> uploadfile_ids { get; set; }
+}
+public class CMWorkTypeTools
+{
+    public int toolId { get; set; }
+    public string toolName { get; set; }
 }
 
 

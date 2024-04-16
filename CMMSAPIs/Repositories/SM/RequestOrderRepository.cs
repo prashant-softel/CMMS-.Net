@@ -301,59 +301,153 @@ namespace CMMSAPIs.Repositories.SM
             return response;
         }
 
-        public async Task<CMCreateRequestOrder> GetRODetailsByID(int id,string facilitytimeZone)
+        /*  public async Task<CMCreateRequestOrder> GetRODetailsByID(int id,string facilitytimeZone)
+          {
+
+              string query = "SELECT fc.name as facilityName,pod.ID as requestDetailsID, facilityid as      " +
+                  " facility_id,pod.spare_status,po.remarks,sai.orderflag," +
+                  " sam.asset_type_ID,pod.requestID,pod.assetItemID,sai.serial_number,sai.location_ID,pod.cost,pod.ordered_qty," +
+                  " po.request_date,sam.asset_type_ID,sam.asset_name,po.receiverID," +
+                  " po.status,sam.asset_code,t1.asset_type,t2.cat_name,pod.received_qty,pod.damaged_qty,pod.accepted_qty, " +
+                  " f1.file_path,f1.Asset_master_id,sm.decimal_status,sm.spare_multi_selection,po.generated_by, " +
+                  " pod.order_type as asset_type_ID_OrderDetails, receive_later, added_to_store,reject_reccomendations as  rejectedRemark, " +
+                  " po.amount,  po.currency as currencyID , curr.name as currency ,  \r\n    CONCAT(ed.firstName,' ',ed.lastName) as generatedBy, " +
+                  " po.received_on as generatedAt,approvedOn as approvedAt,CONCAT(ed1.firstName,' ',ed1.lastName) as receivedBy, " +
+                  " pod.remarks as itemcomment, CONCAT(ed2.firstName,' ',ed2.lastName) as approvedBy , " +
+                  " CONCAT(ed3.firstName,' ',ed3.lastName) as rejectedBy , po.rejected_at as rejectedAt, sic.cat_name asset_type_Name" +
+                  " FROM smrequestorderdetails pod" +
+                  " LEFT JOIN smrequestorder po ON po.ID = pod.requestID" +
+                  " LEFT JOIN smassetitems sai ON sai.ID = pod.assetItemID" +
+                  " LEFT JOIN smassetmasters sam ON sam.id = pod.assetItemID" +
+                  " LEFT JOIN smunitmeasurement sm ON sm.ID = sam.unit_of_measurement LEFT JOIN smitemcategory sic ON sic.ID = sam.item_category_ID" +
+                  " LEFT JOIN ( SELECT file.file_path,file.Asset_master_id as Asset_master_id FROM smassetmasterfiles file" +
+                  "            LEFT join smassetmasters sam on file.Asset_master_id =  sam.id )" +
+                  "   f1 ON f1.Asset_master_id = sam.id" +
+                  " LEFT JOIN (" +
+                  "            SELECT sat.asset_type,s1.ID as master_ID FROM smassettypes sat" +
+                  "            LEFT JOIN smassetmasters s1 ON s1.asset_type_ID = sat.ID" +
+                  "        )  t1 ON t1.master_ID = sam.ID" +
+                  " LEFT JOIN (" +
+                  "            SELECT sic.cat_name,s2.ID as master_ID FROM smitemcategory sic" +
+                  "            LEFT JOIN smassetmasters s2 ON s2.item_category_ID = sic.ID " +
+                  "        )  t2 ON t2.master_ID = sam.ID" +
+                  "        LEFT JOIN facilities fc ON fc.id = po.facilityID" +
+                  " LEFT JOIN currency curr ON curr.id = po.currency  LEFT JOIN users ed2 ON ed2.id = po.approved_by " +
+                  " LEFT JOIN users ed ON ed.id = po.generated_by" +
+                  " LEFT JOIN users ed1 ON ed1.id = po.receiverID     LEFT JOIN users ed3 ON ed3.id = po.rejeccted_by" +
+                  "  WHERE po.ID = "+id+" ;";
+
+              List<CMRequestOrderList> _List = await Context.GetData<CMRequestOrderList>(query).ConfigureAwait(false);
+
+              CMCreateRequestOrder _MasterList = _List.Select(p => new CMCreateRequestOrder
+              {
+                  request_order_id = p.requestID,
+                  facilityID = p.facility_id,
+                  facilityName = p.facilityName,                
+                  status = p.status,                
+                  comment = p.remarks,
+                  rejectedRemark = p.rejectedRemark,
+                  approvedAt = p.approvedAt,
+                  generatedBy = p.generatedBy,
+
+                  generatedAt = p.request_date,
+                  approvedBy = p.approvedBy,
+                  rejectedBy = p.rejectedBy,
+                  rejectedAt = p.rejectedAt
+              }).FirstOrDefault();
+              List<CMRequestOrder_ITEMS> _itemList = _List.Select(p => new CMRequestOrder_ITEMS
+              {
+                  itemID = p.requestDetailsID,
+                  requestID = p.requestID,
+                  cost = p.cost,
+                  asset_name = p.asset_name,
+                  assetMasterItemID = p.assetItemID,
+                  ordered_qty = p.ordered_qty,
+                  comment = p.itemcomment,
+                  asset_code = p.asset_code,
+                  asset_type = p.asset_type,
+                  asset_cat = p.asset_type_Name
+              }).ToList();
+              _MasterList.cost = _itemList.Sum(x=> x.cost);
+              _MasterList.request_order_items = _itemList;
+              _MasterList.number_of_item_count = (int)_itemList.Sum(x => x.ordered_qty);
+              _MasterList.number_of_masters = _itemList.Count;
+
+
+              CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_MasterList.status);
+              string _shortStatus = getShortStatus(CMMS.CMMS_Modules.SM_RO, _Status);
+              string _longStatus = getLongStatus(_MasterList.request_order_id, _Status);
+
+              _MasterList.status_short = _shortStatus;
+              _MasterList.status_long = _longStatus;
+
+              foreach (var list in _List)
+              {
+                  if (list != null && list.approvedAt != null)
+                      list.approvedAt = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)list.approvedAt);
+                  if (list != null && list.challan_date != null)
+                      list.challan_date = (DateTime)(list.approvedAt = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.challan_date));
+                  if (list != null && list.receivedAt != null)
+                      list.receivedAt = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)list.receivedAt);
+                  if (list != null && list.request_date != null)
+                      list.request_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)list.request_date);
+              }
+              return _MasterList;
+
+          }*/
+        //changes
+        public async Task<List<CMCreateRequestOrder>> GetRODetailsByID(string IDs, string facilityTimeZone)
         {
+            // Convert list of IDs to comma-separated string
+           // string idList = string.Join(",", IDs);
 
-            string query = "SELECT fc.name as facilityName,pod.ID as requestDetailsID, facilityid as      " +
-                " facility_id,pod.spare_status,po.remarks,sai.orderflag," +
-                " sam.asset_type_ID,pod.requestID,pod.assetItemID,sai.serial_number,sai.location_ID,pod.cost,pod.ordered_qty," +
-                " po.request_date,sam.asset_type_ID,sam.asset_name,po.receiverID," +
-                " po.status,sam.asset_code,t1.asset_type,t2.cat_name,pod.received_qty,pod.damaged_qty,pod.accepted_qty, " +
-                " f1.file_path,f1.Asset_master_id,sm.decimal_status,sm.spare_multi_selection,po.generated_by, " +
-                " pod.order_type as asset_type_ID_OrderDetails, receive_later, added_to_store,reject_reccomendations as  rejectedRemark, " +
-                " po.amount,  po.currency as currencyID , curr.name as currency ,  \r\n    CONCAT(ed.firstName,' ',ed.lastName) as generatedBy, " +
-                " po.received_on as generatedAt,approvedOn as approvedAt,CONCAT(ed1.firstName,' ',ed1.lastName) as receivedBy, " +
-                " pod.remarks as itemcomment, CONCAT(ed2.firstName,' ',ed2.lastName) as approvedBy , " +
-                " CONCAT(ed3.firstName,' ',ed3.lastName) as rejectedBy , po.rejected_at as rejectedAt, sic.cat_name asset_type_Name" +
-                " FROM smrequestorderdetails pod" +
-                " LEFT JOIN smrequestorder po ON po.ID = pod.requestID" +
-                " LEFT JOIN smassetitems sai ON sai.ID = pod.assetItemID" +
-                " LEFT JOIN smassetmasters sam ON sam.id = pod.assetItemID" +
-                " LEFT JOIN smunitmeasurement sm ON sm.ID = sam.unit_of_measurement LEFT JOIN smitemcategory sic ON sic.ID = sam.item_category_ID" +
-                " LEFT JOIN ( SELECT file.file_path,file.Asset_master_id as Asset_master_id FROM smassetmasterfiles file" +
-                "            LEFT join smassetmasters sam on file.Asset_master_id =  sam.id )" +
-                "   f1 ON f1.Asset_master_id = sam.id" +
-                " LEFT JOIN (" +
-                "            SELECT sat.asset_type,s1.ID as master_ID FROM smassettypes sat" +
-                "            LEFT JOIN smassetmasters s1 ON s1.asset_type_ID = sat.ID" +
-                "        )  t1 ON t1.master_ID = sam.ID" +
-                " LEFT JOIN (" +
-                "            SELECT sic.cat_name,s2.ID as master_ID FROM smitemcategory sic" +
-                "            LEFT JOIN smassetmasters s2 ON s2.item_category_ID = sic.ID " +
-                "        )  t2 ON t2.master_ID = sam.ID" +
-                "        LEFT JOIN facilities fc ON fc.id = po.facilityID" +
-                " LEFT JOIN currency curr ON curr.id = po.currency  LEFT JOIN users ed2 ON ed2.id = po.approved_by " +
-                " LEFT JOIN users ed ON ed.id = po.generated_by" +
-                " LEFT JOIN users ed1 ON ed1.id = po.receiverID     LEFT JOIN users ed3 ON ed3.id = po.rejeccted_by" +
-                "  WHERE po.ID = "+id+" ;";
+            string query = "SELECT fc.name as facilityName, pod.ID as requestDetailsID, facilityid as facility_id, pod.spare_status, po.remarks, sai.orderflag, " +
+                           "sam.asset_type_ID, pod.requestID, pod.assetItemID, sai.serial_number, sai.location_ID, pod.cost, pod.ordered_qty, " +
+                           "po.request_date, sam.asset_type_ID, sam.asset_name, po.receiverID, po.status, sam.asset_code, t1.asset_type, t2.cat_name, " +
+                           "pod.received_qty, pod.damaged_qty, pod.accepted_qty, f1.file_path, f1.Asset_master_id, sm.decimal_status, sm.spare_multi_selection, " +
+                           "po.generated_by, pod.order_type as asset_type_ID_OrderDetails, receive_later, added_to_store, reject_reccomendations as rejectedRemark, " +
+                           "po.amount, po.currency as currencyID, curr.name as currency, CONCAT(ed.firstName,' ',ed.lastName) as generatedBy, " +
+                           "po.received_on as generatedAt, approvedOn as approvedAt, CONCAT(ed1.firstName,' ',ed1.lastName) as receivedBy, " +
+                           "pod.remarks as itemcomment, CONCAT(ed2.firstName,' ',ed2.lastName) as approvedBy, CONCAT(ed3.firstName,' ',ed3.lastName) as rejectedBy, " +
+                           "po.rejected_at as rejectedAt, sic.cat_name as asset_type_Name " +
+                           "FROM smrequestorderdetails pod " +
+                           "LEFT JOIN smrequestorder po ON po.ID = pod.requestID " +
+                           "LEFT JOIN smassetitems sai ON sai.ID = pod.assetItemID " +
+                           "LEFT JOIN smassetmasters sam ON sam.id = pod.assetItemID " +
+                           "LEFT JOIN smunitmeasurement sm ON sm.ID = sam.unit_of_measurement " +
+                           "LEFT JOIN smitemcategory sic ON sic.ID = sam.item_category_ID " +
+                           "LEFT JOIN (SELECT file.file_path, file.Asset_master_id as Asset_master_id FROM smassetmasterfiles file " +
+                           "           LEFT JOIN smassetmasters sam ON file.Asset_master_id = sam.id) f1 ON f1.Asset_master_id = sam.id " +
+                           "LEFT JOIN (SELECT sat.asset_type, s1.ID as master_ID FROM smassettypes sat " +
+                           "           LEFT JOIN smassetmasters s1 ON s1.asset_type_ID = sat.ID) t1 ON t1.master_ID = sam.ID " +
+                           "LEFT JOIN (SELECT sic.cat_name, s2.ID as master_ID FROM smitemcategory sic " +
+                           "           LEFT JOIN smassetmasters s2 ON s2.item_category_ID = sic.ID) t2 ON t2.master_ID = sam.ID " +
+                           "LEFT JOIN facilities fc ON fc.id = po.facilityID " +
+                           "LEFT JOIN currency curr ON curr.id = po.currency " +
+                           "LEFT JOIN users ed2 ON ed2.id = po.approved_by " +
+                           "LEFT JOIN users ed ON ed.id = po.generated_by " +
+                           "LEFT JOIN users ed1 ON ed1.id = po.receiverID " +
+                           "LEFT JOIN users ed3 ON ed3.id = po.rejeccted_by " +
+                           "WHERE  po.ID  IN ("+ IDs + ") ;";
+           
             List<CMRequestOrderList> _List = await Context.GetData<CMRequestOrderList>(query).ConfigureAwait(false);
-
-            CMCreateRequestOrder _MasterList = _List.Select(p => new CMCreateRequestOrder
+            List<CMCreateRequestOrder> _MasterList = _List.Select(p => new CMCreateRequestOrder
             {
                 request_order_id = p.requestID,
                 facilityID = p.facility_id,
-                facilityName = p.facilityName,                
-                status = p.status,                
+                facilityName = p.facilityName,
+                status = p.status,
                 comment = p.remarks,
                 rejectedRemark = p.rejectedRemark,
                 approvedAt = p.approvedAt,
                 generatedBy = p.generatedBy,
-            
+
                 generatedAt = p.request_date,
                 approvedBy = p.approvedBy,
                 rejectedBy = p.rejectedBy,
                 rejectedAt = p.rejectedAt
-            }).FirstOrDefault();
+
+            }).ToList();
             List<CMRequestOrder_ITEMS> _itemList = _List.Select(p => new CMRequestOrder_ITEMS
             {
                 itemID = p.requestDetailsID,
@@ -367,33 +461,36 @@ namespace CMMSAPIs.Repositories.SM
                 asset_type = p.asset_type,
                 asset_cat = p.asset_type_Name
             }).ToList();
-            _MasterList.cost = _itemList.Sum(x=> x.cost);
-            _MasterList.request_order_items = _itemList;
-            _MasterList.number_of_item_count = (int)_itemList.Sum(x => x.ordered_qty);
-            _MasterList.number_of_masters = _itemList.Count;
+            foreach (var MasterList in _MasterList) {
+                MasterList.cost = _itemList.Sum(x => x.cost);
+                MasterList.request_order_items = _itemList;
+                MasterList.number_of_item_count = (int)_itemList.Sum(x => x.ordered_qty);
+                MasterList.number_of_masters = _itemList.Count;
+            }
 
+            foreach (var MasterList in _MasterList)
+            {
+                CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(MasterList.status);
+                string _shortStatus = getShortStatus(CMMS.CMMS_Modules.SM_RO, _Status);
+                string _longStatus = getLongStatus(MasterList.request_order_id, _Status);
 
-            CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_MasterList.status);
-            string _shortStatus = getShortStatus(CMMS.CMMS_Modules.SM_RO, _Status);
-            string _longStatus = getLongStatus(_MasterList.request_order_id, _Status);
-
-            _MasterList.status_short = _shortStatus;
-            _MasterList.status_long = _longStatus;
-
+                MasterList.status_short = _shortStatus;
+                MasterList.status_long = _longStatus;
+            }
             foreach (var list in _List)
             {
                 if (list != null && list.approvedAt != null)
-                    list.approvedAt = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)list.approvedAt);
+                    list.approvedAt = await _utilsRepo.ConvertToUTCDTC(facilityTimeZone, (DateTime)list.approvedAt);
                 if (list != null && list.challan_date != null)
-                    list.challan_date = (DateTime)(list.approvedAt = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.challan_date));
+                    list.challan_date = (DateTime)(list.approvedAt = await _utilsRepo.ConvertToUTCDTC(facilityTimeZone, list.challan_date));
                 if (list != null && list.receivedAt != null)
-                    list.receivedAt = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)list.receivedAt);
+                    list.receivedAt = await _utilsRepo.ConvertToUTCDTC(facilityTimeZone, (DateTime)list.receivedAt);
                 if (list != null && list.request_date != null)
-                    list.request_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)list.request_date);
+                    list.request_date = await _utilsRepo.ConvertToUTCDTC(facilityTimeZone, (DateTime)list.request_date);
             }
             return _MasterList;
-
         }
+
 
         internal static string getShortStatus(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status m_notificationID)
         {

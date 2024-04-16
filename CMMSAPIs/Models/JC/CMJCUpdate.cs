@@ -14,9 +14,10 @@ namespace CMMSAPIs.Models.JC
         public List<CMEmpList> employee_list { get; set; }
         public List<CMIsolatedCategoryId> isolated_list { get; set; }
         public List<CMLotoList> loto_list { get; set; }
-        public List<CMFileUploadForm> file_upload_form { get; set; }
+      //  public List<CMFileUploadForm> file_upload_form { get; set; }
         public List<CMHistoryList> history_list { get; set; }
         public List<IFormFile> Attachments { get; set; }
+        public List<int> uploadfile_ids { get; set; }
     }
     public class CMIsolatedCategoryId
     {

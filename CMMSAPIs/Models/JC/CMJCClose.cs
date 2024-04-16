@@ -1,4 +1,6 @@
-﻿namespace CMMSAPIs.Models.JC
+﻿using System.Collections.Generic;
+
+namespace CMMSAPIs.Models.JC
 {
     public class CMJCClose
     {
@@ -10,6 +12,8 @@
         public int isolationId { get; set; }
         public int normalisedStatus { get; set; }
         public int lotoStatus { get; set; }
+
+        public List<int> uploadfile_ids { get; set; }
 
     }
 }
