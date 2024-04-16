@@ -14,7 +14,7 @@ namespace CMMSAPIs.BS.SM
     public interface IRequestOrderBS
     {
         Task<List<CMCreateRequestOrder>> GetRequestOrderList(int facilityID, DateTime fromDate, DateTime toDate,string facilitytime);
-        Task<CMCreateRequestOrder> GetRODetailsByID(int id, string facilitytime);
+        Task<List<CMCreateRequestOrder>> GetRODetailsByID(string IDs, string facilitytime);
         Task<CMDefaultResponse> CreateRequestOrder(CMCreateRequestOrder request, int userID);
         Task<CMDefaultResponse> UpdateRequestOrder(CMCreateRequestOrder request, int userID);
         Task<CMDefaultResponse> DeleteRequestOrder(CMApproval request, int userID);
@@ -45,13 +45,13 @@ namespace CMMSAPIs.BS.SM
                 throw;
             }
         }
-        public async Task<CMCreateRequestOrder> GetRODetailsByID(int id, string facilitytime)
+        public async Task<List<CMCreateRequestOrder>> GetRODetailsByID(string IDs, string facilitytime)
         {
             try
             {
                 using (var repos = new RequestOrderRepository(getDB))
                 {
-                    return await repos.GetRODetailsByID(id,  facilitytime);
+                    return await repos.GetRODetailsByID(IDs,facilitytime);
 
                 }
             }

@@ -723,7 +723,7 @@ namespace CMMSAPIs.Repositories.Permits
                 }
             }
 
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, insertedId, 0, 0, "Permit Created", CMMS.CMMS_Status.PTW_CREATED,userID);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, insertedId, 0, 0, request.physical_iso_remark, CMMS.CMMS_Status.PTW_CREATED,userID);
 
             await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_CREATED,new[] { userID }, permitDetails[0]);
 
@@ -834,7 +834,7 @@ namespace CMMSAPIs.Repositories.Permits
                     
             }
 
-            string pmlist = $"Select pm.id as pmid, pm.status as status, concat(user.firstname, ' ', user.lastname) as assignedto, plan.plan_name as title,  pm.plan_date as startDate, pm.ptw_id as permitid, group_concat(distinct asset_cat.name order by asset_cat.id separator ', ') as equipmentcat, group_concat(distinct assets.name order by assets.id separator ', ') as equipment " +
+            string pmlist = $"Select pm.id as pmid, pm.status as status, concat(user.firstname, ' ', user.lastname) as assignedto, plan.plan_name as title,DATE_FORMAT(pm.plan_date,'%Y-%m-%d') as startDate, pm.ptw_id as permitid, group_concat(distinct asset_cat.name order by asset_cat.id separator ', ') as equipmentcat, group_concat(distinct assets.name order by assets.id separator ', ') as equipment " +
                 $"from pm_task as pm " +
                 $"left join pm_plan as plan on pm.plan_id = plan.id " +
                 $"left join pm_schedule as pmassets on pm.id = pmassets.task_id " +
@@ -1508,8 +1508,10 @@ namespace CMMSAPIs.Repositories.Permits
                 updatePermitQry += $"approvedById = { request.approver_id }, ";
             if (request.resubmit == true)
                 updatePermitQry += $"status = {(int)CMMS.CMMS_Status.PTW_CREATED}, ";
-            
-            
+            if(request.physical_iso_remark!=null)
+                updatePermitQry += $"physicalIsoRemark = '{ request.physical_iso_remark}', ";
+
+
             updatePermitQry += $" TBT_Done_By = {request.TBT_Done_By},";
             int id = request.TBT_Done_By;
             if (id != null && id !=0)
@@ -1652,9 +1654,9 @@ namespace CMMSAPIs.Repositories.Permits
             }
             else
             {
-                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.permit_id, 0, 0, "Permit Updated", CMMS.CMMS_Status.PTW_UPDATED,userID);
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.permit_id, 0, 0, request.physical_iso_remark, CMMS.CMMS_Status.PTW_UPDATED,userID);
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_UPDATED, new[] { userID }, permitDetails);
-                 response = new CMDefaultResponse(request.permit_id, CMMS.RETRUNSTATUS.SUCCESS, responseText);
+                 response = new CMDefaultResponse(request.permit_id, CMMS.RETRUNSTATUS.SUCCESS, $"Permit Updated Successfully");
 
             }
             return response;

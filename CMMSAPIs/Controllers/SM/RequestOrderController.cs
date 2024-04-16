@@ -45,13 +45,13 @@ namespace CMMSAPIs.Controllers.SM
         //[Authorize]
         [Route("GetRODetailsByID")]
         [HttpGet]
-        public async Task<IActionResult> GetRODetailsByID(int requestID,int facility_id)
+        public async Task<IActionResult> GetRODetailsByID(string IDs, int facility_id)
         {
             try
             {
                 var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
 
-                var data = await _IRequestOrderBS.GetRODetailsByID(requestID,facilitytimeZone);
+                var data = await _IRequestOrderBS.GetRODetailsByID(IDs, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
