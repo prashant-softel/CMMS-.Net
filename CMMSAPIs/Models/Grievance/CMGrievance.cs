@@ -27,7 +27,7 @@ namespace CMMSAPIs.Models.Grievance
         public DateTime deletedAt { get; set; }
         public string deletedBy { get; set; }
         public string deletedByName { get; set; }
-        public dynamic closedAt { get; set; }
+        public DateTime closedAt { get; set; }
         //        public int addedBy { get; set; }
         //      public DateTime? updated_at { get; set; }
         //       public string updated_by { get; set; }

@@ -12,6 +12,7 @@ namespace CMMSAPIs.Models.Grievance
         public string concern { get; set; }
         public string actionTaken { get; set; }
         public string description { get; set; }
+        public int status { get; set; }
 
 
     }
