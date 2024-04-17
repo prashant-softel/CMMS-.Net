@@ -524,7 +524,8 @@ namespace CMMSAPIs.Repositories.Masters
                                 string checklist_Validation_Q = "select ifnull(f.name,'') as name from checklist_number left join facilities f on f.id = checklist_number.facility_id where checklist_number='" + Convert.ToString(newR["checklist_number"]) + "';";
                                 DataTable dt = await Context.FetchData(checklist_Validation_Q).ConfigureAwait(false);
                                 string facility_name = Convert.ToString(dt.Rows[0][0]);
-                                m_errorLog.SetError($"[Checklist: Row {rN}] Checklist name : {Convert.ToString(newR["checklist_number"])} already present in plant {facility_name}.");
+                                //m_errorLog.SetError($"[Checklist: Row {rN}] Checklist name : {Convert.ToString(newR["checklist_number"])} already present in plant {facility_name}.");
+                                newR["facility_id"] = 0;
                             }
                             else
                             {
@@ -600,6 +601,14 @@ namespace CMMSAPIs.Repositories.Masters
             string checklistQry = "SELECT id, UPPER(checklist_number) as name FROM checklist_number WHERE checklist_number is not null and checklist_number != '' GROUP BY checklist_number;";
             DataTable dtChecklist = await Context.FetchData(checklistQry).ConfigureAwait(false);
             checklists.Merge(dtChecklist.GetColumn<string>("name"), dtChecklist.GetColumn<int>("id"));
+
+            if(checklistNames == null)
+            {
+                string checklist_q = "SELECT UPPER(checklist_number) as name FROM checklist_number WHERE checklist_number is not null and checklist_number != '' GROUP BY checklist_number;";
+                DataTable dtChecklist_result = await Context.FetchData(checklist_q).ConfigureAwait(false);
+                checklistNames = dtChecklist_result.GetColumn<string>("name");
+            }
+
             foreach(string checklistName in checklistNames)
             {
                 if(!checklists.ContainsKey(checklistName))
