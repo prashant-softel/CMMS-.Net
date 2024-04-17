@@ -847,6 +847,9 @@ namespace CMMSAPIs.Repositories.SM
                     var stmtI = $"INSERT INTO smassetitems (facility_ID,asset_code,item_condition,status,assetMasterID,materialID,asset_type) VALUES ({mrsList[0].facility_ID},'{assetCode}',1,0,{assetMasterID},{assetMasterID}, {assetTypeId}); SELECT LAST_INSERT_ID();";
                     DataTable dtInsert = await Context.FetchData(stmtI).ConfigureAwait(false);
                     var assetItemId = Convert.ToInt32(dtInsert.Rows[0][0]);
+
+                    var stmtU = $"UPDATE smrsitems set approved_qty = {orderedQty} where id = {item.ID}";
+                    int resultU = await Context.ExecuteNonQry<int>(stmtU).ConfigureAwait(false);
                 }
 
             }
@@ -1841,8 +1844,6 @@ namespace CMMSAPIs.Repositories.SM
                 foreach (var itemDetail in itemResponse)
                 {
                     CMPlantStockOpeningItemWiseResponse_MRSReturn itemWise = new CMPlantStockOpeningItemWiseResponse_MRSReturn();
-                    itemWise.Facility_Is_Block = itemDetail.Facility_Is_Block;
-                    itemWise.Facility_Is_Block_of_name = itemDetail.Facility_Is_Block_of_name;
                     itemWise.assetItemID = itemDetail.assetItemID;
                     itemWise.asset_name = itemDetail.asset_name;
                     itemWise.asset_code = itemDetail.asset_code;
