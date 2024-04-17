@@ -79,6 +79,7 @@ namespace CMMSAPIs.Controllers.Grievance
             {
                 var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => facilityId == facilityId)?.timezone;
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                request.status = 1;
                 var data = await _Grievance.CreateGrievance(request,userID, facilityId, facilitytimeZone);
                     return Ok(data);
                 }

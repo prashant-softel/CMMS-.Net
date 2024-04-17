@@ -176,24 +176,17 @@ namespace CMMSAPIs.Repositories.Grievance
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE; // RETURN is defined as RETRUN
             string strRetMessage = "";
             int statusId = (int)CMMS.CMMS_Status.Grievance_ADDED;
-
-
+            //request.status = 1;
             List<int> idList = new List<int>();
 
             {
               
 
-                string qry = "INSERT INTO  mis_grievance (facilityId, grievanceType, concern, description, status_id, createdAt, createdBy ) VALUES ";
+                string qry = "INSERT INTO  mis_grievance (facilityId, grievanceType, concern, description, status_id, createdAt, createdBy, status ) VALUES ";
                 
                 //concern = request.concern;
-                if (request.concern.Length <= 0)
-                {
-                    throw new ArgumentException($" concern of grievance cannot be empty");
-                }
 
- 
-
-                qry += "('" + request.facilityId + "','" + request.grievanceType + "','" + request.concern + "','" + request.description + "','" + statusId + "','" + UtilsRepository.GetUTCTime() + "','" + userID + "'); ";
+                qry += "('" + request.facilityId + "','" + request.grievanceType + "','" + request.concern + "','" + request.description + "','" + statusId + "','" + UtilsRepository.GetUTCTime() + "','" + userID + "','" + request.status  + "'); ";
 
                 qry += "select LAST_INSERT_ID(); ";
 
