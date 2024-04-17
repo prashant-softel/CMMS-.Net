@@ -9,6 +9,7 @@ namespace CMMSAPIs.Models.JC
         
         public int id { get; set; }
         public string plant_name { get; set; }
+        public string block_name { get; set; }
         public string asset_category_name { get; set; }
         public string title { get; set; }
         public string description { get; set; }
@@ -74,6 +75,7 @@ public class CMJCPermitDetail
     public int status { get; set; }
     public string status_short { get; set; }
 
+    public int TBT_Done_Check { get; set; }
 
 }
 public class CMJCIsolatedDetail
