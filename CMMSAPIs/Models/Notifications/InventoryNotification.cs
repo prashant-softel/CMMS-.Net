@@ -59,7 +59,7 @@ namespace CMMSAPIs.Models.Notifications
                 retValue += String.Format(template, "Block Name", m_InvObj.blockName);
                 retValue += String.Format(template, "Type", m_InvObj.type);
                 retValue += String.Format(template, "Category", m_InvObj.categoryName);
-                retValue += String.Format(template, "Description", m_InvObj.description);
+                retValue += String.Format(template, "Description", m_InvObj.asset_description);
             }
             switch (m_notificationID)
             {

@@ -12,7 +12,7 @@ namespace CMMSAPIs.Models.Inventory
         public string facilityName { get; set; }
         public int blockId { get; set; }
         public string blockName { get; set; }
-        public string description { get; set; }
+        public string asset_description { get; set; }
         public int typeId { get; set; }
         public string type { get; set; }
         public int categoryId { get; set; }
@@ -43,7 +43,7 @@ namespace CMMSAPIs.Models.Inventory
         public DateTime calibrationLastDate { get; set; }
         public DateTime calibrationDueDate { get; set; }
         public int specialTool { get; set; }
-        public string specialToolEmp { get; set; }
+        public int specialToolEmp { get; set; }
         public int warrantyId { get; set; }
         public string warranty_description { get; set; }
         public string certificate_number { get; set; }
@@ -53,7 +53,7 @@ namespace CMMSAPIs.Models.Inventory
         public int warrantyProviderId { get; set; }
         public string warrantyProviderName { get; set; }
         public int warrantyTermTypeId { get; set; }
-        public string warrrantyTermTypeName { get; set; }
+        public int warrrantyTermTypeName { get; set; }
         public AttachmentByReporter attachments { get; set; }
         public int mutliplier { get; set; }
         public int statusId { get; set; }

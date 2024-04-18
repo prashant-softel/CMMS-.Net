@@ -347,15 +347,12 @@ namespace CMMSAPIs.Repositories.Permits
             CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Safety Measure Deleted");
             return response;
         }
-        internal async Task<List<CMCreateJobType>> GetJobTypeList(int facility_id, string facilitytimeZone)
+        internal async Task<List<CMCreateJobType>> GetJobTypeList()
         {
             /*
              * return id, title from PermitJobTypeList table for requested facility_id
             */
-            string myQuery = $"SELECT id, title, description, status, createdBy, createdAt, updatedBy, updatedAt, facilityId, requireSOPJSA as requires_SOP_JSA FROM permitjobtypelist where status = 1  ";
-            if (facility_id <= 0)
-                throw new ArgumentException("Invalid Facility ID");
-            myQuery += $" and facilityId =  { facility_id } ";
+            string myQuery = $"SELECT id, title, description, status, createdBy, createdAt, updatedBy, updatedAt, facilityId, requireSOPJSA as requires_SOP_JSA  FROM permitjobtypelist where status = 1  ";
             List<CMCreateJobType> _JobTypeList = await Context.GetData<CMCreateJobType>(myQuery).ConfigureAwait(false);
             
             return _JobTypeList;
@@ -363,8 +360,8 @@ namespace CMMSAPIs.Repositories.Permits
 
         internal async Task<CMDefaultResponse> CreateJobType(CMCreateJobType request, int userID)
         {
-            string myQuery = "INSERT INTO permitjobtypelist(title, description, status, facilityId, requireSOPJSA, createdAt, createdBy) VALUES " +
-                                $"('{request.title}', '{request.description}', 1, {request.facilityId}, {(request.requires_SOP_JSA == null ? 0 : request.requires_SOP_JSA)}, " +
+            string myQuery = "INSERT INTO permitjobtypelist(title, description, status, requireSOPJSA,isRequired, createdAt, createdBy) VALUES " +
+                                $"('{request.title}', '{request.description}', 1, {(request.requires_SOP_JSA == null ? 0 : request.requires_SOP_JSA)}, " +
                                 $"'{UtilsRepository.GetUTCTime()}', {userID}); SELECT LAST_INSERT_ID();";
             DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
             int id = Convert.ToInt32(dt.Rows[0][0]);
@@ -380,10 +377,9 @@ namespace CMMSAPIs.Repositories.Permits
                 updateQry += $"title = '{request.title}', ";
             if (request.description != null && request.description != "")
                 updateQry += $"description = '{request.description}', ";
-            if (request.facilityId > 0)
-                updateQry += $"facilityId = {request.facilityId}, ";
             if (request.requires_SOP_JSA != null)
                 updateQry += $"requireSOPJSA = {request.requires_SOP_JSA}, ";
+           
             updateQry += $"updatedBy = {userID}, updatedAt = '{UtilsRepository.GetUTCTime()}' WHERE id = {request.id};";
             await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Job Type Details Updated");
@@ -1656,7 +1652,9 @@ namespace CMMSAPIs.Repositories.Permits
             {
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.permit_id, 0, 0, request.physical_iso_remark, CMMS.CMMS_Status.PTW_UPDATED,userID);
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_UPDATED, new[] { userID }, permitDetails);
-                 response = new CMDefaultResponse(request.permit_id, CMMS.RETRUNSTATUS.SUCCESS, $"Permit Updated Successfully");
+                // response = new CMDefaultResponse(request.permit_id, CMMS.RETRUNSTATUS.SUCCESS, $"Permit Updated Successfully");
+                 response = new CMDefaultResponse(request.permit_id, CMMS.RETRUNSTATUS.SUCCESS, responseText);
+
 
             }
             return response;

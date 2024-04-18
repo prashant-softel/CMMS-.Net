@@ -13,7 +13,7 @@ namespace CMMSAPIs.Models.Inventory
     {
         public int id { get; set; }
         public string name { get; set; }
-        public string description { get; set; }
+        public string assetdescription { get; set; }
         public int typeId { get; set; }
         public int facilityId { get; set; }
         public int blockId { get; set; }

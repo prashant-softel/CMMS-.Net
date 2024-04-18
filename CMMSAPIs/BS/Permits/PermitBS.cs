@@ -22,7 +22,7 @@ namespace CMMSAPIs.BS.Permits
         Task<CMDefaultResponse> CreateSafetyMeasure(CMCreateSafetyMeasures request, int userID);
         Task<CMDefaultResponse> UpdateSafetyMeasure(CMCreateSafetyMeasures request, int userID);
         Task<CMDefaultResponse> DeleteSafetyMeasure(int id);
-        Task<List<CMCreateJobType>> GetJobTypeList(int facility_id,string facilitytime);
+        Task<List<CMCreateJobType>> GetJobTypeList();
         Task<CMDefaultResponse> CreateJobType(CMCreateJobType request, int userID);
         Task<CMDefaultResponse> UpdateJobType(CMCreateJobType request, int userID);
         Task<CMDefaultResponse> DeleteJobType(int id);
@@ -186,13 +186,13 @@ namespace CMMSAPIs.BS.Permits
                 throw;
             }
         }
-        public async Task<List<CMCreateJobType>> GetJobTypeList(int facility_id, string facilitytime)
+        public async Task<List<CMCreateJobType>> GetJobTypeList()
         {
             try
             {
                 using (var repos = new PermitRepository(getDB))
                 {
-                    return await repos.GetJobTypeList(facility_id,  facilitytime);
+                    return await repos.GetJobTypeList();
                 }
             }
             catch (Exception ex)

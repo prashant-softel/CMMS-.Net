@@ -27,8 +27,9 @@ namespace CMMSAPIs.Models.Permits
         public int id { get; set; }
         public string title { get; set; }
         public string description { get; set; }
-        public int facilityId { get; set; }
+    //    public int facilityId { get; set; }
         public int? requires_SOP_JSA { get; set; }
+     
     }
     public class CMCreateSOP
     {
