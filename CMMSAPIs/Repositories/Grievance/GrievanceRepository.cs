@@ -234,11 +234,7 @@ namespace CMMSAPIs.Repositories.Grievance
             bool updated = false; // A flag to track if any updates were made
 
 
-            if (!string.IsNullOrEmpty(request.concern))
-            {
-                updateQry += $"grievance = '{request.concern}', ";
-                updated = true;
-            }
+           
 
             if (request.grievanceType > 0)
             {
@@ -264,8 +260,11 @@ namespace CMMSAPIs.Repositories.Grievance
                 updateQry += $"resolutionLevel = {request.resolutionLevel}, ";
                 updated = true;
             }
-           // if (request.updatedBy > 0)   wrong
+            // if (request.updatedBy > 0)   wrong
+            if (!string.IsNullOrEmpty(request.concern))
             {
+                updateQry += $"concern = '{request.concern}', ";
+                updated = true;
             }
 
 
@@ -273,12 +272,13 @@ namespace CMMSAPIs.Repositories.Grievance
             if (updated)
             {
                 updateQry += $"updatedBy = {userID}, ";
-                updateQry += $"updatedAt = {DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")}', ";
+                updateQry += $"updatedAt = '{DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")}', ";
                 // Remove the trailing comma and add the WHERE clause
                 updateQry = updateQry.TrimEnd(',', ' ') + $" WHERE id = '{request.id}'";
 
                 CMDefaultResponse obj = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Grievance <{request.id}> has been updated");
 
+                await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
                 CMGrievance _GrievanceUpdated = await GetGrievanceDetails(request.id);
 
 /*                string _shortStatus = getShortStatus(CMMS.CMMS_Modules.GRIEVANCE, CMMS.CMMS_Status.Grievance_UPDATED);
