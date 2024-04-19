@@ -145,9 +145,9 @@ namespace CMMSAPIs.Repositories.Grievance
                 throw new ArgumentException($"Invalid id: {id}");
             }
             string myQuery =
-                "SELECT g.id, g.facilityId, g.grievanceType AS grievance_Type_Id, g.concern, g.actionTaken, " +
+                "SELECT g.id, g.facilityId, g.grievanceType AS grievanceTypeId, g.concern, g.actionTaken, " +
                 "g.resolutionLevel, g.closedDate, g.status_id as statusId, g.createdAt, g.createdBy as createdById, g.updatedBy as updatedById, " +
-                "t.name AS grievance_Type, t.description, t.status, t.addedBy, t.addedAt, t.updatedBy, t.updatedAt " +
+                "t.name AS grievanceType, t.description, t.status, t.addedBy, t.addedAt, t.updatedBy, t.updatedAt " +
                 "FROM mis_grievance g " +
                 "JOIN mis_m_grievancetype t ON g.grievanceType = t.id " +
                 "WHERE g.id = " + id;
