@@ -303,7 +303,7 @@ namespace CMMSAPIs.Repositories.Permits
                              "LEFT JOIN permittypelists as ptw ON ptw.id = permitsaftymea.permitTypeId ";
             if (permit_type_id > 0)
             {
-                myQuery5 += $"where ptw.id =  {permit_type_id} and ptw.status = 1  ";
+                myQuery5 += $"where ptw.id =  {permit_type_id} and permitsaftymea.status= 1  ";
             }
                
             //myQuery5 += "GROUP BY permitsaftyques.safetyMeasureId ORDER BY ptw.id ASC;";
