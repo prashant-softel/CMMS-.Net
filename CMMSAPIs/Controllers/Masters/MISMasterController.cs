@@ -899,25 +899,8 @@ namespace CMMSAPIs.Controllers.Masters
             {
                 throw;
             }
-        }
-        //changes
-        [Route("GetWaterType")]
-        [HttpGet]
-        public async Task<IActionResult> GetWaterType(int facility_Id)
-        {
-            try
-            {
-                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _IMISMasterBS.GetWaterType(facility_Id);
-                return Ok(data);
-            }
-            catch
-            {
-                throw;
-            }
-        }
-
-                [Route("GetWasteDataList")]
+        }      
+        [Route("GetWasteDataList")]
         [HttpGet]
         public async Task<IActionResult> GetWasteDataList(DateTime fromDate, DateTime toDate)
         {
@@ -988,6 +971,82 @@ namespace CMMSAPIs.Controllers.Masters
             catch (Exception ex)
             {
                 throw ex;
+            }
+        }
+        //changes
+        [Route("GetWaterType")]
+        [HttpGet]
+        public async Task<IActionResult> GetWaterType(int facility_Id)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.GetWaterType(facility_Id);
+                return Ok(data);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+        [Route("CreateWaterType")]
+        [HttpPost]
+        public async Task<IActionResult> CreateWaterType(WaterDataType request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.CreateWaterType(request,userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        [Route("UpdateWaterType")]
+        [HttpPut]
+        public async Task<IActionResult> UpdateWaterType(WaterDataType request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.UpdateWaterType(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        [Route("DeleteWaterType")]
+        [HttpDelete]
+        public async Task<IActionResult> DeleteWaterType(int id)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.DeleteWaterType(id, userID);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        [Route("GetWasteType")]
+        [HttpGet]
+        public async Task<IActionResult> GetWasteType(int facility_Id)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.GetWasteType(facility_Id);
+                return Ok(data);
+            }
+            catch
+            {
+                throw;
             }
         }
     }

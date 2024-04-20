@@ -133,10 +133,22 @@ namespace CMMSAPIs.Models.Masters
         public int id { get; set; }
         public int facility_id { get; set; }
         public string name { get; set; }
-       
         public string description { get; set; }
         public int status { get; set; }
-          public int createdBy { get; set; }
+        public int createdBy { get; set; }
+        public DateTime? createdAt { get; set; }
+        public int UpdatedBy { get; set; }
+        public DateTime? UpdatedAt { get; set; }
+    }
+    public class WasteDataType
+    {
+        public int id { get; set; }
+        public int facility_id { get; set; }
+        public string name { get; set; }
+        public int wastetype { get; set; }
+        public string description { get; set; }
+       // public int status { get; set; }
+        public int createdBy { get; set; }
         public DateTime? createdAt { get; set; }
         public int UpdatedBy { get; set; }
         public DateTime? UpdatedAt { get; set; }

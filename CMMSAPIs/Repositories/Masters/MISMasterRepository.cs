@@ -438,12 +438,40 @@ namespace CMMSAPIs.Repositories.Masters
             List<Responsibility> Data = await Context.GetData<Responsibility>(getqry).ConfigureAwait(false);
             return Data;
         }
+        //Master Of watertype
         internal async Task<List<WaterDataType>> GetWaterType(int facility_id)
         {
 
-            string getqry = $"Select * from mis_watertype where facility_id=" + (facility_id);
+            string getqry = $"Select * from mis_watertype where facility_id=" + (facility_id)+" and status=1;";
             List<WaterDataType> Data = await Context.GetData<WaterDataType>(getqry).ConfigureAwait(false);
             return Data;
+        }
+        internal async Task<CMDefaultResponse>CreateWaterType(WaterDataType request, int UserID)
+        {
+            string myQuery = $"INSERT INTO mis_watertype(facility_id,name,description,status,CreatedAt,CreatedBy) VALUES " +
+            $"('{request.facility_id}','{request.name} ','{request.description}',1,'{UtilsRepository.GetUTCTime()}','{UserID}');" +
+            $"SELECT LAST_INSERT_ID(); ";
+            DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
+            int id = Convert.ToInt32(dt.Rows[0][0]);
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS,"WaterType  Created");
+        }
+             internal async Task<CMDefaultResponse> UpdateWaterType(WaterDataType request, int UserID)
+        {
+            string updateQry = "UPDATE mis_watertype  SET ";
+            if (request.name != null && request.name != "")
+                updateQry += $"name = '{request.name}', ";
+            if (request.description != null && request.description != "")
+                updateQry += $"description = '{request.description}', ";
+            updateQry += $"updatedAt = '{UtilsRepository.GetUTCTime()}', updatedBy = '{UserID}' WHERE id = {request.id};";
+            await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+            return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "WaterType updated");
+        }
+        internal async Task<CMDefaultResponse> DeleteWaterType(int id,int UserID)
+        {
+            string delqry = "update  mis_watertype set status=0  where id =" + (id);
+            await Context.ExecuteNonQry<int>(delqry).ConfigureAwait(false);
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "WaterType deleted");
+
         }
         internal async Task<Responsibility> GetResponsibilityID(int id, string facilitytimeZone) 
         {
@@ -487,6 +515,13 @@ namespace CMMSAPIs.Repositories.Masters
             await Context.ExecuteNonQry<int>(delqry).ConfigureAwait(false);
             return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Responsibility deleted");
 
+        }
+
+        internal async Task<List<WasteDataType>>GetWasteType( int facility_Id)
+        {
+            string delqry = "SELECT id,facility_id,name,wastetype,description,createdAt,UpdatedAt FROM mis_wastetype WHERE facility_id = " + facility_Id + " and status=1;";
+           List< WasteDataType>Data= await Context.GetData<WasteDataType>(delqry).ConfigureAwait(false);
+            return Data;
         }
 
         // Incident type CRUD 
