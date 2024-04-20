@@ -203,8 +203,7 @@ namespace CMMSAPIs.Models.SM
 
     public class CMPlantStockOpeningItemWiseResponse_MRSReturn
     {
-        public int Facility_Is_Block { get; set; }
-        public string Facility_Is_Block_of_name { get; set; }
+
         public int assetItemID { get; set; }
         public string asset_name { get; set; }
         public string asset_code { get; set; }

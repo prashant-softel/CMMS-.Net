@@ -832,7 +832,7 @@ namespace CMMSAPIs.Repositories.SM
 
                             string insertStmt = $"START TRANSACTION; " +
                             $"INSERT INTO smrsitems (mrs_ID,asset_item_ID,asset_MDM_code,requested_qty,status,flag,approval_required,mrs_return_ID,issued_qty,returned_qty,used_qty,available_qty, is_splited,approved_qty)" +
-                            $"VALUES ({request.id},{item.asset_item_ID},'{item.asset_MDM_code}',1,0,0,1,0,0,0, 1, {available_qty},1,1)" +
+                            $"VALUES ({request.id},{item.asset_item_ID},'{item.asset_MDM_code}',1,0,0,1,0,0,0, 0, {available_qty},1,1)" +
                             $"; SELECT LAST_INSERT_ID();COMMIT;";
                             DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
                         }
@@ -847,6 +847,9 @@ namespace CMMSAPIs.Repositories.SM
                     var stmtI = $"INSERT INTO smassetitems (facility_ID,asset_code,item_condition,status,assetMasterID,materialID,asset_type) VALUES ({mrsList[0].facility_ID},'{assetCode}',1,0,{assetMasterID},{assetMasterID}, {assetTypeId}); SELECT LAST_INSERT_ID();";
                     DataTable dtInsert = await Context.FetchData(stmtI).ConfigureAwait(false);
                     var assetItemId = Convert.ToInt32(dtInsert.Rows[0][0]);
+
+                    var stmtU = $"UPDATE smrsitems set approved_qty = {orderedQty} where id = {item.ID}";
+                    int resultU = await Context.ExecuteNonQry<int>(stmtU).ConfigureAwait(false);
                 }
 
             }
@@ -1841,8 +1844,6 @@ namespace CMMSAPIs.Repositories.SM
                 foreach (var itemDetail in itemResponse)
                 {
                     CMPlantStockOpeningItemWiseResponse_MRSReturn itemWise = new CMPlantStockOpeningItemWiseResponse_MRSReturn();
-                    itemWise.Facility_Is_Block = itemDetail.Facility_Is_Block;
-                    itemWise.Facility_Is_Block_of_name = itemDetail.Facility_Is_Block_of_name;
                     itemWise.assetItemID = itemDetail.assetItemID;
                     itemWise.asset_name = itemDetail.asset_name;
                     itemWise.asset_code = itemDetail.asset_code;

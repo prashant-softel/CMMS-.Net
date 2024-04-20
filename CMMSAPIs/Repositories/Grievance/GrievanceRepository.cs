@@ -145,9 +145,9 @@ namespace CMMSAPIs.Repositories.Grievance
                 throw new ArgumentException($"Invalid id: {id}");
             }
             string myQuery =
-                "SELECT g.id, g.facilityId, g.grievanceType AS grievance_Type_Id, g.concern, g.actionTaken, " +
+                "SELECT g.id, g.facilityId, g.grievanceType AS grievanceTypeId, g.concern, g.actionTaken, " +
                 "g.resolutionLevel, g.closedDate, g.status_id as statusId, g.createdAt, g.createdBy as createdById, g.updatedBy as updatedById, " +
-                "t.name AS grievance_Type, t.description, t.status, t.addedBy, t.addedAt, t.updatedBy, t.updatedAt " +
+                "t.name AS grievanceType, t.description, t.status, t.addedBy, t.addedAt, t.updatedBy, t.updatedAt " +
                 "FROM mis_grievance g " +
                 "JOIN mis_m_grievancetype t ON g.grievanceType = t.id " +
                 "WHERE g.id = " + id;
@@ -176,24 +176,17 @@ namespace CMMSAPIs.Repositories.Grievance
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE; // RETURN is defined as RETRUN
             string strRetMessage = "";
             int statusId = (int)CMMS.CMMS_Status.Grievance_ADDED;
-
-
+            //request.status = 1;
             List<int> idList = new List<int>();
 
             {
               
 
-                string qry = "INSERT INTO  mis_grievance (facilityId, grievanceType, concern, description, status_id, createdAt, createdBy ) VALUES ";
+                string qry = "INSERT INTO  mis_grievance (facilityId, grievanceType, concern, description, status_id, createdAt, createdBy, status ) VALUES ";
                 
                 //concern = request.concern;
-                if (request.concern.Length <= 0)
-                {
-                    throw new ArgumentException($" concern of grievance cannot be empty");
-                }
 
- 
-
-                qry += "('" + request.facilityId + "','" + request.grievanceType + "','" + request.concern + "','" + request.description + "','" + statusId + "','" + UtilsRepository.GetUTCTime() + "','" + userID + "'); ";
+                qry += "('" + request.facilityId + "','" + request.grievanceType + "','" + request.concern + "','" + request.description + "','" + statusId + "','" + UtilsRepository.GetUTCTime() + "','" + userID + "','" + request.status  + "'); ";
 
                 qry += "select LAST_INSERT_ID(); ";
 
@@ -241,11 +234,7 @@ namespace CMMSAPIs.Repositories.Grievance
             bool updated = false; // A flag to track if any updates were made
 
 
-            if (!string.IsNullOrEmpty(request.concern))
-            {
-                updateQry += $"grievance = '{request.concern}', ";
-                updated = true;
-            }
+           
 
             if (request.grievanceType > 0)
             {
@@ -271,8 +260,11 @@ namespace CMMSAPIs.Repositories.Grievance
                 updateQry += $"resolutionLevel = {request.resolutionLevel}, ";
                 updated = true;
             }
-           // if (request.updatedBy > 0)   wrong
+            // if (request.updatedBy > 0)   wrong
+            if (!string.IsNullOrEmpty(request.concern))
             {
+                updateQry += $"concern = '{request.concern}', ";
+                updated = true;
             }
 
 
@@ -280,12 +272,13 @@ namespace CMMSAPIs.Repositories.Grievance
             if (updated)
             {
                 updateQry += $"updatedBy = {userID}, ";
-                updateQry += $"updatedAt = {DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")}', ";
+                updateQry += $"updatedAt = '{DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")}', ";
                 // Remove the trailing comma and add the WHERE clause
                 updateQry = updateQry.TrimEnd(',', ' ') + $" WHERE id = '{request.id}'";
 
                 CMDefaultResponse obj = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Grievance <{request.id}> has been updated");
 
+                await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
                 CMGrievance _GrievanceUpdated = await GetGrievanceDetails(request.id);
 
 /*                string _shortStatus = getShortStatus(CMMS.CMMS_Modules.GRIEVANCE, CMMS.CMMS_Status.Grievance_UPDATED);
