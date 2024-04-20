@@ -916,5 +916,79 @@ namespace CMMSAPIs.Controllers.Masters
                 throw;
             }
         }
+
+                [Route("GetWasteDataList")]
+        [HttpGet]
+        public async Task<IActionResult> GetWasteDataList(DateTime fromDate, DateTime toDate)
+        {
+            try
+            {
+                var data = await _IMISMasterBS.GetWasteDataList(fromDate, toDate);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        [Route("GetWasteDataByID")]
+        [HttpGet]
+        public async Task<IActionResult> GetWasteDataByID(int Id)
+        {
+            try
+            {
+                var data = await _IMISMasterBS.GetWasteDataByID(Id);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        [Route("CreateWasteData")]
+        [HttpPost]
+        public async Task<IActionResult> CreateWasteData(CMWasteData request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.CreateWasteData(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        [Route("UpdateWasteData")]
+        [HttpPost]
+        public async Task<IActionResult> UpdateWasteData(CMWasteData request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.UpdateWasteData(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        [Route("DeleteWasteData")]
+        [HttpPost]
+        public async Task<IActionResult> DeleteWasteData(int Id)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.DeleteWasteData(Id, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
     }
 }
