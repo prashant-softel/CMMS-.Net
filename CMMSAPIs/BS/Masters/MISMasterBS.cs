@@ -63,6 +63,7 @@ namespace CMMSAPIs.BS.MISMasters
         Task<CMDefaultResponse> CreateWaterData(CMMisWaterData request, int userId);
         Task<CMDefaultResponse> UpdateWaterData(CMMisWaterData request, int userId);
         Task<CMDefaultResponse> DeleteWaterData(int id, int userId);
+        Task<List<WaterDataType>> GetWaterType(int facility_Id);
     }
     public class MISMasterBS : IMISMasterBS
     {
@@ -858,6 +859,21 @@ namespace CMMSAPIs.BS.MISMasters
                 {
                     return await repos.GetWaterDataReport(fromDate, toDate);
 
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<List<WaterDataType>> GetWaterType(int facility_Id)
+        {
+            try
+
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.GetWaterType(facility_Id);
                 }
             }
             catch (Exception ex)

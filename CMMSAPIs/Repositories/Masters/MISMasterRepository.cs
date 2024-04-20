@@ -438,6 +438,13 @@ namespace CMMSAPIs.Repositories.Masters
             List<Responsibility> Data = await Context.GetData<Responsibility>(getqry).ConfigureAwait(false);
             return Data;
         }
+        internal async Task<List<WaterDataType>> GetWaterType(int facility_id)
+        {
+
+            string getqry = $"Select * from mis_watertype where facility_id=" + (facility_id);
+            List<WaterDataType> Data = await Context.GetData<WaterDataType>(getqry).ConfigureAwait(false);
+            return Data;
+        }
         internal async Task<Responsibility> GetResponsibilityID(int id, string facilitytimeZone) 
         {
             String getqry = $"Select * from   Responsibility where id =" + (id);

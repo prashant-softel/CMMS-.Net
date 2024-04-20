@@ -241,7 +241,8 @@ namespace CMMSAPIs.Repositories.Permits
             string myQuery = $"SELECT id, description,title as name FROM permittypelists ";
             if (facility_id <= 0)
                 throw new ArgumentException("Invalid Facility ID");
-            myQuery += $"WHERE facilityId = { facility_id } and status = 1  ORDER BY id DESC;";
+            // myQuery += $"WHERE facilityId = { facility_id } and status = 1  ORDER BY id DESC;";
+            myQuery += $"WHERE facilityId  in ({ facility_id },0)  and status = 1  ORDER BY id DESC;";
             List<CMDefaultList> _PermitTypeList = await Context.GetData<CMDefaultList>(myQuery).ConfigureAwait(false);
             return _PermitTypeList;
         }

@@ -524,8 +524,11 @@ namespace CMMSAPIs.Repositories.Masters
                                 string checklist_Validation_Q = "select ifnull(f.name,'') as name from checklist_number left join facilities f on f.id = checklist_number.facility_id where checklist_number='" + Convert.ToString(newR["checklist_number"]) + "';";
                                 DataTable dt = await Context.FetchData(checklist_Validation_Q).ConfigureAwait(false);
                                 string facility_name = Convert.ToString(dt.Rows[0][0]);
-                                //m_errorLog.SetError($"[Checklist: Row {rN}] Checklist name : {Convert.ToString(newR["checklist_number"])} already present in plant {facility_name}.");
+
+                                // m_errorLog.SetError($"[Checklist: Row {rN}] Checklist name : {Convert.ToString(newR["checklist_number"])} already present in plant {facility_name}.");
                                 newR["facility_id"] = 0;
+                                continue;
+
                             }
                             else
                             {

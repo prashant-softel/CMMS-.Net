@@ -128,4 +128,17 @@ namespace CMMSAPIs.Models.Masters
         public decimal outward { get; set; }
         public decimal balance { get; set; }
     }
+    public class WaterDataType
+    {
+        public int id { get; set; }
+        public int facility_id { get; set; }
+        public string name { get; set; }
+       
+        public string description { get; set; }
+        public int status { get; set; }
+          public int createdBy { get; set; }
+        public DateTime? createdAt { get; set; }
+        public int UpdatedBy { get; set; }
+        public DateTime? UpdatedAt { get; set; }
+    }
 }

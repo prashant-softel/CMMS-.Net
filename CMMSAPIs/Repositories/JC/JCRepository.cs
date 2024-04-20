@@ -339,9 +339,9 @@ namespace CMMSAPIs.Repositories.JC
             List<CMJCLotoDetail> _lotoList = await Context.GetData<CMJCLotoDetail>(myQuery5).ConfigureAwait(false);
 
             // emp list
-            
+
             //string myQuery6 = $" SELECT CONCAT(user.firstName,' ',user.lastName) as empName, ptwEmpList.responsibility as resp FROM permitemployeelists as ptwEmpList JOIN permits as ptw ON ptw.id = ptwEmpList.pwtId LEFT JOIN users as user ON user.id = ptwEmpList.employeeId JOIN jobcards as jc on jc.PTW_id = ptw.id where jc.id = { jc_id }";
-              string myQuery6 = $" SELECT CONCAT(user.firstName,' ',user.lastName) as empName,ptwEmpList.employeeId as empid ,ptwEmpList.responsibility as resp FROM permitemployeelists as ptwEmpList  LEFT JOIN users as user ON user.id = ptwEmpList.employeeId  where ptwEmpList.JC_id ={ jc_id }";
+            string myQuery6 = $" SELECT CONCAT(user.firstName,' ',user.lastName) as empName,ptwEmpList.employeeId as empid ,ptwEmpList.responsibility as responsibility FROM permitemployeelists as ptwEmpList  LEFT JOIN users as user ON user.id = ptwEmpList.employeeId  where ptwEmpList.JC_id ={ jc_id }";
             List<CMJCEmpDetail> _empList = await Context.GetData<CMJCEmpDetail>(myQuery6).ConfigureAwait(false);
             //toollist
              string myQuery7 = "SELECT tools.id as toolId, tools.assetName as toolName FROM jobs AS job " +
