@@ -141,4 +141,28 @@ namespace CMMSAPIs.Models.Masters
         public int UpdatedBy { get; set; }
         public DateTime? UpdatedAt { get; set; }
     }
+        public class CMWasteData
+    {
+        public int Id { get; set; }
+        public decimal? Solid_Waste { get; set; }
+        public decimal? E_Waste { get; set; }
+        public int? Battery_Waste { get; set; }
+        public int? Solar_Module_Waste { get; set; }
+        public decimal? Haz_Waste_Oil { get; set; }
+        public decimal? Haz_Waste_Grease { get; set; }
+        public decimal? Haz_Solid_Waste { get; set; }
+        public int? Haz_Waste_Oil_Barrel_Generated { get; set; }
+        public decimal? Solid_Waste_Disposed { get; set; }
+        public decimal? E_Waste_Disposed { get; set; }
+        public int? Battery_Waste_Disposed { get; set; }
+        public int? Solar_Module_Waste_Disposed { get; set; }
+        public decimal? Haz_Waste_Oil_Disposed { get; set; }
+        public decimal? Haz_Waste_Grease_Disposed { get; set; }
+        public decimal? Haz_Solid_Waste_Disposed { get; set; }
+        public int? Haz_Waste_Oil_Barrel_Disposed { get; set; }
+        public int? Created_By { get; set; }
+        public DateTime? Created_At { get; set; }
+        public int? Modified_By { get; set; }
+        public string Modified_At { get; set; }
+    }
 }
