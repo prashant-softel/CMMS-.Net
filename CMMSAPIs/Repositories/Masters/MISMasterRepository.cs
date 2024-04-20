@@ -632,6 +632,112 @@ namespace CMMSAPIs.Repositories.Masters
             }
             return result;
         }
+
+                internal async Task<List<CMWasteData>> GetWasteDataList(DateTime fromDate, DateTime toDate)
+        {
+            string SelectQ = "select * from Waste_data where isActive = 1 and DATE_FORMAT(Created_At,'%Y-%m-%d') BETWEEN '" + fromDate.ToString("yyyy-MM-dd") + "' AND '" + toDate.ToString("yyyy-MM-dd") + "'";
+            List<CMWasteData> ListResult = await Context.GetData<CMWasteData>(SelectQ).ConfigureAwait(false);
+            return ListResult;
+        }
+
+        internal async Task<CMWasteData> GetWasteDataByID(int Id)
+        {
+            string SelectQ = "select * from Waste_data where isActive = 1 and id = " + Id + "";
+            List<CMWasteData> ListResult = await Context.GetData<CMWasteData>(SelectQ).ConfigureAwait(false);
+            return ListResult[0];
+        }
+
+        internal async Task<CMDefaultResponse> CreateWasteData(CMWasteData request, int UserID)
+        {
+            CMDefaultResponse response = null;
+            int InsertedValue = 0;
+            string insertQuery = $"INSERT INTO waste_data (" +
+                                 $"Solid_Waste, E_Waste, Battery_Waste, Solar_Module_Waste, " +
+                                 $"Haz_Waste_Oil, Haz_Waste_Grease, Haz_Solid_Waste, " +
+                                 $"Haz_Waste_Oil_Barrel_Generated, Solid_Waste_Disposed, " +
+                                 $"E_Waste_Disposed, Battery_Waste_Disposed, Solar_Module_Waste_Disposed, " +
+                                 $"Haz_Waste_Oil_Disposed, Haz_Waste_Grease_Disposed, " +
+                                 $"Haz_Solid_Waste_Disposed, Haz_Waste_Oil_Barrel_Disposed, " +
+                                 $"Created_By, Created_At" +
+                                 $") VALUES (" +
+                                 $"{request.Solid_Waste}, {request.E_Waste}, {request.Battery_Waste}, {request.Solar_Module_Waste}, " +
+                                 $"{request.Haz_Waste_Oil}, {request.Haz_Waste_Grease}, {request.Haz_Solid_Waste}, " +
+                                 $"{request.Haz_Waste_Oil_Barrel_Generated}, {request.Solid_Waste_Disposed}, " +
+                                 $"{request.E_Waste_Disposed}, {request.Battery_Waste_Disposed}, {request.Solar_Module_Waste_Disposed}, " +
+                                 $"{request.Haz_Waste_Oil_Disposed}, {request.Haz_Waste_Grease_Disposed}, " +
+                                 $"{request.Haz_Solid_Waste_Disposed}, {request.Haz_Waste_Oil_Barrel_Disposed}, " +
+                                 $"{UserID}, '{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}'" +
+                                 $"); SELECT LAST_INSERT_ID();";
+            DataTable dt2 = await Context.FetchData(insertQuery).ConfigureAwait(false);
+            InsertedValue = Convert.ToInt32(dt2.Rows[0][0]);
+            response = new CMDefaultResponse(InsertedValue, CMMS.RETRUNSTATUS.SUCCESS, "Waste Data saved successfully.");
+            return response;
+        }
+
+        internal async Task<CMDefaultResponse> UpdateWasteData(CMWasteData request, int UserID)
+        {
+            CMDefaultResponse response = null;
+            string SelectQ = "select id from waste_data where ID = '" + request.Id + "'";
+            List<CMWasteData> WasteDataList = await Context.GetData<CMWasteData>(SelectQ).ConfigureAwait(false);
+
+            if (WasteDataList != null && WasteDataList.Count > 0)
+            {
+                string updateQuery = $"UPDATE waste_data " +
+                                    $"SET " +
+                                    $"Solid_Waste = {request.Solid_Waste}, " +
+                                    $"E_Waste = {request.E_Waste}, " +
+                                    $"Battery_Waste = {request.Battery_Waste}, " +
+                                    $"Solar_Module_Waste = {request.Solar_Module_Waste}, " +
+                                    $"Haz_Waste_Oil = {request.Haz_Waste_Oil}, " +
+                                    $"Haz_Waste_Grease = {request.Haz_Waste_Grease}, " +
+                                    $"Haz_Solid_Waste = {request.Haz_Solid_Waste}, " +
+                                    $"Haz_Waste_Oil_Barrel_Generated = {request.Haz_Waste_Oil_Barrel_Generated}, " +
+                                    $"Solid_Waste_Disposed = {request.Solid_Waste_Disposed}, " +
+                                    $"E_Waste_Disposed = {request.E_Waste_Disposed}, " +
+                                    $"Battery_Waste_Disposed = {request.Battery_Waste_Disposed}, " +
+                                    $"Solar_Module_Waste_Disposed = {request.Solar_Module_Waste_Disposed}, " +
+                                    $"Haz_Waste_Oil_Disposed = {request.Haz_Waste_Oil_Disposed}, " +
+                                    $"Haz_Waste_Grease_Disposed = {request.Haz_Waste_Grease_Disposed}, " +
+                                    $"Haz_Solid_Waste_Disposed = {request.Haz_Solid_Waste_Disposed}, " +
+                                    $"Haz_Waste_Oil_Barrel_Disposed = {request.Haz_Waste_Oil_Barrel_Disposed}, " +
+                                    $"Modified_By = '{UserID}', " +
+                                    $"Modified_At = '{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}' " +
+                                    $"WHERE id = {request.Id}";
+                var result = await Context.ExecuteNonQry<int>(updateQuery);
+                response = new CMDefaultResponse(request.Id, CMMS.RETRUNSTATUS.SUCCESS, "Waste Data with id " + request.Id + " updated successfully.");
+            }
+            else
+            {
+                response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Waste Data does not exists to update.");
+            }
+
+            return response;
+        }
+
+        internal async Task<CMDefaultResponse> DeleteWasteData(int Id, int UserID)
+        {
+            CMDefaultResponse response = null;
+            string SelectQ = "select id from Waste_data where ID = '" + Id + "'";
+            List<CMWasteData> WasteDataList = await Context.GetData<CMWasteData>(SelectQ).ConfigureAwait(false);
+
+            if (WasteDataList != null && WasteDataList.Count > 0)
+            {
+                string updateQuery = $"UPDATE Waste_data " +
+                      $"SET " +
+                      $"isActive = 0, " +
+                      $"Modified_By = '{UserID}', " +
+                      $"Modified_At = '{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}' " +
+                      $"WHERE id = {Id}";
+                var result = await Context.ExecuteNonQry<int>(updateQuery);
+                response = new CMDefaultResponse(Id, CMMS.RETRUNSTATUS.SUCCESS, "Waste Data with id " + Id + " deleted.");
+            }
+            else
+            {
+                response = new CMDefaultResponse(Id, CMMS.RETRUNSTATUS.FAILURE, "Waste Data does not exists to delete.");
+            }
+
+            return response;
+        }
     }
 
 }
