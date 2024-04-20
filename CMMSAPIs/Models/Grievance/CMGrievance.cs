@@ -13,6 +13,7 @@ namespace CMMSAPIs.Models.Grievance
         public string grievanceType { get; set; }
         public string concern { get; set; }
         public string description { get; set; }
+        public string type_description { get; set; }
         public string actionTaken { get; set; }
         public int resolutionLevel { get; set; }
         public DateTime? closedDate { get; set; }
