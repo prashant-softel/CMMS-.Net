@@ -64,6 +64,12 @@ namespace CMMSAPIs.BS.MISMasters
         Task<CMDefaultResponse> UpdateWaterData(CMMisWaterData request, int userId);
         Task<CMDefaultResponse> DeleteWaterData(int id, int userId);
         Task<List<WaterDataType>> GetWaterType(int facility_Id);
+
+                Task<List<CMWasteData>> GetWasteDataList(DateTime fromDate, DateTime toDate);
+        Task<CMDefaultResponse> CreateWasteData(CMWasteData request, int userID);
+        Task<CMDefaultResponse> UpdateWasteData(CMWasteData request, int userID);
+        Task<CMDefaultResponse> DeleteWasteData(int Id, int UserID);
+        Task<CMWasteData> GetWasteDataByID(int Id);
     }
     public class MISMasterBS : IMISMasterBS
     {
@@ -874,6 +880,82 @@ namespace CMMSAPIs.BS.MISMasters
                 using (var repos = new MISMasterRepository(getDB))
                 {
                     return await repos.GetWaterType(facility_Id);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+                public async Task<List<CMWasteData>> GetWasteDataList(DateTime fromDate, DateTime toDate)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.GetWasteDataList(fromDate, toDate);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<CMWasteData> GetWasteDataByID(int Id)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.GetWasteDataByID(Id);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> CreateWasteData(CMWasteData request, int userID)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.CreateWasteData(request, userID);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<CMDefaultResponse> UpdateWasteData(CMWasteData request, int userID)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.UpdateWasteData(request, userID);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> DeleteWasteData(int Id, int userID)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.DeleteWasteData(Id, userID);
+
                 }
             }
             catch (Exception ex)
