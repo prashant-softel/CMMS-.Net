@@ -605,5 +605,10 @@ namespace CMMSAPIs.Helper
             Contractor,
             Other
         }
+	            public enum MISConsumptionTypes
+        {
+            Procurement = 1,
+            Consumption
+        }
     }
 }
