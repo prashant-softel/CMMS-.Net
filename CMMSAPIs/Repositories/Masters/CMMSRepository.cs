@@ -1415,7 +1415,7 @@ namespace CMMSAPIs.Repositories.Masters
             for (var i = 0; i < _List.Count; i++)
             {
                 CMDashboadItemList item = new CMDashboadItemList();
-                CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(itemList[i].status);
+                CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_List[i].status);
                 string _longStatus = getShortStatus_GO(CMMS.CMMS_Modules.SM_GO, _Status);
                 item.status_long = _longStatus;              
             }
