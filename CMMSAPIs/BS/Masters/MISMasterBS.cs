@@ -73,7 +73,10 @@ namespace CMMSAPIs.BS.MISMasters
         Task<CMDefaultResponse> UpdateWaterType(WaterDataType request, int userId);
         Task<List<WasteDataType>> GetWasteType(int facility_Id);
         Task<CMDefaultResponse> DeleteWaterType(int Id, int userID);
-         Task<List<CMWaterDataMonthWise>> GetWasteDataListMonthWise();
+         Task<List<WaterDataResult>> GetWaterDataListMonthWise(DateTime fromDate, DateTime toDate);
+         Task<List<WaterDataResult>> GetWasteDataListMonthWise(DateTime fromDate, DateTime toDate);
+        Task<List<WaterDataResult_Month>> GetWaterDataMonthDetail(int Month, int Year);
+        Task<List<CMWaterDataMonthDetail>> GetWasteDataMonthDetail(int Month, int Year);
     }
     public class MISMasterBS : IMISMasterBS
     {
@@ -1029,13 +1032,60 @@ namespace CMMSAPIs.BS.MISMasters
             }
         }
 
-                public async Task<List<CMWaterDataMonthWise>> GetWasteDataListMonthWise()
+                public async Task<List<WaterDataResult>> GetWaterDataListMonthWise(DateTime fromDate, DateTime toDate)
         {
             try
             {
                 using (var repos = new MISMasterRepository(getDB))
                 {
-                    return await repos.GetWasteDataListMonthWise();
+                    return await repos.GetWaterDataListMonthWise(fromDate, toDate);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<WaterDataResult>> GetWasteDataListMonthWise(DateTime fromDate, DateTime toDate)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.GetWasteDataListMonthWise(fromDate, toDate);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<WaterDataResult_Month>> GetWaterDataMonthDetail(int Month, int Year)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.GetWaterDataMonthDetail(Month, Year);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<List<CMWaterDataMonthDetail>> GetWasteDataMonthDetail(int Month, int Year)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.GetWasteDataMonthDetail(Month, Year);
 
                 }
             }
