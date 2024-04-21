@@ -571,7 +571,7 @@ namespace CMMSAPIs.Repositories.SM
             string stmt = "SELECT sm.ID,sm.requested_by_emp_ID as requested_by_emp_ID,CONCAT(ed1.firstName,' ',ed1.lastName) as approver_name," +
     "DATE_FORMAT(sm.returnDate,'%Y-%m-%d %H:%i') as returnDate,if(sm.approval_status != '',DATE_FORMAT(sm.approved_date,'%Y-%m-%d %H:%i'),'') as approval_date,sm.approval_status," +
     "sm.approval_comment,CONCAT(ed.firstName,' ',ed.lastName) as requested_by_name, sm.status, sm.activity, sm.whereUsedType, " +
-    " case when sm.whereUsedType = 1 then 'Job' when sm.whereUsedType = 2 then 'PM' else 'Invalid' end as whereUsedTypeName, sm.whereUsedRefID, COALESCE(sm.remarks,'') as  remarks " +
+    " case when sm.whereUsedType = 1 then 'Job' when sm.whereUsedType = 2 then 'PM' when sm.whereUsedType = 4 then 'JOBCARD' when sm.whereUsedType = 27 then 'PMTASK' else 'Invalid' end as whereUsedTypeName, sm.whereUsedRefID, COALESCE(sm.remarks,'') as  remarks " +
     "FROM smmrs sm LEFT JOIN users ed ON ed.id = sm.requested_by_emp_ID LEFT JOIN users ed1 ON ed1.id = sm.approved_by_emp_ID " +
     " WHERE sm.ID = " + ID + "  and sm.flag = 2";
             List<CMMRSList> _List = await Context.GetData<CMMRSList>(stmt).ConfigureAwait(false);
@@ -1077,8 +1077,8 @@ namespace CMMSAPIs.Repositories.SM
                     try
                     {
                         string insertStmt = $"START TRANSACTION; " +
-                        $"INSERT INTO smrsitems (mrs_ID,mrs_return_ID,asset_item_ID,available_qty,requested_qty,returned_qty,return_remarks,flag, is_faulty,is_splited)" +
-                        $"VALUES ({request.ID},{MRS_ReturnID},{request.cmmrsItems[i].asset_item_ID},{request.cmmrsItems[i].qty}, {request.cmmrsItems[i].requested_qty}, {request.cmmrsItems[i].returned_qty}, '{request.cmmrsItems[i].return_remarks}', 2, {request.cmmrsItems[i].is_faulty},1)" +
+                        $"INSERT INTO smrsitems (mrs_ID,mrs_return_ID,asset_item_ID,available_qty,requested_qty,returned_qty,return_remarks,flag, is_faulty,is_splited,issued_qty)" +
+                        $"VALUES ({request.ID},{MRS_ReturnID},{request.cmmrsItems[i].asset_item_ID},{request.cmmrsItems[i].qty}, {request.cmmrsItems[i].requested_qty}, {request.cmmrsItems[i].returned_qty}, '{request.cmmrsItems[i].return_remarks}', 2, {request.cmmrsItems[i].is_faulty},1,{request.cmmrsItems[i].issued_qty})" +
                         $"; SELECT LAST_INSERT_ID(); COMMIT;";
                         DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
 
@@ -1614,7 +1614,8 @@ namespace CMMSAPIs.Repositories.SM
         {
             string stmt = "SELECT sm.ID,sm.requested_by_emp_ID as requested_by_emp_ID,CONCAT(ed1.firstName,' ',ed1.lastName) as approver_name," +
     "DATE_FORMAT(sm.returnDate,'%Y-%m-%d %H:%i') as returnDate,if(sm.approval_status != '',DATE_FORMAT(sm.approved_date,'%Y-%m-%d %H:%i'),'') as approval_date,sm.approval_status," +
-    "sm.approval_comment,CONCAT(ed.firstName,' ',ed.lastName) as requested_by_name, sm.status, sm.activity, sm.whereUsedType, sm.whereUsedRefID, COALESCE(sm.remarks,'') as  remarks " +
+    "sm.approval_comment,CONCAT(ed.firstName,' ',ed.lastName) as requested_by_name, sm.status, sm.activity, sm.whereUsedType, sm.whereUsedRefID, COALESCE(sm.remarks,'') as  remarks," +
+    "case when sm.whereUsedType = 1 then 'Job' when sm.whereUsedType = 2 then 'PM' when sm.whereUsedType = 4 then 'JOBCARD' when sm.whereUsedType = 27 then 'PMTASK' else 'Invalid' end as whereUsedTypeName " +
     "FROM smmrs sm LEFT JOIN users ed ON ed.id = sm.requested_by_emp_ID LEFT JOIN users ed1 ON ed1.id = sm.approved_by_emp_ID " +
     " WHERE sm.facility_ID = " + facility_ID + "  and sm.requested_by_emp_ID = " + emp_id + " and sm.flag = 2";
             List<CMMRSList> _List = await Context.GetData<CMMRSList>(stmt).ConfigureAwait(false);
@@ -1726,14 +1727,14 @@ namespace CMMSAPIs.Repositories.SM
             return _MasterList;
         }
 
-          public async Task<List<CMPlantStockOpeningResponse_MRSRetrun>> getMRSReturnStockItems(int mrs_id)
+        public async Task<List<CMPlantStockOpeningResponse_MRSRetrun>> getMRSReturnStockItems(int mrs_id)
         {
 
             int facility_id = 0;
             int actorTypeID = 0;
             int actorID = 0;
 
-            string mrs_dtls_query = "select facility_ID,from_actor_type_id,from_actor_id from smmrs where id = "+mrs_id+"; ";
+            string mrs_dtls_query = "select facility_ID,from_actor_type_id,from_actor_id from smmrs where id = " + mrs_id + "; ";
             DataTable dt2 = await Context.FetchData(mrs_dtls_query).ConfigureAwait(false);
             if (dt2 != null && dt2.Rows.Count > 0)
             {
@@ -1742,7 +1743,7 @@ namespace CMMSAPIs.Repositories.SM
                 actorID = (dt2.Rows[0]["from_actor_id"].ToInt());
             }
             List<string> Asset_Item_Ids = new List<string>();
-            List<CMPlantStockOpening> Asset_Item_Opening_Balance_details = new List<CMPlantStockOpening>();
+            List<CMPlantStockOpening_MRSReturn> Asset_Item_Opening_Balance_details = new List<CMPlantStockOpening_MRSReturn>();
             List<CMPlantStockOpeningResponse_MRSRetrun> Response = new List<CMPlantStockOpeningResponse_MRSRetrun>();
             string itemCondition = "";
             string Plant_Stock_Opening_Details_query = "";
@@ -1764,21 +1765,10 @@ namespace CMMSAPIs.Repositories.SM
             //    $" where (sm_trans.actorType = {actorTypeID} and sm_trans.facilityID in ('{facility_id}') and " +
             //    $" sm_trans.actorID in ({actorID}) ) or (mrs_ID = {mrs_id} and is_splited = 1)";
 
-            Plant_Stock_Opening_Details_query = $"select distinct smrsitems.asset_item_ID,smrsitems.serial_number," +
-                $"IFNULL((select sum(ST.creditQty)-sum(ST.debitQty)  " +
-                $"FROM smtransition as ST  " +
-                $"JOIN smrsitems as SM ON SM.asset_item_ID = ST.assetItemID   " +
-                $"where  ST.actorType = {actorTypeID} and SM.ID=smrsitems.id  and ST.facilityID in ('{facility_id}') and st.actorID = {actorID}  ),0) Opening," +
+            Plant_Stock_Opening_Details_query = $"select distinct smrsitems.asset_item_ID,smrsitems.serial_number as serial_no," +
                 $" sm_trans.facilityID as facilityID, fc.name as facilityName,fc.isBlock as Facility_Is_Block,  '' as Facility_Is_Block_of_name, " +
                 $"sm_trans.assetItemID, a_master.asset_name, a_master.asset_code, a_master.asset_type_ID, AST.asset_type, " +
-                $"IFNULL((select sum(st.creditQty)  " +
-                $" FROM smtransition as ST  " +
-                $" JOIN smrsitems as SM ON SM.asset_item_ID = ST.assetItemID   " +
-                $"where  ST.actorType = {actorTypeID} and SM.ID=smrsitems.id  and ST.facilityID in ('{facility_id}') and st.actorID = {actorID}  ),0) inward," +
-                $" IFNULL((select sum(st.debitQty)  " +
-                $"FROM smtransition as ST  " +
-                $"JOIN smrsitems as SM ON SM.asset_item_ID = ST.assetItemID   " +
-                $"where  ST.actorType = {actorTypeID} and SM.ID=smrsitems.id  and ST.facilityID in ('{facility_id}') and st.actorID = {actorID}  ),0) outward  " +
+                $"  smrsitems.available_qty,smrsitems.requested_qty, smrsitems.used_qty,smrsitems.issued_qty, smrsitems.approved_qty " +
                 $"from smrsitems " +
                 $" join smtransition as sm_trans  on sm_trans.assetItemID = smrsitems.asset_item_ID  " +
                 $"  JOIN smassetmasters as a_master ON a_master.ID = sm_trans.assetItemID " +
@@ -1787,7 +1777,7 @@ namespace CMMSAPIs.Repositories.SM
                 $"where mrs_ID = {mrs_id} and is_splited = 1 order by sm_trans.id desc;";
 
 
-            List<CMPlantStockOpening> Plant_Stock_Opening_Details_Reader = await Context.GetData<CMPlantStockOpening>(Plant_Stock_Opening_Details_query).ConfigureAwait(false);
+            List<CMPlantStockOpening_MRSReturn> Plant_Stock_Opening_Details_Reader = await Context.GetData<CMPlantStockOpening_MRSReturn>(Plant_Stock_Opening_Details_query).ConfigureAwait(false);
 
 
 
@@ -1806,20 +1796,21 @@ namespace CMMSAPIs.Repositories.SM
 
                 Asset_Item_Ids.Add(Convert.ToString(item.assetItemID));
 
-                CMPlantStockOpening openingBalance = new CMPlantStockOpening();
+                CMPlantStockOpening_MRSReturn openingBalance = new CMPlantStockOpening_MRSReturn();
 
                 openingBalance.facilityID = item.facilityID;
                 openingBalance.facilityName = facility_name;
-                openingBalance.Opening = item.Opening;
+                openingBalance.available_qty = item.available_qty;
                 openingBalance.assetItemID = item.assetItemID;
                 openingBalance.asset_name = item.asset_name;
                 openingBalance.asset_code = item.asset_code;
                 openingBalance.asset_type_ID = item.asset_type_ID;
                 openingBalance.asset_type = item.asset_type;
                 openingBalance.serial_no = item.serial_no;
-                openingBalance.inward = item.inward;
-                openingBalance.outward = item.outward;
-                openingBalance.balance =  item.outward;
+                openingBalance.requested_qty = item.requested_qty;
+                openingBalance.used_qty = item.used_qty;
+                openingBalance.issued_qty = item.issued_qty;
+                openingBalance.approved_qty = item.approved_qty;
                 Asset_Item_Opening_Balance_details.Add(openingBalance);
             }
 
@@ -1850,10 +1841,11 @@ namespace CMMSAPIs.Repositories.SM
                     itemWise.asset_type_ID = itemDetail.asset_type_ID;
                     itemWise.asset_type = itemDetail.asset_type;
                     itemWise.serial_no = itemDetail.serial_no;
-                    itemWise.Opening = itemDetail.Opening;
-                    itemWise.inward = itemDetail.inward;
-                    itemWise.outward = itemDetail.outward;
-                    itemWise.balance = itemDetail.balance;
+                    itemWise.available_qty = itemDetail.available_qty;
+                    itemWise.requested_qty = itemDetail.requested_qty;
+                    itemWise.consumed_qty = itemDetail.used_qty;
+                    itemWise.issued_qty = itemDetail.issued_qty;
+                    itemWise.approved_qty = itemDetail.approved_qty;
                     itemResponseList.Add(itemWise);
                 }
                 item.stockDetails = itemResponseList;
