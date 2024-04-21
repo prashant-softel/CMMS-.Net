@@ -176,5 +176,22 @@ namespace CMMSAPIs.Models.Masters
         public DateTime? Created_At { get; set; }
         public int? Modified_By { get; set; }
         public string Modified_At { get; set; }
+                    public int facilityID { get; set; }
+        public DateTime Date { get; set; }
+        public int wasteTypeId { get; set; }
+        public int consumeType { get; set; }
+        public string Description { get; set; }
+        public decimal DebitQty { get; set; }
+        public decimal CreditQty { get; set; }
+    }
+        public class CMWaterDataMonthWise
+    {
+        public int facility_id { get; set; }
+        public string facility_name { get; set; }
+        public string month_name { get; set; }
+        public decimal opening { get; set; }
+        public decimal procured_qty { get; set; }
+        public decimal consumed_qty { get; set; }
+        public string water_type { get; set; }
     }
 }
