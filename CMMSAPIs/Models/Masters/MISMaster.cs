@@ -232,6 +232,7 @@ namespace CMMSAPIs.Models.Masters
         public decimal consumed_qty { get; set; }
         public decimal closing_qty { get; set; }
         public string water_type { get; set; }
+        public int waterTypeId { get; set; }
         public int consumeTypeId { get; set; }
         public string month { get; set; }
         public int year { get; set; }
@@ -249,7 +250,7 @@ namespace CMMSAPIs.Models.Masters
     public class FacilityPeriodData_Month
     {
         public string water_type { get; set; }
-        public int consumeTypeId { get; set; }
+        public int waterTypeId { get; set; }
         public decimal opening { get; set; }
         public List<CMWaterDataMonthWiseDetails_Month> details { get; set; }
     }
@@ -260,6 +261,7 @@ namespace CMMSAPIs.Models.Masters
         public string Description { get; set; }
         public decimal procured_qty { get; set; }
         public decimal consumed_qty { get; set; }
+        public string TransactionType { get; set; }
 
     }
 }
