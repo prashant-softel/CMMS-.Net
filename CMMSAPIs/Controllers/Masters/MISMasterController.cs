@@ -1050,14 +1050,14 @@ namespace CMMSAPIs.Controllers.Masters
             }
         }
 
-                [Route("GetWasteDataListMonthWise")]
+        [Route("GetWaterDataListMonthWise")]
         [HttpGet]
-        public async Task<IActionResult> GetWasteDataListMonthWise()
+        public async Task<IActionResult> GetWaterDataListMonthWise(DateTime fromDate, DateTime toDate)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _IMISMasterBS.GetWasteDataListMonthWise();
+                var data = await _IMISMasterBS.GetWaterDataListMonthWise(fromDate, toDate);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -1065,5 +1065,52 @@ namespace CMMSAPIs.Controllers.Masters
                 throw ex;
             }
         }
+        [Route("GetWasteDataListMonthWise")]
+        [HttpGet]
+        public async Task<IActionResult> GetWasteDataListMonthWise(DateTime fromDate, DateTime toDate)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.GetWasteDataListMonthWise(fromDate, toDate);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        [Route("GetWaterDataMonthDetail")]
+        [HttpGet]
+        public async Task<IActionResult> GetWaterDataMonthDetail(int Month, int Year)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.GetWaterDataMonthDetail(Month, Year);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        [Route("GetWasteDataMonthDetail")]
+        [HttpGet]
+        public async Task<IActionResult> GetWasteDataMonthDetail(int Month, int Year)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.GetWasteDataMonthDetail(Month, Year);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
     }
 }
