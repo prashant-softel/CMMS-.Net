@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace CMMSAPIs.Models.Masters
 {
@@ -189,9 +190,76 @@ namespace CMMSAPIs.Models.Masters
         public int facility_id { get; set; }
         public string facility_name { get; set; }
         public string month_name { get; set; }
+        public int year { get; set; }
         public decimal opening { get; set; }
         public decimal procured_qty { get; set; }
         public decimal consumed_qty { get; set; }
+        public decimal closing_qty { get; set; }
         public string water_type { get; set; }
+    }
+    public class WaterDataResult
+    {
+        public int facility_id { get; set; }
+        public string facility_name { get; set; }
+        public List<FacilityPeriodData> period { get; set; }
+    }
+
+    public class FacilityPeriodData
+    {
+        public string month_name { get; set; }
+        public int year { get; set; }
+        public List<CMWaterDataMonthWiseDetails> details { get; set; }
+    }
+    public class CMWaterDataMonthWiseDetails
+    {
+        public string water_type { get; set; }
+        public decimal opening { get; set; }
+        public decimal procured_qty { get; set; }
+        public decimal consumed_qty { get; set; }
+        public decimal closing_qty { get; set; }
+
+    }
+
+    public class CMWaterDataMonthDetail
+    {
+        public int facility_id { get; set; }
+        public string facility_name { get; set; }
+        public string date { get; set; }
+        public string TransactionType { get; set; }
+        public string Description { get; set; }
+        public decimal opening { get; set; }
+        public decimal procured_qty { get; set; }
+        public decimal consumed_qty { get; set; }
+        public decimal closing_qty { get; set; }
+        public string water_type { get; set; }
+        public int consumeTypeId { get; set; }
+        public string month { get; set; }
+        public int year { get; set; }
+
+    }
+
+    public class WaterDataResult_Month
+    {
+        public int facility_id { get; set; }
+        public string facility_name { get; set; }
+        public string month { get; set; }
+        public int year { get; set; }
+        public List<FacilityPeriodData_Month> item_data { get; set; }
+    }
+    public class FacilityPeriodData_Month
+    {
+        public string water_type { get; set; }
+        public int consumeTypeId { get; set; }
+        public decimal opening { get; set; }
+        public List<CMWaterDataMonthWiseDetails_Month> details { get; set; }
+    }
+    public class CMWaterDataMonthWiseDetails_Month
+    {
+
+        public string date { get; set; }
+        public string Description { get; set; }
+        public decimal procured_qty { get; set; }
+        public decimal consumed_qty { get; set; }
+
     }
 }
