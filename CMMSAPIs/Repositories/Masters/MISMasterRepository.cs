@@ -682,34 +682,52 @@ namespace CMMSAPIs.Repositories.Masters
             return ListResult[0];
         }
 
-        internal async Task<CMDefaultResponse> CreateWasteData(CMWasteData request, int UserID)
+              internal async Task<CMDefaultResponse> CreateWasteData(CMWasteData request, int UserID)
         {
             CMDefaultResponse response = null;
             int InsertedValue = 0;
-            string insertQuery = $"INSERT INTO waste_data (" +
-                                 $"Solid_Waste, E_Waste, Battery_Waste, Solar_Module_Waste, " +
-                                 $"Haz_Waste_Oil, Haz_Waste_Grease, Haz_Solid_Waste, " +
-                                 $"Haz_Waste_Oil_Barrel_Generated, Solid_Waste_Disposed, " +
-                                 $"E_Waste_Disposed, Battery_Waste_Disposed, Solar_Module_Waste_Disposed, " +
-                                 $"Haz_Waste_Oil_Disposed, Haz_Waste_Grease_Disposed, " +
-                                 $"Haz_Solid_Waste_Disposed, Haz_Waste_Oil_Barrel_Disposed, " +
-                                 $"Created_By, Created_At" +
-                                 $") VALUES (" +
-                                 $"{request.Solid_Waste}, {request.E_Waste}, {request.Battery_Waste}, {request.Solar_Module_Waste}, " +
-                                 $"{request.Haz_Waste_Oil}, {request.Haz_Waste_Grease}, {request.Haz_Solid_Waste}, " +
-                                 $"{request.Haz_Waste_Oil_Barrel_Generated}, {request.Solid_Waste_Disposed}, " +
-                                 $"{request.E_Waste_Disposed}, {request.Battery_Waste_Disposed}, {request.Solar_Module_Waste_Disposed}, " +
-                                 $"{request.Haz_Waste_Oil_Disposed}, {request.Haz_Waste_Grease_Disposed}, " +
-                                 $"{request.Haz_Solid_Waste_Disposed}, {request.Haz_Waste_Oil_Barrel_Disposed}, " +
-                                 $"{UserID}, '{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}'" +
-                                 $"); SELECT LAST_INSERT_ID();";
+            //string insertQuery = $"INSERT INTO waste_data (" +
+            //                     $"Solid_Waste, E_Waste, Battery_Waste, Solar_Module_Waste, " +
+            //                     $"Haz_Waste_Oil, Haz_Waste_Grease, Haz_Solid_Waste, " +
+            //                     $"Haz_Waste_Oil_Barrel_Generated, Solid_Waste_Disposed, " +
+            //                     $"E_Waste_Disposed, Battery_Waste_Disposed, Solar_Module_Waste_Disposed, " +
+            //                     $"Haz_Waste_Oil_Disposed, Haz_Waste_Grease_Disposed, " +
+            //                     $"Haz_Solid_Waste_Disposed, Haz_Waste_Oil_Barrel_Disposed, " +
+            //                     $"Created_By, Created_At" +
+            //                     $") VALUES (" +
+            //                     $"{request.Solid_Waste}, {request.E_Waste}, {request.Battery_Waste}, {request.Solar_Module_Waste}, " +
+            //                     $"{request.Haz_Waste_Oil}, {request.Haz_Waste_Grease}, {request.Haz_Solid_Waste}, " +
+            //                     $"{request.Haz_Waste_Oil_Barrel_Generated}, {request.Solid_Waste_Disposed}, " +
+            //                     $"{request.E_Waste_Disposed}, {request.Battery_Waste_Disposed}, {request.Solar_Module_Waste_Disposed}, " +
+            //                     $"{request.Haz_Waste_Oil_Disposed}, {request.Haz_Waste_Grease_Disposed}, " +
+            //                     $"{request.Haz_Solid_Waste_Disposed}, {request.Haz_Waste_Oil_Barrel_Disposed}, " +
+            //                     $"{UserID}, '{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}'" +
+            //                     $"); SELECT LAST_INSERT_ID();";
+            int consumeType = 0;
+            if (request.CreditQty > 0 && request.DebitQty > 0)
+            {
+                return new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Credit and debit can not happen same time.");
+            }
+
+            if (request.CreditQty > 0 && request.DebitQty == 0)
+            {
+                consumeType = (int)CMMS.MISConsumptionTypes.Procurement;
+            }
+            if (request.CreditQty == 0 && request.DebitQty > 0)
+            {
+                consumeType = (int)CMMS.MISConsumptionTypes.Consumption;
+            }
+            string insertQuery = $"INSERT INTO waste_data(facilityId, date, wasteTypeId, description, debitQty, creditQty, Created_By, Created_At,consumeTypeId) VALUES " +
+                 $"({request.facilityID}, '{request.Date.ToString("yyyy-MM-dd")}', {request.wasteTypeId}, '{request.Description}', {request.DebitQty}, {request.CreditQty}, {UserID}, '{UtilsRepository.GetUTCTime()}',{consumeType}); " +
+                 $"SELECT LAST_INSERT_ID();";
             DataTable dt2 = await Context.FetchData(insertQuery).ConfigureAwait(false);
             InsertedValue = Convert.ToInt32(dt2.Rows[0][0]);
             response = new CMDefaultResponse(InsertedValue, CMMS.RETRUNSTATUS.SUCCESS, "Waste Data saved successfully.");
             return response;
         }
 
-        internal async Task<CMDefaultResponse> UpdateWasteData(CMWasteData request, int UserID)
+
+             internal async Task<CMDefaultResponse> UpdateWasteData(CMWasteData request, int UserID)
         {
             CMDefaultResponse response = null;
             string SelectQ = "select id from waste_data where ID = '" + request.Id + "'";
@@ -719,22 +737,12 @@ namespace CMMSAPIs.Repositories.Masters
             {
                 string updateQuery = $"UPDATE waste_data " +
                                     $"SET " +
-                                    $"Solid_Waste = {request.Solid_Waste}, " +
-                                    $"E_Waste = {request.E_Waste}, " +
-                                    $"Battery_Waste = {request.Battery_Waste}, " +
-                                    $"Solar_Module_Waste = {request.Solar_Module_Waste}, " +
-                                    $"Haz_Waste_Oil = {request.Haz_Waste_Oil}, " +
-                                    $"Haz_Waste_Grease = {request.Haz_Waste_Grease}, " +
-                                    $"Haz_Solid_Waste = {request.Haz_Solid_Waste}, " +
-                                    $"Haz_Waste_Oil_Barrel_Generated = {request.Haz_Waste_Oil_Barrel_Generated}, " +
-                                    $"Solid_Waste_Disposed = {request.Solid_Waste_Disposed}, " +
-                                    $"E_Waste_Disposed = {request.E_Waste_Disposed}, " +
-                                    $"Battery_Waste_Disposed = {request.Battery_Waste_Disposed}, " +
-                                    $"Solar_Module_Waste_Disposed = {request.Solar_Module_Waste_Disposed}, " +
-                                    $"Haz_Waste_Oil_Disposed = {request.Haz_Waste_Oil_Disposed}, " +
-                                    $"Haz_Waste_Grease_Disposed = {request.Haz_Waste_Grease_Disposed}, " +
-                                    $"Haz_Solid_Waste_Disposed = {request.Haz_Solid_Waste_Disposed}, " +
-                                    $"Haz_Waste_Oil_Barrel_Disposed = {request.Haz_Waste_Oil_Barrel_Disposed}, " +
+                                    $"facilityId = {request.facilityID}, " +
+                                    $"date = {request.Date.ToString("yyyy-MM-dd")}, " +
+                                    $"wasteTypeId = {request.wasteTypeId}, " +
+                                    $"description = {request.Description}, " +
+                                    $"debitQty = {request.DebitQty}, " +
+                                    $"creditQty = {request.CreditQty}, " +
                                     $"Modified_By = '{UserID}', " +
                                     $"Modified_At = '{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}' " +
                                     $"WHERE id = {request.Id}";
@@ -772,6 +780,51 @@ namespace CMMSAPIs.Repositories.Masters
             }
 
             return response;
+        }
+
+              internal async Task<List<CMWaterDataMonthWise>> GetWasteDataListMonthWise()
+        {
+            string SelectQ = $" select distinct plantId as facility_id,fc.name facility_name,MONTHNAME(date) as month_name, " +
+                $" (select sum(creditQty)-sum(debitQty) from mis_waterdata where MONTH(date) < 04) as opening," +
+                $" sum(creditQty) as procured_qty, sum(debitQty) as consumed_qty, mw.name as water_type" +
+                $" from mis_waterdata" +
+                $" LEFT JOIN facilities fc ON fc.id = mis_waterdata.plantId" +
+                $" LEFT JOIN mis_watertype mw on mw.id = mis_waterdata.waterTypeId" +
+                $"  group by MONTH(date) ;";
+            List<CMWaterDataMonthWise> ListResult = await Context.GetData<CMWaterDataMonthWise>(SelectQ).ConfigureAwait(false);
+            //foreach (var row in ListResult)
+            //{
+            //    var facilityId = row.facility_id;
+            //    var facilityName = row.facility_name;
+            //    var monthName = row.month_name;
+            //    var name = row.water_type;
+
+            //    if (!facilities.ContainsKey(facilityId))
+            //    {
+            //        facilities.Add(facilityId, new FacilityData { FacilityId = facilityId, FacilityName = facilityName, MonthlyData = new Dictionary<string, MonthlyData>() });
+            //    }
+
+            //    var facilityData = facilities[facilityId];
+            //    if (!facilityData.MonthlyData.ContainsKey(monthName))
+            //    {
+            //        facilityData.MonthlyData.Add(monthName, new MonthlyData());
+            //    }
+
+            //    var monthlyData = facilityData.MonthlyData[monthName];
+            //    monthlyData.Name = name;
+            //    monthlyData.Opening = double.Parse(row[3]);
+            //    monthlyData.ProcuredQty = double.Parse(row[4]);
+            //    monthlyData.ConsumedQty = double.Parse(row[5]);
+            //    monthlyData.ClosingQty = monthlyData.Opening + monthlyData.ProcuredQty - monthlyData.ConsumedQty;
+            //}
+
+            //// Convert FacilityData dictionary to desired JSON format
+            //var formattedData = new List<FacilityData>();
+            //foreach (var facility in facilities.Values)
+            //{
+            //    formattedData.Add(facility);
+            //}
+            return ListResult;
         }
     }
 
