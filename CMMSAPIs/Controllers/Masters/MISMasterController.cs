@@ -1049,5 +1049,21 @@ namespace CMMSAPIs.Controllers.Masters
                 throw;
             }
         }
+
+                [Route("GetWasteDataListMonthWise")]
+        [HttpGet]
+        public async Task<IActionResult> GetWasteDataListMonthWise()
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.GetWasteDataListMonthWise();
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
     }
 }
