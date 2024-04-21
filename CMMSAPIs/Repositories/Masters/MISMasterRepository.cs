@@ -904,12 +904,12 @@ namespace CMMSAPIs.Repositories.Masters
         facility_name = group.Key.facility_name,
         month = group.Key.month,
         year = group.Key.year,
-        item_data = group.Select(r => new { r.water_type, r.consumeTypeId, r.opening })
+        item_data = group.Select(r => new { r.water_type, r.opening, r.waterTypeId })
                         .Distinct()
                         .Select(periodGroup => new FacilityPeriodData_Month
                         {
                             water_type = periodGroup.water_type,
-                            consumeTypeId = periodGroup.consumeTypeId,
+                            waterTypeId = periodGroup.waterTypeId,
                             opening = periodGroup.opening,
                             details = group.Where(g => g.water_type == periodGroup.water_type)
                                           .Select(g => new CMWaterDataMonthWiseDetails_Month
@@ -917,7 +917,8 @@ namespace CMMSAPIs.Repositories.Masters
                                               date = g.date,
                                               procured_qty = g.procured_qty,
                                               consumed_qty = g.consumed_qty,
-                                              Description = g.Description
+                                              Description = g.Description,
+                                              TransactionType = g.TransactionType
                                           }).ToList()
                         }).ToList()
     }).ToList();
