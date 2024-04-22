@@ -286,10 +286,10 @@ namespace CMMSAPIs.Repositories.Permits
              * input 1 - checkbox, 2 - radio, 3 - text, 4 - Ok
             */
 
-            //if(permit_type_id == 0)
-            //{
-            // return new List<CMSafetyMeasurementQuestionList>();
-            //}
+            if(permit_type_id == null)
+            {
+             return new List<CMSafetyMeasurementQuestionList>();
+            }
 
             string inputTypeOut = "CASE ";
             foreach (CMMS.CMMS_Input input in System.Enum.GetValues(typeof(CMMS.CMMS_Input)))
@@ -303,11 +303,14 @@ namespace CMMSAPIs.Repositories.Permits
                              "LEFT JOIN permittypelists as ptw ON ptw.id = permitsaftymea.permitTypeId ";
             if (permit_type_id > 0)
             {
-                myQuery5 += $"where ptw.id =  {permit_type_id} and permitsaftymea.status= 1  ";
+                myQuery5 += $"where ptw.id =  {permit_type_id} and permitsaftymea.status= 1  ORDER BY ptw.id ASC  ";
             }
-               
-            //myQuery5 += "GROUP BY permitsaftyques.safetyMeasureId ORDER BY ptw.id ASC;";
-            myQuery5 += "ORDER BY ptw.id ASC;";
+            else
+            {
+
+                //myQuery5 += "GROUP BY permitsaftyques.safetyMeasureId ORDER BY ptw.id ASC;";
+                myQuery5 += "  where  permitsaftymea.status=1 ORDER BY ptw.id ASC;";
+            }
             List<CMSafetyMeasurementQuestionList> _QuestionList = await Context.GetData<CMSafetyMeasurementQuestionList>(myQuery5).ConfigureAwait(false);
             return _QuestionList;
         }
@@ -343,7 +346,7 @@ namespace CMMSAPIs.Repositories.Permits
         }
         internal async Task<CMDefaultResponse> DeleteSafetyMeasure(int id)
         {
-            string deleteQry = $"UPDATE permittypesafetymeasures SET status = 0 WHERE id = {id}";
+            string deleteQry = $"update permittypesafetymeasures set status=0  WHERE id = {id}";
             await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
             CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Safety Measure Deleted");
             return response;

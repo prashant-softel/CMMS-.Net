@@ -1050,6 +1050,52 @@ namespace CMMSAPIs.Controllers.Masters
             }
         }
 
+        //changes for wastetype
+        [Route("CreateWaterType")]
+        [HttpPost]
+        public async Task<IActionResult> CreateWasteType(WasteDataType request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.CreateWasteType(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        [Route("UpdateWasteType")]
+        [HttpPut]
+        public async Task<IActionResult> UpdateWasteType(WasteDataType request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.UpdateWasteType(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        [Route("DeleteWasteType")]
+        [HttpDelete]
+        public async Task<IActionResult> DeleteWasteType(int id)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.DeleteWasteType(id, userID);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
         [Route("GetWaterDataListMonthWise")]
         [HttpGet]
         public async Task<IActionResult> GetWaterDataListMonthWise(DateTime fromDate, DateTime toDate)
