@@ -74,9 +74,9 @@ namespace CMMSAPIs.BS.MISMasters
         Task<List<WasteDataType>> GetWasteType(int facility_Id);
         Task<CMDefaultResponse> DeleteWaterType(int Id, int userID);
          Task<List<WaterDataResult>> GetWaterDataListMonthWise(DateTime fromDate, DateTime toDate);
-         Task<List<WaterDataResult>> GetWasteDataListMonthWise(DateTime fromDate, DateTime toDate);
+         Task<List<CMWasteDataResult>> GetWasteDataListMonthWise(DateTime fromDate, DateTime toDate, int Hazardous);
         Task<List<WaterDataResult_Month>> GetWaterDataMonthDetail(int Month, int Year);
-        Task<List<CMWaterDataMonthDetail>> GetWasteDataMonthDetail(int Month, int Year);
+        Task<List<CMWaterDataMonthDetail>> GetWasteDataMonthDetail(int Month, int Year, int Hazardous);
     }
     public class MISMasterBS : IMISMasterBS
     {
@@ -1048,13 +1048,13 @@ namespace CMMSAPIs.BS.MISMasters
             }
         }
 
-        public async Task<List<WaterDataResult>> GetWasteDataListMonthWise(DateTime fromDate, DateTime toDate)
+        public async Task<List<CMWasteDataResult>> GetWasteDataListMonthWise(DateTime fromDate, DateTime toDate, int Hazardous)
         {
             try
             {
                 using (var repos = new MISMasterRepository(getDB))
                 {
-                    return await repos.GetWasteDataListMonthWise(fromDate, toDate);
+                    return await repos.GetWasteDataListMonthWise(fromDate, toDate, Hazardous);
 
                 }
             }
@@ -1079,13 +1079,13 @@ namespace CMMSAPIs.BS.MISMasters
                 throw;
             }
         }
-        public async Task<List<CMWaterDataMonthDetail>> GetWasteDataMonthDetail(int Month, int Year)
+        public async Task<List<CMWaterDataMonthDetail>> GetWasteDataMonthDetail(int Month, int Year, int Hazardous)
         {
             try
             {
                 using (var repos = new MISMasterRepository(getDB))
                 {
-                    return await repos.GetWasteDataMonthDetail(Month, Year);
+                    return await repos.GetWasteDataMonthDetail(Month, Year, Hazardous);
 
                 }
             }
