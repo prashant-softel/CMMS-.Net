@@ -799,7 +799,7 @@ namespace CMMSAPIs.Repositories.Masters
             return response;
         }
 
-        internal async Task<List<WaterDataResult>> GetWaterDataListMonthWise(DateTime fromDate, DateTime toDate)
+        internal async Task<List<WaterDataResult>> GetWaterDataListMonthWise(DateTime fromDate, DateTime toDate, int facility_id)
         {
             string SelectQ = $" select distinct plantId as facility_id,fc.name facility_name,MONTHNAME(date) as month_name,YEAR(date) as year, " +
                 $" (select sum(creditQty)-sum(debitQty) from mis_waterdata where MONTH(date) < MONTH('"+ fromDate.ToString("yyyy-MM-dd") + "')) as opening," +
@@ -807,7 +807,7 @@ namespace CMMSAPIs.Repositories.Masters
                 $" from mis_waterdata" +
                 $" LEFT JOIN facilities fc ON fc.id = mis_waterdata.plantId" +
                 $" LEFT JOIN mis_watertype mw on mw.id = mis_waterdata.waterTypeId" +
-                $" where isActive = 1 and DATE_FORMAT(Date,'%Y-%m-%d') BETWEEN '{fromDate.ToString("yyyy-MM-dd")}' AND '{toDate.ToString("yyyy-MM-dd")}'" +
+                $" where isActive = 1 and mis_waterdata.plantId = {facility_id} and DATE_FORMAT(Date,'%Y-%m-%d') BETWEEN '{fromDate.ToString("yyyy-MM-dd")}' AND '{toDate.ToString("yyyy-MM-dd")}'" +
                 $"  group by MONTH(date) , mis_waterdata.waterTypeId;";
             List<CMWaterDataMonthWise> ListResult = await Context.GetData<CMWaterDataMonthWise>(SelectQ).ConfigureAwait(false);
 
@@ -837,7 +837,7 @@ namespace CMMSAPIs.Repositories.Masters
             return groupedResult;
         }
 
-        internal async Task<List<CMWasteDataResult>> GetWasteDataListMonthWise(DateTime fromDate, DateTime toDate, int Hazardous)
+        internal async Task<List<CMWasteDataResult>> GetWasteDataListMonthWise(DateTime fromDate, DateTime toDate, int Hazardous, int facility_id)
         {
             string SelectQ = $" select distinct facilityId as facility_id,fc.name facility_name,MONTHNAME(date) as month_name,YEAR(date) as year, " +
                 $" (select sum(creditQty)-sum(debitQty) from waste_data where MONTH(date) < MONTH('" + fromDate.ToString("yyyy-MM-dd") + "')) as opening," +
@@ -845,7 +845,7 @@ namespace CMMSAPIs.Repositories.Masters
                 $" from waste_data" +
                 $" LEFT JOIN facilities fc ON fc.id = waste_data.facilityId" +
                 $" LEFT JOIN mis_wastetype mw on mw.id = waste_data.wasteTypeId" +
-                $" where isHazardous = {Hazardous} and DATE_FORMAT(Date,'%Y-%m-%d') BETWEEN '{fromDate.ToString("yyyy-MM-dd")}' AND '{toDate.ToString("yyyy-MM-dd")}'" +
+                $" where isHazardous = {Hazardous} and waste_data.facilityId = {facility_id} and DATE_FORMAT(Date,'%Y-%m-%d') BETWEEN '{fromDate.ToString("yyyy-MM-dd")}' AND '{toDate.ToString("yyyy-MM-dd")}'" +
                 $"  group by MONTH(date) , waste_data.wasteTypeId;";
             List<CMWaterDataMonthWise> ListResult = await Context.GetData<CMWaterDataMonthWise>(SelectQ).ConfigureAwait(false);
 
@@ -876,7 +876,7 @@ namespace CMMSAPIs.Repositories.Masters
             return groupedResult;
         }
 
-        internal async Task<List<WaterDataResult_Month>> GetWaterDataMonthDetail(int Month, int Year)
+        internal async Task<List<WaterDataResult_Month>> GetWaterDataMonthDetail(int Month, int Year, int facility_id)
         {
             string SelectQ = $" select distinct mis_waterdata.waterTypeId , plantId as facility_id,fc.name facility_name,DATE_FORMAT(Date,'%Y-%m-%d') as date ,MONTHNAME(date) as month,YEAR(date) as year,"
                              +$" (select sum(creditQty) - sum(debitQty) from mis_waterdata where MONTH(date) < {Month}) as opening,"
@@ -887,7 +887,7 @@ namespace CMMSAPIs.Repositories.Masters
                              +$" from mis_waterdata"
                              +$" LEFT JOIN facilities fc ON fc.id = mis_waterdata.plantId"
                              +$" LEFT JOIN mis_watertype mw on mw.id = mis_waterdata.waterTypeId"
-                             +$" where isActive = 1 and MONTH(date) = {Month} and Year(date) = {Year} group by MONTH(date), mis_waterdata.waterTypeId; ";
+                             +$" where isActive = 1 and mis_waterdata.plantId = {facility_id} and MONTH(date) = {Month} and Year(date) = {Year} group by MONTH(date), mis_waterdata.waterTypeId; ";
             List<CMWaterDataMonthDetail> ListResult = await Context.GetData<CMWaterDataMonthDetail>(SelectQ).ConfigureAwait(false);
             if(ListResult != null)
             {
@@ -927,7 +927,7 @@ namespace CMMSAPIs.Repositories.Masters
 
             return groupedResult;
         }
-        internal async Task<List<CMWaterDataMonthDetail>> GetWasteDataMonthDetail(int Month, int Year, int Hazardous)
+        internal async Task<List<CMWaterDataMonthDetail>> GetWasteDataMonthDetail(int Month, int Year, int Hazardous, int facility_id)
         {
             string SelectQ = $" select distinct waste_data.waterTypeId , plantId as facility_id,fc.name facility_name,date ,"
                              + $" (select sum(creditQty) - sum(debitQty) from waste_data where MONTH(date) < {Month}) as opening,"
@@ -938,7 +938,7 @@ namespace CMMSAPIs.Repositories.Masters
                              + $" from waste_data"
                              + $" LEFT JOIN facilities fc ON fc.id = waste_data.plantId"
                              + $" LEFT JOIN mis_wastetype mw on mw.id = waste_data.wasteTypeId"
-                             + $" where isHazardous = {Hazardous} and MONTH(date) = {Month} and Year(date) = {Year} group by MONTH(date), waste_data.wasteTypeId; ";
+                             + $" where isHazardous = {Hazardous} and waste_data.facilityId = {facility_id} and MONTH(date) = {Month} and Year(date) = {Year} group by MONTH(date), waste_data.wasteTypeId; ";
             List<CMWaterDataMonthDetail> ListResult = await Context.GetData<CMWaterDataMonthDetail>(SelectQ).ConfigureAwait(false);
             if (ListResult != null)
             {
