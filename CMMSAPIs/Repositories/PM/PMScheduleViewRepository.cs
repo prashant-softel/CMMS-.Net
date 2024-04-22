@@ -304,7 +304,7 @@ namespace CMMSAPIs.Repositories.PM
             if (taskViewDetail.Count == 0)
                 throw new MissingMemberException("PM Task not found");
 
-            string myQuery2 = $"SELECT pm_schedule.id as schedule_id,assets.id as assetsID, assets.name as asset_name,PM_Schedule_Completed_by_id as completedBy_id,  CONCAT(users.firstName, users.lastName) as   completedBy_name , checklist.checklist_number as checklist_name from pm_schedule " +
+            string myQuery2 = $"SELECT pm_schedule.id as schedule_id,assets.id as assetsID,assets.name as asset_name,PM_Schedule_Completed_by_id as completedBy_id,  CONCAT(users.firstName, users.lastName) as   completedBy_name , checklist.checklist_number as checklist_name from pm_schedule " +
                 $"left join assets on pm_schedule.asset_id = assets.id " +
                  $"left join users on pm_schedule.PM_Schedule_Completed_by_id = users.id " +
                 $"left join checklist_number as checklist on pm_schedule.checklist_id = checklist.id " +
