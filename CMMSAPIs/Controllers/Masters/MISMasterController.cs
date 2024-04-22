@@ -1067,12 +1067,12 @@ namespace CMMSAPIs.Controllers.Masters
         }
         [Route("GetWasteDataListMonthWise")]
         [HttpGet]
-        public async Task<IActionResult> GetWasteDataListMonthWise(DateTime fromDate, DateTime toDate)
+        public async Task<IActionResult> GetWasteDataListMonthWise(DateTime fromDate, DateTime toDate, int Hazardous)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _IMISMasterBS.GetWasteDataListMonthWise(fromDate, toDate);
+                var data = await _IMISMasterBS.GetWasteDataListMonthWise(fromDate, toDate, Hazardous);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -1098,12 +1098,12 @@ namespace CMMSAPIs.Controllers.Masters
 
         [Route("GetWasteDataMonthDetail")]
         [HttpGet]
-        public async Task<IActionResult> GetWasteDataMonthDetail(int Month, int Year)
+        public async Task<IActionResult> GetWasteDataMonthDetail(int Month, int Year, int Hazardous)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _IMISMasterBS.GetWasteDataMonthDetail(Month, Year);
+                var data = await _IMISMasterBS.GetWasteDataMonthDetail(Month, Year, Hazardous);
                 return Ok(data);
             }
             catch (Exception ex)
