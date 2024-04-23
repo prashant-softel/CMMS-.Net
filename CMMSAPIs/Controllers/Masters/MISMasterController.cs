@@ -1098,12 +1098,12 @@ namespace CMMSAPIs.Controllers.Masters
         }
         [Route("GetWaterDataListMonthWise")]
         [HttpGet]
-        public async Task<IActionResult> GetWaterDataListMonthWise(DateTime fromDate, DateTime toDate)
+        public async Task<IActionResult> GetWaterDataListMonthWise(DateTime fromDate, DateTime toDate, int facility_id)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _IMISMasterBS.GetWaterDataListMonthWise(fromDate, toDate);
+                var data = await _IMISMasterBS.GetWaterDataListMonthWise(fromDate, toDate, facility_id);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -1113,12 +1113,12 @@ namespace CMMSAPIs.Controllers.Masters
         }
         [Route("GetWasteDataListMonthWise")]
         [HttpGet]
-        public async Task<IActionResult> GetWasteDataListMonthWise(DateTime fromDate, DateTime toDate)
+        public async Task<IActionResult> GetWasteDataListMonthWise(DateTime fromDate, DateTime toDate, int Hazardous, int facility_id)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _IMISMasterBS.GetWasteDataListMonthWise(fromDate, toDate);
+                var data = await _IMISMasterBS.GetWasteDataListMonthWise(fromDate, toDate, Hazardous, facility_id);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -1128,12 +1128,12 @@ namespace CMMSAPIs.Controllers.Masters
         }
         [Route("GetWaterDataMonthDetail")]
         [HttpGet]
-        public async Task<IActionResult> GetWaterDataMonthDetail(int Month, int Year)
+        public async Task<IActionResult> GetWaterDataMonthDetail(int Month, int Year, int facility_id)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _IMISMasterBS.GetWaterDataMonthDetail(Month, Year);
+                var data = await _IMISMasterBS.GetWaterDataMonthDetail(Month, Year, facility_id);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -1144,12 +1144,12 @@ namespace CMMSAPIs.Controllers.Masters
 
         [Route("GetWasteDataMonthDetail")]
         [HttpGet]
-        public async Task<IActionResult> GetWasteDataMonthDetail(int Month, int Year)
+        public async Task<IActionResult> GetWasteDataMonthDetail(int Month, int Year, int Hazardous, int facility_id)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _IMISMasterBS.GetWasteDataMonthDetail(Month, Year);
+                var data = await _IMISMasterBS.GetWasteDataMonthDetail(Month, Year, Hazardous, facility_id);
                 return Ok(data);
             }
             catch (Exception ex)

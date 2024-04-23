@@ -74,16 +74,19 @@ namespace CMMSAPIs.BS.MISMasters
         Task<CMDefaultResponse> UpdateWaterType(WaterDataType request, int userId);
         Task<List<WasteDataType>> GetWasteType(int facility_Id);
         Task<CMDefaultResponse> DeleteWaterType(int Id, int userID);
+
         Task<List<WaterDataType>> GetWaterTypebyId(int id);
       //changes
         Task<CMDefaultResponse> CreateWasteType(WasteDataType request, int userId);
         Task<CMDefaultResponse> UpdateWasteType(WasteDataType request, int userId);
-       
         Task<CMDefaultResponse> DeleteWasteType(int Id, int userID);
-        Task<List<WaterDataResult>> GetWaterDataListMonthWise(DateTime fromDate, DateTime toDate);
-         Task<List<WaterDataResult>> GetWasteDataListMonthWise(DateTime fromDate, DateTime toDate);
-        Task<List<WaterDataResult_Month>> GetWaterDataMonthDetail(int Month, int Year);
-        Task<List<CMWaterDataMonthDetail>> GetWasteDataMonthDetail(int Month, int Year);
+        
+
+         Task<List<WaterDataResult>> GetWaterDataListMonthWise(DateTime fromDate, DateTime toDate, int facility_id);
+         Task<List<CMWasteDataResult>> GetWasteDataListMonthWise(DateTime fromDate, DateTime toDate, int Hazardous, int facility_id);
+        Task<List<WaterDataResult_Month>> GetWaterDataMonthDetail(int Month, int Year, int facility_id);
+        Task<List<CMWaterDataMonthDetail>> GetWasteDataMonthDetail(int Month, int Year, int Hazardous, int facility_id);
+
     }
     public class MISMasterBS : IMISMasterBS
     {
@@ -1099,13 +1102,17 @@ namespace CMMSAPIs.BS.MISMasters
             }
         }
 
-        public async Task<List<WaterDataResult>> GetWaterDataListMonthWise(DateTime fromDate, DateTime toDate)
+
+       
+
+                public async Task<List<WaterDataResult>> GetWaterDataListMonthWise(DateTime fromDate, DateTime toDate, int facility_id)
+
         {
             try
             {
                 using (var repos = new MISMasterRepository(getDB))
                 {
-                    return await repos.GetWaterDataListMonthWise(fromDate, toDate);
+                    return await repos.GetWaterDataListMonthWise(fromDate, toDate, facility_id);
 
                 }
             }
@@ -1115,13 +1122,13 @@ namespace CMMSAPIs.BS.MISMasters
             }
         }
 
-        public async Task<List<WaterDataResult>> GetWasteDataListMonthWise(DateTime fromDate, DateTime toDate)
+        public async Task<List<CMWasteDataResult>> GetWasteDataListMonthWise(DateTime fromDate, DateTime toDate, int Hazardous, int facility_id)
         {
             try
             {
                 using (var repos = new MISMasterRepository(getDB))
                 {
-                    return await repos.GetWasteDataListMonthWise(fromDate, toDate);
+                    return await repos.GetWasteDataListMonthWise(fromDate, toDate, Hazardous, facility_id);
 
                 }
             }
@@ -1131,13 +1138,13 @@ namespace CMMSAPIs.BS.MISMasters
             }
         }
 
-        public async Task<List<WaterDataResult_Month>> GetWaterDataMonthDetail(int Month, int Year)
+        public async Task<List<WaterDataResult_Month>> GetWaterDataMonthDetail(int Month, int Year, int facility_id)
         {
             try
             {
                 using (var repos = new MISMasterRepository(getDB))
                 {
-                    return await repos.GetWaterDataMonthDetail(Month, Year);
+                    return await repos.GetWaterDataMonthDetail(Month, Year, facility_id);
 
                 }
             }
@@ -1146,13 +1153,13 @@ namespace CMMSAPIs.BS.MISMasters
                 throw;
             }
         }
-        public async Task<List<CMWaterDataMonthDetail>> GetWasteDataMonthDetail(int Month, int Year)
+        public async Task<List<CMWaterDataMonthDetail>> GetWasteDataMonthDetail(int Month, int Year, int Hazardous,int facility_id)
         {
             try
             {
                 using (var repos = new MISMasterRepository(getDB))
                 {
-                    return await repos.GetWasteDataMonthDetail(Month, Year);
+                    return await repos.GetWasteDataMonthDetail(Month, Year, Hazardous,  facility_id);
 
                 }
             }

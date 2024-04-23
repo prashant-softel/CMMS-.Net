@@ -264,4 +264,28 @@ namespace CMMSAPIs.Models.Masters
         public string TransactionType { get; set; }
 
     }
+
+    public class CMWasteDataResult
+    {
+        public int facility_id { get; set; }
+        public string facility_name { get; set; }
+        public int hazardous { get; set; }
+        public List<CMFacilityPeriodData_Waste> period { get; set; }
+    }
+
+    public class CMFacilityPeriodData_Waste
+    {
+        public string month_name { get; set; }
+        public int year { get; set; }
+        public List<CMWasteDataMonthWiseDetails> details { get; set; }
+    }
+    public class CMWasteDataMonthWiseDetails
+    {
+        public string waste_type { get; set; }
+        public decimal opening { get; set; }
+        public decimal procured_qty { get; set; }
+        public decimal consumed_qty { get; set; }
+        public decimal closing_qty { get; set; }
+
+    }
 }
