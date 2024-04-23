@@ -159,7 +159,12 @@ namespace CMMSAPIs.Repositories.JC
                 
                     if (v != null && v.job_card_date != null)
                     v.job_card_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, v.job_card_date);
-                
+                if (v != null && v.start_time != null)
+                    v.start_time = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, v.start_time);
+                if (v != null && v.end_time != null)
+                    v.end_time = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, v.end_time);
+
+
             }
             return _ViewJobCardList;
         }
@@ -360,10 +365,16 @@ namespace CMMSAPIs.Repositories.JC
            // string q = "select jobId from  WHERE id ="+jc_id;
             //int job_id   = await Context.FetchData<int>(q).ConfigureAwait(false);
             string myQuery17 = "SELECT jc.id as id, file_path as fileName,  U.File_Size as fileSize, U.status,U.description FROM uploadedfiles AS U "+ 
-                              "Left JOIN jobcards as jc on jc.jobid = U.module_ref_id  " +
-                              "where module_ref_id =" + id+ "   and U.module_type = " + (int)CMMS.CMMS_Modules.JOB+ ";";
+                              "Left JOIN jobcards as jc on jc.jobid = U.module_ref_id  " +                             
+                              "where module_ref_id =" + id+ " and U.module_type = " + (int)CMMS.CMMS_Modules.JOB+ ";";
             
             List<CMFileDetail> _fileUpload = await Context.GetData<CMFileDetail>(myQuery17).ConfigureAwait(false);
+            //uploadjobcard
+            string myQuery18 = "SELECT jc.id as id, file_path as fileName,  U.File_Size as fileSize, U.status,U.description FROM uploadedfiles AS U " +
+                              "Left JOIN jobcards as jc on jc.jobid = U.module_ref_id  " +
+                              "where module_ref_id =" + jc_id + " and U.module_type = " + (int)CMMS.CMMS_Modules.JOB + ";";
+
+            List<CMFileDetailJc> Jc_image = await Context.GetData<CMFileDetailJc>(myQuery18).ConfigureAwait(false);
 
             _plantDetails[0].LstCMJCJobDetailList = _jobDetails;
             _plantDetails[0].LstPermitDetailList = _permitDetails;
@@ -372,6 +383,7 @@ namespace CMMSAPIs.Repositories.JC
             _plantDetails[0].LstCMJCEmpList = _empList;
             _plantDetails[0].file_list = _fileUpload;
             _plantDetails[0].tool_List = _ToolsLinked;
+            _plantDetails[0].file_listJc = Jc_image;
 
 
 
@@ -383,7 +395,7 @@ namespace CMMSAPIs.Repositories.JC
             CMMS.CMMS_Status _Status_long = (CMMS.CMMS_Status)(_plantDetails[0].status);
             string _longStatus = getLongStatus(CMMS.CMMS_Modules.JOBCARD, _Status_long, _plantDetails[0]);
             _plantDetails[0].status_long = _longStatus;
-
+           
             return _plantDetails;
         }
 
@@ -578,15 +590,7 @@ namespace CMMSAPIs.Repositories.JC
                 string qryPermitEmpList = $"update permitemployeelists set employeeId ={data.employeeId } , responsibility ='{ data.responsibility }' where id ={data.empId}";
                 await Context.ExecuteNonQry<int>(qryPermitEmpList).ConfigureAwait(false);
             }
-            if (request.uploadfile_ids != null)
-            {
-                foreach (int data in request.uploadfile_ids)
-                {
-                    int facility_id = 380;
-                    string qryuploadFiles = $"UPDATE uploadedfiles SET facility_id = {facility_id}, module_type={(int)CMMS.CMMS_Modules.JOBCARD},module_ref_id={request.id} where id = {data}";
-                    await Context.ExecuteNonQry<int>(qryuploadFiles).ConfigureAwait(false);
-                }
-            }
+          
 
             // JCFILES PENDINGidand history 
             string comment = request.comment;

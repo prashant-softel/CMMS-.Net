@@ -69,14 +69,16 @@ namespace CMMSAPIs.BS.MISMasters
         Task<CMDefaultResponse> DeleteWasteData(int Id, int UserID);
         Task<CMWasteData> GetWasteDataByID(int Id);
         //changes
-        Task<List<WaterDataType>> GetWaterType(int facility_Id);
+        Task<List<WaterDataType>> GetWaterType();
         Task<CMDefaultResponse> CreateWaterType(WaterDataType request, int userId);
         Task<CMDefaultResponse> UpdateWaterType(WaterDataType request, int userId);
-        Task<List<WasteDataType>> GetWasteType(int facility_Id);
+       
         Task<CMDefaultResponse> DeleteWaterType(int Id, int userID);
-
         Task<List<WaterDataType>> GetWaterTypebyId(int id);
-      //changes
+
+        //changes
+        Task<List<WasteDataType>> GetWasteTypeByid(int Type);
+        Task<List<WasteDataType>> GetWasteType();
         Task<CMDefaultResponse> CreateWasteType(WasteDataType request, int userId);
         Task<CMDefaultResponse> UpdateWasteType(WasteDataType request, int userId);
         Task<CMDefaultResponse> DeleteWasteType(int Id, int userID);
@@ -86,7 +88,7 @@ namespace CMMSAPIs.BS.MISMasters
          Task<List<CMWasteDataResult>> GetWasteDataListMonthWise(DateTime fromDate, DateTime toDate, int Hazardous, int facility_id);
         Task<List<WaterDataResult_Month>> GetWaterDataMonthDetail(int Month, int Year, int facility_id);
         Task<List<CMWaterDataMonthDetail>> GetWasteDataMonthDetail(int Month, int Year, int Hazardous, int facility_id);
-
+       
     }
     public class MISMasterBS : IMISMasterBS
     {
@@ -617,7 +619,7 @@ namespace CMMSAPIs.BS.MISMasters
         public async Task<CMDefaultResponse> CreateBodyParts(BODYPARTS requset, int UserId)
         {
             try
-            {
+            { 
                 using (var repos = new MISMasterRepository(getDB))
                     return await repos.CreateBodyParts(requset, UserId);
             }
@@ -889,14 +891,14 @@ namespace CMMSAPIs.BS.MISMasters
                 throw;
             }
         }
-        public async Task<List<WaterDataType>> GetWaterType(int facility_Id)
+        public async Task<List<WaterDataType>> GetWaterType()
         {
             try
 
             {
                 using (var repos = new MISMasterRepository(getDB))
                 {
-                    return await repos.GetWaterType(facility_Id);
+                    return await repos.GetWaterType();
                 }
             }
             catch (Exception ex)
@@ -1086,13 +1088,13 @@ namespace CMMSAPIs.BS.MISMasters
                 throw;
             }
         }
-        public async Task<List<WasteDataType>> GetWasteType(int facility_Id)
+        public async Task<List<WasteDataType>> GetWasteType()
         {
             try
             {
                 using (var repos = new MISMasterRepository(getDB))
                 {
-                    return await repos.GetWasteType(facility_Id);
+                    return await repos.GetWasteType();
 
                 }
             }
@@ -1101,11 +1103,8 @@ namespace CMMSAPIs.BS.MISMasters
                 throw;
             }
         }
-
-
-       
-
-                public async Task<List<WaterDataResult>> GetWaterDataListMonthWise(DateTime fromDate, DateTime toDate, int facility_id)
+  
+             public async Task<List<WaterDataResult>> GetWaterDataListMonthWise(DateTime fromDate, DateTime toDate, int facility_id)
 
         {
             try
@@ -1169,5 +1168,20 @@ namespace CMMSAPIs.BS.MISMasters
             }
         }
 
+        public async Task<List<WasteDataType>> GetWasteTypeByid(int Type)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.GetWasteTypeByid(Type);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
     }
 }

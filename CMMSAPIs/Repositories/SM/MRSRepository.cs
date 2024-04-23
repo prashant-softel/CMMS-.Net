@@ -69,12 +69,12 @@ namespace CMMSAPIs.Repositories.SM
             {
              
                
-                if (list != null && list.requestd_date != null && list.requestd_date!="")
+               /* if (list != null && list.requestd_date != null && list.requestd_date!="")
                 {
                     DateTime requestd_date = Convert.ToDateTime(list.requestd_date);
                     requestd_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, requestd_date);
                     list.requestd_date = requestd_date.ToString();
-                }
+                }*/
                 if (list != null && list.returnDate != null && list.returnDate != "")
                 {
                     DateTime returnDate = DateTime.Parse(list.returnDate);

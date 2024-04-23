@@ -441,10 +441,10 @@ namespace CMMSAPIs.Repositories.Masters
             return Data;
         }
         //Master Of watertype
-        internal async Task<List<WaterDataType>> GetWaterType(int facility_id)
+        internal async Task<List<WaterDataType>> GetWaterType()
         {
 
-            string getqry = $"Select * from mis_watertype where facility_id=" + (facility_id)+" and status=1;";
+            string getqry = $"Select * from mis_watertype where  status=1;";
             List<WaterDataType> Data = await Context.GetData<WaterDataType>(getqry).ConfigureAwait(false);
             return Data;
         }
@@ -478,7 +478,7 @@ namespace CMMSAPIs.Repositories.Masters
         }
         internal async Task<CMDefaultResponse> DeleteWaterType(int id,int UserID)
         {
-            string delqry = "update  mis_watertype set status=0  where id =" + (id);
+            string delqry = "Delete From mis_watertype where id="+(id);
             await Context.ExecuteNonQry<int>(delqry).ConfigureAwait(false);
             return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "WaterType deleted");
 
@@ -499,9 +499,9 @@ namespace CMMSAPIs.Repositories.Masters
             return Body[0];
         }
 
-        internal async Task<List<WasteDataType>> GetWasteType(int facility_Id)
+        internal async Task<List<WasteDataType>> GetWasteType()
         {
-            string delqry = "SELECT id,facility_id,name,wastetype,description,createdAt,UpdatedAt FROM mis_wastetype WHERE facility_id = " + facility_Id + " and status=1;";
+            string delqry ="SELECT id,facility_id,name,Type,description,createdAt,UpdatedAt FROM mis_wastetype  ;";
             List<WasteDataType> Data = await Context.GetData<WasteDataType>(delqry).ConfigureAwait(false);
             return Data;
         }
@@ -509,8 +509,8 @@ namespace CMMSAPIs.Repositories.Masters
         //changes
         internal async Task<CMDefaultResponse> CreateWasteType(WasteDataType request, int userId)
         {
-            string myQuery = $"INSERT INTO mis_wastetype (facility_id,name,wastetype,description,status,CreatedAt,CreatedBy) VALUES " +
-            $"('{request.facility_id}','{request.name} ','{request.description}',1,'{UtilsRepository.GetUTCTime()}','{userId}');" +
+            string myQuery = $"INSERT INTO mis_wastetype (facility_id,name,Type,description,status,CreatedAt,CreatedBy) VALUES " +
+            $"('{request.facility_id}','{request.name} ',{request.Type},'{request.description}',1,'{UtilsRepository.GetUTCTime()}','{userId}');" +
             $"SELECT LAST_INSERT_ID(); ";
             DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
             int id = Convert.ToInt32(dt.Rows[0][0]);
@@ -522,7 +522,6 @@ namespace CMMSAPIs.Repositories.Masters
             await Context.ExecuteNonQry<int>(delqry).ConfigureAwait(false);
             return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "WasteType deleted");
         }
-
         internal async Task<CMDefaultResponse> UpdateWasteType(WasteDataType request, int userId)
         {
             string updateQry = "UPDATE mis_wastetype  SET ";
@@ -530,11 +529,17 @@ namespace CMMSAPIs.Repositories.Masters
                 updateQry += $"name = '{request.name}', ";
             if (request.description != null && request.description != "")
                 updateQry += $"description = '{request.description}', ";
-            if ( request.wastetype !=0)
-                updateQry += $"description = '{request.wastetype}', ";
-            updateQry += $"updatedAt = '{UtilsRepository.GetUTCTime()}', updatedBy = '{userId}' WHERE id = {request.id};";
+            if ( request.Type !=0)
+                updateQry += $"Type = '{request.Type}', ";
+            updateQry += $"updatedAt = '{UtilsRepository.GetUTCTime()}' WHERE id = {request.id};";
             await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
             return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "WasteType updated");
+        }
+        internal async Task<List<WasteDataType>> GetWasteTypeByid(int Type)
+        {
+            string delqry = "SELECT id,Type,facility_id,name,description,createdAt,UpdatedAt FROM mis_wastetype WHERE Type = " + Type + ";";
+            List<WasteDataType> Data = await Context.GetData<WasteDataType>(delqry).ConfigureAwait(false);
+            return Data;
         }
         internal async Task<CMDefaultResponse> CreateResponsibility(Responsibility request, int UserID)
         {

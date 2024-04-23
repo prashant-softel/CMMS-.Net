@@ -976,12 +976,12 @@ namespace CMMSAPIs.Controllers.Masters
         //changes
         [Route("GetWaterType")]
         [HttpGet]
-        public async Task<IActionResult> GetWaterType(int facility_Id)
+        public async Task<IActionResult> GetWaterType()
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _IMISMasterBS.GetWaterType(facility_Id);
+                var data = await _IMISMasterBS.GetWaterType();
                 return Ok(data);
             }
             catch
@@ -1034,14 +1034,30 @@ namespace CMMSAPIs.Controllers.Masters
                 throw;
             }
         }
-        [Route("GetWasteType")]
+        
+        [Route("GetWasteTypeByid")]
         [HttpGet]
-        public async Task<IActionResult> GetWasteType(int facility_Id)
+        public async Task<IActionResult> GetWasteTypeByid(int Type)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _IMISMasterBS.GetWasteType(facility_Id);
+                var data = await _IMISMasterBS.GetWasteTypeByid(Type);
+                return Ok(data);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+        [Route("GetWasteType")]
+        [HttpGet]
+        public async Task<IActionResult> GetWasteType()
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.GetWasteType();
                 return Ok(data);
             }
             catch
@@ -1051,7 +1067,7 @@ namespace CMMSAPIs.Controllers.Masters
         }
 
         //changes for wastetype
-        [Route("CreateWaterType")]
+        [Route("CreateWasteType")]
         [HttpPost]
         public async Task<IActionResult> CreateWasteType(WasteDataType request)
         {

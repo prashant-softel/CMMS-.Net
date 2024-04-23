@@ -70,6 +70,8 @@ namespace CMMSAPIs.Controllers.JC
         {
             try
             {
+              //  var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+
                 var data = await _JCBS.GetJCDetail(jc_id);
                 return Ok(data);
             }

@@ -195,7 +195,7 @@ namespace CMMSAPIs.Repositories.Inventory
 
             Dictionary<string, Tuple<string, Type>> columnNames = new Dictionary<string, Tuple<string, Type>>()
             {
-                 { "Site_Name", new Tuple<string, Type>("siteName", typeof (string)) },
+                { "Plant_Name", new Tuple<string, Type>("siteName", typeof (string)) },
                 { "Asset_Name", new Tuple<string, Type>("name", typeof(string)) },
                 { "Asset_Description", new Tuple<string, Type>("description", typeof(string)) },
                 { "Asset_Serial_no", new Tuple<string, Type>("serialNumber", typeof(string)) },

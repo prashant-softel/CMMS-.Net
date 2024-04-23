@@ -35,9 +35,9 @@ namespace CMMSAPIs.Models.JC
         public List<CMJCLotoDetail> LstCMJCLotoDetailList { get; set; }
         public List<CMJCEmpDetail> LstCMJCEmpList { get; set; }
         public List<CMFileDetail> file_list { get; set; }
-       
+        public List<CMFileDetailJc> file_listJc { get; set; }
         public List<CMWorkTypeTools> tool_List { get; set; }
-        public List<int> uploadfile_ids { get; set; }
+       public List<int> uploadfile_ids { get; set; }
     }
 }
 
@@ -51,6 +51,18 @@ public class CMFileDetail
     public string PTWFiles { get; set; }
     public string description { get; set; }
 }
+
+    public class CMFileDetailJc
+{
+    public int id { get; set; }
+    public string fileName { get; set; }
+    public string fileCategory { get; set; }
+    public double fileSize { get; set; }
+    public int status { get; set; }
+    public string PTWFiles { get; set; }
+    public string description { get; set; }
+}
+
 public class CMJCJobDetail
 {
     public int job_id { get; set; }
