@@ -35,6 +35,12 @@ namespace CMMSAPIs.Models.Inventory
         public string model { get; set; }
         public string serialNumber { get; set; }
         public double cost { get; set; }
+        public string  purchaseCode { get; set; }
+        public string unspCode { get; set; }
+        public string barcode { get; set; }
+        public string descMaintenace { get; set; }
+        public string dcRating { get; set; }
+        public string acRating { get; set; }
         public string currency { get; set; }
         public int moduleQuantity { get; set; }
         public int calibrationFrequency { get; set; }

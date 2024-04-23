@@ -29,6 +29,8 @@ using iTextSharp.tool.xml;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Hosting;
 using OfficeOpenXml;
+using System.Linq;
+using CMMSAPIs.BS.Facility;
 
 namespace CMMSAPIs.Repositories.Masters
 {
@@ -438,12 +440,41 @@ namespace CMMSAPIs.Repositories.Masters
             List<Responsibility> Data = await Context.GetData<Responsibility>(getqry).ConfigureAwait(false);
             return Data;
         }
+        //Master Of watertype
         internal async Task<List<WaterDataType>> GetWaterType(int facility_id)
         {
 
-            string getqry = $"Select * from mis_watertype where facility_id=" + (facility_id);
+            string getqry = $"Select * from mis_watertype where facility_id=" + (facility_id)+" and status=1;";
             List<WaterDataType> Data = await Context.GetData<WaterDataType>(getqry).ConfigureAwait(false);
             return Data;
+        }
+        internal async Task<CMDefaultResponse>CreateWaterType(WaterDataType request, int UserID)
+        {
+
+            string myQuery = $"INSERT INTO mis_watertype(facility_id,name,description,status,CreatedAt,CreatedBy) VALUES " +
+            $"('{request.facility_id}','{request.name} ','{request.description}',1,'{UtilsRepository.GetUTCTime()}','{UserID}');" +
+            $"SELECT LAST_INSERT_ID(); ";
+            DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
+            int id = Convert.ToInt32(dt.Rows[0][0]);
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS,"WaterType  Created");
+        }
+             internal async Task<CMDefaultResponse> UpdateWaterType(WaterDataType request, int UserID)
+        {
+            string updateQry = "UPDATE mis_watertype  SET ";
+            if (request.name != null && request.name != "")
+                updateQry += $"name = '{request.name}', ";
+            if (request.description != null && request.description != "")
+                updateQry += $"description = '{request.description}', ";
+            updateQry += $"updatedAt = '{UtilsRepository.GetUTCTime()}', updatedBy = '{UserID}' WHERE id = {request.id};";
+            await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+            return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "WaterType updated");
+        }
+        internal async Task<CMDefaultResponse> DeleteWaterType(int id,int UserID)
+        {
+            string delqry = "update  mis_watertype set status=0  where id =" + (id);
+            await Context.ExecuteNonQry<int>(delqry).ConfigureAwait(false);
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "WaterType deleted");
+
         }
         internal async Task<Responsibility> GetResponsibilityID(int id, string facilitytimeZone) 
         {
@@ -487,6 +518,13 @@ namespace CMMSAPIs.Repositories.Masters
             await Context.ExecuteNonQry<int>(delqry).ConfigureAwait(false);
             return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Responsibility deleted");
 
+        }
+
+        internal async Task<List<WasteDataType>>GetWasteType( int facility_Id)
+        {
+            string delqry = "SELECT id,facility_id,name,wastetype,description,createdAt,UpdatedAt FROM mis_wastetype WHERE facility_id = " + facility_Id + " and status=1;";
+           List< WasteDataType>Data= await Context.GetData<WasteDataType>(delqry).ConfigureAwait(false);
+            return Data;
         }
 
         // Incident type CRUD 
@@ -581,8 +619,22 @@ namespace CMMSAPIs.Repositories.Masters
         }
         internal async Task<CMDefaultResponse> CreateWaterData(CMMisWaterData request, int userId)
         {
+            int consumeType = 0;
+            if (request.CreditQty > 0 && request.DebitQty > 0)
+            {
+                return new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Credit and debit can not happen same time.");
+            }
+
+            if (request.CreditQty > 0 && request.DebitQty == 0)
+            {
+                consumeType = (int)CMMS.MISConsumptionTypes.Procurement;
+            }
+            if (request.CreditQty == 0 && request.DebitQty > 0)
+            {
+                consumeType = (int)CMMS.MISConsumptionTypes.Consumption;
+            }
             string myQuery = $"INSERT INTO mis_waterdata(plantId, date, waterTypeId, description, debitQty, creditQty, addedBy, addedAt,consumeTypeId) VALUES " +
-                             $"({request.facilityID}, '{request.Date.ToString("yyyy-MM-dd")}', {request.WaterTypeId}, '{request.Description}', {request.DebitQty}, {request.CreditQty}, {userId}, '{UtilsRepository.GetUTCTime()}',{request.consumeType}); " +
+                             $"({request.facilityID}, '{request.Date.ToString("yyyy-MM-dd")}', {request.WaterTypeId}, '{request.Description}', {request.DebitQty}, {request.CreditQty}, {userId}, '{UtilsRepository.GetUTCTime()}',{consumeType}); " +
                              $"SELECT LAST_INSERT_ID();";
             DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
             int id = Convert.ToInt32(dt.Rows[0][0]);
@@ -631,6 +683,272 @@ namespace CMMSAPIs.Repositories.Masters
                 }
             }
             return result;
+        }
+
+                internal async Task<List<CMWasteData>> GetWasteDataList(DateTime fromDate, DateTime toDate)
+        {
+            string SelectQ = "select * from Waste_data where isActive = 1 and DATE_FORMAT(Created_At,'%Y-%m-%d') BETWEEN '" + fromDate.ToString("yyyy-MM-dd") + "' AND '" + toDate.ToString("yyyy-MM-dd") + "'";
+            List<CMWasteData> ListResult = await Context.GetData<CMWasteData>(SelectQ).ConfigureAwait(false);
+            return ListResult;
+        }
+
+        internal async Task<CMWasteData> GetWasteDataByID(int Id)
+        {
+            string SelectQ = "select * from Waste_data where isActive = 1 and id = " + Id + "";
+            List<CMWasteData> ListResult = await Context.GetData<CMWasteData>(SelectQ).ConfigureAwait(false);
+            return ListResult[0];
+        }
+
+              internal async Task<CMDefaultResponse> CreateWasteData(CMWasteData request, int UserID)
+        {
+            CMDefaultResponse response = null;
+            int InsertedValue = 0;
+            //string insertQuery = $"INSERT INTO waste_data (" +
+            //                     $"Solid_Waste, E_Waste, Battery_Waste, Solar_Module_Waste, " +
+            //                     $"Haz_Waste_Oil, Haz_Waste_Grease, Haz_Solid_Waste, " +
+            //                     $"Haz_Waste_Oil_Barrel_Generated, Solid_Waste_Disposed, " +
+            //                     $"E_Waste_Disposed, Battery_Waste_Disposed, Solar_Module_Waste_Disposed, " +
+            //                     $"Haz_Waste_Oil_Disposed, Haz_Waste_Grease_Disposed, " +
+            //                     $"Haz_Solid_Waste_Disposed, Haz_Waste_Oil_Barrel_Disposed, " +
+            //                     $"Created_By, Created_At" +
+            //                     $") VALUES (" +
+            //                     $"{request.Solid_Waste}, {request.E_Waste}, {request.Battery_Waste}, {request.Solar_Module_Waste}, " +
+            //                     $"{request.Haz_Waste_Oil}, {request.Haz_Waste_Grease}, {request.Haz_Solid_Waste}, " +
+            //                     $"{request.Haz_Waste_Oil_Barrel_Generated}, {request.Solid_Waste_Disposed}, " +
+            //                     $"{request.E_Waste_Disposed}, {request.Battery_Waste_Disposed}, {request.Solar_Module_Waste_Disposed}, " +
+            //                     $"{request.Haz_Waste_Oil_Disposed}, {request.Haz_Waste_Grease_Disposed}, " +
+            //                     $"{request.Haz_Solid_Waste_Disposed}, {request.Haz_Waste_Oil_Barrel_Disposed}, " +
+            //                     $"{UserID}, '{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}'" +
+            //                     $"); SELECT LAST_INSERT_ID();";
+            int consumeType = 0;
+            if (request.CreditQty > 0 && request.DebitQty > 0)
+            {
+                return new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Credit and debit can not happen same time.");
+            }
+
+            if (request.CreditQty > 0 && request.DebitQty == 0)
+            {
+                consumeType = (int)CMMS.MISConsumptionTypes.Procurement;
+            }
+            if (request.CreditQty == 0 && request.DebitQty > 0)
+            {
+                consumeType = (int)CMMS.MISConsumptionTypes.Consumption;
+            }
+            string insertQuery = $"INSERT INTO waste_data(facilityId, date, wasteTypeId, description, debitQty, creditQty, Created_By, Created_At,consumeTypeId) VALUES " +
+                 $"({request.facilityID}, '{request.Date.ToString("yyyy-MM-dd")}', {request.wasteTypeId}, '{request.Description}', {request.DebitQty}, {request.CreditQty}, {UserID}, '{UtilsRepository.GetUTCTime()}',{consumeType}); " +
+                 $"SELECT LAST_INSERT_ID();";
+            DataTable dt2 = await Context.FetchData(insertQuery).ConfigureAwait(false);
+            InsertedValue = Convert.ToInt32(dt2.Rows[0][0]);
+            response = new CMDefaultResponse(InsertedValue, CMMS.RETRUNSTATUS.SUCCESS, "Waste Data saved successfully.");
+            return response;
+        }
+
+
+             internal async Task<CMDefaultResponse> UpdateWasteData(CMWasteData request, int UserID)
+        {
+            CMDefaultResponse response = null;
+            string SelectQ = "select id from waste_data where ID = '" + request.Id + "'";
+            List<CMWasteData> WasteDataList = await Context.GetData<CMWasteData>(SelectQ).ConfigureAwait(false);
+
+            if (WasteDataList != null && WasteDataList.Count > 0)
+            {
+                string updateQuery = $"UPDATE waste_data " +
+                                    $"SET " +
+                                    $"facilityId = {request.facilityID}, " +
+                                    $"date = {request.Date.ToString("yyyy-MM-dd")}, " +
+                                    $"wasteTypeId = {request.wasteTypeId}, " +
+                                    $"description = {request.Description}, " +
+                                    $"debitQty = {request.DebitQty}, " +
+                                    $"creditQty = {request.CreditQty}, " +
+                                    $"Modified_By = '{UserID}', " +
+                                    $"Modified_At = '{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}' " +
+                                    $"WHERE id = {request.Id}";
+                var result = await Context.ExecuteNonQry<int>(updateQuery);
+                response = new CMDefaultResponse(request.Id, CMMS.RETRUNSTATUS.SUCCESS, "Waste Data with id " + request.Id + " updated successfully.");
+            }
+            else
+            {
+                response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Waste Data does not exists to update.");
+            }
+
+            return response;
+        }
+
+        internal async Task<CMDefaultResponse> DeleteWasteData(int Id, int UserID)
+        {
+            CMDefaultResponse response = null;
+            string SelectQ = "select id from Waste_data where ID = '" + Id + "'";
+            List<CMWasteData> WasteDataList = await Context.GetData<CMWasteData>(SelectQ).ConfigureAwait(false);
+
+            if (WasteDataList != null && WasteDataList.Count > 0)
+            {
+                string updateQuery = $"UPDATE Waste_data " +
+                      $"SET " +
+                      $"isActive = 0, " +
+                      $"Modified_By = '{UserID}', " +
+                      $"Modified_At = '{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}' " +
+                      $"WHERE id = {Id}";
+                var result = await Context.ExecuteNonQry<int>(updateQuery);
+                response = new CMDefaultResponse(Id, CMMS.RETRUNSTATUS.SUCCESS, "Waste Data with id " + Id + " deleted.");
+            }
+            else
+            {
+                response = new CMDefaultResponse(Id, CMMS.RETRUNSTATUS.FAILURE, "Waste Data does not exists to delete.");
+            }
+
+            return response;
+        }
+
+        internal async Task<List<WaterDataResult>> GetWaterDataListMonthWise(DateTime fromDate, DateTime toDate, int facility_id)
+        {
+            string SelectQ = $" select distinct plantId as facility_id,fc.name facility_name,MONTHNAME(date) as month_name,YEAR(date) as year, " +
+                $" (select sum(creditQty)-sum(debitQty) from mis_waterdata where MONTH(date) < MONTH('"+ fromDate.ToString("yyyy-MM-dd") + "')) as opening," +
+                $" sum(creditQty) as procured_qty, sum(debitQty) as consumed_qty, mw.name as water_type" +
+                $" from mis_waterdata" +
+                $" LEFT JOIN facilities fc ON fc.id = mis_waterdata.plantId" +
+                $" LEFT JOIN mis_watertype mw on mw.id = mis_waterdata.waterTypeId" +
+                $" where isActive = 1 and mis_waterdata.plantId = {facility_id} and DATE_FORMAT(Date,'%Y-%m-%d') BETWEEN '{fromDate.ToString("yyyy-MM-dd")}' AND '{toDate.ToString("yyyy-MM-dd")}'" +
+                $"  group by MONTH(date) , mis_waterdata.waterTypeId;";
+            List<CMWaterDataMonthWise> ListResult = await Context.GetData<CMWaterDataMonthWise>(SelectQ).ConfigureAwait(false);
+
+            List<WaterDataResult> groupedResult = ListResult.GroupBy(r => new { r.facility_id, r.facility_name })
+               .Select(group => new WaterDataResult
+               {
+                   facility_id = group.Key.facility_id,
+                   facility_name = group.Key.facility_name,
+                   period = group.Select(r => new { r.month_name, r.year })
+                                .Distinct()
+                                .Select(periodGroup => new FacilityPeriodData
+                                {
+                                    month_name = periodGroup.month_name,
+                                    year = periodGroup.year,
+                                    details = group.Where(g => g.month_name == periodGroup.month_name && g.year == periodGroup.year)
+                                                  .GroupBy(g => g.water_type)
+                                                  .Select(g => new CMWaterDataMonthWiseDetails
+                                                  {
+                                                      water_type = g.Key,
+                                                      opening = g.Sum(item => item.opening),
+                                                      procured_qty = g.Sum(item => item.procured_qty),
+                                                      consumed_qty = g.Sum(item => item.consumed_qty),
+                                                      closing_qty = g.Sum(item => item.opening) + g.Sum(item => item.procured_qty) - g.Sum(item => item.consumed_qty)
+                                                  }).ToList()
+                                }).ToList()
+               }).ToList();
+            return groupedResult;
+        }
+
+        internal async Task<List<CMWasteDataResult>> GetWasteDataListMonthWise(DateTime fromDate, DateTime toDate, int Hazardous, int facility_id)
+        {
+            string SelectQ = $" select distinct facilityId as facility_id,fc.name facility_name,MONTHNAME(date) as month_name,YEAR(date) as year, " +
+                $" (select sum(creditQty)-sum(debitQty) from waste_data where MONTH(date) < MONTH('" + fromDate.ToString("yyyy-MM-dd") + "')) as opening," +
+                $" sum(creditQty) as procured_qty, sum(debitQty) as consumed_qty, mw.name as water_type" +
+                $" from waste_data" +
+                $" LEFT JOIN facilities fc ON fc.id = waste_data.facilityId" +
+                $" LEFT JOIN mis_wastetype mw on mw.id = waste_data.wasteTypeId" +
+                $" where isHazardous = {Hazardous} and waste_data.facilityId = {facility_id} and DATE_FORMAT(Date,'%Y-%m-%d') BETWEEN '{fromDate.ToString("yyyy-MM-dd")}' AND '{toDate.ToString("yyyy-MM-dd")}'" +
+                $"  group by MONTH(date) , waste_data.wasteTypeId;";
+            List<CMWaterDataMonthWise> ListResult = await Context.GetData<CMWaterDataMonthWise>(SelectQ).ConfigureAwait(false);
+
+            List<CMWasteDataResult> groupedResult = ListResult.GroupBy(r => new { r.facility_id, r.facility_name })
+               .Select(group => new CMWasteDataResult
+               {
+                   facility_id = group.Key.facility_id,
+                   facility_name = group.Key.facility_name,
+                   hazardous = Hazardous,
+                   period = group.Select(r => new { r.month_name, r.year })
+                                .Distinct()
+                                .Select(periodGroup => new CMFacilityPeriodData_Waste
+                                {
+                                    month_name = periodGroup.month_name,
+                                    year = periodGroup.year,
+                                    details = group.Where(g => g.month_name == periodGroup.month_name && g.year == periodGroup.year)
+                                                  .GroupBy(g => g.water_type)
+                                                  .Select(g => new CMWasteDataMonthWiseDetails
+                                                  {
+                                                      waste_type = g.Key,
+                                                      opening = g.Sum(item => item.opening),
+                                                      procured_qty = g.Sum(item => item.procured_qty),
+                                                      consumed_qty = g.Sum(item => item.consumed_qty),
+                                                      closing_qty = g.Sum(item => item.opening) + g.Sum(item => item.procured_qty) - g.Sum(item => item.consumed_qty)
+                                                  }).ToList()
+                                }).ToList()
+               }).ToList();
+            return groupedResult;
+        }
+
+        internal async Task<List<WaterDataResult_Month>> GetWaterDataMonthDetail(int Month, int Year, int facility_id)
+        {
+            string SelectQ = $" select distinct mis_waterdata.waterTypeId , plantId as facility_id,fc.name facility_name,DATE_FORMAT(Date,'%Y-%m-%d') as date ,MONTHNAME(date) as month,YEAR(date) as year,"
+                             +$" (select sum(creditQty) - sum(debitQty) from mis_waterdata where MONTH(date) < {Month}) as opening,"
+                             +$" sum(creditQty) as procured_qty, sum(debitQty) as consumed_qty, mw.name as water_type,"
+                             +$" consumeTypeId as consumeTypeId,"
+                             +$" case when consumeTypeId = 1 then 'Procurement' when consumeTypeId = 2 then 'Consumption' else 'NA' end as TransactionType,"
+                             +$" mis_waterdata.description as Description"
+                             +$" from mis_waterdata"
+                             +$" LEFT JOIN facilities fc ON fc.id = mis_waterdata.plantId"
+                             +$" LEFT JOIN mis_watertype mw on mw.id = mis_waterdata.waterTypeId"
+                             +$" where isActive = 1 and mis_waterdata.plantId = {facility_id} and MONTH(date) = {Month} and Year(date) = {Year} group by MONTH(date), mis_waterdata.waterTypeId; ";
+            List<CMWaterDataMonthDetail> ListResult = await Context.GetData<CMWaterDataMonthDetail>(SelectQ).ConfigureAwait(false);
+            if(ListResult != null)
+            {
+                for (int i=0;i< ListResult.Count;i++)
+                {
+                    ListResult[i].closing_qty = ListResult[i].opening + ListResult[i].procured_qty - ListResult[i].consumed_qty;
+                }
+            }
+
+
+            List<WaterDataResult_Month> groupedResult = ListResult.GroupBy(r => new { r.facility_id, r.facility_name, r.month,r.year })
+    .Select(group => new WaterDataResult_Month
+    {
+        facility_id = group.Key.facility_id,
+        facility_name = group.Key.facility_name,
+        month = group.Key.month,
+        year = group.Key.year,
+        item_data = group.Select(r => new { r.water_type, r.opening, r.waterTypeId })
+                        .Distinct()
+                        .Select(periodGroup => new FacilityPeriodData_Month
+                        {
+                            water_type = periodGroup.water_type,
+                            waterTypeId = periodGroup.waterTypeId,
+                            opening = periodGroup.opening,
+                            details = group.Where(g => g.water_type == periodGroup.water_type)
+                                          .Select(g => new CMWaterDataMonthWiseDetails_Month
+                                          {
+                                              date = g.date,
+                                              procured_qty = g.procured_qty,
+                                              consumed_qty = g.consumed_qty,
+                                              Description = g.Description,
+                                              TransactionType = g.TransactionType
+                                          }).ToList()
+                        }).ToList()
+    }).ToList();
+
+
+            return groupedResult;
+        }
+        internal async Task<List<CMWaterDataMonthDetail>> GetWasteDataMonthDetail(int Month, int Year, int Hazardous, int facility_id)
+        {
+            string SelectQ = $" select distinct waste_data.waterTypeId , plantId as facility_id,fc.name facility_name,date ,"
+                             + $" (select sum(creditQty) - sum(debitQty) from waste_data where MONTH(date) < {Month}) as opening,"
+                             + $" sum(creditQty) as procured_qty, sum(debitQty) as consumed_qty, mw.name as water_type,"
+                             + $" consumeTypeId as consumeTypeId,"
+                             + $" case when consumeTypeId = 1 then 'Procurement' when consumeTypeId = 2 then 'Consumption' else 'NA' end as TransactionType,"
+                             + $" waste_data.description as Description"
+                             + $" from waste_data"
+                             + $" LEFT JOIN facilities fc ON fc.id = waste_data.plantId"
+                             + $" LEFT JOIN mis_wastetype mw on mw.id = waste_data.wasteTypeId"
+                             + $" where isHazardous = {Hazardous} and waste_data.facilityId = {facility_id} and MONTH(date) = {Month} and Year(date) = {Year} group by MONTH(date), waste_data.wasteTypeId; ";
+            List<CMWaterDataMonthDetail> ListResult = await Context.GetData<CMWaterDataMonthDetail>(SelectQ).ConfigureAwait(false);
+            if (ListResult != null)
+            {
+                for (int i = 0; i < ListResult.Count; i++)
+                {
+                    ListResult[i].closing_qty = ListResult[i].opening + ListResult[i].procured_qty - ListResult[i].consumed_qty;
+                }
+            }
+
+            return ListResult;
         }
     }
 

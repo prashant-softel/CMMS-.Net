@@ -101,7 +101,7 @@ namespace CMMSAPIs.Repositories.Grievance
 
             string myQuery =
                 "SELECT g.id, g.facilityId, g.grievanceType AS grievanceTypeId, t.name AS grievanceType, g.concern, g.actionTaken, g.resolutionLevel, g.closedDate as closedAt, g.status_id as statusId " +
-                ", g.createdAt, g.createdBy, g.updatedBy, t.description, t.status, t.addedBy, t.addedAt " +
+                ", g.createdAt, g.createdBy, g.updatedBy, g.description, t.status, t.addedBy, t.addedAt " +
                 ", t.updatedBy, t.updatedAt " +
                 " FROM mis_grievance g " +
                 " JOIN mis_m_grievancetype t ON g.grievanceType = t.id" +
@@ -146,8 +146,8 @@ namespace CMMSAPIs.Repositories.Grievance
             }
             string myQuery =
                 "SELECT g.id, g.facilityId, g.grievanceType AS grievanceTypeId, g.concern, g.actionTaken, " +
-                "g.resolutionLevel, g.closedDate, g.status_id as statusId, g.createdAt, g.createdBy as createdById, g.updatedBy as updatedById, " +
-                "t.name AS grievanceType, t.description, t.status, t.addedBy, t.addedAt, t.updatedBy, t.updatedAt " +
+                "g.resolutionLevel, g.description, g.closedDate, g.status_id as statusId, g.createdAt, g.createdBy as createdById, g.updatedBy as updatedById, " +
+                "t.name AS grievanceType, t.description AS type_description, t.status, t.addedBy, t.addedAt, t.updatedBy, t.updatedAt " +
                 "FROM mis_grievance g " +
                 "JOIN mis_m_grievancetype t ON g.grievanceType = t.id " +
                 "WHERE g.id = " + id;
@@ -266,6 +266,12 @@ namespace CMMSAPIs.Repositories.Grievance
                 updateQry += $"concern = '{request.concern}', ";
                 updated = true;
             }
+            if (request.facilityId > 0)
+            {
+                updateQry += $"facilityId = {request.facilityId}, ";
+                updated = true;
+            }
+
 
 
 

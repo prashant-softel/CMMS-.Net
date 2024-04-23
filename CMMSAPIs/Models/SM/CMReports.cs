@@ -210,9 +210,29 @@ namespace CMMSAPIs.Models.SM
         public int asset_type_ID { get; set; }
         public string asset_type { get; set; }
         public string serial_no { get; set; }
-        public decimal Opening { get; set; }
-        public decimal inward { get; set; }
-        public decimal outward { get; set; }
-        public decimal balance { get; set; }
+        public decimal available_qty { get; set; }
+        public decimal requested_qty { get; set; }
+        public decimal consumed_qty { get; set; }
+        public decimal issued_qty { get; set; }
+        public decimal approved_qty { get; set; }
+    }
+    public class CMPlantStockOpening_MRSReturn
+    {
+        public int facilityID { get; set; }
+        public string facilityName { get; set; }
+        public int Facility_Is_Block { get; set; }
+        public string Facility_Is_Block_of_name { get; set; }
+        public int assetItemID { get; set; }
+        public string asset_name { get; set; }
+        public string asset_code { get; set; }
+        public int asset_type_ID { get; set; }
+        public string asset_type { get; set; }
+        public string serial_no { get; set; }
+        public decimal available_qty { get; set; }
+        public decimal requested_qty { get; set; }
+        public decimal used_qty { get; set; }
+        public decimal issued_qty { get; set; }
+        public decimal approved_qty { get; set; }
+
     }
 }

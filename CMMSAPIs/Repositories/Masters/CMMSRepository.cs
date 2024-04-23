@@ -566,7 +566,7 @@ namespace CMMSAPIs.Repositories.Masters
                 myQuery += $"`contactPerson` = '{request.contactPerson}', ";
             if (request.contactNumber != null && request.contactNumber != "")
                 myQuery += $"`contactNumber` = '{request.contactNumber}', ";
-            if (request.website != null && request.website != "")
+           // if (request.website != null && request.website != "")
                 myQuery += $"`website` = '{request.website}', ";
             if (request.location != null && request.location != "")
                 myQuery += $"`location` = '{request.location}', ";
@@ -819,10 +819,10 @@ namespace CMMSAPIs.Repositories.Masters
                             {
                                 m_errorLog.SetError($"[Row {rN}] Contact number cannot be empty.");
                             }
-                            if (Convert.ToString(newR["website"]) == null || Convert.ToString(newR["website"]) == "")
-                            {
-                                m_errorLog.SetError($"[Row {rN}] Website cannot be empty.");
-                            }
+                            //if (Convert.ToString(newR["website"]) == null || Convert.ToString(newR["website"]) == "")
+                           // {
+                           //     m_errorLog.SetError($"[Row {rN}] Website cannot be empty.");
+                           // }
                             if (Convert.ToString(newR["location"]) == null || Convert.ToString(newR["location"]) == "")
                             {
                                 m_errorLog.SetError($"[Row {rN}] Location details cannot be empty.");
@@ -1415,7 +1415,7 @@ namespace CMMSAPIs.Repositories.Masters
             for (var i = 0; i < _List.Count; i++)
             {
                 CMDashboadItemList item = new CMDashboadItemList();
-                CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(itemList[i].status);
+                CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_List[i].status);
                 string _longStatus = getShortStatus_GO(CMMS.CMMS_Modules.SM_GO, _Status);
                 item.status_long = _longStatus;              
             }

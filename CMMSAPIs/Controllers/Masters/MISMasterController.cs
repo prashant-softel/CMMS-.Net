@@ -899,6 +899,79 @@ namespace CMMSAPIs.Controllers.Masters
             {
                 throw;
             }
+        }      
+        [Route("GetWasteDataList")]
+        [HttpGet]
+        public async Task<IActionResult> GetWasteDataList(DateTime fromDate, DateTime toDate)
+        {
+            try
+            {
+                var data = await _IMISMasterBS.GetWasteDataList(fromDate, toDate);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        [Route("GetWasteDataByID")]
+        [HttpGet]
+        public async Task<IActionResult> GetWasteDataByID(int Id)
+        {
+            try
+            {
+                var data = await _IMISMasterBS.GetWasteDataByID(Id);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        [Route("CreateWasteData")]
+        [HttpPost]
+        public async Task<IActionResult> CreateWasteData(CMWasteData request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.CreateWasteData(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        [Route("UpdateWasteData")]
+        [HttpPost]
+        public async Task<IActionResult> UpdateWasteData(CMWasteData request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.UpdateWasteData(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        [Route("DeleteWasteData")]
+        [HttpPost]
+        public async Task<IActionResult> DeleteWasteData(int Id)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.DeleteWasteData(Id, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
         //changes
         [Route("GetWaterType")]
@@ -916,5 +989,128 @@ namespace CMMSAPIs.Controllers.Masters
                 throw;
             }
         }
+        [Route("CreateWaterType")]
+        [HttpPost]
+        public async Task<IActionResult> CreateWaterType(WaterDataType request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.CreateWaterType(request,userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        [Route("UpdateWaterType")]
+        [HttpPut]
+        public async Task<IActionResult> UpdateWaterType(WaterDataType request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.UpdateWaterType(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        [Route("DeleteWaterType")]
+        [HttpDelete]
+        public async Task<IActionResult> DeleteWaterType(int id)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.DeleteWaterType(id, userID);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        [Route("GetWasteType")]
+        [HttpGet]
+        public async Task<IActionResult> GetWasteType(int facility_Id)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.GetWasteType(facility_Id);
+                return Ok(data);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        [Route("GetWaterDataListMonthWise")]
+        [HttpGet]
+        public async Task<IActionResult> GetWaterDataListMonthWise(DateTime fromDate, DateTime toDate, int facility_id)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.GetWaterDataListMonthWise(fromDate, toDate, facility_id);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        [Route("GetWasteDataListMonthWise")]
+        [HttpGet]
+        public async Task<IActionResult> GetWasteDataListMonthWise(DateTime fromDate, DateTime toDate, int Hazardous, int facility_id)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.GetWasteDataListMonthWise(fromDate, toDate, Hazardous, facility_id);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        [Route("GetWaterDataMonthDetail")]
+        [HttpGet]
+        public async Task<IActionResult> GetWaterDataMonthDetail(int Month, int Year, int facility_id)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.GetWaterDataMonthDetail(Month, Year, facility_id);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        [Route("GetWasteDataMonthDetail")]
+        [HttpGet]
+        public async Task<IActionResult> GetWasteDataMonthDetail(int Month, int Year, int Hazardous, int facility_id)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.GetWasteDataMonthDetail(Month, Year, Hazardous, facility_id);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
     }
 }
