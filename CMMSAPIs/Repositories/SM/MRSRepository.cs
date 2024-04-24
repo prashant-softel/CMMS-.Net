@@ -1748,33 +1748,27 @@ namespace CMMSAPIs.Repositories.SM
             string itemCondition = "";
             string Plant_Stock_Opening_Details_query = "";
 
-            //Plant_Stock_Opening_Details_query = $"SELECT  sm_trans.facilityID as facilityID, fc.name as facilityName," +
-            //    $"fc.isBlock as Facility_Is_Block, " +
-            //    $" '' as Facility_Is_Block_of_name,sm_trans.assetItemID, a_master.asset_name, a_master.asset_code," +
-            //    $" a_master.asset_type_ID, AST.asset_type,  " +
-            //    $" IFNULL((select sum(ST.creditQty)-sum(ST.debitQty)  FROM smtransition as ST  JOIN smassetmasters as SM ON SM.ID = ST.assetItemID  " +
-            //    $" LEFT JOIN facilities fcc ON fcc.id = ST.facilityID   where   ST.actorType = {actorTypeID} and SM.ID=a_master.ID  and ST.facilityID in ('{facility_id}')" +
-            //    $" and sm_trans.actorID = {actorID}   group by SM.asset_code),0) Opening," +
-            //    $"  IFNULL((select sum(si.creditQty) from smtransition si where si.id = sm_trans.id ),0) as inward, " +
-            //    $"   IFNULL((select sum(so.debitQty) from smtransition so where so.id = sm_trans.id ),0) as outward , serial_number as  serial_no" +
-            //    $" from smrsitems  " +
+                      //Plant_Stock_Opening_Details_query = $"select distinct smrsitems.asset_item_ID,smrsitems.serial_number as serial_no," +
+            //    $" sm_trans.facilityID as facilityID, fc.name as facilityName,fc.isBlock as Facility_Is_Block,  '' as Facility_Is_Block_of_name, " +
+            //    $"sm_trans.assetItemID, a_master.asset_name, a_master.asset_code, a_master.asset_type_ID, AST.asset_type, " +
+            //    $"  smrsitems.available_qty,smrsitems.requested_qty, smrsitems.used_qty,smrsitems.issued_qty, smrsitems.approved_qty " +
+            //    $"from smrsitems " +
             //    $" join smtransition as sm_trans  on sm_trans.assetItemID = smrsitems.asset_item_ID  " +
-            //    $" JOIN smassetmasters as a_master ON a_master.ID = sm_trans.assetItemID  " +
-            //    $" LEFT JOIN facilities fc ON fc.id = sm_trans.facilityID " +
-            //    $" Left join smassettypes AST on AST.id = a_master.asset_type_ID " +
-            //    $" where (sm_trans.actorType = {actorTypeID} and sm_trans.facilityID in ('{facility_id}') and " +
-            //    $" sm_trans.actorID in ({actorID}) ) or (mrs_ID = {mrs_id} and is_splited = 1)";
+            //    $"  JOIN smassetmasters as a_master ON a_master.ID = sm_trans.assetItemID " +
+            //    $" LEFT JOIN facilities fc ON fc.id = sm_trans.facilityID  " +
+            //    $" Left join smassettypes AST on AST.id = a_master.asset_type_ID  " +
+            //    $"where mrs_ID = {mrs_id} and is_splited = 1 order by sm_trans.id desc;";
 
-            Plant_Stock_Opening_Details_query = $"select distinct smrsitems.asset_item_ID,smrsitems.serial_number as serial_no," +
-                $" sm_trans.facilityID as facilityID, fc.name as facilityName,fc.isBlock as Facility_Is_Block,  '' as Facility_Is_Block_of_name, " +
-                $"sm_trans.assetItemID, a_master.asset_name, a_master.asset_code, a_master.asset_type_ID, AST.asset_type, " +
+            Plant_Stock_Opening_Details_query = $"select smrsitems.asset_item_ID,smrsitems.serial_number as serial_no, smmrs.facility_ID   as facilityID," +
+                $" fc.name as facilityName, asset_item_ID assetItemID, a_master.asset_name, a_master.asset_code, a_master.asset_type_ID, AST.asset_type, " +
                 $"  smrsitems.available_qty,smrsitems.requested_qty, smrsitems.used_qty,smrsitems.issued_qty, smrsitems.approved_qty " +
-                $"from smrsitems " +
-                $" join smtransition as sm_trans  on sm_trans.assetItemID = smrsitems.asset_item_ID  " +
-                $"  JOIN smassetmasters as a_master ON a_master.ID = sm_trans.assetItemID " +
-                $" LEFT JOIN facilities fc ON fc.id = sm_trans.facilityID  " +
+                $" from smrsitems   " +
+                $" join smmrs on smmrs.id = smrsitems.mrs_ID" +
+                $" JOIN smassetmasters as a_master ON a_master.ID = smrsitems.asset_item_ID  " +
+                $" LEFT JOIN facilities fc ON fc.id = smmrs.facility_ID   " +
                 $" Left join smassettypes AST on AST.id = a_master.asset_type_ID  " +
-                $"where mrs_ID = {mrs_id} and is_splited = 1 order by sm_trans.id desc;";
+                $" where mrs_ID = {mrs_id} and is_splited = 1 " +
+                $" order by  smmrs.id desc;";
 
 
             List<CMPlantStockOpening_MRSReturn> Plant_Stock_Opening_Details_Reader = await Context.GetData<CMPlantStockOpening_MRSReturn>(Plant_Stock_Opening_Details_query).ConfigureAwait(false);
