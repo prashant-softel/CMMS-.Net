@@ -102,9 +102,9 @@ public class CMJCLotoDetail
 
 public class CMJCEmpDetail
 {
-    public int empId { get; set; }
+    public int id { get; set; }
 
-    public string empName { get; set; }
+    public string name { get; set; }
     public string responsibility { get; set; }
 }
 public class Files

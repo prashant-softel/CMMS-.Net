@@ -258,7 +258,7 @@ namespace CMMSAPIs.Repositories.JC
             {
                 string mapChecklistQry = $"insert into  permitemployeelists (employeeId,responsibility,JC_id) VALUES ";
 
-                mapChecklistQry += $"({data.empId}, '{data.responsibility}', {jc_id})";
+                mapChecklistQry += $"({data.id}, '{data.responsibility}', {jc_id})";
                 await Context.ExecuteNonQry<int>(mapChecklistQry).ConfigureAwait(false);
             }
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOBCARD, jc_id, 0, 0, "Job Card Started", CMMS.CMMS_Status.JC_STARTED,userID);
@@ -346,7 +346,7 @@ namespace CMMSAPIs.Repositories.JC
             // emp list
 
             //string myQuery6 = $" SELECT CONCAT(user.firstName,' ',user.lastName) as empName, ptwEmpList.responsibility as resp FROM permitemployeelists as ptwEmpList JOIN permits as ptw ON ptw.id = ptwEmpList.pwtId LEFT JOIN users as user ON user.id = ptwEmpList.employeeId JOIN jobcards as jc on jc.PTW_id = ptw.id where jc.id = { jc_id }";
-            string myQuery6 = $" SELECT CONCAT(user.firstName,' ',user.lastName) as empName,ptwEmpList.employeeId as empid ,ptwEmpList.responsibility as responsibility FROM permitemployeelists as ptwEmpList  LEFT JOIN users as user ON user.id = ptwEmpList.employeeId  where ptwEmpList.JC_id ={ jc_id }";
+            string myQuery6 = $" SELECT CONCAT(user.firstName,' ',user.lastName) as name,ptwEmpList.employeeId as id ,ptwEmpList.responsibility as responsibility FROM permitemployeelists as ptwEmpList  LEFT JOIN users as user ON user.id = ptwEmpList.employeeId  where ptwEmpList.JC_id ={ jc_id }";
             List<CMJCEmpDetail> _empList = await Context.GetData<CMJCEmpDetail>(myQuery6).ConfigureAwait(false);
             //toollist
              string myQuery7 = "SELECT tools.id as toolId, tools.assetName as toolName FROM jobs AS job " +
@@ -587,8 +587,11 @@ namespace CMMSAPIs.Repositories.JC
             //EMP LIST
             foreach (var data in request.employee_list)
             {
-                string qryPermitEmpList = $"update permitemployeelists set employeeId ={data.employeeId } , responsibility ='{ data.responsibility }' where id ={data.empId}";
+                string delqryPermitEmpList=$"delete from permitemployeelists where JC_id ={request.id}";
+
+                string qryPermitEmpList = $"insert into  permitemployeelists (employeeId,responsibility,JC_id) values({ data.id}, { data.responsibility},{request.id}); ";
                 await Context.ExecuteNonQry<int>(qryPermitEmpList).ConfigureAwait(false);
+
             }
           
 

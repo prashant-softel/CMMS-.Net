@@ -110,6 +110,7 @@ namespace CMMSAPIs.Models.Users
         public string name { get; set; }
         public int spv_id { get; set; }
         public string spv { get; set; }
+        public string location { get; set; }
     }
     public class CMCompetency
     {

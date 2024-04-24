@@ -33,7 +33,7 @@ namespace CMMSAPIs.Models.JC
     }    
     public class CMEmpList
     {
-        public int empId { get; set; }
+        public int id { get; set; }
         public int employeeId { get; set; }
         public string responsibility { get; set; }
     }
