@@ -842,11 +842,11 @@ namespace CMMSAPIs.Repositories.Masters
             return response;
         }
 
-        internal async Task<List<WaterDataResult>> GetWaterDataListMonthWise(DateTime fromDate, DateTime toDate, int facility_id)
+      internal async Task<List<WaterDataResult>> GetWaterDataListMonthWise(DateTime fromDate, DateTime toDate, int facility_id)
         {
             string SelectQ = $" select distinct plantId as facility_id,fc.name facility_name,MONTHNAME(date) as month_name,YEAR(date) as year, " +
                 $" (select sum(creditQty)-sum(debitQty) from mis_waterdata where MONTH(date) < MONTH('"+ fromDate.ToString("yyyy-MM-dd") + "')) as opening," +
-                $" sum(creditQty) as procured_qty, sum(debitQty) as consumed_qty, mw.name as water_type" +
+                $" sum(creditQty) as procured_qty, sum(debitQty) as consumed_qty, mw.name as water_type,show_opening" +
                 $" from mis_waterdata" +
                 $" LEFT JOIN facilities fc ON fc.id = mis_waterdata.plantId" +
                 $" LEFT JOIN mis_watertype mw on mw.id = mis_waterdata.waterTypeId" +
@@ -870,13 +870,127 @@ namespace CMMSAPIs.Repositories.Masters
                                                   .Select(g => new CMWaterDataMonthWiseDetails
                                                   {
                                                       water_type = g.Key,
-                                                      opening = g.Sum(item => item.opening),
+                                                      opening_qty = g.Sum(item => item.opening),
                                                       procured_qty = g.Sum(item => item.procured_qty),
                                                       consumed_qty = g.Sum(item => item.consumed_qty),
-                                                      closing_qty = g.Sum(item => item.opening) + g.Sum(item => item.procured_qty) - g.Sum(item => item.consumed_qty)
+                                                      closing_qty = g.Sum(item => item.opening) + g.Sum(item => item.procured_qty) - g.Sum(item => item.consumed_qty),
+                                                      show_opening = g.Sum(item => item.show_opening)
                                                   }).ToList()
+
                                 }).ToList()
                }).ToList();
+
+            //    List<WaterDataResult> groupedResult = ListResult.GroupBy(r => new { r.facility_id, r.facility_name })
+            //.Select(group => new WaterDataResult
+            //{
+            //    facility_id = group.Key.facility_id,
+            //    facility_name = group.Key.facility_name,
+            //    period = group.Select(r => new { r.month_name, r.year })
+            //        .Distinct()
+            //        .Select(periodGroup => new FacilityPeriodData
+            //        {
+            //            month_name = periodGroup.month_name,
+            //            year = periodGroup.year,
+            //            details = ListResult.Where(r => r.facility_id == group.Key.facility_id
+            //                                        && r.facility_name == group.Key.facility_name
+            //                                        && r.month_name == periodGroup.month_name
+            //                                        && r.year == periodGroup.year
+            //                                        && r.water_type != null) // Check if water_type is not null
+            //                .Select(r => r.water_type)
+            //                .Distinct()
+            //                .Select(waterType => new CMWaterDataMonthWiseDetails
+            //                {
+            //                    water_type = waterType.ToString(), // Convert char to string
+            //                    opening_qty = group.Where(g => g.month_name == periodGroup.month_name
+            //                                                && g.year == periodGroup.year
+            //                                                && g.water_type == waterType)
+            //                                        .Sum(g => g.opening),
+            //                    procured_qty = group.Where(g => g.month_name == periodGroup.month_name
+            //                                                && g.year == periodGroup.year
+            //                                                && g.water_type == waterType)
+            //                                        .Sum(g => g.procured_qty),
+            //                    consumed_qty = group.Where(g => g.month_name == periodGroup.month_name
+            //                                                && g.year == periodGroup.year
+            //                                                && g.water_type == waterType)
+            //                                        .Sum(g => g.consumed_qty),
+            //                    closing_qty = group.Where(g => g.month_name == periodGroup.month_name
+            //                                                && g.year == periodGroup.year
+            //                                                && g.water_type == waterType)
+            //                                        .Sum(g => g.opening)
+            //                                + group.Where(g => g.month_name == periodGroup.month_name
+            //                                                && g.year == periodGroup.year
+            //                                                && g.water_type == waterType)
+            //                                        .Sum(g => g.procured_qty)
+            //                                - group.Where(g => g.month_name == periodGroup.month_name
+            //                                                && g.year == periodGroup.year
+            //                                                && g.water_type == waterType)
+            //                                        .Sum(g => g.consumed_qty),
+            //                    show_opening = group.Where(g => g.month_name == periodGroup.month_name
+            //                                                && g.year == periodGroup.year
+            //                                                && g.water_type == waterType)
+            //                                        .Sum(g => g.show_opening)
+            //                }).ToList()
+            //        }).ToList()
+            //}).ToList();
+            var allMonths1 = new List<string> { "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" };
+
+            foreach (var result in groupedResult)
+            {
+                var allMonths = new List<string> { "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" };
+                foreach (var month in allMonths)
+                {
+                    if (result.period.Any(p => p.month_name == month))
+                    {
+                        result.period.Add(new FacilityPeriodData
+                        {
+                            month_name = month,
+                            year = result.period.Select(p => p.year).FirstOrDefault(),
+                            details = result.period.FirstOrDefault()?.details?.Select(d => new CMWaterDataMonthWiseDetails
+                            {
+                                water_type = d.water_type,
+                                opening_qty = 0,
+                                procured_qty = 0,
+                                consumed_qty = 0,
+                                closing_qty = 0,
+                                show_opening = 0
+                            }).ToList() ?? new List<CMWaterDataMonthWiseDetails>()
+                        });
+                        
+                    }
+                }
+            }
+
+            // Sort the periods by year and month
+            foreach (var result in groupedResult)
+            {
+                result.period = result.period.OrderBy(p => p.year).ThenBy(p => Array.IndexOf(allMonths1.ToArray(), p.month_name)).ToList();
+            }
+
+        groupedResult = ListResult.GroupBy(r => new { r.facility_id, r.facility_name, r.month_name, r.year })
+    .Select(group => new WaterDataResult
+    {
+        facility_id = group.Key.facility_id,
+        facility_name = group.Key.facility_name,
+        period = group.Select(r => new { r.month_name, r.year })
+            .Distinct()
+            .Select(periodGroup => new FacilityPeriodData
+            {
+                month_name = periodGroup.month_name,
+                year = periodGroup.year,
+                details = group.Where(g => g.month_name == periodGroup.month_name && g.year == periodGroup.year)
+                              .GroupBy(g => g.water_type)
+                              .Select(g => new CMWaterDataMonthWiseDetails
+                              {
+                                  water_type = g.Key,
+                                  opening_qty = g.Sum(item => item.opening),
+                                  procured_qty = g.Sum(item => item.procured_qty),
+                                  consumed_qty = g.Sum(item => item.consumed_qty),
+                                  closing_qty = g.Sum(item => item.opening) + g.Sum(item => item.procured_qty) - g.Sum(item => item.consumed_qty),
+                                  show_opening = g.Sum(item => item.show_opening)
+                              }).ToList()
+            }).ToList()
+    }).ToList();
+
             return groupedResult;
         }
 
