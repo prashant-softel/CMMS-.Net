@@ -185,7 +185,7 @@ namespace CMMSAPIs.Models.Masters
         public decimal DebitQty { get; set; }
         public decimal CreditQty { get; set; }
     }
-        public class CMWaterDataMonthWise
+         public class CMWaterDataMonthWise
     {
         public int facility_id { get; set; }
         public string facility_name { get; set; }
@@ -196,6 +196,7 @@ namespace CMMSAPIs.Models.Masters
         public decimal consumed_qty { get; set; }
         public decimal closing_qty { get; set; }
         public string water_type { get; set; }
+        public int show_opening { get; set; }
     }
     public class WaterDataResult
     {
@@ -213,10 +214,11 @@ namespace CMMSAPIs.Models.Masters
     public class CMWaterDataMonthWiseDetails
     {
         public string water_type { get; set; }
-        public decimal opening { get; set; }
+        public decimal opening_qty { get; set; }
         public decimal procured_qty { get; set; }
         public decimal consumed_qty { get; set; }
         public decimal closing_qty { get; set; }
+        public int show_opening { get; set; }
 
     }
 
