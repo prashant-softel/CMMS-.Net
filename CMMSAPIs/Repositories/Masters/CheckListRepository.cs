@@ -521,13 +521,27 @@ namespace CMMSAPIs.Repositories.Masters
                             }
                             else if (checklistNames.Contains(Convert.ToString(newR["checklist_number"]).ToUpper()))
                             {
-                                string checklist_Validation_Q = "select ifnull(f.name,'') as name from checklist_number left join facilities f on f.id = checklist_number.facility_id where checklist_number='" + Convert.ToString(newR["checklist_number"]) + "';";
+                                string checklist_Validation_Q = "select ifnull(f.name,'') as name ,facility_id  from checklist_number left join facilities f on f.id = checklist_number.facility_id where checklist_number='" + Convert.ToString(newR["checklist_number"]) + "';";
                                 DataTable dt = await Context.FetchData(checklist_Validation_Q).ConfigureAwait(false);
                                 string facility_name = Convert.ToString(dt.Rows[0][0]);
+                                int facility_id = Convert.ToInt32(dt.Rows[0][1]); 
+                                if (facility_name.ToString()== newR["facility_name"].ToString() || (facility_id==0) )
+                                {
 
+                                    continue;
+                                }
+                                else
+                                {
+
+                                    newR["facility_id"] = 0;
+                                    string updateQry = $"UPDATE  checklist_number SET  facility_id =0  where checklist_number='" + Convert.ToString(newR["checklist_number"]) + "';";
+                                    await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+                                    continue;
+                                }
                                 // m_errorLog.SetError($"[Checklist: Row {rN}] Checklist name : {Convert.ToString(newR["checklist_number"])} already present in plant {facility_name}.");
-                                newR["facility_id"] = 0;
-                                continue;
+
+
+
 
                             }
                             else
