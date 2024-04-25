@@ -202,9 +202,15 @@ namespace CMMSAPIs.Models.Masters
     {
         public int facility_id { get; set; }
         public string facility_name { get; set; }
+        public List<CMWaterTypeMaster> master_list { get; set; }
         public List<FacilityPeriodData> period { get; set; }
+    
     }
-
+    public class CMWaterTypeMaster
+    {
+        public string water_type { get; set; }
+        public int show_opening { get; set; }
+    }
     public class FacilityPeriodData
     {
         public string month_name { get; set; }
@@ -272,9 +278,14 @@ namespace CMMSAPIs.Models.Masters
         public int facility_id { get; set; }
         public string facility_name { get; set; }
         public int hazardous { get; set; }
+        public List<CMWasteTypeMaster> master_list { get; set; }
         public List<CMFacilityPeriodData_Waste> period { get; set; }
     }
-
+    public class CMWasteTypeMaster
+    {
+        public string waste_type { get; set; }
+        public int show_opening { get; set; }
+    }
     public class CMFacilityPeriodData_Waste
     {
         public string month_name { get; set; }
