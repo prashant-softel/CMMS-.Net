@@ -241,6 +241,7 @@ namespace CMMSAPIs.Models.Masters
         public decimal closing_qty { get; set; }
         public string water_type { get; set; }
         public int waterTypeId { get; set; }
+        public int id { get; set; }
         public int consumeTypeId { get; set; }
         public string month { get; set; }
         public int year { get; set; }
@@ -264,7 +265,8 @@ namespace CMMSAPIs.Models.Masters
     }
     public class CMWaterDataMonthWiseDetails_Month
     {
-
+      
+        public int id { get; set; }
         public string date { get; set; }
         public string Description { get; set; }
         public decimal procured_qty { get; set; }

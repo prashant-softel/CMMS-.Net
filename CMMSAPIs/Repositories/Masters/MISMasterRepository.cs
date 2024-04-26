@@ -995,7 +995,7 @@ namespace CMMSAPIs.Repositories.Masters
 
         internal async Task<List<WaterDataResult_Month>> GetWaterDataMonthDetail(int Month, int Year, int facility_id)
         {
-            string SelectQ = $" select distinct mis_waterdata.waterTypeId , plantId as facility_id,fc.name facility_name,DATE_FORMAT(Date,'%Y-%m-%d') as date ,MONTHNAME(date) as month,YEAR(date) as year,"
+            string SelectQ = $" select distinct mis_waterdata.waterTypeId,mis_waterdata.id as id, plantId as facility_id,fc.name facility_name,DATE_FORMAT(Date,'%Y-%m-%d') as date ,MONTHNAME(date) as month,YEAR(date) as year,"
                              +$" (select sum(creditQty) - sum(debitQty) from mis_waterdata where MONTH(date) < {Month}) as opening,"
                              +$" sum(creditQty) as procured_qty, sum(debitQty) as consumed_qty, mw.name as water_type,"
                              +$" consumeTypeId as consumeTypeId,"
@@ -1013,7 +1013,7 @@ namespace CMMSAPIs.Repositories.Masters
                     ListResult[i].closing_qty = ListResult[i].opening + ListResult[i].procured_qty - ListResult[i].consumed_qty;
                 }
             }
-
+                
 
             List<WaterDataResult_Month> groupedResult = ListResult.GroupBy(r => new { r.facility_id, r.facility_name, r.month,r.year })
     .Select(group => new WaterDataResult_Month
@@ -1032,6 +1032,7 @@ namespace CMMSAPIs.Repositories.Masters
                             details = group.Where(g => g.water_type == periodGroup.water_type)
                                           .Select(g => new CMWaterDataMonthWiseDetails_Month
                                           {
+                                              id=g.id,
                                               date = g.date,
                                               procured_qty = g.procured_qty,
                                               consumed_qty = g.consumed_qty,

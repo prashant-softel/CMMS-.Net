@@ -361,7 +361,7 @@ namespace CMMSAPIs.Repositories.Masters
                              "LEFT JOIN " +
                                     "usersaccess as access ON u.id = access.userId " +
                              "WHERE " +
-                                    $"u.status = 1 AND uf.status = 1 AND isEmployee = 1 AND uf.facilityId = {facility_id} ";
+                                    $"u.status = 1 AND uf.status = 1 AND u.isEmployee = 1 AND uf.facilityId = {facility_id} ";
             if (facility_id < 0)
                 throw new ArgumentException("Invalid Facility ID");
             if (module != 0 && access != 0)
@@ -588,7 +588,6 @@ namespace CMMSAPIs.Repositories.Masters
                 myQuery += $"`zip` = '{request.zip}', ";
             if (request.type > 0)
                 myQuery += $"`type` = {request.type}, ";
-
 
             myQuery += $"updatedBy = '{userId}' , updatedAt = '{UtilsRepository.GetUTCTime()}' WHERE id = {request.id};";
             //myQuery += $" WHERE id={request.id};";
