@@ -34,6 +34,7 @@ namespace CMMSAPIs.BS.Masters
         Task<CMDefaultResponse> CreateRiskType(CMIRRiskType request, int userId);
         Task<CMDefaultResponse> UpdateRiskType(CMIRRiskType request, int userId);
         Task<CMDefaultResponse> DeleteRiskType(int id, int userId);
+        Task<List<CMFacilityList>> GetFacilityListByUserId(int userID);
         Task<List<CMIRInsuranceProvider>> GetInsuranceProviderList();
         Task<List<CMIRStatus>> GetInsuranceStatusList();
         Task<List<CMSPV>> GetSPVList();
@@ -642,6 +643,22 @@ namespace CMMSAPIs.BS.Masters
                 using (var repos = new CMMSRepository(getDB))
                 {
                     return await repos.getDashboadDetails(facilityId, moduleID);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<CMFacilityList>> GetFacilityListByUserId(int userID)
+        {
+            try
+            {
+                using (var repos = new CMMSRepository(getDB))
+                {
+                    return await repos.GetFacilityListByUserId(userID);
 
                 }
             }

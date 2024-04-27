@@ -59,7 +59,21 @@ namespace CMMSAPIs.Controllers.Masters
                 throw;
             }
         }
-
+        [Route("GetFacilityListByUserId")]
+        [HttpGet]
+        public async Task<IActionResult> GetFacilityListByUserId()
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _CMMSBS.GetFacilityListByUserId(userID);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
         [Route("GetBlockList")]
         [HttpGet]
         public async Task<IActionResult> GetBlockList(int facility_id)

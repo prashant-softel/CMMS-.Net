@@ -18,11 +18,13 @@ namespace CMMSAPIs.Repositories.Users
         private MYSQLDBHelper _conn;
         //private UserAccessRepository _userAccessRepo;
         private UtilsRepository _utilsRepo;
+         public UserAccessRepository _userAccessRepo;
         public RoleAccessRepository(MYSQLDBHelper sqlDBHelper) : base(sqlDBHelper)
         {
             _conn = sqlDBHelper;
             _utilsRepo = new UtilsRepository(_conn);
-            //_userAccessRepo = new UserAccessRepository(_conn);
+            _userAccessRepo = new UserAccessRepository(_conn);
+            
         }
 
         internal async Task<CMRoleAccess> GetRoleAccess(int role_id)
@@ -62,11 +64,23 @@ namespace CMMSAPIs.Repositories.Users
         }
         internal async Task<CMDefaultResponse> AddRole(CMDefaultList request, int userId)
         {
+            
             string myQuery = $"INSERT INTO userroles(name, status, addedBy, addedAt) VALUES " +
                                 $"('{request.name}', 1, {userId}, '{UtilsRepository.GetUTCTime()}'); " +
                                  $"SELECT LAST_INSERT_ID(); ";
             DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
             int id = Convert.ToInt32(dt.Rows[0][0]);
+            int rid = 0;
+            string qry = $" SELECT roleId FROM  users where id= {userId}";
+            DataTable dt1 = await Context.FetchData(qry).ConfigureAwait(false);
+             rid = Convert.ToInt32(dt1.Rows[0][0]);
+            
+            CMSetRoleAccess roleAccess = new CMSetRoleAccess();
+            roleAccess.role_id = rid;
+            roleAccess.set_existing_users = true;
+           // roleAccess = await GetRoleAccess(rid);
+            await  SetRoleAccess(roleAccess, userId);
+        
             return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Role Added");
         }
          
@@ -156,10 +170,10 @@ namespace CMMSAPIs.Repositories.Users
                         foreach (var access in request.access_list)
                         {
                             CMAccessList feature = features[access.feature_id];
-                            role_access.Add($"({request.role_id}, {access.feature_id}, {(feature.add == 0 ? -1 : access.add)}, " +
-                                            $"{(feature.edit == 0 ? -1 : access.edit)}, {(feature.view == 0 ? -1 : access.view)}, " +
-                                            $"{(feature.delete == 0 ? -1 : access.delete)}, {(feature.issue == 0 ? -1 : access.issue)}, " +
-                                            $"{(feature.approve == 0 ? -1 : access.approve)}, {(feature.selfView == 0 ? -1 : access.selfView)}, " +
+                            role_access.Add($"({request.role_id}, {access.feature_id}, {(feature.add == 0 ? 0 : access.add)}, " +
+                                            $"{(feature.edit == 0 ? 0 : access.edit)}, {(feature.view == 0 ? 0 : access.view)}, " +
+                                            $"{(feature.delete == 0 ? 0 : access.delete)}, {(feature.issue == 0 ? 0 : access.issue)}, " +
+                                            $"{(feature.approve == 0 ? 0 : access.approve)}, {(feature.selfView == 0 ? 0 : access.selfView)}, " +
                                             $"'{UtilsRepository.GetUTCTime()}', {UtilsRepository.GetUserID()})");
                         }
                         string role_access_insert_str = string.Join(',', role_access);

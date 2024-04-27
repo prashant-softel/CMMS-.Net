@@ -47,6 +47,7 @@ namespace CMMSAPIs.Helper
             { CMMS_Modules.INCIDENT_REPORT, 36 },
             { CMMS_Modules.DSM, 37 },
             { CMMS_Modules.GRIEVANCE, 38 },
+           
 
 
         };
@@ -218,6 +219,8 @@ namespace CMMSAPIs.Helper
             CHECKLIST_NUMBER = 11,
             CHECKPOINTS,
             CHECKLIST_MAPPING,
+            PERMIT_CHECKLIST,
+            PERMIT_CHECKPOINT,
 
             PM_SCHEDULE = 21,
             PM_SCEHDULE_VIEW,
@@ -364,6 +367,7 @@ namespace CMMSAPIs.Helper
             PTW_LINKED_TO_HOTO,
             PTW_EXPIRED,
             PTW_UPDATED,
+            PTW_UPDATED_WITH_TBT_UPDATED,
 
             //JC_CREATED = 151,
             //JC_STARTED,
