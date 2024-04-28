@@ -427,14 +427,22 @@ namespace CMMSAPIs.BS.SM
                     CMDefaultResponse response = new CMDefaultResponse();
                     foreach (var request in requestList)
                     {
-                        var result = await repos.updateUsedQty(request.facilityID, request.fromActorID, request.fromActorType, request.toActorID, request.toActorType, request.assetItemID, request.qty, request.refType, request.refID, request.remarks, request.mrsID);
-                        if (result)
+                        var result = await repos.updateUsedQty(request.facilityID, request.fromActorID, request.fromActorType, request.toActorID, request.toActorType, request.assetItemID, request.qty, request.refType, request.refID, request.remarks, request.mrsID, request.mrsItemID);
+                        if (result == 0)
                         {
                             response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.SUCCESS, "Item updated.");
                         }
-                        else
+                        else if(result == 1)
                         {
                             response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.FAILURE, "Item requesting more than available quantity.");
+                        }
+                        else if (result == 2)
+                        {
+                            response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.FAILURE, "MRS Id ( "+request.mrsItemID+" ) not found.");
+                        }
+                        else if (result == 3)
+                        {
+                            response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.FAILURE, "Exception occured during quantity updation.");
                         }
                     }
                     return response;
