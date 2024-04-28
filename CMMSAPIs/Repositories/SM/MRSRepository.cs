@@ -925,40 +925,36 @@ namespace CMMSAPIs.Repositories.SM
                 return false;
             }
         }
-        public async Task<bool> updateUsedQty(int facilityID, int fromActorID, int fromActorType, int toActorID, int toActorType, int assetItemID, int qty, int refType, int refID, string remarks, int mrsID = 0, int natureOfTransaction = 0, int assetItemStatus = 0)
+        public async Task<int> updateUsedQty(int facilityID, int fromActorID, int fromActorType, int toActorID, int toActorType, int assetItemID, int qty, int refType, int refID, string remarks, int mrsID = 0, int natureOfTransaction = 0, int assetItemStatus = 0, int mrsitemID = 0)
         {
             try
             {
-                string stmt = " select i.id,i.available_qty,i.issued_qty from smrsitems i inner join smmrs m on m.ID = i.mrs_ID where i.mrs_ID = "+mrsID+" and asset_item_ID = "+assetItemID+"; ";
-                DataTable dt2 = await Context.FetchData(stmt).ConfigureAwait(false);
-                int mrsitem_ID = 0;
-                decimal available_qty = 0;
+                string stmt = " select i.issued_qty from smrsitems i inner join smmrs m on m.ID = i.mrs_ID where i.mrs_ID = "+mrsID+" and asset_item_ID = "+assetItemID+ " and is_splited=1; ";
+                DataTable dt2 = await Context.FetchData(stmt).ConfigureAwait(false);               
                 decimal issued_qty = 0;
                 if (dt2.Rows.Count > 0)
-                {
-                    mrsitem_ID = Convert.ToInt32(dt2.Rows[0][0]);
-                    available_qty = Convert.ToInt32(dt2.Rows[0][1]);
-                    issued_qty = Convert.ToInt32(dt2.Rows[0][2]);
-                    if (available_qty >= qty)
+                {                  
+                    issued_qty = Convert.ToInt32(dt2.Rows[0][0]);
+                    if (issued_qty >= qty)
                     {
-                        string stmt_update = " update smrsitems set used_qty=" + qty + " where id = " + mrsitem_ID + ";";
+                        string stmt_update = " update smrsitems set used_qty=" + qty + " where id = " + mrsitemID + ";";
                         var result = await Context.ExecuteNonQry<int>(stmt_update);
-                        return true;
+                        return 0;
                     }
                     else
                     {
-                        return false;
+                        return 1;
                     }
                   
                 }
                 else
                 {
-                    return false;
+                    return 2;
                 }
             }
             catch (Exception e)
             {
-                return false;
+                return 3;
             }
         }
 
