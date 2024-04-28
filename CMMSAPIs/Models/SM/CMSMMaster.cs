@@ -406,6 +406,7 @@ namespace CMMSAPIs.Models.SM
         public int refID { get; set; }
         public string remarks { get; set; }
         public int mrsID { get; set; }
+        public int mrsItemID { get; set; }
     }
 
     public class CMIssuedItems
