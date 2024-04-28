@@ -43,6 +43,9 @@ namespace CMMSAPIs.Models.Masters
         public int total { get; set; }
         public int completed { get; set; }
         public int pending { get; set; }
+        public int wo_on_time { get; set; }
+        public int wo_delay { get; set; }
+        public int wo_backlog { get; set; }
         public List<CMDashboadItemList> item_list { get; set; }
     }
 
