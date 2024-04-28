@@ -1137,7 +1137,15 @@ namespace CMMSAPIs.Repositories.Masters
             result.completed = itemList.Where(x=>x.latestJCStatus == (int)CMMS.CMMS_Status.PTW_APPROVED).ToList().Count;
             //result.pending = result.total - itemList.Where(x => x.latestJCPTWStatus != (int)CMMS.CMMS_Status.PTW_APPROVED).ToList().Count;
             result.pending = result.total - result.completed;
-            result.item_list = itemList;
+           
+            int completed_on_time = itemList.Where(x => x.latestJCStatus == (int)CMMS.CMMS_Status.PTW_APPROVED && x.start_date == DateTime.Today).ToList().Count;
+            int wo_delay = itemList.Where(x => x.latestJCStatus != (int)CMMS.CMMS_Status.PTW_APPROVED && x.start_date == DateTime.Today).ToList().Count;
+            int wo_backlog = itemList.Where(x => x.latestJCStatus != (int)CMMS.CMMS_Status.PTW_APPROVED && x.start_date != DateTime.Today).ToList().Count;
+            
+            result.wo_on_time = (completed_on_time / result.total)*100;
+            result.wo_delay = (wo_delay / result.total) * 100;
+            result.wo_backlog = (wo_backlog / result.total) * 100;
+            result.item_list = itemList; 
             return result;
         }
 
@@ -1178,6 +1186,15 @@ namespace CMMSAPIs.Repositories.Masters
             //result.pending = result.total - itemList.Where(x => x.latestJCPTWStatus != (int)CMMS.CMMS_Status.PTW_APPROVED).ToList().Count;
             result.pending = result.total - result.completed;
             result.item_list = itemList;
+
+            int completed_on_time = itemList.Where(x => (x.status == (int)CMMS.CMMS_Status.PM_APPROVED || x.status == (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED || x.status == (int)CMMS.CMMS_Status.PM_PLAN_APPROVED) && (x.start_date == DateTime.Today)).ToList().Count;
+            int wo_delay = itemList.Where(x => (x.status != (int)CMMS.CMMS_Status.PM_APPROVED || x.status != (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED || x.status != (int)CMMS.CMMS_Status.PM_PLAN_APPROVED) && x.start_date != DateTime.Today).ToList().Count;
+            int wo_backlog = itemList.Where(x => (x.status != (int)CMMS.CMMS_Status.PM_APPROVED || x.status != (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED || x.status != (int)CMMS.CMMS_Status.PM_PLAN_APPROVED) && x.start_date != DateTime.Today).ToList().Count;
+
+            result.wo_on_time = (completed_on_time / result.total) * 100;
+            result.wo_delay = (wo_delay / result.total) * 100;
+            result.wo_backlog = (wo_backlog / result.total) * 100;
+            
             return result;
         }
         internal static string getShortStatus_PM_Plan(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status m_notificationID)
@@ -1273,6 +1290,15 @@ namespace CMMSAPIs.Repositories.Masters
             //result.pending = result.total - itemList.Where(x => x.latestJCPTWStatus != (int)CMMS.CMMS_Status.PTW_APPROVED).ToList().Count;
             result.pending = result.total - result.completed;
             result.item_list = itemList;
+
+            int completed_on_time = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.MC_PLAN_APPROVED && x.start_date == DateTime.Today).ToList().Count;
+            int wo_delay = itemList.Where(x => x.status != (int)CMMS.CMMS_Status.MC_PLAN_APPROVED && x.start_date == DateTime.Today).ToList().Count;
+            int wo_backlog = itemList.Where(x => x.status != (int)CMMS.CMMS_Status.MC_PLAN_APPROVED && x.start_date != DateTime.Today).ToList().Count;
+
+            result.wo_on_time = (completed_on_time / result.total) * 100;
+            result.wo_delay = (wo_delay / result.total) * 100;
+            result.wo_backlog = (wo_backlog / result.total) * 100;
+            
             return result;
         }
 
@@ -1329,6 +1355,15 @@ namespace CMMSAPIs.Repositories.Masters
             //result.pending = result.total - itemList.Where(x => x.latestJCPTWStatus != (int)CMMS.CMMS_Status.PTW_APPROVED).ToList().Count;
             result.pending = result.total - result.completed;
             result.item_list = itemList;
+
+            int completed_on_time = getIncidentList.Where(x => x.status == (int)CMMS.CMMS_Status.IR_APPROVED_INITIAL && x.reported_at == DateTime.Today).ToList().Count;
+            int wo_delay = getIncidentList.Where(x => x.status != (int)CMMS.CMMS_Status.IR_APPROVED_INITIAL && x.reported_at == DateTime.Today).ToList().Count;
+            int wo_backlog = getIncidentList.Where(x => x.status != (int)CMMS.CMMS_Status.IR_APPROVED_INITIAL && x.reported_at != DateTime.Today).ToList().Count;
+
+            result.wo_on_time = (completed_on_time / result.total) * 100;
+            result.wo_delay = (wo_delay / result.total) * 100;
+            result.wo_backlog = (wo_backlog / result.total) * 100;
+            
             return result;
         }
         internal static string getShortStatus_GO(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status m_notificationID)
@@ -1442,6 +1477,15 @@ namespace CMMSAPIs.Repositories.Masters
             result.completed = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.GO_APPROVED).ToList().Count;
             result.pending = result.total - result.completed;
             result.item_list = itemList;
+
+            int completed_on_time = _List.Where(x => x.status == (int)CMMS.CMMS_Status.GO_APPROVED && x.purchaseDate == DateTime.Today).ToList().Count;
+            int wo_delay = _List.Where(x => x.status != (int)CMMS.CMMS_Status.GO_APPROVED && x.purchaseDate == DateTime.Today).ToList().Count;
+            int wo_backlog = _List.Where(x => x.status != (int)CMMS.CMMS_Status.GO_APPROVED && x.purchaseDate != DateTime.Today).ToList().Count;
+
+            result.wo_on_time = (completed_on_time / result.total) * 100;
+            result.wo_delay = (wo_delay / result.total) * 100;
+            result.wo_backlog = (wo_backlog / result.total) * 100;
+
             return result;
         }
     }
