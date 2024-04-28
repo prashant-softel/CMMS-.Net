@@ -498,7 +498,7 @@ public async Task<List<CMEmployeeStockReport>> GetEmployeeStockReport(int facili
                 $"  IFNULL((select sum(si.creditQty) from smtransition si where si.assetItemID = sm_trans.assetItemID and  date_format(si.lastModifiedDate, '%Y-%m-%d') " +
                 $" BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}' and si.actorType = {actorTypeID} and si.facilityID in ('{facility_id}') and  si.actorID in ({actorID}) ),0) as inward, " +
                 $"   IFNULL((select sum(so.debitQty) from smtransition so where so.assetItemID = sm_trans.assetItemID and  date_format(so.lastModifiedDate, '%Y-%m-%d') " +
-                $" BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}' and si.actorType = {actorTypeID} and si.facilityID in ('{facility_id}') and  si.actorID in ({actorID})),0) as outward  " +
+                $" BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}' and so.actorType = {actorTypeID} and so.facilityID in ('{facility_id}') and  so.actorID in ({actorID})),0) as outward  " +
                 $" FROM smtransition as sm_trans " +
                 $" JOIN smassetmasters as a_master ON a_master.ID = sm_trans.assetItemID " +
                 $" LEFT JOIN facilities fc ON fc.id = sm_trans.facilityID " +
