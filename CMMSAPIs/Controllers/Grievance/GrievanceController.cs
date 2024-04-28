@@ -91,7 +91,7 @@ namespace CMMSAPIs.Controllers.Grievance
 
             //[Authorize]
             [Route("UpdateGrievance")]
-            [HttpPut]
+            [HttpPost]
             public async Task<IActionResult> UpdateGrievance(CMUpdateGrievance request, string facilityId)
             {
                 try
