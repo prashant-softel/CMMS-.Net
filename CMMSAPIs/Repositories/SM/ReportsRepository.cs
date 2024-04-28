@@ -487,6 +487,7 @@ public async Task<List<CMEmployeeStockReport>> GetEmployeeStockReport(int facili
                 itemCondition = " AND  a_master.ID  in (" + assetMasterIDs + ") ";
             }
 
+
             Plant_Stock_Opening_Details_query = $"SELECT  sm_trans.facilityID as facilityID, fc.name as facilityName," +
                 $"fc.isBlock as Facility_Is_Block, " +
                 $" '' as Facility_Is_Block_of_name,sm_trans.assetItemID, a_master.asset_name, a_master.asset_code," +
@@ -495,9 +496,9 @@ public async Task<List<CMEmployeeStockReport>> GetEmployeeStockReport(int facili
                 $" LEFT JOIN facilities fcc ON fcc.id = ST.facilityID   where   ST.actorType = {actorTypeID} and SM.ID=a_master.ID  and ST.facilityID in ('{facility_id}')" +
                 $" and sm_trans.actorID = {actorID} and date_format(ST.lastModifiedDate, '%Y-%m-%d') <= '{StartDate.ToString("yyyy-MM-dd")}'  group by SM.asset_code),0) Opening," +
                 $"  IFNULL((select sum(si.creditQty) from smtransition si where si.assetItemID = sm_trans.assetItemID and  date_format(si.lastModifiedDate, '%Y-%m-%d') " +
-                $" BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}' ),0) as inward, " +
+                $" BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}' and si.actorType = {actorTypeID} and si.facilityID in ('{facility_id}') and  si.actorID in ({actorID}) ),0) as inward, " +
                 $"   IFNULL((select sum(so.debitQty) from smtransition so where so.assetItemID = sm_trans.assetItemID and  date_format(so.lastModifiedDate, '%Y-%m-%d') " +
-                $" BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}' ),0) as outward  " +
+                $" BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}' and si.actorType = {actorTypeID} and si.facilityID in ('{facility_id}') and  si.actorID in ({actorID})),0) as outward  " +
                 $" FROM smtransition as sm_trans " +
                 $" JOIN smassetmasters as a_master ON a_master.ID = sm_trans.assetItemID " +
                 $" LEFT JOIN facilities fc ON fc.id = sm_trans.facilityID " +
