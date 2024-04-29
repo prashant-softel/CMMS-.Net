@@ -503,7 +503,7 @@ namespace CMMSAPIs.Repositories.Permits
             }
             statusSubQuery += $"ELSE '{Status(0)}' END";
             string myQuery = "SELECT " +
-                                 $"ptw.id as permitId, CASE when ptw.endDate < '{UtilsRepository.GetUTCTime()}' then 1 else 0 END as isExpired,ptw.TBT_Done_By as TBT_Done_By_id, ptw.code, ptw.status as ptwStatus, ptw.permitNumber as permit_site_no, permitType.id as permit_type, permitType.title as PermitTypeName, group_concat(distinct asset_cat.name order by asset_cat.id separator ', ') as equipment_categories, facilities.id as workingAreaId, facilities.name as workingAreaName, ptw.title as title, ptw.description as description, acceptedUser.id as request_by_id, CONCAT(acceptedUser.firstName , ' ' , acceptedUser.lastName) as request_by_name, ptw.acceptedDate as request_datetime, issuedUser.id as issued_by_id, CONCAT(issuedUser.firstName , ' ' , issuedUser.lastName) as issued_by_name, ptw.issuedDate as issue_datetime, approvedUser.id as approved_by_id, CONCAT(approvedUser.firstName , ' ' , approvedUser.lastName) as approved_by_name,ptw.TBT_Done_Check as TBT_Done_Check, ptw.approvedDate as approved_datetime, {statusSubQuery} as current_status_short " +
+                                 $"ptw.id as permitId, CASE when ptw.endDate < '{UtilsRepository.GetUTCTime()}' then 1 else 0 END as isExpired,ptw.TBT_Done_By as TBT_Done_By_id, ptw.code, ptw.status as ptwStatus, ptw.permitNumber as permit_site_no, permitType.id as permit_type, permitType.title as PermitTypeName, group_concat(distinct asset_cat.name order by asset_cat.id separator ', ') as equipment_categories, facilities.id as workingAreaId, facilities.name as workingAreaName, ptw.title as title, ptw.description as description, acceptedUser.id as request_by_id, CONCAT(acceptedUser.firstName , ' ' , acceptedUser.lastName) as request_by_name,DATE_FORMAT(ptw.acceptedDate,'%Y-%m-%d %H:%i')  as request_datetime, issuedUser.id as issued_by_id, CONCAT(issuedUser.firstName , ' ' , issuedUser.lastName) as issued_by_name,DATE_FORMAT(ptw.issuedDate,'%Y-%m-%d %H:%i') as issue_datetime, approvedUser.id as approved_by_id, CONCAT(approvedUser.firstName , ' ' , approvedUser.lastName) as approved_by_name,ptw.TBT_Done_Check as TBT_Done_Check,DATE_FORMAT(ptw.approvedDate,'%Y-%m-%d %H:%i') as approved_datetime, {statusSubQuery} as current_status_short " +
                                  " FROM " +
                                         "permits as ptw " +
                                   "JOIN " +
@@ -552,7 +552,7 @@ namespace CMMSAPIs.Repositories.Permits
                 DateTime start = DateTime.Parse(startDate);
                 DateTime end = DateTime.Parse(endDate);
                 if (DateTime.Compare(start, end) < 0)
-                    myQuery += " DATE_FORMAT(ptw.acceptedDate,'%Y-%m-%d') BETWEEN \'" + startDate + "\' AND \'" + endDate + "\'";
+                    myQuery += " DATE_FORMAT(ptw.acceptedDate,'%Y-%m-%d %H:%i') BETWEEN \'" + startDate + "\' AND \'" + endDate + "\'";
             }
             if(non_expired == true)
             {
@@ -582,16 +582,19 @@ namespace CMMSAPIs.Repositories.Permits
             {
                 if (PermitList != null && PermitList.request_datetime != null)
                 {
-                    PermitList.request_datetime = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, PermitList.request_datetime);
+                    DateTime request_datetime = Convert.ToDateTime(PermitList.request_datetime);
+                    PermitList.request_datetime = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone,request_datetime);
                 }
                 
                 if (PermitList != null && PermitList.issued_datetime != null)
                 {
-                PermitList.issued_datetime = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, PermitList.issued_datetime); 
+                    DateTime issued_datetime = Convert.ToDateTime(PermitList.issued_datetime);
+                    PermitList.issued_datetime = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, issued_datetime); 
                 }
                 if (PermitList != null && PermitList.approved_datetime != null)
                 {
-                    PermitList.approved_datetime = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, PermitList.approved_datetime);
+                    DateTime approved_datetime = Convert.ToDateTime(PermitList.approved_datetime);
+                    PermitList.approved_datetime = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, approved_datetime);
                 }
                
             }
@@ -1654,7 +1657,7 @@ namespace CMMSAPIs.Repositories.Permits
             }
             else if(request.TBT_Done_By!=0)
             {
-                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.permit_id, 0, 0, request.physical_iso_remark, CMMS.CMMS_Status.PTW_UPDATED_WITH_TBT_UPDATED,userID);
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.permit_id, 0, 0, request.physical_iso_remark, CMMS.CMMS_Status.PTW_UPDATED_WITH_TBT,userID);
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_UPDATED, new[] { userID }, permitDetails);
                 // response = new CMDefaultResponse(request.permit_id, CMMS.RETRUNSTATUS.SUCCESS, $"Permit Updated Successfully");
                  response = new CMDefaultResponse(request.permit_id, CMMS.RETRUNSTATUS.SUCCESS, responseText);
