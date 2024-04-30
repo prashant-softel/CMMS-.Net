@@ -118,7 +118,7 @@ namespace CMMSAPIs
             services.AddScoped<IDSMBS, DSMBS>();
             services.AddScoped<IMISMasterBS, MISMasterBS>();
             services.AddScoped<IGrievanceBS, GrievanceBS >();
-
+            services.AddScoped<IMoMBS, MoMBS >();
 
         }
 
