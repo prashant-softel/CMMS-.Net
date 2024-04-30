@@ -221,6 +221,11 @@ namespace CMMSAPIs.Helper
             CHECKLIST_MAPPING,
             PERMIT_CHECKLIST,
             PERMIT_CHECKPOINT,
+            PLANT_STOCKREPORT,
+            EMPLOYEE_STOCKREPORT,
+            TRANSACTION_REPORT,
+            FAULTY_MATERIAL_REPORT,
+
 
             PM_SCHEDULE = 21,
             PM_SCEHDULE_VIEW,
@@ -253,9 +258,11 @@ namespace CMMSAPIs.Helper
 
             MC_PLAN = 81,
             MC_TASK = 82,
+            MC_EXECUTION=83,            
             CORRECTIVE_MAINTENANCE = 91,
             CALIBRATION = 101,
             VEGETATION = 111,
+            VEGETATION_EXECUTION=112,
             WARRANTY_CLAIM = 121,
             INCIDENT_REPORT = 131,
             INVENTORY = 141,
@@ -270,7 +277,7 @@ namespace CMMSAPIs.Helper
 
             DSM = 181,
             JobCard=182,
-
+            
             GRIEVANCE = 301,
             VEGETATION_TASK = 311,
             VEGETATION_PLAN = 321
@@ -367,7 +374,7 @@ namespace CMMSAPIs.Helper
             PTW_LINKED_TO_HOTO,
             PTW_EXPIRED,
             PTW_UPDATED,
-            PTW_UPDATED_WITH_TBT_UPDATED,
+            PTW_UPDATED_WITH_TBT,
 
             //JC_CREATED = 151,
             //JC_STARTED,
