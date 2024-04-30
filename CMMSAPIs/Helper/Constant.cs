@@ -544,7 +544,12 @@ namespace CMMSAPIs.Helper
             AUDIT_DELETED,
             AUDIT_APPROVED,
             AUDIT_REJECTED,
-            AUDIT_CLOSED
+            AUDIT_CLOSED,
+
+
+	    MoM_OPEN = 451,
+            MoM_CANCEL,
+            MoM_CLOSE,
         }
 
         public enum ApprovalStatus
