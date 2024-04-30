@@ -37,6 +37,7 @@ using CMMSAPIs.BS.MISMasters;
 using Microsoft.Extensions.FileProviders;
 using System.IO;
 using Microsoft.AspNetCore.StaticFiles;
+using CMMSAPIs.BS.MoM;
 
 namespace CMMSAPIs
 {
