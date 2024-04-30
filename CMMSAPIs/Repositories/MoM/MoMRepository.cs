@@ -38,7 +38,7 @@ namespace CMMSAPIs.Repositories.MoM
         }
         internal async Task<List<CMMoM>> GetMoMList(int facility_id, string facilitytime)
         {
-            string myQuery = $"SELECT distinct   mom_master.id ,Issue , open_date , close_date , mom_master.target_date , mom_master.assign_to , mom_master.status , action_plan ," +
+            string myQuery = $"SELECT distinct   mom_master.id ,Issue , open_date as openDate , close_date as closeDate , mom_master.target_date as targetDate, mom_master.assign_to , mom_master.status , action_plan ," +
                 $"  CONCAT(users.firstName , ' ' , users.lastName) as AddedBy, mom_master.added_at as AddedAt , updated_by , updated_at " +
                 $" FROM  mom_master   " +
                 $" left join  mom_assignto on mom_assignto.mom_id = mom_master.id" +
@@ -48,13 +48,29 @@ namespace CMMSAPIs.Repositories.MoM
                 $" where  is_active = 1; ";
 
             List<CMMoM> _MoMList = await Context.GetData<CMMoM>(myQuery).ConfigureAwait(false);
+            for(var i = 0; i < _MoMList.Count; i++)
+            {
+                if (_MoMList[i].Status == (int)CMMS.CMMS_Status.MoM_OPEN)
+                {
+                    _MoMList[i].Status_long = "MoM Open";
+                }
+                else if (_MoMList[i].Status == (int)CMMS.CMMS_Status.MoM_CLOSE)
+                {
+                    _MoMList[i].Status_long = "MoM Close";
+                }
+                else if (_MoMList[i].Status == (int)CMMS.CMMS_Status.MoM_CANCEL)
+                {
+                    _MoMList[i].Status_long = "MoM Cancel";
+                }
+            }
+    
 
             return _MoMList;
         }
 
         internal async Task<CMMoM> GetMoMDetails(int facility_id, int mom_id, string facilitytime)
         {
-            string myQuery = $"SELECT distinct   mom_master.id ,Issue , open_date , close_date , mom_master.target_date , mom_master.assign_to , mom_master.status , action_plan ," +
+            string myQuery = $"SELECT distinct   mom_master.id ,Issue , open_date as openDate, close_date as closeDate, mom_master.target_date as targetDate, mom_master.assign_to , mom_master.status , action_plan ," +
                 $" added_at,CONCAT(users.firstName , ' ' , users.lastName) as AddedBy, mom_master.added_at as AddedAt , updated_by , updated_at " +
                 $" FROM  mom_master   " +
                 $" left join  mom_assignto on mom_assignto.mom_id = mom_master.id" +
@@ -64,6 +80,21 @@ namespace CMMSAPIs.Repositories.MoM
                 $" where mom_master.id = {mom_id} and is_active = 1; ";
 
             List<CMMoM> _MoMList = await Context.GetData<CMMoM>(myQuery).ConfigureAwait(false);
+            for (var i = 0; i < _MoMList.Count; i++)
+            {
+                if (_MoMList[i].Status == (int)CMMS.CMMS_Status.MoM_OPEN)
+                {
+                    _MoMList[i].Status_long = "MoM Open";
+                }
+                else if (_MoMList[i].Status == (int)CMMS.CMMS_Status.MoM_CLOSE)
+                {
+                    _MoMList[i].Status_long = "MoM Close";
+                }
+                else if (_MoMList[i].Status == (int)CMMS.CMMS_Status.MoM_CANCEL)
+                {
+                    _MoMList[i].Status_long = "MoM Cancel";
+                }
+            }
 
             return _MoMList[0];
         }
