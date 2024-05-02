@@ -519,30 +519,28 @@ namespace CMMSAPIs.Repositories.Masters
                             {
                                 m_errorLog.SetError($"[Checklist: Row {rN}] Checklist name cannot be empty.");
                             }
-                            else if (checklistNames.Contains(Convert.ToString(newR["checklist_number"]).ToUpper()))
+                           
+                             else if (checklistNames.Contains(Convert.ToString(newR["checklist_number"]).ToUpper()))
                             {
                                 string checklist_Validation_Q = "select ifnull(f.name,'') as name ,facility_id  from checklist_number left join facilities f on f.id = checklist_number.facility_id where checklist_number='" + Convert.ToString(newR["checklist_number"]) + "';";
                                 DataTable dt = await Context.FetchData(checklist_Validation_Q).ConfigureAwait(false);
                                 string facility_name = Convert.ToString(dt.Rows[0][0]);
-                                int facility_id = Convert.ToInt32(dt.Rows[0][1]); 
-                                if (facility_name.ToString()== newR["facility_name"].ToString() && (facility_id==0) )
+                                int facility_id = Convert.ToInt32(dt.Rows[0][1]);
+                                if (facility_name.ToString() == newR["facility_name"].ToString())
                                 {
 
-                                    continue;
+                                    m_errorLog.SetError($"[Checklist: Row {rN}] Checklist name : {Convert.ToString(newR["checklist_number"])} already present in plant {facility_name}.");
                                 }
-                                else
-                                {
+                                //    else
+                                //    {
 
-                                    newR["facility_id"] = 0;
-                               //     string updateQry = $"UPDATE  checklist_number SET  facility_id =0   where facility_id=" + newR["facility_id"]+" and checklist_number ='" + Convert.ToString(newR["checklist_number"]) + "';";
-                               //     await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
-                                    continue;
-                                }
+                                //      newR["facility_id"] = 0;
+                                //     string updateQry = $"UPDATE  checklist_number SET  facility_id =0   where facility_id=" + newR["facility_id"]+" and checklist_number ='" + Convert.ToString(newR["checklist_number"]) + "';";
+                                //     await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+                                //     continue;
+                                //   }
                                 // m_errorLog.SetError($"[Checklist: Row {rN}] Checklist name : {Convert.ToString(newR["checklist_number"])} already present in plant {facility_name}.");
-
-
-
-
+                                // }*/
                             }
                             else
                             {
@@ -808,7 +806,7 @@ namespace CMMSAPIs.Repositories.Masters
             string message;
             if (checklists != null && checkpoints != null && m_errorLog.GetErrorCount() == 0)
             {
-                m_errorLog.SetImportInformation("File ready to Import");
+                m_errorLog.SetImportInformation("File Imported Successfully");
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
                 string qry = $"UPDATE uploadedfiles SET valid = 1 WHERE id = {file_id};";
                 await Context.ExecuteNonQry<int>(qry).ConfigureAwait(false);

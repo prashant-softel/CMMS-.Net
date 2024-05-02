@@ -78,7 +78,7 @@ namespace CMMSAPIs.Repositories.Users
             CMSetRoleAccess roleAccess = new CMSetRoleAccess();
             roleAccess.role_id = rid;
             roleAccess.set_existing_users = true;
-           // roleAccess = await GetRoleAccess(rid);
+          
             await  SetRoleAccess(roleAccess, userId);
         
             return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Role Added");

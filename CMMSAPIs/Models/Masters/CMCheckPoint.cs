@@ -19,8 +19,8 @@
         public int id { get; set; } //1 = bool, 2 = renge, 0 = text;
         public int name { get; set; } //1 = bool, 2 = renge;
         public int value { get; set; } //only required if type is 1 
-        public int min { get; set; } // only required if type is 2 
-        public int max { get; set; } // only required if type is 2 
+        public dynamic min { get; set; } // only required if type is 2 
+        public dynamic max { get; set; } // only required if type is 2 
 
     }
     public class CMCheckPointList

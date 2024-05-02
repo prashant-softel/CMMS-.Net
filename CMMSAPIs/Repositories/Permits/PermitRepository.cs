@@ -364,7 +364,7 @@ namespace CMMSAPIs.Repositories.Permits
 
         internal async Task<CMDefaultResponse> CreateJobType(CMCreateJobType request, int userID)
         {
-            string myQuery = "INSERT INTO permitjobtypelist(title, description, status, requireSOPJSA,isRequired, createdAt, createdBy) VALUES " +
+            string myQuery = "INSERT INTO permitjobtypelist(title, description, status, requireSOPJSA,createdAt, createdBy) VALUES " +
                                 $"('{request.title}', '{request.description}', 1, {(request.requires_SOP_JSA == null ? 0 : request.requires_SOP_JSA)}, " +
                                 $"'{UtilsRepository.GetUTCTime()}', {userID}); SELECT LAST_INSERT_ID();";
             DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
@@ -487,7 +487,7 @@ namespace CMMSAPIs.Repositories.Permits
             CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "SOP Deleted");
             return response;
         }
-        internal async Task<List<CMPermitList>> GetPermitList(int facility_id, string startDate, string endDate,int userID, bool self_view, bool non_expired, string facilitytimeZone) //if current_time>end_time then status = expired
+        internal async Task<List<CMPermitList>> GetPermitList(int facility_id, string startDate, string endDate, int userID, bool self_view, bool non_expired, string facilitytimeZone) //if current_time>end_time then status = expired
         {
             /*
              * Return id as well as string value
@@ -503,7 +503,7 @@ namespace CMMSAPIs.Repositories.Permits
             }
             statusSubQuery += $"ELSE '{Status(0)}' END";
             string myQuery = "SELECT " +
-                                 $"ptw.id as permitId, CASE when ptw.endDate < '{UtilsRepository.GetUTCTime()}' then 1 else 0 END as isExpired,ptw.TBT_Done_By as TBT_Done_By_id, ptw.code, ptw.status as ptwStatus, ptw.permitNumber as permit_site_no, permitType.id as permit_type, permitType.title as PermitTypeName, group_concat(distinct asset_cat.name order by asset_cat.id separator ', ') as equipment_categories, facilities.id as workingAreaId, facilities.name as workingAreaName, ptw.title as title, ptw.description as description, acceptedUser.id as request_by_id, CONCAT(acceptedUser.firstName , ' ' , acceptedUser.lastName) as request_by_name,DATE_FORMAT(ptw.acceptedDate,'%Y-%m-%d %H:%i')  as request_datetime, issuedUser.id as issued_by_id, CONCAT(issuedUser.firstName , ' ' , issuedUser.lastName) as issued_by_name,DATE_FORMAT(ptw.issuedDate,'%Y-%m-%d %H:%i') as issue_datetime, approvedUser.id as approved_by_id, CONCAT(approvedUser.firstName , ' ' , approvedUser.lastName) as approved_by_name,ptw.TBT_Done_Check as TBT_Done_Check,DATE_FORMAT(ptw.approvedDate,'%Y-%m-%d %H:%i') as approved_datetime, {statusSubQuery} as current_status_short " +
+                                 $"ptw.id as permitId, CASE when ptw.endDate < '{UtilsRepository.GetUTCTime()}' then 1 else 0 END as isExpired,ptw.TBT_Done_By as TBT_Done_By_id, ptw.code, ptw.status as ptwStatus, ptw.permitNumber as permit_site_no, permitType.id as permit_type, permitType.title as PermitTypeName, group_concat(distinct asset_cat.name order by asset_cat.id separator ', ') as equipment_categories, facilities.id as workingAreaId, facilities.name as workingAreaName, ptw.title as title, ptw.description as description, acceptedUser.id as request_by_id, CONCAT(acceptedUser.firstName , ' ' , acceptedUser.lastName) as request_by_name, ptw.acceptedDate as request_datetime, issuedUser.id as issued_by_id, CONCAT(issuedUser.firstName , ' ' , issuedUser.lastName) as issued_by_name, ptw.issuedDate as issue_datetime, approvedUser.id as approved_by_id, CONCAT(approvedUser.firstName , ' ' , approvedUser.lastName) as approved_by_name,ptw.TBT_Done_Check as TBT_Done_Check, ptw.approvedDate as approved_datetime, {statusSubQuery} as current_status_short " +
                                  " FROM " +
                                         "permits as ptw " +
                                   "JOIN " +
@@ -529,7 +529,7 @@ namespace CMMSAPIs.Repositories.Permits
             if (facility_id > 0)
             {
                 myQuery += $"WHERE ptw.facilityId = { facility_id } ";
-                 checkFilter = 1;
+                checkFilter = 1;
 
                 if (self_view)
                     myQuery += $"AND ( issuedUser.id = {userID} OR approvedUser.id = {userID} OR acceptedUser.id = {userID} ) ";
@@ -552,9 +552,9 @@ namespace CMMSAPIs.Repositories.Permits
                 DateTime start = DateTime.Parse(startDate);
                 DateTime end = DateTime.Parse(endDate);
                 if (DateTime.Compare(start, end) < 0)
-                    myQuery += " DATE_FORMAT(ptw.acceptedDate,'%Y-%m-%d %H:%i') BETWEEN \'" + startDate + "\' AND \'" + endDate + "\'";
+                    myQuery += " DATE_FORMAT(ptw.acceptedDate,'%Y-%m-%d') BETWEEN \'" + startDate + "\' AND \'" + endDate + "\'";
             }
-            if(non_expired == true)
+            if (non_expired == true)
             {
                 if (checkFilter == 0)
                 {
@@ -573,7 +573,7 @@ namespace CMMSAPIs.Repositories.Permits
             //$" WHERE ptw.facilityId = { facility_id } and user.id = { userID } ";
             List<CMPermitList> _PermitList = await Context.GetData<CMPermitList>(myQuery).ConfigureAwait(false);
 
-            foreach(var permit in _PermitList)
+            foreach (var permit in _PermitList)
             {
                 if (permit.ptwStatus == (int)CMMS.CMMS_Status.PTW_APPROVED && permit.TBT_Done_By_id <= 0)
                     permit.current_status_short = "Approved But TBT not done";
@@ -582,26 +582,137 @@ namespace CMMSAPIs.Repositories.Permits
             {
                 if (PermitList != null && PermitList.request_datetime != null)
                 {
-                    DateTime request_datetime = Convert.ToDateTime(PermitList.request_datetime);
-                    PermitList.request_datetime = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone,request_datetime);
+                    PermitList.request_datetime = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, PermitList.request_datetime);
                 }
-                
+
                 if (PermitList != null && PermitList.issued_datetime != null)
                 {
-                    DateTime issued_datetime = Convert.ToDateTime(PermitList.issued_datetime);
-                    PermitList.issued_datetime = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, issued_datetime); 
+                    PermitList.issued_datetime = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, PermitList.issued_datetime);
                 }
                 if (PermitList != null && PermitList.approved_datetime != null)
                 {
-                    DateTime approved_datetime = Convert.ToDateTime(PermitList.approved_datetime);
-                    PermitList.approved_datetime = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, approved_datetime);
+                    PermitList.approved_datetime = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, PermitList.approved_datetime);
                 }
-               
+
             }
             return _PermitList;
         }
 
-           internal async Task<CMDefaultResponse> CreatePermit(CMCreatePermit request, int userID)
+        // internal async Task<List<CMPermitList>> GetPermitList(int facility_id, string startDate, string endDate,int userID, bool self_view, bool non_expired, string facilitytimeZone) //if current_time>end_time then status = expired
+        //  {
+        /*
+         * Return id as well as string value
+         * Use Permits, Assets, AssetsCategory, Users table to fetch below fields
+         * Permit id, site Permit No., Permit Type, Equipment Categories, Working Area/Equipment, Description, Permit requested by
+         * Request Date/Time, Approved By, Approved Date/Time, Current Status(Approved, Rejected, closed).           
+        */
+        /* var checkFilter = 0;
+         string statusSubQuery = "CASE ";
+         for (int i = (int)CMMS.CMMS_Status.PTW_CREATED; i <= (int)CMMS.CMMS_Status.PTW_EXPIRED; i++)
+         {
+             statusSubQuery += $"WHEN ptw.status = {i} THEN '{Status(i)}' ";
+         }
+         statusSubQuery += $"ELSE '{Status(0)}' END";
+         string myQuery = "SELECT " +
+                              $"ptw.id as permitId, CASE when ptw.endDate < '{UtilsRepository.GetUTCTime()}' then 1 else 0 END as isExpired,ptw.TBT_Done_By as TBT_Done_By_id, ptw.code, ptw.status as ptwStatus, ptw.permitNumber as permit_site_no, permitType.id as permit_type, permitType.title as PermitTypeName, group_concat(distinct asset_cat.name order by asset_cat.id separator ', ') as equipment_categories, facilities.id as workingAreaId, facilities.name as workingAreaName, ptw.title as title, ptw.description as description, acceptedUser.id as request_by_id, CONCAT(acceptedUser.firstName , ' ' , acceptedUser.lastName) as request_by_name,ptw.acceptedDate  as request_datetime, issuedUser.id as issued_by_id, CONCAT(issuedUser.firstName , ' ' , issuedUser.lastName) as issued_by_name,ptw.issuedDate as issue_datetime, approvedUser.id as approved_by_id, CONCAT(approvedUser.firstName , ' ' , approvedUser.lastName) as approved_by_name,ptw.TBT_Done_Check as TBT_Done_Check,ptw.approvedDate as approved_datetime, {statusSubQuery} as current_status_short " +
+                              " FROM " +
+                                     "permits as ptw " +
+                               "JOIN " +
+                                     "facilities as facilities ON ptw.blockId = facilities.id " +
+                               "LEFT JOIN " +
+                                     "permitlotoassets as loto ON ptw.id = loto.PTW_id " +
+                               "LEFT JOIN " +
+                                     "assets ON assets.id = loto.Loto_Asset_id " +
+                               "LEFT JOIN " +
+                                     "permitassetlists as cat ON cat.ptwId = ptw.id " +
+                               "LEFT JOIN " +
+                                     "assetcategories as asset_cat ON cat.assetId = asset_cat.id " +
+                               "LEFT JOIN " +
+                                      "permittypelists as permitType ON ptw.typeId = permitType.id " +
+                               "LEFT JOIN " +
+                                      "jobs as job ON ptw.id = job.linkedPermit " +
+                               "LEFT JOIN " +
+                                     "users as issuedUser ON issuedUser.id = ptw.issuedById " +
+                               "LEFT JOIN " +
+                                     "users as approvedUser ON approvedUser.id = ptw.approvedById " +
+                               "LEFT JOIN " +
+                                     "users as acceptedUser ON acceptedUser.id = ptw.acceptedById ";
+         if (facility_id > 0)
+         {
+             myQuery += $"WHERE ptw.facilityId = { facility_id } ";
+              checkFilter = 1;
+
+             if (self_view)
+                 myQuery += $"AND ( issuedUser.id = {userID} OR approvedUser.id = {userID} OR acceptedUser.id = {userID} ) ";
+         }
+         else
+         {
+             throw new ArgumentException("Invalid Facility ID");
+         }
+         if (startDate?.Length > 0 && endDate?.Length > 0)
+         {
+             if (checkFilter == 0)
+             {
+                 myQuery += " where ";
+                 checkFilter = 1;
+             }
+             else
+             {
+                 myQuery += " and ";
+             }
+             DateTime start = DateTime.Parse(startDate);
+             DateTime end = DateTime.Parse(endDate);
+             if (DateTime.Compare(start, end) < 0)
+                 myQuery += " ptw.acceptedDate BETWEEN \'" + startDate + "\' AND \'" + endDate + "\'";
+         }
+         if(non_expired == true)
+         {
+             if (checkFilter == 0)
+             {
+                 myQuery += " where ";
+                 checkFilter = 1;
+             }
+             else
+             {
+                 myQuery += " and ";
+             }
+
+             myQuery += $" ptw.endDate > '{UtilsRepository.GetUTCTime()}' and ptw.status = {(int)CMMS.CMMS_Status.PTW_APPROVED} ";
+         }
+
+         myQuery += "GROUP BY ptw.id ORDER BY ptw.id DESC;";
+         //$" WHERE ptw.facilityId = { facility_id } and user.id = { userID } ";
+         List<CMPermitList> _PermitList = await Context.GetData<CMPermitList>(myQuery).ConfigureAwait(false);
+
+         foreach(var permit in _PermitList)
+         {
+             if (permit.ptwStatus == (int)CMMS.CMMS_Status.PTW_APPROVED && permit.TBT_Done_By_id <= 0)
+                 permit.current_status_short = "Approved But TBT not done";
+         }
+         foreach (var PermitList in _PermitList)
+         {
+             if (PermitList != null && PermitList.request_datetime != null)
+             {
+                 DateTime request_datetime = Convert.ToDateTime(PermitList.request_datetime);
+                 PermitList.request_datetime = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone,request_datetime);
+             }
+
+             if (PermitList != null && PermitList.issued_datetime != null)
+             {
+                 DateTime issued_datetime = Convert.ToDateTime(PermitList.issued_datetime);
+                 PermitList.issued_datetime = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, issued_datetime); 
+             }
+             if (PermitList != null && PermitList.approved_datetime != null)
+             {
+                 DateTime approved_datetime = Convert.ToDateTime(PermitList.approved_datetime);
+                 PermitList.approved_datetime = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, approved_datetime);
+             }
+
+         }
+         return _PermitList;
+     }*/
+
+        internal async Task<CMDefaultResponse> CreatePermit(CMCreatePermit request, int userID)
         {
             /*
              * Create Form data will go in several tables

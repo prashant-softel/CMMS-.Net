@@ -10,11 +10,17 @@ namespace CMMSAPIs.Models.Inventory
         public string name { get; set; }
         public int facilityId { get; set; }
         public string facilityName { get; set; }
+
+        public int stockCount { get; set; }
         public int blockId { get; set; }
         public string blockName { get; set; }
         public string asset_description { get; set; }
         public int typeId { get; set; }
+        public int vendorid { get; set; }
+        public string meter_limit { get; set; }
+        public string meter_unit { get; set; }
         public string type { get; set; }
+        public int retirementStatus { get; set; }
         public int categoryId { get; set; }
         public string categoryName { get; set; }
         public int parentId { get; set; }
@@ -43,10 +49,14 @@ namespace CMMSAPIs.Models.Inventory
         public string acRating { get; set; }
         public string currency { get; set; }
         public int moduleQuantity { get; set; }
+        public int photoId { get; set; }
         public int calibrationFrequency { get; set; }
         public string calibrationFreqType { get; set; }
         public int calibrationReminderDays { get; set; }
         public DateTime calibrationLastDate { get; set; }
+
+        public DateTime start_date { get; set; }
+        public DateTime expiry_date { get; set; }
         public DateTime calibrationDueDate { get; set; }
         public int specialTool { get; set; }
         public int specialToolEmp { get; set; }

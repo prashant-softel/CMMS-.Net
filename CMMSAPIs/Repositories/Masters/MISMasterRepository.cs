@@ -465,7 +465,7 @@ namespace CMMSAPIs.Repositories.Masters
             int id = Convert.ToInt32(dt.Rows[0][0]);
             return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS,"WaterType  Created");
         }
-             internal async Task<CMDefaultResponse> UpdateWaterType(WaterDataType request, int UserID)
+         internal async Task<CMDefaultResponse> UpdateWaterType(WaterDataType request, int UserID)
         {
             string updateQry = "UPDATE mis_watertype  SET ";
             if (request.name != null && request.name != "")
