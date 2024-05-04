@@ -217,7 +217,7 @@ namespace CMMSAPIs.Repositories.Audits
         internal async Task<CMDefaultResponse> ApproveAuditPlan(CMApproval request, int userId)
         {
             CMDefaultResponse response = null;
-            string SelectQ = "select id from st_audit where ID = '" + request.id + "'";
+            string SelectQ = "select id, Facility_id,Frequency as ApplyFrequency, Schedule_Date,Auditor_Emp_ID as auditor_id from st_audit where ID = '" + request.id + "'";
             List<CMCreateAuditPlan> auditPlanList = await Context.GetData<CMCreateAuditPlan>(SelectQ).ConfigureAwait(false);
 
             if (auditPlanList != null && auditPlanList.Count > 0)
@@ -233,6 +233,14 @@ namespace CMMSAPIs.Repositories.Audits
             else
             {
                 response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Audit plan does not exists to approve.");
+            }
+
+            for(var i = 0; i < auditPlanList.Count; i++)
+            {
+                string entryInTask = $" INSERT INTO pm_task (plan_id, category_id, facility_id, frequency_id, plan_date, prev_task_done_date, closed_at, " +
+                    $"assigned_to, PTW_id, status) VALUES " +
+                    $" ({auditPlanList[i].id},0,{auditPlanList[i].Facility_id},{auditPlanList[i].ApplyFrequency},'{auditPlanList[i].Schedule_Date.ToString("yyyy-MM-dd HH:mm:ss")}',null,null,{auditPlanList[i].auditor_id},0,{(int)CMMS.CMMS_Status.AUDIT_APPROVED});";
+                var result = await Context.ExecuteNonQry<int>(entryInTask);
             }
 
             return response;
@@ -1004,23 +1012,39 @@ namespace CMMSAPIs.Repositories.Audits
         {
             if (id <= 0)
                 throw new ArgumentException("Invalid Facility ID");
-            string planListQry = $"SELECT plan.id as plan_id, plan.plan_name, plan.status as status_id, statuses.statusName as status_short, plan.plan_date, " +
-                                    $"facilities.id as facility_id, facilities.name as facility_name, category.id as category_id, category.name as category_name, " +
-                                    $"frequency.id as plan_freq_id, frequency.name as plan_freq_name, createdBy.id as created_by_id, " +
-                                    $"CONCAT(createdBy.firstName, ' ', createdBy.lastName) as created_by_name, plan.created_at,approvedBy.id as approved_by_id, CONCAT(approvedBy.firstName, ' ', approvedBy.lastName) as approved_by_name, plan.approved_at, rejectedBy.id as rejected_by_id, CONCAT(rejectedBy.firstName, ' ', rejectedBy.lastName) as rejected_by_name, plan.rejected_at,CONCAT(assignedTo.firstName, ' ', assignedTo.lastName) as assigned_to_name, " +
-                                    $"updatedBy.id as updated_by_id, CONCAT(updatedBy.firstName, ' ', updatedBy.lastName) as updated_by_name, plan.updated_at " +
-                                    $"FROM pm_plan as plan " +
-                                    $"LEFT JOIN statuses ON plan.status = statuses.softwareId " +
-                                    $"JOIN facilities ON plan.facility_id = facilities.id " +
-                                    $"LEFT JOIN assetcategories as category ON plan.category_id = category.id " +
-                                    $"LEFT JOIN frequency ON plan.frequency_id = frequency.id " +
-                                    $"LEFT JOIN users as createdBy ON createdBy.id = plan.created_by " +
-                                    $"LEFT JOIN users as updatedBy ON updatedBy.id = plan.updated_by " +
-                                    $"LEFT JOIN users as approvedBy ON approvedBy.id = plan.approved_by " +
-                                    $"LEFT JOIN users as rejectedBy ON rejectedBy.id = plan.rejected_by " +
-                                    $"LEFT JOIN users as assignedTo ON assignedTo.id = plan.assigned_to " +
+            //string planListQry = $"SELECT plan.id as plan_id, plan.plan_name, plan.status as status_id, statuses.statusName as status_short, plan.plan_date, " +
+            //                        $"facilities.id as facility_id, facilities.name as facility_name, category.id as category_id, category.name as category_name, " +
+            //                        $"frequency.id as plan_freq_id, frequency.name as plan_freq_name, createdBy.id as created_by_id, " +
+            //                        $"CONCAT(createdBy.firstName, ' ', createdBy.lastName) as created_by_name, plan.created_at,approvedBy.id as approved_by_id, CONCAT(approvedBy.firstName, ' ', approvedBy.lastName) as approved_by_name, plan.approved_at, rejectedBy.id as rejected_by_id, CONCAT(rejectedBy.firstName, ' ', rejectedBy.lastName) as rejected_by_name, plan.rejected_at,CONCAT(assignedTo.firstName, ' ', assignedTo.lastName) as assigned_to_name, " +
+            //                        $"updatedBy.id as updated_by_id, CONCAT(updatedBy.firstName, ' ', updatedBy.lastName) as updated_by_name, plan.updated_at " +
+            //                        $"FROM st_audit as plan " +
+            //                        $"LEFT JOIN statuses ON plan.status = statuses.softwareId " +
+            //                        $"JOIN facilities ON plan.facility_id = facilities.id " +
+            //                        $"LEFT JOIN assetcategories as category ON plan.category_id = category.id " +
+            //                        $"LEFT JOIN frequency ON plan.frequency_id = frequency.id " +
+            //                        $"LEFT JOIN users as createdBy ON createdBy.id = plan.created_by " +
+            //                        $"LEFT JOIN users as approvedBy ON approvedBy.id = plan.approved_by " +
+            //                        $"LEFT JOIN users as rejectedBy ON rejectedBy.id = plan.rejected_by " +
+            //                        $"LEFT JOIN users as assignedTo ON assignedTo.id = plan.assigned_to " +
 
-                                    $"WHERE plan.id = {id} ";
+            //                        $"WHERE plan.id = {id} ";
+            string planListQry = $"SELECT plan.id as plan_id, plan.plan_number plan_name, plan.status as status_id, statuses.statusName as status_short, plan.Audit_Added_date plan_date, " +
+                $" facilities.id as facility_id, facilities.name as facility_name," +
+                $" frequency.id as plan_freq_id, frequency.name as plan_freq_name, createdBy.id as created_by_id, " +
+                $" CONCAT(createdBy.firstName, ' ', createdBy.lastName) as created_by_name, plan.created_at,approvedBy.id as approved_by_id," +
+                $" CONCAT(approvedBy.firstName, ' ', approvedBy.lastName) as approved_by_name, plan.approved_Date approved_at, rejectedBy.id as rejected_by_id, " +
+                $" CONCAT(rejectedBy.firstName, ' ', rejectedBy.lastName) as rejected_by_name, plan.rejected_Date rejected_at," +
+                $" CONCAT(assignedTo.firstName, ' ', assignedTo.lastName) as assigned_to_name" +
+                $" FROM st_audit as plan " +
+                $" LEFT JOIN statuses ON plan.status = statuses.softwareId " +
+                $" JOIN facilities ON plan.facility_id = facilities.id " +
+                $" LEFT JOIN frequency ON plan.Frequency = frequency.id " +
+                $" LEFT JOIN users as createdBy ON createdBy.id = plan.created_by " +
+                $" LEFT JOIN users as approvedBy ON approvedBy.id = plan.approved_by " +
+                $" LEFT JOIN users as rejectedBy ON rejectedBy.id = plan.rejected_by " +
+                $" LEFT JOIN users as assignedTo ON assignedTo.id = plan.Auditor_Emp_ID " +
+                $"WHERE plan.id = {id} "; 
+
             List<CMPMPlanDetail> planDetails = await Context.GetData<CMPMPlanDetail>(planListQry).ConfigureAwait(false);
 
             if (planDetails.Count == 0)
@@ -1105,12 +1129,10 @@ namespace CMMSAPIs.Repositories.Audits
             //    statusQry += $"WHEN pm_schedule.status = {(int)status.Key} THEN '{status.Value}' ";
             //statusQry += "ELSE 'Unknown Status' END";
 
-            string myQuery = $"SELECT pm_task.id,pm_task.category_id,cat.name as category_name,  CONCAT('AuditTASK',pm_task.id) as task_code,pm_plan.plan_name as plan_title,pm_task.facility_id, pm_task.frequency_id as frequency_id, freq.name as frequency_name, pm_task.plan_date as due_date,prev_task_done_date as last_done_date, closed_at as done_date, CONCAT(assignedTo.firstName,' ',assignedTo.lastName)  as assigned_to_name, pm_task.PTW_id as permit_id, CONCAT('PTW',pm_task.PTW_id) as permit_code,permit.status as ptw_status, PM_task.status " +
+            string myQuery = $"SELECT pm_task.id,pm_task.category_id,'' as category_name,  CONCAT('AuditTASK',pm_task.id) as task_code,st_audit.plan_number as plan_title,pm_task.facility_id, pm_task.frequency_id as frequency_id, freq.name as frequency_name, pm_task.plan_date as due_date,prev_task_done_date as last_done_date, closed_at as done_date, CONCAT(assignedTo.firstName,' ',assignedTo.lastName)  as assigned_to_name, pm_task.PTW_id as permit_id, CONCAT('PTW',pm_task.PTW_id) as permit_code, PM_task.status " +
                                "FROM pm_task " +
                                $"left join users as assignedTo on pm_task.assigned_to = assignedTo.id " +
-                               $"left join pm_plan  on pm_task.plan_id = pm_plan.id " +
-                               $"left join assetcategories as cat  on pm_task.category_id = cat.id " +
-                               $"left join permits as permit on pm_task.PTW_id = permit.id " +
+                               $"left join st_audit  on pm_task.plan_id = st_audit.id " +
                                $"left join frequency as freq on pm_task.frequency_id = freq.id where 1 ";
 
             // myQuery += (frequencyIds.Length > 0 ? " AND freq.id IN ( '" + string.Join("' , '", frequencyIds) + "' )" : string.Empty);
@@ -1156,7 +1178,7 @@ namespace CMMSAPIs.Repositories.Audits
                     else
                     {
                         CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(task.status);
-                        string _shortStatus = getShortStatus(CMMS.CMMS_Modules.PM_PLAN, _Status);
+                        string _shortStatus = getShortStatus(CMMS.CMMS_Modules.AUDIT_PLAN, _Status);
                         task.status_short = _shortStatus;
                     }
 
