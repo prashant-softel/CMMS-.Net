@@ -971,7 +971,16 @@ namespace CMMSAPIs.Repositories.Users
                         }
                     }
                 }
+          
+
+
+
+                default_user_access = default_user_access.ToLookup(item => item.feature_id)
+                                    .Select(group => group.First())
+                                    .ToList();
+
                 Dictionary<dynamic, CMAccessList> old_access = default_user_access.SetPrimaryKey("feature_id");
+
                 if (request.access_list != null)
                 {
                     if (request.access_list.Count > 0)
