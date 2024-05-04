@@ -280,26 +280,26 @@ namespace CMMSAPIs.Repositories.JC
 
             //plant details 
             string myQuery1 = $"SELECT distinct(jc.id ) as id , jc.PTW_id as ptwId, job.id as jobid, facilities.name as plant_name,fc.name as block_name, " +
-                                $"asset_cat.name as asset_category_name, jc.JC_title as title , jc.JC_Description as description, " +
-                                $"job.assignedId as currentEmpID, jc.JC_Added_Date as created_at, jc.JC_Date_Start as JC_Start_At, " +
-                                $"jc.JC_Approved as JC_Approved, jc. JC_Status as status, " +
-                                $"CONCAT(user.firstName , ' ' , user.lastName) as UpdatedByName, " +
-                                $"CONCAT(user1.firstName , ' ' , user1.lastName) as JC_Approved_By_Name, " +
-                                $"CONCAT(user2.firstName , ' ' , user2.lastName) as created_by, " +
-                                $"CONCAT(user3.firstName , ' ' , user3.lastName) as JC_Start_By_Name, " +
-                                $"CONCAT(user4.firstName , ' ' , user4.lastName) as JC_Closed_by_Name " +
-                                $"FROM jobs as job " +
-                                $"LEFT JOIN  jobmappingassets as mapAssets ON mapAssets.jobId = job.id " +
-                                $"Left join assetcategories as asset_cat ON mapAssets.categoryId = asset_cat.id " +
-                                $"JOIN facilities as facilities ON job.facilityId= facilities.id " +
-                                $"JOIN facilities as fc ON job.blockId = fc.id "+
-                                $"LEFT JOIN jobcards as jc on jc.jobId = job.id " +
-                                $"LEFT JOIN users as user ON user.id = jc.JC_Update_by " +
-                                $"LEFT JOIN  users as user1 ON user1.id = jc.JC_Rejected_By_id " +
-                                $"LEFT JOIN  users as user2 ON user2.id = jc.JC_Added_by " +
-                                $"LEFT JOIN  users as user3 ON user3.id = jc.JC_Start_By_id " +
-                                $"LEFT JOIN  users as user4 ON user4.id = jc.JC_End_By_id " +
-                                $"where jc.id = { jc_id }";
+                                 $" jc.JC_title as title , jc.JC_Description as description, " +
+                                 $"job.assignedId as currentEmpID, jc.JC_Added_Date as created_at, jc.JC_Date_Start as JC_Start_At, " +
+                                 $"jc.JC_Approved as JC_Approved, jc. JC_Status as status, " +
+                                 $"CONCAT(user.firstName , ' ' , user.lastName) as UpdatedByName, " +
+                                 $"CONCAT(user1.firstName , ' ' , user1.lastName) as JC_Approved_By_Name, " +
+                                 $"CONCAT(user2.firstName , ' ' , user2.lastName) as created_by, " +
+                                 $"CONCAT(user3.firstName , ' ' , user3.lastName) as JC_Start_By_Name, " +
+                                 $"CONCAT(user4.firstName , ' ' , user4.lastName) as JC_Closed_by_Name " +
+                                 $"FROM jobs as job " +
+                                 $"LEFT JOIN  jobmappingassets as mapAssets ON mapAssets.jobId = job.id " +
+                                 $"Left join assetcategories as asset_cat ON mapAssets.categoryId = asset_cat.id " +
+                                 $"JOIN facilities as facilities ON job.facilityId= facilities.id " +
+                                 $"JOIN facilities as fc ON job.blockId = fc.id " +
+                                 $"LEFT JOIN jobcards as jc on jc.jobId = job.id " +
+                                 $"LEFT JOIN users as user ON user.id = jc.JC_Update_by " +
+                                 $"LEFT JOIN  users as user1 ON user1.id = jc.JC_Rejected_By_id " +
+                                 $"LEFT JOIN  users as user2 ON user2.id = jc.JC_Added_by " +
+                                 $"LEFT JOIN  users as user3 ON user3.id = jc.JC_Start_By_id " +
+                                 $"LEFT JOIN  users as user4 ON user4.id = jc.JC_End_By_id " +
+                                 $"where jc.id = { jc_id }";
 
             List<CMJCDetail> _plantDetails = await Context.GetData<CMJCDetail>(myQuery1).ConfigureAwait(false);
             if (_plantDetails.Count == 0)
@@ -323,8 +323,10 @@ namespace CMMSAPIs.Repositories.JC
                 id = job.job_id;
                 job.status_short = JobRepository.getShortStatus(CMMS.CMMS_Modules.JOB, (CMMS.CMMS_Status)job.status);
             }
-            
 
+            string myquery12 = $"SELECT distinct (asset_cat.name) as asset_category_name from  assetcategories as asset_cat Left join jobmappingassets as mapAssets on mapAssets.categoryId = asset_cat.id  " +
+                              $"where mapAssets.jobId= { id }";
+            List<CMJCAssetName> asset_category_name = await Context.GetData<CMJCAssetName>(myquery12).ConfigureAwait(false);
 
             //permit details
             string myQuery3 = $"SELECT ptw.id as permit_id,ptw.status as status, ptw.permitNumber as site_permit_no, permitType.title as permit_type, ptw.description as permit_description, CONCAT(user.firstName, user.lastName) as job_created_by_name, CONCAT(user1.firstName , ' ' , user1.lastName) as permit_issued_by_name, CONCAT(user2.firstName , ' ' , user2.lastName) as permit_approved_by_name,ptw.TBT_Done_Check as TBT_Done_Check   FROM permits as ptw LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId JOIN jobs as job ON ptw.id = job.linkedPermit LEFT JOIN users as user ON user.id = job.assignedId LEFT JOIN users as user1 ON user1.id = ptw.issuedById LEFT JOIN users as user2 ON user2.id = ptw.approvedById JOIN jobcards as jc on jc.PTW_id = ptw.id where jc.id = { jc_id}";
@@ -378,6 +380,7 @@ namespace CMMSAPIs.Repositories.JC
 
             _plantDetails[0].LstCMJCJobDetailList = _jobDetails;
             _plantDetails[0].LstPermitDetailList = _permitDetails;
+            _plantDetails[0].asset_category_name = asset_category_name;
             _plantDetails[0].LstCMJCIsolatedDetailList = _isolatedDetails;
             _plantDetails[0].LstCMJCLotoDetailList = _lotoList;
             _plantDetails[0].LstCMJCEmpList = _empList;

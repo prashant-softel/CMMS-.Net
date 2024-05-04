@@ -10,7 +10,7 @@ namespace CMMSAPIs.Models.JC
         public int id { get; set; }
         public string plant_name { get; set; }
         public string block_name { get; set; }
-        public string asset_category_name { get; set; }
+      //  public string asset_category_name { get; set; }
         public string title { get; set; }
         public string description { get; set; }
         public int currentEmpID { get; set; }
@@ -31,6 +31,7 @@ namespace CMMSAPIs.Models.JC
         public string status_long { get; set; }
         public List<CMJCJobDetail> LstCMJCJobDetailList { get; set; }
         public List<CMJCPermitDetail> LstPermitDetailList { get; set; }
+        public List<CMJCAssetName> asset_category_name { get; set; }
         public List<CMJCIsolatedDetail> LstCMJCIsolatedDetailList { get; set; }
         public List<CMJCLotoDetail> LstCMJCLotoDetailList { get; set; }
         public List<CMJCEmpDetail> LstCMJCEmpList { get; set; }
@@ -115,6 +116,10 @@ public class CMWorkTypeTools
 {
     public int toolId { get; set; }
     public string toolName { get; set; }
+}
+public class CMJCAssetName
+{
+    public string asset_category_name { get; set; }
 }
 
 
