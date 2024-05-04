@@ -30,6 +30,9 @@ namespace CMMSAPIs.Models.Inventory
         public string model { get; set; }   
         public string serialNumber { get; set; }
         public int cost { get; set; }
+        public string parent_equipment_no { get; set; }
+
+       
         public string currency { get; set; }
         public int currencyId { get; set; }
         public int stockCount { get; set; }

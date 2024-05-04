@@ -20,6 +20,7 @@ namespace CMMSAPIs.Models.Inventory
         public string meter_limit { get; set; }
         public string meter_unit { get; set; }
         public string type { get; set; }
+        public  string parent_equipment_no { get; set; }
         public int retirementStatus { get; set; }
         public int categoryId { get; set; }
         public string categoryName { get; set; }
@@ -65,11 +66,12 @@ namespace CMMSAPIs.Models.Inventory
         public string certificate_number { get; set; }
         public string warranty_certificate_path { get; set; }
         public int warrantyTypeId { get; set; }
-        public string warrantyTypeName { get; set; }
+        public string warrantyType { get; set; }
+        
         public int warrantyProviderId { get; set; }
         public string warrantyProviderName { get; set; }
         public int warrantyTermTypeId { get; set; }
-        public int warrrantyTermTypeName { get; set; }
+        public string warranty_term_type { get; set; }
         public AttachmentByReporter attachments { get; set; }
         public int mutliplier { get; set; }
         public int statusId { get; set; }
