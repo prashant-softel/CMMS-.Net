@@ -345,5 +345,59 @@ namespace CMMSAPIs.Controllers.Audits
             }
         }
 
+        [Route("CreateAuditSkip")]
+        [HttpPost]
+        public async Task<IActionResult> CreateAuditSkip(CMApproval request)
+        {
+            try
+            {
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _AuditPlanBS.CreateAuditSkip(request, userId);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid data sent.";
+                return Ok(item);
+            }
+        }
+        [Route("RejectAuditSkip")]
+        [HttpPost]
+        public async Task<IActionResult> RejectAuditSkip(CMApproval request)
+        {
+            try
+            {
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _AuditPlanBS.RejectAuditSkip(request, userId);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid data sent.";
+                return Ok(item);
+            }
+        }
+        [Route("ApproveAuditSkip")]
+        [HttpPost]
+        public async Task<IActionResult> ApproveAuditSkip(CMApproval request)
+        {
+            try
+            {
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _AuditPlanBS.ApproveAuditSkip(request, userId);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid data sent.";
+                return Ok(item);
+            }
+        }
     }
 }
