@@ -30,6 +30,9 @@ namespace CMMSAPIs.BS.Audits
         Task<CMPMPlanDetail> GetPlanDetail(int id, string facilitytime);
         Task<List<CMPMTaskList>> GetTaskList(int facility_id, DateTime? start_date, DateTime? end_date, string frequencyIds, string facilitytime);
         Task<CMPMTaskView> GetTaskDetail(int task_id,string facilitytime);
+        Task<CMDefaultResponse> CreateAuditSkip(CMApproval request, int userId);
+        Task<CMDefaultResponse> RejectAuditSkip(CMApproval request, int userId);
+        Task<CMDefaultResponse> ApproveAuditSkip(CMApproval request, int userId);
 
     }
     public class AuditPlanBS : IAuditPlanBS
@@ -302,6 +305,53 @@ namespace CMMSAPIs.BS.Audits
                 using (var repos = new AuditPlanRepository(getDB))
                 {
                     return await repos.GetTaskDetail(task_id, facilitytime);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> CreateAuditSkip(CMApproval request, int userId)
+        {
+            try
+            {
+                using (var repos = new AuditPlanRepository(getDB))
+                {
+                    return await repos.CreateAuditSkip(request, userId);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> RejectAuditSkip(CMApproval request, int userId)
+        {
+            try
+            {
+                using (var repos = new AuditPlanRepository(getDB))
+                {
+                    return await repos.RejectAuditSkip(request, userId);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<CMDefaultResponse> ApproveAuditSkip(CMApproval request, int userId)
+        {
+            try
+            {
+                using (var repos = new AuditPlanRepository(getDB))
+                {
+                    return await repos.ApproveAuditSkip(request, userId);
 
                 }
             }
