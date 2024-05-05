@@ -540,14 +540,18 @@ namespace CMMSAPIs.Helper
             EQUIP_ABANDONED,
 
             AUDIT_SCHEDULE = 421,
-            AUDIT_STARTED,
+            AUDIT_START,
             AUDIT_DELETED,
-            AUDIT_APPROVED,
             AUDIT_REJECTED,
+            AUDIT_APPROVED,           
+            AUDIT_SKIP,
+            AUDIT_SKIP_REJECT,
+            AUDIT_SKIP_APPROVED,
             AUDIT_CLOSED,
 
 
-	    MoM_OPEN = 451,
+
+	        MoM_OPEN = 451,
             MoM_CANCEL,
             MoM_CLOSE,
         }
