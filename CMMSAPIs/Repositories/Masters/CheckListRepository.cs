@@ -509,11 +509,12 @@ namespace CMMSAPIs.Repositories.Masters
                             }
                             catch(KeyNotFoundException)
                             {
+                                m_errorLog.SetError($"[Checklist: Row {rN}] Invalid Facility '{newR["facility_name"]}'.");
                                 //if (Convert.ToString(newR["facility_name"]) == null || Convert.ToString(newR["facility_name"]) == "")
                                 //    m_errorLog.SetError($"[Checklist: Row {rN}] Facility Name cannot be empty.");
                                 //else
                                 //    m_errorLog.SetError($"[Checklist: Row {rN}] Invalid Facility '{newR["facility_name"]}'.");
-                                newR["facility_id"] = 0;
+                                //newR["facility_id"] = 0;
                             }
                             if (Convert.ToString(newR["checklist_number"]) == null || Convert.ToString(newR["checklist_number"]) == "")
                             {
@@ -524,13 +525,24 @@ namespace CMMSAPIs.Repositories.Masters
                             {
                                 string checklist_Validation_Q = "select ifnull(f.name,'') as name ,facility_id  from checklist_number left join facilities f on f.id = checklist_number.facility_id where checklist_number='" + Convert.ToString(newR["checklist_number"]) + "';";
                                 DataTable dt = await Context.FetchData(checklist_Validation_Q).ConfigureAwait(false);
-                                string facility_name = Convert.ToString(dt.Rows[0][0]);
-                                int facility_id = Convert.ToInt32(dt.Rows[0][1]);
-                                if (facility_name.ToString() == newR["facility_name"].ToString())
+                                bool isChecklistPresentInSameFacility = false;
+                                for(var i=0; i<dt.Rows.Count; i++)
                                 {
-
-                                    m_errorLog.SetError($"[Checklist: Row {rN}] Checklist name : {Convert.ToString(newR["checklist_number"])} already present in plant {facility_name}.");
+                                    string facility_name = Convert.ToString(dt.Rows[i][0]);
+                                    int facility_id = Convert.ToInt32(dt.Rows[i][1]);
+                                    if (facility_name.ToString() == newR["facility_name"].ToString())
+                                    {
+                                        isChecklistPresentInSameFacility = true;  
+                                        break;
+                                        //m_errorLog.SetError($"[Checklist: Row {rN}] Checklist name : {Convert.ToString(newR["checklist_number"])} already present in plant {facility_name}.");
+                                    }
                                 }
+                                if (isChecklistPresentInSameFacility)
+                                {
+                                    newR.Delete();
+                                    continue;
+                                }
+                           
                                 //    else
                                 //    {
 
@@ -609,7 +621,34 @@ namespace CMMSAPIs.Repositories.Masters
             }
             return null;
         }
-
+        private async Task<int> GetExcelToChecklistsRowCount(int file_id)
+        {
+            int Total_CheckList_rows = 0;
+            string query1 = $"SELECT file_path FROM uploadedfiles WHERE id = {file_id};";
+            DataTable dt1 = await Context.FetchData(query1).ConfigureAwait(false);
+            string path = Convert.ToString(dt1.Rows[0][0]);
+            string dir = Path.GetDirectoryName(path);
+            string filename = Path.GetFileName(path);
+            if (!Directory.Exists(dir))
+                m_errorLog.SetError($"[Checklist] Directory '{dir}' cannot be found");
+            else if (!File.Exists(path))
+                m_errorLog.SetError($"[Checklist] File '{filename}' cannot be found in directory '{dir}'");
+            else
+            {
+                FileInfo info = new FileInfo(path);
+                if (info.Extension != ".xlsx")
+                    m_errorLog.SetError("[Checklist] File is not a .xlsx file");
+                else
+                {
+                    ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                    var excel = new ExcelPackage(path);
+                    var sheet = excel.Workbook.Worksheets["CheckList"];
+                    Total_CheckList_rows = sheet.Dimension.End.Row;
+                }
+            }
+          
+            return Total_CheckList_rows;
+        }
         private async Task<DataTable> ConvertExcelToCheckpoints(int file_id)
         {
             Dictionary<string, int> checklists = new Dictionary<string, int>();
@@ -715,10 +754,7 @@ namespace CMMSAPIs.Repositories.Masters
                                 m_errorLog.SetInformation($"[Checkpoint] Row {rN} is empty.");
                                 continue;
                             }
-                            if(Convert.ToString(newR["check_point"]) == null || Convert.ToString(newR["check_point"]) == "")
-                            {
-                                m_errorLog.SetError($"[Checkpoint: Row {rN}] Checkpoint name cannot be empty.");
-                            }
+                         
                             try
                             {
                                 newR["checklist_id"] = checklists[Convert.ToString(newR["checklist_name"]).ToUpper()];
@@ -729,6 +765,21 @@ namespace CMMSAPIs.Repositories.Masters
                                     m_errorLog.SetError($"[Checkpoint: Row {rN}] Checklist Name cannot be empty.");
                                 else
                                     m_errorLog.SetError($"[Checkpoint: Row {rN}] Checklist '{Convert.ToString(newR["checklist_name"])}' not found.");
+                            }
+
+                            if (Convert.ToString(newR["check_point"]) == null || Convert.ToString(newR["check_point"]) == "")
+                            {
+                                m_errorLog.SetError($"[Checkpoint: Row {rN}] Checkpoint name cannot be empty.");
+                            }
+                            else if (Convert.ToString(newR["check_point"]) != "")
+                            {
+                                string checkpoint_q = $"select * from checkpoint where check_point = '{Convert.ToString(newR["check_point"])}' and check_list_id={Convert.ToInt32(newR["checklist_id"])};";
+                                DataTable st_cp = await Context.FetchData(checklistQry).ConfigureAwait(false);
+                                if (st_cp.Rows.Count >0)
+                                {
+                                    newR.Delete();
+                                    continue;
+                                }
                             }
                             if (Convert.ToString(newR["requirement"]) == null || Convert.ToString(newR["requirement"]) == "")
                             {
@@ -798,6 +849,35 @@ namespace CMMSAPIs.Repositories.Masters
             return null;
         }
 
+        private async Task<int> GetExcelToCheckPointsRowCount(int file_id)
+        {
+            int Total_CheckPoint_rows = 0;
+            string query1 = $"SELECT file_path FROM uploadedfiles WHERE id = {file_id};";
+            DataTable dt1 = await Context.FetchData(query1).ConfigureAwait(false);
+            string path = Convert.ToString(dt1.Rows[0][0]);
+            string dir = Path.GetDirectoryName(path);
+            string filename = Path.GetFileName(path);
+            if (!Directory.Exists(dir))
+                m_errorLog.SetError($"[Checklist] Directory '{dir}' cannot be found");
+            else if (!File.Exists(path))
+                m_errorLog.SetError($"[Checklist] File '{filename}' cannot be found in directory '{dir}'");
+            else
+            {
+                FileInfo info = new FileInfo(path);
+                if (info.Extension != ".xlsx")
+                    m_errorLog.SetError("[CheckPoint] File is not a .xlsx file");
+                else
+                {
+                    ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                    var excel = new ExcelPackage(path);
+                    var sheet = excel.Workbook.Worksheets["CheckPoint"];
+                    Total_CheckPoint_rows = sheet.Dimension.End.Row;
+                }
+            }
+
+            return Total_CheckPoint_rows;
+        }
+
         internal async Task<CMImportFileResponse> ValidateChecklistCheckpoint(int file_id)
         {
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
@@ -844,12 +924,13 @@ namespace CMMSAPIs.Repositories.Masters
             if (valid == 1)
             {
                 DataTable dtChecklists = await ConvertExcelToChecklists(file_id);
+                int total_excelrowCount = await GetExcelToChecklistsRowCount(file_id);
                 if (dtChecklists != null && m_errorLog.GetErrorCount() == 0)
                 {
                     List<CMCreateCheckList> checklists = dtChecklists.MapTo<CMCreateCheckList>();
                   
                     CMDefaultResponse response1 = await CreateChecklist(checklists, userID);
-                    response = new CMImportFileResponse(response1.id, response1.return_status, logfile, log, response1.message);
+                    response = new CMImportFileResponse(response1.id, response1.return_status, logfile, log, response1.message + ", with total "+total_excelrowCount+" check list rows from excel sheet.");
                 }
                 else
                 {
@@ -891,6 +972,7 @@ namespace CMMSAPIs.Repositories.Masters
             if (valid == 1)
             {
                 DataTable dtCheckpoints = await ConvertExcelToCheckpoints(file_id);
+                int total_excelrowCount = await GetExcelToCheckPointsRowCount(file_id);
                 if (dtCheckpoints != null && m_errorLog.GetErrorCount() == 0)
                 {
                     List<CMCreateCheckPoint> checkpoints = new List<CMCreateCheckPoint>();
@@ -925,7 +1007,7 @@ namespace CMMSAPIs.Repositories.Masters
    
                  
                     CMDefaultResponse response1 = await CreateCheckPoint(checkpoints, userID);
-                    response = new CMImportFileResponse(response1.id, response1.return_status, logfile, log, response1.message);
+                    response = new CMImportFileResponse(response1.id, response1.return_status, logfile, log, response1.message + ", with total " + total_excelrowCount + " checkpoint rows from excel sheet.");
                 }
                 else
                 {
