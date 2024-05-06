@@ -294,6 +294,14 @@ namespace CMMSAPIs.Repositories.Incident_Reports
                     return response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Incident Report creation failed");
                 }
             }
+            if (request.uploadfile_ids != null && request.uploadfile_ids.Count > 0)
+            {
+                foreach (int data in request.uploadfile_ids)
+                {
+                    string qryuploadFiles = $"UPDATE uploadedfiles SET facility_id = {request.facility_id}, module_type={(int)CMMS.CMMS_Modules.INCIDENT_REPORT},module_ref_id={incident_id} where id = {data}";
+                    await Context.ExecuteNonQry<int>(qryuploadFiles).ConfigureAwait(false);
+                }
+            }
 
             if (incident_id > 0)
             {
@@ -539,12 +547,20 @@ namespace CMMSAPIs.Repositories.Incident_Reports
             {
                 return null;
             }
+
+            string myQuery4 = "SELECT U.id, file_path as fileName, FC.name as fileCategory, U.File_Size as fileSize, U.status,U.description, '' as ptwFiles FROM uploadedfiles AS U " +
+                              " LEFT JOIN incidents  as ir on ir.id= U.module_ref_id Left join filecategory FC on FC.Id = U.file_category " +
+                              " where ir.id= " + id + " and U.module_type = " + (int)CMMS.CMMS_Modules.INCIDENT_REPORT + ";";
+
+            List<CMFileDetails> _UploadFileList = await Context.GetData<CMFileDetails>(myQuery4).ConfigureAwait(false);
+
             _IncidentReportList[0].Injured_person = await Getinjured_person(id);
             _IncidentReportList[0].why_why_analysis = await Getwhy_why_analysis(id);
             _IncidentReportList[0].root_cause = await Getroot_cause(id);
             _IncidentReportList[0].immediate_correction = await Getimmediate_correction(id);
             _IncidentReportList[0].proposed_action_plan = await Getproposed_action_plan(id);
             _IncidentReportList[0].investigation_team = await Getinvestigation_team(id);
+            _IncidentReportList[0].file_list = _UploadFileList;
             foreach (var list in _IncidentReportList)
             {
 
@@ -1011,7 +1027,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
             List<CMInvestigation_team> result = await Context.GetData<CMInvestigation_team>(selectqry).ConfigureAwait(false);
             return result;
         }
-        internal async Task<CMDefaultResponse> CloseIR(CMApproveIncident request, int userId)
+        internal async Task<CMDefaultResponse>CloseIR(CMApproveIncident request, int userId)
         {
 
             string approveQuery = $"Update incidents set status = {(int)CMMS.CMMS_Status.IR_Close}, status_updated_at = '{UtilsRepository.GetUTCTime()}', close_remarks = '{request.comment}'  where id = {request.id}";

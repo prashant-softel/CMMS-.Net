@@ -89,6 +89,7 @@ namespace CMMSAPIs.Models.Incident_Reports
         public List<CMImmediate_correction> immediate_correction { get; set; }
         public List<CMProposed_action_plan> proposed_action_plan { get; set; }
         public List<CMInvestigation_team> investigation_team { get; set; }
+        public List<CMFileDetails> file_list { get; set; }
     }
     public class CMHistoryLIST
     {
@@ -103,5 +104,11 @@ namespace CMMSAPIs.Models.Incident_Reports
         public float file_size { get; set; }
 
         public string file_path { get; set; }
+    }
+    public class CMFileDetails
+    {
+        public int id { get; set; }
+        public string fileName { get; set; }                   
+        public string description { get; set; }
     }
 }

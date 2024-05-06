@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace CMMSAPIs.Models.Incident_Reports
 {
@@ -22,6 +23,7 @@ namespace CMMSAPIs.Models.Incident_Reports
         public int status { get; set; }
         public int is_why_why_required { get; set; }
         public int is_investigation_required { get; set; }
-     
+      
+
     }
 }

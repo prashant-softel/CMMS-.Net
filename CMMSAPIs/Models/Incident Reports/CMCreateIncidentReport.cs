@@ -60,6 +60,8 @@ namespace CMMSAPIs.Models.Incident_Reports
         public List<CMImmediate_correction> immediate_correction { get; set; }
         public List<CMProposed_action_plan> proposed_action_plan { get; set; }
         public List<CMInvestigation_team> investigation_team { get; set; }
+        public List<int> uploadfile_ids { get; set; }
+
     }
 
     public class CMInvestigation_team
