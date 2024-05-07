@@ -427,7 +427,7 @@ namespace CMMSAPIs.BS.SM
                     CMDefaultResponse response = new CMDefaultResponse();
                     foreach (var request in requestList)
                     {
-                        var result = await repos.updateUsedQty(request.facilityID, request.fromActorID, request.fromActorType, request.toActorID, request.toActorType, request.assetItemID, request.qty, request.refType, request.refID, request.remarks, request.mrsID, request.mrsItemID);
+                        var result = await repos.updateUsedQty(request.facilityID, request.fromActorID, request.fromActorType, request.toActorID, request.toActorType, request.assetItemID, request.qty, request.refType, request.refID, request.remarks, request.mrsID,0,0, request.mrsItemID);
                         if (result == 0)
                         {
                             response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.SUCCESS, "Item updated.");
