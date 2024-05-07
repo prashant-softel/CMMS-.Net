@@ -215,7 +215,7 @@ namespace CMMSAPIs.Repositories.Inventory
                 { "Asset_Warranty_Expiry_Date", new Tuple<string, Type>("expiry_date", typeof(DateTime)) },
                 { "Asset_Warranty_Certificate_No", new Tuple<string, Type>("certificate_number", typeof(string)) },
                 { "Asset_Facility_Name", new Tuple<string, Type>("blockName", typeof (string)) },
-                { "Asset_category_name", new Tuple<string, Type>("categoryName", typeof(string)) },
+                { "Asset_category_Name", new Tuple<string, Type>("categoryName", typeof(string)) },
                 { "Asset_Parent_Name", new Tuple<string, Type>("parentName", typeof(string)) },
                 { "Asset_Customer_Name", new Tuple<string, Type>("customerName", typeof(string)) },
                 { "Asset_Owner_Name", new Tuple<string, Type>("ownerName", typeof(string)) },
@@ -427,11 +427,11 @@ namespace CMMSAPIs.Repositories.Inventory
                             }
                             try
                             {
-                                newR["categoryId"] = categories[Convert.ToString(newR["categoryName"]).ToUpper()];
+                                newR["categoryId"] = categories[Convert.ToString(newR[2]).ToUpper()];
                             }
                             catch (KeyNotFoundException)
                             {
-                                m_errorLog.SetError($"[Row: {rN}] Invalid Asset Category named '{newR["categoryName"]}'.");
+                                m_errorLog.SetError($"[Row: {rN}] Invalid Asset Category named '{newR[2].ToString()}'.");
                                 newR.Delete();
                                 continue;
                                 //string name = Convert.ToString(newR["categoryName"]);
