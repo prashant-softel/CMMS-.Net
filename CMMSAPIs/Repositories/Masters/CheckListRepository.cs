@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using OfficeOpenXml;
 using System.IO;
 using Microsoft.AspNetCore.Hosting;
+using System.Linq;
 
 namespace CMMSAPIs.Repositories.Masters
 {
@@ -334,7 +335,7 @@ namespace CMMSAPIs.Repositories.Masters
             {
                 string query = "INSERT INTO  checkpoint (check_point, check_list_id, requirement, is_document_required, " +
                                 "action_to_be_done,failure_weightage,type,min_range,max_range ,created_by, created_at, status) VALUES " +
-                                $"('{request.check_point.Replace("'", "")}', {request.checklist_id}, '{request.requirement.Replace("'", "")}', " +
+                                $"(\"{request.check_point}\", {request.checklist_id}, '{request.requirement.Replace("'", "")}', " +
                                 $"{(request.is_document_required==null?0 : request.is_document_required)}, '{request.action_to_be_done}', '{request.failure_weightage}', '{request.checkpoint_type.id}', '{request.checkpoint_type.min}','{request.checkpoint_type.max}'," +
                                 $"{userID}, '{UtilsRepository.GetUTCTime()}', 1); select LAST_INSERT_ID();";
 
@@ -536,7 +537,7 @@ namespace CMMSAPIs.Repositories.Masters
                                 m_errorLog.SetError($"[Checklist: Row {rN}] Checklist name cannot be empty.");
                             }
                            
-                             else if (checklistNames.Contains(Convert.ToString(newR["checklist_number"]).ToUpper()))
+                            else if (checklistNames.Contains(Convert.ToString(newR["checklist_number"]).ToUpper()))
                             {
                                 string checklist_Validation_Q = "select ifnull(f.name,'') as name ,facility_id  from checklist_number left join facilities f on f.id = checklist_number.facility_id where checklist_number='" + Convert.ToString(newR["checklist_number"]) + "';";
                                 DataTable dt = await Context.FetchData(checklist_Validation_Q).ConfigureAwait(false);
@@ -547,9 +548,9 @@ namespace CMMSAPIs.Repositories.Masters
                                     int facility_id = Convert.ToInt32(dt.Rows[i][1]);
                                     if (facility_name.ToString() == newR["facility_name"].ToString())
                                     {
-                                        isChecklistPresentInSameFacility = true;  
+                                        isChecklistPresentInSameFacility = true;                            
+                                        m_errorLog.SetImportInformation($"[Checklist: Row {rN}] Checklist name : {Convert.ToString(newR["checklist_number"])} already present in plant {facility_name}.");
                                         break;
-                                        //m_errorLog.SetError($"[Checklist: Row {rN}] Checklist name : {Convert.ToString(newR["checklist_number"])} already present in plant {facility_name}.");
                                     }
                                 }
                                 if (isChecklistPresentInSameFacility)
@@ -788,7 +789,7 @@ namespace CMMSAPIs.Repositories.Masters
                             }
                             else if (Convert.ToString(newR["check_point"]) != "")
                             {
-                                string checkpoint_q = $"select * from checkpoint where check_point = '{Convert.ToString(newR["check_point"])}' and check_list_id={Convert.ToInt32(newR["checklist_id"])};";
+                                string checkpoint_q = "select * from checkpoint where check_point = \""+Convert.ToString(newR["check_point"])+"\" and check_list_id="+Convert.ToInt32(newR["checklist_id"])+";";
                                 //checkpoint_q = System.Text.RegularExpressions.Regex.Replace(checkpoint_q, "[@,\\.\";'\\\\]", string.Empty);
                                 DataTable st_cp = await Context.FetchData(checkpoint_q).ConfigureAwait(false);
                                 if (st_cp.Rows.Count >0)
@@ -946,6 +947,15 @@ namespace CMMSAPIs.Repositories.Masters
                     List<CMCreateCheckList> checklists = dtChecklists.MapTo<CMCreateCheckList>();
                   
                     CMDefaultResponse response1 = await CreateChecklist(checklists, userID);
+
+                    // trying to log information log but did not work
+
+                    //var log_message1 = m_errorLog.messageArray;
+                    //IEnumerable<string> log_message = null;
+                    //for(int i = 0; i<m_errorLog.messageArray.Count; i++)
+                    //{
+                    //    log_message.Append(((CMMSAPIs.Models.Utils.ErrorLog.cMessage)m_errorLog.messageArray[i]).m_sMessage);
+                    //}
                     response = new CMImportFileResponse(response1.id, response1.return_status, logfile, log, response1.message + ", with total "+total_excelrowCount+" check list rows from excel sheet.");
                 }
                 else
