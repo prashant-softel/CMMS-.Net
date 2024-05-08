@@ -20,6 +20,7 @@ namespace CMMSAPIs.Repositories.Masters
     {
         private UtilsRepository _utilsRepo;
         private ErrorLog m_errorLog;
+        private int m_facilityId;
         private List<string> checklistNames;
         public CheckListRepository(MYSQLDBHelper sqlDBHelper, IWebHostEnvironment webHostEnvironment = null) : base(sqlDBHelper)
         {
@@ -103,7 +104,7 @@ namespace CMMSAPIs.Repositories.Masters
                 DataTable dt = await Context.FetchData(query).ConfigureAwait(false);
 
                 int id = Convert.ToInt32(dt.Rows[0][0]);
-                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.CHECKLIST_NUMBER, id, 0, 0, "Check List Created", CMMS.CMMS_Status.CREATED, userID);
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.CHECKLIST_NUMBER, id, 0, 0, $"Check List {request.checklist_number} Created", CMMS.CMMS_Status.CREATED, userID);
                 id_list.Add(id);
             }
             CMDefaultResponse response = new CMDefaultResponse(id_list, CMMS.RETRUNSTATUS.SUCCESS, $"{id_list.Count} Checklist(s) Created Successfully");
@@ -413,15 +414,12 @@ namespace CMMSAPIs.Repositories.Masters
             DataTable dtFrequency = await Context.FetchData(frequencyQry).ConfigureAwait(false);
             frequencies.Merge(dtFrequency.GetColumn<string>("name"), dtFrequency.GetColumn<int>("id"));
 
-            string checklistQry = "SELECT UPPER(checklist_number) as name FROM checklist_number WHERE checklist_number is not null and checklist_number != '' GROUP BY checklist_number;";
-            DataTable dtChecklist = await Context.FetchData(checklistQry).ConfigureAwait(false);
-            checklistNames = dtChecklist.GetColumn<string>("name");
-
             Dictionary<string, int> checklistTypes = new Dictionary<string, int>()
             {
                 { "PM", 1 },
                 { "HOTO", 2 },
-                { "AUDIT", 3 }
+                { "AUDIT", 3 },
+                { "MIS", 4 }
             };
 
             /*
@@ -506,6 +504,22 @@ namespace CMMSAPIs.Repositories.Masters
                             try
                             {
                                 newR["facility_id"] = plants[Convert.ToString(newR["facility_name"]).ToUpper()];
+                                if (m_facilityId == 0)
+                                {
+                                    m_facilityId = (int)newR["facility_id"];
+                                    string checklistQry = $"SELECT UPPER(checklist_number) as name FROM checklist_number WHERE facility_id = {m_facilityId} and checklist_number is not null and checklist_number != '' GROUP BY checklist_number;";
+                                    DataTable dtChecklist = await Context.FetchData(checklistQry).ConfigureAwait(false);
+                                    checklistNames = dtChecklist.GetColumn<string>("name");
+                                }
+                                else
+                                {
+                                    if  (m_facilityId != (int)newR["facility_id"])
+                                    {
+                                        //error logging
+                                        m_errorLog.SetInformation($"[Checklist] {newR["facility_name"]} Row {rN} if not as per first record.");
+                                        continue;
+                                    }
+                            }
                             }
                             catch(KeyNotFoundException)
                             {
@@ -516,6 +530,7 @@ namespace CMMSAPIs.Repositories.Masters
                                 //    m_errorLog.SetError($"[Checklist: Row {rN}] Invalid Facility '{newR["facility_name"]}'.");
                                 //newR["facility_id"] = 0;
                             }
+
                             if (Convert.ToString(newR["checklist_number"]) == null || Convert.ToString(newR["checklist_number"]) == "")
                             {
                                 m_errorLog.SetError($"[Checklist: Row {rN}] Checklist name cannot be empty.");
@@ -652,7 +667,7 @@ namespace CMMSAPIs.Repositories.Masters
         private async Task<DataTable> ConvertExcelToCheckpoints(int file_id)
         {
             Dictionary<string, int> checklists = new Dictionary<string, int>();
-            string checklistQry = "SELECT id, UPPER(checklist_number) as name FROM checklist_number WHERE checklist_number is not null and checklist_number != '' GROUP BY checklist_number;";
+            string checklistQry = $"SELECT id, UPPER(checklist_number) as name FROM checklist_number WHERE facility_id = {m_facilityId} and checklist_number is not null and checklist_number != '' GROUP BY checklist_number;";
             DataTable dtChecklist = await Context.FetchData(checklistQry).ConfigureAwait(false);
             checklists.Merge(dtChecklist.GetColumn<string>("name"), dtChecklist.GetColumn<int>("id"));
 
@@ -774,7 +789,8 @@ namespace CMMSAPIs.Repositories.Masters
                             else if (Convert.ToString(newR["check_point"]) != "")
                             {
                                 string checkpoint_q = $"select * from checkpoint where check_point = '{Convert.ToString(newR["check_point"])}' and check_list_id={Convert.ToInt32(newR["checklist_id"])};";
-                                DataTable st_cp = await Context.FetchData(checklistQry).ConfigureAwait(false);
+                                //checkpoint_q = System.Text.RegularExpressions.Regex.Replace(checkpoint_q, "[@,\\.\";'\\\\]", string.Empty);
+                                DataTable st_cp = await Context.FetchData(checkpoint_q).ConfigureAwait(false);
                                 if (st_cp.Rows.Count >0)
                                 {
                                     newR.Delete();
