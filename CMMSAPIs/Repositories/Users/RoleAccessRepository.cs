@@ -250,6 +250,31 @@ namespace CMMSAPIs.Repositories.Users
 
 
                 }
+                else
+                {
+                    string delete_qry = $" DELETE FROM RoleAccess WHERE RoleId = {request.role_id}";
+                    await Context.GetData<List<int>>(delete_qry).ConfigureAwait(false);
+
+                    // Insert the new setting
+                    List<string> role_access = new List<string>();
+
+                    foreach (var access in request.access_list)
+                    {
+                        Dictionary<dynamic, CMAccessList> feature_role_access = request.access_list.SetPrimaryKey("feature_id");
+                        CMAccessList feature = features[access.feature_id];
+                        role_access.Add($"({request.role_id}, {access.feature_id}, {(feature.add == 0 ? 0 : access.add)}, " +
+                                        $"{(access.edit == 0 ? 0 : access.edit)}, {(access.view == 0 ? 0 : access.view)}, " +
+                                        $"{(access.delete == 0 ? 0 : access.delete)}, {(access.issue == 0 ? 0 : access.issue)}, " +
+                                        $"{(access.approve == 0 ? 0 : access.approve)}, {(access.selfView == 0 ? 0 : access.selfView)}, " +
+                                        $"'{UtilsRepository.GetUTCTime()}', {UtilsRepository.GetUserID()})");
+                    }
+                    string role_access_insert_str = string.Join(',', role_access);
+
+                    string insert_query = $"INSERT INTO RoleAccess" +
+                                                $"(roleId, featureId, `add`, `edit`, `view`, `delete`, `issue`, `approve`, `selfView`, `lastModifiedAt`, `lastModifiedBy`) " +
+                                          $" VALUES {role_access_insert_str}";
+                    await Context.GetData<List<int>>(insert_query).ConfigureAwait(false);
+                }
 
                 CMDefaultResponse response = new CMDefaultResponse(request.role_id, CMMS.RETRUNSTATUS.SUCCESS, "Updated Role Access Successfully");
                 return response;
