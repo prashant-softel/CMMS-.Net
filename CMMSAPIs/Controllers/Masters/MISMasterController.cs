@@ -989,6 +989,21 @@ namespace CMMSAPIs.Controllers.Masters
                 throw;
             }
         }
+        [Route("GetWaterTypebyId")]
+        [HttpGet]
+        public async Task<IActionResult> GetWaterTypebyId(int id)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.GetWaterTypebyId(id);
+                return Ok(data);
+            }
+            catch
+            {
+                throw;
+            }
+        }
         [Route("CreateWaterType")]
         [HttpPost]
         public async Task<IActionResult> CreateWaterType(WaterDataType request)
