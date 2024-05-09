@@ -51,7 +51,7 @@ namespace CMMSAPIs.BS.Masters
         Task<List<CMFrequency>> GetFrequencyList();
         Task<string> Print(int id, CMMS.CMMS_Modules moduleID);
         Task<string> DownloadFile(int id);
-        Task<List<CMDashboadModuleWiseList>> getDashboadDetails(string facilityId, CMMS.CMMS_Modules moduleID);
+        Task<List<CMDashboadModuleWiseList>> getDashboadDetails(string facilityId, CMMS.CMMS_Modules moduleID, DateTime fromDate, DateTime toDate);
 
     }
     public class CMMSBS : ICMMSBS
@@ -636,13 +636,13 @@ namespace CMMSAPIs.BS.Masters
                 throw;
             }
         }
-        public async Task<List<CMDashboadModuleWiseList>> getDashboadDetails(string facilityId, CMMS.CMMS_Modules moduleID)
+        public async Task<List<CMDashboadModuleWiseList>> getDashboadDetails(string facilityId, CMMS.CMMS_Modules moduleID, DateTime fromDate, DateTime toDate)
         {
             try
             {
                 using (var repos = new CMMSRepository(getDB))
                 {
-                    return await repos.getDashboadDetails(facilityId, moduleID);
+                    return await repos.getDashboadDetails(facilityId, moduleID, fromDate, toDate);
 
                 }
             }
