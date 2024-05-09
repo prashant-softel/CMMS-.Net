@@ -458,8 +458,8 @@ namespace CMMSAPIs.Repositories.Masters
         internal async Task<CMDefaultResponse>CreateWaterType(WaterDataType request, int UserID)
         {
 
-            string myQuery = $"INSERT INTO mis_watertype(facility_id,name,description,status,CreatedAt,CreatedBy) VALUES " +
-            $"('{request.facility_id}','{request.name} ','{request.description}',1,'{UtilsRepository.GetUTCTime()}','{UserID}');" +
+            string myQuery = $"INSERT INTO mis_watertype(facility_id,name,description,status,CreatedAt,CreatedBy,show_opening) VALUES " +
+            $"('{request.facility_id}','{request.name} ','{request.description}',1,'{UtilsRepository.GetUTCTime()}','{UserID}',{request.show_opening});" +
             $"SELECT LAST_INSERT_ID(); ";
             DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
             int id = Convert.ToInt32(dt.Rows[0][0]);
@@ -472,13 +472,13 @@ namespace CMMSAPIs.Repositories.Masters
                 updateQry += $"name = '{request.name}', ";
             if (request.description != null && request.description != "")
                 updateQry += $"description = '{request.description}', ";
-            updateQry += $"updatedAt = '{UtilsRepository.GetUTCTime()}', updatedBy = '{UserID}' WHERE id = {request.id};";
+            updateQry += $"updatedAt = '{UtilsRepository.GetUTCTime()}', updatedBy = '{UserID}', show_opening = {request.show_opening} WHERE id = {request.id};";
             await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
             return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "WaterType updated");
         }
         internal async Task<CMDefaultResponse> DeleteWaterType(int id,int UserID)
         {
-            string delqry = "Delete From mis_watertype where id="+(id);
+            string delqry = "UPDATE mis_watertype  SET status = 0 where id=" + (id);
             await Context.ExecuteNonQry<int>(delqry).ConfigureAwait(false);
             return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "WaterType deleted");
 
