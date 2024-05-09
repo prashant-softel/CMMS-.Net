@@ -993,8 +993,12 @@ namespace CMMSAPIs.Repositories.Masters
             return path;
 
         }
-             public async Task<List<CMDashboadModuleWiseList>> getDashboadDetails(string facilityId,CMMS.CMMS_Modules moduleID)
+             public async Task<List<CMDashboadModuleWiseList>> getDashboadDetails(string facilityId,CMMS.CMMS_Modules moduleID, DateTime fromDate, DateTime toDate)
         {
+            if (facilityId.Contains(","))
+            {
+                facilityId = facilityId.Split(",")[0];
+            }
             List<CMDashboadModuleWiseList> countResult = new List<CMDashboadModuleWiseList>();
             CMDashboadModuleWiseList modulewiseDetail = new CMDashboadModuleWiseList();
             CMDashboadDetails result = new CMDashboadDetails();
