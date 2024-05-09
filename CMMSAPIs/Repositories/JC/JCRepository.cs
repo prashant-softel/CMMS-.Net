@@ -256,9 +256,9 @@ namespace CMMSAPIs.Repositories.JC
 
             foreach (var data in request.LstCMJCEmpList)
             {
-                string mapChecklistQry = $"insert into  permitemployeelists (employeeId,responsibility,JC_id) VALUES ";
+                string mapChecklistQry = $"insert into  permitemployeelists (employeeId,responsibility,status,JC_id) VALUES ";
 
-                mapChecklistQry += $"({data.id}, '{data.responsibility}', {jc_id})";
+                mapChecklistQry += $"({data.id}, '{data.responsibility}', 1 ,{jc_id})";
                 await Context.ExecuteNonQry<int>(mapChecklistQry).ConfigureAwait(false);
             }
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOBCARD, jc_id, 0, 0, "Job Card Started", CMMS.CMMS_Status.JC_STARTED,userID);

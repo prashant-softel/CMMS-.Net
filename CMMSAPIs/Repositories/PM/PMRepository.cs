@@ -149,6 +149,8 @@ namespace CMMSAPIs.Repositories.PM
                 myQuery += $"facility_id = {request.facility_id}, ";
             if (request.category_id > 0)
                 myQuery += $"category_id = {request.category_id}, ";
+            
+                myQuery += $"status_id=1 ,";
             if (request.assigned_to_id > 0)
                 myQuery += $"assigned_to = {request.assigned_to_id}, ";
 
@@ -700,6 +702,7 @@ namespace CMMSAPIs.Repositories.PM
                             try
                             {
                                 newR["plantID"] = facilities[Convert.ToString(newR["PlantName"]).ToUpper()];
+                                //  Plan named  Power Transformer Halfyearly Check does not exist. Row not Inserted.
                             }
                             catch (KeyNotFoundException)
                             {
