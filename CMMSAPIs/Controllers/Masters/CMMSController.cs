@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
@@ -669,11 +669,11 @@ namespace CMMSAPIs.Controllers.Masters
 
         [Route("getDashboadDetails")]
         [HttpGet]
-        public async Task<IActionResult> getDashboadDetails(string facilityId, CMMS.CMMS_Modules moduleID)
+        public async Task<IActionResult> getDashboadDetails(string facilityId, CMMS.CMMS_Modules moduleID, DateTime fromDate, DateTime toDate)
         {
             try
             {
-                var data = await _CMMSBS.getDashboadDetails(facilityId, moduleID);
+                var data = await _CMMSBS.getDashboadDetails(facilityId, moduleID, fromDate, toDate);
                 return Ok(data);
             }
             catch (Exception)
