@@ -121,6 +121,21 @@ namespace CMMSAPIs.Controllers.Incident_Reports
                 throw;
             }
         }
+        [Route("ApproveIncidentReportforSecondStep")]
+        [HttpPost]
+        public async Task<IActionResult> ApproveIncidentReportforSecondStep(CMApproveIncident request)
+        {
+            try
+            {
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IncidentReportBS.ApproveIncidentReportforSecondStep(request, userId);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
 
         //[Authorize]
         [Route("RejectIncidentReport")]

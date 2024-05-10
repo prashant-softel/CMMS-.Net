@@ -23,7 +23,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
         {
             { 181, "Created-waiting for approval" },
             { 182, "Create-Rejected" },
-            { 183, "Created" },
+            { 183, "Approved-Waiting-2nd-Step " },
             { 184, "Investigation-waiting for approval" },
             { 185, "Investigation-Rejected" },
             { 186, "Investigation-Completed" },
@@ -45,7 +45,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
                     retValue = "Updated";
                     break;
                 case CMMS.CMMS_Status.IR_APPROVED_INITIAL:     
-                    retValue = "Created";
+                    retValue = "Approved-Waiting-2nd-Step";
                     break;
                 case CMMS.CMMS_Status.IR_REJECTED_INITIAL:     
                     retValue = "Create-Rejected";
@@ -861,6 +861,36 @@ namespace CMMSAPIs.Repositories.Incident_Reports
             else
             {
                  response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.FAILURE, " Incident Report approval failed");
+            }
+            return response;
+        }
+        internal async Task<CMDefaultResponse> ApproveIncidentReportforSecondStep(CMApproveIncident request, int userId)
+        {
+            /*
+             * Update the Incidents and also update the history table
+             * check create function for history update
+             * Your code goes here ask status only
+            */
+            CMDefaultResponse response = new CMDefaultResponse();
+
+            string approveQuery = $"Update incidents set status = {(int)CMMS.CMMS_Status.IR_Close},status_updated_at='{UtilsRepository.GetUTCTime()}',is_approved = 1,approved_by={userId},approved_at= '{UtilsRepository.GetUTCTime()}',approved_remarks='{request.comment}',is_why_why_required={request.is_why_why_required},is_investigation_required={request.is_investigation_required}  where id = " + request.id;
+            int approve_id = await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
+
+            CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
+
+            if (approve_id > 0)
+            {
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INCIDENT_REPORT, request.id, 0, 0, request.comment, CMMS.CMMS_Status.IR_Close, userId);
+
+                CMViewIncidentReport _IncidentReportDetails = await GetIncidentDetailsReport(request.id, "");
+
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INCIDENT_REPORT, CMMS.CMMS_Status.IR_Close, new[] { userId }, _IncidentReportDetails);
+
+                response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, " Incident Report Approved");
+            }
+            else
+            {
+                response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.FAILURE, " Incident Report approval failed");
             }
             return response;
         }

@@ -21,7 +21,7 @@ namespace CMMSAPIs.BS.Incident_Reports
         Task<CMDefaultResponse> RejectCreateIR(CMApproveIncident request, int userId);
         Task<CMDefaultResponse> CancelIR(CMApproveIncident request, int userId);
         Task<CMDefaultResponse> CloseIR(CMApproveIncident request, int userId);
-
+        Task<CMDefaultResponse> ApproveIncidentReportforSecondStep(CMApproveIncident request, int userId);
     }
     public class IncidentReportBS : IIncidentReportBS
     {
@@ -209,5 +209,20 @@ namespace CMMSAPIs.BS.Incident_Reports
             }
         }
 
+        public async Task<CMDefaultResponse> ApproveIncidentReportforSecondStep(CMApproveIncident request, int userId)
+        {
+            try
+            {
+                using (var repos = new IncidentReportRepository(getDB))
+                {
+                    return await repos.ApproveIncidentReportforSecondStep(request, userId);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
     }
 }

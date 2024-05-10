@@ -39,7 +39,21 @@ namespace CMMSAPIs.Controllers.Facility
                 throw;
             }
         }
-
+       /* [Route("GetFacilityListEmployee")]
+        [HttpGet]
+            public async Task<IActionResult> GetFacilityListEmployee(int facility_id)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _FacilityBS.GetFacilityListEmployee(facility_id, userID);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }*/
         [Route("GetFacilityDetails")]
         [HttpGet]
         public async Task<IActionResult> GetFacilityDetails(int id)

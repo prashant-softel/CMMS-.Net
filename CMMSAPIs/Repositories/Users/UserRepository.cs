@@ -132,8 +132,20 @@ namespace CMMSAPIs.Repositories.Users
 
             if (user_detail.Count > 0)
             {
-                string facilitiesQry = $"SELECT facilities.id as id, facilities.name as name, spv.id as spv_id, spv.name as spv FROM userfacilities JOIN facilities ON userfacilities.facilityId = facilities.id LEFT JOIN spv ON facilities.spvId=spv.id WHERE userfacilities.userId = {user_id}  and userfacilities.status = 1;";
+                string facilitiesQry = $"SELECT facilities.id as id, facilities.name as name, spv.id as spv_id, spv.name as spv,facilities.address as location, isemployee as isEmployees  FROM userfacilities JOIN facilities ON userfacilities.facilityId = facilities.id LEFT JOIN spv ON facilities.spvId=spv.id WHERE userfacilities.userId = {user_id}  and userfacilities.status = 1;";
                 List<CMPlantAccess> facilities = await Context.GetData<CMPlantAccess>(facilitiesQry).ConfigureAwait(false);
+                foreach(var f in facilities)
+                {
+
+                    if (f.isEmployees == 1)
+                    {
+                        f.isEmployees = "true";
+                    }
+                    else
+                    {
+                        f.isEmployees = "false";
+                    }
+                }
                 user_detail[0].plant_list = facilities;
                 string reportToQuery = $"SELECT reportToId FROM users WHERE id = {user_id};";
                 DataTable dt = await Context.FetchData(reportToQuery).ConfigureAwait(false);
@@ -577,7 +589,7 @@ namespace CMMSAPIs.Repositories.Users
             for (int i = 0; i < userList.Count; i++)
             {
                 userList[i].credentials = credList[i];
-                userList[i].facilities = new List<int>() { Convert.ToInt32(users.Rows[i]["plant_id"]) };
+                userList[i].facilitiesid = new List<int>() { Convert.ToInt32(users.Rows[i]["plant_id"]) };
             }
             CMDefaultResponse response = await CreateUser(userList, userID);
             return response;
@@ -648,14 +660,18 @@ namespace CMMSAPIs.Repositories.Users
                     DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
                     int id = Convert.ToInt32(dt.Rows[0][0]);
                     /*  */
-                    if (user.facilities != null)
+                    if (user.facility_list != null)
                     {
-                        foreach (int facility in user.facilities)
+                        foreach (var facility in user.facility_list)
+
                         {
-                            string addFacility = $"INSERT INTO userfacilities(userId, facilityId, createdAt, createdBy, status) " +
-                                                    $"VALUES ({id}, {facility}, '{UtilsRepository.GetUTCTime()}', {userID}, 1);";
+                            int isemp;
+                            isemp = facility.isEmployees == true ? 1 : 0;
+                            string addFacility = $"INSERT INTO userfacilities(userId, facilityId, createdAt, createdBy, status,isemployee) " +
+                                                    $"VALUES ({id}, {facility.id},'{UtilsRepository.GetUTCTime()}', {userID}, 1,{isemp});";
                             await Context.ExecuteNonQry<int>(addFacility).ConfigureAwait(false);
                         }
+                       
                     }
 
                     CMUserAccess userAccess = new CMUserAccess()
@@ -779,16 +795,18 @@ namespace CMMSAPIs.Repositories.Users
                 updateQry += $"reportToId = {request.report_to_id}, ";
             updateQry += $"updatedBy = {userID}, updatedAt = '{UtilsRepository.GetUTCTime()}' WHERE id = {request.id};";
             await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
-            if (request.facilities != null)
+            if (request.facility_list != null)
             {
-                if (request.facilities.Count > 0)
+                if (request.facility_list.Count > 0)
                 {
                     string deleteFacilities = $"DELETE FROM userfacilities WHERE userId = {request.id};";
                     await Context.ExecuteNonQry<int>(deleteFacilities).ConfigureAwait(false);
-                    foreach (int facility in request.facilities)
+                    foreach (var facility in request.facility_list)
                     {
-                        string addFacility = $"INSERT INTO userfacilities(userId, facilityId, createdAt, createdBy, status) " +
-                                                $"VALUES ({request.id}, {facility}, '{UtilsRepository.GetUTCTime()}', {userID}, 1);";
+                        int isemp;
+                        isemp = facility.isEmployees == true ? 1 : 0;
+                        string addFacility = $"INSERT INTO userfacilities(userId, facilityId, createdAt, createdBy, status,isemployee) " +
+                                                $"VALUES ({request.id}, {facility.id},'{UtilsRepository.GetUTCTime()}', {userID}, 1,{isemp});";
                         await Context.ExecuteNonQry<int>(addFacility).ConfigureAwait(false);
                     }
                 }
@@ -901,8 +919,9 @@ namespace CMMSAPIs.Repositories.Users
 
         internal async Task<List<CMUser>> GetUserList(int facility_id)
         {
+            int id=0;
             string qry = $"SELECT " +
-                            $"u.id, CONCAT(firstName, ' ', lastName) as full_name, loginId as user_name, mobileNumber as contact_no, r.id as role_id, r.name as role_name, CASE WHEN u.status=0 THEN 'Inactive' ELSE 'Active' END AS status, photo.id AS photoId, photo.file_path AS photoPath, sign.id AS signatureId, sign.file_path AS signaturePath " +
+                            $"u.id, CONCAT(firstName, ' ', lastName) as full_name, loginId as user_name,DATE_FORMAT(u.createdAt,'%Y-%m-%d ') as  createdAt ,DATE_FORMAT(u.updatedAt,'%Y-%m-%d ') as updatedAt, mobileNumber as contact_no, r.id as role_id, r.name as role_name, CASE WHEN u.status=0 THEN 'Inactive' ELSE 'Active' END AS status, photo.id AS photoId, photo.file_path AS photoPath, sign.id AS signatureId, sign.file_path AS signaturePath " +
                          $"FROM " +
                             $"Users as u " +
                          $"JOIN " +
@@ -917,6 +936,14 @@ namespace CMMSAPIs.Repositories.Users
                             $"uf.facilityId = {facility_id}";
 
             List<CMUser> user_list = await Context.GetData<CMUser>(qry).ConfigureAwait(false);
+            foreach (var req in user_list)
+            {
+                id = req.id;
+                string qry1 = $"SELECT f.name,uf.userId  from  userfacilities as uf left join   facilities as f on uf.facilityId=f.id where uf.userId={id} ";
+                List<CMPlant> plant_list = await Context.GetData<CMPlant>(qry1).ConfigureAwait(false);
+                req.Facilities = plant_list;
+            }
+
             return user_list;
         }
 

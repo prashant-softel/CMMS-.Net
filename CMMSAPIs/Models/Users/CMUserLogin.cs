@@ -31,6 +31,7 @@ namespace CMMSAPIs.Models.Users
 
     public class CMUser 
     {
+        
         public int id { get; set; }
         public string full_name { get; set; }
         public string user_name { get; set; }
@@ -40,8 +41,12 @@ namespace CMMSAPIs.Models.Users
         public string status { get; set; }
         public int photoId { get; set; }
         public string photoPath { get; set; }
-        public int signatureId { get; set; }
+        public int signatureId  { get; set; }
         public string signaturePath { get; set; }
+        public  dynamic createdAt { get; set; }
+        public dynamic updatedAt { get; set; }
+        public List<CMPlant> Facilities { get; set; }
+        
     }
 
     public class CMUserDetail : CMUser
@@ -61,6 +66,7 @@ namespace CMMSAPIs.Models.Users
         public string city_name { get; set; }
         public int zipcode { get; set; }
         public int? isEmployee { get; set; }
+       
         public DateTime? joiningDate { get; set; }
         public int company_id { get; set; }
         public string company_name { get; set; }
@@ -82,7 +88,7 @@ namespace CMMSAPIs.Models.Users
     }
     public class CMUpdateUser : CMUserDetail
     {
-        public List<int> facilities { get; set; }
+        public List<CMUserPlant> facility_list { get; set; }
         public CMUserCrentials credentials { get; set; }
         public int report_to_id { get; set; }
         public bool flagUpdateAccess { get; set; }
@@ -91,12 +97,14 @@ namespace CMMSAPIs.Models.Users
     }
     public class CMCreateUser : CMUserDetail
     {
-        public List<int> facilities { get; set; }
+        
+        public List<CMUserPlant> facility_list { get; set; }
         public CMUserCrentials credentials { get; set; }
         public int report_to_id { get; set; }
         public List<CMAccessList> access_list { get; set; }
         public List<CMNotificationList> notification_list { get; set; }
         public List<CMUserResponsibilityList> user_responsibility_list { get; set; }
+        public List<int> facilitiesid { get; set; }
     }
     public class CMUserResponsibilityList
     {
@@ -109,6 +117,7 @@ namespace CMMSAPIs.Models.Users
         public int id { get; set; }
         public string name { get; set; }
         public int spv_id { get; set; }
+        public dynamic isEmployees { get; set; }
         public string spv { get; set; }
         public string location { get; set; }
     }
@@ -117,5 +126,16 @@ namespace CMMSAPIs.Models.Users
         public int id { get; set; }
         public string name { get; set; }
         public string description { get; set; } 
+    }
+    public class CMPlant
+    {
+        public string name { get; set; }
+    }
+    public class CMUserPlant
+    {
+        public  int id { get; set; }
+        public string name { get; set; }
+        public string  address { get; set; }
+        public bool isEmployees { get; set; }
     }
 }

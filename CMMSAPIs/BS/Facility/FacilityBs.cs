@@ -19,6 +19,7 @@ namespace CMMSAPIs.BS.Facility
         Task<CMDefaultResponse> CreateNewBlock(CMCreateBlock request, int userID);
         Task<CMDefaultResponse> UpdateBlock(CMCreateBlock request, int userID);
         Task<CMDefaultResponse> DeleteBlock(int block_id);
+      //  Task<CMDefaultResponse>GetFacilityListEmployee(int facility_id, int userID);
     }
 
     public class FacilityBs : IFacilityBS
@@ -163,5 +164,20 @@ namespace CMMSAPIs.BS.Facility
                 throw;
             }
         }
+        /*
+        public async Task<CMDefaultResponse> GetFacilityListEmployee(int facility_id, int userID)
+        {
+            try
+            {
+                using (var repos = new FacilityRepository(getDB))
+                {
+                    return await repos.GetFacilityListEmployee(facility_id,userID);
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }*/
     }
 }
