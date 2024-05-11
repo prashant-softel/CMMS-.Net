@@ -642,7 +642,7 @@ namespace CMMSAPIs.Repositories.Masters
             List<CMFrequency> _FrequencyList = await Context.GetData<CMFrequency>(myQuery).ConfigureAwait(false);
             return _FrequencyList;
         }
-
+        
         internal async Task<string> Print(int id, CMMS.CMMS_Modules moduleID, params object[] args)
         {
             CMMSNotification.print = true;
@@ -1318,8 +1318,6 @@ namespace CMMSAPIs.Repositories.Masters
                     retValue = "Updated"; break;
                 case CMMS.CMMS_Status.PM_TASK_DELETED:
                     retValue = "Deleted"; break;
-                case CMMS.CMMS_Status.PM_PLAN_APPROVED:
-                    retValue = "Approved"; break;
                 default:
                     break;
             }
@@ -1597,13 +1595,102 @@ namespace CMMSAPIs.Repositories.Masters
             result.created = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.GO_DRAFT).ToList().Count;
             result.rejected = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.GO_REJECTED).ToList().Count;
 
-            result.submitted = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.GO_SUBMITTED).ToList().Count;
+            //result.submitted = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.GO_SUBMITTED).ToList().Count;
+            result.submitted = 4;
             result.approved = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.GO_APPROVED).ToList().Count;
 
 
             result.total = itemList.Count;
             result.completed = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.GO_APPROVED ).ToList().Count;
             result.pending = result.total - result.completed;
+            result.item_list = itemList;
+            result.po_items_awaited = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.GO_CLOSED).ToList().Count;
+            result.low_stock_items = 4;
+
+            int completed_on_time = _List.Where(x => x.status == (int)CMMS.CMMS_Status.GO_APPROVED && x.purchaseDate != x.purchaseDate).ToList().Count;
+            int wo_delay = _List.Where(x => x.status != (int)CMMS.CMMS_Status.GO_APPROVED && x.purchaseDate != x.purchaseDate).ToList().Count;
+            int wo_backlog = _List.Where(x => x.status != (int)CMMS.CMMS_Status.GO_APPROVED && x.purchaseDate != x.purchaseDate).ToList().Count;
+
+            if (result.total > 0)
+            {
+                result.wo_on_time = completed_on_time;
+                result.wo_delay = wo_delay;
+                result.wo_backlog = wo_backlog;
+            }
+            var test = await getLowStockItemList(facilityId, fromDate, toDate);
+            return result;
+        }
+        public async Task<CMDashboadDetails> getLowStockItemList(string facilityId, DateTime fromDate, DateTime toDate)
+        {
+            CMDashboadDetails result = new CMDashboadDetails();
+
+
+            string filter = " facilityID in (" + facilityId + ")";
+            string datefilter = "";
+
+            if (fromDate != null && fromDate.ToString("yyyy-MM-dd") != "0001-01-01" && toDate != null && toDate.ToString("yyyy-MM-dd") != "0001-01-01")
+            {
+                datefilter = $" and pod.lastModifiedDate between '{fromDate.ToString("yyyy-MM-dd")}' and '{toDate.ToString("yyyy-MM-dd")}'";
+            }
+
+
+            string query = "SELECT fc.name as facilityName,pod.ID as podID, facilityid as       facility_id,pod.spare_status,pod.remarks,sai.orderflag,sam.asset_type_ID," +
+                "pod.purchaseID,pod.assetItemID,sai.serial_number,sai.location_ID,(select sum(cost) from smgoodsorderdetails where purchaseID = po.id) as cost,pod.ordered_qty,\r\n bl.name as vendor_name,\r\n     " +
+                " po.purchaseDate,sam.asset_type_ID,sam.asset_name,po.receiverID,\r\n        " +
+                "po.vendorID,po.status,sai.asset_code,t1.asset_type,t2.cat_name,pod.received_qty,pod.damaged_qty,pod.accepted_qty," +
+                "f1.file_path,f1.Asset_master_id,sm.decimal_status,sm.spare_multi_selection,po.generated_by,pod.order_type as asset_type_ID_OrderDetails, receive_later, " +
+                "added_to_store,   \r\n      " +
+                "  po.challan_no, po.po_no, po.freight, po.transport, po.no_pkg_received, po.lr_no, po.condition_pkg_received, " +
+                "po.vehicle_no, po.gir_no, po.job_ref, po.amount,  po.currency as currencyID , curr.name as currency , stt.asset_type as asset_type_Name,  po_no, requested_qty,lost_qty, ordered_qty, CONCAT(ed.firstName,' ',ed.lastName) as generatedBy\r\n  ,po.received_on as receivedAt    " +
+                "  FROM smgoodsorderdetails pod\r\n        LEFT JOIN smgoodsorder po ON po.ID = pod.purchaseID\r\n     " +
+                "   LEFT JOIN smassetitems sai ON sai.ID = pod.assetItemID\r\n       " +
+                " LEFT JOIN smassetmasters sam ON sam.ID = pod.assetItemID\r\n      " +
+                "  LEFT JOIN smunitmeasurement sm ON sm.ID = sam.unit_of_measurement\r\n    " +
+                "    LEFT JOIN (\r\n            SELECT file.file_path,file.Asset_master_id as Asset_master_id FROM smassetmasterfiles file \r\n " +
+                "           LEFT join smassetmasters sam on file.Asset_master_id =  sam.id )\r\n        " +
+                "    f1 ON f1.Asset_master_id = sam.id\r\n        LEFT JOIN (\r\n         " +
+                "   SELECT sat.asset_type,s1.ID as master_ID FROM smassettypes sat\r\n      " +
+                "      LEFT JOIN smassetmasters s1 ON s1.asset_type_ID = sat.ID\r\n        )  t1 ON t1.master_ID = sam.ID\r\n     " +
+                "   LEFT JOIN (\r\n            SELECT sic.cat_name,s2.ID as master_ID FROM smitemcategory sic\r\n          " +
+                "  LEFT JOIN smassetmasters s2 ON s2.item_category_ID = sic.ID\r\n        )  t2 ON t2.master_ID = sam.ID\r\n " +
+                "       LEFT JOIN facilities fc ON fc.id = po.facilityID\r\nLEFT JOIN users as vendor on vendor.id=po.vendorID " +
+                "       LEFT JOIN business bl ON bl.id = po.vendorID left join smassettypes stt on stt.ID = pod.order_type LEFT JOIN currency curr ON curr.id = po.currency LEFT JOIN users ed ON ed.id = po.generated_by" +
+                " WHERE " + filter + " " + datefilter + "";
+
+
+            List<CMGoodsOrderList> _List = await Context.GetData<CMGoodsOrderList>(query).ConfigureAwait(false);
+
+            List<CMDashboadItemList> itemList = _List.Select(p => new CMDashboadItemList
+            {
+                wo_number = p.purchaseID,
+                facility_id = p.facility_id,
+                facility_name = p.facilityName,
+                asset_name = p.asset_name,
+                status = p.status,
+                start_date = p.purchaseDate
+
+            }).GroupBy(p => p.wo_number).Select(group => group.First()).OrderBy(p => p.wo_number).ToList();
+
+
+            for (var i = 0; i < _List.Count; i++)
+            {
+                CMDashboadItemList item = new CMDashboadItemList();
+                CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_List[i].status);
+                string _longStatus = getShortStatus_GO(CMMS.CMMS_Modules.SM_GO, _Status);
+                item.status_long = _longStatus;
+            }
+
+            result.created = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.GO_DRAFT).ToList().Count;
+            result.rejected = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.GO_REJECTED).ToList().Count;
+
+            result.submitted = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.GO_SUBMITTED).ToList().Count;
+            result.approved = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.GO_APPROVED).ToList().Count;
+
+
+            result.total = itemList.Count;
+            result.completed = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.GO_APPROVED).ToList().Count;
+            result.pending = result.total - result.completed;
+            result.po_items_awaited = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.GO_CLOSED).ToList().Count;
             result.item_list = itemList;
 
             int completed_on_time = _List.Where(x => x.status == (int)CMMS.CMMS_Status.GO_APPROVED && x.purchaseDate != x.purchaseDate).ToList().Count;
@@ -1618,6 +1705,7 @@ namespace CMMSAPIs.Repositories.Masters
             }
             return result;
         }
+
     }
 
 }
