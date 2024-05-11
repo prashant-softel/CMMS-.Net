@@ -19,10 +19,10 @@ namespace CMMSAPIs.Repositories.Facility
             _utilsRepo = new UtilsRepository(sqlDBHelper);
         }
 
-     
+
         internal async Task<List<CMFacilityList>> GetFacilityList(int userID)
         {
-            string myQuery = "SELECT facilities.id, facilities.name,spv.id as spv_id,spv.name as spv, facilities.address, facilities.city, facilities.state, facilities.country, facilities.zipcode as pin, Facilities.description FROM Facilities  inner join userfacilities uf on uf.facilityId = Facilities.id LEFT JOIN spv ON facilities.spvId=spv.id WHERE isBlock = 0 and facilities.status = 1 and uf.userId = " + userID+";";
+            string myQuery = "SELECT facilities.id, facilities.name,spv.id as spv_id,spv.name as spv, facilities.address, facilities.city, facilities.state, facilities.country, facilities.zipcode as pin, Facilities.description FROM Facilities  inner join userfacilities uf on uf.facilityId = Facilities.id LEFT JOIN spv ON facilities.spvId=spv.id WHERE isBlock = 0 and facilities.status = 1 and uf.userId = " + userID + ";";
             List<CMFacilityList> _Facility = await Context.GetData<CMFacilityList>(myQuery).ConfigureAwait(false);
             return _Facility;
         }
@@ -36,7 +36,7 @@ namespace CMMSAPIs.Repositories.Facility
             return _Block;
         }
 
-        internal async Task<CMFacilityDetails> GetFacilityDetails(int id,string facilitytimeZone)
+        internal async Task<CMFacilityDetails> GetFacilityDetails(int id, string facilitytimeZone)
         {
             string myQuery = $"SELECT facility.id as id, block.name as parentName, facility.name AS blockName, b.name as ownerName, spv.name as spvName, facility.customerId as customerId, facility.ownerId as ownerId, facility.operatorId as operatorId, facility.isBlock as isBlock, facility.parentId as parentId, facility.address as address, facility.city as city, facility.state as state, facility.country as country, facility.zipcode as zipcode, facility.latitude as latitude, facility.longitude as longitude, facility.createdBy as createdById, facility.createdAt as createdAt, facility.status as status, facility.photoId as photoId, facility.description as description, facility.timezone as timezone, facility.startDate as startDate, facility.endDate as endDate, CONCAT(u.firstName + ' ' + u.lastName) as createdByName FROM facilities as facility LEFT JOIN facilities as block on block.id = facility.parentId LEFT JOIN business AS b ON facility.ownerId = b.id LEFT JOIN spv ON facility.spvId=spv.id LEFT JOIN users as u ON u.id = facility.createdBy ";
             if (id > 0)
@@ -50,12 +50,12 @@ namespace CMMSAPIs.Repositories.Facility
             List<CMFacilityDetails> _GetFacilityDetails = await Context.GetData<CMFacilityDetails>(myQuery).ConfigureAwait(false);
             foreach (var detail in _GetFacilityDetails)
             {
-                if(detail!=null && detail.createdAt!=null)
-                detail.createdAt = (DateTime)await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, detail.createdAt);
+                if (detail != null && detail.createdAt != null)
+                    detail.createdAt = (DateTime)await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, detail.createdAt);
                 if (detail != null && detail.endDate != null)
-                    detail.endDate = (DateTime) await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, detail.endDate);
+                    detail.endDate = (DateTime)await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, detail.endDate);
                 if (detail != null && detail.startDate != null)
-                    detail.startDate = (DateTime) await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, detail.startDate);
+                    detail.startDate = (DateTime)await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, detail.startDate);
 
             }
 
@@ -93,10 +93,10 @@ namespace CMMSAPIs.Repositories.Facility
             //DataTable dt2 = await Context.FetchData(myQuery2).ConfigureAwait(false);
             ////if (dt2.Rows.Count == 0)
             ////    throw new ArgumentException($"{city} is not situated in {state}, {country}");
-           
+
             string qryFacilityInsert = "insert into facilities(name, spvId, customerId, ownerId, operatorId, isBlock, parentId, " +
                                         "address, country, state, city, zipcode, countryId, stateId, cityId, latitude, longitude, " +
-                                        "createdBy, createdAt, status, photoId, description, timezone, startDate, endDate) " + 
+                                        "createdBy, createdAt, status, photoId, description, timezone, startDate, endDate) " +
                                         $"values ('{request.name}', {request.spvId}, {request.customerId}, {request.ownerId}, {request.operatorId}, " +
                                         $"0, 0, '{request.address}', '{country}', '{state}', '{city}', {request.zipcode}, {request.countryId}, " +
                                         $"{request.stateId}, {request.cityId}, {request.latitude}, {request.longitude}, {userID}, " +
@@ -111,12 +111,7 @@ namespace CMMSAPIs.Repositories.Facility
             return response;
         }
 
-      /*  internal Task<CMDefaultResponse> GetFacilityListEmployee(int facility_id, int userID)
-        {
-            string myQuery = "SELECT facilities.id, facilities.name,spv.id as spv_id,spv.name as spv, facilities.address, facilities.city, facilities.state, facilities.country, facilities.zipcode as pin, Facilities.description FROM Facilities  inner join userfacilities uf on uf.facilityId = Facilities.id LEFT JOIN spv ON facilities.spvId=spv.id WHERE isBlock = 0 and facilities.status = 1 and uf.userId = " + userID + ";";
-            List<CMFacilityList> _Facility = await Context.GetData<CMFacilityList>(myQuery).ConfigureAwait(false);
-            return _Facility;
-        }*/
+
 
         internal async Task<CMDefaultResponse> CreateNewBlock(CMCreateBlock request, int userID)
         {
@@ -131,7 +126,7 @@ namespace CMMSAPIs.Repositories.Facility
                                 $"blocks.country = plants.country, blocks.state = plants.state, blocks.city = plants.city, blocks.timezone = plants.timezone, " +
                                 $"blocks.zipcode = plants.zipcode, blocks.latitude = plants.latitude, blocks.longitude = plants.longitude WHERE blocks.id = {id};";
             await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
-            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS,"Block Created Successfully");
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Block Created Successfully");
         }
         internal async Task<CMDefaultResponse> UpdateBlock(CMCreateBlock request, int userID)
         {
@@ -154,7 +149,7 @@ namespace CMMSAPIs.Repositories.Facility
             }
             updateQry += $"updatedBy = {userID}, updatedAt = '{UtilsRepository.GetUTCTime()}' WHERE id = {request.id};";
             await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
-            if(updateParentQry != null && updateParentQry != "")
+            if (updateParentQry != null && updateParentQry != "")
                 await Context.ExecuteNonQry<int>(updateParentQry).ConfigureAwait(false);
             return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Block Details updated successfully");
         }
@@ -258,5 +253,47 @@ namespace CMMSAPIs.Repositories.Facility
             CMDefaultResponse response = new CMDefaultResponse(block_id, CMMS.RETRUNSTATUS.SUCCESS, "Block Deleted Successfully");
             return response;
         }
+        internal async Task<List<FacilityListEmployee>>GetFacilityListEmployee(int facility_id)
+        {
+            string myQuery = $"SELECT u.id, loginId as login_id, concat(firstName,' ', lastName) as name,uf.isemployee, birthday as birthdate, gender, mobileNumber, cities.name as city, states.name as state, countries.name as country, zipcode as pin FROM Users as u JOIN UserFacilities as uf ON u.id = uf.userId LEFT JOIN cities as cities ON cities.id = u.cityId LEFT JOIN states as states ON states.id = u.stateId and states.id = cities.state_id LEFT JOIN countries as countries ON countries.id = u.countryId and countries.id = cities.country_id and countries.id = states.country_id LEFT JOIN usersaccess as access ON u.id = access.userId WHERE uf.isemployee=1 and  u.status = 1 AND uf.status = 1  AND u.isEmployee = 1 AND uf.facilityId = {facility_id}  GROUP BY u.id ORDER BY u.id ;";
+        List<FacilityListEmployee> _Facility = await Context.GetData<FacilityListEmployee>(myQuery).ConfigureAwait(false);
+
+
+            foreach (FacilityListEmployee emp in _Facility)
+            {
+
+                emp.responsibilityIds = new int[2];
+                emp.responsibilityIds[0] = 1;
+                emp.responsibilityIds[1] = 2;
+
+            }
+
+         
+            return _Facility;
+        }
+        internal async Task<List<FacilityListEmployee>> GetEmployeeListbyFeatureId(int facility_id,int featureid)
+        {
+            string myQuery = $"SELECT u.id, loginId as login_id, concat(firstName,' ', lastName) as name,uf.isemployee, birthday as birthdate, gender, mobileNumber, cities.name as city, states.name as state, countries.name as country, zipcode as pin  " +               
+                             $"FROM  Users as u  JOIN UserFacilities as uf ON u.id = uf.userId  " +
+                             $"LEFT JOIN cities as cities ON cities.id = u.cityId  " +
+                             $"LEFT JOIN states as states ON states.id = u.stateId and states.id = cities.state_id  " +
+                             $"LEFT JOIN countries as countries ON countries.id = u.countryId and countries.id = cities.country_id and countries.id = states.country_id  " +
+                             $"LEFT JOIN usersaccess as access ON u.id = access.userId  " +
+                             $"WHERE uf.isemployee = 1 and access.featureId ={featureid} and access.edit = 1 and u.status = 1 AND uf.status = 1  " +
+                             $"AND uf.facilityId = {facility_id} GROUP BY u.id ORDER BY u.id;";
+            List<FacilityListEmployee> _FacilityByFeatureid= await Context.GetData<FacilityListEmployee>(myQuery).ConfigureAwait(false);
+
+
+            foreach (FacilityListEmployee emp in _FacilityByFeatureid)
+            {
+
+                emp.responsibilityIds = new int[2];
+                emp.responsibilityIds[0] = 1;
+                emp.responsibilityIds[1] = 2;
+            }
+            return _FacilityByFeatureid;
+        }
+
     }
 }
+

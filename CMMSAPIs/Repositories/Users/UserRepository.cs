@@ -136,14 +136,15 @@ namespace CMMSAPIs.Repositories.Users
                 List<CMPlantAccess> facilities = await Context.GetData<CMPlantAccess>(facilitiesQry).ConfigureAwait(false);
                 foreach(var f in facilities)
                 {
-
+                 
+                  
                     if (f.isEmployees == 1)
                     {
-                        f.isEmployees = "true";
+                        f.isEmployees = true;
                     }
                     else
                     {
-                        f.isEmployees = "false";
+                        f.isEmployees = false;
                     }
                 }
                 user_detail[0].plant_list = facilities;

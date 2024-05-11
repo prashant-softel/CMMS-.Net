@@ -19,7 +19,8 @@ namespace CMMSAPIs.BS.Facility
         Task<CMDefaultResponse> CreateNewBlock(CMCreateBlock request, int userID);
         Task<CMDefaultResponse> UpdateBlock(CMCreateBlock request, int userID);
         Task<CMDefaultResponse> DeleteBlock(int block_id);
-      //  Task<CMDefaultResponse>GetFacilityListEmployee(int facility_id, int userID);
+        Task<List<FacilityListEmployee>>GetFacilityListEmployee(int facility_id);
+        Task<List<FacilityListEmployee>>GetEmployeeListbyFeatureId(int facility_id, int featureid);
     }
 
     public class FacilityBs : IFacilityBS
@@ -164,20 +165,36 @@ namespace CMMSAPIs.BS.Facility
                 throw;
             }
         }
-        /*
-        public async Task<CMDefaultResponse> GetFacilityListEmployee(int facility_id, int userID)
+        
+        public async Task<List<FacilityListEmployee>> GetFacilityListEmployee(int facility_id)
         {
             try
             {
                 using (var repos = new FacilityRepository(getDB))
                 {
-                    return await repos.GetFacilityListEmployee(facility_id,userID);
+                    return await repos.GetFacilityListEmployee( facility_id);
                 }
             }
             catch (Exception)
             {
                 throw;
             }
-        }*/
+        }
+
+        public async Task<List<FacilityListEmployee>> GetEmployeeListbyFeatureId(int facility_id, int featureid)
+        {
+            try
+            {
+                using (var repos = new FacilityRepository(getDB))
+                {
+                    return await repos.GetEmployeeListbyFeatureId(facility_id,featureid);
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+        }
     }
 }
