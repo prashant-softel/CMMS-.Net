@@ -31,6 +31,7 @@ using Microsoft.AspNetCore.Hosting;
 using OfficeOpenXml;
 using System.Linq;
 using CMMSAPIs.Models;
+using System.Net.NetworkInformation;
 
 
 namespace CMMSAPIs.Repositories.Masters
@@ -993,12 +994,40 @@ namespace CMMSAPIs.Repositories.Masters
             return path;
 
         }
-             public async Task<List<CMDashboadModuleWiseList>> getDashboadDetails(string facilityId,CMMS.CMMS_Modules moduleID, DateTime fromDate, DateTime toDate)
+        internal static string getShortStatus_JOB(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status m_notificationID)
         {
-            if (facilityId.Contains(","))
+            string retValue;
+
+            switch (m_notificationID)
             {
-                facilityId = facilityId.Split(",")[0];
+                case CMMS.CMMS_Status.JOB_CREATED:     //Created
+                    retValue = "Job Created";
+                    break;
+                case CMMS.CMMS_Status.JOB_ASSIGNED:     //Assigned
+                    retValue = "Job Assigned";
+                    break;
+                case CMMS.CMMS_Status.JOB_LINKED:     //Linked
+                    retValue = "Job Linked to PTW";
+                    break;
+                case CMMS.CMMS_Status.JOB_CLOSED:     //Closed
+                    retValue = "Job Closed";
+                    break;
+                case CMMS.CMMS_Status.JOB_CANCELLED:     //Cancelled
+                    retValue = "Job Cancelled";
+                    break;
+                default:
+                    retValue = "Unknown Status";
+                    break;
             }
+            return retValue;
+
+        }
+        public async Task<List<CMDashboadModuleWiseList>> getDashboadDetails(string facilityId,CMMS.CMMS_Modules moduleID, DateTime fromDate, DateTime toDate)
+        {
+            //if (facilityId.Contains(","))
+            //{
+            //    facilityId = facilityId.Split(",")[0];
+            //}
             List<CMDashboadModuleWiseList> countResult = new List<CMDashboadModuleWiseList>();
             CMDashboadModuleWiseList modulewiseDetail = new CMDashboadModuleWiseList();
             CMDashboadDetails result = new CMDashboadDetails();
@@ -1006,31 +1035,31 @@ namespace CMMSAPIs.Repositories.Masters
             {
                 case CMMS.CMMS_Modules.JOB:
                     modulewiseDetail.module_name = "Breakdown Maintenance";
-                    result = await getJobDashboardDetails(facilityId);
+                    result = await getJobDashboardDetails(facilityId, fromDate, toDate);
                     modulewiseDetail.CMDashboadDetails = result;
                     countResult.Add(modulewiseDetail);
                     break;
                 case CMMS.CMMS_Modules.PM_PLAN:
                     modulewiseDetail.module_name = "Preventive Maintenance";
-                    result = await getPMPlanDashboardDetails(facilityId);
+                    result = await getPMPlanDashboardDetails(facilityId, fromDate, toDate);
                     modulewiseDetail.CMDashboadDetails = result;
                     countResult.Add(modulewiseDetail);
                     break;
                 case CMMS.CMMS_Modules.MC_PLAN:
                     modulewiseDetail.module_name = "Module Cleaning";
-                    result = await getMCPlanDashboardDetails(facilityId);
+                    result = await getMCPlanDashboardDetails(facilityId, fromDate, toDate);
                     modulewiseDetail.CMDashboadDetails = result;
                     countResult.Add(modulewiseDetail);
                     break;
                 case CMMS.CMMS_Modules.INCIDENT_REPORT:
                     modulewiseDetail.module_name = "Incident Report";
-                    result = await getIRDashboardDetails(facilityId);
+                    result = await getIRDashboardDetails(facilityId, fromDate, toDate);
                     modulewiseDetail.CMDashboadDetails = result;
                     countResult.Add(modulewiseDetail);
                     break;
                 case CMMS.CMMS_Modules.SM_GO:
                     modulewiseDetail.module_name = "Stock Management";
-                    result = await getSMDashboardDetails(facilityId);
+                    result = await getSMDashboardDetails(facilityId, fromDate, toDate);
                     modulewiseDetail.CMDashboadDetails = result;
                     countResult.Add(modulewiseDetail);
                     break;
@@ -1038,35 +1067,35 @@ namespace CMMSAPIs.Repositories.Masters
                     CMDashboadModuleWiseList modulewiseDetail_Job = new CMDashboadModuleWiseList();
                     CMDashboadDetails result_job = new CMDashboadDetails();
                     modulewiseDetail_Job.module_name = "Breakdown Maintenance";
-                    result_job = await getJobDashboardDetails(facilityId);
+                    result_job = await getJobDashboardDetails(facilityId, fromDate, toDate);
                     modulewiseDetail_Job.CMDashboadDetails = result_job;
                     countResult.Add(modulewiseDetail_Job);
 
                     CMDashboadModuleWiseList modulewiseDetail_PM = new CMDashboadModuleWiseList();
                     CMDashboadDetails result_PM = new CMDashboadDetails();
                     modulewiseDetail_PM.module_name = "Preventive Maintenance";
-                    result_PM = await getPMPlanDashboardDetails(facilityId);
+                    result_PM = await getPMPlanDashboardDetails(facilityId, fromDate, toDate);
                     modulewiseDetail_PM.CMDashboadDetails = result_PM;
                     countResult.Add(modulewiseDetail_PM);
 
                     CMDashboadModuleWiseList modulewiseDetail_MC = new CMDashboadModuleWiseList();
                     CMDashboadDetails result_MC = new CMDashboadDetails();
                     modulewiseDetail_MC.module_name = "Module Cleaning";
-                    result_MC = await getMCPlanDashboardDetails(facilityId);
+                    result_MC = await getMCPlanDashboardDetails(facilityId, fromDate, toDate);
                     modulewiseDetail_MC.CMDashboadDetails = result_MC;
                     countResult.Add(modulewiseDetail_MC);
 
                     CMDashboadModuleWiseList modulewiseDetail_IR = new CMDashboadModuleWiseList();
                     CMDashboadDetails result_IR = new CMDashboadDetails();
                     modulewiseDetail_IR.module_name = "Incident Report";
-                    result_IR = await getIRDashboardDetails(facilityId);
+                    result_IR = await getIRDashboardDetails(facilityId, fromDate, toDate);
                     modulewiseDetail_IR.CMDashboadDetails = result_IR;
                     countResult.Add(modulewiseDetail_IR);
 
                     CMDashboadModuleWiseList modulewiseDetail_SM = new CMDashboadModuleWiseList();
                     CMDashboadDetails result_SM = new CMDashboadDetails();
                     modulewiseDetail_SM.module_name = "Stock Management";
-                    result_SM = await getSMDashboardDetails(facilityId);
+                    result_SM = await getSMDashboardDetails(facilityId, fromDate, toDate);
                     modulewiseDetail_SM.CMDashboadDetails = result_SM;
                     countResult.Add(modulewiseDetail_SM);
                     break;
@@ -1074,9 +1103,16 @@ namespace CMMSAPIs.Repositories.Masters
             return countResult;
         }
 
-        public async Task<CMDashboadDetails> getJobDashboardDetails(string facilityId)
+        public async Task<CMDashboadDetails> getJobDashboardDetails(string facilityId, DateTime fromDate, DateTime toDate)
         {
             CMDashboadDetails result = new CMDashboadDetails();
+
+            string filter = "";
+
+            if (fromDate != null && fromDate.ToString("yyyy-MM-dd") != "0001-01-01" && toDate != null && toDate.ToString("yyyy-MM-dd") != "0001-01-01")
+            {
+                filter = $" and job.createdAt between '{fromDate.ToString("yyyy-MM-dd")}' and '{toDate.ToString("yyyy-MM-dd")}'";
+            }
 
             string myQuery = $"SELECT job.id  wo_number, job.facilityId as facility_id, facilities.name as facility_name, job.status," +
                 $" group_concat(distinct asset_cat.name order by asset_cat.id separator ', ') as asset_category, " +
@@ -1089,17 +1125,63 @@ namespace CMMSAPIs.Repositories.Masters
                 $" LEFT JOIN assets as asset ON mapAssets.assetId  =  asset.id " +
                 $" LEFT JOIN assetcategories as asset_cat ON mapAssets.categoryId = asset_cat.id " +
                 $" LEFT JOIN permits as permit ON permit.id = job.linkedPermit " +
-                $" WHERE job.facilityId in ({facilityId}) " +
+                $" WHERE job.facilityId in ({facilityId}) {filter} " +
                 $" GROUP BY job.id order by job.id DESC;";
             List<CMDashboadItemList> itemList = await Context.GetData<CMDashboadItemList>(myQuery).ConfigureAwait(false);
                  foreach(CMDashboadItemList _Job in itemList)
             {
-                if (_Job.ptw_id == 0)
+                //if (_Job.ptw_id == 0)
+                //{
+                //    _Job.status_long = "Permit not linked";
+                //}
+                //else if (_Job.latestJCid != 0)
+                //{
+                //    //if permit status is not yet approved
+                //    if (_Job.latestJCPTWStatus == (int)CMMS.CMMS_Status.PTW_APPROVED)
+                //    {
+                //        _Job.status_long = JCRepository.getShortStatus(CMMS.CMMS_Modules.JOBCARD, (CMMS.CMMS_Status)_Job.latestJCStatus, (CMMS.ApprovalStatus)_Job.latestJCApproval);
+                //    }
+                //    else if (_Job.latestJCPTWStatus == (int)CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER)
+                //    {
+                //        _Job.status_long = "Permit - rejected";
+                //    }
+                //    else
+                //    {
+                //        _Job.status_long = "Permit - Waiting For Approval";
+                //    }
+                //}
+                //else
+                //{
+                //    if (_Job.latestJCPTWStatus == (int)CMMS.CMMS_Status.PTW_APPROVED)
+                //    {
+
+                //        _Job.status_long = "Permit - Approved";
+                //    }
+                //    else if (_Job.latestJCPTWStatus == (int)CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER)
+                //    {
+                //        _Job.status_long = "Permit - rejected";
+                //    }
+                //    else
+                //    {
+                //        _Job.status_long = "Permit - Pending";
+                //    }
+                //}
+
+                //if permit status is not yet approved
+                if (_Job.latestJCStatus > 0)
                 {
-                    _Job.status_long = "Permit not linked";
-                }
-                else if (_Job.latestJCid != 0)
-                {
+                    if (_Job.latestJCPTWStatus == (int)CMMS.CMMS_Status.PTW_APPROVED)
+                    {
+                        _Job.status_long = JCRepository.getShortStatus(CMMS.CMMS_Modules.JOBCARD, (CMMS.CMMS_Status)_Job.latestJCStatus, (CMMS.ApprovalStatus)_Job.latestJCApproval);
+                    }
+                    else if (_Job.latestJCPTWStatus == (int)CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER)
+                    {
+                        _Job.status_long = "Permit - rejected";
+                    }
+                    else
+                    {
+                        _Job.status_long = "Permit - Waiting For Approval";
+                    }
                     //if permit status is not yet approved
                     if (_Job.latestJCPTWStatus == (int)CMMS.CMMS_Status.PTW_APPROVED)
                     {
@@ -1116,19 +1198,8 @@ namespace CMMSAPIs.Repositories.Masters
                 }
                 else
                 {
-                    if (_Job.latestJCPTWStatus == (int)CMMS.CMMS_Status.PTW_APPROVED)
-                    {
-                        
-                        _Job.status_long = "Permit - Approved";
-                    }
-                    else if (_Job.latestJCPTWStatus == (int)CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER)
-                    {
-                        _Job.status_long = "Permit - rejected";
-                    }
-                    else
-                    {
-                        _Job.status_long = "Permit - Pending";
-                    }
+                    CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_Job.status);
+                    _Job.status_long = getShortStatus_JOB(CMMS.CMMS_Modules.JOB, _Status);
                 }
             }
 
@@ -1142,36 +1213,44 @@ namespace CMMSAPIs.Repositories.Masters
             //result.pending = result.total - itemList.Where(x => x.latestJCPTWStatus != (int)CMMS.CMMS_Status.PTW_APPROVED).ToList().Count;
             result.pending = result.total - result.completed;
            
-            int completed_on_time = itemList.Where(x => x.latestJCStatus == (int)CMMS.CMMS_Status.PTW_APPROVED && x.start_date == DateTime.Today).ToList().Count;
-            int wo_delay = itemList.Where(x => x.latestJCStatus != (int)CMMS.CMMS_Status.PTW_APPROVED && x.start_date == DateTime.Today).ToList().Count;
-            int wo_backlog = itemList.Where(x => x.latestJCStatus != (int)CMMS.CMMS_Status.PTW_APPROVED && x.start_date != DateTime.Today).ToList().Count;
+            int completed_on_time = itemList.Where(x => x.latestJCStatus == (int)CMMS.CMMS_Status.PTW_APPROVED && x.start_date == x.start_date).ToList().Count;
+            int wo_delay = itemList.Where(x => x.latestJCStatus == (int)CMMS.CMMS_Status.PTW_APPROVED && x.start_date != x.start_date).ToList().Count;
+            int wo_backlog = itemList.Where(x => x.latestJCStatus != (int)CMMS.CMMS_Status.PTW_APPROVED && x.start_date != x.start_date).ToList().Count;
             if (result.total > 0)
             {
-                result.wo_on_time = (completed_on_time / result.total) * 100;
-                result.wo_delay = (wo_delay / result.total) * 100;
-                result.wo_backlog = (wo_backlog / result.total) * 100;
+                result.wo_on_time = completed_on_time;
+                result.wo_delay = wo_delay;
+                result.wo_backlog = wo_backlog;
             }
             result.item_list = itemList; 
             return result;
         }
 
-        public async Task<CMDashboadDetails> getPMPlanDashboardDetails(string facilityId)
+        public async Task<CMDashboadDetails> getPMPlanDashboardDetails(string facilityId, DateTime fromDate, DateTime toDate)
         {
             CMDashboadDetails result = new CMDashboadDetails();
 
-            string myQuery = $"SELECT facilities.name as facility_name, plan.id as wo_number, plan.plan_name, " +
-                $" plan.status as status,category.name as asset_category,category.id as category_id, " +
-                $" plan.plan_date as start_date," +
-                $"  (select task.plan_date from pm_task task where task.id = (select max(id) from pm_task where pm_task.plan_id = plan.id  ) ) as end_date" +
-                $"  FROM pm_plan as plan " +
-                $" LEFT JOIN statuses ON plan.status = statuses.softwareId " +
-                $" JOIN facilities ON plan.facility_id = facilities.id " +
-                $" LEFT JOIN assetcategories as category ON plan.category_id = category.id " +
-                $" LEFT JOIN frequency ON plan.frequency_id = frequency.id " +
-                $" LEFT JOIN users as createdBy ON createdBy.id = plan.created_by " +
-                $" LEFT JOIN users as updatedBy ON updatedBy.id = plan.updated_by " +
-                $" LEFT JOIN users as assignedTo ON assignedTo.id = plan.assigned_to " +
-                $" WHERE facilities.id in ({facilityId})  and status_id = 1 ;";
+            string filter = "";
+
+            if (fromDate != null && fromDate.ToString("yyyy-MM-dd") != "0001-01-01" && toDate != null && toDate.ToString("yyyy-MM-dd") != "0001-01-01")
+            {
+                filter = $" and pm_task.plan_date between '{fromDate.ToString("yyyy-MM-dd")}' and '{toDate.ToString("yyyy-MM-dd")}'";
+            }
+
+
+            string myQuery = $"SELECT facilities.name as facility_name,pm_task.id as wo_number,pm_plan.plan_name,pm_task.category_id,cat.name as asset_category, " +
+                $" CONCAT('PMTASK',pm_task.id) as task_code,pm_plan.plan_name as plan_title,pm_task.facility_id, pm_task.frequency_id as frequency_id, pm_plan.plan_date as start_date," +
+                $"freq.name as frequency_name, pm_task.plan_date as due_date,prev_task_done_date as last_done_date, closed_at as done_date, " +
+                $"CONCAT(assignedTo.firstName,' ',assignedTo.lastName)  as assigned_to_name, pm_task.PTW_id as permit_id, " +
+                $"CONCAT('PTW',pm_task.PTW_id) as permit_code,permit.status as ptw_status, PM_task.status " +
+                   "FROM pm_task " +
+                   $"left join users as assignedTo on pm_task.assigned_to = assignedTo.id " +
+                   $"left join pm_plan  on pm_task.plan_id = pm_plan.id " +
+                   $"left join assetcategories as cat  on pm_task.category_id = cat.id " +
+                   $"left join permits as permit on pm_task.PTW_id = permit.id " +
+                   $"left join frequency as freq on pm_task.frequency_id = freq.id "+
+                   $" JOIN facilities ON pm_task.facility_id = facilities.id " +
+                   $" WHERE facilities.id in ({facilityId})  and status_id = 1 {filter};";
             List<CMDashboadItemList> itemList = await Context.GetData<CMDashboadItemList>(myQuery).ConfigureAwait(false);
 
             foreach (var plan in itemList)
@@ -1180,28 +1259,28 @@ namespace CMMSAPIs.Repositories.Masters
                 string _shortStatus = getShortStatus_PM_Plan(CMMS.CMMS_Modules.PM_PLAN, _Status);
                 plan.status_long = _shortStatus;
             }
-            result.created = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.PM_PLAN_CREATED).ToList().Count;
+            result.created = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.PM_ASSIGNED).ToList().Count;
             result.rejected = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.PM_REJECTED || x.status == (int)CMMS.CMMS_Status.PM_CLOSE_REJECTED || x.status == (int)CMMS.CMMS_Status.PM_PLAN_REJECTED).ToList().Count;
             result.assigned = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.PM_ASSIGNED).ToList().Count;
             result.submitted = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.PM_SUBMIT).ToList().Count;
-            result.approved = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.PM_APPROVED || x.status == (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED || x.status == (int)CMMS.CMMS_Status.PM_PLAN_APPROVED).ToList().Count;
+            result.approved = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED || x.status == (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED || x.status == (int)CMMS.CMMS_Status.PM_PLAN_APPROVED).ToList().Count;
 
 
             result.total = itemList.Count;
-            result.completed = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.PM_APPROVED || x.status == (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED || x.status == (int)CMMS.CMMS_Status.PM_PLAN_APPROVED).ToList().Count;
+            result.completed = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED).ToList().Count;
             //result.pending = result.total - itemList.Where(x => x.latestJCPTWStatus != (int)CMMS.CMMS_Status.PTW_APPROVED).ToList().Count;
             result.pending = result.total - result.completed;
             result.item_list = itemList;
 
-            int completed_on_time = itemList.Where(x => (x.status == (int)CMMS.CMMS_Status.PM_APPROVED || x.status == (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED || x.status == (int)CMMS.CMMS_Status.PM_PLAN_APPROVED) && (x.start_date == DateTime.Today)).ToList().Count;
-            int wo_delay = itemList.Where(x => (x.status != (int)CMMS.CMMS_Status.PM_APPROVED || x.status != (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED || x.status != (int)CMMS.CMMS_Status.PM_PLAN_APPROVED) && x.start_date != DateTime.Today).ToList().Count;
-            int wo_backlog = itemList.Where(x => (x.status != (int)CMMS.CMMS_Status.PM_APPROVED || x.status != (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED || x.status != (int)CMMS.CMMS_Status.PM_PLAN_APPROVED) && x.start_date != DateTime.Today).ToList().Count;
+            int completed_on_time = itemList.Where(x => (x.status == (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED) && (x.start_date == x.start_date)).ToList().Count;
+            int wo_delay = itemList.Where(x => (x.status == (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED ) && x.start_date != x.start_date).ToList().Count;
+            int wo_backlog = itemList.Where(x => (x.status != (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED ) && x.start_date != x.start_date).ToList().Count;
 
             if (result.total > 0)
             {
-                result.wo_on_time = (completed_on_time / result.total) * 100;
-                result.wo_delay = (wo_delay / result.total) * 100;
-                result.wo_backlog = (wo_backlog / result.total) * 100;
+                result.wo_on_time = completed_on_time;
+                result.wo_delay = wo_delay;
+                result.wo_backlog = wo_backlog;
             }
             
             return result;
@@ -1213,15 +1292,31 @@ namespace CMMSAPIs.Repositories.Masters
 
             switch (m_notificationID)
             {
-                case CMMS.CMMS_Status.PM_PLAN_DRAFT:
-                    retValue = "Draft"; break;
-                case CMMS.CMMS_Status.PM_PLAN_CREATED:
-                    retValue = "Waiting For Approval"; break;
-                case CMMS.CMMS_Status.PM_PLAN_REJECTED:
+                case CMMS.CMMS_Status.PM_SCHEDULED:
+                    retValue = "Scheduled"; break;
+                case CMMS.CMMS_Status.PM_ASSIGNED:
+                    retValue = "Assigned"; break;
+                case CMMS.CMMS_Status.PM_LINKED_TO_PTW:
+                    retValue = "Linked To PTW"; break;
+                case CMMS.CMMS_Status.PM_START:
+                    retValue = "Started"; break;
+                case CMMS.CMMS_Status.PM_COMPLETED:
+                    retValue = "Close - Waiting for Approval"; break;
+                case CMMS.CMMS_Status.PM_REJECTED:
                     retValue = "Rejected"; break;
-                case CMMS.CMMS_Status.PM_PLAN_UPDATED:
+                case CMMS.CMMS_Status.PM_APPROVED:
+                    retValue = "Approved"; break;
+                case CMMS.CMMS_Status.PM_CLOSE_REJECTED:
+                    retValue = "Close - Rejected"; break;
+                case CMMS.CMMS_Status.PM_CLOSE_APPROVED:
+                    retValue = "Close - Approved"; break;
+                case CMMS.CMMS_Status.PM_CANCELLED:
+                    retValue = "Cancelled"; break;
+                case CMMS.CMMS_Status.PM_DELETED:
+                    retValue = "Deleted"; break;
+                case CMMS.CMMS_Status.PM_UPDATED:
                     retValue = "Updated"; break;
-                case CMMS.CMMS_Status.PM_PLAN_DELETED:
+                case CMMS.CMMS_Status.PM_TASK_DELETED:
                     retValue = "Deleted"; break;
                 case CMMS.CMMS_Status.PM_PLAN_APPROVED:
                     retValue = "Approved"; break;
@@ -1260,9 +1355,15 @@ namespace CMMSAPIs.Repositories.Masters
             { (int)CMMS.CMMS_Status.EQUIP_ABANDONED, "Abandoned" },
             { (int)CMMS.CMMS_Status.EQUIP_SCHEDULED, "Scheduled" },
         };
-        public async Task<CMDashboadDetails> getMCPlanDashboardDetails(string facilityId)
+        public async Task<CMDashboadDetails> getMCPlanDashboardDetails(string facilityId, DateTime fromDate, DateTime toDate)
         {
             CMDashboadDetails result = new CMDashboadDetails();
+            string filter = "";
+
+            if (fromDate != null && fromDate.ToString("yyyy-MM-dd") != "0001-01-01" && toDate != null && toDate.ToString("yyyy-MM-dd") != "0001-01-01")
+            {
+                filter = $" and mc.createdAt between '{fromDate.ToString("yyyy-MM-dd")}' and '{toDate.ToString("yyyy-MM-dd")}'";
+            }
 
             string statusOut = "CASE ";
             foreach (KeyValuePair<int, string> status in StatusDictionary_MC_Plan)
@@ -1280,7 +1381,7 @@ namespace CMMSAPIs.Repositories.Masters
              $" left join facilities as F on F.id = mc.facilityId " +
              $"LEFT JOIN users as assignedTo ON assignedTo.id = mc.assignedTo " +
             $"LEFT JOIN users as createdBy ON createdBy.id = mc.createdById " +
-            $"LEFT JOIN users as approvedBy ON approvedBy.id = mc.approvedById where moduleType=1 ";
+            $"LEFT JOIN users as approvedBy ON approvedBy.id = mc.approvedById where moduleType=1 {filter} ";
        
             
                 myQuery1 += $" and facilityId in ({facilityId}) ";
@@ -1300,15 +1401,15 @@ namespace CMMSAPIs.Repositories.Masters
             result.pending = result.total - result.completed;
             result.item_list = itemList;
 
-            int completed_on_time = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.MC_PLAN_APPROVED && x.start_date == DateTime.Today).ToList().Count;
-            int wo_delay = itemList.Where(x => x.status != (int)CMMS.CMMS_Status.MC_PLAN_APPROVED && x.start_date == DateTime.Today).ToList().Count;
-            int wo_backlog = itemList.Where(x => x.status != (int)CMMS.CMMS_Status.MC_PLAN_APPROVED && x.start_date != DateTime.Today).ToList().Count;
+            int completed_on_time = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.MC_PLAN_APPROVED && x.start_date == x.start_date).ToList().Count;
+            int wo_delay = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.MC_PLAN_APPROVED && x.start_date != x.start_date).ToList().Count;
+            int wo_backlog = itemList.Where(x => x.status != (int)CMMS.CMMS_Status.MC_PLAN_APPROVED && x.start_date != x.start_date).ToList().Count;
 
             if (result.total > 0)
             {
-                result.wo_on_time = (completed_on_time / result.total) * 100;
-                result.wo_delay = (wo_delay / result.total) * 100;
-                result.wo_backlog = (wo_backlog / result.total) * 100;
+                result.wo_on_time = completed_on_time;
+                result.wo_delay = wo_delay;
+                result.wo_backlog = wo_backlog;
             }
             return result;
         }
@@ -1324,11 +1425,18 @@ namespace CMMSAPIs.Repositories.Masters
             { 187, "Updated" },
             { 188, "Cancelled" },
         };
-        public async Task<CMDashboadDetails> getIRDashboardDetails(string facilityId)
+        public async Task<CMDashboadDetails> getIRDashboardDetails(string facilityId, DateTime fromDate, DateTime toDate)
         {
             CMDashboadDetails result = new CMDashboadDetails();
 
             string filter = " incident.facility_id in (" + facilityId + ") ";
+            string Datefilter = "";
+
+            if (fromDate != null && fromDate.ToString("yyyy-MM-dd") != "0001-01-01" && toDate != null && toDate.ToString("yyyy-MM-dd") != "0001-01-01")
+            {
+                Datefilter = $" and incident.incident_datetime between '{fromDate.ToString("yyyy-MM-dd")}' and '{toDate.ToString("yyyy-MM-dd")}'";
+            }
+
 
             string statusOut = "CASE ";
             foreach (KeyValuePair<int, string> status in StatusDictionary_IR)
@@ -1347,7 +1455,7 @@ namespace CMMSAPIs.Repositories.Masters
                 $" LEFT JOIN users as user on incident.approved_by = user.id " +
                 $" LEFT JOIN users as created_by on incident.created_by = created_by.id " +
                 $" LEFT JOIN users as user1 on incident.verified_by = user1.id " +
-                $" where " + filter + " order by incident.id asc";
+                $" where " + filter + " "+Datefilter+" order by incident.id asc";
 
             List<CMIncidentList> getIncidentList = await Context.GetData<CMIncidentList>(selectqry).ConfigureAwait(false);
 
@@ -1367,15 +1475,15 @@ namespace CMMSAPIs.Repositories.Masters
             result.pending = result.total - result.completed;
             result.item_list = itemList;
 
-            int completed_on_time = getIncidentList.Where(x => x.status == (int)CMMS.CMMS_Status.IR_APPROVED_INITIAL && x.reported_at == DateTime.Today).ToList().Count;
-            int wo_delay = getIncidentList.Where(x => x.status != (int)CMMS.CMMS_Status.IR_APPROVED_INITIAL && x.reported_at == DateTime.Today).ToList().Count;
-            int wo_backlog = getIncidentList.Where(x => x.status != (int)CMMS.CMMS_Status.IR_APPROVED_INITIAL && x.reported_at != DateTime.Today).ToList().Count;
+            int completed_on_time = getIncidentList.Where(x => x.status == (int)CMMS.CMMS_Status.IR_APPROVED_INITIAL && x.reported_at == x.reported_at).ToList().Count;
+            int wo_delay = getIncidentList.Where(x => x.status == (int)CMMS.CMMS_Status.IR_APPROVED_INITIAL && x.reported_at != x.reported_at).ToList().Count;
+            int wo_backlog = getIncidentList.Where(x => x.status != (int)CMMS.CMMS_Status.IR_APPROVED_INITIAL && x.reported_at != x.reported_at).ToList().Count;
 
             if (result.total > 0)
             {
-                result.wo_on_time = (completed_on_time / result.total) * 100;
-                result.wo_delay = (wo_delay / result.total) * 100;
-                result.wo_backlog = (wo_backlog / result.total) * 100;
+                result.wo_on_time = completed_on_time;
+                result.wo_delay = wo_delay;
+                result.wo_backlog = wo_backlog;
             }
             return result;
         }
@@ -1426,12 +1534,19 @@ namespace CMMSAPIs.Repositories.Masters
             return retValue;
 
         }
-        public async Task<CMDashboadDetails> getSMDashboardDetails(string facilityId)
+        public async Task<CMDashboadDetails> getSMDashboardDetails(string facilityId, DateTime fromDate, DateTime toDate)
         {
             CMDashboadDetails result = new CMDashboadDetails();
 
            
             string filter = " facilityID in (" + facilityId + ")";
+            string datefilter = "";
+
+            if (fromDate != null && fromDate.ToString("yyyy-MM-dd") != "0001-01-01" && toDate != null && toDate.ToString("yyyy-MM-dd") != "0001-01-01")
+            {
+                datefilter = $" and pod.lastModifiedDate between '{fromDate.ToString("yyyy-MM-dd")}' and '{toDate.ToString("yyyy-MM-dd")}'";
+            }
+
 
             string query = "SELECT fc.name as facilityName,pod.ID as podID, facilityid as       facility_id,pod.spare_status,pod.remarks,sai.orderflag,sam.asset_type_ID," +
                 "pod.purchaseID,pod.assetItemID,sai.serial_number,sai.location_ID,(select sum(cost) from smgoodsorderdetails where purchaseID = po.id) as cost,pod.ordered_qty,\r\n bl.name as vendor_name,\r\n     " +
@@ -1454,7 +1569,7 @@ namespace CMMSAPIs.Repositories.Masters
                 "  LEFT JOIN smassetmasters s2 ON s2.item_category_ID = sic.ID\r\n        )  t2 ON t2.master_ID = sam.ID\r\n " +
                 "       LEFT JOIN facilities fc ON fc.id = po.facilityID\r\nLEFT JOIN users as vendor on vendor.id=po.vendorID " +
                 "       LEFT JOIN business bl ON bl.id = po.vendorID left join smassettypes stt on stt.ID = pod.order_type LEFT JOIN currency curr ON curr.id = po.currency LEFT JOIN users ed ON ed.id = po.generated_by" +
-                " WHERE " + filter + "";
+                " WHERE " + filter + " "+datefilter+"";
 
 
             List<CMGoodsOrderList> _List = await Context.GetData<CMGoodsOrderList>(query).ConfigureAwait(false);
@@ -1487,19 +1602,19 @@ namespace CMMSAPIs.Repositories.Masters
 
 
             result.total = itemList.Count;
-            result.completed = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.GO_APPROVED).ToList().Count;
+            result.completed = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.GO_APPROVED ).ToList().Count;
             result.pending = result.total - result.completed;
             result.item_list = itemList;
 
-            int completed_on_time = _List.Where(x => x.status == (int)CMMS.CMMS_Status.GO_APPROVED && x.purchaseDate == DateTime.Today).ToList().Count;
-            int wo_delay = _List.Where(x => x.status != (int)CMMS.CMMS_Status.GO_APPROVED && x.purchaseDate == DateTime.Today).ToList().Count;
-            int wo_backlog = _List.Where(x => x.status != (int)CMMS.CMMS_Status.GO_APPROVED && x.purchaseDate != DateTime.Today).ToList().Count;
+            int completed_on_time = _List.Where(x => x.status == (int)CMMS.CMMS_Status.GO_APPROVED && x.purchaseDate != x.purchaseDate).ToList().Count;
+            int wo_delay = _List.Where(x => x.status != (int)CMMS.CMMS_Status.GO_APPROVED && x.purchaseDate != x.purchaseDate).ToList().Count;
+            int wo_backlog = _List.Where(x => x.status != (int)CMMS.CMMS_Status.GO_APPROVED && x.purchaseDate != x.purchaseDate).ToList().Count;
 
             if (result.total > 0)
             {
-                result.wo_on_time = (completed_on_time / result.total) * 100;
-                result.wo_delay = (wo_delay / result.total) * 100;
-                result.wo_backlog = (wo_backlog / result.total) * 100;
+                result.wo_on_time = completed_on_time;
+                result.wo_delay = wo_delay;
+                result.wo_backlog = wo_backlog;
             }
             return result;
         }
