@@ -32,7 +32,7 @@ using OfficeOpenXml;
 using System.Linq;
 using CMMSAPIs.Models;
 using System.Net.NetworkInformation;
-
+using CMMSAPIs.Models.SM;
 
 namespace CMMSAPIs.Repositories.Masters
 {
@@ -95,11 +95,11 @@ namespace CMMSAPIs.Repositories.Masters
              * Read property of CMModule and insert into Features table
             */
             CMDefaultResponse response = new CMDefaultResponse();
-            if (request.software_id == 0)
-            {
-                response = new CMDefaultResponse(request.software_id, CMMS.RETRUNSTATUS.FAILURE, "For Module Name <" + request.moduleName + "> Software Id Is Not Passed. Please contact Backend Team For Getting Software_id For This Module.");
-                return response;
-            }
+            //if (request.software_id == 0)
+            //{
+            //    response = new CMDefaultResponse(request.software_id, CMMS.RETRUNSTATUS.FAILURE, "For Module Name <" + request.moduleName + "> Software Id Is Not Passed. Please contact Backend Team For Getting Software_id For This Module.");
+            //    return response;
+            //}
             string myQuery = "INSERT INTO features(`moduleName`,softwareid, `featureName`, `menuImage`, `add`, `edit`, `delete`, `view`, `issue`, `approve`, `selfView`,isactive,serialNo) " +
                 $"VALUES('{request.moduleName}',{request.software_id}, '{request.featureName}', '{request.menuImage}', {request.add}, {request.edit}, " +
                 $"{request.delete}, {request.view}, {request.issue}, {request.approve}, {request.selfView},1, id*100); SELECT LAST_INSERT_ID();";
@@ -169,12 +169,21 @@ namespace CMMSAPIs.Repositories.Masters
             List<CMModule> _moduleDetails = await Context.GetData<CMModule>(myQuery).ConfigureAwait(false);
             return _moduleDetails[0];
         }
-        internal async Task<List<CMModule>> GetModuleList()
+        internal async Task<List<CMModule>> GetModuleList(bool return_all)
         {
             /*
              * Return List of modules from Features table
             */
-            string myQuery = "SELECT * FROM features where isActive=1; ";
+            string myQuery = "";
+            if (return_all)
+            {
+                myQuery = "SELECT * FROM features ";
+            }
+            else
+            {
+                myQuery = "SELECT * FROM features where isActive=1; ";
+            }
+            myQuery = "SELECT * FROM features where isActive=1; ";
             List<CMModule> _moduleList = await Context.GetData<CMModule>(myQuery).ConfigureAwait(false);
             return _moduleList;
         }
@@ -1024,11 +1033,12 @@ namespace CMMSAPIs.Repositories.Masters
         }
         public async Task<List<CMDashboadModuleWiseList>> getDashboadDetails(string facilityId,CMMS.CMMS_Modules moduleID, DateTime fromDate, DateTime toDate)
         {
-            //if (facilityId.Contains(","))
-            //{
-            //    facilityId = facilityId.Split(",")[0];
-            //}
+
             List<CMDashboadModuleWiseList> countResult = new List<CMDashboadModuleWiseList>();
+            if (facilityId == null)
+            {
+                return countResult;
+            }
             CMDashboadModuleWiseList modulewiseDetail = new CMDashboadModuleWiseList();
             CMDashboadDetails result = new CMDashboadDetails();
             switch (moduleID)
@@ -1106,7 +1116,10 @@ namespace CMMSAPIs.Repositories.Masters
         public async Task<CMDashboadDetails> getJobDashboardDetails(string facilityId, DateTime fromDate, DateTime toDate)
         {
             CMDashboadDetails result = new CMDashboadDetails();
-
+            if(facilityId == "")
+            {
+                return result;
+            }
             string filter = "";
 
             if (fromDate != null && fromDate.ToString("yyyy-MM-dd") != "0001-01-01" && toDate != null && toDate.ToString("yyyy-MM-dd") != "0001-01-01")
@@ -1114,7 +1127,7 @@ namespace CMMSAPIs.Repositories.Masters
                 filter = $" and job.createdAt between '{fromDate.ToString("yyyy-MM-dd")}' and '{toDate.ToString("yyyy-MM-dd")}'";
             }
 
-            string myQuery = $"SELECT job.id  wo_number, job.facilityId as facility_id, facilities.name as facility_name, job.status," +
+            string myQuery = $"SELECT job.id  wo_number,job.title as wo_decription ,job.facilityId as facility_id, facilities.name as facility_name, job.status," +
                 $" group_concat(distinct asset_cat.name order by asset_cat.id separator ', ') as asset_category, " +
                 $" group_concat(distinct asset.name order by asset.id separator ', ') as asset_name, permit.startDate, permit.endDate," +
                 $" jc.JC_Status as latestJCStatus,  jc.JC_Approved as latestJCApproval, permit.id as ptw_id,jc.id as latestJCid,permit.status as  latestJCPTWStatus" +
@@ -1212,7 +1225,8 @@ namespace CMMSAPIs.Repositories.Masters
             result.completed = itemList.Where(x=>x.latestJCStatus == (int)CMMS.CMMS_Status.PTW_APPROVED).ToList().Count;
             //result.pending = result.total - itemList.Where(x => x.latestJCPTWStatus != (int)CMMS.CMMS_Status.PTW_APPROVED).ToList().Count;
             result.pending = result.total - result.completed;
-           
+
+
             int completed_on_time = itemList.Where(x => x.latestJCStatus == (int)CMMS.CMMS_Status.PTW_APPROVED && x.start_date == x.start_date).ToList().Count;
             int wo_delay = itemList.Where(x => x.latestJCStatus == (int)CMMS.CMMS_Status.PTW_APPROVED && x.start_date != x.start_date).ToList().Count;
             int wo_backlog = itemList.Where(x => x.latestJCStatus != (int)CMMS.CMMS_Status.PTW_APPROVED && x.start_date != x.start_date).ToList().Count;
@@ -1238,7 +1252,7 @@ namespace CMMSAPIs.Repositories.Masters
             }
 
 
-            string myQuery = $"SELECT facilities.name as facility_name,pm_task.id as wo_number,pm_plan.plan_name,pm_task.category_id,cat.name as asset_category, " +
+            string myQuery = $"SELECT facilities.name as facility_name,pm_task.id as wo_number,pm_plan.plan_name as wo_decription,pm_plan.plan_name,pm_task.category_id,cat.name as asset_category, " +
                 $" CONCAT('PMTASK',pm_task.id) as task_code,pm_plan.plan_name as plan_title,pm_task.facility_id, pm_task.frequency_id as frequency_id, pm_plan.plan_date as start_date," +
                 $"freq.name as frequency_name, pm_task.plan_date as due_date,prev_task_done_date as last_done_date, closed_at as done_date, " +
                 $"CONCAT(assignedTo.firstName,' ',assignedTo.lastName)  as assigned_to_name, pm_task.PTW_id as permit_id, " +
@@ -1370,7 +1384,7 @@ namespace CMMSAPIs.Repositories.Masters
             }
             statusOut += $"ELSE 'Invalid Status' END";
 
-            string myQuery1 = $"select mc.facilityId,F.name as facility_name," +
+            string myQuery1 = $"select mc.facilityId,F.name as facility_name ,mc.title as wo_decription," +
                 $" mc.planId as wo_number,mc.status as status, mc.frequencyId,mc.assignedTo as assignedToId, case when mc.startDate = '0000-00-00 00:00:00' then null else mc.startDate end as start_date,mc.durationDays as noOfCleaningDays, mc.title," +
                 $" CONCAT(createdBy.firstName, createdBy.lastName) as createdBy , mc.createdAt, " +
                 $" CONCAT(approvedBy.firstName, approvedBy.lastName) as approvedBy,mc.approvedAt,freq.name as frequency," +
@@ -1444,7 +1458,7 @@ namespace CMMSAPIs.Repositories.Masters
             statusOut += $"ELSE 'Invalid Status' END";
 
 
-            string selectqry = $"SELECT incident.id as wo_number, incident.description as description , facilities.name as facility_name,blockName.name as block_name, assets.name as asset_name, incident.risk_level as risk_level, CONCAT(created_by.firstName ,' ' , created_by.lastName) as reported_by_name, incident.created_at as reported_at,CONCAT(user.firstName ,' ' , user.lastName) as approved_by, incident.approved_at as approved_at, CONCAT(user1.firstName , ' ' , user1.lastName) as reported_by_name , {statusOut} as status_long ,incident.status, incident.location_of_incident, incident_datetime, type_of_job,title," +
+            string selectqry = $"SELECT incident.id as wo_number,incident.title as wo_decription, incident.description as description , facilities.name as facility_name,blockName.name as block_name, assets.name as asset_name, incident.risk_level as risk_level, CONCAT(created_by.firstName ,' ' , created_by.lastName) as reported_by_name, incident.created_at as reported_at,CONCAT(user.firstName ,' ' , user.lastName) as approved_by, incident.approved_at as approved_at, CONCAT(user1.firstName , ' ' , user1.lastName) as reported_by_name , {statusOut} as status_long ,incident.status, incident.location_of_incident, incident_datetime, type_of_job,title," +
                 $" incident.status, incident.is_why_why_required, incident.is_investigation_required " +
                 $" FROM incidents as incident " +
                 $" left JOIN facilities AS facilities on facilities.id = incident.facility_id " +
@@ -1546,7 +1560,7 @@ namespace CMMSAPIs.Repositories.Masters
             }
 
 
-            string query = "SELECT fc.name as facilityName,pod.ID as podID, facilityid as       facility_id,pod.spare_status,pod.remarks,sai.orderflag,sam.asset_type_ID," +
+            string query = "SELECT fc.name as facilityName,pod.ID as podID,pod.remarks as wo_decription, facilityid as       facility_id,pod.spare_status,pod.remarks,sai.orderflag,sam.asset_type_ID," +
                 "pod.purchaseID,pod.assetItemID,sai.serial_number,sai.location_ID,(select sum(cost) from smgoodsorderdetails where purchaseID = po.id) as cost,pod.ordered_qty,\r\n bl.name as vendor_name,\r\n     " +
                 " po.purchaseDate,sam.asset_type_ID,sam.asset_name,po.receiverID,\r\n        " +
                 "po.vendorID,po.status,sai.asset_code,t1.asset_type,t2.cat_name,pod.received_qty,pod.damaged_qty,pod.accepted_qty," +
