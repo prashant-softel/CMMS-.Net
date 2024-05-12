@@ -43,6 +43,9 @@ namespace CMMSAPIs.Models.Masters
         public int total { get; set; }
         public int completed { get; set; }
         public int pending { get; set; }
+        public int schedule_compliance_total { get; set; }
+        public int schedule_compliance_completed { get; set; }
+        public int schedule_compliance_pending { get; set; }
         public int wo_on_time { get; set; }
         public int wo_delay { get; set; }
         public int wo_backlog { get; set; }
@@ -56,6 +59,7 @@ namespace CMMSAPIs.Models.Masters
         public int facility_id { get; set; }
         public string facility_name { get; set; }
         public int wo_number { get; set; }
+        public string wo_decription { get; set; }
         public int status { get; set; }
         public string status_long { get; set; }
         public string asset_category { get; set; }
