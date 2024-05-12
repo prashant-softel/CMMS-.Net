@@ -545,11 +545,11 @@ namespace CMMSAPIs.Controllers.Masters
 
         [Route("GetModuleList")]
         [HttpGet]
-        public async Task<IActionResult> GetModuleList()
+        public async Task<IActionResult> GetModuleList(bool return_all)
         {
             try
             {
-                var data = await _CMMSBS.GetModuleList();
+                var data = await _CMMSBS.GetModuleList(return_all);
                 return Ok(data);
             }
             catch (Exception)
