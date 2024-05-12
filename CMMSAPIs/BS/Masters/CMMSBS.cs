@@ -46,7 +46,7 @@ namespace CMMSAPIs.BS.Masters
         Task<CMDefaultResponse> UpdateModule(CMModule request);
         Task<CMDefaultResponse> DeleteModule(int id);
         Task<CMModule> GetModuleDetail(int id);
-        Task<List<CMModule>> GetModuleList();
+        Task<List<CMModule>> GetModuleList(bool return_all);
         Task<List<CMStatus>> GetStatusList(CMMS.CMMS_Modules module);
         Task<List<CMFrequency>> GetFrequencyList();
         Task<string> Print(int id, CMMS.CMMS_Modules moduleID);
@@ -129,13 +129,13 @@ namespace CMMSAPIs.BS.Masters
             }
         }
 
-        public async Task<List<CMModule>> GetModuleList()
+        public async Task<List<CMModule>> GetModuleList(bool return_all)
         {
             try
             {
                 using (var repos = new CMMSRepository(getDB))
                 {
-                    return await repos.GetModuleList();
+                    return await repos.GetModuleList(return_all);
                 }
             }
             catch (Exception ex)
