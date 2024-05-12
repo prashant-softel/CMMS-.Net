@@ -1013,7 +1013,8 @@ namespace CMMSAPIs.Repositories.Users
                 {
                     if (request.access_list.Count > 0)
                     {
-                        Dictionary<dynamic, CMAccessList> new_access = request.access_list.SetPrimaryKey("feature_id");
+                        var accessList = request.access_list.GroupBy(x => x.feature_id).Select(g => g.First()).ToList();                   
+                        Dictionary<dynamic, CMAccessList> new_access = accessList.SetPrimaryKey("feature_id");
                         foreach (var access in new_access)
                             old_access[access.Key] = access.Value;
                     }
