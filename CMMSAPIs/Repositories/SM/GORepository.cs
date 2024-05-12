@@ -475,6 +475,11 @@ namespace CMMSAPIs.Repositories
                     var stmtU = $"UPDATE smgoodsorderdetails set is_splited = 0 where id = {item.podID}";
                     int resultU = await Context.ExecuteNonQry<int>(stmtU).ConfigureAwait(false);
                 }
+                else
+                {
+                    var stmtU = $"UPDATE smgoodsorderdetails set received_qty = {item.ordered_qty} where id = {item.podID}";
+                    int resultU = await Context.ExecuteNonQry<int>(stmtU).ConfigureAwait(false);
+                }
             }
 
 
@@ -740,7 +745,12 @@ namespace CMMSAPIs.Repositories
                 $"LEFT JOIN smassetmasters sam ON sam.asset_code = sai.asset_code" +
                 $" WHERE sai.ID = {assetItemID}";
             DataTable dt = await Context.FetchData(stmt).ConfigureAwait(false);
-            int asset_type_ID = Convert.ToInt32(dt.Rows[0][0]);
+            int asset_type_ID = 0;
+            if(dt.Rows.Count > 0)
+            {
+                asset_type_ID = Convert.ToInt32(dt.Rows[0][0]);
+            }
+        
             if (asset_type_ID > 1)
             {
                 string stmtUpdate = $"UPDATE smassetitems SET status = {status} WHERE ID = {assetItemID}";
@@ -1336,7 +1346,7 @@ namespace CMMSAPIs.Repositories
                     {
 
                         //decimal stock_qty = data[i].ordered_qty + data[i].received_qty;
-                        decimal stock_qty = data[i].accepted_qty;
+                        decimal stock_qty = data[i].received_qty;
                         var tResult = await TransactionDetails(data[i].facility_id, data[i].vendorID, (int)CMMS.SM_Actor_Types.Vendor, data[i].facility_id, (int)CMMS.SM_Actor_Types.Store, data[i].assetItemID, (double)stock_qty, (int)CMMS.CMMS_Modules.SM_GO, request.id, "Goods Order");
 
                         // Update the order type.
