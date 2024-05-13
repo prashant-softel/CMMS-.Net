@@ -929,12 +929,15 @@ namespace CMMSAPIs.Repositories.SM
         {
             try
             {
-                string stmt = " select i.issued_qty from smrsitems i inner join smmrs m on m.ID = i.mrs_ID where i.mrs_ID = "+mrsID+" and asset_item_ID = "+assetItemID+ " and is_splited=1; ";
+                string stmt = " select i.issued_qty,i.used_qty from smrsitems i inner join smmrs m on m.ID = i.mrs_ID where i.mrs_ID = " + mrsID+" and asset_item_ID = "+assetItemID+ " and is_splited=1; ";
                 DataTable dt2 = await Context.FetchData(stmt).ConfigureAwait(false);               
                 decimal issued_qty = 0;
+                int stored_used_qty = 0;
                 if (dt2.Rows.Count > 0)
                 {                  
                     issued_qty = Convert.ToInt32(dt2.Rows[0][0]);
+                    stored_used_qty = Convert.ToInt32(dt2.Rows[0][1]);
+                    qty = qty + stored_used_qty;
                     if (issued_qty >= qty)
                     {
                         string stmt_update = " update smrsitems set used_qty=" + qty + " where id = " + mrsitemID + ";";
