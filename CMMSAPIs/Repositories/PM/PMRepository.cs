@@ -154,7 +154,7 @@ namespace CMMSAPIs.Repositories.PM
             if (request.assigned_to_id > 0)
                 myQuery += $"assigned_to = {request.assigned_to_id}, ";
 
-            myQuery += $"updated_at = '{UtilsRepository.GetUTCTime()}', updated_by = {userID} WHERE id = {request.plan_id};";
+            myQuery += $"updated_at = '{UtilsRepository.GetUTCTime()}', updated_by = {userID} WHERE id = {request.plan_id} and facility_id = {request.facility_id};";
          
             string myQuery2 = $"Delete from pmplanassetchecklist where planId = {request.plan_id};";
             await Context.ExecuteNonQry<int>(myQuery2).ConfigureAwait(false);
