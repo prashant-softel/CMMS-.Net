@@ -548,6 +548,9 @@ namespace CMMSAPIs.Helper
             AUDIT_SKIP_REJECT,
             AUDIT_SKIP_APPROVED,
             AUDIT_CLOSED,
+            AUDIT_CLOSED_REJECT,
+            AUDIT_CLOSED_APPROVED,
+           
 
 
 
