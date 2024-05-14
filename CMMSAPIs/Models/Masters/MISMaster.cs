@@ -191,6 +191,7 @@ namespace CMMSAPIs.Models.Masters
         public int facility_id { get; set; }
         public string facility_name { get; set; }
         public string month_name { get; set; }
+        public int month_id { get; set; }
         public int year { get; set; }
         public decimal opening { get; set; }
         public decimal procured_qty { get; set; }
@@ -215,8 +216,10 @@ namespace CMMSAPIs.Models.Masters
     public class FacilityPeriodData
     {
         public string month_name { get; set; }
+        public int month_id { get; set; }
         public int year { get; set; }
         public List<CMWaterDataMonthWiseDetails> details { get; set; }
+       
     }
     public class CMWaterDataMonthWiseDetails
     {
@@ -292,8 +295,10 @@ namespace CMMSAPIs.Models.Masters
     public class CMFacilityPeriodData_Waste
     {
         public string month_name { get; set; }
+        public int month_id { get; set; }
         public int year { get; set; }
         public List<CMWasteDataMonthWiseDetails> details { get; set; }
+
     }
     public class CMWasteDataMonthWiseDetails
     {
