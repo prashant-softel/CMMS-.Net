@@ -699,10 +699,10 @@ namespace CMMSAPIs.Repositories.Inventory
                             }
                             try
                             {
-                                newR["id"] = assets[Convert.ToString(newR["name"]).Replace("_", "").ToUpper()];
+                                newR["id"] = assets[Convert.ToString(newR["name"]).ToUpper()];
                                 try
                                     {
-                                    newR["parentID"] = assets[Convert.ToString(newR["parentName"]).Replace("_", "").ToUpper()];
+                                    newR["parentID"] = assets[Convert.ToString(newR["parentName"]).ToUpper()];
                                 }
                                 catch
                                 {
@@ -1003,13 +1003,13 @@ namespace CMMSAPIs.Repositories.Inventory
             {
                 try
                 {
-                    row["parentId"] = assetDict[Convert.ToString(row["parentName"]).Replace("_", "").ToUpper()];
+                    row["parentId"] = assetDict[Convert.ToString(row["parentName"]).ToUpper()];
                 }
                 catch (KeyNotFoundException)
                 {
                     try
                     {
-                        row["parentId"] = assetDict2[Convert.ToString(row["parentName"]).Replace("_", "").ToUpper()];
+                        row["parentId"] = assetDict2[Convert.ToString(row["parentName"]).ToUpper()];
                         row["parentId"] = 0;
                     }
                     catch
@@ -1045,13 +1045,13 @@ namespace CMMSAPIs.Repositories.Inventory
             {
                 try
                 {
-                    row["parentId"] = assetDict[Convert.ToString(row["parentName"]).Replace("_", "").ToUpper()];
+                    row["parentId"] = assetDict[Convert.ToString(row["parentName"]).ToUpper()];
                 }
                 catch (KeyNotFoundException)
                 {
                     try
                     {
-                        row["parentId"] = assetDict2[Convert.ToString(row["parentName"]).Replace("_", "").ToUpper()];
+                        row["parentId"] = assetDict2[Convert.ToString(row["parentName"]).ToUpper()];
                         row["parentId"] = 0;
                     }
                     catch

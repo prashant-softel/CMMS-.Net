@@ -525,9 +525,14 @@ namespace CMMSAPIs.Repositories.PM
 
      internal async Task<CMImportFileResponse> ImportPMPlanFile(int file_id, int userID)
         {
+            int facilityid=0;
+            string queryplan;
             CMImportFileResponse response = new CMImportFileResponse();
             DataTable dt2 = new DataTable();
+            DataTable dtplan = new DataTable();
             DataTable dt3 = new DataTable();
+            Dictionary<string, int> plan= new Dictionary<string, int>();
+            
 
 
             string queryfacilities = "SELECT id, UPPER(name) as name FROM facilities GROUP BY name ORDER BY id ASC;";
@@ -558,12 +563,7 @@ namespace CMMSAPIs.Repositories.PM
             Dictionary<string, int> users = new Dictionary<string, int>();
             users.Merge(users_Names, users_IDs);
 
-            string querychecklist = "SELECT id, UPPER(checklist_number) as name FROM checklist_number GROUP BY name ORDER BY id ASC;";
-            DataTable dtchecklist = await Context.FetchData(querychecklist).ConfigureAwait(false);
-            List<string> checklist_name = dtchecklist.GetColumn<string>("name");
-            List<int> checklist_id = dtchecklist.GetColumn<int>("id");
-            Dictionary<string, int> checklist = new Dictionary<string, int>();
-            checklist.Merge(checklist_name, checklist_id);
+           
 
             string queryasset = "SELECT id, UPPER(name) as name FROM assets GROUP BY name ORDER BY id ASC;";
             DataTable dtasset = await Context.FetchData(queryasset).ConfigureAwait(false);
@@ -571,13 +571,8 @@ namespace CMMSAPIs.Repositories.PM
             List<int> asset_id = dtasset.GetColumn<int>("id");
             Dictionary<string, int> asset = new Dictionary<string, int>();
             asset.Merge(asset_name, asset_id);
-
-            string queryplan = "SELECT id, UPPER(plan_name) as name FROM pm_plan GROUP BY name ORDER BY id ASC;";
-            DataTable dtplan = await Context.FetchData(queryplan).ConfigureAwait(false);
-            List<string> plan_name = dtplan.GetColumn<string>("name");
-            List<int> plan_id = dtplan.GetColumn<int>("id");
-            Dictionary<string, int> plan = new Dictionary<string, int>();
-            plan.Merge(plan_name, plan_id);
+             
+           
 
             List<int> idList = new List<int>();
             List<int> updatedIdList = new List<int>();
@@ -702,7 +697,19 @@ namespace CMMSAPIs.Repositories.PM
                             try
                             {
                                 newR["plantID"] = facilities[Convert.ToString(newR["PlantName"]).ToUpper()];
+
                                 //  Plan named  Power Transformer Halfyearly Check does not exist. Row not Inserted.
+                                if (facilityid == 0 && newR["plantID"].ToInt() > 0)
+                                {
+                                     
+                                    facilityid = Convert.ToInt32(newR["plantID"]);
+                                    queryplan = $"SELECT id, UPPER(plan_name) as name FROM pm_plan WHERE facility_id = {facilityid} GROUP BY name ORDER BY id ASC;";
+                                    dtplan = await Context.FetchData(queryplan).ConfigureAwait(false);
+                                    List<string> plan_name = dtplan.GetColumn<string>("name");
+                                    List<int> plan_id = dtplan.GetColumn<int>("id");
+                                     plan = new Dictionary<string, int>();
+                                    plan.Merge(plan_name, plan_id);
+                                }
                             }
                             catch (KeyNotFoundException)
                             {
@@ -768,8 +775,11 @@ namespace CMMSAPIs.Repositories.PM
                                 continue;
                                 //return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] assigned to named '{newR[7]}' does not exist.");
                             }
+
+                            
                             try
                             {
+
                                 newR["planID"] = plan[Convert.ToString(newR["PlanName"]).ToUpper()];
 
                                 CMPMPlanDetail updatePlan = new CMPMPlanDetail();
@@ -855,7 +865,7 @@ namespace CMMSAPIs.Repositories.PM
 
                             dt2.Rows.Add(newR);
                         }
-                        if (dt2.Rows.Count == 0 && updateCount ==0)
+                        if (dt2.Rows.Count == 0  && updateCount ==0)
                         {
                             string logPath1 = m_errorLog.SaveAsText($"ImportLog\\ImportPMPlan_File{file_id}_{DateTime.UtcNow.ToString("yyyyMMdd_HHmmss")}");
                             string logQry1 = $"UPDATE uploadedfiles SET logfile = '{logPath1}' WHERE id = {file_id}";
@@ -933,7 +943,12 @@ namespace CMMSAPIs.Repositories.PM
                         //{
                         //    return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, "Import failed, file has empty rows.");
                         //}
-
+                        string querychecklist = $"SELECT id, UPPER(checklist_number) as name FROM checklist_number where facility_id ={facilityid} GROUP BY name ORDER BY id ASC;";
+                        DataTable dtchecklist = await Context.FetchData(querychecklist).ConfigureAwait(false);
+                        List<string> checklist_name = dtchecklist.GetColumn<string>("name");
+                        List<int> checklist_id = dtchecklist.GetColumn<int>("id");
+                        Dictionary<string, int> checklist = new Dictionary<string, int>();
+                        checklist.Merge(checklist_name, checklist_id);
                         Dictionary<string, Tuple<string, Type>> equipColumnNames = new Dictionary<string, Tuple<string, Type>>()
                         {
                            { "Plan Name", new Tuple<string, Type>("PlanName", typeof(string)) },
@@ -998,7 +1013,7 @@ namespace CMMSAPIs.Repositories.PM
                             newR["EquipmentName"] = newR[1];
                             newR["CheckList"] = newR[2];
 
-
+                            
                             try
                             {
                                 newR["planID"] = plan[Convert.ToString(newR["PlanName"]).ToUpper()];

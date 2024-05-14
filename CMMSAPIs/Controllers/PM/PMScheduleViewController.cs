@@ -69,13 +69,13 @@ namespace CMMSAPIs.Controllers.PM
         //[Authorize]
         [Route("GetPMTaskList")]
         [HttpGet]
-        public async Task<IActionResult> GetPMTaskList(int facility_id, DateTime? start_date, DateTime? end_date, string frequencyIds, string categoryIds)
+        public async Task<IActionResult> GetPMTaskList(int facility_id, DateTime? start_date, DateTime? end_date, string frequencyIds, string categoryIds ,bool self_view)
         {
             try
             {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
                 var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
-
-                var data = await _PMScheduleViewBS.GetPMTaskList(facility_id, start_date, end_date, frequencyIds, categoryIds, facilitytimeZone);
+                var data = await _PMScheduleViewBS.GetPMTaskList(facility_id, start_date, end_date, frequencyIds, categoryIds,userID,self_view,facilitytimeZone);
                 return Ok(data);
             }
             catch (ArgumentException ex)

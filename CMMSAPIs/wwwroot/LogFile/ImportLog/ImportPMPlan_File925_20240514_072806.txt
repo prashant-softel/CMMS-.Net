@@ -1,0 +1,16 @@
+Error : [Row: 53] Equipment  named 'CNHalli_MCR_ICR1_11kV Feeder' does not exist. Row not Inserted.
+Error : [Row: 54] Equipment  named 'CNHalli_MCR_ICR1_11kV Feeder' does not exist. Row not Inserted.
+Error : [Row: 55] Equipment  named 'CNHalli_MCR_ICR1_11kV Feeder' does not exist. Row not Inserted.
+Error : [Row: 56] Equipment  named 'CNHalli_MCR_ICR2_11kV Feeder' does not exist. Row not Inserted.
+Error : [Row: 57] Equipment  named 'CNHalli_MCR_ICR2_11kV Feeder' does not exist. Row not Inserted.
+Error : [Row: 58] Equipment  named 'CNHalli_MCR_ICR2_11kV Feeder' does not exist. Row not Inserted.
+Error : [Row: 59] Equipment  named 'CNHalli_MCR_ICR3_11kV Feeder' does not exist. Row not Inserted.
+Error : [Row: 60] Equipment  named 'CNHalli_MCR_ICR3_11kV Feeder' does not exist. Row not Inserted.
+Error : [Row: 61] Equipment  named 'CNHalli_MCR_ICR3_11kV Feeder' does not exist. Row not Inserted.
+Error : [Row: 62] Equipment  named 'CNHalli_MCR_ICR4_11kV Feeder' does not exist. Row not Inserted.
+Error : [Row: 63] Equipment  named 'CNHalli_MCR_ICR4_11kV Feeder' does not exist. Row not Inserted.
+Error : [Row: 64] Equipment  named 'CNHalli_MCR_ICR4_11kV Feeder' does not exist. Row not Inserted.
+Error : [Row: 65] Equipment  named 'CNHalli_MCR_ICR5_11kV Feeder' does not exist. Row not Inserted.
+Error : [Row: 66] Equipment  named 'CNHalli_MCR_ICR5_11kV Feeder' does not exist. Row not Inserted.
+Error : [Row: 67] Equipment  named 'CNHalli_MCR_ICR5_11kV Feeder' does not exist. Row not Inserted.
+Total errors <15>
