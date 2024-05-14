@@ -399,5 +399,62 @@ namespace CMMSAPIs.Controllers.Audits
                 return Ok(item);
             }
         }
+
+        [Route("CloseAuditPlan")]
+        [HttpPost]
+        public async Task<IActionResult> CloseAuditPlan(CMApproval request)
+        {
+            try
+            {
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _AuditPlanBS.CloseAuditPlan(request, userId);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid data sent.";
+                return Ok(item);
+            }
+        }
+
+        [Route("RejectCloseAuditPlan")]
+        [HttpPost]
+        public async Task<IActionResult> RejectCloseAuditPlan(CMApproval request)
+        {
+            try
+            {
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _AuditPlanBS.RejectCloseAuditPlan(request, userId);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid data sent.";
+                return Ok(item);
+            }
+        }
+
+        [Route("ApproveClosedAuditPlan")]
+        [HttpPost]
+        public async Task<IActionResult> ApproveClosedAuditPlan(CMApproval request)
+        {
+            try
+            {
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _AuditPlanBS.ApproveClosedAuditPlan(request, userId);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid data sent.";
+                return Ok(item);
+            }
+        }
     }
 }
