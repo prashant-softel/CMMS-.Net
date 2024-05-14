@@ -856,7 +856,7 @@ namespace CMMSAPIs.Repositories.Masters
        //     List<WasteDataType> Master_ID_Result = await Context.GetData<WasteDataType>(SelectQ_MasterIDS).ConfigureAwait(false);
 
 
-            string SelectQ = $" select distinct plantId as facility_id,fc.name facility_name,MONTHNAME(date) as month_name,YEAR(date) as year, " +
+            string SelectQ = $" select distinct plantId as facility_id,fc.name facility_name,MONTHNAME(date) as month_name,Month(date) as month_id,YEAR(date) as year, " +
                 $" (select sum(creditQty)-sum(debitQty) from mis_waterdata where MONTH(date) < MONTH('"+ fromDate.ToString("yyyy-MM-dd") + "')) as opening," +
                 $" sum(creditQty) as procured_qty, sum(debitQty) as consumed_qty, mw.name as water_type,show_opening" +
                 $" from mis_waterdata" +
@@ -883,11 +883,12 @@ namespace CMMSAPIs.Repositories.Masters
                {
                    facility_id = group.Key.facility_id,
                    facility_name = group.Key.facility_name,
-                   period = group.Select(r => new { r.month_name, r.year })
+                   period = group.Select(r => new { r.month_name,r.month_id, r.year })
                                 .Distinct()
                                 .Select(periodGroup => new FacilityPeriodData
                                 {
                                     month_name = periodGroup.month_name,
+                                    month_id = periodGroup.month_id,
                                     year = periodGroup.year,
                                     details = group.Where(g => g.month_name == periodGroup.month_name && g.year == periodGroup.year)
                                                   .GroupBy(g => g.water_type)
@@ -931,7 +932,7 @@ namespace CMMSAPIs.Repositories.Masters
 
         internal async Task<List<CMWasteDataResult>> GetWasteDataListMonthWise(DateTime fromDate, DateTime toDate, int Hazardous, int facility_id)
         {
-            string SelectQ = $" select distinct facilityId as facility_id,fc.name facility_name,MONTHNAME(date) as month_name,YEAR(date) as year, " +
+            string SelectQ = $" select distinct facilityId as facility_id,fc.name facility_name,MONTHNAME(date) as month_name,Month(date) as month_id,YEAR(date) as year, " +
                 $" (select sum(creditQty)-sum(debitQty) from waste_data where MONTH(date) < MONTH('" + fromDate.ToString("yyyy-MM-dd") + "')) as opening," +
                 $" sum(creditQty) as procured_qty, sum(debitQty) as consumed_qty, mw.name as water_type" +
                 $" from waste_data" +
@@ -953,11 +954,12 @@ namespace CMMSAPIs.Repositories.Masters
                    facility_id = group.Key.facility_id,
                    facility_name = group.Key.facility_name,
                    hazardous = Hazardous,
-                   period = group.Select(r => new { r.month_name, r.year })
+                   period = group.Select(r => new { r.month_name, r.month_id , r.year })
                                 .Distinct()
                                 .Select(periodGroup => new CMFacilityPeriodData_Waste
                                 {
                                     month_name = periodGroup.month_name,
+                                    month_id = periodGroup.month_id,
                                     year = periodGroup.year,
                                     details = group.Where(g => g.month_name == periodGroup.month_name && g.year == periodGroup.year)
                                                   .GroupBy(g => g.water_type)
