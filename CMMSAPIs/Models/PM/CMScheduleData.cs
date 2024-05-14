@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace CMMSAPIs.Models.PM
@@ -31,6 +31,13 @@ namespace CMMSAPIs.Models.PM
         public int updated_by_id { get; set; }
         public string updated_by_name { get; set; }
         public DateTime updated_at { get; set; }
+        public string rejected_close_by_name { get; set; }
+        public DateTime rejected_close_Date { get; set; }
+        public string approved_close_by_name { get; set; }
+        public DateTime approved_close_Date { get; set; }
+        public string close_by_name { get; set; }
+        public DateTime close_Date { get; set; }
+        public string close_comment { get; set; }
     }
     public class CMPMPlanDetail : CMPMPlanList
     {
