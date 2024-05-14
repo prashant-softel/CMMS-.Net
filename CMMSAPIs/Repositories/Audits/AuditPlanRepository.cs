@@ -217,6 +217,12 @@ namespace CMMSAPIs.Repositories.Audits
                 case CMMS.CMMS_Status.AUDIT_SKIP_APPROVED:
                     retValue = "Skip Approved";
                     break;
+                case CMMS.CMMS_Status.AUDIT_CLOSED_REJECT:
+                    retValue = "Closed Rejected";
+                    break;
+                case CMMS.CMMS_Status.AUDIT_CLOSED_APPROVED:
+                    retValue = "Closed Approved";
+                    break;
                 default:
                     retValue = "Unknown <" + m_notificationID + ">";
                     break;
@@ -291,7 +297,7 @@ namespace CMMSAPIs.Repositories.Audits
 
             return response;
         }
-                internal async Task<CMDefaultResponse> CreateAuditPlan(CMPMPlanDetail pm_plan, int userID)
+        internal async Task<CMDefaultResponse> CreateAuditPlan(CMPMPlanDetail pm_plan, int userID)
         {
             int status = pm_plan.isDraft > 0 ? (int)CMMS.CMMS_Status.PM_PLAN_DRAFT : (int)CMMS.CMMS_Status.PM_PLAN_CREATED;
 
@@ -1057,7 +1063,11 @@ namespace CMMSAPIs.Repositories.Audits
                 $" CONCAT(createdBy.firstName, ' ', createdBy.lastName) as created_by_name, plan.created_at,approvedBy.id as approved_by_id," +
                 $" CONCAT(approvedBy.firstName, ' ', approvedBy.lastName) as approved_by_name, plan.approved_Date approved_at, rejectedBy.id as rejected_by_id, " +
                 $" CONCAT(rejectedBy.firstName, ' ', rejectedBy.lastName) as rejected_by_name, plan.rejected_Date rejected_at," +
-                $" CONCAT(assignedTo.firstName, ' ', assignedTo.lastName) as assigned_to_name" +
+                $" CONCAT(assignedTo.firstName, ' ', assignedTo.lastName) as assigned_to_name," +
+                $" CONCAT(rejected_close_by.firstName, ' ', rejected_close_by.lastName) as rejected_close_by_name," +
+                $" CONCAT(approved_close_by.firstName, ' ', approved_close_by.lastName) as approved_close_by_name," +
+                $" CONCAT(close_by.firstName, ' ', close_by.lastName) as close_by_name, " +
+                $" close_comment, close_Date,approved_close_Date,rejected_close_Date" +
                 $" FROM st_audit as plan " +
                 $" LEFT JOIN statuses ON plan.status = statuses.softwareId " +
                 $" JOIN facilities ON plan.facility_id = facilities.id " +
@@ -1066,6 +1076,9 @@ namespace CMMSAPIs.Repositories.Audits
                 $" LEFT JOIN users as approvedBy ON approvedBy.id = plan.approved_by " +
                 $" LEFT JOIN users as rejectedBy ON rejectedBy.id = plan.rejected_by " +
                 $" LEFT JOIN users as assignedTo ON assignedTo.id = plan.Auditor_Emp_ID " +
+                $" LEFT JOIN users as rejected_close_by ON rejected_close_by.id = plan.rejected_close_by " +
+                $" LEFT JOIN users as approved_close_by ON approved_close_by.id = plan.approved_close_by " +
+                $" LEFT JOIN users as close_by ON close_by.id = plan.close_by " +
                 $"WHERE plan.id = {id} "; 
 
             List<CMPMPlanDetail> planDetails = await Context.GetData<CMPMPlanDetail>(planListQry).ConfigureAwait(false);
@@ -1144,6 +1157,12 @@ namespace CMMSAPIs.Repositories.Audits
                     break;
                 case CMMS.CMMS_Status.AUDIT_SKIP_APPROVED:
                     retValue = String.Format("Audit Skip Approved by {0} ", PlanObj.created_by_name);
+                    break;
+                case CMMS.CMMS_Status.AUDIT_CLOSED_APPROVED:
+                    retValue = String.Format("Audit Close Approved by {0} ", PlanObj.created_by_name);
+                    break;
+                case CMMS.CMMS_Status.AUDIT_CLOSED_REJECT:
+                    retValue = String.Format("Audit Close Rejected by {0} ", PlanObj.created_by_name);
                     break;
                 default:
                     break;
@@ -1494,6 +1513,75 @@ namespace CMMSAPIs.Repositories.Audits
 
             return response;
         }
+        internal async Task<CMDefaultResponse> CloseAuditPlan(CMApproval request, int userId)
+        {
+            CMDefaultResponse response = null;
+            string SelectQ = "select id from st_audit where ID = '" + request.id + "'";
+            List<CMCreateAuditPlan> auditPlanList = await Context.GetData<CMCreateAuditPlan>(SelectQ).ConfigureAwait(false);
 
+            if (auditPlanList != null && auditPlanList.Count > 0)
+            {
+                string UpdateQ = $"update st_audit " +
+                 $"set Status = '{(int)CMMS.CMMS_Status.AUDIT_CLOSED}' , close_by = {userId}, close_Date = '{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}', close_comment = '{request.comment}'" +
+                 $"where ID = {request.id}";
+                var result = await Context.ExecuteNonQry<int>(UpdateQ);
+                response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Audit plan with plan number : " + auditPlanList[0].plan_number + " closed successfully.");
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.AUDIT_PLAN, request.id, 0, 0, request.comment, CMMS.CMMS_Status.AUDIT_REJECTED);
+
+            }
+            else
+            {
+                response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Audit plan does not exists to approve close audit.");
+            }
+
+            return response;
+        }
+        internal async Task<CMDefaultResponse> RejectCloseAuditPlan(CMApproval request, int userId)
+        {
+            CMDefaultResponse response = null;
+            string SelectQ = "select id from st_audit where ID = '" + request.id + "'";
+            List<CMCreateAuditPlan> auditPlanList = await Context.GetData<CMCreateAuditPlan>(SelectQ).ConfigureAwait(false);
+
+            if (auditPlanList != null && auditPlanList.Count > 0)
+            {
+                string UpdateQ = $"update st_audit " +
+                 $"set Status = '{(int)CMMS.CMMS_Status.AUDIT_CLOSED_REJECT}' , rejected_by = {userId}, rejected_Date = '{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}', rejected_Comment = '{request.comment}'" +
+                 $"where ID = {request.id}";
+                var result = await Context.ExecuteNonQry<int>(UpdateQ);
+                response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Audit plan with plan number : " + auditPlanList[0].plan_number + " close rejected.");
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.AUDIT_PLAN, request.id, 0, 0, request.comment, CMMS.CMMS_Status.AUDIT_CLOSED_REJECT);
+
+            }
+            else
+            {
+                response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Audit plan does not exists to audit close reject.");
+            }
+
+            return response;
+        }
+
+        internal async Task<CMDefaultResponse> ApproveClosedAuditPlan(CMApproval request, int userId)
+        {
+            CMDefaultResponse response = null;
+            string SelectQ = "select id from st_audit where ID = '" + request.id + "'";
+            List<CMCreateAuditPlan> auditPlanList = await Context.GetData<CMCreateAuditPlan>(SelectQ).ConfigureAwait(false);
+
+            if (auditPlanList != null && auditPlanList.Count > 0)
+            {
+                string UpdateQ = $"update st_audit " +
+                 $"set Status = '{(int)CMMS.CMMS_Status.AUDIT_CLOSED_APPROVED}' , approved_close_by = {userId}, approved_close_Date = '{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}', approved_Comment = '{request.comment}'" +
+                 $"where ID = {request.id}";
+                var result = await Context.ExecuteNonQry<int>(UpdateQ);
+                response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Audit plan with plan number : " + auditPlanList[0].plan_number + " close approved successfully.");
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.AUDIT_PLAN, request.id, 0, 0, request.comment, CMMS.CMMS_Status.AUDIT_REJECTED);
+
+            }
+            else
+            {
+                response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Audit plan does not exists to approve close audit.");
+            }
+
+            return response;
+        }
     }
 }
