@@ -33,6 +33,9 @@ namespace CMMSAPIs.BS.Audits
         Task<CMDefaultResponse> CreateAuditSkip(CMApproval request, int userId);
         Task<CMDefaultResponse> RejectAuditSkip(CMApproval request, int userId);
         Task<CMDefaultResponse> ApproveAuditSkip(CMApproval request, int userId);
+        Task<CMDefaultResponse> CloseAuditPlan(CMApproval request, int userId);
+        Task<CMDefaultResponse> RejectCloseAuditPlan(CMApproval request, int userId);
+        Task<CMDefaultResponse> ApproveClosedAuditPlan(CMApproval request, int userId);
 
     }
     public class AuditPlanBS : IAuditPlanBS
@@ -352,6 +355,51 @@ namespace CMMSAPIs.BS.Audits
                 using (var repos = new AuditPlanRepository(getDB))
                 {
                     return await repos.ApproveAuditSkip(request, userId);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<CMDefaultResponse> CloseAuditPlan(CMApproval request, int userId)
+        {
+            try
+            {
+                using (var repos = new AuditPlanRepository(getDB))
+                {
+                    return await repos.CloseAuditPlan(request, userId);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<CMDefaultResponse> RejectCloseAuditPlan(CMApproval request, int userId)
+        {
+            try
+            {
+                using (var repos = new AuditPlanRepository(getDB))
+                {
+                    return await repos.RejectCloseAuditPlan(request, userId);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<CMDefaultResponse> ApproveClosedAuditPlan(CMApproval request, int userId)
+        {
+            try
+            {
+                using (var repos = new AuditPlanRepository(getDB))
+                {
+                    return await repos.ApproveClosedAuditPlan(request, userId);
 
                 }
             }
