@@ -99,6 +99,10 @@ namespace CMMSAPIs.Models
         public string sr_no { get; set; }
         public int requestOrderId { get; set; }
         public int requestOrderItemID { get; set; }
+        public int storage_rack_no { get; set; }
+        public int storage_row_no { get; set; }
+        public int storage_column_no { get; set; }
+        public string remarks { get; set; }
 
 
     }
