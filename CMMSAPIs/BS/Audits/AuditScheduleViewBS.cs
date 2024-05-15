@@ -1,5 +1,6 @@
 ﻿using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Audit;
+using CMMSAPIs.Models.PM;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Audits;
 using Microsoft.AspNetCore.Mvc;
@@ -13,7 +14,7 @@ namespace CMMSAPIs.BS.Audits
     {
         Task<List<CMAuditScheduleList>> GetAuditScheduleViewList(CMAuditListFilter request);
         Task<CMAuditScheduleDetail> GetAuditScheduleDetail(int audit_id);
-        Task<CMDefaultResponse> ExecuteAuditSchedule(CMExecuteAuditSchedule request);
+        Task<List<CMDefaultResponse>> ExecuteAuditSchedule(CMPMExecutionDetail request, int userID);
         Task<CMDefaultResponse> ApproveAuditSchedule(CMApproval request);
         Task<CMDefaultResponse> RejectAuditSchedule(CMApproval request);
     }
@@ -56,13 +57,13 @@ namespace CMMSAPIs.BS.Audits
             }
         }
 
-        public async Task<CMDefaultResponse> ExecuteAuditSchedule(CMExecuteAuditSchedule request)
+        public async Task<List<CMDefaultResponse>> ExecuteAuditSchedule(CMPMExecutionDetail request, int userID)
         {
             try
             {
                 using (var repos = new AuditScheduleViewRepository(getDB))
                 {
-                    return await repos.ExecuteAuditSchedule(request);
+                    return await repos.ExecuteAuditSchedule(request,userID);
                 }
             }
             catch (Exception ex)
