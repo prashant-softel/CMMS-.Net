@@ -1287,6 +1287,18 @@ namespace CMMSAPIs.Repositories
                 itemsQuery = itemsQuery + $"update smassetitems set serial_number = '{request.go_items[i].sr_no}' where materialID = {request.go_items[i].assetMasterItemID}";
                 var result = await Context.ExecuteNonQry<int>(itemsQuery);
             }
+            // Assuming request.go_items is a list of items to insert into smrequestreorder
+
+            foreach (var item in request.go_items)
+            {
+                string insertQuery = $@"INSERT INTO smrequestreorder 
+                            (requestID, assetItemID, location_ID, storage_rack_no, storage_row_no, storage_column_no, cost, ordered_qty, received_qty, lost_qty, requested_qty, damaged_qty, accepted_qty, remarks)
+                            VALUES 
+                            ({request.id}, {item.assetMasterItemID}, {request.location_ID}, '{item.storage_rack_no}', {item.storage_row_no}, {item.storage_column_no}, {item.cost}, {item.ordered_qty}, {item.received_qty}, {item.lost_qty}, {item.requested_qty}, {item.damaged_qty}, {item.accepted_qty},  '{item.remarks}')";
+
+                // Execute the query
+                var result = await Context.ExecuteNonQry<int>(insertQuery);
+            }
 
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Goods order updated successfully.");
             return response;
