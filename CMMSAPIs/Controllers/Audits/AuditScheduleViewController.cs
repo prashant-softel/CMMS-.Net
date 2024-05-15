@@ -1,10 +1,12 @@
-﻿using CMMSAPIs.BS.Audits;
+using CMMSAPIs.BS.Audits;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using System;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Models.Audit;
+using CMMSAPIs.Models.PM;
+using Microsoft.AspNetCore.Http;
 
 namespace CMMSAPIs.Controllers.Audits
 {
@@ -54,11 +56,12 @@ namespace CMMSAPIs.Controllers.Audits
         //[Authorize]
         [Route("ExecuteAuditSchedule")]
         [HttpPost]
-        public async Task<IActionResult> ExecuteAuditSchedule(CMExecuteAuditSchedule request)
+        public async Task<IActionResult> ExecuteAuditSchedule(CMPMExecutionDetail request)
         {
             try
             {
-                var data = await _AuditScheduleViewBS.ExecuteAuditSchedule(request);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _AuditScheduleViewBS.ExecuteAuditSchedule(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
