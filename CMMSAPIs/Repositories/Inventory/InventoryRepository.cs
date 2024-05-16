@@ -337,7 +337,7 @@ namespace CMMSAPIs.Repositories.Inventory
                         List<int> idList = new List<int>();
                         List<int> updatedIdList = new List<int>();
 
-                        Total_no_row_excel = sheet.Dimension.End.Row-1;
+                        Total_no_row_excel = sheet.Dimension.End.Row - 1;
 
                         for (int rN = 2; rN <= sheet.Dimension.End.Row; rN++)
                         {
@@ -365,7 +365,7 @@ namespace CMMSAPIs.Repositories.Inventory
                                 continue;
                             }
                             newR["row_no"] = rN;
-                            
+
                             string siteName = Convert.ToString(newR[0]).ToUpper();
                             if (plants.ContainsValue(siteName))
                             {
@@ -608,7 +608,7 @@ namespace CMMSAPIs.Repositories.Inventory
                                 {
                                     newR["typeId"] = assetTypes["MAIN INVENTRY"];
                                 }
-                                    
+
                                 else
                                 {
                                     string addAssetsType = $"INSERT INTO assettypes(name, description, addedAt, Status, AddedBy) VALUES " +
@@ -621,7 +621,7 @@ namespace CMMSAPIs.Repositories.Inventory
                                     //return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] Asset type named '{newR["typeName"]}' not found.");
 
                                 }
-                             
+
                             }
                             try
                             {
@@ -641,10 +641,10 @@ namespace CMMSAPIs.Repositories.Inventory
                                     assetStatuses.Add(Convert.ToString(newR["statusName"]).ToUpper(), id);
                                     newR["statusId"] = id;
 
-                                   // return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] Asset status named '{newR["statusName"]}' not found.");
+                                    // return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] Asset status named '{newR["statusName"]}' not found.");
 
                                 }
-                               
+
                             }
                             try
                             {
@@ -689,20 +689,21 @@ namespace CMMSAPIs.Repositories.Inventory
                                 }
                             }
 
-                            if (!(Convert.ToInt32(newR["warranty_type"]) > 0 && Convert.ToInt32(newR["warranty_term_type"]) > 0 && Convert.ToInt32(newR["warranty_provider_id"]) > 0)) {
+                            if (!(Convert.ToInt32(newR["warranty_type"]) > 0 && Convert.ToInt32(newR["warranty_term_type"]) > 0 && Convert.ToInt32(newR["warranty_provider_id"]) > 0))
+                            {
                                 //m_errorLog.SetWarning($"[Row: {rN}] Warranty data does not exist. ");
                             }
-                           
-                                if (Convert.ToString(newR["parentName"]) == null || Convert.ToString(newR["parentName"]) == "")
+
+                            if (Convert.ToString(newR["parentName"]) == null || Convert.ToString(newR["parentName"]) == "")
                             {
                                 newR["parentName"] = "";
                             }
                             try
                             {
-                                newR["id"] = assets[Convert.ToString(newR["name"]).ToUpper()];
+                                newR["id"] = assets[Convert.ToString(newR["name"]).Replace("_", "").ToUpper()];
                                 try
-                                    {
-                                    newR["parentID"] = assets[Convert.ToString(newR["parentName"]).ToUpper()];
+                                {
+                                    newR["parentID"] = assets[Convert.ToString(newR["parentName"]).Replace("_", "").ToUpper()];
                                 }
                                 catch
                                 {
@@ -713,7 +714,8 @@ namespace CMMSAPIs.Repositories.Inventory
                                 DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
                                 //int id = Convert.ToInt32(dt.Rows[0][0]);
                                 //int retVal = await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
-                                    if (dt.Rows.Count > 0 && Convert.ToInt32(dt.Rows[0][0]) > 0) {
+                                if (dt.Rows.Count > 0 && Convert.ToInt32(dt.Rows[0][0]) > 0)
+                                {
 
                                     DataTable updateTable = dt2.Clone();
                                     DataRow newRow = updateTable.NewRow();
@@ -724,7 +726,7 @@ namespace CMMSAPIs.Repositories.Inventory
 
 
                                     //CMAddInventory updateAsset = new CMAddInventory();    
-                                    List<CMAddInventory> updateAsset = updateTable.MapTo<CMAddInventory>();                                     
+                                    List<CMAddInventory> updateAsset = updateTable.MapTo<CMAddInventory>();
 
                                     var resPlan = await UpdateInventory(updateAsset[0], userID);
                                     updateCount++;
@@ -784,115 +786,115 @@ namespace CMMSAPIs.Repositories.Inventory
                         //if (m_errorLog.GetErrorCount() == 0)
                         //{
                         int childListCount = 1;
-                            DataTable insertedTable = dt2.Clone();
+                        DataTable insertedTable = dt2.Clone();
 
-                            string filter = "";
-                            string ids = "";
-                            string assetQry = "";
+                        string filter = "";
+                        string ids = "";
+                        string assetQry = "";
 
-                            for (int i = 0; i < childListCount; i++)
+                        for (int i = 0; i < childListCount; i++)
+                        {
+                            if (i == 0)
                             {
-                                if (i == 0)
-                                {
-                                    assetQry = $"SELECT REPLACE(UPPER(name), '_', '') as name FROM facilities WHERE parentId = {facility_id} union SELECT REPLACE(UPPER(name), '_', '') as name FROM assets WHERE facilityId = {facility_id} {filter};";
-                                }
-                                else
-                                {
-                                    assetQry = $"SELECT UPPER(name) as name FROM assets WHERE facilityId = {facility_id} {filter};";
-                                }
+                                assetQry = $"SELECT REPLACE(UPPER(name), '_', '') as name FROM facilities WHERE parentId = {facility_id} union SELECT REPLACE(UPPER(name), '_', '') as name FROM assets WHERE facilityId = {facility_id} {filter};";
+                            }
+                            else
+                            {
+                                assetQry = $"SELECT UPPER(name) as name FROM assets WHERE facilityId = {facility_id} {filter};";
+                            }
 
-                                DataTable assetDt = await Context.FetchData(assetQry).ConfigureAwait(false);
+                            DataTable assetDt = await Context.FetchData(assetQry).ConfigureAwait(false);
 
-                                List<List<string>> assetList = new List<List<string>>() { assetDt.GetColumn<string>("name") };
+                            List<List<string>> assetList = new List<List<string>>() { assetDt.GetColumn<string>("name") };
 
-                                List<DataTable> assetPriority = new List<DataTable>();
+                            List<DataTable> assetPriority = new List<DataTable>();
 
-                                List<string> assetnames = new List<string>();
-                                assetnames.AddRange(assetDt.GetColumn<string>("name"));
-                                //assetnames.AddRange(dt2.GetColumn<string>("name"));
-                                assetnames.Contains("");
-                                //DataRow[] filterRows = dt2.AsEnumerable()
-                                //           .Where(row => assetnames.Contains(row.Field<string>("parentName").Replace("_", "").ToUpper(), StringComparison.OrdinalIgnoreCase) ||
-                                //            assetnames.Contains(ConvertString(row.Field<string>("parentName")).Replace("_", "").ToUpper(), StringComparison.OrdinalIgnoreCase))
-                                //           .ToArray();
+                            List<string> assetnames = new List<string>();
+                            assetnames.AddRange(assetDt.GetColumn<string>("name"));
+                            //assetnames.AddRange(dt2.GetColumn<string>("name"));
+                            assetnames.Contains("");
+                            //DataRow[] filterRows = dt2.AsEnumerable()
+                            //           .Where(row => assetnames.Contains(row.Field<string>("parentName").Replace("_", "").ToUpper(), StringComparison.OrdinalIgnoreCase) ||
+                            //            assetnames.Contains(ConvertString(row.Field<string>("parentName")).Replace("_", "").ToUpper(), StringComparison.OrdinalIgnoreCase))
+                            //           .ToArray();
 
                             DataRow[] filterRows = dt2.AsEnumerable()
                                         .Where(row => assetnames.Contains(row.Field<string>("parentName").Replace("_", "").ToUpper(), StringComparison.OrdinalIgnoreCase))
                                         .ToArray();
 
-                  
+
                             if (filterRows.Length <= 0)
+                            {
+                                List<string> assetnames2 = new List<string>();
+                                assetnames2.AddRange(insertedTable.GetColumn<string>("name"));
+                                DataRow[] notInserted = dt2.AsEnumerable()
+                                       .Where(row => !assetnames2.Contains(row.Field<string>("name")))
+                                       .ToArray();
+
+                                DataTable notInsertedTable = dt2.Clone();
+
+                                foreach (DataRow row in notInserted)
                                 {
-                                    List<string> assetnames2 = new List<string>();
-                                    assetnames2.AddRange(insertedTable.GetColumn<string>("name"));
-                                    DataRow[] notInserted = dt2.AsEnumerable()
-                                           .Where(row => !assetnames2.Contains(row.Field<string>("name")))
-                                           .ToArray();
-
-                                    DataTable notInsertedTable = dt2.Clone();
-
-                                    foreach (DataRow row in notInserted)
-                                    {
-                                        notInsertedTable.ImportRow(row);
-                                    }
-                                    List<int> ids_ = (await AddInventoryWithParent(notInsertedTable, facility_id, userID)).id;
-                                    idList.AddRange(ids_);
-
-                                    //foreach (DataRow row in notInserted)
-                                    //{
-                                    //    m_errorLog.SetInformation($"Asset <{row.Field<string>("name")}> not inserted");
-                                    //}
-
-                                    break;
+                                    notInsertedTable.ImportRow(row);
                                 }
-                                else
-                                {
-                                    DataTable filteredDataTable = dt2.Clone();
+                                List<int> ids_ = (await AddInventoryWithParent(notInsertedTable, facility_id, userID)).id;
+                                idList.AddRange(ids_);
 
-                                    foreach (DataRow row in filterRows)
-                                    {
-                                        filteredDataTable.ImportRow(row);
-                                    }
-                                    //List<int> ids_ = (await AddInventoryWithParent(filteredDataTable, facility_id, userID)).id;
-                                    List<int> ids_ = (await UpdateInventoryWithParent(filteredDataTable, facility_id, userID)).id;
-                                    insertedTable.Merge(filteredDataTable);
-                                    childListCount++;
-                                    ids = string.Join(", ", ids_.Select(x => x.ToString()));
+                                //foreach (DataRow row in notInserted)
+                                //{
+                                //    m_errorLog.SetInformation($"Asset <{row.Field<string>("name")}> not inserted");
+                                //}
+
+                                break;
+                            }
+                            else
+                            {
+                                DataTable filteredDataTable = dt2.Clone();
+
+                                foreach (DataRow row in filterRows)
+                                {
+                                    filteredDataTable.ImportRow(row);
+                                }
+                                //List<int> ids_ = (await AddInventoryWithParent(filteredDataTable, facility_id, userID)).id;
+                                List<int> ids_ = (await UpdateInventoryWithParent(filteredDataTable, facility_id, userID)).id;
+                                insertedTable.Merge(filteredDataTable);
+                                childListCount++;
+                                ids = string.Join(", ", ids_.Select(x => x.ToString()));
                                 if (ids != "")
                                 {
                                     filter = $" and id IN ({ids})";
                                 }
-                                    idList.AddRange(ids_);
+                                idList.AddRange(ids_);
 
-                                }
-                                //if (filterRows.Length > 0)
-                                //{
-                                //    assetPriority.Insert(0, filterRows.CopyToDataTable());
-                                //    assetList.Insert(0, assetPriority[assetPriority.Count - 1].GetColumn<string>("name"));
-                                //}
-
-                                //foreach (var item in assetList)
-                                //{
-                                //    List<string> temp = item;
-                                //    do
-                                //    {
-                                //        filterRows = dt2.AsEnumerable()
-                                //           .Where(row => temp.Contains(row.Field<string>("parentName"), StringComparison.OrdinalIgnoreCase))
-                                //           .ToArray();
-                                //        if (filterRows.Length == 0)
-                                //            continue;
-                                //        assetPriority.Add(filterRows.CopyToDataTable());
-                                //        temp = assetPriority[assetPriority.Count - 1].GetColumn<string>("name");
-                                //    } while (filterRows.Length != 0);
-                                //}
-                                //List<int> idList = new List<int>();
-
-
-                                //foreach (DataTable dtUsers in assetPriority)
-                                //{
-                                //    idList.AddRange((await AddInventoryWithParent(dtUsers, facility_id, userID)).id);
-                                //}
                             }
+                            //if (filterRows.Length > 0)
+                            //{
+                            //    assetPriority.Insert(0, filterRows.CopyToDataTable());
+                            //    assetList.Insert(0, assetPriority[assetPriority.Count - 1].GetColumn<string>("name"));
+                            //}
+
+                            //foreach (var item in assetList)
+                            //{
+                            //    List<string> temp = item;
+                            //    do
+                            //    {
+                            //        filterRows = dt2.AsEnumerable()
+                            //           .Where(row => temp.Contains(row.Field<string>("parentName"), StringComparison.OrdinalIgnoreCase))
+                            //           .ToArray();
+                            //        if (filterRows.Length == 0)
+                            //            continue;
+                            //        assetPriority.Add(filterRows.CopyToDataTable());
+                            //        temp = assetPriority[assetPriority.Count - 1].GetColumn<string>("name");
+                            //    } while (filterRows.Length != 0);
+                            //}
+                            //List<int> idList = new List<int>();
+
+
+                            //foreach (DataTable dtUsers in assetPriority)
+                            //{
+                            //    idList.AddRange((await AddInventoryWithParent(dtUsers, facility_id, userID)).id);
+                            //}
+                        }
 
                         string checkParentID = $"select id,name from assets  where parentId = 0 and facilityId = {facility_id} GROUP BY name  ORDER BY id ASC ";
                         DataTable dt_checkingParentID = await Context.FetchData(checkParentID).ConfigureAwait(false);
@@ -922,7 +924,7 @@ namespace CMMSAPIs.Repositories.Inventory
                         {
                             dt3.ImportRow(row);
                         }
-                        for(int i = 0; i < diccheckParentID.Count; i++)
+                        for (int i = 0; i < diccheckParentID.Count; i++)
                         {
 
                         }
@@ -931,7 +933,7 @@ namespace CMMSAPIs.Repositories.Inventory
                         Total_Inserted_Rows = updatedIdList.Count + idList.Count;
                         response = new CMImportFileResponse(file_id, idList, updatedIdList, CMMS.RETRUNSTATUS.SUCCESS, null, null, $"{idList.Count} new assets added.{updatedIdList.Count} assets Updated.");
 
-                       // }
+                        // }
                     }
                 }
                 else //
@@ -954,7 +956,7 @@ namespace CMMSAPIs.Repositories.Inventory
                 response.error_log_file_path = logPath;
                 response.import_log = m_errorLog.errorLog();
             }
-            
+
             return response;
             //return response;*/
         }
