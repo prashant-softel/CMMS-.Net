@@ -17,10 +17,10 @@ namespace CMMSAPIs.BS.SM
         Task<CMDefaultResponse> UpdateAssetType(CMSMMaster request, int userID);
         Task<CMDefaultResponse> DeleteAssetType(int Id, int userID);
 
-        Task<List<CMItemCategory>> GetAssetCategoryList(int ID);
-        Task<CMDefaultResponse> AddAssetCategory(CMItemCategory request, int userID);
-        Task<CMDefaultResponse> UpdateAssetCategory(CMItemCategory request, int userID);
-        Task<CMDefaultResponse> DeleteAssetCategory(int acID, int userID);
+        Task<List<CMItemCategory>> GetMaterialCategoryList(int ID);
+        Task<CMDefaultResponse> AddMaterialCategory(CMItemCategory request, int userID);
+        Task<CMDefaultResponse> UpdateMaterialCategory(CMItemCategory request, int userID);
+        Task<CMDefaultResponse> DeleteMaterialCategory(int acID, int userID);
 
         Task<List<CMUnitMeasurement>> GetUnitMeasurementList(int ID);
         Task<CMDefaultResponse> AddUnitMeasurement(CMUnitMeasurement request, int userID);
@@ -39,6 +39,7 @@ namespace CMMSAPIs.BS.SM
         Task<CMDefaultResponse> UpdatePaidBy(CMPaidBy request, int UserID);
         Task<CMDefaultResponse> DeletePaidBy(CMPaidBy request, int UserID);
         Task<CMImportFileResponse> ImportMaterialFile(int file_id, int facility_id, int userID);
+      
     }
 
     public class SMMasterBS : ISMMasterBS
@@ -111,13 +112,13 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<CMItemCategory>> GetAssetCategoryList(int ID)
+        public async Task<List<CMItemCategory>> GetMaterialCategoryList(int ID)
         {
             try
             {
                 using (var repos = new SMMasterRepository(getDB))
                 {
-                    return await repos.GetAssetCategoryList(ID);
+                    return await repos.GetMaterialCategoryList(ID);
                 }
             }
             catch (Exception ex)
@@ -126,13 +127,13 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<CMDefaultResponse> AddAssetCategory(CMItemCategory request, int userID)
+        public async Task<CMDefaultResponse> AddMaterialCategory(CMItemCategory request, int userID)
         {
             try
             {
                 using (var repos = new SMMasterRepository(getDB))
                 {
-                    return await repos.AddAssetCategory(request, userID);
+                    return await repos.AddMaterialCategory(request, userID);
                 }
             }
             catch (Exception ex)
@@ -141,13 +142,13 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<CMDefaultResponse> UpdateAssetCategory(CMItemCategory request, int userID)
+        public async Task<CMDefaultResponse> UpdateMaterialCategory(CMItemCategory request, int userID)
         {
             try
             {
                 using (var repos = new SMMasterRepository(getDB))
                 {
-                    return await repos.UpdateAssetCategory(request, userID);
+                    return await repos.UpdateMaterialCategory(request, userID);
                 }
             }
             catch (Exception ex)
@@ -156,13 +157,13 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<CMDefaultResponse> DeleteAssetCategory(int acID, int userID)
+        public async Task<CMDefaultResponse> DeleteMaterialCategory(int acID, int userID)
         {
             try
             {
                 using (var repos = new SMMasterRepository(getDB))
                 {
-                    return await repos.DeleteAssetCategory(acID, userID);
+                    return await repos.DeleteMaterialCategory(acID, userID);
                 }
             }
             catch (Exception ex)
@@ -407,5 +408,7 @@ namespace CMMSAPIs.BS.SM
                 throw;
             }
         }
+
+      
     }
 }

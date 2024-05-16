@@ -29,6 +29,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
             { 186, "Investigation-Completed" },
             { 187, "Updated" },
             { 188, "Cancelled" },
+            { 189, "Closed" },
         };
         private bool _IncidentReportDetails;
 

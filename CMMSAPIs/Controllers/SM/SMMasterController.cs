@@ -116,95 +116,7 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
-        /*
-         * Asset Category CRUD End Points
-        */
 
-        //[Authorize]
-        [Route("GetAssetCategoryList")]
-        [HttpGet]
-        public async Task<IActionResult> GetAssetCategoryList(int id)
-        {
-            try
-            {
-                var data = await _SMMasterBS.GetAssetCategoryList(id);
-                return Ok(data);
-            }
-            catch (Exception ex)
-            {
-                ExceptionResponse item = new ExceptionResponse();
-                item.Status = 400;
-                item.Message = "Invalid id is sent.";
-                return Ok(item);
-            }
-        }
-
-
-        //[Authorize]
-        [Route("AddAssetCategory")]
-        [HttpPost]
-        public async Task<IActionResult> AddAssetCategory(CMItemCategory request)
-        {
-            try
-            {
-                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _SMMasterBS.AddAssetCategory(request, userID);
-                return Ok(data);
-            }
-            catch (Exception ex)
-            {
-                ExceptionResponse item = new ExceptionResponse();
-                item.Status = 400;
-                item.Message = "Invalid data is sent.";
-                return Ok(item);
-            }
-        }
-
-
-        //[Authorize]
-        [Route("UpdateAssetCategory")]
-        [HttpPost]
-        public async Task<IActionResult> UpdateAssetCategory(CMItemCategory request)
-        {
-            try
-            {
-                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _SMMasterBS.UpdateAssetCategory(request, userID);
-                return Ok(data);
-            }
-            catch (Exception ex)
-            {
-                ExceptionResponse item = new ExceptionResponse();
-                item.Status = 400;
-                item.Message = "Invalid data is sent.";
-                return Ok(item);
-            }
-        }
-
-
-        //[Authorize]
-        [Route("DeleteAssetCategory")]
-        [HttpPost]
-        public async Task<IActionResult> DeleteAssetCategory([FromForm] int id)
-        {
-            try
-            {
-                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _SMMasterBS.DeleteAssetCategory(id, userID);
-                return Ok(data);
-            }
-            catch (Exception ex)
-            {
-                ExceptionResponse item = new ExceptionResponse();
-                item.Status = 400;
-                item.Message = "Invalid id is sent.";
-                return Ok(item);
-            }
-        }
-
-        /*
-         * Asset Category CRUD End Points
-        */
 
 
         //[Authorize]
@@ -537,5 +449,93 @@ namespace CMMSAPIs.Controllers.SM
                 throw;
             }
         }
+
+        /*
+         * Asset Category CRUD End Points
+        */
+        //[Authorize]
+        [Route("GetMaterialCategoryList")]
+        [HttpGet]
+        public async Task<IActionResult> GetMaterialCategoryList(int id)
+        {
+            try
+            {
+                var data = await _SMMasterBS.GetMaterialCategoryList(id);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid id is sent.";
+                return Ok(item);
+            }
+        }
+
+
+        //[Authorize]
+        [Route("AddMaterialCategory")]
+        [HttpPost]
+        public async Task<IActionResult> AddMaterialCategory(CMItemCategory request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _SMMasterBS.AddMaterialCategory(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid data is sent.";
+                return Ok(item);
+            }
+        }
+
+
+        //[Authorize]
+        [Route("UpdateMaterialCategory")]
+        [HttpPost]
+        public async Task<IActionResult> UpdateMaterialCategory(CMItemCategory request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _SMMasterBS.UpdateMaterialCategory(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid data is sent.";
+                return Ok(item);
+            }
+        }
+
+
+        //[Authorize]
+        [Route("DeleteMaterialCategory")]
+        [HttpPost]
+        public async Task<IActionResult> DeleteMaterialCategory(int id)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _SMMasterBS.DeleteMaterialCategory(id, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid id is sent.";
+                return Ok(item);
+            }
+        }
+        /*
+         * Asset Category CRUD End Points
+        */
     }
 }

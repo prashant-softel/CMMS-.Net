@@ -99,7 +99,7 @@ namespace CMMSAPIs.Repositories.SM
             return response;
         }
 
-        internal async Task<List<CMItemCategory>> GetAssetCategoryList(int ID)
+        internal async Task<List<CMItemCategory>> GetMaterialCategoryList(int ID)
         {
             /*
              * Return id, name from SMItemCategory
@@ -119,7 +119,7 @@ namespace CMMSAPIs.Repositories.SM
             return _List;
         }
 
-        internal async Task<CMDefaultResponse> AddAssetCategory(CMItemCategory request, int userID)
+        internal async Task<CMDefaultResponse> AddMaterialCategory(CMItemCategory request, int userID)
         {
             /*
              * Add record in SMItemCategory
@@ -131,7 +131,7 @@ namespace CMMSAPIs.Repositories.SM
             return response;
         }
 
-        internal async Task<CMDefaultResponse> UpdateAssetCategory(CMItemCategory request, int userID)
+        internal async Task<CMDefaultResponse> UpdateMaterialCategory(CMItemCategory request, int userID)
         {
             /*
              * Update record in SMItemCategory
@@ -142,7 +142,7 @@ namespace CMMSAPIs.Repositories.SM
             return response;
         }
 
-        internal async Task<CMDefaultResponse> DeleteAssetCategory(int acID, int userID)
+        internal async Task<CMDefaultResponse> DeleteMaterialCategory(int acID, int userID)
         {
             /*
              * Delete record in SMItemCategory
@@ -747,6 +747,7 @@ namespace CMMSAPIs.Repositories.SM
 
             return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.SUCCESS, null, null, "File imported successfully."); 
             //return response;*/
-        }
+        }       
+
     }
 }

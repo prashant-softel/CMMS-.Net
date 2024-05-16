@@ -399,7 +399,11 @@ namespace CMMSAPIs.Repositories.SM
         public async Task<List<CMCreateRequestOrder>> GetRODetailsByID(string IDs, string facilityTimeZone)
         {
             // Convert list of IDs to comma-separated string
-           // string idList = string.Join(",", IDs);
+            // string idList = string.Join(",", IDs);
+            if(IDs==null || IDs== "")
+            {
+                IDs = "0";
+            }
 
             string query = "SELECT fc.name as facilityName, pod.ID as requestDetailsID, facilityid as facility_id, pod.spare_status, po.remarks, sai.orderflag, " +
                            "sam.asset_type_ID, pod.requestID, pod.assetItemID, sai.serial_number, sai.location_ID, pod.cost, pod.ordered_qty, " +
