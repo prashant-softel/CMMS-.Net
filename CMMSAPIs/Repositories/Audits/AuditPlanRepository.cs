@@ -1439,7 +1439,7 @@ namespace CMMSAPIs.Repositories.Audits
             string SelectQ = "select id, Facility_id,Frequency as ApplyFrequency, Schedule_Date,Auditor_Emp_ID as auditor_id, status from st_audit where ID = '" + request.id + "'";
             List<CMCreateAuditPlan> auditPlanList = await Context.GetData<CMCreateAuditPlan>(SelectQ).ConfigureAwait(false);
 
-            if (auditPlanList != null && auditPlanList.Count > 0 && auditPlanList[0].Status == (int)CMMS.CMMS_Status.AUDIT_APPROVED)
+            if (auditPlanList != null && auditPlanList.Count > 0)
             {
                 string UpdateQ = $"update st_audit " +
                  $"set Status = '{(int)CMMS.CMMS_Status.AUDIT_SKIP}' , approved_by = {userId}, approved_Date = '{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}', approved_Comment = '{request.comment}'" +
@@ -1451,7 +1451,7 @@ namespace CMMSAPIs.Repositories.Audits
             }
             else
             {
-                response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Audit plan does not approved to skip.");
+                response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Audit plan does not exist to skip.");
             }
 
    
@@ -1506,12 +1506,12 @@ namespace CMMSAPIs.Repositories.Audits
             {
                 string entryInTask = $" INSERT INTO pm_task (plan_id, category_id, facility_id, frequency_id, plan_date, prev_task_done_date, closed_at, " +
                     $"assigned_to, PTW_id, status) VALUES " +
-                    $" ({auditPlanList[i].id},0,{auditPlanList[i].Facility_id},{auditPlanList[i].ApplyFrequency},'{auditPlanList[i].Schedule_Date.ToString("yyyy-MM-dd HH:mm:ss")}',null,null,{auditPlanList[i].auditor_id},0,{(int)CMMS.CMMS_Status.AUDIT_SKIP});SELECT LAST_INSERT_ID();";
+                    $" ({auditPlanList[i].id},0,{auditPlanList[i].Facility_id},{auditPlanList[i].ApplyFrequency},'{auditPlanList[i].Schedule_Date.ToString("yyyy-MM-dd HH:mm:ss")}',null,null,{auditPlanList[i].auditor_id},0,{(int)CMMS.CMMS_Status.AUDIT_APPROVED});SELECT LAST_INSERT_ID();";
                 DataTable dt2 = await Context.FetchData(entryInTask).ConfigureAwait(false);
                 int task_id = Convert.ToInt32(dt2.Rows[0][0]);
 
                 string scheduleQry = $"INSERT INTO pm_schedule(task_id,plan_id,Asset_id,checklist_id,PM_Schedule_date,status) " +
-                                $"select {task_id} as task_id,id as plan_id, 0 as Asset_id, Checklist_id  as checklist_id,Schedule_Date    as PM_Schedule_date,{(int)CMMS.CMMS_Status.AUDIT_SKIP} as status from st_audit  where id = {request.id}";
+                                $"select {task_id} as task_id,id as plan_id, 0 as Asset_id, Checklist_id  as checklist_id,Schedule_Date    as PM_Schedule_date,{(int)CMMS.CMMS_Status.AUDIT_APPROVED} as status from st_audit  where id = {request.id}";
                 await Context.ExecuteNonQry<int>(scheduleQry);
 
                 string setCodeNameQuery = "UPDATE pm_schedule " +
