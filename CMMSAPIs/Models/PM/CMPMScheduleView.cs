@@ -68,6 +68,7 @@ namespace CMMSAPIs.Models.PM
         public List<CMPMScheduleExecutionDetail> schedules { get; set; }
 
         public int plan_id { get; set; }
+        public DateTime Schedule_Date { get; set; }
         public int started_by_id { get; set; }
         public string started_by_name { get; set; }
         public DateTime started_at { get; set; }
