@@ -127,7 +127,7 @@ namespace CMMSAPIs.Repositories.SM
             string mainQuery = $"INSERT INTO SMItemCategory (cat_name,status) VALUES ('" + request.cat_name + "',1); SELECT LAST_INSERT_ID();";
             DataTable dt2 = await Context.FetchData(mainQuery).ConfigureAwait(false);
             int id = Convert.ToInt32(dt2.Rows[0][0]);
-            CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Asset category added successfully.");
+            CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Material category added successfully.");
             return response;
         }
 
@@ -138,7 +138,7 @@ namespace CMMSAPIs.Repositories.SM
             */
             string mainQuery = $"UPDATE SMItemCategory SET cat_name = '"+request.cat_name+"' where ID = " + request.ID + "";
             await Context.ExecuteNonQry<int>(mainQuery);
-            CMDefaultResponse response = new CMDefaultResponse(1, CMMS.RETRUNSTATUS.SUCCESS, "Asset category updated successfully.");
+            CMDefaultResponse response = new CMDefaultResponse(request.ID, CMMS.RETRUNSTATUS.SUCCESS, "Material category updated successfully.");
             return response;
         }
 
@@ -149,7 +149,7 @@ namespace CMMSAPIs.Repositories.SM
             */
             string mainQuery = $"UPDATE SMItemCategory SET status = 0 where ID = " + acID + "";
             await Context.ExecuteNonQry<int>(mainQuery);
-            CMDefaultResponse response = new CMDefaultResponse(1, CMMS.RETRUNSTATUS.SUCCESS, "Asset category deleted.");
+            CMDefaultResponse response = new CMDefaultResponse(acID, CMMS.RETRUNSTATUS.SUCCESS, "Material category deleted.");
             return response;
         }
 

@@ -517,13 +517,13 @@ namespace CMMSAPIs.Controllers.SM
 
         //[Authorize]
         [Route("DeleteMaterialCategory")]
-        [HttpPost]
-        public async Task<IActionResult> DeleteMaterialCategory(int id)
+        [HttpDelete]
+        public async Task<IActionResult> DeleteMaterialCategory(int acID)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _SMMasterBS.DeleteMaterialCategory(id, userID);
+                var data = await _SMMasterBS.DeleteMaterialCategory(acID, userID);
                 return Ok(data);
             }
             catch (Exception ex)

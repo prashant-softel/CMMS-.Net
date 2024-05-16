@@ -1081,14 +1081,22 @@ namespace CMMSAPIs.Repositories.Inventory
              * Business - owner, operator, customer
             */
             /*Your code goes here*/
-            string myQuery =
-                "SELECT a.id, a.name,a.moduleQuantity, a.description, ast.name as type, b2.name as supplierName, b5.name as operatorName, a.categoryId , ac.name as categoryName, a.serialNumber,a.specialTool, a.warrantyId" +
-
-                ", f.name AS facilityName, f.id AS facilityId, bl.id AS blockId, bl.name AS blockName, linkedbl.id AS linkedToBlockId, linkedbl.name AS linkedToBlockName, a.parentId, a2.name as parentName, custbl.name as customerName, owntbl.name as ownerName, s.name AS status, b5.name AS operatorName" +
-
+                string myQuery =
+                " select a.id, a.name,a.moduleQuantity, a.description, ast.name as type, b2.name as supplierName, b5.name as operatorName, a.categoryId, ac.name as categoryName, a.serialNumber,a.specialTool, a.warrantyId,f.name AS facilityName, f.id AS facilityId, bl.id AS blockId, bl.name AS blockName,linkedbl.id AS linkedToBlockId, linkedbl.name AS linkedToBlockName, a.parentId, a2.name as parentName, custbl.name as customerName, owntbl.name as ownerName, s.name AS status, a.dccapacity,a.acrating, a.dcRating, a.acCapacity, a.descMaintenace, wt.name as warrantyType, wp.id as warrantyProviderId, wp.name as warrantyProviderName, " +
+                "w.start_date,w.expiry_date,w.warrantyTenture,w.certificate_number,a.cost,cy.name as currency,a.barcode,a.unspCode,a.purchaseCode,a.calibrationDueDate,a.calibrationReminderDays,a.calibrationFrequency,a.calibrationLastDate,a.calibrationDueDate as calibration_testing_date,a.model,a.supplierId,a.manufacturerId,manufacturertlb.name as manufacturername "+
+               
                 " from assets as a " +
                 "left join assettypes as ast on ast.id = a.typeId " +
                 "" +
+
+                "left join assetwarranty as w ON a.warrantyId = w.id "+
+                 "" +
+                "left join warrantytype as wt ON w.warranty_type = wt.id " +
+                 "" + 
+                "left join business as wp ON w.warranty_provider = wp.id " +
+                "left JOIN business AS manufacturertlb ON a.ownerId = manufacturertlb.id "+
+                "left JOIN currency as cy on a.id = cy.id "+
+
                 "left join assetcategories as ac on ac.id= a.categoryId " +
                 "" +
                 "left join business as custbl on custbl.id = a.customerId " +

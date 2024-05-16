@@ -27,6 +27,28 @@ namespace CMMSAPIs.Models.Inventory
         public dynamic calibrationDueDate { get; set; }
         public string status { get; set; }
         public int moduleQuantity { get; set; }
+        public int dccapacity { get; set; }
+        public string acrating { get; set; }
+        public string dcRating { get; set; }
+        public int acCapacity { get; set; }
+        public string descMaintenace { get; set; }
+        public string warrantyType { get; set; }
+        public string warrantyProviderName { get; set; }
+        public DateTime? start_date { get; set; }
+        public int warrantyTenture { get; set; }
+        public string certificate_number { get; set; }
+        public double cost { get; set; }
+        public string currency { get; set; }
+        public string barcode { get; set; }
+        public string unspCode { get; set; }
+        public string purchaseCode { get; set; }
+        public int calibrationReminderDays { get; set; }
+        public int calibrationFrequency { get; set; }
+        public DateTime? calibrationLastDate { get; set; }
+        public DateTime? calibration_testing_date { get; set; }
+        public string model { get; set; }
+        public string manufacturername { get; set; }
+
     }
 
     public class CMInventoryTypeList
@@ -52,7 +74,7 @@ namespace CMMSAPIs.Models.Inventory
     }
 
     public class CMWarrantyCertificate
-    { 
+    {
 
         public int asset_id { get; set; }
         public int categoryId { get; set; }

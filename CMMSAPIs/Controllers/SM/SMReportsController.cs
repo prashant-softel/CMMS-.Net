@@ -148,29 +148,6 @@ namespace CMMSAPIs.Controllers.SM
         }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         [Route("GetTransactionReport")]
         [HttpGet]
         public async Task<IActionResult> GetTransactionReport(string facility_ID, int actorType, int actorID, DateTime fromDate, DateTime toDate)
