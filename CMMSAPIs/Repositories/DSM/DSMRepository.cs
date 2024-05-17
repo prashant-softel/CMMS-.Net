@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Data;
@@ -104,15 +104,31 @@ namespace CMMSAPIs.Repositories.DSM
                                     m_errorLog.SetError($"Exception Caught : " + ex.Message);
 
                                 }
+                                foreach (DataRow dr in dt.Rows.Cast<DataRow>().ToArray())
+                                {
+                                    bool isEmpty = true;
+                                    foreach (var item in dr.ItemArray)
+                                    {
+                                        if (item != DBNull.Value && !string.IsNullOrWhiteSpace(item.ToString()))
+                                        {
+                                            isEmpty = false;
+                                            break;
+                                        }
+                                    }
 
-                                string qry = "insert into dsm (year, month, site,dsmType, vendor, category, dsmPenalty, scheduleKwh, actualKwh) Values ";
+                                    if (isEmpty)
+                                    {
+                                        dr.Delete();
+                                    }
+                                }
+                                string qry = "insert into dsm (fy, month, site,dmsType, vendor, category, dsmPenalty, scheduleKwh, actualKwh) Values ";
 
                                 foreach (DataRow dr in dt.Rows)
                                 {
 
                                     CMDSMImportData unit = new CMDSMImportData
                                     {
-                                        year = dr["Year"] is DBNull || string.IsNullOrEmpty((string)dr["Year"]) ? 0 : Convert.ToInt32(dr["Year"]),
+                                        fy = dr["Year"] is DBNull || string.IsNullOrEmpty((string)dr["Year"]) ? "" : Convert.ToString(dr["Year"]),
 
                                         month = dr["Month"] is DBNull || string.IsNullOrEmpty((string)dr["Month"]) ? "Nil" : Convert.ToString(dr["Month"]),
 
@@ -131,7 +147,7 @@ namespace CMMSAPIs.Repositories.DSM
                                         actualKwh = dr["Actual (kWh)"] is DBNull || string.IsNullOrEmpty((string)dr["Actual (kWh)"]) ? 0 : Convert.ToInt32(dr["Actual (kWh)"])
                                     };
 
-                                    qry += "('" + unit.year + "','" + unit.month + "','" + unit.site + "','" + unit.dsmType + "','" + unit.vendor + "','" + unit.category + "','" + unit.dsmPenalty + "','" + unit.scheduleKwh + "','" + unit.actualKwh + "'), ";
+                                    qry += "('" + unit.fy + "','" + unit.month + "','" + unit.site + "','" + unit.dsmType + "','" + unit.vendor + "','" + unit.category + "','" + unit.dsmPenalty + "','" + unit.scheduleKwh + "','" + unit.actualKwh + "'), ";
                                 }
 
                                 qry = qry.Substring(0, (qry.Length - 2)) + ";";
@@ -142,12 +158,15 @@ namespace CMMSAPIs.Repositories.DSM
                         catch (Exception ex)
                         {
                             // Handle exceptions
-                            Console.WriteLine("An error occurred: " + ex.Message); 
+                            Console.WriteLine("An error occurred: " + ex.Message);
+                            throw ex;
                             
                         }
                     }
                 }
             }
+            response = new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.SUCCESS, "", null, "File imported successfully.");
+
             return response;
         }
 
