@@ -1,4 +1,4 @@
-﻿using CMMSAPIs.Helper;
+using CMMSAPIs.Helper;
 using System;
 using System.Collections.Generic;
 
@@ -24,6 +24,7 @@ namespace CMMSAPIs.Models.DSM
     public class CMDSMImportData
     {
         public int year { get; set; }
+        public string fy { get; set; }
         public string month { get; set; }
         public string site { get; set; }
         public string dsmType { get; set; }
