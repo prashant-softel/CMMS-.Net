@@ -33,6 +33,7 @@ using System.Linq;
 using CMMSAPIs.Models;
 using System.Net.NetworkInformation;
 using CMMSAPIs.Models.SM;
+using CMMSAPIs.Models.Users;
 
 namespace CMMSAPIs.Repositories.Masters
 {
@@ -110,10 +111,10 @@ namespace CMMSAPIs.Repositories.Masters
             await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
 
             string insertIntoRoles = $"INSERT INTO roleaccess(roleId , featureId , `add` , edit , `delete` , `view` , issue , approve , selfView , " +
-                $"lastModifiedAt , lastModifiedBy ) " +
-                $" select id ,{id},0,0,0,0,0,0,0,NOW(),0 from userroles; ";
+               $"lastModifiedAt , lastModifiedBy ) " +
+               $" select id ,{id},0,0,0,0,0,0,0,NOW(),0 from userroles; ";
             DataTable dt_Roles = await Context.FetchData(insertIntoRoles).ConfigureAwait(false);
-
+            
             response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Module Added Successfully");
             return response;
         }

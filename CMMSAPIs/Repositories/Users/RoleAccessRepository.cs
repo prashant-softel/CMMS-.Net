@@ -75,12 +75,27 @@ namespace CMMSAPIs.Repositories.Users
             string qry = $" SELECT roleId FROM  users where id= {userId}";
             DataTable dt1 = await Context.FetchData(qry).ConfigureAwait(false);
              rid = Convert.ToInt32(dt1.Rows[0][0]);
-            
-            CMSetRoleAccess roleAccess = new CMSetRoleAccess();
-            roleAccess.role_id = rid;
-            roleAccess.set_existing_users = true;
-              await  SetRoleAccess(roleAccess, userId);
-        
+
+            List<string> role_access = new List<string>();
+            string myf = "SELECT id as featureid FROM features order by id asc ;";
+            List<CMAccessList1> fid = await Context.GetData<CMAccessList1>(myf).ConfigureAwait(false);
+
+            foreach (CMAccessList1 access in fid)
+            {
+
+                role_access.Add($"({id}, {access.featureid}, {0}, " +
+                 $"{0}, {0}, " +
+                 $"{0}, {0}, " +
+                 $"{0}, {0}, " +
+                 $"'{UtilsRepository.GetUTCTime()}', {UtilsRepository.GetUserID()})");
+            }
+            string role_access_insert_str = string.Join(',', role_access);
+
+            string insert_query = $"INSERT INTO RoleAccess" +
+                                        $"(roleId, featureId, `add`, `edit`, `view`, `delete`, `issue`, `approve`, `selfView`, `lastModifiedAt`, `lastModifiedBy`) " +
+                                  $" VALUES {role_access_insert_str}";
+            await Context.GetData<List<int>>(insert_query).ConfigureAwait(false);
+
             return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Role Added");
         }
          

@@ -247,6 +247,8 @@ namespace CMMSAPIs.Helper
             AUDIT_SCEHDULE_VIEW,
             AUDIT_EXECUTION,
             AUDIT_SUMMARY,
+         
+
 
             HOTO_PLAN = 61,
             HOTO_SCHEDULE,
@@ -550,11 +552,12 @@ namespace CMMSAPIs.Helper
             AUDIT_CLOSED,
             AUDIT_CLOSED_REJECT,
             AUDIT_CLOSED_APPROVED,
-           
+            AUDIT_EXECUTED,
 
 
 
-	        MoM_OPEN = 451,
+
+            MoM_OPEN = 451,
             MoM_CANCEL,
             MoM_CLOSE,
         }

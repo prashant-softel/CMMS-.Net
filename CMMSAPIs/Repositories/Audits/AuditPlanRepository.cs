@@ -41,7 +41,8 @@ namespace CMMSAPIs.Repositories.Audits
             { CMMS.CMMS_Status.AUDIT_SKIP_APPROVED, "Skip Approved" },
             { CMMS.CMMS_Status.AUDIT_SKIP_REJECT, "Skip Reject" },
             { CMMS.CMMS_Status.AUDIT_CLOSED_APPROVED, "Closed Approved" },
-            { CMMS.CMMS_Status.AUDIT_CLOSED_REJECT, "Closed Reject" }
+            { CMMS.CMMS_Status.AUDIT_CLOSED_REJECT, "Closed Reject" },
+            { CMMS.CMMS_Status.AUDIT_EXECUTED, "Executed" }
         };
 
         internal async Task<List<CMAuditPlanList>> GetAuditPlanList(int facility_id, DateTime fromDate, DateTime toDate,string facilitytimeZone)
@@ -227,6 +228,9 @@ namespace CMMSAPIs.Repositories.Audits
                     break;
                 case CMMS.CMMS_Status.AUDIT_CLOSED_APPROVED:
                     retValue = "Closed Approved";
+                    break;
+                case CMMS.CMMS_Status.AUDIT_EXECUTED:
+                    retValue = "Executed";
                     break;
                 default:
                     retValue = "Unknown <" + m_notificationID + ">";
@@ -1167,6 +1171,9 @@ namespace CMMSAPIs.Repositories.Audits
                     retValue = String.Format("Audit Close Approved by {0} ", PlanObj.created_by_name);
                     break;
                 case CMMS.CMMS_Status.AUDIT_CLOSED_REJECT:
+                    retValue = String.Format("Audit Close Rejected by {0} ", PlanObj.created_by_name);
+                    break;
+                case CMMS.CMMS_Status.AUDIT_EXECUTED:
                     retValue = String.Format("Audit Close Rejected by {0} ", PlanObj.created_by_name);
                     break;
                 default:

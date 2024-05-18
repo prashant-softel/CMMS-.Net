@@ -260,12 +260,12 @@ namespace CMMSAPIs.Controllers.PM
 
         [Route("ImportPMPlanFile")]
         [HttpPost]
-        public async Task<IActionResult> ImportPMPlanFile(int file_id)
+        public async Task<IActionResult> ImportPMPlanFile(int file_id, int facility_id)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _PMBS.ImportPMPlanFile(file_id, userID);
+                var data = await _PMBS.ImportPMPlanFile(file_id, facility_id, userID);
                 return Ok(data);
             }
             catch (Exception ex)

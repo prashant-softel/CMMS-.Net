@@ -72,4 +72,8 @@ namespace CMMSAPIs.Models.Masters
         public int latestJCPTWStatus { get; set; }
         public int latestJCApproval { get; set; }
     }
+    public class CMROLE
+    {
+        public int roleId { get; set; }
+    }
 }

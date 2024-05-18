@@ -255,7 +255,7 @@ namespace CMMSAPIs.Repositories.Audits
             //CMDefaultResponse responseSchedule = new CMDefaultResponse(schedule.schedule_id, CMMS.RETRUNSTATUS.SUCCESS, $"Schedule Execution Updated Successfully.");
 
             //responseList.Add(responseSchedule);
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, request.task_id, 0, 0, $"PM Task {request.task_id} updated.", CMMS.CMMS_Status.PM_UPDATED, userID);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_TASK, request.task_id, 0, 0, $"Audit Task {request.task_id} Executed.", CMMS.CMMS_Status.AUDIT_EXECUTED, userID);
             return responseList;
         }
 

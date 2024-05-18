@@ -54,4 +54,8 @@ namespace CMMSAPIs.Models.Users
         public CMMS.CMMS_Status notification_id { get; set; }
         public int[] user_ids { get; set; }
     }
+    public class CMAccessList1
+    {
+        public int featureid { get; set; }
+    }
 }

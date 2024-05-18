@@ -25,12 +25,12 @@ namespace CMMSAPIs.Controllers.DSM
         ////[Authorize]
         [Route("getDSMData")]
         [HttpGet]
-        public async Task<IActionResult> getDSMData(CMDSMFilter request)
+        public async Task<IActionResult> getDSMDatagetDSMData(string fy, string month, string stateId, string spvId, string siteId)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _DSMBS.getDSMData(request);
+                var data = await _DSMBS.getDSMData(fy, month, stateId, spvId, siteId);
                 return Ok(data);
             }
             catch (Exception)

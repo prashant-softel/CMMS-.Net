@@ -170,26 +170,52 @@ namespace CMMSAPIs.Repositories.DSM
             return response;
         }
 
-        public async Task<List<CMDSMData>> getDSMData(CMDSMFilter request)
+        public async Task<List<CMDSMData>> getDSMData(string fy, string month, string stateId, string spvId, string siteId)
         {
+            string[] fyArray = null;
+            string[] monthArray = null;
+
+
+
+            if (!string.IsNullOrEmpty(fy))
+            {
+                fyArray = fy.Split(',');
+            }
+            else
+            {
+                fyArray = new string[] { };
+            }
+
+            if (!string.IsNullOrEmpty(month))
+            {
+                monthArray = month.Split(',');
+            }
+            else
+            {
+                monthArray = new string[] { };
+            }
+
             string filter = "";
 
-            filter += (request?.fy?.Length > 0 ? " AND fy IN ( '" + string.Join("' , '", request.fy) + "' )" :string.Empty);
-            filter += (request?.month?.Length > 0 ? " AND month IN ( '" + string.Join("' , '", request.month) + "' )" : string.Empty);
-            filter += (request?.stateId?.Length > 0 ? " AND sm.stateId IN (" + string.Join(",", request.stateId) + ")" : string.Empty);
-            filter += (request?.spvId?.Length > 0 ? " AND sm.spvId IN (" + string.Join(",", request.spvId) + ")" : string.Empty);
-            filter += (request?.siteId?.Length > 0 ? " AND sm.id IN (" + string.Join(",", request.siteId) + ")" : string.Empty);
+            filter += (fyArray.Length > 0 ? " AND fy IN ( '" + string.Join("', '", fyArray) + "' )" : string.Empty);
+            filter += (monthArray.Length > 0 ? " AND month IN ( '" + string.Join("', '", monthArray) + "' )" : string.Empty);
+            filter += (!string.IsNullOrEmpty(stateId) ? " AND sm.stateId IN (" + string.Join(",", stateId) + ")" : string.Empty);
+            filter += (!string.IsNullOrEmpty(spvId) ? " AND sm.spvId IN (" + string.Join(",", spvId) + ")" : string.Empty);
+            filter += (!string.IsNullOrEmpty(siteId) ? " AND sm.id IN (" + string.Join(",", siteId) + ")" : string.Empty);
 
-            string qry = "select fy , month, dsm.site, spv.name as spv, states.name as state, category, dmsType, vendor as forcasterName ,dsmPenalty, actualKwh , scheduleKwh ,sum(dsmPenalty/actualKwh)*100 as dsmPer from dsm " +
-                " left join site_master as sm on sm.site = dsm.site" +
-                " left join spv on spv.id = sm.spvId" +
-                " left join states on states.id = sm.stateId " +
-                " where 1 " + filter + " group by fy, month, site";
+            string qry = "SELECT fy, month, dsm.site, spv.name AS spv, states.name AS state, category, dmsType, vendor AS forcasterName, dsmPenalty, actualKwh, scheduleKwh, " +
+                         "SUM(dsmPenalty / actualKwh) * 100 AS dsmPer " +
+                         "FROM dsm " +
+                         "LEFT JOIN site_master AS sm ON sm.site = dsm.site " +
+                         "LEFT JOIN spv ON spv.id = sm.spvId " +
+                         "LEFT JOIN states ON states.id = sm.stateId " +
+                         "WHERE 1 = 1 " + filter + " " +
+                         "GROUP BY fy, month, site";
 
             List<CMDSMData> data = await Context.GetData<CMDSMData>(qry).ConfigureAwait(false);
 
             return data;
         }
-       
-    }
+
+    }  
 }

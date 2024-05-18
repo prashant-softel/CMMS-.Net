@@ -13,7 +13,7 @@ namespace CMMSAPIs.BS.DSM
 {
     public interface IDSMBS
     {
-        Task<List<CMDSMData>> getDSMData(CMDSMFilter request);
+        Task<List<CMDSMData>> getDSMData(string fy, string month, string stateId, string spvId, string siteId);
         Task<CMImportFileResponse> importDSMFile(int file_id, int userID);
     }
         public class DSMBS : IDSMBS
@@ -30,22 +30,22 @@ namespace CMMSAPIs.BS.DSM
 
             }
 
-            public async Task<List<CMDSMData>> getDSMData(CMDSMFilter request)
+        public async Task<List<CMDSMData>> getDSMData(string fy, string month, string stateId, string spvId, string siteId)
+        {
+            try
             {
-                try
+                using (var repos = new DSMRepository(getDB, _environment))
                 {
-                    using (var repos = new DSMRepository(getDB, _environment))
-                    {
-                        return await repos.getDSMData(request);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    throw;
+                    return await repos.getDSMData(fy, month, stateId, spvId, siteId);
                 }
             }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
 
-            public async Task<CMImportFileResponse> importDSMFile(int file_id, int userID)
+        public async Task<CMImportFileResponse> importDSMFile(int file_id, int userID)
             {
 
                 try

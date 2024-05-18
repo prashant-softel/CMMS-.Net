@@ -653,35 +653,52 @@ namespace CMMSAPIs.Repositories.Incident_Reports
 
            int updateId= await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
             int incident_id = request.id;
+            StringBuilder injured_Query = new StringBuilder();
+            string fetch = $"select id as injured_item_id from injured_person where incidents_id={incident_id} ;";
+            List<CMInjuredperson> injuredid = await Context.GetData<CMInjuredperson>(fetch).ConfigureAwait(false);
 
             if (request.injured_person != null && request.injured_person.Count > 0)
             {
                 try
                 {
-               
-
-                    
-                    foreach (var item in request.injured_person)
+                    foreach (var items in injuredid)
                     {
-                        StringBuilder injured_Query = new StringBuilder();
-                        injured_Query.Append("UPDATE injured_person SET ");
-                        injured_Query.Append("incidents_id = '" + incident_id + "', ");
-                        injured_Query.Append("person_id = '" + item.person_id + "', ");
-                        injured_Query.Append("person_type = " + item.person_type + ", ");
-                        injured_Query.Append("age = " + item.age + ", ");
-                        injured_Query.Append("sex = '" + item.sex + "', ");
-                        injured_Query.Append("designation = '" + item.designation + "', ");
-                        injured_Query.Append("address = '" + item.address + "', ");
-                        injured_Query.Append("name_contractor = '" + item.name_contractor + "', ");
-                        injured_Query.Append("body_part_and_nature_of_injury = '" + item.body_part_and_nature_of_injury + "', ");
-                        injured_Query.Append("work_experience_years = " + item.work_experience_years + ", ");
-                        injured_Query.Append("plant_equipment_involved = '" + item.plant_equipment_involved + "', ");
-                        injured_Query.Append("location_of_incident = '" + item.location_of_incident + "' ");
-                        injured_Query.Append("WHERE id = " + item.injured_item_id);
-                        var injured_Query_result = await Context.ExecuteNonQry<int>(injured_Query.ToString()).ConfigureAwait(false);
+
+
+                        foreach (var item in request.injured_person)
+                        {
+                            if (item.injured_item_id == items.injured_item_id)
+                            {
+                              
+                                injured_Query.Append("UPDATE injured_person SET ");
+                                injured_Query.Append("incidents_id = '" + incident_id + "', ");
+                                injured_Query.Append("person_id = '" + item.person_id + "', ");
+                                injured_Query.Append("person_type = " + item.person_type + ", ");
+                                injured_Query.Append("age = " + item.age + ", ");
+                                injured_Query.Append("sex = '" + item.sex + "', ");
+                                injured_Query.Append("designation = '" + item.designation + "', ");
+                                injured_Query.Append("address = '" + item.address + "', ");
+                                injured_Query.Append("name_contractor = '" + item.name_contractor + "', ");
+                                injured_Query.Append("body_part_and_nature_of_injury = '" + item.body_part_and_nature_of_injury + "', ");
+                                injured_Query.Append("work_experience_years = " + item.work_experience_years + ", ");
+                                injured_Query.Append("plant_equipment_involved = '" + item.plant_equipment_involved + "', ");
+                                injured_Query.Append("location_of_incident = '" + item.location_of_incident + "' ");
+                                injured_Query.Append("WHERE id = " + item.injured_item_id);
+                            }
+
+                            var injured_Query_result = await Context.ExecuteNonQry<int>(injured_Query.ToString()).ConfigureAwait(false);
+                            string injured_Query1 = "INSERT INTO injured_person\r\n(\r\n incidents_id, person_id, person_type, age, sex, designation, address, name_contractor,\r\n  body_part_and_nature_of_injury, work_experience_years, plant_equipment_involved, location_of_incident\r\n)";
+                            foreach (var item1 in request.injured_person)
+                            {
+                                injured_Query1 = injured_Query1 + $" select   {incident_id}, '{item1.person_id}', {item1.person_type}, {item1.age}, {item1.sex}, '{item1.designation}',\r\n  '{item1.address}', '{item1.name_contractor}', '{item1.body_part_and_nature_of_injury}', {item1.work_experience_years},\r\n  '{item1.plant_equipment_involved}', '{item1.location_of_incident}' UNION ALL ";
+                            }
+                            injured_Query1 = injured_Query1.TrimEnd("UNION ALL ".ToCharArray());
+                            var injured_Query_result2 = await Context.ExecuteNonQry<int>(injured_Query1).ConfigureAwait(false);
+                        }
+
+
                     }
 
-    
                 }
                 catch (Exception ex)
                 {

@@ -48,6 +48,7 @@ namespace CMMSAPIs.Models.Inventory
         public DateTime? calibration_testing_date { get; set; }
         public string model { get; set; }
         public string manufacturername { get; set; }
+        public string supplierName { get; set; }
 
     }
 

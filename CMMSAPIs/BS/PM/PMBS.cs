@@ -25,7 +25,7 @@ namespace CMMSAPIs.BS.PM
         Task<CMDefaultResponse> DeletePMPlan(int planId, int userID);
         Task<CMDefaultResponse> UpdatePMPlan(CMPMPlanDetail request, int userID);
 
-        Task<CMImportFileResponse> ImportPMPlanFile(int file_id, int userID);
+        Task<CMImportFileResponse> ImportPMPlanFile(int file_id, int facility_id, int userID);
         Task<CMDefaultResponse> DeletePMTask(CMApproval request, int userID);
     }
     public class PMBS : IPMBS
@@ -173,13 +173,13 @@ namespace CMMSAPIs.BS.PM
             }
         }
 
-        public async Task<CMImportFileResponse> ImportPMPlanFile(int file_id, int userID)
+        public async Task<CMImportFileResponse> ImportPMPlanFile(int file_id,int  facility_id , int userID)
         {
             try
             {
                 using (var repos = new PMRepository(getDB, _environment))
                 {
-                    return await repos.ImportPMPlanFile(file_id, userID);
+                    return await repos.ImportPMPlanFile(file_id, facility_id, userID);
                 }
             }
             catch (Exception)

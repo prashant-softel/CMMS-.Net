@@ -523,7 +523,7 @@ namespace CMMSAPIs.Repositories.PM
             return response;
         }
 
-     internal async Task<CMImportFileResponse> ImportPMPlanFile(int file_id, int userID)
+     internal async Task<CMImportFileResponse> ImportPMPlanFile(int file_id,int Facility_Id, int userID)
         {
             int facilityid=0;
             string queryplan;
@@ -693,8 +693,9 @@ namespace CMMSAPIs.Repositories.PM
                             newR["AssignedTo"] = newR[5];
                             newR["Approval"] = newR[6];
 
-
-                            try
+                            if (Facility_Id == Convert.ToInt32(newR["plantID"]))
+                            {
+                                try
                             {
                                 newR["plantID"] = facilities[Convert.ToString(newR["PlantName"]).ToUpper()];
 
@@ -717,6 +718,13 @@ namespace CMMSAPIs.Repositories.PM
                                 newR.Delete();
                                 continue;
                                 // return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] Plant named '{newR[0]}' does not exist.");
+                            }
+                            }
+                            else
+                            {
+                                m_errorLog.SetError($"[Row: {rN}] Invalid Plant Name  '{newR["PlantName"]}'.");
+                                newR.Delete();
+                                continue;
                             }
 
                             if (Convert.ToString(newR["PlanName"]) == null || Convert.ToString(newR["PlanName"]) == "")
