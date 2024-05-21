@@ -366,14 +366,14 @@ namespace CMMSAPIs.Repositories.Inventory
                             }
                             newR["row_no"] = rN;
 
-                            string myQuery1 = $"Select name from facilities where id = {facility_id} and parentId = 0";
-                            DataTable dt12 = await Context.FetchData(myQuery1).ConfigureAwait(false);
-                            string PlantName = Convert.ToString(dt12.Rows[0][0]).ToUpper();
+                           // string myQuery1 = $"Select name from facilities where id = {facility_id} and parentId = 0";
+                           // DataTable dt12 = await Context.FetchData(myQuery1).ConfigureAwait(false);
+                           // string PlantName = Convert.ToString(dt12.Rows[0][0]).ToUpper();
                             newR["row_no"] = rN;
                             string siteName = Convert.ToString(newR[0]).ToUpper();
 
 
-                            if (plants.ContainsValue(siteName) && (siteName == PlantName))
+                            if (plants.ContainsValue(siteName))
                             {
 
                             }

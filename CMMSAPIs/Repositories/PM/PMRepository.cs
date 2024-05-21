@@ -523,8 +523,9 @@ namespace CMMSAPIs.Repositories.PM
             return response;
         }
 
-     internal async Task<CMImportFileResponse> ImportPMPlanFile(int file_id,int Facility_Id, int userID)
+     internal async Task<CMImportFileResponse> ImportPMPlanFile(int file_id,int Facility, int userID)
         {
+            int no = Facility;
             int facilityid=0;
             string queryplan;
             CMImportFileResponse response = new CMImportFileResponse();
@@ -693,9 +694,7 @@ namespace CMMSAPIs.Repositories.PM
                             newR["AssignedTo"] = newR[5];
                             newR["Approval"] = newR[6];
 
-                            if (Facility_Id == Convert.ToInt32(newR["plantID"]))
-                            {
-                                try
+                            try
                             {
                                 newR["plantID"] = facilities[Convert.ToString(newR["PlantName"]).ToUpper()];
 
@@ -719,14 +718,7 @@ namespace CMMSAPIs.Repositories.PM
                                 continue;
                                 // return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] Plant named '{newR[0]}' does not exist.");
                             }
-                            }
-                            else
-                            {
-                                m_errorLog.SetError($"[Row: {rN}] Invalid Plant Name  '{newR["PlantName"]}'.");
-                                newR.Delete();
-                                continue;
-                            }
-
+                            
                             if (Convert.ToString(newR["PlanName"]) == null || Convert.ToString(newR["PlanName"]) == "")
                             {
                                 m_errorLog.SetError($"[Row: {rN}] Plan Name cannot be null. Row not Inserted");

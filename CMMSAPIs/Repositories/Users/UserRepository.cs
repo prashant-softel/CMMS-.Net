@@ -103,7 +103,7 @@ namespace CMMSAPIs.Repositories.Users
         {
             // Pending - Include all the property listed in CMUserDetail Model
             string qry = "SELECT " +
-                            "u.id as id, firstName as first_name, lastName as last_name, u.secondaryEmail, u.landlineNumber as landline_number, CONCAT(firstName, ' ', lastName) as full_name, loginId as user_name, r.id as role_id, r.name as role_name, mobileNumber as contact_no, u.genderId as gender_id, gender.name as gender_name, u.bloodGroupId as blood_group_id, bloodgroup.name as blood_group_name, birthday as DOB, countries.name as country_name, u.countryId as country_id, states.name as state_name, u.stateId as state_id, cities.name as city_name, u.cityId as city_id, zipcode, CASE WHEN u.status=0 THEN 'Inactive' ELSE 'Active' END AS status, u.isEmployee, u.joiningDate, photo.id as photoId, photo.file_path AS photoPath, sign.id AS signatureId, sign.file_path AS signaturePath ,co.name as company_name ,companyId as company_id " +
+                            "u.id as id, firstName as first_name, lastName as last_name, u.secondaryEmail, u.landlineNumber as landline_number, CONCAT(firstName, ' ', lastName) as full_name, loginId as user_name, r.id as role_id, r.name as role_name, mobileNumber as contact_no, u.genderId as gender_id, gender.name as gender_name, u.bloodGroupId as blood_group_id, bloodgroup.name as blood_group_name, birthday as DOB, countries.name as country_name, u.countryId as country_id, states.name as state_name, u.stateId as state_id, cities.name as city_name, u.cityId as city_id, zipcode, CASE WHEN u.status=0 THEN 'Inactive' ELSE 'Active' END AS status, u.isEmployee, u.joiningDate, photo.id as photoId, photo.file_path AS photoPath, sign.id AS signatureId, sign.file_path AS signaturePath ,co.name as company_name ,companyId as company_id, usd.designationName as designation  " +
                          "FROM " +
                             "Users as u " +
                          "LEFT JOIN " +
@@ -124,6 +124,8 @@ namespace CMMSAPIs.Repositories.Users
                             "UserRoles as r ON u.roleId = r.id " +
                          "LEFT JOIN " +
                             "business as co on  u.companyId = co.id   " +
+                            "LEFT JOIN " +
+                            "userdesignation as usd on  usd.id = u.designation_id   " +
                          " WHERE " +
                             $"u.id = {user_id}";
 
@@ -651,11 +653,11 @@ namespace CMMSAPIs.Repositories.Users
                 foreach (var user in request)
                 {
                     string myQuery = "INSERT INTO users(loginId, password, secondaryEmail, firstName, lastName, birthday, genderId, gender, bloodGroupId, bloodGroup, photoId, " +
-                                       "mobileNumber, landlineNumber, countryId, stateId, cityId, zipcode, roleId, isEmployee,companyId, joiningDate, createdBy, createdAt, reportToId, status) " +
+                                       "mobileNumber, landlineNumber, countryId, stateId, cityId, zipcode, roleId, isEmployee,companyId,designation_id, joiningDate, createdBy, createdAt, reportToId, status) " +
                                        $"VALUES ('{user.credentials.user_name}', '{user.credentials.password}', '{user.secondaryEmail}', '{user.first_name}', '{user.last_name}', " +
                                        $"'{((DateTime)user.DOB).ToString("yyyy-MM-dd")}', {(int)user.gender_id}, '{user.gender_id}', {user.blood_group_id}, '{CMMS.BLOOD_GROUPS[user.blood_group_id]}', " +
                                        $"{user.photoId}, '{user.contact_no}','{user.landline_number}', {user.country_id}, {user.state_id}, {user.city_id}, {user.zipcode}, " +
-                                       $"{user.role_id}, {(user.isEmployee == null ? 0 : user.isEmployee)},{user.company_id},'{((DateTime)user.joiningDate).ToString("yyyy-MM-dd HH:mm:ss")}', " +
+                                       $"{user.role_id}, {(user.isEmployee == null ? 0 : user.isEmployee)},{user.company_id},{user.designation_id},'{((DateTime)user.joiningDate).ToString("yyyy-MM-dd HH:mm:ss")}', " +
                                        $"{userID}, '{UtilsRepository.GetUTCTime()}', {user.report_to_id}, 1); SELECT LAST_INSERT_ID(); ";
 
                     DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
@@ -790,6 +792,8 @@ namespace CMMSAPIs.Repositories.Users
                 updateQry += $"isEmployee = {request.isEmployee}, ";
             if (request.company_id > 0)
                 updateQry += $"companyId = {request.company_id}, ";
+            if (request.company_id > 0)
+                updateQry += $"designation_id = {request.designation_id}, ";
             if (request.joiningDate != null)
                 updateQry += $"joiningDate = '{((DateTime)request.joiningDate).ToString("yyyy-MM-dd HH:mm:ss")}', ";
             if (request.report_to_id > 0)

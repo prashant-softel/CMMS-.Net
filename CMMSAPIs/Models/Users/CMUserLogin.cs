@@ -69,6 +69,9 @@ namespace CMMSAPIs.Models.Users
        
         public DateTime? joiningDate { get; set; }
         public int company_id { get; set; }
+        public int designation_id { get; set; }
+        public string designation { get; set; }
+
         public string company_name { get; set; }
         public int blood_group_id { get; set; }
         public string blood_group_name { get; set; }
@@ -105,6 +108,7 @@ namespace CMMSAPIs.Models.Users
         public List<CMNotificationList> notification_list { get; set; }
         public List<CMUserResponsibilityList> user_responsibility_list { get; set; }
         public List<int> facilitiesid { get; set; }
+
     }
     public class CMUserResponsibilityList
     {
