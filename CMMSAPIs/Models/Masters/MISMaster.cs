@@ -154,6 +154,7 @@ namespace CMMSAPIs.Models.Masters
         public DateTime? createdAt { get; set; }
         public int UpdatedBy { get; set; }
         public DateTime? UpdatedAt { get; set; }
+        public int show_opening { get; set; }
     }
         public class CMWasteData
     {
