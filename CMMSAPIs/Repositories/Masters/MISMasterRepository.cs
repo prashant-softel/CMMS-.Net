@@ -509,8 +509,8 @@ namespace CMMSAPIs.Repositories.Masters
         //changes
         internal async Task<CMDefaultResponse> CreateWasteType(WasteDataType request, int userId)
         {
-            string myQuery = $"INSERT INTO mis_wastetype (facility_id,name,Type,description,status,CreatedAt,CreatedBy) VALUES " +
-            $"('{request.facility_id}','{request.name} ',{request.Type},'{request.description}',1,'{UtilsRepository.GetUTCTime()}','{userId}');" +
+            string myQuery = $"INSERT INTO mis_wastetype (facility_id,name,Type,description,status,CreatedAt,CreatedBy, show_opening) VALUES " +
+            $"('{request.facility_id}','{request.name} ',{request.Type},'{request.description}',1,'{UtilsRepository.GetUTCTime()}','{userId}', {request.show_opening});" +
             $"SELECT LAST_INSERT_ID(); ";
             DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
             int id = Convert.ToInt32(dt.Rows[0][0]);
@@ -531,7 +531,7 @@ namespace CMMSAPIs.Repositories.Masters
                 updateQry += $"description = '{request.description}', ";
             if ( request.Type !=0)
                 updateQry += $"Type = '{request.Type}', ";
-            updateQry += $"updatedAt = '{UtilsRepository.GetUTCTime()}' WHERE id = {request.id};";
+            updateQry += $"updatedAt = '{UtilsRepository.GetUTCTime()}', show_opening = {request.show_opening} WHERE id = {request.id};";
             await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
             return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "WasteType updated");
         }
@@ -937,9 +937,9 @@ namespace CMMSAPIs.Repositories.Masters
                 $" sum(creditQty) as procured_qty, sum(debitQty) as consumed_qty, mw.name as water_type" +
                 $" from waste_data" +
                 $" LEFT JOIN facilities fc ON fc.id = waste_data.facilityId" +
-                $" LEFT JOIN mis_wastetype mw on mw.id = waste_data.wasteTypeId" +
-                $" where isHazardous = {Hazardous} and waste_data.facilityId = {facility_id} and DATE_FORMAT(Date,'%Y-%m-%d') BETWEEN '{fromDate.ToString("yyyy-MM-dd")}' AND '{toDate.ToString("yyyy-MM-dd")}'" +
-                $"  group by MONTH(date) , waste_data.wasteTypeId;";
+                $" LEFT JOIN mis_wastetype mw on mw.id = waste_data.waterTypeId" +
+                $" where  DATE_FORMAT(Date,'%Y-%m-%d') BETWEEN '{fromDate.ToString("yyyy-MM-dd")}' AND '{toDate.ToString("yyyy-MM-dd")}'" +
+                $"  group by MONTH(date) , waste_data.waterTypeId;";
             List<CMWaterDataMonthWise> ListResult = await Context.GetData<CMWaterDataMonthWise>(SelectQ).ConfigureAwait(false);
 
             string water_type_master_q = " select facility_id,fc.name facility_name, mis_wastetype.name as water_type,show_opening " +
