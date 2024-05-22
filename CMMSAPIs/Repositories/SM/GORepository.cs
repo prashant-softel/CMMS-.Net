@@ -472,14 +472,9 @@ namespace CMMSAPIs.Repositories
             {
                 if (item.spare_status == (int)CMMS.SM_AssetTypes.Spare)
                 {
-                    var stmtU = $"UPDATE smgoodsorderdetails set is_splited = 0 where id = {item.podID}";
+                    var stmtU   = $"UPDATE smgoodsorderdetails set is_splited = 0 where id = {item.podID}";
                     int resultU = await Context.ExecuteNonQry<int>(stmtU).ConfigureAwait(false);
-                }
-                else
-                {
-                    var stmtU = $"UPDATE smgoodsorderdetails set received_qty = {item.ordered_qty} where id = {item.podID}";
-                    int resultU = await Context.ExecuteNonQry<int>(stmtU).ConfigureAwait(false);
-                }
+                }              
             }
 
 
