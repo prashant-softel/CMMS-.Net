@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Collections.Generic;
 
 namespace CMMSAPIs.Models.Audit
 {
@@ -16,6 +17,9 @@ namespace CMMSAPIs.Models.Audit
         public string auditor_name { get; set; }
         public string Description { get; set; }
         public DateTime Schedule_Date { get; set; }
+        public string assignedTo { get; set; }
+        public List<string> Employees { get; set; }
+        public bool is_PTW { get; set; }
     }
 
     public class CMCreateAuditPlan : CMAuditPlan
