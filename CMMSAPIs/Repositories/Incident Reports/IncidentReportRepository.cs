@@ -1,13 +1,13 @@
 using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Incident_Reports;
+using CMMSAPIs.Models.Notifications;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Utils;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using CMMSAPIs.Models.Notifications;
 using System.Data;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace CMMSAPIs.Repositories.Incident_Reports
 {
@@ -39,16 +39,16 @@ namespace CMMSAPIs.Repositories.Incident_Reports
 
             switch (m_notificationID)
             {
-                case CMMS.CMMS_Status.IR_CREATED_INITIAL:     
+                case CMMS.CMMS_Status.IR_CREATED_INITIAL:
                     retValue = "Created-waiting for approval";
                     break;
-                case CMMS.CMMS_Status.IR_UPDATED:     
+                case CMMS.CMMS_Status.IR_UPDATED:
                     retValue = "Updated";
                     break;
-                case CMMS.CMMS_Status.IR_APPROVED_INITIAL:     
+                case CMMS.CMMS_Status.IR_APPROVED_INITIAL:
                     retValue = "Approved-Waiting-2nd-Step";
                     break;
-                case CMMS.CMMS_Status.IR_REJECTED_INITIAL:     
+                case CMMS.CMMS_Status.IR_REJECTED_INITIAL:
                     retValue = "Create-Rejected";
                     break;
                 case CMMS.CMMS_Status.IR_CREATED_INVESTIGATION:
@@ -115,7 +115,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
 
         }
 
-        internal async Task<List<CMIncidentList>> GetIncidentList(int facility_id, DateTime start_date, DateTime end_date,string facilitytimeZone)
+        internal async Task<List<CMIncidentList>> GetIncidentList(int facility_id, DateTime start_date, DateTime end_date, string facilitytimeZone)
         {
             /*              
              * Fetch all the CMIncidentList model data from Incidents table and join other table to get string value for facility, user using there respctive tables
@@ -146,22 +146,22 @@ namespace CMMSAPIs.Repositories.Incident_Reports
             string selectqry = $"SELECT incident.id as id,{severityName} as severity,  incident.description as description , facilities.name as facility_name,blockName.name as block_name, assets.name as equipment_name, incident.risk_level as risk_level, CONCAT(created_by.firstName ,' ' , created_by.lastName) as reported_by_name, incident.created_at as reported_at,CONCAT(user.firstName ,' ' , user.lastName) as approved_by, incident.approved_at as approved_at, CONCAT(user1.firstName , ' ' , user1.lastName) as reported_by_name , {statusOut} as status_short , incident.location_of_incident, incident_datetime, type_of_job,title,\r\nincident.status, incident.is_why_why_required, incident.is_investigation_required FROM incidents as incident left JOIN facilities AS facilities on facilities.id = incident.facility_id LEFT JOIN facilities AS blockName on blockName.id = incident.block_id  and blockName.isBlock = 1 LEFT JOIN assets as assets on incident.equipment_id = assets.id LEFT JOIN users as user on incident.approved_by = user.id LEFT JOIN users as created_by on incident.created_by = created_by.id LEFT JOIN users as user1 on incident.verified_by = user1.id where " + filter + " order by incident.id asc";
 
             List<CMIncidentList> getIncidentList = await Context.GetData<CMIncidentList>(selectqry).ConfigureAwait(false);
-            foreach ( var getlist in getIncidentList)
+            foreach (var getlist in getIncidentList)
             {
-                if (getlist!=null && getlist.approved_at!=null)
-                getlist.approved_at= (DateTime)await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, getlist.approved_at);
-                if (getlist!=null && getlist.incident_datetime!=null)
-                    getlist.incident_datetime= (DateTime)await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)getlist.incident_datetime);
-                if (getlist!=null && getlist.reported_at!=null)
-                    getlist.reported_at= (DateTime)await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, getlist.reported_at);
+                if (getlist != null && getlist.approved_at != null)
+                    getlist.approved_at = (DateTime)await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, getlist.approved_at);
+                if (getlist != null && getlist.incident_datetime != null)
+                    getlist.incident_datetime = (DateTime)await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)getlist.incident_datetime);
+                if (getlist != null && getlist.reported_at != null)
+                    getlist.reported_at = (DateTime)await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, getlist.reported_at);
 
             }
             return getIncidentList;
         }
 
-        internal async Task<CMDefaultResponse> CreateIncidentReport(CMCreateIncidentReport request,int userId)
+        internal async Task<CMDefaultResponse> CreateIncidentReport(CMCreateIncidentReport request, int userId)
         {
-           
+
             CMDefaultResponse response = new CMDefaultResponse();
 
             //string qryIncident = "INSERT INTO incidents" +
@@ -187,14 +187,14 @@ namespace CMMSAPIs.Repositories.Incident_Reports
             DataTable dt2 = await Context.FetchData(qryIncident).ConfigureAwait(false);
             int incident_id = Convert.ToInt32(dt2.Rows[0][0]);
 
-            if(request.injured_person != null && request.injured_person.Count > 0)
+            if (request.injured_person != null && request.injured_person.Count > 0)
             {
                 try
                 {
                     string injured_Query = "INSERT INTO injured_person\r\n(\r\n incidents_id, person_id, person_type, age, sex, designation, address, name_contractor,\r\n  body_part_and_nature_of_injury, work_experience_years, plant_equipment_involved, location_of_incident\r\n)";
-                    foreach(var item in  request.injured_person)
+                    foreach (var item in request.injured_person)
                     {
-                        injured_Query = injured_Query + $" select   {incident_id}, '{ item.person_id}', { item.person_type}, { item.age}, { item.sex}, '{ item.designation}',\r\n  '{ item.address}', '{ item.name_contractor}', '{ item.body_part_and_nature_of_injury}', { item.work_experience_years},\r\n  '{ item.plant_equipment_involved}', '{ item.location_of_incident}' UNION ALL ";
+                        injured_Query = injured_Query + $" select   {incident_id}, '{item.person_id}', {item.person_type}, {item.age}, {item.sex}, '{item.designation}',\r\n  '{item.address}', '{item.name_contractor}', '{item.body_part_and_nature_of_injury}', {item.work_experience_years},\r\n  '{item.plant_equipment_involved}', '{item.location_of_incident}' UNION ALL ";
                     }
                     injured_Query = injured_Query.TrimEnd("UNION ALL ".ToCharArray());
                     var injured_Query_result = await Context.ExecuteNonQry<int>(injured_Query).ConfigureAwait(false);
@@ -210,7 +210,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
                 try
                 {
                     string why_why_IQuery = "INSERT INTO why_why_analysis (incidents_id, why, cause) ";
-                    foreach(var item in request.why_why_analysis)
+                    foreach (var item in request.why_why_analysis)
                     {
                         why_why_IQuery = why_why_IQuery + $" select {incident_id}, '{item.why}', '{item.cause}' UNION ALL ";
                     }
@@ -306,15 +306,16 @@ namespace CMMSAPIs.Repositories.Incident_Reports
 
             if (incident_id > 0)
             {
-                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INCIDENT_REPORT, incident_id, 0, 0, "Incident Report Created", CMMS.CMMS_Status.IR_CREATED_INITIAL,userId);
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INCIDENT_REPORT, incident_id, 0, 0, "Incident Report Created", CMMS.CMMS_Status.IR_CREATED_INITIAL, userId);
 
-                CMViewIncidentReport _IncidentReportDetails = await GetIncidentDetailsReport(incident_id,"");
+                CMViewIncidentReport _IncidentReportDetails = await GetIncidentDetailsReport(incident_id, "");
 
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INCIDENT_REPORT, CMMS.CMMS_Status.IR_CREATED_INITIAL, new[] { userId }, _IncidentReportDetails);
 
                 response = new CMDefaultResponse(incident_id, CMMS.RETRUNSTATUS.SUCCESS, "Created Incident Report");
             }
-            else{
+            else
+            {
 
                 response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Incident Report creation failed");
             }
@@ -346,7 +347,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
             //             $" '{request.is_person_authorized}', '{request.instructions_given}', '{request.safety_equipments}', '{request.safe_procedure_observed}', '{request.unsafe_condition_contributed}', '{request.unsafe_act_cause}', {request.incidet_type_id}, '{request.esi_applicability_remark}','{request.legal_applicability_remark}','{request.rca_required_remark}' " +
             //         ") ; SELECT LAST_INSERT_ID()";
 
-            string qryIncident = " update incidents set status='"+(int)CMMS.CMMS_Status.IR_CREATED_INVESTIGATION+"', status_updated_at='"+ UtilsRepository.GetUTCTime() + "' where id= "+request.id+"";
+            string qryIncident = " update incidents set status='" + (int)CMMS.CMMS_Status.IR_CREATED_INVESTIGATION + "', status_updated_at='" + UtilsRepository.GetUTCTime() + "' where id= " + request.id + "";
             DataTable dt2 = await Context.FetchData(qryIncident).ConfigureAwait(false);
             int incident_id = request.id;
 
@@ -463,7 +464,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
             {
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INCIDENT_REPORT, incident_id, 0, 0, "Incident Report Created", CMMS.CMMS_Status.IR_CREATED_INITIAL, userId);
 
-                CMViewIncidentReport _IncidentReportDetails = await GetIncidentDetailsReport(incident_id,"");
+                CMViewIncidentReport _IncidentReportDetails = await GetIncidentDetailsReport(incident_id, "");
 
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INCIDENT_REPORT, CMMS.CMMS_Status.IR_CREATED_INITIAL, new[] { userId }, _IncidentReportDetails);
 
@@ -477,7 +478,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
 
             return response;
         }
-        internal async Task<CMViewIncidentReport> GetIncidentDetailsReport(int id,string facilitytimeZone)
+        internal async Task<CMViewIncidentReport> GetIncidentDetailsReport(int id, string facilitytimeZone)
         {
             /*risk_type
              * Fetch all the CMViewIncidentReport model data from Incidents table
@@ -492,7 +493,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
 
             string strRiskType = "";
             string strParanthesis = "";
-            
+
             foreach (var kvp in CMMS.INCIDENT_RISK_TYPE)
             {
                 strRiskType += $"If(risk_type = '{kvp.Value}', '{kvp.Key}',";
@@ -565,22 +566,22 @@ namespace CMMSAPIs.Repositories.Incident_Reports
             foreach (var list in _IncidentReportList)
             {
 
-                if(list.action_taken_datetime!=null && list!=null)
+                if (list.action_taken_datetime != null && list != null)
 
-                list.action_taken_datetime= await _utilsRepo.ConvertToUTCDTC(facilitytimeZone,list.action_taken_datetime);
+                    list.action_taken_datetime = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.action_taken_datetime);
 
                 if (list.approved_at != null && list != null)
 
-                    list.approved_at= await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.approved_at);
+                    list.approved_at = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.approved_at);
 
                 if (list.incident_datetime != null && list != null)
-                    list.incident_datetime= await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.incident_datetime);
+                    list.incident_datetime = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.incident_datetime);
 
                 if (list.reporting_datetime != null && list != null)
 
                     list.reporting_datetime = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.reporting_datetime);
 
-               
+
             }
             return _IncidentReportList[0];
         }
@@ -651,11 +652,11 @@ namespace CMMSAPIs.Repositories.Incident_Reports
             //                      $" set facility_id = { request.facility_id }, block_id={request.block_id}, equipment_id={ request.equipment_id }, risk_level= {request.risk_level}, incident_datetime='{request.incident_datetime }',victim_id={request.victim_id},action_taken_by= {request.action_taken_by},action_taken_datetime = '{ request.action_taken_datetime }', inverstigated_by= {request.inverstigated_by}, verified_by={request.verified_by}, risk_type={request.risk_type},esi_applicability={request.esi_applicability},legal_applicability={request.legal_applicability},rca_required={request.rca_required},damaged_cost={request.damaged_cost},generation_loss={request.generation_loss},job_id= {request.job_id},title='{request.job_id}',description='{request.description}',is_insurance_applicable={request.is_insurance_applicable},insurance='{request.insurance_id}',insurance_status={request.insurance_status},insurance_remark= '{request.insurance_remark}',updated_by={userId},update_at= '{UtilsRepository.GetUTCTime()}'" +
             //                    $" where id =   { request.id}";
 
-           int updateId= await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+            int updateId = await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
             int incident_id = request.id;
             StringBuilder injured_Query = new StringBuilder();
             string fetch = $"select id as injured_item_id from injured_person where incidents_id={incident_id} ;";
-            List<CMInjuredperson> injuredid = await Context.GetData<CMInjuredperson>(fetch).ConfigureAwait(false);
+            List<CMInjured_person> injuredid = await Context.GetData<CMInjured_person>(fetch).ConfigureAwait(false);
 
             if (request.injured_person != null && request.injured_person.Count > 0)
             {
@@ -669,7 +670,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
                         {
                             if (item.injured_item_id == items.injured_item_id)
                             {
-                              
+
                                 injured_Query.Append("UPDATE injured_person SET ");
                                 injured_Query.Append("incidents_id = '" + incident_id + "', ");
                                 injured_Query.Append("person_id = '" + item.person_id + "', ");
@@ -742,16 +743,16 @@ namespace CMMSAPIs.Repositories.Incident_Reports
             {
                 try
                 {
-                    
+
 
                     foreach (var item in request.root_cause)
                     {
                         StringBuilder root_UQuery = new StringBuilder();
                         root_UQuery.Append("UPDATE root_cause ");
-                        root_UQuery.Append("SET cause = '"+item.cause+"' ");
+                        root_UQuery.Append("SET cause = '" + item.cause + "' ");
                         root_UQuery.Append("WHERE id = " + item.root_item_id);
                         var root_Query_result = await Context.ExecuteNonQry<int>(root_UQuery.ToString()).ConfigureAwait(false);
-                    }                    
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -763,12 +764,12 @@ namespace CMMSAPIs.Repositories.Incident_Reports
             {
                 try
                 {
-                
+
                     foreach (var item in request.immediate_correction)
                     {
                         StringBuilder immediate_UQuery = new StringBuilder();
                         immediate_UQuery.Append("UPDATE immediate_correction ");
-                        immediate_UQuery.Append("SET details = '"+item.details+"' ");
+                        immediate_UQuery.Append("SET details = '" + item.details + "' ");
                         immediate_UQuery.Append("WHERE id = " + item.ic_item_id);
                         var immediate_Query_result = await Context.ExecuteNonQry<int>(immediate_UQuery.ToString()).ConfigureAwait(false);
                     }
@@ -789,10 +790,10 @@ namespace CMMSAPIs.Repositories.Incident_Reports
                     {
                         StringBuilder proposedActionPlanUQuery = new StringBuilder();
                         proposedActionPlanUQuery.Append("UPDATE proposed_action_plan ");
-                        proposedActionPlanUQuery.Append("SET actions_as_per_plan = '"+item.actions_as_per_plan+"', ");
-                        proposedActionPlanUQuery.Append("responsibility = '"+item.responsibility+"', ");
-                        proposedActionPlanUQuery.Append("target_date = '"+item.target_date.Value.ToString("yyyy-MM-dd HH:mm:ss")+"', ");
-                        proposedActionPlanUQuery.Append("remarks = '"+item.remarks+"', ");
+                        proposedActionPlanUQuery.Append("SET actions_as_per_plan = '" + item.actions_as_per_plan + "', ");
+                        proposedActionPlanUQuery.Append("responsibility = '" + item.responsibility + "', ");
+                        proposedActionPlanUQuery.Append("target_date = '" + item.target_date.Value.ToString("yyyy-MM-dd HH:mm:ss") + "', ");
+                        proposedActionPlanUQuery.Append("remarks = '" + item.remarks + "', ");
                         proposedActionPlanUQuery.Append("hse_remark = '" + item.hse_remark + "', ");
                         proposedActionPlanUQuery.Append("id_Status = " + item.id_Status + " ");
                         proposedActionPlanUQuery.Append("WHERE id = " + item.proposed_item_id);
@@ -809,7 +810,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
             {
                 try
                 {
-                 
+
                     foreach (var item in request.investigation_team)
                     {
                         StringBuilder investigation_UQuery = new StringBuilder();
@@ -829,13 +830,13 @@ namespace CMMSAPIs.Repositories.Incident_Reports
                     return response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Incident Report update failed");
                 }
             }
-      
+
             if (updateId > 0)
             {
 
-                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INCIDENT_REPORT, request.id, 0, 0, "Incident Report Updated", CMMS.CMMS_Status.IR_UPDATED,userId);
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INCIDENT_REPORT, request.id, 0, 0, "Incident Report Updated", CMMS.CMMS_Status.IR_UPDATED, userId);
 
-                CMViewIncidentReport _IncidentReportDetails = await GetIncidentDetailsReport(request.id,"");
+                CMViewIncidentReport _IncidentReportDetails = await GetIncidentDetailsReport(request.id, "");
 
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INCIDENT_REPORT, CMMS.CMMS_Status.IR_UPDATED, new[] { userId }, _IncidentReportDetails);
 
@@ -845,7 +846,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
             else
             {
 
-                 response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.FAILURE, " Incident Report Update Failed");
+                response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.FAILURE, " Incident Report Update Failed");
             }
 
             return response;
@@ -862,7 +863,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
             CMDefaultResponse response = new CMDefaultResponse();
 
             string approveQuery = $"Update incidents set status = {(int)CMMS.CMMS_Status.IR_APPROVED_INITIAL},status_updated_at='{UtilsRepository.GetUTCTime()}',is_approved = 1,approved_by={userId},approved_at= '{UtilsRepository.GetUTCTime()}',approved_remarks='{request.comment}',is_why_why_required={request.is_why_why_required},is_investigation_required={request.is_investigation_required}  where id = " + request.id;
-            int approve_id= await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
+            int approve_id = await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
 
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
 
@@ -870,15 +871,15 @@ namespace CMMSAPIs.Repositories.Incident_Reports
             {
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INCIDENT_REPORT, request.id, 0, 0, request.comment, CMMS.CMMS_Status.IR_APPROVED_INITIAL, userId);
 
-               CMViewIncidentReport _IncidentReportDetails = await GetIncidentDetailsReport(request.id,"");
+                CMViewIncidentReport _IncidentReportDetails = await GetIncidentDetailsReport(request.id, "");
 
-                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INCIDENT_REPORT, CMMS.CMMS_Status.IR_APPROVED_INITIAL,new[] { userId }, _IncidentReportDetails);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INCIDENT_REPORT, CMMS.CMMS_Status.IR_APPROVED_INITIAL, new[] { userId }, _IncidentReportDetails);
 
                 response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, " Incident Report Approved");
             }
             else
             {
-                 response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.FAILURE, " Incident Report approval failed");
+                response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.FAILURE, " Incident Report approval failed");
             }
             return response;
         }
@@ -913,15 +914,15 @@ namespace CMMSAPIs.Repositories.Incident_Reports
             return response;
         }
 
-        internal async Task<CMDefaultResponse> RejectIncidentReport(CMApproveIncident request,int userId)
+        internal async Task<CMDefaultResponse> RejectIncidentReport(CMApproveIncident request, int userId)
         {
             /*
              * Update the Incidents and also update the history table
              * check create function for history update
              * Your code goes here
             */
-            string approveQuery = $"Update incidents set status = {(int)CMMS.CMMS_Status.IR_REJECTED_INITIAL}, status_updated_at = '{UtilsRepository.GetUTCTime()}',is_approved = 2,approved_by={userId},approved_at= '{UtilsRepository.GetUTCTime()}',  reject_reccomendations = '{request.comment}'  where id = { request.id}";
-            int reject_id= await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
+            string approveQuery = $"Update incidents set status = {(int)CMMS.CMMS_Status.IR_REJECTED_INITIAL}, status_updated_at = '{UtilsRepository.GetUTCTime()}',is_approved = 2,approved_by={userId},approved_at= '{UtilsRepository.GetUTCTime()}',  reject_reccomendations = '{request.comment}'  where id = {request.id}";
+            int reject_id = await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
 
             CMDefaultResponse response = new CMDefaultResponse();
 
@@ -929,7 +930,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
             {
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INCIDENT_REPORT, request.id, 0, 0, "Incident Report Rejected", CMMS.CMMS_Status.IR_REJECTED_INITIAL, userId);
 
-                CMViewIncidentReport _IncidentReportDetails = await GetIncidentDetailsReport(request.id,"");
+                CMViewIncidentReport _IncidentReportDetails = await GetIncidentDetailsReport(request.id, "");
 
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INCIDENT_REPORT, CMMS.CMMS_Status.IR_REJECTED_INITIAL, new[] { userId }, _IncidentReportDetails);
 
@@ -959,9 +960,9 @@ namespace CMMSAPIs.Repositories.Incident_Reports
 
             if (approve_id > 0)
             {
-                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INCIDENT_REPORT, request.id, 0, 0, request.comment, CMMS.CMMS_Status.IR_APPROVED_INVESTIGATION,userId);
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INCIDENT_REPORT, request.id, 0, 0, request.comment, CMMS.CMMS_Status.IR_APPROVED_INVESTIGATION, userId);
 
-                CMViewIncidentReport _IncidentReportDetails = await GetIncidentDetailsReport(request.id,"");
+                CMViewIncidentReport _IncidentReportDetails = await GetIncidentDetailsReport(request.id, "");
 
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INCIDENT_REPORT, CMMS.CMMS_Status.IR_APPROVED_INVESTIGATION, new[] { userId }, _IncidentReportDetails);
 
@@ -990,7 +991,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
             {
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INCIDENT_REPORT, request.id, 0, 0, request.comment, CMMS.CMMS_Status.IR_REJECTED_INVESTIGATION, userId);
 
-                CMViewIncidentReport _IncidentReportDetails = await GetIncidentDetailsReport(request.id,"");
+                CMViewIncidentReport _IncidentReportDetails = await GetIncidentDetailsReport(request.id, "");
 
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INCIDENT_REPORT, CMMS.CMMS_Status.IR_REJECTED_INVESTIGATION, new[] { userId }, _IncidentReportDetails);
 
@@ -1020,7 +1021,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
             {
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INCIDENT_REPORT, request.id, 0, 0, request.comment, CMMS.CMMS_Status.IR_Cancel, userId);
 
-                CMViewIncidentReport _IncidentReportDetails = await GetIncidentDetailsReport(request.id,"");
+                CMViewIncidentReport _IncidentReportDetails = await GetIncidentDetailsReport(request.id, "");
 
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INCIDENT_REPORT, CMMS.CMMS_Status.IR_Cancel, new[] { userId }, _IncidentReportDetails);
 
@@ -1075,7 +1076,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
             List<CMInvestigation_team> result = await Context.GetData<CMInvestigation_team>(selectqry).ConfigureAwait(false);
             return result;
         }
-        internal async Task<CMDefaultResponse>CloseIR(CMApproveIncident request, int userId)
+        internal async Task<CMDefaultResponse> CloseIR(CMApproveIncident request, int userId)
         {
 
             string approveQuery = $"Update incidents set status = {(int)CMMS.CMMS_Status.IR_Close}, status_updated_at = '{UtilsRepository.GetUTCTime()}', close_remarks = '{request.comment}'  where id = {request.id}";
@@ -1087,7 +1088,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
             {
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INCIDENT_REPORT, request.id, 0, 0, request.comment, CMMS.CMMS_Status.IR_Close, userId);
 
-                CMViewIncidentReport _IncidentReportDetails = await GetIncidentDetailsReport(request.id,"");
+                CMViewIncidentReport _IncidentReportDetails = await GetIncidentDetailsReport(request.id, "");
 
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INCIDENT_REPORT, CMMS.CMMS_Status.IR_Close, new[] { userId }, _IncidentReportDetails);
 

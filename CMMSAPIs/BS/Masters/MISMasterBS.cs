@@ -1,12 +1,11 @@
 using CMMSAPIs.Helper;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using CMMSAPIs.Repositories.Masters;
 using CMMSAPIs.Models.Masters;
 using CMMSAPIs.Models.Utils;
+using CMMSAPIs.Repositories.Masters;
 using Microsoft.AspNetCore.Hosting;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace CMMSAPIs.BS.MISMasters
 {
@@ -47,7 +46,7 @@ namespace CMMSAPIs.BS.MISMasters
         Task<CMDefaultResponse> UpdateBodyParts(BODYPARTS request, int UserId);
         Task<CMDefaultResponse> DeleteBodyParts(int id, int UserId);
         Task<List<Responsibility>> GetResponsibilityList();
-        Task<Responsibility> GetResponsibilityID(int id,string facilitytime);
+        Task<Responsibility> GetResponsibilityID(int id, string facilitytime);
         Task<CMDefaultResponse> CreateResponsibility(Responsibility request, int UserId);
         Task<CMDefaultResponse> UpdateResponsibility(Responsibility request, int UserId);
         Task<CMDefaultResponse> DeleteResponsibility(int id);
@@ -72,7 +71,7 @@ namespace CMMSAPIs.BS.MISMasters
         Task<List<WaterDataType>> GetWaterType();
         Task<CMDefaultResponse> CreateWaterType(WaterDataType request, int userId);
         Task<CMDefaultResponse> UpdateWaterType(WaterDataType request, int userId);
-       
+
         Task<CMDefaultResponse> DeleteWaterType(int Id, int userID);
         Task<List<WaterDataType>> GetWaterTypebyId(int id);
 
@@ -82,13 +81,14 @@ namespace CMMSAPIs.BS.MISMasters
         Task<CMDefaultResponse> CreateWasteType(WasteDataType request, int userId);
         Task<CMDefaultResponse> UpdateWasteType(WasteDataType request, int userId);
         Task<CMDefaultResponse> DeleteWasteType(int Id, int userID);
-        
 
-         Task<List<WaterDataResult>> GetWaterDataListMonthWise(DateTime fromDate, DateTime toDate, int facility_id);
-         Task<List<CMWasteDataResult>> GetWasteDataListMonthWise(DateTime fromDate, DateTime toDate, int Hazardous, int facility_id);
+
+        Task<List<WaterDataResult>> GetWaterDataListMonthWise(DateTime fromDate, DateTime toDate, int facility_id);
+        Task<List<CMWasteDataResult>> GetWasteDataListMonthWise(DateTime fromDate, DateTime toDate, int Hazardous, int facility_id);
         Task<List<WaterDataResult_Month>> GetWaterDataMonthDetail(int Month, int Year, int facility_id);
         Task<List<CMWaterDataMonthDetail>> GetWasteDataMonthDetail(int Month, int Year, int Hazardous, int facility_id);
-       
+
+
     }
     public class MISMasterBS : IMISMasterBS
     {
@@ -619,7 +619,7 @@ namespace CMMSAPIs.BS.MISMasters
         public async Task<CMDefaultResponse> CreateBodyParts(BODYPARTS requset, int UserId)
         {
             try
-            { 
+            {
                 using (var repos = new MISMasterRepository(getDB))
                     return await repos.CreateBodyParts(requset, UserId);
             }
@@ -1103,8 +1103,8 @@ namespace CMMSAPIs.BS.MISMasters
                 throw;
             }
         }
-  
-             public async Task<List<WaterDataResult>> GetWaterDataListMonthWise(DateTime fromDate, DateTime toDate, int facility_id)
+
+        public async Task<List<WaterDataResult>> GetWaterDataListMonthWise(DateTime fromDate, DateTime toDate, int facility_id)
 
         {
             try
@@ -1152,13 +1152,13 @@ namespace CMMSAPIs.BS.MISMasters
                 throw;
             }
         }
-        public async Task<List<CMWaterDataMonthDetail>> GetWasteDataMonthDetail(int Month, int Year, int Hazardous,int facility_id)
+        public async Task<List<CMWaterDataMonthDetail>> GetWasteDataMonthDetail(int Month, int Year, int Hazardous, int facility_id)
         {
             try
             {
                 using (var repos = new MISMasterRepository(getDB))
                 {
-                    return await repos.GetWasteDataMonthDetail(Month, Year, Hazardous,  facility_id);
+                    return await repos.GetWasteDataMonthDetail(Month, Year, Hazardous, facility_id);
 
                 }
             }
@@ -1183,5 +1183,6 @@ namespace CMMSAPIs.BS.MISMasters
                 throw;
             }
         }
+
     }
 }

@@ -1,21 +1,16 @@
 using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Masters;
 using CMMSAPIs.Models.PM;
-using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Models.Users;
+using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Utils;
+using Microsoft.AspNetCore.Hosting;
+using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Threading.Tasks;
-using CMMSAPIs.Models.Notifications;
-using System.Numerics;
-using CMMSAPIs.Models.WC;
-using OfficeOpenXml.VBA;
 using System.IO;
-using OfficeOpenXml;
-using MySqlX.XDevAPI.Relational;
-using Microsoft.AspNetCore.Hosting;
+using System.Threading.Tasks;
 
 namespace CMMSAPIs.Repositories.PM
 {
@@ -81,7 +76,7 @@ namespace CMMSAPIs.Repositories.PM
                     //retValue = String.Format("Warranty Claim Dispachted by {0} at {1}", WCObj.dispatched_by, WCObj.dispatched_at);
                     retValue = String.Format("PM Plan Deleted by {0} ", PlanObj.created_by_name);
                     break;
-               
+
                 default:
                     break;
             }
@@ -104,9 +99,9 @@ namespace CMMSAPIs.Repositories.PM
             List<int> invalidAssets = new List<int>();
             foreach (var map in pm_plan.mapAssetChecklist)
             {
-                if(!checklistIDs.Contains(map.checklist_id))
+                if (!checklistIDs.Contains(map.checklist_id))
                     invalidChecklists.Add(map.checklist_id);
-                if(!assetIDs.Contains(map.asset_id))
+                if (!assetIDs.Contains(map.asset_id))
                     invalidAssets.Add(map.asset_id);
             }
             if (invalidChecklists.Count > 0 || invalidAssets.Count > 0)
@@ -124,7 +119,7 @@ namespace CMMSAPIs.Repositories.PM
             int id = Convert.ToInt32(dt3.Rows[0][0]);
 
             string mapChecklistQry = "INSERT INTO pmplanassetchecklist(planId, assetId, checklistId) VALUES ";
-            foreach(var map in pm_plan.mapAssetChecklist)
+            foreach (var map in pm_plan.mapAssetChecklist)
             {
                 mapChecklistQry += $"({id}, {map.asset_id}, {map.checklist_id}), ";
             }
@@ -149,13 +144,13 @@ namespace CMMSAPIs.Repositories.PM
                 myQuery += $"facility_id = {request.facility_id}, ";
             if (request.category_id > 0)
                 myQuery += $"category_id = {request.category_id}, ";
-            
-                myQuery += $"status_id=1 ,";
+
+            myQuery += $"status_id=1 ,";
             if (request.assigned_to_id > 0)
                 myQuery += $"assigned_to = {request.assigned_to_id}, ";
 
             myQuery += $"updated_at = '{UtilsRepository.GetUTCTime()}', updated_by = {userID} WHERE id = {request.plan_id} and facility_id = {request.facility_id};";
-         
+
             string myQuery2 = $"Delete from pmplanassetchecklist where planId = {request.plan_id};";
             await Context.ExecuteNonQry<int>(myQuery2).ConfigureAwait(false);
             if (request.mapAssetChecklist != null)
@@ -177,7 +172,7 @@ namespace CMMSAPIs.Repositories.PM
             return response;
         }
 
-        internal async Task<List<CMPMPlanList>> GetPMPlanList(int facility_id, string category_id, string frequency_id, DateTime? start_date, DateTime? end_date,string facilitytimeZone)
+        internal async Task<List<CMPMPlanList>> GetPMPlanList(int facility_id, string category_id, string frequency_id, DateTime? start_date, DateTime? end_date, string facilitytimeZone)
         {
             if (facility_id <= 0)
                 throw new ArgumentException("Invalid Facility ID");
@@ -209,7 +204,7 @@ namespace CMMSAPIs.Repositories.PM
             planListQry += $";";
 
             List<CMPMPlanList> plan_list = await Context.GetData<CMPMPlanList>(planListQry).ConfigureAwait(false);
-            
+
 
             foreach (var plan in plan_list)
             {
@@ -229,10 +224,10 @@ namespace CMMSAPIs.Repositories.PM
             return plan_list;
         }
 
-            internal async Task<CMPMPlanDetail> GetPMPlanDetail(int id, string facilitytimeZone)
+        internal async Task<CMPMPlanDetail> GetPMPlanDetail(int id, string facilitytimeZone)
         {
-     
-            
+
+
             if (id <= 0)
                 throw new ArgumentException("Invalid Plan ID");
             string planListQry = $"SELECT plan.id as plan_id, plan.plan_name, plan.status as status_id, statuses.statusName as status_short, plan.plan_date, " +
@@ -251,9 +246,9 @@ namespace CMMSAPIs.Repositories.PM
                                     $"LEFT JOIN users as rejectedBy ON rejectedBy.id = plan.rejected_by " +
                                     $"LEFT JOIN users as assignedTo ON assignedTo.id = plan.assigned_to " +
                                     $"WHERE plan.id = {id} ";
-           
-            List <CMPMPlanDetail>  planDetails = await Context.GetData<CMPMPlanDetail>(planListQry).ConfigureAwait(false);
-           
+
+            List<CMPMPlanDetail> planDetails = await Context.GetData<CMPMPlanDetail>(planListQry).ConfigureAwait(false);
+
             if (planDetails.Count == 0)
                 return null;
             string assetChecklistsQry = $"SELECT distinct assets.id as asset_id, assets.name as asset_name, parent.id as parent_id, parent.name as parent_name, assets.moduleQuantity as module_qty, checklist.id as checklist_id, checklist.checklist_number as checklist_name " +
@@ -281,7 +276,7 @@ namespace CMMSAPIs.Repositories.PM
 
             return planDetails[0];
         }
-        internal async Task<List<CMScheduleData>> GetScheduleData(int facility_id, int category_id,string facilitytimeZone)
+        internal async Task<List<CMScheduleData>> GetScheduleData(int facility_id, int category_id, string facilitytimeZone)
         {
             /*
              * Primary Table - PMSchedule
@@ -311,7 +306,7 @@ namespace CMMSAPIs.Repositories.PM
             }
             myQuery += " ORDER BY assets.id ASC;";
             List<CMScheduleData> _scheduleList = await Context.GetData<CMScheduleData>(myQuery).ConfigureAwait(false);
-            foreach(CMScheduleData schedule in _scheduleList)
+            foreach (CMScheduleData schedule in _scheduleList)
             {
                 string query2 = "SELECT a.id as schedule_id, frequency.id as frequency_id, frequency.name as frequency_name, " +
                                     "a.PM_Schedule_date as schedule_date FROM pm_schedule as a " +
@@ -324,13 +319,13 @@ namespace CMMSAPIs.Repositories.PM
                 schedule.frequency_dates = _freqData;
                 foreach (var detail in _freqData)
                 {
-                    detail.schedule_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime) detail.schedule_date);
-                   
+                    detail.schedule_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)detail.schedule_date);
+
                 }
 
 
             }
-            
+
 
             return _scheduleList;
         }
@@ -348,7 +343,7 @@ namespace CMMSAPIs.Repositories.PM
             List<CMUser> user = await Context.GetData<CMUser>(myQuery1).ConfigureAwait(false);
             string myQuery2 = $"SELECT id, name, address, city, state, country, zipcode as pin FROM facilities WHERE id = {request.facility_id};";
             List<CMFacility> facility = await Context.GetData<CMFacility>(myQuery2).ConfigureAwait(false);
-            foreach(var asset_schedule in request.asset_schedules)
+            foreach (var asset_schedule in request.asset_schedules)
             {
                 CMDefaultResponse response = null;
                 string myQuery3 = $"SELECT id, facilityId, categoryId, name FROM assets WHERE id = {asset_schedule.asset_id};";
@@ -373,7 +368,7 @@ namespace CMMSAPIs.Repositories.PM
                     cat.description = "Others";
                     category.Add(cat);
                 }
-                foreach(var frequency_schedule in asset_schedule.frequency_dates)
+                foreach (var frequency_schedule in asset_schedule.frequency_dates)
                 {
                     string myQuery6 = $"SELECT * FROM frequency WHERE id = {frequency_schedule.frequency_id};";
                     List<CMFrequency> frequency = await Context.GetData<CMFrequency>(myQuery6).ConfigureAwait(false);
@@ -381,12 +376,12 @@ namespace CMMSAPIs.Repositories.PM
                                         $"FROM pm_schedule WHERE Asset_id = {asset_schedule.asset_id} AND PM_Frequecy_id = {frequency_schedule.frequency_id} " +
                                         $"AND status NOT IN ({(int)CMMS.CMMS_Status.PM_CANCELLED}) AND PM_Rescheduled = 0;";
                     List<ScheduleIDData> scheduleData = await Context.GetData<ScheduleIDData>(myQuery7).ConfigureAwait(false);
-                    if(scheduleData.Count > 0)
+                    if (scheduleData.Count > 0)
                     {
-                        if(frequency_schedule.schedule_date != null)
+                        if (frequency_schedule.schedule_date != null)
                         {
                             string updateQry = $"UPDATE pm_schedule SET PM_Schedule_date = '{((DateTime)frequency_schedule.schedule_date).ToString("yyyy'-'MM'-'dd")}', " +
-                                                $"PM_Schedule_updated_by = {userID}, PM_Schedule_updated_date = '{UtilsRepository.GetUTCTime()}' " + 
+                                                $"PM_Schedule_updated_by = {userID}, PM_Schedule_updated_date = '{UtilsRepository.GetUTCTime()}' " +
                                                 $"WHERE id = {scheduleData[0].schedule_id};";
                             await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
                             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, scheduleData[0].schedule_id, 0, 0, "PM Schedule Details Updated", CMMS.CMMS_Status.PM_UPDATED, userID);
@@ -404,7 +399,7 @@ namespace CMMSAPIs.Repositories.PM
                     }
                     else
                     {
-                        if(frequency_schedule.schedule_date != null)
+                        if (frequency_schedule.schedule_date != null)
                         {
                             string mainQuery = $"INSERT INTO pm_schedule(PM_Schedule_Date, PM_Frequecy_Name, PM_Frequecy_id, PM_Frequecy_Code, " +
                                $"Facility_id, Facility_Name, Facility_Code, Block_Id, Block_Code, Asset_Category_id, Asset_Category_Code, Asset_Category_name, " +
@@ -440,7 +435,7 @@ namespace CMMSAPIs.Repositories.PM
 
         internal async Task<CMDefaultResponse> ApprovePMPlan(CMApproval request, int userId)
         {
-          
+
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
 
             if (request.id <= 0)
@@ -466,7 +461,7 @@ namespace CMMSAPIs.Repositories.PM
             string scheduleQry = $"INSERT INTO pm_schedule(task_id,plan_id,Asset_id,checklist_id,PM_Schedule_date,status) " +
                                 $"select {id} as task_id,planId as plan_id, assetId as Asset_id, checklistId as checklist_id,PP.plan_date  as PM_Schedule_date,{(int)CMMS.CMMS_Status.PM_SCHEDULED} as status from pmplanassetchecklist  P inner join pm_plan PP on PP.Id = P.planId where planId = {request.id}";
             await Context.ExecuteNonQry<int>(scheduleQry);
-            
+
             string setCodeNameQuery = "UPDATE pm_schedule " +
                                         "SET PM_Schedule_Code = CONCAT(id,Facility_Code,Asset_Category_Code,Asset_Code,PM_Frequecy_Code), " +
                                         "PM_Schedule_Name = CONCAT(id,' ',Facility_Name,' ',Asset_Category_name,' ',Asset_Name), " +
@@ -486,7 +481,7 @@ namespace CMMSAPIs.Repositories.PM
 
         internal async Task<CMDefaultResponse> RejectPMPlan(CMApproval request, int userId)
         {
-           
+
             if (request.id <= 0)
             {
                 throw new ArgumentException("Invalid argument id<" + request.id + ">");
@@ -505,7 +500,7 @@ namespace CMMSAPIs.Repositories.PM
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
             }
 
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_PLAN, request.id, 0, 0, string.IsNullOrEmpty(request.comment) ? "PM Plan Rejected ": request.comment, CMMS.CMMS_Status.PM_PLAN_REJECTED);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_PLAN, request.id, 0, 0, string.IsNullOrEmpty(request.comment) ? "PM Plan Rejected " : request.comment, CMMS.CMMS_Status.PM_PLAN_REJECTED);
 
             //await CMMSNotification.sendNotification(CMMS.CMMS_Modules.WARRANTY_CLAIM, CMMS.CMMS_Status.REJECTED, new[] { _WCList[0].created_by }, _WCList[0]);
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "PM Plan Rejected Successfully");
@@ -523,17 +518,17 @@ namespace CMMSAPIs.Repositories.PM
             return response;
         }
 
-     internal async Task<CMImportFileResponse> ImportPMPlanFile(int file_id,int Facility, int userID)
+        internal async Task<CMImportFileResponse> ImportPMPlanFile(int file_id, int Facility, int userID)
         {
             int no = Facility;
-            int facilityid=0;
+            int facilityid = 0;
             string queryplan;
             CMImportFileResponse response = new CMImportFileResponse();
             DataTable dt2 = new DataTable();
             DataTable dtplan = new DataTable();
             DataTable dt3 = new DataTable();
-            Dictionary<string, int> plan= new Dictionary<string, int>();
-            
+            Dictionary<string, int> plan = new Dictionary<string, int>();
+
 
 
             string queryfacilities = "SELECT id, UPPER(name) as name FROM facilities GROUP BY name ORDER BY id ASC;";
@@ -564,7 +559,7 @@ namespace CMMSAPIs.Repositories.PM
             Dictionary<string, int> users = new Dictionary<string, int>();
             users.Merge(users_Names, users_IDs);
 
-           
+
 
             string queryasset = "SELECT id, UPPER(name) as name FROM assets GROUP BY name ORDER BY id ASC;";
             DataTable dtasset = await Context.FetchData(queryasset).ConfigureAwait(false);
@@ -572,8 +567,8 @@ namespace CMMSAPIs.Repositories.PM
             List<int> asset_id = dtasset.GetColumn<int>("id");
             Dictionary<string, int> asset = new Dictionary<string, int>();
             asset.Merge(asset_name, asset_id);
-             
-           
+
+
 
             List<int> idList = new List<int>();
             List<int> updatedIdList = new List<int>();
@@ -601,7 +596,7 @@ namespace CMMSAPIs.Repositories.PM
             string dir = Path.GetDirectoryName(path);
             string filename = Path.GetFileName(path);
 
-            
+
 
             if (!Directory.Exists(dir))
                 return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"Directory '{dir}' cannot be found");
@@ -681,7 +676,7 @@ namespace CMMSAPIs.Repositories.PM
                             }
                             if (newR.IsEmpty())
                             {
-                   
+
                                 continue;
                             }
                             newR["PlantName"] = newR[0];
@@ -701,13 +696,13 @@ namespace CMMSAPIs.Repositories.PM
                                 //  Plan named  Power Transformer Halfyearly Check does not exist. Row not Inserted.
                                 if (facilityid == 0 && newR["plantID"].ToInt() > 0)
                                 {
-                                     
+
                                     facilityid = Convert.ToInt32(newR["plantID"]);
                                     queryplan = $"SELECT id, UPPER(plan_name) as name FROM pm_plan WHERE facility_id = {facilityid} GROUP BY name ORDER BY id ASC;";
                                     dtplan = await Context.FetchData(queryplan).ConfigureAwait(false);
                                     List<string> plan_name = dtplan.GetColumn<string>("name");
                                     List<int> plan_id = dtplan.GetColumn<int>("id");
-                                     plan = new Dictionary<string, int>();
+                                    plan = new Dictionary<string, int>();
                                     plan.Merge(plan_name, plan_id);
                                 }
                             }
@@ -718,7 +713,7 @@ namespace CMMSAPIs.Repositories.PM
                                 continue;
                                 // return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] Plant named '{newR[0]}' does not exist.");
                             }
-                            
+
                             if (Convert.ToString(newR["PlanName"]) == null || Convert.ToString(newR["PlanName"]) == "")
                             {
                                 m_errorLog.SetError($"[Row: {rN}] Plan Name cannot be null. Row not Inserted");
@@ -741,7 +736,7 @@ namespace CMMSAPIs.Repositories.PM
                                 //return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] Invalid Start date {newR["StartDate"]}.");
 
                             }
-                           
+
                             try
                             {
                                 newR["categoryID"] = assetcategories[Convert.ToString(newR["EquipmentCategory"]).ToUpper()];
@@ -776,7 +771,7 @@ namespace CMMSAPIs.Repositories.PM
                                 //return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] assigned to named '{newR[7]}' does not exist.");
                             }
 
-                            
+
                             try
                             {
 
@@ -814,11 +809,11 @@ namespace CMMSAPIs.Repositories.PM
                             }
                             catch (KeyNotFoundException)
                             {
-                                
+
                                 //return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] Equipment named '{newR["EquipmentName"]}' does not exist.");
                             }
-                            
-                            
+
+
                             //try
                             //{
                             //    newR["checklistID"] = checklist[Convert.ToString(newR[8]).ToUpper()];
@@ -837,7 +832,7 @@ namespace CMMSAPIs.Repositories.PM
                             //    return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] Equipment named '{newR[4]}' does not exist.");
                             //}
 
-                            
+
 
                             newR["row_no"] = rN;
 
@@ -865,7 +860,7 @@ namespace CMMSAPIs.Repositories.PM
 
                             dt2.Rows.Add(newR);
                         }
-                        if (dt2.Rows.Count == 0  && updateCount ==0)
+                        if (dt2.Rows.Count == 0 && updateCount == 0)
                         {
                             string logPath1 = m_errorLog.SaveAsText($"ImportLog\\ImportPMPlan_File{file_id}_{DateTime.UtcNow.ToString("yyyyMMdd_HHmmss")}");
                             string logQry1 = $"UPDATE uploadedfiles SET logfile = '{logPath1}' WHERE id = {file_id}";
@@ -873,8 +868,8 @@ namespace CMMSAPIs.Repositories.PM
                             logPath1 = logPath1.Replace("\\\\", "\\");
 
                             m_errorLog.SetImportInformation("File has invalid rows.");
-                           // response.error_log_file_path = logPath1;
-                           // response.import_log = m_errorLog.errorLog();
+                            // response.error_log_file_path = logPath1;
+                            // response.import_log = m_errorLog.errorLog();
                             return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, logPath1, m_errorLog.errorLog(), "Import failed, file has empty rows.");
                         }
                         string insertQuery = "INSERT INTO pm_plan " +
@@ -889,7 +884,7 @@ namespace CMMSAPIs.Repositories.PM
                         //        $" {userID},'{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}', 'Approved', 1 UNION ALL ";
                         //}
 
-                       
+
                         foreach (DataRow row in dt2.Rows)
                         {
                             string plan_name1 = Convert.ToString(row["PlanName"]);
@@ -919,7 +914,7 @@ namespace CMMSAPIs.Repositories.PM
                                     comment = "Approved"
                                 };
 
-                                approval.Add(planApproval); 
+                                approval.Add(planApproval);
                             }
 
                             //string mapChecklistQry = "INSERT INTO pmplanassetchecklist(planId, assetId, checklistId) VALUES ";
@@ -1013,7 +1008,7 @@ namespace CMMSAPIs.Repositories.PM
                             newR["EquipmentName"] = newR[1];
                             newR["CheckList"] = newR[2];
 
-                            
+
                             try
                             {
                                 newR["planID"] = plan[Convert.ToString(newR["PlanName"]).ToUpper()];
@@ -1072,23 +1067,24 @@ namespace CMMSAPIs.Repositories.PM
                             int equipmentID = Convert.ToInt32(row["equipmentID"]);
                             int checklistID = Convert.ToInt32(row["checklistID"]);
 
-                            
+
                             mapChecklistQry += $"({planID}, {equipmentID}, {checklistID}), ";
-                                                       
+
                         }
                         mapChecklistQry = mapChecklistQry.Substring(0, mapChecklistQry.Length - 2) + ";";
 
                         await Context.ExecuteNonQry<int>(mapChecklistQry).ConfigureAwait(false);
 
 
-                        foreach (var plans in approval) {
-                            var approvePlan = await ApprovePMPlan(plans, userID); 
+                        foreach (var plans in approval)
+                        {
+                            var approvePlan = await ApprovePMPlan(plans, userID);
                         }
                     }
                 }
                 else //
                 {
-                    
+
                     return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, "File is not an excel file");
 
                 }
@@ -1098,15 +1094,15 @@ namespace CMMSAPIs.Repositories.PM
             await Context.ExecuteNonQry<int>(logQry).ConfigureAwait(false);
             logPath = logPath.Replace("\\\\", "\\");
 
-            m_errorLog.SetImportInformation($"Total Errors <{m_errorLog.GetErrorCount()}>");          
-            return new CMImportFileResponse(file_id,idList, updatedIdList, CMMS.RETRUNSTATUS.SUCCESS, logPath, m_errorLog.errorLog(), $"{idList.Count} Plan(s) created, {updatedIdList.Count} Plan(s) updated."); 
+            m_errorLog.SetImportInformation($"Total Errors <{m_errorLog.GetErrorCount()}>");
+            return new CMImportFileResponse(file_id, idList, updatedIdList, CMMS.RETRUNSTATUS.SUCCESS, logPath, m_errorLog.errorLog(), $"{idList.Count} Plan(s) created, {updatedIdList.Count} Plan(s) updated.");
             //return response;*/
         }
 
         internal async Task<CMDefaultResponse> DeletePMTask(CMApproval request, int userID)
         {
             CMDefaultResponse response = null;
-            string mrsQ = "select status,id from smmrs where whereUsedRefID = " + request.id+";";
+            string mrsQ = "select status,id from smmrs where whereUsedRefID = " + request.id + ";";
             DataTable dt_insert = await Context.FetchData(mrsQ).ConfigureAwait(false);
 
             string taskQ = "select ptw_id from pm_task where id = " + request.id + ";";
@@ -1123,16 +1119,16 @@ namespace CMMSAPIs.Repositories.PM
 
             if (dt_task.Rows.Count > 0)
             {
-                if(Convert.ToString(dt_task.Rows[0][0]) != "")
+                if (Convert.ToString(dt_task.Rows[0][0]) != "")
                 {
                     permit_id = Convert.ToInt32(dt_insert.Rows[0][0]);
                 }
-               
+
             }
 
             if ((CMMS.CMMS_Status)mrs_status == CMMS.CMMS_Status.MRS_REQUEST_ISSUED)
             {
-                response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.FAILURE, $" PM Plan With MRS "+mrs_id+ " Is Issued. Please Return MRS To Proceed Further.");
+                response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.FAILURE, $" PM Plan With MRS " + mrs_id + " Is Issued. Please Return MRS To Proceed Further.");
                 return response;
             }
 
@@ -1144,7 +1140,7 @@ namespace CMMSAPIs.Repositories.PM
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_TASK, request.id, 0, 0, request.comment, CMMS.CMMS_Status.PM_TASK_DELETED);
 
-            response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $" PM Task Deleted With MRS : "+mrs_id+"");
+            response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $" PM Task Deleted With MRS : " + mrs_id + "");
             return response;
         }
     }

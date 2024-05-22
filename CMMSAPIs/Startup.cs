@@ -1,43 +1,37 @@
-using System;
-using System.Text;
+using CMMSAPIs.BS;
+using CMMSAPIs.BS.Audits;
+using CMMSAPIs.BS.Calibration;
+using CMMSAPIs.BS.Cleaning;
+using CMMSAPIs.BS.DSM;
+using CMMSAPIs.BS.EM;
+using CMMSAPIs.BS.Facility;
+using CMMSAPIs.BS.FileUpload;
+using CMMSAPIs.BS.Grievance;
+using CMMSAPIs.BS.Incident_Reports;
+using CMMSAPIs.BS.Inventory;
+using CMMSAPIs.BS.JC;
+using CMMSAPIs.BS.Jobs;
+using CMMSAPIs.BS.Masters;
+using CMMSAPIs.BS.MISMasters;
+using CMMSAPIs.BS.MoM;
+using CMMSAPIs.BS.Permits;
+using CMMSAPIs.BS.PM;
+using CMMSAPIs.BS.SM;
+using CMMSAPIs.BS.Users;
+using CMMSAPIs.BS.Utils;
+using CMMSAPIs.BS.WC;
+using CMMSAPIs.Helper;
+using CMMSAPIs.Middlewares;
+using CMMSAPIs.Models.Mails;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Microsoft.IdentityModel.Tokens;
-using CMMSAPIs.BS.FileUpload;
-using CMMSAPIs.Middlewares;
-using CMMSAPIs.BS.Incident_Reports;
-using CMMSAPIs.BS.WC;
-using CMMSAPIs.BS.Inventory;
-using CMMSAPIs.BS.Facility;
-using CMMSAPIs.BS.Jobs;
-using CMMSAPIs.BS.Permits;
-using CMMSAPIs.BS.JC;
-using CMMSAPIs.BS.Mails;
-using CMMSAPIs.BS.Masters;
-using CMMSAPIs.BS.SM;
-using CMMSAPIs.BS.Utils;
-using CMMSAPIs.BS.Users;
-using CMMSAPIs.Helper;
-using CMMSAPIs.Models.Mails;
-using CMMSAPIs.BS.PM;
-using CMMSAPIs.BS.Audits;
-using CMMSAPIs.BS.Calibration;
-using CMMSAPIs.BS;
-using CMMSAPIs.BS.Cleaning;
-using CMMSAPIs.BS.Grievance;
-using CMMSAPIs.BS.EM;
-using CMMSAPIs.BS.DSM;
-using CMMSAPIs.BS.MISMasters;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Hosting;
+using System;
 using System.IO;
-using Microsoft.AspNetCore.StaticFiles;
-using CMMSAPIs.BS.MoM;
 
 namespace CMMSAPIs
 {
@@ -53,7 +47,7 @@ namespace CMMSAPIs
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-         //services.AddAuthentication(authOption =>
+            //services.AddAuthentication(authOption =>
             //{
             //    authOption.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
             //    authOption.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -73,7 +67,8 @@ namespace CMMSAPIs
             //});
 
             services.AddDistributedMemoryCache();
-            services.AddSession(options => {
+            services.AddSession(options =>
+            {
                 options.IdleTimeout = TimeSpan.FromMinutes(1);//You can set Time   
             });
             services.AddControllers();
@@ -101,7 +96,7 @@ namespace CMMSAPIs
             services.AddScoped<IWCBS, WCBS>();
             services.AddScoped<IInventoryBS, InventoryBS>();
             services.Configure<CMMailSettings>(Configuration.GetSection("MailSettings"));
-           // services.AddTransient<IMailService, MailService>();
+            // services.AddTransient<IMailService, MailService>();
             services.AddScoped<IFileUploadBS, FileUploadBS>();
             services.AddScoped<ICheckListBS, CheckListBS>();
             services.AddScoped<IPMScheduleViewBS, PMScheduleViewBS>();
@@ -109,7 +104,7 @@ namespace CMMSAPIs
             services.AddScoped<ICalibrationBS, CalibrationBS>();
             services.AddScoped<IAuditScheduleViewBS, AuditScheduleViewBS>();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-             services.AddScoped<IMRSBS, MRSBS>();
+            services.AddScoped<IMRSBS, MRSBS>();
             services.AddScoped<IGOBS, GOBS>();
             services.AddScoped<IReOrderBS, ReOrderBS>();
             services.AddScoped<CleaningBS>();
@@ -118,8 +113,10 @@ namespace CMMSAPIs
             services.AddScoped<IEMBS, EMBS>();
             services.AddScoped<IDSMBS, DSMBS>();
             services.AddScoped<IMISMasterBS, MISMasterBS>();
-            services.AddScoped<IGrievanceBS, GrievanceBS >();
-            services.AddScoped<IMoMBS, MoMBS >();
+            services.AddScoped<IGrievanceBS, GrievanceBS>();
+            services.AddScoped<IMoMBS, MoMBS>();
+            services.AddScoped<AttendeceBS, _AttendeceBS>();
+            services.AddScoped<TrainingCourseBS, Traningbs>();
 
         }
 

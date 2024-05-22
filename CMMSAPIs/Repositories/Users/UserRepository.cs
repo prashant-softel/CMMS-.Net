@@ -136,10 +136,10 @@ namespace CMMSAPIs.Repositories.Users
             {
                 string facilitiesQry = $"SELECT facilities.id as id, facilities.name as name, spv.id as spv_id, spv.name as spv,facilities.address as location, isemployee as isEmployees  FROM userfacilities JOIN facilities ON userfacilities.facilityId = facilities.id LEFT JOIN spv ON facilities.spvId=spv.id WHERE userfacilities.userId = {user_id}  and userfacilities.status = 1;";
                 List<CMPlantAccess> facilities = await Context.GetData<CMPlantAccess>(facilitiesQry).ConfigureAwait(false);
-                foreach(var f in facilities)
+                foreach (var f in facilities)
                 {
-                 
-                  
+
+
                     if (f.isEmployees == 1)
                     {
                         f.isEmployees = true;
@@ -166,7 +166,7 @@ namespace CMMSAPIs.Repositories.Users
                                             $"WHERE " +
                                                 $"u.id = {reportTo}";
                 List<CMUser> reportToDetails = await Context.GetData<CMUser>(reportToDetailsQry).ConfigureAwait(false);
-     
+
 
                 //CMResposibility reponsibility2 = new CMResposibility();
                 //reponsibility2.id = 2;
@@ -174,9 +174,9 @@ namespace CMMSAPIs.Repositories.Users
                 //reponsibility2.since = DateTime.Parse("12-12-2018");
                 //reponsibility2.experianceYears = 4;
                 user_detail[0].responsibility = await GetUserResponsibity(user_id);
-        
+
                 //user_detail[0].responsibility.Add(reponsibility2);
-         
+
                 if (reportToDetails.Count > 0)
                     user_detail[0].report_to = reportToDetails[0];
                 return user_detail[0];
@@ -541,7 +541,7 @@ namespace CMMSAPIs.Repositories.Users
                     }
                 }
             }
-                string logPath = m_errorLog.SaveAsText($"ImportLog\\ImportUsers_File{file_id}_{DateTime.UtcNow.ToString("yyyyMMdd_HHmmss")}");
+            string logPath = m_errorLog.SaveAsText($"ImportLog\\ImportUsers_File{file_id}_{DateTime.UtcNow.ToString("yyyyMMdd_HHmmss")}");
             string logQry = $"UPDATE uploadedfiles SET logfile = '{logPath}' WHERE id = {file_id}";
             await Context.ExecuteNonQry<int>(logQry).ConfigureAwait(false);
             logPath = logPath.Replace("\\\\", "\\");
@@ -674,7 +674,7 @@ namespace CMMSAPIs.Repositories.Users
                                                     $"VALUES ({id}, {facility.id},'{UtilsRepository.GetUTCTime()}', {userID}, 1,{isemp});";
                             await Context.ExecuteNonQry<int>(addFacility).ConfigureAwait(false);
                         }
-                       
+
                     }
 
                     CMUserAccess userAccess = new CMUserAccess()
@@ -840,12 +840,12 @@ namespace CMMSAPIs.Repositories.Users
                 }
             }
 
-            if(request.user_responsibility_list.Count > 0)
+            if (request.user_responsibility_list.Count > 0)
             {
-                foreach(var item in request.user_responsibility_list)
+                foreach (var item in request.user_responsibility_list)
                 {
                     string updateQ = $"update user_responsibility set responsibility = '{item.responsibility}', since_when = '{((DateTime)item.since_when).ToString("yyyy-MM-dd HH:mm:ss")}' where id = {item.responsibility_id} ";
-                                             
+
                     await Context.ExecuteNonQry<int>(updateQ).ConfigureAwait(false);
                 }
             }
@@ -924,7 +924,7 @@ namespace CMMSAPIs.Repositories.Users
 
         internal async Task<List<CMUser>> GetUserList(int facility_id)
         {
-            int id=0;
+            int id = 0;
             string qry = $"SELECT " +
                             $"u.id, CONCAT(firstName, ' ', lastName) as full_name, loginId as user_name,DATE_FORMAT(u.createdAt,'%Y-%m-%d ') as  createdAt ,DATE_FORMAT(u.updatedAt,'%Y-%m-%d ') as updatedAt, mobileNumber as contact_no, r.id as role_id, r.name as role_name, CASE WHEN u.status=0 THEN 'Inactive' ELSE 'Active' END AS status, photo.id AS photoId, photo.file_path AS photoPath, sign.id AS signatureId, sign.file_path AS signaturePath " +
                          $"FROM " +
@@ -1003,7 +1003,7 @@ namespace CMMSAPIs.Repositories.Users
                         }
                     }
                 }
-          
+
 
 
 
@@ -1017,7 +1017,7 @@ namespace CMMSAPIs.Repositories.Users
                 {
                     if (request.access_list.Count > 0)
                     {
-                        var accessList = request.access_list.GroupBy(x => x.feature_id).Select(g => g.First()).ToList();                   
+                        var accessList = request.access_list.GroupBy(x => x.feature_id).Select(g => g.First()).ToList();
                         Dictionary<dynamic, CMAccessList> new_access = accessList.SetPrimaryKey("feature_id");
                         foreach (var access in new_access)
                             old_access[access.Key] = access.Value;
@@ -1037,7 +1037,7 @@ namespace CMMSAPIs.Repositories.Users
                                     $"{access.view},{access.delete}, {access.issue}, {access.approve}, {access.selfView}, " +
                                     $"'{UtilsRepository.GetUTCTime()}', {userID} ");
                 }
-                if(user_access.Count > 0)
+                if (user_access.Count > 0)
                 {
                     user_access[0] = user_access[0].Substring(9);
                 }
