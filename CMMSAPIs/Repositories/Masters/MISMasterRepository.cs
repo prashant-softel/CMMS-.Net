@@ -911,7 +911,7 @@ namespace CMMSAPIs.Repositories.Masters
         {
             string SelectQ = $" select distinct facilityId as facility_id,fc.name facility_name,MONTHNAME(date) as month_name,Month(date) as month_id,YEAR(date) as year, " +
                 $" (select sum(creditQty)-sum(debitQty) from waste_data where MONTH(date) < MONTH('" + fromDate.ToString("yyyy-MM-dd") + "')) as opening," +
-                $" sum(creditQty) as procured_qty, sum(debitQty) as consumed_qty, mw.name as water_type" +
+                $" sum(creditQty) as procured_qty, sum(debitQty) as consumed_qty, mw.name as water_type, show_opening " +
                 $" from waste_data" +
                 $" LEFT JOIN facilities fc ON fc.id = waste_data.facilityId" +
                 $" LEFT JOIN mis_wastetype mw on mw.id = waste_data.waterTypeId" +
@@ -946,7 +946,8 @@ namespace CMMSAPIs.Repositories.Masters
                                                       opening = g.Sum(item => item.opening),
                                                       procured_qty = g.Sum(item => item.procured_qty),
                                                       consumed_qty = g.Sum(item => item.consumed_qty),
-                                                      closing_qty = g.Sum(item => item.opening) + g.Sum(item => item.procured_qty) - g.Sum(item => item.consumed_qty)
+                                                      closing_qty = g.Sum(item => item.opening) + g.Sum(item => item.procured_qty) - g.Sum(item => item.consumed_qty),
+                                                      show_opening = g.Sum(item => item.show_opening)
                                                   }).ToList()
                                 }).ToList()
                }).ToList();
