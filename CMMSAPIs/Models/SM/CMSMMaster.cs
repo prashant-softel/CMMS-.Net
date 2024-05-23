@@ -160,6 +160,7 @@ namespace CMMSAPIs.Models.SM
     {
         public int ID { get; set; }
         //public string return_remarks { get; set; }
+        public int original_mrs_ID { get; set; }
         public int mrs_return_ID { get; set; }
         //public string finalRemark { get; set; }
         public int asset_item_ID { get; set; }
@@ -281,12 +282,15 @@ namespace CMMSAPIs.Models.SM
         public int whereUsedRefID { get; set; }
         public string remarks { get; set; }
         public int is_splited { get; set; }
+        public int is_mrs_return { get; set; }
         public List<CMMRSItems> CMMRSItems { get; set; }
     }
 
     public class CMMRSListByModule
     {
         public int mrsId { get; set; }
+        public int is_mrs_return { get; set; }
+        public int mrs_return_ID { get; set; }
         public int jobId { get; set; }
         public int jobCardId { get; set; }
         public int pmId { get; set; }
