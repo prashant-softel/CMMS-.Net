@@ -27,13 +27,14 @@ namespace CMMSAPIs.Repositories.Masters
         {
             int employeeValue = 0;
             int fid = 0;
+            string date = requests.Date.ToString("yyyy-MM-dd");
             CMDefaultResponse response = new CMDefaultResponse();
             //Employee ATTENDENCE
             foreach (CMGetAttendence request in requests.hfeAttendance)
             {
                 fid = request.Facility_Id;
                 string AttenQuery = $"INSERT INTO employee_attendance ( attendance_id, facility_id, employee_id, present, in_time, out_time,Date, CreatedAt, CreatedBy, UpdatedAt, UpdatedBy) VALUES " +
-               $"({request.Attendance_Id}, {fid}, '{request.Employee_Id}', {request.Present}, '{request.In_Time}','{request.Out_Time}','{requests.Date.ToString("yyyy - MM - dd")}','{UtilsRepository.GetUTCTime()}',{userID},'{UtilsRepository.GetUTCTime()}',{userID}); " +
+               $"({request.Attendance_Id}, {fid}, '{request.Employee_Id}', {request.Present}, '{request.In_Time}','{request.Out_Time}','{date}','{UtilsRepository.GetUTCTime()}',{userID},'{UtilsRepository.GetUTCTime()}',{userID}); " +
                $"SELECT LAST_INSERT_ID();";
                 DataTable dt2 = await Context.FetchData(AttenQuery).ConfigureAwait(false);
                 employeeValue = Convert.ToInt32(dt2.Rows[0][0]);
@@ -46,7 +47,7 @@ namespace CMMSAPIs.Repositories.Masters
 
             requst.Contractor_Id = 0;
             string contQuery = $"INSERT INTO contractor_attendnace (facility_id, Date, contractor_id, age_lessthan_35, age_Between_35_50 , age_Greater_50, purpose) VALUES " +
-               $"( {fid},'{requests.Date.ToString("yyyy - MM - dd")}', {requst.Contractor_Id}, {requst.Age_Less_Than35}, {requst.Age_Between_35And50} ,{requst.Age_Greater50},'{requst.Purpose}'); " +
+               $"( {fid},'{date}', {requst.Contractor_Id}, {requst.Age_Less_Than35}, {requst.Age_Between_35And50} ,{requst.Age_Greater50},'{requst.Purpose}'); " +
                $"SELECT LAST_INSERT_ID();";
             DataTable dt3 = await Context.FetchData(contQuery).ConfigureAwait(false);
             int contractValue = Convert.ToInt32(dt3.Rows[0][0]);
@@ -54,12 +55,13 @@ namespace CMMSAPIs.Repositories.Masters
             return response;
         }
 
-        internal async Task<object> GetAttendanceList(int facility_id, DateTime from_date, DateTime to_date)
+        internal async Task<object> GetAttendanceByDetails(int facility_id, DateTime from_date, DateTime to_date)
         {
+            DateTime Dates = from_date;
             string employeeFilter = " WHERE (DATE(ea.Date) >= '" + from_date.ToString("yyyy-MM-dd") + "' AND DATE(ea.Date) <= '" + to_date.ToString("yyyy-MM-dd") + "')";
             employeeFilter += " AND ea.facility_id = " + facility_id;
 
-            string getEmployeeAttendance = $"SELECT ea.id AS Id, ea.attendance_id AS Attendance_Id, ea.facility_id AS Facility_Id, ea.employee_id AS Employee_Id, ea.present AS Present, ea.in_time AS In_Time, ea.out_time AS Out_Time, ea.Date " +
+            string getEmployeeAttendance = $"SELECT ea.id AS Id, ea.attendance_id AS Attendance_Id, ea.facility_id AS Facility_Id, ea.employee_id AS Employee_Id, ea.present AS Present, ea.in_time AS In_Time, ea.out_time AS Out_Time,(DATE_FORMAT(ea.Date ,'%Y-%m-%d')) as Dates " +
                                            $"FROM employee_attendance ea {employeeFilter};";
 
 
@@ -67,6 +69,8 @@ namespace CMMSAPIs.Repositories.Masters
 
             foreach (CMGetAttendence cmg in employeeAttendanceList)
             {
+                Dates = Convert.ToDateTime(cmg.Dates);
+
                 if (cmg.Present == 1)
                 {
                     cmg.Present = true;
@@ -92,14 +96,15 @@ namespace CMMSAPIs.Repositories.Masters
             string contractorFilter = " WHERE (DATE(contractor_attendnace.Date) >= '" + from_date.ToString("yyyy-MM-dd") + "' AND DATE(contractor_attendnace.Date) <= '" + to_date.ToString("yyyy-MM-dd") + "')";
             contractorFilter += " AND contractor_attendnace.facility_id = " + facility_id;
 
-            string getContractorAttendance = $"SELECT id AS Id, facility_id AS Facility_Id, Date, contractor_id AS Contractor_Id, age_lessthan_35 AS Age_Less_Than35, age_Between_35_50 AS Age_Between_35And50, age_Greater_50 AS Age_Greater50, Purpose as Purpose " +
+            string getContractorAttendance = $"SELECT id AS Id, facility_id AS Facility_Id,(DATE_FORMAT(Date ,'%Y-%m-%d')) as Date, contractor_id AS Contractor_Id, age_lessthan_35 AS Age_Less_Than35, age_Between_35_50 AS Age_Between_35And50, age_Greater_50 AS Age_Greater50, Purpose as Purpose " +
                                              $"FROM contractor_attendnace {contractorFilter};";
 
             var contractAttendances = await Context.GetData<CMGetCotractor>(getContractorAttendance).ConfigureAwait(false);
 
+
             var response = new
             {
-                date = from_date,
+                Date = Dates.ToString("yyyy-MM-dd"),
                 hfeAttendance,
                 contractAttendances
             };
@@ -108,9 +113,37 @@ namespace CMMSAPIs.Repositories.Masters
         }
 
 
-        internal async Task<CMDefaultResponse> UpdateAttendance(CMCreateAttendence request)
+        internal async Task<CMDefaultResponse> UpdateAttendance(CMCreateAttendence requests, int userID)
         {
-            return null;
+            CMDefaultResponse response = new CMDefaultResponse();
+            string queryemp = $"Delete From employee_attendance where Date={requests.Date} ;";
+            await Context.ExecuteNonQry<int>(queryemp).ConfigureAwait(false);
+
+            string querycon = $"Delete From contractor_attendnace where Date={requests.Date} ;";
+            await Context.ExecuteNonQry<int>(querycon).ConfigureAwait(false);
+            int fid = 0;
+            int employeeValue = 0;
+            foreach (CMGetAttendence request in requests.hfeAttendance)
+            {
+                fid = request.Facility_Id;
+                string instimp = $"INSERT INTO employee_attendance ( attendance_id, facility_id, employee_id, present, in_time, out_time,Date, CreatedAt, CreatedBy, UpdatedAt, UpdatedBy) VALUES " +
+               $"({request.Attendance_Id}, {fid}, '{request.Employee_Id}', {request.Present}, '{request.In_Time}','{request.Out_Time}','{requests.Date}','{UtilsRepository.GetUTCTime()}',{userID},'{UtilsRepository.GetUTCTime()}',{userID}); " +
+               $"SELECT LAST_INSERT_ID();";
+                DataTable dt2 = await Context.FetchData(instimp).ConfigureAwait(false);
+                employeeValue = Convert.ToInt32(dt2.Rows[0][0]);
+            }
+            response = new CMDefaultResponse(employeeValue, CMMS.RETRUNSTATUS.SUCCESS, "Attendence Updated successfully.");
+
+            //Contractor Ateendence
+            CMGetCotractor requst = requests.contractAttendance;
+            requst.Contractor_Id = 0;
+            string contupdt = $"INSERT INTO contractor_attendnace (facility_id, Date, contractor_id, age_lessthan_35, age_Between_35_50 , age_Greater_50, purpose) VALUES " +
+               $"( {fid},'{requests.Date}', {requst.Contractor_Id}, {requst.Age_Less_Than35}, {requst.Age_Between_35And50} ,{requst.Age_Greater50},'{requst.Purpose}'); " +
+               $"SELECT LAST_INSERT_ID();";
+            DataTable dt3 = await Context.FetchData(contupdt).ConfigureAwait(false);
+            int contractValue = Convert.ToInt32(dt3.Rows[0][0]);
+
+            return response;
         }
 
     }

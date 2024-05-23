@@ -1,4 +1,5 @@
 ﻿using CMMSAPIs.BS.Masters;
+using CMMSAPIs.Models.Masters;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -11,19 +12,19 @@ namespace CMMSAPIs.Controllers.Masters
     public class TrainingController : ControllerBase
     {
         private TrainingCourseBS TrainingCourseBS;
-        TrainingController(TrainingCourseBS cmms)
+        public TrainingController(TrainingCourseBS cmms)
         {
             TrainingCourseBS = cmms;
 
         }
         [Route("CreateTrainingCourse")]
         [HttpPost]
-        public async Task<IActionResult> CreateTrainingCourse()
+        public async Task<IActionResult> CreateTrainingCourse(CMTrainingCourse request)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await TrainingCourseBS.CreateTrainingCourse();
+                var data = await TrainingCourseBS.CreateTrainingCourse(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -33,12 +34,12 @@ namespace CMMSAPIs.Controllers.Masters
         }
         [Route("GetCourseList")]
         [HttpGet]
-        public async Task<IActionResult> GetCourseList()
+        public async Task<IActionResult> GetCourseList(int facility_id)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await TrainingCourseBS.GetCourseList();
+                var data = await TrainingCourseBS.GetCourseList(facility_id);
 
                 return Ok(data);
             }
@@ -49,12 +50,12 @@ namespace CMMSAPIs.Controllers.Masters
         }
         [Route("UpdateCourseList")]
         [HttpPatch]
-        public async Task<IActionResult> UpdateCourseList()
+        public async Task<IActionResult> UpdateCourse(CMTrainingCourse request)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await TrainingCourseBS.UpdateCourseList();
+                var data = await TrainingCourseBS.UpdateCourseList(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -64,12 +65,12 @@ namespace CMMSAPIs.Controllers.Masters
         }
         [Route("DleteCourseList")]
         [HttpPatch]
-        public async Task<IActionResult> DeleteCourseList()
+        public async Task<IActionResult> DeleteCourse(int id)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await TrainingCourseBS.DeleteCourseList();
+                var data = await TrainingCourseBS.DeleteCourseList(id, userID);
                 return Ok(data);
             }
             catch (Exception ex)

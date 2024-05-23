@@ -1,20 +1,23 @@
 ﻿using CMMSAPIs.Helper;
+using CMMSAPIs.Models.Masters;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Masters;
 using Microsoft.AspNetCore.Hosting;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace CMMSAPIs.BS.Masters
 {
     public interface TrainingCourseBS
     {
-        Task<CMDefaultResponse> CreateTrainingCourse();
-        Task<CMDefaultResponse> GetCourseList();
-        Task<CMDefaultResponse> UpdateCourseList();
+        Task<CMDefaultResponse> CreateTrainingCourse(CMTrainingCourse request, int userID);
+        Task<List<CMTrainingCourse>> GetCourseList(int facility_id);
+        Task<CMDefaultResponse> UpdateCourseList(CMTrainingCourse request, int userID);
+        Task<CMDefaultResponse> DeleteCourseList(int id, int userID);
         Task<CMDefaultResponse> CreateScheduleCourse();
         Task<CMDefaultResponse> GetScheduleCourse();
-        Task<CMDefaultResponse> DeleteCourseList();
+
         Task<CMDefaultResponse> ExecuteScheduleCourse();
     }
     public class Traningbs : TrainingCourseBS
@@ -29,13 +32,13 @@ namespace CMMSAPIs.BS.Masters
 
         }
 
-        public async Task<CMDefaultResponse> CreateTrainingCourse()
+        public async Task<CMDefaultResponse> CreateTrainingCourse(CMTrainingCourse request, int userID)
         {
             try
             {
                 using (var repos = new TrainingRepository(getDB))
                 {
-                    return await repos.CreateTrainingCourse();
+                    return await repos.CreateTrainingCourse(request, userID);
 
                 }
             }
@@ -45,13 +48,13 @@ namespace CMMSAPIs.BS.Masters
             }
         }
 
-        public async Task<CMDefaultResponse> GetCourseList()
+        public async Task<List<CMTrainingCourse>> GetCourseList(int facility_id)
         {
             try
             {
                 using (var repos = new TrainingRepository(getDB))
                 {
-                    return await repos.GetCourseList();
+                    return await repos.GetCourseList(facility_id);
 
                 }
             }
@@ -61,13 +64,13 @@ namespace CMMSAPIs.BS.Masters
             }
         }
 
-        public async Task<CMDefaultResponse> UpdateCourseList()
+        public async Task<CMDefaultResponse> UpdateCourseList(CMTrainingCourse request, int userID)
         {
             try
             {
                 using (var repos = new TrainingRepository(getDB))
                 {
-                    return await repos.UpdateCourseList();
+                    return await repos.UpdateCourseList(request, userID);
 
                 }
             }
@@ -76,14 +79,14 @@ namespace CMMSAPIs.BS.Masters
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> DeleteCourseList()
+        public async Task<CMDefaultResponse> DeleteCourseList(int id, int userID)
         {
 
             try
             {
                 using (var repos = new TrainingRepository(getDB))
                 {
-                    return await repos.DeleteCourseList();
+                    return await repos.DeleteCourseList(id, userID);
 
                 }
             }

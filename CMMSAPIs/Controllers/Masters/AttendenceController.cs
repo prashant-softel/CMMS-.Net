@@ -34,12 +34,12 @@ namespace CMMSAPIs.Controllers.Masters
         }
         [Route("GetAttendanceList")]
         [HttpGet]
-        public async Task<IActionResult> GetAttendanceList(int facility_id, DateTime from_date, DateTime to_date)
+        public async Task<IActionResult> GetAttendanceByDetails(int facility_id, DateTime from_date, DateTime to_date)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _attendeceBS.GetAttendanceList(facility_id, from_date, to_date);
+                var data = await _attendeceBS.GetAttendanceByDetails(facility_id, from_date, to_date);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -49,12 +49,12 @@ namespace CMMSAPIs.Controllers.Masters
         }
         [Route("UpdateAttendance")]
         [HttpPatch]
-        public async Task<IActionResult> UpdateAttendance(CMCreateAttendence requset)
+        public async Task<IActionResult> UpdateAttendance(CMCreateAttendence requests)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _attendeceBS.UpdateAttendance(requset);
+                var data = await _attendeceBS.UpdateAttendance(requests, userID);
                 return Ok(data);
             }
             catch (Exception ex)

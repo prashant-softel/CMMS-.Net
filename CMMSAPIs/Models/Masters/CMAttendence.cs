@@ -20,13 +20,13 @@ namespace CMMSAPIs.Models.Masters
         public int Facility_Id { get; set; }
         public int Employee_Id { get; set; }
         public dynamic Present { get; set; }
-        public dynamic In_Time { get; set; }
-        public dynamic Out_Time { get; set; }
+        public string In_Time { get; set; }
+        public string Out_Time { get; set; }
         public int CreatedBy { get; set; }
         public DateTime? CreatedAt { get; set; }
         public int UpdatedBy { get; set; }
         public DateTime? UpdatedAt { get; set; }
-
+        public dynamic Dates { get; set; }
         public CMGetCotractor Contractors { get; set; }
     }
     public class CMGetCotractor
