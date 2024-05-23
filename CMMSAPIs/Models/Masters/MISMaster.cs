@@ -308,6 +308,7 @@ namespace CMMSAPIs.Models.Masters
         public decimal procured_qty { get; set; }
         public decimal consumed_qty { get; set; }
         public decimal closing_qty { get; set; }
+        public int show_opening { get; set; }
 
     }
 }
