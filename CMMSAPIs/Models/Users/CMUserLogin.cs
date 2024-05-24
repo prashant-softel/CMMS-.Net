@@ -1,10 +1,7 @@
-using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Authentication;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace CMMSAPIs.Models.Users
 {
@@ -22,16 +19,16 @@ namespace CMMSAPIs.Models.Users
         public string token { get; set; }
         public CMUserDetail user_detail { get; set; }
 
-        public UserToken(string _token, CMUserDetail _user_detail) 
+        public UserToken(string _token, CMUserDetail _user_detail)
         {
             token = _token;
             user_detail = _user_detail;
         }
     }
 
-    public class CMUser 
+    public class CMUser
     {
-        
+
         public int id { get; set; }
         public string full_name { get; set; }
         public string user_name { get; set; }
@@ -41,12 +38,33 @@ namespace CMMSAPIs.Models.Users
         public string status { get; set; }
         public int photoId { get; set; }
         public string photoPath { get; set; }
-        public int signatureId  { get; set; }
+        public int signatureId { get; set; }
         public string signaturePath { get; set; }
-        public  dynamic createdAt { get; set; }
+        public dynamic createdAt { get; set; }
         public dynamic updatedAt { get; set; }
         public List<CMPlant> Facilities { get; set; }
-        
+
+        public string SecondaryName { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public DateTime DateOfBirth { get; set; }
+        public string Gender { get; set; }
+        public string BloodGroup { get; set; }
+
+
+        public string MobileNumber { get; set; }
+        public string LandlineNumber { get; set; }
+
+
+        public string Country { get; set; }
+        public string State { get; set; }
+        public string City { get; set; }
+        public int zipcodes { get; set; }
+
+
+        public int employees { get; set; }
+        public DateTime? joining_dates { get; set; }
+
     }
 
     public class CMUserDetail : CMUser
@@ -66,7 +84,7 @@ namespace CMMSAPIs.Models.Users
         public string city_name { get; set; }
         public int zipcode { get; set; }
         public int? isEmployee { get; set; }
-       
+
         public DateTime? joiningDate { get; set; }
         public int company_id { get; set; }
         public int designation_id { get; set; }
@@ -100,7 +118,7 @@ namespace CMMSAPIs.Models.Users
     }
     public class CMCreateUser : CMUserDetail
     {
-        
+
         public List<CMUserPlant> facility_list { get; set; }
         public CMUserCrentials credentials { get; set; }
         public int report_to_id { get; set; }
@@ -129,7 +147,7 @@ namespace CMMSAPIs.Models.Users
     {
         public int id { get; set; }
         public string name { get; set; }
-        public string description { get; set; } 
+        public string description { get; set; }
     }
     public class CMPlant
     {
@@ -137,9 +155,9 @@ namespace CMMSAPIs.Models.Users
     }
     public class CMUserPlant
     {
-        public  int id { get; set; }
+        public int id { get; set; }
         public string name { get; set; }
-        public string  address { get; set; }
+        public string address { get; set; }
         public bool isEmployees { get; set; }
     }
 }

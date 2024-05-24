@@ -12,13 +12,18 @@ namespace CMMSAPIs.BS.Masters
     public interface TrainingCourseBS
     {
         Task<CMDefaultResponse> CreateTrainingCourse(CMTrainingCourse request, int userID);
-        Task<List<CMTrainingCourse>> GetCourseList(int facility_id);
+        Task<List<CMTrainingCourse>> GetCourseList(int facility_id, DateTime from_date, DateTime to_date);
         Task<CMDefaultResponse> UpdateCourseList(CMTrainingCourse request, int userID);
         Task<CMDefaultResponse> DeleteCourseList(int id, int userID);
         Task<CMDefaultResponse> CreateScheduleCourse();
         Task<CMDefaultResponse> GetScheduleCourse();
 
         Task<CMDefaultResponse> ExecuteScheduleCourse();
+        Task<List<CMTrainingCourse>> GetCourseDetailById(int id);
+        Task<List<CMTRAININGCATE>> GetTrainingCategorty(int id);
+        Task<CMDefaultResponse> CreateTrainingCategorty(CMTRAININGCATE request, int userID);
+        Task<CMDefaultResponse> UpdateTrainingCategorty(CMTRAININGCATE request, int userID);
+        Task<CMDefaultResponse> DeleteTrainingCategorty(int id, int userID);
     }
     public class Traningbs : TrainingCourseBS
     {
@@ -48,13 +53,13 @@ namespace CMMSAPIs.BS.Masters
             }
         }
 
-        public async Task<List<CMTrainingCourse>> GetCourseList(int facility_id)
+        public async Task<List<CMTrainingCourse>> GetCourseList(int facility_id, DateTime from_date, DateTime to_date)
         {
             try
             {
                 using (var repos = new TrainingRepository(getDB))
                 {
-                    return await repos.GetCourseList(facility_id);
+                    return await repos.GetCourseList(facility_id, from_date, to_date);
 
                 }
             }
@@ -63,7 +68,21 @@ namespace CMMSAPIs.BS.Masters
                 throw;
             }
         }
+        public async Task<List<CMTrainingCourse>> GetCourseDetailById(int id)
+        {
+            try
+            {
+                using (var repos = new TrainingRepository(getDB))
+                {
+                    return await repos.GetCourseDetailById(id);
 
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
         public async Task<CMDefaultResponse> UpdateCourseList(CMTrainingCourse request, int userID)
         {
             try
@@ -145,5 +164,77 @@ namespace CMMSAPIs.BS.Masters
                 throw;
             }
         }
+        //
+
+        public async Task<List<CMTRAININGCATE>> GetTrainingCategorty(int id)
+        {
+            try
+            {
+                using (var repos = new TrainingRepository(getDB))
+                {
+                    return await repos.GetTrainingCategorty();
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+
+
+        public async Task<CMDefaultResponse> CreateTrainingCategorty(CMTRAININGCATE request, int userID)
+        {
+            try
+            {
+                using (var repos = new TrainingRepository(getDB))
+                {
+                    return await repos.CreateTrainingCategorty(request);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+
+
+        public async Task<CMDefaultResponse> UpdateTrainingCategorty(CMTRAININGCATE request, int userID)
+        {
+            try
+            {
+                using (var repos = new TrainingRepository(getDB))
+                {
+                    return await repos.UpdateTrainingCategorty(request);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> DeleteTrainingCategorty(int id, int userID)
+        {
+            try
+            {
+                using (var repos = new TrainingRepository(getDB))
+                {
+                    return await repos.DeleteTrainingCategorty(id);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+
     }
 }
+

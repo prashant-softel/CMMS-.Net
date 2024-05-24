@@ -78,9 +78,17 @@ namespace CMMSAPIs.Repositories.Masters
             return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Course Added Successfully.");
         }
 
-        internal async Task<List<CMTrainingCourse>> GetCourseList(int facility_id)
+        internal async Task<List<CMTrainingCourse>> GetCourseList(int facility_id, DateTime from_date, DateTime to_date)
         {
-            string gcl = $" SELECT id as id, facility_id as facility_id,Topic as name, Description as description ,Traning_category_id as category_id , No_Of_Days as number_of_days, Max_capacity as max_cap, Targated_group_id as group_id, Duration_in_Minutes as duration ,Status as status, CreatedAt  , CreatedBy  , UpdateAt  , UpdateBy from course where facility_id={facility_id}";
+            string From = Convert.ToDateTime(from_date).ToString("yyyy-MM-dd");
+            string to = Convert.ToDateTime(to_date).ToString("yyyy-MM-dd");
+            string gcl = $" SELECT id as id, facility_id as facility_id,Topic as name, Description as description ,Traning_category_id as category_id , No_Of_Days as number_of_days, Max_capacity as max_cap, Targated_group_id as group_id, Duration_in_Minutes as duration ,Status as status, CreatedAt  , CreatedBy  , UpdatedAt  , UpdatedBy from course where facility_id={facility_id} and Status=1 or CreatedAt='{From}' or CreatedAt='{to}'  ";
+            List<CMTrainingCourse> result = await Context.GetData<CMTrainingCourse>(gcl).ConfigureAwait(false);
+            return result;
+        }
+        internal async Task<List<CMTrainingCourse>> GetCourseDetailById(int id)
+        {
+            string gcl = $" SELECT id as id, facility_id as facility_id,Topic as name, Description as description ,Traning_category_id as category_id , No_Of_Days as number_of_days, Max_capacity as max_cap, Targated_group_id as group_id, Duration_in_Minutes as duration ,Status as status, CreatedAt  , CreatedBy  , UpdatedAt  , UpdatedBy from course where id={id} and Status=1 ";
             List<CMTrainingCourse> result = await Context.GetData<CMTrainingCourse>(gcl).ConfigureAwait(false);
             return result;
         }
@@ -91,23 +99,23 @@ namespace CMMSAPIs.Repositories.Masters
              $"Topic = '{request.name}', " +
              $"facility_id = {request.facility_id}, " +
              $"Description = '{request.description}', " +
-             $"Training_category_id = {request.category_id}, " +
+             $"Traning_category_id= {request.category_id}, " +
              $"No_Of_Days = {request.number_of_days}, " +
              $"Max_capacity = {request.max_cap}, " +
-             $"Targeted_group_id = {request.group_id}, " +
+             $"Targated_group_id = {request.group_id}, " +
              $"Duration_in_Minutes = {request.duration}, " +
              $"Status = 1, " +
-             $"UpdatedAt = {UtilsRepository.GetUTCTime()}, " +
-             $"UreatedBy = {userID} " +
+             $"UpdatedAt = '{UtilsRepository.GetUTCTime()}', " +
+             $"UpdatedBy = {userID} " +
              $"WHERE  id={request.id};";
-            DataTable dt = await Context.FetchData(ctq).ConfigureAwait(false);
-            int id = Convert.ToInt32(dt.Rows[0][0]);
-            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Course Updated Successfully.");
+            await Context.ExecuteNonQry<int>(ctq).ConfigureAwait(false);
+
+            return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Course Updated Successfully.");
         }
         internal async Task<CMDefaultResponse> DeleteCourseList(int id, int userID)
         {
             string deleteQry = $"UPDATE course " +
-               $" SET Status = 0 , updatedBy = {userID} , updatedAt = '{UtilsRepository.GetUTCTime()}' WHERE id = {id};";
+               $" SET Status = 0 , UpdatedBy = {userID} , UpdatedAt = '{UtilsRepository.GetUTCTime()}' WHERE id = {id};";
             await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
             return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Course Deleted Successfully.");
         }
@@ -128,7 +136,40 @@ namespace CMMSAPIs.Repositories.Masters
         {
             return null;
         }
+        //Master OF Trainig Category
+        internal async Task<List<CMTRAININGCATE>> GetTrainingCategorty()
+        {
+            string myQuery = "SELECT id, name, description FROM course_category where status=1 ";
+            List<CMTRAININGCATE> Data = await Context.GetData<CMTRAININGCATE>(myQuery).ConfigureAwait(false);
+            return Data;
+        }
+        internal async Task<CMDefaultResponse> CreateTrainingCategorty(CMTRAININGCATE request)
+        {
 
+            String myqry = $"INSERT INTO course_category(name, description, status) VALUES " +
+                                $"('{request.name}','{request.description}',1); " +
+                                 $"SELECT LAST_INSERT_ID(); ";
+            DataTable dt = await Context.FetchData(myqry).ConfigureAwait(false);
+            int id = Convert.ToInt32(dt.Rows[0][0]);
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Category Added");
+        }
+        internal async Task<CMDefaultResponse> UpdateTrainingCategorty(CMTRAININGCATE request)
+        {
+            string updateQry = "UPDATE course_category  SET ";
+            updateQry += $"name = '{request.name}', " +
+                 $"description = '{request.description}'," +
+                 $"status = 1" +
+                $"WHERE id = {request.id};";
+            await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+            return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Category Updated");
+
+        }
+        internal async Task<CMDefaultResponse> DeleteTrainingCategorty(int id)
+        {
+            string delqry = $"UPDATE course_category  SET status=0  where id={id};";
+            await Context.ExecuteNonQry<int>(delqry).ConfigureAwait(false);
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Training Category deleted");
+        }
     }
 
 }

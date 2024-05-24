@@ -1,26 +1,12 @@
+using CMMSAPIs.Helper;
+using CMMSAPIs.Models.SM;
+using CMMSAPIs.Models.Utils;
+using CMMSAPIs.Repositories.Utils;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Threading.Tasks;
-using CMMSAPIs.BS;
-using CMMSAPIs.Helper;
-using CMMSAPIs.Models;
-using CMMSAPIs.Models.Notifications;
-using CMMSAPIs.Models.SM;
-using CMMSAPIs.Models.Utils;
-using CMMSAPIs.Models.WC;
-using CMMSAPIs.Repositories.Utils;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.VisualBasic;
-using MySql.Data.MySqlClient;
-using MySqlX.XDevAPI.Common;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using Org.BouncyCastle.Utilities.Collections;
-using static Google.Protobuf.Reflection.SourceCodeInfo.Types;
 
 namespace CMMSAPIs.Repositories.SM
 {
@@ -36,7 +22,7 @@ namespace CMMSAPIs.Repositories.SM
         {
             CMDefaultResponse response = null;
             int ReturnID = 0;
-          
+
             try
             {
                 if (request.request_order_items != null)
@@ -45,7 +31,7 @@ namespace CMMSAPIs.Repositories.SM
                     string poInsertQuery = $" INSERT INTO smrequestorder (facilityID,generated_by,request_date,status,remarks)" +
                        $"VALUES({request.facilityID},  {userID}, '{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}', {(int)CMMS.CMMS_Status.SM_RO_SUBMITTED}, '{request.comment}');" +
                         $" SELECT LAST_INSERT_ID();";
-                   
+
                     DataTable dt2 = await Context.FetchData(poInsertQuery).ConfigureAwait(false);
                     int roid = Convert.ToInt32(dt2.Rows[0][0]);
                     ReturnID = roid;
@@ -106,12 +92,12 @@ namespace CMMSAPIs.Repositories.SM
             //validate request.id
             string mainQuery = $"UPDATE smrequestorder SET status = {(int)CMMS.CMMS_Status.SM_RO_CLOSED}, remarks= '{request.comment}' WHERE ID = " + request.id + "";
             await Context.ExecuteNonQry<int>(mainQuery);
-            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Request order {"+request.id+"} closed.");
+            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Request order {" + request.id + "} closed.");
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_RO, request.id, 0, 0, request.comment, CMMS.CMMS_Status.SM_RO_CLOSED);
             return response;
         }
 
-        internal async Task<List<CMCreateRequestOrder>> GetRequestOrderList(int facilityID, DateTime fromDate, DateTime toDate,string facilitytimeZone)
+        internal async Task<List<CMCreateRequestOrder>> GetRequestOrderList(int facilityID, DateTime fromDate, DateTime toDate, string facilitytimeZone)
         {
             string filter = " facilityID = " + facilityID + " and  DATE_FORMAT(po.request_date, '%Y-%m-%d') >= '" + fromDate.ToString("yyyy-MM-dd") + "'  and  DATE_FORMAT(po.request_date, '%Y-%m-%d') <= '" + toDate.ToString("yyyy-MM-dd") + "'";
 
@@ -147,7 +133,7 @@ namespace CMMSAPIs.Repositories.SM
                            " LEFT JOIN users ed ON ed.id = po.generated_by" +
                            " LEFT JOIN users ed1 ON ed1.id = po.receiverID     LEFT JOIN users ed3 ON ed3.id = po.rejeccted_by" +
                            "  WHERE " + filter;
-          
+
             List<CMRequestOrderList> _List = await Context.GetData<CMRequestOrderList>(query).ConfigureAwait(false);
             List<CMCreateRequestOrder> _MasterList = _List.Select(p => new CMCreateRequestOrder
             {
@@ -188,13 +174,13 @@ namespace CMMSAPIs.Repositories.SM
             }
             foreach (var list in _MasterList)
             {
-                if(list!=null && list.approvedAt!=null)
-                    list.approvedAt= await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)list.approvedAt);
-                if (list != null && list.generatedAt!= null)
-                    list.generatedAt =await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)list.generatedAt);
-                if (list != null && list.rejectedAt!= null)
-                    list.rejectedAt  = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)list.rejectedAt);
-               
+                if (list != null && list.approvedAt != null)
+                    list.approvedAt = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)list.approvedAt);
+                if (list != null && list.generatedAt != null)
+                    list.generatedAt = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)list.generatedAt);
+                if (list != null && list.rejectedAt != null)
+                    list.rejectedAt = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)list.rejectedAt);
+
             }
             return _MasterList;
         }
@@ -400,7 +386,7 @@ namespace CMMSAPIs.Repositories.SM
         {
             // Convert list of IDs to comma-separated string
             // string idList = string.Join(",", IDs);
-            if(IDs==null || IDs== "")
+            if (IDs == null || IDs == "")
             {
                 IDs = "0";
             }
@@ -432,8 +418,8 @@ namespace CMMSAPIs.Repositories.SM
                            "LEFT JOIN users ed ON ed.id = po.generated_by " +
                            "LEFT JOIN users ed1 ON ed1.id = po.receiverID " +
                            "LEFT JOIN users ed3 ON ed3.id = po.rejeccted_by " +
-                           "WHERE  po.ID  IN ("+ IDs + ") ;";
-           
+                           "WHERE  po.ID  IN (" + IDs + ") ;";
+
             List<CMRequestOrderList> _List = await Context.GetData<CMRequestOrderList>(query).ConfigureAwait(false);
             List<CMCreateRequestOrder> _MasterList = _List.Select(p => new CMCreateRequestOrder
             {
@@ -465,7 +451,8 @@ namespace CMMSAPIs.Repositories.SM
                 asset_type = p.asset_type,
                 asset_cat = p.asset_type_Name
             }).ToList();
-            foreach (var MasterList in _MasterList) {
+            foreach (var MasterList in _MasterList)
+            {
                 MasterList.cost = _itemList.Sum(x => x.cost);
                 MasterList.request_order_items = _itemList;
                 MasterList.number_of_item_count = (int)_itemList.Sum(x => x.ordered_qty);

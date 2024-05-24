@@ -5,7 +5,7 @@ namespace CMMSAPIs.Models.Masters
 {
     public class MISSourceOfObservation
     {
-        public int id { get; set; } 
+        public int id { get; set; }
         public string name { get; set; }
         public string description { get; set; }
         public int status { get; set; }
@@ -75,30 +75,30 @@ namespace CMMSAPIs.Models.Masters
         public int id { get; set; }
         public string incidenttype { get; set; }
         public int status { get; set; }
-       // public DateTime CreatedAt { get; set; }
-       // public string CreatedBy { get; set; }
-       // public DateTime UpdatedAt { get; set; }
+        // public DateTime CreatedAt { get; set; }
+        // public string CreatedBy { get; set; }
+        // public DateTime UpdatedAt { get; set; }
         //public string UpdatedBy { get; set; }
         //changes
         public int addedBy { get; set; }
-        public DateTime  addedAt { get; set; }
-        public  int updatedBy { get; set; }
-        public  DateTime updatedAt { get; set; }
+        public DateTime addedAt { get; set; }
+        public int updatedBy { get; set; }
+        public DateTime updatedAt { get; set; }
     }
 
     public class CMMisWaterData
     {
-        public int Id { get; set; } 
-        public int facilityID { get; set; } 
-        public DateTime Date { get; set; } 
+        public int Id { get; set; }
+        public int facilityID { get; set; }
+        public DateTime Date { get; set; }
         public int WaterTypeId { get; set; }
         public int consumeType { get; set; }
         public string Description { get; set; }
-        public decimal DebitQty { get; set; } 
-        public decimal CreditQty { get; set; } 
-        public int AddedBy { get; set; } 
+        public decimal DebitQty { get; set; }
+        public decimal CreditQty { get; set; }
+        public int AddedBy { get; set; }
         public DateTime AddedAt { get; set; }
-        public int UpdatedBy { get; set; } 
+        public int UpdatedBy { get; set; }
         public DateTime UpdatedAt { get; set; }
     }
 
@@ -149,14 +149,14 @@ namespace CMMSAPIs.Models.Masters
         public string name { get; set; }
         public int Type { get; set; }
         public string description { get; set; }
-       // public int status { get; set; }
+        // public int status { get; set; }
         public int createdBy { get; set; }
         public DateTime? createdAt { get; set; }
         public int UpdatedBy { get; set; }
         public DateTime? UpdatedAt { get; set; }
         public int show_opening { get; set; }
     }
-        public class CMWasteData
+    public class CMWasteData
     {
         public int Id { get; set; }
         public decimal? Solid_Waste { get; set; }
@@ -179,7 +179,7 @@ namespace CMMSAPIs.Models.Masters
         public DateTime? Created_At { get; set; }
         public int? Modified_By { get; set; }
         public string Modified_At { get; set; }
-                    public int facilityID { get; set; }
+        public int facilityID { get; set; }
         public DateTime Date { get; set; }
         public int wasteTypeId { get; set; }
         public int consumeType { get; set; }
@@ -187,7 +187,7 @@ namespace CMMSAPIs.Models.Masters
         public decimal DebitQty { get; set; }
         public decimal CreditQty { get; set; }
     }
-         public class CMWaterDataMonthWise
+    public class CMWaterDataMonthWise
     {
         public int facility_id { get; set; }
         public string facility_name { get; set; }
@@ -207,7 +207,7 @@ namespace CMMSAPIs.Models.Masters
         public string facility_name { get; set; }
         public List<CMWaterTypeMaster> master_list { get; set; }
         public List<FacilityPeriodData> period { get; set; }
-    
+
     }
     public class CMWaterTypeMaster
     {
@@ -220,7 +220,7 @@ namespace CMMSAPIs.Models.Masters
         public int month_id { get; set; }
         public int year { get; set; }
         public List<CMWaterDataMonthWiseDetails> details { get; set; }
-       
+
     }
     public class CMWaterDataMonthWiseDetails
     {
@@ -270,7 +270,7 @@ namespace CMMSAPIs.Models.Masters
     }
     public class CMWaterDataMonthWiseDetails_Month
     {
-      
+
         public int id { get; set; }
         public string date { get; set; }
         public string Description { get; set; }

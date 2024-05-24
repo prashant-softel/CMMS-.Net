@@ -698,17 +698,16 @@ namespace CMMSAPIs.Repositories.Incident_Reports
             string insertQuerynewinjured = "";
             foreach (var person in request.injured_person)
             {
-                foreach (var injured in injuredid)
+
+                if (person.injured_item_id == null)
                 {
-                    if (person.injured_item_id != injured.injured_item_id)
+                    insertQuerynewinjured = "INSERT INTO injured_person (incidents_id, person_id, person_type, age, sex, designation, address, name_contractor, body_part_and_nature_of_injury, work_experience_years, plant_equipment_involved, location_of_incident) VALUES ";
                     {
-                        insertQuerynewinjured = "INSERT INTO injured_person (incidents_id, person_id, person_type, age, sex, designation, address, name_contractor, body_part_and_nature_of_injury, work_experience_years, plant_equipment_involved, location_of_incident) VALUES ";
-                        {
-                            insertQuerynewinjured += $"({incident_id}, '{person.person_id}', {person.person_type}, {person.age}, {person.sex}, '{person.designation}', '{person.address}', '{person.name_contractor}', '{person.body_part_and_nature_of_injury}', {person.work_experience_years}, '{person.plant_equipment_involved}', '{person.location_of_incident}')";
-                            await Context.ExecuteNonQry<int>(insertQuerynewinjured).ConfigureAwait(false);
-                        }
+                        insertQuerynewinjured += $"({incident_id}, '{person.person_id}', {person.person_type}, {person.age}, {person.sex}, '{person.designation}', '{person.address}', '{person.name_contractor}', '{person.body_part_and_nature_of_injury}', {person.work_experience_years}, '{person.plant_equipment_involved}', '{person.location_of_incident}')";
+                        await Context.ExecuteNonQry<int>(insertQuerynewinjured).ConfigureAwait(false);
                     }
                 }
+
 
             }
 

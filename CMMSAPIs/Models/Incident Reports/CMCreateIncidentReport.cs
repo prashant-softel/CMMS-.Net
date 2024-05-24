@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 
@@ -43,17 +42,17 @@ namespace CMMSAPIs.Models.Incident_Reports
 
         // New modifications added 25-11-2023
 
-        public int incidet_type_id { get; set; } 
-        public string location_of_incident { get; set; } 
-        public string type_of_job { get; set; } 
-        public string is_activities_trained { get; set; } 
-        public string is_person_authorized { get; set; } 
-        public string instructions_given { get; set; } 
+        public int incidet_type_id { get; set; }
+        public string location_of_incident { get; set; }
+        public string type_of_job { get; set; }
+        public string is_activities_trained { get; set; }
+        public string is_person_authorized { get; set; }
+        public string instructions_given { get; set; }
         public string safety_equipments { get; set; }
-        public string safe_procedure_observed { get; set; } 
-        public string unsafe_condition_contributed { get; set; } 
-        public string unsafe_act_cause { get; set; } 
-        public string is_person_involved { get; set; } 
+        public string safe_procedure_observed { get; set; }
+        public string unsafe_condition_contributed { get; set; }
+        public string unsafe_act_cause { get; set; }
+        public string is_person_involved { get; set; }
         public List<CMInjured_person> injured_person { get; set; }
         public List<CMWhy_why_analysis> why_why_analysis { get; set; }
         public List<CMRoot_cause> root_cause { get; set; }
@@ -72,7 +71,7 @@ namespace CMMSAPIs.Models.Incident_Reports
         public string person_name { get; set; }
         public int person_type { get; set; }
         public string person_type_name { get; set; }
-        public string designation { get; set; } 
+        public string designation { get; set; }
         public DateTime? investigation_date { get; set; }
     }
     public class CMProposed_action_plan
@@ -111,7 +110,7 @@ namespace CMMSAPIs.Models.Incident_Reports
 
     public class CMInjured_person
     {
-        public int injured_item_id { get; set; }
+        public int? injured_item_id { get; set; }
         public int incidents_id { get; set; }
         public string person_id { get; set; }
         public int person_type { get; set; }

@@ -926,7 +926,9 @@ namespace CMMSAPIs.Repositories.Users
         {
             int id = 0;
             string qry = $"SELECT " +
-                            $"u.id, CONCAT(firstName, ' ', lastName) as full_name, loginId as user_name,DATE_FORMAT(u.createdAt,'%Y-%m-%d ') as  createdAt ,DATE_FORMAT(u.updatedAt,'%Y-%m-%d ') as updatedAt, mobileNumber as contact_no, r.id as role_id, r.name as role_name, CASE WHEN u.status=0 THEN 'Inactive' ELSE 'Active' END AS status, photo.id AS photoId, photo.file_path AS photoPath, sign.id AS signatureId, sign.file_path AS signaturePath " +
+                            $"u.id, CONCAT(firstName, ' ', lastName) as full_name, loginId as user_name,DATE_FORMAT(u.createdAt,'%Y-%m-%d ') as  createdAt ,DATE_FORMAT(u.updatedAt,'%Y-%m-%d ') as updatedAt, mobileNumber as contact_no," +
+                            $" r.id as role_id, r.name as role_name, CASE WHEN u.status=0 THEN 'Inactive' ELSE 'Active' END AS status, photo.id AS photoId, photo.file_path AS photoPath, sign.id AS signatureId, sign.file_path AS signaturePath, " +
+                            $" u.secondaryEmail as SecondaryName,u.firstName,u.lastName,u.birthday,u.gender,u.mobileNumber,u.bloodGroup,u.landlineNumber,c.name as Country ,states.name as State ,cities.name as City,u.zipcode as zipcodes,u.isEmployee as employees, u.joiningDate as joining_dates " +
                          $"FROM " +
                             $"Users as u " +
                          $"JOIN " +
@@ -937,7 +939,10 @@ namespace CMMSAPIs.Repositories.Users
                             $"uploadedfiles as photo ON photo.id = u.photoId " +
                          $"LEFT JOIN " +
                             $"uploadedfiles as sign ON sign.id = u.signatureId " +
-                         $"WHERE " +
+                            $"LEFT JOIN countries as c on c.id = u.countryId " +
+                            $"LEFT JOIN states on states.id = u.stateId " +
+                            $"LEFT JOIN cities on cities.id = u.cityId " +
+                            $"WHERE " +
                             $"uf.facilityId = {facility_id}";
 
             List<CMUser> user_list = await Context.GetData<CMUser>(qry).ConfigureAwait(false);

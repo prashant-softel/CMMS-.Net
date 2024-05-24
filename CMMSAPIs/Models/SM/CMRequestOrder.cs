@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
-using System;
+﻿using System;
+using System.Collections.Generic;
 
 namespace CMMSAPIs.Models.SM
 {
-    
+
     public class CMRequestOrder
     {
         public int id { get; set; }
@@ -13,7 +13,7 @@ namespace CMMSAPIs.Models.SM
         //public int order_by_type { get; set; }
         public string remarks { get; set; }
         public string rejectedRemark { get; set; }
-     
+
         public DateTime? request_date { get; set; }
         public int vendorID { get; set; }
         public int status { get; set; }
@@ -56,7 +56,7 @@ namespace CMMSAPIs.Models.SM
     }
     public class CMRequestOrder_ITEMS
     {
-        public int itemID { get; set; }
+        public int? itemID { get; set; }
         public int requestID { get; set; }
         public int assetMasterItemID { get; set; }
         public decimal cost { get; set; }
@@ -152,7 +152,7 @@ namespace CMMSAPIs.Models.SM
 
         public string rejectedBy { get; set; }
         public DateTime? rejectedAt { get; set; }
-        public string approvedBy { get; set; }      
+        public string approvedBy { get; set; }
         public DateTime? approvedAt { get; set; }
         public DateTime? generatedAt { get; set; }
         public int number_of_masters { get; set; }

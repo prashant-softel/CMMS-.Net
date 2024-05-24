@@ -18,11 +18,18 @@ namespace CMMSAPIs.Models.Masters
         public int status { get; set; }
         public DateTime CreatedAt { get; set; }
         public int CreatedBy { get; set; }
-        public DateTime UpdateAt { get; set; }
-        public int UpdateBy { get; set; }
+        public DateTime UpdatedAt { get; set; }
+        public int UpdatedBy { get; set; }
 
         public List<int> uploadfile_ids { get; set; }
 
+    }
+    public class CMTRAININGCATE
+    {
+        public int id { get; set; }
+        public string name { set; get; }
+        public string description { get; set; }
+        public int status { get; set; }
     }
 
 }

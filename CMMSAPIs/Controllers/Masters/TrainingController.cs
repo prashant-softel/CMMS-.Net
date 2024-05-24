@@ -34,12 +34,12 @@ namespace CMMSAPIs.Controllers.Masters
         }
         [Route("GetCourseList")]
         [HttpGet]
-        public async Task<IActionResult> GetCourseList(int facility_id)
+        public async Task<IActionResult> GetCourseList(int facility_id, DateTime from_date, DateTime to_date)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await TrainingCourseBS.GetCourseList(facility_id);
+                var data = await TrainingCourseBS.GetCourseList(facility_id, from_date, to_date);
 
                 return Ok(data);
             }
@@ -48,7 +48,23 @@ namespace CMMSAPIs.Controllers.Masters
                 throw ex;
             }
         }
-        [Route("UpdateCourseList")]
+        [Route("GetCourseDetailById")]
+        [HttpGet]
+        public async Task<IActionResult> GetCourseDetailById(int id)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await TrainingCourseBS.GetCourseDetailById(id);
+
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        [Route("UpdateCourse")]
         [HttpPatch]
         public async Task<IActionResult> UpdateCourse(CMTrainingCourse request)
         {
@@ -63,8 +79,8 @@ namespace CMMSAPIs.Controllers.Masters
                 throw ex;
             }
         }
-        [Route("DleteCourseList")]
-        [HttpPatch]
+        [Route("DeleteCourse")]
+        [HttpDelete]
         public async Task<IActionResult> DeleteCourse(int id)
         {
             try
@@ -123,6 +139,74 @@ namespace CMMSAPIs.Controllers.Masters
                 return Ok(data);
             }
             catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        //Master Of training
+        [Route("GetTrainingCategorty")]
+        [HttpGet]
+
+        public async Task<IActionResult> GetTrainingCategorty(int id)
+        {
+            try
+            {
+
+                var data = await TrainingCourseBS.GetTrainingCategorty(id);
+                return Ok(data);
+
+            }
+            catch (Exception ex)
+            {
+
+                return BadRequest(ex.Message);
+            }
+
+        }
+        [Route("CreateTrainingCategorty")]
+        [HttpPost]
+        public async Task<IActionResult> CreateTrainingCategorty(CMTRAININGCATE request)
+        {
+
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await TrainingCourseBS.CreateTrainingCategorty(request, userID);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+        }
+        [Route("UpdateTrainingCategorty")]
+        [HttpPut]
+        public async Task<IActionResult> UpdateTrainingCategorty(CMTRAININGCATE request)
+        {
+
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await TrainingCourseBS.UpdateTrainingCategorty(request, userID);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+        }
+        [Route("DeleteTrainingCategorty")]
+        public async Task<IActionResult> DeleteTrainingCategorty(int id)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await TrainingCourseBS.DeleteTrainingCategorty(id, userID);
+                return Ok(data);
+            }
+            catch
             {
                 throw;
             }
