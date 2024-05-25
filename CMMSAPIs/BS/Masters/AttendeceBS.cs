@@ -11,7 +11,7 @@ namespace CMMSAPIs.BS.Masters
     public interface AttendeceBS
     {
         Task<CMDefaultResponse> CreateAttendance(CMCreateAttendence requset, int userID);
-        Task<object> GetAttendanceByDetails(int facility_id, DateTime from_date, DateTime to_date);
+        Task<object> GetAttendanceByDetails(int facility_id, DateTime date);
         Task<CMDefaultResponse> UpdateAttendance(CMCreateAttendence requests, int userID);
 
 
@@ -43,14 +43,14 @@ namespace CMMSAPIs.BS.Masters
             }
         }
 
-        public async Task<object> GetAttendanceByDetails(int facility_id, DateTime from_date, DateTime to_date)
+        public async Task<object> GetAttendanceByDetails(int facility_id, DateTime date)
         {
 
             try
             {
                 using (var repos = new AttendenceRepository(getDB))
                 {
-                    return await repos.GetAttendanceByDetails(facility_id, from_date, to_date);
+                    return await repos.GetAttendanceByDetails(facility_id, date);
 
                 }
             }
