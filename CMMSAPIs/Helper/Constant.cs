@@ -1,5 +1,5 @@
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
 
 namespace CMMSAPIs.Helper
 {
@@ -7,7 +7,7 @@ namespace CMMSAPIs.Helper
     {
         // Token expiration time
         public const int TOKEN_EXPIRATION_TIME = 30;
-	public const int TOKEN_RENEW_TIME = 30;
+        public const int TOKEN_RENEW_TIME = 30;
         public Dictionary<CMMS_Modules, int> module_dict = new Dictionary<CMMS_Modules, int>()
         {
             { CMMS_Modules.DASHBOARD, 1 },
@@ -47,7 +47,7 @@ namespace CMMSAPIs.Helper
             { CMMS_Modules.INCIDENT_REPORT, 36 },
             { CMMS_Modules.DSM, 37 },
             { CMMS_Modules.GRIEVANCE, 38 },
-           
+
 
 
         };
@@ -127,7 +127,7 @@ namespace CMMSAPIs.Helper
             CUSTOMER = 3,
             MANUFACTURER = 4,
             SUPPLIER = 5,
-            VENDOR=6,
+            VENDOR = 6,
         }
 
         public enum CMMS_Events
@@ -239,7 +239,7 @@ namespace CMMSAPIs.Helper
             SM_GO,
             SM_MRS,
             SM_MRS_RETURN,
-            SM_S2S,          
+            SM_S2S,
             SM_RO,
 
             AUDIT_PLAN = 41,
@@ -247,7 +247,7 @@ namespace CMMSAPIs.Helper
             AUDIT_SCEHDULE_VIEW,
             AUDIT_EXECUTION,
             AUDIT_SUMMARY,
-         
+
 
 
             HOTO_PLAN = 61,
@@ -256,15 +256,15 @@ namespace CMMSAPIs.Helper
             HOTO_EXECUTION,
             HOTO_SUMMARY,
 
-           
+
 
             MC_PLAN = 81,
             MC_TASK = 82,
-            MC_EXECUTION=83,            
+            MC_EXECUTION = 83,
             CORRECTIVE_MAINTENANCE = 91,
             CALIBRATION = 101,
             VEGETATION = 111,
-            VEGETATION_EXECUTION=112,
+            VEGETATION_EXECUTION = 112,
             WARRANTY_CLAIM = 121,
             INCIDENT_REPORT = 131,
             INVENTORY = 141,
@@ -273,16 +273,20 @@ namespace CMMSAPIs.Helper
 
             USER = 171,
             USER_MODULE,
-            USER_NOTIFICATIONS, 
-            ROLE_DEFAULT_NOTIFICATIONS, 
+            USER_NOTIFICATIONS,
+            ROLE_DEFAULT_NOTIFICATIONS,
             ROLE_DEFAULT_ACCESS_MODULE,
 
             DSM = 181,
-            JobCard=182,
-            
+            JobCard = 182,
+
             GRIEVANCE = 301,
             VEGETATION_TASK = 311,
-            VEGETATION_PLAN = 321
+            VEGETATION_PLAN = 321,
+
+            ATTENDANCE = 400,
+            TRAINING_COURSE,
+
 
         }
 
@@ -292,10 +296,10 @@ namespace CMMSAPIs.Helper
             MEDIUM = 2,
             LOW = 3
         }
-        
-        public static Dictionary<string, int> INCIDENT_RISK_TYPE =  new Dictionary<string, int>() { {"First-Aids Injury", 1 }, { "Electric Short", 2} };
 
-        public static Dictionary<string, int> INCIDENT_SEVERITY = new Dictionary<string, int>() 
+        public static Dictionary<string, int> INCIDENT_RISK_TYPE = new Dictionary<string, int>() { { "First-Aids Injury", 1 }, { "Electric Short", 2 } };
+
+        public static Dictionary<string, int> INCIDENT_SEVERITY = new Dictionary<string, int>()
         { { "Critical", 1 }, { "High", 2 } , { "Medium", 3 }, { "Low", 4 } };
 
         /* Features Constant END */
@@ -408,19 +412,19 @@ namespace CMMSAPIs.Helper
             PM_CANCELLED,
             PM_DELETED,
             PM_UPDATED, //Only for notification purpose
-            
+
             PM_SUBMIT,//for temp only
             PM_LINK_PTW,
             PM_TASK_DELETED,
-           
-           
-            IR_CREATED_INITIAL = 181,         
+
+
+            IR_CREATED_INITIAL = 181,
             IR_REJECTED_INITIAL,
             IR_APPROVED_INITIAL,
 
             IR_CREATED_INVESTIGATION,
             IR_REJECTED_INVESTIGATION,
-            IR_APPROVED_INVESTIGATION,           
+            IR_APPROVED_INVESTIGATION,
             IR_UPDATED, // Only for notification purpose
             IR_Cancel,
             IR_Close,
@@ -448,8 +452,8 @@ namespace CMMSAPIs.Helper
             CALIBRATION_CLOSED,
             CALIBRATION_REJECTED,
             CALIBRATION_APPROVED,
-            
-			INVENTORY_IMPORTED = 221,
+
+            INVENTORY_IMPORTED = 221,
             INVENTORY_ADDED,
             INVENTORY_UPDATED,
             INVENTORY_DELETED,
@@ -480,21 +484,21 @@ namespace CMMSAPIs.Helper
             //SM_PO_CLOSED_APPROVED,      //7
 
 
-            MRS_SUBMITTED =321,
+            MRS_SUBMITTED = 321,
             MRS_REQUEST_REJECTED,
-            MRS_REQUEST_APPROVED,             
-            MRS_REQUEST_ISSUED ,
-            MRS_REQUEST_ISSUED_REJECTED ,
-            MRS_REQUEST_ISSUED_APPROVED ,
-	        MRS_REQUEST_RETURN,
-            
+            MRS_REQUEST_APPROVED,
+            MRS_REQUEST_ISSUED,
+            MRS_REQUEST_ISSUED_REJECTED,
+            MRS_REQUEST_ISSUED_APPROVED,
+            MRS_REQUEST_RETURN,
 
-   
-            
+
+
+
             //GO_SHORT_CLOSED_BY_STORE_KEEPER,
             GO_WITHDRAW_BY_ADMINISTRATOR,
 
-         
+
             SM_RO_DRAFT = 341,
             SM_RO_SUBMITTED,
             SM_RO_SUBMIT_REJECTED,
@@ -515,7 +519,7 @@ namespace CMMSAPIs.Helper
             MC_TASK_ABANDONED,
             MC_TASK_APPROVED,
             MC_TASK_REJECTED,
-            MC_TASK_UPDATED,            
+            MC_TASK_UPDATED,
 
             VEG_PLAN_DRAFT = 370,
             VEG_PLAN_SUBMITTED,
@@ -545,7 +549,7 @@ namespace CMMSAPIs.Helper
             AUDIT_START,
             AUDIT_DELETED,
             AUDIT_REJECTED,
-            AUDIT_APPROVED,           
+            AUDIT_APPROVED,
             AUDIT_SKIP,
             AUDIT_SKIP_REJECT,
             AUDIT_SKIP_APPROVED,
@@ -571,7 +575,7 @@ namespace CMMSAPIs.Helper
 
         public enum checklist_type
         {
-            PM=1,
+            PM = 1,
             HOTO,
             Audit,
         }
@@ -590,13 +594,13 @@ namespace CMMSAPIs.Helper
 
         public enum SM_Actor_Types
         {
-            Vendor = 1, 
+            Vendor = 1,
             Store,
             PM_Task,
             JobCard,
             Engineer,
             Inventory,
-            NonOperational        
+            NonOperational
         }
         public enum SM_AssetTypes
         {
@@ -631,7 +635,7 @@ namespace CMMSAPIs.Helper
             Contractor,
             Other
         }
-	            public enum MISConsumptionTypes
+        public enum MISConsumptionTypes
         {
             Procurement = 1,
             Consumption

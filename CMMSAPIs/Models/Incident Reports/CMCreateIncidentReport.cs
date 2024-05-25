@@ -10,7 +10,7 @@ namespace CMMSAPIs.Models.Incident_Reports
         public int block_id { get; set; }
         public int equipment_id { get; set; }
         public int risk_level { get; set; }
-        public int severity_id { get; set; }
+        public string severity { get; set; }
         public DateTime incident_datetime { get; set; }
         public int victim_id { get; set; }
         public int action_taken_by { get; set; }

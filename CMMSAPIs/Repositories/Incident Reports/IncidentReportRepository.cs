@@ -180,7 +180,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
                      ")" +
                      "VALUES" +
                      "(" +
-                         $"{request.facility_id}, {request.block_id}, {request.equipment_id}, {request.severity_id}, {request.risk_level}, '{request.incident_datetime.ToString("yyyy-MM-dd HH:mm:ss")}', {request.victim_id}, {request.action_taken_by}, '{request.action_taken_datetime.ToString("yyyy-MM-dd HH:mm:ss")}', {request.inverstigated_by}, {request.verified_by}, {request.risk_type}, {request.esi_applicability}, {request.legal_applicability}, {request.rca_required}, {request.damaged_cost}, {request.generation_loss}, {request.damaged_cost_curr_id}, {request.generation_loss_curr_id}, '{request.title}', '{request.description}', {request.is_insurance_applicable}, '{request.insurance}', {request.insurance_status}, '{request.insurance_remark}', {(int)CMMS.CMMS_Status.IR_CREATED_INITIAL}, {userId}, '{UtilsRepository.GetUTCTime()}', '{UtilsRepository.GetUTCTime()}', '{request.location_of_incident}', '{request.type_of_job}', '{request.is_activities_trained}'," +
+                         $"{request.facility_id}, {request.block_id}, {request.equipment_id},' {request.severity}', {request.risk_level}, '{request.incident_datetime.ToString("yyyy-MM-dd HH:mm:ss")}', {request.victim_id}, {request.action_taken_by}, '{request.action_taken_datetime.ToString("yyyy-MM-dd HH:mm:ss")}', {request.inverstigated_by}, {request.verified_by}, {request.risk_type}, {request.esi_applicability}, {request.legal_applicability}, {request.rca_required}, {request.damaged_cost}, {request.generation_loss}, {request.damaged_cost_curr_id}, {request.generation_loss_curr_id}, '{request.title}', '{request.description}', {request.is_insurance_applicable}, '{request.insurance}', {request.insurance_status}, '{request.insurance_remark}', {(int)CMMS.CMMS_Status.IR_CREATED_INITIAL}, {userId}, '{UtilsRepository.GetUTCTime()}', '{UtilsRepository.GetUTCTime()}', '{request.location_of_incident}', '{request.type_of_job}', '{request.is_activities_trained}'," +
                          $" '{request.is_person_authorized}', '{request.instructions_given}', '{request.safety_equipments}', '{request.safe_procedure_observed}', '{request.unsafe_condition_contributed}', '{request.unsafe_act_cause}', {request.incidet_type_id}, '{request.esi_applicability_remark}','{request.legal_applicability_remark}','{request.rca_required_remark}','{request.is_person_involved}' " +
                      ") ; SELECT LAST_INSERT_ID()";
 
@@ -495,25 +495,25 @@ namespace CMMSAPIs.Repositories.Incident_Reports
             string strRiskType = "";
             string strParanthesis = "";
 
-            foreach (var kvp in CMMS.INCIDENT_RISK_TYPE)
-            {
-                strRiskType += $"If(risk_type = '{kvp.Value}', '{kvp.Key}',";
-                strParanthesis += ")";
-            }
+            //  foreach (var kvp in CMMS.INCIDENT_RISK_TYPE)
+            //  {
+            //      strRiskType += $"If(risk_type = '{kvp.Value}', '{kvp.Key}',";
+            //      strParanthesis += ")";
+            //   }
 
-            string severityName = "CASE ";
-            foreach (KeyValuePair<string, int> severity in CMMS.INCIDENT_SEVERITY)
-            {
-                severityName += $"WHEN incident.severity = {severity.Value} THEN '{severity.Key}' ";
-            }
-            severityName += $"ELSE 'Invalid severity' END";
+            /* string severityName = "CASE ";
+             foreach (KeyValuePair<string, int> severity in CMMS.INCIDENT_SEVERITY)
+             {
+                 severityName += $"WHEN incident.severity = {severity.Value} THEN '{severity.Key}' ";
+             }
+             severityName += $"ELSE 'Invalid severity' END";
 
-
-            strRiskType = strRiskType.Substring(0, (strRiskType.Length - 1)) + ",''" + strParanthesis + " as risk_type_name ";
+             */
+            //    strRiskType = strRiskType.Substring(0, (strRiskType.Length - 1)) + ",''" + strParanthesis + " as risk_type_name ";
 
 
             string myQuery = $"SELECT " +
-                               $"incident.id as id,incident.title, incident.description,facilities.id as facility_id, facilities.name as facility_name, blockName.id as block_id, blockName.name as block_name, assets.id as equipment_id,  assets.name as equipment_name,{severityName} as severity,incident.risk_level as risk_level ,IF(risk_level = '1','high',IF(risk_level ='2','medium','Low')) as risk_level_name, incident.incident_datetime as incident_datetime, incident.created_at as reporting_datetime,incident.action_taken_datetime ,user.id as victim_id, user.firstName as victim_name , user1.id as action_taken_by,  CONCAT(user1.firstName, user1.lastName) as action_taken_by_name, user2.id as inverstigated_by ,  CONCAT(user2.firstName, user2.lastName) as inverstigated_by_name , user3.id as verified_by ,CONCAT(user3.firstName, user3.lastName) as verified_by_name, incident.risk_type as risk_type, " + strRiskType + ",esi_applicability as esi_applicability,IF(esi_applicability = '1', 'YES', 'NO') as esi_applicability_name,legal_applicability as legal_applicability, IF(legal_applicability = '1', 'YES', 'NO') as legal_applicability_name, rca_required , IF(rca_required = '1', 'YES', 'NO') as rca_required_name, incident.damaged_cost AS damaged_cost, incident.generation_loss as generation_loss,incident.damaged_cost_curr_id, incident.generation_loss_curr_id, job.id as job_id, job.title as job_name , job.description as description , IF(is_insurance_applicable = '1', 'YES', 'NO') as is_insurance_applicable_name, incident.insurance_status as insurance_status, incident.insurance as insurance_name, incident.insurance_remark as insurance_remark, user4.id as approved_by ,CONCAT(user4.firstName, user4.lastName) as approved_by_name, CONCAT(user5.firstName, user5.lastName) as created_by_name,created_by as created_by_id, CONCAT(user6.firstName, user6.lastName) as updated_by_name, incident.status as status, incident.approved_at as approved_at,incident.reject_reccomendations as reject_comment " +
+                               $"incident.id as id,incident.title, incident.description,facilities.id as facility_id, facilities.name as facility_name, blockName.id as block_id, blockName.name as block_name, assets.id as equipment_id,  assets.name as equipment_name,incident.severity as severity,incident.risk_level as risk_level ,IF(risk_level = '1','high',IF(risk_level ='2','medium','Low')) as risk_level_name, incident.incident_datetime as incident_datetime, incident.created_at as reporting_datetime,incident.action_taken_datetime ,user.id as victim_id, user.firstName as victim_name , user1.id as action_taken_by,  CONCAT(user1.firstName, user1.lastName) as action_taken_by_name, user2.id as inverstigated_by ,  CONCAT(user2.firstName, user2.lastName) as inverstigated_by_name , user3.id as verified_by ,CONCAT(user3.firstName, user3.lastName) as verified_by_name, incident.risk_type as risk_type,ict.incidenttype as risk_type_name,esi_applicability as esi_applicability,IF(esi_applicability = '1', 'YES', 'NO') as esi_applicability_name,legal_applicability as legal_applicability, IF(legal_applicability = '1', 'YES', 'NO') as legal_applicability_name, rca_required , IF(rca_required = '1', 'YES', 'NO') as rca_required_name, incident.damaged_cost AS damaged_cost, incident.generation_loss as generation_loss,incident.damaged_cost_curr_id, incident.generation_loss_curr_id, job.id as job_id, job.title as job_name , job.description as description , IF(is_insurance_applicable = '1', 'YES', 'NO') as is_insurance_applicable_name, incident.insurance_status as insurance_status, incident.insurance as insurance_name, incident.insurance_remark as insurance_remark, user4.id as approved_by ,CONCAT(user4.firstName, user4.lastName) as approved_by_name, CONCAT(user5.firstName, user5.lastName) as created_by_name,created_by as created_by_id, CONCAT(user6.firstName, user6.lastName) as updated_by_name, incident.status as status, incident.approved_at as approved_at,incident.reject_reccomendations as reject_comment " +
                                " ,esi_applicability_remark\r\n,legal_applicability_remark\r\n,location_of_incident\r\n,type_of_job\r\n,is_activities_trained\r\n,is_person_authorized\r\n,instructions_given\r\n,safety_equipments\r\n,safe_procedure_observed\r\n,unsafe_condition_contributed\r\n,unsafe_act_cause,incident.cancel_remarks, incident.is_person_involved, incident.approved_remarks, incident.is_why_why_required,incident.is_investigation_required FROM incidents as incident " +
                                "LEFT JOIN facilities AS facilities on facilities.id = incident.facility_id " +
                                "LEFT JOIN facilities AS blockName on blockName.id = incident.block_id  and blockName.isBlock = 1 " +
@@ -525,6 +525,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
                                "LEFT JOIN users as user3 on incident.verified_by = user3.id " +
                                "LEFT JOIN users as user4 on incident.approved_by = user4.id " +
                                "LEFT JOIN users as user5 on incident.created_by = user5.id " +
+                               "LEFT JOIN incidenttype as ict on incident.risk_type=ict.id " +
                                "LEFT JOIN users as user6 on incident.updated_by = user6.id " +
                                " where incident.id = " + id;
 
@@ -603,8 +604,8 @@ namespace CMMSAPIs.Repositories.Incident_Reports
                 updateQry += $" block_id = {request.block_id},";
             if (request.risk_level > 0)
                 updateQry += $" equipment_id = {request.risk_level},";
-            if (request.severity_id > 0)
-                updateQry += $" severity = {request.severity_id},";
+
+            updateQry += $" severity = '{request.severity}' ,";
             if (request.equipment_id > 0)
                 updateQry += $" equipment_id = {request.equipment_id},";
             if (request.incident_datetime != DateTime.Parse("01-01-0001 00:00:00"))

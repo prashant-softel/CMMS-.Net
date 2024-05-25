@@ -30,6 +30,7 @@ namespace CMMSAPIs.Models.Incident_Reports
         public int verified_by { get; set; }
         public string verified_by_name { get; set; }
         public int risk_type { get; set; }
+
         public string risk_type_name { get; set; }
         public int esi_applicability { get; set; }
         public string esi_applicability_name { get; set; }
@@ -38,7 +39,7 @@ namespace CMMSAPIs.Models.Incident_Reports
         public int rca_required { get; set; }
         public string rca_required_name { get; set; }
         public double damaged_cost { get; set; }
-        public int damaged_cost_curr_id{ get; set; }
+        public int damaged_cost_curr_id { get; set; }
         public int generation_loss { get; set; }
         public int generation_loss_curr_id { get; set; }
 
@@ -108,7 +109,7 @@ namespace CMMSAPIs.Models.Incident_Reports
     public class CMFileDetails
     {
         public int id { get; set; }
-        public string fileName { get; set; }                   
+        public string fileName { get; set; }
         public string description { get; set; }
     }
 }

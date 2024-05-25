@@ -1,9 +1,3 @@
-using System;
-using System.Collections.Generic;
-using CMMSAPIs.Models.Utils;
-using System.Linq;
-using System.Threading.Tasks;
-
 namespace CMMSAPIs.Models.Permits
 {
     public class CMPermitList
@@ -26,6 +20,7 @@ namespace CMMSAPIs.Models.Permits
         public dynamic issued_datetime { get; set; }
         public int approved_by_id { get; set; }
         public string approved_by_name { get; set; }
+        public dynamic endDate { get; set; }
         public dynamic approved_datetime { get; set; }
         public string current_status_short { get; set; }
         public string current_status_long { get; set; }

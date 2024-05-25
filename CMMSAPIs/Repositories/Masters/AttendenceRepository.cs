@@ -55,10 +55,10 @@ namespace CMMSAPIs.Repositories.Masters
             return response;
         }
 
-        internal async Task<object> GetAttendanceByDetails(int facility_id, DateTime from_date, DateTime to_date)
+        internal async Task<object> GetAttendanceByDetails(int facility_id, DateTime date)
         {
-            DateTime Dates = from_date;
-            string employeeFilter = " WHERE (DATE(ea.Date) >= '" + from_date.ToString("yyyy-MM-dd") + "' AND DATE(ea.Date) <= '" + to_date.ToString("yyyy-MM-dd") + "')";
+            DateTime Dates = date;
+            string employeeFilter = " WHERE (DATE(ea.Date) >= '" + date.ToString("yyyy-MM-dd") + "')";
             employeeFilter += " AND ea.facility_id = " + facility_id;
 
             string getEmployeeAttendance = $"SELECT ea.id AS Id, ea.attendance_id AS Attendance_Id, ea.facility_id AS Facility_Id, ea.employee_id AS Employee_Id, ea.present AS Present, ea.in_time AS In_Time, ea.out_time AS Out_Time,(DATE_FORMAT(ea.Date ,'%Y-%m-%d')) as Dates " +
@@ -93,7 +93,7 @@ namespace CMMSAPIs.Repositories.Masters
                 outTime = ea.Out_Time
             }).ToList();
 
-            string contractorFilter = " WHERE (DATE(contractor_attendnace.Date) >= '" + from_date.ToString("yyyy-MM-dd") + "' AND DATE(contractor_attendnace.Date) <= '" + to_date.ToString("yyyy-MM-dd") + "')";
+            string contractorFilter = " WHERE (DATE(contractor_attendnace.Date) >= '" + date.ToString("yyyy-MM-dd") + "')";
             contractorFilter += " AND contractor_attendnace.facility_id = " + facility_id;
 
             string getContractorAttendance = $"SELECT id AS Id, facility_id AS Facility_Id,(DATE_FORMAT(Date ,'%Y-%m-%d')) as Date, contractor_id AS Contractor_Id, age_lessthan_35 AS Age_Less_Than35, age_Between_35_50 AS Age_Between_35And50, age_Greater_50 AS Age_Greater50, Purpose as Purpose " +

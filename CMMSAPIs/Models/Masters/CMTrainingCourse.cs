@@ -6,7 +6,7 @@ namespace CMMSAPIs.Models.Masters
     public class CMTrainingCourse
     {
 
-        public int id { get; set; }
+        public int Id { get; set; }
         public int facility_id { get; set; }
         public string name { get; set; }
         public int category_id { get; set; }
@@ -20,8 +20,11 @@ namespace CMMSAPIs.Models.Masters
         public int CreatedBy { get; set; }
         public DateTime UpdatedAt { get; set; }
         public int UpdatedBy { get; set; }
-
+        public string Traning_category { get; set; }
+        public string Targated_group { get; set; }
         public List<int> uploadfile_ids { get; set; }
+        public List<CMTRAININGFILE> ImageDetails { get; set; }
+
 
     }
     public class CMTRAININGCATE
@@ -30,6 +33,14 @@ namespace CMMSAPIs.Models.Masters
         public string name { set; get; }
         public string description { get; set; }
         public int status { get; set; }
+    }
+    public class CMTRAININGFILE
+    {
+        public int id { get; set; }
+
+        public string description { get; set; }
+        public string fileName { get; set; }
+
     }
 
 }

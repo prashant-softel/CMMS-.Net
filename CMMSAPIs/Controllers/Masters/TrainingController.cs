@@ -147,12 +147,12 @@ namespace CMMSAPIs.Controllers.Masters
         [Route("GetTrainingCategorty")]
         [HttpGet]
 
-        public async Task<IActionResult> GetTrainingCategorty(int id)
+        public async Task<IActionResult> GetTrainingCategorty()
         {
             try
             {
 
-                var data = await TrainingCourseBS.GetTrainingCategorty(id);
+                var data = await TrainingCourseBS.GetTrainingCategorty();
                 return Ok(data);
 
             }
@@ -204,6 +204,75 @@ namespace CMMSAPIs.Controllers.Masters
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
                 var data = await TrainingCourseBS.DeleteTrainingCategorty(id, userID);
+                return Ok(data);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+        //Master Of Targeted Group
+        [Route("GetTargetedGroup")]
+        [HttpGet]
+
+        public async Task<IActionResult> GetTargetedGroup()
+        {
+            try
+            {
+
+                var data = await TrainingCourseBS.GetTargetedGroupList();
+                return Ok(data);
+
+            }
+            catch (Exception ex)
+            {
+
+                return BadRequest(ex.Message);
+            }
+
+        }
+        [Route("CreateTargetedGroup")]
+        [HttpPost]
+        public async Task<IActionResult> CreateTargetedGroup(CMTRAININGCATE request)
+        {
+
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await TrainingCourseBS.CreateTargetedGroup(request, userID);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+        }
+        [Route("UpdateTargetedGroup")]
+        [HttpPut]
+        public async Task<IActionResult> UpdateTargetedGroup(CMTRAININGCATE request)
+        {
+
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await TrainingCourseBS.UpdateTargetedGroup(request, userID);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+        }
+        [Route("DeleteTargetedGroup")]
+        [HttpDelete]
+        public async Task<IActionResult> DeleteTargetedGroup(int id)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await TrainingCourseBS.DeleteTargetedGroup(id, userID);
                 return Ok(data);
             }
             catch

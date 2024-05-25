@@ -32,14 +32,14 @@ namespace CMMSAPIs.Controllers.Masters
                 throw ex;
             }
         }
-        [Route("GetAttendanceList")]
+        [Route("GetAttendanceByDetails")]
         [HttpGet]
-        public async Task<IActionResult> GetAttendanceByDetails(int facility_id, DateTime from_date, DateTime to_date)
+        public async Task<IActionResult> GetAttendanceByDetails(int facility_id, DateTime date)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _attendeceBS.GetAttendanceByDetails(facility_id, from_date, to_date);
+                var data = await _attendeceBS.GetAttendanceByDetails(facility_id, date);
                 return Ok(data);
             }
             catch (Exception ex)
