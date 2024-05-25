@@ -13,17 +13,21 @@ namespace CMMSAPIs.BS.Masters
     {
         Task<CMDefaultResponse> CreateTrainingCourse(CMTrainingCourse request, int userID);
         Task<List<CMTrainingCourse>> GetCourseList(int facility_id, DateTime from_date, DateTime to_date);
+        Task<List<CMTrainingCourse>> GetCourseDetailById(int id);
         Task<CMDefaultResponse> UpdateCourseList(CMTrainingCourse request, int userID);
         Task<CMDefaultResponse> DeleteCourseList(int id, int userID);
         Task<CMDefaultResponse> CreateScheduleCourse();
         Task<CMDefaultResponse> GetScheduleCourse();
 
         Task<CMDefaultResponse> ExecuteScheduleCourse();
-        Task<List<CMTrainingCourse>> GetCourseDetailById(int id);
-        Task<List<CMTRAININGCATE>> GetTrainingCategorty(int id);
+        Task<List<CMTRAININGCATE>> GetTrainingCategorty();
         Task<CMDefaultResponse> CreateTrainingCategorty(CMTRAININGCATE request, int userID);
         Task<CMDefaultResponse> UpdateTrainingCategorty(CMTRAININGCATE request, int userID);
         Task<CMDefaultResponse> DeleteTrainingCategorty(int id, int userID);
+        Task<List<CMTRAININGCATE>> GetTargetedGroupList();
+        Task<CMDefaultResponse> CreateTargetedGroup(CMTRAININGCATE request, int userID);
+        Task<CMDefaultResponse> UpdateTargetedGroup(CMTRAININGCATE request, int userID);
+        Task<CMDefaultResponse> DeleteTargetedGroup(int id, int userID);
     }
     public class Traningbs : TrainingCourseBS
     {
@@ -166,7 +170,7 @@ namespace CMMSAPIs.BS.Masters
         }
         //
 
-        public async Task<List<CMTRAININGCATE>> GetTrainingCategorty(int id)
+        public async Task<List<CMTRAININGCATE>> GetTrainingCategorty()
         {
             try
             {
@@ -234,7 +238,72 @@ namespace CMMSAPIs.BS.Masters
             }
         }
 
+        public async Task<List<CMTRAININGCATE>> GetTargetedGroupList()
+        {
+            try
+            {
+                using (var repos = new TrainingRepository(getDB))
+                {
+                    return await repos.GetTargetedGroupList();
 
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+
+        }
+
+        public async Task<CMDefaultResponse> CreateTargetedGroup(CMTRAININGCATE request, int userID)
+        {
+
+            try
+            {
+                using (var repos = new TrainingRepository(getDB))
+                {
+                    return await repos.CreateTargetedGroup(request);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+
+        }
+
+        public async Task<CMDefaultResponse> UpdateTargetedGroup(CMTRAININGCATE request, int userID)
+        {
+            try
+            {
+                using (var repos = new TrainingRepository(getDB))
+                {
+                    return await repos.UpdateTargetedGroup(request);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> DeleteTargetedGroup(int id, int userID)
+        {
+            try
+            {
+                using (var repos = new TrainingRepository(getDB))
+                {
+                    return await repos.DeleteTargetedGroup(id);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
     }
 }
 
