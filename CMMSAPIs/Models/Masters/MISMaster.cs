@@ -155,6 +155,7 @@ namespace CMMSAPIs.Models.Masters
         public int UpdatedBy { get; set; }
         public DateTime? UpdatedAt { get; set; }
         public int show_opening { get; set; }
+        public int isHazardous { get; set; }
     }
     public class CMWasteData
     {
@@ -309,6 +310,21 @@ namespace CMMSAPIs.Models.Masters
         public decimal consumed_qty { get; set; }
         public decimal closing_qty { get; set; }
         public int show_opening { get; set; }
+
+    }
+    public class CMGetMisWasteData
+    {
+        public int Id { get; set; }
+        public int facilityID { get; set; }
+        public string facilityName { get; set; }
+        public DateTime Date { get; set; }
+        public int WasteTypeId { get; set; }
+        public string Description { get; set; }
+        public int isHazardous { get; set; }
+        public decimal DebitQty { get; set; }
+        public decimal CreditQty { get; set; }
+        public string AddedBy { get; set; }
+        public DateTime? AddedAt { get; set; }
 
     }
 }
