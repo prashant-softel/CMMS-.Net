@@ -62,7 +62,7 @@ namespace CMMSAPIs.BS.MISMasters
         Task<CMDefaultResponse> CreateWaterData(CMMisWaterData request, int userId);
         Task<CMDefaultResponse> UpdateWaterData(CMMisWaterData request, int userId);
         Task<CMDefaultResponse> DeleteWaterData(int id, int userId);
-        Task<List<CMWasteData>> GetWasteDataList(DateTime fromDate, DateTime toDate);
+        Task<List<CMGetMisWasteData>> GetWasteDataList(int facility_id, DateTime fromDate, DateTime toDate, int Hazardous, string facilitytimeZone);
         Task<CMDefaultResponse> CreateWasteData(CMWasteData request, int userID);
         Task<CMDefaultResponse> UpdateWasteData(CMWasteData request, int userID);
         Task<CMDefaultResponse> DeleteWasteData(int Id, int UserID);
@@ -1013,13 +1013,13 @@ namespace CMMSAPIs.BS.MISMasters
                 throw;
             }
         }
-        public async Task<List<CMWasteData>> GetWasteDataList(DateTime fromDate, DateTime toDate)
+        public async Task<List<CMGetMisWasteData>> GetWasteDataList(int facility_id, DateTime fromDate, DateTime toDate, int Hazardous, string facilitytimeZone)
         {
             try
             {
                 using (var repos = new MISMasterRepository(getDB))
                 {
-                    return await repos.GetWasteDataList(fromDate, toDate);
+                    return await repos.GetWasteDataList(facility_id, fromDate, toDate, Hazardous, facilitytimeZone);
                 }
             }
             catch (Exception ex)
