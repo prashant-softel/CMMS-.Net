@@ -3,6 +3,7 @@ using CMMSAPIs.Models.Masters;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Utils;
 using Microsoft.AspNetCore.Hosting;
+using MySqlX.XDevAPI.Common;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -486,8 +487,8 @@ namespace CMMSAPIs.Repositories.Masters
         //changes
         internal async Task<CMDefaultResponse> CreateWasteType(WasteDataType request, int userId)
         {
-            string myQuery = $"INSERT INTO mis_wastetype (facility_id,name,Type,description,status,CreatedAt,CreatedBy, show_opening) VALUES " +
-            $"('{request.facility_id}','{request.name} ',{request.Type},'{request.description}',1,'{UtilsRepository.GetUTCTime()}','{userId}', {request.show_opening});" +
+            string myQuery = $"INSERT INTO mis_wastetype (facility_id,name,Type,description,status,CreatedAt,CreatedBy, show_opening, isHazardous) VALUES " +
+            $"('{request.facility_id}','{request.name} ',{request.Type},'{request.description}',1,'{UtilsRepository.GetUTCTime()}','{userId}', {request.show_opening}, {request.isHazardous});" +
             $"SELECT LAST_INSERT_ID(); ";
             DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
             int id = Convert.ToInt32(dt.Rows[0][0]);
@@ -508,7 +509,7 @@ namespace CMMSAPIs.Repositories.Masters
                 updateQry += $"description = '{request.description}', ";
             if (request.Type != 0)
                 updateQry += $"Type = '{request.Type}', ";
-            updateQry += $"updatedAt = '{UtilsRepository.GetUTCTime()}', show_opening = {request.show_opening} WHERE id = {request.id};";
+            updateQry += $"updatedAt = '{UtilsRepository.GetUTCTime()}', show_opening = {request.show_opening},isHazardous= {request.isHazardous} WHERE id = {request.id};";
             await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
             return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "WasteType updated");
         }
@@ -705,10 +706,24 @@ namespace CMMSAPIs.Repositories.Masters
             return result;
         }
 
-        internal async Task<List<CMWasteData>> GetWasteDataList(DateTime fromDate, DateTime toDate)
+        internal async Task<List<CMGetMisWasteData>> GetWasteDataList(int facility_id,DateTime fromDate, DateTime toDate, int Hazardous,string facilitytimeZone)
         {
-            string SelectQ = "select * from Waste_data where isActive = 1 and DATE_FORMAT(Created_At,'%Y-%m-%d') BETWEEN '" + fromDate.ToString("yyyy-MM-dd") + "' AND '" + toDate.ToString("yyyy-MM-dd") + "'";
-            List<CMWasteData> ListResult = await Context.GetData<CMWasteData>(SelectQ).ConfigureAwait(false);
+            string myQuery = "SELECT M.id, M.facilityId as facilityID,f.name as facilityName, date, waterTypeId, M.description, debitQty, creditQty, \nconcat(added.firstname,' ',added.lastname)  as addedBy, M.Created_At as addedAt,M.isHazardous " +
+                " FROM waste_data M " +
+                " left join mis_wastetype wt on wt.id = waterTypeId " +
+                " left join users added on added.id = M.Created_By " +
+                " left join facilities f on f.id = M.facilityId " +
+                " where isActive = 1 and M.isHazardous = "+ Hazardous + " and DATE_FORMAT(Created_At,'%Y-%m-%d') BETWEEN '" + fromDate.ToString("yyyy-MM-dd") + "' AND '" + toDate.ToString("yyyy-MM-dd") + "';";
+
+            List<CMGetMisWasteData> ListResult = await Context.GetData<CMGetMisWasteData>(myQuery).ConfigureAwait(false);
+            foreach (var results in ListResult)
+            {
+                if (results != null && results.AddedAt != null)
+                    results.AddedAt = (DateTime)await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)results.AddedAt);
+                if (results != null && results.Date != null)
+                    results.Date = (DateTime)await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, results.Date);
+
+            }
             return ListResult;
         }
 
@@ -754,8 +769,18 @@ namespace CMMSAPIs.Repositories.Masters
             {
                 consumeType = (int)CMMS.MISConsumptionTypes.Consumption;
             }
-            string insertQuery = $"INSERT INTO waste_data(facilityId, date, wasteTypeId, description, debitQty, creditQty, Created_By, Created_At,consumeTypeId) VALUES " +
-                 $"({request.facilityID}, '{request.Date.ToString("yyyy-MM-dd")}', {request.wasteTypeId}, '{request.Description}', {request.DebitQty}, {request.CreditQty}, {UserID}, '{UtilsRepository.GetUTCTime()}',{consumeType}); " +
+            int isHazardous = 0;
+            string SelectQ = "select isHazardous from mis_wastetype where ID = '" + request.wasteTypeId + "'";
+            DataTable dt = await Context.FetchData(SelectQ).ConfigureAwait(false);
+            if(dt.Rows.Count > 0)
+            {
+                isHazardous = Convert.ToInt32(dt.Rows[0][0]);
+            }
+      
+
+
+            string insertQuery = $"INSERT INTO waste_data(facilityId, date, wasteTypeId, description, debitQty, creditQty, Created_By, Created_At,consumeTypeId, isHazardous) VALUES " +
+                 $"({request.facilityID}, '{request.Date.ToString("yyyy-MM-dd")}', {request.wasteTypeId}, '{request.Description}', {request.DebitQty}, {request.CreditQty}, {UserID}, '{UtilsRepository.GetUTCTime()}',{consumeType},{isHazardous}); " +
                  $"SELECT LAST_INSERT_ID();";
             DataTable dt2 = await Context.FetchData(insertQuery).ConfigureAwait(false);
             InsertedValue = Convert.ToInt32(dt2.Rows[0][0]);
