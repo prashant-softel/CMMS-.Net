@@ -894,11 +894,13 @@ namespace CMMSAPIs.Controllers.Masters
         }
         [Route("GetWasteDataList")]
         [HttpGet]
-        public async Task<IActionResult> GetWasteDataList(DateTime fromDate, DateTime toDate)
+        public async Task<IActionResult> GetWasteDataList(int facility_id,DateTime fromDate, DateTime toDate, int isHazardous)
         {
             try
             {
-                var data = await _IMISMasterBS.GetWasteDataList(fromDate, toDate);
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+
+                var data = await _IMISMasterBS.GetWasteDataList(facility_id, fromDate, toDate, isHazardous, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
