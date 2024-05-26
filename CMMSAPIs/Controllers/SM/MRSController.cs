@@ -329,6 +329,26 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
+        [Route("CreateReturnFaultyMRS")]
+        [HttpPost]
+        public async Task<IActionResult> CreateReturnFaultyMRS(CMMRS request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _MRSBS.CreateReturnFaultyMRS(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                _AddLog.ErrorLog(ex.ToString());
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid data sent.";
+                return Ok(item);
+            }
+        }
+
         [Route("UpdateReturnMRS")]
         [HttpPost]
         public async Task<IActionResult> UpdateReturnMRS(CMMRS request)
