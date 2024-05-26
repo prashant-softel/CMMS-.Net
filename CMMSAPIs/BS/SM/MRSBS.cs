@@ -23,6 +23,7 @@ namespace CMMSAPIs.BS.SM
         Task<CMMRSList> getReturnDataByID(int ID, string facilitytime);        
         Task<CMMRSAssetTypeList> getAssetTypeByItemID(int ItemID);
         Task<CMDefaultResponse> ReturnMRS(CMMRS request, int UserID);        
+        Task<CMDefaultResponse> CreateReturnFaultyMRS(CMMRS request, int UserID);        
         Task<CMDefaultResponse> UpdateReturnMRS(CMMRS request, int UserID);        
         Task<CMDefaultResponse> mrsApproval(CMMrsApproval request, int userId);        
         Task<CMDefaultResponse> mrsReject(CMApproval request, int userId);        
@@ -204,6 +205,21 @@ namespace CMMSAPIs.BS.SM
                 using (var repos = new MRSRepository(getDB))
                 {
                     return await repos.ReturnMRS(request, UserID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> CreateReturnFaultyMRS(CMMRS request, int UserID)
+        {
+            try
+            {
+                using (var repos = new MRSRepository(getDB))
+                {
+                    return await repos.CreateReturnFaultyMRS(request, UserID);
                 }
             }
             catch (Exception ex)
