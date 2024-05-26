@@ -1935,6 +1935,64 @@ namespace CMMSAPIs.Repositories.SM
             return Response;
 
         }
+        internal async Task<CMDefaultResponse> CreateReturnFaultyMRS(CMMRS request, int UserID)
+        {
+            CMDefaultResponse response = null;
+            bool Queryflag = false;
 
+
+            string updatestmt = $" START TRANSACTION; UPDATE smmrs SET status = {(int)CMMS.CMMS_Status.MRS_SUBMITTED}, facility_ID = {request.facility_ID}, requested_by_emp_ID = {UserID}, requested_date = '{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}'," +
+                $" activity='{request.activity}',whereUsedType={request.whereUsedType},whereUsedRefID={request.whereUsedRefID},is_mrs_return=1 WHERE ID = {request.ID}" +
+                $" ; DELETE FROM smrsitems WHERE mrs_ID =  {request.ID} ; COMMIT;";
+
+            try
+            {
+                await Context.ExecuteNonQry<int>(updatestmt);
+            }
+            catch (Exception ex)
+            {
+                Queryflag = false;
+                throw ex;
+            }
+
+            if (request.cmmrsItems != null)
+            {
+                for (var i = 0; i < request.cmmrsItems.Count; i++)
+                {
+
+                    int equipmentID = request.cmmrsItems[i].asset_item_ID;
+                    decimal quantity = request.cmmrsItems[i].qty;
+
+
+                    try
+                    {
+                        string insertStmt = $"START TRANSACTION; " +
+                        $"INSERT INTO smrsitems (mrs_ID,mrs_return_ID,asset_item_ID,available_qty,requested_qty,returned_qty,return_remarks,flag, is_faulty,is_splited,issued_qty)" +
+                        $"VALUES ({request.ID},{request.ID},{request.cmmrsItems[i].asset_item_ID},{request.cmmrsItems[i].qty}, {request.cmmrsItems[i].requested_qty}, {request.cmmrsItems[i].returned_qty}, '{request.cmmrsItems[i].return_remarks}', 2, {request.cmmrsItems[i].is_faulty},1,{request.cmmrsItems[i].issued_qty})" +
+                        $"; SELECT LAST_INSERT_ID(); COMMIT;";
+                        DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        Queryflag = false;
+                        throw ex;
+                    }
+
+
+                    Queryflag = true;
+                }
+            }
+            if (!Queryflag)
+            {
+                response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Failed to submit MRS return.");
+            }
+            else
+            {
+                response = new CMDefaultResponse(request.ID, CMMS.RETRUNSTATUS.SUCCESS, "MRS return faluty submitted.");
+            }
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_MRS, request.ID, 0, 0, "MRS return faluty submitted.", CMMS.CMMS_Status.MRS_SUBMITTED);
+
+            return response;
+        }
     }
 }
