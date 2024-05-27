@@ -1150,11 +1150,23 @@ namespace CMMSAPIs.Repositories.SM
 
                     try
                     {
-                        string insertStmt = $"START TRANSACTION; " +
-                        $"INSERT INTO smrsitems (mrs_ID,mrs_return_ID,asset_item_ID,available_qty,requested_qty,returned_qty,return_remarks,flag, is_faulty,is_splited,issued_qty)" +
-                        $"VALUES ({request.ID},{MRS_ReturnID},{request.cmmrsItems[i].asset_item_ID},{request.cmmrsItems[i].qty}, {request.cmmrsItems[i].requested_qty}, {request.cmmrsItems[i].returned_qty}, '{request.cmmrsItems[i].return_remarks}', 2, {request.cmmrsItems[i].is_faulty},1,{request.cmmrsItems[i].issued_qty})" +
-                        $"; SELECT LAST_INSERT_ID(); COMMIT;";
-                        DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
+                        if(request.cmmrsItems[i].is_faulty == 1)
+                        {
+                            string insertStmt = $"START TRANSACTION; " +
+                                        $"Update smmrs SET status = {(int)CMMS.CMMS_Status.MRS_SUBMITTED} where id = {request.ID} ;INSERT INTO smrsitems (mrs_ID,mrs_return_ID,asset_item_ID,available_qty,requested_qty,returned_qty,return_remarks,flag, is_faulty,is_splited,issued_qty)" +
+                                        $"VALUES ({request.ID},0,{request.cmmrsItems[i].asset_item_ID},{request.cmmrsItems[i].qty}, {request.cmmrsItems[i].requested_qty}, {request.cmmrsItems[i].returned_qty}, '{request.cmmrsItems[i].return_remarks}', 2, {request.cmmrsItems[i].is_faulty},1,{request.cmmrsItems[i].issued_qty})" +
+                                        $"; SELECT LAST_INSERT_ID(); COMMIT;";
+                            DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
+                        }
+                        else
+                        {
+                            string insertStmt = $"START TRANSACTION; " +
+                                $"INSERT INTO smrsitems (mrs_ID,mrs_return_ID,asset_item_ID,available_qty,requested_qty,returned_qty,return_remarks,flag, is_faulty,is_splited,issued_qty)" +
+                                $"VALUES ({request.ID},{MRS_ReturnID},{request.cmmrsItems[i].asset_item_ID},{request.cmmrsItems[i].qty}, {request.cmmrsItems[i].requested_qty}, {request.cmmrsItems[i].returned_qty}, '{request.cmmrsItems[i].return_remarks}', 2, {request.cmmrsItems[i].is_faulty},1,{request.cmmrsItems[i].issued_qty})" +
+                                $"; SELECT LAST_INSERT_ID(); COMMIT;";
+                            DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
+                        }
+                 
 
                         string updatestmt = $"UPDATE smassetitems SET item_condition = {request.cmmrsItems[i].is_faulty} WHERE ID = {request.cmmrsItems[i].asset_item_ID};";
                         await Context.ExecuteNonQry<int>(updatestmt);
