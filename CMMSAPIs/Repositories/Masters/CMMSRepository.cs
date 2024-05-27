@@ -1,39 +1,29 @@
+using CMMSAPIs.Helper;
+using CMMSAPIs.Models;
+using CMMSAPIs.Models.Calibration;
+using CMMSAPIs.Models.Incident_Reports;
+using CMMSAPIs.Models.JC;
+using CMMSAPIs.Models.Jobs;
+using CMMSAPIs.Models.Masters;
+using CMMSAPIs.Models.Notifications;
+using CMMSAPIs.Models.Permits;
+using CMMSAPIs.Models.Utils;
+using CMMSAPIs.Models.WC;
+using CMMSAPIs.Repositories.Calibration;
+using CMMSAPIs.Repositories.Incident_Reports;
+using CMMSAPIs.Repositories.JC;
+using CMMSAPIs.Repositories.Jobs;
+using CMMSAPIs.Repositories.Permits;
+using CMMSAPIs.Repositories.Utils;
+using CMMSAPIs.Repositories.WC;
+using Microsoft.AspNetCore.Hosting;
+using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Threading.Tasks;
-using CMMSAPIs.Helper;
-using CMMSAPIs.Models.Masters;
-using CMMSAPIs.Models.Utils;
-using CMMSAPIs.Repositories.Utils;
-using CMMSAPIs.Repositories.Jobs;
-using CMMSAPIs.Repositories.Permits;
-using CMMSAPIs.Repositories.JC;
-using CMMSAPIs.Repositories.Incident_Reports;
-using CMMSAPIs.Repositories.WC;
-using CMMSAPIs.Repositories.Calibration;
-using CMMSAPIs.Repositories.Inventory;
-using CMMSAPIs.Models.Jobs;
-using CMMSAPIs.Models.Permits;
-using CMMSAPIs.Models.JC;
-using CMMSAPIs.Models.Incident_Reports;
-using CMMSAPIs.Models.WC;
-using CMMSAPIs.Models.Calibration;
-using CMMSAPIs.Models.Inventory;
-using CMMSAPIs.Models.Notifications;
 using System.IO;
-using System.Web;
-using iTextSharp.text;
-using iTextSharp.text.pdf;
-using iTextSharp.tool.xml;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Hosting;
-using OfficeOpenXml;
 using System.Linq;
-using CMMSAPIs.Models;
-using System.Net.NetworkInformation;
-using CMMSAPIs.Models.SM;
-using CMMSAPIs.Models.Users;
+using System.Threading.Tasks;
 
 namespace CMMSAPIs.Repositories.Masters
 {
@@ -114,7 +104,7 @@ namespace CMMSAPIs.Repositories.Masters
                $"lastModifiedAt , lastModifiedBy ) " +
                $" select id ,{id},0,0,0,0,0,0,0,NOW(),0 from userroles; ";
             DataTable dt_Roles = await Context.FetchData(insertIntoRoles).ConfigureAwait(false);
-            
+
             response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Module Added Successfully");
             return response;
         }
@@ -237,11 +227,11 @@ namespace CMMSAPIs.Repositories.Masters
         {
             string myQuery = "SELECT facilities.id, facilities.name, spv.name as spv, facilities.address, facilities.city, facilities.state, facilities.country, facilities.zipcode as pin " +
                 ", u.name as customer ,u2.name as owner,u3.name as Operator, Facilities.description,Facilities.timezone" +
-                " FROM Facilities LEFT JOIN spv ON facilities.spvId=spv.id LEFT JOIN business as u ON u.id = facilities.customerId LEFT JOIN userfacilities as uf ON uf.facilityId = facilities.id LEFT JOIN business as u2 ON u2.id = facilities.ownerId LEFT JOIN business as u3 ON u3.id = facilities.operatorId WHERE uf.userId = "+ user_id+ " and  isBlock = 0 and facilities.status = 1;";
+                " FROM Facilities LEFT JOIN spv ON facilities.spvId=spv.id LEFT JOIN business as u ON u.id = facilities.customerId LEFT JOIN userfacilities as uf ON uf.facilityId = facilities.id LEFT JOIN business as u2 ON u2.id = facilities.ownerId LEFT JOIN business as u3 ON u3.id = facilities.operatorId WHERE uf.userId = " + user_id + " and  isBlock = 0 and facilities.status = 1;";
 
             List<CMFacilityList> _Facility = await Context.GetData<CMFacilityList>(myQuery).ConfigureAwait(false);
             return _Facility;
-           
+
 
         }
 
@@ -370,7 +360,7 @@ namespace CMMSAPIs.Repositories.Masters
         {
             string myQuery = "SELECT " +
                                     "u.id, loginId as login_id, concat(firstName,' ', lastName) as name, birthday as birthdate, " +
-                                    "gender, mobileNumber, cities.name as city, states.name as state, countries.name as country, zipcode as pin " +
+                                    "gender, mobileNumber, cities.name as city, states.name as state, countries.name as country, zipcode as pin, usd.designationName as designation " +
                              "FROM " +
                                     "Users as u " +
                              "JOIN " +
@@ -383,6 +373,8 @@ namespace CMMSAPIs.Repositories.Masters
                                     "countries as countries ON countries.id = u.countryId and countries.id = cities.country_id and countries.id = states.country_id " +
                              "LEFT JOIN " +
                                     "usersaccess as access ON u.id = access.userId " +
+                             "LEFT JOIN " +
+                                     "userdesignation as usd on  usd.id = u.designation_id   " +
                              "WHERE " +
                                     $"u.status = 1 AND uf.status = 1 AND u.isEmployee = 1 AND uf.facilityId = {facility_id} ";
             if (facility_id < 0)
@@ -430,18 +422,18 @@ namespace CMMSAPIs.Repositories.Masters
             }
             myQuery += " GROUP BY u.id ORDER BY u.id;";
 
-            
+
             List<CMEmployee> _Employee = await Context.GetData<CMEmployee>(myQuery).ConfigureAwait(false);
 
-            foreach(CMEmployee emp in _Employee)
+            foreach (CMEmployee emp in _Employee)
             {
-               
+
                 emp.responsibilityIds = new int[2];
                 emp.responsibilityIds[0] = 1;
                 emp.responsibilityIds[1] = 2;
 
             }
-           
+
             return _Employee;
         }
 
@@ -589,8 +581,8 @@ namespace CMMSAPIs.Repositories.Masters
                 myQuery += $"`contactPerson` = '{request.contactPerson}', ";
             if (request.contactNumber != null && request.contactNumber != "")
                 myQuery += $"`contactNumber` = '{request.contactNumber}', ";
-           // if (request.website != null && request.website != "")
-                myQuery += $"`website` = '{request.website}', ";
+            // if (request.website != null && request.website != "")
+            myQuery += $"`website` = '{request.website}', ";
             if (request.location != null && request.location != "")
                 myQuery += $"`location` = '{request.location}', ";
             if (request.address != null && request.address != "")
@@ -625,7 +617,7 @@ namespace CMMSAPIs.Repositories.Masters
             await Context.ExecuteNonQry<int>(deleteQuery).ConfigureAwait(false);
             return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Business Deleted");
         }
-        internal async Task<List<CMBusiness>> GetBusinessList(int businessType,string facilitytimeZone)
+        internal async Task<List<CMBusiness>> GetBusinessList(int businessType, string facilitytimeZone)
         {
             string myQuery = $"SELECT business.id, business.name, email, contactPerson, contactNumber, website, location, address, cities.id as cityId, cities.name as city, states.id as stateId, states.name as state, countries.id as countryId, countries.name as country, zip, type.id as type, type.name as typeName, business.addedAt " +
                                 $"FROM Business " +
@@ -639,9 +631,9 @@ namespace CMMSAPIs.Repositories.Masters
             List<CMBusiness> _Business = await Context.GetData<CMBusiness>(myQuery).ConfigureAwait(false);
             foreach (var business in _Business)
             {
-                if (business!= null && business.addedAt != null)
+                if (business != null && business.addedAt != null)
                     business.addedAt = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, business.addedAt);
-                
+
             }
             return _Business;
         }
@@ -652,7 +644,7 @@ namespace CMMSAPIs.Repositories.Masters
             List<CMFrequency> _FrequencyList = await Context.GetData<CMFrequency>(myQuery).ConfigureAwait(false);
             return _FrequencyList;
         }
-        
+
         internal async Task<string> Print(int id, CMMS.CMMS_Modules moduleID, params object[] args)
         {
             CMMSNotification.print = true;
@@ -663,13 +655,13 @@ namespace CMMSAPIs.Repositories.Masters
 
                 case CMMS.CMMS_Modules.JOB:
                     JobRepository obj = new JobRepository(getDB);
-                    CMJobView _jobView = await obj.GetJobDetails(id,"");
+                    CMJobView _jobView = await obj.GetJobDetails(id, "");
                     notificationID = (CMMS.CMMS_Status)(_jobView.status);
                     await CMMSNotification.sendNotification(moduleID, notificationID, null, _jobView);
                     break;
                 case CMMS.CMMS_Modules.PTW:
                     PermitRepository obj1 = new PermitRepository(getDB);
-                    CMPermitDetail _Permit = await obj1.GetPermitDetails(id,"");
+                    CMPermitDetail _Permit = await obj1.GetPermitDetails(id, "");
                     notificationID = (CMMS.CMMS_Status)(_Permit.ptwStatus);
                     await CMMSNotification.sendNotification(moduleID, notificationID, null, _Permit);
                     break;
@@ -681,7 +673,7 @@ namespace CMMSAPIs.Repositories.Masters
                     break;
                 case CMMS.CMMS_Modules.INCIDENT_REPORT:
                     IncidentReportRepository obj3 = new IncidentReportRepository(getDB);
-                    CMViewIncidentReport _IncidentReport = await obj3.GetIncidentDetailsReport(id,"");
+                    CMViewIncidentReport _IncidentReport = await obj3.GetIncidentDetailsReport(id, "");
                     notificationID = (CMMS.CMMS_Status)(_IncidentReport.status);
                     await CMMSNotification.sendNotification(moduleID, notificationID, null, _IncidentReport);
                     break;
@@ -693,7 +685,7 @@ namespace CMMSAPIs.Repositories.Masters
                     break;
                 case CMMS.CMMS_Modules.CALIBRATION:
                     CalibrationRepository obj5 = new CalibrationRepository(getDB);
-                    CMCalibrationDetails _Calibration = await obj5.GetCalibrationDetails(id,"");
+                    CMCalibrationDetails _Calibration = await obj5.GetCalibrationDetails(id, "");
                     notificationID = (CMMS.CMMS_Status)(_Calibration.statusID + 100);
                     await CMMSNotification.sendNotification(moduleID, notificationID, null, _Calibration);
                     break;
@@ -842,9 +834,9 @@ namespace CMMSAPIs.Repositories.Masters
                                 m_errorLog.SetError($"[Row {rN}] Contact number cannot be empty.");
                             }
                             //if (Convert.ToString(newR["website"]) == null || Convert.ToString(newR["website"]) == "")
-                           // {
-                           //     m_errorLog.SetError($"[Row {rN}] Website cannot be empty.");
-                           // }
+                            // {
+                            //     m_errorLog.SetError($"[Row {rN}] Website cannot be empty.");
+                            // }
                             if (Convert.ToString(newR["location"]) == null || Convert.ToString(newR["location"]) == "")
                             {
                                 m_errorLog.SetError($"[Row {rN}] Location details cannot be empty.");
@@ -1032,7 +1024,7 @@ namespace CMMSAPIs.Repositories.Masters
             return retValue;
 
         }
-        public async Task<List<CMDashboadModuleWiseList>> getDashboadDetails(string facilityId,CMMS.CMMS_Modules moduleID, DateTime fromDate, DateTime toDate)
+        public async Task<List<CMDashboadModuleWiseList>> getDashboadDetails(string facilityId, CMMS.CMMS_Modules moduleID, DateTime fromDate, DateTime toDate)
         {
 
             List<CMDashboadModuleWiseList> countResult = new List<CMDashboadModuleWiseList>();
@@ -1117,7 +1109,7 @@ namespace CMMSAPIs.Repositories.Masters
         public async Task<CMDashboadDetails> getJobDashboardDetails(string facilityId, DateTime fromDate, DateTime toDate)
         {
             CMDashboadDetails result = new CMDashboadDetails();
-            if(facilityId == "")
+            if (facilityId == "")
             {
                 return result;
             }
@@ -1142,7 +1134,7 @@ namespace CMMSAPIs.Repositories.Masters
                 $" WHERE job.facilityId in ({facilityId}) {filter} " +
                 $" GROUP BY job.id order by job.id DESC;";
             List<CMDashboadItemList> itemList = await Context.GetData<CMDashboadItemList>(myQuery).ConfigureAwait(false);
-                 foreach(CMDashboadItemList _Job in itemList)
+            foreach (CMDashboadItemList _Job in itemList)
             {
                 //if (_Job.ptw_id == 0)
                 //{
@@ -1223,7 +1215,7 @@ namespace CMMSAPIs.Repositories.Masters
 
 
             result.total = itemList.Count;
-            result.completed = itemList.Where(x=>x.latestJCStatus == (int)CMMS.CMMS_Status.PTW_APPROVED).ToList().Count;
+            result.completed = itemList.Where(x => x.latestJCStatus == (int)CMMS.CMMS_Status.PTW_APPROVED).ToList().Count;
             //result.pending = result.total - itemList.Where(x => x.latestJCPTWStatus != (int)CMMS.CMMS_Status.PTW_APPROVED).ToList().Count;
             result.pending = result.total - result.completed;
 
@@ -1237,7 +1229,7 @@ namespace CMMSAPIs.Repositories.Masters
                 result.wo_delay = wo_delay;
                 result.wo_backlog = wo_backlog;
             }
-            result.item_list = itemList; 
+            result.item_list = itemList;
             return result;
         }
 
@@ -1263,7 +1255,7 @@ namespace CMMSAPIs.Repositories.Masters
                    $"left join pm_plan  on pm_task.plan_id = pm_plan.id " +
                    $"left join assetcategories as cat  on pm_task.category_id = cat.id " +
                    $"left join permits as permit on pm_task.PTW_id = permit.id " +
-                   $"left join frequency as freq on pm_task.frequency_id = freq.id "+
+                   $"left join frequency as freq on pm_task.frequency_id = freq.id " +
                    $" JOIN facilities ON pm_task.facility_id = facilities.id " +
                    $" WHERE facilities.id in ({facilityId})  and status_id = 1 {filter};";
             List<CMDashboadItemList> itemList = await Context.GetData<CMDashboadItemList>(myQuery).ConfigureAwait(false);
@@ -1288,8 +1280,8 @@ namespace CMMSAPIs.Repositories.Masters
             result.item_list = itemList;
 
             int completed_on_time = itemList.Where(x => (x.status == (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED) && (x.start_date == x.start_date)).ToList().Count;
-            int wo_delay = itemList.Where(x => (x.status == (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED ) && x.start_date != x.start_date).ToList().Count;
-            int wo_backlog = itemList.Where(x => (x.status != (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED ) && x.start_date != x.start_date).ToList().Count;
+            int wo_delay = itemList.Where(x => (x.status == (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED) && x.start_date != x.start_date).ToList().Count;
+            int wo_backlog = itemList.Where(x => (x.status != (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED) && x.start_date != x.start_date).ToList().Count;
 
             if (result.total > 0)
             {
@@ -1297,7 +1289,7 @@ namespace CMMSAPIs.Repositories.Masters
                 result.wo_delay = wo_delay;
                 result.wo_backlog = wo_backlog;
             }
-            
+
             return result;
         }
         internal static string getShortStatus_PM_Plan(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status m_notificationID)
@@ -1395,10 +1387,10 @@ namespace CMMSAPIs.Repositories.Masters
              $"LEFT JOIN users as assignedTo ON assignedTo.id = mc.assignedTo " +
             $"LEFT JOIN users as createdBy ON createdBy.id = mc.createdById " +
             $"LEFT JOIN users as approvedBy ON approvedBy.id = mc.approvedById where moduleType=1 {filter} ";
-       
-            
-                myQuery1 += $" and facilityId in ({facilityId}) ";
-            
+
+
+            myQuery1 += $" and facilityId in ({facilityId}) ";
+
             List<CMDashboadItemList> itemList = await Context.GetData<CMDashboadItemList>(myQuery1).ConfigureAwait(false);
 
             result.created = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.MC_PLAN_DRAFT).ToList().Count;
@@ -1468,7 +1460,7 @@ namespace CMMSAPIs.Repositories.Masters
                 $" LEFT JOIN users as user on incident.approved_by = user.id " +
                 $" LEFT JOIN users as created_by on incident.created_by = created_by.id " +
                 $" LEFT JOIN users as user1 on incident.verified_by = user1.id " +
-                $" where " + filter + " "+Datefilter+" order by incident.id asc";
+                $" where " + filter + " " + Datefilter + " order by incident.id asc";
 
             List<CMIncidentList> getIncidentList = await Context.GetData<CMIncidentList>(selectqry).ConfigureAwait(false);
 
@@ -1551,7 +1543,7 @@ namespace CMMSAPIs.Repositories.Masters
         {
             CMDashboadDetails result = new CMDashboadDetails();
 
-           
+
             string filter = " facilityID in (" + facilityId + ")";
             string datefilter = "";
 
@@ -1582,7 +1574,7 @@ namespace CMMSAPIs.Repositories.Masters
                 "  LEFT JOIN smassetmasters s2 ON s2.item_category_ID = sic.ID\r\n        )  t2 ON t2.master_ID = sam.ID\r\n " +
                 "       LEFT JOIN facilities fc ON fc.id = po.facilityID\r\nLEFT JOIN users as vendor on vendor.id=po.vendorID " +
                 "       LEFT JOIN business bl ON bl.id = po.vendorID left join smassettypes stt on stt.ID = pod.order_type LEFT JOIN currency curr ON curr.id = po.currency LEFT JOIN users ed ON ed.id = po.generated_by" +
-                " WHERE " + filter + " "+datefilter+"";
+                " WHERE " + filter + " " + datefilter + "";
 
 
             List<CMGoodsOrderList> _List = await Context.GetData<CMGoodsOrderList>(query).ConfigureAwait(false);
@@ -1595,7 +1587,7 @@ namespace CMMSAPIs.Repositories.Masters
                 asset_name = p.asset_name,
                 status = p.status,
                 start_date = p.purchaseDate
-               
+
             }).GroupBy(p => p.wo_number).Select(group => group.First()).OrderBy(p => p.wo_number).ToList();
 
 
@@ -1604,7 +1596,7 @@ namespace CMMSAPIs.Repositories.Masters
                 CMDashboadItemList item = new CMDashboadItemList();
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_List[i].status);
                 string _longStatus = getShortStatus_GO(CMMS.CMMS_Modules.SM_GO, _Status);
-                item.status_long = _longStatus;              
+                item.status_long = _longStatus;
             }
 
             result.created = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.GO_DRAFT).ToList().Count;
@@ -1616,7 +1608,7 @@ namespace CMMSAPIs.Repositories.Masters
 
 
             result.total = itemList.Count;
-            result.completed = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.GO_APPROVED ).ToList().Count;
+            result.completed = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.GO_APPROVED).ToList().Count;
             result.pending = result.total - result.completed;
             result.item_list = itemList;
             result.po_items_awaited = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.GO_CLOSED).ToList().Count;
