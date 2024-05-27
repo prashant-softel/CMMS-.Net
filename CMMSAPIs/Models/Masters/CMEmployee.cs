@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace CMMSAPIs.Models.Masters
 {
@@ -19,7 +17,7 @@ namespace CMMSAPIs.Models.Masters
         public string country { get; set; }
         public int pin { get; set; }
         public int[] responsibilityIds { get; set; }
-
+        public string designation { get; set; }
         public List<CMResposibility> responsibility { get; set; }
 
     }

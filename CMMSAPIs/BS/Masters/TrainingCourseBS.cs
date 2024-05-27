@@ -16,7 +16,7 @@ namespace CMMSAPIs.BS.Masters
         Task<List<CMTrainingCourse>> GetCourseDetailById(int id);
         Task<CMDefaultResponse> UpdateCourseList(CMTrainingCourse request, int userID);
         Task<CMDefaultResponse> DeleteCourseList(int id, int userID);
-        Task<CMDefaultResponse> CreateScheduleCourse();
+        Task<CMDefaultResponse> CreateScheduleCourse(TrainingSchedule request, int userID);
         Task<CMDefaultResponse> GetScheduleCourse();
 
         Task<CMDefaultResponse> ExecuteScheduleCourse();
@@ -119,13 +119,13 @@ namespace CMMSAPIs.BS.Masters
             }
         }
 
-        public async Task<CMDefaultResponse> CreateScheduleCourse()
+        public async Task<CMDefaultResponse> CreateScheduleCourse(TrainingSchedule request, int userID)
         {
             try
             {
                 using (var repos = new TrainingRepository(getDB))
                 {
-                    return await repos.CreateScheduleCourse();
+                    return await repos.CreateScheduleCourse(request, userID);
 
                 }
             }

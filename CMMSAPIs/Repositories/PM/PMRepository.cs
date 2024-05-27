@@ -520,7 +520,7 @@ namespace CMMSAPIs.Repositories.PM
 
         internal async Task<CMImportFileResponse> ImportPMPlanFile(int file_id, int Facility, int userID)
         {
-            int no = Facility;
+            int FID = Facility;
             int facilityid = 0;
             string queryplan;
             CMImportFileResponse response = new CMImportFileResponse();
@@ -688,7 +688,14 @@ namespace CMMSAPIs.Repositories.PM
                             newR["Frequency"] = newR[4];
                             newR["AssignedTo"] = newR[5];
                             newR["Approval"] = newR[6];
-
+                            string fqr = $"select id From facilities where name='{newR["PlantName"]}';";
+                            DataTable dt = await Context.FetchData(fqr).ConfigureAwait(false);
+                            int id = Convert.ToInt32(dt.Rows[0][0]);
+                            if (FID != id)
+                            {
+                                m_errorLog.SetError($"[Row: {rN}] Invalid Plant Name '{newR["PlantName"]}'.");
+                                continue;
+                            }
                             try
                             {
                                 newR["plantID"] = facilities[Convert.ToString(newR["PlantName"]).ToUpper()];

@@ -81,7 +81,7 @@ namespace CMMSAPIs.Repositories.Masters
                 foreach (int data in request.uploadfile_ids)
                 {
 
-                    string qryuploadFiles = $"UPDATE uploadedfiles SET facility_id = {request.facility_id},description={request.description}, module_type={(int)CMMS.CMMS_Modules.TRAINING_COURSE},module_ref_id={id} where id = {data}";
+                    string qryuploadFiles = $"UPDATE uploadedfiles SET facility_id = {request.facility_id},description='{request.description}', module_type={(int)CMMS.CMMS_Modules.TRAINING_COURSE},module_ref_id={id} where id = {data}";
                     await Context.ExecuteNonQry<int>(qryuploadFiles).ConfigureAwait(false);
                 }
             }
@@ -160,9 +160,15 @@ namespace CMMSAPIs.Repositories.Masters
         }
 
 
-        internal async Task<CMDefaultResponse> CreateScheduleCourse()
+        internal async Task<CMDefaultResponse> CreateScheduleCourse(TrainingSchedule request, int userID)
         {
-            return null;
+            string crtqry = $"INSERT INTO training_schedule (CourseId,Course_name, ScheduleDate, TraingCompany, Trainer, Online,Comment,CreatedAt,CreatedBy) values " +
+                            $"('{request.CourseId}',{request.CourseName},'{request.DateOfTraining}',{request.TrainingAgencyId},{request.TrainerName},{request.online},{request.Comment},'{UtilsRepository.GetUTCTime()}',{userID}) ; " +
+                            $"SELECT LAST_INSERT_ID();";
+            DataTable dt = await Context.FetchData(crtqry).ConfigureAwait(false);
+            int id = Convert.ToInt32(dt.Rows[0][0]);
+
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Schedule Created Successfully.");
         }
 
 

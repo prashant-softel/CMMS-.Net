@@ -96,12 +96,12 @@ namespace CMMSAPIs.Controllers.Masters
         }
         [Route("CreateScheduleCourse")]
         [HttpPost]
-        public async Task<IActionResult> CreateScheduleCourse()
+        public async Task<IActionResult> CreateScheduleCourse(TrainingSchedule request)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await TrainingCourseBS.CreateScheduleCourse();
+                var data = await TrainingCourseBS.CreateScheduleCourse(request, userID);
                 return Ok(data);
 
             }

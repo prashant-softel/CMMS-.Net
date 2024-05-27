@@ -1,13 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Facility;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Utils;
-using CMMSAPIs.Models.Notifications;
+using System;
+using System.Collections.Generic;
 using System.Data;
+using System.Threading.Tasks;
 
 namespace CMMSAPIs.Repositories.Facility
 {
@@ -253,10 +251,10 @@ namespace CMMSAPIs.Repositories.Facility
             CMDefaultResponse response = new CMDefaultResponse(block_id, CMMS.RETRUNSTATUS.SUCCESS, "Block Deleted Successfully");
             return response;
         }
-        internal async Task<List<FacilityListEmployee>>GetFacilityListEmployee(int facility_id)
+        internal async Task<List<FacilityListEmployee>> GetFacilityListEmployee(int facility_id)
         {
             string myQuery = $"SELECT u.id, loginId as login_id, concat(firstName,' ', lastName) as name,uf.isemployee, birthday as birthdate, gender, mobileNumber, cities.name as city, states.name as state, countries.name as country, zipcode as pin FROM Users as u JOIN UserFacilities as uf ON u.id = uf.userId LEFT JOIN cities as cities ON cities.id = u.cityId LEFT JOIN states as states ON states.id = u.stateId and states.id = cities.state_id LEFT JOIN countries as countries ON countries.id = u.countryId and countries.id = cities.country_id and countries.id = states.country_id LEFT JOIN usersaccess as access ON u.id = access.userId WHERE uf.isemployee=1 and  u.status = 1 AND uf.status = 1  AND u.isEmployee = 1 AND uf.facilityId = {facility_id}  GROUP BY u.id ORDER BY u.id ;";
-        List<FacilityListEmployee> _Facility = await Context.GetData<FacilityListEmployee>(myQuery).ConfigureAwait(false);
+            List<FacilityListEmployee> _Facility = await Context.GetData<FacilityListEmployee>(myQuery).ConfigureAwait(false);
 
 
             foreach (FacilityListEmployee emp in _Facility)
@@ -268,20 +266,21 @@ namespace CMMSAPIs.Repositories.Facility
 
             }
 
-         
+
             return _Facility;
         }
-        internal async Task<List<FacilityListEmployee>> GetEmployeeListbyFeatureId(int facility_id,int featureid)
+        internal async Task<List<FacilityListEmployee>> GetEmployeeListbyFeatureId(int facility_id, int featureid)
         {
-            string myQuery = $"SELECT u.id, loginId as login_id, concat(firstName,' ', lastName) as name,uf.isemployee, birthday as birthdate, gender, mobileNumber, cities.name as city, states.name as state, countries.name as country, zipcode as pin  " +               
+            string myQuery = $"SELECT u.id, loginId as login_id, concat(firstName,' ', lastName) as name,uf.isemployee, usd.designationName as designation, birthday as birthdate, gender, mobileNumber, cities.name as city, states.name as state, countries.name as country, zipcode as pin  " +
                              $"FROM  Users as u  JOIN UserFacilities as uf ON u.id = uf.userId  " +
                              $"LEFT JOIN cities as cities ON cities.id = u.cityId  " +
                              $"LEFT JOIN states as states ON states.id = u.stateId and states.id = cities.state_id  " +
                              $"LEFT JOIN countries as countries ON countries.id = u.countryId and countries.id = cities.country_id and countries.id = states.country_id  " +
                              $"LEFT JOIN usersaccess as access ON u.id = access.userId  " +
+                             $"LEFT JOIN  userdesignation as usd on  usd.id = u.designation_id " +
                              $"WHERE uf.isemployee = 1 and access.featureId ={featureid} and access.edit = 1 and u.status = 1 AND uf.status = 1  " +
                              $"AND uf.facilityId = {facility_id} GROUP BY u.id ORDER BY u.id;";
-            List<FacilityListEmployee> _FacilityByFeatureid= await Context.GetData<FacilityListEmployee>(myQuery).ConfigureAwait(false);
+            List<FacilityListEmployee> _FacilityByFeatureid = await Context.GetData<FacilityListEmployee>(myQuery).ConfigureAwait(false);
 
 
             foreach (FacilityListEmployee emp in _FacilityByFeatureid)

@@ -793,7 +793,7 @@ namespace CMMSAPIs.Repositories.Users
             if (request.company_id > 0)
                 updateQry += $"companyId = {request.company_id}, ";
             if (request.company_id > 0)
-                updateQry += $"designation_id = {request.designation_id}, ";
+                updateQry += $"designation_id   = {request.designation_id}, ";
             if (request.joiningDate != null)
                 updateQry += $"joiningDate = '{((DateTime)request.joiningDate).ToString("yyyy-MM-dd HH:mm:ss")}', ";
             if (request.report_to_id > 0)

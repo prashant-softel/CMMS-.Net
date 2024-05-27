@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace CMMSAPIs.Models.Facility
 {
@@ -47,8 +44,11 @@ namespace CMMSAPIs.Models.Facility
         public string state { get; set; }
         public string country { get; set; }
         public int pin { get; set; }
+
+        public string designation { get; set; }
+
         public int[] responsibilityIds { get; set; }
 
-        
+
     }
 }
