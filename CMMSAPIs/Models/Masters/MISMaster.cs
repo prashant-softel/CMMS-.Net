@@ -325,6 +325,7 @@ namespace CMMSAPIs.Models.Masters
         public decimal CreditQty { get; set; }
         public string AddedBy { get; set; }
         public DateTime? AddedAt { get; set; }
-
+        public string updatedBy { get; set; }
+        public DateTime? updatedAt { get; set; }
     }
 }
