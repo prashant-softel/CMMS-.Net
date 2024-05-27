@@ -578,6 +578,7 @@ namespace CMMSAPIs.Helper
             PM = 1,
             HOTO,
             Audit,
+            MIS
         }
         public enum SM_OrderByType
         {
