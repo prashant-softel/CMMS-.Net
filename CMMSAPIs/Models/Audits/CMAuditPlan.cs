@@ -20,6 +20,7 @@ namespace CMMSAPIs.Models.Audit
         public string assignedTo { get; set; }
         public List<string> Employees { get; set; }
         public bool is_PTW { get; set; }
+        public int Module_Type_id { get; set; }
     }
 
     public class CMCreateAuditPlan : CMAuditPlan
@@ -45,5 +46,6 @@ namespace CMMSAPIs.Models.Audit
         public DateTime Schedule_Date { get; set; }
         public DateTime created_at { get; set; }
         public string created_by { get; set; }
+        public int Module_Type_id { get; set; }
     }
 }
