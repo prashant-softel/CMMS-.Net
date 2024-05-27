@@ -309,9 +309,9 @@ namespace CMMSAPIs.Controllers.SM
 
 
         //[Authorize]
-        [Route("ReturnMRS")]
+        [Route("CreateReturnMRS")]
         [HttpPost] 
-        public async Task<IActionResult> ReturnMRS(CMMRS request)
+        public async Task<IActionResult> CreateReturnMRS(CMMRS request)
         {
             try
             {
