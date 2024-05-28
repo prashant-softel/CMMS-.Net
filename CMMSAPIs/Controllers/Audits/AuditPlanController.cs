@@ -29,13 +29,13 @@ namespace CMMSAPIs.Controllers.Audits
         //[Authorize]
         [Route("GetAuditPlanList")]
         [HttpGet]
-        public async Task<IActionResult> GetAuditPlanList(int facility_id, DateTime fromDate, DateTime toDate)
+        public async Task<IActionResult> GetAuditPlanList(int facility_id, DateTime fromDate, DateTime toDate,int module_type_id)
         {
             try
             {
                 var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
 
-                var data = await _AuditPlanBS.GetAuditPlanList(facility_id, fromDate, toDate, facilitytimeZone);
+                var data = await _AuditPlanBS.GetAuditPlanList(facility_id, fromDate, toDate, facilitytimeZone, module_type_id);
                 return Ok(data);
             }
             catch (Exception ex)
