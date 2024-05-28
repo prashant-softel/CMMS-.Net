@@ -1,32 +1,30 @@
 using CMMSAPIs.Helper;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using CMMSAPIs.Repositories.SM;
 using CMMSAPIs.Models.SM;
 using CMMSAPIs.Models.Utils;
-using CMMSAPIs.Models.Users;
+using CMMSAPIs.Repositories.SM;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace CMMSAPIs.BS.SM
 {
     public interface IMRSBS
     {
-        Task<CMDefaultResponse> CreateMRS(CMMRS request, int UserID);        
-        Task<CMDefaultResponse> updateMRS(CMMRS request, int UserID);        
-        Task<List<CMMRSList>> getMRSList(int facility_ID, int emp_id, DateTime toDate, DateTime fromDate, int status,string facilitytime);
+        Task<CMDefaultResponse> CreateMRS(CMMRS request, int UserID);
+        Task<CMDefaultResponse> updateMRS(CMMRS request, int UserID);
+        Task<List<CMMRSList>> getMRSList(int facility_ID, int emp_id, DateTime toDate, DateTime fromDate, int status, string facilitytime);
         Task<List<CMMRSListByModule>> getMRSListByModule(int jobId, int pmId, string facilitytime);
-        Task<List<CMMRSItems>> getMRSItems(int ID, string facilitytime);        
-        Task<List<CMMRSItemsBeforeIssue>> getMRSItemsBeforeIssue(int ID, string facilitytime);        
-        Task<List<CMMRSItemsBeforeIssue>> getMRSItemsWithCode(int ID, string facilitytime);        
-        Task<CMMRSList> getMRSDetails(int ID,string facilitytime );        
-        Task<CMMRSList> getReturnDataByID(int ID, string facilitytime);        
+        Task<List<CMMRSItems>> getMRSItems(int ID, string facilitytime);
+        Task<List<CMMRSItemsBeforeIssue>> getMRSItemsBeforeIssue(int ID, string facilitytime);
+        Task<List<CMMRSItemsBeforeIssue>> getMRSItemsWithCode(int ID, string facilitytime);
+        Task<CMMRSList> getMRSDetails(int ID, string facilitytime);
+        Task<CMMRSList> getReturnDataByID(int ID, string facilitytime);
         Task<CMMRSAssetTypeList> getAssetTypeByItemID(int ItemID);
-        Task<CMDefaultResponse> ReturnMRS(CMMRS request, int UserID);        
-        Task<CMDefaultResponse> CreateReturnFaultyMRS(CMMRS request, int UserID);        
-        Task<CMDefaultResponse> UpdateReturnMRS(CMMRS request, int UserID);        
-        Task<CMDefaultResponse> mrsApproval(CMMrsApproval request, int userId);        
-        Task<CMDefaultResponse> mrsReject(CMApproval request, int userId);        
+        Task<CMDefaultResponse> ReturnMRS(CMMRS request, int UserID);
+        Task<CMDefaultResponse> CreateReturnFaultyMRS(CMMRS request, int UserID);
+        Task<CMDefaultResponse> UpdateReturnMRS(CMMRS request, int UserID);
+        Task<CMDefaultResponse> mrsApproval(CMMrsApproval request, int userId);
+        Task<CMDefaultResponse> mrsReject(CMApproval request, int userId);
         Task<CMDefaultResponse> ApproveMRSReturn(CMApproval request, int UserID);
         Task<CMDefaultResponse> RejectMRSReturn(CMApproval request, int UserID);
         void UpdateAssetStatus(int assetItemID, int status);
@@ -35,7 +33,7 @@ namespace CMMSAPIs.BS.SM
         Task<CMDefaultResponse> MRSIssue(CMMRS request, int UserID);
         Task<CMDefaultResponse> ApproveMRSIssue(CMApproval request, int userId);
         Task<CMDefaultResponse> RejectMRSIssue(CMApproval request, int userId);
-        Task<List<CMMRSList>> GetMRSReturnList(int facility_ID, int emp_id, string facilitytime);
+        Task<List<CMMRSList>> GetMRSReturnList(int facility_ID, bool self_view, int userID, string facilitytime);
         Task<CMDefaultResponse> TransactionDetails(List<CMTransferItems> request);
         Task<CMDefaultResponse> updateUsedQty(List<CMTransferItems> request);
         Task<CMIssuedAssetItems> getIssuedAssetItems(int id);
@@ -86,7 +84,7 @@ namespace CMMSAPIs.BS.SM
             {
                 using (var repos = new MRSRepository(getDB))
                 {
-                    return await repos.getMRSList(facility_ID, emp_id, toDate, fromDate, status,facilitytime);
+                    return await repos.getMRSList(facility_ID, emp_id, toDate, fromDate, status, facilitytime);
                 }
             }
             catch (Exception ex)
@@ -95,13 +93,13 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public  async Task<List<CMMRSListByModule>> getMRSListByModule(int jobId, int pmId, string facilitytime)
-        { 
+        public async Task<List<CMMRSListByModule>> getMRSListByModule(int jobId, int pmId, string facilitytime)
+        {
             try
             {
                 using (var repos = new MRSRepository(getDB))
                 {
-                    return await repos.getMRSListByModule( jobId, pmId, facilitytime);
+                    return await repos.getMRSListByModule(jobId, pmId, facilitytime);
                 }
             }
             catch (Exception ex)
@@ -110,8 +108,8 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<CMMRSItems>> getMRSItems(int ID,string facilitytime)
-           {
+        public async Task<List<CMMRSItems>> getMRSItems(int ID, string facilitytime)
+        {
             try
             {
                 using (var repos = new MRSRepository(getDB))
@@ -124,8 +122,8 @@ namespace CMMSAPIs.BS.SM
                 throw;
             }
         }
-        
-        public async Task<List<CMMRSItemsBeforeIssue>> getMRSItemsBeforeIssue(int ID,string facilitytime)
+
+        public async Task<List<CMMRSItemsBeforeIssue>> getMRSItemsBeforeIssue(int ID, string facilitytime)
         {
             try
             {
@@ -140,7 +138,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<CMMRSItemsBeforeIssue>> getMRSItemsWithCode(int ID,string facilitytime)
+        public async Task<List<CMMRSItemsBeforeIssue>> getMRSItemsWithCode(int ID, string facilitytime)
         {
             try
             {
@@ -308,7 +306,7 @@ namespace CMMSAPIs.BS.SM
             {
                 using (var repos = new MRSRepository(getDB))
                 {
-                     repos.UpdateAssetStatus(assetItemID, status);
+                    repos.UpdateAssetStatus(assetItemID, status);
                 }
             }
             catch (Exception ex)
@@ -322,7 +320,7 @@ namespace CMMSAPIs.BS.SM
             {
                 using (var repos = new MRSRepository(getDB))
                 {
-                   return await repos.getLastTemplateData(ID);
+                    return await repos.getLastTemplateData(ID);
                 }
             }
             catch (Exception ex)
@@ -390,13 +388,13 @@ namespace CMMSAPIs.BS.SM
                 throw;
             }
         }
-        public async Task<List<CMMRSList>> GetMRSReturnList(int facility_ID, int emp_id, string facilitytime)
+        public async Task<List<CMMRSList>> GetMRSReturnList(int facility_ID, bool self_view, int userID, string facilitytime)
         {
             try
             {
                 using (var repos = new MRSRepository(getDB))
                 {
-                    return await repos.GetMRSReturnList(facility_ID, emp_id, facilitytime);
+                    return await repos.GetMRSReturnList(facility_ID, self_view, userID, facilitytime);
                 }
             }
             catch (Exception ex)
@@ -443,18 +441,18 @@ namespace CMMSAPIs.BS.SM
                     CMDefaultResponse response = new CMDefaultResponse();
                     foreach (var request in requestList)
                     {
-                        var result = await repos.updateUsedQty(request.facilityID, request.fromActorID, request.fromActorType, request.toActorID, request.toActorType, request.assetItemID, request.qty, request.refType, request.refID, request.remarks, request.mrsID,0,0, request.mrsItemID);
+                        var result = await repos.updateUsedQty(request.facilityID, request.fromActorID, request.fromActorType, request.toActorID, request.toActorType, request.assetItemID, request.qty, request.refType, request.refID, request.remarks, request.mrsID, 0, 0, request.mrsItemID);
                         if (result == 0)
                         {
                             response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.SUCCESS, "Item updated.");
                         }
-                        else if(result == 1)
+                        else if (result == 1)
                         {
                             response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.FAILURE, "Item requesting more than available quantity.");
                         }
                         else if (result == 2)
                         {
-                            response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.FAILURE, "MRS Id ( "+request.mrsItemID+" ) not found.");
+                            response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.FAILURE, "MRS Id ( " + request.mrsItemID + " ) not found.");
                         }
                         else if (result == 3)
                         {
@@ -469,7 +467,7 @@ namespace CMMSAPIs.BS.SM
                 throw;
             }
         }
-        
+
         public async Task<CMIssuedAssetItems> getIssuedAssetItems(int id)
         {
             try

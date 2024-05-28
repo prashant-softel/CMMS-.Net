@@ -1,33 +1,14 @@
+using CMMSAPIs.Helper;
+using CMMSAPIs.Models.SM;
+using CMMSAPIs.Models.Utils;
+using CMMSAPIs.Repositories.Utils;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
-using CMMSAPIs.Helper;
-using CMMSAPIs.Models.PM;
-using CMMSAPIs.Models.SM;
-using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using CMMSAPIs.Repositories.Utils;
-using CMMSAPIs.Models.Utils;
-using System.Data;
-using CMMSAPIs.Models.Users;
-using MySql.Data.MySqlClient;
-using System.Transactions;
-using Microsoft.IdentityModel.Tokens;
-using System.Diagnostics;
-using System.ComponentModel;
-using Google.Protobuf.WellKnownTypes;
-using System.Runtime.CompilerServices;
-using System.Xml.Linq;
-using Org.BouncyCastle.Ocsp;
-using System.Collections;
-using System.Security.Cryptography.Xml;
-using static Org.BouncyCastle.Math.EC.ECCurve;
-using Microsoft.Extensions.Configuration;
-using Ubiety.Dns.Core;
-using CMMSAPIs.Models;
-using System.Reflection;
 
 namespace CMMSAPIs.Repositories.SM
 {
@@ -39,10 +20,10 @@ namespace CMMSAPIs.Repositories.SM
             _utilsRepo = new UtilsRepository(sqlDBHelper);
         }
 
-        internal async Task<List<CMMRSList>> getMRSList(int facility_ID, int emp_id, DateTime toDate, DateTime fromDate, int status,string facilitytimeZone)
+        internal async Task<List<CMMRSList>> getMRSList(int facility_ID, int emp_id, DateTime toDate, DateTime fromDate, int status, string facilitytimeZone)
 
         {
-            
+
             string filter = " WHERE sm.facility_ID = " + facility_ID + "  AND  (DATE_FORMAT(sm.lastmodifieddate,'%Y-%m-%d') BETWEEN '" + fromDate.ToString("yyyy-MM-dd") + "' AND '" + toDate.ToString("yyyy-MM-dd") + "' OR DATE_FORMAT(sm.returnDate,'%Y-%m-%d') BETWEEN '" + fromDate.ToString("yyyy-MM-dd") + "' AND '" + toDate.ToString("yyyy-MM-dd") + "')";
 
 
@@ -54,7 +35,7 @@ namespace CMMSAPIs.Repositories.SM
                 "FROM smmrs sm LEFT JOIN users ed ON ed.id = sm.requested_by_emp_ID LEFT JOIN users ed1 ON ed1.id = sm.approved_by_emp_ID " +
                 "" + filter + "";
             List<CMMRSList> _List = await Context.GetData<CMMRSList>(stmt).ConfigureAwait(false);
-           
+
 
             for (var i = 0; i < _List.Count; i++)
             {
@@ -73,16 +54,16 @@ namespace CMMSAPIs.Repositories.SM
                 }
 
             }
-           foreach(var list in _List)
+            foreach (var list in _List)
             {
-             
-               
-               /* if (list != null && list.requestd_date != null && list.requestd_date!="")
-                {
-                    DateTime requestd_date = Convert.ToDateTime(list.requestd_date);
-                    requestd_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, requestd_date);
-                    list.requestd_date = requestd_date.ToString();
-                }*/
+
+
+                /* if (list != null && list.requestd_date != null && list.requestd_date!="")
+                 {
+                     DateTime requestd_date = Convert.ToDateTime(list.requestd_date);
+                     requestd_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, requestd_date);
+                     list.requestd_date = requestd_date.ToString();
+                 }*/
                 if (list != null && list.returnDate != null && list.returnDate != "")
                 {
                     DateTime returnDate = DateTime.Parse(list.returnDate);
@@ -96,16 +77,16 @@ namespace CMMSAPIs.Repositories.SM
                     list.issued_date = issued_date.ToString();
                 }
             }
-           
+
             return _List;
-          }
+        }
 
         private DateTime TimeSpanConverter(string approval_date)
         {
             throw new NotImplementedException();
         }
 
-        internal async Task<List<CMMRSListByModule>> getMRSListByModule(int jobId, int pmId,string facilitytimeZone)
+        internal async Task<List<CMMRSListByModule>> getMRSListByModule(int jobId, int pmId, string facilitytimeZone)
         {
             int Id = 0;
             string filter = "";
@@ -139,7 +120,7 @@ namespace CMMSAPIs.Repositories.SM
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_List[i].status);
                 string _shortStatus = getShortStatus(CMMS.CMMS_Modules.SM_MRS, _Status);
                 _List[i].status_short = _shortStatus;
-                if(_List[i].is_mrs_return == 0)
+                if (_List[i].is_mrs_return == 0)
                 {
                     // filling original MRS Items list
                     _List[i].CMMRSItems = await getMRSItems(_List[i].mrsId, facilitytimeZone);
@@ -152,25 +133,25 @@ namespace CMMSAPIs.Repositories.SM
                     {
                         _List[i].mrsId = _List[i].CMMRSItems[0].original_mrs_ID;
                     }
-                   
+
                 }
 
                 if (_List[i].CMMRSItems.Count > 0)
                 {
-                    for(var k=0;k< _List[i].CMMRSItems.Count; k++)
+                    for (var k = 0; k < _List[i].CMMRSItems.Count; k++)
                     {
                         _List[i].CMMRSItems[k].available_qty = _List[i].CMMRSItems[k].available_qty - _List[i].CMMRSItems[k].issued_qty;
-                        if(_List[i].CMMRSItems[k].available_qty < 0)
+                        if (_List[i].CMMRSItems[k].available_qty < 0)
                         {
                             _List[i].CMMRSItems[k].available_qty = 0;
                         }
                     }
                 }
-                for(var j=0;j < _List[i].CMMRSItems.Count; j++)
+                for (var j = 0; j < _List[i].CMMRSItems.Count; j++)
                 {
                     assetItemNames = assetItemNames + _List[i].CMMRSItems[j].asset_name + ", ";
                 }
-                if(assetItemNames.Count() > 0)
+                if (assetItemNames.Count() > 0)
                 {
                     assetItemNames = assetItemNames.Substring(0, assetItemNames.Length - 2);
                 }
@@ -178,7 +159,7 @@ namespace CMMSAPIs.Repositories.SM
                 _List[i].mrs_return_ID = _List[i].CMMRSItems[0].mrs_return_ID;
 
             }
-            
+
             return _List;
         }
         internal static string getShortStatus(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status m_notificationID)
@@ -288,7 +269,7 @@ namespace CMMSAPIs.Repositories.SM
                     {
                         isApproval_required = true;
                     }
-                    
+
                     if (asset_type_ID == (int)CMMS.SM_AssetTypes.Spare && request.cmmrsItems[i].requested_qty > 0)
                     {
                         is_splited = 0;
@@ -341,7 +322,7 @@ namespace CMMSAPIs.Repositories.SM
             }
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_MRS, request.ID, 0, 0, request.remarks, CMMS.CMMS_Status.MRS_SUBMITTED);
             // Adding code for isApproval_required=0 then go for MRS approval automatically.
-            if (isApproval_required == false) 
+            if (isApproval_required == false)
             {
                 CMMrsApproval approve_request = new CMMrsApproval();
                 approve_request.id = request.ID;
@@ -349,14 +330,14 @@ namespace CMMSAPIs.Repositories.SM
                 var mrsApproved = await mrsApproval(approve_request, UserID);
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_MRS, request.ID, 0, 0, approve_request.comment, CMMS.CMMS_Status.MRS_REQUEST_APPROVED);
             }
-         
+
             return response;
         }
 
         public async Task<CMDefaultResponse> updateMRS(CMMRS request, int UserID)
         {
             int status = 0;
-            if (request.is_submit == 0) 
+            if (request.is_submit == 0)
             {
                 status = (int)CMMS.CMMS_Status.MRS_SUBMITTED;
             }
@@ -477,7 +458,7 @@ namespace CMMSAPIs.Repositories.SM
             List<CMUnitMeasurement> _checkList = await Context.GetData<CMUnitMeasurement>(stmt).ConfigureAwait(false);
             return _checkList[0].spare_multi_selection;
         }
-        internal async Task<List<CMMRSItems>> getMRSItems(int ID,string facilitytimeZone)
+        internal async Task<List<CMMRSItems>> getMRSItems(int ID, string facilitytimeZone)
         {
             //string stmt = "SELECT smi.ID,smi.return_remarks,smi.mrs_return_ID,smi.finalRemark,smi.asset_item_ID,smi.asset_MDM_code," +
             //    "t1.serial_number,smi.returned_qty,smi.available_qty,smi.used_qty,smi.ID,smi.issued_qty,sm.flag as status,DATE_FORMAT(sm.returnDate,'%Y-%m-%d') as returnDate," +
@@ -504,7 +485,7 @@ namespace CMMSAPIs.Repositories.SM
                 " left join smassetitems sai on sai.assetMasterID =  sam.id " +
                 " LEFT JOIN smassetmasterfiles  file ON file.Asset_master_id =  sam.ID    " +
                 " LEFT JOIN smassettypes sat ON sat.ID = sam.asset_type_ID     " +
-                " WHERE (smi.mrs_ID = "+ID+ ")and smi.is_splited = 1 GROUP BY smi.ID";
+                " WHERE (smi.mrs_ID = " + ID + ")and smi.is_splited = 1 GROUP BY smi.ID";
             List<CMMRSItems> _List = await Context.GetData<CMMRSItems>(stmt).ConfigureAwait(false);
             for (var i = 0; i < _List.Count; i++)
             {
@@ -514,9 +495,9 @@ namespace CMMSAPIs.Repositories.SM
                 _List[i].status_short = _shortStatus;
                 _List[i].status_long = _status_long;
             }
-           
+
             return _List;
-           
+
         }
 
         internal async Task<List<CMMRSItems>> getMRSItemsReturn(int ID, string facilitytimeZone)
@@ -561,7 +542,7 @@ namespace CMMSAPIs.Repositories.SM
 
         }
 
-        internal async Task<List<CMMRSItemsBeforeIssue>> getMRSItemsBeforeIssue(int ID,string facilitytimeZone)
+        internal async Task<List<CMMRSItemsBeforeIssue>> getMRSItemsBeforeIssue(int ID, string facilitytimeZone)
         {
 
             string stmt = "SELECT smi.ID,smi.return_remarks,smi.mrs_return_ID,smi.finalRemark,smi.asset_item_ID,smi.asset_MDM_code," +
@@ -575,12 +556,12 @@ namespace CMMSAPIs.Repositories.SM
                 "ON file.Asset_master_id =  sam.ID  LEFT JOIN smassettypes sat ON sat.ID = sam.asset_type_ID  LEFT JOIN smunitmeasurement f_sum " +
                 "ON  f_sum.id = sam.unit_of_measurement      ) as t1 ON t1.asset_MDM_code = smi.asset_MDM_code where smi.mrs_ID = " + ID + " GROUP BY smi.ID";
             List<CMMRSItemsBeforeIssue> _List = await Context.GetData<CMMRSItemsBeforeIssue>(stmt).ConfigureAwait(false);
-           
-                return _List;
+
+            return _List;
         }
 
 
-        internal async Task<List<CMMRSItemsBeforeIssue>> getMRSItemsWithCode(int ID,string facilitytimeZone)
+        internal async Task<List<CMMRSItemsBeforeIssue>> getMRSItemsWithCode(int ID, string facilitytimeZone)
         {
             string stmt = "SELECT smi.ID,smi.mrs_return_ID,smi.finalRemark,smi.asset_item_ID,smi.asset_MDM_code," +
                 "smi.returned_qty,smi.available_qty,smi.used_qty,smi.ID,smi.issued_qty,\r\nsm.flag," +
@@ -598,11 +579,11 @@ namespace CMMSAPIs.Repositories.SM
                 " WHERE smi.mrs_ID = " + ID + " GROUP BY smi.asset_MDM_code";
 
             List<CMMRSItemsBeforeIssue> _List = await Context.GetData<CMMRSItemsBeforeIssue>(stmt).ConfigureAwait(false);
-           
+
             return _List;
         }
 
-        internal async Task<CMMRSList> getMRSDetails(int ID,string facilitytimeZone)
+        internal async Task<CMMRSList> getMRSDetails(int ID, string facilitytimeZone)
         {
             //string stmt = $"SELECT * FROM smmrs WHERE ID = {ID}";
             //List<CMMRS> _List = await Context.GetData<CMMRS>(stmt).ConfigureAwait(false);
@@ -623,7 +604,7 @@ namespace CMMSAPIs.Repositories.SM
     " LEFT JOIN users issuedUser ON issuedUser.id = sm.issued_by_emp_ID " +
     "WHERE sm.id = " + ID + ";";
             List<CMMRSList> _List = await Context.GetData<CMMRSList>(stmt).ConfigureAwait(false);
-            
+
             for (var i = 0; i < _List.Count; i++)
             {
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_List[i].status);
@@ -631,13 +612,13 @@ namespace CMMSAPIs.Repositories.SM
                 string _status_long = getLongStatus(_Status, _List[i].ID);
                 _List[i].status_short = _shortStatus;
                 _List[i].status_long = _status_long;
-                _List[i].CMMRSItems = await getMRSItems(_List[i].ID,facilitytimeZone);
+                _List[i].CMMRSItems = await getMRSItems(_List[i].ID, facilitytimeZone);
             }
-           
-                return _List[0];
+
+            return _List[0];
         }
 
-        internal async Task<CMMRSList> getReturnDataByID(int ID,string facilitytimeZone)
+        internal async Task<CMMRSList> getReturnDataByID(int ID, string facilitytimeZone)
         {
             string stmt = "SELECT sm.ID,sm.requested_by_emp_ID as requested_by_emp_ID,CONCAT(ed1.firstName,' ',ed1.lastName) as approver_name," +
     "DATE_FORMAT(sm.returnDate,'%Y-%m-%d %H:%i') as returnDate,if(sm.approval_status != '',DATE_FORMAT(sm.approved_date,'%Y-%m-%d %H:%i'),'') as approval_date,sm.approval_status," +
@@ -646,8 +627,8 @@ namespace CMMSAPIs.Repositories.SM
     "FROM smmrs sm LEFT JOIN users ed ON ed.id = sm.requested_by_emp_ID LEFT JOIN users ed1 ON ed1.id = sm.approved_by_emp_ID " +
     " WHERE sm.ID = " + ID + "  and sm.flag = 2";
             List<CMMRSList> _List = await Context.GetData<CMMRSList>(stmt).ConfigureAwait(false);
-           
-              
+
+
             for (var i = 0; i < _List.Count; i++)
             {
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_List[i].status);
@@ -667,7 +648,7 @@ namespace CMMSAPIs.Repositories.SM
                 return null;
             }
 
-          
+
         }
 
         //internal async Task<CMDefaultResponse> mrsApproval(CMMRS request)
@@ -769,7 +750,7 @@ namespace CMMSAPIs.Repositories.SM
             CMDefaultResponse response = null;
             string stmtSelect = $"SELECT ID,facility_ID, requested_by_emp_ID,reference,from_actor_type_id,from_actor_id,to_actor_type_id,to_actor_id FROM smmrs WHERE ID = {request.id}";
             List<CMMRS> mrsList = await Context.GetData<CMMRS>(stmtSelect).ConfigureAwait(false);
-            
+
             string stmtSelectItems = "SELECT ID,requested_qty,asset_item_ID FROM smrsitems WHERE mrs_ID = " + request.id + "";
             List<CMMRSItems> mrsItemList = await Context.GetData<CMMRSItems>(stmtSelectItems).ConfigureAwait(false);
 
@@ -804,7 +785,7 @@ namespace CMMSAPIs.Repositories.SM
                 response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.FAILURE, "Invalid mrs updated.");
             }
 
-          
+
 
             // Adding code to 
 
@@ -841,7 +822,7 @@ namespace CMMSAPIs.Repositories.SM
             //}
 
 
-            var data = await getMRSItems(request.id,"");
+            var data = await getMRSItems(request.id, "");
 
             foreach (var item in data)
             {
@@ -912,7 +893,8 @@ namespace CMMSAPIs.Repositories.SM
                     }
 
                 }
-                else {
+                else
+                {
                     int assetMasterID = 0;
                     assetMasterID = item.asset_item_ID;
                     var stmtI = $"INSERT INTO smassetitems (facility_ID,asset_code,item_condition,status,assetMasterID,materialID,asset_type) VALUES ({mrsList[0].facility_ID},'{assetCode}',1,0,{assetMasterID},{assetMasterID}, {assetTypeId}); SELECT LAST_INSERT_ID();";
@@ -1000,12 +982,12 @@ namespace CMMSAPIs.Repositories.SM
         {
             try
             {
-                string stmt = " select i.issued_qty,i.used_qty from smrsitems i inner join smmrs m on m.ID = i.mrs_ID where i.mrs_ID = " + mrsID+" and asset_item_ID = "+assetItemID+ " and is_splited=1; ";
-                DataTable dt2 = await Context.FetchData(stmt).ConfigureAwait(false);               
+                string stmt = " select i.issued_qty,i.used_qty from smrsitems i inner join smmrs m on m.ID = i.mrs_ID where i.mrs_ID = " + mrsID + " and asset_item_ID = " + assetItemID + " and is_splited=1; ";
+                DataTable dt2 = await Context.FetchData(stmt).ConfigureAwait(false);
                 decimal issued_qty = 0;
                 int stored_used_qty = 0;
                 if (dt2.Rows.Count > 0)
-                {                  
+                {
                     issued_qty = Convert.ToInt32(dt2.Rows[0][0]);
                     stored_used_qty = Convert.ToInt32(dt2.Rows[0][1]);
                     qty = qty + stored_used_qty;
@@ -1019,7 +1001,7 @@ namespace CMMSAPIs.Repositories.SM
                     {
                         return 1;
                     }
-                  
+
                 }
                 else
                 {
@@ -1032,7 +1014,7 @@ namespace CMMSAPIs.Repositories.SM
             }
         }
 
-        
+
         private async Task<int> DebitTransation(int facilityID, int transactionID, int actorType, int actorID, int debitQty, int assetItemID, int mrsID)
         {
             string stmt = $"INSERT INTO smtransition (facilityID, transactionID, actorType, actorID,creditQty, debitQty, assetItemID, mrsID) VALUES ({facilityID},{transactionID}, '{actorType}', {actorID},0, {debitQty}, {assetItemID}, {mrsID}); SELECT LAST_INSERT_ID();";
@@ -1150,7 +1132,7 @@ namespace CMMSAPIs.Repositories.SM
 
                     try
                     {
-                        if(request.cmmrsItems[i].is_faulty == 1)
+                        if (request.cmmrsItems[i].is_faulty == 1)
                         {
                             string insertStmt = $"START TRANSACTION; " +
                                         $"Update smmrs SET status = {(int)CMMS.CMMS_Status.MRS_SUBMITTED} where id = {request.ID} ;INSERT INTO smrsitems (mrs_ID,mrs_return_ID,asset_item_ID,available_qty,requested_qty,returned_qty,return_remarks,flag, is_faulty,is_splited,issued_qty)" +
@@ -1166,7 +1148,7 @@ namespace CMMSAPIs.Repositories.SM
                                 $"; SELECT LAST_INSERT_ID(); COMMIT;";
                             DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
                         }
-                 
+
 
                         string updatestmt = $"UPDATE smassetitems SET item_condition = {request.cmmrsItems[i].is_faulty} WHERE ID = {request.cmmrsItems[i].asset_item_ID};";
                         await Context.ExecuteNonQry<int>(updatestmt);
@@ -1201,29 +1183,29 @@ namespace CMMSAPIs.Repositories.SM
             int MRS_ReturnID = 0;
             var flag = "MRS_RETURN_REQUEST";
 
-                // Updating existing MRS;
+            // Updating existing MRS;
 
-                var lastMRSID = request.ID;
-                var refType = "MRSReturnEdit";
-                var mailSub = "MRS Return Request Updated.";
-                string updatestmt = $" START TRANSACTION; UPDATE smmrs SET facility_ID = {request.facility_ID}, requested_by_emp_ID = {UserID}, requested_date = '{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}'," +
-                    $" activity='{request.activity}',whereUsedType={request.whereUsedType},whereUsedRefID={request.whereUsedRefID}, status= {(int)CMMS.CMMS_Status.MRS_SUBMITTED} WHERE ID = {request.ID}" +
-                    $" ; COMMIT;";
-                try
-                {
-                    await Context.ExecuteNonQry<int>(updatestmt);
-                }
-                catch (Exception ex)
-                {
-                    Queryflag = false;
-                    throw ex;
-                }
-                MRS_ReturnID = request.ID;
-      
+            var lastMRSID = request.ID;
+            var refType = "MRSReturnEdit";
+            var mailSub = "MRS Return Request Updated.";
+            string updatestmt = $" START TRANSACTION; UPDATE smmrs SET facility_ID = {request.facility_ID}, requested_by_emp_ID = {UserID}, requested_date = '{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}'," +
+                $" activity='{request.activity}',whereUsedType={request.whereUsedType},whereUsedRefID={request.whereUsedRefID}, status= {(int)CMMS.CMMS_Status.MRS_SUBMITTED} WHERE ID = {request.ID}" +
+                $" ; COMMIT;";
+            try
+            {
+                await Context.ExecuteNonQry<int>(updatestmt);
+            }
+            catch (Exception ex)
+            {
+                Queryflag = false;
+                throw ex;
+            }
+            MRS_ReturnID = request.ID;
+
 
             if (request.cmmrsItems != null)
             {
-        
+
 
                 for (var i = 0; i < request.cmmrsItems.Count; i++)
                 {
@@ -1248,7 +1230,7 @@ namespace CMMSAPIs.Repositories.SM
                     catch (Exception ex)
                     {
                         Queryflag = false;
-                       
+
                     }
 
                     Queryflag = true;
@@ -1450,7 +1432,7 @@ namespace CMMSAPIs.Repositories.SM
         {
             // actor Type 2 : Store
             int actorType = (int)CMMS.SM_Actor_Types.Store;
-            string stmt = "SELECT SUM(debitQty) as drQty, SUM(creditQty) as crQty FROM  smtransition WHERE assetItemID IN ("+ assetMasterIDs + ") AND actorType = '" + actorType + "' AND transactionID IN (SELECT ID FROM smtransactiondetails WHERE plantID = " + plantID.ToString() + ")";
+            string stmt = "SELECT SUM(debitQty) as drQty, SUM(creditQty) as crQty FROM  smtransition WHERE assetItemID IN (" + assetMasterIDs + ") AND actorType = '" + actorType + "' AND transactionID IN (SELECT ID FROM smtransactiondetails WHERE plantID = " + plantID.ToString() + ")";
             DataTable dt2 = await Context.FetchData(stmt).ConfigureAwait(false);
             int crQty = 0, drQty = 0;
             if (dt2 != null && dt2.Rows.Count > 0)
@@ -1604,14 +1586,14 @@ namespace CMMSAPIs.Repositories.SM
 
                         string updateStmtForItemList = $"update smrsitems set serial_number= '{request.cmmrsItems[i].serial_number}', issued_qty = {request.cmmrsItems[i].issued_qty}, issue_remarks = '{request.cmmrsItems[i].issue_remarks}' where ID = {request.cmmrsItems[i].mrs_item_id};";
 
-                       
+
                         DataTable dt = await Context.FetchData(getassetitemIDQ).ConfigureAwait(false);
                         int smassetitemsID = 0;
-                        if(dt.Rows.Count > 0)
+                        if (dt.Rows.Count > 0)
                         {
                             smassetitemsID = Convert.ToInt32(dt.Rows[0]["id"]);
                         }
-                        updateStmtForItemList = updateStmtForItemList + $" update smassetitems set  item_issued_mrs = {request.ID} where id = "+ smassetitemsID + ";";
+                        updateStmtForItemList = updateStmtForItemList + $" update smassetitems set  item_issued_mrs = {request.ID} where id = " + smassetitemsID + ";";
                         try
                         {
                             Queryflag = true;
@@ -1696,14 +1678,27 @@ namespace CMMSAPIs.Repositories.SM
             return response;
         }
 
-        internal async Task<List<CMMRSList>> GetMRSReturnList(int facility_ID, int emp_id,string facilitytimeZone)
+        internal async Task<List<CMMRSList>> GetMRSReturnList(int facility_ID, bool self_view, int userID, string facilitytimeZone)
         {
+
             string stmt = "SELECT sm.ID,sm.requested_by_emp_ID as requested_by_emp_ID,CONCAT(ed1.firstName,' ',ed1.lastName) as approver_name," +
-    "DATE_FORMAT(sm.returnDate,'%Y-%m-%d %H:%i') as returnDate,if(sm.approval_status != '',DATE_FORMAT(sm.approved_date,'%Y-%m-%d %H:%i'),'') as approval_date,sm.approval_status," +
-    "sm.approval_comment,CONCAT(ed.firstName,' ',ed.lastName) as requested_by_name, sm.status, sm.activity, sm.whereUsedType, sm.whereUsedRefID, COALESCE(sm.remarks,'') as  remarks," +
-    "case when sm.whereUsedType = 1 then 'Job' when sm.whereUsedType = 2 then 'PM' when sm.whereUsedType = 4 then 'JOBCARD' when sm.whereUsedType = 27 then 'PMTASK' else 'Invalid' end as whereUsedTypeName " +
-    "FROM smmrs sm LEFT JOIN users ed ON ed.id = sm.requested_by_emp_ID LEFT JOIN users ed1 ON ed1.id = sm.approved_by_emp_ID " +
-    " WHERE sm.facility_ID = " + facility_ID + "  and sm.requested_by_emp_ID = " + emp_id + " and sm.flag = 2";
+                           "DATE_FORMAT(sm.returnDate,'%Y-%m-%d %H:%i') as returnDate,if(sm.approval_status != '',DATE_FORMAT(sm.approved_date,'%Y-%m-%d %H:%i'),'') as approval_date,sm.approval_status," +
+                           "sm.approval_comment,CONCAT(ed.firstName,' ',ed.lastName) as requested_by_name, sm.status, sm.activity, sm.whereUsedType, sm.whereUsedRefID, COALESCE(sm.remarks,'') as  remarks," +
+                           "case when sm.whereUsedType = 1 then 'Job' when sm.whereUsedType = 2 then 'PM' when sm.whereUsedType = 4 then 'JOBCARD' when sm.whereUsedType = 27 then 'PMTASK' else 'Invalid' end as whereUsedTypeName " +
+                           "FROM smmrs sm LEFT JOIN users ed ON ed.id = sm.requested_by_emp_ID LEFT JOIN users ed1 ON ed1.id = sm.approved_by_emp_ID ";
+
+            if (facility_ID > 0)
+            {
+                stmt += $" WHERE sm.facility_ID = " + facility_ID + "  and  sm.flag = 2 ";
+
+
+                if (self_view)
+                    stmt += $" AND ( sm.requested_by_emp_ID = {userID}) ";
+            }
+            else
+            {
+                throw new ArgumentException("Invalid Facility ID");
+            }
             List<CMMRSList> _List = await Context.GetData<CMMRSList>(stmt).ConfigureAwait(false);
             /* foreach (var list in _List)
              {
@@ -1735,51 +1730,51 @@ namespace CMMSAPIs.Repositories.SM
                 _List[i].status_long = _status_long;
                 _List[i].CMMRSItems = await getMRSReturnItems(_List[i].ID, facilitytimeZone);
             }
-          
+
             return _List;
         }
 
-        internal async Task<List<CMMRSItems>> getMRSReturnItems(int ID,string facilitytimeZone)
+        internal async Task<List<CMMRSItems>> getMRSReturnItems(int ID, string facilitytimeZone)
         {
-           /* string stmt = "SELECT smi.ID,smi.return_remarks,smi.mrs_return_ID,smi.finalRemark,smi.asset_item_ID,smi.asset_MDM_code," +
-                "t1.serial_number,smi.returned_qty,smi.available_qty,smi.used_qty,smi.ID,smi.issued_qty,sm.flag as status,DATE_FORMAT(sm.returnDate,'%Y-%m-%d %H:%i') as returnDate," +
-                "sm.approval_status,DATE_FORMAT(sm.approved_date,'%Y-%m-%d %H:%i') as approved_date,DATE_FORMAT(sm.requested_date,'%Y-%m-%d %H:%i') as issued_date," +
-                "DATE_FORMAT(sm.returnDate, '%Y-%m-%d %H:%i') as returnDate, smi.requested_qty,if(smi.approval_required = 1,'Yes','No') as approval_required,\r\n " +
-                "t1.asset_name,t1.asset_type_ID,t1.asset_type,COALESCE(t1.file_path,'') as file_path,t1.Asset_master_id\r\n        FROM smrsitems smi\r\n " +
-                " LEFT JOIN smmrs sm ON sm.ID = smi.mrs_return_ID         \r\n        LEFT JOIN (SELECT sai.ID as asset_item_ID, sai.serial_number, sam.asset_name, " +
-                "sam.asset_type_ID,sat.asset_type,COALESCE(file.file_path,'') as file_path,file.Asset_master_id\r\n        FROM smassetitems sai  " +
-                "LEFT JOIN smassetmasters sam ON sam.asset_code = sai.asset_code LEFT JOIN smassetmasterfiles  file ON file.Asset_master_id =  sam.ID " +
-                "LEFT JOIN smassettypes sat ON sat.ID = sam.asset_type_ID) as t1 ON t1.asset_item_ID = smi.asset_item_ID" +
-                "  WHERE smi.mrs_return_ID = " + ID + " /*GROUP BY smi.ID*/
-            
-                 string stmt = "SELECT smi.ID,smi.return_remarks,smi.mrs_return_ID,smi.finalRemark,smi.asset_item_ID,smi.asset_MDM_code," +
-                "t1.serial_number,smi.is_faulty as is_faulty,smi.returned_qty,smi.available_qty,smi.used_qty,smi.ID,smi.issued_qty,sm.flag as status,DATE_FORMAT(sm.returnDate,'%Y-%m-%d %H:%i') as returnDate," +
-                "sm.approval_status,DATE_FORMAT(sm.approved_date,'%Y-%m-%d %H:%i') as approved_date,DATE_FORMAT(sm.requested_date,'%Y-%m-%d %H:%i') as issued_date," +
-                "DATE_FORMAT(sm.returnDate, '%Y-%m-%d %H:%i') as returnDate, smi.requested_qty,if(smi.approval_required = 1,'Yes','No') as approval_required,\r\n " +
-                "t1.asset_name,t1.asset_type_ID,t1.asset_type,COALESCE(t1.file_path,'') as file_path,t1.Asset_master_id\r\n        FROM smrsitems smi\r\n " +
-                " LEFT JOIN smmrs sm ON sm.ID = smi.mrs_return_ID   \r\n   LEFT JOIN (SELECT distinct sai.assetMasterID as asset_item_ID, sai.serial_number, sam.asset_name, " +
-                "sam.asset_type_ID,sat.asset_type,COALESCE(file.file_path,'') as file_path,file.Asset_master_id\r\n  FROM smassetitems sai " +
-                "LEFT JOIN smassetmasters sam ON sam.ID = sai.assetMasterID LEFT JOIN smassetmasterfiles  file ON file.Asset_master_id = sam.ID " +
-                "LEFT JOIN smassettypes sat ON sat.ID = sam.asset_type_ID)  as t1 ON t1.asset_item_ID = smi.asset_item_ID " +
-                " WHERE smi.mrs_return_ID = " + ID + "/*GROUP BY smi.ID*/";
-            
-      
+            /* string stmt = "SELECT smi.ID,smi.return_remarks,smi.mrs_return_ID,smi.finalRemark,smi.asset_item_ID,smi.asset_MDM_code," +
+                 "t1.serial_number,smi.returned_qty,smi.available_qty,smi.used_qty,smi.ID,smi.issued_qty,sm.flag as status,DATE_FORMAT(sm.returnDate,'%Y-%m-%d %H:%i') as returnDate," +
+                 "sm.approval_status,DATE_FORMAT(sm.approved_date,'%Y-%m-%d %H:%i') as approved_date,DATE_FORMAT(sm.requested_date,'%Y-%m-%d %H:%i') as issued_date," +
+                 "DATE_FORMAT(sm.returnDate, '%Y-%m-%d %H:%i') as returnDate, smi.requested_qty,if(smi.approval_required = 1,'Yes','No') as approval_required,\r\n " +
+                 "t1.asset_name,t1.asset_type_ID,t1.asset_type,COALESCE(t1.file_path,'') as file_path,t1.Asset_master_id\r\n        FROM smrsitems smi\r\n " +
+                 " LEFT JOIN smmrs sm ON sm.ID = smi.mrs_return_ID         \r\n        LEFT JOIN (SELECT sai.ID as asset_item_ID, sai.serial_number, sam.asset_name, " +
+                 "sam.asset_type_ID,sat.asset_type,COALESCE(file.file_path,'') as file_path,file.Asset_master_id\r\n        FROM smassetitems sai  " +
+                 "LEFT JOIN smassetmasters sam ON sam.asset_code = sai.asset_code LEFT JOIN smassetmasterfiles  file ON file.Asset_master_id =  sam.ID " +
+                 "LEFT JOIN smassettypes sat ON sat.ID = sam.asset_type_ID) as t1 ON t1.asset_item_ID = smi.asset_item_ID" +
+                 "  WHERE smi.mrs_return_ID = " + ID + " /*GROUP BY smi.ID*/
+
+            string stmt = "SELECT smi.ID,smi.return_remarks,smi.mrs_return_ID,smi.finalRemark,smi.asset_item_ID,smi.asset_MDM_code," +
+           "t1.serial_number,smi.is_faulty as is_faulty,smi.returned_qty,smi.available_qty,smi.used_qty,smi.ID,smi.issued_qty,sm.flag as status,DATE_FORMAT(sm.returnDate,'%Y-%m-%d %H:%i') as returnDate," +
+           "sm.approval_status,DATE_FORMAT(sm.approved_date,'%Y-%m-%d %H:%i') as approved_date,DATE_FORMAT(sm.requested_date,'%Y-%m-%d %H:%i') as issued_date," +
+           "DATE_FORMAT(sm.returnDate, '%Y-%m-%d %H:%i') as returnDate, smi.requested_qty,if(smi.approval_required = 1,'Yes','No') as approval_required,\r\n " +
+           "t1.asset_name,t1.asset_type_ID,t1.asset_type,COALESCE(t1.file_path,'') as file_path,t1.Asset_master_id\r\n        FROM smrsitems smi\r\n " +
+           " LEFT JOIN smmrs sm ON sm.ID = smi.mrs_return_ID   \r\n   LEFT JOIN (SELECT distinct sai.assetMasterID as asset_item_ID, sai.serial_number, sam.asset_name, " +
+           "sam.asset_type_ID,sat.asset_type,COALESCE(file.file_path,'') as file_path,file.Asset_master_id\r\n  FROM smassetitems sai " +
+           "LEFT JOIN smassetmasters sam ON sam.ID = sai.assetMasterID LEFT JOIN smassetmasterfiles  file ON file.Asset_master_id = sam.ID " +
+           "LEFT JOIN smassettypes sat ON sat.ID = sam.asset_type_ID)  as t1 ON t1.asset_item_ID = smi.asset_item_ID " +
+           " WHERE smi.mrs_return_ID = " + ID + "/*GROUP BY smi.ID*/";
+
+
             List<CMMRSItems> _List = await Context.GetData<CMMRSItems>(stmt).ConfigureAwait(false);
-          /*  foreach (var list in _List)
-            {
-                if (list != null && list.approved_date != null && list.approved_date!="" && list.approved_date!="0000-00-00")
-                {
-                    DateTime approved_date = DateTime.Parse(list.approved_date);
-                    approved_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, approved_date);
-                    list.approved_date = approved_date.ToString();
-                }
-                if (list != null && list.issued_date != null && list.issued_date != "")
-                {
-                    DateTime issued_date = DateTime.Parse(list.issued_date);
-                    issued_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, issued_date);
-                    list.approved_date = issued_date.ToString();
-                }
-            }*/
+            /*  foreach (var list in _List)
+              {
+                  if (list != null && list.approved_date != null && list.approved_date!="" && list.approved_date!="0000-00-00")
+                  {
+                      DateTime approved_date = DateTime.Parse(list.approved_date);
+                      approved_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, approved_date);
+                      list.approved_date = approved_date.ToString();
+                  }
+                  if (list != null && list.issued_date != null && list.issued_date != "")
+                  {
+                      DateTime issued_date = DateTime.Parse(list.issued_date);
+                      issued_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, issued_date);
+                      list.approved_date = issued_date.ToString();
+                  }
+              }*/
             for (var i = 0; i < _List.Count; i++)
             {
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_List[i].status);
@@ -1820,7 +1815,7 @@ namespace CMMSAPIs.Repositories.SM
                     materialID = p.materialID,
                 }).ToList();
                 _MasterList.CMIssuedAssetItemsWithSerialNo = _itemList;
-               
+
             }
 
             return _MasterList;
@@ -1847,7 +1842,7 @@ namespace CMMSAPIs.Repositories.SM
             string itemCondition = "";
             string Plant_Stock_Opening_Details_query = "";
 
-                      //Plant_Stock_Opening_Details_query = $"select distinct smrsitems.asset_item_ID,smrsitems.serial_number as serial_no," +
+            //Plant_Stock_Opening_Details_query = $"select distinct smrsitems.asset_item_ID,smrsitems.serial_number as serial_no," +
             //    $" sm_trans.facilityID as facilityID, fc.name as facilityName,fc.isBlock as Facility_Is_Block,  '' as Facility_Is_Block_of_name, " +
             //    $"sm_trans.assetItemID, a_master.asset_name, a_master.asset_code, a_master.asset_type_ID, AST.asset_type, " +
             //    $"  smrsitems.available_qty,smrsitems.requested_qty, smrsitems.used_qty,smrsitems.issued_qty, smrsitems.approved_qty " +

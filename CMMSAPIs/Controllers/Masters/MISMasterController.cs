@@ -894,7 +894,7 @@ namespace CMMSAPIs.Controllers.Masters
         }
         [Route("GetWasteDataList")]
         [HttpGet]
-        public async Task<IActionResult> GetWasteDataList(int facility_id,DateTime fromDate, DateTime toDate, int isHazardous)
+        public async Task<IActionResult> GetWasteDataList(int facility_id, DateTime fromDate, DateTime toDate, int isHazardous)
         {
             try
             {

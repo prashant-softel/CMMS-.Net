@@ -3,7 +3,6 @@ using CMMSAPIs.Models.Masters;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Utils;
 using Microsoft.AspNetCore.Hosting;
-using MySqlX.XDevAPI.Common;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -706,14 +705,14 @@ namespace CMMSAPIs.Repositories.Masters
             return result;
         }
 
-        internal async Task<List<CMGetMisWasteData>> GetWasteDataList(int facility_id,DateTime fromDate, DateTime toDate, int Hazardous,string facilitytimeZone)
+        internal async Task<List<CMGetMisWasteData>> GetWasteDataList(int facility_id, DateTime fromDate, DateTime toDate, int Hazardous, string facilitytimeZone)
         {
             string myQuery = "SELECT M.id, M.facilityId as facilityID,f.name as facilityName, date, waterTypeId, M.description, debitQty, creditQty, \nconcat(added.firstname,' ',added.lastname)  as addedBy, M.Created_At as addedAt,M.isHazardous " +
                 " FROM waste_data M " +
                 " left join mis_wastetype wt on wt.id = waterTypeId " +
                 " left join users added on added.id = M.Created_By " +
                 " left join facilities f on f.id = M.facilityId " +
-                " where isActive = 1 and M.isHazardous = "+ Hazardous + " and DATE_FORMAT(Created_At,'%Y-%m-%d') BETWEEN '" + fromDate.ToString("yyyy-MM-dd") + "' AND '" + toDate.ToString("yyyy-MM-dd") + "';";
+                " where isActive = 1 and M.isHazardous = " + Hazardous + " and DATE_FORMAT(Created_At,'%Y-%m-%d') BETWEEN '" + fromDate.ToString("yyyy-MM-dd") + "' AND '" + toDate.ToString("yyyy-MM-dd") + "';";
 
             List<CMGetMisWasteData> ListResult = await Context.GetData<CMGetMisWasteData>(myQuery).ConfigureAwait(false);
             foreach (var results in ListResult)
@@ -772,11 +771,11 @@ namespace CMMSAPIs.Repositories.Masters
             int isHazardous = 0;
             string SelectQ = "select isHazardous from mis_wastetype where ID = '" + request.wasteTypeId + "'";
             DataTable dt = await Context.FetchData(SelectQ).ConfigureAwait(false);
-            if(dt.Rows.Count > 0)
+            if (dt.Rows.Count > 0)
             {
                 isHazardous = Convert.ToInt32(dt.Rows[0][0]);
             }
-      
+
 
 
             string insertQuery = $"INSERT INTO waste_data(facilityId, date, wasteTypeId, description, debitQty, creditQty, Created_By, Created_At,consumeTypeId, isHazardous) VALUES " +
@@ -939,9 +938,9 @@ namespace CMMSAPIs.Repositories.Masters
                 $" sum(creditQty) as procured_qty, sum(debitQty) as consumed_qty, mw.name as water_type, show_opening " +
                 $" from waste_data" +
                 $" LEFT JOIN facilities fc ON fc.id = waste_data.facilityId" +
-                $" LEFT JOIN mis_wastetype mw on mw.id = waste_data.waterTypeId" +
+                $" LEFT JOIN mis_wastetype mw on mw.id = waste_data.wasteTypeId" +
                 $" where  DATE_FORMAT(Date,'%Y-%m-%d') BETWEEN '{fromDate.ToString("yyyy-MM-dd")}' AND '{toDate.ToString("yyyy-MM-dd")}'" +
-                $"  group by MONTH(date) , waste_data.waterTypeId;";
+                $"  group by MONTH(date) , waste_data.wasteTypeId;";
             List<CMWaterDataMonthWise> ListResult = await Context.GetData<CMWaterDataMonthWise>(SelectQ).ConfigureAwait(false);
 
             string water_type_master_q = " select facility_id,fc.name facility_name, mis_wastetype.name as water_type,show_opening " +
@@ -1020,12 +1019,12 @@ namespace CMMSAPIs.Repositories.Masters
             }
 
 
-            List<WaterDataResult_Month> groupedResult = ListResult.GroupBy(r => new { r.facility_id, r.facility_name, r.month, r.year })
+            List<WaterDataResult_Month> groupedResult = ListResult.GroupBy(r => new { r.facility_id, r.facility_name, r.months, r.year })
     .Select(group => new WaterDataResult_Month
     {
         facility_id = group.Key.facility_id,
         facility_name = group.Key.facility_name,
-        month = group.Key.month,
+        month = group.Key.months,
         year = group.Key.year,
         item_data = group.Select(r => new { r.water_type, r.opening, r.waterTypeId })
                         .Distinct()
@@ -1050,19 +1049,30 @@ namespace CMMSAPIs.Repositories.Masters
 
             return groupedResult;
         }
-        internal async Task<List<CMWaterDataMonthDetail>> GetWasteDataMonthDetail(int Month, int Year, int Hazardous, int facility_id)
+        internal async Task<List<CMWasteDataMonthDetail>> GetWasteDataMonthDetail(int Month, int Year, int Hazardous, int facility_id)
         {
-            string SelectQ = $" select distinct waste_data.waterTypeId , plantId as facility_id,fc.name facility_name,date ,"
-                             + $" (select sum(creditQty) - sum(debitQty) from waste_data where MONTH(date) < {Month}) as opening,"
-                             + $" sum(creditQty) as procured_qty, sum(debitQty) as consumed_qty, mw.name as water_type,"
-                             + $" consumeTypeId as consumeTypeId,"
-                             + $" case when consumeTypeId = 1 then 'Procurement' when consumeTypeId = 2 then 'Consumption' else 'NA' end as TransactionType,"
-                             + $" waste_data.description as Description"
-                             + $" from waste_data"
-                             + $" LEFT JOIN facilities fc ON fc.id = waste_data.plantId"
-                             + $" LEFT JOIN mis_wastetype mw on mw.id = waste_data.wasteTypeId"
-                             + $" where isHazardous = {Hazardous} and waste_data.facilityId = {facility_id} and MONTH(date) = {Month} and Year(date) = {Year} group by MONTH(date), waste_data.wasteTypeId; ";
-            List<CMWaterDataMonthDetail> ListResult = await Context.GetData<CMWaterDataMonthDetail>(SelectQ).ConfigureAwait(false);
+            /* string SelectQ = $" select distinct waste_data.waterTypeId ,waste_data.id as id,Year(waste_data.date) as year,MONTH(waste_data.date) as months , facilityId as facility_id,fc.name facility_name,date ,"
+                              + $" (select sum(creditQty) - sum(debitQty) from waste_data where MONTH(date) < {Month}) as opening,"
+                              + $" sum(creditQty) as procured_qty, sum(debitQty) as consumed_qty, mw.name as water_type,"
+                              + $" consumeTypeId as consumeTypeId,"
+                              + $" case when consumeTypeId = 1 then 'Procurement' when consumeTypeId = 2 then 'Consumption' else 'NA' end as TransactionType,"
+                              + $" waste_data.description as Description"
+                              + $" from waste_data"
+                              + $" LEFT JOIN facilities fc ON fc.id = waste_data.facilityId"
+                              + $" LEFT JOIN mis_wastetype mw on mw.id = waste_data.waterTypeId"
+                              + $" where waste_data.isHazardous = {Hazardous} and waste_data.facilityId = {facility_id} and MONTH(date) = {Month} and Year(date) = {Year} group by MONTH(date), waste_data.waterTypeId; ";*/
+            string SelectQ = $" SELECT DISTINCT waste_data.wasteTypeId ,waste_data.id AS id,YEAR(waste_data.date) AS year,MONTH(waste_data.date) AS months , facilityId AS facility_id,fc.name AS facility_name,date ,"
+                    + $" (SELECT SUM(creditQty) - SUM(debitQty) FROM waste_data WHERE MONTH(date) < {Month}) AS opening,"
+                    + $" SUM(creditQty) AS procured_qty, SUM(debitQty) AS consumed_qty, mw.name AS waste_type,"
+                    + $" consumeTypeId AS consumeTypeId,"
+                    + $" CASE WHEN consumeTypeId = 1 THEN 'Procurement' WHEN consumeTypeId = 2 THEN 'Consumption' ELSE 'NA' END AS TransactionType,"
+                    + $" waste_data.description AS Description"
+                    + $" FROM waste_data"
+                    + $" LEFT JOIN facilities fc ON fc.id = waste_data.facilityId"
+                    + $" LEFT JOIN mis_wastetype mw ON mw.id = waste_data.wasteTypeId"
+                    + $" WHERE waste_data.isHazardous = {Hazardous} AND waste_data.facilityId = {facility_id} AND MONTH(date) = {Month} AND YEAR(date) = {Year} GROUP BY MONTH(date), waste_data.wasteTypeId;";
+
+            List<CMWasteDataMonthDetail> ListResult = await Context.GetData<CMWasteDataMonthDetail>(SelectQ).ConfigureAwait(false);
             if (ListResult != null)
             {
                 for (int i = 0; i < ListResult.Count; i++)

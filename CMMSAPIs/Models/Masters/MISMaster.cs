@@ -238,7 +238,7 @@ namespace CMMSAPIs.Models.Masters
     {
         public int facility_id { get; set; }
         public string facility_name { get; set; }
-        public string date { get; set; }
+        public dynamic date { get; set; }
         public string TransactionType { get; set; }
         public string Description { get; set; }
         public decimal opening { get; set; }
@@ -246,11 +246,13 @@ namespace CMMSAPIs.Models.Masters
         public decimal consumed_qty { get; set; }
         public decimal closing_qty { get; set; }
         public string water_type { get; set; }
+
         public int waterTypeId { get; set; }
+
         public int id { get; set; }
         public int consumeTypeId { get; set; }
-        public string month { get; set; }
-        public int year { get; set; }
+        public dynamic months { get; set; }
+        public dynamic year { get; set; }
 
     }
 
@@ -260,6 +262,9 @@ namespace CMMSAPIs.Models.Masters
         public string facility_name { get; set; }
         public string month { get; set; }
         public int year { get; set; }
+        public string water_type { get; set; }
+        public int waterTypeId { get; set; }
+
         public List<FacilityPeriodData_Month> item_data { get; set; }
     }
     public class FacilityPeriodData_Month
@@ -327,5 +332,26 @@ namespace CMMSAPIs.Models.Masters
         public DateTime? AddedAt { get; set; }
         public string updatedBy { get; set; }
         public DateTime? updatedAt { get; set; }
+    }
+    public class CMWasteDataMonthDetail
+    {
+        public int facility_id { get; set; }
+        public string facility_name { get; set; }
+        public dynamic date { get; set; }
+        public string TransactionType { get; set; }
+        public string Description { get; set; }
+        public decimal opening { get; set; }
+        public decimal procured_qty { get; set; }
+        public decimal consumed_qty { get; set; }
+        public decimal closing_qty { get; set; }
+
+        public string waste_type { get; set; }
+
+        public int wasteTypeId { get; set; }
+        public int id { get; set; }
+        public int consumeTypeId { get; set; }
+        public dynamic months { get; set; }
+        public dynamic year { get; set; }
+
     }
 }

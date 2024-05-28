@@ -1,10 +1,7 @@
 using CMMSAPIs.BS.SM;
 using CMMSAPIs.Helper;
 using CMMSAPIs.Models.SM;
-using CMMSAPIs.Models.Users;
 using CMMSAPIs.Models.Utils;
-using CMMSAPIs.Repositories.SM;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -29,14 +26,14 @@ namespace CMMSAPIs.Controllers.SM
         {
             _MRSBS = Master;
             _logger = ilogger;
-            _AddLog = new AddLog(configuration); 
+            _AddLog = new AddLog(configuration);
         }
 
         // First 
 
         //[Authorize]
         [Route("CreateMRS")]
-        [HttpPost]       
+        [HttpPost]
         public async Task<IActionResult> CreateMRS(CMMRS request)
         {
             try
@@ -96,7 +93,7 @@ namespace CMMSAPIs.Controllers.SM
             {
 
                 _AddLog.ErrorLog(ex.ToString());
-                _AddLog.ErrorLog("Exception got using ILOGGER "+ex.ToString());
+                _AddLog.ErrorLog("Exception got using ILOGGER " + ex.ToString());
                 ExceptionResponse item = new ExceptionResponse();
                 item.Status = 400;
                 item.Message = "Invalid data sent.";
@@ -106,7 +103,7 @@ namespace CMMSAPIs.Controllers.SM
 
         [Route("getMRSListByModule")]
         [HttpGet]
-        public async Task<IActionResult> getMRSListByModule(int jobId, int pmId,int facility_id)
+        public async Task<IActionResult> getMRSListByModule(int jobId, int pmId, int facility_id)
         {
             try
             {
@@ -131,7 +128,7 @@ namespace CMMSAPIs.Controllers.SM
         //[Authorize]
         [Route("getMRSItems")]
         [HttpGet]
-        public async Task<IActionResult> getMRSItems(int ID,int facility_id)
+        public async Task<IActionResult> getMRSItems(int ID, int facility_id)
         {
             try
             {
@@ -154,7 +151,7 @@ namespace CMMSAPIs.Controllers.SM
         //[Authorize]
         [Route("getMRSItemsBeforeIssue")]
         [HttpGet]
-        public async Task<IActionResult> getMRSItemsBeforeIssue(int ID,int facility_id)
+        public async Task<IActionResult> getMRSItemsBeforeIssue(int ID, int facility_id)
         {
             try
             {
@@ -177,7 +174,7 @@ namespace CMMSAPIs.Controllers.SM
         //[Authorize]
         [Route("getMRSItemsWithCode")]
         [HttpGet]
-        public async Task<IActionResult> getMRSItemsWithCode(int ID,int facility_id)
+        public async Task<IActionResult> getMRSItemsWithCode(int ID, int facility_id)
         {
             try
             {
@@ -199,7 +196,7 @@ namespace CMMSAPIs.Controllers.SM
         //[Authorize]
         [Route("getMRSDetails")]
         [HttpGet]
-        public async Task<IActionResult> getMRSDetails(int ID,int facility_id)
+        public async Task<IActionResult> getMRSDetails(int ID, int facility_id)
         {
             try
             {
@@ -229,7 +226,7 @@ namespace CMMSAPIs.Controllers.SM
                 var data = await _MRSBS.mrsApproval(request, userID);
                 return Ok(data);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _AddLog.ErrorLog(ex.ToString());
                 ExceptionResponse item = new ExceptionResponse();
@@ -265,7 +262,7 @@ namespace CMMSAPIs.Controllers.SM
         //[Authorize]
         [Route("getReturnDataByID")]
         [HttpGet]
-        public async Task<IActionResult> getReturnDataByID(int ID,int facility_id)
+        public async Task<IActionResult> getReturnDataByID(int ID, int facility_id)
         {
             try
             {
@@ -310,7 +307,7 @@ namespace CMMSAPIs.Controllers.SM
 
         //[Authorize]
         [Route("CreateReturnMRS")]
-        [HttpPost] 
+        [HttpPost]
         public async Task<IActionResult> CreateReturnMRS(CMMRS request)
         {
             try
@@ -517,13 +514,13 @@ namespace CMMSAPIs.Controllers.SM
         //[Authorize]
         [Route("GetMRSReturnList")]
         [HttpGet]
-        public async Task<IActionResult> GetMRSReturnList(int facility_ID, int emp_id)
+        public async Task<IActionResult> GetMRSReturnList(int facility_ID, bool self_view)
         {
             try
             {
                 var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_ID)?.timezone;
-
-                var data = await _MRSBS.GetMRSReturnList(facility_ID, emp_id,facilitytimeZone);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _MRSBS.GetMRSReturnList(facility_ID, self_view, userID, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -553,8 +550,8 @@ namespace CMMSAPIs.Controllers.SM
                 {
                     return Ok(result);
                 }
-                
-              
+
+
             }
             catch (Exception ex)
             {
@@ -602,4 +599,4 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
     }
-}   
+}

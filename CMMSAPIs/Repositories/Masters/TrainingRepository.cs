@@ -159,19 +159,34 @@ namespace CMMSAPIs.Repositories.Masters
             return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Course Deleted Successfully.");
         }
 
-
+        int Exterid = 0;
         internal async Task<CMDefaultResponse> CreateScheduleCourse(TrainingSchedule request, int userID)
         {
-            string crtqry = $"INSERT INTO training_schedule (CourseId,Course_name, ScheduleDate, TraingCompany, Trainer, Online,Comment,CreatedAt,CreatedBy) values " +
-                            $"('{request.CourseId}',{request.CourseName},'{request.DateOfTraining}',{request.TrainingAgencyId},{request.TrainerName},{request.online},{request.Comment},'{UtilsRepository.GetUTCTime()}',{userID}) ; " +
+
+            string crtqry = $"INSERT INTO training_schedule ( CourseId, Course_name, ScheduleDate, TraingCompany, Trainer,Mode, Comment, Venue, hfeEmployeeId, CreatedAt, CreatedBy) values " +
+                            $"({request.CourseId},'{request.CourseName}','{request.DateOfTraining}',{request.TrainingAgencyId},'{request.TrainerName}','{request.Mode}','{request.Comment}','{request.Venue}',{request.HfeEmployeeId},'{UtilsRepository.GetUTCTime()}',{userID}) ; " +
                             $"SELECT LAST_INSERT_ID();";
             DataTable dt = await Context.FetchData(crtqry).ConfigureAwait(false);
-            int id = Convert.ToInt32(dt.Rows[0][0]);
+            int schid = Convert.ToInt32(dt.Rows[0][0]);
+            foreach (ExternalEmployee items in request.externalEmployees)
+            {
+                string externalsc = $"INSERT INTO visitor_details (Name, Email, Mobile, Company,CreatedAt,CreatedBy) values " +
+                                    $"('{items.employeeName}','{items.employeeEmail}','{items.employeeNumber}','{items.companyName}','{UtilsRepository.GetUTCTime()}',{userID}) ; " +
+                               $"SELECT LAST_INSERT_ID();";
+                DataTable dt1 = await Context.FetchData(externalsc).ConfigureAwait(false);
+                Exterid = Convert.ToInt32(dt1.Rows[0][0]);
+            }
 
-            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Schedule Created Successfully.");
+            foreach (InternalEmployee item in request.internalEmployees)
+            {
+                string inviteschdule = $"INSERT INTO schdule_invitee ( Schid, employee_id, Visitor,RSVP_Datetime, Attendence,CreatedAt,CreatedBy) values " +
+                               $"('{schid}',{item.EmpId},{Exterid},'{UtilsRepository.GetUTCTime()}','{item.Attendence}','{UtilsRepository.GetUTCTime()}',{userID}) ; " +
+                               $"SELECT LAST_INSERT_ID();";
+                DataTable dt2 = await Context.FetchData(inviteschdule).ConfigureAwait(false);
+                int schdinviid = Convert.ToInt32(dt2.Rows[0][0]);
+            }
+            return new CMDefaultResponse(schid, CMMS.RETRUNSTATUS.SUCCESS, "Course Schedule Sucessfully");
         }
-
-
         internal async Task<CMDefaultResponse> GetScheduleCourse()
         {
             return null;
