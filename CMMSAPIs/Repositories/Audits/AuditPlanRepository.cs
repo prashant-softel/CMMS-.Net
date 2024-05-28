@@ -45,12 +45,15 @@ namespace CMMSAPIs.Repositories.Audits
             { CMMS.CMMS_Status.AUDIT_EXECUTED, "Executed" }
         };
 
-        internal async Task<List<CMAuditPlanList>> GetAuditPlanList(int facility_id, DateTime fromDate, DateTime toDate,string facilitytimeZone)
+        internal async Task<List<CMAuditPlanList>> GetAuditPlanList(int facility_id, DateTime fromDate, DateTime toDate,string facilitytimeZone, int module_type_id)
         {
-
+            
             string filter = "Where (DATE(st.Audit_Added_date) >= '" + fromDate.ToString("yyyy-MM-dd") + "'  and DATE(st.Audit_Added_date) <= '" + toDate.ToString("yyyy-MM-dd") + "')";
             filter = filter + " and st.Facility_id = " + facility_id + "";
-
+            if (module_type_id > 0)
+            {
+                filter = filter + " and st.module_type_id = "+module_type_id+"";
+            }
             string SelectQ = "select st.id,plan_number,  f.name as facility_name, concat(au.firstName, ' ', au.lastName)  Auditee_Emp_Name, " +
                 "concat(u.firstName, ' ', u.lastName) Auditor_Emp_Name,checklist_number as checklist_name, frequency.name as frequency_name,st.frequency,st.checklist_id, st.status, case when st.frequency = 0 then 'False' else 'True' end as FrequencyApplicable " +
                 " ,st.Description,st.Schedule_Date,module_type_id as Module_Type_id from st_audit st " +
@@ -85,7 +88,7 @@ namespace CMMSAPIs.Repositories.Audits
             string filter = " where st.id = " + id + "";
             string SelectQ = "select st.id,plan_number,  f.name as facility_name, concat(au.firstName, ' ', au.lastName)  Auditee_Emp_Name, " +
                 "concat(u.firstName, ' ', u.lastName) Auditor_Emp_Name , st.frequency, st.status, case when st.frequency = 0 then 'False' else 'True' end as FrequencyApplicable, st.Description,st.Schedule_Date, st.checklist_id, " +
-                " checklist_number as checklist_name, frequency.name as frequency_name, st.created_at, concat(created.firstName, ' ', created.lastName) created_by" +
+                " checklist_number as checklist_name, frequency.name as frequency_name, st.created_at, concat(created.firstName, ' ', created.lastName) created_by, st.module_type_id as Module_Type_id, case when st.module_type_id = 1 then 'PM'  when st.module_type_id = 2 then 'HOTO'  when st.module_type_id = 3 then 'Audit' \r\n  when st.module_type_id = 4 then 'MIS' end as  Module_Type,   assignedTo,Employees, '' ptw" +
                 " from st_audit st " +
                 "inner join facilities f ON st.Facility_id = f.id " +
                 "left join users au on au.id = st.Auditee_Emp_ID " +
