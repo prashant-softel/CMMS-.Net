@@ -47,5 +47,9 @@ namespace CMMSAPIs.Models.Audit
         public DateTime created_at { get; set; }
         public string created_by { get; set; }
         public int Module_Type_id { get; set; }
+        public string Module_Type { get; set; }
+        public string assignedTo { get; set; }
+        public string Employees { get; set; }
+        public string ptw { get; set; }
     }
 }
