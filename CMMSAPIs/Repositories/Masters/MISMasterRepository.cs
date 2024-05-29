@@ -1049,7 +1049,7 @@ namespace CMMSAPIs.Repositories.Masters
 
             return groupedResult;
         }
-        internal async Task<List<CMWasteDataMonthDetail>> GetWasteDataMonthDetail(int Month, int Year, int Hazardous, int facility_id)
+        internal async Task<List<CMWasteDataResult>> GetWasteDataMonthDetail(int Month, int Year, int Hazardous, int facility_id)
         {
             /* string SelectQ = $" select distinct waste_data.waterTypeId ,waste_data.id as id,Year(waste_data.date) as year,MONTH(waste_data.date) as months , facilityId as facility_id,fc.name facility_name,date ,"
                               + $" (select sum(creditQty) - sum(debitQty) from waste_data where MONTH(date) < {Month}) as opening,"
@@ -1063,25 +1063,76 @@ namespace CMMSAPIs.Repositories.Masters
                               + $" where waste_data.isHazardous = {Hazardous} and waste_data.facilityId = {facility_id} and MONTH(date) = {Month} and Year(date) = {Year} group by MONTH(date), waste_data.waterTypeId; ";*/
             string SelectQ = $" SELECT DISTINCT waste_data.wasteTypeId ,waste_data.id AS id,YEAR(waste_data.date) AS year,MONTH(waste_data.date) AS months , facilityId AS facility_id,fc.name AS facility_name,date ,"
                     + $" (SELECT SUM(creditQty) - SUM(debitQty) FROM waste_data WHERE MONTH(date) < {Month}) AS opening,"
-                    + $" SUM(creditQty) AS procured_qty, SUM(debitQty) AS consumed_qty, mw.name AS waste_type,"
+                    + $" SUM(creditQty) AS procured_qty, SUM(debitQty) AS consumed_qty, mw.name AS water_type,"
                     + $" consumeTypeId AS consumeTypeId,"
                     + $" CASE WHEN consumeTypeId = 1 THEN 'Procurement' WHEN consumeTypeId = 2 THEN 'Consumption' ELSE 'NA' END AS TransactionType,"
-                    + $" waste_data.description AS Description"
+                    + $" waste_data.description AS Description,MONTHNAME(date) as month_name,Month(date) as month_id,show_opening\r\n"
                     + $" FROM waste_data"
                     + $" LEFT JOIN facilities fc ON fc.id = waste_data.facilityId"
                     + $" LEFT JOIN mis_wastetype mw ON mw.id = waste_data.wasteTypeId"
                     + $" WHERE waste_data.isHazardous = {Hazardous} AND waste_data.facilityId = {facility_id} AND MONTH(date) = {Month} AND YEAR(date) = {Year} GROUP BY MONTH(date), waste_data.wasteTypeId;";
 
-            List<CMWasteDataMonthDetail> ListResult = await Context.GetData<CMWasteDataMonthDetail>(SelectQ).ConfigureAwait(false);
-            if (ListResult != null)
+
+            // start
+            List<CMWaterDataMonthWise> ListResult_new = await Context.GetData<CMWaterDataMonthWise>(SelectQ).ConfigureAwait(false);
+            if (ListResult_new != null)
             {
-                for (int i = 0; i < ListResult.Count; i++)
+                for (int i = 0; i < ListResult_new.Count; i++)
                 {
-                    ListResult[i].closing_qty = ListResult[i].opening + ListResult[i].procured_qty - ListResult[i].consumed_qty;
+                    ListResult_new[i].closing_qty = ListResult_new[i].opening + ListResult_new[i].procured_qty - ListResult_new[i].consumed_qty;
                 }
             }
+            List<CMWasteDataResult> groupedResult = ListResult_new.GroupBy(r => new { r.facility_id, r.facility_name })
+                  .Select(group => new CMWasteDataResult
+                  {
+                      facility_id = group.Key.facility_id,
+                      facility_name = group.Key.facility_name,
+                      hazardous = Hazardous,
+                      period = group.Select(r => new { r.month_name, r.month_id, r.year })
+                                   .Distinct()
+                                   .Select(periodGroup => new CMFacilityPeriodData_Waste
+                                   {
+                                       month_name = periodGroup.month_name,
+                                       month_id = periodGroup.month_id,
+                                       year = periodGroup.year,
+                                       details = group.Where(g => g.month_name == periodGroup.month_name && g.year == periodGroup.year)
+                                                     .GroupBy(g => g.water_type)
+                                                     .Select(g => new CMWasteDataMonthWiseDetails
+                                                     {
+                                                         waste_type = g.Key,
+                                                         opening = g.Sum(item => item.opening),
+                                                         procured_qty = g.Sum(item => item.procured_qty),
+                                                         consumed_qty = g.Sum(item => item.consumed_qty),
+                                                         closing_qty = g.Sum(item => item.opening) + g.Sum(item => item.procured_qty) - g.Sum(item => item.consumed_qty),
+                                                         show_opening = g.Sum(item => item.show_opening)
+                                                     }).ToList()
+                                   }).ToList()
+                  }).ToList();
+            //end
+            string water_type_master_q = " select facility_id,fc.name facility_name, mis_wastetype.name as water_type,show_opening " +
+            " from mis_wastetype  LEFT JOIN facilities fc ON fc.id = mis_wastetype.facility_id;";
 
-            return ListResult;
+            List<CMWaterDataMonthWise> Result_masterList = await Context.GetData<CMWaterDataMonthWise>(water_type_master_q).ConfigureAwait(false);
+            List<CMWasteTypeMaster> waste_types = new List<CMWasteTypeMaster>();
+            foreach (var item in Result_masterList)
+            {
+                for (int i = 0; i < groupedResult.Count; i++)
+                {
+                    if (groupedResult[i].facility_id == item.facility_id)
+                    {
+                        CMWasteTypeMaster element = new CMWasteTypeMaster();
+                        element.waste_type = item.water_type;
+                        element.show_opening = item.show_opening;
+                        if (groupedResult[i].master_list == null)
+                        {
+                            groupedResult[i].master_list = waste_types;
+                        }
+                        groupedResult[i].master_list.Add(element);
+                    }
+                }
+
+            }
+            return groupedResult;
         }
     }
 
