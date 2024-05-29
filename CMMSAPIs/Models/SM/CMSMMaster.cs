@@ -128,8 +128,19 @@ namespace CMMSAPIs.Models.SM
         public int is_submit { get; set; }
 
         public List<CMEquipments> cmmrsItems { get; set;}
+        public List<CMFaultyItems> faultyItems { get; set;}
 
     }
+
+    public class CMFaultyItems
+    {
+        public int mrsItemID { get; set; }
+        public int assetMasterItemID { get; set; }
+        public int returned_qty { get; set; }
+        public string return_remarks { get; set; }
+        public string sr_no { get; set; }
+    }
+
     public class CMEquipments
     {
         public int id { get; set; }
