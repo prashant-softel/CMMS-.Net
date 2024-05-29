@@ -260,7 +260,7 @@ namespace CMMSAPIs.Models.Masters
     {
         public int facility_id { get; set; }
         public string facility_name { get; set; }
-        public string month { get; set; }
+        public dynamic month { get; set; }
         public int year { get; set; }
         public string water_type { get; set; }
         public int waterTypeId { get; set; }

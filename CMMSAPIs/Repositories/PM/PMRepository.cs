@@ -778,12 +778,12 @@ namespace CMMSAPIs.Repositories.PM
                                 //return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] assigned to named '{newR[7]}' does not exist.");
                             }
 
-                            if (plan.ContainsKey(Convert.ToString(newR["PlanName"])))
-                            {
-                                m_errorLog.SetError($"[Row: {rN}] PlanName Is Already Present");
-                                newR.Delete();
-                                continue;
-                            }
+                            //   if (plan.ContainsKey(Convert.ToString(newR["PlanName"])))
+                            //   {
+                            //       m_errorLog.SetError($"[Row: {rN}] PlanName Is Already Present");
+                            //        newR.Delete();
+                            //        continue;
+                            //    }
                             try
                             {
 
@@ -1035,16 +1035,11 @@ namespace CMMSAPIs.Repositories.PM
 
                             try
                             {
-                                if (asset.ContainsKey(Convert.ToString(newR["EquipmentName"])))
+
                                 {
                                     newR["equipmentID"] = asset[Convert.ToString(newR["EquipmentName"]).ToUpper()];
                                 }
-                                else
-                                {
-                                    m_errorLog.SetError($"[Row: {rN}] Equipment name does not exist '{newR["EquipmentName"]}'.");
-                                    newR.Delete();
-                                    continue;
-                                }
+
                             }
                             catch (KeyNotFoundException)
                             {

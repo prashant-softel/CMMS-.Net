@@ -286,6 +286,12 @@ namespace CMMSAPIs.Helper
 
             ATTENDANCE = 400,
             TRAINING_COURSE,
+            TRAINNING_SCHEDULE,
+            SEND_INVITATION,
+            MARK_ATTENDENCE,
+            EXECUTE_SCHEDULE
+
+
 
 
         }
@@ -564,6 +570,7 @@ namespace CMMSAPIs.Helper
             MoM_OPEN = 451,
             MoM_CANCEL,
             MoM_CLOSE,
+            COURSE_SCHEDULE,
         }
 
         public enum ApprovalStatus

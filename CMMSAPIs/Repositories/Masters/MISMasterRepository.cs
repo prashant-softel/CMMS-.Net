@@ -478,7 +478,7 @@ namespace CMMSAPIs.Repositories.Masters
 
         internal async Task<List<WasteDataType>> GetWasteType()
         {
-            string delqry = "SELECT id,facility_id,name,Type,description,createdAt,UpdatedAt FROM mis_wastetype  ;";
+            string delqry = "SELECT id,facility_id,name,Type,description,isHazardous,show_opening,createdAt,UpdatedAt FROM mis_wastetype  ;";
             List<WasteDataType> Data = await Context.GetData<WasteDataType>(delqry).ConfigureAwait(false);
             return Data;
         }

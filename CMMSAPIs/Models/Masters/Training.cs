@@ -42,5 +42,23 @@ namespace CMMSAPIs.Models.Masters
         public string Address { get; set; }
         public string companyName { get; set; }
     }
+    public class GETSCHEDULE
+    {
+        public int ScheduleID { get; set; }
+        public int CourseID { get; set; }
+        public DateTime ScheduleDate { get; set; }
+        public string TrainingCompany { get; set; }
+        public string Trainer { get; set; }
+        public string Mode { get; set; }
+        public string Venue { get; set; }
+        public int Traning_category_id { get; set; }
+        public int No_Of_Days { get; set; }
+        public int Targeted_Group_Id { get; set; }
+        public int Duration_In_Minutes { get; set; }
+        public string Course_Category { get; set; }
+        public string Targeted_Group { get; set; }
+
+
+    }
 
 }

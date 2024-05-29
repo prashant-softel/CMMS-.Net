@@ -94,7 +94,7 @@ namespace CMMSAPIs.Controllers.Masters
                 throw ex;
             }
         }
-        [Route("CreateScheduleCourse")]
+        [Route("ScheduleCourse")]
         [HttpPost]
         public async Task<IActionResult> CreateScheduleCourse(TrainingSchedule request)
         {
@@ -110,14 +110,14 @@ namespace CMMSAPIs.Controllers.Masters
                 throw ex;
             }
         }
-        [Route("GetScheduleCourse")]
+        [Route("GetScheduleCourseList")]
         [HttpGet]
-        public async Task<IActionResult> GetScheduleCourse()
+        public async Task<IActionResult> GetScheduleCourseList(int facility_id, DateTime from_date, DateTime to_date)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await TrainingCourseBS.GetScheduleCourse();
+                var data = await TrainingCourseBS.GetScheduleCourseList(facility_id, from_date, to_date);
                 return Ok(data);
 
             }

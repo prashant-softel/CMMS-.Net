@@ -185,11 +185,20 @@ namespace CMMSAPIs.Repositories.Masters
                 DataTable dt2 = await Context.FetchData(inviteschdule).ConfigureAwait(false);
                 int schdinviid = Convert.ToInt32(dt2.Rows[0][0]);
             }
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.TRAINNING_SCHEDULE, schid, 0, 0, request.Comment, CMMS.CMMS_Status.COURSE_SCHEDULE);
             return new CMDefaultResponse(schid, CMMS.RETRUNSTATUS.SUCCESS, "Course Schedule Sucessfully");
         }
-        internal async Task<CMDefaultResponse> GetScheduleCourse()
+        internal async Task<List<GETSCHEDULE>> GetScheduleCourseList(int facility_id, DateTime from_date, DateTime to_date)
+
         {
-            return null;
+            string getsch = $"SELECT  Schid as ScheduleID ,CourseId as  CourseID , Course_name, ScheduleDate, TraingCompany as TrainingCompany, Trainer, Mode,  Venue , " +
+                $" c.Topic,c.Traning_category_id, c.No_Of_Days, c.Targated_group_id, c.Duration_in_Minutes ,cc.name as course_category ,tg.name as targeted_group from  training_schedule " +
+                $"  LEFT JOIN course as c on c.id = training_schedule.CourseId " +
+                $"  LEFT JOIN course_category cc on cc.id = c.Traning_category_id " +
+                $" LEFT JOIN targeted_group as tg on tg.id = c.Targated_group_id " +
+                $" where training_schedule.facility_id={facility_id} ";
+            List<GETSCHEDULE> Schedules = await Context.GetData<GETSCHEDULE>(getsch).ConfigureAwait(false);
+            return Schedules;
         }
 
         internal async Task<CMDefaultResponse> ExecuteScheduleCourse()

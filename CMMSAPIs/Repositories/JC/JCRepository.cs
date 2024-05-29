@@ -248,7 +248,7 @@ namespace CMMSAPIs.Repositories.JC
                 foreach (int data in request.uploadfile_ids)
                 {
 
-                    string qryuploadFiles = $"UPDATE uploadedfiles SET facility_id = {fid}, module_type={(int)CMMS.CMMS_Modules.JOBCARD},module_ref_id={jc_id} where id = {data}";
+                    string qryuploadFiles = $"UPDATE uploadedfiles SET facility_id = {fid}, module_type={(int)CMMS.CMMS_Modules.JOB},module_ref_id={jc_id} where id = {data}";
                     await Context.ExecuteNonQry<int>(qryuploadFiles).ConfigureAwait(false);
                 }
             }
@@ -613,7 +613,7 @@ namespace CMMSAPIs.Repositories.JC
             int fid = 0;
             foreach (var id in _jcDetails)
             {
-                string fq = $"SELECT id as fid from  where name={id.plant_name}";
+                string fq = $"SELECT id as fid from facilities  where name='{id.plant_name}'";
                 DataTable dt = await Context.FetchData(fq).ConfigureAwait(false);
                 fid = Convert.ToInt32(dt.Rows[0][0]);
             }

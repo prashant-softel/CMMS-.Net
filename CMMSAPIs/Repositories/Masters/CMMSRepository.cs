@@ -359,7 +359,7 @@ namespace CMMSAPIs.Repositories.Masters
         internal async Task<List<CMEmployee>> GetEmployeeList(int facility_id, CMMS.CMMS_Modules module, CMMS.CMMS_Access access)
         {
             string myQuery = "SELECT " +
-                                    "u.id, loginId as login_id, concat(firstName,' ', lastName) as name, birthday as birthdate, " +
+                                    "u.id, loginId as login_id, concat(firstName,' ', lastName) as name, birthday as birthdate,TIMESTAMPDIFF(YEAR,u.joiningDate, CURDATE()) AS experince,  " +
                                     "gender, mobileNumber, cities.name as city, states.name as state, countries.name as country, zipcode as pin, usd.designationName as designation " +
                              "FROM " +
                                     "Users as u " +

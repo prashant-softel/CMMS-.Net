@@ -18,6 +18,7 @@ namespace CMMSAPIs.Models.Masters
         public int pin { get; set; }
         public int[] responsibilityIds { get; set; }
         public string designation { get; set; }
+        public dynamic experince { get; set; }
         public List<CMResposibility> responsibility { get; set; }
 
     }
