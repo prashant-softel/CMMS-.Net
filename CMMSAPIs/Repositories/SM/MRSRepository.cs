@@ -1084,6 +1084,10 @@ namespace CMMSAPIs.Repositories.SM
                 var lastMRSID = request.ID;
                 var refType = "MRSReturnEdit";
                 var mailSub = "MRS Return Request Updated.";
+
+                string updatestmt = $"UPDATE smrsitems SET is_splited = 0 WHERE mrs_ID = {request.ID};";
+                await Context.ExecuteNonQry<int>(updatestmt);
+
                 //string updatestmt = $" START TRANSACTION; UPDATE smmrs SET facility_ID = {request.facility_ID}, requested_by_emp_ID = {UserID}, requested_date = '{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}'," +
                 //    $" activity='{request.activity}',whereUsedType={request.whereUsedType},whereUsedRefID={request.whereUsedRefID},is_mrs_return=1 WHERE ID = {request.ID}" +
                 //    $" ; DELETE FROM smrsitems WHERE mrs_ID =  {lastMRSID} ; COMMIT;";
@@ -1132,22 +1136,27 @@ namespace CMMSAPIs.Repositories.SM
 
                     try
                     {
-                        if (request.cmmrsItems[i].is_faulty == 1)
-                        {
-                            string insertStmt = $"START TRANSACTION; " +
-                                        $"Update smmrs SET status = {(int)CMMS.CMMS_Status.MRS_SUBMITTED} where id = {request.ID} ;INSERT INTO smrsitems (mrs_ID,mrs_return_ID,asset_item_ID,available_qty,requested_qty,returned_qty,return_remarks,flag, is_faulty,is_splited,issued_qty)" +
-                                        $"VALUES ({request.ID},0,{request.cmmrsItems[i].asset_item_ID},{request.cmmrsItems[i].qty}, {request.cmmrsItems[i].requested_qty}, {request.cmmrsItems[i].returned_qty}, '{request.cmmrsItems[i].return_remarks}', 2, {request.cmmrsItems[i].is_faulty},1,{request.cmmrsItems[i].issued_qty})" +
-                                        $"; SELECT LAST_INSERT_ID(); COMMIT;";
-                            DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
-                        }
-                        else
-                        {
-                            string insertStmt = $"START TRANSACTION; " +
-                                $"INSERT INTO smrsitems (mrs_ID,mrs_return_ID,asset_item_ID,available_qty,requested_qty,returned_qty,return_remarks,flag, is_faulty,is_splited,issued_qty)" +
-                                $"VALUES ({request.ID},{MRS_ReturnID},{request.cmmrsItems[i].asset_item_ID},{request.cmmrsItems[i].qty}, {request.cmmrsItems[i].requested_qty}, {request.cmmrsItems[i].returned_qty}, '{request.cmmrsItems[i].return_remarks}', 2, {request.cmmrsItems[i].is_faulty},1,{request.cmmrsItems[i].issued_qty})" +
-                                $"; SELECT LAST_INSERT_ID(); COMMIT;";
-                            DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
-                        }
+                        //if (request.cmmrsItems[i].is_faulty == 1)
+                        //{
+                        //    string insertStmt = $"START TRANSACTION; " +
+                        //                $"Update smmrs SET status = {(int)CMMS.CMMS_Status.MRS_SUBMITTED} where id = {request.ID} ;INSERT INTO smrsitems (mrs_ID,mrs_return_ID,asset_item_ID,available_qty,requested_qty,returned_qty,return_remarks,flag, is_faulty,is_splited,issued_qty)" +
+                        //                $"VALUES ({request.ID},0,{request.cmmrsItems[i].asset_item_ID},{request.cmmrsItems[i].qty}, {request.cmmrsItems[i].requested_qty}, {request.cmmrsItems[i].returned_qty}, '{request.cmmrsItems[i].return_remarks}', 2, {request.cmmrsItems[i].is_faulty},1,{request.cmmrsItems[i].issued_qty})" +
+                        //                $"; SELECT LAST_INSERT_ID(); COMMIT;";
+                        //    DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
+                        //}
+                        //else
+                        //{
+                        //    string insertStmt = $"START TRANSACTION; " +
+                        //        $"INSERT INTO smrsitems (mrs_ID,mrs_return_ID,asset_item_ID,available_qty,requested_qty,returned_qty,return_remarks,flag, is_faulty,is_splited,issued_qty)" +
+                        //        $"VALUES ({request.ID},{MRS_ReturnID},{request.cmmrsItems[i].asset_item_ID},{request.cmmrsItems[i].qty}, {request.cmmrsItems[i].requested_qty}, {request.cmmrsItems[i].returned_qty}, '{request.cmmrsItems[i].return_remarks}', 2, {request.cmmrsItems[i].is_faulty},1,{request.cmmrsItems[i].issued_qty})" +
+                        //        $"; SELECT LAST_INSERT_ID(); COMMIT;";
+                        //    DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
+                        //}
+                        string insertStmt = $"START TRANSACTION; " +
+                            $"INSERT INTO smrsitems (mrs_ID,mrs_return_ID,asset_item_ID,available_qty,requested_qty,returned_qty,return_remarks,flag, is_faulty,is_splited,issued_qty)" +
+                            $"VALUES ({request.ID},{MRS_ReturnID},{request.cmmrsItems[i].asset_item_ID},{request.cmmrsItems[i].qty}, {request.cmmrsItems[i].requested_qty}, {request.cmmrsItems[i].returned_qty}, '{request.cmmrsItems[i].return_remarks}', 2, {request.cmmrsItems[i].is_faulty},1,{request.cmmrsItems[i].issued_qty})" +
+                            $"; SELECT LAST_INSERT_ID(); COMMIT;";
+                        DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
 
 
                         string updatestmt = $"UPDATE smassetitems SET item_condition = {request.cmmrsItems[i].is_faulty} WHERE ID = {request.cmmrsItems[i].asset_item_ID};";
@@ -1163,6 +1172,19 @@ namespace CMMSAPIs.Repositories.SM
                     Queryflag = true;
                 }
             }
+
+            if (request.faultyItems.Count > 0)
+            {
+                for (var i = 0; i < request.faultyItems.Count; i++)
+                {                    
+                    if(request.faultyItems[i].mrsItemID > 0)
+                    {
+                        string updatestmt = $"Update smmrs SET status = {(int)CMMS.CMMS_Status.MRS_SUBMITTED} where id = {request.ID} ;UPDATE smrsitems SET mrs_return_ID = {request.ID}, returned_qty={request.faultyItems[i].returned_qty},return_remarks='{request.faultyItems[i].return_remarks}', is_faulty = 1 WHERE ID = {request.faultyItems[i].mrsItemID};";
+                        await Context.ExecuteNonQry<int>(updatestmt);
+                    }
+                }
+            }
+
             if (!Queryflag)
             {
                 response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Failed to submit MRS return.");
