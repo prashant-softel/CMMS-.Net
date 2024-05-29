@@ -86,7 +86,7 @@ namespace CMMSAPIs.BS.MISMasters
         Task<List<WaterDataResult>> GetWaterDataListMonthWise(DateTime fromDate, DateTime toDate, int facility_id);
         Task<List<CMWasteDataResult>> GetWasteDataListMonthWise(DateTime fromDate, DateTime toDate, int Hazardous, int facility_id);
         Task<List<WaterDataResult_Month>> GetWaterDataMonthDetail(int Month, int Year, int facility_id);
-        Task<List<CMWasteDataMonthDetail>> GetWasteDataMonthDetail(int Month, int Year, int Hazardous, int facility_id);
+        Task<List<CMWasteDataResult>> GetWasteDataMonthDetail(int Month, int Year, int Hazardous, int facility_id);
 
 
     }
@@ -1152,7 +1152,7 @@ namespace CMMSAPIs.BS.MISMasters
                 throw;
             }
         }
-        public async Task<List<CMWasteDataMonthDetail>> GetWasteDataMonthDetail(int Month, int Year, int Hazardous, int facility_id)
+        public async Task<List<CMWasteDataResult>> GetWasteDataMonthDetail(int Month, int Year, int Hazardous, int facility_id)
         {
             try
             {
