@@ -378,6 +378,8 @@ namespace CMMSAPIs.Repositories.JC
 
             List<CMFileDetailJc> Jc_image = await Context.GetData<CMFileDetailJc>(myQuery18).ConfigureAwait(false);
 
+
+
             _plantDetails[0].LstCMJCJobDetailList = _jobDetails;
             _plantDetails[0].LstPermitDetailList = _permitDetails;
             _plantDetails[0].asset_category_name = asset_category_name;

@@ -162,9 +162,9 @@ namespace CMMSAPIs.Repositories.Masters
         int Exterid = 0;
         internal async Task<CMDefaultResponse> CreateScheduleCourse(TrainingSchedule request, int userID)
         {
-
-            string crtqry = $"INSERT INTO training_schedule ( CourseId, Course_name, ScheduleDate, TraingCompany, Trainer,Mode, Comment, Venue, hfeEmployeeId, CreatedAt, CreatedBy) values " +
-                            $"({request.CourseId},'{request.CourseName}','{request.DateOfTraining}',{request.TrainingAgencyId},'{request.TrainerName}','{request.Mode}','{request.Comment}','{request.Venue}',{request.HfeEmployeeId},'{UtilsRepository.GetUTCTime()}',{userID}) ; " +
+            DateTime data = Convert.ToDateTime(request.Date_of_training);
+            string crtqry = $"INSERT INTO training_schedule ( CourseId,facility_id, Course_name, ScheduleDate, TraingCompany, Trainer,Mode, Comment, Venue, hfeEmployeeId, CreatedAt, CreatedBy) values " +
+                            $"({request.CourseId},{request.facility_id},'{request.CourseName}','{data.ToString("yyyyy-MM-dd")}',{request.TrainingAgencyId},'{request.TrainerName}','{request.Mode}','{request.Comment}','{request.Venue}',{request.HfeEmployeeId},'{UtilsRepository.GetUTCTime()}',{userID}) ; " +
                             $"SELECT LAST_INSERT_ID();";
             DataTable dt = await Context.FetchData(crtqry).ConfigureAwait(false);
             int schid = Convert.ToInt32(dt.Rows[0][0]);
@@ -179,7 +179,7 @@ namespace CMMSAPIs.Repositories.Masters
 
             foreach (InternalEmployee item in request.internalEmployees)
             {
-                string inviteschdule = $"INSERT INTO schdule_invitee ( Schid, employee_id, Visitor,RSVP_Datetime, Attendence,CreatedAt,CreatedBy) values " +
+                string inviteschdule = $"INSERT INTO schdule_invitee ( Schid, employee_id, Visitor_id,RSVP_Datetime, Attendence,CreatedAt,CreatedBy) values " +
                                $"('{schid}',{item.EmpId},{Exterid},'{UtilsRepository.GetUTCTime()}','{item.Attendence}','{UtilsRepository.GetUTCTime()}',{userID}) ; " +
                                $"SELECT LAST_INSERT_ID();";
                 DataTable dt2 = await Context.FetchData(inviteschdule).ConfigureAwait(false);
@@ -189,9 +189,8 @@ namespace CMMSAPIs.Repositories.Masters
             return new CMDefaultResponse(schid, CMMS.RETRUNSTATUS.SUCCESS, "Course Schedule Sucessfully");
         }
         internal async Task<List<GETSCHEDULE>> GetScheduleCourseList(int facility_id, DateTime from_date, DateTime to_date)
-
         {
-            string getsch = $"SELECT  Schid as ScheduleID ,CourseId as  CourseID , Course_name, ScheduleDate, TraingCompany as TrainingCompany, Trainer, Mode,  Venue , " +
+            string getsch = $"SELECT  Schid as ScheduleID ,CourseId as  CourseID , Course_name, ScheduleDate, TraingCompany as TrainingCompany, Trainer, Mode as mode,  Venue , " +
                 $" c.Topic,c.Traning_category_id, c.No_Of_Days, c.Targated_group_id, c.Duration_in_Minutes ,cc.name as course_category ,tg.name as targeted_group from  training_schedule " +
                 $"  LEFT JOIN course as c on c.id = training_schedule.CourseId " +
                 $"  LEFT JOIN course_category cc on cc.id = c.Traning_category_id " +

@@ -1176,8 +1176,8 @@ namespace CMMSAPIs.Repositories.SM
             if (request.faultyItems.Count > 0)
             {
                 for (var i = 0; i < request.faultyItems.Count; i++)
-                {                    
-                    if(request.faultyItems[i].mrsItemID > 0)
+                {
+                    if (request.faultyItems[i].mrsItemID > 0)
                     {
                         string updatestmt = $"Update smmrs SET status = {(int)CMMS.CMMS_Status.MRS_SUBMITTED} where id = {request.ID} ;UPDATE smrsitems SET mrs_return_ID = {request.ID}, returned_qty={request.faultyItems[i].returned_qty},return_remarks='{request.faultyItems[i].return_remarks}', is_faulty = 1 WHERE ID = {request.faultyItems[i].mrsItemID};";
                         await Context.ExecuteNonQry<int>(updatestmt);

@@ -5,8 +5,8 @@ namespace CMMSAPIs.Models.Masters
 {
     public class CMCreateAttendence
     {
-
-        public DateTime Date { get; set; }
+        public DateTime date { get; set; }
+        public int facility_id { get; set; }
         public List<CMGetAttendence> hfeAttendance { get; set; }
         public CMGetCotractor contractAttendance { get; set; }
 
@@ -14,14 +14,15 @@ namespace CMMSAPIs.Models.Masters
     }
     public class CMGetAttendence
     {
-        public int Id { get; set; }
+        public int id { get; set; }
+        public string name { get; set; }
+        public dynamic present { get; set; }
+        public string InTime { get; set; }
+        public string OutTime { get; set; }
         public int Attendance_Id { get; set; }
-
         public int Facility_Id { get; set; }
+
         public int Employee_Id { get; set; }
-        public dynamic Present { get; set; }
-        public string In_Time { get; set; }
-        public string Out_Time { get; set; }
         public int CreatedBy { get; set; }
         public DateTime? CreatedAt { get; set; }
         public int UpdatedBy { get; set; }
@@ -33,9 +34,9 @@ namespace CMMSAPIs.Models.Masters
     {
         public int Id { get; set; }
         public int Contractor_Id { get; set; }
-        public int Age_Less_Than35 { get; set; }
-        public int Age_Between_35And50 { get; set; }
-        public int Age_Greater50 { get; set; }
-        public string Purpose { get; set; }
+        public int lessThan35 { get; set; }
+        public int between35to50 { get; set; }
+        public int greaterThan50 { get; set; }
+        public string purpose { get; set; }
     }
 }

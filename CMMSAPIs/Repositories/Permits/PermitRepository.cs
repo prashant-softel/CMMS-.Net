@@ -485,6 +485,7 @@ namespace CMMSAPIs.Repositories.Permits
              * Permit id, site Permit No., Permit Type, Equipment Categories, Working Area/Equipment, Description, Permit requested by
              * Request Date/Time, Approved By, Approved Date/Time, Current Status(Approved, Rejected, closed).           
             */
+            //Changes Pending LEFT JOIN jobcards as jc ON jc.PTW_id = ptw.id
             var checkFilter = 0;
             string statusSubQuery = "CASE ";
             for (int i = (int)CMMS.CMMS_Status.PTW_CREATED; i <= (int)CMMS.CMMS_Status.PTW_EXPIRED; i++)

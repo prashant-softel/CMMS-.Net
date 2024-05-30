@@ -253,7 +253,7 @@ namespace CMMSAPIs.Repositories.Facility
         }
         internal async Task<List<FacilityListEmployee>> GetFacilityListEmployee(int facility_id)
         {
-            string myQuery = $"SELECT u.id, loginId as login_id, concat(firstName,' ', lastName) as name,uf.isemployee, birthday as birthdate, gender, mobileNumber, cities.name as city, states.name as state, countries.name as country, zipcode as pin FROM Users as u JOIN UserFacilities as uf ON u.id = uf.userId LEFT JOIN cities as cities ON cities.id = u.cityId LEFT JOIN states as states ON states.id = u.stateId and states.id = cities.state_id LEFT JOIN countries as countries ON countries.id = u.countryId and countries.id = cities.country_id and countries.id = states.country_id LEFT JOIN usersaccess as access ON u.id = access.userId WHERE uf.isemployee=1 and  u.status = 1 AND uf.status = 1  AND u.isEmployee = 1 AND uf.facilityId = {facility_id}  GROUP BY u.id ORDER BY u.id ;";
+            string myQuery = $"SELECT u.id, loginId as login_id, concat(firstName,' ', lastName) as name,uf.isemployee, birthday as birthdate, gender, mobileNumber, cities.name as city, states.name as state, countries.name as country, zipcode as pin,ud.designationName as designation FROM Users as u JOIN UserFacilities as uf ON u.id = uf.userId LEFT JOIN cities as cities ON cities.id = u.cityId LEFT JOIN states as states ON states.id = u.stateId and states.id = cities.state_id LEFT JOIN countries as countries ON countries.id = u.countryId and countries.id = cities.country_id and countries.id = states.country_id LEFT JOIN userdesignation as ud ON ud.id =u.designation_id LEFT JOIN usersaccess as access ON u.id = access.userId WHERE uf.isemployee=1 and  u.status = 1 AND uf.status = 1  AND u.isEmployee = 1 AND uf.facilityId = {facility_id}  GROUP BY u.id ORDER BY u.id ;";
             List<FacilityListEmployee> _Facility = await Context.GetData<FacilityListEmployee>(myQuery).ConfigureAwait(false);
 
 
@@ -278,6 +278,7 @@ namespace CMMSAPIs.Repositories.Facility
                              $"LEFT JOIN countries as countries ON countries.id = u.countryId and countries.id = cities.country_id and countries.id = states.country_id  " +
                              $"LEFT JOIN usersaccess as access ON u.id = access.userId  " +
                              $"LEFT JOIN  userdesignation as usd on  usd.id = u.designation_id " +
+                             // $"LEFT JOIN employee_attendance as es on es.employee_id = u.id "+AND es.in_time<now() 
                              $"WHERE uf.isemployee = 1 and access.featureId ={featureid} and access.edit = 1 and u.status = 1 AND uf.status = 1  " +
                              $"AND uf.facilityId = {facility_id} GROUP BY u.id ORDER BY u.id;";
             List<FacilityListEmployee> _FacilityByFeatureid = await Context.GetData<FacilityListEmployee>(myQuery).ConfigureAwait(false);

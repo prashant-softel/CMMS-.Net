@@ -7,13 +7,13 @@ namespace CMMSAPIs.Models.Masters
         public int CourseId { get; set; }
         public string CourseName { get; set; }
         public string Comment { get; set; }
-        public DateTime DateOfTraining { get; set; }
+        public string Date_of_training { get; set; }
         public string TrainerName { get; set; }
         public int TrainingAgencyId { get; set; }
         public int HfeEmployeeId { get; set; }
         public string Venue { get; set; }
         public DateTime CreatedAt { get; set; }
-
+        public int facility_id { get; set; }
         public string Mode { get; set; }
         public int CreatedBy { get; set; }
         public List<InternalEmployee> internalEmployees { get; set; }

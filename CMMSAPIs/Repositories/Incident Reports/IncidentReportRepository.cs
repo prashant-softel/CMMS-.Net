@@ -837,6 +837,17 @@ namespace CMMSAPIs.Repositories.Incident_Reports
                 }
             }
 
+            if (request.uploadfile_ids != null)
+            {
+                foreach (int data in request.uploadfile_ids)
+                {
+
+                    string qryuploadFiles = $"UPDATE uploadedfiles SET facility_id = {request.facility_id}, module_type={(int)CMMS.CMMS_Modules.INCIDENT_REPORT},module_ref_id={request.id} where id = {data}";
+                    await Context.ExecuteNonQry<int>(qryuploadFiles).ConfigureAwait(false);
+                }
+            }
+
+
             if (updateId > 0)
             {
 

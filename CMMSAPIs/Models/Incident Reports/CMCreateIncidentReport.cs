@@ -122,6 +122,7 @@ namespace CMMSAPIs.Models.Incident_Reports
         public string address { get; set; }
         public string name_contractor { get; set; }
         public string body_part_and_nature_of_injury { get; set; }
+
         public dynamic work_experience_years { get; set; }
         public string plant_equipment_involved { get; set; }
         public string location_of_incident { get; set; }
