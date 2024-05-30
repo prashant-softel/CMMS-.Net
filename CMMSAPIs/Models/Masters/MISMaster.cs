@@ -190,6 +190,7 @@ namespace CMMSAPIs.Models.Masters
     }
     public class CMWaterDataMonthWise
     {
+        public int id { get; set; }
         public int facility_id { get; set; }
         public string facility_name { get; set; }
         public string month_name { get; set; }
@@ -225,6 +226,7 @@ namespace CMMSAPIs.Models.Masters
     }
     public class CMWaterDataMonthWiseDetails
     {
+        public int water_id { get; set; }
         public string water_type { get; set; }
         public decimal opening_qty { get; set; }
         public decimal procured_qty { get; set; }
@@ -309,6 +311,7 @@ namespace CMMSAPIs.Models.Masters
     }
     public class CMWasteDataMonthWiseDetails
     {
+        public int waste_id { get; set; }
         public string waste_type { get; set; }
         public decimal opening { get; set; }
         public decimal procured_qty { get; set; }
@@ -352,6 +355,40 @@ namespace CMMSAPIs.Models.Masters
         public int consumeTypeId { get; set; }
         public dynamic months { get; set; }
         public dynamic year { get; set; }
+        public int show_opening { get; set; }
+
+    }
+
+    public class CMWasteDataResult_Month
+    {
+        public int facility_id { get; set; }
+        public string facility_name { get; set; }
+        public dynamic month { get; set; }
+        public int year { get; set; }
+        public string waste_type { get; set; }
+        public int wasteTypeId { get; set; }
+
+        public List<CMWasteFacilityPeriodData_Month> item_data { get; set; }
+    }
+    public class CMWasteFacilityPeriodData_Month
+    {
+        public string waste_type { get; set; }
+        public int wasteTypeId { get; set; }
+        public decimal opening { get; set; }
+        public List<CMWasteDataMonthWiseDetails_Month> details { get; set; }
+    }
+    public class CMWasteDataMonthWiseDetails_Month
+    {
+        public int id { get; set; }
+        public dynamic date { get; set; }
+        public string waste_type { get; set; }
+        public decimal opening { get; set; }
+        public decimal procured_qty { get; set; }
+        public decimal consumed_qty { get; set; }
+        public decimal closing_qty { get; set; }
+        public string Description { get; set; }
+        public string TransactionType { get; set; }
+        public int show_opening { get; set; }
 
     }
 }
