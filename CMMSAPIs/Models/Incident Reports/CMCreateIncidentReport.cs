@@ -111,21 +111,19 @@ namespace CMMSAPIs.Models.Incident_Reports
     public class CMInjured_person
     {
         public int? injured_item_id { get; set; }
-        public int incidents_id { get; set; }
-        public string person_id { get; set; }
-        public int person_type { get; set; }
-        public string person_type_name { get; set; }
-        public int age { get; set; }
-        public int sex { get; set; }
-        public string gender_name { get; set; }
-        public string designation { get; set; }
-        public string address { get; set; }
-        public string name_contractor { get; set; }
-        public string body_part_and_nature_of_injury { get; set; }
-
-        public dynamic work_experience_years { get; set; }
-        public string plant_equipment_involved { get; set; }
-        public string location_of_incident { get; set; }
+        public int? incidents_id { get; set; }
+        public string? name { get; set; }
+        public int? person_type { get; set; }
+        public string? other_victim { get; set; }
+        public int? age { get; set; }
+        public int? sex { get; set; }
+        public string? designation { get; set; }
+        public string? address { get; set; }
+        public string? name_contractor { get; set; }
+        public string? body_part_and_nature_of_injury { get; set; }
+        public int? work_experience_years { get; set; }
+        public string? plant_equipment_involved { get; set; }
+        public string? location_of_incident { get; set; }
     }
 
 }
