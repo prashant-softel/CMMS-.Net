@@ -1115,6 +1115,47 @@ namespace CMMSAPIs.Repositories.Masters
                 }).ToList();
             return groupedResult_new;
         }
+
+        internal async Task<List<CMChecklistInspectionReport>> GetChecklistInspectionReport(string facility_id,int module_type, DateTime fromDate, DateTime toDate )
+        {
+            string myQuery = " select distinct  st.id, checklist_number as checklist_name , '' SOP_number, " +
+                " frequency.name as frequency, case when  is_ok = 0 then 'No' when is_ok = 1 then 'Yes' else 'NA' end as inspection_status, " +
+                " PM_Schedule_Observation_add_date as date_of_inspection, monthname(PM_Schedule_Observation_add_date) as month, " +
+                " case when file_required = 0 then 'No' else 'Yes' end  as checklist_attachment" +
+                " from st_audit st " +
+                " left join pm_task task on task.plan_id = st.id " +
+                " left join pm_execution pm_execution on pm_execution.task_id = task.id" +
+                " left join checklist_number checklist_number on checklist_number.id = st.Checklist_id " +
+                " left join frequency frequency on frequency.id = st.Frequency" +
+                " where st.facility_id in ( "+facility_id+") and st.module_type_id = "+module_type+ " and DATE_FORMAT(PM_Schedule_Observation_add_date,'%Y-%m-%d') BETWEEN '" + fromDate.ToString("yyyy-MM-dd") + "' AND '" + toDate.ToString("yyyy-MM-dd") + "'" +
+                "  group by st.id order by st.id desc; ";
+            List<CMChecklistInspectionReport> response = await Context.GetData<CMChecklistInspectionReport>(myQuery).ConfigureAwait(false);
+            return response;
+        }
+
+
+        internal async Task<List<CMObservationReport>> GetObservationSheetReport(string facility_id, DateTime fromDate, DateTime toDate)
+        {
+            string myQuery = " select st.id, distinct monthname(PM_Schedule_Observation_add_date) as month_of_observation, " +
+                " PM_Schedule_Observation_add_date as date_of_observation, " +
+                " concat(contarctorname.firstName, ' ', contarctorname.lastName) contractor_name," +
+                " '' location_of_observation, '' source_of_observation,''risk_type, Description observation_description," +
+                " '' corrective_action, concat(assignTo.firstName, ' ', assignTo.lastName) responsible_person," +
+                "  started_at as target_date, '' action_taken, started_at closer_date, '' cost_type,'Closed' status," +
+                "  '' timeline " +
+                " from st_audit st" +
+                " left join pm_task task on task.plan_id = st.id " +
+                " left join pm_execution pm_execution on pm_execution.task_id = task.id" +
+                " left join checklist_number checklist_number on checklist_number.id = st.Checklist_id " +
+                " left join frequency frequency on frequency.id = st.Frequency" +
+                " left join users contarctorname on contarctorname.id = pm_execution.PM_Schedule_Observation_added_by" +
+                " left join users assignTo on assignTo.id = task.assigned_to" +
+                " where st.facility_id in ( "+ facility_id + ") and is_ok = 0 and DATE_FORMAT(PM_Schedule_Observation_add_date,'%Y-%m-%d') BETWEEN '" + fromDate.ToString("yyyy-MM-dd") + "' AND '" + toDate.ToString("yyyy-MM-dd") + "' " +
+                "  group by st.id  order by st.id desc;";
+            List<CMObservationReport> response = await Context.GetData<CMObservationReport>(myQuery).ConfigureAwait(false);
+            return response;
+        }
+
     }
 
 }
