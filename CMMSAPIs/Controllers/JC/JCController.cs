@@ -1,14 +1,13 @@
 using CMMSAPIs.BS.JC;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http;
-using System.Threading.Tasks;
-using System;
 using CMMSAPIs.Models.JC;
 using CMMSAPIs.Models.Utils;
-using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace CMMSAPIs.Controllers.JC
 {
@@ -36,7 +35,7 @@ namespace CMMSAPIs.Controllers.JC
                 var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
 
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _JCBS.GetJCList(facility_id,  userID,  self_view, facilitytimeZone);
+                var data = await _JCBS.GetJCList(facility_id, userID, self_view, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -47,7 +46,7 @@ namespace CMMSAPIs.Controllers.JC
 
         [Route("GetJCListByJobId")]
         [HttpGet]
-        public async Task<IActionResult> GetJCListByJobId(int jobId,int facility_id)
+        public async Task<IActionResult> GetJCListByJobId(int jobId, int facility_id)
         {
             try
             {
@@ -70,7 +69,7 @@ namespace CMMSAPIs.Controllers.JC
         {
             try
             {
-              //  var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+                //  var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
 
                 var data = await _JCBS.GetJCDetail(jc_id);
                 return Ok(data);
@@ -169,13 +168,13 @@ namespace CMMSAPIs.Controllers.JC
 
         //[Authorize]
         [Route("StartJC")]
-        [HttpPut]
+        [HttpPost]
         public async Task<IActionResult> StartJC(CMJCRequest request)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _JCBS.StartJC(request,  userID);
+                var data = await _JCBS.StartJC(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
