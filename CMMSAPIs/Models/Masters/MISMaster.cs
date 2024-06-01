@@ -391,4 +391,38 @@ namespace CMMSAPIs.Models.Masters
         public int show_opening { get; set; }
 
     }
+
+    public class CMChecklistInspectionReport
+    {
+        public int id { get; set; }
+        public string checklist_name { get; set; }
+        public string SOP_number { get; set; }
+        public string frequency { get; set; }
+        public string month { get; set; }
+        public string inspection_status { get; set; }
+        public DateTime? date_of_inspection { get; set; }
+        public string checklist_attachment { get; set; }
+        public int no_of_unsafe_observation { get; set; }
+    }
+    public class CMObservationReport
+    {
+        public int id { get; set; }
+        public string month_of_observation { get; set; }
+        public DateTime? date_of_observation { get; set; }
+        public string contractor_name { get; set; }
+        public string location_of_observation  { get; set; }
+        public string type_of_observation  { get; set; }
+        public string source_of_observation  { get; set; }
+        public string risk_type  { get; set; }
+        public string observation_description  { get; set; }
+        public string corrective_action  { get; set; }
+        public string responsible_person  { get; set; }
+        public DateTime? target_date  { get; set; }
+        public string action_taken  { get; set; }
+        public DateTime? closer_date { get; set; }
+        public string cost_type { get; set; }
+        public string status { get; set; }
+        public int days_remaining { get; set; }
+        public string timeline { get; set; }
+    }
 }
