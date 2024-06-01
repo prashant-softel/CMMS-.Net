@@ -1,20 +1,18 @@
-using System;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using CMMSAPIs.Models.Masters;
 using CMMSAPIs.BS.Masters;
 using CMMSAPIs.Helper;
-using System.Reflection;
+using CMMSAPIs.Models.Masters;
+using CMMSAPIs.Models.Utils;
 using iTextSharp.text;
 using iTextSharp.text.pdf;
 using iTextSharp.tool.xml;
-using System.IO;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using CMMSAPIs.Models.Utils;
+using System.Threading.Tasks;
 
 namespace CMMSAPIs.Controllers.Masters
 {
@@ -26,7 +24,7 @@ namespace CMMSAPIs.Controllers.Masters
         public CMMSController(ICMMSBS cmms)
         {
             _CMMSBS = cmms;
-        }     
+        }
 
         #region helper
 
@@ -129,7 +127,7 @@ namespace CMMSAPIs.Controllers.Masters
                 var data = await _CMMSBS.GetEmployeeList(facility_id, module, access);
                 return Ok(data);
             }
-            catch(ArgumentException ex)
+            catch (ArgumentException ex)
             {
                 return BadRequest(ex.Message);
             }
@@ -156,11 +154,11 @@ namespace CMMSAPIs.Controllers.Masters
 
         [Route("GetBusinessList")]
         [HttpGet]
-        public async Task<IActionResult> GetBusinessList(int businessType,int facility_id)
+        public async Task<IActionResult> GetBusinessList(int businessType, int facility_id)
         {
             try
             {
-                    var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 var data = await _CMMSBS.GetBusinessList(businessType, facilitytimeZone);
                 return Ok(data);
             }
@@ -575,11 +573,11 @@ namespace CMMSAPIs.Controllers.Masters
 
         [Route("GetStatusList")]
         [HttpGet]
-        public async Task<IActionResult> GetStatusList(CMMS.CMMS_Modules module)
+        public async Task<IActionResult> GetStatusList()
         {
             try
             {
-                var data = await _CMMSBS.GetStatusList(module);
+                var data = await _CMMSBS.GetStatusList();
                 return Ok(data);
             }
             catch (Exception)
@@ -597,7 +595,7 @@ namespace CMMSAPIs.Controllers.Masters
                 var data = await _CMMSBS.GetFrequencyList();
                 return Ok(data);
             }
-            catch(Exception)
+            catch (Exception)
             {
                 throw;
             }
@@ -644,7 +642,7 @@ namespace CMMSAPIs.Controllers.Masters
                 {
                     path = await _CMMSBS.DownloadFile(id);
                 }
-                else if(filePath != null || filePath != "")
+                else if (filePath != null || filePath != "")
                 {
                     path = filePath;
                 }
@@ -653,7 +651,7 @@ namespace CMMSAPIs.Controllers.Masters
                     Response.StatusCode = StatusCodes.Status404NotFound;
                     Response.WriteAsync("File not found.");
                 }
-     
+
                 //string templateFilePath = $"./Upload/Templates/Bellary_Material.xlsx";
                 string templateFilePath = path;
                 byte[] fileContent = await System.IO.File.ReadAllBytesAsync(templateFilePath);
@@ -679,6 +677,22 @@ namespace CMMSAPIs.Controllers.Masters
             catch (Exception)
             {
                 throw;
+            }
+        }
+        [Route("GetStatusbymodule")]
+        [HttpGet]
+        public async Task<IActionResult> GetStatusbymodule(CMMS.CMMS_Modules module)
+        {
+            try
+            {
+                var data = await _CMMSBS.GetStatusbymodule(module);
+                return Ok(data);
+
+            }
+            catch (Exception ex)
+            {
+
+                return BadRequest(ex.Message);
             }
         }
 

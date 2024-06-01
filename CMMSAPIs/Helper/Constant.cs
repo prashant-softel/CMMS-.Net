@@ -511,6 +511,7 @@ namespace CMMSAPIs.Helper
             SM_RO_SUBMIT_APPROVED,
             SM_RO_DELETED,
             SM_RO_CLOSED,
+            SM_RO_UPDATED,
 
             MC_PLAN_DRAFT = 350,
             MC_PLAN_SUBMITTED,

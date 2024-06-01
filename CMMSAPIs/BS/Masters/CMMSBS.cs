@@ -1,12 +1,11 @@
 using CMMSAPIs.Helper;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using CMMSAPIs.Repositories.Masters;
 using CMMSAPIs.Models.Masters;
 using CMMSAPIs.Models.Utils;
+using CMMSAPIs.Repositories.Masters;
 using Microsoft.AspNetCore.Hosting;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace CMMSAPIs.BS.Masters
 {
@@ -41,18 +40,18 @@ namespace CMMSAPIs.BS.Masters
         Task<CMDefaultResponse> CreateSPV(CMSPV request, int userId);
         Task<CMDefaultResponse> UpdateSPV(CMSPV request, int userId);
         Task<CMDefaultResponse> DeleteSPV(int id, int userId);
-        Task<List<CMBusiness>> GetBusinessList(int businessType,string facilitytime);
+        Task<List<CMBusiness>> GetBusinessList(int businessType, string facilitytime);
         Task<CMDefaultResponse> AddModule(CMModule request);
         Task<CMDefaultResponse> UpdateModule(CMModule request);
         Task<CMDefaultResponse> DeleteModule(int id);
         Task<CMModule> GetModuleDetail(int id);
         Task<List<CMModule>> GetModuleList(bool return_all);
-        Task<List<CMStatus>> GetStatusList(CMMS.CMMS_Modules module);
+        Task<List<CMStatus>> GetStatusList();
         Task<List<CMFrequency>> GetFrequencyList();
         Task<string> Print(int id, CMMS.CMMS_Modules moduleID);
         Task<string> DownloadFile(int id);
         Task<List<CMDashboadModuleWiseList>> getDashboadDetails(string facilityId, CMMS.CMMS_Modules moduleID, DateTime fromDate, DateTime toDate);
-
+        Task<CMStatus1> GetStatusbymodule(CMMS.CMMS_Modules module);
     }
     public class CMMSBS : ICMMSBS
     {
@@ -66,7 +65,7 @@ namespace CMMSAPIs.BS.Masters
 
         }
 
-        
+
         #region helper
 
         public async Task<CMDefaultResponse> AddModule(CMModule request)
@@ -144,13 +143,13 @@ namespace CMMSAPIs.BS.Masters
             }
         }
 
-        public async Task<List<CMStatus>> GetStatusList(CMMS.CMMS_Modules module)
+        public async Task<List<CMStatus>> GetStatusList()
         {
             try
             {
                 using (var repos = new CMMSRepository(getDB))
                 {
-                    return await repos.GetStatusList(module);
+                    return await repos.GetStatusList();
                 }
             }
             catch (Exception)
@@ -176,7 +175,7 @@ namespace CMMSAPIs.BS.Masters
 
         }
 
-       public async Task<List<CMFacility>> GetFacility(int facility_id)
+        public async Task<List<CMFacility>> GetFacility(int facility_id)
         {
             try
             {
@@ -602,7 +601,7 @@ namespace CMMSAPIs.BS.Masters
                     return await repos.GetFrequencyList();
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw;
             }
@@ -659,6 +658,22 @@ namespace CMMSAPIs.BS.Masters
                 using (var repos = new CMMSRepository(getDB))
                 {
                     return await repos.GetFacilityListByUserId(userID);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMStatus1> GetStatusbymodule(CMMS.CMMS_Modules module)
+        {
+            try
+            {
+                using (var repos = new CMMSRepository(getDB))
+                {
+                    return await repos.GetStatusbymodule(module);
 
                 }
             }

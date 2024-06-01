@@ -522,6 +522,7 @@ namespace CMMSAPIs.Repositories.PM
         {
             int FID = Facility;
             int facilityid = 0;
+            int equpifac = 0;
             string queryplan;
             CMImportFileResponse response = new CMImportFileResponse();
             DataTable dt2 = new DataTable();
@@ -691,6 +692,7 @@ namespace CMMSAPIs.Repositories.PM
                             string fqr = $"select id From facilities where name='{newR["PlantName"]}';";
                             DataTable dt = await Context.FetchData(fqr).ConfigureAwait(false);
                             int id = Convert.ToInt32(dt.Rows[0][0]);
+                            equpifac = id;
                             if (FID != id)
                             {
                                 m_errorLog.SetError($"[Row: {rN}] Invalid Plant Name '{newR["PlantName"]}'.");
@@ -786,6 +788,7 @@ namespace CMMSAPIs.Repositories.PM
                             //    }
                             try
                             {
+
 
                                 newR["planID"] = plan[Convert.ToString(newR["PlanName"]).ToUpper()];
 
@@ -884,11 +887,11 @@ namespace CMMSAPIs.Repositories.PM
                             // response.import_log = m_errorLog.errorLog();
                             return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, logPath1, m_errorLog.errorLog(), "Import failed, file has empty rows.");
                         }
-                        string insertQuery = "INSERT INTO pm_plan " +
-                            "(plan_name, facility_id, category_id, frequency_id, " +
-                            " plan_date, assigned_to, status, created_by, created_at, " +
-                            " approved_by, approved_at,  " +
-                            " remarks,status_id)";
+                        /* string insertQuery = "INSERT INTO pm_plan " +
+                             "(plan_name, facility_id, category_id, frequency_id, " +
+                             " plan_date, assigned_to, status, created_by, created_at, " +
+                             " approved_by, approved_at,  " +
+                             " remarks,status_id)";*/
                         //foreach (DataRow row in dt2.Rows)
                         //{
                         //    insertQuery = insertQuery + $"Select '{row.ItemArray[1]}',{row.ItemArray[12]}, {row.ItemArray[13]}, {row.ItemArray[14]}," +
@@ -896,7 +899,7 @@ namespace CMMSAPIs.Repositories.PM
                         //        $" {userID},'{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}', 'Approved', 1 UNION ALL ";
                         //}
 
-
+                        String insertQuery = "";
                         foreach (DataRow row in dt2.Rows)
                         {
                             string plan_name1 = Convert.ToString(row["PlanName"]);
@@ -948,7 +951,7 @@ namespace CMMSAPIs.Repositories.PM
 
                         //if (!insertQuery.Contains("Select"))
                         //{
-                        //    return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, "Import failed, file has empty rows.");
+                        //    return new p=(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, "Import failed, file has empty rows.");
                         //}
                         string querychecklist = $"SELECT id, UPPER(checklist_number) as name FROM checklist_number where facility_id ={facilityid} GROUP BY name ORDER BY id ASC;";
                         DataTable dtchecklist = await Context.FetchData(querychecklist).ConfigureAwait(false);
@@ -988,7 +991,7 @@ namespace CMMSAPIs.Repositories.PM
                         dt3.Columns.Add("planID", typeof(int));
                         dt3.Columns.Add("equipmentID", typeof(int));
                         dt3.Columns.Add("checklistID", typeof(int));
-
+                        int p_id = 0;
 
                         for (int rN = 2; rN <= sheet2.Dimension.End.Row; rN++)
                         {
@@ -1043,9 +1046,18 @@ namespace CMMSAPIs.Repositories.PM
                             }
                             catch (KeyNotFoundException)
                             {
-                                m_errorLog.SetError($"[Row: {rN}] Equipment  named '{newR["EquipmentName"]}' does not exist. Row not Inserted.");
+                                m_errorLog.SetError($"[Row: {rN}] Equipment  named '{newR["EquipmentName"]}' does not exist.Plan '{newR["PlanName"]}' not imported.");
+                                string qur = $"select id from pm_plan where plan_name= '{newR["PlanName"]}' and facility_id={equpifac} ;";
+                                DataTable dt = await Context.FetchData(qur).ConfigureAwait(false);
+                                string blockId = Convert.ToString(dt.Rows[0][0]);
+
+                                string qurq = $"DELETE FROM pm_plan WHERE id ={blockId};";
+
+                                await Context.ExecuteNonQry<int>(qurq).ConfigureAwait(false);
                                 newR.Delete();
                                 continue;
+
+
                                 //return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] Equipment named '{newR["EquipmentName"]}' does not exist.");
                             }
                             try
@@ -1075,7 +1087,7 @@ namespace CMMSAPIs.Repositories.PM
                             return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, logPath1, m_errorLog.errorLog(), "Import failed, file sheet[PlanEquipments] no rows to Insert.");
                         }
 
-                        string mapChecklistQry = "INSERT INTO pmplanassetchecklist(planId, assetId, checklistId) VALUES ";
+                        string mapChecklistQry = "INSERT INTO pmplanassetchecklist(planId, assetId, checklistId,facility_id) VALUES ";
 
                         foreach (DataRow row in dt3.Rows)
                         {
@@ -1085,7 +1097,7 @@ namespace CMMSAPIs.Repositories.PM
                             int checklistID = Convert.ToInt32(row["checklistID"]);
 
 
-                            mapChecklistQry += $"({planID}, {equipmentID}, {checklistID}), ";
+                            mapChecklistQry += $"({planID}, {equipmentID}, {checklistID},{Facility}), ";
 
                         }
                         mapChecklistQry = mapChecklistQry.Substring(0, mapChecklistQry.Length - 2) + ";";

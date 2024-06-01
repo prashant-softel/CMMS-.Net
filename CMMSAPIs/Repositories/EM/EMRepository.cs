@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Data;
-using System.Threading.Tasks;
-using CMMSAPIs.Helper;
+﻿using CMMSAPIs.Helper;
 using CMMSAPIs.Models.EM;
 using CMMSAPIs.Models.Utils;
-using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using CMMSAPIs.Repositories.Utils;
-using CMMSAPIs.Models.Notifications;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Threading.Tasks;
 
 namespace CMMSAPIs.Repositories.EM
 {
@@ -28,9 +23,9 @@ namespace CMMSAPIs.Repositories.EM
              * Master method where matrix is stored in EscalationMatrix table
              */
             List<int> idList = new List<int>();
-            foreach(CMSetMasterEM emModule in request)
+            foreach (CMSetMasterEM emModule in request)
             {
-                foreach(CMMasterEM emStatus in emModule.status_escalation)
+                foreach (CMMasterEM emStatus in emModule.status_escalation)
                 {
                     string deleteEscalation = $"DELETE FROM escalationmatrix WHERE moduleId = {emModule.module_id} AND statusId = {emStatus.status_id};";
                     await Context.ExecuteNonQry<int>(deleteEscalation).ConfigureAwait(false);
@@ -65,7 +60,7 @@ namespace CMMSAPIs.Repositories.EM
                 getModuleList += $"WHERE moduleId = {(int)module} ";
             getModuleList += "GROUP BY moduleId;";
             List<CMSetMasterEM> matrix = await Context.GetData<CMSetMasterEM>(getModuleList).ConfigureAwait(false);
-            foreach(CMSetMasterEM mod in matrix)
+            foreach (CMSetMasterEM mod in matrix)
             {
                 string statusCase = "CASE ";
                 foreach (CMMS.CMMS_Status status in Enum.GetValues(typeof(CMMS.CMMS_Status)))
@@ -77,16 +72,16 @@ namespace CMMSAPIs.Repositories.EM
                 List<CMMasterEM> statusList = await Context.GetData<CMMasterEM>(getStatusList).ConfigureAwait(false);
                 foreach (CMMasterEM status in statusList)
                 {
-                    string escalationQry = $"SELECT days, role.id as role_id, role.name as role_name FROM escalationmatrix " +
+                    string escalationQry = $"SELECT DISTINCT days, role.id as role_id, role.name as role_name FROM escalationmatrix " +
                                             $"LEFT JOIN userroles as role ON role.id = escalationmatrix.roleId " +
                                             $"WHERE statusId = {status.status_id} ORDER BY days;";
                     List<CMEscalation> escalation = await Context.GetData<CMEscalation>(escalationQry).ConfigureAwait(false);
-                   
+
                     status.escalation = escalation;
                 }
                 mod.status_escalation = statusList;
             }
-            
+
             return matrix;
         }
         public async Task<CMEscalationResponse> Escalate(CMMS.CMMS_Modules module, int module_ref_id)
@@ -102,7 +97,7 @@ namespace CMMSAPIs.Repositories.EM
             string qry0 = $"SELECT tableName, updateTimeColumn, statusColumn FROM moduletables WHERE softwareId = {(int)module};";
             DataTable dt0 = await Context.FetchData(qry0).ConfigureAwait(false);
             string qry1;
-            if(dt0.Rows.Count > 0)
+            if (dt0.Rows.Count > 0)
             {
                 string table = Convert.ToString(dt0.Rows[0]["tableName"]);
                 string timeCol = Convert.ToString(dt0.Rows[0]["updateTimeColumn"]);
@@ -134,9 +129,9 @@ namespace CMMSAPIs.Repositories.EM
                 DataTable dt4 = await Context.FetchData(qry4).ConfigureAwait(false);
                 List<int> userIds = dt4.GetColumn<int>("id");
                 string qry5 = "INSERT INTO escalationsentto (escalationLogId, notifSentTo) VALUES ";
-                foreach(int user in userIds)
+                foreach (int user in userIds)
                 {
-                    
+
                     qry5 += $"({newId}, {user}), ";
                 }
                 qry5 = qry5.Substring(0, qry5.Length - 2);

@@ -77,6 +77,7 @@ namespace CMMSAPIs.Repositories.SM
                 }
             }
             CMDefaultResponse response = new CMDefaultResponse(request.request_order_id, CMMS.RETRUNSTATUS.SUCCESS, "Request order updated successfully.");
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_RO, request.request_order_id, 0, 0, request.comment, CMMS.CMMS_Status.SM_RO_UPDATED);
             return response;
         }
         internal async Task<CMDefaultResponse> DeleteRequestOrder(CMApproval request, int userID)

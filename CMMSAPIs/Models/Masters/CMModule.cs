@@ -23,10 +23,24 @@ namespace CMMSAPIs.Models.Masters
         public int module_id { get; set; }
         public int module_software_id { get; set; }
         public string module_name { get; set; }
+
         public int status_id { get; set; } // only software id will be shown
         public string status_name { get; set; }
     }
+    public class CMStatus1
+    {
+        public int module_id { get; set; }
+        public int module_software_id { get; set; }
+        public string module_name { get; set; }
+        public List<Statusformodule> status { get; set; }
 
+    }
+    public class Statusformodule
+    {
+        public int status_id { get; set; } // only software id will be shown
+        public string status_name { get; set; }
+
+    }
     public class CMDashboadModuleWiseList
     {
         public string module_name { get; set; }
@@ -38,7 +52,7 @@ namespace CMMSAPIs.Models.Masters
         public int submitted { get; set; }
         public int assigned { get; set; }
         public int rejected { get; set; }
-        public int approved { get; set; }        
+        public int approved { get; set; }
         public int issued { get; set; }
         public int total { get; set; }
         public int completed { get; set; }

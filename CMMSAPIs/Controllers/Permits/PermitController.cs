@@ -1,17 +1,14 @@
 ﻿
 using CMMSAPIs.BS.Permits;
-using CMMSAPIs.Models;
 using CMMSAPIs.Models.Permits;
 using CMMSAPIs.Models.Utils;
-using CMMSAPIs.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
-using Newtonsoft.Json;
 
 namespace CMMSAPIs.Controllers.Permits
 {
@@ -35,7 +32,7 @@ namespace CMMSAPIs.Controllers.Permits
         {
             try
             {
-       
+
 
                 var data = await _PermitBS.GetPermitTypeList(facility_id);
                 return Ok(data);
@@ -198,7 +195,7 @@ namespace CMMSAPIs.Controllers.Permits
             try
             {
 
-              //  var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+                //  var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
 
                 var data = await _PermitBS.GetJobTypeList();
                 return Ok(data);
@@ -396,7 +393,7 @@ namespace CMMSAPIs.Controllers.Permits
         //[Authorize]
         [Route("GetPermitDetails")]
         [HttpGet]
-        public async Task<IActionResult> GetPermitDetails(int permit_id,int facility_id)
+        public async Task<IActionResult> GetPermitDetails(int permit_id, int facility_id)
         {
             try
             {
@@ -425,7 +422,7 @@ namespace CMMSAPIs.Controllers.Permits
         //[Authorize]
         [Route("PermitIssue")]
         [HttpPut]
-        public async Task<IActionResult> PermitIssue( CMApproval request)
+        public async Task<IActionResult> PermitIssue(CMApproval request)
         {
             try
             {
@@ -442,7 +439,7 @@ namespace CMMSAPIs.Controllers.Permits
         //[Authorize]
         [Route("PermitApprove")]
         [HttpPut]
-        public async Task<IActionResult> PermitApprove( CMApproval request)
+        public async Task<IActionResult> PermitApprove(CMApproval request)
         {
             try
             {
@@ -673,13 +670,13 @@ namespace CMMSAPIs.Controllers.Permits
         //[Authorize]
         [Route("GetPermitConditionList")]
         [HttpGet]
-        public async Task<IActionResult> GetPermitConditionList(int permit_type_id, int isClose, int isCancle, int isExtend,int facility_id)
+        public async Task<IActionResult> GetPermitConditionList(int permit_type_id, int isClose, int isCancle, int isExtend, int facility_id)
         {
             try
             {
                 var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
 
-                var data = await _PermitBS.GetPermitConditionList(permit_type_id, isClose, isCancle, isExtend,facility_id,facilitytimeZone);
+                var data = await _PermitBS.GetPermitConditionList(permit_type_id, isClose, isCancle, isExtend, facility_id, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception)
