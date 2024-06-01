@@ -1,4 +1,4 @@
-﻿using CMMSAPIs.BS.JC;
+using CMMSAPIs.BS.JC;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
@@ -170,12 +170,12 @@ namespace CMMSAPIs.Controllers.JC
         //[Authorize]
         [Route("StartJC")]
         [HttpPut]
-        public async Task<IActionResult> StartJC(int jc_id, CMJCDetail request)
+        public async Task<IActionResult> StartJC(CMJCRequest request)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _JCBS.StartJC( jc_id,  request,  userID);
+                var data = await _JCBS.StartJC(request,  userID);
                 return Ok(data);
             }
             catch (Exception ex)
