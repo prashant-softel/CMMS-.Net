@@ -1183,7 +1183,35 @@ namespace CMMSAPIs.Controllers.Masters
             }
         }
 
+        [Route("GetChecklistInspectionReport")]
+        [HttpGet]
+        public async Task<IActionResult> GetChecklistInspectionReport(string facility_id, int module_type, DateTime fromDate, DateTime toDate)
+        {
+            try
+            {
+                var data = await _IMISMasterBS.GetChecklistInspectionReport(facility_id, module_type, fromDate, toDate);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
 
+        [Route("GetObservationSheetReport")]
+        [HttpGet]
+        public async Task<IActionResult> GetObservationSheetReport(string facility_id, DateTime fromDate, DateTime toDate)
+        {
+            try
+            {
+                var data = await _IMISMasterBS.GetObservationSheetReport(facility_id, fromDate, toDate);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
 
     }
 }
