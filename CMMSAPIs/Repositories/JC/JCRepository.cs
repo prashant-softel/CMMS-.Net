@@ -227,9 +227,10 @@ namespace CMMSAPIs.Repositories.JC
 
               return response;
           }*/
-        internal async Task<CMDefaultResponse> StartJC(int jc_id, CMJCDetail request, int userID)
+        internal async Task<CMDefaultResponse> StartJC(CMJCRequest requestList, int userID)
         {
-
+            int jc_id = requestList.jc_id;            
+                CMJCDetail request = requestList.request;
             string myQuery = $"UPDATE jobcards SET JC_Status = {(int)CMMS.CMMS_Status.JC_STARTED}, status_updated_at = '{UtilsRepository.GetUTCTime()}', JC_Date_Start = '{UtilsRepository.GetUTCTime()}', JC_Start_By_id = {userID} WHERE id = {jc_id};";
             await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
 
