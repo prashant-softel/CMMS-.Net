@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authentication.OAuth.Claims;
+using Microsoft.AspNetCore.Authentication.OAuth.Claims;
 using System.Collections.Generic;
 using CMMSAPIs.Models.Utils;
 
@@ -40,7 +40,15 @@ namespace CMMSAPIs.Models.JC
         public List<CMWorkTypeTools> tool_List { get; set; }
        public List<int> uploadfile_ids { get; set; }
     }
+
+    public class CMJCRequest
+    {
+        public int jc_id { get; set; }
+        public CMJCDetail request { get; set; }
+    }
 }
+
+
 
 public class CMFileDetail
 {
