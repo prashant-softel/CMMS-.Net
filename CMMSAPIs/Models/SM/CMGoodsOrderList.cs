@@ -234,7 +234,9 @@ namespace CMMSAPIs.Models
         public string facilityName { get; set; }
         public string freight_value { get; set; }
         public string inspection_report { get; set; }
-
+        public int storage_rack_no { get; set; }
+        public int storage_row_no { get; set; }
+        public int storage_column_no { get; set; }
         public List<CMGODetails> GODetails { get; set; }
     }
 
