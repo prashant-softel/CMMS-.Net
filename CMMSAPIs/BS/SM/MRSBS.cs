@@ -18,7 +18,7 @@ namespace CMMSAPIs.BS.SM
         Task<List<CMMRSItemsBeforeIssue>> getMRSItemsBeforeIssue(int ID, string facilitytime);
         Task<List<CMMRSItemsBeforeIssue>> getMRSItemsWithCode(int ID, string facilitytime);
         Task<CMMRSList> getMRSDetails(int ID, string facilitytime);
-        Task<CMMRSList> getReturnDataByID(int ID, string facilitytime);
+        Task<CMMRSReturnList> getReturnDataByID(int ID, string facilitytime);
         Task<CMMRSAssetTypeList> getAssetTypeByItemID(int ItemID);
         Task<CMDefaultResponse> ReturnMRS(CMMRS request, int UserID);
         Task<CMDefaultResponse> CreateReturnFaultyMRS(CMMRS request, int UserID);
@@ -167,7 +167,7 @@ namespace CMMSAPIs.BS.SM
                 throw;
             }
         }
-        public async Task<CMMRSList> getReturnDataByID(int ID, string facilitytime)
+        public async Task<CMMRSReturnList> getReturnDataByID(int ID, string facilitytime)
         {
             try
             {
