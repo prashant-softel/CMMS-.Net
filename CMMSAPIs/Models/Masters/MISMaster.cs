@@ -425,4 +425,32 @@ namespace CMMSAPIs.Models.Masters
         public int days_remaining { get; set; }
         public string timeline { get; set; }
     }
+
+    public class CMStatutoryCompliance
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public int? IsActive { get; set; }
+        public string CreatedBy { get; set; }
+        public DateTime? CreatedAt { get; set; }
+    }
+    public class CMStatutory
+    {
+        public int id { get; set; }
+        public int? compliance_id { get; set; }
+        public DateTime? issue_date { get; set; }
+        public DateTime? expires_on { get; set; }
+        public int status { get; set; }
+        public string status_short { get; set; }
+        public string created_by { get; set; }
+        public DateTime? created_at { get; set; }
+        public string updated_by { get; set; }
+        public DateTime? updated_at { get; set; }
+        public DateTime? renew_from { get; set; }
+        public int? renew_from_id { get; set; }
+        public string approved_by { get; set; }
+        public DateTime? approved_at { get; set; }
+    }
+
+
 }
