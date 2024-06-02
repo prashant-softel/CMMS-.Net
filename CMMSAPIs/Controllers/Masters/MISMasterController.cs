@@ -1323,7 +1323,7 @@ namespace CMMSAPIs.Controllers.Masters
         }
 
         [Route("GetStatutoryList")]
-        [HttpPost]
+        [HttpGet]
         public async Task<IActionResult> GetStatutoryList()
         {
             try
@@ -1337,7 +1337,7 @@ namespace CMMSAPIs.Controllers.Masters
             }
         }
         [Route("GetStatutoryById")]
-        [HttpPost]
+        [HttpGet]
         public async Task<IActionResult> GetStatutoryById(int id)
         {
             try
