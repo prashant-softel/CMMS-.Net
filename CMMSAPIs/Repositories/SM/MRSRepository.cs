@@ -618,7 +618,7 @@ namespace CMMSAPIs.Repositories.SM
             return _List[0];
         }
 
-        internal async Task<CMMRSList> getReturnDataByID(int ID, string facilitytimeZone)
+        internal async Task<CMMRSReturnList> getReturnDataByID(int ID, string facilitytimeZone)
         {
             string stmt = "SELECT sm.ID,sm.requested_by_emp_ID as requested_by_emp_ID,CONCAT(ed1.firstName,' ',ed1.lastName) as approver_name," +
     "DATE_FORMAT(sm.returnDate,'%Y-%m-%d %H:%i') as returnDate,if(sm.approval_status != '',DATE_FORMAT(sm.approved_date,'%Y-%m-%d %H:%i'),'') as approval_date,sm.approval_status," +
@@ -626,7 +626,7 @@ namespace CMMSAPIs.Repositories.SM
     " case when sm.whereUsedType = 1 then 'Job' when sm.whereUsedType = 2 then 'PM' when sm.whereUsedType = 4 then 'JOBCARD' when sm.whereUsedType = 27 then 'PMTASK' else 'Invalid' end as whereUsedTypeName, sm.whereUsedRefID, COALESCE(sm.remarks,'') as  remarks " +
     "FROM smmrs sm LEFT JOIN users ed ON ed.id = sm.requested_by_emp_ID LEFT JOIN users ed1 ON ed1.id = sm.approved_by_emp_ID " +
     " WHERE sm.ID = " + ID + "  and sm.flag = 2";
-            List<CMMRSList> _List = await Context.GetData<CMMRSList>(stmt).ConfigureAwait(false);
+            List<CMMRSReturnList> _List = await Context.GetData<CMMRSReturnList>(stmt).ConfigureAwait(false);
 
 
             for (var i = 0; i < _List.Count; i++)
@@ -637,6 +637,8 @@ namespace CMMSAPIs.Repositories.SM
                 _List[i].status_short = _shortStatus;
                 _List[i].status_long = _status_long;
                 _List[i].CMMRSItems = await getMRSReturnItems(_List[i].ID, facilitytimeZone);
+                _List[i].CMMRSFaultyItems = _List[i].CMMRSItems.Where(x => x.is_faulty == 1).ToList();
+                _List[i].CMMRSItems = _List[i].CMMRSItems.Where(x => x.is_faulty == 0).ToList();
             }
 
             if (_List.Count > 0)
@@ -1077,19 +1079,19 @@ namespace CMMSAPIs.Repositories.SM
             int MRS_ReturnID = 0;
             var flag = "MRS_RETURN_REQUEST";
 
-            if (request.ID > 0)
+            if (request.mrsreturnID > 0)
             {
                 // Updating existing MRS;
 
-                var lastMRSID = request.ID;
+                var lastMRSID = request.mrsreturnID;
                 var refType = "MRSReturnEdit";
                 var mailSub = "MRS Return Request Updated.";
 
-                string updatestmt = $"UPDATE smrsitems SET is_splited = 0 WHERE mrs_ID = {request.ID};";
+                string updatestmt = $"UPDATE smrsitems SET is_splited = 0 WHERE mrs_ID = {request.mrsreturnID};";
                 await Context.ExecuteNonQry<int>(updatestmt);
 
                 //string updatestmt = $" START TRANSACTION; UPDATE smmrs SET facility_ID = {request.facility_ID}, requested_by_emp_ID = {UserID}, requested_date = '{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}'," +
-                //    $" activity='{request.activity}',whereUsedType={request.whereUsedType},whereUsedRefID={request.whereUsedRefID},is_mrs_return=1 WHERE ID = {request.ID}" +
+                //    $" activity='{request.activity}',whereUsedType={request.whereUsedType},whereUsedRefID={request.whereUsedRefID},is_mrs_return=1 WHERE ID = {request.mrsreturnID}" +
                 //    $" ; DELETE FROM smrsitems WHERE mrs_ID =  {lastMRSID} ; COMMIT;";
                 string insertStmt = $"START TRANSACTION; INSERT INTO smmrs (facility_ID,requested_by_emp_ID,requested_date," +
                         $"returnDate,status,flag, activity,whereUsedType,whereUsedRefID,is_mrs_return,from_actor_type_id,from_actor_id,to_actor_type_id,to_actor_id)\r\n VALUES ({request.facility_ID},{UserID},'{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}'" +
@@ -1097,7 +1099,7 @@ namespace CMMSAPIs.Repositories.SM
                 try
                 {
                     DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
-                    //request.ID = Convert.ToInt32(dt2.Rows[0][0]);
+                    //request.mrsreturnID = Convert.ToInt32(dt2.Rows[0][0]);
                     MRS_ReturnID = Convert.ToInt32(dt2.Rows[0][0]);
                 }
                 catch (Exception ex)
@@ -1116,7 +1118,7 @@ namespace CMMSAPIs.Repositories.SM
                 try
                 {
                     DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
-                    //request.ID = Convert.ToInt32(dt2.Rows[0][0]);
+                    //request.mrsreturnID = Convert.ToInt32(dt2.Rows[0][0]);
                     MRS_ReturnID = Convert.ToInt32(dt2.Rows[0][0]);
                 }
                 catch (Exception ex)
@@ -1139,8 +1141,8 @@ namespace CMMSAPIs.Repositories.SM
                         //if (request.cmmrsItems[i].is_faulty == 1)
                         //{
                         //    string insertStmt = $"START TRANSACTION; " +
-                        //                $"Update smmrs SET status = {(int)CMMS.CMMS_Status.MRS_SUBMITTED} where id = {request.ID} ;INSERT INTO smrsitems (mrs_ID,mrs_return_ID,asset_item_ID,available_qty,requested_qty,returned_qty,return_remarks,flag, is_faulty,is_splited,issued_qty)" +
-                        //                $"VALUES ({request.ID},0,{request.cmmrsItems[i].asset_item_ID},{request.cmmrsItems[i].qty}, {request.cmmrsItems[i].requested_qty}, {request.cmmrsItems[i].returned_qty}, '{request.cmmrsItems[i].return_remarks}', 2, {request.cmmrsItems[i].is_faulty},1,{request.cmmrsItems[i].issued_qty})" +
+                        //                $"Update smmrs SET status = {(int)CMMS.CMMS_Status.MRS_SUBMITTED} where id = {request.mrsreturnID} ;INSERT INTO smrsitems (mrs_ID,mrs_return_ID,asset_item_ID,available_qty,requested_qty,returned_qty,return_remarks,flag, is_faulty,is_splited,issued_qty)" +
+                        //                $"VALUES ({request.mrsreturnID},0,{request.cmmrsItems[i].asset_item_ID},{request.cmmrsItems[i].qty}, {request.cmmrsItems[i].requested_qty}, {request.cmmrsItems[i].returned_qty}, '{request.cmmrsItems[i].return_remarks}', 2, {request.cmmrsItems[i].is_faulty},1,{request.cmmrsItems[i].issued_qty})" +
                         //                $"; SELECT LAST_INSERT_ID(); COMMIT;";
                         //    DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
                         //}
@@ -1148,13 +1150,30 @@ namespace CMMSAPIs.Repositories.SM
                         //{
                         //    string insertStmt = $"START TRANSACTION; " +
                         //        $"INSERT INTO smrsitems (mrs_ID,mrs_return_ID,asset_item_ID,available_qty,requested_qty,returned_qty,return_remarks,flag, is_faulty,is_splited,issued_qty)" +
-                        //        $"VALUES ({request.ID},{MRS_ReturnID},{request.cmmrsItems[i].asset_item_ID},{request.cmmrsItems[i].qty}, {request.cmmrsItems[i].requested_qty}, {request.cmmrsItems[i].returned_qty}, '{request.cmmrsItems[i].return_remarks}', 2, {request.cmmrsItems[i].is_faulty},1,{request.cmmrsItems[i].issued_qty})" +
+                        //        $"VALUES ({request.mrsreturnID},{MRS_ReturnID},{request.cmmrsItems[i].asset_item_ID},{request.cmmrsItems[i].qty}, {request.cmmrsItems[i].requested_qty}, {request.cmmrsItems[i].returned_qty}, '{request.cmmrsItems[i].return_remarks}', 2, {request.cmmrsItems[i].is_faulty},1,{request.cmmrsItems[i].issued_qty})" +
                         //        $"; SELECT LAST_INSERT_ID(); COMMIT;";
                         //    DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
                         //}
+
+                        int asset_item_ID = 0;
+                        int qty = 0;
+                        int requested_qty = 0;
+                        int issued_qty = 0;
+
+                        string chkSrNoAvailableQuery = "select asset_item_ID,available_qty,requested_qty,issued_qty from smrsitems where id = " + request.cmmrsItems[i].mrs_item_id + "";
+                        DataTable dt_chk = await Context.FetchData(chkSrNoAvailableQuery).ConfigureAwait(false);
+                     
+                        if(dt_chk.Rows.Count > 0)
+                        {
+                            asset_item_ID = (dt_chk.Rows[0]["asset_item_ID"].ToInt());
+                            qty = (dt_chk.Rows[0]["available_qty"].ToInt());
+                            requested_qty = (dt_chk.Rows[0]["requested_qty"].ToInt());
+                            issued_qty = (dt_chk.Rows[0]["issued_qty"].ToInt());
+                        }
+
                         string insertStmt = $"START TRANSACTION; " +
                             $"INSERT INTO smrsitems (mrs_ID,mrs_return_ID,asset_item_ID,available_qty,requested_qty,returned_qty,return_remarks,flag, is_faulty,is_splited,issued_qty)" +
-                            $"VALUES ({request.ID},{MRS_ReturnID},{request.cmmrsItems[i].asset_item_ID},{request.cmmrsItems[i].qty}, {request.cmmrsItems[i].requested_qty}, {request.cmmrsItems[i].returned_qty}, '{request.cmmrsItems[i].return_remarks}', 2, {request.cmmrsItems[i].is_faulty},1,{request.cmmrsItems[i].issued_qty})" +
+                            $"VALUES ({request.mrsreturnID},{MRS_ReturnID},{asset_item_ID},{qty}, {requested_qty}, {request.cmmrsItems[i].returned_qty}, '{request.cmmrsItems[i].return_remarks}', 2, 0,1,{issued_qty})" +
                             $"; SELECT LAST_INSERT_ID(); COMMIT;";
                         DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
 
@@ -1177,10 +1196,44 @@ namespace CMMSAPIs.Repositories.SM
             {
                 for (var i = 0; i < request.faultyItems.Count; i++)
                 {
-                    if (request.faultyItems[i].mrsItemID > 0)
+                    int asset_item_ID = 0;
+                    int qty = 0;
+                    int requested_qty = 0;
+                    int issued_qty = 0;
+
+                    string chkSrNoAvailableQuery = "select asset_item_ID,available_qty,requested_qty,issued_qty from smrsitems where serial_number = '" + request.faultyItems[i].sr_no + "'";
+                    DataTable dt_chk = await Context.FetchData(chkSrNoAvailableQuery).ConfigureAwait(false);
+
+                    if (dt_chk.Rows.Count > 0)
                     {
-                        string updatestmt = $"Update smmrs SET status = {(int)CMMS.CMMS_Status.MRS_SUBMITTED} where id = {request.ID} ;UPDATE smrsitems SET mrs_return_ID = {request.ID}, returned_qty={request.faultyItems[i].returned_qty},return_remarks='{request.faultyItems[i].return_remarks}', is_faulty = 1 WHERE ID = {request.faultyItems[i].mrsItemID};";
+                        asset_item_ID = (dt_chk.Rows[0]["asset_item_ID"].ToInt());
+                        qty = (dt_chk.Rows[0]["available_qty"].ToInt());
+                        requested_qty = (dt_chk.Rows[0]["requested_qty"].ToInt());
+                        issued_qty = (dt_chk.Rows[0]["issued_qty"].ToInt());
+                    }
+                    if (dt_chk.Rows.Count > 0)
+                    {
+                        string updatestmt = $"Update smmrs SET status = {(int)CMMS.CMMS_Status.MRS_SUBMITTED} where id = {request.mrsreturnID} ;UPDATE smrsitems SET mrs_return_ID = {request.mrsreturnID}, returned_qty={request.faultyItems[i].returned_qty},return_remarks='{request.faultyItems[i].return_remarks}', is_faulty = 1 WHERE ID = {request.faultyItems[i].mrs_item_ID};";
                         await Context.ExecuteNonQry<int>(updatestmt);
+                    }
+                    else
+                    {
+                        string chkSrNoAvailableQuery_faulty = "select asset_item_ID,qty,requested_qty,issued_qty from smrsitems where id = " + request.cmmrsItems[i].mrs_item_id + "";
+                        DataTable dt_chk_faulty = await Context.FetchData(chkSrNoAvailableQuery_faulty).ConfigureAwait(false);
+
+                        if (dt_chk_faulty.Rows.Count > 0)
+                        {
+                            asset_item_ID = (dt_chk_faulty.Rows[0]["asset_item_ID"].ToInt());
+                            qty = (dt_chk_faulty.Rows[0]["qty"].ToInt());
+                            requested_qty = (dt_chk_faulty.Rows[0]["requested_qty"].ToInt());
+                            issued_qty = (dt_chk_faulty.Rows[0]["issued_qty"].ToInt());
+                        }
+
+                        string insertStmt = $"START TRANSACTION; " +
+                            $"Update smmrs SET status = {(int)CMMS.CMMS_Status.MRS_SUBMITTED} where id = {request.mrsreturnID} ;INSERT INTO smrsitems (mrs_ID,mrs_return_ID,asset_item_ID,available_qty,requested_qty,returned_qty,return_remarks,flag, is_faulty,is_splited,issued_qty)" +
+                            $"VALUES ({request.mrsreturnID},{MRS_ReturnID},{asset_item_ID},{qty}, {requested_qty}, {request.cmmrsItems[i].returned_qty}, '{request.cmmrsItems[i].return_remarks}', 2, 1,1,{issued_qty})" +
+                            $"; SELECT LAST_INSERT_ID(); COMMIT;";
+                        DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
                     }
                 }
             }
