@@ -1222,7 +1222,7 @@ namespace CMMSAPIs.Repositories.Masters
         {
             string myQuery = $"INSERT INTO statutory (compliance_id, issue_date, expires_on, status, created_by, created_at, updated_by, updated_at, renew_from, renew_from_id, approved_by, approved_at) VALUES " +
                              $"({request.compliance_id}, '{request.issue_date}', '{request.expires_on}', 0, {UserId}, '{UtilsRepository.GetUTCTime()}', " +
-                             $"null, null, '{request.renew_from}', {request.renew_from_id}, null, null); " +
+                             $"null, null, null, 0, null, null); " +
                              $"SELECT LAST_INSERT_ID();";
             DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
             int id = Convert.ToInt32(dt.Rows[0][0]);
