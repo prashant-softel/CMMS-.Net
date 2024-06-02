@@ -1213,5 +1213,142 @@ namespace CMMSAPIs.Controllers.Masters
             }
         }
 
+        [Route("GetStatutoryComplianceMasterById")]
+        [HttpGet]
+        public async Task<IActionResult> GetStatutoryComplianceMasterById(int id)
+        {
+            try
+            {
+                var data = await _IMISMasterBS.GetStatutoryComplianceMasterById(id);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        [Route("GetStatutoryComplianceMasterList")]
+        [HttpGet]
+        public async Task<IActionResult> GetStatutoryComplianceMasterList()
+        {
+            try
+            {
+                var data = await _IMISMasterBS.GetStatutoryComplianceMasterList();
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        [Route("CreateStatutoryComplianceMaster")]
+        [HttpPost]
+        public async Task<IActionResult> CreateStatutoryComplianceMaster(CMStatutoryCompliance request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.CreateStatutoryComplianceMaster(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        [Route("UpdateStatutoryComplianceMaster")]
+        [HttpPost]
+        public async Task<IActionResult> UpdateStatutoryComplianceMaster(CMStatutoryCompliance request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.UpdateStatutoryComplianceMaster(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        [Route("DeleteStatutoryComplianceMaster")]
+        [HttpPost]
+        public async Task<IActionResult> DeleteStatutoryComplianceMaster(CMStatutoryCompliance request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.DeleteStatutoryComplianceMaster(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        [Route("CreateStatutory")]
+        [HttpPost]
+        public async Task<IActionResult> CreateStatutory(CMStatutory request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.CreateStatutory(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        [Route("UpdateStatutory")]
+        [HttpPost]
+        public async Task<IActionResult> UpdateStatutory(CMStatutory request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.UpdateStatutory(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        [Route("GetStatutoryList")]
+        [HttpPost]
+        public async Task<IActionResult> GetStatutoryList()
+        {
+            try
+            {
+                var data = await _IMISMasterBS.GetStatutoryList();
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        [Route("GetStatutoryById")]
+        [HttpPost]
+        public async Task<IActionResult> GetStatutoryById(int id)
+        {
+            try
+            {
+                var data = await _IMISMasterBS.GetStatutoryById(id);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
     }
 }
