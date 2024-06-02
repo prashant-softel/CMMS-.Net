@@ -1040,7 +1040,7 @@ namespace CMMSAPIs.Repositories.Masters
                                           .Select(g => new CMWaterDataMonthWiseDetails_Month
                                           {
                                               id = g.id,
-                                              date = g.date,
+                                              date = Convert.ToString(g.date),
                                               procured_qty = g.procured_qty,
                                               consumed_qty = g.consumed_qty,
                                               Description = g.Description,
@@ -1051,7 +1051,7 @@ namespace CMMSAPIs.Repositories.Masters
 
             for(int i = 0; i < groupedResult[0].item_data.Count; i++)
             {
-                string detail_Q = " select id,date,description,creditQty as procured_qty,debitQty as consumed_qty," +
+                string detail_Q = " select id, DATE_FORMAT(date, '%d-%m-%Y') date,description,creditQty as procured_qty,debitQty as consumed_qty," +
                       "  case when consumeTypeId = 1 then 'Procurement' when consumeTypeId = 2 then 'Consumption' else 'NA' end as TransactionType" +
                       " from mis_waterdata where waterTypeId = " + groupedResult[0].item_data[i].waterTypeId + " and isActive = 1 and mis_waterdata.plantId =  " + facility_id + " and MONTH(date) = " + Month + " and Year(date) = " + Year + " ;";
 
@@ -1126,7 +1126,7 @@ namespace CMMSAPIs.Repositories.Masters
 
             for (int i = 0; i < groupedResult_new[0].item_data.Count; i++)
             {
-                string detail_Q = " select id,date,description,creditQty as procured_qty,debitQty as consumed_qty," +
+                string detail_Q = " select mw.id,date,mw.description,creditQty as procured_qty,debitQty as consumed_qty," +
                       "  case when consumeTypeId = 1 then 'Procurement' when consumeTypeId = 2 then 'Consumption' else 'NA' end as TransactionType, show_opening" +
                       " from waste_data LEFT JOIN mis_wastetype mw ON mw.id = waste_data.wasteTypeId where waterTypeId = " + groupedResult_new[0].item_data[i].wasteTypeId + " and waste_data.isHazardous = " + Hazardous + " AND waste_data.facilityId = " + facility_id + " AND MONTH(date) = " + Month + " AND YEAR(date) = " + Year + " ;";
 
