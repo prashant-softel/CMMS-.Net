@@ -1231,14 +1231,14 @@ namespace CMMSAPIs.Repositories.Masters
 
         internal async Task<List<CMStatutory>> GetStatutoryList()
         {
-            string myQuery = "SELECT * FROM statutory";
+            string myQuery = "SELECT compliance_id FROM statutory";
             List<CMStatutory> data = await Context.GetData<CMStatutory>(myQuery).ConfigureAwait(false);
             return data;
         }
 
         internal async Task<CMStatutory> GetStatutoryById(int id)
         {
-            string myQuery = $"SELECT * FROM statutory WHERE id = {id}";
+            string myQuery = $"SELECT compliance_id FROM statutory WHERE id = {id}";
             List<CMStatutory> data = await Context.GetData<CMStatutory>(myQuery).ConfigureAwait(false);
             return data.FirstOrDefault();
         }
