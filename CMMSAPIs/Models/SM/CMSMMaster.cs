@@ -71,6 +71,7 @@ namespace CMMSAPIs.Models.SM
     public class CMMRS
     {
         public int ID { get; set; }
+        public int mrsreturnID { get; set; }
         public int requested_by_emp_ID { get; set; }
         public string approver_name { get; set; }
         public DateTime? requestd_date { get; set; }
@@ -134,7 +135,7 @@ namespace CMMSAPIs.Models.SM
 
     public class CMFaultyItems
     {
-        public int mrsItemID { get; set; }
+        public int mrs_item_ID { get; set; }
         public int assetMasterItemID { get; set; }
         public int returned_qty { get; set; }
         public string return_remarks { get; set; }
@@ -295,6 +296,33 @@ namespace CMMSAPIs.Models.SM
         public int is_splited { get; set; }
         public int is_mrs_return { get; set; }
         public List<CMMRSItems> CMMRSItems { get; set; }
+    }
+
+    public class CMMRSReturnList
+    {
+        public int ID { get; set; }
+        public int requested_by_emp_ID { get; set; }
+        public string approver_name { get; set; }
+        public string? requestd_date { get; set; }
+        public string returnDate { get; set; }
+        public string? issued_date { get; set; }
+        public string approval_date { get; set; }
+        public int approval_status { get; set; }
+        public string approval_comment { get; set; }
+        public string requested_by_name { get; set; }
+        public string issued_name { get; set; }
+        public int status { get; set; }
+        public string status_short { get; set; }
+        public string status_long { get; set; }
+        public string activity { get; set; }
+        //public int whereUsedType { get; set; }
+        public string whereUsedTypeName { get; set; }
+        public int whereUsedRefID { get; set; }
+        public string remarks { get; set; }
+        public int is_splited { get; set; }
+        public int is_mrs_return { get; set; }
+        public List<CMMRSItems> CMMRSItems { get; set; }
+        public List<CMMRSItems> CMMRSFaultyItems { get; set; }
     }
 
     public class CMMRSListByModule
