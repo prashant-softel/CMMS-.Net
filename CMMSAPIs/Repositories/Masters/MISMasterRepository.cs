@@ -3,6 +3,7 @@ using CMMSAPIs.Models.Masters;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Utils;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -1048,6 +1049,15 @@ namespace CMMSAPIs.Repositories.Masters
                         }).ToList()
     }).ToList();
 
+            for(int i = 0; i < groupedResult[0].item_data.Count; i++)
+            {
+                string detail_Q = " select id,date,description,creditQty as procured_qty,debitQty as consumed_qty," +
+                      "  case when consumeTypeId = 1 then 'Procurement' when consumeTypeId = 2 then 'Consumption' else 'NA' end as TransactionType" +
+                      " from mis_waterdata where waterTypeId = " + groupedResult[0].item_data[i].waterTypeId + " and isActive = 1 and mis_waterdata.plantId =  " + facility_id + " and MONTH(date) = " + Month + " and Year(date) = " + Year + " ;";
+
+
+                    groupedResult[0].item_data[i].details = await Context.GetData<CMWaterDataMonthWiseDetails_Month>(detail_Q).ConfigureAwait(false);
+            }
 
             return groupedResult;
         }
@@ -1113,6 +1123,16 @@ namespace CMMSAPIs.Repositories.Masters
                                               }).ToList()
                             }).ToList()
                 }).ToList();
+
+            for (int i = 0; i < groupedResult_new[0].item_data.Count; i++)
+            {
+                string detail_Q = " select id,date,description,creditQty as procured_qty,debitQty as consumed_qty," +
+                      "  case when consumeTypeId = 1 then 'Procurement' when consumeTypeId = 2 then 'Consumption' else 'NA' end as TransactionType, show_opening" +
+                      " from waste_data LEFT JOIN mis_wastetype mw ON mw.id = waste_data.wasteTypeId where waterTypeId = " + groupedResult_new[0].item_data[i].wasteTypeId + " and waste_data.isHazardous = " + Hazardous + " AND waste_data.facilityId = " + facility_id + " AND MONTH(date) = " + Month + " AND YEAR(date) = " + Year + " ;";
+
+
+                    groupedResult_new[0].item_data[i].details = await Context.GetData<CMWasteDataMonthWiseDetails_Month>(detail_Q).ConfigureAwait(false);
+            }
             return groupedResult_new;
         }
 
@@ -1155,6 +1175,100 @@ namespace CMMSAPIs.Repositories.Masters
             List<CMObservationReport> response = await Context.GetData<CMObservationReport>(myQuery).ConfigureAwait(false);
             return response;
         }
+
+        internal async Task<CMStatutoryCompliance> GetStatutoryComplianceMasterById(int id)
+        {
+            string myQuery = $" SELECT s.id,s.name,s.isActive, concat(users.firstName, ' ', users.lastName) Created_by, s.created_At FROM statutorycomliance s\n  left join users on users.id = s.Created_by WHERE s.id = {id} and s.isActive=1";
+            List<CMStatutoryCompliance> data = await Context.GetData<CMStatutoryCompliance>(myQuery).ConfigureAwait(false);
+            return data.FirstOrDefault();
+        }
+
+        internal async Task<List<CMStatutoryCompliance>> GetStatutoryComplianceMasterList()
+        {
+            string myQuery = " SELECT s.id,s.name,s.isActive, concat(users.firstName, ' ', users.lastName) Created_by, s.created_At FROM statutorycomliance s\n  left join users on users.id = s.Created_by where s.isActive = 1 ";
+            List<CMStatutoryCompliance> data = await Context.GetData<CMStatutoryCompliance>(myQuery).ConfigureAwait(false);
+            return data;
+        }
+        internal async Task<CMDefaultResponse> CreateStatutoryComplianceMaster(CMStatutoryCompliance request, int UserId)
+        {
+            string myQuery = $"INSERT INTO statutorycomliance(name, isActive, Created_by, Created_at) VALUES " +
+                             $"('{request.Name}',1, {UserId}, '{UtilsRepository.GetUTCTime()}'); " +
+                             $"SELECT LAST_INSERT_ID();";
+            DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
+            int id = Convert.ToInt32(dt.Rows[0][0]);
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "CMStatutory Compliance Added.");
+        }
+        internal async Task<CMDefaultResponse> UpdateStatutoryComplianceMaster(CMStatutoryCompliance request, int UserId)
+        {
+            string updateQry = "UPDATE statutorycomliance SET ";
+            if (!string.IsNullOrEmpty(request.Name))
+                updateQry += $"name = '{request.Name}' ";
+            updateQry += $"WHERE id = {request.Id};";
+
+            await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+            return new CMDefaultResponse(request.Id, CMMS.RETRUNSTATUS.SUCCESS, "CMStatutory Compliance Updated.");
+        }
+
+        internal async Task<CMDefaultResponse> DeleteStatutoryComplianceMaster(CMStatutoryCompliance request, int UserId)
+        {
+            string updateQry = "UPDATE statutorycomliance SET ";
+            updateQry += $"isActive = 0 ";
+            updateQry += $"WHERE id = {request.Id};";
+
+            await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+            return new CMDefaultResponse(request.Id, CMMS.RETRUNSTATUS.SUCCESS, "CMStatutory Compliance Deleted.");
+        }
+        internal async Task<CMDefaultResponse> CreateStatutory(CMStatutory request, int UserId)
+        {
+            string myQuery = $"INSERT INTO statutory (compliance_id, issue_date, expires_on, status, created_by, created_at, updated_by, updated_at, renew_from, renew_from_id, approved_by, approved_at) VALUES " +
+                             $"({request.compliance_id}, '{request.issue_date}', '{request.expires_on}', 0, {UserId}, '{UtilsRepository.GetUTCTime()}', " +
+                             $"null, null, '{request.renew_from}', {request.renew_from_id}, null, null); " +
+                             $"SELECT LAST_INSERT_ID();";
+            DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
+            int id = Convert.ToInt32(dt.Rows[0][0]);
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Record Added");
+        }
+
+        internal async Task<List<CMStatutory>> GetStatutoryList()
+        {
+            string myQuery = "SELECT * FROM statutory";
+            List<CMStatutory> data = await Context.GetData<CMStatutory>(myQuery).ConfigureAwait(false);
+            return data;
+        }
+
+        internal async Task<CMStatutory> GetStatutoryById(int id)
+        {
+            string myQuery = $"SELECT * FROM statutory WHERE id = {id}";
+            List<CMStatutory> data = await Context.GetData<CMStatutory>(myQuery).ConfigureAwait(false);
+            return data.FirstOrDefault();
+        }
+
+        internal async Task<CMDefaultResponse> UpdateStatutory(CMStatutory request, int UserId)
+        {
+            string updateQry = "UPDATE statutory SET ";
+            if (request.compliance_id.HasValue)
+                updateQry += $"compliance_id = {request.compliance_id.Value}, ";
+            if (request.issue_date.HasValue)
+                updateQry += $"issue_date = '{request.issue_date.Value}', ";
+            if (request.expires_on.HasValue)
+                updateQry += $"expires_on = '{request.expires_on.Value}', ";
+        
+            updateQry += $"status = 0, ";
+
+            updateQry = updateQry.TrimEnd(',', ' ');
+            updateQry += $" WHERE id = {request.id};";
+
+            await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+            return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Record Updated");
+        }
+
+        internal async Task<CMDefaultResponse> DeleteStatutory(int id)
+        {
+            string deleteQry = $"DELETE FROM statutory WHERE id = {id};";
+            await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Record Deleted");
+        }
+
 
     }
 
