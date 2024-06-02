@@ -90,7 +90,15 @@ namespace CMMSAPIs.BS.MISMasters
         Task<List<CMWasteDataResult_Month>> GetWasteDataMonthDetail(int Month, int Year, int Hazardous, int facility_id);
         Task<List<CMChecklistInspectionReport>> GetChecklistInspectionReport(string facility_id, int module_type, DateTime fromDate, DateTime toDate);
         Task<List<CMObservationReport>> GetObservationSheetReport(string facility_id, DateTime fromDate, DateTime toDate);
-
+        Task<CMStatutoryCompliance> GetStatutoryComplianceMasterById(int id);
+        Task<List<CMStatutoryCompliance>> GetStatutoryComplianceMasterList();
+        Task<CMDefaultResponse> CreateStatutoryComplianceMaster(CMStatutoryCompliance request, int UserId);
+        Task<CMDefaultResponse> UpdateStatutoryComplianceMaster(CMStatutoryCompliance request, int UserId);
+        Task<CMDefaultResponse> DeleteStatutoryComplianceMaster(CMStatutoryCompliance request, int UserId);
+        Task<CMDefaultResponse> CreateStatutory(CMStatutory request, int UserId);
+        Task<CMDefaultResponse> UpdateStatutory(CMStatutory request, int UserId);
+        Task<List<CMStatutory>> GetStatutoryList();
+        Task<CMStatutory> GetStatutoryById(int id);
     }
     public class MISMasterBS : IMISMasterBS
     {
@@ -1208,6 +1216,144 @@ namespace CMMSAPIs.BS.MISMasters
                 using (var repos = new MISMasterRepository(getDB))
                 {
                     return await repos.GetObservationSheetReport(facility_id, fromDate, toDate);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMStatutoryCompliance> GetStatutoryComplianceMasterById(int id)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.GetStatutoryComplianceMasterById(id);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<CMStatutoryCompliance>> GetStatutoryComplianceMasterList()
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.GetStatutoryComplianceMasterList();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<CMDefaultResponse> CreateStatutoryComplianceMaster(CMStatutoryCompliance request, int UserId)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.CreateStatutoryComplianceMaster(request, UserId);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> UpdateStatutoryComplianceMaster(CMStatutoryCompliance request, int UserId)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.UpdateStatutoryComplianceMaster(request, UserId);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> DeleteStatutoryComplianceMaster(CMStatutoryCompliance request, int UserId)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.DeleteStatutoryComplianceMaster(request, UserId);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> CreateStatutory(CMStatutory request, int UserId)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.CreateStatutory(request, UserId);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<CMDefaultResponse> UpdateStatutory(CMStatutory request, int UserId)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.UpdateStatutory(request, UserId);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<List<CMStatutory>> GetStatutoryList()
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.GetStatutoryList();
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<CMStatutory> GetStatutoryById(int id)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.GetStatutoryById(id);
 
                 }
             }
