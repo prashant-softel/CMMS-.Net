@@ -1058,11 +1058,11 @@ namespace CMMSAPIs.Repositories
                 "added_to_store,   \r\n      " +
                 "  po.challan_no, po.po_no, po.freight, po.transport, po.no_pkg_received, po.lr_no, po.condition_pkg_received, " +
                 "po.vehicle_no, po.gir_no, po.challan_date, po.job_ref, po.amount,  po.currency as currencyID , curr.name as currency , stt.asset_type as asset_type_Name,  po_no, po_date, requested_qty,lost_qty, ordered_qty\r\n    ,paid_by_ID, smpaidby.paid_by paid_by_name , case when po.received_on = '0000-00-00 00:00:00' then null else po.received_on end as receivedAt,sam.asset_type_ID,sam.asset_code,sam.asset_name" +
-                " , sic.cat_name,smat.asset_type, pod.is_splited, pod.sr_no, requestOrderId, requestOrderItemID, freight_value,inspection_report  " +
+                " , sic.cat_name,smat.asset_type, pod.is_splited, pod.sr_no, requestOrderId, requestOrderItemID, freight_value,inspection_report , " +
                 " (select storage_rack_no from smrequestreorder where requestID="+id+ " and assetItemID = pod.assetItemID limit 1) storage_rack_no," +
                 " (select storage_row_no from smrequestreorder where requestID=" + id + " and assetItemID = pod.assetItemID limit 1) storage_row_no," +
-                " (select storage_column_no from smrequestreorder where requestID=" + id + " and assetItemID = pod.assetItemID limit 1) storage_column_no," +
-                "FROM smgoodsorderdetails pod\r\n        LEFT JOIN smgoodsorder po ON po.ID = pod.purchaseID\r\n     " +
+                " (select storage_column_no from smrequestreorder where requestID=" + id + " and assetItemID = pod.assetItemID limit 1) storage_column_no" +
+                " FROM smgoodsorderdetails pod\r\n        LEFT JOIN smgoodsorder po ON po.ID = pod.purchaseID\r\n     " +
                 "   LEFT JOIN smassetitems sai ON sai.ID = pod.assetItemID\r\n       " +
                 " LEFT JOIN smassetmasters sam ON  sam.ID = pod.assetItemID\r\n      " +
                 "  LEFT JOIN smunitmeasurement sm ON sm.ID = sam.unit_of_measurement\r\n    " +
@@ -1137,7 +1137,10 @@ namespace CMMSAPIs.Repositories
                     is_splited = p.is_splited,
                     requestOrderId = p.requestOrderId,
                     requestOrderItemID= p.requestOrderItemID,
-                    sr_no = p.sr_no
+                    sr_no = p.sr_no,
+                    storage_column_no=p.storage_column_no,
+                    storage_row_no = p.storage_row_no,
+                    storage_rack_no = p.storage_rack_no,
                 }).ToList();
                 _MasterList.GODetails = _itemList;
 
