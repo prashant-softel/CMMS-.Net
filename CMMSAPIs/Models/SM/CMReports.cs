@@ -204,6 +204,7 @@ namespace CMMSAPIs.Models.SM
     public class CMPlantStockOpeningItemWiseResponse_MRSReturn
     {
 
+        public int mrs_item_id { get; set; }
         public int assetItemID { get; set; }
         public string asset_name { get; set; }
         public string asset_code { get; set; }
@@ -222,6 +223,7 @@ namespace CMMSAPIs.Models.SM
         public string facilityName { get; set; }
         public int Facility_Is_Block { get; set; }
         public string Facility_Is_Block_of_name { get; set; }
+        public int mrs_item_id { get; set; }
         public int assetItemID { get; set; }
         public string asset_name { get; set; }
         public string asset_code { get; set; }
@@ -233,6 +235,7 @@ namespace CMMSAPIs.Models.SM
         public decimal used_qty { get; set; }
         public decimal issued_qty { get; set; }
         public decimal approved_qty { get; set; }
+       
 
     }
 }

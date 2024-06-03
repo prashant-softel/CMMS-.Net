@@ -75,9 +75,9 @@ namespace CMMSAPIs.Models
         public string sr_no { get; set; }
         public string freight_value { get; set; }
         public string inspection_report { get; set; }
-        public int storage_rack_no { get; set; }
-        public int storage_row_no { get; set; }
-        public int storage_column_no { get; set; }
+        public string storage_rack_no { get; set; }
+        public string storage_row_no { get; set; }
+        public string storage_column_no { get; set; }
 
         public List<CMGO_ITEMS> go_items { get; set; }
     }
@@ -103,9 +103,9 @@ namespace CMMSAPIs.Models
         public string sr_no { get; set; }
         public int requestOrderId { get; set; }
         public int requestOrderItemID { get; set; }
-        public int storage_rack_no { get; set; }
-        public int storage_row_no { get; set; }
-        public int storage_column_no { get; set; }
+        public string storage_rack_no { get; set; }
+        public string storage_row_no { get; set; }
+        public string storage_column_no { get; set; }
         public string remarks { get; set; }
 
 
@@ -271,9 +271,9 @@ namespace CMMSAPIs.Models
         public int is_splited { get; set; }
         public int requestOrderId { get; set; }
         public int requestOrderItemID { get; set; }
-        public int storage_rack_no { get; set; }
-        public int storage_row_no { get; set; }
-        public int storage_column_no { get; set; }
+        public string storage_rack_no { get; set; }
+        public string storage_row_no { get; set; }
+        public string storage_column_no { get; set; }
         public string sr_no { get; set; }
     }
 
