@@ -1196,7 +1196,7 @@ namespace CMMSAPIs.Repositories.SM
             {
                 for (var i = 0; i < request.faultyItems.Count; i++)
                 {
-                    int asset_item_ID = 0;
+                    int asset_item_ID = request.faultyItems[i].assetMasterItemID; 
                     int qty = 0;
                     int requested_qty = 0;
                     int issued_qty = 0;
@@ -1218,13 +1218,13 @@ namespace CMMSAPIs.Repositories.SM
                     }
                     else
                     {
-                        string chkSrNoAvailableQuery_faulty = "select asset_item_ID,qty,requested_qty,issued_qty from smrsitems where id = " + request.cmmrsItems[i].mrs_item_id + "";
+                        string chkSrNoAvailableQuery_faulty = "select asset_item_ID,available_qty,requested_qty,issued_qty from smrsitems where id = " + request.cmmrsItems[i].mrs_item_id + "";
                         DataTable dt_chk_faulty = await Context.FetchData(chkSrNoAvailableQuery_faulty).ConfigureAwait(false);
 
                         if (dt_chk_faulty.Rows.Count > 0)
                         {
-                            asset_item_ID = (dt_chk_faulty.Rows[0]["asset_item_ID"].ToInt());
-                            qty = (dt_chk_faulty.Rows[0]["qty"].ToInt());
+                            asset_item_ID = request.faultyItems[i].assetMasterItemID;
+                            qty = (dt_chk_faulty.Rows[0]["available_qty"].ToInt());
                             requested_qty = (dt_chk_faulty.Rows[0]["requested_qty"].ToInt());
                             issued_qty = (dt_chk_faulty.Rows[0]["issued_qty"].ToInt());
                         }
@@ -1928,7 +1928,7 @@ namespace CMMSAPIs.Repositories.SM
             //    $" Left join smassettypes AST on AST.id = a_master.asset_type_ID  " +
             //    $"where mrs_ID = {mrs_id} and is_splited = 1 order by sm_trans.id desc;";
 
-            Plant_Stock_Opening_Details_query = $"select smrsitems.asset_item_ID,smrsitems.serial_number as serial_no, smmrs.facility_ID   as facilityID," +
+            Plant_Stock_Opening_Details_query = $"select smrsitems.id mrs_item_id, smrsitems.asset_item_ID,smrsitems.serial_number as serial_no, smmrs.facility_ID   as facilityID," +
                 $" fc.name as facilityName, asset_item_ID assetItemID, a_master.asset_name, a_master.asset_code, a_master.asset_type_ID, AST.asset_type, " +
                 $"  smrsitems.available_qty,smrsitems.requested_qty, smrsitems.used_qty,smrsitems.issued_qty, smrsitems.approved_qty " +
                 $" from smrsitems   " +
@@ -1961,6 +1961,7 @@ namespace CMMSAPIs.Repositories.SM
 
                 CMPlantStockOpening_MRSReturn openingBalance = new CMPlantStockOpening_MRSReturn();
 
+                openingBalance.mrs_item_id = item.mrs_item_id;
                 openingBalance.facilityID = item.facilityID;
                 openingBalance.facilityName = facility_name;
                 openingBalance.available_qty = item.available_qty;
@@ -1998,6 +1999,7 @@ namespace CMMSAPIs.Repositories.SM
                 foreach (var itemDetail in itemResponse)
                 {
                     CMPlantStockOpeningItemWiseResponse_MRSReturn itemWise = new CMPlantStockOpeningItemWiseResponse_MRSReturn();
+                    itemWise.mrs_item_id = itemDetail.mrs_item_id;
                     itemWise.assetItemID = itemDetail.assetItemID;
                     itemWise.asset_name = itemDetail.asset_name;
                     itemWise.asset_code = itemDetail.asset_code;

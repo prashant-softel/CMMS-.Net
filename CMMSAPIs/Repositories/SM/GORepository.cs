@@ -1296,7 +1296,7 @@ namespace CMMSAPIs.Repositories
                 string insertQuery = $@"INSERT INTO smrequestreorder 
                             (requestID, assetItemID, location_ID, storage_rack_no, storage_row_no, storage_column_no, cost, ordered_qty, received_qty, lost_qty, requested_qty, damaged_qty, accepted_qty, remarks)
                             VALUES 
-                            ({request.id}, {item.assetMasterItemID}, {request.location_ID}, '{item.storage_rack_no}', {item.storage_row_no}, {item.storage_column_no}, {item.cost}, {item.ordered_qty}, {item.received_qty}, {item.lost_qty}, {item.requested_qty}, {item.damaged_qty}, {item.accepted_qty},  '{item.remarks}')";
+                            ({request.id}, {item.assetMasterItemID}, {request.location_ID}, '{item.storage_rack_no}', '{item.storage_row_no}', '{item.storage_column_no}', {item.cost}, {item.ordered_qty}, {item.received_qty}, {item.lost_qty}, {item.requested_qty}, {item.damaged_qty}, {item.accepted_qty},  '{item.remarks}')";
 
                 // Execute the query
                 var result = await Context.ExecuteNonQry<int>(insertQuery);
