@@ -32,6 +32,21 @@ namespace CMMSAPIs.Controllers.Masters
                 throw ex;
             }
         }
+        [Route("GetAttendanceList")]
+        [HttpGet]
+        public async Task<IActionResult> GetAttendanceList(int facility_id, int year)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _attendeceBS.GetAttendanceList(facility_id, year);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
         [Route("GetAttendanceByDetails")]
         [HttpGet]
         public async Task<IActionResult> GetAttendanceByDetails(int facility_id, DateTime date)

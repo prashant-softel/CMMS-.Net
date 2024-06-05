@@ -1293,7 +1293,7 @@ namespace CMMSAPIs.Controllers.Masters
 
         [Route("CreateStatutory")]
         [HttpPost]
-        public async Task<IActionResult> CreateStatutory(CMStatutory request)
+        public async Task<IActionResult> CreateStatutory(CMCreateStatutory request)
         {
             try
             {
@@ -1308,7 +1308,7 @@ namespace CMMSAPIs.Controllers.Masters
         }
         [Route("UpdateStatutory")]
         [HttpPost]
-        public async Task<IActionResult> UpdateStatutory(CMStatutory request)
+        public async Task<IActionResult> UpdateStatutory(CMCreateStatutory request)
         {
             try
             {

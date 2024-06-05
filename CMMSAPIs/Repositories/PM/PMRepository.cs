@@ -780,12 +780,13 @@ namespace CMMSAPIs.Repositories.PM
                                 //return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] assigned to named '{newR[7]}' does not exist.");
                             }
 
-                            //   if (plan.ContainsKey(Convert.ToString(newR["PlanName"])))
-                            //   {
-                            //       m_errorLog.SetError($"[Row: {rN}] PlanName Is Already Present");
-                            //        newR.Delete();
-                            //        continue;
-                            //    }
+
+                            if (plan.ContainsKey(Convert.ToString(newR["PlanName"]).ToUpper()))
+                            {
+                                m_errorLog.SetError($"[Row: {rN}] PlanName Is Already Present");
+                                newR.Delete();
+                                continue;
+                            }
                             try
                             {
 
@@ -959,6 +960,7 @@ namespace CMMSAPIs.Repositories.PM
                         List<int> checklist_id = dtchecklist.GetColumn<int>("id");
                         Dictionary<string, int> checklist = new Dictionary<string, int>();
                         checklist.Merge(checklist_name, checklist_id);
+                        List<string> deletePmId = new List<string>();
                         Dictionary<string, Tuple<string, Type>> equipColumnNames = new Dictionary<string, Tuple<string, Type>>()
                         {
                            { "Plan Name", new Tuple<string, Type>("PlanName", typeof(string)) },
@@ -1047,13 +1049,7 @@ namespace CMMSAPIs.Repositories.PM
                             catch (KeyNotFoundException)
                             {
                                 m_errorLog.SetError($"[Row: {rN}] Equipment  named '{newR["EquipmentName"]}' does not exist.Plan '{newR["PlanName"]}' not imported.");
-                                string qur = $"select id from pm_plan where plan_name= '{newR["PlanName"]}' and facility_id={equpifac} ;";
-                                DataTable dt = await Context.FetchData(qur).ConfigureAwait(false);
-                                string blockId = Convert.ToString(dt.Rows[0][0]);
-
-                                string qurq = $"DELETE FROM pm_plan WHERE id ={blockId};";
-
-                                await Context.ExecuteNonQry<int>(qurq).ConfigureAwait(false);
+                                deletePmId.Add(newR["planID"].ToString());
                                 newR.Delete();
                                 continue;
 
@@ -1086,7 +1082,10 @@ namespace CMMSAPIs.Repositories.PM
                             // response.import_log = m_errorLog.errorLog();
                             return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, logPath1, m_errorLog.errorLog(), "Import failed, file sheet[PlanEquipments] no rows to Insert.");
                         }
+                        string deletePmIdString = string.Join(",", deletePmId);
+                        string qurq = $"DELETE FROM pm_plan WHERE id in ({deletePmIdString});";
 
+                        await Context.ExecuteNonQry<int>(qurq).ConfigureAwait(false);
                         string mapChecklistQry = "INSERT INTO pmplanassetchecklist(planId, assetId, checklistId,facility_id) VALUES ";
 
                         foreach (DataRow row in dt3.Rows)

@@ -39,4 +39,8 @@ namespace CMMSAPIs.Models.Masters
         public int greaterThan50 { get; set; }
         public string purpose { get; set; }
     }
+    public class CMGetAttendenceList
+    {
+        public int Id { get; set; }
+    }
 }

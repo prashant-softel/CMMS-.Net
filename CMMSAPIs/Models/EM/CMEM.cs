@@ -1,11 +1,9 @@
-﻿using CMMSAPIs.Helper;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace CMMSAPIs.Models.EM
 {
     public class CMSetMasterEM
-    { 
+    {
         public int module_id { get; set; }
         public string module_name { get; set; }
         public List<CMMasterEM> status_escalation { get; set; }
@@ -31,6 +29,14 @@ namespace CMMSAPIs.Models.EM
         public int escalated_to_role_id { get; set; }
         public string escalated_to_role_name { get; set; }
         public int status_id { get; set; }
-        public string status_name { get; set; } 
+        public string status_name { get; set; }
+    }
+    public class GetEcMatrix
+    {
+        public int module_id { get; set; }
+        public string module_name { get; set; }
+        public int status_id { get; set; }
+        public string status_name { get; set; }
+        public List<CMEscalation> escalation { get; set; }
     }
 }

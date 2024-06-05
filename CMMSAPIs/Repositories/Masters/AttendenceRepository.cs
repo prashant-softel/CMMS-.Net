@@ -146,5 +146,10 @@ namespace CMMSAPIs.Repositories.Masters
             return response;
         }
 
+        internal async Task<List<CMGetAttendenceList>> GetAttendanceList(int facility_id, int year)
+        {
+
+            return null;
+        }
     }
 }

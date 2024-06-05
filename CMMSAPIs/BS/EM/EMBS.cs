@@ -4,7 +4,6 @@ using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.EM;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace CMMSAPIs.BS.EM
@@ -12,9 +11,11 @@ namespace CMMSAPIs.BS.EM
     public interface IEMBS
     {
         Task<CMDefaultResponse> SetEscalationMatrix(List<CMSetMasterEM> request, int userID);
-        Task<List<CMSetMasterEM>> GetEscalationMatrix(CMMS.CMMS_Modules module);
+
         Task<CMEscalationResponse> Escalate(CMMS.CMMS_Modules module, int id); // change to run escalation
         Task<List<CMEscalationLog>> ShowEscalationLog(CMMS.CMMS_Modules module, int module_ref_id);
+        Task<List<CMSetMasterEM>> GetEscalationMatrixbystatusId(CMMS.CMMS_Modules module, int status_id);
+        Task<List<GetEcMatrix>> GetEscalationMatrixList(CMMS.CMMS_Modules module);
     }
     public class EMBS : IEMBS
     {
@@ -38,13 +39,27 @@ namespace CMMSAPIs.BS.EM
                 throw;
             }
         }
-        public async Task<List<CMSetMasterEM>> GetEscalationMatrix(CMMS.CMMS_Modules module)
+        public async Task<List<GetEcMatrix>> GetEscalationMatrixList(CMMS.CMMS_Modules module)
         {
             try
             {
                 using (var repos = new EMRepository(getDB))
                 {
-                    return await repos.GetEscalationMatrix(module);
+                    return await repos.GetEscalationMatrixList(module);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<List<CMSetMasterEM>> GetEscalationMatrixbystatusId(CMMS.CMMS_Modules module, int status_id)
+        {
+            try
+            {
+                using (var repos = new EMRepository(getDB))
+                {
+                    return await repos.GetEscalationMatrixbystatusId(module, status_id);
                 }
             }
             catch (Exception ex)
@@ -82,4 +97,4 @@ namespace CMMSAPIs.BS.EM
         }
     }
 }
-        
+

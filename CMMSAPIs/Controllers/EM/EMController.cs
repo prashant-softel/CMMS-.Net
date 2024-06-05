@@ -1,13 +1,11 @@
 ﻿using CMMSAPIs.BS.EM;
-using CMMSAPIs.Models.EM;
-using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Helper;
+using CMMSAPIs.Models.EM;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace CMMSAPIs.Controllers.EM
 {
@@ -38,15 +36,28 @@ namespace CMMSAPIs.Controllers.EM
                 throw;
             }
         }
-
-        //[Authorize]
-        [Route("GetEscalationMatrix")]
+        [Route("GetEscalationMatrixbystatusId")]
         [HttpGet]
-        public async Task<IActionResult> GetEscalationMatrix(CMMS.CMMS_Modules module)
+        public async Task<IActionResult> GetEscalationMatrixbystatusId(CMMS.CMMS_Modules module, int status_id)
         {
             try
             {
-                var data = await _EMBS.GetEscalationMatrix(module);
+                var data = await _EMBS.GetEscalationMatrixbystatusId(module, status_id);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        //[Authorize]
+        [Route("GetEscalationMatrixList")]
+        [HttpGet]
+        public async Task<IActionResult> GetEscalationMatrixList(CMMS.CMMS_Modules module)
+        {
+            try
+            {
+                var data = await _EMBS.GetEscalationMatrixList(module);
                 return Ok(data);
             }
             catch (Exception)

@@ -3,7 +3,6 @@ using CMMSAPIs.Models.Masters;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Utils;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -479,7 +478,7 @@ namespace CMMSAPIs.Repositories.Masters
 
         internal async Task<List<WasteDataType>> GetWasteType()
         {
-            string delqry = "SELECT id,facility_id,name,Type,description,isHazardous,show_opening,createdAt,UpdatedAt FROM mis_wastetype  ;";
+            string delqry = "SELECT id,facility_id,name,Type,description,isHazardous,show_opening,createdAt,UpdatedAt  FROM mis_wastetype where status=1  ;";
             List<WasteDataType> Data = await Context.GetData<WasteDataType>(delqry).ConfigureAwait(false);
             return Data;
         }
@@ -515,7 +514,7 @@ namespace CMMSAPIs.Repositories.Masters
         }
         internal async Task<List<WasteDataType>> GetWasteTypeByid(int Type)
         {
-            string delqry = "SELECT id,Type,facility_id,name,description,createdAt,UpdatedAt FROM mis_wastetype WHERE Type = " + Type + ";";
+            string delqry = "SELECT id,Type,facility_id,name,description,createdAt,UpdatedAt FROM mis_wastetype WHERE status=1 Type = " + Type + ";";
             List<WasteDataType> Data = await Context.GetData<WasteDataType>(delqry).ConfigureAwait(false);
             return Data;
         }
@@ -1049,14 +1048,14 @@ namespace CMMSAPIs.Repositories.Masters
                         }).ToList()
     }).ToList();
 
-            for(int i = 0; i < groupedResult[0].item_data.Count; i++)
+            for (int i = 0; i < groupedResult[0].item_data.Count; i++)
             {
-                string detail_Q = " select id, DATE_FORMAT(date, '%d-%m-%Y') date,description,creditQty as procured_qty,debitQty as consumed_qty," +
+                string detail_Q = " select id, DATE_FORMAT(date,'%Y-%m-%d') date,description,creditQty as procured_qty,debitQty as consumed_qty," +
                       "  case when consumeTypeId = 1 then 'Procurement' when consumeTypeId = 2 then 'Consumption' else 'NA' end as TransactionType" +
                       " from mis_waterdata where waterTypeId = " + groupedResult[0].item_data[i].waterTypeId + " and isActive = 1 and mis_waterdata.plantId =  " + facility_id + " and MONTH(date) = " + Month + " and Year(date) = " + Year + " ;";
 
 
-                    groupedResult[0].item_data[i].details = await Context.GetData<CMWaterDataMonthWiseDetails_Month>(detail_Q).ConfigureAwait(false);
+                groupedResult[0].item_data[i].details = await Context.GetData<CMWaterDataMonthWiseDetails_Month>(detail_Q).ConfigureAwait(false);
             }
 
             return groupedResult;
@@ -1099,11 +1098,11 @@ namespace CMMSAPIs.Repositories.Masters
             List<CMWasteDataResult_Month> groupedResult_new = ListResult_new.GroupBy(r => new { r.facility_id, r.facility_name, r.months, r.year })
                 .Select(group => new CMWasteDataResult_Month
                 {
-                facility_id = group.Key.facility_id,
-                facility_name = group.Key.facility_name,
-                month = group.Key.months,
-                year = group.Key.year,
-                item_data = group.Select(r => new { r.wasteTypeId,r.waste_type, r.opening })
+                    facility_id = group.Key.facility_id,
+                    facility_name = group.Key.facility_name,
+                    month = group.Key.months,
+                    year = group.Key.year,
+                    item_data = group.Select(r => new { r.wasteTypeId, r.waste_type, r.opening })
                             .Distinct()
                             .Select(periodGroup => new CMWasteFacilityPeriodData_Month
                             {
@@ -1131,12 +1130,12 @@ namespace CMMSAPIs.Repositories.Masters
                       " from waste_data LEFT JOIN mis_wastetype mw ON mw.id = waste_data.wasteTypeId where waterTypeId = " + groupedResult_new[0].item_data[i].wasteTypeId + " and waste_data.isHazardous = " + Hazardous + " AND waste_data.facilityId = " + facility_id + " AND MONTH(date) = " + Month + " AND YEAR(date) = " + Year + " ;";
 
 
-                    groupedResult_new[0].item_data[i].details = await Context.GetData<CMWasteDataMonthWiseDetails_Month>(detail_Q).ConfigureAwait(false);
+                groupedResult_new[0].item_data[i].details = await Context.GetData<CMWasteDataMonthWiseDetails_Month>(detail_Q).ConfigureAwait(false);
             }
             return groupedResult_new;
         }
 
-        internal async Task<List<CMChecklistInspectionReport>> GetChecklistInspectionReport(string facility_id,int module_type, DateTime fromDate, DateTime toDate )
+        internal async Task<List<CMChecklistInspectionReport>> GetChecklistInspectionReport(string facility_id, int module_type, DateTime fromDate, DateTime toDate)
         {
             string myQuery = " select distinct  st.id, checklist_number as checklist_name , '' SOP_number, " +
                 " frequency.name as frequency, case when  is_ok = 0 then 'No' when is_ok = 1 then 'Yes' else 'NA' end as inspection_status, " +
@@ -1147,7 +1146,7 @@ namespace CMMSAPIs.Repositories.Masters
                 " left join pm_execution pm_execution on pm_execution.task_id = task.id" +
                 " left join checklist_number checklist_number on checklist_number.id = st.Checklist_id " +
                 " left join frequency frequency on frequency.id = st.Frequency" +
-                " where st.facility_id in ( "+facility_id+") and st.module_type_id = "+module_type+ " and DATE_FORMAT(PM_Schedule_Observation_add_date,'%Y-%m-%d') BETWEEN '" + fromDate.ToString("yyyy-MM-dd") + "' AND '" + toDate.ToString("yyyy-MM-dd") + "'" +
+                " where st.facility_id in ( " + facility_id + ") and st.module_type_id = " + module_type + " and DATE_FORMAT(PM_Schedule_Observation_add_date,'%Y-%m-%d') BETWEEN '" + fromDate.ToString("yyyy-MM-dd") + "' AND '" + toDate.ToString("yyyy-MM-dd") + "'" +
                 "  group by st.id order by st.id desc; ";
             List<CMChecklistInspectionReport> response = await Context.GetData<CMChecklistInspectionReport>(myQuery).ConfigureAwait(false);
             return response;
@@ -1170,7 +1169,7 @@ namespace CMMSAPIs.Repositories.Masters
                 " left join frequency frequency on frequency.id = st.Frequency" +
                 " left join users contarctorname on contarctorname.id = pm_execution.PM_Schedule_Observation_added_by" +
                 " left join users assignTo on assignTo.id = task.assigned_to" +
-                " where st.facility_id in ( "+ facility_id + ") and is_ok = 0 and DATE_FORMAT(PM_Schedule_Observation_add_date,'%Y-%m-%d') BETWEEN '" + fromDate.ToString("yyyy-MM-dd") + "' AND '" + toDate.ToString("yyyy-MM-dd") + "' " +
+                " where st.facility_id in ( " + facility_id + ") and is_ok = 0 and DATE_FORMAT(PM_Schedule_Observation_add_date,'%Y-%m-%d') BETWEEN '" + fromDate.ToString("yyyy-MM-dd") + "' AND '" + toDate.ToString("yyyy-MM-dd") + "' " +
                 "  group by st.id  order by st.id desc;";
             List<CMObservationReport> response = await Context.GetData<CMObservationReport>(myQuery).ConfigureAwait(false);
             return response;
@@ -1218,11 +1217,14 @@ namespace CMMSAPIs.Repositories.Masters
             await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
             return new CMDefaultResponse(request.Id, CMMS.RETRUNSTATUS.SUCCESS, "CMStatutory Compliance Deleted.");
         }
-        internal async Task<CMDefaultResponse> CreateStatutory(CMStatutory request, int UserId)
+        internal async Task<CMDefaultResponse> CreateStatutory(CMCreateStatutory request, int UserId)
         {
-            string myQuery = $"INSERT INTO statutory (compliance_id, issue_date, expires_on, status, created_by, created_at, updated_by, updated_at, renew_from, renew_from_id, approved_by, approved_at) VALUES " +
-                             $"({request.compliance_id}, '{request.issue_date}', '{request.expires_on}', 0, {UserId}, '{UtilsRepository.GetUTCTime()}', " +
-                             $"null, null, null, 0, null, null); " +
+
+            string renew_from = Convert.ToString(request.renew_from);
+
+            string myQuery = $"INSERT INTO statutory (compliance_id,facility_id,issue_date, expires_on, status, created_by, created_at, updated_by, updated_at, renew_from, renew_from_id, approved_by, approved_at) VALUES " +
+                             $"({request.compliance_id},{request.facility_id}, '{request.issue_date.ToString("yyyy-MM-dd HH:mm")}', '{request.expires_on.ToString("yyyy-MM-dd HH:mm")}', 1, {UserId}, '{UtilsRepository.GetUTCTime()}', " +
+                             $" {UserId},  '{UtilsRepository.GetUTCTime()}','{renew_from}', {request.renew_from_id}, {UserId}, '{UtilsRepository.GetUTCTime()}'); " +
                              $"SELECT LAST_INSERT_ID();";
             DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
             int id = Convert.ToInt32(dt.Rows[0][0]);
@@ -1231,33 +1233,33 @@ namespace CMMSAPIs.Repositories.Masters
 
         internal async Task<List<CMStatutory>> GetStatutoryList()
         {
-            string myQuery = "SELECT compliance_id FROM statutory";
+            string myQuery = "SELECT id, Compliance_id,facility_id, Issue_date as start_date, expires_on as end_date, status, created_by, created_at, updated_by, updated_at, renew_from, renew_from_id, approved_by, approved_at  FROM statutory";
             List<CMStatutory> data = await Context.GetData<CMStatutory>(myQuery).ConfigureAwait(false);
             return data;
         }
 
         internal async Task<CMStatutory> GetStatutoryById(int id)
         {
-            string myQuery = $"SELECT compliance_id FROM statutory WHERE id = {id}";
+            string myQuery = $"SELECT  Compliance_id,facility_id, Issue_date as start_date, expires_on as end_date, status, created_by, created_at, updated_by, updated_at, renew_from, renew_from_id, approved_by, approved_at  FROM statutory WHERE id = {id}";
             List<CMStatutory> data = await Context.GetData<CMStatutory>(myQuery).ConfigureAwait(false);
             return data.FirstOrDefault();
         }
 
-        internal async Task<CMDefaultResponse> UpdateStatutory(CMStatutory request, int UserId)
+        internal async Task<CMDefaultResponse> UpdateStatutory(CMCreateStatutory request, int UserId)
         {
+
             string updateQry = "UPDATE statutory SET ";
             if (request.compliance_id.HasValue)
                 updateQry += $"compliance_id = {request.compliance_id.Value}, ";
-            if (request.issue_date.HasValue)
-                updateQry += $"issue_date = '{request.issue_date.Value}', ";
-            if (request.expires_on.HasValue)
-                updateQry += $"expires_on = '{request.expires_on.Value}', ";
-        
-            updateQry += $"status = 0, ";
+            updateQry += $"issue_date = '{request.issue_date.ToString("yyyy-MM-dd HH:mm")}', ";
 
+            updateQry += $"expires_on = '{request.expires_on.ToString("yyyy-MM-dd HH:mm")}', ";
+
+            updateQry += $"status = 1, ";
+            updateQry += $"updated_by ={UserId} ,";
+            updateQry += $"updated_at ='{UtilsRepository.GetUTCTime()}'";
             updateQry = updateQry.TrimEnd(',', ' ');
             updateQry += $" WHERE id = {request.id};";
-
             await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
             return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Record Updated");
         }

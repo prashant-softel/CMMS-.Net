@@ -4,6 +4,7 @@ using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Masters;
 using Microsoft.AspNetCore.Hosting;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace CMMSAPIs.BS.Masters
@@ -13,6 +14,7 @@ namespace CMMSAPIs.BS.Masters
         Task<CMDefaultResponse> CreateAttendance(CMCreateAttendence requset, int userID);
         Task<object> GetAttendanceByDetails(int facility_id, DateTime date);
         Task<CMDefaultResponse> UpdateAttendance(CMCreateAttendence requests, int userID);
+        Task<List<object>> GetAttendanceList(int facility_id, int year);
 
 
     }
@@ -76,7 +78,22 @@ namespace CMMSAPIs.BS.Masters
                 throw;
             }
         }
+        public async Task<List<CMGetAttendenceList>> GetAttendanceList(int facility_id, int year)
 
+        {
+            try
+            {
+                using (var repos = new AttendenceRepository(getDB))
+                {
+                    return await repos.GetAttendanceList(facility_id, year);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
 
     }
 }

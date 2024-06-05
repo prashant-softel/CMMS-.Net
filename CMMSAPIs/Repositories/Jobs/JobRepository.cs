@@ -1,15 +1,13 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Jobs;
-using CMMSAPIs.Repositories.JC;
-using CMMSAPIs.Models.Utils;
-using CMMSAPIs.Repositories.Utils;
 using CMMSAPIs.Models.Notifications;
-using System.Data;
+using CMMSAPIs.Models.Utils;
+using CMMSAPIs.Repositories.JC;
+using CMMSAPIs.Repositories.Utils;
 using System;
-using CMMSAPIs.Models.Users;
-using System.Linq;
+using System.Collections.Generic;
+using System.Data;
+using System.Threading.Tasks;
 
 namespace CMMSAPIs.Repositories.Jobs
 {
@@ -23,8 +21,8 @@ namespace CMMSAPIs.Repositories.Jobs
             _utilsRepo = new UtilsRepository(sqlDBHelper);
             _conn = sqlDBHelper;
         }
-        
-        internal async Task<List<CMJobView>> GetJobView(int jobID,string facilitytimeZone)
+
+        internal async Task<List<CMJobView>> GetJobView(int jobID, string facilitytimeZone)
         {
             string myQuery = "SELECT " +
                                     "job.id as id, facilities.id as facility_id, facilities.name as facility_name, blocks.id as block_id, blocks.name as block_name, job.status as status, created_user.id as created_by_id, CONCAT(created_user.firstName, created_user.lastName) as created_by_name, user.id as assigned_id, CONCAT(user.firstName, user.lastName) as assigned_name, job.title as job_title, job.description as job_description, job.breakdownTime as breakdown_time, ptw.id as current_ptw_id, ptw.title as current_ptw_title " +
@@ -57,21 +55,21 @@ namespace CMMSAPIs.Repositories.Jobs
                     list.breakdown_time = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.closed_at);
                 if (list != null && list.created_at != null)
                     list.breakdown_time = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)list.created_at);
-                
+
 
             }
             return _ViewJobList;
         }
 
-        internal async Task<List<CMJobList>> GetJobListByPermitId(int permitId,string facilitytimeZone)
+        internal async Task<List<CMJobList>> GetJobListByPermitId(int permitId, string facilitytimeZone)
         {
             string myQuery = $"Select job.id as jobid, job.status as status, concat(user.firstname, ' ', user.lastname) as assignedto, job.title as title,  job.breakdowntime, job.linkedpermit as permitid, group_concat(distinct asset_cat.name order by asset_cat.id separator ', ') as equipmentcat, group_concat(distinct assets.name order by assets.id separator ', ') as equipment from jobs as job left join jobmappingassets as jobassets on job.id = jobassets.jobid left join assetcategories as asset_cat on asset_cat.id = jobassets.categoryid left join assets on assets.id = jobassets.assetid left join users as user on user.id = job.assignedid where job.linkedpermit = {permitId} group by job.id; ";
 
             List<CMJobList> _ViewJobList = await Context.GetData<CMJobList>(myQuery).ConfigureAwait(false);
 
-            
+
             foreach (var job in _ViewJobList)
-            {          
+            {
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(job.status);
                 string _shortStatus = getShortStatus(CMMS.CMMS_Modules.JOB, _Status);
                 job.status_short = _shortStatus;
@@ -80,7 +78,7 @@ namespace CMMSAPIs.Repositories.Jobs
             {
                 if (list != null && list.breakdownTime != null)
                     list.breakdownTime = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.breakdownTime);
-               
+
 
             }
 
@@ -129,12 +127,12 @@ namespace CMMSAPIs.Repositories.Jobs
                                         "users as user ON user.id = job.assignedId ";
             if (facility_id > 0)
             {
-                myQuery += " WHERE job.facilityId = " + facility_id ;
+                myQuery += " WHERE job.facilityId = " + facility_id;
                 if ((int)jobType > 0)
                 {
                     myQuery += " AND job.JobType = " + (int)jobType;
                 }
-                   
+
                 if (startDate?.Length > 0 && endDate?.Length > 0)
                 {
                     DateTime start = DateTime.Parse(startDate);
@@ -147,7 +145,7 @@ namespace CMMSAPIs.Repositories.Jobs
                     myQuery += " AND (user.id = " + userId + " OR created_user.id = " + userId + ")";
 
                 if (status?.Length > 0)
-                    myQuery += " AND job.status IN ("+status+")";
+                    myQuery += " AND job.status IN (" + status + ")";
             }
             else
             {
@@ -157,7 +155,7 @@ namespace CMMSAPIs.Repositories.Jobs
 
             List<CMJobModel> _JobList = await Context.GetData<CMJobModel>(myQuery).ConfigureAwait(false);
 
-            foreach(CMJobModel _Job in _JobList)
+            foreach (CMJobModel _Job in _JobList)
             {
                 if (_Job.ptw_id == 0)
                 {
@@ -166,24 +164,24 @@ namespace CMMSAPIs.Repositories.Jobs
                 else if (_Job.latestJCid != 0)
                 {
                     //if permit status is not yet approved
-                    if (_Job.latestJCPTWStatus == (int)CMMS.CMMS_Status.PTW_APPROVED)
-                    {
-                        _Job.latestJCStatusShort = JCRepository.getShortStatus(CMMS.CMMS_Modules.JOBCARD, (CMMS.CMMS_Status)_Job.latestJCStatus, (CMMS.ApprovalStatus)_Job.latestJCApproval);
-                    }
-                    else if (_Job.latestJCPTWStatus == (int)CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER)
+                    if (_Job.latestJCPTWStatus == (int)CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER)
                     {
                         _Job.latestJCStatusShort = "Permit - rejected";
                     }
-                    else
+                    else if (_Job.latestJCPTWStatus == (int)CMMS.CMMS_Status.PTW_CREATED)
                     {
                         _Job.latestJCStatusShort = "Permit - Waiting For Approval";
+                    }
+                    else //if (_Job.latestJCPTWStatus == (int)CMMS.CMMS_Status.PTW_APPROVED)
+                    {
+                        _Job.latestJCStatusShort = JCRepository.getShortStatus(CMMS.CMMS_Modules.JOBCARD, (CMMS.CMMS_Status)_Job.latestJCStatus, (CMMS.ApprovalStatus)_Job.latestJCApproval);
                     }
                 }
                 else
                 {
                     if (_Job.latestJCPTWStatus == (int)CMMS.CMMS_Status.PTW_APPROVED)
                     {
-                        
+
                         _Job.latestJCStatusShort = "Permit - Approved";
                     }
                     else if (_Job.latestJCPTWStatus == (int)CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER)
@@ -198,10 +196,10 @@ namespace CMMSAPIs.Repositories.Jobs
             }
             foreach (var list in _JobList)
             {
-                if(list!=null && list.breakdownTime!=null)
-                list.breakdownTime = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone,list.breakdownTime);
+                if (list != null && list.breakdownTime != null)
+                    list.breakdownTime = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.breakdownTime);
                 if (list != null && list.jobDate != null)
-                    list.jobDate= await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.jobDate);
+                    list.jobDate = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.jobDate);
 
             }
             return _JobList;
@@ -239,14 +237,14 @@ namespace CMMSAPIs.Repositories.Jobs
 
         internal string getLongStatus(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMJobView jobObj)
         {
-                string retValue = "Job";
-                int jobId = jobObj.id;
+            string retValue = "Job";
+            int jobId = jobObj.id;
 
-                switch (notificationID)
-                {
-                    case CMMS.CMMS_Status.JOB_CREATED:     //Created
-                                                           //description is sent at 1 index of arg for this notification, so developer fetch it and use to format the subject
-                        string desc = jobObj.job_description;
+            switch (notificationID)
+            {
+                case CMMS.CMMS_Status.JOB_CREATED:     //Created
+                                                       //description is sent at 1 index of arg for this notification, so developer fetch it and use to format the subject
+                    string desc = jobObj.job_description;
                     if (string.IsNullOrEmpty(jobObj.assigned_name))
                     {
                         retValue = String.Format("Job {0} created by", jobObj.created_by_name);
@@ -256,27 +254,27 @@ namespace CMMSAPIs.Repositories.Jobs
                         retValue = String.Format("Job {0} Created by and Assigned to", jobObj.created_by_name, jobObj.assigned_name);
                     }
                     break;
-                    case CMMS.CMMS_Status.JOB_ASSIGNED:     //Assigned
-                        retValue = String.Format("Job <{0}> assigned to <{1}>", jobObj.job_title, jobObj.assigned_name);
-                        break;
-                    case CMMS.CMMS_Status.JOB_LINKED:     //Linked
-                        retValue = String.Format("Job <{0}> linked to PTW <{1}>", jobObj.job_title, jobObj.current_ptw_id);
-                        break;
-                    case CMMS.CMMS_Status.JOB_CLOSED:     //Closed
-                        retValue = String.Format("Job <{0}> closed", jobObj.job_title);
-                        break;
-                    case CMMS.CMMS_Status.JOB_CANCELLED:     //Cancelled
-                        retValue = String.Format("Job <{0}> Cancelled", jobObj.job_title);
-                        break;
-                    default:
-                        break;
-                }
-                return retValue;
-
+                case CMMS.CMMS_Status.JOB_ASSIGNED:     //Assigned
+                    retValue = String.Format("Job <{0}> assigned to <{1}>", jobObj.job_title, jobObj.assigned_name);
+                    break;
+                case CMMS.CMMS_Status.JOB_LINKED:     //Linked
+                    retValue = String.Format("Job <{0}> linked to PTW <{1}>", jobObj.job_title, jobObj.current_ptw_id);
+                    break;
+                case CMMS.CMMS_Status.JOB_CLOSED:     //Closed
+                    retValue = String.Format("Job <{0}> closed", jobObj.job_title);
+                    break;
+                case CMMS.CMMS_Status.JOB_CANCELLED:     //Cancelled
+                    retValue = String.Format("Job <{0}> Cancelled", jobObj.job_title);
+                    break;
+                default:
+                    break;
             }
+            return retValue;
 
-            internal async Task<CMJobView> GetJobDetails(int job_id,string  facilitytimeZone)
-            {
+        }
+
+        internal async Task<CMJobView> GetJobDetails(int job_id, string facilitytimeZone)
+        {
             /*
              * Fetch data from Job table and joins these table for relationship using ids Users, Assets, AssetCategory, Facility
              * id and it string value should be there in list
@@ -305,7 +303,7 @@ namespace CMMSAPIs.Repositories.Jobs
 
             string _shortStatus = getShortStatus(CMMS.CMMS_Modules.JOB, (CMMS.CMMS_Status)_ViewJobList[0].status);
             _ViewJobList[0].status_short = _shortStatus;
-            _ViewJobList[0].breakdown_type = $"{(CMMS.CMMS_JobType)_ViewJobList[0].job_type}";           
+            _ViewJobList[0].breakdown_type = $"{(CMMS.CMMS_JobType)_ViewJobList[0].job_type}";
 
             //get equipmentCat list
             string myQuery1 = "SELECT asset_cat.id as equipmentCat_id, asset_cat.name as equipmentCat_name  FROM assetcategories as asset_cat " +
@@ -323,10 +321,10 @@ namespace CMMSAPIs.Repositories.Jobs
                 "LEFT JOIN st_jc_files as jobCard ON jobCard.JC_id = ptw.id " +
             "WHERE job.id= " + job_id;
             List<CMAssociatedPermitList> _AssociatedpermitList = await Context.GetData<CMAssociatedPermitList>(myQuery3).ConfigureAwait(false);
-            if(_AssociatedpermitList.Count > 0)
-			{
-				_AssociatedpermitList[0].ptwStatus_short = "Linked";    //temp till JOIN is made
-			}
+            if (_AssociatedpermitList.Count > 0)
+            {
+                _AssociatedpermitList[0].ptwStatus_short = "Linked";    //temp till JOIN is made
+            }
             string myQuery4 = "SELECT distinct(workType.id) AS workTypeId, workType.workTypeName as workTypeName FROM jobs AS job " +
                 "left JOIN jobmappingassets AS mapAssets ON mapAssets.jobId = job.id " +
                 "left JOIN assetcategories AS asset_cat ON mapAssets.categoryId = asset_cat.id " +
@@ -335,13 +333,13 @@ namespace CMMSAPIs.Repositories.Jobs
                 $"WHERE job.id = {job_id} ";
             List<CMWorkType> _WorkType = await Context.GetData<CMWorkType>(myQuery4).ConfigureAwait(false);
 
-            string myQuery5 = "SELECT tools.id as toolId, tools.assetName as toolName FROM jobs AS job " + 
+            string myQuery5 = "SELECT tools.id as toolId, tools.assetName as toolName FROM jobs AS job " +
                 "JOIN jobmappingassets AS mapAssets ON mapAssets.jobId = job.id " +
                 "JOIN assets ON mapAssets.assetId = assets.id " +
                 "JOIN assetcategories AS asset_cat ON assets.categoryId = asset_cat.id " +
-                "LEFT JOIN jobassociatedworktypes as mapWorkTypes on mapWorkTypes.jobId = job.id " + 
+                "LEFT JOIN jobassociatedworktypes as mapWorkTypes on mapWorkTypes.jobId = job.id " +
                 "LEFT JOIN jobworktypes AS workType ON mapWorkTypes.workTypeId = workType.id " +
-                "LEFT JOIN worktypeassociatedtools AS mapTools ON mapTools.workTypeId=workType.id " + 
+                "LEFT JOIN worktypeassociatedtools AS mapTools ON mapTools.workTypeId=workType.id " +
                 "LEFT JOIN worktypemasterassets AS tools ON tools.id=mapTools.ToolId " +
                 $"WHERE job.id = {job_id} GROUP BY tools.id";
             List<CMWorkTypeTool> _Tools = await Context.GetData<CMWorkTypeTool>(myQuery5).ConfigureAwait(false);
@@ -353,18 +351,19 @@ namespace CMMSAPIs.Repositories.Jobs
             else if (_ViewJobList[0].latestJCid != 0)
             {
                 //if permit status is not yet approved
-                if (_AssociatedpermitList[0].ptwStatus == (int)CMMS.CMMS_Status.PTW_APPROVED)
-                {
-                    _ViewJobList[0].latestJCStatusShort = JCRepository.getShortStatus(CMMS.CMMS_Modules.JOBCARD, (CMMS.CMMS_Status)_ViewJobList[0].latestJCStatus, (CMMS.ApprovalStatus)_ViewJobList[0].latestJCApproval);
-                }
-                else if (_AssociatedpermitList[0].ptwStatus == (int)CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER)
+                if (_AssociatedpermitList[0].ptwStatus == (int)CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER)
                 {
                     _ViewJobList[0].latestJCStatusShort = "Permit - rejected";
                 }
-                else
+                else if (_AssociatedpermitList[0].ptwStatus == (int)CMMS.CMMS_Status.PTW_CREATED)
                 {
                     _ViewJobList[0].latestJCStatusShort = "Permit - Waiting For Approval";
                 }
+                else
+                {
+                    _ViewJobList[0].latestJCStatusShort = JCRepository.getShortStatus(CMMS.CMMS_Modules.JOBCARD, (CMMS.CMMS_Status)_ViewJobList[0].latestJCStatus, (CMMS.ApprovalStatus)_ViewJobList[0].latestJCApproval);
+                }
+
             }
             else
             {
@@ -394,15 +393,15 @@ namespace CMMSAPIs.Repositories.Jobs
             _ViewJobList[0].status_long = _longStatus;
             foreach (var list in _ViewJobList)
             {
-                 if (list != null && list.breakdown_time != null)
+                if (list != null && list.breakdown_time != null)
                     list.breakdown_time = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)list.breakdown_time);
-                    if(list != null && list.closed_at != null)
+                if (list != null && list.closed_at != null)
                     list.closed_at = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.closed_at);
                 if (list != null && list.created_at != null)
                     list.created_at = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)list.created_at);
-                
+
             }
-            
+
             return _ViewJobList[0];
         }
 
@@ -426,7 +425,7 @@ namespace CMMSAPIs.Repositories.Jobs
             if (request.jobType == null)
                 request.jobType = CMMS.CMMS_JobType.BreakdownMaintenance;
             string qryJobBasic = "insert into jobs(facilityId, blockId, title, description, statusUpdatedAt, createdAt, createdBy, breakdownTime, JobType, status, assignedId, linkedPermit) values" +
-            $"({ request.facility_id }, { request.block_id }, '{ request.title }', '{ request.description }', '{UtilsRepository.GetUTCTime() }','{UtilsRepository.GetUTCTime() }',{ userId},'{  request.breakdown_time.ToString("yyyy-MM-dd HH:mm:ss")}',{(int)request.jobType},{ status },{ request.assigned_id },{ (request.permit_id==null?0:request.permit_id) })";
+            $"({request.facility_id}, {request.block_id}, '{request.title}', '{request.description}', '{UtilsRepository.GetUTCTime()}','{UtilsRepository.GetUTCTime()}',{userId},'{request.breakdown_time.ToString("yyyy-MM-dd HH:mm:ss")}',{(int)request.jobType},{status},{request.assigned_id},{(request.permit_id == null ? 0 : request.permit_id)})";
             qryJobBasic = qryJobBasic + ";" + "select LAST_INSERT_ID(); ";
 
             DataTable dt = await Context.FetchData(qryJobBasic).ConfigureAwait(false);
@@ -439,7 +438,7 @@ namespace CMMSAPIs.Repositories.Jobs
 
             foreach (var data in request.AssetsIds)
             {
-                string qryAssetsIds = $"insert into jobmappingassets(jobId, assetId ) values ({ newJobID }, { data });";
+                string qryAssetsIds = $"insert into jobmappingassets(jobId, assetId ) values ({newJobID}, {data});";
                 await Context.ExecuteNonQry<int>(qryAssetsIds).ConfigureAwait(false);
             }
             string setCat = $"UPDATE jobmappingassets, assets SET jobmappingassets.categoryId = assets.categoryId WHERE jobmappingassets.assetId = assets.id;";
@@ -449,23 +448,23 @@ namespace CMMSAPIs.Repositories.Jobs
 
             foreach (var data in request.WorkType_Ids)
             {
-               string qryCategoryIds = $"insert into jobassociatedworktypes(jobId, workTypeId ) value ( { newJobID }, { data });";
-               await Context.ExecuteNonQry<int>(qryCategoryIds).ConfigureAwait(false);
+                string qryCategoryIds = $"insert into jobassociatedworktypes(jobId, workTypeId ) value ( {newJobID}, {data});";
+                await Context.ExecuteNonQry<int>(qryCategoryIds).ConfigureAwait(false);
             }
-           
 
-            CMJobView _ViewJobList = await GetJobDetails(newJobID,"");
 
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, newJobID, 0, 0, "Job Created", CMMS.CMMS_Status.JOB_CREATED,userId);
-            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_CREATED, new[] { userId },_ViewJobList);
+            CMJobView _ViewJobList = await GetJobDetails(newJobID, "");
+
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, newJobID, 0, 0, "Job Created", CMMS.CMMS_Status.JOB_CREATED, userId);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_CREATED, new[] { userId }, _ViewJobList);
 
             string strJobStatusMsg = $"Job {newJobID} Created";
             if (_ViewJobList.assigned_id > 0)
-            {     
-				        strJobStatusMsg = $"Job {newJobID} Created and Assigned to " + _ViewJobList.assigned_name;        
-        
+            {
+                strJobStatusMsg = $"Job {newJobID} Created and Assigned to " + _ViewJobList.assigned_name;
+
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, newJobID, 0, 0, "Job Assigned", CMMS.CMMS_Status.JOB_ASSIGNED, userId);
-                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_ASSIGNED, new[]{ userId },_ViewJobList);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_ASSIGNED, new[] { userId }, _ViewJobList);
             }
 
             // File Upload code for JOB
@@ -536,10 +535,10 @@ namespace CMMSAPIs.Repositories.Jobs
                 }
             }
             int jobID = request.id;
-            CMJobView _ViewJobList = await GetJobDetails(jobID,"");
+            CMJobView _ViewJobList = await GetJobDetails(jobID, "");
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, jobID, 0, 0, "Job Updated", CMMS.CMMS_Status.JOB_UPDATED, userId);
-            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_UPDATED, new[] {userId}, _ViewJobList);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_UPDATED, new[] { userId }, _ViewJobList);
 
             string strJobStatusMsg = $"Job {jobID} Updated";
             CMDefaultResponse response = new CMDefaultResponse(jobID, CMMS.RETRUNSTATUS.SUCCESS, strJobStatusMsg);
@@ -555,22 +554,22 @@ namespace CMMSAPIs.Repositories.Jobs
              * AssignedID/PermitID/CancelJob. Out of 3 we can update any one fields based on request
              * Re-assigned employee/ link permit / Cancel Permit. 3 different end points call this function.
              * return boolean true/false*/
-            string updateQry = $"update jobs set assignedId = { assignedTo }, statusUpdatedAt = '{UtilsRepository.GetUTCTime()}', status = { (int)CMMS.CMMS_Status.JOB_ASSIGNED }, updatedBy = { updatedBy } where id = { job_id } ";
+            string updateQry = $"update jobs set assignedId = {assignedTo}, statusUpdatedAt = '{UtilsRepository.GetUTCTime()}', status = {(int)CMMS.CMMS_Status.JOB_ASSIGNED}, updatedBy = {updatedBy} where id = {job_id} ";
             int retVal = await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
 
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
-            if(retVal > 0)
+            if (retVal > 0)
             {
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
             }
 
 
 
-            CMJobView _ViewJobList = await GetJobDetails(job_id,"");
+            CMJobView _ViewJobList = await GetJobDetails(job_id, "");
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, job_id, 0, 0, $"Job Assigned to {_ViewJobList.assigned_name}", CMMS.CMMS_Status.JOB_ASSIGNED, updatedBy);
 
-            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_ASSIGNED, new[] {assignedTo}, _ViewJobList);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_ASSIGNED, new[] { assignedTo }, _ViewJobList);
 
             CMDefaultResponse response = new CMDefaultResponse(_ViewJobList.id, CMMS.RETRUNSTATUS.SUCCESS, $"Job {_ViewJobList.id} Assigned");
             return response;
@@ -602,21 +601,21 @@ namespace CMMSAPIs.Repositories.Jobs
         internal async Task<CMDefaultResponse> CancelJob(int job_id, int cancelledBy, string Cancelremark)
         {
             /*Your code goes here*/
-            string updateQry = $"update jobs set updatedBy = { cancelledBy }, statusUpdatedAt = '{UtilsRepository.GetUTCTime()}', cancellationRemarks = '{ Cancelremark }',  status = { (int)CMMS.CMMS_Status.JOB_CANCELLED }, cancelStatus = 'N'  where id = { job_id };";
+            string updateQry = $"update jobs set updatedBy = {cancelledBy}, statusUpdatedAt = '{UtilsRepository.GetUTCTime()}', cancellationRemarks = '{Cancelremark}',  status = {(int)CMMS.CMMS_Status.JOB_CANCELLED}, cancelStatus = 'N'  where id = {job_id};";
             int retValue = await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
 
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
 
-            if(retValue > 0)
+            if (retValue > 0)
             {
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
             }
 
-            CMJobView _ViewJobList = await GetJobDetails(job_id,"");
+            CMJobView _ViewJobList = await GetJobDetails(job_id, "");
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, job_id, 0, 0, "Job Cancelled", CMMS.CMMS_Status.JOB_CANCELLED, cancelledBy);
 
-            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_CANCELLED,new[] { _ViewJobList.assigned_id }, _ViewJobList);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_CANCELLED, new[] { _ViewJobList.assigned_id }, _ViewJobList);
 
             CMDefaultResponse response = new CMDefaultResponse(_ViewJobList.id, CMMS.RETRUNSTATUS.SUCCESS, $"Job {_ViewJobList.id} Cancelled");
             return response;
@@ -630,7 +629,7 @@ namespace CMMSAPIs.Repositories.Jobs
                  * return boolean true / false    
                  Your code goes here
             */
-            string updateQry = $"update jobs set updatedBy = { updatedBy },status = { (int) CMMS.CMMS_Status.JOB_LINKED }, statusUpdatedAt = '{UtilsRepository.GetUTCTime()}', linkedPermit = { ptw_id }  where id =  { job_id };";
+            string updateQry = $"update jobs set updatedBy = {updatedBy},status = {(int)CMMS.CMMS_Status.JOB_LINKED}, statusUpdatedAt = '{UtilsRepository.GetUTCTime()}', linkedPermit = {ptw_id}  where id =  {job_id};";
             int retVal = await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
 
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
@@ -639,15 +638,15 @@ namespace CMMSAPIs.Repositories.Jobs
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
             }
 
-            CMJobView _ViewJobList = await GetJobDetails(job_id,"");
+            CMJobView _ViewJobList = await GetJobDetails(job_id, "");
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, job_id, CMMS.CMMS_Modules.PTW, ptw_id, $"Permit <{ptw_id}> Assigned to Job <{job_id}>", CMMS.CMMS_Status.JOB_LINKED, updatedBy);
 
-            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_LINKED, new[] { _ViewJobList.assigned_id}, _ViewJobList);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_LINKED, new[] { _ViewJobList.assigned_id }, _ViewJobList);
 
             CMDefaultResponse response = new CMDefaultResponse(_ViewJobList.id, CMMS.RETRUNSTATUS.SUCCESS, $"Job <{_ViewJobList.id}> Linked To Permit <{ptw_id}> ");
 
-            return response;        
+            return response;
         }
     }
 }

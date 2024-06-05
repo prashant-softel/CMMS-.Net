@@ -43,7 +43,63 @@ namespace CMMSAPIs.Repositories.EM
             }
             return new CMDefaultResponse(idList, CMMS.RETRUNSTATUS.SUCCESS, "Escalation Details Added");
         }
-        public async Task<List<CMSetMasterEM>> GetEscalationMatrix(CMMS.CMMS_Modules module)
+        //
+        public async Task<List<GetEcMatrix>> GetEscalationMatrixList(CMMS.CMMS_Modules module)
+        {
+            /*
+             * Gets the escalation matrix from EscalationMatrix table
+             */
+
+            string moduleCase = "CASE ";
+            foreach (CMMS.CMMS_Modules mod in Enum.GetValues(typeof(CMMS.CMMS_Modules)))
+            {
+                moduleCase += $"WHEN moduleId = {(int)mod} THEN '{mod}' ";
+            }
+            moduleCase += "ELSE 'Invalid' END";
+
+            string getModuleList = $"SELECT moduleId as module_id, {moduleCase} as module_name FROM escalationmatrix ";
+            if (module > 0)
+                getModuleList += $"WHERE moduleId = {(int)module} ";
+            getModuleList += "GROUP BY moduleId;";
+
+            List<GetEcMatrix> modules = await Context.GetData<GetEcMatrix>(getModuleList).ConfigureAwait(false);
+
+            var response = new List<GetEcMatrix>();
+
+            foreach (var mod in modules)
+            {
+                string statusCase = "CASE ";
+                foreach (CMMS.CMMS_Status status in Enum.GetValues(typeof(CMMS.CMMS_Status)))
+                {
+                    statusCase += $"WHEN statusId = {(int)status} THEN '{status}' ";
+                }
+                statusCase += "ELSE 'Invalid' END";
+
+                string getStatusList = $"SELECT statusId as status_Id, {statusCase} as status_name FROM escalationmatrix WHERE moduleId = {mod.module_id} GROUP BY statusId;";
+                List<GetEcMatrix> statuses = await Context.GetData<GetEcMatrix>(getStatusList).ConfigureAwait(false);
+
+                foreach (var status in statuses)
+                {
+                    string escalationQry = $"SELECT DISTINCT days, role.id as role_id, role.name as role_name FROM escalationmatrix " +
+                                           $"LEFT JOIN userroles as role ON role.id = escalationmatrix.roleId " +
+                                           $"WHERE statusId = {status.status_id} ORDER BY days;";
+                    List<CMEscalation> escalations = await Context.GetData<CMEscalation>(escalationQry).ConfigureAwait(false);
+
+                    response.Add(new GetEcMatrix
+                    {
+                        module_id = mod.module_id,
+                        module_name = mod.module_name,
+                        status_id = status.status_id,
+                        status_name = status.status_name,
+                        escalation = escalations
+                    });
+                }
+            }
+
+            return response;
+        }
+
+        public async Task<List<CMSetMasterEM>> GetEscalationMatrixbystatusId(CMMS.CMMS_Modules module, int status_id)
         {
             /*
              * Gets the escalation matrix from EscalationMatrix table
@@ -68,7 +124,7 @@ namespace CMMSAPIs.Repositories.EM
                     statusCase += $"WHEN statusId = {(int)status} THEN '{status}' ";
                 }
                 statusCase += "ELSE 'Invalid' END";
-                string getStatusList = $"SELECT statusId as status_id, {statusCase} as status_name FROM escalationmatrix WHERE moduleId = {mod.module_id} GROUP BY statusId;";
+                string getStatusList = $"SELECT statusId as status_id, {statusCase} as status_name FROM escalationmatrix WHERE statusId = {status_id} GROUP BY statusId;";
                 List<CMMasterEM> statusList = await Context.GetData<CMMasterEM>(getStatusList).ConfigureAwait(false);
                 foreach (CMMasterEM status in statusList)
                 {
@@ -84,6 +140,8 @@ namespace CMMSAPIs.Repositories.EM
 
             return matrix;
         }
+
+
         public async Task<CMEscalationResponse> Escalate(CMMS.CMMS_Modules module, int module_ref_id)
         {
             /*

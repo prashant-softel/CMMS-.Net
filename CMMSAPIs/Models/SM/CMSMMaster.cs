@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace CMMSAPIs.Models.SM
 {
@@ -26,7 +24,7 @@ namespace CMMSAPIs.Models.SM
 
 
     }
-   
+
     public class CMAssetTypes
     {
         public int ID { get; set; }
@@ -105,7 +103,7 @@ namespace CMMSAPIs.Models.SM
         public string returned_qty { get; set; }
         public decimal available_qty { get; set; }
         public decimal used_qty { get; set; }
-   
+
         public decimal issued_qty { get; set; }
         public DateTime? issued_date { get; set; }
         public decimal requested_qty { get; set; }
@@ -128,8 +126,8 @@ namespace CMMSAPIs.Models.SM
         public int to_actor_id { get; set; }
         public int is_submit { get; set; }
 
-        public List<CMEquipments> cmmrsItems { get; set;}
-        public List<CMFaultyItems> faultyItems { get; set;}
+        public List<CMEquipments> cmmrsItems { get; set; }
+        public List<CMFaultyItems> faultyItems { get; set; }
 
     }
 
@@ -176,7 +174,7 @@ namespace CMMSAPIs.Models.SM
         public int mrs_return_ID { get; set; }
         //public string finalRemark { get; set; }
         public int asset_item_ID { get; set; }
-        public string asset_MDM_code { get; set; }
+        public string asset_code { get; set; }
         //public string serial_number { get; set; }
         public decimal requested_qty { get; set; }
         public decimal returned_qty { get; set; }
@@ -188,7 +186,7 @@ namespace CMMSAPIs.Models.SM
         //public int approval_status { get; set; }
         public string approved_date { get; set; }
         public string issued_date { get; set; }
-     
+
         public string approval_required { get; set; }
         public string asset_name { get; set; }
         public int asset_type_ID { get; set; }
@@ -203,7 +201,7 @@ namespace CMMSAPIs.Models.SM
         public int is_faulty { get; set; }
         public int assetMasterID { get; set; }
         public string serial_number { get; set; }
-      
+
     }
 
     public class CMAssetBySerialNo
@@ -260,7 +258,7 @@ namespace CMMSAPIs.Models.SM
         public int approval_status { get; set; }
         public string approved_date { get; set; }
         public string issued_date { get; set; }
-       
+
         public decimal requested_qty { get; set; }
         public string approval_required { get; set; }
         public string asset_name { get; set; }
@@ -301,6 +299,8 @@ namespace CMMSAPIs.Models.SM
     public class CMMRSReturnList
     {
         public int ID { get; set; }
+        public int mrs_id { get; set; }
+
         public int requested_by_emp_ID { get; set; }
         public string approver_name { get; set; }
         public string? requestd_date { get; set; }
@@ -356,7 +356,7 @@ namespace CMMSAPIs.Models.SM
         public int status { get; set; }
         public int flag { get; set; }
         public DateTime lastmodifieddate { get; set; }
-        public decimal   available_qty { get; set; }
+        public decimal available_qty { get; set; }
         public string finalRemark { get; set; }
 
     }
@@ -371,8 +371,8 @@ namespace CMMSAPIs.Models.SM
         public string asset_name { get; set; }
         public string description { get; set; }
         public string approval_required { get; set; }
-      
- 
+
+
         public string measurement { get; set; }
         public int decimal_status { get; set; }
 
@@ -469,7 +469,7 @@ namespace CMMSAPIs.Models.SM
         public int assetMasterID { get; set; }
         public int asset_type_ID { get; set; }
         public string asset_type { get; set; }
-        public string asset_name { get; set; }    
+        public string asset_name { get; set; }
         public List<CMIssuedAssetItemsWithSerialNo> CMIssuedAssetItemsWithSerialNo { get; set; }
     }
 

@@ -3,7 +3,6 @@ using CMMSAPIs.Models.Masters;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Masters;
 using Microsoft.AspNetCore.Hosting;
-using OfficeOpenXml.VBA;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -95,8 +94,8 @@ namespace CMMSAPIs.BS.MISMasters
         Task<CMDefaultResponse> CreateStatutoryComplianceMaster(CMStatutoryCompliance request, int UserId);
         Task<CMDefaultResponse> UpdateStatutoryComplianceMaster(CMStatutoryCompliance request, int UserId);
         Task<CMDefaultResponse> DeleteStatutoryComplianceMaster(CMStatutoryCompliance request, int UserId);
-        Task<CMDefaultResponse> CreateStatutory(CMStatutory request, int UserId);
-        Task<CMDefaultResponse> UpdateStatutory(CMStatutory request, int UserId);
+        Task<CMDefaultResponse> CreateStatutory(CMCreateStatutory request, int UserId);
+        Task<CMDefaultResponse> UpdateStatutory(CMCreateStatutory request, int UserId);
         Task<List<CMStatutory>> GetStatutoryList();
         Task<CMStatutory> GetStatutoryById(int id);
     }
@@ -1302,7 +1301,7 @@ namespace CMMSAPIs.BS.MISMasters
             }
         }
 
-        public async Task<CMDefaultResponse> CreateStatutory(CMStatutory request, int UserId)
+        public async Task<CMDefaultResponse> CreateStatutory(CMCreateStatutory request, int UserId)
         {
             try
             {
@@ -1317,7 +1316,7 @@ namespace CMMSAPIs.BS.MISMasters
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> UpdateStatutory(CMStatutory request, int UserId)
+        public async Task<CMDefaultResponse> UpdateStatutory(CMCreateStatutory request, int UserId)
         {
             try
             {

@@ -410,15 +410,15 @@ namespace CMMSAPIs.Models.Masters
         public string month_of_observation { get; set; }
         public DateTime? date_of_observation { get; set; }
         public string contractor_name { get; set; }
-        public string location_of_observation  { get; set; }
-        public string type_of_observation  { get; set; }
-        public string source_of_observation  { get; set; }
-        public string risk_type  { get; set; }
-        public string observation_description  { get; set; }
-        public string corrective_action  { get; set; }
-        public string responsible_person  { get; set; }
-        public DateTime? target_date  { get; set; }
-        public string action_taken  { get; set; }
+        public string location_of_observation { get; set; }
+        public string type_of_observation { get; set; }
+        public string source_of_observation { get; set; }
+        public string risk_type { get; set; }
+        public string observation_description { get; set; }
+        public string corrective_action { get; set; }
+        public string responsible_person { get; set; }
+        public DateTime? target_date { get; set; }
+        public string action_taken { get; set; }
         public DateTime? closer_date { get; set; }
         public string cost_type { get; set; }
         public string status { get; set; }
@@ -434,21 +434,43 @@ namespace CMMSAPIs.Models.Masters
         public string CreatedBy { get; set; }
         public DateTime? CreatedAt { get; set; }
     }
-    public class CMStatutory
+    public class CMCreateStatutory
     {
         public int id { get; set; }
+        public int facility_id { get; set; }
         public int? compliance_id { get; set; }
-        public DateTime? issue_date { get; set; }
-        public DateTime? expires_on { get; set; }
+        public DateTime issue_date { get; set; }
+        public DateTime start_date { get; set; }
+        public DateTime end_date { get; set; }
+        public DateTime expires_on { get; set; }
+
         public int status { get; set; }
         public string status_short { get; set; }
-        public string created_by { get; set; }
+        public int created_by { get; set; }
         public DateTime? created_at { get; set; }
-        public string updated_by { get; set; }
+        public int updated_by { get; set; }
         public DateTime? updated_at { get; set; }
-        public DateTime? renew_from { get; set; }
+        public dynamic renew_from { get; set; }
         public int? renew_from_id { get; set; }
-        public string approved_by { get; set; }
+        public int approved_by { get; set; }
+        public DateTime? approved_at { get; set; }
+    }
+    public class CMStatutory
+    {
+
+        public int facility_id { get; set; }
+        public int? compliance_id { get; set; }
+        public DateTime start_date { get; set; }
+        public DateTime end_date { get; set; }
+        public int status { get; set; }
+        public string status_short { get; set; }
+        public int created_by { get; set; }
+        public DateTime? created_at { get; set; }
+        public int updated_by { get; set; }
+        public DateTime? updated_at { get; set; }
+        public dynamic renew_from { get; set; }
+        public int? renew_from_id { get; set; }
+        public int approved_by { get; set; }
         public DateTime? approved_at { get; set; }
     }
 
