@@ -472,6 +472,8 @@ namespace CMMSAPIs.Models.Masters
         public int? renew_from_id { get; set; }
         public int approved_by { get; set; }
         public DateTime? approved_at { get; set; }
+
+        public string createdByName { get; set; }
     }
 
 

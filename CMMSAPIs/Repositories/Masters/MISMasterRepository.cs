@@ -1233,7 +1233,8 @@ namespace CMMSAPIs.Repositories.Masters
 
         internal async Task<List<CMStatutory>> GetStatutoryList()
         {
-            string myQuery = "SELECT id, Compliance_id,facility_id, Issue_date as start_date, expires_on as end_date, status, created_by, created_at, updated_by, updated_at, renew_from, renew_from_id, approved_by, approved_at  FROM statutory";
+            // string myQuery = "SELECT id, Compliance_id,facility_id, Issue_date as start_date, expires_on as end_date, status, created_by, created_at, updated_by, updated_at, renew_from, renew_from_id, approved_by, approved_at  FROM statutory";
+            string myQuery = "SELECT  s.id, s.Compliance_id, s.facility_id, s.Issue_date AS start_date, s.expires_on AS end_date, s.status, CONCAT(uc.firstName, ' ', uc.lastName) AS createdByName, s.created_at, s.updated_by, s.updated_at, s.renew_from, s.renew_from_id, s.approved_by, s.approved_at FROM statutory AS s LEFT JOIN users uc ON s.created_by = uc.id;";
             List<CMStatutory> data = await Context.GetData<CMStatutory>(myQuery).ConfigureAwait(false);
             return data;
         }
