@@ -32,9 +32,9 @@ namespace CMMSAPIs.Repositories.Masters
             //Employee ATTENDENCE
             foreach (CMGetAttendence request in requests.hfeAttendance)
             {
-                fid = request.Facility_Id;
+                fid = request.facility_id;
                 string AttenQuery = $"INSERT INTO employee_attendance ( attendance_id, facility_id, employee_id, present, in_time, out_time,Date, CreatedAt, CreatedBy, UpdatedAt, UpdatedBy) VALUES " +
-               $"({request.Attendance_Id}, {fid}, '{request.Employee_Id}', {request.present}, '{request.InTime}','{request.OutTime}','{date}','{UtilsRepository.GetUTCTime()}',{userID},'{UtilsRepository.GetUTCTime()}',{userID}); " +
+               $"({request.Attendance_Id}, {requests.facility_id}, '{request.employee_id}', {request.present}, '{request.InTime}','{request.OutTime}','{date}','{UtilsRepository.GetUTCTime()}',{userID},'{UtilsRepository.GetUTCTime()}',{userID}); " +
                $"SELECT LAST_INSERT_ID();";
                 DataTable dt2 = await Context.FetchData(AttenQuery).ConfigureAwait(false);
                 employeeValue = Convert.ToInt32(dt2.Rows[0][0]);
@@ -45,9 +45,9 @@ namespace CMMSAPIs.Repositories.Masters
             CMGetCotractor requst = requests.contractAttendance;
 
 
-            requst.Contractor_Id = 0;
+            requst.contractor_id = 0;
             string contQuery = $"INSERT INTO contractor_attendnace (facility_id, Date, contractor_id, age_lessthan_35, age_Between_35_50 , age_Greater_50, purpose) VALUES " +
-               $"( {fid},'{date}', {requst.Contractor_Id}, {requst.lessThan35}, {requst.between35to50} ,{requst.greaterThan50},'{requst.purpose}'); " +
+               $"( {requests.facility_id},'{date}', {requst.contractor_id}, {requst.lessThan35}, {requst.between35to50} ,{requst.greaterThan50},'{requst.purpose}'); " +
                $"SELECT LAST_INSERT_ID();";
             DataTable dt3 = await Context.FetchData(contQuery).ConfigureAwait(false);
             int contractValue = Convert.ToInt32(dt3.Rows[0][0]);
@@ -85,9 +85,9 @@ namespace CMMSAPIs.Repositories.Masters
             var hfeAttendance = employeeAttendanceList.Select(ea => new
             {
                 id = ea.id,
-                Facility_Id = ea.Facility_Id,
+                Facility_Id = ea.facility_id,
                 Attendance_Id = ea.Attendance_Id,
-                Employee_Id = ea.Employee_Id,
+                Employee_Id = ea.employee_id,
                 present = ea.present,
                 inTime = ea.InTime,
                 outTime = ea.OutTime
@@ -125,9 +125,9 @@ namespace CMMSAPIs.Repositories.Masters
             int employeeValue = 0;
             foreach (CMGetAttendence request in requests.hfeAttendance)
             {
-                fid = request.Facility_Id;
+                fid = request.facility_id;
                 string instimp = $"INSERT INTO employee_attendance ( attendance_id, facility_id, employee_id, present, in_time, out_time,Date, CreatedAt, CreatedBy, UpdatedAt, UpdatedBy) VALUES " +
-               $"({request.Attendance_Id}, {fid}, '{request.Employee_Id}', {request.present}, '{request.InTime}','{request.OutTime}','{requests.date}','{UtilsRepository.GetUTCTime()}',{userID},'{UtilsRepository.GetUTCTime()}',{userID}); " +
+               $"({request.Attendance_Id}, {fid}, '{request.employee_id}', {request.present}, '{request.InTime}','{request.OutTime}','{requests.date}','{UtilsRepository.GetUTCTime()}',{userID},'{UtilsRepository.GetUTCTime()}',{userID}); " +
                $"SELECT LAST_INSERT_ID();";
                 DataTable dt2 = await Context.FetchData(instimp).ConfigureAwait(false);
                 employeeValue = Convert.ToInt32(dt2.Rows[0][0]);
@@ -136,9 +136,9 @@ namespace CMMSAPIs.Repositories.Masters
 
             //Contractor Ateendence
             CMGetCotractor requst = requests.contractAttendance;
-            requst.Contractor_Id = 0;
+            requst.contractor_id = 0;
             string contupdt = $"INSERT INTO contractor_attendnace (facility_id, Date, contractor_id, age_lessthan_35, age_Between_35_50 , age_Greater_50, purpose) VALUES " +
-               $"( {fid},'{requests.date}', {requst.Contractor_Id}, {requst.lessThan35}, {requst.between35to50}  , {requst.greaterThan50} ,' {requst.purpose}'); " +
+               $"( {fid},'{requests.date}', {requst.contractor_id}, {requst.lessThan35}, {requst.between35to50}  , {requst.greaterThan50} ,' {requst.purpose}'); " +
                $"SELECT LAST_INSERT_ID();";
             DataTable dt3 = await Context.FetchData(contupdt).ConfigureAwait(false);
             int contractValue = Convert.ToInt32(dt3.Rows[0][0]);

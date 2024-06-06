@@ -523,7 +523,7 @@ namespace CMMSAPIs.Repositories.Permits
                 checkFilter = 1;
 
                 if (self_view)
-                    myQuery += $"AND ( issuedUser.id = {userID} OR approvedUser.id = {userID} OR acceptedUser.id = {userID} ) ";
+                    myQuery += $"AND  ptw.acceptedById = {userID}  ";
             }
             else
             {

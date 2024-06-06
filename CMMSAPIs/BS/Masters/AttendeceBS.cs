@@ -95,5 +95,9 @@ namespace CMMSAPIs.BS.Masters
             }
         }
 
+        Task<List<object>> AttendeceBS.GetAttendanceList(int facility_id, int year)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
