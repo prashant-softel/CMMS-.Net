@@ -1095,6 +1095,10 @@ namespace CMMSAPIs.Repositories.Masters
                     modulewiseDetail_Job.module_name = "Breakdown Maintenance";
                     result_job = await getJobDashboardDetails(facilityId, fromDate, toDate);
                     modulewiseDetail_Job.CMDashboadDetails = result_job;
+                    modulewiseDetail_Job.category_total_count = result_job.bm_closed_count + result_job.mc_closed_count + result_job.pm_closed_count;
+                    modulewiseDetail_Job.category_pm_count = result_job.pm_closed_count;
+                    modulewiseDetail_Job.category_mc_count = result_job.mc_closed_count;
+                    modulewiseDetail_Job.category_bm_count = result_job.bm_closed_count;
                     countResult.Add(modulewiseDetail_Job);
 
                     CMDashboadModuleWiseList modulewiseDetail_PM = new CMDashboadModuleWiseList();
@@ -1102,6 +1106,10 @@ namespace CMMSAPIs.Repositories.Masters
                     modulewiseDetail_PM.module_name = "Preventive Maintenance";
                     result_PM = await getPMPlanDashboardDetails(facilityId, fromDate, toDate);
                     modulewiseDetail_PM.CMDashboadDetails = result_PM;
+                    modulewiseDetail_PM.category_total_count = result_PM.bm_closed_count+ result_PM.mc_closed_count+ result_PM.pm_closed_count;
+                    modulewiseDetail_PM.category_pm_count = result_PM.pm_closed_count;
+                    modulewiseDetail_PM.category_mc_count = result_PM.mc_closed_count;
+                    modulewiseDetail_PM.category_bm_count = result_PM.bm_closed_count;
                     countResult.Add(modulewiseDetail_PM);
 
                     CMDashboadModuleWiseList modulewiseDetail_MC = new CMDashboadModuleWiseList();
@@ -1109,6 +1117,10 @@ namespace CMMSAPIs.Repositories.Masters
                     modulewiseDetail_MC.module_name = "Module Cleaning";
                     result_MC = await getMCPlanDashboardDetails(facilityId, fromDate, toDate);
                     modulewiseDetail_MC.CMDashboadDetails = result_MC;
+                    modulewiseDetail_PM.category_total_count = result_PM.bm_closed_count + result_PM.mc_closed_count + result_PM.pm_closed_count;
+                    modulewiseDetail_PM.category_pm_count = result_PM.pm_closed_count;
+                    modulewiseDetail_PM.category_mc_count = result_PM.mc_closed_count;
+                    modulewiseDetail_PM.category_bm_count = result_PM.bm_closed_count;
                     countResult.Add(modulewiseDetail_MC);
 
                     CMDashboadModuleWiseList modulewiseDetail_IR = new CMDashboadModuleWiseList();
@@ -1116,6 +1128,10 @@ namespace CMMSAPIs.Repositories.Masters
                     modulewiseDetail_IR.module_name = "Incident Report";
                     result_IR = await getIRDashboardDetails(facilityId, fromDate, toDate);
                     modulewiseDetail_IR.CMDashboadDetails = result_IR;
+                    modulewiseDetail_PM.category_total_count = result_PM.bm_closed_count + result_PM.mc_closed_count + result_PM.pm_closed_count;
+                    modulewiseDetail_PM.category_pm_count = result_PM.pm_closed_count;
+                    modulewiseDetail_PM.category_mc_count = result_PM.mc_closed_count;
+                    modulewiseDetail_PM.category_bm_count = result_PM.bm_closed_count;
                     countResult.Add(modulewiseDetail_IR);
 
                     CMDashboadModuleWiseList modulewiseDetail_SM = new CMDashboadModuleWiseList();
@@ -1235,12 +1251,18 @@ namespace CMMSAPIs.Repositories.Masters
             result.created = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.JOB_CREATED).ToList().Count;
             result.rejected = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.JOB_CANCELLED).ToList().Count;
             result.assigned = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.JOB_ASSIGNED).ToList().Count;
+            result.bm_closed_count = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.JOB_CLOSED).ToList().Count;
 
 
             result.total = itemList.Count;
             result.completed = itemList.Where(x => x.latestJCStatus == (int)CMMS.CMMS_Status.PTW_APPROVED).ToList().Count;
             //result.pending = result.total - itemList.Where(x => x.latestJCPTWStatus != (int)CMMS.CMMS_Status.PTW_APPROVED).ToList().Count;
             result.pending = result.total - result.completed;
+            if(result.total != result.pending+ result.completed+ result.created+ result.rejected + result.assigned)
+            {
+                result.unknown_count = result.total - result.pending + result.completed + result.created + result.rejected + result.assigned;
+            }
+     
 
 
             int completed_on_time = itemList.Where(x => x.latestJCStatus == (int)CMMS.CMMS_Status.PTW_APPROVED && x.start_date == x.start_date).ToList().Count;
@@ -1293,6 +1315,7 @@ namespace CMMSAPIs.Repositories.Masters
             result.rejected = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.PM_REJECTED || x.status == (int)CMMS.CMMS_Status.PM_CLOSE_REJECTED || x.status == (int)CMMS.CMMS_Status.PM_PLAN_REJECTED).ToList().Count;
             result.assigned = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.PM_ASSIGNED).ToList().Count;
             result.submitted = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.PM_SUBMIT).ToList().Count;
+            result.pm_closed_count = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED).ToList().Count;
             result.approved = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED || x.status == (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED || x.status == (int)CMMS.CMMS_Status.PM_PLAN_APPROVED).ToList().Count;
 
 
@@ -1312,7 +1335,10 @@ namespace CMMSAPIs.Repositories.Masters
                 result.wo_delay = wo_delay;
                 result.wo_backlog = wo_backlog;
             }
-
+            if (result.total != result.pending + result.completed + result.created + result.rejected + result.assigned)
+            {
+                result.unknown_count = result.total - result.pending + result.completed + result.created + result.rejected + result.assigned;
+            }
             return result;
         }
         internal static string getShortStatus_PM_Plan(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status m_notificationID)
@@ -1421,6 +1447,7 @@ namespace CMMSAPIs.Repositories.Masters
 
             result.submitted = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.MC_PLAN_SUBMITTED).ToList().Count;
             result.approved = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.MC_PLAN_APPROVED).ToList().Count;
+            result.mc_closed_count = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.MC_PLAN_APPROVED).ToList().Count;
 
 
             result.total = itemList.Count;
@@ -1438,6 +1465,10 @@ namespace CMMSAPIs.Repositories.Masters
                 result.wo_on_time = completed_on_time;
                 result.wo_delay = wo_delay;
                 result.wo_backlog = wo_backlog;
+            }
+            if (result.total != result.pending + result.completed + result.created + result.rejected + result.assigned)
+            {
+                result.unknown_count = result.total - result.pending + result.completed + result.created + result.rejected + result.assigned;
             }
             return result;
         }
@@ -1512,6 +1543,10 @@ namespace CMMSAPIs.Repositories.Masters
                 result.wo_on_time = completed_on_time;
                 result.wo_delay = wo_delay;
                 result.wo_backlog = wo_backlog;
+            }
+            if (result.total != result.pending + result.completed + result.created + result.rejected + result.assigned)
+            {
+                result.unknown_count = result.total - result.pending + result.completed + result.created + result.rejected + result.assigned;
             }
             return result;
         }
@@ -1646,6 +1681,10 @@ namespace CMMSAPIs.Repositories.Masters
                 result.wo_on_time = completed_on_time;
                 result.wo_delay = wo_delay;
                 result.wo_backlog = wo_backlog;
+            }
+            if (result.total != result.pending + result.completed + result.created + result.rejected + result.assigned)
+            {
+                result.unknown_count = result.total - result.pending + result.completed + result.created + result.rejected + result.assigned;
             }
             var test = await getLowStockItemList(facilityId, fromDate, toDate);
             return result;
