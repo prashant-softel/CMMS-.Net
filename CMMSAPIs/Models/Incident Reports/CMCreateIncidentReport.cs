@@ -54,6 +54,7 @@ namespace CMMSAPIs.Models.Incident_Reports
         public string unsafe_act_cause { get; set; }
         public string is_person_involved { get; set; }
         public List<CMInjured_person> injured_person { get; set; }
+        public List<CMInjured_person> other { get; set; }
         public List<CMWhy_why_analysis> why_why_analysis { get; set; }
         public List<CMRoot_cause> root_cause { get; set; }
         public List<CMImmediate_correction> immediate_correction { get; set; }

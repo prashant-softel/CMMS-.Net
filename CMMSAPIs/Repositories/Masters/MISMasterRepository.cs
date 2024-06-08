@@ -55,7 +55,8 @@ namespace CMMSAPIs.Repositories.Masters
             { CMMS.CMMS_Modules.WARRANTY_CLAIM, 30 },
             { CMMS.CMMS_Modules.CALIBRATION, 31 },
            // { CMMS.CMMS_Modules.MODULE_CLEANING, 32 },
-            { CMMS.CMMS_Modules.VEGETATION, 33 }
+            { CMMS.CMMS_Modules.VEGETATION, 33 },
+            {CMMS.CMMS_Modules.STATUTORY,34 }
         };
         public MISMasterRepository(MYSQLDBHelper sqlDBHelper, IWebHostEnvironment _webHost = null) : base(sqlDBHelper)
         {
@@ -83,8 +84,49 @@ namespace CMMSAPIs.Repositories.Masters
             return _risktype;
         }
 
+        internal static string getShortStatus(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status m_notificationID)
+        {
+            string retValue;
 
+            switch (m_notificationID)
+            {
+                case CMMS.CMMS_Status.STATUTORY_CREATED:     //Created
+                    retValue = "Statutory Created";
+                    break;
+                case CMMS.CMMS_Status.STATUTORY_DELETED:     //Assigned
+                    retValue = "Statutory Deleted";
+                    break;
+                case CMMS.CMMS_Status.STATUTORY_UPDATED:     //Linked
+                    retValue = "Statutory Updated";
+                    break;
+                default:
+                    retValue = "Unknown Status";
+                    break;
+            }
+            return retValue;
 
+        }
+        public static string Status(int statusID)
+        {
+            CMMS.CMMS_Status status = (CMMS.CMMS_Status)statusID;
+            string statusName = "";
+            switch (status)
+            {
+                case CMMS.CMMS_Status.STATUTORY_CREATED:
+                    statusName = "Created ";
+                    break;
+                case CMMS.CMMS_Status.STATUTORY_DELETED:
+                    statusName = "Deleted ";
+                    break;
+                case CMMS.CMMS_Status.STATUTORY_UPDATED:
+                    statusName = "Updated ";
+                    break;
+                default:
+                    statusName = "Unknown Status";
+                    break;
+            }
+            return statusName;
+        }
         internal async Task<CMDefaultResponse> CreateRiskType(MISRiskType request, int userId)
         {
             string myQuery = $"INSERT INTO ir_risktype(risktype, description, status, addedBy, addedAt) VALUES " +
@@ -856,7 +898,7 @@ namespace CMMSAPIs.Repositories.Masters
 
             //     List<WasteDataType> Master_ID_Result = await Context.GetData<WasteDataType>(SelectQ_MasterIDS).ConfigureAwait(false);
 
-
+            //show_opening
             string SelectQ = $" select distinct mis_waterdata.id,plantId as facility_id,fc.name facility_name,MONTHNAME(date) as month_name,Month(date) as month_id,YEAR(date) as year, " +
                 $" (select sum(creditQty)-sum(debitQty) from mis_waterdata where MONTH(date) < MONTH('" + fromDate.ToString("yyyy-MM-dd") + "')) as opening," +
                 $" sum(creditQty) as procured_qty, sum(debitQty) as consumed_qty, mw.name as water_type,show_opening" +
@@ -1195,6 +1237,8 @@ namespace CMMSAPIs.Repositories.Masters
                              $"SELECT LAST_INSERT_ID();";
             DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
             int id = Convert.ToInt32(dt.Rows[0][0]);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.STATUTORY, id, 0, 0, "CMStatutory Compliance Added.", CMMS.CMMS_Status.STATUTORY_CREATED, UserId); ;
+
             return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "CMStatutory Compliance Added.");
         }
         internal async Task<CMDefaultResponse> UpdateStatutoryComplianceMaster(CMStatutoryCompliance request, int UserId)
@@ -1205,6 +1249,7 @@ namespace CMMSAPIs.Repositories.Masters
             updateQry += $"WHERE id = {request.Id};";
 
             await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.STATUTORY, request.Id, 0, 0, "CMStatutory Compliance Updated.", CMMS.CMMS_Status.STATUTORY_COMPILANCE_UPDATED, UserId); ;
             return new CMDefaultResponse(request.Id, CMMS.RETRUNSTATUS.SUCCESS, "CMStatutory Compliance Updated.");
         }
 
@@ -1215,6 +1260,7 @@ namespace CMMSAPIs.Repositories.Masters
             updateQry += $"WHERE id = {request.Id};";
 
             await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.STATUTORY, request.Id, 0, 0, "CMStatutory Compliance Updated.", CMMS.CMMS_Status.STATUTORY_COMPILANCE_DELETED, UserId); ;
             return new CMDefaultResponse(request.Id, CMMS.RETRUNSTATUS.SUCCESS, "CMStatutory Compliance Deleted.");
         }
         internal async Task<CMDefaultResponse> CreateStatutory(CMCreateStatutory request, int UserId)
@@ -1228,7 +1274,8 @@ namespace CMMSAPIs.Repositories.Masters
                              $"SELECT LAST_INSERT_ID();";
             DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
             int id = Convert.ToInt32(dt.Rows[0][0]);
-            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Record Added");
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.STATUTORY, id, 0, 0, "CMStatutory Created.", CMMS.CMMS_Status.STATUTORY_CREATED, UserId); ;
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Statutory Record Added");
         }
 
         internal async Task<List<CMStatutory>> GetStatutoryList()
@@ -1262,6 +1309,7 @@ namespace CMMSAPIs.Repositories.Masters
             updateQry = updateQry.TrimEnd(',', ' ');
             updateQry += $" WHERE id = {request.id};";
             await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.STATUTORY, request.id, 0, 0, "Statutory Updated.", CMMS.CMMS_Status.STATUTORY_UPDATED, UserId);
             return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Record Updated");
         }
 
@@ -1269,7 +1317,8 @@ namespace CMMSAPIs.Repositories.Masters
         {
             string deleteQry = $"DELETE FROM statutory WHERE id = {id};";
             await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
-            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Record Deleted");
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.STATUTORY, id, 0, 0, "CMStatutory Deleted.", CMMS.CMMS_Status.STATUTORY_DELETED, 0);
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Statutory Deleted");
         }
 
 

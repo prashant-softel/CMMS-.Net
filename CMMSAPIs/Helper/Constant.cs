@@ -289,11 +289,8 @@ namespace CMMSAPIs.Helper
             TRAINNING_SCHEDULE,
             SEND_INVITATION,
             MARK_ATTENDENCE,
-            EXECUTE_SCHEDULE
-
-
-
-
+            EXECUTE_SCHEDULE,
+            STATUTORY
         }
 
         public enum INCIDENT_RISK_LEVEL
@@ -572,6 +569,14 @@ namespace CMMSAPIs.Helper
             MoM_CANCEL,
             MoM_CLOSE,
             COURSE_SCHEDULE,
+
+            STATUTORY_COMPILANCE_CREATED = 501,
+            STATUTORY_COMPILANCE_UPDATED,
+            STATUTORY_COMPILANCE_DELETED,
+            STATUTORY_CREATED,
+            STATUTORY_UPDATED,
+            STATUTORY_DELETED,
+
         }
 
         public enum ApprovalStatus

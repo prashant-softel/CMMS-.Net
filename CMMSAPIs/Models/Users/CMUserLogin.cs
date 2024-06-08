@@ -39,6 +39,7 @@ namespace CMMSAPIs.Models.Users
         public int photoId { get; set; }
         public string photoPath { get; set; }
         public int signatureId { get; set; }
+
         public string signaturePath { get; set; }
         public dynamic createdAt { get; set; }
         public dynamic updatedAt { get; set; }

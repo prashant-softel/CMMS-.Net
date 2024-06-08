@@ -182,7 +182,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
                      "(" +
                          $"{request.facility_id}, {request.block_id}, {request.equipment_id},' {request.severity}', {request.risk_level}, '{request.incident_datetime.ToString("yyyy-MM-dd HH:mm:ss")}', {request.victim_id}, {request.action_taken_by}, '{request.action_taken_datetime.ToString("yyyy-MM-dd HH:mm:ss")}', {request.inverstigated_by}, {request.verified_by}, {request.risk_type}, {request.esi_applicability}, {request.legal_applicability}, {request.rca_required}, {request.damaged_cost}, {request.generation_loss}, {request.damaged_cost_curr_id}, {request.generation_loss_curr_id}, '{request.title}', '{request.description}', {request.is_insurance_applicable}, '{request.insurance}', {request.insurance_status}, '{request.insurance_remark}', {(int)CMMS.CMMS_Status.IR_CREATED_INITIAL}, {userId}, '{UtilsRepository.GetUTCTime()}', '{UtilsRepository.GetUTCTime()}', '{request.location_of_incident}', '{request.type_of_job}', '{request.is_activities_trained}'," +
                          $" '{request.is_person_authorized}', '{request.instructions_given}', '{request.safety_equipments}', '{request.safe_procedure_observed}', '{request.unsafe_condition_contributed}', '{request.unsafe_act_cause}', {request.incidet_type_id}, '{request.esi_applicability_remark}','{request.legal_applicability_remark}','{request.rca_required_remark}','{request.is_person_involved}' " +
-                     ") ; SELECT LAST_INSERT_ID()";
+                     ");SELECT LAST_INSERT_ID()";
 
 
             DataTable dt2 = await Context.FetchData(qryIncident).ConfigureAwait(false);
@@ -208,6 +208,25 @@ namespace CMMSAPIs.Repositories.Incident_Reports
                 catch (Exception ex)
                 {
                     return response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Incident Report creation failed");
+                }
+            }
+            if (request.other != null && request.other.Count > 0)
+            {
+                try
+                {
+                    foreach (var item in request.other)
+                    {
+                        string injured_Query = "INSERT INTO injured_person( incidents_id, person_id, person_type, age, sex, designation, address, name_contractor,  body_part_and_nature_of_injury, work_experience_years,other_victim, plant_equipment_involved, location_of_incident ) values ";
+                        injured_Query += $"({incident_id}, '{item.name}', {item.person_type}, {item.age}, {item.sex}, " +
+                                         $"'{item.designation}', '{item.address}', '{item.name_contractor}', " +
+                                         $"'{item.body_part_and_nature_of_injury}', {(item.work_experience_years == null ? 0 : item.work_experience_years)},'{item.other_victim}', " +
+                                         $"'{item.plant_equipment_involved}', '{item.location_of_incident}') ; ";
+                        var injured_Query_result = await Context.ExecuteNonQry<int>(injured_Query).ConfigureAwait(false);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    return response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Other Report creation failed");
                 }
             }
 
@@ -374,7 +393,25 @@ namespace CMMSAPIs.Repositories.Incident_Reports
                     return response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Incident Report creation failed");
                 }
             }
-
+            if (request.other != null && request.other.Count > 0)
+            {
+                try
+                {
+                    foreach (var item in request.other)
+                    {
+                        string injured_Query = "INSERT INTO injured_person( incidents_id, person_id, person_type, age, sex, designation, address, name_contractor,  body_part_and_nature_of_injury, work_experience_years,other_victim, plant_equipment_involved, location_of_incident ) values ";
+                        injured_Query += $"({incident_id}, '{item.name}', {item.person_type}, {item.age}, {item.sex}, " +
+                                         $"'{item.designation}', '{item.address}', '{item.name_contractor}', " +
+                                         $"'{item.body_part_and_nature_of_injury}', {(item.work_experience_years == null ? 0 : item.work_experience_years)},'{item.other_victim}', " +
+                                         $"'{item.plant_equipment_involved}', '{item.location_of_incident}') ; ";
+                        var injured_Query_result = await Context.ExecuteNonQry<int>(injured_Query).ConfigureAwait(false);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    return response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Other Report creation failed");
+                }
+            }
             if (request.why_why_analysis != null && request.why_why_analysis.Count > 0)
             {
                 try
@@ -714,6 +751,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
                     }
                 }
             }
+
             if (request.why_why_analysis != null && request.why_why_analysis.Count > 0)
             {
                 try

@@ -47,7 +47,7 @@ namespace CMMSAPIs.Repositories.Audits
 
         internal async Task<List<CMAuditPlanList>> GetAuditPlanList(int facility_id, DateTime fromDate, DateTime toDate,string facilitytimeZone, int module_type_id)
         {
-            
+          
             string filter = "Where (DATE(st.Audit_Added_date) >= '" + fromDate.ToString("yyyy-MM-dd") + "'  and DATE(st.Audit_Added_date) <= '" + toDate.ToString("yyyy-MM-dd") + "')";
             filter = filter + " and st.Facility_id = " + facility_id + "";
             if (module_type_id > 0)
