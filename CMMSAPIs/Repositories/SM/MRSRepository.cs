@@ -472,12 +472,12 @@ namespace CMMSAPIs.Repositories.SM
             //    "  WHERE smi.mrs_ID = " + ID + " /*GROUP BY smi.ID*/";
 
             string stmt = "SELECT smi.ID,smi.return_remarks,smi.mrs_return_ID,smi.finalRemark,smi.asset_item_ID," +
-                "smi.asset_MDM_code,smi.returned_qty," +
+                "smi.asset_MDM_code as asset_code,smi.returned_qty," +
                 "smi.available_qty,smi.used_qty,smi.ID,smi.issued_qty,sm.flag as status, " +
                 "DATE_FORMAT(sm.returnDate,'%Y-%m-%d %H:%i') as returnDate,sm.approval_status,DATE_FORMAT(sm.approved_date,'%Y-%m-%d %H:%i') as approved_date," +
                 "DATE_FORMAT(sm.requested_date,'%Y-%m-%d %H:%i') as issued_date,DATE_FORMAT(sm.returnDate, '%Y-%m-%d %H:%i') as returnDate, smi.requested_qty, " +
                 "if(smi.approval_required = 1,'Yes','No') as approval_required, smi.is_splited, sam.ID as asset_item_ID," +
-                " smi.serial_number, sam.asset_name, sam.asset_type_ID,sat.asset_type,COALESCE(file.file_path,'') as file_path," +
+                " smi.serial_number as serial_number, sam.asset_name, sam.asset_type_ID,sat.asset_type,COALESCE(file.file_path,'') as file_path," +
                 "file.Asset_master_id,sai.materialID, sai.assetMasterID " +
                 " FROM smrsitems smi " +
                 " LEFT JOIN smmrs sm ON sm.ID = smi.mrs_ID " +
@@ -838,7 +838,7 @@ namespace CMMSAPIs.Repositories.SM
             foreach (var item in data)
             {
                 int assetTypeId = 0;
-                string stmtAssetType = $"SELECT asset_type_ID FROM smassetmasters WHERE asset_code = '{item.asset_code}'";
+                string stmtAssetType = $"SELECT asset_type_ID FROM smassetmasters WHERE id = '{item.assetMasterID}'";
                 DataTable dtAssetType = await Context.FetchData(stmtAssetType).ConfigureAwait(false);
 
                 if (dtAssetType == null && dtAssetType.Rows.Count == 0)
@@ -865,7 +865,7 @@ namespace CMMSAPIs.Repositories.SM
 
                 // Get the asset type ID.
                 int assetTypeId = 0;
-                string stmtAssetType = $"SELECT asset_type_ID FROM smassetmasters WHERE asset_code = '{item.asset_code}'";
+                string stmtAssetType = $"SELECT asset_type_ID FROM smassetmasters WHERE id = '{item.assetMasterID}'";
                 DataTable dtAssetType = await Context.FetchData(stmtAssetType).ConfigureAwait(false);
 
                 if (dtAssetType == null && dtAssetType.Rows.Count == 0)
