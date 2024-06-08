@@ -41,6 +41,20 @@ namespace CMMSAPIs.Models.Masters
     }
     public class CMGetAttendenceList
     {
-        public int Id { get; set; }
+        public int facility_id { get; set; }
+        public string facilityname { get; set; }
+        public int? month_id { get; set; }
+        public String? month_name { get; set; }
+        public int? year { get; set; }
+        public List<MonthData>? month_data { get; set; }
+    }
+    public class MonthData
+    {
+        public string date { get; set; }
+        public int hfe_employees { get; set; }
+        public int less_than_35 { get; set; }
+        public int between_30_to_50 { get; set; }
+        public int greater_than_50 { get; set; }
     }
 }
+

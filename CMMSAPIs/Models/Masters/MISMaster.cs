@@ -463,7 +463,7 @@ namespace CMMSAPIs.Models.Masters
         public DateTime start_date { get; set; }
         public DateTime end_date { get; set; }
         public int status { get; set; }
-        public string status_short { get; set; }
+        public string Current_status_short { get; set; }
         public int created_by { get; set; }
         public DateTime? created_at { get; set; }
         public int updated_by { get; set; }

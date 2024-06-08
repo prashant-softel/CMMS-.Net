@@ -990,12 +990,12 @@ namespace CMMSAPIs.Repositories.Inventory
             Dictionary<string, int> assetDict = new Dictionary<string, int>();
             assetDict.Merge(assetNames, assetIds);
 
-            string assetQry2 = $"SELECT id, REPLACE(UPPER(name), '_', '') as name FROM facilities WHERE parentId = {facility_id}  GROUP BY name ORDER BY id;";
+            /*string assetQry2 = $"SELECT id, REPLACE(UPPER(name), '_', '') as name FROM facilities WHERE parentId = {facility_id}  GROUP BY name ORDER BY id;";
             DataTable dtAsset2 = await Context.FetchData(assetQry2).ConfigureAwait(false);
             List<string> assetNames2 = dtAsset2.GetColumn<string>("name");
             List<int> assetIds2 = dtAsset2.GetColumn<int>("id");
             Dictionary<string, int> assetDict2 = new Dictionary<string, int>();
-            assetDict2.Merge(assetNames2, assetIds2);
+            assetDict2.Merge(assetNames2, assetIds2);*/
 
             foreach (DataRow row in assets.Rows)
             {
@@ -1005,16 +1005,10 @@ namespace CMMSAPIs.Repositories.Inventory
                 }
                 catch (KeyNotFoundException)
                 {
-                    try
-                    {
-                        row["parentId"] = assetDict2[Convert.ToString(row["parentName"]).ToUpper()];
-                        row["parentId"] = 0;
-                    }
-                    catch
-                    {
-                        //m_errorLog.SetWarning($"[Row: {row["row_no"]}] Asset named '{Convert.ToString(row["parentName"])}' '{Convert.ToString(row["parentName"]).Replace("_", "").ToUpper()}'not found. Setting parent ID as 0.");
-                        row["parentId"] = 0;
-                    }
+
+                    //m_errorLog.SetWarning($"[Row: {row["row_no"]}] Asset named '{Convert.ToString(row["parentName"])}' '{Convert.ToString(row["parentName"]).Replace("_", "").ToUpper()}'not found. Setting parent ID as 0.");
+                    row["parentId"] = 0;
+
                 }
             }
 

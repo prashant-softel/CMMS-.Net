@@ -901,7 +901,7 @@ namespace CMMSAPIs.Repositories.Masters
             //show_opening
             string SelectQ = $" select distinct mis_waterdata.id,plantId as facility_id,fc.name facility_name,MONTHNAME(date) as month_name,Month(date) as month_id,YEAR(date) as year, " +
                 $" (select sum(creditQty)-sum(debitQty) from mis_waterdata where MONTH(date) < MONTH('" + fromDate.ToString("yyyy-MM-dd") + "')) as opening," +
-                $" sum(creditQty) as procured_qty, sum(debitQty) as consumed_qty, mw.name as water_type,show_opening" +
+                $" sum(creditQty) as procured_qty, sum(debitQty) as consumed_qty, mw.name as water_type,mw.show_opening" +
                 $" from mis_waterdata" +
                 $" LEFT JOIN facilities fc ON fc.id = mis_waterdata.plantId" +
                 $" LEFT JOIN mis_watertype mw on mw.id = mis_waterdata.waterTypeId" +
@@ -915,7 +915,7 @@ namespace CMMSAPIs.Repositories.Masters
             //    $"  LEFT JOIN facilities fc ON fc.id = mis_waterdata.plantId " +
             //    $"  LEFT JOIN mis_watertype mw on  mw.id not in ({string.Join(",", Master_ID_Result.Select(w => w.id).Distinct())})";
 
-            string water_type_master_q = " select facility_id,fc.name facility_name, mis_watertype.name as water_type,show_opening " +
+            string water_type_master_q = " select facility_id,fc.name facility_name, mis_watertype.name as water_type,mis_watertype.show_opening " +
                 " from mis_watertype  LEFT JOIN facilities fc ON fc.id = mis_watertype.facility_id;";
 
             List<CMWaterDataMonthWise> Result_masterList = await Context.GetData<CMWaterDataMonthWise>(water_type_master_q).ConfigureAwait(false);
@@ -982,12 +982,12 @@ namespace CMMSAPIs.Repositories.Masters
                 $" from waste_data" +
                 $" LEFT JOIN facilities fc ON fc.id = waste_data.facilityId" +
                 $" LEFT JOIN mis_wastetype mw on mw.id = waste_data.wasteTypeId" +
-                $" where waste_data.isActive = 1 and DATE_FORMAT(Date,'%Y-%m-%d') BETWEEN '{fromDate.ToString("yyyy-MM-dd")}' AND '{toDate.ToString("yyyy-MM-dd")}'" +
+                $" where waste_data.isActive = 1 and DATE_FORMAT(Date,'%Y-%m-%d') BETWEEN '{fromDate.ToString("yyyy-MM-dd")}' AND '{toDate.ToString("yyyy-MM-dd")}'and  mw.isHazardous={Hazardous} and mw.status=1 " +
                 $"  group by MONTH(date) , waste_data.wasteTypeId;";
             List<CMWaterDataMonthWise> ListResult = await Context.GetData<CMWaterDataMonthWise>(SelectQ).ConfigureAwait(false);
 
             string water_type_master_q = " select facility_id,fc.name facility_name, mis_wastetype.name as water_type,show_opening " +
-    " from mis_wastetype  LEFT JOIN facilities fc ON fc.id = mis_wastetype.facility_id;";
+                                         $" from mis_wastetype  LEFT JOIN facilities fc ON fc.id = mis_wastetype.facility_id where mis_wastetype.isHazardous={Hazardous} and mis_wastetype.status=1 ;";
 
             List<CMWaterDataMonthWise> Result_masterList = await Context.GetData<CMWaterDataMonthWise>(water_type_master_q).ConfigureAwait(false);
 
@@ -1164,15 +1164,17 @@ namespace CMMSAPIs.Repositories.Masters
                                               }).ToList()
                             }).ToList()
                 }).ToList();
-
-            for (int i = 0; i < groupedResult_new[0].item_data.Count; i++)
+            if (groupedResult_new.Count > 0)
             {
-                string detail_Q = " select mw.id,date,mw.description,creditQty as procured_qty,debitQty as consumed_qty," +
-                      "  case when consumeTypeId = 1 then 'Procurement' when consumeTypeId = 2 then 'Consumption' else 'NA' end as TransactionType, show_opening" +
-                      " from waste_data LEFT JOIN mis_wastetype mw ON mw.id = waste_data.wasteTypeId where waterTypeId = " + groupedResult_new[0].item_data[i].wasteTypeId + " and waste_data.isHazardous = " + Hazardous + " AND waste_data.facilityId = " + facility_id + " AND MONTH(date) = " + Month + " AND YEAR(date) = " + Year + " ;";
+                for (int i = 0; i < groupedResult_new[0].item_data.Count; i++)
+                {
+                    string detail_Q = " select mw.id,date,mw.description,creditQty as procured_qty,debitQty as consumed_qty," +
+                          "  case when consumeTypeId = 1 then 'Procurement' when consumeTypeId = 2 then 'Consumption' else 'NA' end as TransactionType, show_opening" +
+                          " from waste_data LEFT JOIN mis_wastetype mw ON mw.id = waste_data.wasteTypeId where waterTypeId = " + groupedResult_new[0].item_data[i].wasteTypeId + " and waste_data.isHazardous = " + Hazardous + " AND waste_data.facilityId = " + facility_id + " AND MONTH(date) = " + Month + " AND YEAR(date) = " + Year + " ;";
 
 
-                groupedResult_new[0].item_data[i].details = await Context.GetData<CMWasteDataMonthWiseDetails_Month>(detail_Q).ConfigureAwait(false);
+                    groupedResult_new[0].item_data[i].details = await Context.GetData<CMWasteDataMonthWiseDetails_Month>(detail_Q).ConfigureAwait(false);
+                }
             }
             return groupedResult_new;
         }
@@ -1269,8 +1271,8 @@ namespace CMMSAPIs.Repositories.Masters
             string renew_from = Convert.ToString(request.renew_from);
 
             string myQuery = $"INSERT INTO statutory (compliance_id,facility_id,issue_date, expires_on, status, created_by, created_at, updated_by, updated_at, renew_from, renew_from_id, approved_by, approved_at) VALUES " +
-                             $"({request.compliance_id},{request.facility_id}, '{request.issue_date.ToString("yyyy-MM-dd HH:mm")}', '{request.expires_on.ToString("yyyy-MM-dd HH:mm")}', 1, {UserId}, '{UtilsRepository.GetUTCTime()}', " +
-                             $" {UserId},  '{UtilsRepository.GetUTCTime()}','{renew_from}', {request.renew_from_id}, {UserId}, '{UtilsRepository.GetUTCTime()}'); " +
+                             $"({request.compliance_id},{request.facility_id}, '{request.issue_date.ToString("yyyy-MM-dd HH:mm")}', '{request.expires_on.ToString("yyyy-MM-dd HH:mm")}', {(int)CMMS.CMMS_Status.STATUTORY_CREATED}, {UserId}, '{UtilsRepository.GetUTCTime()}', " +
+                             $" {UserId},  '{UtilsRepository.GetUTCTime()}','{renew_from}', {(request.renew_from_id == null ? 0 : request.renew_from_id)}, {UserId}, '{UtilsRepository.GetUTCTime()}'); " +
                              $"SELECT LAST_INSERT_ID();";
             DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
             int id = Convert.ToInt32(dt.Rows[0][0]);
@@ -1283,6 +1285,12 @@ namespace CMMSAPIs.Repositories.Masters
             // string myQuery = "SELECT id, Compliance_id,facility_id, Issue_date as start_date, expires_on as end_date, status, created_by, created_at, updated_by, updated_at, renew_from, renew_from_id, approved_by, approved_at  FROM statutory";
             string myQuery = "SELECT  s.id, s.Compliance_id, s.facility_id, s.Issue_date AS start_date, s.expires_on AS end_date, s.status, CONCAT(uc.firstName, ' ', uc.lastName) AS createdByName, s.created_at, s.updated_by, s.updated_at, s.renew_from, s.renew_from_id, s.approved_by, s.approved_at FROM statutory AS s LEFT JOIN users uc ON s.created_by = uc.id;";
             List<CMStatutory> data = await Context.GetData<CMStatutory>(myQuery).ConfigureAwait(false);
+            foreach (var item in data)
+            {
+                CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(item.status);
+                string _shortStatus = getShortStatus(CMMS.CMMS_Modules.STATUTORY, _Status);
+                item.Current_status_short = _shortStatus;
+            }
             return data;
         }
 
@@ -1290,6 +1298,12 @@ namespace CMMSAPIs.Repositories.Masters
         {
             string myQuery = $"SELECT  Compliance_id,facility_id, Issue_date as start_date, expires_on as end_date, status, created_by, created_at, updated_by, updated_at, renew_from, renew_from_id, approved_by, approved_at  FROM statutory WHERE id = {id}";
             List<CMStatutory> data = await Context.GetData<CMStatutory>(myQuery).ConfigureAwait(false);
+            foreach (var item in data)
+            {
+                CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(item.status);
+                string _shortStatus = getShortStatus(CMMS.CMMS_Modules.STATUTORY, _Status);
+                item.Current_status_short = _shortStatus;
+            }
             return data.FirstOrDefault();
         }
 
@@ -1303,7 +1317,7 @@ namespace CMMSAPIs.Repositories.Masters
 
             updateQry += $"expires_on = '{request.expires_on.ToString("yyyy-MM-dd HH:mm")}', ";
 
-            updateQry += $"status = 1, ";
+            updateQry += $"status = {(int)CMMS.CMMS_Status.STATUTORY_UPDATED}, ";
             updateQry += $"updated_by ={UserId} ,";
             updateQry += $"updated_at ='{UtilsRepository.GetUTCTime()}'";
             updateQry = updateQry.TrimEnd(',', ' ');

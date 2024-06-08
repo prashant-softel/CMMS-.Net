@@ -124,11 +124,11 @@ namespace CMMSAPIs.Repositories.Masters
 
             string querycon = $"Delete From contractor_attendnace where Date={requests.date} ;";
             await Context.ExecuteNonQry<int>(querycon).ConfigureAwait(false);
-            int fid = 0;
+
             int employeeValue = 0;
             foreach (CMGetAttendence request in requests.hfeAttendance)
             {
-                fid = request.facility_id;
+
                 string instimp = $"INSERT INTO employee_attendance ( attendance_id, facility_id, employee_id, present, in_time, out_time,Date, CreatedAt, CreatedBy, UpdatedAt, UpdatedBy) VALUES " +
                $"({request.Attendance_Id}, {requests.facility_id}, '{request.employee_id}', {request.present}, '{request.InTime}','{request.OutTime}','{requests.date}','{UtilsRepository.GetUTCTime()}',{userID},'{UtilsRepository.GetUTCTime()}',{userID}); " +
                $"SELECT LAST_INSERT_ID();";
@@ -151,8 +151,8 @@ namespace CMMSAPIs.Repositories.Masters
 
         internal async Task<List<CMGetAttendenceList>> GetAttendanceList(int facility_id, int year)
         {
-
             return null;
+
         }
     }
 }

@@ -169,10 +169,10 @@ namespace CMMSAPIs.Models.SM
     public class CMMRSItems
     {
         public int ID { get; set; }
-        //public string return_remarks { get; set; }
+        public string return_remarks { get; set; }
         public int original_mrs_ID { get; set; }
         public int mrs_return_ID { get; set; }
-        //public string finalRemark { get; set; }
+        public string finalRemark { get; set; }
         public int asset_item_ID { get; set; }
         public string asset_code { get; set; }
         //public string serial_number { get; set; }
