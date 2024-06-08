@@ -44,6 +44,10 @@ namespace CMMSAPIs.Models.Masters
     public class CMDashboadModuleWiseList
     {
         public string module_name { get; set; }
+        public int category_mc_count { get; set; }
+        public int category_pm_count { get; set; }
+        public int category_bm_count { get; set; }
+        public int category_total_count { get; set; }
         public CMDashboadDetails CMDashboadDetails { get; set; }
     }
     public class CMDashboadDetails
@@ -57,6 +61,7 @@ namespace CMMSAPIs.Models.Masters
         public int total { get; set; }
         public int completed { get; set; }
         public int pending { get; set; }
+        public int unknown_count { get; set; }
         public int schedule_compliance_total { get; set; }
         public int schedule_compliance_completed { get; set; }
         public int schedule_compliance_pending { get; set; }
@@ -65,6 +70,10 @@ namespace CMMSAPIs.Models.Masters
         public int wo_backlog { get; set; }
         public int low_stock_items { get; set; }
         public int po_items_awaited { get; set; }
+        public int pm_closed_count { get; set; }
+        public int bm_closed_count { get; set; }
+        public int mc_closed_count { get; set; }
+
         public List<CMDashboadItemList> item_list { get; set; }
     }
 
