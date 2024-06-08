@@ -1835,11 +1835,11 @@ namespace CMMSAPIs.Repositories.SM
                  "  WHERE smi.mrs_return_ID = " + ID + " /*GROUP BY smi.ID*/
 
             string stmt = "SELECT smi.ID,smi.return_remarks,smi.mrs_return_ID,smi.finalRemark,smi.asset_item_ID,smi.asset_MDM_code as asset_code," +
-           "sai.serial_number,smi.is_faulty as is_faulty,smi.returned_qty,smi.available_qty,smi.used_qty,smi.ID,smi.issued_qty,sm.flag as status,DATE_FORMAT(sm.returnDate,'%Y-%m-%d %H:%i') as returnDate," +
+           "smi.serial_number,smi.is_faulty as is_faulty,smi.returned_qty,smi.available_qty,smi.used_qty,smi.ID,smi.issued_qty,sm.flag as status,DATE_FORMAT(sm.returnDate,'%Y-%m-%d %H:%i') as returnDate," +
            "sm.approval_status,DATE_FORMAT(sm.approved_date,'%Y-%m-%d %H:%i') as approved_date,DATE_FORMAT(sm.requested_date,'%Y-%m-%d %H:%i') as issued_date," +
            "DATE_FORMAT(sm.returnDate, '%Y-%m-%d %H:%i') as returnDate, smi.requested_qty,if(smi.approval_required = 1,'Yes','No') as approval_required,\r\n " +
            "t1.asset_name,t1.asset_type_ID,t1.asset_type,COALESCE(t1.file_path,'') as file_path,t1.Asset_master_id\r\n        FROM smrsitems smi\r\n " +
-           " LEFT JOIN smmrs sm ON sm.ID = smi.mrs_return_ID   \r\n   LEFT JOIN (SELECT distinct sai.assetMasterID as asset_item_ID, sam.asset_name, " +
+           " LEFT JOIN smmrs sm ON sm.ID = smi.mrs_return_ID   \r\n   LEFT JOIN (SELECT distinct sai.assetMasterID as asset_item_ID,  sam.asset_name, " +
            "sam.asset_type_ID,sat.asset_type,COALESCE(file.file_path,'') as file_path,file.Asset_master_id\r\n  FROM smassetitems sai " +
            "LEFT JOIN smassetmasters sam ON sam.ID = sai.assetMasterID LEFT JOIN smassetmasterfiles  file ON file.Asset_master_id = sam.ID " +
            "LEFT JOIN smassettypes sat ON sat.ID = sam.asset_type_ID)  as t1 ON t1.asset_item_ID = smi.asset_item_ID " +
