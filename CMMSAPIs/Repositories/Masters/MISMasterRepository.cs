@@ -1334,7 +1334,7 @@ namespace CMMSAPIs.Repositories.Masters
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.STATUTORY, id, 0, 0, "CMStatutory Deleted.", CMMS.CMMS_Status.STATUTORY_DELETED, 0);
             return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Statutory Deleted");
         }
-        internal async Task<List<CMStatutory>> GetStatutoryHistoryById(int compliance_id)
+        internal async Task<List<CMStatutoryHistory>> GetStatutoryHistoryById(int compliance_id)
         {
             string myQuery = $"SELECT distinct s.id,Compliance_id,sc.name ,facility_id, Issue_date as start_date, " +
                 $" expires_on as end_date, s.status,concat(created.firstName, ' ', created.lastName)  created_by, s.created_at," +
@@ -1348,7 +1348,7 @@ namespace CMMSAPIs.Repositories.Masters
                 $" left join users approved on  approved.id = s.approved_by" +
                 $" left join users rejected on  rejected.id = s.rejected_by" +
                 $" WHERE Compliance_id = {compliance_id};";
-            List<CMStatutory> data = await Context.GetData<CMStatutory>(myQuery).ConfigureAwait(false);
+            List<CMStatutoryHistory> data = await Context.GetData<CMStatutoryHistory>(myQuery).ConfigureAwait(false);
             foreach (var item in data)
             {
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(item.status);
