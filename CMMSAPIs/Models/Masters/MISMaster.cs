@@ -476,6 +476,27 @@ namespace CMMSAPIs.Models.Masters
 
         public string createdByName { get; set; }
     }
+    public class CMStatutoryHistory
+    {
 
+        public int id { get; set; }
+        public int facility_id { get; set; }
+        public int? compliance_id { get; set; }
+        public DateTime start_date { get; set; }
+        public DateTime end_date { get; set; }
+        public int status { get; set; }
+        public string Current_status_short { get; set; }
+        public string status_short { get; set; }
+        public string created_by { get; set; }
+        public DateTime? created_at { get; set; }
+        public string updated_by { get; set; }
+        public DateTime? updated_at { get; set; }
+        public dynamic renew_from { get; set; }
+        public int? renew_from_id { get; set; }
+        public string approved_by { get; set; }
+        public DateTime? approved_at { get; set; }
+
+        public string createdByName { get; set; }
+    }
 
 }
