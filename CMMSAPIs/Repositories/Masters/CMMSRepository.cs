@@ -1251,7 +1251,7 @@ namespace CMMSAPIs.Repositories.Masters
             result.created = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.JOB_CREATED).ToList().Count;
             result.rejected = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.JOB_CANCELLED).ToList().Count;
             result.assigned = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.JOB_ASSIGNED).ToList().Count;
-            result.bm_closed_count = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.JOB_CLOSED).ToList().Count;
+            result.bm_closed_count = itemList.Where(x => x.latestJCStatus == (int)CMMS.CMMS_Status.JOB_CLOSED).ToList().Count;
 
 
             result.total = itemList.Count;

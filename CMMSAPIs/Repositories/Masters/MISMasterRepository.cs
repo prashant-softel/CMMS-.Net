@@ -901,12 +901,12 @@ namespace CMMSAPIs.Repositories.Masters
             //show_opening
             string SelectQ = $" select distinct mis_waterdata.id,plantId as facility_id,fc.name facility_name,MONTHNAME(date) as month_name,Month(date) as month_id,YEAR(date) as year, " +
                 $" (select sum(creditQty)-sum(debitQty) from mis_waterdata where MONTH(date) < MONTH('" + fromDate.ToString("yyyy-MM-dd") + "')) as opening," +
-                $" sum(creditQty) as procured_qty, sum(debitQty) as consumed_qty, mw.name as water_type,mw.show_opening" +
+                $" creditQty as procured_qty, debitQty as consumed_qty, mw.name as water_type,mw.show_opening" +
                 $" from mis_waterdata" +
                 $" LEFT JOIN facilities fc ON fc.id = mis_waterdata.plantId" +
                 $" LEFT JOIN mis_watertype mw on mw.id = mis_waterdata.waterTypeId" +
-                $" where isActive = 1 and mis_waterdata.plantId = {facility_id} and DATE_FORMAT(Date,'%Y-%m-%d') BETWEEN '{fromDate.ToString("yyyy-MM-dd")}' AND '{toDate.ToString("yyyy-MM-dd")}'" +
-                $"  group by MONTH(date) , mis_waterdata.waterTypeId;";
+                $" where  mis_waterdata.plantId = {facility_id} and DATE_FORMAT(Date,'%Y-%m-%d') BETWEEN '{fromDate.ToString("yyyy-MM-dd")}' AND '{toDate.ToString("yyyy-MM-dd")}'" +
+                $"  ;";
             //SelectQ = SelectQ + $" union all" +
             //    $"    select distinct plantId as facility_id,fc.name facility_name,'' as month_name," +
             //    $"  0000 as year, 0 as opening, " +
@@ -934,16 +934,16 @@ namespace CMMSAPIs.Repositories.Masters
                                     month_id = periodGroup.month_id,
                                     year = periodGroup.year,
                                     details = group.Where(g => g.month_name == periodGroup.month_name && g.year == periodGroup.year)
-                                                  .GroupBy(g => g.water_type)
+                                                  //.GroupBy(g => g.water_type)
                                                   .Select(g => new CMWaterDataMonthWiseDetails
                                                   {
-                                                      water_id = g.Sum(item => item.id),
-                                                      water_type = g.Key,
-                                                      opening_qty = g.Sum(item => item.opening),
-                                                      procured_qty = g.Sum(item => item.procured_qty),
-                                                      consumed_qty = g.Sum(item => item.consumed_qty),
-                                                      closing_qty = g.Sum(item => item.opening) + g.Sum(item => item.procured_qty) - g.Sum(item => item.consumed_qty),
-                                                      show_opening = g.Sum(item => item.show_opening)
+                                                      water_id = g.id,
+                                                      water_type = g.water_type,
+                                                      opening_qty = g.opening,
+                                                      procured_qty = g.procured_qty,
+                                                      consumed_qty = g.consumed_qty,
+                                                      closing_qty = g.opening + g.procured_qty - g.consumed_qty,
+                                                      show_opening = g.show_opening
                                                   }).ToList()
 
                                 }).ToList()
@@ -978,12 +978,12 @@ namespace CMMSAPIs.Repositories.Masters
         {
             string SelectQ = $" select distinct waste_data.id, facilityId as facility_id,fc.name facility_name,MONTHNAME(date) as month_name,Month(date) as month_id,YEAR(date) as year, " +
                 $" (select sum(creditQty)-sum(debitQty) from waste_data where MONTH(date) < MONTH('" + fromDate.ToString("yyyy-MM-dd") + "')) as opening," +
-                $" sum(creditQty) as procured_qty, sum(debitQty) as consumed_qty, mw.name as water_type, show_opening " +
+                $" creditQty as procured_qty, debitQty as consumed_qty, mw.name as water_type, show_opening " +
                 $" from waste_data" +
                 $" LEFT JOIN facilities fc ON fc.id = waste_data.facilityId" +
                 $" LEFT JOIN mis_wastetype mw on mw.id = waste_data.wasteTypeId" +
-                $" where waste_data.isActive = 1 and DATE_FORMAT(Date,'%Y-%m-%d') BETWEEN '{fromDate.ToString("yyyy-MM-dd")}' AND '{toDate.ToString("yyyy-MM-dd")}'and  mw.isHazardous={Hazardous} and mw.status=1 " +
-                $"  group by MONTH(date) , waste_data.wasteTypeId;";
+                $" where DATE_FORMAT(Date,'%Y-%m-%d') BETWEEN '{fromDate.ToString("yyyy-MM-dd")}' AND '{toDate.ToString("yyyy-MM-dd")}'and  mw.isHazardous={Hazardous} and mw.status=1 " +
+                $" ;";
             List<CMWaterDataMonthWise> ListResult = await Context.GetData<CMWaterDataMonthWise>(SelectQ).ConfigureAwait(false);
 
             string water_type_master_q = " select facility_id,fc.name facility_name, mis_wastetype.name as water_type,show_opening " +
@@ -1006,16 +1006,16 @@ namespace CMMSAPIs.Repositories.Masters
                                     month_id = periodGroup.month_id,
                                     year = periodGroup.year,
                                     details = group.Where(g => g.month_name == periodGroup.month_name && g.year == periodGroup.year)
-                                                  .GroupBy(g => g.water_type)
+                                                  //.GroupBy(g => g.water_type)
                                                   .Select(g => new CMWasteDataMonthWiseDetails
                                                   {
-                                                      waste_id = g.Sum(item => item.id),
-                                                      waste_type = g.Key,
-                                                      opening = g.Sum(item => item.opening),
-                                                      procured_qty = g.Sum(item => item.procured_qty),
-                                                      consumed_qty = g.Sum(item => item.consumed_qty),
-                                                      closing_qty = g.Sum(item => item.opening) + g.Sum(item => item.procured_qty) - g.Sum(item => item.consumed_qty),
-                                                      show_opening = g.Sum(item => item.show_opening)
+                                                      waste_id = g.id,
+                                                      waste_type = g.water_type,
+                                                      opening = g.opening,
+                                                      procured_qty = g.procured_qty,
+                                                      consumed_qty = g.consumed_qty,
+                                                      closing_qty = g.opening + g.procured_qty - g.consumed_qty,
+                                                      show_opening = g.show_opening
                                                   }).ToList()
                                 }).ToList()
                }).ToList();
@@ -1043,7 +1043,7 @@ namespace CMMSAPIs.Repositories.Masters
 
         internal async Task<List<WaterDataResult_Month>> GetWaterDataMonthDetail(int Month, int Year, int facility_id)
         {
-            string SelectQ = $" select distinct mis_waterdata.waterTypeId,mis_waterdata.id as id, plantId as facility_id,fc.name facility_name,DATE_FORMAT(Date,'%Y-%m-%d') as date ,MONTHNAME(date) as month,YEAR(date) as year,"
+            string SelectQ = $" select distinct mis_waterdata.waterTypeId,mis_waterdata.id as id, plantId as facility_id,fc.name facility_name,DATE_FORMAT(Date,'%Y-%m-%d') as date ,MONTHNAME(date) as months,YEAR(date) as year,"
                              + $" (select sum(creditQty) - sum(debitQty) from mis_waterdata where MONTH(date) < {Month}) as opening,"
                              + $" sum(creditQty) as procured_qty, sum(debitQty) as consumed_qty, mw.name as water_type,"
                              + $" consumeTypeId as consumeTypeId,"
@@ -1114,7 +1114,7 @@ namespace CMMSAPIs.Repositories.Masters
                               + $" LEFT JOIN facilities fc ON fc.id = waste_data.facilityId"
                               + $" LEFT JOIN mis_wastetype mw on mw.id = waste_data.waterTypeId"
                               + $" where waste_data.isHazardous = {Hazardous} and waste_data.facilityId = {facility_id} and MONTH(date) = {Month} and Year(date) = {Year} group by MONTH(date), waste_data.waterTypeId; ";*/
-            string SelectQ = $" SELECT DISTINCT waste_data.wasteTypeId ,waste_data.id AS id,YEAR(waste_data.date) AS year,MONTH(waste_data.date) AS months , facilityId AS facility_id,fc.name AS facility_name,date ,"
+            string SelectQ = $" SELECT DISTINCT waste_data.wasteTypeId ,waste_data.id AS id,YEAR(waste_data.date) AS year,MONTHNAME(waste_data.date) AS months , facilityId AS facility_id,fc.name AS facility_name,date ,"
                     + $" (SELECT SUM(creditQty) - SUM(debitQty) FROM waste_data WHERE MONTH(date) < {Month}) AS opening,"
                     + $" SUM(creditQty) AS procured_qty, SUM(debitQty) AS consumed_qty, mw.name AS waste_type,"
                     + $" consumeTypeId AS consumeTypeId,"
@@ -1170,7 +1170,7 @@ namespace CMMSAPIs.Repositories.Masters
                 {
                     string detail_Q = " select mw.id,date,mw.description,creditQty as procured_qty,debitQty as consumed_qty," +
                           "  case when consumeTypeId = 1 then 'Procurement' when consumeTypeId = 2 then 'Consumption' else 'NA' end as TransactionType, show_opening" +
-                          " from waste_data LEFT JOIN mis_wastetype mw ON mw.id = waste_data.wasteTypeId where waterTypeId = " + groupedResult_new[0].item_data[i].wasteTypeId + " and waste_data.isHazardous = " + Hazardous + " AND waste_data.facilityId = " + facility_id + " AND MONTH(date) = " + Month + " AND YEAR(date) = " + Year + " ;";
+                          " from waste_data LEFT JOIN mis_wastetype mw ON mw.id = waste_data.wasteTypeId where wasteTypeId = " + groupedResult_new[0].item_data[i].wasteTypeId + " and waste_data.isHazardous = " + Hazardous + " AND waste_data.facilityId = " + facility_id + " AND MONTH(date) = " + Month + " AND YEAR(date) = " + Year + " ;";
 
 
                     groupedResult_new[0].item_data[i].details = await Context.GetData<CMWasteDataMonthWiseDetails_Month>(detail_Q).ConfigureAwait(false);
@@ -1334,7 +1334,29 @@ namespace CMMSAPIs.Repositories.Masters
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.STATUTORY, id, 0, 0, "CMStatutory Deleted.", CMMS.CMMS_Status.STATUTORY_DELETED, 0);
             return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Statutory Deleted");
         }
-
+        internal async Task<List<CMStatutory>> GetStatutoryHistoryById(int compliance_id)
+        {
+            string myQuery = $"SELECT distinct s.id,Compliance_id,sc.name ,facility_id, Issue_date as start_date, " +
+                $" expires_on as end_date, s.status,concat(created.firstName, ' ', created.lastName)  created_by, s.created_at," +
+                $" concat(updated.firstName, ' ', updated.lastName)  updated_by , s.updated_at, renew_from, renew_from_id, " +
+                $" concat(approved.firstName, ' ', approved.lastName)  approved_by , s.approved_at, " +
+                $" concat(rejected.firstName, ' ', rejected.lastName)  rejected_by ,   s.rejected_at " +
+                $" FROM statutory s" +
+                $" left join statutorycomliance sc on sc.id = s.Compliance_id " +
+                $" left join users created on  created.id = s.created_by" +
+                $" left join users updated on  updated.id = s.updated_by" +
+                $" left join users approved on  approved.id = s.approved_by" +
+                $" left join users rejected on  rejected.id = s.rejected_by" +
+                $" WHERE Compliance_id = {compliance_id};";
+            List<CMStatutory> data = await Context.GetData<CMStatutory>(myQuery).ConfigureAwait(false);
+            foreach (var item in data)
+            {
+                CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(item.status);
+                string _shortStatus = getShortStatus(CMMS.CMMS_Modules.STATUTORY, _Status);
+                item.status_short = _shortStatus;
+            }
+            return data;
+        }
 
     }
 
