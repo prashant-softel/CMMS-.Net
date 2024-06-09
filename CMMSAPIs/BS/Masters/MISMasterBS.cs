@@ -97,6 +97,7 @@ namespace CMMSAPIs.BS.MISMasters
         Task<CMDefaultResponse> CreateStatutory(CMCreateStatutory request, int UserId);
         Task<CMDefaultResponse> UpdateStatutory(CMCreateStatutory request, int UserId);
         Task<List<CMStatutory>> GetStatutoryList();
+        Task<List<CMStatutory>> GetStatutoryHistoryById(int compliance_id);
         Task<CMStatutory> GetStatutoryById(int id);
     }
     public class MISMasterBS : IMISMasterBS
@@ -1338,6 +1339,21 @@ namespace CMMSAPIs.BS.MISMasters
                 using (var repos = new MISMasterRepository(getDB))
                 {
                     return await repos.GetStatutoryList();
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<List<CMStatutory>> GetStatutoryHistoryById(int compliance_id)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.GetStatutoryHistoryById(compliance_id);
 
                 }
             }
