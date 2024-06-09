@@ -1308,8 +1308,32 @@ namespace CMMSAPIs.Repositories.SM
                             $"requested_qty = {request.cmmrsItems[i].requested_qty}, " +
                             $"returned_qty = {request.cmmrsItems[i].returned_qty}, " +
                             $"return_remarks = '{request.cmmrsItems[i].return_remarks}', " +
-                            $"is_faulty = {request.cmmrsItems[i].is_faulty} " +
-                            $"WHERE mrs_return_ID = {request.cmmrsItems[i].mrs_item_id} ; " +
+                            $"WHERE id = {request.cmmrsItems[i].mrs_item_id} ; " +
+                            "COMMIT;";
+
+                        await Context.ExecuteNonQry<int>(updateStmt).ConfigureAwait(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        Queryflag = false;
+
+                    }
+
+                    Queryflag = true;
+                }
+
+                for (var i = 0; i < request.faultyItems.Count; i++)
+                {
+
+                    try
+                    {
+                        // Construct the SQL UPDATE statement for smrsitem
+                        string updateStmt = $"START TRANSACTION; " +
+                            $"UPDATE smrsitem " +
+                            $"SET  " +
+                            $"returned_qty = {request.faultyItems[i].returned_qty}, " +
+                            $"return_remarks = '{request.faultyItems[i].return_remarks}', " +
+                            $"WHERE id = {request.faultyItems[i].mrs_item_ID} ; " +
                             "COMMIT;";
 
                         await Context.ExecuteNonQry<int>(updateStmt).ConfigureAwait(false);
