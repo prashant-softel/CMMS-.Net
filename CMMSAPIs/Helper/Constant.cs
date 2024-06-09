@@ -654,5 +654,11 @@ namespace CMMSAPIs.Helper
             Procurement = 1,
             Consumption
         }
+                public enum JCDashboardStatus
+        {
+            Backlog = 0,
+            OnTime,
+            Delay
+        }
     }
 }
