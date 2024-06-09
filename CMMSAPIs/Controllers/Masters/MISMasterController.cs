@@ -1336,6 +1336,21 @@ namespace CMMSAPIs.Controllers.Masters
                 throw ex;
             }
         }
+
+        [Route("GetStatutoryHistoryById")]
+        [HttpGet]
+        public async Task<IActionResult> GetStatutoryHistoryById(int compliance_id)
+        {
+            try
+            {
+                var data = await _IMISMasterBS.GetStatutoryHistoryById(compliance_id);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
         [Route("GetStatutoryById")]
         [HttpGet]
         public async Task<IActionResult> GetStatutoryById(int id)
