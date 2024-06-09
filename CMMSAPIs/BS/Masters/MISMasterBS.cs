@@ -97,7 +97,7 @@ namespace CMMSAPIs.BS.MISMasters
         Task<CMDefaultResponse> CreateStatutory(CMCreateStatutory request, int UserId);
         Task<CMDefaultResponse> UpdateStatutory(CMCreateStatutory request, int UserId);
         Task<List<CMStatutory>> GetStatutoryList();
-        Task<List<CMStatutory>> GetStatutoryHistoryById(int compliance_id);
+        Task<List<CMStatutoryHistory>> GetStatutoryHistoryById(int compliance_id);
         Task<CMStatutory> GetStatutoryById(int id);
     }
     public class MISMasterBS : IMISMasterBS
@@ -1347,7 +1347,7 @@ namespace CMMSAPIs.BS.MISMasters
                 throw;
             }
         }
-        public async Task<List<CMStatutory>> GetStatutoryHistoryById(int compliance_id)
+        public async Task<List<CMStatutoryHistory>> GetStatutoryHistoryById(int compliance_id)
         {
             try
             {
