@@ -1276,7 +1276,7 @@ namespace CMMSAPIs.Repositories.SM
             var refType = "MRSReturnEdit";
             var mailSub = "MRS Return Request Updated.";
             string updatestmt = $" START TRANSACTION; UPDATE smmrs SET facility_ID = {request.facility_ID}, requested_by_emp_ID = {UserID}, requested_date = '{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}'," +
-                $" activity='{request.activity}',whereUsedType={request.whereUsedType},whereUsedRefID={request.whereUsedRefID}, status= {(int)CMMS.CMMS_Status.MRS_SUBMITTED} WHERE ID = {request.ID}" +
+                $" activity='{request.activity}',whereUsedType={request.whereUsedType},whereUsedRefID={request.whereUsedRefID},from_actor_type_id={request.from_actor_type_id},from_actor_id={request.from_actor_id},to_actor_type_id={request.to_actor_type_id},to_actor_id={request.to_actor_id},remarks='{request.remarks}', status= {(int)CMMS.CMMS_Status.MRS_SUBMITTED} WHERE ID = {request.ID}" +
                 $" ; COMMIT;";
             try
             {
@@ -1303,11 +1303,11 @@ namespace CMMSAPIs.Repositories.SM
                     {
                         // Construct the SQL UPDATE statement for smrsitem
                         string updateStmt = $"START TRANSACTION; " +
-                            $"UPDATE smrsitem " +
+                            $"UPDATE smrsitems " +
                             $"SET asset_item_ID = {request.cmmrsItems[i].asset_item_ID}, available_qty = {request.cmmrsItems[i].qty}, " +
                             $"requested_qty = {request.cmmrsItems[i].requested_qty}, " +
                             $"returned_qty = {request.cmmrsItems[i].returned_qty}, " +
-                            $"return_remarks = '{request.cmmrsItems[i].return_remarks}', " +
+                            $"return_remarks = '{request.cmmrsItems[i].return_remarks}' " +
                             $"WHERE id = {request.cmmrsItems[i].mrs_item_id} ; " +
                             "COMMIT;";
 
@@ -1329,10 +1329,10 @@ namespace CMMSAPIs.Repositories.SM
                     {
                         // Construct the SQL UPDATE statement for smrsitem
                         string updateStmt = $"START TRANSACTION; " +
-                            $"UPDATE smrsitem " +
+                            $"UPDATE smrsitems " +
                             $"SET  " +
                             $"returned_qty = {request.faultyItems[i].returned_qty}, " +
-                            $"return_remarks = '{request.faultyItems[i].return_remarks}', " +
+                            $"return_remarks = '{request.faultyItems[i].return_remarks}' " +
                             $"WHERE id = {request.faultyItems[i].mrs_item_ID} ; " +
                             "COMMIT;";
 

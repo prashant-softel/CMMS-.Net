@@ -1290,6 +1290,98 @@ namespace CMMSAPIs.Controllers.Masters
                 throw ex;
             }
         }
+        [Route("RejectStatutory")]
+        [HttpPost]
+        public async Task<IActionResult> RejectStatutory(CMApprovals request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.RejectStatutory(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        [Route("ApproveStatutory")]
+        [HttpPost]
+        public async Task<IActionResult> ApproveStatutory(CMApprovals request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.ApproveStatutory(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        //Master of Status of Application
+        [Route("CreateStatusofAppliaction")]
+        [HttpPost]
+        public async Task<IActionResult> CreateStatusofAppliaction(MISTypeObservation request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.CreateStatusofAppliaction(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        [Route("UpdateStatsofAppliaction")]
+        [HttpPost]
+        public async Task<IActionResult> UpdateStatsofAppliaction(MISTypeObservation request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.UpdateStatsofAppliaction(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        [Route("GetStatsofAppliaction")]
+        [HttpGet]
+        public async Task<IActionResult> GetStatsofAppliaction()
+        {
+            try
+            {
+                var data = await _IMISMasterBS.GetStatsofAppliaction();
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        [Route("DeleteStatsofAppliaction")]
+        [HttpDelete]
+        public async Task<IActionResult> DeleteStatsofAppliaction(int id)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.DeleteStatsofAppliaction(id, userID);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
 
         [Route("CreateStatutory")]
         [HttpPost]
@@ -1324,11 +1416,11 @@ namespace CMMSAPIs.Controllers.Masters
 
         [Route("GetStatutoryList")]
         [HttpGet]
-        public async Task<IActionResult> GetStatutoryList()
+        public async Task<IActionResult> GetStatutoryList(int facility_id)
         {
             try
             {
-                var data = await _IMISMasterBS.GetStatutoryList();
+                var data = await _IMISMasterBS.GetStatutoryList(facility_id);
                 return Ok(data);
             }
             catch (Exception ex)

@@ -14,15 +14,16 @@ namespace CMMSAPIs.Models.Utils
         public List<int> id { get; set; }
         public List<int> updatedId { get; set; }
         public List<int> insertedId { get; set; }
+
         public CMMS.RETRUNSTATUS return_status;
         public string message { get; set; }
-       //public List<CMJobDetailsList> LstJobDetails { get; set; }
-       //public List<CMEmpDetailsList> LstEmpDetails { get; set; }
+        //public List<CMJobDetailsList> LstJobDetails { get; set; }
+        //public List<CMEmpDetailsList> LstEmpDetails { get; set; }
         public CMDefaultResponse()
         {
 
         }
-        public CMDefaultResponse(int id,  CMMS.RETRUNSTATUS return_status, string message)
+        public CMDefaultResponse(int id, CMMS.RETRUNSTATUS return_status, string message)
         {
             this.id = new List<int>();
             this.id.Add(id);
@@ -35,7 +36,7 @@ namespace CMMSAPIs.Models.Utils
             this.return_status = return_status;
             this.message = message;
         }
-        public CMDefaultResponse(int id,List<int> insertedId, List<int> updatedId, CMMS.RETRUNSTATUS return_status, string message)
+        public CMDefaultResponse(int id, List<int> insertedId, List<int> updatedId, CMMS.RETRUNSTATUS return_status, string message)
         {
             this.id = new List<int>();
             this.id.Add(id);
@@ -45,6 +46,7 @@ namespace CMMSAPIs.Models.Utils
             this.return_status = return_status;
             this.message = message;
         }
+
     }
     public class CMImportFileResponse : CMDefaultResponse
     {
@@ -65,9 +67,9 @@ namespace CMMSAPIs.Models.Utils
             this.error_log_file_path = error_log_file_path;
             this.import_log = import_log;
         }
-        public CMImportFileResponse(int id,List<int> insertedId, List<int> updatedId, CMMS.RETRUNSTATUS return_status, string error_log_file_path, IEnumerable<string> import_log, string message) : base(id,insertedId, updatedId, return_status, message)
+        public CMImportFileResponse(int id, List<int> insertedId, List<int> updatedId, CMMS.RETRUNSTATUS return_status, string error_log_file_path, IEnumerable<string> import_log, string message) : base(id, insertedId, updatedId, return_status, message)
         {
-            
+
             this.error_log_file_path = error_log_file_path;
             this.import_log = import_log;
         }

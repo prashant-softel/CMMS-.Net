@@ -96,9 +96,15 @@ namespace CMMSAPIs.BS.MISMasters
         Task<CMDefaultResponse> DeleteStatutoryComplianceMaster(CMStatutoryCompliance request, int UserId);
         Task<CMDefaultResponse> CreateStatutory(CMCreateStatutory request, int UserId);
         Task<CMDefaultResponse> UpdateStatutory(CMCreateStatutory request, int UserId);
-        Task<List<CMStatutory>> GetStatutoryList();
+        Task<List<CMStatutory>> GetStatutoryList(int facility_id);
         Task<List<CMStatutoryHistory>> GetStatutoryHistoryById(int compliance_id);
         Task<CMStatutory> GetStatutoryById(int id);
+        Task<CMDefaultResponse> CreateStatusofAppliaction(MISTypeObservation request, int userID);
+        Task<CMDefaultResponse> UpdateStatsofAppliaction(MISTypeObservation request, int userID);
+        Task<List<MISTypeObservation>> GetStatsofAppliaction();
+        Task<CMDefaultResponse> DeleteStatsofAppliaction(int id, int userID);
+        Task<CMDefaultResponse> RejectStatutory(CMApprovals request, int userID);
+        Task<CMDefaultResponse> ApproveStatutory(CMApprovals request, int userID);
     }
     public class MISMasterBS : IMISMasterBS
     {
@@ -1332,13 +1338,13 @@ namespace CMMSAPIs.BS.MISMasters
                 throw;
             }
         }
-        public async Task<List<CMStatutory>> GetStatutoryList()
+        public async Task<List<CMStatutory>> GetStatutoryList(int facility_id)
         {
             try
             {
                 using (var repos = new MISMasterRepository(getDB))
                 {
-                    return await repos.GetStatutoryList();
+                    return await repos.GetStatutoryList(facility_id);
 
                 }
             }
@@ -1370,6 +1376,100 @@ namespace CMMSAPIs.BS.MISMasters
                 {
                     return await repos.GetStatutoryById(id);
 
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> CreateStatusofAppliaction(MISTypeObservation request, int userID)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.CreateStatusofAppliaction(request);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> UpdateStatsofAppliaction(MISTypeObservation request, int userID)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.UpdateStatsofAppliaction(request);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<MISTypeObservation>> GetStatsofAppliaction()
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.GetStatsofAppliaction();
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> DeleteStatsofAppliaction(int id, int userID)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.DeleteStatsofAppliaction(id);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> RejectStatutory(CMApprovals request, int userID)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.RejectStatutory(request, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> ApproveStatutory(CMApprovals request, int userID)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.ApproveStatutory(request, userID);
                 }
             }
             catch (Exception ex)

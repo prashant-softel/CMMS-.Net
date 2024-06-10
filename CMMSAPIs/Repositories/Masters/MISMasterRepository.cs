@@ -90,14 +90,18 @@ namespace CMMSAPIs.Repositories.Masters
 
             switch (m_notificationID)
             {
-                case CMMS.CMMS_Status.STATUTORY_CREATED:     //Created
-                    retValue = "Statutory Created";
+                case CMMS.CMMS_Status.STATUTORY_CREATED:
+                    retValue = "Waiting for Approval";
                     break;
-                case CMMS.CMMS_Status.STATUTORY_DELETED:     //Assigned
-                    retValue = "Statutory Deleted";
+
+                case CMMS.CMMS_Status.STATUTORY_UPDATED:
+                    retValue = "Waiting for Approval";
                     break;
-                case CMMS.CMMS_Status.STATUTORY_UPDATED:     //Linked
-                    retValue = "Statutory Updated";
+                case CMMS.CMMS_Status.STATUTORY_APPROVED:
+                    retValue = "Approved";
+                    break;
+                case CMMS.CMMS_Status.STATUTORY_REJECTED:
+                    retValue = "Closed";
                     break;
                 default:
                     retValue = "Unknown Status";
@@ -120,6 +124,12 @@ namespace CMMSAPIs.Repositories.Masters
                     break;
                 case CMMS.CMMS_Status.STATUTORY_UPDATED:
                     statusName = "Updated ";
+                    break;
+                case CMMS.CMMS_Status.STATUTORY_APPROVED:
+                    statusName = "Approved";
+                    break;
+                case CMMS.CMMS_Status.STATUTORY_REJECTED:
+                    statusName = "Rejected";
                     break;
                 default:
                     statusName = "Unknown Status";
@@ -1280,16 +1290,35 @@ namespace CMMSAPIs.Repositories.Masters
             return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Statutory Record Added");
         }
 
-        internal async Task<List<CMStatutory>> GetStatutoryList()
+        internal async Task<List<CMStatutory>> GetStatutoryList(int facility_id)
         {
-            // string myQuery = "SELECT id, Compliance_id,facility_id, Issue_date as start_date, expires_on as end_date, status, created_by, created_at, updated_by, updated_at, renew_from, renew_from_id, approved_by, approved_at  FROM statutory";
-            string myQuery = "SELECT  s.id, s.Compliance_id, s.facility_id, s.Issue_date AS start_date, s.expires_on AS end_date, s.status, CONCAT(uc.firstName, ' ', uc.lastName) AS createdByName, s.created_at, s.updated_by, s.updated_at, s.renew_from, s.renew_from_id, s.approved_by, s.approved_at FROM statutory AS s LEFT JOIN users uc ON s.created_by = uc.id;";
+
+            string myQuery = $"SELECT s.id,s.Compliance_id,st.name as compilanceName, s.facility_id, " +
+                             $"s.Issue_date AS start_date, s.expires_on AS end_date, s.status as status_id ,s.created_by, CONCAT(uc.firstName, ' ', uc.lastName) AS createdByName, CONCAT(u.firstName, ' ', u.lastName) AS UpdatedByName ," +
+                             $" CONCAT(us.firstName, ' ', us.lastName) AS ApprovedByName, s.created_at, s.updated_by, s.updated_at, s.renew_from, s.renew_from_id, s.approved_by, s.approved_at, " +
+                             $" DAY(expires_on) AS status, " +
+                             $" YEAR(expires_on) AS expiry_year,DATEDIFF(expires_on, now()) AS daysLeft,TIMESTAMPDIFF(MONTH, now(), expires_on) AS validity_month, " +
+                             $" CASE WHEN expires_on< Now() THEN 'inactive'  ELSE 'active'    END AS Activation_status " +
+                             $" FROM statutory AS s LEFT JOIN users uc ON  s.created_by = uc.id " +
+                             $" LEFT JOIN users u on s.updated_by = u.id" +
+                             $" LEFT JOIN users us on s.approved_by = us.id " +
+                             $"LEFT JOIN statutorycomliance as st on st.id = s.Compliance_id " +
+                             $" where facility_id ={facility_id} ;";
             List<CMStatutory> data = await Context.GetData<CMStatutory>(myQuery).ConfigureAwait(false);
+
             foreach (var item in data)
             {
-                CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(item.status);
+                item.validity_month = item.validity_month < 0 ? 0 : item.validity_month;
+                item.daysLeft = item.daysLeft < 0 ? 0 : item.daysLeft;
+
+                string _shortStatus = Status(item.status_id);
+                item.Current_status = _shortStatus;
+            }
+            foreach (var task in data)
+            {
+                CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(task.status_id);
                 string _shortStatus = getShortStatus(CMMS.CMMS_Modules.STATUTORY, _Status);
-                item.Current_status_short = _shortStatus;
+                task.status_short = _shortStatus;
             }
             return data;
         }
@@ -1300,9 +1329,9 @@ namespace CMMSAPIs.Repositories.Masters
             List<CMStatutory> data = await Context.GetData<CMStatutory>(myQuery).ConfigureAwait(false);
             foreach (var item in data)
             {
-                CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(item.status);
+                CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(item.status_id);
                 string _shortStatus = getShortStatus(CMMS.CMMS_Modules.STATUTORY, _Status);
-                item.Current_status_short = _shortStatus;
+                item.Current_status = _shortStatus;
             }
             return data.FirstOrDefault();
         }
@@ -1357,7 +1386,81 @@ namespace CMMSAPIs.Repositories.Masters
             }
             return data;
         }
+        internal async Task<CMDefaultResponse> ApproveStatutory(CMApprovals request, int userID)
+        {
+            string approveQuery = $"Update statutory set status={(int)CMMS.CMMS_Status.STATUTORY_APPROVED}, approved_at = '{UtilsRepository.GetUTCTime()}', approved_by={userID},comment='{request.comment}',facility_id={request.facility_id} where id = {request.id} ";
+            await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.STATUTORY, request.id, 0, 0, request.comment, CMMS.CMMS_Status.STATUTORY_APPROVED, userID);
+            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, request.comment);
 
+            return response;
+        }
+        internal async Task<CMDefaultResponse> RejectStatutory(CMApprovals request, int userId)
+        {
+
+            if (request.id <= 0)
+            {
+                throw new ArgumentException("Invalid argument id<" + request.id + ">");
+            }
+
+            string approveQuery = $"Update statutory set status = {(int)CMMS.CMMS_Status.STATUTORY_REJECTED} , " +
+                $"comment = '{request.comment}', " +
+                $"facility_id ={request.facility_id}, " +
+                $"rejected_by = {userId}, rejected_at = '{UtilsRepository.GetUTCTime()}' " +
+                $" where id = {request.id} ";
+            int reject_id = await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
+
+            CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
+
+            if (reject_id > 0)
+            {
+                retCode = CMMS.RETRUNSTATUS.SUCCESS;
+            }
+
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.STATUTORY, request.id, 0, 0, string.IsNullOrEmpty(request.comment) ? "Statutory Rejected " : request.comment, CMMS.CMMS_Status.STATUTORY_REJECTED);
+
+            //await CMMSNotification.sendNotification(CMMS.CMMS_Modules.WARRANTY_CLAIM, CMMS.CMMS_Status.REJECTED, new[] { _WCList[0].created_by }, _WCList[0]);
+            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Statutory Rejected Successfully");
+            return response;
+        }
+
+        internal async Task<CMDefaultResponse> CreateStatusofAppliaction(MISTypeObservation request)
+        {
+            String myqry = $"INSERT INTO status_of_appllication(id,name,description) VALUES " +
+                               $"({request.id},'{request.name}','{request.description}'); " +
+                                $"SELECT LAST_INSERT_ID(); ";
+            DataTable dt = await Context.FetchData(myqry).ConfigureAwait(false);
+            int id = Convert.ToInt32(dt.Rows[0][0]);
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "RECORD Added");
+
+
+        }
+
+        internal async Task<CMDefaultResponse> UpdateStatsofAppliaction(MISTypeObservation request)
+        {
+            string updateQry = "UPDATE status_of_appllication SET ";
+            updateQry += $"name = '{request.name}', ";
+            if (request.description != null && request.description != "")
+                updateQry += $"description = '{request.description}', ";
+            updateQry += $" WHERE id = {request.id};";
+            await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+            return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Record Updated");
+
+        }
+
+        internal async Task<List<MISTypeObservation>> GetStatsofAppliaction()
+        {
+            string myQuery = "SELECT * FROM  status_of_appllication ";
+            List<MISTypeObservation> Data = await Context.GetData<MISTypeObservation>(myQuery).ConfigureAwait(false);
+            return Data;
+        }
+
+        internal async Task<CMDefaultResponse> DeleteStatsofAppliaction(int id)
+        {
+            string delqry = $"Delete From status_of_appllication where id={id};";
+            await Context.ExecuteNonQry<int>(delqry).ConfigureAwait(false);
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "status deleted");
+        }
     }
 
 }

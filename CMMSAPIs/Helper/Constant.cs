@@ -576,6 +576,8 @@ namespace CMMSAPIs.Helper
             STATUTORY_CREATED,
             STATUTORY_UPDATED,
             STATUTORY_DELETED,
+            STATUTORY_APPROVED,
+            STATUTORY_REJECTED,
 
         }
 
@@ -654,7 +656,7 @@ namespace CMMSAPIs.Helper
             Procurement = 1,
             Consumption
         }
-                public enum JCDashboardStatus
+        public enum JCDashboardStatus
         {
             Backlog = 0,
             OnTime,

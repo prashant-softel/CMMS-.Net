@@ -457,13 +457,14 @@ namespace CMMSAPIs.Models.Masters
     }
     public class CMStatutory
     {
-
+        public int id { get; set; }
         public int facility_id { get; set; }
         public int? compliance_id { get; set; }
+        public string compilanceName { get; set; }
         public DateTime start_date { get; set; }
         public DateTime end_date { get; set; }
-        public int status { get; set; }
-        public string Current_status_short { get; set; }
+        public int status_id { get; set; }
+        public string Current_status { get; set; }
         public string status_short { get; set; }
         public int created_by { get; set; }
         public DateTime? created_at { get; set; }
@@ -475,6 +476,12 @@ namespace CMMSAPIs.Models.Masters
         public DateTime? approved_at { get; set; }
 
         public string createdByName { get; set; }
+        public string UpdatedByName { get; set; }
+        public string ApprovedByName { get; set; }
+        public dynamic validity_month { get; set; }
+        public dynamic expiry_year { get; set; }
+        public dynamic daysLeft { get; set; }
+        public string Activation_status { get; set; }
     }
     public class CMStatutoryHistory
     {
@@ -497,6 +504,14 @@ namespace CMMSAPIs.Models.Masters
         public DateTime? approved_at { get; set; }
 
         public string createdByName { get; set; }
+    }
+    public class CMApprovals
+    {
+        public int id { get; set; }
+        public string comment { get; set; }
+        public int facility_id { get; set; }
+
+
     }
 
 }

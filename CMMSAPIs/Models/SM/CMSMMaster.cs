@@ -119,7 +119,7 @@ namespace CMMSAPIs.Models.SM
         public int whereUsedType { get; set; }
         public string whereUsedTypeName { get; set; }
         public int whereUsedRefID { get; set; }
-        public string remarks { get; set; }
+        public string? remarks { get; set; }
         public int from_actor_type_id { get; set; }
         public int from_actor_id { get; set; }
         public int to_actor_type_id { get; set; }
