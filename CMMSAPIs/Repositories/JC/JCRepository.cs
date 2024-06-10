@@ -649,6 +649,37 @@ namespace CMMSAPIs.Repositories.JC
              *                 
             /*Your code goes here*/
             //Pending   add JC_End_date
+
+            string query_bmtime_query = "select id, breakdownTime from jobs where id in (select jobId from jobcards where id = 31 ); ";
+            DataTable dt = await Context.FetchData(query_bmtime_query).ConfigureAwait(false);
+            DateTime breakdownTime = DateTime.Now;
+            int jobs_id = 0;
+            if(dt.Rows.Count > 0)
+            {
+                jobs_id = Convert.ToInt32(dt.Rows[0][0]);
+                breakdownTime = Convert.ToDateTime(dt.Rows[0][1]);
+            }
+            DateTime Utc = DateTime.UtcNow;
+
+            int hour_diff = breakdownTime.Hour - Utc.Hour;
+
+            // keeping on_time_status_flag as default value as 0 = Backlog
+            int on_time_status_flag = (int)CMMS.JCDashboardStatus.Backlog;
+
+            if (hour_diff < 8)
+            {
+                on_time_status_flag = (int)CMMS.JCDashboardStatus.OnTime;
+            }
+            else
+            {
+                on_time_status_flag = (int)CMMS.JCDashboardStatus.Delay;
+            }
+
+            string query_update_onstatus_job = $"update jobs set on_time_status={on_time_status_flag} where id ={jobs_id};";
+            await Context.ExecuteNonQry<int>(query_update_onstatus_job).ConfigureAwait(false);
+
+            // Code for close jc start here
+
             string queryCloseJc = $"update jobcards set JC_End_By_id={userID}, JC_Date_Stop ='{UtilsRepository.GetUTCTime()}',JC_Done_Description = '{request.comment}', JC_Approved = {(int)CMMS.ApprovalStatus.WAITING_FOR_APPROVAL}, JC_Status={(int)CMMS.CMMS_Status.JC_CLOSED}, status_updated_at = '{UtilsRepository.GetUTCTime()}' where id ={request.id};";
             await Context.ExecuteNonQry<int>(queryCloseJc).ConfigureAwait(false);
 
