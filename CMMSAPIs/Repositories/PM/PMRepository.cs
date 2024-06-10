@@ -448,10 +448,10 @@ namespace CMMSAPIs.Repositories.PM
                 $" where id = {request.id}";
             int reject_id = await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
 
-            string mainQuery = $"INSERT INTO pm_task(plan_id,facility_id,category_id,frequency_id,plan_Date,assigned_to,status)  " +
+            string mainQuery = $"INSERT INTO pm_task(plan_id,facility_id,category_id,frequency_id,plan_Date,assigned_to,status,schedule_time)  " +
                                $"select id as plan_id,facility_id,category_id,frequency_id,plan_Date,assigned_to," +
                                $"CASE WHEN assigned_to = '' or assigned_to IS NULL THEN {(int)CMMS.CMMS_Status.PM_SCHEDULED} " +
-                               $"ELSE {(int)CMMS.CMMS_Status.PM_ASSIGNED} END as status " +
+                               $"ELSE {(int)CMMS.CMMS_Status.PM_ASSIGNED} END as status,  '{UtilsRepository.GetUTCTime()}'" +
                                $"from pm_plan where id = {request.id}; " +
                                $"SELECT LAST_INSERT_ID(); ";
 
