@@ -1162,7 +1162,7 @@ namespace CMMSAPIs.Repositories.Masters
             string myQuery = $"SELECT job.id  wo_number,job.title as wo_decription ,job.facilityId as facility_id, facilities.name as facility_name, job.status," +
                 $" group_concat(distinct asset_cat.name order by asset_cat.id separator ', ') as asset_category, " +
                 $" group_concat(distinct asset.name order by asset.id separator ', ') as asset_name, permit.startDate, permit.endDate," +
-                $" jc.JC_Status as latestJCStatus,  jc.JC_Approved as latestJCApproval, permit.id as ptw_id,jc.id as latestJCid,permit.status as  latestJCPTWStatus" +
+                $" jc.JC_Status as latestJCStatus,  jc.JC_Approved as latestJCApproval, permit.id as ptw_id,jc.id as latestJCid,permit.status as  latestJCPTWStatus,on_time_status" +
                 $" FROM jobs as job " +
                 $" LEFT JOIN jobcards as jc ON job.latestJC = jc.id " +
                 $" LEFT JOIN  facilities as facilities ON job.facilityId = facilities.id " +
@@ -1251,7 +1251,7 @@ namespace CMMSAPIs.Repositories.Masters
             result.created = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.JOB_CREATED).ToList().Count;
             result.rejected = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.JOB_CANCELLED).ToList().Count;
             result.assigned = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.JOB_ASSIGNED).ToList().Count;
-            result.bm_closed_count = itemList.Where(x => x.latestJCStatus == (int)CMMS.CMMS_Status.JOB_CLOSED).ToList().Count;
+            result.bm_closed_count = itemList.Where(x => x.latestJCStatus == (int)CMMS.CMMS_Status.JC_CLOSE_APPROVED).ToList().Count;
 
 
             result.total = itemList.Count;
@@ -1265,9 +1265,9 @@ namespace CMMSAPIs.Repositories.Masters
      
 
 
-            int completed_on_time = itemList.Where(x => x.latestJCStatus == (int)CMMS.CMMS_Status.PTW_APPROVED && x.start_date == x.start_date).ToList().Count;
-            int wo_delay = itemList.Where(x => x.latestJCStatus == (int)CMMS.CMMS_Status.PTW_APPROVED && x.start_date != x.start_date).ToList().Count;
-            int wo_backlog = itemList.Where(x => x.latestJCStatus != (int)CMMS.CMMS_Status.PTW_APPROVED && x.start_date != x.start_date).ToList().Count;
+            int completed_on_time = itemList.Where(x => x.latestJCStatus == (int)CMMS.CMMS_Status.JC_CLOSE_APPROVED && x.on_time_status == 1).ToList().Count;
+            int wo_delay = itemList.Where(x => x.latestJCStatus == (int)CMMS.CMMS_Status.JC_CLOSE_APPROVED && x.on_time_status == 2).ToList().Count;
+            int wo_backlog = itemList.Where(x => x.on_time_status == 0).ToList().Count;
             if (result.total > 0)
             {
                 result.wo_on_time = completed_on_time;
@@ -1294,7 +1294,7 @@ namespace CMMSAPIs.Repositories.Masters
                 $" CONCAT('PMTASK',pm_task.id) as task_code,pm_plan.plan_name as plan_title,pm_task.facility_id, pm_task.frequency_id as frequency_id, pm_plan.plan_date as start_date," +
                 $"freq.name as frequency_name, pm_task.plan_date as due_date,prev_task_done_date as last_done_date, closed_at as done_date, " +
                 $"CONCAT(assignedTo.firstName,' ',assignedTo.lastName)  as assigned_to_name, pm_task.PTW_id as permit_id, " +
-                $"CONCAT('PTW',pm_task.PTW_id) as permit_code,permit.status as ptw_status, PM_task.status " +
+                $"CONCAT('PTW',pm_task.PTW_id) as permit_code,permit.status as ptw_status, PM_task.status, IFNULL( PM_task.schedule_time, CAST('1900-01-01 00:00:00' AS DATETIME)) as schedule_time  " +
                    "FROM pm_task " +
                    $"left join users as assignedTo on pm_task.assigned_to = assignedTo.id " +
                    $"left join pm_plan  on pm_task.plan_id = pm_plan.id " +
@@ -1325,9 +1325,9 @@ namespace CMMSAPIs.Repositories.Masters
             result.pending = result.total - result.completed;
             result.item_list = itemList;
 
-            int completed_on_time = itemList.Where(x => (x.status == (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED) && (x.start_date == x.start_date)).ToList().Count;
-            int wo_delay = itemList.Where(x => (x.status == (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED) && x.start_date != x.start_date).ToList().Count;
-            int wo_backlog = itemList.Where(x => (x.status != (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED) && x.start_date != x.start_date).ToList().Count;
+            int completed_on_time = itemList.Where(x => (x.status == (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED) && (x.schedule_time.Value.Hour - x.start_date.Value.Hour <= 8)).ToList().Count;
+            int wo_delay = itemList.Where(x => (x.status == (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED) && (x.schedule_time.Value.Hour - x.start_date.Value.Hour > 8)).ToList().Count;
+            int wo_backlog = itemList.Where(x => (x.status != (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED) && (x.schedule_time.Value.Hour - x.start_date.Value.Hour > 8)).ToList().Count;
 
             if (result.total > 0)
             {
