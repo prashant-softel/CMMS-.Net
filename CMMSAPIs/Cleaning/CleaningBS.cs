@@ -34,12 +34,12 @@ namespace CMMSAPIs.BS.Cleaning
         public Task<CMDefaultResponse> AbandonSchedule(CMApproval request, int userId);
         public Task<List<CMMCEquipmentList>> GetEquipmentList(int facilityId);
         public Task<List<CMMCTaskEquipmentList>> GetTaskEquipmentList(int taskId, string facilitytime);
-        public Task<List<CMVegEquipmentList>> GetVegEquipmentList(int facilityId);
+        public Task<List<CMMCEquipmentList>> GetVegEquipmentList(int facilityId);
         public Task<CMDefaultResponse> EndScheduleExecution(int scheduleId, int userId);
         public Task<CMDefaultResponse> EndExecution(int executionId, int userId);
         public Task<CMDefaultResponse> ApproveExecution(CMApproval request, int userID);
         public Task<CMDefaultResponse> RejectExecution(CMApproval request, int userID);
-        public Task<List<CMMCTaskEquipmentList>> GetVegitationTaskEquipmentList(int taskId, string facilitytime);
+       // public Task<List<CMMCTaskEquipmentList>> GetVegTaskEquipmentList(int taskId, string facilitytime);
 
     }
     public class CleaningBS : ICleaningBS
@@ -332,13 +332,13 @@ namespace CMMSAPIs.BS.Cleaning
             }
         }
 
-        public async Task<List<CMVegEquipmentList>> GetVegEquipmentList(int facilityId)
+        public async Task<List<CMMCEquipmentList>> GetVegEquipmentList(int facilityId)
         {
             try
             {
                 // using (var repos = new MCRepository(getDB))
                 {
-                    return await repos.GetVegEquipmentList(facilityId);
+                    return await repos.GetEquipmentList(facilityId);
                 }
             }
             catch (Exception ex)
@@ -406,19 +406,19 @@ namespace CMMSAPIs.BS.Cleaning
             }
         }
 
-        public async Task<List<CMMCTaskEquipmentList>> GetVegitationTaskEquipmentList(int taskId, string facilitytime)
-        {
-            try
-            {
-                // using (var repos = new MCRepository(getDB))
-                {
-                    return await repos.GetVegitationTaskEquipmentList(taskId, facilitytime);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        }
+        //public async Task<List<CMMCTaskEquipmentList>> GetVegitationTaskEquipmentList(int taskId, string facilitytime)
+        //{
+        //    try
+        //    {
+        //        // using (var repos = new MCRepository(getDB))
+        //        {
+        //            return await repos.GetVegitationTaskEquipmentList(taskId, facilitytime);
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        throw;
+        //    }
+        //}
     }
 }
