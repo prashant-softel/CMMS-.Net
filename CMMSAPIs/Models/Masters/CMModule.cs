@@ -88,12 +88,14 @@ namespace CMMSAPIs.Models.Masters
         public string asset_category { get; set; }
         public string asset_name { get; set; }
         public DateTime? start_date { get; set; }
+        public DateTime? schedule_time { get; set; }
         public DateTime? end_date { get; set; }
         public int ptw_id { get; set; }
         public int latestJCStatus { get; set; }
         public int latestJCid { get; set; }
         public int latestJCPTWStatus { get; set; }
         public int latestJCApproval { get; set; }
+        public int on_time_status { get; set; }
     }
     public class CMROLE
     {
