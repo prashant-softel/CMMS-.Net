@@ -155,12 +155,14 @@ namespace CMMSAPIs.Models.MC
         public int cleaningDay { get; set; }  //First, second etc day
         //public int cleaningType { get; set; }  //First, second etc day
         public string cleaningTypeName { get; set; }
-        public decimal ScheduledModules { get; set; }
-        public decimal cleanedModules { get; set; }
-        public decimal abandonedModules { get; set; }
-        public decimal pendingModules { get; set; }
+        public decimal Scheduled { get; set; }
+        public decimal cleaned { get; set; }
+        public decimal abandoned { get; set; }
+        public decimal pending { get; set; }
         public int waterUsed { get; set; }
-        public DateTime execution_date { get; set; }
+        public DateTime start_date { get; set; }
+        public DateTime end_date { get; set; }
+
         public string remark { get; set; }
         public int status { get; set; }
 
@@ -258,7 +260,7 @@ namespace CMMSAPIs.Models.MC
     //}
     public class CMMCTaskList
     {
-        public int id { get; set; }
+        public int executionId { get; set; }
         public int planId { get; set; }
         public string responsibility { get; set; }
         public string frequency { get; set; }
@@ -284,7 +286,8 @@ namespace CMMSAPIs.Models.MC
     {
         public int invId { get; set; }
         public string invName { get; set; }
-        public dynamic moduleQuantity { get; set; }       
+        public dynamic moduleQuantity { get; set; }
+        public dynamic area { get; set; }
         public List<CMPlanSMB> smbs { get; set; } = new List<CMPlanSMB>();
 
         // public int area { get; set; }
@@ -294,6 +297,8 @@ namespace CMMSAPIs.Models.MC
         public int invId { get; set; }
         public string invName { get; set; }
         public dynamic moduleQuantity { get; set; }
+        public dynamic area { get; set; }
+
         public List<CMSMB> smbs { get; set; } = new List<CMSMB>();
 
         // public int area { get; set; }
@@ -304,6 +309,7 @@ namespace CMMSAPIs.Models.MC
         public int smbId { get; set; }
         public string smbName { get; set; }
         public int moduleQuantity { get; set; }
+        public int area { get; set; }
         public dynamic isPending { get; set; }
         public DateTime scheduledAt { get; set; }
         public int scheduledDay{ get; set; }
@@ -321,6 +327,8 @@ namespace CMMSAPIs.Models.MC
         public int smbId { get; set; }
         public string smbName { get; set; }
         public int moduleQuantity { get; set; }
+        public int area { get; set; }
+
 
     }
     public class CMVegEquipmentList

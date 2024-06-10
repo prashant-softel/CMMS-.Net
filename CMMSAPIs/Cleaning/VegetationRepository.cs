@@ -20,6 +20,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
         {
             _utilsRepo = new UtilsRepository(sqlDBHelper);
             moduleType = (int)cleaningType.Vegetation;
+            measure = "area";
         }
 
         internal async Task<List<CMVegEquipmentList>> GetEquipmentList(int facilityId)
