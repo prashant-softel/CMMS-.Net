@@ -194,8 +194,8 @@ namespace CMMSAPIs.Models.Masters
         public int facility_id { get; set; }
         public string facility_name { get; set; }
         public string month_name { get; set; }
-        public int month_id { get; set; }
-        public int year { get; set; }
+        public Int64 month_id { get; set; }
+        public Int64 year { get; set; }
         public decimal opening { get; set; }
         public decimal procured_qty { get; set; }
         public decimal consumed_qty { get; set; }
@@ -471,6 +471,7 @@ namespace CMMSAPIs.Models.Masters
         public int updated_by { get; set; }
         public DateTime? updated_at { get; set; }
         public dynamic renew_from { get; set; }
+        public string description { get; set; }
         public int? renew_from_id { get; set; }
         public int approved_by { get; set; }
         public DateTime? approved_at { get; set; }
@@ -510,8 +511,52 @@ namespace CMMSAPIs.Models.Masters
         public int id { get; set; }
         public string comment { get; set; }
         public int facility_id { get; set; }
+    }
+    public class Details
+    {
+        public DateTime Date { get; set; }
+        public String Status { get; set; }
 
+        public String In_time { get; set; }
+
+        public String Out_time { get; set; }
+    }
+
+    public class Employee
+    {
+        public int employeeId { get; set; }
+        public String employeeName { get; set; }
+        public DateTime dateOfJoining { get; set; }
+        public DateTime dateOfExit { get; set; }
+        public String workingStatus { get; set; }
+        public List<Details> Details { get; set; }
 
     }
 
+    public class AttendanceMonthModel
+    {
+        public int facility_id { get; set; }
+        public String facility_name { get; set; }
+        public List<Employee> Employee { get; set; }
+    }
+
+    public class AttendanceListModel
+    {
+        public int month_id { get; set; }
+
+        public String month_name { get; set; }
+
+        public int year { get; set; }
+
+        public List<MonthData> MonthData { get; set; }
+    }
+
+    public class MonthData
+    {
+        public DateTime date { get; set; }
+        public int hfe_employees { get; set; }
+        public int less_than_35 { get; set; }
+        public int between_30_to_50 { get; set; }
+        public int greater_than_50 { get; set; }
+    }
 }

@@ -191,7 +191,7 @@ namespace CMMSAPIs.Repositories.PM
                                     $"LEFT JOIN users as createdBy ON createdBy.id = plan.created_by " +
                                     $"LEFT JOIN users as updatedBy ON updatedBy.id = plan.updated_by " +
                                     $"LEFT JOIN users as assignedTo ON assignedTo.id = plan.assigned_to " +
-                                    $"WHERE facilities.id = {facility_id} and status_id = 1 ";
+                                    $"WHERE facilities.id = {facility_id} and status_id = 1 order by DATE(plan.created_at) ASC";
 
             if (category_id != null && category_id != "")
                 planListQry += $"AND category.id IN ( {category_id} )";

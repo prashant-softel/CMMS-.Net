@@ -1416,11 +1416,11 @@ namespace CMMSAPIs.Controllers.Masters
 
         [Route("GetStatutoryList")]
         [HttpGet]
-        public async Task<IActionResult> GetStatutoryList(int facility_id)
+        public async Task<IActionResult> GetStatutoryList(int facility_id, string start_date, string end_date)
         {
             try
             {
-                var data = await _IMISMasterBS.GetStatutoryList(facility_id);
+                var data = await _IMISMasterBS.GetStatutoryList(facility_id, start_date, end_date);
                 return Ok(data);
             }
             catch (Exception ex)

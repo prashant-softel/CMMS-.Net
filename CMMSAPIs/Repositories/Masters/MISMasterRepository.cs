@@ -911,11 +911,12 @@ namespace CMMSAPIs.Repositories.Masters
             //show_opening
             string SelectQ = $" select distinct mis_waterdata.id,plantId as facility_id,fc.name facility_name,MONTHNAME(date) as month_name,Month(date) as month_id,YEAR(date) as year, " +
                 $" (select sum(creditQty)-sum(debitQty) from mis_waterdata where MONTH(date) < MONTH('" + fromDate.ToString("yyyy-MM-dd") + "')) as opening," +
-                $" creditQty as procured_qty, debitQty as consumed_qty, mw.name as water_type,mw.show_opening" +
+                $"sum(creditQty) as procured_qty, sum(debitQty) as consumed_qty, mw.name as water_type,mw.show_opening" +
                 $" from mis_waterdata" +
                 $" LEFT JOIN facilities fc ON fc.id = mis_waterdata.plantId" +
                 $" LEFT JOIN mis_watertype mw on mw.id = mis_waterdata.waterTypeId" +
                 $" where  mis_waterdata.plantId = {facility_id} and DATE_FORMAT(Date,'%Y-%m-%d') BETWEEN '{fromDate.ToString("yyyy-MM-dd")}' AND '{toDate.ToString("yyyy-MM-dd")}'" +
+                $" group by MONTH(month_id) , mis_waterdata.waterTypeId  " +
                 $"  ;";
             //SelectQ = SelectQ + $" union all" +
             //    $"    select distinct plantId as facility_id,fc.name facility_name,'' as month_name," +
@@ -941,8 +942,10 @@ namespace CMMSAPIs.Repositories.Masters
                                 .Select(periodGroup => new FacilityPeriodData
                                 {
                                     month_name = periodGroup.month_name,
-                                    month_id = periodGroup.month_id,
-                                    year = periodGroup.year,
+                                    // month_id = periodGroup.month_id,
+                                    month_id = (int)periodGroup.month_id, // Explicit cast to int
+                                    year = (int)periodGroup.year, // Explicit cast to int
+                                                                  // year = periodGroup.year,
                                     details = group.Where(g => g.month_name == periodGroup.month_name && g.year == periodGroup.year)
                                                   //.GroupBy(g => g.water_type)
                                                   .Select(g => new CMWaterDataMonthWiseDetails
@@ -988,12 +991,14 @@ namespace CMMSAPIs.Repositories.Masters
         {
             string SelectQ = $" select distinct waste_data.id, facilityId as facility_id,fc.name facility_name,MONTHNAME(date) as month_name,Month(date) as month_id,YEAR(date) as year, " +
                 $" (select sum(creditQty)-sum(debitQty) from waste_data where MONTH(date) < MONTH('" + fromDate.ToString("yyyy-MM-dd") + "')) as opening," +
-                $" creditQty as procured_qty, debitQty as consumed_qty, mw.name as water_type, show_opening " +
+                $" sum(creditQty) as procured_qty, sum(debitQty) as consumed_qty, mw.name as water_type, show_opening " +
                 $" from waste_data" +
                 $" LEFT JOIN facilities fc ON fc.id = waste_data.facilityId" +
                 $" LEFT JOIN mis_wastetype mw on mw.id = waste_data.wasteTypeId" +
                 $" where DATE_FORMAT(Date,'%Y-%m-%d') BETWEEN '{fromDate.ToString("yyyy-MM-dd")}' AND '{toDate.ToString("yyyy-MM-dd")}'and  mw.isHazardous={Hazardous} and mw.status=1 " +
-                $" ;";
+                $" group by MONTH(month_id) , waste_data.wasteTypeId  " +
+                $"  ;";
+
             List<CMWaterDataMonthWise> ListResult = await Context.GetData<CMWaterDataMonthWise>(SelectQ).ConfigureAwait(false);
 
             string water_type_master_q = " select facility_id,fc.name facility_name, mis_wastetype.name as water_type,show_opening " +
@@ -1013,8 +1018,10 @@ namespace CMMSAPIs.Repositories.Masters
                                 .Select(periodGroup => new CMFacilityPeriodData_Waste
                                 {
                                     month_name = periodGroup.month_name,
-                                    month_id = periodGroup.month_id,
-                                    year = periodGroup.year,
+                                    month_id = (int)periodGroup.month_id, // Explicit cast to int
+                                    year = (int)periodGroup.year, // Explicit cast to int
+                                                                  // month_id = periodGroup.month_id,
+                                                                  //  year = periodGroup.year,
                                     details = group.Where(g => g.month_name == periodGroup.month_name && g.year == periodGroup.year)
                                                   //.GroupBy(g => g.water_type)
                                                   .Select(g => new CMWasteDataMonthWiseDetails
@@ -1290,10 +1297,10 @@ namespace CMMSAPIs.Repositories.Masters
             return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Statutory Record Added");
         }
 
-        internal async Task<List<CMStatutory>> GetStatutoryList(int facility_id)
+        internal async Task<List<CMStatutory>> GetStatutoryList(int facility_id, string start_date, string end_date)
         {
 
-            string myQuery = $"SELECT s.id,s.Compliance_id,st.name as compilanceName, s.facility_id, " +
+            string myQuery = $"SELECT s.id,s.Compliance_id,st.name as compilanceName,s.comment as description, s.facility_id, " +
                              $"s.Issue_date AS start_date, s.expires_on AS end_date, s.status as status_id ,s.created_by, CONCAT(uc.firstName, ' ', uc.lastName) AS createdByName, CONCAT(u.firstName, ' ', u.lastName) AS UpdatedByName ," +
                              $" CONCAT(us.firstName, ' ', us.lastName) AS ApprovedByName, s.created_at, s.updated_by, s.updated_at, s.renew_from, s.renew_from_id, s.approved_by, s.approved_at, " +
                              $" DAY(expires_on) AS status, " +
@@ -1303,7 +1310,7 @@ namespace CMMSAPIs.Repositories.Masters
                              $" LEFT JOIN users u on s.updated_by = u.id" +
                              $" LEFT JOIN users us on s.approved_by = us.id " +
                              $"LEFT JOIN statutorycomliance as st on st.id = s.Compliance_id " +
-                             $" where facility_id ={facility_id} ;";
+                             $" where facility_id ={facility_id} or s.created_at={start_date} or s.created_at={end_date} ;";
             List<CMStatutory> data = await Context.GetData<CMStatutory>(myQuery).ConfigureAwait(false);
 
             foreach (var item in data)
@@ -1325,13 +1332,32 @@ namespace CMMSAPIs.Repositories.Masters
 
         internal async Task<CMStatutory> GetStatutoryById(int id)
         {
-            string myQuery = $"SELECT  Compliance_id,facility_id, Issue_date as start_date, expires_on as end_date, status, created_by, created_at, updated_by, updated_at, renew_from, renew_from_id, approved_by, approved_at  FROM statutory WHERE id = {id}";
+            // string myQuery = $"SELECT  Compliance_id,facility_id, Issue_date as start_date, expires_on as end_date, status, created_by, created_at, updated_by, updated_at, renew_from, renew_from_id, approved_by, approved_at  FROM statutory WHERE id = {id}";
+            string myQuery = $"SELECT s.id,s.Compliance_id,st.name as compilanceName, s.facility_id, " +
+                          $"s.Issue_date AS start_date, s.expires_on AS end_date,s.comment as description, s.status as status_id ,s.created_by, CONCAT(uc.firstName, ' ', uc.lastName) AS createdByName, CONCAT(u.firstName, ' ', u.lastName) AS UpdatedByName ," +
+                          $" CONCAT(us.firstName, ' ', us.lastName) AS ApprovedByName, s.created_at, s.updated_by, s.updated_at, s.renew_from, s.renew_from_id, s.approved_by, s.approved_at, " +
+                          $" DAY(expires_on) AS status, " +
+                          $" YEAR(expires_on) AS expiry_year,DATEDIFF(expires_on, now()) AS daysLeft,TIMESTAMPDIFF(MONTH, now(), expires_on) AS validity_month, " +
+                          $" CASE WHEN expires_on< Now() THEN 'inactive'  ELSE 'active'    END AS Activation_status " +
+                          $" FROM statutory AS s LEFT JOIN users uc ON  s.created_by = uc.id " +
+                          $" LEFT JOIN users u on s.updated_by = u.id" +
+                          $" LEFT JOIN users us on s.approved_by = us.id " +
+                          $"LEFT JOIN statutorycomliance as st on st.id = s.Compliance_id " +
+                          $" where s.id ={id} ;";
             List<CMStatutory> data = await Context.GetData<CMStatutory>(myQuery).ConfigureAwait(false);
             foreach (var item in data)
             {
-                CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(item.status_id);
-                string _shortStatus = getShortStatus(CMMS.CMMS_Modules.STATUTORY, _Status);
+                item.validity_month = item.validity_month < 0 ? 0 : item.validity_month;
+                item.daysLeft = item.daysLeft < 0 ? 0 : item.daysLeft;
+
+                string _shortStatus = Status(item.status_id);
                 item.Current_status = _shortStatus;
+            }
+            foreach (var task in data)
+            {
+                CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(task.status_id);
+                string _shortStatus = getShortStatus(CMMS.CMMS_Modules.STATUTORY, _Status);
+                task.status_short = _shortStatus;
             }
             return data.FirstOrDefault();
         }
@@ -1388,7 +1414,7 @@ namespace CMMSAPIs.Repositories.Masters
         }
         internal async Task<CMDefaultResponse> ApproveStatutory(CMApprovals request, int userID)
         {
-            string approveQuery = $"Update statutory set status={(int)CMMS.CMMS_Status.STATUTORY_APPROVED}, approved_at = '{UtilsRepository.GetUTCTime()}', approved_by={userID},comment='{request.comment}',facility_id={request.facility_id} where id = {request.id} ";
+            string approveQuery = $"Update statutory set status={(int)CMMS.CMMS_Status.STATUTORY_APPROVED}, approved_at = '{UtilsRepository.GetUTCTime()}', approved_by={userID},comment='{request.comment}' where id = {request.id} ";
             await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.STATUTORY, request.id, 0, 0, request.comment, CMMS.CMMS_Status.STATUTORY_APPROVED, userID);
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, request.comment);

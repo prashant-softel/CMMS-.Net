@@ -96,7 +96,7 @@ namespace CMMSAPIs.BS.MISMasters
         Task<CMDefaultResponse> DeleteStatutoryComplianceMaster(CMStatutoryCompliance request, int UserId);
         Task<CMDefaultResponse> CreateStatutory(CMCreateStatutory request, int UserId);
         Task<CMDefaultResponse> UpdateStatutory(CMCreateStatutory request, int UserId);
-        Task<List<CMStatutory>> GetStatutoryList(int facility_id);
+        Task<List<CMStatutory>> GetStatutoryList(int facility_id, string start_date, string end_date);
         Task<List<CMStatutoryHistory>> GetStatutoryHistoryById(int compliance_id);
         Task<CMStatutory> GetStatutoryById(int id);
         Task<CMDefaultResponse> CreateStatusofAppliaction(MISTypeObservation request, int userID);
@@ -1338,13 +1338,13 @@ namespace CMMSAPIs.BS.MISMasters
                 throw;
             }
         }
-        public async Task<List<CMStatutory>> GetStatutoryList(int facility_id)
+        public async Task<List<CMStatutory>> GetStatutoryList(int facility_id, string start_date, string end_date)
         {
             try
             {
                 using (var repos = new MISMasterRepository(getDB))
                 {
-                    return await repos.GetStatutoryList(facility_id);
+                    return await repos.GetStatutoryList(facility_id, start_date, end_date);
 
                 }
             }
