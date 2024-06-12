@@ -1,4 +1,4 @@
-﻿using CMMSAPIs.Helper;
+using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Audit;
 using CMMSAPIs.Models.Calibration;
 using CMMSAPIs.Models.Utils;
@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Data;
 using System;
 using CMMSAPIs.Models.Notifications;
+using Microsoft.VisualBasic;
 
 
 namespace CMMSAPIs.Repositories.Calibration
@@ -28,7 +29,8 @@ namespace CMMSAPIs.Repositories.Calibration
             { (int)CMMS.CMMS_Status.CALIBRATION_COMPLETED, "Calibration Completed" },
             { (int)CMMS.CMMS_Status.CALIBRATION_CLOSED, "Calibration Closed" },
             { (int)CMMS.CMMS_Status.CALIBRATION_APPROVED, "Calibration Approved" },
-            { (int)CMMS.CMMS_Status.CALIBRATION_REJECTED, "Calibration Rejected" }
+            { (int)CMMS.CMMS_Status.CALIBRATION_REJECTED, "Calibration Rejected" },
+            { (int)CMMS.CMMS_Status.CALIBRATION_SKIPPED, "Calibration Skipped" }
         };
 
 
@@ -64,7 +66,9 @@ namespace CMMSAPIs.Repositories.Calibration
                 case CMMS.CMMS_Status.CALIBRATION_REJECTED:
                     retValue = String.Format("Calibration Rejected by {0}", CaliObj.rejected_by);
                     break;
-
+                case CMMS.CMMS_Status.CALIBRATION_SKIPPED:
+                    retValue = String.Format("Calibration Skipped by {0}", CaliObj.approved_by);
+                    break;
                 default:
                     break;
             }
@@ -543,6 +547,56 @@ namespace CMMSAPIs.Repositories.Calibration
             else
             {
                 response = new CMDefaultResponse(request.id, returnStatus, "Calibration could not get rejected.");
+            }
+            return response;
+        }
+
+        internal async Task<CMDefaultResponse> SkipCalibration(CMCloseCalibration request, int userID)
+        {
+
+             // start time initializd
+            string due_date_q = $"select  DATE_ADD(due_date, INTERVAL frequency.days DAY) due_date " +
+                $" FROM assets " +
+                $" LEFT JOIN frequency ON assets.calibrationFrequency = frequency.id " +
+                $" LEFT JOIN calibration as a_calibration on a_calibration.asset_id=assets.id " +
+                $" where a_calibration.id = {request.calibration_id};";
+            DataTable dt_due_date = await Context.FetchData(due_date_q).ConfigureAwait(false);
+            DateTime due_date = Convert.ToDateTime(dt_due_date.Rows[0][0]);
+
+            // creating new entry for start date based on frequeny
+            string insertQuery = $"INSERT INTO calibration ( asset_id, facility_id, due_date, start_date, calibration_certificate_file_id, status, status_updated_at, received_date, is_damaged, requested_by, requested_at, request_approved_by, request_approved_at, request_approve_remark, request_rejected_by, request_rejected_at, request_reject_remark, vendor_id, completed_by, completed_remark, close_by, close_remark, approved_by, approved_at, approve_remark, rejected_by, rejected_at, reject_remark, health_status) " +
+                      $"SELECT asset_id, facility_id, '{due_date.ToString("yyyy-MM-dd")}', start_date, calibration_certificate_file_id, status, status_updated_at, received_date, is_damaged, requested_by, requested_at, request_approved_by, request_approved_at, request_approve_remark, request_rejected_by, request_rejected_at, request_reject_remark, vendor_id, completed_by, completed_remark, close_by, close_remark, approved_by, approved_at, approve_remark, rejected_by, rejected_at, reject_remark, health_status " +
+                      $"FROM calibration WHERE id = {request.calibration_id};";
+
+            await Context.ExecuteNonQry<int>(insertQuery).ConfigureAwait(false);
+
+            // updating old to CALIBRATION_SKIPPED
+
+            string myQuery = $"UPDATE calibration SET " +
+                                $"status = {(int)CMMS.CMMS_Status.CALIBRATION_SKIPPED}, status_updated_at = '{UtilsRepository.GetUTCTime()}' " +
+                                $"WHERE id = {request.calibration_id} ;";
+            
+
+            
+            int retVal = await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
+            string assetIDQuery = $"SELECT asset_id FROM calibration where id = {request.calibration_id};";
+            DataTable dtAsset = await Context.FetchData(assetIDQuery).ConfigureAwait(false);
+            int assetID = Convert.ToInt32(dtAsset.Rows[0][0]);
+            CMMS.RETRUNSTATUS returnStatus = CMMS.RETRUNSTATUS.FAILURE;
+            if (retVal > 0)
+                returnStatus = CMMS.RETRUNSTATUS.SUCCESS;
+            CMDefaultResponse response;
+            if (returnStatus == CMMS.RETRUNSTATUS.SUCCESS)
+            {
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, assetID, CMMS.CMMS_Modules.CALIBRATION, request.calibration_id, "Calibration Skipped", CMMS.CMMS_Status.CALIBRATION_SKIPPED, userID);
+                CMCalibrationDetails _ViewCalibration = await GetCalibrationDetails(request.calibration_id, "");
+
+                //await CMMSNotification.sendNotification(CMMS.CMMS_Modules.CALIBRATION, CMMS.CMMS_Status.CALIBRATION_SKIPPED, new[] { userID }, _ViewCalibration);
+                response = new CMDefaultResponse(request.calibration_id, returnStatus, "Calibration Skipped");
+            }
+            else
+            {
+                response = new CMDefaultResponse(request.calibration_id, returnStatus, "Calibration cannot be skipped.");
             }
             return response;
         }
