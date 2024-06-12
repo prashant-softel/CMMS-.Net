@@ -1,4 +1,4 @@
-﻿using CMMSAPIs.Helper;
+using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Audit;
 using CMMSAPIs.Models.Calibration;
 using CMMSAPIs.Models.JC;
@@ -25,6 +25,7 @@ namespace CMMSAPIs.BS.Calibration
         Task<CMDefaultResponse> CloseCalibration(CMCloseCalibration request, int userID);
         Task<CMRescheduleApprovalResponse> ApproveCalibration(CMApproval request, int userID);
         Task<CMDefaultResponse> RejectCalibration(CMApproval request, int userID);
+        Task<CMDefaultResponse> SkipCalibration(CMCloseCalibration request, int userID);
     }
     public class CalibrationBS : ICalibrationBS
     {
@@ -192,6 +193,20 @@ namespace CMMSAPIs.BS.Calibration
                 using (var repos = new CalibrationRepository(getDB))
                 {
                     return await repos.RejectCalibration(request, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<CMDefaultResponse> SkipCalibration(CMCloseCalibration request, int userID)
+        {
+            try
+            {
+                using (var repos = new CalibrationRepository(getDB))
+                {
+                    return await repos.SkipCalibration(request, userID);
                 }
             }
             catch (Exception ex)
