@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
@@ -217,6 +217,22 @@ namespace CMMSAPIs.Controllers.Calibration
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
                 var data = await _CalibrationBS.RejectCalibration(request, userID);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [Route("SkipCalibration")]
+        [HttpPut]
+        public async Task<IActionResult> SkipCalibration(CMCloseCalibration request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _CalibrationBS.SkipCalibration(request, userID);
                 return Ok(data);
             }
             catch (Exception)
