@@ -452,6 +452,7 @@ namespace CMMSAPIs.Helper
             CALIBRATION_CLOSED,
             CALIBRATION_REJECTED,
             CALIBRATION_APPROVED,
+            CALIBRATION_SKIPPED,
 
             INVENTORY_IMPORTED = 221,
             INVENTORY_ADDED,
