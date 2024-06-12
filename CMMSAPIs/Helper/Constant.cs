@@ -47,9 +47,6 @@ namespace CMMSAPIs.Helper
             { CMMS_Modules.INCIDENT_REPORT, 36 },
             { CMMS_Modules.DSM, 37 },
             { CMMS_Modules.GRIEVANCE, 38 },
-
-
-
         };
         public enum RETRUNSTATUS
         {
@@ -578,6 +575,7 @@ namespace CMMSAPIs.Helper
             STATUTORY_DELETED,
             STATUTORY_APPROVED,
             STATUTORY_REJECTED,
+            STATUTORY_RENEWD
 
         }
 

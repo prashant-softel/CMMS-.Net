@@ -58,7 +58,7 @@ namespace CMMSAPIs.Models.SM
     {
         public int? itemID { get; set; }
         public int requestID { get; set; }
-        public int assetMasterItemID { get; set; }
+        public int? assetMasterItemID { get; set; }
         public decimal cost { get; set; }
         public decimal ordered_qty { get; set; }
         public string asset_name { get; set; }

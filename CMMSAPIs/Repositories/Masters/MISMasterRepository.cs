@@ -93,7 +93,9 @@ namespace CMMSAPIs.Repositories.Masters
                 case CMMS.CMMS_Status.STATUTORY_CREATED:
                     retValue = "Waiting for Approval";
                     break;
-
+                case CMMS.CMMS_Status.STATUTORY_RENEWD:
+                    retValue = "Waiting for Approval";
+                    break;
                 case CMMS.CMMS_Status.STATUTORY_UPDATED:
                     retValue = "Waiting for Approval";
                     break;
@@ -130,6 +132,9 @@ namespace CMMSAPIs.Repositories.Masters
                     break;
                 case CMMS.CMMS_Status.STATUTORY_REJECTED:
                     statusName = "Rejected";
+                    break;
+                case CMMS.CMMS_Status.STATUTORY_RENEWD:
+                    statusName = "Created";
                     break;
                 default:
                     statusName = "Unknown Status";
@@ -1284,17 +1289,35 @@ namespace CMMSAPIs.Repositories.Masters
         }
         internal async Task<CMDefaultResponse> CreateStatutory(CMCreateStatutory request, int UserId)
         {
-
+            CMDefaultResponse response = new CMDefaultResponse();
             string renew_from = Convert.ToString(request.renew_from);
+            if (request.renewflag == 0)
+            {
+                string myQuery = $"INSERT INTO statutory (compliance_id, facility_id, issue_date, expires_on, renewFlag, status_of_application, status, created_by, created_at, updated_by, updated_at, approved_by, approved_at, renew_from, renew_by,comment) VALUES " +
+                 $"({request.compliance_id}, {request.facility_id}, '{request.issue_date.ToString("yyyy-MM-dd HH:mm")}', '{request.expires_on.ToString("yyyy-MM-dd HH:mm")}', {request.renewflag}, {request.status_of_aplication_id}, {(int)CMMS.CMMS_Status.STATUTORY_CREATED}, {UserId}, '{UtilsRepository.GetUTCTime()}', {UserId}, '{UtilsRepository.GetUTCTime()}', {UserId}, '{UtilsRepository.GetUTCTime()}', '{renew_from}', {(request.renew_from_id == null ? 0 : request.renew_from_id)},'{request.Comment}' );" +
+                 $"SELECT LAST_INSERT_ID();";
 
-            string myQuery = $"INSERT INTO statutory (compliance_id,facility_id,issue_date, expires_on, status, created_by, created_at, updated_by, updated_at, renew_from, renew_from_id, approved_by, approved_at) VALUES " +
-                             $"({request.compliance_id},{request.facility_id}, '{request.issue_date.ToString("yyyy-MM-dd HH:mm")}', '{request.expires_on.ToString("yyyy-MM-dd HH:mm")}', {(int)CMMS.CMMS_Status.STATUTORY_CREATED}, {UserId}, '{UtilsRepository.GetUTCTime()}', " +
-                             $" {UserId},  '{UtilsRepository.GetUTCTime()}','{renew_from}', {(request.renew_from_id == null ? 0 : request.renew_from_id)}, {UserId}, '{UtilsRepository.GetUTCTime()}'); " +
-                             $"SELECT LAST_INSERT_ID();";
-            DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
-            int id = Convert.ToInt32(dt.Rows[0][0]);
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.STATUTORY, id, 0, 0, "CMStatutory Created.", CMMS.CMMS_Status.STATUTORY_CREATED, UserId); ;
-            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Statutory Record Added");
+                DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
+                int id = Convert.ToInt32(dt.Rows[0][0]);
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.STATUTORY, id, 0, 0, "Statutory Created.", CMMS.CMMS_Status.STATUTORY_CREATED, UserId); ;
+                response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Statutory  Added");
+            }
+            if (request.renewflag == 1)
+            {
+                string myQuery = $"INSERT INTO statutory (compliance_id,facility_id,issue_date, expires_on,renewFlag,status_of_application ,status, created_by, created_at, updated_by, updated_at,approved_by, " +
+                    $"approved_at,renew_from, renew_by,renew_id,comment) VALUES " +
+                                 $"({request.compliance_id},{request.facility_id}, '{request.issue_date.ToString("yyyy-MM-dd HH:mm")}', '{request.expires_on.ToString("yyyy-MM-dd HH:mm")}' , " +
+                                 $"{request.renewflag},{request.status_of_aplication_id}," +
+                                 $" {(int)CMMS.CMMS_Status.STATUTORY_RENEWD}, {UserId}, '{UtilsRepository.GetUTCTime()}',{UserId},'{UtilsRepository.GetUTCTime()}', {UserId},'{UtilsRepository.GetUTCTime()}' ," +
+                                 $" '{renew_from}',{UserId},{(request.renew_from_id == null ? 0 : request.renew_from_id)},'{request.Comment}' ); " +
+                                 $"SELECT LAST_INSERT_ID();";
+                DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
+                int id = Convert.ToInt32(dt.Rows[0][0]);
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.STATUTORY, id, 0, 0, "Statutory Renewed.", CMMS.CMMS_Status.STATUTORY_CREATED, UserId); ;
+                response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Statutory Renewed.");
+
+            }
+            return response;
         }
 
         internal async Task<List<CMStatutory>> GetStatutoryList(int facility_id, string start_date, string end_date)
@@ -1302,7 +1325,7 @@ namespace CMMSAPIs.Repositories.Masters
 
             string myQuery = $"SELECT s.id,s.Compliance_id,st.name as compilanceName,s.comment as description, s.facility_id, " +
                              $"s.Issue_date AS start_date, s.expires_on AS end_date, s.status as status_id ,s.created_by, CONCAT(uc.firstName, ' ', uc.lastName) AS createdByName, CONCAT(u.firstName, ' ', u.lastName) AS UpdatedByName ," +
-                             $" CONCAT(us.firstName, ' ', us.lastName) AS ApprovedByName, s.created_at, s.updated_by, s.updated_at, s.renew_from, s.renew_from_id, s.approved_by, s.approved_at, " +
+                             $" CONCAT(us.firstName, ' ', us.lastName) AS ApprovedByName, s.created_at, s.updated_by, s.updated_at, s.renew_from as renew_date, s.renew_by , s.approved_by, s.approved_at, " +
                              $" DAY(expires_on) AS status, " +
                              $" YEAR(expires_on) AS expiry_year,DATEDIFF(expires_on, now()) AS daysLeft,TIMESTAMPDIFF(MONTH, now(), expires_on) AS validity_month, " +
                              $" CASE WHEN expires_on< Now() THEN 'inactive'  ELSE 'active'    END AS Activation_status " +
@@ -1335,7 +1358,7 @@ namespace CMMSAPIs.Repositories.Masters
             // string myQuery = $"SELECT  Compliance_id,facility_id, Issue_date as start_date, expires_on as end_date, status, created_by, created_at, updated_by, updated_at, renew_from, renew_from_id, approved_by, approved_at  FROM statutory WHERE id = {id}";
             string myQuery = $"SELECT s.id,s.Compliance_id,st.name as compilanceName, s.facility_id, " +
                           $"s.Issue_date AS start_date, s.expires_on AS end_date,s.comment as description, s.status as status_id ,s.created_by, CONCAT(uc.firstName, ' ', uc.lastName) AS createdByName, CONCAT(u.firstName, ' ', u.lastName) AS UpdatedByName ," +
-                          $" CONCAT(us.firstName, ' ', us.lastName) AS ApprovedByName, s.created_at, s.updated_by, s.updated_at, s.renew_from, s.renew_from_id, s.approved_by, s.approved_at, " +
+                          $" CONCAT(us.firstName, ' ', us.lastName) AS ApprovedByName, s.created_at, s.updated_by, s.updated_at, s.renew_from, s.renew_by, s.approved_by, s.approved_at, " +
                           $" DAY(expires_on) AS status, " +
                           $" YEAR(expires_on) AS expiry_year,DATEDIFF(expires_on, now()) AS daysLeft,TIMESTAMPDIFF(MONTH, now(), expires_on) AS validity_month, " +
                           $" CASE WHEN expires_on< Now() THEN 'inactive'  ELSE 'active'    END AS Activation_status " +
@@ -1369,8 +1392,11 @@ namespace CMMSAPIs.Repositories.Masters
             if (request.compliance_id.HasValue)
                 updateQry += $"compliance_id = {request.compliance_id.Value}, ";
             updateQry += $"issue_date = '{request.issue_date.ToString("yyyy-MM-dd HH:mm")}', ";
-
-            updateQry += $"expires_on = '{request.expires_on.ToString("yyyy-MM-dd HH:mm")}', ";
+            updateQry += $"status_of_application = '{request.status_of_aplication_id}', ";
+            updateQry += $"renew_from = '{request.renew_from}', ";
+            updateQry += $"renew_by = '{UserId}', ";
+            updateQry += $"renew_id = '{request.renew_from_id}', ";
+            updateQry += $"comment = '{request.Comment}', ";
 
             updateQry += $"status = {(int)CMMS.CMMS_Status.STATUTORY_UPDATED}, ";
             updateQry += $"updated_by ={UserId} ,";
@@ -1431,7 +1457,6 @@ namespace CMMSAPIs.Repositories.Masters
 
             string approveQuery = $"Update statutory set status = {(int)CMMS.CMMS_Status.STATUTORY_REJECTED} , " +
                 $"comment = '{request.comment}', " +
-                $"facility_id ={request.facility_id}, " +
                 $"rejected_by = {userId}, rejected_at = '{UtilsRepository.GetUTCTime()}' " +
                 $" where id = {request.id} ";
             int reject_id = await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);

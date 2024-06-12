@@ -367,7 +367,7 @@ namespace CMMSAPIs.Models.Masters
         public int year { get; set; }
         public string waste_type { get; set; }
         public int wasteTypeId { get; set; }
-
+        public string Description { get; set; }
         public List<CMWasteFacilityPeriodData_Month> item_data { get; set; }
     }
     public class CMWasteFacilityPeriodData_Month
@@ -450,10 +450,13 @@ namespace CMMSAPIs.Models.Masters
         public DateTime? created_at { get; set; }
         public int updated_by { get; set; }
         public DateTime? updated_at { get; set; }
-        public dynamic renew_from { get; set; }
+        public dynamic? renew_from { get; set; }
         public int? renew_from_id { get; set; }
         public int approved_by { get; set; }
         public DateTime? approved_at { get; set; }
+        public int status_of_aplication_id { get; set; }
+        public int renewflag { get; set; }
+        public string Comment { get; set; }
     }
     public class CMStatutory
     {
@@ -472,10 +475,9 @@ namespace CMMSAPIs.Models.Masters
         public DateTime? updated_at { get; set; }
         public dynamic renew_from { get; set; }
         public string description { get; set; }
-        public int? renew_from_id { get; set; }
+        public int? renew_by { get; set; }
         public int approved_by { get; set; }
         public DateTime? approved_at { get; set; }
-
         public string createdByName { get; set; }
         public string UpdatedByName { get; set; }
         public string ApprovedByName { get; set; }
@@ -503,7 +505,6 @@ namespace CMMSAPIs.Models.Masters
         public int? renew_from_id { get; set; }
         public string approved_by { get; set; }
         public DateTime? approved_at { get; set; }
-
         public string createdByName { get; set; }
     }
     public class CMApprovals
@@ -516,9 +517,7 @@ namespace CMMSAPIs.Models.Masters
     {
         public DateTime Date { get; set; }
         public String Status { get; set; }
-
         public String In_time { get; set; }
-
         public String Out_time { get; set; }
     }
 
@@ -543,15 +542,12 @@ namespace CMMSAPIs.Models.Masters
     public class AttendanceListModel
     {
         public int month_id { get; set; }
-
         public String month_name { get; set; }
-
         public int year { get; set; }
-
-        public List<MonthData> MonthData { get; set; }
+        public List<month_emp> Months_Data_employee { get; set; }
     }
 
-    public class MonthData
+    public class month_emp
     {
         public DateTime date { get; set; }
         public int hfe_employees { get; set; }

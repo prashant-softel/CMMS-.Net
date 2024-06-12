@@ -191,18 +191,18 @@ namespace CMMSAPIs.Repositories.PM
                                     $"LEFT JOIN users as createdBy ON createdBy.id = plan.created_by " +
                                     $"LEFT JOIN users as updatedBy ON updatedBy.id = plan.updated_by " +
                                     $"LEFT JOIN users as assignedTo ON assignedTo.id = plan.assigned_to " +
-                                    $"WHERE facilities.id = {facility_id} and status_id = 1 order by DATE(plan.created_at) ASC";
+                                    $"WHERE facilities.id = {facility_id} and status_id = 1 ";
 
             if (category_id != null && category_id != "")
-                planListQry += $"AND category.id IN ( {category_id} )";
+                planListQry += $" AND category.id IN ( {category_id} )";
             if (frequency_id != null && category_id != "")
-                planListQry += $"AND frequency.id IN ( {frequency_id} )";
+                planListQry += $" AND frequency.id IN ( {frequency_id} )";
             if (start_date != null)
-                planListQry += $"AND plan.plan_date >= '{((DateTime)start_date).ToString("yyyy-MM-dd")}' ";
+                planListQry += $" AND plan.plan_date >= '{((DateTime)start_date).ToString("yyyy-MM-dd")}' ";
             if (end_date != null)
-                planListQry += $"AND plan.plan_date <= '{((DateTime)end_date).ToString("yyyy-MM-dd")}' ";
+                planListQry += $" AND plan.plan_date <= '{((DateTime)end_date).ToString("yyyy-MM-dd")}' ";
+            //  planListQry += "order by DATE(plan.created_at) ASC ";
             planListQry += $";";
-
             List<CMPMPlanList> plan_list = await Context.GetData<CMPMPlanList>(planListQry).ConfigureAwait(false);
 
 
@@ -783,7 +783,7 @@ namespace CMMSAPIs.Repositories.PM
 
                             if (plan.ContainsKey(Convert.ToString(newR["PlanName"]).ToUpper()))
                             {
-                                m_errorLog.SetError($"[Row: {rN}] PlanName Is Already Present");
+                                m_errorLog.SetError($"[Row: {rN}] " + Convert.ToString(newR["PlanName"]).ToUpper() + "  Is Already Present ");
                                 newR.Delete();
                                 continue;
                             }

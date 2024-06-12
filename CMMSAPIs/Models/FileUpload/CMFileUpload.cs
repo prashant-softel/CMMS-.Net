@@ -1,12 +1,12 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using CMMSAPIs.Helper;
+using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
-using CMMSAPIs.Helper;
 
 namespace CMMSAPIs.Models.FileUpload
 {
     public class CMFileUpload
     {
-        public  string description { get; set; }
+        public string description { get; set; }
 
         public List<IFormFile>? files { get; set; }
         public int facility_id { get; set; }

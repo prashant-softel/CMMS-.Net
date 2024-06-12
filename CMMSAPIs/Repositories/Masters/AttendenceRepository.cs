@@ -119,40 +119,27 @@ namespace CMMSAPIs.Repositories.Masters
         internal async Task<CMDefaultResponse> UpdateAttendance(CMCreateAttendence requests, int userID)
         {
             CMDefaultResponse response = new CMDefaultResponse();
-            string queryemp = $"Delete From employee_attendance where Date={requests.date} ;";
-            await Context.ExecuteNonQry<int>(queryemp).ConfigureAwait(false);
 
-            string querycon = $"Delete From contractor_attendnace where Date={requests.date} ;";
-            await Context.ExecuteNonQry<int>(querycon).ConfigureAwait(false);
 
             int employeeValue = 0;
             foreach (CMGetAttendence request in requests.hfeAttendance)
             {
 
-                string instimp = $"INSERT INTO employee_attendance ( attendance_id, facility_id, employee_id, present, in_time, out_time,Date, CreatedAt, CreatedBy, UpdatedAt, UpdatedBy) VALUES " +
-               $"({request.Attendance_Id}, {requests.facility_id}, '{request.employee_id}', {request.present}, '{request.InTime}','{request.OutTime}','{requests.date}','{UtilsRepository.GetUTCTime()}',{userID},'{UtilsRepository.GetUTCTime()}',{userID}); " +
-               $"SELECT LAST_INSERT_ID();";
-                DataTable dt2 = await Context.FetchData(instimp).ConfigureAwait(false);
-                employeeValue = Convert.ToInt32(dt2.Rows[0][0]);
-            }
-            response = new CMDefaultResponse(employeeValue, CMMS.RETRUNSTATUS.SUCCESS, "Attendence Updated successfully.");
+                string instimp = $"Update  employee_attendance SET attendance_id={request.Attendance_Id}, facility_id={request.facility_id}, employee_id={request.employee_id}, present={request.present}, in_time= '{request.InTime}', out_time,Date=,'{request.OutTime}', CreatedAt='{UtilsRepository.GetUTCTime()}', CreatedBy={userID}, UpdatedAt='{UtilsRepository.GetUTCTime()}', UpdatedBy={userID} where date={request.Dates} ;";
+                await Context.ExecuteNonQuery(instimp).ConfigureAwait(false);
 
+            }
             //Contractor Ateendence
             CMGetCotractor requst = requests.contractAttendance;
-            requst.contractor_id = 0;
-            string contupdt = $"INSERT INTO contractor_attendnace (facility_id, Date, contractor_id, age_lessthan_35, age_Between_35_50 , age_Greater_50, purpose) VALUES " +
-               $"( {requests.facility_id},'{requests.date}', {requst.contractor_id}, {requst.lessThan35}, {requst.between35to50}  , {requst.greaterThan50} ,' {requst.purpose}'); " +
-               $"SELECT LAST_INSERT_ID();";
-            DataTable dt3 = await Context.FetchData(contupdt).ConfigureAwait(false);
-            int contractValue = Convert.ToInt32(dt3.Rows[0][0]);
-
+            string contupdt = $"Update  contractor_attendnace SET facility_id={requests.facility_id},contractor_id={requst.contractor_id}, age_lessthan_35={requst.lessThan35}, age_Between_35_50={requst.between35to50}, age_Greater_50={requst.greaterThan50} , purpose='{requst.purpose}' where Date={requests.date} ;";
+            await Context.ExecuteNonQuery(contupdt).ConfigureAwait(false);
+            response = new CMDefaultResponse(employeeValue, CMMS.RETRUNSTATUS.SUCCESS, "Attendence Updated successfully.");
             return response;
         }
 
         internal async Task<List<CMGetAttendenceList>> GetAttendanceList(int facility_id, int year)
         {
             return null;
-
         }
     }
 }
