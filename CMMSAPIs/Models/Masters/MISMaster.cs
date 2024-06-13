@@ -492,9 +492,11 @@ namespace CMMSAPIs.Models.Masters
         public int id { get; set; }
         public int facility_id { get; set; }
         public int? compliance_id { get; set; }
+        public string compliance_name { get; set; }
         public DateTime start_date { get; set; }
         public DateTime end_date { get; set; }
         public int status { get; set; }
+        public string facility_name { get; set; }
         public string Current_status_short { get; set; }
         public string status_short { get; set; }
         public string created_by { get; set; }

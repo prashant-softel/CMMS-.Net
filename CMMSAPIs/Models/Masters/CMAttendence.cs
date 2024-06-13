@@ -42,7 +42,7 @@ namespace CMMSAPIs.Models.Masters
     public class CMGetAttendenceList
     {
         public int facility_id { get; set; }
-        public string facilityname { get; set; }
+
         public int? month_id { get; set; }
         public String? month_name { get; set; }
         public int? year { get; set; }

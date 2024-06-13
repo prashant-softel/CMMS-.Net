@@ -207,7 +207,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
                 }
                 catch (Exception ex)
                 {
-                    return response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Incident Report creation failed");
+                    return response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Incident Report creation failed A");
                 }
             }
             if (request.other != null && request.other.Count > 0)
@@ -216,10 +216,10 @@ namespace CMMSAPIs.Repositories.Incident_Reports
                 {
                     foreach (var item in request.other)
                     {
-                        string injured_Query = "INSERT INTO injured_person( incidents_id, person_id, person_type, age, sex, designation, address, name_contractor,  body_part_and_nature_of_injury, work_experience_years,other_victim, plant_equipment_involved, location_of_incident ) values ";
+                        string injured_Query = "INSERT INTO injured_person( incidents_id, person_id, person_type, age, sex, designation, address, name_contractor,  body_part_and_nature_of_injury, work_experience_years, plant_equipment_involved, location_of_incident ) values ";
                         injured_Query += $"({incident_id}, '{item.name}', {item.person_type}, {item.age}, {item.sex}, " +
                                          $"'{item.designation}', '{item.address}', '{item.name_contractor}', " +
-                                         $"'{item.body_part_and_nature_of_injury}', {(item.work_experience_years == null ? 0 : item.work_experience_years)},'{item.other_victim}', " +
+                                         $"'{item.body_part_and_nature_of_injury}', {(item.work_experience_years == null ? 0 : item.work_experience_years)}, " +
                                          $"'{item.plant_equipment_involved}', '{item.location_of_incident}') ; ";
                         var injured_Query_result = await Context.ExecuteNonQry<int>(injured_Query).ConfigureAwait(false);
                     }
@@ -244,7 +244,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
                 }
                 catch (Exception ex)
                 {
-                    return response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Incident Report creation failed");
+                    return response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Incident Report creation failed B");
                 }
             }
 
@@ -262,7 +262,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
                 }
                 catch (Exception ex)
                 {
-                    return response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Incident Report creation failed");
+                    return response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Incident Report creation failed C");
                 }
             }
 
@@ -280,7 +280,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
                 }
                 catch (Exception ex)
                 {
-                    return response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Incident Report creation failed");
+                    return response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Incident Report creation failed D");
                 }
             }
 
@@ -299,7 +299,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
                 }
                 catch (Exception ex)
                 {
-                    return response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Incident Report creation failed");
+                    return response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Incident Report creation failed E");
                 }
             }
 
@@ -317,7 +317,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
                 }
                 catch (Exception ex)
                 {
-                    return response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Incident Report creation failed");
+                    return response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Incident Report creation failed F");
                 }
             }
             if (request.uploadfile_ids != null && request.uploadfile_ids.Count > 0)
@@ -342,7 +342,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
             else
             {
 
-                response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Incident Report creation failed");
+                response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Incident Report creation failed G");
             }
 
             return response;

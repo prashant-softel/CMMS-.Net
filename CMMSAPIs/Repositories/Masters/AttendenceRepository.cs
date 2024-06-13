@@ -139,7 +139,11 @@ namespace CMMSAPIs.Repositories.Masters
 
         internal async Task<List<CMGetAttendenceList>> GetAttendanceList(int facility_id, int year)
         {
-            return null;
+            string getattendence = "SELECT  cc.Date AS date,cc.facility_id,DAY(cc.Date) AS day_id,MONTH(cc.Date) AS month_id,MONTHNAME(cc.Date) AS month_name,  YEAR(cc.Date) AS years, COALESCE(cs.age_Between_35_50, 0) AS age_Between_35_50, COALESCE(cs.age_lessthan_35, 0) AS age_lessthan_35, COALESCE(cs.age_Greater_50, 0) AS age_Greater_50, COUNT(cc.employee_id) AS total_employees FROM employee_attendance AS cc " +
+                $" LEFT JOIN ( SELECT Date, SUM(age_Between_35_50) AS age_Between_35_50,SUM(age_lessthan_35) AS age_lessthan_35,SUM(age_Greater_50) AS age_Greater_50   FROM   contractor_attendnace   GROUP BY  Date) AS cs ON  cc.Date = cs.Date " +
+                $" WHERE  YEAR(cc.Date) ={year} and facility_id={facility_id} GROUP BY  cc.Date, cc.facility_id ORDER BY  cc.Date;";
+            List<CMGetAttendenceList> employeeAttendanceList = await Context.GetData<CMGetAttendenceList>(getattendence).ConfigureAwait(false);
+            return employeeAttendanceList;
         }
     }
 }

@@ -1417,17 +1417,19 @@ namespace CMMSAPIs.Repositories.Masters
         }
         internal async Task<List<CMStatutoryHistory>> GetStatutoryHistoryById(int compliance_id)
         {
-            string myQuery = $"SELECT distinct s.id,Compliance_id,sc.name ,facility_id, Issue_date as start_date, " +
+            string myQuery = $"SELECT distinct s.id,Compliance_id,sc.name as compliance_name ,facility_id,f.name as facility_name, Issue_date as start_date, " +
                 $" expires_on as end_date, s.status,concat(created.firstName, ' ', created.lastName)  created_by, s.created_at," +
-                $" concat(updated.firstName, ' ', updated.lastName)  updated_by , s.updated_at, renew_from, renew_from_id, " +
+                $" concat(updated.firstName, ' ', updated.lastName)  updated_by , s.updated_at, renew_from, s.renew_by, " +
                 $" concat(approved.firstName, ' ', approved.lastName)  approved_by , s.approved_at, " +
-                $" concat(rejected.firstName, ' ', rejected.lastName)  rejected_by ,   s.rejected_at " +
+                $" concat(rejected.firstName, ' ', rejected.lastName)  rejected_by ,  s.rejected_at " +
                 $" FROM statutory s" +
                 $" left join statutorycomliance sc on sc.id = s.Compliance_id " +
                 $" left join users created on  created.id = s.created_by" +
                 $" left join users updated on  updated.id = s.updated_by" +
                 $" left join users approved on  approved.id = s.approved_by" +
                 $" left join users rejected on  rejected.id = s.rejected_by" +
+                $" left join facilities as f on  f.id = s.facility_id" +
+
                 $" WHERE Compliance_id = {compliance_id};";
             List<CMStatutoryHistory> data = await Context.GetData<CMStatutoryHistory>(myQuery).ConfigureAwait(false);
             foreach (var item in data)
@@ -1492,7 +1494,7 @@ namespace CMMSAPIs.Repositories.Masters
             string updateQry = "UPDATE status_of_appllication SET ";
             updateQry += $"name = '{request.name}', ";
             if (request.description != null && request.description != "")
-                updateQry += $"description = '{request.description}', ";
+                updateQry += $"description = '{request.description}' ";
             updateQry += $" WHERE id = {request.id};";
             await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
             return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Record Updated");
@@ -1505,12 +1507,65 @@ namespace CMMSAPIs.Repositories.Masters
             List<MISTypeObservation> Data = await Context.GetData<MISTypeObservation>(myQuery).ConfigureAwait(false);
             return Data;
         }
-
         internal async Task<CMDefaultResponse> DeleteStatsofAppliaction(int id)
         {
             string delqry = $"Delete From status_of_appllication where id={id};";
             await Context.ExecuteNonQry<int>(delqry).ConfigureAwait(false);
             return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "status deleted");
+        }
+
+        //Documen
+        //Master of Document
+        internal async Task<CMDefaultResponse> CreateDocument(MISTypeObservation request)
+        {
+            String myqry = $"INSERT INTO document(name,description,status) VALUES " +
+                               $"('{request.name}','{request.description}',1); " +
+                                $"SELECT LAST_INSERT_ID(); ";
+            DataTable dt = await Context.FetchData(myqry).ConfigureAwait(false);
+            int id = Convert.ToInt32(dt.Rows[0][0]);
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Document Added");
+
+
+        }
+        internal async Task<List<MISTypeObservation>> GetDocument()
+        {
+            string myQuery = "SELECT * FROM  document ";
+            List<MISTypeObservation> Data = await Context.GetData<MISTypeObservation>(myQuery).ConfigureAwait(false);
+            return Data;
+        }
+
+        internal async Task<CMDefaultResponse> UpdateDocument(MISTypeObservation request)
+        {
+            string updateQry = "UPDATE document SET ";
+            updateQry += $"name = '{request.name}', ";
+
+            if (!string.IsNullOrEmpty(request.description))
+            {
+                updateQry += $"description = '{request.description}', ";
+            }
+
+            updateQry += $"status = 1 ";
+            updateQry += $"WHERE id = {request.id};";
+
+
+            updateQry = updateQry.TrimEnd(',', ' ');
+
+            try
+            {
+                await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+                return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Document Updated");
+            }
+            catch (Exception ex)
+            {
+
+                throw new Exception("Failed to update Document", ex);
+            }
+        }
+        internal async Task<CMDefaultResponse> DeleteDocument(int id)
+        {
+            string delqry = $"Delete From document where id={id};";
+            await Context.ExecuteNonQry<int>(delqry).ConfigureAwait(false);
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Document deleted");
         }
     }
 

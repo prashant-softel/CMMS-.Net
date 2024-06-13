@@ -19,6 +19,7 @@ namespace CMMSAPIs.Models.WC
         public string equipment_name { get; set; }
         public string equipment_sr_no { get; set; }
         public int supplier_id { get; set; }
+        public string severity { get; set; }
         public string supplier_name { get; set; }
         public string good_order_id { get; set; }
         public string order_reference_number { get; set; }
@@ -31,6 +32,7 @@ namespace CMMSAPIs.Models.WC
         public int estimated_cost { get; set; }
         public int quantity { get; set; }
         public string cost_of_replacement { get; set; }
+        public int approxdailyloss { get; set; }
         public int currencyId { get; set; }
         public string currency { get; set; }
         public string corrective_action_by_buyer { get; set; }
@@ -43,6 +45,7 @@ namespace CMMSAPIs.Models.WC
         public int status { get; set; }
         public List<CMLog> log { get; set; }
         public string status_short { get; set; }
+        //public string srNumber { get; set; }
         public string status_long { get; set; }
         public DateTime warrantyStartDate { get; set; }
         public DateTime warrantyEndDate { get; set; }

@@ -1457,5 +1457,52 @@ namespace CMMSAPIs.Controllers.Masters
                 throw ex;
             }
         }
+        // document Master
+        [Route("GetDocument")]
+        [HttpGet]
+        public async Task<IActionResult> GetDocument()
+        {
+            try
+            {
+                var data = await _IMISMasterBS.GetDocument();
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        [Route("UpdateDocument")]
+        [HttpPost]
+        public async Task<IActionResult> UpdateDocument(MISTypeObservation request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.UpdateDocument(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        [Route("DeleteDocument")]
+        [HttpDelete]
+        public async Task<IActionResult> DeleteDocument(int id)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.DeleteDocument(id, userID);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

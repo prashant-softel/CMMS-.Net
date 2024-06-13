@@ -105,6 +105,10 @@ namespace CMMSAPIs.BS.MISMasters
         Task<CMDefaultResponse> DeleteStatsofAppliaction(int id, int userID);
         Task<CMDefaultResponse> RejectStatutory(CMApprovals request, int userID);
         Task<CMDefaultResponse> ApproveStatutory(CMApprovals request, int userID);
+        Task<CMDefaultResponse> CreateDocument(MISTypeObservation request, int userID);
+        Task<List<MISTypeObservation>> GetDocument();
+        Task<CMDefaultResponse> UpdateDocument(MISTypeObservation request, int userID);
+        Task<CMDefaultResponse> DeleteDocument(int id, int userID);
     }
     public class MISMasterBS : IMISMasterBS
     {
@@ -1470,6 +1474,69 @@ namespace CMMSAPIs.BS.MISMasters
                 using (var repos = new MISMasterRepository(getDB))
                 {
                     return await repos.ApproveStatutory(request, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<CMDefaultResponse> CreateDocument(MISTypeObservation request, int userID)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.CreateDocument(request);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<MISTypeObservation>> GetDocument()
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.GetDocument();
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> UpdateDocument(MISTypeObservation request, int userID)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.UpdateDocument(request);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> DeleteDocument(int id, int userID)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.DeleteDocument(id);
+
                 }
             }
             catch (Exception ex)
