@@ -197,6 +197,13 @@ namespace CMMSAPIs.Repositories.Calibration
 
             }
 
+            string myQuery4 = "SELECT U.id, file_path as fileName, FC.name as fileCategory, U.File_Size as fileSize, U.status,U.description, '' as ptwFiles FROM uploadedfiles AS U " +
+                         " LEFT JOIN calibration  as calibration on calibration.id = U.module_ref_id Left join filecategory FC on FC.Id = U.file_category " +
+                         " where calibration.id = " + id + " and U.module_type = " + (int)CMMS.CMMS_Modules.CALIBRATION + ";";
+
+            List<CMFileDetailCalibration> _UploadFileList = await Context.GetData<CMFileDetailCalibration>(myQuery4).ConfigureAwait(false);
+            _calibrationDetails[0].file_list = _UploadFileList;
+
             return _calibrationDetails[0];
         }
 
@@ -419,6 +426,16 @@ namespace CMMSAPIs.Repositories.Calibration
             string assetIDQuery = $"SELECT asset_id FROM calibration where id = {request.calibration_id};";
             DataTable dtAsset = await Context.FetchData(assetIDQuery).ConfigureAwait(false);
             int assetID = Convert.ToInt32(dtAsset.Rows[0][0]);
+
+            if(request.uploaded_file_id.Count > 0)
+            {
+                for(var i=0; i< request.uploaded_file_id.Count; i++)
+                {
+                    string update_Q = $"update uploadedfiles set module_type = {(int)CMMS.CMMS_Modules.CALIBRATION} , module_ref_id = {request.calibration_id} where id = {request.uploaded_file_id[i]};";
+                    int result = await Context.ExecuteNonQry<int>(update_Q).ConfigureAwait(false);
+                }
+            }
+
             CMMS.RETRUNSTATUS returnStatus = CMMS.RETRUNSTATUS.FAILURE;
             if (retVal > 0)
                 returnStatus = CMMS.RETRUNSTATUS.SUCCESS;
