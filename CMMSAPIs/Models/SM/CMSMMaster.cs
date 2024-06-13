@@ -169,6 +169,7 @@ namespace CMMSAPIs.Models.SM
     public class CMMRSItems
     {
         public int ID { get; set; }
+        public int mrs_item_id { get; set; }
         public string return_remarks { get; set; }
         public int original_mrs_ID { get; set; }
         public int mrs_return_ID { get; set; }
