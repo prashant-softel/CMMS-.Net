@@ -475,6 +475,7 @@ namespace CMMSAPIs.Models.Masters
         public DateTime? updated_at { get; set; }
         public dynamic renew_from { get; set; }
         public string description { get; set; }
+        public string status_of_application { get; set; }
         public int? renew_by { get; set; }
         public int approved_by { get; set; }
         public DateTime? approved_at { get; set; }

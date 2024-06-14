@@ -1106,7 +1106,7 @@ namespace CMMSAPIs.Repositories.Masters
                     modulewiseDetail_PM.module_name = "Preventive Maintenance";
                     result_PM = await getPMPlanDashboardDetails(facilityId, fromDate, toDate);
                     modulewiseDetail_PM.CMDashboadDetails = result_PM;
-                    modulewiseDetail_PM.category_total_count = result_PM.bm_closed_count+ result_PM.mc_closed_count+ result_PM.pm_closed_count;
+                    modulewiseDetail_PM.category_total_count = result_PM.bm_closed_count + result_PM.mc_closed_count + result_PM.pm_closed_count;
                     modulewiseDetail_PM.category_pm_count = result_PM.pm_closed_count;
                     modulewiseDetail_PM.category_mc_count = result_PM.mc_closed_count;
                     modulewiseDetail_PM.category_bm_count = result_PM.bm_closed_count;
@@ -1258,11 +1258,11 @@ namespace CMMSAPIs.Repositories.Masters
             result.completed = itemList.Where(x => x.latestJCStatus == (int)CMMS.CMMS_Status.PTW_APPROVED).ToList().Count;
             //result.pending = result.total - itemList.Where(x => x.latestJCPTWStatus != (int)CMMS.CMMS_Status.PTW_APPROVED).ToList().Count;
             result.pending = result.total - result.completed;
-            if(result.total != result.pending+ result.completed+ result.created+ result.rejected + result.assigned)
+            if (result.total != result.pending + result.completed + result.created + result.rejected + result.assigned)
             {
                 result.unknown_count = result.total - result.pending + result.completed + result.created + result.rejected + result.assigned;
             }
-     
+
 
 
             int completed_on_time = itemList.Where(x => x.latestJCStatus == (int)CMMS.CMMS_Status.JC_CLOSE_APPROVED && x.on_time_status == 1).ToList().Count;

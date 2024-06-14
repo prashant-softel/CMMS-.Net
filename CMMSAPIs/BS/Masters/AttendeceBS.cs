@@ -14,7 +14,7 @@ namespace CMMSAPIs.BS.Masters
         Task<CMDefaultResponse> CreateAttendance(CMCreateAttendence requset, int userID);
         Task<object> GetAttendanceByDetails(int facility_id, DateTime date);
         Task<CMDefaultResponse> UpdateAttendance(CMCreateAttendence requests, int userID);
-        Task<List<object>> GetAttendanceList(int facility_id, int year);
+        Task<List<CMGetAttendenceList>> GetAttendanceList(int facility_id, int year);
 
 
     }
@@ -95,9 +95,5 @@ namespace CMMSAPIs.BS.Masters
             }
         }
 
-        Task<List<object>> AttendeceBS.GetAttendanceList(int facility_id, int year)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

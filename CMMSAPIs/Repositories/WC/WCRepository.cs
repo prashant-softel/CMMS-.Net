@@ -16,7 +16,7 @@ namespace CMMSAPIs.Repositories.WC
         private Dictionary<int, string> StatusDictionary = new Dictionary<int, string>() {
             { 191, "In Draft" },
          //   { 192, "Warranty Claim Created" },
-            { 192, "Waiting for Submit Approval" },
+            { 192, "Waiting for Approval" },
             { 193, "Submit Request Rejected" },
             { 194, "Submitted" },
             { 195, "Asset Dispatched" },
@@ -143,7 +143,7 @@ namespace CMMSAPIs.Repositories.WC
                 "b1.name AS supplier_name, good_order_id, affected_part, order_reference_number, affected_sr_no, cost_of_replacement, wc.currency," +
                 " warranty_start_date, warranty_end_date, warranty_claim_title, warranty_description, " +
                 "corrective_action_by_buyer, request_to_supplier, concat(user.firstName , ' ' , user.lastName) AS approver_name," +
-                $" created_by, issued_on, {statusOut} as status, approved_by, wc_fac_code, failure_time " +
+                $" created_by, issued_on, {statusOut} as status,wc.status as status_code, approved_by, wc_fac_code, failure_time " +
                 " FROM wc " +
                 "JOIN facilities as f ON f.id = wc.facilityId " +
                 "JOIN assets as a ON a.id = wc.equipment_id " +
@@ -181,15 +181,21 @@ namespace CMMSAPIs.Repositories.WC
             List<int> idList = new List<int>();
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.INVALID_ARG;
             string strRetMessage = "";
-
+            int fid = 0;
+            int cw_id = 0;
 
             foreach (CMWCCreate unit in set)
             {
+                fid = unit.facilityId;
+
+
                 CMMS.CMMS_Status draftStatus = (CMMS.CMMS_Status)(int)CMMS.CMMS_Status.WC_DRAFT;
                 if (unit.status == 1)
                 {
                     draftStatus = (CMMS.CMMS_Status)(int)CMMS.CMMS_Status.WC_SUBMITTED;
                 }
+
+
                 string qry = "insert into wc(status_updated_at, facilityId, equipment_id, good_order_id, affected_part, order_reference_number, affected_sr_no, " +
                                 "cost_of_replacement,approxdailyloss , currencyId, warranty_start_date, warranty_end_date, warranty_claim_title, warranty_description, " +
                                 "corrective_action_by_buyer,severity, request_to_supplier, approver_id, status, wc_fac_code, failure_time, created_by) values" +
@@ -197,9 +203,10 @@ namespace CMMSAPIs.Repositories.WC
                                 $"'{unit.affectedSrNo}', '{unit.costOfReplacement}',{unit.approxdailyloss}, {unit.currencyId}, '{((DateTime)unit.warrantyStartAt).ToString("yyyy'-'MM'-'dd")}', " +
                                 $"'{((DateTime)unit.warrantyEndAt).ToString("yyyy'-'MM'-'dd")}', '{unit.warrantyClaimTitle}', '{unit.warrantyDescription}', " +
                                 $"'{unit.correctiveActionByBuyer}','{unit.severity}' ,'{unit.requestToSupplier}', {unit.approverId},{(int)draftStatus}, " +
-                                $"'FAC{1000 + unit.facilityId}', '{((DateTime)unit.failureTime).ToString("yyyy'-'MM'-'dd")}', {userID}); select LAST_INSERT_ID(); ";
+                                $"'FAC{1000 + unit.facilityId}', '{((DateTime)unit.failureTime).ToString("yyyy-MM-dd HH-mm")}', {userID}); select LAST_INSERT_ID(); ";
                 DataTable dt = await Context.FetchData(qry).ConfigureAwait(false);
                 int id = Convert.ToInt32(dt.Rows[0][0]);
+                cw_id = id;
                 string updateQry = $"UPDATE wc SET equipment_cat_id = (SELECT categoryId FROM assets WHERE assets.id = {unit.equipmentId}), " +
                                     $"equipment_sr_no = (SELECT serialNumber FROM assets WHERE assets.id = {unit.equipmentId}), " +
                                     $"supplier_id = (SELECT supplierId FROM assets WHERE assets.id = {unit.equipmentId}), " +
@@ -260,6 +267,18 @@ namespace CMMSAPIs.Repositories.WC
                     InsertAffectedPart = InsertAffectedPart.Substring(0, InsertAffectedPart.Length - 10);
                     await Context.ExecuteNonQry<int>(InsertAffectedPart).ConfigureAwait(false);
                 }
+
+                if (unit.uploadfile_ids != null)
+                {
+                    foreach (int data in unit.uploadfile_ids)
+                    {
+
+                        string qryuploadFiles = $"UPDATE uploadedfiles SET facility_id = {fid}, module_type={(int)CMMS.CMMS_Modules.WARRANTY_CLAIM},module_ref_id={cw_id} where id = {data}";
+                        await Context.ExecuteNonQry<int>(qryuploadFiles).ConfigureAwait(false);
+                    }
+                }
+
+
 
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.WARRANTY_CLAIM, id, 0, 0, "Warranty Claim Created", draftStatus, userID);
             }
@@ -344,9 +363,17 @@ namespace CMMSAPIs.Repositories.WC
             string affectedParts_Q = $"SELECT affected_part as name FROM wc_parts WHERE wc_id =  {id}";
             List<affectedParts> affectedParts = await Context.GetData<affectedParts>(affectedParts_Q).ConfigureAwait(false);
 
+            //uploadjobcard
+            string myQuery18 = "SELECT c.id as id,U.file_path as fileName,U.id as file_id,U.description FROM uploadedfiles AS U " +
+                              "Left JOIN wc as c on c.id= U.module_ref_id  " +
+                              "where module_ref_id =" + id + " and U.module_type = " + (int)CMMS.CMMS_Modules.WARRANTY_CLAIM + ";";
+
+            List<WCFileDetail> WC_image = await Context.GetData<WCFileDetail>(myQuery18).ConfigureAwait(false);
 
             GetWCDetails[0].affectedParts = affectedParts;
             GetWCDetails[0].supplierActions = supplierActions;
+            GetWCDetails[0].Images = WC_image;
+
 
             return GetWCDetails[0];
         }
@@ -403,7 +430,7 @@ namespace CMMSAPIs.Repositories.WC
             if (request.approverId > 0)
                 updateQry += $"approver_id = {request.approverId}, ";
             if (request.failureTime != null)
-                updateQry += $"failure_time = '{((DateTime)request.failureTime).ToString("yyyy'-'MM'-'dd")}', ";
+                updateQry += $"failure_time = '{((DateTime)request.failureTime).ToString("yyyy'-'MM'-'dd 'HH'-'mm")}', ";
             updateQry = updateQry.Substring(0, updateQry.Length - 2) + $" WHERE id = {request.id};";
             await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
             if (request.additionalEmailEmployees != null || request.externalEmails != null)
@@ -513,7 +540,7 @@ namespace CMMSAPIs.Repositories.WC
             {
                 throw new ArgumentException("Invalid argument id<" + request.id + ">");
             }
-            string approveQuery = $"Update wc set status = {(int)CMMS.CMMS_Status.APPROVED}, status_updated_at = '{UtilsRepository.GetUTCTime()}', " +
+            string approveQuery = $"Update wc set status = {(int)CMMS.CMMS_Status.WC_SUBMIT_APPROVED}, status_updated_at = '{UtilsRepository.GetUTCTime()}', " +
                 $"approval_reccomendations = '{request.comment}',  " +
                 $" approved_by = {userId}, approvedAt = '{UtilsRepository.GetUTCTime()}'" +
                 $" where id = {request.id}";
@@ -540,7 +567,7 @@ namespace CMMSAPIs.Repositories.WC
                 throw new ArgumentException("Invalid argument id<" + request.id + ">");
             }
 
-            string approveQuery = $"Update wc set status = {(int)CMMS.CMMS_Status.REJECTED}, status_updated_at = '{UtilsRepository.GetUTCTime()}' , " +
+            string approveQuery = $"Update wc set status = {(int)CMMS.CMMS_Status.WC_SUBMIT_REJECTED}, status_updated_at = '{UtilsRepository.GetUTCTime()}' , " +
                 $"reject_reccomendations = '{request.comment}',  " +
                 $" rejecctedBy = {userId}, rejectedAt = '{UtilsRepository.GetUTCTime()}' " +
                 $" where id = {request.id}";

@@ -195,10 +195,10 @@ namespace CMMSAPIs.Repositories.Incident_Reports
 
                     foreach (var item in request.injured_person)
                     {
-                        string injured_Query = "INSERT INTO injured_person( incidents_id, person_id, person_type, age, sex, designation, address, name_contractor,  body_part_and_nature_of_injury, work_experience_years,other_victim, plant_equipment_involved, location_of_incident ) values ";
+                        string injured_Query = "INSERT INTO injured_person( incidents_id, person_id, person_type, age, sex, designation, address, name_contractor,  body_part_and_nature_of_injury, work_experience_years, plant_equipment_involved, location_of_incident ) values ";
                         injured_Query += $"({incident_id}, '{item.name}', {item.person_type}, {item.age}, {item.sex}, " +
                                          $"'{item.designation}', '{item.address}', '{item.name_contractor}', " +
-                                         $"'{item.body_part_and_nature_of_injury}', {(item.work_experience_years == null ? 0 : item.work_experience_years)},'{item.other_victim}', " +
+                                         $"'{item.body_part_and_nature_of_injury}', {(item.work_experience_years == null ? 0 : item.work_experience_years)}, " +
                                          $"'{item.plant_equipment_involved}', '{item.location_of_incident}') ; ";
                         var injured_Query_result = await Context.ExecuteNonQry<int>(injured_Query).ConfigureAwait(false);
                     }
@@ -216,11 +216,11 @@ namespace CMMSAPIs.Repositories.Incident_Reports
                 {
                     foreach (var item in request.other)
                     {
-                        string injured_Query = "INSERT INTO injured_person( incidents_id, person_id, person_type, age, sex, designation, address, name_contractor,  body_part_and_nature_of_injury, work_experience_years, plant_equipment_involved, location_of_incident ) values ";
+                        string injured_Query = "INSERT INTO injured_person(incidents_id, person_id, person_type, age, sex, designation, address, name_contractor,  body_part_and_nature_of_injury, work_experience_years, plant_equipment_involved, location_of_incident,other_injured ) values ";
                         injured_Query += $"({incident_id}, '{item.name}', {item.person_type}, {item.age}, {item.sex}, " +
                                          $"'{item.designation}', '{item.address}', '{item.name_contractor}', " +
                                          $"'{item.body_part_and_nature_of_injury}', {(item.work_experience_years == null ? 0 : item.work_experience_years)}, " +
-                                         $"'{item.plant_equipment_involved}', '{item.location_of_incident}') ; ";
+                                         $"'{item.plant_equipment_involved}', '{item.location_of_incident},1') ; ";
                         var injured_Query_result = await Context.ExecuteNonQry<int>(injured_Query).ConfigureAwait(false);
                     }
                 }
@@ -399,10 +399,10 @@ namespace CMMSAPIs.Repositories.Incident_Reports
                 {
                     foreach (var item in request.other)
                     {
-                        string injured_Query = "INSERT INTO injured_person( incidents_id, person_id, person_type, age, sex, designation, address, name_contractor,  body_part_and_nature_of_injury, work_experience_years,other_victim, plant_equipment_involved, location_of_incident ) values ";
+                        string injured_Query = "INSERT INTO injured_person( incidents_id, person_id, person_type, age, sex, designation, address, name_contractor,  body_part_and_nature_of_injury, work_experience_years, plant_equipment_involved, location_of_incident ) values ";
                         injured_Query += $"({incident_id}, '{item.name}', {item.person_type}, {item.age}, {item.sex}, " +
                                          $"'{item.designation}', '{item.address}', '{item.name_contractor}', " +
-                                         $"'{item.body_part_and_nature_of_injury}', {(item.work_experience_years == null ? 0 : item.work_experience_years)},'{item.other_victim}', " +
+                                         $"'{item.body_part_and_nature_of_injury}', {(item.work_experience_years == null ? 0 : item.work_experience_years)}', " +
                                          $"'{item.plant_equipment_involved}', '{item.location_of_incident}') ; ";
                         var injured_Query_result = await Context.ExecuteNonQry<int>(injured_Query).ConfigureAwait(false);
                     }
@@ -601,6 +601,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
             List<CMFileDetails> _UploadFileList = await Context.GetData<CMFileDetails>(myQuery4).ConfigureAwait(false);
 
             _IncidentReportList[0].Injured_person = await Getinjured_person(id);
+            _IncidentReportList[0].other_injured = await Getinjured_person(id);
             _IncidentReportList[0].why_why_analysis = await Getwhy_why_analysis(id);
             _IncidentReportList[0].root_cause = await Getroot_cause(id);
             _IncidentReportList[0].immediate_correction = await Getimmediate_correction(id);
@@ -1094,7 +1095,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
         internal async Task<List<CMInjured_person>> Getinjured_person(int incidents_id)
         {
             string selectqry = " SELECT\r\n    i.id as injured_item_id,\r\n    incidents_id,\r\n     person_id as name,\r\n     case when i.person_type =1 then concat(u.firstName, ' ', u.lastname)\r\n when i.person_type =2 then b.name\r\n else person_name\r\n end as person_name ,\r\n    person_type, case when person_type = 1 then 'Employee' when person_type = 2 then 'Contractor'  when person_type = 3 then 'Other' else '' end as person_type_name,\r\n    age,\r\n    sex,\r\n    designation,\r\n    i.address,\r\n    name_contractor,\r\n    body_part_and_nature_of_injury,\r\n    work_experience_years,\r\n    plant_equipment_involved,\r\n    location_of_incident, g.name as gender_name from injured_person i \r\nleft join  gender g on g.id = i.sex\r\nleft join users u on u.id = i.person_id\r\nleft join business b on b.id = i.person_id" +
-                " where incidents_id = " + incidents_id + ";";
+                " where incidents_id = " + incidents_id + " and other_injured=1;";
             List<CMInjured_person> result = await Context.GetData<CMInjured_person>(selectqry).ConfigureAwait(false);
             return result;
         }

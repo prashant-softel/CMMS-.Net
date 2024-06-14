@@ -1,14 +1,12 @@
 using CMMSAPIs.Helper;
-using CMMSAPIs.Models.Audit;
 using CMMSAPIs.Models.Calibration;
+using CMMSAPIs.Models.Notifications;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Utils;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using System.Data;
 using System;
-using CMMSAPIs.Models.Notifications;
-using Microsoft.VisualBasic;
+using System.Collections.Generic;
+using System.Data;
+using System.Threading.Tasks;
 
 
 namespace CMMSAPIs.Repositories.Calibration
@@ -76,7 +74,7 @@ namespace CMMSAPIs.Repositories.Calibration
 
         }
 
-        internal async Task<List<CMCalibrationList>> GetCalibrationList(int facility_id,string facilitytimeZone)
+        internal async Task<List<CMCalibrationList>> GetCalibrationList(int facility_id, string facilitytimeZone)
         {
             /* Fetch all the Asset table which calibration due date is lower than current date
              * JOIN Calibration table to fetch their previous details for list model
@@ -117,17 +115,17 @@ namespace CMMSAPIs.Repositories.Calibration
             List<CMCalibrationList> _calibrationList = await Context.GetData<CMCalibrationList>(myQuery).ConfigureAwait(false);
             foreach (var a in _calibrationList)
             {
-                if(a!=null && a.last_calibration_date!=null)
-                   a.last_calibration_date= await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)a.last_calibration_date);
+                if (a != null && a.last_calibration_date != null)
+                    a.last_calibration_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)a.last_calibration_date);
                 if (a != null && a.next_calibration_due_date != null)
-                   a.next_calibration_due_date= await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime) a.next_calibration_due_date);
+                    a.next_calibration_due_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)a.next_calibration_due_date);
                 if (a != null && a.received_date != null)
-                    a.received_date= await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime) a.received_date);
+                    a.received_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)a.received_date);
 
             }
             return _calibrationList;
         }
-        internal async Task<CMCalibrationDetails> GetCalibrationDetails(int id,string facilitytimeZone)
+        internal async Task<CMCalibrationDetails> GetCalibrationDetails(int id, string facilitytimeZone)
         {
 
             string statusOut = "CASE ";
@@ -174,7 +172,7 @@ namespace CMMSAPIs.Repositories.Calibration
             foreach (var a in _calibrationDetails)
             {
                 if (a != null && a.started_at != null)
-                    a.started_at = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime) a.started_at);
+                    a.started_at = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)a.started_at);
                 if (a != null && a.request_rejected_at != null)
                     a.request_rejected_at = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)a.request_rejected_at);
                 if (a != null && a.request_approved_at != null)
@@ -190,10 +188,10 @@ namespace CMMSAPIs.Repositories.Calibration
                 if (a != null && a.completed_at != null)
                     a.completed_at = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)a.completed_at);
                 if (a != null && a.Closed_at != null)
-                    a.Closed_at = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime) a.Closed_at);
+                    a.Closed_at = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)a.Closed_at);
                 if (a != null && a.calibration_due_date != null)
                     a.calibration_due_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)a.calibration_due_date);
-                
+
 
             }
 
@@ -275,7 +273,7 @@ namespace CMMSAPIs.Repositories.Calibration
                 string setDueDate = $"UPDATE assets SET calibrationDueDate = '{request.next_calibration_date.ToString("yyyy-MM-dd HH:mm:ss")}' WHERE id = {request.asset_id};";
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, request.asset_id, CMMS.CMMS_Modules.CALIBRATION, id, "Calibration Requested", CMMS.CMMS_Status.CALIBRATION_REQUEST, userID);
 
-                CMCalibrationDetails _ViewCalibration = await GetCalibrationDetails(id,"");
+                CMCalibrationDetails _ViewCalibration = await GetCalibrationDetails(id, "");
 
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.CALIBRATION, CMMS.CMMS_Status.CALIBRATION_REQUEST, new[] { userID }, _ViewCalibration);
                 CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Calibration requested successfully");
@@ -310,7 +308,7 @@ namespace CMMSAPIs.Repositories.Calibration
             if (returnStatus == CMMS.RETRUNSTATUS.SUCCESS)
             {
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, assetID, CMMS.CMMS_Modules.CALIBRATION, request.id, "Calibration Request Approved", CMMS.CMMS_Status.CALIBRATION_REQUEST_APPROVED, userID);
-                CMCalibrationDetails _ViewCalibration = await GetCalibrationDetails(request.id,"");
+                CMCalibrationDetails _ViewCalibration = await GetCalibrationDetails(request.id, "");
 
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.CALIBRATION, CMMS.CMMS_Status.CALIBRATION_REQUEST_APPROVED, new[] { userID }, _ViewCalibration);
                 response = new CMDefaultResponse(request.id, returnStatus, "Calibration Request Approved Successfully");
@@ -342,7 +340,7 @@ namespace CMMSAPIs.Repositories.Calibration
             if (returnStatus == CMMS.RETRUNSTATUS.SUCCESS)
             {
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, assetID, CMMS.CMMS_Modules.CALIBRATION, request.id, "Calibration Request Rejected", CMMS.CMMS_Status.CALIBRATION_REQUEST_REJECTED, userID);
-                CMCalibrationDetails _ViewCalibration = await GetCalibrationDetails(request.id,"");
+                CMCalibrationDetails _ViewCalibration = await GetCalibrationDetails(request.id, "");
 
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.CALIBRATION, CMMS.CMMS_Status.CALIBRATION_REQUEST_REJECTED, new[] { userID }, _ViewCalibration);
                 response = new CMDefaultResponse(request.id, returnStatus, "Calibration Request Rejected Successfully");
@@ -353,7 +351,7 @@ namespace CMMSAPIs.Repositories.Calibration
             }
             return response;
         }
-        internal async Task<CMPreviousCalibration> GetPreviousCalibration(int asset_id,string facilitytimeZone)
+        internal async Task<CMPreviousCalibration> GetPreviousCalibration(int asset_id, string facilitytimeZone)
         {
             /*
              * While requesting user need to show the previous calibrated details.
@@ -366,9 +364,9 @@ namespace CMMSAPIs.Repositories.Calibration
                              "LEFT JOIN business as vendor ON assets.vendorId = vendor.id " +
                              $"WHERE assets.id = {asset_id}";
             List<CMPreviousCalibration> _calibrationList = await Context.GetData<CMPreviousCalibration>(myQuery).ConfigureAwait(false);
-            foreach(var a in _calibrationList)
+            foreach (var a in _calibrationList)
             {
-              
+
                 if (a != null && a.previous_calibration_date != null)
                     a.previous_calibration_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)a.previous_calibration_date);
             }
@@ -399,7 +397,7 @@ namespace CMMSAPIs.Repositories.Calibration
             if (returnStatus == CMMS.RETRUNSTATUS.SUCCESS)
             {
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, assetID, CMMS.CMMS_Modules.CALIBRATION, calibration_id, "Calibration Started", CMMS.CMMS_Status.CALIBRATION_STARTED, userID);
-                CMCalibrationDetails _ViewCalibration = await GetCalibrationDetails(calibration_id,"");
+                CMCalibrationDetails _ViewCalibration = await GetCalibrationDetails(calibration_id, "");
 
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.CALIBRATION, CMMS.CMMS_Status.CALIBRATION_STARTED, new[] { userID }, _ViewCalibration);
 
@@ -427,9 +425,9 @@ namespace CMMSAPIs.Repositories.Calibration
             DataTable dtAsset = await Context.FetchData(assetIDQuery).ConfigureAwait(false);
             int assetID = Convert.ToInt32(dtAsset.Rows[0][0]);
 
-            if(request.uploaded_file_id.Count > 0)
+            if (request.uploaded_file_id.Count > 0)
             {
-                for(var i=0; i< request.uploaded_file_id.Count; i++)
+                for (var i = 0; i < request.uploaded_file_id.Count; i++)
                 {
                     string update_Q = $"update uploadedfiles set module_type = {(int)CMMS.CMMS_Modules.CALIBRATION} , module_ref_id = {request.calibration_id} where id = {request.uploaded_file_id[i]};";
                     int result = await Context.ExecuteNonQry<int>(update_Q).ConfigureAwait(false);
@@ -443,7 +441,7 @@ namespace CMMSAPIs.Repositories.Calibration
             if (returnStatus == CMMS.RETRUNSTATUS.SUCCESS)
             {
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, assetID, CMMS.CMMS_Modules.CALIBRATION, request.calibration_id, "Calibration Completed", CMMS.CMMS_Status.CALIBRATION_COMPLETED, userID);
-                CMCalibrationDetails _ViewCalibration = await GetCalibrationDetails(request.calibration_id,"");
+                CMCalibrationDetails _ViewCalibration = await GetCalibrationDetails(request.calibration_id, "");
 
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.CALIBRATION, CMMS.CMMS_Status.CALIBRATION_COMPLETED, new[] { userID }, _ViewCalibration);
                 response = new CMDefaultResponse(request.calibration_id, returnStatus, "Calibration Completed");
@@ -477,7 +475,7 @@ namespace CMMSAPIs.Repositories.Calibration
             if (returnStatus == CMMS.RETRUNSTATUS.SUCCESS)
             {
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, assetID, CMMS.CMMS_Modules.CALIBRATION, request.calibration_id, "Calibration Closed", CMMS.CMMS_Status.CALIBRATION_CLOSED, userID);
-                CMCalibrationDetails _ViewCalibration = await GetCalibrationDetails(request.calibration_id,"");
+                CMCalibrationDetails _ViewCalibration = await GetCalibrationDetails(request.calibration_id, "");
 
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.CALIBRATION, CMMS.CMMS_Status.CALIBRATION_CLOSED, new[] { userID }, _ViewCalibration);
                 response = new CMDefaultResponse(request.calibration_id, returnStatus, "Calibration Closed");
@@ -524,7 +522,7 @@ namespace CMMSAPIs.Repositories.Calibration
             if (returnStatus == CMMS.RETRUNSTATUS.SUCCESS)
             {
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, nextRequest[0].asset_id, CMMS.CMMS_Modules.CALIBRATION, request.id, $"Calibration Approved to ID {newCalibration.id[0]}", CMMS.CMMS_Status.CALIBRATION_COMPLETED, userID);
-                CMCalibrationDetails _ViewCalibration = await GetCalibrationDetails(request.id,"");
+                CMCalibrationDetails _ViewCalibration = await GetCalibrationDetails(request.id, "");
 
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.CALIBRATION, CMMS.CMMS_Status.CALIBRATION_APPROVED, new[] { userID }, _ViewCalibration);
                 response = new CMRescheduleApprovalResponse(newCalibration.id[0], request.id, returnStatus, $"Calibration Approved. Next Calibration with ID {newCalibration.id[0]} on '{nextRequest[0].next_calibration_date.ToString("yyyy'-'MM'-'dd")}'");
@@ -556,7 +554,7 @@ namespace CMMSAPIs.Repositories.Calibration
             if (returnStatus == CMMS.RETRUNSTATUS.SUCCESS)
             {
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, assetID, CMMS.CMMS_Modules.CALIBRATION, request.id, "Calibration Rejected", CMMS.CMMS_Status.CALIBRATION_REJECTED, userID);
-                CMCalibrationDetails _ViewCalibration = await GetCalibrationDetails(request.id,"");
+                CMCalibrationDetails _ViewCalibration = await GetCalibrationDetails(request.id, "");
 
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.CALIBRATION, CMMS.CMMS_Status.CALIBRATION_REJECTED, new[] { userID }, _ViewCalibration);
                 response = new CMDefaultResponse(request.id, returnStatus, "Calibration Rejected");
@@ -571,14 +569,18 @@ namespace CMMSAPIs.Repositories.Calibration
         internal async Task<CMDefaultResponse> SkipCalibration(CMCloseCalibration request, int userID)
         {
 
-             // start time initializd
+
+            DateTime due_date = DateTime.Parse("0001-01-01");
             string due_date_q = $"select  DATE_ADD(due_date, INTERVAL frequency.days DAY) due_date " +
                 $" FROM assets " +
                 $" LEFT JOIN frequency ON assets.calibrationFrequency = frequency.id " +
                 $" LEFT JOIN calibration as a_calibration on a_calibration.asset_id=assets.id " +
                 $" where a_calibration.id = {request.calibration_id};";
             DataTable dt_due_date = await Context.FetchData(due_date_q).ConfigureAwait(false);
-            DateTime due_date = Convert.ToDateTime(dt_due_date.Rows[0][0]);
+            if (dt_due_date.Rows.Count > 0 && dt_due_date.Rows[0][0] != DBNull.Value)
+            {
+                due_date = Convert.ToDateTime(dt_due_date.Rows[0][0]);
+            }
 
             // creating new entry for start date based on frequeny
             string insertQuery = $"INSERT INTO calibration ( asset_id, facility_id, due_date, start_date, calibration_certificate_file_id, status, status_updated_at, received_date, is_damaged, requested_by, requested_at, request_approved_by, request_approved_at, request_approve_remark, request_rejected_by, request_rejected_at, request_reject_remark, vendor_id, completed_by, completed_remark, close_by, close_remark, approved_by, approved_at, approve_remark, rejected_by, rejected_at, reject_remark, health_status) " +
@@ -592,9 +594,9 @@ namespace CMMSAPIs.Repositories.Calibration
             string myQuery = $"UPDATE calibration SET " +
                                 $"status = {(int)CMMS.CMMS_Status.CALIBRATION_SKIPPED}, status_updated_at = '{UtilsRepository.GetUTCTime()}' " +
                                 $"WHERE id = {request.calibration_id} ;";
-            
 
-            
+
+
             int retVal = await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
             string assetIDQuery = $"SELECT asset_id FROM calibration where id = {request.calibration_id};";
             DataTable dtAsset = await Context.FetchData(assetIDQuery).ConfigureAwait(false);

@@ -1,8 +1,5 @@
-﻿using Microsoft.VisualBasic;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Linq.Expressions;
 
 namespace CMMSAPIs.Models.MC
 {
@@ -38,7 +35,7 @@ namespace CMMSAPIs.Models.MC
     public class CMMCPlan
     {
         public UInt64 id { get; set; }
-        
+
         public int planId { get; set; }
         public int facilityId { get; set; }
         //public int blockId { get; set; }
@@ -73,7 +70,7 @@ namespace CMMSAPIs.Models.MC
 
     }
 
-    
+
     public class CMMCPlanScheduleSummary
     {
 
@@ -147,7 +144,7 @@ namespace CMMSAPIs.Models.MC
     }
 
 
-    public class CMMCExecutionSchedule 
+    public class CMMCExecutionSchedule
     {
         public UInt64 id { get; set; }
         public int scheduleId { get; set; }
@@ -312,7 +309,7 @@ namespace CMMSAPIs.Models.MC
         public int area { get; set; }
         public dynamic isPending { get; set; }
         public DateTime scheduledAt { get; set; }
-        public int scheduledDay{ get; set; }
+        public int scheduledDay { get; set; }
         public dynamic isCleaned { get; set; }
         public DateTime cleanedAt { get; set; }
         public int executedDay { get; set; }

@@ -12,6 +12,8 @@ namespace CMMSAPIs.Models.Permits
         public int workingAreaId { get; set; }
         public string workingAreaName { get; set; }
         public string description { get; set; }
+        public int jc_id { get; set; }
+        public int jc_status { get; set; }
         public int request_by_id { get; set; }
         public string request_by_name { get; set; }
         public dynamic request_datetime { get; set; }

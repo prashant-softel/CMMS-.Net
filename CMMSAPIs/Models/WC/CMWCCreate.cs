@@ -49,6 +49,7 @@ namespace CMMSAPIs.Models.WC
         public string srNumber { get; set; }
         public string severity { get; set; }
         public List<affectedParts> affectedParts { get; set; }
+        public List<int> uploadfile_ids { get; set; }
     }
 
     public class affectedParts

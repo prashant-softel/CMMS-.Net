@@ -1472,6 +1472,21 @@ namespace CMMSAPIs.Controllers.Masters
                 throw ex;
             }
         }
+        [Route("CreateDocument")]
+        [HttpPost]
+        public async Task<IActionResult> CreateDocument(MISTypeObservation request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.CreateDocument(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
 
         [Route("UpdateDocument")]
         [HttpPost]

@@ -1361,11 +1361,12 @@ namespace CMMSAPIs.Repositories.Masters
                           $" CONCAT(us.firstName, ' ', us.lastName) AS ApprovedByName, s.created_at, s.updated_by, s.updated_at, s.renew_from, s.renew_by, s.approved_by, s.approved_at, " +
                           $" DAY(expires_on) AS status, " +
                           $" YEAR(expires_on) AS expiry_year,DATEDIFF(expires_on, now()) AS daysLeft,TIMESTAMPDIFF(MONTH, now(), expires_on) AS validity_month, " +
-                          $" CASE WHEN expires_on< Now() THEN 'inactive'  ELSE 'active'    END AS Activation_status " +
-                          $" FROM statutory AS s LEFT JOIN users uc ON  s.created_by = uc.id " +
+                          $" CASE WHEN expires_on< Now() THEN 'inactive'  ELSE 'active'    END AS Activation_status, " +
+                          $" sa.name AS status_of_application FROM statutory AS s LEFT JOIN users uc ON  s.created_by = uc.id " +
                           $" LEFT JOIN users u on s.updated_by = u.id" +
                           $" LEFT JOIN users us on s.approved_by = us.id " +
-                          $"LEFT JOIN statutorycomliance as st on st.id = s.Compliance_id " +
+                          $" LEFT JOIN  status_of_appllication sa ON sa.id = s.status_of_application " +
+                          $" LEFT JOIN statutorycomliance as st on st.id = s.Compliance_id " +
                           $" where s.id ={id} ;";
             List<CMStatutory> data = await Context.GetData<CMStatutory>(myQuery).ConfigureAwait(false);
             foreach (var item in data)

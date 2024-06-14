@@ -6,6 +6,7 @@ namespace CMMSAPIs.Models.WC
 {
     public class CMWCDetail
     {
+
         public int wc_id { get; set; }
         //        public int wc_number { get; set; }
         public int facility_id { get; set; }
@@ -53,6 +54,13 @@ namespace CMMSAPIs.Models.WC
         public List<CMWCExternalEmail> externalEmails { get; set; }
         public List<CMWCSupplierActions> supplierActions { get; set; }
         public List<affectedParts> affectedParts { get; set; }
+        public List<WCFileDetail> Images { get; set; }
+    }
+    public class WCFileDetail
+    {
+        public int file_id { get; set; }
+        public string description { get; set; }
+        public string fileName { get; set; }
 
     }
 }

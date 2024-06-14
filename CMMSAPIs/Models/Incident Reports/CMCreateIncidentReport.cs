@@ -115,7 +115,7 @@ namespace CMMSAPIs.Models.Incident_Reports
         public int? incidents_id { get; set; }
         public string? name { get; set; }
         public int? person_type { get; set; }
-        public string? other_victim { get; set; }
+
         public int? age { get; set; }
         public int? sex { get; set; }
         public string? designation { get; set; }

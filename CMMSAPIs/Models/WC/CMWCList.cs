@@ -11,7 +11,7 @@ namespace CMMSAPIs.Models.WC
         public int site_wc_number { get; set; }
         public string warranty_claim_title { get; set; }
         public dynamic date_of_claim { get; set; }
-        public string equipment_category { get; set;}
+        public string equipment_category { get; set; }
         public string equipment_name { get; set; }
         public string equipment_sr_no { get; set; }
         public string supplier_name { get; set; }
@@ -35,6 +35,7 @@ namespace CMMSAPIs.Models.WC
         public dynamic last_updated_at { get; set; }
         public dynamic closed_at { get; set; }
         public string status { get; set; }
-        public string material_replinishment_status { get; set; }        
+        public int status_code { get; set; }
+        public string material_replinishment_status { get; set; }
     }
 }

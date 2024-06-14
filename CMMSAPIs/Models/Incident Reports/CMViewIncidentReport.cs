@@ -90,6 +90,7 @@ namespace CMMSAPIs.Models.Incident_Reports
         public List<CMImmediate_correction> immediate_correction { get; set; }
         public List<CMProposed_action_plan> proposed_action_plan { get; set; }
         public List<CMInvestigation_team> investigation_team { get; set; }
+        public List<CMInjured_person> other_injured { get; set; }
         public List<CMFileDetails> file_list { get; set; }
     }
     public class CMHistoryLIST

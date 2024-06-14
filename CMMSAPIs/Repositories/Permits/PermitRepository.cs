@@ -494,7 +494,7 @@ namespace CMMSAPIs.Repositories.Permits
             }
             statusSubQuery += $"ELSE '{Status(0)}' END";
             string myQuery = "SELECT " +
-                                 $"ptw.id as permitId, CASE when ptw.endDate < '{UtilsRepository.GetUTCTime()}' then 1 else 0 END as isExpired,ptw.TBT_Done_By as TBT_Done_By_id, ptw.code, ptw.status as ptwStatus, ptw.permitNumber as permit_site_no, permitType.id as permit_type, permitType.title as PermitTypeName, group_concat(distinct asset_cat.name order by asset_cat.id separator ', ') as equipment_categories, facilities.id as workingAreaId, facilities.name as workingAreaName, ptw.title as title, ptw.description as description, acceptedUser.id as request_by_id, CONCAT(acceptedUser.firstName , ' ' , acceptedUser.lastName) as request_by_name, ptw.acceptedDate as request_datetime, issuedUser.id as issued_by_id, CONCAT(issuedUser.firstName , ' ' , issuedUser.lastName) as issued_by_name, ptw.issuedDate as issue_datetime,ptw.endDate as endDate, approvedUser.id as approved_by_id, CONCAT(approvedUser.firstName , ' ' , approvedUser.lastName) as approved_by_name,ptw.TBT_Done_Check as TBT_Done_Check, ptw.approvedDate as approved_datetime, {statusSubQuery} as current_status_short " +
+                                 $"ptw.id as permitId, CASE when ptw.endDate < '{UtilsRepository.GetUTCTime()}' then 1 else 0 END as isExpired,ptw.TBT_Done_By as TBT_Done_By_id, ptw.code, ptw.status as ptwStatus,jc.id as jc_id,jc.JC_Status as jc_status,ptw.permitNumber as permit_site_no, permitType.id as permit_type, permitType.title as PermitTypeName, group_concat(distinct asset_cat.name order by asset_cat.id separator ', ') as equipment_categories, facilities.id as workingAreaId, facilities.name as workingAreaName, ptw.title as title, ptw.description as description, acceptedUser.id as request_by_id, CONCAT(acceptedUser.firstName , ' ' , acceptedUser.lastName) as request_by_name, ptw.acceptedDate as request_datetime, issuedUser.id as issued_by_id, CONCAT(issuedUser.firstName , ' ' , issuedUser.lastName) as issued_by_name, ptw.issuedDate as issue_datetime,ptw.endDate as endDate, approvedUser.id as approved_by_id, CONCAT(approvedUser.firstName , ' ' , approvedUser.lastName) as approved_by_name,ptw.TBT_Done_Check as TBT_Done_Check, ptw.approvedDate as approved_datetime, {statusSubQuery} as current_status_short " +
                                  " FROM " +
                                         "permits as ptw " +
                                   "JOIN " +
@@ -513,6 +513,8 @@ namespace CMMSAPIs.Repositories.Permits
                                          "jobs as job ON ptw.id = job.linkedPermit " +
                                   "LEFT JOIN " +
                                         "users as issuedUser ON issuedUser.id = ptw.issuedById " +
+                                  "LEFT JOIN " +
+                                       "jobcards as jc ON jc.PTW_id = ptw.id " +
                                   "LEFT JOIN " +
                                         "users as approvedUser ON approvedUser.id = ptw.approvedById " +
                                   "LEFT JOIN " +
