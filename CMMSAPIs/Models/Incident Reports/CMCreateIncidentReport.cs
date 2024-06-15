@@ -12,6 +12,7 @@ namespace CMMSAPIs.Models.Incident_Reports
         public int risk_level { get; set; }
         public string severity { get; set; }
         public DateTime incident_datetime { get; set; }
+
         public int victim_id { get; set; }
         public int action_taken_by { get; set; }
         public DateTime action_taken_datetime { get; set; }
@@ -115,7 +116,7 @@ namespace CMMSAPIs.Models.Incident_Reports
         public int? incidents_id { get; set; }
         public string? name { get; set; }
         public int? person_type { get; set; }
-
+        public int other_injured { get; set; }
         public int? age { get; set; }
         public string sex { get; set; }
         public string? designation { get; set; }

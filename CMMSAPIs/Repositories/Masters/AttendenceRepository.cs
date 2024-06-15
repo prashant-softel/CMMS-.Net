@@ -139,11 +139,11 @@ namespace CMMSAPIs.Repositories.Masters
 
         internal async Task<List<CMGetAttendenceList>> GetAttendanceList(int facility_id, int year)
         {
-            string getattendence = "SELECT  cc.Date AS date,cc.facility_id,DAY(cc.Date) AS day_id,MONTH(cc.Date) AS month_id,MONTHNAME(cc.Date) AS month_name, " +
+            string getattendence = "SELECT cc.Date  AS dates,cc.facility_id,DAY(cc.Date) AS day_id,MONTH(cc.Date) AS month_id,MONTHNAME(cc.Date) AS month_name, " +
                 " YEAR(cc.Date) AS years FROM employee_attendance AS cc " +
                 $" WHERE  YEAR(cc.Date) ={year} and facility_id={facility_id} GROUP BY  cc.Date, cc.facility_id ORDER BY  cc.Date;";
             List<CMGetAttendenceList> employeeAttendanceList = await Context.GetData<CMGetAttendenceList>(getattendence).ConfigureAwait(false);
-            string getmonth = "SELECT cc.Date as date, COALESCE(cs.age_Between_35_50) AS age_Between_35_50, COALESCE(cs.age_lessthan_35) AS age_lessthan_35, " +
+            string getmonth = "SELECT  cc.Date as date, COALESCE(cs.age_Between_35_50) AS age_Between_35_50, COALESCE(cs.age_lessthan_35) AS age_lessthan_35, " +
                 $"COALESCE(cs.age_Greater_50) AS age_Greater_50, COUNT(cc.employee_id) AS hfe_employees FROM employee_attendance AS cc " +
                 $" LEFT JOIN ( SELECT Date, SUM(age_Between_35_50) AS age_Between_35_50,SUM(age_lessthan_35) AS age_lessthan_35,SUM(age_Greater_50) AS age_Greater_50 " +
                 $" FROM contractor_attendnace   GROUP BY  Date) AS cs ON  cc.Date = cs.Date  WHERE  YEAR(cc.Date) ={year} " +
@@ -154,6 +154,7 @@ namespace CMMSAPIs.Repositories.Masters
          .GroupBy(x => new { x.dates, x.facility_id, x.month_id, x.month_name, x.years })
          .Select(g => new CMGetAttendenceList
          {
+
              dates = g.Key.dates,
              facility_id = g.Key.facility_id,
              month_id = g.Key.month_id,
@@ -168,35 +169,9 @@ namespace CMMSAPIs.Repositories.Masters
                  age_Greater_50 = g.age_Greater_50,
              }).ToList()
          }).ToList();
+
             return groupedResult;
-            /*
-                        List<CMGetAttendenceList> groupedResult = employeeAttendanceList.GroupBy(x => new { x.dates, x.facility_id, x.month_id, x.month_name, x.years }).Select(group => new CMGetAttendenceList
-                        {
-                            facility_id = group.facility_id,
-                            month_name = group.month_name,
-                            month_id = (int)group.month_id,
-                            years = (int)group.years,
 
-                            month_data = MONTHList.Select(g => new MonthData
-                            {
-                                date = g.date,
-                                hfe_employees = g.hfe_employees,
-                                age_Between_35_50 = g.age_Between_35_50,
-                                age_lessthan_35 = g.age_lessthan_35,
-                                age_Greater_50 = g.age_Greater_50,
-
-                            }).ToList()
-                        }).ToList();
-                        return groupedResult;
-                        /*
-                        return new Dictionary<string, object>
-                {
-                    { "facility_id", groupedData.facility_id },
-                    { "month_id", groupedData.month_id },
-                    { "month_name", groupedData.month_name },
-                    { "years", groupedData.years },
-                    { "month_data", groupedData.month_data }
-                };*/
         }
     }
 }

@@ -162,9 +162,9 @@ namespace CMMSAPIs.Repositories.Masters
         int Exterid = 0;
         internal async Task<CMDefaultResponse> CreateScheduleCourse(TrainingSchedule request, int userID)
         {
-            DateTime data = Convert.ToDateTime(request.Date_of_training);
+
             string crtqry = $"INSERT INTO training_schedule ( CourseId,facility_id, Course_name, ScheduleDate, TraingCompany, Trainer,Mode, Comment, Venue, hfeEmployeeId, CreatedAt, CreatedBy) values " +
-                            $"({request.CourseId},{request.facility_id},'{request.CourseName}','{data.ToString("yyyyy-MM-dd")}',{request.TrainingAgencyId},'{request.TrainerName}','{request.Mode}','{request.Comment}','{request.Venue}',{request.HfeEmployeeId},'{UtilsRepository.GetUTCTime()}',{userID}) ; " +
+                            $"({request.CourseId},{request.facility_id},'{request.CourseName}','{request.Date_of_training}',{request.TrainingAgencyId},'{request.TrainerName}','{request.Mode}','{request.Comment}','{request.Venue}',{request.HfeEmployeeId},'{UtilsRepository.GetUTCTime()}',{userID}) ; " +
                             $"SELECT LAST_INSERT_ID();";
             DataTable dt = await Context.FetchData(crtqry).ConfigureAwait(false);
             int schid = Convert.ToInt32(dt.Rows[0][0]);
