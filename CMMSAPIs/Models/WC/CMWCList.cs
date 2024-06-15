@@ -10,7 +10,7 @@ namespace CMMSAPIs.Models.WC
         public string facility_name { get; set; }
         public int site_wc_number { get; set; }
         public string warranty_claim_title { get; set; }
-        public dynamic date_of_claim { get; set; }
+        public DateTime date_of_claim { get; set; }
         public string equipment_category { get; set; }
         public string equipment_name { get; set; }
         public string equipment_sr_no { get; set; }

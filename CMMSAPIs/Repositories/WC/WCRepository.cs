@@ -203,7 +203,7 @@ namespace CMMSAPIs.Repositories.WC
                                 $"'{unit.affectedSrNo}', '{unit.costOfReplacement}',{unit.approxdailyloss}, {unit.currencyId}, '{((DateTime)unit.warrantyStartAt).ToString("yyyy'-'MM'-'dd")}', " +
                                 $"'{((DateTime)unit.warrantyEndAt).ToString("yyyy'-'MM'-'dd")}', '{unit.warrantyClaimTitle}', '{unit.warrantyDescription}', " +
                                 $"'{unit.correctiveActionByBuyer}','{unit.severity}' ,'{unit.requestToSupplier}', {unit.approverId},{(int)draftStatus}, " +
-                                $"'FAC{1000 + unit.facilityId}', '{((DateTime)unit.failureTime).ToString("yyyy-MM-dd HH-mm")}','{unit.date_of_claim}', {userID}); select LAST_INSERT_ID(); ";
+                                $"'FAC{1000 + unit.facilityId}', '{((DateTime)unit.failureTime).ToString("yyyy-MM-dd HH-mm")}','{((DateTime)unit.date_of_claim).ToString("yyyy-MM-dd HH-mm")}', {userID}); select LAST_INSERT_ID(); ";
                 DataTable dt = await Context.FetchData(qry).ConfigureAwait(false);
                 int id = Convert.ToInt32(dt.Rows[0][0]);
                 cw_id = id;
