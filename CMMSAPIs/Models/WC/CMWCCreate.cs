@@ -19,6 +19,7 @@ namespace CMMSAPIs.Models.WC
         public int currencyId { get; set; }
         public DateTime? warrantyStartAt { get; set; }
         public DateTime? warrantyEndAt { get; set; }
+        public DateTime date_of_claim { get; set; }
         public string title { get; set; }
         public string description { get; set; }
         public List<IFormFile> equipmentImages { get; set; }

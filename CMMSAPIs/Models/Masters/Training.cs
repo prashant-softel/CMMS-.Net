@@ -54,7 +54,7 @@ namespace CMMSAPIs.Models.Masters
         public int Traning_category_id { get; set; }
         public int No_Of_Days { get; set; }
         public int Targeted_Group_Id { get; set; }
-        public int Duration_In_Minutes { get; set; }
+        public int Duration_in_Minutes { get; set; }
         public string Course_Category { get; set; }
         public string Targeted_Group { get; set; }
 

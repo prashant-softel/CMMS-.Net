@@ -54,7 +54,7 @@ namespace CMMSAPIs.Models.Incident_Reports
         public string unsafe_act_cause { get; set; }
         public string is_person_involved { get; set; }
         public List<CMInjured_person> injured_person { get; set; }
-        public List<CMInjured_person> other { get; set; }
+        public List<CMInjured_person> Otherinjured_person { get; set; }
         public List<CMWhy_why_analysis> why_why_analysis { get; set; }
         public List<CMRoot_cause> root_cause { get; set; }
         public List<CMImmediate_correction> immediate_correction { get; set; }
@@ -117,7 +117,7 @@ namespace CMMSAPIs.Models.Incident_Reports
         public int? person_type { get; set; }
 
         public int? age { get; set; }
-        public int? sex { get; set; }
+        public string sex { get; set; }
         public string? designation { get; set; }
         public string? address { get; set; }
         public string? name_contractor { get; set; }

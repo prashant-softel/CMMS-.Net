@@ -169,7 +169,6 @@ namespace CMMSAPIs.Repositories.Masters
              }).ToList()
          }).ToList();
             return groupedResult;
-
             /*
                         List<CMGetAttendenceList> groupedResult = employeeAttendanceList.GroupBy(x => new { x.dates, x.facility_id, x.month_id, x.month_name, x.years }).Select(group => new CMGetAttendenceList
                         {
@@ -198,8 +197,6 @@ namespace CMMSAPIs.Repositories.Masters
                     { "years", groupedData.years },
                     { "month_data", groupedData.month_data }
                 };*/
-
-
         }
     }
 }

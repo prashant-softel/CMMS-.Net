@@ -140,7 +140,7 @@ namespace CMMSAPIs.Repositories.WC
             }
             statusOut += $"ELSE 'Invalid Status' END";
             string myQuery = "SELECT  wc.id as wc_id, wc.facilityID as facility_Id, f.name as facility_name,approxdailyloss, ac.name AS equipment_category, a.name AS equipment_name, equipment_sr_no," +
-                "b1.name AS supplier_name, good_order_id, affected_part, order_reference_number, affected_sr_no, cost_of_replacement, wc.currency," +
+                "b1.name AS supplier_name, good_order_id, affected_part, order_reference_number, affected_sr_no,wc.date_of_claim, cost_of_replacement, wc.currency," +
                 " warranty_start_date, warranty_end_date, warranty_claim_title, warranty_description, " +
                 "corrective_action_by_buyer, request_to_supplier, concat(user.firstName , ' ' , user.lastName) AS approver_name," +
                 $" created_by, issued_on, {statusOut} as status,wc.status as status_code, approved_by, wc_fac_code, failure_time " +
@@ -198,12 +198,12 @@ namespace CMMSAPIs.Repositories.WC
 
                 string qry = "insert into wc(status_updated_at, facilityId, equipment_id, good_order_id, affected_part, order_reference_number, affected_sr_no, " +
                                 "cost_of_replacement,approxdailyloss , currencyId, warranty_start_date, warranty_end_date, warranty_claim_title, warranty_description, " +
-                                "corrective_action_by_buyer,severity, request_to_supplier, approver_id, status, wc_fac_code, failure_time, created_by) values" +
+                                "corrective_action_by_buyer,severity, request_to_supplier, approver_id, status, wc_fac_code, failure_time,date_of_claim, created_by) values" +
                                 $"('{UtilsRepository.GetUTCTime()}', {unit.facilityId}, {unit.equipmentId}, '{unit.goodsOrderId}', '{unit.affectedPart}', '{unit.orderReference}', " +
                                 $"'{unit.affectedSrNo}', '{unit.costOfReplacement}',{unit.approxdailyloss}, {unit.currencyId}, '{((DateTime)unit.warrantyStartAt).ToString("yyyy'-'MM'-'dd")}', " +
                                 $"'{((DateTime)unit.warrantyEndAt).ToString("yyyy'-'MM'-'dd")}', '{unit.warrantyClaimTitle}', '{unit.warrantyDescription}', " +
                                 $"'{unit.correctiveActionByBuyer}','{unit.severity}' ,'{unit.requestToSupplier}', {unit.approverId},{(int)draftStatus}, " +
-                                $"'FAC{1000 + unit.facilityId}', '{((DateTime)unit.failureTime).ToString("yyyy-MM-dd HH-mm")}', {userID}); select LAST_INSERT_ID(); ";
+                                $"'FAC{1000 + unit.facilityId}', '{((DateTime)unit.failureTime).ToString("yyyy-MM-dd HH-mm")}','{unit.date_of_claim}', {userID}); select LAST_INSERT_ID(); ";
                 DataTable dt = await Context.FetchData(qry).ConfigureAwait(false);
                 int id = Convert.ToInt32(dt.Rows[0][0]);
                 cw_id = id;
@@ -318,7 +318,7 @@ namespace CMMSAPIs.Repositories.WC
             "b1.id AS supplier_id, b1.name AS supplier_name, good_order_id, affected_part, order_reference_number, affected_sr_no, cost_of_replacement, wc.currencyId,  wc.currency, approxdailyloss ," + // add cost_of_replacement,
             " warranty_start_date, warranty_end_date,wc.severity, warranty_claim_title, warranty_description, " +
             "corrective_action_by_buyer, request_to_supplier, concat(user.firstName , ' ' , user.lastName) AS approver_name," +
-            " created_by, issued_on, wc.status,approved_by, wc.created_at AS date_of_claim, wc_fac_code, failure_time, startDate warrantyStartDate,  endDate warrantyEndDate" +
+            " created_by, issued_on, wc.status,approved_by, wc.date_of_claim AS date_of_claim, wc_fac_code, failure_time, startDate warrantyStartDate,  endDate warrantyEndDate" +
             " FROM wc " +
             "LEFT JOIN facilities as f ON f.id = wc.facilityId " +
             "LEFT JOIN assets as a ON a.id = wc.equipment_id " +
@@ -429,6 +429,8 @@ namespace CMMSAPIs.Repositories.WC
                 updateQry += $"severity= {request.severity}, ";
             if (request.approverId > 0)
                 updateQry += $"approver_id = {request.approverId}, ";
+            if (request.date_of_claim != null)
+                updateQry += $"date_of_claim =' {request.date_of_claim}', ";
             if (request.failureTime != null)
                 updateQry += $"failure_time = '{((DateTime)request.failureTime).ToString("yyyy'-'MM'-'dd 'HH'-'mm")}', ";
             updateQry = updateQry.Substring(0, updateQry.Length - 2) + $" WHERE id = {request.id};";

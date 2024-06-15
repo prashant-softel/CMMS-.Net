@@ -196,7 +196,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
                     foreach (var item in request.injured_person)
                     {
                         string injured_Query = "INSERT INTO injured_person( incidents_id, person_id, person_type, age, sex, designation, address, name_contractor,  body_part_and_nature_of_injury, work_experience_years, plant_equipment_involved, location_of_incident ) values ";
-                        injured_Query += $"({incident_id}, '{item.name}', {item.person_type}, {item.age}, {item.sex}, " +
+                        injured_Query += $"({incident_id}, '{item.name}', {item.person_type}, {item.age}, '{item.sex}', " +
                                          $"'{item.designation}', '{item.address}', '{item.name_contractor}', " +
                                          $"'{item.body_part_and_nature_of_injury}', {(item.work_experience_years == null ? 0 : item.work_experience_years)}, " +
                                          $"'{item.plant_equipment_involved}', '{item.location_of_incident}') ; ";
@@ -210,14 +210,14 @@ namespace CMMSAPIs.Repositories.Incident_Reports
                     return response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Incident Report creation failed A");
                 }
             }
-            if (request.other != null && request.other.Count > 0)
+            if (request.Otherinjured_person != null && request.Otherinjured_person.Count > 0)
             {
                 try
                 {
-                    foreach (var item in request.other)
+                    foreach (var item in request.Otherinjured_person)
                     {
                         string injured_Query = "INSERT INTO injured_person(incidents_id, person_id, person_type, age, sex, designation, address, name_contractor,  body_part_and_nature_of_injury, work_experience_years, plant_equipment_involved, location_of_incident,other_injured ) values ";
-                        injured_Query += $"({incident_id}, '{item.name}', {item.person_type}, {item.age}, {item.sex}, " +
+                        injured_Query += $"({incident_id}, '{item.name}', {item.person_type}, {item.age}, '{item.sex}', " +
                                          $"'{item.designation}', '{item.address}', '{item.name_contractor}', " +
                                          $"'{item.body_part_and_nature_of_injury}', {(item.work_experience_years == null ? 0 : item.work_experience_years)}, " +
                                          $"'{item.plant_equipment_involved}', '{item.location_of_incident},1') ; ";
@@ -393,14 +393,14 @@ namespace CMMSAPIs.Repositories.Incident_Reports
                     return response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Incident Report creation failed");
                 }
             }
-            if (request.other != null && request.other.Count > 0)
+            if (request.Otherinjured_person != null && request.Otherinjured_person.Count > 0)
             {
                 try
                 {
-                    foreach (var item in request.other)
+                    foreach (var item in request.Otherinjured_person)
                     {
                         string injured_Query = "INSERT INTO injured_person( incidents_id, person_id, person_type, age, sex, designation, address, name_contractor,  body_part_and_nature_of_injury, work_experience_years, plant_equipment_involved, location_of_incident ) values ";
-                        injured_Query += $"({incident_id}, '{item.name}', {item.person_type}, {item.age}, {item.sex}, " +
+                        injured_Query += $"({incident_id}, '{item.name}', {item.person_type}, {item.age},'{item.sex}', " +
                                          $"'{item.designation}', '{item.address}', '{item.name_contractor}', " +
                                          $"'{item.body_part_and_nature_of_injury}', {(item.work_experience_years == null ? 0 : item.work_experience_years)}', " +
                                          $"'{item.plant_equipment_involved}', '{item.location_of_incident}') ; ";
@@ -601,7 +601,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
             List<CMFileDetails> _UploadFileList = await Context.GetData<CMFileDetails>(myQuery4).ConfigureAwait(false);
 
             _IncidentReportList[0].Injured_person = await Getinjured_person(id);
-            _IncidentReportList[0].other_injured = await Getinjured_person(id);
+            _IncidentReportList[0].other_injured = await Getother_person(id);
             _IncidentReportList[0].why_why_analysis = await Getwhy_why_analysis(id);
             _IncidentReportList[0].root_cause = await Getroot_cause(id);
             _IncidentReportList[0].immediate_correction = await Getimmediate_correction(id);
@@ -710,7 +710,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
                 {
                     foreach (var injured in injuredid)
                     {
-                        var matchedPerson = request.injured_person.FirstOrDefault(p => p.injured_item_id == injured.injured_item_id);
+                        var matchedPerson = request.Otherinjured_person.FirstOrDefault(p => p.injured_item_id == injured.injured_item_id);
                         if (matchedPerson != null)
                         {
                             var updateQuery = $@"
@@ -719,7 +719,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
                                      person_id = '{matchedPerson.name}', 
                                      person_type = {matchedPerson.person_type}, 
                                      age = {matchedPerson.age}, 
-                                     sex = {matchedPerson.sex}, 
+                                     sex = '{matchedPerson.sex}', 
                                      designation = '{matchedPerson.designation}', 
                                      address = '{matchedPerson.address}', 
                                      name_contractor = '{matchedPerson.name_contractor}', 
@@ -741,13 +741,61 @@ namespace CMMSAPIs.Repositories.Incident_Reports
             string insertQuerynewinjured = "";
             foreach (var injured in injuredid)
             {
-                var person = request.injured_person.FirstOrDefault(p => p.injured_item_id != injured.injured_item_id);
+                var person = request.Otherinjured_person.FirstOrDefault(p => p.injured_item_id != injured.injured_item_id);
                 if (person != null)
                 {
                     insertQuerynewinjured = "INSERT INTO injured_person (incidents_id, person_id, person_type, age, sex, designation, address, name_contractor, body_part_and_nature_of_injury, work_experience_years, plant_equipment_involved, location_of_incident) VALUES ";
                     {
-                        insertQuerynewinjured += $"({incident_id}, '{person.name}', {person.person_type}, {person.age}, {person.sex}, '{person.designation}', '{person.address}', '{person.name_contractor}', '{person.body_part_and_nature_of_injury}', {(person.work_experience_years == null ? 0 : person.work_experience_years)}, '{person.plant_equipment_involved}', '{person.location_of_incident}')";
+                        insertQuerynewinjured += $"({incident_id}, '{person.name}', {person.person_type}, {person.age}, '{person.sex}', '{person.designation}', '{person.address}', '{person.name_contractor}', '{person.body_part_and_nature_of_injury}', {(person.work_experience_years == null ? 0 : person.work_experience_years)}, '{person.plant_equipment_involved}', '{person.location_of_incident}')";
                         await Context.ExecuteNonQry<int>(insertQuerynewinjured).ConfigureAwait(false);
+
+                    }
+                }
+            }
+            if (request.Otherinjured_person != null && request.Otherinjured_person.Count > 0)
+            {
+                try
+                {
+                    foreach (var injured in injuredid)
+                    {
+                        var matchedPerson = request.Otherinjured_person.FirstOrDefault(p => p.injured_item_id == injured.injured_item_id);
+                        if (matchedPerson != null)
+                        {
+                            var updateQuery = $@"
+                                     UPDATE injured_person SET 
+                                     incidents_id = {incident_id}, 
+                                     person_id = '{matchedPerson.name}', 
+                                     person_type = {matchedPerson.person_type}, 
+                                     age = {matchedPerson.age}, 
+                                     sex = '{matchedPerson.sex}', 
+                                     designation = '{matchedPerson.designation}', 
+                                     address = '{matchedPerson.address}', 
+                                     name_contractor = '{matchedPerson.name_contractor}', 
+                                     body_part_and_nature_of_injury = '{matchedPerson.body_part_and_nature_of_injury}', 
+                                      work_experience_years = {(matchedPerson.work_experience_years == null ? 0 : matchedPerson.work_experience_years)},
+                                     plant_equipment_involved = '{matchedPerson.plant_equipment_involved}', 
+                                     location_of_incident = '{matchedPerson.location_of_incident}' 
+                                     WHERE id = {matchedPerson.injured_item_id};";
+
+                            await Context.ExecuteNonQry<int>(updateQuery).ConfigureAwait(false);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    return new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Incident Report update failed");
+                }
+            }
+            string insertQuerynewinjured1 = "";
+            foreach (var injured in injuredid)
+            {
+                var person = request.Otherinjured_person.FirstOrDefault(p => p.injured_item_id != injured.injured_item_id);
+                if (person != null)
+                {
+                    insertQuerynewinjured1 = "INSERT INTO injured_person (incidents_id, person_id, person_type, age, sex, designation, address, name_contractor, body_part_and_nature_of_injury, work_experience_years, plant_equipment_involved, location_of_incident) VALUES ";
+                    {
+                        insertQuerynewinjured += $"({incident_id}, '{person.name}', {person.person_type}, {person.age}, '{person.sex}', '{person.designation}', '{person.address}', '{person.name_contractor}', '{person.body_part_and_nature_of_injury}', {(person.work_experience_years == null ? 0 : person.work_experience_years)}, '{person.plant_equipment_involved}', '{person.location_of_incident}')";
+                        await Context.ExecuteNonQry<int>(insertQuerynewinjured1).ConfigureAwait(false);
 
                     }
                 }
@@ -1094,12 +1142,19 @@ namespace CMMSAPIs.Repositories.Incident_Reports
 
         internal async Task<List<CMInjured_person>> Getinjured_person(int incidents_id)
         {
+
             string selectqry = " SELECT\r\n    i.id as injured_item_id,\r\n    incidents_id,\r\n     person_id as name,\r\n     case when i.person_type =1 then concat(u.firstName, ' ', u.lastname)\r\n when i.person_type =2 then b.name\r\n else person_name\r\n end as person_name ,\r\n    person_type, case when person_type = 1 then 'Employee' when person_type = 2 then 'Contractor'  when person_type = 3 then 'Other' else '' end as person_type_name,\r\n    age,\r\n    sex,\r\n    designation,\r\n    i.address,\r\n    name_contractor,\r\n    body_part_and_nature_of_injury,\r\n    work_experience_years,\r\n    plant_equipment_involved,\r\n    location_of_incident, g.name as gender_name from injured_person i \r\nleft join  gender g on g.id = i.sex\r\nleft join users u on u.id = i.person_id\r\nleft join business b on b.id = i.person_id" +
-                " where incidents_id = " + incidents_id + " and other_injured=1;";
+                " where incidents_id = " + incidents_id + ";";
             List<CMInjured_person> result = await Context.GetData<CMInjured_person>(selectqry).ConfigureAwait(false);
             return result;
         }
-
+        private async Task<List<CMInjured_person>> Getother_person(int id)
+        {
+            string selectqry = " SELECT\r\n    i.id as injured_item_id,\r\n    incidents_id,\r\n     person_id as name,\r\n     case when i.person_type =1 then concat(u.firstName, ' ', u.lastname)\r\n when i.person_type =2 then b.name\r\n else person_name\r\n end as person_name ,\r\n    person_type, case when person_type = 1 then 'Employee' when person_type = 2 then 'Contractor'  when person_type = 3 then 'Other' else '' end as person_type_name,\r\n    age,\r\n    sex,\r\n    designation,\r\n    i.address,\r\n    name_contractor,\r\n    body_part_and_nature_of_injury,\r\n    work_experience_years,\r\n    plant_equipment_involved,\r\n    location_of_incident, g.name as gender_name from injured_person i \r\nleft join  gender g on g.id = i.sex\r\nleft join users u on u.id = i.person_id\r\nleft join business b on b.id = i.person_id" +
+                 " where incidents_id = " + id + " and other_injured=1;";
+            List<CMInjured_person> result = await Context.GetData<CMInjured_person>(selectqry).ConfigureAwait(false);
+            return result;
+        }
         internal async Task<List<CMWhy_why_analysis>> Getwhy_why_analysis(int incidents_id)
         {
             string selectqry = "select id as why_item_id, incidents_id, why,cause from why_why_analysis where incidents_id = " + incidents_id + ";";

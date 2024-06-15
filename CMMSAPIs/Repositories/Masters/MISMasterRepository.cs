@@ -1221,7 +1221,7 @@ namespace CMMSAPIs.Repositories.Masters
 
         internal async Task<List<CMObservationReport>> GetObservationSheetReport(string facility_id, DateTime fromDate, DateTime toDate)
         {
-            string myQuery = " select st.id, distinct monthname(PM_Schedule_Observation_add_date) as month_of_observation, " +
+            string myQuery = " select  distinct monthname(PM_Schedule_Observation_add_date) as month_of_observation,st.id, " +
                 " PM_Schedule_Observation_add_date as date_of_observation, " +
                 " concat(contarctorname.firstName, ' ', contarctorname.lastName) contractor_name," +
                 " '' location_of_observation, '' source_of_observation,''risk_type, Description observation_description," +
