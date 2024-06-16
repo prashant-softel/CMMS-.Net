@@ -1,4 +1,5 @@
 using CMMSAPIs.Helper;
+using CMMSAPIs.Models.Calibration;
 using CMMSAPIs.Models.Masters;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Utils;
@@ -198,7 +199,7 @@ namespace CMMSAPIs.Repositories.Masters
             DataTable dt = await Context.FetchData(qry).ConfigureAwait(false);
             int id = Convert.ToInt32(dt.Rows[0][0]);
             //Add history
-            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Source Observation Added");
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Source CMObservation Added");
         }
 
         internal async Task<CMDefaultResponse> UpdateSourceOfObservation(MISSourceOfObservation request, int userID)
@@ -211,14 +212,14 @@ namespace CMMSAPIs.Repositories.Masters
             updateQry += $"updatedBy = '{userID}', updatedAt = '{UtilsRepository.GetUTCTime()}' WHERE id = {request.id};";
             await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
             //Add history
-            return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Source Observation Updated");
+            return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Source CMObservation Updated");
         }
         internal async Task<CMDefaultResponse> DeleteSourceOfObservation(int id, int userId)
         {
             string deleteQry = $"UPDATE mis_m_observationsheet SET status = 0 , updatedBy = '{userId}' , updatedAt = '{UtilsRepository.GetUTCTime()}' WHERE id = {id};";
             await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
             //Add history
-            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Source Observation Deleted");
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Source CMObservation Deleted");
         }
 
 
@@ -251,7 +252,7 @@ namespace CMMSAPIs.Repositories.Masters
             DataTable dt = await Context.FetchData(qry).ConfigureAwait(false);
             int id = Convert.ToInt32(dt.Rows[0][0]);
             //Add history
-            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Type Observation Added");
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Type CMObservation Added");
         }
 
         internal async Task<CMDefaultResponse> UpdateTypeOfObservation(MISTypeObservation request, int userID)
@@ -264,14 +265,14 @@ namespace CMMSAPIs.Repositories.Masters
             updateQry += $"updatedBy = '{userID}', updatedAt = '{UtilsRepository.GetUTCTime()}' WHERE id = {request.id};";
             await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
             //Add history
-            return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Type Observation Updated");
+            return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Type CMObservation Updated");
         }
         internal async Task<CMDefaultResponse> DeleteTypeOfObservation(int id, int userId)
         {
             string deleteQry = $"UPDATE mis_m_typeofobservation SET status = 0 , updatedBy = '{userId}' , updatedAt = '{UtilsRepository.GetUTCTime()}' WHERE id = {id};";
             await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
             //Add history
-            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Type Observation Deleted");
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Type CMObservation Deleted");
         }
 
 
@@ -1114,7 +1115,7 @@ namespace CMMSAPIs.Repositories.Masters
 
             for (int i = 0; i < groupedResult[0].item_data.Count; i++)
             {
-                string detail_Q = " select id, DATE_FORMAT(date,'%Y-%m-%d') date,description,creditQty as procured_qty,debitQty as consumed_qty," +
+                string detail_Q = " select id, DATE_FORMAT(date,'%Y-%m-%d') date,mis_waterdata.description,creditQty as procured_qty,debitQty as consumed_qty," +
                       "  case when consumeTypeId = 1 then 'Procurement' when consumeTypeId = 2 then 'Consumption' else 'NA' end as TransactionType" +
                       " from mis_waterdata where waterTypeId = " + groupedResult[0].item_data[i].waterTypeId + " and isActive = 1 and mis_waterdata.plantId =  " + facility_id + " and MONTH(date) = " + Month + " and Year(date) = " + Year + " ;";
 
@@ -1190,7 +1191,7 @@ namespace CMMSAPIs.Repositories.Masters
             {
                 for (int i = 0; i < groupedResult_new[0].item_data.Count; i++)
                 {
-                    string detail_Q = " select mw.id,date,mw.description,creditQty as procured_qty,debitQty as consumed_qty," +
+                    string detail_Q = " select waste_data.id,date,waste_data.description,creditQty as procured_qty,debitQty as consumed_qty," +
                           "  case when consumeTypeId = 1 then 'Procurement' when consumeTypeId = 2 then 'Consumption' else 'NA' end as TransactionType, show_opening" +
                           " from waste_data LEFT JOIN mis_wastetype mw ON mw.id = waste_data.wasteTypeId where wasteTypeId = " + groupedResult_new[0].item_data[i].wasteTypeId + " and waste_data.isHazardous = " + Hazardous + " AND waste_data.facilityId = " + facility_id + " AND MONTH(date) = " + Month + " AND YEAR(date) = " + Year + " ;";
 
@@ -1568,6 +1569,130 @@ namespace CMMSAPIs.Repositories.Masters
             await Context.ExecuteNonQry<int>(delqry).ConfigureAwait(false);
             return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Document deleted");
         }
-    }
 
+        internal async Task<CMDefaultResponse> CreateObservation(CMObservation request, int UserID)
+        {
+            CMDefaultResponse response = null;
+            int insertedValue = 0;
+            try
+            {
+                string insertQuery = $"INSERT INTO observations(" +
+                                     $"facility_id, contractor_name, risk_type_id, preventive_action, responsible_person, contact_number, cost_type, " +
+                                     $"date_of_observation, type_of_observation, location_of_observation, source_of_observation, target_date, " +
+                                     $"observation_description, created_at, created_by, is_active) VALUES " +
+                                     $"({request.facility_id},'{request.contractor_name}', {request.risk_type_id}, '{request.preventive_action}', '{request.responsible_person}', '{request.contact_number}', " +
+                                     $"'{request.cost_type}', '{request.date_of_observation:yyyy-MM-dd HH:mm:ss}', '{request.type_of_observation}', '{request.location_of_observation}', " +
+                                     $"'{request.source_of_observation}', '{request.target_date:yyyy-MM-dd HH:mm:ss}', '{request.observation_description}', " +
+                                     $"'{UtilsRepository.GetUTCTime()}', {UserID}, 1); " +
+                                     $"SELECT LAST_INSERT_ID();";
+
+                DataTable dt = await Context.FetchData(insertQuery).ConfigureAwait(false);
+                if (dt.Rows.Count > 0)
+                {
+                    insertedValue = Convert.ToInt32(dt.Rows[0][0]);
+
+                    if (request.file_ids.Count > 0)
+                    {
+                        for (var i = 0; i < request.file_ids.Count; i++)
+                        {
+                            string update_Q = $"update uploadedfiles set module_type = {(int)CMMS.CMMS_Modules.OBSERVATION} , module_ref_id = {insertedValue} where id = {request.file_ids[i]};";
+                            int result = await Context.ExecuteNonQry<int>(update_Q).ConfigureAwait(false);
+                        }
+                    }
+                }
+                response = new CMDefaultResponse(insertedValue, CMMS.RETRUNSTATUS.SUCCESS, "Observation data saved successfully.");
+            }catch(Exception ex)
+            {
+                response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.SUCCESS, "Observation data failed to save.");
+            }
+            return response;
+        }
+        internal async Task<CMDefaultResponse> UpdateObservation(CMObservation request, int UserID)
+        {
+            CMDefaultResponse response = null;
+            try
+            {
+                string updateQuery = $"UPDATE observations SET " +
+                                     $"contractor_name = '{request.contractor_name}', " +
+                                     $"risk_type_id = {request.risk_type_id}, " +
+                                     $"preventive_action = '{request.preventive_action}', " +
+                                     $"responsible_person = '{request.responsible_person}', " +
+                                     $"contact_number = '{request.contact_number}', " +
+                                     $"cost_type = '{request.cost_type}', " +
+                                     $"date_of_observation = '{request.date_of_observation:yyyy-MM-dd HH:mm:ss}', " +
+                                     $"type_of_observation = '{request.type_of_observation}', " +
+                                     $"location_of_observation = '{request.location_of_observation}', " +
+                                     $"source_of_observation = '{request.source_of_observation}', " +
+                                     $"target_date = '{request.target_date:yyyy-MM-dd HH:mm:ss}', " +
+                                     $"observation_description = '{request.observation_description}', " +
+                                     $"updated_at = '{UtilsRepository.GetUTCTime()}', " +
+                                     $"updated_by = {UserID} " +
+                                     $"WHERE id = {request.id};";
+                await Context.ExecuteNonQry<int>(updateQuery).ConfigureAwait(false);
+                response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Observation data updated successfully.");
+
+            }catch(Exception ex)
+            {
+                response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Failed to update observation data.");
+            }
+            return response;
+        }
+        internal async Task<CMDefaultResponse> DeleteObservation(int id, int UserID)
+        {
+            CMDefaultResponse response = null;
+            try
+            {
+                string updateQuery = $"UPDATE observations SET " +
+                                     $"is_active = 0 " +
+                                     $"WHERE id = {id};";
+                await Context.ExecuteNonQry<int>(updateQuery).ConfigureAwait(false);
+                response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "CMObservation data deleted successfully.");
+
+            }
+            catch (Exception ex)
+            {
+                response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Failed to delete observation data.");
+            }
+            return response;
+        }
+
+        internal async Task<List<CMObservation>> GetObservationList(int facilityId, DateTime fromDate, DateTime toDate)
+        {
+            string myQuery = "select observations.id,observations.facility_id,facilities.name facility_name, " +
+                " contractor_name, risk_type_id,ir_risktype.risktype as risk_type_name, preventive_action, responsible_person, contact_number, cost_type, " +
+                " date_of_observation, type_of_observation, location_of_observation, source_of_observation, " +
+                " target_date, observation_description, created_at, concat(createdBy.firstName, ' ', createdBy.lastName) created_by, " +
+                " updated_at, concat(updatedBy.firstName, ' ', updatedBy.lastName) updated_by " +
+                " from observations" +
+                " left join ir_risktype ON observations.risk_type_id = ir_risktype.id" +
+                " left join facilities ON observations.facility_id = facilities.id" +
+                " left join users createdBy on createdBy.id = observations.created_by" +
+                " left join users updatedBy on updatedBy.id = observations.updated_by" +
+                " where is_active = 1 and observations.facility_id = "+ facilityId + "  and created_at between '"+ fromDate.ToString("yyyy-MM-dd") + "' and '"+ toDate.ToString("yyyy-MM-dd") + "';";
+            List<CMObservation> Result = await Context.GetData<CMObservation>(myQuery).ConfigureAwait(false);
+            return Result;
+        }
+        internal async Task<CMObservationByIdList> GetObservationById(int observation_id)
+        {
+            string myQuery = "select observations.id,observations.facility_id,facilities.name facility_name, " +
+                " contractor_name, risk_type_id,ir_risktype.risktype as risk_type_name, preventive_action, responsible_person, contact_number, cost_type, " +
+                " date_of_observation, type_of_observation, location_of_observation, source_of_observation, " +
+                " target_date, observation_description, created_at, concat(createdBy.firstName, ' ', createdBy.lastName) created_by, " +
+                " updated_at, concat(updatedBy.firstName, ' ', updatedBy.lastName) updated_by " +
+                " from observations" +
+                " left join ir_risktype ON observations.risk_type_id = ir_risktype.id" +
+                " left join facilities ON observations.facility_id = facilities.id" +
+                " left join users createdBy on createdBy.id = observations.created_by" +
+                " left join users updatedBy on updatedBy.id = observations.updated_by" +
+                " where is_active = 1 and observations.id = " + observation_id + ";";
+            List<CMObservationByIdList> Result = await Context.GetData<CMObservationByIdList>(myQuery).ConfigureAwait(false);
+            string myQuery4 = "SELECT U.id, file_path as fileName, FC.name as fileCategory, U.File_Size as fileSize, U.status,U.description, '' as ptwFiles FROM uploadedfiles AS U " +
+             " LEFT JOIN observations  as observations on observations.id = U.module_ref_id Left join filecategory FC on FC.Id = U.file_category " +
+             " where observations.id = " + observation_id + " and U.module_type = " + (int)CMMS.CMMS_Modules.OBSERVATION + ";";
+
+            List<CMFileDetailObservation> _UploadFileList = await Context.GetData<CMFileDetailObservation>(myQuery4).ConfigureAwait(false);
+            Result[0].FileDetails = _UploadFileList;
+            return Result[0];
+        }
+    }
 }

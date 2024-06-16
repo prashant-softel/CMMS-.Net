@@ -105,6 +105,11 @@ namespace CMMSAPIs.Repositories.Masters
                $" select id ,{id},0,0,0,0,0,0,0,NOW(),0 from userroles; ";
             DataTable dt_Roles = await Context.FetchData(insertIntoRoles).ConfigureAwait(false);
 
+            string insertIntoUserRoles = $"INSERT INTO UsersAccess(userId , featureId , `add` , edit , `delete` , `view` , issue , approve , selfView , " +
+   $"lastModifiedAt , lastModifiedBy ) " +
+   $" select id ,{id},0,0,0,0,0,0,0,NOW(),0 from userroles; ";
+            DataTable dt_UserRoles = await Context.FetchData(insertIntoUserRoles).ConfigureAwait(false);
+
             response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Module Added Successfully");
             return response;
         }
