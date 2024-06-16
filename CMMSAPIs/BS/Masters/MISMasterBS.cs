@@ -109,6 +109,11 @@ namespace CMMSAPIs.BS.MISMasters
         Task<List<MISTypeObservation>> GetDocument();
         Task<CMDefaultResponse> UpdateDocument(MISTypeObservation request, int userID);
         Task<CMDefaultResponse> DeleteDocument(int id, int userID);
+        Task<CMObservationByIdList> GetObservationById(int observation_id);
+        Task<List<CMObservation>> GetObservationList(int facilityId, DateTime fromDate, DateTime toDate);
+        Task<CMDefaultResponse> DeleteObservation(int id, int UserID);
+        Task<CMDefaultResponse> UpdateObservation(CMObservation request, int UserID);
+        Task<CMDefaultResponse> CreateObservation(CMObservation request, int UserID);
     }
     public class MISMasterBS : IMISMasterBS
     {
@@ -1536,6 +1541,81 @@ namespace CMMSAPIs.BS.MISMasters
                 using (var repos = new MISMasterRepository(getDB))
                 {
                     return await repos.DeleteDocument(id);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<CMDefaultResponse> CreateObservation(CMObservation request, int UserID)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.CreateObservation(request, UserID);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<CMDefaultResponse> UpdateObservation(CMObservation request, int UserID)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.UpdateObservation(request, UserID);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<CMDefaultResponse> DeleteObservation(int id, int UserID)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.DeleteObservation(id, UserID);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<List<CMObservation>> GetObservationList(int facilityId, DateTime fromDate, DateTime toDate)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.GetObservationList(facilityId, fromDate, toDate);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<CMObservationByIdList> GetObservationById(int observation_id)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.GetObservationById(observation_id);
 
                 }
             }
