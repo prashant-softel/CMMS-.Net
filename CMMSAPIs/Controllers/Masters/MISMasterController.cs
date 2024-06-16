@@ -1519,5 +1519,78 @@ namespace CMMSAPIs.Controllers.Masters
                 throw;
             }
         }
+        [Route("GetObservationList")]
+        [HttpGet]
+        public async Task<IActionResult> GetObservationList(int facilityId, DateTime fromDate, DateTime toDate)
+        {
+            try
+            {
+                var data = await _IMISMasterBS.GetObservationList(facilityId, fromDate, toDate);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        [Route("GetObservationById")]
+        [HttpGet]
+        public async Task<IActionResult> GetObservationById(int observation_id)
+        {
+            try
+            {
+                var data = await _IMISMasterBS.GetObservationById(observation_id);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        [Route("CreateObservation")]
+        [HttpPost]
+        public async Task<IActionResult> CreateObservation(CMObservation request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.CreateObservation(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        [Route("UpdateObservation")]
+        [HttpPost]
+        public async Task<IActionResult> UpdateObservation(CMObservation request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.UpdateObservation(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        [Route("DeleteObservation")]
+        [HttpDelete]
+        public async Task<IActionResult> DeleteObservation(int id)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.DeleteObservation(id, userID);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }
