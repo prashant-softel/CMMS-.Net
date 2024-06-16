@@ -558,4 +558,61 @@ namespace CMMSAPIs.Models.Masters
         public int between_30_to_50 { get; set; }
         public int greater_than_50 { get; set; }
     }
+
+
+    public class CMObservation
+    {
+        public int id { get; set; }
+        public int facility_id { get; set; }
+        public string contractor_name { get; set; }
+        public int risk_type_id { get; set; }
+        public string risk_type_name { get; set; }
+        public string preventive_action { get; set; }
+        public string responsible_person { get; set; }
+        public string contact_number { get; set; }
+        public string cost_type { get; set; }
+        public DateTime? date_of_observation { get; set; }
+        public string type_of_observation { get; set; }
+        public string location_of_observation { get; set; }
+        public string source_of_observation { get; set; }
+        public DateTime? target_date { get; set; }
+        public string observation_description { get; set; }
+        public DateTime? created_at { get; set; }
+        public string created_by { get; set; }
+        public DateTime? updated_at { get; set; }
+        public string updated_by { get; set; }
+        public List<int> file_ids { get; set; }
+    }
+    public class CMObservationByIdList
+    {
+        public int id { get; set; }
+        public int facility_id { get; set; }
+        public string contractor_name { get; set; }
+        public int risk_type_id { get; set; }
+        public string risk_type_name { get; set; }
+        public string preventive_action { get; set; }
+        public string responsible_person { get; set; }
+        public string contact_number { get; set; }
+        public string cost_type { get; set; }
+        public DateTime? date_of_observation { get; set; }
+        public string type_of_observation { get; set; }
+        public string location_of_observation { get; set; }
+        public string source_of_observation { get; set; }
+        public DateTime? target_date { get; set; }
+        public string observation_description { get; set; }
+        public DateTime? created_at { get; set; }
+        public string created_by { get; set; }
+        public DateTime? updated_at { get; set; }
+        public string updated_by { get; set; }
+        public List<CMFileDetailObservation> FileDetails { get; set; }    
+    }
+    public class CMFileDetailObservation
+    {
+        public int id { get; set; }
+        public string fileName { get; set; }
+        public string fileCategory { get; set; }
+        public double fileSize { get; set; }
+        public int status { get; set; }
+        public string description { get; set; }
+    }
 }
