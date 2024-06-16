@@ -287,7 +287,8 @@ namespace CMMSAPIs.Helper
             SEND_INVITATION,
             MARK_ATTENDENCE,
             EXECUTE_SCHEDULE,
-            STATUTORY
+            STATUTORY,
+            OBSERVATION
         }
 
         public enum INCIDENT_RISK_LEVEL
