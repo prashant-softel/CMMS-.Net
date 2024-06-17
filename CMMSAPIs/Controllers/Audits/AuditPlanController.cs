@@ -11,6 +11,7 @@ using CMMSAPIs.Models.PM;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
+using CMMSAPIs.Models.Users;
 
 namespace CMMSAPIs.Controllers.Audits
 {
@@ -456,5 +457,22 @@ namespace CMMSAPIs.Controllers.Audits
                 return Ok(item);
             }
         }
+
+        [Route("AuditLinkToPermit")]
+        [HttpPut]
+        public async Task<IActionResult> AuditLinkToPermit(int audit_id, int ptw_id)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _AuditPlanBS.AuditLinkToPermit(audit_id, ptw_id, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
     }
 }
