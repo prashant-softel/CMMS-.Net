@@ -235,6 +235,9 @@ namespace CMMSAPIs.Repositories.Audits
                 case CMMS.CMMS_Status.AUDIT_EXECUTED:
                     retValue = "Executed";
                     break;
+                case CMMS.CMMS_Status.PTW_LINKED_TO_AUDIT:
+                    retValue = "Audit link with permit";
+                    break;
                 default:
                     retValue = "Unknown <" + m_notificationID + ">";
                     break;
@@ -534,16 +537,16 @@ namespace CMMSAPIs.Repositories.Audits
                                 updateQry += $"PM_Schedule_Observation_added_by = {userID}, " +
                                             $"PM_Schedule_Observation_add_date = '{UtilsRepository.GetUTCTime()}', " +
                                             $"PM_Schedule_Observation = '{schedule_detail.observation}' {CPtypeValue} ";
-                                message = "Observation Added";
-                                response = new CMDefaultResponse(schedule_detail.execution_id, CMMS.RETRUNSTATUS.SUCCESS, "Observation Added Successfully");
+                                message = "CMObservation Added";
+                                response = new CMDefaultResponse(schedule_detail.execution_id, CMMS.RETRUNSTATUS.SUCCESS, "CMObservation Added Successfully");
                             }
                             else
                             {
                                 updateQry += $"PM_Schedule_Observation = '{schedule_detail.observation}', ";
                                 updateQry += $"PM_Schedule_Observation_update_by = {userID}, " +
                                             $"PM_Schedule_Observation_update_date = '{UtilsRepository.GetUTCTime()}' {CPtypeValue} ";
-                                message = "Observation Updated";
-                                response = new CMDefaultResponse(schedule_detail.execution_id, CMMS.RETRUNSTATUS.SUCCESS, "Observation Updated Successfully");
+                                message = "CMObservation Updated";
+                                response = new CMDefaultResponse(schedule_detail.execution_id, CMMS.RETRUNSTATUS.SUCCESS, "CMObservation Updated Successfully");
                             }
                             updateQry += $"WHERE id = {schedule_detail.execution_id};";
                             await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
@@ -1179,6 +1182,9 @@ namespace CMMSAPIs.Repositories.Audits
                 case CMMS.CMMS_Status.AUDIT_EXECUTED:
                     retValue = String.Format("Audit Close Rejected by {0} ", PlanObj.created_by_name);
                     break;
+                case CMMS.CMMS_Status.PTW_LINKED_TO_AUDIT:
+                    retValue = String.Format("Audit linked with permit by {0} ", PlanObj.created_by_name);
+                    break;
                 default:
                     break;
             }
@@ -1435,7 +1441,8 @@ namespace CMMSAPIs.Repositories.Audits
                     retValue = $"Audit Rejected By {Obj.rejected_by_name}"; break;
                 case CMMS.CMMS_Status.AUDIT_CLOSED:
                     retValue = $"Audit Closed By {Obj.closed_by_name}"; break;
-
+                case CMMS.CMMS_Status.PTW_LINKED_TO_AUDIT:
+                    retValue = $"Audit linked with permit By {Obj.closed_by_name}"; break;
                 default:
                     break;
             }
@@ -1601,6 +1608,26 @@ namespace CMMSAPIs.Repositories.Audits
             {
                 response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Audit plan does not exists to approve close audit.");
             }
+
+            return response;
+        }
+
+        internal async Task<CMDefaultResponse> AuditLinkToPermit(int audit_id, int ptw_id, int updatedBy)
+        {
+            string updateQry = $"update st_audit set Audit_update_by_id = {updatedBy},status = {(int)CMMS.CMMS_Status.PTW_LINKED_TO_AUDIT}, Audit_update_date = '{UtilsRepository.GetUTCTime()}', linked_permit_id = {ptw_id}  where id =  {audit_id};";
+            int retVal = await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+
+            CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
+            if (retVal > 0)
+            {
+                retCode = CMMS.RETRUNSTATUS.SUCCESS;
+            }
+
+    
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.AUDIT_PLAN, audit_id, CMMS.CMMS_Modules.AUDIT_PLAN, ptw_id, $"Permit <{ptw_id}> Assigned to Audit <{audit_id}>", CMMS.CMMS_Status.PTW_LINKED_TO_AUDIT, updatedBy);
+
+            
+            CMDefaultResponse response = new CMDefaultResponse(audit_id, CMMS.RETRUNSTATUS.SUCCESS, $"Audit <{audit_id}> Linked To Permit <{ptw_id}> ");
 
             return response;
         }
