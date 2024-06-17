@@ -1304,7 +1304,7 @@ namespace CMMSAPIs.Repositories.SM
                         // Construct the SQL UPDATE statement for smrsitem
                         string updateStmt = $"START TRANSACTION; " +
                             $"UPDATE smrsitems " +
-                            $"SET asset_item_ID = {request.cmmrsItems[i].asset_item_ID}, available_qty = {request.cmmrsItems[i].qty}, " +
+                            $"SET asset_item_ID = {request.cmmrsItems[i].asset_item_ID},  " +
                             $"requested_qty = {request.cmmrsItems[i].requested_qty}, " +
                             $"returned_qty = {request.cmmrsItems[i].returned_qty}, " +
                             $"return_remarks = '{request.cmmrsItems[i].return_remarks}' " +
