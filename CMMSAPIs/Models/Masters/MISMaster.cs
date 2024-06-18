@@ -572,9 +572,9 @@ namespace CMMSAPIs.Models.Masters
         public string contact_number { get; set; }
         public string cost_type { get; set; }
         public DateTime? date_of_observation { get; set; }
-        public string type_of_observation { get; set; }
+        public int type_of_observation { get; set; }
         public string location_of_observation { get; set; }
-        public string source_of_observation { get; set; }
+        public int source_of_observation { get; set; }
         public DateTime? target_date { get; set; }
         public string observation_description { get; set; }
         public DateTime? created_at { get; set; }
@@ -595,9 +595,11 @@ namespace CMMSAPIs.Models.Masters
         public string contact_number { get; set; }
         public string cost_type { get; set; }
         public DateTime? date_of_observation { get; set; }
-        public string type_of_observation { get; set; }
+        public int type_of_observation { get; set; }
+        public string type_of_observation_name { get; set; }
         public string location_of_observation { get; set; }
-        public string source_of_observation { get; set; }
+        public int source_of_observation { get; set; }
+        public string source_of_observation_name { get; set; }
         public DateTime? target_date { get; set; }
         public string observation_description { get; set; }
         public DateTime? created_at { get; set; }
@@ -616,3 +618,4 @@ namespace CMMSAPIs.Models.Masters
         public string description { get; set; }
     }
 }
+
