@@ -1662,13 +1662,14 @@ namespace CMMSAPIs.Repositories.Masters
                 " contractor_name, risk_type_id,ir_risktype.risktype as risk_type_name, preventive_action, responsible_person, contact_number, cost_type, " +
                 " date_of_observation, type_of_observation, location_of_observation, source_of_observation, " +
                 " target_date, observation_description, created_at, concat(createdBy.firstName, ' ', createdBy.lastName) created_by, " +
-                " updated_at, concat(updatedBy.firstName, ' ', updatedBy.lastName) updated_by " +
+                " updated_at, concat(updatedBy.firstName, ' ', updatedBy.lastName) updated_by,mis_m_typeofobservation.name as type_of_observation_name " +
                 " from observations" +
                 " left join ir_risktype ON observations.risk_type_id = ir_risktype.id" +
+                " left join mis_m_typeofobservation ON observations.type_of_observation  = mis_m_typeofobservation.id" +
                 " left join facilities ON observations.facility_id = facilities.id" +
                 " left join users createdBy on createdBy.id = observations.created_by" +
                 " left join users updatedBy on updatedBy.id = observations.updated_by" +
-                " where is_active = 1 and observations.facility_id = "+ facilityId + "  and created_at between '"+ fromDate.ToString("yyyy-MM-dd") + "' and '"+ toDate.ToString("yyyy-MM-dd") + "';";
+                " where is_active = 1 and observations.facility_id = "+ facilityId + "  and created_at >= '"+ fromDate.ToString("yyyy-MM-dd") + "' and created_at <= '" + toDate.ToString("yyyy-MM-dd") + "';";
             List<CMObservation> Result = await Context.GetData<CMObservation>(myQuery).ConfigureAwait(false);
             return Result;
         }
@@ -1678,9 +1679,10 @@ namespace CMMSAPIs.Repositories.Masters
                 " contractor_name, risk_type_id,ir_risktype.risktype as risk_type_name, preventive_action, responsible_person, contact_number, cost_type, " +
                 " date_of_observation, type_of_observation, location_of_observation, source_of_observation, " +
                 " target_date, observation_description, created_at, concat(createdBy.firstName, ' ', createdBy.lastName) created_by, " +
-                " updated_at, concat(updatedBy.firstName, ' ', updatedBy.lastName) updated_by " +
+                " updated_at, concat(updatedBy.firstName, ' ', updatedBy.lastName) updated_by,mis_m_typeofobservation.name as type_of_observation_name " +
                 " from observations" +
                 " left join ir_risktype ON observations.risk_type_id = ir_risktype.id" +
+                " left join mis_m_typeofobservation ON observations.type_of_observation  = mis_m_typeofobservation.id" +
                 " left join facilities ON observations.facility_id = facilities.id" +
                 " left join users createdBy on createdBy.id = observations.created_by" +
                 " left join users updatedBy on updatedBy.id = observations.updated_by" +
