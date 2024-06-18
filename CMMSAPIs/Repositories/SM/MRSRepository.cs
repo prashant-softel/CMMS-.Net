@@ -1307,6 +1307,7 @@ namespace CMMSAPIs.Repositories.SM
                             $"SET asset_item_ID = {request.cmmrsItems[i].asset_item_ID},  " +
                             $"requested_qty = {request.cmmrsItems[i].requested_qty}, " +
                             $"returned_qty = {request.cmmrsItems[i].returned_qty}, " +
+                            $"serial_number = '{request.cmmrsItems[i].serial_number}', " +
                             $"return_remarks = '{request.cmmrsItems[i].return_remarks}' " +
                             $"WHERE ID = {request.cmmrsItems[i].mrs_item_id} ; " +
                             "COMMIT;";
@@ -1332,6 +1333,7 @@ namespace CMMSAPIs.Repositories.SM
                             $"UPDATE smrsitems " +
                             $"SET  " +
                             $"returned_qty = {request.faultyItems[i].returned_qty}, " +
+                            $"serial_number = '{request.cmmrsItems[i].serial_number}', " +
                             $"return_remarks = '{request.faultyItems[i].return_remarks}' " +
                             $"WHERE ID = {request.faultyItems[i].mrs_item_ID} ; " +
                             "COMMIT;";
