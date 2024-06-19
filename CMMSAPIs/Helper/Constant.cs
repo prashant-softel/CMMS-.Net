@@ -577,8 +577,10 @@ namespace CMMSAPIs.Helper
             STATUTORY_DELETED,
             STATUTORY_APPROVED,
             STATUTORY_REJECTED,
-            STATUTORY_RENEWD
-
+            STATUTORY_RENEWD,
+            OBSERVATION_CREATED,
+            OBSERVATION_UPDATED,
+            OBSERVATION_DELETED
         }
 
         public enum ApprovalStatus

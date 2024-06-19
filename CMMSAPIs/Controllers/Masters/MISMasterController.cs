@@ -1200,11 +1200,11 @@ namespace CMMSAPIs.Controllers.Masters
 
         [Route("GetObservationSheetReport")]
         [HttpGet]
-        public async Task<IActionResult> GetObservationSheetReport(string facility_id, DateTime fromDate, DateTime toDate)
+        public async Task<IActionResult> GetObservationSheetReport(string facility_id, DateTime start_date, DateTime end_date)
         {
             try
             {
-                var data = await _IMISMasterBS.GetObservationSheetReport(facility_id, fromDate, toDate);
+                var data = await _IMISMasterBS.GetObservationSheetReport(facility_id, start_date, end_date);
                 return Ok(data);
             }
             catch (Exception ex)

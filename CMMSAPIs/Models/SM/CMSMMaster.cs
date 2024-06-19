@@ -372,8 +372,9 @@ namespace CMMSAPIs.Models.SM
         public string asset_name { get; set; }
         public string description { get; set; }
         public string approval_required { get; set; }
-
-
+        public string section { get; set; }
+        public int reorder_qty { get; set; }
+        public int max_request_qty { get; set; }
         public string measurement { get; set; }
         public int decimal_status { get; set; }
 
