@@ -582,6 +582,7 @@ namespace CMMSAPIs.Models.Masters
         public DateTime? updated_at { get; set; }
         public string updated_by { get; set; }
         public List<int> file_ids { get; set; }
+        public List<int> uploadfile_ids { get; set; }
     }
     public class CMObservationByIdList
     {

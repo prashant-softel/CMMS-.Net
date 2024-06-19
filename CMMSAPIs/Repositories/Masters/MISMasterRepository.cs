@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 
 namespace CMMSAPIs.Repositories.Masters
@@ -1600,6 +1601,7 @@ namespace CMMSAPIs.Repositories.Masters
                         }
                     }
                 }
+
                 response = new CMDefaultResponse(insertedValue, CMMS.RETRUNSTATUS.SUCCESS, "Observation data saved successfully.");
             }catch(Exception ex)
             {
@@ -1629,9 +1631,22 @@ namespace CMMSAPIs.Repositories.Masters
                                      $"updated_by = {UserID} " +
                                      $"WHERE id = {request.id};";
                 await Context.ExecuteNonQry<int>(updateQuery).ConfigureAwait(false);
+
+                if (request.uploadfile_ids != null)
+                {
+                    foreach (int data in request.uploadfile_ids)
+                    {
+
+                        string qryuploadFiles = $"UPDATE uploadedfiles SET facility_id = {request.facility_id}, module_type={(int)CMMS.CMMS_Modules.OBSERVATION},module_ref_id={request.id} where id = {data}";
+                        await Context.ExecuteNonQry<int>(qryuploadFiles).ConfigureAwait(false);
+                    }
+                }
+
                 response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Observation data updated successfully.");
 
-            }catch(Exception ex)
+               
+            }
+            catch(Exception ex)
             {
                 response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Failed to update observation data.");
             }
