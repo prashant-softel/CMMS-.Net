@@ -1521,11 +1521,11 @@ namespace CMMSAPIs.Controllers.Masters
         }
         [Route("GetObservationList")]
         [HttpGet]
-        public async Task<IActionResult> GetObservationList(int facilityId, DateTime fromDate, DateTime toDate)
+        public async Task<IActionResult> GetObservationList(int facility_Id, DateTime fromDate, DateTime toDate)
         {
             try
             {
-                var data = await _IMISMasterBS.GetObservationList(facilityId, fromDate, toDate);
+                var data = await _IMISMasterBS.GetObservationList(facility_Id, fromDate, toDate);
                 return Ok(data);
             }
             catch (Exception ex)

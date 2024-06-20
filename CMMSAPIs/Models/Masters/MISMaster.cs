@@ -575,8 +575,10 @@ namespace CMMSAPIs.Models.Masters
         public int type_of_observation { get; set; }
         public DateTime closer_date { get; set; }
         public string location_of_observation { get; set; }
+        public dynamic remaining_days { get; set; }
         public int source_of_observation { get; set; }
         public DateTime? target_date { get; set; }
+        public string corrective_action { get; set; }
         public string observation_description { get; set; }
         public DateTime? created_at { get; set; }
         public string created_by { get; set; }
@@ -587,7 +589,7 @@ namespace CMMSAPIs.Models.Masters
         public int status_code { get; set; }
         public string short_status { get; set; }
         // public List<int> file_ids { get; set; }
-        public List<int> uploadfile_ids { get; set; }
+        public List<int> uploadfileIds { get; set; }
     }
     public class CMObservationByIdList
     {

@@ -1612,11 +1612,11 @@ namespace CMMSAPIs.Repositories.Masters
                 {
                     insertedValue = Convert.ToInt32(dt.Rows[0][0]);
 
-                    if (request.uploadfile_ids.Count > 0)
+                    if (request.uploadfileIds.Count > 0)
                     {
-                        for (var i = 0; i < request.uploadfile_ids.Count; i++)
+                        for (var i = 0; i < request.uploadfileIds.Count; i++)
                         {
-                            string update_Q = $"update uploadedfiles set module_type = {(int)CMMS.CMMS_Modules.OBSERVATION} , module_ref_id = {insertedValue} where id = {request.uploadfile_ids};";
+                            string update_Q = $"update uploadedfiles set module_type = {(int)CMMS.CMMS_Modules.OBSERVATION} , module_ref_id = {insertedValue} where id = {request.uploadfileIds[i]};";
                             int result = await Context.ExecuteNonQry<int>(update_Q).ConfigureAwait(false);
                         }
                     }
@@ -1654,9 +1654,9 @@ namespace CMMSAPIs.Repositories.Masters
                                      $"WHERE id = {request.id};";
                 await Context.ExecuteNonQry<int>(updateQuery).ConfigureAwait(false);
 
-                if (request.uploadfile_ids != null)
+                if (request.uploadfileIds != null)
                 {
-                    foreach (int data in request.uploadfile_ids)
+                    foreach (int data in request.uploadfileIds)
                     {
 
                         string qryuploadFiles = $"UPDATE uploadedfiles SET facility_id = {request.facility_id}, module_type={(int)CMMS.CMMS_Modules.OBSERVATION},module_ref_id={request.id} where id = {data}";
@@ -1694,12 +1694,12 @@ namespace CMMSAPIs.Repositories.Masters
             return response;
         }
 
-        internal async Task<List<CMObservation>> GetObservationList(int facilityId, DateTime fromDate, DateTime toDate)
+        internal async Task<List<CMObservation>> GetObservationList(int facility_Id, DateTime fromDate, DateTime toDate)
         {
             string myQuery = "select observations.id,observations.facility_id,facilities.name facility_name,status_code,observations.short_status, " +
                 " contractor_name, risk_type_id,ir_risktype.risktype as risk_type, preventive_action, responsible_person, contact_number, cost_type, " +
                 " date_of_observation, type_of_observation, location_of_observation, source_of_observation, " +
-                " MONTH(observations.date_of_observation) as month_of_observation,observations.target_date as closer_date, concat(createdBy.firstName, ' ', createdBy.lastName) as action_taken, " +
+                " monthname(observations.date_of_observation) as month_of_observation,observations.target_date as closer_date, concat(createdBy.firstName, ' ', createdBy.lastName) as action_taken, " +
                 " observations.preventive_action as  corrective_action, DATEDIFF(observations.target_date, observations.date_of_observation) AS remaining_days," +
                 " observations.target_date, observation_description, created_at, concat(createdBy.firstName, ' ', createdBy.lastName) created_by, " +
                 " updated_at, concat(updatedBy.firstName, ' ', updatedBy.lastName) updated_by,mis_m_typeofobservation.name as type_of_observation_name " +
@@ -1709,7 +1709,7 @@ namespace CMMSAPIs.Repositories.Masters
                 " left join facilities ON observations.facility_id = facilities.id" +
                 " left join users createdBy on createdBy.id = observations.created_by" +
                 " left join users updatedBy on updatedBy.id = observations.updated_by" +
-                " where is_active = 1 and observations.facility_id = " + facilityId + "  and created_at >= '" + fromDate.ToString("yyyy-MM-dd") + "' OR  created_at <= '" + toDate.ToString("yyyy-MM-dd") + "';";
+                " where is_active = 1 and observations.facility_id = " + facility_Id + "  and created_at >= '" + fromDate.ToString("yyyy-MM-dd") + "' OR  created_at <= '" + toDate.ToString("yyyy-MM-dd") + "';";
             List<CMObservation> Result = await Context.GetData<CMObservation>(myQuery).ConfigureAwait(false);
             foreach (var task in Result)
             {
@@ -1723,7 +1723,7 @@ namespace CMMSAPIs.Repositories.Masters
             string myQuery = "select observations.id,observations.facility_id,facilities.name facility_name,status_code,observations.short_status, " +
                 " contractor_name, risk_type_id,ir_risktype.risktype as risk_type_name, preventive_action, responsible_person, contact_number, cost_type, " +
                 " date_of_observation, type_of_observation, location_of_observation, source_of_observation,mis.name as source_of_observation_name,  " +
-                 " MONTH(observations.date_of_observation) as month_of_observation,observations.target_date as closer_date, concat(createdBy.firstName, ' ', createdBy.lastName) as action_taken, " +
+                 " monthname(observations.date_of_observation) as month_of_observation,observations.target_date as closer_date, concat(createdBy.firstName, ' ', createdBy.lastName) as action_taken, " +
                 " observations.preventive_action as  corrective_action, DATEDIFF(observations.target_date, observations.date_of_observation) AS remaining_days," +
                 " target_date, observation_description, created_at, concat(createdBy.firstName, ' ', createdBy.lastName) created_by, " +
                 " updated_at, concat(updatedBy.firstName, ' ', updatedBy.lastName) updated_by,mis_m_typeofobservation.name as type_of_observation_name " +

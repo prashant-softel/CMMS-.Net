@@ -201,7 +201,7 @@ namespace CMMSAPIs.Repositories.PM
                 planListQry += $" AND plan.plan_date >= '{((DateTime)start_date).ToString("yyyy-MM-dd")}' ";
             if (end_date != null)
                 planListQry += $" AND plan.plan_date <= '{((DateTime)end_date).ToString("yyyy-MM-dd")}' ";
-            //  planListQry += "order by DATE(plan.created_at) ASC ";
+            planListQry += "order by created_at asc ";
             planListQry += $";";
             List<CMPMPlanList> plan_list = await Context.GetData<CMPMPlanList>(planListQry).ConfigureAwait(false);
 

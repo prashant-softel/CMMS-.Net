@@ -1,16 +1,13 @@
-using CMMSAPIs.BS.Users;
 using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Users;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Utils;
 using System;
-using System.Data;
-using System.Collections;
 using System.Collections.Generic;
+using System.Data;
+using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
-using iTextSharp.tool.xml.css.parser.state;
-using System.Linq;
 
 namespace CMMSAPIs.Repositories.Users
 {
@@ -19,13 +16,13 @@ namespace CMMSAPIs.Repositories.Users
         private MYSQLDBHelper _conn;
         //private UserAccessRepository _userAccessRepo;
         private UtilsRepository _utilsRepo;
-         public UserAccessRepository _userAccessRepo;
+        public UserAccessRepository _userAccessRepo;
         public RoleAccessRepository(MYSQLDBHelper sqlDBHelper) : base(sqlDBHelper)
         {
             _conn = sqlDBHelper;
             _utilsRepo = new UtilsRepository(_conn);
             _userAccessRepo = new UserAccessRepository(_conn);
-            
+
         }
 
         internal async Task<CMRoleAccess> GetRoleAccess(int role_id)
@@ -49,23 +46,23 @@ namespace CMMSAPIs.Repositories.Users
             return role_access;
         }
 
-        internal async Task<List<KeyValuePairs>> GetRoleList(int role_id = 0) 
+        internal async Task<List<KeyValuePairs>> GetRoleList(int role_id = 0)
         {
             string roleQry = $"SELECT id, name FROM UserRoles ";
-            if(role_id > 0) 
+            if (role_id > 0)
             {
                 roleQry += $"WHERE id = {role_id}";
             }
             else
             {
                 roleQry += "WHERE status = 1";
-            }    
+            }
             List<KeyValuePairs> roleList = await Context.GetData<KeyValuePairs>(roleQry).ConfigureAwait(false);
             return roleList;
         }
         internal async Task<CMDefaultResponse> AddRole(CMDefaultList request, int userId)
         {
-            
+
             string myQuery = $"INSERT INTO userroles(name, status, addedBy, addedAt) VALUES " +
                                 $"('{request.name}', 1, {userId}, '{UtilsRepository.GetUTCTime()}'); " +
                                  $"SELECT LAST_INSERT_ID(); ";
@@ -74,7 +71,7 @@ namespace CMMSAPIs.Repositories.Users
             int rid = 0;
             string qry = $" SELECT roleId FROM  users where id= {userId}";
             DataTable dt1 = await Context.FetchData(qry).ConfigureAwait(false);
-             rid = Convert.ToInt32(dt1.Rows[0][0]);
+            rid = Convert.ToInt32(dt1.Rows[0][0]);
 
             List<string> role_access = new List<string>();
             string myf = "SELECT id as featureid FROM features order by id asc ;";
@@ -98,7 +95,7 @@ namespace CMMSAPIs.Repositories.Users
 
             return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Role Added");
         }
-         
+
         internal async Task<CMDefaultResponse> UpdateRole(CMDefaultList request, int userID)
         {
             string updateQry = "UPDATE userroles SET ";
@@ -119,12 +116,12 @@ namespace CMMSAPIs.Repositories.Users
         internal async Task<List<CMDesignation>> GetDesignationList()
         {
             string designationQry = $"SELECT id, designationName as name, designationDescriptions as description FROM userdesignation where status=1 ";
-            
+
             List<CMDesignation> designationList = await Context.GetData<CMDesignation>(designationQry).ConfigureAwait(false);
             return designationList;
         }
 
-        internal async Task<CMDefaultResponse> AddDesignation(CMDesignation request , int userId)
+        internal async Task<CMDefaultResponse> AddDesignation(CMDesignation request, int userId)
         {
             string myQuery = $"INSERT INTO userdesignation(designationName, designationDescriptions, status, addedBy, addedAt) VALUES " +
                                 $"('{request.name}', '{request.description}', 1, {userId}, '{UtilsRepository.GetUTCTime()}');" +
@@ -145,7 +142,7 @@ namespace CMMSAPIs.Repositories.Users
             await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
             return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Designation Details Updated");
         }
-        
+
         internal async Task<CMDefaultResponse> DeleteDesignation(int id)
         {
             string deleteQry = $"UPDATE userdesignation SET status = 0 WHERE id = {id};";
@@ -160,7 +157,7 @@ namespace CMMSAPIs.Repositories.Users
         internal async Task<CMDefaultResponse> SetRoleAccess(CMSetRoleAccess request, int userID)
         {
             try
-            {                
+            {
                 // Get previous settings
                 CMRoleAccess old_access = await GetRoleAccess(request.role_id);
                 string featureAccessQry = "SELECT id as feature_id, concat(moduleName,': ',featureName) as feature_name, menuImage as menu_image, features.* FROM features;";
@@ -171,9 +168,9 @@ namespace CMMSAPIs.Repositories.Users
                 Dictionary<int, CMAccessList> features = new Dictionary<int, CMAccessList>();
                 features.Merge(featureIDs, featureAccessList);
                 // Check the whether to change existing settings or not
-                if (request.set_role) 
+                if (request.set_role)
                 {
-                    
+
                     if (old_access.access_list.Count != request.access_list.Count)
                     {
                         // Delete the previous setting
@@ -205,9 +202,9 @@ namespace CMMSAPIs.Repositories.Users
 
                 if (request.set_existing_users)
                 {
-                    List<CMUserID> user_list  = await getUsersByRoleId(request.role_id);
-                    CMUserAccess user_access  = new CMUserAccess();
-                    user_access.access_list   = request.access_list;
+                    List<CMUserID> user_list = await getUsersByRoleId(request.role_id);
+                    CMUserAccess user_access = new CMUserAccess();
+                    user_access.access_list = request.access_list;
 
                     using (var repos = new UserAccessRepository(_conn))
                     {
@@ -215,7 +212,7 @@ namespace CMMSAPIs.Repositories.Users
                         {
                             user_access.user_id = user.id;
                             await repos.SetUserAccess(user_access, userID);
-                     
+
                         }
                     }
 
@@ -227,9 +224,9 @@ namespace CMMSAPIs.Repositories.Users
                         string roleQry = $"SELECT roleId FROM users WHERE id = {user.id};";
                         DataTable dt_role = await Context.FetchData(roleQry).ConfigureAwait(false);
                         int role = Convert.ToInt32(dt_role.Rows[0][0]);
-                       
+
                         //Adding code for missed feature list
-                       var default_user_access = (await GetRoleAccess(role)).access_list;
+                        var default_user_access = (await GetRoleAccess(role)).access_list;
                         string missed_featureQ = $"select id as feature_id,featureName as feature_name, menuimage as menu_image from Features where id not in ({string.Join(",", default_user_access.Select(item => item.feature_id))}) and isActive=1 ; ";
 
                         List<CMAccessList> missed_feature_list = await Context.GetData<CMAccessList>(missed_featureQ).ConfigureAwait(false);
@@ -297,10 +294,10 @@ namespace CMMSAPIs.Repositories.Users
             catch (Exception)
             {
                 throw;
-            }            
+            }
         }
 
-        internal async Task<List<CMUserID>> getUsersByRoleId(int role_id) 
+        internal async Task<List<CMUserID>> getUsersByRoleId(int role_id)
         {
             try
             {
@@ -311,7 +308,7 @@ namespace CMMSAPIs.Repositories.Users
             catch (Exception e)
             {
                 throw new Exception("Unable to get Users List");
-            }            
+            }
         }
 
         internal async Task<CMRoleNotifications> GetRoleNotifications(int role_id)
@@ -326,7 +323,7 @@ namespace CMMSAPIs.Repositories.Users
                             $"roleId = {role_id}";
 
             List<CMNotificationList> access_list = await Context.GetData<CMNotificationList>(qry).ConfigureAwait(false);
-            
+
             List<KeyValuePairs> roleDetail = await GetRoleList(role_id);
 
             CMRoleNotifications role_notification_list = new CMRoleNotifications();
@@ -379,7 +376,7 @@ namespace CMMSAPIs.Repositories.Users
                     CMUserNotifications user_notification = new CMUserNotifications();
                     user_notification.notification_list = request.notification_list;
 
-                    using(var repos = new UserAccessRepository(_conn))
+                    using (var repos = new UserAccessRepository(_conn))
                     {
                         foreach (var user in user_list)
                         {
@@ -387,7 +384,7 @@ namespace CMMSAPIs.Repositories.Users
                             await repos.SetUserNotifications(user_notification, userID);
                         }
                     }
-                }                
+                }
 
                 CMDefaultResponse response = new CMDefaultResponse(role_id, CMMS.RETRUNSTATUS.SUCCESS, "Updated Role Notifications Successfully");
                 return response;
