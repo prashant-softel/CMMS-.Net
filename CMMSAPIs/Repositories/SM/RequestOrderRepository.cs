@@ -383,7 +383,7 @@ namespace CMMSAPIs.Repositories.SM
 
           }*/
         //changes
-        public async Task<List<CMCreateRequestOrder>> GetRODetailsByID(string IDs, string facilityTimeZone)
+        public async Task<List<CMCreateRequestOrderGET>> GetRODetailsByID(string IDs, string facilityTimeZone)
         {
             // Convert list of IDs to comma-separated string
             // string idList = string.Join(",", IDs);
@@ -422,7 +422,7 @@ namespace CMMSAPIs.Repositories.SM
                            "WHERE  po.ID  IN (" + IDs + ") ;";
 
             List<CMRequestOrderList> _List = await Context.GetData<CMRequestOrderList>(query).ConfigureAwait(false);
-            List<CMCreateRequestOrder> _MasterList = _List.Select(p => new CMCreateRequestOrder
+            List<CMCreateRequestOrderGET> _MasterList = _List.Select(p => new CMCreateRequestOrderGET
             {
                 request_order_id = p.requestID,
                 facilityID = p.facility_id,
@@ -439,13 +439,13 @@ namespace CMMSAPIs.Repositories.SM
                 rejectedAt = p.rejectedAt
 
             }).ToList();
-            List<CMRequestOrder_ITEMS> _itemList = _List.Select(p => new CMRequestOrder_ITEMS
+            List<CMRequestOrder_ITEMS_GET> _itemList = _List.Select(p => new CMRequestOrder_ITEMS_GET
             {
                 itemID = p.requestDetailsID,
                 requestID = p.requestID,
                 cost = p.cost,
                 asset_name = p.asset_name,
-                assetMasterItemID = p.assetItemID,
+                id = p.assetItemID,
                 ordered_qty = p.ordered_qty,
                 comment = p.itemcomment,
                 asset_code = p.asset_code,

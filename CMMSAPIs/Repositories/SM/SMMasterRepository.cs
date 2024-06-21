@@ -191,16 +191,16 @@ namespace CMMSAPIs.Repositories.SM
             string myQuery = "";
             if (ID == 0)
             {
-                myQuery = "SELECT sam.ID,sam.asset_type_ID,sam.asset_code,sam.asset_name,sam.description,if(sam.approval_required = 1, 'Yes','No') as approval_required,sam.section,sam.reorder_qty,sam.max_request_qty," +
-                          " sat.asset_type,sic.cat_name,sm.name as measurement,sm.decimal_status " +
-                          " FROM smassetmasters sam LEFT JOIN smassettypes sat ON sat.ID s sam.asset_type_ID " +
+                myQuery = "SELECT sam.ID,sam.asset_type_ID,sam.asset_code,sam.asset_name,sam.description,if(sam.approval_required = 1, 'Yes','No') as approval_required,sam.section,sam.reorder_qty,sam.max_request_qty, " +
+                          " sat.asset_type , sic.cat_name,sm.name as measurement,sm.decimal_status " +
+                          " FROM smassetmasters sam LEFT JOIN smassettypes sat ON sat.ID = sam.asset_type_ID " +
                           " LEFT JOIN smitemcategory sic ON sic.ID = sam.item_category_ID  LEFT JOIN smunitmeasurement sm ON sm.ID = sam.unit_of_measurement " +
                           " WHERE sam.flag = 1;";
             }
             else
             {
-                myQuery = "SELECT sam.ID,sam.asset_type_ID,sam.asset_code,sam.asset_name,sam.description,if(sam.approval_required = 1, 'Yes','No') as approval_required,sam.section,sam.reorder_qty,sam.max_request_qty" +
-                          " sat.asset_type,sic.cat_name,sm.name as measurement,sm.decimal_status " +
+                myQuery = "SELECT sam.ID,sam.asset_type_ID,sam.asset_code,sam.asset_name,sam.description,if(sam.approval_required = 1, 'Yes','No') as approval_required,sam.section,sam.reorder_qty,sam.max_request_qty ," +
+                          " sat.asset_type , sic.cat_name,sm.name as measurement,sm.decimal_status " +
                           " FROM smassetmasters sam LEFT JOIN smassettypes sat ON sat.ID = sam.asset_type_ID " +
                           " LEFT JOIN smitemcategory sic ON sic.ID = sam.item_category_ID  LEFT JOIN smunitmeasurement sm ON sm.ID = sam.unit_of_measurement " +
                           " WHERE sam.ID = " + ID + " AND sam.flag = 1;";

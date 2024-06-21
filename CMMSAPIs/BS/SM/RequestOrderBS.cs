@@ -1,20 +1,17 @@
 ﻿using CMMSAPIs.Helper;
-using CMMSAPIs.Models;
-using CMMSAPIs.Repositories;
+using CMMSAPIs.Models.SM;
+using CMMSAPIs.Models.Utils;
+using CMMSAPIs.Repositories.SM;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using System;
-using CMMSAPIs.Models.SM;
-using CMMSAPIs.Repositories.SM;
-using CMMSAPIs.Models.Utils;
-using CMMSAPIs.BS.Facility;
 
 namespace CMMSAPIs.BS.SM
 {
     public interface IRequestOrderBS
     {
-        Task<List<CMCreateRequestOrder>> GetRequestOrderList(int facilityID, DateTime fromDate, DateTime toDate,string facilitytime);
-        Task<List<CMCreateRequestOrder>> GetRODetailsByID(string IDs, string facilitytime);
+        Task<List<CMCreateRequestOrder>> GetRequestOrderList(int facilityID, DateTime fromDate, DateTime toDate, string facilitytime);
+        Task<List<CMCreateRequestOrderGET>> GetRODetailsByID(string IDs, string facilitytime);
         Task<CMDefaultResponse> CreateRequestOrder(CMCreateRequestOrder request, int userID);
         Task<CMDefaultResponse> UpdateRequestOrder(CMCreateRequestOrder request, int userID);
         Task<CMDefaultResponse> DeleteRequestOrder(CMApproval request, int userID);
@@ -45,13 +42,13 @@ namespace CMMSAPIs.BS.SM
                 throw;
             }
         }
-        public async Task<List<CMCreateRequestOrder>> GetRODetailsByID(string IDs, string facilitytime)
+        public async Task<List<CMCreateRequestOrderGET>> GetRODetailsByID(string IDs, string facilitytime)
         {
             try
             {
                 using (var repos = new RequestOrderRepository(getDB))
                 {
-                    return await repos.GetRODetailsByID(IDs,facilitytime);
+                    return await repos.GetRODetailsByID(IDs, facilitytime);
 
                 }
             }

@@ -68,33 +68,32 @@ namespace CMMSAPIs.Repositories.Masters
                                            $"FROM employee_attendance ea {employeeFilter};";
 
 
-            List<CMGetAttendence> employeeAttendanceList = await Context.GetData<CMGetAttendence>(getEmployeeAttendance).ConfigureAwait(false);
+            // List<CMGETAttendenceDETAIL> employeeAttendanceList = await Context.GetData<CMGETAttendenceDETAIL>(getEmployeeAttendance).ConfigureAwait(false);
 
-            foreach (CMGetAttendence cmg in employeeAttendanceList)
-            {
-                Dates = Convert.ToDateTime(cmg.Dates);
+            List<CMGETAttendenceDETAIL> employeeAttendanceList = await Context.GetData<CMGETAttendenceDETAIL>(getEmployeeAttendance).ConfigureAwait(false);
+            //foreach (CMGETAttendenceDETAIL cmg in employeeAttendanceList)
+            //{
 
-                if (cmg.present == 1)
-                {
-                    cmg.present = true;
-                }
-                else
-                {
-                    cmg.present = false;
-                }
+            //        if (cmg.present == 1)
+            //        {
+            //            cmg.present = true;
+            //        }
+            //        else
+            //        {
+            //            cmg.present = false;
+            //        }
 
-            }
 
-            var hfeAttendance = employeeAttendanceList.Select(ea => new
-            {
-                id = ea.id,
-                Facility_Id = ea.facility_id,
-                Attendance_Id = ea.Attendance_Id,
-                Employee_Id = ea.employee_id,
-                present = ea.present,
-                inTime = ea.InTime,
-                outTime = ea.OutTime
-            }).ToList();
+            //}
+            //var hfeAttendance = employeeAttendanceList.Select(e => new CMGetAttendence
+            //{
+            //    id = e.id,
+            //    name = e.name,
+            //    employee_id = e.employee_id,
+            //    InTime = e.in_time,
+            //    OutTime = e.out_time,
+            //    present = e.present == 1 ? true : false,
+            //}).ToList();
 
             string contractorFilter = " WHERE (DATE(contractor_attendnace.Date) >= '" + date.ToString("yyyy-MM-dd") + "')";
             contractorFilter += " AND contractor_attendnace.facility_id = " + facility_id;
@@ -108,7 +107,8 @@ namespace CMMSAPIs.Repositories.Masters
             var response = new
             {
                 Date = Dates.ToString("yyyy-MM-dd"),
-                hfeAttendance,
+                facility_id = facility_id,
+                //  hfeAttendance,
                 contractAttendances
             };
 

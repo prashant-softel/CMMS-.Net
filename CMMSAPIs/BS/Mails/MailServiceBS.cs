@@ -1,8 +1,6 @@
 ﻿using CMMSAPIs.Models.Mails;
-using CMMSAPIs.Repositories;
 using MailKit.Net.Smtp;
 using MailKit.Security;
-using Microsoft.Extensions.Options;
 using MimeKit;
 using System;
 using System.Collections.Generic;
@@ -15,7 +13,7 @@ namespace CMMSAPIs.BS.Mails
         Task<List<CMMailResponse>> SendEmailAsync(CMMailRequest mailRequest, CMMailSettings _mailSettings);
     }
     //public class MailService : IMailService
-    public class MailService 
+    public class MailService
     {
         //private readonly CMMailSettings _mailSettings;
         //public MailService(IOptions<CMMailSettings> mailSettings)
@@ -33,11 +31,17 @@ namespace CMMSAPIs.BS.Mails
                 email.Sender = MailboxAddress.Parse(_mailSettings.Mail);
                 foreach (var mail in mailRequest.ToEmail)
                 {
-                    email.To.Add(MailboxAddress.Parse(mail));
+                    if (mail != null)
+                    {
+                        email.To.Add(MailboxAddress.Parse(mail));
+                    }
                 }
                 foreach (var mail in mailRequest.CcEmail)
                 {
-                    email.To.Add(MailboxAddress.Parse(mail));
+                    if (mail != null)
+                    {
+                        email.To.Add(MailboxAddress.Parse(mail));
+                    }
                 }
                 // email.Cc.Add(MailboxAddress.Parse(mailRequest.CcEmail));
                 email.Subject = mailRequest.Subject;

@@ -895,7 +895,7 @@ namespace CMMSAPIs.Repositories.Users
                          $"LEFT JOIN " +
                             $"notifications as nt ON nt.id = un.notificationId " +
                          $"WHERE " +
-                            $" userPreference = 1 AND softwareId = {(int)request.notification_id} " +
+                            $" userPreference = 1 or softwareId = {(int)request.notification_id} " +
                             $" ";
 
             if (!user_ids_str.IsNullOrEmpty())

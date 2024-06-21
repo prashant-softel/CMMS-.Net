@@ -12,6 +12,15 @@ namespace CMMSAPIs.Models.Masters
 
 
     }
+    public class CMGETAttendenceDETAIL
+    {
+        public DateTime date { get; set; }
+        public int facility_id { get; set; }
+        public List<CMGetAttendence> hfeAttendance { get; set; }
+        public CMGetCotractor contractAttendance { get; set; }
+
+
+    }
     public class CMGetAttendence
     {
         public int id { get; set; }

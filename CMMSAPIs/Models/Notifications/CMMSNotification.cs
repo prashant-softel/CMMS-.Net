@@ -1,32 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using CMMSAPIs.BS.Mails;
 using CMMSAPIs.Helper;
-using CMMSAPIs.Models.Jobs;
-using CMMSAPIs.Models.Permits;
-using CMMSAPIs.Models.JC;
-using CMMSAPIs.Models.Incident_Reports;
-using CMMSAPIs.Models.WC;
 using CMMSAPIs.Models.Calibration;
-using CMMSAPIs.Models.Inventory;
-using CMMSAPIs.Models.Mails;
-using Microsoft.Extensions.Configuration;
-using CMMSAPIs.BS;
-using CMMSAPIs.BS.Mails;
-using CMMSAPIs.Repositories.Users;
-using CMMSAPIs.Models.Users;
-using System.IO;
-using CMMSAPIs.BS.Facility;
-using CMMSAPIs.BS.Users;
-using System.Data;
-using CMMSAPIs.Models.Utils;
-using System.Drawing;
-using Microsoft.AspNetCore.Hosting;
-using System.Configuration;
-using CMMSAPIs.Repositories;
-using CMMSAPIs.Repositories.Utils;
 using CMMSAPIs.Models.Grievance;
+using CMMSAPIs.Models.Incident_Reports;
+using CMMSAPIs.Models.Inventory;
+using CMMSAPIs.Models.JC;
+using CMMSAPIs.Models.Jobs;
+using CMMSAPIs.Models.Mails;
+using CMMSAPIs.Models.Permits;
+using CMMSAPIs.Models.Users;
+using CMMSAPIs.Models.Utils;
+using CMMSAPIs.Models.WC;
+using CMMSAPIs.Repositories.Users;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 //using CommonUtilities;
 //using CMMSAPIs.Models.Notifications;
@@ -34,7 +24,7 @@ using CMMSAPIs.Models.Grievance;
 namespace CMMSAPIs.Models.Notifications
 {
 
-    abstract public class CMMSNotification 
+    abstract public class CMMSNotification
     {
         public static bool print = false;
         public static string printBody = "";
@@ -139,8 +129,7 @@ namespace CMMSAPIs.Models.Notifications
 
             CMMailRequest request = new CMMailRequest();
 
-            AddTo.Add("tanvi@softeltech.in");
-
+            //AddTo.Add("tanvi@softeltech.in");
             request.ToEmail = AddTo;
             request.CcEmail = AddCc;
             request.Subject = subject;
@@ -159,7 +148,7 @@ namespace CMMSAPIs.Models.Notifications
 
             return retValue;
         }
-        public async Task<CMDefaultResponse> sendEmailNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, int facilityId,int[] userID, params object[] args)
+        public async Task<CMDefaultResponse> sendEmailNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, int facilityId, int[] userID, params object[] args)
         {
             CMDefaultResponse response = new CMDefaultResponse();
 
@@ -182,22 +171,25 @@ namespace CMMSAPIs.Models.Notifications
             try
             {
                 //CMMSNotification objc = new CMMSNotification(_conn);
-               // UserAccessRepository obj = new UserAccessRepository(_conn);
+                // UserAccessRepository obj = new UserAccessRepository(_conn);
                 users = await _userAccessRepository.GetUserByNotificationId(notification);
             }
             catch (Exception e)
             {
 
-               if(users == null || users.Count==0)
+                if (users == null || users.Count == 0)
                 {
                     return response = new CMDefaultResponse(2, CMMS.RETRUNSTATUS.INVALID_ARG, "Email List is empty "); ;
                 }
-            } 
+            }
             List<string> EmailTo = new List<string>();
             // List<CMUser> EmailTo = users;
             foreach (var email in users)
             {
-                EmailTo.Add(email.user_name);
+                if (email != null)
+                {
+                    EmailTo.Add(email.user_name);
+                }
             }
 
 
@@ -205,7 +197,7 @@ namespace CMMSAPIs.Models.Notifications
 
             if (print)
             {
-                response = new CMDefaultResponse(1, CMMS.RETRUNSTATUS.SUCCESS, ""); 
+                response = new CMDefaultResponse(1, CMMS.RETRUNSTATUS.SUCCESS, "");
             }
             else
             {

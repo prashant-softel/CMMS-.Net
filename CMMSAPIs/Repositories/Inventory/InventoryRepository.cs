@@ -792,7 +792,8 @@ namespace CMMSAPIs.Repositories.Inventory
                         {
                             if (i == 0)
                             {
-                                assetQry = $"SELECT REPLACE(UPPER(name), '_', '') as name FROM facilities WHERE parentId = {facility_id} union SELECT REPLACE(UPPER(name), '_', '') as name FROM assets WHERE facilityId = {facility_id} {filter};";
+                                //assetQry = $"SELECT REPLACE(UPPER(name), '_', '') as name FROM facilities WHERE parentId = {facility_id} union" +
+                                assetQry = $" SELECT REPLACE(UPPER(name), '_', '') as name FROM assets WHERE facilityId = {facility_id} {filter};";
                             }
                             else
                             {
@@ -1037,7 +1038,7 @@ namespace CMMSAPIs.Repositories.Inventory
             {
                 try
                 {
-                    row["parentId"] = assetDict[Convert.ToString(row["parentName"]).ToUpper()];
+                    row["parentId"] = assetDict[Convert.ToString(row["parentName"]).Replace("_", "").ToUpper()];
                 }
                 catch (KeyNotFoundException)
                 {
