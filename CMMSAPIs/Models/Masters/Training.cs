@@ -18,7 +18,7 @@ namespace CMMSAPIs.Models.Masters
         public int CreatedBy { get; set; }
         public List<InternalEmployee> internalEmployees { get; set; }
         public List<ExternalEmployee> externalEmployees { get; set; }
-        public List<int> UploadfileIds { get; set; }
+        public List<int> uploadfile_ids { get; set; }
 
     }
 
@@ -29,7 +29,7 @@ namespace CMMSAPIs.Models.Masters
         public string empEmail { get; set; }
         public string empNumber { get; set; }
         public string Attendence { get; set; }
-        public int empDesignation { get; set; }
+        public string empDesignation { get; set; }
     }
 
     public class ExternalEmployee

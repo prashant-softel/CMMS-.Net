@@ -13,6 +13,7 @@ namespace CMMSAPIs.Repositories.Masters
 {
     public class AttendenceRepository : GenericRepository
     {
+
         private UtilsRepository _utilsRepo;
         public static Microsoft.AspNetCore.Hosting.IWebHostEnvironment _environment;
         private MYSQLDBHelper getDB;
@@ -58,60 +59,37 @@ namespace CMMSAPIs.Repositories.Masters
             return response;
         }
 
-        internal async Task<object> GetAttendanceByDetails(int facility_id, DateTime date)
+        internal async Task<object> GetAttendanceByDetails(int facility_id, DateTime dates)
         {
-            DateTime Dates = date;
-            string employeeFilter = " WHERE (DATE(ea.Date) >= '" + date.ToString("yyyy-MM-dd") + "')";
-            employeeFilter += " AND ea.facility_id = " + facility_id;
+            DateTime Dates = dates;
+            string detail = $"SELECT  facility_id AS Facility_Id " +
+                                           $" FROM employee_attendance where facility_id ={facility_id};";
+            List<CMGETAttendenceDETAIL> Detail = await Context.GetData<CMGETAttendenceDETAIL>(detail).ConfigureAwait(false);
 
-            string getEmployeeAttendance = $"SELECT ea.id AS Id, ea.attendance_id AS Attendance_Id, ea.facility_id AS Facility_Id, ea.employee_id AS Employee_Id, ea.present AS Present, ea.in_time AS In_Time, ea.out_time AS Out_Time,(DATE_FORMAT(ea.Date ,'%Y-%m-%d')) as Dates " +
-                                           $"FROM employee_attendance ea {employeeFilter};";
-
-
-            // List<CMGETAttendenceDETAIL> employeeAttendanceList = await Context.GetData<CMGETAttendenceDETAIL>(getEmployeeAttendance).ConfigureAwait(false);
-
-            List<CMGETAttendenceDETAIL> employeeAttendanceList = await Context.GetData<CMGETAttendenceDETAIL>(getEmployeeAttendance).ConfigureAwait(false);
-            //foreach (CMGETAttendenceDETAIL cmg in employeeAttendanceList)
-            //{
-
-            //        if (cmg.present == 1)
-            //        {
-            //            cmg.present = true;
-            //        }
-            //        else
-            //        {
-            //            cmg.present = false;
-            //        }
-
-
-            //}
-            //var hfeAttendance = employeeAttendanceList.Select(e => new CMGetAttendence
-            //{
-            //    id = e.id,
-            //    name = e.name,
-            //    employee_id = e.employee_id,
-            //    InTime = e.in_time,
-            //    OutTime = e.out_time,
-            //    present = e.present == 1 ? true : false,
-            //}).ToList();
-
-            string contractorFilter = " WHERE (DATE(contractor_attendnace.Date) >= '" + date.ToString("yyyy-MM-dd") + "')";
-            contractorFilter += " AND contractor_attendnace.facility_id = " + facility_id;
+            string getEmployeeAttendance = $"SELECT employee_attendance.id AS Id, attendance_id AS Attendance_Id, facility_id AS Facility_Id, employee_id AS Employee_Id,concat(u.firstName,u.lastName) as name, present AS Present, in_time AS In_Time, out_time AS Out_Time,(DATE_FORMAT(Date ,'%Y-%m-%d')) as Dates " +
+                                           $" FROM employee_attendance left join users as u on u.id=employee_attendance.employee_id  WHERE (DATE(Date) = '{dates.ToString("yyyy-MM-dd")} ') AND facility_id ={facility_id};";
+            List<CMGetAttendence1> employeeAttendanceList = await Context.GetData<CMGetAttendence1>(getEmployeeAttendance).ConfigureAwait(false);
 
             string getContractorAttendance = $"SELECT id AS Id, facility_id AS Facility_Id,(DATE_FORMAT(Date ,'%Y-%m-%d')) as Date, contractor_id AS Contractor_Id, age_lessthan_35 AS Age_Less_Than35, age_Between_35_50 AS Age_Between_35And50, age_Greater_50 AS Age_Greater50, Purpose as Purpose " +
-                                             $"FROM contractor_attendnace {contractorFilter};";
+                                            $" FROM contractor_attendnace WHERE (DATE(contractor_attendnace.Date) = '{dates.ToString("yyyy-MM-dd")} ') and contractor_attendnace.facility_id ={facility_id};";
+            var contractAttendances = await Context.GetData<CMGetCotractor1>(getContractorAttendance).ConfigureAwait(false);
 
-            var contractAttendances = await Context.GetData<CMGetCotractor>(getContractorAttendance).ConfigureAwait(false);
-
-
+            var hfeAttendance = employeeAttendanceList.Select(a => new CMGetAttendence1
+            {
+                // id = a.id,
+                employee_id = a.employee_id,
+                name = a.name,
+                present = a.present == 1 ? "true" : "false",
+                In_Time = a.In_Time,
+                Out_Time = a.Out_Time,
+            }).ToList();
             var response = new
             {
-                Date = Dates.ToString("yyyy-MM-dd"),
+                date = dates.ToString("yyyy-MM-dd"),
                 facility_id = facility_id,
-                //  hfeAttendance,
+                hfeAttendance,
                 contractAttendances
             };
-
             return response;
         }
 
@@ -151,11 +129,9 @@ namespace CMMSAPIs.Repositories.Masters
             List<MonthData> MONTHList = await Context.GetData<MonthData>(getmonth).ConfigureAwait(false);
 
             var groupedResult = employeeAttendanceList
-         .GroupBy(x => new { x.dates, x.facility_id, x.month_id, x.month_name, x.years })
+         .GroupBy(x => new { x.facility_id, x.month_id, x.month_name, x.years })
          .Select(g => new CMGetAttendenceList
          {
-
-             dates = g.Key.dates,
              facility_id = g.Key.facility_id,
              month_id = g.Key.month_id,
              month_name = g.Key.month_name,

@@ -14,10 +14,10 @@ namespace CMMSAPIs.Models.Masters
     }
     public class CMGETAttendenceDETAIL
     {
-        public DateTime date { get; set; }
+        public dynamic date { get; set; }
         public int facility_id { get; set; }
-        public List<CMGetAttendence> hfeAttendance { get; set; }
-        public CMGetCotractor contractAttendance { get; set; }
+        public List<CMGetAttendence1> hfeAttendance { get; set; }
+        // public CMGetCotractor contractAttendance { get; set; }
 
 
     }
@@ -39,19 +39,45 @@ namespace CMMSAPIs.Models.Masters
         public dynamic Dates { get; set; }
         public CMGetCotractor Contractors { get; set; }
     }
+    public class CMGetAttendence1
+    {
+        //  public int id { get; set; }
+        public int employee_id { get; set; }
+        public string name { get; set; }
+        public dynamic present { get; set; }
+        public string? In_Time { get; set; }
+
+        public string? Out_Time { get; set; }
+
+
+    }
+
     public class CMGetCotractor
     {
-        public int Id { get; set; }
+        // public int Id { get; set; }
         public int contractor_id { get; set; }
         public int lessThan35 { get; set; }
         public int between35to50 { get; set; }
         public int greaterThan50 { get; set; }
         public string purpose { get; set; }
+
+
+    }
+    public class CMGetCotractor1
+    {
+
+        //  public int id { get; set; }
+        public int contractor_id { get; set; }
+        public int Age_Less_Than35 { get; set; }
+        public int Age_Between_35And50 { get; set; }
+        public int Age_Greater50 { get; set; }
+        public string Purpose { get; set; }
+
     }
     public class CMGetAttendenceList
     {
         public int facility_id { get; set; }
-        public DateTime dates { get; set; }
+        //s   public DateTime dates { get; set; }
         public int? month_id { get; set; }
         public String? month_name { get; set; }
         public int? years { get; set; }

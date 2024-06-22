@@ -159,10 +159,10 @@ namespace CMMSAPIs.Repositories.Masters
             return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Course Deleted Successfully.");
         }
 
-        int Exterid = 0;
+
         internal async Task<CMDefaultResponse> CreateScheduleCourse(TrainingSchedule request, int userID)
         {
-
+            int Exterid = 0;
             string crtqry = $"INSERT INTO training_schedule ( CourseId,facility_id, Course_name, ScheduleDate, TraingCompany, Trainer,Mode, Comment, Venue, hfeEmployeeId, CreatedAt, CreatedBy) values " +
                             $"({request.CourseId},{request.facility_id},'{request.CourseName}','{request.Date_of_training}',{request.TrainingAgencyId},'{request.TrainerName}','{request.Mode}','{request.Comment}','{request.Venue}',{request.HfeEmployeeId},'{UtilsRepository.GetUTCTime()}',{userID}) ; " +
                             $"SELECT LAST_INSERT_ID();";
@@ -179,12 +179,22 @@ namespace CMMSAPIs.Repositories.Masters
 
             foreach (InternalEmployee item in request.internalEmployees)
             {
-                string inviteschdule = $"INSERT INTO schdule_invitee ( Schid, employee_id, Visitor_id,RSVP_Datetime, Attendence,CreatedAt,CreatedBy) values " +
-                               $"('{schid}',{item.EmpId},{Exterid},'{UtilsRepository.GetUTCTime()}','{item.Attendence}','{UtilsRepository.GetUTCTime()}',{userID}) ; " +
+                string inviteschdule = $"INSERT INTO schdule_invitee ( Schid, employee_id, Visitor_id,RSVP_Datetime,designation, Attendence,CreatedAt,CreatedBy) values " +
+                               $"('{schid}',{item.EmpId},{Exterid},'{UtilsRepository.GetUTCTime()}','{item.Attendence}',{item.empDesignation},'{UtilsRepository.GetUTCTime()}',{userID}) ; " +
                                $"SELECT LAST_INSERT_ID();";
                 DataTable dt2 = await Context.FetchData(inviteschdule).ConfigureAwait(false);
                 int schdinviid = Convert.ToInt32(dt2.Rows[0][0]);
             }
+            if (request.uploadfile_ids != null && request.uploadfile_ids.Count > 0)
+            {
+                foreach (int data in request.uploadfile_ids)
+                {
+
+                    string qryuploadFiles = $"UPDATE uploadedfiles SET facility_id = {request.facility_id}, module_type={(int)CMMS.CMMS_Modules.TRAINNING_SCHEDULE},module_ref_id={schid} where id = {data}";
+                    await Context.ExecuteNonQry<int>(qryuploadFiles).ConfigureAwait(false);
+                }
+            }
+
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.TRAINNING_SCHEDULE, schid, 0, 0, request.Comment, CMMS.CMMS_Status.COURSE_SCHEDULE);
             return new CMDefaultResponse(schid, CMMS.RETRUNSTATUS.SUCCESS, "Course Schedule Sucessfully");
         }
@@ -199,7 +209,17 @@ namespace CMMSAPIs.Repositories.Masters
             List<GETSCHEDULE> Schedules = await Context.GetData<GETSCHEDULE>(getsch).ConfigureAwait(false);
             return Schedules;
         }
-
+        internal async Task<List<GETSCHEDULE>> GetScheduleCourseDetail(int schedule_id)
+        {
+            string getsch = $"SELECT  Schid as ScheduleID ,CourseId as  CourseID , Course_name, ScheduleDate as Date_of_Trainig, TraingCompany as TrainingCompany, Trainer, Mode as mode,  Venue , " +
+                $" c.Topic,c.Traning_category_id, c.No_Of_Days, c.Targated_group_id, c.Duration_in_Minutes ,cc.name as course_category ,tg.name as targeted_group from  training_schedule " +
+                $"  LEFT JOIN course as c on c.id = training_schedule.CourseId " +
+                $"  LEFT JOIN course_category cc on cc.id = c.Traning_category_id " +
+                $" LEFT JOIN targeted_group as tg on tg.id = c.Targated_group_id " +
+                $" where training_schedule.id={schedule_id} ";
+            List<GETSCHEDULE> Schedules = await Context.GetData<GETSCHEDULE>(getsch).ConfigureAwait(false);
+            return Schedules;
+        }
         internal async Task<CMDefaultResponse> ExecuteScheduleCourse()
         {
             return null;

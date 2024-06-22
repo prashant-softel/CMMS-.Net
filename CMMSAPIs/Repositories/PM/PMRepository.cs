@@ -201,7 +201,7 @@ namespace CMMSAPIs.Repositories.PM
                 planListQry += $" AND plan.plan_date >= '{((DateTime)start_date).ToString("yyyy-MM-dd")}' ";
             if (end_date != null)
                 planListQry += $" AND plan.plan_date <= '{((DateTime)end_date).ToString("yyyy-MM-dd")}' ";
-            planListQry += "order by created_at asc ";
+            planListQry += "order by plan_date asc ; ";
             planListQry += $";";
             List<CMPMPlanList> plan_list = await Context.GetData<CMPMPlanList>(planListQry).ConfigureAwait(false);
 
@@ -1058,6 +1058,7 @@ namespace CMMSAPIs.Repositories.PM
                             }
                             try
                             {
+
                                 newR["checklistID"] = checklist[Convert.ToString(newR["CheckList"]).ToUpper()];
                             }
                             catch (KeyNotFoundException)

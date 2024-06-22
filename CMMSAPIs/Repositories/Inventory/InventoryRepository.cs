@@ -188,7 +188,7 @@ namespace CMMSAPIs.Repositories.Inventory
             {
                 { "Plant_Name", new Tuple<string, Type>("siteName", typeof (string)) },
                 { "Asset_Name", new Tuple<string, Type>("name", typeof(string)) },
-                { "Asset_Description", new Tuple<string, Type>("description", typeof(string)) },
+                { "Asset_Description", new Tuple<string, Type>("assetdescription", typeof(string)) },
                 { "Asset_Serial_no", new Tuple<string, Type>("serialNumber", typeof(string)) },
                 { "DC_Capacity", new Tuple<string, Type>("dcCapacity", typeof(int)) },
                 { "AC_Capacity", new Tuple<string, Type>("acCapacity", typeof(int)) },
@@ -386,6 +386,7 @@ namespace CMMSAPIs.Repositories.Inventory
                             //{
                             //    m_errorLog.SetError($"[Checklist: Row {rN}] Checklist name cannot be duplicate.");
                             //}
+
 
                             try
                             {
@@ -640,6 +641,7 @@ namespace CMMSAPIs.Repositories.Inventory
                                     // return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] Asset status named '{newR["statusName"]}' not found.");
 
                                 }
+
 
                             }
                             try
@@ -1264,7 +1266,7 @@ string warrantyQry = "insert into assetwarranty
                 //List<CMInventoryList> newInventory = await Context.GetData<CMInventoryList>(qry).ConfigureAwait(false);
                 DataTable dt = await Context.FetchData(qry).ConfigureAwait(false);
                 retID = Convert.ToInt32(dt.Rows[0][0]);
-                if (unit.warranty_type > 0 && unit.warranty_term_type > 0 && unit.warranty_provider_id > 0)
+                if (unit.warranty_type > 0 || unit.warranty_term_type > 0 || unit.warranty_provider_id > 0)
                 {
                     string start_date = unit.start_date != null ? ((DateTime)unit.start_date).ToString("yyyy-MM-dd HH:mm:ss") : UtilsRepository.GetUTCTime().ToString();
                     string warranty_description = unit.warranty_description == null ? "" : unit.warranty_description;
