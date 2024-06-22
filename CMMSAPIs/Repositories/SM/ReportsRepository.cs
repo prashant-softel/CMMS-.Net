@@ -242,20 +242,30 @@ public async Task<List<CMEmployeeStockReport>> GetEmployeeStockReport(int facili
                 $" and sm_td.plantID in ('{facility_id}')  AND sm_td.Nature_Of_Transaction = 1 ORDER BY sm_td.ID DESC) as fmItemList GROUP BY fmItemList.assetItemID ORDER BY fmItemList.ID DESC";
 
             // updated
-            string Plant_Stock_Opening_Details_query = $"SELECT  sm_trans.facilityID as facilityID, fc.name as facilityName, " +
+
+            string assetCondition = "";
+            if(itemID != null && itemID != "")
+            {
+                assetCondition = $"and a_master.id in ({itemID})";
+            }
+  
+
+            string Plant_Stock_Opening_Details_query = $"SELECT smrsitems.serial_number, sm_trans.facilityID as facility_id,sm_td.*, fc.name as facilityName, " +
                 $" fc.isBlock as Facility_Is_Block, '' as Facility_Is_Block_of_name,sm_trans.assetItemID, a_master.asset_name, " +
                 $" a_master.asset_code, a_master.asset_type_ID, AST.asset_type," +
                 $" IFNULL((select sum(ST.creditQty)-sum(ST.debitQty)  FROM smtransition as ST  " +
                 $" JOIN smassetmasters as SM ON SM.ID = ST.assetItemID  LEFT JOIN facilities fcc ON fcc.id = ST.facilityID  " +
                 $" where   ST.actorType = {(int)CMMS.SM_Actor_Types.Inventory} and SM.ID=a_master.ID  and ST.facilityID in ('{facility_id}')  and" +
                 $" date_format(ST.lastModifiedDate, '%Y-%m-%d') < '{StartDate.ToString("yyyy-MM-dd")}'  group by SM.asset_code),0) Opening," +
-                $" sum(sm_trans.creditQty) as inward, sum(sm_trans.debitQty) as outward" +
+                $" sum(sm_trans.creditQty) as inward, sum(sm_trans.debitQty) as outward, sm_trans.lastModifiedDate lastInsetedDateTime" +
                 $" FROM smtransition as sm_trans " +
-                $" JOIN smassetmasters as a_master ON a_master.ID = sm_trans.assetItemID" +
+                $" JOIN smassetmasters as a_master ON a_master.ID = sm_trans.assetItemID join smtransactiondetails as sm_td on sm_td.id = sm_trans.transactionID" +
                 $" LEFT JOIN facilities fc ON fc.id = sm_trans.facilityID " +
                 $" Left join smassettypes AST on AST.id = a_master.asset_type_ID " +
+                $" left join smmrs on smmrs.id = sm_trans.mrsID " +
+                $"left join smrsitems on smrsitems.mrs_return_ID = smmrs.id " +
                 $" where sm_trans.actorType = {(int)CMMS.SM_Actor_Types.Inventory} and sm_trans.facilityID in ('{facility_id}') " +
-                $" and date_format(sm_trans.lastModifiedDate, '%Y-%m-%d')  BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}' and a_master.id in ({itemID}) group by a_master.asset_code;";
+                $" and date_format(sm_trans.lastModifiedDate, '%Y-%m-%d')  BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}' {assetCondition} group by a_master.asset_code;";
 
             List<CMFaultyMaterialReport> result = await Context.GetData<CMFaultyMaterialReport>(Plant_Stock_Opening_Details_query).ConfigureAwait(false);
             return result;
@@ -587,3 +597,4 @@ public async Task<List<CMEmployeeStockReport>> GetEmployeeStockReport(int facili
 
     }
 }
+
