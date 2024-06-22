@@ -1200,7 +1200,21 @@ namespace CMMSAPIs.Repositories.SM
                     Queryflag = true;
                 }
             }
+            int from_actor_id = 0;
+            int from_actor_type_id = 0;
+            int to_actor_id = 0;
+            int to_actor_type_id = 0;
+            string getActorIds = "select from_actor_id,from_actor_type_id,to_actor_id,to_actor_type_id  from smmrs where id = "+ request.mrsreturnID + ";";
+            DataTable dt_actorids = await Context.FetchData(getActorIds).ConfigureAwait(false);
 
+            if (dt_actorids.Rows.Count > 0)
+            {
+                from_actor_id = (dt_actorids.Rows[0]["from_actor_id"].ToInt());
+                from_actor_type_id = (dt_actorids.Rows[0]["from_actor_type_id"].ToInt());
+                to_actor_id = (dt_actorids.Rows[0]["to_actor_id"].ToInt());
+                to_actor_type_id = (dt_actorids.Rows[0]["to_actor_type_id"].ToInt());
+ 
+            }
             if (request.faultyItems.Count > 0)
             {
                 for (var i = 0; i < request.faultyItems.Count; i++)
@@ -1226,6 +1240,11 @@ namespace CMMSAPIs.Repositories.SM
                     {
                         string updatestmt = $"Update smmrs SET status = {(int)CMMS.CMMS_Status.MRS_SUBMITTED} where id = {request.mrsreturnID} ;UPDATE smrsitems SET mrs_return_ID = {request.mrsreturnID}, returned_qty={request.faultyItems[i].returned_qty},return_remarks='{request.faultyItems[i].return_remarks}', is_faulty = 1 WHERE ID = {request.faultyItems[i].mrs_item_ID};";
                         await Context.ExecuteNonQry<int>(updatestmt);
+                      
+
+                            var tResult = await TransactionDetails(request.facility_ID, from_actor_id, from_actor_type_id, to_actor_id, to_actor_type_id, asset_item_ID, Convert.ToInt32(request.faultyItems[i].returned_qty), (int)CMMS.CMMS_Modules.SM_MRS_RETURN, request.mrsreturnID, request.faultyItems[i].return_remarks, 0);
+                          
+                        
                     }
                     else
                     {
@@ -1246,6 +1265,8 @@ namespace CMMSAPIs.Repositories.SM
                             $"VALUES ({request.mrsreturnID},{MRS_ReturnID},{asset_item_ID},{qty}, {requested_qty}, {request.faultyItems[i].returned_qty}, '{request.faultyItems[i].return_remarks}', 2, 1,1,{issued_qty},'{request.faultyItems[i].sr_no}','{asset_MDM_code}')" +
                             $"; SELECT LAST_INSERT_ID(); COMMIT;";
                         DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
+                        var tResult = await TransactionDetails(request.facility_ID, from_actor_id, from_actor_type_id, to_actor_id, to_actor_type_id, asset_item_ID, Convert.ToInt32(request.faultyItems[i].returned_qty), (int)CMMS.CMMS_Modules.SM_MRS_RETURN, request.mrsreturnID, request.faultyItems[i].return_remarks, 0);
+
                     }
                 }
             }
@@ -1479,8 +1500,7 @@ namespace CMMSAPIs.Repositories.SM
             comment = "MRS Return Rejected. Reason : " + request.comment + "";
 
 
-            if (Queryflag)
-            {
+         
                 var stmtUpdate = $"UPDATE smmrs SET rejected_by_emp_ID = {UserID}, rejected_date = '{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}'," +
                 $"status = {(int)CMMS.CMMS_Status.MRS_REQUEST_REJECTED}, approval_comment = '{request.comment}'" +
                 $" WHERE ID = {request.id}";
@@ -1496,8 +1516,6 @@ namespace CMMSAPIs.Repositories.SM
                 {
                     return new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "MRS Item update details failed.");
                 }
-
-            }
 
             response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, comment);
             return response;
