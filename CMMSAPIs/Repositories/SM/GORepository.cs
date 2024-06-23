@@ -309,14 +309,41 @@ namespace CMMSAPIs.Repositories
                 string itemsQuery = "";
                 if (request.go_items[i].ordered_qty > 0)
                 {
-                    itemsQuery = $"UPDATE smgoodsorderdetails SET location_ID = {request.location_ID},cost = {request.go_items[i].cost}, accepted_qty = {request.go_items[i].accepted_qty},ordered_qty = {request.go_items[i].ordered_qty} , requested_qty = {request.go_items[i].requested_qty}, received_qty= {request.go_items[i].received_qty},lost_qty = {request.go_items[i].lost_qty}, damaged_qty={request.go_items[i].damaged_qty}, paid_by_ID = {request.go_items[i].paid_by_ID}" +
-                        $" , sr_no = '{request.go_items[i].sr_no}', requestOrderId= {request.go_items[i].requestOrderId}, requestOrderItemID = {request.go_items[i].requestOrderItemID}  WHERE ID = {request.go_items[i].goItemID}";
+                    if (request.go_items[i].goItemID > 0)
+                    {
+                        itemsQuery = $"UPDATE smgoodsorderdetails SET location_ID = {request.location_ID},cost = {request.go_items[i].cost}, accepted_qty = {request.go_items[i].accepted_qty},ordered_qty = {request.go_items[i].ordered_qty} , requested_qty = {request.go_items[i].requested_qty}, received_qty= {request.go_items[i].received_qty},lost_qty = {request.go_items[i].lost_qty}, damaged_qty={request.go_items[i].damaged_qty}, paid_by_ID = {request.go_items[i].paid_by_ID}" +
+                            $" , sr_no = '{request.go_items[i].sr_no}', requestOrderId= {request.go_items[i].requestOrderId}, requestOrderItemID = {request.go_items[i].requestOrderItemID}  WHERE ID = {request.go_items[i].goItemID}";
+                    }
+                    else
+                    {
+                        int assetTypeId = 0;
+                        string stmtAssetType = $"SELECT asset_type_ID FROM smassetmasters WHERE id = '{request.go_items[i].assetMasterItemID}'";
+                        DataTable dtAssetType = await Context.FetchData(stmtAssetType).ConfigureAwait(false);
+
+                        if (dtAssetType == null && dtAssetType.Rows.Count == 0)
+                        {
+                            assetTypeId = 0;
+                        }
+                        else
+                        {
+                            assetTypeId = Convert.ToInt32(dtAssetType.Rows[0][0]);
+                        }
+
+                        string poDetailsQuery = $"INSERT INTO smgoodsorderdetails (purchaseID,assetItemID,cost,ordered_qty,location_ID, paid_by_ID, requested_qty,sr_no,spare_status,is_splited, requestOrderId, requestOrderItemID) " +
+                        "values(" + request.id + ", " + request.go_items[i].assetMasterItemID + ",  " + request.go_items[i].cost + ", " + request.go_items[i].ordered_qty + ", " + request.location_ID + ", " + request.go_items[i].paid_by_ID + ", " + request.go_items[i].requested_qty + ", '" + request.go_items[i].sr_no + "', " + assetTypeId + ", 1, " + request.go_items[i].requestOrderId + "," + request.go_items[i].requestOrderItemID + ") ; SELECT LAST_INSERT_ID();";
+                        DataTable dtInsertPO = await Context.FetchData(poDetailsQuery).ConfigureAwait(false);
+                    }
+
                 }
                 else
                 {
                     itemsQuery = $"DELETE from smgoodsorderdetails where ID = {request.go_items[i].goItemID}";
                 }
-                var result = await Context.ExecuteNonQry<int>(itemsQuery);
+                if(itemsQuery != "")
+                {
+                    var result = await Context.ExecuteNonQry<int>(itemsQuery);
+                }
+  
             }
             if (request.is_submit == 0)
             {
