@@ -92,5 +92,27 @@ namespace CMMSAPIs.Models.Masters
         public decimal age_Between_35_50 { get; set; }
         public decimal age_Greater_50 { get; set; }
     }
+    public class CMGETAttendenceMONTH
+    {
+        public int? facility_id { get; set; }
+        public String? facility_name { get; set; }
+        public List<Employee>? attendance { get; set; }
+    }
+    public class EmployeeMonth
+    {
+        public int? employeeId { get; set; }
+        public String? employeeName { get; set; }
+        public String? dateOfJoining { get; set; }
+        public String? dateOfExit { get; set; }
+        public String? workingStatus { get; set; }
+        public List<Details>? details { get; set; }
+    }
+    public class DetailsOFMonth
+    {
+        public string date { get; set; }
+        public string status { get; set; }
+        public string? inTime { get; set; }
+        public string? outTime { get; set; }
+    }
 }
 

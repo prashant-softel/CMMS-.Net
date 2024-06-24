@@ -16,6 +16,8 @@ namespace CMMSAPIs.Models.Masters
         public int facility_id { get; set; }
         public string Mode { get; set; }
         public int CreatedBy { get; set; }
+        public int status_code { get; set; }
+        public string short_status { get; set; }
         public List<InternalEmployee> internalEmployees { get; set; }
         public List<ExternalEmployee> externalEmployees { get; set; }
         public List<int> uploadfile_ids { get; set; }
@@ -58,6 +60,35 @@ namespace CMMSAPIs.Models.Masters
         public string Course_Category { get; set; }
         public string Targeted_Group { get; set; }
 
+
+
+    }
+    public class GETSCHEDULEDETAIL
+    {
+
+        public int ScheduleID { get; set; }
+        public int facility_id { get; set; }
+        public string Date_of_Trainig { get; set; }
+        public string Training_course { get; set; }
+        public string Trainer { get; set; }
+        public string Mode { get; set; }
+        public string Venue { get; set; }
+        public string Training_Agency { get; set; }
+        public string HFE_Epmloyee { get; set; }
+        public List<INTERNALEMPLOYEE> internal_employee { get; set; }
+        public List<INTERNALEMPLOYEE> external_employee { get; set; }
+        public List<CMTRAININGFILE> uploadfile_ids { get; set; }
+    }
+    public class INTERNALEMPLOYEE
+    {
+        public int id { get; set; }
+        // public int ScheduleID { get; set; }
+        public string Name { get; set; }
+        public string Email { get; set; }
+        public dynamic Mobile { get; set; }
+        public int Attendend { get; set; }
+        public dynamic Rsvp { get; set; }
+        public string notes { get; set; }
 
     }
 

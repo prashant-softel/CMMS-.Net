@@ -747,7 +747,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             }
 
             string scheduleQuery = $"Update cleaning_execution_schedules set status = {status},startedById={userId},startedAt='{UtilsRepository.GetUTCTime()}' where scheduleId = {scheduleId}; ";
-            //$"Update cleaning_execution_items set status = {status} where scheduleId = {scheduleId}";
+
 
             await Context.GetData<CMMCExecutionSchedule>(scheduleQuery).ConfigureAwait(false);
 

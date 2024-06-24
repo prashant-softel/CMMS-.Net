@@ -1,17 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
-using System;
-using Microsoft.AspNetCore.Authorization;
+﻿using CMMSAPIs.BS.Cleaning;
 using CMMSAPIs.Models.MC;
-using CMMSAPIs.BS.Cleaning;
 using CMMSAPIs.Models.Utils;
-using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
-using CMMSAPIs.Helper;
-using Org.BouncyCastle.Crypto.Modes.Gcm;
-using static CMMSAPIs.Helper.CMMS;
+using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using static CMMSAPIs.Helper.CMMS;
 
 namespace CMMSAPIs.Controllers.Vegetation
 {
@@ -19,7 +16,7 @@ namespace CMMSAPIs.Controllers.Vegetation
     [ApiController]
     public class VegetationController : Controller
     {
-        private  CleaningBS _CleaningBS;
+        private CleaningBS _CleaningBS;
 
         public VegetationController(CleaningBS Cleaning)
         {
@@ -67,7 +64,7 @@ namespace CMMSAPIs.Controllers.Vegetation
             try
             {
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _CleaningBS.CreatePlan(request,userId);
+                var data = await _CleaningBS.CreatePlan(request, userId);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -94,11 +91,11 @@ namespace CMMSAPIs.Controllers.Vegetation
 
         [Route("GetVegetationPlanDetails")]
         [HttpGet]
-        public async Task<IActionResult> GetVegetationPlanDetails(int planId, int  facility_id)
+        public async Task<IActionResult> GetVegetationPlanDetails(int planId, int facility_id)
         {
             try
             {
-              
+
                 var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
 
                 var data = await _CleaningBS.GetPlanDetails(planId, facilitytimeZone);
@@ -148,7 +145,7 @@ namespace CMMSAPIs.Controllers.Vegetation
             try
             {
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _CleaningBS.RejectPlan(request,userId);
+                var data = await _CleaningBS.RejectPlan(request, userId);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -254,7 +251,7 @@ namespace CMMSAPIs.Controllers.Vegetation
 
         [Route("GetVegExecutionDetails")]
         [HttpGet]
-        public async Task<IActionResult> GetVegExecutionDetails(int executionId,int facility_id)
+        public async Task<IActionResult> GetVegExecutionDetails(int executionId, int facility_id)
         {
             try
             {

@@ -62,14 +62,14 @@ namespace CMMSAPIs.Controllers.Masters
                 throw ex;
             }
         }
-        [Route("UpdateAttendance")]
-        [HttpPatch]
-        public async Task<IActionResult> UpdateAttendance(CMCreateAttendence requests)
+        [Route("GetAttendanceByDetailsByMonth")]
+        [HttpGet]
+        public async Task<IActionResult> GetAttendanceByDetailsByMonth(int facility_id, DateTime from_date, DateTime to_date)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _attendeceBS.UpdateAttendance(requests, userID);
+                var data = await _attendeceBS.GetAttendanceByDetailsByMonth(facility_id, from_date, to_date);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -77,5 +77,6 @@ namespace CMMSAPIs.Controllers.Masters
                 throw ex;
             }
         }
+
     }
 }

@@ -1,11 +1,10 @@
-﻿using System;
+﻿using MySql.Data.MySqlClient;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Linq;
 using System.Threading.Tasks;
-using MySql.Data;
-using MySql.Data.MySqlClient;
 
 namespace CMMSAPIs.Helper
 {
@@ -35,8 +34,8 @@ namespace CMMSAPIs.Helper
                         //cmd1.ExecuteNonQuery();
                         cmd.CommandTimeout = 99999;
                         cmd.CommandType = CommandType.Text;
-                       
- 
+
+
 
                         using (DbDataReader dataReader = await cmd.ExecuteReaderAsync(CommandBehavior.CloseConnection))
                         {
@@ -54,12 +53,44 @@ namespace CMMSAPIs.Helper
             catch (MySqlException sqlex)
             {
                 throw sqlex;
-                throw new Exception("GetData =" +Environment.NewLine, sqlex);
+                throw new Exception("GetData =" + Environment.NewLine, sqlex);
             }
             finally
             {
 
 
+            }
+        }
+        internal async Task<T> GetDataFirst<T>(string qry) where T : class, new()
+        {
+            try
+            {
+                using (MySqlConnection conn = TheConnection)
+                {
+                    using (MySqlCommand cmd = getQryCommand(qry, conn))
+                    {
+                        await conn.OpenAsync();
+
+                        // Set a long timeout for the command
+                        cmd.CommandTimeout = 99999;
+                        cmd.CommandType = CommandType.Text;
+
+                        using (DbDataReader dataReader = await cmd.ExecuteReaderAsync(CommandBehavior.CloseConnection))
+                        {
+                            DataSet ds = new DataSet();
+                            DataTable dt = new DataTable();
+                            ds.Tables.Add(dt);
+                            dt.DataSet.EnforceConstraints = false;
+                            dt.Load(dataReader);
+                            cmd.Parameters.Clear();
+                            return dt.MapTo<T>().FirstOrDefault();
+                        }
+                    }
+                }
+            }
+            catch (MySqlException sqlex)
+            {
+                throw new Exception("GetData =" + Environment.NewLine, sqlex);
             }
         }
 
@@ -149,7 +180,7 @@ namespace CMMSAPIs.Helper
 
         internal async Task<int> ExecuteNonQuery(string SpName, MySqlParameter[] sqlpara = null, bool returnvalue = false)
         {
-           // MySqlParameter retpara = null;
+            // MySqlParameter retpara = null;
 
             try
             {
@@ -171,11 +202,11 @@ namespace CMMSAPIs.Helper
                                 cmd.Parameters.Add(para);
                             }
                         }
-                      
+
                         int i = await cmd.ExecuteNonQueryAsync();
-                       
+
                         return i;
-                         
+
                     }
                 }
             }
@@ -186,7 +217,7 @@ namespace CMMSAPIs.Helper
             finally
             {
 
-               // retpara = null;
+                // retpara = null;
 
             }
         }
@@ -203,7 +234,7 @@ namespace CMMSAPIs.Helper
                         cmd.CommandTimeout = 99999;
                         cmd.CommandType = CommandType.Text;
                         await conn.OpenAsync();
-                       
+
 
                         int i = await cmd.ExecuteNonQueryAsync();
 
@@ -246,7 +277,7 @@ namespace CMMSAPIs.Helper
                                 cmd.Parameters.Add(para);
                             }
                         }
-                         
+
                         using (DbDataReader dataReader = await cmd.ExecuteReaderAsync(CommandBehavior.CloseConnection))
                         {
                             DataSet ds = new DataSet();
@@ -282,7 +313,7 @@ namespace CMMSAPIs.Helper
         internal MySqlCommand getQryCommand(string qry, MySqlConnection conn)
         {
             MySqlCommand cmd = new MySqlCommand(qry);   //check if this line is required? see next line
-            cmd=conn.CreateCommand();
+            cmd = conn.CreateCommand();
             cmd.CommandTimeout = conn.ConnectionTimeout;
             cmd.CommandText = qry;
             return cmd;

@@ -1,4 +1,3 @@
-using iTextSharp.text;
 using System;
 using System.Collections.Generic;
 
@@ -11,7 +10,7 @@ namespace CMMSAPIs.Models.SM
 
     public class CMPlantStockOpening
     {
-        public int facilityID {  get; set; }    
+        public int facilityID { get; set; }
         public string facilityName { get; set; }
         public int Facility_Is_Block { get; set; }
         public string Facility_Is_Block_of_name { get; set; }
@@ -114,7 +113,7 @@ namespace CMMSAPIs.Models.SM
         public string remarks_in_short { get; set; }
 
     }
-        public class CMEmployeeStockList
+    public class CMEmployeeStockList
     {
         public int emp_ID { get; set; }
         public string emp_name { get; set; }
@@ -131,7 +130,7 @@ namespace CMMSAPIs.Models.SM
     }
     public class CMTaskStockItems
     {
-       
+
         public int assetItemID { get; set; }
         public string asset_name { get; set; }
         public int facilityID { get; set; }
@@ -235,7 +234,7 @@ namespace CMMSAPIs.Models.SM
         public decimal used_qty { get; set; }
         public decimal issued_qty { get; set; }
         public decimal approved_qty { get; set; }
-       
+
 
     }
 }

@@ -1,35 +1,30 @@
 ﻿using CMMSAPIs.Helper;
 using CMMSAPIs.Models.MC;
-using CMMSAPIs.Models.Users;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.CleaningRepository;
-using CMMSAPIs.Repositories.Users;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Numerics;
 using System.Threading.Tasks;
-using static CMMSAPIs.Helper.CMMS;
 
 namespace CMMSAPIs.BS.Cleaning
 {
     public interface ICleaningBS
     {
-        public Task<List<CMMCPlan>> GetPlanList(int facilityId,string facilitytime);
+        public Task<List<CMMCPlan>> GetPlanList(int facilityId, string facilitytime);
         public Task<CMDefaultResponse> CreatePlan(List<CMMCPlan> request, int userId);
-        public Task<CMMCPlan> GetPlanDetails(int planId,string facilitytime);
+        public Task<CMMCPlan> GetPlanDetails(int planId, string facilitytime);
         public Task<CMMCPlanSummary> GetPlanDetailsSummary(int planId, CMMCPlanSummary request);
 
         public Task<CMDefaultResponse> ApprovePlan(CMApproval request, int userId);
         public Task<CMDefaultResponse> RejectPlan(CMApproval request, int userId);
         public Task<CMDefaultResponse> DeletePlan(int planId, int userId);
         public Task<CMDefaultResponse> UpdatePlan(List<CMMCPlan> request, int userId);
-        public Task<List<CMMCTaskList>> GetTaskList(int facilityId,string facilitytime);
+        public Task<List<CMMCTaskList>> GetTaskList(int facilityId, string facilitytime);
         public Task<CMDefaultResponse> StartExecution(int executionId, int userId);
         public Task<CMDefaultResponse> StartScheduleExecution(int scheduleId, int userId);
         public Task<CMDefaultResponse> UpdateScheduleExecution(CMMCGetScheduleExecution schedule, int userId);
-        public Task<CMMCExecutionSchedule> GetScheduleExecutionSummary(CMMCGetScheduleExecution schedule,string facilitytime);
-        public Task<CMMCExecution> GetExecutionDetails(int id,string facilitytime);
+        public Task<CMMCExecutionSchedule> GetScheduleExecutionSummary(CMMCGetScheduleExecution schedule, string facilitytime);
+        public Task<CMMCExecution> GetExecutionDetails(int id, string facilitytime);
         public Task<CMDefaultResponse> AbandonExecution(CMApproval request, int userId);
         public Task<CMDefaultResponse> AbandonSchedule(CMApproval request, int userId);
         public Task<List<CMMCEquipmentList>> GetEquipmentList(int facilityId);
@@ -39,7 +34,7 @@ namespace CMMSAPIs.BS.Cleaning
         public Task<CMDefaultResponse> EndExecution(int executionId, int userId);
         public Task<CMDefaultResponse> ApproveExecution(CMApproval request, int userID);
         public Task<CMDefaultResponse> RejectExecution(CMApproval request, int userID);
-       // public Task<List<CMMCTaskEquipmentList>> GetVegTaskEquipmentList(int taskId, string facilitytime);
+        // public Task<List<CMMCTaskEquipmentList>> GetVegTaskEquipmentList(int taskId, string facilitytime);
 
     }
     public class CleaningBS : ICleaningBS
@@ -51,11 +46,12 @@ namespace CMMSAPIs.BS.Cleaning
 
         public CleaningBS(DatabaseProvider dbProvider)
         {
-            databaseProvider = dbProvider;           
+            databaseProvider = dbProvider;
 
         }
 
-        public int setModuleType(CMMS.cleaningType module) {
+        public int setModuleType(CMMS.cleaningType module)
+        {
 
             if (CMMS.cleaningType.ModuleCleaning == module)
             {
@@ -68,14 +64,14 @@ namespace CMMSAPIs.BS.Cleaning
             }
             return 1;
         }
-        public async Task<List<CMMCPlan>> GetPlanList(int facilityId,string facilitytime)
+        public async Task<List<CMMCPlan>> GetPlanList(int facilityId, string facilitytime)
         {
             try
             {
                 //using (var repos = new MCRepository(getDB))
                 {
-                    
-                    return await repos.GetPlanList(facilityId,facilitytime);
+
+                    return await repos.GetPlanList(facilityId, facilitytime);
                 }
             }
             catch (Exception ex)
@@ -83,7 +79,7 @@ namespace CMMSAPIs.BS.Cleaning
                 throw;
             }
         }
-        public async Task<List<CMMCTaskList>> GetTaskList(int facility,string facilitytime)
+        public async Task<List<CMMCTaskList>> GetTaskList(int facility, string facilitytime)
         {
             try
             {
@@ -100,7 +96,7 @@ namespace CMMSAPIs.BS.Cleaning
 
 
 
-        public async Task<CMMCPlan> GetPlanDetails(int planId,string facilitytime )
+        public async Task<CMMCPlan> GetPlanDetails(int planId, string facilitytime)
         {
             try
             {
@@ -115,13 +111,13 @@ namespace CMMSAPIs.BS.Cleaning
             }
         }
 
-        public async Task<CMMCPlanSummary> GetPlanDetailsSummary(int planId, CMMCPlanSummary request )
+        public async Task<CMMCPlanSummary> GetPlanDetailsSummary(int planId, CMMCPlanSummary request)
         {
             try
             {
                 //using (var repos = new MCRepository(getDB))
                 {
-                    return await repos.GetPlanDetailsSummary(planId,request);
+                    return await repos.GetPlanDetailsSummary(planId, request);
                 }
             }
             catch (Exception ex)
@@ -251,7 +247,7 @@ namespace CMMSAPIs.BS.Cleaning
             {
                 // using (var repos = new MCRepository(getDB))
                 {
-                    return await repos.GetScheduleExecutionSummary(schedule,  facilitytime);
+                    return await repos.GetScheduleExecutionSummary(schedule, facilitytime);
                 }
             }
             catch (Exception ex)
@@ -289,7 +285,7 @@ namespace CMMSAPIs.BS.Cleaning
             }
         }
 
-        public async Task<CMMCExecution> GetExecutionDetails(int executionId,string facilitytime)
+        public async Task<CMMCExecution> GetExecutionDetails(int executionId, string facilitytime)
         {
             try
             {
@@ -317,7 +313,7 @@ namespace CMMSAPIs.BS.Cleaning
                 throw;
             }
         }
-        public async Task<List<CMMCTaskEquipmentList>> GetTaskEquipmentList(int taskId,string facilitytime)
+        public async Task<List<CMMCTaskEquipmentList>> GetTaskEquipmentList(int taskId, string facilitytime)
         {
             try
             {
@@ -377,7 +373,8 @@ namespace CMMSAPIs.BS.Cleaning
             }
         }
 
-        public async Task<CMDefaultResponse> EndScheduleExecution(int scheduleId, int userId) { 
+        public async Task<CMDefaultResponse> EndScheduleExecution(int scheduleId, int userId)
+        {
             try
             {
                 // using (var repos = new MCRepository(getDB))
@@ -395,7 +392,7 @@ namespace CMMSAPIs.BS.Cleaning
         {
             try
             {
-                // using (var repos = new MCRepository(getDB))
+                using (var repos = new MCRepository(getDB))
                 {
                     return await repos.EndExecution(executionId, userId);
                 }

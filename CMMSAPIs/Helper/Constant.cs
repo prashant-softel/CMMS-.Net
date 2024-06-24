@@ -567,7 +567,12 @@ namespace CMMSAPIs.Helper
             MoM_OPEN = 451,
             MoM_CANCEL,
             MoM_CLOSE,
+            COURSE_CREATED,
+            COURSE_UPDATED,
+            COURSE_DELETED,
             COURSE_SCHEDULE,
+            COURSE_ENDED,
+
 
             STATUTORY_COMPILANCE_CREATED = 501,
             STATUTORY_COMPILANCE_UPDATED,

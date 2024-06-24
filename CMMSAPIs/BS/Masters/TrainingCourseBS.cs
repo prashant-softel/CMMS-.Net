@@ -18,8 +18,9 @@ namespace CMMSAPIs.BS.Masters
         Task<CMDefaultResponse> DeleteCourseList(int id, int userID);
         Task<CMDefaultResponse> CreateScheduleCourse(TrainingSchedule request, int userID);
         Task<List<GETSCHEDULE>> GetScheduleCourseList(int facility_id, DateTime from_date, DateTime to_date);
+        Task<List<GETSCHEDULEDETAIL>> GetScheduleCourseDetail(int schedule_id);
 
-        Task<CMDefaultResponse> ExecuteScheduleCourse();
+        Task<CMDefaultResponse> ExecuteScheduleCourse(GETSCHEDULEDETAIL requset);
         Task<List<CMTRAININGCATE>> GetTrainingCategorty();
         Task<CMDefaultResponse> CreateTrainingCategorty(CMTRAININGCATE request, int userID);
         Task<CMDefaultResponse> UpdateTrainingCategorty(CMTRAININGCATE request, int userID);
@@ -152,13 +153,13 @@ namespace CMMSAPIs.BS.Masters
             }
         }
 
-        public async Task<CMDefaultResponse> ExecuteScheduleCourse()
+        public async Task<CMDefaultResponse> ExecuteScheduleCourse(GETSCHEDULEDETAIL requset)
         {
             try
             {
                 using (var repos = new TrainingRepository(getDB))
                 {
-                    return await repos.ExecuteScheduleCourse();
+                    return await repos.ExecuteScheduleCourse(requset);
                 }
 
 
@@ -296,6 +297,22 @@ namespace CMMSAPIs.BS.Masters
                 using (var repos = new TrainingRepository(getDB))
                 {
                     return await repos.DeleteTargetedGroup(id);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<GETSCHEDULEDETAIL>> GetScheduleCourseDetail(int schedule_id)
+        {
+            try
+            {
+                using (var repos = new TrainingRepository(getDB))
+                {
+                    return await repos.GetScheduleCourseDetail(schedule_id);
 
                 }
             }

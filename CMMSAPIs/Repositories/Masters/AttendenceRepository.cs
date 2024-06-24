@@ -29,6 +29,10 @@ namespace CMMSAPIs.Repositories.Masters
             int employeeValue = 0;
             int fid = 0;
             string date = requests.date.ToString("yyyy-MM-dd");
+            string delete = $"DELETE FROM employee_attendance WHERE Date='{date}';";
+            await Context.ExecuteNonQry<int>(delete).ConfigureAwait(false);
+            string deletecontractor = $"DELETE FROM contractor_attendnace WHERE Date='{date}';";
+            await Context.ExecuteNonQry<int>(deletecontractor).ConfigureAwait(false);
             CMDefaultResponse response = new CMDefaultResponse();
             //Employee ATTENDENCE
 
@@ -72,14 +76,14 @@ namespace CMMSAPIs.Repositories.Masters
 
             string getContractorAttendance = $"SELECT id AS Id, facility_id AS Facility_Id,(DATE_FORMAT(Date ,'%Y-%m-%d')) as Date, contractor_id AS Contractor_Id, age_lessthan_35 AS Age_Less_Than35, age_Between_35_50 AS Age_Between_35And50, age_Greater_50 AS Age_Greater50, Purpose as Purpose " +
                                             $" FROM contractor_attendnace WHERE (DATE(contractor_attendnace.Date) = '{dates.ToString("yyyy-MM-dd")} ') and contractor_attendnace.facility_id ={facility_id};";
-            var contractAttendances = await Context.GetData<CMGetCotractor1>(getContractorAttendance).ConfigureAwait(false);
+            var contractAttendances = await Context.GetDataFirst<CMGetCotractor1>(getContractorAttendance).ConfigureAwait(false);
 
             var hfeAttendance = employeeAttendanceList.Select(a => new CMGetAttendence1
             {
                 // id = a.id,
                 employee_id = a.employee_id,
                 name = a.name,
-                present = a.present == 1 ? "true" : "false",
+                present = a.present == 1 ? true : false,
                 In_Time = a.In_Time,
                 Out_Time = a.Out_Time,
             }).ToList();
@@ -90,28 +94,6 @@ namespace CMMSAPIs.Repositories.Masters
                 hfeAttendance,
                 contractAttendances
             };
-            return response;
-        }
-
-
-        internal async Task<CMDefaultResponse> UpdateAttendance(CMCreateAttendence requests, int userID)
-        {
-            CMDefaultResponse response = new CMDefaultResponse();
-
-
-            int employeeValue = 0;
-            foreach (CMGetAttendence request in requests.hfeAttendance)
-            {
-
-                string instimp = $"Update  employee_attendance SET attendance_id={request.Attendance_Id}, facility_id={request.facility_id}, employee_id={request.employee_id}, present={request.present}, in_time= '{request.InTime}', out_time,Date=,'{request.OutTime}', CreatedAt='{UtilsRepository.GetUTCTime()}', CreatedBy={userID}, UpdatedAt='{UtilsRepository.GetUTCTime()}', UpdatedBy={userID} where date={request.Dates} ;";
-                await Context.ExecuteNonQuery(instimp).ConfigureAwait(false);
-
-            }
-            //Contractor Ateendence
-            CMGetCotractor requst = requests.contractAttendance;
-            string contupdt = $"Update  contractor_attendnace SET facility_id={requests.facility_id},contractor_id={requst.contractor_id}, age_lessthan_35={requst.lessThan35}, age_Between_35_50={requst.between35to50}, age_Greater_50={requst.greaterThan50} , purpose='{requst.purpose}' where Date={requests.date} ;";
-            await Context.ExecuteNonQuery(contupdt).ConfigureAwait(false);
-            response = new CMDefaultResponse(employeeValue, CMMS.RETRUNSTATUS.SUCCESS, "Attendence Updated successfully.");
             return response;
         }
 
@@ -147,6 +129,18 @@ namespace CMMSAPIs.Repositories.Masters
          }).ToList();
 
             return groupedResult;
+
+        }
+
+        internal async Task<List<object>> GetAttendanceByDetailsByMonth(int facility_id, DateTime from_date, DateTime to_date)
+        {
+            string querybymonth = $"select facility_id ,f.name as facility_name from employee_attendance left join facilities f on f.id=employee_attendance.facility_id;";
+            List<CMGETAttendenceMONTH> employeeAttendanceList = await Context.GetData<CMGETAttendenceMONTH>(querybymonth).ConfigureAwait(false);
+            string querybymontemp = $"select ea.employee_id, concat(u.firstName,u.lastname) as employeeName, u.joiningDate as dateOfJoining,ea.Date as date," +
+                                  $" ea.in_time as inTime,ea.out_time as outTime from employee_attendance as ea " +
+                                  $"left join users as u on u.id=ea.employee_id";
+            List<EmployeeMonth> EmpDetails = await Context.GetData<EmployeeMonth>(querybymontemp).ConfigureAwait(false);
+            return null;
 
         }
     }

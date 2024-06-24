@@ -127,15 +127,31 @@ namespace CMMSAPIs.Controllers.Masters
             }
 
         }
-        //[Authorize]
-        [Route("ExecuteScheduleCourse")]
-        [HttpPost]
-        public async Task<IActionResult> ExecuteScheduleCourse()
+        [Route("GetScheduleCourseDetail")]
+        [HttpGet]
+        public async Task<IActionResult> GetScheduleCourseDetail(int schedule_id)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await TrainingCourseBS.ExecuteScheduleCourse();
+                var data = await TrainingCourseBS.GetScheduleCourseDetail(schedule_id);
+
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        //[Authorize]
+        [Route("ExecuteScheduleCourse")]
+        [HttpPost]
+        public async Task<IActionResult> ExecuteScheduleCourse(GETSCHEDULEDETAIL requset)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await TrainingCourseBS.ExecuteScheduleCourse(requset);
                 return Ok(data);
             }
             catch (Exception ex)
