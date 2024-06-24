@@ -1984,7 +1984,7 @@ namespace CMMSAPIs.Repositories.SM
             //    $" Left join smassettypes AST on AST.id = a_master.asset_type_ID  " +
             //    $"where mrs_ID = {mrs_id} and is_splited = 1 order by sm_trans.id desc;";
 
-            Plant_Stock_Opening_Details_query = $"select smrsitems.id mrs_item_id, smrsitems.asset_item_ID,smrsitems.serial_number as serial_no, smmrs.facility_ID   as facilityID," +
+            Plant_Stock_Opening_Details_query = $"select smrsitems.id mrs_item_id, smrsitems.asset_item_ID,smrsitems.serial_number, smmrs.facility_ID   as facilityID," +
                 $" fc.name as facilityName, asset_item_ID assetItemID, a_master.asset_name, a_master.asset_code, a_master.asset_type_ID, AST.asset_type, " +
                 $"  smrsitems.available_qty,smrsitems.requested_qty, smrsitems.used_qty,smrsitems.issued_qty, smrsitems.approved_qty " +
                 $" from smrsitems   " +
@@ -2026,7 +2026,7 @@ namespace CMMSAPIs.Repositories.SM
                 openingBalance.asset_code = item.asset_code;
                 openingBalance.asset_type_ID = item.asset_type_ID;
                 openingBalance.asset_type = item.asset_type;
-                openingBalance.serial_no = item.serial_no;
+                openingBalance.serial_number = item.serial_number;
                 openingBalance.requested_qty = item.requested_qty;
                 openingBalance.used_qty = item.used_qty;
                 openingBalance.issued_qty = item.issued_qty;
@@ -2061,7 +2061,7 @@ namespace CMMSAPIs.Repositories.SM
                     itemWise.asset_code = itemDetail.asset_code;
                     itemWise.asset_type_ID = itemDetail.asset_type_ID;
                     itemWise.asset_type = itemDetail.asset_type;
-                    itemWise.serial_no = itemDetail.serial_no;
+                    itemWise.serial_number = itemDetail.serial_number;
                     itemWise.available_qty = itemDetail.available_qty;
                     itemWise.requested_qty = itemDetail.requested_qty;
                     itemWise.consumed_qty = itemDetail.used_qty;

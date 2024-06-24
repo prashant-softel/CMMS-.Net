@@ -20,7 +20,7 @@ namespace CMMSAPIs.Models.SM
         public string asset_code { get; set; }
         public int asset_type_ID { get; set; }
         public string asset_type { get; set; }
-        public string serial_no { get; set; }
+        public string serial_number { get; set; }
         public decimal Opening { get; set; }
         public decimal inward { get; set; }
         public decimal outward { get; set; }
@@ -210,7 +210,7 @@ namespace CMMSAPIs.Models.SM
         public string asset_code { get; set; }
         public int asset_type_ID { get; set; }
         public string asset_type { get; set; }
-        public string serial_no { get; set; }
+        public string serial_number { get; set; }
         public decimal available_qty { get; set; }
         public decimal requested_qty { get; set; }
         public decimal consumed_qty { get; set; }
@@ -229,7 +229,7 @@ namespace CMMSAPIs.Models.SM
         public string asset_code { get; set; }
         public int asset_type_ID { get; set; }
         public string asset_type { get; set; }
-        public string serial_no { get; set; }
+        public string serial_number { get; set; }
         public decimal available_qty { get; set; }
         public decimal requested_qty { get; set; }
         public decimal used_qty { get; set; }
