@@ -15,7 +15,7 @@ namespace CMMSAPIs.BS.Masters
         Task<object> GetAttendanceByDetails(int facility_id, DateTime date);
 
         Task<List<CMGetAttendenceList>> GetAttendanceList(int facility_id, int year);
-        Task<List<object>> GetAttendanceByDetailsByMonth(int facility_id, DateTime from_date, DateTime to_date);
+        Task<object> GetAttendanceByDetailsByMonth(int facility_id, DateTime from_date, DateTime to_date);
     }
     public class _AttendeceBS : AttendeceBS
     {
@@ -79,7 +79,7 @@ namespace CMMSAPIs.BS.Masters
             }
         }
 
-        public async Task<List<object>> GetAttendanceByDetailsByMonth(int facility_id, DateTime from_date, DateTime to_date)
+        public async Task<object> GetAttendanceByDetailsByMonth(int facility_id, DateTime from_date, DateTime to_date)
         {
             try
             {

@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace CMMSAPIs.Repositories.PM
@@ -1083,10 +1084,15 @@ namespace CMMSAPIs.Repositories.PM
                             // response.import_log = m_errorLog.errorLog();
                             return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, logPath1, m_errorLog.errorLog(), "Import failed, file sheet[PlanEquipments] no rows to Insert.");
                         }
-                        string deletePmIdString = string.Join(",", deletePmId);
-                        string qurq = $"DELETE FROM pm_plan WHERE id in ({deletePmIdString});";
+                        var deletePmIdList = deletePmId.ToList();
 
-                        await Context.ExecuteNonQry<int>(qurq).ConfigureAwait(false);
+                        if (deletePmIdList.Any())
+                        {
+                            string deletePmIdString = string.Join(",", deletePmIdList);
+                            string qurq = $"DELETE FROM pm_plan WHERE id in ({deletePmIdString});";
+                            await Context.ExecuteNonQry<int>(qurq).ConfigureAwait(false);
+                        }
+
                         string mapChecklistQry = "INSERT INTO pmplanassetchecklist(planId, assetId, checklistId,facility_id) VALUES ";
 
                         foreach (DataRow row in dt3.Rows)

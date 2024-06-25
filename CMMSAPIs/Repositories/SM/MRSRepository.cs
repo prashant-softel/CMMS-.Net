@@ -1346,7 +1346,6 @@ namespace CMMSAPIs.Repositories.SM
 
                 for (var i = 0; i < request.faultyItems.Count; i++)
                 {
-
                     try
                     {
                         // Construct the SQL UPDATE statement for smrsitem
@@ -1361,6 +1360,31 @@ namespace CMMSAPIs.Repositories.SM
 
                         await Context.ExecuteNonQry<int>(updateStmt).ConfigureAwait(false);
                     }
+                    //try
+                    //{
+                    //    if (request.faultyItems[i].mrs_item_ID != null)
+                    //    {
+                    //        // Construct the SQL UPDATE statement for smrsitem
+                    //        string updateStmt = $"START TRANSACTION; " +
+                    //            $"UPDATE smrsitems " +
+                    //            $"SET  " +
+                    //            $"returned_qty = {request.faultyItems[i].returned_qty}, " +
+                    //            $"serial_number = '{request.faultyItems[i].sr_no}', " +
+                    //            $"return_remarks = '{request.faultyItems[i].return_remarks}' " +
+                    //            $"WHERE ID = {request.faultyItems[i].mrs_item_ID} ; " +
+                    //            "COMMIT;";
+                    //        await Context.ExecuteNonQry<int>(updateStmt).ConfigureAwait(false);
+                    //    }
+                    //else
+                    //{
+                    //    string insertStmt = $"START TRANSACTION; " +
+                    //$"INSERT INTO smrsitems (mrs_ID,mrs_return_ID,asset_item_ID,available_qty,requested_qty,returned_qty,return_remarks,flag,serial_number ,is_faulty,is_splited,issued_qty)" +
+                    //$"VALUES ({request.ID},{request.ID},{request.faultyItems[i].assetMasterItemID},{request.cmmrsItems[i].qty}, {request.cmmrsItems[i].requested_qty}, {request.faultyItems[i].returned_qty}, '{request.faultyItems[i].return_remarks}', 2,'{request.faultyItems[0].sr_no}',{request.cmmrsItems[i].is_faulty},1,{request.cmmrsItems[i].issued_qty})" +
+                    //$"; SELECT LAST_INSERT_ID(); COMMIT;";
+                    //    DataTable dt = await Context.FetchData(insertStmt).ConfigureAwait(false);
+                    //    int id = Convert.ToInt32(dt.Rows[0][0]);
+                    //}
+
                     catch (Exception ex)
                     {
                         Queryflag = false;
@@ -1604,7 +1628,7 @@ namespace CMMSAPIs.Repositories.SM
 
             //var_dump(spareAssetIds);
 
-            var stmt = @"SELECT sm.asset_type_ID, sm.ID as asset_ID, sm.asset_code, sic.cat_name, sat.serial_number, sat.ID, sm.asset_name, st.asset_type, if(sm.approval_required = 1, 'Yes', 'NO') as approval_required, COALESCE(file.file_path, '') as file_path, file.Asset_master_id, f_sum.spare_multi_selection,if(sm.approval_required = 1, 1, 0) as is_approval_required,
+            var stmt = @"SELECT sm.asset_type_ID, sm.ID as asset_ID, sm.asset_code, sic.cat_name, sat.serial_number, sat.ID, sm.asset_name, st.asset_type, if(sm.approval_required = 1, 'Yes', 'NO') as approval_required, COALESCE(file.file_path, '') as file_path, file.Asset_master_id, f_sum.spare_multi_selection,if(sm.approval_required = 1, 1, 0) as approval_required,
                         sat.materialID
                         FROM smassetitems sat
                         LEFT JOIN smassetmasters sm ON sm.id = sat.assetMasterID
