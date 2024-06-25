@@ -750,7 +750,7 @@ namespace CMMSAPIs.Repositories
         public async Task<int> updateAssetStatus(int assetItemID, int status)
         {
 
-            string stmt = $"SELECT sam.asset_type_ID FROM smassetitems sai " +
+            string stmt = $"SELECT ifnull(sam.asset_type_ID,0) asset_type_ID FROM smassetitems sai " +
                 $"LEFT JOIN smassetmasters sam ON sam.asset_code = sai.asset_code" +
                 $" WHERE sai.ID = {assetItemID}";
             DataTable dt = await Context.FetchData(stmt).ConfigureAwait(false);

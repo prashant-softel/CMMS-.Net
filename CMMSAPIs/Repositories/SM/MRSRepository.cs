@@ -1349,16 +1349,28 @@ namespace CMMSAPIs.Repositories.SM
                     try
                     {
                         // Construct the SQL UPDATE statement for smrsitem
-                        string updateStmt = $"START TRANSACTION; " +
-                            $"UPDATE smrsitems " +
-                            $"SET  " +
-                            $"returned_qty = {request.faultyItems[i].returned_qty}, " +
-                            $"serial_number = '{request.cmmrsItems[i].serial_number}', " +
-                            $"return_remarks = '{request.faultyItems[i].return_remarks}' " +
-                            $"WHERE ID = {request.faultyItems[i].mrs_item_ID} ; " +
-                            "COMMIT;";
+                        if(request.faultyItems[i].mrs_item_ID > 0)
+                        {
+                            string updateStmt = $"START TRANSACTION; " +
+                          $"UPDATE smrsitems " +
+                          $"SET  " +
+                          $"returned_qty = {request.faultyItems[i].returned_qty}, " +
+                          $"serial_number = '{request.cmmrsItems[i].serial_number}', " +
+                          $"return_remarks = '{request.faultyItems[i].return_remarks}' " +
+                          $"WHERE ID = {request.faultyItems[i].mrs_item_ID} ; " +
+                          "COMMIT;";
 
-                        await Context.ExecuteNonQry<int>(updateStmt).ConfigureAwait(false);
+                            await Context.ExecuteNonQry<int>(updateStmt).ConfigureAwait(false);
+                        }
+                        else
+                        {
+                            string insertStmt = $"START TRANSACTION; " +
+                            $"INSERT INTO smrsitems (mrs_ID,mrs_return_ID,asset_item_ID,available_qty,requested_qty,returned_qty,return_remarks,flag, is_faulty,is_splited,issued_qty)" +
+                            $"VALUES ({request.ID},0,{request.faultyItems[i].assetMasterItemID},0, {request.faultyItems[i].assetMasterItemID}, {request.cmmrsItems[i].returned_qty}, '{request.cmmrsItems[i].return_remarks}', 2, 1,1,0)" +
+                            $"; SELECT LAST_INSERT_ID(); COMMIT;";
+                            DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
+                        }
+                      
                     }
                     //try
                     //{
