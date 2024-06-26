@@ -383,7 +383,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
                     string injured_Query = "INSERT INTO injured_person\r\n(\r\n incidents_id, person_id, person_type, age, sex, designation, address, name_contractor,\r\n  body_part_and_nature_of_injury, work_experience_years, plant_equipment_involved, location_of_incident\r\n)";
                     foreach (var item in request.injured_person)
                     {
-                        injured_Query = injured_Query + $" select   {incident_id}, '{item.name}', {item.person_type}, {item.age}, {item.sex}, '{item.designation}',\r\n  '{item.address}', '{item.name_contractor}', '{item.body_part_and_nature_of_injury}', {item.work_experience_years},\r\n  '{item.plant_equipment_involved}', '{item.location_of_incident}' UNION ALL ";
+                        injured_Query = injured_Query + $" select   {incident_id}, '{item.name}', {item.person_type}, {item.age}, '{item.sex}', '{item.designation}',\r\n  '{item.address}', '{item.name_contractor}', '{item.body_part_and_nature_of_injury}', {item.work_experience_years},\r\n  '{item.plant_equipment_involved}', '{item.location_of_incident}' UNION ALL ";
                     }
                     injured_Query = injured_Query.TrimEnd("UNION ALL ".ToCharArray());
                     var injured_Query_result = await Context.ExecuteNonQry<int>(injured_Query).ConfigureAwait(false);
@@ -735,7 +735,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
                 }
                 catch (Exception ex)
                 {
-                    return new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Incident Report update failed");
+                    return new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Incident Report update failed injured_person");
                 }
             }
             string insertQuerynewinjured = "";
@@ -786,7 +786,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
                 }
                 catch (Exception ex)
                 {
-                    return new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Incident Report update failed");
+                    return new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Incident Report update failed other_injured");
                 }
             }
             string insertQuerynewinjured1 = "";
@@ -832,7 +832,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
                 }
                 catch (Exception ex)
                 {
-                    return response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Incident Report update failed");
+                    return response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Incident Report update failed why_why_analysis");
                 }
             }
 
@@ -853,7 +853,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
                 }
                 catch (Exception ex)
                 {
-                    return response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Incident Report update failed");
+                    return response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Incident Report update failed root_cause");
                 }
             }
 
@@ -873,7 +873,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
                 }
                 catch (Exception ex)
                 {
-                    return response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Incident Report update failed");
+                    return response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Incident Report update failed immediate_correction");
                 }
             }
 
@@ -900,7 +900,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
                 }
                 catch (Exception ex)
                 {
-                    return response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Incident Report update failed");
+                    return response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Incident Report update failed proposed_action_plan");
                 }
             }
             if (request.investigation_team != null && request.investigation_team.Count > 0)
@@ -924,7 +924,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
                 }
                 catch (Exception ex)
                 {
-                    return response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Incident Report update failed");
+                    return response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Incident Report update failed investigation_team");
                 }
             }
 

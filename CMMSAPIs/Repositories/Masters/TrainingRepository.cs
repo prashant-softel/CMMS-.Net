@@ -100,9 +100,6 @@ namespace CMMSAPIs.Repositories.Masters
                 $" Left join targeted_group  as tg on tg.id=c.Targated_group_id " +
                 $" where c.facility_id={facility_id} and c.Status=1 or CreatedAt='{From}' or CreatedAt='{to}'  ";
             List<CMTrainingCourse> result = await Context.GetData<CMTrainingCourse>(gcl).ConfigureAwait(false);
-
-
-
             return result;
         }
         internal async Task<List<CMTrainingCourse>> GetCourseDetailById(int ids)
@@ -122,7 +119,6 @@ namespace CMMSAPIs.Repositories.Masters
             result[0].ImageDetails = _fileUpload;
             return result;
         }
-
         internal async Task<CMDefaultResponse> UpdateCourseList(CMTrainingCourse request, int userID)
         {
             string ctq = $"UPDATE course SET " +

@@ -145,12 +145,13 @@ namespace CMMSAPIs.Repositories.Masters
 
             List<EmployeeMonth> empDetails = await Context.GetData<EmployeeMonth>(queryByMonthEmp).ConfigureAwait(false);
 
-            string queryByEmp = $"SELECT ea.employee_id, ea.Date AS date, ea.present AS status, ea.in_time as inTime ," +
+            string queryByEmp = $"SELECT ea.employee_id as emp_id, ea.Date AS date, ea.present AS status, ea.in_time as inTime ," +
                                 $" ea.out_time AS outTime " +
                                 $" FROM employee_attendance AS ea LEFT JOIN users AS u ON u.id = ea.employee_id " +
                                 $" WHERE ea.facility_id ={facility_id} or ea.Date between'{from_date}' and ea.Date = '{to_date}' order by ea.Date;";
 
             List<DetailsOFMonth> EmpAteendence = await Context.GetData<DetailsOFMonth>(queryByEmp).ConfigureAwait(false);
+
 
             var result = empDetails.Select(a => new EmployeeMonth
             {
@@ -159,8 +160,10 @@ namespace CMMSAPIs.Repositories.Masters
                 dateOfJoining = a.dateOfJoining,
                 DateofExit = a.DateofExit,
                 workingStatus = a.workingStatus,
-                details = EmpAteendence.Select(b => new DetailsOFMonth
+
+                details = EmpAteendence.Where(x => x.emp_id == a.employeeId).Select(b => new DetailsOFMonth
                 {
+                    emp_id = b.emp_id,
                     date = b.date,
                     inTime = b.inTime,
                     outTime = b.outTime,

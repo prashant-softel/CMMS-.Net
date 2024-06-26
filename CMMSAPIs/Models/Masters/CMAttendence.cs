@@ -102,13 +102,14 @@ namespace CMMSAPIs.Models.Masters
     {
         public int? employeeId { get; set; }
         public String? employeeName { get; set; }
-        public DateTime? dateOfJoining { get; set; }
-        public DateTime? DateofExit { get; set; }
+        public DateTime dateOfJoining { get; set; }
+        public DateTime DateofExit { get; set; }
         public String? workingStatus { get; set; }
         public List<DetailsOFMonth>? details { get; set; }
     }
     public class DetailsOFMonth
     {
+        public int emp_id { get; set; }
         public DateTime date { get; set; }
         public dynamic status { get; set; }
         public string? inTime { get; set; }
