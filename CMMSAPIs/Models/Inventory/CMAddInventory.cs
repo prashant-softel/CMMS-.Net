@@ -27,12 +27,12 @@ namespace CMMSAPIs.Models.Inventory
         public int manufacturerId { get; set; }
         public int acCapacity { get; set; }
         public int dcCapacity { get; set; }
-        public string model { get; set; }   
+        public string model { get; set; }
         public string serialNumber { get; set; }
         public int cost { get; set; }
         public string parent_equipment_no { get; set; }
 
-       
+
         public string currency { get; set; }
         public int currencyId { get; set; }
         public int stockCount { get; set; }
@@ -65,10 +65,10 @@ namespace CMMSAPIs.Models.Inventory
         public string dcRating { get; set; }
         public string descMaintenace { get; set; }
         public int warrantyTenture { get; set; }
-        public string barcode  { get; set; }
+        public string barcode { get; set; }
         public string unspCode { get; set; }
         public string purchaseCode { get; set; }
-
+        public List<int> uplaodfile_ids { get; set; }
         public int num_of_module { get; set; }
     }
 

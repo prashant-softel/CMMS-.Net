@@ -1,6 +1,5 @@
-﻿using CMMSAPIs.Models.Incident_Reports;
-using System;
-using static CMMSAPIs.Models.Inventory.CMAddInventory;
+﻿using System;
+using System.Collections.Generic;
 
 namespace CMMSAPIs.Models.Inventory
 {
@@ -20,7 +19,7 @@ namespace CMMSAPIs.Models.Inventory
         public string meter_limit { get; set; }
         public string meter_unit { get; set; }
         public string type { get; set; }
-        public  string parent_equipment_no { get; set; }
+        public string parent_equipment_no { get; set; }
         public int retirementStatus { get; set; }
         public int categoryId { get; set; }
         public string categoryName { get; set; }
@@ -41,8 +40,8 @@ namespace CMMSAPIs.Models.Inventory
         public int dcCapacity { get; set; }
         public string model { get; set; }
         public string serialNumber { get; set; }
-        public double cost { get; set; }
-        public string  purchaseCode { get; set; }
+        public double? cost { get; set; }
+        public string purchaseCode { get; set; }
         public string unspCode { get; set; }
         public string barcode { get; set; }
         public string descMaintenace { get; set; }
@@ -53,11 +52,11 @@ namespace CMMSAPIs.Models.Inventory
         public int photoId { get; set; }
         public int calibrationFrequency { get; set; }
         public string calibrationFreqType { get; set; }
-        public int calibrationReminderDays { get; set; }
+        public int? calibrationReminderDays { get; set; }
         public DateTime calibrationLastDate { get; set; }
 
-        public DateTime start_date { get; set; }
-        public DateTime expiry_date { get; set; }
+        public DateTime? start_date { get; set; }
+        public DateTime? expiry_date { get; set; }
         public DateTime calibrationDueDate { get; set; }
         public int specialTool { get; set; }
         public int specialToolEmp { get; set; }
@@ -67,12 +66,12 @@ namespace CMMSAPIs.Models.Inventory
         public string warranty_certificate_path { get; set; }
         public int warrantyTypeId { get; set; }
         public string warrantyType { get; set; }
-        
+
         public int warrantyProviderId { get; set; }
         public string warrantyProviderName { get; set; }
         public int warrantyTermTypeId { get; set; }
         public string warranty_term_type { get; set; }
-        public AttachmentByReporter attachments { get; set; }
+        // public AttachmentByReporter attachments { get; set; }
         public int mutliplier { get; set; }
         public int statusId { get; set; }
         public string status { get; set; }
@@ -86,6 +85,7 @@ namespace CMMSAPIs.Models.Inventory
         public string updated_by { get; set; }
         public DateTime? deleted_at { get; set; }
         public string deleted_by { get; set; }
+        public List<CMFileDetailJc> inventory_image { get; set; }
 
     }
     public class CMItem

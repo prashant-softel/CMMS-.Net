@@ -45,7 +45,7 @@ namespace CMMSAPIs.Models.MC
         public string frequency { get; set; }
         public int assignedToId { get; set; }
         public string assignedTo { get; set; }
-        public DateTime startDate { get; set; }
+        public dynamic startDate { get; set; }
         public int noOfCleaningDays { get; set; }
         public int createdById { get; set; }
         public string createdBy { get; set; }

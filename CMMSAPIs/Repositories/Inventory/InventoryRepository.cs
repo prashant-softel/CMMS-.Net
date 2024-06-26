@@ -1172,6 +1172,11 @@ namespace CMMSAPIs.Repositories.Inventory
                 myQuery += " WHERE a.id= " + id;
             }
             List<CMViewInventory> _ViewInventoryList = await Context.GetData<CMViewInventory>(myQuery).ConfigureAwait(false);
+            string myQuery18 = "SELECT  asset.id as id, file_path as fileName,  U.File_Size as fileSize, U.status,U.description FROM uploadedfiles AS U " +
+                             "Left JOIN assets as  asset on asset.id = U.module_ref_id  " +
+                             "where module_ref_id =" + id + " and U.module_type = " + (int)CMMS.CMMS_Modules.INVENTORY + ";";
+            List<CMFileDetailJc> in_image = await Context.GetData<CMFileDetailJc>(myQuery18).ConfigureAwait(false);
+            _ViewInventoryList[0].inventory_image = in_image;
             foreach (var a in _ViewInventoryList)
             {
                 if (a != null && a.added_at != null)
@@ -1283,7 +1288,16 @@ string warrantyQry = "insert into assetwarranty
                 {
                     strRetMessage = "Warranty data for <" + assetName + "> does not exist. ";
                 }
+                if (unit.uplaodfile_ids.Count > 0)
+                {
+                    foreach (int data in unit.uplaodfile_ids)
+                    {
+                        string qryuploadFiles = $"UPDATE uploadedfiles SET facility_id = {unit.facilityId}, module_type={(int)CMMS.CMMS_Modules.INVENTORY},module_ref_id={retID} where id = {data}";
+                        await Context.ExecuteNonQry<int>(qryuploadFiles).ConfigureAwait(false);
+                    }
+                }
                 idList.Add(retID);
+
                 CMViewInventory _inventoryAdded = await GetInventoryDetails(retID, "");
 
                 string _shortStatus = getShortStatus(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_ADDED);
