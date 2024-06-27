@@ -1361,7 +1361,7 @@ namespace CMMSAPIs.Repositories.SM
                           $"UPDATE smrsitems " +
                           $"SET  " +
                           $"returned_qty = {request.faultyItems[i].returned_qty}, " +
-                          $"serial_number = '{request.cmmrsItems[i].serial_number}', " +
+                          $"serial_number = '{request.faultyItems[i].serial_number}', " +
                           $"return_remarks = '{request.faultyItems[i].return_remarks}' " +
                           $"WHERE ID = {request.faultyItems[i].mrs_item_ID} ; " +
                           "COMMIT;";
