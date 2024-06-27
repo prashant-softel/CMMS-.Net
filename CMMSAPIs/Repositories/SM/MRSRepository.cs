@@ -1372,7 +1372,7 @@ namespace CMMSAPIs.Repositories.SM
                         {
                             string insertStmt = $"START TRANSACTION; " +
                             $"INSERT INTO smrsitems (mrs_return_ID,mrs_ID,asset_item_ID,available_qty,requested_qty,returned_qty,return_remarks,flag, is_faulty,is_splited,issued_qty,serial_number)" +
-                            $"VALUES ({request.ID},0,{request.faultyItems[i].assetMasterItemID},0, {request.faultyItems[i].assetMasterItemID}, {request.cmmrsItems[i].returned_qty}, '{request.cmmrsItems[i].return_remarks}', 2, 1,1,0,'{request.cmmrsItems[i].serial_number}')" +
+                            $"VALUES ({request.ID},0,{request.faultyItems[i].assetMasterItemID},0, {request.faultyItems[i].assetMasterItemID}, {request.faultyItems[i].returned_qty}, '{request.faultyItems[i].return_remarks}', 2, 1,1,0,'{request.faultyItems[i].serial_number}')" +
                             $"; SELECT LAST_INSERT_ID(); COMMIT;";
                             DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
                         }
