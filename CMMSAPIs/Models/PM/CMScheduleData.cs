@@ -12,7 +12,7 @@ namespace CMMSAPIs.Models.PM
         public string status_long { get; set; }
         public DateTime plan_date { get; set; }
         public int facility_id { get; set; }
-        public string facility_name { get; set; }   
+        public string facility_name { get; set; }
         public int category_id { get; set; }
         public string category_name { get; set; }
         public int assigned_to_id { get; set; }
@@ -35,6 +35,7 @@ namespace CMMSAPIs.Models.PM
         public DateTime rejected_close_Date { get; set; }
         public string approved_close_by_name { get; set; }
         public DateTime approved_close_Date { get; set; }
+        public DateTime next_schedule_date { get; set; }
         public string close_by_name { get; set; }
         public DateTime close_Date { get; set; }
         public string close_comment { get; set; }
@@ -42,7 +43,7 @@ namespace CMMSAPIs.Models.PM
     public class CMPMPlanDetail : CMPMPlanList
     {
         public int isDraft { get; set; }
-            public int type_id { get; set; }
+        public int type_id { get; set; }
         public List<AssetCheckList> mapAssetChecklist { get; set; }
     }
     public class AssetCheckList

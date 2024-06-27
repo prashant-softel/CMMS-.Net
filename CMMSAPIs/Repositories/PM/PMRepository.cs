@@ -181,8 +181,8 @@ namespace CMMSAPIs.Repositories.PM
                                     $"facilities.id as facility_id, facilities.name as facility_name, category.id as category_id, category.name as category_name, " +
                                     $"frequency.id as plan_freq_id, frequency.name as plan_freq_name, createdBy.id as created_by_id, " +
                                     $"CONCAT(createdBy.firstName, ' ', createdBy.lastName) as created_by_name, plan.created_at,CONCAT(assignedTo.firstName, ' ', assignedTo.lastName) as assigned_to_name, " +
-                                    $"updatedBy.id as updated_by_id, CONCAT(updatedBy.firstName, ' ', updatedBy.lastName) as updated_by_name, plan.updated_at," +
-                                    $" (select task.plan_date from pm_task task where task.id = (select max(id) from pm_task where pm_task.plan_id = plan.id  ) ) as next_schedule_date,  " +
+                                    $"updatedBy.id as updated_by_id, CONCAT(updatedBy.firstName, ' ', updatedBy.lastName) as updated_by_name, plan.updated_at,plan.next_schedule_date as next_schedule_date," +
+                                    //$" (select task.plan_date from pm_task task where task.id = (select max(id) from pm_task where pm_task.plan_id = plan.id  ) ) as next_schedule_date,  " +
                                     $" (select task1.id from pm_task task1 where task1.id = (select max(id) from pm_task where pm_task.plan_id = plan.id  ) ) as next_task_id " +
                                     $" FROM pm_plan as plan " +
                                     $"LEFT JOIN statuses ON plan.status = statuses.softwareId " +
@@ -212,6 +212,18 @@ namespace CMMSAPIs.Repositories.PM
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(plan.status_id);
                 string _shortStatus = getShortStatus(CMMS.CMMS_Modules.PM_PLAN, _Status);
                 plan.status_short = _shortStatus;
+            }
+            foreach (var item in plan_list)
+            {
+                string sch = $"select plan_date,frequency_id as fid from pm_plan where id={item.plan_id} ";
+                DataTable dt2 = await Context.FetchData(sch).ConfigureAwait(false);
+                DateTime nextdate = Convert.ToDateTime(dt2.Rows[0][0]);
+                int fid = Convert.ToInt32(dt2.Rows[0][1]);
+                string days = $"select days from frequency where id={fid}";
+                DataTable dt11 = await Context.FetchData(days).ConfigureAwait(false);
+                int f_days = Convert.ToInt32(dt11.Rows[0][0]);
+                DateTime total_date = nextdate.AddDays(f_days);
+                item.next_schedule_date = total_date;
             }
             foreach (var detail in plan_list)
             {
@@ -438,13 +450,21 @@ namespace CMMSAPIs.Repositories.PM
         {
 
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
-
+            string sch = $"select plan_date,frequency_id from pm_plan where id={request.id} ";
+            DataTable dt2 = await Context.FetchData(sch).ConfigureAwait(false);
+            DateTime nextdate = Convert.ToDateTime(dt2.Rows[0][0]);
+            int frequency_id = Convert.ToInt32(dt2.Rows[0][1]);
+            string days = $"select days from frequency where id={frequency_id}";
+            DataTable dt11 = await Context.FetchData(days).ConfigureAwait(false);
+            int f_days = Convert.ToInt32(dt11.Rows[0][0]);
+            DateTime total_date = nextdate.AddDays(f_days);
             if (request.id <= 0)
             {
                 throw new ArgumentException("Invalid argument id<" + request.id + ">");
             }
             string approveQuery = $"Update pm_plan set status = {(int)CMMS.CMMS_Status.PM_PLAN_APPROVED}, approved_at = '{UtilsRepository.GetUTCTime()}', " +
-                $" remarks = '{request.comment}',  " +
+                $" remarks = '{request.comment}'," +
+                $"next_schedule_date='{total_date.ToString("yyyy-MM-dd")}', " +
                 $" approved_by = {userId}" +
                 $" where id = {request.id}";
             int reject_id = await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
@@ -460,7 +480,7 @@ namespace CMMSAPIs.Repositories.PM
             int id = Convert.ToInt32(dt3.Rows[0][0]);
 
             string scheduleQry = $"INSERT INTO pm_schedule(task_id,plan_id,Asset_id,checklist_id,PM_Schedule_date,status) " +
-                                $"select {id} as task_id,planId as plan_id, assetId as Asset_id, checklistId as checklist_id,PP.plan_date  as PM_Schedule_date,{(int)CMMS.CMMS_Status.PM_SCHEDULED} as status from pmplanassetchecklist  P inner join pm_plan PP on PP.Id = P.planId where planId = {request.id}";
+                                $"select {id} as task_id,planId as plan_id, assetId as Asset_id, checklistId as checklist_id,PP.plan_date as PM_Schedule_date,{(int)CMMS.CMMS_Status.PM_SCHEDULED} as status from pmplanassetchecklist  P inner join pm_plan PP on PP.Id = P.planId where planId = {request.id}";
             await Context.ExecuteNonQry<int>(scheduleQry);
 
             string setCodeNameQuery = "UPDATE pm_schedule " +
@@ -563,7 +583,7 @@ namespace CMMSAPIs.Repositories.PM
 
 
 
-            string queryasset = "SELECT id, UPPER(name) as name FROM assets GROUP BY name ORDER BY id ASC;";
+            string queryasset = $"SELECT id, UPPER(name) as name FROM assets where facility_id={facilityid} GROUP BY name ORDER BY id ASC;";
             DataTable dtasset = await Context.FetchData(queryasset).ConfigureAwait(false);
             List<string> asset_name = dtasset.GetColumn<string>("name");
             List<int> asset_id = dtasset.GetColumn<int>("id");

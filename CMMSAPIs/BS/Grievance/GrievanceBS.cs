@@ -1,14 +1,11 @@
 ﻿using CMMSAPIs.Helper;
-using CMMSAPIs.Repositories.Grievance;
 using CMMSAPIs.Models.Grievance;
 using CMMSAPIs.Models.Utils;
+using CMMSAPIs.Repositories.Grievance;
+using Microsoft.AspNetCore.Hosting;
 using System;
-using System.Data;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Hosting;
-using CMMSAPIs.Models.Calibration;
-using Ubiety.Dns.Core;
 
 namespace CMMSAPIs.BS.Grievance
 {
@@ -16,7 +13,7 @@ namespace CMMSAPIs.BS.Grievance
     {
         Task<List<CMGrievance>> GetGrievanceList(string facilityId, string status, string startDate, string endDate, int selfView, string facilityTimeZone);
         Task<CMGrievance> GetGrievanceDetails(int id, int facilityId, string facilityTimeZone);
-        Task<CMDefaultResponse> CreateGrievance(CMCreateGrievance request,int userID, string facilityId, string facilityTimeZone);
+        Task<CMDefaultResponse> CreateGrievance(CMCreateGrievance request, int userID, string facilityId, string facilityTimeZone);
         Task<CMDefaultResponse> UpdateGrievance(CMUpdateGrievance request, int userID, string facilityId, string facilityTimeZone);
         Task<CMDefaultResponse> DeleteGrievance(int id, int userID, string facilityId, string facilityTimezone);
         Task<CMDefaultResponse> CloseGrievance(CMGrievance request, int userID, string facilityId, string facilityTimezone);
@@ -131,5 +128,5 @@ namespace CMMSAPIs.BS.Grievance
 
     }
 
-    }
+}
 

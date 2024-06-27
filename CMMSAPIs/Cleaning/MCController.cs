@@ -1,17 +1,14 @@
-using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using System;
-using Microsoft.AspNetCore.Authorization;
-using CMMSAPIs.Models.MC;
 using CMMSAPIs.BS.Cleaning;
+using CMMSAPIs.Models.MC;
 using CMMSAPIs.Models.Utils;
-using System.Collections.Generic;
-using CMMSAPIs.BS.Facility;
-using CMMSAPIs.Repositories.CleaningRepository;
-using static CMMSAPIs.Helper.CMMS;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using static CMMSAPIs.Helper.CMMS;
 
 namespace CMMSAPIs.Controllers.MC
 {
@@ -62,7 +59,7 @@ namespace CMMSAPIs.Controllers.MC
 
         [Route("GetMCPlanDetails")]
         [HttpGet]
-        public async Task<IActionResult> GetMCPlanDetails(int planId,int facility_id)
+        public async Task<IActionResult> GetMCPlanDetails(int planId, int facility_id)
         {
             try
             {
@@ -82,7 +79,7 @@ namespace CMMSAPIs.Controllers.MC
         {
             try
             {
-                var data = await _CleaningBS.GetPlanDetailsSummary(planId,request);
+                var data = await _CleaningBS.GetPlanDetailsSummary(planId, request);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -230,7 +227,7 @@ namespace CMMSAPIs.Controllers.MC
         //[Authorize]
         [Route("GetMCScheduleExecutionSummary")]
         [HttpPut]
-        public async Task<IActionResult> GetMCScheduleExecutionSummary(CMMCGetScheduleExecution schedule,int facility_id)
+        public async Task<IActionResult> GetMCScheduleExecutionSummary(CMMCGetScheduleExecution schedule, int facility_id)
         {
             try
             {
@@ -246,11 +243,11 @@ namespace CMMSAPIs.Controllers.MC
 
         [Route("GetMCExecutionDetails")]
         [HttpGet]
-        public async Task<IActionResult> GetMCExecutionDetails(int executionId,int facility_id)
+        public async Task<IActionResult> GetMCExecutionDetails(int executionId, int facility_id)
         {
             try
             {
-                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id ==facility_id)?.timezone;
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 var data = await _CleaningBS.GetExecutionDetails(executionId, facilitytimeZone);
                 return Ok(data);
             }
@@ -311,13 +308,13 @@ namespace CMMSAPIs.Controllers.MC
         }
         [Route("GetMCTaskEquipmentList")]
         [HttpGet]
-        public async Task<IActionResult> GetMCTaskEquipmentList(int taskId,int facility_id)
+        public async Task<IActionResult> GetMCTaskEquipmentList(int taskId, int facility_id)
         {
             try
             {
                 var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
 
-                var data = await _CleaningBS.GetTaskEquipmentList(taskId,facilitytimeZone);
+                var data = await _CleaningBS.GetTaskEquipmentList(taskId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)

@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using CMMSAPIs.Helper;
+using CMMSAPIs.Models.Users;
 using System.Linq;
 using System.Threading.Tasks;
-using CMMSAPIs.Helper;
-using CMMSAPIs.Models.Users;
 
 namespace CMMSAPIs.Repositories.Users
 {
