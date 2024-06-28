@@ -93,7 +93,7 @@ namespace CMMSAPIs.Repositories.Calibration
                              "FROM assets " +
                              "LEFT JOIN " +
                                 "frequency ON assets.calibrationFrequency = frequency.id " +
-                             "LEFT JOIN " +
+                             "inner JOIN " +
                                 "calibration as a_calibration on a_calibration.asset_id=assets.id " +
                              "LEFT JOIN " +
                                 "assetcategories as categories on categories.id=assets.categoryId " +

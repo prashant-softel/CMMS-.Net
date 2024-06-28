@@ -137,6 +137,7 @@ namespace CMMSAPIs.Models.SM
         public int assetMasterItemID { get; set; }
         public int returned_qty { get; set; }
         public string return_remarks { get; set; }
+        public string serial_number { get; set; }
         public string sr_no { get; set; }
     }
 
