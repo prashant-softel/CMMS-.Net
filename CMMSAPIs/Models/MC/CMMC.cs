@@ -39,6 +39,7 @@ namespace CMMSAPIs.Models.MC
         public int planId { get; set; }
         public int facilityId { get; set; }
         //public int blockId { get; set; }
+        public string siteName { get; set; }
         public string title { get; set; }
         public string description { get; set; }
         public int frequencyId { get; set; }

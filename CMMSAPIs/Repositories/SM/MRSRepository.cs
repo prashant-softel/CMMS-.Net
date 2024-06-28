@@ -1349,7 +1349,7 @@ namespace CMMSAPIs.Repositories.SM
                     try
                     {
                         // Construct the SQL UPDATE statement for smrsitem
-                        if(request.faultyItems[i].mrs_item_ID > 0)
+                        if (request.faultyItems[i].mrs_item_ID > 0)
                         {
                             string updateStmt = $"START TRANSACTION; " +
                           $"UPDATE smrsitems " +
@@ -1370,7 +1370,7 @@ namespace CMMSAPIs.Repositories.SM
                             $"; SELECT LAST_INSERT_ID(); COMMIT;";
                             DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
                         }
-                      
+
                     }
                     //try
                     //{
