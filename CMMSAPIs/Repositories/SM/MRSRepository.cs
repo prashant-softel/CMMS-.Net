@@ -1317,19 +1317,19 @@ namespace CMMSAPIs.Repositories.SM
             MRS_ReturnID = request.ID;
 
             string commaSeparatedIds = "";
-            if(request.cmmrsItems != null)
+            if (request.cmmrsItems != null)
             {
                 commaSeparatedIds = string.Join(",", request.cmmrsItems.Select(item => item.mrs_item_id.ToString()));
             }
             if (request.faultyItems != null)
             {
-                if(commaSeparatedIds.Length > 1)
+                if (commaSeparatedIds.Length > 1)
                 {
                     commaSeparatedIds = commaSeparatedIds + ",";
                 }
                 commaSeparatedIds = commaSeparatedIds + string.Join(",", request.faultyItems.Select(item => item.mrs_item_ID.ToString()));
             }
-             
+
 
             string deleteQueryForItems = $" delete from smrsitems where mrs_return_ID = {request.ID} and id not in ({commaSeparatedIds});  ";
             await Context.ExecuteNonQry<int>(deleteQueryForItems).ConfigureAwait(false);
