@@ -50,6 +50,6 @@ namespace CMMSAPIs.Models.Audit
         public string Module_Type { get; set; }
         public string assignedTo { get; set; }
         public string Employees { get; set; }
-        public string ptw { get; set; }
+        public string is_PTW { get; set; }
     }
 }
