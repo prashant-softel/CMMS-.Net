@@ -17,7 +17,7 @@ using CMMSAPIs.Models.Notifications;
 using CMMSAPIs.Repositories.JC;
 using CMMSAPIs.Models.Users;
 using System.Numerics;
-
+using System.Linq;
 
 namespace CMMSAPIs.Repositories.Audits
 {
@@ -1297,7 +1297,7 @@ namespace CMMSAPIs.Repositories.Audits
             //                    $"FROM pm_schedule WHERE id = {schedule_id};";
 
             string myQuery = $"SELECT pm_plan.Schedule_Date, pm_task.id,pm_plan.id as plan_id, CONCAT('AUDITTASK',pm_task.id) as task_code,pm_task.category_id,cat.name as category_name, pm_plan.plan_number as plan_title, pm_task.facility_id, pm_task.frequency_id as frequency_id, freq.name as frequency_name, pm_task.plan_date as due_date,prev_task_done_date as done_date, CONCAT(assignedTo.firstName,' ',assignedTo.lastName)  as assigned_to_name, CONCAT(closedBy.firstName,' ',closedBy.lastName)  as closed_by_name, pm_task.closed_at , CONCAT(approvedBy.firstName,' ',approvedBy.lastName)  as approved_by_name, pm_task.approved_at ,CONCAT(rejectedBy.firstName,' ',rejectedBy.lastName)  as rejected_by_name, pm_task.rejected_at ,CONCAT(cancelledBy.firstName,' ',cancelledBy.lastName)  as cancelled_by_name, pm_task.cancelled_at , pm_task.rejected_at ,CONCAT(startedBy.firstName,' ',startedBy.lastName)  as started_by_name, pm_task.started_at , pm_task.PTW_id as permit_id, CONCAT('PTW',pm_task.PTW_id) as permit_code,permit.status as ptw_status, case when pm_plan.status = 425 then pm_task.Status else pm_plan.status end status, {statusQry} as status_short " +
-                               ",  CONCAT(tbtDone.firstName,' ',tbtDone.lastName)  as tbt_by_name, Case when permit.TBT_Done_By is null then 0 else 1 end ptw_tbt_done " +
+                               ",  CONCAT(tbtDone.firstName,' ',tbtDone.lastName)  as tbt_by_name, Case when permit.TBT_Done_By is null then 0 else 1 end ptw_tbt_done, pm_plan.Employees employee_list,case when pm_plan.is_PTW = 1 then 'True' else 'False' end is_PTW" +
                                " FROM pm_task " +
                                $"left join users as assignedTo on pm_task.assigned_to = assignedTo.id " +
                                $"left join users as closedBy on pm_task.closed_by = closedBy.id " +
@@ -1313,6 +1313,11 @@ namespace CMMSAPIs.Repositories.Audits
                                $" where pm_task.id = {task_id} ";
 
             List<CMPMTaskView> taskViewDetail = await Context.GetData<CMPMTaskView>(myQuery).ConfigureAwait(false);
+
+            for(var i=0;i< taskViewDetail.Count; i++)
+            {
+                taskViewDetail[i].Employees = taskViewDetail[i].employee_list.Split(',').ToList();
+            }
 
             if (taskViewDetail.Count == 0)
                 throw new MissingMemberException("PM Task not found");
