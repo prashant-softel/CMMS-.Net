@@ -89,6 +89,9 @@ namespace CMMSAPIs.Models.PM
         public DateTime updated_at { get; set; }
         public string status_long { get; set; }
         public string permit_type { get; set; }
+        public string employee_list { get; set; }
+        public string is_PTW { get; set; }
+        public List<string> Employees { get; set; }
 
     }
     public class CMPMScheduleViewDetail : CMPMScheduleView
