@@ -578,9 +578,7 @@ namespace CMMSAPIs.Repositories.PM
             Dictionary<string, int> users = new Dictionary<string, int>();
             users.Merge(users_Names, users_IDs);
 
-
-
-            string queryasset = $"SELECT id, UPPER(name) as name FROM assets where facility_id={facilityid} GROUP BY name ORDER BY id ASC;";
+            string queryasset = $"SELECT id, UPPER(name) as name FROM assets where facilityId={Facility} GROUP BY name ORDER BY id ASC;";
             DataTable dtasset = await Context.FetchData(queryasset).ConfigureAwait(false);
             List<string> asset_name = dtasset.GetColumn<string>("name");
             List<int> asset_id = dtasset.GetColumn<int>("id");
