@@ -90,7 +90,7 @@ namespace CMMSAPIs.BS.MISMasters
         Task<List<CMChecklistInspectionReport>> GetChecklistInspectionReport(string facility_id, int module_type, DateTime fromDate, DateTime toDate);
         Task<List<CMObservationReport>> GetObservationSheetReport(string facility_id, DateTime fromDate, DateTime toDate);
         Task<List<CMObservationSummary>> GetObservationSummaryReport(string facility_id, string fromDate, string toDate);
-        Task<CMDefaultResponse> CloseObservation(int id, string comment, int userId);
+        Task<CMDefaultResponse> CloseObservation(CMApproval requset, int userId);
         Task<CMStatutoryCompliance> GetStatutoryComplianceMasterById(int id);
         Task<List<CMStatutoryCompliance>> GetStatutoryComplianceMasterList();
         Task<CMDefaultResponse> CreateStatutoryComplianceMaster(CMStatutoryCompliance request, int UserId);
@@ -1258,13 +1258,13 @@ namespace CMMSAPIs.BS.MISMasters
             }
         }
 
-        public async Task<CMDefaultResponse> CloseObservation(int id, string comment, int userId)
+        public async Task<CMDefaultResponse> CloseObservation(CMApproval requset, int userId)
         {
             try
             {
                 using (var repos = new MISMasterRepository(getDB))
                 {
-                    return await repos.CloseObservation(id, comment, userId);
+                    return await repos.CloseObservation(requset, userId);
 
                 }
             }

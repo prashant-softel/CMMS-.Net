@@ -505,6 +505,7 @@ namespace CMMSAPIs.Models.Masters
         public string compilanceName { get; set; }
         public DateTime start_date { get; set; }
         public DateTime end_date { get; set; }
+        public int renewFlag { get; set; }
         public int status_id { get; set; }
         public string Current_status { get; set; }
         public string status_short { get; set; }

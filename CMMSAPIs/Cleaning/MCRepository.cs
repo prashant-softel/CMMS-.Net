@@ -79,7 +79,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
             if (ptw_id > 0)
             {
-                return new CMDefaultResponse(task_id, CMMS.RETRUNSTATUS.FAILURE, "PM Task is already Linked to Module Cleaning");
+                return new CMDefaultResponse(task_id, CMMS.RETRUNSTATUS.FAILURE, "PM Task is already Linked to Vegetation");
             }
 
 
@@ -92,7 +92,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 return new CMDefaultResponse(task_id, CMMS.RETRUNSTATUS.FAILURE, $"Permit {permit_id} does not exist.");
             string myQuery = "UPDATE cleaning_execution  SET " +
                                 $"ptw_id = {permit[0].ptw_id}, " +
-                                $"status = {(int)CMMS.CMMS_Status.MC_LINKED_TO_PTW}, " +
+                                $"status = {(int)CMMS.CMMS_Status.VEGETATION_LINKED_TO_PTW}, " +
                                 $"updatedAt = '{UtilsRepository.GetUTCTime()}', " +
                                 $"updatedById = '{userId}' " +
                                 $"WHERE id = {task_id};";

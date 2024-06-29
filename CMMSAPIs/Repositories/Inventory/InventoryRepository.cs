@@ -229,10 +229,7 @@ namespace CMMSAPIs.Repositories.Inventory
                 { "Asset_Purchase_Code", new Tuple<string, Type>("purchaseCode", typeof(string)) },
                // { "Asset_SPV_Name", new Tuple<string, Type>("spvName", typeof(string)) },
                 { "Calibration_Next_Due_date", new Tuple<string, Type>("calibrationNextDueDate", typeof(DateTime)) },
-
-
-
-
+              //  { "Area", new Tuple<string,Type>("area", typeof(double)) },
 
             };
             /*
@@ -459,6 +456,16 @@ namespace CMMSAPIs.Repositories.Inventory
                                 //    }
                                 //}
                             }
+                            // try
+                            // {
+                            //       newR["area"] = Convert.ToDouble(newR["Area"]);
+                            //    }
+                            //   catch (FormatException)
+                            //   {
+                            //       m_errorLog.SetError($"[Row: {rN}] Invalid Area '{newR["Area"]}'. Area must be an integer.");
+                            //       newR.Delete();
+                            //        continue;
+                            //    }
                             try
                             {
                                 newR["customerId"] = businesses[Convert.ToString(newR["customerName"]).ToUpper()];

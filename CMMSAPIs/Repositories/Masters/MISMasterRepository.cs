@@ -244,12 +244,12 @@ namespace CMMSAPIs.Repositories.Masters
             return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Source CMObservation Deleted");
         }
 
-        internal async Task<CMDefaultResponse> CloseObservation(int id, string comment, int userId)
+        internal async Task<CMDefaultResponse> CloseObservation(CMApproval request, int userId)
         {
-            string deleteQry = $"UPDATE observations SET status_code = {(int)CMMS_Status.OBSERVATION_CLOSED}, closed_by = '{userId}' , updated_at = '{UtilsRepository.GetUTCTime()}' WHERE id = {id};";
+            string deleteQry = $"UPDATE observations SET status_code = {(int)CMMS_Status.OBSERVATION_CLOSED}, closed_by = '{userId}' , updated_at = '{UtilsRepository.GetUTCTime()}' WHERE id = {request.id};";
             await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.OBSERVATION, id, 0, 0, "Observation Closed.", CMMS.CMMS_Status.OBSERVATION_CLOSED, userId); ;
-            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, $"Observation {id} closed");
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.OBSERVATION, request.id, 0, 0, "Observation Closed.", CMMS.CMMS_Status.OBSERVATION_CLOSED, userId); ;
+            return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Observation {request.id} closed");
         }
 
         /***********************************************************************************************************************************/
@@ -1479,7 +1479,7 @@ namespace CMMSAPIs.Repositories.Masters
         internal async Task<List<CMStatutory>> GetStatutoryList(int facility_id, string start_date, string end_date)
         {
 
-            string myQuery = $"SELECT s.id,s.Compliance_id,st.name as compilanceName,s.comment as description, s.facility_id, " +
+            string myQuery = $"SELECT s.id,s.Compliance_id,st.name as compilanceName,s.comment as description,s.renewFlag, s.facility_id, " +
                              $"s.Issue_date AS start_date, s.expires_on AS end_date, s.status as status_id ,s.created_by, CONCAT(uc.firstName, ' ', uc.lastName) AS createdByName, CONCAT(u.firstName, ' ', u.lastName) AS UpdatedByName ," +
                              $" CONCAT(us.firstName, ' ', us.lastName) AS ApprovedByName, s.created_at, s.updated_by, s.updated_at, s.renew_from as renew_date, s.renew_by , s.approved_by, s.approved_at, " +
                              $" DAY(expires_on) AS status, " +
@@ -1489,16 +1489,19 @@ namespace CMMSAPIs.Repositories.Masters
                              $" LEFT JOIN users u on s.updated_by = u.id" +
                              $" LEFT JOIN users us on s.approved_by = us.id " +
                              $"LEFT JOIN statutorycomliance as st on st.id = s.Compliance_id " +
-                             $" where facility_id ={facility_id} or s.created_at={start_date} or s.created_at={end_date} ;";
+                             $" where (facility_id ={facility_id} or s.created_at='{start_date}' or s.created_at='{end_date}') AND DATEDIFF(expires_on, NOW()) >=0 or s.renewFlag !=0;";                          /* AND  daysLeft!= 0 AND s.renewFlag!= 0;";*/
             List<CMStatutory> data = await Context.GetData<CMStatutory>(myQuery).ConfigureAwait(false);
 
             foreach (var item in data)
             {
+
                 item.validity_month = item.validity_month < 0 ? 0 : item.validity_month;
                 item.daysLeft = item.daysLeft < 0 ? 0 : item.daysLeft;
 
                 string _shortStatus = Status(item.status_id);
                 item.Current_status = _shortStatus;
+
+
             }
             foreach (var task in data)
             {
@@ -1506,6 +1509,8 @@ namespace CMMSAPIs.Repositories.Masters
                 string _shortStatus = getShortStatus(CMMS.CMMS_Modules.STATUTORY, _Status);
                 task.status_short = _shortStatus;
             }
+
+
             return data;
         }
 
