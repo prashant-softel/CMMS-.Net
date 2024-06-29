@@ -1213,6 +1213,39 @@ namespace CMMSAPIs.Controllers.Masters
             }
         }
 
+        [Route("GetObservationSummaryReport")]
+        [HttpGet]
+        public async Task<IActionResult> GetObservationSummaryReport(string facility_id, string fromDate, string toDate)
+        {
+            try
+            {
+                var data = await _IMISMasterBS.GetObservationSummaryReport(facility_id, fromDate, toDate);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        [Route("CloseObservation")]
+        [HttpGet]
+        public async Task<IActionResult> CloseObservation(int id, string comment)
+        {
+            try
+            {
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.CloseObservation(id, comment, userId);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+
+
         [Route("GetStatutoryComplianceMasterById")]
         [HttpGet]
         public async Task<IActionResult> GetStatutoryComplianceMasterById(int id)

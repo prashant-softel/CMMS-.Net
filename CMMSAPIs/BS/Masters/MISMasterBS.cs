@@ -89,6 +89,8 @@ namespace CMMSAPIs.BS.MISMasters
         Task<List<CMWasteDataResult_Month>> GetWasteDataMonthDetail(int Month, int Year, int Hazardous, int facility_id);
         Task<List<CMChecklistInspectionReport>> GetChecklistInspectionReport(string facility_id, int module_type, DateTime fromDate, DateTime toDate);
         Task<List<CMObservationReport>> GetObservationSheetReport(string facility_id, DateTime fromDate, DateTime toDate);
+        Task<List<CMObservationSummary>> GetObservationSummaryReport(string facility_id, string fromDate, string toDate);
+        Task<CMDefaultResponse> CloseObservation(int id, string comment, int userId);
         Task<CMStatutoryCompliance> GetStatutoryComplianceMasterById(int id);
         Task<List<CMStatutoryCompliance>> GetStatutoryComplianceMasterList();
         Task<CMDefaultResponse> CreateStatutoryComplianceMaster(CMStatutoryCompliance request, int UserId);
@@ -1239,6 +1241,39 @@ namespace CMMSAPIs.BS.MISMasters
                 throw;
             }
         }
+
+        public async Task<List<CMObservationSummary>> GetObservationSummaryReport(string facility_id, string fromDate, string toDate)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.GetObservationSummaryReport(facility_id, fromDate, toDate);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> CloseObservation(int id, string comment, int userId)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.CloseObservation(id, comment, userId);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
 
         public async Task<CMStatutoryCompliance> GetStatutoryComplianceMasterById(int id)
         {

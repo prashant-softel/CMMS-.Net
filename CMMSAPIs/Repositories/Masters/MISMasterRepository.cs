@@ -1,13 +1,18 @@
 using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Masters;
+using CMMSAPIs.Models.Users;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Utils;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
+using static CMMSAPIs.Helper.CMMS;
+using static iTextSharp.text.pdf.AcroFields;
 
 namespace CMMSAPIs.Repositories.Masters
 {
@@ -237,12 +242,18 @@ namespace CMMSAPIs.Repositories.Masters
         }
         internal async Task<CMDefaultResponse> DeleteSourceOfObservation(int id, int userId)
         {
-            string deleteQry = $"UPDATE mis_m_observationsheet SET status = 0 , updatedBy = '{userId}' , updatedAt = '{UtilsRepository.GetUTCTime()}' WHERE id = {id};";
+            string deleteQry = $"UPDATE mis_observation SET status = 0 , updatedBy = '{userId}' , updatedAt = '{UtilsRepository.GetUTCTime()}' WHERE id = {id};";
             await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
             //Add history
             return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Source CMObservation Deleted");
         }
 
+        internal async Task<CMDefaultResponse> CloseObservation(int id, string comment, int userId){
+            string deleteQry = $"UPDATE observations SET status_code = {(int)CMMS_Status.OBSERVATION_CLOSED}, closed_by = '{userId}' , updated_at = '{UtilsRepository.GetUTCTime()}' WHERE id = {id};";
+            await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.OBSERVATION,id, 0, 0, "Observation Closed.", CMMS.CMMS_Status.OBSERVATION_CLOSED, userId); ;
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, $"Observation {id} closed");
+        }
 
         /***********************************************************************************************************************************/
         /***********************************************************************************************************************************/
@@ -1262,6 +1273,132 @@ namespace CMMSAPIs.Repositories.Masters
             List<CMObservationReport> response = await Context.GetData<CMObservationReport>(myQuery).ConfigureAwait(false);
             return response;
         }
+
+        internal async Task<List<CMObservationSummary>> GetObservationSummaryReport(string facility_id, string fromDate, string toDate)
+        {
+            int createdCount = 0;
+            int openCount = 0;
+            int closeCount = 0;
+            bool isOpen = false;
+            bool isClosed = false;
+
+
+            //CMObservationSummary of months
+            Dictionary<int, CMObservationSummary> monthlyObservationSummary = new Dictionary<int, CMObservationSummary>();
+
+            //
+            //remove columns whose data is not required\
+            // What is the need of short_Status
+            string myQuery = "SELECT id, facility_id, contractor_name, risk_type_id, cost_type, date_of_observation, " +
+                 "type_of_observation, location_of_observation, source_of_observation, target_date, created_at, " +
+                 "is_active, status_code, short_Status FROM observations " +
+                 "WHERE facility_id in ( " + facility_id + ") AND " +
+                 "DATE_FORMAT(date_of_observation,'%Y-%m-%d') BETWEEN '" + fromDate + "' AND '" + toDate + "'";
+
+            List<CMObservationReport> response = await Context.GetData<CMObservationReport>(myQuery).ConfigureAwait(false);
+
+            if (response != null)
+            {
+                foreach (var item in response)
+                {
+                    isOpen = false;
+                    isClosed = false;
+                    // int month_of_observation = Convert.ToInt32(item.date_of_observation); //convert to int
+
+                    DateTime d_o_o = (DateTime)item.date_of_observation;
+                    string date_of_observation = d_o_o.ToString("yyyy-MM-dd");
+                    string strMonth = date_of_observation.Substring(5, 2);
+                    int month = int.Parse(strMonth);
+
+                    string strYear = date_of_observation.Substring(0, 4);
+                    int year = int.Parse(strYear);
+
+
+                    CMObservationSummary forMonth;
+
+
+                    if (!monthlyObservationSummary.TryGetValue(month, out forMonth))
+                    {
+
+                        forMonth = new CMObservationSummary(month, year);
+                        monthlyObservationSummary.Add(month, forMonth);
+                    }
+                    
+                    //if (item.status_code == CMMS.CMMS_Status.OBSERVATION_CLOSED)
+
+                    forMonth.created++;
+                    if (item.status_code == (int)CMMS.CMMS_Status.OBSERVATION_CLOSED)
+                    {
+                        forMonth.closed++;
+                        isClosed = true;
+                    }
+                    else
+                    {
+                        forMonth.open++;
+                        isOpen = true;
+
+                    }
+
+                    if (item.type_of_observation == 1)
+                    {
+                        forMonth.unsafe_act++;
+                    }
+                    if (item.type_of_observation == 2)
+                    {
+                        forMonth.unsafe_condition++;
+                    }
+                    if (item.type_of_observation == 3)
+                    {
+                        forMonth.statutory_non_compliance++;
+                    }
+
+                    if (item.risk_type_id == 1)
+                    {
+                        forMonth.createdCount_Critical++;
+
+                        if (isOpen == true)
+                        {
+                            forMonth.openCount_Critical++;
+                        }
+
+                    }
+
+                    if (item.risk_type_id == 2)
+                    {
+                        forMonth.createdCount_Significant++;
+
+                        if (isOpen == true)
+                        {
+                            forMonth.openCount_Significant++;
+                        }
+                        if (isOpen == true)
+                        {
+                            forMonth.closeCount_Significant++;
+                        }
+
+                    }
+
+                    if (item.risk_type_id == 3)
+                    {
+                        forMonth.createdCount_Moderate++;
+
+                        if (isOpen == true)
+                        {
+                            forMonth.openCount_Moderate++;
+                        }
+                        if (isOpen == true)
+                        {
+                            forMonth.closeCount_Moderate++;
+                        }
+
+                    }
+                }
+            }
+            return monthlyObservationSummary.Values.ToList();
+        }
+
+        
+
 
         internal async Task<CMStatutoryCompliance> GetStatutoryComplianceMasterById(int id)
         {

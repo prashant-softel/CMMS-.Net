@@ -518,6 +518,7 @@ namespace CMMSAPIs.Helper
 
             MC_TASK_SCHEDULED = 360,
             MC_TASK_STARTED,
+            MC_TASK_ENDED,
             MC_TASK_COMPLETED,
             MC_TASK_ABANDONED,
             MC_TASK_APPROVED,
@@ -532,6 +533,7 @@ namespace CMMSAPIs.Helper
 
             VEG_TASK_SCHEDULED = 380,
             VEG_TASK_STARTED,
+            VEG_TASK_ENDED,
             VEG_TASK_COMPLETED,
             VEG_TASK_ABANDONED,
             VEG_TASK_APPROVED,
@@ -583,9 +585,10 @@ namespace CMMSAPIs.Helper
             STATUTORY_APPROVED,
             STATUTORY_REJECTED,
             STATUTORY_RENEWD,
-            OBSERVATION_CREATED,
+            OBSERVATION_CREATED = 551,
+            OBSERVATION_CLOSED,
+            OBSERVATION_DELETED,
             OBSERVATION_UPDATED,
-            OBSERVATION_DELETED
         }
 
         public enum ApprovalStatus

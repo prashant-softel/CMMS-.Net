@@ -411,8 +411,8 @@ namespace CMMSAPIs.Models.Masters
         public DateTime? date_of_observation { get; set; }
         public string contractor_name { get; set; }
         public string location_of_observation { get; set; }
-        public string type_of_observation { get; set; }
-        public string source_of_observation { get; set; }
+        public int type_of_observation { get; set; }
+        public int source_of_observation { get; set; }
         public string risk_type { get; set; }
         public string observation_description { get; set; }
         public string corrective_action { get; set; }
@@ -424,7 +424,46 @@ namespace CMMSAPIs.Models.Masters
         public string status { get; set; }
         public int days_remaining { get; set; }
         public string timeline { get; set; }
+        public int risk_type_id { get; set; }
+
+        public int status_code { get; set; }
+        public int short_Status { get; set; }
+
     }
+
+    public class CMObservationSummary
+    {
+        public CMObservationSummary(int month, int year)
+        {
+            this.month = month;
+            this.year = year;
+        }
+        public int month { get; set; }
+        public int year { get; set; }
+        //public int id { get; set; }
+        public int created { get; set; }
+        public int open { get; set; }
+        public int closed { get; set; }
+        public int unsafe_act { get; set; }
+        public int unsafe_condition { get; set; }
+        public int statutory_non_compliance { get; set; }
+        public int createdCount_Critical { get; set; }
+        public int openCount_Critical { get; set; }
+        public int closeCount_Critical { get; set; }
+        public int createdCount_Significant { get; set; }
+        public int openCount_Significant { get; set; }
+        public int closeCount_Significant { get; set; }
+        public int createdCount_Moderate { get; set; }
+        public int openCount_Moderate { get; set; }
+        public int closeCount_Moderate { get; set; }
+        public int status_code { get; set; }
+      
+
+       
+    }
+
+
+
 
     public class CMStatutoryCompliance
     {
