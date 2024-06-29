@@ -151,12 +151,13 @@ namespace CMMSAPIs.Repositories.Audits
                  $"set plan_number = '{request.plan_number}', " +
                  $"Facility_id = {request.Facility_id}, " +
                  $"Audit_Added_date = '{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}', " +
-                 $"Auditee_Emp_ID = {request.auditee_id}, " +
-                 $"Auditor_Emp_ID = {request.auditor_id}, " +
                  $"Frequency = {request.ApplyFrequency}, " +
                  $"Checklist_id = {request.Checklist_id}, " +
                  $"Description = '{request.Description}', " +
-                 $"Schedule_Date = '{request.Schedule_Date}' " +
+                 $"assignedTo = '{request.assignedTo}', " +
+                 $"is_PTW = {request.is_PTW}, " +
+                 $"module_type_id = {request.Module_Type_id}, " +
+                 $"Schedule_Date = '{request.Schedule_Date.ToString("yyyy-MM-dd HH:mm:ss")}' " +
                  $"where ID = {request.id}";
                 var result = await Context.ExecuteNonQry<int>(UpdateQ);
                 response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Audit plan with plan number : " + request.plan_number + " updated successfully.");
