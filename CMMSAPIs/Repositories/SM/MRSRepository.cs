@@ -1206,7 +1206,7 @@ namespace CMMSAPIs.Repositories.SM
             int from_actor_type_id = 0;
             int to_actor_id = 0;
             int to_actor_type_id = 0;
-           
+
             string getActorIds = "select from_actor_id,from_actor_type_id,to_actor_id,to_actor_type_id  from smmrs where id = " + request.mrsreturnID + ";";
             DataTable dt_actorids = await Context.FetchData(getActorIds).ConfigureAwait(false);
 
@@ -1228,7 +1228,7 @@ namespace CMMSAPIs.Repositories.SM
                     int requested_qty = 0;
                     int issued_qty = 0;
                     string asset_MDM_code = "";
-                  
+
 
                     string chkSrNoAvailableQuery = "select asset_item_ID,available_qty,requested_qty,issued_qty,asset_MDM_code from smrsitems where serial_number = '" + request.faultyItems[i].sr_no + "'";
                     DataTable dt_chk = await Context.FetchData(chkSrNoAvailableQuery).ConfigureAwait(false);
@@ -1263,7 +1263,7 @@ namespace CMMSAPIs.Repositories.SM
                             requested_qty = (dt_chk_faulty.Rows[0]["requested_qty"].ToInt());
                             issued_qty = (dt_chk_faulty.Rows[0]["issued_qty"].ToInt());
                             asset_MDM_code = (dt_chk_faulty.Rows[0]["asset_MDM_code"].ToString());
-                            
+
                         }
 
                         string insertStmt = $"START TRANSACTION; " +
@@ -1332,9 +1332,9 @@ namespace CMMSAPIs.Repositories.SM
                         string updateStmt = $"START TRANSACTION; " +
                             $"UPDATE smrsitems " +
                             $"SET " +
-                         
+
                             $"returned_qty = {request.cmmrsItems[i].returned_qty}, " +
-                        
+
                             $"return_remarks = '{request.cmmrsItems[i].return_remarks}' " +
                             $"WHERE ID = {request.cmmrsItems[i].mrs_item_id} ; " +
                             "COMMIT;";
