@@ -457,9 +457,9 @@ namespace CMMSAPIs.Models.Masters
         public int openCount_Moderate { get; set; }
         public int closeCount_Moderate { get; set; }
         public int status_code { get; set; }
-      
 
-       
+
+
     }
 
 

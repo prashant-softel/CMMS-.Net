@@ -172,7 +172,21 @@ namespace CMMSAPIs.Controllers.MC
                 throw;
             }
         }
-
+        [Route("LinkPermitToModuleCleaning")]
+        [HttpPut]
+        public async Task<IActionResult> LinkPermitToModuleCleaning(int task_id, int permit_id)
+        {
+            try
+            {
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _CleaningBS.LinkPermitToModuleCleaning(task_id, permit_id, userId);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
         //[Authorize]
         [Route("StartMCExecution")]
         [HttpPut]

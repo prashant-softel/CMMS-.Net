@@ -35,6 +35,8 @@ namespace CMMSAPIs.BS.Cleaning
         public Task<CMDefaultResponse> ApproveExecution(CMApproval request, int userID);
         public Task<CMDefaultResponse> RejectExecution(CMApproval request, int userID);
         // public Task<List<CMMCTaskEquipmentList>> GetVegTaskEquipmentList(int taskId, string facilitytime);
+        public Task<CMDefaultResponse> LinkPermitToModuleCleaning(int task_id, int permit_id, int userId);
+        public Task<CMDefaultResponse> LinkPermitToVegetation(int task_id, int permit_id, int userId);
 
     }
     public class CleaningBS : ICleaningBS
@@ -402,6 +404,38 @@ namespace CMMSAPIs.BS.Cleaning
                 throw;
             }
         }
+
+        public async Task<CMDefaultResponse> LinkPermitToModuleCleaning(int task_id, int permit_id, int userId)
+        {
+
+            try
+            {
+                using (var repos = new MCRepository(getDB))
+                {
+                    return await repos.LinkPermitToModuleCleaning(task_id, permit_id, userId);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> LinkPermitToVegetation(int task_id, int permit_id, int userId)
+        {
+            try
+            {
+                using (var repos = new MCRepository(getDB))
+                {
+                    return await repos.LinkPermitToVegetation(task_id, permit_id, userId);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
 
         //public async Task<List<CMMCTaskEquipmentList>> GetVegitationTaskEquipmentList(int taskId, string facilitytime)
         //{

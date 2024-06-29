@@ -1,5 +1,6 @@
 ﻿using CMMSAPIs.Helper;
 using CMMSAPIs.Models.MC;
+using CMMSAPIs.Models.PM;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Utils;
 using System;
@@ -508,6 +509,58 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             CMDefaultResponse response = new CMDefaultResponse(planid, CMMS.RETRUNSTATUS.SUCCESS, $"Plan Deleted");
             return response;
         }
+        internal async Task<CMDefaultResponse> LinkPermitToModuleCleaning(int task_id, int permit_id, int userID)
+        {
+            /*
+             * Primary Table - PMSchedule
+             * Set the required fields in primary table for linling permit to MC
+             * Code goes here
+            */
+            //string scheduleQuery = "SELECT PM_Schedule_date as schedule_date, Facility_id as facility_id, Asset_id as asset_id, PM_Frequecy_id as frequency_id " +
+            //                        $"FROM pm_task WHERE id = {task_id};";
+            //List<ScheduleIDData> scheduleData = await Context.GetData<ScheduleIDData>(scheduleQuery).ConfigureAwait(false);
+
+            CMDefaultResponse response;
+            string statusQry = $"SELECT status,ifnull(assignedTo,0) assigned_to, ifnull(ptw_id,0) ptw_id FROM Cleaning_execution WHERE id = {task_id}";
+            DataTable dt1 = await Context.FetchData(statusQry).ConfigureAwait(false);
+            CMMS.CMMS_Status status = (CMMS.CMMS_Status)Convert.ToInt32(dt1.Rows[0][0]);
+            int assigned_to = Convert.ToInt32(dt1.Rows[0][1]);
+            int ptw_id = Convert.ToInt32(dt1.Rows[0][2]);
+            if (assigned_to <= 0)
+            {
+                return new CMDefaultResponse(task_id, CMMS.RETRUNSTATUS.FAILURE, "PM Task is Not Assigned.");
+            }
+
+            if (ptw_id > 0)
+            {
+                return new CMDefaultResponse(task_id, CMMS.RETRUNSTATUS.FAILURE, "PM Task is already Linked to Module Cleaning");
+            }
+
+
+            string permitQuery = "SELECT ptw.id as ptw_id, ptw.code as ptw_code, ptw.title as ptw_title, ptw.status as ptw_status " +
+                                    "FROM " +
+                                        "permits as ptw " +
+                                    $"WHERE ptw.id = {permit_id} ;";
+            List<ScheduleLinkedPermit> permit = await Context.GetData<ScheduleLinkedPermit>(permitQuery).ConfigureAwait(false);
+            if (permit.Count == 0)
+                return new CMDefaultResponse(task_id, CMMS.RETRUNSTATUS.FAILURE, $"Permit {permit_id} does not exist.");
+            string myQuery = "UPDATE cleaning_execution  SET " +
+                                $"ptw_id = {permit[0].ptw_id}, " +
+                                $"status = {(int)CMMS.CMMS_Status.MC_LINKED_TO_PTW}, " +
+                                $"updatedAt = '{UtilsRepository.GetUTCTime()}', " +
+                                $"updatedById = '{userID}' " +
+                                $"WHERE id = {task_id};";
+            int retVal = await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
+            CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
+            if (retVal > 0)
+                retCode = CMMS.RETRUNSTATUS.SUCCESS;
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MC_PLAN, task_id, CMMS.CMMS_Modules.PTW, permit_id, "PTW linked to MC", CMMS.CMMS_Status.MC_LINKED_TO_PTW, userID);
+
+            response = new CMDefaultResponse(task_id, CMMS.RETRUNSTATUS.SUCCESS, $"Permit {permit_id} linked to Task {task_id}");
+
+            return response;
+        }
+
         internal async Task<List<CMMCTaskList>> GetTaskList(int facilityId, string facilitytimeZone)
         {
             string statusOut = "CASE ";

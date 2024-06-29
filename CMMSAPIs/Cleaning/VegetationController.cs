@@ -184,7 +184,21 @@ namespace CMMSAPIs.Controllers.Vegetation
                 throw;
             }
         }
-
+        [Route("LinkPermitToVegetation")]
+        [HttpPut]
+        public async Task<IActionResult> LinkPermitToVegetation(int task_id, int permit_id)
+        {
+            try
+            {
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _CleaningBS.LinkPermitToVegetation(task_id, permit_id, userId);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
         [Route("StartVegetationExecution")]
         [HttpPut]
         public async Task<IActionResult> StartVegetationExecution(int executionId)

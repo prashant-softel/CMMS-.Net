@@ -1,18 +1,14 @@
 using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Masters;
-using CMMSAPIs.Models.Users;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Utils;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using static CMMSAPIs.Helper.CMMS;
-using static iTextSharp.text.pdf.AcroFields;
 
 namespace CMMSAPIs.Repositories.Masters
 {
@@ -248,10 +244,11 @@ namespace CMMSAPIs.Repositories.Masters
             return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Source CMObservation Deleted");
         }
 
-        internal async Task<CMDefaultResponse> CloseObservation(int id, string comment, int userId){
+        internal async Task<CMDefaultResponse> CloseObservation(int id, string comment, int userId)
+        {
             string deleteQry = $"UPDATE observations SET status_code = {(int)CMMS_Status.OBSERVATION_CLOSED}, closed_by = '{userId}' , updated_at = '{UtilsRepository.GetUTCTime()}' WHERE id = {id};";
             await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.OBSERVATION,id, 0, 0, "Observation Closed.", CMMS.CMMS_Status.OBSERVATION_CLOSED, userId); ;
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.OBSERVATION, id, 0, 0, "Observation Closed.", CMMS.CMMS_Status.OBSERVATION_CLOSED, userId); ;
             return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, $"Observation {id} closed");
         }
 
@@ -1323,7 +1320,7 @@ namespace CMMSAPIs.Repositories.Masters
                         forMonth = new CMObservationSummary(month, year);
                         monthlyObservationSummary.Add(month, forMonth);
                     }
-                    
+
                     //if (item.status_code == CMMS.CMMS_Status.OBSERVATION_CLOSED)
 
                     forMonth.created++;
@@ -1397,7 +1394,7 @@ namespace CMMSAPIs.Repositories.Masters
             return monthlyObservationSummary.Values.ToList();
         }
 
-        
+
 
 
         internal async Task<CMStatutoryCompliance> GetStatutoryComplianceMasterById(int id)

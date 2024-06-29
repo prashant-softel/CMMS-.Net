@@ -518,6 +518,7 @@ namespace CMMSAPIs.Helper
 
             MC_TASK_SCHEDULED = 360,
             MC_TASK_STARTED,
+            MC_LINKED_TO_PTW,
             MC_TASK_ENDED,
             MC_TASK_COMPLETED,
             MC_TASK_ABANDONED,
