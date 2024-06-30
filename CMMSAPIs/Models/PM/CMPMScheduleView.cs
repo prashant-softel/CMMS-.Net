@@ -42,9 +42,11 @@ namespace CMMSAPIs.Models.PM
         public string assigned_to_name { get; set; }                
         public int permit_id { get; set; }
         public string permit_code { get; set; }
+        public int status_plan { get; set; }
         public int status { get; set; }
         public int ptw_status { get; set; }
         public string status_short { get; set; }
+        public string status_plan_short { get; set; }
         public long ptw_tbt_done { get; set; }
         public string status_short_ptw { get; set; }
     }
