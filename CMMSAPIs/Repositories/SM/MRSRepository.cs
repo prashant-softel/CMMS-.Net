@@ -1206,7 +1206,7 @@ namespace CMMSAPIs.Repositories.SM
             int from_actor_type_id = 0;
             int to_actor_id = 0;
             int to_actor_type_id = 0;
-           
+
             string getActorIds = "select from_actor_id,from_actor_type_id,to_actor_id,to_actor_type_id  from smmrs where id = " + request.mrsreturnID + ";";
             DataTable dt_actorids = await Context.FetchData(getActorIds).ConfigureAwait(false);
 
@@ -1221,7 +1221,7 @@ namespace CMMSAPIs.Repositories.SM
             }
             if (request.faultyItems.Count > 0)
             {
-                if(request.mrsreturnID == 0)
+                if (request.mrsreturnID == 0)
                 {
                     request.mrsreturnID = MRS_ReturnID;
                 }
@@ -1240,7 +1240,7 @@ namespace CMMSAPIs.Repositories.SM
                         chkSrNoAvailableQuery = "select asset_item_ID,available_qty,requested_qty,issued_qty,asset_MDM_code from smrsitems where serial_number = '" + request.faultyItems[i].serial_number + "'";
                         dt_chk = await Context.FetchData(chkSrNoAvailableQuery).ConfigureAwait(false);
                     }
-                   
+
 
                     if (dt_chk.Rows.Count > 0)
                     {
@@ -1272,7 +1272,7 @@ namespace CMMSAPIs.Repositories.SM
                             requested_qty = (dt_chk_faulty.Rows[0]["requested_qty"].ToInt());
                             issued_qty = (dt_chk_faulty.Rows[0]["issued_qty"].ToInt());
                             asset_MDM_code = (dt_chk_faulty.Rows[0]["asset_MDM_code"].ToString());
-                            
+
                         }
 
                         string insertStmt = $"START TRANSACTION; " +
@@ -1280,7 +1280,7 @@ namespace CMMSAPIs.Repositories.SM
                             $"VALUES ({request.mrsreturnID},{MRS_ReturnID},{asset_item_ID},{qty}, {requested_qty}, {request.faultyItems[i].returned_qty}, '{request.faultyItems[i].return_remarks}', 2, 1,1,{issued_qty},'{request.faultyItems[i].serial_number}','{asset_MDM_code}')" +
                             $"; SELECT LAST_INSERT_ID(); COMMIT;";
                         DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
-                     
+
                         var tResult = await TransactionDetails(request.facility_ID, from_actor_id, (int)CMMS.SM_Actor_Types.Inventory, to_actor_id, (int)CMMS.SM_Actor_Types.NonOperational, asset_item_ID, Convert.ToInt32(request.faultyItems[i].returned_qty), (int)CMMS.CMMS_Modules.SM_MRS_RETURN, request.mrsreturnID, request.faultyItems[i].return_remarks, 0);
                     }
                 }
@@ -1326,19 +1326,19 @@ namespace CMMSAPIs.Repositories.SM
             MRS_ReturnID = request.ID;
 
             string commaSeparatedIds = "";
-            if(request.cmmrsItems != null)
+            if (request.cmmrsItems != null)
             {
                 commaSeparatedIds = string.Join(",", request.cmmrsItems.Select(item => item.mrs_item_id.ToString()));
             }
             if (request.faultyItems != null)
             {
-                if(commaSeparatedIds.Length > 1)
+                if (commaSeparatedIds.Length > 1)
                 {
                     commaSeparatedIds = commaSeparatedIds + ",";
                 }
                 commaSeparatedIds = commaSeparatedIds + string.Join(",", request.faultyItems.Select(item => item.mrs_item_ID.ToString()));
             }
-             
+
 
             string deleteQueryForItems = $" delete from smrsitems where mrs_return_ID = {request.ID} and id not in ({commaSeparatedIds});  ";
             await Context.ExecuteNonQry<int>(deleteQueryForItems).ConfigureAwait(false);
@@ -1358,9 +1358,9 @@ namespace CMMSAPIs.Repositories.SM
                         string updateStmt = $"START TRANSACTION; " +
                             $"UPDATE smrsitems " +
                             $"SET " +
-                         
+
                             $"returned_qty = {request.cmmrsItems[i].returned_qty}, " +
-                        
+
                             $"return_remarks = '{request.cmmrsItems[i].return_remarks}' " +
                             $"WHERE ID = {request.cmmrsItems[i].mrs_item_id} ; " +
                             "COMMIT;";
