@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace CMMSAPIs.Models.MC
@@ -60,6 +60,7 @@ namespace CMMSAPIs.Models.MC
         public string status_long { get; set; }
 
         public bool scheduleAdded = false;
+        public int cleaningType { get; set; }
         public List<CMMCSchedule> schedules { get; set; }
 
     }
@@ -151,7 +152,7 @@ namespace CMMSAPIs.Models.MC
         public int scheduleId { get; set; }
         public int executionId { get; set; }
         public int cleaningDay { get; set; }  //First, second etc day
-        //public int cleaningType { get; set; }  //First, second etc day
+        public int cleaningType { get; set; }  //First, second etc day
         public string cleaningTypeName { get; set; }
         public decimal Scheduled { get; set; }
         public decimal cleaned { get; set; }
