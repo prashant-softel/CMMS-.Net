@@ -1,4 +1,4 @@
-﻿using CMMSAPIs.Helper;
+using CMMSAPIs.Helper;
 using CMMSAPIs.Models.MC;
 using CMMSAPIs.Models.PM;
 using CMMSAPIs.Models.Utils;
@@ -176,7 +176,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             int planIds = 0;
             int status = (int)CMMS.CMMS_Status.MC_PLAN_SUBMITTED;
             int cleaningType;
-
+         
 
 
             if (moduleType == 2)
@@ -186,6 +186,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
             foreach (CMMCPlan plan in request)
             {
+                cleaningType = plan.cleaningType;
                 string startDate = "NULL";
 
                 /* if (plan.startDate != null && plan.startDate != Convert.ToDateTime("01-01-0001 00:00:00"))
@@ -209,10 +210,10 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
                     foreach (var schedule in plan.schedules)
                     {
-                        cleaningType = schedule.cleaningType;
+                        //cleaningType = schedule.cleaningType;
 
-                        if (moduleType == 2)
-                            cleaningType = 0;
+                        //if (moduleType == 2)
+                        //    cleaningType = 0;
 
                         scheduleQry = "insert into `cleaning_plan_schedules` (`planId`,`moduleType`,`plannedDay`,`cleaningType`,`createdById`,`createdAt`) VALUES ";
                         scheduleQry += $"({planId},{moduleType},{schedule.cleaningDay},{cleaningType},'{userId}','{UtilsRepository.GetUTCTime()}');" +
@@ -708,7 +709,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
             List<CMMCExecution> _ViewExecution = await Context.GetData<CMMCExecution>(executionQuery).ConfigureAwait(false);
 
-            string scheduleQuery = $"select schedule.scheduleId as scheduleId ,schedule.status ,schedule.executionId, schedule.actualDay as cleaningDay ,schedule.startedAt as start_date,schedule.endedAt as end_date,CASE schedule.cleaningType WHEN 1 then 'Wet' When 2 then 'Dry' else 'Wet 'end as cleaningTypeName, SUM({measure}) as scheduled, SUM(CASE WHEN item.status = {(int)CMMS.CMMS_Status.EQUIP_CLEANED} THEN {measure} ELSE 0 END) as cleaned , SUM(CASE WHEN item.status = {(int)CMMS.CMMS_Status.EQUIP_ABANDONED} THEN {measure} ELSE 0 END) as abandoned ,SUM(CASE WHEN item.status = {(int)CMMS.CMMS_Status.EQUIP_SCHEDULED} THEN {measure} ELSE 0 END) as pending ,schedule.waterUsed, schedule.remark ,{statusSc} as status_short from cleaning_execution_schedules as schedule left join cleaning_execution_items as item on schedule.scheduleId = item.scheduleId where schedule.executionId = {exectionId} group by schedule.scheduleId;";
+            string scheduleQuery = $"select schedule.scheduleId as scheduleId ,schedule.status ,schedule.executionId, schedule.actualDay as cleaningDay ,schedule.startedAt as start_date,schedule.endedAt as end_date,schedule.cleaningType ,CASE schedule.cleaningType WHEN 1 then 'Wet' When 2 then 'Dry' else 'Wet 'end as cleaningTypeName, SUM({measure}) as scheduled, SUM(CASE WHEN item.status = {(int)CMMS.CMMS_Status.EQUIP_CLEANED} THEN {measure} ELSE 0 END) as cleaned , SUM(CASE WHEN item.status = {(int)CMMS.CMMS_Status.EQUIP_ABANDONED} THEN {measure} ELSE 0 END) as abandoned ,SUM(CASE WHEN item.status = {(int)CMMS.CMMS_Status.EQUIP_SCHEDULED} THEN {measure} ELSE 0 END) as pending ,schedule.waterUsed, schedule.remark ,{statusSc} as status_short from cleaning_execution_schedules as schedule left join cleaning_execution_items as item on schedule.scheduleId = item.scheduleId where schedule.executionId = {exectionId} group by schedule.scheduleId;";
 
             List<CMMCExecutionSchedule> _ViewSchedule = await Context.GetData<CMMCExecutionSchedule>(scheduleQuery).ConfigureAwait(false);
 
