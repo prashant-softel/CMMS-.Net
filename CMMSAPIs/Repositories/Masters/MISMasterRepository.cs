@@ -1306,7 +1306,8 @@ namespace CMMSAPIs.Repositories.Masters
                     string date_of_observation = d_o_o.ToString("yyyy-MM-dd");
                     string strMonth = date_of_observation.Substring(5, 2);
                     int month = int.Parse(strMonth);
-                    string month_name = item.month_name;
+                    string mn = item.month_name;
+
                     string strYear = date_of_observation.Substring(0, 4);
                     int year = int.Parse(strYear);
 
@@ -1317,7 +1318,7 @@ namespace CMMSAPIs.Repositories.Masters
                     if (!monthlyObservationSummary.TryGetValue(month, out forMonth))
                     {
 
-                        forMonth = new CMObservationSummary(month, year);
+                        forMonth = new CMObservationSummary(month, year, mn);
                         monthlyObservationSummary.Add(month, forMonth);
                     }
 

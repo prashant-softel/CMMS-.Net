@@ -229,7 +229,7 @@ namespace CMMSAPIs.Repositories.Inventory
                 { "Asset_Purchase_Code", new Tuple<string, Type>("purchaseCode", typeof(string)) },
                // { "Asset_SPV_Name", new Tuple<string, Type>("spvName", typeof(string)) },
                 { "Calibration_Next_Due_date", new Tuple<string, Type>("calibrationNextDueDate", typeof(DateTime)) },
-              //  { "Area", new Tuple<string,Type>("area", typeof(double)) },
+               { "Area", new Tuple<string,Type>("area", typeof(double)) },
 
             };
             /*
@@ -456,16 +456,17 @@ namespace CMMSAPIs.Repositories.Inventory
                                 //    }
                                 //}
                             }
-                            // try
-                            // {
-                            //       newR["area"] = Convert.ToDouble(newR["Area"]);
-                            //    }
-                            //   catch (FormatException)
-                            //   {
-                            //       m_errorLog.SetError($"[Row: {rN}] Invalid Area '{newR["Area"]}'. Area must be an integer.");
-                            //       newR.Delete();
-                            //        continue;
-                            //    }
+
+                            if (newR["area"] != DBNull.Value)
+                            {
+                                newR["area"] = Convert.ToDouble(newR["area"]);
+                            }
+                            else
+                            {
+                                newR["area"] = 0;
+                            }
+
+
                             try
                             {
                                 newR["customerId"] = businesses[Convert.ToString(newR["customerName"]).ToUpper()];
@@ -1351,7 +1352,7 @@ string warrantyQry = "insert into assetwarranty
             {
                 /* string qry = "insert into assets (name, description, parentId, acCapacity, dcCapacity, categoryId, typeId, statusId, facilityId, blockId, linkedToBlockId, customerId, ownerId,operatorId, manufacturerId,supplierId,serialNumber,createdBy,photoId,model,stockCount,moduleQuantity, cost,currency,specialTool,specialToolEmpId,calibrationDueDate,calibrationLastDate,calibrationFreqType,calibrationFrequency,calibrationReminderDays,retirementStatus,multiplier,vendorId,calibrationNextDueDate,acRating,dcRating,descMaintenace,barcode,unspCode,purchaseCode,createdAt) values ";*/
 
-                string qry = "insert into assets (name, description, parentId, acCapacity, dcCapacity, categoryId, typeId, statusId, facilityId, blockId, linkedToBlockId, customerId, ownerId,operatorId, manufacturerId,parent_equipment_no,supplierId,serialNumber,createdBy,photoId,model,stockCount,moduleQuantity, cost,currency,specialTool,specialToolEmpId,calibrationDueDate,calibrationLastDate,calibrationFreqType,calibrationFrequency,calibrationReminderDays,retirementStatus,multiplier,vendorId,calibrationNextDueDate,acRating,dcRating,descMaintenace,barcode,unspCode,purchaseCode,createdAt,num_of_module) values ";
+                string qry = "insert into assets (name, description, parentId, acCapacity, dcCapacity, categoryId, typeId, statusId, facilityId, blockId, linkedToBlockId, customerId, ownerId,operatorId, manufacturerId,parent_equipment_no,supplierId,serialNumber,createdBy,photoId,model,stockCount,moduleQuantity, cost,currency,specialTool,specialToolEmpId,calibrationDueDate,calibrationLastDate,calibrationFreqType,calibrationFrequency,calibrationReminderDays,retirementStatus,multiplier,vendorId,calibrationNextDueDate,acRating,dcRating,descMaintenace,barcode,unspCode,purchaseCode,createdAt,num_of_module,area) values ";
                 count++;
                 assetName = unit.name;
                 if (assetName.Length <= 0)
@@ -1393,7 +1394,7 @@ string warrantyQry = "insert into assetwarranty
                 /* qry += "('" + unit.name + "','" + unit.description + "','" + unit.parentId + "','" + unit.acCapacity + "','" + unit.dcCapacity + "','" + unit.categoryId + "','" + unit.typeId + "','" + unit.statusId + "','" + unit.facilityId + "','" + unit.blockId + "','" + unit.blockId + "','" + unit.customerId + "','" + unit.ownerId + "','" + unit.operatorId + "','" + unit.manufacturerId + "','" + unit.supplierId + "','" + unit.serialNumber + "','" + userID + "','" + unit.photoId + "','" + unit.model + "','" + unit.stockCount + "','" + unit.moduleQuantity + "','" + unit.cost + "','" + unit.currency + "','" + unit.specialToolId + "','" + unit.specialToolEmpId + "'," + firstCalibrationDate + "," + lastCalibrationDate + ",'" + unit.calibrationFrequencyType + "','" + unit.calibrationFrequency + "','" + unit.calibrationReminderDays + "','" + unit.retirementStatus + "','" + unit.multiplier + "','" + unit.vendorId + "'," + nextCalibrationDate + ",'" + unit.acRating + "','" + unit.dcRating + "','" + unit.descMaintenace + "','" + unit.barcode + "','" + unit.unspCode + "','" + unit.purchaseCode + "','"+ UtilsRepository.GetUTCTime() + "'); ";
                  qry += "select LAST_INSERT_ID(); ";*/
 
-                qry += "('" + unit.name + "','" + unit.assetdescription + "','" + unit.parentId + "','" + unit.acCapacity + "','" + unit.dcCapacity + "','" + unit.categoryId + "','" + unit.typeId + "','" + unit.statusId + "','" + unit.facilityId + "','" + unit.blockId + "','" + unit.blockId + "','" + unit.customerId + "','" + unit.ownerId + "','" + unit.operatorId + "','" + unit.manufacturerId + "','" + unit.parent_equipment_no + "','" + unit.supplierId + "','" + unit.serialNumber + "','" + userID + "','" + unit.photoId + "','" + unit.model + "','" + unit.stockCount + "','" + unit.moduleQuantity + "','" + unit.cost + "','" + unit.currency + "','" + unit.specialToolId + "','" + unit.specialToolEmpId + "'," + firstCalibrationDate + "," + lastCalibrationDate + ",'" + unit.calibrationFrequencyType + "','" + unit.calibrationFrequency + "','" + unit.calibrationReminderDays + "','" + unit.retirementStatus + "','" + unit.multiplier + "','" + unit.vendorId + "'," + nextCalibrationDate + ",'" + unit.acRating + "','" + unit.dcRating + "','" + unit.descMaintenace + "','" + unit.barcode + "','" + unit.unspCode + "','" + unit.purchaseCode + "','" + UtilsRepository.GetUTCTime() + "','" + unit.num_of_module + "'); ";
+                qry += "('" + unit.name + "','" + unit.assetdescription + "','" + unit.parentId + "','" + unit.acCapacity + "','" + unit.dcCapacity + "','" + unit.categoryId + "','" + unit.typeId + "','" + unit.statusId + "','" + unit.facilityId + "','" + unit.blockId + "','" + unit.blockId + "','" + unit.customerId + "','" + unit.ownerId + "','" + unit.operatorId + "','" + unit.manufacturerId + "','" + unit.parent_equipment_no + "','" + unit.supplierId + "','" + unit.serialNumber + "','" + userID + "','" + unit.photoId + "','" + unit.model + "','" + unit.stockCount + "','" + unit.moduleQuantity + "','" + unit.cost + "','" + unit.currency + "','" + unit.specialToolId + "','" + unit.specialToolEmpId + "'," + firstCalibrationDate + "," + lastCalibrationDate + ",'" + unit.calibrationFrequencyType + "','" + unit.calibrationFrequency + "','" + unit.calibrationReminderDays + "','" + unit.retirementStatus + "','" + unit.multiplier + "','" + unit.vendorId + "'," + nextCalibrationDate + ",'" + unit.acRating + "','" + unit.dcRating + "','" + unit.descMaintenace + "','" + unit.barcode + "','" + unit.unspCode + "','" + unit.purchaseCode + "','" + UtilsRepository.GetUTCTime() + "','" + unit.num_of_module + "'," + unit.area + "); ";
                 qry += "select LAST_INSERT_ID(); ";
 
                 //List<CMInventoryList> newInventory = await Context.GetData<CMInventoryList>(qry).ConfigureAwait(false);
@@ -1582,6 +1583,10 @@ string warrantyQry = "insert into assetwarranty
             if (request.moduleQuantity != 0)
             {
                 updateQry += $" moduleQuantity= '{request.moduleQuantity}',";
+            }
+            if (request.area != 0)
+            {
+                updateQry += $" area= '{request.area}',";
             }
             if (request.categoryId != 0)
             {

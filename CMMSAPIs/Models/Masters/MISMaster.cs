@@ -434,11 +434,13 @@ namespace CMMSAPIs.Models.Masters
 
     public class CMObservationSummary
     {
-        public CMObservationSummary(int month, int year)
+        public CMObservationSummary(int month, int year, string month_name)
         {
             this.month = month;
             this.year = year;
+            this.month_name = month_name;
         }
+        public string month_name { get; set; }
         public int month { get; set; }
         public int year { get; set; }
         //public int id { get; set; }

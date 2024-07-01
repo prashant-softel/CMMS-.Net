@@ -1306,6 +1306,7 @@ namespace CMMSAPIs.Repositories.Masters
                    $"left join assetcategories as cat  on pm_task.category_id = cat.id " +
                    $"left join permits as permit on pm_task.PTW_id = permit.id " +
                    $"left join frequency as freq on pm_task.frequency_id = freq.id " +
+
                    $" JOIN facilities ON pm_task.facility_id = facilities.id " +
                    $" WHERE facilities.id in ({facilityId})  and status_id = 1 {filter};";
             List<CMDashboadItemList> itemList = await Context.GetData<CMDashboadItemList>(myQuery).ConfigureAwait(false);

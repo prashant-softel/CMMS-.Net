@@ -1,13 +1,8 @@
 using CMMSAPIs.BS.SM;
 using CMMSAPIs.Models.SM;
-using CMMSAPIs.Models.Users;
-using CMMSAPIs.Repositories.SM;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace CMMSAPIs.Controllers.SM
@@ -350,7 +345,7 @@ namespace CMMSAPIs.Controllers.SM
             }
         }
 
-        
+
         // Paid By API's
         //[Authorize]
         [Route("GetPaidByList")]
@@ -380,7 +375,7 @@ namespace CMMSAPIs.Controllers.SM
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _SMMasterBS.AddPaidBy(request,  userID);
+                var data = await _SMMasterBS.AddPaidBy(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)

@@ -232,12 +232,12 @@ namespace CMMSAPIs.Repositories.Masters
         {
             foreach (INTERNALEMPLOYEE item in request.internal_employee)
             {
-                string execute = $"update schdule_invitee set Attendend={item.Attendend},notes={item.notes},status_code={(int)CMMS.CMMS_Status.COURSE_ENDED} where id={item.id}";
+                string execute = $"update schdule_invitee set Attendend={item.Attendend},notes={item.notes},RSVP_Datetime='{UtilsRepository.GetUTCTime()}',Rsvp={1},status_code={(int)CMMS.CMMS_Status.COURSE_ENDED} where id={item.id}";
                 await Context.ExecuteNonQry<int>(execute).ConfigureAwait(false);
             }
             foreach (INTERNALEMPLOYEE item1 in request.external_employee)
             {
-                string execute2 = $"update vistor_details set Attendend={item1.Attendend},notes={item1.notes},status_code={(int)CMMS.CMMS_Status.COURSE_ENDED} where id={item1.id}";
+                string execute2 = $"update visitor_details set Attendend={item1.Attendend},notes={item1.notes},status_code={(int)CMMS.CMMS_Status.COURSE_ENDED} where id={item1.id}";
                 await Context.ExecuteNonQry<int>(execute2).ConfigureAwait(false);
 
             }

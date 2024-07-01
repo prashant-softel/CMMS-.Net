@@ -1,19 +1,14 @@
-using CMMSAPIs.BS.Masters;
 using CMMSAPIs.Helper;
-using CMMSAPIs.Models.Jobs;
 using CMMSAPIs.Models.Masters;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Utils;
-using CMMSAPIs.Models.Notifications;
+using Microsoft.AspNetCore.Hosting;
+using OfficeOpenXml;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Data;
-using System.Threading.Tasks;
-using OfficeOpenXml;
 using System.IO;
-using Microsoft.AspNetCore.Hosting;
-using System.Linq;
+using System.Threading.Tasks;
 
 namespace CMMSAPIs.Repositories.Masters
 {
@@ -53,9 +48,9 @@ namespace CMMSAPIs.Repositories.Masters
                                 "users as updated_user ON updated_user.id = checklist_number.updated_by where 1 ";
             if (facility_id > 0)
             {
-                myQuery += $" and ( checklist_number.facility_id = { facility_id } or checklist_number.facility_id = 0)";
+                myQuery += $" and ( checklist_number.facility_id = {facility_id} or checklist_number.facility_id = 0)";
                 if (type > 0)
-                    myQuery += $" and  checklist_number.checklist_type in ({ type }) ";
+                    myQuery += $" and  checklist_number.checklist_type in ({type}) ";
                 else
                 {
                     throw new ArgumentException("Type cannot be empty");
@@ -83,10 +78,10 @@ namespace CMMSAPIs.Repositories.Masters
                 {
                     checkList.updatedAt = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, checkList.createdAt);
                 }
-             }
-                return _checkList;
             }
-        
+            return _checkList;
+        }
+
         internal async Task<CMDefaultResponse> CreateChecklist(List<CMCreateCheckList> request_list, int userID)
         {
             /*
@@ -111,7 +106,7 @@ namespace CMMSAPIs.Repositories.Masters
             CMDefaultResponse response = new CMDefaultResponse(id_list, CMMS.RETRUNSTATUS.SUCCESS, $"{id_list.Count} Checklist(s) Created Successfully");
 
             return response;
-            
+
         }
 
         internal async Task<CMDefaultResponse> UpdateCheckList(CMCreateCheckList request, int userID)
@@ -159,23 +154,23 @@ namespace CMMSAPIs.Repositories.Masters
             CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Check List Deleted");
 
             return response;
-           
+
         }
         #endregion
 
         #region checklistmap
-        internal async Task<List<CMCheckListMapList>> GetCheckListMap(int facility_id, int category_id = 0, int? type=null)
+        internal async Task<List<CMCheckListMapList>> GetCheckListMap(int facility_id, int category_id = 0, int? type = null)
         {
             /*
              * Primary Table - CheckList_Mapping
              * Read All properties mention in model and return list
              * Code goes here
             */
-            string myQuery = "SELECT " + 
-                                "checklist_mapping.category_id, asset_cat.name as category_name, checklist_mapping.status, checklist_mapping.plan_id "+
-                             "FROM  " + 
-                                "checklist_mapping " + 
-                             "JOIN " + 
+            string myQuery = "SELECT " +
+                                "checklist_mapping.category_id, asset_cat.name as category_name, checklist_mapping.status, checklist_mapping.plan_id " +
+                             "FROM  " +
+                                "checklist_mapping " +
+                             "JOIN " +
                                 "assetcategories as asset_cat ON checklist_mapping.category_id=asset_cat.id ";
             if (facility_id > 0)
             {
@@ -193,12 +188,12 @@ namespace CMMSAPIs.Repositories.Masters
             List<CMCheckListMapList> _checkListMapList = await Context.GetData<CMCheckListMapList>(myQuery).ConfigureAwait(false);
             foreach (CMCheckListMapList _checkListMap in _checkListMapList)
             {
-                string myQuery2 = "SELECT " + 
-                                    "checklist_mapping.id as mapping_id, checklist_mapping.checklist_id, checklist_number.checklist_number as checklist_name, checklist_number.checklist_type as type " + 
+                string myQuery2 = "SELECT " +
+                                    "checklist_mapping.id as mapping_id, checklist_mapping.checklist_id, checklist_number.checklist_number as checklist_name, checklist_number.checklist_type as type " +
                                   "FROM " +
-                                    "checklist_mapping " + 
-                                  "JOIN " + 
-                                    "checklist_number ON checklist_number.id = checklist_mapping.checklist_id " + 
+                                    "checklist_mapping " +
+                                  "JOIN " +
+                                    "checklist_number ON checklist_number.id = checklist_mapping.checklist_id " +
                                   $"WHERE checklist_mapping.facility_id = {facility_id} AND checklist_mapping.category_id = {_checkListMap.category_id} ";
                 if (type != null)
                 {
@@ -265,7 +260,7 @@ namespace CMMSAPIs.Repositories.Masters
 
             return response;*/
             return null;
-            
+
         }
         #endregion
 
@@ -280,25 +275,25 @@ namespace CMMSAPIs.Repositories.Masters
             */
             string myQuery = "SELECT " +
                                 "checkpoint.id as id, check_point, check_list_id as checklist_id, checklist_number.checklist_number as checklist_name, requirement, is_document_required, action_to_be_done, checkpoint.created_by as created_by_id, CONCAT(created_user.firstName,' ',created_user.lastName) as created_by_name, checkpoint.created_at, checkpoint.updated_by as updated_by_id, CONCAT(updated_user.firstName,' ',updated_user.lastName) as updated_by_name, checkpoint.updated_at, checkpoint.status ,checkpoint.failure_weightage,checkpoint.type as type,CASE WHEN checkpoint.type = 1 then 'Bool'  WHEN checkpoint.type = 0 then 'Text' WHEN checkpoint.type = 2 then 'Range' ELSE 'Unknown Type' END as checkpoint_type , checkpoint.min_range as min ,checkpoint.max_range as max " +
-                             "FROM " + 
-                                "checkpoint " + 
-                             "LEFT JOIN " + 
-                                "checklist_number ON checklist_number.id=checkpoint.check_list_id " + 
-                             "LEFT JOIN " + 
+                             "FROM " +
+                                "checkpoint " +
+                             "LEFT JOIN " +
+                                "checklist_number ON checklist_number.id=checkpoint.check_list_id " +
+                             "LEFT JOIN " +
                                 "users as created_user ON created_user.id=checkpoint.created_by " +
                              "LEFT JOIN " +
                                 "users as updated_user ON updated_user.id=checkpoint.updated_by ";
 
-            if (checklist_id > 0 && facility_id ==0)
+            if (checklist_id > 0 && facility_id == 0)
             {
                 myQuery += $" WHERE check_list_id = {checklist_id} ";
             }
             else if (facility_id > 0 && checklist_id == 0)
             {
-               // checklist_number.facility_id in(1798, 0)
+                // checklist_number.facility_id in(1798, 0)
                 myQuery += $" WHERE checklist_number.facility_id in ({facility_id},0) ";
             }
-            else if(checklist_id > 0 && facility_id > 0)
+            else if (checklist_id > 0 && facility_id > 0)
             {
                 myQuery += $" WHERE check_list_id = {checklist_id} ";
             }
@@ -318,7 +313,7 @@ namespace CMMSAPIs.Repositories.Masters
                 }
                 if (checkList != null && checkList.updated_at != null)
 
-                    checkList.updated_at= await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, checkList.updated_at);
+                    checkList.updated_at = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, checkList.updated_at);
             }
             return _checkList;
         }
@@ -336,7 +331,7 @@ namespace CMMSAPIs.Repositories.Masters
                 string query = "INSERT INTO  checkpoint (check_point, check_list_id, requirement, is_document_required, " +
                                 "action_to_be_done,failure_weightage,type,min_range,max_range ,created_by, created_at, status) VALUES " +
                                 $"(\"{request.check_point}\", {request.checklist_id}, '{request.requirement.Replace("'", "")}', " +
-                                $"{(request.is_document_required==null?0 : request.is_document_required)}, '{request.action_to_be_done}', '{request.failure_weightage}', '{request.checkpoint_type.id}', '{request.checkpoint_type.min}','{request.checkpoint_type.max}'," +
+                                $"{(request.is_document_required == null ? 0 : request.is_document_required)}, '{request.action_to_be_done}', '{request.failure_weightage}', '{request.checkpoint_type.id}', '{request.checkpoint_type.min}','{request.checkpoint_type.max}'," +
                                 $"{userID}, '{UtilsRepository.GetUTCTime()}', 1); select LAST_INSERT_ID();";
 
                 DataTable dt = await Context.FetchData(query).ConfigureAwait(false);
@@ -397,7 +392,7 @@ namespace CMMSAPIs.Repositories.Masters
         }
         #endregion
 
-        
+
         private async Task<DataTable> ConvertExcelToChecklists(int file_id)
         {
             Dictionary<string, int> plants = new Dictionary<string, int>();
@@ -514,15 +509,15 @@ namespace CMMSAPIs.Repositories.Masters
                                 }
                                 else
                                 {
-                                    if  (m_facilityId != (int)newR["facility_id"])
+                                    if (m_facilityId != (int)newR["facility_id"])
                                     {
                                         //error logging
                                         m_errorLog.SetInformation($"[Checklist] {newR["facility_name"]} Row {rN} if not as per first record.");
                                         continue;
                                     }
+                                }
                             }
-                            }
-                            catch(KeyNotFoundException)
+                            catch (KeyNotFoundException)
                             {
                                 m_errorLog.SetError($"[Checklist: Row {rN}] Invalid Facility '{newR["facility_name"]}'.");
                                 //if (Convert.ToString(newR["facility_name"]) == null || Convert.ToString(newR["facility_name"]) == "")
@@ -536,19 +531,19 @@ namespace CMMSAPIs.Repositories.Masters
                             {
                                 m_errorLog.SetError($"[Checklist: Row {rN}] Checklist name cannot be empty.");
                             }
-                           
+
                             else if (checklistNames.Contains(Convert.ToString(newR["checklist_number"]).ToUpper()))
                             {
                                 string checklist_Validation_Q = "select ifnull(f.name,'') as name ,facility_id  from checklist_number left join facilities f on f.id = checklist_number.facility_id where checklist_number='" + Convert.ToString(newR["checklist_number"]) + "';";
                                 DataTable dt = await Context.FetchData(checklist_Validation_Q).ConfigureAwait(false);
                                 bool isChecklistPresentInSameFacility = false;
-                                for(var i=0; i<dt.Rows.Count; i++)
+                                for (var i = 0; i < dt.Rows.Count; i++)
                                 {
                                     string facility_name = Convert.ToString(dt.Rows[i][0]);
                                     int facility_id = Convert.ToInt32(dt.Rows[i][1]);
                                     if (facility_name.ToString() == newR["facility_name"].ToString())
                                     {
-                                        isChecklistPresentInSameFacility = true;                            
+                                        isChecklistPresentInSameFacility = true;
                                         m_errorLog.SetImportInformation($"[Checklist: Row {rN}] Checklist name : {Convert.ToString(newR["checklist_number"])} already present in plant {facility_name}.");
                                         break;
                                     }
@@ -558,7 +553,7 @@ namespace CMMSAPIs.Repositories.Masters
                                     newR.Delete();
                                     continue;
                                 }
-                           
+
                                 //    else
                                 //    {
 
@@ -662,7 +657,7 @@ namespace CMMSAPIs.Repositories.Masters
                     Total_CheckList_rows = sheet.Dimension.End.Row;
                 }
             }
-          
+
             return Total_CheckList_rows;
         }
         private async Task<DataTable> ConvertExcelToCheckpoints(int file_id)
@@ -672,16 +667,16 @@ namespace CMMSAPIs.Repositories.Masters
             DataTable dtChecklist = await Context.FetchData(checklistQry).ConfigureAwait(false);
             checklists.Merge(dtChecklist.GetColumn<string>("name"), dtChecklist.GetColumn<int>("id"));
 
-            if(checklistNames == null)
+            if (checklistNames == null)
             {
                 string checklist_q = "SELECT UPPER(checklist_number) as name FROM checklist_number WHERE checklist_number is not null and checklist_number != '' GROUP BY checklist_number;";
                 DataTable dtChecklist_result = await Context.FetchData(checklist_q).ConfigureAwait(false);
                 checklistNames = dtChecklist_result.GetColumn<string>("name");
             }
 
-            foreach(string checklistName in checklistNames)
+            foreach (string checklistName in checklistNames)
             {
-                if(!checklists.ContainsKey(checklistName))
+                if (!checklists.ContainsKey(checklistName))
                     checklists.Add(checklistName, 0);
             }
             List<string> yesNo = new List<string>() { "NO", "YES" };
@@ -703,7 +698,7 @@ namespace CMMSAPIs.Repositories.Masters
                 { "Action to be taken", new Tuple<string, Type>("action_to_be_done", typeof(string)) },
                 { "Failure Weightage", new Tuple<string, Type>("failure_weightage", typeof(int)) },
                 { "Checkpoint Type", new Tuple<string, Type>("checkpoint_type", typeof(string)) },
-               
+
                 { "Range Min", new Tuple<string, Type>("range_min", typeof(string)) },
                 { "Range Max", new Tuple<string, Type>("range_max", typeof(string)) }
             };
@@ -770,7 +765,7 @@ namespace CMMSAPIs.Repositories.Masters
                                 m_errorLog.SetInformation($"[Checkpoint] Row {rN} is empty.");
                                 continue;
                             }
-                         
+
                             try
                             {
                                 newR["checklist_id"] = checklists[Convert.ToString(newR["checklist_name"]).ToUpper()];
@@ -789,10 +784,10 @@ namespace CMMSAPIs.Repositories.Masters
                             }
                             else if (Convert.ToString(newR["check_point"]) != "")
                             {
-                                string checkpoint_q = "select * from checkpoint where check_point = \""+Convert.ToString(newR["check_point"])+"\" and check_list_id="+Convert.ToInt32(newR["checklist_id"])+";";
+                                string checkpoint_q = "select * from checkpoint where check_point = \"" + Convert.ToString(newR["check_point"]) + "\" and check_list_id=" + Convert.ToInt32(newR["checklist_id"]) + ";";
                                 //checkpoint_q = System.Text.RegularExpressions.Regex.Replace(checkpoint_q, "[@,\\.\";'\\\\]", string.Empty);
                                 DataTable st_cp = await Context.FetchData(checkpoint_q).ConfigureAwait(false);
-                                if (st_cp.Rows.Count >0)
+                                if (st_cp.Rows.Count > 0)
                                 {
                                     newR.Delete();
                                     continue;
@@ -806,11 +801,11 @@ namespace CMMSAPIs.Repositories.Masters
                             int yesNoIndex = yesNo.IndexOf(yn.ToUpper());
                             if (yesNoIndex == -1)
                             {
-                                if(yn == "" || yn == null)
+                                if (yn == "" || yn == null)
                                 {
                                     yesNoIndex = 0;
                                     m_errorLog.SetInformation($"[Checkpoint: Row {rN}] Is Document Required set to False by default");
-                                }    
+                                }
                                 else
                                 {
                                     m_errorLog.SetError($"[Checkpoint: Row {rN}] Invalid answer '{yn}'");
@@ -825,9 +820,9 @@ namespace CMMSAPIs.Repositories.Masters
                             {
                                 m_errorLog.SetError($"[Checkpoint: Row {rN}] Invalid checkpoint type.");
                             }
-                           
-                               
-                          if(Convert.ToInt32(newR["failure_weightage"]) > 100)
+
+
+                            if (Convert.ToInt32(newR["failure_weightage"]) > 100)
                             {
                                 m_errorLog.SetError($"[Checkpoint: Row {rN}] failure weightage cannot be greater than 100.");
                             }
@@ -836,13 +831,13 @@ namespace CMMSAPIs.Repositories.Masters
                                 newR["failure_weightage"] = newR["failure_weightage"].ToInt();
                             }
 
-                            if (Convert.ToString(newR["range_min"]) == null || Convert.ToString(newR["range_min"]) == "")                               
+                            if (Convert.ToString(newR["range_min"]) == null || Convert.ToString(newR["range_min"]) == "")
                                 newR["range_min"] = 0;
                             else
                                 newR["range_min"] = newR["range_min"].ToInt();
 
                             if (Convert.ToString(newR["range_max"]) == null || Convert.ToString(newR["range_max"]) == "")
-                                 newR["range_max"] = 0;
+                                newR["range_max"] = 0;
                             else
                                 newR["range_max"] = newR["range_max"].ToInt();
 
@@ -945,7 +940,7 @@ namespace CMMSAPIs.Repositories.Masters
                 if (dtChecklists != null && m_errorLog.GetErrorCount() == 0)
                 {
                     List<CMCreateCheckList> checklists = dtChecklists.MapTo<CMCreateCheckList>();
-                  
+
                     CMDefaultResponse response1 = await CreateChecklist(checklists, userID);
 
                     // trying to log information log but did not work
@@ -956,7 +951,7 @@ namespace CMMSAPIs.Repositories.Masters
                     //{
                     //    log_message.Append(((CMMSAPIs.Models.Utils.ErrorLog.cMessage)m_errorLog.messageArray[i]).m_sMessage);
                     //}
-                    response = new CMImportFileResponse(response1.id, response1.return_status, logfile, log, response1.message + ", with total "+total_excelrowCount+" check list rows from excel sheet.");
+                    response = new CMImportFileResponse(response1.id, response1.return_status, logfile, log, response1.message + ", with total " + total_excelrowCount + " check list rows from excel sheet.");
                 }
                 else
                 {
@@ -1007,12 +1002,12 @@ namespace CMMSAPIs.Repositories.Masters
                         CMCPType checkpoint_type = new CMCPType();
                         checkpoint_type.id = Convert.ToInt32(row["checkpoint_type_id"]);
                         //  checkpoint_type.min = Convert.ToInt32(row["range_min"]);
-                        checkpoint_type.min = row["range_min"].ToInt();
+                        checkpoint_type.min = Convert.ToDouble(row["range_min"]);
                         // checkpoint_type.max = Convert.ToInt32(row["range_max"]);
-                        checkpoint_type.max = row["range_max"].ToInt();
+                        checkpoint_type.max = Convert.ToDouble(row["range_max"]);
                         CMCreateCheckPoint checkpoint = new CMCreateCheckPoint
                         {
-                          
+
                             check_point = Convert.ToString(row["check_point"]),
                             checklist_id = Convert.ToInt32(row["checklist_id"]),
                             requirement = Convert.ToString(row["requirement"]),
@@ -1022,7 +1017,7 @@ namespace CMMSAPIs.Repositories.Masters
                             action_to_be_done = null,
                             failure_weightage = row["failure_weightage"] == DBNull.Value
                                 ? (int?)null
-                                : Convert.ToInt32(row["failure_weightage"]),                           
+                                : Convert.ToInt32(row["failure_weightage"]),
                             checkpoint_type = checkpoint_type
                         };
 
@@ -1030,8 +1025,8 @@ namespace CMMSAPIs.Repositories.Masters
                     }
 
 
-   
-                 
+
+
                     CMDefaultResponse response1 = await CreateCheckPoint(checkpoints, userID);
                     response = new CMImportFileResponse(response1.id, response1.return_status, logfile, log, response1.message + ", with total " + total_excelrowCount + " checkpoint rows from excel sheet.");
                 }

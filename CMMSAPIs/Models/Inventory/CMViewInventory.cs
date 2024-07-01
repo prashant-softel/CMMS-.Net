@@ -19,7 +19,7 @@ namespace CMMSAPIs.Models.Inventory
         public string meter_limit { get; set; }
         public string meter_unit { get; set; }
         public string type { get; set; }
-        public string parent_equipment_no { get; set; }
+        public dynamic parent_equipment_no { get; set; }
         public int retirementStatus { get; set; }
         public int categoryId { get; set; }
         public string categoryName { get; set; }

@@ -1,23 +1,17 @@
 using CMMSAPIs.Helper;
-using CMMSAPIs.Models;
 using CMMSAPIs.Models.Audit;
-using CMMSAPIs.Models.SM;
-using CMMSAPIs.Models.Utils;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.Design;
-using System.Data;
-using System.Security.Cryptography;
-using System.Threading.Tasks;
-using CMMSAPIs.Repositories.Utils;
 using CMMSAPIs.Models.Jobs;
-using CMMSAPIs.Models.PM;
 using CMMSAPIs.Models.Masters;
 using CMMSAPIs.Models.Notifications;
+using CMMSAPIs.Models.PM;
+using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.JC;
-using CMMSAPIs.Models.Users;
-using System.Numerics;
+using CMMSAPIs.Repositories.Utils;
+using System;
+using System.Collections.Generic;
+using System.Data;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace CMMSAPIs.Repositories.Audits
 {
@@ -45,22 +39,22 @@ namespace CMMSAPIs.Repositories.Audits
             { CMMS.CMMS_Status.AUDIT_EXECUTED, "Executed" }
         };
 
-        internal async Task<List<CMAuditPlanList>> GetAuditPlanList(int facility_id, DateTime fromDate, DateTime toDate,string facilitytimeZone, int module_type_id)
+        internal async Task<List<CMAuditPlanList>> GetAuditPlanList(int facility_id, DateTime fromDate, DateTime toDate, string facilitytimeZone, int module_type_id)
         {
-          
+
             string filter = "Where (DATE(st.Audit_Added_date) >= '" + fromDate.ToString("yyyy-MM-dd") + "'  and DATE(st.Audit_Added_date) <= '" + toDate.ToString("yyyy-MM-dd") + "')";
             filter = filter + " and st.Facility_id = " + facility_id + "";
             if (module_type_id > 0)
             {
-                filter = filter + " and st.module_type_id = "+module_type_id+"";
+                filter = filter + " and st.module_type_id = " + module_type_id + "";
             }
             string SelectQ = "select st.id,plan_number,  f.name as facility_name, concat(au.firstName, ' ', au.lastName)  Auditee_Emp_Name, " +
                 "concat(u.firstName, ' ', u.lastName) Auditor_Emp_Name,checklist_number as checklist_name, frequency.name as frequency_name,st.frequency,st.checklist_id, st.status, case when st.frequency = 0 then 'False' else 'True' end as FrequencyApplicable " +
                 " ,st.Description,st.Schedule_Date,module_type_id as Module_Type_id from st_audit st " +
                 "inner join facilities f ON st.Facility_id = f.id " +
                 "left join users au on au.id = st.Auditee_Emp_ID " +
-                "left join checklist_number checklist_number on checklist_number.id = st.Checklist_id "+
-                "left join frequency frequency on frequency.id = st.Frequency "+
+                "left join checklist_number checklist_number on checklist_number.id = st.Checklist_id " +
+                "left join frequency frequency on frequency.id = st.Frequency " +
                 "left join users u on u.id = st.Auditor_Emp_ID  " + filter;
 
             List<CMAuditPlanList> auditPlanList = await Context.GetData<CMAuditPlanList>(SelectQ).ConfigureAwait(false);
@@ -73,16 +67,16 @@ namespace CMMSAPIs.Repositories.Audits
             }
             foreach (var list in auditPlanList)
             {
-                list.created_at= await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.created_at);
-                list.Schedule_Date= await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.Schedule_Date);
+                list.created_at = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.created_at);
+                list.Schedule_Date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.Schedule_Date);
 
             }
 
 
-                return auditPlanList;
+            return auditPlanList;
         }
 
-        internal async Task<CMAuditPlanList> GetAuditPlanByID(int id,string facilitytimeZone)
+        internal async Task<CMAuditPlanList> GetAuditPlanByID(int id, string facilitytimeZone)
         {
 
             string filter = " where st.id = " + id + "";
@@ -95,7 +89,7 @@ namespace CMMSAPIs.Repositories.Audits
                 "left join users u on u.id = st.Auditor_Emp_ID " +
                 " left join checklist_number checklist_number on checklist_number.id = st.Checklist_id " +
                 "left join frequency frequency on frequency.id = st.Frequency " +
-          
+
                 "left join users created on created.id = st.created_by   " + filter;
 
             List<CMAuditPlanList> auditPlanList = await Context.GetData<CMAuditPlanList>(SelectQ).ConfigureAwait(false);
@@ -132,10 +126,9 @@ namespace CMMSAPIs.Repositories.Audits
                 DataTable dt2 = await Context.FetchData(InsertQ).ConfigureAwait(false);
                 InsertedValue = Convert.ToInt32(dt2.Rows[0][0]);
                 response = new CMDefaultResponse(InsertedValue, CMMS.RETRUNSTATUS.SUCCESS, "Audit plan with plan number : " + request.plan_number + " created successfully.");
-                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.AUDIT_PLAN, request.id, 0, 0, " Audit plan schduled ", CMMS.CMMS_Status.AUDIT_SCHEDULE);
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.AUDIT_PLAN, InsertedValue, 0, 0, " Audit plan schduled ", CMMS.CMMS_Status.AUDIT_SCHEDULE);
 
             }
-
             return response;
         }
 
@@ -268,14 +261,14 @@ namespace CMMSAPIs.Repositories.Audits
                 response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Audit plan does not exists to approve.");
             }
 
-            for(var i = 0; i < auditPlanList.Count; i++)
+            for (var i = 0; i < auditPlanList.Count; i++)
             {
                 string entryInTask = $" INSERT INTO pm_task (plan_id, category_id, facility_id, frequency_id, plan_date, prev_task_done_date, closed_at, " +
                     $"assigned_to, PTW_id, status) VALUES " +
                     $" ({auditPlanList[i].id},0,{auditPlanList[i].Facility_id},{auditPlanList[i].ApplyFrequency},'{auditPlanList[i].Schedule_Date.ToString("yyyy-MM-dd HH:mm:ss")}',null,null,{auditPlanList[i].auditor_id},0,{(int)CMMS.CMMS_Status.AUDIT_APPROVED});SELECT LAST_INSERT_ID();";
                 DataTable dt2 = await Context.FetchData(entryInTask).ConfigureAwait(false);
                 int task_id = Convert.ToInt32(dt2.Rows[0][0]);
- 
+
                 string scheduleQry = $"INSERT INTO pm_schedule(task_id,plan_id,Asset_id,checklist_id,PM_Schedule_date,status) " +
                                 $"select {task_id} as task_id,id as plan_id, 0 as Asset_id, Checklist_id  as checklist_id,Schedule_Date    as PM_Schedule_date,{(int)CMMS.CMMS_Status.AUDIT_SCHEDULE} as status from st_audit  where id = {request.id}";
                 await Context.ExecuteNonQry<int>(scheduleQry);
@@ -375,9 +368,10 @@ namespace CMMSAPIs.Repositories.Audits
                                $"left join permits as permit on pm_task.PTW_id = permit.id " +
                 $"WHERE pm_task.id = {task_id}";
 
-      
+
             DataTable dt1 = await Context.FetchData(statusQry).ConfigureAwait(false);
-            if(dt1.Rows.Count > 0) {
+            if (dt1.Rows.Count > 0)
+            {
                 plan_id = Convert.ToInt32(dt1.Rows[0][3]);
             }
             //CMMS.CMMS_Status ptw_status = (CMMS.CMMS_Status)Convert.ToInt32(dt1.Rows[0][2]);
@@ -722,7 +716,7 @@ namespace CMMSAPIs.Repositories.Audits
             }
 
 
-            CMJobView _ViewJobList = await GetJobDetails(newJobID,"");
+            CMJobView _ViewJobList = await GetJobDetails(newJobID, "");
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, newJobID, 0, 0, "Job Created", CMMS.CMMS_Status.JOB_CREATED, userId);
             await CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_CREATED, new[] { userId }, _ViewJobList);
@@ -751,7 +745,7 @@ namespace CMMSAPIs.Repositories.Audits
             return response;
         }
 
-        internal async Task<CMJobView> GetJobDetails(int job_id,string facilitytimeZone)
+        internal async Task<CMJobView> GetJobDetails(int job_id, string facilitytimeZone)
         {
             /*
              * Fetch data from Job table and joins these table for relationship using ids Users, Assets, AssetCategory, Facility
@@ -871,16 +865,16 @@ namespace CMMSAPIs.Repositories.Audits
 
             foreach (var vlt in _ViewJobList)
             {
-                if (vlt.breakdown_time!= null && vlt.breakdown_time != null)
+                if (vlt.breakdown_time != null && vlt.breakdown_time != null)
                     vlt.breakdown_time = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)vlt.breakdown_time);
                 if (vlt.closed_at != null && vlt.closed_at != null)
                     vlt.closed_at = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, vlt.closed_at);
-                if (vlt.created_at!= null && vlt.created_at!= null)
-                    vlt.created_at =  await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)vlt.created_at );
+                if (vlt.created_at != null && vlt.created_at != null)
+                    vlt.created_at = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)vlt.created_at);
 
-                
-                  
-                    
+
+
+
             }
             return _ViewJobList[0];
         }
@@ -1007,7 +1001,7 @@ namespace CMMSAPIs.Repositories.Audits
             return response;
         }
 
-        internal async Task<List<CMPMPlanList>> GetAuditPlanList(int facility_id, string category_id, string frequency_id, DateTime? start_date, DateTime? end_date,string facilitytimeZone)
+        internal async Task<List<CMPMPlanList>> GetAuditPlanList(int facility_id, string category_id, string frequency_id, DateTime? start_date, DateTime? end_date, string facilitytimeZone)
         {
             if (facility_id <= 0)
                 throw new ArgumentException("Invalid Facility ID");
@@ -1055,13 +1049,13 @@ namespace CMMSAPIs.Repositories.Audits
                 if (list.rejected_at != null && list.rejected_at != null)
                     list.rejected_at = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.rejected_at);
                 if (list.updated_at != null && list.updated_at != null)
-                     list.updated_at = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.updated_at);
+                    list.updated_at = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.updated_at);
 
             }
             return plan_list;
         }
 
-        internal async Task<CMPMPlanDetail> GetAuditPlanDetail(int id,string facilitytimeZone)
+        internal async Task<CMPMPlanDetail> GetAuditPlanDetail(int id, string facilitytimeZone)
         {
             if (id <= 0)
                 throw new ArgumentException("Invalid Facility ID");
@@ -1103,7 +1097,7 @@ namespace CMMSAPIs.Repositories.Audits
                 $" LEFT JOIN users as rejected_close_by ON rejected_close_by.id = plan.rejected_close_by " +
                 $" LEFT JOIN users as approved_close_by ON approved_close_by.id = plan.approved_close_by " +
                 $" LEFT JOIN users as close_by ON close_by.id = plan.close_by " +
-                $"WHERE plan.id = {id} "; 
+                $"WHERE plan.id = {id} ";
 
             List<CMPMPlanDetail> planDetails = await Context.GetData<CMPMPlanDetail>(planListQry).ConfigureAwait(false);
 
@@ -1137,13 +1131,13 @@ namespace CMMSAPIs.Repositories.Audits
                     pd.approved_at = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, pd.approved_at);
                 if (pd != null && pd.created_at != null)
                     pd.created_at = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, pd.created_at);
-                if (pd != null && pd.plan_date!= null)
+                if (pd != null && pd.plan_date != null)
                     pd.plan_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, pd.plan_date);
                 if (pd != null && pd.rejected_at != null)
                     pd.rejected_at = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, pd.rejected_at);
 
 
-               
+
             }
             return planDetails[0];
         }
@@ -1154,7 +1148,7 @@ namespace CMMSAPIs.Repositories.Audits
 
             switch (notificationID)
             {
-               
+
                 case CMMS.CMMS_Status.AUDIT_START:
                     retValue = String.Format("Audit Plan submitted by {0}", PlanObj.created_by_name);
                     break;
@@ -1168,7 +1162,7 @@ namespace CMMSAPIs.Repositories.Audits
                     retValue = String.Format("Audit Plan Deleted by {0} ", PlanObj.created_by_name);
                     break;
                 case CMMS.CMMS_Status.AUDIT_CLOSED:
-                   retValue = String.Format("Audit Plan Closed by {0} ", PlanObj.created_by_name);
+                    retValue = String.Format("Audit Plan Closed by {0} ", PlanObj.created_by_name);
                     break;
                 case CMMS.CMMS_Status.AUDIT_SCHEDULE:
                     retValue = String.Format("Audit Plan scheduled by {0} ", PlanObj.created_by_name);
@@ -1202,7 +1196,7 @@ namespace CMMSAPIs.Repositories.Audits
         }
 
 
-        internal async Task<List<CMPMTaskList>> GetTaskList(int facility_id, DateTime? start_date, DateTime? end_date, string frequencyIds,string facilitytimeZone)
+        internal async Task<List<CMPMTaskList>> GetTaskList(int facility_id, DateTime? start_date, DateTime? end_date, string frequencyIds, string facilitytimeZone)
         {
             /*
              * Primary Table - PMExecution & PMSchedule
@@ -1269,7 +1263,7 @@ namespace CMMSAPIs.Repositories.Audits
                     }
                     CMMS.CMMS_Status _Status_plan = (CMMS.CMMS_Status)(task.status_plan);
                     string _shortStatus_plan = getShortStatus(CMMS.CMMS_Modules.AUDIT_PLAN, _Status_plan);
-                    task.status_plan_short = _shortStatus_plan;                    
+                    task.status_plan_short = _shortStatus_plan;
 
                 }
             }
@@ -1326,7 +1320,7 @@ namespace CMMSAPIs.Repositories.Audits
 
             List<CMPMTaskView> taskViewDetail = await Context.GetData<CMPMTaskView>(myQuery).ConfigureAwait(false);
 
-            for(var i=0;i< taskViewDetail.Count; i++)
+            for (var i = 0; i < taskViewDetail.Count; i++)
             {
                 taskViewDetail[i].Employees = taskViewDetail[i].employee_list.Split(',').ToList();
             }
@@ -1379,7 +1373,7 @@ namespace CMMSAPIs.Repositories.Audits
                 try
                 {
                     List<ScheduleLinkJob> linked_jobs = await Context.GetData<ScheduleLinkJob>(myQuery4).ConfigureAwait(false);
-                    List<CMLog> log = await _utilsRepo.GetHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, schedule.schedule_id,"");
+                    List<CMLog> log = await _utilsRepo.GetHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, schedule.schedule_id, "");
                     schedule.schedule_link_job = linked_jobs;
 
                 }
@@ -1403,30 +1397,30 @@ namespace CMMSAPIs.Repositories.Audits
             CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(taskViewDetail[0].status);
             //if (_Status != CMMS.CMMS_Status.AUDIT_APPROVED)
             //{
-                string _shortStatus = getShortStatus(CMMS.CMMS_Modules.AUDIT_SCHEDULE, _Status);
-                taskViewDetail[0].status_short = _shortStatus;
+            string _shortStatus = getShortStatus(CMMS.CMMS_Modules.AUDIT_SCHEDULE, _Status);
+            taskViewDetail[0].status_short = _shortStatus;
 
-                string _longStatus = getLongStatus_taskview(CMMS.CMMS_Modules.AUDIT_SCHEDULE, _Status, taskViewDetail[0]);
-                taskViewDetail[0].status_long = _longStatus;
+            string _longStatus = getLongStatus_taskview(CMMS.CMMS_Modules.AUDIT_SCHEDULE, _Status, taskViewDetail[0]);
+            taskViewDetail[0].status_long = _longStatus;
 
             CMMS.CMMS_Status ptw_status = (CMMS.CMMS_Status)(taskViewDetail[0].ptw_status);
             string _longStatus_PTW = getLongStatus_taskview(CMMS.CMMS_Modules.AUDIT_SCHEDULE, ptw_status, taskViewDetail[0]);
-            
+
             //}
             taskViewDetail[0].status_short_ptw = Status_PTW(taskViewDetail[0].ptw_status);
 
 
-            foreach ( var task in taskViewDetail)
+            foreach (var task in taskViewDetail)
             {
-                if (task != null && task.approved_at!= null)
+                if (task != null && task.approved_at != null)
                     task.approved_at = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, task.approved_at);
                 if (task != null && task.cancelled_at != null)
                     task.cancelled_at = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, task.cancelled_at);
-                if (task != null && task.closed_at!= null)
+                if (task != null && task.closed_at != null)
                     task.closed_at = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, task.closed_at);
-                if (task != null && task.done_date!= null)
+                if (task != null && task.done_date != null)
                     task.done_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)task.done_date);
-                if (task != null && task.due_date!= null)
+                if (task != null && task.due_date != null)
                     task.due_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)task.due_date);
                 if (task != null && task.last_done_date != null)
                     task.last_done_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)task.last_done_date);
@@ -1568,7 +1562,7 @@ namespace CMMSAPIs.Repositories.Audits
                 response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Audit plan does not exist to skip.");
             }
 
-   
+
 
             return response;
         }
@@ -1611,7 +1605,7 @@ namespace CMMSAPIs.Repositories.Audits
                 int fdays = Convert.ToInt32(dt.Rows[0]["days"]);
 
                 total_date = months == 0 ? nextdate.AddDays(fdays) : nextdate.AddMonths(months);
-          
+
             }
 
             if (auditPlanList != null && auditPlanList.Count > 0)
@@ -1670,7 +1664,7 @@ namespace CMMSAPIs.Repositories.Audits
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.AUDIT_PLAN, request.id, 0, 0, request.comment, CMMS.CMMS_Status.AUDIT_CLOSED);
 
 
-           
+
             }
             else
             {
@@ -1767,7 +1761,7 @@ namespace CMMSAPIs.Repositories.Audits
 
         internal async Task<CMDefaultResponse> AuditLinkToPermit(int audit_id, int ptw_id, int updatedBy)
         {
-           
+
             string updateQry_task = $"update pm_task set ptw_id = {ptw_id},status = {(int)CMMS.CMMS_Status.PTW_LINKED_TO_AUDIT}, updated_at = '{UtilsRepository.GetUTCTime()}', updated_by = {updatedBy}  where id =  {audit_id};";
             int retVal_task = await Context.ExecuteNonQry<int>(updateQry_task).ConfigureAwait(false);
 
@@ -1783,10 +1777,10 @@ namespace CMMSAPIs.Repositories.Audits
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
             }
 
-    
+
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.AUDIT_PLAN, audit_id, CMMS.CMMS_Modules.AUDIT_PLAN, ptw_id, $"Permit <{ptw_id}> Assigned to Audit <{audit_id}>", CMMS.CMMS_Status.PTW_LINKED_TO_AUDIT, updatedBy);
 
-            
+
             CMDefaultResponse response = new CMDefaultResponse(audit_id, CMMS.RETRUNSTATUS.SUCCESS, $"Audit <{audit_id}> Linked To Permit <{ptw_id}> ");
 
             return response;

@@ -1,8 +1,7 @@
-using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Helper;
+using CMMSAPIs.Models.Utils;
 using System;
 using System.Collections.Generic;
-using CMMSAPIs.Models.Masters;
 
 namespace CMMSAPIs.Models.PM
 {
@@ -39,7 +38,7 @@ namespace CMMSAPIs.Models.PM
         public int category_id { get; set; }
         public string category_name { get; set; }
         public int assigned_to_id { get; set; }
-        public string assigned_to_name { get; set; }                
+        public string assigned_to_name { get; set; }
         public int permit_id { get; set; }
         public string permit_code { get; set; }
         public int status_plan { get; set; }
@@ -65,7 +64,7 @@ namespace CMMSAPIs.Models.PM
         public string completedBy_name { get; set; }
 
     }
-    public class CMPMTaskView: CMPMTaskList
+    public class CMPMTaskView : CMPMTaskList
     {
         public List<CMPMScheduleExecutionDetail> schedules { get; set; }
 
@@ -97,7 +96,7 @@ namespace CMMSAPIs.Models.PM
 
     }
     public class CMPMScheduleViewDetail : CMPMScheduleView
-    {   
+    {
         public int facility_id { get; set; }
         public string facility_name { get; set; }
         public int checklist_id { get; set; }
@@ -128,8 +127,8 @@ namespace CMMSAPIs.Models.PM
 
 
     }
-    
-    public class ScheduleCheckList 
+
+    public class ScheduleCheckList
     {
         public int execution_id { get; set; }
         public int check_point_id { get; set; }
@@ -159,11 +158,11 @@ namespace CMMSAPIs.Models.PM
         public string file_description { get; set; }
     }
 
-    public class ScheduleLinkJob 
+    public class ScheduleLinkJob
     {
         public int job_id { get; set; }
         public string job_title { get; set; }
-        public string job_description { get; set;}
+        public string job_description { get; set; }
         public DateTime? job_date { get; set; }
         public string job_status { get; set; }
 

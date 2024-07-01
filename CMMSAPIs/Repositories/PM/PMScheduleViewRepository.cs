@@ -596,7 +596,7 @@ namespace CMMSAPIs.Repositories.PM
                         string executeQuery = "INSERT INTO pm_execution(task_id,PM_Schedule_Id, PM_Schedule_Code, Check_Point_id, Check_Point_Name, " +
                                                 "Check_Point_Code, Status, Check_Point_Requirement) VALUES " +
                                                 $"({task_id}, {schedule.schedule_id} ,'PMSCH{schedule.schedule_id}', {checkpoint.id}, " +
-                                                $"'{checkpoint.check_point}', 'CP{checkpoint.id}', 1, '{checkpoint.requirement}'); " +
+                                                $"\"{checkpoint.check_point}\", 'CP{checkpoint.id}', 1, '{checkpoint.requirement}'); " +
                                                 $"SELECT LAST_INSERT_ID();";
                         DataTable dt2 = await Context.FetchData(executeQuery).ConfigureAwait(false);
                         int id = Convert.ToInt32(dt2.Rows[0][0]);

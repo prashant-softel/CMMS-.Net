@@ -1230,12 +1230,12 @@ namespace CMMSAPIs.Controllers.Masters
 
         [Route("CloseObservation")]
         [HttpPost]
-        public async Task<IActionResult> CloseObservation(int id, string comment)
+        public async Task<IActionResult> CloseObservation(CMApproval request)
         {
             try
             {
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _IMISMasterBS.CloseObservation(id, comment, userId);
+                var data = await _IMISMasterBS.CloseObservation(request, userId);
                 return Ok(data);
             }
             catch (Exception ex)
