@@ -413,6 +413,7 @@ namespace CMMSAPIs.Models.Masters
         public string location_of_observation { get; set; }
         public int type_of_observation { get; set; }
         public int source_of_observation { get; set; }
+        public string month_name { get; set; }
         public string risk_type { get; set; }
         public string observation_description { get; set; }
         public string corrective_action { get; set; }
