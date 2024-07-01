@@ -1286,7 +1286,7 @@ namespace CMMSAPIs.Repositories.Masters
             //
             //remove columns whose data is not required\
             // What is the need of short_Status
-            string myQuery = "SELECT id, facility_id, contractor_name, risk_type_id, cost_type, date_of_observation, " +
+            string myQuery = "SELECT id, facility_id, contractor_name, risk_type_id, cost_type, date_of_observation,MONTHNAME(date_of_observation) AS month_name, " +
                  "type_of_observation, location_of_observation, source_of_observation, target_date, created_at, " +
                  "is_active, status_code, short_Status FROM observations " +
                  "WHERE facility_id in ( " + facility_id + ") AND " +
@@ -1306,7 +1306,7 @@ namespace CMMSAPIs.Repositories.Masters
                     string date_of_observation = d_o_o.ToString("yyyy-MM-dd");
                     string strMonth = date_of_observation.Substring(5, 2);
                     int month = int.Parse(strMonth);
-
+                    string month_name = item.month_name;
                     string strYear = date_of_observation.Substring(0, 4);
                     int year = int.Parse(strYear);
 
