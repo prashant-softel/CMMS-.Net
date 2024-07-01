@@ -479,7 +479,7 @@ namespace CMMSAPIs.Repositories.SM
                 { "ApprovalRequired", new Tuple<string, Type>("ApprovalRequired", typeof(int)) },
                 { "Section", new Tuple<string, Type>("Section", typeof(string)) },
                 { "Min Qty", new Tuple<string, Type>("MinQty", typeof(string)) },
-                { "Max Qty", new Tuple<string, Type>("MaxQty", typeof(string)) }
+                { "Reorder Qty", new Tuple<string, Type>("MaxQty", typeof(string)) }
 
             };
 
