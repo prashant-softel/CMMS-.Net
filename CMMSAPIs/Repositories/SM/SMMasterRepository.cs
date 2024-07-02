@@ -661,14 +661,14 @@ namespace CMMSAPIs.Repositories.SM
                                 insertQuery = $" UPDATE smassetmasters set plant_ID = {plantID}, asset_code = '{row.ItemArray[0]}', asset_name = '{row.ItemArray[1]}', " +
                                     $" description = '{row.ItemArray[1]}', unit_of_measurement = {row.ItemArray[4]}, flag = 1, lastmodifieddate = '{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}', " +
                                     $" asset_type_ID = {row.ItemArray[14]}, item_category_ID = '{row.ItemArray[15]}', approval_required = {row.ItemArray[10]},Section = '{row.ItemArray[8]}'," +
-                                    $" min_qty = {row.ItemArray[11]},max_qty = {row.ItemArray[12]}  " +
+                                    $" min_qty = {row.ItemArray[11]},reorder_qty = {row.ItemArray[12]}  " +
                                     $" where id = {Convert.ToInt32(dt_checkAssetCode.Rows[0][0])}; Select {Convert.ToInt32(dt_checkAssetCode.Rows[0][0])};";
 
                             }
                             else
                             {
                                 insertQuery = "INSERT INTO smassetmasters (plant_ID, asset_code, asset_name,description, " +
-                                    "unit_of_measurement, flag, lastmodifieddate, asset_type_ID, item_category_ID, approval_required,Section, min_qty, max_qty)";
+                                    "unit_of_measurement, flag, lastmodifieddate, asset_type_ID, item_category_ID, approval_required,Section, min_qty, reorder_qty)";
 
                                 insertQuery = insertQuery + $"Select {row.ItemArray[2]},'{row.ItemArray[0]}', '{row.ItemArray[1]}', '{row.ItemArray[1]}'," +
                                 $"{row.ItemArray[4]}, 1, '{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}', {row.ItemArray[14]},'{row.ItemArray[15]}',{row.ItemArray[10]},'{row.ItemArray[8]}',{row.ItemArray[11]},{row.ItemArray[12]} ; SELECT LAST_INSERT_ID();";
