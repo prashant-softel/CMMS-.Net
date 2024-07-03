@@ -44,6 +44,8 @@ namespace CMMSAPIs.Models.MC
         public string description { get; set; }
         public int frequencyId { get; set; }
         public string frequency { get; set; }
+        public int cleaningType { get; set; }
+        public string cleaningTypeName { get; set; }
         public int assignedToId { get; set; }
         public string assignedTo { get; set; }
         public dynamic startDate { get; set; }
@@ -60,7 +62,7 @@ namespace CMMSAPIs.Models.MC
         public string status_long { get; set; }
 
         public bool scheduleAdded = false;
-        public int cleaningType { get; set; }
+
         public List<CMMCSchedule> schedules { get; set; }
 
     }
@@ -209,6 +211,8 @@ namespace CMMSAPIs.Models.MC
         public string title { get; set; }
         public string description { get; set; }
         public string frequency { get; set; }
+        //  public int cleaningType { get; set; }  //First, second etc day
+        //  public string cleaningTypeName { get; set; }
         public string assignedTo { get; set; }
         public DateTime startDate { get; set; }
         public int noOfDays { get; set; }

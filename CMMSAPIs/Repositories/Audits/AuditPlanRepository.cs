@@ -1631,7 +1631,7 @@ namespace CMMSAPIs.Repositories.Audits
                 int task_id = Convert.ToInt32(dt2.Rows[0][0]);
 
                 string scheduleQry = $"INSERT INTO pm_schedule(task_id,plan_id,Asset_id,checklist_id,PM_Schedule_date,status) " +
-                                $"select {task_id} as task_id,id as plan_id, 0 as Asset_id, Checklist_id  as checklist_id,Schedule_Date    as PM_Schedule_date,{(int)CMMS.CMMS_Status.AUDIT_APPROVED} as status from st_audit  where id = {request.id}";
+                                $"select {task_id} as task_id,id as plan_id, 0 as Asset_id, Checklist_id  as checklist_id,Schedule_Date    as PM_Schedule_date,{(int)CMMS.CMMS_Status.AUDIT_APPROVED} as status from st_audit  where id = {auditPlanList[i].id}";
                 await Context.ExecuteNonQry<int>(scheduleQry);
 
                 string setCodeNameQuery = "UPDATE pm_schedule " +
@@ -1641,7 +1641,6 @@ namespace CMMSAPIs.Repositories.Audits
                                             "PM_Maintenance_Order_Number = CONCAT('PMSCH',id);";
                 await Context.ExecuteNonQry<int>(setCodeNameQuery);
             }
-
             return response;
         }
         internal async Task<CMDefaultResponse> CloseAuditPlan(CMApproval request, int userId)

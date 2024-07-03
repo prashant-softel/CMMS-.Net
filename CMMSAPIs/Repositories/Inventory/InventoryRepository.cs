@@ -189,24 +189,24 @@ namespace CMMSAPIs.Repositories.Inventory
                 { "Plant_Name", new Tuple<string, Type>("siteName", typeof (string)) },
                 { "Asset_Name", new Tuple<string, Type>("name", typeof(string)) },
                 { "Asset_Description", new Tuple<string, Type>("assetdescription", typeof(string)) },
-                { "Asset_Serial_no", new Tuple<string, Type>("serialNumber", typeof(string)) },
+                { "Asset_Serial_No", new Tuple<string, Type>("serialNumber", typeof(string)) },
                 { "DC_Capacity", new Tuple<string, Type>("dcCapacity", typeof(int)) },
                 { "AC_Capacity", new Tuple<string, Type>("acCapacity", typeof(int)) },
                 { "Module_Quantity", new Tuple<string, Type>("moduleQuantity", typeof(int)) },
                 { "Asset_Model_Name", new Tuple<string, Type>("model", typeof(string)) },
-                { "Asset_cost", new Tuple<string, Type>("cost", typeof(int)) },
+                { "Asset_Cost", new Tuple<string, Type>("cost", typeof(int)) },
                 { "Asset_Currency", new Tuple<string, Type>("currency", typeof(string)) },
                 { "Stock_Count", new Tuple<string, Type>("stockCount", typeof(int)) },
-                { "Asset_calibration/testing_date", new Tuple<string, Type>("calibrationFirstDueDate", typeof(DateTime)) },
-                { "Asset_Last_calibration_date", new Tuple<string, Type>("calibrationLastDate", typeof(DateTime)) },
-                { "Asset_calibration_frequency", new Tuple<string, Type>("calibrationFrequency", typeof(int)) },
-                { "Calibration_reminder_days", new Tuple<string, Type>("calibrationReminderDays", typeof(int)) },
+                { "Asset_Calibration/Testing_Date", new Tuple<string, Type>("calibrationFirstDueDate", typeof(DateTime)) },
+                { "Asset_Last_Calibration_Date", new Tuple<string, Type>("calibrationLastDate", typeof(DateTime)) },
+                { "Asset_Calibration_Frequency", new Tuple<string, Type>("calibrationFrequency", typeof(int)) },
+                { "Calibration_Reminder_Days", new Tuple<string, Type>("calibrationReminderDays", typeof(int)) },
                 { "Warranty_Description", new Tuple<string, Type>("warranty_description", typeof(string)) },
                 { "Asset_Warranty_Start_Date", new Tuple<string, Type>("start_date", typeof(DateTime)) },
                 { "Asset_Warranty_Expiry_Date", new Tuple<string, Type>("expiry_date", typeof(DateTime)) },
                 { "Asset_Warranty_Certificate_No", new Tuple<string, Type>("certificate_number", typeof(string)) },
                 { "Asset_Facility_Name", new Tuple<string, Type>("blockName", typeof (string)) },
-                { "Asset_category_name", new Tuple<string, Type>("categoryName", typeof(string)) },
+                { "Asset_Category_Name", new Tuple<string, Type>("categoryName", typeof(string)) },
                 { "Asset_Parent_Name", new Tuple<string, Type>("parentName", typeof(string)) },
                 { "Asset_Customer_Name", new Tuple<string, Type>("customerName", typeof(string)) },
                 { "Asset_Owner_Name", new Tuple<string, Type>("ownerName", typeof(string)) },
@@ -216,8 +216,8 @@ namespace CMMSAPIs.Repositories.Inventory
                 { "Asset_Type_Name", new Tuple<string, Type>("typeName", typeof(string)) },
                 { "Asset_Status_Name", new Tuple<string, Type>("statusName", typeof(string)) },
                 { "Warranty Type", new Tuple<string, Type>("warranty_type_name", typeof(string)) },
-                { "warranty_term_names", new Tuple<string, Type>("warranty_term_type_name", typeof(string)) },
-                { "Asset_warranty_Provider", new Tuple<string, Type>("warranty_provider_name", typeof(string)) },
+                { "warranty_Term_Names", new Tuple<string, Type>("warranty_term_type_name", typeof(string)) },
+                { "Asset_Warranty_Provider", new Tuple<string, Type>("warranty_provider_name", typeof(string)) },
 
 
                 { "DC_Rating", new Tuple<string, Type>("dcRating", typeof(string)) },
@@ -228,8 +228,8 @@ namespace CMMSAPIs.Repositories.Inventory
                 { "Asset_UNSPC_Code", new Tuple<string, Type>("unspCode", typeof(string)) },
                 { "Asset_Purchase_Code", new Tuple<string, Type>("purchaseCode", typeof(string)) },
                // { "Asset_SPV_Name", new Tuple<string, Type>("spvName", typeof(string)) },
-                { "Calibration_Next_Due_date", new Tuple<string, Type>("calibrationNextDueDate", typeof(DateTime)) },
-               { "Area", new Tuple<string,Type>("area", typeof(double)) },
+                { "Calibration_Next_Due_Date", new Tuple<string, Type>("calibrationNextDueDate", typeof(DateTime)) },
+                { "Area", new Tuple<string,Type>("area", typeof(double)) },
 
             };
             /*
@@ -457,9 +457,9 @@ namespace CMMSAPIs.Repositories.Inventory
                                 //}
                             }
 
-                            if (newR["area"] != DBNull.Value)
+                            if (newR["Area"] != DBNull.Value)
                             {
-                                newR["area"] = Convert.ToDouble(newR["area"]);
+                                newR["area"] = Convert.ToDouble(newR["Area"]);
                             }
                             else
                             {
@@ -1992,7 +1992,7 @@ string warrantyQry = "insert into assetwarranty
             string myQuery = "SELECT assets.id, assets.name, category.id as categoryId, category.name as categoryName, " +
             "vendor.id as vendorId, vendor.name as vendorName, assets.calibrationFreqType, " +
             "frequency.id as frequencyId, frequency.name as frequencyName, CASE WHEN assets.calibrationLastDate = '0000-00-00 00:00:00' THEN NULL ELSE assets.calibrationLastDate END AS calibrationLastDate, " +
-            "CASE WHEN assets.calibrationDueDate = '0000-00-00 00:00:00' THEN NULL ELSE assets.calibrationDueDate END AS calibrationDueDate, assets.calibrationReminderDays " +
+            "CASE WHEN assets.calibrationDueDate = '0000-00-00 00:00:00' THEN NULL ELSE assets.calibrationDueDate END AS calibrationDueDate, assets.calibrationReminderDays,   " +
             "FROM assets " +
             "LEFT JOIN assetcategories as category ON category.id = assets.categoryId " +
             "LEFT JOIN business as vendor ON vendor.id = assets.vendorId " +

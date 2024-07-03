@@ -198,14 +198,22 @@ namespace CMMSAPIs.Repositories.PM
                 planListQry += $" AND category.id IN ( {category_id} )";
             if (frequency_id != null && category_id != "")
                 planListQry += $" AND frequency.id IN ( {frequency_id} )";
-            if (start_date != null)
-                planListQry += $" AND plan.plan_date >= '{((DateTime)start_date).ToString("yyyy-MM-dd")}' ";
-            if (end_date != null)
-                planListQry += $" AND plan.plan_date <= '{((DateTime)end_date).ToString("yyyy-MM-dd")}' ";
-            planListQry += "order by plan_date asc ; ";
-            planListQry += $";";
-            List<CMPMPlanList> plan_list = await Context.GetData<CMPMPlanList>(planListQry).ConfigureAwait(false);
+            // if (start_date != null)
+            //   planListQry += $" AND plan.plan_date >= '{((DateTime)start_date).ToString("yyyy-MM-dd")}' ";
+            //  if (end_date != null)
+            //      planListQry += $" AND plan.plan_date <= '{((DateTime)end_date).ToString("yyyy-MM-dd")}' ";
+            planListQry += $" ORDER BY plan.plan_date ASC";
+            List<CMPMPlanList> plan_list = new List<CMPMPlanList>();
 
+            try
+            {
+                plan_list = await Context.GetData<CMPMPlanList>(planListQry).ConfigureAwait(false);
+            }
+            catch (Exception e)
+            {
+                string msg = "Exception due to : " + e.ToString();
+                string finalMsg = "";
+            }
 
             foreach (var plan in plan_list)
             {

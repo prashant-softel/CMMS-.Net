@@ -1,15 +1,13 @@
-using CMMSAPIs.BS.Masters;
-using Microsoft.AspNetCore.Authorization;
+using CMMSAPIs.BS.PM;
+using CMMSAPIs.Models.PM;
+using CMMSAPIs.Models.Utils;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
-using System;
-using CMMSAPIs.Models.PM;
-using CMMSAPIs.BS.PM;
-using System.Collections.Generic;
-using CMMSAPIs.Models.Utils;
 using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace CMMSAPIs.Controllers.PM
 {
@@ -66,15 +64,15 @@ namespace CMMSAPIs.Controllers.PM
         }
 
         //[Authorize]
-         [Route("GetPMPlanDetail")]
+        [Route("GetPMPlanDetail")]
         [HttpGet]
-        public async Task<IActionResult> GetPMPlanDetail(int facility_id,int planId)
+        public async Task<IActionResult> GetPMPlanDetail(int facility_id, int planId)
         {
             try
             {
-        
+
                 var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
- 
+
 
                 var data = await _PMBS.GetPMPlanDetail(planId, facilitytimeZone);
                 return Ok(data);
@@ -108,7 +106,7 @@ namespace CMMSAPIs.Controllers.PM
                 throw;
             }
         }
-        
+
         //[Authorize]
         [Route("RejectPMPlan")]
         [HttpPut]
@@ -141,7 +139,7 @@ namespace CMMSAPIs.Controllers.PM
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _PMBS.DeletePMPlan(planId,userID);
+                var data = await _PMBS.DeletePMPlan(planId, userID);
                 return Ok(data);
             }
             catch (ArgumentException ex)
@@ -155,7 +153,7 @@ namespace CMMSAPIs.Controllers.PM
         }
 
         //[Authorize]
-        [Route("GetPMPlanList")]    
+        [Route("GetPMPlanList")]
         [HttpGet]
         public async Task<IActionResult> GetPMPlanList(int facility_id, string category_id, string frequency_id, DateTime? start_date, DateTime? end_date)
         {
@@ -173,8 +171,8 @@ namespace CMMSAPIs.Controllers.PM
             {
                 throw;
             }
-        }      
-        
+        }
+
         //[Authorize]
         [Route("GetScheduleData")]
         [HttpGet]

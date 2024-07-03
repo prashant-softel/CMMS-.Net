@@ -148,6 +148,7 @@ namespace CMMSAPIs.Repositories.SM
                 generatedBy = p.generatedBy,
                 generatedAt = p.request_date,
                 approvedBy = p.approvedBy,
+                currency = p.currency,
                 rejectedBy = p.rejectedBy,
                 rejectedAt = p.rejectedAt
             }).GroupBy(p => p.request_order_id).Select(group => group.First()).ToList();

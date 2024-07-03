@@ -143,6 +143,7 @@ namespace CMMSAPIs.Models.SM
         public int facilityID { get; set; }
         public string facilityName { get; set; }
         public decimal cost { get; set; }
+        public string currency { get; set; }
         public string comment { get; set; }
         public int status { get; set; }
         public string status_short { get; set; }

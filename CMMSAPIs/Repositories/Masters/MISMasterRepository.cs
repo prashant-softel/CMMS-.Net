@@ -1310,7 +1310,7 @@ namespace CMMSAPIs.Repositories.Masters
 
                     string strYear = date_of_observation.Substring(0, 4);
                     int year = int.Parse(strYear);
-
+                    DateTime date_of_observation_Date = DateTime.ParseExact(date_of_observation, "yyyy-MM-dd", null);
 
                     CMObservationSummary forMonth;
 
@@ -1389,6 +1389,10 @@ namespace CMMSAPIs.Repositories.Masters
                             forMonth.closeCount_Moderate++;
                         }
 
+                    }
+                    if (date_of_observation_Date > item.target_date)
+                    {
+                        forMonth.target_count++;
                     }
                 }
             }

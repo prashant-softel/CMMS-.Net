@@ -67,22 +67,13 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             //List<ScheduleIDData> scheduleData = await Context.GetData<ScheduleIDData>(scheduleQuery).ConfigureAwait(false);
 
             CMDefaultResponse response;
-            string statusQry = $"SELECT status,ifnull(assignedTo,0) assigned_to, ifnull(ptw_id,0) ptw_id FROM Cleaning_execution WHERE id = {task_id}";
+            string statusQry = $"SELECT  ifnull(ptw_id,0) ptw_id FROM Cleaning_execution WHERE id = {task_id}";
             DataTable dt1 = await Context.FetchData(statusQry).ConfigureAwait(false);
-            CMMS.CMMS_Status status = (CMMS.CMMS_Status)Convert.ToInt32(dt1.Rows[0][0]);
-            int assigned_to = Convert.ToInt32(dt1.Rows[0][1]);
-            int ptw_id = Convert.ToInt32(dt1.Rows[0][2]);
-            if (assigned_to <= 0)
-            {
-                return new CMDefaultResponse(task_id, CMMS.RETRUNSTATUS.FAILURE, "PM Task is Not Assigned.");
-            }
-
+            int ptw_id = Convert.ToInt32(dt1.Rows[0][0]);
             if (ptw_id > 0)
             {
-                return new CMDefaultResponse(task_id, CMMS.RETRUNSTATUS.FAILURE, "PM Task is already Linked to Vegetation");
+                return new CMDefaultResponse(task_id, CMMS.RETRUNSTATUS.FAILURE, "Permit is already Linked to Vegetation");
             }
-
-
             string permitQuery = "SELECT ptw.id as ptw_id, ptw.code as ptw_code, ptw.title as ptw_title, ptw.status as ptw_status " +
                                     "FROM " +
                                         "permits as ptw " +
@@ -100,9 +91,9 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
             if (retVal > 0)
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MC_PLAN, task_id, CMMS.CMMS_Modules.PTW, permit_id, "PTW linked to MC", CMMS.CMMS_Status.MC_LINKED_TO_PTW, userId);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.VEGETATION, task_id, CMMS.CMMS_Modules.PTW, permit_id, "PTW linked to Vegetation", CMMS.CMMS_Status.VEGETATION_LINKED_TO_PTW, userId);
 
-            response = new CMDefaultResponse(task_id, CMMS.RETRUNSTATUS.SUCCESS, $"Permit {permit_id} linked to Task {task_id}");
+            response = new CMDefaultResponse(task_id, CMMS.RETRUNSTATUS.SUCCESS, $"Permit {permit_id} linked to  vegetation Task {task_id}");
             return response;
         }
     }

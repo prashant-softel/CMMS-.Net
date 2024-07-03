@@ -10,7 +10,7 @@ namespace CMMSAPIs.Models.PM
         public int status_id { get; set; }
         public string status_short { get; set; }
         public string status_long { get; set; }
-        public DateTime plan_date { get; set; }
+        public dynamic plan_date { get; set; }
         public int facility_id { get; set; }
         public string facility_name { get; set; }
         public int category_id { get; set; }

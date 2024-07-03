@@ -187,7 +187,7 @@ namespace CMMSAPIs.Repositories.Masters
             var employeeAttendanceList = await Context.GetDataFirst<CMGETAttendenceMONTH>(querybymonth).ConfigureAwait(false);
 
             string queryByMonthEmp = "SELECT DISTINCT ea.employee_id as employeeId, CONCAT(u.firstName, u.lastname) AS employeeName, u.joiningDate as dateOfJoining, " +
-                                     "u.dateofExit as DateofExit, CASE WHEN u.dateofExit < NOW() THEN 'Active' ELSE 'Inactive' END AS workingStatus " +
+                                     "u.dateofExit as DateofExit,  CASE   WHEN u.dateofExit IS NULL OR u.dateofExit > CURDATE() THEN 'Active'  ELSE 'Inactive'  END AS workingStatus " +
                                      $"FROM employee_attendance AS ea LEFT JOIN users AS u ON u.id = ea.employee_id " +
                                      $"WHERE ea.facility_id = {facility_id} OR (ea.Date BETWEEN '{from_date}' AND '{to_date}') ORDER BY ea.employee_id;";
 

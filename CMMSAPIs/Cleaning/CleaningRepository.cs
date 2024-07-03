@@ -176,7 +176,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             int planIds = 0;
             int status = (int)CMMS.CMMS_Status.MC_PLAN_SUBMITTED;
             int cleaningType;
-         
+
 
 
             if (moduleType == 2)
@@ -186,7 +186,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
             foreach (CMMCPlan plan in request)
             {
-                cleaningType = plan.cleaningType;
+                //cleaningType = plan.cleaningType;
                 string startDate = "NULL";
 
                 /* if (plan.startDate != null && plan.startDate != Convert.ToDateTime("01-01-0001 00:00:00"))
@@ -194,8 +194,8 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                      startDate = " '" + plan.startDate.ToString("yyyy-MM-dd hh:MM:ss")+"' ";
 
                  }*/
-                string qry = "insert into `cleaning_plan` (`moduleType`,`facilityId`,`title`,`description`, `durationDays`,`frequencyId`,`startDate`,`assignedTo`,`status`,`createdById`,`createdAt`) VALUES " +
-                            $"({moduleType},'{plan.facilityId}','{plan.title}','{plan.description}','{plan.noOfCleaningDays}','{plan.frequencyId}','{plan.startDate}','{plan.assignedToId}',{status},'{userId}','{UtilsRepository.GetUTCTime()}');" +
+                string qry = "insert into `cleaning_plan` (`moduleType`,`facilityId`,`title`,`description`, `durationDays`,`frequencyId`,cleaningType,`startDate`,`assignedTo`,`status`,`createdById`,`createdAt`) VALUES " +
+                            $"({moduleType},'{plan.facilityId}','{plan.title}','{plan.description}','{plan.noOfCleaningDays}','{plan.frequencyId}',{plan.cleaningType},'{plan.startDate}','{plan.assignedToId}',{status},'{userId}','{UtilsRepository.GetUTCTime()}');" +
                              "SELECT LAST_INSERT_ID() as id ;";
 
                 List<CMMCPlan> planQry = await Context.GetData<CMMCPlan>(qry).ConfigureAwait(false);
@@ -215,8 +215,8 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                         //if (moduleType == 2)
                         //    cleaningType = 0;
 
-                        scheduleQry = "insert into `cleaning_plan_schedules` (`planId`,`moduleType`,`plannedDay`,`cleaningType`,`createdById`,`createdAt`) VALUES ";
-                        scheduleQry += $"({planId},{moduleType},{schedule.cleaningDay},{cleaningType},'{userId}','{UtilsRepository.GetUTCTime()}');" +
+                        scheduleQry = "insert into `cleaning_plan_schedules` (`planId`,`moduleType`,`plannedDay`,`createdById`,`createdAt`) VALUES ";
+                        scheduleQry += $"({planId},{moduleType},{schedule.cleaningDay},'{userId}','{UtilsRepository.GetUTCTime()}');" +
                                            $"SELECT LAST_INSERT_ID() as id ;";
 
                         List<CMMCSchedule> schedule_ = await Context.GetData<CMMCSchedule>(scheduleQry).ConfigureAwait(false);
@@ -266,6 +266,8 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                     Query += $"description = '{request.description}', ";
                 if (request.frequencyId > 0)
                     Query += $"frequencyId = {request.frequencyId}, ";
+                if (request.cleaningType > 0)
+                    Query += $"cleaningType = {request.cleaningType}, ";
                 if (request.startDate != null)
                     Query += $"startDate = '{request.startDate.ToString("yyyy-MM-dd")}', ";
                 if (request.noOfCleaningDays > 0)
@@ -286,8 +288,9 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                         if (moduleType == 1)
                         {
                             //(CASE WHEN { schedule.cleaningType} = 'Wet' then 1 else WHEN { schedule.cleaningType} = 'Dry' then 2 end)
-                            if (schedule.cleaningType != 0)
-                                myQuery += $"UPDATE cleaning_plan_schedules SET cleaningType = {schedule.cleaningType},updatedAt = '{UtilsRepository.GetUTCTime()}', updatedById = {userId} where plannedDay ={schedule.cleaningDay} and planId={request.planId};";
+                            // if (schedule.cleaningType != 0)
+                            // cleaningType = { schedule.cleaningType},
+                            myQuery += $"UPDATE cleaning_plan_schedules SET updatedAt = '{UtilsRepository.GetUTCTime()}', updatedById = {userId} where plannedDay ={schedule.cleaningDay} and planId={request.planId};";
                         }
 
                         myQuery += $"Delete from cleaning_plan_items where scheduleId = {schedule.scheduleId};";
@@ -328,7 +331,8 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             }
             statusOut += $"ELSE 'Invalid Status' END";
 
-            string planQuery = $"select plan.planId,plan.title,plan.startDate ,plan.frequencyId,plan.assignedTo as assignedToId ,plan.approvedById,plan.createdById,plan.facilityId,f.name as siteName, CONCAT(createdBy.firstName, createdBy.lastName) as createdBy , plan.createdAt,freq.name as frequency,plan.durationDays as noOfCleaningDays, CONCAT(approvedBy.firstName, approvedBy.lastName) as approvedBy , plan.approvedAt as approvedAt,CONCAT(assignedTo.firstName, ' ', assignedTo.lastName) as assignedTo,plan.status,{statusOut} as status_short from cleaning_plan as plan  LEFT JOIN Frequency as freq on freq.id = plan.frequencyId LEFT JOIN users as createdBy ON createdBy.id = plan.createdById LEFT JOIN users as approvedBy ON approvedBy.id = plan.approvedById LEFT JOIN facilities as f  on f.id=plan.facilityId    " +
+            string planQuery = $"select plan.planId,plan.title,plan.startDate ,plan.frequencyId,plan.assignedTo as assignedToId ,plan.approvedById,plan.createdById,plan.facilityId,f.name as siteName, CONCAT(createdBy.firstName, createdBy.lastName) as createdBy , plan.createdAt,freq.name as frequency, " +
+                $" plan.durationDays as noOfCleaningDays, CONCAT(approvedBy.firstName, approvedBy.lastName) as approvedBy , plan.approvedAt as approvedAt,CONCAT(assignedTo.firstName, ' ', assignedTo.lastName) as assignedTo,plan.status,{statusOut} as status_short from cleaning_plan as plan  LEFT JOIN Frequency as freq on freq.id = plan.frequencyId LEFT JOIN users as createdBy ON createdBy.id = plan.createdById LEFT JOIN users as approvedBy ON approvedBy.id = plan.approvedById LEFT JOIN facilities as f  on f.id=plan.facilityId    " +
               $"LEFT JOIN users as assignedTo ON assignedTo.id = plan.assignedTo where plan.planId = {planId}  ;";
 
             List<CMMCPlan> _ViewMCPlan = await Context.GetData<CMMCPlan>(planQuery).ConfigureAwait(false);
@@ -341,10 +345,10 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             }
             else
             {
-                measures += ",sum(assets.moduleQuantity) as scheduledModules ,CASE schedule.cleaningType WHEN 1 then 'Wet' When 2 then 'Dry' else 'Wet 'end as cleaningTypeName ";
+                measures += ",sum(assets.moduleQuantity) as scheduledModules,cp.cleaningType as cleaningType ,CASE cp.cleaningType WHEN 1 then 'Wet' When 2 then 'Dry' when 3 then 'Robotic' else 'Wet 'end as cleaningTypeName";
             }
 
-            string scheduleQuery = $"select schedule.scheduleId, schedule.plannedDay as cleaningDay {measures} from cleaning_plan_schedules as schedule  LEFT JOIN cleaning_plan_items as item on schedule.scheduleId = item.scheduleId LEFT JOIN assets on assets.id = item.assetId where schedule.planId={planId} group by schedule.scheduleId ORDER BY schedule.scheduleId ASC";
+            string scheduleQuery = $"select schedule.scheduleId, schedule.plannedDay as cleaningDay {measures} from cleaning_plan_schedules as schedule  LEFT JOIN cleaning_plan_items as item on schedule.scheduleId = item.scheduleId   LEFT JOIN cleaning_plan as cp on schedule.planId = cp.planId LEFT   JOIN assets on assets.id = item.assetId where schedule.planId={planId} group by schedule.scheduleId ORDER BY schedule.scheduleId ASC";
 
 
             List<CMMCSchedule> _Schedules = await Context.GetData<CMMCSchedule>(scheduleQuery).ConfigureAwait(false);
@@ -522,22 +526,13 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             //List<ScheduleIDData> scheduleData = await Context.GetData<ScheduleIDData>(scheduleQuery).ConfigureAwait(false);
 
             CMDefaultResponse response;
-            string statusQry = $"SELECT status,ifnull(assignedTo,0) assigned_to, ifnull(ptw_id,0) ptw_id FROM Cleaning_execution WHERE id = {task_id}";
+            string statusQry = $"SELECT  ifnull(ptw_id,0) ptw_id FROM Cleaning_execution WHERE id = {task_id}";
             DataTable dt1 = await Context.FetchData(statusQry).ConfigureAwait(false);
-            CMMS.CMMS_Status status = (CMMS.CMMS_Status)Convert.ToInt32(dt1.Rows[0][0]);
-            int assigned_to = Convert.ToInt32(dt1.Rows[0][1]);
-            int ptw_id = Convert.ToInt32(dt1.Rows[0][2]);
-            if (assigned_to <= 0)
-            {
-                return new CMDefaultResponse(task_id, CMMS.RETRUNSTATUS.FAILURE, "PM Task is Not Assigned.");
-            }
-
+            int ptw_id = Convert.ToInt32(dt1.Rows[0][0]);
             if (ptw_id > 0)
             {
-                return new CMDefaultResponse(task_id, CMMS.RETRUNSTATUS.FAILURE, "PM Task is already Linked to Module Cleaning");
+                return new CMDefaultResponse(task_id, CMMS.RETRUNSTATUS.FAILURE, "Permit  is already Linked to Module Cleaning");
             }
-
-
             string permitQuery = "SELECT ptw.id as ptw_id, ptw.code as ptw_code, ptw.title as ptw_title, ptw.status as ptw_status " +
                                     "FROM " +
                                         "permits as ptw " +
@@ -557,7 +552,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MC_PLAN, task_id, CMMS.CMMS_Modules.PTW, permit_id, "PTW linked to MC", CMMS.CMMS_Status.MC_LINKED_TO_PTW, userID);
 
-            response = new CMDefaultResponse(task_id, CMMS.RETRUNSTATUS.SUCCESS, $"Permit {permit_id} linked to Task {task_id}");
+            response = new CMDefaultResponse(task_id, CMMS.RETRUNSTATUS.SUCCESS, $"Permit {permit_id} linked to MC Task {task_id}");
 
             return response;
         }
@@ -703,13 +698,19 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             }
             statusEquip += $"ELSE 'Invalid Status' END";
 
-            string executionQuery = $"select ex.id as executionId,ex.status ,ex.startDate,CONCAT(assignedTo.firstName, assignedTo.lastName) as assignedTo, plan.title, CONCAT(createdBy.firstName, createdBy.lastName) as plannedBy , plan.createdAt as plannedAt,freq.name as frequency, CONCAT(startedBy.firstName, startedBy.lastName) as startedBy , ex.executionStartedAt as startedAt , {statusEx} as status_short from cleaning_execution as ex JOIN cleaning_plan as plan on ex.planId = plan.planId LEFT JOIN Frequency as freq on freq.id = plan.frequencyId LEFT JOIN users as createdBy ON createdBy.id = plan.createdById LEFT JOIN users as startedBy ON startedBy.id = ex.executedById " +
+            string executionQuery = $"select ex.id as executionId,ex.status ,ex.startDate,CONCAT(assignedTo.firstName, assignedTo.lastName) as assignedTo, plan.title, CONCAT(createdBy.firstName, createdBy.lastName) as plannedBy ,plan.createdAt as plannedAt,freq.name as frequency, CONCAT(startedBy.firstName, startedBy.lastName) as startedBy , ex.executionStartedAt as startedAt , {statusEx} as status_short from cleaning_execution as ex JOIN cleaning_plan as plan on ex.planId = plan.planId LEFT JOIN Frequency as freq on freq.id = plan.frequencyId LEFT JOIN users as createdBy ON createdBy.id = plan.createdById LEFT JOIN users as startedBy ON startedBy.id = ex.executedById " +
                 $"LEFT JOIN users as assignedTo ON assignedTo.id = ex.assignedTo where ex.id={exectionId};";
 
 
             List<CMMCExecution> _ViewExecution = await Context.GetData<CMMCExecution>(executionQuery).ConfigureAwait(false);
 
-            string scheduleQuery = $"select schedule.scheduleId as scheduleId ,schedule.status ,schedule.executionId, schedule.actualDay as cleaningDay ,schedule.startedAt as start_date,schedule.endedAt as end_date,schedule.cleaningType ,CASE schedule.cleaningType WHEN 1 then 'Wet' When 2 then 'Dry' else 'Wet 'end as cleaningTypeName, SUM({measure}) as scheduled, SUM(CASE WHEN item.status = {(int)CMMS.CMMS_Status.EQUIP_CLEANED} THEN {measure} ELSE 0 END) as cleaned , SUM(CASE WHEN item.status = {(int)CMMS.CMMS_Status.EQUIP_ABANDONED} THEN {measure} ELSE 0 END) as abandoned ,SUM(CASE WHEN item.status = {(int)CMMS.CMMS_Status.EQUIP_SCHEDULED} THEN {measure} ELSE 0 END) as pending ,schedule.waterUsed, schedule.remark ,{statusSc} as status_short from cleaning_execution_schedules as schedule left join cleaning_execution_items as item on schedule.scheduleId = item.scheduleId where schedule.executionId = {exectionId} group by schedule.scheduleId;";
+            string scheduleQuery = $"select schedule.scheduleId as scheduleId ,schedule.status ,schedule.executionId, schedule.actualDay as cleaningDay ,schedule.startedAt as start_date,schedule.endedAt as end_date  , " +
+                                   $" cp.cleaningType ,CASE cp.cleaningType WHEN 1 then 'Wet' When 2 then 'Dry' when 3 then 'Robotic'  else 'Wet '  end as cleaningTypeName, SUM({measure}) as scheduled , " +
+                                   $" SUM(CASE WHEN item.status = {(int)CMMS.CMMS_Status.EQUIP_CLEANED} THEN {measure} ELSE 0 END) as cleaned , SUM(CASE WHEN item.status = {(int)CMMS.CMMS_Status.EQUIP_ABANDONED} THEN {measure} ELSE 0 END) as abandoned , " +
+                                   $" SUM(CASE WHEN item.status = {(int)CMMS.CMMS_Status.EQUIP_SCHEDULED} THEN {measure} ELSE 0 END) as pending ,schedule.waterUsed, schedule.remark ,{statusSc} as status_short from cleaning_execution_schedules as schedule " +
+                                   $" left join cleaning_execution_items as item on schedule.scheduleId = item.scheduleId " +
+                                   $" left join cleaning_plan as cp on schedule.planId= cp.planId " +
+                                   $" where schedule.executionId = {exectionId} group by schedule.scheduleId;";
 
             List<CMMCExecutionSchedule> _ViewSchedule = await Context.GetData<CMMCExecutionSchedule>(scheduleQuery).ConfigureAwait(false);
 

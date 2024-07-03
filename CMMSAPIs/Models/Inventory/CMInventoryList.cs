@@ -111,6 +111,7 @@ namespace CMMSAPIs.Models.Inventory
         public int calibrationReminderDays { get; set; }
         public DateTime calibrationLastDate { get; set; }
         public DateTime calibrationDueDate { get; set; }
+
         public string calibrationStatus { get; set; }
     }
 
