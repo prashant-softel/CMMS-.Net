@@ -67,9 +67,15 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             //List<ScheduleIDData> scheduleData = await Context.GetData<ScheduleIDData>(scheduleQuery).ConfigureAwait(false);
 
             CMDefaultResponse response;
-            string statusQry = $"SELECT  ifnull(ptw_id,0) ptw_id FROM Cleaning_execution WHERE id = {task_id}";
+            string statusQry = $"SELECT status,ifnull(assignedTo,0) assigned_to, ifnull(ptw_id,0) ptw_id FROM Cleaning_execution WHERE id = {task_id}";
             DataTable dt1 = await Context.FetchData(statusQry).ConfigureAwait(false);
-            int ptw_id = Convert.ToInt32(dt1.Rows[0][0]);
+            CMMS.CMMS_Status status = (CMMS.CMMS_Status)Convert.ToInt32(dt1.Rows[0][0]);
+            int assigned_to = Convert.ToInt32(dt1.Rows[0][1]);
+            int ptw_id = Convert.ToInt32(dt1.Rows[0][2]);
+            if (assigned_to <= 0)
+            {
+                return new CMDefaultResponse(task_id, CMMS.RETRUNSTATUS.FAILURE, "Vegetation Task is Not Assigned.");
+            }
             if (ptw_id > 0)
             {
                 return new CMDefaultResponse(task_id, CMMS.RETRUNSTATUS.FAILURE, "Permit is already Linked to Vegetation");

@@ -134,7 +134,81 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             return retValue;
 
         }
-
+        public static string Status_PTW(int statusID)
+        {
+            CMMS.CMMS_Status status = (CMMS.CMMS_Status)statusID;
+            string statusName = "";
+            switch (status)
+            {
+                case CMMS.CMMS_Status.PTW_CREATED:
+                    statusName = "Waiting for Approval";
+                    break;
+                case CMMS.CMMS_Status.PTW_ISSUED:
+                    statusName = "Issued";
+                    break;
+                case CMMS.CMMS_Status.PTW_REJECTED_BY_ISSUER:
+                    statusName = "Rejected By Issuer";
+                    break;
+                case CMMS.CMMS_Status.PTW_APPROVED:
+                    statusName = "Approved";
+                    break;
+                case CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER:
+                    statusName = "Rejected By Approver";
+                    break;
+                case CMMS.CMMS_Status.PTW_CLOSED:
+                    statusName = "Closed";
+                    break;
+                case CMMS.CMMS_Status.PTW_CANCELLED_BY_ISSUER:
+                    statusName = "Cancelled BY Issuer";
+                    break;
+                case CMMS.CMMS_Status.PTW_CANCELLED_BY_HSE:
+                    statusName = "Cancelled By HSE";
+                    break;
+                case CMMS.CMMS_Status.PTW_CANCELLED_BY_APPROVER:
+                    statusName = "Cancelled By Approver";
+                    break;
+                case CMMS.CMMS_Status.PTW_CANCEL_REQUESTED:
+                    statusName = "Cancelled";
+                    break;
+                case CMMS.CMMS_Status.PTW_CANCEL_REQUEST_REJECTED:
+                    statusName = "Cancel Request Rejected";
+                    break;
+                case CMMS.CMMS_Status.PTW_CANCEL_REQUEST_APPROVED:
+                    statusName = "Cancelled";
+                    break;
+                case CMMS.CMMS_Status.PTW_EXTEND_REQUESTED:
+                    statusName = "Requested for Extension";
+                    break;
+                case CMMS.CMMS_Status.PTW_EXTEND_REQUEST_APPROVE:
+                    statusName = "Approved Extension";
+                    break;
+                case CMMS.CMMS_Status.PTW_EXTEND_REQUEST_REJECTED:
+                    statusName = "Rejected Extension";
+                    break;
+                case CMMS.CMMS_Status.PTW_LINKED_TO_JOB:
+                    statusName = "Linked to Job";
+                    break;
+                case CMMS.CMMS_Status.PTW_LINKED_TO_PM:
+                    statusName = "Linked to PM";
+                    break;
+                case CMMS.CMMS_Status.PTW_LINKED_TO_AUDIT:
+                    statusName = "Linked to Audit";
+                    break;
+                case CMMS.CMMS_Status.PTW_LINKED_TO_HOTO:
+                    statusName = "Linked to HOTO";
+                    break;
+                case CMMS.CMMS_Status.PTW_EXPIRED:
+                    statusName = "Expired";
+                    break;
+                case CMMS.CMMS_Status.PTW_UPDATED:
+                    statusName = "Updated";
+                    break;
+                default:
+                    statusName = "Invalid";
+                    break;
+            }
+            return statusName;
+        }
         internal async Task<List<CMMCPlan>> GetPlanList(int facilityId, string facilitytimeZone)
         {
             string statusOut = "CASE ";
@@ -526,12 +600,19 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             //List<ScheduleIDData> scheduleData = await Context.GetData<ScheduleIDData>(scheduleQuery).ConfigureAwait(false);
 
             CMDefaultResponse response;
-            string statusQry = $"SELECT  ifnull(ptw_id,0) ptw_id FROM Cleaning_execution WHERE id = {task_id}";
+            string statusQry = $"SELECT  status,ifnull(assignedTo,0) assigned_to,ifnull(ptw_id,0) ptw_id FROM Cleaning_execution WHERE id = {task_id}";
             DataTable dt1 = await Context.FetchData(statusQry).ConfigureAwait(false);
-            int ptw_id = Convert.ToInt32(dt1.Rows[0][0]);
+            CMMS.CMMS_Status status = (CMMS.CMMS_Status)Convert.ToInt32(dt1.Rows[0][0]);
+            int assigned_to = Convert.ToInt32(dt1.Rows[0][1]);
+            int ptw_id = Convert.ToInt32(dt1.Rows[0][2]);
+            if (assigned_to <= 0)
+            {
+                return new CMDefaultResponse(task_id, CMMS.RETRUNSTATUS.FAILURE, "MC Task is Not Assigned.");
+            }
+
             if (ptw_id > 0)
             {
-                return new CMDefaultResponse(task_id, CMMS.RETRUNSTATUS.FAILURE, "Permit  is already Linked to Module Cleaning");
+                return new CMDefaultResponse(task_id, CMMS.RETRUNSTATUS.FAILURE, "Permit is already Linked to Module Cleaning");
             }
             string permitQuery = "SELECT ptw.id as ptw_id, ptw.code as ptw_code, ptw.title as ptw_title, ptw.status as ptw_status " +
                                     "FROM " +
@@ -698,8 +779,17 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             }
             statusEquip += $"ELSE 'Invalid Status' END";
 
-            string executionQuery = $"select ex.id as executionId,ex.status ,ex.startDate,CONCAT(assignedTo.firstName, assignedTo.lastName) as assignedTo, plan.title, CONCAT(createdBy.firstName, createdBy.lastName) as plannedBy ,plan.createdAt as plannedAt,freq.name as frequency, CONCAT(startedBy.firstName, startedBy.lastName) as startedBy , ex.executionStartedAt as startedAt , {statusEx} as status_short from cleaning_execution as ex JOIN cleaning_plan as plan on ex.planId = plan.planId LEFT JOIN Frequency as freq on freq.id = plan.frequencyId LEFT JOIN users as createdBy ON createdBy.id = plan.createdById LEFT JOIN users as startedBy ON startedBy.id = ex.executedById " +
-                $"LEFT JOIN users as assignedTo ON assignedTo.id = ex.assignedTo where ex.id={exectionId};";
+            string executionQuery = $"select ex.id as executionId,ex.status ,ex.startDate,CONCAT(assignedTo.firstName, assignedTo.lastName) as assignedTo , " +
+                $"plan.title, CONCAT(createdBy.firstName, createdBy.lastName) as plannedBy ,plan.createdAt as plannedAt,freq.name as frequency, CONCAT(startedBy.firstName, startedBy.lastName) as startedBy ," +
+                $" ex.executionStartedAt as startedAt , {statusEx} as status_short, " +
+                $"permit.id as permit_id,permit.code as  permit_code , " +
+                $" Case when permit.TBT_Done_By is null or permit.TBT_Done_By = 0 then 0 else 1 end ptw_tbt_done,permit.status as ptw_status " +
+                $"  from cleaning_execution as ex JOIN cleaning_plan as plan on ex.planId = plan.planId " +
+                $" LEFT JOIN Frequency as freq on freq.id = plan.frequencyId " +
+                $" LEFT JOIN permits as permit on permit.id = ex.ptw_id " +
+                $" LEFT JOIN users as createdBy ON createdBy.id = plan.createdById " +
+                $" LEFT JOIN users as startedBy ON startedBy.id = ex.executedById " +
+                $" LEFT JOIN users as assignedTo ON assignedTo.id = ex.assignedTo where ex.id={exectionId};";
 
 
             List<CMMCExecution> _ViewExecution = await Context.GetData<CMMCExecution>(executionQuery).ConfigureAwait(false);
@@ -745,6 +835,8 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             CMMS.CMMS_Status _Status_long = (CMMS.CMMS_Status)(_ViewExecution[0].status);
             string _longStatus = getLongStatus(CMMS.CMMS_Modules.MC_TASK, _Status_long, null, _ViewExecution[0]);
             _ViewExecution[0].status_long = _longStatus;
+            CMMS.CMMS_Status ptw_status1 = (CMMS.CMMS_Status)(_ViewExecution[0].ptw_status);
+            _ViewExecution[0].status_short_ptw = Status_PTW((int)ptw_status1);
             foreach (var view in _ViewExecution)
             {
                 if (view != null && view.abandonedAt != null)

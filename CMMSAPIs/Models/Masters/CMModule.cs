@@ -83,6 +83,7 @@ namespace CMMSAPIs.Models.Masters
         public string facility_name { get; set; }
         public int wo_number { get; set; }
         public string wo_decription { get; set; }
+        public string assetsname { get; set; }
         public int status { get; set; }
         public string status_long { get; set; }
         public string asset_category { get; set; }

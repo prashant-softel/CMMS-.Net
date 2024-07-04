@@ -1166,7 +1166,7 @@ namespace CMMSAPIs.Repositories.Masters
 
             string myQuery = $"SELECT job.id  wo_number,job.title as wo_decription ,job.facilityId as facility_id, facilities.name as facility_name, job.status," +
                 $" group_concat(distinct asset_cat.name order by asset_cat.id separator ', ') as asset_category, " +
-                $" group_concat(distinct asset.name order by asset.id separator ', ') as asset_name, permit.startDate, permit.endDate," +
+                $" group_concat(distinct asset.name order by asset.id separator ', ') as asset_name, job.breakdownTime as start_date, jc.JC_Date_Stop as end_Date," +
                 $" jc.JC_Status as latestJCStatus,  jc.JC_Approved as latestJCApproval, permit.id as ptw_id,jc.id as latestJCid,permit.status as  latestJCPTWStatus,on_time_status" +
                 $" FROM jobs as job " +
                 $" LEFT JOIN jobcards as jc ON job.latestJC = jc.id " +
@@ -1295,8 +1295,8 @@ namespace CMMSAPIs.Repositories.Masters
             }
 
 
-            string myQuery = $"SELECT facilities.name as facility_name,pm_task.id as wo_number,pm_plan.plan_name as wo_decription,pm_plan.plan_name,pm_task.category_id,cat.name as asset_category, " +
-                $" CONCAT('PMTASK',pm_task.id) as task_code,pm_plan.plan_name as plan_title,pm_task.facility_id, pm_task.frequency_id as frequency_id, pm_plan.plan_date as start_date," +
+            string myQuery = $"SELECT facilities.name as facility_name,pm_task.id as wo_number,pm_plan.plan_name as wo_decription, a.name as assetsname ,pm_plan.plan_name,pm_task.category_id,cat.name as asset_category, " +
+                $" CONCAT('PMTASK',pm_task.id) as task_code,pm_plan.plan_name as plan_title,pm_task.facility_id, pm_task.frequency_id as frequency_id, pm_plan.plan_date as start_date,pm_task.closed_at as end_date, " +
                 $"freq.name as frequency_name, pm_task.plan_date as due_date,prev_task_done_date as last_done_date, closed_at as done_date, " +
                 $"CONCAT(assignedTo.firstName,' ',assignedTo.lastName)  as assigned_to_name, pm_task.PTW_id as permit_id, " +
                 $"CONCAT('PTW',pm_task.PTW_id) as permit_code,permit.status as ptw_status, PM_task.status, IFNULL( PM_task.schedule_time, CAST('1900-01-01 00:00:00' AS DATETIME)) as schedule_time  " +
@@ -1306,7 +1306,7 @@ namespace CMMSAPIs.Repositories.Masters
                    $"left join assetcategories as cat  on pm_task.category_id = cat.id " +
                    $"left join permits as permit on pm_task.PTW_id = permit.id " +
                    $"left join frequency as freq on pm_task.frequency_id = freq.id " +
-
+                   $"left join assets as a on a.id=(select Asset_id  from pm_schedule where id=pm_task.id) " +
                    $" JOIN facilities ON pm_task.facility_id = facilities.id " +
                    $" WHERE facilities.id in ({facilityId})  and status_id = 1 {filter};";
             List<CMDashboadItemList> itemList = await Context.GetData<CMDashboadItemList>(myQuery).ConfigureAwait(false);
@@ -1432,19 +1432,23 @@ namespace CMMSAPIs.Repositories.Masters
             }
             statusOut += $"ELSE 'Invalid Status' END";
 
-            string myQuery1 = $"select mc.facilityId,F.name as facility_name ,mc.title as wo_decription," +
+            string myQuery1 = $"select mc.facilityId,F.name as facility_name ,mc.title as wo_decription,sa.name as assetsname , ac.name as asset_category ," +
                 $" mc.planId as wo_number,mc.status as status, mc.frequencyId,mc.assignedTo as assignedToId, case when mc.startDate = '0000-00-00 00:00:00' then null else mc.startDate end as start_date,mc.durationDays as noOfCleaningDays, mc.title," +
-                $" CONCAT(createdBy.firstName, createdBy.lastName) as createdBy , mc.createdAt, " +
+                $" CONCAT(createdBy.firstName, createdBy.lastName) as createdBy , mc.createdAt,cx.endedAt as end_date, " +
                 $" CONCAT(approvedBy.firstName, approvedBy.lastName) as approvedBy,mc.approvedAt,freq.name as frequency," +
                 $" CONCAT(assignedTo.firstName, ' ', assignedTo.lastName) as assignedTo,mc.durationDays,{statusOut} as status_long" +
                 $" from cleaning_plan as mc LEFT JOIN Frequency as freq on freq.id = mc.frequencyId " +
-             $" left join facilities as F on F.id = mc.facilityId " +
-             $"LEFT JOIN users as assignedTo ON assignedTo.id = mc.assignedTo " +
-            $"LEFT JOIN users as createdBy ON createdBy.id = mc.createdById " +
-            $"LEFT JOIN users as approvedBy ON approvedBy.id = mc.approvedById where moduleType=1 {filter} ";
+                $" left join facilities as F on F.id = mc.facilityId " +
+                $" left join cleaning_execution as cx on cx.planId=mc.planId " +
+                $" Left Join cleaning_plan_items AS cpi ON cpi.planId = mc.planId " +
+                $" LEFT JOIN assets AS sa ON sa.id = cpi.assetId " +
+                $" LEFT JOIN assetcategories AS ac ON ac.id = sa.categoryId " +
+                $" LEFT JOIN users as assignedTo ON assignedTo.id = mc.assignedTo  " +
+                $" LEFT JOIN users as createdBy ON createdBy.id = mc.createdById  " +
+                $" LEFT JOIN users as approvedBy ON approvedBy.id = mc.approvedById where mc.moduleType=1 {filter} ";
 
 
-            myQuery1 += $" and facilityId in ({facilityId}) ";
+            myQuery1 += $" and mc.facilityId in ({facilityId}) ";
 
             List<CMDashboadItemList> itemList = await Context.GetData<CMDashboadItemList>(myQuery1).ConfigureAwait(false);
 
