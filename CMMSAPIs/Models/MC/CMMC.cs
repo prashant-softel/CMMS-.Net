@@ -163,7 +163,11 @@ namespace CMMSAPIs.Models.MC
         public int waterUsed { get; set; }
         public DateTime start_date { get; set; }
         public DateTime end_date { get; set; }
-
+        public int permit_id { get; set; }
+        public string permit_code { get; set; }
+        public int ptw_status { get; set; }
+        public dynamic ptw_tbt_done { get; set; }
+        public string status_short_ptw { get; set; }
         public string remark { get; set; }
         public int status { get; set; }
 
@@ -225,11 +229,7 @@ namespace CMMSAPIs.Models.MC
         public int status { get; set; }     //Completed
         public string status_short { get; set; }
         public string status_long { get; set; }
-        public int permit_id { get; set; }
-        public string permit_code { get; set; }
-        public int ptw_status { get; set; }
-        public dynamic ptw_tbt_done { get; set; }
-        public string status_short_ptw { get; set; }
+
         // public string siteName { get; set; }
         //public List<CMMCEquipmentDetails> smbIds;
         public List<CMMCExecutionSchedule> schedules { get; set; }

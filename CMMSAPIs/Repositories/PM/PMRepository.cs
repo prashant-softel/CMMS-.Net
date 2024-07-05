@@ -242,20 +242,18 @@ namespace CMMSAPIs.Repositories.PM
                 string _shortStatus = getShortStatus(CMMS.CMMS_Modules.PM_PLAN, _Status);
                 plan.status_short = _shortStatus;
 
-                string combinedQuery = $@"SELECT plan.plan_date, plan.frequency_id, frequency.months, frequency.days FROM pm_plan AS plan JOIN frequency ON plan.frequency_id = frequency.id WHERE plan.id = {plan.plan_id}";
-                DataTable dt = await Context.FetchData(combinedQuery).ConfigureAwait(false);
+                //string combinedQuery = $@"SELECT plan.plan_date, plan.frequency_id, frequency.months, frequency.days FROM pm_plan AS plan JOIN frequency ON plan.frequency_id = frequency.id WHERE plan.id = {plan.plan_id}";
+                // DataTable dt = await Context.FetchData(combinedQuery).ConfigureAwait(false);
 
-                if (dt.Rows.Count > 0)
-                {
-                    DateTime nextdate = Convert.ToDateTime(dt.Rows[0]["plan_date"]);
-                    int months = Convert.ToInt32(dt.Rows[0]["months"]);
-                    int fdays = Convert.ToInt32(dt.Rows[0]["days"]);
+                // if (dt.Rows.Count > 0)
+                //  {
+                //      DateTime nextdate = Convert.ToDateTime(dt.Rows[0]["plan_date"]);
+                //      int months = Convert.ToInt32(dt.Rows[0]["months"]);
+                //      int fdays = Convert.ToInt32(dt.Rows[0]["days"]);
 
-                    DateTime total_date = months == 0 ? nextdate.AddDays(fdays) : nextdate.AddMonths(months);
-                    plan.next_schedule_date = total_date;
-                }
-
-
+                //      DateTime total_date = months == 0 ? nextdate.AddDays(fdays) : nextdate.AddMonths(months);
+                //      plan.next_schedule_date = total_date;
+                //    }
             }
 
             foreach (var detail in plan_list)

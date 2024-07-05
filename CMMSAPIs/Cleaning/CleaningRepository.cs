@@ -588,7 +588,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             CMDefaultResponse response = new CMDefaultResponse(planid, CMMS.RETRUNSTATUS.SUCCESS, $"Plan Deleted");
             return response;
         }
-        internal async Task<CMDefaultResponse> LinkPermitToModuleCleaning(int task_id, int permit_id, int userID)
+        internal async Task<CMDefaultResponse> LinkPermitToModuleCleaning(int scheduleId, int permit_id, int userID)
         {
             /*
              * Primary Table - PMSchedule
@@ -600,19 +600,15 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             //List<ScheduleIDData> scheduleData = await Context.GetData<ScheduleIDData>(scheduleQuery).ConfigureAwait(false);
 
             CMDefaultResponse response;
-            string statusQry = $"SELECT  status,ifnull(assignedTo,0) assigned_to,ifnull(ptw_id,0) ptw_id FROM Cleaning_execution WHERE id = {task_id}";
+            string statusQry = $"SELECT  status,ifnull(ptw_id,0) ptw_id FROM cleaning_execution_schedules WHERE  scheduleId= {scheduleId}";
             DataTable dt1 = await Context.FetchData(statusQry).ConfigureAwait(false);
             CMMS.CMMS_Status status = (CMMS.CMMS_Status)Convert.ToInt32(dt1.Rows[0][0]);
-            int assigned_to = Convert.ToInt32(dt1.Rows[0][1]);
-            int ptw_id = Convert.ToInt32(dt1.Rows[0][2]);
-            if (assigned_to <= 0)
-            {
-                return new CMDefaultResponse(task_id, CMMS.RETRUNSTATUS.FAILURE, "MC Task is Not Assigned.");
-            }
+            int ptw_id = Convert.ToInt32(dt1.Rows[0][1]);
+
 
             if (ptw_id > 0)
             {
-                return new CMDefaultResponse(task_id, CMMS.RETRUNSTATUS.FAILURE, "Permit is already Linked to Module Cleaning");
+                return new CMDefaultResponse(scheduleId, CMMS.RETRUNSTATUS.FAILURE, "Permit is already Linked to scheduled");
             }
             string permitQuery = "SELECT ptw.id as ptw_id, ptw.code as ptw_code, ptw.title as ptw_title, ptw.status as ptw_status " +
                                     "FROM " +
@@ -620,20 +616,20 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                                     $"WHERE ptw.id = {permit_id} ;";
             List<ScheduleLinkedPermit> permit = await Context.GetData<ScheduleLinkedPermit>(permitQuery).ConfigureAwait(false);
             if (permit.Count == 0)
-                return new CMDefaultResponse(task_id, CMMS.RETRUNSTATUS.FAILURE, $"Permit {permit_id} does not exist.");
-            string myQuery = "UPDATE cleaning_execution  SET " +
+                return new CMDefaultResponse(scheduleId, CMMS.RETRUNSTATUS.FAILURE, $"Permit {permit_id} does not exist.");
+            string myQuery = "UPDATE cleaning_execution_schedules  SET " +
                                 $"ptw_id = {permit[0].ptw_id}, " +
-                                $"status = {(int)CMMS.CMMS_Status.MC_LINKED_TO_PTW}, " +
+                                $"status = {(int)CMMS.CMMS_Status.SCHEDULED_LINKED_TO_PTW}, " +
                                 $"updatedAt = '{UtilsRepository.GetUTCTime()}', " +
                                 $"updatedById = '{userID}' " +
-                                $"WHERE id = {task_id};";
+                                $"WHERE scheduleId = {scheduleId};";
             int retVal = await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
             if (retVal > 0)
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MC_PLAN, task_id, CMMS.CMMS_Modules.PTW, permit_id, "PTW linked to MC", CMMS.CMMS_Status.MC_LINKED_TO_PTW, userID);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MC_EXECUTION, scheduleId, CMMS.CMMS_Modules.PTW, permit_id, "PTW linked to MC", CMMS.CMMS_Status.SCHEDULED_LINKED_TO_PTW, userID);
 
-            response = new CMDefaultResponse(task_id, CMMS.RETRUNSTATUS.SUCCESS, $"Permit {permit_id} linked to MC Task {task_id}");
+            response = new CMDefaultResponse(scheduleId, CMMS.RETRUNSTATUS.SUCCESS, $"Permit {permit_id} linked to MC Schedule {scheduleId} Successfully");
 
             return response;
         }
@@ -651,7 +647,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
             if (facilityId > 0)
             {
-                myQuery1 += $" and facilityId = {facilityId} ";
+                myQuery1 += $" and mc.facilityId = {facilityId} ";
             }
             List<CMMCTaskList> _ViewMCTaskList = await Context.GetData<CMMCTaskList>(myQuery1).ConfigureAwait(false);
             foreach (var ViewMCTaskList in _ViewMCTaskList)
@@ -781,12 +777,9 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
             string executionQuery = $"select ex.id as executionId,ex.status ,ex.startDate,CONCAT(assignedTo.firstName, assignedTo.lastName) as assignedTo , " +
                 $"plan.title, CONCAT(createdBy.firstName, createdBy.lastName) as plannedBy ,plan.createdAt as plannedAt,freq.name as frequency, CONCAT(startedBy.firstName, startedBy.lastName) as startedBy ," +
-                $" ex.executionStartedAt as startedAt , {statusEx} as status_short, " +
-                $"permit.id as permit_id,permit.code as  permit_code , " +
-                $" Case when permit.TBT_Done_By is null or permit.TBT_Done_By = 0 then 0 else 1 end ptw_tbt_done,permit.status as ptw_status " +
+                $" ex.executionStartedAt as startedAt , {statusEx} as status_short " +
                 $"  from cleaning_execution as ex JOIN cleaning_plan as plan on ex.planId = plan.planId " +
                 $" LEFT JOIN Frequency as freq on freq.id = plan.frequencyId " +
-                $" LEFT JOIN permits as permit on permit.id = ex.ptw_id " +
                 $" LEFT JOIN users as createdBy ON createdBy.id = plan.createdById " +
                 $" LEFT JOIN users as startedBy ON startedBy.id = ex.executedById " +
                 $" LEFT JOIN users as assignedTo ON assignedTo.id = ex.assignedTo where ex.id={exectionId};";
@@ -796,9 +789,12 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
             string scheduleQuery = $"select schedule.scheduleId as scheduleId ,schedule.status ,schedule.executionId, schedule.actualDay as cleaningDay ,schedule.startedAt as start_date,schedule.endedAt as end_date  , " +
                                    $" cp.cleaningType ,CASE cp.cleaningType WHEN 1 then 'Wet' When 2 then 'Dry' when 3 then 'Robotic'  else 'Wet '  end as cleaningTypeName, SUM({measure}) as scheduled , " +
+                                   $" permit.id as permit_id,permit.code as  permit_code , " +
+                                   $" Case when permit.TBT_Done_By is null or permit.TBT_Done_By = 0 then 0 else 1 end ptw_tbt_done,permit.status as ptw_status ," +
                                    $" SUM(CASE WHEN item.status = {(int)CMMS.CMMS_Status.EQUIP_CLEANED} THEN {measure} ELSE 0 END) as cleaned , SUM(CASE WHEN item.status = {(int)CMMS.CMMS_Status.EQUIP_ABANDONED} THEN {measure} ELSE 0 END) as abandoned , " +
                                    $" SUM(CASE WHEN item.status = {(int)CMMS.CMMS_Status.EQUIP_SCHEDULED} THEN {measure} ELSE 0 END) as pending ,schedule.waterUsed, schedule.remark ,{statusSc} as status_short from cleaning_execution_schedules as schedule " +
                                    $" left join cleaning_execution_items as item on schedule.scheduleId = item.scheduleId " +
+                                   $" left join permits as permit on permit.id = schedule.ptw_id " +
                                    $" left join cleaning_plan as cp on schedule.planId= cp.planId " +
                                    $" where schedule.executionId = {exectionId} group by schedule.scheduleId;";
 
@@ -835,8 +831,13 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             CMMS.CMMS_Status _Status_long = (CMMS.CMMS_Status)(_ViewExecution[0].status);
             string _longStatus = getLongStatus(CMMS.CMMS_Modules.MC_TASK, _Status_long, null, _ViewExecution[0]);
             _ViewExecution[0].status_long = _longStatus;
-            CMMS.CMMS_Status ptw_status1 = (CMMS.CMMS_Status)(_ViewExecution[0].ptw_status);
-            _ViewExecution[0].status_short_ptw = Status_PTW((int)ptw_status1);
+            foreach (var item in _ViewSchedule)
+            {
+                CMMS.CMMS_Status ptw_status1 = (CMMS.CMMS_Status)(item.ptw_status);
+                item.status_short_ptw = Status_PTW((int)ptw_status1);
+
+            }
+
             foreach (var view in _ViewExecution)
             {
                 if (view != null && view.abandonedAt != null)

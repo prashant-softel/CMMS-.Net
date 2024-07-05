@@ -1,8 +1,11 @@
-﻿using CMMSAPIs.Helper;
+﻿using CMMSAPIs.BS.Mails;
+using CMMSAPIs.Helper;
+using CMMSAPIs.Models.Mails;
 using CMMSAPIs.Models.Masters;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Utils;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -155,6 +158,7 @@ namespace CMMSAPIs.Repositories.Masters
             await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
             return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Course Deleted Successfully.");
         }
+        /*
         internal async Task<CMDefaultResponse> CreateScheduleCourse(TrainingSchedule request, int userID)
         {
             int Exterid = 0;
@@ -192,7 +196,105 @@ namespace CMMSAPIs.Repositories.Masters
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.TRAINNING_SCHEDULE, schid, 0, 0, request.Comment, CMMS.CMMS_Status.COURSE_SCHEDULE);
             return new CMDefaultResponse(schid, CMMS.RETRUNSTATUS.SUCCESS, "Course Schedule Sucessfully");
+        }*/
+        internal async Task<CMDefaultResponse> CreateScheduleCourse(TrainingSchedule request, int userID)
+        {
+            int Exterid = 0;
+            string crtqry = $"INSERT INTO training_schedule ( CourseId,facility_id, Course_name, ScheduleDate, TraingCompany, Trainer,Mode, Comment, Venue, hfeEmployeeId,status_code, CreatedAt, CreatedBy) values " +
+                            $"({request.CourseId},{request.facility_id},'{request.CourseName}','{request.Date_of_training}',{request.TrainingAgencyId},'{request.TrainerName}','{request.Mode}','{request.Comment}','{request.Venue}',{request.HfeEmployeeId},{(int)CMMS.CMMS_Status.COURSE_SCHEDULE},'{UtilsRepository.GetUTCTime()}',{userID}) ; " +
+                            $"SELECT LAST_INSERT_ID();";
+            DataTable dt = await Context.FetchData(crtqry).ConfigureAwait(false);
+            int schid = Convert.ToInt32(dt.Rows[0][0]);
+
+            foreach (ExternalEmployee items in request.externalEmployees)
+            {
+                string externalsc = $"INSERT INTO visitor_details (Schid,Name, Email, Mobile, Company,CreatedAt,CreatedBy) values " +
+                                    $"({schid},'{items.employeeName}','{items.employeeEmail}','{items.employeeNumber}','{items.companyName}','{UtilsRepository.GetUTCTime()}',{userID}) ; " +
+                                    $"SELECT LAST_INSERT_ID();";
+                DataTable dt1 = await Context.FetchData(externalsc).ConfigureAwait(false);
+                Exterid = Convert.ToInt32(dt1.Rows[0][0]);
+            }
+
+            foreach (InternalEmployee item in request.internalEmployees)
+            {
+                string invitationLink = GenerateInvitationLink(schid, item.EmpId); // Generate unique invitation link
+                string emailBody = $"You are invited to attend a training course. Please RSVP using the following link: {invitationLink}";
+                await sendEmail("Invitation to Training Course", emailBody, item.empEmail); // Send email with the invitation link
+
+                string inviteschdule = $"INSERT INTO schdule_invitee ( Schid, employee_id, Visitor_id, Rsvp, designation, Attendend, CreatedAt, CreatedBy) values " +
+                                       $"('{schid}', {item.EmpId}, {Exterid}, 0, '{item.empDesignation}', '{item.Attendence}', '{UtilsRepository.GetUTCTime()}', {userID}) ; " +
+                                       $"SELECT LAST_INSERT_ID();";
+                DataTable dt2 = await Context.FetchData(inviteschdule).ConfigureAwait(false);
+                int schdinviid = Convert.ToInt32(dt2.Rows[0][0]);
+            }
+
+            if (request.uploadfile_ids != null && request.uploadfile_ids.Count > 0)
+            {
+                foreach (int data in request.uploadfile_ids)
+                {
+                    string qryuploadFiles = $"UPDATE uploadedfiles SET facility_id = {request.facility_id}, module_type = {(int)CMMS.CMMS_Modules.TRAINNING_SCHEDULE}, module_ref_id = {schid} where id = {data}";
+                    await Context.ExecuteNonQry<int>(qryuploadFiles).ConfigureAwait(false);
+                }
+            }
+
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.TRAINNING_SCHEDULE, schid, 0, 0, request.Comment, CMMS.CMMS_Status.COURSE_SCHEDULE);
+            return new CMDefaultResponse(schid, CMMS.RETRUNSTATUS.SUCCESS, "Course Schedule Successfully Created");
         }
+        protected async Task<CMDefaultResponse> sendEmail(string subject, string body, string emailTo)
+        {
+            CMMailSettings _settings = new CMMailSettings();
+            var MyConfig = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
+            _settings.Mail = MyConfig.GetValue<string>("MailSettings:Mail");
+            _settings.DisplayName = MyConfig.GetValue<string>("MailSettings:DisplayName");
+            _settings.Password = MyConfig.GetValue<string>("MailSettings:Password");
+            _settings.Host = MyConfig.GetValue<string>("MailSettings:Host");
+            _settings.Port = MyConfig.GetValue<int>("MailSettings:Port");
+
+            List<string> AddCc = new List<string>();
+
+            DateTime today = DateTime.Now;
+
+            string emailBody = "<div style='width:100%; padding:0.5rem; text-align:center;'><span><img src='https://i.ibb.co/FD60YSY/hfe.png' alt='hfe' border='0'></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b style='color:#31576D; padding:0.5rem;'><i>" + today.ToString("dddd") + " , " + today.ToString("dd-MMM-yyyy") + "</i></b></div><hr><br><div style='text-align:center;'>";
+
+            emailBody += body;
+            emailBody += "</div><br><div><p style='text-align:center;'>visit:<a href='https://i.ibb.co/FD60YSY/hfe.png'> http://cmms_726897com</a></p></div><br><p style='padding:0.5rem; '><b>Disclaimer:</b> The information contained in this electronic message and any attachments to this message are intended for the exclusive use of the addressee(s) and may contain proprietary, confidential or privileged information. If you are not the intended recipient, you should not disseminate, distribute, print or copy this e-mail. Please notify the sender immediately and destroy all copies of this message and any attachments. Although the company has taken reasonable precautions to ensure no viruses are present in this email, the company cannot accept responsibility for any loss or damage arising from the use of this email or attachments.</p>";
+
+
+            CMMailRequest request = new CMMailRequest
+            {
+                emailtraingn = emailTo,
+                CcEmail = AddCc,
+                Subject = subject,
+                Body = emailBody,
+            };
+
+            try
+            {
+                var res = await MailService.SendEmailAsync(request, _settings);
+            }
+            catch (Exception e)
+            {
+                string msg = e.Message;
+            }
+
+            return new CMDefaultResponse(1, CMMS.RETRUNSTATUS.SUCCESS, "mail sent");
+        }
+        private string GenerateInvitationLink(int schid, int empId)
+        {
+            // Assuming you have a method to generate a unique URL for the invitation
+            return $"https://mail.google.com/rsvp?schid={schid}&empId={empId}";
+        }
+
+        // Endpoint to handle RSVP responses (This would be part of your API controller)
+
+        public async Task<string> HandleRsvpResponse(int schid, int empId, int response)
+        {
+            // Update RSVP status in the database
+            string updateRsvpQry = $"UPDATE schdule_invitee SET Rsvp = {response} WHERE Schid = {schid} AND employee_id = {empId}";
+            await Context.ExecuteNonQry<int>(updateRsvpQry).ConfigureAwait(false);
+            return "RSVP response recorded successfully";
+        }
+
         internal async Task<List<GETSCHEDULE>> GetScheduleCourseList(int facility_id, DateTime from_date, DateTime to_date)
         {
             string getsch = $"SELECT  Schid as ScheduleID ,CourseId as  CourseID , Course_name, ScheduleDate, TraingCompany as TrainingCompany, Trainer, Mode as mode,  Venue , " +

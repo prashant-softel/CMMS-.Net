@@ -524,7 +524,7 @@ namespace CMMSAPIs.Helper
             MC_TASK_APPROVED,
             MC_TASK_REJECTED,
             MC_TASK_UPDATED,
-            MC_LINKED_TO_PTW,
+            SCHEDULED_LINKED_TO_PTW,
 
             VEG_PLAN_DRAFT = 370,
             VEG_PLAN_SUBMITTED,

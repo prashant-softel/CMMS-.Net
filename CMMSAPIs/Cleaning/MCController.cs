@@ -174,12 +174,12 @@ namespace CMMSAPIs.Controllers.MC
         }
         [Route("LinkPermitToModuleCleaning")]
         [HttpPut]
-        public async Task<IActionResult> LinkPermitToModuleCleaning(int task_id, int permit_id)
+        public async Task<IActionResult> LinkPermitToModuleCleaning(int scheduleId, int permit_id)
         {
             try
             {
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _CleaningBS.LinkPermitToModuleCleaning(task_id, permit_id, userId);
+                var data = await _CleaningBS.LinkPermitToModuleCleaning(scheduleId, permit_id, userId);
                 return Ok(data);
             }
             catch (Exception ex)

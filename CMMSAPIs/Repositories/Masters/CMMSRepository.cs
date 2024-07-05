@@ -1515,7 +1515,7 @@ namespace CMMSAPIs.Repositories.Masters
             statusOut += $"ELSE 'Invalid Status' END";
 
 
-            string selectqry = $"SELECT incident.id as wo_number,incident.title as wo_decription, incident.description as description , facilities.name as facility_name,blockName.name as block_name, assets.name as asset_name, incident.risk_level as risk_level, CONCAT(created_by.firstName ,' ' , created_by.lastName) as reported_by_name, incident.created_at as reported_at,CONCAT(user.firstName ,' ' , user.lastName) as approved_by, incident.approved_at as approved_at, CONCAT(user1.firstName , ' ' , user1.lastName) as reported_by_name , {statusOut} as status_long ,incident.status, incident.location_of_incident, incident_datetime, type_of_job,title," +
+            string selectqry = $"SELECT incident.id as wo_number,incident.title as title, incident.description as wo_decription , incident.incident_datetime as incident_datetime,incident.location_of_incident as location_of_incident,incident.action_taken_datetime as restoration_datetime,incident.severity as severity, facilities.name as facility_name,blockName.name as block_name, assets.name as asset_name, incident.risk_level as risk_level, CONCAT(created_by.firstName ,' ' , created_by.lastName) as reported_by_name, incident.created_at as reported_at,CONCAT(user.firstName ,' ' , user.lastName) as approved_by, incident.approved_at as approved_at, CONCAT(user1.firstName , ' ' , user1.lastName) as reported_by_name , {statusOut} as status_long ,incident.status, incident.location_of_incident, incident_datetime, type_of_job,title," +
                 $" incident.status, incident.is_why_why_required, incident.is_investigation_required " +
                 $" FROM incidents as incident " +
                 $" left JOIN facilities AS facilities on facilities.id = incident.facility_id " +
@@ -1619,8 +1619,6 @@ namespace CMMSAPIs.Repositories.Masters
             {
                 datefilter = $" and pod.lastModifiedDate between '{fromDate.ToString("yyyy-MM-dd")}' and '{toDate.ToString("yyyy-MM-dd")}'";
             }
-
-
             string query = "SELECT fc.name as facilityName,pod.ID as podID,pod.remarks as wo_decription, facilityid as       facility_id,pod.spare_status,pod.remarks,sai.orderflag,sam.asset_type_ID," +
                 "pod.purchaseID,pod.assetItemID,sai.serial_number,sai.location_ID,(select sum(cost) from smgoodsorderdetails where purchaseID = po.id) as cost,pod.ordered_qty,\r\n bl.name as vendor_name,\r\n     " +
                 " po.purchaseDate,sam.asset_type_ID,sam.asset_name,po.receiverID,\r\n        " +
@@ -1652,7 +1650,7 @@ namespace CMMSAPIs.Repositories.Masters
                 wo_number = p.purchaseID,
                 facility_id = p.facility_id,
                 facility_name = p.facilityName,
-                asset_name = p.asset_name,
+                assetsname = p.asset_name,
                 status = p.status,
                 start_date = p.purchaseDate
 
@@ -1744,7 +1742,7 @@ namespace CMMSAPIs.Repositories.Masters
                 wo_number = p.purchaseID,
                 facility_id = p.facility_id,
                 facility_name = p.facilityName,
-                asset_name = p.asset_name,
+                assetsname = p.asset_name,
                 status = p.status,
                 start_date = p.purchaseDate
 

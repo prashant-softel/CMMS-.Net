@@ -87,7 +87,7 @@ namespace CMMSAPIs.Models.Masters
         public int status { get; set; }
         public string status_long { get; set; }
         public string asset_category { get; set; }
-        public string asset_name { get; set; }
+
         public DateTime? start_date { get; set; }
         public DateTime? schedule_time { get; set; }
         public DateTime? end_date { get; set; }
