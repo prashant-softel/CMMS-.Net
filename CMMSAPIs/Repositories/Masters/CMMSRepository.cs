@@ -7,6 +7,7 @@ using CMMSAPIs.Models.Jobs;
 using CMMSAPIs.Models.Masters;
 using CMMSAPIs.Models.Notifications;
 using CMMSAPIs.Models.Permits;
+using CMMSAPIs.Models.SM;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Models.WC;
 using CMMSAPIs.Repositories.Calibration;
@@ -24,6 +25,7 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using static iTextSharp.text.pdf.AcroFields;
 
 namespace CMMSAPIs.Repositories.Masters
 {
@@ -1718,6 +1720,11 @@ namespace CMMSAPIs.Repositories.Masters
             {
                 result.unknown_count = result.total - result.pending + result.completed + result.created + result.rejected + result.assigned;
             }
+
+            result.StockConsumptionByGoods = await getStockAvailableByGoods(facilityId,fromDate,toDate);
+            result.StockConsumptionBySites = await getStockAvailableBySites(fromDate,toDate);
+            result.StockOverview = await StockOverview(facilityId,fromDate, toDate);
+
             var test = await getLowStockItemList(facilityId, fromDate, toDate);
             return result;
         }
@@ -1804,6 +1811,128 @@ namespace CMMSAPIs.Repositories.Masters
                 result.wo_delay = wo_delay;
                 result.wo_backlog = wo_backlog;
             }
+            return result;
+        }
+
+        public async Task<List<CMSMConsumptionByGoods>> getStockAvailableByGoods(string facility_id, DateTime StartDate, DateTime EndDate)
+        {
+
+           string Plant_Stock_Opening_Details_query = $"select     asset_type, SUM(opening) AS Opening, SUM(inward) AS inward," +
+                $" SUM(outward) AS outward  from (SELECT ifnull(smc.cat_name,'Others') as asset_type, " +
+    $" IFNULL((select sum(ST.creditQty)-sum(ST.debitQty)  FROM smtransition as ST  JOIN smassetmasters as SM ON SM.ID = ST.assetItemID  " +
+    $" LEFT JOIN facilities fcc ON fcc.id = ST.facilityID   where   ST.actorType = {(int)CMMS.SM_Actor_Types.Store} and SM.ID=a_master.ID  and ST.facilityID in ('{facility_id}')" +
+    $" and sm_trans.actorID = {facility_id} and date_format(ST.lastModifiedDate, '%Y-%m-%d') < '{StartDate.ToString("yyyy-MM-dd")}'  group by SM.asset_code),0) Opening," +
+    $"  IFNULL((select sum(si.creditQty) from smtransition si where si.id = sm_trans.id and  date_format(sm_trans.lastModifiedDate, '%Y-%m-%d') " +
+    $" BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}' ),0) as inward, " +
+    $"   IFNULL((select sum(so.debitQty) from smtransition so where so.id = sm_trans.id and  date_format(sm_trans.lastModifiedDate, '%Y-%m-%d') " +
+    $" BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}' ),0) as outward " +
+    $" FROM smtransition as sm_trans " +
+    $" JOIN smassetmasters as a_master ON a_master.ID = sm_trans.assetItemID " +
+    $" LEFT JOIN facilities fc ON fc.id = sm_trans.facilityID " +
+    $" Left join smassettypes AST on AST.id = a_master.asset_type_ID " +
+    $"  left join smitemcategory smc on smc.ID = a_master.item_category_ID " +
+    $" where sm_trans.actorType = {(int)CMMS.SM_Actor_Types.Store} and sm_trans.facilityID in ('{facility_id}') and " +
+    $" sm_trans.actorID in ({facility_id}) group by a_master.asset_code) a GROUP BY asset_type;";
+
+            List<CMPlantStockOpening> Plant_Stock_Opening_Details_Reader = await Context.GetData<CMPlantStockOpening>(Plant_Stock_Opening_Details_query).ConfigureAwait(false);
+            List<CMSMConsumptionByGoods> result = new List<CMSMConsumptionByGoods>();
+            foreach (var item in Plant_Stock_Opening_Details_Reader)
+            {
+                item.balance = item.Opening + item.inward - item.outward;
+                CMSMConsumptionByGoods category_item = new CMSMConsumptionByGoods();
+                category_item.key = item.asset_type;
+                category_item.value = item.balance;
+                result.Add(category_item);
+            }
+
+
+
+            return result;
+        }
+
+        public async Task<List<CMSMConsumptionByGoods>> getStockAvailableBySites( DateTime StartDate, DateTime EndDate)
+        {
+
+            string Plant_Stock_Opening_Details_query = $"select     facilityName, SUM(opening) AS Opening, SUM(inward) AS inward," +
+                 $" SUM(outward) AS outward  from (SELECT fc.name as facilityName, " +
+     $" IFNULL((select sum(ST.creditQty)-sum(ST.debitQty)  FROM smtransition as ST  JOIN smassetmasters as SM ON SM.ID = ST.assetItemID  " +
+     $" LEFT JOIN facilities fcc ON fcc.id = ST.facilityID   where   ST.actorType = {(int)CMMS.SM_Actor_Types.Store} and SM.ID=a_master.ID " +
+     $" and sm_trans.actorID =  sm_trans.facilityID and date_format(ST.lastModifiedDate, '%Y-%m-%d') < '{StartDate.ToString("yyyy-MM-dd")}'  group by SM.asset_code),0) Opening," +
+     $"  IFNULL((select sum(si.creditQty) from smtransition si where si.id = sm_trans.id and  date_format(sm_trans.lastModifiedDate, '%Y-%m-%d') " +
+     $" BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}' ),0) as inward, " +
+     $"   IFNULL((select sum(so.debitQty) from smtransition so where so.id = sm_trans.id and  date_format(sm_trans.lastModifiedDate, '%Y-%m-%d') " +
+     $" BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}' ),0) as outward " +
+     $" FROM smtransition as sm_trans " +
+     $" JOIN smassetmasters as a_master ON a_master.ID = sm_trans.assetItemID " +
+     $" LEFT JOIN facilities fc ON fc.id = sm_trans.facilityID " +
+     $" Left join smassettypes AST on AST.id = a_master.asset_type_ID " +
+     $"  left join smitemcategory smc on smc.ID = a_master.item_category_ID " +
+     $" where sm_trans.actorType = {(int)CMMS.SM_Actor_Types.Store} and " +
+     $" sm_trans.actorID = sm_trans.facilityID   group by a_master.asset_code) a GROUP BY facilityName;";
+
+            List<CMPlantStockOpening> Plant_Stock_Opening_Details_Reader = await Context.GetData<CMPlantStockOpening>(Plant_Stock_Opening_Details_query).ConfigureAwait(false);
+            List<CMSMConsumptionByGoods> result = new List<CMSMConsumptionByGoods>();
+            foreach (var item in Plant_Stock_Opening_Details_Reader)
+            {
+                item.balance = item.Opening + item.inward - item.outward;
+                CMSMConsumptionByGoods category_item = new CMSMConsumptionByGoods();
+                category_item.key = item.facilityName;
+                category_item.value = item.balance;
+                result.Add(category_item);
+            }
+
+
+
+            return result;
+        }
+
+        public async Task<List<CMSMConsumptionByGoods>> StockOverview(string facility_id, DateTime StartDate, DateTime EndDate)
+        {
+
+            string Plant_Stock_Opening_Details_query = $"select     SUM(opening) AS Opening, SUM(inward) AS inward," +
+                 $" SUM(outward) AS outward  from (SELECT ifnull(smc.cat_name,'Others') as asset_type, " +
+     $" IFNULL((select sum(ST.creditQty)-sum(ST.debitQty)  FROM smtransition as ST  JOIN smassetmasters as SM ON SM.ID = ST.assetItemID  " +
+     $" LEFT JOIN facilities fcc ON fcc.id = ST.facilityID   where   ST.actorType = {(int)CMMS.SM_Actor_Types.Store} and SM.ID=a_master.ID  and ST.facilityID in ('{facility_id}')" +
+     $" and sm_trans.actorID = {facility_id} and date_format(ST.lastModifiedDate, '%Y-%m-%d') < '{StartDate.ToString("yyyy-MM-dd")}'  group by SM.asset_code),0) Opening," +
+     $"  IFNULL((select sum(si.creditQty) from smtransition si where si.id = sm_trans.id and  date_format(sm_trans.lastModifiedDate, '%Y-%m-%d') " +
+     $" BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}' ),0) as inward, " +
+     $"   IFNULL((select sum(so.debitQty) from smtransition so where so.id = sm_trans.id and  date_format(sm_trans.lastModifiedDate, '%Y-%m-%d') " +
+     $" BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}' ),0) as outward " +
+     $" FROM smtransition as sm_trans " +
+     $" JOIN smassetmasters as a_master ON a_master.ID = sm_trans.assetItemID " +
+     $" LEFT JOIN facilities fc ON fc.id = sm_trans.facilityID " +
+     $" Left join smassettypes AST on AST.id = a_master.asset_type_ID " +
+     $"  left join smitemcategory smc on smc.ID = a_master.item_category_ID " +
+     $" where sm_trans.actorType = {(int)CMMS.SM_Actor_Types.Store} and sm_trans.facilityID in ('{facility_id}') and " +
+     $" sm_trans.actorID in ({facility_id}) group by a_master.asset_code) a;";
+
+            List<CMPlantStockOpening> Plant_Stock_Opening_Details_Reader = await Context.GetData<CMPlantStockOpening>(Plant_Stock_Opening_Details_query).ConfigureAwait(false);
+            List<CMSMConsumptionByGoods> result = new List<CMSMConsumptionByGoods>();
+            foreach (var item in Plant_Stock_Opening_Details_Reader)
+            {
+                item.balance = item.Opening + item.inward - item.outward;
+              
+            }
+
+            CMSMConsumptionByGoods category_item_opening = new CMSMConsumptionByGoods();
+            CMSMConsumptionByGoods category_item_inward = new CMSMConsumptionByGoods();
+            CMSMConsumptionByGoods category_item_outward = new CMSMConsumptionByGoods();
+            CMSMConsumptionByGoods category_item_balance = new CMSMConsumptionByGoods();
+            category_item_opening.key = "Opening";
+            category_item_opening.value = Plant_Stock_Opening_Details_Reader[0].Opening;
+            category_item_inward.key = "Inward";
+            category_item_inward.value = Plant_Stock_Opening_Details_Reader[0].inward;
+            category_item_outward.key = "Outward";
+            category_item_outward.value = Plant_Stock_Opening_Details_Reader[0].outward;
+            category_item_balance.key = "Balance";
+            category_item_balance.value = Plant_Stock_Opening_Details_Reader[0].balance;
+            result.Add(category_item_opening);
+            result.Add(category_item_inward);
+            result.Add(category_item_outward);
+            result.Add(category_item_balance);
+
+
+
             return result;
         }
 
