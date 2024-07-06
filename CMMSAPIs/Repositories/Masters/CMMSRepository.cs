@@ -1567,38 +1567,38 @@ namespace CMMSAPIs.Repositories.Masters
             switch (m_notificationID)
             {
                 case CMMS.CMMS_Status.GO_DRAFT:
-                    retValue = "Drafted";
+                    retValue = "GO Raised - Drafted";
                     break;
                 case CMMS.CMMS_Status.GO_SUBMITTED:
-                    retValue = "Waiting for approval";
+                    retValue = "GO Raised - Waiting for approval";
                     break;
 
                 case CMMS.CMMS_Status.GO_CLOSED:
-                    retValue = "Closed";
+                    retValue = "GO Raised - Closed";
                     break;
 
                 case CMMS.CMMS_Status.GO_DELETED:
-                    retValue = "Deleted";
+                    retValue = "GO - Deleted";
                     break;
 
 
                 case CMMS.CMMS_Status.GO_REJECTED:
-                    retValue = "Rejected";
+                    retValue = "GO Raised - Rejected";
                     break;
                 case CMMS.CMMS_Status.GO_APPROVED:
-                    retValue = "Approved";
+                    retValue = "GO Raised - Approved";
                     break;
                 case CMMS.CMMS_Status.GO_RECEIVE_DRAFT:
-                    retValue = "Receive draft";
+                    retValue = "Goods Partically Received - Open";
                     break;
                 case CMMS.CMMS_Status.GO_RECEIVED_SUBMITTED:
-                    retValue = "Receive submitted";
+                    retValue = "Goods Receive - Submitted";
                     break;
                 case CMMS.CMMS_Status.GO_RECEIVED_REJECTED:
-                    retValue = "Receive rejected";
+                    retValue = "Goods Receive - Rejected";
                     break;
                 case CMMS.CMMS_Status.GO_RECEIVED_APPROVED:
-                    retValue = "Receive approved";
+                    retValue = "Goods Receive - Approved";
                     break;
                 default:
                     retValue = "Unknown <" + m_notificationID + ">";
@@ -1619,50 +1619,74 @@ namespace CMMSAPIs.Repositories.Masters
             {
                 datefilter = $" and pod.lastModifiedDate between '{fromDate.ToString("yyyy-MM-dd")}' and '{toDate.ToString("yyyy-MM-dd")}'";
             }
-            string query = "SELECT fc.name as facilityName,pod.ID as podID,pod.remarks as wo_decription, facilityid as       facility_id,pod.spare_status,pod.remarks,sai.orderflag,sam.asset_type_ID," +
-                "pod.purchaseID,pod.assetItemID,sai.serial_number,sai.location_ID,(select sum(cost) from smgoodsorderdetails where purchaseID = po.id) as cost,pod.ordered_qty,\r\n bl.name as vendor_name,\r\n     " +
-                " po.purchaseDate,sam.asset_type_ID,sam.asset_name,po.receiverID,\r\n        " +
-                "po.vendorID,po.status,sai.asset_code,t1.asset_type,t2.cat_name,pod.received_qty,pod.damaged_qty,pod.accepted_qty," +
-                "f1.file_path,f1.Asset_master_id,sm.decimal_status,sm.spare_multi_selection,po.generated_by,pod.order_type as asset_type_ID_OrderDetails, receive_later, " +
-                "added_to_store,   \r\n      " +
-                "  po.challan_no, po.po_no, po.freight, po.transport, po.no_pkg_received, po.lr_no, po.condition_pkg_received, " +
-                "po.vehicle_no, po.gir_no, po.job_ref, po.amount,  po.currency as currencyID , curr.name as currency , stt.asset_type as asset_type_Name,  po_no, requested_qty,lost_qty, ordered_qty, CONCAT(ed.firstName,' ',ed.lastName) as generatedBy\r\n  ,po.received_on as receivedAt    " +
-                "  FROM smgoodsorderdetails pod\r\n        LEFT JOIN smgoodsorder po ON po.ID = pod.purchaseID\r\n     " +
-                "   LEFT JOIN smassetitems sai ON sai.ID = pod.assetItemID\r\n       " +
-                " LEFT JOIN smassetmasters sam ON sam.ID = pod.assetItemID\r\n      " +
-                "  LEFT JOIN smunitmeasurement sm ON sm.ID = sam.unit_of_measurement\r\n    " +
-                "    LEFT JOIN (\r\n            SELECT file.file_path,file.Asset_master_id as Asset_master_id FROM smassetmasterfiles file \r\n " +
-                "           LEFT join smassetmasters sam on file.Asset_master_id =  sam.id )\r\n        " +
-                "    f1 ON f1.Asset_master_id = sam.id\r\n        LEFT JOIN (\r\n         " +
-                "   SELECT sat.asset_type,s1.ID as master_ID FROM smassettypes sat\r\n      " +
-                "      LEFT JOIN smassetmasters s1 ON s1.asset_type_ID = sat.ID\r\n        )  t1 ON t1.master_ID = sam.ID\r\n     " +
-                "   LEFT JOIN (\r\n            SELECT sic.cat_name,s2.ID as master_ID FROM smitemcategory sic\r\n          " +
-                "  LEFT JOIN smassetmasters s2 ON s2.item_category_ID = sic.ID\r\n        )  t2 ON t2.master_ID = sam.ID\r\n " +
-                "       LEFT JOIN facilities fc ON fc.id = po.facilityID\r\nLEFT JOIN users as vendor on vendor.id=po.vendorID " +
-                "       LEFT JOIN business bl ON bl.id = po.vendorID left join smassettypes stt on stt.ID = pod.order_type LEFT JOIN currency curr ON curr.id = po.currency LEFT JOIN users ed ON ed.id = po.generated_by" +
-                " WHERE " + filter + " " + datefilter + "";
+            //string query = "SELECT fc.name as facilityName,pod.ID as podID,pod.remarks as wo_decription, facilityid as       facility_id,pod.spare_status,pod.remarks,sai.orderflag,sam.asset_type_ID," +
+            //    "pod.purchaseID,pod.assetItemID,sai.serial_number,sai.location_ID,(select sum(cost) from smgoodsorderdetails where purchaseID = po.id) as cost,pod.ordered_qty,\r\n bl.name as vendor_name,\r\n     " +
+            //    " po.purchaseDate,sam.asset_type_ID,sam.asset_name,po.receiverID,\r\n        " +
+            //    "po.vendorID,po.status,sai.asset_code,t1.asset_type,t2.cat_name,pod.received_qty,pod.damaged_qty,pod.accepted_qty," +
+            //    "f1.file_path,f1.Asset_master_id,sm.decimal_status,sm.spare_multi_selection,po.generated_by,pod.order_type as asset_type_ID_OrderDetails, receive_later, " +
+            //    "added_to_store,   \r\n      " +
+            //    "  po.challan_no, po.po_no, po.freight, po.transport, po.no_pkg_received, po.lr_no, po.condition_pkg_received, " +
+            //    "po.vehicle_no, po.gir_no, po.job_ref, po.amount,  po.currency as currencyID , curr.name as currency , stt.asset_type as asset_type_Name,  po_no, requested_qty,lost_qty, ordered_qty, CONCAT(ed.firstName,' ',ed.lastName) as generatedBy\r\n  ,po.received_on as receivedAt    " +
+            //    "  FROM smgoodsorderdetails pod\r\n        LEFT JOIN smgoodsorder po ON po.ID = pod.purchaseID\r\n     " +
+            //    "   LEFT JOIN smassetitems sai ON sai.ID = pod.assetItemID\r\n       " +
+            //    " LEFT JOIN smassetmasters sam ON sam.ID = pod.assetItemID\r\n      " +
+            //    "  LEFT JOIN smunitmeasurement sm ON sm.ID = sam.unit_of_measurement\r\n    " +
+            //    "    LEFT JOIN (\r\n            SELECT file.file_path,file.Asset_master_id as Asset_master_id FROM smassetmasterfiles file \r\n " +
+            //    "           LEFT join smassetmasters sam on file.Asset_master_id =  sam.id )\r\n        " +
+            //    "    f1 ON f1.Asset_master_id = sam.id\r\n        LEFT JOIN (\r\n         " +
+            //    "   SELECT sat.asset_type,s1.ID as master_ID FROM smassettypes sat\r\n      " +
+            //    "      LEFT JOIN smassetmasters s1 ON s1.asset_type_ID = sat.ID\r\n        )  t1 ON t1.master_ID = sam.ID\r\n     " +
+            //    "   LEFT JOIN (\r\n            SELECT sic.cat_name,s2.ID as master_ID FROM smitemcategory sic\r\n          " +
+            //    "  LEFT JOIN smassetmasters s2 ON s2.item_category_ID = sic.ID\r\n        )  t2 ON t2.master_ID = sam.ID\r\n " +
+            //    "       LEFT JOIN facilities fc ON fc.id = po.facilityID\r\nLEFT JOIN users as vendor on vendor.id=po.vendorID " +
+            //    "       LEFT JOIN business bl ON bl.id = po.vendorID left join smassettypes stt on stt.ID = pod.order_type LEFT JOIN currency curr ON curr.id = po.currency LEFT JOIN users ed ON ed.id = po.generated_by" +
+            //    " WHERE " + filter + " " + datefilter + "";
+
+            string updatedQuery = $"SELECT pod.purchaseID as go_id,po.facilityID as facilityId,fc.name as facilityName," +
+                $"gir_no as GRNo,po.status,sam.asset_name as product_name,po_no as GONo,\r\nrequested_qty,ordered_qty," +
+                $"amount as total_amount,\r\n(select sum(cost) from smgoodsorderdetails where purchaseID = po.id) " +
+                $"as unit_amount, requested_qty as grn_qty, purchaseDate as grn_date, purchaseDate as gr_date, " +
+                $"po_date as go_date,\r\n facilityid as       facility_id,\t\r\n        " +
+                $"CONCAT(ed.firstName,' ',ed.lastName) as generatedBy\r\n  ,po.received_on as receivedAt      " +
+                $"FROM smgoodsorderdetails pod\r\n        LEFT JOIN smgoodsorder po ON po.ID = pod.purchaseID\r\n  " +
+                $"      LEFT JOIN smassetitems sai ON sai.ID = pod.assetItemID\r\n        " +
+                $"LEFT JOIN smassetmasters sam ON sam.ID = pod.assetItemID\r\n        " +
+                $"LEFT JOIN facilities fc ON fc.id = po.facilityID\r\nLEFT JOIN users as vendor on vendor.id=po.vendorID" +
+                $"        \r\nLEFT JOIN users ed ON ed.id = po.generated_by \r\n" +
+                $"  WHERE { filter}  { datefilter} ;";
+     
+            List<CMGODashboardList> _List1 = await Context.GetData<CMGODashboardList>(updatedQuery).ConfigureAwait(false);
 
 
-            List<CMGoodsOrderList> _List = await Context.GetData<CMGoodsOrderList>(query).ConfigureAwait(false);
 
-            List<CMDashboadItemList> itemList = _List.Select(p => new CMDashboadItemList
+            List<CMDashboadItemList> itemList = _List1.Select(p => new CMDashboadItemList
             {
-                wo_number = p.purchaseID,
-                facility_id = p.facility_id,
+                wo_number = p.go_id,
+                facility_id = p.facilityId,
                 facility_name = p.facilityName,
-                assetsname = p.asset_name,
+                assetsname = p.product_name,
                 status = p.status,
-                start_date = p.purchaseDate
+                go_id = p.go_id,
+                GRNo = p.GRNo,
+                GONo = p.GONo,
+                product_name = p.product_name,
+                requested_qty = p.requested_qty,
+                gr_date = p.gr_date,
+                ordered_qty = p.ordered_qty,
+                go_date = p.go_date,
+                unit_amount = p.unit_amount,
+                total_amount = p.total_amount,
+                grn_date = p.grn_date,
+                grn_qty = p.grn_qty,
 
             }).GroupBy(p => p.wo_number).Select(group => group.First()).OrderBy(p => p.wo_number).ToList();
 
-
-            for (var i = 0; i < _List.Count; i++)
+            for (var i = 0; i < itemList.Count; i++)
             {
-                CMDashboadItemList item = new CMDashboadItemList();
-                CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_List[i].status);
+             
+                CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(itemList[i].status);
                 string _longStatus = getShortStatus_GO(CMMS.CMMS_Modules.SM_GO, _Status);
-                item.status_long = _longStatus;
+                itemList[i].status_long = _longStatus;
             }
 
             result.created = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.GO_DRAFT).ToList().Count;
@@ -1680,9 +1704,9 @@ namespace CMMSAPIs.Repositories.Masters
             result.po_items_awaited = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.GO_CLOSED).ToList().Count;
             result.low_stock_items = 4;
 
-            int completed_on_time = _List.Where(x => x.status == (int)CMMS.CMMS_Status.GO_APPROVED && x.purchaseDate != x.purchaseDate).ToList().Count;
-            int wo_delay = _List.Where(x => x.status != (int)CMMS.CMMS_Status.GO_APPROVED && x.purchaseDate != x.purchaseDate).ToList().Count;
-            int wo_backlog = _List.Where(x => x.status != (int)CMMS.CMMS_Status.GO_APPROVED && x.purchaseDate != x.purchaseDate).ToList().Count;
+            int completed_on_time = _List1.Where(x => x.status == (int)CMMS.CMMS_Status.GO_APPROVED && x.go_date != x.go_date).ToList().Count;
+            int wo_delay = _List1.Where(x => x.status != (int)CMMS.CMMS_Status.GO_APPROVED && x.go_date != x.go_date).ToList().Count;
+            int wo_backlog = _List1.Where(x => x.status != (int)CMMS.CMMS_Status.GO_APPROVED && x.go_date != x.go_date).ToList().Count;
 
             if (result.total > 0)
             {
