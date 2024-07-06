@@ -75,6 +75,10 @@ namespace CMMSAPIs.Models.Masters
         public int mc_closed_count { get; set; }
 
         public List<CMDashboadItemList> item_list { get; set; }
+        public List<CMSMConsumptionByGoods> StockOverview { get; set; }
+        public List<CMSMConsumptionByGoods> StockConsumptionByGoods { get; set; }
+        public List<CMSMConsumptionByGoods> StockConsumptionBySites { get; set; }
+    
     }
 
     public class CMDashboadItemList
@@ -115,5 +119,11 @@ namespace CMMSAPIs.Models.Masters
     public class CMROLE
     {
         public int roleId { get; set; }
+    }
+
+    public class CMSMConsumptionByGoods
+    {
+        public string key { get; set; }
+        public decimal value { get; set; }
     }
 }
