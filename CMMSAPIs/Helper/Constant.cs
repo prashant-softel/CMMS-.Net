@@ -598,7 +598,8 @@ namespace CMMSAPIs.Helper
             MC_TASK_END_APPROVED = 600,
             MC_TASK_END_REJECTED,
             MC_TASK_SCHEDULE_APPROVED,
-            MC_TASK_SCHEDULE_REJECT
+            MC_TASK_SCHEDULE_REJECT,
+            MC_TASK_RESCHEDULED
         }
 
         public enum ApprovalStatus

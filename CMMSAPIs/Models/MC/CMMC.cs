@@ -365,6 +365,7 @@ namespace CMMSAPIs.Models.MC
     }
     public class ApproveMC
     {
+        public int id { get; set; }
         public int execution_id { get; set; }
         public int schedule_id { get; set; }
         public string comment { get; set; }

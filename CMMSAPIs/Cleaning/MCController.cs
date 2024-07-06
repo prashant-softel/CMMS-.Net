@@ -198,6 +198,21 @@ namespace CMMSAPIs.Controllers.MC
                 throw;
             }
         }
+        [Route("RescheduleExecution")]
+        [HttpPut]
+        public async Task<IActionResult> RescheduleExecution(ApproveMC request)
+        {
+            try
+            {
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _CleaningBS.RescheduleExecution(request, userId);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
         //[Authorize]
         [Route("RejectMCPlan")]
         [HttpPut]

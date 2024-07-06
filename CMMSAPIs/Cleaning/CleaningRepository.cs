@@ -45,6 +45,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             { (int)CMMS.CMMS_Status.MC_TASK_END_REJECTED,"MC_Task_Ended_Reject" },
             { (int)CMMS.CMMS_Status.MC_TASK_SCHEDULE_APPROVED,"MC_Task_Schedule_Approved" },
             { (int)CMMS.CMMS_Status.MC_TASK_SCHEDULE_REJECT,"MC_Task_Schedule_Reject" },
+            { (int)CMMS.CMMS_Status.MC_TASK_RESCHEDULED,"Reschedule" },
             { (int)CMMS.CMMS_Status.VEG_PLAN_DRAFT, "Draft" },
             { (int)CMMS.CMMS_Status.VEG_PLAN_SUBMITTED, "Waiting for Approval" },
             { (int)CMMS.CMMS_Status.VEG_PLAN_APPROVED, "Approved" },
@@ -1137,6 +1138,25 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MC_TASK, request.schedule_id, 0, 0, request.comment, (CMMS.CMMS_Status)status, userID);
 
             CMDefaultResponse response = new CMDefaultResponse(request.schedule_id, CMMS.RETRUNSTATUS.SUCCESS, $"Execution Schedule Rejected");
+            return response;
+        }
+        internal async Task<CMDefaultResponse> RescheduleExecution(ApproveMC request, int userID)
+        {
+
+            int status = (int)CMMS.CMMS_Status.MC_TASK_RESCHEDULED;
+
+            if (moduleType == 2)
+            {
+                //  status = (int)CMMS.CMMS_Status.;
+
+            }
+
+            string approveQuery = $"Update cleaning_execution set status= {status},updatedById={userID},remark='{request.comment}',rescheduled = 1, updatedAt='{UtilsRepository.GetUTCTime()}' where id= {request.id}";
+            await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
+
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MC_TASK, request.id, 0, 0, request.comment, (CMMS.CMMS_Status)status, userID);
+
+            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Execution Reschedule");
             return response;
         }
         internal async Task<CMDefaultResponse> RejectExecution(CMApproval request, int userID)
