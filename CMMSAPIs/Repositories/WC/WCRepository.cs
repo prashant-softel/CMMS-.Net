@@ -212,7 +212,42 @@ namespace CMMSAPIs.Repositories.WC
                                     $"supplier_id = (SELECT supplierId FROM assets WHERE assets.id = {unit.equipmentId}), " +
                                     $"currency = (SELECT code FROM currency WHERE currency.id = {unit.currencyId}) WHERE wc.id = {id};";
                 await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
-
+                if (unit.additionalEmailEmployees.Count > 0)
+                {
+                    string addMailQry = "INSERT INTO wc_emails (wc_id, email, name, user_id, type,role) VALUES ";
+                    string idToMail = $"SELECT id, loginId as email, CONCAT(firstName,' ',lastName) as name,roleId  FROM users " +
+                                        $"WHERE id IN ({string.Join(',', unit.additionalEmailEmployees)});";
+                    DataTable mailList = await Context.FetchData(idToMail).ConfigureAwait(false);
+                    foreach (DataRow mail in mailList.Rows)
+                    {
+                        addMailQry += $"({id}, '{mail["email"]}', '{mail["name"]}', {mail["id"]}, 'Internal','{mail["roleId"]}'), ";
+                    }
+                    string getAllMails = "SELECT id, loginId,roleId FROM users;";
+                    DataTable allMails = await Context.FetchData(getAllMails).ConfigureAwait(false);
+                    Dictionary<string, int> mailToId = new Dictionary<string, int>();
+                    Dictionary<string, int> mailToRole = new Dictionary<string, int>();
+                    mailToId.Merge(allMails.GetColumn<string>("loginId"), allMails.GetColumn<int>("id"));
+                    mailToRole.Merge(allMails.GetColumn<string>("loginId"), allMails.GetColumn<int>("roleId"));
+                    foreach (var mail in unit.externalEmails)
+                    {
+                        int u_id;
+                        int roleId;
+                        try
+                        {
+                            u_id = mailToId[mail.email];
+                            roleId = mailToRole[mail.email];
+                        }
+                        catch (KeyNotFoundException)
+                        {
+                            u_id = 0;
+                            roleId = 0;
+                        }
+                        addMailQry += $"({id}, '{mail.email}', '{mail.name}', {u_id}, '{(u_id != 0 ? "Internal" : "External")}','{roleId}'), ";
+                    }
+                    addMailQry = addMailQry.Substring(0, addMailQry.Length - 2) + ";";
+                    await Context.ExecuteNonQry<int>(addMailQry).ConfigureAwait(false);
+                }
+                /*
                 if (unit.additionalEmailEmployees.Count > 0)
                 {
                     string addMailQry = "INSERT INTO wc_emails (wc_id, email, name, user_id, type) VALUES ";
@@ -243,7 +278,7 @@ namespace CMMSAPIs.Repositories.WC
                     addMailQry = addMailQry.Substring(0, addMailQry.Length - 2) + ";";
                     await Context.ExecuteNonQry<int>(addMailQry).ConfigureAwait(false);
                 }
-
+                */
                 string addSupplierActions = "INSERT INTO wcschedules (warranty_id, supplier_action, input_value, input_date,srNumber, created_at) VALUES ";
                 foreach (var action in unit.supplierActions)
                 {
@@ -345,12 +380,12 @@ namespace CMMSAPIs.Repositories.WC
             GetWCDetails[0].status_long = _longStatus;
 
             // Retrieve external emails associated with the warranty claim
-            string internalEmailsQuery = $"SELECT user_id, name, email  FROM wc_emails WHERE wc_id = {id} and type = 'Internal'";
+            string internalEmailsQuery = $"SELECT user_id, name, email,role  FROM wc_emails WHERE wc_id = {id} and type = 'Internal'";
             List<CMWCExternalEmail> internalEmails = await Context.GetData<CMWCExternalEmail>(internalEmailsQuery).ConfigureAwait(false);
             GetWCDetails[0].additionalEmailEmployees = internalEmails;
 
             // Retrieve external emails associated with the warranty claim
-            string externalEmailsQuery = $"SELECT user_id, name, email FROM wc_emails WHERE wc_id = {id} and type = 'External'";
+            string externalEmailsQuery = $"SELECT user_id, name, email,role FROM wc_emails WHERE wc_id = {id} and type = 'External'";
             List<CMWCExternalEmail> externalEmails = await Context.GetData<CMWCExternalEmail>(externalEmailsQuery).ConfigureAwait(false);
             GetWCDetails[0].externalEmails = externalEmails;
 

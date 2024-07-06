@@ -133,12 +133,12 @@ namespace CMMSAPIs.Repositories.PM
         }
         internal async Task<CMDefaultResponse> UpdatePMPlan(CMPMPlanDetail request, int userID)
         {
-
+            string date = Convert.ToString(request.plan_date);
             string myQuery = "UPDATE pm_plan SET ";
             if (request.plan_name != null && request.plan_name != "")
                 myQuery += $"plan_name = '{request.plan_name}', ";
-            if (request.plan_date != null)
-                myQuery += $"plan_date = '{request.plan_date.ToString("yyyy-MM-dd")}', ";
+            if (date != null)
+                myQuery += $"plan_date = '{date}', ";
             if (request.plan_freq_id > 0)
                 myQuery += $"frequency_id = {request.plan_freq_id}, ";
             if (request.facility_id > 0)

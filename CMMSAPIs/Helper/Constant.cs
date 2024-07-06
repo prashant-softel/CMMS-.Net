@@ -526,6 +526,7 @@ namespace CMMSAPIs.Helper
             MC_TASK_UPDATED,
             SCHEDULED_LINKED_TO_PTW,
 
+
             VEG_PLAN_DRAFT = 370,
             VEG_PLAN_SUBMITTED,
             VEG_PLAN_REJECTED,
@@ -540,6 +541,8 @@ namespace CMMSAPIs.Helper
             VEG_TASK_APPROVED,
             VEG_TASK_REJECTED,
             VEGETATION_LINKED_TO_PTW,
+            VEG_TASK_END_APPROVED,
+            VEG_TASK_END_REJECTED,
 
             PM_PLAN_CREATED = 401,
             PM_PLAN_DRAFT,
@@ -591,6 +594,11 @@ namespace CMMSAPIs.Helper
             OBSERVATION_CLOSED,
             OBSERVATION_DELETED,
             OBSERVATION_UPDATED,
+
+            MC_TASK_END_APPROVED = 600,
+            MC_TASK_END_REJECTED,
+            MC_TASK_SCHEDULE_APPROVED,
+            MC_TASK_SCHEDULE_REJECT
         }
 
         public enum ApprovalStatus

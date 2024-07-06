@@ -170,7 +170,10 @@ namespace CMMSAPIs.Models.MC
         public string status_short_ptw { get; set; }
         public string remark { get; set; }
         public int status { get; set; }
-
+        public string rejectedById { get; set; }
+        public DateTime? rejectedAt { get; set; }
+        public string approvedById { get; set; }
+        public DateTime? approvedAt { get; set; }
         public string status_short { get; set; }
         public List<CMMCExecutionEquipment> equipments { get; set; }
     }
@@ -226,6 +229,12 @@ namespace CMMSAPIs.Models.MC
         public DateTime startedAt { get; set; }
         public string abandonedBy { get; set; }
         public DateTime abandonedAt { get; set; }
+        public string rejectedById { get; set; }
+        public DateTime? rejectedAt { get; set; }
+        public string approvedById { get; set; }
+        public DateTime? approvedAt { get; set; }
+
+
         public int status { get; set; }     //Completed
         public string status_short { get; set; }
         public string status_long { get; set; }
@@ -352,6 +361,14 @@ namespace CMMSAPIs.Models.MC
         public int invId { get; set; }
         public string invName { get; set; }
         public int area { get; set; }
+
+    }
+    public class ApproveMC
+    {
+        public int execution_id { get; set; }
+        public int schedule_id { get; set; }
+        public string comment { get; set; }
+
 
     }
 

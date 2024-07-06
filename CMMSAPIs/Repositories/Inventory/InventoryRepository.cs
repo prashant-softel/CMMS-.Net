@@ -184,6 +184,13 @@ namespace CMMSAPIs.Repositories.Inventory
             Dictionary<string, int> assets = new Dictionary<string, int>();
             assets.Merge(assetNames, assetIDs);
 
+            string queryfrequency = "SELECT id, UPPER(name) as name FROM frequency GROUP BY name ORDER BY id ASC;";
+            DataTable dtqueryfrequency = await Context.FetchData(queryfrequency).ConfigureAwait(false);
+            List<string> frequency_Names = dtqueryfrequency.GetColumn<string>("name");
+            List<int> frequency_IDs = dtqueryfrequency.GetColumn<int>("id");
+            Dictionary<string, int> frequency = new Dictionary<string, int>();
+            frequency.Merge(frequency_Names, frequency_IDs);
+
             Dictionary<string, Tuple<string, Type>> columnNames = new Dictionary<string, Tuple<string, Type>>()
             {
                 { "Plant_Name", new Tuple<string, Type>("siteName", typeof (string)) },
@@ -200,6 +207,7 @@ namespace CMMSAPIs.Repositories.Inventory
                 { "Asset_Calibration/Testing_Date", new Tuple<string, Type>("calibrationFirstDueDate", typeof(DateTime)) },
                 { "Asset_Last_Calibration_Date", new Tuple<string, Type>("calibrationLastDate", typeof(DateTime)) },
                 { "Asset_Calibration_Frequency", new Tuple<string, Type>("calibrationFrequency", typeof(int)) },
+               // { "Asset_Calibration_Frequency", new Tuple<string, Type>("calibrationFrequency", typeof(string)) },
                 { "Calibration_Reminder_Days", new Tuple<string, Type>("calibrationReminderDays", typeof(int)) },
                 { "Warranty_Description", new Tuple<string, Type>("warranty_description", typeof(string)) },
                 { "Asset_Warranty_Start_Date", new Tuple<string, Type>("start_date", typeof(DateTime)) },
@@ -316,6 +324,7 @@ namespace CMMSAPIs.Repositories.Inventory
                         dt2.Columns.Add("statusId", typeof(int));
                         dt2.Columns.Add("warranty_type", typeof(int));
                         dt2.Columns.Add("warranty_term_type", typeof(int));
+                        dt2.Columns.Add("calibrationFrequency", typeof(string));
                         dt2.Columns.Add("warranty_provider_id", typeof(int));
                         dt2.Columns.Add("id", typeof(int));
 
@@ -456,6 +465,16 @@ namespace CMMSAPIs.Repositories.Inventory
                                 //    }
                                 //}
                             }
+                            //  try
+                            //   {
+                            //        newR["calibrationFrequency"] = frequency[Convert.ToString(newR["calibrationFrequency"]).ToUpper()];
+                            //    }
+                            // {
+                            //  m_errorLog.SetError($"[Row: {rN}] Frequency named '{newR["calibrationFrequency"]}' does not exist.");
+                            //  newR.Delete();
+                            // continue;
+                            //return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] frequency named '{newR[6]}' does not exist.");
+                            //}
 
                             if (newR["Area"] != DBNull.Value)
                             {

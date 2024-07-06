@@ -40,6 +40,11 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             { (int)CMMS.CMMS_Status.MC_TASK_ABANDONED, "Abandoned" },
             { (int)CMMS.CMMS_Status.MC_TASK_APPROVED, "Approved" },
             { (int)CMMS.CMMS_Status.MC_TASK_REJECTED, "Rejected" },
+            { (int)CMMS.CMMS_Status.SCHEDULED_LINKED_TO_PTW,"Schedule_Linked_To_PTW" },
+            { (int)CMMS.CMMS_Status.MC_TASK_END_APPROVED,"MC_Task_Ended_Approved" },
+            { (int)CMMS.CMMS_Status.MC_TASK_END_REJECTED,"MC_Task_Ended_Reject" },
+            { (int)CMMS.CMMS_Status.MC_TASK_SCHEDULE_APPROVED,"MC_Task_Schedule_Approved" },
+            { (int)CMMS.CMMS_Status.MC_TASK_SCHEDULE_REJECT,"MC_Task_Schedule_Reject" },
             { (int)CMMS.CMMS_Status.VEG_PLAN_DRAFT, "Draft" },
             { (int)CMMS.CMMS_Status.VEG_PLAN_SUBMITTED, "Waiting for Approval" },
             { (int)CMMS.CMMS_Status.VEG_PLAN_APPROVED, "Approved" },
@@ -89,6 +94,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 case CMMS.CMMS_Status.MC_TASK_ABANDONED:
                     retValue = String.Format("Module Cleaning Task <{0}>  Execution Abandoned ", executionObj.executionId, executionObj.abandonedBy);
                     break;
+
                 case CMMS.CMMS_Status.MC_TASK_REJECTED:
                     retValue = String.Format("Module Cleaning Task <{0}> Rejected ", executionObj.executionId);
                     break;
@@ -777,10 +783,12 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
             string executionQuery = $"select ex.id as executionId,ex.status ,ex.startDate,CONCAT(assignedTo.firstName, assignedTo.lastName) as assignedTo , " +
                 $"plan.title, CONCAT(createdBy.firstName, createdBy.lastName) as plannedBy ,plan.createdAt as plannedAt,freq.name as frequency, CONCAT(startedBy.firstName, startedBy.lastName) as startedBy ," +
-                $" ex.executionStartedAt as startedAt , {statusEx} as status_short " +
+                $" ex.executionStartedAt as startedAt , CONCAT(rejectedById.firstName, rejectedById.lastName) as rejectedById,ex.rejectedAt,CONCAT(approvedById.firstName, approvedById.lastName) as approvedById,ex.approvedAt,  {statusEx} as status_short " +
                 $"  from cleaning_execution as ex JOIN cleaning_plan as plan on ex.planId = plan.planId " +
                 $" LEFT JOIN Frequency as freq on freq.id = plan.frequencyId " +
                 $" LEFT JOIN users as createdBy ON createdBy.id = plan.createdById " +
+                $" LEFT JOIN users as rejectedById ON rejectedById.id = ex.rejectedById " +
+                $" LEFT JOIN users as approvedById ON approvedById.id = ex.approvedById " +
                 $" LEFT JOIN users as startedBy ON startedBy.id = ex.executedById " +
                 $" LEFT JOIN users as assignedTo ON assignedTo.id = ex.assignedTo where ex.id={exectionId};";
 
@@ -789,12 +797,14 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
             string scheduleQuery = $"select schedule.scheduleId as scheduleId ,schedule.status ,schedule.executionId, schedule.actualDay as cleaningDay ,schedule.startedAt as start_date,schedule.endedAt as end_date  , " +
                                    $" cp.cleaningType ,CASE cp.cleaningType WHEN 1 then 'Wet' When 2 then 'Dry' when 3 then 'Robotic'  else 'Wet '  end as cleaningTypeName, SUM({measure}) as scheduled , " +
-                                   $" permit.id as permit_id,permit.code as  permit_code , " +
+                                   $" permit.id as permit_id,permit.code as  permit_code , CONCAT(rejectedById.firstName, rejectedById.lastName) as rejectedById,schedule.rejectedAt,CONCAT(approvedById.firstName, approvedById.lastName) as approvedById,schedule.approvedAt, " +
                                    $" Case when permit.TBT_Done_By is null or permit.TBT_Done_By = 0 then 0 else 1 end ptw_tbt_done,permit.status as ptw_status ," +
                                    $" SUM(CASE WHEN item.status = {(int)CMMS.CMMS_Status.EQUIP_CLEANED} THEN {measure} ELSE 0 END) as cleaned , SUM(CASE WHEN item.status = {(int)CMMS.CMMS_Status.EQUIP_ABANDONED} THEN {measure} ELSE 0 END) as abandoned , " +
                                    $" SUM(CASE WHEN item.status = {(int)CMMS.CMMS_Status.EQUIP_SCHEDULED} THEN {measure} ELSE 0 END) as pending ,schedule.waterUsed, schedule.remark ,{statusSc} as status_short from cleaning_execution_schedules as schedule " +
                                    $" left join cleaning_execution_items as item on schedule.scheduleId = item.scheduleId " +
                                    $" left join permits as permit on permit.id = schedule.ptw_id " +
+                                   $" LEFT JOIN users as rejectedById ON rejectedById.id = schedule.rejectedById " +
+                                   $" LEFT JOIN users as approvedById ON approvedById.id = schedule.approvedById " +
                                    $" left join cleaning_plan as cp on schedule.planId= cp.planId " +
                                    $" where schedule.executionId = {exectionId} group by schedule.scheduleId;";
 
@@ -1053,6 +1063,81 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Execution Approved");
             return response;
 
+        }
+        internal async Task<CMDefaultResponse> ApproveEndExecution(ApproveMC request, int userID)
+        {
+            int status = (int)CMMS.CMMS_Status.MC_TASK_END_APPROVED;
+
+
+            if (moduleType == 2)
+            {
+                status = (int)CMMS.CMMS_Status.VEG_TASK_END_APPROVED;
+
+
+            }
+            string approveQuery = $"Update cleaning_execution set status= {status} ,approvedById={userID}, remark='{request.comment}', approvedAt='{UtilsRepository.GetUTCTime()}' where id = {request.execution_id} ";
+            await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MC_TASK, request.execution_id, 0, 0, request.comment, (CMMS.CMMS_Status)status, userID);
+
+            CMDefaultResponse response = new CMDefaultResponse(request.execution_id, CMMS.RETRUNSTATUS.SUCCESS, $"Execution End Approved");
+            return response;
+
+        }
+        internal async Task<CMDefaultResponse> RejectEndExecution(ApproveMC request, int userID)
+        {
+
+            int status = (int)CMMS.CMMS_Status.MC_TASK_END_REJECTED;
+
+            if (moduleType == 2)
+            {
+                status = (int)CMMS.CMMS_Status.VEG_TASK_END_REJECTED;
+
+            }
+
+            string approveQuery = $"Update cleaning_execution set status= {status},rejectedById={userID},remark='{request.comment}', rejectedAt='{UtilsRepository.GetUTCTime()}' where id = {request.execution_id}";
+            await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
+
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MC_TASK, request.execution_id, 0, 0, request.comment, (CMMS.CMMS_Status)status, userID);
+
+            CMDefaultResponse response = new CMDefaultResponse(request.execution_id, CMMS.RETRUNSTATUS.SUCCESS, $"Execution End Rejected");
+            return response;
+        }
+        internal async Task<CMDefaultResponse> ApproveScheduleExecution(ApproveMC request, int userID)
+        {
+            int status = (int)CMMS.CMMS_Status.MC_TASK_SCHEDULE_APPROVED;
+
+
+            if (moduleType == 2)
+            {
+                status = (int)CMMS.CMMS_Status.VEG_TASK_END_APPROVED;
+
+            }
+            string approveQuery = $"Update cleaning_execution_schedules set status= {status} ,approvedById={userID}, remark='{request.comment}', approvedAt='{UtilsRepository.GetUTCTime()}' where  scheduleId= {request.schedule_id} ";
+            await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MC_TASK, request.schedule_id, 0, 0, request.comment, (CMMS.CMMS_Status)status, userID);
+
+            CMDefaultResponse response = new CMDefaultResponse(request.schedule_id, CMMS.RETRUNSTATUS.SUCCESS, $"Execution Schedule Approved");
+            return response;
+
+        }
+        internal async Task<CMDefaultResponse> RejectScheduleExecution(ApproveMC request, int userID)
+        {
+
+            int status = (int)CMMS.CMMS_Status.MC_TASK_SCHEDULE_REJECT;
+
+            if (moduleType == 2)
+            {
+                status = (int)CMMS.CMMS_Status.VEG_TASK_END_REJECTED;
+
+            }
+
+            string approveQuery = $"Update cleaning_execution_schedules set status= {status},rejectedById={userID},remark='{request.comment}', rejectedAt='{UtilsRepository.GetUTCTime()}' where scheduleId = {request.schedule_id}";
+            await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
+
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MC_TASK, request.schedule_id, 0, 0, request.comment, (CMMS.CMMS_Status)status, userID);
+
+            CMDefaultResponse response = new CMDefaultResponse(request.schedule_id, CMMS.RETRUNSTATUS.SUCCESS, $"Execution Schedule Rejected");
+            return response;
         }
         internal async Task<CMDefaultResponse> RejectExecution(CMApproval request, int userID)
         {

@@ -43,12 +43,12 @@ namespace CMMSAPIs.Controllers.MC
 
         [Route("GetMCTaskList")]
         [HttpGet]
-        public async Task<IActionResult> GetMCTaskList(int facilityId)
+        public async Task<IActionResult> GetMCTaskList(int facility_Id)
         {
             try
             {
-                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
-                var data = await _CleaningBS.GetTaskList(facilityId, facilitytimeZone);
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_Id)?.timezone;
+                var data = await _CleaningBS.GetTaskList(facility_Id, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -138,7 +138,66 @@ namespace CMMSAPIs.Controllers.MC
                 throw;
             }
         }
-
+        [Route("ApproveEndExecution")]
+        [HttpPut]
+        public async Task<IActionResult> ApproveEndExecution(ApproveMC request)
+        {
+            try
+            {
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _CleaningBS.ApproveEndExecution(request, userId);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        [Route("RejectEndExecution")]
+        [HttpPut]
+        public async Task<IActionResult> RejectEndExecution(ApproveMC request)
+        {
+            try
+            {
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _CleaningBS.RejectEndExecution(request, userId);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        [Route("ApproveScheduleExecution")]
+        [HttpPut]
+        public async Task<IActionResult> ApproveScheduleExecution(ApproveMC request)
+        {
+            try
+            {
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _CleaningBS.ApproveScheduleExecution(request, userId);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        [Route("RejectScheduleExecution")]
+        [HttpPut]
+        public async Task<IActionResult> RejectScheduleExecution(ApproveMC request)
+        {
+            try
+            {
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _CleaningBS.RejectScheduleExecution(request, userId);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
         //[Authorize]
         [Route("RejectMCPlan")]
         [HttpPut]

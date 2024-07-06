@@ -14,7 +14,8 @@ namespace CMMSAPIs.BS.Cleaning
         public Task<CMDefaultResponse> CreatePlan(List<CMMCPlan> request, int userId);
         public Task<CMMCPlan> GetPlanDetails(int planId, string facilitytime);
         public Task<CMMCPlanSummary> GetPlanDetailsSummary(int planId, CMMCPlanSummary request);
-
+        public Task<CMDefaultResponse> ApproveEndExecution(ApproveMC request, int userId);
+        public Task<CMDefaultResponse> RejectEndExecution(ApproveMC request, int userId);
         public Task<CMDefaultResponse> ApprovePlan(CMApproval request, int userId);
         public Task<CMDefaultResponse> RejectPlan(CMApproval request, int userId);
         public Task<CMDefaultResponse> DeletePlan(int planId, int userId);
@@ -436,6 +437,68 @@ namespace CMMSAPIs.BS.Cleaning
             }
         }
 
+        public async Task<CMDefaultResponse> ApproveEndExecution(ApproveMC request, int userId)
+        {
+            try
+            {
+                //using (var repos = new MCRepository(getDB))
+                {
+
+                    return await repos.ApproveEndExecution(request, userId);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<CMDefaultResponse> RejectEndExecution(ApproveMC request, int userId)
+        {
+            try
+            {
+                //using (var repos = new MCRepository(getDB))
+                {
+
+                    return await repos.RejectEndExecution(request, userId);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        internal async Task<CMDefaultResponse> ApproveScheduleExecution(ApproveMC request, int userId)
+        {
+            try
+            {
+                //using (var repos = new MCRepository(getDB))
+                {
+
+                    return await repos.ApproveScheduleExecution(request, userId);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        internal async Task<CMDefaultResponse> RejectScheduleExecution(ApproveMC request, int userId)
+        {
+            try
+            {
+                //using (var repos = new MCRepository(getDB))
+                {
+
+                    return await repos.RejectScheduleExecution(request, userId);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
 
         //public async Task<List<CMMCTaskEquipmentList>> GetVegitationTaskEquipmentList(int taskId, string facilitytime)
         //{
