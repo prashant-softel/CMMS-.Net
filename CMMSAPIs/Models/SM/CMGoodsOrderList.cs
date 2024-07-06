@@ -349,4 +349,23 @@ namespace CMMSAPIs.Models
         public string generatedBy { get; set; }
 
     }
+
+    public class CMGODashboardList
+    {
+        public int go_id { get; set; }
+        public int facilityId { get; set; }
+        public string facilityName { get; set; }
+        public string GRNo { get; set; }
+        public string GONo { get; set; }
+        public int status { get; set; }
+        public string product_name { get; set; }
+        public decimal requested_qty { get; set; }
+        public DateTime? gr_date { get; set; }
+        public decimal ordered_qty { get; set; }
+        public DateTime? go_date { get; set; }
+        public decimal unit_amount { get; set; }
+        public int total_amount { get; set; }
+        public DateTime? grn_date { get; set; }
+        public decimal grn_qty { get; set; }
+    }
 }
