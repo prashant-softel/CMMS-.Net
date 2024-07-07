@@ -1,4 +1,4 @@
-﻿using CMMSAPIs.Helper;
+using CMMSAPIs.Helper;
 using CMMSAPIs.Models.MC;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.CleaningRepository;
@@ -27,6 +27,8 @@ namespace CMMSAPIs.BS.Cleaning
         public Task<CMMCExecutionSchedule> GetScheduleExecutionSummary(CMMCGetScheduleExecution schedule, string facilitytime);
         public Task<CMMCExecution> GetExecutionDetails(int id, string facilitytime);
         public Task<CMDefaultResponse> AbandonExecution(CMApproval request, int userId);
+        public Task<CMDefaultResponse> RejectAbandonExecution(CMApproval request, int userId);
+        public Task<CMDefaultResponse> ApproveAbandonExecution(CMApproval request, int userId);
         public Task<CMDefaultResponse> AbandonSchedule(CMApproval request, int userId);
         public Task<List<CMMCEquipmentList>> GetEquipmentList(int facilityId);
         public Task<List<CMMCTaskEquipmentList>> GetTaskEquipmentList(int taskId, string facilitytime);
@@ -265,6 +267,34 @@ namespace CMMSAPIs.BS.Cleaning
                 // using (var repos = new MCRepository(getDB))
                 {
                     return await repos.AbandonExecution(request, userId);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<CMDefaultResponse> RejectAbandonExecution(CMApproval request, int userId)
+        {
+            try
+            {
+           
+                {
+                    return await repos.RejectAbandonExecution(request, userId);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<CMDefaultResponse> ApproveAbandonExecution(CMApproval request, int userId)
+        {
+            try
+            {
+             
+                {
+                    return await repos.ApproveAbandonExecution(request, userId);
                 }
             }
             catch (Exception ex)
