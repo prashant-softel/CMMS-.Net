@@ -60,6 +60,8 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             { (int)CMMS.CMMS_Status.EQUIP_CLEANED, "Cleaned" },
             { (int)CMMS.CMMS_Status.EQUIP_ABANDONED, "Abandoned" },
             { (int)CMMS.CMMS_Status.EQUIP_SCHEDULED, "Scheduled" },
+            { (int)CMMS.CMMS_Status.MC_TASK_ABANDONED_REJECTED, "TASK ABANDONED REJECTED" },
+            { (int)CMMS.CMMS_Status.MC_TASK_ABANDONED_APPROVED, "TASK ABANDONED APPROVED" },
         };
 
         internal string getLongStatus(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMMCPlan planObj, CMMCExecution executionObj)
@@ -94,6 +96,12 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                     break;
                 case CMMS.CMMS_Status.MC_TASK_ABANDONED:
                     retValue = String.Format("Module Cleaning Task <{0}>  Execution Abandoned ", executionObj.executionId, executionObj.abandonedBy);
+                    break;
+                case CMMS.CMMS_Status.MC_TASK_ABANDONED_REJECTED:
+                    retValue = String.Format("Module Cleaning Task <{0}>  Task Abandoned Rejected", executionObj.executionId, executionObj.abandonedBy);
+                    break;
+                case CMMS.CMMS_Status.MC_TASK_ABANDONED_APPROVED:
+                    retValue = String.Format("Module Cleaning Task <{0}>  Task Abandoned Approved", executionObj.executionId, executionObj.approvedById);
                     break;
 
                 case CMMS.CMMS_Status.MC_TASK_REJECTED:
@@ -1025,6 +1033,46 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             return response;
         }
 
+        internal async Task<CMDefaultResponse> RejectAbandonExecution(CMApproval request, int userId)
+        {
+            int status = (int)CMMS.CMMS_Status.MC_TASK_ABANDONED_REJECTED;
+            int notStatus = (int)CMMS.CMMS_Status.MC_TASK_COMPLETED;
+            if (moduleType == 2)
+            {
+                status = (int)CMMS.CMMS_Status.VEG_TASK_ABANDONED_REJECTED;
+                notStatus = (int)CMMS.CMMS_Status.VEG_TASK_COMPLETED;
+            }
+
+            string Query = $"Update cleaning_execution set status = {status},abandonedById={userId},abandonedAt='{UtilsRepository.GetUTCTime()}' ,reasonForAbandon = '{request.comment}' where id = {request.id};";
+              
+            await Context.GetData<CMMCExecutionSchedule>(Query).ConfigureAwait(false);
+
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MC_TASK, request.id, 0, 0, request.comment, (CMMS.CMMS_Status)status, userId);
+
+            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, request.comment);
+            return response;
+        }
+
+        internal async Task<CMDefaultResponse> ApproveAbandonExecution(CMApproval request, int userId)
+        {
+            int status = (int)CMMS.CMMS_Status.MC_TASK_ABANDONED_APPROVED;
+            int notStatus = (int)CMMS.CMMS_Status.MC_TASK_COMPLETED;
+            if (moduleType == 2)
+            {
+                status = (int)CMMS.CMMS_Status.VEG_TASK_ABANDONED_APPROVED;
+                notStatus = (int)CMMS.CMMS_Status.VEG_TASK_COMPLETED;
+            }
+
+            string Query = $"Update cleaning_execution set status = {status},abandonedById={userId},abandonedAt='{UtilsRepository.GetUTCTime()}' ,reasonForAbandon = '{request.comment}' where id = {request.id};";
+               
+            await Context.GetData<CMMCExecutionSchedule>(Query).ConfigureAwait(false);
+
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MC_TASK, request.id, 0, 0, request.comment, (CMMS.CMMS_Status)status, userId);
+
+            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, request.comment);
+            return response;
+        }
+
         internal async Task<CMDefaultResponse> ApproveExecution(CMApproval request, int userID)
         {
             int status = (int)CMMS.CMMS_Status.MC_TASK_APPROVED;
@@ -1076,7 +1124,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
 
             }
-            string approveQuery = $"Update cleaning_execution set status= {status} ,approvedById={userID}, remark='{request.comment}', approvedAt='{UtilsRepository.GetUTCTime()}' where id = {request.execution_id} ";
+            string approveQuery = $"Update cleaning_execution set status= {status} ,approvedById={userID}, remark='{request.comment}', approvedAt='{UtilsRepository.GetUTCTime()}' where id = {request.id} ";
             await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MC_TASK, request.execution_id, 0, 0, request.comment, (CMMS.CMMS_Status)status, userID);
 
@@ -1087,7 +1135,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
         internal async Task<CMDefaultResponse> RejectEndExecution(ApproveMC request, int userID)
         {
 
-            int status = (int)CMMS.CMMS_Status.MC_TASK_END_REJECTED;
+            int status = (int)CMMS.CMMS_Status.MC_TASK_STARTED;
 
             if (moduleType == 2)
             {
@@ -1095,7 +1143,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
             }
 
-            string approveQuery = $"Update cleaning_execution set status= {status},rejectedById={userID},remark='{request.comment}', rejectedAt='{UtilsRepository.GetUTCTime()}' where id = {request.id}";
+            string approveQuery = $"Update cleaning_execution set status= {status},rejectedById={userID},executionRejectedRemarks='{request.comment}', rejectedAt='{UtilsRepository.GetUTCTime()}', executionRejectedAt = '{UtilsRepository.GetUTCTime()}' where id = {request.id}";
             await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MC_TASK, request.execution_id, 0, 0, request.comment, (CMMS.CMMS_Status)status, userID);
@@ -1132,7 +1180,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
             }
 
-            string approveQuery = $"Update cleaning_execution_schedules set status= {status},rejectedById={userID},remark='{request.comment}', rejectedAt='{UtilsRepository.GetUTCTime()}' where executionId = {request.id}";
+            string approveQuery = $"Update cleaning_execution_schedules set status= {status},rejectedById={userID},remark='{request.comment}', rejectedAt='{UtilsRepository.GetUTCTime()}' where scheduleId = {request.id}";
             await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MC_TASK, request.schedule_id, 0, 0, request.comment, (CMMS.CMMS_Status)status, userID);
