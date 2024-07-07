@@ -362,6 +362,37 @@ namespace CMMSAPIs.Controllers.MC
             }
         }
 
+        [Route("RejectAbandonExecution")]
+        [HttpPut]
+        public async Task<IActionResult> RejectAbandonExecution(CMApproval request)
+        {
+            try
+            {
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _CleaningBS.RejectAbandonExecution(request, userId);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        [Route("ApproveAbandonExecution")]
+        [HttpPut]
+        public async Task<IActionResult> ApproveAbandonExecution(CMApproval request)
+        {
+            try
+            {
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _CleaningBS.ApproveAbandonExecution(request, userId);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
         //[Authorize]
         [Route("AbandonMcSchedule")]
         [HttpPut]
