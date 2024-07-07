@@ -20,6 +20,9 @@ namespace CMMSAPIs.Models.SM
         public int item_category_ID { get; set; }
         public int unit_measurement_ID { get; set; }
         public int approval_required_ID { get; set; }
+        public int min_req_qty { get; set; }
+        public int reorder_qty { get; set; }
+        public string section { get; set; }
         public CMAssetMasterFiles fileData { get; set; }
 
 
