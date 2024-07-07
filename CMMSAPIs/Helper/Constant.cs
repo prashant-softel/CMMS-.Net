@@ -524,25 +524,17 @@ namespace CMMSAPIs.Helper
             MC_TASK_APPROVED,
             MC_TASK_REJECTED,
             MC_TASK_UPDATED,
+            MC_TASK_ABANDONED_REJECTED,
+            MC_TASK_ABANDONED_APPROVED,
             SCHEDULED_LINKED_TO_PTW,
+            MC_TASK_END_APPROVED = 381,
+            MC_TASK_END_REJECTED,
+            MC_TASK_SCHEDULE_APPROVED,
+            MC_TASK_SCHEDULE_REJECT,
+            MC_TASK_RESCHEDULED,
 
 
-            VEG_PLAN_DRAFT = 370,
-            VEG_PLAN_SUBMITTED,
-            VEG_PLAN_REJECTED,
-            VEG_PLAN_APPROVED,
-            VEG_PLAN_DELETED,
 
-            VEG_TASK_SCHEDULED = 380,
-            VEG_TASK_STARTED,
-            VEG_TASK_ENDED,
-            VEG_TASK_COMPLETED,
-            VEG_TASK_ABANDONED,
-            VEG_TASK_APPROVED,
-            VEG_TASK_REJECTED,
-            VEGETATION_LINKED_TO_PTW,
-            VEG_TASK_END_APPROVED,
-            VEG_TASK_END_REJECTED,
 
             PM_PLAN_CREATED = 401,
             PM_PLAN_DRAFT,
@@ -595,11 +587,25 @@ namespace CMMSAPIs.Helper
             OBSERVATION_DELETED,
             OBSERVATION_UPDATED,
 
-            MC_TASK_END_APPROVED = 600,
-            MC_TASK_END_REJECTED,
-            MC_TASK_SCHEDULE_APPROVED,
-            MC_TASK_SCHEDULE_REJECT,
-            MC_TASK_RESCHEDULED
+
+            VEG_PLAN_DRAFT = 701,
+            VEG_PLAN_SUBMITTED,
+            VEG_PLAN_REJECTED,
+            VEG_PLAN_APPROVED,
+            VEG_PLAN_DELETED,
+
+            VEG_TASK_SCHEDULED = 721,
+            VEG_TASK_STARTED,
+            VEG_TASK_ENDED,
+            VEG_TASK_COMPLETED,
+            VEG_TASK_ABANDONED,
+            VEG_TASK_ABANDONED_REJECTED,
+            VEG_TASK_ABANDONED_APPROVED,
+            VEG_TASK_APPROVED,
+            VEG_TASK_REJECTED,
+            VEGETATION_LINKED_TO_PTW,
+            VEG_TASK_END_APPROVED,
+            VEG_TASK_END_REJECTED,
         }
 
         public enum ApprovalStatus
