@@ -102,6 +102,13 @@ namespace CMMSAPIs.Models.Masters
         public int latestJCApproval { get; set; }
         public int on_time_status { get; set; }
 
+        // IR module
+
+        public string title { get; set; }
+        public string location_of_incident { get; set; }
+        public DateTime? incident_datetime { get; set; }
+        public DateTime? restoration_datetime { get; set; }
+
         // SM module
         public int go_id { get; set; }
         public string GRNo { get; set; }
