@@ -1517,7 +1517,15 @@ namespace CMMSAPIs.Repositories.Masters
             statusOut += $"ELSE 'Invalid Status' END";
 
 
-            string selectqry = $"SELECT incident.id as wo_number,incident.title as title, incident.description as wo_decription , incident.incident_datetime as incident_datetime,incident.location_of_incident as location_of_incident,incident.action_taken_datetime as restoration_datetime,incident.severity as severity, facilities.name as facility_name,blockName.name as block_name, assets.name as asset_name, incident.risk_level as risk_level, CONCAT(created_by.firstName ,' ' , created_by.lastName) as reported_by_name, incident.created_at as reported_at,CONCAT(user.firstName ,' ' , user.lastName) as approved_by, incident.approved_at as approved_at, CONCAT(user1.firstName , ' ' , user1.lastName) as reported_by_name , {statusOut} as status_long ,incident.status, incident.location_of_incident, incident_datetime, type_of_job,title," +
+            string selectqry = $"SELECT incident.id as wo_number,incident.title as title, incident.description as wo_decription , " +
+                $"incident.incident_datetime as incident_datetime,incident.location_of_incident as location_of_incident," +
+                $"incident.action_taken_datetime as restoration_datetime,incident.severity as severity, " +
+                $"facilities.name as facility_name,blockName.name as block_name, assets.name as asset_name, " +
+                $"incident.risk_level as risk_level, CONCAT(created_by.firstName ,' ' , created_by.lastName) as reported_by_name, " +
+                $"incident.created_at as reported_at,CONCAT(user.firstName ,' ' , user.lastName) as approved_by," +
+                $" incident.approved_at as approved_at, CONCAT(user1.firstName , ' ' , user1.lastName) as reported_by_name , " +
+                $"{statusOut} as status_long ,incident.status, incident.location_of_incident, incident_datetime," +
+                $" type_of_job,title," +
                 $" incident.status, incident.is_why_why_required, incident.is_investigation_required " +
                 $" FROM incidents as incident " +
                 $" left JOIN facilities AS facilities on facilities.id = incident.facility_id " +
@@ -1930,6 +1938,9 @@ namespace CMMSAPIs.Repositories.Masters
             result.Add(category_item_inward);
             result.Add(category_item_outward);
             result.Add(category_item_balance);
+
+
+
             return result;
         }
 
