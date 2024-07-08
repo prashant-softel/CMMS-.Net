@@ -667,7 +667,7 @@ namespace CMMSAPIs.Controllers.Masters
 
         [Route("getDashboadDetails")]
         [HttpGet]
-        public async Task<IActionResult> getDashboadDetails(string facilityId, CMMS.CMMS_Modules moduleID, DateTime fromDate, DateTime toDate, int isStockAvailable)
+        public async Task<IActionResult> getDashboadDetails(string facilityId, CMMS.CMMS_Modules moduleID, DateTime fromDate, DateTime toDate)
         {
             try
             {
