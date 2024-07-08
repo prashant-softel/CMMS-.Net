@@ -78,6 +78,8 @@ namespace CMMSAPIs.Models.Masters
         public List<CMSMConsumptionByGoods> StockOverview { get; set; }
         public List<CMSMConsumptionByGoods> StockConsumptionByGoods { get; set; }
         public List<CMSMConsumptionByGoods> StockConsumptionBySites { get; set; }
+        public List<CMSMConsumptionByGoods> StockAvailbleByGoods { get; set; }
+        public List<CMSMConsumptionByGoods> StockAvailbleBySites { get; set; }
     
     }
 
@@ -105,7 +107,9 @@ namespace CMMSAPIs.Models.Masters
         // IR module
 
         public string title { get; set; }
+        public string type_of_incident { get; set; }
         public string location_of_incident { get; set; }
+        public string severity { get; set; }
         public DateTime? incident_datetime { get; set; }
         public DateTime? restoration_datetime { get; set; }
 
