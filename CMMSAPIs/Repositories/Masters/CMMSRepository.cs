@@ -1161,14 +1161,16 @@ namespace CMMSAPIs.Repositories.Masters
             }
             string filter = "";
 
-            if (fromDate != null && fromDate.ToString("yyyy-MM-dd") != "0001-01-01" && toDate != null && toDate.ToString("yyyy-MM-dd") != "0001-01-01")
+            if (fromDate != null && fromDate.ToString("yyyy-MM-dd hh-mm") != "0001-01-01 00-00" && toDate != null && toDate.ToString("yyyy-MM-dd hh-mm") != "0001-01-01 00-00")
+
             {
-                filter = $" and job.createdAt between '{fromDate.ToString("yyyy-MM-dd")}' and '{toDate.ToString("yyyy-MM-dd")}'";
+
+                filter = $" and job.createdAt between '{fromDate.ToString("yyyy-MM-dd hh-mm")}' and '{toDate.ToString("yyyy-MM-dd hh-mm")}'";
             }
 
             string myQuery = $"SELECT job.id  wo_number,job.title as wo_decription ,job.facilityId as facility_id, facilities.name as facility_name, job.status," +
                 $" group_concat(distinct asset_cat.name order by asset_cat.id separator ', ') as asset_category, " +
-                $" group_concat(distinct asset.name order by asset.id separator ', ') as asset_name, job.breakdownTime as start_date, jc.JC_Date_Stop as end_Date," +
+                $" group_concat(distinct asset.name order by asset.id separator ', ') as assetsname, job.breakdownTime as start_date, jc.JC_Date_Stop as end_Date," +
                 $" jc.JC_Status as latestJCStatus,  jc.JC_Approved as latestJCApproval, permit.id as ptw_id,jc.id as latestJCid,permit.status as  latestJCPTWStatus,on_time_status" +
                 $" FROM jobs as job " +
                 $" LEFT JOIN jobcards as jc ON job.latestJC = jc.id " +
@@ -1308,7 +1310,9 @@ namespace CMMSAPIs.Repositories.Masters
                    $"left join assetcategories as cat  on pm_task.category_id = cat.id " +
                    $"left join permits as permit on pm_task.PTW_id = permit.id " +
                    $"left join frequency as freq on pm_task.frequency_id = freq.id " +
-                   $"left join assets as a on a.id=(select Asset_id  from pm_schedule where id=pm_task.id) " +
+                   $"left join pm_schedule as ps on ps.task_id = pm_task.id " +
+                   $"left join assets as a on a.id = ps.Asset_id " +
+                   //  $"left join assets as a on a.id=(select Asset_id  from pm_schedule where id=pm_task.id) " +
                    $" JOIN facilities ON pm_task.facility_id = facilities.id " +
                    $" WHERE facilities.id in ({facilityId})  and status_id = 1 {filter};";
             List<CMDashboadItemList> itemList = await Context.GetData<CMDashboadItemList>(myQuery).ConfigureAwait(false);
@@ -1505,7 +1509,7 @@ namespace CMMSAPIs.Repositories.Masters
 
             if (fromDate != null && fromDate.ToString("yyyy-MM-dd") != "0001-01-01" && toDate != null && toDate.ToString("yyyy-MM-dd") != "0001-01-01")
             {
-                Datefilter = $" and date_format(incident.incident_datetime, '%Y-%m-%d') between '{fromDate.ToString("yyyy-MM-dd")}' and '{toDate.ToString("yyyy-MM-dd")}'";
+                Datefilter = $" and incident.incident_datetime between '{fromDate.ToString("yyyy-MM-dd")}' and '{toDate.ToString("yyyy-MM-dd")}'";
             }
 
 
@@ -1524,7 +1528,7 @@ namespace CMMSAPIs.Repositories.Masters
                 $"incident.risk_level as risk_level, CONCAT(created_by.firstName ,' ' , created_by.lastName) as reported_by_name, " +
                 $"incident.created_at as reported_at,CONCAT(user.firstName ,' ' , user.lastName) as approved_by," +
                 $" incident.approved_at as approved_at, CONCAT(user1.firstName , ' ' , user1.lastName) as reported_by_name , " +
-                $"{statusOut} as status_long ,incident.status,incidenttype.incidenttype as type_of_incident,incident.location_of_incident, incident_datetime," +
+                $"{statusOut} as status_long ,incident.status, incident.location_of_incident, incident_datetime," +
                 $" type_of_job,title," +
                 $" incident.status, incident.is_why_why_required, incident.is_investigation_required " +
                 $" FROM incidents as incident " +

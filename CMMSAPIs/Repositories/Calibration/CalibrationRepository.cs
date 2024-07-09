@@ -111,7 +111,7 @@ namespace CMMSAPIs.Repositories.Calibration
             {
                 throw new ArgumentException("Invalid Facility ID");
             }
-            myQuery += "GROUP BY assets.id ;";
+            myQuery += "GROUP BY assets.id  ORDER BY next_calibration_due_date ASC ;";
             List<CMCalibrationList> _calibrationList = await Context.GetData<CMCalibrationList>(myQuery).ConfigureAwait(false);
             foreach (var a in _calibrationList)
             {
