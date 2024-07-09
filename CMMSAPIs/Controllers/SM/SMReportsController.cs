@@ -205,5 +205,28 @@ namespace CMMSAPIs.Controllers.SM
                 return Ok(item);
             }
         }
+
+
+        [Route("GetPlantItemTransactionReport")]
+        [HttpGet]
+        public async Task<IActionResult> GetPlantItemTransactionReport(string facility_ID, int assetItemId, DateTime fromDate, DateTime toDate)
+        {
+            try
+            {
+                int facility_IDs = facility_ID.ToInt();
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_IDs)?.timezone;
+
+
+                var data = await _SMReportsBS.GetPlantItemTransactionReport(facility_ID, assetItemId, fromDate, toDate, facilitytimeZone);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid employee id or facility id is sent.";
+                return Ok(item);
+            }
+        }
     }
 }
