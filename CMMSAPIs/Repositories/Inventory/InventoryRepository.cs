@@ -156,6 +156,13 @@ namespace CMMSAPIs.Repositories.Inventory
             Dictionary<string, int> currencies = new Dictionary<string, int>();
             currencies.Merge(currencyCodes, currencyIDs);
 
+            string queryFrequency = "SELECT id, name FROM frequency GROUP BY name ORDER BY id ASC;";
+            DataTable dtFrequency = await Context.FetchData(queryFrequency).ConfigureAwait(false);
+            List<string> frequencyNames = dtFrequency.GetColumn<string>("name");
+            List<int> frequencyIDs = dtFrequency.GetColumn<int>("id");
+            Dictionary<string, int> frequencies = new Dictionary<string, int>();
+            frequencies.Merge(frequencyNames, frequencyIDs); //call me now
+
             /*string queryMapBlocks = "SELECT id, CASE WHEN parentId=0 THEN id ELSE parentId END as parent FROM facilities;";
             DataTable dtMapBlocks = await Context.FetchData(queryMapBlocks).ConfigureAwait(false);
             List<int> blockParents = dtMapBlocks.GetColumn<int>("parent");
@@ -194,8 +201,13 @@ namespace CMMSAPIs.Repositories.Inventory
             Dictionary<string, Tuple<string, Type>> columnNames = new Dictionary<string, Tuple<string, Type>>()
             {
                 { "Plant_Name", new Tuple<string, Type>("siteName", typeof (string)) },
+                { "Asset_Facility_Name", new Tuple<string, Type>("blockName", typeof (string)) },
+                { "Asset_Parent_Name", new Tuple<string, Type>("parentName", typeof(string)) },
                 { "Asset_Name", new Tuple<string, Type>("name", typeof(string)) },
                 { "Asset_Description", new Tuple<string, Type>("assetdescription", typeof(string)) },
+                { "Asset_Category_Name", new Tuple<string, Type>("categoryName", typeof(string)) },
+                { "Asset_Type_Name", new Tuple<string, Type>("typeName", typeof(string)) },
+                { "Asset_Status_Name", new Tuple<string, Type>("statusName", typeof(string)) },
                 { "Asset_Serial_No", new Tuple<string, Type>("serialNumber", typeof(string)) },
                 { "DC_Capacity", new Tuple<string, Type>("dcCapacity", typeof(int)) },
                 { "AC_Capacity", new Tuple<string, Type>("acCapacity", typeof(int)) },
@@ -207,27 +219,19 @@ namespace CMMSAPIs.Repositories.Inventory
                 { "Asset_Calibration/Testing_Date", new Tuple<string, Type>("calibrationFirstDueDate", typeof(DateTime)) },
                 { "Asset_Last_Calibration_Date", new Tuple<string, Type>("calibrationLastDate", typeof(DateTime)) },
                 { "Asset_Calibration_Frequency", new Tuple<string, Type>("calibrationFrequency", typeof(int)) },
-               // { "Asset_Calibration_Frequency", new Tuple<string, Type>("calibrationFrequency", typeof(string)) },
                 { "Calibration_Reminder_Days", new Tuple<string, Type>("calibrationReminderDays", typeof(int)) },
-                { "Warranty_Description", new Tuple<string, Type>("warranty_description", typeof(string)) },
-                { "Asset_Warranty_Start_Date", new Tuple<string, Type>("start_date", typeof(DateTime)) },
-                { "Asset_Warranty_Expiry_Date", new Tuple<string, Type>("expiry_date", typeof(DateTime)) },
-                { "Asset_Warranty_Certificate_No", new Tuple<string, Type>("certificate_number", typeof(string)) },
-                { "Asset_Facility_Name", new Tuple<string, Type>("blockName", typeof (string)) },
-                { "Asset_Category_Name", new Tuple<string, Type>("categoryName", typeof(string)) },
-                { "Asset_Parent_Name", new Tuple<string, Type>("parentName", typeof(string)) },
                 { "Asset_Customer_Name", new Tuple<string, Type>("customerName", typeof(string)) },
                 { "Asset_Owner_Name", new Tuple<string, Type>("ownerName", typeof(string)) },
                 { "Asset_Operator_Name", new Tuple<string, Type>("operatorName", typeof(string)) },
                 { "Asset_Supplier_Name", new Tuple<string, Type>("supplierName", typeof(string)) },
                 { "Asset_Manufacturer_Name", new Tuple<string, Type>("manufacturerName", typeof(string)) },
-                { "Asset_Type_Name", new Tuple<string, Type>("typeName", typeof(string)) },
-                { "Asset_Status_Name", new Tuple<string, Type>("statusName", typeof(string)) },
+                { "Warranty_Description", new Tuple<string, Type>("warranty_description", typeof(string)) },
+                { "Asset_Warranty_Start_Date", new Tuple<string, Type>("start_date", typeof(DateTime)) },
+                { "Asset_Warranty_Expiry_Date", new Tuple<string, Type>("expiry_date", typeof(DateTime)) },
+                { "Asset_Warranty_Certificate_No", new Tuple<string, Type>("certificate_number", typeof(string)) },
                 { "Warranty Type", new Tuple<string, Type>("warranty_type_name", typeof(string)) },
                 { "warranty_Term_Names", new Tuple<string, Type>("warranty_term_type_name", typeof(string)) },
                 { "Asset_Warranty_Provider", new Tuple<string, Type>("warranty_provider_name", typeof(string)) },
-
-
                 { "DC_Rating", new Tuple<string, Type>("dcRating", typeof(string)) },
                 { "AC_Rating", new Tuple<string, Type>("acRating", typeof(string)) },
                 { "Description_Maintenance", new Tuple<string, Type>("descMaintenace", typeof(string)) },
@@ -236,7 +240,6 @@ namespace CMMSAPIs.Repositories.Inventory
                 { "Asset_UNSPC_Code", new Tuple<string, Type>("unspCode", typeof(string)) },
                 { "Asset_Purchase_Code", new Tuple<string, Type>("purchaseCode", typeof(string)) },
                // { "Asset_SPV_Name", new Tuple<string, Type>("spvName", typeof(string)) },
-                { "Calibration_Next_Due_Date", new Tuple<string, Type>("calibrationNextDueDate", typeof(DateTime)) },
                 { "Area", new Tuple<string,Type>("area", typeof(double)) },
 
             };
@@ -323,11 +326,12 @@ namespace CMMSAPIs.Repositories.Inventory
                         dt2.Columns.Add("typeId", typeof(int));
                         dt2.Columns.Add("statusId", typeof(int));
                         dt2.Columns.Add("warranty_type", typeof(int));
+                        //dt2.Columns.Add("warranty_description", typeof(string));
                         dt2.Columns.Add("warranty_term_type", typeof(int));
                         dt2.Columns.Add("calibrationFrequency", typeof(string));
                         dt2.Columns.Add("warranty_provider_id", typeof(int));
                         dt2.Columns.Add("id", typeof(int));
-
+                        dt2.Columns.Add("calibrationFrequencyType", typeof(int));
                         dt2.Columns.Add("row_no", typeof(int));
 
                         int updateCount = 0;
@@ -611,6 +615,47 @@ namespace CMMSAPIs.Repositories.Inventory
 
                                 }
                             }
+
+                            //Validate calibration data
+                            bool CalibrationValidationFailed = false;
+/*
+                            string strTemp = Convert.ToString(newR["name"]);
+                            string strTemp11 = Convert.ToString(newR["calibrationFrequency"]);
+                            
+                            string strTemp1 = Convert.ToString(newR["calibrationFirstDueDate"]);
+                            string strTemp2 = Convert.ToString(newR["calibrationFrequency"]);
+                            string strTemp3 = Convert.ToString(newR["calibrationNextDueDate"]);
+                            string strTemp4 = Convert.ToString(newR["calibrationLastDate"]);
+*/
+                            if (newR["calibrationFirstDueDate"] != null && (Convert.ToString(newR["calibrationFirstDueDate"]) != ""))
+                            {
+                                //Validate calibration frequency
+                                try
+                                {
+                                    newR["calibrationFrequencyType"] = frequencies[Convert.ToString(newR["calibrationFrequency"])];
+                                    //string strTemp5 = Convert.ToString(newR["calibrationFrequencyType"]);
+                                }
+                                catch (KeyNotFoundException)
+                                {
+                                    m_errorLog.SetError($"[Row: {rN}] Calibration Frequency with name '{newR["calibrationFrequency"]}' not valid.");
+                                    newR["calibrationFrequencyType"] = 0;
+                                    CalibrationValidationFailed = true;
+                                }
+                            }
+                            else
+                            {
+                                if (newR["calibrationFrequency"] != null && (Convert.ToString(newR["calibrationFrequency"]) != ""))
+                                {
+                                    m_errorLog.SetWarning($"[Row: {rN}] Asset_Calibration_Frequency is set, but Asset_Calibration/Testing_Date is not defined ");
+                                }
+
+                            }
+                            if(CalibrationValidationFailed)
+                            {
+                                newR.Delete();
+                                continue;
+                            }
+
                             try
                             {
                                 newR["currencyId"] = currencies[Convert.ToString(newR["currency"])];
@@ -671,27 +716,36 @@ namespace CMMSAPIs.Repositories.Inventory
 
 
                             }
+
+                            bool warrantyDataExist = false;
+                            bool warrantyValidationFailed = false;
                             try
                             {
                                 newR["warranty_type"] = warrantyTypes[Convert.ToString(newR["warranty_type_name"]).ToUpper()];
+                                warrantyDataExist = true;
                             }
                             catch (KeyNotFoundException)
                             {
-                                //m_errorLog.SetWarning($"[Row: {rN}] Warranty Type named '{newR["warranty_type_name"]}' not found. Setting warranty Type ID as 0.");
+                                m_errorLog.SetError($"[Row: {rN}] Warranty Type named '{newR["warranty_type_name"]}' not found.");
                                 newR["warranty_type"] = 0;
+                                warrantyValidationFailed = true;
                             }
                             try
                             {
+                                string strTemp1 = Convert.ToString(newR["warranty_term_type_name"]);
                                 newR["warranty_term_type"] = warrantyTerms[Convert.ToString(newR["warranty_term_type_name"]).ToUpper()];
+                                warrantyDataExist = true;
                             }
                             catch (KeyNotFoundException)
                             {
-                                //m_errorLog.SetWarning($"[Row: {rN}] Warranty Term named '{newR["warranty_term_type_name"]}' not found. Setting warranty term ID as 0.");
+                                m_errorLog.SetError($"[Row: {rN}] Warranty Term named '{newR["warranty_term_type_name"]}' not found.");
                                 newR["warranty_term_type"] = 0;
+                                warrantyValidationFailed = true;
                             }
                             try
                             {
                                 newR["warranty_provider_id"] = businesses[Convert.ToString(newR["warranty_provider_name"]).ToUpper()];
+                                warrantyDataExist = true;
                             }
                             catch (KeyNotFoundException)
                             {
@@ -711,13 +765,49 @@ namespace CMMSAPIs.Repositories.Inventory
                                 {
                                     //m_errorLog.SetWarning($"[Row: {rN}] Warranty Provider named '{name}' not found. Setting warranty provider ID as 0.");
                                     newR["warranty_provider_id"] = 0;
+                                    warrantyValidationFailed = true;
                                 }
                             }
 
-                            if (!(Convert.ToInt32(newR["warranty_type"]) > 0 && Convert.ToInt32(newR["warranty_term_type"]) > 0 && Convert.ToInt32(newR["warranty_provider_id"]) > 0))
+                            if ((Convert.ToInt32(newR["warranty_type"]) > 0 && Convert.ToInt32(newR["warranty_term_type"]) > 0 && Convert.ToInt32(newR["warranty_provider_id"]) > 0))
                             {
-                                //m_errorLog.SetWarning($"[Row: {rN}] Warranty data does not exist. ");
+                                if (newR["warranty_description"] != null && (Convert.ToString(newR["warranty_description"]) != ""))
+                                {
+                                    m_errorLog.SetWarning($"[Row: {rN}] Warranty type and term is set, but Warranty_Description is not defined ");
+                                }
+                                if (newR["start_date"] != null && (Convert.ToString(newR["start_date"]) != ""))
+                                {
+                                    m_errorLog.SetError($"[Row: {rN}] Warranty type and term is set, but Asset_Warranty_Start_Date is not defined ");
+                                    warrantyValidationFailed = true;
+                                }
+                                if (newR["expiry_date"] != null && (Convert.ToString(newR["expiry_date"]) != ""))
+                                {
+                                    m_errorLog.SetWarning($"[Row: {rN}] Warranty type and term is set, but Asset_Warranty_Expiry_Date is not defined ");
+                                }
+                                if (newR["certificate_number"] != null && (Convert.ToString(newR["certificate_number"]) != ""))
+                                {
+                                    m_errorLog.SetWarning($"[Row: {rN}]  Warranty type and term is set, but Asset_Warranty_Certificate_No is not defined ");
+                                }
                             }
+                            else
+                            {
+                                if(warrantyDataExist)
+                                {
+                                    m_errorLog.SetError($"[Row: {rN}] Incomplete Warranty details. Warranty type and/or warranty term is not set.");
+                                }
+                            }
+                            if (warrantyValidationFailed)
+                            {
+                                m_errorLog.SetError($"[Row: {rN}] Warranty data validation failed");
+                                newR.Delete();
+                                continue;
+                            }
+
+                            string warrantyQry = "insert into assetwarranty (warranty_type, warranty_description, warranty_term_type, start_date, expiry_date, warranty_provider, certificate_number, addedAt, addedBy, status) VALUES ";
+                            warrantyQry += $"('{Convert.ToString(newR["warranty_type"]).ToUpper()}', '{Convert.ToString(newR["warranty_description"]).ToUpper()}', '{Convert.ToString(newR["warranty_term_type"]).ToUpper()}','{Convert.ToString(newR["start_date"]).ToUpper()}', '{Convert.ToString(newR["expiry_date"]).ToUpper()}','{Convert.ToString(newR["warranty_provider_id"]).ToUpper()}','{Convert.ToString(newR["certificate_number"]).ToUpper()}');" +
+                                $" SELECT LAST_INSERT_ID();"; 
+
+
 
                             if (Convert.ToString(newR["parentName"]) == null || Convert.ToString(newR["parentName"]) == "")
                             {
@@ -1101,9 +1191,11 @@ namespace CMMSAPIs.Repositories.Inventory
              * Business - owner, operator, customer
             */
             /*Your code goes here*/
+//            "w.start_date,w.expiry_date,w.warrantyTenture,w.certificate_number,a.cost,cy.name as currency,a.barcode,a.unspCode,a.purchaseCode,a.calibrationDueDate,a.calibrationReminderDays,a.calibrationFrequencyType,a.calibrationLastDate,a.calibrationDueDate as calibration_testing_date,a.model,a.supplierId,a.manufacturerId,manufacturertlb.name as manufacturername " +
+
             string myQuery =
             " select a.id, a.name,a.moduleQuantity, a.description, ast.name as type, b2.name as supplierName, b5.name as operatorName, a.categoryId, ac.name as categoryName, a.serialNumber,a.specialTool, a.warrantyId,f.name AS facilityName, f.id AS facilityId, bl.id AS blockId, bl.name AS blockName,linkedbl.id AS linkedToBlockId, linkedbl.name AS linkedToBlockName, a.parentId, a2.name as parentName, custbl.name as customerName, owntbl.name as ownerName, s.name AS status, a.dccapacity,a.acrating, a.dcRating, a.acCapacity, a.descMaintenace, wt.name as warrantyType, wp.id as warrantyProviderId, wp.name as warrantyProviderName, " +
-            "w.start_date,w.expiry_date,w.warrantyTenture,w.certificate_number,a.cost,cy.name as currency,a.barcode,a.unspCode,a.purchaseCode,a.calibrationDueDate,a.calibrationReminderDays,a.calibrationFrequency,a.calibrationLastDate,a.calibrationDueDate as calibration_testing_date,a.model,a.supplierId,a.manufacturerId,manufacturertlb.name as manufacturername " +
+            "w.start_date,w.expiry_date,w.warrantyTenture,w.certificate_number,a.cost,cy.name as currency,a.barcode,a.unspCode,a.purchaseCode,a.calibrationDueDate,a.calibrationReminderDays,a.calibrationFrequencyType,a.calibrationDueDate as calibration_testing_date,a.model,a.supplierId,a.manufacturerId,manufacturertlb.name as manufacturername " +
 
             " from assets as a " +
             "left join assettypes as ast on ast.id = a.typeId " +
@@ -1246,6 +1338,10 @@ namespace CMMSAPIs.Repositories.Inventory
             string strRetMessage = "";
             int linkedToBlockId = 0;
             // List<int> idList = new List<int>();
+            Dictionary<string, int> inventoryDict = new Dictionary<string, int>();
+
+            DataTable dt3 = new DataTable();
+
             foreach (var unit in request)
             {
                 /* string qry = "insert into assets (name, description, parentId, acCapacity, dcCapacity, categoryId, typeId, statusId, facilityId, blockId, linkedToBlockId, customerId, ownerId,operatorId, manufacturerId,supplierId,serialNumber,createdBy,photoId,model,stockCount,moduleQuantity, cost,currency,specialTool,specialToolEmpId,calibrationDueDate,calibrationLastDate,calibrationFreqType,calibrationFrequency,calibrationReminderDays,retirementStatus,multiplier,vendorId,calibrationNextDueDate,acRating,dcRating,descMaintenace,barcode,unspCode,purchaseCode,createdAt) values ";*/
@@ -1257,10 +1353,6 @@ namespace CMMSAPIs.Repositories.Inventory
                 {
                     throw new ArgumentException($"name of asset cannot be empty on line {count}");
                 }
-                string firstCalibrationDate = (unit.calibrationFirstDueDate == null) ? "NULL" : "'" + ((DateTime)unit.calibrationFirstDueDate.Value).ToString("yyyy-MM-dd") + "'";
-                string lastCalibrationDate = (unit.calibrationLastDate == null) ? "NULL" : "'" + ((DateTime)unit.calibrationLastDate.Value).ToString("yyyy-MM-dd") + "'";
-                string nextCalibrationDate = (unit.calibrationNextDueDate == null) ? "NULL" : "'" + ((DateTime)unit.calibrationNextDueDate.Value).ToString("yyyy-MM-dd") + "'";
-
                 if (unit.blockId > 0)
                 {
                     linkedToBlockId = unit.blockId;
@@ -1291,6 +1383,21 @@ string warrantyQry = "insert into assetwarranty
             */
                 /* qry += "('" + unit.name + "','" + unit.description + "','" + unit.parentId + "','" + unit.acCapacity + "','" + unit.dcCapacity + "','" + unit.categoryId + "','" + unit.typeId + "','" + unit.statusId + "','" + unit.facilityId + "','" + unit.blockId + "','" + unit.blockId + "','" + unit.customerId + "','" + unit.ownerId + "','" + unit.operatorId + "','" + unit.manufacturerId + "','" + unit.supplierId + "','" + unit.serialNumber + "','" + userID + "','" + unit.photoId + "','" + unit.model + "','" + unit.stockCount + "','" + unit.moduleQuantity + "','" + unit.cost + "','" + unit.currency + "','" + unit.specialToolId + "','" + unit.specialToolEmpId + "'," + firstCalibrationDate + "," + lastCalibrationDate + ",'" + unit.calibrationFrequencyType + "','" + unit.calibrationFrequency + "','" + unit.calibrationReminderDays + "','" + unit.retirementStatus + "','" + unit.multiplier + "','" + unit.vendorId + "'," + nextCalibrationDate + ",'" + unit.acRating + "','" + unit.dcRating + "','" + unit.descMaintenace + "','" + unit.barcode + "','" + unit.unspCode + "','" + unit.purchaseCode + "','"+ UtilsRepository.GetUTCTime() + "'); ";
                  qry += "select LAST_INSERT_ID(); ";*/
+
+                //Asset_Calibration/Testing_Date	Asset_Last_Calibration_Date	Calibration_Next_Due_Date	Asset_Calibration_Frequency	Calibration_Reminder_Days
+                //calibrationDueDate,calibrationLastDate,calibrationNextDueDate,calibrationFreqType,calibrationFrequency,calibrationReminderDays
+                string firstCalibrationDate = (unit.calibrationFirstDueDate == null) ? "NULL" : "'" + ((DateTime)unit.calibrationFirstDueDate.Value).ToString("yyyy-MM-dd") + "'";
+                string lastCalibrationDate = (unit.calibrationLastDate == null) ? "NULL" : "'" + ((DateTime)unit.calibrationLastDate.Value).ToString("yyyy-MM-dd") + "'";
+                string nextCalibrationDate = (unit.calibrationNextDueDate == null) ? "NULL" : "'" + ((DateTime)unit.calibrationNextDueDate.Value).ToString("yyyy-MM-dd") + "'";
+                //Validation : if firstCalibrationDate date exist
+                if (firstCalibrationDate.Length > 0)
+                {
+                    //then, Asset_Calibration_Frequency	Asset_Last_Calibration_Date required
+
+                    //if(unit.calibrationFrequency && lastCalibrationDate != null)
+                }
+                //firstCalibrationDate + "," + lastCalibrationDate + ",'" + unit.calibrationFrequencyType + "','" + unit.calibrationFrequency + "','" + unit.calibrationReminderDays + "','" +  "'," + nextCalibrationDate + 
+
 
                 qry += "('" + unit.name + "','" + unit.assetdescription + "','" + unit.parentId + "','" + unit.acCapacity + "','" + unit.dcCapacity + "','" + unit.categoryId + "','" + unit.typeId + "','" + unit.statusId + "','" + unit.facilityId + "','" + unit.blockId + "','" + unit.blockId + "','" + unit.customerId + "','" + unit.ownerId + "','" + unit.operatorId + "','" + unit.manufacturerId + "','" + unit.parent_equipment_no + "','" + unit.supplierId + "','" + unit.serialNumber + "','" + userID + "','" + unit.photoId + "','" + unit.model + "','" + unit.stockCount + "','" + unit.moduleQuantity + "','" + unit.cost + "','" + unit.currency + "','" + unit.specialToolId + "','" + unit.specialToolEmpId + "'," + firstCalibrationDate + "," + lastCalibrationDate + ",'" + unit.calibrationFrequencyType + "','" + unit.calibrationFrequency + "','" + unit.calibrationReminderDays + "','" + unit.retirementStatus + "','" + unit.multiplier + "','" + unit.vendorId + "'," + nextCalibrationDate + ",'" + unit.acRating + "','" + unit.dcRating + "','" + unit.descMaintenace + "','" + unit.barcode + "','" + unit.unspCode + "','" + unit.purchaseCode + "','" + UtilsRepository.GetUTCTime() + "','" + unit.num_of_module + "'); ";
                 qry += "select LAST_INSERT_ID(); ";
@@ -1371,16 +1478,34 @@ string warrantyQry = "insert into assetwarranty
             {
                 /* string qry = "insert into assets (name, description, parentId, acCapacity, dcCapacity, categoryId, typeId, statusId, facilityId, blockId, linkedToBlockId, customerId, ownerId,operatorId, manufacturerId,supplierId,serialNumber,createdBy,photoId,model,stockCount,moduleQuantity, cost,currency,specialTool,specialToolEmpId,calibrationDueDate,calibrationLastDate,calibrationFreqType,calibrationFrequency,calibrationReminderDays,retirementStatus,multiplier,vendorId,calibrationNextDueDate,acRating,dcRating,descMaintenace,barcode,unspCode,purchaseCode,createdAt) values ";*/
 
-                string qry = "insert into assets (name, description, parentId, acCapacity, dcCapacity, categoryId, typeId, statusId, facilityId, blockId, linkedToBlockId, customerId, ownerId,operatorId, manufacturerId,parent_equipment_no,supplierId,serialNumber,createdBy,photoId,model,stockCount,moduleQuantity, cost,currency,specialTool,specialToolEmpId,calibrationDueDate,calibrationLastDate,calibrationFreqType,calibrationFrequency,calibrationReminderDays,retirementStatus,multiplier,vendorId,calibrationNextDueDate,acRating,dcRating,descMaintenace,barcode,unspCode,purchaseCode,createdAt,num_of_module,area) values ";
+                string qry = "insert into assets (name, description, parentId, acCapacity, dcCapacity, categoryId, typeId, statusId, facilityId, blockId, linkedToBlockId, customerId, ownerId,operatorId, manufacturerId,parent_equipment_no,supplierId,serialNumber,createdBy,photoId,model,stockCount,moduleQuantity, cost,currency,specialTool,specialToolEmpId,calibrationDueDate,calibrationFreqType,calibrationReminderDays,retirementStatus,multiplier,vendorId,acRating,dcRating,descMaintenace,barcode,unspCode,purchaseCode,createdAt,num_of_module,area) values ";
                 count++;
                 assetName = unit.name;
                 if (assetName.Length <= 0)
                 {
                     throw new ArgumentException($"name of asset cannot be empty on line {count}");
                 }
+
+
+                //Asset_Calibration/Testing_Date	Asset_Last_Calibration_Date	Calibration_Next_Due_Date	Asset_Calibration_Frequency	Calibration_Reminder_Days
+                //calibrationDueDate,calibrationLastDate,calibrationNextDueDate,calibrationFreqType,calibrationFrequency,calibrationReminderDays
                 string firstCalibrationDate = (unit.calibrationFirstDueDate == null) ? "NULL" : "'" + ((DateTime)unit.calibrationFirstDueDate.Value).ToString("yyyy-MM-dd") + "'";
                 string lastCalibrationDate = (unit.calibrationLastDate == null) ? "NULL" : "'" + ((DateTime)unit.calibrationLastDate.Value).ToString("yyyy-MM-dd") + "'";
                 string nextCalibrationDate = (unit.calibrationNextDueDate == null) ? "NULL" : "'" + ((DateTime)unit.calibrationNextDueDate.Value).ToString("yyyy-MM-dd") + "'";
+
+                //Validation : if firstCalibrationDate date exist
+                if (firstCalibrationDate.Length > 0)
+                {
+                    //then, Asset_Calibration_Frequency	Asset_Last_Calibration_Date required
+
+
+                    //if not, then log erro
+                }
+                //firstCalibrationDate + "," + lastCalibrationDate + ",'" + unit.calibrationFrequencyType + "','" + unit.calibrationFrequency + "','" + unit.calibrationReminderDays + "','" +  "'," + nextCalibrationDate + 
+
+
+
+
 
                 if (unit.blockId > 0)
                 {
@@ -1413,7 +1538,7 @@ string warrantyQry = "insert into assetwarranty
                 /* qry += "('" + unit.name + "','" + unit.description + "','" + unit.parentId + "','" + unit.acCapacity + "','" + unit.dcCapacity + "','" + unit.categoryId + "','" + unit.typeId + "','" + unit.statusId + "','" + unit.facilityId + "','" + unit.blockId + "','" + unit.blockId + "','" + unit.customerId + "','" + unit.ownerId + "','" + unit.operatorId + "','" + unit.manufacturerId + "','" + unit.supplierId + "','" + unit.serialNumber + "','" + userID + "','" + unit.photoId + "','" + unit.model + "','" + unit.stockCount + "','" + unit.moduleQuantity + "','" + unit.cost + "','" + unit.currency + "','" + unit.specialToolId + "','" + unit.specialToolEmpId + "'," + firstCalibrationDate + "," + lastCalibrationDate + ",'" + unit.calibrationFrequencyType + "','" + unit.calibrationFrequency + "','" + unit.calibrationReminderDays + "','" + unit.retirementStatus + "','" + unit.multiplier + "','" + unit.vendorId + "'," + nextCalibrationDate + ",'" + unit.acRating + "','" + unit.dcRating + "','" + unit.descMaintenace + "','" + unit.barcode + "','" + unit.unspCode + "','" + unit.purchaseCode + "','"+ UtilsRepository.GetUTCTime() + "'); ";
                  qry += "select LAST_INSERT_ID(); ";*/
 
-                qry += "('" + unit.name + "','" + unit.assetdescription + "','" + unit.parentId + "','" + unit.acCapacity + "','" + unit.dcCapacity + "','" + unit.categoryId + "','" + unit.typeId + "','" + unit.statusId + "','" + unit.facilityId + "','" + unit.blockId + "','" + unit.blockId + "','" + unit.customerId + "','" + unit.ownerId + "','" + unit.operatorId + "','" + unit.manufacturerId + "','" + unit.parent_equipment_no + "','" + unit.supplierId + "','" + unit.serialNumber + "','" + userID + "','" + unit.photoId + "','" + unit.model + "','" + unit.stockCount + "','" + unit.moduleQuantity + "','" + unit.cost + "','" + unit.currency + "','" + unit.specialToolId + "','" + unit.specialToolEmpId + "'," + firstCalibrationDate + "," + lastCalibrationDate + ",'" + unit.calibrationFrequencyType + "','" + unit.calibrationFrequency + "','" + unit.calibrationReminderDays + "','" + unit.retirementStatus + "','" + unit.multiplier + "','" + unit.vendorId + "'," + nextCalibrationDate + ",'" + unit.acRating + "','" + unit.dcRating + "','" + unit.descMaintenace + "','" + unit.barcode + "','" + unit.unspCode + "','" + unit.purchaseCode + "','" + UtilsRepository.GetUTCTime() + "','" + unit.num_of_module + "'," + unit.area + "); ";
+                qry += "('" + unit.name + "','" + unit.assetdescription + "','" + unit.parentId + "','" + unit.acCapacity + "','" + unit.dcCapacity + "','" + unit.categoryId + "','" + unit.typeId + "','" + unit.statusId + "','" + unit.facilityId + "','" + unit.blockId + "','" + unit.blockId + "','" + unit.customerId + "','" + unit.ownerId + "','" + unit.operatorId + "','" + unit.manufacturerId + "','" + unit.parent_equipment_no + "','" + unit.supplierId + "','" + unit.serialNumber + "','" + userID + "','" + unit.photoId + "','" + unit.model + "','" + unit.stockCount + "','" + unit.moduleQuantity + "','" + unit.cost + "','" + unit.currency + "','" + unit.specialToolId + "','" + unit.specialToolEmpId + "'," + firstCalibrationDate + "," + lastCalibrationDate + ",'" + unit.calibrationFrequencyType + "','" + "','" + unit.calibrationReminderDays + "','" + unit.retirementStatus + "','" + unit.multiplier + "','" + unit.vendorId + "'," + nextCalibrationDate + ",'" + unit.acRating + "','" + unit.dcRating + "','" + unit.descMaintenace + "','" + unit.barcode + "','" + unit.unspCode + "','" + unit.purchaseCode + "','" + UtilsRepository.GetUTCTime() + "','" + unit.num_of_module + "'," + unit.area + "); ";
                 qry += "select LAST_INSERT_ID(); ";
 
                 //List<CMInventoryList> newInventory = await Context.GetData<CMInventoryList>(qry).ConfigureAwait(false);
@@ -1720,7 +1845,7 @@ string warrantyQry = "insert into assetwarranty
             //    updateQry += $" calibrationLastDate = '{request.calibrationLastDate}',";
 
             //}
-            if (request.calibrationFrequency != 0)
+            if (request.calibrationFrequency != null)
             {
                 updateQry += $" calibrationFrequency = '{request.calibrationFrequency}',";
 
