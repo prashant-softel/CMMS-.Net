@@ -548,7 +548,7 @@ public async Task<List<CMEmployeeStockReport>> GetEmployeeStockReport(int facili
 
                 openingBalance.facilityID = item.facilityID;
                 openingBalance.facilityName = facility_name;
-                openingBalance.Opening = item.Opening;
+                openingBalance.Opening = item.Opening < 0 ? 0 : item.Opening;
                 openingBalance.assetItemID = item.assetItemID;
                 openingBalance.asset_name = item.asset_name;
                 openingBalance.asset_code = item.asset_code;
@@ -556,7 +556,7 @@ public async Task<List<CMEmployeeStockReport>> GetEmployeeStockReport(int facili
                 openingBalance.asset_type = item.asset_type;
                 openingBalance.inward = item.inward;
                 openingBalance.outward = item.outward;
-                openingBalance.balance = item.Opening + item.inward - item.outward;
+                openingBalance.balance = openingBalance.Opening + item.inward - item.outward;
                 Asset_Item_Opening_Balance_details.Add(openingBalance);
             }
 
@@ -600,6 +600,56 @@ public async Task<List<CMEmployeeStockReport>> GetEmployeeStockReport(int facili
             return Response;
 
         }
+
+        internal async Task<List<CMEmployeeStockTransactionReport>> GetPlantItemTransactionReport(string facility_ID, int assetItemId, DateTime fromDate, DateTime toDate, string facilitytimeZone)
+        {
+
+            List<CMEmployeeStockTransactionReport> EmployeeStockReportList = new List<CMEmployeeStockTransactionReport>();
+
+            string Plant_Stock_Opening_Details_query = "select ST.fromActorID, CASE WHEN fromActorType = 1 then 'Vendor'" +
+                " WHEN fromActorType = 2 then 'Store' " +
+                " WHEN fromActorType = 5 then 'Engineer' " +
+                " WHEN fromActorType = 3 then 'Task' " +
+                " WHEN fromActorType = 6 then 'Inventory' End AS fromActorType, " +
+                " CASE WHEN fromActorType = 1 then (select Name from business B where B.ID = ST.fromActorID) " +
+                " WHEN fromActorType = 2 then (select name  from facilities F where F.ID = ST.fromActorID) " +
+                " WHEN fromActorType = 3 then (select concat(p.plan_name,' - Task',T.id) actorName from pm_task T inner join pm_plan P on P.id = T.plan_id where T.id = ST.fromActorID) " +
+                " WHEN fromActorType in (5) then (select CONCAT(firstName, ' ', lastName)   from users u where u.ID = ST.fromActorID) " +
+                " End AS FromActorName , toActorID as toActorID," +
+                " CASE WHEN toActorType = 1 then 'Vendor'  WHEN toActorType = 2 then 'Store' WHEN toActorType = 3 then 'Task' " +
+                " WHEN toActorType = 5 then 'Engineer'  WHEN toActorType = 6 then 'Inventory' End AS toActorType, " +
+                " CASE WHEN toActorType = 1 then (select Name from business B where B.ID = ST.toActorID) " +
+                " WHEN toActorType = 2 then (select name  from facilities F where F.ID = ST.toActorID) " +
+                " WHEN toActorType = 3 then (select concat(p.plan_name,' - Task',T.id) actorName from pm_task T inner join pm_plan P on P.id = T.plan_id where T.id = ST.toActorID) " +
+                " WHEN toActorType in (5) then (select CONCAT(firstName, ' ', lastName)   from users u where u.ID = ST.toActorID) " +
+                " When toActorType = 4 then (select JC_title from jobcards j where j.id= st.toActorID) " +
+                " When toActorType = 6 then (select a.name from assets a where a.id= st.toActorID)  End AS toActorName," +
+                " ST.assetItemID,am.asset_name as assetItemName, qty , FF.name as facilityName, remarks, lastInsetedDateTime as LastUpdated, " +
+                " CONCAT(C.firstName, ' ', C.lastName) CreatedBy, ST.createdAt, smtypes.asset_type " +
+                " from smtransactiondetails ST  inner join smtransition smt on smt.transactionID = ST.ID" +
+                " inner join smassetmasters am on am.ID = ST.assetItemID left join facilities FF on FF.id = ST.plantID " +
+                " left join users C on C.id = ST.createdBy left join smassettypes smtypes on smtypes.ID = am.asset_type_ID " +
+                " where ST.assetItemID = " + assetItemId + "  and  date_format(smt.lastModifiedDate, '%Y-%m-%d')  BETWEEN '" + fromDate.ToString("yyyy-MM-dd") + "' AND '" + toDate.ToString("yyyy-MM-dd") + "' ";
+
+            if (facility_ID != "" && facility_ID != null)
+            {
+                Plant_Stock_Opening_Details_query = Plant_Stock_Opening_Details_query + " AND ST.plantID in (" + facility_ID + ")";
+            }
+
+            Plant_Stock_Opening_Details_query = Plant_Stock_Opening_Details_query + " group by St.id order by ST.id desc;";
+
+            List<CMEmployeeStockTransactionReport> result = await Context.GetData<CMEmployeeStockTransactionReport>(Plant_Stock_Opening_Details_query).ConfigureAwait(false);
+            foreach (var detail in result)
+            {
+                if (detail != null && detail.createdAt != null)
+                    detail.createdAt = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)detail.createdAt);
+                if (detail != null && detail.LastUpdated != null)
+                    detail.LastUpdated = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)detail.LastUpdated);
+            }
+
+            return result;
+        }
+
 
     }
 }
