@@ -64,12 +64,12 @@ namespace CMMSAPIs.Controllers.Masters
         }
         [Route("GetAttendanceByDetailsByMonth")]
         [HttpGet]
-        public async Task<IActionResult> GetAttendanceByDetailsByMonth(int facility_id, DateTime from_date, DateTime to_date)
+        public async Task<IActionResult> GetAttendanceByDetailsByMonth(int facility_id, DateTime start_date, DateTime end_date)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _attendeceBS.GetAttendanceByDetailsByMonth(facility_id, from_date, to_date);
+                var data = await _attendeceBS.GetAttendanceByDetailsByMonth(facility_id, start_date, end_date);
                 return Ok(data);
             }
             catch (Exception ex)

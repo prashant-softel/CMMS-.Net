@@ -11,6 +11,7 @@ namespace CMMSAPIs.Models.Calibration
     {
         public int calibration_id { get; set; }
         public int asset_id { get; set; }
+        public int is_damaged { get; set; }
         public string asset_name { get; set; }
         public string asset_serial { get; set; }
         public string category_name { get; set; }
@@ -79,6 +80,7 @@ namespace CMMSAPIs.Models.Calibration
     {
         public int calibration_id { get; set; }
         public string comment { get; set; }
+        public int is_damaged { get; set; }
         public List<int> uploaded_file_id { get; set; }
     }
 

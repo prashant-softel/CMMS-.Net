@@ -206,7 +206,7 @@ namespace CMMSAPIs.Repositories.Inventory
                 { "Stock_Count", new Tuple<string, Type>("stockCount", typeof(int)) },
                 { "Asset_Calibration/Testing_Date", new Tuple<string, Type>("calibrationFirstDueDate", typeof(DateTime)) },
                 { "Asset_Last_Calibration_Date", new Tuple<string, Type>("calibrationLastDate", typeof(DateTime)) },
-                { "Asset_Calibration_Frequency", new Tuple<string, Type>("calibrationFrequency", typeof(int)) },
+               { "Asset_Calibration_Frequency", new Tuple<string, Type>("calibrationFrequency", typeof(int)) },
                // { "Asset_Calibration_Frequency", new Tuple<string, Type>("calibrationFrequency", typeof(string)) },
                 { "Calibration_Reminder_Days", new Tuple<string, Type>("calibrationReminderDays", typeof(int)) },
                 { "Warranty_Description", new Tuple<string, Type>("warranty_description", typeof(string)) },
@@ -324,7 +324,7 @@ namespace CMMSAPIs.Repositories.Inventory
                         dt2.Columns.Add("statusId", typeof(int));
                         dt2.Columns.Add("warranty_type", typeof(int));
                         dt2.Columns.Add("warranty_term_type", typeof(int));
-                        dt2.Columns.Add("calibrationFrequency", typeof(string));
+                        //dt2.Columns.Add("calibrationFrequency", typeof(string));
                         dt2.Columns.Add("warranty_provider_id", typeof(int));
                         dt2.Columns.Add("id", typeof(int));
 
@@ -1314,6 +1314,16 @@ string warrantyQry = "insert into assetwarranty
                 else
                 {
                     strRetMessage = "Warranty data for <" + assetName + "> does not exist. ";
+                }
+                if (unit.warranty_type >= 0 || unit.warranty_term_type >= 0 || unit.warranty_provider_id >= 0)
+                {
+
+                    string calibratoinquery = "insert into calibration (facility_id,due_date,asset_id,start_date,status,requested_by,requested_at ) VALUES ";
+                    calibratoinquery += $"({unit.facilityId}, {firstCalibrationDate}, {retID},{lastCalibrationDate},{(int)CMMS.CMMS_Status.CALIBRATION_REQUEST},{userID},'{UtilsRepository.GetUTCTime()}');" +
+                        $" SELECT LAST_INSERT_ID();";
+                    DataTable dt2 = await Context.FetchData(calibratoinquery).ConfigureAwait(false);
+                    int calibration_id = Convert.ToInt32(dt2.Rows[0][0]);
+
                 }
                 if (unit.uplaodfile_ids.Count > 0)
                 {

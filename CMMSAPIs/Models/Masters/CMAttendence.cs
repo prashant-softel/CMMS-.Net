@@ -112,8 +112,8 @@ namespace CMMSAPIs.Models.Masters
         public int emp_id { get; set; }
         public DateTime date { get; set; }
         public dynamic status { get; set; }
-        public string? inTime { get; set; }
-        public string? outTime { get; set; }
+        public DateTime? inTime { get; set; }
+        public DateTime? outTime { get; set; }
     }
 }
 
