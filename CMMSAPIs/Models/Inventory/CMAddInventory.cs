@@ -42,8 +42,8 @@ namespace CMMSAPIs.Models.Inventory
         public DateTime? calibrationFirstDueDate { get; set; }
         public DateTime? calibrationNextDueDate { get; set; }
         public DateTime? calibrationLastDate { get; set; } //add this col to database if its not there
-        public string calibrationFrequency { get; set; }
-        public int calibrationFrequencyType { get; set; }
+        public int calibrationFrequency { get; set; }
+        public string calibrationFrequencyType { get; set; }
         public int calibrationReminderDays { get; set; }
         public int retirementStatus { get; set; }
         public int specialToolId { get; set; }

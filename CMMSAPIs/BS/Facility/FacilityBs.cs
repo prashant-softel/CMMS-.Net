@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using CMMSAPIs.Helper;
+﻿using CMMSAPIs.Helper;
+using CMMSAPIs.Models.Facility;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Facility;
-using CMMSAPIs.Models.Facility;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace CMMSAPIs.BS.Facility
 {
@@ -12,15 +12,15 @@ namespace CMMSAPIs.BS.Facility
     {
         Task<List<CMFacilityList>> GetFacilityList(int userID);
         Task<List<CMFacilityList>> GetBlockList(int parent_id);
-        Task<CMFacilityDetails> GetFacilityDetails(int id,string facilitytime);
+        Task<CMFacilityDetails> GetFacilityDetails(int id, string facilitytime);
         Task<CMDefaultResponse> CreateNewFacility(CMCreateFacility request, int userID);
         Task<CMDefaultResponse> UpdateFacility(CMCreateFacility request, int userID);
         Task<CMDefaultResponse> DeleteFacility(int facility_id);
         Task<CMDefaultResponse> CreateNewBlock(CMCreateBlock request, int userID);
         Task<CMDefaultResponse> UpdateBlock(CMCreateBlock request, int userID);
         Task<CMDefaultResponse> DeleteBlock(int block_id);
-        Task<List<FacilityListEmployee>>GetFacilityListEmployee(int facility_id);
-        Task<List<FacilityListEmployee>>GetEmployeeListbyFeatureId(int facility_id, int featureid);
+        Task<List<FacilityListEmployee>> GetFacilityListEmployee(int facility_id);
+        Task<List<FacilityListEmployee>> GetEmployeeListbyFeatureId(int facility_id, int featureid);
     }
 
     public class FacilityBs : IFacilityBS
@@ -165,14 +165,14 @@ namespace CMMSAPIs.BS.Facility
                 throw;
             }
         }
-        
+
         public async Task<List<FacilityListEmployee>> GetFacilityListEmployee(int facility_id)
         {
             try
             {
                 using (var repos = new FacilityRepository(getDB))
                 {
-                    return await repos.GetFacilityListEmployee( facility_id);
+                    return await repos.GetFacilityListEmployee(facility_id);
                 }
             }
             catch (Exception)
@@ -187,7 +187,7 @@ namespace CMMSAPIs.BS.Facility
             {
                 using (var repos = new FacilityRepository(getDB))
                 {
-                    return await repos.GetEmployeeListbyFeatureId(facility_id,featureid);
+                    return await repos.GetEmployeeListbyFeatureId(facility_id, featureid);
                 }
             }
             catch (Exception)
