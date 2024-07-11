@@ -10,6 +10,7 @@ namespace CMMSAPIs.Models.Incident_Reports
         public string equipment_name { get; set; }
         public string facility_name { get; set; }
         public string type_of_job { get; set; }
+        public string type_of_incident { get; set; }
         public string location_of_incident { get; set; }
         public DateTime? incident_datetime { get; set; }
         public DateTime? restoration_datetime { get; set; }
