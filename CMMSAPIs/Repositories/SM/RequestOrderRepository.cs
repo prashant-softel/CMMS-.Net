@@ -38,7 +38,7 @@ namespace CMMSAPIs.Repositories.SM
                     for (var i = 0; i < request.request_order_items.Count; i++)
                     {
                         string poDetailsQuery = $"INSERT INTO smrequestorderdetails (requestID,assetItemID,cost, currencyId, ordered_qty,remarks) " +
-                        "values(" + roid + ", " + request.request_order_items[i].assetMasterItemID + ",  " + request.request_order_items[i].cost + ", " + request.request_order_items[i].currencyId + ", " + request.request_order_items[i].ordered_qty + ", '" + request.request_order_items[i].comment + "') ; SELECT LAST_INSERT_ID();";
+                        "values(" + roid + ", " + request.request_order_items[i].assetItemID + ",  " + request.request_order_items[i].cost + ", " + request.request_order_items[i].currencyId + ", " + request.request_order_items[i].ordered_qty + ", '" + request.request_order_items[i].comment + "') ; SELECT LAST_INSERT_ID();";
                         DataTable dtInsertPO = await Context.FetchData(poDetailsQuery).ConfigureAwait(false);
                         int id = Convert.ToInt32(dtInsertPO.Rows[0][0]);
                     }
@@ -109,7 +109,7 @@ namespace CMMSAPIs.Repositories.SM
                            " po.status,sai.asset_code,t1.asset_type,t2.cat_name,pod.received_qty,pod.damaged_qty,pod.accepted_qty, " +
                            " f1.file_path,f1.Asset_master_id,sm.decimal_status,sm.spare_multi_selection,po.generated_by, " +
                            " pod.order_type as asset_type_ID_OrderDetails, receive_later, added_to_store,reject_reccomendations as  rejectedRemark, " +
-                           " po.amount,  po.currency as currencyID , curr.name as currency ,  \r\n    CONCAT(ed.firstName,' ',ed.lastName) as generatedBy, " +
+                           " po.amount,  pod.currencyId as currencyId , curr.name as currency ,  \r\n    CONCAT(ed.firstName,' ',ed.lastName) as generatedBy, " +
                            " po.received_on as generatedAt,approvedOn as approvedAt,CONCAT(ed1.firstName,' ',ed1.lastName) as receivedBy, " +
                            " pod.remarks as itemcomment, CONCAT(ed2.firstName,' ',ed2.lastName) as approvedBy , " +
                            " CONCAT(ed3.firstName,' ',ed3.lastName) as rejectedBy , po.rejected_at as rejectedAt " +
@@ -130,7 +130,7 @@ namespace CMMSAPIs.Repositories.SM
                            "            LEFT JOIN smassetmasters s2 ON s2.item_category_ID = sic.ID " +
                            "        )  t2 ON t2.master_ID = sam.ID" +
                            "        LEFT JOIN facilities fc ON fc.id = po.facilityID" +
-                           " LEFT JOIN currency curr ON curr.id = po.currency  LEFT JOIN users ed2 ON ed2.id = po.approved_by " +
+                           " LEFT JOIN currency curr ON curr.id = pod.currencyId  LEFT JOIN users ed2 ON ed2.id = po.approved_by " +
                            " LEFT JOIN users ed ON ed.id = po.generated_by" +
                            " LEFT JOIN users ed1 ON ed1.id = po.receiverID     LEFT JOIN users ed3 ON ed3.id = po.rejeccted_by" +
                            "  WHERE " + filter;
@@ -148,7 +148,6 @@ namespace CMMSAPIs.Repositories.SM
                 generatedBy = p.generatedBy,
                 generatedAt = p.request_date,
                 approvedBy = p.approvedBy,
-                currency = p.currency,
                 rejectedBy = p.rejectedBy,
                 rejectedAt = p.rejectedAt
             }).GroupBy(p => p.request_order_id).Select(group => group.First()).ToList();
@@ -162,7 +161,10 @@ namespace CMMSAPIs.Repositories.SM
                     asset_name = p.asset_name,
                     assetMasterItemID = p.assetItemID,
                     ordered_qty = p.ordered_qty,
-                    comment = p.itemcomment
+                    comment = p.itemcomment,
+                    currency = p.currency,
+                    currencyId = p.currencyId
+
                 }).ToList();
                 _MasterList[i].number_of_masters = _itemList.Where(group => group.requestID == _MasterList[i].request_order_id).Count();
                 _MasterList[i].number_of_item_count = (int)_itemList.Where(group => group.requestID == _MasterList[i].request_order_id).Sum(x => x.ordered_qty);

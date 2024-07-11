@@ -59,8 +59,11 @@ namespace CMMSAPIs.Models.SM
         public int? itemID { get; set; }
         public int requestID { get; set; }
         public int? assetMasterItemID { get; set; }
+
+        public int? assetItemID { get; set; }
         public decimal cost { get; set; }
         public int currencyId { get; set; }
+        public string currency { get; set; }
         public decimal ordered_qty { get; set; }
         public string asset_name { get; set; }
         //public int asset_type_ID { get; set; }
@@ -144,7 +147,7 @@ namespace CMMSAPIs.Models.SM
         public int facilityID { get; set; }
         public string facilityName { get; set; }
         public decimal cost { get; set; }
-        public string currency { get; set; }
+        public int assetItemID { get; set; }
         public string comment { get; set; }
         public int status { get; set; }
         public string status_short { get; set; }
