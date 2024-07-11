@@ -37,8 +37,8 @@ namespace CMMSAPIs.Repositories.SM
                     ReturnID = roid;
                     for (var i = 0; i < request.request_order_items.Count; i++)
                     {
-                        string poDetailsQuery = $"INSERT INTO smrequestorderdetails (requestID,assetItemID,cost,ordered_qty,remarks) " +
-                        "values(" + roid + ", " + request.request_order_items[i].assetMasterItemID + ",  " + request.request_order_items[i].cost + ", " + request.request_order_items[i].ordered_qty + ", '" + request.request_order_items[i].comment + "') ; SELECT LAST_INSERT_ID();";
+                        string poDetailsQuery = $"INSERT INTO smrequestorderdetails (requestID,assetItemID,cost, currencyId, ordered_qty,remarks) " +
+                        "values(" + roid + ", " + request.request_order_items[i].assetMasterItemID + ",  " + request.request_order_items[i].cost + ", " + request.request_order_items[i].currencyId + ", " + request.request_order_items[i].ordered_qty + ", '" + request.request_order_items[i].comment + "') ; SELECT LAST_INSERT_ID();";
                         DataTable dtInsertPO = await Context.FetchData(poDetailsQuery).ConfigureAwait(false);
                         int id = Convert.ToInt32(dtInsertPO.Rows[0][0]);
                     }
@@ -394,7 +394,7 @@ namespace CMMSAPIs.Repositories.SM
             }
 
             string query = "SELECT fc.name as facilityName, pod.ID as requestDetailsID, facilityid as facility_id, pod.spare_status, po.remarks, sai.orderflag, " +
-                           "sam.asset_type_ID, pod.requestID, pod.assetItemID, sai.serial_number, sai.location_ID, pod.cost, pod.ordered_qty, " +
+                           "sam.asset_type_ID, pod.requestID, pod.assetItemID, sai.serial_number, sai.location_ID, pod.cost, pod.currencyId, pod.currency, pod.ordered_qty, " +
                            "po.request_date, sam.asset_type_ID, sam.asset_name, po.receiverID, po.status, sam.asset_code, t1.asset_type, t2.cat_name, " +
                            "pod.received_qty, pod.damaged_qty, pod.accepted_qty, f1.file_path, f1.Asset_master_id, sm.decimal_status, sm.spare_multi_selection, " +
                            "po.generated_by, pod.order_type as asset_type_ID_OrderDetails, receive_later, added_to_store, reject_reccomendations as rejectedRemark, " +
@@ -416,6 +416,7 @@ namespace CMMSAPIs.Repositories.SM
                            "           LEFT JOIN smassetmasters s2 ON s2.item_category_ID = sic.ID) t2 ON t2.master_ID = sam.ID " +
                            "LEFT JOIN facilities fc ON fc.id = po.facilityID " +
                            "LEFT JOIN currency curr ON curr.id = po.currency " +
+                           "LEFT JOIN currency curr ON curr.id = pod.currency " +
                            "LEFT JOIN users ed2 ON ed2.id = po.approved_by " +
                            "LEFT JOIN users ed ON ed.id = po.generated_by " +
                            "LEFT JOIN users ed1 ON ed1.id = po.receiverID " +
@@ -445,6 +446,8 @@ namespace CMMSAPIs.Repositories.SM
                 itemID = p.requestDetailsID,
                 requestID = p.requestID,
                 cost = p.cost,
+                currencyId = p.currencyId,
+                currency = p.currency,
                 asset_name = p.asset_name,
                 id = p.assetItemID,
                 ordered_qty = p.ordered_qty,

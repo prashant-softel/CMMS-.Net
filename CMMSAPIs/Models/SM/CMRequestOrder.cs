@@ -60,6 +60,7 @@ namespace CMMSAPIs.Models.SM
         public int requestID { get; set; }
         public int? assetMasterItemID { get; set; }
         public decimal cost { get; set; }
+        public int currencyId { get; set; }
         public decimal ordered_qty { get; set; }
         public string asset_name { get; set; }
         //public int asset_type_ID { get; set; }
@@ -123,7 +124,7 @@ namespace CMMSAPIs.Models.SM
         public DateTime challan_date { get; set; }
         public string job_ref { get; set; }
         public decimal amount { get; set; }
-        public int currencyID { get; set; }
+        public int currencyId { get; set; }
         public string currency { get; set; }
         public string asset_type_Name { get; set; }
         public string rejectedRemark { get; set; }
@@ -188,6 +189,8 @@ namespace CMMSAPIs.Models.SM
         public int requestID { get; set; }
         public int? id { get; set; }
         public decimal cost { get; set; }
+        public int currencyId { get; set; }
+        public string currency { get; set; }
         public decimal ordered_qty { get; set; }
         public string asset_name { get; set; }
         //public int asset_type_ID { get; set; }
