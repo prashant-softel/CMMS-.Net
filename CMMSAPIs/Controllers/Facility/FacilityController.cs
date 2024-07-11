@@ -1,16 +1,13 @@
 ﻿using CMMSAPIs.BS.Facility;
-using CMMSAPIs.Models;
 using CMMSAPIs.Models.Facility;
 using CMMSAPIs.Models.Utils;
-using CMMSAPIs.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
-using Newtonsoft.Json;
 
 namespace CMMSAPIs.Controllers.Facility
 {
@@ -56,12 +53,12 @@ namespace CMMSAPIs.Controllers.Facility
         }
         [Route("GetEmployeeListbyFeatureId")]
         [HttpGet]
-        public async Task<IActionResult> GetEmployeeListbyFeatureId(int facility_id, int featureid)
+        public async Task<IActionResult> GetEmployeeListbyFeatureId(int facility_id, int featureid, int isattendence)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _FacilityBS.GetEmployeeListbyFeatureId(facility_id, featureid);
+                var data = await _FacilityBS.GetEmployeeListbyFeatureId(facility_id, featureid, isattendence);
                 return Ok(data);
             }
             catch (Exception)
@@ -81,11 +78,11 @@ namespace CMMSAPIs.Controllers.Facility
                 var data = await _FacilityBS.GetFacilityDetails(id, facilitytimeZone);
                 return Ok(data);
             }
-            catch(ArgumentException ex)
+            catch (ArgumentException ex)
             {
                 return BadRequest(ex.Message);
             }
-            catch(NullReferenceException ex)
+            catch (NullReferenceException ex)
             {
                 return NotFound(ex.Message);
             }
@@ -129,7 +126,7 @@ namespace CMMSAPIs.Controllers.Facility
                 var data = await _FacilityBS.CreateNewFacility(request, userID);
                 return Ok(data);
             }
-            catch(ArgumentException ex)
+            catch (ArgumentException ex)
             {
                 return BadRequest(ex.Message);
             }

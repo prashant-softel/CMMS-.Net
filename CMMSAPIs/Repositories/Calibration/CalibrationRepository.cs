@@ -101,8 +101,7 @@ namespace CMMSAPIs.Repositories.Calibration
                                 "business as vendor ON a_calibration.vendor_id=vendor.id " +
                              "LEFT JOIN " +
                                 "users as request_by ON a_calibration.requested_by=request_by.id " +
-                             " WHERE categories.calibrationStatus = 1 ";
-            // "AND (a_calibration.requested_at = (SELECT MAX(requested_at) FROM calibration as b_calibration WHERE a_calibration.asset_id = b_calibration.asset_id) OR a_calibration.requested_at is null) ";
+                             " WHERE categories.calibrationStatus = 1 AND (a_calibration.requested_at = (SELECT MAX(requested_at) FROM calibration as b_calibration WHERE a_calibration.asset_id = b_calibration.asset_id) OR a_calibration.requested_at is null) ";
             if (facility_id > 0)
             {
                 myQuery += $"AND assets.facilityId = {facility_id} ";

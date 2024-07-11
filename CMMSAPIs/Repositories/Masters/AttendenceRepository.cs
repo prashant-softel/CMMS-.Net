@@ -183,6 +183,7 @@ namespace CMMSAPIs.Repositories.Masters
         //        }
         public async Task<object> GetAttendanceByDetailsByMonth(int facility_id, DateTime from_date, DateTime to_date)
         {
+
             string querybymonth = "SELECT DISTINCT facility_id, f.name as facility_name FROM employee_attendance LEFT JOIN facilities f ON f.id = employee_attendance.facility_id;";
             var employeeAttendanceList = await Context.GetDataFirst<CMGETAttendenceMONTH>(querybymonth).ConfigureAwait(false);
 
