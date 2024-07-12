@@ -417,8 +417,8 @@ namespace CMMSAPIs.Repositories.SM
                            "LEFT JOIN (SELECT sic.cat_name, s2.ID as master_ID FROM smitemcategory sic " +
                            "           LEFT JOIN smassetmasters s2 ON s2.item_category_ID = sic.ID) t2 ON t2.master_ID = sam.ID " +
                            "LEFT JOIN facilities fc ON fc.id = po.facilityID " +
-                           "LEFT JOIN currency curr ON curr.id = po.currency " +
-                           "LEFT JOIN currency curr ON curr.id = pod.currency " +
+                           "LEFT JOIN currency curr ON curr.id = pod.currencyId " +
+                           "LEFT JOIN currency curr1 ON curr.id = pod.currency " +
                            "LEFT JOIN users ed2 ON ed2.id = po.approved_by " +
                            "LEFT JOIN users ed ON ed.id = po.generated_by " +
                            "LEFT JOIN users ed1 ON ed1.id = po.receiverID " +
