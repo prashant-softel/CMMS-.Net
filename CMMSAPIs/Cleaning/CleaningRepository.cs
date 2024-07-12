@@ -1115,6 +1115,11 @@ namespace CMMSAPIs.Repositories.CleaningRepository
         }
         internal async Task<CMDefaultResponse> ApproveEndExecution(ApproveMC request, int userID)
         {
+            string statusQry = $"SELECT status FROM cleaning_execution  WHERE id = {request.id};";
+            DataTable dt1 = await Context.FetchData(statusQry).ConfigureAwait(false);
+            CMMS.CMMS_Status status1 = (CMMS.CMMS_Status)Convert.ToInt32(dt1.Rows[0][0]);
+            if (status1 != CMMS.CMMS_Status.MC_TASK_END_APPROVED)
+                return new CMRescheduleApprovalResponse(0, request.id, CMMS.RETRUNSTATUS.FAILURE, "Only a End  MC Task can be Approved ");
             int status = (int)CMMS.CMMS_Status.MC_TASK_END_APPROVED;
 
 
@@ -1124,11 +1129,32 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
 
             }
-            string approveQuery = $"Update cleaning_execution set status= {status} ,approvedById={userID}, remark='{request.comment}', approvedAt='{UtilsRepository.GetUTCTime()}' where id = {request.id} ";
+            string approveQuery = $"Update cleaning_execution set status= {status} ,approvedById={userID}, " +
+                $"remark='{request.comment}', approvedAt='{UtilsRepository.GetUTCTime()}',rescheduled = 1 where id = {request.id} ";
             await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MC_TASK, request.execution_id, 0, 0, request.comment, (CMMS.CMMS_Status)status, userID);
 
-            CMDefaultResponse response = new CMDefaultResponse(request.execution_id, CMMS.RETRUNSTATUS.SUCCESS, $"Execution End Approved");
+            string mainQuery = $"INSERT INTO cleaning_execution(planId,moduleType,facilityId,frequencyId,noOfDays,startDate,assignedTo,status,prevTaskId,prevTaskDoneDate)  " +
+                              $"select planId as planId,{moduleType} as moduleType,facilityId,frequencyId,durationDays as noOfDays , " +
+                              $"Case WHEN cleaning_plan.frequencyId in(4,5,6) THEN DATE_ADD(startDate,INTERVAL freq.months MONTH) WHEN  cleaning_plan.frequencyId=7 THEN DATE_ADD(startDate,INTERVAL 1 YEAR)  else DATE_ADD(startDate, INTERVAL freq.days DAY) end as startDate,assignedTo , " +
+                              $"{(int)CMMS.CMMS_Status.MC_TASK_SCHEDULED} as status,{request.id} as prevTaskId, '{UtilsRepository.GetUTCTime()}' as prevTaskDoneDate " +
+                              $" from cleaning_plan left join frequency as freq on cleaning_plan.frequencyId= freq.id " +
+                              $" where planId = {request.id}; " +
+                              $"SELECT LAST_INSERT_ID(); ";
+
+            DataTable dt3 = await Context.FetchData(mainQuery).ConfigureAwait(false);
+            int taskid = Convert.ToInt32(dt3.Rows[0][0]);
+
+            string scheduleQry = $"INSERT INTO cleaning_execution_schedules(executionId,planId,actualDay,cleaningType,status) " +
+                                $"select {taskid} as executionId,planId as planId, plannedDay,cleaningType,{(int)CMMS.CMMS_Status.MC_TASK_SCHEDULED} as status from cleaning_plan_schedules where planId = {request.id}";
+            await Context.ExecuteNonQry<int>(scheduleQry);
+            string equipmentQry = $"INSERT INTO cleaning_execution_items (`executionId`,`moduleType`,`scheduleId`,`assetId`,`{measure}`,`plannedDate`,`plannedDay`,`createdById`,`createdAt`,`status`) SELECT '{taskid}' as executionId,item.moduleType,schedule.scheduleId,item.assetId,{measure},DATE_ADD('{DateTime.Now.ToString("yyyy-MM-dd")}',interval item.plannedDay - 1  DAY) as plannedDate,item.plannedDay,schedule.createdById,schedule.createdAt,{(int)CMMS.CMMS_Status.EQUIP_SCHEDULED} as status from cleaning_plan_items as item join cleaning_execution_schedules as schedule on item.planId = schedule.planId and item.plannedDay = schedule.actualDay where schedule.executionId = {taskid}";
+
+            var retVal = await Context.ExecuteNonQry<int>(equipmentQry).ConfigureAwait(false);
+
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MC_TASK, request.id, 0, 0, request.comment, CMMS.CMMS_Status.MC_PLAN_APPROVED, userID);
+
+            CMDefaultResponse response = new CMRescheduleApprovalResponse(taskid, request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Execution End Approved To Mc Task {taskid}");
+
             return response;
 
         }
@@ -1188,25 +1214,25 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             CMDefaultResponse response = new CMDefaultResponse(request.schedule_id, CMMS.RETRUNSTATUS.SUCCESS, $"Execution Schedule Rejected");
             return response;
         }
-        internal async Task<CMDefaultResponse> RescheduleExecution(ApproveMC request, int userID)
-        {
+        /*  internal async Task<CMDefaultResponse> RescheduleExecution(ApproveMC request, int userID)
+          {
 
-            int status = (int)CMMS.CMMS_Status.MC_TASK_RESCHEDULED;
+              int status = (int)CMMS.CMMS_Status.MC_TASK_RESCHEDULED;
 
-            if (moduleType == 2)
-            {
-                //  status = (int)CMMS.CMMS_Status.;
+              if (moduleType == 2)
+              {
+                  //  status = (int)CMMS.CMMS_Status.;
 
-            }
+              }
 
-            string approveQuery = $"Update cleaning_execution set status= {status},updatedById={userID},remark='{request.comment}',rescheduled = 1, updatedAt='{UtilsRepository.GetUTCTime()}' where id= {request.id}";
-            await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
+              string approveQuery = $"Update cleaning_execution set status= {status},updatedById={userID},remark='{request.comment}',rescheduled = 1, updatedAt='{UtilsRepository.GetUTCTime()}' where id= {request.id}";
+              await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
 
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MC_TASK, request.id, 0, 0, request.comment, (CMMS.CMMS_Status)status, userID);
+              await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MC_TASK, request.id, 0, 0, request.comment, (CMMS.CMMS_Status)status, userID);
 
-            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Execution Reschedule");
-            return response;
-        }
+              CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Execution Reschedule");
+              return response;
+          }*/
         internal async Task<CMDefaultResponse> RejectExecution(CMApproval request, int userID)
         {
 

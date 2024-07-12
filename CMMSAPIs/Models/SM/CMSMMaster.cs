@@ -378,7 +378,7 @@ namespace CMMSAPIs.Models.SM
         public string approval_required { get; set; }
         public string section { get; set; }
         public int reorder_qty { get; set; }
-        public int max_request_qty { get; set; }
+        public int min_qty { get; set; }
         public string measurement { get; set; }
         public int decimal_status { get; set; }
 

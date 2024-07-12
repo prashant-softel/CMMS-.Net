@@ -25,7 +25,6 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using static iTextSharp.text.pdf.AcroFields;
 
 namespace CMMSAPIs.Repositories.Masters
 {
@@ -1165,7 +1164,7 @@ namespace CMMSAPIs.Repositories.Masters
 
             {
 
-                filter = $" and job.createdAt between '{fromDate.ToString("yyyy-MM-dd hh-mm")}' and '{toDate.ToString("yyyy-MM-dd hh-mm")}'";
+                filter = $" and DATE_FORMAT(job.createdAt, '%Y-%m-%d') between '{fromDate.ToString("yyyy-MM-dd")}' and '{toDate.ToString("yyyy-MM-dd")}'";
             }
 
             string myQuery = $"SELECT job.id  wo_number,job.title as wo_decription ,job.facilityId as facility_id, facilities.name as facility_name, job.status," +
@@ -1509,7 +1508,7 @@ namespace CMMSAPIs.Repositories.Masters
 
             if (fromDate != null && fromDate.ToString("yyyy-MM-dd") != "0001-01-01" && toDate != null && toDate.ToString("yyyy-MM-dd") != "0001-01-01")
             {
-                Datefilter = $" and incident.incident_datetime between '{fromDate.ToString("yyyy-MM-dd")}' and '{toDate.ToString("yyyy-MM-dd")}'";
+                Datefilter = $" and DATE_FORMAT(incident.incident_datetime, '%Y-%m-%d')  between '{fromDate.ToString("yyyy-MM-dd")}' and '{toDate.ToString("yyyy-MM-dd")}'";
             }
 
 
@@ -1522,7 +1521,8 @@ namespace CMMSAPIs.Repositories.Masters
 
 
             string selectqry = $"SELECT incident.id as wo_number,incident.title as title, incident.description as wo_decription , " +
-                $"incident.incident_datetime as incident_datetime,incident.location_of_incident as location_of_incident," +
+                $"incident.incident_datetime as incident_datetime,incident.location_of_incident as location_of_incident, " +
+                $"incidenttype.incidenttype as  type_of_incident ," +
                 $"incident.action_taken_datetime as restoration_datetime,incident.severity as severity, " +
                 $"facilities.name as facility_name,blockName.name as block_name, assets.name as asset_name, " +
                 $"incident.risk_level as risk_level, CONCAT(created_by.firstName ,' ' , created_by.lastName) as reported_by_name, " +
@@ -1668,8 +1668,8 @@ namespace CMMSAPIs.Repositories.Masters
                 $"LEFT JOIN smassetmasters sam ON sam.ID = pod.assetItemID\r\n        " +
                 $"LEFT JOIN facilities fc ON fc.id = po.facilityID\r\nLEFT JOIN users as vendor on vendor.id=po.vendorID" +
                 $"        \r\nLEFT JOIN users ed ON ed.id = po.generated_by \r\n" +
-                $"  WHERE { filter}  { datefilter} ;";
-     
+                $"  WHERE {filter}  {datefilter} ;";
+
             List<CMGODashboardList> _List1 = await Context.GetData<CMGODashboardList>(updatedQuery).ConfigureAwait(false);
 
 
@@ -1698,7 +1698,7 @@ namespace CMMSAPIs.Repositories.Masters
 
             for (var i = 0; i < itemList.Count; i++)
             {
-             
+
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(itemList[i].status);
                 string _longStatus = getShortStatus_GO(CMMS.CMMS_Modules.SM_GO, _Status);
                 itemList[i].status_long = _longStatus;
@@ -1734,11 +1734,11 @@ namespace CMMSAPIs.Repositories.Masters
                 result.unknown_count = result.total - result.pending + result.completed + result.created + result.rejected + result.assigned;
             }
 
-            result.StockConsumptionByGoods = await getStockConsumptionByGoods(facilityId,fromDate,toDate);
-            result.StockConsumptionBySites = await getStockConsumptionBySites(fromDate,toDate);
-            result.StockAvailbleByGoods = await getStockAvailableByGoods(facilityId,fromDate, toDate);
-            result.StockAvailbleBySites = await getStockAvailableBySites(fromDate,toDate);
-            result.StockOverview = await StockOverview(facilityId,fromDate, toDate);
+            result.StockConsumptionByGoods = await getStockConsumptionByGoods(facilityId, fromDate, toDate);
+            result.StockConsumptionBySites = await getStockConsumptionBySites(fromDate, toDate);
+            result.StockAvailbleByGoods = await getStockAvailableByGoods(facilityId, fromDate, toDate);
+            result.StockAvailbleBySites = await getStockAvailableBySites(fromDate, toDate);
+            result.StockOverview = await StockOverview(facilityId, fromDate, toDate);
 
             var test = await getLowStockItemList(facilityId, fromDate, toDate);
             return result;
@@ -1832,22 +1832,22 @@ namespace CMMSAPIs.Repositories.Masters
         public async Task<List<CMSMConsumptionByGoods>> getStockAvailableByGoods(string facility_id, DateTime StartDate, DateTime EndDate)
         {
 
-           string Plant_Stock_Opening_Details_query = $"select     asset_type, SUM(opening) AS Opening, SUM(inward) AS inward," +
-                $" SUM(outward) AS outward  from (SELECT ifnull(smc.cat_name,'Others') as asset_type, " +
-    $" IFNULL((select sum(ST.creditQty)-sum(ST.debitQty)  FROM smtransition as ST  JOIN smassetmasters as SM ON SM.ID = ST.assetItemID  " +
-    $" LEFT JOIN facilities fcc ON fcc.id = ST.facilityID   where   ST.actorType = {(int)CMMS.SM_Actor_Types.Store} and SM.ID=a_master.ID  and ST.facilityID in ({facility_id})" +
-    $" and sm_trans.actorID in ({facility_id}) and date_format(ST.lastModifiedDate, '%Y-%m-%d') < '{StartDate.ToString("yyyy-MM-dd")}'  group by SM.asset_code),0) Opening," +
-    $"  IFNULL((select sum(si.creditQty) from smtransition si where si.id = sm_trans.id and  date_format(sm_trans.lastModifiedDate, '%Y-%m-%d') " +
-    $" BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}' ),0) as inward, " +
-    $"   IFNULL((select sum(so.debitQty) from smtransition so where so.id = sm_trans.id and  date_format(sm_trans.lastModifiedDate, '%Y-%m-%d') " +
-    $" BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}' ),0) as outward " +
-    $" FROM smtransition as sm_trans " +
-    $" JOIN smassetmasters as a_master ON a_master.ID = sm_trans.assetItemID " +
-    $" LEFT JOIN facilities fc ON fc.id = sm_trans.facilityID " +
-    $" Left join smassettypes AST on AST.id = a_master.asset_type_ID " +
-    $"  left join smitemcategory smc on smc.ID = a_master.item_category_ID " +
-    $" where sm_trans.actorType = {(int)CMMS.SM_Actor_Types.Store} and sm_trans.facilityID in ({facility_id}) and " +
-    $" sm_trans.actorID in ({facility_id}) group by a_master.asset_code) a GROUP BY asset_type;";
+            string Plant_Stock_Opening_Details_query = $"select     asset_type, SUM(opening) AS Opening, SUM(inward) AS inward," +
+                 $" SUM(outward) AS outward  from (SELECT ifnull(smc.cat_name,'Others') as asset_type, " +
+     $" IFNULL((select sum(ST.creditQty)-sum(ST.debitQty)  FROM smtransition as ST  JOIN smassetmasters as SM ON SM.ID = ST.assetItemID  " +
+     $" LEFT JOIN facilities fcc ON fcc.id = ST.facilityID   where   ST.actorType = {(int)CMMS.SM_Actor_Types.Store} and SM.ID=a_master.ID  and ST.facilityID in ({facility_id})" +
+     $" and sm_trans.actorID in ({facility_id}) and date_format(ST.lastModifiedDate, '%Y-%m-%d') < '{StartDate.ToString("yyyy-MM-dd")}'  group by SM.asset_code),0) Opening," +
+     $"  IFNULL((select sum(si.creditQty) from smtransition si where si.id = sm_trans.id and  date_format(sm_trans.lastModifiedDate, '%Y-%m-%d') " +
+     $" BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}' ),0) as inward, " +
+     $"   IFNULL((select sum(so.debitQty) from smtransition so where so.id = sm_trans.id and  date_format(sm_trans.lastModifiedDate, '%Y-%m-%d') " +
+     $" BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}' ),0) as outward " +
+     $" FROM smtransition as sm_trans " +
+     $" JOIN smassetmasters as a_master ON a_master.ID = sm_trans.assetItemID " +
+     $" LEFT JOIN facilities fc ON fc.id = sm_trans.facilityID " +
+     $" Left join smassettypes AST on AST.id = a_master.asset_type_ID " +
+     $"  left join smitemcategory smc on smc.ID = a_master.item_category_ID " +
+     $" where sm_trans.actorType = {(int)CMMS.SM_Actor_Types.Store} and sm_trans.facilityID in ({facility_id}) and " +
+     $" sm_trans.actorID in ({facility_id}) group by a_master.asset_code) a GROUP BY asset_type;";
 
             List<CMPlantStockOpening> Plant_Stock_Opening_Details_Reader = await Context.GetData<CMPlantStockOpening>(Plant_Stock_Opening_Details_query).ConfigureAwait(false);
             List<CMSMConsumptionByGoods> result = new List<CMSMConsumptionByGoods>();
@@ -1865,7 +1865,7 @@ namespace CMMSAPIs.Repositories.Masters
             return result;
         }
 
-        public async Task<List<CMSMConsumptionByGoods>> getStockAvailableBySites( DateTime StartDate, DateTime EndDate)
+        public async Task<List<CMSMConsumptionByGoods>> getStockAvailableBySites(DateTime StartDate, DateTime EndDate)
         {
 
             string Plant_Stock_Opening_Details_query = $"select     facilityName, SUM(opening) AS Opening, SUM(inward) AS inward," +
@@ -1904,29 +1904,47 @@ namespace CMMSAPIs.Repositories.Masters
         public async Task<List<CMSMConsumptionByGoods>> StockOverview(string facility_id, DateTime StartDate, DateTime EndDate)
         {
 
-            string Plant_Stock_Opening_Details_query = $"select     SUM(opening) AS Opening, SUM(inward) AS inward," +
-                 $" SUM(outward) AS outward  from (SELECT ifnull(smc.cat_name,'Others') as asset_type, " +
-     $" IFNULL((select sum(ST.creditQty)-sum(ST.debitQty)  FROM smtransition as ST  JOIN smassetmasters as SM ON SM.ID = ST.assetItemID  " +
-     $" LEFT JOIN facilities fcc ON fcc.id = ST.facilityID   where   ST.actorType = {(int)CMMS.SM_Actor_Types.Store} and SM.ID=a_master.ID  and ST.facilityID in ({facility_id})" +
-     $" and sm_trans.actorID in ({facility_id}) and date_format(ST.lastModifiedDate, '%Y-%m-%d') < '{StartDate.ToString("yyyy-MM-dd")}'  group by SM.asset_code),0) Opening," +
-     $"  IFNULL((select sum(si.creditQty) from smtransition si where si.id = sm_trans.id and  date_format(sm_trans.lastModifiedDate, '%Y-%m-%d') " +
-     $" BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}' ),0) as inward, " +
-     $"   IFNULL((select sum(so.debitQty) from smtransition so where so.id = sm_trans.id and  date_format(sm_trans.lastModifiedDate, '%Y-%m-%d') " +
-     $" BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}' ),0) as outward " +
-     $" FROM smtransition as sm_trans " +
-     $" JOIN smassetmasters as a_master ON a_master.ID = sm_trans.assetItemID " +
-     $" LEFT JOIN facilities fc ON fc.id = sm_trans.facilityID " +
-     $" Left join smassettypes AST on AST.id = a_master.asset_type_ID " +
-     $"  left join smitemcategory smc on smc.ID = a_master.item_category_ID " +
-     $" where sm_trans.actorType = {(int)CMMS.SM_Actor_Types.Store} and sm_trans.facilityID in ({facility_id}) and " +
-     $" sm_trans.actorID in ({facility_id}) group by a_master.asset_code) a;";
+            //string Plant_Stock_Opening_Details_query = $"select SUM(opening) AS Opening, SUM(inward) AS inward," +
+            //    $" SUM(outward) AS outward  from (SELECT ifnull(smc.cat_name,'Others') as asset_type, " +
+            //    $" IFNULL((select SUM(smt.qty) from smtransactiondetails smt where date_format(smt.lastInsetedDateTime, '%Y-%m-%d') < '{StartDate.ToString("yyyy-MM-dd")}' and  smt.fromActorType = {(int)CMMS.SM_Actor_Types.Vendor}  and smt.assetItemID = sm_trans.assetItemID and smt.toActorType ={(int)CMMS.SM_Actor_Types.Store} and smt.PlantId in ({facility_id}) ),0) - " +
+            //    $" IFNULL((select SUM(smt1.qty) from smtransactiondetails smt1  where date_format(smt1.lastInsetedDateTime, '%Y-%m-%d') < '{StartDate.ToString("yyyy-MM-dd")}' and smt1.assetItemID = sm_trans.assetItemID  and smt1.fromActorType IN ({(int)CMMS.SM_Actor_Types.PM_Task},{(int)CMMS.SM_Actor_Types.JobCard},{(int)CMMS.SM_Actor_Types.Engineer}) and smt1.toActorType ={(int)CMMS.SM_Actor_Types.Inventory} and smt1.PlantId in ({facility_id})),0) as Opening,  " +
+            //    $"  IFNULL((select SUM(smt.qty) from smtransactiondetails smt where date_format(smt.lastInsetedDateTime, '%Y-%m-%d') " +
+            //    $" BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}' and  smt.fromActorType = {(int)CMMS.SM_Actor_Types.Vendor}  and smt.assetItemID = sm_trans.assetItemID and smt.toActorType ={(int)CMMS.SM_Actor_Types.Store} and smt.PlantId in ({facility_id}) ),0) as inward, " +
+            //    $"   IFNULL((select SUM(smt1.qty) from smtransactiondetails smt1  where date_format(smt1.lastInsetedDateTime, '%Y-%m-%d') " +
+            //    $" BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}'  and smt1.assetItemID = sm_trans.assetItemID  and smt1.fromActorType IN ({(int)CMMS.SM_Actor_Types.PM_Task},{(int)CMMS.SM_Actor_Types.JobCard},{(int)CMMS.SM_Actor_Types.Engineer}) and smt1.toActorType ={(int)CMMS.SM_Actor_Types.Inventory} and smt1.PlantId in ({facility_id})),0) as outward  " +
+            //    $" FROM smtransition as sm_trans " +
+            //    $" JOIN smassetmasters as a_master ON a_master.ID = sm_trans.assetItemID " +
+            //    $" LEFT JOIN facilities fc ON fc.id = sm_trans.facilityID " +
+            //    $" Left join smassettypes AST on AST.id = a_master.asset_type_ID " +
+            //    $"  left join smitemcategory smc on smc.ID = a_master.item_category_ID " +
+            //    $" where sm_trans.actorType = {(int)CMMS.SM_Actor_Types.Store} and sm_trans.facilityID in ({facility_id}) and " +
+            //    $" sm_trans.actorID in ({facility_id}) group by a_master.asset_code) a;";
+
+
+           string Plant_Stock_Opening_Details_query = $"select SUM(opening) AS Opening, SUM(inward) AS inward,SUM(outward) AS outward  from (" +
+                $"SELECT  sm_trans.facilityID as facilityID, fc.name as facilityName," +
+                $"fc.isBlock as Facility_Is_Block, " +
+                $" '' as Facility_Is_Block_of_name,sm_trans.assetItemID, a_master.asset_name, a_master.asset_code," +
+                $" a_master.asset_type_ID, AST.asset_type,  " +
+                $" IFNULL((select SUM(smt.qty) from smtransactiondetails smt where date_format(smt.lastInsetedDateTime, '%Y-%m-%d') < '{StartDate.ToString("yyyy-MM-dd")}' and  smt.fromActorType = {(int)CMMS.SM_Actor_Types.Vendor}  and smt.assetItemID = sm_trans.assetItemID and smt.toActorType ={(int)CMMS.SM_Actor_Types.Store} and smt.PlantId in ({facility_id}) ),0) - " +
+                $" IFNULL((select SUM(smt1.qty) from smtransactiondetails smt1  where date_format(smt1.lastInsetedDateTime, '%Y-%m-%d') < '{StartDate.ToString("yyyy-MM-dd")}' and smt1.assetItemID = sm_trans.assetItemID  and smt1.fromActorType IN ({(int)CMMS.SM_Actor_Types.PM_Task},{(int)CMMS.SM_Actor_Types.JobCard},{(int)CMMS.SM_Actor_Types.Engineer}) and smt1.toActorType ={(int)CMMS.SM_Actor_Types.Inventory} and smt1.PlantId in ({facility_id})),0) as Opening,  " +
+                $"  IFNULL((select SUM(smt.qty) from smtransactiondetails smt where date_format(smt.lastInsetedDateTime, '%Y-%m-%d') " +
+                $" BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}' and  smt.fromActorType = {(int)CMMS.SM_Actor_Types.Vendor}  and smt.assetItemID = sm_trans.assetItemID and smt.toActorType ={(int)CMMS.SM_Actor_Types.Store} and smt.PlantId in ({facility_id}) ),0) as inward, " +
+                $"   IFNULL((select SUM(smt1.qty) from smtransactiondetails smt1  where date_format(smt1.lastInsetedDateTime, '%Y-%m-%d') " +
+                $" BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}'  and smt1.assetItemID = sm_trans.assetItemID  and smt1.fromActorType IN ({(int)CMMS.SM_Actor_Types.PM_Task},{(int)CMMS.SM_Actor_Types.JobCard},{(int)CMMS.SM_Actor_Types.Engineer}) and smt1.toActorType ={(int)CMMS.SM_Actor_Types.Inventory} and smt1.PlantId in ({facility_id})),0) as outward  " +
+                $" FROM smtransition as sm_trans " +
+                $" JOIN smassetmasters as a_master ON a_master.ID = sm_trans.assetItemID " +
+                $" LEFT JOIN facilities fc ON fc.id = sm_trans.facilityID " +
+                $" Left join smassettypes AST on AST.id = a_master.asset_type_ID " +
+                $" where sm_trans.actorType = {(int)CMMS.SM_Actor_Types.Store} and sm_trans.facilityID in ({facility_id}) and " +
+                $" sm_trans.actorID in ({facility_id})) a ";
 
             List<CMPlantStockOpening> Plant_Stock_Opening_Details_Reader = await Context.GetData<CMPlantStockOpening>(Plant_Stock_Opening_Details_query).ConfigureAwait(false);
             List<CMSMConsumptionByGoods> result = new List<CMSMConsumptionByGoods>();
             foreach (var item in Plant_Stock_Opening_Details_Reader)
             {
                 item.balance = item.Opening + item.inward - item.outward;
-              
+
             }
 
             CMSMConsumptionByGoods category_item_opening = new CMSMConsumptionByGoods();
@@ -1956,12 +1974,12 @@ namespace CMMSAPIs.Repositories.Masters
             string Plant_Stock_Opening_Details_query = $"select     asset_type, SUM(opening) AS Opening, SUM(inward) AS inward," +
                  $" SUM(outward) AS outward  from (" +
                  $"SELECT ifnull(smc.cat_name,'Others') as asset_type, " +
-                $" IFNULL((select SUM(smt1.qty) from smtransactiondetails smt1  where date_format(smt1.lastInsetedDateTime, '%Y-%m-%d') BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}'  and smt1.assetItemID = sm_trans.assetItemID  and smt1.fromActorType IN ({(int)CMMS.SM_Actor_Types.PM_Task},{(int)CMMS.SM_Actor_Types.JobCard},{(int)CMMS.SM_Actor_Types.Engineer}) and smt1.toActorType ={(int)CMMS.SM_Actor_Types.Inventory} and smt1.PlantId in ('{facility_id}')),0) - " +
-                $" IFNULL((select SUM(smt.qty) from smtransactiondetails smt where date_format(smt.lastInsetedDateTime, '%Y-%m-%d') BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}' and  smt.fromActorType = {(int)CMMS.SM_Actor_Types.Vendor}  and smt.assetItemID = sm_trans.assetItemID and smt.toActorType ={(int)CMMS.SM_Actor_Types.Store} and smt.PlantId in ('{facility_id}') ),0) as Opening," +
+                $" IFNULL((select SUM(smt1.qty) from smtransactiondetails smt1  where date_format(smt1.lastInsetedDateTime, '%Y-%m-%d') BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}'  and smt1.assetItemID = sm_trans.assetItemID  and smt1.fromActorType IN ({(int)CMMS.SM_Actor_Types.PM_Task},{(int)CMMS.SM_Actor_Types.JobCard},{(int)CMMS.SM_Actor_Types.Engineer}) and smt1.toActorType ={(int)CMMS.SM_Actor_Types.Inventory} and smt1.PlantId in ({facility_id})),0) - " +
+                $" IFNULL((select SUM(smt.qty) from smtransactiondetails smt where date_format(smt.lastInsetedDateTime, '%Y-%m-%d') BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}' and  smt.fromActorType = {(int)CMMS.SM_Actor_Types.Vendor}  and smt.assetItemID = sm_trans.assetItemID and smt.toActorType ={(int)CMMS.SM_Actor_Types.Store} and smt.PlantId in ({facility_id}) ),0) as Opening," +
                 $"  IFNULL((select SUM(smt.qty) from smtransactiondetails smt where date_format(smt.lastInsetedDateTime, '%Y-%m-%d') " +
-                $" BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}' and  smt.fromActorType = {(int)CMMS.SM_Actor_Types.Vendor}  and smt.assetItemID = sm_trans.assetItemID and smt.toActorType ={(int)CMMS.SM_Actor_Types.Store} and smt.PlantId in ('{facility_id}') ),0) as inward, " +
+                $" BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}' and  smt.fromActorType = {(int)CMMS.SM_Actor_Types.Vendor}  and smt.assetItemID = sm_trans.assetItemID and smt.toActorType ={(int)CMMS.SM_Actor_Types.Store} and smt.PlantId in ({facility_id}) ),0) as inward, " +
                 $"   IFNULL((select SUM(smt1.qty) from smtransactiondetails smt1  where date_format(smt1.lastInsetedDateTime, '%Y-%m-%d') " +
-                $" BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}'  and smt1.assetItemID = sm_trans.assetItemID  and smt1.fromActorType IN ({(int)CMMS.SM_Actor_Types.PM_Task},{(int)CMMS.SM_Actor_Types.JobCard},{(int)CMMS.SM_Actor_Types.Engineer}) and smt1.toActorType ={(int)CMMS.SM_Actor_Types.Inventory} and smt1.PlantId in ('{facility_id}')),0) as outward  " +
+                $" BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}'  and smt1.assetItemID = sm_trans.assetItemID  and smt1.fromActorType IN ({(int)CMMS.SM_Actor_Types.PM_Task},{(int)CMMS.SM_Actor_Types.JobCard},{(int)CMMS.SM_Actor_Types.Engineer}) and smt1.toActorType ={(int)CMMS.SM_Actor_Types.Inventory} and smt1.PlantId in ({facility_id})),0) as outward  " +
      $" FROM smtransition as sm_trans " +
      $" JOIN smassetmasters as a_master ON a_master.ID = sm_trans.assetItemID " +
      $" LEFT JOIN facilities fc ON fc.id = sm_trans.facilityID " +

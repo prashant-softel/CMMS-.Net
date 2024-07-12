@@ -278,7 +278,7 @@ namespace CMMSAPIs.BS.Cleaning
         {
             try
             {
-           
+
                 {
                     return await repos.RejectAbandonExecution(request, userId);
                 }
@@ -292,7 +292,7 @@ namespace CMMSAPIs.BS.Cleaning
         {
             try
             {
-             
+
                 {
                     return await repos.ApproveAbandonExecution(request, userId);
                 }
@@ -513,21 +513,7 @@ namespace CMMSAPIs.BS.Cleaning
                 throw;
             }
         }
-        internal async Task<CMDefaultResponse> RescheduleExecution(ApproveMC request, int userId)
-        {
-            try
-            {
-                //using (var repos = new MCRepository(getDB))
-                {
 
-                    return await repos.RescheduleExecution(request, userId);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        }
 
         internal async Task<CMDefaultResponse> RejectScheduleExecution(ApproveMC request, int userId)
         {
