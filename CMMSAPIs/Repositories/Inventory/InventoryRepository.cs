@@ -1020,45 +1020,39 @@ namespace CMMSAPIs.Repositories.Inventory
                             }
                             else
                             {
-
                                 List<string> assetnames2 = new List<string>();
                                 assetnames2.AddRange(insertedTable.GetColumn<string>("name"));
                                 DataRow[] notInserted = dt2.AsEnumerable()
-                                      .Where(row => !assetnames2.Contains(row.Field<string>("name")))
-                                     .ToArray();
-                                DataTable filteredDataTable = dt2.Clone();
-
+                                       .Where(row => !assetnames2.Contains(row.Field<string>("name")))
+                                       .ToArray();
                                 if (notInserted.Length > 0)
                                 {
-
                                     DataTable notInsertedTable = dt2.Clone();
 
                                     foreach (DataRow row in notInserted)
                                     {
                                         notInsertedTable.ImportRow(row);
                                     }
-                                    List<int> ids_ = (await AddInventoryWithParent(notInsertedTable, facility_id, userID)).id;
-                                    idList.AddRange(ids_);
+                                    List<int> ids_inserted = (await AddInventoryWithParent(notInsertedTable, facility_id, userID)).id;
+                                    idList.AddRange(ids_inserted);
                                 }
-                                else
+
+                                DataTable filteredDataTable = dt2.Clone();
+
+                                foreach (DataRow row in filterRows)
                                 {
-                                    foreach (DataRow row in filterRows)
-                                    {
-                                        filteredDataTable.ImportRow(row);
-                                    }
-                                    //List<int> ids_ = (await AddInventoryWithParent(filteredDataTable, facility_id, userID)).id;
-                                    List<int> ids_ = (await UpdateInventoryWithParent(filteredDataTable, facility_id, userID)).id;
-                                    insertedTable.Merge(filteredDataTable);
-                                    childListCount++;
-                                    ids = string.Join(", ", ids_.Select(x => x.ToString()));
-                                    if (ids != "")
-                                    {
-                                        filter = $" and id IN ({ids})";
-                                    }
-                                    idList.AddRange(ids_);
+                                    filteredDataTable.ImportRow(row);
                                 }
-
-
+                                //List<int> ids_ = (await AddInventoryWithParent(filteredDataTable, facility_id, userID)).id;
+                                List<int> ids_ = (await UpdateInventoryWithParent(filteredDataTable, facility_id, userID)).id;
+                                insertedTable.Merge(filteredDataTable);
+                                childListCount++;
+                                ids = string.Join(", ", ids_.Select(x => x.ToString()));
+                                if (ids != "")
+                                {
+                                    filter = $" and id IN ({ids})";
+                                }
+                                idList.AddRange(ids_);
 
                             }
                             //if (filterRows.Length > 0)
