@@ -1237,16 +1237,11 @@ namespace CMMSAPIs.Repositories.Masters
                     {
                         _Job.status_long = "JC CLOSE APPROVED";
                     }
-                    else if (_Job.latestJCStatus == (int)CMMS.CMMS_Status.JC_CLOSE_REJECTED)
+                    else if (_Job.latestJCPTWStatus == (int)CMMS.CMMS_Status.JC_CLOSE_REJECTED)
                     {
                         _Job.status_long = "JC CLOSE REJECTED";
                     }
-                    else
-                    {
-                        _Job.status_long = "Permit - Waiting For Approval";
-                    }
-                    //if permit status is not yet approved
-                    if (_Job.latestJCPTWStatus == (int)CMMS.CMMS_Status.PTW_APPROVED)
+                    else if (_Job.latestJCPTWStatus == (int)CMMS.CMMS_Status.PTW_APPROVED)
                     {
                         _Job.status_long = JCRepository.getShortStatus(CMMS.CMMS_Modules.JOBCARD, (CMMS.CMMS_Status)_Job.latestJCStatus, (CMMS.ApprovalStatus)_Job.latestJCApproval);
                     }
@@ -1258,6 +1253,12 @@ namespace CMMSAPIs.Repositories.Masters
                     {
                         _Job.status_long = "Permit - Waiting For Approval";
                     }
+                    ////if permit status is not yet approved
+                   
+                    //else
+                    //{
+                    //    _Job.status_long = "Permit - Waiting For Approval";
+                    //}
                 }
                 else
                 {
@@ -1563,7 +1564,7 @@ namespace CMMSAPIs.Repositories.Masters
                 $"incident.risk_level as risk_level, CONCAT(created_by.firstName ,' ' , created_by.lastName) as reported_by_name, " +
                 $"incident.created_at as reported_at,CONCAT(user.firstName ,' ' , user.lastName) as approved_by," +
                 $" incident.approved_at as approved_at, CONCAT(user1.firstName , ' ' , user1.lastName) as reported_by_name , " +
-                $"{statusOut} as status_long ,incident.status, incident.location_of_incident, incident_datetime," +
+                $"{statusOut} as status_long ,incident.status,blockName.name location_of_incident, incident_datetime," +
                 $" type_of_job,title," +
                 $" incident.status, incident.is_why_why_required, incident.is_investigation_required " +
                 $" FROM incidents as incident " +
