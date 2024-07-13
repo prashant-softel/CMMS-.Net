@@ -1233,11 +1233,11 @@ namespace CMMSAPIs.Repositories.Masters
                     {
                         _Job.status_long = "Permit - rejected";
                     }
-                    else if (_Job.latestJCPTWStatus == (int)CMMS.CMMS_Status.JC_CLOSE_APPROVED)
+                    else if (_Job.latestJCStatus == (int)CMMS.CMMS_Status.JC_CLOSE_APPROVED)
                     {
                         _Job.status_long = "JC CLOSE APPROVED";
                     }
-                    else if (_Job.latestJCPTWStatus == (int)CMMS.CMMS_Status.JC_CLOSE_REJECTED)
+                    else if (_Job.latestJCStatus == (int)CMMS.CMMS_Status.JC_CLOSE_REJECTED)
                     {
                         _Job.status_long = "JC CLOSE REJECTED";
                     }
