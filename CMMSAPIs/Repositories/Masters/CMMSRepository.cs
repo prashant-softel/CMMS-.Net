@@ -5,6 +5,7 @@ using CMMSAPIs.Models.Incident_Reports;
 using CMMSAPIs.Models.JC;
 using CMMSAPIs.Models.Jobs;
 using CMMSAPIs.Models.Masters;
+using CMMSAPIs.Models.MC;
 using CMMSAPIs.Models.Notifications;
 using CMMSAPIs.Models.Permits;
 using CMMSAPIs.Models.SM;
@@ -19,6 +20,7 @@ using CMMSAPIs.Repositories.Utils;
 using CMMSAPIs.Repositories.WC;
 using Microsoft.AspNetCore.Hosting;
 using OfficeOpenXml;
+using OfficeOpenXml.VBA;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -1405,6 +1407,12 @@ namespace CMMSAPIs.Repositories.Masters
             { (int)CMMS.CMMS_Status.MC_TASK_ABANDONED, "Abandoned" },
             { (int)CMMS.CMMS_Status.MC_TASK_APPROVED, "Approved" },
             { (int)CMMS.CMMS_Status.MC_TASK_REJECTED, "Rejected" },
+            { (int)CMMS.CMMS_Status.SCHEDULED_LINKED_TO_PTW,"Schedule_Linked_To_PTW" },
+            { (int)CMMS.CMMS_Status.MC_TASK_END_APPROVED,"MC_Task_Ended_Approved" },
+            { (int)CMMS.CMMS_Status.MC_TASK_END_REJECTED,"MC_Task_Ended_Reject" },
+            { (int)CMMS.CMMS_Status.MC_TASK_SCHEDULE_APPROVED,"MC_Task_Schedule_Approved" },
+            { (int)CMMS.CMMS_Status.MC_TASK_SCHEDULE_REJECT,"MC_Task_Schedule_Reject" },
+            { (int)CMMS.CMMS_Status.MC_TASK_RESCHEDULED,"Reschedule" },
             { (int)CMMS.CMMS_Status.VEG_PLAN_DRAFT, "Draft" },
             { (int)CMMS.CMMS_Status.VEG_PLAN_SUBMITTED, "Waiting for Approval" },
             { (int)CMMS.CMMS_Status.VEG_PLAN_APPROVED, "Approved" },
@@ -1419,6 +1427,8 @@ namespace CMMSAPIs.Repositories.Masters
             { (int)CMMS.CMMS_Status.EQUIP_CLEANED, "Cleaned" },
             { (int)CMMS.CMMS_Status.EQUIP_ABANDONED, "Abandoned" },
             { (int)CMMS.CMMS_Status.EQUIP_SCHEDULED, "Scheduled" },
+            { (int)CMMS.CMMS_Status.MC_TASK_ABANDONED_REJECTED, "TASK ABANDONED REJECTED" },
+            { (int)CMMS.CMMS_Status.MC_TASK_ABANDONED_APPROVED, "TASK ABANDONED APPROVED" },
         };
         public async Task<CMDashboadDetails> getMCPlanDashboardDetails(string facilityId, DateTime fromDate, DateTime toDate)
         {
@@ -1437,32 +1447,49 @@ namespace CMMSAPIs.Repositories.Masters
             }
             statusOut += $"ELSE 'Invalid Status' END";
 
-            string myQuery1 = $"select mc.facilityId,F.name as facility_name ,mc.title as wo_decription,sa.name as assetsname , ac.name as asset_category ," +
-                $" mc.planId as wo_number,mc.status as status, mc.frequencyId,mc.assignedTo as assignedToId, case when mc.startDate = '0000-00-00 00:00:00' then null else mc.startDate end as start_date,mc.durationDays as noOfCleaningDays, mc.title," +
-                $" CONCAT(createdBy.firstName, createdBy.lastName) as createdBy , mc.createdAt,cx.endedAt as end_date, " +
-                $" CONCAT(approvedBy.firstName, approvedBy.lastName) as approvedBy,mc.approvedAt,freq.name as frequency," +
-                $" CONCAT(assignedTo.firstName, ' ', assignedTo.lastName) as assignedTo,mc.durationDays,{statusOut} as status_long" +
-                $" from cleaning_plan as mc LEFT JOIN Frequency as freq on freq.id = mc.frequencyId " +
-                $" left join facilities as F on F.id = mc.facilityId " +
-                $" left join cleaning_execution as cx on cx.planId=mc.planId " +
-                $" Left Join cleaning_plan_items AS cpi ON cpi.planId = mc.planId " +
-                $" LEFT JOIN assets AS sa ON sa.id = cpi.assetId " +
-                $" LEFT JOIN assetcategories AS ac ON ac.id = sa.categoryId " +
-                $" LEFT JOIN users as assignedTo ON assignedTo.id = mc.assignedTo  " +
-                $" LEFT JOIN users as createdBy ON createdBy.id = mc.createdById  " +
-                $" LEFT JOIN users as approvedBy ON approvedBy.id = mc.approvedById where mc.moduleType=1 {filter} ";
+            //string myQuery1 = $"select mc.facilityId,F.name as facility_name ,mc.title as wo_decription,sa.name as assetsname , ac.name as asset_category ," +
+            //    $" mc.planId as wo_number,mc.status as status, mc.frequencyId,mc.assignedTo as assignedToId, case when mc.startDate = '0000-00-00 00:00:00' then null else mc.startDate end as start_date,mc.durationDays as noOfCleaningDays, mc.title," +
+            //    $" CONCAT(createdBy.firstName, createdBy.lastName) as createdBy , mc.createdAt,cx.endedAt as end_date, " +
+            //    $" CONCAT(approvedBy.firstName, approvedBy.lastName) as approvedBy,mc.approvedAt,freq.name as frequency," +
+            //    $" CONCAT(assignedTo.firstName, ' ', assignedTo.lastName) as assignedTo,mc.durationDays,{statusOut} as status_long" +
+            //    $" from cleaning_plan as mc LEFT JOIN Frequency as freq on freq.id = mc.frequencyId " +
+            //    $" left join facilities as F on F.id = mc.facilityId " +
+            //    $" left join cleaning_execution as cx on cx.planId=mc.planId " +
+            //    $" Left Join cleaning_plan_items AS cpi ON cpi.planId = mc.planId " +
+            //    $" LEFT JOIN assets AS sa ON sa.id = cpi.assetId " +
+            //    $" LEFT JOIN assetcategories AS ac ON ac.id = sa.categoryId " +
+            //    $" LEFT JOIN users as assignedTo ON assignedTo.id = mc.assignedTo  " +
+            //    $" LEFT JOIN users as createdBy ON createdBy.id = mc.createdById  " +
+            //    $" LEFT JOIN users as approvedBy ON approvedBy.id = mc.approvedById where mc.moduleType=1 {filter} ";
 
 
-            myQuery1 += $" and mc.facilityId in ({facilityId}) ";
+            //myQuery1 += $" and mc.facilityId in ({facilityId}) ";
+            //// New query for excution
 
-            List<CMDashboadItemList> itemList = await Context.GetData<CMDashboadItemList>(myQuery1).ConfigureAwait(false);
+
+            string myQuery12 = $"select mc.facilityId,F.name as facility_name, mc.id as executionId ,mp.title as wo_decription,mc.planId,mc.status, CONCAT(createdBy.firstName, createdBy.lastName) as responsibility ," +
+                $" mc.startDate as start_date, mc.endedAt as doneDate,mc.prevTaskDoneDate as end_date,freq.name as frequency,mc.noOfDays, {statusOut} as " +
+                $"status_short " +
+                $"from cleaning_execution as mc " +
+                $"left join cleaning_plan as mp on mp.planId = mc.planId " +
+                $"LEFT JOIN Frequency as freq on freq.id = mp.frequencyId " +
+                $"LEFT JOIN users as createdBy ON createdBy.id = mc.assignedTo " +
+                $"LEFT JOIN users as approvedBy ON approvedBy.id = mc.approvedByID " +
+                $" left join facilities as F on F.id = mc.facilityId  " +
+                $"where mc.moduleType=1 or rescheduled = 0";         
+                myQuery12 += $" and mc.facilityId in ({facilityId}) ";
+            
+
+            // end
+
+            List<CMDashboadItemList> itemList = await Context.GetData<CMDashboadItemList>(myQuery12).ConfigureAwait(false);
 
             result.created = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.MC_PLAN_DRAFT).ToList().Count;
             result.rejected = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.MC_PLAN_REJECTED).ToList().Count;
 
             result.submitted = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.MC_PLAN_SUBMITTED).ToList().Count;
             result.approved = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.MC_PLAN_APPROVED).ToList().Count;
-            result.mc_closed_count = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.MC_PLAN_APPROVED).ToList().Count;
+            result.mc_closed_count = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.MC_TASK_END_APPROVED).ToList().Count;
 
 
             result.total = itemList.Count;
