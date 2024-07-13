@@ -533,6 +533,7 @@ namespace CMMSAPIs.Helper
             MC_TASK_SCHEDULE_REJECT,
             MC_TASK_RESCHEDULED,
             MC_ASSIGNED,
+            RESCHEDULED_TASK,
 
 
 
