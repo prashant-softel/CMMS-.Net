@@ -998,6 +998,8 @@ namespace CMMSAPIs.Repositories.SM
                 //string stmt = " select i.issued_qty,i.used_qty from smrsitems i inner join smmrs m on m.ID = i.mrs_ID where i.mrs_ID = " + mrsID + " and asset_item_ID = " + assetItemID + " and is_splited=1; ";
                 string stmt = " select i.issued_qty,i.used_qty from smrsitems i inner join smmrs m on m.ID = i.mrs_ID where i.mrs_ID = " + mrsID + " and ID = " + mrsitemID + " and is_splited=1; ";
                 DataTable dt2 = await Context.FetchData(stmt).ConfigureAwait(false);
+                string stmt_inseret = $" insert into log4netlog(Date,Message,Exception)value('{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}','{stmt}','mrs_item_id : {mrsitemID}, mrs_id : {mrsID} ');";
+                var resultq = await Context.ExecuteNonQry<int>(stmt_inseret);
                 decimal issued_qty = 0;
                 int stored_used_qty = 0;
                 if (dt2.Rows.Count > 0)
