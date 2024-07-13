@@ -1125,10 +1125,10 @@ namespace CMMSAPIs.Repositories.Masters
                     modulewiseDetail_MC.module_name = "Module Cleaning";
                     result_MC = await getMCPlanDashboardDetails(facilityId, fromDate, toDate);
                     modulewiseDetail_MC.CMDashboadDetails = result_MC;
-                    modulewiseDetail_PM.category_total_count = result_PM.bm_closed_count + result_PM.mc_closed_count + result_PM.pm_closed_count;
-                    modulewiseDetail_PM.category_pm_count = result_PM.pm_closed_count;
-                    modulewiseDetail_PM.category_mc_count = result_PM.mc_closed_count;
-                    modulewiseDetail_PM.category_bm_count = result_PM.bm_closed_count;
+                    modulewiseDetail_MC.category_total_count = result_MC.bm_closed_count + result_MC.mc_closed_count + result_MC.pm_closed_count;
+                    modulewiseDetail_MC.category_pm_count = result_MC.pm_closed_count;
+                    modulewiseDetail_MC.category_mc_count = result_MC.mc_closed_count;
+                    modulewiseDetail_MC.category_bm_count = result_MC.bm_closed_count;
                     countResult.Add(modulewiseDetail_MC);
 
                     CMDashboadModuleWiseList modulewiseDetail_IR = new CMDashboadModuleWiseList();
@@ -1136,10 +1136,10 @@ namespace CMMSAPIs.Repositories.Masters
                     modulewiseDetail_IR.module_name = "Incident Report";
                     result_IR = await getIRDashboardDetails(facilityId, fromDate, toDate);
                     modulewiseDetail_IR.CMDashboadDetails = result_IR;
-                    modulewiseDetail_PM.category_total_count = result_PM.bm_closed_count + result_PM.mc_closed_count + result_PM.pm_closed_count;
-                    modulewiseDetail_PM.category_pm_count = result_PM.pm_closed_count;
-                    modulewiseDetail_PM.category_mc_count = result_PM.mc_closed_count;
-                    modulewiseDetail_PM.category_bm_count = result_PM.bm_closed_count;
+                    modulewiseDetail_IR.category_total_count = result_IR.bm_closed_count + result_IR.mc_closed_count + result_IR.pm_closed_count;
+                    modulewiseDetail_IR.category_pm_count = result_IR.pm_closed_count;
+                    modulewiseDetail_IR.category_mc_count = result_IR.mc_closed_count;
+                    modulewiseDetail_IR.category_bm_count = result_IR.bm_closed_count;
                     countResult.Add(modulewiseDetail_IR);
 
                     CMDashboadModuleWiseList modulewiseDetail_SM = new CMDashboadModuleWiseList();
@@ -1467,7 +1467,7 @@ namespace CMMSAPIs.Repositories.Masters
             //// New query for excution
 
 
-            string myQuery12 = $"select mc.facilityId,F.name as facility_name, mc.id as executionId ,mp.title as wo_decription,mc.planId,mc.status, CONCAT(createdBy.firstName, createdBy.lastName) as responsibility ," +
+            string myQuery12 = $"select mc.facilityId as facility_id,F.name as facility_name, mc.id as executionId ,mp.title as wo_decription,mc.planId,mc.status, CONCAT(createdBy.firstName, createdBy.lastName) as responsibility ," +
                 $" mc.startDate as start_date, mc.endedAt as doneDate,mc.prevTaskDoneDate as end_date,freq.name as frequency,mc.noOfDays, {statusOut} as " +
                 $"status_short " +
                 $"from cleaning_execution as mc " +
@@ -1484,23 +1484,23 @@ namespace CMMSAPIs.Repositories.Masters
 
             List<CMDashboadItemList> itemList = await Context.GetData<CMDashboadItemList>(myQuery12).ConfigureAwait(false);
 
-            result.created = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.MC_PLAN_DRAFT).ToList().Count;
-            result.rejected = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.MC_PLAN_REJECTED).ToList().Count;
+            result.created = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.MC_TASK_SCHEDULED).ToList().Count;
+            result.rejected = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.MC_TASK_REJECTED).ToList().Count;
 
-            result.submitted = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.MC_PLAN_SUBMITTED).ToList().Count;
-            result.approved = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.MC_PLAN_APPROVED).ToList().Count;
+            result.submitted = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.MC_TASK_STARTED).ToList().Count;
+            result.approved = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.MC_TASK_APPROVED).ToList().Count;
             result.mc_closed_count = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.MC_TASK_END_APPROVED).ToList().Count;
 
 
             result.total = itemList.Count;
-            result.completed = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.MC_PLAN_APPROVED).ToList().Count;
+            result.completed = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.MC_TASK_APPROVED).ToList().Count;
             //result.pending = result.total - itemList.Where(x => x.latestJCPTWStatus != (int)CMMS.CMMS_Status.PTW_APPROVED).ToList().Count;
             result.pending = result.total - result.completed;
             result.item_list = itemList;
 
-            int completed_on_time = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.MC_PLAN_APPROVED && x.start_date == x.start_date).ToList().Count;
-            int wo_delay = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.MC_PLAN_APPROVED && x.start_date != x.start_date).ToList().Count;
-            int wo_backlog = itemList.Where(x => x.status != (int)CMMS.CMMS_Status.MC_PLAN_APPROVED && x.start_date != x.start_date).ToList().Count;
+            int completed_on_time = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.MC_TASK_APPROVED && x.start_date == x.start_date).ToList().Count;
+            int wo_delay = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.MC_TASK_APPROVED && x.start_date != x.start_date).ToList().Count;
+            int wo_backlog = itemList.Where(x => x.status != (int)CMMS.CMMS_Status.MC_TASK_APPROVED && x.start_date != x.start_date).ToList().Count;
 
             if (result.total > 0)
             {
