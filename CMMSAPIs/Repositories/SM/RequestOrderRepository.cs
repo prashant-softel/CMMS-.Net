@@ -38,7 +38,7 @@ namespace CMMSAPIs.Repositories.SM
                     for (var i = 0; i < request.request_order_items.Count; i++)
                     {
                         string poDetailsQuery = $"INSERT INTO smrequestorderdetails (requestID,assetItemID,cost, currencyId, ordered_qty,remarks) " +
-                        "values(" + roid + ", " + request.request_order_items[i].assetItemID + ",  " + request.request_order_items[i].cost + ", " + request.request_order_items[i].currencyId + ", " + request.request_order_items[i].ordered_qty + ", '" + request.request_order_items[i].comment + "') ; SELECT LAST_INSERT_ID();";
+                        "values(" + roid + ", " + request.request_order_items[i].assetMasterItemID + ",  " + request.request_order_items[i].cost + ", " + request.request_order_items[i].currencyId + ", " + request.request_order_items[i].ordered_qty + ", '" + request.request_order_items[i].comment + "') ; SELECT LAST_INSERT_ID();";
                         DataTable dtInsertPO = await Context.FetchData(poDetailsQuery).ConfigureAwait(false);
                         int id = Convert.ToInt32(dtInsertPO.Rows[0][0]);
                     }

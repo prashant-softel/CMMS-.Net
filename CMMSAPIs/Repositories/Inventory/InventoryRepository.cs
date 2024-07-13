@@ -1218,7 +1218,7 @@ namespace CMMSAPIs.Repositories.Inventory
                 {
                     try
                     {
-                        row["parentId"] = assetDict2[Convert.ToString(row["parentName"]).ToUpper()];
+                        row["parentId"] = assetDict[Convert.ToString(row["parentName"]).ToUpper()];
                         row["parentId"] = 0;
                     }
                     catch

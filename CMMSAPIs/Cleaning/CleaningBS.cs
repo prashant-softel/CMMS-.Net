@@ -531,6 +531,22 @@ namespace CMMSAPIs.BS.Cleaning
             }
         }
 
+        internal async Task<CMDefaultResponse> ReAssignMcTask(int task_id, int assign_to, int userID)
+        {
+            try
+            {
+                //using (var repos = new MCRepository(getDB))
+                {
+
+                    return await repos.ReAssignMcTask(task_id, assign_to, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
         //public async Task<List<CMMCTaskEquipmentList>> GetVegitationTaskEquipmentList(int taskId, string facilitytime)
         //{
         //    try

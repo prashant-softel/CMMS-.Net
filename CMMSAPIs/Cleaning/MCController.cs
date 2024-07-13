@@ -153,6 +153,24 @@ namespace CMMSAPIs.Controllers.MC
                 throw;
             }
         }
+        [Route("ReAssignMcTask")]
+        [HttpPut]
+        public async Task<IActionResult> ReAssignMcTask(int task_id, int assign_to)
+        {
+
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _CleaningBS.ReAssignMcTask(task_id, assign_to, userID);
+                return Ok(data);
+
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+
+        }
         [Route("RejectEndExecution")]
         [HttpPut]
         public async Task<IActionResult> RejectEndExecution(ApproveMC request)

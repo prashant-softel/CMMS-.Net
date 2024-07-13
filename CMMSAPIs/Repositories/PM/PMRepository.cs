@@ -1003,7 +1003,16 @@ namespace CMMSAPIs.Repositories.PM
                         List<int> checklist_id = dtchecklist.GetColumn<int>("id");
                         Dictionary<string, int> checklist = new Dictionary<string, int>();
                         checklist.Merge(checklist_name, checklist_id);
+
+
+                        string queryasse = $"SELECT planId FROM pmplanassetchecklist where facility_id={Facility};";
+                        DataTable dtchecklist1 = await Context.FetchData(queryasse).ConfigureAwait(false);
+                        List<int> pmplatasset = dtchecklist1.GetColumn<int>("planId");
                         List<string> deletePmId = new List<string>();
+
+                        Dictionary<int, bool> pmplatassetDict = pmplatasset.ToDictionary(id => id, id => true);
+
+
                         Dictionary<string, Tuple<string, Type>> equipColumnNames = new Dictionary<string, Tuple<string, Type>>()
                         {
                            { "Plan Name", new Tuple<string, Type>("PlanName", typeof(string)) },
@@ -1063,15 +1072,16 @@ namespace CMMSAPIs.Repositories.PM
 
                                 continue;
                             }
-
+                            //second 
                             newR["PlanName"] = newR[0];
                             newR["EquipmentName"] = newR[1];
                             newR["CheckList"] = newR[2];
 
-
                             try
                             {
                                 newR["planID"] = plan[Convert.ToString(newR["PlanName"]).ToUpper()];
+
+
                             }
                             catch (KeyNotFoundException)
                             {
@@ -1079,6 +1089,11 @@ namespace CMMSAPIs.Repositories.PM
                                 newR.Delete();
                                 continue;
                                 //return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] Equipment named '{newR["EquipmentName"]}' does not exist.");
+                            }
+                            if (pmplatassetDict.ContainsKey(newR["planID"].ToInt()))
+                            {
+                                newR.Delete();
+                                continue;
                             }
 
                             try
@@ -1143,7 +1158,6 @@ namespace CMMSAPIs.Repositories.PM
                             int planID = Convert.ToInt32(row["planID"]);
                             int equipmentID = Convert.ToInt32(row["equipmentID"]);
                             int checklistID = Convert.ToInt32(row["checklistID"]);
-
 
                             mapChecklistQry += $"({planID}, {equipmentID}, {checklistID},{Facility}), ";
 
