@@ -1621,7 +1621,7 @@ namespace CMMSAPIs.Repositories.SM
         public async Task<int> GetAvailableQty(int assetItemID, int plantID)
         {
             // actor Type 2 : Store
-            string actorType = "2";
+            int actorType = (int)CMMS.SM_Actor_Types.Inventory;
             string stmt = "SELECT SUM(debitQty) as drQty, SUM(creditQty) as crQty FROM smtransition WHERE assetItemID = " + assetItemID.ToString() + " AND actorType = '" + actorType + "' AND transactionID IN (SELECT ID FROM smtransactiondetails WHERE plantID = " + plantID.ToString() + ")";
             DataTable dt2 = await Context.FetchData(stmt).ConfigureAwait(false);
             int crQty = 0, drQty = 0;
