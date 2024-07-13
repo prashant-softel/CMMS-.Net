@@ -1233,6 +1233,14 @@ namespace CMMSAPIs.Repositories.Masters
                     {
                         _Job.status_long = "Permit - rejected";
                     }
+                    else if (_Job.latestJCPTWStatus == (int)CMMS.CMMS_Status.JC_CLOSE_APPROVED)
+                    {
+                        _Job.status_long = "JC CLOSE APPROVED";
+                    }
+                    else if (_Job.latestJCPTWStatus == (int)CMMS.CMMS_Status.JC_CLOSE_REJECTED)
+                    {
+                        _Job.status_long = "JC CLOSE REJECTED";
+                    }
                     else
                     {
                         _Job.status_long = "Permit - Waiting For Approval";
@@ -1467,9 +1475,9 @@ namespace CMMSAPIs.Repositories.Masters
             //// New query for excution
 
 
-            string myQuery12 = $"select mc.facilityId as facility_id,F.name as facility_name, mc.id as executionId ,mp.title as wo_decription,mc.planId,mc.status, CONCAT(createdBy.firstName, createdBy.lastName) as responsibility ," +
+            string myQuery12 = $"select mc.facilityId as facility_id,F.name as facility_name, mc.id as wo_number ,mp.title as wo_decription,mc.planId,mc.status, CONCAT(createdBy.firstName, createdBy.lastName) as responsibility ," +
                 $" mc.startDate as start_date, mc.endedAt as doneDate,mc.prevTaskDoneDate as end_date,freq.name as frequency,mc.noOfDays, {statusOut} as " +
-                $"status_short " +
+                $"status_long " +
                 $"from cleaning_execution as mc " +
                 $"left join cleaning_plan as mp on mp.planId = mc.planId " +
                 $"LEFT JOIN Frequency as freq on freq.id = mp.frequencyId " +
