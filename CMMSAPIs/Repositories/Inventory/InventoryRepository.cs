@@ -712,8 +712,24 @@ namespace CMMSAPIs.Repositories.Inventory
 
                             }
 
+                             string FormatErrorMessage(List<string> errors)
+                            {
+                                if (errors.Count == 1)
+                                {
+                                    return errors[0];
+                                }
+                                else if (errors.Count == 2)
+                                {
+                                    return string.Join(" and ", errors);
+                                }
+                                else
+                                {
+                                    return string.Join(", ", errors.GetRange(0, errors.Count - 1)) + " and " + errors[errors.Count - 1];
+                                }
+                            }
 
-                            
+
+
                             bool warrantyDataExist = true;
                             bool warrantyValidationFailed = false;
 
@@ -743,10 +759,11 @@ namespace CMMSAPIs.Repositories.Inventory
                                 }
                                 catch (KeyNotFoundException)
                                 {
-                                    m_errorLog.SetError($"[Row: {rN}] Warranty Term named '{newR["warranty_term_type_name"]}' not found.");
+                                   // m_errorLog.SetError($"[Row: {rN}] Warranty Term named '{newR["warranty_term_type_name"]}' not found.");
                                     newR["warranty_term_type"] = 0;
-                                    warrantyValidationFailed = true;
-                                    warrantyDataExist = false;
+
+                                    /*warrantyValidationFailed = true;
+                                    warrantyDataExist = false;*/
                                 }
                             }
 
@@ -777,8 +794,9 @@ namespace CMMSAPIs.Repositories.Inventory
                                         {
                                             //m_errorLog.SetWarning($"[Row: {rN}] Warranty Provider named '{name}' not found. Setting warranty provider ID as 0.");
                                             newR["warranty_provider_id"] = 0;
-                                            warrantyValidationFailed = true;
-                                            warrantyDataExist = false;
+
+                                            /*warrantyValidationFailed = true;
+                                            warrantyDataExist = false;*/
                                         }
                                     }
                                 }
@@ -790,39 +808,55 @@ namespace CMMSAPIs.Repositories.Inventory
                                (newR["warranty_provider_name"] == null || string.IsNullOrWhiteSpace(Convert.ToString(newR["warranty_provider_name"]))) &&
                                (newR["warranty_term_type"] == null || string.IsNullOrWhiteSpace(Convert.ToString(newR["warranty_term_type"])) || (int)newR["warranty_term_type"] == 0) &&
                                (newR["warranty_type"] == null || string.IsNullOrWhiteSpace(Convert.ToString(newR["warranty_type"])) || (int)newR["warranty_type"] == 0);
-                            
+
                             if (!allFieldsNullOrEmpty)
                             {
+                                List<string> errors = new List<string>();
+
                                 if (newR["start_date"] == null || string.IsNullOrWhiteSpace(Convert.ToString(newR["start_date"])))
                                 {
-                                    m_errorLog.SetError($"[Row: {rN}] Asset_Warranty_Start_Date is not defined");
-                                    /*warrantyValidationFailed = true;
-                                    warrantyDataExist = false;*/
+                                    errors.Add("Asset_Warranty_Start_Date");
                                 }
 
                                 if (newR["expiry_date"] == null || string.IsNullOrWhiteSpace(Convert.ToString(newR["expiry_date"])))
                                 {
-                                    m_errorLog.SetError($"[Row: {rN}] Asset_Warranty_Expiry_Date is not defined");
-                                   /* warrantyValidationFailed = true;
-                                    warrantyDataExist = false;*/
+                                    errors.Add("Asset_Warranty_Expiry_Date");
                                 }
 
                                 if (newR["warranty_provider_name"] == null || string.IsNullOrWhiteSpace(Convert.ToString(newR["warranty_provider_name"])))
                                 {
-                                    m_errorLog.SetError($"[Row: {rN}] Asset_Warranty_Provider is not defined");
-                                   /* warrantyValidationFailed = true;
-                                    warrantyDataExist = false;*/
+                                    errors.Add("Asset_Warranty_Provider");
                                 }
 
                                 if (newR["warranty_term_type"] == null || string.IsNullOrWhiteSpace(Convert.ToString(newR["warranty_term_type"])))
                                 {
-                                    m_errorLog.SetError($"[Row: {rN}] Asset_Warranty_Term_Type is not defined");
-                                   /* warrantyValidationFailed = true;
-                                    warrantyDataExist = false;*/
+                                    errors.Add("Asset_Warranty_Term_Type");
                                 }
 
-                                
-                                    if (newR["warranty_description"] != null && (Convert.ToString(newR["warranty_description"]) != ""))
+                                if (newR["warranty_type"] == null || string.IsNullOrWhiteSpace(Convert.ToString(newR["warranty_type"])) || (int)newR["warranty_type"] == 0)
+                                {
+                                    errors.Add("Warranty Type");
+                                }
+
+                                if (errors.Count > 0)
+                                {
+                                    string errorMessage = $"[Row: {rN}] " + FormatErrorMessage(errors) + " are not defined";
+                                    m_errorLog.SetError(errorMessage);
+                                    // warrantyValidationFailed = true;
+                                    // warrantyDataExist = false;
+                                }
+                                else
+                                {
+
+                                    string warrantyQry = "insert into assetwarranty (warranty_type, warranty_description, warranty_term_type, start_date, expiry_date, warranty_provider, certificate_number, addedAt, addedBy, status) VALUES ";
+                                    warrantyQry += $"('{Convert.ToString(newR["warranty_type"]).ToUpper()}', '{Convert.ToString(newR["warranty_description"]).ToUpper()}', '{Convert.ToString(newR["warranty_term_type"]).ToUpper()}','{Convert.ToString(newR["start_date"]).ToUpper()}', '{Convert.ToString(newR["expiry_date"]).ToUpper()}','{Convert.ToString(newR["warranty_provider_id"]).ToUpper()}','{Convert.ToString(newR["certificate_number"]).ToUpper()}');" +
+                                        $" SELECT LAST_INSERT_ID();";
+                                }
+                            }
+
+
+
+                            if (newR["warranty_description"] != null && (Convert.ToString(newR["warranty_description"]) != ""))
                                     {
                                         m_errorLog.SetWarning($"[Row: {rN}] Warranty_Description is not defined ");
                                     }
@@ -830,11 +864,18 @@ namespace CMMSAPIs.Repositories.Inventory
                                     {
                                         m_errorLog.SetWarning($"[Row: {rN}] Asset_Warranty_Certificate_No is not defined ");
                                     }
-                                    string warrantyQry = "insert into assetwarranty (warranty_type, warranty_description, warranty_term_type, start_date, expiry_date, warranty_provider, certificate_number, addedAt, addedBy, status) VALUES ";
-                                    warrantyQry += $"('{Convert.ToString(newR["warranty_type"]).ToUpper()}', '{Convert.ToString(newR["warranty_description"]).ToUpper()}', '{Convert.ToString(newR["warranty_term_type"]).ToUpper()}','{Convert.ToString(newR["start_date"]).ToUpper()}', '{Convert.ToString(newR["expiry_date"]).ToUpper()}','{Convert.ToString(newR["warranty_provider_id"]).ToUpper()}','{Convert.ToString(newR["certificate_number"]).ToUpper()}');" +
-                                        $" SELECT LAST_INSERT_ID();";
+                                    
 
-                            }
+                            
+                             
+                            
+                              /* if (newR["start_date"] != null && !string.IsNullOrWhiteSpace(Convert.ToString(newR["start_date"]))) &&
+                               (newR["expiry_date"] == null || string.IsNullOrWhiteSpace(Convert.ToString(newR["expiry_date"]))) &&
+                               (newR["warranty_provider_name"] == null || string.IsNullOrWhiteSpace(Convert.ToString(newR["warranty_provider_name"]))) &&
+                               (newR["warranty_term_type"] == null || string.IsNullOrWhiteSpace(Convert.ToString(newR["warranty_term_type"])) || (int)newR["warranty_term_type"] == 0) &&
+                               (newR["warranty_type"] == null || string.IsNullOrWhiteSpace(Convert.ToString(newR["warranty_type"])) || (int)newR["warranty_type"] == 0);*/
+
+                            
 
 
                             if (Convert.ToString(newR["parentName"]) == null || Convert.ToString(newR["parentName"]) == "")
