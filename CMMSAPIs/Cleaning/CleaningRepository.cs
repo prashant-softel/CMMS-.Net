@@ -1169,11 +1169,11 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 return new CMRescheduleApprovalResponse(0, request.id, CMMS.RETRUNSTATUS.FAILURE, "Only a End  MC Task can be Approved ");
 
             string mainQuery = $"INSERT INTO cleaning_execution(planId,moduleType,facilityId,frequencyId,noOfDays,startDate,assignedTo,status,prevTaskId,prevTaskDoneDate)  " +
-                              $"select planId as planId,{moduleType} as moduleType,facilityId,frequencyId,durationDays as noOfDays , " +
-                              $"Case WHEN cleaning_plan.frequencyId in(4,5,6) THEN DATE_ADD(startDate,INTERVAL freq.months MONTH) WHEN  cleaning_plan.frequencyId=7 THEN DATE_ADD(startDate,INTERVAL 1 YEAR)  else DATE_ADD(startDate, INTERVAL freq.days DAY) end as startDate,assignedTo , " +
+                              $"select planId as planId,{moduleType} as moduleType,facilityId,frequencyId,noOfDays as noOfDays , " +
+                              $"Case WHEN cleaning_execution.frequencyId in(4,5,6) THEN DATE_ADD(startDate,INTERVAL freq.months MONTH) WHEN  cleaning_execution.frequencyId=7 THEN DATE_ADD(startDate,INTERVAL 1 YEAR)  else DATE_ADD(startDate, INTERVAL freq.days DAY) end as startDate,assignedTo , " +
                               $"{(int)CMMS.CMMS_Status.MC_TASK_SCHEDULED} as status,{request.id} as prevTaskId, '{UtilsRepository.GetUTCTime()}' as prevTaskDoneDate " +
-                              $" from cleaning_plan left join frequency as freq on cleaning_plan.frequencyId= freq.id " +
-                              $" where planId = {request.id}; " +
+                              $" from cleaning_execution left join frequency as freq on cleaning_execution.frequencyId= freq.id " +
+                              $" where cleaning_execution.id = {request.id}; " +
                               $"SELECT LAST_INSERT_ID(); ";
 
             DataTable dt3 = await Context.FetchData(mainQuery).ConfigureAwait(false);

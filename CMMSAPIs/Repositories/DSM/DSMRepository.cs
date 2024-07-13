@@ -1,23 +1,15 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Data;
-using System.Threading.Tasks;
 using CMMSAPIs.Helper;
 using CMMSAPIs.Models.DSM;
 using CMMSAPIs.Models.Utils;
-using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using CMMSAPIs.Repositories.Utils;
-using CMMSAPIs.Models.Notifications;
-using OfficeOpenXml;
-using System.IO;
 using Microsoft.AspNetCore.Hosting;
-using System.Reflection.Metadata;
-using System.Net;
-using Microsoft.AspNetCore.Http;
-using static OfficeOpenXml.ExcelErrorValue;
+using OfficeOpenXml;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace CMMSAPIs.Repositories.DSM
 {
@@ -26,7 +18,7 @@ namespace CMMSAPIs.Repositories.DSM
         private UtilsRepository _utilsRepo;
         ErrorLog m_errorLog;
 
-        public DSMRepository(MYSQLDBHelper sqlDBHelper ,IWebHostEnvironment iwebhostobj) : base(sqlDBHelper)
+        public DSMRepository(MYSQLDBHelper sqlDBHelper, IWebHostEnvironment iwebhostobj) : base(sqlDBHelper)
         {
             _utilsRepo = new UtilsRepository(sqlDBHelper);
             m_errorLog = new ErrorLog(iwebhostobj);
@@ -62,14 +54,14 @@ namespace CMMSAPIs.Repositories.DSM
                         try
                         {
                             DataTable dt = new DataTable();
-                           
+
                             using (var package = new ExcelPackage(path))
                             {
                                 if (package.Workbook.Worksheets.Count == 0)
                                 {
                                     throw new Exception("No worksheets found in the Excel file. Total worksheets in the file: " + package.Workbook.Worksheets.Count);
                                 }
-                              
+
                                 dt.TableName = "DSM";
                                 var workSheet = package.Workbook.Worksheets["DSM"]; // Assuming data is in the first worksheet
 
@@ -101,6 +93,7 @@ namespace CMMSAPIs.Repositories.DSM
                                 }
                                 catch (Exception ex)
                                 {
+
                                     m_errorLog.SetError($"Exception Caught : " + ex.Message);
 
                                 }
@@ -160,7 +153,7 @@ namespace CMMSAPIs.Repositories.DSM
                             // Handle exceptions
                             Console.WriteLine("An error occurred: " + ex.Message);
                             throw ex;
-                            
+
                         }
                     }
                 }
@@ -217,5 +210,5 @@ namespace CMMSAPIs.Repositories.DSM
             return data;
         }
 
-    }  
+    }
 }
