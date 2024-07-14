@@ -1,0 +1,9 @@
+Error : [Row: 2] Asset_Warranty_Term_Type <> and Warranty Type <> are not defined
+Error : [Row: 3] Asset_Warranty_Term_Type <> and Warranty Type <> are not defined
+Error : [Row: 4] Asset_Warranty_Term_Type <> and Warranty Type <> are not defined
+Error : [Row: 5] Asset_Warranty_Term_Type <> and Warranty Type <> are not defined
+Error : [Row: 6] Asset_Warranty_Term_Type <> and Warranty Type <> are not defined
+Error : [Row: 7] Asset_Warranty_Term_Type <> and Warranty Type <> are not defined
+Error : [Row: 8] Asset_Warranty_Term_Type <> and Warranty Type <> are not defined
+Error : [Row: 9] Asset_Warranty_Term_Type <> and Warranty Type <> are not defined
+Total errors <8>

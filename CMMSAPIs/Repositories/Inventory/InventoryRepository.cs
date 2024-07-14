@@ -397,7 +397,7 @@ namespace CMMSAPIs.Repositories.Inventory
                             try
                             {
                                 newR["blockId"] = facilities[Convert.ToString(newR["blockName"]).ToUpper()];
-                                newR["facilityId"] = facility_id;
+                                newR["facilityId"] = facility_id; 
                             }
                             catch (KeyNotFoundException)
                             {
@@ -838,14 +838,14 @@ namespace CMMSAPIs.Repositories.Inventory
 
 
 
-                            if (newR["warranty_description"] != null && (Convert.ToString(newR["warranty_description"]) != ""))
+                           /* if (newR["warranty_description"] != null && (Convert.ToString(newR["warranty_description"]) != ""))
                             {
                                         m_errorLog.SetWarning($"[Row: {rN}] Warranty_Description is not defined ");
                             }
                             if (newR["certificate_number"] != null && (Convert.ToString(newR["certificate_number"]) != ""))
                             {
                                         m_errorLog.SetWarning($"[Row: {rN}] Asset_Warranty_Certificate_No is not defined ");
-                            }
+                            }*/
                  
 
                             if (Convert.ToString(newR["parentName"]) == null || Convert.ToString(newR["parentName"]) == "")
