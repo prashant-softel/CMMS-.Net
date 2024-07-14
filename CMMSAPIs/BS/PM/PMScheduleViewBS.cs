@@ -1,4 +1,4 @@
-﻿using CMMSAPIs.Helper;
+using CMMSAPIs.Helper;
 using CMMSAPIs.Models.PM;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.PM;
@@ -18,6 +18,8 @@ namespace CMMSAPIs.BS.PM
         Task<CMDefaultResponse> StartPMTask(int task_id, int userID);
         Task<List<CMDefaultResponse>> UpdatePMTaskExecution(CMPMExecutionDetail request, int userID);
         Task<CMDefaultResponse> ClosePMTaskExecution(CMApproval request, int userID);
+        Task<CMDefaultResponse> CancelRejectedPMTaskExecution(CMApproval request, int userID);
+        Task<CMDefaultResponse> CancelApprovedPMTaskExecution(CMApproval request, int userID);
         Task<CMRescheduleApprovalResponse> ApprovePMTaskExecution(CMApproval request, int userID);
         Task<CMDefaultResponse> RejectPMTaskExecution(CMApproval request, int userID);
         Task<CMDefaultResponse> LinkPermitToPMTask(int task_id, int permit_id, int userID);
@@ -149,6 +151,35 @@ namespace CMMSAPIs.BS.PM
                 using (var repos = new PMScheduleViewRepository(getDB))
                 {
                     return await repos.ClosePMTaskExecution(request, userID);
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> CancelRejectedPMTaskExecution(CMApproval request, int userID)
+        {
+            try
+            {
+                using (var repos = new PMScheduleViewRepository(getDB))
+                {
+                    return await repos.CancelRejectedPMTaskExecution(request, userID);
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        public async Task<CMDefaultResponse> CancelApprovedPMTaskExecution(CMApproval request, int userID)
+        {
+            try
+            {
+                using (var repos = new PMScheduleViewRepository(getDB))
+                {
+                    return await repos.CancelApprovedPMTaskExecution(request, userID);
                 }
             }
             catch (Exception)
