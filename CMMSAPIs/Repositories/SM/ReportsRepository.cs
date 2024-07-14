@@ -250,7 +250,7 @@ namespace CMMSAPIs.Repositories.SM
                 $" Left join smassettypes AST on AST.id = a_master.asset_type_ID " +
                 $" left join smmrs on smmrs.id = sm_trans.mrsID " +
                 $"left join smrsitems on smrsitems.mrs_return_ID = smmrs.id " +
-                $" where sm_trans.actorType = {(int)CMMS.SM_Actor_Types.Inventory} and sm_trans.facilityID in ('{facility_id}') " +
+                $" where smrsitems.is_faulty = 1  and sm_trans.facilityID in ('{facility_id}') " +
                 $" and date_format(sm_trans.lastModifiedDate, '%Y-%m-%d')  BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}' {assetCondition} group by a_master.asset_code;";
 
             List<CMFaultyMaterialReport> result = await Context.GetData<CMFaultyMaterialReport>(Plant_Stock_Opening_Details_query).ConfigureAwait(false);

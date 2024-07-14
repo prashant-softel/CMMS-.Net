@@ -24,7 +24,7 @@ namespace CMMSAPIs.Repositories.SM
 
         {
 
-            string filter = " WHERE sm.facility_ID = " + facility_ID + "  AND  (DATE_FORMAT(sm.lastmodifieddate,'%Y-%m-%d') BETWEEN '" + fromDate.ToString("yyyy-MM-dd") + "' AND '" + toDate.ToString("yyyy-MM-dd") + "' OR DATE_FORMAT(sm.returnDate,'%Y-%m-%d') BETWEEN '" + fromDate.ToString("yyyy-MM-dd") + "' AND '" + toDate.ToString("yyyy-MM-dd") + "')";
+            string filter = " WHERE is_mrs_return = 0 and sm.facility_ID = " + facility_ID + "  AND  (DATE_FORMAT(sm.lastmodifieddate,'%Y-%m-%d') BETWEEN '" + fromDate.ToString("yyyy-MM-dd") + "' AND '" + toDate.ToString("yyyy-MM-dd") + "' OR DATE_FORMAT(sm.returnDate,'%Y-%m-%d') BETWEEN '" + fromDate.ToString("yyyy-MM-dd") + "' AND '" + toDate.ToString("yyyy-MM-dd") + "')";
 
 
 
@@ -129,11 +129,16 @@ namespace CMMSAPIs.Repositories.SM
                 {
                     // filling MRS Return Items list
                     _List[i].CMMRSItems = await getMRSItemsReturn(_List[i].mrsId, facilitytimeZone);
+                    if(jobId > 0)
+                    {
+                        _List[i].mrs_return_ID = _List[i].mrsId;
+                    }
+               
                     if (_List[i].CMMRSItems.Count > 0)
                     {
                         _List[i].mrsId = _List[i].CMMRSItems[0].original_mrs_ID;
                     }
-
+                   
                 }
 
                 if (_List[i].CMMRSItems.Count > 0)
@@ -250,9 +255,6 @@ namespace CMMSAPIs.Repositories.SM
             {
                 for (var i = 0; i < request.cmmrsItems.Count; i++)
                 {
-                    int available_qty = await GetAvailableQty(request.cmmrsItems[i].asset_item_ID, request.facility_ID);
-
-                    request.cmmrsItems[i].available_qty = available_qty; //- request.cmmrsItems[i].requested_qty;
                     int equipmentID = request.cmmrsItems[i].asset_item_ID;
                     decimal quantity = request.cmmrsItems[i].qty;
 
@@ -1345,6 +1347,10 @@ namespace CMMSAPIs.Repositories.SM
                 commaSeparatedIds = commaSeparatedIds + string.Join(",", request.faultyItems.Select(item => item.mrs_item_ID.ToString()));
             }
 
+            if (commaSeparatedIds.EndsWith(","))
+            {
+                commaSeparatedIds = commaSeparatedIds.TrimEnd(',');
+            }
 
             string deleteQueryForItems = $" delete from smrsitems where mrs_return_ID = {request.ID} and id not in ({commaSeparatedIds});  ";
             await Context.ExecuteNonQry<int>(deleteQueryForItems).ConfigureAwait(false);
@@ -1637,13 +1643,13 @@ namespace CMMSAPIs.Repositories.SM
         {
             // actor Type 2 : Store
             int actorType = (int)CMMS.SM_Actor_Types.Store;
-            string stmt = "SELECT SUM(debitQty) as drQty, SUM(creditQty) as crQty FROM  smtransition WHERE assetItemID IN (" + assetMasterIDs + ") AND actorType = '" + actorType + "' AND transactionID IN (SELECT ID FROM smtransactiondetails WHERE plantID = " + plantID.ToString() + ")";
+            string stmt = "SELECT ifnull(SUM(debitQty),0) as drQty, ifnull(SUM(creditQty),0) as crQty FROM  smtransition WHERE assetItemID IN (" + assetMasterIDs + ") AND actorType = '" + actorType + "' AND facilityID = "+plantID+"";
             DataTable dt2 = await Context.FetchData(stmt).ConfigureAwait(false);
             int crQty = 0, drQty = 0;
             if (dt2 != null && dt2.Rows.Count > 0)
             {
-                crQty = dt2.Rows[0]["crQty"] == "" || dt2.Rows[0]["crQty"] == DBNull.Value ? 0 : Convert.ToInt32(dt2.Rows[0]["crQty"]);
-                drQty = dt2.Rows[0]["drQty"] == "" || dt2.Rows[0]["drQty"] == DBNull.Value ? 0 : Convert.ToInt32(dt2.Rows[0]["drQty"]);
+                crQty = Convert.ToInt32(dt2.Rows[0]["crQty"]);
+                drQty = Convert.ToInt32(dt2.Rows[0]["drQty"]);
             }
             int availableQty = crQty - drQty;
             return availableQty;
