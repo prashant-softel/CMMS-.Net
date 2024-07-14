@@ -1390,6 +1390,10 @@ namespace CMMSAPIs.Repositories.Masters
                     retValue = "Close - Approved"; break;
                 case CMMS.CMMS_Status.PM_CANCELLED:
                     retValue = "Cancelled"; break;
+                case CMMS.CMMS_Status.PM_CANCELLED_REJECTED:
+                    retValue = "Cancelled - Rejected"; break;
+                case CMMS.CMMS_Status.PM_CANCELLED_APPROVED:
+                    retValue = "Cancelled - Approved"; break;
                 case CMMS.CMMS_Status.PM_DELETED:
                     retValue = "Deleted"; break;
                 case CMMS.CMMS_Status.PM_UPDATED:
