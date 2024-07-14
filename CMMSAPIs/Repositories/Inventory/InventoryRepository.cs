@@ -614,15 +614,7 @@ namespace CMMSAPIs.Repositories.Inventory
 
                             //Validate calibration data
                             bool CalibrationValidationFailed = false;
-                            /*
-                                                        string strTemp = Convert.ToString(newR["name"]);
-                                                        string strTemp11 = Convert.ToString(newR["calibrationFrequency"]);
-
-                                                        string strTemp1 = Convert.ToString(newR["calibrationFirstDueDate"]);
-                                                        string strTemp2 = Convert.ToString(newR["calibrationFrequency"]);
-                                                        string strTemp3 = Convert.ToString(newR["calibrationNextDueDate"]);
-                                                        string strTemp4 = Convert.ToString(newR["calibrationLastDate"]);
-                            */
+                          
                             if (newR["calibrationFirstDueDate"] != null && (Convert.ToString(newR["calibrationFirstDueDate"]) != ""))
                             {
                                 //Validate calibration frequency
@@ -730,8 +722,7 @@ namespace CMMSAPIs.Repositories.Inventory
 
 
 
-                            bool warrantyDataExist = true;
-                            bool warrantyValidationFailed = false;
+                         
 
                             if (newR["warranty_type_name"].ToString() != null && newR["warranty_type_name"].ToString() != "")
                             {
@@ -741,11 +732,9 @@ namespace CMMSAPIs.Repositories.Inventory
                                 }
                                 catch (KeyNotFoundException)
                                 {
-                                    m_errorLog.SetError($"[Row: {rN}] Warranty Type named '{newR["warranty_type_name"]}' not found.");
+
                                     newR["warranty_type"] = 0;
-                                    warrantyValidationFailed = true;
-                                    warrantyDataExist = false;
-                                }
+                                        }
                             }
 
                             if (newR["warranty_term_type_name"].ToString() != null && newR["warranty_term_type_name"].ToString() != "")
@@ -759,11 +748,7 @@ namespace CMMSAPIs.Repositories.Inventory
                                 }
                                 catch (KeyNotFoundException)
                                 {
-                                   // m_errorLog.SetError($"[Row: {rN}] Warranty Term named '{newR["warranty_term_type_name"]}' not found.");
                                     newR["warranty_term_type"] = 0;
-
-                                    /*warrantyValidationFailed = true;
-                                    warrantyDataExist = false;*/
                                 }
                             }
 
@@ -788,16 +773,11 @@ namespace CMMSAPIs.Repositories.Inventory
                                             int id = Convert.ToInt32(dt.Rows[0][0]);
                                             businesses.Add(name.ToUpper(), id);
                                             newR["warranty_provider_id"] = id;
-                                            //m_errorLog.SetInformation($"New business '{name}' added.");
                                         }
                                         catch (KeyNotFoundException)
                                         {
-                                            //m_errorLog.SetWarning($"[Row: {rN}] Warranty Provider named '{name}' not found. Setting warranty provider ID as 0.");
-                                            newR["warranty_provider_id"] = 0;
-
-                                            /*warrantyValidationFailed = true;
-                                            warrantyDataExist = false;*/
-                                        }
+                                        newR["warranty_provider_id"] = 0;
+                                    }
                                     }
                                 }
                             
@@ -813,37 +793,39 @@ namespace CMMSAPIs.Repositories.Inventory
                             {
                                 List<string> errors = new List<string>();
 
+                                string name = Convert.ToString(newR["warranty_provider_name"]);
                                 if (newR["start_date"] == null || string.IsNullOrWhiteSpace(Convert.ToString(newR["start_date"])))
                                 {
-                                    errors.Add("Asset_Warranty_Start_Date");
+                                    errors.Add("Asset_Warranty_Start_Date <" + Convert.ToString(newR["start_date"]) + ">");
                                 }
 
                                 if (newR["expiry_date"] == null || string.IsNullOrWhiteSpace(Convert.ToString(newR["expiry_date"])))
                                 {
-                                    errors.Add("Asset_Warranty_Expiry_Date");
+                                    errors.Add("Asset_Warranty_Expiry_Date <" + Convert.ToString(newR["expiry_date"]) + ">");
                                 }
 
                                 if (newR["warranty_provider_name"] == null || string.IsNullOrWhiteSpace(Convert.ToString(newR["warranty_provider_name"])))
                                 {
-                                    errors.Add("Asset_Warranty_Provider");
+                                    errors.Add("Asset_Warranty_Provider <" + Convert.ToString(newR["warranty_provider_name"]) + ">");
                                 }
 
-                                if (newR["warranty_term_type"] == null || string.IsNullOrWhiteSpace(Convert.ToString(newR["warranty_term_type"])))
+                                if (newR["warranty_term_type"] == null || string.IsNullOrWhiteSpace(Convert.ToString(newR["warranty_term_type"])) || (int)newR["warranty_term_type"] == 0)
                                 {
-                                    errors.Add("Asset_Warranty_Term_Type");
+                                    errors.Add("Asset_Warranty_Term_Type <" + Convert.ToString(newR["warranty_term_type_name"]) + ">");
                                 }
 
                                 if (newR["warranty_type"] == null || string.IsNullOrWhiteSpace(Convert.ToString(newR["warranty_type"])) || (int)newR["warranty_type"] == 0)
                                 {
-                                    errors.Add("Warranty Type");
+                                    errors.Add("Warranty Type <" + Convert.ToString(newR["warranty_type_name"]) + ">");
                                 }
+
 
                                 if (errors.Count > 0)
                                 {
                                     string errorMessage = $"[Row: {rN}] " + FormatErrorMessage(errors) + " are not defined";
                                     m_errorLog.SetError(errorMessage);
-                                    // warrantyValidationFailed = true;
-                                    // warrantyDataExist = false;
+                                    newR.Delete();
+                                    continue;
                                 }
                                 else
                                 {
@@ -857,26 +839,14 @@ namespace CMMSAPIs.Repositories.Inventory
 
 
                             if (newR["warranty_description"] != null && (Convert.ToString(newR["warranty_description"]) != ""))
-                                    {
+                            {
                                         m_errorLog.SetWarning($"[Row: {rN}] Warranty_Description is not defined ");
-                                    }
-                                    if (newR["certificate_number"] != null && (Convert.ToString(newR["certificate_number"]) != ""))
-                                    {
+                            }
+                            if (newR["certificate_number"] != null && (Convert.ToString(newR["certificate_number"]) != ""))
+                            {
                                         m_errorLog.SetWarning($"[Row: {rN}] Asset_Warranty_Certificate_No is not defined ");
-                                    }
-                                    
-
-                            
-                             
-                            
-                              /* if (newR["start_date"] != null && !string.IsNullOrWhiteSpace(Convert.ToString(newR["start_date"]))) &&
-                               (newR["expiry_date"] == null || string.IsNullOrWhiteSpace(Convert.ToString(newR["expiry_date"]))) &&
-                               (newR["warranty_provider_name"] == null || string.IsNullOrWhiteSpace(Convert.ToString(newR["warranty_provider_name"]))) &&
-                               (newR["warranty_term_type"] == null || string.IsNullOrWhiteSpace(Convert.ToString(newR["warranty_term_type"])) || (int)newR["warranty_term_type"] == 0) &&
-                               (newR["warranty_type"] == null || string.IsNullOrWhiteSpace(Convert.ToString(newR["warranty_type"])) || (int)newR["warranty_type"] == 0);*/
-
-                            
-
+                            }
+                 
 
                             if (Convert.ToString(newR["parentName"]) == null || Convert.ToString(newR["parentName"]) == "")
                             {
@@ -920,31 +890,7 @@ namespace CMMSAPIs.Repositories.Inventory
 
                                 }
 
-                                //CMPMPlanDetail updatePlan = new CMPMPlanDetail();
-
-                                //updatePlan.plan_id = Convert.ToInt32(newR["planID"]);
-                                //updatePlan.plan_name = Convert.ToString(newR["PlanName"]);
-                                //updatePlan.plan_date = startDate;
-                                //updatePlan.plan_freq_id = Convert.ToInt32(newR["frequencyID"]);
-                                //updatePlan.facility_id = Convert.ToInt32(newR["plantID"]);
-                                //updatePlan.category_id = Convert.ToInt32(newR["categoryID"]);
-                                //updatePlan.assigned_to_id = Convert.ToInt32(newR["assignedToID"]);
-                                //var resPlan = await UpdatePMPlan(updatePlan, userID);
-                                //updateCount++;
-                                //string myQuery2 = $"Update pm_plan set status = {(int)CMMS.CMMS_Status.PM_PLAN_CREATED},approved_by = null where id = {updatePlan.plan_id};";
-                                //await Context.ExecuteNonQry<int>(myQuery2).ConfigureAwait(false);
-                                //int app = Convert.ToInt32(newR["Approval"]);
-                                //if (app == 1)
-                                //{
-                                //    CMApproval planApproval = new CMApproval
-                                //    {
-                                //        id = Convert.ToInt32(newR["planID"]),
-                                //        comment = "Approved"
-                                //    };
-
-                                //    approval.Add(planApproval);
-                                //}
-                                ////m_errorLog.SetWarning($"[Row: {rN}] Updated Plan '{newR["PlanName"]}'. Plan ID :{newR["planID"]}. ");
+                              
 
 
                             }
@@ -953,10 +899,7 @@ namespace CMMSAPIs.Repositories.Inventory
 
                                 //return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] Equipment named '{newR["EquipmentName"]}' does not exist.");
                             }
-                            /*
-                        dt2.Columns.Add("warranty_type", typeof(int));
-                        dt2.Columns.Add("warrranty_term_type", typeof(int));
-                        dt2.Columns.Add("warranty_provider_id", typeof(int));*/
+
                             dt2.Rows.Add(newR);
                         }
                         //excel data exctrat complete
@@ -967,8 +910,6 @@ namespace CMMSAPIs.Repositories.Inventory
                                $"blocks.zipcode = plants.zipcode, blocks.latitude = plants.latitude, blocks.longitude = plants.longitude;";
                         await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
 
-                        //if (m_errorLog.GetErrorCount() == 0)
-                        //{
                         int childListCount = 1;
                         DataTable insertedTable = dt2.Clone();
 
