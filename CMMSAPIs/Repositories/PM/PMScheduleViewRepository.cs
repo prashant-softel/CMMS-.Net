@@ -67,6 +67,10 @@ namespace CMMSAPIs.Repositories.PM
                     retValue = "Close - Approved"; break;
                 case CMMS.CMMS_Status.PM_CANCELLED:
                     retValue = "Cancelled"; break;
+                case CMMS.CMMS_Status.PM_CANCELLED_REJECTED:
+                    retValue = "Cancelled - Rejected"; break;
+                case CMMS.CMMS_Status.PM_CANCELLED_APPROVED:
+                    retValue = "Cancelled - Approved"; break;
                 case CMMS.CMMS_Status.PM_DELETED:
                     retValue = "Deleted"; break;
                 case CMMS.CMMS_Status.PM_UPDATED:
@@ -107,6 +111,10 @@ namespace CMMSAPIs.Repositories.PM
                     retValue = $"PM Task Close Approved By {Obj.approved_by_name}"; break;
                 case CMMS.CMMS_Status.PM_CANCELLED:
                     retValue = $"PM Task Cancelled By {Obj.cancelled_by_name} "; break;
+                case CMMS.CMMS_Status.PM_CANCELLED_REJECTED:
+                    retValue = $"PM Task cancelled Rejected By {Obj.cancelled_by_name}"; break;
+                case CMMS.CMMS_Status.PM_CANCELLED_APPROVED:
+                    retValue = $"PM Task cancelled Approved By {Obj.approved_by_name}"; break;
                 case CMMS.CMMS_Status.PM_DELETED:
                     retValue = $"PM Task Deleted "; break;
                 case CMMS.CMMS_Status.PM_UPDATED:
@@ -894,6 +902,42 @@ namespace CMMSAPIs.Repositories.PM
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_TASK, request.id, 0, 0, string.IsNullOrEmpty(request.comment) ? "PM Task Close Requested " : request.comment, CMMS.CMMS_Status.PM_COMPLETED, userID);
             CMDefaultResponse response = new CMDefaultResponse(request.id, retCode, "PM Task Close Requested successfully");
+            return response;
+        }
+        internal async Task<CMDefaultResponse> CancelRejectedPMTaskExecution(CMApproval request, int userID)
+        {
+            string myQuery = "UPDATE pm_task SET " +
+                                $"cancel_rejected_by = {userID}, " +
+                                $"cancel_rejected_at = '{UtilsRepository.GetUTCTime()}', " +
+                                $"cancel_remarks = '{request.comment}', " +
+                                $"status = {(int)CMMS.CMMS_Status.PM_CANCELLED_REJECTED}, " +
+                                $"status_updated_at = '{UtilsRepository.GetUTCTime()}', " +
+                                $"status_updated_by = {userID} " +
+                                $"WHERE id = {request.id};";
+            int retVal = await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
+            CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
+            if (retVal > 0)
+                retCode = CMMS.RETRUNSTATUS.SUCCESS;
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_TASK, request.id, 0, 0, string.IsNullOrEmpty(request.comment) ? "PM Task Cancel Rejected " : request.comment, CMMS.CMMS_Status.PM_CANCELLED_REJECTED, userID);
+            CMDefaultResponse response = new CMDefaultResponse(request.id, retCode, "PM Task Cancel Rejected successfully.");
+            return response;
+        }
+        internal async Task<CMDefaultResponse> CancelApprovedPMTaskExecution(CMApproval request, int userID)
+        {
+            string myQuery = "UPDATE pm_task SET " +
+                                $"cancel_approved_by = {userID}, " +
+                                $"cancel_approved_at = '{UtilsRepository.GetUTCTime()}', " +
+                                $"approve_remarks = '{request.comment}', " +
+                                $"status = {(int)CMMS.CMMS_Status.PM_CANCELLED_APPROVED}, " +
+                                $"status_updated_at = '{UtilsRepository.GetUTCTime()}', " +
+                                $"status_updated_by = {userID} " +
+                                $"WHERE id = {request.id};";
+            int retVal = await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
+            CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
+            if (retVal > 0)
+                retCode = CMMS.RETRUNSTATUS.SUCCESS;
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_TASK, request.id, 0, 0, string.IsNullOrEmpty(request.comment) ? "PM Task Cancel Rejected " : request.comment, CMMS.CMMS_Status.PM_CANCELLED_REJECTED, userID);
+            CMDefaultResponse response = new CMDefaultResponse(request.id, retCode, "PM Task Cancel Rejected successfully.");
             return response;
         }
 
