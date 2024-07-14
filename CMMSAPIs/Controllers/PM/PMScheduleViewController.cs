@@ -1,4 +1,4 @@
-﻿using CMMSAPIs.BS.PM;
+using CMMSAPIs.BS.PM;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -173,6 +173,41 @@ namespace CMMSAPIs.Controllers.PM
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
                 var data = await _PMScheduleViewBS.ClosePMTaskExecution(request, userID);
+                //request.comment = "Approved";
+                //var data2 = _PMScheduleViewBS.ApprovePMTaskExecution(request, userID);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [Route("CancelApprovedPMTaskExecution")]
+        [HttpPut]
+        public async Task<IActionResult> CancelApprovedPMTaskExecution(CMApproval request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _PMScheduleViewBS.CancelApprovedPMTaskExecution(request, userID);
+                //request.comment = "Approved";
+                //var data2 = _PMScheduleViewBS.ApprovePMTaskExecution(request, userID);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        [Route("CancelRejectedPMTaskExecution")]
+        [HttpPut]
+        public async Task<IActionResult> CancelRejectedPMTaskExecution(CMApproval request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _PMScheduleViewBS.CancelRejectedPMTaskExecution(request, userID);
                 //request.comment = "Approved";
                 //var data2 = _PMScheduleViewBS.ApprovePMTaskExecution(request, userID);
                 return Ok(data);
