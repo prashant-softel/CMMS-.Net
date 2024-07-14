@@ -405,12 +405,14 @@ namespace CMMSAPIs.Helper
             PM_ASSIGNED,
             PM_LINKED_TO_PTW,
             PM_START,
-            PM_COMPLETED,
-            PM_REJECTED,
-            PM_APPROVED,
+            PM_COMPLETED, // close task
+            PM_REJECTED,    // not used
+            PM_APPROVED,      // not used
             PM_CLOSE_REJECTED,
             PM_CLOSE_APPROVED,
             PM_CANCELLED,
+            PM_CANCELLED_REJECTED,
+            PM_CANCELLED_APPROVED,
             PM_DELETED,
             PM_UPDATED, //Only for notification purpose
 
