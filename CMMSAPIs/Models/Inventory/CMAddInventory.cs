@@ -41,7 +41,11 @@ namespace CMMSAPIs.Models.Inventory
         public int vendorId { get; set; }
         public DateTime? calibrationFirstDueDate { get; set; }
         public DateTime? calibrationNextDueDate { get; set; }
-        public DateTime? calibrationLastDate { get; set; } //add this col to database if its not there
+        public DateTime? calibrationLastDate { get; set; }
+        public DateTime? calibrationDueDate { get; set; } //add this col to database if its not there  //
+        public DateTime? LastcalibrationDoneDate { get; set; }// as duedate in calibration
+        public DateTime? calibrationDoneDate { get; set; }
+        public DateTime? calibrationstartDate { get; set; }
         public int calibrationFrequency { get; set; }
         public string calibrationFrequencyType { get; set; }
         public int calibrationReminderDays { get; set; }

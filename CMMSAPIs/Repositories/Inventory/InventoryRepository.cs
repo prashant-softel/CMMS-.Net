@@ -397,7 +397,7 @@ namespace CMMSAPIs.Repositories.Inventory
                             try
                             {
                                 newR["blockId"] = facilities[Convert.ToString(newR["blockName"]).ToUpper()];
-                                newR["facilityId"] = facility_id; 
+                                newR["facilityId"] = facility_id;
                             }
                             catch (KeyNotFoundException)
                             {
@@ -614,7 +614,7 @@ namespace CMMSAPIs.Repositories.Inventory
 
                             //Validate calibration data
                             bool CalibrationValidationFailed = false;
-                          
+
                             if (newR["calibrationFirstDueDate"] != null && (Convert.ToString(newR["calibrationFirstDueDate"]) != ""))
                             {
                                 //Validate calibration frequency
@@ -704,7 +704,7 @@ namespace CMMSAPIs.Repositories.Inventory
 
                             }
 
-                             string FormatErrorMessage(List<string> errors)
+                            string FormatErrorMessage(List<string> errors)
                             {
                                 if (errors.Count == 1)
                                 {
@@ -722,7 +722,7 @@ namespace CMMSAPIs.Repositories.Inventory
 
 
 
-                         
+
 
                             if (newR["warranty_type_name"].ToString() != null && newR["warranty_type_name"].ToString() != "")
                             {
@@ -734,7 +734,7 @@ namespace CMMSAPIs.Repositories.Inventory
                                 {
 
                                     newR["warranty_type"] = 0;
-                                        }
+                                }
                             }
 
                             if (newR["warranty_term_type_name"].ToString() != null && newR["warranty_term_type_name"].ToString() != "")
@@ -752,35 +752,35 @@ namespace CMMSAPIs.Repositories.Inventory
                                 }
                             }
 
-                                if (newR["warranty_provider_name"].ToString() != null && newR["warranty_provider_name"].ToString() != "")
+                            if (newR["warranty_provider_name"].ToString() != null && newR["warranty_provider_name"].ToString() != "")
+                            {
+
+
+                                try
                                 {
+                                    newR["warranty_provider_id"] = businesses[Convert.ToString(newR["warranty_provider_name"]).ToUpper()];
 
-
+                                }
+                                catch (KeyNotFoundException)
+                                {
+                                    string name = Convert.ToString(newR["warranty_provider_name"]);
                                     try
                                     {
-                                        newR["warranty_provider_id"] = businesses[Convert.ToString(newR["warranty_provider_name"]).ToUpper()];
-
+                                        string addBusinessQry = $"INSERT INTO business(name, type) VALUES " +
+                                                            $"('{name}', {businessTypes["MANUFACTURER"]}); " +
+                                                            $"SELECT LAST_INSERT_ID();";
+                                        DataTable dt = await Context.FetchData(addBusinessQry).ConfigureAwait(false);
+                                        int id = Convert.ToInt32(dt.Rows[0][0]);
+                                        businesses.Add(name.ToUpper(), id);
+                                        newR["warranty_provider_id"] = id;
                                     }
                                     catch (KeyNotFoundException)
                                     {
-                                        string name = Convert.ToString(newR["warranty_provider_name"]);
-                                        try
-                                        {
-                                            string addBusinessQry = $"INSERT INTO business(name, type) VALUES " +
-                                                                $"('{name}', {businessTypes["MANUFACTURER"]}); " +
-                                                                $"SELECT LAST_INSERT_ID();";
-                                            DataTable dt = await Context.FetchData(addBusinessQry).ConfigureAwait(false);
-                                            int id = Convert.ToInt32(dt.Rows[0][0]);
-                                            businesses.Add(name.ToUpper(), id);
-                                            newR["warranty_provider_id"] = id;
-                                        }
-                                        catch (KeyNotFoundException)
-                                        {
                                         newR["warranty_provider_id"] = 0;
                                     }
-                                    }
                                 }
-                            
+                            }
+
 
 
                             bool allFieldsNullOrEmpty = (newR["start_date"] == null || string.IsNullOrWhiteSpace(Convert.ToString(newR["start_date"]))) &&
@@ -838,15 +838,15 @@ namespace CMMSAPIs.Repositories.Inventory
 
 
 
-                           /* if (newR["warranty_description"] != null && (Convert.ToString(newR["warranty_description"]) != ""))
-                            {
-                                        m_errorLog.SetWarning($"[Row: {rN}] Warranty_Description is not defined ");
-                            }
-                            if (newR["certificate_number"] != null && (Convert.ToString(newR["certificate_number"]) != ""))
-                            {
-                                        m_errorLog.SetWarning($"[Row: {rN}] Asset_Warranty_Certificate_No is not defined ");
-                            }*/
-                 
+                            /* if (newR["warranty_description"] != null && (Convert.ToString(newR["warranty_description"]) != ""))
+                             {
+                                         m_errorLog.SetWarning($"[Row: {rN}] Warranty_Description is not defined ");
+                             }
+                             if (newR["certificate_number"] != null && (Convert.ToString(newR["certificate_number"]) != ""))
+                             {
+                                         m_errorLog.SetWarning($"[Row: {rN}] Asset_Warranty_Certificate_No is not defined ");
+                             }*/
+
 
                             if (Convert.ToString(newR["parentName"]) == null || Convert.ToString(newR["parentName"]) == "")
                             {
@@ -890,7 +890,7 @@ namespace CMMSAPIs.Repositories.Inventory
 
                                 }
 
-                              
+
 
 
                             }
@@ -945,10 +945,8 @@ namespace CMMSAPIs.Repositories.Inventory
                             //           .ToArray();
 
                             DataRow[] filterRows = dt2.AsEnumerable()
-                                        .Where(row => assetnames.Contains(row.Field<string>("parentName").Replace("_", "").ToUpper(), StringComparison.OrdinalIgnoreCase))
+                                        .Where(row => assetnames.Contains(row.Field<string>("name").Replace("_", "").ToUpper(), StringComparison.OrdinalIgnoreCase))
                                         .ToArray();
-
-
                             if (filterRows.Length <= 0)
                             {
                                 List<string> assetnames2 = new List<string>();
@@ -975,23 +973,6 @@ namespace CMMSAPIs.Repositories.Inventory
                             }
                             else
                             {
-                                List<string> assetnames2 = new List<string>();
-                                assetnames2.AddRange(insertedTable.GetColumn<string>("name"));
-                                DataRow[] notInserted = dt2.AsEnumerable()
-                                       .Where(row => !assetnames2.Contains(row.Field<string>("name")))
-                                       .ToArray();
-                                if (notInserted.Length > 0)
-                                {
-                                    DataTable notInsertedTable = dt2.Clone();
-
-                                    foreach (DataRow row in notInserted)
-                                    {
-                                        notInsertedTable.ImportRow(row);
-                                    }
-                                    List<int> ids_inserted = (await AddInventoryWithParent(notInsertedTable, facility_id, userID)).id;
-                                    idList.AddRange(ids_inserted);
-                                }
-
                                 DataTable filteredDataTable = dt2.Clone();
 
                                 foreach (DataRow row in filterRows)
@@ -1010,33 +991,70 @@ namespace CMMSAPIs.Repositories.Inventory
                                 idList.AddRange(ids_);
 
                             }
-                            //if (filterRows.Length > 0)
-                            //{
-                            //    assetPriority.Insert(0, filterRows.CopyToDataTable());
-                            //    assetList.Insert(0, assetPriority[assetPriority.Count - 1].GetColumn<string>("name"));
-                            //}
-
-                            //foreach (var item in assetList)
-                            //{
-                            //    List<string> temp = item;
-                            //    do
-                            //    {
-                            //        filterRows = dt2.AsEnumerable()
-                            //           .Where(row => temp.Contains(row.Field<string>("parentName"), StringComparison.OrdinalIgnoreCase))
-                            //           .ToArray();
-                            //        if (filterRows.Length == 0)
-                            //            continue;
-                            //        assetPriority.Add(filterRows.CopyToDataTable());
-                            //        temp = assetPriority[assetPriority.Count - 1].GetColumn<string>("name");
-                            //    } while (filterRows.Length != 0);
-                            //}
-                            //List<int> idList = new List<int>();
 
 
-                            //foreach (DataTable dtUsers in assetPriority)
-                            //{
-                            //    idList.AddRange((await AddInventoryWithParent(dtUsers, facility_id, userID)).id);
-                            //}
+                            /* if (filterRows.Length <= 0)
+                             {
+                                 List<string> assetnames2 = new List<string>();
+                                 assetnames2.AddRange(insertedTable.GetColumn<string>("name"));
+                                 DataRow[] notInserted = dt2.AsEnumerable()
+                                        .Where(row => !assetnames2.Contains(row.Field<string>("name")))
+                                        .ToArray();
+
+                                 DataTable notInsertedTable = dt2.Clone();
+
+                                 foreach (DataRow row in notInserted)
+                                 {
+                                     notInsertedTable.ImportRow(row);
+                                 }
+                                 List<int> ids_ = (await AddInventoryWithParent(notInsertedTable, facility_id, userID)).id;
+                                 idList.AddRange(ids_);
+
+                                 //foreach (DataRow row in notInserted)
+                                 //{
+                                 //    m_errorLog.SetInformation($"Asset <{row.Field<string>("name")}> not inserted");
+                                 //}
+
+                                 break;
+                             }
+                             else
+                             {
+                                 List<string> assetnames2 = new List<string>();
+                                 assetnames2.AddRange(insertedTable.GetColumn<string>("name"));
+                                 DataRow[] notInserted = dt2.AsEnumerable()
+                                        .Where(row => !assetnames2.Contains(row.Field<string>("name")))
+                                        .ToArray();
+                                 if (notInserted.Length > 0)
+                                 {
+                                     DataTable notInsertedTable = dt2.Clone();
+
+                                     foreach (DataRow row in notInserted)
+                                     {
+                                         notInsertedTable.ImportRow(row);
+                                     }
+                                     List<int> ids_inserted = (await AddInventoryWithParent(notInsertedTable, facility_id, userID)).id;
+                                     idList.AddRange(ids_inserted);
+                                 }
+
+                                 DataTable filteredDataTable = dt2.Clone();
+
+                                 foreach (DataRow row in filterRows)
+                                 {
+                                     filteredDataTable.ImportRow(row);
+                                 }
+                                 //List<int> ids_ = (await AddInventoryWithParent(filteredDataTable, facility_id, userID)).id;
+                                 List<int> ids_ = (await UpdateInventoryWithParent(filteredDataTable, facility_id, userID)).id;
+                                 insertedTable.Merge(filteredDataTable);
+                                 childListCount++;
+                                 ids = string.Join(", ", ids_.Select(x => x.ToString()));
+                                 if (ids != "")
+                                 {
+                                     filter = $" and id IN ({ids})";
+                                 }
+                                 idList.AddRange(ids_);
+
+                             }*/
+
                         }
 
                         string checkParentID = $"select id,name from assets  where parentId = 0 and facilityId = {facility_id} GROUP BY name  ORDER BY id ASC ";
@@ -1289,7 +1307,7 @@ namespace CMMSAPIs.Repositories.Inventory
             //    "b3.name as manufacturer_name, a.currency FROM assets AS a JOIN assetstatus as s on s.id = a.statusId " +
             //    "JOIN facilities as f ON f.id = a.blockId JOIN assets as a2 ON a.parentId = a2.id " +
             //    "JOIN business AS b2 ON a.ownerId = b2.id JOIN business AS b3 ON a.manufacturerId = b3.id";
-            string myQuery = "SELECT a.id ,a.name, a.description as asset_description,a.calibrationDueDate as calibrationDueDate ,a.calibrationLastDate as calibrationLastDate,a.vendorId as vendorid,a.stockCount as stockCount,a.photoId as photoId,a.retirementStatus as retirementStatus,w.meter_limit as meter_limit,w.meter_unit as meter_unit,a.moduleQuantity, ast.id as typeId, ast.name as type, a.supplierId as supplierId, b2.name as supplierName, manufacturertlb.id as manufacturerId, manufacturertlb.name as manufacturerName,a.parent_equipment_no ,b5.id as operatorId, b5.name as operatorName, ac.id as categoryId, ac.name as categoryName, a.serialNumber,a.cost as cost,a.currency as currencyId ,c.name as currency, a.model,a.calibrationFrequency,frequency.name as calibrationFrequencyType, a.calibrationReminderDays, " +
+            string myQuery = "SELECT a.id ,a.name, a.description as asset_description, a.calibrationStartDate as calibrationSatrtDate,a.calibrationDueDate as calibrationDueDate, a.calibrationLastDate as calibrationLastDate,a.vendorId as vendorid,a.stockCount as stockCount,a.photoId as photoId,a.retirementStatus as retirementStatus,w.meter_limit as meter_limit,w.meter_unit as meter_unit,a.moduleQuantity, ast.id as typeId, ast.name as type, a.supplierId as supplierId, b2.name as supplierName, manufacturertlb.id as manufacturerId, manufacturertlb.name as manufacturerName,a.parent_equipment_no ,b5.id as operatorId, b5.name as operatorName, ac.id as categoryId, ac.name as categoryName, a.serialNumber,a.cost as cost,a.currency as currencyId ,c.name as currency, a.model,a.calibrationFrequency,frequency.name as calibrationFrequencyType, a.calibrationReminderDays, " +
             //      "CASE WHEN a.calibrationLastDate = '0000-00-00 00:00:00' THEN NULL ELSE a.calibrationLastDate END as calibrationLastDate, CASE WHEN a.calibrationDueDate = '0000-00-00 00:00:00' THEN NULL ELSE a.calibrationDueDate END AS calibrationDueDate," +
             //    " a.model, a.currency, a.cost, a.acCapacity, a.dcCapacity, a.moduleQuantity, " +
             //"a.firstDueDate as calibrationDueDate, "+
