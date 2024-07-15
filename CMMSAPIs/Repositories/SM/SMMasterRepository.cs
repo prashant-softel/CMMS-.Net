@@ -701,10 +701,32 @@ namespace CMMSAPIs.Repositories.SM
                                 plantID = AssetCodeMasterList[Convert.ToString(row.ItemArray[0]).ToUpper()];
                                 if (plantID != Convert.ToInt32(row.ItemArray[2]))
                                 {
+                                    sm_asset_id = (AssetMasterList[Convert.ToString(asset_code).ToUpper()]);
                                     plantID = 0;
+                                    int openingPlantID = Convert.ToInt32(row.ItemArray[2]);
+                                    string checkOpeningStockExist = $"select count(id) from smtransactiondetails where isOpening=1 and assetItemID={sm_asset_id} and plantID={openingPlantID}";
+                                    DataTable dt_checkOpeningStockExist = await Context.FetchData(checkOpeningStockExist).ConfigureAwait(false);
+                                    int isOpeningCount = 0;
+                                    if (dt_checkOpeningStockExist.Rows.Count > 0)
+                                    {
+                                        isOpeningCount = Convert.ToInt32(dt_checkOpeningStockExist.Rows[0][0]);
+                                    }
+                                    // here we are checking if already inserted in stock then use sm_asset_id = 0 for skipping 
+                                    // duplicate
+                                    if (isOpeningCount >= 1)
+                                    {
+                                        sm_asset_id = 0;
+
+                                    }
+                                    else
+                                    {
+                                        sm_asset_id = (AssetMasterList[Convert.ToString(asset_code).ToUpper()]);
+
+                                    }
                                 }
                                 else
                                 {
+                                    sm_asset_id = 0;
                                     plantID = Convert.ToInt32(row.ItemArray[2]);
                                 }
 
@@ -715,7 +737,8 @@ namespace CMMSAPIs.Repositories.SM
                                     $" where id = {AssetMasterList[Convert.ToString(asset_code).ToUpper()]}; Select 0;";
                                 int id = await Context.CheckGetData(insertQuery).ConfigureAwait(false);
 
-                                sm_asset_id = (AssetMasterList[Convert.ToString(asset_code).ToUpper()]);
+
+                            
 
                             }
                             else
@@ -729,38 +752,7 @@ namespace CMMSAPIs.Repositories.SM
                                 sm_asset_id = Convert.ToInt32(dt_asset1.Rows[0][0]);
                             }
 
-                            //if (dt_checkAssetCode.Rows.Count > 0)
-                            //{
-                            //    // Check if material already stored in db and has same plant id then make plantID as 0 to use all plants
-                            //    int plantID = 0;
-                            //    if (Convert.ToInt32(dt_checkAssetCode.Rows[0][1]) != Convert.ToInt32(row.ItemArray[2]))
-                            //    {
-                            //        plantID = 0;
-                            //    }
-                            //    else
-                            //    {
-                            //        plantID = Convert.ToInt32(row.ItemArray[2]);
-                            //    }
 
-                            //    insertQuery = $" UPDATE smassetmasters set plant_ID = {plantID}, asset_code = '{row.ItemArray[0]}', asset_name = '{row.ItemArray[1]}', " +
-                            //        $" description = '{row.ItemArray[1]}', unit_of_measurement = {row.ItemArray[4]}, flag = 1, lastmodifieddate = '{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}', " +
-                            //        $" asset_type_ID = {row.ItemArray[14]}, item_category_ID = '{row.ItemArray[15]}', approval_required = {row.ItemArray[10]},Section = '{row.ItemArray[8]}'," +
-                            //        $" min_qty = {row.ItemArray[11]},reorder_qty = {row.ItemArray[12]}  " +
-                            //        $" where id = {Convert.ToInt32(dt_checkAssetCode.Rows[0][0])}; Select {Convert.ToInt32(dt_checkAssetCode.Rows[0][0])};";
-
-                            //}
-                            //else
-                            //{
-                            //    insertQuery = "INSERT INTO smassetmasters (plant_ID, asset_code, asset_name,description, " +
-                            //        "unit_of_measurement, flag, lastmodifieddate, asset_type_ID, item_category_ID, approval_required,Section, min_qty, reorder_qty)";
-
-                            //    insertQuery = insertQuery + $"Select {row.ItemArray[2]},'{row.ItemArray[0]}', '{row.ItemArray[1]}', '{row.ItemArray[1]}'," +
-                            //    $"{row.ItemArray[4]}, 1, '{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}', {row.ItemArray[14]},'{row.ItemArray[15]}',{row.ItemArray[10]},'{row.ItemArray[8]}',{row.ItemArray[11]},{row.ItemArray[12]} ; SELECT LAST_INSERT_ID();";
-
-                            //}
-
-                            // DataTable dt_asset = await Context.FetchData(insertQuery).ConfigureAwait(false);
-                            // sm_asset_id = Convert.ToInt32(dt_asset.Rows[0][0]);
 
                             // When new asset is inserting then we are getting new asset_id
                             // we have used same variable for insert and update, while update it will return 0
