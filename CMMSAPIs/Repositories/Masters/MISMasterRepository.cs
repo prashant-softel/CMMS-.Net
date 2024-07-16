@@ -1893,5 +1893,101 @@ namespace CMMSAPIs.Repositories.Masters
             Result[0].FileDetails = _UploadFileList;
             return Result[0];
         }
+        public async Task<GetChecklistInspection> GetChecklistInspection()
+        {
+            var _GetChecklistInspection = new GetChecklistInspection
+            {
+                FacilityId = 1,
+                FacilityName = "Bellary",
+                InspectionData = new List<InspectionData>
+                {
+                    new InspectionData
+                    {
+                        MonthName = "April",
+                        MonthId = 4,
+                        Year = 2024,
+                        CheckList = new List<CheckList>
+                        {
+                            new CheckList
+                            {
+                                ChecklistName = "Monitoring Checklist of Electrical",
+                                SopNumber = "HFE/HSE/SOP-10/C-1",
+                                Frequency = "Monthly",
+                                InspectionStatus = "Yes",
+                                DateOfInspection = "2023-09-18",
+                                ChecklistAttachment = "No",
+                                NoOfUnsafeObservation = 2
+                            },
+                            new CheckList
+                            {
+                                ChecklistName = "Monitoring Checklist of Electrical2",
+                                SopNumber = "HFE/HSE/SOP-10/C-2",
+                                Frequency = "Monthly",
+                                InspectionStatus = "Yes",
+                                DateOfInspection = "2023-09-18",
+                                ChecklistAttachment = "No",
+                                NoOfUnsafeObservation = 2
+                            },
+                            new CheckList
+                            {
+                                ChecklistName = "Monitoring Checklist of Electrical3",
+                                SopNumber = "HFE/HSE/SOP-10/C-3",
+                                Frequency = "Monthly",
+                                InspectionStatus = "Yes",
+                                DateOfInspection = "2023-09-18",
+                                ChecklistAttachment = "No",
+                                NoOfUnsafeObservation = 2
+                            }
+                        }
+                    },
+                    new InspectionData
+                    {
+                        MonthName = "May",
+                        MonthId = 5,
+                        Year = 2024,
+                        CheckList = new List<CheckList>
+                        {
+                            new CheckList
+                            {
+                                ChecklistName = "Vehicle fitness Checklist",
+                                SopNumber = "HFE/HSE/SOP-11/C-1",
+                                Frequency = "Monthly",
+                                InspectionStatus = "No",
+                                DateOfInspection = "2023-09-18",
+                                ChecklistAttachment = "yes",
+                                NoOfUnsafeObservation = 51
+                            },
+                            new CheckList
+                            {
+                                ChecklistName = "Monitoring Checklist of Electrical2",
+                                SopNumber = "HFE/HSE/SOP-10/C-2",
+                                Frequency = "Monthly",
+                                InspectionStatus = "Yes",
+                                DateOfInspection = "2023-09-18",
+                                ChecklistAttachment = "No",
+                                NoOfUnsafeObservation = 2
+                            },
+                            new CheckList
+                            {
+                                ChecklistName = "Monitoring Checklist of Electrical3",
+                                SopNumber = "HFE/HSE/SOP-10/C-3",
+                                Frequency = "Monthly",
+                                InspectionStatus = "Yes",
+                                DateOfInspection = "2023-09-18",
+                                ChecklistAttachment = "No",
+                                NoOfUnsafeObservation = 2
+                            }
+                        }
+                    }
+                }
+            };
+
+            // Simulate async work
+           // await Task.Delay(100);
+
+            return _GetChecklistInspection;
+        }
+        
+
     }
 }

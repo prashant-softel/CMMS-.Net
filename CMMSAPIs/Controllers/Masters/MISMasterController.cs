@@ -1625,5 +1625,19 @@ namespace CMMSAPIs.Controllers.Masters
                 throw;
             }
         }
+        [Route("GetChecklistInspection")]
+        [HttpGet]
+        public async Task<IActionResult> GetChecklistInspection()
+        {
+            try
+            {
+                var data = await _IMISMasterBS.GetChecklistInspection();
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
     }
 }

@@ -673,5 +673,34 @@ namespace CMMSAPIs.Models.Masters
         public int status { get; set; }
         public string description { get; set; }
     }
+    // Added for new api sned data hardcoded data 
+
+    public class GetChecklistInspection
+    {
+        public int FacilityId { get; set; }
+        public string FacilityName { get; set; }
+        public List<InspectionData> InspectionData { get; set; }
+    }
+
+    public class InspectionData
+    {
+        public string MonthName { get; set; }
+        public int MonthId { get; set; }
+        public int Year { get; set; }
+        public List<CheckList> CheckList { get; set; }
+    }
+
+    public class CheckList
+    {
+        public string ChecklistName { get; set; }
+        public string SopNumber { get; set; }
+        public string Frequency { get; set; }
+        public string InspectionStatus { get; set; }
+        public string DateOfInspection { get; set; }
+        public string ChecklistAttachment { get; set; }
+        public double NoOfUnsafeObservation { get; set; }
+    }
+
+   
 }
 

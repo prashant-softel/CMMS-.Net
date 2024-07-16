@@ -116,6 +116,8 @@ namespace CMMSAPIs.BS.MISMasters
         Task<CMDefaultResponse> DeleteObservation(int id, int UserID);
         Task<CMDefaultResponse> UpdateObservation(CMObservation request, int UserID);
         Task<CMDefaultResponse> CreateObservation(CMObservation request, int UserID);
+
+        Task<GetChecklistInspection> GetChecklistInspection();
     }
     public class MISMasterBS : IMISMasterBS
     {
@@ -1651,6 +1653,21 @@ namespace CMMSAPIs.BS.MISMasters
                 using (var repos = new MISMasterRepository(getDB))
                 {
                     return await repos.GetObservationById(observation_id);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<GetChecklistInspection> GetChecklistInspection()
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.GetChecklistInspection();
 
                 }
             }
