@@ -160,6 +160,7 @@ namespace CMMSAPIs.Models.MC
         public decimal cleaned { get; set; }
         public decimal abandoned { get; set; }
         public decimal pending { get; set; }
+        public string remark_of_schedule { get; set; }
         public int waterUsed { get; set; }
         public DateTime start_date { get; set; }
         public DateTime end_date { get; set; }

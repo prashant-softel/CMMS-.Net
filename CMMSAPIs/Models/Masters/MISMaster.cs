@@ -701,6 +701,6 @@ namespace CMMSAPIs.Models.Masters
         public double NoOfUnsafeObservation { get; set; }
     }
 
-   
+
 }
 

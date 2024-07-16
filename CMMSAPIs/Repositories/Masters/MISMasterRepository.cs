@@ -1983,11 +1983,11 @@ namespace CMMSAPIs.Repositories.Masters
             };
 
             // Simulate async work
-           // await Task.Delay(100);
+            // await Task.Delay(100);
 
             return _GetChecklistInspection;
         }
-        
+
 
     }
 }

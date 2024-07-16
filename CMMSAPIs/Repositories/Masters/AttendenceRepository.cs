@@ -183,20 +183,21 @@ namespace CMMSAPIs.Repositories.Masters
         //        }
         public async Task<object> GetAttendanceByDetailsByMonth(int facility_id, DateTime from_date, DateTime to_date)
         {
-
+            string from = Convert.ToString(from_date.ToString("yyyy-MM-dd"));
+            string to = Convert.ToString(to_date.ToString("yyyy-MM-dd"));
             string querybymonth = "SELECT DISTINCT facility_id, f.name as facility_name FROM employee_attendance LEFT JOIN facilities f ON f.id = employee_attendance.facility_id;";
             var employeeAttendanceList = await Context.GetDataFirst<CMGETAttendenceMONTH>(querybymonth).ConfigureAwait(false);
 
             string queryByMonthEmp = "SELECT DISTINCT ea.employee_id as employeeId, CONCAT(u.firstName, u.lastname) AS employeeName, u.joiningDate as dateOfJoining, " +
                                      "u.dateofExit as DateofExit,  CASE   WHEN u.dateofExit IS NULL OR u.dateofExit > CURDATE() THEN 'Active'  ELSE 'Inactive'  END AS workingStatus " +
                                      $"FROM employee_attendance AS ea LEFT JOIN users AS u ON u.id = ea.employee_id " +
-                                     $"WHERE ea.facility_id = {facility_id} OR (ea.Date BETWEEN '{from_date}' AND '{to_date}') ORDER BY ea.employee_id;";
+                                     $"WHERE ea.facility_id = {facility_id} AND (ea.Date BETWEEN '{from}' AND '{to}') ORDER BY ea.employee_id;";
 
             List<EmployeeMonth> empDetails = await Context.GetData<EmployeeMonth>(queryByMonthEmp).ConfigureAwait(false);
 
             string queryByEmp = $"SELECT ea.employee_id as emp_id, ea.Date AS date, ea.present AS status, ea.in_time as inTime, ea.out_time AS outTime " +
                                 $"FROM employee_attendance AS ea LEFT JOIN users AS u ON u.id = ea.employee_id " +
-                                $"WHERE ea.facility_id = {facility_id} OR (ea.Date BETWEEN '{from_date}' AND '{to_date}') ORDER BY ea.Date;";
+                                $"WHERE ea.facility_id = {facility_id} AND (ea.Date BETWEEN '{from}' AND '{to}') ORDER BY ea.Date;";
 
             List<DetailsOFMonth> EmpAteendence = await Context.GetData<DetailsOFMonth>(queryByEmp).ConfigureAwait(false);
 
