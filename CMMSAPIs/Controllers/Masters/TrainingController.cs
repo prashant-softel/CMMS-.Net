@@ -179,6 +179,26 @@ namespace CMMSAPIs.Controllers.Masters
             }
 
         }
+
+        [Route("GetTrainingReportByCategory")]
+        [HttpGet]
+
+        public async Task<IActionResult> GetTrainingReportByCategory(int facility_id, DateTime from_date, DateTime to_date)
+        {
+            try
+            {
+
+                var data = await TrainingCourseBS.GetTrainingReportByCategory(facility_id, from_date, to_date);
+                return Ok(data);
+
+            }
+            catch (Exception ex)
+            {
+
+                return BadRequest(ex.Message);
+            }
+
+        }
         [Route("CreateTrainingCategorty")]
         [HttpPost]
         public async Task<IActionResult> CreateTrainingCategorty(CMTRAININGCATE request)
@@ -196,6 +216,8 @@ namespace CMMSAPIs.Controllers.Masters
             }
 
         }
+
+
         [Route("UpdateTrainingCategorty")]
         [HttpPut]
         public async Task<IActionResult> UpdateTrainingCategorty(CMTRAININGCATE request)

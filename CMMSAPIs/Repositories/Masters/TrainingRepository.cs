@@ -9,7 +9,10 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Threading.Tasks;
+using static CMMSAPIs.Helper.CMMS;
+using static iTextSharp.text.pdf.AcroFields;
 
 namespace CMMSAPIs.Repositories.Masters
 {
@@ -413,6 +416,120 @@ namespace CMMSAPIs.Repositories.Masters
             string delqry1 = $"UPDATE targeted_group  SET status=0  where id={id};";
             await Context.ExecuteNonQry<int>(delqry1).ConfigureAwait(false);
             return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Target Group delete Successfully");
+        }
+
+
+        internal async Task<List<CMTrainingSummary>> GetTrainingReportByCategory(int facility_id, DateTime from_date, DateTime to_date)
+        {
+ 
+
+            string getsch = $" SELECT ts.Schid AS ScheduleID, ts.CourseId, ts.ScheduleDate, MONTHNAME(ts.ScheduleDate) AS month_name, " +
+            $" c.Traning_category_id, c.No_Of_Days, c.Duration_in_Minutes, cc.name AS course_category, ts.status_code AS status_code " +
+            $" FROM training_schedule " +
+            $" ts LEFT JOIN course c ON c.id = ts.CourseId LEFT JOIN course_category cc ON cc.id = c.Traning_category_id  " +
+            $" LEFT JOIN targeted_group tg ON tg.id = c.Targated_group_id WHERE ts.facility_id = {facility_id} " +
+            $" AND ts.ScheduleDate BETWEEN '{from_date:yyyy-MM-dd}' AND '{to_date:yyyy-MM-dd}'";
+
+
+
+            List<GETSCHEDULE> trainings = await Context.GetData<GETSCHEDULE>(getsch).ConfigureAwait(false);
+
+            Dictionary<int, CMTrainingSummary> monthlyTrainingSummary = new Dictionary<int, CMTrainingSummary>();
+            //Dictonary <category_id int,Count int>
+            //Loop here of above list
+
+            decimal duration_in_minutes = 0;
+            if (trainings != null)
+            {
+                foreach (var item in trainings)
+                {
+                    bool isScheduled = false;
+                    bool isEnded = false;
+
+                    bool mockDrillManHours = false;
+                    bool inductionManHours = false;
+
+                    DateTime d_o_t = (DateTime)item.ScheduleDate;
+                    string date_of_training = d_o_t.ToString("yyyy-MM-dd");
+                    string strMonth = date_of_training.Substring(5, 2);
+                    int month = int.Parse(strMonth);
+                    string mn = item.month_name;
+
+                    string strYear = date_of_training.Substring(0, 4);
+                    int year = int.Parse(strYear);
+                    DateTime date_of_observation_Date = DateTime.ParseExact(date_of_training, "yyyy-MM-dd", null);
+
+                    CMTrainingSummary forMonth;
+
+
+                    if (!monthlyTrainingSummary.TryGetValue(month, out forMonth))
+                    {
+
+                        forMonth = new CMTrainingSummary(month, mn, year);
+                        monthlyTrainingSummary.Add(month, forMonth);
+                    }
+
+                    forMonth.created++;
+                    int num = Int32.Parse(item.status_code);
+                    if (num == (int)CMMS.CMMS_Status.COURSE_SCHEDULE)
+                    {
+                        forMonth.scheduled++;
+                        isScheduled = true;
+                    }
+                    else if(num == (int)CMMS.CMMS_Status.COURSE_ENDED)
+                    {
+                        forMonth.ended++;
+                        isEnded = true;
+                    }
+
+                    switch (item.Traning_category_id)
+                    {
+                        case 1:
+                            forMonth.hfe_training++;
+                            break;
+
+                        case 2:
+                            forMonth.hfe_mockDrill++;
+                            mockDrillManHours = true;
+                            break;
+
+                        case 3:
+                            forMonth.induction++;
+                            inductionManHours = true;
+                            break;
+
+                        case 4:
+                            forMonth.special_training++;
+                            break;
+
+                        case 5:
+                            forMonth.special_mockDrill++;
+                            break;
+                    }
+
+                    duration_in_minutes = item.Duration_in_Minutes;
+
+                    decimal hours = duration_in_minutes / 60;
+
+                    decimal decimal_hours = Decimal.Round(hours, 2);
+
+                    forMonth.manHours += decimal_hours;
+
+                    if(mockDrillManHours == false && inductionManHours == false)
+                    {
+                        forMonth.total_man_hours_excluding_mock_and_induction+= decimal_hours;
+                    }
+
+                    if (mockDrillManHours == false && inductionManHours == false)
+                    {
+                        forMonth.total_training_hours_excluding_mock_and_induction++;
+                    }
+
+                }
+
+            }
+
+            return monthlyTrainingSummary.Values.ToList();
         }
     }
 

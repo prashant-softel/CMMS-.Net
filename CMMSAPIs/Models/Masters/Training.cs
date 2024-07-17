@@ -59,6 +59,8 @@ namespace CMMSAPIs.Models.Masters
         public int Duration_in_Minutes { get; set; }
         public string Course_Category { get; set; }
         public string Targeted_Group { get; set; }
+        public string month_name { get; set; }
+        public string status_code { get; set; }
 
 
 
@@ -90,6 +92,33 @@ namespace CMMSAPIs.Models.Masters
         public dynamic Rsvp { get; set; }
         public string notes { get; set; }
 
+    }
+
+    public class CMTrainingSummary
+    {
+        
+        public CMTrainingSummary(int month, string month_name, int year)
+        {
+            this.month = month;
+            this.month_name = month_name;
+            this.year = year;
+        }
+        public int created { get; set; }
+        public int month { get; set; }
+        public string month_name { get; set; }
+        public int year { get; set; }
+        public int closed { get; set; }
+        public decimal manHours { get; set; }
+        public int special_mockDrill { get; set; }
+        public int hfe_mockDrill { get; set; }
+        public int induction { get; set; }
+        public int hfe_training { get; set; }
+        public int special_training { get; set; }
+        public int number_of_people_inducted { get; set; }
+        public decimal total_man_hours_excluding_mock_and_induction { get; set; }
+        public decimal total_training_hours_excluding_mock_and_induction { get; set; }
+        public int scheduled { get; set; }
+        public int ended { get; set; }
     }
 
 }
