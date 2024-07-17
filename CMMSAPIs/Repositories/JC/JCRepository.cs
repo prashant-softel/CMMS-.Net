@@ -593,11 +593,11 @@ namespace CMMSAPIs.Repositories.JC
             //EMP LIST
             foreach (var data in request.employee_list)
             {
-                string delqryPermitEmpList = $"delete from permitemployeelists where JC_id ={request.id}";
+                string delqryPermitEmpList = $"delete from permitemployeelists where JC_id  ={request.id} and employeeId={data.id}";
                 await Context.ExecuteNonQry<int>(delqryPermitEmpList).ConfigureAwait(false);
 
                 string qryPermitEmpList = $"insert into  permitemployeelists (employeeId,responsibility,status,JC_id) values({data.id},'{data.responsibility}',1,{request.id}); ";
-                await Context.ExecuteNonQry<int>(qryPermitEmpList).ConfigureAwait(false);
+                int id = await Context.ExecuteNonQry<int>(qryPermitEmpList).ConfigureAwait(false);
 
             }
             // JCFILES PENDINGidand history 
@@ -654,7 +654,7 @@ namespace CMMSAPIs.Repositories.JC
             DataTable dt = await Context.FetchData(query_bmtime_query).ConfigureAwait(false);
             DateTime breakdownTime = DateTime.Now;
             int jobs_id = 0;
-            if(dt.Rows.Count > 0)
+            if (dt.Rows.Count > 0)
             {
                 jobs_id = Convert.ToInt32(dt.Rows[0][0]);
                 breakdownTime = Convert.ToDateTime(dt.Rows[0][1]);

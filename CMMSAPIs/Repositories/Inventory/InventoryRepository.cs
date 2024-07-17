@@ -1615,7 +1615,16 @@ string warrantyQry = "insert into assetwarranty
                 {
                     strRetMessage = "Warranty data for <" + assetName + "> does not exist. ";
                 }
+                /* if (retID > 0)
+                 {
 
+                     string calibratoinquery = "insert into calibration (facility_id,asset_id,status) VALUES ";
+                     calibratoinquery += $"({unit.facilityId},{retID},{(int)CMMS.CMMS_Status.CREATED});" +
+                         $" SELECT LAST_INSERT_ID();";
+                     DataTable dt2 = await Context.FetchData(calibratoinquery).ConfigureAwait(false);
+                     int calibration_id = Convert.ToInt32(dt2.Rows[0][0]);
+                 }
+                */
                 idList.Add(retID);
 
                 CMViewInventory _inventoryAdded = await GetInventoryDetails(retID, "");

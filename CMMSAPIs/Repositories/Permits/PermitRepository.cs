@@ -1747,7 +1747,7 @@ namespace CMMSAPIs.Repositories.Permits
             string responseText = "";
             if (request.TBT_Done_By != 0)
             {
-                responseText = $"Permit Updated Successfully with tbt {request.TBT_Done_By}.";
+                responseText = $"Permit Updated Successfully with tbt ";
             }
             else
             {

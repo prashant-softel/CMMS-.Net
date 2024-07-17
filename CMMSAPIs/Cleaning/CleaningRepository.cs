@@ -278,7 +278,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
             foreach (CMMCPlan plan in request)
             {
-                //cleaningType = plan.cleaningType;
+                cleaningType = plan.cleaningType;
                 string startDate = "NULL";
 
                 /* if (plan.startDate != null && plan.startDate != Convert.ToDateTime("01-01-0001 00:00:00"))
@@ -307,8 +307,8 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                         //if (moduleType == 2)
                         //    cleaningType = 0;
 
-                        scheduleQry = "insert into `cleaning_plan_schedules` (`planId`,`moduleType`,`plannedDay`,`createdById`,`createdAt`) VALUES ";
-                        scheduleQry += $"({planId},{moduleType},{schedule.cleaningDay},'{userId}','{UtilsRepository.GetUTCTime()}');" +
+                        scheduleQry = "insert into `cleaning_plan_schedules` (`planId`,`moduleType`,cleaningType,`plannedDay`,`createdById`,`createdAt`) VALUES ";
+                        scheduleQry += $"({planId},{moduleType},{cleaningType},{schedule.cleaningDay},'{userId}','{UtilsRepository.GetUTCTime()}');" +
                                            $"SELECT LAST_INSERT_ID() as id ;";
 
                         List<CMMCSchedule> schedule_ = await Context.GetData<CMMCSchedule>(scheduleQry).ConfigureAwait(false);

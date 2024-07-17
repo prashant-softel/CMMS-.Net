@@ -11,8 +11,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
-using static CMMSAPIs.Helper.CMMS;
-using static iTextSharp.text.pdf.AcroFields;
 
 namespace CMMSAPIs.Repositories.Masters
 {
@@ -421,7 +419,7 @@ namespace CMMSAPIs.Repositories.Masters
 
         internal async Task<List<CMTrainingSummary>> GetTrainingReportByCategory(int facility_id, DateTime from_date, DateTime to_date)
         {
- 
+
 
             string getsch = $" SELECT ts.Schid AS ScheduleID, ts.CourseId, ts.ScheduleDate, MONTHNAME(ts.ScheduleDate) AS month_name, " +
             $" c.Traning_category_id, c.No_Of_Days, c.Duration_in_Minutes, cc.name AS course_category, ts.status_code AS status_code " +
@@ -476,7 +474,7 @@ namespace CMMSAPIs.Repositories.Masters
                         forMonth.scheduled++;
                         isScheduled = true;
                     }
-                    else if(num == (int)CMMS.CMMS_Status.COURSE_ENDED)
+                    else if (num == (int)CMMS.CMMS_Status.COURSE_ENDED)
                     {
                         forMonth.ended++;
                         isEnded = true;
@@ -515,9 +513,9 @@ namespace CMMSAPIs.Repositories.Masters
 
                     forMonth.manHours += decimal_hours;
 
-                    if(mockDrillManHours == false && inductionManHours == false)
+                    if (mockDrillManHours == false && inductionManHours == false)
                     {
-                        forMonth.total_man_hours_excluding_mock_and_induction+= decimal_hours;
+                        forMonth.total_man_hours_excluding_mock_and_induction += decimal_hours;
                     }
 
                     if (mockDrillManHours == false && inductionManHours == false)

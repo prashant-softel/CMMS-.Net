@@ -96,7 +96,7 @@ namespace CMMSAPIs.Models.Masters
 
     public class CMTrainingSummary
     {
-        
+
         public CMTrainingSummary(int month, string month_name, int year)
         {
             this.month = month;

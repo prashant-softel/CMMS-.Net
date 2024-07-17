@@ -684,6 +684,7 @@ namespace CMMSAPIs.Repositories.SM
                             object value = row.ItemArray[5];
                             int qty;
 
+                            Console.WriteLine(row.ItemArray[0]);
                             if (value != DBNull.Value && !string.IsNullOrEmpty(value.ToString()))
                             {
                                 qty = Convert.ToInt32(value);
@@ -738,7 +739,7 @@ namespace CMMSAPIs.Repositories.SM
                                 int id = await Context.CheckGetData(insertQuery).ConfigureAwait(false);
 
 
-                            
+
 
                             }
                             else
