@@ -1616,23 +1616,25 @@ namespace CMMSAPIs.Repositories.SM
             List<CMMRSAssetTypeList> _List = await Context.GetData<CMMRSAssetTypeList>(stmt).ConfigureAwait(false);
             var isMultiSpareSelectionStatus = getMultiSpareSelectionStatus("", ItemID);
 
-            if (_List[0].asset_type_ID == 2 || (_List[0].asset_type_ID == 3 && Convert.ToInt32(isMultiSpareSelectionStatus) == 0))
+            /*if (_List[0].asset_type_ID == 2 || (_List[0].asset_type_ID == 3 && Convert.ToInt32(isMultiSpareSelectionStatus) == 0))
             {
                 _List[0].available_qty = await GetAvailableQty(_List[0].item_ID, _List[0].facility_ID);
             }
             else
-            {
+            {*/
                 _List[0].available_qty = await GetAvailableQtyByCode(_List[0].Asset_master_id.ToString(), _List[0].facility_ID);
-            }
+            //}
 
             return _List[0];
         }
 
-        public async Task<int> GetAvailableQty(int assetItemID, int plantID)
+       /* public async Task<int> GetAvailableQty(int assetItemID, int plantID)
         {
             // actor Type 2 : Store
             int actorType = (int)CMMS.SM_Actor_Types.Inventory;
             string stmt = "SELECT SUM(debitQty) as drQty, SUM(creditQty) as crQty FROM smtransition WHERE assetItemID = " + assetItemID.ToString() + " AND actorType = '" + actorType + "' AND transactionID IN (SELECT ID FROM smtransactiondetails WHERE plantID = " + plantID.ToString() + ")";
+            //string stmt = "SELECT SUM(debitQty) as drQty, SUM(creditQty) as crQty FROM smtransition WHERE assetItemID = " + assetItemID.ToString() + " AND actorType = '" + actorType + "' AND transactionID IN (SELECT ID FROM smtransactiondetails WHERE plantID = " + plantID.ToString() + ")";
+
             DataTable dt2 = await Context.FetchData(stmt).ConfigureAwait(false);
             int crQty = 0, drQty = 0;
             if (dt2 != null && dt2.Rows.Count > 0)
@@ -1642,12 +1644,15 @@ namespace CMMSAPIs.Repositories.SM
             }
             int availableQty = crQty - drQty;
             return availableQty;
-        }
+        }*/
         public async Task<int> GetAvailableQtyByCode(string assetMasterIDs, int plantID)
         {
             // actor Type 2 : Store
             int actorType = (int)CMMS.SM_Actor_Types.Store;
-            string stmt = "SELECT ifnull(SUM(debitQty),0) as drQty, ifnull(SUM(creditQty),0) as crQty FROM  smtransition WHERE assetItemID IN (" + assetMasterIDs + ") AND actorType = '" + actorType + "' AND facilityID = "+plantID+"";
+
+            //string stmt = "SELECT ifnull(SUM(debitQty),0) as drQty, ifnull(SUM(creditQty),0) as crQty FROM  smtransition WHERE assetItemID IN (" + assetMasterIDs + ") AND actorType = '" + actorType + "' AND facilityID = "+plantID+"";
+
+            string stmt = "SELECT ifnull(SUM(debitQty),0) as drQty, ifnull(SUM(creditQty),0) as crQty FROM  smtransition WHERE assetItemID IN (" + assetMasterIDs + ") AND actorType IN (" + (int)CMMS.SM_Actor_Types.Store + ","+(int)CMMS.SM_Actor_Types.PM_Task+ "," + (int)CMMS.SM_Actor_Types.JobCard + "," + (int)CMMS.SM_Actor_Types.Engineer + ") AND facilityID = " + plantID + "";
             DataTable dt2 = await Context.FetchData(stmt).ConfigureAwait(false);
             int crQty = 0, drQty = 0;
             if (dt2 != null && dt2.Rows.Count > 0)
