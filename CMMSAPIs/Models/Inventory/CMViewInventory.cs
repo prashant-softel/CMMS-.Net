@@ -87,6 +87,8 @@ namespace CMMSAPIs.Models.Inventory
         public DateTime? deleted_at { get; set; }
         public string deleted_by { get; set; }
         public List<CMFileDetailJc> inventory_image { get; set; }
+        public List<CMFileDetailJc> calibration_file { get; set; }
+        public List<CMFileDetailJc> warranty_file { get; set; }
 
     }
     public class CMItem

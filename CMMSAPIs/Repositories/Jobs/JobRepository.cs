@@ -333,7 +333,7 @@ namespace CMMSAPIs.Repositories.Jobs
                 $"WHERE job.id = {job_id} ";
             List<CMWorkType> _WorkType = await Context.GetData<CMWorkType>(myQuery4).ConfigureAwait(false);
 
-            string myQuery5 = "SELECT tools.id as toolId, tools.assetName as toolName FROM jobs AS job " +
+            string myQuery5 = "SELECT Distinct tools.id as toolId, tools.assetName as toolName FROM jobs AS job " +
                 "JOIN jobmappingassets AS mapAssets ON mapAssets.jobId = job.id " +
                 "JOIN assets ON mapAssets.assetId = assets.id " +
                 "JOIN assetcategories AS asset_cat ON assets.categoryId = asset_cat.id " +
@@ -341,8 +341,9 @@ namespace CMMSAPIs.Repositories.Jobs
                 "LEFT JOIN jobworktypes AS workType ON mapWorkTypes.workTypeId = workType.id " +
                 "LEFT JOIN worktypeassociatedtools AS mapTools ON mapTools.workTypeId=workType.id " +
                 "LEFT JOIN worktypemasterassets AS tools ON tools.id=mapTools.ToolId " +
-                $"WHERE job.id = {job_id} GROUP BY tools.id";
+                $"WHERE job.id = {job_id} AND tools.id IS NOT NULL AND tools.assetName IS NOT NULL GROUP BY tools.id, tools.assetName";
             List<CMWorkTypeTool> _Tools = await Context.GetData<CMWorkTypeTool>(myQuery5).ConfigureAwait(false);
+
 
             if (_ViewJobList[0].current_ptw_id == 0)
             {

@@ -1343,7 +1343,18 @@ namespace CMMSAPIs.Repositories.Inventory
                              "Left JOIN assets as  asset on asset.id = U.module_ref_id  " +
                              "where module_ref_id =" + id + " and U.module_type = " + (int)CMMS.CMMS_Modules.INVENTORY + ";";
             List<CMFileDetailJc> in_image = await Context.GetData<CMFileDetailJc>(myQuery18).ConfigureAwait(false);
+            string myQuery19 = "SELECT  asset.id as id, file_path as fileName,  U.File_Size as fileSize, U.status,U.description FROM uploadedfiles AS U " +
+                             "Left JOIN assets as  asset on asset.id = U.module_ref_id  " +
+                             "where module_ref_id =" + id + " and U.module_type = " + (int)CMMS.CMMS_Modules.WARRANTY_CLAIM + ";";
+            List<CMFileDetailJc> warranty_file = await Context.GetData<CMFileDetailJc>(myQuery19).ConfigureAwait(false);
+
+            string myQuery20 = "SELECT  asset.id as id, file_path as fileName,  U.File_Size as fileSize, U.status,U.description FROM uploadedfiles AS U " +
+                             "Left JOIN assets as  asset on asset.id = U.module_ref_id  " +
+                             "where module_ref_id =" + id + " and U.module_type = " + (int)CMMS.CMMS_Modules.CALIBRATION + ";";
+            List<CMFileDetailJc> calibration_file = await Context.GetData<CMFileDetailJc>(myQuery20).ConfigureAwait(false);
             _ViewInventoryList[0].inventory_image = in_image;
+            _ViewInventoryList[0].warranty_file = warranty_file;
+            _ViewInventoryList[0].calibration_file = calibration_file;
             foreach (var a in _ViewInventoryList)
             {
                 if (a != null && a.added_at != null)
@@ -1474,11 +1485,27 @@ namespace CMMSAPIs.Repositories.Inventory
                 if (retID > 0)
                 {
 
-                    string calibratoinquery = "insert into calibration (facility_id,asset_id) VALUES ";
-                    calibratoinquery += $"({unit.facilityId},{retID});" +
+                    string calibratoinquery = "insert into calibration (facility_id,asset_id,status,due_date) VALUES ";
+                    calibratoinquery += $"({unit.facilityId},{retID},{(int)CMMS.CMMS_Status.CALIBRATION_SCHEDULED},'{firstCalibrationDate}');" +
                         $" SELECT LAST_INSERT_ID();";
                     DataTable dt2 = await Context.FetchData(calibratoinquery).ConfigureAwait(false);
                     int calibration_id = Convert.ToInt32(dt2.Rows[0][0]);
+                }
+                if (unit.uplaodfile_of_calibration.Count > 0)
+                {
+                    foreach (int cimage_id in unit.uplaodfile_of_calibration)
+                    {
+                        string qryuploadFiles = $"UPDATE uploadedfiles SET facility_id = {unit.facilityId}, module_type={(int)CMMS.CMMS_Modules.CALIBRATION},module_ref_id={retID} where id = {cimage_id}";
+                        await Context.ExecuteNonQry<int>(qryuploadFiles).ConfigureAwait(false);
+                    }
+                }
+                if (unit.uplaodfile_of_warranty.Count > 0)
+                {
+                    foreach (int Wimage_id in unit.uplaodfile_of_warranty)
+                    {
+                        string qryuploadFiles = $"UPDATE uploadedfiles SET facility_id = {unit.facilityId}, module_type={(int)CMMS.CMMS_Modules.WARRANTY_CLAIM},module_ref_id={retID} where id = {Wimage_id}";
+                        await Context.ExecuteNonQry<int>(qryuploadFiles).ConfigureAwait(false);
+                    }
                 }
                 if (unit.uplaodfile_ids.Count > 0)
                 {
@@ -1615,16 +1642,17 @@ string warrantyQry = "insert into assetwarranty
                 {
                     strRetMessage = "Warranty data for <" + assetName + "> does not exist. ";
                 }
-                /* if (retID > 0)
-                 {
+                if (retID > 0)
+                {
 
-                     string calibratoinquery = "insert into calibration (facility_id,asset_id,status) VALUES ";
-                     calibratoinquery += $"({unit.facilityId},{retID},{(int)CMMS.CMMS_Status.CREATED});" +
-                         $" SELECT LAST_INSERT_ID();";
-                     DataTable dt2 = await Context.FetchData(calibratoinquery).ConfigureAwait(false);
-                     int calibration_id = Convert.ToInt32(dt2.Rows[0][0]);
-                 }
-                */
+                    string calibratoinquery = "insert into calibration (facility_id,asset_id,status,due_date) VALUES ";
+                    calibratoinquery += $"({unit.facilityId},{retID},{(int)CMMS.CMMS_Status.CALIBRATION_SCHEDULED},{firstCalibrationDate});" +
+                        $" SELECT LAST_INSERT_ID();";
+                    DataTable dt2 = await Context.FetchData(calibratoinquery).ConfigureAwait(false);
+                    int calibration_id = Convert.ToInt32(dt2.Rows[0][0]);
+
+                }
+
                 idList.Add(retID);
 
                 CMViewInventory _inventoryAdded = await GetInventoryDetails(retID, "");
@@ -1969,11 +1997,221 @@ string warrantyQry = "insert into assetwarranty
             //await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_UPDATED, new[] { userID } ,_inventoryAdded);
 
             return obj;
+        }
+        internal async Task<CMDefaultResponse> UpdateInventries(CMAddInventory request, int userID)
+        {
 
+            string updateQry = "";
+            if (request.name != null)
+            {
+                updateQry += $" name= '{request.name}',";
+            }
+            if (request.assetdescription != null)
+            {
+                updateQry += $" description = '{request.assetdescription}',";
+            }
+            if (request.typeId != 0)
+            {
+                updateQry += $" typeId= '{request.typeId}',";
+            }
+            if (request.acCapacity != 0)
+            {
+                updateQry += $" acCapacity= '{request.acCapacity}',";
+            }
+            if (request.dcCapacity != 0)
+            {
+                updateQry += $" dcCapacity= '{request.dcCapacity}',";
+            }
+            if (request.categoryId != 0)
+            {
+                updateQry += $" categoryId= '{request.categoryId}',";
+            }
+            if (request.moduleQuantity != 0)
+            {
+                updateQry += $" moduleQuantity= '{request.moduleQuantity}',";
+            }
+            if (request.area != 0)
+            {
+                updateQry += $" area= '{request.area}',";
+            }
+            if (request.categoryId != 0)
+            {
+                updateQry += $" categoryId = '{request.categoryId}',";
+            }
+            if (request.statusId != 0)
+            {
+                updateQry += $" statusId = '{request.statusId}',";
+                updateQry += $" status = '{request.statusId}',";
+            }
+            if (request.parentId != 0)
+            {
+                updateQry += $" parentId = '{request.parentId}',";
+            }
+            if (request.facilityId != 0)
+            {
+                updateQry += $" facilityId= '{request.facilityId}',";
 
+            }
+            if (request.blockId != 0) //here you may have check if its not 0. verify during testig
+            {
+                updateQry += $" blockId= '{request.blockId}',";
 
+            }
+            if (request.customerId != 0)
+            {
+                updateQry += $" customerId= '{request.customerId}',";
 
+            }
+            if (request.ownerId != 0)
+            {
+                updateQry += $" ownerId= '{request.ownerId}',";
 
+            }
+            if (request.operatorId != 0)
+            {
+                updateQry += $" operatorId = '{request.operatorId}',";
+
+            }
+            if (request.manufacturerId != 0)
+            {
+                updateQry += $" manufacturerid= '{request.manufacturerId}',";
+
+            }
+            if (request.supplierId != 0)
+            {
+                updateQry += $" supplierId= '{request.supplierId}',";
+
+            }
+            if (request.acCapacity != 0)
+            {
+                updateQry += $" acCapacity= '{request.acCapacity}',";
+            }
+            if (request.dcCapacity != 0)
+            {
+                updateQry += $" dcCapacity= '{request.dcCapacity}',";
+            }
+            if (request.model != null)
+            {
+                updateQry += $" model = '{request.model}',";
+            }
+            if (request.serialNumber != null)
+            {
+                updateQry += $" serialNumber= '{request.serialNumber}',";
+            }
+            if (request.currency != null)
+            {
+                updateQry += $" currency = '{request.currency}',";
+            }
+            //if (request.currencyId != 0)
+            //{
+            //    updateQry += $" currencyId = '{request.currencyId}',";
+
+            //}
+            if (request.photoId != 0)
+            {
+                updateQry += $" photoId= '{request.photoId}',";
+
+            }
+            if (request.cost != 0)
+            {
+                updateQry += $" cost= '{request.cost}',";
+
+            }
+            if (request.stockCount != 0)
+            {
+                updateQry += $" stockCount= '{request.stockCount}',";
+
+            }
+            if (request.moduleQuantity != 0)
+            {
+                updateQry += $" moduleQuantity= '{request.moduleQuantity}',";
+
+            }
+            if (request.specialToolId != 0)
+            {
+                updateQry += $" specialTool= '{request.specialToolId}',";
+
+            }
+            if (request.specialToolEmpId != 0)
+            {
+                updateQry += $" specialToolEmpId= '{request.specialToolEmpId}',";
+
+            }
+            if (request.calibrationFrequency != null)
+            {
+                updateQry += $" calibrationFrequency = '{request.calibrationFrequency}',";
+
+            }
+            if (request.calibrationReminderDays != 0)
+            {
+                updateQry += $" calibrationReminderDays = '{request.calibrationReminderDays}',";
+
+            }
+            if (request.retirementStatus != 0)
+            {
+                updateQry += $" retirementStatus= '{request.retirementStatus}',";
+
+            }
+            if (request.retirementStatus != 0)
+            {
+                updateQry += $" retirementStatus = '{request.retirementStatus}',";
+
+            }
+
+            if (request.multiplier != 0)
+            {
+                updateQry += $" multiplier = '{request.multiplier}',";
+
+            }
+            if (updateQry != null)
+            {
+                updateQry += $" updatedAt= '{UtilsRepository.GetUTCTime()}',";
+                updateQry += $" updatedBy= '{userID}',";
+                updateQry = "UPDATE assets SET " + updateQry.Substring(0, updateQry.Length - 1);
+                updateQry += $" WHERE id= '{request.id}'";
+                await Context.GetData<List<int>>(updateQry).ConfigureAwait(false);
+            }
+            if (request.uplaodfile_of_calibration != null)
+            {
+                foreach (int data_cal in request.uplaodfile_of_calibration)
+                {
+
+                    string qryuploadFiles = $"UPDATE uploadedfiles SET facility_id = {request.facilityId}, module_type={(int)CMMS.CMMS_Modules.CALIBRATION},module_ref_id={request.id} where id = {data_cal}";
+                    await Context.ExecuteNonQry<int>(qryuploadFiles).ConfigureAwait(false);
+                }
+            }
+            if (request.uplaodfile_of_warranty != null)
+            {
+                foreach (int data_war in request.uplaodfile_of_warranty)
+                {
+
+                    string qryuploadFiles = $"UPDATE uploadedfiles SET facility_id = {request.facilityId}, module_type={(int)CMMS.CMMS_Modules.WARRANTY_CLAIM},module_ref_id={request.id} where id = {data_war}";
+                    await Context.ExecuteNonQry<int>(qryuploadFiles).ConfigureAwait(false);
+                }
+            }
+            if (request.uplaodfile_ids != null)
+            {
+                foreach (int data in request.uplaodfile_ids)
+                {
+
+                    string qryuploadFiles = $"UPDATE uploadedfiles SET facility_id = {request.facilityId}, module_type={(int)CMMS.CMMS_Modules.INVENTORY},module_ref_id={request.id} where id = {data}";
+                    await Context.ExecuteNonQry<int>(qryuploadFiles).ConfigureAwait(false);
+                }
+            }
+
+            CMDefaultResponse obj = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Inventory  <" + request.id + "> has been updated");
+
+            CMViewInventory _inventoryAdded = await GetInventoryDetails(request.id, "");
+
+            string _shortStatus = getShortStatus(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_UPDATED);
+            _inventoryAdded.status_short = _shortStatus;
+
+            string _longStatus = getLongStatus(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_UPDATED, _inventoryAdded);
+            _inventoryAdded.status_long = _longStatus;
+
+            //await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_UPDATED, new[] { userID } ,_inventoryAdded);
+
+            return obj;
         }
 
         internal async Task<CMDefaultResponse> DeleteInventory(int id, int userID)
