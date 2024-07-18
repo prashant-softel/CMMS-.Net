@@ -73,6 +73,8 @@ namespace CMMSAPIs.Models.Inventory
         public string unspCode { get; set; }
         public string purchaseCode { get; set; }
         public List<int> uplaodfile_ids { get; set; }
+        public List<int> uplaodfile_of_warranty { get; set; }
+        public List<int> uplaodfile_of_calibration { get; set; }
         public int num_of_module { get; set; }
     }
 

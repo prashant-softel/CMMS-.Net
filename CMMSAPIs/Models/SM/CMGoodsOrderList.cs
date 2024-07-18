@@ -1,8 +1,6 @@
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace CMMSAPIs.Models
 {
@@ -57,8 +55,8 @@ namespace CMMSAPIs.Models
         public decimal cost { get; set; }
         public int podID { get; set; }
         public string asset_type_Name { get; set; }
-        public string asset_name { get; set; }  
-        public string asset_code { get; set; }  
+        public string asset_name { get; set; }
+        public string asset_code { get; set; }
         public string facilityName { get; set; }
         public decimal received_qty { get; set; }
         public decimal lost_qty { get; set; }
@@ -245,7 +243,7 @@ namespace CMMSAPIs.Models
     public class CMGODetails
     {
         public int id { get; set; }
-        public int assetMasterItemID { get; set; }       
+        public int assetMasterItemID { get; set; }
         public int asset_type_ID { get; set; }
         public string asset_code { get; set; }
         public string assetItem_Name { get; set; }
