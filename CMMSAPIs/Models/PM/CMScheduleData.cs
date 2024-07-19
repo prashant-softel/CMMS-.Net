@@ -48,13 +48,18 @@ namespace CMMSAPIs.Models.PM
     }
     public class AssetCheckList
     {
-        public int asset_id { get; set; }
-        public string asset_name { get; set; }
-        public int parent_id { get; set; }
-        public string parent_name { get; set; }
+        // public int asset_id { get; set; }
+        //  public string asset_name { get; set; }
+        //  public int parent_id { get; set; }
+        //  public string parent_name { get; set; }
+
         public int module_qty { get; set; }
         public int checklist_id { get; set; }
         public string checklist_name { get; set; }
+        public int id { get; set; }
+        public string name { get; set; }
+        public int parentId { get; set; }
+        public string parentName { get; set; }
     }
     public class CMSetScheduleData
     {
