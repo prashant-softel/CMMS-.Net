@@ -324,8 +324,8 @@ namespace CMMSAPIs.Repositories.Audits
             {
                 if (!checklistIDs.Contains(map.checklist_id))
                     invalidChecklists.Add(map.checklist_id);
-                if (!assetIDs.Contains(map.asset_id))
-                    invalidAssets.Add(map.asset_id);
+                if (!assetIDs.Contains(map.id))
+                    invalidAssets.Add(map.id);
             }
             //if (invalidChecklists.Count > 0 || invalidAssets.Count > 0)
             //    return new CMDefaultResponse(0, CMMS.RETRUNSTATUS.INVALID_ARG,
@@ -344,7 +344,7 @@ namespace CMMSAPIs.Repositories.Audits
             string mapChecklistQry = "INSERT INTO pmplanassetchecklist(planId, assetId, checklistId, typeId) VALUES ";
             foreach (var map in pm_plan.mapAssetChecklist)
             {
-                mapChecklistQry += $"({id}, {map.asset_id}, {map.checklist_id}, {pm_plan.type_id}), ";
+                mapChecklistQry += $"({id}, {map.id}, {map.checklist_id}, {pm_plan.type_id}), ";
             }
             mapChecklistQry = mapChecklistQry.Substring(0, mapChecklistQry.Length - 2) + ";";
             await Context.ExecuteNonQry<int>(mapChecklistQry).ConfigureAwait(false);

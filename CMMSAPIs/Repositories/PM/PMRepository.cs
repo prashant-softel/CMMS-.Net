@@ -102,8 +102,8 @@ namespace CMMSAPIs.Repositories.PM
             {
                 if (!checklistIDs.Contains(map.checklist_id))
                     invalidChecklists.Add(map.checklist_id);
-                if (!assetIDs.Contains(map.asset_id))
-                    invalidAssets.Add(map.asset_id);
+                if (!assetIDs.Contains(map.id))
+                    invalidAssets.Add(map.id);
             }
             if (invalidChecklists.Count > 0 || invalidAssets.Count > 0)
                 return new CMDefaultResponse(0, CMMS.RETRUNSTATUS.INVALID_ARG,
@@ -122,7 +122,7 @@ namespace CMMSAPIs.Repositories.PM
             string mapChecklistQry = "INSERT INTO pmplanassetchecklist(planId, assetId, checklistId) VALUES ";
             foreach (var map in pm_plan.mapAssetChecklist)
             {
-                mapChecklistQry += $"({id}, {map.asset_id}, {map.checklist_id}), ";
+                mapChecklistQry += $"({id}, {map.id}, {map.checklist_id}), ";
             }
             mapChecklistQry = mapChecklistQry.Substring(0, mapChecklistQry.Length - 2) + ";";
             await Context.ExecuteNonQry<int>(mapChecklistQry).ConfigureAwait(false);
@@ -159,7 +159,7 @@ namespace CMMSAPIs.Repositories.PM
                 string mapChecklistQry = "INSERT INTO pmplanassetchecklist(planId, assetId, checklistId) VALUES ";
                 foreach (var map in request.mapAssetChecklist)
                 {
-                    mapChecklistQry += $"({request.plan_id}, {map.asset_id}, {map.checklist_id}), ";
+                    mapChecklistQry += $"({request.plan_id}, {map.id}, {map.checklist_id}), ";
                 }
                 mapChecklistQry = mapChecklistQry.Substring(0, mapChecklistQry.Length - 2) + ";";
                 await Context.ExecuteNonQry<int>(mapChecklistQry).ConfigureAwait(false);
@@ -295,7 +295,7 @@ namespace CMMSAPIs.Repositories.PM
 
             if (planDetails.Count == 0)
                 return null;
-            string assetChecklistsQry = $"SELECT distinct assets.id as asset_id, assets.name as asset_name, parent.id as parent_id, parent.name as parent_name, assets.moduleQuantity as module_qty, checklist.id as checklist_id, checklist.checklist_number as checklist_name " +
+            string assetChecklistsQry = $"SELECT distinct assets.id as id, assets.name as name, parent.id as parentId, parent.name as parentName, assets.moduleQuantity as module_qty, checklist.id as checklist_id, checklist.checklist_number as checklist_name " +
                                         $"FROM pmplanassetchecklist as planmap " +
                                         $"LEFT JOIN assets ON assets.id = planmap.assetId " +
                                         $"LEFT JOIN assets as parent ON assets.parentId = parent.id " +
