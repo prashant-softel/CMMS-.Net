@@ -24,7 +24,7 @@ namespace CMMSAPIs.BS.SM
         Task<List<CMPlantStockOpeningResponse>> GetStockReport(string facility_id, int actorTypeID,int actorID,  DateTime StartDate, DateTime EndDate, string assetMasterIDs);
         //Changes
        Task<List<CMTaskStockItems>> GetpmTaskStock(int facility_ID, int emp_id);
-       Task<List<CMEmployeeStockTransactionReport>> GetPlantItemTransactionReport(string facility_ID, int assetItemId, DateTime fromDate, DateTime toDate, string facilitytimeZone);
+       Task<List<CMItemWiseTransaction>> GetPlantItemTransactionReport(string facility_ID, int assetItemId, DateTime fromDate, DateTime toDate, string facilitytimeZone);
 
 
     }
@@ -153,7 +153,7 @@ namespace CMMSAPIs.BS.SM
                 throw;
             }
         }
-        public async Task<List<CMEmployeeStockTransactionReport>> GetPlantItemTransactionReport(string facility_ID, int assetItemId, DateTime fromDate, DateTime toDate, string facilitytimeZone)
+        public async Task<List<CMItemWiseTransaction>> GetPlantItemTransactionReport(string facility_ID, int assetItemId, DateTime fromDate, DateTime toDate, string facilitytimeZone)
         {
             try
             {
