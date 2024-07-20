@@ -155,6 +155,7 @@ namespace CMMSAPIs.Repositories.SM
                 for (var j = 0; j < _List[i].CMMRSItems.Count; j++)
                 {
                     assetItemNames = assetItemNames + _List[i].CMMRSItems[j].asset_name + ", ";
+                    _List[i].CMMRSItems[j].transaction_id = await getTransactionIdForMRS(_List[i].mrsId, _List[i].CMMRSItems[j].assetMasterID);
                 }
                 if (assetItemNames.Count() > 0)
                 {
@@ -162,10 +163,23 @@ namespace CMMSAPIs.Repositories.SM
                 }
                 _List[i].mrsItems = assetItemNames;
                 _List[i].mrs_return_ID = _List[i].CMMRSItems[0].mrs_return_ID;
-
+                
             }
 
             return _List;
+        }
+
+        protected async Task<int> getTransactionIdForMRS(int mrsID, int assetItemID)
+        {
+            string stmt = "";
+            int ID = 0;
+            stmt = $"select nullif(id,0) as ID from smtransactiondetails where mrsID = {mrsID} and assetItemID = {assetItemID}; ";
+            DataTable dt2 = await Context.FetchData(stmt).ConfigureAwait(false);
+            if(dt2.Rows.Count > 0)
+            {
+                ID = Convert.ToInt32(dt2.Rows[0][0]);
+            }            
+            return ID;
         }
         internal static string getShortStatus(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status m_notificationID)
         {
@@ -962,25 +976,37 @@ namespace CMMSAPIs.Repositories.SM
             return response;
         }
 
-        public async Task<bool> TransactionDetails(int facilityID, int fromActorID, int fromActorType, int toActorID, int toActorType, int assetItemID, int qty, int refType, int refID, string remarks, int mrsID = 0, int natureOfTransaction = 0, int assetItemStatus = 0)
+        public async Task<bool> TransactionDetails(int facilityID, int fromActorID, int fromActorType, int toActorID, int toActorType, int assetItemID, int qty, int refType, int refID, string remarks, int mrsID = 0, int natureOfTransaction = 0, int assetItemStatus = 0, int transaction_id= 0)
         {
             try
             {
-                string stmt = "INSERT INTO smtransactiondetails (plantID,fromActorID,fromActorType,toActorID,toActorType,assetItemID,qty,referedby,reference_ID,remarks,Nature_Of_Transaction,Asset_Item_Status)" +
-                              $"VALUES ({facilityID},{fromActorID},{fromActorType},{toActorID},{toActorType},{assetItemID},{qty},{refType},{refID},'{remarks}',{natureOfTransaction},{assetItemStatus}); SELECT LAST_INSERT_ID(); ";
-
-                DataTable dt2 = await Context.FetchData(stmt).ConfigureAwait(false);
-                int transaction_ID = 0;
-                if (dt2.Rows.Count > 0)
+                // validate MRS ID
+                if(mrsID == 0)
                 {
-                    transaction_ID = Convert.ToInt32(dt2.Rows[0][0]);
-                    int debitTransactionID = await DebitTransation(facilityID, transaction_ID, fromActorType, fromActorID, qty, assetItemID, mrsID);
-                    int creditTransactionID = await CreditTransation(facilityID, transaction_ID, toActorType, toActorID, qty, assetItemID, mrsID);
-                    bool isValid = await VerifyTransactionDetails(transaction_ID, debitTransactionID, creditTransactionID, facilityID, fromActorID, fromActorType, toActorID, toActorType, assetItemID, qty, refType, refID, remarks, mrsID);
-                    if (isValid)
+                    return false;
+                }
+                if (transaction_id == 0)
+                {
+                    string stmt = "INSERT INTO smtransactiondetails (plantID,fromActorID,fromActorType,toActorID,toActorType,assetItemID,qty,referedby,reference_ID,remarks,Nature_Of_Transaction,Asset_Item_Status,mrsID)" +
+                                  $"VALUES ({facilityID},{fromActorID},{fromActorType},{toActorID},{toActorType},{assetItemID},{qty},{refType},{refID},'{remarks}',{natureOfTransaction},{assetItemStatus},{mrsID}); SELECT LAST_INSERT_ID(); ";
+
+                    DataTable dt2 = await Context.FetchData(stmt).ConfigureAwait(false);
+                    int transaction_ID = 0;
+                    if (dt2.Rows.Count > 0)
                     {
-                        //minQtyReminder(assetItemID, plantID);
-                        return true;
+                        transaction_ID = Convert.ToInt32(dt2.Rows[0][0]);
+                        int debitTransactionID = await DebitTransation(facilityID, transaction_ID, fromActorType, fromActorID, qty, assetItemID, mrsID);
+                        int creditTransactionID = await CreditTransation(facilityID, transaction_ID, toActorType, toActorID, qty, assetItemID, mrsID);
+                        bool isValid = await VerifyTransactionDetails(transaction_ID, debitTransactionID, creditTransactionID, facilityID, fromActorID, fromActorType, toActorID, toActorType, assetItemID, qty, refType, refID, remarks, mrsID);
+                        if (isValid)
+                        {
+                            //minQtyReminder(assetItemID, plantID);
+                            return true;
+                        }
+                        else
+                        {
+                            throw new Exception("transaction table not updated properly");
+                        }
                     }
                     else
                     {
@@ -989,7 +1015,11 @@ namespace CMMSAPIs.Repositories.SM
                 }
                 else
                 {
-                    throw new Exception("transaction table not updated properly");
+                    string updateQ = $"update smtransactiondetails set qty = {qty} where id = {transaction_id};" +
+                        $" update smtransition set debitQty = {qty} where transactionID = {transaction_id} and mrsID = {mrsID} and assetItemID = {assetItemID} and actorType = {fromActorType};" +
+                        $" update smtransition set creditQty = {qty} where transactionID = {transaction_id} and mrsID = {mrsID} and assetItemID = {assetItemID} and actorType = {toActorType};";
+                    var result = await Context.ExecuteNonQry<int>(updateQ);
+                    return true;
                 }
             }
             catch (Exception e)
