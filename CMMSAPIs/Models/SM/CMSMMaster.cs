@@ -128,7 +128,7 @@ namespace CMMSAPIs.Models.SM
         public int to_actor_type_id { get; set; }
         public int to_actor_id { get; set; }
         public int is_submit { get; set; }
-        public int issue_comment { get; set; }
+        public string issue_comment { get; set; }
 
         public List<CMEquipments> cmmrsItems { get; set; }
         public List<CMFaultyItems> faultyItems { get; set; }
@@ -207,6 +207,7 @@ namespace CMMSAPIs.Models.SM
         public int is_faulty { get; set; }
         public int assetMasterID { get; set; }
         public string serial_number { get; set; }
+        public int transaction_id { get; set; }
 
     }
 
@@ -457,6 +458,7 @@ namespace CMMSAPIs.Models.SM
         public string remarks { get; set; }
         public int mrsID { get; set; }
         public int mrsItemID { get; set; }
+        public int transaction_id { get; set; }
     }
 
     public class CMIssuedItems
