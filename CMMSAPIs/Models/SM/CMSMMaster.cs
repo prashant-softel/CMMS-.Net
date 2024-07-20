@@ -128,6 +128,7 @@ namespace CMMSAPIs.Models.SM
         public int to_actor_type_id { get; set; }
         public int to_actor_id { get; set; }
         public int is_submit { get; set; }
+        public int issue_comment { get; set; }
 
         public List<CMEquipments> cmmrsItems { get; set; }
         public List<CMFaultyItems> faultyItems { get; set; }
