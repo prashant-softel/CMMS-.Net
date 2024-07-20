@@ -1,4 +1,5 @@
 using CMMSAPIs.Helper;
+using CMMSAPIs.Models.Masters;
 using CMMSAPIs.Models.SM;
 using CMMSAPIs.Repositories.Utils;
 using System;
@@ -596,12 +597,15 @@ namespace CMMSAPIs.Repositories.SM
 
         }
 
-        internal async Task<List<CMEmployeeStockTransactionReport>> GetPlantItemTransactionReport(string facility_ID, int assetItemId, DateTime fromDate, DateTime toDate, string facilitytimeZone)
+        internal async Task<List<CMItemWiseTransaction>> GetPlantItemTransactionReport(string facility_ID, int assetItemId, DateTime fromDate, DateTime toDate, string facilitytimeZone)
         {
 
             List<CMEmployeeStockTransactionReport> EmployeeStockReportList = new List<CMEmployeeStockTransactionReport>();
 
-            string Plant_Stock_Opening_Details_query = "select ST.fromActorID, CASE WHEN fromActorType = 1 then 'Vendor'" +
+            string Plant_Stock_Opening_Details_query = $"select ST.plantID as facilityID," +
+                               $" IFNULL((select SUM(smt.qty) from smtransactiondetails smt where date_format(smt.lastInsetedDateTime, '%Y-%m-%d') < '{fromDate.ToString("yyyy-MM-dd")}' and  smt.fromActorType = {(int)CMMS.SM_Actor_Types.Vendor}  and smt.assetItemID = ST.assetItemID and smt.toActorType ={(int)CMMS.SM_Actor_Types.Store} and smt.PlantId in ('{facility_ID}') ),0) - " +
+                $" IFNULL((select SUM(smt1.qty) from smtransactiondetails smt1  where date_format(smt1.lastInsetedDateTime, '%Y-%m-%d') < '{fromDate.ToString("yyyy-MM-dd")}' and smt1.assetItemID = ST.assetItemID  and smt1.fromActorType IN ({(int)CMMS.SM_Actor_Types.PM_Task},{(int)CMMS.SM_Actor_Types.JobCard},{(int)CMMS.SM_Actor_Types.Engineer}) and smt1.toActorType ={(int)CMMS.SM_Actor_Types.Inventory} and smt1.PlantId in ('{facility_ID}')),0) as Opening,  " +
+                " ST.fromActorID, CASE WHEN fromActorType = 1 then 'Vendor'" +
                 " WHEN fromActorType = 2 then 'Store' " +
                 " WHEN fromActorType = 5 then 'Engineer' " +
                 " WHEN fromActorType = 3 then 'Task' " +
@@ -642,7 +646,37 @@ namespace CMMSAPIs.Repositories.SM
                     detail.LastUpdated = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)detail.LastUpdated);
             }
 
-            return result;
+
+            // formatting data
+
+            List<CMItemWiseTransaction> groupedResult = result.GroupBy(r => new { r.facilityID, r.facilityName,r.Opening })
+               .Select(group => new CMItemWiseTransaction
+               {
+                   facilityID = group.Key.facilityID,
+                   facilityName = group.Key.facilityName,
+                   opening = group.Key.Opening,
+                   details = group
+                                                  //.GroupBy(g => g.water_type)
+                                                  .Select(g => new CMItemWiseTransactionDetails
+                                                  {
+                                                      fromActorID = g.fromActorID,
+                                                      fromActorType = g.fromActorType,
+                                                      FromActorName = g.FromActorName,
+                                                      toActorID = g.toActorID,
+                                                      toActorType = g.toActorType,
+                                                      toActorName = g.toActorName,
+                                                      assetItemID = g.assetItemID,
+                                                      assetItemName = g.assetItemName,
+                                                      qty = g.qty,
+                                                      asset_type = g.asset_type,
+                                                      remarks = g.remarks,
+                                                      LastUpdated = g.LastUpdated,
+                                                      CreatedBy = g.CreatedBy,
+                                                      createdAt = g.createdAt,
+                                                  }).ToList()
+               }).ToList();
+
+            return groupedResult;
         }
 
 
