@@ -299,10 +299,10 @@ namespace CMMSAPIs.Repositories.Facility
                                  $"LEFT JOIN employee_attendance as es on es.employee_id = u.id " +
                                  $"WHERE uf.isemployee = 1 and access.featureId ={featureid} and access.edit = 1 and u.status = 1 " +
                                  $"AND  es.present=1 and es.Date=current_date() " +
-                                // $" AND es.in_time <DATE_FORMAT(CURTIME(),'%l:%i %p')  AND " +
-                                // $" out_time >DATE_FORMAT(CURTIME(),'%l:%i %p')  AND uf.status = 1  " +
-                                $" AND es.in_time< now() AND " +
-                                $" out_time < now() AND uf.status = 1  " +
+                                 $" AND es.in_time <DATE_FORMAT(CURTIME(),'%l:%i %p')  AND " +
+                                 $" out_time >DATE_FORMAT(CURTIME(),'%l:%i %p')  AND uf.status = 1  " +
+                                 //$" AND es.in_time< now() AND " +
+                                 //$" out_time < now() AND uf.status = 1  " +
                                  $"AND uf.facilityId = {facility_id} GROUP BY u.id ORDER BY u.id;";
                 _FacilityByFeatureid = await Context.GetData<FacilityListEmployee>(myQuery).ConfigureAwait(false);
             }

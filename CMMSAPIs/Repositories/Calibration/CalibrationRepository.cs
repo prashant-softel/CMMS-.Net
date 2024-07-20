@@ -210,8 +210,11 @@ namespace CMMSAPIs.Repositories.Calibration
             /*
              * Create new record in calibration table and insert all field mentioned in CMRequestCalibration model
              * Your Code goes here
-            */
-
+            
+            int id;
+            string facilityQuery = $"SELECT facilityId FROM assets WHERE assets.id = {request.asset_id};";
+            DataTable dt1 = await Context.FetchData(facilityQuery).ConfigureAwait(false);
+            int facilityId = Convert.ToInt32(dt1.Rows[0][0]);
             if (request.asset_id <= 0)
                 throw new ArgumentException("Invalid Asset ID");
             if (request.vendor_id <= 0)
@@ -262,12 +265,144 @@ namespace CMMSAPIs.Repositories.Calibration
                             (int)CMMS.CMMS_Status.CALIBRATION_REJECTED};
                 exists = Array.Exists(status_array, element => element == status);
             }
+
             if (!exists)
             {
-                string facilityQuery = $"SELECT facilityId FROM assets WHERE assets.id = {request.asset_id};";
-                DataTable dt1 = await Context.FetchData(facilityQuery).ConfigureAwait(false);
-                int facilityId = Convert.ToInt32(dt1.Rows[0][0]);
 
+
+                // No existing calibration record to update, so insert a new one
+                string insertQuery = "INSERT INTO calibration(asset_id, facility_id, vendor_id, due_date, requested_by, requested_at, status, status_updated_at) " +
+                                    $"VALUES({request.asset_id}, {facilityId}, {request.vendor_id}, '{request.next_calibration_date.ToString("yyyy'-'MM'-'dd")}', " +
+                                    $"{userID}, '{UtilsRepository.GetUTCTime()}', {(int)CMMS.CMMS_Status.CALIBRATION_REQUEST}, '{UtilsRepository.GetUTCTime()}'); SELECT LAST_INSERT_ID();";
+                DataTable dt21 = await Context.FetchData(insertQuery).ConfigureAwait(false);
+                id = Convert.ToInt32(dt21.Rows[0][0]);
+            }
+
+            else
+            {
+                 string getIdQuery = $"SELECT id FROM calibration WHERE asset_id = {request.asset_id} AND status = {(int)CMMS.CMMS_Status.CALIBRATION_REQUEST};";
+                 DataTable dt2 = await Context.FetchData(getIdQuery).ConfigureAwait(false);
+                 id = Convert.ToInt32(dt2.Rows[0][0]);
+            // Update query instead of insert
+            string updateQuery = $"UPDATE calibration SET facility_id = {facilityId}, vendor_id = {request.vendor_id}, " +
+                                $"due_date = '{request.next_calibration_date.ToString("yyyy-MM-dd")}', " +
+                               $"requested_by = {userID}, requested_at = '{UtilsRepository.GetUTCTime()}', " +
+                               $"status = {(int)CMMS.CMMS_Status.CALIBRATION_REQUEST}, " +
+                               $"status_updated_at = '{UtilsRepository.GetUTCTime()}' " +
+                               $"WHERE asset_id = {request.asset_id} " +
+                               $"AND status != {(int)CMMS.CMMS_Status.CALIBRATION_COMPLETED};";
+            int affectedRows = await Context.ExecuteNonQry<int>(updateQuery).ConfigureAwait(false);
+        }
+
+
+        string setDueDate = $"UPDATE assets SET calibrationDueDate = '{request.next_calibration_date.ToString("yyyy-MM-dd")}' WHERE id = {request.asset_id};";
+        await Context.ExecuteNonQry<int>(setDueDate).ConfigureAwait(false);
+
+        await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, request.asset_id, CMMS.CMMS_Modules.CALIBRATION, id, "Calibration Requested", CMMS.CMMS_Status.CALIBRATION_REQUEST, userID);
+
+        CMCalibrationDetails _ViewCalibration = await GetCalibrationDetails(id, "");
+
+        await CMMSNotification.sendNotification(CMMS.CMMS_Modules.CALIBRATION, CMMS.CMMS_Status.CALIBRATION_REQUEST, new[] { userID
+    }, _ViewCalibration);
+            CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Calibration requested successfully");
+            return response;
+
+              else
+              {
+                  int id = Convert.ToInt32(dt0.Rows[0]["id"]);
+    CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.FAILURE, "Calibration cannot be requested as asset is already sent or requested for calibration");
+                  return response;
+              }
+           
+*/
+            int status;
+            if (request.asset_id <= 0)
+                throw new ArgumentException("Invalid Asset ID");
+            if (request.vendor_id <= 0)
+            {
+                string vendorQry = $"SELECT vendorId FROM assets WHERE id = {request.asset_id};";
+                DataTable dtVendor = await Context.FetchData(vendorQry).ConfigureAwait(false);
+                if (dtVendor.Rows.Count > 0)
+                {
+                    if (Convert.ToInt32(dtVendor.Rows[0][0]) == 0)
+                        throw new ArgumentException("Invalid Vendor ID");
+                    else
+                        request.vendor_id = Convert.ToInt32(dtVendor.Rows[0][0]);
+                }
+                else
+                {
+                    throw new ArgumentException("Invalid Vendor ID");
+                }
+            }
+            if (request.next_calibration_date == null)
+            {
+                string dateQry = $"SELECT CASE WHEN calibrationDueDate = '0000-00-00 00:00:00' THEN NULL ELSE calibrationDueDate " +
+                                    $"END AS next_calibration_date FROM assets WHERE id = {request.asset_id};";
+                DataTable dtDate = await Context.FetchData(dateQry).ConfigureAwait(false);
+                if (dtDate.Rows.Count > 0)
+                {
+                    if (dtDate.Rows[0][0] == DBNull.Value)
+                        throw new ArgumentException("Invalid Due Date");
+                    else
+                        request.next_calibration_date = Convert.ToDateTime(dtDate.Rows[0][0]);
+                }
+                else
+                {
+                    throw new ArgumentException("Invalid Due Date");
+                }
+            }
+            string statusQuery = $"SELECT id, status FROM calibration where due_date=(SELECT MAX(due_date) FROM calibration WHERE asset_id={request.asset_id} AND due_date is not null ORDER BY requested_at DESC) and asset_id={request.asset_id};";
+            DataTable dt0 = await Context.FetchData(statusQuery).ConfigureAwait(false);
+            status = Convert.ToInt32(dt0.Rows[0]["status"]);
+            bool exists = false;
+            if (dt0.Rows.Count > 0)
+            {
+
+                int[] status_array = { (int)CMMS.CMMS_Status.CALIBRATION_REQUEST,
+                              (int)CMMS.CMMS_Status.CALIBRATION_REQUEST_APPROVED,
+                              (int)CMMS.CMMS_Status.CALIBRATION_STARTED,
+                              (int)CMMS.CMMS_Status.CALIBRATION_COMPLETED,
+                              (int)CMMS.CMMS_Status.CALIBRATION_CLOSED,
+                              (int)CMMS.CMMS_Status.CALIBRATION_APPROVED,
+                              (int)CMMS.CMMS_Status.CALIBRATION_REJECTED};
+                exists = Array.Exists(status_array, element => element == status);
+            }
+            //  if (status >211 (int)CMMS.CMMS_Status.CALIBRATION_REQUEST)
+            if (status > 211)
+            {
+                int id = Convert.ToInt32(dt0.Rows[0]["id"]);
+                CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.FAILURE, "Calibration cannot be requested as asset is already sent or requested for calibration");
+                return response;
+            }
+            string facilityQuery = $"SELECT facilityId,reschedule FROM assets WHERE assets.id = {request.asset_id};";
+            DataTable dt1 = await Context.FetchData(facilityQuery).ConfigureAwait(false);
+            int facilityId = Convert.ToInt32(dt1.Rows[0][0]);
+            int res = Convert.ToInt32(dt1.Rows[0][1]);
+            if (exists && res != 1)
+            {
+
+                string myQuery = "INSERT INTO calibration(asset_id, facility_id, vendor_id, due_date, requested_by, requested_at, status, status_updated_at) " +
+                            $"VALUES({request.asset_id}, {facilityId}, {request.vendor_id}, '{request.next_calibration_date.ToString("yyyy'-'MM'-'dd")}', " +
+                            $"{userID}, '{UtilsRepository.GetUTCTime()}', {(int)CMMS.CMMS_Status.CALIBRATION_REQUEST}, '{UtilsRepository.GetUTCTime()}'); SELECT LAST_INSERT_ID();";
+                DataTable dt2 = await Context.FetchData(myQuery).ConfigureAwait(false);
+                int id = Convert.ToInt32(dt2.Rows[0][0]);
+                string setDueDate = $"UPDATE assets SET calibrationDueDate = '{request.next_calibration_date.ToString("yyyy-MM-dd HH:mm:ss")}' WHERE id = {request.asset_id};";
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, request.asset_id, CMMS.CMMS_Modules.CALIBRATION, id, "Calibration Requested", CMMS.CMMS_Status.CALIBRATION_REQUEST, userID);
+
+                CMCalibrationDetails _ViewCalibration = await GetCalibrationDetails(id, "");
+
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.CALIBRATION, CMMS.CMMS_Status.CALIBRATION_SCHEDULED, new[] { userID }, _ViewCalibration);
+                CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Calibration requested successfully");
+                return response;
+
+            }
+            else
+            {
+                int id;
+
+                string getIdQuery = $"SELECT id FROM calibration WHERE asset_id = {request.asset_id} AND status = {(int)CMMS.CMMS_Status.CALIBRATION_SCHEDULED};";
+                DataTable dt2 = await Context.FetchData(getIdQuery).ConfigureAwait(false);
+                id = Convert.ToInt32(dt2.Rows[0][0]);
                 // Update query instead of insert
                 string updateQuery = $"UPDATE calibration SET facility_id = {facilityId}, vendor_id = {request.vendor_id}, " +
                                     $"due_date = '{request.next_calibration_date.ToString("yyyy-MM-dd")}', " +
@@ -277,27 +412,7 @@ namespace CMMSAPIs.Repositories.Calibration
                                    $"WHERE asset_id = {request.asset_id} " +
                                    $"AND status != {(int)CMMS.CMMS_Status.CALIBRATION_COMPLETED};";
                 int affectedRows = await Context.ExecuteNonQry<int>(updateQuery).ConfigureAwait(false);
-
-                int id;
-                if (affectedRows == 0)
-                {
-                    // No existing calibration record to update, so insert a new one
-                    string insertQuery = "INSERT INTO calibration(asset_id, facility_id, vendor_id, due_date, requested_by, requested_at, status, status_updated_at) " +
-                                        $"VALUES({request.asset_id}, {facilityId}, {request.vendor_id}, '{request.next_calibration_date.ToString("yyyy'-'MM'-'dd")}', " +
-                                        $"{userID}, '{UtilsRepository.GetUTCTime()}', {(int)CMMS.CMMS_Status.CALIBRATION_REQUEST}, '{UtilsRepository.GetUTCTime()}'); SELECT LAST_INSERT_ID();";
-                    DataTable dt2 = await Context.FetchData(insertQuery).ConfigureAwait(false);
-                    id = Convert.ToInt32(dt2.Rows[0][0]);
-                }
-                else
-                {
-                    string getIdQuery = $"SELECT id FROM calibration WHERE asset_id = {request.asset_id} AND status = {(int)CMMS.CMMS_Status.CALIBRATION_REQUEST};";
-                    DataTable dt2 = await Context.FetchData(getIdQuery).ConfigureAwait(false);
-                    id = Convert.ToInt32(dt2.Rows[0][0]);
-                }
-
-                string setDueDate = $"UPDATE assets SET calibrationDueDate = '{request.next_calibration_date.ToString("yyyy-MM-dd")}' WHERE id = {request.asset_id};";
-                await Context.ExecuteNonQry<int>(setDueDate).ConfigureAwait(false);
-
+                string setDueDate = $"UPDATE assets SET calibrationDueDate = '{request.next_calibration_date.ToString("yyyy-MM-dd HH:mm:ss")}' WHERE id = {request.asset_id};";
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, request.asset_id, CMMS.CMMS_Modules.CALIBRATION, id, "Calibration Requested", CMMS.CMMS_Status.CALIBRATION_REQUEST, userID);
 
                 CMCalibrationDetails _ViewCalibration = await GetCalibrationDetails(id, "");
@@ -306,13 +421,6 @@ namespace CMMSAPIs.Repositories.Calibration
                 CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Calibration requested successfully");
                 return response;
             }
-            else
-            {
-                int id = Convert.ToInt32(dt0.Rows[0]["id"]);
-                CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.FAILURE, "Calibration cannot be requested as asset is already sent or requested for calibration");
-                return response;
-            }
-
         }
 
         internal async Task<CMDefaultResponse> ApproveRequestCalibration(CMApproval request, int userID)
@@ -534,10 +642,11 @@ namespace CMMSAPIs.Repositories.Calibration
             string myQuery3 = $"UPDATE assets SET vendorId = {nextRequest[0].vendor_id}, calibrationDueDate = '{nextDate.ToString("yyyy-MM-dd HH:mm:ss")}', calibrationLastDate = '{nextRequest[0].next_calibration_date.ToString("yyyy-MM-dd HH:mm:ss")}' WHERE id = {nextRequest[0].asset_id};";
             nextRequest[0].next_calibration_date = nextDate;
             await Context.ExecuteNonQry<int>(myQuery3).ConfigureAwait(false);
-            string myQuery4 = $"UPDATE calibration SET approved_by = {userID}, approved_at = '{UtilsRepository.GetUTCTime()}', " +
+            string myQuery4 = $"UPDATE calibration SET approved_by = {userID},reschedule=1,LastcalibrationDoneDate='{nextRequest[0].next_calibration_date}',approved_at = '{UtilsRepository.GetUTCTime()}', " +
                                 $"approve_remark = '{request.comment}', status = {(int)CMMS.CMMS_Status.CALIBRATION_APPROVED}, " +
                                 $"status_updated_at = '{UtilsRepository.GetUTCTime()}' " +
                                 $"WHERE id = {request.id} AND status = {(int)CMMS.CMMS_Status.CALIBRATION_CLOSED};";
+            //need add lastcalibration
             int retVal = await Context.ExecuteNonQry<int>(myQuery4).ConfigureAwait(false);
             CMDefaultResponse newCalibration = await RequestCalibration(nextRequest[0], userID);
             CMApproval approval = new CMApproval()
