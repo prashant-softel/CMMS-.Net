@@ -1,3 +1,4 @@
+using CMMSAPIs.Models.Masters;
 using System;
 using System.Collections.Generic;
 
@@ -162,6 +163,7 @@ namespace CMMSAPIs.Models.SM
 
     public class CMEmployeeStockTransactionReport
     {
+        public int facilityID { get; set; }
         public int fromActorID { get; set; }
         public string fromActorType { get; set; }
         public string FromActorName { get; set; }
@@ -171,6 +173,7 @@ namespace CMMSAPIs.Models.SM
         public int assetItemID { get; set; }
         public string assetItemName { get; set; }
         public decimal qty { get; set; }
+        public decimal Opening { get; set; }
         public string facilityName { get; set; }
         public string remarks { get; set; }
         public string asset_type { get; set; }
@@ -178,6 +181,34 @@ namespace CMMSAPIs.Models.SM
         public string CreatedBy { get; set; }
         public DateTime? createdAt { get; set; }
 
+    }
+
+    public class CMItemWiseTransaction
+    {
+        public string facilityName { get; set; }
+        public int facilityID { get; set; }
+        public decimal opening { get; set; }
+        public List<CMItemWiseTransactionDetails> details { get; set; }
+
+    }
+
+    public class CMItemWiseTransactionDetails
+    {
+        public int fromActorID { get; set; }
+        public string fromActorType { get; set; }
+        public string FromActorName { get; set; }
+        public int toActorID { get; set; }
+        public string toActorType { get; set; }
+        public string toActorName { get; set; }
+        public int assetItemID { get; set; }
+        public string assetItemName { get; set; }
+        public string asset_type { get; set; }
+        public decimal qty { get; set; }
+        public string remarks { get; set; }
+   
+        public DateTime? LastUpdated { get; set; }
+        public string CreatedBy { get; set; }
+        public DateTime? createdAt { get; set; }
     }
 
     public class CMAssetMasterStockItems
