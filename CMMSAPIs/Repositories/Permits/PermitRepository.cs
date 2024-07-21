@@ -1458,8 +1458,10 @@ namespace CMMSAPIs.Repositories.Permits
             {
                 conditions += $" `{column}` = 1, ";
             }
-
-            conditions = conditions.Substring(0, conditions.Length - 2);
+            if(conditions != "")
+            {
+                conditions = conditions.Substring(0, conditions.Length - 2);
+            }
 
             string other = "";
 
@@ -1467,10 +1469,12 @@ namespace CMMSAPIs.Repositories.Permits
             {
                 other = $" , cancelOther = '{request.otherCondition}' ";
             }
-            string qryCondition = $"update permits set {conditions} {other} where id = {request.id}";
+            if (conditions != "")
+            {
+                string qryCondition = $"update permits set {conditions} {other} where id = {request.id}";
 
-            await Context.ExecuteNonQry<int>(qryCondition).ConfigureAwait(false);
-
+                await Context.ExecuteNonQry<int>(qryCondition).ConfigureAwait(false);
+            }
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.id, 0, 0, request.comment, CMMS.CMMS_Status.PTW_CANCEL_REQUEST_APPROVED, userID);
 
