@@ -180,6 +180,10 @@ namespace CMMSAPIs.Models.SM
         public DateTime? LastUpdated { get; set; }
         public string CreatedBy { get; set; }
         public DateTime? createdAt { get; set; }
+        public int mrsID { get; set; }
+        public int referenceID { get; set; }
+        public string referenceBy { get; set; }
+        public string referenceName { get; set; }
 
     }
 
@@ -204,6 +208,10 @@ namespace CMMSAPIs.Models.SM
         public string assetItemName { get; set; }
         public string asset_type { get; set; }
         public decimal qty { get; set; }
+        public int mrsID { get; set; }
+        public int referenceID { get; set; }
+        public string referenceBy { get; set; }
+        public string referenceName { get; set; }
         public string remarks { get; set; }
    
         public DateTime? LastUpdated { get; set; }
