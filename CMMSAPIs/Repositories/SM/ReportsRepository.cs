@@ -602,7 +602,7 @@ namespace CMMSAPIs.Repositories.SM
 
             List<CMEmployeeStockTransactionReport> EmployeeStockReportList = new List<CMEmployeeStockTransactionReport>();
 
-            string Plant_Stock_Opening_Details_query = $"select ST.plantID as facilityID," +
+            string Plant_Stock_Opening_Details_query = $"select ST.plantID as facilityID,ST.mrsID as mrsID,ST.referedby as referenceBy,ST.reference_ID as referenceID, CONCAT(ref.firstName, ' ', ref.lastName) referenceName," +
                                $" IFNULL((select SUM(smt.qty) from smtransactiondetails smt where date_format(smt.lastInsetedDateTime, '%Y-%m-%d') < '{fromDate.ToString("yyyy-MM-dd")}' and  smt.fromActorType = {(int)CMMS.SM_Actor_Types.Vendor}  and smt.assetItemID = ST.assetItemID and smt.toActorType ={(int)CMMS.SM_Actor_Types.Store} and smt.PlantId in ('{facility_ID}') ),0) - " +
                 $" IFNULL((select SUM(smt1.qty) from smtransactiondetails smt1  where date_format(smt1.lastInsetedDateTime, '%Y-%m-%d') < '{fromDate.ToString("yyyy-MM-dd")}' and smt1.assetItemID = ST.assetItemID  and smt1.fromActorType IN ({(int)CMMS.SM_Actor_Types.PM_Task},{(int)CMMS.SM_Actor_Types.JobCard},{(int)CMMS.SM_Actor_Types.Engineer}) and smt1.toActorType ={(int)CMMS.SM_Actor_Types.Inventory} and smt1.PlantId in ('{facility_ID}')),0) as Opening,  " +
                 " ST.fromActorID, CASE WHEN fromActorType = 1 then 'Vendor'" +
@@ -627,7 +627,7 @@ namespace CMMSAPIs.Repositories.SM
                 " CONCAT(C.firstName, ' ', C.lastName) CreatedBy, ST.createdAt, smtypes.asset_type " +
                 " from smtransactiondetails ST  inner join smtransition smt on smt.transactionID = ST.ID" +
                 " inner join smassetmasters am on am.ID = ST.assetItemID left join facilities FF on FF.id = ST.plantID " +
-                " left join users C on C.id = ST.createdBy left join smassettypes smtypes on smtypes.ID = am.asset_type_ID " +
+                " left join users C on C.id = ST.createdBy left join users ref on ref.id = ST.referedby left join smassettypes smtypes on smtypes.ID = am.asset_type_ID " +
                 " where ST.assetItemID = " + assetItemId + "  and  date_format(smt.lastModifiedDate, '%Y-%m-%d')  BETWEEN '" + fromDate.ToString("yyyy-MM-dd") + "' AND '" + toDate.ToString("yyyy-MM-dd") + "' ";
 
             if (facility_ID != "" && facility_ID != null)
@@ -635,7 +635,7 @@ namespace CMMSAPIs.Repositories.SM
                 Plant_Stock_Opening_Details_query = Plant_Stock_Opening_Details_query + " AND ST.plantID in (" + facility_ID + ")";
             }
 
-            Plant_Stock_Opening_Details_query = Plant_Stock_Opening_Details_query + " group by St.id order by ST.id desc;";
+            Plant_Stock_Opening_Details_query = Plant_Stock_Opening_Details_query + " group by St.id order by ST.id asc;";
 
             List<CMEmployeeStockTransactionReport> result = await Context.GetData<CMEmployeeStockTransactionReport>(Plant_Stock_Opening_Details_query).ConfigureAwait(false);
             foreach (var detail in result)
@@ -654,7 +654,7 @@ namespace CMMSAPIs.Repositories.SM
                {
                    facilityID = group.Key.facilityID,
                    facilityName = group.Key.facilityName,
-                   opening = group.Key.Opening,
+                   opening = group.Key.Opening < 0 ? 0 : group.Key.Opening,
                    details = group
                                                   //.GroupBy(g => g.water_type)
                                                   .Select(g => new CMItemWiseTransactionDetails
@@ -673,6 +673,10 @@ namespace CMMSAPIs.Repositories.SM
                                                       LastUpdated = g.LastUpdated,
                                                       CreatedBy = g.CreatedBy,
                                                       createdAt = g.createdAt,
+                                                      mrsID = g.mrsID,
+                                                      referenceBy = g.referenceBy,
+                                                      referenceID = g.referenceID,
+                                                      referenceName = g.referenceName,
                                                   }).ToList()
                }).ToList();
 
