@@ -134,10 +134,10 @@ namespace CMMSAPIs.Repositories.SM
                         _List[i].mrs_return_ID = _List[i].mrsId;
                     }
                
-                    if (_List[i].CMMRSItems.Count > 0)
-                    {
-                        _List[i].mrsId = _List[i].CMMRSItems[0].original_mrs_ID;
-                    }
+                    //if (_List[i].CMMRSItems.Count > 0)
+                    //{
+                    //    _List[i].mrsId = _List[i].CMMRSItems[0].original_mrs_ID;
+                    //}
                    
                 }
 
@@ -1211,8 +1211,9 @@ namespace CMMSAPIs.Repositories.SM
                         int requested_qty = 0;
                         int issued_qty = 0;
                         string serial_number = "";
+                        string MDMCode = "";
 
-                        string chkSrNoAvailableQuery = "select asset_item_ID,available_qty,requested_qty,issued_qty,serial_number from smrsitems where id = " + request.cmmrsItems[i].mrs_item_id + "";
+                        string chkSrNoAvailableQuery = "select asset_item_ID,available_qty,requested_qty,issued_qty,serial_number,case when asset_MDM_code = '' then (select asset_code from smassetmasters where id =asset_item_ID) else asset_MDM_code end asset_MDM_code from smrsitems where id = " + request.cmmrsItems[i].mrs_item_id + "";
                         DataTable dt_chk = await Context.FetchData(chkSrNoAvailableQuery).ConfigureAwait(false);
 
                         if (dt_chk.Rows.Count > 0)
@@ -1222,11 +1223,12 @@ namespace CMMSAPIs.Repositories.SM
                             requested_qty = (dt_chk.Rows[0]["requested_qty"].ToInt());
                             issued_qty = (dt_chk.Rows[0]["issued_qty"].ToInt());
                             serial_number = (dt_chk.Rows[0]["serial_number"].ToString());
+                            MDMCode = (dt_chk.Rows[0]["asset_MDM_code"].ToString());
                         }
 
                         string insertStmt = $"START TRANSACTION; " +
-                            $"INSERT INTO smrsitems (mrs_ID,mrs_return_ID,asset_item_ID,available_qty,requested_qty,returned_qty,return_remarks,flag, is_faulty,is_splited,issued_qty,serial_number)" +
-                            $"VALUES ({request.mrsreturnID},{MRS_ReturnID},{asset_item_ID},{qty}, {requested_qty}, {request.cmmrsItems[i].returned_qty}, '{request.cmmrsItems[i].return_remarks}', 2, 0,1,{issued_qty},'{serial_number}')" +
+                            $"INSERT INTO smrsitems (mrs_ID,mrs_return_ID,asset_item_ID,available_qty,requested_qty,returned_qty,return_remarks,flag, is_faulty,is_splited,issued_qty,serial_number,asset_MDM_code)" +
+                            $"VALUES (0,{MRS_ReturnID},{asset_item_ID},{qty}, {requested_qty}, {request.cmmrsItems[i].returned_qty}, '{request.cmmrsItems[i].return_remarks}', 2, 0,1,{issued_qty},'{serial_number}','{MDMCode}')" +
                             $"; SELECT LAST_INSERT_ID(); COMMIT;";
                         DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
 
@@ -1279,7 +1281,7 @@ namespace CMMSAPIs.Repositories.SM
                     DataTable dt_chk = new DataTable();
                     if (request.faultyItems[i].serial_number != null)
                     {
-                        chkSrNoAvailableQuery = "select asset_item_ID,available_qty,requested_qty,issued_qty,asset_MDM_code from smrsitems where serial_number = '" + request.faultyItems[i].serial_number + "'";
+                        chkSrNoAvailableQuery = "select asset_item_ID,available_qty,requested_qty,issued_qty,case when asset_MDM_code = '' then (select asset_code from smassetmasters where id = asset_item_ID) else asset_MDM_code end asset_MDM_code from smrsitems where serial_number = '" + request.faultyItems[i].serial_number + "'";
                         dt_chk = await Context.FetchData(chkSrNoAvailableQuery).ConfigureAwait(false);
                     }
 
@@ -1298,13 +1300,13 @@ namespace CMMSAPIs.Repositories.SM
                         await Context.ExecuteNonQry<int>(updatestmt);
 
 
-                        var tResult = await TransactionDetails(request.facility_ID, from_actor_id, (int)CMMS.SM_Actor_Types.Inventory, to_actor_id, (int)CMMS.SM_Actor_Types.NonOperational, asset_item_ID, Convert.ToInt32(request.faultyItems[i].returned_qty), (int)CMMS.CMMS_Modules.SM_MRS_RETURN, request.mrsreturnID, request.faultyItems[i].return_remarks, 0);
+                        var tResult = await TransactionDetails(request.facility_ID, asset_item_ID, (int)CMMS.SM_Actor_Types.Inventory, request.facility_ID, (int)CMMS.SM_Actor_Types.NonOperational, asset_item_ID, Convert.ToInt32(request.faultyItems[i].returned_qty), (int)CMMS.CMMS_Modules.SM_MRS_RETURN, request.mrsreturnID, request.faultyItems[i].return_remarks, request.mrsreturnID);
 
 
                     }
                     else
                     {
-                        string chkSrNoAvailableQuery_faulty = "select asset_item_ID,available_qty,requested_qty,issued_qty,asset_MDM_code from smrsitems where id = " + request.faultyItems[i].mrs_item_ID + "";
+                        string chkSrNoAvailableQuery_faulty = "select asset_item_ID,available_qty,requested_qty,issued_qty,case when asset_MDM_code = '' then (select asset_code from smassetmasters where id =asset_item_ID) else asset_MDM_code end asset_MDM_code from smrsitems where id = " + request.faultyItems[i].mrs_item_ID + "";
                         DataTable dt_chk_faulty = await Context.FetchData(chkSrNoAvailableQuery_faulty).ConfigureAwait(false);
 
                         if (dt_chk_faulty.Rows.Count > 0)
@@ -1316,14 +1318,25 @@ namespace CMMSAPIs.Repositories.SM
                             asset_MDM_code = (dt_chk_faulty.Rows[0]["asset_MDM_code"].ToString());
 
                         }
+                        else
+                        {
+                            string getMDMCode = "select asset_code from smassetmasters where id = " + request.faultyItems[i].assetMasterItemID + "";
+                            DataTable dt_getMDMCode = await Context.FetchData(getMDMCode).ConfigureAwait(false);
+                            if (dt_getMDMCode.Rows.Count > 0)
+                            {
+                                asset_item_ID = request.faultyItems[i].assetMasterItemID;
+                                asset_MDM_code = (dt_getMDMCode.Rows[0]["asset_code"].ToString());
+
+                            }
+                        }
 
                         string insertStmt = $"START TRANSACTION; " +
-                            $"Update smmrs SET status = {(int)CMMS.CMMS_Status.MRS_SUBMITTED} where id = {request.mrsreturnID} ;INSERT INTO smrsitems (mrs_ID,mrs_return_ID,asset_item_ID,available_qty,requested_qty,returned_qty,return_remarks,flag, is_faulty,is_splited,issued_qty,serial_number,asset_MDM_code)" +
-                            $"VALUES ({request.mrsreturnID},{MRS_ReturnID},{asset_item_ID},{qty}, {requested_qty}, {request.faultyItems[i].returned_qty}, '{request.faultyItems[i].return_remarks}', 2, 1,1,{issued_qty},'{request.faultyItems[i].serial_number}','{asset_MDM_code}')" +
+                            $"Update smmrs SET status = {(int)CMMS.CMMS_Status.MRS_SUBMITTED} where id = {request.mrsreturnID} ;INSERT INTO smrsitems (mrs_ID,mrs_return_ID,asset_item_ID,available_qty,requested_qty,returned_qty,return_remarks,flag, is_faulty,is_splited,issued_qty,serial_number,asset_MDM_code,approval_required)" +
+                            $"VALUES (0,{MRS_ReturnID},{asset_item_ID},{qty}, {requested_qty}, {request.faultyItems[i].returned_qty}, '{request.faultyItems[i].return_remarks}', 2, 1,1,{issued_qty},'{request.faultyItems[i].serial_number}','{asset_MDM_code}',1)" +
                             $"; SELECT LAST_INSERT_ID(); COMMIT;";
                         DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
-
-                        var tResult = await TransactionDetails(request.facility_ID, from_actor_id, (int)CMMS.SM_Actor_Types.Inventory, to_actor_id, (int)CMMS.SM_Actor_Types.NonOperational, asset_item_ID, Convert.ToInt32(request.faultyItems[i].returned_qty), (int)CMMS.CMMS_Modules.SM_MRS_RETURN, request.mrsreturnID, request.faultyItems[i].return_remarks, 0);
+                        //fromavctor id will asset item id which is faulty , to actor id will be plant id i.e it is return to plant
+                        var tResult = await TransactionDetails(request.facility_ID, asset_item_ID, (int)CMMS.SM_Actor_Types.Inventory, request.facility_ID, (int)CMMS.SM_Actor_Types.NonOperational, asset_item_ID, Convert.ToInt32(request.faultyItems[i].returned_qty), (int)CMMS.CMMS_Modules.SM_MRS_RETURN, request.mrsreturnID, request.faultyItems[i].return_remarks, request.mrsreturnID);
                     }
                 }
             }
