@@ -412,7 +412,7 @@ namespace CMMSAPIs.BS.SM
                     CMDefaultResponse response = new CMDefaultResponse();
                     foreach (var request in requestList)
                     {
-                        var result = await repos.TransactionDetails(request.facilityID, request.fromActorID, request.fromActorType, request.toActorID, request.toActorType, request.assetItemID, request.qty, request.refType, request.refID, request.remarks, request.mrsID,request.transaction_id);
+                        var result = await repos.TransactionDetails(request.facilityID, request.fromActorID, request.fromActorType, request.toActorID, request.toActorType, request.assetItemID, request.qty, request.refType, request.refID, request.remarks, request.mrsID, 0, 0, request.transaction_id);
                         if (result)
                         {
                             response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.SUCCESS, "Item transferred.");
