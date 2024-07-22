@@ -469,7 +469,7 @@ namespace CMMSAPIs.Repositories.SM
     */
 
 
-            string queryAssetMaster = "SELECT DISTINCT id, UPPER(asset_code) as name FROM smassetmasters WHERE plant_ID = " + facility_id + " ORDER BY id ASC;";
+            string queryAssetMaster = "SELECT  id, UPPER(asset_code) as name FROM smassetmasters WHERE plant_ID = " + facility_id + " ORDER BY id ASC;";
             DataTable dtAssetMaster = await Context.FetchData(queryAssetMaster).ConfigureAwait(false);
             List<string> AssetMasterNames = dtAssetMaster.GetColumn<string>("name");
             List<int> AssetMasterIDs = dtAssetMaster.GetColumn<int>("id");
