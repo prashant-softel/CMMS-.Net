@@ -1,8 +1,6 @@
+using CMMSAPIs.Models.Utils;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using CMMSAPIs.Models.Utils;
 
 namespace CMMSAPIs.Models.Permits
 {
@@ -15,6 +13,8 @@ namespace CMMSAPIs.Models.Permits
         public int typeId { get; set; }
         public int facility_id { get; set; }
         public DateTime? start_date { get; set; }
+        public DateTime? end_datetime { get; set; }
+        public DateTime? start_datetime { get; set; }
         public DateTime? end_date { get; set; }
         public string description { get; set; }
 
@@ -35,7 +35,7 @@ namespace CMMSAPIs.Models.Permits
         public List<CMFileUploadForm> file_upload_form { get; set; }
         public List<CMUpdatePermit> PermitHistory { get; set; }
         public int TBT_Done_By { get; set; }
-        public DateTime? TBT_Done_At  { get; set; }
+        public DateTime? TBT_Done_At { get; set; }
         public List<CMPermitLotoOtherList> LotoOtherDetails { get; set; }
         public List<int> uploadfile_ids { get; set; }
     }

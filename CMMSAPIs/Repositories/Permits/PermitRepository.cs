@@ -1598,10 +1598,10 @@ namespace CMMSAPIs.Repositories.Permits
                 updatePermitQry += $"facilityId = {request.facility_id}, ";
             if (request.blockId > 0)
                 updatePermitQry += $"blockId = {request.blockId}, ";
-            if (request.start_date != null)
-                updatePermitQry += $"startDate = '{((DateTime)request.start_date).ToString("yyyy-MM-dd HH:mm:ss")}', ";
-            if (request.end_date != null)
-                updatePermitQry += $"endDate = '{((DateTime)request.end_date).ToString("yyyy-MM-dd HH:mm:ss")}', ";
+            if (request.start_datetime != null)
+                updatePermitQry += $"startDate = '{((DateTime)request.start_datetime).ToString("yyyy-MM-dd HH:mm:ss")}', ";
+            if (request.end_datetime != null)
+                updatePermitQry += $"endDate = '{((DateTime)request.end_datetime).ToString("yyyy-MM-dd HH:mm:ss")}', ";
             if (request.description != null && request.description != "")
                 updatePermitQry += $"description = '{request.description}', ";
             if (request.job_type_id > 0)

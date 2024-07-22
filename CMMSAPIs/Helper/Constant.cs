@@ -622,6 +622,8 @@ namespace CMMSAPIs.Helper
             VEGETATION_LINKED_TO_PTW,
             VEG_TASK_END_APPROVED,
             VEG_TASK_END_REJECTED,
+            VEG_TASK_UPDATED,
+            VEG_TASK_ASSIGNED
         }
 
         public enum ApprovalStatus

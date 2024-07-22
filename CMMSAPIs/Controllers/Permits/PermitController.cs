@@ -649,8 +649,8 @@ namespace CMMSAPIs.Controllers.Permits
         {
             try
             {
-                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _PermitBS.UpdatePermit(request, userID);
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _PermitBS.UpdatePermit(request, userId);
                 return Ok(data);
             }
             catch (AccessViolationException ex)

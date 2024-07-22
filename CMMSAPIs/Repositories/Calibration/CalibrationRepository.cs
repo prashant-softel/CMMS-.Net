@@ -90,7 +90,7 @@ namespace CMMSAPIs.Repositories.Calibration
             string myQuery = "SELECT " +
                                 $" a_calibration.id as calibration_id, assets.id as asset_id, assets.name as asset_name, assets.serialNumber as asset_serial, CASE WHEN categories.name is null THEN 'Others' ELSE categories.name END as category_name, frequency.id as frequency_id, frequency.name as frequency_name,a_calibration.is_damaged, a_calibration.status as statusID, {statusOut} as calibration_status, " +
                                 $" IF(assets.calibrationLastDate = '0000-00-00 00:00:00', CAST( '0001-01-01 00:00:01' as datetime), CAST(assets.calibrationLastDate AS DATETIME)) AS last_calibration_date, " +
-                                $"IF(assets.calibrationDueDate = '0000-00-00 00:00:00', CAST( '0001-01-01 00:00:01' as datetime), CAST(assets.calibrationDueDate AS DATETIME)) AS next_calibration_due_date, vendor.id as vendor_id, vendor.name as vendor_name, CONCAT(request_by.firstName,' ',request_by.lastName) as responsible_person, a_calibration.received_date,a_calibration.start_date as Schedule_start_date ,a_calibration.health_status as asset_health_status " +
+                                $"IF(assets.calibrationDueDate = '0000-00-00 00:00:00', CAST( '0001-01-01 00:00:01' as datetime), CAST(assets.calibrationDueDate AS DATETIME)) AS next_calibration_due_date, vendor.id as vendor_id, vendor.name as vendor_name, CONCAT(request_by.firstName,' ',request_by.lastName) as responsible_person, a_calibration.received_date,a_calibration.start_date as Schedule_start_date,a_calibration.due_date AS calibration_due_date ,a_calibration.health_status as asset_health_status " +
                              "FROM assets " +
                              "LEFT JOIN " +
                                 "frequency ON assets.calibrationFrequency = frequency.id " +
@@ -374,10 +374,12 @@ namespace CMMSAPIs.Repositories.Calibration
                 CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.FAILURE, "Calibration cannot be requested as asset is already sent or requested for calibration");
                 return response;
             }
-            string facilityQuery = $"SELECT facilityId,reschedule FROM assets WHERE assets.id = {request.asset_id};";
+            string facilityQuery = $"SELECT facilityId FROM assets WHERE assets.id = {request.asset_id};";
             DataTable dt1 = await Context.FetchData(facilityQuery).ConfigureAwait(false);
             int facilityId = Convert.ToInt32(dt1.Rows[0][0]);
-            int res = Convert.ToInt32(dt1.Rows[0][1]);
+            string facilityq = $"SELECT reschedule FROM calibration  WHERE asset_id = {request.asset_id};";
+            DataTable dt12 = await Context.FetchData(facilityq).ConfigureAwait(false);
+            int res = Convert.ToInt32(dt12.Rows[0][0]);
             if (exists && res != 1)
             {
 

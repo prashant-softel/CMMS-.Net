@@ -80,7 +80,7 @@ namespace CMMSAPIs.Models.PM
         public string cancelled_by_name { get; set; }
         public DateTime cancelled_at { get; set; }
         public int approved_by_id { get; set; }
-        public string approved_by_name { get; set; }
+        public string approved_by { get; set; }
         public DateTime approved_at { get; set; }
         public int rejected_by_id { get; set; }
         public string rejected_by_name { get; set; }
@@ -90,6 +90,7 @@ namespace CMMSAPIs.Models.PM
         public DateTime updated_at { get; set; }
         public string status_long { get; set; }
         public string permit_type { get; set; }
+
         public string employee_list { get; set; }
         public string is_PTW { get; set; }
         public List<string> Employees { get; set; }

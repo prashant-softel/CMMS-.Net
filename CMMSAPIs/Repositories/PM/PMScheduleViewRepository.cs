@@ -108,13 +108,13 @@ namespace CMMSAPIs.Repositories.PM
                 case CMMS.CMMS_Status.PM_CLOSE_REJECTED:
                     retValue = $"PM Task Close Rejected By {Obj.rejected_by_name}"; break;
                 case CMMS.CMMS_Status.PM_CLOSE_APPROVED:
-                    retValue = $"PM Task Close Approved By {Obj.approved_by_name}"; break;
+                    retValue = $"PM Task Close Approved By {Obj.approved_by}"; break;
                 case CMMS.CMMS_Status.PM_CANCELLED:
                     retValue = $"PM Task Cancelled By {Obj.cancelled_by_name} "; break;
                 case CMMS.CMMS_Status.PM_CANCELLED_REJECTED:
                     retValue = $"PM Task cancelled Rejected By {Obj.cancelled_by_name}"; break;
                 case CMMS.CMMS_Status.PM_CANCELLED_APPROVED:
-                    retValue = $"PM Task cancelled Approved By {Obj.approved_by_name}"; break;
+                    retValue = $"PM Task cancelled Approved By {Obj.approved_by}"; break;
                 case CMMS.CMMS_Status.PM_DELETED:
                     retValue = $"PM Task Deleted "; break;
                 case CMMS.CMMS_Status.PM_UPDATED:

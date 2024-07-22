@@ -46,6 +46,8 @@ namespace CMMSAPIs.Models.Audit
         public DateTime Schedule_Date { get; set; }
         public DateTime created_at { get; set; }
         public string created_by { get; set; }
+        public DateTime approved_Date { get; set; }
+        public string approved_by { get; set; }
         public int Module_Type_id { get; set; }
         public string Module_Type { get; set; }
         public string assignedTo { get; set; }
