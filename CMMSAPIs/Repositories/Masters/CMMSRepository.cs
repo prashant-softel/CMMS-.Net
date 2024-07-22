@@ -1489,7 +1489,7 @@ namespace CMMSAPIs.Repositories.Masters
                 $"LEFT JOIN users as createdBy ON createdBy.id = mc.assignedTo " +
                 $"LEFT JOIN users as approvedBy ON approvedBy.id = mc.approvedByID " +
                 $" left join facilities as F on F.id = mc.facilityId  " +
-                $"where mc.moduleType=1 or rescheduled = 0";         
+                $"where (mc.moduleType=1 or rescheduled = 0)";         
                 myQuery12 += $" and mc.facilityId in ({facilityId}) ";
             
 
