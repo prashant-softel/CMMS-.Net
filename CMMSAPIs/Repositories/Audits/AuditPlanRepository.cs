@@ -349,7 +349,7 @@ namespace CMMSAPIs.Repositories.Audits
             mapChecklistQry = mapChecklistQry.Substring(0, mapChecklistQry.Length - 2) + ";";
             await Context.ExecuteNonQry<int>(mapChecklistQry).ConfigureAwait(false);
 
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_PLAN, id, 0, 0, "PM Plan added", CMMS.CMMS_Status.PM_PLAN_CREATED, userID);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.AUDIT_PLAN, id, 0, 0, "PM Plan added", CMMS.CMMS_Status.PM_PLAN_CREATED, userID);
             CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Plan added successfully");
             return response;
         }
@@ -461,7 +461,7 @@ namespace CMMSAPIs.Repositories.Audits
             string startQry3 = $"UPDATE st_audit SET  status = {(int)CMMS.CMMS_Status.AUDIT_START} WHERE id = {plan_id};";
             await Context.ExecuteNonQry<int>(startQry3).ConfigureAwait(false);
 
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_TASK, task_id, 0, 0, $"PM Execution Started of assets ", CMMS.CMMS_Status.AUDIT_START, userID);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.AUDIT_PLAN, task_id, 0, 0, $"PM Execution Started of assets ", CMMS.CMMS_Status.AUDIT_START, userID);
 
             response = new CMDefaultResponse(idList, CMMS.RETRUNSTATUS.SUCCESS, $"Execution PMTASK{task_id} Started Successfully");
 
@@ -660,7 +660,7 @@ namespace CMMSAPIs.Repositories.Audits
             if (retVal > 0)
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
 
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_TASK, request.task_id, 0, 0, string.IsNullOrEmpty(request.comment) ? "Audit Task Updated" : request.comment, CMMS.CMMS_Status.PM_UPDATED, userID);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.AUDIT_PLAN, request.task_id, 0, 0, string.IsNullOrEmpty(request.comment) ? "Audit Task Updated" : request.comment, CMMS.CMMS_Status.PM_UPDATED, userID);
 
             CMDefaultResponse responseResult = new CMDefaultResponse(request.task_id, retCode, "Audit Task Updated successfully");
             responseList.Add(responseResult);
@@ -983,7 +983,7 @@ namespace CMMSAPIs.Repositories.Audits
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
             }
 
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_PLAN, request.id, 0, 0, string.IsNullOrEmpty(request.comment) ? "PM Plan Rejected " : request.comment, CMMS.CMMS_Status.PM_PLAN_REJECTED);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.AUDIT_PLAN, request.id, 0, 0, string.IsNullOrEmpty(request.comment) ? "PM Plan Rejected " : request.comment, CMMS.CMMS_Status.PM_PLAN_REJECTED);
 
             //await CMMSNotification.sendNotification(CMMS.CMMS_Modules.WARRANTY_CLAIM, CMMS.CMMS_Status.REJECTED, new[] { _WCList[0].created_by }, _WCList[0]);
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "PM Plan Rejected Successfully");
@@ -995,7 +995,7 @@ namespace CMMSAPIs.Repositories.Audits
             string approveQuery = $"update pm_plan set status_id = 0 where id = {planId}; ";
             await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
 
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_PLAN, planId, 0, 0, $"PM Plan Deleted by user {userID}", CMMS.CMMS_Status.PM_PLAN_DELETED);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.AUDIT_PLAN, planId, 0, 0, $"PM Plan Deleted by user {userID}", CMMS.CMMS_Status.PM_PLAN_DELETED);
 
             CMDefaultResponse response = new CMDefaultResponse(planId, CMMS.RETRUNSTATUS.SUCCESS, $" PM Plan Deleted");
             return response;
@@ -1035,7 +1035,7 @@ namespace CMMSAPIs.Repositories.Audits
             foreach (var plan in plan_list)
             {
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(plan.status_id);
-                string _shortStatus = getShortStatus(CMMS.CMMS_Modules.PM_PLAN, _Status);
+                string _shortStatus = getShortStatus(CMMS.CMMS_Modules.AUDIT_PLAN, _Status);
                 plan.status_short = _shortStatus;
             }
             foreach (var list in plan_list)
