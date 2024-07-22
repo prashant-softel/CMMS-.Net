@@ -30,6 +30,8 @@ namespace CMMSAPIs.Models.JC
         public int jobId { get; set; }
         public int permitId { get; set; }
         public string permitNo { get; set; }
+        public int permitStatus { get; set; }
+        public string permit_status_short { get; set; }
         public string jobAssingedTo { get; set; }
         public dynamic jobCardDate { get; set; }
         public dynamic endTime { get; set; }

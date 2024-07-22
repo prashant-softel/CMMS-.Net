@@ -44,7 +44,7 @@ namespace CMMSAPIs.Repositories.Permits
             return permitDetails;
         }*/
 
-        public static string Status(int statusID)
+        public static string getShortStatus(int statusID)
         {
             CMMS.CMMS_Status status = (CMMS.CMMS_Status)statusID;
             string statusName = "";
@@ -195,7 +195,7 @@ namespace CMMSAPIs.Repositories.Permits
             }
             return statusName;
         }
-        internal static string getShortStatus(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status m_notificationID)
+        internal static string getShortJobStatus(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status m_notificationID)
         {
             string retValue;
 
@@ -490,9 +490,9 @@ namespace CMMSAPIs.Repositories.Permits
             string statusSubQuery = "CASE ";
             for (int i = (int)CMMS.CMMS_Status.PTW_CREATED; i <= (int)CMMS.CMMS_Status.PTW_EXPIRED; i++)
             {
-                statusSubQuery += $"WHEN ptw.status = {i} THEN '{Status(i)}' ";
+                statusSubQuery += $"WHEN ptw.status = {i} THEN '{getShortStatus(i)}' ";
             }
-            statusSubQuery += $"ELSE '{Status(0)}' END";
+            statusSubQuery += $"ELSE '{getShortStatus(0)}' END";
             string myQuery = "SELECT " +
                                  $"ptw.id as permitId, CASE when ptw.endDate < '{UtilsRepository.GetUTCTime()}' then 1 else 0 END as isExpired,ptw.TBT_Done_By as TBT_Done_By_id, ptw.code, ptw.status as ptwStatus,jc.id as jc_id,jc.JC_Status as jc_status,ptw.permitNumber as permit_site_no, permitType.id as permit_type, permitType.title as PermitTypeName, group_concat(distinct asset_cat.name order by asset_cat.id separator ', ') as equipment_categories, facilities.id as workingAreaId, facilities.name as workingAreaName, ptw.title as title, ptw.description as description, acceptedUser.id as request_by_id, CONCAT(acceptedUser.firstName , ' ' , acceptedUser.lastName) as request_by_name, ptw.acceptedDate as request_datetime, issuedUser.id as issued_by_id, CONCAT(issuedUser.firstName , ' ' , issuedUser.lastName) as issued_by_name, ptw.issuedDate as issue_datetime,ptw.endDate as endDate, approvedUser.id as approved_by_id, CONCAT(approvedUser.firstName , ' ' , approvedUser.lastName) as approved_by_name,ptw.TBT_Done_Check as TBT_Done_Check, ptw.approvedDate as approved_datetime, {statusSubQuery} as current_status_short " +
                                  " FROM " +
@@ -849,9 +849,9 @@ namespace CMMSAPIs.Repositories.Permits
             string statusSubQuery = "CASE ";
             for (int i = 121; i <= 140; i++)
             {
-                statusSubQuery += $"WHEN ptw.status = {i} THEN '{Status(i)}' ";
+                statusSubQuery += $"WHEN ptw.status = {i} THEN '{getShortStatus(i)}' ";
             }
-            statusSubQuery += $"ELSE '{Status(0)}' END";
+            statusSubQuery += $"ELSE '{getShortStatus(0)}' END";
             if (permit_id <= 0)
                 throw new ArgumentException("Invalid Permit ID");
 
@@ -1108,7 +1108,7 @@ namespace CMMSAPIs.Repositories.Permits
             {
 
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(job.status);
-                string _shortStatus = getShortStatus(CMMS.CMMS_Modules.JOB, _Status);
+                string _shortStatus = getShortJobStatus(CMMS.CMMS_Modules.JOB, _Status);
                 job.status_short = _shortStatus;
             }
 
@@ -1458,10 +1458,8 @@ namespace CMMSAPIs.Repositories.Permits
             {
                 conditions += $" `{column}` = 1, ";
             }
-            if(conditions != "")
-            {
-                conditions = conditions.Substring(0, conditions.Length - 2);
-            }
+
+            conditions = conditions.Substring(0, conditions.Length - 2);
 
             string other = "";
 
@@ -1469,12 +1467,10 @@ namespace CMMSAPIs.Repositories.Permits
             {
                 other = $" , cancelOther = '{request.otherCondition}' ";
             }
-            if (conditions != "")
-            {
-                string qryCondition = $"update permits set {conditions} {other} where id = {request.id}";
+            string qryCondition = $"update permits set {conditions} {other} where id = {request.id}";
 
-                await Context.ExecuteNonQry<int>(qryCondition).ConfigureAwait(false);
-            }
+            await Context.ExecuteNonQry<int>(qryCondition).ConfigureAwait(false);
+
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.id, 0, 0, request.comment, CMMS.CMMS_Status.PTW_CANCEL_REQUEST_APPROVED, userID);
 

@@ -193,7 +193,7 @@ namespace CMMSAPIs.Repositories.PM
                             string startQry2 = $"UPDATE pm_task SET  status = {(int)CMMS.CMMS_Status.PM_APPROVED} WHERE id = {task.id};";
                             await Context.ExecuteNonQry<int>(startQry2).ConfigureAwait(false);
                         }
-                        task.status_short = "Permit - " + PermitRepository.Status(task.ptw_status);
+                        task.status_short = "Permit - " + PermitRepository.getShortStatus(task.ptw_status);
                     }
                     else
                     {
@@ -381,7 +381,7 @@ namespace CMMSAPIs.Repositories.PM
                     string startQry2 = $"UPDATE pm_task SET  status = {(int)CMMS.CMMS_Status.PM_APPROVED} WHERE id = {taskViewDetail[0].id};";
                     await Context.ExecuteNonQry<int>(startQry2).ConfigureAwait(false);
                 }
-                taskViewDetail[0].status_short = "Permit - " + PermitRepository.Status(taskViewDetail[0].ptw_status);
+                taskViewDetail[0].status_short = "Permit - " + PermitRepository.getShortStatus(taskViewDetail[0].ptw_status);
                 taskViewDetail[0].status_short = PermitRepository.LongStatus(taskViewDetail[0].ptw_status, null);
                 string _shortStatus_PTW = Status_PTW(taskViewDetail[0].ptw_status);
                 taskViewDetail[0].status_short_ptw = _shortStatus_PTW;
