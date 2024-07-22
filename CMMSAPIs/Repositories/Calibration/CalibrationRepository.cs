@@ -516,7 +516,7 @@ namespace CMMSAPIs.Repositories.Calibration
              * Update the Calibration table status and History log
              * Your Code goes here
             */
-            string Query = $"SELECT LastcalibrationDoneDate FROM calibration where id = {calibration_id};";
+            string Query = $"SELECT due_date FROM calibration where id = {calibration_id};";
             DataTable dt = await Context.FetchData(Query).ConfigureAwait(false);
             DateTime start_date = Convert.ToDateTime(dt.Rows[0][0]);
             string myQuery = $"UPDATE calibration SET status = {(int)CMMS.CMMS_Status.CALIBRATION_STARTED}, " +
