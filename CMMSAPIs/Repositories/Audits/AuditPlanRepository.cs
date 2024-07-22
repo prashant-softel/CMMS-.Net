@@ -1196,7 +1196,7 @@ namespace CMMSAPIs.Repositories.Audits
         }
 
 
-        internal async Task<List<CMPMTaskList>> GetTaskList(int facility_id, DateTime? start_date, DateTime? end_date, string frequencyIds, string facilitytimeZone)
+        internal async Task<List<CMPMTaskList>> GetTaskList(int facility_id, DateTime? start_date, DateTime? end_date, string frequencyIds, string facilitytimeZone, int module_type_id)
         {
             /*
              * Primary Table - PMExecution & PMSchedule
@@ -1213,7 +1213,7 @@ namespace CMMSAPIs.Repositories.Audits
                                "FROM pm_task " +
                                $"left join users as assignedTo on pm_task.assigned_to = assignedTo.id " +
                                $"left join st_audit  on pm_task.plan_id = st_audit.id " +
-                               $"left join frequency as freq on pm_task.frequency_id = freq.id where 1 ";
+                               $"left join frequency as freq on pm_task.frequency_id = freq.id Where  module_type_id = " + module_type_id + ""; 
 
             // myQuery += (frequencyIds.Length > 0 ? " AND freq.id IN ( '" + string.Join("' , '", frequencyIds) + "' )" : string.Empty);
 

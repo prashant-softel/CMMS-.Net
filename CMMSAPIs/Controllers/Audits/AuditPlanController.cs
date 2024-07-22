@@ -328,12 +328,12 @@ namespace CMMSAPIs.Controllers.Audits
 
         [Route("GetTaskList")]
         [HttpGet]
-        public async Task<IActionResult> GetTaskList(int facility_id, DateTime? start_date, DateTime? end_date, string frequencyIds)
+        public async Task<IActionResult> GetTaskList(int facility_id, DateTime? start_date, DateTime? end_date, string frequencyIds, int module_type_id)
         {
             try
             {
                 var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
-                var data = await _AuditPlanBS.GetTaskList(facility_id, start_date, end_date, frequencyIds, facilitytimeZone);
+                var data = await _AuditPlanBS.GetTaskList(facility_id, start_date, end_date, frequencyIds, facilitytimeZone, module_type_id);
                 return Ok(data);
             }
             catch (ArgumentException ex)

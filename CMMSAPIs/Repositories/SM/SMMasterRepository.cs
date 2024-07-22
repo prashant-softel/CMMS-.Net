@@ -469,14 +469,14 @@ namespace CMMSAPIs.Repositories.SM
     */
 
 
-            string queryAssetMaster = "SELECT id, UPPER(asset_code) as name FROM smassetmasters ORDER BY id ASC;";
+            string queryAssetMaster = "SELECT DISTINCT id, UPPER(asset_code) as name FROM smassetmasters WHERE plant_ID = " + facility_id + " ORDER BY id ASC;";
             DataTable dtAssetMaster = await Context.FetchData(queryAssetMaster).ConfigureAwait(false);
             List<string> AssetMasterNames = dtAssetMaster.GetColumn<string>("name");
             List<int> AssetMasterIDs = dtAssetMaster.GetColumn<int>("id");
             Dictionary<string, int> AssetMasterList = new Dictionary<string, int>();
             AssetMasterList.Merge(AssetMasterNames, AssetMasterIDs);
 
-            string queryAssetCode = "SELECT plant_ID as id, asset_code as name FROM smassetmasters ORDER BY id ASC;";
+            string queryAssetCode = "SELECT plant_ID as id, asset_code as name FROM smassetmasters  WHERE plant_ID = " + facility_id + " ORDER BY id ASC;";
             DataTable dtAssetCode = await Context.FetchData(queryAssetCode).ConfigureAwait(false);
             List<string> AssetMasterCodeNames = dtAssetCode.GetColumn<string>("name");
             List<int> AssetMasterCodeIDs = dtAssetCode.GetColumn<int>("id");
@@ -547,10 +547,10 @@ namespace CMMSAPIs.Repositories.SM
                 {
                     ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
                     var excel = new ExcelPackage(path);
-                    var sheet = excel.Workbook.Worksheets["Sheet1"];
+                    var sheet = excel.Workbook.Worksheets["Stocks"];
                     if (sheet == null)
                     {
-                        return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, "Invalid sheet");
+                        return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, "Invalid sheet name. Sheet name must be Stocks");
                     }
                     else
                     {
