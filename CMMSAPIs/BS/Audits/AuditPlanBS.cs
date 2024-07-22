@@ -28,7 +28,7 @@ namespace CMMSAPIs.BS.Audits
         Task<CMDefaultResponse> RejectPlan(CMApproval request, int userId);
         Task<List<CMPMPlanList>> GetPlanList(int facility_id, string category_id, string frequency_id, DateTime? start_date, DateTime? end_date, string facilitytime);
         Task<CMPMPlanDetail> GetPlanDetail(int id, string facilitytime);
-        Task<List<CMPMTaskList>> GetTaskList(int facility_id, DateTime? start_date, DateTime? end_date, string frequencyIds, string facilitytime);
+        Task<List<CMPMTaskList>> GetTaskList(int facility_id, DateTime? start_date, DateTime? end_date, string frequencyIds, string facilitytime, int module_type_id);
         Task<CMPMTaskView> GetTaskDetail(int task_id,string facilitytime);
         Task<CMDefaultResponse> CreateAuditSkip(CMApproval request, int userId);
         Task<CMDefaultResponse> RejectAuditSkip(CMApproval request, int userId);
@@ -285,13 +285,13 @@ namespace CMMSAPIs.BS.Audits
             }
         }
 
-        public async Task<List<CMPMTaskList>> GetTaskList(int facility_id, DateTime? start_date, DateTime? end_date, string frequencyIds, string facilitytime)
+        public async Task<List<CMPMTaskList>> GetTaskList(int facility_id, DateTime? start_date, DateTime? end_date, string frequencyIds, string facilitytime, int module_type_id)
         {
             try
             {
                 using (var repos = new AuditPlanRepository(getDB))
                 {
-                    return await repos.GetTaskList(facility_id, start_date, end_date, frequencyIds, facilitytime);
+                    return await repos.GetTaskList(facility_id, start_date, end_date, frequencyIds, facilitytime, module_type_id);
 
                 }
             }
