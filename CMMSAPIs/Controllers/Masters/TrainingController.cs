@@ -183,12 +183,12 @@ namespace CMMSAPIs.Controllers.Masters
         [Route("GetTrainingReportByCategory")]
         [HttpGet]
 
-        public async Task<IActionResult> GetTrainingReportByCategory(int facility_id, DateTime from_date, DateTime to_date)
+        public async Task<IActionResult> GetTrainingReportByCategory(int facility_id, DateTime fromDate, DateTime toDate)
         {
             try
             {
 
-                var data = await TrainingCourseBS.GetTrainingReportByCategory(facility_id, from_date, to_date);
+                var data = await TrainingCourseBS.GetTrainingReportByCategory(facility_id, fromDate, toDate);
                 return Ok(data);
 
             }

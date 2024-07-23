@@ -22,7 +22,7 @@ namespace CMMSAPIs.BS.Masters
 
         Task<CMDefaultResponse> ExecuteScheduleCourse(GETSCHEDULEDETAIL requset);
         Task<List<CMTRAININGCATE>> GetTrainingCategorty();
-        Task<List<CMTrainingSummary>> GetTrainingReportByCategory(int facility_id, DateTime from_date, DateTime to_date);
+        Task<List<CMTrainingSummary>> GetTrainingReportByCategory(int facility_id, DateTime fromDate, DateTime toDate);
         Task<CMDefaultResponse> CreateTrainingCategorty(CMTRAININGCATE request, int userID);
         Task<CMDefaultResponse> UpdateTrainingCategorty(CMTRAININGCATE request, int userID);
         Task<CMDefaultResponse> DeleteTrainingCategorty(int id, int userID);
@@ -188,13 +188,13 @@ namespace CMMSAPIs.BS.Masters
             }
         }
 
-        public async Task<List<CMTrainingSummary>> GetTrainingReportByCategory(int facility_id, DateTime from_date, DateTime to_date)
+        public async Task<List<CMTrainingSummary>> GetTrainingReportByCategory(int facility_id, DateTime fromDate, DateTime toDate)
         {
             try
             {
                 using (var repos = new TrainingRepository(getDB))
                 {
-                    return await repos.GetTrainingReportByCategory(facility_id, from_date, to_date);
+                    return await repos.GetTrainingReportByCategory(facility_id, fromDate, toDate);
 
                 }
             }

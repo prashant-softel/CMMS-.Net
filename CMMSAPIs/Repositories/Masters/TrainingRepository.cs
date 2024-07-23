@@ -417,7 +417,7 @@ namespace CMMSAPIs.Repositories.Masters
         }
 
 
-        internal async Task<List<CMTrainingSummary>> GetTrainingReportByCategory(int facility_id, DateTime from_date, DateTime to_date)
+        internal async Task<List<CMTrainingSummary>> GetTrainingReportByCategory(int facility_id, DateTime fromDate, DateTime toDate)
         {
 
 
@@ -426,7 +426,7 @@ namespace CMMSAPIs.Repositories.Masters
             $" FROM training_schedule " +
             $" ts LEFT JOIN course c ON c.id = ts.CourseId LEFT JOIN course_category cc ON cc.id = c.Traning_category_id  " +
             $" LEFT JOIN targeted_group tg ON tg.id = c.Targated_group_id WHERE ts.facility_id = {facility_id} " +
-            $" AND ts.ScheduleDate BETWEEN '{from_date:yyyy-MM-dd}' AND '{to_date:yyyy-MM-dd}'";
+            $" AND ts.ScheduleDate BETWEEN '{fromDate:yyyy-MM-dd}' AND '{toDate:yyyy-MM-dd}'";
 
 
 
