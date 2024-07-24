@@ -172,7 +172,7 @@ namespace CMMSAPIs.Repositories.JC
 
 
             /*Your code goes here*/
-            string myQuery1 = $"select jc.id as jobCardId,jc.JC_code as jobCardNo, jc.JC_Date_Start as jobCardDate,jc.JC_Date_Stop as endTime, job.id as jobId, CONCAT(user.firstName, user.lastName) as jobAssingedTo,  ptw.id as permitId, ptw.code as permitNo,JC_Status as status, JC_Approved as approvedStatus from jobcards as jc LEFT JOIN jobs as job ON JC.jobid = job.id LEFT JOIN permits as ptw ON JC.PTW_id = PTW.ID LEFT JOIN users as user ON user.id = job.assignedId ";
+            string myQuery1 = $"select jc.id as jobCardId,jc.JC_code as jobCardNo, jc.JC_Date_Start as jobCardDate,jc.JC_Date_Stop as endTime, job.id as jobId, CONCAT(user.firstName, user.lastName) as jobAssingedTo,  ptw.id as permitId, ptw.status as permitStatus, ptw.code as permitNo,JC_Status as status, JC_Approved as approvedStatus from jobcards as jc LEFT JOIN jobs as job ON JC.jobid = job.id LEFT JOIN permits as ptw ON JC.PTW_id = PTW.ID LEFT JOIN users as user ON user.id = job.assignedId ";
             //$"LEFT JOIN  users as user2 ON user2.id = jc.JC_Added_by " +
             //$"LEFT JOIN  users as user3 ON user3.id = jc.JC_Start_By_id " ;
 
@@ -193,19 +193,21 @@ namespace CMMSAPIs.Repositories.JC
                 CMMS.ApprovalStatus _Approval = (CMMS.ApprovalStatus)(jc.approvedStatus);
                 string _shortStatus = getShortStatus(CMMS.CMMS_Modules.JOBCARD, _Status, _Approval);
                 jc.status_short = _shortStatus;
+
+                CMMS.CMMS_Status _PermitStatus = (CMMS.CMMS_Status)(jc.permitStatus);
+                jc.permit_status_short = PermitRepository.getShortStatus((int)_PermitStatus);
+
+                //Update UTC to timezome time
+                if (jc != null && jc.endTime != null)
+                    jc.endTime = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, jc.endTime);
+                if (jc != null && jc.jobCardDate != null)
+                    jc.jobCardDate = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, jc.jobCardDate);
             }
             //job equipment category
             /* string myQuery2 = $"SELECT asset_cat.id as equipmentCat_id, asset_cat.name as equipmentCat_name  FROM assetcategories as asset_cat JOIN jobmappingassets as mapAssets ON mapAssets.categoryId = asset_cat.id JOIN jobs as job ON mapAssets.jobId = job.id WHERE job.id = {_ViewJobCardList[0].jobid } and job.facilityId = { facility_id }";
              List<equipmentCatList> _equipmentCatList = await Context.GetData<equipmentCatList>(myQuery2).ConfigureAwait(false);
 
              _ViewJobCardList[0].LstequipmentCatList = _equipmentCatList;*/
-            foreach (var list in _ViewJobCardList)
-            {
-                if (list != null && list.endTime != null)
-                    list.endTime = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.endTime);
-                if (list != null && list.jobCardDate != null)
-                    list.jobCardDate = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.jobCardDate);
-            }
             return _ViewJobCardList;
 
         }
@@ -335,7 +337,7 @@ namespace CMMSAPIs.Repositories.JC
 
             foreach (var permit in _permitDetails)
             {
-                permit.status_short = PermitRepository.Status(permit.status);
+                permit.status_short = PermitRepository.getShortStatus(permit.status);
             }
 
             // isolated details
