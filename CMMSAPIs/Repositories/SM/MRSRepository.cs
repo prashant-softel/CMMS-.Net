@@ -173,7 +173,7 @@ namespace CMMSAPIs.Repositories.SM
         {
             string stmt = "";
             int ID = 0;
-            stmt = $"select nullif(id,0) as ID from smtransactiondetails where mrsID = {mrsID} and assetItemID = {assetItemID}; ";
+            stmt = $"select nullif(id,0) as ID from smtransactiondetails where mrsID = {mrsID} and assetItemID = {assetItemID} and fromActorType IN ({(int)CMMS.SM_Actor_Types.PM_Task},{(int)CMMS.SM_Actor_Types.JobCard},{(int)CMMS.SM_Actor_Types.Engineer}) and toActorType ={(int)CMMS.SM_Actor_Types.Inventory}; ";
             DataTable dt2 = await Context.FetchData(stmt).ConfigureAwait(false);
             if(dt2.Rows.Count > 0)
             {
@@ -985,8 +985,17 @@ namespace CMMSAPIs.Repositories.SM
                 {
                     return false;
                 }
-                if (transaction_id == 0)
-                {
+                // setting transaction_id as 0 becuse nowonwards we do not require this id from UI team
+                transaction_id = 0;
+                string chkAssetPresnt = $"select nullif(id,0) id,qty from smtransactiondetails where toActorID = {toActorID} and toActorType = {toActorType} and assetItemID = {assetItemID} and mrsID = {mrsID};";
+                      DataTable dt_chkAssetPresnt = await Context.FetchData(chkAssetPresnt).ConfigureAwait(false);
+                    if (dt_chkAssetPresnt.Rows.Count > 0)
+                    {
+                        transaction_id = Convert.ToInt32(dt_chkAssetPresnt.Rows[0][0]);
+                    }
+                    // check for edit provision for consume item i.e toActorID==6 then it is coming for consume
+                    if (transaction_id == 0)
+                    {
                     string stmt = "INSERT INTO smtransactiondetails (plantID,fromActorID,fromActorType,toActorID,toActorType,assetItemID,qty,referedby,reference_ID,remarks,Nature_Of_Transaction,Asset_Item_Status,mrsID)" +
                                   $"VALUES ({facilityID},{fromActorID},{fromActorType},{toActorID},{toActorType},{assetItemID},{qty},{refType},{refID},'{remarks}',{natureOfTransaction},{assetItemStatus},{mrsID}); SELECT LAST_INSERT_ID(); ";
 
