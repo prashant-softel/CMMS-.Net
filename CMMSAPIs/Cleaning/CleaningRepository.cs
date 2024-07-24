@@ -40,11 +40,11 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             { (int)CMMS.CMMS_Status.MC_TASK_ABANDONED, "Abandoned" },
             { (int)CMMS.CMMS_Status.MC_TASK_APPROVED, "Approved" },
             { (int)CMMS.CMMS_Status.MC_TASK_REJECTED, "Rejected" },
-            { (int)CMMS.CMMS_Status.SCHEDULED_LINKED_TO_PTW,"Schedule_Linked_To_PTW" },
-            { (int)CMMS.CMMS_Status.MC_TASK_END_APPROVED,"MC_Task_Ended_Approved" },
-            { (int)CMMS.CMMS_Status.MC_TASK_END_REJECTED,"MC_Task_Ended_Reject" },
-            { (int)CMMS.CMMS_Status.MC_TASK_SCHEDULE_APPROVED,"MC_Task_Schedule_Approved" },
-            { (int)CMMS.CMMS_Status.MC_TASK_SCHEDULE_REJECT,"MC_Task_Schedule_Reject" },
+            { (int)CMMS.CMMS_Status.SCHEDULED_LINKED_TO_PTW,"PTW_Linked" },
+            { (int)CMMS.CMMS_Status.MC_TASK_END_APPROVED,"Approved" },
+            { (int)CMMS.CMMS_Status.MC_TASK_END_REJECTED,"Reject" },
+            { (int)CMMS.CMMS_Status.MC_TASK_SCHEDULE_APPROVED,"Approved" },
+            { (int)CMMS.CMMS_Status.MC_TASK_SCHEDULE_REJECT,"Reject" },
             { (int)CMMS.CMMS_Status.MC_TASK_RESCHEDULED,"Reschedule" },
             { (int)CMMS.CMMS_Status.VEG_PLAN_DRAFT, "Draft" },
             { (int)CMMS.CMMS_Status.VEG_PLAN_SUBMITTED, "Waiting for Approval" },
@@ -113,6 +113,21 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 case CMMS.CMMS_Status.MC_TASK_APPROVED:
                     retValue = String.Format("Module Cleaning Task <{0}> Approved ", executionObj.executionId);
                     break;
+                case CMMS.CMMS_Status.SCHEDULED_LINKED_TO_PTW:
+                    retValue = String.Format("Module Cleaning Task <{0}> PTW_Linked ", executionObj.executionId);
+                    break;
+                case CMMS.CMMS_Status.MC_TASK_END_APPROVED:
+                    retValue = String.Format("Module Cleaning Task <{0}> Approved ", executionObj.executionId);
+                    break;
+                case CMMS.CMMS_Status.MC_TASK_END_REJECTED:
+                    retValue = String.Format("Module Cleaning Task <{0}> Rejected ", executionObj.executionId);
+                    break;
+                case CMMS.CMMS_Status.MC_TASK_SCHEDULE_REJECT:
+                    retValue = String.Format("Module Cleaning Task <{0}> Rejected ", executionObj.executionId);
+                    break;
+                case CMMS.CMMS_Status.MC_TASK_RESCHEDULED:
+                    retValue = String.Format("Module Cleaning Task <{0}> Reschdule ", executionObj.executionId);
+                    break;
                 case CMMS.CMMS_Status.VEG_PLAN_DRAFT:
                     retValue = String.Format("Vegetation Plan <{0}> Draft by {1} ", planObj.planId, planObj.createdBy);
                     break;
@@ -146,6 +161,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 case CMMS.CMMS_Status.VEG_TASK_APPROVED:
                     retValue = String.Format("Vegetation Task <{0}> Approved ", executionObj.executionId);
                     break;
+
                 default:
                     break;
             }
@@ -227,6 +243,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             }
             return statusName;
         }
+
         internal async Task<List<CMMCPlan>> GetPlanList(int facilityId, string facilitytimeZone)
         {
             string statusOut = "CASE ";

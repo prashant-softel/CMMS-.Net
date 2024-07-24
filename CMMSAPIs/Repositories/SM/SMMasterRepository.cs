@@ -187,26 +187,28 @@ namespace CMMSAPIs.Repositories.SM
             /*
              * Return id, name, code, description, asset type, asset categroy, unit measurement, attached files  
              * from SMAssetMasters, SMAssetMasterFiles, SMUnitMeasurement, SMAssetTypes, SMAssetCategory
-            */
+            *?
+                 
+                /* if (ID == 0)
+                 {
+                     myQuery = "SELECT sam.ID,sam.asset_type_ID,sam.asset_code,sam.asset_name,sam.description,if(sam.approval_required = 1, 'Yes','No') as approval_required,sam.section,sam.reorder_qty,sam.max_request_qty, " +
+                               " sat.asset_type ,sam.min_qty, sic.cat_name,sm.name as measurement,sm.decimal_status " +
+                               " FROM smassetmasters sam LEFT JOIN smassettypes sat ON sat.ID = sam.asset_type_ID " +
+                               " LEFT JOIN smitemcategory sic ON sic.ID = sam.item_category_ID  LEFT JOIN smunitmeasurement sm ON sm.ID = sam.unit_of_measurement " +
+                               " WHERE sam.flag = 1;";
+                 }*/
             string myQuery = "";
-            if (ID == 0)
-            {
-                myQuery = "SELECT sam.ID,sam.asset_type_ID,sam.asset_code,sam.asset_name,sam.description,if(sam.approval_required = 1, 'Yes','No') as approval_required,sam.section,sam.reorder_qty,sam.max_request_qty, " +
-                          " sat.asset_type ,sam.min_qty, sic.cat_name,sm.name as measurement,sm.decimal_status " +
-                          " FROM smassetmasters sam LEFT JOIN smassettypes sat ON sat.ID = sam.asset_type_ID " +
-                          " LEFT JOIN smitemcategory sic ON sic.ID = sam.item_category_ID  LEFT JOIN smunitmeasurement sm ON sm.ID = sam.unit_of_measurement " +
-                          " WHERE sam.flag = 1;";
-            }
-            else
-            {
+            if (ID > 0)
+
                 myQuery = "SELECT sam.ID,sam.asset_type_ID,sam.asset_code,sam.asset_name,sam.description,if(sam.approval_required = 1, 'Yes','No') as approval_required,sam.section,sam.reorder_qty,sam.max_request_qty ," +
-                          " sat.asset_type ,sam.min_qty, sic.cat_name,sm.name as measurement,sm.decimal_status " +
-                          " FROM smassetmasters sam LEFT JOIN smassettypes sat ON sat.ID = sam.asset_type_ID " +
-                          " LEFT JOIN smitemcategory sic ON sic.ID = sam.item_category_ID  LEFT JOIN smunitmeasurement sm ON sm.ID = sam.unit_of_measurement " +
-                          " WHERE sam.ID = " + ID + " AND sam.flag = 1;";
-            }
+                      " sat.asset_type ,sam.min_qty, sic.cat_name,sm.name as measurement,sm.decimal_status " +
+                      " FROM smassetmasters sam LEFT JOIN smassettypes sat ON sat.ID = sam.asset_type_ID " +
+                      " LEFT JOIN smitemcategory sic ON sic.ID = sam.item_category_ID  LEFT JOIN smunitmeasurement sm ON sm.ID = sam.unit_of_measurement " +
+                      " WHERE sam.plant_ID = " + ID + " AND sam.flag = 1;";
+
             List<CMASSETMASTERLIST> _List = await Context.GetData<CMASSETMASTERLIST>(myQuery).ConfigureAwait(false);
             return _List;
+
         }
 
         internal async Task<CMDefaultResponse> AddAssetMaster(CMSMMaster request, CMAssetMasterFiles fileData, int UserID)

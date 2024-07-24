@@ -40,7 +40,6 @@ namespace CMMSAPIs.BS.Cleaning
         // public Task<List<CMMCTaskEquipmentList>> GetVegTaskEquipmentList(int taskId, string facilitytime);
         public Task<CMDefaultResponse> LinkPermitToModuleCleaning(int task_id, int permit_id, int userId);
 
-
     }
     public class CleaningBS : ICleaningBS
     {
@@ -64,7 +63,7 @@ namespace CMMSAPIs.BS.Cleaning
             }
             if (CMMS.cleaningType.Vegetation == module)
             {
-                repos = new VegetationRepository(getDB);
+                repos = new CleaningRepository(getDB);
 
             }
             return 1;
@@ -451,6 +450,9 @@ namespace CMMSAPIs.BS.Cleaning
                 throw;
             }
         }
+
+
+
         public async Task<CMDefaultResponse> ApproveEndExecution(ApproveMC request, int userId)
         {
             try

@@ -90,7 +90,9 @@ namespace CMMSAPIs.Repositories.SM
         {
             int Id = 0;
             string filter = "";
+            int mrs_id = 0;
             List<CMMRSListByModule> _List = null;
+            //  List<ASSETSITEM> _ListASSET = null;
             if (jobId > 0)
             {
                 Id = jobId;
@@ -117,6 +119,8 @@ namespace CMMSAPIs.Repositories.SM
             {
                 string assetItemNames = "";
                 _List[i].pmId = pmId;
+                mrs_id = _List[i].mrsId;
+
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_List[i].status);
                 string _shortStatus = getShortStatus(CMMS.CMMS_Modules.SM_MRS, _Status);
                 _List[i].status_short = _shortStatus;
@@ -129,16 +133,49 @@ namespace CMMSAPIs.Repositories.SM
                 {
                     // filling MRS Return Items list
                     _List[i].CMMRSItems = await getMRSItemsReturn(_List[i].mrsId, facilitytimeZone);
-                    if(jobId > 0)
+                    if (jobId > 0)
                     {
                         _List[i].mrs_return_ID = _List[i].mrsId;
                     }
-               
+
                     //if (_List[i].CMMRSItems.Count > 0)
                     //{
                     //    _List[i].mrsId = _List[i].CMMRSItems[0].original_mrs_ID;
                     //}
-                   
+
+                }
+                /*  string qrytocator = $"SELECT toActorID FROM smtransactiondetails WHERE fromActorID={pmId}";
+                  List<IDASETS> ID = await Context.GetData<IDASETS>(qrytocator).ConfigureAwait(false);
+
+                  foreach (IDASETS id in ID)
+                  {
+                      if (_List[i].is_mrs_return == 0)
+                      {
+                          string stmt = "";
+                          stmt = $"select assetItemID as sm_asset_id,qty as used_qty  from smtransactiondetails where toActorID={ID} and  toActorType ={(int)CMMS.SM_Actor_Types.Inventory}; ";
+                          List<CMASSETSItems> material_used_by_assets = await Context.GetData<CMASSETSItems>(stmt).ConfigureAwait(false);
+                          return material_used_by_assets;
+
+                      }
+                  }*/
+
+                string qrytocator = $"SELECT DISTINCT toActorID as asset_id FROM smtransactiondetails WHERE fromActorID={pmId}";
+                List<IDASETS> ID = await Context.GetData<IDASETS>(qrytocator).ConfigureAwait(false);
+
+                var assets = new List<IDASETS>();
+
+                foreach (var toactor in ID)
+                {
+                    int tid = toactor.asset_id;
+                    string stmt = $"SELECT assetItemID as sm_asset_id, qty as used_qty FROM smtransactiondetails WHERE  mrsID={mrs_id} AND toActorID={tid}  AND toActorType={(int)CMMS.SM_Actor_Types.Inventory}";
+                    List<ASSETSITEM> material_used_by_assets = await Context.GetData<ASSETSITEM>(stmt).ConfigureAwait(false);
+                    var Itemsm = new IDASETS
+                    {
+                        asset_id = tid,
+                        Items = material_used_by_assets
+                    };
+
+                    assets.Add(Itemsm);
                 }
 
                 if (_List[i].CMMRSItems.Count > 0)
@@ -163,24 +200,29 @@ namespace CMMSAPIs.Repositories.SM
                 }
                 _List[i].mrsItems = assetItemNames;
                 _List[i].mrs_return_ID = _List[i].CMMRSItems[0].mrs_return_ID;
-                
+                _List[i].material_used_by_assets = assets;
+
+            }
+            foreach (var item in _List)
+            {
+
             }
 
             return _List;
         }
-
         protected async Task<int> getTransactionIdForMRS(int mrsID, int assetItemID)
         {
             string stmt = "";
             int ID = 0;
             stmt = $"select nullif(id,0) as ID from smtransactiondetails where mrsID = {mrsID} and assetItemID = {assetItemID} and fromActorType IN ({(int)CMMS.SM_Actor_Types.PM_Task},{(int)CMMS.SM_Actor_Types.JobCard},{(int)CMMS.SM_Actor_Types.Engineer}) and toActorType ={(int)CMMS.SM_Actor_Types.Inventory}; ";
             DataTable dt2 = await Context.FetchData(stmt).ConfigureAwait(false);
-            if(dt2.Rows.Count > 0)
+            if (dt2.Rows.Count > 0)
             {
                 ID = Convert.ToInt32(dt2.Rows[0][0]);
-            }            
+            }
             return ID;
         }
+
         internal static string getShortStatus(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status m_notificationID)
         {
             string retValue;
@@ -976,26 +1018,26 @@ namespace CMMSAPIs.Repositories.SM
             return response;
         }
 
-        public async Task<bool> TransactionDetails(int facilityID, int fromActorID, int fromActorType, int toActorID, int toActorType, int assetItemID, int qty, int refType, int refID, string remarks, int mrsID = 0, int natureOfTransaction = 0, int assetItemStatus = 0, int transaction_id= 0)
+        public async Task<bool> TransactionDetails(int facilityID, int fromActorID, int fromActorType, int toActorID, int toActorType, int assetItemID, int qty, int refType, int refID, string remarks, int mrsID = 0, int natureOfTransaction = 0, int assetItemStatus = 0, int transaction_id = 0)
         {
             try
             {
                 // validate MRS ID
-                if(mrsID == 0)
+                if (mrsID == 0)
                 {
                     return false;
                 }
                 // setting transaction_id as 0 becuse nowonwards we do not require this id from UI team
                 transaction_id = 0;
                 string chkAssetPresnt = $"select nullif(id,0) id,qty from smtransactiondetails where toActorID = {toActorID} and toActorType = {toActorType} and assetItemID = {assetItemID} and mrsID = {mrsID};";
-                      DataTable dt_chkAssetPresnt = await Context.FetchData(chkAssetPresnt).ConfigureAwait(false);
-                    if (dt_chkAssetPresnt.Rows.Count > 0)
-                    {
-                        transaction_id = Convert.ToInt32(dt_chkAssetPresnt.Rows[0][0]);
-                    }
-                    // check for edit provision for consume item i.e toActorID==6 then it is coming for consume
-                    if (transaction_id == 0)
-                    {
+                DataTable dt_chkAssetPresnt = await Context.FetchData(chkAssetPresnt).ConfigureAwait(false);
+                if (dt_chkAssetPresnt.Rows.Count > 0)
+                {
+                    transaction_id = Convert.ToInt32(dt_chkAssetPresnt.Rows[0][0]);
+                }
+                // check for edit provision for consume item i.e toActorID==6 then it is coming for consume
+                if (transaction_id == 0)
+                {
                     string stmt = "INSERT INTO smtransactiondetails (plantID,fromActorID,fromActorType,toActorID,toActorType,assetItemID,qty,referedby,reference_ID,remarks,Nature_Of_Transaction,Asset_Item_Status,mrsID)" +
                                   $"VALUES ({facilityID},{fromActorID},{fromActorType},{toActorID},{toActorType},{assetItemID},{qty},{refType},{refID},'{remarks}',{natureOfTransaction},{assetItemStatus},{mrsID}); SELECT LAST_INSERT_ID(); ";
 
@@ -1041,18 +1083,32 @@ namespace CMMSAPIs.Repositories.SM
         {
             try
             {
+                int existingqty = 0;
 
+                string chkAssetPresnt = $"select qty as existingqty from smtransactiondetails where toActorID = {toActorID} and toActorType = {toActorType} and assetItemID = {assetItemID} and mrsID = {mrsID};";
+                DataTable dt1 = await Context.FetchData(chkAssetPresnt).ConfigureAwait(false);
                 //string stmt = " select i.issued_qty,i.used_qty from smrsitems i inner join smmrs m on m.ID = i.mrs_ID where i.mrs_ID = " + mrsID + " and asset_item_ID = " + assetItemID + " and is_splited=1; ";
-                string stmt = " select i.issued_qty,i.used_qty from smrsitems i inner join smmrs m on m.ID = i.mrs_ID where i.mrs_ID = " + mrsID + " and i.ID = " + mrsitemID + " and is_splited=1; ";
+                string stmt = " select i.issued_qty from smrsitems i inner join smmrs m on m.ID = i.mrs_ID where i.mrs_ID = " + mrsID + " and i.ID = " + mrsitemID + " and is_splited=1; ";
                 DataTable dt2 = await Context.FetchData(stmt).ConfigureAwait(false);
+
+                string stmt1 = $"select sum(qty) as used_qty from smtransactiondetails where fromActorID={fromActorID} and fromActorType={fromActorType} and mrsID={mrsID} and assetItemID={assetItemID}; ";
+                DataTable dt3 = await Context.FetchData(stmt1).ConfigureAwait(false);
 
                 decimal issued_qty = 0;
                 int stored_used_qty = 0;
+
                 if (dt2.Rows.Count > 0)
                 {
+
+                    if (dt1.Rows.Count > 0)
+                    {
+                        existingqty = Convert.ToInt32(dt1.Rows[0][0]);
+                    }
+
                     issued_qty = Convert.ToInt32(dt2.Rows[0][0]);
-                    stored_used_qty = Convert.ToInt32(dt2.Rows[0][1]);
-                    qty = qty + stored_used_qty;
+                    stored_used_qty = Convert.ToInt32(dt3.Rows[0][0]);
+
+                    qty = qty + stored_used_qty - existingqty;
                     if (issued_qty >= qty)
                     {
                         string stmt_update = " update smrsitems set used_qty=" + qty + " where id = " + mrsitemID + ";";
@@ -1345,7 +1401,7 @@ namespace CMMSAPIs.Repositories.SM
                             $"; SELECT LAST_INSERT_ID(); COMMIT;";
                         DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
                         //fromavctor id will asset item id which is faulty , to actor id will be plant id i.e it is return to plant
-                        var tResult = await TransactionDetails(request.facility_ID, asset_item_ID, (int)CMMS.SM_Actor_Types.Inventory, request.facility_ID, (int)CMMS.SM_Actor_Types.NonOperational, asset_item_ID, Convert.ToInt32(request.faultyItems[i].returned_qty), (int)CMMS.CMMS_Modules.SM_MRS_RETURN, request.mrsreturnID, request.faultyItems[i].return_remarks, request.mrsreturnID);
+                        var tResult = await TransactionDetails(request.facility_ID, request.faultyItems[i].faulty_item_asset_id, (int)CMMS.SM_Actor_Types.Inventory, request.facility_ID, (int)CMMS.SM_Actor_Types.NonOperational, asset_item_ID, Convert.ToInt32(request.faultyItems[i].returned_qty), (int)CMMS.CMMS_Modules.SM_MRS_RETURN, request.mrsreturnID, request.faultyItems[i].return_remarks, request.mrsreturnID);
                     }
                 }
             }
@@ -1674,29 +1730,29 @@ namespace CMMSAPIs.Repositories.SM
             }
             else
             {*/
-                _List[0].available_qty = await GetAvailableQtyByCode(_List[0].Asset_master_id.ToString(), _List[0].facility_ID);
+            _List[0].available_qty = await GetAvailableQtyByCode(_List[0].Asset_master_id.ToString(), _List[0].facility_ID);
             //}
 
             return _List[0];
         }
 
-       /* public async Task<int> GetAvailableQty(int assetItemID, int plantID)
-        {
-            // actor Type 2 : Store
-            int actorType = (int)CMMS.SM_Actor_Types.Inventory;
-            string stmt = "SELECT SUM(debitQty) as drQty, SUM(creditQty) as crQty FROM smtransition WHERE assetItemID = " + assetItemID.ToString() + " AND actorType = '" + actorType + "' AND transactionID IN (SELECT ID FROM smtransactiondetails WHERE plantID = " + plantID.ToString() + ")";
-            //string stmt = "SELECT SUM(debitQty) as drQty, SUM(creditQty) as crQty FROM smtransition WHERE assetItemID = " + assetItemID.ToString() + " AND actorType = '" + actorType + "' AND transactionID IN (SELECT ID FROM smtransactiondetails WHERE plantID = " + plantID.ToString() + ")";
+        /* public async Task<int> GetAvailableQty(int assetItemID, int plantID)
+         {
+             // actor Type 2 : Store
+             int actorType = (int)CMMS.SM_Actor_Types.Inventory;
+             string stmt = "SELECT SUM(debitQty) as drQty, SUM(creditQty) as crQty FROM smtransition WHERE assetItemID = " + assetItemID.ToString() + " AND actorType = '" + actorType + "' AND transactionID IN (SELECT ID FROM smtransactiondetails WHERE plantID = " + plantID.ToString() + ")";
+             //string stmt = "SELECT SUM(debitQty) as drQty, SUM(creditQty) as crQty FROM smtransition WHERE assetItemID = " + assetItemID.ToString() + " AND actorType = '" + actorType + "' AND transactionID IN (SELECT ID FROM smtransactiondetails WHERE plantID = " + plantID.ToString() + ")";
 
-            DataTable dt2 = await Context.FetchData(stmt).ConfigureAwait(false);
-            int crQty = 0, drQty = 0;
-            if (dt2 != null && dt2.Rows.Count > 0)
-            {
-                crQty = (dt2.Rows[0]["crQty"].ToInt());
-                drQty = (dt2.Rows[0]["drQty"].ToInt());
-            }
-            int availableQty = crQty - drQty;
-            return availableQty;
-        }*/
+             DataTable dt2 = await Context.FetchData(stmt).ConfigureAwait(false);
+             int crQty = 0, drQty = 0;
+             if (dt2 != null && dt2.Rows.Count > 0)
+             {
+                 crQty = (dt2.Rows[0]["crQty"].ToInt());
+                 drQty = (dt2.Rows[0]["drQty"].ToInt());
+             }
+             int availableQty = crQty - drQty;
+             return availableQty;
+         }*/
         public async Task<int> GetAvailableQtyByCode(string assetMasterIDs, int plantID)
         {
             // actor Type 2 : Store
@@ -1704,7 +1760,7 @@ namespace CMMSAPIs.Repositories.SM
 
             //string stmt = "SELECT ifnull(SUM(debitQty),0) as drQty, ifnull(SUM(creditQty),0) as crQty FROM  smtransition WHERE assetItemID IN (" + assetMasterIDs + ") AND actorType = '" + actorType + "' AND facilityID = "+plantID+"";
 
-            string stmt = "SELECT ifnull(SUM(debitQty),0) as drQty, ifnull(SUM(creditQty),0) as crQty FROM  smtransition WHERE assetItemID IN (" + assetMasterIDs + ") AND actorType IN (" + (int)CMMS.SM_Actor_Types.Store + ","+(int)CMMS.SM_Actor_Types.PM_Task+ "," + (int)CMMS.SM_Actor_Types.JobCard + "," + (int)CMMS.SM_Actor_Types.Engineer + ") AND facilityID = " + plantID + "";
+            string stmt = "SELECT ifnull(SUM(debitQty),0) as drQty, ifnull(SUM(creditQty),0) as crQty FROM  smtransition WHERE assetItemID IN (" + assetMasterIDs + ") AND actorType IN (" + (int)CMMS.SM_Actor_Types.Store + "," + (int)CMMS.SM_Actor_Types.PM_Task + "," + (int)CMMS.SM_Actor_Types.JobCard + "," + (int)CMMS.SM_Actor_Types.Engineer + ") AND facilityID = " + plantID + "";
             DataTable dt2 = await Context.FetchData(stmt).ConfigureAwait(false);
             int crQty = 0, drQty = 0;
             if (dt2 != null && dt2.Rows.Count > 0)

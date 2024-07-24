@@ -139,6 +139,7 @@ namespace CMMSAPIs.Models.SM
     {
         public int mrs_item_ID { get; set; }
         public int assetMasterItemID { get; set; }
+        public int faulty_item_asset_id { get; set; }
         public int returned_qty { get; set; }
         public string return_remarks { get; set; }
         public string serial_number { get; set; }
@@ -344,9 +345,21 @@ namespace CMMSAPIs.Models.SM
         public int status { get; set; }
         public string status_short { get; set; }
         public List<CMMRSItems> CMMRSItems { get; set; }
+        public List<IDASETS> material_used_by_assets { get; set; }
 
     }
+    public class ASSETSITEM
+    {
 
+        public dynamic sm_asset_id { get; set; }
+        public dynamic used_qty { get; set; }
+    }
+    public class IDASETS
+    {
+
+        public int asset_id { get; set; }
+        public List<ASSETSITEM> Items { get; set; }
+    }
     public class CMRETURNMRSDATA
     {
         public int ID { get; set; }

@@ -3,26 +3,31 @@ using CMMSAPIs.Models.MC;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.CleaningRepository;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace CMMSAPIs.Cleaning
 {
     public interface VegBS
     {
-        public Task<CMDefaultResponse> AbandonExecution(CMApproval request, int userId);
-        public Task<CMDefaultResponse> ApproveExecution(CMApproval request, int userId);
-        public Task<CMDefaultResponse> CreatePlan(List<CMMCPlan> request, int userId);
-        public Task<CMDefaultResponse> DeletePlan(int planId, int userId);
-        public Task<CMDefaultResponse> EndExecution(int executionId, int userId);
-        Task<CMDefaultResponse> LinkPermitToVegetation(int task_id, int permit_id, int userId);
-        public Task<CMDefaultResponse> RejectExecution(CMApproval request, int userId);
-        public Task<CMDefaultResponse> RejectPlan(CMApproval request, int userId);
-        public Task<CMDefaultResponse> StartExecution(int executionId, int userId);
-        public Task<CMDefaultResponse> StartScheduleExecution(int scheduleId, int userId);
-        public Task<CMDefaultResponse> UpdatePlan(List<CMMCPlan> request, int userId);
-        public Task<CMDefaultResponse> RejectEndExecution(ApproveMC request, int userId);
-        public Task<CMDefaultResponse> AbandonSchedule(CMApproval request, int userId);
+        public Task<CMDefaultResponse> AbandonExecutionVegetation(CMApproval request, int userId);
+        public Task<CMDefaultResponse> ApproveExecutionVegetation(ApproveMC request, int userId);
+        public Task<CMDefaultResponse> StartExecutionVegetation(int executionId, int userId);
+        public Task<CMDefaultResponse> StartScheduleExecutionVegetation(int scheduleId, int userId);
+        public Task<CMDefaultResponse> EndExecutionVegetation(int executionId, int userId);
+        public Task<CMDefaultResponse> LinkPermitToVegetation(int task_id, int permit_id, int userId);
+        public Task<CMDefaultResponse> RejectExecutionVegetation(CMApproval request, int userId);
+        public Task<CMDefaultResponse> RejectEndExecutionVegetation(ApproveMC request, int userId);
+        public Task<CMDefaultResponse> AbandonScheduleVegetation(CMApproval request, int userId);
+        public Task<CMDefaultResponse> CompleteExecutionVegetation(CMMCExecution request, int userId);
+        public Task<CMDefaultResponse> ApproveScheduleExecutionVegetation(ApproveMC request, int userId);
+        public Task<CMDefaultResponse> RejectAbandonExecutionVegetation(CMApproval request, int userId);
+        public Task<CMDefaultResponse> ApproveAbandonExecutionVegetation(CMApproval request, int userId);
+        public Task<CMDefaultResponse> EndScheduleExecutionVegetation(int scheduleId, int userId);
+        public Task<CMDefaultResponse> ReAssignMcTaskVegetation(int task_id, int assign_to, int userID);
+        public Task<CMDefaultResponse> UpdateScheduleExecutionVegetation(CMMCGetScheduleExecution request, int userId);
+        public Task<CMDefaultResponse> ApproveEndExecutionVegetation(ApproveMC request, int userId);
+        public Task<CMDefaultResponse> RejectScheduleExecutionVegetation(ApproveMC request, int userId);
+
     }
 
     public class vegetaion : VegBS
@@ -31,7 +36,7 @@ namespace CMMSAPIs.Cleaning
         private readonly DatabaseProvider databaseProvider;
         private MYSQLDBHelper getDB => databaseProvider.SqlInstance();
 
-        private CleaningRepository repos;
+        private VegetationRepository repos;
 
         public vegetaion(DatabaseProvider dbProvider)
         {
@@ -44,7 +49,7 @@ namespace CMMSAPIs.Cleaning
 
             if (CMMS.cleaningType.ModuleCleaning == module)
             {
-                repos = new MCRepository(getDB);
+                repos = new VegetationRepository(getDB);
             }
             if (CMMS.cleaningType.Vegetation == module)
             {
@@ -54,14 +59,13 @@ namespace CMMSAPIs.Cleaning
             return 1;
         }
 
-        public async Task<CMDefaultResponse> AbandonExecution(CMApproval request, int userId)
+        public async Task<CMDefaultResponse> AbandonExecutionVegetation(CMApproval request, int userId)
         {
-
             try
             {
                 using (var repos = new VegetationRepository(getDB))
                 {
-                    return await repos.AbandonExecution(request, userId);
+                    return await repos.AbandonExecutionVegetation(request, userId);
                 }
             }
             catch (Exception ex)
@@ -70,13 +74,13 @@ namespace CMMSAPIs.Cleaning
             }
         }
 
-        public async Task<CMDefaultResponse> ApproveExecution(CMApproval request, int userId)
+        public async Task<CMDefaultResponse> StartExecutionVegetation(int executionId, int userId)
         {
             try
             {
                 using (var repos = new VegetationRepository(getDB))
                 {
-                    return await repos.ApproveExecution(request, userId);
+                    return await repos.StartExecutionVegetation(executionId, userId);
                 }
             }
             catch (Exception ex)
@@ -85,15 +89,13 @@ namespace CMMSAPIs.Cleaning
             }
         }
 
-
-
-        public async Task<CMDefaultResponse> CreatePlan(List<CMMCPlan> request, int userId)
+        public async Task<CMDefaultResponse> StartScheduleExecutionVegetation(int scheduleId, int userId)
         {
             try
             {
                 using (var repos = new VegetationRepository(getDB))
                 {
-                    return await repos.CreatePlan(request, userId);
+                    return await repos.StartScheduleExecutionVegetation(scheduleId, userId);
                 }
             }
             catch (Exception ex)
@@ -102,13 +104,13 @@ namespace CMMSAPIs.Cleaning
             }
         }
 
-        public async Task<CMDefaultResponse> DeletePlan(int planId, int userId)
+        public async Task<CMDefaultResponse> EndExecutionVegetation(int executionId, int userId)
         {
             try
             {
                 using (var repos = new VegetationRepository(getDB))
                 {
-                    return await repos.DeletePlan(planId, userId);
+                    return await repos.EndExecutionVegetation(executionId, userId);
                 }
             }
             catch (Exception ex)
@@ -116,22 +118,6 @@ namespace CMMSAPIs.Cleaning
                 throw;
             }
         }
-
-        public async Task<CMDefaultResponse> EndExecution(int executionId, int userId)
-        {
-            try
-            {
-                using (var repos = new VegetationRepository(getDB))
-                {
-                    return await repos.EndExecution(executionId, userId);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        }
-
 
         public async Task<CMDefaultResponse> LinkPermitToVegetation(int task_id, int permit_id, int userId)
         {
@@ -147,14 +133,13 @@ namespace CMMSAPIs.Cleaning
                 throw;
             }
         }
-
-        public async Task<CMDefaultResponse> RejectExecution(CMApproval request, int userId)
+        public async Task<CMDefaultResponse> AbandonScheduleVegetation(CMApproval request, int userId)
         {
             try
             {
                 using (var repos = new VegetationRepository(getDB))
                 {
-                    return await repos.RejectExecution(request, userId);
+                    return await repos.AbandonScheduleVegetation(request, userId);
                 }
             }
             catch (Exception ex)
@@ -163,15 +148,13 @@ namespace CMMSAPIs.Cleaning
             }
         }
 
-
-
-        public async Task<CMDefaultResponse> RejectPlan(CMApproval request, int userId)
+        public async Task<CMDefaultResponse> CompleteExecutionVegetation(CMMCExecution request, int userId)
         {
             try
             {
                 using (var repos = new VegetationRepository(getDB))
                 {
-                    return await repos.RejectPlan(request, userId);
+                    return await repos.CompleteExecutionVegetation(request, userId);
                 }
             }
             catch (Exception ex)
@@ -180,13 +163,13 @@ namespace CMMSAPIs.Cleaning
             }
         }
 
-        public async Task<CMDefaultResponse> StartExecution(int executionId, int userId)
+        public async Task<CMDefaultResponse> EndScheduleExecutionVegetation(int scheduleId, int userId)
         {
             try
             {
                 using (var repos = new VegetationRepository(getDB))
                 {
-                    return await repos.StartExecution(executionId, userId);
+                    return await repos.EndScheduleExecutionVegetation(scheduleId, userId);
                 }
             }
             catch (Exception ex)
@@ -195,13 +178,13 @@ namespace CMMSAPIs.Cleaning
             }
         }
 
-        public async Task<CMDefaultResponse> StartMCExecution(int id, int userId)
+        public async Task<CMDefaultResponse> ReAssignMcTaskVegetation(int task_id, int assign_to, int userID)
         {
             try
             {
                 using (var repos = new VegetationRepository(getDB))
                 {
-                    return await repos.StartExecutionVegetation(id, userId);
+                    return await repos.ReAssignMcTaskVegetation(task_id, assign_to, userID);
                 }
             }
             catch (Exception ex)
@@ -210,13 +193,13 @@ namespace CMMSAPIs.Cleaning
             }
         }
 
-        public async Task<CMDefaultResponse> StartScheduleExecution(int scheduleId, int userId)
+        public async Task<CMDefaultResponse> UpdateScheduleExecutionVegetation(CMMCGetScheduleExecution request, int userId)
         {
             try
             {
                 using (var repos = new VegetationRepository(getDB))
                 {
-                    return await repos.StartScheduleExecution(scheduleId, userId);
+                    return await repos.UpdateScheduleExecutionVegetation(request, userId);
                 }
             }
             catch (Exception ex)
@@ -225,13 +208,13 @@ namespace CMMSAPIs.Cleaning
             }
         }
 
-        public async Task<CMDefaultResponse> UpdatePlan(List<CMMCPlan> request, int userId)
+        public async Task<CMDefaultResponse> ApproveEndExecutionVegetation(ApproveMC request, int userId)
         {
             try
             {
                 using (var repos = new VegetationRepository(getDB))
                 {
-                    return await repos.UpdatePlan(request, userId);
+                    return await repos.ApproveEndExecutionVegetation(request, userId);
                 }
             }
             catch (Exception ex)
@@ -240,13 +223,13 @@ namespace CMMSAPIs.Cleaning
             }
         }
 
-        public async Task<CMDefaultResponse> RejectEndExecution(ApproveMC request, int userId)
+        public async Task<CMDefaultResponse> ApproveScheduleExecutionVegetation(ApproveMC request, int userId)
         {
             try
             {
                 using (var repos = new VegetationRepository(getDB))
                 {
-                    return await repos.RejectEndExecution(request, userId);
+                    return await repos.ApproveScheduleExecutionVegetation(request, userId);
                 }
             }
             catch (Exception ex)
@@ -255,13 +238,13 @@ namespace CMMSAPIs.Cleaning
             }
         }
 
-        public async Task<CMDefaultResponse> AbandonSchedule(CMApproval request, int userId)
+        public async Task<CMDefaultResponse> RejectAbandonExecutionVegetation(CMApproval request, int userId)
         {
             try
             {
                 using (var repos = new VegetationRepository(getDB))
                 {
-                    return await repos.AbandonSchedule(request, userId);
+                    return await repos.RejectAbandonExecutionVegetation(request, userId);
                 }
             }
             catch (Exception ex)
@@ -270,13 +253,13 @@ namespace CMMSAPIs.Cleaning
             }
         }
 
-        internal async Task<CMDefaultResponse> CompleteExecution(CMMCExecution request, int userId)
+        public async Task<CMDefaultResponse> ApproveExecutionVegetation(ApproveMC request, int userId)
         {
             try
             {
                 using (var repos = new VegetationRepository(getDB))
                 {
-                    return await repos.CompleteExecution(request, userId);
+                    return await repos.ApproveEndExecutionVegetation(request, userId);
                 }
             }
             catch (Exception ex)
@@ -285,5 +268,69 @@ namespace CMMSAPIs.Cleaning
             }
         }
 
+        public async Task<CMDefaultResponse> RejectEndExecutionVegetation(ApproveMC request, int userId)
+        {
+            try
+            {
+                using (var repos = new VegetationRepository(getDB))
+                {
+                    return await repos.RejectEndExecutionVegetation(request, userId);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+
+        }
+
+        public async Task<CMDefaultResponse> ApproveAbandonExecutionVegetation(CMApproval request, int userId)
+        {
+
+
+            try
+            {
+                using (var repos = new VegetationRepository(getDB))
+                {
+                    return await repos.ApproveAbandonExecutionVegetation(request, userId);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<CMDefaultResponse> RejectExecutionVegetation(CMApproval request, int userId)
+        {
+
+            try
+            {
+                using (var repos = new VegetationRepository(getDB))
+                {
+                    return await repos.RejectExecutionVegetation(request, userId);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+
+        }
+
+        public async Task<CMDefaultResponse> RejectScheduleExecutionVegetation(ApproveMC request, int userId)
+        {
+            try
+            {
+                using (var repos = new VegetationRepository(getDB))
+                {
+                    return await repos.RejectScheduleExecutionVegetation(request, userId);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+
+        }
     }
 }

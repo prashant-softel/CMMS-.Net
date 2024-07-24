@@ -12,9 +12,11 @@ using static CMMSAPIs.Helper.CMMS;
 namespace CMMSAPIs.Repositories.CleaningRepository
 {
 
-    public class VegetationRepository : CleaningRepository
+    public class VegetationRepository : GenericRepository
     {
         private UtilsRepository _utilsRepo;
+        public int moduleType;
+        public static string measure = "moduleQuantity";
         public VegetationRepository(MYSQLDBHelper sqlDBHelper) : base(sqlDBHelper)
         {
             _utilsRepo = new UtilsRepository(sqlDBHelper);
@@ -134,14 +136,33 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 string equipIds2 = string.Join(" , ", request.abandonedEquipmentIds);
 
                 string abandoneQuery = $"Update cleaning_execution_items set status = {abandonStatus},executionDay={request.cleaningDay},abandonedById={userId},abandonedAt= '{UtilsRepository.GetUTCTime()}' where executionId = {request.executionId} and assetId IN ({equipIds2}); ";
-
                 int val3 = await Context.ExecuteNonQry<int>(abandoneQuery).ConfigureAwait(false);
             }
-
-
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.VEGETATION, request.scheduleId, 0, 0, "schedule Updated", CMMS.CMMS_Status.VEG_TASK_UPDATED, userId);
 
             CMDefaultResponse response = new CMDefaultResponse(request.scheduleId, CMMS.RETRUNSTATUS.SUCCESS, $"Schedule Updated Successfully");
+            return response;
+        }
+        internal async Task<CMDefaultResponse> AbandonScheduleVegetation(CMApproval request, int userId)
+        {
+            int status = (int)CMMS.CMMS_Status.MC_TASK_ABANDONED;
+            int equipstatus = (int)CMMS.CMMS_Status.EQUIP_ABANDONED;
+            int notStatus = (int)CMMS.CMMS_Status.MC_TASK_COMPLETED;
+            if (moduleType == 2)
+            {
+                status = (int)CMMS.CMMS_Status.VEG_TASK_ABANDONED;
+                notStatus = (int)CMMS.CMMS_Status.VEG_TASK_COMPLETED;
+            }
+
+            string Query = $"Update cleaning_execution_schedules set status = {status}, abandonedById={userId},abandonedAt='{UtilsRepository.GetUTCTime()}' ,remark = '{request.comment}' where scheduleId = {request.id} ;" +
+                 $"Update cleaning_execution_items set status = {equipstatus}, abandonedById={userId},abandonedAt='{UtilsRepository.GetUTCTime()}'  where scheduleId = {request.id} and  status NOT IN ( {notStatus} );";
+
+
+            int val = await Context.ExecuteNonQry<int>(Query).ConfigureAwait(false);
+
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MC_TASK, request.id, 0, 0, request.comment, (CMMS.CMMS_Status)status, userId);
+
+            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, request.comment);
             return response;
         }
         internal async Task<CMDefaultResponse> EndScheduleExecutionVegetation(int scheduleId, int userId)
@@ -201,7 +222,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             CMDefaultResponse response = new CMDefaultResponse(executionId, CMMS.RETRUNSTATUS.SUCCESS, $"Task Execution Completed");
             return response;
         }
-        internal async Task<CMDefaultResponse> ApproveEndExecution(ApproveMC request, int userID)
+        internal async Task<CMDefaultResponse> ApproveEndExecutionVegetation(ApproveMC request, int userID)
         {
             //comment remark='{request.comment}'
 
@@ -387,9 +408,105 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             return response;
         }
 
-        internal async Task<CMDefaultResponse> CompleteExecution(CMMCExecution request, int userId)
+        internal async Task<CMDefaultResponse> CompleteExecutionVegetation(CMMCExecution request, int userId)
         {
             return null;
+        }
+
+        internal async Task<CMDefaultResponse> RejectEndExecutionVegetation(ApproveMC request, int userID)
+        {
+
+            int status;
+
+            status = (int)CMMS.CMMS_Status.VEG_TASK_END_REJECTED;
+            string approveQuery = $"Update cleaning_execution set status= {status},rejectedById={userID},executionRejectedRemarks='{request.comment}', rejectedAt='{UtilsRepository.GetUTCTime()}', executionRejectedAt = '{UtilsRepository.GetUTCTime()}' where id = {request.id}";
+            await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
+
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.VEGETATION_TASK, request.execution_id, 0, 0, request.comment, (CMMS.CMMS_Status)status, userID);
+
+            CMDefaultResponse response = new CMDefaultResponse(request.execution_id, CMMS.RETRUNSTATUS.SUCCESS, $"Execution End Rejected");
+            return response;
+
+        }
+
+        internal async Task<CMDefaultResponse> RejectExecutionVegetation(CMApproval request, int userID)
+        {
+
+            int status = (int)CMMS.CMMS_Status.MC_TASK_REJECTED;
+
+            if (moduleType == 2)
+            {
+                status = (int)CMMS.CMMS_Status.VEG_TASK_REJECTED;
+            }
+
+            string approveQuery = $"Update cleaning_execution set status= {status},rejectedById={userID},remark='{request.comment}', rejectedAt='{UtilsRepository.GetUTCTime()}' where id = {request.id}";
+            await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
+
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.VEGETATION_TASK, request.id, 0, 0, request.comment, (CMMS.CMMS_Status)status, userID);
+
+            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Execution Rejected");
+            return response;
+        }
+
+        internal async Task<CMDefaultResponse> ApproveExecutionVegetation(CMApproval request, int userID)
+        {
+
+            int status;
+            int status2;
+
+
+            status = (int)CMMS.CMMS_Status.VEG_TASK_APPROVED;
+            status2 = (int)CMMS.CMMS_Status.VEG_TASK_SCHEDULED;
+
+
+
+            string approveQuery = $"Update cleaning_execution set status= {status} ,approvedById={userID},rescheduled = 1, remark='{request.comment}', approvedAt='{UtilsRepository.GetUTCTime()}' where id = {request.id} ";
+            await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
+
+            string mainQuery = $"INSERT INTO cleaning_execution(planId,moduleType,facilityId,frequencyId,noOfDays,startDate,assignedTo,status,prevTaskId,prevTaskDoneDate)  " +
+                              $"select planId as planId,{moduleType} as moduleType,facilityId,frequencyId, noOfDays ,DATE_ADD(startDate, INTERVAL freq.days DAY),assignedTo," +
+                              $"{status2} as status, {request.id} as prevTaskId, '{UtilsRepository.GetUTCTime()}' as prevTaskDoneDate " +
+                              $" from cleaning_execution left join frequency as freq on cleaning_execution.frequencyId = freq.id where  cleaning_execution.id = {request.id}; " +
+                              $"SELECT LAST_INSERT_ID(); ";
+
+            DataTable dt3 = await Context.FetchData(mainQuery).ConfigureAwait(false);
+            int taskid = Convert.ToInt32(dt3.Rows[0][0]);
+
+            string scheduleQry = $"INSERT INTO cleaning_execution_schedules(executionId,planId,actualDay,cleaningType,status) " +
+                                $"select {taskid} as executionId,planId as planId, actualDay,cleaningType,{status2} as status from cleaning_execution_schedules where executionId = {request.id}";
+            await Context.ExecuteNonQry<int>(scheduleQry);
+
+            string equipmentQry = $"INSERT INTO cleaning_execution_items (`executionId`,`moduleType`,`scheduleId`,`assetId`,`{measure}`,`plannedDate`,`plannedDay`,`createdById`,`createdAt`,status) SELECT '{taskid}' as executionId,item.moduleType,schedule.scheduleId,item.assetId,{measure},DATE_ADD('{DateTime.Now.ToString("yyyy-MM-dd")}',interval schedule.actualDay DAY) as plannedDate,schedule.actualDay,schedule.createdById,schedule.createdAt ,{(int)CMMS.CMMS_Status.EQUIP_SCHEDULED} as status from cleaning_execution_items as item join cleaning_execution_schedules as schedule on item.executionId = schedule.executionId and item.plannedDay = schedule.actualDay where schedule.executionId = {taskid}";
+
+            var retVal = await Context.ExecuteNonQry<int>(equipmentQry).ConfigureAwait(false);
+
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.VEGETATION_TASK, request.id, 0, 0, request.comment, (CMMS.CMMS_Status)status, userID);
+
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.VEGETATION_TASK, taskid, 0, 0, "Execution scheduled", CMMS.CMMS_Status.VEG_TASK_SCHEDULED, userID);
+
+            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Execution Approved");
+            return response;
+
+
+        }
+
+        internal async Task<CMDefaultResponse> RejectScheduleExecutionVegetation(ApproveMC request, int userId)
+        {
+
+            int status;
+
+            status = (int)CMMS.CMMS_Status.VEG_TASK_END_REJECTED;
+
+
+
+            string approveQuery = $"Update cleaning_execution_schedules set status= {status},rejectedById={userId},remark='{request.comment}', rejectedAt='{UtilsRepository.GetUTCTime()}' where scheduleId = {request.id}";
+            await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
+
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.VEGETATION_TASK, request.schedule_id, 0, 0, request.comment, (CMMS.CMMS_Status)status, userId);
+
+            CMDefaultResponse response = new CMDefaultResponse(request.schedule_id, CMMS.RETRUNSTATUS.SUCCESS, $"Execution Schedule Rejected");
+            return response;
+
         }
     }
 }

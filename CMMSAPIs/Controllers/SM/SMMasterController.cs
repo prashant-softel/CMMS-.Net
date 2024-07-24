@@ -204,11 +204,11 @@ namespace CMMSAPIs.Controllers.SM
         //[Authorize]
         [Route("GetAssetMasterList")]
         [HttpGet]
-        public async Task<IActionResult> GetAssetMasterList(int id)
+        public async Task<IActionResult> GetAssetMasterList(int facility_id)
         {
             try
             {
-                var data = await _SMMasterBS.GetAssetMasterList(id);
+                var data = await _SMMasterBS.GetAssetMasterList(facility_id);
                 return Ok(data);
             }
             catch (Exception ex)
