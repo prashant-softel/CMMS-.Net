@@ -167,7 +167,7 @@ namespace CMMSAPIs.Repositories.SM
                 foreach (var toactor in ID)
                 {
                     int tid = toactor.asset_id;
-                    string stmt = $"SELECT assetItemID as sm_asset_id, mrs_Item_Id, qty as used_qty FROM smtransactiondetails WHERE  mrsID={mrs_id} AND toActorID={tid}  AND toActorType={(int)CMMS.SM_Actor_Types.Inventory}";
+                    string stmt = $"SELECT assetItemID as sm_asset_id, mrsItemId as mrs_Item_Id, qty as used_qty FROM smtransactiondetails WHERE  mrsID={mrs_id} AND toActorID={tid}  AND toActorType={(int)CMMS.SM_Actor_Types.Inventory}";
                     List<ASSETSITEM> material_used_by_assets = await Context.GetData<ASSETSITEM>(stmt).ConfigureAwait(false);
                     var Itemsm = new IDASETS
                     {
