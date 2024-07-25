@@ -179,6 +179,8 @@ namespace CMMSAPIs.Models.SM
         public string return_remarks { get; set; }
         public int original_mrs_ID { get; set; }
         public int mrs_return_ID { get; set; }
+        public dynamic fromActorID { get; set; }
+        public string fromActorName { get; set; }
         public string finalRemark { get; set; }
         public int asset_item_ID { get; set; }
         public string asset_code { get; set; }
