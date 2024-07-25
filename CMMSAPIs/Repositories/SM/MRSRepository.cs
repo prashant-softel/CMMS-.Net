@@ -167,7 +167,7 @@ namespace CMMSAPIs.Repositories.SM
                 foreach (var toactor in ID)
                 {
                     int tid = toactor.asset_id;
-                    string stmt = $"SELECT assetItemID as sm_asset_id, qty as used_qty FROM smtransactiondetails WHERE  mrsID={mrs_id} AND toActorID={tid}  AND toActorType={(int)CMMS.SM_Actor_Types.Inventory}";
+                    string stmt = $"SELECT assetItemID as sm_asset_id, mrs_Item_Id, qty as used_qty FROM smtransactiondetails WHERE  mrsID={mrs_id} AND toActorID={tid}  AND toActorType={(int)CMMS.SM_Actor_Types.Inventory}";
                     List<ASSETSITEM> material_used_by_assets = await Context.GetData<ASSETSITEM>(stmt).ConfigureAwait(false);
                     var Itemsm = new IDASETS
                     {
@@ -1018,7 +1018,7 @@ namespace CMMSAPIs.Repositories.SM
             return response;
         }
 
-        public async Task<bool> TransactionDetails(int facilityID, int fromActorID, int fromActorType, int toActorID, int toActorType, int assetItemID, int qty, int refType, int refID, string remarks, int mrsID = 0, int natureOfTransaction = 0, int assetItemStatus = 0, int transaction_id = 0)
+        public async Task<bool> TransactionDetails(int facilityID, int fromActorID, int fromActorType, int toActorID, int toActorType, int assetItemID, int qty, int refType, int refID, string remarks, int mrsID = 0, int natureOfTransaction = 0, int assetItemStatus = 0, int transaction_id = 0, int mrsItemID = 0)
         {
             try
             {
@@ -1038,8 +1038,8 @@ namespace CMMSAPIs.Repositories.SM
                 // check for edit provision for consume item i.e toActorID==6 then it is coming for consume
                 if (transaction_id == 0)
                 {
-                    string stmt = "INSERT INTO smtransactiondetails (plantID,fromActorID,fromActorType,toActorID,toActorType,assetItemID,qty,referedby,reference_ID,remarks,Nature_Of_Transaction,Asset_Item_Status,mrsID)" +
-                                  $"VALUES ({facilityID},{fromActorID},{fromActorType},{toActorID},{toActorType},{assetItemID},{qty},{refType},{refID},'{remarks}',{natureOfTransaction},{assetItemStatus},{mrsID}); SELECT LAST_INSERT_ID(); ";
+                    string stmt = "INSERT INTO smtransactiondetails (plantID,fromActorID,fromActorType,toActorID,toActorType,assetItemID,qty,referedby,reference_ID,remarks,Nature_Of_Transaction,Asset_Item_Status,mrsID, mrsItemID)" +
+                                  $"VALUES ({facilityID},{fromActorID},{fromActorType},{toActorID},{toActorType},{assetItemID},{qty},{refType},{refID},'{remarks}',{natureOfTransaction},{assetItemStatus},{mrsID},{mrsItemID}); SELECT LAST_INSERT_ID(); ";
 
                     DataTable dt2 = await Context.FetchData(stmt).ConfigureAwait(false);
                     int transaction_ID = 0;
