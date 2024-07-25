@@ -350,13 +350,12 @@ namespace CMMSAPIs.Models.SM
     }
     public class ASSETSITEM
     {
-
         public dynamic sm_asset_id { get; set; }
+        public dynamic mrs_Item_Id { get; set; }
         public dynamic used_qty { get; set; }
     }
     public class IDASETS
     {
-
         public int asset_id { get; set; }
         public List<ASSETSITEM> Items { get; set; }
     }
