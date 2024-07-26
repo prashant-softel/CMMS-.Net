@@ -472,7 +472,6 @@ namespace CMMSAPIs.Models.SM
         public string remarks { get; set; }
         public int mrsID { get; set; }
         public int mrsItemID { get; set; }
-        public int transaction_id { get; set; }
     }
 
     public class CMIssuedItems

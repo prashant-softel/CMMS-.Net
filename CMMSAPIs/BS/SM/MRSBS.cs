@@ -432,6 +432,7 @@ namespace CMMSAPIs.BS.SM
                         else if (result == 2)
                         {
                             response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.FAILURE, "MRS Id ( " + request.mrsItemID + " ) not found.");
+                            response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.FAILURE, "MRSItemId ( " + request.mrsItemID + " ) not found.");
                         }
                         else if (result == 3)
                         {
@@ -440,6 +441,22 @@ namespace CMMSAPIs.BS.SM
                         else if (result == 4)
                         {
                             response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.FAILURE, "MRS Id is 0.");
+                        }
+                        else if (result == 5)
+                        {
+                            response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.FAILURE, "Issued qantity 0.");
+                        }
+                        else if (result == 6)
+                        {
+                            response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.FAILURE, "Existing qty same as updating quantity.");
+                        }
+                        else if (result == 7)
+                        {
+                            response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.FAILURE, "No old transaction. 0 quantity not updated.");
+                        }
+                        else
+                        {
+                            response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.FAILURE, "Unknown error code <" + result + ">. Pl contact tech team.");
                         }
                     }
                     return response;

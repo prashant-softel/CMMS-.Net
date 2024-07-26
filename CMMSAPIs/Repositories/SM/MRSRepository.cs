@@ -1057,24 +1057,33 @@ namespace CMMSAPIs.Repositories.SM
 
         public async Task<int> TransferMaterialInTransaction(CMTransferItems request)
         {
+
+            int facilityID = request.facilityID;
+            int fromActorID = request.fromActorID;
+            int fromActorType = request.fromActorType;
+            int toActorID = request.toActorID;
+            int toActorType = request.toActorType;
+            int assetItemID = request.assetItemID;
+            int qty = request.qty;
+            int refType = request.refType;
+            int refID = request.refID;
+            string remarks = request.remarks;
+            int mrsID = request.mrsID;
+            int mrsitemID = request.mrsItemID;
+
+            int assetItemStatus = 0;
+            // setting transaction_id as 0 becuse nowonwards we do not require this id from UI team
+            int transaction_id = 0;
+            int natureOfTransaction = 0;
+
+            int returnValue = await TransactionDetails(facilityID, fromActorID, fromActorType, toActorID, toActorType, assetItemID, qty, refType, refID, remarks, mrsID, natureOfTransaction, assetItemStatus, transaction_id, mrsitemID);
+            return returnValue;
+        }
+
+        public async Task<int> TransactionDetails(int facilityID, int fromActorID, int fromActorType, int toActorID, int toActorType, int assetItemID, int qty, int refType, int refID, string remarks, int mrsID = 0, int natureOfTransaction = 0, int assetItemStatus = 0, int transaction_id = 0, int mrsitemID = 0)
+        {
             try
             {
-               
-                int facilityID = request.facilityID;
-                int fromActorID = request.fromActorID;
-                int fromActorType = request.fromActorType;
-                int toActorID = request.toActorID;
-                int toActorType = request.toActorType;
-                int assetItemID = request.assetItemID;
-                int qty = request.qty;
-                int refType = request.refType; 
-                int refID = request.refID;
-                string remarks = request.remarks;
-                int mrsID = request.mrsID;
-             
-                int assetItemStatus = 0;
-                int transaction_id = 0; 
-                int mrsitemID = request.mrsItemID;
 
                 // validate MRS ID
                 if (mrsID == 0)
@@ -1082,121 +1091,120 @@ namespace CMMSAPIs.Repositories.SM
                     return 4;
                 }
                 // MRS Item detail for qty update
-                int existingqty = 0;
-
-         
-
-                string stmtMRSItem = " select i.issued_qty from smrsitems i inner join smmrs m on m.ID = i.mrs_ID where i.mrs_ID = " + mrsID + " and i.ID = " + mrsitemID + " and is_splited=1 ; ";
-                DataTable dt2_mrsItem = await Context.FetchData(stmtMRSItem).ConfigureAwait(false);
-
-                string stmt1 = $"select sum(qty) as used_qty from smtransactiondetails where toActorID={toActorID} and toActorType={toActorType} and mrsID={mrsID} and assetItemID={assetItemID} and mrsItemID={mrsitemID}; ";
-                DataTable dt3 = await Context.FetchData(stmt1).ConfigureAwait(false);
-
-                // setting transaction_id as 0 becuse nowonwards we do not require this id from UI team
-
-                string chkAssetPresnt = $"select nullif(id,0) id,qty from smtransactiondetails where toActorID = {toActorID} and toActorType = {toActorType} and assetItemID = {assetItemID} and mrsID = {mrsID} and mrsItemID={mrsitemID};";
-                DataTable dt_chkAssetPresnt = await Context.FetchData(chkAssetPresnt).ConfigureAwait(false);
-                if (dt_chkAssetPresnt.Rows.Count > 0)
-                {
-                    transaction_id = Convert.ToInt32(dt_chkAssetPresnt.Rows[0][0]);
-                }
-                // check for edit provision for consume item i.e toActorID==6 then it is coming for consume
-                if (transaction_id == 0)
-                {
-                    string stmt = "INSERT INTO smtransactiondetails (plantID,fromActorID,fromActorType,toActorID,toActorType,assetItemID,qty,referedby,reference_ID,remarks,Asset_Item_Status,mrsID, mrsItemID)" +
-                                 $"VALUES ({facilityID},{fromActorID},{fromActorType},{toActorID},{toActorType},{assetItemID},{qty},{refType},{refID},'{remarks}',{assetItemStatus},{mrsID},{mrsitemID}); SELECT LAST_INSERT_ID(); ";
-
-                    DataTable dt2 = await Context.FetchData(stmt).ConfigureAwait(false);
-                    int transaction_ID = 0;
-                    if (dt2.Rows.Count > 0)
-                    {
-                        transaction_ID = Convert.ToInt32(dt2.Rows[0][0]);
-                        int debitTransactionID = await DebitTransation(facilityID, transaction_ID, fromActorType, fromActorID, qty, assetItemID, mrsID);
-                        int creditTransactionID = await CreditTransation(facilityID, transaction_ID, toActorType, toActorID, qty, assetItemID, mrsID);
-                        bool isValid = await VerifyTransactionDetails(transaction_ID, debitTransactionID, creditTransactionID, facilityID, fromActorID, fromActorType, toActorID, toActorType, assetItemID, qty, refType, refID, remarks, mrsID);
-                        if (isValid)
-                        {
-                            //minQtyReminder(assetItemID, plantID);
-                           // need to implement in phase 2
-                        }
-                        else
-                        {
-                            throw new Exception("transaction table not updated properly");
-                        }
-                    }
-                    else
-                    {
-                        throw new Exception("transaction table not updated properly");
-                    }
-                }
-                else
-                {
-                    string updateQ = $"update smtransactiondetails set qty = {qty} where ID = {transaction_id};" +
-                        $" update smtransition set debitQty = {qty} where transactionID = {transaction_id} and mrsID = {mrsID} and assetItemID = {assetItemID} and actorType = {fromActorType};" +
-                        $" update smtransition set creditQty = {qty} where transactionID = {transaction_id} and mrsID = {mrsID} and assetItemID = {assetItemID} and actorType = {toActorType};";
-                    var result = await Context.ExecuteNonQry<int>(updateQ);
-             
-                }
-
-
-                //string stmt = " select i.issued_qty,i.used_qty from smrsitems i inner join smmrs m on m.ID = i.mrs_ID where i.mrs_ID = " + mrsID + " and asset_item_ID = " + assetItemID + " and is_splited=1; ";
-
-                string chkAssetPresntMRS = $"select qty as existingqty from smtransactiondetails where toActorID = {toActorID} and toActorType = {toActorType} and assetItemID = {assetItemID} and mrsID = {mrsID};";
-                DataTable dt1_mrsitem = await Context.FetchData(chkAssetPresntMRS).ConfigureAwait(false);
-                decimal issued_qty = 0;
+                int existingQty = 0;
+                decimal mrsitem_issued_qty = 0;
+                decimal mrsitem_used_qty = 0;
+                decimal mrsitem_returned_qty = 0;
                 dynamic stored_used_qty = 0;
 
-                if (dt2_mrsItem.Rows.Count > 0)
+
+                //Get quantities issued for this material
+                string stmtMRSItem = " select i.issued_qty, i.used_qty, i.returned_qty from smrsitems i inner join smmrs m on m.ID = i.mrs_ID where i.mrs_ID = " + mrsID + " and i.ID = " + mrsitemID + " and is_splited=1 ; ";
+                DataTable dt2_issued_qty = await Context.FetchData(stmtMRSItem).ConfigureAwait(false);
+                if (dt2_issued_qty.Rows.Count > 0 && dt2_issued_qty.Rows[0][0] != DBNull.Value)
                 {
-
-                    if (dt1_mrsitem.Rows.Count > 0 && dt1_mrsitem.Rows[0][0] != DBNull.Value)
-                    {
-                        existingqty = Convert.ToInt32(dt1_mrsitem.Rows[0][0]);
-                    }
-                    if (dt2_mrsItem.Rows.Count > 0 && dt2_mrsItem.Rows[0][0] != DBNull.Value)
-                    {
-                        issued_qty = Convert.ToInt32(dt2_mrsItem.Rows[0][0]);
-                    }
-                    if (dt3.Rows.Count > 0 && dt3.Rows[0][0] != DBNull.Value)
-                    {
-                        stored_used_qty = Convert.ToInt32(dt3.Rows[0][0]);
-                    }
-                    int UpdatingMRSqty = qty + stored_used_qty - existingqty;
-                    if (issued_qty >= qty)
-                    {
-                        if(transaction_id == 0)
-                        {
-                            string get_qty = $"select sum(qty) as used_qty from smtransactiondetails where fromActorID={fromActorID} and fromActorType={fromActorType} and mrsID={mrsID} and assetItemID={assetItemID} and mrsItemID={mrsitemID}; ";
-                            DataTable dt4 = await Context.FetchData(get_qty).ConfigureAwait(false);
-                            if (dt4.Rows.Count > 0 && dt4.Rows[0][0] != DBNull.Value)
-                            {
-                                UpdatingMRSqty = Convert.ToInt32(dt4.Rows[0][0]);
-                            }
-                            string stmt_update = " update smrsitems set used_qty=" + UpdatingMRSqty + " where id = " + mrsitemID + ";";
-                            var result = await Context.ExecuteNonQry<int>(stmt_update);
-                            return 0;
-                        }
-                        else
-                        {
-
-                            string stmt_update = " update smrsitems set used_qty=" + qty + " where id = " + mrsitemID + ";";
-                            var result = await Context.ExecuteNonQry<int>(stmt_update);
-                            return 0;
-                        }
-                       
-
-                    }
-                    else
-                    {
-                        return 1;
-                    }
-
+                    mrsitem_issued_qty = Convert.ToInt32(dt2_issued_qty.Rows[0][0]);
+                    mrsitem_used_qty = Convert.ToInt32(dt2_issued_qty.Rows[0][1]);
+                    mrsitem_returned_qty = Convert.ToInt32(dt2_issued_qty.Rows[0][2]);
                 }
                 else
                 {
                     return 2;
                 }
 
+                //All the quantities used for this material in various assets
+                string stmt1 = $"select sum(qty) as used_qty from smtransactiondetails where toActorType={toActorType} and mrsID={mrsID} and assetItemID={assetItemID}; ";
+                DataTable dt3_used_qty = await Context.FetchData(stmt1).ConfigureAwait(false);
+                if (dt3_used_qty.Rows.Count > 0 && dt3_used_qty.Rows[0][0] != DBNull.Value)
+                {
+                    stored_used_qty = Convert.ToInt32(dt3_used_qty.Rows[0][0]);
+                }
+
+                //The qantity already used by this asset toActorID. Useful for edit qty calculation
+                string chkAssetPresnt = $"select nullif(id,0) id,qty as existingqty from smtransactiondetails where toActorID = {toActorID} and toActorType = {toActorType} and assetItemID = {assetItemID} and mrsID = {mrsID} and mrsItemID={mrsitemID};";
+                DataTable dt_chkAssetPresnt = await Context.FetchData(chkAssetPresnt).ConfigureAwait(false);
+                if (dt_chkAssetPresnt.Rows.Count > 0 && dt_chkAssetPresnt.Rows[0][0] != DBNull.Value)
+                {
+                    transaction_id = Convert.ToInt32(dt_chkAssetPresnt.Rows[0][0]);
+                    existingQty = Convert.ToInt32(dt_chkAssetPresnt.Rows[0][1]);
+                }
+                if (existingQty == qty)
+                {
+                    return 6;
+                }
+                //string chkAssetPresntMRS = $"select qty as existingqty from smtransactiondetails where toActorID = {toActorID} and toActorType = {toActorType} and assetItemID = {assetItemID} and mrsID = {mrsID};";
+                //DataTable dt1_mrsitem = await Context.FetchData(chkAssetPresntMRS).ConfigureAwait(false);
+
+                if (mrsitem_issued_qty > 0)
+                {
+                    int UpdatingMRSqty = qty + stored_used_qty - existingQty;
+                    if (mrsitem_issued_qty >= UpdatingMRSqty)
+                    {
+                        // check for edit provision for consume item i.e toActorID==6 then it is coming for consume
+                        if (transaction_id == 0)
+                        {
+                            if (qty == 0)
+                            {
+                                //if qauntity 0, and its a new transaction, then dont do anything
+                                return 7;
+                            }
+                            string stmt = "INSERT INTO smtransactiondetails (plantID,fromActorID,fromActorType,toActorID,toActorType,assetItemID,qty,referedby,reference_ID,remarks,Asset_Item_Status,mrsID, mrsItemID)" +
+                                            $"VALUES ({facilityID},{fromActorID},{fromActorType},{toActorID},{toActorType},{assetItemID},{qty},{refType},{refID},'{remarks}',{assetItemStatus},{mrsID},{mrsitemID}); SELECT LAST_INSERT_ID(); ";
+
+                            DataTable dt2 = await Context.FetchData(stmt).ConfigureAwait(false);
+                            if (dt2.Rows.Count > 0)
+                            {
+                                transaction_id = Convert.ToInt32(dt2.Rows[0][0]);
+                                int debitTransactionID = await DebitTransation(facilityID, transaction_id, fromActorType, fromActorID, qty, assetItemID, mrsID);
+                                int creditTransactionID = await CreditTransation(facilityID, transaction_id, toActorType, toActorID, qty, assetItemID, mrsID);
+                                bool isValid = await VerifyTransactionDetails(transaction_id, debitTransactionID, creditTransactionID, facilityID, fromActorID, fromActorType, toActorID, toActorType, assetItemID, qty, refType, refID, remarks, mrsID);
+                                if (isValid)
+                                {
+                                    //minQtyReminder(assetItemID, plantID);
+                                    // need to implement in phase 2
+                                }
+                                else
+                                {
+                                    throw new Exception("transaction table not updated properly");
+                                }
+                            }
+                            else
+                            {
+                                throw new Exception("transaction table not updated properly");
+                            }
+                        }
+                        else
+                        {
+                            string updateQ = $"update smtransactiondetails set qty = {qty} where ID = {transaction_id};" +
+                                $" update smtransition set debitQty = {qty} where transactionID = {transaction_id} and mrsID = {mrsID} and assetItemID = {assetItemID} and actorType = {fromActorType};" +
+                                $" update smtransition set creditQty = {qty} where transactionID = {transaction_id} and mrsID = {mrsID} and assetItemID = {assetItemID} and actorType = {toActorType};";
+                            var result = await Context.ExecuteNonQry<int>(updateQ);
+
+                        }
+
+
+                        //string stmt = " select i.issued_qty,i.used_qty from smrsitems i inner join smmrs m on m.ID = i.mrs_ID where i.mrs_ID = " + mrsID + " and asset_item_ID = " + assetItemID + " and is_splited=1; ";
+
+                        if (transaction_id > 0)
+                        {
+                            string stmt_update = " update smrsitems set used_qty=" + UpdatingMRSqty + " where id = " + mrsitemID + ";";
+                            var result = await Context.ExecuteNonQry<int>(stmt_update);
+                            return 0;
+                        }
+                        else
+                        {
+                            return 420;
+                        }
+                    }
+                    else
+                    {
+                        return 1;
+                    }
+                }
+                else
+                {
+                    return 5;
+                }
             }
             catch (Exception e)
             {
@@ -1204,7 +1212,7 @@ namespace CMMSAPIs.Repositories.SM
             }
         }
 
-        public async Task<bool> TransactionDetails(int facilityID, int fromActorID, int fromActorType, int toActorID, int toActorType, int assetItemID, int qty, int refType, int refID, string remarks, int mrsID = 0, int natureOfTransaction = 0, int assetItemStatus = 0, int transaction_id = 0, int mrsItemID = 0)
+        public async Task<bool> TransactionDetails_old(int facilityID, int fromActorID, int fromActorType, int toActorID, int toActorType, int assetItemID, int qty, int refType, int refID, string remarks, int mrsID = 0, int natureOfTransaction = 0, int assetItemStatus = 0, int transaction_id = 0, int mrsItemID = 0)
         {
             try
             {
@@ -1222,7 +1230,7 @@ namespace CMMSAPIs.Repositories.SM
                     transaction_id = Convert.ToInt32(dt_chkAssetPresnt.Rows[0][0]);
                 }
                 // check for edit provision for consume item i.e toActorID==6 then it is coming for consume
-                if (transaction_id == 0 && qty >0)
+                if (transaction_id == 0 && qty > 0)
                 {
                     string stmt = "INSERT INTO smtransactiondetails (plantID,fromActorID,fromActorType,toActorID,toActorType,assetItemID,qty,referedby,reference_ID,remarks,Nature_Of_Transaction,Asset_Item_Status,mrsID, mrsItemID)" +
                                  $"VALUES ({facilityID},{fromActorID},{fromActorType},{toActorID},{toActorType},{assetItemID},{qty},{refType},{refID},'{remarks}',{natureOfTransaction},{assetItemStatus},{mrsID},{mrsItemID}); SELECT LAST_INSERT_ID(); ";
@@ -1836,8 +1844,8 @@ namespace CMMSAPIs.Repositories.SM
 
             for (var i = 0; i < mrsItemList.Count(); i++)
             {
-                var tResult = await TransactionDetails(mrsList[0].facility_ID, mrsList[0].from_actor_id, mrsList[0].from_actor_type_id, mrsList[0].to_actor_id, mrsList[0].to_actor_type_id, mrsItemList[i].asset_item_ID, Convert.ToInt32(mrsItemList[i].returned_qty), (int)CMMS.CMMS_Modules.SM_MRS_RETURN, request.id, request.comment, mrsList[0].ID);
-                if (!tResult)
+                int tResult = await TransactionDetails(mrsList[0].facility_ID, mrsList[0].from_actor_id, mrsList[0].from_actor_type_id, mrsList[0].to_actor_id, mrsList[0].to_actor_type_id, mrsItemList[i].asset_item_ID, Convert.ToInt32(mrsItemList[i].returned_qty), (int)CMMS.CMMS_Modules.SM_MRS_RETURN, request.id, request.comment, mrsList[0].ID);
+                if (tResult > 0)
                 {
                     return new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Transaction details failed.");
                 }
@@ -2141,8 +2149,8 @@ namespace CMMSAPIs.Repositories.SM
                 for (var i = 0; i < request.cmmrsItems.Count; i++)
                 {
 
-                    var tResult = await TransactionDetails(mrsList[0].facility_ID, mrsList[0].from_actor_id, mrsList[0].from_actor_type_id, mrsList[0].to_actor_id, mrsList[0].to_actor_type_id, Convert.ToInt32(request.cmmrsItems[i].asset_item_ID), Convert.ToInt32(request.cmmrsItems[i].issued_qty), Convert.ToInt32(CMMS.CMMS_Modules.SM_MRS), request.ID, "", request.ID, 0, 0, 0, request.cmmrsItems[i].mrs_item_id);
-                    if (!tResult)
+                    int tResult = await TransactionDetails(mrsList[0].facility_ID, mrsList[0].from_actor_id, mrsList[0].from_actor_type_id, mrsList[0].to_actor_id, mrsList[0].to_actor_type_id, Convert.ToInt32(request.cmmrsItems[i].asset_item_ID), Convert.ToInt32(request.cmmrsItems[i].issued_qty), Convert.ToInt32(CMMS.CMMS_Modules.SM_MRS), request.ID, "", request.ID, 0, 0, 0, request.cmmrsItems[i].mrs_item_id);
+                    if (tResult > 0)
                     {
                         return new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Transaction details failed.");
                     }
