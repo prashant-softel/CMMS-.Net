@@ -290,6 +290,15 @@ namespace CMMSAPIs.Repositories.WC
 
                 count++;
                 idList.Add(id);
+                if (unit.affectedPartsImages != null)
+                {
+                    foreach (var data in unit.affectedPartsImages)
+                    {
+
+                        string qryuploadFiles = $"UPDATE uploadedfiles SET facility_id = {fid}, module_type={(int)CMMS.CMMS_Modules.WARRANTY_CLAIM},module_ref_id={cw_id},description='{data.description}',status=1 where id = {data.id}";
+                        await Context.ExecuteNonQry<int>(qryuploadFiles).ConfigureAwait(false);
+                    }
+                }
 
                 if (unit.affectedParts.Count > 0)
                 {
@@ -379,6 +388,7 @@ namespace CMMSAPIs.Repositories.WC
             string _longStatus = getLongStatus(CMMS.CMMS_Modules.WARRANTY_CLAIM, _Status_long, GetWCDetails[0]);
             GetWCDetails[0].status_long = _longStatus;
 
+
             // Retrieve external emails associated with the warranty claim
             string internalEmailsQuery = $"SELECT user_id, name, email,role  FROM wc_emails WHERE wc_id = {id} and type = 'Internal'";
             List<CMWCExternalEmail> internalEmails = await Context.GetData<CMWCExternalEmail>(internalEmailsQuery).ConfigureAwait(false);
@@ -404,10 +414,18 @@ namespace CMMSAPIs.Repositories.WC
                               "where module_ref_id =" + id + " and U.module_type = " + (int)CMMS.CMMS_Modules.WARRANTY_CLAIM + ";";
 
             List<WCFileDetail> WC_image = await Context.GetData<WCFileDetail>(myQuery18).ConfigureAwait(false);
+            //Affected Images
+            string myQuery19 = "SELECT c.id as id,U.file_path as fileName,U.id as file_id,U.description FROM uploadedfiles AS U " +
+                             "Left JOIN wc as c on c.id= U.module_ref_id  " +
+                             "where module_ref_id =" + id + " and u.status=1  and U.module_type = " + (int)CMMS.CMMS_Modules.WARRANTY_CLAIM + ";";
+
+            List<WCFileDetail> WC_image_affected = await Context.GetData<WCFileDetail>(myQuery19).ConfigureAwait(false);
+
 
             GetWCDetails[0].affectedParts = affectedParts;
             GetWCDetails[0].supplierActions = supplierActions;
             GetWCDetails[0].Images = WC_image;
+            GetWCDetails[0].affectedPartsImages = WC_image_affected;
 
 
             return GetWCDetails[0];
@@ -470,6 +488,15 @@ namespace CMMSAPIs.Repositories.WC
                 updateQry += $"failure_time = '{((DateTime)request.failureTime).ToString("yyyy'-'MM'-'dd 'HH'-'mm")}', ";
             updateQry = updateQry.Substring(0, updateQry.Length - 2) + $" WHERE id = {request.id};";
             await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+            if (request.affectedPartsImages != null)
+            {
+                foreach (var data in request.affectedPartsImages)
+                {
+
+                    string qryuploadFiles = $"UPDATE uploadedfiles SET facility_id = {request.facilityId},description={data.description} module_type={(int)CMMS.CMMS_Modules.WARRANTY_CLAIM},module_ref_id={request.id} where id = {data.id} and status=1";
+                    await Context.ExecuteNonQry<int>(qryuploadFiles).ConfigureAwait(false);
+                }
+            }
             if (request.additionalEmailEmployees != null || request.externalEmails != null)
             {
                 if (request.additionalEmailEmployees.Count > 0 || request.externalEmails.Count > 0)

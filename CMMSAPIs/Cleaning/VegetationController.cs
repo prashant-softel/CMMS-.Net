@@ -3,7 +3,10 @@ using CMMSAPIs.Models.MC;
 using CMMSAPIs.Models.Utils;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using static CMMSAPIs.Helper.CMMS;
 
@@ -14,18 +17,145 @@ namespace CMMSAPIs.Controllers.Vegetation
     public class VegetationController : Controller
     {
         private readonly vegetaion _vegetationBS;
-        private readonly VegBS _vegetationBS1;
 
 
-        public VegetationController(vegetaion vge)
+        public VegetationController(VegBS vegetationBS)
         {
-            _vegetationBS = vge;
-            _vegetationBS.setModuleType(cleaningType.ModuleCleaning);
-
+            _vegetationBS = (vegetaion)vegetationBS;
+            _vegetationBS.setModuleType(cleaningType.Vegetation);
         }
-        [Route("ApproveVegetationExecution")]
+
+
+        [Route("GetVegetationPlanList")]
+        [HttpGet]
+        public async Task<IActionResult> GetVegetationPlanList(int facilityId)
+        {
+            try
+            {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
+                var data = await _vegetationBS.GetPlanList(facilityId, facilitytimeZone);
+                return Ok(data);
+
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        [Route("GetVegetationTaskList")]
+        [HttpGet]
+        public async Task<IActionResult> GetVegetationTaskList(int facilityId)
+        {
+            try
+            {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
+
+                var data = await _vegetationBS.GetTaskList(facilityId, facilitytimeZone);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        [Route("CreateVegetationPlan")]
+        [HttpPost]
+        public async Task<IActionResult> CreateVegetationPlan(List<CMMCPlan> request)
+        {
+            try
+            {
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _vegetationBS.CreatePlan(request, userId);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        [Route("UpdateVegetationPlan")]
+        [HttpPost]
+        public async Task<IActionResult> UpdateVegetationPlan(List<CMMCPlan> request)
+        {
+            try
+            {
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _vegetationBS.UpdatePlan(request, userId);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        [Route("GetVegetationPlanDetails")]
+        [HttpGet]
+        public async Task<IActionResult> GetVegetationPlanDetails(int planId, int facility_id)
+        {
+            try
+            {
+
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+
+                var data = await _vegetationBS.GetPlanDetails(planId, facilitytimeZone);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        [Route("GetVegExecutionDetails")]
+        [HttpGet]
+        public async Task<IActionResult> GetVegExecutionDetails(int executionId, int facility_id)
+        {
+            try
+            {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+                var data = await _vegetationBS.GetExecutionDetails(executionId, facilitytimeZone);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        [Route("GetVegEquipmentList")]
+        [HttpGet]
+        public async Task<IActionResult> GetVegEquipmentList(int facilityId)
+        {
+            try
+            {
+                var data = await _vegetationBS.GetVegEquipmentList(facilityId);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        [Route("GetVegTaskExecutionEquipmentList")]
+        [HttpGet]
+        public async Task<IActionResult> GetVegTaskExecutionEquipmentList(int taskId, int facility_id)
+        {
+            try
+            {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+
+                var data = await _vegetationBS.GetTaskEquipmentList(taskId, facilitytimeZone);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        [Route("ApproveExecutionVegetation")]
         [HttpPut]
-        public async Task<IActionResult> ApproveVegetationExecution(ApproveMC request)
+        public async Task<IActionResult> ApproveExecutionVegetation(ApproveMC request)
         {
             try
             {
@@ -38,9 +168,9 @@ namespace CMMSAPIs.Controllers.Vegetation
                 throw;
             }
         }
-        [Route("RejectExecution")]
+        [Route("RejectExecutionVegetation")]
         [HttpPut]
-        public async Task<IActionResult> RejectEndExecution(CMApproval request)
+        public async Task<IActionResult> RejectExecutionVegetation(CMApproval request)
         {
             try
             {
@@ -53,9 +183,9 @@ namespace CMMSAPIs.Controllers.Vegetation
                 throw;
             }
         }
-        [Route("RejectEndExecution")]
+        [Route("RejectEndExecutionVegetation")]
         [HttpPut]
-        public async Task<IActionResult> RejectVegetationExecution(ApproveMC request)
+        public async Task<IActionResult> RejectEndExecutionVegetation(ApproveMC request)
         {
             try
             {
@@ -83,9 +213,9 @@ namespace CMMSAPIs.Controllers.Vegetation
                 throw;
             }
         }
-        [Route("StartVegetationExecution")]
+        [Route("StartExecutionVegetation")]
         [HttpPut]
-        public async Task<IActionResult> StartVegetationExecution(int executionId)
+        public async Task<IActionResult> StartExecutionVegetation(int executionId)
         {
             try
             {
@@ -100,9 +230,9 @@ namespace CMMSAPIs.Controllers.Vegetation
         }
 
 
-        [Route("EndVegetationExecution")]
+        [Route("EndExecutionVegetation")]
         [HttpPut]
-        public async Task<IActionResult> EndVegetationExecution(int executionId)
+        public async Task<IActionResult> EndExecutionVegetation(int executionId)
         {
             try
             {
@@ -116,9 +246,9 @@ namespace CMMSAPIs.Controllers.Vegetation
             }
         }
 
-        [Route("StartVegScheduleExecution")]
+        [Route("StartScheduleExecutionVegetation")]
         [HttpPut]
-        public async Task<IActionResult> StartVegScheduleExecution(int scheduleId)
+        public async Task<IActionResult> StartScheduleExecutionVegetation(int scheduleId)
         {
             try
             {
@@ -131,9 +261,9 @@ namespace CMMSAPIs.Controllers.Vegetation
                 throw;
             }
         }
-        [Route("UpdateVegScheduleExecution")]
+        [Route("UpdateScheduleExecutionVegetation")]
         [HttpPut]
-        public async Task<IActionResult> UpdateVegScheduleExecution(CMMCGetScheduleExecution schedule)
+        public async Task<IActionResult> UpdateScheduleExecutionVegetation(CMMCGetScheduleExecution schedule)
         {
             try
             {
@@ -147,9 +277,9 @@ namespace CMMSAPIs.Controllers.Vegetation
             }
         }
 
-        [Route("AbandonVegetationExecution")]
+        [Route("AbandonExecutionVegetation")]
         [HttpPut]
-        public async Task<IActionResult> AbandonVegetationExecution(CMApproval request)
+        public async Task<IActionResult> AbandonExecutionVegetation(CMApproval request)
         {
             try
             {
@@ -162,9 +292,9 @@ namespace CMMSAPIs.Controllers.Vegetation
                 throw;
             }
         }
-        [Route("AbandonVegetationSchedule")]
+        [Route("AbandonScheduleVegetation")]
         [HttpPut]
-        public async Task<IActionResult> AbandonVegetationSchedule(CMApproval request)
+        public async Task<IActionResult> AbandonScheduleVegetation(CMApproval request)
         {
             try
             {
@@ -177,26 +307,9 @@ namespace CMMSAPIs.Controllers.Vegetation
                 throw;
             }
         }
-
-
-        [Route("StartMCExecution")]
+        [Route("CompleteExecutionVegetation")]
         [HttpPost]
-        public async Task<IActionResult> StartMCExecution(int id)
-        {
-            try
-            {
-                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _vegetationBS.StartExecutionVegetation(id, userId);
-                return Ok(data);
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        }
-        [Route("CompleteMCExecution")]
-        [HttpPost]
-        public async Task<IActionResult> CompleteMCExecution(CMMCExecution request)
+        public async Task<IActionResult> CompleteExecutionVegetation(CMMCExecution request)
         {
             try
             {
@@ -225,26 +338,9 @@ namespace CMMSAPIs.Controllers.Vegetation
                 throw;
             }
         }
-
-        [Route("RejectMCExecution")]
+        [Route("EndScheduleExecutionVegetation")]
         [HttpPut]
-        public async Task<IActionResult> RejectMCExecution(CMApproval request)
-        {
-            try
-            {
-                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _vegetationBS.RejectExecutionVegetation(request, userId);
-                return Ok(data);
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-
-        }
-        [Route("EndVEGScheduleExecution")]
-        [HttpPut]
-        public async Task<IActionResult> EndVEGScheduleExecution(int scheduleId)
+        public async Task<IActionResult> EndScheduleExecutionVegetation(int scheduleId)
         {
             try
             {
@@ -257,14 +353,78 @@ namespace CMMSAPIs.Controllers.Vegetation
                 throw;
             }
         }
-        [Route("RejectVegScheduleExecution")]
+        [Route("RejectScheduleExecutionVegetation")]
         [HttpPut]
-        public async Task<IActionResult> RejectVegScheduleExecution(ApproveMC request)
+        public async Task<IActionResult> RejectScheduleExecutionVegetation(ApproveMC request)
         {
             try
             {
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _vegetationBS1.RejectScheduleExecutionVegetation(request, userId);
+                var data = await _vegetationBS.RejectScheduleExecutionVegetation(request, userId);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        [Route("ApproveVegetationPlan")]
+        [HttpPut]
+        public async Task<IActionResult> ApproveVegetationPlan(CMApproval request)
+        {
+            try
+            {
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _vegetationBS.ApprovePlan(request, userId);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        [Route("RejectVegetationPlan")]
+        [HttpPut]
+        public async Task<IActionResult> RejectVegetationPlan(CMApproval request)
+        {
+            try
+            {
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _vegetationBS.RejectPlan(request, userId);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        [Route("DeleteVegetationPlan")]
+        [HttpPut]
+        public async Task<IActionResult> DeleteVegetationPlan(int planId)
+        {
+            try
+            {
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _vegetationBS.DeletePlan(planId, userId);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        [Route("StartVegetationExecution")]
+        [HttpPut]
+        public async Task<IActionResult> StartVegetationExecution(int planId)
+        {
+            try
+            {
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _vegetationBS.StartExecution(planId, userId);
                 return Ok(data);
             }
             catch (Exception ex)

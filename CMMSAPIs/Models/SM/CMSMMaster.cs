@@ -179,8 +179,8 @@ namespace CMMSAPIs.Models.SM
         public string return_remarks { get; set; }
         public int original_mrs_ID { get; set; }
         public int mrs_return_ID { get; set; }
-        public dynamic fromActorID { get; set; }
-        public string fromActorName { get; set; }
+        public int fromActorID { get; set; }
+        public string fromActorType { get; set; }
         public string finalRemark { get; set; }
         public int asset_item_ID { get; set; }
         public string asset_code { get; set; }
@@ -352,8 +352,9 @@ namespace CMMSAPIs.Models.SM
     }
     public class ASSETSITEM
     {
-        public dynamic sm_asset_id { get; set; }
+        public dynamic workingArea_id { get; set; }
         public dynamic mrs_Item_Id { get; set; }
+        public string workingArea_name { get; set; }
         public dynamic used_qty { get; set; }
     }
     public class IDASETS

@@ -171,7 +171,8 @@ namespace CMMSAPIs.Repositories.SM
                     foreach (var toactor in ID)
                     {
                         int tid = toactor.asset_id;
-                        string stmt = $"SELECT assetItemID as sm_asset_id, qty as used_qty,mrsItemId as mrs_Item_Id FROM smtransactiondetails WHERE  mrsID={mrs_id} AND toActorID={tid}  AND toActorType={(int)CMMS.SM_Actor_Types.Inventory}";
+                        string stmt = $"SELECT assetItemID as workingArea_id, qty as used_qty,mrsItemId as mrs_Item_Id,sm.asset_name as workingArea_name  " +
+                            $"  FROM smtransactiondetails  LEFT JOIN smassetmasters as sm on sm.ID=smtransactiondetails.assetItemID WHERE  mrsID={mrs_id} AND toActorID={tid}  AND toActorType={(int)CMMS.SM_Actor_Types.Inventory}";
                         List<ASSETSITEM> material_used_by_assets = await Context.GetData<ASSETSITEM>(stmt).ConfigureAwait(false);
                         var Itemsm = new IDASETS
                         {
@@ -187,13 +188,15 @@ namespace CMMSAPIs.Repositories.SM
 
                 if (jobId > 0)
                 {
-                    string qrytocator = $"SELECT DISTINCT toActorID as asset_id,mrsItemId as mrs_Item_Id FROM smtransactiondetails WHERE fromActorID={jc_id} and fromActorType={(int)CMMS.SM_Actor_Types.JobCard}";
+                    string qrytocator = $"SELECT DISTINCT toActorID as asset_id,mrsItemId as mrs_Item_Id FROM smtransactiondetails  " +
+                        $" LEFT JOIN smassetmasters as sm on sm.ID=smtransactiondetails.assetItemID  WHERE fromActorID={jc_id} and fromActorType={(int)CMMS.SM_Actor_Types.JobCard}";
                     List<IDASETS> ID = await Context.GetData<IDASETS>(qrytocator).ConfigureAwait(false);
 
                     foreach (var toactor in ID)
                     {
                         int tid = toactor.asset_id;
-                        string stmt = $"SELECT assetItemID as sm_asset_id, qty as used_qty ,mrsItemId as mrs_Item_Id FROM smtransactiondetails WHERE  mrsID={mrs_id} AND toActorID={tid}  AND toActorType={(int)CMMS.SM_Actor_Types.Inventory}";
+                        string stmt = $"SELECT assetItemID as workingArea_id, qty as used_qty ,mrsItemId as mrs_Item_Id,sm.asset_name as workingArea_name FROM smtransactiondetails  " +
+                            $"  LEFT JOIN smassetmasters as sm on sm.ID=smtransactiondetails.assetItemID  WHERE  mrsID={mrs_id} AND toActorID={tid}  AND toActorType={(int)CMMS.SM_Actor_Types.Inventory}";
                         List<ASSETSITEM> material_used_by_assets = await Context.GetData<ASSETSITEM>(stmt).ConfigureAwait(false);
                         var Itemsm = new IDASETS
                         {
@@ -1076,11 +1079,11 @@ namespace CMMSAPIs.Repositories.SM
             int transaction_id = 0;
             int natureOfTransaction = 0;
 
-            int returnValue = await TransactionDetails(facilityID, fromActorID, fromActorType, toActorID, toActorType, assetItemID, qty, refType, refID, remarks, mrsID, natureOfTransaction, assetItemStatus, transaction_id, mrsitemID);
+            int returnValue = await TransactionDetails1(facilityID, fromActorID, fromActorType, toActorID, toActorType, assetItemID, qty, refType, refID, remarks, mrsID, natureOfTransaction, assetItemStatus, transaction_id, mrsitemID);
             return returnValue;
         }
 
-        public async Task<int> TransactionDetails(int facilityID, int fromActorID, int fromActorType, int toActorID, int toActorType, int assetItemID, int qty, int refType, int refID, string remarks, int mrsID = 0, int natureOfTransaction = 0, int assetItemStatus = 0, int transaction_id = 0, int mrsitemID = 0)
+        public async Task<int> TransactionDetails1(int facilityID, int fromActorID, int fromActorType, int toActorID, int toActorType, int assetItemID, int qty, int refType, int refID, string remarks, int mrsID = 0, int natureOfTransaction = 0, int assetItemStatus = 0, int transaction_id = 0, int mrsitemID = 0)
         {
             try
             {
@@ -1563,7 +1566,7 @@ namespace CMMSAPIs.Repositories.SM
                         await Context.ExecuteNonQry<int>(updatestmt);
 
 
-                        var tResult = await TransactionDetails(request.facility_ID, asset_item_ID, (int)CMMS.SM_Actor_Types.Inventory, request.facility_ID, (int)CMMS.SM_Actor_Types.NonOperational, asset_item_ID, Convert.ToInt32(request.faultyItems[i].returned_qty), (int)CMMS.CMMS_Modules.SM_MRS_RETURN, request.mrsreturnID, request.faultyItems[i].return_remarks, request.mrsreturnID);
+                        var tResult = await TransactionDetails_old(request.facility_ID, asset_item_ID, (int)CMMS.SM_Actor_Types.Inventory, request.facility_ID, (int)CMMS.SM_Actor_Types.NonOperational, asset_item_ID, Convert.ToInt32(request.faultyItems[i].returned_qty), (int)CMMS.CMMS_Modules.SM_MRS_RETURN, request.mrsreturnID, request.faultyItems[i].return_remarks, request.mrsreturnID);
 
 
                     }
@@ -1600,7 +1603,7 @@ namespace CMMSAPIs.Repositories.SM
                         DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
                         int mrsItemID = dt2.Rows[0][0].ToInt();
                         //fromavctor id will asset item id which is faulty , to actor id will be plant id i.e it is return to plant
-                        var tResult = await TransactionDetails(request.facility_ID, request.faultyItems[i].faulty_item_asset_id, (int)CMMS.SM_Actor_Types.Inventory, request.facility_ID, (int)CMMS.SM_Actor_Types.NonOperational, asset_item_ID, Convert.ToInt32(request.faultyItems[i].returned_qty), (int)CMMS.CMMS_Modules.SM_MRS_RETURN, request.mrsreturnID, request.faultyItems[i].return_remarks, request.mrsreturnID, 0, 0, 0, mrsItemID);
+                        var tResult = await TransactionDetails_old(request.facility_ID, request.faultyItems[i].faulty_item_asset_id, (int)CMMS.SM_Actor_Types.Inventory, request.facility_ID, (int)CMMS.SM_Actor_Types.NonOperational, asset_item_ID, Convert.ToInt32(request.faultyItems[i].returned_qty), (int)CMMS.CMMS_Modules.SM_MRS_RETURN, request.mrsreturnID, request.faultyItems[i].return_remarks, request.mrsreturnID, 0, 0, 0, mrsItemID);
                     }
                 }
             }
@@ -1844,8 +1847,8 @@ namespace CMMSAPIs.Repositories.SM
 
             for (var i = 0; i < mrsItemList.Count(); i++)
             {
-                int tResult = await TransactionDetails(mrsList[0].facility_ID, mrsList[0].from_actor_id, mrsList[0].from_actor_type_id, mrsList[0].to_actor_id, mrsList[0].to_actor_type_id, mrsItemList[i].asset_item_ID, Convert.ToInt32(mrsItemList[i].returned_qty), (int)CMMS.CMMS_Modules.SM_MRS_RETURN, request.id, request.comment, mrsList[0].ID);
-                if (tResult > 0)
+                var tResult = await TransactionDetails_old(mrsList[0].facility_ID, mrsList[0].from_actor_id, mrsList[0].from_actor_type_id, mrsList[0].to_actor_id, mrsList[0].to_actor_type_id, mrsItemList[i].asset_item_ID, Convert.ToInt32(mrsItemList[i].returned_qty), (int)CMMS.CMMS_Modules.SM_MRS_RETURN, request.id, request.comment, mrsList[0].ID);
+                if (!tResult)
                 {
                     return new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Transaction details failed.");
                 }
@@ -2113,7 +2116,7 @@ namespace CMMSAPIs.Repositories.SM
                         int availableQty = await GetAvailableQtyByCode(Convert.ToString(request.cmmrsItems[i].asset_item_ID), mrsList[0].facility_ID);
 
                         decimal remainingQty = availableQty - request.cmmrsItems[i].issued_qty;
-                        string updateStmtForItemList = $"update smrsitems set available_qty={remainingQty}, serial_number= '{request.cmmrsItems[i].serial_number}', issued_qty = {request.cmmrsItems[i].issued_qty}, issue_remarks = '{request.cmmrsItems[i].issue_remarks}' where ID = {request.cmmrsItems[i].mrs_item_id};";
+                        string updateStmtForItemList = $"update smrsitems set available_qty={availableQty}, serial_number= '{request.cmmrsItems[i].serial_number}', issued_qty = {request.cmmrsItems[i].issued_qty}, issue_remarks = '{request.cmmrsItems[i].issue_remarks}' where ID = {request.cmmrsItems[i].mrs_item_id};";
 
 
                         DataTable dt = await Context.FetchData(getassetitemIDQ).ConfigureAwait(false);
@@ -2149,8 +2152,8 @@ namespace CMMSAPIs.Repositories.SM
                 for (var i = 0; i < request.cmmrsItems.Count; i++)
                 {
 
-                    int tResult = await TransactionDetails(mrsList[0].facility_ID, mrsList[0].from_actor_id, mrsList[0].from_actor_type_id, mrsList[0].to_actor_id, mrsList[0].to_actor_type_id, Convert.ToInt32(request.cmmrsItems[i].asset_item_ID), Convert.ToInt32(request.cmmrsItems[i].issued_qty), Convert.ToInt32(CMMS.CMMS_Modules.SM_MRS), request.ID, "", request.ID, 0, 0, 0, request.cmmrsItems[i].mrs_item_id);
-                    if (tResult > 0)
+                    var tResult = await TransactionDetails_old(mrsList[0].facility_ID, mrsList[0].from_actor_id, mrsList[0].from_actor_type_id, mrsList[0].to_actor_id, mrsList[0].to_actor_type_id, Convert.ToInt32(request.cmmrsItems[i].asset_item_ID), Convert.ToInt32(request.cmmrsItems[i].issued_qty), Convert.ToInt32(CMMS.CMMS_Modules.SM_MRS), request.ID, "", request.ID, 0, 0, 0, request.cmmrsItems[i].mrs_item_id);
+                    if (!tResult)
                     {
                         return new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Transaction details failed.");
                     }

@@ -20,6 +20,7 @@ using CMMSAPIs.BS.SM;
 using CMMSAPIs.BS.Users;
 using CMMSAPIs.BS.Utils;
 using CMMSAPIs.BS.WC;
+using CMMSAPIs.Cleaning;
 using CMMSAPIs.Helper;
 using CMMSAPIs.Middlewares;
 using CMMSAPIs.Models.Mails;
@@ -117,6 +118,7 @@ namespace CMMSAPIs
             services.AddScoped<IMoMBS, MoMBS>();
             services.AddScoped<AttendeceBS, _AttendeceBS>();
             services.AddScoped<TrainingCourseBS, Traningbs>();
+            services.AddScoped<VegBS, vegetaion>();
 
         }
 

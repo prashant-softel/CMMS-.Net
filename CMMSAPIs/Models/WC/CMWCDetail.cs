@@ -54,6 +54,7 @@ namespace CMMSAPIs.Models.WC
         public List<CMWCExternalEmail> externalEmails { get; set; }
         public List<CMWCSupplierActions> supplierActions { get; set; }
         public List<affectedParts> affectedParts { get; set; }
+        public List<WCFileDetail> affectedPartsImages { get; set; }
         public List<WCFileDetail> Images { get; set; }
     }
     public class WCFileDetail
