@@ -412,14 +412,34 @@ namespace CMMSAPIs.BS.SM
                     CMDefaultResponse response = new CMDefaultResponse();
                     foreach (var request in requestList)
                     {
-                        var result = await repos.TransactionDetails(request.facilityID, request.fromActorID, request.fromActorType, request.toActorID, request.toActorType, request.assetItemID, request.qty, request.refType, request.refID, request.remarks, request.mrsID, 0, 0, request.transaction_id, request.mrsItemID);
-                        if (result)
+                        var result = await repos.TransferMaterialInTransaction(request);
+                        //if (result)
+                        //{
+                        //    response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.SUCCESS, "Item transferred.");
+                        //}
+                        //else
+                        //{
+                        //    response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.FAILURE, "Item failed to transfer.");
+                        //}
+                        if (result == 0)
                         {
                             response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.SUCCESS, "Item transferred.");
                         }
-                        else
+                        else if (result == 1)
                         {
-                            response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.FAILURE, "Item failed to transfer.");
+                            response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.FAILURE, "Item requesting more than available quantity.");
+                        }
+                        else if (result == 2)
+                        {
+                            response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.FAILURE, "MRS Id ( " + request.mrsItemID + " ) not found.");
+                        }
+                        else if (result == 3)
+                        {
+                            response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.FAILURE, "Exception occured during quantity updation.");
+                        }
+                        else if (result == 4)
+                        {
+                            response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.FAILURE, "MRS Id is 0.");
                         }
                     }
                     return response;
