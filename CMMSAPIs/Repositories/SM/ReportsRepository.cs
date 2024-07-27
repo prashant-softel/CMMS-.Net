@@ -616,7 +616,7 @@ namespace CMMSAPIs.Repositories.SM
                 " WHEN fromActorType in (5) then (select CONCAT(firstName, ' ', lastName)   from users u where u.ID = ST.fromActorID) " +
                 " End AS FromActorName , toActorID as toActorID," +
                 " CASE WHEN toActorType = 1 then 'Vendor'  WHEN toActorType = 2 then 'Store' WHEN toActorType = 3 then 'Task' " +
-                " WHEN toActorType = 5 then 'Engineer'  WHEN toActorType = 6 then 'Inventory' End AS toActorType, " +
+                " WHEN toActorType = 4 then 'JobCard' WHEN toActorType = 5 then 'Engineer'  WHEN toActorType = 6 then 'Inventory' WHEN toActorType = 7 then 'NonOperational' End AS toActorType, " +
                 " CASE WHEN toActorType = 1 then (select Name from business B where B.ID = ST.toActorID) " +
                 " WHEN toActorType = 2 then (select name  from facilities F where F.ID = ST.toActorID) " +
                 " WHEN toActorType = 3 then (select concat(p.plan_name,' - Task',T.id) actorName from pm_task T inner join pm_plan P on P.id = T.plan_id where T.id = ST.toActorID) " +
