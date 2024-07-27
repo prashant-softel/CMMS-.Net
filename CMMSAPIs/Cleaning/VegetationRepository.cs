@@ -316,12 +316,12 @@ namespace CMMSAPIs.Repositories.CleaningRepository
         }
         internal async Task<CMDefaultResponse> ApprovePlan(CMApproval request, int userID)
         {
-            string approveQuery = $"Update cleaning_plan set isApproved = 1,status= {(int)CMMS.CMMS_Status.MC_PLAN_APPROVED} ,approvedById={userID}, ApprovalReason='{request.comment}', approvedAt='{UtilsRepository.GetUTCTime()}' where planId = {request.id}";
+            string approveQuery = $"Update cleaning_plan set isApproved = 1,status= {(int)CMMS.CMMS_Status.VEG_PLAN_APPROVED} ,approvedById={userID}, ApprovalReason='{request.comment}', approvedAt='{UtilsRepository.GetUTCTime()}' where planId = {request.id}";
             await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
 
             string mainQuery = $"INSERT INTO cleaning_execution(planId,moduleType,facilityId,frequencyId,noOfDays,startDate,assignedTo,status)  " +
                               $"select planId as planId,{moduleType} as moduleType,facilityId,frequencyId,durationDays as noOfDays ,startDate,assignedTo," +
-                              $"{(int)CMMS.CMMS_Status.MC_TASK_SCHEDULED} as status " +
+                              $"{(int)CMMS.CMMS_Status.VEG_TASK_SCHEDULED} as status " +
                               $"from cleaning_plan where planId = {request.id}; " +
                               $"SELECT LAST_INSERT_ID(); ";
 
@@ -336,9 +336,9 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
             var retVal = await Context.ExecuteNonQry<int>(equipmentQry).ConfigureAwait(false);
 
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MC_PLAN, request.id, 0, 0, request.comment, CMMS.CMMS_Status.MC_PLAN_APPROVED, userID);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.VEGETATION_PLAN, request.id, 0, 0, request.comment, CMMS.CMMS_Status.VEG_PLAN_APPROVED, userID);
 
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MC_TASK, taskid, 0, 0, "Execution scheduled", CMMS.CMMS_Status.MC_TASK_SCHEDULED, userID);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.VEGETATION_TASK, taskid, 0, 0, "Execution scheduled", CMMS.CMMS_Status.VEG_TASK_APPROVED, userID);
 
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Plan Approved");
             return response;
