@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace CMMSAPIs.Models.Jobs
 {
@@ -26,7 +24,7 @@ namespace CMMSAPIs.Models.Jobs
         public string assigned_name { get; set; }
         public int job_type { get; set; }
         public string work_type { get; set; }
-        public string standard_action{ get; set; }
+        public string standard_action { get; set; }
         public string breakdown_type { get; set; }
         public string job_title { get; set; }
         public string job_description { get; set; }
@@ -37,7 +35,7 @@ namespace CMMSAPIs.Models.Jobs
         public dynamic closed_at { get; set; }
 
 
-        
+
         public List<CMequipmentCatList> equipment_cat_list { get; set; }
         public List<CMworkingAreaNameList> working_area_name_list { get; set; }
         public List<CMAssociatedPermitList> associated_permit_list { get; set; }
@@ -54,8 +52,8 @@ namespace CMMSAPIs.Models.Jobs
 
     public class CMworkingAreaNameList
     {
-        public int workingArea_id { get; set; }
-        public string workingArea_name { get; set; }
+        public int asset_id { get; set; }
+        public string asset_name { get; set; }
     }
     public class CMAssociatedPermitList
     {

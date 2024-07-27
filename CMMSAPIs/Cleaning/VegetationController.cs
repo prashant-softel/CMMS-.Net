@@ -200,12 +200,12 @@ namespace CMMSAPIs.Controllers.Vegetation
         }
         [Route("LinkPermitToVegetation")]
         [HttpPut]
-        public async Task<IActionResult> LinkPermitToVegetation(int task_id, int permit_id)
+        public async Task<IActionResult> LinkPermitToVegetation(int scheduleId, int permit_id)
         {
             try
             {
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _vegetationBS.LinkPermitToVegetation(task_id, permit_id, userId);
+                var data = await _vegetationBS.LinkPermitToVegetation(scheduleId, permit_id, userId);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -323,14 +323,14 @@ namespace CMMSAPIs.Controllers.Vegetation
             }
         }
 
-        [Route("ApproveMCExecution")]
+        [Route("ApproveEndExecutionVegetation")]
         [HttpPut]
-        public async Task<IActionResult> ApproveMCExecution(ApproveMC request)
+        public async Task<IActionResult> ApproveEndExecutionVegetation(ApproveMC request)
         {
             try
             {
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _vegetationBS.ApproveExecutionVegetation(request, userId);
+                var data = await _vegetationBS.ApproveEndExecutionVegetation(request, userId);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -369,14 +369,14 @@ namespace CMMSAPIs.Controllers.Vegetation
             }
         }
 
-        [Route("ApproveVegetationPlan")]
+        [Route("ApproveScheduleExecutionVegetation")]
         [HttpPut]
-        public async Task<IActionResult> ApproveVegetationPlan(CMApproval request)
+        public async Task<IActionResult> ApproveScheduleExecutionVegetation(ApproveMC request)
         {
             try
             {
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _vegetationBS.ApprovePlan(request, userId);
+                var data = await _vegetationBS.ApproveScheduleExecutionVegetation(request, userId);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -419,18 +419,36 @@ namespace CMMSAPIs.Controllers.Vegetation
 
         [Route("StartVegetationExecution")]
         [HttpPut]
-        public async Task<IActionResult> StartVegetationExecution(int planId)
+        public async Task<IActionResult> StartVegetationExecution(int executionId)
         {
             try
             {
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _vegetationBS.StartExecution(planId, userId);
+                var data = await _vegetationBS.StartExecutionVegetation(executionId, userId);
                 return Ok(data);
             }
             catch (Exception ex)
             {
                 throw;
             }
+        }
+        [Route("ReAssignTaskVegetation")]
+        [HttpPut]
+        public async Task<IActionResult> ReAssignTaskVegetation(int task_id, int assign_to)
+        {
+
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _vegetationBS.ReAssignTaskVegetation(task_id, assign_to, userID);
+                return Ok(data);
+
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+
         }
     }
 }

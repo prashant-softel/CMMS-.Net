@@ -352,14 +352,16 @@ namespace CMMSAPIs.Models.SM
     }
     public class ASSETSITEM
     {
-        public dynamic workingArea_id { get; set; }
+        public dynamic sm_asset_id { get; set; }
+        public string sm_asset_name { get; set; }
         public dynamic mrs_Item_Id { get; set; }
-        public string workingArea_name { get; set; }
+
         public dynamic used_qty { get; set; }
     }
     public class IDASETS
     {
         public int asset_id { get; set; }
+        public string asset_name { get; set; }
         public List<ASSETSITEM> Items { get; set; }
     }
     public class CMRETURNMRSDATA
@@ -473,6 +475,10 @@ namespace CMMSAPIs.Models.SM
         public string remarks { get; set; }
         public int mrsID { get; set; }
         public int mrsItemID { get; set; }
+        public double longitude { get; set; }
+        public double latitude { get; set; }
+
+        public string address { get; set; }
     }
 
     public class CMIssuedItems

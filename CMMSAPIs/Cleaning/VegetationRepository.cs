@@ -536,7 +536,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
             }
 
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.VEGETATION, executionId, 0, 0, "Execution Started", (CMMS.CMMS_Status)status, userId);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.VEGETATION_TASK, executionId, 0, 0, "Execution Started", (CMMS.CMMS_Status)status, userId);
 
 
             CMDefaultResponse response = new CMDefaultResponse(executionId, CMMS.RETRUNSTATUS.SUCCESS, $"Task Execution started");
@@ -555,7 +555,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
             await Context.GetData<CMMCExecutionSchedule>(scheduleQuery).ConfigureAwait(false);
 
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.VEGETATION, scheduleId, 0, 0, "schedule Started", (CMMS.CMMS_Status)status, userId);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.VEGETATION_EXECUTION, scheduleId, 0, 0, "schedule Started", (CMMS.CMMS_Status)status, userId);
 
             CMDefaultResponse response = new CMDefaultResponse(scheduleId, CMMS.RETRUNSTATUS.SUCCESS, $"Schedule started Successfully");
             return response;
@@ -594,7 +594,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 string abandoneQuery = $"Update cleaning_execution_items set status = {abandonStatus},executionDay={request.cleaningDay},abandonedById={userId},abandonedAt= '{UtilsRepository.GetUTCTime()}' where executionId = {request.executionId} and assetId IN ({equipIds2}); ";
                 int val3 = await Context.ExecuteNonQry<int>(abandoneQuery).ConfigureAwait(false);
             }
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.VEGETATION, request.scheduleId, 0, 0, "schedule Updated", CMMS.CMMS_Status.VEG_TASK_UPDATED, userId);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.VEGETATION_EXECUTION, request.scheduleId, 0, 0, "schedule Updated", CMMS.CMMS_Status.VEG_TASK_UPDATED, userId);
 
             CMDefaultResponse response = new CMDefaultResponse(request.scheduleId, CMMS.RETRUNSTATUS.SUCCESS, $"Schedule Updated Successfully");
             return response;
@@ -630,7 +630,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
             await Context.GetData<CMMCExecutionSchedule>(scheduleQuery).ConfigureAwait(false);
 
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.VEGETATION, scheduleId, 0, 0, "schedule Execution Completed", (CMMS.CMMS_Status)status, userId);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.VEGETATION_EXECUTION, scheduleId, 0, 0, "schedule Execution Completed", (CMMS.CMMS_Status)status, userId);
 
             CMDefaultResponse response = new CMDefaultResponse(scheduleId, CMMS.RETRUNSTATUS.SUCCESS, $"Schedule Execution Completed");
             return response;
@@ -641,9 +641,9 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             status = (int)CMMS.CMMS_Status.VEG_TASK_END_APPROVED;
             string approveQuery = $"Update cleaning_execution_schedules set status= {status} ,approvedById={userID}, remark='{request.comment}', approvedAt='{UtilsRepository.GetUTCTime()}' where  scheduleId= {request.id} ";
             await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.VEGETATION, request.schedule_id, 0, 0, request.comment, (CMMS.CMMS_Status)status, userID);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.VEGETATION_EXECUTION, request.id, 0, 0, request.comment, (CMMS.CMMS_Status)status, userID);
 
-            CMDefaultResponse response = new CMDefaultResponse(request.schedule_id, CMMS.RETRUNSTATUS.SUCCESS, $"Execution Schedule Approved");
+            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Execution Schedule Approved");
             return response;
 
         }
@@ -718,14 +718,14 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
             var retVal = await Context.ExecuteNonQry<int>(equipmentQry).ConfigureAwait(false);
 
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.VEGETATION, request.id, 0, 0, request.comment, CMMS.CMMS_Status.VEG_PLAN_APPROVED, userID);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.VEGETATION_EXECUTION, request.id, 0, 0, request.comment, CMMS.CMMS_Status.VEG_PLAN_APPROVED, userID);
 
             CMDefaultResponse response = new CMRescheduleApprovalResponse(taskid, request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Execution End Approved To Vegetation Task {taskid}");
 
             return response;
 
         }
-        internal async Task<CMDefaultResponse> ReAssignMcTaskVegetation(int task_id, int assign_to, int userID)
+        internal async Task<CMDefaultResponse> ReAssignTaskVegetation(int task_id, int assign_to, int userID)
         {
 
             string statusQry = $"SELECT status FROM cleaning_execution WHERE id = {task_id};";
@@ -760,7 +760,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 response = new CMDefaultResponse(task_id, retCode, $"Vegetation Task Reassigned To user Id {assign_to}");
             }
 
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.VEGETATION, task_id, 0, 0, $" Task Assigned to user_Id {assign_to}", CMMS.CMMS_Status.VEG_TASK_ASSIGNED, userID);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.VEGETATION_TASK, task_id, 0, 0, $" Task Assigned to user_Id {assign_to}", CMMS.CMMS_Status.VEG_TASK_ASSIGNED, userID);
             return response;
         }
         internal async Task<CMDefaultResponse> AbandonExecutionVegetation(CMApproval request, int userId)
@@ -820,7 +820,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, request.comment);
             return response;
         }
-        internal async Task<CMDefaultResponse> LinkPermitToVegetation(int task_id, int permit_id, int userId)
+        internal async Task<CMDefaultResponse> LinkPermitToVegetation(int scheduleId, int permit_id, int userId)
         {
             /*
             * Primary Table - PMSchedule
@@ -828,18 +828,15 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             * Code goes here
            */
             CMDefaultResponse response;
-            string statusQry = $"SELECT status,ifnull(assignedTo,0) assigned_to, ifnull(ptw_id,0) ptw_id FROM Cleaning_execution WHERE id = {task_id}";
+            string statusQry = $"SELECT  status,ifnull(ptw_id,0) ptw_id FROM cleaning_execution_schedules WHERE  scheduleId= {scheduleId}";
             DataTable dt1 = await Context.FetchData(statusQry).ConfigureAwait(false);
             CMMS.CMMS_Status status = (CMMS.CMMS_Status)Convert.ToInt32(dt1.Rows[0][0]);
-            int assigned_to = Convert.ToInt32(dt1.Rows[0][1]);
-            int ptw_id = Convert.ToInt32(dt1.Rows[0][2]);
-            if (assigned_to <= 0)
-            {
-                return new CMDefaultResponse(task_id, CMMS.RETRUNSTATUS.FAILURE, "Vegetation Task is Not Assigned.");
-            }
+            int ptw_id = Convert.ToInt32(dt1.Rows[0][1]);
+
+
             if (ptw_id > 0)
             {
-                return new CMDefaultResponse(task_id, CMMS.RETRUNSTATUS.FAILURE, "Permit is already Linked to Vegetation");
+                return new CMDefaultResponse(scheduleId, CMMS.RETRUNSTATUS.FAILURE, "Permit is already Linked to scheduled");
             }
             string permitQuery = "SELECT ptw.id as ptw_id, ptw.code as ptw_code, ptw.title as ptw_title, ptw.status as ptw_status " +
                                     "FROM " +
@@ -847,20 +844,21 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                                     $"WHERE ptw.id = {permit_id} ;";
             List<ScheduleLinkedPermit> permit = await Context.GetData<ScheduleLinkedPermit>(permitQuery).ConfigureAwait(false);
             if (permit.Count == 0)
-                return new CMDefaultResponse(task_id, CMMS.RETRUNSTATUS.FAILURE, $"Permit {permit_id} does not exist.");
-            string myQuery = "UPDATE cleaning_execution  SET " +
+                return new CMDefaultResponse(scheduleId, CMMS.RETRUNSTATUS.FAILURE, $"Permit {permit_id} does not exist.");
+            string myQuery = "UPDATE cleaning_execution_schedules  SET " +
                                 $"ptw_id = {permit[0].ptw_id}, " +
-                                $"status = {(int)CMMS.CMMS_Status.VEGETATION_LINKED_TO_PTW}, " +
+                                $"status = {(int)CMMS.CMMS_Status.SCHEDULED_LINKED_TO_PTW}, " +
                                 $"updatedAt = '{UtilsRepository.GetUTCTime()}', " +
                                 $"updatedById = '{userId}' " +
-                                $"WHERE id = {task_id};";
+                                $"WHERE scheduleId = {scheduleId};";
             int retVal = await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
             if (retVal > 0)
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.VEGETATION, task_id, CMMS.CMMS_Modules.PTW, permit_id, "PTW linked to Vegetation", CMMS.CMMS_Status.VEGETATION_LINKED_TO_PTW, userId);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.VEGETATION_EXECUTION, scheduleId, CMMS.CMMS_Modules.PTW, permit_id, "PTW linked to MC", CMMS.CMMS_Status.SCHEDULED_LINKED_TO_PTW, userId);
 
-            response = new CMDefaultResponse(task_id, CMMS.RETRUNSTATUS.SUCCESS, $"Permit {permit_id} linked to  vegetation Task {task_id}");
+            response = new CMDefaultResponse(scheduleId, CMMS.RETRUNSTATUS.SUCCESS, $"Permit {permit_id} linked to MC Schedule {scheduleId} Successfully");
+
             return response;
         }
 

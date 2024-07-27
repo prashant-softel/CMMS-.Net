@@ -24,7 +24,7 @@ namespace CMMSAPIs.Cleaning
         public Task<CMDefaultResponse> RejectAbandonExecutionVegetation(CMApproval request, int userId);
         public Task<CMDefaultResponse> ApproveAbandonExecutionVegetation(CMApproval request, int userId);
         public Task<CMDefaultResponse> EndScheduleExecutionVegetation(int scheduleId, int userId);
-        public Task<CMDefaultResponse> ReAssignMcTaskVegetation(int task_id, int assign_to, int userID);
+        public Task<CMDefaultResponse> ReAssignTaskVegetation(int task_id, int assign_to, int userID);
         public Task<CMDefaultResponse> UpdateScheduleExecutionVegetation(CMMCGetScheduleExecution request, int userId);
         public Task<CMDefaultResponse> ApproveEndExecutionVegetation(ApproveMC request, int userId);
         public Task<CMDefaultResponse> RejectScheduleExecutionVegetation(ApproveMC request, int userId);
@@ -185,13 +185,13 @@ namespace CMMSAPIs.Cleaning
             }
         }
 
-        public async Task<CMDefaultResponse> ReAssignMcTaskVegetation(int task_id, int assign_to, int userID)
+        public async Task<CMDefaultResponse> ReAssignTaskVegetation(int task_id, int assign_to, int userID)
         {
             try
             {
                 using (var repos = new VegetationRepository(getDB))
                 {
-                    return await repos.ReAssignMcTaskVegetation(task_id, assign_to, userID);
+                    return await repos.ReAssignTaskVegetation(task_id, assign_to, userID);
                 }
             }
             catch (Exception ex)
@@ -443,7 +443,7 @@ namespace CMMSAPIs.Cleaning
         {
             try
             {
-                // using (var repos = new VegetationRepository(getDB))
+                using (var repos = new VegetationRepository(getDB))
                 {
                     return await repos.GetExecutionDetails(executionId, facilitytimeZone);
                 }
@@ -507,21 +507,6 @@ namespace CMMSAPIs.Cleaning
                 using (var repos = new VegetationRepository(getDB))
                 {
                     return await repos.DeletePlan(planId, userId);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        }
-
-        internal async Task<CMDefaultResponse> StartExecution(int planId, int userId)
-        {
-            try
-            {
-                using (var repos = new VegetationRepository(getDB))
-                {
-                    return await repos.StartExecutionVegetation(planId, userId);
                 }
             }
             catch (Exception ex)
