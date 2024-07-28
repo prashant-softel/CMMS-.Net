@@ -207,9 +207,9 @@ namespace CMMSAPIs.Controllers.SM
         }
 
 
-        [Route("GetPlantItemTransactionReport")]
+        [Route("GetAssetItemTransactionReport")]
         [HttpGet]
-        public async Task<IActionResult> GetPlantItemTransactionReport(string facility_ID, int assetItemId, DateTime fromDate, DateTime toDate)
+        public async Task<IActionResult> GetAssetItemTransactionReport(string facility_ID, int assetItemId, DateTime fromDate, DateTime toDate)
         {
             try
             {
