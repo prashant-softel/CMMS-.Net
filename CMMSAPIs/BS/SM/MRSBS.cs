@@ -431,7 +431,6 @@ namespace CMMSAPIs.BS.SM
                         }
                         else if (result == 2)
                         {
-                            response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.FAILURE, "MRS Id ( " + request.mrsItemID + " ) not found.");
                             response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.FAILURE, "MRSItemId ( " + request.mrsItemID + " ) not found.");
                         }
                         else if (result == 3)
