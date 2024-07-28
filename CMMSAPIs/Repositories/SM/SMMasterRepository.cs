@@ -784,7 +784,7 @@ namespace CMMSAPIs.Repositories.SM
                                 DataTable dtInsertPO = await Context.FetchData(poDetailsQuery).ConfigureAwait(false);
                                 int id = Convert.ToInt32(dtInsertPO.Rows[0][0]);
 
-                                var stmtI = $"INSERT INTO smassetitems (facility_ID,asset_code,item_condition,status,assetMasterID) VALUES ({row.ItemArray[2]},'{row.ItemArray[0]}',1,0,{sm_asset_id}); SELECT LAST_INSERT_ID();";
+                                var stmtI = $"INSERT INTO smassetitems (facility_ID,asset_code,item_condition,status,assetMasterID,reorder_qty,min_stock_qty) VALUES ({row.ItemArray[2]},'{row.ItemArray[0]}',1,0,{sm_asset_id},{row.ItemArray[12]},{row.ItemArray[11]}); SELECT LAST_INSERT_ID();";
                                 DataTable dtInsert = await Context.FetchData(stmtI).ConfigureAwait(false);
                                 var assetitemsId = Convert.ToInt32(dtInsert.Rows[0][0]);
 
