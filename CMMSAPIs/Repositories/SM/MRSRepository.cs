@@ -1142,8 +1142,8 @@ namespace CMMSAPIs.Repositories.SM
                 DataTable dt_chkAssetPresnt = await Context.FetchData(chkAssetPresnt).ConfigureAwait(false);
                 if (dt_chkAssetPresnt.Rows.Count > 0 && dt_chkAssetPresnt.Rows[0][0] != DBNull.Value)
                 {
-                    transaction_id = Convert.ToInt32(dt_chkAssetPresnt.Rows[0][0]);
-                    existingQty = Convert.ToInt32(dt_chkAssetPresnt.Rows[0][1]);
+                    transaction_id  = Convert.ToInt32(dt_chkAssetPresnt.Rows[0][0]);
+                    existingQty     = Convert.ToInt32(dt_chkAssetPresnt.Rows[0][1]);
                 }
                 if (existingQty == qty)
                 {
@@ -1166,7 +1166,7 @@ namespace CMMSAPIs.Repositories.SM
                                 return 7;
                             }
                             string stmt = "INSERT INTO smtransactiondetails (plantID,fromActorID,fromActorType,toActorID,toActorType,assetItemID,qty,referedby,reference_ID,remarks,Asset_Item_Status,mrsID, mrsItemID,latitude,longitude,address)" +
-                                            $"VALUES ({facilityID},{fromActorID},{fromActorType},{toActorID},{toActorType},{assetItemID},{qty},{refType},{refID},'{remarks}',{assetItemStatus},{mrsID},{mrsitemID}.{latitude},{longitude},{address}); SELECT LAST_INSERT_ID(); ";
+                                            $"VALUES ({facilityID},{fromActorID},{fromActorType},{toActorID},{toActorType},{assetItemID},{qty},{refType},{refID},'{remarks}',{assetItemStatus},{mrsID},{mrsitemID},{latitude},{longitude},'{address}'); SELECT LAST_INSERT_ID(); ";
 
                             DataTable dt2 = await Context.FetchData(stmt).ConfigureAwait(false);
                             if (dt2.Rows.Count > 0)
@@ -1192,7 +1192,7 @@ namespace CMMSAPIs.Repositories.SM
                         }
                         else
                         {
-                            string updateQ = $"update smtransactiondetails set qty = {qty} where ID = {transaction_id};" +
+                            string updateQ = $"update smtransactiondetails set qty = {qty}, lastInsetedDateTime = '{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}' where ID = {transaction_id};" +
                                 $" update smtransition set debitQty = {qty} where transactionID = {transaction_id} and mrsID = {mrsID} and assetItemID = {assetItemID} and actorType = {fromActorType};" +
                                 $" update smtransition set creditQty = {qty} where transactionID = {transaction_id} and mrsID = {mrsID} and assetItemID = {assetItemID} and actorType = {toActorType};";
                             var result = await Context.ExecuteNonQry<int>(updateQ);
@@ -1353,14 +1353,21 @@ namespace CMMSAPIs.Repositories.SM
             string stmt = $"INSERT INTO smtransition (facilityID, transactionID, actorType, actorID,creditQty, debitQty, assetItemID, mrsID) VALUES ({facilityID},{transactionID}, '{actorType}', {actorID},0, {debitQty}, {assetItemID}, {mrsID}); SELECT LAST_INSERT_ID();";
             DataTable dt2 = await Context.FetchData(stmt).ConfigureAwait(false);
             int id = Convert.ToInt32(dt2.Rows[0][0]);
+
+            // update createdBy for smtransition , on the basis of mrs requested user
+            string stmt_Update_CreatedBy = $"UPDATE smtransition st\r\nJOIN smmrs sm ON st.mrsID = sm.id\r\nSET st.createdBy = sm.requested_by_emp_ID\r\nWHERE st.id = {id};\r\n";
+            await Context.ExecuteNonQry<int>(stmt_Update_CreatedBy);
             return id;
         }
-
         private async Task<int> CreditTransation(int facilityID, int transactionID, int actorType, int actorID, int qty, int assetItemID, int mrsID)
         {
             string query = $"INSERT INTO smtransition (facilityID, transactionID,actorType,actorID,creditQty,debitQty,assetItemID,mrsID) VALUES ({facilityID},{transactionID},'{actorType}',{actorID},{qty},0,{assetItemID},{mrsID});SELECT LAST_INSERT_ID();";
             DataTable dt2 = await Context.FetchData(query).ConfigureAwait(false);
             int id = Convert.ToInt32(dt2.Rows[0][0]);
+
+            // update createdBy for smtransition , on the basis of mrs requested user
+            string stmt_Update_CreatedBy = $"UPDATE smtransition st\r\nJOIN smmrs sm ON st.mrsID = sm.id\r\nSET st.createdBy = sm.requested_by_emp_ID\r\nWHERE st.id = {id};\r\n";
+            await Context.ExecuteNonQry<int>(stmt_Update_CreatedBy);
             return id;
         }
 

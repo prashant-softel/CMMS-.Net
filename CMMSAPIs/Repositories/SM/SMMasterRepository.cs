@@ -799,11 +799,11 @@ namespace CMMSAPIs.Repositories.SM
 
 
                                 string insertTransition = $"INSERT INTO smtransition (transactionID, facilityID, goID, mrsID, assetItemID, actorType, actorID, " +
-                                    $" debitQty, creditQty, lastModifiedDate,isImported,isOpening) " +
+                                    $" debitQty, creditQty, lastModifiedDate,isImported,isOpening,createdBy) " +
                                     $" select {asset_TransDetail}, {row.ItemArray[2]},{go_id},0, {sm_asset_id},{(int)CMMS.SM_Actor_Types.Vendor}, {userID}, " +
-                                    $" {qty},0, '{assetImportStartDate}',1,1 union all " +
+                                    $" {qty},0, '{assetImportStartDate}',1,1,{userID} union all " +
                                     $" select {asset_TransDetail}, {row.ItemArray[2]},{go_id},0, {sm_asset_id},{(int)CMMS.SM_Actor_Types.Store}, {row.ItemArray[2]}," +
-                                    $" 0, {qty}, '{assetImportStartDate}',1,1;";
+                                    $" 0, {qty}, '{assetImportStartDate}',1,1,{userID};";
                                 var insertedResult = await Context.ExecuteNonQry<int>(insertTransition).ConfigureAwait(false);
                             }
 

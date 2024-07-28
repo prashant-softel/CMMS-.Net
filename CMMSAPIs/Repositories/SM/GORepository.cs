@@ -702,7 +702,7 @@ namespace CMMSAPIs.Repositories
         }
 
 
-        public async Task<bool> TransactionDetails(int facilityID, int fromActorID, int fromActorType, int toActorID, int toActorType, int assetItemID, double qty, int refType, int refID, string remarks, int mrsID = 0, int natureOfTransaction = 0, int assetItemStatus = 0)
+        public async Task<bool> TransactionDetails(int facilityID, int fromActorID, int fromActorType, int toActorID, int toActorType, int assetItemID, double qty, int refType, int refID, string remarks, int mrsID = 0, int natureOfTransaction = 0, int assetItemStatus = 0, int userId = 0)
         {
             try
             {
@@ -715,8 +715,8 @@ namespace CMMSAPIs.Repositories
                 if (dt2.Rows.Count > 0)
                 {
                     transaction_ID = Convert.ToInt32(dt2.Rows[0][0]);
-                    int debitTransactionID = await DebitTransation(transaction_ID, fromActorID, fromActorType, qty, assetItemID, refID, facilityID);
-                    int creditTransactionID = await CreditTransation(transaction_ID, toActorID, toActorType, qty, assetItemID, refID, facilityID);
+                    int debitTransactionID = await DebitTransation(transaction_ID, fromActorID, fromActorType, qty, assetItemID, refID, facilityID, userId);
+                    int creditTransactionID = await CreditTransation(transaction_ID, toActorID, toActorType, qty, assetItemID, refID, facilityID, userId);
                     bool isValid = await VerifyTransactionDetails(transaction_ID, debitTransactionID, creditTransactionID, facilityID, fromActorID, fromActorType, toActorID, toActorType, assetItemID, qty, refType, refID, remarks, mrsID);
                     if (isValid)
                     {
@@ -768,17 +768,17 @@ namespace CMMSAPIs.Repositories
             return 1;
         }
 
-        private async Task<int> DebitTransation(int transactionID, int actorID, int actorType, double debitQty, int assetItemID, int mrsID, int facilityID)
+        private async Task<int> DebitTransation(int transactionID, int actorID, int actorType, double debitQty, int assetItemID, int mrsID, int facilityID, int createdBy)
         {
-            string stmt = $"INSERT INTO smtransition (transactionID, actorType, actorID, debitQty, assetItemID, goID, facilityID) VALUES ({transactionID}, '{actorType}', {actorID}, {debitQty}, {assetItemID}, {mrsID}, {facilityID}); SELECT LAST_INSERT_ID();";
+            string stmt = $"INSERT INTO smtransition (transactionID, actorType, actorID, debitQty, assetItemID, goID, facilityID, createdBy) VALUES ({transactionID}, '{actorType}', {actorID}, {debitQty}, {assetItemID}, {mrsID}, {facilityID},{createdBy}); SELECT LAST_INSERT_ID();";
             DataTable dt2 = await Context.FetchData(stmt).ConfigureAwait(false);
             int id = Convert.ToInt32(dt2.Rows[0][0]);
             return id;
         }
 
-        private async Task<int> CreditTransation(int transactionID, int actorID, int actorType, double qty, int assetItemID, int mrsID, int facilityID)
+        private async Task<int> CreditTransation(int transactionID, int actorID, int actorType, double qty, int assetItemID, int mrsID, int facilityID, int createdBy)
         {
-            string query = $"INSERT INTO smtransition (transactionID,actorType,actorID,creditQty,assetItemID,goID, facilityID) VALUES ({transactionID},'{actorType}',{actorID},{qty},{assetItemID},{mrsID}, {facilityID}) ; SELECT LAST_INSERT_ID();";
+            string query = $"INSERT INTO smtransition (transactionID,actorType,actorID,creditQty,assetItemID,goID, facilityID,createdBy) VALUES ({transactionID},'{actorType}',{actorID},{qty},{assetItemID},{mrsID}, {facilityID},{createdBy}) ; SELECT LAST_INSERT_ID();";
             DataTable dt2 = await Context.FetchData(query).ConfigureAwait(false);
             int id = Convert.ToInt32(dt2.Rows[0][0]);
             return id;
@@ -1352,7 +1352,7 @@ namespace CMMSAPIs.Repositories
                     for (var j = 0; j < data[i].ordered_qty; j++)
                     {
                         decimal stock_qty = 1;
-                        var tResult = await TransactionDetails(data[i].facility_id, data[i].vendorID, (int)CMMS.SM_Actor_Types.Vendor, data[i].facility_id, (int)CMMS.SM_Actor_Types.Store, data[i].assetItemID, (double)stock_qty, (int)CMMS.CMMS_Modules.SM_GO, request.id, "Goods Order");
+                        var tResult = await TransactionDetails(data[i].facility_id, data[i].vendorID, (int)CMMS.SM_Actor_Types.Vendor, data[i].facility_id, (int)CMMS.SM_Actor_Types.Store, data[i].assetItemID, (double)stock_qty, (int)CMMS.CMMS_Modules.SM_GO, request.id, "Goods Order", userId);
 
                         // Update the order type.
                         var update_order_type = await updateGOType(data[i].order_by_type, data[i].id);
