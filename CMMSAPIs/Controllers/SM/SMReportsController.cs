@@ -217,7 +217,7 @@ namespace CMMSAPIs.Controllers.SM
                 var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_IDs)?.timezone;
 
 
-                var data = await _SMReportsBS.GetPlantItemTransactionReport(facility_ID, assetItemId, fromDate, toDate, facilitytimeZone);
+                var data = await _SMReportsBS.GetAssetItemTransactionReport(facility_ID, assetItemId, fromDate, toDate, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
