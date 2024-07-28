@@ -597,7 +597,7 @@ namespace CMMSAPIs.Repositories.SM
 
         }
 
-        internal async Task<List<CMItemWiseTransaction>> GetPlantItemTransactionReport(string facility_ID, int assetItemId, DateTime fromDate, DateTime toDate, string facilitytimeZone)
+        internal async Task<List<CMItemWiseTransaction>> GetAssetItemTransactionReport(string facility_ID, int assetItemId, DateTime fromDate, DateTime toDate, string facilitytimeZone)
         {
 
             List<CMEmployeeStockTransactionReport> EmployeeStockReportList = new List<CMEmployeeStockTransactionReport>();
