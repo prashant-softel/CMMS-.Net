@@ -288,7 +288,12 @@ namespace CMMSAPIs.Models.MC
         public int status { get; set; }
         public string status_short { get; set; }
         public int water_used { get; set; }
-
+        public string permit_code { get; set; }
+        public int permit_id { get; set; }
+        public int ptw_status { get; set; }
+        public string status_short_ptw { get; set; }
+        public int permit_tbt_done_by { get; set; }
+        public int ptw_id { get; set; }
         public string title { get; set; }
     }
     public class CMMCExecutionList

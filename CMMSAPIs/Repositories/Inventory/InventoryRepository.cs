@@ -1487,7 +1487,7 @@ namespace CMMSAPIs.Repositories.Inventory
                 {
 
                     string calibratoinquery = "insert into calibration (facility_id,asset_id,status,due_date) VALUES ";
-                    calibratoinquery += $"({unit.facilityId},{retID},{(int)CMMS.CMMS_Status.CALIBRATION_SCHEDULED},'{firstCalibrationDate}');" +
+                    calibratoinquery += $"({unit.facilityId},{retID},{(int)CMMS.CMMS_Status.CALIBRATION_SCHEDULED},{firstCalibrationDate});" +
                         $" SELECT LAST_INSERT_ID();";
                     DataTable dt2 = await Context.FetchData(calibratoinquery).ConfigureAwait(false);
                     int calibration_id = Convert.ToInt32(dt2.Rows[0][0]);

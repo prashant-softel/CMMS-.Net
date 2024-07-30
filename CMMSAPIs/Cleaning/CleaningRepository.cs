@@ -378,7 +378,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 if (request.cleaningType > 0)
                     Query += $"cleaningType = {request.cleaningType}, ";
                 if (request.startDate != null)
-                    Query += $"startDate = '{request.startDate.ToString("yyyy-MM-dd")}', ";
+                    Query += $"startDate = '{request.startDate.Value.ToString("yyyy-MM-dd")}', ";
                 if (request.noOfCleaningDays > 0)
                     Query += $"durationDays = {request.noOfCleaningDays}, ";
 
@@ -678,13 +678,26 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             }
             statusOut += $"ELSE 'Invalid Status' END";
 
-            string myQuery1 = $"select mc.id as executionId ,mp.title,mc.planId,mc.status, CONCAT(createdBy.firstName, createdBy.lastName) as responsibility , mc.startDate, mc.endedAt as doneDate,mc.prevTaskDoneDate as lastDoneDate,freq.name as frequency,mc.noOfDays, {statusOut} as status_short from cleaning_execution as mc left join cleaning_plan as mp on mp.planId = mc.planId LEFT JOIN Frequency as freq on freq.id = mp.frequencyId LEFT JOIN users as createdBy ON createdBy.id = mc.assignedTo LEFT JOIN users as approvedBy ON approvedBy.id = mc.approvedByID where mc.moduleType={moduleType} ";
+            string myQuery1 = $"select mc.id as executionId ,mp.title,mc.planId,mc.status, CONCAT(createdBy.firstName, createdBy.lastName) as responsibility , " +
+                $" mc.startDate, mc.endedAt as doneDate,mc.prevTaskDoneDate as lastDoneDate,freq.name as frequency,mc.noOfDays, {statusOut} as status_short , permits.status AS ptw_status, permits.code AS permit_code,permits.id AS permit_id, permits.tbt_done_by AS permit_tbt_done_by " +
+                $" from cleaning_execution as mc left join cleaning_plan as mp on mp.planId = mc.planId " +
+                $" LEFT JOIN Frequency as freq on freq.id = mp.frequencyId " +
+                $" LEFT JOIN users as createdBy ON createdBy.id = mc.assignedTo " +
+                $" LEFT JOIN cleaning_execution_schedules AS ces ON ces.executionId = mc.id " +
+                $" LEFT JOIN permits ON permits.id = ces.ptw_Id " +
+                $" LEFT JOIN users as approvedBy ON approvedBy.id = mc.approvedByID where mc.moduleType={moduleType} ";
 
             if (facilityId > 0)
             {
                 myQuery1 += $" and mc.facilityId = {facilityId} ";
             }
             List<CMMCTaskList> _ViewMCTaskList = await Context.GetData<CMMCTaskList>(myQuery1).ConfigureAwait(false);
+            foreach (var item in _ViewMCTaskList)
+            {
+                CMMS.CMMS_Status ptw_status1 = (CMMS.CMMS_Status)(item.ptw_status);
+                item.status_short_ptw = Status_PTW((int)ptw_status1);
+
+            }
             foreach (var ViewMCTaskList in _ViewMCTaskList)
             {
                 if (ViewMCTaskList != null && ViewMCTaskList.doneDate != null)

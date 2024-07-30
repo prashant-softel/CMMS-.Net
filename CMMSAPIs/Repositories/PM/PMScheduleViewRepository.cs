@@ -236,22 +236,43 @@ namespace CMMSAPIs.Repositories.PM
              * Delete the requested id from primary table
              * Code goes here
             */
+            int retVal = 0;
             string statusQry = $"SELECT status FROM pm_task WHERE id = {request.id};";
             DataTable dt1 = await Context.FetchData(statusQry).ConfigureAwait(false);
             CMMS.CMMS_Status status = (CMMS.CMMS_Status)Convert.ToInt32(dt1.Rows[0][0]);
-            //if (status != CMMS.CMMS_Status.PM_LINK_PTW && status != CMMS.CMMS_Status.PM_SUBMIT)
-            //    return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.FAILURE, "Only a PM Task that has not been executed can be cancelled.");
-            string myQuery = "UPDATE pm_task SET " +
-                                $"cancelled_by = {userID}, " +
-                                $"cancelled_at = '{UtilsRepository.GetUTCTime()}', " +
-                                $"cancel_remarks = '{request.comment}', " +
-                                $"status = {(int)CMMS.CMMS_Status.PM_CANCELLED}, " +
-                                $"status_updated_at = '{UtilsRepository.GetUTCTime()}', " +
-                                $"status_updated_by = {userID} " +
-                                $"WHERE id = {request.id} ";
+            if (status != CMMS.CMMS_Status.RESCHEDULED_TASK && status != CMMS.CMMS_Status.PM_CLOSE_APPROVED)
+            {
+                // return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.FAILURE, "Only a PM Task that has not been executed can be cancelled.");
+                string myQuery = "UPDATE pm_task SET " +
+                                    $"cancelled_by = {userID}, " +
+                                    $"cancelled_at = '{UtilsRepository.GetUTCTime()}', " +
+                                    $"cancel_remarks = '{request.comment}', " +
+                                    $"status = {(int)CMMS.CMMS_Status.PM_CANCELLED}, " +
+                                    $"rescheduled = 1 , " +
+                                    $"status_updated_at = '{UtilsRepository.GetUTCTime()}', " +
+                                    $"status_updated_by = {userID} " +
+                                    $"WHERE id = {request.id} ";
 
-            int retVal = await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
+                retVal = await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
+            }
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
+            string mainQuery = $"INSERT INTO pm_task(plan_id,facility_id,category_id,frequency_id,plan_Date,assigned_to,status,prev_task_id,prev_task_done_date)  " +
+                             $"select plan_id as plan_id,facility_id,category_id,frequency_id,CASE when  pm_task.frequency_id in( 4,5,6)  then\r\nDATE_ADD(plan_date, INTERVAL freq.months MONTH) \r\n  WHEN pm_task.frequency_id = 7 THEN \r\n DATE_ADD(plan_date, INTERVAL 1 YEAR)\r\nelse DATE_ADD(plan_date, INTERVAL freq.days DAY) end as plan_date,assigned_to,{(int)CMMS.CMMS_Status.PM_SCHEDULED} as status,{request.id} as prev_task_id, '{UtilsRepository.GetUTCTime()}' as prev_task_done_date from pm_task " +
+                             $"left join frequency as freq on pm_task.frequency_id = freq.id where pm_task.id = {request.id}; " +
+                             $"SELECT LAST_INSERT_ID(); ";
+            DataTable dt3 = await Context.FetchData(mainQuery).ConfigureAwait(false);
+            int id = Convert.ToInt32(dt3.Rows[0][0]);
+
+            string scheduleQry = $"INSERT INTO pm_schedule(task_id,plan_id,Asset_id,checklist_id,PM_Schedule_date,status) " +
+                                $"select {id} as task_id, plan_id, Asset_id, checklist_id, PM_Schedule_date,{(int)CMMS.CMMS_Status.PM_SCHEDULED} as status from pm_schedule where task_id = {request.id}";
+            await Context.ExecuteNonQry<int>(scheduleQry);
+
+            string setCodeNameQuery = "UPDATE pm_schedule " +
+                                        "SET PM_Schedule_Code = CONCAT(id,Facility_Code,Asset_Category_Code,Asset_Code,PM_Frequecy_Code), " +
+                                        "PM_Schedule_Name = CONCAT(id,' ',Facility_Name,' ',Asset_Category_name,' ',Asset_Name), " +
+                                        "PM_Schedule_Number = CONCAT('SCH',id), " +
+                                        "PM_Maintenance_Order_Number = CONCAT('PMSCH',id);";
+            await Context.ExecuteNonQry<int>(setCodeNameQuery);
             if (retVal > 0)
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_TASK, request.id, 0, 0, string.IsNullOrEmpty(request.comment) ? "PM Task Cancelled" : request.comment, CMMS.CMMS_Status.PM_CANCELLED, userID);

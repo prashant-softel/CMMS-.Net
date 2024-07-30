@@ -1,5 +1,4 @@
 using CMMSAPIs.Helper;
-using CMMSAPIs.Models.Masters;
 using CMMSAPIs.Models.SM;
 using CMMSAPIs.Repositories.Utils;
 using System;
@@ -628,7 +627,7 @@ namespace CMMSAPIs.Repositories.SM
                 " from smtransactiondetails ST  inner join smtransition smt on smt.transactionID = ST.ID" +
                 " inner join smassetmasters am on am.ID = ST.assetItemID left join facilities FF on FF.id = ST.plantID " +
                 " left join users C on C.id = ST.createdBy left join users Ctranaction on Ctranaction.id = smt.createdBy  left join users ref on ref.id = ST.referedby left join smassettypes smtypes on smtypes.ID = am.asset_type_ID " +
-                " where ST.assetItemID = " + assetItemId + "  and  date_format(smt.lastModifiedDate, '%Y-%m-%d')  BETWEEN '" + fromDate.ToString("yyyy-MM-dd") + "' AND '" + toDate.ToString("yyyy-MM-dd") + "' ";
+                " where ST.assetItemID = " + assetItemId + "  and  date_format(smt.lastModifiedDate, '%Y-%m-%d')  >= '" + fromDate.ToString("yyyy-MM-dd") + "' AND date_format(smt.lastModifiedDate, '%Y-%m-%d') <= '" + toDate.ToString("yyyy-MM-dd") + "' ";
 
             if (facility_ID != "" && facility_ID != null)
             {
@@ -645,11 +644,26 @@ namespace CMMSAPIs.Repositories.SM
                 if (detail != null && detail.LastUpdated != null)
                     detail.LastUpdated = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)detail.LastUpdated);
             }
+            if (result.Count == 0)
+            {
+                String result1 = $"select distinct ST.plantID as facilityID , FF.name as facilityName,isOpening from smtransactiondetails As ST  " +
+                                 $" left join facilities FF on FF.id = ST.plantID " +
+                                 $" where ST.assetItemID = {assetItemId} ";
+                List<CMEmployeeStockTransactionReport> results = await Context.GetData<CMEmployeeStockTransactionReport>(result1).ConfigureAwait(false);
+                List<CMItemWiseTransaction> groupedResult1 = results.GroupBy(g => new { g.facilityID, g.facilityName, g.Opening })
+              .Select(group => new CMItemWiseTransaction
+              {
+                  facilityID = group.Key.facilityID,
+                  facilityName = group.Key.facilityName,
+                  opening = group.Key.Opening < 0 ? 0 : group.Key.Opening,
 
+              }).ToList();
+                return groupedResult1;
+            }
 
             // formatting data
 
-            List<CMItemWiseTransaction> groupedResult = result.GroupBy(r => new { r.facilityID, r.facilityName,r.Opening })
+            List<CMItemWiseTransaction> groupedResult = result.GroupBy(r => new { r.facilityID, r.facilityName, r.Opening })
                .Select(group => new CMItemWiseTransaction
                {
                    facilityID = group.Key.facilityID,
@@ -686,4 +700,5 @@ namespace CMMSAPIs.Repositories.SM
 
     }
 }
+
 

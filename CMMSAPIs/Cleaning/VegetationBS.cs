@@ -470,7 +470,7 @@ namespace CMMSAPIs.Cleaning
             }
         }
 
-        internal async Task<CMDefaultResponse> ApprovePlan(CMApproval request, int userId)
+        /*internal async Task<CMDefaultResponse> ApprovePlan(CMApproval request, int userId)
         {
             try
             {
@@ -483,7 +483,7 @@ namespace CMMSAPIs.Cleaning
             {
                 throw;
             }
-        }
+        }*/
 
         internal async Task<CMDefaultResponse> RejectPlan(CMApproval request, int userId)
         {
@@ -507,6 +507,21 @@ namespace CMMSAPIs.Cleaning
                 using (var repos = new VegetationRepository(getDB))
                 {
                     return await repos.DeletePlan(planId, userId);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        internal async Task<CMDefaultResponse> ApproveVegetationPlan(CMApproval request, int userId)
+        {
+            try
+            {
+                using (var repos = new VegetationRepository(getDB))
+                {
+                    return await repos.ApprovePlan(request, userId);
                 }
             }
             catch (Exception ex)

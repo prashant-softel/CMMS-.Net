@@ -322,6 +322,21 @@ namespace CMMSAPIs.Controllers.Vegetation
                 throw;
             }
         }
+        [Route("ApproveVegetationPlan")]
+        [HttpPost]
+        public async Task<IActionResult> ApproveVegetationPlan(CMApproval request)
+        {
+            try
+            {
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _vegetationBS.ApproveVegetationPlan(request, userId);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
 
         [Route("ApproveEndExecutionVegetation")]
         [HttpPut]
