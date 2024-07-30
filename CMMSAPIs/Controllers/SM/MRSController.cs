@@ -313,7 +313,7 @@ namespace CMMSAPIs.Controllers.SM
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _MRSBS.ReturnMRS(request, userID);
+                var data = await _MRSBS.CreateReturnMRS(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
