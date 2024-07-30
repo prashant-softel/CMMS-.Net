@@ -212,6 +212,7 @@ namespace CMMSAPIs.Models.SM
         public int assetMasterID { get; set; }
         public string serial_number { get; set; }
         public int transaction_id { get; set; }
+        public int faulty_item_asset_id { get; set; }
 
     }
 
