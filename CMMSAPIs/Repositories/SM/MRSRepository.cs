@@ -1130,7 +1130,7 @@ namespace CMMSAPIs.Repositories.SM
                 }
 
                 //All the quantities used for this material in various assets
-                string stmt1 = $"select sum(qty) as used_qty from smtransactiondetails where toActorType={toActorType} and mrsID={mrsID} and assetItemID={assetItemID}; ";
+                string stmt1 = $"select sum(qty) as used_qty from smtransactiondetails where toActorType={toActorType} and mrsID={mrsID} and assetItemID={assetItemID}  and mrsItemID={mrsitemID}; ";
                 DataTable dt3_used_qty = await Context.FetchData(stmt1).ConfigureAwait(false);
                 if (dt3_used_qty.Rows.Count > 0 && dt3_used_qty.Rows[0][0] != DBNull.Value)
                 {
@@ -1589,7 +1589,7 @@ namespace CMMSAPIs.Repositories.SM
                         await Context.ExecuteNonQry<int>(updatestmt);
 
 
-          
+
                     }
                     else
                     {
@@ -1886,7 +1886,8 @@ namespace CMMSAPIs.Repositories.SM
                 }
                 string msg = "Equipment returned to store.";
                 response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, msg);
-            }catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 return new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "MRS Item update details failed.");
             }

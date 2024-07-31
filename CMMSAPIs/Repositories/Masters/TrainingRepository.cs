@@ -1,11 +1,8 @@
-﻿using CMMSAPIs.BS.Mails;
-using CMMSAPIs.Helper;
-using CMMSAPIs.Models.Mails;
+﻿using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Masters;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Utils;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -218,9 +215,9 @@ namespace CMMSAPIs.Repositories.Masters
 
             foreach (InternalEmployee item in request.internalEmployees)
             {
-                string invitationLink = GenerateInvitationLink(schid, item.EmpId); // Generate unique invitation link
-                string emailBody = $"You are invited to attend a training course. Please RSVP using the following link: {invitationLink}";
-                await sendEmail("Invitation to Training Course", emailBody, item.empEmail); // Send email with the invitation link
+                //string invitationLink = GenerateInvitationLink(schid, item.EmpId); // Generate unique invitation link
+                //string emailBody = $"You are invited to attend a training course. Please RSVP using the following link: {invitationLink}";
+                //await sendEmail("Invitation to Training Course", emailBody, item.empEmail); // Send email with the invitation link
 
                 string inviteschdule = $"INSERT INTO schdule_invitee ( Schid, employee_id, Visitor_id, Rsvp, designation, Attendend, CreatedAt, CreatedBy) values " +
                                        $"('{schid}', {item.EmpId}, {Exterid}, 0, '{item.empDesignation}', '{item.Attendence}', '{UtilsRepository.GetUTCTime()}', {userID}) ; " +
@@ -241,6 +238,7 @@ namespace CMMSAPIs.Repositories.Masters
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.TRAINNING_SCHEDULE, schid, 0, 0, request.Comment, CMMS.CMMS_Status.COURSE_SCHEDULE);
             return new CMDefaultResponse(schid, CMMS.RETRUNSTATUS.SUCCESS, "Course Schedule Successfully Created");
         }
+        /*
         protected async Task<CMDefaultResponse> sendEmail(string subject, string body, string emailTo)
         {
             CMMailSettings _settings = new CMMailSettings();
@@ -295,7 +293,7 @@ namespace CMMSAPIs.Repositories.Masters
             await Context.ExecuteNonQry<int>(updateRsvpQry).ConfigureAwait(false);
             return "RSVP response recorded successfully";
         }
-
+        */
         internal async Task<List<GETSCHEDULE>> GetScheduleCourseList(int facility_id, DateTime from_date, DateTime to_date)
         {
             string getsch = $"SELECT  Schid as ScheduleID ,CourseId as  CourseID , Course_name, ScheduleDate, TraingCompany as TrainingCompany, Trainer, Mode as mode,  Venue , " +

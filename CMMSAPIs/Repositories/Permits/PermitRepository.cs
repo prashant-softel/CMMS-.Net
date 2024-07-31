@@ -1755,7 +1755,7 @@ namespace CMMSAPIs.Repositories.Permits
             }
             if (request.resubmit == true)
             {
-                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.permit_id, 0, 0, "Permit Resubmitted for Approval", CMMS.CMMS_Status.PTW_CREATED, userID);
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.permit_id, 0, 0, request.description, CMMS.CMMS_Status.PTW_CREATED, userID);
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_CREATED, new[] { userID }, permitDetails);
                 response = new CMDefaultResponse(request.permit_id, CMMS.RETRUNSTATUS.SUCCESS, $"Permit Resubmitted for Approval");
 

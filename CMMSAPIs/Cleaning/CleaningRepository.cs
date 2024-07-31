@@ -366,6 +366,8 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             int planId = 0;
             foreach (CMMCPlan request in requests)
             {
+
+
                 string Query = "UPDATE cleaning_plan SET ";
                 if (request.title != null && request.title != "")
                     Query += $"title = '{request.title}', ";
@@ -377,8 +379,8 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                     Query += $"frequencyId = {request.frequencyId}, ";
                 if (request.cleaningType > 0)
                     Query += $"cleaningType = {request.cleaningType}, ";
-                if (request.startDate != null)
-                    Query += $"startDate = '{request.startDate.Value.ToString("yyyy-MM-dd")}', ";
+                //if (request.startDate != null)
+                Query += $"startDate = '{request.startDate}', ";
                 if (request.noOfCleaningDays > 0)
                     Query += $"durationDays = {request.noOfCleaningDays}, ";
 
