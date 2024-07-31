@@ -421,6 +421,37 @@ namespace CMMSAPIs.BS.SM
                         //{
                         //    response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.FAILURE, "Item failed to transfer.");
                         //}
+                        switch (result)
+                        {
+                            case 0:
+                                response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.SUCCESS, "Item transferred.");
+                                break;
+                            case 1:
+                                response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.FAILURE, "Item requesting more than available quantity.");
+                                break;
+                            case 2:
+                                response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.FAILURE, "MRS Id ( " + request.mrsItemID + " ) not found.");
+                                break;
+                            case 3:
+                                response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.FAILURE, "Exception occurred during quantity updation.");
+                                break;
+                            case 4:
+                                response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.FAILURE, "MRS Id is 0.");
+                                break;
+                            case 5:
+                                response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.FAILURE, "Issued quantity 0.");
+                                break;
+                            case 6:
+                                response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.FAILURE, "Existing qty same as updating quantity.");
+                                break;
+                            case 7:
+                                response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.FAILURE, "No old transaction. 0 quantity not updated.");
+                                break;
+                            default:
+                                response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.FAILURE, "Unknown error code <" + result + ">. Please contact tech team.");
+                                break;
+                        }
+                        /*
                         if (result == 0)
                         {
                             response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.SUCCESS, "Item transferred.");
@@ -456,7 +487,7 @@ namespace CMMSAPIs.BS.SM
                         else
                         {
                             response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.FAILURE, "Unknown error code <" + result + ">. Pl contact tech team.");
-                        }
+                        }*/
                     }
                     return response;
                 }
