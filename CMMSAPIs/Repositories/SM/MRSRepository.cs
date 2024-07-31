@@ -21,7 +21,6 @@ namespace CMMSAPIs.Repositories.SM
         }
 
         internal async Task<List<CMMRSList>> getMRSList(int facility_ID, int emp_id, DateTime toDate, DateTime fromDate, int status, string facilitytimeZone)
-
         {
 
             string filter = " WHERE is_mrs_return = 0 and sm.facility_ID = " + facility_ID + "  AND  (DATE_FORMAT(sm.lastmodifieddate,'%Y-%m-%d') BETWEEN '" + fromDate.ToString("yyyy-MM-dd") + "' AND '" + toDate.ToString("yyyy-MM-dd") + "' OR DATE_FORMAT(sm.returnDate,'%Y-%m-%d') BETWEEN '" + fromDate.ToString("yyyy-MM-dd") + "' AND '" + toDate.ToString("yyyy-MM-dd") + "')";
@@ -1417,53 +1416,21 @@ namespace CMMSAPIs.Repositories.SM
             int MRS_ReturnID = 0;
             var flag = "MRS_RETURN_REQUEST";
 
-            if (request.mrsreturnID > 0)
+            var refType = "MRSReturn";
+            var mailSub = "MRS Return Request";
+            string insertStmt = $"START TRANSACTION; INSERT INTO smmrs (facility_ID,requested_by_emp_ID,requested_date," +
+                $"returnDate,status,flag, activity,whereUsedType,whereUsedRefID,is_mrs_return,from_actor_type_id,from_actor_id,to_actor_type_id,to_actor_id)\r\n VALUES ({request.facility_ID},{UserID},'{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}'" +
+                $",'{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}',{(int)CMMS.CMMS_Status.MRS_SUBMITTED}, {2},'{request.activity}',{request.whereUsedType},{request.whereUsedRefID},1,{request.from_actor_type_id},{request.from_actor_id},{request.to_actor_type_id},{request.to_actor_id}); SELECT LAST_INSERT_ID(); COMMIT;";
+            try
             {
-                // Updating existing MRS;
-
-                var lastMRSID = request.mrsreturnID;
-                var refType = "MRSReturnEdit";
-                var mailSub = "MRS Return Request Updated.";
-
-                string updatestmt = $"UPDATE smrsitems SET is_splited = 0 WHERE mrs_ID = {request.mrsreturnID};";
-                await Context.ExecuteNonQry<int>(updatestmt);
-
-                //string updatestmt = $" START TRANSACTION; UPDATE smmrs SET facility_ID = {request.facility_ID}, requested_by_emp_ID = {UserID}, requested_date = '{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}'," +
-                //    $" activity='{request.activity}',whereUsedType={request.whereUsedType},whereUsedRefID={request.whereUsedRefID},is_mrs_return=1 WHERE ID = {request.mrsreturnID}" +
-                //    $" ; DELETE FROM smrsitems WHERE mrs_ID =  {lastMRSID} ; COMMIT;";
-                string insertStmt = $"START TRANSACTION; INSERT INTO smmrs (facility_ID,requested_by_emp_ID,requested_date," +
-                        $"returnDate,status,flag, activity,whereUsedType,whereUsedRefID,is_mrs_return,from_actor_type_id,from_actor_id,to_actor_type_id,to_actor_id)\r\n VALUES ({request.facility_ID},{UserID},'{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}'" +
-                        $",'{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}',{(int)CMMS.CMMS_Status.MRS_SUBMITTED}, {2},'{request.activity}',{request.whereUsedType},{request.whereUsedRefID},1,{request.from_actor_type_id},{request.from_actor_id},{request.to_actor_type_id},{request.to_actor_id}); SELECT LAST_INSERT_ID(); COMMIT;";
-                try
-                {
-                    DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
-                    //request.mrsreturnID = Convert.ToInt32(dt2.Rows[0][0]);
-                    MRS_ReturnID = Convert.ToInt32(dt2.Rows[0][0]);
-                }
-                catch (Exception ex)
-                {
-                    Queryflag = false;
-                    throw ex;
-                }
+                DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
+                //request.mrsreturnID = Convert.ToInt32(dt2.Rows[0][0]);
+                MRS_ReturnID = Convert.ToInt32(dt2.Rows[0][0]);
             }
-            else
+            catch (Exception ex)
             {
-                var refType = "MRSReturn";
-                var mailSub = "MRS Return Request";
-                string insertStmt = $"START TRANSACTION; INSERT INTO smmrs (facility_ID,requested_by_emp_ID,requested_date," +
-                    $"returnDate,status,flag, activity,whereUsedType,whereUsedRefID,is_mrs_return,from_actor_type_id,from_actor_id,to_actor_type_id,to_actor_id)\r\n VALUES ({request.facility_ID},{UserID},'{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}'" +
-                    $",'{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}',{(int)CMMS.CMMS_Status.MRS_SUBMITTED}, {2},'{request.activity}',{request.whereUsedType},{request.whereUsedRefID},1,{request.from_actor_type_id},{request.from_actor_id},{request.to_actor_type_id},{request.to_actor_id}); SELECT LAST_INSERT_ID(); COMMIT;";
-                try
-                {
-                    DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
-                    //request.mrsreturnID = Convert.ToInt32(dt2.Rows[0][0]);
-                    MRS_ReturnID = Convert.ToInt32(dt2.Rows[0][0]);
-                }
-                catch (Exception ex)
-                {
-                    Queryflag = false;
-                    throw ex;
-                }
+                Queryflag = false;
+                throw ex;
             }
             if (request.cmmrsItems != null)
             {
@@ -1513,7 +1480,7 @@ namespace CMMSAPIs.Repositories.SM
                             MDMCode = (dt_chk.Rows[0]["asset_MDM_code"].ToString());
                         }
 
-                        string insertStmt = $"START TRANSACTION; " +
+                         insertStmt = $"START TRANSACTION; " +
                             $"INSERT INTO smrsitems (mrs_ID,mrs_return_ID,asset_item_ID,available_qty,requested_qty,returned_qty,return_remarks,flag, is_faulty,is_splited,issued_qty,serial_number,asset_MDM_code)" +
                             $"VALUES (0,{MRS_ReturnID},{asset_item_ID},{qty}, {requested_qty}, {request.cmmrsItems[i].returned_qty}, '{request.cmmrsItems[i].return_remarks}', 2, 0,1,{issued_qty},'{serial_number}','{MDMCode}')" +
                             $"; SELECT LAST_INSERT_ID(); COMMIT;";
@@ -1617,7 +1584,7 @@ namespace CMMSAPIs.Repositories.SM
                             }
                         }
 
-                        string insertStmt = $"START TRANSACTION; " +
+                         insertStmt = $"START TRANSACTION; " +
                             $"Update smmrs SET status = {(int)CMMS.CMMS_Status.MRS_SUBMITTED} where id = {request.mrsreturnID} ;INSERT INTO smrsitems (mrs_ID,mrs_return_ID,asset_item_ID,available_qty,requested_qty,returned_qty,return_remarks,flag, is_faulty,is_splited,issued_qty,serial_number,asset_MDM_code,approval_required,faulty_item_asset_id)" +
                             $"VALUES (0,{MRS_ReturnID},{asset_item_ID},{qty}, {requested_qty}, {request.faultyItems[i].returned_qty}, '{request.faultyItems[i].return_remarks}', 2, 1,1,{issued_qty},'{request.faultyItems[i].serial_number}','{asset_MDM_code}',1,{request.faultyItems[i].faulty_item_asset_id})" +
                             $"; SELECT LAST_INSERT_ID(); COMMIT;";
@@ -1845,7 +1812,7 @@ namespace CMMSAPIs.Repositories.SM
 
 
             var stmtUpdate = $"UPDATE smmrs SET approved_by_emp_ID = {UserID}, approved_date = '{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}'," +
-            $"approval_status = {(int)CMMS.CMMS_Status.MRS_REQUEST_APPROVED},status = {(int)CMMS.CMMS_Status.MRS_REQUEST_APPROVED}, approval_comment = '{request.comment}'" +
+            $"status = {(int)CMMS.CMMS_Status.MRS_REQUEST_APPROVED}, approval_comment = '{request.comment}'" +
             $" WHERE ID = {request.id}";
             try
             {
