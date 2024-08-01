@@ -195,7 +195,7 @@ namespace CMMSAPIs.Repositories.SM
                     string qrytocator = $"SELECT DISTINCT toActorID as asset_id,asst.name as asset_name,mrsItemId as mrs_Item_Id FROM smtransactiondetails  " +
                         $" LEFT JOIN smassetmasters as sm on sm.ID=smtransactiondetails.assetItemID " +
                         $" LEFT JOIN assets as asst on smtransactiondetails.toActorID=asst.id " +
-                        $" WHERE fromActorID={jc_id} and fromActorType={(int)CMMS.SM_Actor_Types.JobCard}";
+                        $" WHERE fromActorID={jc_id} and fromActorType={(int)CMMS.SM_Actor_Types.JobCard} group by toActorID";
                     List<IDASETS> ID = await Context.GetData<IDASETS>(qrytocator).ConfigureAwait(false);
 
                     foreach (var toactor in ID)
