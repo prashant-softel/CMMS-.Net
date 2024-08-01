@@ -243,13 +243,14 @@ namespace CMMSAPIs.Repositories.SM
                 $" JOIN smassetmasters as SM ON SM.ID = ST.assetItemID  LEFT JOIN facilities fcc ON fcc.id = ST.facilityID  " +
                 $" where   ST.actorType = {(int)CMMS.SM_Actor_Types.Inventory} and SM.ID=a_master.ID  and ST.facilityID in ('{facility_id}')  and" +
                 $" date_format(ST.lastModifiedDate, '%Y-%m-%d') < '{StartDate.ToString("yyyy-MM-dd")}'  group by SM.asset_code),0) Opening," +
-                $" sum(sm_trans.creditQty) as inward, sum(sm_trans.debitQty) as outward, sm_trans.lastModifiedDate lastInsetedDateTime" +
+                $" sum(sm_trans.creditQty) as inward, sum(sm_trans.debitQty) as outward, sm_trans.lastModifiedDate lastInsetedDateTime, CONCAT(ed.firstName, ' ' , ed.lastName) AS createdByName " +
                 $" FROM smtransition as sm_trans " +
                 $" JOIN smassetmasters as a_master ON a_master.ID = sm_trans.assetItemID join smtransactiondetails as sm_td on sm_td.id = sm_trans.transactionID" +
                 $" LEFT JOIN facilities fc ON fc.id = sm_trans.facilityID " +
                 $" Left join smassettypes AST on AST.id = a_master.asset_type_ID " +
                 $" left join smmrs on smmrs.id = sm_trans.mrsID " +
-                $"left join smrsitems on smrsitems.mrs_return_ID = smmrs.id " +
+                $" left join smrsitems on smrsitems.mrs_return_ID = smmrs.id " +
+                $" LEFT JOIN users ed ON ed.id = smmrs.requested_by_emp_ID " +
                 $" where smrsitems.is_faulty = 1  and sm_trans.facilityID in ('{facility_id}') " +
                 $" and date_format(sm_trans.lastModifiedDate, '%Y-%m-%d')  BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}' {assetCondition} group by a_master.asset_code;";
 
