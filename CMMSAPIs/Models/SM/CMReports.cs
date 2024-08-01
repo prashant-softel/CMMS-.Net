@@ -76,6 +76,7 @@ namespace CMMSAPIs.Models.SM
         public int asset_type_ID { get; set; }
         public int item_category_ID { get; set; }
         public int actorID { get; set; }
+        public string createdByName { get; set; }
 
     }
 
