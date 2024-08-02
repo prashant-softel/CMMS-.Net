@@ -215,6 +215,13 @@ namespace CMMSAPIs.Models.SM
         public int faulty_item_asset_id { get; set; }
 
     }
+    public class Cmmrs1
+    {
+        public int fromActorID { get; set; }
+        public string fromActorType { get; set; }
+        public string fromActorName { get; set; }
+
+    }
 
     public class CMAssetBySerialNo
     {

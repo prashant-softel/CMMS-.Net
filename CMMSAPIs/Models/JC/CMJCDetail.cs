@@ -1,16 +1,14 @@
-using Microsoft.AspNetCore.Authentication.OAuth.Claims;
 using System.Collections.Generic;
-using CMMSAPIs.Models.Utils;
 
 namespace CMMSAPIs.Models.JC
 {
     public class CMJCDetail
     {
-        
+
         public int id { get; set; }
         public string plant_name { get; set; }
         public string block_name { get; set; }
-      //  public string asset_category_name { get; set; }
+        //  public string asset_category_name { get; set; }
         public string title { get; set; }
         public string description { get; set; }
         public int currentEmpID { get; set; }
@@ -38,7 +36,7 @@ namespace CMMSAPIs.Models.JC
         public List<CMFileDetail> file_list { get; set; }
         public List<CMFileDetailJc> file_listJc { get; set; }
         public List<CMWorkTypeTools> tool_List { get; set; }
-       public List<int> uploadfile_ids { get; set; }
+        public List<int> uploadfile_ids { get; set; }
     }
 
     public class CMJCRequest
@@ -61,7 +59,7 @@ public class CMFileDetail
     public string description { get; set; }
 }
 
-    public class CMFileDetailJc
+public class CMFileDetailJc
 {
     public int id { get; set; }
     public string fileName { get; set; }
@@ -115,6 +113,7 @@ public class CMJCEmpDetail
 
     public string name { get; set; }
     public string responsibility { get; set; }
+    public string designation { get; set; }
 }
 public class Files
 {

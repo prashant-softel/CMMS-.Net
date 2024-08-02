@@ -21,6 +21,8 @@ namespace CMMSAPIs.Models.Calibration
         public DateTime? next_calibration_due_date { get; set; }
         public DateTime? calibration_due_date { get; set; }
         public DateTime Schedule_start_date { get; set; }
+        public DateTime? last_calibration_due_date { get; set; }
+        public DateTime? calibration_date { get; set; }
         public int frequency_id { get; set; }
         public string frequency_name { get; set; }
         public int vendor_id { get; set; }

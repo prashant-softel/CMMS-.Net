@@ -87,10 +87,17 @@ namespace CMMSAPIs.Repositories.Calibration
                 statusOut += $"WHEN a_calibration.status = {status.Key} THEN '{status.Value}' ";
             }
             statusOut += $"ELSE 'Invalid Status' END";
-            string myQuery = "SELECT " +
-                                $" a_calibration.id as calibration_id, assets.id as asset_id, assets.name as asset_name, assets.serialNumber as asset_serial, CASE WHEN categories.name is null THEN 'Others' ELSE categories.name END as category_name, frequency.id as frequency_id, frequency.name as frequency_name,a_calibration.is_damaged, a_calibration.status as statusID, {statusOut} as calibration_status, " +
-                                $" IF(assets.calibrationLastDate = '0000-00-00 00:00:00', CAST( '0001-01-01 00:00:01' as datetime), CAST(assets.calibrationLastDate AS DATETIME)) AS last_calibration_date, " +
-                                $"IF(assets.calibrationDueDate = '0000-00-00 00:00:00', CAST( '0001-01-01 00:00:01' as datetime), CAST(assets.calibrationDueDate AS DATETIME)) AS next_calibration_due_date, vendor.id as vendor_id, vendor.name as vendor_name, CONCAT(request_by.firstName,' ',request_by.lastName) as responsible_person, a_calibration.received_date,a_calibration.start_date as Schedule_start_date,a_calibration.due_date AS calibration_due_date ,a_calibration.health_status as asset_health_status " +
+            /*string myQuery = "SELECT " +
+                                $" a_calibration.id as calibration_id, assets.id as asset_id, assets.name as asset_name, assets.serialNumber as asset_serial, " +
+                                $"CASE WHEN categories.name is null THEN 'Others' ELSE categories.name END as category_name, frequency.id as frequency_id," +
+                                $" frequency.name as frequency_name,a_calibration.is_damaged, a_calibration.status as statusID, {statusOut} as calibration_status, " +
+                                $" IF(assets.calibrationLastDate = '0000-00-00 00:00:00', CAST( '0001-01-01 00:00:01' as datetime)," +
+                                $" CAST(assets.calibrationLastDate AS DATETIME)) AS last_calibration_date, " +
+                                $" IF(assets.calibrationDueDate = '0000-00-00 00:00:00', CAST( '0001-01-01 00:00:01' as datetime), " +
+                                $" CAST(assets.calibrationDueDate AS DATETIME)) AS next_calibration_due_date, vendor.id as vendor_id,  " +
+                                $"vendor.name as vendor_name, CONCAT(request_by.firstName,' ',request_by.lastName) as responsible_person, " +
+                                $" a_calibration.received_date,a_calibration.start_date as Schedule_start_date, " +
+                                $"a_calibration.due_date AS calibration_due_date ,a_calibration.health_status as asset_health_status " +
                              "FROM assets " +
                              "LEFT JOIN " +
                                 "frequency ON assets.calibrationFrequency = frequency.id " +
@@ -103,6 +110,39 @@ namespace CMMSAPIs.Repositories.Calibration
                              "LEFT JOIN " +
                                 "users as request_by ON a_calibration.requested_by=request_by.id " +
                              " WHERE categories.calibrationStatus = 1 AND (a_calibration.requested_at = (SELECT MAX(requested_at) FROM calibration as b_calibration WHERE a_calibration.asset_id = b_calibration.asset_id) OR a_calibration.requested_at is null) ";
+                             if (facility_id > 0)
+                             {
+                             myQuery += $"AND assets.facilityId = {facility_id} ";
+                             }
+                             else
+                             {
+                             throw new ArgumentException("Invalid Facility ID");
+                             }
+                             myQuery += "GROUP BY assets.id  ORDER BY next_calibration_due_date ASC ;";
+                             */
+            string myQuery = "SELECT a_calibration.id as calibration_id, assets.id as asset_id, assets.name as asset_name, assets.serialNumber as asset_serial, " +
+                            $"CASE WHEN categories.name is null THEN 'Others' ELSE categories.name END as category_name, frequency.id as frequency_id," +
+                            $" frequency.name as frequency_name,a_calibration.is_damaged, a_calibration.status as statusID, {statusOut} as calibration_status, " +
+                            $" a_calibration.done_date  AS calibration_date, a_calibration.start_date as Schedule_start_date, a_calibration.due_date AS calibration_due_date ,  assets.calibrationDueDate  AS last_calibration_due_date ," +
+                            $" IF(a_calibration.LastcalibrationDoneDate = '0000-00-00 00:00:00', CAST( '0001-01-01 00:00:01' as datetime)," +
+                            $" CAST(a_calibration.LastcalibrationDoneDate AS DATETIME)) AS last_calibration_date, " +
+                            $" IF(assets.calibrationNextDueDate = '0000-00-00 00:00:00', CAST( '0001-01-01 00:00:01' as datetime), " +
+                            $" CAST(assets.calibrationNextDueDate AS DATETIME)) AS next_calibration_due_date, vendor.id as vendor_id,  " +
+                            $"vendor.name as vendor_name, CONCAT(request_by.firstName,' ',request_by.lastName) as responsible_person, " +
+                            $" a_calibration.received_date, " +
+                            $"a_calibration.health_status as asset_health_status " +
+                            "FROM assets " +
+                            "LEFT JOIN " +
+                            "frequency ON assets.calibrationFrequency = frequency.id " +
+                            "inner JOIN " +
+                            "calibration as a_calibration on a_calibration.asset_id=assets.id " +
+                            "LEFT JOIN " +
+                            "assetcategories as categories on categories.id=assets.categoryId " +
+                            "LEFT JOIN " +
+                            "business as vendor ON a_calibration.vendor_id=vendor.id " +
+                            "LEFT JOIN " +
+                           "users as request_by ON a_calibration.requested_by=request_by.id " +
+                          " WHERE categories.calibrationStatus = 1  "; //(a_calibration.requested_at = (SELECT MAX(requested_at) FROM calibration as b_calibration WHERE a_calibration.asset_id = b_calibration.asset_id) OR a_calibration.requested_at is null) ";
             if (facility_id > 0)
             {
                 myQuery += $"AND assets.facilityId = {facility_id} ";
@@ -112,6 +152,7 @@ namespace CMMSAPIs.Repositories.Calibration
                 throw new ArgumentException("Invalid Facility ID");
             }
             myQuery += "GROUP BY assets.id  ORDER BY next_calibration_due_date ASC ;";
+
             List<CMCalibrationList> _calibrationList = await Context.GetData<CMCalibrationList>(myQuery).ConfigureAwait(false);
             foreach (var a in _calibrationList)
             {
@@ -263,19 +304,19 @@ namespace CMMSAPIs.Repositories.Calibration
                 exists = Array.Exists(status_array, element => element == status);
             }
             //  if (status >211 (int)CMMS.CMMS_Status.CALIBRATION_REQUEST)
-            if (status > 211)
+            /*if (status > 211)
             {
                 int id = Convert.ToInt32(dt0.Rows[0]["id"]);
                 CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.FAILURE, "Calibration cannot be requested as asset is already sent or requested for calibration");
                 return response;
-            }
+            }*/
             string facilityQuery = $"SELECT facilityId FROM assets WHERE assets.id = {request.asset_id};";
             DataTable dt1 = await Context.FetchData(facilityQuery).ConfigureAwait(false);
             int facilityId = Convert.ToInt32(dt1.Rows[0][0]);
             string facilityq = $"SELECT reschedule FROM calibration  WHERE asset_id = {request.asset_id};";
             DataTable dt12 = await Context.FetchData(facilityq).ConfigureAwait(false);
             int res = Convert.ToInt32(dt12.Rows[0][0]);
-            if (exists && res != 1)
+            if (exists && res == 1)
             {
 
                 string myQuery = "INSERT INTO calibration(asset_id, facility_id, vendor_id, due_date, requested_by, requested_at, status, status_updated_at) " +
@@ -299,6 +340,7 @@ namespace CMMSAPIs.Repositories.Calibration
 
                 string getIdQuery = $"SELECT id FROM calibration WHERE asset_id = {request.asset_id} AND status = {(int)CMMS.CMMS_Status.CALIBRATION_SCHEDULED};";
                 DataTable dt2 = await Context.FetchData(getIdQuery).ConfigureAwait(false);
+                if (dt2.Rows.Count > 0) { }
                 id = Convert.ToInt32(dt2.Rows[0][0]);
                 // Update query instead of insert
                 string updateQuery = $"UPDATE calibration SET facility_id = {facilityId}, vendor_id = {request.vendor_id}, " +
@@ -539,7 +581,7 @@ namespace CMMSAPIs.Repositories.Calibration
             string myQuery3 = $"UPDATE assets SET vendorId = {nextRequest[0].vendor_id}, calibrationDueDate = '{nextDate.ToString("yyyy-MM-dd HH:mm:ss")}', calibrationLastDate = '{nextRequest[0].next_calibration_date.ToString("yyyy-MM-dd HH:mm:ss")}' WHERE id = {nextRequest[0].asset_id};";
             nextRequest[0].next_calibration_date = nextDate;
             await Context.ExecuteNonQry<int>(myQuery3).ConfigureAwait(false);
-            string myQuery4 = $"UPDATE calibration SET approved_by = {userID},reschedule=1,LastcalibrationDoneDate='{nextRequest[0].next_calibration_date}',approved_at = '{UtilsRepository.GetUTCTime()}', " +
+            string myQuery4 = $"UPDATE calibration SET approved_by = {userID},reschedule=1,LastcalibrationDoneDate='{nextRequest[0].next_calibration_date.ToString("yyyy-MM-dd HH:mm:ss")}',approved_at = '{UtilsRepository.GetUTCTime()}', " +
                                 $"approve_remark = '{request.comment}', status = {(int)CMMS.CMMS_Status.CALIBRATION_APPROVED}, " +
                                 $"status_updated_at = '{UtilsRepository.GetUTCTime()}' " +
                                 $"WHERE id = {request.id} AND status = {(int)CMMS.CMMS_Status.CALIBRATION_CLOSED};";
