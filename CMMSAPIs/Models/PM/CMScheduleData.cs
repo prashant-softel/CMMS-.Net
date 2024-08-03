@@ -39,11 +39,13 @@ namespace CMMSAPIs.Models.PM
         public string close_by_name { get; set; }
         public DateTime close_Date { get; set; }
         public string close_comment { get; set; }
+        public string comment { get; set; }
     }
     public class CMPMPlanDetail : CMPMPlanList
     {
         public int isDraft { get; set; }
         public int type_id { get; set; }
+
         public List<AssetCheckList> mapAssetChecklist { get; set; }
     }
     public class AssetCheckList

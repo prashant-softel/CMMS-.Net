@@ -167,7 +167,11 @@ namespace CMMSAPIs.Repositories.PM
 
             await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
 
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_PLAN, request.plan_id, 0, 0, "PM Plan Updated ", CMMS.CMMS_Status.PM_PLAN_UPDATED);
+            String car = request.comment;
+            System.Text.StringBuilder sb = new System.Text.StringBuilder("PM Plan Updated");
+            sb.Append(": " + request.comment);
+
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_PLAN, request.plan_id, 0, 0, sb.ToString(), CMMS.CMMS_Status.PM_PLAN_UPDATED);
 
             CMDefaultResponse response = new CMDefaultResponse(request.plan_id, CMMS.RETRUNSTATUS.SUCCESS, $"Plan Updated Successfully ");
             return response;

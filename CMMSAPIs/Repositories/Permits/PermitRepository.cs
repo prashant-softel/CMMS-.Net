@@ -1742,6 +1742,7 @@ namespace CMMSAPIs.Repositories.Permits
                     await Context.ExecuteNonQry<int>(qryuploadFiles).ConfigureAwait(false);
                 }
             }
+            
 
             CMDefaultResponse response = new CMDefaultResponse();
             string responseText = "";
@@ -1755,14 +1756,18 @@ namespace CMMSAPIs.Repositories.Permits
             }
             if (request.resubmit == true)
             {
-                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.permit_id, 0, 0, request.description, CMMS.CMMS_Status.PTW_CREATED, userID);
+                System.Text.StringBuilder sb = new System.Text.StringBuilder(request.description);
+                sb.Append(" " + request.comment);
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.permit_id, 0, 0, sb.ToString(), CMMS.CMMS_Status.PTW_CREATED, userID);
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_CREATED, new[] { userID }, permitDetails);
                 response = new CMDefaultResponse(request.permit_id, CMMS.RETRUNSTATUS.SUCCESS, $"Permit Resubmitted for Approval");
 
             }
             else if (request.TBT_Done_By != 0)
             {
-                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.permit_id, 0, 0, request.physical_iso_remark, CMMS.CMMS_Status.PTW_UPDATED_WITH_TBT, userID);
+                System.Text.StringBuilder sb = new System.Text.StringBuilder(request.physical_iso_remark);
+                sb.Append(" " + request.comment);
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.permit_id, 0, 0, sb.ToString(), CMMS.CMMS_Status.PTW_UPDATED_WITH_TBT, userID);
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_UPDATED, new[] { userID }, permitDetails);
                 // response = new CMDefaultResponse(request.permit_id, CMMS.RETRUNSTATUS.SUCCESS, $"Permit Updated Successfully");
                 response = new CMDefaultResponse(request.permit_id, CMMS.RETRUNSTATUS.SUCCESS, responseText);
@@ -1771,7 +1776,9 @@ namespace CMMSAPIs.Repositories.Permits
             }
             else
             {
-                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.permit_id, 0, 0, request.physical_iso_remark, CMMS.CMMS_Status.PTW_UPDATED, userID);
+                System.Text.StringBuilder sb = new System.Text.StringBuilder(request.physical_iso_remark);
+                sb.Append(": " + request.comment);
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.permit_id, 0, 0, sb.ToString(), CMMS.CMMS_Status.PTW_UPDATED, userID);
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_UPDATED, new[] { userID }, permitDetails);
                 // response = new CMDefaultResponse(request.permit_id, CMMS.RETRUNSTATUS.SUCCESS, $"Permit Updated Successfully");
                 response = new CMDefaultResponse(request.permit_id, CMMS.RETRUNSTATUS.SUCCESS, responseText);
