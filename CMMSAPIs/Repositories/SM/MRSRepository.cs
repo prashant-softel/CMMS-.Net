@@ -28,10 +28,10 @@ namespace CMMSAPIs.Repositories.SM
 
 
             string stmt = "SELECT is_mrs_return, sm.ID,sm.requested_by_emp_ID,CONCAT(ed1.firstName,' ',ed1.lastName) as approver_name,DATE_FORMAT(sm.requested_date,'%Y-%m-%d %H:%i') as requestd_date," +
-                "DATE_FORMAT(sm.returnDate,'%Y-%m-%d %H:%i') as returnDate,if(sm.approval_status != '',DATE_FORMAT(sm.approved_date,'%Y-%m-%d %H:%i'),'') as approval_date,sm.approval_status," +
+                "DATE_FORMAT(sm.returnDate,'%Y-%m-%d %H:%i') as returnDate,if(sm.approval_status != '',DATE_FORMAT(sm.approved_date,'%Y-%m-%d %H:%i'),'') as approval_date,sm.approval_status,sm.issuedAt, CONCAT(ed2.firstName,' ',ed2.lastName) as issued_name , " +
                 "sm.approval_comment,CONCAT(ed.firstName,' ',ed.lastName) as requested_by_name, sm.status, sm.activity, sm.whereUsedType, " +
-    " case when sm.whereUsedType = 1 then 'Job' when sm.whereUsedType = 2 then 'PM' when sm.whereUsedType = 4 then 'JOBCARD' when sm.whereUsedType = 27 then 'PMTASK' else 'Invalid' end as whereUsedTypeName, sm.whereUsedRefID, sm.remarks " +
-                "FROM smmrs sm LEFT JOIN users ed ON ed.id = sm.requested_by_emp_ID LEFT JOIN users ed1 ON ed1.id = sm.approved_by_emp_ID " +
+                 " case when sm.whereUsedType = 1 then 'Job' when sm.whereUsedType = 2 then 'PM' when sm.whereUsedType = 4 then 'JOBCARD' when sm.whereUsedType = 27 then 'PMTASK' else 'Invalid' end as whereUsedTypeName, sm.whereUsedRefID, sm.remarks " +
+                "FROM smmrs sm LEFT JOIN users ed ON ed.id = sm.requested_by_emp_ID  LEFT JOIN users ed1 ON ed1.id = sm.approved_by_emp_ID LEFT JOIN users ed2 ON ed2.id = sm.issued_by_emp_ID   " +
                 "" + filter + "";
             List<CMMRSList> _List = await Context.GetData<CMMRSList>(stmt).ConfigureAwait(false);
 
@@ -2318,13 +2318,42 @@ namespace CMMSAPIs.Repositories.SM
                 _List[i].status_long = _status_long;
                 if (_List[i].is_faulty == 1)
                 {
-                    string qry = "SELECT sm.from_actor_id AS fromActorID, sm.from_actor_type_id AS fromActorType, ast.name AS fromActorName FROM smmrs AS sm  " +
-                                 " LEFT  JOIN smrsitems AS smr on sm.ID=smr.mrs_return_ID" +
-                                 $" LEFT JOIN assets AS ast ON sm.from_actor_id = ast.id  where smr.ID={_List[i].mrs_item_id}";
-                    List<Cmmrs1> _ListOFFAULTY = await Context.GetData<Cmmrs1>(qry).ConfigureAwait(false);
-                    _List[i].fromActorID = _ListOFFAULTY[i].fromActorID;
-                    _List[i].fromActorType = _ListOFFAULTY[i].fromActorType;
-                    _List[i].fromActorName = _ListOFFAULTY[i].fromActorName;
+                    string qry = " SELECT smr.from_actor_id AS actor_id,smr.from_actor_type_id as actor_type, ast.name AS actorname FROM smrsitems AS sm  " +
+                                 " LEFT  JOIN smmrs AS smr on sm.mrs_return_ID=smr.ID " +
+                                $"LEFT JOIN assets AS ast ON sm.faulty_item_asset_id = ast.id  where sm.ID={_List[i].mrs_item_id}";
+                    try
+                    {
+                        List<Cmmrs1> _ListOFFAULTY = await Context.GetData<Cmmrs1>(qry).ConfigureAwait(false);
+
+                        if (_ListOFFAULTY != null && _ListOFFAULTY.Count > 0)
+                        {
+                            var firstItem = _ListOFFAULTY.FirstOrDefault();
+                            if (firstItem != null)
+                            {
+                                int acid = firstItem.actor_id;
+                                string actornames = firstItem.actorname;
+                                string actorType = Convert.ToString(firstItem.actor_type);
+
+                                _List[i].fromActorID = acid;
+                                _List[i].fromActorType = actorType;
+                                _List[i].fromActorName = actornames;
+                            }
+                            else
+                            {
+                                Console.WriteLine("No data found for the given query.");
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine("No data found or _ListOFFAULTY is empty.");
+                        }
+
+                    }
+                    catch (Exception ex)
+                    {
+
+                        throw ex;
+                    }
 
                 }
             }

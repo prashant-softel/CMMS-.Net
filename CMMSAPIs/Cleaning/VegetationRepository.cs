@@ -564,14 +564,14 @@ namespace CMMSAPIs.Repositories.CleaningRepository
         }
         internal async Task<CMDefaultResponse> UpdateScheduleExecutionVegetation(CMMCGetScheduleExecution request, int userId)
         {
-            int status = (int)CMMS.CMMS_Status.EQUIP_CLEANED;
-            int abandonStatus = (int)CMMS.CMMS_Status.EQUIP_ABANDONED;
+            int status1 = (int)CMMS.CMMS_Status.EQUIP_CLEANED;
+            int abandonStatus1 = (int)CMMS.CMMS_Status.EQUIP_ABANDONED;
 
             string field = $"waterUsed ={request.waterUsed},";
 
 
-            status = (int)CMMS.CMMS_Status.VEG_TASK_COMPLETED;
-            abandonStatus = (int)CMMS.CMMS_Status.VEG_TASK_ABANDONED;
+            int status = (int)CMMS.CMMS_Status.VEG_TASK_COMPLETED;
+            int abandonStatus = (int)CMMS.CMMS_Status.VEG_TASK_ABANDONED;
 
             field = "";
 
@@ -584,7 +584,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             {
                 string equipIds = (request?.cleanedEquipmentIds?.Length > 0 ? " " + string.Join(" , ", request.cleanedEquipmentIds) + " " : string.Empty);
 
-                string cleanedQuery = $"Update cleaning_execution_items set status = {status},executionDay={request.cleaningDay},cleanedById={userId},cleanedAt= '{UtilsRepository.GetUTCTime()}' where executionId = {request.executionId} and assetId IN ({equipIds}); ";
+                string cleanedQuery = $"Update cleaning_execution_items set status = {status1},executionDay={request.cleaningDay},cleanedById={userId},cleanedAt= '{UtilsRepository.GetUTCTime()}' where executionId = {request.executionId} and assetId IN ({equipIds}); ";
 
                 int val2 = await Context.ExecuteNonQry<int>(cleanedQuery).ConfigureAwait(false);
             }
@@ -593,7 +593,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             {
                 string equipIds2 = string.Join(" , ", request.abandonedEquipmentIds);
 
-                string abandoneQuery = $"Update cleaning_execution_items set status = {abandonStatus},executionDay={request.cleaningDay},abandonedById={userId},abandonedAt= '{UtilsRepository.GetUTCTime()}' where executionId = {request.executionId} and assetId IN ({equipIds2}); ";
+                string abandoneQuery = $"Update cleaning_execution_items set status = {abandonStatus1},executionDay={request.cleaningDay},abandonedById={userId},abandonedAt= '{UtilsRepository.GetUTCTime()}' where executionId = {request.executionId} and assetId IN ({equipIds2}); ";
                 int val3 = await Context.ExecuteNonQry<int>(abandoneQuery).ConfigureAwait(false);
             }
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.VEGETATION_EXECUTION, request.scheduleId, 0, 0, "schedule Updated", CMMS.CMMS_Status.VEG_TASK_UPDATED, userId);

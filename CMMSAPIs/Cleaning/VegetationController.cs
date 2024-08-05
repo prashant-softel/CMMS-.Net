@@ -307,6 +307,36 @@ namespace CMMSAPIs.Controllers.Vegetation
                 throw;
             }
         }
+        [Route("ApproveAbandonExecutionVegetation")]
+        [HttpPut]
+        public async Task<IActionResult> ApproveAbandonExecutionVegetation(CMApproval request)
+        {
+            try
+            {
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _vegetationBS.ApproveAbandonExecutionVegetation(request, userId);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        [Route("RejectAbandonExecutionVegetation")]
+        [HttpPut]
+        public async Task<IActionResult> RejectAbandonExecutionVegetation(CMApproval request)
+        {
+            try
+            {
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _vegetationBS.RejectAbandonExecutionVegetation(request, userId);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
         [Route("CompleteExecutionVegetation")]
         [HttpPost]
         public async Task<IActionResult> CompleteExecutionVegetation(CMMCExecution request)
