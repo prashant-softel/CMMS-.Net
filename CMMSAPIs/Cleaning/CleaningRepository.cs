@@ -684,12 +684,10 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             statusOut += $"ELSE 'Invalid Status' END";
 
             string myQuery1 = $"select mc.id as executionId ,mp.title,mc.planId,mc.status, CONCAT(createdBy.firstName, createdBy.lastName) as responsibility , " +
-                $" mc.startDate, mc.endedAt as doneDate,mc.prevTaskDoneDate as lastDoneDate,freq.name as frequency,mc.noOfDays, {statusOut} as status_short , permits.status AS ptw_status, permits.code AS permit_code,permits.id AS permit_id, permits.tbt_done_by AS permit_tbt_done_by " +
+                $" mc.startDate, mc.endedAt as doneDate,mc.prevTaskDoneDate as lastDoneDate,freq.name as frequency,mc.noOfDays, {statusOut} as status_short  " +
                 $" from cleaning_execution as mc left join cleaning_plan as mp on mp.planId = mc.planId " +
                 $" LEFT JOIN Frequency as freq on freq.id = mp.frequencyId " +
                 $" LEFT JOIN users as createdBy ON createdBy.id = mc.assignedTo " +
-                $" LEFT JOIN cleaning_execution_schedules AS ces ON ces.executionId = mc.id " +
-                $" LEFT JOIN permits ON permits.id = ces.ptw_Id " +
                 $" LEFT JOIN users as approvedBy ON approvedBy.id = mc.approvedByID where mc.moduleType={moduleType} ";
 
             if (facilityId > 0)
@@ -1053,6 +1051,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
         {
             int status = (int)CMMS.CMMS_Status.MC_TASK_ABANDONED;
             int notStatus = (int)CMMS.CMMS_Status.MC_TASK_COMPLETED;
+
             if (moduleType == 2)
             {
                 status = (int)CMMS.CMMS_Status.VEG_TASK_ABANDONED;
@@ -1060,7 +1059,9 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             }
 
             string Query = $"Update cleaning_execution set status = {status},abandonedById={userId},abandonedAt='{UtilsRepository.GetUTCTime()}' ,reasonForAbandon = '{request.comment}' where id = {request.id};" +
-                 $"Update cleaning_execution_schedules set status = {status} where executionId = {request.id} and  status NOT IN ( {notStatus} ) ;";
+
+
+                 $"Update cleaning_execution_schedules set status = {status} where executionId = {request.id} and  status NOT IN ( {notStatus}  ) ;";
             //$"Update cleaning_execution_items set status = {status} where executionId = {request.id} and  status NOT IN ( {notStatus} ) ;";
 
 

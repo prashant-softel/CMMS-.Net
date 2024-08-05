@@ -54,6 +54,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             { (int)CMMS.CMMS_Status.VEG_TASK_ABANDONED, "Abandoned" },
             { (int)CMMS.CMMS_Status.VEG_TASK_APPROVED, "Approved" },
             { (int)CMMS.CMMS_Status.VEG_TASK_REJECTED, "Rejected" },
+
             { (int)CMMS.CMMS_Status.EQUIP_CLEANED, "Cleaned" },
             { (int)CMMS.CMMS_Status.EQUIP_ABANDONED, "Abandoned" },
             { (int)CMMS.CMMS_Status.EQUIP_SCHEDULED, "Scheduled" },

@@ -1701,8 +1701,9 @@ namespace CMMSAPIs.Repositories.SM
                           $"SET  " +
                           $"returned_qty = {request.faultyItems[i].returned_qty}, " +
                           $"serial_number = '{request.faultyItems[i].serial_number}', " +
-                          $"return_remarks = '{request.faultyItems[i].return_remarks} ,' " +
-                          $"faulty_item_asset_id = {request.faultyItems[i].faulty_item_asset_id} " +
+                          $"return_remarks = '{request.faultyItems[i].return_remarks} ', " +
+                          $"faulty_item_asset_id = {request.faultyItems[i].faulty_item_asset_id}, " +
+                          $"asset_item_ID = {request.faultyItems[i].assetMasterItemID} " +
                           $"WHERE ID = {request.faultyItems[i].mrs_item_ID} ; " +
                           "COMMIT;";
 
