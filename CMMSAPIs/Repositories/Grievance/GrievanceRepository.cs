@@ -1,28 +1,13 @@
-﻿using System;
-using System.Linq;
+﻿using CMMSAPIs.Helper;
+using CMMSAPIs.Models.Grievance;
+using CMMSAPIs.Models.Notifications;
+using CMMSAPIs.Models.Utils;
+using CMMSAPIs.Repositories.Utils;
+using Microsoft.AspNetCore.Hosting;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
-using CMMSAPIs.Helper;
-using CMMSAPIs.Models.Grievance;
-using CMMSAPIs.Models.Utils;
-using CMMSAPIs.Repositories.Utils;
-using System.IO;
-using Microsoft.AspNetCore.Hosting;
-using OfficeOpenXml;
-using CMMSAPIs.Models.Notifications;
-using CMMSAPIs.Models.Calibration;
-using CMMSAPIs.Models.Jobs;
-using iTextSharp.tool.xml.html;
-using Org.BouncyCastle.Asn1.X500;
-using System.Drawing;
-using System.Text.RegularExpressions;
-using MySqlX.XDevAPI.Relational;
-using Microsoft.IdentityModel.Tokens;
-using CMMSAPIs.Models.Inventory;
-using CMMSAPIs.Models.Users;
-using Microsoft.AspNetCore.Http;
-using Newtonsoft.Json;
 //using static System.Net.WebRequestMethods;
 //using IronXL;
 
@@ -63,7 +48,7 @@ namespace CMMSAPIs.Repositories.Grievance
             return retValue;
 
         }
-      
+
 
         internal string getLongStatus(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMGrievance InvObj)
         {
@@ -107,7 +92,7 @@ namespace CMMSAPIs.Repositories.Grievance
                 " JOIN mis_m_grievancetype t ON g.grievanceType = t.id" +
                 " WHERE  g.facilityId IN (" + facilityId + ") and g.status = 1";
 
-          
+
 
             if (status?.Length > 0)
             {
@@ -127,16 +112,16 @@ namespace CMMSAPIs.Repositories.Grievance
             }
 
             List<CMGrievance> Grievance = await Context.GetData<CMGrievance>(myQuery).ConfigureAwait(false);
-            foreach(var detail in Grievance)
+            foreach (var detail in Grievance)
             {
                 detail.updatedAt = await _utilsRepo.ConvertToUTCDTC(facilitytimezone, detail.updatedAt);
                 detail.createdAt = await _utilsRepo.ConvertToUTCDTC(facilitytimezone, detail.createdAt);
                 detail.deletedAt = await _utilsRepo.ConvertToUTCDTC(facilitytimezone, detail.deletedAt);
-            //    detail.closedAt = await _utilsRepo.ConvertToUTCDTC(facilitytimezone, detail.closedAt);
+                //    detail.closedAt = await _utilsRepo.ConvertToUTCDTC(facilitytimezone, detail.closedAt);
             }
             return Grievance;
         }
-    
+
 
         internal async Task<CMGrievance> GetGrievanceDetails(int id)
         {
@@ -157,7 +142,7 @@ namespace CMMSAPIs.Repositories.Grievance
             string _shortStatus = getShortStatus(CMMS.CMMS_Modules.GRIEVANCE, (CMMS.CMMS_Status)_ViewGrievanceList[0].statusId);
             _ViewGrievanceList[0].statusShort = _shortStatus;
 
-            string _longStatus = getLongStatus(CMMS.CMMS_Modules.GRIEVANCE, (CMMS.CMMS_Status) _ViewGrievanceList[0].statusId, _ViewGrievanceList[0]);
+            string _longStatus = getLongStatus(CMMS.CMMS_Modules.GRIEVANCE, (CMMS.CMMS_Status)_ViewGrievanceList[0].statusId, _ViewGrievanceList[0]);
             _ViewGrievanceList[0].statusLong = _longStatus;
 
             return _ViewGrievanceList[0];
@@ -180,13 +165,13 @@ namespace CMMSAPIs.Repositories.Grievance
             List<int> idList = new List<int>();
 
             {
-              
+
 
                 string qry = "INSERT INTO  mis_grievance (facilityId, grievanceType, concern, description, status_id, createdAt, createdBy, status ) VALUES ";
-                
+
                 //concern = request.concern;
 
-                qry += "('" + request.facilityId + "','" + request.grievanceType + "','" + request.concern + "','" + request.description + "','" + statusId + "','" + UtilsRepository.GetUTCTime() + "','" + userID + "','" + request.status  + "'); ";
+                qry += "('" + request.facilityId + "','" + request.grievanceType + "','" + request.concern + "','" + request.description + "','" + statusId + "','" + UtilsRepository.GetUTCTime() + "','" + userID + "'," + 1 + "); ";
 
                 qry += "select LAST_INSERT_ID(); ";
 
@@ -206,11 +191,11 @@ namespace CMMSAPIs.Repositories.Grievance
             {
 
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
-               // if (count == 1)
+                // if (count == 1)
                 {
                     strRetMessage = "New grievance <" + request.concern + "> created";
                 }
-        
+
             }
             else
             {
@@ -234,7 +219,7 @@ namespace CMMSAPIs.Repositories.Grievance
             bool updated = false; // A flag to track if any updates were made
 
 
-           
+
 
             if (request.grievanceType > 0)
             {
@@ -287,12 +272,12 @@ namespace CMMSAPIs.Repositories.Grievance
                 await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
                 CMGrievance _GrievanceUpdated = await GetGrievanceDetails(request.id);
 
-/*                string _shortStatus = getShortStatus(CMMS.CMMS_Modules.GRIEVANCE, CMMS.CMMS_Status.Grievance_UPDATED);
-                _GrievanceUpdated.statusShort = _shortStatus;
+                /*                string _shortStatus = getShortStatus(CMMS.CMMS_Modules.GRIEVANCE, CMMS.CMMS_Status.Grievance_UPDATED);
+                                _GrievanceUpdated.statusShort = _shortStatus;
 
-                string _longStatus = getLongStatus(CMMS.CMMS_Modules.GRIEVANCE, CMMS.CMMS_Status.Grievance_UPDATED, _GrievanceUpdated);
-                _GrievanceUpdated.statusLong = _longStatus;
-*/
+                                string _longStatus = getLongStatus(CMMS.CMMS_Modules.GRIEVANCE, CMMS.CMMS_Status.Grievance_UPDATED, _GrievanceUpdated);
+                                _GrievanceUpdated.statusLong = _longStatus;
+                */
                 // You can uncomment the notification part when ready to use it
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.GRIEVANCE, CMMS.CMMS_Status.Grievance_UPDATED, new[] { userID }, _GrievanceUpdated);
 
@@ -322,76 +307,76 @@ namespace CMMSAPIs.Repositories.Grievance
             await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
 
 
-                idList.Add(retID);
-                CMGrievance _GrievanceAdded = await GetGrievanceDetails(retID);
+            idList.Add(retID);
+            CMGrievance _GrievanceAdded = await GetGrievanceDetails(retID);
 
-                string _shortStatus = getShortStatus(CMMS.CMMS_Modules.GRIEVANCE, CMMS.CMMS_Status.Grievance_ADDED);
-                _GrievanceAdded.statusShort = _shortStatus;
-                // String _shortStatus = getShortStatus(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_ADDED);
-                // _inventoryAdded.status_short = _shortStatus;
+            string _shortStatus = getShortStatus(CMMS.CMMS_Modules.GRIEVANCE, CMMS.CMMS_Status.Grievance_ADDED);
+            _GrievanceAdded.statusShort = _shortStatus;
+            // String _shortStatus = getShortStatus(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_ADDED);
+            // _inventoryAdded.status_short = _shortStatus;
 
-                //_GrievanceAdded.status_short = Convert.ToInt32(_shortStatus);
+            //_GrievanceAdded.status_short = Convert.ToInt32(_shortStatus);
 
-                string _longStatus = getLongStatus(CMMS.CMMS_Modules.GRIEVANCE, CMMS.CMMS_Status.GRIEVANCE_CLOSED, _GrievanceAdded);
-                _GrievanceAdded.statusLong = _longStatus;
-                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.GRIEVANCE, CMMS.CMMS_Status.GRIEVANCE_CLOSED, new int[] { userID }, _GrievanceAdded);
-                //add to history
+            string _longStatus = getLongStatus(CMMS.CMMS_Modules.GRIEVANCE, CMMS.CMMS_Status.GRIEVANCE_CLOSED, _GrievanceAdded);
+            _GrievanceAdded.statusLong = _longStatus;
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.GRIEVANCE, CMMS.CMMS_Status.GRIEVANCE_CLOSED, new int[] { userID }, _GrievanceAdded);
+            //add to history
 
- 
+
 
             return new CMDefaultResponse(idList, retCode, strRetMessage);
         }
 
 
 
-       /* internal async Task<CMDefaultResponse> DeleteGrievance(int id, int userID)
-        {
-           *//* ?ID=34
-             delete from assets and warranty table*//*
-           
-        //Your code goes here
-        if (id <= 0)
-        {
-            throw new ArgumentException("Invalid argument <" + id + ">");
+        /* internal async Task<CMDefaultResponse> DeleteGrievance(int id, int userID)
+         {
+            *//* ?ID=34
+              delete from assets and warranty table*//*
 
-        }
+         //Your code goes here
+         if (id <= 0)
+         {
+             throw new ArgumentException("Invalid argument <" + id + ">");
 
-        CMGrievance _GrievanceAdded = await GetGrievanceDetails(id);
+         }
 
-        string qry = $"SELECT concern as deleted_by FROM mis_grievance WHERE id = {id}";
+         CMGrievance _GrievanceAdded = await GetGrievanceDetails(id);
 
-        List<CMGrievance> deleted_by = await Context.GetData<CMGrievance>(qry).ConfigureAwait(false);
+         string qry = $"SELECT concern as deleted_by FROM mis_grievance WHERE id = {id}";
 
-        _GrievanceAdded.deletedBy = deleted_by[0].deletedBy;
+         List<CMGrievance> deleted_by = await Context.GetData<CMGrievance>(qry).ConfigureAwait(false);
 
-        string _shortStatus = getShortStatus(CMMS.CMMS_Modules.GRIEVANCE, CMMS.CMMS_Status.Grievance_DELETED);
-        _GrievanceAdded.statusShort = _shortStatus;
+         _GrievanceAdded.deletedBy = deleted_by[0].deletedBy;
 
-        string _longStatus = getLongStatus(CMMS.CMMS_Modules.GRIEVANCE, CMMS.CMMS_Status.Grievance_DELETED, _GrievanceAdded);
-        _GrievanceAdded.statusLong = _longStatus;
+         string _shortStatus = getShortStatus(CMMS.CMMS_Modules.GRIEVANCE, CMMS.CMMS_Status.Grievance_DELETED);
+         _GrievanceAdded.statusShort = _shortStatus;
 
-            await CMMSNotification.sendNotification(
-     CMMS.CMMS_Modules.GRIEVANCE,
-     CMMS.CMMS_Status.Grievance_DELETED,
-     new int[] { userID }, // Convert the single userID to an array
-     _GrievanceAdded
- );
-            string delQuery1 = $"UPDATE mis_grievance SET status_id = 0, status = 0 WHERE id = {id}";
-      //string delQuery2 = $"UPDATE assetwarranty SET status = 0 where asset_id = {id}";
-        await Context.GetData<List<int>>(delQuery1).ConfigureAwait(false);
-      //await Context.GetData<List<int>>(delQuery2).ConfigureAwait(false);
+         string _longStatus = getLongStatus(CMMS.CMMS_Modules.GRIEVANCE, CMMS.CMMS_Status.Grievance_DELETED, _GrievanceAdded);
+         _GrievanceAdded.statusLong = _longStatus;
 
-        CMDefaultResponse obj = null;
-        //if (retVal1 && retVal2)
-        {
-            obj = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Grievance <" + id + "> has been deleted");
-        }
-        return obj;
-        // DELETE t1, t2 FROM t1 INNER JOIN t2 INNER JOIN t3
-        //WHERE t1.id = t2.id AND t2.id = t3.id;
-    }*/
+             await CMMSNotification.sendNotification(
+      CMMS.CMMS_Modules.GRIEVANCE,
+      CMMS.CMMS_Status.Grievance_DELETED,
+      new int[] { userID }, // Convert the single userID to an array
+      _GrievanceAdded
+  );
+             string delQuery1 = $"UPDATE mis_grievance SET status_id = 0, status = 0 WHERE id = {id}";
+       //string delQuery2 = $"UPDATE assetwarranty SET status = 0 where asset_id = {id}";
+         await Context.GetData<List<int>>(delQuery1).ConfigureAwait(false);
+       //await Context.GetData<List<int>>(delQuery2).ConfigureAwait(false);
 
-         internal async Task<CMDefaultResponse> DeleteGrievance(int id, int userID)
+         CMDefaultResponse obj = null;
+         //if (retVal1 && retVal2)
+         {
+             obj = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Grievance <" + id + "> has been deleted");
+         }
+         return obj;
+         // DELETE t1, t2 FROM t1 INNER JOIN t2 INNER JOIN t3
+         //WHERE t1.id = t2.id AND t2.id = t3.id;
+     }*/
+
+        internal async Task<CMDefaultResponse> DeleteGrievance(int id, int userID)
         {
             /*?ID=34
              * delete from assets and warranty table
@@ -403,7 +388,7 @@ namespace CMMSAPIs.Repositories.Grievance
 
             }
 
-           CMGrievance _grievanceAdded = await GetGrievanceDetails(id);
+            CMGrievance _grievanceAdded = await GetGrievanceDetails(id);
 
             string qry = $"SELECT concern as deleted_by FROM mis_grievance WHERE id = {id}";
 
@@ -424,7 +409,7 @@ namespace CMMSAPIs.Repositories.Grievance
 
             // string delQuery2 = $"UPDATE assetwarranty SET status = 0 where asset_id = {id}";
             await Context.GetData<List<int>>(delQuery1).ConfigureAwait(false);
-           // await Context.GetData<List<int>>(delQuery2).ConfigureAwait(false);
+            // await Context.GetData<List<int>>(delQuery2).ConfigureAwait(false);
 
             //send deleted notification here
 

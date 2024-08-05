@@ -265,7 +265,7 @@ namespace CMMSAPIs.Repositories.Masters
         #endregion
 
         #region CheckPoint
-        internal async Task<List<CMCheckPointList>> GetCheckPointList(int checklist_id, int facility_id, string facilitytimeZone)
+        internal async Task<List<CMCheckPointList>> GetCheckPointList(int checklist_id, int facility_id, int type, string facilitytimeZone)
         {
             /*
              * Primary Table - CheckPoint
@@ -301,7 +301,7 @@ namespace CMMSAPIs.Repositories.Masters
             {
                 throw new ArgumentException("Invalid checklist_id");
             }
-            myQuery += "ORDER BY checkpoint.id DESC";
+            myQuery += $" and checkpoint.type={type}  ORDER BY checkpoint.id DESC";
 
             List<CMCheckPointList> _checkList = await Context.GetData<CMCheckPointList>(myQuery).ConfigureAwait(false);
 
@@ -325,14 +325,16 @@ namespace CMMSAPIs.Repositories.Masters
              * Insert all properties mention in model to CheckPoint table
              * Code goes here
             */
+            //
             List<int> idList = new List<int>();
             foreach (CMCreateCheckPoint request in requestList)
             {
+
                 string query = "INSERT INTO  checkpoint (check_point, check_list_id, requirement, is_document_required, " +
-                                "action_to_be_done,failure_weightage,type,min_range,max_range ,created_by, created_at, status) VALUES " +
+                                "action_to_be_done,failure_weightage,type,min_range,max_range ,created_by, created_at,risk_type ,status) VALUES " +
                                 $"(\"{request.check_point}\", {request.checklist_id}, '{request.requirement.Replace("'", "")}', " +
                                 $"{(request.is_document_required == null ? 0 : request.is_document_required)}, '{request.action_to_be_done}', '{request.failure_weightage}', '{request.checkpoint_type.id}', '{request.checkpoint_type.min}','{request.checkpoint_type.max}'," +
-                                $"{userID}, '{UtilsRepository.GetUTCTime()}', 1); select LAST_INSERT_ID();";
+                                $"{userID}, '{UtilsRepository.GetUTCTime()}',{request.risk_type}, 1); select LAST_INSERT_ID();";
 
                 DataTable dt = await Context.FetchData(query).ConfigureAwait(false);
 
@@ -365,6 +367,8 @@ namespace CMMSAPIs.Repositories.Masters
                 updateQry += $"action_to_be_done = '{request.action_to_be_done}', ";
             if (request.status != null)
                 updateQry += $"status = {request.status}, ";
+            if (request.risk_type != null)
+                updateQry += $"risk_type = {request.risk_type}, ";
             if (request.checkpoint_type != null)
                 updateQry += $"type = '{request.checkpoint_type.id}', min_range = '{request.checkpoint_type.min}',max_range = '{request.checkpoint_type.max}', ";
             if (request.failure_weightage != 0)

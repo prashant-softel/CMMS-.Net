@@ -1,15 +1,13 @@
 ﻿using CMMSAPIs.BS.Masters;
-using Microsoft.AspNetCore.Authorization;
+using CMMSAPIs.Models.Masters;
+using CMMSAPIs.Models.Utils;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
-using CMMSAPIs.Models.Masters;
-using System.Collections.Generic;
-
-using System;
 using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
 using System.Linq;
-using CMMSAPIs.Models.Utils;
+using System.Threading.Tasks;
 
 namespace CMMSAPIs.Controllers.Masters
 {
@@ -27,13 +25,13 @@ namespace CMMSAPIs.Controllers.Masters
         //[Authorize]
         [Route("GetCheckList")]
         [HttpGet]
-        public async Task<IActionResult> GetCheckList(int facility_id, int type,int frequency_id,int category_id)
+        public async Task<IActionResult> GetCheckList(int facility_id, int type, int frequency_id, int category_id)
         {
             try
             {
                 var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
 
-                var data = await _CheckListBS.GetCheckList(facility_id, type,  frequency_id,  category_id, facilitytimeZone);
+                var data = await _CheckListBS.GetCheckList(facility_id, type, frequency_id, category_id, facilitytimeZone);
                 return Ok(data);
             }
             catch (ArgumentException ex)
@@ -107,7 +105,7 @@ namespace CMMSAPIs.Controllers.Masters
                 var data = await _CheckListBS.GetCheckListMap(facility_id, category_id, type);
                 return Ok(data);
             }
-            catch(ArgumentException ex)
+            catch (ArgumentException ex)
             {
                 return BadRequest(ex.Message);
             }
@@ -153,12 +151,12 @@ namespace CMMSAPIs.Controllers.Masters
         //[Authorize]
         [Route("GetCheckPointList")]
         [HttpGet]
-        public async Task<IActionResult> GetCheckPointList(int checklist_id, int facility_Id)
+        public async Task<IActionResult> GetCheckPointList(int checklist_id, int facility_Id, int type)
         {
             try
             {
                 var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_Id)?.timezone;
-                var data = await _CheckListBS.GetCheckPointList(checklist_id, facility_Id, facilitytimeZone);
+                var data = await _CheckListBS.GetCheckPointList(checklist_id, facility_Id, type, facilitytimeZone);
                 return Ok(data);
             }
             catch (ArgumentException ex)

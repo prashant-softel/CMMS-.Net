@@ -230,8 +230,8 @@ namespace CMMSAPIs.Repositories.Masters
             if (request.name != null && request.name != "")
                 updateQry += $"name = '{request.name}', ";
             if (request.description != null && request.description != "")
-                updateQry += $"description = '{request.description}', ";
-            updateQry += $"updatedBy = '{userID}', updatedAt = '{UtilsRepository.GetUTCTime()}' WHERE id = {request.id};";
+                updateQry += $"description = '{request.description}' ";
+            updateQry += $" WHERE id = {request.id};";
             await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
             //Add history
             return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Source CMObservation Updated");

@@ -11,14 +11,14 @@ namespace CMMSAPIs.BS.Masters
 {
     public interface ICheckListBS
     {
-        Task<List<CMCheckList>> GetCheckList(int facility_id, int type, int frequency_id, int category_id,string facilitytime);
-        Task<CMDefaultResponse> CreateChecklist(List<CMCreateCheckList> request, int userID);      
+        Task<List<CMCheckList>> GetCheckList(int facility_id, int type, int frequency_id, int category_id, string facilitytime);
+        Task<CMDefaultResponse> CreateChecklist(List<CMCreateCheckList> request, int userID);
         Task<CMDefaultResponse> UpdateCheckList(CMCreateCheckList request, int userID);
         Task<CMDefaultResponse> DeleteChecklist(int id, int userID);
         Task<List<CMCheckListMapList>> GetCheckListMap(int facility_id, int category_id, int? type);
-        Task<List<CMDefaultResponse>> CreateCheckListMap(CMCreateCheckListMap request, int userID);      
+        Task<List<CMDefaultResponse>> CreateCheckListMap(CMCreateCheckListMap request, int userID);
         Task<CMDefaultResponse> UpdateCheckListMap(CMCreateCheckListMap request);
-        Task<List<CMCheckPointList>> GetCheckPointList(int checklist_id, int facility_Id, string facilitytime);
+        Task<List<CMCheckPointList>> GetCheckPointList(int checklist_id, int facility_Id, int type, string facilitytime);
         Task<CMDefaultResponse> CreateCheckPoint(List<CMCreateCheckPoint> request, int userID);
         Task<CMDefaultResponse> UpdateCheckPoint(CMCreateCheckPoint request, int userID);
         Task<CMDefaultResponse> DeleteCheckPoint(int id, int userID);
@@ -42,7 +42,7 @@ namespace CMMSAPIs.BS.Masters
             {
                 using (var repos = new CheckListRepository(getDB))
                 {
-                    return await repos.GetCheckList(facility_id, type, frequency_id, category_id,  facilitytime);
+                    return await repos.GetCheckList(facility_id, type, frequency_id, category_id, facilitytime);
 
                 }
             }
@@ -145,13 +145,13 @@ namespace CMMSAPIs.BS.Masters
             }
         }
 
-        public async Task<List<CMCheckPointList>> GetCheckPointList(int checklist_id,int facility_id, string facilitytime)
+        public async Task<List<CMCheckPointList>> GetCheckPointList(int checklist_id, int facility_id, int type, string facilitytime)
         {
             try
             {
                 using (var repos = new CheckListRepository(getDB))
                 {
-                    return await repos.GetCheckPointList(checklist_id, facility_id, facilitytime);
+                    return await repos.GetCheckPointList(checklist_id, facility_id, type, facilitytime);
 
                 }
             }

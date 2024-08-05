@@ -1653,7 +1653,8 @@ namespace CMMSAPIs.Repositories.SM
                 commaSeparatedIds = commaSeparatedIds.TrimEnd(',');
             }
 
-
+            string deleteQueryForItems = $" delete from smrsitems where mrs_return_ID = {request.ID} and id not in ({commaSeparatedIds});  ";
+            await Context.ExecuteNonQry<int>(deleteQueryForItems).ConfigureAwait(false);
 
             if (request.cmmrsItems != null)
             {
@@ -1700,7 +1701,7 @@ namespace CMMSAPIs.Repositories.SM
                           $"SET  " +
                           $"returned_qty = {request.faultyItems[i].returned_qty}, " +
                           $"serial_number = '{request.faultyItems[i].serial_number}', " +
-                          $"return_remarks = '{request.faultyItems[i].return_remarks}' " +
+                          $"return_remarks = '{request.faultyItems[i].return_remarks} ,' " +
                           $"faulty_item_asset_id = {request.faultyItems[i].faulty_item_asset_id} " +
                           $"WHERE ID = {request.faultyItems[i].mrs_item_ID} ; " +
                           "COMMIT;";
@@ -1717,31 +1718,6 @@ namespace CMMSAPIs.Repositories.SM
                         }
 
                     }
-                    //try
-                    //{
-                    //    if (request.faultyItems[i].mrs_item_ID != null)
-                    //    {
-                    //        // Construct the SQL UPDATE statement for smrsitem
-                    //        string updateStmt = $"START TRANSACTION; " +
-                    //            $"UPDATE smrsitems " +
-                    //            $"SET  " +
-                    //            $"returned_qty = {request.faultyItems[i].returned_qty}, " +
-                    //            $"serial_number = '{request.faultyItems[i].sr_no}', " +
-                    //            $"return_remarks = '{request.faultyItems[i].return_remarks}' " +
-                    //            $"WHERE ID = {request.faultyItems[i].mrs_item_ID} ; " +
-                    //            "COMMIT;";
-                    //        await Context.ExecuteNonQry<int>(updateStmt).ConfigureAwait(false);
-                    //    }
-                    //else
-                    //{
-                    //    string insertStmt = $"START TRANSACTION; " +
-                    //$"INSERT INTO smrsitems (mrs_ID,mrs_return_ID,asset_item_ID,available_qty,requested_qty,returned_qty,return_remarks,flag,serial_number ,is_faulty,is_splited,issued_qty)" +
-                    //$"VALUES ({request.ID},{request.ID},{request.faultyItems[i].assetMasterItemID},{request.cmmrsItems[i].qty}, {request.cmmrsItems[i].requested_qty}, {request.faultyItems[i].returned_qty}, '{request.faultyItems[i].return_remarks}', 2,'{request.faultyItems[0].sr_no}',{request.cmmrsItems[i].is_faulty},1,{request.cmmrsItems[i].issued_qty})" +
-                    //$"; SELECT LAST_INSERT_ID(); COMMIT;";
-                    //    DataTable dt = await Context.FetchData(insertStmt).ConfigureAwait(false);
-                    //    int id = Convert.ToInt32(dt.Rows[0][0]);
-                    //}
-
                     catch (Exception ex)
                     {
                         Queryflag = false;

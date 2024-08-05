@@ -1033,26 +1033,17 @@ namespace CMMSAPIs.Repositories.CleaningRepository
         {
 
             string status = "";
-
             status = $" case WHEN task.status = {(int)CMMS.CMMS_Status.EQUIP_SCHEDULED} THEN 1 ELSE 0 END as isPending , " +
                 $"case WHEN task.status = {(int)CMMS.CMMS_Status.EQUIP_CLEANED} THEN 1 ELSE 0 END as isCleaned," +
                 $"case WHEN task.status = {(int)CMMS.CMMS_Status.EQUIP_ABANDONED} THEN 1 ELSE 0 END as isAbandoned , ";
-
 
             string smbQuery = $"select task.assetId as smbId, assets.name as smbName , assets.parentId as parentId , task.{measure}, {status} " +
                 " task.plannedDate AS scheduledAt, task.cleanedAt AS cleanedAt, task.abandonedAt AS abandonedAt" +
                 $", plannedDay as scheduledDay, executionDay as executedDay from cleaning_execution_items as task left join assets on assets.id = task.assetId where task.executionId ={taskId}";
 
             List<CMSMB> smbs = await Context.GetData<CMSMB>(smbQuery).ConfigureAwait(false);
-
-            //string invQuery = $"select parent.id as invId, parent.name as invName,sum(task.{measure}) as {measure} from cleaning_execution_items as task left join assets on assets.id = task.assetId left join assets as parent on parent.id = assets.parentId where task.executionId ={taskId} group by assets.parentId";
-
             string invQuery = $"Select id as invId , name as invName from assets where id in (Select  parent.id as id from cleaning_execution_items as task left join  assets on assets.id = task.assetId left join assets as parent on parent.id = assets.parentId where task.executionId ={taskId} group by assets.parentId)";
-
             List<CMMCTaskEquipmentList> invs = await Context.GetData<CMMCTaskEquipmentList>(invQuery).ConfigureAwait(false);
-
-            //List<CMSMB> invSmbs = new List<CMSMB>;
-
             foreach (CMMCTaskEquipmentList inv in invs)
             {
                 inv.moduleQuantity = 0;
