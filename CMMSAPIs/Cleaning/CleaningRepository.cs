@@ -856,30 +856,6 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
             List<CMMCExecutionSchedule> _ViewSchedule = await Context.GetData<CMMCExecutionSchedule>(scheduleQuery).ConfigureAwait(false);
 
-            //string equipmentQuery = $"select item.assetId as id ,assets.parentId, parent.name as parentName,DATE_ADD(execution.startDate,interval item.plannedDay - 1  DAY) as scheduledAt ,item.cleanedAt,item.abandonedAt,item.status,assets.name as equipmentName,item.abandonedAt, item.moduleQuantity, item.plannedDay as cleaningDay ,{statusEquip} as short_status from cleaning_execution_items as item left join cleaning_execution_schedules as schedule on schedule.executionId = item.executionId left join cleaning_execution as execution on execution.id = item.executionId left join assets on item.assetId = assets.id left join assets as parent on assets.parentId = parent.id  where schedule.executionId = {exectionId} group by item.assetId ;";
-
-            //List<CMMCExecutionEquipment> _ViewEquipment = await Context.GetData<CMMCExecutionEquipment>(equipmentQuery).ConfigureAwait(false);
-            //foreach(var equiment in _ViewEquipment)
-            //{
-            //    if(equiment!=null && equiment.abandonedAt!=null)
-            //    equiment.abandonedAt = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, equiment.abandonedAt);
-            //    if (equiment != null && equiment.cleanedAt != null)
-            //        equiment.cleanedAt = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, equiment.cleanedAt);
-            //    if (equiment != null && equiment.scheduledAt != null)
-            //        equiment.scheduledAt= await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, equiment.scheduledAt);
-
-            //}
-
-            //foreach(var schedule in _ViewSchedule)
-            //{
-            //    schedule.equipments = new List<CMMCExecutionEquipment>();
-
-            //    foreach (var equipment in _ViewEquipment)
-            //    {
-            //        if(schedule.cleaningDay == equipment.cleaningDay)
-            //            schedule.equipments.Add(equipment);
-            //    }
-            //}
 
             _ViewExecution[0].noOfDays = _ViewSchedule.Count;
             _ViewExecution[0].schedules = _ViewSchedule;
@@ -891,7 +867,6 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             {
                 CMMS.CMMS_Status ptw_status1 = (CMMS.CMMS_Status)(item.ptw_status);
                 item.status_short_ptw = Status_PTW((int)ptw_status1);
-
             }
 
             foreach (var view in _ViewExecution)
@@ -905,7 +880,9 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 if (view != null && view.startedAt != null)
                     view.startedAt = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, view.startedAt);
 
+
             }
+
             return _ViewExecution[0];
         }
 
@@ -996,7 +973,10 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 field = "";
             }
 
-            string scheduleQuery = $"Update cleaning_execution_schedules set {field} updatedById={userId},remark_of_schedule='{request.remark}',updatedAt='{UtilsRepository.GetUTCTime()}' where scheduleId = {request.scheduleId}; Update cleaning_execution_items set status = {(int)CMMS.CMMS_Status.EQUIP_SCHEDULED} where scheduleId = {request.scheduleId} ;";
+            string scheduleQuery = $"Update cleaning_execution_schedules set {field} updatedById={userId},remark_of_schedule='{request.remark}',  " +
+                                   $"updatedAt='{UtilsRepository.GetUTCTime()}' where scheduleId = {request.scheduleId}";
+            // $"Update cleaning_execution_items set status = {(int)CMMS.CMMS_Status.EQUIP_SCHEDULED} " +
+            // $"where scheduleId = {request.scheduleId} ;";
 
             int val = await Context.ExecuteNonQry<int>(scheduleQuery).ConfigureAwait(false);
 
@@ -1004,7 +984,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             {
                 string equipIds = (request?.cleanedEquipmentIds?.Length > 0 ? " " + string.Join(" , ", request.cleanedEquipmentIds) + " " : string.Empty);
 
-                string cleanedQuery = $"Update cleaning_execution_items set status = {status},executionDay={request.cleaningDay},cleanedById={userId},cleanedAt= '{UtilsRepository.GetUTCTime()}' where executionId = {request.executionId} and assetId IN ({equipIds}); ";
+                string cleanedQuery = $"Update cleaning_execution_items set status = {status},executionDay={request.cleaningDay},cleanedById={userId},cleanedAt= '{UtilsRepository.GetUTCTime()}' where executionId = {request.executionId} and scheduleId={request.scheduleId} and assetId IN ({equipIds}); ";
 
                 int val2 = await Context.ExecuteNonQry<int>(cleanedQuery).ConfigureAwait(false);
             }
@@ -1050,20 +1030,9 @@ namespace CMMSAPIs.Repositories.CleaningRepository
         internal async Task<CMDefaultResponse> AbandonExecution(CMApproval request, int userId)
         {
             int status = (int)CMMS.CMMS_Status.MC_TASK_ABANDONED;
-            int notStatus = (int)CMMS.CMMS_Status.MC_TASK_COMPLETED;
 
-            if (moduleType == 2)
-            {
-                status = (int)CMMS.CMMS_Status.VEG_TASK_ABANDONED;
-                notStatus = (int)CMMS.CMMS_Status.VEG_TASK_COMPLETED;
-            }
-
-            string Query = $"Update cleaning_execution set status = {status},abandonedById={userId},abandonedAt='{UtilsRepository.GetUTCTime()}' ,reasonForAbandon = '{request.comment}' where id = {request.id};" +
-
-
-                 $"Update cleaning_execution_schedules set status = {status} where executionId = {request.id} and  status NOT IN ( {notStatus}  ) ;";
-            //$"Update cleaning_execution_items set status = {status} where executionId = {request.id} and  status NOT IN ( {notStatus} ) ;";
-
+            string Query = $"Update cleaning_execution set status = {status},abandonedById={userId},abandonedAt='{UtilsRepository.GetUTCTime()}' ,  " +
+                $"reasonForAbandon = '{request.comment}' where id = {request.id};";
 
             await Context.GetData<CMMCExecutionSchedule>(Query).ConfigureAwait(false);
 
@@ -1096,7 +1065,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
         internal async Task<CMDefaultResponse> ApproveAbandonExecution(CMApproval request, int userId)
         {
             int status = (int)CMMS.CMMS_Status.MC_TASK_ABANDONED_APPROVED;
-            int notStatus = (int)CMMS.CMMS_Status.MC_TASK_COMPLETED;
+            int notStatus = (int)CMMS.CMMS_Status.MC_TASK_SCHEDULED;
             if (moduleType == 2)
             {
                 status = (int)CMMS.CMMS_Status.VEG_TASK_ABANDONED_APPROVED;
@@ -1105,6 +1074,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
             string Query = $"Update cleaning_execution set status = {status},abandonedById={userId},abandonedAt='{UtilsRepository.GetUTCTime()}' ,reasonForAbandon = '{request.comment}' where id = {request.id};";
 
+            Query += $"Update cleaning_execution_schedules set status = {status} where executionId = {request.id} and  status  IN ( {notStatus}  ) ;";
             await Context.GetData<CMMCExecutionSchedule>(Query).ConfigureAwait(false);
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MC_TASK, request.id, 0, 0, request.comment, (CMMS.CMMS_Status)status, userId);

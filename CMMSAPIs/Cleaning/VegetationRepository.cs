@@ -577,7 +577,8 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             field = "";
 
 
-            string scheduleQuery = $"Update cleaning_execution_schedules set {field} updatedById={userId},remark_of_schedule='{request.remark}',updatedAt='{UtilsRepository.GetUTCTime()}' where scheduleId = {request.scheduleId}; Update cleaning_execution_items set status = {(int)CMMS.CMMS_Status.EQUIP_SCHEDULED} where scheduleId = {request.scheduleId} ;";
+            string scheduleQuery = $"Update cleaning_execution_schedules set {field} updatedById={userId},remark_of_schedule='{request.remark}',updatedAt='{UtilsRepository.GetUTCTime()}' where scheduleId = {request.scheduleId};";
+            //  $" Update cleaning_execution_items set status = {(int)CMMS.CMMS_Status.EQUIP_SCHEDULED} where scheduleId = {request.scheduleId} ;";
 
             int val = await Context.ExecuteNonQry<int>(scheduleQuery).ConfigureAwait(false);
 
@@ -772,13 +773,8 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             int notStatus;
 
             status = (int)CMMS.CMMS_Status.VEG_TASK_ABANDONED;
-            notStatus = (int)CMMS.CMMS_Status.VEG_TASK_COMPLETED;
 
-
-            string Query = $"Update cleaning_execution set status = {status},abandonedById={userId},abandonedAt='{UtilsRepository.GetUTCTime()}' ,reasonForAbandon = '{request.comment}' where id = {request.id};" +
-                 $"Update cleaning_execution_schedules set status = {status} where executionId = {request.id} and  status NOT IN ( {notStatus} ) ;";
-            //$"Update cleaning_execution_items set status = {status} where executionId = {request.id} and  status NOT IN ( {notStatus} ) ;";
-
+            string Query = $"Update cleaning_execution set status = {status},abandonedById={userId},abandonedAt='{UtilsRepository.GetUTCTime()}' ,reasonForAbandon = '{request.comment}' where id = {request.id};";
 
             await Context.GetData<CMMCExecutionSchedule>(Query).ConfigureAwait(false);
 
@@ -811,11 +807,12 @@ namespace CMMSAPIs.Repositories.CleaningRepository
         {
 
             int status = (int)CMMS.CMMS_Status.VEG_TASK_ABANDONED_APPROVED;
-            int notStatus = (int)CMMS.CMMS_Status.VEG_TASK_COMPLETED;
+            int notStatus = (int)CMMS.CMMS_Status.VEG_TASK_SCHEDULED;
+
 
 
             string Query = $"Update cleaning_execution set status = {status},abandonedById={userId},abandonedAt='{UtilsRepository.GetUTCTime()}' ,reasonForAbandon = '{request.comment}' where id = {request.id};";
-
+            Query += $" Update cleaning_execution_schedules set status = {status} where executionId = {request.id} and  status  IN ( {notStatus} ) ;";
             await Context.GetData<CMMCExecutionSchedule>(Query).ConfigureAwait(false);
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.VEGETATION_TASK, request.id, 0, 0, request.comment, (CMMS.CMMS_Status)status, userId);

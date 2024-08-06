@@ -274,7 +274,13 @@ namespace CMMSAPIs.Repositories.Masters
              * Code goes here
             */
             string myQuery = "SELECT " +
-                                "checkpoint.id as id, check_point, check_list_id as checklist_id, checklist_number.checklist_number as checklist_name, requirement, is_document_required, action_to_be_done, checkpoint.created_by as created_by_id, CONCAT(created_user.firstName,' ',created_user.lastName) as created_by_name, checkpoint.created_at, checkpoint.updated_by as updated_by_id, CONCAT(updated_user.firstName,' ',updated_user.lastName) as updated_by_name, checkpoint.updated_at, checkpoint.status ,checkpoint.failure_weightage,checkpoint.type as type,CASE WHEN checkpoint.type = 1 then 'Bool'  WHEN checkpoint.type = 0 then 'Text' WHEN checkpoint.type = 2 then 'Range' ELSE 'Unknown Type' END as checkpoint_type , checkpoint.min_range as min ,checkpoint.max_range as max " +
+                                "checkpoint.id as id, check_point, check_list_id as checklist_id, checklist_number.checklist_number as checklist_name, " +
+                                "requirement, is_document_required, action_to_be_done, checkpoint.created_by as created_by_id," +
+                                " CONCAT(created_user.firstName,' ',created_user.lastName) as created_by_name, checkpoint.created_at, " +
+                                "checkpoint.updated_by as updated_by_id, CONCAT(updated_user.firstName,' ',updated_user.lastName) as updated_by_name, " +
+                                "checkpoint.updated_at, checkpoint.status ,checkpoint.failure_weightage,checkpoint.type as type,  " +
+                                "CASE WHEN checkpoint.type = 1 then 'Bool'  WHEN checkpoint.type = 0 then 'Text' WHEN checkpoint.type = 2 then 'Range' ELSE 'Unknown Type' END as checkpoint_type , " +
+                                "checkpoint.min_range as min ,checkpoint.max_range as max " +
                              "FROM " +
                                 "checkpoint " +
                              "LEFT JOIN " +
@@ -290,7 +296,7 @@ namespace CMMSAPIs.Repositories.Masters
             }
             else if (facility_id > 0 && checklist_id == 0)
             {
-                // checklist_number.facility_id in(1798, 0)
+
                 myQuery += $" WHERE checklist_number.facility_id in ({facility_id},0) ";
             }
             else if (checklist_id > 0 && facility_id > 0)
@@ -301,7 +307,7 @@ namespace CMMSAPIs.Repositories.Masters
             {
                 throw new ArgumentException("Invalid checklist_id");
             }
-            myQuery += $" and checkpoint.type={type}  ORDER BY checkpoint.id DESC";
+            myQuery += $"    ORDER BY checkpoint.id DESC";
 
             List<CMCheckPointList> _checkList = await Context.GetData<CMCheckPointList>(myQuery).ConfigureAwait(false);
 
@@ -325,16 +331,16 @@ namespace CMMSAPIs.Repositories.Masters
              * Insert all properties mention in model to CheckPoint table
              * Code goes here
             */
-            //
+            //{request.risk_type}
             List<int> idList = new List<int>();
             foreach (CMCreateCheckPoint request in requestList)
             {
 
                 string query = "INSERT INTO  checkpoint (check_point, check_list_id, requirement, is_document_required, " +
-                                "action_to_be_done,failure_weightage,type,min_range,max_range ,created_by, created_at,risk_type ,status) VALUES " +
+                                "action_to_be_done,failure_weightage,type,min_range,max_range ,created_by, created_at,status) VALUES " +
                                 $"(\"{request.check_point}\", {request.checklist_id}, '{request.requirement.Replace("'", "")}', " +
-                                $"{(request.is_document_required == null ? 0 : request.is_document_required)}, '{request.action_to_be_done}', '{request.failure_weightage}', '{request.checkpoint_type.id}', '{request.checkpoint_type.min}','{request.checkpoint_type.max}'," +
-                                $"{userID}, '{UtilsRepository.GetUTCTime()}',{request.risk_type}, 1); select LAST_INSERT_ID();";
+                                $"{(request.is_document_required == null ? 0 : request.is_document_required)}, '{request.action_to_be_done}', '{request.failure_weightage}', '{request.type}', '{request.checkpoint_type.min}','{request.checkpoint_type.max}'," +
+                                $"{userID}, '{UtilsRepository.GetUTCTime()}', 1); select LAST_INSERT_ID();";
 
                 DataTable dt = await Context.FetchData(query).ConfigureAwait(false);
 

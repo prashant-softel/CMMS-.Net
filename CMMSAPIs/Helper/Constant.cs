@@ -549,9 +549,6 @@ namespace CMMSAPIs.Helper
             MC_ASSIGNED,
             RESCHEDULED_TASK,
 
-
-
-
             PM_PLAN_CREATED = 401,
             PM_PLAN_DRAFT,
             PM_PLAN_UPDATED,
