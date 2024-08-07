@@ -139,7 +139,7 @@ namespace CMMSAPIs.Models.MC
         public Int64 Invs { get; set; }
         public Int64 smbs { get; set; }
         public decimal ScheduledModules { get; set; }
-        public decimal ScheduledArea { get; set; }
+        public decimal area { get; set; }
         public DateTime plannedDate { get; set; }
         public int status { get; set; }
         public string status_short { get; set; }
@@ -218,6 +218,7 @@ namespace CMMSAPIs.Models.MC
         public int executionId { get; set; }
         public string title { get; set; }
         public string description { get; set; }
+        public int planId { get; set; }
         public string frequency { get; set; }
         //  public int cleaningType { get; set; }  //First, second etc day
         //  public string cleaningTypeName { get; set; }

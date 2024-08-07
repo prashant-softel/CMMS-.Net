@@ -623,6 +623,8 @@ namespace CMMSAPIs.Models.Masters
         public DateTime? target_date { get; set; }
         public string corrective_action { get; set; }
         public string observation_description { get; set; }
+        public string type_of_observation_name { get; set; }
+        public string source_of_observation_name { get; set; }
         public DateTime? created_at { get; set; }
         public string created_by { get; set; }
         public DateTime? updated_at { get; set; }

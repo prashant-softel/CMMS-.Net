@@ -1230,6 +1230,7 @@ namespace CMMSAPIs.Repositories.Inventory
                 {
                     throw new ArgumentException($"name of asset cannot be empty on line {count}");
                 }
+                //calibrationLastDate
                 string firstCalibrationDueDate = (unit.calibrationFirstDueDate == null) ? "NULL" : "'" + ((DateTime)unit.calibrationFirstDueDate.Value).ToString("yyyy-MM-dd") + "'";
                 string lastCalibrationDate = (unit.calibrationLastDate == null) ? "NULL" : "'" + ((DateTime)unit.calibrationLastDate.Value).ToString("yyyy-MM-dd") + "'";
                 string nextCalibrationDate = (unit.calibrationNextDueDate == null) ? "NULL" : "'" + ((DateTime)unit.calibrationNextDueDate.Value).ToString("yyyy-MM-dd") + "'";
@@ -1303,7 +1304,7 @@ namespace CMMSAPIs.Repositories.Inventory
                 {
 
                     string calibratoinquery = "insert into calibration (facility_id,asset_id,status,due_date) VALUES ";
-                    calibratoinquery += $"({unit.facilityId},{retID},{(int)CMMS.CMMS_Status.CALIBRATION_SCHEDULED},{firstCalibrationDueDate});" +
+                    calibratoinquery += $"({unit.facilityId},{retID},{(int)CMMS.CMMS_Status.CALIBRATION_SCHEDULED},{lastCalibrationDate});" +
                         $" SELECT LAST_INSERT_ID();";
                     DataTable dt2 = await Context.FetchData(calibratoinquery).ConfigureAwait(false);
                     int calibration_id = Convert.ToInt32(dt2.Rows[0][0]);
@@ -1443,6 +1444,16 @@ namespace CMMSAPIs.Repositories.Inventory
                 else
                 {
                     strRetMessage = "Warranty data for <" + assetName + "> does not exist. ";
+                }
+                if (retID > 0)
+                {
+
+                    string calibratoinquery = "insert into calibration (facility_id,asset_id,status,due_date) VALUES ";
+                    calibratoinquery += $"({unit.facilityId},{retID},{(int)CMMS.CMMS_Status.CALIBRATION_SCHEDULED},{firstCalibrationDate});" +
+                        $" SELECT LAST_INSERT_ID();";
+                    DataTable dt2 = await Context.FetchData(calibratoinquery).ConfigureAwait(false);
+                    int calibration_id = Convert.ToInt32(dt2.Rows[0][0]);
+
                 }
                 idList.Add(retID);
 

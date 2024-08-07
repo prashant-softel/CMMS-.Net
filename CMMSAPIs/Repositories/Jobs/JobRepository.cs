@@ -460,6 +460,7 @@ namespace CMMSAPIs.Repositories.Jobs
             await CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_CREATED, new[] { userId }, _ViewJobList);
 
             string strJobStatusMsg = $"Job {newJobID} Created";
+            int assigned_id = 1;
             if (_ViewJobList.assigned_id > 0)
             {
                 strJobStatusMsg = $"Job {newJobID} Created and Assigned to " + _ViewJobList.assigned_name;

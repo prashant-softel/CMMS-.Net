@@ -54,7 +54,11 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             { (int)CMMS.CMMS_Status.VEG_TASK_ABANDONED, "Abandoned" },
             { (int)CMMS.CMMS_Status.VEG_TASK_APPROVED, "Approved" },
             { (int)CMMS.CMMS_Status.VEG_TASK_REJECTED, "Rejected" },
-
+            { (int)CMMS.CMMS_Status.VEGETATION_LINKED_TO_PTW, "PTW Linked" },
+            { (int)CMMS.CMMS_Status.VEG_TASK_END_APPROVED, "Closed Approved" },
+            { (int)CMMS.CMMS_Status.VEG_TASK_END_REJECTED, "Closed Rejected" },
+            { (int)CMMS.CMMS_Status.VEG_TASK_UPDATED, " Task updated" },
+            { (int)CMMS.CMMS_Status.VEG_TASK_ASSIGNED , "Task Reassign" },
             { (int)CMMS.CMMS_Status.EQUIP_CLEANED, "Cleaned" },
             { (int)CMMS.CMMS_Status.EQUIP_ABANDONED, "Abandoned" },
             { (int)CMMS.CMMS_Status.EQUIP_SCHEDULED, "Scheduled" },
@@ -345,13 +349,14 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             return response;
 
         }
+
         internal async Task<CMDefaultResponse> UpdatePlan(List<CMMCPlan> requests, int userId)
         {
             int planId = 0;
 
             foreach (CMMCPlan request in requests)
             {
-                DateTime time = Convert.ToString(request.startDate);
+
                 string Query = "UPDATE cleaning_plan SET ";
                 if (request.title != null && request.title != "")
                     Query += $"title = '{request.title}', ";
@@ -363,8 +368,8 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                     Query += $"frequencyId = {request.frequencyId}, ";
                 if (request.cleaningType > 0)
                     Query += $"cleaningType = {request.cleaningType}, ";
-                if (time != null)
-                    Query += $"startDate = '{time.ToString("yyyy-MM-dd")}', ";
+
+                Query += $"startDate = '{request.startDate}', ";
                 if (request.noOfCleaningDays > 0)
                     Query += $"durationDays = {request.noOfCleaningDays}, ";
 
@@ -380,7 +385,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                     foreach (var schedule in request.schedules)
                     {
 
-                        if (moduleType == 1)
+                        if (moduleType == 2)
                         {
                             //(CASE WHEN { schedule.cleaningType} = 'Wet' then 1 else WHEN { schedule.cleaningType} = 'Dry' then 2 end)
                             // if (schedule.cleaningType != 0)
@@ -435,7 +440,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
             if (moduleType == 2)
             {
-                measures += ", sum(assets.area) as scheduledArea ";
+                measures += ", sum(assets.area) as area ";
             }
             else
             {
@@ -521,6 +526,8 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             }
             return invs;
         }
+
+
         internal async Task<CMDefaultResponse> StartExecutionVegetation(int executionId, int userId)
         {
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
@@ -1092,7 +1099,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             }
             statusEquip += $"ELSE 'Invalid Status' END";
 
-            string executionQuery = $"select ex.id as executionId,ex.status ,ex.startDate,CONCAT(assignedTo.firstName, assignedTo.lastName) as assignedTo , " +
+            string executionQuery = $"select ex.id as executionId, ex.status,ex.planId ,ex.startDate,CONCAT(assignedTo.firstName, assignedTo.lastName) as assignedTo , " +
                 $"plan.title, CONCAT(createdBy.firstName, createdBy.lastName) as plannedBy ,plan.createdAt as plannedAt,freq.name as frequency, CONCAT(startedBy.firstName, startedBy.lastName) as startedBy ," +
                 $" ex.executionStartedAt as startedAt , CONCAT(rejectedById.firstName, rejectedById.lastName) as rejectedById,ex.rejectedAt,CONCAT(approvedById.firstName, approvedById.lastName) as approvedById,ex.approvedAt,  {statusEx} as status_short " +
                 $"  from cleaning_execution as ex JOIN cleaning_plan as plan on ex.planId = plan.planId " +

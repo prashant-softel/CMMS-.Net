@@ -158,7 +158,9 @@ namespace CMMSAPIs.Repositories.Masters
                 case CMMS.CMMS_Status.OBSERVATION_UPDATED:
                     statusName = "Updated ";
                     break;
-
+                case CMMS.CMMS_Status.OBSERVATION_CLOSED:
+                    statusName = "Closed";
+                    break;
                 default:
                     statusName = "Unknown Status";
                     break;
@@ -1846,11 +1848,12 @@ namespace CMMSAPIs.Repositories.Masters
                 " monthname(observations.date_of_observation) as month_of_observation,observations.target_date as closer_date, concat(createdBy.firstName, ' ', createdBy.lastName) as action_taken, " +
                 " observations.preventive_action as  corrective_action, DATEDIFF(observations.target_date, observations.date_of_observation) AS remaining_days," +
                 " observations.target_date, observation_description, created_at, concat(createdBy.firstName, ' ', createdBy.lastName) created_by, " +
-                " updated_at, concat(updatedBy.firstName, ' ', updatedBy.lastName) updated_by,mis_m_typeofobservation.name as type_of_observation_name " +
+                " updated_at, concat(updatedBy.firstName, ' ', updatedBy.lastName) updated_by,mis_m_typeofobservation.name as type_of_observation_name, mssheet.name  as source_of_observation_name " +
                 " from observations" +
                 " left join ir_risktype ON observations.risk_type_id = ir_risktype.id" +
-                " left join mis_m_typeofobservation ON observations.type_of_observation  = mis_m_typeofobservation.id" +
-                " left join facilities ON observations.facility_id = facilities.id" +
+                " left join mis_m_typeofobservation ON observations.type_of_observation  = mis_m_typeofobservation.id " +
+                " left join facilities ON observations.facility_id = facilities.id " +
+                " left join mis_m_observationsheet as mssheet ON observations.source_of_observation  =mssheet.id " +
                 " left join users createdBy on createdBy.id = observations.created_by" +
                 " left join users updatedBy on updatedBy.id = observations.updated_by" +
                 " where is_active = 1 and observations.facility_id = " + facility_Id + "  and created_at >= '" + fromDate.ToString("yyyy-MM-dd") + "' OR  created_at <= '" + toDate.ToString("yyyy-MM-dd") + "';";
