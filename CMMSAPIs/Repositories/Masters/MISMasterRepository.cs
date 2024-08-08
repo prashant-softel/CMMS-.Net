@@ -261,7 +261,7 @@ namespace CMMSAPIs.Repositories.Masters
         /***********************************************************************************************************************************/
         internal async Task<MISTypeObservation> GetTypeOfObservation(int type_id)
         {
-            string myQuery = $"SELECT id, name, description, status FROM mis_m_typeofobservation WHERE id = " + type_id;
+            string myQuery = $"SELECT  m.id, m.name, m.description, m.risk_type_id, r.risktype, m.status FROM  mis_m_typeofobservation m LEFT JOIN  ir_risktype r ON  m.risk_type_id = r.id WHERE m.id = " + type_id;
             List<MISTypeObservation> _Typeofobs = await Context.GetData<MISTypeObservation>(myQuery).ConfigureAwait(false);
             //Add history
             return _Typeofobs[0];
@@ -269,7 +269,8 @@ namespace CMMSAPIs.Repositories.Masters
 
         internal async Task<List<MISTypeObservation>> GetTypeOfObservationList()
         {
-            string myQuery = $"SELECT id, name, description FROM mis_m_typeofobservation WHERE status = 1 ";
+     
+            string myQuery = $" SELECT  m.id, m.name, m.description, m.risk_type_id, r.risktype FROM mis_m_typeofobservation m LEFT JOIN  ir_risktype r ON  m.risk_type_id = r.id WHERE m.status = 1; ";
             List<MISTypeObservation> _Sourceofobs = await Context.GetData<MISTypeObservation>(myQuery).ConfigureAwait(false);
             //Add history
             return _Sourceofobs;
@@ -279,7 +280,7 @@ namespace CMMSAPIs.Repositories.Masters
 
             //CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.INVALID_ARG;
             //string strRetMessage = "";
-            string qry = "insert into mis_m_typeofobservation ( name, description, status , addedBy ,addedAt) values " + $"('{request.name}' ,'{request.description}' , 1 ,'{userId}' , '{UtilsRepository.GetUTCTime()}');" + $"SELECT LAST_INSERT_ID();";
+            string qry = "insert into mis_m_typeofobservation ( name, description, status , addedBy ,addedAt, risk_type_id) values " + $"('{request.name}' ,'{request.description}' , 1 ,'{userId}' , '{UtilsRepository.GetUTCTime()}', {request.risk_type_id});" + $"SELECT LAST_INSERT_ID();";
             DataTable dt = await Context.FetchData(qry).ConfigureAwait(false);
             int id = Convert.ToInt32(dt.Rows[0][0]);
             //Add history
@@ -293,6 +294,8 @@ namespace CMMSAPIs.Repositories.Masters
                 updateQry += $"name = '{request.name}', ";
             if (request.description != null && request.description != "")
                 updateQry += $"description = '{request.description}', ";
+            if (request.risk_type_id != null)
+                updateQry += $"risk_type_id = '{request.risk_type_id}', ";
             updateQry += $"updatedBy = '{userID}', updatedAt = '{UtilsRepository.GetUTCTime()}' WHERE id = {request.id};";
             await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
             //Add history
