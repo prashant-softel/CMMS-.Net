@@ -54,18 +54,19 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             { (int)CMMS.CMMS_Status.VEG_TASK_ABANDONED, "Abandoned" },
             { (int)CMMS.CMMS_Status.VEG_TASK_APPROVED, "Approved" },
             { (int)CMMS.CMMS_Status.VEG_TASK_REJECTED, "Rejected" },
-            { (int)CMMS.CMMS_Status.VEGETATION_LINKED_TO_PTW, "PTW Linked" },
-            { (int)CMMS.CMMS_Status.VEG_TASK_END_APPROVED, "Closed Approved" },
-            { (int)CMMS.CMMS_Status.VEG_TASK_END_REJECTED, "Closed Rejected" },
-            { (int)CMMS.CMMS_Status.VEG_TASK_UPDATED, " Task updated" },
-            { (int)CMMS.CMMS_Status.VEG_TASK_ASSIGNED , "Task Reassign" },
+            { (int)CMMS.CMMS_Status.VEGETATION_LINKED_TO_PTW, "PTW_Linked" },
+            { (int)CMMS.CMMS_Status.VEG_TASK_END_APPROVED, " Approved" },
+            { (int)CMMS.CMMS_Status.VEG_TASK_END_REJECTED, " Rejected" },
+            { (int)CMMS.CMMS_Status.VEG_TASK_UPDATED, "  updated" },
+            { (int)CMMS.CMMS_Status.VEG_TASK_ASSIGNED , " Reassign" },
             { (int)CMMS.CMMS_Status.EQUIP_CLEANED, "Cleaned" },
             { (int)CMMS.CMMS_Status.EQUIP_ABANDONED, "Abandoned" },
             { (int)CMMS.CMMS_Status.EQUIP_SCHEDULED, "Scheduled" },
-            { (int)CMMS.CMMS_Status.MC_TASK_ABANDONED_REJECTED, "TASK ABANDONED REJECTED" },
-            { (int)CMMS.CMMS_Status.MC_TASK_ABANDONED_APPROVED, "TASK ABANDONED APPROVED" },
-            { (int)CMMS.CMMS_Status.RESCHEDULED_TASK, "TASK RESCHEDULE" },
-            { (int)CMMS.CMMS_Status.MC_ASSIGNED, "TASK REASSING" },
+            { (int)CMMS.CMMS_Status.VEG_TASK_ABANDONED_REJECTED, " ABANDONED REJECTED" },
+            { (int)CMMS.CMMS_Status.VEG_TASK_ABANDONED_APPROVED, " ABANDONED APPROVED" },
+            { (int)CMMS.CMMS_Status.RESCHEDULED_TASK, "Rescheduled" }
+           ,
+
 
         };
         internal string getLongStatus(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMMCPlan planObj, CMMCExecution executionObj)

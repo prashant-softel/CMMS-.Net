@@ -1164,8 +1164,8 @@ namespace CMMSAPIs.Repositories.SM
                                 //if qauntity 0, and its a new transaction, then dont do anything
                                 return 7;
                             }
-                            string stmt = "INSERT INTO smtransactiondetails (plantID,fromActorID,fromActorType,toActorID,toActorType,assetItemID,qty,referedby,reference_ID,remarks,Asset_Item_Status,mrsID, mrsItemID,latitude,longitude,address)" +
-                                            $"VALUES ({facilityID},{fromActorID},{fromActorType},{toActorID},{toActorType},{assetItemID},{qty},{refType},{refID},'{remarks}',{assetItemStatus},{mrsID},{mrsitemID},{latitude},{longitude},'{address}'); SELECT LAST_INSERT_ID(); ";
+                            string stmt = "INSERT INTO smtransactiondetails (plantID,fromActorID,fromActorType,toActorID,toActorType,assetItemID,qty,referedby,reference_ID,remarks,Asset_Item_Status,mrsID, mrsItemID,latitude,longitude )" +
+                                            $"VALUES ({facilityID},{fromActorID},{fromActorType},{toActorID},{toActorType},{assetItemID},{qty},{refType},{refID},'{remarks}',{assetItemStatus},{mrsID},{mrsitemID},{latitude},{longitude}); SELECT LAST_INSERT_ID(); ";
 
                             DataTable dt2 = await Context.FetchData(stmt).ConfigureAwait(false);
                             if (dt2.Rows.Count > 0)

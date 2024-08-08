@@ -64,7 +64,6 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             { (int)CMMS.CMMS_Status.MC_TASK_ABANDONED_APPROVED, "TASK ABANDONED APPROVED" },
             { (int)CMMS.CMMS_Status.RESCHEDULED_TASK, "TASK RESCHEDULE" },
             { (int)CMMS.CMMS_Status.MC_ASSIGNED, "TASK REASSING" },
-
         };
 
         internal string getLongStatus(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMMCPlan planObj, CMMCExecution executionObj)
@@ -398,9 +397,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
                         if (moduleType == 1)
                         {
-                            //(CASE WHEN { schedule.cleaningType} = 'Wet' then 1 else WHEN { schedule.cleaningType} = 'Dry' then 2 end)
-                            // if (schedule.cleaningType != 0)
-                            // cleaningType = { schedule.cleaningType},
+
                             myQuery += $"UPDATE cleaning_plan_schedules SET updatedAt = '{UtilsRepository.GetUTCTime()}', updatedById = {userId} where plannedDay ={schedule.cleaningDay} and planId={request.planId};";
                         }
 
