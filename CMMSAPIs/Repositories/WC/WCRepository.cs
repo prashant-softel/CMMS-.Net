@@ -145,11 +145,11 @@ namespace CMMSAPIs.Repositories.WC
                 "corrective_action_by_buyer, request_to_supplier, concat(user.firstName , ' ' , user.lastName) AS approver_name," +
                 $" created_by, issued_on, {statusOut} as status,wc.status as status_code, approved_by, wc_fac_code, failure_time " +
                 " FROM wc " +
-                "JOIN facilities as f ON f.id = wc.facilityId " +
-                "JOIN assets as a ON a.id = wc.equipment_id " +
-                "JOIN business as b1 ON b1.id = wc.supplier_id " +
-                "JOIN assetcategories AS ac ON ac.id = wc.equipment_cat_id  " +
-                "JOIN users as user ON user.id = wc.approver_id";
+                " LEFT JOIN facilities as f ON f.id = wc.facilityId " +
+                " LEFT JOIN assets as a ON a.id = wc.equipment_id " +
+                " LEFT JOIN business as b1 ON b1.id = wc.supplier_id " +
+                " LEFT JOIN assetcategories AS ac ON ac.id = wc.equipment_cat_id  " +
+                " LEFT JOIN users as user ON user.id = wc.approver_id";
             if (facilityId > 0)
             {
                 myQuery += " WHERE wc.facilityId = " + facilityId;

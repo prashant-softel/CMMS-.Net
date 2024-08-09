@@ -935,6 +935,13 @@ namespace CMMSAPIs.Repositories.Permits
             string joblist = $"Select job.id as jobid, job.status as status, concat(user.firstname, ' ', user.lastname) as assignedto, job.title as title,  job.breakdowntime, job.linkedpermit as permitid, group_concat(distinct asset_cat.name order by asset_cat.id separator ', ') as equipmentcat, group_concat(distinct assets.name order by assets.id separator ', ') as equipment from jobs as job left join jobmappingassets as jobassets on job.id = jobassets.jobid left join assetcategories as asset_cat on asset_cat.id = jobassets.categoryid left join assets on assets.id = jobassets.assetid left join users as user on user.id = job.assignedid where job.linkedpermit = {permit_id} group by job.id; ";
 
             List<CMAssociatedList> _AssociatedJobList = await Context.GetData<CMAssociatedList>(joblist).ConfigureAwait(false);
+            //get mc
+            string MClist = $"Select ces.scheduleId as schedule_id, ces.status as status, concat(user.firstname, ' ', user.lastname)  as assignedto, cp.title as title,  ces.startedAt as start_date, ces.ptw_id as  permitid, group_concat(distinct asset_cat.name order by asset_cat.id separator ', ') as equipmentcat,\r\n group_concat(distinct assets.name order by assets.id separator ', ') as equipment from cleaning_execution_schedules as ces  left join cleaning_plan as cp on ces.planId = cp.planId  left join cleaning_execution_items as cei on cei.scheduleId = ces.scheduleId  left join assets on assets.id = cei.assetid  left join assetcategories as asset_cat on asset_cat.id = assets.categoryid  left join users as user on user.id = ces.startedById where ces.ptw_id ={permit_id} and ces.moduleType=1  ; ";
+            //get vc
+            List<CMAssociatedListMC> _AssociatedMCList = await Context.GetData<CMAssociatedListMC>(MClist).ConfigureAwait(false);
+            string Vclist = $"Select ces.scheduleId as schedule_id, ces.status as status, concat(user.firstname, ' ', user.lastname)  as assignedto, cp.title as title,  ces.startedAt as start_date, ces.ptw_id as  permitid, group_concat(distinct asset_cat.name order by asset_cat.id separator ', ') as equipmentcat,\r\n group_concat(distinct assets.name order by assets.id separator ', ') as equipment from cleaning_execution_schedules as ces  left join cleaning_plan as cp on ces.planId = cp.planId  left join cleaning_execution_items as cei on cei.scheduleId = ces.scheduleId  left join assets on assets.id = cei.assetid  left join assetcategories as asset_cat on asset_cat.id = assets.categoryid  left join users as user on user.id = ces.startedById where ces.ptw_id ={permit_id} and ces.moduleType=2 ; ";
+
+            List<CMAssociatedPMListVC> _AssociatedVcList = await Context.GetData<CMAssociatedPMListVC>(Vclist).ConfigureAwait(false);
             foreach (var list in _AssociatedJobList)
             {
                 list.breakdownTime = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.breakdownTime);
@@ -1139,6 +1146,8 @@ namespace CMMSAPIs.Repositories.Permits
             _PermitDetailsList[0].safety_question_list = _QuestionList;
             _PermitDetailsList[0].LstAssociatedJobs = _AssociatedJobList;
             _PermitDetailsList[0].LstAssociatedPM = _AssociatedPMList;
+            _PermitDetailsList[0].ListAssociatedMC = _AssociatedMCList;
+
             _PermitDetailsList[0].LstCategory = _CategoryList;
             _PermitDetailsList[0].category_ids = _CategoryIDList;
             _PermitDetailsList[0].physical_iso_equips = _physical_iso_equips;
@@ -1742,7 +1751,7 @@ namespace CMMSAPIs.Repositories.Permits
                     await Context.ExecuteNonQry<int>(qryuploadFiles).ConfigureAwait(false);
                 }
             }
-            
+
 
             CMDefaultResponse response = new CMDefaultResponse();
             string responseText = "";

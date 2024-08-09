@@ -248,7 +248,7 @@ namespace CMMSAPIs.Repositories.Masters
 
         internal async Task<CMDefaultResponse> CloseObservation(CMApproval request, int userId)
         {
-            string deleteQry = $"UPDATE observations SET status_code = {(int)CMMS_Status.OBSERVATION_CLOSED}, closed_by = '{userId}' , updated_at = '{UtilsRepository.GetUTCTime()}' WHERE id = {request.id};";
+            string deleteQry = $"UPDATE observations SET status_code = {(int)CMMS_Status.OBSERVATION_CLOSED}, closed_by = '{userId}' , closed_at='{UtilsRepository.GetUTCTime()}' , updated_at = '{UtilsRepository.GetUTCTime()}' WHERE id = {request.id};";
             await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.OBSERVATION, request.id, 0, 0, "Observation Closed.", CMMS.CMMS_Status.OBSERVATION_CLOSED, userId); ;
             return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Observation {request.id} closed");
@@ -261,7 +261,7 @@ namespace CMMSAPIs.Repositories.Masters
         /***********************************************************************************************************************************/
         internal async Task<MISTypeObservation> GetTypeOfObservation(int type_id)
         {
-            string myQuery = $"SELECT  id, name, description, status FROM  mis_m_typeofobservation WHERE  id = " + type_id;
+            string myQuery = $"SELECT  m.id, m.name, m.description, m.id as risk_type_id, r.risktype, m.status FROM  mis_m_typeofobservation m LEFT JOIN  ir_risktype r ON  m.id = r.id WHERE m.id = " + type_id;
             List<MISTypeObservation> _Typeofobs = await Context.GetData<MISTypeObservation>(myQuery).ConfigureAwait(false);
             //Add history
             return _Typeofobs[0];
@@ -269,7 +269,8 @@ namespace CMMSAPIs.Repositories.Masters
 
         internal async Task<List<MISTypeObservation>> GetTypeOfObservationList()
         {
-            string myQuery = $" SELECT  id, name, description FROM mis_m_typeofobservation WHERE status = 1; ";
+
+            string myQuery = $" SELECT  m.id, m.name, m.description,  m.id  as risk_type_id, r.risktype FROM mis_m_typeofobservation m LEFT JOIN  ir_risktype r ON   m.id = r.id WHERE m.status = 1; ";
             List<MISTypeObservation> _Sourceofobs = await Context.GetData<MISTypeObservation>(myQuery).ConfigureAwait(false);
             //Add history
             return _Sourceofobs;
@@ -279,7 +280,7 @@ namespace CMMSAPIs.Repositories.Masters
 
             //CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.INVALID_ARG;
             //string strRetMessage = "";
-            string qry = "insert into mis_m_typeofobservation ( name, description, status , addedBy ,addedAt) values " + $"('{request.name}' ,'{request.description}' , 1 ,'{userId}' , '{UtilsRepository.GetUTCTime()}');" + $"SELECT LAST_INSERT_ID();";
+            string qry = "insert into mis_m_typeofobservation ( name, description, status , addedBy ,addedAt, risk_type_id) values " + $"('{request.name}' ,'{request.description}' , 1 ,'{userId}' , '{UtilsRepository.GetUTCTime()}', {request.risk_type_id});" + $"SELECT LAST_INSERT_ID();";
             DataTable dt = await Context.FetchData(qry).ConfigureAwait(false);
             int id = Convert.ToInt32(dt.Rows[0][0]);
             //Add history
@@ -293,6 +294,8 @@ namespace CMMSAPIs.Repositories.Masters
                 updateQry += $"name = '{request.name}', ";
             if (request.description != null && request.description != "")
                 updateQry += $"description = '{request.description}', ";
+            if (request.risk_type_id != null)
+                updateQry += $"risk_type_id = '{request.risk_type_id}', ";
             updateQry += $"updatedBy = '{userID}', updatedAt = '{UtilsRepository.GetUTCTime()}' WHERE id = {request.id};";
             await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
             //Add history
@@ -1845,10 +1848,15 @@ namespace CMMSAPIs.Repositories.Masters
             string myQuery = "select observations.id,observations.facility_id,facilities.name facility_name,status_code,observations.short_status, " +
                 " contractor_name, risk_type_id,ir_risktype.risktype as risk_type, preventive_action, responsible_person, contact_number, cost_type, " +
                 " date_of_observation, type_of_observation, location_of_observation, source_of_observation, " +
-                " monthname(observations.date_of_observation) as month_of_observation,observations.target_date as closer_date, concat(createdBy.firstName, ' ', createdBy.lastName) as action_taken, " +
+                " monthname(observations.date_of_observation) as month_of_observation,observations.target_date as closer_date,observations.closed_at as closed_date, concat(createdBy.firstName, ' ', createdBy.lastName) as action_taken, " +
                 " observations.preventive_action as  corrective_action, DATEDIFF(observations.target_date, observations.date_of_observation) AS remaining_days," +
                 " observations.target_date, observation_description, created_at, concat(createdBy.firstName, ' ', createdBy.lastName) created_by, " +
-                " updated_at, concat(updatedBy.firstName, ' ', updatedBy.lastName) updated_by,mis_m_typeofobservation.name as type_of_observation_name, mssheet.name  as source_of_observation_name " +
+                " updated_at, concat(updatedBy.firstName, ' ', updatedBy.lastName) updated_by,mis_m_typeofobservation.name as type_of_observation_name, mssheet.name  as source_of_observation_name, " +
+                "CASE " +
+                "WHEN observations.closed_at IS NOT NULL AND observations.closed_at <= observations.target_date THEN 'In Time' " +
+                "WHEN observations.closed_at IS NOT NULL AND observations.closed_at > observations.target_date THEN 'Out of Target Date' " +
+                "ELSE 'Open' " +
+                "END AS observation_status " +
                 " from observations" +
                 " left join ir_risktype ON observations.risk_type_id = ir_risktype.id" +
                 " left join mis_m_typeofobservation ON observations.type_of_observation  = mis_m_typeofobservation.id " +

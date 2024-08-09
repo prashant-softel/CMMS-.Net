@@ -44,6 +44,7 @@ namespace CMMSAPIs.Repositories.Audits
 
             string filter = "Where (DATE(st.Audit_Added_date) >= '" + fromDate.ToString("yyyy-MM-dd") + "'  and DATE(st.Audit_Added_date) <= '" + toDate.ToString("yyyy-MM-dd") + "')";
             filter = filter + " and st.Facility_id = " + facility_id + "";
+
             if (module_type_id > 0)
             {
                 filter = filter + " and st.module_type_id = " + module_type_id + "";
@@ -1783,6 +1784,43 @@ namespace CMMSAPIs.Repositories.Audits
 
             CMDefaultResponse response = new CMDefaultResponse(audit_id, CMMS.RETRUNSTATUS.SUCCESS, $"Audit <{audit_id}> Linked To Permit <{ptw_id}> ");
 
+            return response;
+        }
+        internal async Task<CMDefaultResponse> AssignAuditTask(int task_id, int assign_to, int userID)
+        {
+            string statusQry = $"SELECT status FROM pm_task WHERE id = {task_id};";
+            DataTable dt1 = await Context.FetchData(statusQry).ConfigureAwait(false);
+            CMMS.CMMS_Status status = (CMMS.CMMS_Status)Convert.ToInt32(dt1.Rows[0][0]);
+
+            if (status != CMMS.CMMS_Status.AUDIT_SCHEDULE && status != CMMS.CMMS_Status.PM_ASSIGNED && status != CMMS.CMMS_Status.PM_LINKED_TO_PTW)
+            {
+                return new CMDefaultResponse(task_id, CMMS.RETRUNSTATUS.FAILURE, "Only Scheduled Tasks can be assigned and Not yet started and Rejected Tasks can be Reassigned ");
+            }
+
+            string myQuery = "UPDATE pm_task SET " +
+                                $"assigned_to = {assign_to}, " +
+                                $"status = {(int)CMMS.CMMS_Status.AUDIT_SCHEDULE}, " +
+                                $"status_updated_at = '{UtilsRepository.GetUTCTime()}', " +
+                                $"status_updated_by = {userID}  " +
+                                $"WHERE id = {task_id} ;";
+            int retVal = await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
+            CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
+            if (retVal > 0)
+                retCode = CMMS.RETRUNSTATUS.SUCCESS;
+
+            CMDefaultResponse response = new CMDefaultResponse();
+
+
+            if (status == CMMS.CMMS_Status.AUDIT_SCHEDULE)
+            {
+                response = new CMDefaultResponse(task_id, retCode, $"Audit Task Assigned To user Id {assign_to}");
+            }
+            else
+            {
+                response = new CMDefaultResponse(task_id, retCode, $"Audit Task Reassigned To user Id {assign_to}");
+            }
+
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.AUDIT_EXECUTION, task_id, 0, 0, $"Audit Task Assigned to user Id {assign_to}", CMMS.CMMS_Status.AUDIT_SCHEDULE, userID);
             return response;
         }
     }

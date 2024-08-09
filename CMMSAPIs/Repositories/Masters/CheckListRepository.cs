@@ -347,15 +347,15 @@ namespace CMMSAPIs.Repositories.Masters
                     request.checkpoint_type.min = 0; // Consider min value if type is 2
                     request.checkpoint_type.max = 0; // Consider max value if type is 2
                 }
-                
+
                 if (request.checkpoint_type.type != 1)
                 {
                     request.checkpoint_type.type = 0;
-                   // Only consider type 1
+                    // Only consider type 1
                 }
-                
-       
-              
+
+
+
                 string query = "INSERT INTO checkpoint " +
                "(check_point, check_list_id, requirement, is_document_required, action_to_be_done, " +
                "failure_weightage, type, min_range, max_range, created_by, created_at, status, " +
@@ -368,10 +368,31 @@ namespace CMMSAPIs.Repositories.Masters
                $"'{request.type_of_observation_id}', '{request.risk_type_id}'); " +
                "SELECT LAST_INSERT_ID();";
 
+                DataTable dt = await Context.FetchData(query).ConfigureAwait(false);
 
-               
+                int id = Convert.ToInt32(dt.Rows[0][0]);
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.CHECKPOINTS, id, 0, 0, "Check Point Created", CMMS.CMMS_Status.CREATED, userID);
+                idList.Add(id);
+            }
+            CMDefaultResponse response = new CMDefaultResponse(idList, CMMS.RETRUNSTATUS.SUCCESS, $"{idList.Count} checkpoint(s) created successfully");
 
-
+            return response;
+        }
+        internal async Task<CMDefaultResponse> importCreateCheckPoint(List<CMCreateCheckPoint> requestList, int userID)
+        {
+            /*
+             * Primary Table - CheckPoint
+             * Insert all properties mention in model to CheckPoint table
+             * Code goes here
+            */
+            List<int> idList = new List<int>();
+            foreach (CMCreateCheckPoint request in requestList)
+            {
+                string query = "INSERT INTO  checkpoint (check_point, check_list_id, requirement, is_document_required, " +
+                                "action_to_be_done,failure_weightage,type,min_range,max_range ,created_by, created_at, status) VALUES " +
+                                $"(\"{request.check_point}\", {request.checklist_id}, '{request.requirement.Replace("'", "")}', " +
+                                $"{(request.is_document_required == null ? 0 : request.is_document_required)}, '{request.action_to_be_done}', '{request.failure_weightage}', '{request.checkpoint_type.id}', '{request.checkpoint_type.min}','{request.checkpoint_type.max}'," +
+                                $"{userID}, '{UtilsRepository.GetUTCTime()}', 1); select LAST_INSERT_ID();";
 
                 DataTable dt = await Context.FetchData(query).ConfigureAwait(false);
 
@@ -1082,7 +1103,7 @@ namespace CMMSAPIs.Repositories.Masters
 
 
 
-                    CMDefaultResponse response1 = await CreateCheckPoint(checkpoints, userID);
+                    CMDefaultResponse response1 = await importCreateCheckPoint(checkpoints, userID);
                     response = new CMImportFileResponse(response1.id, response1.return_status, logfile, log, response1.message + ", with total " + total_excelrowCount + " checkpoint rows from excel sheet.");
                 }
                 else

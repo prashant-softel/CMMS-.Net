@@ -1,13 +1,13 @@
 ﻿using CMMSAPIs.BS.Users;
+using CMMSAPIs.Models.Authentication;
+using CMMSAPIs.Models.SM;
 using CMMSAPIs.Models.Users;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
-using CMMSAPIs.Helper;
-using CMMSAPIs.Models.Authentication;
-using Microsoft.AspNetCore.Authorization;
+using System.Threading.Tasks;
 
 namespace CMMSAPIs.Controllers.Users
 {
@@ -90,7 +90,10 @@ namespace CMMSAPIs.Controllers.Users
             }*/
             catch (Exception ex)
             {
-                throw;
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 200;
+                item.Message = ex.Message;
+                return Ok(item);
             }
         }
 

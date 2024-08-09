@@ -44,26 +44,26 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             { (int)CMMS.CMMS_Status.MC_TASK_SCHEDULE_REJECT,"Reject" },
             { (int)CMMS.CMMS_Status.MC_TASK_RESCHEDULED,"Reschedule" },
             { (int)CMMS.CMMS_Status.VEG_PLAN_DRAFT, "Draft" },
-            { (int)CMMS.CMMS_Status.VEG_PLAN_SUBMITTED, "Waiting for Approval" },
-            { (int)CMMS.CMMS_Status.VEG_PLAN_APPROVED, "Approved" },
+            { (int)CMMS.CMMS_Status.VEG_PLAN_SUBMITTED, "VC Waiting for Approval" },
+            { (int)CMMS.CMMS_Status.VEG_PLAN_APPROVED, "VC Plan Approved" },
             { (int)CMMS.CMMS_Status.VEG_PLAN_REJECTED, "Rejected" },
             { (int)CMMS.CMMS_Status.VEG_PLAN_DELETED, "Deleted" },
-            { (int)CMMS.CMMS_Status.VEG_TASK_SCHEDULED, "Scheduled" },
+            { (int)CMMS.CMMS_Status.VEG_TASK_SCHEDULED, "Task Scheduled" },
             { (int)CMMS.CMMS_Status.VEG_TASK_STARTED, "In Progress" },
-            { (int)CMMS.CMMS_Status.VEG_TASK_COMPLETED, "Completed" },
-            { (int)CMMS.CMMS_Status.VEG_TASK_ABANDONED, "Abandoned" },
+            { (int)CMMS.CMMS_Status.VEG_TASK_COMPLETED, "Task Completed" },
+            { (int)CMMS.CMMS_Status.VEG_TASK_ABANDONED, "Task Abandoned" },
             { (int)CMMS.CMMS_Status.VEG_TASK_APPROVED, "Approved" },
             { (int)CMMS.CMMS_Status.VEG_TASK_REJECTED, "Rejected" },
-            { (int)CMMS.CMMS_Status.VEGETATION_LINKED_TO_PTW, "PTW_Linked" },
-            { (int)CMMS.CMMS_Status.VEG_TASK_END_APPROVED, " Approved" },
+            { (int)CMMS.CMMS_Status.VEGETATION_LINKED_TO_PTW, "PTW Linked" },
+            { (int)CMMS.CMMS_Status.VEG_TASK_END_APPROVED, "Schedule Approved" },
             { (int)CMMS.CMMS_Status.VEG_TASK_END_REJECTED, " Rejected" },
             { (int)CMMS.CMMS_Status.VEG_TASK_UPDATED, "  updated" },
             { (int)CMMS.CMMS_Status.VEG_TASK_ASSIGNED , " Reassign" },
             { (int)CMMS.CMMS_Status.EQUIP_CLEANED, "Cleaned" },
             { (int)CMMS.CMMS_Status.EQUIP_ABANDONED, "Abandoned" },
             { (int)CMMS.CMMS_Status.EQUIP_SCHEDULED, "Scheduled" },
-            { (int)CMMS.CMMS_Status.VEG_TASK_ABANDONED_REJECTED, " ABANDONED REJECTED" },
-            { (int)CMMS.CMMS_Status.VEG_TASK_ABANDONED_APPROVED, " ABANDONED APPROVED" },
+            { (int)CMMS.CMMS_Status.VEG_TASK_ABANDONED_REJECTED, "Task ABANDONED REJECTED" },
+            { (int)CMMS.CMMS_Status.VEG_TASK_ABANDONED_APPROVED, "Task ABANDONED APPROVED" },
             { (int)CMMS.CMMS_Status.RESCHEDULED_TASK, "Rescheduled" }
 
         };
@@ -320,6 +320,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
         }
         internal async Task<CMDefaultResponse> ApprovePlan(CMApproval request, int userID)
         {
+            int moduleType = 2;
             string approveQuery = $"Update cleaning_plan set isApproved = 1,status= {(int)CMMS.CMMS_Status.VEG_PLAN_APPROVED} ,approvedById={userID}, ApprovalReason='{request.comment}', approvedAt='{UtilsRepository.GetUTCTime()}' where planId = {request.id}";
             await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
 
@@ -332,8 +333,8 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             DataTable dt3 = await Context.FetchData(mainQuery).ConfigureAwait(false);
             int taskid = Convert.ToInt32(dt3.Rows[0][0]);
 
-            string scheduleQry = $"INSERT INTO cleaning_execution_schedules(executionId,planId,actualDay,cleaningType,status) " +
-                                $"select {taskid} as executionId,planId as planId, plannedDay,cleaningType,{(int)CMMS.CMMS_Status.MC_TASK_SCHEDULED} as status from cleaning_plan_schedules where planId = {request.id}";
+            string scheduleQry = $"INSERT INTO cleaning_execution_schedules(executionId,planId,actualDay,moduleType,cleaningType,status) " +
+                                $"select {taskid} as executionId,planId as planId, plannedDay,{moduleType},cleaningType,{(int)CMMS.CMMS_Status.VEG_TASK_SCHEDULED} as status from cleaning_plan_schedules where planId = {request.id}";
             await Context.ExecuteNonQry<int>(scheduleQry);
 
             string equipmentQry = $"INSERT INTO cleaning_execution_items (`executionId`,`moduleType`,`scheduleId`,`assetId`,`{measure}`,`plannedDate`,`plannedDay`,`createdById`,`createdAt`,`status`) SELECT '{taskid}' as executionId,item.moduleType,schedule.scheduleId,item.assetId,{measure},DATE_ADD('{DateTime.Now.ToString("yyyy-MM-dd")}',interval item.plannedDay - 1  DAY) as plannedDate,item.plannedDay,schedule.createdById,schedule.createdAt,{(int)CMMS.CMMS_Status.EQUIP_SCHEDULED} as status from cleaning_plan_items as item join cleaning_execution_schedules as schedule on item.planId = schedule.planId and item.plannedDay = schedule.actualDay where schedule.executionId = {taskid}";
@@ -735,7 +736,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             //comment remark='{request.comment}'
 
             int status = (int)CMMS.CMMS_Status.VEG_TASK_END_APPROVED;
-
+            int moduleType = 2;
             string approveQuery = $"Update cleaning_execution set status= {status} ,approvedById={userID}, " +
                 $" approvedAt='{UtilsRepository.GetUTCTime()}',rescheduled = 1 where id = {request.id} ";
             await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
@@ -757,8 +758,8 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             DataTable dt3 = await Context.FetchData(mainQuery).ConfigureAwait(false);
             int taskid = Convert.ToInt32(dt3.Rows[0][0]);
 
-            string scheduleQry = $"INSERT INTO cleaning_execution_schedules(executionId,planId,actualDay,cleaningType,status) " +
-                                $"select {taskid} as executionId,planId as planId, actualDay,cleaningType,{(int)CMMS.CMMS_Status.VEG_TASK_SCHEDULED} as status from cleaning_execution_schedules where cleaning_execution_schedules.executionId = {request.id}";
+            string scheduleQry = $"INSERT INTO cleaning_execution_schedules(executionId,planId,moduleType,actualDay,cleaningType,status) " +
+                                $"select {taskid} as executionId,planId as planId,{moduleType} as moduleType,actualDay,cleaningType,{(int)CMMS.CMMS_Status.VEG_TASK_SCHEDULED} as status from cleaning_execution_schedules where cleaning_execution_schedules.executionId = {request.id}";
             await Context.ExecuteNonQry<int>(scheduleQry);
 
 
@@ -974,8 +975,8 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             DataTable dt3 = await Context.FetchData(mainQuery).ConfigureAwait(false);
             int taskid = Convert.ToInt32(dt3.Rows[0][0]);
 
-            string scheduleQry = $"INSERT INTO cleaning_execution_schedules(executionId,planId,actualDay,cleaningType,status) " +
-                                $"select {taskid} as executionId,planId as planId, actualDay,cleaningType,{status2} as status from cleaning_execution_schedules where executionId = {request.id}";
+            string scheduleQry = $"INSERT INTO cleaning_execution_schedules(executionId,planId,actualDay,moduleType,cleaningType,status) " +
+                                $"select {taskid} as executionId,planId as planId, actualDay,{moduleType} as moduleType,cleaningType,{status2} as status from cleaning_execution_schedules where executionId = {request.id}";
             await Context.ExecuteNonQry<int>(scheduleQry);
 
             string equipmentQry = $"INSERT INTO cleaning_execution_items (`executionId`,`moduleType`,`scheduleId`,`assetId`,`{measure}`,`plannedDate`,`plannedDay`,`createdById`,`createdAt`,status) SELECT '{taskid}' as executionId,item.moduleType,schedule.scheduleId,item.assetId,{measure},DATE_ADD('{DateTime.Now.ToString("yyyy-MM-dd")}',interval schedule.actualDay DAY) as plannedDate,schedule.actualDay,schedule.createdById,schedule.createdAt ,{(int)CMMS.CMMS_Status.EQUIP_SCHEDULED} as status from cleaning_execution_items as item join cleaning_execution_schedules as schedule on item.executionId = schedule.executionId and item.plannedDay = schedule.actualDay where schedule.executionId = {taskid}";

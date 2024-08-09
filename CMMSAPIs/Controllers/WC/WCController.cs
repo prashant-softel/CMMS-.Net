@@ -1,12 +1,11 @@
-using Microsoft.AspNetCore.Mvc;
+using CMMSAPIs.BS.WC;
+using CMMSAPIs.Models.Utils;
+using CMMSAPIs.Models.WC;
 using Microsoft.AspNetCore.Http;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
-using Microsoft.AspNetCore.Authorization;
-using CMMSAPIs.BS.WC;
-using CMMSAPIs.Models.WC;
-using CMMSAPIs.Models.Utils;
+using System.Threading.Tasks;
 
 namespace CMMSAPIs.Controllers.WC
 {
@@ -17,17 +16,17 @@ namespace CMMSAPIs.Controllers.WC
         private readonly IWCBS _WCBS;
         public WCController(IWCBS wc)
         {
-            _WCBS = wc;            
+            _WCBS = wc;
         }
 
         //[Authorize]
         [Route("GetWCList")]
         [HttpGet]
-        public async Task<IActionResult> GetWCList(int facilityId, string startDate, string endDate, int statusId)
+        public async Task<IActionResult> GetWCList(int facilityId, string start_Date, string end_Date, int statusId)
         {
             try
             {
-                var data = await _WCBS.GetWCList(facilityId, startDate, endDate, statusId);
+                var data = await _WCBS.GetWCList(facilityId, start_Date, end_Date, statusId);
                 return Ok(data);
             }
             catch (ArgumentException ex)
@@ -48,7 +47,7 @@ namespace CMMSAPIs.Controllers.WC
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _WCBS.CreateWC(request,userID);
+                var data = await _WCBS.CreateWC(request, userID);
                 return Ok(data);
             }
             catch (Exception)
@@ -67,11 +66,11 @@ namespace CMMSAPIs.Controllers.WC
                 var data = await _WCBS.GetWCDetails(wc_id);
                 return Ok(data);
             }
-            catch(ArgumentException ex)
+            catch (ArgumentException ex)
             {
                 return BadRequest(ex.Message);
             }
-            catch(NullReferenceException ex)
+            catch (NullReferenceException ex)
             {
                 return NotFound(ex.Message);
             }

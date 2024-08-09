@@ -473,6 +473,24 @@ namespace CMMSAPIs.Controllers.Audits
                 throw;
             }
         }
+        [Route("AssignAuditTask")]
+        [HttpPut]
+        public async Task<IActionResult> AssignAuditTask(int task_id, int assign_to)
+        {
+
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _AuditPlanBS.AssignAuditTask(task_id, assign_to, userID);
+                return Ok(data);
+
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+
+        }
 
     }
 }

@@ -579,8 +579,8 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             string approveQuery = $"Update cleaning_plan set isApproved = 1,status= {(int)CMMS.CMMS_Status.MC_PLAN_APPROVED} ,approvedById={userID}, ApprovalReason='{request.comment}', approvedAt='{UtilsRepository.GetUTCTime()}' where planId = {request.id}";
             await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
 
-            string mainQuery = $"INSERT INTO cleaning_execution(planId,moduleType,facilityId,frequencyId,noOfDays,startDate,assignedTo,status)  " +
-                              $"select planId as planId,{moduleType} as moduleType,facilityId,frequencyId,durationDays as noOfDays ,startDate,assignedTo," +
+            string mainQuery = $"INSERT INTO cleaning_execution(planId,moduleType,facilityId,frequencyId,noOfDays,assignedTo,status)  " +
+                              $"select planId as planId,{moduleType} as moduleType,facilityId,frequencyId,durationDays as noOfDays ,assignedTo," +
                               $"{(int)CMMS.CMMS_Status.MC_TASK_SCHEDULED} as status " +
                               $"from cleaning_plan where planId = {request.id}; " +
                               $"SELECT LAST_INSERT_ID(); ";
@@ -588,8 +588,8 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             DataTable dt3 = await Context.FetchData(mainQuery).ConfigureAwait(false);
             int taskid = Convert.ToInt32(dt3.Rows[0][0]);
 
-            string scheduleQry = $"INSERT INTO cleaning_execution_schedules(executionId,planId,actualDay,cleaningType,status) " +
-                                $"select {taskid} as executionId,planId as planId, plannedDay,cleaningType,{(int)CMMS.CMMS_Status.MC_TASK_SCHEDULED} as status from cleaning_plan_schedules where planId = {request.id}";
+            string scheduleQry = $"INSERT INTO cleaning_execution_schedules(executionId,planId,actualDay,moduleType,cleaningType,status) " +
+                                $"select {taskid} as executionId,planId as planId, plannedDay,{moduleType}as moduleType,cleaningType,cleaningType,{(int)CMMS.CMMS_Status.MC_TASK_SCHEDULED} as status from cleaning_plan_schedules where planId = {request.id}";
             await Context.ExecuteNonQry<int>(scheduleQry);
 
             string equipmentQry = $"INSERT INTO cleaning_execution_items (`executionId`,`moduleType`,`scheduleId`,`assetId`,`{measure}`,`plannedDate`,`plannedDay`,`createdById`,`createdAt`,`status`) SELECT '{taskid}' as executionId,item.moduleType,schedule.scheduleId,item.assetId,{measure},DATE_ADD('{DateTime.Now.ToString("yyyy-MM-dd")}',interval item.plannedDay - 1  DAY) as plannedDate,item.plannedDay,schedule.createdById,schedule.createdAt,{(int)CMMS.CMMS_Status.EQUIP_SCHEDULED} as status from cleaning_plan_items as item join cleaning_execution_schedules as schedule on item.planId = schedule.planId and item.plannedDay = schedule.actualDay where schedule.executionId = {taskid}";
@@ -724,7 +724,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
             }
 
-            string Query = $"Update cleaning_execution set status = {status},executedById={userId},executionStartedAt='{UtilsRepository.GetUTCTime()}' where id = {executionId}; ";
+            string Query = $"Update cleaning_execution set status = {status},executedById={userId},executionStartedAt='{UtilsRepository.GetUTCTime()}',startDate='{UtilsRepository.GetUTCTime()}'  where id = {executionId}; ";
             //$"Update cleaning_execution_schedules set status = {status} where scheduleId = {scheduleId}";
 
             int retVal = await Context.ExecuteNonQry<int>(Query).ConfigureAwait(false);
@@ -876,8 +876,8 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                     view.startDate = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, view.startDate);
                 if (view != null && view.startedAt != null)
                     view.startedAt = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, view.startedAt);
-
-
+                if (view != null && view.startDate != null)
+                    view.startedAt = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, view.startDate);
             }
 
             return _ViewExecution[0];
@@ -1142,8 +1142,8 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             DataTable dt3 = await Context.FetchData(mainQuery).ConfigureAwait(false);
             int taskid = Convert.ToInt32(dt3.Rows[0][0]);
 
-            string scheduleQry = $"INSERT INTO cleaning_execution_schedules(executionId,planId,actualDay,cleaningType,status) " +
-                                $"select {taskid} as executionId,planId as planId, actualDay,cleaningType,{status2} as status from cleaning_execution_schedules where executionId = {request.id}";
+            string scheduleQry = $"INSERT INTO cleaning_execution_schedules(executionId,planId,actualDay,moduleType,cleaningType,status) " +
+                                $"select {taskid} as executionId,planId as planId, actualDay,{moduleType} as moduleType,cleaningType,{status2} as status from cleaning_execution_schedules where executionId = {request.id}";
             await Context.ExecuteNonQry<int>(scheduleQry);
 
             string equipmentQry = $"INSERT INTO cleaning_execution_items (`executionId`,`moduleType`,`scheduleId`,`assetId`,`{measure}`,`plannedDate`,`plannedDay`,`createdById`,`createdAt`,status) SELECT '{taskid}' as executionId,item.moduleType,schedule.scheduleId,item.assetId,{measure},DATE_ADD('{DateTime.Now.ToString("yyyy-MM-dd")}',interval schedule.actualDay DAY) as plannedDate,schedule.actualDay,schedule.createdById,schedule.createdAt ,{(int)CMMS.CMMS_Status.EQUIP_SCHEDULED} as status from cleaning_execution_items as item join cleaning_execution_schedules as schedule on item.executionId = schedule.executionId and item.plannedDay = schedule.actualDay where schedule.executionId = {taskid}";
@@ -1187,8 +1187,8 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             DataTable dt3 = await Context.FetchData(mainQuery).ConfigureAwait(false);
             int taskid = Convert.ToInt32(dt3.Rows[0][0]);
 
-            string scheduleQry = $"INSERT INTO cleaning_execution_schedules(executionId,planId,actualDay,cleaningType,status) " +
-                                $"select {taskid} as executionId,planId as planId, actualDay,cleaningType,{(int)CMMS.CMMS_Status.MC_TASK_SCHEDULED} as status from cleaning_execution_schedules where cleaning_execution_schedules.executionId = {request.id}";
+            string scheduleQry = $"INSERT INTO cleaning_execution_schedules(executionId,planId,actualDay,cleaningType,moduleType,status) " +
+                                $"select {taskid} as executionId,planId as planId, actualDay,cleaningType,{moduleType} as moduleType,{(int)CMMS.CMMS_Status.MC_TASK_SCHEDULED} as status from cleaning_execution_schedules where cleaning_execution_schedules.executionId = {request.id}";
             await Context.ExecuteNonQry<int>(scheduleQry);
 
 

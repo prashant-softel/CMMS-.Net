@@ -17,6 +17,8 @@ namespace CMMSAPIs.Models.Masters
         public string name { get; set; }
         public string description { get; set; }
         public int status { get; set; }
+        public int risk_type_id { get; set; }
+        public string risktype { get; set; }
     }
 
     public class MISRiskType
@@ -614,6 +616,8 @@ namespace CMMSAPIs.Models.Masters
         public string responsible_person { get; set; }
         public string contact_number { get; set; }
         public string cost_type { get; set; }
+        public DateTime closed_date { get; set; }
+        public string observation_status { get; set; }
         public DateTime? date_of_observation { get; set; }
         public int type_of_observation { get; set; }
         public DateTime closer_date { get; set; }

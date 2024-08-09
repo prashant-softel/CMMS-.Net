@@ -441,7 +441,10 @@ namespace CMMSAPIs.Controllers.SM
             }
             catch (Exception ex)
             {
-                throw;
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 200;
+                item.Message = ex.Message;
+                return Ok(item);
             }
         }
 
