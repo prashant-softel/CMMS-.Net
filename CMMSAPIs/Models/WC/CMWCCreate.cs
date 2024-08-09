@@ -48,8 +48,9 @@ namespace CMMSAPIs.Models.WC
         public int quantity { get; set; }
         public int approxdailyloss { get; set; }
         public string srNumber { get; set; }
+        public string comment { get; set; }
         public string severity { get; set; }
-        public List<affectedParts> affectedParts { get; set; }
+        public List<int> affectedParts { get; set; }
 
         public List<affectedPartsimg> affectedPartsImages { get; set; }
         public List<int> uploadfile_ids { get; set; }
