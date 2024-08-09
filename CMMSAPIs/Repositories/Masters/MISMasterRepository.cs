@@ -1999,6 +1999,36 @@ namespace CMMSAPIs.Repositories.Masters
             return _GetChecklistInspection;
         }
 
+        internal async Task<CMDefaultResponse> uploadDocument(CMDocumentVersion request, int user_id)
+        {
+            string myqry = $"INSERT INTO document_version(doc_master_id, file_id, sub_doc_name, renew_date, added_by, added_at, remarks) VALUES " +
+                           $"({request.doc_master_id}, {request.file_id}, '{request.sub_doc_name}', " +
+                           $"{(request.renew_date.HasValue ? $"'{request.renew_date.Value.ToString("yyyy-MM-dd")}'" : "NULL")}, " +
+                           $"{user_id}, '{UtilsRepository.GetUTCTime()}', '{request.Remarks}'); " +
+                           $"SELECT LAST_INSERT_ID();";
+
+            DataTable dt = await Context.FetchData(myqry).ConfigureAwait(false);
+            int id = Convert.ToInt32(dt.Rows[0][0]);
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Document Version Added");
+        }
+
+        internal async Task<List<CMDocumentVersion>> getDocuementList()
+        {
+            string myQuery = "SELECT auto_id id, doc_master_id, file_id,sub_doc_name, renew_date, concat(u.firstName, ' ', u.lastName) added_by, added_at, remarks " +
+                " FROM  document_version d " +
+                " left join users u on u.id = d.added_by ";
+            List<CMDocumentVersion> Data = await Context.GetData<CMDocumentVersion>(myQuery).ConfigureAwait(false);
+            return Data;
+        }
+        internal async Task<List<CMDocumentVersion>> getDocuementListById(int id,string sub_doc_name,DateTime fromDate, DateTime toDate)
+        {
+            string myQuery = "SELECT auto_id id, doc_master_id, file_id,sub_doc_name, renew_date, concat(u.firstName, ' ', u.lastName) added_by, added_at, remarks " +
+        " FROM  document_version d " +
+        " left join users u on u.id = d.added_by " +
+        " where doc_master_id="+id+ " and sub_doc_name = '"+sub_doc_name+ "' ";
+            List<CMDocumentVersion> Data = await Context.GetData<CMDocumentVersion>(myQuery).ConfigureAwait(false);
+            return Data;
+        }
 
     }
 }
