@@ -707,6 +707,16 @@ namespace CMMSAPIs.Models.Masters
         public double NoOfUnsafeObservation { get; set; }
     }
 
-
+    public class CMDocumentVersion
+    {
+        public int id { get; set; }
+        public int doc_master_id { get; set; }
+        public int file_id { get; set; }
+        public string sub_doc_name { get; set; }
+        public DateTime? renew_date { get; set; } 
+        public string added_by { get; set; }
+        public DateTime added_at { get; set; }
+        public string Remarks { get; set; }
+    }
 }
 
