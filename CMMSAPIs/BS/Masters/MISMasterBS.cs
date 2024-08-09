@@ -118,6 +118,9 @@ namespace CMMSAPIs.BS.MISMasters
         Task<CMDefaultResponse> CreateObservation(CMObservation request, int UserID);
 
         Task<GetChecklistInspection> GetChecklistInspection();
+        Task<CMDefaultResponse> uploadDocument(CMDocumentVersion request, int userID);
+        Task<List<CMDocumentVersion>> getDocuementList();
+        Task<List<CMDocumentVersion>> getDocuementListById(int id,string sub_doc_name,DateTime fromDate, DateTime toDate);
     }
     public class MISMasterBS : IMISMasterBS
     {
@@ -1669,6 +1672,51 @@ namespace CMMSAPIs.BS.MISMasters
                 {
                     return await repos.GetChecklistInspection();
 
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> uploadDocument(CMDocumentVersion request, int userID)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.uploadDocument(request, userID);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<CMDocumentVersion>> getDocuementList()
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.getDocuementList();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<List<CMDocumentVersion>> getDocuementListById(int id, string sub_doc_name, DateTime fromDate, DateTime toDate)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.getDocuementListById(id, sub_doc_name, fromDate, toDate);
                 }
             }
             catch (Exception ex)
