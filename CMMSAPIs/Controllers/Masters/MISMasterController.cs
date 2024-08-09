@@ -1552,6 +1552,51 @@ namespace CMMSAPIs.Controllers.Masters
                 throw;
             }
         }
+
+        [Route("uploadDocument")]
+        [HttpPost]
+        public async Task<IActionResult> uploadDocument(CMDocumentVersion request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.uploadDocument(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        [Route("getDocuementList")]
+        [HttpGet]
+        public async Task<IActionResult> getDocuementList()
+        {
+            try
+            {
+                var data = await _IMISMasterBS.getDocuementList();
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        [Route("getDocuementListById")]
+        [HttpGet]
+        public async Task<IActionResult> getDocuementListById(int id,string sub_doc_name, DateTime fromDate, DateTime toDate)
+        {
+            try
+            {
+                var data = await _IMISMasterBS.getDocuementListById(id, sub_doc_name, fromDate, toDate);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
         [Route("GetObservationList")]
         [HttpGet]
         public async Task<IActionResult> GetObservationList(int facility_Id, DateTime fromDate, DateTime toDate)
@@ -1639,5 +1684,6 @@ namespace CMMSAPIs.Controllers.Masters
                 throw ex;
             }
         }
+
     }
 }
