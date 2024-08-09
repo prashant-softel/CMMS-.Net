@@ -17,8 +17,6 @@ namespace CMMSAPIs.Models.Masters
         public string name { get; set; }
         public string description { get; set; }
         public int status { get; set; }
-        public int risk_type_id { get; set; }
-        public string risktype { get; set; }
     }
 
     public class MISRiskType

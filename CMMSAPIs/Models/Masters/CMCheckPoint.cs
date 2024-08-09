@@ -10,8 +10,9 @@
         public string action_to_be_done { get; set; }
         public int? failure_weightage { get; set; } // in per
         public CMCPType? checkpoint_type { get; set; } // bool,renge
-        public int? risk_type { get; set; }
-        public int? type { get; set; }
+        public int? risk_type_id { get; set; }
+        public int? type_of_observation_id { get; set; }
+        public int type { get; set; }
         public int? status { get; set; }
     }
 
@@ -19,7 +20,8 @@
     {
         public int id { get; set; } //1 = bool, 2 = renge, 0 = text;
         public int name { get; set; } //1 = bool, 2 = renge;
-        public int value { get; set; } //only required if type is 1 
+        public int value { get; set; }
+        public int type { get; set; }//only required if type is 1 
         public dynamic min { get; set; } // only required if type is 2 
         public dynamic max { get; set; } // only required if type is 2 
 
@@ -45,5 +47,8 @@
         public dynamic updated_at { get; set; }
         public int? status { get; set; }
         public int? type { get; set; }
+        public string type_of_observation { get; set; }
+        public string risk_type { get; set; }
+
     }
 }

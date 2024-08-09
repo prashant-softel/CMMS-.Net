@@ -278,7 +278,7 @@ namespace CMMSAPIs.Repositories.Masters
                                 "requirement, is_document_required, action_to_be_done, checkpoint.created_by as created_by_id," +
                                 " CONCAT(created_user.firstName,' ',created_user.lastName) as created_by_name, checkpoint.created_at, " +
                                 "checkpoint.updated_by as updated_by_id, CONCAT(updated_user.firstName,' ',updated_user.lastName) as updated_by_name, " +
-                                "checkpoint.updated_at, checkpoint.status ,checkpoint.failure_weightage,checkpoint.type as type,  " +
+                                "checkpoint.updated_at, checkpoint.status ,checkpoint.failure_weightage,checkpoint.type as type, m.name AS type_of_observation, r.risktype AS risk_type, " +
                                 "CASE WHEN checkpoint.type = 1 then 'Bool'  WHEN checkpoint.type = 0 then 'Text' WHEN checkpoint.type = 2 then 'Range' ELSE 'Unknown Type' END as checkpoint_type , " +
                                 "checkpoint.min_range as min ,checkpoint.max_range as max " +
                              "FROM " +
@@ -288,7 +288,12 @@ namespace CMMSAPIs.Repositories.Masters
                              "LEFT JOIN " +
                                 "users as created_user ON created_user.id=checkpoint.created_by " +
                              "LEFT JOIN " +
-                                "users as updated_user ON updated_user.id=checkpoint.updated_by ";
+                                "users as updated_user ON updated_user.id=checkpoint.updated_by " +
+                             "LEFT JOIN " +
+                                "mis_m_typeofobservation as m ON m.id=checkpoint.type_of_observation " +
+                             "LEFT JOIN " +
+                                "ir_risktype as r ON r.id=checkpoint.risk_type "
+                                ;
 
             if (checklist_id > 0 && facility_id == 0)
             {
@@ -332,15 +337,41 @@ namespace CMMSAPIs.Repositories.Masters
              * Code goes here
             */
             //{request.risk_type}
+
             List<int> idList = new List<int>();
             foreach (CMCreateCheckPoint request in requestList)
             {
 
-                string query = "INSERT INTO  checkpoint (check_point, check_list_id, requirement, is_document_required, " +
-                                "action_to_be_done,failure_weightage,type,min_range,max_range ,created_by, created_at,status) VALUES " +
-                                $"(\"{request.check_point}\", {request.checklist_id}, '{request.requirement.Replace("'", "")}', " +
-                                $"{(request.is_document_required == null ? 0 : request.is_document_required)}, '{request.action_to_be_done}', '{request.failure_weightage}', '{request.type}', '{request.checkpoint_type.min}','{request.checkpoint_type.max}'," +
-                                $"{userID}, '{UtilsRepository.GetUTCTime()}', 1); select LAST_INSERT_ID();";
+                if (request.checkpoint_type.type != 2)
+                {
+                    request.checkpoint_type.min = 0; // Consider min value if type is 2
+                    request.checkpoint_type.max = 0; // Consider max value if type is 2
+                }
+                
+                if (request.checkpoint_type.type != 1)
+                {
+                    request.checkpoint_type.type = 0;
+                   // Only consider type 1
+                }
+                
+       
+              
+                string query = "INSERT INTO checkpoint " +
+               "(check_point, check_list_id, requirement, is_document_required, action_to_be_done, " +
+               "failure_weightage, type, min_range, max_range, created_by, created_at, status, " +
+               "type_of_observation, risk_type) " +
+               "VALUES " +
+               $"('{request.check_point}', {request.checklist_id}, '{request.requirement.Replace("'", "''")}', " +
+               $"{(request.is_document_required ?? 0)}, '{request.action_to_be_done}', '{request.failure_weightage}', " +
+               $"'{request.checkpoint_type.type}', '{request.checkpoint_type.min}', '{request.checkpoint_type.max}', " +
+               $"'{userID}', '{UtilsRepository.GetUTCTime()}', 1, " +
+               $"'{request.type_of_observation_id}', '{request.risk_type_id}'); " +
+               "SELECT LAST_INSERT_ID();";
+
+
+               
+
+
 
                 DataTable dt = await Context.FetchData(query).ConfigureAwait(false);
 
@@ -360,6 +391,18 @@ namespace CMMSAPIs.Repositories.Masters
              * Update all properties mention in model to CheckPoint table for requisted id
              * Code goes here
             */
+
+            if (request.checkpoint_type.type != 2)
+            {
+                request.checkpoint_type.min = 0; // Consider min value if type is 2
+                request.checkpoint_type.max = 0; // Consider max value if type is 2
+            }
+
+            if (request.checkpoint_type.type != 1)
+            {
+                request.checkpoint_type.type = 0;
+                // Only consider type 1
+            }
             string updateQry = $"UPDATE checkpoint SET ";
             if (request.check_point != "" && request.check_point != null)
                 updateQry += $"check_point = '{request.check_point}', ";
@@ -373,10 +416,12 @@ namespace CMMSAPIs.Repositories.Masters
                 updateQry += $"action_to_be_done = '{request.action_to_be_done}', ";
             if (request.status != null)
                 updateQry += $"status = {request.status}, ";
-            if (request.risk_type != null)
-                updateQry += $"risk_type = {request.risk_type}, ";
+            if (request.risk_type_id != null)
+                updateQry += $"risk_type = {request.risk_type_id}, ";
+            if (request.type_of_observation_id != null)
+                updateQry += $"type_of_observation = {request.type_of_observation_id}, ";
             if (request.checkpoint_type != null)
-                updateQry += $"type = '{request.checkpoint_type.id}', min_range = '{request.checkpoint_type.min}',max_range = '{request.checkpoint_type.max}', ";
+                updateQry += $"type = '{request.checkpoint_type.type}', min_range = '{request.checkpoint_type.min}',max_range = '{request.checkpoint_type.max}', ";
             if (request.failure_weightage != 0)
                 updateQry += $"failure_weightage = {request.failure_weightage}, ";
             updateQry += $"updated_by = {userID}, updated_at='{UtilsRepository.GetUTCTime()}' WHERE id = {request.id};";
