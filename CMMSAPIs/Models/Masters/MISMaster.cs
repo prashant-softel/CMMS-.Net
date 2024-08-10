@@ -633,6 +633,7 @@ namespace CMMSAPIs.Models.Masters
         public string short_status { get; set; }
         // public List<int> file_ids { get; set; }
         public List<int> uploadfileIds { get; set; }
+        public string comment { get; set; }
     }
     public class CMObservationByIdList
     {

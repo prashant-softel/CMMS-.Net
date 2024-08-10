@@ -1,5 +1,6 @@
 using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Masters;
+using CMMSAPIs.Models.Users;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Utils;
 using Microsoft.AspNetCore.Hosting;
@@ -8,6 +9,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using static CMMSAPIs.Helper.CMMS;
 
 namespace CMMSAPIs.Repositories.Masters
@@ -248,7 +250,12 @@ namespace CMMSAPIs.Repositories.Masters
         {
             string deleteQry = $"UPDATE observations SET status_code = {(int)CMMS_Status.OBSERVATION_CLOSED}, closed_by = '{userId}' , updated_at = '{UtilsRepository.GetUTCTime()}' WHERE id = {request.id};";
             await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.OBSERVATION, request.id, 0, 0, "Observation Closed.", CMMS.CMMS_Status.OBSERVATION_CLOSED, userId); ;
+            System.Text.StringBuilder sb = new System.Text.StringBuilder("Observation Updated");
+            if (request.comment.Length > 0)
+            {
+                sb.Append(": " + request.comment);
+            }
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.OBSERVATION, request.id, 0, 0, sb.ToString(), CMMS.CMMS_Status.OBSERVATION_CLOSED, userId); ;
             return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Observation {request.id} closed");
         }
 
@@ -1755,17 +1762,15 @@ namespace CMMSAPIs.Repositories.Masters
                 if (dt.Rows.Count > 0)
                 {
                     insertedValue = Convert.ToInt32(dt.Rows[0][0]);
-
-                    if (request.uploadfileIds.Count > 0)
-                    {
-                        for (var i = 0; i < request.uploadfileIds.Count; i++)
-                        {
-                            string update_Q = $"update uploadedfiles set module_type = {(int)CMMS.CMMS_Modules.OBSERVATION} , module_ref_id = {insertedValue} where id = {request.uploadfileIds[i]};";
-                            int result = await Context.ExecuteNonQry<int>(update_Q).ConfigureAwait(false);
-                        }
-                    }
                 }
 
+                // Create history log if there is a comment
+                System.Text.StringBuilder sb = new System.Text.StringBuilder("Observation Created");
+                if (request.comment.Length > 0)
+                {
+                    sb.Append(": " + request.comment);
+                }
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.OBSERVATION, insertedValue, 0, 0, sb.ToString(), CMMS.CMMS_Status.OBSERVATION_CREATED, UserID);
                 response = new CMDefaultResponse(insertedValue, CMMS.RETRUNSTATUS.SUCCESS, "Observation data saved successfully.");
             }
             catch (Exception ex)
@@ -1798,16 +1803,13 @@ namespace CMMSAPIs.Repositories.Masters
                                      $"WHERE id = {request.id};";
                 await Context.ExecuteNonQry<int>(updateQuery).ConfigureAwait(false);
 
-                if (request.uploadfileIds != null)
+               
+                System.Text.StringBuilder sb = new System.Text.StringBuilder("Observation Updated");
+                if (request.comment.Length > 0)
                 {
-                    foreach (int data in request.uploadfileIds)
-                    {
-
-                        string qryuploadFiles = $"UPDATE uploadedfiles SET facility_id = {request.facility_id}, module_type={(int)CMMS.CMMS_Modules.OBSERVATION},module_ref_id={request.id} where id = {data}";
-                        await Context.ExecuteNonQry<int>(qryuploadFiles).ConfigureAwait(false);
-                    }
+                    sb.Append(": " + request.comment);
                 }
-
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.OBSERVATION, request.id, 0, 0, sb.ToString(), CMMS.CMMS_Status.OBSERVATION_UPDATED, UserID);
                 response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Observation data updated successfully.");
 
 
@@ -1818,18 +1820,27 @@ namespace CMMSAPIs.Repositories.Masters
             }
             return response;
         }
-        internal async Task<CMDefaultResponse> DeleteObservation(int id, int UserID)
+        internal async Task<CMDefaultResponse> DeleteObservation(int id, int UserID, string comment)
         {
             CMDefaultResponse response = null;
+
             try
             {
                 string updateQuery = $"UPDATE observations SET " +
                                       $"status_code={(int)CMMS.CMMS_Status.OBSERVATION_DELETED}," +
+                                      $"deleted_at = '{UtilsRepository.GetUTCTime()}'," +
+                                      $"deleted_by = {UserID}," +
+                                      $"delete_comment = '{comment}',"+
                                      $"is_active = 0 " +
                                      $"WHERE id = {id};";
                 await Context.ExecuteNonQry<int>(updateQuery).ConfigureAwait(false);
+                System.Text.StringBuilder sb = new System.Text.StringBuilder("Observation Deleted");
+                if (comment.Length > 0)
+                {
+                    sb.Append(": " + comment);
+                }
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.OBSERVATION, id, 0, 0, sb.ToString(), CMMS.CMMS_Status.OBSERVATION_DELETED, UserID);
                 response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "CMObservation data deleted successfully.");
-
             }
             catch (Exception ex)
             {
