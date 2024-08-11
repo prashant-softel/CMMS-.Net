@@ -212,10 +212,12 @@ namespace CMMSAPIs.Repositories.Calibration
             string myQuery20 = "SELECT  asset.id as id, file_path as fileName,  U.File_Size as fileSize, U.status,U.description FROM uploadedfiles AS U " +
                            "Left JOIN assets as  asset on asset.id = U.module_ref_id  " +
                            "where module_ref_id =" + _calibrationDetails[0].asset_id + " and U.module_type = " + (int)CMMS.CMMS_Modules.CALIBRATION + ";";
+
+
             List<CMFileDetailJc> calibration_file = await Context.GetData<CMFileDetailJc>(myQuery20).ConfigureAwait(false);
             string myQuery4 = "SELECT U.id, file_path as fileName, FC.name as fileCategory, U.File_Size as fileSize, U.status,U.description, '' as ptwFiles FROM uploadedfiles AS U " +
                         " LEFT JOIN calibration  as calibration on calibration.id = U.module_ref_id Left join filecategory FC on FC.Id = U.file_category " +
-                        " where calibration.id = " + id + " and U.module_type = " + (int)CMMS.CMMS_Modules.CALIBRATION + ";";
+                        " where calibration.id = " + id + " and U.module_type = " + (int)CMMS.CMMS_Modules.CALIBRATION + " ;";
 
             List<CMFileDetailCalibration> _UploadFileList = await Context.GetData<CMFileDetailCalibration>(myQuery4).ConfigureAwait(false);
 
@@ -344,6 +346,10 @@ namespace CMMSAPIs.Repositories.Calibration
                             $"{userID}, '{UtilsRepository.GetUTCTime()}', {(int)CMMS.CMMS_Status.CALIBRATION_SCHEDULED}, '{UtilsRepository.GetUTCTime()}'); SELECT LAST_INSERT_ID();";
                 DataTable dt2 = await Context.FetchData(myQuery).ConfigureAwait(false);
                 int id = Convert.ToInt32(dt2.Rows[0][0]);
+
+                string uploadFiles = "INSERT INTO uploadedfiles(facility_id, module_type, module_ref_id, file_category, file_path,description, file_type, created_by, created_at, file_size, file_size_units, file_size_bytes) " +
+                    "select facility_id, module_type, "+id+ ", file_category, file_path,description, file_type, created_by, created_at, file_size, file_size_units, file_size_bytes from uploadedfiles where module_type = 101 and module_ref_id = " + request.id+"";
+                DataTable dt_file = await Context.FetchData(uploadFiles).ConfigureAwait(false);
                 string setDueDate = $"UPDATE assets SET calibrationDueDate = '{request.next_calibration_date.ToString("yyyy-MM-dd HH:mm:ss")}' WHERE id = {request.asset_id};";
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, request.asset_id, CMMS.CMMS_Modules.CALIBRATION, id, "Calibration Requested", CMMS.CMMS_Status.CALIBRATION_REQUEST, userID);
 
