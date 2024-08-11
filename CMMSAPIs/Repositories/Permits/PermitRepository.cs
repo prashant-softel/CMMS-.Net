@@ -44,6 +44,44 @@ namespace CMMSAPIs.Repositories.Permits
             return permitDetails;
         }*/
 
+        private Dictionary<int, string> StatusDictionary_MC = new Dictionary<int, string>()
+        {
+            { (int)CMMS.CMMS_Status.MC_PLAN_DRAFT, "Draft" },
+            { (int)CMMS.CMMS_Status.MC_PLAN_SUBMITTED, "Waiting for Approval" },
+            { (int)CMMS.CMMS_Status.MC_PLAN_APPROVED, "Plan Approved" },
+            { (int)CMMS.CMMS_Status.MC_PLAN_REJECTED, "PLan Rejected" },
+            { (int)CMMS.CMMS_Status.MC_PLAN_DELETED, "Plan Deleted" },
+            { (int)CMMS.CMMS_Status.MC_TASK_SCHEDULED, "Task Scheduled" },
+            { (int)CMMS.CMMS_Status.MC_TASK_STARTED, "In Progress" },
+            { (int)CMMS.CMMS_Status.MC_TASK_COMPLETED, "Task Completed" },
+            { (int)CMMS.CMMS_Status.MC_TASK_ABANDONED, "Task Abandoned" },
+            { (int)CMMS.CMMS_Status.MC_TASK_APPROVED, "Task Approved" },
+            { (int)CMMS.CMMS_Status.MC_TASK_REJECTED, "Task Rejected" },
+            { (int)CMMS.CMMS_Status.SCHEDULED_LINKED_TO_PTW,"PTW Linked" },
+            { (int)CMMS.CMMS_Status.MC_TASK_END_APPROVED,"Closed Approved" },
+            { (int)CMMS.CMMS_Status.MC_TASK_END_REJECTED,"Closed Reject" },
+            { (int)CMMS.CMMS_Status.MC_TASK_SCHEDULE_APPROVED,"Scheduled Approved" },
+            { (int)CMMS.CMMS_Status.MC_TASK_SCHEDULE_REJECT,"Scheduled Reject" },
+            { (int)CMMS.CMMS_Status.MC_TASK_RESCHEDULED,"Rescheduled" },
+            { (int)CMMS.CMMS_Status.VEG_PLAN_DRAFT, "Draft" },
+            { (int)CMMS.CMMS_Status.VEG_PLAN_SUBMITTED, "Waiting for Approval" },
+            { (int)CMMS.CMMS_Status.VEG_PLAN_APPROVED, "Approved" },
+            { (int)CMMS.CMMS_Status.VEG_PLAN_REJECTED, "Rejected" },
+            { (int)CMMS.CMMS_Status.VEG_PLAN_DELETED, "Deleted" },
+            { (int)CMMS.CMMS_Status.VEG_TASK_SCHEDULED, "Scheduled" },
+            { (int)CMMS.CMMS_Status.VEG_TASK_STARTED, "In Progress" },
+            { (int)CMMS.CMMS_Status.VEG_TASK_COMPLETED, "Completed" },
+            { (int)CMMS.CMMS_Status.VEG_TASK_ABANDONED, "Abandoned" },
+            { (int)CMMS.CMMS_Status.VEG_TASK_APPROVED, "Approved" },
+            { (int)CMMS.CMMS_Status.VEG_TASK_REJECTED, "Rejected" },
+            { (int)CMMS.CMMS_Status.EQUIP_CLEANED, "Cleaned" },
+            { (int)CMMS.CMMS_Status.EQUIP_ABANDONED, "Abandoned" },
+            { (int)CMMS.CMMS_Status.EQUIP_SCHEDULED, "Scheduled" },
+            { (int)CMMS.CMMS_Status.MC_TASK_ABANDONED_REJECTED, "TASK ABANDONED REJECTED" },
+            { (int)CMMS.CMMS_Status.MC_TASK_ABANDONED_APPROVED, "TASK ABANDONED APPROVED" },
+            { (int)CMMS.CMMS_Status.RESCHEDULED_TASK, "TASK RESCHEDULE" },
+            { (int)CMMS.CMMS_Status.MC_ASSIGNED, "TASK REASSING" },
+        };
         public static string getShortStatus(int statusID)
         {
             CMMS.CMMS_Status status = (CMMS.CMMS_Status)statusID;
@@ -936,10 +974,18 @@ namespace CMMSAPIs.Repositories.Permits
 
             List<CMAssociatedList> _AssociatedJobList = await Context.GetData<CMAssociatedList>(joblist).ConfigureAwait(false);
             //get mc
-            string MClist = $"Select ces.scheduleId as schedule_id, ces.status as status, concat(user.firstname, ' ', user.lastname)  as assignedto, cp.title as title,  ces.startedAt as start_date, ces.ptw_id as  permitid, group_concat(distinct asset_cat.name order by asset_cat.id separator ', ') as equipmentcat,\r\n group_concat(distinct assets.name order by assets.id separator ', ') as equipment from cleaning_execution_schedules as ces  left join cleaning_plan as cp on ces.planId = cp.planId  left join cleaning_execution_items as cei on cei.scheduleId = ces.scheduleId  left join assets on assets.id = cei.assetid  left join assetcategories as asset_cat on asset_cat.id = assets.categoryid  left join users as user on user.id = ces.startedById where ces.ptw_id ={permit_id} and ces.moduleType=1  ; ";
+
+            string statusOut = "CASE ";
+            foreach (KeyValuePair<int, string> status in StatusDictionary_MC)
+            {
+                statusOut += $"WHEN ces.status = {status.Key} THEN '{status.Value}' ";
+            }
+            statusOut += $"ELSE 'Invalid Status' END";
+
+            string MClist = $"Select  ces.planId mc_id,ces.scheduleId as schedule_id, ces.status as status, {statusOut} as status_short, concat(user.firstname, ' ', user.lastname)  as assignedto, cp.title as title,  ces.startedAt as start_date, ces.ptw_id as  permitid, group_concat(distinct asset_cat.name order by asset_cat.id separator ', ') as equipmentcat,\r\n group_concat(distinct assets.name order by assets.id separator ', ') as equipment from cleaning_execution_schedules as ces  left join cleaning_plan as cp on ces.planId = cp.planId  left join cleaning_execution_items as cei on cei.scheduleId = ces.scheduleId  left join assets on assets.id = cei.assetid  left join assetcategories as asset_cat on asset_cat.id = assets.categoryid  left join users as user on user.id = ces.startedById where ces.ptw_id ={permit_id} ; ";
             //get vc
             List<CMAssociatedListMC> _AssociatedMCList = await Context.GetData<CMAssociatedListMC>(MClist).ConfigureAwait(false);
-            string Vclist = $"Select ces.scheduleId as schedule_id, ces.status as status, concat(user.firstname, ' ', user.lastname)  as assignedto, cp.title as title,  ces.startedAt as start_date, ces.ptw_id as  permitid, group_concat(distinct asset_cat.name order by asset_cat.id separator ', ') as equipmentcat,\r\n group_concat(distinct assets.name order by assets.id separator ', ') as equipment from cleaning_execution_schedules as ces  left join cleaning_plan as cp on ces.planId = cp.planId  left join cleaning_execution_items as cei on cei.scheduleId = ces.scheduleId  left join assets on assets.id = cei.assetid  left join assetcategories as asset_cat on asset_cat.id = assets.categoryid  left join users as user on user.id = ces.startedById where ces.ptw_id ={permit_id} and ces.moduleType=2 ; ";
+            string Vclist = $"Select ces.scheduleId as schedule_id, ces.status as status, concat(user.firstname, ' ', user.lastname)  as assignedto, cp.title as title,  ces.startedAt as start_date, ces.ptw_id as  permitid, group_concat(distinct asset_cat.name order by asset_cat.id separator ', ') as equipmentcat,\r\n group_concat(distinct assets.name order by assets.id separator ', ') as equipment from cleaning_execution_schedules as ces  left join cleaning_plan as cp on ces.planId = cp.planId  left join cleaning_execution_items as cei on cei.scheduleId = ces.scheduleId  left join assets on assets.id = cei.assetid  left join assetcategories as asset_cat on asset_cat.id = assets.categoryid  left join users as user on user.id = ces.startedById where ces.ptw_id ={permit_id} ; ";
 
             List<CMAssociatedPMListVC> _AssociatedVcList = await Context.GetData<CMAssociatedPMListVC>(Vclist).ConfigureAwait(false);
             foreach (var list in _AssociatedJobList)
