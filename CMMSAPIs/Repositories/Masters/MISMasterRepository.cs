@@ -1564,6 +1564,7 @@ namespace CMMSAPIs.Repositories.Masters
             if (request.compliance_id.HasValue)
                 updateQry += $"compliance_id = {request.compliance_id.Value}, ";
             updateQry += $"issue_date = '{request.issue_date.ToString("yyyy-MM-dd HH:mm")}', ";
+            updateQry += $"expires_on = '{request.expires_on.ToString("yyyy-MM-dd HH:mm")}', ";
             updateQry += $"status_of_application = '{request.status_of_aplication_id}', ";
             updateQry += $"renew_from = '{request.renew_from}', ";
             updateQry += $"renew_by = '{UserId}', ";
@@ -1864,7 +1865,7 @@ namespace CMMSAPIs.Repositories.Masters
                 " left join mis_m_observationsheet as mssheet ON observations.source_of_observation  =mssheet.id " +
                 " left join users createdBy on createdBy.id = observations.created_by" +
                 " left join users updatedBy on updatedBy.id = observations.updated_by" +
-                " where is_active = 1 and observations.facility_id = " + facility_Id + "  and created_at >= '" + fromDate.ToString("yyyy-MM-dd") + "' OR  created_at <= '" + toDate.ToString("yyyy-MM-dd") + "';";
+                " where is_active = 1 and observations.facility_id = " + facility_Id + " and date_format(created_at, '%Y-%m-%d') between '" + fromDate.ToString("yyyy-MM-dd")+"' and '"+toDate.ToString("yyyy-MM-dd")+"' ;";
             List<CMObservation> Result = await Context.GetData<CMObservation>(myQuery).ConfigureAwait(false);
             foreach (var task in Result)
             {
@@ -2001,32 +2002,56 @@ namespace CMMSAPIs.Repositories.Masters
 
         internal async Task<CMDefaultResponse> uploadDocument(CMDocumentVersion request, int user_id)
         {
-            string myqry = $"INSERT INTO document_version(doc_master_id, file_id, sub_doc_name, renew_date, added_by, added_at, remarks) VALUES " +
-                           $"({request.doc_master_id}, {request.file_id}, '{request.sub_doc_name}', " +
-                           $"{(request.renew_date.HasValue ? $"'{request.renew_date.Value.ToString("yyyy-MM-dd")}'" : "NULL")}, " +
-                           $"{user_id}, '{UtilsRepository.GetUTCTime()}', '{request.Remarks}'); " +
-                           $"SELECT LAST_INSERT_ID();";
+            CMDefaultResponse response = null;
+            if (request.is_renew == 0)
+            {
+                string stmt = "select auto_id from document_version where doc_master_id = " + request.doc_master_id + " and trim(lower(sub_doc_name)) = '" + request.sub_doc_name + "';";
+                DataTable dt_chk = await Context.FetchData(stmt).ConfigureAwait(false);
+                if(dt_chk.Rows.Count > 0)
+                {
+                    return new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Document Version Already Added With Sub Document : "+request.sub_doc_name+"");
+                }
+         
+                string myqry = $"INSERT INTO document_version(facility_id, doc_master_id, file_id, sub_doc_name, renew_date, created_by, created_at, remarks) VALUES " +
+                               $"({request.facility_id},{request.doc_master_id}, {request.file_id}, '{request.sub_doc_name}', " +
+                               $"{(request.renew_date.HasValue ? $"'{request.renew_date.Value.ToString("yyyy-MM-dd HH:mm")}'" : "NULL")}, " +
+                               $"{user_id}, '{UtilsRepository.GetUTCTime()}', '{request.Remarks}'); " +
+                               $"SELECT LAST_INSERT_ID();";
 
-            DataTable dt = await Context.FetchData(myqry).ConfigureAwait(false);
-            int id = Convert.ToInt32(dt.Rows[0][0]);
-            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Document Version Added");
+                DataTable dt = await Context.FetchData(myqry).ConfigureAwait(false);
+                int id = Convert.ToInt32(dt.Rows[0][0]);
+                response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Document Version Added");
+            }
+            else
+            {
+                string stmt_update = $"update document_version set renew_date = '{request.renew_date.Value.ToString("yyyy-MM-dd")}' where auto_id = {request.docuemnt_id};";
+                await Context.ExecuteNonQry<int>(stmt_update).ConfigureAwait(false);
+                response = new CMDefaultResponse(request.docuemnt_id, CMMS.RETRUNSTATUS.SUCCESS, "Document Version Updated");
+
+            }
+            return response;
         }
 
-        internal async Task<List<CMDocumentVersion>> getDocuementList()
+        internal async Task<List<CMDocumentVersionList>> getDocuementList()
         {
-            string myQuery = "SELECT auto_id id, doc_master_id, file_id,sub_doc_name, renew_date, concat(u.firstName, ' ', u.lastName) added_by, added_at, remarks " +
+            string myQuery = "SELECT auto_id id, d.facility_id, f.name as facility_name, doc_master_id,dd.name doc_master_name, file_id,sub_doc_name, renew_date, concat(u.firstName, ' ', u.lastName) created_by, created_at, remarks " +
                 " FROM  document_version d " +
-                " left join users u on u.id = d.added_by ";
-            List<CMDocumentVersion> Data = await Context.GetData<CMDocumentVersion>(myQuery).ConfigureAwait(false);
+                " left join users u on u.id = d.created_by " +
+                " left join document dd on dd.id = d.doc_master_id " +
+                " left join facilities f on f.id = d.facility_id" +
+                " group by doc_master_id";
+            List<CMDocumentVersionList> Data = await Context.GetData<CMDocumentVersionList>(myQuery).ConfigureAwait(false);
             return Data;
         }
-        internal async Task<List<CMDocumentVersion>> getDocuementListById(int id,string sub_doc_name,DateTime fromDate, DateTime toDate)
+        internal async Task<List<CMDocumentVersionList>> getDocuementListById(int id,string sub_doc_name,DateTime fromDate, DateTime toDate)
         {
-            string myQuery = "SELECT auto_id id, doc_master_id, file_id,sub_doc_name, renew_date, concat(u.firstName, ' ', u.lastName) added_by, added_at, remarks " +
+            string myQuery = "SELECT auto_id id, doc_master_id,f.name as facility_name,dd.name doc_master_name, file_id,sub_doc_name, renew_date, concat(u.firstName, ' ', u.lastName) created_by, created_at, remarks " +
         " FROM  document_version d " +
-        " left join users u on u.id = d.added_by " +
-        " where doc_master_id="+id+ " and sub_doc_name = '"+sub_doc_name+ "' ";
-            List<CMDocumentVersion> Data = await Context.GetData<CMDocumentVersion>(myQuery).ConfigureAwait(false);
+        " left join users u on u.id = d.created_by " +
+        " left join document dd on dd.id = d.doc_master_id" +
+        " left join facilities f on f.id = d.facility_id" +
+        " where doc_master_id="+id+ " or (date_format(created_at, '%Y-%m-%d') >= '" + fromDate.ToString("yyyy-MM-dd") + "' and  created_at <= '" + toDate.ToString("yyyy-MM-dd") + "') ";
+            List<CMDocumentVersionList> Data = await Context.GetData<CMDocumentVersionList>(myQuery).ConfigureAwait(false);
             return Data;
         }
 
