@@ -1628,12 +1628,12 @@ namespace CMMSAPIs.Repositories.Audits
             {
                 string entryInTask = $" INSERT INTO pm_task (plan_id, category_id, facility_id, frequency_id, prev_task_done_date,plan_date, closed_at, " +
                     $"assigned_to, PTW_id, status) VALUES " +
-                    $" ({auditPlanList[i].id},0,{auditPlanList[i].Facility_id},{auditPlanList[i].ApplyFrequency},'{auditPlanList[i].Schedule_Date.ToString("yyyy-MM-dd HH:mm:ss")}','{total_date.ToString("yyyy-MM-dd HH:mm:ss")}',null,{auditPlanList[i].auditee_id},0,{(int)CMMS.CMMS_Status.AUDIT_APPROVED});SELECT LAST_INSERT_ID();";
+                    $" ({auditPlanList[i].id},0,{auditPlanList[i].Facility_id},{auditPlanList[i].ApplyFrequency},'{auditPlanList[i].Schedule_Date.ToString("yyyy-MM-dd HH:mm:ss")}','{total_date.ToString("yyyy-MM-dd HH:mm:ss")}',null,{auditPlanList[i].auditee_id},0,{(int)CMMS.CMMS_Status.AUDIT_SCHEDULE});SELECT LAST_INSERT_ID();";
                 DataTable dt2 = await Context.FetchData(entryInTask).ConfigureAwait(false);
                 int task_id = Convert.ToInt32(dt2.Rows[0][0]);
 
                 string scheduleQry = $"INSERT INTO pm_schedule(task_id,plan_id,Asset_id,checklist_id,PM_Schedule_date,status) " +
-                                $"select {task_id} as task_id,id as plan_id, 0 as Asset_id, Checklist_id  as checklist_id,Schedule_Date    as PM_Schedule_date,{(int)CMMS.CMMS_Status.AUDIT_APPROVED} as status from st_audit  where id = {auditPlanList[i].id}";
+                                $"select {task_id} as task_id,id as plan_id, 0 as Asset_id, Checklist_id  as checklist_id,Schedule_Date    as PM_Schedule_date,{(int)CMMS.CMMS_Status.AUDIT_SCHEDULE} as status from st_audit  where id = {auditPlanList[i].id}";
                 await Context.ExecuteNonQry<int>(scheduleQry);
 
                 string setCodeNameQuery = "UPDATE pm_schedule " +
@@ -1734,13 +1734,13 @@ namespace CMMSAPIs.Repositories.Audits
                 {
                     string entryInTask = $" INSERT INTO pm_task (plan_id, category_id, facility_id, frequency_id,  prev_task_done_date,plan_date, closed_at, " +
                      $"assigned_to, PTW_id, status) VALUES " +
-                     $" ({auditPlanList[i].id},0,{auditPlanList[i].Facility_id},{auditPlanList[i].ApplyFrequency},'{auditPlanList[i].Schedule_Date.ToString("yyyy-MM-dd HH:mm:ss")}','{total_date.ToString("yyyy-MM-dd HH:mm:ss")}',null,{auditPlanList[i].auditee_id},0,{(int)CMMS.CMMS_Status.AUDIT_APPROVED});SELECT LAST_INSERT_ID();";
+                     $" ({auditPlanList[i].id},0,{auditPlanList[i].Facility_id},{auditPlanList[i].ApplyFrequency},'{auditPlanList[i].Schedule_Date.ToString("yyyy-MM-dd HH:mm:ss")}','{total_date.ToString("yyyy-MM-dd HH:mm:ss")}',null,{auditPlanList[i].auditee_id},0,{(int)CMMS.CMMS_Status.AUDIT_SCHEDULE});SELECT LAST_INSERT_ID();";
 
                     DataTable dt2 = await Context.FetchData(entryInTask).ConfigureAwait(false);
                     int task_id = Convert.ToInt32(dt2.Rows[0][0]);
 
                     string scheduleQry = $"INSERT INTO pm_schedule(task_id,plan_id,Asset_id,checklist_id,PM_Schedule_date,status) " +
-                                    $"select {task_id} as task_id,id as plan_id, 0 as Asset_id, Checklist_id  as checklist_id,Schedule_Date    as PM_Schedule_date,{(int)CMMS.CMMS_Status.AUDIT_APPROVED} as status from st_audit  where id = {auditPlanList[i].id}";
+                                    $"select {task_id} as task_id,id as plan_id, 0 as Asset_id, Checklist_id  as checklist_id,Schedule_Date    as PM_Schedule_date,{(int)CMMS.CMMS_Status.AUDIT_SCHEDULE} as status from st_audit  where id = {auditPlanList[i].id}";
                     await Context.ExecuteNonQry<int>(scheduleQry);
 
                     string setCodeNameQuery = "UPDATE pm_schedule " +
@@ -1799,7 +1799,7 @@ namespace CMMSAPIs.Repositories.Audits
 
             string myQuery = "UPDATE pm_task SET " +
                                 $"assigned_to = {assign_to}, " +
-                                $"status = {(int)CMMS.CMMS_Status.AUDIT_SCHEDULE}, " +
+                                $"status = {(int)CMMS.CMMS_Status.AUDIT_APPROVED}, " +
                                 $"status_updated_at = '{UtilsRepository.GetUTCTime()}', " +
                                 $"status_updated_by = {userID}  " +
                                 $"WHERE id = {task_id} ;";
@@ -1820,7 +1820,7 @@ namespace CMMSAPIs.Repositories.Audits
                 response = new CMDefaultResponse(task_id, retCode, $"Audit Task Reassigned To user Id {assign_to}");
             }
 
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.AUDIT_EXECUTION, task_id, 0, 0, $"Audit Task Assigned to user Id {assign_to}", CMMS.CMMS_Status.AUDIT_SCHEDULE, userID);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.AUDIT_EXECUTION, task_id, 0, 0, $"Audit Task Assigned to user Id {assign_to}", CMMS.CMMS_Status.AUDIT_APPROVED, userID);
             return response;
         }
     }
