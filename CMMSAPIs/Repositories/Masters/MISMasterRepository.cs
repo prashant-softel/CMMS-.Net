@@ -1536,6 +1536,7 @@ namespace CMMSAPIs.Repositories.Masters
                           $" sa.name AS status_of_application FROM statutory AS s LEFT JOIN users uc ON  s.created_by = uc.id " +
                           $" LEFT JOIN users u on s.updated_by = u.id" +
                           $" LEFT JOIN users us on s.approved_by = us.id " +
+
                           $" LEFT JOIN  status_of_appllication sa ON sa.id = s.status_of_application " +
                           $" LEFT JOIN statutorycomliance as st on st.id = s.Compliance_id " +
                           $" where s.id ={id} ;";
@@ -1865,7 +1866,7 @@ namespace CMMSAPIs.Repositories.Masters
                 " left join mis_m_observationsheet as mssheet ON observations.source_of_observation  =mssheet.id " +
                 " left join users createdBy on createdBy.id = observations.created_by" +
                 " left join users updatedBy on updatedBy.id = observations.updated_by" +
-                " where is_active = 1 and observations.facility_id = " + facility_Id + " and date_format(created_at, '%Y-%m-%d') between '" + fromDate.ToString("yyyy-MM-dd")+"' and '"+toDate.ToString("yyyy-MM-dd")+"' ;";
+                " where is_active = 1 and observations.facility_id = " + facility_Id + " and date_format(created_at, '%Y-%m-%d') between '" + fromDate.ToString("yyyy-MM-dd") + "' and '" + toDate.ToString("yyyy-MM-dd") + "' ;";
             List<CMObservation> Result = await Context.GetData<CMObservation>(myQuery).ConfigureAwait(false);
             foreach (var task in Result)
             {
@@ -2007,11 +2008,11 @@ namespace CMMSAPIs.Repositories.Masters
             {
                 string stmt = "select auto_id from document_version where doc_master_id = " + request.doc_master_id + " and trim(lower(sub_doc_name)) = '" + request.sub_doc_name + "';";
                 DataTable dt_chk = await Context.FetchData(stmt).ConfigureAwait(false);
-                if(dt_chk.Rows.Count > 0)
+                if (dt_chk.Rows.Count > 0)
                 {
-                    return new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Document Version Already Added With Sub Document : "+request.sub_doc_name+"");
+                    return new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Document Version Already Added With Sub Document : " + request.sub_doc_name + "");
                 }
-         
+
                 string myqry = $"INSERT INTO document_version(facility_id, doc_master_id, file_id, sub_doc_name, renew_date, created_by, created_at, remarks) VALUES " +
                                $"({request.facility_id},{request.doc_master_id}, {request.file_id}, '{request.sub_doc_name}', " +
                                $"{(request.renew_date.HasValue ? $"'{request.renew_date.Value.ToString("yyyy-MM-dd HH:mm")}'" : "NULL")}, " +
@@ -2032,25 +2033,38 @@ namespace CMMSAPIs.Repositories.Masters
             return response;
         }
 
-        internal async Task<List<CMDocumentVersionList>> getDocuementList()
+        internal async Task<List<CMDocumentVersionList>> getDocuementList(int facility_id, string fromDate, string toDate)
         {
-            string myQuery = "SELECT auto_id id, d.facility_id, f.name as facility_name, doc_master_id,dd.name doc_master_name, file_id,sub_doc_name, renew_date, concat(u.firstName, ' ', u.lastName) created_by, created_at, remarks " +
-                " FROM  document_version d " +
-                " left join users u on u.id = d.created_by " +
-                " left join document dd on dd.id = d.doc_master_id " +
-                " left join facilities f on f.id = d.facility_id" +
-                " group by doc_master_id";
+            string myQuery = "SELECT auto_id id, d.facility_id, f.name as facility_name, doc_master_id, " +
+                              "dd.name doc_master_name, file_id,sub_doc_name, renew_date," +
+                             " concat(u.firstName, ' ', u.lastName) created_by, d.created_at, remarks ," +
+                             " CASE WHEN d.renew_date < Now() THEN '0'  ELSE '1'    END AS Activation_status, up.file_path,up.description " +
+                             " FROM  document_version d  " +
+                             " left join users u on u.id = d.created_by " +
+                             " left join document dd on dd.id = d.doc_master_id " +
+                             " left join uploadedfiles as up on up.id=d.file_id and module_type=0    " +
+                             " left join facilities f on f.id = d.facility_id" +
+                             $" where d.facility_id={facility_id} and  DATE(d.created_at)>='{fromDate}'  and DATE(d.created_at) <='{toDate}' ;";
             List<CMDocumentVersionList> Data = await Context.GetData<CMDocumentVersionList>(myQuery).ConfigureAwait(false);
+            foreach (var item in Data)
+            {
+                int inactiv = Convert.ToInt32(item.Activation_status);
+                item.Activation_status = inactiv;
+            }
+
             return Data;
         }
-        internal async Task<List<CMDocumentVersionList>> getDocuementListById(int id,string sub_doc_name,DateTime fromDate, DateTime toDate)
+        internal async Task<List<CMDocumentVersionList>> getDocuementListById(int id, string sub_doc_name, string fromDate, string toDate)
         {
-            string myQuery = "SELECT auto_id id, doc_master_id,f.name as facility_name,dd.name doc_master_name, file_id,sub_doc_name, renew_date, concat(u.firstName, ' ', u.lastName) created_by, created_at, remarks " +
-        " FROM  document_version d " +
-        " left join users u on u.id = d.created_by " +
-        " left join document dd on dd.id = d.doc_master_id" +
-        " left join facilities f on f.id = d.facility_id" +
-        " where doc_master_id="+id+ " or (date_format(created_at, '%Y-%m-%d') >= '" + fromDate.ToString("yyyy-MM-dd") + "' and  created_at <= '" + toDate.ToString("yyyy-MM-dd") + "') ";
+            string myQuery = "SELECT auto_id id, doc_master_id,d.facility_id,f.name as facility_name,dd.name doc_master_name, up.file_path,up.description , file_id,sub_doc_name, renew_date, concat(u.firstName, ' ', u.lastName) created_by, d.created_at, remarks " +
+                             " FROM  document_version d " +
+                             " left join users u on u.id = d.created_by " +
+                             " left join document dd on dd.id = d.doc_master_id" +
+                             " left join facilities f on f.id = d.facility_id" +
+                             " left join uploadedfiles as up on up.id=d.file_id and module_type=0    " +
+                            $" where doc_master_id={id} and sub_doc_name='{sub_doc_name}' and " +
+                            $"DATE(d.created_at)>='{fromDate}'  and DATE(d.created_at) <='{toDate}'";
+            //$"(date_format(d.created_at, '%Y-%m-%d') >= '" + fromDate.ToString("yyyy-MM-dd") + "' and  d.created_at <= '" + toDate.ToString("yyyy-MM-dd") + "') ";
             List<CMDocumentVersionList> Data = await Context.GetData<CMDocumentVersionList>(myQuery).ConfigureAwait(false);
             return Data;
         }

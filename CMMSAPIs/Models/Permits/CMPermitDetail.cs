@@ -123,7 +123,8 @@ namespace CMMSAPIs.Models.Permits
     public class CMAssociatedListMC
     {
         public int permitId { get; set; }
-        public int mc_id { get; set; }
+        public int plan_id { get; set; }
+        public int executionId { get; set; }
         public string title { get; set; }
         public string equipmentCat { get; set; }
         public string equipment { get; set; }
@@ -136,6 +137,8 @@ namespace CMMSAPIs.Models.Permits
     {
         public int permitId { get; set; }
         public string title { get; set; }
+        public int plan_id { get; set; }
+        public int executionId { get; set; }
         public string equipmentCat { get; set; }
         public string equipment { get; set; }
         public dynamic start_date { get; set; }

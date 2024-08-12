@@ -119,8 +119,8 @@ namespace CMMSAPIs.BS.MISMasters
 
         Task<GetChecklistInspection> GetChecklistInspection();
         Task<CMDefaultResponse> uploadDocument(CMDocumentVersion request, int userID);
-        Task<List<CMDocumentVersionList>> getDocuementList();
-        Task<List<CMDocumentVersionList>> getDocuementListById(int id,string sub_doc_name,DateTime fromDate, DateTime toDate);
+        Task<List<CMDocumentVersionList>> getDocuementList(int facility_id, string fromDate, string toDate);
+        Task<List<CMDocumentVersionList>> getDocuementListById(int id, string sub_doc_name, string fromDate, string toDate);
     }
     public class MISMasterBS : IMISMasterBS
     {
@@ -1696,13 +1696,13 @@ namespace CMMSAPIs.BS.MISMasters
             }
         }
 
-        public async Task<List<CMDocumentVersionList>> getDocuementList()
+        public async Task<List<CMDocumentVersionList>> getDocuementList(int facility_id, string fromDate, string toDate)
         {
             try
             {
                 using (var repos = new MISMasterRepository(getDB))
                 {
-                    return await repos.getDocuementList();
+                    return await repos.getDocuementList(facility_id, fromDate, toDate);
                 }
             }
             catch (Exception ex)
@@ -1710,7 +1710,7 @@ namespace CMMSAPIs.BS.MISMasters
                 throw;
             }
         }
-        public async Task<List<CMDocumentVersionList>> getDocuementListById(int id, string sub_doc_name, DateTime fromDate, DateTime toDate)
+        public async Task<List<CMDocumentVersionList>> getDocuementListById(int id, string sub_doc_name, string fromDate, string toDate)
         {
             try
             {

@@ -1570,11 +1570,11 @@ namespace CMMSAPIs.Controllers.Masters
         }
         [Route("getDocuementList")]
         [HttpGet]
-        public async Task<IActionResult> getDocuementList()
+        public async Task<IActionResult> getDocuementList(int facility_id, string fromDate, string toDate)
         {
             try
             {
-                var data = await _IMISMasterBS.getDocuementList();
+                var data = await _IMISMasterBS.getDocuementList(facility_id, fromDate, toDate);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -1584,7 +1584,7 @@ namespace CMMSAPIs.Controllers.Masters
         }
         [Route("getDocuementListById")]
         [HttpGet]
-        public async Task<IActionResult> getDocuementListById(int id,string sub_doc_name, DateTime fromDate, DateTime toDate)
+        public async Task<IActionResult> getDocuementListById(int id, string sub_doc_name, string fromDate, string toDate)
         {
             try
             {
