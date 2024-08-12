@@ -179,8 +179,8 @@ namespace CMMSAPIs.Repositories.Calibration
             }
             statusOut += $"ELSE 'Invalid Status' END";
             string myQuery = "SELECT " +
-                                $"a_calibration.asset_id, assets.name as asset_name, assets.serialNumber as asset_serial, files.file_path as calibration_certificate_path, CASE WHEN categories.name is null THEN 'Others' ELSE categories.name END as category_name, {statusOut} as calibration_status, {statusOut} as status_short, a_calibration.status as statusID, frequency.id as frequency_id, frequency.name as frequency_name, " +
-                                $" CASE WHEN a_calibration.LastcalibrationDoneDate = '0000-00-00 00:00:00' THEN NULL ELSE a_calibration.LastcalibrationDoneDate END as last_calibration_date, CASE WHEN assets.calibrationDueDate = '0000-00-00 00:00:00' THEN NULL ELSE assets.calibrationDueDate END as next_calibration_due_date, vendor.id as vendor_id, vendor.name as vendor_name, CONCAT(request_by.firstName,' ',request_by.lastName) as responsible_person, CONCAT(request_approved_by.firstName,' ',request_approved_by.lastName) as request_approved_by, CONCAT(request_rejected_by.firstName,' ',request_rejected_by.lastName) as request_rejected_by,CONCAT(completed_by.firstName,' ',completed_by.lastName) as completed_by, CONCAT(approved_by.firstName,' ',approved_by.lastName) as approved_by,CONCAT(rejected_by.firstName,' ',rejected_by.lastName) as rejected_by,CONCAT(close_by.firstName,' ',close_by.lastName) as Closed_by, CASE WHEN a_calibration.received_date = '0000-00-00 00:00:00' THEN NULL ELSE a_calibration.received_date END AS received_date, a_calibration.requested_by,a_calibration.reschedule,CASE WHEN a_calibration.requested_at = '0000-00-00 00:00:00' THEN NULL ELSE a_calibration.requested_at END AS requested_at, CASE WHEN a_calibration.request_approved_at = '0000-00-00 00:00:00' THEN NULL ELSE a_calibration.request_approved_at END AS request_approved_at, CASE WHEN a_calibration.request_rejected_at = '0000-00-00 00:00:00' THEN NULL ELSE a_calibration.request_rejected_at END AS request_rejected_at,a_calibration.is_damaged, CASE WHEN a_calibration.start_date = '0000-00-00 00:00:00' THEN NULL ELSE a_calibration.start_date END AS started_at,CASE WHEN a_calibration.done_date = '0000-00-00 00:00:00' THEN NULL ELSE a_calibration.done_date END AS completed_at, CASE WHEN a_calibration.approved_at = '0000-00-00 00:00:00' THEN NULL ELSE a_calibration.approved_at END AS approved_at, a_calibration.health_status as asset_health_status, CASE WHEN a_calibration.due_date = '0000-00-00 00:00:00' THEN NULL ELSE a_calibration.due_date END AS calibration_due_date,a_calibration.prev_task_id,a_calibration.start_date as schedule_start_date,assets.calibrationDueDate  AS last_calibration_due_date,a_calibration.done_date  AS calibration_date   " +
+                                $" prev_task_id,a_calibration.asset_id, assets.name as asset_name, assets.serialNumber as asset_serial, files.file_path as calibration_certificate_path, CASE WHEN categories.name is null THEN 'Others' ELSE categories.name END as category_name, {statusOut} as calibration_status, {statusOut} as status_short, a_calibration.status as statusID, frequency.id as frequency_id, frequency.name as frequency_name, " +
+                                $" CASE WHEN a_calibration.LastcalibrationDoneDate = '0000-00-00 00:00:00' THEN NULL ELSE a_calibration.LastcalibrationDoneDate END as last_calibration_date, CASE WHEN assets.calibrationDueDate = '0000-00-00 00:00:00' THEN NULL ELSE assets.calibrationDueDate END as next_calibration_due_date, vendor.id as vendor_id, vendor.name as vendor_name, CONCAT(request_by.firstName,' ',request_by.lastName) as responsible_person, CONCAT(request_approved_by.firstName,' ',request_approved_by.lastName) as request_approved_by, CONCAT(request_rejected_by.firstName,' ',request_rejected_by.lastName) as request_rejected_by,CONCAT(completed_by.firstName,' ',completed_by.lastName) as completed_by, CONCAT(approved_by.firstName,' ',approved_by.lastName) as approved_by,CONCAT(rejected_by.firstName,' ',rejected_by.lastName) as rejected_by,CONCAT(close_by.firstName,' ',close_by.lastName) as Closed_by, CASE WHEN a_calibration.received_date = '0000-00-00 00:00:00' THEN NULL ELSE a_calibration.received_date END AS received_date, a_calibration.requested_by,CASE WHEN a_calibration.requested_at = '0000-00-00 00:00:00' THEN NULL ELSE a_calibration.requested_at END AS requested_at, CASE WHEN a_calibration.request_approved_at = '0000-00-00 00:00:00' THEN NULL ELSE a_calibration.request_approved_at END AS request_approved_at, CASE WHEN a_calibration.request_rejected_at = '0000-00-00 00:00:00' THEN NULL ELSE a_calibration.request_rejected_at END AS request_rejected_at,a_calibration.is_damaged, CASE WHEN a_calibration.start_date = '0000-00-00 00:00:00' THEN NULL ELSE a_calibration.start_date END AS started_at,CASE WHEN a_calibration.done_date = '0000-00-00 00:00:00' THEN NULL ELSE a_calibration.done_date END AS completed_at, CASE WHEN a_calibration.approved_at = '0000-00-00 00:00:00' THEN NULL ELSE a_calibration.approved_at END AS approved_at, a_calibration.health_status as asset_health_status, CASE WHEN a_calibration.due_date = '0000-00-00 00:00:00' THEN NULL ELSE a_calibration.due_date END AS calibration_due_date,a_calibration.start_date as schedule_start_date,assets.calibrationDueDate  AS last_calibration_due_date,a_calibration.done_date  AS calibration_date   " +
                              "FROM assets " +
                              "LEFT JOIN " +
                                 "frequency ON assets.calibrationFrequency = frequency.id " +
@@ -207,63 +207,36 @@ namespace CMMSAPIs.Repositories.Calibration
             {
                 throw new ArgumentException("Invalid ID");
             }
-
             List<CMCalibrationDetails> _calibrationDetails = await Context.GetData<CMCalibrationDetails>(myQuery).ConfigureAwait(false);
-            /*
-            List<CMFileDetailJc> calibration_file = new List<CMFileDetailJc>();
-            if (_calibrationDetails[0].reschedule == 0 && _calibrationDetails[0].calibration_date == null && _calibrationDetails[0].started_at == null)
+            string myQuery20 = "";
+            string myQuery4 = "";
+            if (_calibrationDetails[0].reschedule == 0 && _calibrationDetails[0].prev_task_id > 0)
             {
-                string myQuery41 = "SELECT U.id, file_path as fileName, FC.name as fileCategory, U.File_Size as fileSize, U.status,U.description, '' as ptwFiles FROM uploadedfiles AS U " +
-                        " LEFT JOIN calibration  as calibration on calibration.id = U.module_ref_id Left join filecategory FC on FC.Id = U.file_category " +
-                        " where calibration.id = " + id + " and U.module_type = " + (int)CMMS.CMMS_Modules.CALIBRATION + " ;";
-                calibration_file = await Context.GetData<CMFileDetailJc>(myQuery41).ConfigureAwait(false);
+                myQuery20 = "SELECT  asset.id as id, file_path as fileName,  U.File_Size as fileSize, U.status,U.description FROM uploadedfiles AS U " +
+                         "Left JOIN assets as  asset on asset.id = U.module_ref_id  " +
+                         "where module_ref_id =" + _calibrationDetails[0].prev_task_id + " and U.module_type = " + (int)CMMS.CMMS_Modules.CALIBRATION + ";";
+
+                myQuery4 = "SELECT U.id, file_path as fileName, FC.name as fileCategory, U.File_Size as fileSize, U.status,U.description, '' as ptwFiles FROM uploadedfiles AS U " +
+                     " LEFT JOIN calibration  as calibration on calibration.id = U.module_ref_id Left join filecategory FC on FC.Id = U.file_category " +
+                     " where calibration.id = " + id + " and U.module_type = " + (int)CMMS.CMMS_Modules.CALIBRATION + " ;";
+
             }
             else
             {
-                string myQuery20 = "SELECT  asset.id as id, file_path as fileName,  U.File_Size as fileSize, U.status,U.description FROM uploadedfiles AS U " +
-                               "Left JOIN assets as  asset on asset.id = U.module_ref_id  " +
-                               "where module_ref_id =" + _calibrationDetails[0].asset_id + " and U.module_type = " + (int)CMMS.CMMS_Modules.CALIBRATION + ";";
-                calibration_file = await Context.GetData<CMFileDetailJc>(myQuery20).ConfigureAwait(false);
-            }
-            List<CMFileDetailJc> _UploadFileList = new List<CMFileDetailJc>();
-            if (_calibrationDetails[0].reschedule == 0 && _calibrationDetails[0].started_at != null && )
-            {
-                string myQuery4 = "SELECT U.id, file_path as fileName, FC.name as fileCategory, U.File_Size as fileSize, U.status,U.description, '' as ptwFiles FROM uploadedfiles AS U " +
-                            " LEFT JOIN calibration  as calibration on calibration.id = U.module_ref_id Left join filecategory FC on FC.Id = U.file_category " +
-                            " where calibration.id = " + id + " and U.module_type = " + (int)CMMS.CMMS_Modules.CALIBRATION + " ;";
+                myQuery20 = "SELECT  asset.id as id, file_path as fileName,  U.File_Size as fileSize, U.status,U.description FROM uploadedfiles AS U " +
+                       "Left JOIN assets as  asset on asset.id = U.module_ref_id  " +
+                       "where module_ref_id =" + _calibrationDetails[0].asset_id + " and U.module_type = " + (int)CMMS.CMMS_Modules.CALIBRATION + ";";
+                myQuery4 = "SELECT U.id, file_path as fileName, FC.name as fileCategory, U.File_Size as fileSize, U.status,U.description, '' as ptwFiles FROM uploadedfiles AS U " +
+                     " LEFT JOIN calibration  as calibration on calibration.id = U.module_ref_id Left join filecategory FC on FC.Id = U.file_category " +
+                     " where calibration.id = " + id + " and U.module_type = " + (int)CMMS.CMMS_Modules.CALIBRATION + " ;";
 
-                _UploadFileList = await Context.GetData<CMFileDetailJc>(myQuery4).ConfigureAwait(false);
             }
-            */
-            List<CMFileDetailJc> calibration_file = new List<CMFileDetailJc>();
-            List<CMFileDetailJc> _UploadFileList = new List<CMFileDetailJc>();
-            bool p = _calibrationDetails[0].reschedule == 0 && _calibrationDetails[0].prev_task_id > 0;
-            if (_calibrationDetails[0].reschedule == 0 && _calibrationDetails[0].prev_task_id > 0)
-            {
 
-                string myQuery41 = "SELECT U.id, file_path as fileName, FC.name as fileCategory, U.File_Size as fileSize, U.status, U.description, '' as ptwFiles FROM uploadedfiles AS U " +
-                          " LEFT JOIN calibration as calibration on calibration.id = U.module_ref_id " +
-                          " LEFT JOIN filecategory FC on FC.Id = U.file_category " +
-                          " WHERE calibration.id = " + _calibrationDetails[0].prev_task_id + " AND U.module_type = " + (int)CMMS.CMMS_Modules.CALIBRATION + ";";
-                calibration_file = await Context.GetData<CMFileDetailJc>(myQuery41).ConfigureAwait(false);
-                //    else if (p == true && _calibrationDetails[0].started_at != null)
-            }
-            if (_calibrationDetails[0].reschedule == 0 && _calibrationDetails[0].prev_task_id == 0)
-            {
 
-                string myQuery20 = "SELECT asset.id as id, file_path as fileName, U.File_Size as fileSize, U.status, U.description FROM uploadedfiles AS U " +
-                                 "LEFT JOIN assets as asset on asset.id = U.module_ref_id " +
-                                 "WHERE module_ref_id = " + _calibrationDetails[0].asset_id + " AND U.module_type = " + (int)CMMS.CMMS_Modules.CALIBRATION + ";";
-                calibration_file = await Context.GetData<CMFileDetailJc>(myQuery20).ConfigureAwait(false);
-            }
-            if (_calibrationDetails[0].reschedule == 0 && _calibrationDetails[0].started_at != null)
-            {
-                string myQuery4 = "SELECT U.id, file_path as fileName, FC.name as fileCategory, U.File_Size as fileSize, U.status, U.description, '' as ptwFiles FROM uploadedfiles AS U " +
-                              "LEFT JOIN calibration as calibration on calibration.id = U.module_ref_id " +
-                              "LEFT JOIN filecategory FC on FC.Id = U.file_category " +
-                              "WHERE calibration.id = " + id + " AND U.module_type = " + (int)CMMS.CMMS_Modules.CALIBRATION + ";";
-                _UploadFileList = await Context.GetData<CMFileDetailJc>(myQuery4).ConfigureAwait(false);
-            }
+
+            List<CMFileDetailJc> calibration_file = await Context.GetData<CMFileDetailJc>(myQuery20).ConfigureAwait(false);
+         
+            List<CMFileDetailJc> _UploadFileList = await Context.GetData<CMFileDetailJc>(myQuery4).ConfigureAwait(false);
 
             CMMS.CMMS_Status _Status_long = (CMMS.CMMS_Status)(_calibrationDetails[0].statusID);
             string _longStatus = getLongStatus(_Status_long, _calibrationDetails[0]);
@@ -391,11 +364,11 @@ namespace CMMSAPIs.Repositories.Calibration
                 DataTable dt2 = await Context.FetchData(myQuery).ConfigureAwait(false);
                 int id = Convert.ToInt32(dt2.Rows[0][0]);
 
-                string uploadFiles = "INSERT INTO uploadedfiles(facility_id, module_type, module_ref_id, file_category, file_path,description, file_type, created_by, created_at, file_size, file_size_units, file_size_bytes) " +
-                    "select facility_id, module_type, " + id + ", file_category, file_path,description, file_type, created_by, created_at, file_size, file_size_units, file_size_bytes from uploadedfiles where module_type = 101 and module_ref_id = " + request.id + "";
-                DataTable dt_file = await Context.FetchData(uploadFiles).ConfigureAwait(false);
+                //string uploadFiles = "INSERT INTO uploadedfiles(facility_id, module_type, module_ref_id, file_category, file_path,description, file_type, created_by, created_at, file_size, file_size_units, file_size_bytes) " +
+                //    "select facility_id, module_type, " + id + ", file_category, file_path,description, file_type, created_by, created_at, file_size, file_size_units, file_size_bytes from uploadedfiles where module_type = 101 and module_ref_id = " + request.id + "";
+                //DataTable dt_file = await Context.FetchData(uploadFiles).ConfigureAwait(false);
                 string setDueDate = $"UPDATE assets SET calibrationDueDate = '{request.next_calibration_date.ToString("yyyy-MM-dd HH:mm:ss")}' WHERE id = {request.asset_id};";
-                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, request.asset_id, CMMS.CMMS_Modules.CALIBRATION, id, "Calibration Requested", CMMS.CMMS_Status.CALIBRATION_REQUEST, userID);
+                //await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.CALIBRATION, id, CMMS.CMMS_Modules.CALIBRATION, id, "Calibration Requested", CMMS.CMMS_Status.CALIBRATION_REQUEST, userID);
 
                 CMCalibrationDetails _ViewCalibration = await GetCalibrationDetails(id, "");
 
@@ -424,7 +397,7 @@ namespace CMMSAPIs.Repositories.Calibration
                                    $"AND status != {(int)CMMS.CMMS_Status.CALIBRATION_COMPLETED};";
                 int affectedRows = await Context.ExecuteNonQry<int>(updateQuery).ConfigureAwait(false);
                 //  string setDueDate = $"UPDATE assets SET calibrationDueDate = '{request.next_calibration_date.ToString("yyyy-MM-dd HH:mm:ss")}' WHERE id = {request.asset_id};";
-                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, request.asset_id, CMMS.CMMS_Modules.CALIBRATION, id, "Calibration Requested", CMMS.CMMS_Status.CALIBRATION_REQUEST, userID);
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.CALIBRATION, request.id, CMMS.CMMS_Modules.CALIBRATION, id, "Calibration Requested", CMMS.CMMS_Status.CALIBRATION_REQUEST, userID);
 
                 CMCalibrationDetails _ViewCalibration = await GetCalibrationDetails(id, "");
 
