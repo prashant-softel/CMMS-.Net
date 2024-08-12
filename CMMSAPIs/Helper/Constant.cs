@@ -707,5 +707,29 @@ namespace CMMSAPIs.Helper
             OnTime,
             Delay
         }
+        public enum CostType
+        {
+            Undefined = 0,
+            Capex,
+            Opex
+        }
+        public enum ObservationType
+        {
+            Undefined = 0,
+            Unsafe_Act,
+            Unsafe_Condition,
+            Statutory_Non_Compilance
+            
+        }
+        public enum RiskType
+        {
+            Undefined = 0,
+            Major,
+            Significant,
+            Moderate
+
+        }
+
+
     }
 }

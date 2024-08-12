@@ -70,6 +70,13 @@ namespace CMMSAPIs.Repositories.Masters
 
         /***********************************************************************************************************************************/
         /***********************************************************************************************************************************/
+        /************************************************* COST TYPE *************************************************************/
+        /***********************************************************************************************************************************/
+        /***********************************************************************************************************************************/
+      
+
+        /***********************************************************************************************************************************/
+        /***********************************************************************************************************************************/
         /************************************************* RISK TYPE *************************************************************/
         /***********************************************************************************************************************************/
         /***********************************************************************************************************************************/
@@ -1746,6 +1753,54 @@ namespace CMMSAPIs.Repositories.Masters
         {
             CMDefaultResponse response = null;
             int insertedValue = 0;
+
+            // Validate type_of_observation and risk_type_id
+            bool isValidTypeOfObservation = request.type_of_observation == (int)ObservationType.Unsafe_Act ||
+                                            request.type_of_observation == (int)ObservationType.Unsafe_Condition ||
+                                            request.type_of_observation == (int)ObservationType.Statutory_Non_Compilance;
+
+            bool isValidRiskTypeId = request.risk_type_id == (int)RiskType.Major ||
+                                     request.risk_type_id == (int)RiskType.Significant ||
+                                     request.risk_type_id == (int)RiskType.Moderate;
+
+            bool isValidCostType = request.cost_type == (int)CostType.Capex ||
+                                           request.cost_type == (int)CostType.Opex;
+
+            // Collect errors
+            List<string> errors = new List<string>();
+
+            if (!isValidTypeOfObservation)
+            {
+                errors.Add($"Type of Observation <{request.type_of_observation}> is invalid. " +
+                           $"It should be {(int)ObservationType.Unsafe_Act} <{ObservationType.Unsafe_Act}>, " +
+                           $"{(int)ObservationType.Unsafe_Condition} <{ObservationType.Unsafe_Condition}>, " +
+                           $"or {(int)ObservationType.Statutory_Non_Compilance} <{ObservationType.Statutory_Non_Compilance}>.");
+            }
+
+            if (!isValidRiskTypeId)
+            {
+                errors.Add($"Risk Type ID <{request.risk_type_id}> is invalid. " +
+                           $"It should be {(int)RiskType.Major} <{RiskType.Major}>, " +
+                           $"{(int)RiskType.Significant} <{RiskType.Significant}>, " +
+                           $"or {(int)RiskType.Moderate} <{RiskType.Moderate}>.");
+            }
+
+            if (!isValidCostType)
+            {
+                errors.Add($"Cost Type ID <{request.cost_type}> is invalid. " +
+                           $"It should be {(int)CostType.Capex} <{CostType.Capex}>, " +
+                           $"or {(int)CostType.Opex} <{CostType.Opex}>, ");
+            }
+
+
+
+            if (errors.Count > 0)
+            {
+                m_errorLog.SetError(string.Join(" ", errors));
+                m_errorLog.SetError(string.Join(" ", errors));
+                return new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, string.Join(" ", errors));
+            }
+
             try
             {
                 string insertQuery = $"INSERT INTO observations(" +
@@ -1775,10 +1830,12 @@ namespace CMMSAPIs.Repositories.Masters
             }
             catch (Exception ex)
             {
-                response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.SUCCESS, "Observation data failed to save.");
+                response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Observation data failed to save.");
             }
+
             return response;
         }
+
         internal async Task<CMDefaultResponse> UpdateObservation(CMObservation request, int UserID)
         {
             CMDefaultResponse response = null;

@@ -613,7 +613,7 @@ namespace CMMSAPIs.Models.Masters
         public string preventive_action { get; set; }
         public string responsible_person { get; set; }
         public string contact_number { get; set; }
-        public string cost_type { get; set; }
+        public int cost_type { get; set; }
         public DateTime? date_of_observation { get; set; }
         public int type_of_observation { get; set; }
         public DateTime closer_date { get; set; }
