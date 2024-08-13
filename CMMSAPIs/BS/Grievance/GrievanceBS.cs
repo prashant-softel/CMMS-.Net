@@ -1,11 +1,15 @@
 ﻿using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Grievance;
+using CMMSAPIs.Models.Masters;
+using CMMSAPIs.Models.Users;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Grievance;
+using CMMSAPIs.Repositories.Masters;
 using Microsoft.AspNetCore.Hosting;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using GrievanceSummaryReport = CMMSAPIs.Models.Grievance.GrievanceSummaryReport;
 
 namespace CMMSAPIs.BS.Grievance
 {
@@ -13,10 +17,11 @@ namespace CMMSAPIs.BS.Grievance
     {
         Task<List<CMGrievance>> GetGrievanceList(string facilityId, string status, string startDate, string endDate, int selfView, string facilityTimeZone);
         Task<CMGrievance> GetGrievanceDetails(int id, int facilityId, string facilityTimeZone);
-        Task<CMDefaultResponse> CreateGrievance(CMCreateGrievance request, int userID, string facilityId, string facilityTimeZone);
+        Task<CMDefaultResponse> CreateGrievance(CMCreateGrievance request, int userID, string facilityId, string facilityTimeZone, int status);
         Task<CMDefaultResponse> UpdateGrievance(CMUpdateGrievance request, int userID, string facilityId, string facilityTimeZone);
         Task<CMDefaultResponse> DeleteGrievance(int id, int userID, string facilityId, string facilityTimezone);
         Task<CMDefaultResponse> CloseGrievance(CMGrievance request, int userID, string facilityId, string facilityTimezone);
+        Task<List<GrievanceSummaryReport>> GrievanceSummaryReport(string facilityId, string fromDate, string toDate);
 
     }
     public class GrievanceBS : IGrievanceBS
@@ -62,7 +67,7 @@ namespace CMMSAPIs.BS.Grievance
             }
         }
 
-        public async Task<CMDefaultResponse> CreateGrievance(CMCreateGrievance request, int userID, string facilityId, string facilityTime)
+        public async Task<CMDefaultResponse> CreateGrievance(CMCreateGrievance request, int userID, string facilityId, string facilityTime, int status)
         {
             try
             {
@@ -125,6 +130,24 @@ namespace CMMSAPIs.BS.Grievance
                 throw;
             }
         }
+
+        public async Task<List<GrievanceSummaryReport>> GrievanceSummaryReport(string facilityId, string fromDate, string toDate)
+        {
+            try
+            {
+                using (var repos = new GrievanceRepository(getDB, _environment))
+                {
+                    return await repos.GrievanceSummaryReport(facilityId, fromDate, toDate);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+
 
     }
 
