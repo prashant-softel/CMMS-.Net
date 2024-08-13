@@ -118,6 +118,9 @@ namespace CMMSAPIs.BS.MISMasters
         Task<CMDefaultResponse> CreateObservation(CMObservation request, int UserID);
 
         Task<GetChecklistInspection> GetChecklistInspection();
+        Task<CMDefaultResponse> uploadDocument(CMDocumentVersion request, int userID);
+        Task<List<CMDocumentVersionList>> getDocuementList(int facility_id, string fromDate, string toDate);
+        Task<List<CMDocumentVersionList>> getDocuementListById(int id, string sub_doc_name, string fromDate, string toDate);
     }
     public class MISMasterBS : IMISMasterBS
     {
@@ -1669,6 +1672,51 @@ namespace CMMSAPIs.BS.MISMasters
                 {
                     return await repos.GetChecklistInspection();
 
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> uploadDocument(CMDocumentVersion request, int userID)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.uploadDocument(request, userID);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<CMDocumentVersionList>> getDocuementList(int facility_id, string fromDate, string toDate)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.getDocuementList(facility_id, fromDate, toDate);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<List<CMDocumentVersionList>> getDocuementListById(int id, string sub_doc_name, string fromDate, string toDate)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.getDocuementListById(id, sub_doc_name, fromDate, toDate);
                 }
             }
             catch (Exception ex)

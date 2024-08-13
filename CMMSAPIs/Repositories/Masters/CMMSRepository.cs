@@ -1672,7 +1672,7 @@ namespace CMMSAPIs.Repositories.Masters
 
             if (fromDate != null && fromDate.ToString("yyyy-MM-dd") != "0001-01-01" && toDate != null && toDate.ToString("yyyy-MM-dd") != "0001-01-01")
             {
-                datefilter = $" and pod.lastModifiedDate between '{fromDate.ToString("yyyy-MM-dd")}' and '{toDate.ToString("yyyy-MM-dd")}'";
+                datefilter = $" and date_format(pod.lastModifiedDate, '%Y-%m-%d') between '{fromDate.ToString("yyyy-MM-dd")}' and '{toDate.ToString("yyyy-MM-dd")}'";
             }
             //string query = "SELECT fc.name as facilityName,pod.ID as podID,pod.remarks as wo_decription, facilityid as       facility_id,pod.spare_status,pod.remarks,sai.orderflag,sam.asset_type_ID," +
             //    "pod.purchaseID,pod.assetItemID,sai.serial_number,sai.location_ID,(select sum(cost) from smgoodsorderdetails where purchaseID = po.id) as cost,pod.ordered_qty,\r\n bl.name as vendor_name,\r\n     " +

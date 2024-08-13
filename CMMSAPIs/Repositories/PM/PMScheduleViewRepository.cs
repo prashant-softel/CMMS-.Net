@@ -154,7 +154,7 @@ namespace CMMSAPIs.Repositories.PM
             List<CMPMTaskList> scheduleViewList = new List<CMPMTaskList>();
             if (facility_id > 0)
             {
-                myQuery += $" and pm_task.Facility_id = {facility_id} ";
+                myQuery += $" and pm_task.Facility_id = {facility_id} and pm_task.category_id!=0 ";
                 if (start_date != null && end_date != null)
                 {
                     string start = ((DateTime)start_date).ToString("yyyy'-'MM'-'dd");

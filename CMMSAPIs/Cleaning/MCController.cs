@@ -1,5 +1,6 @@
 using CMMSAPIs.BS.Cleaning;
 using CMMSAPIs.Models.MC;
+using CMMSAPIs.Models.SM;
 using CMMSAPIs.Models.Utils;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -345,7 +346,11 @@ namespace CMMSAPIs.Controllers.MC
             }
             catch (Exception ex)
             {
-                throw;
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 200;
+                item.Message = "No Data Found For This executionId";
+                return Ok(item);
+
             }
         }
 

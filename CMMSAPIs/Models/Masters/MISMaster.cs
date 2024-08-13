@@ -17,6 +17,8 @@ namespace CMMSAPIs.Models.Masters
         public string name { get; set; }
         public string description { get; set; }
         public int status { get; set; }
+        public int risk_type_id { get; set; }
+        public string risktype { get; set; }
     }
 
     public class MISRiskType
@@ -613,7 +615,12 @@ namespace CMMSAPIs.Models.Masters
         public string preventive_action { get; set; }
         public string responsible_person { get; set; }
         public string contact_number { get; set; }
+
+       
+
         public int cost_type { get; set; }
+        public DateTime closed_date { get; set; }
+        public string observation_status { get; set; }
         public DateTime? date_of_observation { get; set; }
         public int type_of_observation { get; set; }
         public DateTime closer_date { get; set; }
@@ -623,6 +630,8 @@ namespace CMMSAPIs.Models.Masters
         public DateTime? target_date { get; set; }
         public string corrective_action { get; set; }
         public string observation_description { get; set; }
+        public string type_of_observation_name { get; set; }
+        public string source_of_observation_name { get; set; }
         public DateTime? created_at { get; set; }
         public string created_by { get; set; }
         public DateTime? updated_at { get; set; }
@@ -702,6 +711,36 @@ namespace CMMSAPIs.Models.Masters
         public double NoOfUnsafeObservation { get; set; }
     }
 
-
+    public class CMDocumentVersion
+    {
+        public int id { get; set; }
+        public int facility_id { get; set; }
+        public int doc_master_id { get; set; }
+        public int file_id { get; set; }
+        public string sub_doc_name { get; set; }
+        public DateTime? renew_date { get; set; }
+        public string created_by { get; set; }
+        public DateTime created_at { get; set; }
+        public string Remarks { get; set; }
+        public int is_renew { get; set; }
+        public int docuemnt_id { get; set; }
+    }
+    public class CMDocumentVersionList
+    {
+        public int id { get; set; }
+        public int facility_id { get; set; }
+        public string facility_name { get; set; }
+        public int doc_master_id { get; set; }
+        public string doc_master_name { get; set; }
+        public dynamic Activation_status { get; set; }
+        public int file_id { get; set; }
+        public string file_path { get; set; }
+        public string sub_doc_name { get; set; }
+        public DateTime? renew_date { get; set; }
+        public string created_by { get; set; }
+        public DateTime created_at { get; set; }
+        public string Remarks { get; set; }
+        public string description { get; set; }
+    }
 }
 

@@ -1135,7 +1135,9 @@ namespace CMMSAPIs.Repositories.Inventory
             * Business - owner, operator, customer
            */
             /*Your code goes here*/
-            string myQuery = "SELECT a.id ,a.name, a.description as asset_description, a.calibrationStartDate as calibrationSatrtDate,a.calibrationDueDate as calibrationDueDate, a.calibrationLastDate as calibrationLastDate,a.vendorId as vendorid,a.stockCount as stockCount,a.photoId as photoId,a.retirementStatus as retirementStatus,w.meter_limit as meter_limit,w.meter_unit as meter_unit,a.moduleQuantity, ast.id as typeId, ast.name as type, a.supplierId as supplierId, b2.name as supplierName, manufacturertlb.id as manufacturerId, manufacturertlb.name as manufacturerName,a.parent_equipment_no ,b5.id as operatorId, b5.name as operatorName, ac.id as categoryId, ac.name as categoryName, a.serialNumber,a.cost as cost,a.currency as currencyId ,c.name as currency, a.model,a.calibrationFrequency,frequency.name as calibrationFrequencyType, a.calibrationReminderDays, " +
+            string myQuery = "SELECT a.id ,frequency.name as calibrationFreqType ,a.name, a.description as asset_description, a.calibrationStartDate as calibrationSatrtDate,  " +
+                "a.calibrationDueDate as calibrationDueDate, a.calibrationLastDate as calibrationLastDate,a.vendorId as vendorid,  " +
+                "a.stockCount as stockCount,a.photoId as photoId,a.retirementStatus as retirementStatus,w.meter_limit as meter_limit,w.meter_unit as meter_unit,a.moduleQuantity, ast.id as typeId, ast.name as type, a.supplierId as supplierId, b2.name as supplierName, manufacturertlb.id as manufacturerId, manufacturertlb.name as manufacturerName,a.parent_equipment_no ,b5.id as operatorId, b5.name as operatorName, ac.id as categoryId, ac.name as categoryName, a.serialNumber,a.cost as cost,a.currency as currencyId ,c.name as currency, a.model,a.calibrationFrequency,frequency.name as calibrationFrequencyType, a.calibrationReminderDays, " +
             "f.id as facilityId, f.name AS facilityName, bl.id as blockId, bl.name AS blockName, a2.id as parentId, a2.name as parentName, a2.serialNumber as parentSerial, custbl.id as customerId, custbl.name as customerName, owntbl.id as ownerId, owntbl.name as ownerName, s.id as statusId, s.name AS status,a.purchaseCode as purchaseCode, a.unspCode as unspCode, a.barcode as barcode,a.descMaintenace as descMaintenace,a.dcRating as dcRating ,a.acRating as acRating, a.specialTool,a.specialToolEmpId as specialToolEmp,  " +
             "w.start_date as start_date,w.expiry_date as expiry_date, w.id as warrantyId, w.warranty_description, w.certificate_number,wut.name as warranty_term_type,wt.id as warrantyTypeId, wt.name as warrantyType, wut.id as warrantyTermTypeId, wp.id as warrantyProviderId, wp.name as warrantyProviderName, files.file_path as warranty_certificate_path ," +
             "CASE WHEN w.start_date IS NULL OR CURDATE() < w.start_date OR CURDATE() > w.expiry_date THEN 'Inactive' ELSE 'Active' END AS WarrantyStatus " +
@@ -1218,14 +1220,20 @@ namespace CMMSAPIs.Repositories.Inventory
             {
                 /* string qry = "insert into assets (name, description, parentId, acCapacity, dcCapacity, categoryId, typeId, statusId, facilityId, blockId, linkedToBlockId, customerId, ownerId,operatorId, manufacturerId,supplierId,serialNumber,createdBy,photoId,model,stockCount,moduleQuantity, cost,currency,specialTool,specialToolEmpId,calibrationDueDate,calibrationLastDate,calibrationFreqType,calibrationFrequency,calibrationReminderDays,retirementStatus,multiplier,vendorId,calibrationNextDueDate,acRating,dcRating,descMaintenace,barcode,unspCode,purchaseCode,createdAt) values ";*/
 
-                string qry = "insert into assets (name, description, parentId, acCapacity, dcCapacity, categoryId, typeId, statusId, facilityId, blockId, linkedToBlockId, customerId, ownerId,operatorId, manufacturerId,parent_equipment_no,supplierId,serialNumber,createdBy,photoId,model,stockCount,moduleQuantity, cost,currency,specialTool,specialToolEmpId,calibrationDueDate,calibrationLastDate,calibrationFrequencyType,calibrationFrequency,calibrationReminderDays,retirementStatus,multiplier,vendorId,calibrationNextDueDate,acRating,dcRating,descMaintenace,barcode,unspCode,purchaseCode,createdAt,num_of_module) values ";
+                string qry = "insert into assets (name, description, parentId, acCapacity, dcCapacity, categoryId, typeId,  " +
+                            " statusId, facilityId, blockId, linkedToBlockId, customerId, ownerId,operatorId, " +
+                            " manufacturerId,parent_equipment_no,supplierId,serialNumber,createdBy,photoId,model,stockCount,moduleQuantity, " +
+                            " cost,currency,specialTool,specialToolEmpId,calibrationDueDate,calibrationLastDate, " +
+                            " calibrationFrequencyType,calibrationFrequency,calibrationReminderDays,retirementStatus,multiplier,  " +
+                            " vendorId,calibrationNextDueDate,acRating,dcRating,descMaintenace,barcode,unspCode,purchaseCode,createdAt,num_of_module) values ";
                 count++;
                 assetName = unit.name;
                 if (assetName.Length <= 0)
                 {
                     throw new ArgumentException($"name of asset cannot be empty on line {count}");
                 }
-                string firstCalibrationDate = (unit.calibrationFirstDueDate == null) ? "NULL" : "'" + ((DateTime)unit.calibrationFirstDueDate.Value).ToString("yyyy-MM-dd") + "'";
+                //calibrationLastDate
+                string firstCalibrationDueDate = (unit.calibrationFirstDueDate == null) ? "NULL" : "'" + ((DateTime)unit.calibrationFirstDueDate.Value).ToString("yyyy-MM-dd") + "'";
                 string lastCalibrationDate = (unit.calibrationLastDate == null) ? "NULL" : "'" + ((DateTime)unit.calibrationLastDate.Value).ToString("yyyy-MM-dd") + "'";
                 string nextCalibrationDate = (unit.calibrationNextDueDate == null) ? "NULL" : "'" + ((DateTime)unit.calibrationNextDueDate.Value).ToString("yyyy-MM-dd") + "'";
 
@@ -1253,13 +1261,25 @@ namespace CMMSAPIs.Repositories.Inventory
                     unit.vendorId = unit.manufacturerId;
                 }
 
-                if (firstCalibrationDate.Length > 0)
+                if (firstCalibrationDueDate.Length > 0)
                 {
                     //then, Asset_Calibration_Frequency	Asset_Last_Calibration_Date required
 
                     //if(unit.calibrationFrequency && lastCalibrationDate != null)
                 }
-                qry += "('" + unit.name + "','" + unit.assetdescription + "','" + unit.parentId + "','" + unit.acCapacity + "','" + unit.dcCapacity + "','" + unit.categoryId + "','" + unit.typeId + "','" + unit.statusId + "','" + unit.facilityId + "','" + unit.blockId + "','" + unit.blockId + "','" + unit.customerId + "','" + unit.ownerId + "','" + unit.operatorId + "','" + unit.manufacturerId + "','" + unit.parent_equipment_no + "','" + unit.supplierId + "','" + unit.serialNumber + "','" + userID + "','" + unit.photoId + "','" + unit.model + "','" + unit.stockCount + "','" + unit.moduleQuantity + "','" + unit.cost + "','" + unit.currency + "','" + unit.specialToolId + "','" + unit.specialToolEmpId + "'," + firstCalibrationDate + "," + lastCalibrationDate + ",'" + unit.calibrationFrequencyType + "','" + unit.calibrationFrequency + "','" + unit.calibrationReminderDays + "','" + unit.retirementStatus + "','" + unit.multiplier + "','" + unit.vendorId + "'," + nextCalibrationDate + ",'" + unit.acRating + "','" + unit.dcRating + "','" + unit.descMaintenace + "','" + unit.barcode + "','" + unit.unspCode + "','" + unit.purchaseCode + "','" + UtilsRepository.GetUTCTime() + "','" + unit.num_of_module + "'); ";
+                qry += "('" + unit.name + "','" + unit.assetdescription + "','" + unit.parentId + "','" + unit.acCapacity +
+                       "', '" + unit.dcCapacity + "','" + unit.categoryId + "','" + unit.typeId + "','" + unit.statusId +
+                       "','" + unit.facilityId + "','" + unit.blockId + "','" + unit.blockId + "','" + unit.customerId +
+                       "','" + unit.ownerId + "','" + unit.operatorId + "','" + unit.manufacturerId + "','" + unit.parent_equipment_no +
+                       "','" + unit.supplierId + "','" + unit.serialNumber + "','" + userID + "','" + unit.photoId +
+                       "','" + unit.model + "','" + unit.stockCount + "','" + unit.moduleQuantity + "','" + unit.cost +
+                       "','" + unit.currency + "','" + unit.specialToolId + "','" + unit.specialToolEmpId +
+                       "'," + firstCalibrationDueDate + "," + lastCalibrationDate + ",'" + unit.calibrationFrequencyType +
+                       "','" + unit.calibrationFrequency + "','" + unit.calibrationReminderDays +
+                       "','" + unit.retirementStatus + "','" + unit.multiplier + "','" + unit.vendorId +
+                       "'," + nextCalibrationDate + ",'" + unit.acRating + "','" + unit.dcRating +
+                       "','" + unit.descMaintenace + "','" + unit.barcode + "','" + unit.unspCode +
+                       "','" + unit.purchaseCode + "','" + UtilsRepository.GetUTCTime() + "','" + unit.num_of_module + "'); ";
                 qry += "select LAST_INSERT_ID(); ";
 
                 //List<CMInventoryList> newInventory = await Context.GetData<CMInventoryList>(qry).ConfigureAwait(false);
@@ -1269,9 +1289,9 @@ namespace CMMSAPIs.Repositories.Inventory
                 {
                     string start_date = unit.start_date != null ? ((DateTime)unit.start_date).ToString("yyyy-MM-dd HH:mm:ss") : UtilsRepository.GetUTCTime().ToString();
                     string warranty_description = unit.warranty_description == null ? "" : unit.warranty_description;
-                    string expiry_date = unit.expiry_date == null ? "" : ((DateTime)unit.expiry_date).ToString("yyyy-MM-dd HH:mm:ss");
+                    string expiry_date = unit.expiry_date == null ? "0000:00:00 00:00" : ((DateTime)unit.expiry_date).ToString("yyyy-MM-dd HH:mm:ss");
                     string warrantyQry = "insert into assetwarranty (certificate_file_id, warranty_type, warranty_description, warranty_term_type, asset_id, start_date, expiry_date, meter_limit, meter_unit, warranty_provider, certificate_number, addedAt, addedBy, status,warrantyTenture) VALUES ";
-                    warrantyQry += $"({unit.warranty_certificate_file_id}, {unit.warranty_type}, '{warranty_description}', {unit.warranty_term_type}, {retID}, '{start_date}', '{expiry_date}', {unit.meter_limit}, {unit.meter_unit}, {unit.warranty_provider_id}, '{unit.certificate_number}', '{UtilsRepository.GetUTCTime()}', {userID}, 1,{unit.warrantyTenture});" +
+                    warrantyQry += $"({unit.warranty_certificate_file_id}, {unit.warranty_type}, '{warranty_description}', {unit.warranty_term_type}, {retID},'{start_date}',' {expiry_date}', {unit.meter_limit}, {unit.meter_unit}, {unit.warranty_provider_id}, '{unit.certificate_number}', '{UtilsRepository.GetUTCTime()}', {userID}, 1,{unit.warrantyTenture});" +
                         $" SELECT LAST_INSERT_ID();";
                     DataTable dt2 = await Context.FetchData(warrantyQry).ConfigureAwait(false);
                     int warrantyId = Convert.ToInt32(dt2.Rows[0][0]);
@@ -1286,7 +1306,7 @@ namespace CMMSAPIs.Repositories.Inventory
                 {
 
                     string calibratoinquery = "insert into calibration (facility_id,asset_id,status,due_date) VALUES ";
-                    calibratoinquery += $"({unit.facilityId},{retID},{(int)CMMS.CMMS_Status.CALIBRATION_SCHEDULED},{firstCalibrationDate});" +
+                    calibratoinquery += $"({unit.facilityId},{retID},{(int)CMMS.CMMS_Status.CALIBRATION_SCHEDULED},{lastCalibrationDate});" +
                         $" SELECT LAST_INSERT_ID();";
                     DataTable dt2 = await Context.FetchData(calibratoinquery).ConfigureAwait(false);
                     int calibration_id = Convert.ToInt32(dt2.Rows[0][0]);
@@ -1426,6 +1446,16 @@ namespace CMMSAPIs.Repositories.Inventory
                 else
                 {
                     strRetMessage = "Warranty data for <" + assetName + "> does not exist. ";
+                }
+                if (retID > 0)
+                {
+
+                    string calibratoinquery = "insert into calibration (facility_id,asset_id,status,due_date) VALUES ";
+                    calibratoinquery += $"({unit.facilityId},{retID},{(int)CMMS.CMMS_Status.CALIBRATION_SCHEDULED},{firstCalibrationDate});" +
+                        $" SELECT LAST_INSERT_ID();";
+                    DataTable dt2 = await Context.FetchData(calibratoinquery).ConfigureAwait(false);
+                    int calibration_id = Convert.ToInt32(dt2.Rows[0][0]);
+
                 }
                 idList.Add(retID);
 

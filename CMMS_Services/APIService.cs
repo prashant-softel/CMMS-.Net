@@ -9,12 +9,12 @@ namespace CMMS_Services
     public class APIService<T>
     {
         private string token;
-        public string baseUrl = "http://65.0.20.19/CMMS_API";
-        private static string username = "sujit@softeltech.in";
-        private static string password = "Sujit123";
+        public string baseUrl = "http://172.20.43.18:82";
+        private static string username = "Admin@herofutureenergies.com";
+        private static string password = "Admin@hfe";
         //public string baseUrl = "http://localhost:23835";
         private static readonly object filelock = new object();
-        public APIService(bool authorizationRequired = false)
+        public APIService(bool authorizationRequired = true)
         {
             if(authorizationRequired)
                 SetToken();

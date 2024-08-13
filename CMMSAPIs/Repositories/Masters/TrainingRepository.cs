@@ -132,7 +132,7 @@ namespace CMMSAPIs.Repositories.Masters
              $"Targated_group_id = {request.group_id}, " +
              $"Duration_in_Minutes = {request.duration}, " +
              $"Status = 1, " +
-             $"status_code={(int)CMMS.CMMS_Status.COURSE_UPDATED} " +
+             $"status_code={(int)CMMS.CMMS_Status.COURSE_UPDATED}, " +
              $"UpdatedAt = '{UtilsRepository.GetUTCTime()}', " +
              $"UpdatedBy = {userID} " +
              $"WHERE  id={request.Id};";

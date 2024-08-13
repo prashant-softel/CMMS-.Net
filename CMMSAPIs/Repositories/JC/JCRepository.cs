@@ -352,7 +352,7 @@ namespace CMMSAPIs.Repositories.JC
 
             //string myQuery6 = $" SELECT CONCAT(user.firstName,' ',user.lastName) as empName, ptwEmpList.responsibility as resp FROM permitemployeelists as ptwEmpList JOIN permits as ptw ON ptw.id = ptwEmpList.pwtId LEFT JOIN users as user ON user.id = ptwEmpList.employeeId JOIN jobcards as jc on jc.PTW_id = ptw.id where jc.id = { jc_id }";
             string myQuery6 = $" SELECT CONCAT(user.firstName,' ',user.lastName) as name,ptwEmpList.employeeId as id, " +
-                $"u.designationName  as responsibility FROM permitemployeelists as ptwEmpList" +
+                $"u.designationName  as designation FROM permitemployeelists as ptwEmpList" +
                 $"  LEFT JOIN users as user ON user.id = ptwEmpList.employeeId  " +
                 $" LEFT JOIN userdesignation as u ON user.designation_id=u.id " +
                 $"where ptwEmpList.JC_id ={jc_id} and ptwEmpList.status=1";

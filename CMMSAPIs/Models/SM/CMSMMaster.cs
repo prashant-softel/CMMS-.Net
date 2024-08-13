@@ -215,6 +215,13 @@ namespace CMMSAPIs.Models.SM
         public int faulty_item_asset_id { get; set; }
 
     }
+    public class Cmmrs1
+    {
+        public int actor_id { get; set; }
+        public dynamic actor_type { get; set; }
+        public string actorname { get; set; }
+
+    }
 
     public class CMAssetBySerialNo
     {
@@ -290,6 +297,7 @@ namespace CMMSAPIs.Models.SM
         public string? requestd_date { get; set; }
         public string returnDate { get; set; }
         public string? issued_date { get; set; }
+        public dynamic issuedAt { get; set; }
         public string approval_date { get; set; }
         public int approval_status { get; set; }
         public string approval_comment { get; set; }

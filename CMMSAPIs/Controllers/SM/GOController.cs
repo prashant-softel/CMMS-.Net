@@ -1,18 +1,13 @@
 using CMMSAPIs.BS;
 using CMMSAPIs.Models;
 using CMMSAPIs.Models.SM;
-using CMMSAPIs.Models.Users;
 using CMMSAPIs.Models.Utils;
-using CMMSAPIs.Repositories;
-using MailKit.Search;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Threading.Tasks;
 
 namespace CMMSAPIs.Controllers
@@ -56,7 +51,7 @@ namespace CMMSAPIs.Controllers
         //[Authorize]
         [Route("GetGOItemByID")]
         [HttpGet]
-        public async Task<IActionResult> GetGOItemByID(int id,int facility_id)
+        public async Task<IActionResult> GetGOItemByID(int id, int facility_id)
         {
             try
             {
@@ -106,7 +101,7 @@ namespace CMMSAPIs.Controllers
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _GOBS.CreateGO(request,  userID);
+                var data = await _GOBS.CreateGO(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -189,7 +184,7 @@ namespace CMMSAPIs.Controllers
         //[Authorize]
         [Route("ApproveGO")]
         [HttpPost]
-        public async Task<IActionResult> ApproveGO(  CMApproval request )
+        public async Task<IActionResult> ApproveGO(CMApproval request)
         {
             try
             {
@@ -211,7 +206,7 @@ namespace CMMSAPIs.Controllers
         //[Authorize]
         [Route("RejectGO")]
         [HttpPost]
-        public async Task<IActionResult> RejectGO(  CMApproval request)
+        public async Task<IActionResult> RejectGO(CMApproval request)
         {
             try
             {

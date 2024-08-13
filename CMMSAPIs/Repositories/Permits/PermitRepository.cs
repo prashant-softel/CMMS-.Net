@@ -7,6 +7,7 @@ using CMMSAPIs.Repositories.Utils;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace CMMSAPIs.Repositories.Permits
@@ -44,6 +45,49 @@ namespace CMMSAPIs.Repositories.Permits
             return permitDetails;
         }*/
 
+        private Dictionary<int, string> StatusDictionary_MC = new Dictionary<int, string>()
+        {
+            { (int)CMMS.CMMS_Status.MC_PLAN_DRAFT, "Draft" },
+            { (int)CMMS.CMMS_Status.MC_PLAN_SUBMITTED, "Waiting for Approval" },
+            { (int)CMMS.CMMS_Status.MC_PLAN_APPROVED, "Plan Approved" },
+            { (int)CMMS.CMMS_Status.MC_PLAN_REJECTED, "PLan Rejected" },
+            { (int)CMMS.CMMS_Status.MC_PLAN_DELETED, "Plan Deleted" },
+            { (int)CMMS.CMMS_Status.MC_TASK_SCHEDULED, "Task Scheduled" },
+            { (int)CMMS.CMMS_Status.MC_TASK_STARTED, "In Progress" },
+            { (int)CMMS.CMMS_Status.MC_TASK_COMPLETED, "Task Completed" },
+            { (int)CMMS.CMMS_Status.MC_TASK_ABANDONED, "Task Abandoned" },
+            { (int)CMMS.CMMS_Status.MC_TASK_APPROVED, "Task Approved" },
+            { (int)CMMS.CMMS_Status.MC_TASK_REJECTED, "Task Rejected" },
+            { (int)CMMS.CMMS_Status.SCHEDULED_LINKED_TO_PTW,"PTW Linked" },
+            { (int)CMMS.CMMS_Status.MC_TASK_END_APPROVED,"Closed Approved" },
+            { (int)CMMS.CMMS_Status.MC_TASK_END_REJECTED,"Closed Reject" },
+            { (int)CMMS.CMMS_Status.MC_TASK_SCHEDULE_APPROVED,"Scheduled Approved" },
+            { (int)CMMS.CMMS_Status.MC_TASK_SCHEDULE_REJECT,"Scheduled Reject" },
+            { (int)CMMS.CMMS_Status.MC_TASK_RESCHEDULED,"Rescheduled" },
+            { (int)CMMS.CMMS_Status.VEG_PLAN_DRAFT, "Draft" },
+            { (int)CMMS.CMMS_Status.VEG_PLAN_SUBMITTED, "Waiting for Approval" },
+            { (int)CMMS.CMMS_Status.VEG_PLAN_APPROVED, "Approved" },
+            { (int)CMMS.CMMS_Status.VEG_PLAN_REJECTED, "Rejected" },
+            { (int)CMMS.CMMS_Status.VEG_PLAN_DELETED, "Deleted" },
+            { (int)CMMS.CMMS_Status.VEG_TASK_SCHEDULED, "Scheduled" },
+            { (int)CMMS.CMMS_Status.VEG_TASK_STARTED, "In Progress" },
+            { (int)CMMS.CMMS_Status.VEG_TASK_COMPLETED, "Completed" },
+            { (int)CMMS.CMMS_Status.VEG_TASK_ABANDONED, "Abandoned" },
+            { (int)CMMS.CMMS_Status.VEG_TASK_APPROVED, "Approved" },
+            { (int)CMMS.CMMS_Status.VEG_TASK_REJECTED, "Rejected" },
+            { (int)CMMS.CMMS_Status.VEGETATION_LINKED_TO_PTW, "PTW Linked" },
+            { (int)CMMS.CMMS_Status.VEG_TASK_END_APPROVED, "Schedule Approved" },
+            { (int)CMMS.CMMS_Status.VEG_TASK_END_REJECTED, " Rejected" },
+            { (int)CMMS.CMMS_Status.VEG_TASK_UPDATED, "  updated" },
+            { (int)CMMS.CMMS_Status.VEG_TASK_ASSIGNED , " Reassign" },
+            { (int)CMMS.CMMS_Status.EQUIP_CLEANED, "Cleaned" },
+            { (int)CMMS.CMMS_Status.EQUIP_ABANDONED, "Abandoned" },
+            { (int)CMMS.CMMS_Status.EQUIP_SCHEDULED, "Scheduled" },
+            { (int)CMMS.CMMS_Status.MC_TASK_ABANDONED_REJECTED, "TASK ABANDONED REJECTED" },
+            { (int)CMMS.CMMS_Status.MC_TASK_ABANDONED_APPROVED, "TASK ABANDONED APPROVED" },
+            { (int)CMMS.CMMS_Status.RESCHEDULED_TASK, "TASK RESCHEDULE" },
+            { (int)CMMS.CMMS_Status.MC_ASSIGNED, "TASK REASSING" },
+        };
         public static string getShortStatus(int statusID)
         {
             CMMS.CMMS_Status status = (CMMS.CMMS_Status)statusID;
@@ -935,6 +979,26 @@ namespace CMMSAPIs.Repositories.Permits
             string joblist = $"Select job.id as jobid, job.status as status, concat(user.firstname, ' ', user.lastname) as assignedto, job.title as title,  job.breakdowntime, job.linkedpermit as permitid, group_concat(distinct asset_cat.name order by asset_cat.id separator ', ') as equipmentcat, group_concat(distinct assets.name order by assets.id separator ', ') as equipment from jobs as job left join jobmappingassets as jobassets on job.id = jobassets.jobid left join assetcategories as asset_cat on asset_cat.id = jobassets.categoryid left join assets on assets.id = jobassets.assetid left join users as user on user.id = job.assignedid where job.linkedpermit = {permit_id} group by job.id; ";
 
             List<CMAssociatedList> _AssociatedJobList = await Context.GetData<CMAssociatedList>(joblist).ConfigureAwait(false);
+            //get mc
+
+            string statusOut = "CASE ";
+            foreach (KeyValuePair<int, string> status in StatusDictionary_MC)
+            {
+                statusOut += $"WHEN ces.status = {status.Key} THEN '{status.Value}' ";
+            }
+            statusOut += $"ELSE 'Invalid Status' END";
+
+            string MClist = $"Select  ces.planId as plan_id,ces.scheduleId as schedule_id,ces.executionId, ces.status as status, {statusOut} as status_short, concat(user.firstname, ' ', user.lastname)  as assignedto, cp.title as title,  ces.startedAt as start_date, ces.ptw_id as  permitid, group_concat(distinct asset_cat.name order by asset_cat.id separator ', ') as equipmentcat,\r\n group_concat(distinct assets.name order by assets.id separator ', ') as equipment from cleaning_execution_schedules as ces  left join cleaning_plan as cp on ces.planId = cp.planId  left join cleaning_execution_items as cei on cei.scheduleId = ces.scheduleId  left join assets on assets.id = cei.assetid  left join assetcategories as asset_cat on asset_cat.id = assets.categoryid  left join users as user on user.id = ces.startedById where ces.ptw_id ={permit_id} and  ces.moduleType=1; ; ";
+            List<CMAssociatedListMC> _AssociatedMCList = await Context.GetData<CMAssociatedListMC>(MClist).ConfigureAwait(false);
+            List<CMAssociatedListMC> filteredMCList = _AssociatedMCList
+             .Where(mc => mc.permitId != 0 && mc.plan_id != 0)
+             .ToList();
+            //get vc
+            string Vclist = $"Select ces.planId as plan_id, ces.scheduleId as schedule_id,ces.executionId, ces.status as status,{statusOut} as status_short, concat(user.firstname, ' ', user.lastname)  as assignedto, cp.title as title,  ces.startedAt as start_date, ces.ptw_id as  permitid, group_concat(distinct asset_cat.name order by asset_cat.id separator ', ') as equipmentcat,\r\n group_concat(distinct assets.name order by assets.id separator ', ') as equipment from cleaning_execution_schedules as ces  left join cleaning_plan as cp on ces.planId = cp.planId  left join cleaning_execution_items as cei on cei.scheduleId = ces.scheduleId  left join assets on assets.id = cei.assetid  left join assetcategories as asset_cat on asset_cat.id = assets.categoryid  left join users as user on user.id = ces.startedById where ces.ptw_id ={permit_id} and ces.moduleType=2 ; ";
+            List<CMAssociatedPMListVC> _AssociatedVcList = await Context.GetData<CMAssociatedPMListVC>(Vclist).ConfigureAwait(false);
+            List<CMAssociatedPMListVC> filteredMCList1 = _AssociatedVcList
+            .Where(mc => mc.permitId != 0 && mc.plan_id != 0)
+            .ToList();
             foreach (var list in _AssociatedJobList)
             {
                 list.breakdownTime = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.breakdownTime);
@@ -1139,6 +1203,9 @@ namespace CMMSAPIs.Repositories.Permits
             _PermitDetailsList[0].safety_question_list = _QuestionList;
             _PermitDetailsList[0].LstAssociatedJobs = _AssociatedJobList;
             _PermitDetailsList[0].LstAssociatedPM = _AssociatedPMList;
+            _PermitDetailsList[0].ListAssociatedMC = filteredMCList;
+            _PermitDetailsList[0].ListAssociatedvc = filteredMCList1;
+
             _PermitDetailsList[0].LstCategory = _CategoryList;
             _PermitDetailsList[0].category_ids = _CategoryIDList;
             _PermitDetailsList[0].physical_iso_equips = _physical_iso_equips;
@@ -1742,7 +1809,7 @@ namespace CMMSAPIs.Repositories.Permits
                     await Context.ExecuteNonQry<int>(qryuploadFiles).ConfigureAwait(false);
                 }
             }
-            
+
 
             CMDefaultResponse response = new CMDefaultResponse();
             string responseText = "";

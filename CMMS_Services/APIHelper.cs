@@ -19,7 +19,7 @@ namespace CMMS_Services
         private RestClient restClient;
         private RestSharp.RestRequest restRequest;
         //public string baseUrl = "http://localhost:23835";
-        public string baseUrl = "http://65.0.20.19/CMMS_API";
+        public string baseUrl = "http://172.20.43.18:82";
 
         string token = "";
 

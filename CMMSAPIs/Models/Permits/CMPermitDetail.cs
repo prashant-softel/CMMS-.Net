@@ -1,6 +1,6 @@
+using CMMSAPIs.Models.Utils;
 using System;
 using System.Collections.Generic;
-using CMMSAPIs.Models.Utils;
 
 namespace CMMSAPIs.Models.Permits
 {
@@ -77,7 +77,7 @@ namespace CMMSAPIs.Models.Permits
         public int cancelRequestRejectedby_id { get; set; }
         public string cancelRequestRejectedByName { get; set; }
         public string cancelRequestRejectedByDesignation { get; set; }
-        public string cancelRequestRejectedByCompany{ get; set; }
+        public string cancelRequestRejectedByCompany { get; set; }
 
         public double latitude { get; set; }
         public double longitude { get; set; }
@@ -102,6 +102,8 @@ namespace CMMSAPIs.Models.Permits
         public List<CMIsolationList> LstIsolation { get; set; }
         public List<CMAssociatedList> LstAssociatedJobs { get; set; }
         public List<CMAssociatedPMList> LstAssociatedPM { get; set; }
+        public List<CMAssociatedListMC> ListAssociatedMC { get; set; }
+        public List<CMAssociatedPMListVC> ListAssociatedvc { get; set; }
 
         public int ptwStatus { get; set; }
         public string current_status_short { get; set; }
@@ -116,9 +118,34 @@ namespace CMMSAPIs.Models.Permits
         public DateTime? TBT_Done_At { get; set; }
         public bool is_TBT_Expire { get; set; }
         public int TBT_Done_Check { get; set; }
-        public List<CMPermitLotoOtherList> LotoOtherDetails { get; set; }   
+        public List<CMPermitLotoOtherList> LotoOtherDetails { get; set; }
     }
-
+    public class CMAssociatedListMC
+    {
+        public int permitId { get; set; }
+        public int plan_id { get; set; }
+        public int executionId { get; set; }
+        public string title { get; set; }
+        public string equipmentCat { get; set; }
+        public string equipment { get; set; }
+        public dynamic start_date { get; set; }
+        public string assignedTo { get; set; }
+        public int status { get; set; }
+        public string status_short { get; set; }
+    }
+    public class CMAssociatedPMListVC
+    {
+        public int permitId { get; set; }
+        public string title { get; set; }
+        public int plan_id { get; set; }
+        public int executionId { get; set; }
+        public string equipmentCat { get; set; }
+        public string equipment { get; set; }
+        public dynamic start_date { get; set; }
+        public string assignedTo { get; set; }
+        public int status { get; set; }
+        public string status_short { get; set; }
+    }
     public class CMLotoListDetail
     {
         public string equipment_name { get; set; }
@@ -127,7 +154,7 @@ namespace CMMSAPIs.Models.Permits
         public string Loto_lock_number { get; set; }
         public string employee_name { get; set; }
 
-       public int Loto_id { get; set; }
+        public int Loto_id { get; set; }
     }
     public class CMAssociatedList
     {

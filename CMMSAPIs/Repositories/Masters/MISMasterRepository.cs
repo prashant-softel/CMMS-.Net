@@ -167,7 +167,9 @@ namespace CMMSAPIs.Repositories.Masters
                 case CMMS.CMMS_Status.OBSERVATION_UPDATED:
                     statusName = "Updated ";
                     break;
-
+                case CMMS.CMMS_Status.OBSERVATION_CLOSED:
+                    statusName = "Closed";
+                    break;
                 default:
                     statusName = "Unknown Status";
                     break;
@@ -239,8 +241,8 @@ namespace CMMSAPIs.Repositories.Masters
             if (request.name != null && request.name != "")
                 updateQry += $"name = '{request.name}', ";
             if (request.description != null && request.description != "")
-                updateQry += $"description = '{request.description}', ";
-            updateQry += $"updatedBy = '{userID}', updatedAt = '{UtilsRepository.GetUTCTime()}' WHERE id = {request.id};";
+                updateQry += $"description = '{request.description}' ";
+            updateQry += $" WHERE id = {request.id};";
             await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
             //Add history
             return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Source CMObservation Updated");
@@ -255,7 +257,7 @@ namespace CMMSAPIs.Repositories.Masters
 
         internal async Task<CMDefaultResponse> CloseObservation(CMApproval request, int userId)
         {
-            string deleteQry = $"UPDATE observations SET status_code = {(int)CMMS_Status.OBSERVATION_CLOSED}, closed_by = '{userId}' , updated_at = '{UtilsRepository.GetUTCTime()}' WHERE id = {request.id};";
+            string deleteQry = $"UPDATE observations SET status_code = {(int)CMMS_Status.OBSERVATION_CLOSED}, closed_by = '{userId}' , closed_at='{UtilsRepository.GetUTCTime()}' , updated_at = '{UtilsRepository.GetUTCTime()}' WHERE id = {request.id};";
             await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
             System.Text.StringBuilder sb = new System.Text.StringBuilder("Observation Updated");
             if (request.comment.Length > 0)
@@ -273,7 +275,7 @@ namespace CMMSAPIs.Repositories.Masters
         /***********************************************************************************************************************************/
         internal async Task<MISTypeObservation> GetTypeOfObservation(int type_id)
         {
-            string myQuery = $"SELECT id, name, description, status FROM mis_m_typeofobservation WHERE id = " + type_id;
+            string myQuery = $"SELECT  m.id, m.name, m.description, m.id as risk_type_id, r.risktype, m.status FROM  mis_m_typeofobservation m LEFT JOIN  ir_risktype r ON  m.id = r.id WHERE m.id = " + type_id;
             List<MISTypeObservation> _Typeofobs = await Context.GetData<MISTypeObservation>(myQuery).ConfigureAwait(false);
             //Add history
             return _Typeofobs[0];
@@ -281,7 +283,8 @@ namespace CMMSAPIs.Repositories.Masters
 
         internal async Task<List<MISTypeObservation>> GetTypeOfObservationList()
         {
-            string myQuery = $"SELECT id, name, description FROM mis_m_typeofobservation WHERE status = 1 ";
+
+            string myQuery = $" SELECT  m.id, m.name, m.description,  m.id  as risk_type_id, r.risktype FROM mis_m_typeofobservation m LEFT JOIN  ir_risktype r ON   m.id = r.id WHERE m.status = 1; ";
             List<MISTypeObservation> _Sourceofobs = await Context.GetData<MISTypeObservation>(myQuery).ConfigureAwait(false);
             //Add history
             return _Sourceofobs;
@@ -291,7 +294,7 @@ namespace CMMSAPIs.Repositories.Masters
 
             //CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.INVALID_ARG;
             //string strRetMessage = "";
-            string qry = "insert into mis_m_typeofobservation ( name, description, status , addedBy ,addedAt) values " + $"('{request.name}' ,'{request.description}' , 1 ,'{userId}' , '{UtilsRepository.GetUTCTime()}');" + $"SELECT LAST_INSERT_ID();";
+            string qry = "insert into mis_m_typeofobservation ( name, description, status , addedBy ,addedAt, risk_type_id) values " + $"('{request.name}' ,'{request.description}' , 1 ,'{userId}' , '{UtilsRepository.GetUTCTime()}', {request.risk_type_id});" + $"SELECT LAST_INSERT_ID();";
             DataTable dt = await Context.FetchData(qry).ConfigureAwait(false);
             int id = Convert.ToInt32(dt.Rows[0][0]);
             //Add history
@@ -305,6 +308,8 @@ namespace CMMSAPIs.Repositories.Masters
                 updateQry += $"name = '{request.name}', ";
             if (request.description != null && request.description != "")
                 updateQry += $"description = '{request.description}', ";
+            if (request.risk_type_id != null)
+                updateQry += $"risk_type_id = '{request.risk_type_id}', ";
             updateQry += $"updatedBy = '{userID}', updatedAt = '{UtilsRepository.GetUTCTime()}' WHERE id = {request.id};";
             await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
             //Add history
@@ -1545,6 +1550,7 @@ namespace CMMSAPIs.Repositories.Masters
                           $" sa.name AS status_of_application FROM statutory AS s LEFT JOIN users uc ON  s.created_by = uc.id " +
                           $" LEFT JOIN users u on s.updated_by = u.id" +
                           $" LEFT JOIN users us on s.approved_by = us.id " +
+
                           $" LEFT JOIN  status_of_appllication sa ON sa.id = s.status_of_application " +
                           $" LEFT JOIN statutorycomliance as st on st.id = s.Compliance_id " +
                           $" where s.id ={id} ;";
@@ -1573,6 +1579,7 @@ namespace CMMSAPIs.Repositories.Masters
             if (request.compliance_id.HasValue)
                 updateQry += $"compliance_id = {request.compliance_id.Value}, ";
             updateQry += $"issue_date = '{request.issue_date.ToString("yyyy-MM-dd HH:mm")}', ";
+            updateQry += $"expires_on = '{request.expires_on.ToString("yyyy-MM-dd HH:mm")}', ";
             updateQry += $"status_of_application = '{request.status_of_aplication_id}', ";
             updateQry += $"renew_from = '{request.renew_from}', ";
             updateQry += $"renew_by = '{UserId}', ";
@@ -1911,17 +1918,23 @@ namespace CMMSAPIs.Repositories.Masters
             string myQuery = "select observations.id,observations.facility_id,facilities.name facility_name,status_code,observations.short_status, " +
                 " contractor_name, risk_type_id,ir_risktype.risktype as risk_type, preventive_action, responsible_person, contact_number, cost_type, " +
                 " date_of_observation, type_of_observation, location_of_observation, source_of_observation, " +
-                " monthname(observations.date_of_observation) as month_of_observation,observations.target_date as closer_date, concat(createdBy.firstName, ' ', createdBy.lastName) as action_taken, " +
+                " monthname(observations.date_of_observation) as month_of_observation,observations.target_date as closer_date,observations.closed_at as closed_date, concat(createdBy.firstName, ' ', createdBy.lastName) as action_taken, " +
                 " observations.preventive_action as  corrective_action, DATEDIFF(observations.target_date, observations.date_of_observation) AS remaining_days," +
                 " observations.target_date, observation_description, created_at, concat(createdBy.firstName, ' ', createdBy.lastName) created_by, " +
-                " updated_at, concat(updatedBy.firstName, ' ', updatedBy.lastName) updated_by,mis_m_typeofobservation.name as type_of_observation_name " +
+                " updated_at, concat(updatedBy.firstName, ' ', updatedBy.lastName) updated_by,mis_m_typeofobservation.name as type_of_observation_name, mssheet.name  as source_of_observation_name, " +
+                "CASE " +
+                "WHEN observations.closed_at IS NOT NULL AND observations.closed_at <= observations.target_date THEN 'In Time' " +
+                "WHEN observations.closed_at IS NOT NULL AND observations.closed_at > observations.target_date THEN 'Out of Target Date' " +
+                "ELSE 'Open' " +
+                "END AS observation_status " +
                 " from observations" +
                 " left join ir_risktype ON observations.risk_type_id = ir_risktype.id" +
-                " left join mis_m_typeofobservation ON observations.type_of_observation  = mis_m_typeofobservation.id" +
-                " left join facilities ON observations.facility_id = facilities.id" +
+                " left join mis_m_typeofobservation ON observations.type_of_observation  = mis_m_typeofobservation.id " +
+                " left join facilities ON observations.facility_id = facilities.id " +
+                " left join mis_m_observationsheet as mssheet ON observations.source_of_observation  =mssheet.id " +
                 " left join users createdBy on createdBy.id = observations.created_by" +
                 " left join users updatedBy on updatedBy.id = observations.updated_by" +
-                " where is_active = 1 and observations.facility_id = " + facility_Id + "  and created_at >= '" + fromDate.ToString("yyyy-MM-dd") + "' OR  created_at <= '" + toDate.ToString("yyyy-MM-dd") + "';";
+                " where is_active = 1 and observations.facility_id = " + facility_Id + " and date_format(created_at, '%Y-%m-%d') between '" + fromDate.ToString("yyyy-MM-dd") + "' and '" + toDate.ToString("yyyy-MM-dd") + "' ;";
             List<CMObservation> Result = await Context.GetData<CMObservation>(myQuery).ConfigureAwait(false);
             foreach (var task in Result)
             {
@@ -2056,6 +2069,73 @@ namespace CMMSAPIs.Repositories.Masters
             return _GetChecklistInspection;
         }
 
+        internal async Task<CMDefaultResponse> uploadDocument(CMDocumentVersion request, int user_id)
+        {
+            CMDefaultResponse response = null;
+            if (request.is_renew == 0)
+            {
+                string stmt = "select auto_id from document_version where doc_master_id = " + request.doc_master_id + " and trim(lower(sub_doc_name)) = '" + request.sub_doc_name + "';";
+                DataTable dt_chk = await Context.FetchData(stmt).ConfigureAwait(false);
+                if (dt_chk.Rows.Count > 0)
+                {
+                    return new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Document Version Already Added With Sub Document : " + request.sub_doc_name + "");
+                }
+
+                string myqry = $"INSERT INTO document_version(facility_id, doc_master_id, file_id, sub_doc_name, renew_date, created_by, created_at, remarks) VALUES " +
+                               $"({request.facility_id},{request.doc_master_id}, {request.file_id}, '{request.sub_doc_name}', " +
+                               $"{(request.renew_date.HasValue ? $"'{request.renew_date.Value.ToString("yyyy-MM-dd HH:mm")}'" : "NULL")}, " +
+                               $"{user_id}, '{UtilsRepository.GetUTCTime()}', '{request.Remarks}'); " +
+                               $"SELECT LAST_INSERT_ID();";
+
+                DataTable dt = await Context.FetchData(myqry).ConfigureAwait(false);
+                int id = Convert.ToInt32(dt.Rows[0][0]);
+                response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Document Version Added");
+            }
+            else
+            {
+                string stmt_update = $"update document_version set renew_date = '{request.renew_date.Value.ToString("yyyy-MM-dd")}' where auto_id = {request.docuemnt_id};";
+                await Context.ExecuteNonQry<int>(stmt_update).ConfigureAwait(false);
+                response = new CMDefaultResponse(request.docuemnt_id, CMMS.RETRUNSTATUS.SUCCESS, "Document Version Updated");
+
+            }
+            return response;
+        }
+
+        internal async Task<List<CMDocumentVersionList>> getDocuementList(int facility_id, string fromDate, string toDate)
+        {
+            string myQuery = "SELECT auto_id id, d.facility_id, f.name as facility_name, doc_master_id, " +
+                              "dd.name doc_master_name, file_id,sub_doc_name, renew_date," +
+                             " concat(u.firstName, ' ', u.lastName) created_by, d.created_at, remarks ," +
+                             " CASE WHEN d.renew_date < Now() THEN '0'  ELSE '1'    END AS Activation_status, up.file_path,up.description " +
+                             " FROM  document_version d  " +
+                             " left join users u on u.id = d.created_by " +
+                             " left join document dd on dd.id = d.doc_master_id " +
+                             " left join uploadedfiles as up on up.id=d.file_id and module_type=0    " +
+                             " left join facilities f on f.id = d.facility_id" +
+                             $" where d.facility_id={facility_id} and  DATE(d.created_at)>='{fromDate}'  and DATE(d.created_at) <='{toDate}' ;";
+            List<CMDocumentVersionList> Data = await Context.GetData<CMDocumentVersionList>(myQuery).ConfigureAwait(false);
+            foreach (var item in Data)
+            {
+                int inactiv = Convert.ToInt32(item.Activation_status);
+                item.Activation_status = inactiv;
+            }
+
+            return Data;
+        }
+        internal async Task<List<CMDocumentVersionList>> getDocuementListById(int id, string sub_doc_name, string fromDate, string toDate)
+        {
+            string myQuery = "SELECT auto_id id, doc_master_id,d.facility_id,f.name as facility_name,dd.name doc_master_name, up.file_path,up.description , file_id,sub_doc_name, renew_date, concat(u.firstName, ' ', u.lastName) created_by, d.created_at, remarks " +
+                             " FROM  document_version d " +
+                             " left join users u on u.id = d.created_by " +
+                             " left join document dd on dd.id = d.doc_master_id" +
+                             " left join facilities f on f.id = d.facility_id" +
+                             " left join uploadedfiles as up on up.id=d.file_id and module_type=0    " +
+                            $" where doc_master_id={id} and sub_doc_name='{sub_doc_name}' and " +
+                            $"DATE(d.created_at)>='{fromDate}'  and DATE(d.created_at) <='{toDate}'";
+            //$"(date_format(d.created_at, '%Y-%m-%d') >= '" + fromDate.ToString("yyyy-MM-dd") + "' and  d.created_at <= '" + toDate.ToString("yyyy-MM-dd") + "') ";
+            List<CMDocumentVersionList> Data = await Context.GetData<CMDocumentVersionList>(myQuery).ConfigureAwait(false);
+            return Data;
+        }
 
     }
 }

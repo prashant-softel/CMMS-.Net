@@ -145,11 +145,11 @@ namespace CMMSAPIs.Repositories.WC
                 "corrective_action_by_buyer, request_to_supplier, concat(user.firstName , ' ' , user.lastName) AS approver_name," +
                 $" created_by, issued_on, {statusOut} as status,wc.status as status_code, approved_by, wc_fac_code, failure_time " +
                 " FROM wc " +
-                "JOIN facilities as f ON f.id = wc.facilityId " +
-                "JOIN assets as a ON a.id = wc.equipment_id " +
-                "JOIN business as b1 ON b1.id = wc.supplier_id " +
-                "JOIN assetcategories AS ac ON ac.id = wc.equipment_cat_id  " +
-                "JOIN users as user ON user.id = wc.approver_id";
+                " LEFT JOIN facilities as f ON f.id = wc.facilityId " +
+                " LEFT JOIN assets as a ON a.id = wc.equipment_id " +
+                " LEFT JOIN business as b1 ON b1.id = wc.supplier_id " +
+                " LEFT JOIN assetcategories AS ac ON ac.id = wc.equipment_cat_id  " +
+                " LEFT JOIN users as user ON user.id = wc.approver_id";
             if (facilityId > 0)
             {
                 myQuery += " WHERE wc.facilityId = " + facilityId;
@@ -198,12 +198,12 @@ namespace CMMSAPIs.Repositories.WC
 
                 string qry = "insert into wc(status_updated_at, facilityId, equipment_id, good_order_id, affected_part, order_reference_number, affected_sr_no, " +
                                 "cost_of_replacement,approxdailyloss , currencyId, warranty_start_date, warranty_end_date, warranty_claim_title, warranty_description, " +
-                                "corrective_action_by_buyer,severity, request_to_supplier, approver_id, status, wc_fac_code, failure_time,date_of_claim, created_by) values" +
+                                "corrective_action_by_buyer,severity, request_to_supplier, approver_id, status, wc_fac_code, failure_time,date_of_claim, created_by,comment) values" +
                                 $"('{UtilsRepository.GetUTCTime()}', {unit.facilityId}, {unit.equipmentId}, '{unit.goodsOrderId}', '{unit.affectedPart}', '{unit.orderReference}', " +
                                 $"'{unit.affectedSrNo}', '{unit.costOfReplacement}',{unit.approxdailyloss}, {unit.currencyId}, '{((DateTime)unit.warrantyStartAt).ToString("yyyy'-'MM'-'dd")}', " +
                                 $"'{((DateTime)unit.warrantyEndAt).ToString("yyyy'-'MM'-'dd")}', '{unit.warrantyClaimTitle}', '{unit.warrantyDescription}', " +
                                 $"'{unit.correctiveActionByBuyer}','{unit.severity}' ,'{unit.requestToSupplier}', {unit.approverId},{(int)draftStatus}, " +
-                                $"'FAC{1000 + unit.facilityId}', '{((DateTime)unit.failureTime).ToString("yyyy-MM-dd HH-mm")}','{((DateTime)unit.date_of_claim).ToString("yyyy-MM-dd HH-mm")}', {userID}); select LAST_INSERT_ID(); ";
+                                $"'FAC{1000 + unit.facilityId}', '{((DateTime)unit.failureTime).ToString("yyyy-MM-dd HH-mm")}','{((DateTime)unit.date_of_claim).ToString("yyyy-MM-dd HH-mm")}', {userID},'{unit.comment}'); select LAST_INSERT_ID(); ";
                 DataTable dt = await Context.FetchData(qry).ConfigureAwait(false);
                 int id = Convert.ToInt32(dt.Rows[0][0]);
                 cw_id = id;
@@ -290,27 +290,27 @@ namespace CMMSAPIs.Repositories.WC
 
                 count++;
                 idList.Add(id);
-                if (unit.affectedPartsImages != null)
+                if (unit.affectedParts != null)
                 {
-                    foreach (var data in unit.affectedPartsImages)
+                    foreach (var data in unit.affectedParts)
                     {
 
-                        string qryuploadFiles = $"UPDATE uploadedfiles SET facility_id = {fid}, module_type={(int)CMMS.CMMS_Modules.WARRANTY_CLAIM},module_ref_id={cw_id},description='{data.description}',status=1 where id = {data.id}";
+                        string qryuploadFiles = $"UPDATE uploadedfiles SET facility_id = {fid}, module_type={(int)CMMS.CMMS_Modules.WARRANTY_CLAIM},module_ref_id={cw_id},status=1 where id = {data}";
                         await Context.ExecuteNonQry<int>(qryuploadFiles).ConfigureAwait(false);
                     }
                 }
 
-                if (unit.affectedParts.Count > 0)
-                {
-                    string InsertAffectedPart = $" insert into wc_parts(wc_id, affected_part)";
-                    foreach (var item in unit.affectedParts)
-                    {
-                        InsertAffectedPart = InsertAffectedPart + $" Select {id}, '{item.name}'  union all";
-                    }
+                /* if (unit.affectedParts.Count > 0)
+                 {
+                     string InsertAffectedPart = $" insert into wc_parts(wc_id, affected_part)";
+                     foreach (var item in unit.affectedParts)
+                     {
+                         InsertAffectedPart = InsertAffectedPart + $" Select {id}, '{item.name}'  union all";
+                     }
 
-                    InsertAffectedPart = InsertAffectedPart.Substring(0, InsertAffectedPart.Length - 10);
-                    await Context.ExecuteNonQry<int>(InsertAffectedPart).ConfigureAwait(false);
-                }
+                     InsertAffectedPart = InsertAffectedPart.Substring(0, InsertAffectedPart.Length - 10);
+                     await Context.ExecuteNonQry<int>(InsertAffectedPart).ConfigureAwait(false);
+                 }*/
 
                 if (unit.uploadfile_ids != null)
                 {
@@ -324,7 +324,7 @@ namespace CMMSAPIs.Repositories.WC
 
 
 
-                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.WARRANTY_CLAIM, id, 0, 0, "Warranty Claim Created", draftStatus, userID);
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.WARRANTY_CLAIM, id, 0, 0, unit.comment, draftStatus, userID);
             }
             if (count > 0)
             {
@@ -577,17 +577,17 @@ namespace CMMSAPIs.Repositories.WC
                 }
             }
 
-            if (request.affectedParts.Count > 0)
-            {
-                string InsertAffectedPart = $" delete from wc_parts where wc_id = {request.id};  insert into wc_parts(wc_id, affected_part)";
-                foreach (var item in request.affectedParts)
-                {
-                    InsertAffectedPart = InsertAffectedPart + $" Select {request.id}, '{item.name}'  union all";
-                }
+            /* if (request.affectedParts.Count > 0)
+             {
+                 string InsertAffectedPart = $" delete from wc_parts where wc_id = {request.id};  insert into wc_parts(wc_id, affected_part)";
+                 foreach (var item in request.affectedParts)
+                 {
+                     InsertAffectedPart = InsertAffectedPart + $" Select {request.id}, '{item.name}'  union all";
+                 }
 
-                InsertAffectedPart = InsertAffectedPart.Substring(0, InsertAffectedPart.Length - 10);
-                await Context.ExecuteNonQry<int>(InsertAffectedPart).ConfigureAwait(false);
-            }
+                 InsertAffectedPart = InsertAffectedPart.Substring(0, InsertAffectedPart.Length - 10);
+                 await Context.ExecuteNonQry<int>(InsertAffectedPart).ConfigureAwait(false);
+             }*/
             return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "WC Details Updated Successfully");
         }
 

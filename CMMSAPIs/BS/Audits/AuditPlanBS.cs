@@ -37,6 +37,7 @@ namespace CMMSAPIs.BS.Audits
         Task<CMDefaultResponse> RejectCloseAuditPlan(CMApproval request, int userId);
         Task<CMDefaultResponse> ApproveClosedAuditPlan(CMApproval request, int userId);
         Task<CMDefaultResponse> AuditLinkToPermit(int audit_id, int ptw_id, int updatedBy);
+        Task<CMDefaultResponse> AssignAuditTask(int task_id, int assign_to, int userID);
     }
     public class AuditPlanBS : IAuditPlanBS
     {
@@ -415,6 +416,22 @@ namespace CMMSAPIs.BS.Audits
                 using (var repos = new AuditPlanRepository(getDB))
                 {
                     return await repos.AuditLinkToPermit(audit_id, ptw_id, updatedBy);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> AssignAuditTask(int task_id, int assign_to, int userID)
+        {
+            try
+            {
+                using (var repos = new AuditPlanRepository(getDB))
+                {
+                    return await repos.AssignAuditTask(task_id, assign_to, userID);
 
                 }
             }

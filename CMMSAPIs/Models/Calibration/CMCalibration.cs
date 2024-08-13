@@ -21,7 +21,10 @@ namespace CMMSAPIs.Models.Calibration
         public DateTime? next_calibration_due_date { get; set; }
         public DateTime? calibration_due_date { get; set; }
         public DateTime Schedule_start_date { get; set; }
+        public DateTime? last_calibration_due_date { get; set; }
+        public DateTime? calibration_date { get; set; }
         public int frequency_id { get; set; }
+        public int reschedule { get; set; }
         public string frequency_name { get; set; }
         public int vendor_id { get; set; }
         public string vendor_name { get; set; }
@@ -50,7 +53,9 @@ namespace CMMSAPIs.Models.Calibration
         public DateTime? Closed_at { get; set; }
         public string Closed_by { get; set; }
         public int is_damaged { get; set; }
-        public List<CMFileDetailCalibration> file_list { get; set; }
+        public int prev_task_id { get; set; }
+        public List<CMFileDetailJc> file_list_calibration { get; set; }
+        public List<CMFileDetailJc> file_list { get; set; }
     }
     public class CMFileDetailCalibration
     {
@@ -64,8 +69,12 @@ namespace CMMSAPIs.Models.Calibration
     public class CMRequestCalibration
     {
         public int asset_id { get; set; }
+        public int id { get; set; }
+        public int prev_task_id { get; set; }
         public int vendor_id { get; set; }
         public DateTime next_calibration_date { get; set; }
+        public DateTime calibrationdonedate { get; set; }
+
     }
 
     public class CMPreviousCalibration
@@ -87,7 +96,7 @@ namespace CMMSAPIs.Models.Calibration
 
     public class CMCloseCalibration
     {
-        public int calibration_id { get; set; }
+        public int id { get; set; }
         public string comment { get; set; }
         public int? is_damaged { get; set; }
         public int calibration_certificate_file_id { get; set; }
