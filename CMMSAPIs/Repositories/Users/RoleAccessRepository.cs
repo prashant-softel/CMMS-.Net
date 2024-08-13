@@ -1,4 +1,5 @@
 using CMMSAPIs.Helper;
+using CMMSAPIs.Models.Masters;
 using CMMSAPIs.Models.Users;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Utils;
@@ -352,11 +353,21 @@ namespace CMMSAPIs.Repositories.Users
 
                         // Insert the new setting
                         List<string> role_access = new List<string>();
-
+                     
                         foreach (var access in request.notification_list)
                         {
                             role_access.Add($"({role_id}, {access.notification_id}, {access.default_flag}, {access.can_change}, " +
                                             $"'{UtilsRepository.GetUTCTime()}', {UtilsRepository.GetUserID()})");
+                        }
+                        if (request.notification_list.Count == 0)
+                        {
+                            string stmt_notificationIDs = "select featureId as notification_id  from roleaccess where roleId= " + role_id + " order by featureId asc;";
+                            List<CMNotificationList> itemList = await Context.GetData<CMNotificationList>(stmt_notificationIDs).ConfigureAwait(false);
+                            foreach (var access in itemList)
+                            {
+                                role_access.Add($"({role_id}, {access.notification_id}, 1, 1, " +
+                                                $"'{UtilsRepository.GetUTCTime()}', {UtilsRepository.GetUserID()})");
+                            }
                         }
                         string role_access_insert_str = string.Join(',', role_access);
 
