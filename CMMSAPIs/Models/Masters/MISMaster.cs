@@ -615,7 +615,10 @@ namespace CMMSAPIs.Models.Masters
         public string preventive_action { get; set; }
         public string responsible_person { get; set; }
         public string contact_number { get; set; }
-        public string cost_type { get; set; }
+
+       
+
+        public int cost_type { get; set; }
         public DateTime closed_date { get; set; }
         public string observation_status { get; set; }
         public DateTime? date_of_observation { get; set; }
@@ -639,6 +642,7 @@ namespace CMMSAPIs.Models.Masters
         public string short_status { get; set; }
         // public List<int> file_ids { get; set; }
         public List<int> uploadfileIds { get; set; }
+        public string comment { get; set; }
     }
     public class CMObservationByIdList
     {
