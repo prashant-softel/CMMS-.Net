@@ -1657,12 +1657,12 @@ namespace CMMSAPIs.Controllers.Masters
         }
         [Route("DeleteObservation")]
         [HttpDelete]
-        public async Task<IActionResult> DeleteObservation(int id)
+        public async Task<IActionResult> DeleteObservation(int id, string comment)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _IMISMasterBS.DeleteObservation(id, userID);
+                var data = await _IMISMasterBS.DeleteObservation(id, userID, comment);
                 return Ok(data);
             }
             catch (Exception)
