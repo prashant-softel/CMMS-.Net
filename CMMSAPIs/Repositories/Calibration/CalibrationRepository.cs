@@ -231,11 +231,8 @@ namespace CMMSAPIs.Repositories.Calibration
                      " where calibration.id = " + id + " and U.module_type = " + (int)CMMS.CMMS_Modules.CALIBRATION + " ;";
 
             }
-
-
-
             List<CMFileDetailJc> calibration_file = await Context.GetData<CMFileDetailJc>(myQuery20).ConfigureAwait(false);
-         
+
             List<CMFileDetailJc> _UploadFileList = await Context.GetData<CMFileDetailJc>(myQuery4).ConfigureAwait(false);
 
             CMMS.CMMS_Status _Status_long = (CMMS.CMMS_Status)(_calibrationDetails[0].statusID);

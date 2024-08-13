@@ -214,13 +214,13 @@ namespace CMMSAPIs.Repositories.WC
                 await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
                 if (unit.additionalEmailEmployees.Count > 0)
                 {
-                    string addMailQry = "INSERT INTO wc_emails (wc_id, email, name, user_id, type,role) VALUES ";
+                    string addMailQry = "INSERT INTO wc_emails (wc_id, email, name, user_id, type,role,rolename) VALUES ";
                     string idToMail = $"SELECT id, loginId as email, CONCAT(firstName,' ',lastName) as name,roleId  FROM users " +
                                         $"WHERE id IN ({string.Join(',', unit.additionalEmailEmployees)});";
                     DataTable mailList = await Context.FetchData(idToMail).ConfigureAwait(false);
                     foreach (DataRow mail in mailList.Rows)
                     {
-                        addMailQry += $"({id}, '{mail["email"]}', '{mail["name"]}', {mail["id"]}, 'Internal','{mail["roleId"]}'), ";
+                        addMailQry += $"({id}, '{mail["email"]}', '{mail["name"]}', {mail["id"]}, 'Internal','{mail["roleId"]}','0'), ";
                     }
                     string getAllMails = "SELECT id, loginId,roleId FROM users;";
                     DataTable allMails = await Context.FetchData(getAllMails).ConfigureAwait(false);
@@ -230,6 +230,7 @@ namespace CMMSAPIs.Repositories.WC
                     mailToRole.Merge(allMails.GetColumn<string>("loginId"), allMails.GetColumn<int>("roleId"));
                     foreach (var mail in unit.externalEmails)
                     {
+                        string role_name = mail.role;
                         int u_id;
                         int roleId;
                         try
@@ -242,7 +243,7 @@ namespace CMMSAPIs.Repositories.WC
                             u_id = 0;
                             roleId = 0;
                         }
-                        addMailQry += $"({id}, '{mail.email}', '{mail.name}', {u_id}, '{(u_id != 0 ? "Internal" : "External")}','{roleId}'), ";
+                        addMailQry += $"({id}, '{mail.email}', '{mail.name}', {u_id}, '{(u_id != 0 ? "Internal" : "External")}','{roleId}','{role_name}'), ";
                     }
                     addMailQry = addMailQry.Substring(0, addMailQry.Length - 2) + ";";
                     await Context.ExecuteNonQry<int>(addMailQry).ConfigureAwait(false);
@@ -277,8 +278,8 @@ namespace CMMSAPIs.Repositories.WC
                     }
                     addMailQry = addMailQry.Substring(0, addMailQry.Length - 2) + ";";
                     await Context.ExecuteNonQry<int>(addMailQry).ConfigureAwait(false);
-                }
-                */
+                }*/
+
                 string addSupplierActions = "INSERT INTO wcschedules (warranty_id, supplier_action, input_value, input_date,srNumber, created_at) VALUES ";
                 foreach (var action in unit.supplierActions)
                 {
@@ -317,7 +318,7 @@ namespace CMMSAPIs.Repositories.WC
                     foreach (int data in unit.uploadfile_ids)
                     {
 
-                        string qryuploadFiles = $"UPDATE uploadedfiles SET facility_id = {fid}, module_type={(int)CMMS.CMMS_Modules.WARRANTY_CLAIM},module_ref_id={cw_id} where id = {data}";
+                        string qryuploadFiles = $"UPDATE uploadedfiles SET facility_id = {fid}, module_type={(int)CMMS.CMMS_Modules.WARRANTY_CLAIM}, status=0, module_ref_id={cw_id} where id = {data}";
                         await Context.ExecuteNonQry<int>(qryuploadFiles).ConfigureAwait(false);
                     }
                 }
@@ -359,13 +360,14 @@ namespace CMMSAPIs.Repositories.WC
             }
 
             string myQuery = "SELECT  wc.id as wc_id, wc.facilityId as facility_Id, f.name as facility_name,ac.id AS equipment_category_id, ac.name AS equipment_category, a.id AS equipment_id, a.name AS equipment_name, equipment_sr_no," +
-            "b1.id AS supplier_id, b1.name AS supplier_name, good_order_id, affected_part, order_reference_number, affected_sr_no, cost_of_replacement, wc.currencyId,  wc.currency, approxdailyloss ," + // add cost_of_replacement,
+            "b1.id AS supplier_id, b1.name AS supplier_name,bs.name as manufacture_name, good_order_id, affected_part, order_reference_number, affected_sr_no, cost_of_replacement, wc.currencyId,  wc.currency, approxdailyloss ," + // add cost_of_replacement,
             " warranty_start_date, warranty_end_date,wc.severity, warranty_claim_title, warranty_description, " +
             "corrective_action_by_buyer, request_to_supplier, concat(user.firstName , ' ' , user.lastName) AS approver_name," +
             " created_by, issued_on, wc.status,approved_by, wc.date_of_claim AS date_of_claim, wc_fac_code, failure_time, startDate warrantyStartDate,  endDate warrantyEndDate" +
             " FROM wc " +
             "LEFT JOIN facilities as f ON f.id = wc.facilityId " +
             "LEFT JOIN assets as a ON a.id = wc.equipment_id " +
+            "LEFT JOIN business as bs ON a.ownerId = bs.id " +
             "LEFT JOIN wcschedules as ws ON ws.id=wc.id " +
             "LEFT JOIN business as b1 ON b1.id = wc.supplier_id " +
             "LEFT JOIN assetcategories AS ac ON ac.id = wc.equipment_cat_id  " +
@@ -395,7 +397,7 @@ namespace CMMSAPIs.Repositories.WC
             GetWCDetails[0].additionalEmailEmployees = internalEmails;
 
             // Retrieve external emails associated with the warranty claim
-            string externalEmailsQuery = $"SELECT user_id, name, email,role FROM wc_emails WHERE wc_id = {id} and type = 'External'";
+            string externalEmailsQuery = $"SELECT user_id, name, email,role,rolename FROM wc_emails WHERE wc_id = {id} and type = 'External'";
             List<CMWCExternalEmail> externalEmails = await Context.GetData<CMWCExternalEmail>(externalEmailsQuery).ConfigureAwait(false);
             GetWCDetails[0].externalEmails = externalEmails;
 
@@ -411,7 +413,7 @@ namespace CMMSAPIs.Repositories.WC
             //uploadjobcard
             string myQuery18 = "SELECT c.id as id,U.file_path as fileName,U.id as file_id,U.description FROM uploadedfiles AS U " +
                               "Left JOIN wc as c on c.id= U.module_ref_id  " +
-                              "where module_ref_id =" + id + " and U.module_type = " + (int)CMMS.CMMS_Modules.WARRANTY_CLAIM + ";";
+                              "where module_ref_id =" + id + " and u.status=0 and U.module_type = " + (int)CMMS.CMMS_Modules.WARRANTY_CLAIM + ";";
 
             List<WCFileDetail> WC_image = await Context.GetData<WCFileDetail>(myQuery18).ConfigureAwait(false);
             //Affected Images
@@ -479,13 +481,13 @@ namespace CMMSAPIs.Repositories.WC
             if (request.requestToSupplier != null && request.requestToSupplier != "")
                 updateQry += $"request_to_supplier = '{request.requestToSupplier}', ";
             if (request.severity != null)
-                updateQry += $"severity= {request.severity}, ";
+                updateQry += $"severity= '{request.severity}', ";
             if (request.approverId > 0)
                 updateQry += $"approver_id = {request.approverId}, ";
             if (request.date_of_claim != null)
                 updateQry += $"date_of_claim =' {request.date_of_claim}', ";
             if (request.failureTime != null)
-                updateQry += $"failure_time = '{((DateTime)request.failureTime).ToString("yyyy'-'MM'-'dd 'HH'-'mm")}', ";
+                updateQry += $"failure_time = '{request.failureTime}', ";
             updateQry = updateQry.Substring(0, updateQry.Length - 2) + $" WHERE id = {request.id};";
             await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
             if (request.affectedPartsImages != null)

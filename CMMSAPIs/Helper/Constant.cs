@@ -244,7 +244,7 @@ namespace CMMSAPIs.Helper
             AUDIT_SCEHDULE_VIEW,
             AUDIT_EXECUTION,
             AUDIT_SUMMARY,
-
+            AUDIT_TASK,
 
 
             HOTO_PLAN = 61,

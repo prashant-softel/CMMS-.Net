@@ -1,5 +1,6 @@
 using CMMSAPIs.BS.MISMasters;
 using CMMSAPIs.Models.Masters;
+using CMMSAPIs.Models.SM;
 using CMMSAPIs.Models.Utils;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -1579,7 +1580,10 @@ namespace CMMSAPIs.Controllers.Masters
             }
             catch (Exception ex)
             {
-                throw ex;
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 200;
+                item.Message = ex.Message;
+                return Ok(item);
             }
         }
         [Route("getDocuementListById")]

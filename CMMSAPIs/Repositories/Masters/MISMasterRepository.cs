@@ -2025,8 +2025,17 @@ namespace CMMSAPIs.Repositories.Masters
             }
             else
             {
-                string stmt_update = $"update document_version set renew_date = '{request.renew_date.Value.ToString("yyyy-MM-dd")}' where auto_id = {request.docuemnt_id};";
-                await Context.ExecuteNonQry<int>(stmt_update).ConfigureAwait(false);
+                //string stmt_update = $"update document_version set renew_date = '{request.renew_date.Value.ToString("yyyy-MM-dd")}' where auto_id = {request.docuemnt_id};";
+                //await Context.ExecuteNonQry<int>(stmt_update).ConfigureAwait(false);
+                string myqry1 = $"INSERT INTO document_version(facility_id, doc_master_id, file_id, sub_doc_name, renew_date, created_by, created_at, remarks) VALUES " +
+                               $"({request.facility_id},{request.doc_master_id}, {request.file_id}, '{request.sub_doc_name}', " +
+                               $"{(request.renew_date.HasValue ? $"'{request.renew_date.Value.ToString("yyyy-MM-dd HH:mm")}'" : "NULL")}, " +
+                               $"{user_id}, '{UtilsRepository.GetUTCTime()}', '{request.Remarks}'); " +
+                               $"SELECT LAST_INSERT_ID();";
+
+                DataTable dt = await Context.FetchData(myqry1).ConfigureAwait(false);
+                int id = Convert.ToInt32(dt.Rows[0][0]);
+
                 response = new CMDefaultResponse(request.docuemnt_id, CMMS.RETRUNSTATUS.SUCCESS, "Document Version Updated");
 
             }
@@ -2064,7 +2073,6 @@ namespace CMMSAPIs.Repositories.Masters
                              " left join uploadedfiles as up on up.id=d.file_id and module_type=0    " +
                             $" where doc_master_id={id} and sub_doc_name='{sub_doc_name}' and " +
                             $"DATE(d.created_at)>='{fromDate}'  and DATE(d.created_at) <='{toDate}'";
-            //$"(date_format(d.created_at, '%Y-%m-%d') >= '" + fromDate.ToString("yyyy-MM-dd") + "' and  d.created_at <= '" + toDate.ToString("yyyy-MM-dd") + "') ";
             List<CMDocumentVersionList> Data = await Context.GetData<CMDocumentVersionList>(myQuery).ConfigureAwait(false);
             return Data;
         }

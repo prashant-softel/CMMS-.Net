@@ -1,13 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Utils;
-using Microsoft.AspNetCore.Http;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using ExpressTimezone;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using TimeZoneConverter;
 
 namespace CMMSAPIs.Repositories.Utils
@@ -28,7 +24,7 @@ namespace CMMSAPIs.Repositories.Utils
 
         internal async Task<List<CMDefaultList>> GetStateList(int country_id)
         {
-            string myQuery = "SELECT id, name FROM States WHERE country_id = "+country_id;
+            string myQuery = "SELECT id, name FROM States WHERE country_id = " + country_id;
             List<CMDefaultList> _List = await Context.GetData<CMDefaultList>(myQuery).ConfigureAwait(false);
             return _List;
         }
@@ -74,7 +70,7 @@ namespace CMMSAPIs.Repositories.Utils
             return null;
         }
 
-        internal async Task<List<CMDefaultResponse>> AddHistoryLog(CMMS.CMMS_Modules module_type, int module_ref_id, CMMS.CMMS_Modules secondary_module_type, int secondary_module_ref_id, string comment, CMMS.CMMS_Status status, int userID=0, string current_latitude="", string current_longitude="")
+        internal async Task<List<CMDefaultResponse>> AddHistoryLog(CMMS.CMMS_Modules module_type, int module_ref_id, CMMS.CMMS_Modules secondary_module_type, int secondary_module_ref_id, string comment, CMMS.CMMS_Status status, int userID = 0, string current_latitude = "", string current_longitude = "")
         {
 
             string qry = "INSERT INTO History" +
@@ -98,24 +94,35 @@ namespace CMMSAPIs.Repositories.Utils
         }
 
 
-        internal async Task<List<CMLog>> GetHistoryLog(CMMS.CMMS_Modules module_type, int id,string facilitytimezone)
+        internal async Task<List<CMLog>> GetHistoryLog(CMMS.CMMS_Modules module_type, int id, string facilitytimezone)
         {
             /*
              * Fetch data from History table for requested module_type and id
              * Return Log
             */
             string statusCase = "CASE ";
-            foreach(CMMS.CMMS_Status status in Enum.GetValues(typeof(CMMS.CMMS_Status)))
+            foreach (CMMS.CMMS_Status status in Enum.GetValues(typeof(CMMS.CMMS_Status)))
             {
                 statusCase += $"WHEN history.status = {(int)status} THEN '{status}' ";
             }
-            statusCase += "ELSE 'Invalid' END ";
-            string myQuery = $"select history.Id as id, moduleType as module_type, moduleRefId as module_ref_id, secondaryModuleRefType as secondary_module, secondaryModuleRefId as secondary_module_ref_id, comment as comment, history.status as status, {statusCase} as status_cmms,(SELECT (UPPER(status_cmms))) as status_name, history.createdBy as created_by_id, CONCAT(created_user.firstName,' ',created_user.lastName) as created_by_name, history.createdAt as created_at, history.currentLatitude as current_latitude, history.currentLongitude as current_longitude from history left join users as created_user on history.createdBy=created_user.id " +
-                $"WHERE (moduleType = {(int)module_type} AND moduleRefId = {id}) OR (secondaryModuleRefType = {(int)module_type} AND secondaryModuleRefId = {id}) ORDER BY history.createdAt DESC";
-            List<CMLog> _Log = await Context.GetData<CMLog>(myQuery).ConfigureAwait(false);
+            List<CMLog> _Log = new List<CMLog>();
+            if (module_type == CMMS.CMMS_Modules.AUDIT_PLAN)
+            {
+                statusCase += "ELSE 'Invalid' END ";
+                string myQuery1 = $"select history.Id as id, moduleType as module_type, moduleRefId as module_ref_id, secondaryModuleRefType as secondary_module, secondaryModuleRefId as secondary_module_ref_id, comment as comment, history.status as status, {statusCase} as status_cmms,(SELECT (UPPER(status_cmms))) as status_name, history.createdBy as created_by_id, CONCAT(created_user.firstName,' ',created_user.lastName) as created_by_name, history.createdAt as created_at, history.currentLatitude as current_latitude, history.currentLongitude as current_longitude from history left join users as created_user on history.createdBy=created_user.id " +
+                $"WHERE moduleType = {(int)module_type} AND moduleRefId = {id} AND secondaryModuleRefType = {(int)module_type} ORDER BY history.createdAt DESC";
+                _Log = await Context.GetData<CMLog>(myQuery1).ConfigureAwait(false);
+            }
+            else
+            {
+                statusCase += "ELSE 'Invalid' END ";
+                string myQuery = $"select history.Id as id, moduleType as module_type, moduleRefId as module_ref_id, secondaryModuleRefType as secondary_module, secondaryModuleRefId as secondary_module_ref_id, comment as comment, history.status as status, {statusCase} as status_cmms,(SELECT (UPPER(status_cmms))) as status_name, history.createdBy as created_by_id, CONCAT(created_user.firstName,' ',created_user.lastName) as created_by_name, history.createdAt as created_at, history.currentLatitude as current_latitude, history.currentLongitude as current_longitude from history left join users as created_user on history.createdBy=created_user.id " +
+                    $"WHERE (moduleType = {(int)module_type} AND moduleRefId = {id}) OR (secondaryModuleRefType = {(int)module_type} AND secondaryModuleRefId = {id}) ORDER BY history.createdAt DESC";
+                _Log = await Context.GetData<CMLog>(myQuery).ConfigureAwait(false);
+            }
             foreach (var list in _Log)
             {
-                list.created_at = ConvertToUTCDTC(facilitytimezone,list.created_at);                    
+                list.created_at = ConvertToUTCDTC(facilitytimezone, list.created_at);
             }
             return _Log;
         }
@@ -142,15 +149,15 @@ namespace CMMSAPIs.Repositories.Utils
                }
                return sqlQuery;
            }*/
-       // internal  static DateTime Contvertime(int facility_id, string datetimeof)
-       public async Task<DateTime> Contvertime(int facility_id, DateTime datetime)
+        // internal  static DateTime Contvertime(int facility_id, string datetimeof)
+        public async Task<DateTime> Contvertime(int facility_id, DateTime datetime)
         {
             // var utcTime =DateTime.Parse(datetime);
             var utcTime = datetime;
-            string qry = $"SELECT timezone,id as facility_id from facilities where id=" + facility_id ;
-             var data=  await Context.GetData<CMTimeZone>(qry).ConfigureAwait(false);
-           // await context.FetchData<string>(qry).ConfigureAwait(false);
-            string timezone ="" ;
+            string qry = $"SELECT timezone,id as facility_id from facilities where id=" + facility_id;
+            var data = await Context.GetData<CMTimeZone>(qry).ConfigureAwait(false);
+            // await context.FetchData<string>(qry).ConfigureAwait(false);
+            string timezone = "";
             if (data[0].timezone == "" && data[0].timezone == "default_hardcoded")
             {
                 timezone = "Asia/Kolkata";
@@ -178,7 +185,7 @@ namespace CMMSAPIs.Repositories.Utils
         //    ////
 
         //    string sourceTimeZoneId = "UTC"; // Fixed source time zone
-         
+
         //    string windowsTimeZoneId = TZConvert.IanaToWindows(destinationTimeZoneId);
 
         //    // Convert the source time to the destination time zone
@@ -203,7 +210,7 @@ namespace CMMSAPIs.Repositories.Utils
                 DateTime destinationTime = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(utcTime, sourceTimeZoneId, windowsTimeZoneId);
 
                 destinationTime = new DateTime(destinationTime.Year, destinationTime.Month, destinationTime.Day,
-                                           destinationTime.Hour, destinationTime.Minute,0);
+                                           destinationTime.Hour, destinationTime.Minute, 0);
 
                 return destinationTime;
             }
@@ -212,10 +219,10 @@ namespace CMMSAPIs.Repositories.Utils
                 return utcTime;
             }
         }
-      
-    internal static DateTime Reschedule(DateTime source, int frequencyID)
+
+        internal static DateTime Reschedule(DateTime source, int frequencyID)
         {
-            switch(frequencyID)
+            switch (frequencyID)
             {
                 case 1:
                     return source.AddDays(1);
@@ -225,16 +232,16 @@ namespace CMMSAPIs.Repositories.Utils
 
                 case 3:
                     return source.AddDays(14);
-                
+
                 case 4:
                     return source.AddMonths(1);
-                
+
                 case 5:
                     return source.AddMonths(3);
 
                 case 6:
                     return source.AddMonths(6);
-                
+
                 case 7:
                     return source.AddYears(1);
 
@@ -243,19 +250,19 @@ namespace CMMSAPIs.Repositories.Utils
 
                 case 9:
                     return source.AddYears(5);
-                
+
                 case 10:
                     return source.AddYears(10);
-                
+
                 case 11:
                     return source.AddYears(3);
-                
+
                 case 12:
                     return source.AddYears(6);
-                
+
                 case 13:
                     return source.AddYears(4);
-                
+
                 case 14:
                     return source.AddYears(20);
 
@@ -263,7 +270,7 @@ namespace CMMSAPIs.Repositories.Utils
                     return source.AddMonths(2);
 
                 case 16:
-                    return source.AddDays(10); 
+                    return source.AddDays(10);
 
                 case 17:
                     return source.AddDays(20);

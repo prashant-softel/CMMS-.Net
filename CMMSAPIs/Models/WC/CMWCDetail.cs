@@ -22,6 +22,7 @@ namespace CMMSAPIs.Models.WC
         public int supplier_id { get; set; }
         public string severity { get; set; }
         public string supplier_name { get; set; }
+        public string manufacture_name { get; set; }
         public string good_order_id { get; set; }
         public string order_reference_number { get; set; }
         //public string warranty_start_date { get; set; }
