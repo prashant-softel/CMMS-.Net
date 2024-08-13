@@ -276,11 +276,13 @@ namespace CMMSAPIs.Repositories.Masters
                 $" LEFT JOIN mis_targeted_group as tg on tg.id = c.Targated_group_id " +
                 $" where mis_training_schedule.Schid={schedule_id} ";
             List<GETSCHEDULEDETAIL> Schedules = await Context.GetData<GETSCHEDULEDETAIL>(getsch).ConfigureAwait(false);
-            string interemployee = $"SELECT id , Name, Email, Mobile,Attendend, Rsvp from mis_visitor_details where Schid={schedule_id}";
-            List<INTERNALEMPLOYEE> internalemployee = await Context.GetData<INTERNALEMPLOYEE>(interemployee).ConfigureAwait(false);
 
-            string Exteremployee = $" SELECT  Schid as id, employee_id, Visitor_id, Rsvp, notes, Attendend, designation from mis_schedule_invites where Schid={schedule_id}";
-            List<INTERNALEMPLOYEE> externalemployee = await Context.GetData<INTERNALEMPLOYEE>(Exteremployee).ConfigureAwait(false);
+
+            string Exteremployee = $"SELECT id , Name as employeeName,  Email as employeeEmail, Mobile as employeeNumber,Company as  companyName,Attendend,notes, Rsvp from mis_visitor_details where Schid={schedule_id}";
+            List<ExternalEmployee> externalemployee = await Context.GetData<ExternalEmployee>(Exteremployee).ConfigureAwait(false);
+
+            string interemployee = $" SELECT Schid as schid, employee_id, Visitor_id, Rsvp, notes, Attendend, designation from mis_schedule_invites where Schid={schedule_id}";
+            List<INTERNALEMPLOYEES> internalemployee = await Context.GetData<INTERNALEMPLOYEES>(interemployee).ConfigureAwait(false);
             string myQuery17 = "SELECT U.id as id, file_path as fileName,U.description FROM uploadedfiles AS U " +
                             "Left JOIN mis_training_schedule as cor on cor.Schid= U.module_ref_id" +
                             " where module_ref_id =" + schedule_id + " and U.module_type = " + (int)CMMS.CMMS_Modules.TRAINNING_SCHEDULE + ";";
@@ -292,12 +294,12 @@ namespace CMMSAPIs.Repositories.Masters
         }
         internal async Task<CMDefaultResponse> ExecuteScheduleCourse(GETSCHEDULEDETAIL request)
         {
-            foreach (INTERNALEMPLOYEE item in request.internal_employee)
+            foreach (INTERNALEMPLOYEES item in request.internal_employee)
             {
                 string execute = $"update mis_schedule_invites set Attendend={item.Attendend},notes={item.notes},RSVP_Datetime='{UtilsRepository.GetUTCTime()}',Rsvp={1},status_code={(int)CMMS.CMMS_Status.COURSE_ENDED} where id={item.id}";
                 await Context.ExecuteNonQry<int>(execute).ConfigureAwait(false);
             }
-            foreach (INTERNALEMPLOYEE item1 in request.external_employee)
+            foreach (ExternalEmployee item1 in request.external_employee)
             {
                 string execute2 = $"update mis_visitor_details set Attendend={item1.Attendend},notes={item1.notes},status_code={(int)CMMS.CMMS_Status.COURSE_ENDED} where id={item1.id}";
                 await Context.ExecuteNonQry<int>(execute2).ConfigureAwait(false);

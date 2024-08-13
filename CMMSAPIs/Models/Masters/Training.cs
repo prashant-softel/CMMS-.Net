@@ -36,12 +36,15 @@ namespace CMMSAPIs.Models.Masters
 
     public class ExternalEmployee
     {
+
         public int id { get; set; }
         public string employeeName { get; set; }
         public string employeeEmail { get; set; }
-        public string employeeNumber { get; set; }
+        public dynamic employeeNumber { get; set; }
         public string designation { get; set; }
-        public string Address { get; set; }
+        public DateTime Rsvp { get; set; }
+        public int Attendend { get; set; }
+        public string notes { get; set; }
         public string companyName { get; set; }
     }
     public class GETSCHEDULE
@@ -77,8 +80,8 @@ namespace CMMSAPIs.Models.Masters
         public string Venue { get; set; }
         public string Training_Agency { get; set; }
         public string HFE_Epmloyee { get; set; }
-        public List<INTERNALEMPLOYEE> internal_employee { get; set; }
-        public List<INTERNALEMPLOYEE> external_employee { get; set; }
+        public List<INTERNALEMPLOYEES> internal_employee { get; set; }
+        public List<ExternalEmployee> external_employee { get; set; }
         public List<CMTRAININGFILE> uploadfile_ids { get; set; }
     }
     public class INTERNALEMPLOYEE
@@ -92,6 +95,18 @@ namespace CMMSAPIs.Models.Masters
         public dynamic Rsvp { get; set; }
         public string notes { get; set; }
 
+    }
+    public class INTERNALEMPLOYEES
+    {
+        public int id { get; set; }
+
+        public int Schid { get; set; }
+        public int employee_id { get; set; }
+        public int Visitor_id { get; set; }
+        public DateTime Rsvp { get; set; }
+        public string notes { get; set; }
+        public string designation { get; set; }
+        public dynamic Attendend { get; set; }
     }
 
     public class CMTrainingSummary

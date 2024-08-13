@@ -616,7 +616,7 @@ namespace CMMSAPIs.Models.Masters
         public string responsible_person { get; set; }
         public string contact_number { get; set; }
 
-       
+
 
         public int cost_type { get; set; }
         public DateTime closed_date { get; set; }
