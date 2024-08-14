@@ -716,7 +716,7 @@ namespace CMMSAPIs.Helper
             Unsafe_Act,
             Unsafe_Condition,
             Statutory_Non_Compilance
-            
+
         }
         public enum RiskType
         {

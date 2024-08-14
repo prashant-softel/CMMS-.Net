@@ -248,38 +248,6 @@ namespace CMMSAPIs.Repositories.WC
                     addMailQry = addMailQry.Substring(0, addMailQry.Length - 2) + ";";
                     await Context.ExecuteNonQry<int>(addMailQry).ConfigureAwait(false);
                 }
-                /*
-                if (unit.additionalEmailEmployees.Count > 0)
-                {
-                    string addMailQry = "INSERT INTO wc_emails (wc_id, email, name, user_id, type) VALUES ";
-                    string idToMail = $"SELECT id, loginId as email, CONCAT(firstName,' ',lastName) as name FROM users " +
-                                        $"WHERE id IN ({string.Join(',', unit.additionalEmailEmployees)});";
-                    DataTable mailList = await Context.FetchData(idToMail).ConfigureAwait(false);
-                    foreach (DataRow mail in mailList.Rows)
-                    {
-                        addMailQry += $"({id}, '{mail["email"]}', '{mail["name"]}', {mail["id"]}, 'Internal'), ";
-                    }
-                    string getAllMails = "SELECT id, loginId FROM users;";
-                    DataTable allMails = await Context.FetchData(getAllMails).ConfigureAwait(false);
-                    Dictionary<string, int> mailToId = new Dictionary<string, int>();
-                    mailToId.Merge(allMails.GetColumn<string>("loginId"), allMails.GetColumn<int>("id"));
-                    foreach (var mail in unit.externalEmails)
-                    {
-                        int u_id;
-                        try
-                        {
-                            u_id = mailToId[mail.email];
-                        }
-                        catch (KeyNotFoundException)
-                        {
-                            u_id = 0;
-                        }
-                        addMailQry += $"({id}, '{mail.email}', '{mail.name}', {u_id}, '{(u_id != 0 ? "Internal" : "External")}'), ";
-                    }
-                    addMailQry = addMailQry.Substring(0, addMailQry.Length - 2) + ";";
-                    await Context.ExecuteNonQry<int>(addMailQry).ConfigureAwait(false);
-                }*/
-
                 string addSupplierActions = "INSERT INTO wcschedules (warranty_id, supplier_action, input_value, input_date,srNumber, created_at) VALUES ";
                 foreach (var action in unit.supplierActions)
                 {
@@ -300,19 +268,6 @@ namespace CMMSAPIs.Repositories.WC
                         await Context.ExecuteNonQry<int>(qryuploadFiles).ConfigureAwait(false);
                     }
                 }
-
-                /* if (unit.affectedParts.Count > 0)
-                 {
-                     string InsertAffectedPart = $" insert into wc_parts(wc_id, affected_part)";
-                     foreach (var item in unit.affectedParts)
-                     {
-                         InsertAffectedPart = InsertAffectedPart + $" Select {id}, '{item.name}'  union all";
-                     }
-
-                     InsertAffectedPart = InsertAffectedPart.Substring(0, InsertAffectedPart.Length - 10);
-                     await Context.ExecuteNonQry<int>(InsertAffectedPart).ConfigureAwait(false);
-                 }*/
-
                 if (unit.uploadfile_ids != null)
                 {
                     foreach (int data in unit.uploadfile_ids)
@@ -322,8 +277,6 @@ namespace CMMSAPIs.Repositories.WC
                         await Context.ExecuteNonQry<int>(qryuploadFiles).ConfigureAwait(false);
                     }
                 }
-
-
 
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.WARRANTY_CLAIM, id, 0, 0, unit.comment, draftStatus, userID);
             }
@@ -410,14 +363,14 @@ namespace CMMSAPIs.Repositories.WC
             string affectedParts_Q = $"SELECT affected_part as name FROM wc_parts WHERE wc_id =  {id}";
             List<affectedParts> affectedParts = await Context.GetData<affectedParts>(affectedParts_Q).ConfigureAwait(false);
 
-            //uploadjobcard
+            //Normal Images
             string myQuery18 = "SELECT c.id as id,U.file_path as fileName,U.id as file_id,U.description FROM uploadedfiles AS U " +
                               "Left JOIN wc as c on c.id= U.module_ref_id  " +
                               "where module_ref_id =" + id + " and u.status=0 and U.module_type = " + (int)CMMS.CMMS_Modules.WARRANTY_CLAIM + ";";
 
             List<WCFileDetail> WC_image = await Context.GetData<WCFileDetail>(myQuery18).ConfigureAwait(false);
             //Affected Images
-            string myQuery19 = "SELECT c.id as id,U.file_path as fileName,U.id as file_id,U.description FROM uploadedfiles AS U " +
+            string myQuery19 = "SELECT c.id as id,U.file_path as fileName,U.id as file_id,U.description as affectedParts FROM uploadedfiles AS U " +
                              "Left JOIN wc as c on c.id= U.module_ref_id  " +
                              "where module_ref_id =" + id + " and u.status=1  and U.module_type = " + (int)CMMS.CMMS_Modules.WARRANTY_CLAIM + ";";
 
@@ -647,8 +600,6 @@ namespace CMMSAPIs.Repositories.WC
             }
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.WARRANTY_CLAIM, request.id, 0, 0, "Rejected warranty claim", CMMS.CMMS_Status.REJECTED);
-
-
             string myQuery = $"SELECT * from wc where id = {request.id}";
             List<CMWCDetail> _WCList = await Context.GetData<CMWCDetail>(myQuery).ConfigureAwait(false);
             await CMMSNotification.sendNotification(CMMS.CMMS_Modules.WARRANTY_CLAIM, CMMS.CMMS_Status.REJECTED, new[] { _WCList[0].created_by }, _WCList[0]);

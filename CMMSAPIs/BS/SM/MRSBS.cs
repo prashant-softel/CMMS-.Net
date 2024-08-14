@@ -38,6 +38,7 @@ namespace CMMSAPIs.BS.SM
         Task<CMDefaultResponse> updateUsedQty(List<CMTransferItems> request);
         Task<CMIssuedAssetItems> getIssuedAssetItems(int id);
         Task<List<CMPlantStockOpeningResponse_MRSRetrun>> getMRSReturnStockItems(int mrs_id);
+        Task<List<PLANTAVAILABLE>> GetAvailableQuantityinPlant(int smassetid);
     }
     public class MRSBS : IMRSBS
     {
@@ -557,6 +558,21 @@ namespace CMMSAPIs.BS.SM
                 using (var repos = new MRSRepository(getDB))
                 {
                     return await repos.getMRSReturnStockItems(mrs_id);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<PLANTAVAILABLE>> GetAvailableQuantityinPlant(int smassetid)
+        {
+            try
+            {
+                using (var repos = new MRSRepository(getDB))
+                {
+                    return await repos.GetAvailableQuantityinPlant(smassetid);
                 }
             }
             catch (Exception ex)

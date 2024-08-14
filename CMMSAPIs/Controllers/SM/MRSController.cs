@@ -589,5 +589,23 @@ namespace CMMSAPIs.Controllers.SM
                 return Ok(item);
             }
         }
+        [Route("GetAvailableQuantityinPlant")]
+        [HttpGet]
+        public async Task<IActionResult> GetAvailableQuantityinPlant(int smassetid)
+        {
+            try
+            {
+                var data = await _MRSBS.GetAvailableQuantityinPlant(smassetid);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                _AddLog.ErrorLog(ex.ToString());
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid data sent.";
+                return Ok(item);
+            }
+        }
     }
 }

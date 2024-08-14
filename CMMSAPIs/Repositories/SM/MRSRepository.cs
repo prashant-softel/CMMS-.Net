@@ -25,8 +25,6 @@ namespace CMMSAPIs.Repositories.SM
 
             string filter = " WHERE is_mrs_return = 0 and sm.facility_ID = " + facility_ID + "  AND  (DATE_FORMAT(sm.lastmodifieddate,'%Y-%m-%d') BETWEEN '" + fromDate.ToString("yyyy-MM-dd") + "' AND '" + toDate.ToString("yyyy-MM-dd") + "' OR DATE_FORMAT(sm.returnDate,'%Y-%m-%d') BETWEEN '" + fromDate.ToString("yyyy-MM-dd") + "' AND '" + toDate.ToString("yyyy-MM-dd") + "')";
 
-
-
             string stmt = "SELECT is_mrs_return, sm.ID,sm.requested_by_emp_ID,CONCAT(ed1.firstName,' ',ed1.lastName) as approver_name,DATE_FORMAT(sm.requested_date,'%Y-%m-%d %H:%i') as requestd_date," +
                 "DATE_FORMAT(sm.returnDate,'%Y-%m-%d %H:%i') as returnDate,if(sm.approval_status != '',DATE_FORMAT(sm.approved_date,'%Y-%m-%d %H:%i'),'') as approval_date,sm.approval_status,sm.issuedAt, CONCAT(ed2.firstName,' ',ed2.lastName) as issued_name , " +
                 "sm.approval_comment,CONCAT(ed.firstName,' ',ed.lastName) as requested_by_name, sm.status, sm.activity, sm.whereUsedType, " +
@@ -2553,6 +2551,15 @@ namespace CMMSAPIs.Repositories.SM
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_MRS, request.ID, 0, 0, "MRS return faluty submitted.", CMMS.CMMS_Status.MRS_SUBMITTED);
 
             return response;
+        }
+        internal async Task<List<PLANTAVAILABLE>> GetAvailableQuantityinPlant(int smassetid)
+        {
+            string Plant_facility_query = $"select sm.plant_ID as facilityId ,f.name as facility_name,smi.available_qty from smrsitems as smi " +
+                                          $"LEFT Join smassetmasters as sm on sm.ID=smi.asset_item_ID " +
+                                          $"LEFT Join facilities as f on f.id=sm.plant_ID " +
+                                          $" where asset_item_ID={smassetid} group by sm.plant_ID ;";
+            List<PLANTAVAILABLE> Plant_Details = await Context.GetData<PLANTAVAILABLE>(Plant_facility_query).ConfigureAwait(false);
+            return Plant_Details;
         }
     }
 }

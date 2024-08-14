@@ -1,4 +1,3 @@
-using CMMSAPIs.Models.Masters;
 using System;
 using System.Collections.Generic;
 
@@ -214,7 +213,7 @@ namespace CMMSAPIs.Models.SM
         public string referenceBy { get; set; }
         public string referenceName { get; set; }
         public string remarks { get; set; }
-   
+
         public DateTime? LastUpdated { get; set; }
         public string CreatedBy { get; set; }
         public DateTime? createdAt { get; set; }
@@ -255,6 +254,14 @@ namespace CMMSAPIs.Models.SM
         public decimal consumed_qty { get; set; }
         public decimal issued_qty { get; set; }
         public decimal approved_qty { get; set; }
+    }
+    public class PLANTAVAILABLE
+    {
+        public int facilityId { get; set; }
+        public string facility_name { get; set; }
+        public dynamic available_qty { get; set; }
+        public int assetItemID { get; set; }
+        public string sm_asset_name { get; set; }
     }
     public class CMPlantStockOpening_MRSReturn
     {
