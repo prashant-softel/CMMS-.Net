@@ -47,7 +47,10 @@ namespace CMMSAPIs.Repositories.DSM
                     var excel = new ExcelPackage(path);
                     var sheet = excel.Workbook.Worksheets["DSM"];
                     if (sheet == null)
-                        m_errorLog.SetWarning("Sheet containing DSM Data should be named 'DSM'");
+                    {
+
+                        return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, "Invalid sheet name. Sheet name must be DSM");
+                    }
                     else
                     {
                         List<CMDSMImportData> dataList = new List<CMDSMImportData>();
@@ -196,7 +199,7 @@ namespace CMMSAPIs.Repositories.DSM
             filter += (!string.IsNullOrEmpty(spvId) ? " AND sm.spvId IN (" + string.Join(",", spvId) + ")" : string.Empty);
             filter += (!string.IsNullOrEmpty(siteId) ? " AND sm.id IN (" + string.Join(",", siteId) + ")" : string.Empty);
 
-            string qry = "SELECT fy, month, dsm.site, spv.name AS spv, states.name AS state, category, dmsType, vendor AS forcasterName, dsmPenalty, actualKwh, scheduleKwh, " +
+            string qry = "SELECT fy, month, dsm.site, spv.name AS spv, states.name AS state, category, dmsType as dsmType, vendor AS forcasterName, dsmPenalty, actualKwh, scheduleKwh, " +
                          "SUM(dsmPenalty / actualKwh) * 100 AS dsmPer " +
                          "FROM dsm " +
                          "LEFT JOIN site_master AS sm ON sm.site = dsm.site " +

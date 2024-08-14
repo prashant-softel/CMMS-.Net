@@ -1,13 +1,9 @@
 ﻿using CMMSAPIs.BS.DSM;
-using CMMSAPIs.Models.DSM;
-using CMMSAPIs.Models.Utils;
-using CMMSAPIs.Helper;
+using CMMSAPIs.Models.SM;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
-using System.Collections.Generic;
 using System;
+using System.Threading.Tasks;
 
 namespace CMMSAPIs.Controllers.DSM
 {
@@ -52,7 +48,11 @@ namespace CMMSAPIs.Controllers.DSM
             }
             catch (Exception ex)
             {
-                throw;
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = ex.Message;
+                return Ok(item);
+
             }
         }
 

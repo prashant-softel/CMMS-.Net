@@ -18,6 +18,7 @@ namespace CMMSAPIs.Models.WC
         public string equipment_category { get; set; }
         public int equipment_id { get; set; }
         public string equipment_name { get; set; }
+        public int is_required { get; set; }
         public string equipment_sr_no { get; set; }
         public int supplier_id { get; set; }
         public string severity { get; set; }

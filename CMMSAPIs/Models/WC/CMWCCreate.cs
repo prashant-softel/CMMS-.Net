@@ -42,7 +42,7 @@ namespace CMMSAPIs.Models.WC
         public string approvedBy { get; set; }
         public string approvedOn { get; set; }
         public string wcFacCode { get; set; }
-        public DateTime? failureTime { get; set; }
+        public DateTime failureTime { get; set; }
         public int estimatedLoss { get; set; }
         public int estimatedLossCurrencyId { get; set; }
         public int quantity { get; set; }
@@ -72,6 +72,7 @@ namespace CMMSAPIs.Models.WC
         public string email { get; set; }
         public string rolename { get; set; }
         public string role { get; set; }
+        public dynamic mobile { get; set; }
     }
 
     public class CMWCSupplierActions

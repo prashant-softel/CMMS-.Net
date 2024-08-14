@@ -267,7 +267,7 @@ namespace CMMSAPIs.Repositories.Masters
         }
         internal async Task<List<GETSCHEDULEDETAIL>> GetScheduleCourseDetail(int schedule_id)
         {
-            //$" c.Topic,c.Traning_category_id, c.No_Of_Days, c.Targated_group_id, c.Duration_in_Minutes ,cc.name as mis_training_mis_course_category ,tg.name as mis_targeted_group
+
             string getsch = $"SELECT  Schid as ScheduleID,mis_training_schedule.facility_id ,courseId as courseID , course_name as course,DATE_FORMAT(ScheduleDate,'%Y-%m-%d') as Date_of_Trainig, TraingCompany as Training_Agency, Trainer,concat(u.firstName,u.lastName) as HFE_Epmloyee, Mode as mode,  Venue  " +
                 $" from  mis_training_schedule " +
                 $"  LEFT JOIN mis_training_course as c on c.id = mis_training_schedule.courseId " +

@@ -214,13 +214,13 @@ namespace CMMSAPIs.Repositories.WC
                 await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
                 if (unit.additionalEmailEmployees.Count > 0)
                 {
-                    string addMailQry = "INSERT INTO wc_emails (wc_id, email, name, user_id, type,role,rolename) VALUES ";
+                    string addMailQry = "INSERT INTO wc_emails (wc_id, email, name, user_id, type,role,rolename,mobile) VALUES ";
                     string idToMail = $"SELECT id, loginId as email, CONCAT(firstName,' ',lastName) as name,roleId  FROM users " +
                                         $"WHERE id IN ({string.Join(',', unit.additionalEmailEmployees)});";
                     DataTable mailList = await Context.FetchData(idToMail).ConfigureAwait(false);
                     foreach (DataRow mail in mailList.Rows)
                     {
-                        addMailQry += $"({id}, '{mail["email"]}', '{mail["name"]}', {mail["id"]}, 'Internal','{mail["roleId"]}','0'), ";
+                        addMailQry += $"({id}, '{mail["email"]}', '{mail["name"]}', {mail["id"]}, 'Internal','{mail["roleId"]}','0','0'), ";
                     }
                     string getAllMails = "SELECT id, loginId,roleId FROM users;";
                     DataTable allMails = await Context.FetchData(getAllMails).ConfigureAwait(false);
@@ -243,16 +243,16 @@ namespace CMMSAPIs.Repositories.WC
                             u_id = 0;
                             roleId = 0;
                         }
-                        addMailQry += $"({id}, '{mail.email}', '{mail.name}', {u_id}, '{(u_id != 0 ? "Internal" : "External")}','{roleId}','{role_name}'), ";
+                        addMailQry += $"({id}, '{mail.email}', '{mail.name}', {u_id}, '{(u_id != 0 ? "Internal" : "External")}','{roleId}','{role_name}','{mail.mobile}'), ";
                     }
                     addMailQry = addMailQry.Substring(0, addMailQry.Length - 2) + ";";
                     await Context.ExecuteNonQry<int>(addMailQry).ConfigureAwait(false);
                 }
-                string addSupplierActions = "INSERT INTO wcschedules (warranty_id, supplier_action, input_value, input_date,srNumber, created_at) VALUES ";
+                string addSupplierActions = "INSERT INTO wcschedules (warranty_id, supplier_action, input_value, input_date,srNumber,is_required, created_at) VALUES ";
                 foreach (var action in unit.supplierActions)
                 {
-                    addSupplierActions += $"({id}, '{action.name}', {(action.is_required)}, '{((DateTime)action.required_by_date).ToString("yyyy-MM-dd")}', " +
-                                            $"'{action.srNumber}','{UtilsRepository.GetUTCTime()}'), ";
+                    addSupplierActions += $"({id}, '{action.name}',0, '{((DateTime)action.required_by_date).ToString("yyyy-MM-dd")}', " +
+                                            $"'{action.srNumber}',{action.is_required},'{UtilsRepository.GetUTCTime()}'), ";
                 }
                 addSupplierActions = addSupplierActions.Substring(0, addSupplierActions.Length - 2) + ";";
                 await Context.ExecuteNonQry<int>(addSupplierActions).ConfigureAwait(false);
@@ -315,7 +315,7 @@ namespace CMMSAPIs.Repositories.WC
             string myQuery = "SELECT  wc.id as wc_id, wc.facilityId as facility_Id, f.name as facility_name,ac.id AS equipment_category_id, ac.name AS equipment_category, a.id AS equipment_id, a.name AS equipment_name, equipment_sr_no," +
             "b1.id AS supplier_id, b1.name AS supplier_name,bs.name as manufacture_name, good_order_id, affected_part, order_reference_number, affected_sr_no, cost_of_replacement, wc.currencyId,  wc.currency, approxdailyloss ," + // add cost_of_replacement,
             " warranty_start_date, warranty_end_date,wc.severity, warranty_claim_title, warranty_description, " +
-            "corrective_action_by_buyer, request_to_supplier, concat(user.firstName , ' ' , user.lastName) AS approver_name," +
+            "corrective_action_by_buyer, request_to_supplier, concat(user.firstName , ' ' , user.lastName) AS approver_name,ws.is_required as is_required ," +
             " created_by, issued_on, wc.status,approved_by, wc.date_of_claim AS date_of_claim, wc_fac_code, failure_time, startDate warrantyStartDate,  endDate warrantyEndDate" +
             " FROM wc " +
             "LEFT JOIN facilities as f ON f.id = wc.facilityId " +
@@ -350,12 +350,12 @@ namespace CMMSAPIs.Repositories.WC
             GetWCDetails[0].additionalEmailEmployees = internalEmails;
 
             // Retrieve external emails associated with the warranty claim
-            string externalEmailsQuery = $"SELECT user_id, name, email,role,rolename FROM wc_emails WHERE wc_id = {id} and type = 'External'";
+            string externalEmailsQuery = $"SELECT user_id, name, email,role,rolename as rolename,mobile as mobile FROM wc_emails WHERE wc_id = {id} and type = 'External'";
             List<CMWCExternalEmail> externalEmails = await Context.GetData<CMWCExternalEmail>(externalEmailsQuery).ConfigureAwait(false);
             GetWCDetails[0].externalEmails = externalEmails;
 
             // Retrieve supplier actions associated with the warranty claim
-            string supplierActionsQuery = $"SELECT supplier_action as name,srNumber, input_value AS is_required, input_date AS required_by_date FROM wcschedules WHERE warranty_id =  {id}";
+            string supplierActionsQuery = $"SELECT supplier_action as name,srNumber, is_required AS is_required, input_date AS required_by_date FROM wcschedules WHERE warranty_id =  {id}";
             List<CMWCSupplierActions> supplierActions = await Context.GetData<CMWCSupplierActions>(supplierActionsQuery).ConfigureAwait(false);
             GetWCDetails[0].supplierActions = supplierActions;
 
@@ -438,9 +438,12 @@ namespace CMMSAPIs.Repositories.WC
             if (request.approverId > 0)
                 updateQry += $"approver_id = {request.approverId}, ";
             if (request.date_of_claim != null)
-                updateQry += $"date_of_claim =' {request.date_of_claim}', ";
+                updateQry += $"date_of_claim =' {request.date_of_claim.ToString("yyyy'-'MM'-'dd HH-mm")}', ";
+
             if (request.failureTime != null)
-                updateQry += $"failure_time = '{request.failureTime}', ";
+            {
+                updateQry += $"failure_time = '{request.failureTime.ToString("yyyy'-'MM'-'dd HH-mm")}', ";
+            }
             updateQry = updateQry.Substring(0, updateQry.Length - 2) + $" WHERE id = {request.id};";
             await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
             if (request.affectedPartsImages != null)
@@ -521,11 +524,11 @@ namespace CMMSAPIs.Repositories.WC
                 {
                     string deleteActions = $"DELETE FROM wcschedules WHERE warranty_id = {request.id}";
                     await Context.ExecuteNonQry<int>(deleteActions).ConfigureAwait(false);
-                    string addSupplierActions = "INSERT INTO wcschedules (warranty_id, supplier_action, input_value, input_date,srNumber, created_at) VALUES ";
+                    string addSupplierActions = "INSERT INTO wcschedules (warranty_id, supplier_action, input_value, input_date,srNumber,is_required, created_at) VALUES ";
                     foreach (var action in request.supplierActions)
                     {
-                        addSupplierActions += $"({request.id}, '{action.name}', {(action.is_required)}, '{((DateTime)action.required_by_date).ToString("yyyy-MM-dd")}', " +
-                                                $"{request.srNumber},'{UtilsRepository.GetUTCTime()}'), ";
+                        addSupplierActions += $"({request.id}, '{action.name}', 0, '{((DateTime)action.required_by_date).ToString("yyyy-MM-dd")}', " +
+                                                $"'{action.srNumber}',{action.is_required},'{UtilsRepository.GetUTCTime()}'), ";
                     }
                     addSupplierActions = addSupplierActions.Substring(0, addSupplierActions.Length - 2) + ";";
                     await Context.ExecuteNonQry<int>(addSupplierActions).ConfigureAwait(false);
