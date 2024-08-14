@@ -5,7 +5,7 @@ namespace CMMSAPIs.Models.Grievance
     public class CMGrievance
     {
         public int id { get; set; }
-        //public string name { get; set; }
+        public string month_name { get; set; }
         //public DateTime? added_at { get; set; }
         //public string added_by { get; set; }
         public int facilityId { get; set; }
@@ -57,4 +57,36 @@ namespace CMMSAPIs.Models.Grievance
  //       public int updatedBy { get; set; }
 
     }
+
+    public class GrievanceSummaryReport
+    {
+        public int months { get; set; }
+        public string month_name { get; set; }
+        public int year {  get; set; }
+
+      
+
+        public GrievanceSummaryReport(int months, string month_name, int year)
+        {
+            this.months = months;
+            this.month_name = month_name;
+            this.year = year;
+        }
+        public int number_of_work_force_grievances {  get; set; }
+        public int number_of_local_community_grievances { get; set; }
+        public int workforce_case_resolved {  get; set; }
+        public int worforce_case_pending {  get; set; }
+        public int worforce_inspection_ongoing { get; set; }
+        public int local_cases_resolved { get; set; }
+        public int local_cases_pending { get; set; }
+        public int local_cases_inspection_ongoing { get; set; }
+        public int total_numer_of_grievances_raised { get; set; }
+        public int total_number_of_grievances_resolved {  get; set; }
+        public int total_number_of_grievances_pending {  get; set; }
+        public int resolved_at_l1 {  get; set; }
+        public int resolved_at_l2 {  get; set; }
+        public int resolved_at_l3 {  get; set; }
+
+    }
 }
+

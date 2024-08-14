@@ -1,13 +1,33 @@
-﻿using CMMSAPIs.Helper;
-using CMMSAPIs.Models.Grievance;
-using CMMSAPIs.Models.Notifications;
-using CMMSAPIs.Models.Utils;
-using CMMSAPIs.Repositories.Utils;
-using Microsoft.AspNetCore.Hosting;
-using System;
+﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
+using CMMSAPIs.Helper;
+using CMMSAPIs.Models.Grievance;
+using CMMSAPIs.Models.Utils;
+using CMMSAPIs.Repositories.Utils;
+using System.IO;
+using Microsoft.AspNetCore.Hosting;
+using OfficeOpenXml;
+using CMMSAPIs.Models.Notifications;
+using CMMSAPIs.Models.Calibration;
+using CMMSAPIs.Models.Jobs;
+using iTextSharp.tool.xml.html;
+using Org.BouncyCastle.Asn1.X500;
+using System.Drawing;
+using System.Text.RegularExpressions;
+using MySqlX.XDevAPI.Relational;
+using Microsoft.IdentityModel.Tokens;
+using CMMSAPIs.Models.Inventory;
+using CMMSAPIs.Models.Users;
+using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json;
+using CMMSAPIs.Models.Masters;
+using CMMSAPIs.BS.Facility;
+using static CMMSAPIs.Helper.CMMS;
+using Microsoft.AspNetCore.Http.Features;
+using GrievanceSummaryReport = CMMSAPIs.Models.Grievance.GrievanceSummaryReport;
 //using static System.Net.WebRequestMethods;
 //using IronXL;
 
@@ -89,14 +109,14 @@ namespace CMMSAPIs.Repositories.Grievance
                 ", g.createdAt, g.createdBy, g.updatedBy, g.description, t.status, t.addedBy, t.addedAt " +
                 ", t.updatedBy, t.updatedAt " +
                 " FROM mis_grievance g " +
-                " JOIN mis_m_grievancetype t ON g.grievanceType = t.id" +
+                " LEFT JOIN mis_m_grievancetype t ON g.grievanceType = t.id" +
                 " WHERE  g.facilityId IN (" + facilityId + ") and g.status = 1";
 
 
 
             if (status?.Length > 0)
             {
-                myQuery += " AND g.status_id IN (" + status + ")";
+                myQuery += " AND g.status_id IN (" + (int)CMMS.CMMS_Status.Grievance_ADDED + ", " + (int)CMMS.CMMS_Status.GRIEVANCE_ONGOING + ")";
             }
 
 
@@ -134,18 +154,32 @@ namespace CMMSAPIs.Repositories.Grievance
                 "g.resolutionLevel, g.description, g.closedDate, g.status_id as statusId, g.createdAt, g.createdBy as createdById, g.updatedBy as updatedById, " +
                 "t.name AS grievanceType, t.description AS type_description, t.status, t.addedBy, t.addedAt, t.updatedBy, t.updatedAt " +
                 "FROM mis_grievance g " +
-                "JOIN mis_m_grievancetype t ON g.grievanceType = t.id " +
+                "LEFT JOIN mis_m_grievancetype t ON g.grievanceType = t.id " +
                 "WHERE g.id = " + id;
 
+
+
             List<CMGrievance> _ViewGrievanceList = await Context.GetData<CMGrievance>(myQuery).ConfigureAwait(false);
-            //update status
-            string _shortStatus = getShortStatus(CMMS.CMMS_Modules.GRIEVANCE, (CMMS.CMMS_Status)_ViewGrievanceList[0].statusId);
-            _ViewGrievanceList[0].statusShort = _shortStatus;
 
-            string _longStatus = getLongStatus(CMMS.CMMS_Modules.GRIEVANCE, (CMMS.CMMS_Status)_ViewGrievanceList[0].statusId, _ViewGrievanceList[0]);
-            _ViewGrievanceList[0].statusLong = _longStatus;
+            Console.WriteLine($"_ViewGrievanceList.Count = {_ViewGrievanceList.Count}");
 
-            return _ViewGrievanceList[0];
+
+            if (_ViewGrievanceList != null && _ViewGrievanceList.Count > 0)
+            {
+                CMGrievance grievance = _ViewGrievanceList[0];
+
+                // Update status with short and long descriptions
+                grievance.statusShort = getShortStatus(CMMS.CMMS_Modules.GRIEVANCE, (CMMS.CMMS_Status)_ViewGrievanceList[0].statusId);
+
+                grievance.statusLong = getLongStatus(CMMS.CMMS_Modules.GRIEVANCE, (CMMS.CMMS_Status)_ViewGrievanceList[0].statusId, grievance);
+
+                return grievance;
+            }
+            else
+            {
+                // Handle the case where no grievance was found
+                throw new KeyNotFoundException($"No grievance found with ID {id}");
+            }
         }
 
 
@@ -167,11 +201,11 @@ namespace CMMSAPIs.Repositories.Grievance
             {
 
 
-                string qry = "INSERT INTO  mis_grievance (facilityId, grievanceType, concern, description, status_id, createdAt, createdBy, status ) VALUES ";
+                string qry = "INSERT INTO  mis_grievance (facilityId, grievanceType, concern, description, resolutionLevel, status_id, createdAt, createdBy) VALUES ";
 
                 //concern = request.concern;
 
-                qry += "('" + request.facilityId + "','" + request.grievanceType + "','" + request.concern + "','" + request.description + "','" + statusId + "','" + UtilsRepository.GetUTCTime() + "','" + userID + "'," + 1 + "); ";
+                qry += "('" + request.facilityId + "','" + request.grievanceType + "','" + request.concern + "','" + request.description + "','" + request.resolutionLevel + "','" + statusId + "','" + UtilsRepository.GetUTCTime() + "','" + userID + "'); ";
 
                 qry += "select LAST_INSERT_ID(); ";
 
@@ -329,53 +363,6 @@ namespace CMMSAPIs.Repositories.Grievance
 
 
 
-        /* internal async Task<CMDefaultResponse> DeleteGrievance(int id, int userID)
-         {
-            *//* ?ID=34
-              delete from assets and warranty table*//*
-
-         //Your code goes here
-         if (id <= 0)
-         {
-             throw new ArgumentException("Invalid argument <" + id + ">");
-
-         }
-
-         CMGrievance _GrievanceAdded = await GetGrievanceDetails(id);
-
-         string qry = $"SELECT concern as deleted_by FROM mis_grievance WHERE id = {id}";
-
-         List<CMGrievance> deleted_by = await Context.GetData<CMGrievance>(qry).ConfigureAwait(false);
-
-         _GrievanceAdded.deletedBy = deleted_by[0].deletedBy;
-
-         string _shortStatus = getShortStatus(CMMS.CMMS_Modules.GRIEVANCE, CMMS.CMMS_Status.Grievance_DELETED);
-         _GrievanceAdded.statusShort = _shortStatus;
-
-         string _longStatus = getLongStatus(CMMS.CMMS_Modules.GRIEVANCE, CMMS.CMMS_Status.Grievance_DELETED, _GrievanceAdded);
-         _GrievanceAdded.statusLong = _longStatus;
-
-             await CMMSNotification.sendNotification(
-      CMMS.CMMS_Modules.GRIEVANCE,
-      CMMS.CMMS_Status.Grievance_DELETED,
-      new int[] { userID }, // Convert the single userID to an array
-      _GrievanceAdded
-  );
-             string delQuery1 = $"UPDATE mis_grievance SET status_id = 0, status = 0 WHERE id = {id}";
-       //string delQuery2 = $"UPDATE assetwarranty SET status = 0 where asset_id = {id}";
-         await Context.GetData<List<int>>(delQuery1).ConfigureAwait(false);
-       //await Context.GetData<List<int>>(delQuery2).ConfigureAwait(false);
-
-         CMDefaultResponse obj = null;
-         //if (retVal1 && retVal2)
-         {
-             obj = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Grievance <" + id + "> has been deleted");
-         }
-         return obj;
-         // DELETE t1, t2 FROM t1 INNER JOIN t2 INNER JOIN t3
-         //WHERE t1.id = t2.id AND t2.id = t3.id;
-     }*/
-
         internal async Task<CMDefaultResponse> DeleteGrievance(int id, int userID)
         {
             /*?ID=34
@@ -423,8 +410,111 @@ namespace CMMSAPIs.Repositories.Grievance
             //WHERE t1.id = t2.id AND t2.id = t3.id;
         }
 
+        internal async Task<List<GrievanceSummaryReport>> GrievanceSummaryReport(string facilityId, string fromDate, string toDate)
+        {
+            Dictionary<int, GrievanceSummaryReport> dictionary = new Dictionary<int, GrievanceSummaryReport>();
 
+            
+
+            string myQuery =
+                "SELECT g.id, g.facilityId, g.grievanceType AS grievanceTypeId, g.concern, g.resolutionLevel, g.status_id as statusId " +
+                ", g.createdAt, g.createdBy, g.updatedBy, g.description, g.status, MONTHNAME(createdAt) AS month_name" +
+                " FROM mis_grievance g ";
+
+            List<CMGrievance> response = await Context.GetData<CMGrievance>(myQuery).ConfigureAwait(false);
+
+            if (response != null)
+            {
+                foreach (var item in response)
+                {
+                    bool work_force = false;
+                    bool local_community = false;
+
+                    string createdAt_string = item.createdAt.ToString("yyyy-MM-dd");
+                    string strMonth = createdAt_string.Substring(5, 2);
+                    int month = int.Parse(strMonth);
+                    string mn = item.month_name;
+
+                    string strYear = createdAt_string.Substring(0, 4);
+                    int year = int.Parse(strYear);
+
+                    GrievanceSummaryReport forMonth;
+
+                    if (!dictionary.TryGetValue(month, out forMonth))
+                    {
+                        forMonth = new GrievanceSummaryReport(month, mn, year);
+                        dictionary.Add(month, forMonth);
+                    }
+
+                    if (item.grievanceTypeId == 1)
+                    {
+                        forMonth.number_of_work_force_grievances++;
+                        work_force = true;
+                    }
+
+                    if (item.grievanceTypeId == 2)
+                    {
+                        forMonth.number_of_local_community_grievances++;
+                        local_community = true;
+                    }
+
+                    if (item.statusId == (int)CMMS_Status.GRIEVANCE_CLOSED && item.status == 0 && work_force)
+                    {
+                        forMonth.workforce_case_resolved++;
+                        forMonth.total_number_of_grievances_resolved++;
+                    }
+                    else if (item.statusId == (int)CMMS_Status.Grievance_ADDED && item.status == 1 && work_force)
+                    {
+                        forMonth.worforce_case_pending++;
+                        forMonth.total_number_of_grievances_pending++;
+                    }
+                    else if (item.statusId == (int)CMMS_Status.GRIEVANCE_ONGOING && item.status == 1 && work_force)
+                    {
+                        forMonth.worforce_inspection_ongoing++;
+                    }
+
+                    if (item.statusId == (int)CMMS_Status.GRIEVANCE_CLOSED && item.status == 0 && local_community)
+                    {
+                        forMonth.local_cases_resolved++;
+                        forMonth.total_number_of_grievances_resolved++;
+                    }
+                    else if (item.statusId == (int)CMMS_Status.Grievance_ADDED && item.status == 1 && local_community)
+                    {
+                        forMonth.local_cases_pending++;
+                        forMonth.total_number_of_grievances_pending++;
+                    }
+                    else if (item.statusId == (int)CMMS_Status.GRIEVANCE_ONGOING && item.status == 1 && local_community)
+                    {
+                        forMonth.local_cases_inspection_ongoing++;
+                    }
+
+                    if (item.statusId == (int)CMMS_Status.GRIEVANCE_CLOSED && item.status == 0 && item.resolutionLevel == 1)
+                    {
+                        forMonth.resolved_at_l1++;
+                    }
+                    else if (item.statusId == (int)CMMS_Status.GRIEVANCE_CLOSED && item.status == 0 && item.resolutionLevel == 2)
+                    {
+                        forMonth.resolved_at_l2++;
+                    }
+                    else if (item.statusId == (int)CMMS_Status.GRIEVANCE_CLOSED && item.status == 0 && item.resolutionLevel == 3)
+                    {
+                        forMonth.resolved_at_l3++;
+                    }
+                    DateTime start_Date = DateTime.ParseExact(fromDate, "yyyy-MM-dd", null);
+
+                    if (item.createdAt > start_Date)
+                    {
+                        forMonth.total_numer_of_grievances_raised++;
+                    }
+                }
+            }
+
+            // Return the values of the dictionary as a list
+            return dictionary.Values.ToList();
+        }
 
     }
+
+
 }
 

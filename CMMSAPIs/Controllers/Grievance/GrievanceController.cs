@@ -79,8 +79,8 @@ namespace CMMSAPIs.Controllers.Grievance
             {
                 var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => facilityId == facilityId)?.timezone;
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                request.status = 1;
-                var data = await _Grievance.CreateGrievance(request,userID, facilityId, facilitytimeZone);
+                int status = 1;
+                var data = await _Grievance.CreateGrievance(request,userID, facilityId, facilitytimeZone, status);
                     return Ok(data);
                 }
                 catch (Exception ex)
@@ -141,5 +141,24 @@ namespace CMMSAPIs.Controllers.Grievance
                 }
             }
 
+        [Route("GrievanceSummaryReport")]
+        [HttpGet]
+
+        public async Task<IActionResult> GetObservationSummaryReport(string facilityId, string fromDate, string toDate)
+        {
+            try
+            {
+                var data = await _Grievance.GrievanceSummaryReport(facilityId, fromDate, toDate);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
+
+
+
+
     }
+}
