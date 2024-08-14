@@ -1529,6 +1529,7 @@ namespace CMMSAPIs.Repositories.SM
                     int issued_qty = 0;
                     string asset_MDM_code = "";
                     int mrs_item_id_faulty = 0;
+                    int is_from_stock = 0;
 
                     string chkSrNoAvailableQuery = "";
                     DataTable dt_chk = new DataTable();
@@ -1547,10 +1548,11 @@ namespace CMMSAPIs.Repositories.SM
                         requested_qty = (dt_chk.Rows[0]["requested_qty"].ToInt());
                         issued_qty = (dt_chk.Rows[0]["issued_qty"].ToInt());
                         asset_MDM_code = (dt_chk.Rows[0]["asset_MDM_code"].ToString());
+                        is_from_stock = 1;
                     }
                     if (dt_chk.Rows.Count > 0)
                     {
-                        string updatestmt = $"Update smmrs SET status = {(int)CMMS.CMMS_Status.MRS_SUBMITTED} where id = {request.mrsreturnID} ;UPDATE smrsitems SET mrs_return_ID = {request.mrsreturnID}, returned_qty={request.faultyItems[i].returned_qty},return_remarks='{request.faultyItems[i].return_remarks}', is_faulty = 1,faulty_item_asset_id={request.faultyItems[i].faulty_item_asset_id} WHERE ID = {mrs_item_id_faulty};";
+                        string updatestmt = $"Update smmrs SET status = {(int)CMMS.CMMS_Status.MRS_SUBMITTED} where id = {request.mrsreturnID} ;UPDATE smrsitems SET mrs_return_ID = {request.mrsreturnID}, returned_qty={request.faultyItems[i].returned_qty},return_remarks='{request.faultyItems[i].return_remarks}', is_faulty = 1,faulty_item_asset_id={request.faultyItems[i].faulty_item_asset_id}, is_from_stock=1 WHERE ID = {mrs_item_id_faulty};";
                         await Context.ExecuteNonQry<int>(updatestmt);
 
 
