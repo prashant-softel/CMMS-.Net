@@ -1,5 +1,6 @@
 ﻿using CMMSAPIs.BS.Masters;
 using CMMSAPIs.Models.Masters;
+using CMMSAPIs.Models.Utils;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -318,6 +319,20 @@ namespace CMMSAPIs.Controllers.Masters
                 throw;
             }
         }
-
+        [Route("ApproveScheduleCourse")]
+        [HttpPost]
+        public async Task<IActionResult> ApproveScheduleCourse(CMApproval request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = TrainingCourseBS.ApproveScheduleCourse(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
     }
 }

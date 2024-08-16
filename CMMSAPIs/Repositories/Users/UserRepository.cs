@@ -1255,7 +1255,7 @@ namespace CMMSAPIs.Repositories.Users
                     user_access.Add($"({user_id}, {access.notification_id}, {access.can_change}, {access.user_flag}, " +
                                     $"'{UtilsRepository.GetUTCTime()}', {userID})");
                 }
-                                // inserting values from notification table for new user
+                // inserting values from notification table for new user
                 if (def_notif.Values.Count == 0)
                 {
                     string stmt_notificationIDs = "select featureId as notification_id  from usersaccess where userId= " + user_id + " order by featureId asc;";

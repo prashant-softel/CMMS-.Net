@@ -23,7 +23,7 @@ namespace CMMSAPIs.Models.WC
         public string affected_part { get; set; }
         public string affected_sr_no { get; set; }
         public DateTime failure_time { get; set; }
-        public int estimated_cost { get; set; }
+        public string estimated_cost { get; set; }
         public int quantity { get; set; }
         public string cost_of_replacement { get; set; }
         public string currency { get; set; }

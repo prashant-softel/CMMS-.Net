@@ -3,7 +3,6 @@ using CMMSAPIs.Models.Audit;
 using CMMSAPIs.Models.PM;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Audits;
-using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -63,7 +62,7 @@ namespace CMMSAPIs.BS.Audits
             {
                 using (var repos = new AuditScheduleViewRepository(getDB))
                 {
-                    return await repos.ExecuteAuditSchedule(request,userID);
+                    return await repos.ExecuteAuditSchedule(request, userID);
                 }
             }
             catch (Exception ex)

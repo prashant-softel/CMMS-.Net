@@ -63,6 +63,7 @@ namespace CMMSAPIs.Models.WC
     {
         public int file_id { get; set; }
         public string description { get; set; }
+
         public string fileName { get; set; }
 
     }

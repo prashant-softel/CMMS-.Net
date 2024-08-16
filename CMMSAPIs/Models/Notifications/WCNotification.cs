@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using CMMSAPIs.Helper;
+﻿using CMMSAPIs.Helper;
 using CMMSAPIs.Models.WC;
-using CMMSAPIs.Models.Utils;
-using CMMSAPIs.Repositories.Utils;
+using System;
 
 namespace CMMSAPIs.Models.Notifications
 {
@@ -51,7 +46,7 @@ namespace CMMSAPIs.Models.Notifications
                 case CMMS.CMMS_Status.WC_ITEM_REPLENISHED:     //Cancelled
                     retValue = String.Format("Warranty Claim <{0}> Item Replenished", WCObj.warranty_claim_title);
                     break;
-                case CMMS.CMMS_Status.WC_CLOSE_REJECTED:     //Cancelled
+                case CMMS.CMMS_Status.WC_CLOSED_REJECTED:     //Cancelled
                     retValue = String.Format("Warranty Claim <{0}> Close Rejected", WCObj.warranty_claim_title);
                     break;
                 case CMMS.CMMS_Status.WC_CLOSE_APPROVED:     //Cancelled
@@ -107,7 +102,7 @@ namespace CMMSAPIs.Models.Notifications
                 case CMMS.CMMS_Status.WC_ITEM_REPLENISHED:
                     retValue += String.Format(templateEnd, "Item Replenished At", WCObj.closed_at);
                     break;
-                case CMMS.CMMS_Status.WC_CLOSE_REJECTED:
+                case CMMS.CMMS_Status.WC_CLOSED_REJECTED:
                     retValue += String.Format(templateEnd, "Close Rejected by", WCObj.approver_name);
                     break;
                 case CMMS.CMMS_Status.WC_CLOSE_APPROVED:

@@ -443,8 +443,9 @@ namespace CMMSAPIs.Helper
             WC_APPROVED_BY_MANUFACTURER,
             WC_ITEM_REPLENISHED,
             //WC_WAITING_FOR_CLOSE_APPROVAL,
-            WC_CLOSE_REJECTED,
+            WC_CLOSED,
             WC_CLOSE_APPROVED,
+            WC_CLOSED_REJECTED,
             WC_CANCELLED,
 
             CALIBRATION_SCHEDULED = 211,

@@ -8,6 +8,7 @@ namespace CMMSAPIs.Models.WC
     {
 
         public int id { get; set; }
+        public bool resubmit { get; set; }
         public int facilityId { get; set; }
         public int equipmentCategoryId { get; set; }
         public int equipmentId { get; set; }

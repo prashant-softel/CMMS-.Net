@@ -30,6 +30,7 @@ namespace CMMSAPIs.BS.Masters
         Task<CMDefaultResponse> CreateTargetedGroup(CMTRAININGCATE request, int userID);
         Task<CMDefaultResponse> UpdateTargetedGroup(CMTRAININGCATE request, int userID);
         Task<CMDefaultResponse> DeleteTargetedGroup(int id, int userID);
+        Task<CMDefaultResponse> ApproveScheduleCourse(CMApproval request, int userid);
     }
     public class Traningbs : TrainingCourseBS
     {
@@ -332,6 +333,21 @@ namespace CMMSAPIs.BS.Masters
                     return await repos.GetScheduleCourseDetail(schedule_id);
 
                 }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<CMDefaultResponse> ApproveScheduleCourse(CMApproval request, int userid)
+        {
+            try
+            {
+                using (var repos = new TrainingRepository(getDB))
+                {
+                    return await repos.ApproveScheduleCourse(request, userid);
+                }
+
             }
             catch (Exception ex)
             {

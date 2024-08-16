@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using CMMSAPIs.Helper;
+﻿using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Models.WC;
 using CMMSAPIs.Repositories.WC;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace CMMSAPIs.BS.WC
 {
@@ -13,9 +13,13 @@ namespace CMMSAPIs.BS.WC
         Task<List<CMWCList>> GetWCList(int facilityId, string startDate, string endDate, int statusId);
         Task<CMDefaultResponse> CreateWC(List<CMWCCreate> request, int userID);
         Task<CMWCDetail> GetWCDetails(int wc_id);
-        Task<CMDefaultResponse> UpdateWC(CMWCCreate request);
+        Task<CMDefaultResponse> UpdateWC(CMWCCreate request, int userID);
         Task<CMDefaultResponse> ApproveWC(CMApproval request, int userID);
         Task<CMDefaultResponse> RejectWC(CMApproval request, int userID);
+        Task<CMDefaultResponse> ClosedWC(CMApproval request, int userID);
+        Task<CMDefaultResponse> updateWCimages(filesforwc request, int userID);
+        Task<CMDefaultResponse> ApprovedClosedWC(CMApproval request, int userID);
+        Task<CMDefaultResponse> RejectClosedWC(CMApproval request, int userID);
 
 
         //  Add those methods here and in WCcontroller
@@ -75,13 +79,13 @@ namespace CMMSAPIs.BS.WC
             }
         }
 
-        public async Task<CMDefaultResponse> UpdateWC(CMWCCreate request)
+        public async Task<CMDefaultResponse> UpdateWC(CMWCCreate request, int userID)
         {
             try
             {
                 using (var repos = new WCRepository(getDB))
                 {
-                    return await repos.UpdateWC(request);
+                    return await repos.UpdateWC(request, userID);
                 }
             }
             catch (Exception ex)
@@ -112,6 +116,66 @@ namespace CMMSAPIs.BS.WC
                 using (var repos = new WCRepository(getDB))
                 {
                     return await repos.RejectWC(request, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> ClosedWC(CMApproval request, int userID)
+        {
+            try
+            {
+                using (var repos = new WCRepository(getDB))
+                {
+                    return await repos.ClosedWC(request, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> updateWCimages(filesforwc request, int userID)
+        {
+            try
+            {
+                using (var repos = new WCRepository(getDB))
+                {
+                    return await repos.updateWCimages(request, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> ApprovedClosedWC(CMApproval request, int userID)
+        {
+            try
+            {
+                using (var repos = new WCRepository(getDB))
+                {
+                    return await repos.ApprovedClosedWC(request, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> RejectClosedWC(CMApproval request, int userID)
+        {
+            try
+            {
+                using (var repos = new WCRepository(getDB))
+                {
+                    return await repos.RejectClosedWC(request, userID);
                 }
             }
             catch (Exception ex)

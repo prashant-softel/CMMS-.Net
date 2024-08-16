@@ -1,4 +1,5 @@
 using CMMSAPIs.BS.WC;
+using CMMSAPIs.Models.SM;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Models.WC;
 using Microsoft.AspNetCore.Http;
@@ -50,9 +51,13 @@ namespace CMMSAPIs.Controllers.WC
                 var data = await _WCBS.CreateWC(request, userID);
                 return Ok(data);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = ex.Message;
+                return Ok(item);
+
             }
         }
 
@@ -74,9 +79,12 @@ namespace CMMSAPIs.Controllers.WC
             {
                 return NotFound(ex.Message);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = ex.Message;
+                return Ok(item);
             }
         }
 
@@ -87,12 +95,16 @@ namespace CMMSAPIs.Controllers.WC
         {
             try
             {
-                var data = await _WCBS.UpdateWC(request);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _WCBS.UpdateWC(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
             {
-                throw;
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = ex.Message;
+                return Ok(item);
             }
         }
 
@@ -109,10 +121,84 @@ namespace CMMSAPIs.Controllers.WC
             }
             catch (Exception ex)
             {
-                throw;
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = ex.Message;
+                return Ok(item);
             }
         }
-
+        [Route("updateWCimages")]
+        [HttpPost]
+        public async Task<IActionResult> updateWCimages(filesforwc request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _WCBS.updateWCimages(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = ex.Message;
+                return Ok(item);
+            }
+        }
+        [Route("ClosedWC")]
+        [HttpPost]
+        public async Task<IActionResult> ClosedWC(CMApproval request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _WCBS.ClosedWC(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = ex.Message;
+                return Ok(item);
+            }
+        }
+        [Route("ApprovedClosedWC")]
+        [HttpPost]
+        public async Task<IActionResult> ApprovedClosedWC(CMApproval request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _WCBS.ApprovedClosedWC(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = ex.Message;
+                return Ok(item);
+            }
+        }
+        [Route("RejectClosedWC")]
+        [HttpPost]
+        public async Task<IActionResult> RejectClosedWC(CMApproval request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _WCBS.RejectClosedWC(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = ex.Message;
+                return Ok(item);
+            }
+        }
         //[Authorize]
         [Route("RejectWC")]
         [HttpPut]
@@ -126,7 +212,10 @@ namespace CMMSAPIs.Controllers.WC
             }
             catch (Exception ex)
             {
-                throw;
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = ex.Message;
+                return Ok(item);
             }
 
         }

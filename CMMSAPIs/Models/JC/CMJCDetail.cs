@@ -119,6 +119,14 @@ public class Files
 {
     public List<int> uploadfile_ids { get; set; }
 }
+public class filesforwc
+{
+    public int id { get; set; }
+    public int facilityId { get; set; }
+    public string comment { get; set; }
+    public List<int> uploadfile_ids { get; set; }
+
+}
 public class CMWorkTypeTools
 {
     public int toolId { get; set; }

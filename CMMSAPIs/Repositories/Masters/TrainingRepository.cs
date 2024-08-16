@@ -490,6 +490,13 @@ namespace CMMSAPIs.Repositories.Masters
 
             return monthlyTrainingSummary.Values.ToList();
         }
+        public async Task<CMDefaultResponse> ApproveScheduleCourse(CMApproval request, int userid)
+        {
+            CMDefaultResponse response = new CMDefaultResponse();
+            string approve = $"update from  mis_training_schedule set approvedby={userid} and approvedat='{UtilsRepository.GetUTCTime()}' where Schid={request.id}";
+            int id = await Context.CheckGetData(approve).ConfigureAwait(false);
+            return response;
+        }
     }
 
 }
