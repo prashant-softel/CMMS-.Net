@@ -144,6 +144,10 @@ namespace CMMSAPIs.Repositories.WC
                 " warranty_start_date, warranty_end_date, warranty_claim_title, warranty_description, " +
                 "corrective_action_by_buyer, request_to_supplier, concat(user.firstName , ' ' , user.lastName) AS approver_name," +
                 $" created_by, issued_on, {statusOut} as status,wc.status as status_code, approved_by, wc_fac_code, failure_time " +
+                  " , wc.claim_status,case when wc.claim_status=1 then 'WC done-closed'" +
+            " when wc.claim_status=2 then 'WC rejected-closed'" +
+            " when wc.claim_status=3 then 'WC partially-closed' " +
+            " else 'Invalid status' end as long_claim_status " +
                 " FROM wc " +
                 " LEFT JOIN facilities as f ON f.id = wc.facilityId " +
                 " LEFT JOIN assets as a ON a.id = wc.equipment_id " +
@@ -322,6 +326,10 @@ namespace CMMSAPIs.Repositories.WC
             " warranty_start_date, warranty_end_date,wc.severity, warranty_claim_title, warranty_description, " +
             "corrective_action_by_buyer, request_to_supplier, concat(user.firstName , ' ' , user.lastName) AS approver_name,ws.is_required as is_required ," +
             " created_by, issued_on, wc.status,approved_by, wc.date_of_claim AS date_of_claim, wc_fac_code, failure_time, startDate warrantyStartDate,  endDate warrantyEndDate" +
+            " , wc.claim_status,case when wc.claim_status=1 then 'WC done-closed'" +
+            " when wc.claim_status=2 then 'WC rejected-closed'" +
+            " when wc.claim_status=3 then 'WC partially-closed' " +
+            " else 'Invalid status' end as long_claim_status " +
             " FROM wc " +
             "LEFT JOIN facilities as f ON f.id = wc.facilityId " +
             "LEFT JOIN assets as a ON a.id = wc.equipment_id " +
@@ -653,7 +661,7 @@ namespace CMMSAPIs.Repositories.WC
 
             string approveQuery = $"Update wc set status = {(int)CMMS.CMMS_Status.WC_CLOSED}, status_updated_at = '{UtilsRepository.GetUTCTime()}' , " +
                 $"reject_reccomendations = '{request.comment}',  " +
-                $" closed_by = {userId}, closed_at = '{UtilsRepository.GetUTCTime()}' " +
+                $" closed_by = {userId}, closed_at = '{UtilsRepository.GetUTCTime()}' , claim_status = {request.claim_status}" +
                 $" where id = {request.id} ;";
             int cloesd = await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
 
