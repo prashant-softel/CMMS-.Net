@@ -1,0 +1,13 @@
+D:\CMMS-.Net\CMMS_Services\bin\Debug\netcoreapp3.1\CMMS_Services.deps.json
+D:\CMMS-.Net\CMMS_Services\bin\Debug\netcoreapp3.1\CMMS_Services.dll
+D:\CMMS-.Net\CMMS_Services\bin\Debug\netcoreapp3.1\CMMS_Services.pdb
+D:\CMMS-.Net\CMMS_Services\bin\Debug\netcoreapp3.1\CMMSAPIs.dll
+D:\CMMS-.Net\CMMS_Services\bin\Debug\netcoreapp3.1\CMMSAPIs.pdb
+D:\CMMS-.Net\CMMS_Services\obj\Debug\netcoreapp3.1\CMMS_Services.csproj.AssemblyReference.cache
+D:\CMMS-.Net\CMMS_Services\obj\Debug\netcoreapp3.1\CMMS_Services.GeneratedMSBuildEditorConfig.editorconfig
+D:\CMMS-.Net\CMMS_Services\obj\Debug\netcoreapp3.1\CMMS_Services.AssemblyInfoInputs.cache
+D:\CMMS-.Net\CMMS_Services\obj\Debug\netcoreapp3.1\CMMS_Services.AssemblyInfo.cs
+D:\CMMS-.Net\CMMS_Services\obj\Debug\netcoreapp3.1\CMMS_Services.csproj.CoreCompileInputs.cache
+D:\CMMS-.Net\CMMS_Services\obj\Debug\netcoreapp3.1\CMMS_Services.csproj.CopyComplete
+D:\CMMS-.Net\CMMS_Services\obj\Debug\netcoreapp3.1\CMMS_Services.dll
+D:\CMMS-.Net\CMMS_Services\obj\Debug\netcoreapp3.1\CMMS_Services.pdb

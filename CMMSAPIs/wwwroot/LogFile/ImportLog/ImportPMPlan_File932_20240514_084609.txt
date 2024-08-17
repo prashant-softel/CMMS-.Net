@@ -1,0 +1,67 @@
+Error : [Row: 3] Frequency named 'Halfyearly' does not exist. Plan 'Power Transformer Halfyearly Check' not Inserted.
+Error : [Row: 6] Frequency named 'Halfyearly' does not exist. Plan 'SF6 CIRCUIT BREAKER Halfyearly Check' not Inserted.
+Error : [Row: 9] Frequency named 'Halfyearly' does not exist. Plan 'Isolator Halfyearly Check' not Inserted.
+Error : [Row: 11] Frequency named 'Halfyearly' does not exist. Plan 'Surge Arrestor Halfyearly Check' not Inserted.
+Error : [Row: 16] Frequency named 'Halfyearly' does not exist. Plan 'Potential Transformer Halfyearly Check' not Inserted.
+Error : [Row: 19] Frequency named 'Halfyearly' does not exist. Plan 'Current Transformer Halfyearly Check' not Inserted.
+Error : [Row: 23] Frequency named 'Halfyearly' does not exist. Plan 'Switchgear Halfyearly Check' not Inserted.
+Error : [Row: 28] Frequency named 'Halfyearly' does not exist. Plan 'ACDB Halfyearly Check' not Inserted.
+Error : [Row: 30] Frequency named 'Halfyearly' does not exist. Plan 'ACDB Halfyearly Check_ICR1' not Inserted.
+Error : [Row: 32] Frequency named 'Halfyearly' does not exist. Plan 'ACDB Halfyearly Check_ICR2' not Inserted.
+Error : [Row: 34] Frequency named 'Halfyearly' does not exist. Plan 'ACDB Halfyearly Check_ICR3' not Inserted.
+Error : [Row: 36] Frequency named 'Halfyearly' does not exist. Plan 'ACDB Halfyearly Check_ICR4' not Inserted.
+Error : [Row: 51] Frequency named 'Halfyearly' does not exist. Plan 'RMU Halfyearly Check_ICR1' not Inserted.
+Error : [Row: 54] Frequency named 'Halfyearly' does not exist. Plan 'RMU Halfyearly Check_ICR2' not Inserted.
+Error : [Row: 57] Frequency named 'Halfyearly' does not exist. Plan 'RMU Halfyearly Check_ICR3' not Inserted.
+Error : [Row: 60] Frequency named 'Halfyearly' does not exist. Plan 'RMU Halfyearly Check_ICR4' not Inserted.
+Error : [Row: 63] Frequency named 'Halfyearly' does not exist. Plan 'Transformer Halfyearly Check_ICR1' not Inserted.
+Error : [Row: 66] Frequency named 'Halfyearly' does not exist. Plan 'Transformer Halfyearly Check_ICR2' not Inserted.
+Error : [Row: 69] Frequency named 'Halfyearly' does not exist. Plan 'Transformer Halfyearly Check_ICR3' not Inserted.
+Error : [Row: 72] Frequency named 'Halfyearly' does not exist. Plan 'Transformer Halfyearly Check_ICR4' not Inserted.
+Error : [Row: 3] Plan  named 'Power Transformer Halfyearly Check' does not exist. Row not Inserted.
+Error : [Row: 6] Plan  named 'SF6 CIRCUIT BREAKER Halfyearly Check' does not exist. Row not Inserted.
+Error : [Row: 9] Plan  named 'Isolator Halfyearly Check' does not exist. Row not Inserted.
+Error : [Row: 12] Plan  named 'Isolator Halfyearly Check' does not exist. Row not Inserted.
+Error : [Row: 14] Plan  named 'Surge Arrestor Halfyearly Check' does not exist. Row not Inserted.
+Error : [Row: 16] Plan  named 'Surge Arrestor Halfyearly Check' does not exist. Row not Inserted.
+Error : [Row: 18] Plan  named 'Surge Arrestor Halfyearly Check' does not exist. Row not Inserted.
+Error : [Row: 20] Plan  named 'Surge Arrestor Halfyearly Check' does not exist. Row not Inserted.
+Error : [Row: 22] Plan  named 'Surge Arrestor Halfyearly Check' does not exist. Row not Inserted.
+Error : [Row: 24] Plan  named 'Surge Arrestor Halfyearly Check' does not exist. Row not Inserted.
+Error : [Row: 29] Plan  named 'Potential Transformer Halfyearly Check' does not exist. Row not Inserted.
+Error : [Row: 32] Plan  named 'Potential Transformer Halfyearly Check' does not exist. Row not Inserted.
+Error : [Row: 35] Plan  named 'Potential Transformer Halfyearly Check' does not exist. Row not Inserted.
+Error : [Row: 38] Plan  named 'Potential Transformer Halfyearly Check' does not exist. Row not Inserted.
+Error : [Row: 41] Plan  named 'Potential Transformer Halfyearly Check' does not exist. Row not Inserted.
+Error : [Row: 44] Plan  named 'Potential Transformer Halfyearly Check' does not exist. Row not Inserted.
+Error : [Row: 47] Plan  named 'Current Transformer Halfyearly Check' does not exist. Row not Inserted.
+Error : [Row: 50] Plan  named 'Current Transformer Halfyearly Check' does not exist. Row not Inserted.
+Error : [Row: 53] Plan  named 'Current Transformer Halfyearly Check' does not exist. Row not Inserted.
+Error : [Row: 56] Plan  named 'Current Transformer Halfyearly Check' does not exist. Row not Inserted.
+Error : [Row: 59] Plan  named 'Current Transformer Halfyearly Check' does not exist. Row not Inserted.
+Error : [Row: 62] Plan  named 'Current Transformer Halfyearly Check' does not exist. Row not Inserted.
+Error : [Row: 66] Plan  named 'Switchgear Halfyearly Check' does not exist. Row not Inserted.
+Error : [Row: 69] Plan  named 'Switchgear Halfyearly Check' does not exist. Row not Inserted.
+Error : [Row: 72] Plan  named 'Switchgear Halfyearly Check' does not exist. Row not Inserted.
+Error : [Row: 75] Plan  named 'Switchgear Halfyearly Check' does not exist. Row not Inserted.
+Error : [Row: 78] Plan  named 'Switchgear Halfyearly Check' does not exist. Row not Inserted.
+Error : [Row: 81] Plan  named 'Switchgear Halfyearly Check' does not exist. Row not Inserted.
+Error : [Row: 84] Plan  named 'Switchgear Halfyearly Check' does not exist. Row not Inserted.
+Error : [Row: 89] Plan  named 'ACDB Halfyearly Check' does not exist. Row not Inserted.
+Error : [Row: 91] Plan  named 'ACDB Halfyearly Check_ICR1' does not exist. Row not Inserted.
+Error : [Row: 93] Plan  named 'ACDB Halfyearly Check_ICR1' does not exist. Row not Inserted.
+Error : [Row: 95] Plan  named 'ACDB Halfyearly Check_ICR2' does not exist. Row not Inserted.
+Error : [Row: 97] Plan  named 'ACDB Halfyearly Check_ICR2' does not exist. Row not Inserted.
+Error : [Row: 99] Plan  named 'ACDB Halfyearly Check_ICR3' does not exist. Row not Inserted.
+Error : [Row: 101] Plan  named 'ACDB Halfyearly Check_ICR3' does not exist. Row not Inserted.
+Error : [Row: 103] Plan  named 'ACDB Halfyearly Check_ICR4' does not exist. Row not Inserted.
+Error : [Row: 105] Plan  named 'ACDB Halfyearly Check_ICR4' does not exist. Row not Inserted.
+Error : [Row: 120] Plan  named 'RMU Halfyearly Check_ICR1' does not exist. Row not Inserted.
+Error : [Row: 123] Plan  named 'RMU Halfyearly Check_ICR2' does not exist. Row not Inserted.
+Error : [Row: 126] Plan  named 'RMU Halfyearly Check_ICR3' does not exist. Row not Inserted.
+Error : [Row: 129] Plan  named 'RMU Halfyearly Check_ICR4' does not exist. Row not Inserted.
+Error : [Row: 132] Plan  named 'Transformer Halfyearly Check_ICR1' does not exist. Row not Inserted.
+Error : [Row: 135] Plan  named 'Transformer Halfyearly Check_ICR2' does not exist. Row not Inserted.
+Error : [Row: 138] Plan  named 'Transformer Halfyearly Check_ICR3' does not exist. Row not Inserted.
+Error : [Row: 141] Plan  named 'Transformer Halfyearly Check_ICR4' does not exist. Row not Inserted.
+Total errors <66>

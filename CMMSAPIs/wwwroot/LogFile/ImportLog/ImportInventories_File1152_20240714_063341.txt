@@ -1,0 +1,3 @@
+Error : [Row: 2] Asset_Warranty_Provider and Warranty Type are not defined
+Error : [Row: 5] Asset_Warranty_Start_Date, Asset_Warranty_Expiry_Date and Asset_Warranty_Term_Type are not defined
+Total errors <2>

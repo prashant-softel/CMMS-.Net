@@ -1,0 +1,43 @@
+Error : [Row: 13] Start Date '4/18/2024 12:00:00 AM' is less than Current Date . Plan 'Control & Relay Panel Monthly Check' not Inserted.
+Error : [Row: 25] Start Date '4/18/2024 12:00:00 AM' is less than Current Date . Plan 'Battery Charger Monthly Check' not Inserted.
+Error : [Row: 27] Start Date '4/18/2024 12:00:00 AM' is less than Current Date . Plan 'ACDB LT Panel Monthly Check' not Inserted.
+Error : [Row: 29] Start Date '4/18/2024 12:00:00 AM' is less than Current Date . Plan 'PLC Monthly Check_MCR' not Inserted.
+Error : [Row: 30] Start Date '4/13/2024 12:00:00 AM' is less than Current Date . Plan 'PLC Monthly Check_ICR1' not Inserted.
+Error : [Row: 31] Start Date '4/14/2024 12:00:00 AM' is less than Current Date . Plan 'PLC Monthly Check_ICR2' not Inserted.
+Error : [Row: 32] Start Date '4/15/2024 12:00:00 AM' is less than Current Date . Plan 'PLC Monthly Check_ICR3' not Inserted.
+Error : [Row: 33] Start Date '4/16/2024 12:00:00 AM' is less than Current Date . Plan 'PLC Monthly Check_ICR4' not Inserted.
+Error : [Row: 34] Start Date '4/17/2024 12:00:00 AM' is less than Current Date . Plan 'PLC Monthly Check_ICR5' not Inserted.
+Error : [Row: 35] Start Date '4/13/2024 12:00:00 AM' is less than Current Date . Plan 'ACDB Monthly Check_ICR1' not Inserted.
+Error : [Row: 37] Start Date '4/14/2024 12:00:00 AM' is less than Current Date . Plan 'ACDB Monthly Check_ICR2' not Inserted.
+Error : [Row: 39] Start Date '4/15/2024 12:00:00 AM' is less than Current Date . Plan 'ACDB Monthly Check_ICR3' not Inserted.
+Error : [Row: 41] Start Date '4/16/2024 12:00:00 AM' is less than Current Date . Plan 'ACDB Monthly Check_ICR4' not Inserted.
+Error : [Row: 43] Start Date '4/17/2024 12:00:00 AM' is less than Current Date . Plan 'ACDB Monthly Check_ICR5' not Inserted.
+Error : [Row: 45] Start Date '4/18/2024 12:00:00 AM' is less than Current Date . Plan 'NIFPS Monthly Check' not Inserted.
+Error : [Row: 46] Start Date '4/18/2024 12:00:00 AM' is less than Current Date . Plan 'UPS Monthly Check_MCR' not Inserted.
+Error : [Row: 47] Start Date '4/13/2024 12:00:00 AM' is less than Current Date . Plan 'UPS Monthly Check_ICR1' not Inserted.
+Error : [Row: 48] Start Date '4/14/2024 12:00:00 AM' is less than Current Date . Plan 'UPS Monthly Check_ICR2' not Inserted.
+Error : [Row: 49] Start Date '4/15/2024 12:00:00 AM' is less than Current Date . Plan 'UPS Monthly Check_ICR3' not Inserted.
+Error : [Row: 50] Start Date '4/17/2024 12:00:00 AM' is less than Current Date . Plan 'UPS Monthly Check_ICR5' not Inserted.
+Error : [Row: 51] Start Date '4/25/2024 12:00:00 AM' is less than Current Date . Plan 'WMS Monthly Check' not Inserted.
+Error : [Row: 52] Start Date '4/25/2024 12:00:00 AM' is less than Current Date . Plan 'Pyranometer Monthly Check' not Inserted.
+Error : [Row: 80] Start Date '4/13/2024 12:00:00 AM' is less than Current Date . Plan 'Inverter Monthly CheckICR1_ICR1_INV1' not Inserted.
+Error : [Row: 83] Start Date '4/13/2024 12:00:00 AM' is less than Current Date . Plan 'Inverter Monthly Check_ICR1_INV2' not Inserted.
+Error : [Row: 86] Start Date '4/13/2024 12:00:00 AM' is less than Current Date . Plan 'Inverter Monthly Check_ICR1_INV3' not Inserted.
+Error : [Row: 89] Start Date '4/13/2024 12:00:00 AM' is less than Current Date . Plan 'Inverter Monthly Check_ICR1_INV4' not Inserted.
+Error : [Row: 92] Start Date '4/14/2024 12:00:00 AM' is less than Current Date . Plan 'Inverter Monthly Check_ICR2_INV1' not Inserted.
+Error : [Row: 95] Start Date '4/14/2024 12:00:00 AM' is less than Current Date . Plan 'Inverter Monthly Check_ICR2_INV2' not Inserted.
+Error : [Row: 98] Start Date '4/14/2024 12:00:00 AM' is less than Current Date . Plan 'Inverter Monthly Check_ICR2_INV3' not Inserted.
+Error : [Row: 101] Start Date '4/14/2024 12:00:00 AM' is less than Current Date . Plan 'Inverter Monthly Check_ICR2_INV4' not Inserted.
+Error : [Row: 104] Start Date '4/15/2024 12:00:00 AM' is less than Current Date . Plan 'Inverter Monthly Check_ICR3_INV1' not Inserted.
+Error : [Row: 107] Start Date '4/15/2024 12:00:00 AM' is less than Current Date . Plan 'Inverter Monthly Check_ICR3_INV2' not Inserted.
+Error : [Row: 110] Start Date '4/15/2024 12:00:00 AM' is less than Current Date . Plan 'Inverter Monthly Check_ICR3_INV3' not Inserted.
+Error : [Row: 113] Start Date '4/15/2024 12:00:00 AM' is less than Current Date . Plan 'Inverter Monthly Check_ICR3_INV4' not Inserted.
+Error : [Row: 116] Start Date '4/16/2024 12:00:00 AM' is less than Current Date . Plan 'Inverter Monthly Check_ICR4_INV1' not Inserted.
+Error : [Row: 119] Start Date '4/16/2024 12:00:00 AM' is less than Current Date . Plan 'Inverter Monthly Check_ICR4_INV2' not Inserted.
+Error : [Row: 122] Start Date '4/16/2024 12:00:00 AM' is less than Current Date . Plan 'Inverter Monthly Check_ICR4_INV3' not Inserted.
+Error : [Row: 125] Start Date '4/16/2024 12:00:00 AM' is less than Current Date . Plan 'Inverter Monthly Check_ICR4_INV4' not Inserted.
+Error : [Row: 128] Start Date '4/17/2024 12:00:00 AM' is less than Current Date . Plan 'Inverter Monthly Check_ICR5_INV1' not Inserted.
+Error : [Row: 131] Start Date '4/17/2024 12:00:00 AM' is less than Current Date . Plan 'Inverter Monthly Check_ICR5_INV2' not Inserted.
+Error : [Row: 134] Start Date '4/17/2024 12:00:00 AM' is less than Current Date . Plan 'Inverter Monthly Check_ICR5_INV3' not Inserted.
+Error : [Row: 137] Start Date '4/17/2024 12:00:00 AM' is less than Current Date . Plan 'Inverter Monthly Check_ICR5_INV4' not Inserted.
+Total errors <42>

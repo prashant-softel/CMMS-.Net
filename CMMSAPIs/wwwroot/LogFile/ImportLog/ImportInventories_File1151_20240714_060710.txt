@@ -1,0 +1,2 @@
+Error : [Row: 2] Asset_Warranty_Provider and Warranty Type are not defined
+Total errors <1>

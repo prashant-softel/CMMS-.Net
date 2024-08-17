@@ -1,0 +1,9 @@
+Warning : [Row: 2] Asset_Warranty_Certificate_No is not defined 
+Warning : [Row: 3] Asset_Warranty_Certificate_No is not defined 
+Warning : [Row: 4] Asset_Warranty_Certificate_No is not defined 
+Warning : [Row: 5] Asset_Warranty_Certificate_No is not defined 
+Warning : [Row: 6] Asset_Warranty_Certificate_No is not defined 
+Warning : [Row: 7] Asset_Warranty_Certificate_No is not defined 
+Warning : [Row: 8] Asset_Warranty_Certificate_No is not defined 
+Warning : [Row: 9] Asset_Warranty_Certificate_No is not defined 
+Total errors <0>

@@ -1,0 +1,11 @@
+/.vscode
+/Memphis-Server/Properties
+/Saml2.Authentication.Core
+# */*.csproj
+*/*.csproj.user
+*/*.csproj.vspscc
+*/*bin
+/packages
+*/*bin
+/bin
+/obj
