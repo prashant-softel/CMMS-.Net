@@ -308,8 +308,11 @@ namespace CMMSAPIs.Repositories.PM
 
             string myQuery = $"SELECT pm_task.id, CONCAT('PMTASK',pm_task.id) as task_code, pm_plan.id as plan_id, pm_task.category_id,cat.name as category_name, pm_plan.plan_name as plan_title, pm_task.facility_id, pm_task.frequency_id as frequency_id, freq.name as frequency_name, pm_task.plan_date as due_date,closed_at as done_date, CONCAT(assignedTo.firstName,' ',assignedTo.lastName)  as assigned_to_name, CONCAT(closedBy.firstName,' ',closedBy.lastName)  as closed_by_name, pm_task.closed_at , CONCAT(approvedBy.firstName,' ',approvedBy.lastName)  as approved_by_name, pm_task.approved_at ,CONCAT(rejectedBy.firstName,' ',rejectedBy.lastName)  as rejected_by_name, pm_task.rejected_at ,CONCAT(cancelledBy.firstName,' ',cancelledBy.lastName)  as cancelled_by_name, pm_task.cancelled_at , pm_task.rejected_at ,CONCAT(startedBy.firstName,' ',startedBy.lastName)  as started_by_name, pm_task.started_at , pm_task.PTW_id as permit_id, CONCAT('PTW',pm_task.PTW_id) as permit_code,permit.status as ptw_status, PM_task.status, {statusQry} as status_short " +
                                ",  CONCAT(tbtDone.firstName,' ',tbtDone.lastName)  as tbt_by_name, Case when permit.TBT_Done_By is null or  permit.TBT_Done_By =0 then 0 else 1 end ptw_tbt_done " +
-                               " , permittypelists.title as permit_type " +
+                               " , permittypelists.title as permit_type,ptwu.id as Employee_ID,CONCAT(ptwu.firstName,ptwu.lastName) as Employee_name,bus.name as Company, " +
+                               " passt.name as Isolated_equipments,permit.TBT_Done_By as TBT_conducted_by,permit.TBT_Done_At TBT_done_time,permit.startDate Start_time, " +
+                               " permit.status as status_PTW, CONCAT(isotak.firstName,isotak.lastName) as Isolation_taken" +
                                " FROM pm_task " +
+
                                $"left join users as assignedTo on pm_task.assigned_to = assignedTo.id " +
                                $"left join users as closedBy on pm_task.closed_by = closedBy.id " +
                                $"left join users as approvedBy on pm_task.approved_by = approvedBy.id " +
@@ -319,21 +322,36 @@ namespace CMMSAPIs.Repositories.PM
                                $"left join permits as permit on pm_task.PTW_id = permit.id " +
                                $"left join pm_plan  on pm_task.plan_id = pm_plan.id " +
                                $"left join assetcategories as cat  on pm_task.category_id = cat.id " +
+                               $"Left join users as ptwu on permit.issuedById = ptwu.id " +
+                               $"LEFT join  assets as passt on permit.physicalIsoEquips = passt.id  " +
+                               $"Left join users as isotak on permit.physicalIsolation = isotak.id  " +
                                $"left join frequency as freq on pm_task.frequency_id = freq.id " +
-                               $"  left join users as tbtDone on permit.TBT_Done_By = tbtDone.id " +
-                               $" left join permittypelists on permittypelists.id = permit.typeId  " +
+                               $"left join users as tbtDone on permit.TBT_Done_By = tbtDone.id " +
+                               $"left join business as bus on bus.id = ptwu.companyId " +
+                               $"left join permittypelists on permittypelists.id = permit.typeId  " +
                                $" where pm_task.id = {task_id} ";
 
             List<CMPMTaskView> taskViewDetail = await Context.GetData<CMPMTaskView>(myQuery).ConfigureAwait(false);
-
+            string Materialconsumption = "SELECT sam.ID as Material_ID,sam.asset_name as  Material_name,smi.asset_item_ID as Equipment_ID, " +
+                    "smtype.asset_type as  Material_type, smi.used_qty,smi.issued_qty" +
+                    " FROM smassetmasters sam LEFT JOIN smrsitems smi ON sam.ID = smi.mrs_ID " +
+                    "Left join smmrs as smm on smm.id=smi.mrs_ID " +
+                    "Left join smassettypes as smtype on smtype.ID=sam.asset_type_ID " +
+                    "left join smassetitems sai on sai.assetMasterID =  sam.id " +
+                    $"WHERE  smm.whereUsedRefID={task_id};";
+            List<Materialconsumption> Material = await Context.GetData<Materialconsumption>(Materialconsumption).ConfigureAwait(false);
             if (taskViewDetail.Count == 0)
                 throw new MissingMemberException("PM Task not found");
 
-            string myQuery2 = $"SELECT pm_schedule.id as schedule_id,assets.id as assetsID,assets.name as asset_name,PM_Schedule_Completed_by_id as completedBy_id,  CONCAT(users.firstName, users.lastName) as   completedBy_name , checklist.checklist_number as checklist_name from pm_schedule " +
-                $"left join assets on pm_schedule.asset_id = assets.id " +
-                 $"left join users on pm_schedule.PM_Schedule_Completed_by_id = users.id " +
-                $"left join checklist_number as checklist on pm_schedule.checklist_id = checklist.id " +
-                $"where task_id = {task_id};";
+            string myQuery2 = $"SELECT pm_schedule.id as schedule_id,assets.id as assetsID,assets.name as asset_name, " +
+                $"PM_Schedule_Completed_by_id as completedBy_id,  CONCAT(users.firstName, users.lastName) as   completedBy_name , asst.name as categoryname, " +
+                $" checklist.checklist_number as checklist_name from pm_schedule " +
+                $" left join assets on pm_schedule.asset_id = assets.id " +
+                $" left join pm_task on pm_task.id = pm_schedule.task_id " +
+                $" left join assetcategories as asst on asst.id = pm_task.category_id " +
+                $" left join users on pm_schedule.PM_Schedule_Completed_by_id = users.id " +
+                $" left join checklist_number as checklist on pm_schedule.checklist_id = checklist.id " +
+                $" where task_id = {task_id};";
 
             List<CMPMScheduleExecutionDetail> checklist_collection = await Context.GetData<CMPMScheduleExecutionDetail>(myQuery2).ConfigureAwait(false);
 
@@ -383,6 +401,7 @@ namespace CMMSAPIs.Repositories.PM
                 {
 
                 }
+
                 //if (checklist_collection.Count > 0)
                 //{
                 //    taskViewDetail[0].checklist_id = checklist_collection[0].id;
@@ -394,6 +413,7 @@ namespace CMMSAPIs.Repositories.PM
                 schedule.checklist_observation = scheduleCheckList;
             }
             taskViewDetail[0].schedules = checklist_collection;
+            taskViewDetail[0].Material_consumption = Material;
 
             if (taskViewDetail[0].status == (int)CMMS.CMMS_Status.PM_LINKED_TO_PTW)
             {

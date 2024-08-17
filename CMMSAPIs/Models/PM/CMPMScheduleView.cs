@@ -58,8 +58,10 @@ namespace CMMSAPIs.Models.PM
         public int assetsID { get; set; }
         public string asset_name { get; set; }
         public string checklist_name { get; set; }
+        public string categoryname { get; set; }
         public List<ScheduleCheckList> checklist_observation { get; set; }
         public List<ScheduleLinkJob> schedule_link_job { get; set; }
+
         public int completedBy_id { get; set; }
         public string completedBy_name { get; set; }
 
@@ -67,6 +69,7 @@ namespace CMMSAPIs.Models.PM
     public class CMPMTaskView : CMPMTaskList
     {
         public List<CMPMScheduleExecutionDetail> schedules { get; set; }
+        public List<Materialconsumption> Material_consumption { get; set; }
 
         public int plan_id { get; set; }
         public DateTime Schedule_Date { get; set; }
@@ -90,10 +93,18 @@ namespace CMMSAPIs.Models.PM
         public DateTime updated_at { get; set; }
         public string status_long { get; set; }
         public string permit_type { get; set; }
-
+        public int Employee_ID { get; set; }
+        public string Employee_name { get; set; }
+        public string Company { get; set; }
         public string employee_list { get; set; }
         public string is_PTW { get; set; }
         public List<string> Employees { get; set; }
+        public int Isolation_taken { get; set; }
+        public string Isolated_equipment { get; set; }
+        public int TBT_conducted_by { get; set; }
+        public DateTime TBT_done_time { get; set; }
+        public DateTime Start_time { get; set; }
+        public int Status_PTW { get; set; }
 
     }
     public class CMPMScheduleViewDetail : CMPMScheduleView
@@ -167,6 +178,16 @@ namespace CMMSAPIs.Models.PM
         public DateTime? job_date { get; set; }
         public string job_status { get; set; }
 
+    }
+
+    public class Materialconsumption
+    {
+        public int Material_ID { get; set; }
+        public string Material_name { get; set; }
+        public dynamic used_qty { get; set; }
+        public dynamic issued_qty { get; set; }
+        public string Material_type { get; set; }
+        public int Equipment_ID { get; set; }
     }
 
     public class CMCustomCheckPoint
