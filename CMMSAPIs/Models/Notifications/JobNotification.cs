@@ -6,6 +6,7 @@ using System.Web;
 using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Jobs;
 using CMMSAPIs.Models.Utils;
+using CMMSAPIs.Repositories.Jobs;
 using CMMSAPIs.Repositories.Utils;
 
 namespace CMMSAPIs.Models.Notifications
@@ -14,14 +15,25 @@ namespace CMMSAPIs.Models.Notifications
     {
         int m_jobId;
         CMJobView m_jobObj;
-       
-        public JobNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMJobView jobObj) : base(moduleID, notificationID)
+        private JobRepository _JobRepo;
+        int m_notificationType = 1;
+
+        public JobNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMJobView jobObj, int notificationType = 1) : base(moduleID, notificationID)
         {
             m_jobObj = jobObj;
             m_jobId = m_jobObj.id;
+            m_notificationType = notificationType;
         }
+
+        protected virtual int getObjectId(params object[] args)
+        {
+            return m_jobObj.id;
+        }
+
         override protected string getSubject(params object[] args)
         {
+            if (m_notificationType == 2)
+                return getEMSubject(args);
 
             string retValue = "My job subject";
             m_jobId = m_jobObj.id;
@@ -38,6 +50,37 @@ namespace CMMSAPIs.Models.Notifications
                     break;
                 case CMMS.CMMS_Status.JOB_LINKED:     //Linked
                     retValue = String.Format("Job <{0}> linked to PTW <{1}>", m_jobObj.job_title,m_jobObj.current_ptw_id);
+                    break;
+                case CMMS.CMMS_Status.JOB_CLOSED:     //Closed
+                    retValue = String.Format("Job <{0}> closed", m_jobObj.job_title);
+                    break;
+                case CMMS.CMMS_Status.JOB_CANCELLED:     //Cancelled
+                    retValue = String.Format("Job <{0}> Cancelled", m_jobObj.job_title);
+                    break;
+                default:
+                    break;
+            }
+            return retValue;
+
+        }
+        override protected string getEMSubject(params object[] args)
+        {
+
+            string retValue = "My job subject";
+            m_jobId = m_jobObj.id;
+
+            switch (m_notificationID)
+            {
+                case CMMS.CMMS_Status.JOB_CREATED:     //Created
+                    //description is sent at 1 index of arg for this notification, so developer fetch it and use to format the subject
+                    string desc = m_jobObj.job_description;
+                    retValue = String.Format("Job <{0}><{1}> created escalation notification", m_jobId, desc);
+                    break;
+                case CMMS.CMMS_Status.JOB_ASSIGNED:     //Assigned
+                    retValue = String.Format("Job <{0}> assigned to <{1}>  escalation notification", m_jobObj.job_title, m_jobObj.assigned_name);
+                    break;
+                case CMMS.CMMS_Status.JOB_LINKED:     //Linked
+                    retValue = String.Format("Job <{0}> linked to PTW <{1}>", m_jobObj.job_title, m_jobObj.current_ptw_id);
                     break;
                 case CMMS.CMMS_Status.JOB_CLOSED:     //Closed
                     retValue = String.Format("Job <{0}> closed", m_jobObj.job_title);

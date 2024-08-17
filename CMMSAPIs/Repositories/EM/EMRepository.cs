@@ -1,6 +1,10 @@
 ﻿using CMMSAPIs.Helper;
 using CMMSAPIs.Models.EM;
+using CMMSAPIs.Models.Jobs;
+using CMMSAPIs.Models.Notifications;
+using CMMSAPIs.Models.Users;
 using CMMSAPIs.Models.Utils;
+using CMMSAPIs.Repositories.Jobs;
 using CMMSAPIs.Repositories.Utils;
 using System;
 using System.Collections.Generic;
@@ -12,9 +16,11 @@ namespace CMMSAPIs.Repositories.EM
     public class EMRepository : GenericRepository
     {
         private UtilsRepository _utilsRepo;
+        private JobRepository _JobRepo;
         public EMRepository(MYSQLDBHelper sqlDBHelper) : base(sqlDBHelper)
         {
             _utilsRepo = new UtilsRepository(sqlDBHelper);
+            _JobRepo = new JobRepository(sqlDBHelper);
         }
         public async Task<CMDefaultResponse> SetEscalationMatrix(List<CMSetMasterEM> request, int userID)
         {
@@ -192,6 +198,8 @@ namespace CMMSAPIs.Repositories.EM
 
                     qry5 += $"({newId}, {user}), ";
                 }
+
+
                 qry5 = qry5.Substring(0, qry5.Length - 2);
                 await Context.ExecuteNonQry<int>(qry5).ConfigureAwait(false);
                 response = new CMEscalationResponse(module, module_ref_id, CMMS.RETRUNSTATUS.SUCCESS, "Escalation performed successfully");
@@ -202,6 +210,123 @@ namespace CMMSAPIs.Repositories.EM
             }
             return response;
         }
+
+        public async Task<CMEscalationResponse> Escalate_NewImplementation(CMMS.CMMS_Modules module, int module_ref_id)
+        {
+            /*
+             * Checks the current UTC time with the time since status was last updated
+             * Performs escalation process as per escalation matrix
+             * Will put escalation details in escalation table
+             * Also sends notification to all users under the plant
+             * 
+             */
+            CMEscalationResponse response = null;
+            var esvalationList = await GetEscalationMatrixList(0);
+
+            for(var i=0;i<= esvalationList.Count; i++)
+            {
+                int moduleId = esvalationList[i].module_id;
+                int statusID = esvalationList[i].status_id;
+                Escalate_NewImplementationForStatus((CMMS.CMMS_Modules)moduleId, statusID);
+
+            }
+            return response;
+        }
+        public async Task<CMEscalationResponse> Escalate_NewImplementationForStatus(CMMS.CMMS_Modules module, int status) 
+        {
+            //for debugging setting module as JOB , remove once done
+             module = CMMS.CMMS_Modules.JOB;
+            status = 102;
+            //end
+            CMEscalationResponse response = null;
+            string qry0 = $"SELECT tableName, updateTimeColumn, statusColumn FROM moduletables WHERE softwareId = {(int)module};";
+            DataTable dt0 = await Context.FetchData(qry0).ConfigureAwait(false);
+            string qry1;
+            if (dt0.Rows.Count > 0)
+            {
+                string table = Convert.ToString(dt0.Rows[0]["tableName"]);
+                string timeCol = Convert.ToString(dt0.Rows[0]["updateTimeColumn"]);
+                string statCol = Convert.ToString(dt0.Rows[0]["statusColumn"]);
+                qry1 = $"SELECT {table}.id,{table}.{statCol} as status, {table}.{timeCol} as updateDate FROM {table} WHERE {table}.{statCol} = {status};";
+            }
+            else
+            {
+                qry1 = $"SELECT status, CASE WHEN createdAt = '0000-00-00 00:00:00' THEN NULL ELSE createdAt END AS updateDate " +
+                                $"FROM history WHERE (moduleType = {(int)module} OR secondaryModuleRefType = {(int)module}) " +
+                                $" ORDER BY createdAt DESC;";
+            }
+            DataTable dt1 = await Context.FetchData(qry1).ConfigureAwait(false);
+
+            // form this loop we are getting forms with particular status
+            for(var i=0;i< dt1.Rows.Count; i++)
+            {
+                int module_ref_id = Convert.ToInt32(dt1.Rows[i]["id"]);
+                var diff = DateTime.UtcNow.Date - Convert.ToDateTime(dt1.Rows[0]["updateDate"]).Date;
+                int delayDays = diff.Days;
+
+                //int status = Convert.ToInt32(dt1.Rows[0]["status"]);
+                string qry2 = $"SELECT days, roleId FROM escalationmatrix WHERE moduleId = {(int)module} AND statusId = {status} " +
+                                $"ORDER BY days ASC;";
+                DataTable dt2 = await Context.FetchData(qry2).ConfigureAwait(false);
+                Dictionary<int, int> escalation = new Dictionary<int, int>();
+                escalation.Merge(dt2.GetColumn<int>("days"), dt2.GetColumn<int>("roleId"));
+
+                if (module == CMMS.CMMS_Modules.JOB)
+                {
+                    CMJobView _ViewJobList = null;
+                    _ViewJobList = await _JobRepo.GetJobDetails(module_ref_id, "");
+                    int[] userID = { 0 };
+                    await CMMSNotification.sendEMNotification(CMMS.CMMS_Modules.JOB, (CMMS.CMMS_Status)status, userID, module_ref_id, escalation[delayDays], delayDays, _ViewJobList);
+                }
+
+                try
+                {
+                    string qry3 = $"INSERT INTO escalationlog (moduleId, moduleRefId, moduleStatus, notifSentToId, notifSentAt) VALUES " +
+                                    $"({(int)module}, {module_ref_id}, {status}, {escalation[delayDays]}, '{UtilsRepository.GetUTCTime()}'); " +
+                                    $"SELECT LAST_INSERT_ID(); ";
+
+                    DataTable dt3 = await Context.FetchData(qry3).ConfigureAwait(false);
+
+                    int newId = Convert.ToInt32(dt3.Rows[0][0]);
+
+                    //string qry4 = $"SELECT  FROM users WHERE roleId >= {escalation[diff.Days]};";
+                    string qry4 = $"select users.id, users.loginId from users inner join userroles on userroles.id = users.roleId" +
+                        $" WHERE userroles.status=1 and roleId >= {escalation[delayDays]}  order by sort_order asc;;";
+                    DataTable dt4 = await Context.FetchData(qry4).ConfigureAwait(false);
+                    List<int> userIds = dt4.GetColumn<int>("id");
+                    string qry5 = "INSERT INTO escalationsentto (escalationLogId, notifSentTo) VALUES ";
+                    CMJobView _ViewJobList = null;
+                    if (module == CMMS.CMMS_Modules.JOB)
+                    {
+                        _ViewJobList = await _JobRepo.GetJobDetails(module_ref_id, "");
+                    }
+                 
+                    foreach (int user in userIds)
+                    {
+
+                        qry5 += $"({newId}, {user}),";
+                        if (module == CMMS.CMMS_Modules.JOB)
+                        {
+                            //await CMMSNotification.sendEMNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_UPDATED, new[] { user }, _ViewJobList);
+                        }
+                    }
+
+
+                    qry5 = qry5.Substring(0, qry5.Length - 2);
+                    await Context.ExecuteNonQry<int>(qry5).ConfigureAwait(false);
+                    response = new CMEscalationResponse(module, module_ref_id, CMMS.RETRUNSTATUS.SUCCESS, "Escalation performed successfully");
+                }
+                catch (KeyNotFoundException)
+                {
+
+                }
+            }
+
+    
+            return response;
+        }
+       
+        
         public async Task<List<CMEscalationLog>> ShowEscalationLog(CMMS.CMMS_Modules module, int module_ref_id)
         {
             /*
