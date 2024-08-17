@@ -37,5 +37,7 @@ namespace CMMSAPIs.Models.WC
         public string status { get; set; }
         public int status_code { get; set; }
         public string material_replinishment_status { get; set; }
+        public int claim_status { get; set; }
+        public string long_claim_status { get; set; }
     }
 }
