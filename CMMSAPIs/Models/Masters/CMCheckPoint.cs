@@ -10,8 +10,8 @@
         public string action_to_be_done { get; set; }
         public int? failure_weightage { get; set; } // in per
         public CMCPType? checkpoint_type { get; set; } // bool,renge
-        public int? risk_type_id { get; set; }
-        public int? type_of_observation_id { get; set; }
+        public int? risk_type { get; set; }
+        public int? type_of_observation { get; set; }
         public int type { get; set; }
         public int? status { get; set; }
     }

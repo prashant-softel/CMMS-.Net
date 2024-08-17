@@ -283,7 +283,10 @@ namespace CMMSAPIs.Repositories.Jobs
             /*Your code goes here*/
 
             string myQuery = "SELECT " +
-                                    "job.id as id, facilities.id as facility_id, facilities.name as facility_name, blocks.id as block_id, blocks.name as block_name, job.status as status, job.createdAt as created_at,created_user.id as created_by_id, CONCAT(created_user.firstName, created_user.lastName) as created_by_name, user.id as assigned_id, CONCAT(user.firstName, user.lastName) as assigned_name, job.title as job_title, job.description as job_description, job.breakdownTime as breakdown_time, ptw.id as current_ptw_id, ptw.title as current_ptw_title, ptw.description as current_ptw_desc, jc.id as latestJCid, jc.JC_Status as latestJCStatus, jc.JC_Approved as latestJCApproval " +
+                                    "job.id as id, facilities.id as facility_id, facilities.name as facility_name, blocks.id as block_id, blocks.name as block_name, job.status as status, job.createdAt as created_at,created_user.id as created_by_id," +
+                                    " CONCAT(created_user.firstName, created_user.lastName) as created_by_name, user.id as assigned_id, CONCAT(user.firstName, user.lastName) as assigned_name, job.title as job_title, " +
+                                    "job.description as job_description, job.breakdownTime as breakdown_time, ptw.id as current_ptw_id, ptw.title as current_ptw_title, ptw.description as current_ptw_desc, jc.id as latestJCid, " +
+                                    "jc.JC_Status as latestJCStatus, jc.JC_Approved as latestJCApproval, jc.JC_Date_Stop as Job_closed_on ,jc.JC_Date_Stop as Breakdown_end_time,job.breakdownTime as Breakdown_start_time  " +
                                       "FROM " +
                                             "jobs as job " +
                                       "LEFT JOIN " +

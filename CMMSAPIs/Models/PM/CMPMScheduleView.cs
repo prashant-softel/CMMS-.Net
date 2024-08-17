@@ -72,6 +72,7 @@ namespace CMMSAPIs.Models.PM
         public List<Materialconsumption> Material_consumption { get; set; }
 
         public int plan_id { get; set; }
+        public string site_name { get; set; }
         public DateTime Schedule_Date { get; set; }
         public int started_by_id { get; set; }
         public string started_by_name { get; set; }
@@ -94,10 +95,13 @@ namespace CMMSAPIs.Models.PM
         public string status_long { get; set; }
         public string permit_type { get; set; }
         public int Employee_ID { get; set; }
+        public string workdescription { get; set; }
         public string Employee_name { get; set; }
         public string Company { get; set; }
+        public string new_remark { get; set; }
         public string employee_list { get; set; }
         public string is_PTW { get; set; }
+        public string TBT_conducted_by_name { get; set; }
         public List<string> Employees { get; set; }
         public int Isolation_taken { get; set; }
         public string Isolated_equipment { get; set; }
@@ -177,6 +181,8 @@ namespace CMMSAPIs.Models.PM
         public string job_description { get; set; }
         public DateTime? job_date { get; set; }
         public string job_status { get; set; }
+        public int No_of_tools { get; set; }
+        public string Tool_name { get; set; }
 
     }
 

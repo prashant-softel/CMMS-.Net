@@ -16,17 +16,17 @@ namespace CMMSAPIs.Repositories.WC
         private Dictionary<int, string> StatusDictionary = new Dictionary<int, string>() {
             { 191, "In Draft" },
          //   { 192, "Warranty Claim Created" },
-            { 192, "Waiting for Approval" },
+            { 192, "submitted - waiting for approval" },
             { 193, "Submit Request Rejected" },
-            { 194, "Approved" },
+            { 194, "open claim" },
             { 195, "Asset Dispatched" },
             { 196, "Rejected By Manufacturer" },
             { 197, "Approved By Manufacturer" },
             { 198, "Item Replenished" },
         //    { 199, "Warranty Claim Waiting for Close Approval" },
             { 199, "Closed Waiting for Approval" },
-            { 200, "Approve Closed" },
-            { 201, "Reject Closed" },
+            { 200, "Closed-Approved" },
+            { 201, "Closed- Reject" },
 
         };
         public WCRepository(MYSQLDBHelper sqlDBHelper) : base(sqlDBHelper)
@@ -44,11 +44,11 @@ namespace CMMSAPIs.Repositories.WC
                 case CMMS.CMMS_Status.WC_DRAFT:
                     retValue = "Draft"; break;
                 case CMMS.CMMS_Status.WC_SUBMITTED:
-                    retValue = "Submitted"; break;
+                    retValue = "submitted - waiting for approval"; break;
                 case CMMS.CMMS_Status.WC_SUBMIT_REJECTED:
                     retValue = "Submit Rejected"; break;
                 case CMMS.CMMS_Status.WC_SUBMIT_APPROVED:
-                    retValue = "Submit Approved"; break;
+                    retValue = "Open Claim"; break;
                 case CMMS.CMMS_Status.WC_DISPATCHED:
                     retValue = "Dispatched"; break;
                 case CMMS.CMMS_Status.WC_REJECTED_BY_MANUFACTURER:
@@ -58,9 +58,9 @@ namespace CMMSAPIs.Repositories.WC
                 case CMMS.CMMS_Status.WC_ITEM_REPLENISHED:
                     retValue = "Item Replenished"; break;
                 case CMMS.CMMS_Status.WC_CLOSED_REJECTED:
-                    retValue = "Close Rejected"; break;
+                    retValue = "Closed- Reject"; break;
                 case CMMS.CMMS_Status.WC_CLOSE_APPROVED:
-                    retValue = "Closed Approved"; break;
+                    retValue = "Closed-Approved"; break;
                 case CMMS.CMMS_Status.WC_CLOSED:
                     retValue = "Closed Waiting for Approval "; break;
                 case CMMS.CMMS_Status.WC_CANCELLED:
@@ -575,6 +575,7 @@ namespace CMMSAPIs.Repositories.WC
                 return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"WC Resubmitted for Approval");
 
             }
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.WARRANTY_CLAIM, request.id, 0, 0, request.comment, CMMS.CMMS_Status.UPDATED, userID);
             return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "WC Details Updated Successfully");
         }
 
@@ -598,7 +599,7 @@ namespace CMMSAPIs.Repositories.WC
             int reject_id = await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
 
             retCode = CMMS.RETRUNSTATUS.SUCCESS;
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.WARRANTY_CLAIM, request.id, 0, 0, request.comment, CMMS.CMMS_Status.WC_SUBMIT_APPROVED);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.WARRANTY_CLAIM, request.id, 0, 0, request.comment, CMMS.CMMS_Status.WC_SUBMIT_APPROVED, userId);
             string myQuery = $"SELECT * from wc where id = {request.id}";
             List<CMWCDetail> _WCList = await Context.GetData<CMWCDetail>(myQuery).ConfigureAwait(false);
             await CMMSNotification.sendNotification(CMMS.CMMS_Modules.WARRANTY_CLAIM, CMMS.CMMS_Status.APPROVED, new[] { _WCList[0].created_by }, _WCList[0]);
@@ -631,7 +632,7 @@ namespace CMMSAPIs.Repositories.WC
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
             }
 
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.WARRANTY_CLAIM, request.id, 0, 0, request.comment, CMMS.CMMS_Status.WC_SUBMIT_REJECTED);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.WARRANTY_CLAIM, request.id, 0, 0, request.comment, CMMS.CMMS_Status.WC_SUBMIT_REJECTED, userId);
             string myQuery = $"SELECT * from wc where id = {request.id}";
             List<CMWCDetail> _WCList = await Context.GetData<CMWCDetail>(myQuery).ConfigureAwait(false);
             await CMMSNotification.sendNotification(CMMS.CMMS_Modules.WARRANTY_CLAIM, CMMS.CMMS_Status.REJECTED, new[] { _WCList[0].created_by }, _WCList[0]);
@@ -663,10 +664,10 @@ namespace CMMSAPIs.Repositories.WC
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
             }
 
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.WARRANTY_CLAIM, request.id, 0, 0, request.comment, CMMS.CMMS_Status.WC_CLOSED);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.WARRANTY_CLAIM, request.id, 0, 0, request.comment, CMMS.CMMS_Status.WC_CLOSED, userId);
             string myQuery = $"SELECT * from wc where id = {request.id}";
             List<CMWCDetail> _WCList = await Context.GetData<CMWCDetail>(myQuery).ConfigureAwait(false);
-            //await CMMSNotification.sendNotification(CMMS.CMMS_Modules.WARRANTY_CLAIM, CMMS.CMMS_Status.CANCELLED, new[] { _WCList[0].created_by }, _WCList[0]);
+            //await CMMSNotification.sendNotification(CMMS.CMMS_Modules.WARRANTY_CLAIM, CMMS.CMMS_Status.CANCELLED, new[] { _WCList[0].closed_by }, _WCList[0]);
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "WC Closed Successfully");
             return response;
         }
@@ -680,21 +681,20 @@ namespace CMMSAPIs.Repositories.WC
                 await Context.ExecuteNonQry<int>(qryuploadFiles).ConfigureAwait(false);
 
             }
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.WARRANTY_CLAIM, request.id, 0, 0, request.comment, CMMS.CMMS_Status.UPDATED);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.WARRANTY_CLAIM, request.id, 0, 0, request.comment, CMMS.CMMS_Status.UPDATED, userId);
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "WC Updated");
             return response;
 
         }
         internal async Task<CMDefaultResponse> ApprovedClosedWC(CMApproval request, int userId)
         {
-
             string UpdateQ = $"update wc " +
              $"set Status = {(int)CMMS.CMMS_Status.WC_CLOSE_APPROVED} , closed_by = {userId}, " +
              $"closed_at = '{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}', close_remarks = '{request.comment}' " +
              $"where id = {request.id} ;";
             var result = await Context.ExecuteNonQry<int>(UpdateQ);
 
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.WARRANTY_CLAIM, request.id, 0, 0, request.comment, CMMS.CMMS_Status.WC_CLOSE_APPROVED);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.WARRANTY_CLAIM, request.id, 0, 0, request.comment, CMMS.CMMS_Status.WC_CLOSE_APPROVED, userId);
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, " approved closed successfully.");
             return response;
         }
@@ -706,7 +706,9 @@ namespace CMMSAPIs.Repositories.WC
             await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.WARRANTY_CLAIM, request.id, 0, 0, request.comment, CMMS.CMMS_Status.WC_CLOSED_REJECTED, userID);
-
+            string myQuery = $"SELECT * from wc where id = {request.id}";
+            List<CMWCDetail> _WCList = await Context.GetData<CMWCDetail>(myQuery).ConfigureAwait(false);
+            //await CMMSNotification.sendNotification(CMMS.CMMS_Modules.WARRANTY_CLAIM, CMMS.CMMS_Status.REJECTED, new[] { _WCList[0] }, _WCList[0]);
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Reject closed successfully");
             return response;
         }

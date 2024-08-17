@@ -20,16 +20,16 @@ namespace CMMSAPIs.Repositories.Calibration
         }
         private Dictionary<int, string> StatusDictionary = new Dictionary<int, string>()
         {
-            { (int)CMMS.CMMS_Status.CALIBRATION_REQUEST, "Calibration Request Waiting for Approval" },
-            { (int)CMMS.CMMS_Status.CALIBRATION_REQUEST_APPROVED, "Calibration Request Approved" },
-            { (int)CMMS.CMMS_Status.CALIBRATION_REQUEST_REJECTED, "Calibration Request Rejected" },
-            { (int)CMMS.CMMS_Status.CALIBRATION_STARTED, "Calibration Started" },
-            { (int)CMMS.CMMS_Status.CALIBRATION_COMPLETED, "Calibration Completed" },
-            { (int)CMMS.CMMS_Status.CALIBRATION_CLOSED, "Calibration Closed" },
-            { (int)CMMS.CMMS_Status.CALIBRATION_APPROVED, "Calibration Approved Closed" },
-            { (int)CMMS.CMMS_Status.CALIBRATION_REJECTED, "Calibration Rejected" },
-            { (int)CMMS.CMMS_Status.CALIBRATION_SKIPPED, "Calibration Skipped" },
-            { (int)CMMS.CMMS_Status.CALIBRATION_SCHEDULED, "Calibration Scheduled" }
+            { (int)CMMS.CMMS_Status.CALIBRATION_REQUEST, " Request Waiting for Approval" },
+            { (int)CMMS.CMMS_Status.CALIBRATION_REQUEST_APPROVED, " Request Approved" },
+            { (int)CMMS.CMMS_Status.CALIBRATION_REQUEST_REJECTED, " Request Rejected" },
+            { (int)CMMS.CMMS_Status.CALIBRATION_STARTED, " Started" },
+            { (int)CMMS.CMMS_Status.CALIBRATION_COMPLETED, " Completed" },
+            { (int)CMMS.CMMS_Status.CALIBRATION_CLOSED, " Closed" },
+            { (int)CMMS.CMMS_Status.CALIBRATION_APPROVED, " Approved Closed" },
+            { (int)CMMS.CMMS_Status.CALIBRATION_REJECTED, " Rejected" },
+            { (int)CMMS.CMMS_Status.CALIBRATION_SKIPPED, " Skipped" },
+            { (int)CMMS.CMMS_Status.CALIBRATION_SCHEDULED, " Scheduled" }
         };
 
 

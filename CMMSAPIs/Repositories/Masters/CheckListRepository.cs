@@ -365,7 +365,7 @@ namespace CMMSAPIs.Repositories.Masters
                $"{(request.is_document_required ?? 0)}, '{request.action_to_be_done}', '{request.failure_weightage}', " +
                $"'{request.checkpoint_type.type}', '{request.checkpoint_type.min}', '{request.checkpoint_type.max}', " +
                $"'{userID}', '{UtilsRepository.GetUTCTime()}', 1, " +
-               $"'{request.type_of_observation_id}', '{request.risk_type_id}'); " +
+               $"{request.type_of_observation}, {request.risk_type}); " +
                "SELECT LAST_INSERT_ID();";
 
                 DataTable dt = await Context.FetchData(query).ConfigureAwait(false);
@@ -437,10 +437,10 @@ namespace CMMSAPIs.Repositories.Masters
                 updateQry += $"action_to_be_done = '{request.action_to_be_done}', ";
             if (request.status != null)
                 updateQry += $"status = {request.status}, ";
-            if (request.risk_type_id != null)
-                updateQry += $"risk_type = {request.risk_type_id}, ";
-            if (request.type_of_observation_id != null)
-                updateQry += $"type_of_observation = {request.type_of_observation_id}, ";
+            if (request.risk_type != null)
+                updateQry += $"risk_type = {request.risk_type}, ";
+            if (request.type_of_observation != null)
+                updateQry += $"type_of_observation = {request.type_of_observation}, ";
             if (request.checkpoint_type != null)
                 updateQry += $"type = '{request.checkpoint_type.type}', min_range = '{request.checkpoint_type.min}',max_range = '{request.checkpoint_type.max}', ";
             if (request.failure_weightage != 0)
