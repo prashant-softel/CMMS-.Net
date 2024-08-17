@@ -309,12 +309,12 @@ namespace CMMSAPIs.Repositories.Jobs
             _ViewJobList[0].breakdown_type = $"{(CMMS.CMMS_JobType)_ViewJobList[0].job_type}";
 
             //get equipmentCat list
-            string myQuery1 = "SELECT asset_cat.id as equipmentCat_id, asset_cat.name as equipmentCat_name  FROM assetcategories as asset_cat " +
+            string myQuery1 = "SELECT asset_cat.id as eid, asset_cat.name as name  FROM assetcategories as asset_cat " +
                 "JOIN jobmappingassets as mapAssets ON mapAssets.categoryId = asset_cat.id JOIN jobs as job ON mapAssets.jobId = job.id WHERE job.id =" + job_id;
             List<CMequipmentCatList> _equipmentCatList = await Context.GetData<CMequipmentCatList>(myQuery1).ConfigureAwait(false);
 
             //get workingArea_name list 
-            string myQuery2 = "SELECT asset.id as asset_id, asset.name as asset_name FROM assets as asset " +
+            string myQuery2 = "SELECT asset.id as id, asset.name as name FROM assets as asset " +
              "JOIN jobmappingassets as mapAssets ON mapAssets.assetId  =  asset.id  JOIN jobs as job ON mapAssets.jobId = job.id WHERE job.id =" + job_id;
             List<CMworkingAreaNameList> _WorkingAreaNameList = await Context.GetData<CMworkingAreaNameList>(myQuery2).ConfigureAwait(false);
 
@@ -328,7 +328,7 @@ namespace CMMSAPIs.Repositories.Jobs
             {
                 _AssociatedpermitList[0].ptwStatus_short = "Linked";    //temp till JOIN is made
             }
-            string myQuery4 = "SELECT distinct(workType.id) AS workTypeId, workType.workTypeName as workTypeName FROM jobs AS job " +
+            string myQuery4 = "SELECT distinct(workType.id) AS id, workType.workTypeName as workType FROM jobs AS job " +
                 "left JOIN jobmappingassets AS mapAssets ON mapAssets.jobId = job.id " +
                 "left JOIN assetcategories AS asset_cat ON mapAssets.categoryId = asset_cat.id " +
                 "LEFT JOIN jobassociatedworktypes as mapWorkTypes on mapWorkTypes.jobId = job.id " +
@@ -336,7 +336,7 @@ namespace CMMSAPIs.Repositories.Jobs
                 $"WHERE job.id = {job_id} ";
             List<CMWorkType> _WorkType = await Context.GetData<CMWorkType>(myQuery4).ConfigureAwait(false);
 
-            string myQuery5 = "SELECT Distinct tools.id as toolId, tools.assetName as toolName FROM jobs AS job " +
+            string myQuery5 = "SELECT Distinct tools.id as id, tools.assetName as linkedToolName FROM jobs AS job " +
                 "JOIN jobmappingassets AS mapAssets ON mapAssets.jobId = job.id " +
                 "JOIN assets ON mapAssets.assetId = assets.id " +
                 "JOIN assetcategories AS asset_cat ON assets.categoryId = asset_cat.id " +

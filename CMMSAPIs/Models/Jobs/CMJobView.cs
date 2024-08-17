@@ -49,14 +49,14 @@ namespace CMMSAPIs.Models.Jobs
 
     public class CMequipmentCatList
     {
-        public int equipmentCat_id { get; set; }
-        public string equipmentCat_name { get; set; }
+        public int id { get; set; }
+        public string name { get; set; }
     }
 
     public class CMworkingAreaNameList
     {
-        public int asset_id { get; set; }
-        public string asset_name { get; set; }
+        public int id { get; set; }
+        public string name { get; set; }
     }
     public class CMAssociatedPermitList
     {
@@ -74,12 +74,12 @@ namespace CMMSAPIs.Models.Jobs
 
     public class CMWorkType
     {
-        public int workTypeId { get; set; }
-        public string workTypeName { get; set; }
+        public int id { get; set; }
+        public string workType { get; set; }
     }
     public class CMWorkTypeTool
     {
-        public int toolId { get; set; }
-        public string toolName { get; set; }
+        public int id { get; set; }
+        public string linkedToolName { get; set; }
     }
 }
