@@ -1,6 +1,5 @@
 using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Masters;
-using CMMSAPIs.Models.Users;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Utils;
 using Microsoft.AspNetCore.Hosting;
@@ -9,7 +8,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Xml.Linq;
 using static CMMSAPIs.Helper.CMMS;
 
 namespace CMMSAPIs.Repositories.Masters
@@ -73,7 +71,7 @@ namespace CMMSAPIs.Repositories.Masters
         /************************************************* COST TYPE *************************************************************/
         /***********************************************************************************************************************************/
         /***********************************************************************************************************************************/
-      
+
 
         /***********************************************************************************************************************************/
         /***********************************************************************************************************************************/
@@ -1867,7 +1865,7 @@ namespace CMMSAPIs.Repositories.Masters
                                      $"WHERE id = {request.id};";
                 await Context.ExecuteNonQry<int>(updateQuery).ConfigureAwait(false);
 
-               
+
                 System.Text.StringBuilder sb = new System.Text.StringBuilder("Observation Updated");
                 if (request.comment.Length > 0)
                 {
@@ -1894,7 +1892,7 @@ namespace CMMSAPIs.Repositories.Masters
                                       $"status_code={(int)CMMS.CMMS_Status.OBSERVATION_DELETED}," +
                                       $"deleted_at = '{UtilsRepository.GetUTCTime()}'," +
                                       $"deleted_by = {UserID}," +
-                                      $"delete_comment = '{comment}',"+
+                                      $"delete_comment = '{comment}'," +
                                      $"is_active = 0 " +
                                      $"WHERE id = {id};";
                 await Context.ExecuteNonQry<int>(updateQuery).ConfigureAwait(false);
@@ -2144,6 +2142,299 @@ namespace CMMSAPIs.Repositories.Masters
             List<CMDocumentVersionList> Data = await Context.GetData<CMDocumentVersionList>(myQuery).ConfigureAwait(false);
             return Data;
         }
+        //Chages For Mis Health Data
+        internal async Task<CMDefaultResponse> CreateHealthData(OccupationalHealthData request, int userID)
+        {
+            string date = request.Date.ToString("yyyy-MM-dd");
+            string myqry1 = $"INSERT INTO MIS_OccupationalHealthData " +
+                      $"(Date, NoOfHealthExamsOfNewJoiner, PeriodicTests, OccupationaIllnesses, Status, CreatedBy, CreatedAt) " +
+                      $"VALUES " +
+                      $"('{date}', {request.NoOfHealthExamsOfNewJoiner}, {request.PeriodicTests}, {request.OccupationalIllnesses},1 , " +
+                      $"{userID}, '{UtilsRepository.GetUTCTime()}'); " +
+                      $"SELECT LAST_INSERT_ID();";
 
+            DataTable dt = await Context.FetchData(myqry1).ConfigureAwait(false);
+            int id = Convert.ToInt32(dt.Rows[0][0]);
+
+            var response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Health Data Created");
+
+            return response;
+        }
+
+        internal async Task<CMDefaultResponse> UpdateHealthData(OccupationalHealthData request, int userID)
+        {
+            string date = request.Date.ToString("yyyy-MM-dd");
+            string updateQry = "UPDATE MIS_OccupationalHealthData SET ";
+
+            if (request.Date != null)
+            {
+                updateQry += $"Date = '{date}', ";
+            }
+            if (request.NoOfHealthExamsOfNewJoiner >= 0)
+            {
+                updateQry += $"NoOfHealthExamsOfNewJoiner = {request.NoOfHealthExamsOfNewJoiner}, ";
+            }
+            if (request.PeriodicTests > 0)
+            {
+                updateQry += $"PeriodicTests = {request.PeriodicTests} , ";
+            }
+            if (request.OccupationalIllnesses > 0)
+            {
+                updateQry += $"OccupationaIllnesses = {request.OccupationalIllnesses}, ";
+            }
+            updateQry += $"UpdatedBy = {userID}," +
+            $" UpdatedAt = '{UtilsRepository.GetUTCTime()}' WHERE id = {request.id};";
+
+            await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+
+            return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Health Data Updated");
+
+        }
+
+        internal async Task<CMDefaultResponse> DeleteHealthData(int id, int userID)
+        {
+            string deleteQry = $"DELETE FROM MIS_OccupationalHealthData WHERE id = {id};";
+
+            await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
+
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Health Data Deleted");
+        }
+
+        internal async Task<List<OccupationalHealthData>> GetHealthData()
+        {
+            string myQuery = "SELECT id, Date, NoOfHealthExamsOfNewJoiner, PeriodicTests, OccupationaIllnesses as OccupationalIllnesses, Status, " +
+                             "CreatedBy, CreatedAt, UpdatedBy, UpdatedAt " +
+                             "FROM MIS_OccupationalHealthData " +
+                             "WHERE  Status = 1 ;";
+            List<OccupationalHealthData> data = await Context.GetData<OccupationalHealthData>(myQuery).ConfigureAwait(false);
+            return data;
+        }
+        //Create Vsitor Data
+        internal async Task<CMDefaultResponse> CreateVisitsAndNotices(VisitsAndNotices request, int userID)
+        {
+            string date = request.Date.ToString("yyyy-MM-dd");
+            string myqry1 = $"INSERT INTO mis_visitsandnotices " +
+                            $"(Date, GovtAuthVisits, NoOfFineByThirdParty, NoOfShowCauseNoticesByThirdParty, " +
+                            $"NoticesToContractor, AmountOfPenaltiesToContractors, AnyOther, Status, CreatedBy, CreatedAt) " +
+                            $"VALUES " +
+                            $"('{date}', {request.GovtAuthVisits}, {request.NoOfFineByThirdParty}, " +
+                            $"{request.NoOfShowCauseNoticesByThirdParty}, {request.NoticesToContractor}, " +
+                            $"{request.AmountOfPenaltiesToContractors}, {request.AnyOther}, 1, " +
+                            $"{userID}, '{UtilsRepository.GetUTCTime()}'); " +
+                            $"SELECT LAST_INSERT_ID();";
+
+            DataTable dt = await Context.FetchData(myqry1).ConfigureAwait(false);
+            int id = Convert.ToInt32(dt.Rows[0][0]);
+
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Visit Notice Created");
+        }
+        internal async Task<CMDefaultResponse> UpdateVisitsAndNotices(VisitsAndNotices request, int userID)
+        {
+            string date = request.Date.ToString("yyyy-MM-dd");
+            string updateQry = "UPDATE mis_visitsandnotices SET ";
+
+            if (request.Date != null)
+                updateQry += $"Date = '{date}', ";
+            if (request.GovtAuthVisits > 0)
+                updateQry += $"GovtAuthVisits = {request.GovtAuthVisits}, ";
+            if (request.NoOfFineByThirdParty > 0)
+                updateQry += $"NoOfFineByThirdParty = {request.NoOfFineByThirdParty}, ";
+            if (request.NoOfShowCauseNoticesByThirdParty > 0)
+                updateQry += $"NoOfShowCauseNoticesByThirdParty = {request.NoOfShowCauseNoticesByThirdParty}, ";
+            if (request.NoticesToContractor > 0)
+                updateQry += $"NoticesToContractor = {request.NoticesToContractor}, ";
+            if (request.AmountOfPenaltiesToContractors > 0)
+                updateQry += $"AmountOfPenaltiesToContractors = {request.AmountOfPenaltiesToContractors}, ";
+            if (request.AnyOther > 0)
+                updateQry += $"AnyOther = {request.AnyOther}, ";
+
+            updateQry += $"UpdatedBy = {userID}, UpdatedAt = '{UtilsRepository.GetUTCTime()}' WHERE id = {request.id};";
+
+            await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+
+            return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Visit  Notice Updated");
+        }
+        internal async Task<CMDefaultResponse> DeleteVisitsAndNotices(int id, int userID)
+        {
+            string deleteQry = $"DELETE FROM mis_visitsandnotices WHERE id = {id};";
+
+            await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
+
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Visit Notice Deleted");
+        }
+        internal async Task<List<VisitsAndNotices>> GetVisitsAndNotices()
+        {
+            string myQuery = "SELECT id, Date, GovtAuthVisits, NoOfFineByThirdParty, NoOfShowCauseNoticesByThirdParty, " +
+                             "NoticesToContractor, AmountOfPenaltiesToContractors, AnyOther, Status, CreatedBy, CreatedAt, UpdatedBy, UpdatedAt " +
+                             "FROM mis_visitsandnotices " +
+                             "WHERE Status =1 ; ";
+            List<VisitsAndNotices> data = await Context.GetData<VisitsAndNotices>(myQuery).ConfigureAwait(false);
+
+            return data;
+        }
+        //Fuel Consumption
+        internal async Task<CMDefaultResponse> CreateFuelConsumption(FuelData request, int userID)
+        {
+            string myqry1 = $"INSERT INTO mis_fueldata (Date, DieselConsumedForVehicles, PetrolConsumedForVehicles, PetrolConsumedForGrassCuttingAndMovers, DieselConsumedAtSite, PetrolConsumedAtSite, Status, CreatedBy, CreatedAt) " +
+                             $"VALUES " +
+                             $"('{request.Date:yyyy-MM-dd}', " +
+                             $"{request.DieselConsumedForVehicles}, " +
+                             $"{request.PetrolConsumedForVehicles}, " +
+                             $"{request.PetrolConsumedForGrassCuttingAndMovers}, " +
+                             $"{request.DieselConsumedAtSite}, " +
+                             $"{request.PetrolConsumedAtSite},1, " +
+                             $"{userID}, " +
+                             $"'{UtilsRepository.GetUTCTime()}'); " +
+                             $"SELECT LAST_INSERT_ID();";
+
+            DataTable dt = await Context.FetchData(myqry1).ConfigureAwait(false);
+            int id = Convert.ToInt32(dt.Rows[0][0]);
+
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Fuel Consumption Data Created");
+        }
+        internal async Task<CMDefaultResponse> UpdateFuelConsumption(FuelData request, int userID)
+        {
+            string updateQry = "UPDATE mis_fueldata SET ";
+            updateQry += $"Date = '{request.Date:yyyy-MM-dd}', ";
+            updateQry += $"DieselConsumedForVehicles = {request.DieselConsumedForVehicles}, ";
+            updateQry += $"PetrolConsumedForVehicles = {request.PetrolConsumedForVehicles}, ";
+            updateQry += $"PetrolConsumedForGrassCuttingAndMovers = {request.PetrolConsumedForGrassCuttingAndMovers}, ";
+            updateQry += $"DieselConsumedAtSite = {request.DieselConsumedAtSite}, ";
+            updateQry += $"PetrolConsumedAtSite = {request.PetrolConsumedAtSite}, ";
+            updateQry += $"UpdatedBy = {userID}, ";
+            updateQry += $"UpdatedAt = '{UtilsRepository.GetUTCTime()}' ";
+            updateQry += $"WHERE id = {request.id};";
+
+            await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+
+            return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Fuel Consumption Data Updated");
+        }
+        internal async Task<CMDefaultResponse> DeleteFuelConsumption(int id)
+        {
+            string deleteQry = $"DELETE FROM mis_fueldata WHERE id = {id};";
+            await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
+
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Fuel Consumption Data Deleted");
+        }
+        internal async Task<List<FuelData>> GetFuelConsumption()
+        {
+            string myQuery = "SELECT id, Date, DieselConsumedForVehicles, PetrolConsumedForVehicles, PetrolConsumedForGrassCuttingAndMovers, DieselConsumedAtSite, PetrolConsumedAtSite, CreatedBy, CreatedAt, UpdatedBy, UpdatedAt " +
+                             "FROM mis_fueldata " +
+                             "WHERE Status=1";
+            List<FuelData> data = await Context.GetData<FuelData>(myQuery).ConfigureAwait(false);
+            return data;
+        }
+
+        //Plantation Data
+
+        public async Task<CMDefaultResponse> CreatePlantationData(PlantationData request, int userID)
+        {
+            string date = request.Date.ToString("yyyy-MM-dd");
+            string myqry1 = $"INSERT INTO mis_plantationdata (Date, SaplingsPlanted, SaplingsSurvived, SaplingsDied, Status, CreatedBy, CreatedAt) " +
+                            $"VALUES " +
+                            $"('{date}', " +
+                            $"{request.SaplingsPlanted}, " +
+                            $"{request.SaplingsSurvived}, " +
+                            $"{request.SaplingsDied},1, " +
+                            $"{userID}, " +
+                            $"'{UtilsRepository.GetUTCTime()}'); " +
+                            $"SELECT LAST_INSERT_ID();";
+
+            DataTable dt = await Context.FetchData(myqry1).ConfigureAwait(false);
+            int id = Convert.ToInt32(dt.Rows[0][0]);
+
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Plantation Data Created");
+        }
+
+        public async Task<CMDefaultResponse> UpdatePlantationData(PlantationData request, int userID)
+        {
+            string date = request.Date.ToString("yyyy-MM-dd");
+            string updateQry = "UPDATE mis_plantationdata SET ";
+            updateQry += $"Date = '{date}', ";
+            updateQry += $"SaplingsPlanted = {request.SaplingsPlanted}, ";
+            updateQry += $"SaplingsSurvived = {request.SaplingsSurvived}, ";
+            updateQry += $"SaplingsDied = {request.SaplingsDied}, ";
+            updateQry += $"UpdatedBy = {userID}, ";
+            updateQry += $"UpdatedAt = '{UtilsRepository.GetUTCTime()}' ";
+            updateQry += $"WHERE id = {request.id};";
+
+            await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+
+            return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Plantation Data Updated");
+        }
+
+        public async Task<CMDefaultResponse> DeletePlantationData(int id)
+        {
+            string deleteQry = $"DELETE FROM mis_plantationdata WHERE id = {id};";
+            await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
+
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Plantation Data Deleted");
+        }
+
+        public async Task<List<PlantationData>> GetPlantationData()
+        {
+            string myQuery = "SELECT id, Date, SaplingsPlanted, SaplingsSurvived, SaplingsDied, CreatedBy, CreatedAt, UpdatedBy, UpdatedAt " +
+                             "FROM mis_plantationdata " +
+                             "WHERE Status=1";
+            List<PlantationData> data = await Context.GetData<PlantationData>(myQuery).ConfigureAwait(false);
+            return data;
+        }
+
+        //Kizensdata
+        public async Task<CMDefaultResponse> CreateKaizensData(KaizensData request, int userID)
+        {
+            string date = request.Date.ToString("yyyy-MM-dd");
+            string myqry1 = $"INSERT INTO mis_kaizensdata (Date, KaizensImplemented, CostForImplementation, CostSavedFromImplementation, Status, CreatedBy, CreatedAt) " +
+                            $"VALUES " +
+                            $"('{date}', " +
+                            $"{request.KaizensImplemented}, " +
+                            $"{request.CostForImplementation}, " +
+                            $"{request.CostSavedFromImplementation},1, " +
+                            $"{userID}, " +
+                            $"'{UtilsRepository.GetUTCTime()}'); " +
+                            $"SELECT LAST_INSERT_ID();";
+
+            DataTable dt = await Context.FetchData(myqry1).ConfigureAwait(false);
+            int id = Convert.ToInt32(dt.Rows[0][0]);
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Kaizens Data Created");
+        }
+
+        public async Task<CMDefaultResponse> UpdateKaizensData(KaizensData request, int userID)
+        {
+            string date = request.Date.ToString("yyyy-MM-dd");
+            string updateQry = "UPDATE mis_kaizensdata SET ";
+            updateQry += $"Date = '{date}', ";
+            updateQry += $"KaizensImplemented = {request.KaizensImplemented}, ";
+            updateQry += $"CostForImplementation = {request.CostForImplementation}, ";
+            updateQry += $"CostSavedFromImplementation = {request.CostSavedFromImplementation}, ";
+            updateQry += $"UpdatedBy = {userID}, ";
+            updateQry += $"UpdatedAt = '{UtilsRepository.GetUTCTime()}' ";
+            updateQry += $"WHERE id = {request.id};";
+
+            await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+
+            return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Kaizens Data Updated");
+        }
+
+        public async Task<CMDefaultResponse> DeleteKaizensData(int id)
+        {
+            string deleteQry = $"DELETE FROM mis_kaizensdata WHERE id = {id};";
+            await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
+
+            return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Kaizens Data Deleted");
+        }
+
+        public async Task<List<KaizensData>> GetKaizensData()
+        {
+            string myQuery = "SELECT id, Date, KaizensImplemented, CostForImplementation, CostSavedFromImplementation, CreatedBy, CreatedAt, UpdatedBy, UpdatedAt " +
+                             "FROM mis_kaizensdata " +
+                             "WHERE Status=1";
+            List<KaizensData> data = await Context.GetData<KaizensData>(myQuery).ConfigureAwait(false);
+            return data;
+        }
     }
+
+
 }
+
+

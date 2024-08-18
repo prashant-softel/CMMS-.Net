@@ -1688,6 +1688,318 @@ namespace CMMSAPIs.Controllers.Masters
                 throw ex;
             }
         }
+        //Chags for MIs MIS_OccupationalHealthData
+        [Route("CreateHealthData")]
+        [HttpPost]
+        public async Task<IActionResult> CreateHealthData(OccupationalHealthData request, int Userid)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.CreateHealthData(request, userID);
+                return Ok(data);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+        [Route("UpdateHealthData")]
+        [HttpPost]
+        public async Task<IActionResult> UpdateHealthData(OccupationalHealthData request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.UpdateHealthData(request, userID);
+                return Ok(data);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+        [Route("DeleteHealthData")]
+        [HttpDelete]
+        public async Task<IActionResult> DeleteHealthData(int id)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.DeleteHealthData(id, userID);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        [Route("GetHealthData")]
+        [HttpGet]
+        public async Task<IActionResult> GetHealthData()
+        {
+            try
+            {
+                var data = await _IMISMasterBS.GetHealthData();
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        [Route("CreateVisitsAndNotices")]
+        [HttpPost]
+        public async Task<IActionResult> CreateVisitsAndNotices(VisitsAndNotices request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.CreateVisitsAndNotices(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [Route("UpdateVisitsAndNotices")]
+        [HttpPost]
+        public async Task<IActionResult> UpdateVisitsAndNotices(VisitsAndNotices request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.UpdateVisitsAndNotices(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [Route("DeleteVisitsAndNotices")]
+        [HttpDelete]
+        public async Task<IActionResult> DeleteVisitsAndNotices([FromQuery] int id)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.DeleteVisitsAndNotices(id, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [Route("GetVisitsAndNotices")]
+        [HttpGet]
+        public async Task<IActionResult> GetVisitsAndNotices()
+        {
+            try
+            {
+                var data = await _IMISMasterBS.GetVisitsAndNotices();
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        //CreateFuleDaa
+        [Route("CreateFuelConsumption")]
+        [HttpPost]
+        public async Task<IActionResult> CreateFuelConsumption(FuelData request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.CreateFuelConsumption(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [Route("UpdateFuelConsumption")]
+        [HttpPost]
+        public async Task<IActionResult> UpdateFuelConsumption(FuelData request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+
+                var data = await _IMISMasterBS.UpdateFuelConsumption(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [Route("DeleteFuelConsumption")]
+        [HttpDelete]
+        public async Task<IActionResult> DeleteFuelConsumption(int id)
+        {
+            try
+            {
+
+                var data = await _IMISMasterBS.DeleteFuelConsumption(id);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [Route("GetFuelConsumption")]
+        [HttpGet]
+        public async Task<IActionResult> GetFuelConsumption()
+        {
+            try
+            {
+                var data = await _IMISMasterBS.GetFuelConsumption();
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        // changes in PlantationData
+        [Route("CreatePlantationData")]
+        [HttpPost]
+        public async Task<IActionResult> CreatePlantationData(PlantationData request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+
+                var data = await _IMISMasterBS.CreatePlantationData(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [Route("UpdatePlantationData")]
+        [HttpPost]
+        public async Task<IActionResult> UpdatePlantationData(PlantationData request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.UpdatePlantationData(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [Route("DeletePlantationData")]
+        [HttpDelete]
+        public async Task<IActionResult> DeletePlantationData(int id)
+        {
+            try
+            {
+                var data = await _IMISMasterBS.DeletePlantationData(id);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [Route("GetPlantationData")]
+        [HttpGet]
+        public async Task<IActionResult> GetPlantationData(int id)
+        {
+            try
+            {
+                var data = await _IMISMasterBS.GetPlantationData(id);
+                return Ok(data);
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        //kizens Data
+        [Route("CreateKaizensData")]
+        [HttpPost]
+        public async Task<IActionResult> CreateKaizensData(KaizensData request, int userID)
+        {
+            try
+            {
+                var data = await _IMISMasterBS.CreateKaizensData(request, userID);
+                return Ok(data);
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [Route("UpdateKaizensData")]
+        [HttpPost]
+        public async Task<IActionResult> UpdateKaizensData(KaizensData request, int userID)
+        {
+            try
+            {
+                var data = await _IMISMasterBS.UpdateKaizensData(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [Route("DeleteKaizensData")]
+        [HttpDelete]
+        public async Task<IActionResult> DeleteKaizensData(int id)
+        {
+            try
+            {
+                var data = await _IMISMasterBS.DeleteKaizensData(id);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [Route("GetKaizensData")]
+        [HttpGet]
+        public async Task<IActionResult> GetKaizensData()
+        {
+            try
+            {
+                var data = await _IMISMasterBS.GetKaizensData();
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
 
     }
 }
+
