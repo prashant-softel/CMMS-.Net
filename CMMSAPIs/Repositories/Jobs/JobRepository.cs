@@ -284,9 +284,11 @@ namespace CMMSAPIs.Repositories.Jobs
 
             string myQuery = "SELECT " +
                                     "job.id as id, facilities.id as facility_id, facilities.name as facility_name, blocks.id as block_id, blocks.name as block_name, job.status as status, job.createdAt as created_at,created_user.id as created_by_id," +
-                                    " CONCAT(created_user.firstName, created_user.lastName) as created_by_name, user.id as assigned_id, CONCAT(user.firstName, user.lastName) as assigned_name, job.title as job_title, " +
+                                    " CONCAT(created_user.firstName, created_user.lastName) as created_by_name,bus_user.name as Company, user.id as assigned_id, CONCAT(user.firstName, user.lastName) as assigned_name, job.title as job_title, " +
                                     "job.description as job_description, job.breakdownTime as breakdown_time, ptw.id as current_ptw_id, ptw.title as current_ptw_title, ptw.description as current_ptw_desc, jc.id as latestJCid, " +
-                                    "jc.JC_Status as latestJCStatus, jc.JC_Approved as latestJCApproval, jc.JC_Date_Stop as Job_closed_on ,jc.JC_Date_Stop as Breakdown_end_time,job.breakdownTime as Breakdown_start_time  " +
+                                    " passt.name as Isolated_equipments, CONCAT(tbtDone.firstName, ' ', tbtDone.lastName) as TBT_conducted_by_name,ptw.TBT_Done_At as TBT_done_time,ptw.startDate Start_time, " +
+                                    "jc.JC_Status as latestJCStatus, jc.JC_Approved as latestJCApproval, jc.JC_Date_Stop as Job_closed_on ," +
+                                    " jc.JC_Date_Stop as Breakdown_end_time,job.breakdownTime as Breakdown_start_time,ptw.status as status_PTW, CONCAT(isotak.firstName,isotak.lastName) as Isolation_taken  " +
                                       "FROM " +
                                             "jobs as job " +
                                       "LEFT JOIN " +
@@ -300,6 +302,11 @@ namespace CMMSAPIs.Repositories.Jobs
                                       "LEFT JOIN " +
                                             "users as created_user ON created_user.id = job.createdby " +
                                       "LEFT JOIN " +
+                                            "business as bus_user ON bus_user.id = job.createdby " +
+                                            "LEFT join  assets as passt on ptw.physicalIsoEquips = passt.id " +
+                                            "Left join users as isotak on ptw.physicalIsolation = isotak.id  " +
+                                            "left join users as tbtDone on ptw.TBT_Done_By = tbtDone.id " +
+                                      "LEFT JOIN " +
                                             "users as user ON user.id = job.assignedId " +
                                       "WHERE job.id = " + job_id;
             List<CMJobView> _ViewJobList = await Context.GetData<CMJobView>(myQuery).ConfigureAwait(false);
@@ -309,7 +316,7 @@ namespace CMMSAPIs.Repositories.Jobs
             _ViewJobList[0].breakdown_type = $"{(CMMS.CMMS_JobType)_ViewJobList[0].job_type}";
 
             //get equipmentCat list
-            string myQuery1 = "SELECT asset_cat.id as eid, asset_cat.name as name  FROM assetcategories as asset_cat " +
+            string myQuery1 = "SELECT asset_cat.id as id, asset_cat.name as name  FROM assetcategories as asset_cat " +
                 "JOIN jobmappingassets as mapAssets ON mapAssets.categoryId = asset_cat.id JOIN jobs as job ON mapAssets.jobId = job.id WHERE job.id =" + job_id;
             List<CMequipmentCatList> _equipmentCatList = await Context.GetData<CMequipmentCatList>(myQuery1).ConfigureAwait(false);
 
@@ -319,8 +326,9 @@ namespace CMMSAPIs.Repositories.Jobs
             List<CMworkingAreaNameList> _WorkingAreaNameList = await Context.GetData<CMworkingAreaNameList>(myQuery2).ConfigureAwait(false);
 
             //get Associated permits
-            string myQuery3 = "SELECT ptw.id as permitId,ptw.status as ptwStatus ,ptw.title as title, ptw.code as sitePermitNo, ptw.startDate, ptw.endDate,  CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, ptw.status as ptwStatus FROM permits as ptw JOIN jobs as job ON ptw.id = job.linkedPermit " +
+            string myQuery3 = "SELECT ptw.id as permitId,ptw.status as ptwStatus ,permittypelists.title  as permitTypeName,ptw.title as title, ptw.code as sitePermitNo, ptw.startDate, ptw.endDate,  CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, ptw.status as ptwStatus FROM permits as ptw JOIN jobs as job ON ptw.id = job.linkedPermit " +
                 "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
+                 "left join permittypelists on permittypelists.id = ptw.typeId " +
                 "LEFT JOIN st_jc_files as jobCard ON jobCard.JC_id = ptw.id " +
             "WHERE job.id= " + job_id;
             List<CMAssociatedPermitList> _AssociatedpermitList = await Context.GetData<CMAssociatedPermitList>(myQuery3).ConfigureAwait(false);
@@ -391,6 +399,7 @@ namespace CMMSAPIs.Repositories.Jobs
             _ViewJobList[0].associated_permit_list = _AssociatedpermitList;
             _ViewJobList[0].work_type_list = _WorkType;
             _ViewJobList[0].tools_required_list = _Tools;
+
             //add worktype and tools ka collection
             CMMS.CMMS_Status _Status_long = (CMMS.CMMS_Status)(_ViewJobList[0].status + 100);
             string _longStatus = getLongStatus(CMMS.CMMS_Modules.JOB, _Status_long, _ViewJobList[0]);

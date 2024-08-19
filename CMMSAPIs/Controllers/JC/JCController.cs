@@ -76,7 +76,7 @@ namespace CMMSAPIs.Controllers.JC
             }
             catch (Exception ex)
             {
-                throw;
+                throw ex;
             }
         }
 

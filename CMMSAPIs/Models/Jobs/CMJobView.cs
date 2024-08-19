@@ -20,6 +20,7 @@ namespace CMMSAPIs.Models.Jobs
         public int created_by_id { get; set; }
         public string created_by_name { get; set; }
         public DateTime? created_at { get; set; }
+        public string Company { get; set; }
         public int assigned_id { get; set; }
         public string assigned_name { get; set; }
         public int job_type { get; set; }
@@ -37,6 +38,7 @@ namespace CMMSAPIs.Models.Jobs
         public DateTime Breakdown_end_time { get; set; }
         public DateTime Breakdown_start_time { get; set; }
         public string Approved_by_name { get; set; }
+        public string TBT_conducted_by_name { get; set; }
 
 
         public List<CMequipmentCatList> equipment_cat_list { get; set; }
@@ -44,6 +46,7 @@ namespace CMMSAPIs.Models.Jobs
         public List<CMAssociatedPermitList> associated_permit_list { get; set; }
         public List<CMWorkType> work_type_list { get; set; }
         public List<CMWorkTypeTool> tools_required_list { get; set; }
+
 
     }
 

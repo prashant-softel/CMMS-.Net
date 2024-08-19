@@ -1,3 +1,6 @@
+using CMMSAPIs.Models.PM;
+using CMMSAPIs.Models.WC;
+using System;
 using System.Collections.Generic;
 
 namespace CMMSAPIs.Models.JC
@@ -25,6 +28,7 @@ namespace CMMSAPIs.Models.JC
         public int JC_Approved { get; set; }
         public string current_status { get; set; }
         public int status { get; set; }
+        public string Remark_new { get; set; }
         public string status_short { get; set; }
         public string status_long { get; set; }
         public List<CMJCJobDetail> LstCMJCJobDetailList { get; set; }
@@ -37,6 +41,7 @@ namespace CMMSAPIs.Models.JC
         public List<CMFileDetailJc> file_listJc { get; set; }
         public List<CMWorkTypeTools> tool_List { get; set; }
         public List<int> uploadfile_ids { get; set; }
+        public List<Materialconsumption> Material_consumption { get; set; }
     }
 
     public class CMJCRequest
@@ -80,6 +85,19 @@ public class CMJCJobDetail
     public int facility_id { get; set; }
     public int status { get; set; }
     public string status_short { get; set; }
+    public string perform_by { get; set; }
+    public string Employee_name { get; set; }
+    public string Company { get; set; }
+    public int Employee_ID { get; set; }
+    public DateTime Breakdown_end_time { get; set; }
+    public DateTime Breakdown_start_time { get; set; }
+    public DateTime Job_closed_on { get; set; }
+    public DateTime Job_raised_on { get; set; }
+    public string Type_of_Job { get; set; }
+    public dynamic turnaround_time_minutes { get; set; }
+    public string JobAssignedEmployeeName { get; set; }
+    public string JobDescription { get; set; }
+
 
 }
 public class CMJCPermitDetail
@@ -93,6 +111,12 @@ public class CMJCPermitDetail
     public string permit_approved_by_name { get; set; }
     public int status { get; set; }
     public string status_short { get; set; }
+    public string Isolation_taken { get; set; }
+    public string Isolated_equipment { get; set; }
+    public string TBT_conducted_by_name { get; set; }
+    public DateTime TBT_done_time { get; set; }
+    public DateTime Start_time { get; set; }
+    public int Status_PTW { get; set; }
 
     public int TBT_Done_Check { get; set; }
 
@@ -125,16 +149,19 @@ public class filesforwc
     public int facilityId { get; set; }
     public string comment { get; set; }
     public List<int> uploadfile_ids { get; set; }
+    public List<CMWCSupplierActions> supplierActions { get; set; }
 
 }
 public class CMWorkTypeTools
 {
     public int toolId { get; set; }
     public string toolName { get; set; }
+    public dynamic No_of_tools { get; set; }
 }
 public class CMJCAssetName
 {
-    public string asset_category_name { get; set; }
+    public string Equipment_name { get; set; }
+    public string Equipment_category { get; set; }
 }
 
 

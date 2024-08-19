@@ -689,6 +689,22 @@ namespace CMMSAPIs.Repositories.WC
                 await Context.ExecuteNonQry<int>(qryuploadFiles).ConfigureAwait(false);
 
             }
+            if (request.supplierActions != null)
+            {
+                if (request.supplierActions.Count > 0)
+                {
+                    string deleteActions = $"DELETE FROM wcschedules WHERE warranty_id = {request.id}";
+                    await Context.ExecuteNonQry<int>(deleteActions).ConfigureAwait(false);
+                    string addSupplierActions = "INSERT INTO wcschedules (warranty_id, supplier_action, input_value, input_date,srNumber,is_required, created_at) VALUES ";
+                    foreach (var action in request.supplierActions)
+                    {
+                        addSupplierActions += $"({request.id}, '{action.name}', 0, '{((DateTime)action.required_by_date).ToString("yyyy-MM-dd")}', " +
+                                                $"'{action.srNumber}',{action.is_required},'{UtilsRepository.GetUTCTime()}'), ";
+                    }
+                    addSupplierActions = addSupplierActions.Substring(0, addSupplierActions.Length - 2) + ";";
+                    await Context.ExecuteNonQry<int>(addSupplierActions).ConfigureAwait(false);
+                }
+            }
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.WARRANTY_CLAIM, request.id, 0, 0, request.comment, CMMS.CMMS_Status.UPDATED, userId);
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "WC Updated");
             return response;
