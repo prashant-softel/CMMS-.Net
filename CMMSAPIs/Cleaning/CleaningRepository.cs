@@ -31,39 +31,28 @@ namespace CMMSAPIs.Repositories.CleaningRepository
         {
             { (int)CMMS.CMMS_Status.MC_PLAN_DRAFT, "Draft" },
             { (int)CMMS.CMMS_Status.MC_PLAN_SUBMITTED, "Waiting for Approval" },
-            { (int)CMMS.CMMS_Status.MC_PLAN_APPROVED, "Plan Approved" },
-            { (int)CMMS.CMMS_Status.MC_PLAN_REJECTED, "PLan Rejected" },
-            { (int)CMMS.CMMS_Status.MC_PLAN_DELETED, "Plan Deleted" },
-            { (int)CMMS.CMMS_Status.MC_TASK_SCHEDULED, "Task Scheduled" },
-            { (int)CMMS.CMMS_Status.MC_TASK_STARTED, "In Progress" },
-            { (int)CMMS.CMMS_Status.MC_TASK_COMPLETED, "Task Completed" },
-            { (int)CMMS.CMMS_Status.MC_TASK_ABANDONED, "Task Abandoned" },
-            { (int)CMMS.CMMS_Status.MC_TASK_APPROVED, "Task Approved" },
-            { (int)CMMS.CMMS_Status.MC_TASK_REJECTED, "Task Rejected" },
+            { (int)CMMS.CMMS_Status.MC_PLAN_APPROVED, "Approved" },
+            { (int)CMMS.CMMS_Status.MC_PLAN_REJECTED, "Rejected" },
+            { (int)CMMS.CMMS_Status.MC_PLAN_DELETED, "Deleted" },
+            { (int)CMMS.CMMS_Status.MC_TASK_SCHEDULED, "Scheduled" },
+            { (int)CMMS.CMMS_Status.MC_TASK_STARTED,  "Started" },
+            { (int)CMMS.CMMS_Status.MC_TASK_COMPLETED, "Completed" },
+            { (int)CMMS.CMMS_Status.MC_TASK_ABANDONED, "Abandoned" },
+            { (int)CMMS.CMMS_Status.MC_TASK_APPROVED, "Approved" },
+            { (int)CMMS.CMMS_Status.MC_TASK_REJECTED, "Rejected" },
             { (int)CMMS.CMMS_Status.SCHEDULED_LINKED_TO_PTW,"PTW Linked" },
-            { (int)CMMS.CMMS_Status.MC_TASK_END_APPROVED,"Closed Approved" },
-            { (int)CMMS.CMMS_Status.MC_TASK_END_REJECTED,"Closed Reject" },
-            { (int)CMMS.CMMS_Status.MC_TASK_SCHEDULE_APPROVED,"Scheduled Approved" },
-            { (int)CMMS.CMMS_Status.MC_TASK_SCHEDULE_REJECT,"Scheduled Reject" },
+            { (int)CMMS.CMMS_Status.MC_TASK_END_APPROVED,"Closed - Approved" },
+            { (int)CMMS.CMMS_Status.MC_TASK_END_REJECTED,"Closed - Reject" },
+            { (int)CMMS.CMMS_Status.MC_TASK_SCHEDULE_APPROVED,"Scheduled - Approved" },
+            { (int)CMMS.CMMS_Status.MC_TASK_SCHEDULE_REJECT,"Scheduled - Reject" },
             { (int)CMMS.CMMS_Status.MC_TASK_RESCHEDULED,"Rescheduled" },
-            { (int)CMMS.CMMS_Status.VEG_PLAN_DRAFT, "Draft" },
-            { (int)CMMS.CMMS_Status.VEG_PLAN_SUBMITTED, "Waiting for Approval" },
-            { (int)CMMS.CMMS_Status.VEG_PLAN_APPROVED, "Approved" },
-            { (int)CMMS.CMMS_Status.VEG_PLAN_REJECTED, "Rejected" },
-            { (int)CMMS.CMMS_Status.VEG_PLAN_DELETED, "Deleted" },
-            { (int)CMMS.CMMS_Status.VEG_TASK_SCHEDULED, "Scheduled" },
-            { (int)CMMS.CMMS_Status.VEG_TASK_STARTED, "In Progress" },
-            { (int)CMMS.CMMS_Status.VEG_TASK_COMPLETED, "Completed" },
-            { (int)CMMS.CMMS_Status.VEG_TASK_ABANDONED, "Abandoned" },
-            { (int)CMMS.CMMS_Status.VEG_TASK_APPROVED, "Approved" },
-            { (int)CMMS.CMMS_Status.VEG_TASK_REJECTED, "Rejected" },
             { (int)CMMS.CMMS_Status.EQUIP_CLEANED, "Cleaned" },
             { (int)CMMS.CMMS_Status.EQUIP_ABANDONED, "Abandoned" },
             { (int)CMMS.CMMS_Status.EQUIP_SCHEDULED, "Scheduled" },
-            { (int)CMMS.CMMS_Status.MC_TASK_ABANDONED_REJECTED, "TASK ABANDONED REJECTED" },
-            { (int)CMMS.CMMS_Status.MC_TASK_ABANDONED_APPROVED, "TASK ABANDONED APPROVED" },
-            { (int)CMMS.CMMS_Status.RESCHEDULED_TASK, "TASK RESCHEDULE" },
-            { (int)CMMS.CMMS_Status.MC_ASSIGNED, "TASK REASSING" },
+            { (int)CMMS.CMMS_Status.MC_TASK_ABANDONED_REJECTED, "Abandoned - Rejected" },
+            { (int)CMMS.CMMS_Status.MC_TASK_ABANDONED_APPROVED, "Abandoned - Approved" },
+            { (int)CMMS.CMMS_Status.RESCHEDULED_TASK, "Reschedule" },
+            { (int)CMMS.CMMS_Status.MC_ASSIGNED, "Reassigned" },
         };
 
         internal string getLongStatus(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMMCPlan planObj, CMMCExecution executionObj)
@@ -257,9 +246,9 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 $"mc.createdAt,CONCAT(approvedBy.firstName, approvedBy.lastName) as approvedBy,mc.approvedAt,freq.name as" +
                 $" frequency,CONCAT(assignedTo.firstName, ' ', assignedTo.lastName) as assignedTo,mc.durationDays,{statusOut} as status_short" +
                 $" from cleaning_plan as mc LEFT JOIN Frequency as freq on freq.id = mc.frequencyId " +
-             $"LEFT JOIN users as assignedTo ON assignedTo.id = mc.assignedTo " +
-            $"LEFT JOIN users as createdBy ON createdBy.id = mc.createdById " +
-            $"LEFT JOIN users as approvedBy ON approvedBy.id = mc.approvedById where moduleType={moduleType} ";
+                $"LEFT JOIN users as assignedTo ON assignedTo.id = mc.assignedTo " +
+                $"LEFT JOIN users as createdBy ON createdBy.id = mc.createdById " +
+                $"LEFT JOIN users as approvedBy ON approvedBy.id = mc.approvedById where moduleType={moduleType} ";
 
             if (facilityId > 0)
             {
@@ -395,27 +384,23 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                     foreach (var schedule in request.schedules)
                     {
 
+
                         if (moduleType == 1)
                         {
 
-                            myQuery += $"UPDATE cleaning_plan_schedules SET updatedAt = '{UtilsRepository.GetUTCTime()}', updatedById = {userId} where plannedDay ={schedule.cleaningDay} and planId={request.planId};";
+                            myQuery += $"UPDATE cleaning_plan_schedules SET updatedAt = '{UtilsRepository.GetUTCTime()}', updatedById = {userId} , plannedDay ={schedule.cleaningDay} " +
+                                             $"where  planId={request.planId} and scheduleId={schedule.scheduleId}  ;";
+
                         }
-
-                        myQuery += $"Delete from cleaning_plan_items where scheduleId = {schedule.scheduleId};";
-
                         if (schedule.equipments.Count > 0)
                         {
-                            myQuery += $"insert into `cleaning_plan_items` (`planId`,`scheduleId`,`assetId`,`{measure}`,`plannedDay`,`updatedById`,`updatedAt`,`createdById`,`createdAt`) VALUES ";
-
-
                             foreach (var equipment in schedule.equipments)
                             {
-                                myQuery += $"({request.planId},{schedule.scheduleId},{equipment.id},(select {measure} from assets where id={equipment.id}),{schedule.cleaningDay},{userId},'{UtilsRepository.GetUTCTime()}',(select createdById from cleaning_plan where planId={request.planId}),(select createdAt from cleaning_plan where planId={request.planId})),";
-                                // if (equipment.noOfPlanDay > 0)
-                                //myQuery += $"UPDATE cleaning_plan_items SET plannedDay ={equipment.noOfPlanDay},updatedAt = '{UtilsRepository.GetUTCTime()}', updatedBy = {userId} where assetId = {equipment.id} and scheduleId={schedule.scheduleId};";
+
+                                myQuery += $"UPDATE cleaning_plan_items  SET moduleType = 1, scheduleId = {schedule.scheduleId} ,plannedDay={schedule.cleaningDay} " +
+                                           $" WHERE planId={request.planId} and  assetId  ={equipment.id} ; ";
                             }
-                            myQuery = myQuery.Substring(0, myQuery.Length - 1);
-                            myQuery += ";";
+
                             planId = request.planId;
                         }
 
@@ -493,8 +478,6 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
                 if (list != null && list.createdAt != null)
                     list.createdAt = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.createdAt);
-                if (list != null && list.startDate != null)
-                    list.startDate = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.startDate);
 
             }
 

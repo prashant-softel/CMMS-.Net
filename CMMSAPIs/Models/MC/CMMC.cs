@@ -131,6 +131,7 @@ namespace CMMSAPIs.Models.MC
 
         public UInt64 id { get; set; }
         public int scheduleId { get; set; }
+
         public int executionId { get; set; }
         public int cleaningDay { get; set; }  //First, second etc day
         public int cleaningType { get; set; }  //First, second etc day

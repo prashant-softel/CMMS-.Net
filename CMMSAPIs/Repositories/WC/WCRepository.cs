@@ -15,15 +15,13 @@ namespace CMMSAPIs.Repositories.WC
         private UtilsRepository _utilsRepo;
         private Dictionary<int, string> StatusDictionary = new Dictionary<int, string>() {
             { 191, "In Draft" },
-         //   { 192, "Warranty Claim Created" },
             { 192, "submitted - waiting for approval" },
             { 193, "Submit Request Rejected" },
-            { 194, "open claim" },
+            { 194, "Open Claim" },
             { 195, "Asset Dispatched" },
             { 196, "Rejected By Manufacturer" },
             { 197, "Approved By Manufacturer" },
             { 198, "Item Replenished" },
-        //    { 199, "Warranty Claim Waiting for Close Approval" },
             { 199, "Closed Waiting for Approval" },
             { 200, "Closed-Approved" },
             { 201, "Closed- Reject" },
@@ -143,11 +141,11 @@ namespace CMMSAPIs.Repositories.WC
                 "b1.name AS supplier_name, good_order_id, affected_part, order_reference_number, affected_sr_no,wc.date_of_claim, cost_of_replacement, wc.currency," +
                 " warranty_start_date, warranty_end_date, warranty_claim_title, warranty_description, " +
                 "corrective_action_by_buyer, request_to_supplier, concat(user.firstName , ' ' , user.lastName) AS approver_name," +
-                $" created_by, issued_on, {statusOut} as status,wc.status as status_code, approved_by, wc_fac_code, failure_time " +
-                  " , wc.claim_status,case when wc.claim_status=1 then 'WC done-closed'" +
-            " when wc.claim_status=2 then 'WC rejected-closed'" +
-            " when wc.claim_status=3 then 'WC partially-closed' " +
-            " else 'Invalid status' end as long_claim_status " +
+                $" created_by, issued_on, {statusOut} as status,wc.status as status_code, approved_by, wc_fac_code, failure_time, " +
+                "wc.claim_status,case when wc.claim_status=1 then 'WC done-closed'" +
+               " when wc.claim_status=2 then 'WC rejected-closed'" +
+               " when wc.claim_status=3 then 'WC partially-closed' " +
+               " else 'Invalid status' end as long_claim_status " +
                 " FROM wc " +
                 " LEFT JOIN facilities as f ON f.id = wc.facilityId " +
                 " LEFT JOIN assets as a ON a.id = wc.equipment_id " +

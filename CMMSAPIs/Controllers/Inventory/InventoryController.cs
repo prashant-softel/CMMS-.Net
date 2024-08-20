@@ -1,15 +1,13 @@
 ﻿using CMMSAPIs.BS.Inventory;
 using CMMSAPIs.Models.Inventory;
-using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
-using System;
-using System.IO;
-using Microsoft.AspNetCore.Authorization;
-using System.Collections.Generic;
-using Microsoft.AspNetCore.Http;
-using Newtonsoft.Json;
 using CMMSAPIs.Models.Utils;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace CMMSAPIs.Controllers.Inventory
 {
@@ -17,9 +15,9 @@ namespace CMMSAPIs.Controllers.Inventory
     [ApiController]
     public class InventoryController : ControllerBase
     {
-        
+
         private readonly IInventoryBS _InventoryBS;
-        public InventoryController(IInventoryBS inventory) 
+        public InventoryController(IInventoryBS inventory)
         {
             _InventoryBS = inventory;
         }
@@ -95,7 +93,7 @@ namespace CMMSAPIs.Controllers.Inventory
         //[Authorize]
         [Route("GetInventoryDetails")]
         [HttpGet]
-        public async Task<IActionResult> GetInventoryDetails(int id,int facility_id)
+        public async Task<IActionResult> GetInventoryDetails(int id, int facility_id)
         {
             try
             {

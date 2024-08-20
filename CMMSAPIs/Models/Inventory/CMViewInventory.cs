@@ -49,6 +49,7 @@ namespace CMMSAPIs.Models.Inventory
         public string dcRating { get; set; }
         public string acRating { get; set; }
         public string currency { get; set; }
+        public int currencyId { get; set; }
         public int moduleQuantity { get; set; }
         public int photoId { get; set; }
         public int calibrationFrequency { get; set; }

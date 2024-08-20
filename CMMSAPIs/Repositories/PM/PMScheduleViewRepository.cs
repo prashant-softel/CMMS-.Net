@@ -62,9 +62,9 @@ namespace CMMSAPIs.Repositories.PM
                 case CMMS.CMMS_Status.PM_APPROVED:
                     retValue = "Approved"; break;
                 case CMMS.CMMS_Status.PM_CLOSE_REJECTED:
-                    retValue = "Close - Rejected"; break;
+                    retValue = "Closed - Rejected"; break;
                 case CMMS.CMMS_Status.PM_CLOSE_APPROVED:
-                    retValue = "Close - Approved"; break;
+                    retValue = "Closed - Approved"; break;
                 case CMMS.CMMS_Status.PM_CANCELLED:
                     retValue = "Cancelled"; break;
                 case CMMS.CMMS_Status.PM_CANCELLED_REJECTED:

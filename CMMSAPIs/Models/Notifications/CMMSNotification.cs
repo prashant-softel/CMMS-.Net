@@ -206,20 +206,21 @@ namespace CMMSAPIs.Models.Notifications
             {
                 //CMMSNotification objc = new CMMSNotification(_conn);
                 // UserAccessRepository obj = new UserAccessRepository(_conn);
-                if (notificationType == 1)
+                if (notificationType == 2)
                 {
-                    users = await _userAccessRepository.GetUserByNotificationId(notification);
+                    users = await _userAccessRepository.GetEMUsers(facilityId, role);
                     notificationQry = $"INSERT INTO escalationlog (moduleId, moduleRefId, moduleStatus, notifSentToId, notifSentAt) VALUES " +
                                     $"({(int)moduleID}, {module_ref_id}, {notificationID}, {role}, '{UtilsRepository.GetUTCTime()}'); " +
                                     $"SELECT LAST_INSERT_ID(); ";
                 }
                 else
                 {
-                    users = await _userAccessRepository.GetEMUsers(facilityId, role);
-                    notificationQry =   $"INSERT INTO escalationlog (moduleId, moduleRefId, moduleStatus, notifSentToId, notifSentAt) VALUES " +
-                                    $"({(int)moduleID}, {module_ref_id}, {notificationID}, {role}, '{UtilsRepository.GetUTCTime()}'); " +
+                    users = await _userAccessRepository.GetUserByNotificationId(notification);
+                    notificationQry = $"INSERT INTO escalationlog (moduleId, moduleRefId, moduleStatus, notifSentToId, notifSentAt) VALUES " +
+                                    $"({(int)moduleID}, {module_ref_id}, {(int)notificationID}, {role}, '{UtilsRepository.GetUTCTime()}'); " +
                                     $"SELECT LAST_INSERT_ID(); ";
                 }
+
             }
             catch (Exception e)
             {
@@ -236,17 +237,23 @@ namespace CMMSAPIs.Models.Notifications
             int escalationlogID = Convert.ToInt32(dt1.Rows[0][0]);
 
             string notificationRecordsQry = "INSERT INTO escalationsentto (escalationLogId, notifSentTo) VALUES ";
+            string delimiter = "";
+            int emailCount = 0;
             foreach (var email in users)
             {
                 if (email != null)
                 {
                     EmailTo.Add(email.user_name);
-                    notificationRecordsQry += $"({escalationlogID}, {email.id}),";
-
+                    notificationRecordsQry += $"({escalationlogID}, '{email.id}'),";
+                    emailCount++;
                 }
             }
+            if (users.Count > 0)
+            {
+                EmailTo.Add("cmms@softeltech.in");
+                notificationRecordsQry = notificationRecordsQry.Substring(0, notificationRecordsQry.Length - 1);
+            }
             System.Data.DataTable dt2 = await _conn.FetchData(notificationRecordsQry).ConfigureAwait(false);
-
 
             if (print)
             {
