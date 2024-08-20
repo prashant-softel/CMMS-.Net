@@ -73,7 +73,10 @@ namespace CMMSAPIs.Models.MC
         public List<CMMCPlanScheduleSummary> schedules { get; set; }
 
     }
-
+    public class Schudle
+    {
+        public List<int> id { get; set; }
+    }
 
     public class CMMCPlanScheduleSummary
     {

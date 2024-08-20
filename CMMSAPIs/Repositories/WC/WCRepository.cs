@@ -144,7 +144,7 @@ namespace CMMSAPIs.Repositories.WC
                 $" created_by, issued_on, {statusOut} as status,wc.status as status_code, approved_by, wc_fac_code, failure_time, " +
                 "wc.claim_status,case when wc.claim_status=1 then 'WC done-closed'" +
                " when wc.claim_status=2 then 'WC rejected-closed'" +
-               " when wc.claim_status=3 then 'WC partially-closed' " +
+               " when wc.claim_status=3 then 'WC partially done-closed' " +
                " else 'Invalid status' end as long_claim_status " +
                 " FROM wc " +
                 " LEFT JOIN facilities as f ON f.id = wc.facilityId " +
@@ -326,7 +326,7 @@ namespace CMMSAPIs.Repositories.WC
             " created_by, issued_on, wc.status,approved_by, wc.date_of_claim AS date_of_claim, wc_fac_code, failure_time, startDate warrantyStartDate,  endDate warrantyEndDate" +
             " , wc.claim_status,case when wc.claim_status=1 then 'WC done-closed'" +
             " when wc.claim_status=2 then 'WC rejected-closed'" +
-            " when wc.claim_status=3 then 'WC partially-closed' " +
+            " when wc.claim_status=3 then 'WC partially done-closed' " +
             " else 'Invalid status' end as long_claim_status " +
             " FROM wc " +
             "LEFT JOIN facilities as f ON f.id = wc.facilityId " +
