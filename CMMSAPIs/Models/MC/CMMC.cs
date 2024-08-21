@@ -143,7 +143,7 @@ namespace CMMSAPIs.Models.MC
         public Int64 Invs { get; set; }
         public Int64 smbs { get; set; }
         public decimal ScheduledModules { get; set; }
-        public decimal area { get; set; }
+        public dynamic area { get; set; }
         public DateTime plannedDate { get; set; }
         public int status { get; set; }
         public string status_short { get; set; }
@@ -324,7 +324,7 @@ namespace CMMSAPIs.Models.MC
         public int invId { get; set; }
         public string invName { get; set; }
         public dynamic moduleQuantity { get; set; }
-        public dynamic area { get; set; }
+        public int area { get; set; }
 
         public List<CMSMB> smbs { get; set; } = new List<CMSMB>();
 
@@ -354,7 +354,7 @@ namespace CMMSAPIs.Models.MC
         public int smbId { get; set; }
         public string smbName { get; set; }
         public int moduleQuantity { get; set; }
-        public int area { get; set; }
+        public dynamic area { get; set; }
 
 
     }
@@ -362,7 +362,7 @@ namespace CMMSAPIs.Models.MC
     {
         public int blockId { get; set; }
         public string blockName { get; set; }
-        public int area { get; set; }
+        public dynamic area { get; set; }
         public List<CMInv> invs { get; set; } = new List<CMInv>();
 
     }
@@ -371,7 +371,7 @@ namespace CMMSAPIs.Models.MC
         public int blockId { get; set; }
         public int invId { get; set; }
         public string invName { get; set; }
-        public int area { get; set; }
+        public dynamic area { get; set; }
 
     }
     public class ApproveMC

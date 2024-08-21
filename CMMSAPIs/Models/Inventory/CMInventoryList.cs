@@ -49,6 +49,7 @@ namespace CMMSAPIs.Models.Inventory
         public string model { get; set; }
         public string manufacturername { get; set; }
         public string supplierName { get; set; }
+        public dynamic area { get; set; }
 
     }
 

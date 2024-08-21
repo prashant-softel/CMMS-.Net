@@ -826,7 +826,7 @@ namespace CMMSAPIs.Repositories.Inventory
                         {
                             if (i == 0)
                             {
-                                //assetQry = $"SELECT REPLACE(UPPER(name), '_', '') as name FROM facilities WHERE parentId = {facility_id} union" +
+
                                 assetQry = $" SELECT REPLACE(UPPER(name), '_', '') as name FROM assets WHERE facilityId = {facility_id} {filter};";
                             }
                             else
@@ -1073,7 +1073,7 @@ namespace CMMSAPIs.Repositories.Inventory
 
             string myQuery =
             " select a.id, a.name,a.moduleQuantity, a.description, ast.name as type, b2.name as supplierName, b5.name as operatorName, a.categoryId, ac.name as categoryName, a.serialNumber,a.specialTool, a.warrantyId,f.name AS facilityName, f.id AS facilityId, bl.id AS blockId, bl.name AS blockName,linkedbl.id AS linkedToBlockId, linkedbl.name AS linkedToBlockName, a.parentId, a2.name as parentName, custbl.name as customerName, owntbl.name as ownerName, s.name AS status, a.dccapacity,a.acrating, a.dcRating, a.acCapacity, a.descMaintenace, wt.name as warrantyType, wp.id as warrantyProviderId, wp.name as warrantyProviderName, " +
-            "w.start_date,w.expiry_date,w.warrantyTenture,w.certificate_number,a.cost,cy.name as currency,a.barcode,a.unspCode,a.purchaseCode,a.calibrationDueDate,a.calibrationReminderDays,a.calibrationFrequencyType,a.calibrationDueDate as calibration_testing_date,a.model,a.supplierId,a.manufacturerId,manufacturertlb.name as manufacturername " +
+            "w.start_date,w.expiry_date,w.warrantyTenture,w.certificate_number,a.cost,a.area, cy.name as currency,a.barcode,a.unspCode,a.purchaseCode,a.calibrationDueDate,a.calibrationReminderDays,a.calibrationFrequencyType,a.calibrationDueDate as calibration_testing_date,a.model,a.supplierId,a.manufacturerId,manufacturertlb.name as manufacturername " +
 
             " from assets as a " +
             "left join assettypes as ast on ast.id = a.typeId " +
@@ -1136,7 +1136,7 @@ namespace CMMSAPIs.Repositories.Inventory
            */
             /*Your code goes here*/
             string myQuery = "SELECT a.id ,frequency.name as calibrationFreqType ,a.name, a.description as asset_description, a.calibrationStartDate as calibrationSatrtDate,  " +
-                "cal.due_date as calibrationDueDate, cal.due_date as calibrationLastDate,a.vendorId as vendorid,  " +
+                "cal.due_date as calibrationDueDate, cal.due_date as calibrationLastDate,a.vendorId as vendorid,a.area , " +
                 "a.stockCount as stockCount,a.photoId as photoId,a.retirementStatus as retirementStatus,w.meter_limit as meter_limit,w.meter_unit as meter_unit,a.moduleQuantity, ast.id as typeId, ast.name as type, a.supplierId as supplierId, b2.name as supplierName, manufacturertlb.id as manufacturerId, manufacturertlb.name as manufacturerName,a.parent_equipment_no ,b5.id as operatorId, b5.name as operatorName, ac.id as categoryId, ac.name as categoryName, a.serialNumber,a.cost as cost,a.currency as currencyId ,c.name as currency, a.model,a.calibrationFrequency,frequency.name as calibrationFrequencyType, a.calibrationReminderDays, " +
             "f.id as facilityId, f.name AS facilityName, bl.id as blockId, bl.name AS blockName, a2.id as parentId, a2.name as parentName, a2.serialNumber as parentSerial, custbl.id as customerId, custbl.name as customerName, owntbl.id as ownerId, owntbl.name as ownerName, s.id as statusId, s.name AS status,a.purchaseCode as purchaseCode, a.unspCode as unspCode, a.barcode as barcode,a.descMaintenace as descMaintenace,a.dcRating as dcRating ,a.acRating as acRating, a.specialTool,a.specialToolEmpId as specialToolEmp,  " +
             "w.start_date as start_date,w.expiry_date as expiry_date, w.id as warrantyId, w.warranty_description, w.certificate_number,wut.name as warranty_term_type,wt.id as warrantyTypeId, wt.name as warrantyType, wut.id as warrantyTermTypeId, wp.id as warrantyProviderId, wp.name as warrantyProviderName, files.file_path as warranty_certificate_path ," +
@@ -1275,7 +1275,7 @@ namespace CMMSAPIs.Repositories.Inventory
                        "','" + unit.ownerId + "','" + unit.operatorId + "','" + unit.manufacturerId + "','" + unit.parent_equipment_no +
                        "','" + unit.supplierId + "','" + unit.serialNumber + "','" + userID + "','" + unit.photoId +
                        "','" + unit.model + "','" + unit.stockCount + "','" + unit.moduleQuantity + "','" + unit.cost +
-                       "','" + unit.currency + "','" + unit.specialToolId + "','" + unit.specialToolEmpId +
+                       "','" + unit.currencyId + "','" + unit.specialToolId + "','" + unit.specialToolEmpId +
                        "'," + firstCalibrationDueDate + "," + lastCalibrationDate + ",'" + unit.calibrationFrequencyType +
                        "','" + unit.calibrationFrequency + "','" + unit.calibrationReminderDays +
                        "','" + unit.retirementStatus + "','" + unit.multiplier + "','" + unit.vendorId +
@@ -1543,7 +1543,7 @@ namespace CMMSAPIs.Repositories.Inventory
                     unit.vendorId = unit.manufacturerId;
                 }
                 string qry = "update  assets set description='" + unit.assetdescription + "', parentId='" + unit.parentId + "', acCapacity='" + unit.acCapacity + "', dcCapacity='" + unit.dcCapacity + "', categoryId='" + unit.categoryId + "', typeId='" + unit.typeId + "', statusId='" + unit.statusId + "', facilityId='" + unit.facilityId + "', blockId='" + unit.blockId + "', linkedToBlockId='" + unit.blockId + "', customerId='" + unit.customerId + "', ownerId='" + unit.ownerId + "',operatorId='" + unit.operatorId + "', manufacturerId='" + unit.manufacturerId + "',supplierId='" + unit.supplierId + "',serialNumber='" + unit.serialNumber + "',createdBy='" + userID + "',photoId='" + unit.photoId + "',model='" + unit.model + "',stockCount='" + unit.stockCount + "',moduleQuantity='" + unit.moduleQuantity + "', cost='" + unit.cost + "',currency='" + unit.currency + "',specialTool='" + unit.specialToolId + "',specialToolEmpId='" + unit.specialToolEmpId + "',calibrationDueDate=" + firstCalibrationDate + ",calibrationLastDate=" + lastCalibrationDate + ",calibrationFrequencyType='" + unit.calibrationFrequencyType + "',calibrationFrequency='" + unit.calibrationFrequency + "',calibrationReminderDays='" + unit.calibrationReminderDays + "',retirementStatus='" + unit.retirementStatus + "',multiplier='" + unit.multiplier + "',vendorId='" + unit.vendorId + "',calibrationNextDueDate=" + nextCalibrationDate + ",acRating='" + unit.acRating + "',dcRating='" + unit.dcRating + "',descMaintenace='" + unit.descMaintenace + "',barcode='" + unit.barcode + "',unspCode='" + unit.unspCode + "'" +
-                    ",purchaseCode='" + unit.purchaseCode + "' where name = '" + unit.name + "' and facilityid='" + unit.facilityId + "' ";
+                    ",purchaseCode='" + unit.purchaseCode + "',area=" + unit.area + " where name = '" + unit.name + "' and facilityid='" + unit.facilityId + "' ";
                 //qry += "('" + unit.name + "','" + unit.description + "','" + unit.parentId + "','" + unit.acCapacity + "','" + unit.dcCapacity + "','" + unit.categoryId + "','" + unit.typeId + "','" + unit.statusId + "','" + unit.facilityId + "','" + unit.blockId + "','" + unit.blockId + "','" + unit.customerId + "','" + unit.ownerId + "','" + unit.operatorId + "','" + unit.manufacturerId + "','" + unit.supplierId + "','" + unit.serialNumber + "','" + userID + "','" + unit.photoId + "','" + unit.model + "','" + unit.stockCount + "','" + unit.moduleQuantity + "','" + unit.cost + "','" + unit.currency + "','" + unit.specialToolId + "','" + unit.specialToolEmpId + "'," + firstCalibrationDate + "," + lastCalibrationDate + ",'" + unit.calibrationFrequencyType + "','" + unit.calibrationFrequency + "','" + unit.calibrationReminderDays + "','" + unit.retirementStatus + "','" + unit.multiplier + "','" + unit.vendorId + "'," + nextCalibrationDate + ",'" + unit.acRating + "','" + unit.dcRating + "','" + unit.descMaintenace + "','" + unit.barcode + "','" + unit.unspCode + "','" + unit.purchaseCode + "'); ";
 
 
@@ -1627,7 +1627,7 @@ namespace CMMSAPIs.Repositories.Inventory
             }
             if (request.area != 0)
             {
-                updateQry += $" area= '{request.area}',";
+                updateQry += $" area= {request.area} ,";
             }
             if (request.categoryId != 0)
             {
@@ -1847,7 +1847,7 @@ namespace CMMSAPIs.Repositories.Inventory
             if (request.statusId != 0)
             {
                 updateQry += $" statusId = '{request.statusId}',";
-                updateQry += $" status = '{request.statusId}',";
+
             }
             if (request.parentId != 0)
             {
@@ -1904,13 +1904,10 @@ namespace CMMSAPIs.Repositories.Inventory
             {
                 updateQry += $" serialNumber= '{request.serialNumber}',";
             }
-            if (request.currency != null)
-            {
-                updateQry += $" currency = '{request.currency}',";
-            }
+
             if (request.currencyId != 0)
             {
-                updateQry += $" currencyId = '{request.currencyId}',";
+                updateQry += $" currency = '{request.currencyId}',";
 
             }
             if (request.photoId != 0)

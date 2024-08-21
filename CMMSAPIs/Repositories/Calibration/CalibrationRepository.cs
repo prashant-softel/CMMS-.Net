@@ -87,39 +87,7 @@ namespace CMMSAPIs.Repositories.Calibration
                 statusOut += $"WHEN a_calibration.status = {status.Key} THEN '{status.Value}' ";
             }
             statusOut += $"ELSE 'Invalid Status' END";
-            /*string myQuery = "SELECT " +
-                                $" a_calibration.id as calibration_id, assets.id as asset_id, assets.name as asset_name, assets.serialNumber as asset_serial, " +
-                                $"CASE WHEN categories.name is null THEN 'Others' ELSE categories.name END as category_name, frequency.id as frequency_id," +
-                                $" frequency.name as frequency_name,a_calibration.is_damaged, a_calibration.status as statusID, {statusOut} as calibration_status, " +
-                                $" IF(assets.calibrationLastDate = '0000-00-00 00:00:00', CAST( '0001-01-01 00:00:01' as datetime)," +
-                                $" CAST(assets.calibrationLastDate AS DATETIME)) AS last_calibration_date, " +
-                                $" IF(assets.calibrationDueDate = '0000-00-00 00:00:00', CAST( '0001-01-01 00:00:01' as datetime), " +
-                                $" CAST(assets.calibrationDueDate AS DATETIME)) AS next_calibration_due_date, vendor.id as vendor_id,  " +
-                                $"vendor.name as vendor_name, CONCAT(request_by.firstName,' ',request_by.lastName) as responsible_person, " +
-                                $" a_calibration.received_date,a_calibration.start_date as Schedule_start_date, " +
-                                $"a_calibration.due_date AS calibration_due_date ,a_calibration.health_status as asset_health_status " +
-                             "FROM assets " +
-                             "LEFT JOIN " +
-                                "frequency ON assets.calibrationFrequency = frequency.id " +
-                             "inner JOIN " +
-                                 "calibration as a_calibration on a_calibration.asset_id=assets.id " +
-                             "LEFT JOIN " +
-                                "assetcategories as categories on categories.id=assets.categoryId " +
-                             "LEFT JOIN " +
-                                "business as vendor ON a_calibration.vendor_id=vendor.id " +
-                             "LEFT JOIN " +
-                                "users as request_by ON a_calibration.requested_by=request_by.id " +
-                             " WHERE categories.calibrationStatus = 1 AND (a_calibration.requested_at = (SELECT MAX(requested_at) FROM calibration as b_calibration WHERE a_calibration.asset_id = b_calibration.asset_id) OR a_calibration.requested_at is null) ";
-                             if (facility_id > 0)
-                             {
-                             myQuery += $"AND assets.facilityId = {facility_id} ";
-                             }
-                             else
-                             {
-                             throw new ArgumentException("Invalid Facility ID");
-                             }
-                             myQuery += "GROUP BY assets.id  ORDER BY next_calibration_due_date ASC ;";
-                             */
+
             string myQuery = "SELECT a_calibration.id as calibration_id, assets.id as asset_id, assets.name as asset_name,  " +
                             "assets.serialNumber as asset_serial, CASE WHEN categories.name is null THEN 'Others' ELSE categories.name END as category_name, " +
                             "frequency.id as frequency_id," +
@@ -424,7 +392,7 @@ namespace CMMSAPIs.Repositories.Calibration
             CMDefaultResponse response;
             if (returnStatus == CMMS.RETRUNSTATUS.SUCCESS)
             {
-                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, assetID, CMMS.CMMS_Modules.CALIBRATION, request.id, "Calibration Request Approved", CMMS.CMMS_Status.CALIBRATION_REQUEST_APPROVED, userID);
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, assetID, CMMS.CMMS_Modules.CALIBRATION, request.id, request.comment, CMMS.CMMS_Status.CALIBRATION_REQUEST_APPROVED, userID);
                 CMCalibrationDetails _ViewCalibration = await GetCalibrationDetails(request.id, "");
 
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.CALIBRATION, CMMS.CMMS_Status.CALIBRATION_REQUEST_APPROVED, new[] { userID }, _ViewCalibration);
@@ -456,7 +424,7 @@ namespace CMMSAPIs.Repositories.Calibration
             CMDefaultResponse response;
             if (returnStatus == CMMS.RETRUNSTATUS.SUCCESS)
             {
-                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, assetID, CMMS.CMMS_Modules.CALIBRATION, request.id, "Calibration Request Rejected", CMMS.CMMS_Status.CALIBRATION_REQUEST_REJECTED, userID);
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, assetID, CMMS.CMMS_Modules.CALIBRATION, request.id, request.comment, CMMS.CMMS_Status.CALIBRATION_REQUEST_REJECTED, userID);
                 CMCalibrationDetails _ViewCalibration = await GetCalibrationDetails(request.id, "");
 
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.CALIBRATION, CMMS.CMMS_Status.CALIBRATION_REQUEST_REJECTED, new[] { userID }, _ViewCalibration);
@@ -566,7 +534,7 @@ namespace CMMSAPIs.Repositories.Calibration
             CMDefaultResponse response;
             if (returnStatus == CMMS.RETRUNSTATUS.SUCCESS)
             {
-                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, assetID, CMMS.CMMS_Modules.CALIBRATION, request.calibration_id, "Calibration Completed", CMMS.CMMS_Status.CALIBRATION_COMPLETED, userID);
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, assetID, CMMS.CMMS_Modules.CALIBRATION, request.calibration_id, request.comment, CMMS.CMMS_Status.CALIBRATION_COMPLETED, userID);
                 CMCalibrationDetails _ViewCalibration = await GetCalibrationDetails(request.calibration_id, "");
 
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.CALIBRATION, CMMS.CMMS_Status.CALIBRATION_COMPLETED, new[] { userID }, _ViewCalibration);
@@ -605,7 +573,7 @@ namespace CMMSAPIs.Repositories.Calibration
             CMDefaultResponse response;
             if (returnStatus == CMMS.RETRUNSTATUS.SUCCESS)
             {
-                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, assetID, CMMS.CMMS_Modules.CALIBRATION, request.id, "Calibration Closed", CMMS.CMMS_Status.CALIBRATION_CLOSED, userID);
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, assetID, CMMS.CMMS_Modules.CALIBRATION, request.id, request.comment, CMMS.CMMS_Status.CALIBRATION_CLOSED, userID);
                 CMCalibrationDetails _ViewCalibration = await GetCalibrationDetails(request.id, "");
 
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.CALIBRATION, CMMS.CMMS_Status.CALIBRATION_CLOSED, new[] { userID }, _ViewCalibration);
@@ -687,7 +655,7 @@ namespace CMMSAPIs.Repositories.Calibration
             CMDefaultResponse response;
             if (returnStatus == CMMS.RETRUNSTATUS.SUCCESS)
             {
-                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, assetID, CMMS.CMMS_Modules.CALIBRATION, request.id, "Calibration Rejected", CMMS.CMMS_Status.CALIBRATION_REJECTED, userID);
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, assetID, CMMS.CMMS_Modules.CALIBRATION, request.id, request.comment, CMMS.CMMS_Status.CALIBRATION_REJECTED, userID);
                 CMCalibrationDetails _ViewCalibration = await GetCalibrationDetails(request.id, "");
 
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.CALIBRATION, CMMS.CMMS_Status.CALIBRATION_REJECTED, new[] { userID }, _ViewCalibration);
@@ -746,7 +714,7 @@ namespace CMMSAPIs.Repositories.Calibration
             CMDefaultResponse response;
             if (returnStatus == CMMS.RETRUNSTATUS.SUCCESS)
             {
-                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, assetID, CMMS.CMMS_Modules.CALIBRATION, request.id, "Calibration Skipped", CMMS.CMMS_Status.CALIBRATION_SKIPPED, userID);
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, assetID, CMMS.CMMS_Modules.CALIBRATION, request.id, request.comment, CMMS.CMMS_Status.CALIBRATION_SKIPPED, userID);
                 CMCalibrationDetails _ViewCalibration = await GetCalibrationDetails(request.id, "");
 
                 //await CMMSNotification.sendNotification(CMMS.CMMS_Modules.CALIBRATION, CMMS.CMMS_Status.CALIBRATION_SKIPPED, new[] { userID }, _ViewCalibration);

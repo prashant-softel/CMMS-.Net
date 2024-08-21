@@ -2202,7 +2202,7 @@ namespace CMMSAPIs.Repositories.Masters
 
         internal async Task<List<OccupationalHealthData>> GetHealthData()
         {
-            string myQuery = "SELECT id, Date, NoOfHealthExamsOfNewJoiner, PeriodicTests, OccupationaIllnesses as OccupationalIllnesses, Status, " +
+            string myQuery = "SELECT id, Date,MONTHNAME(Date) as month_name,Month(Date) as month_id, NoOfHealthExamsOfNewJoiner, PeriodicTests, OccupationaIllnesses as OccupationalIllnesses, Status, " +
                              "CreatedBy, CreatedAt, UpdatedBy, UpdatedAt " +
                              "FROM MIS_OccupationalHealthData " +
                              "WHERE  Status = 1 ;";
@@ -2264,7 +2264,7 @@ namespace CMMSAPIs.Repositories.Masters
         }
         internal async Task<List<VisitsAndNotices>> GetVisitsAndNotices()
         {
-            string myQuery = "SELECT id, Date, GovtAuthVisits, NoOfFineByThirdParty, NoOfShowCauseNoticesByThirdParty, " +
+            string myQuery = "SELECT id, Date,MONTHNAME(Date) as month_name,Month(Date) as month_id, GovtAuthVisits, NoOfFineByThirdParty, NoOfShowCauseNoticesByThirdParty, " +
                              "NoticesToContractor, AmountOfPenaltiesToContractors, AnyOther, Status, CreatedBy, CreatedAt, UpdatedBy, UpdatedAt " +
                              "FROM mis_visitsandnotices " +
                              "WHERE Status =1 ; ";
@@ -2318,7 +2318,7 @@ namespace CMMSAPIs.Repositories.Masters
         }
         internal async Task<List<FuelData>> GetFuelConsumption()
         {
-            string myQuery = "SELECT id, Date, DieselConsumedForVehicles, PetrolConsumedForVehicles, PetrolConsumedForGrassCuttingAndMovers, DieselConsumedAtSite, PetrolConsumedAtSite, CreatedBy, CreatedAt, UpdatedBy, UpdatedAt " +
+            string myQuery = "SELECT id, Date,MONTHNAME(Date) as month_name,Month(Date) as month_id, DieselConsumedForVehicles, PetrolConsumedForVehicles, PetrolConsumedForGrassCuttingAndMovers, DieselConsumedAtSite, PetrolConsumedAtSite, CreatedBy, CreatedAt, UpdatedBy, UpdatedAt " +
                              "FROM mis_fueldata " +
                              "WHERE Status=1";
             List<FuelData> data = await Context.GetData<FuelData>(myQuery).ConfigureAwait(false);
@@ -2373,7 +2373,7 @@ namespace CMMSAPIs.Repositories.Masters
 
         public async Task<List<PlantationData>> GetPlantationData()
         {
-            string myQuery = "SELECT id, Date, SaplingsPlanted, SaplingsSurvived, SaplingsDied, CreatedBy, CreatedAt, UpdatedBy, UpdatedAt " +
+            string myQuery = "SELECT id, Date, MONTHNAME(Date) as month_name,Month(Date) as month_id, SaplingsPlanted, SaplingsSurvived, SaplingsDied, CreatedBy, CreatedAt, UpdatedBy, UpdatedAt " +
                              "FROM mis_plantationdata " +
                              "WHERE Status=1";
             List<PlantationData> data = await Context.GetData<PlantationData>(myQuery).ConfigureAwait(false);
@@ -2426,7 +2426,7 @@ namespace CMMSAPIs.Repositories.Masters
 
         public async Task<List<KaizensData>> GetKaizensData()
         {
-            string myQuery = "SELECT id, Date, KaizensImplemented, CostForImplementation, CostSavedFromImplementation, CreatedBy, CreatedAt, UpdatedBy, UpdatedAt " +
+            string myQuery = "SELECT id, Date, MONTHNAME(Date) as month_name,Month(Date) as month_id, KaizensImplemented, CostForImplementation, CostSavedFromImplementation, CreatedBy, CreatedAt, UpdatedBy, UpdatedAt " +
                              "FROM mis_kaizensdata " +
                              "WHERE Status=1";
             List<KaizensData> data = await Context.GetData<KaizensData>(myQuery).ConfigureAwait(false);
