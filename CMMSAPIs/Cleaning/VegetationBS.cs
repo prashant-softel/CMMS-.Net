@@ -10,27 +10,27 @@ namespace CMMSAPIs.Cleaning
 {
     public interface VegBS
     {
-        public Task<CMDefaultResponse> AbandonExecutionVegetation(CMApproval request, int userId);
-        public Task<CMDefaultResponse> ApproveExecutionVegetation(ApproveMC request, int userId);
-        public Task<CMDefaultResponse> StartExecutionVegetation(int executionId, int userId);
-        public Task<CMDefaultResponse> StartScheduleExecutionVegetation(int scheduleId, int userId);
-        public Task<CMDefaultResponse> EndExecutionVegetation(int executionId, int userId);
-        public Task<CMDefaultResponse> LinkPermitToVegetation(int task_id, int permit_id, int userId);
-        public Task<CMDefaultResponse> RejectExecutionVegetation(CMApproval request, int userId);
-        public Task<CMDefaultResponse> RejectEndExecutionVegetation(ApproveMC request, int userId);
-        public Task<CMDefaultResponse> AbandonScheduleVegetation(CMApproval request, int userId);
+        public Task<CMDefaultResponse> AbandonExecutionVegetation(CMApproval request, int userId, string facilitytimeZone);
+        public Task<CMDefaultResponse> ApproveExecutionVegetation(ApproveMC request, int userId, string facilitytimeZone);
+        public Task<CMDefaultResponse> StartExecutionVegetation(int executionId, int userId, string facilitytimeZone);
+        public Task<CMDefaultResponse> StartScheduleExecutionVegetation(int scheduleId, int userId, string facilitytimeZone);
+        public Task<CMDefaultResponse> EndExecutionVegetation(int executionId, int userId, string facilitytimeZone);
+        public Task<CMDefaultResponse> LinkPermitToVegetation(int task_id, int permit_id, int userId, string facilitytimeZone);
+        public Task<CMDefaultResponse> RejectExecutionVegetation(CMApproval request, int userId, string facilitytimeZone);
+        public Task<CMDefaultResponse> RejectEndExecutionVegetation(ApproveMC request, int userId, string facilitytimeZone);
+        public Task<CMDefaultResponse> AbandonScheduleVegetation(CMApproval request, int userId, string facilitytimeZone);
         public Task<CMDefaultResponse> CompleteExecutionVegetation(CMMCExecution request, int userId);
-        public Task<CMDefaultResponse> ApproveScheduleExecutionVegetation(ApproveMC request, int userId);
-        public Task<CMDefaultResponse> RejectAbandonExecutionVegetation(CMApproval request, int userId);
-        public Task<CMDefaultResponse> ApproveAbandonExecutionVegetation(CMApproval request, int userId);
-        public Task<CMDefaultResponse> EndScheduleExecutionVegetation(int scheduleId, int userId);
-        public Task<CMDefaultResponse> ReAssignTaskVegetation(int task_id, int assign_to, int userID);
-        public Task<CMDefaultResponse> UpdateScheduleExecutionVegetation(CMMCGetScheduleExecution request, int userId);
-        public Task<CMDefaultResponse> ApproveEndExecutionVegetation(ApproveMC request, int userId);
-        public Task<CMDefaultResponse> RejectScheduleExecutionVegetation(ApproveMC request, int userId);
+        public Task<CMDefaultResponse> ApproveScheduleExecutionVegetation(ApproveMC request, int userId, string facilitytimeZone);
+        public Task<CMDefaultResponse> RejectAbandonExecutionVegetation(CMApproval request, int userId, string facilitytimeZone);
+        public Task<CMDefaultResponse> ApproveAbandonExecutionVegetation(CMApproval request, int userId, string facilitytimeZone);
+        public Task<CMDefaultResponse> EndScheduleExecutionVegetation(int scheduleId, int userId, string facilitytimeZone);
+        public Task<CMDefaultResponse> ReAssignTaskVegetation(int task_id, int assign_to, int userID, string facilitytimeZone);
+        public Task<CMDefaultResponse> UpdateScheduleExecutionVegetation(CMMCGetScheduleExecution request, int userId, string facilitytimeZone);
+        public Task<CMDefaultResponse> ApproveEndExecutionVegetation(ApproveMC request, int userId, string facilitytimeZone);
+        public Task<CMDefaultResponse> RejectScheduleExecutionVegetation(ApproveMC request, int userId, string facilitytimeZone);
         public Task<List<CMMCTaskList>> GetTaskList(int facilityId, string facilitytimeZone);
-        public Task<CMDefaultResponse> CreatePlan(List<CMMCPlan> request, int userId);
-        public Task<CMDefaultResponse> UpdatePlan(List<CMMCPlan> request, int userId);
+        public Task<CMDefaultResponse> CreatePlan(List<CMMCPlan> request, int userId, string facilitytimeZone);
+        public Task<CMDefaultResponse> UpdatePlan(List<CMMCPlan> request, int userId, string facilitytimeZone);
         public Task<CMMCPlan> GetPlanDetails(int planId, string facilitytimeZone);
         public Task<List<CMMCEquipmentList>> GetVegEquipmentList(int facilityId);
         public Task<List<CMMCTaskEquipmentList>> GetTaskEquipmentList(int taskId, string facilitytimeZone);
@@ -66,13 +66,13 @@ namespace CMMSAPIs.Cleaning
         }
 
 
-        public async Task<CMDefaultResponse> AbandonExecutionVegetation(CMApproval request, int userId)
+        public async Task<CMDefaultResponse> AbandonExecutionVegetation(CMApproval request, int userId, string facilitytimeZone)
         {
             try
             {
                 using (var repos = new VegetationRepository(getDB))
                 {
-                    return await repos.AbandonExecutionVegetation(request, userId);
+                    return await repos.AbandonExecutionVegetation(request, userId, facilitytimeZone);
                 }
             }
             catch (Exception ex)
@@ -81,13 +81,13 @@ namespace CMMSAPIs.Cleaning
             }
         }
 
-        public async Task<CMDefaultResponse> StartExecutionVegetation(int executionId, int userId)
+        public async Task<CMDefaultResponse> StartExecutionVegetation(int executionId, int userId, string facilitytimeZone)
         {
             try
             {
                 using (var repos = new VegetationRepository(getDB))
                 {
-                    return await repos.StartExecutionVegetation(executionId, userId);
+                    return await repos.StartExecutionVegetation(executionId, userId, facilitytimeZone);
                 }
             }
             catch (Exception ex)
@@ -96,13 +96,13 @@ namespace CMMSAPIs.Cleaning
             }
         }
 
-        public async Task<CMDefaultResponse> StartScheduleExecutionVegetation(int scheduleId, int userId)
+        public async Task<CMDefaultResponse> StartScheduleExecutionVegetation(int scheduleId, int userId, string facilitytimeZone)
         {
             try
             {
                 using (var repos = new VegetationRepository(getDB))
                 {
-                    return await repos.StartScheduleExecutionVegetation(scheduleId, userId);
+                    return await repos.StartScheduleExecutionVegetation(scheduleId, userId, facilitytimeZone);
                 }
             }
             catch (Exception ex)
@@ -111,13 +111,13 @@ namespace CMMSAPIs.Cleaning
             }
         }
 
-        public async Task<CMDefaultResponse> EndExecutionVegetation(int executionId, int userId)
+        public async Task<CMDefaultResponse> EndExecutionVegetation(int executionId, int userId, string facilitytimeZone)
         {
             try
             {
                 using (var repos = new VegetationRepository(getDB))
                 {
-                    return await repos.EndExecutionVegetation(executionId, userId);
+                    return await repos.EndExecutionVegetation(executionId, userId, facilitytimeZone);
                 }
             }
             catch (Exception ex)
@@ -126,13 +126,13 @@ namespace CMMSAPIs.Cleaning
             }
         }
 
-        public async Task<CMDefaultResponse> LinkPermitToVegetation(int task_id, int permit_id, int userId)
+        public async Task<CMDefaultResponse> LinkPermitToVegetation(int task_id, int permit_id, int userId, string facilitytimeZone)
         {
             try
             {
                 using (var repos = new VegetationRepository(getDB))
                 {
-                    return await repos.LinkPermitToVegetation(task_id, permit_id, userId);
+                    return await repos.LinkPermitToVegetation(task_id, permit_id, userId, facilitytimeZone);
                 }
             }
             catch (Exception ex)
@@ -140,13 +140,13 @@ namespace CMMSAPIs.Cleaning
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> AbandonScheduleVegetation(CMApproval request, int userId)
+        public async Task<CMDefaultResponse> AbandonScheduleVegetation(CMApproval request, int userId, string facilitytimeZone)
         {
             try
             {
                 using (var repos = new VegetationRepository(getDB))
                 {
-                    return await repos.AbandonScheduleVegetation(request, userId);
+                    return await repos.AbandonScheduleVegetation(request, userId, facilitytimeZone);
                 }
             }
             catch (Exception ex)
@@ -170,13 +170,25 @@ namespace CMMSAPIs.Cleaning
             }
         }
 
-        public async Task<CMDefaultResponse> EndScheduleExecutionVegetation(int scheduleId, int userId)
+        public async Task<CMDefaultResponse> EndScheduleExecutionVegetation(int scheduleId, int userId, string facilitytimeZone)
         {
             try
             {
                 using (var repos = new VegetationRepository(getDB))
                 {
-                    return await repos.EndScheduleExecutionVegetation(scheduleId, userId);
+                    return await repos.EndScheduleExecutionVegetation(scheduleId, userId, facilitytimeZone);
+                }
+            }
+            catch (Exception ex) { throw; }
+        }
+
+        public async Task<CMDefaultResponse> ReAssignTaskVegetation(int task_id, int assign_to, int userID, string facilitytimeZone)
+        {
+            try
+            {
+                using (var repos = new VegetationRepository(getDB))
+                {
+                    return await repos.ReAssignTaskVegetation(task_id, assign_to, userID, facilitytimeZone);
                 }
             }
             catch (Exception ex)
@@ -185,13 +197,13 @@ namespace CMMSAPIs.Cleaning
             }
         }
 
-        public async Task<CMDefaultResponse> ReAssignTaskVegetation(int task_id, int assign_to, int userID)
+        public async Task<CMDefaultResponse> UpdateScheduleExecutionVegetation(CMMCGetScheduleExecution request, int userId, string facilitytimeZone)
         {
             try
             {
                 using (var repos = new VegetationRepository(getDB))
                 {
-                    return await repos.ReAssignTaskVegetation(task_id, assign_to, userID);
+                    return await repos.UpdateScheduleExecutionVegetation(request, userId,  facilitytimeZone);
                 }
             }
             catch (Exception ex)
@@ -200,13 +212,13 @@ namespace CMMSAPIs.Cleaning
             }
         }
 
-        public async Task<CMDefaultResponse> UpdateScheduleExecutionVegetation(CMMCGetScheduleExecution request, int userId)
+        public async Task<CMDefaultResponse> ApproveEndExecutionVegetation(ApproveMC request, int userId, string facilitytimeZone)
         {
             try
             {
                 using (var repos = new VegetationRepository(getDB))
                 {
-                    return await repos.UpdateScheduleExecutionVegetation(request, userId);
+                    return await repos.ApproveEndExecutionVegetation(request, userId, facilitytimeZone);
                 }
             }
             catch (Exception ex)
@@ -215,13 +227,13 @@ namespace CMMSAPIs.Cleaning
             }
         }
 
-        public async Task<CMDefaultResponse> ApproveEndExecutionVegetation(ApproveMC request, int userId)
+        public async Task<CMDefaultResponse> ApproveScheduleExecutionVegetation(ApproveMC request, int userId, string facilitytimeZone)
         {
             try
             {
                 using (var repos = new VegetationRepository(getDB))
                 {
-                    return await repos.ApproveEndExecutionVegetation(request, userId);
+                    return await repos.ApproveScheduleExecutionVegetation(request, userId, facilitytimeZone);
                 }
             }
             catch (Exception ex)
@@ -230,13 +242,13 @@ namespace CMMSAPIs.Cleaning
             }
         }
 
-        public async Task<CMDefaultResponse> ApproveScheduleExecutionVegetation(ApproveMC request, int userId)
+        public async Task<CMDefaultResponse> RejectAbandonExecutionVegetation(CMApproval request, int userId, string facilitytimeZone)
         {
             try
             {
                 using (var repos = new VegetationRepository(getDB))
                 {
-                    return await repos.ApproveScheduleExecutionVegetation(request, userId);
+                    return await repos.RejectAbandonExecutionVegetation(request, userId, facilitytimeZone);
                 }
             }
             catch (Exception ex)
@@ -245,13 +257,13 @@ namespace CMMSAPIs.Cleaning
             }
         }
 
-        public async Task<CMDefaultResponse> RejectAbandonExecutionVegetation(CMApproval request, int userId)
+        public async Task<CMDefaultResponse> ApproveExecutionVegetation(ApproveMC request, int userId, string facilitytimeZone)
         {
             try
             {
                 using (var repos = new VegetationRepository(getDB))
                 {
-                    return await repos.RejectAbandonExecutionVegetation(request, userId);
+                    return await repos.ApproveEndExecutionVegetation(request, userId, facilitytimeZone);
                 }
             }
             catch (Exception ex)
@@ -260,61 +272,13 @@ namespace CMMSAPIs.Cleaning
             }
         }
 
-        public async Task<CMDefaultResponse> ApproveExecutionVegetation(ApproveMC request, int userId)
+        public async Task<CMDefaultResponse> RejectEndExecutionVegetation(ApproveMC request, int userId, string facilitytimeZone)
         {
             try
             {
                 using (var repos = new VegetationRepository(getDB))
                 {
-                    return await repos.ApproveEndExecutionVegetation(request, userId);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        }
-
-        public async Task<CMDefaultResponse> RejectEndExecutionVegetation(ApproveMC request, int userId)
-        {
-            try
-            {
-                using (var repos = new VegetationRepository(getDB))
-                {
-                    return await repos.RejectEndExecutionVegetation(request, userId);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-
-        }
-
-        public async Task<CMDefaultResponse> ApproveAbandonExecutionVegetation(CMApproval request, int userId)
-        {
-
-
-            try
-            {
-                using (var repos = new VegetationRepository(getDB))
-                {
-                    return await repos.ApproveAbandonExecutionVegetation(request, userId);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        }
-        public async Task<CMDefaultResponse> RejectExecutionVegetation(CMApproval request, int userId)
-        {
-
-            try
-            {
-                using (var repos = new VegetationRepository(getDB))
-                {
-                    return await repos.RejectExecutionVegetation(request, userId);
+                    return await repos.RejectEndExecutionVegetation(request, userId, facilitytimeZone);
                 }
             }
             catch (Exception ex)
@@ -324,13 +288,46 @@ namespace CMMSAPIs.Cleaning
 
         }
 
-        public async Task<CMDefaultResponse> RejectScheduleExecutionVegetation(ApproveMC request, int userId)
+        public async Task<CMDefaultResponse> ApproveAbandonExecutionVegetation(CMApproval request, int userId, string facilitytimeZone)
+        {
+
+
+            try
+            {
+                using (var repos = new VegetationRepository(getDB))
+                {
+                    return await repos.ApproveAbandonExecutionVegetation(request, userId, facilitytimeZone);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<CMDefaultResponse> RejectExecutionVegetation(CMApproval request, int userId, string facilitytimeZone)
+        {
+
+            try
+            {
+                using (var repos = new VegetationRepository(getDB))
+                {
+                    return await repos.RejectExecutionVegetation(request, userId, facilitytimeZone);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+
+        }
+
+        public async Task<CMDefaultResponse> RejectScheduleExecutionVegetation(ApproveMC request, int userId, string facilitytimeZone)
         {
             try
             {
                 using (var repos = new VegetationRepository(getDB))
                 {
-                    return await repos.RejectScheduleExecutionVegetation(request, userId);
+                    return await repos.RejectScheduleExecutionVegetation(request, userId, facilitytimeZone);
                 }
             }
             catch (Exception ex)
@@ -341,13 +338,13 @@ namespace CMMSAPIs.Cleaning
         }
 
 
-        public async Task<CMDefaultResponse> CreatePlan(List<CMMCPlan> request, int userId)
+        public async Task<CMDefaultResponse> CreatePlan(List<CMMCPlan> request, int userId, string facilitytimeZone)
         {
             try
             {
                 using (var repos = new VegetationRepository(getDB))
                 {
-                    return await repos.CreatePlan(request, userId);
+                    return await repos.CreatePlan(request, userId, facilitytimeZone);
                 }
             }
             catch (Exception ex)
@@ -357,13 +354,13 @@ namespace CMMSAPIs.Cleaning
 
         }
 
-        public async Task<CMDefaultResponse> UpdatePlan(List<CMMCPlan> request, int userId)
+        public async Task<CMDefaultResponse> UpdatePlan(List<CMMCPlan> request, int userId, string facilitytimeZone)
         {
             try
             {
                 using (var repos = new VegetationRepository(getDB))
                 {
-                    return await repos.UpdatePlan(request, userId);
+                    return await repos.UpdatePlan(request, userId, facilitytimeZone);
                 }
             }
             catch (Exception ex)
@@ -485,13 +482,13 @@ namespace CMMSAPIs.Cleaning
             }
         }*/
 
-        internal async Task<CMDefaultResponse> RejectPlan(CMApproval request, int userId)
+        internal async Task<CMDefaultResponse> RejectPlan(CMApproval request, int userId, string facilitytimeZone)
         {
             try
             {
                 using (var repos = new VegetationRepository(getDB))
                 {
-                    return await repos.RejectPlan(request, userId);
+                    return await repos.RejectPlan(request, userId, facilitytimeZone);
                 }
             }
             catch (Exception ex)
@@ -500,13 +497,13 @@ namespace CMMSAPIs.Cleaning
             }
         }
 
-        internal async Task<CMDefaultResponse> DeletePlan(int planId, int userId)
+        internal async Task<CMDefaultResponse> DeletePlan(int planId, int userId, string facilitytimeZone)
         {
             try
             {
                 using (var repos = new VegetationRepository(getDB))
                 {
-                    return await repos.DeletePlan(planId, userId);
+                    return await repos.DeletePlan(planId, userId, facilitytimeZone);
                 }
             }
             catch (Exception ex)
@@ -515,13 +512,13 @@ namespace CMMSAPIs.Cleaning
             }
         }
 
-        internal async Task<CMDefaultResponse> ApproveVegetationPlan(CMApproval request, int userId)
+        internal async Task<CMDefaultResponse> ApproveVegetationPlan(CMApproval request, int userId, string facilitytimeZone)
         {
             try
             {
                 using (var repos = new VegetationRepository(getDB))
                 {
-                    return await repos.ApprovePlan(request, userId);
+                    return await repos.ApprovePlan(request, userId, facilitytimeZone);
                 }
             }
             catch (Exception ex)

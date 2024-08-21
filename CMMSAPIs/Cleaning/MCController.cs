@@ -92,29 +92,33 @@ namespace CMMSAPIs.Controllers.MC
         //[Authorize]
         [Route("CreateMCPlan")]
         [HttpPost]
-        public async Task<IActionResult> CreateMCPlan(List<CMMCPlan> request)
+        public async Task<IActionResult> CreateMCPlan(List<CMMCPlan> request, int facility_id)
         {
             try
             {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _CleaningBS.CreatePlan(request, userId);
+                var data = await _CleaningBS.CreatePlan(request, userId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
             {
-                throw;
+                ExceptionResponse item = new ExceptionResponse();
+                item.Message = ex.Message;
+                return Ok(item);
             }
         }
 
         //[Authorize]
         [Route("UpdateMCPlan")]
         [HttpPost]
-        public async Task<IActionResult> UpdateMCPlan(List<CMMCPlan> request)
+        public async Task<IActionResult> UpdateMCPlan(List<CMMCPlan> request, int facility_id)
         {
             try
             {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _CleaningBS.UpdatePlan(request, userId);
+                var data = await _CleaningBS.UpdatePlan(request, userId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -126,12 +130,13 @@ namespace CMMSAPIs.Controllers.MC
         //[Authorize]
         [Route("ApproveMCPlan")]
         [HttpPut]
-        public async Task<IActionResult> ApproveMCPlan(CMApproval request)
+        public async Task<IActionResult> ApproveMCPlan(CMApproval request, int facility_id)
         {
             try
             {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _CleaningBS.ApprovePlan(request, userId);
+                var data = await _CleaningBS.ApprovePlan(request, userId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -141,12 +146,13 @@ namespace CMMSAPIs.Controllers.MC
         }
         [Route("ApproveEndExecution")]
         [HttpPut]
-        public async Task<IActionResult> ApproveEndExecution(ApproveMC request)
+        public async Task<IActionResult> ApproveEndExecution(ApproveMC request, int facility_id)
         {
             try
             {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _CleaningBS.ApproveEndExecution(request, userId);
+                var data = await _CleaningBS.ApproveEndExecution(request, userId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -156,13 +162,14 @@ namespace CMMSAPIs.Controllers.MC
         }
         [Route("ReAssignMcTask")]
         [HttpPut]
-        public async Task<IActionResult> ReAssignMcTask(int task_id, int assign_to)
+        public async Task<IActionResult> ReAssignMcTask(int task_id, int assign_to, int facility_id)
         {
 
             try
             {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _CleaningBS.ReAssignMcTask(task_id, assign_to, userID);
+                var data = await _CleaningBS.ReAssignMcTask(task_id, assign_to, userID, facilitytimeZone);
                 return Ok(data);
 
             }
@@ -174,12 +181,13 @@ namespace CMMSAPIs.Controllers.MC
         }
         [Route("RejectEndExecution")]
         [HttpPut]
-        public async Task<IActionResult> RejectEndExecution(ApproveMC request)
+        public async Task<IActionResult> RejectEndExecution(ApproveMC request, int facility_id)
         {
             try
             {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _CleaningBS.RejectEndExecution(request, userId);
+                var data = await _CleaningBS.RejectEndExecution(request, userId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -189,12 +197,13 @@ namespace CMMSAPIs.Controllers.MC
         }
         [Route("ApproveScheduleExecution")]
         [HttpPut]
-        public async Task<IActionResult> ApproveScheduleExecution(ApproveMC request)
+        public async Task<IActionResult> ApproveScheduleExecution(ApproveMC request, int facility_id)
         {
             try
             {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _CleaningBS.ApproveScheduleExecution(request, userId);
+                var data = await _CleaningBS.ApproveScheduleExecution(request, userId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -204,12 +213,13 @@ namespace CMMSAPIs.Controllers.MC
         }
         [Route("RejectScheduleExecution")]
         [HttpPut]
-        public async Task<IActionResult> RejectScheduleExecution(ApproveMC request)
+        public async Task<IActionResult> RejectScheduleExecution(ApproveMC request, int facility_id)
         {
             try
             {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _CleaningBS.RejectScheduleExecution(request, userId);
+                var data = await _CleaningBS.RejectScheduleExecution(request, userId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -221,12 +231,13 @@ namespace CMMSAPIs.Controllers.MC
         //[Authorize]
         [Route("RejectMCPlan")]
         [HttpPut]
-        public async Task<IActionResult> RejectMCPlan(CMApproval request)
+        public async Task<IActionResult> RejectMCPlan(CMApproval request, int facility_id)
         {
             try
             {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _CleaningBS.RejectPlan(request, userId);
+                var data = await _CleaningBS.RejectPlan(request, userId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -238,12 +249,13 @@ namespace CMMSAPIs.Controllers.MC
         //[Authorize]
         [Route("DeleteMCPlan")]
         [HttpPut]
-        public async Task<IActionResult> DeleteMCPlan(int planId)
+        public async Task<IActionResult> DeleteMCPlan(int planId, int facility_id)
         {
             try
             {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _CleaningBS.DeletePlan(planId, userId);
+                var data = await _CleaningBS.DeletePlan(planId, userId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -253,12 +265,13 @@ namespace CMMSAPIs.Controllers.MC
         }
         [Route("LinkPermitToModuleCleaning")]
         [HttpPut]
-        public async Task<IActionResult> LinkPermitToModuleCleaning(int scheduleId, int permit_id)
+        public async Task<IActionResult> LinkPermitToModuleCleaning(int scheduleId, int permit_id, int facility_id)
         {
             try
             {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _CleaningBS.LinkPermitToModuleCleaning(scheduleId, permit_id, userId);
+                var data = await _CleaningBS.LinkPermitToModuleCleaning(scheduleId, permit_id, userId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -269,12 +282,13 @@ namespace CMMSAPIs.Controllers.MC
         //[Authorize]
         [Route("StartMCExecution")]
         [HttpPut]
-        public async Task<IActionResult> StartMCExecution(int executionId)
+        public async Task<IActionResult> StartMCExecution(int executionId, int facility_id)
         {
             try
             {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _CleaningBS.StartExecution(executionId, userId);
+                var data = await _CleaningBS.StartExecution(executionId, userId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -286,12 +300,13 @@ namespace CMMSAPIs.Controllers.MC
         //[Authorize]
         [Route("StartMCScheduleExecution")]
         [HttpPut]
-        public async Task<IActionResult> StartMCScheduleExecution(int scheduleId)
+        public async Task<IActionResult> StartMCScheduleExecution(int scheduleId, int facility_id)
         {
             try
             {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _CleaningBS.StartScheduleExecution(scheduleId, userId);
+                var data = await _CleaningBS.StartScheduleExecution(scheduleId, userId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -303,12 +318,13 @@ namespace CMMSAPIs.Controllers.MC
         //[Authorize]
         [Route("UpdateMCScheduleExecution")]
         [HttpPut]
-        public async Task<IActionResult> UpdateMCScheduleExecution(CMMCGetScheduleExecution schedule)
+        public async Task<IActionResult> UpdateMCScheduleExecution(CMMCGetScheduleExecution schedule, int facility_id)
         {
             try
             {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _CleaningBS.UpdateScheduleExecution(schedule, userId);
+                var data = await _CleaningBS.UpdateScheduleExecution(schedule, userId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -357,12 +373,13 @@ namespace CMMSAPIs.Controllers.MC
         //[Authorize]
         [Route("AbandonMcExecution")]
         [HttpPut]
-        public async Task<IActionResult> AbandonMcExecution(CMApproval request)
+        public async Task<IActionResult> AbandonMcExecution(CMApproval request, int facility_id)
         {
             try
             {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _CleaningBS.AbandonExecution(request, userId);
+                var data = await _CleaningBS.AbandonExecution(request, userId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -373,12 +390,13 @@ namespace CMMSAPIs.Controllers.MC
 
         [Route("RejectAbandonExecution")]
         [HttpPut]
-        public async Task<IActionResult> RejectAbandonExecution(CMApproval request)
+        public async Task<IActionResult> RejectAbandonExecution(CMApproval request, int facility_id)
         {
             try
             {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _CleaningBS.RejectAbandonExecution(request, userId);
+                var data = await _CleaningBS.RejectAbandonExecution(request, userId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -388,12 +406,13 @@ namespace CMMSAPIs.Controllers.MC
         }
         [Route("ApproveAbandonExecution")]
         [HttpPut]
-        public async Task<IActionResult> ApproveAbandonExecution(CMApproval request)
+        public async Task<IActionResult> ApproveAbandonExecution(CMApproval request, int facility_id)
         {
             try
             {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _CleaningBS.ApproveAbandonExecution(request, userId);
+                var data = await _CleaningBS.ApproveAbandonExecution(request, userId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -405,12 +424,13 @@ namespace CMMSAPIs.Controllers.MC
         //[Authorize]
         [Route("AbandonMcSchedule")]
         [HttpPut]
-        public async Task<IActionResult> AbandonMcSchedule(CMApproval request)
+        public async Task<IActionResult> AbandonMcSchedule(CMApproval request, int facility_id)
         {
             try
             {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _CleaningBS.AbandonSchedule(request, userId);
+                var data = await _CleaningBS.AbandonSchedule(request, userId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -453,12 +473,13 @@ namespace CMMSAPIs.Controllers.MC
 
         [Route("ApproveMCExecution")]
         [HttpPut]
-        public async Task<IActionResult> ApproveMCExecution(CMApproval request)
+        public async Task<IActionResult> ApproveMCExecution(CMApproval request, int facility_id)
         {
             try
             {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _CleaningBS.ApproveExecution(request, userId);
+                var data = await _CleaningBS.ApproveExecution(request, userId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -470,12 +491,13 @@ namespace CMMSAPIs.Controllers.MC
         //[Authorize]
         [Route("RejectMCPExecution")]
         [HttpPut]
-        public async Task<IActionResult> RejectMCPExecution(CMApproval request)
+        public async Task<IActionResult> RejectMCPExecution(CMApproval request, int facility_id)
         {
             try
             {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _CleaningBS.RejectExecution(request, userId);
+                var data = await _CleaningBS.RejectExecution(request, userId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -487,12 +509,13 @@ namespace CMMSAPIs.Controllers.MC
         //[Authorize]
         [Route("EndMCScheduleExecution")]
         [HttpPut]
-        public async Task<IActionResult> EndMCScheduleExecution(int scheduleId)
+        public async Task<IActionResult> EndMCScheduleExecution(int scheduleId, int facility_id)
         {
             try
             {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _CleaningBS.EndScheduleExecution(scheduleId, userId);
+                var data = await _CleaningBS.EndScheduleExecution(scheduleId, userId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -503,12 +526,13 @@ namespace CMMSAPIs.Controllers.MC
 
         [Route("EndMCExecution")]
         [HttpPut]
-        public async Task<IActionResult> EndMCExecution(int executionId)
+        public async Task<IActionResult> EndMCExecution(int executionId, int facility_id)
         {
             try
             {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _CleaningBS.EndExecution(executionId, userId);
+                var data = await _CleaningBS.EndExecution(executionId, userId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)

@@ -19,10 +19,11 @@ namespace CMMSAPIs.Models.Notifications
             m_InvObj = InvObj;
             m_InvObjID = InvObj.id;
         }
-        override protected string getSubject(params object[] args)
+
+        override protected string getEMSubject(params object[] args)
         {
 
-            string retValue = "My job subject";
+            string retValue = "ESCALALTION : ";
 
             switch (m_notificationID)
             {
@@ -37,6 +38,34 @@ namespace CMMSAPIs.Models.Notifications
                     break;
                 case CMMS.CMMS_Status.INVENTORY_DELETED:
                     retValue += String.Format("Asset {0} Deleted by {1} at {2}</p>", m_InvObj.name, m_InvObj.deleted_by, m_InvObj.deleted_at);
+                    break;
+                default:
+                    retValue += String.Format("Asset <{0}> Undefined status {1} ", m_InvObj.id, m_notificationID);
+                    break;
+            }
+            retValue += $" for {m_delayDays} days";
+            return retValue;
+        }
+
+       
+        override protected string getSubject(params object[] args)
+        {
+
+            string retValue = "My job subject";
+
+            switch (m_notificationID)
+            {
+                case CMMS.CMMS_Status.INVENTORY_IMPORTED:
+                    retValue = String.Format("Assets Imorted by {1} at {2}</p>", m_InvObj.name, m_InvObj.Imported_by, m_InvObj.Imported_at);
+                    break;
+                case CMMS.CMMS_Status.INVENTORY_ADDED:
+                    retValue = String.Format("Asset {0} Added by {1} at {2}</p>", m_InvObj.name, m_InvObj.added_by, m_InvObj.added_at);
+                    break;
+                case CMMS.CMMS_Status.INVENTORY_UPDATED:
+                    retValue = String.Format("Asset {0} Updated by {1} at {2}</p>", m_InvObj.name, m_InvObj.updated_by, m_InvObj.updated_at);
+                    break;
+                case CMMS.CMMS_Status.INVENTORY_DELETED:
+                    retValue = String.Format("Asset {0} Deleted by {1} at {2}</p>", m_InvObj.name, m_InvObj.deleted_by, m_InvObj.deleted_at);
                     break;
                 default:
                     break;

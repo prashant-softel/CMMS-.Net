@@ -7,6 +7,7 @@ using CMMSAPIs.Models.Inventory;
 using CMMSAPIs.Models.JC;
 using CMMSAPIs.Models.Jobs;
 using CMMSAPIs.Models.Mails;
+using CMMSAPIs.Models.MC;
 using CMMSAPIs.Models.Permits;
 using CMMSAPIs.Models.Users;
 using CMMSAPIs.Models.Utils;
@@ -180,6 +181,8 @@ namespace CMMSAPIs.Models.Notifications
             CMDefaultResponse response = new CMDefaultResponse();
 
             List<CMUser> emailList = new List<CMUser>();
+
+            int notificationID_int = (int)notificationID;
             // emailList = GetUserByNotificationId(notificationID);
 
             string subject;

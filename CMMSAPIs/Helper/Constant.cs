@@ -607,6 +607,7 @@ namespace CMMSAPIs.Helper
             VEG_PLAN_REJECTED,
             VEG_PLAN_APPROVED,
             VEG_PLAN_DELETED,
+            VEG_PLAN_UPDATED,
 
             VEG_TASK_SCHEDULED = 721,
             VEG_TASK_STARTED,

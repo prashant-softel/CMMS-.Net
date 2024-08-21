@@ -7,12 +7,69 @@ namespace CMMSAPIs.Models.Notifications
 {
     internal class CalibrationNotification : CMMSNotification
     {
-        int m_jobId;
+        int m_calibrationId;
         CMCalibrationDetails calibObj;
 
         public CalibrationNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMCalibrationDetails CaliObj) : base(moduleID, notificationID)
         {
             calibObj = CaliObj;
+        }
+        override protected string getEMSubject(params object[] args)
+        {
+            m_calibrationId = calibObj.calibration_id;
+            string retValue = "ESCLATION : ";
+
+            switch (m_notificationID)
+            {
+                case CMMS.CMMS_Status.CALIBRATION_SCHEDULED:
+                    retValue += String.Format("CAL{0} Scheduled ", calibObj.calibration_id);
+                    break;
+                case CMMS.CMMS_Status.CALIBRATION_REQUEST:
+                    retValue += String.Format("CAL{0} Requested ", calibObj.calibration_id);
+                    break;
+                case CMMS.CMMS_Status.CALIBRATION_REQUEST_REJECTED:
+                    retValue += String.Format("CAL{0} Request in Rejected ", calibObj.calibration_id);
+                    break;
+                case CMMS.CMMS_Status.CALIBRATION_REQUEST_APPROVED:
+                    retValue += String.Format("CAL{0} Request in Approved ", calibObj.calibration_id);
+                    break;
+                case CMMS.CMMS_Status.CALIBRATION_STARTED:
+                    retValue += String.Format("CAL{0} Request Started ", calibObj.calibration_id);
+                    break;
+                case CMMS.CMMS_Status.CALIBRATION_COMPLETED:
+                    retValue += String.Format("CAL{0} Completed ", calibObj.calibration_id);
+                    break;
+                case CMMS.CMMS_Status.CALIBRATION_CLOSED:
+                    retValue += String.Format("CAL{0} Completed ", calibObj.calibration_id);
+                    break;
+                case CMMS.CMMS_Status.CALIBRATION_CLOSED_REJECTED:
+                    retValue += String.Format("CAL{0} Close Request Rejected ", calibObj.calibration_id);
+                    break;
+                case CMMS.CMMS_Status.CALIBRATION_CLOSED_APPROVED:
+                    retValue += String.Format("CAL{0} Close Request Approved ", calibObj.calibration_id);
+                    break;
+                case CMMS.CMMS_Status.CALIBRATION_REJECTED:
+                    retValue += String.Format("CAL{0} Close Request Rejected ", calibObj.calibration_id);
+                    break;
+                case CMMS.CMMS_Status.CALIBRATION_APPROVED:
+                    retValue += String.Format("CAL{0} Close Request Approved ", calibObj.calibration_id);
+                    break;
+                case CMMS.CMMS_Status.CALIBRATION_SKIPPED:
+                    retValue += String.Format("CAL{0} Skipped ", calibObj.calibration_id);
+                    break;
+                case CMMS.CMMS_Status.CALIBRATION_SKIPPED_REJCTED:
+                    retValue += String.Format("CAL{0} Skip Request Rejected ", calibObj.calibration_id);
+                    break;
+                case CMMS.CMMS_Status.CALIBRATION_SKIPPED_APPROVED:
+                    retValue = String.Format("CAL{0} Skipped Approved", calibObj.calibration_id);
+                    break;
+                default:
+                    retValue += String.Format("CAL{0} Undefined status {1}", calibObj.calibration_id, m_notificationID);
+                    break;
+            }
+            retValue += $" for {m_delayDays} days";
+            return retValue;
+
         }
         override protected string getSubject(params object[] args)
         {
@@ -21,31 +78,47 @@ namespace CMMSAPIs.Models.Notifications
 
             switch (m_notificationID)
             {
-                case CMMS.CMMS_Status.CALIBRATION_REQUEST:
-                    retValue = String.Format("Calibration Requested <{0}> ", calibObj.calibration_id);
+                case CMMS.CMMS_Status.CALIBRATION_SCHEDULED:
+                    retValue = String.Format("CAL{0}  Scheduled", calibObj.calibration_id);
                     break;
-                case CMMS.CMMS_Status.CALIBRATION_REQUEST_APPROVED:
-                    retValue = String.Format("Calibration Request Approved <{0}> ", calibObj.calibration_id);
+                case CMMS.CMMS_Status.CALIBRATION_REQUEST:
+                    retValue = String.Format("CAL{0}  Requested", calibObj.calibration_id);
                     break;
                 case CMMS.CMMS_Status.CALIBRATION_REQUEST_REJECTED:
-                    retValue = String.Format("Calibration Request Rejected <{0}> ", calibObj.calibration_id);
+                    retValue = String.Format("CAL{0}  Request Rejected", calibObj.calibration_id);
                     break;
                 case CMMS.CMMS_Status.CALIBRATION_STARTED:
-                    retValue = String.Format("Calibration Started <{0}> ", calibObj.calibration_id);
+                    retValue = String.Format("CAL{0} Started", calibObj.calibration_id);
                     break;
                 case CMMS.CMMS_Status.CALIBRATION_COMPLETED:
-                    retValue = String.Format("Calibration Completed <{0}> ", calibObj.calibration_id);
+                    retValue = String.Format("CAL{0} Complete Requested", calibObj.calibration_id);
                     break;
                 case CMMS.CMMS_Status.CALIBRATION_CLOSED:
-                    retValue = String.Format("Calibration Closed <{0}> ", calibObj.calibration_id);
+                    retValue = String.Format("CAL{0} Complete Requested", calibObj.calibration_id);
                     break;
-                // case CMMS.CMMS_Status.CALIBRATION_APPROVED:    
-                //   retValue = String.Format("Calibration Approved <{0}> ", calibObj.calibration_id);
-                //   break;
-                //   case CMMS.CMMS_Status.CALIBRATION_REJECTED:    
-                //      retValue = String.Format("Calibration Rejected <{0}> ", calibObj.calibration_id);
-                //   break;
+                case CMMS.CMMS_Status.CALIBRATION_CLOSED_REJECTED:
+                    retValue = String.Format("CAL{0} Complete Requested", calibObj.calibration_id);
+                    break;
+               /* case CMMS.CMMS_Status.CALIBRATION_CLOSED_APPROVED:
+                    retValue = String.Format("CAL{0} Complete Requested", calibObj.calibration_id);
+                    break;*/
+                case CMMS.CMMS_Status.CALIBRATION_REJECTED:
+                    retValue = String.Format("CAL{0} Completed Rejectde", calibObj.calibration_id);
+                    break;
+                /*case CMMS.CMMS_Status.CALIBRATION_APPROVED:
+                    retValue = String.Format("CAL{0} Completed Approved", calibObj.calibration_id);
+                    break;*/
+                case CMMS.CMMS_Status.CALIBRATION_SKIPPED:
+                    retValue = String.Format("CAL{0} Skipped Requested", calibObj.calibration_id);
+                    break;
+                case CMMS.CMMS_Status.CALIBRATION_SKIPPED_REJCTED:
+                    retValue = String.Format("CAL{0} Skipped Rejectde", calibObj.calibration_id);
+                    break;
+                /*case CMMS.CMMS_Status.CALIBRATION_SKIPPED_APPROVED:
+                    retValue = String.Format("CAL{0} Skipped Approved", calibObj.calibration_id);
+                    break;*/
                 default:
+                    retValue += String.Format("CAL{0} Undefined status {1}", calibObj.calibration_id, m_notificationID);
                     break;
             }
             return retValue;
@@ -85,12 +158,24 @@ namespace CMMSAPIs.Models.Notifications
                     retValue += String.Format(templateEnd, "Started At", calibObj.started_at);
                     break;
                 case CMMS.CMMS_Status.CALIBRATION_COMPLETED:
+                case CMMS.CMMS_Status.CALIBRATION_REJECTED:
+                case CMMS.CMMS_Status.CALIBRATION_APPROVED:
                     retValue += String.Format(template, "Request Approved by", calibObj.request_approved_by);
                     retValue += String.Format(template, "Started At", calibObj.started_at);
                     retValue += String.Format(template, "Completed By", calibObj.completed_by);
                     retValue += String.Format(templateEnd, "Completed At", calibObj.completed_at);
                     break;
                 case CMMS.CMMS_Status.CALIBRATION_CLOSED:
+                case CMMS.CMMS_Status.CALIBRATION_CLOSED_REJECTED:
+                case CMMS.CMMS_Status.CALIBRATION_CLOSED_APPROVED:
+                    retValue += String.Format(template, "Request Approved by", calibObj.request_approved_by);
+                    retValue += String.Format(template, "Started At", calibObj.started_at);
+                    retValue += String.Format(template, "Closed By", calibObj.Closed_by);
+                    retValue += String.Format(templateEnd, "Closed At", calibObj.Closed_at);
+                    break;
+                case CMMS.CMMS_Status.CALIBRATION_SKIPPED:
+                case CMMS.CMMS_Status.CALIBRATION_SKIPPED_REJCTED:
+                case CMMS.CMMS_Status.CALIBRATION_SKIPPED_APPROVED:
                     retValue += String.Format(template, "Request Approved by", calibObj.request_approved_by);
                     retValue += String.Format(template, "Started At", calibObj.started_at);
                     retValue += String.Format(template, "Closed By", calibObj.Closed_by);
@@ -112,6 +197,7 @@ namespace CMMSAPIs.Models.Notifications
                      break;*/
 
                 default:
+                    retValue += String.Format(templateEnd, "Closed At", calibObj.Closed_at);
                     break;
             }
 
