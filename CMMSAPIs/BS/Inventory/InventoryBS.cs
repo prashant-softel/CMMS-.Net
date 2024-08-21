@@ -1,19 +1,17 @@
 ﻿using CMMSAPIs.Helper;
-using CMMSAPIs.Repositories.Inventory;
 using CMMSAPIs.Models.Inventory;
 using CMMSAPIs.Models.Utils;
+using CMMSAPIs.Repositories.Inventory;
+using Microsoft.AspNetCore.Hosting;
 using System;
-using System.Data;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Hosting;
-using CMMSAPIs.Models.Calibration;
 
 namespace CMMSAPIs.BS.Inventory
 {
     public interface IInventoryBS
     {
-        Task<List<CMInventoryList>> GetInventoryList(int facilityId, int linkedToBlockId, int status, string categoryIds,string facilitytime);
+        Task<List<CMInventoryList>> GetInventoryList(int facilityId, int linkedToBlockId, int status, string categoryIds, string facilitytime);
         Task<CMViewInventory> GetInventoryDetails(int id, string facilitytime);
         Task<CMDefaultResponse> AddInventory(List<CMAddInventory> request, int userID);
         Task<CMImportFileResponse> ImportInventories(int file_id, int facility_id, int userID);
@@ -35,7 +33,7 @@ namespace CMMSAPIs.BS.Inventory
         Task<List<CMDefaultList>> GetWarrantyTypeList();
         Task<List<CMDefaultList>> GetWarrantyUsageTermList();
         Task<List<CMWarrantyCertificate>> GetWarrantyCertificate();
-        Task<List<CMCalibrationAssets>> GetCalibrationList(int facilityId,string facilitytime);
+        Task<List<CMCalibrationAssets>> GetCalibrationList(int facilityId, string facilitytime);
 
         Task<CMDefaultResponse> SetParentAsset(int parentID, int childID, int userID);
     }
@@ -50,13 +48,13 @@ namespace CMMSAPIs.BS.Inventory
             _environment = environment;
         }
 
-        public async Task<List<CMInventoryList>> GetInventoryList(int facilityId, int linkedToBlockId, int status, string categoryIds,string facilitytime)
+        public async Task<List<CMInventoryList>> GetInventoryList(int facilityId, int linkedToBlockId, int status, string categoryIds, string facilitytime)
         {
             try
             {
                 using (var repos = new InventoryRepository(getDB, _environment))
                 {
-                    return await repos.GetInventoryList(facilityId, linkedToBlockId, status, categoryIds,facilitytime);
+                    return await repos.GetInventoryList(facilityId, linkedToBlockId, status, categoryIds, facilitytime);
 
                 }
             }
@@ -72,7 +70,7 @@ namespace CMMSAPIs.BS.Inventory
             {
                 using (var repos = new InventoryRepository(getDB, _environment))
                 {
-                    return await repos.GetInventoryDetails(id,  facilitytime);
+                    return await repos.GetInventoryDetails(id, facilitytime);
 
                 }
             }
@@ -104,7 +102,7 @@ namespace CMMSAPIs.BS.Inventory
             {
                 using (var repos = new InventoryRepository(getDB, _environment))
                 {
-                    return await repos.UpdateInventory(request, userID);
+                    return await repos.UpdateInventries(request, userID);
 
                 }
             }
@@ -379,8 +377,8 @@ namespace CMMSAPIs.BS.Inventory
                 using (var repos = new InventoryRepository(getDB, _environment))
                 {
                     return await repos.GetWarrantyUsageTermList
-                        
-                        
+
+
                         ();
 
                 }
@@ -407,13 +405,13 @@ namespace CMMSAPIs.BS.Inventory
             }
         }
 
-        public async Task<List<CMCalibrationAssets>> GetCalibrationList(int facilityId,string facilitytime)
+        public async Task<List<CMCalibrationAssets>> GetCalibrationList(int facilityId, string facilitytime)
         {
             try
             {
                 using (var repos = new InventoryRepository(getDB, _environment))
                 {
-                    return await repos.GetCalibrationList( facilityId,facilitytime);
+                    return await repos.GetCalibrationList(facilityId, facilitytime);
 
                 }
             }

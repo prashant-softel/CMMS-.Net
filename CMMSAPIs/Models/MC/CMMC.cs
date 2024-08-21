@@ -75,7 +75,10 @@ namespace CMMSAPIs.Models.MC
         public List<CMMCPlanScheduleSummary> schedules { get; set; }
 
     }
-
+    public class Schudle
+    {
+        public List<int> id { get; set; }
+    }
 
     public class CMMCPlanScheduleSummary
     {
@@ -133,6 +136,7 @@ namespace CMMSAPIs.Models.MC
 
         public UInt64 id { get; set; }
         public int scheduleId { get; set; }
+
         public int executionId { get; set; }
         public int cleaningDay { get; set; }  //First, second etc day
         public int cleaningType { get; set; }  //First, second etc day

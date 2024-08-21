@@ -1,14 +1,14 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using System.Threading.Tasks;
-using System;
-using CMMSAPIs.Models.Utils;
-using CMMSAPIs.Models.Calibration;
 using CMMSAPIs.BS.Calibration;
+using CMMSAPIs.Models.Calibration;
+using CMMSAPIs.Models.SM;
+using CMMSAPIs.Models.Utils;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace CMMSAPIs.Controllers.Calibration
 {
@@ -46,7 +46,7 @@ namespace CMMSAPIs.Controllers.Calibration
         //[Authorize]
         [Route("GetCalibrationDetails")]
         [HttpGet]
-        public async Task<IActionResult> GetCalibrationDetails(int id,int facilty_id)
+        public async Task<IActionResult> GetCalibrationDetails(int id, int facilty_id)
         {
             try
             {
@@ -75,14 +75,14 @@ namespace CMMSAPIs.Controllers.Calibration
                 var data = await _CalibrationBS.RequestCalibration(request, userID);
                 return Ok(data);
             }
-            catch(ArgumentException ex)
+            catch (ArgumentException ex)
             {
-                return BadRequest(ex.Message);
+
+                ExceptionResponse item = new ExceptionResponse();
+                item.Message = ex.Message;
+                return Ok(item);
             }
-            catch (Exception)
-            {
-                throw;
-            }
+
         }
 
         //[Authorize]
@@ -96,9 +96,11 @@ namespace CMMSAPIs.Controllers.Calibration
                 var data = await _CalibrationBS.ApproveRequestCalibration(request, userID);
                 return Ok(data);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                ExceptionResponse item = new ExceptionResponse();
+                item.Message = ex.Message;
+                return Ok(item);
             }
         }
 
@@ -113,16 +115,18 @@ namespace CMMSAPIs.Controllers.Calibration
                 var data = await _CalibrationBS.RejectRequestCalibration(request, userID);
                 return Ok(data);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                ExceptionResponse item = new ExceptionResponse();
+                item.Message = ex.Message;
+                return Ok(item);
             }
         }
 
         //[Authorize]
         [Route("GetPreviousCalibration")]
         [HttpGet]
-        public async Task<IActionResult> GetPreviousCalibration(int asset_id,int facility_id)
+        public async Task<IActionResult> GetPreviousCalibration(int asset_id, int facility_id)
         {
             try
             {
@@ -131,13 +135,12 @@ namespace CMMSAPIs.Controllers.Calibration
                 var data = await _CalibrationBS.GetPreviousCalibration(asset_id, facilitytimeZone);
                 return Ok(data);
             }
-            catch(NullReferenceException ex)
+
+            catch (Exception ex)
             {
-                return NotFound(ex.Message);
-            }
-            catch (Exception)
-            {
-                throw;
+                ExceptionResponse item = new ExceptionResponse();
+                item.Message = ex.Message;
+                return Ok(item);
             }
         }
 
@@ -151,7 +154,7 @@ namespace CMMSAPIs.Controllers.Calibration
                 var data = await _CalibrationBS.StartCalibration(calibration_id);
                 return Ok(data);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 throw;
             }
@@ -168,9 +171,11 @@ namespace CMMSAPIs.Controllers.Calibration
                 var data = await _CalibrationBS.CompleteCalibration(request, userID);
                 return Ok(data);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                ExceptionResponse item = new ExceptionResponse();
+                item.Message = ex.Message;
+                return Ok(item);
             }
         }
 
@@ -185,7 +190,7 @@ namespace CMMSAPIs.Controllers.Calibration
                 var data = await _CalibrationBS.CloseCalibration(request, userID);
                 return Ok(data);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 throw;
             }
@@ -199,12 +204,14 @@ namespace CMMSAPIs.Controllers.Calibration
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _CalibrationBS.ApproveCalibration(request,userID);
+                var data = await _CalibrationBS.ApproveCalibration(request, userID);
                 return Ok(data);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                ExceptionResponse item = new ExceptionResponse();
+                item.Message = ex.Message;
+                return Ok(item);
             }
         }
 
@@ -219,9 +226,11 @@ namespace CMMSAPIs.Controllers.Calibration
                 var data = await _CalibrationBS.RejectCalibration(request, userID);
                 return Ok(data);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                ExceptionResponse item = new ExceptionResponse();
+                item.Message = ex.Message;
+                return Ok(item);
             }
         }
 
@@ -235,9 +244,11 @@ namespace CMMSAPIs.Controllers.Calibration
                 var data = await _CalibrationBS.SkipCalibration(request, userID);
                 return Ok(data);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                ExceptionResponse item = new ExceptionResponse();
+                item.Message = ex.Message;
+                return Ok(item);
             }
         }
     }

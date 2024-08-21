@@ -1136,18 +1136,20 @@ namespace CMMSAPIs.Repositories.Inventory
            */
             /*Your code goes here*/
             string myQuery = "SELECT a.id ,frequency.name as calibrationFreqType ,a.name, a.description as asset_description, a.calibrationStartDate as calibrationSatrtDate,  " +
-                "a.calibrationDueDate as calibrationDueDate, a.calibrationLastDate as calibrationLastDate,a.vendorId as vendorid,  " +
+                "cal.due_date as calibrationDueDate, cal.due_date as calibrationLastDate,a.vendorId as vendorid,  " +
                 "a.stockCount as stockCount,a.photoId as photoId,a.retirementStatus as retirementStatus,w.meter_limit as meter_limit,w.meter_unit as meter_unit,a.moduleQuantity, ast.id as typeId, ast.name as type, a.supplierId as supplierId, b2.name as supplierName, manufacturertlb.id as manufacturerId, manufacturertlb.name as manufacturerName,a.parent_equipment_no ,b5.id as operatorId, b5.name as operatorName, ac.id as categoryId, ac.name as categoryName, a.serialNumber,a.cost as cost,a.currency as currencyId ,c.name as currency, a.model,a.calibrationFrequency,frequency.name as calibrationFrequencyType, a.calibrationReminderDays, " +
             "f.id as facilityId, f.name AS facilityName, bl.id as blockId, bl.name AS blockName, a2.id as parentId, a2.name as parentName, a2.serialNumber as parentSerial, custbl.id as customerId, custbl.name as customerName, owntbl.id as ownerId, owntbl.name as ownerName, s.id as statusId, s.name AS status,a.purchaseCode as purchaseCode, a.unspCode as unspCode, a.barcode as barcode,a.descMaintenace as descMaintenace,a.dcRating as dcRating ,a.acRating as acRating, a.specialTool,a.specialToolEmpId as specialToolEmp,  " +
             "w.start_date as start_date,w.expiry_date as expiry_date, w.id as warrantyId, w.warranty_description, w.certificate_number,wut.name as warranty_term_type,wt.id as warrantyTypeId, wt.name as warrantyType, wut.id as warrantyTermTypeId, wp.id as warrantyProviderId, wp.name as warrantyProviderName, files.file_path as warranty_certificate_path ," +
-            "CASE WHEN w.start_date IS NULL OR CURDATE() < w.start_date OR CURDATE() > w.expiry_date THEN 'Inactive' ELSE 'Active' END AS WarrantyStatus " +
+            "CASE  WHEN w.start_date IS NULL THEN 'Inactive' WHEN w.expiry_date IS NULL THEN 'Inactive'" +
+            " WHEN w.start_date IS NULL OR CURDATE() < w.start_date OR CURDATE() > w.expiry_date THEN 'Expire' ELSE 'Active'  END AS WarrantyStatus " +
             "from assets as a " +
-            "left join assettypes as ast on ast.id = a.typeId " +   //use a.specialToolEmpId to put specialToolEmp,
+            "left join assettypes as ast on ast.id = a.typeId " +
             "left join currency as c ON c.id =a.currency " +
+            "left join calibration as cal on cal.asset_id = a.id " +
             "left join assetcategories as ac on ac.id= a.categoryId " +
             "left join business as custbl on custbl.id = a.customerId " +
             "left join business as owntbl" + " on owntbl.id = a.ownerId " +
-            "left JOIN business AS manufacturertlb ON a.ownerId = manufacturertlb.id " +
+            "left JOIN business AS manufacturertlb ON a.manufacturerId = manufacturertlb.id " +
             "left JOIN business AS b2 ON a.supplierId= b2.id " +
             "left JOIN business as b5 ON b5.id = a.operatorId " +
             "left JOIN assets as a2 ON a.parentId = a2.id " +
@@ -1287,7 +1289,7 @@ namespace CMMSAPIs.Repositories.Inventory
                 retID = Convert.ToInt32(dt.Rows[0][0]);
                 if (unit.warranty_type >= 0 || unit.warranty_term_type >= 0 || unit.warranty_provider_id >= 0)
                 {
-                    string start_date = unit.start_date != null ? ((DateTime)unit.start_date).ToString("yyyy-MM-dd HH:mm:ss") : UtilsRepository.GetUTCTime().ToString();
+                    string start_date = unit.start_date != null ? ((DateTime)unit.start_date).ToString("yyyy-MM-dd HH:mm:ss") : "0000:00:00 00:00";
                     string warranty_description = unit.warranty_description == null ? "" : unit.warranty_description;
                     string expiry_date = unit.expiry_date == null ? "0000:00:00 00:00" : ((DateTime)unit.expiry_date).ToString("yyyy-MM-dd HH:mm:ss");
                     string warrantyQry = "insert into assetwarranty (certificate_file_id, warranty_type, warranty_description, warranty_term_type, asset_id, start_date, expiry_date, meter_limit, meter_unit, warranty_provider, certificate_number, addedAt, addedBy, status,warrantyTenture) VALUES ";
@@ -1424,7 +1426,7 @@ namespace CMMSAPIs.Repositories.Inventory
                     unit.vendorId = unit.manufacturerId;
                 }
 
-                qry += "('" + unit.name + "','" + unit.assetdescription + "','" + unit.parentId + "','" + unit.acCapacity + "','" + unit.dcCapacity + "','" + unit.categoryId + "','" + unit.typeId + "','" + unit.statusId + "','" + unit.facilityId + "','" + unit.blockId + "','" + unit.blockId + "','" + unit.customerId + "','" + unit.ownerId + "','" + unit.operatorId + "','" + unit.manufacturerId + "','" + unit.parent_equipment_no + "','" + unit.supplierId + "','" + unit.serialNumber + "','" + userID + "','" + unit.photoId + "','" + unit.model + "','" + unit.stockCount + "','" + unit.moduleQuantity + "','" + unit.cost + "','" + unit.currency + "','" + unit.specialToolId + "','" + unit.specialToolEmpId + "'," + firstCalibrationDate + ",'" + unit.calibrationFrequency + "','" + unit.calibrationReminderDays + "','" + unit.retirementStatus + "','" + unit.multiplier + "','" + unit.vendorId + "','" + unit.acRating + "','" + unit.dcRating + "','" + unit.descMaintenace + "','" + unit.barcode + "','" + unit.unspCode + "','" + unit.purchaseCode + "','" + UtilsRepository.GetUTCTime() + "','" + unit.num_of_module + "'," + unit.area + "); ";
+                qry += "('" + unit.name + "','" + unit.assetdescription + "','" + unit.parentId + "','" + unit.acCapacity + "','" + unit.dcCapacity + "','" + unit.categoryId + "','" + unit.typeId + "','" + unit.statusId + "','" + unit.facilityId + "','" + unit.blockId + "','" + unit.blockId + "','" + unit.customerId + "','" + unit.ownerId + "','" + unit.operatorId + "','" + unit.manufacturerId + "','" + unit.parent_equipment_no + "','" + unit.supplierId + "','" + unit.serialNumber + "','" + userID + "','" + unit.photoId + "','" + unit.model + "','" + unit.stockCount + "','" + unit.moduleQuantity + "','" + unit.cost + "','" + unit.currencyId + "','" + unit.specialToolId + "','" + unit.specialToolEmpId + "'," + firstCalibrationDate + ",'" + unit.calibrationFrequency + "','" + unit.calibrationReminderDays + "','" + unit.retirementStatus + "','" + unit.multiplier + "','" + unit.vendorId + "','" + unit.acRating + "','" + unit.dcRating + "','" + unit.descMaintenace + "','" + unit.barcode + "','" + unit.unspCode + "','" + unit.purchaseCode + "','" + UtilsRepository.GetUTCTime() + "','" + unit.num_of_module + "'," + unit.area + "); ";
                 qry += "select LAST_INSERT_ID(); ";
 
                 //List<CMInventoryList> newInventory = await Context.GetData<CMInventoryList>(qry).ConfigureAwait(false);
@@ -1432,7 +1434,7 @@ namespace CMMSAPIs.Repositories.Inventory
                 retID = Convert.ToInt32(dt.Rows[0][0]);
                 if (unit.warranty_type > 0 && unit.warranty_term_type > 0 && unit.warranty_provider_id > 0 && unit.start_date != null)
                 {
-                    string start_date = unit.start_date != null ? ((DateTime)unit.start_date).ToString("yyyy-MM-dd HH:mm:ss") : UtilsRepository.GetUTCTime().ToString();
+                    string start_date = unit.start_date != null ? ((DateTime)unit.start_date).ToString("yyyy-MM-dd HH:mm:ss") : "0000:00:00 00:00";
                     string warranty_description = unit.warranty_description == null ? "" : unit.warranty_description;
                     string expiry_date = unit.expiry_date == null ? "" : ((DateTime)unit.expiry_date).ToString("yyyy-MM-dd HH:mm:ss");
                     string warrantyQry = "insert into assetwarranty (certificate_file_id, warranty_type, warranty_description, warranty_term_type, asset_id, start_date, expiry_date, meter_limit, meter_unit, warranty_provider, certificate_number, addedAt, addedBy, status,warrantyTenture) VALUES ";
@@ -1906,11 +1908,11 @@ namespace CMMSAPIs.Repositories.Inventory
             {
                 updateQry += $" currency = '{request.currency}',";
             }
-            //if (request.currencyId != 0)
-            //{
-            //    updateQry += $" currencyId = '{request.currencyId}',";
+            if (request.currencyId != 0)
+            {
+                updateQry += $" currencyId = '{request.currencyId}',";
 
-            //}
+            }
             if (request.photoId != 0)
             {
                 updateQry += $" photoId= '{request.photoId}',";
@@ -2001,6 +2003,27 @@ namespace CMMSAPIs.Repositories.Inventory
                     string qryuploadFiles = $"UPDATE uploadedfiles SET facility_id = {request.facilityId}, module_type={(int)CMMS.CMMS_Modules.INVENTORY},module_ref_id={request.id} where id = {data}";
                     await Context.ExecuteNonQry<int>(qryuploadFiles).ConfigureAwait(false);
                 }
+            }
+            if (request.warranty_type > 0 || request.warranty_term_type > 0 || request.warranty_provider_id > 0 || request.start_date != null)
+            {
+                string warrantyQry = "";
+                string start_date = request.start_date != null ? ((DateTime)request.start_date).ToString("yyyy-MM-dd HH:mm:ss") : "0000:00:00 00:00";
+                string warranty_description = request.warranty_description == null ? "" : request.warranty_description;
+                string expiry_date = request.expiry_date == null ? "" : ((DateTime)request.expiry_date).ToString("yyyy-MM-dd HH:mm:ss");
+                warrantyQry += $"Update assetwarranty SET   warranty_type={request.warranty_type}, " +
+                   $"warranty_description='{warranty_description}', certificate_number='{request.certificate_number}' , " +
+                   $"warranty_term_type={request.warranty_term_type} ,start_date='{start_date}', " +
+                   $"expiry_date='{expiry_date}', warranty_provider= {request.warranty_provider_id}  " +
+                   $"where  asset_id={request.id}  ;";
+                await Context.ExecuteNonQry<int>(warrantyQry).ConfigureAwait(false);
+            }
+            if (request.calibrationLastDate != null)
+            {
+                string lastCalibrationDate = (request.calibrationLastDate == null) ? "NULL" : "'" + ((DateTime)request.calibrationLastDate.Value).ToString("yyyy-MM-dd") + "'";
+                string calibratoinquery = $"Update  calibration SET due_date={lastCalibrationDate} where asset_id={request.id} ";
+
+                await Context.ExecuteNonQry<int>(calibratoinquery).ConfigureAwait(false);
+
             }
 
             CMDefaultResponse obj = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Inventory  <" + request.id + "> has been updated");

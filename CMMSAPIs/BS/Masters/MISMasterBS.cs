@@ -121,6 +121,26 @@ namespace CMMSAPIs.BS.MISMasters
         Task<CMDefaultResponse> uploadDocument(CMDocumentVersion request, int userID);
         Task<List<CMDocumentVersionList>> getDocuementList(int facility_id, string fromDate, string toDate);
         Task<List<CMDocumentVersionList>> getDocuementListById(int id, string sub_doc_name, string fromDate, string toDate);
+        Task<CMDefaultResponse> CreateHealthData(OccupationalHealthData request, int userID);
+        Task<CMDefaultResponse> UpdateHealthData(OccupationalHealthData request, int userID);
+        Task<CMDefaultResponse> DeleteHealthData(int id, int userID);
+        Task<List<OccupationalHealthData>> GetHealthData();
+        Task<CMDefaultResponse> CreateVisitsAndNotices(VisitsAndNotices request, int userID);
+        Task<CMDefaultResponse> UpdateVisitsAndNotices(VisitsAndNotices request, int userID);
+        Task<CMDefaultResponse> DeleteVisitsAndNotices(int id, int userID);
+        Task<List<VisitsAndNotices>> GetVisitsAndNotices();
+        Task<CMDefaultResponse> CreateFuelConsumption(FuelData request, int userID);
+        Task<CMDefaultResponse> UpdateFuelConsumption(FuelData request, int userID);
+        Task<CMDefaultResponse> DeleteFuelConsumption(int id);
+        Task<List<FuelData>> GetFuelConsumption();
+        Task<CMDefaultResponse> CreatePlantationData(PlantationData request, int userID);
+        Task<CMDefaultResponse> UpdatePlantationData(PlantationData request, int userID);
+        Task<List<PlantationData>> GetPlantationData(int id);
+        Task<CMDefaultResponse> DeletePlantationData(int id);
+        Task<CMDefaultResponse> UpdateKaizensData(KaizensData request, int userID);
+        Task<CMDefaultResponse> CreateKaizensData(KaizensData request, int userID);
+        Task<CMDefaultResponse> DeleteKaizensData(int id);
+        Task<List<KaizensData>> GetKaizensData();
     }
     public class MISMasterBS : IMISMasterBS
     {
@@ -1717,6 +1737,312 @@ namespace CMMSAPIs.BS.MISMasters
                 using (var repos = new MISMasterRepository(getDB))
                 {
                     return await repos.getDocuementListById(id, sub_doc_name, fromDate, toDate);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> CreateHealthData(OccupationalHealthData request, int userID)
+        {
+
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.CreateHealthData(request, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> UpdateHealthData(OccupationalHealthData request, int userID)
+        {
+
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.UpdateHealthData(request, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> DeleteHealthData(int id, int userID)
+        {
+
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.DeleteHealthData(id, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<OccupationalHealthData>> GetHealthData()
+        {
+
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.GetHealthData();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> CreateVisitsAndNotices(VisitsAndNotices request, int userID)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.CreateVisitsAndNotices(request, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> UpdateVisitsAndNotices(VisitsAndNotices request, int userID)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.UpdateVisitsAndNotices(request, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> DeleteVisitsAndNotices(int id, int userID)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.DeleteVisitsAndNotices(id, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<VisitsAndNotices>> GetVisitsAndNotices()
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.GetVisitsAndNotices();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> CreateFuelConsumption(FuelData request, int userID)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.CreateFuelConsumption(request, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> UpdateFuelConsumption(FuelData request, int userID)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.UpdateFuelConsumption(request, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> DeleteFuelConsumption(int id)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.DeleteFuelConsumption(id);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<FuelData>> GetFuelConsumption()
+        {
+
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.GetFuelConsumption();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> CreatePlantationData(PlantationData request, int userID)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.CreatePlantationData(request, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> UpdatePlantationData(PlantationData request, int userID)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.UpdatePlantationData(request, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<PlantationData>> GetPlantationData(int id)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.GetPlantationData();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> DeletePlantationData(int id)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.DeletePlantationData(id);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> UpdateKaizensData(KaizensData request, int userID)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.UpdateKaizensData(request, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> CreateKaizensData(KaizensData request, int userID)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.CreateKaizensData(request, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> DeleteKaizensData(int id)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.DeletePlantationData(id);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+
+        }
+
+        public async Task<List<KaizensData>> GetKaizensData()
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.GetKaizensData();
                 }
             }
             catch (Exception ex)

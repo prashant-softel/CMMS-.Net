@@ -742,5 +742,79 @@ namespace CMMSAPIs.Models.Masters
         public string Remarks { get; set; }
         public string description { get; set; }
     }
+
+    public class FuelData
+    {
+        public int id { get; set; }
+        public DateTime Date { get; set; }
+        public int DieselConsumedForVehicles { get; set; }
+        public int PetrolConsumedForVehicles { get; set; }
+        public int PetrolConsumedForGrassCuttingAndMovers { get; set; }
+        public int DieselConsumedAtSite { get; set; }
+        public int PetrolConsumedAtSite { get; set; }
+        public int Status { get; set; }
+        public int CreatedBy { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public int UpdatedBy { get; set; }
+        public DateTime UpdatedAt { get; set; }
+    }
+
+    public class KaizensData
+    {
+        public int id { get; set; }
+        public DateTime Date { get; set; }
+        public int KaizensImplemented { get; set; }
+        public int CostForImplementation { get; set; }
+        public int CostSavedFromImplementation { get; set; }
+        public int Status { get; set; }
+        public int CreatedBy { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public int UpdatedBy { get; set; }
+        public DateTime UpdatedAt { get; set; }
+    }
+    public class PlantationData
+    {
+        public int id { get; set; }
+        public DateTime Date { get; set; }
+        public int SaplingsPlanted { get; set; }
+        public int SaplingsSurvived { get; set; }
+        public int SaplingsDied { get; set; }
+        public int Status { get; set; }
+        public int CreatedBy { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public int UpdatedBy { get; set; }
+        public DateTime UpdatedAt { get; set; }
+    }
+    public class VisitsAndNotices
+    {
+        public int id { get; set; }
+        public DateTime Date { get; set; }
+        public int GovtAuthVisits { get; set; }
+        public int NoOfFineByThirdParty { get; set; }
+        public int NoOfShowCauseNoticesByThirdParty { get; set; }
+        public int NoticesToContractor { get; set; }
+        public int AmountOfPenaltiesToContractors { get; set; }
+        public int AnyOther { get; set; }
+        public int Status { get; set; }
+        public int CreatedBy { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public int UpdatedBy { get; set; }
+        public DateTime UpdatedAt { get; set; }
+    }
+
+    public class OccupationalHealthData
+    {
+        public int id { get; set; }
+        public DateTime Date { get; set; }
+        public int NoOfHealthExamsOfNewJoiner { get; set; }
+        public int PeriodicTests { get; set; }
+        public int OccupationalIllnesses { get; set; }
+
+        public int Status { get; set; }
+        public int CreatedBy { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public int UpdatedBy { get; set; }
+        public DateTime UpdatedAt { get; set; }
+    }
 }
 

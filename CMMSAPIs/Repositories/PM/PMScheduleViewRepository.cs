@@ -62,9 +62,9 @@ namespace CMMSAPIs.Repositories.PM
                 case CMMS.CMMS_Status.PM_APPROVED:
                     retValue = "Approved"; break;
                 case CMMS.CMMS_Status.PM_CLOSE_REJECTED:
-                    retValue = "Close - Rejected"; break;
+                    retValue = "Closed - Rejected"; break;
                 case CMMS.CMMS_Status.PM_CLOSE_APPROVED:
-                    retValue = "Close - Approved"; break;
+                    retValue = "Closed - Approved"; break;
                 case CMMS.CMMS_Status.PM_CANCELLED:
                     retValue = "Cancelled"; break;
                 case CMMS.CMMS_Status.PM_CANCELLED_REJECTED:
@@ -240,6 +240,8 @@ namespace CMMSAPIs.Repositories.PM
             string statusQry = $"SELECT status FROM pm_task WHERE id = {request.id};";
             DataTable dt1 = await Context.FetchData(statusQry).ConfigureAwait(false);
             CMMS.CMMS_Status status = (CMMS.CMMS_Status)Convert.ToInt32(dt1.Rows[0][0]);
+
+
             if (status != CMMS.CMMS_Status.RESCHEDULED_TASK && status != CMMS.CMMS_Status.PM_CLOSE_APPROVED)
             {
                 // return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.FAILURE, "Only a PM Task that has not been executed can be cancelled.");

@@ -218,6 +218,13 @@ namespace CMMSAPIs.Repositories.Users
             Dictionary<string, int> roles = new Dictionary<string, int>();
             roles.Merge(roleNames, roleIds);
 
+            string desigqry = "SELECT id, UPPER(designationName) as name FROM userdesignation ";
+            DataTable dgRole = await Context.FetchData(desigqry).ConfigureAwait(false);
+            List<string> Designame = dgRole.GetColumn<string>("name");
+            List<int> desigid = dgRole.GetColumn<int>("id");
+            Dictionary<string, int> Designation = new Dictionary<string, int>();
+            Designation.Merge(Designame, desigid);
+
             string countryQry = "SELECT id, UPPER(name) as name FROM countries";
             DataTable dtCountry = await Context.FetchData(countryQry).ConfigureAwait(false);
             List<string> countryNames = dtCountry.GetColumn<string>("name");
@@ -413,6 +420,14 @@ namespace CMMSAPIs.Repositories.Users
                                 else
                                     m_errorLog.SetError($"Invalid Gender. [Row: {rN}]");
                             }
+                            /* try
+                             {
+                                 newR["designation"] = Designation[Convert.ToString(newR["Designation"]).ToUpper()];
+                             }
+                             catch (KeyNotFoundException)
+                             {
+                                 newR["designation"] = 0;
+                             }*/
                             try
                             {
                                 newR["blood_group_id"] = bloodGroups[Convert.ToString(newR["blood_group_name"]).ToUpper()];
@@ -991,6 +1006,7 @@ namespace CMMSAPIs.Repositories.Users
                 $" order by sort_order asc;";
 
             List<CMUser> user_list = await Context.GetData<CMUser>(userQry).ConfigureAwait(false);
+
             return user_list;
         }
 

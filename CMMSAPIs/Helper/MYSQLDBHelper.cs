@@ -254,6 +254,55 @@ namespace CMMSAPIs.Helper
 
             }
         }
+        internal async Task<List<int>> ExecuteNonQrys<T>(string qry)
+        {
+            // MySqlParameter retpara = null;
+
+            try
+            {
+                using (MySqlConnection conn = TheConnection)
+                {
+                    using (MySqlCommand cmd = getQryCommand(qry, conn))
+                    {
+                        cmd.CommandTimeout = 99999;
+                        cmd.CommandType = CommandType.Text;
+                        await conn.OpenAsync();
+
+                        using (DbDataReader dataReader = await cmd.ExecuteReaderAsync(CommandBehavior.CloseConnection))
+                        {
+                            DataTable dt = new DataTable();
+                            dt.Load(dataReader);
+                            cmd.Parameters.Clear();
+
+                            // Assuming the first column contains the integers you want to return
+                            List<int> result = new List<int>();
+
+                            foreach (DataRow row in dt.Rows)
+                            {
+                                if (row[0] != DBNull.Value) // Check if the value is not null
+                                {
+                                    result.Add(Convert.ToInt32(row[0])); // Convert the first column value to int and add it to the list
+                                }
+                            }
+
+
+                            return result;
+
+                        }
+                    }
+                }
+            }
+            catch (MySqlException sqlex)
+            {
+                throw new Exception("ExecuteNonQuery SPname=" + qry + Environment.NewLine + sqlex.Message, sqlex);
+            }
+            finally
+            {
+
+                // retpara = null;
+
+            }
+        }
         internal async Task<List<T>> ExecuteToDataTable<T>(string SpName, MySqlParameter[] sqlpara = null) where T : class, new()
         {
             try
@@ -328,6 +377,9 @@ namespace CMMSAPIs.Helper
         private int GetConnectionTimeOut()
         {
             return 600;
+
         }
     }
+
+
 }
