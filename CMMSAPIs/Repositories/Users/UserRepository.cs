@@ -979,18 +979,18 @@ namespace CMMSAPIs.Repositories.Users
 
         internal async Task<List<CMUser>> GetEMUsers(int facilityId, int role, int notificationID)
         {
-            string userQry = $"select u.id as id, u.loginId as user_name, concat(firstName, ' ', lastName) as full_name, u.mobileNumber as contact_no, ur.id as role_id, ur.name as role_name " +
-                $"FROM users as u inner join userroles on userroles.id = u.roleId " +
-                $"LEFT JOIN " +
-                $"UserFacilities as uf ON uf.userId = u.id " +
-                $"LEFT JOIN " +
-                $"UserRoles as ur ON ur.id = u.roleId " +
-                $"WHERE userroles.status=1 and roleId >= {role}  " +
-                $"AND userPreference = 1 and un.notificationId = {notificationID} " +
-                $"order by ur.sort_order asc;";
-            
+            string userQry = $"select u.id as id, u.loginId as user_name, concat(firstName, ' ', lastName) as full_name, u.mobileNumber as contact_no, userroles.id as role_id," +
+                $" userroles.name as role_name " +
+                $" FROM users as u " +
+                $" inner join userroles on userroles.id = u.roleId " +
+                $" LEFT JOIN UserFacilities as uf ON uf.userId = u.id " +
+                $" left join UserNotifications as un on u.id = un.userId  " +
+                $" WHERE userroles.status=1 and roleId >= {role}" +
+                $" and uf.facilityId = {facilityId}" +
+                $"  and userPreference = 1 and un.notificationId =  {notificationID}" +
+                $" order by sort_order asc;";
+
             List<CMUser> user_list = await Context.GetData<CMUser>(userQry).ConfigureAwait(false);
-            
             return user_list;
         }
 
