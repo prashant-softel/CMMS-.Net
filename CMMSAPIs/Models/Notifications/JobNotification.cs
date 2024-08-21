@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -129,11 +129,11 @@ namespace CMMSAPIs.Models.Notifications
                 retValue += String.Format(template, "Assigned To", m_jobObj.assigned_name);
                 //retValue += String.Format(template, "Assigned At", m_jobObj.created_by_name);
             }
-            if (!m_jobObj.closed_at.IsNull)
-            {
+            //if (!m_jobObj.closed_at.IsNull)
+            //{
                 //retValue += String.Format(template, "Closed By", m_jobObj.assigned_name);
                 retValue += String.Format(templateEnd, "Closed At", m_jobObj.closed_at);
-            }
+            //}
 
 
 

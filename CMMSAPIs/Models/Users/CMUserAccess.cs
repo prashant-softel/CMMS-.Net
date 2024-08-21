@@ -1,4 +1,4 @@
-﻿using CMMSAPIs.Helper;
+using CMMSAPIs.Helper;
 using System.Collections.Generic;
 using static CMMSAPIs.Helper.CMMS;
 
@@ -51,7 +51,8 @@ namespace CMMSAPIs.Models.Users
     public class CMUserByNotificationId
     {
         public int facility_id { get; set; }
-        public CMMS.CMMS_Status notification_id { get; set; }
+        public CMMS.CMMS_Modules module_id { get; set; }
+        public int role_id { get; set; }
         public int[] user_ids { get; set; }
     }
     public class CMAccessList1
