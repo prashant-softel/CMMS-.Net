@@ -1,4 +1,4 @@
-﻿using CMMSAPIs.Helper;
+using CMMSAPIs.Helper;
 using CMMSAPIs.Models.EM;
 using CMMSAPIs.Models.JC;
 using CMMSAPIs.Models.Jobs;
@@ -10,6 +10,7 @@ using CMMSAPIs.Repositories.Jobs;
 using CMMSAPIs.Repositories.Permits;
 using CMMSAPIs.Repositories.Utils;
 using Microsoft.Extensions.Configuration;
+using MySqlX.XDevAPI;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -282,6 +283,11 @@ namespace CMMSAPIs.Repositories.EM
                                 $" ORDER BY createdAt DESC;";
             }
             //string qry1 = "SELECT Jobs.id,Jobs.status as status, Jobs.statusUpdatedAt as updateDate FROM Jobs WHERE Jobs.status = 101;";
+            if(Context == null)
+            {
+                MYSQLDBHelper mYSQLDB = new MYSQLDBHelper(ConnectionString);
+                Context = mYSQLDB;
+            }
             DataTable dt1 = await Context.FetchData(qry1).ConfigureAwait(false);
 
             // form this loop we are getting forms with particular status
