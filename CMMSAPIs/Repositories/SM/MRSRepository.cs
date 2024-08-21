@@ -4,9 +4,12 @@ using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Utils;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -15,6 +18,7 @@ namespace CMMSAPIs.Repositories.SM
     public class MRSRepository : GenericRepository
     {
         private UtilsRepository _utilsRepo;
+  
         public MRSRepository(MYSQLDBHelper sqlDBHelper) : base(sqlDBHelper)
         {
             _utilsRepo = new UtilsRepository(sqlDBHelper);
@@ -1065,9 +1069,10 @@ namespace CMMSAPIs.Repositories.SM
         // here using int status code for returning
         // 0 is for success
 
+
         public async Task<int> TransferMaterialInTransaction(CMTransferItems request)
         {
-
+           
             int facilityID = request.facilityID;
             int fromActorID = request.fromActorID;
             int fromActorType = request.fromActorType;
@@ -1085,146 +1090,203 @@ namespace CMMSAPIs.Repositories.SM
             string address = request.address;
 
             int assetItemStatus = 0;
-            // setting transaction_id as 0 becuse nowonwards we do not require this id from UI team
             int transaction_id = 0;
             int natureOfTransaction = 0;
-            /*
 
-            int returnValue = await TransactionDetails1(facilityID, fromActorID, fromActorType, toActorID, toActorType, assetItemID, qty, refType, refID, remarks, mrsID, natureOfTransaction, assetItemStatus, transaction_id, mrsitemID);
-            return returnValue;
-        }
+            // Create a transaction
+            var MyConfig = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
 
-        public async Task<int> TransactionDetails1(int facilityID, int fromActorID, int fromActorType, int toActorID, int toActorType, int assetItemID, int qty, int refType, int refID, string remarks, int mrsID = 0, int natureOfTransaction = 0, int assetItemStatus = 0, int transaction_id = 0, int mrsitemID = 0)
-        {*/
-            try
+            string ConnectionString = MyConfig.GetValue<string>("ConnectionStrings:Con");
+
+            using (MySqlConnection conn = new MySqlConnection(ConnectionString))
             {
-
-                // validate MRS ID
-                if (mrsID == 0)
+                await conn.OpenAsync();
+                using (var transaction = conn.BeginTransaction())
                 {
-                    return 4;
-                }
-                // MRS Item detail for qty update
-                int existingQty = 0;
-                decimal mrsitem_issued_qty = 0;
-                decimal mrsitem_used_qty = 0;
-                decimal mrsitem_returned_qty = 0;
-                dynamic stored_used_qty = 0;
-
-
-                //Get quantities issued for this material
-                string stmtMRSItem = " select i.issued_qty, i.used_qty, i.returned_qty from smrsitems i inner join smmrs m on m.ID = i.mrs_ID where i.mrs_ID = " + mrsID + " and i.ID = " + mrsitemID + " and is_splited=1 ; ";
-                DataTable dt2_issued_qty = await Context.FetchData(stmtMRSItem).ConfigureAwait(false);
-                if (dt2_issued_qty.Rows.Count > 0 && dt2_issued_qty.Rows[0][0] != DBNull.Value)
-                {
-                    mrsitem_issued_qty = Convert.ToInt32(dt2_issued_qty.Rows[0][0]);
-                    mrsitem_used_qty = Convert.ToInt32(dt2_issued_qty.Rows[0][1]);
-                    mrsitem_returned_qty = Convert.ToInt32(dt2_issued_qty.Rows[0][2]);
-                }
-                else
-                {
-                    return 2;
-                }
-
-                //All the quantities used for this material in various assets
-                string stmt1 = $"select sum(qty) as used_qty from smtransactiondetails where toActorType={toActorType} and mrsID={mrsID} and assetItemID={assetItemID}  and mrsItemID={mrsitemID}; ";
-                DataTable dt3_used_qty = await Context.FetchData(stmt1).ConfigureAwait(false);
-                if (dt3_used_qty.Rows.Count > 0 && dt3_used_qty.Rows[0][0] != DBNull.Value)
-                {
-                    stored_used_qty = Convert.ToInt32(dt3_used_qty.Rows[0][0]);
-                }
-
-                //The qantity already used by this asset toActorID. Useful for edit qty calculation
-                string chkAssetPresnt = $"select nullif(id,0) id,qty as existingqty from smtransactiondetails where toActorID = {toActorID} and toActorType = {toActorType} and assetItemID = {assetItemID} and mrsID = {mrsID} and mrsItemID={mrsitemID};";
-                DataTable dt_chkAssetPresnt = await Context.FetchData(chkAssetPresnt).ConfigureAwait(false);
-                if (dt_chkAssetPresnt.Rows.Count > 0 && dt_chkAssetPresnt.Rows[0][0] != DBNull.Value)
-                {
-                    transaction_id = Convert.ToInt32(dt_chkAssetPresnt.Rows[0][0]);
-                    existingQty = Convert.ToInt32(dt_chkAssetPresnt.Rows[0][1]);
-                }
-                if (existingQty == qty)
-                {
-                    return 6;
-                }
-                //string chkAssetPresntMRS = $"select qty as existingqty from smtransactiondetails where toActorID = {toActorID} and toActorType = {toActorType} and assetItemID = {assetItemID} and mrsID = {mrsID};";
-                //DataTable dt1_mrsitem = await Context.FetchData(chkAssetPresntMRS).ConfigureAwait(false);
-
-                if (mrsitem_issued_qty > 0)
-                {
-                    int UpdatingMRSqty = qty + stored_used_qty - existingQty;
-                    if (mrsitem_issued_qty >= UpdatingMRSqty)
+                    try
                     {
-                        // check for edit provision for consume item i.e toActorID==6 then it is coming for consume
-                        if (transaction_id == 0)
+                        // Validate MRS ID
+                        if (mrsID == 0)
                         {
-                            if (qty == 0)
-                            {
-                                //if qauntity 0, and its a new transaction, then dont do anything
-                                return 7;
-                            }
-                            string stmt = "INSERT INTO smtransactiondetails (plantID,fromActorID,fromActorType,toActorID,toActorType,assetItemID,qty,referedby,reference_ID,remarks,Asset_Item_Status,mrsID, mrsItemID,latitude,longitude )" +
-                                            $"VALUES ({facilityID},{fromActorID},{fromActorType},{toActorID},{toActorType},{assetItemID},{qty},{refType},{refID},'{remarks}',{assetItemStatus},{mrsID},{mrsitemID},{latitude},{longitude}); SELECT LAST_INSERT_ID(); ";
+                            return 4;
+                        }
 
-                            DataTable dt2 = await Context.FetchData(stmt).ConfigureAwait(false);
-                            if (dt2.Rows.Count > 0)
+                        int existingQty = 0;
+                        decimal mrsitem_issued_qty = 0;
+                        decimal mrsitem_used_qty = 0;
+                        decimal mrsitem_returned_qty = 0;
+                        dynamic stored_used_qty = 0;
+
+                        // Get quantities issued for this material
+                        string stmtMRSItem = "SELECT i.issued_qty, i.used_qty, i.returned_qty FROM smrsitems i INNER JOIN smmrs m ON m.ID = i.mrs_ID WHERE i.mrs_ID = @mrsID AND i.ID = @mrsitemID AND is_splited = 1;";
+                        using (var cmd = new MySqlCommand(stmtMRSItem, conn, transaction))
+                        {
+                            cmd.Parameters.Add("@mrsID", MySqlDbType.Int32).Value = mrsID;
+                            cmd.Parameters.Add("@mrsitemID", MySqlDbType.Int32).Value = mrsitemID;
+
+                            using (var reader = await cmd.ExecuteReaderAsync())
                             {
-                                transaction_id = Convert.ToInt32(dt2.Rows[0][0]);
-                                int debitTransactionID = await DebitTransation(facilityID, transaction_id, fromActorType, fromActorID, qty, assetItemID, mrsID);
-                                int creditTransactionID = await CreditTransation(facilityID, transaction_id, toActorType, toActorID, qty, assetItemID, mrsID);
-                                bool isValid = await VerifyTransactionDetails(transaction_id, debitTransactionID, creditTransactionID, facilityID, fromActorID, fromActorType, toActorID, toActorType, assetItemID, qty, refType, refID, remarks, mrsID);
-                                if (isValid)
+                                if (reader.HasRows)
                                 {
-                                    //minQtyReminder(assetItemID, plantID);
-                                    // need to implement in phase 2
+                                    while (await reader.ReadAsync())
+                                    {
+                                        mrsitem_issued_qty = reader.GetDecimal(0);
+                                        mrsitem_used_qty = reader.GetDecimal(1);
+                                        mrsitem_returned_qty = reader.GetDecimal(2);
+                                    }
                                 }
                                 else
                                 {
-                                    throw new Exception("transaction table not updated properly");
+                                    return 2; // No data found
+                                }
+                            }
+                        }
+
+                        // Get all the quantities used for this material in various assets
+                        string stmt1 = "SELECT SUM(qty) AS used_qty FROM smtransactiondetails WHERE toActorType = @toActorType AND mrsID = @mrsID AND assetItemID = @assetItemID AND mrsItemID = @mrsitemID;";
+                        using (var cmd = new MySqlCommand(stmt1, conn, transaction))
+                        {
+                            cmd.Parameters.Add("@toActorType", MySqlDbType.Int32).Value = toActorType;
+                            cmd.Parameters.Add("@mrsID", MySqlDbType.Int32).Value = mrsID;
+                            cmd.Parameters.Add("@assetItemID", MySqlDbType.Int32).Value = assetItemID;
+                            cmd.Parameters.Add("@mrsitemID", MySqlDbType.Int32).Value = mrsitemID;
+
+                            stored_used_qty = Convert.ToInt32(await cmd.ExecuteScalarAsync());
+                        }
+
+                        // Check if the quantity is already used by this asset
+                        string chkAssetPresnt = "SELECT ID, qty AS existingqty FROM smtransactiondetails WHERE toActorID = @toActorID AND toActorType = @toActorType AND assetItemID = @assetItemID AND mrsID = @mrsID AND mrsItemID = @mrsitemID;";
+                        using (var cmd = new MySqlCommand(chkAssetPresnt, conn, transaction))
+                        {
+                            cmd.Parameters.Add("@toActorID", MySqlDbType.Int32).Value = toActorID;
+                            cmd.Parameters.Add("@toActorType", MySqlDbType.Int32).Value = toActorType;
+                            cmd.Parameters.Add("@assetItemID", MySqlDbType.Int32).Value = assetItemID;
+                            cmd.Parameters.Add("@mrsID", MySqlDbType.Int32).Value = mrsID;
+                            cmd.Parameters.Add("@mrsitemID", MySqlDbType.Int32).Value = mrsitemID;
+
+                            using (var reader = await cmd.ExecuteReaderAsync())
+                            {
+                                if (reader.HasRows)
+                                {
+                                    while (await reader.ReadAsync())
+                                    {
+                                        transaction_id = reader.GetInt32(0);
+                                        existingQty = reader.GetInt32(1);
+                                    }
+                                }
+                            }
+                        }
+
+                        if (existingQty == qty)
+                        {
+                            return 6; // Quantity unchanged
+                        }
+
+                        if (mrsitem_issued_qty > 0)
+                        {
+                            int updatingMRSqty = qty + stored_used_qty - existingQty;
+                            if (mrsitem_issued_qty >= updatingMRSqty)
+                            {
+                                if (transaction_id == 0)
+                                {
+                                    if (qty == 0)
+                                    {
+                                        return 7; // Quantity is zero, no need to proceed
+                                    }
+
+                                    // Insert the new transaction
+                                    string insertStmt = "INSERT INTO smtransactiondetails (plantID, fromActorID, fromActorType, toActorID, toActorType, assetItemID, qty, referedby, reference_ID, remarks, Asset_Item_Status, mrsID, mrsItemID, latitude, longitude) " +
+                                                        "VALUES (@facilityID, @fromActorID, @fromActorType, @toActorID, @toActorType, @assetItemID, @qty, @refType, @refID, @remarks, @assetItemStatus, @mrsID, @mrsitemID, @latitude, @longitude); SELECT LAST_INSERT_ID();";
+
+                                    using (var cmd = new MySqlCommand(insertStmt, conn, transaction))
+                                    {
+                                        cmd.Parameters.Add("@facilityID", MySqlDbType.Int32).Value = facilityID;
+                                        cmd.Parameters.Add("@fromActorID", MySqlDbType.Int32).Value = fromActorID;
+                                        cmd.Parameters.Add("@fromActorType", MySqlDbType.Int32).Value = fromActorType;
+                                        cmd.Parameters.Add("@toActorID", MySqlDbType.Int32).Value = toActorID;
+                                        cmd.Parameters.Add("@toActorType", MySqlDbType.Int32).Value = toActorType;
+                                        cmd.Parameters.Add("@assetItemID", MySqlDbType.Int32).Value = assetItemID;
+                                        cmd.Parameters.Add("@qty", MySqlDbType.Int32).Value = qty;
+                                        cmd.Parameters.Add("@refType", MySqlDbType.Int32).Value = refType;
+                                        cmd.Parameters.Add("@refID", MySqlDbType.Int32).Value = refID;
+                                        cmd.Parameters.Add("@remarks", MySqlDbType.VarChar).Value = remarks;
+                                        cmd.Parameters.Add("@assetItemStatus", MySqlDbType.Int32).Value = assetItemStatus;
+                                        cmd.Parameters.Add("@mrsID", MySqlDbType.Int32).Value = mrsID;
+                                        cmd.Parameters.Add("@mrsitemID", MySqlDbType.Int32).Value = mrsitemID;
+                                        cmd.Parameters.Add("@latitude", MySqlDbType.Double).Value = latitude;
+                                        cmd.Parameters.Add("@longitude", MySqlDbType.Double).Value = longitude;
+
+                                        transaction_id = Convert.ToInt32(await cmd.ExecuteScalarAsync());
+                                    }
+
+                                    int debitTransactionID = await DebitTransation(facilityID, transaction_id, fromActorType, fromActorID, qty, assetItemID, mrsID);
+                                    int creditTransactionID = await CreditTransation(facilityID, transaction_id, toActorType, toActorID, qty, assetItemID, mrsID);
+
+                                    bool isValid = await VerifyTransactionDetails(transaction_id, debitTransactionID, creditTransactionID, facilityID, fromActorID, fromActorType, toActorID, toActorType, assetItemID, qty, refType, refID, remarks, mrsID);
+                                    if (!isValid)
+                                    {
+                                        throw new Exception("Transaction details verification failed.");
+                                    }
+                                }
+                                else
+                                {
+                                    // Update the existing transaction
+                                    string updateQ = "UPDATE smtransactiondetails SET qty = @qty, lastInsetedDateTime = @lastInsetedDateTime WHERE ID = @transaction_id;" +
+                                                     "UPDATE smtransition SET debitQty = @qty WHERE transactionID = @transaction_id AND mrsID = @mrsID AND assetItemID = @assetItemID AND actorType = @fromActorType;" +
+                                                     "UPDATE smtransition SET creditQty = @qty WHERE transactionID = @transaction_id AND mrsID = @mrsID AND assetItemID = @assetItemID AND actorType = @toActorType;";
+
+                                    using (var cmd = new MySqlCommand(updateQ, conn, transaction))
+                                    {
+                                        cmd.Parameters.Add("@qty", MySqlDbType.Int32).Value = qty;
+                                        cmd.Parameters.Add("@lastInsetedDateTime", MySqlDbType.VarChar).Value = DateTime.Now.ToString("yyyy-MM-dd HH:mm");
+                                        cmd.Parameters.Add("@transaction_id", MySqlDbType.Int32).Value = transaction_id;
+                                        cmd.Parameters.Add("@mrsID", MySqlDbType.Int32).Value = mrsID;
+                                        cmd.Parameters.Add("@assetItemID", MySqlDbType.Int32).Value = assetItemID;
+                                        cmd.Parameters.Add("@fromActorType", MySqlDbType.Int32).Value = fromActorType;
+                                        cmd.Parameters.Add("@toActorType", MySqlDbType.Int32).Value = toActorType;
+
+                                        await cmd.ExecuteNonQueryAsync();
+                                    }
+                                }
+
+                                // Update the MRS item quantities
+                                if (transaction_id > 0)
+                                {
+                                    string stmt_update = "UPDATE smrsitems SET used_qty = @UpdatingMRSqty WHERE ID = @mrsitemID;";
+                                    using (var cmd = new MySqlCommand(stmt_update, conn, transaction))
+                                    {
+                                        cmd.Parameters.Add("@UpdatingMRSqty", MySqlDbType.Decimal).Value = updatingMRSqty;
+                                        cmd.Parameters.Add("@mrsitemID", MySqlDbType.Int32).Value = mrsitemID;
+                                        await cmd.ExecuteNonQueryAsync();
+                                    }
+
+                                    transaction.Commit(); // Commit the transaction if all operations are successful
+                                    return 0;
+                                }
+                                else
+                                {
+                                    throw new Exception("Transaction ID not generated.");
                                 }
                             }
                             else
                             {
-                                throw new Exception("transaction table not updated properly");
+                                return 1; // Issued quantity exceeded
                             }
                         }
                         else
                         {
-                            string updateQ = $"update smtransactiondetails set qty = {qty}, lastInsetedDateTime = '{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}' where ID = {transaction_id};" +
-                                $" update smtransition set debitQty = {qty} where transactionID = {transaction_id} and mrsID = {mrsID} and assetItemID = {assetItemID} and actorType = {fromActorType};" +
-                                $" update smtransition set creditQty = {qty} where transactionID = {transaction_id} and mrsID = {mrsID} and assetItemID = {assetItemID} and actorType = {toActorType};";
-                            var result = await Context.ExecuteNonQry<int>(updateQ);
-
-                        }
-
-
-                        //string stmt = " select i.issued_qty,i.used_qty from smrsitems i inner join smmrs m on m.ID = i.mrs_ID where i.mrs_ID = " + mrsID + " and asset_item_ID = " + assetItemID + " and is_splited=1; ";
-
-                        if (transaction_id > 0)
-                        {
-                            string stmt_update = " update smrsitems set used_qty=" + UpdatingMRSqty + " where id = " + mrsitemID + ";";
-                            var result = await Context.ExecuteNonQry<int>(stmt_update);
-                            return 0;
-                        }
-                        else
-                        {
-                            return 420;
+                            return 5; // Invalid MRS item
                         }
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        return 1;
+                        transaction.Rollback(); // Rollback the transaction in case of any error
+                        return 3; // Return a generic error code
                     }
                 }
-                else
-                {
-                    return 5;
-                }
-            }
-            catch (Exception e)
-            {
-                return 3;
             }
         }
+
 
         public async Task<bool> TransactionDetails_old(int facilityID, int fromActorID, int fromActorType, int toActorID, int toActorType, int assetItemID, int qty, int refType, int refID, string remarks, int mrsID = 0, int natureOfTransaction = 0, int assetItemStatus = 0, int transaction_id = 0, int mrsItemID = 0)
         {
