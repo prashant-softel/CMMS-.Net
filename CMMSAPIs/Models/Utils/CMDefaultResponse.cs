@@ -77,6 +77,8 @@ namespace CMMSAPIs.Models.Utils
     public class CMEscalationResponse : CMDefaultResponse
     {
         public CMMS.CMMS_Modules module { get; set; }
+        public IEnumerable<string> escalation_log { get; set; }
+
         public CMEscalationResponse()
         {
 

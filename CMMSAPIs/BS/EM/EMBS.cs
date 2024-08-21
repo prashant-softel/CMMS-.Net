@@ -12,8 +12,8 @@ namespace CMMSAPIs.BS.EM
     {
         Task<CMDefaultResponse> SetEscalationMatrix(List<CMSetMasterEM> request, int userID);
 
-        Task<CMEscalationResponse> Escalate(CMMS.CMMS_Modules module, int id); // change to run escalation
-        Task<List<CMEscalationLog>> ShowEscalationLog(CMMS.CMMS_Modules module, int module_ref_id);
+        Task<CMEscalationResponse> Escalate(CMMS.CMMS_Modules moduleId, int statusId, int userID, string facilitytimeZone); // change to run escalation
+        Task<List<CMEscalationLog>> GetEscalationLog(CMMS.CMMS_Modules module, int module_ref_id, int userID, string facilitytimeZone);
         Task<List<CMSetMasterEM>> GetEscalationMatrixbystatusId(CMMS.CMMS_Modules module, int status_id);
         Task<List<GetEcMatrix>> GetEscalationMatrixList(CMMS.CMMS_Modules module);
     }
@@ -67,13 +67,13 @@ namespace CMMSAPIs.BS.EM
                 throw;
             }
         }
-        public async Task<CMEscalationResponse> Escalate(CMMS.CMMS_Modules module, int id)
+        public async Task<CMEscalationResponse> Escalate(CMMS.CMMS_Modules moduleId, int statusId, int userID, string facilitytimeZone)
         {
             try
             {
                 using (var repos = new EMRepository(getDB))
                 {
-                    return await repos.Escalate(module, id);
+                    return await repos.Escalate_2(moduleId, statusId, userID, facilitytimeZone);
                 }
             }
             catch (Exception ex)
@@ -81,13 +81,13 @@ namespace CMMSAPIs.BS.EM
                 throw;
             }
         }
-        public async Task<List<CMEscalationLog>> ShowEscalationLog(CMMS.CMMS_Modules module, int module_ref_id)
+        public async Task<List<CMEscalationLog>> GetEscalationLog(CMMS.CMMS_Modules module, int module_ref_id, int userID, string facilitytimeZone)
         {
             try
             {
                 using (var repos = new EMRepository(getDB))
                 {
-                    return await repos.ShowEscalationLog(module, module_ref_id);
+                    return await repos.GetEscalationLog(module, module_ref_id, userID, facilitytimeZone);
                 }
             }
             catch (Exception ex)
