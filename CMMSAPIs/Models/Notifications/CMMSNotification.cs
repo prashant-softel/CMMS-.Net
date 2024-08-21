@@ -7,6 +7,7 @@ using CMMSAPIs.Models.Inventory;
 using CMMSAPIs.Models.JC;
 using CMMSAPIs.Models.Jobs;
 using CMMSAPIs.Models.Mails;
+using CMMSAPIs.Models.MC;
 using CMMSAPIs.Models.Permits;
 using CMMSAPIs.Models.Users;
 using CMMSAPIs.Models.Utils;
@@ -32,6 +33,11 @@ namespace CMMSAPIs.Models.Notifications
 
         private CMMS.CMMS_Modules m_moduleID;
         protected CMMS.CMMS_Status m_notificationID;
+        protected int m_notificationType = 1;
+        protected int m_delayDays = 0;
+        protected int module_ref_id = 0;
+        protected int m_role = 0;
+
 
         public string template = "<tr><td style=' text-align: left; padding:0.5rem; background-color:#31576D;color:#ffffff;width:35%' ><b>&nbsp;&nbsp;{0}</b></td><td style='text-align: left; padding:0.5rem;'>&nbsp;&nbsp;{1}</td></tr>";
 
@@ -41,7 +47,6 @@ namespace CMMSAPIs.Models.Notifications
         private static string _conString;
         public static MYSQLDBHelper _conn;
 
-        int notificationType = 1;
 
         private UserAccessRepository _userAccessRepository;
         public CMMSNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID)
@@ -59,7 +64,7 @@ namespace CMMSAPIs.Models.Notifications
         }
 
 
-        protected virtual int getObjectId(params object[] args)
+        protected virtual int getId(params object[] args)
         {
             return 0;
         }
@@ -168,32 +173,36 @@ namespace CMMSAPIs.Models.Notifications
 
             return retValue;
         }
-        public async Task<CMDefaultResponse> sendEmailNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, int facilityId, int[] userID, int role, int delayDays, int notificationType, params object[] args)
+
+
+        public async Task<CMDefaultResponse> sendEmailNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, int[] userID, int facilityId, params object[] args)
         {
+            //m_delayDays = delayDays;
             CMDefaultResponse response = new CMDefaultResponse();
 
             List<CMUser> emailList = new List<CMUser>();
+
+            int notificationID_int = (int)notificationID;
             // emailList = GetUserByNotificationId(notificationID);
 
             string subject;
             string printBody;
 
-            if (notificationType == 2)
+            if (m_notificationType == 2)
             {
                 subject = getEMSubject(args);
-                printBody = getEMHTMLBody(args);
 
             }
             else
             {
                 subject = getSubject(args);
-                printBody = getHTMLBody(args);
             }
+            //string HTMLBody = getHTMLBody(args);
             string HTMLHeader = getHTMLHeader(args);
             string HTMLFooter = getHTMLFooter(args);
             string HTMLSignature = getHTMLSignature(args);
-            int module_ref_id = getObjectId(args);
-            //printBody = getHTMLBody(args);
+            int module_ref_id = getId(args);
+            printBody = getHTMLBody(args);
 
             CMUserByNotificationId notification = new CMUserByNotificationId();
             notification.facility_id = facilityId;
@@ -206,15 +215,18 @@ namespace CMMSAPIs.Models.Notifications
             {
                 //CMMSNotification objc = new CMMSNotification(_conn);
                 // UserAccessRepository obj = new UserAccessRepository(_conn);
+
                 if (notificationType == 2)
+
                 {
                     users = await _userAccessRepository.GetEMUsers(facilityId, role);
                     notificationQry = $"INSERT INTO escalationlog (moduleId, moduleRefId, moduleStatus, notifSentToId, notifSentAt) VALUES " +
-                                    $"({(int)moduleID}, {module_ref_id}, {notificationID}, {role}, '{UtilsRepository.GetUTCTime()}'); " +
+                                    $"({(int)moduleID}, {module_ref_id}, {notificationID}, {m_role}, '{UtilsRepository.GetUTCTime()}'); " +
                                     $"SELECT LAST_INSERT_ID(); ";
                 }
                 else
                 {
+
                     users = await _userAccessRepository.GetUserByNotificationId(notification);
                     notificationQry = $"INSERT INTO escalationlog (moduleId, moduleRefId, moduleStatus, notifSentToId, notifSentAt) VALUES " +
                                     $"({(int)moduleID}, {module_ref_id}, {(int)notificationID}, {role}, '{UtilsRepository.GetUTCTime()}'); " +
@@ -243,11 +255,13 @@ namespace CMMSAPIs.Models.Notifications
             {
                 if (email != null)
                 {
+
                     EmailTo.Add(email.user_name);
                     notificationRecordsQry += $"({escalationlogID}, '{email.id}'),";
                     emailCount++;
                 }
             }
+
             if (users.Count > 0)
             {
                 EmailTo.Add("cmms@softeltech.in");
@@ -271,38 +285,56 @@ namespace CMMSAPIs.Models.Notifications
 
         public static async Task<CMDefaultResponse> sendEMNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, int[] userID, int module_ref_id, int role, int delayDays, params object[] args)
         {
-            CMDefaultResponse retValue = new CMDefaultResponse();
-            CMMSNotification notificationObj = null;
-            int notificationType = 2;
-            int facilityId = 0;
+            CMDefaultResponse retValue;
 
+            int notificationType = 2;
+/*
             if (moduleID == CMMS.CMMS_Modules.JOB)     //JOB
             {
                 CMJobView _jobView = (CMJobView)args[0];
                 notificationObj = new JobNotification(moduleID, notificationID, _jobView, notificationType);
                 facilityId = _jobView.facility_id;
             }
+*/
+
             //create else if block for your module and add Notification class for  your module to implement yous notification
-            retValue = await notificationObj.sendEmailNotification(moduleID, notificationID, facilityId, userID, module_ref_id, role, delayDays, notificationType, args);
+            retValue = await sendBaseNotification(moduleID, notificationID, userID, module_ref_id, role, delayDays, notificationType, args);
             return retValue;
         }
 
-        //create else if block for your module and add Notification class for  your module to implement yous notification
-        /*    public static CMMS.RETRUNSTATUS sendNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, params object[] args)*/
         public static async Task<CMDefaultResponse> sendNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, int[] userID, params object[] args)
         {
-            CMDefaultResponse retValue = new CMDefaultResponse();
-            CMMSNotification notificationObj = null;
+            CMDefaultResponse retValue;
             int notificationType = 1;
-            int facilityId = 0;
             int module_ref_id = 0;
+            int role = 0;
+            int delayDays = 0;
+
+            //retValue = await sendBaseNotification(moduleID, notificationID, userID, args);
+            retValue = await sendBaseNotification(moduleID, notificationID, userID, module_ref_id, role, delayDays, notificationType, args);
+            return retValue;
+        }
+
+
+        //create else if block for your module and add Notification class for  your module to implement yous notification
+        /*    public static CMMS.RETRUNSTATUS sendNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, params object[] args)*/
+        public static async Task<CMDefaultResponse> sendBaseNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, int[] userID, int module_ref_id, int role, int delayDays, int notificationType, params object[] args)
+        {
+            CMDefaultResponse retValue = new CMDefaultResponse();
+
+            int facilityId = 0;
+            CMMSNotification notificationObj = null;
 
             if (moduleID == CMMS.CMMS_Modules.JOB)     //JOB
             {
                 CMJobView _jobView = (CMJobView)args[0];
                 notificationObj = new JobNotification(moduleID, notificationID, _jobView);
+                notificationObj.module_ref_id = module_ref_id;
+                notificationObj.m_delayDays = delayDays;
+                notificationObj.m_notificationType = notificationType;
+                notificationObj.m_role = role;
                 facilityId = _jobView.facility_id;
-                module_ref_id = _jobView.id;
+//                module_ref_id = _jobView.id;
             }
             else if (moduleID == CMMS.CMMS_Modules.PTW)    //PTW
             {
@@ -348,7 +380,7 @@ namespace CMMSAPIs.Models.Notifications
                 //facilityId = _Inventory.facility_id;
             }
             //create else if block for your module and add Notification class for  your module to implement yous notification
-            retValue = await notificationObj.sendEmailNotification(moduleID, notificationID, facilityId, userID, module_ref_id, 0, 0, notificationType, args);
+            retValue = await notificationObj.sendEmailNotification(moduleID, notificationID, userID, facilityId, module_ref_id, 0, 0, notificationType, args);
             return retValue;
         }
 

@@ -1,11 +1,14 @@
 ﻿using CMMSAPIs.BS.EM;
 using CMMSAPIs.Helper;
 using CMMSAPIs.Models.EM;
+using CMMSAPIs.Models.Utils;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+using System.Linq;
 
 namespace CMMSAPIs.Controllers.EM
 {
@@ -69,12 +72,13 @@ namespace CMMSAPIs.Controllers.EM
         //[Authorize]
         [Route("Escalate")]
         [HttpPost]
-        public async Task<IActionResult> Escalate(CMMS.CMMS_Modules module, int id)
+        public async Task<IActionResult> Escalate(CMMS.CMMS_Modules moduleId, int statusId, int facilityId)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _EMBS.Escalate(module, id);
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
+                var data = await _EMBS.Escalate(moduleId, statusId, userID, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception)
@@ -84,13 +88,15 @@ namespace CMMSAPIs.Controllers.EM
         }
 
         //[Authorize]
-        [Route("ShowEscalationLog")]
+        [Route("GetEscalationLog")]
         [HttpGet]
-        public async Task<IActionResult> ShowEscalationLog(CMMS.CMMS_Modules module, int id)
+        public async Task<IActionResult> GetEscalationLog(CMMS.CMMS_Modules module, int id, int facilityId)
         {
             try
             {
-                var data = await _EMBS.ShowEscalationLog(module, id);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
+                var data = await _EMBS.GetEscalationLog(module, id, userID, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception)

@@ -247,24 +247,24 @@ namespace CMMSAPIs.Repositories.Jobs
                     string desc = jobObj.job_description;
                     if (string.IsNullOrEmpty(jobObj.assigned_name))
                     {
-                        retValue = String.Format("Job {0} created by", jobObj.created_by_name);
+                        retValue = String.Format("Job{0} created by {1}", jobId, jobObj.created_by_name);
                     }
                     else
                     {
-                        retValue = String.Format("Job {0} Created by and Assigned to", jobObj.created_by_name, jobObj.assigned_name);
+                        retValue = String.Format("Job{0} Created by {1} and Assigned to {2}", jobId, jobObj.created_by_name, jobObj.assigned_name);
                     }
                     break;
                 case CMMS.CMMS_Status.JOB_ASSIGNED:     //Assigned
-                    retValue = String.Format("Job <{0}> assigned to <{1}>", jobObj.job_title, jobObj.assigned_name);
+                    retValue = String.Format("Job{0} assigned to <{1}>", jobId, jobObj.assigned_name);
                     break;
                 case CMMS.CMMS_Status.JOB_LINKED:     //Linked
-                    retValue = String.Format("Job <{0}> linked to PTW <{1}>", jobObj.job_title, jobObj.current_ptw_id);
+                    retValue = String.Format("Job{0} linked to PTW{1}", jobId, jobObj.job_title, jobObj.current_ptw_id);
                     break;
                 case CMMS.CMMS_Status.JOB_CLOSED:     //Closed
-                    retValue = String.Format("Job <{0}> closed", jobObj.job_title);
+                    retValue = String.Format("Job{0} closed", jobId);
                     break;
                 case CMMS.CMMS_Status.JOB_CANCELLED:     //Cancelled
-                    retValue = String.Format("Job <{0}> Cancelled", jobObj.job_title);
+                    retValue = String.Format("Job{0} <{1}> cancelled", jobId);
                     break;
                 default:
                     break;
@@ -401,8 +401,8 @@ namespace CMMSAPIs.Repositories.Jobs
             _ViewJobList[0].tools_required_list = _Tools;
 
             //add worktype and tools ka collection
-            CMMS.CMMS_Status _Status_long = (CMMS.CMMS_Status)(_ViewJobList[0].status + 100);
-            string _longStatus = getLongStatus(CMMS.CMMS_Modules.JOB, _Status_long, _ViewJobList[0]);
+            CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_ViewJobList[0].status);
+            string _longStatus = getLongStatus(CMMS.CMMS_Modules.JOB, _Status, _ViewJobList[0]);
             _ViewJobList[0].status_long = _longStatus;
             foreach (var list in _ViewJobList)
             {
