@@ -25,8 +25,8 @@ namespace CMMSAPIs.Repositories.Calibration
             { (int)CMMS.CMMS_Status.CALIBRATION_REQUEST_REJECTED, " Request Rejected" },
             { (int)CMMS.CMMS_Status.CALIBRATION_STARTED, " Started" },
             { (int)CMMS.CMMS_Status.CALIBRATION_COMPLETED, " Completed" },
-            { (int)CMMS.CMMS_Status.CALIBRATION_CLOSED, " Closed" },
-            { (int)CMMS.CMMS_Status.CALIBRATION_APPROVED, " Approved Closed" },
+            { (int)CMMS.CMMS_Status.CALIBRATION_CLOSED, " Close - Waiting for Approval " },
+            { (int)CMMS.CMMS_Status.CALIBRATION_APPROVED, "Closed - Approved" },
             { (int)CMMS.CMMS_Status.CALIBRATION_REJECTED, " Rejected" },
             { (int)CMMS.CMMS_Status.CALIBRATION_SKIPPED, " Skipped" },
             { (int)CMMS.CMMS_Status.CALIBRATION_SCHEDULED, " Scheduled" }
