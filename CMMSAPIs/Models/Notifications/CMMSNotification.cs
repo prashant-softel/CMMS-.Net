@@ -7,6 +7,7 @@ using CMMSAPIs.Models.Inventory;
 using CMMSAPIs.Models.JC;
 using CMMSAPIs.Models.Jobs;
 using CMMSAPIs.Models.Mails;
+using CMMSAPIs.Models.MC;
 using CMMSAPIs.Models.Permits;
 using CMMSAPIs.Models.Users;
 using CMMSAPIs.Models.Utils;
@@ -176,12 +177,12 @@ namespace CMMSAPIs.Models.Notifications
 
         public async Task<CMDefaultResponse> sendEmailNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, int[] userID, int facilityId, params object[] args)
         {
-            try
-            {
-                //m_delayDays = delayDays;
-                CMDefaultResponse response = new CMDefaultResponse();
+            //m_delayDays = delayDays;
+            CMDefaultResponse response = new CMDefaultResponse();
 
             List<CMUser> emailList = new List<CMUser>();
+
+            int notificationID_int = (int)notificationID;
             // emailList = GetUserByNotificationId(notificationID);
 
             string subject;
@@ -196,21 +197,16 @@ namespace CMMSAPIs.Models.Notifications
             {
                 subject = getSubject(args);
             }
-        
             //string HTMLBody = getHTMLBody(args);
             string HTMLHeader = getHTMLHeader(args);
             string HTMLFooter = getHTMLFooter(args);
             string HTMLSignature = getHTMLSignature(args);
             int module_ref_id = getId(args);
-           
-                printBody = getHTMLBody(args);
-          
-        
+            printBody = getHTMLBody(args);
 
             CMUserByNotificationId notification = new CMUserByNotificationId();
             notification.facility_id = facilityId;
-            notification.module_id = moduleID;
-            notification.role_id = m_role;
+            notification.notification_id = notificationID;
             notification.user_ids = userID;
 
             List<CMUser> users = new List<CMUser>();
@@ -219,23 +215,19 @@ namespace CMMSAPIs.Models.Notifications
             {
                 //CMMSNotification objc = new CMMSNotification(_conn);
                 // UserAccessRepository obj = new UserAccessRepository(_conn);
-                if (m_notificationType == 2)
-              
+                if (m_notificationType == 1)
                 {
-                    users = await _userAccessRepository.GetEMUsers(facilityId, m_role, (int)moduleID);
-                    notificationQry =   $"INSERT INTO escalationlog (moduleId, moduleRefId, moduleStatus, notifSentToId, notifSentAt) VALUES " +
-                                    $"({(int)moduleID}, {module_ref_id}, {(int)notificationID}, {m_role}, '{UtilsRepository.GetUTCTime()}'); " +
-                                    $"SELECT LAST_INSERT_ID(); ";
-                }
-                else
-                {
-                    
                     users = await _userAccessRepository.GetUserByNotificationId(notification);
                     notificationQry = $"INSERT INTO escalationlog (moduleId, moduleRefId, moduleStatus, notifSentToId, notifSentAt) VALUES " +
                                     $"({(int)moduleID}, {module_ref_id}, {notificationID}, {m_role}, '{UtilsRepository.GetUTCTime()}'); " +
                                     $"SELECT LAST_INSERT_ID(); ";
-                    
-                
+                }
+                else
+                {
+                    users = await _userAccessRepository.GetEMUsers(facilityId, m_role, (int)notificationID);
+                    notificationQry = $"INSERT INTO escalationlog (moduleId, moduleRefId, moduleStatus, notifSentToId, notifSentAt) VALUES " +
+                                    $"({(int)moduleID}, {module_ref_id}, {(int)notificationID}, {m_role}, '{UtilsRepository.GetUTCTime()}'); " +
+                                    $"SELECT LAST_INSERT_ID(); ";
                 }
             }
             catch (Exception e)
@@ -264,10 +256,10 @@ namespace CMMSAPIs.Models.Notifications
                     emailCount++;
                 }
             }
-            if(users.Count > 0)
+            if (users.Count > 0)
             {
                 EmailTo.Add("cmms@softeltech.in");
-                notificationRecordsQry = notificationRecordsQry.Substring(0,notificationRecordsQry.Length - 1);
+                notificationRecordsQry = notificationRecordsQry.Substring(0, notificationRecordsQry.Length - 1);
             }
             System.Data.DataTable dt2 = await _conn.FetchData(notificationRecordsQry).ConfigureAwait(false);
 
@@ -282,12 +274,6 @@ namespace CMMSAPIs.Models.Notifications
 
             }
             return response;
-            }
-            catch (Exception ex)
-            {
-                var msg = ex;
-                throw ex;
-            }
 
         }
 
@@ -297,14 +283,14 @@ namespace CMMSAPIs.Models.Notifications
             CMDefaultResponse retValue;
 
             int notificationType = 2;
-/*
-            if (moduleID == CMMS.CMMS_Modules.JOB)     //JOB
-            {
-                CMJobView _jobView = (CMJobView)args[0];
-                notificationObj = new JobNotification(moduleID, notificationID, _jobView, notificationType);
-                facilityId = _jobView.facility_id;
-            }
-*/
+            /*
+                        if (moduleID == CMMS.CMMS_Modules.JOB)     //JOB
+                        {
+                            CMJobView _jobView = (CMJobView)args[0];
+                            notificationObj = new JobNotification(moduleID, notificationID, _jobView, notificationType);
+                            facilityId = _jobView.facility_id;
+                        }
+            */
 
             //create else if block for your module and add Notification class for  your module to implement yous notification
             retValue = await sendBaseNotification(moduleID, notificationID, userID, module_ref_id, role, delayDays, notificationType, args);
@@ -343,7 +329,7 @@ namespace CMMSAPIs.Models.Notifications
                 notificationObj.m_notificationType = notificationType;
                 notificationObj.m_role = role;
                 facilityId = _jobView.facility_id;
-//                module_ref_id = _jobView.id;
+                //                module_ref_id = _jobView.id;
             }
             else if (moduleID == CMMS.CMMS_Modules.PTW)    //PTW
             {
@@ -386,6 +372,30 @@ namespace CMMSAPIs.Models.Notifications
             {
                 CMGrievance _Grievance = (CMGrievance)args[0];
                 notificationObj = new GrievanceNotification(moduleID, notificationID, _Grievance);
+                //facilityId = _Inventory.facility_id;
+            }
+            else if (moduleID == CMMS.CMMS_Modules.MC_PLAN)
+            {
+                CMMCPlan _Plan = (CMMCPlan)args[0];
+                notificationObj = new MCNotification(moduleID, notificationID, _Plan, null);
+                //facilityId = _Inventory.facility_id;
+            }
+            else if (moduleID == CMMS.CMMS_Modules.MC_TASK)
+            {
+                CMMCExecution _Task = (CMMCExecution)args[0];
+                notificationObj = new MCNotification(moduleID, notificationID, null, _Task);
+                //facilityId = _Inventory.facility_id;
+            }
+            else if (moduleID == CMMS.CMMS_Modules.VEGETATION_PLAN)
+            {
+                CMMCPlan _Plan = (CMMCPlan)args[0];
+                notificationObj = new VegetationNotification(moduleID, notificationID, _Plan, null);
+                //facilityId = _Inventory.facility_id;
+            }
+            else if (moduleID == CMMS.CMMS_Modules.VEGETATION_TASK)
+            {
+                CMMCExecution _Task = (CMMCExecution)args[0];
+                notificationObj = new VegetationNotification(moduleID, notificationID, null, _Task);
                 //facilityId = _Inventory.facility_id;
             }
             //create else if block for your module and add Notification class for  your module to implement yous notification
