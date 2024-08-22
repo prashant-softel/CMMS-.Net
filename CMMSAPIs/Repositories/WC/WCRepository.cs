@@ -145,7 +145,7 @@ namespace CMMSAPIs.Repositories.WC
                 "wc.claim_status,case when wc.claim_status=1 then 'WC done-closed'" +
                " when wc.claim_status=2 then 'WC rejected-closed'" +
                " when wc.claim_status=3 then 'WC partially done-closed' " +
-               " else 'Invalid status' end as long_claim_status " +
+               " else 'In Process' end as long_claim_status " +
                 " FROM wc " +
                 " LEFT JOIN facilities as f ON f.id = wc.facilityId " +
                 " LEFT JOIN assets as a ON a.id = wc.equipment_id " +
@@ -327,7 +327,7 @@ namespace CMMSAPIs.Repositories.WC
             " , wc.claim_status,case when wc.claim_status=1 then 'WC done-closed'" +
             " when wc.claim_status=2 then 'WC rejected-closed'" +
             " when wc.claim_status=3 then 'WC partially done-closed' " +
-            " else 'Invalid status' end as long_claim_status " +
+            " else 'In Process' end as long_claim_status " +
             " FROM wc " +
             "LEFT JOIN facilities as f ON f.id = wc.facilityId " +
             "LEFT JOIN assets as a ON a.id = wc.equipment_id " +
