@@ -25,12 +25,13 @@ namespace CMMSAPIs.Controllers.PM
         //[Authorize]
         [Route("CreatePMPlan")]
         [HttpPost]
-        public async Task<IActionResult> CreatePMPlan(CMPMPlanDetail pm_plan)
+        public async Task<IActionResult> CreatePMPlan(CMPMPlanDetail pm_plan,int facility_id)
         {
             try
             {
+                string facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _PMBS.CreatePMPlan(pm_plan, userID);
+                var data = await _PMBS.CreatePMPlan(pm_plan, userID, facilitytimeZone);
                 return Ok(data);
             }
             catch (ArgumentException ex)
@@ -45,12 +46,14 @@ namespace CMMSAPIs.Controllers.PM
 
         [Route("UpdatePMPlan")]
         [HttpPost]
-        public async Task<IActionResult> UpdatePMPlan(CMPMPlanDetail request)
+        public async Task<IActionResult> UpdatePMPlan(CMPMPlanDetail request,int facility_id)
         {
             try
             {
+                string facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _PMBS.UpdatePMPlan(request, userID);
+                var data = await _PMBS.UpdatePMPlan(request, userID, facilitytimeZone);
                 return Ok(data);
             }
             catch (ArgumentException ex)
@@ -89,12 +92,14 @@ namespace CMMSAPIs.Controllers.PM
         //[Authorize]
         [Route("ApprovePMPlan")]
         [HttpPut]
-        public async Task<IActionResult> ApprovePMPlan(CMApproval request)
+        public async Task<IActionResult> ApprovePMPlan(CMApproval request, int facility_id)
         {
             try
             {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _PMBS.ApprovePMPlan(request, userID);
+                var data = await _PMBS.ApprovePMPlan(request, userID, facilitytimeZone);
                 return Ok(data);
             }
             catch (ArgumentException ex)
@@ -110,12 +115,13 @@ namespace CMMSAPIs.Controllers.PM
         //[Authorize]
         [Route("RejectPMPlan")]
         [HttpPut]
-        public async Task<IActionResult> RejectPMPlan(CMApproval request)
+        public async Task<IActionResult> RejectPMPlan(CMApproval request, int facility_id)
         {
             try
             {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _PMBS.RejectPMPlan(request, userID);
+                var data = await _PMBS.RejectPMPlan(request, userID, facilitytimeZone);
                 return Ok(data);
             }
             catch (ArgumentException ex)
@@ -133,13 +139,14 @@ namespace CMMSAPIs.Controllers.PM
         //[Authorize]
         [Route("DeletePMPlan")]
         [HttpPut]
-        public async Task<IActionResult> DeletePMPlan(int planId)
+        public async Task<IActionResult> DeletePMPlan(int planId,int facility_id)
 
         {
             try
             {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _PMBS.DeletePMPlan(planId, userID);
+                var data = await _PMBS.DeletePMPlan(planId, userID,facilitytimeZone);
                 return Ok(data);
             }
             catch (ArgumentException ex)

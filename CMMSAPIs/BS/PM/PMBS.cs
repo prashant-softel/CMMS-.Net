@@ -11,15 +11,15 @@ namespace CMMSAPIs.BS.PM
 {
     public interface IPMBS
     {
-        Task<CMDefaultResponse> CreatePMPlan(CMPMPlanDetail pm_plan, int userID);
+        Task<CMDefaultResponse> CreatePMPlan(CMPMPlanDetail pm_plan, int userID, string facilitytime);
         Task<List<CMPMPlanList>> GetPMPlanList(int facility_id, string category_id, string frequency_id, DateTime? start_date, DateTime? end_date, string facilitytime);
         Task<CMPMPlanDetail> GetPMPlanDetail(int id, string facilitytime);
         Task<List<CMScheduleData>> GetScheduleData(int facility_id, int category_id, string facilitytime);
         Task<List<CMDefaultResponse>> SetScheduleData(CMSetScheduleData request, int userID);
-        Task<CMDefaultResponse> ApprovePMPlan(CMApproval request, int userID);
-        Task<CMDefaultResponse> RejectPMPlan(CMApproval request, int userID);
-        Task<CMDefaultResponse> DeletePMPlan(int planId, int userID);
-        Task<CMDefaultResponse> UpdatePMPlan(CMPMPlanDetail request, int userID);
+        Task<CMDefaultResponse> ApprovePMPlan(CMApproval request, int userID, string facilitytime);
+        Task<CMDefaultResponse> RejectPMPlan(CMApproval request, int userID, string facilitytime);
+        Task<CMDefaultResponse> DeletePMPlan(int planId, int userID, string facilitytime);
+        Task<CMDefaultResponse> UpdatePMPlan(CMPMPlanDetail request, int userID, string facilitytime);
 
         Task<CMImportFileResponse> ImportPMPlanFile(int file_id, int facility_id, int userID);
         Task<CMDefaultResponse> DeletePMTask(CMApproval request, int userID);
@@ -36,13 +36,13 @@ namespace CMMSAPIs.BS.PM
             _environment = environment;
         }
 
-        public async Task<CMDefaultResponse> CreatePMPlan(CMPMPlanDetail pm_plan, int userID)
+        public async Task<CMDefaultResponse> CreatePMPlan(CMPMPlanDetail pm_plan, int userID, string facilitytime)
         {
             try
             {
                 using (var repos = new PMRepository(getDB, _environment))
                 {
-                    return await repos.CreatePMPlan(pm_plan, userID);
+                    return await repos.CreatePMPlan(pm_plan, userID, facilitytime);
                 }
             }
             catch (Exception ex)
@@ -109,13 +109,13 @@ namespace CMMSAPIs.BS.PM
             }
         }
 
-        public async Task<CMDefaultResponse> ApprovePMPlan(CMApproval request, int userID)
+        public async Task<CMDefaultResponse> ApprovePMPlan(CMApproval request, int userID, string facilitytime)
         {
             try
             {
                 using (var repos = new PMRepository(getDB, _environment))
                 {
-                    return await repos.ApprovePMPlan(request, userID);
+                    return await repos.ApprovePMPlan(request, userID, facilitytime);
                 }
             }
             catch (Exception ex)
@@ -124,13 +124,13 @@ namespace CMMSAPIs.BS.PM
             }
         }
 
-        public async Task<CMDefaultResponse> RejectPMPlan(CMApproval request, int userID)
+        public async Task<CMDefaultResponse> RejectPMPlan(CMApproval request, int userID, string facilitytime)
         {
             try
             {
                 using (var repos = new PMRepository(getDB, _environment))
                 {
-                    return await repos.RejectPMPlan(request, userID);
+                    return await repos.RejectPMPlan(request, userID, facilitytime);
                 }
             }
             catch (Exception ex)
@@ -139,13 +139,13 @@ namespace CMMSAPIs.BS.PM
             }
         }
 
-        public async Task<CMDefaultResponse> DeletePMPlan(int planId, int userID)
+        public async Task<CMDefaultResponse> DeletePMPlan(int planId, int userID, string facilitytime)
         {
             try
             {
                 using (var repos = new PMRepository(getDB, _environment))
                 {
-                    return await repos.DeletePMPlan(planId, userID);
+                    return await repos.DeletePMPlan(planId, userID, facilitytime);
                 }
             }
             catch (Exception ex)
@@ -153,14 +153,14 @@ namespace CMMSAPIs.BS.PM
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> UpdatePMPlan(CMPMPlanDetail request, int userID)
+        public async Task<CMDefaultResponse> UpdatePMPlan(CMPMPlanDetail request, int userID, string facilitytime)
 
         {
             try
             {
                 using (var repos = new PMRepository(getDB, _environment))
                 {
-                    return await repos.UpdatePMPlan(request, userID);
+                    return await repos.UpdatePMPlan(request, userID, facilitytime);
                 }
             }
             catch (Exception ex)

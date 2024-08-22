@@ -98,11 +98,12 @@ namespace CMMSAPIs.Controllers.Audits
         //[Authorize]
         [Route("DeleteAuditPlan")]
         [HttpPost]
-        public async Task<IActionResult> DeleteAuditPlan([FromForm] int audit_plan_id)
+        public async Task<IActionResult> DeleteAuditPlan([FromForm] int audit_plan_id, int facility_id)
         {
             try
             {
-                var data = await _AuditPlanBS.DeleteAuditPlan(audit_plan_id);
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+                var data = await _AuditPlanBS.DeleteAuditPlan(audit_plan_id, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -132,12 +133,13 @@ namespace CMMSAPIs.Controllers.Audits
 
         [Route("RejectAuditPlan")]
         [HttpPost]
-        public async Task<IActionResult> RejectAuditPlan(CMApproval request)
+        public async Task<IActionResult> RejectAuditPlan(CMApproval request, int facility_id)
         {
             try
             {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _AuditPlanBS.RejectAuditPlan(request, userId);
+                var data = await _AuditPlanBS.RejectAuditPlan(request, userId,facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -169,12 +171,13 @@ namespace CMMSAPIs.Controllers.Audits
 
         [Route("StartAuditTask")]
         [HttpPost]
-        public async Task<IActionResult> StartAuditTask(int task_id)
+        public async Task<IActionResult> StartAuditTask(int task_id, int facility_id)
         {
             try
             {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _AuditPlanBS.StartAuditTask(task_id, userId);
+                var data = await _AuditPlanBS.StartAuditTask(task_id, userId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -207,12 +210,13 @@ namespace CMMSAPIs.Controllers.Audits
 
         [Route("ApprovePlan")]
         [HttpPost]
-        public async Task<IActionResult> ApprovePlan(CMApproval request)
+        public async Task<IActionResult> ApprovePlan(CMApproval request, int facility_id)
         {
             try
             {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _AuditPlanBS.ApprovePlan(request, userId);
+                var data = await _AuditPlanBS.ApprovePlan(request, userId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -348,12 +352,13 @@ namespace CMMSAPIs.Controllers.Audits
 
         [Route("CreateAuditSkip")]
         [HttpPost]
-        public async Task<IActionResult> CreateAuditSkip(CMApproval request)
+        public async Task<IActionResult> CreateAuditSkip(CMApproval request, int facility_id)
         {
             try
             {
+                string facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _AuditPlanBS.CreateAuditSkip(request, userId);
+                var data = await _AuditPlanBS.CreateAuditSkip(request, userId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -366,12 +371,13 @@ namespace CMMSAPIs.Controllers.Audits
         }
         [Route("RejectAuditSkip")]
         [HttpPost]
-        public async Task<IActionResult> RejectAuditSkip(CMApproval request)
+        public async Task<IActionResult> RejectAuditSkip(CMApproval request, int facility_id)
         {
             try
             {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _AuditPlanBS.RejectAuditSkip(request, userId);
+                var data = await _AuditPlanBS.RejectAuditSkip(request, userId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -384,12 +390,13 @@ namespace CMMSAPIs.Controllers.Audits
         }
         [Route("ApproveAuditSkip")]
         [HttpPost]
-        public async Task<IActionResult> ApproveAuditSkip(CMApproval request)
+        public async Task<IActionResult> ApproveAuditSkip(CMApproval request, int facility_id)
         {
             try
             {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _AuditPlanBS.ApproveAuditSkip(request, userId);
+                var data = await _AuditPlanBS.ApproveAuditSkip(request, userId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -403,12 +410,13 @@ namespace CMMSAPIs.Controllers.Audits
 
         [Route("CloseAuditPlan")]
         [HttpPost]
-        public async Task<IActionResult> CloseAuditPlan(CMApproval request)
+        public async Task<IActionResult> CloseAuditPlan(CMApproval request, int facility_id)
         {
             try
             {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _AuditPlanBS.CloseAuditPlan(request, userId);
+                var data = await _AuditPlanBS.CloseAuditPlan(request, userId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -422,12 +430,13 @@ namespace CMMSAPIs.Controllers.Audits
 
         [Route("RejectCloseAuditPlan")]
         [HttpPost]
-        public async Task<IActionResult> RejectCloseAuditPlan(CMApproval request)
+        public async Task<IActionResult> RejectCloseAuditPlan(CMApproval request, int facility_id)
         {
             try
             {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _AuditPlanBS.RejectCloseAuditPlan(request, userId);
+                var data = await _AuditPlanBS.RejectCloseAuditPlan(request, userId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -441,12 +450,13 @@ namespace CMMSAPIs.Controllers.Audits
 
         [Route("ApproveClosedAuditPlan")]
         [HttpPost]
-        public async Task<IActionResult> ApproveClosedAuditPlan(CMApproval request)
+        public async Task<IActionResult> ApproveClosedAuditPlan(CMApproval request, int facility_id)
         {
             try
             {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _AuditPlanBS.ApproveClosedAuditPlan(request, userId);
+                var data = await _AuditPlanBS.ApproveClosedAuditPlan(request, userId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)

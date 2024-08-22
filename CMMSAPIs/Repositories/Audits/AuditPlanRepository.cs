@@ -164,7 +164,7 @@ namespace CMMSAPIs.Repositories.Audits
             return response;
         }
 
-        internal async Task<CMDefaultResponse> DeleteAuditPlan(int audit_plan_id)
+        internal async Task<CMDefaultResponse> DeleteAuditPlan(int audit_plan_id,string facilitytimeZone)
         {
             CMDefaultResponse response = null;
             string SelectQ = "select id from st_audit where ID = '" + audit_plan_id + "'";
@@ -178,6 +178,8 @@ namespace CMMSAPIs.Repositories.Audits
                 var result = await Context.ExecuteNonQry<int>(UpdateQ);
                 response = new CMDefaultResponse(audit_plan_id, CMMS.RETRUNSTATUS.SUCCESS, "Audit plan with plan number : " + auditPlanList[0].plan_number + " deleted.");
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.AUDIT_PLAN, audit_plan_id, 0, 0, " Audit plan deleted ", CMMS.CMMS_Status.AUDIT_DELETED);
+                CMPMPlanDetail _AuditList = await GetAuditPlanDetail(audit_plan_id, facilitytimeZone);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.AUDIT_PLAN, CMMS.CMMS_Status.AUDIT_DELETED, new[] { audit_plan_id }, _AuditList);
 
             }
             else
@@ -287,7 +289,7 @@ namespace CMMSAPIs.Repositories.Audits
 
             return response;
         }
-        internal async Task<CMDefaultResponse> RejectAuditPlan(CMApproval request, int userId)
+        internal async Task<CMDefaultResponse> RejectAuditPlan(CMApproval request, int userId,string facilitytimeZone)
         {
             CMDefaultResponse response = null;
             string SelectQ = "select id from st_audit where ID = '" + request.id + "'";
@@ -301,6 +303,8 @@ namespace CMMSAPIs.Repositories.Audits
                 var result = await Context.ExecuteNonQry<int>(UpdateQ);
                 response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Audit plan with plan number : " + auditPlanList[0].plan_number + " rejected successfully.");
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.AUDIT_PLAN, request.id, 0, 0, request.comment, CMMS.CMMS_Status.AUDIT_REJECTED);
+                CMPMPlanDetail _AuditList = await GetAuditPlanDetail(request.id, facilitytimeZone);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.AUDIT_PLAN, CMMS.CMMS_Status.AUDIT_REJECTED, new[] { userId }, _AuditList);
 
             }
             else
@@ -358,7 +362,7 @@ namespace CMMSAPIs.Repositories.Audits
             return response;
         }
 
-        internal async Task<CMDefaultResponse> StartAuditTask(int task_id, int userID)
+        internal async Task<CMDefaultResponse> StartAuditTask(int task_id, int userID, string facilitytimeZone)
         {
             /*
              * Primary Table - PMExecution
@@ -466,6 +470,8 @@ namespace CMMSAPIs.Repositories.Audits
             await Context.ExecuteNonQry<int>(startQry3).ConfigureAwait(false);
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.AUDIT_TASK, task_id, 0, 0, $"Audit Execution Started of assets ", CMMS.CMMS_Status.AUDIT_START, userID);
+            CMPMPlanDetail _AuditList = await GetAuditPlanDetail(task_id, facilitytimeZone);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.AUDIT_TASK, CMMS.CMMS_Status.AUDIT_START, new[] { userID }, _AuditList);
 
             response = new CMDefaultResponse(idList, CMMS.RETRUNSTATUS.SUCCESS, $"Execution AuditTask{task_id} Started Successfully");
 
@@ -920,7 +926,7 @@ namespace CMMSAPIs.Repositories.Audits
 
         }
 
-        internal async Task<CMDefaultResponse> ApprovePlan(CMApproval request, int userId)
+        internal async Task<CMDefaultResponse> ApprovePlan(CMApproval request, int userId, string facilitytimeZone)
         {
 
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
@@ -960,6 +966,8 @@ namespace CMMSAPIs.Repositories.Audits
 
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.AUDIT_PLAN, request.id, 0, 0, string.IsNullOrEmpty(request.comment) ? "Audit Plan Approved " : request.comment, CMMS.CMMS_Status.AUDIT_APPROVED);
+            CMPMPlanDetail _AuditList = await GetAuditPlanDetail(request.id, facilitytimeZone);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.AUDIT_PLAN, CMMS.CMMS_Status.AUDIT_APPROVED, new[] { userId }, _AuditList);
 
             //await CMMSNotification.sendNotification(CMMS.CMMS_Modules.WARRANTY_CLAIM, CMMS.CMMS_Status.APPROVED, new[] { _WCList[0].created_by }, _WCList[0]);
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "PM Plan Approved Successfully");
@@ -1546,7 +1554,7 @@ namespace CMMSAPIs.Repositories.Audits
             return statusName;
         }
 
-        internal async Task<CMDefaultResponse> CreateAuditSkip(CMApproval request, int userId)
+        internal async Task<CMDefaultResponse> CreateAuditSkip(CMApproval request, int userId, string facilitytimeZone)
         {
             CMDefaultResponse response = null;
             string SelectQ = "select id from pm_task where ID = '" + request.id + "'";
@@ -1560,6 +1568,8 @@ namespace CMMSAPIs.Repositories.Audits
                 var result = await Context.ExecuteNonQry<int>(UpdateQ);
                 response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Audit plan with plan task id : " + auditPlanList[0].id + " skipped successfully.");
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.AUDIT_PLAN, request.id, 0, 0, request.comment, CMMS.CMMS_Status.AUDIT_SKIP);
+                CMPMPlanDetail _AuditList = await GetAuditPlanDetail(request.id, facilitytimeZone);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.AUDIT_PLAN, CMMS.CMMS_Status.AUDIT_SKIP, new[] { userId }, _AuditList);
 
             }
             else
@@ -1572,7 +1582,7 @@ namespace CMMSAPIs.Repositories.Audits
             return response;
         }
 
-        internal async Task<CMDefaultResponse> RejectAuditSkip(CMApproval request, int userId)
+        internal async Task<CMDefaultResponse> RejectAuditSkip(CMApproval request, int userId,string facilitytimeZone)
         {
             CMDefaultResponse response = null;
             string SelectQ = "select id  from pm_task where ID = '" + request.id + "'";
@@ -1586,6 +1596,8 @@ namespace CMMSAPIs.Repositories.Audits
                 var result = await Context.ExecuteNonQry<int>(UpdateQ);
                 response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Audit plan with task id : " + auditPlanList[0].id + " skip rejected.");
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.AUDIT_PLAN, request.id, 0, 0, request.comment, CMMS.CMMS_Status.AUDIT_SKIP_REJECT);
+                CMPMPlanDetail _AuditList = await GetAuditPlanDetail(request.id, facilitytimeZone);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.AUDIT_PLAN, CMMS.CMMS_Status.AUDIT_SKIP_REJECT, new[] { userId }, _AuditList);
 
             }
             else
@@ -1595,7 +1607,7 @@ namespace CMMSAPIs.Repositories.Audits
 
             return response;
         }
-        internal async Task<CMDefaultResponse> ApproveAuditSkip(CMApproval request, int userId)
+        internal async Task<CMDefaultResponse> ApproveAuditSkip(CMApproval request, int userId, string facilitytimeZone)
         {
             CMDefaultResponse response = null;
             string SelectQ = "select plan_id id, Facility_id,frequency_id as ApplyFrequency,plan_date as Schedule_Date,assigned_to_audit as assignedTo,frequency.months, frequency.days  from pm_task  JOIN frequency ON pm_task.frequency_id = frequency.id where pm_task.ID = '" + request.id + "'";
@@ -1621,6 +1633,8 @@ namespace CMMSAPIs.Repositories.Audits
                 var result = await Context.ExecuteNonQry<int>(UpdateQ);
                 response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Audit plan with plan task : " + auditPlanList[0].plan_number + " skip approved successfully.");
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.AUDIT_PLAN, request.id, 0, 0, request.comment, CMMS.CMMS_Status.AUDIT_SKIP_APPROVED);
+                CMPMPlanDetail _AuditList = await GetAuditPlanDetail(request.id, facilitytimeZone);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.AUDIT_PLAN, CMMS.CMMS_Status.AUDIT_SKIP_APPROVED, new[] { userId }, _AuditList);
 
             }
             else
@@ -1648,7 +1662,7 @@ namespace CMMSAPIs.Repositories.Audits
             }
             return response;
         }
-        internal async Task<CMDefaultResponse> CloseAuditPlan(CMApproval request, int userId)
+        internal async Task<CMDefaultResponse> CloseAuditPlan(CMApproval request, int userId,string facilitytimeZone)
         {
             CMDefaultResponse response = null;
             //string SelectQ = "select id from st_audit where ID = '" + request.id + "'";
@@ -1666,6 +1680,8 @@ namespace CMMSAPIs.Repositories.Audits
                 var result = await Context.ExecuteNonQry<int>(UpdateQ);
                 response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Audit task with id : " + auditPlanList[0].id + " closed successfully.");
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.AUDIT_PLAN, request.id, 0, 0, request.comment, CMMS.CMMS_Status.AUDIT_CLOSED);
+                CMPMPlanDetail _AuditList = await GetAuditPlanDetail(request.id, facilitytimeZone);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.AUDIT_PLAN, CMMS.CMMS_Status.AUDIT_CLOSED, new[] { userId }, _AuditList);
 
 
 
@@ -1677,7 +1693,7 @@ namespace CMMSAPIs.Repositories.Audits
 
             return response;
         }
-        internal async Task<CMDefaultResponse> RejectCloseAuditPlan(CMApproval request, int userId)
+        internal async Task<CMDefaultResponse> RejectCloseAuditPlan(CMApproval request, int userId, string facilitytimeZone)
         {
             CMDefaultResponse response = null;
             string SelectQ = "select id from pm_task where ID = '" + request.id + "'";
@@ -1691,6 +1707,8 @@ namespace CMMSAPIs.Repositories.Audits
                 var result = await Context.ExecuteNonQry<int>(UpdateQ);
                 response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Audit plan with plan number : " + auditPlanList[0].plan_number + " close rejected.");
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.AUDIT_PLAN, request.id, 0, 0, request.comment, CMMS.CMMS_Status.AUDIT_CLOSED_REJECT);
+                CMPMPlanDetail _AuditList = await GetAuditPlanDetail(request.id, facilitytimeZone);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.AUDIT_PLAN, CMMS.CMMS_Status.AUDIT_CLOSED_REJECT, new[] { userId }, _AuditList);
 
             }
             else
@@ -1701,7 +1719,7 @@ namespace CMMSAPIs.Repositories.Audits
             return response;
         }
 
-        internal async Task<CMDefaultResponse> ApproveClosedAuditPlan(CMApproval request, int userId)
+        internal async Task<CMDefaultResponse> ApproveClosedAuditPlan(CMApproval request, int userId, string facilitytimeZone)
         {
             CMDefaultResponse response = null;
             //string SelectQ = "select id from st_audit where ID = '" + request.id + "'";
@@ -1731,7 +1749,8 @@ namespace CMMSAPIs.Repositories.Audits
                 var result = await Context.ExecuteNonQry<int>(UpdateQ);
                 response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Audit plan with task id : " + auditPlanList[0].id + " close approved successfully.");
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.AUDIT_PLAN, request.id, 0, 0, request.comment, CMMS.CMMS_Status.AUDIT_CLOSED_APPROVED);
-
+                CMPMPlanDetail _AuditList = await GetAuditPlanDetail(request.id, facilitytimeZone);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.AUDIT_PLAN, CMMS.CMMS_Status.AUDIT_CLOSED_APPROVED, new[] { userId }, _AuditList);
 
                 for (var i = 0; i < auditPlanList.Count; i++)
                 {
