@@ -1,5 +1,6 @@
 ﻿using CMMSAPIs.BS.Inventory;
 using CMMSAPIs.Models.Inventory;
+using CMMSAPIs.Models.SM;
 using CMMSAPIs.Models.Utils;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -32,26 +33,14 @@ namespace CMMSAPIs.Controllers.Inventory
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
                 var data = await _InventoryBS.ImportInventories(file_id, facility_id, userID);
                 return Ok(data);
-            }/*
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
             }
-            catch (DirectoryNotFoundException ex)
+
+            catch (Exception ex)
             {
-                return NotFound(ex.Message);
-            }
-            catch (FileNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
-            catch(InvalidCastException ex)
-            {
-                return Conflict(ex.Message);
-            }*/
-            catch (Exception)
-            {
-                throw;
+                ExceptionResponse item = new ExceptionResponse();
+
+                item.Message = ex.Message;
+                return Ok(item);
             }
         }
 
@@ -69,7 +58,10 @@ namespace CMMSAPIs.Controllers.Inventory
             }
             catch (Exception ex)
             {
-                throw;
+                ExceptionResponse item = new ExceptionResponse();
+
+                item.Message = ex.Message;
+                return Ok(item);
             }
         }
 
@@ -103,7 +95,10 @@ namespace CMMSAPIs.Controllers.Inventory
             }
             catch (Exception ex)
             {
-                throw;
+                ExceptionResponse item = new ExceptionResponse();
+
+                item.Message = ex.Message;
+                return Ok(item);
             }
         }
 
@@ -124,7 +119,10 @@ namespace CMMSAPIs.Controllers.Inventory
             }
             catch (Exception ex)
             {
-                throw;
+                ExceptionResponse item = new ExceptionResponse();
+
+                item.Message = ex.Message;
+                return Ok(item);
             }
         }
 
@@ -141,7 +139,10 @@ namespace CMMSAPIs.Controllers.Inventory
             }
             catch (Exception ex)
             {
-                throw;
+                ExceptionResponse item = new ExceptionResponse();
+
+                item.Message = ex.Message;
+                return Ok(item);
             }
         }
 
@@ -436,7 +437,10 @@ namespace CMMSAPIs.Controllers.Inventory
             }
             catch (Exception ex)
             {
-                throw;
+                ExceptionResponse item = new ExceptionResponse();
+
+                item.Message = ex.Message;
+                return Ok(item);
             }
         }
 

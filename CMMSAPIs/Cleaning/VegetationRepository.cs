@@ -37,13 +37,13 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             { (int)CMMS.CMMS_Status.VEG_PLAN_DELETED, "Deleted" },
             { (int)CMMS.CMMS_Status.VEG_TASK_SCHEDULED, "Scheduled" },
             { (int)CMMS.CMMS_Status.VEG_TASK_STARTED, "Started" },
-            { (int)CMMS.CMMS_Status.VEG_TASK_COMPLETED, "Completed" },
-            { (int)CMMS.CMMS_Status.VEG_TASK_ABANDONED, "Abandon - waiting for approval" },
+            { (int)CMMS.CMMS_Status.VEG_TASK_COMPLETED, "Close - Waiting for Approval" },
+            { (int)CMMS.CMMS_Status.VEG_TASK_ABANDONED, "Abandon - Waiting for Approval" },
             { (int)CMMS.CMMS_Status.VEG_TASK_APPROVED, "Approved" },
-            { (int)CMMS.CMMS_Status.VEG_TASK_REJECTED, "Rejected - waiting for approval" },
+            { (int)CMMS.CMMS_Status.VEG_TASK_REJECTED, "Rejected - Waiting for Approval" },
             { (int)CMMS.CMMS_Status.SCHEDULED_LINKED_TO_PTW,"PTW Linked" },
             { (int)CMMS.CMMS_Status.VEG_TASK_END_APPROVED, "Schedule - Approved" },
-            { (int)CMMS.CMMS_Status.VEG_TASK_END_REJECTED, "Rejected" },
+            { (int)CMMS.CMMS_Status.VEG_TASK_END_REJECTED, "Schedule - Reject" },
             { (int)CMMS.CMMS_Status.VEG_TASK_UPDATED, "Updated" },
             { (int)CMMS.CMMS_Status.VEG_TASK_ASSIGNED , "Reassigned" },
             { (int)CMMS.CMMS_Status.EQUIP_CLEANED, "Cleaned" },
@@ -869,14 +869,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
         internal async Task<CMDefaultResponse> RejectExecutionVegetation(CMApproval request, int userID, string facilitytimeZone)
         {
-
-            int status = (int)CMMS.CMMS_Status.MC_TASK_REJECTED;
-
-            if (moduleType == 2)
-            {
-                status = (int)CMMS.CMMS_Status.VEG_TASK_REJECTED;
-            }
-
+            int status = (int)CMMS.CMMS_Status.VEG_TASK_REJECTED;
             string approveQuery = $"Update cleaning_execution set status= {status},rejectedById={userID},remark='{request.comment}', rejectedAt='{UtilsRepository.GetUTCTime()}' where id = {request.id}";
             await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
 
@@ -943,6 +936,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
             string approveQuery = $"Update cleaning_execution_schedules set status= {status},rejectedById={userId},remark='{request.comment}', rejectedAt='{UtilsRepository.GetUTCTime()}' where scheduleId = {request.id}";
             await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
+
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.VEGETATION_TASK, request.schedule_id, 0, 0, request.comment, (CMMS.CMMS_Status)status, userId);
             CMMCExecution _ViewTaskList = await GetExecutionDetails(request.id, facilitytimeZone);

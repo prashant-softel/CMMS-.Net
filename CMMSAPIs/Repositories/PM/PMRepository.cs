@@ -181,22 +181,6 @@ namespace CMMSAPIs.Repositories.PM
         {
             if (facility_id <= 0)
                 throw new ArgumentException("Invalid Facility ID");
-            /*string planListQry = $"SELECT plan.id as plan_id, plan.plan_name, plan.status as status_id, statuses.statusName as status_short, plan.plan_date, " +
-                                    $"facilities.id as facility_id, facilities.name as facility_name, category.id as category_id, category.name as category_name, " +
-                                    $"frequency.id as plan_freq_id, frequency.name as plan_freq_name, createdBy.id as created_by_id, " +
-                                    $"CONCAT(createdBy.firstName, ' ', createdBy.lastName) as created_by_name, plan.created_at,CONCAT(assignedTo.firstName, ' ', assignedTo.lastName) as assigned_to_name, " +
-                                    $"updatedBy.id as updated_by_id, CONCAT(updatedBy.firstName, ' ', updatedBy.lastName) as updated_by_name, plan.updated_at," +
-                                    $" (select task.plan_date from pm_task task where task.id = (select max(id) from pm_task where pm_task.plan_id = plan.id  ) ) as next_schedule_date,  " +
-                                    $" (select task1.id from pm_task task1 where task1.id = (select max(id) from pm_task where pm_task.plan_id = plan.id  ) ) as next_task_id " +
-                                    $" FROM pm_plan as plan " +
-                                    $"LEFT JOIN statuses ON plan.status = statuses.softwareId " +
-                                    $"JOIN facilities ON plan.facility_id = facilities.id " +
-                                    $"LEFT JOIN assetcategories as category ON plan.category_id = category.id " +
-                                    $"LEFT JOIN frequency ON plan.frequency_id = frequency.id " +
-                                    $"LEFT JOIN users as createdBy ON createdBy.id = plan.created_by " +
-                                    $"LEFT JOIN users as updatedBy ON updatedBy.id = plan.updated_by " +
-                                    $"LEFT JOIN users as assignedTo ON assignedTo.id = plan.assigned_to " +
-                                    $"WHERE facilities.id = {facility_id} and status_id = 1 ";*/
 
             string planListQry = $"SELECT plan.id as plan_id, plan.plan_name, plan.status as status_id, statuses.statusName as status_short, plan.plan_date, " +
                                     $"facilities.id as facility_id, facilities.name as facility_name, category.id as category_id, category.name as category_name, " +
@@ -204,7 +188,7 @@ namespace CMMSAPIs.Repositories.PM
                                     $"CONCAT(createdBy.firstName, ' ', createdBy.lastName) as created_by_name, plan.created_at,CONCAT(assignedTo.firstName, ' ', assignedTo.lastName) as assigned_to_name, " +
                                     $"updatedBy.id as updated_by_id, CONCAT(updatedBy.firstName, ' ', updatedBy.lastName) as updated_by_name, plan.updated_at," +
                                     $" COALESCE((SELECT task.plan_date FROM pm_task task WHERE task.id = (SELECT MAX(id) FROM pm_task WHERE pm_task.plan_id = plan.id)),plan.plan_date) AS next_schedule_date, " +
-                                    //$" (select task.plan_date from pm_task task where task.id = (select max(id) from pm_task where pm_task.plan_id = plan.id  ) ) as next_schedule_date,  " +
+
                                     $" (select task1.id from pm_task task1 where task1.id = (select max(id) from pm_task where pm_task.plan_id = plan.id  ) ) as next_task_id " +
                                     $" FROM pm_plan as plan " +
                                     $"LEFT JOIN statuses ON plan.status = statuses.softwareId " +

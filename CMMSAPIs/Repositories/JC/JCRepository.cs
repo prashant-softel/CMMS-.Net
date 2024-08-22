@@ -122,7 +122,17 @@ namespace CMMSAPIs.Repositories.JC
             var checkFilter = 0;
 
             /*Your code goes here*/
-            string myQuery1 = $"select jc.id as jobCardId,jc.JC_Status as status ,jc.JC_Approved as approvedStatus, jc.JC_Date_Start as job_card_date, jc.JC_Date_Start as start_time,jc.JC_Date_Stop as end_time, job.id as jobid, job.title as description, CONCAT(user.firstName, user.lastName) as job_assinged_to,  ptw.id as permit_id, ptw.code as permit_no,JC_Status as current_status  from jobcards as jc JOIN jobs as job ON JC.jobid = job.id JOIN permits as ptw ON JC.PTW_id = PTW.ID LEFT JOIN users as user ON user.id = job.assignedId ";
+            string myQuery1 = $"select jc.id as jobCardId,jc.JC_Status as status ,jc.JC_Approved as approvedStatus, jc.JC_Date_Start as job_card_date, " +
+                $"jc.JC_Date_Start as start_time,jc.JC_Date_Stop as end_time, job.id as jobid, job.title as description, " +
+                $"CONCAT(user.firstName, user.lastName) as job_assinged_to,  ptw.id as permit_id, ptw.code as permit_no,  JC_Status as current_status ,  " +
+                $" f.name as site_name,jc.JC_Date_Start as jobs_closed,job.breakdownTime,permitType.title as permit_type,CONCAT(isotak.firstName,isotak.lastName) as Isolation_taken " +
+                $"from jobcards as jc " +
+                $"JOIN jobs as job ON JC.jobid = job.id  " +
+                $"JOIN permits as ptw ON JC.PTW_id = PTW.ID " +
+                $"Left Join facilities as f on f.id = jc.facility_Id " +
+                $"LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
+                $" LEFT JOIN users as isotak ON isotak.id = ptw.physicalIsolation  " +
+                $"LEFT JOIN users as user ON user.id = job.assignedId ";
             //$"LEFT JOIN  users as user2 ON user2.id = jc.JC_Added_by " +
             //$"LEFT JOIN  users as user3 ON user3.id = jc.JC_Start_By_id " ;
 
@@ -150,10 +160,12 @@ namespace CMMSAPIs.Repositories.JC
                 jc.status_short = _shortStatus;
             }
             //job equipment category
-            /* string myQuery2 = $"SELECT asset_cat.id as equipmentCat_id, asset_cat.name as equipmentCat_name  FROM assetcategories as asset_cat JOIN jobmappingassets as mapAssets ON mapAssets.categoryId = asset_cat.id JOIN jobs as job ON mapAssets.jobId = job.id WHERE job.id = {_ViewJobCardList[0].jobid } and job.facilityId = { facility_id }";
-             List<equipmentCatList> _equipmentCatList = await Context.GetData<equipmentCatList>(myQuery2).ConfigureAwait(false);
+            string myQuery2 = $"SELECT asset_cat.id as equipmentCat_id, asset_cat.name as equipmentCat_name,Assets.name as Equipment_name   " +
+                              $"FROM assetcategories as asset_cat JOIN jobmappingassets as mapAssets ON mapAssets.categoryId = asset_cat.id  LEFT JOIN assets as Assets ON Assets.id =mapAssets.assetId " +
+                              $" JOIN jobs as job ON mapAssets.jobId = job.id WHERE job.id = {_ViewJobCardList[0].jobid} and job.facilityId = {facility_id}";
+            List<equipmentCatList> _equipmentCatList = await Context.GetData<equipmentCatList>(myQuery2).ConfigureAwait(false);
 
-             _ViewJobCardList[0].LstequipmentCatList = _equipmentCatList;*/
+            _ViewJobCardList[0].LstequipmentCatList = _equipmentCatList;
             foreach (var v in _ViewJobCardList)
             {
 

@@ -28,11 +28,16 @@ namespace CMMSAPIs.Models.PM
     {
         public int id { get; set; }
         public int facility_id { get; set; }
+        public string Site_name { get; set; }
         public string task_code { get; set; }
         public string plan_title { get; set; }
         public DateTime? last_done_date { get; set; }
         public DateTime? due_date { get; set; }
         public DateTime? done_date { get; set; }
+        public DateTime? start_date { get; set; }
+        public DateTime? close_time { get; set; }
+        public string Isolation_taken { get; set; }
+        public string permit_type { get; set; }
         public int frequency_id { get; set; }
         public string frequency_name { get; set; }
         public int category_id { get; set; }
@@ -72,7 +77,7 @@ namespace CMMSAPIs.Models.PM
         public List<Materialconsumption> Material_consumption { get; set; }
 
         public int plan_id { get; set; }
-        public string site_name { get; set; }
+
         public DateTime Schedule_Date { get; set; }
         public int started_by_id { get; set; }
         public string started_by_name { get; set; }
@@ -103,9 +108,9 @@ namespace CMMSAPIs.Models.PM
         public string is_PTW { get; set; }
         public string TBT_conducted_by_name { get; set; }
         public List<string> Employees { get; set; }
-        public int Isolation_taken { get; set; }
+        public string Isolation_taken { get; set; }
         public string Isolated_equipment { get; set; }
-        public int TBT_conducted_by { get; set; }
+
         public DateTime TBT_done_time { get; set; }
         public DateTime Start_time { get; set; }
         public int Status_PTW { get; set; }
