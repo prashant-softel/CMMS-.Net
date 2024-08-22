@@ -218,13 +218,6 @@ namespace CMMSAPIs.Repositories.Users
             Dictionary<string, int> roles = new Dictionary<string, int>();
             roles.Merge(roleNames, roleIds);
 
-            string desigqry = "SELECT id, UPPER(designationName) as name FROM userdesignation ";
-            DataTable dgRole = await Context.FetchData(desigqry).ConfigureAwait(false);
-            List<string> Designame = dgRole.GetColumn<string>("name");
-            List<int> desigid = dgRole.GetColumn<int>("id");
-            Dictionary<string, int> Designation = new Dictionary<string, int>();
-            Designation.Merge(Designame, desigid);
-
             string countryQry = "SELECT id, UPPER(name) as name FROM countries";
             DataTable dtCountry = await Context.FetchData(countryQry).ConfigureAwait(false);
             List<string> countryNames = dtCountry.GetColumn<string>("name");
@@ -420,14 +413,6 @@ namespace CMMSAPIs.Repositories.Users
                                 else
                                     m_errorLog.SetError($"Invalid Gender. [Row: {rN}]");
                             }
-                            /* try
-                             {
-                                 newR["designation"] = Designation[Convert.ToString(newR["Designation"]).ToUpper()];
-                             }
-                             catch (KeyNotFoundException)
-                             {
-                                 newR["designation"] = 0;
-                             }*/
                             try
                             {
                                 newR["blood_group_id"] = bloodGroups[Convert.ToString(newR["blood_group_name"]).ToUpper()];
@@ -992,32 +977,32 @@ namespace CMMSAPIs.Repositories.Users
 
 
 
-        internal async Task<List<CMUser>> GetEMUsers(int facilityId, int role)
+        internal async Task<List<CMUser>> GetEMUsers(int facilityId, int role, int notificationID)
         {
             string userQry = $"select u.id as id, u.loginId as user_name, concat(firstName, ' ', lastName) as full_name, u.mobileNumber as contact_no, userroles.id as role_id," +
                 $" userroles.name as role_name " +
                 $" FROM users as u " +
                 $" inner join userroles on userroles.id = u.roleId " +
                 $" LEFT JOIN UserFacilities as uf ON uf.userId = u.id " +
+                $" left join UserNotifications as un on u.id = un.userId  " +
                 $" WHERE userroles.status=1 and roleId >= {role}" +
                 $" and uf.facilityId = {facilityId}" +
+                $"  and userPreference = 1 and un.notificationId =  {notificationID}" +
                 $" order by sort_order asc;";
 
             List<CMUser> user_list = await Context.GetData<CMUser>(userQry).ConfigureAwait(false);
-            /*
-             * Table - Users, UserNotification, Notification
-             * Return user based on notification_id and facility_id 
-            */
             return user_list;
         }
 
-        internal async Task<List<CMUser>> GetUserByNotificationId(CMUserByNotificationId request)
+        internal async Task<List<CMUser>> GetUserByNotificationId(CMUserByNotificationId notification)
         {
             // Pending convert user_ids into string for where condition
+            int notification_id = (int) notification.module_id;
+            int facility_id = notification.facility_id;
             string user_ids_str = "";
-            if (request.user_ids != null)
+            if (notification.user_ids != null)
             {
-                user_ids_str += string.Join(",", request.user_ids.ToArray());
+                user_ids_str += string.Join(",", notification.user_ids.ToArray());
             }
             string qry = $"SELECT " +
                             $"u.id as id, u.loginId as user_name, concat(firstName, ' ', lastName) as full_name, ur.id as role_id, ur.name as role_name, u.mobileNumber as contact_no " +
@@ -1030,9 +1015,9 @@ namespace CMMSAPIs.Repositories.Users
                          $"LEFT JOIN " +
                             $"UserRoles as ur ON ur.id = u.roleId " +
                          $"LEFT JOIN " +
-                            $"notifications as nt ON nt.id = un.notificationId " +
+                            $"notifications as nt ON nt.featureId = un.notificationId " +
                          $"WHERE " +
-                            $" userPreference = 1 or softwareId = {(int)request.notification_id} " +
+                            $" userPreference = 1 and un.notificationId = {notification_id} " +
                             $" ";
 
             if (!user_ids_str.IsNullOrEmpty())
@@ -1043,9 +1028,9 @@ namespace CMMSAPIs.Repositories.Users
             {
                 qry += $" AND self = 0";
             }
-            if (request.facility_id != 0)
+            if (facility_id != 0)
             {
-                qry += $" AND uf.facilityId = {request.facility_id}";
+                qry += $" AND uf.facilityId = {facility_id}";
             }
 
             qry += " group by un.userId ";
@@ -1057,7 +1042,6 @@ namespace CMMSAPIs.Repositories.Users
             */
             return user_list;
         }
-
 
         internal async Task<List<CMUser>> GetUserList(int facility_id)
         {

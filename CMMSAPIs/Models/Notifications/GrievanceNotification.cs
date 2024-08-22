@@ -19,6 +19,36 @@ namespace CMMSAPIs.Models.Notifications
             m_InvObj = InvObj;
             m_InvObjID = InvObj.id;
         }
+
+        override protected string getEMSubject(params object[] args)
+        {
+
+            string retValue = "Escalaltion : ";
+
+            switch (m_notificationID)
+            {
+
+                case CMMS.CMMS_Status.Grievance_ADDED:
+                    retValue += String.Format("Asset {0} Added by {1} at {2}</p>", m_InvObj.concern, m_InvObj.createdBy, m_InvObj.createdAt);
+                    break;
+                case CMMS.CMMS_Status.Grievance_UPDATED:
+                    retValue += String.Format("Asset {0} Updated by {1} at {2}</p>", m_InvObj.concern, m_InvObj.updatedBy, m_InvObj.updatedAt);
+                    break;
+                case CMMS.CMMS_Status.Grievance_DELETED:
+                    retValue += String.Format("Asset {0} Deleted by {1} at {2}</p>", m_InvObj.concern, m_InvObj.deletedBy, m_InvObj.deletedAt);
+                    break;
+                case CMMS.CMMS_Status.GRIEVANCE_CLOSED:
+                    retValue += String.Format("Asset {0} Added by {1} at {2}</p>", m_InvObj.concern, m_InvObj.createdBy, m_InvObj.createdAt);
+                    break;
+                default:
+                    retValue += String.Format("Grievance <{0}> Undefined status {1} ", m_InvObj.id, m_notificationID);
+                    break;
+            }
+            retValue += $" for {m_delayDays} days";
+            return retValue;
+        }
+
+         
         override protected string getSubject(params object[] args)
         {
 
@@ -31,6 +61,9 @@ namespace CMMSAPIs.Models.Notifications
                     retValue += String.Format("Asset {0} Added by {1} at {2}</p>", m_InvObj.concern, m_InvObj.createdBy, m_InvObj.createdAt);
                     break;
                 case CMMS.CMMS_Status.Grievance_UPDATED:
+                    retValue += String.Format("Asset {0} Updated by {1} at {2}</p>", m_InvObj.concern, m_InvObj.updatedBy, m_InvObj.updatedAt);
+                    break;
+                case CMMS.CMMS_Status.GRIEVANCE_ONGOING:
                     retValue += String.Format("Asset {0} Updated by {1} at {2}</p>", m_InvObj.concern, m_InvObj.updatedBy, m_InvObj.updatedAt);
                      break;
                 case CMMS.CMMS_Status.Grievance_DELETED:

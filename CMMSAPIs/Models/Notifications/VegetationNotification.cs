@@ -17,6 +17,49 @@ namespace CMMSAPIs.Models.Notifications
             planObj = vegPlanObj;
             executionObj = vegTaskObj;
         }
+
+        override protected string getEMSubject(params object[] args)
+        {
+            int plan_id = planObj.planId;
+            string retValue = "ESCALATION : ";
+
+            switch (m_notificationID)
+            {
+                case CMMS.CMMS_Status.VEG_PLAN_DRAFT:
+                    retValue += String.Format("Vegetation Plan <{0}> Draft by {1} ", planObj.planId, planObj.createdBy);
+                    break;
+                case CMMS.CMMS_Status.VEG_PLAN_SUBMITTED:
+                    retValue += String.Format("Vegetation Plan <{0}> Submitted by {1} ", planObj.planId, planObj.createdBy);
+                    break;
+                case CMMS.CMMS_Status.VEG_PLAN_REJECTED:
+                    retValue += String.Format("Vegetation Plan <{0}> Rejected by {1} ", planObj.planId, planObj.approvedBy);
+                    break;
+                case CMMS.CMMS_Status.VEG_PLAN_APPROVED:
+                    retValue += String.Format("Vegetation Plan <{0}> Approved by {1} ", planObj.planId, planObj.approvedBy);
+                    break;
+                case CMMS.CMMS_Status.VEG_PLAN_DELETED:
+                    retValue += String.Format("Vegetation Plan <{0}> Deleted by {1} ", planObj.planId, planObj.deletedBy);
+                    break;
+                case CMMS.CMMS_Status.VEG_TASK_SCHEDULED:
+                    retValue += String.Format("Vegetation Task <{0}> Execution started by {1} ", executionObj.id, executionObj.startedBy);
+                    break;
+                case CMMS.CMMS_Status.VEG_TASK_STARTED:
+                    retValue += String.Format("Vegetation Task <{0}> Execution started by {1} ", executionObj.id, executionObj.startedBy);
+                    break;
+                case CMMS.CMMS_Status.VEG_TASK_COMPLETED:
+                    retValue += String.Format("Vegetation Task <{0}> Execution Completed by {1} ", executionObj.id, executionObj.startedBy);
+                    break;
+                case CMMS.CMMS_Status.VEG_TASK_ABANDONED:
+                    retValue += String.Format("Vegetation Task <{0}>  Execution Abandoned by {1} ", executionObj.id, executionObj.abandonedBy);
+                    break;
+                default:
+                    retValue += String.Format("Vegetation Task <{0}> Undefined status {1} ", executionObj.id, m_notificationID);
+                    break;
+            }
+            retValue += $" for {m_delayDays} days";
+            return retValue;
+
+        }
         override protected string getSubject(params object[] args)
         {
 

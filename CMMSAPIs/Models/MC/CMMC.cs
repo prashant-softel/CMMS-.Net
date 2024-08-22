@@ -60,8 +60,10 @@ namespace CMMSAPIs.Models.MC
         public int status { get; set; }
         public string status_short { get; set; }
         public string status_long { get; set; }
+        public string updatedBy { get; set; }
 
         public bool scheduleAdded = false;
+
 
         public List<CMMCSchedule> schedules { get; set; }
 
@@ -239,8 +241,8 @@ namespace CMMSAPIs.Models.MC
         public DateTime? rejectedAt { get; set; }
         public string approvedById { get; set; }
         public DateTime? approvedAt { get; set; }
-
-
+        public string updatedBy { get; set; }
+        public string endedBy { get; set; }
         public int status { get; set; }     //Completed
         public string status_short { get; set; }
         public string status_long { get; set; }
