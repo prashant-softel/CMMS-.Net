@@ -129,13 +129,13 @@ namespace CMMSAPIs.BS.Cleaning
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> CreatePlan(List<CMMCPlan> request, int userId)
+        public async Task<CMDefaultResponse> CreatePlan(List<CMMCPlan> request, int userId, string facilitytime)
         {
             try
             {
                 // using (var repos = new MCRepository(getDB))
                 {
-                    return await repos.CreatePlan(request, userId);
+                    return await repos.CreatePlan(request, userId, facilitytime);
                 }
             }
             catch (Exception ex)
@@ -143,13 +143,13 @@ namespace CMMSAPIs.BS.Cleaning
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> UpdatePlan(List<CMMCPlan> request, int userId)
+        public async Task<CMDefaultResponse> UpdatePlan(List<CMMCPlan> request, int userId, string facilitytime)
         {
             try
             {
                 // using (var repos = new MCRepository(getDB))
                 {
-                    return await repos.UpdatePlan(request, userId);
+                    return await repos.UpdatePlan(request, userId, facilitytime);
                 }
             }
             catch (Exception ex)
@@ -158,7 +158,7 @@ namespace CMMSAPIs.BS.Cleaning
             }
         }
 
-        public async Task<CMDefaultResponse> ApprovePlan(CMApproval request, int userID)
+        public async Task<CMDefaultResponse> ApprovePlan(CMApproval request, int userID, string facilitytime)
         {
             try
             {
@@ -194,7 +194,7 @@ namespace CMMSAPIs.BS.Cleaning
             {
                 // using (var repos = new MCRepository(getDB))
                 {
-                    return await repos.DeletePlan(planId, userID);
+                    return await repos.DeletePlan(planId, userID, facilitytime);
                 }
             }
             catch (Exception ex)
@@ -231,7 +231,7 @@ namespace CMMSAPIs.BS.Cleaning
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> UpdateScheduleExecution(CMMCGetScheduleExecution schedule, int userId)
+        public async Task<CMDefaultResponse> UpdateScheduleExecution(CMMCGetScheduleExecution schedule, int userId, string facilitytime)
         {
             try
             {

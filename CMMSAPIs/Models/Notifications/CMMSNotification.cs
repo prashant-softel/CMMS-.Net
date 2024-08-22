@@ -206,8 +206,9 @@ namespace CMMSAPIs.Models.Notifications
 
             CMUserByNotificationId notification = new CMUserByNotificationId();
             notification.facility_id = facilityId;
-            notification.notification_id = notificationID;
+            notification.notification_id = (int)notificationID;
             notification.user_ids = userID;
+            notification.role_id = m_role;
 
             List<CMUser> users = new List<CMUser>();
             string notificationQry = "";

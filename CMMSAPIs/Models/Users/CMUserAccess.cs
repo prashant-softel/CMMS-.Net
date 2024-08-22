@@ -54,6 +54,7 @@ namespace CMMSAPIs.Models.Users
         public CMMS.CMMS_Modules module_id { get; set; }
         public int role_id { get; set; }
         public int[] user_ids { get; set; }
+        public int notification_id { get; set; }
     }
     public class CMAccessList1
     {
