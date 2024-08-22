@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using CMMSAPIs.Helper;
+﻿using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Grievance;
-using CMMSAPIs.Models.Utils;
-using CMMSAPIs.Repositories.Utils;
+using System;
 
 namespace CMMSAPIs.Models.Notifications
 {
@@ -48,7 +43,7 @@ namespace CMMSAPIs.Models.Notifications
             return retValue;
         }
 
-         
+
         override protected string getSubject(params object[] args)
         {
 
@@ -56,7 +51,7 @@ namespace CMMSAPIs.Models.Notifications
 
             switch (m_notificationID)
             {
-                
+
                 case CMMS.CMMS_Status.Grievance_ADDED:
                     retValue += String.Format("Asset {0} Added by {1} at {2}</p>", m_InvObj.concern, m_InvObj.createdBy, m_InvObj.createdAt);
                     break;
@@ -65,7 +60,7 @@ namespace CMMSAPIs.Models.Notifications
                     break;
                 case CMMS.CMMS_Status.GRIEVANCE_ONGOING:
                     retValue += String.Format("Asset {0} Updated by {1} at {2}</p>", m_InvObj.concern, m_InvObj.updatedBy, m_InvObj.updatedAt);
-                     break;
+                    break;
                 case CMMS.CMMS_Status.Grievance_DELETED:
                     retValue += String.Format("Asset {0} Deleted by {1} at {2}</p>", m_InvObj.concern, m_InvObj.deletedBy, m_InvObj.deletedAt);
                     break;
@@ -84,11 +79,11 @@ namespace CMMSAPIs.Models.Notifications
 
             retValue = String.Format("<h3><b style='color:#31576D'>Status:</b>{0}</h3><br>", m_InvObj.statusLong);
 
-            
+
             switch (m_notificationID)
             {
 
-               
+
                 case CMMS.CMMS_Status.Grievance_ADDED:
                     //   retValue += String.Format(template, "Added By", m_InvObj.added_by);
                     retValue += String.Format(templateEnd, "Added By", m_InvObj.createdBy);

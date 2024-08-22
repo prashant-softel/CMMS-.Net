@@ -1,8 +1,5 @@
 ﻿using CMMSAPIs.Helper;
-using CMMSAPIs.Models.MC;
 using CMMSAPIs.Repositories.Utils;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using static CMMSAPIs.Helper.CMMS;
 
 namespace CMMSAPIs.Repositories.CleaningRepository
@@ -51,5 +48,6 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             return invs;
         }
 
+    }*/
     }
 }

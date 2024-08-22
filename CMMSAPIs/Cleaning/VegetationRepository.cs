@@ -1,5 +1,6 @@
 ﻿using CMMSAPIs.Helper;
 using CMMSAPIs.Models.MC;
+using CMMSAPIs.Models.Notifications;
 using CMMSAPIs.Models.PM;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Utils;
@@ -8,9 +9,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
 using static CMMSAPIs.Helper.CMMS;
-using CMMSAPIs.Models.Notifications;
-using System.Numerics;
-using CMMSAPIs.Models.Users;
 
 namespace CMMSAPIs.Repositories.CleaningRepository
 {
@@ -654,7 +652,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.VEGETATION, executionId, 0, 0, "Execution Completed", (CMMS.CMMS_Status)status, userId);
             CMMCExecution _ViewTaskList = await GetExecutionDetails(executionId, facilitytimeZone);
             await CMMSNotification.sendNotification(CMMS.CMMS_Modules.VEGETATION, CMMS.CMMS_Status.VEG_TASK_COMPLETED, new[] { userId }, _ViewTaskList);
-            
+
             CMDefaultResponse response = new CMDefaultResponse(executionId, CMMS.RETRUNSTATUS.SUCCESS, $"Task Execution Completed");
             return response;
         }
@@ -838,8 +836,8 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             if (retVal > 0)
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.VEGETATION_EXECUTION, scheduleId, CMMS.CMMS_Modules.PTW, permit_id, "PTW linked to MC", CMMS.CMMS_Status.SCHEDULED_LINKED_TO_PTW, userId);
-            CMMCExecution _ViewTaskList = await GetExecutionDetails(scheduleId, facilitytimeZone);
-            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.VEGETATION_EXECUTION, CMMS.CMMS_Status.VEGETATION_LINKED_TO_PTW, new[] { userId }, _ViewTaskList);
+            //CMMCExecution _ViewTaskList = await GetExecutionDetails(scheduleId, facilitytimeZone);
+            //  await CMMSNotification.sendNotification(CMMS.CMMS_Modules.VEGETATION_EXECUTION, CMMS.CMMS_Status.VEGETATION_LINKED_TO_PTW, new[] { userId }, _ViewTaskList);
             response = new CMDefaultResponse(scheduleId, CMMS.RETRUNSTATUS.SUCCESS, $"Permit {permit_id} linked to MC Schedule {scheduleId} Successfully");
 
             return response;

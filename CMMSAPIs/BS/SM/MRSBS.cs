@@ -10,7 +10,7 @@ namespace CMMSAPIs.BS.SM
 {
     public interface IMRSBS
     {
-        Task<CMDefaultResponse> CreateMRS(CMMRS request, int UserID);
+        Task<CMDefaultResponse> CreateMRS(CMMRS request, int UserID, string facilitytime);
         Task<CMDefaultResponse> updateMRS(CMMRS request, int UserID);
         Task<List<CMMRSList>> getMRSList(int facility_ID, int emp_id, DateTime toDate, DateTime fromDate, int status, string facilitytime);
         Task<List<CMMRSListByModule>> getMRSListByModule(int jobId, int pmId, string facilitytime);
@@ -49,13 +49,13 @@ namespace CMMSAPIs.BS.SM
             databaseProvider = dbProvider;
         }
 
-        public async Task<CMDefaultResponse> CreateMRS(CMMRS request, int UserID)
+        public async Task<CMDefaultResponse> CreateMRS(CMMRS request, int UserID, string facilitytime)
         {
             try
             {
                 using (var repos = new MRSRepository(getDB))
                 {
-                    return await repos.CreateMRS(request, UserID);
+                    return await repos.CreateMRS(request, UserID, facilitytime);
                 }
             }
             catch (Exception ex)
