@@ -16,7 +16,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             _utilsRepo = new UtilsRepository(sqlDBHelper);
             moduleType = (int)cleaningType.ModuleCleaning;
         }
-        /*
+    }/*
         internal async new Task<List<CMMCEquipmentList>> GetEquipmentList(int facilityId)
         {
             string filter = "";
@@ -52,4 +52,6 @@ namespace CMMSAPIs.Repositories.CleaningRepository
         }
 
     }
+}
+    */
 }
