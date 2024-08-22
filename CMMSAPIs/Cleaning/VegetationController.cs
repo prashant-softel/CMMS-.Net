@@ -45,13 +45,13 @@ namespace CMMSAPIs.Controllers.Vegetation
         }
         [Route("GetVegetationTaskList")]
         [HttpGet]
-        public async Task<IActionResult> GetVegetationTaskList(int facilityId)
+        public async Task<IActionResult> GetVegetationTaskList(int facility_Id)
         {
             try
             {
-                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_Id)?.timezone;
 
-                var data = await _vegetationBS.GetTaskList(facilityId, facilitytimeZone);
+                var data = await _vegetationBS.GetTaskList(facility_Id, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)

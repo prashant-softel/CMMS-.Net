@@ -43,15 +43,15 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             { (int)CMMS.CMMS_Status.MC_PLAN_DELETED, "Deleted" },
             { (int)CMMS.CMMS_Status.MC_TASK_SCHEDULED, "Scheduled" },
             { (int)CMMS.CMMS_Status.MC_TASK_STARTED,  "Started" },
-            { (int)CMMS.CMMS_Status.MC_TASK_COMPLETED, "Completed" },
-            { (int)CMMS.CMMS_Status.MC_TASK_ABANDONED, "Abandoned" },
+            { (int)CMMS.CMMS_Status.MC_TASK_COMPLETED, "Close - Waiting for Approval" },
+            { (int)CMMS.CMMS_Status.MC_TASK_ABANDONED, "Abandon - Waiting for Approval" },
             { (int)CMMS.CMMS_Status.MC_TASK_APPROVED, "Approved" },
-            { (int)CMMS.CMMS_Status.MC_TASK_REJECTED, "Rejected" },
+            { (int)CMMS.CMMS_Status.MC_TASK_REJECTED, "Rejected - Waiting for Approval" },
             { (int)CMMS.CMMS_Status.SCHEDULED_LINKED_TO_PTW,"PTW Linked" },
             { (int)CMMS.CMMS_Status.MC_TASK_END_APPROVED,"Closed - Approved" },
             { (int)CMMS.CMMS_Status.MC_TASK_END_REJECTED,"Closed - Reject" },
             { (int)CMMS.CMMS_Status.MC_TASK_SCHEDULE_APPROVED,"Scheduled - Approved" },
-            { (int)CMMS.CMMS_Status.MC_TASK_SCHEDULE_REJECT,"Scheduled - Reject" },
+            { (int)CMMS.CMMS_Status.MC_TASK_SCHEDULE_REJECT,"Schedule - Reject" },
             { (int)CMMS.CMMS_Status.MC_TASK_RESCHEDULED,"Rescheduled" },
             { (int)CMMS.CMMS_Status.EQUIP_CLEANED, "Cleaned" },
             { (int)CMMS.CMMS_Status.EQUIP_ABANDONED, "Abandoned" },
@@ -1307,11 +1307,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
             int status = (int)CMMS.CMMS_Status.MC_TASK_SCHEDULE_REJECT;
 
-            if (moduleType == 2)
-            {
-                status = (int)CMMS.CMMS_Status.VEG_TASK_END_REJECTED;
 
-            }
 
             string approveQuery = $"Update cleaning_execution_schedules set status= {status},rejectedById={userID},remark='{request.comment}', rejectedAt='{UtilsRepository.GetUTCTime()}' where scheduleId = {request.id}";
             await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
@@ -1322,26 +1318,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
             CMDefaultResponse response = new CMDefaultResponse(request.schedule_id, CMMS.RETRUNSTATUS.SUCCESS, $"Execution Schedule Rejected");
             return response;
-        }
-        /*  internal async Task<CMDefaultResponse> RescheduleExecution(ApproveMC request, int userID)
-          {
-
-              int status = (int)CMMS.CMMS_Status.MC_TASK_RESCHEDULED;
-
-              if (moduleType == 2)
-              {
-                  //  status = (int)CMMS.CMMS_Status.;
-
-              }
-
-              string approveQuery = $"Update cleaning_execution set status= {status},updatedById={userID},remark='{request.comment}',rescheduled = 1, updatedAt='{UtilsRepository.GetUTCTime()}' where id= {request.id}";
-              await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
-
-              await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MC_TASK, request.id, 0, 0, request.comment, (CMMS.CMMS_Status)status, userID);
-
-              CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Execution Reschedule");
-              return response;
-          }*/
+        } 
         internal async Task<CMDefaultResponse> RejectExecution(CMApproval request, int userID, string facilitytimeZone)
         {
 

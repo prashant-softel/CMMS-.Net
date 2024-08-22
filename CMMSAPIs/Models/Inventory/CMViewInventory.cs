@@ -42,6 +42,7 @@ namespace CMMSAPIs.Models.Inventory
         public string model { get; set; }
         public string serialNumber { get; set; }
         public double? cost { get; set; }
+        public dynamic area { get; set; }
         public string purchaseCode { get; set; }
         public string unspCode { get; set; }
         public string barcode { get; set; }
