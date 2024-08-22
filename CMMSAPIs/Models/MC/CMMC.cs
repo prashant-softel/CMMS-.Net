@@ -61,6 +61,8 @@ namespace CMMSAPIs.Models.MC
         public string status_short { get; set; }
         public string status_long { get; set; }
         public string updatedBy { get; set; }
+        public string rejectedBy { get; set; }
+        
 
         public bool scheduleAdded = false;
 
