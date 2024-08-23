@@ -1,7 +1,6 @@
-﻿using System;
-using CMMSAPIs.BS.WC;
-using CMMSAPIs.Helper;
+﻿using CMMSAPIs.Helper;
 using CMMSAPIs.Models.MC;
+using System;
 
 namespace CMMSAPIs.Models.Notifications
 {
@@ -257,10 +256,10 @@ namespace CMMSAPIs.Models.Notifications
                         break;
                     case CMMS.CMMS_Status.VEG_TASK_ASSIGNED:
                         retValue += String.Format(templateEnd, "Schedule Assigned to", executionObj.assignedTo);
-                        break;   
+                        break;
                 }
             }
-                return retValue;
+            return retValue;
         }
 
 
