@@ -45,10 +45,10 @@ namespace CMMSAPIs.Models.Notifications
                     retValue = String.Format("JOB{0} <{1}> created", m_jobId, desc);
                     break;
                 case CMMS.CMMS_Status.JOB_ASSIGNED:     //Assigned
-                    retValue = String.Format("JOB{0} <{1}> assigned to <{1}>", m_jobId, m_jobObj.job_title, m_jobObj.assigned_name);
+                    retValue = String.Format("JOB{0} <{1}> assigned to <{2}>", m_jobId, m_jobObj.job_title, m_jobObj.assigned_name);
                     break;
                 case CMMS.CMMS_Status.JOB_LINKED:     //Linked
-                    retValue = String.Format("JOB{0} <{1}> linked to PTW <{1}>", m_jobId, m_jobObj.job_title,m_jobObj.current_ptw_id);
+                    retValue = String.Format("JOB{0} <{1}> linked to PTW{2}", m_jobId, m_jobObj.job_title,m_jobObj.current_ptw_id);
                     break;
                 case CMMS.CMMS_Status.JOB_CLOSED:     //Closed
                     retValue = String.Format("JOB{0} <{1}> closed", m_jobId, m_jobObj.job_title);
@@ -83,7 +83,7 @@ namespace CMMSAPIs.Models.Notifications
                     retValue += String.Format("JOB{0} <{1}> assigned to <{2}>", m_jobId, m_jobObj.job_title, m_jobObj.assigned_name);
                     break;
                 case CMMS.CMMS_Status.JOB_LINKED:     //Linked
-                    retValue += String.Format("JOB{0} <{1}> linked to PTW <{1}>", m_jobId, m_jobObj.job_title, m_jobObj.current_ptw_id);
+                    retValue += String.Format("JOB{0} <{1}> linked to PTW{2}", m_jobId, m_jobObj.job_title, m_jobObj.current_ptw_id);
                     break;
                 case CMMS.CMMS_Status.JOB_CLOSED:     //Closed
                     retValue += String.Format("JOB{0} <{1}> closed", m_jobId, m_jobObj.job_title);
@@ -116,7 +116,7 @@ namespace CMMSAPIs.Models.Notifications
             retValue += String.Format(template, "Job Title", m_jobObj.job_title);
             retValue += String.Format(template, "Job Description", m_jobObj.job_description);
             retValue += String.Format(template, "Breakdown time", m_jobObj.breakdown_time);
-            retValue += String.Format(template, "Breakdown type", m_jobObj.breakdown_type);
+
             if (m_jobObj.current_ptw_id > 0)
             {
                 retValue += String.Format(template, "PTW Id", m_jobObj.current_ptw_id);
