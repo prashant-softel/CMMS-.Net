@@ -264,12 +264,12 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                     await CMMSNotification.sendNotification(CMMS.CMMS_Modules.VEGETATION_PLAN, (CMMS.CMMS_Status)status, new[] { userId }, _ViewPlanList);
 
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
-                   // response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Failed to send Vegetation Notification");
+                    // response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Failed to send Vegetation Notification");
                     Console.WriteLine($"Failed to send Vegetation Notification: {e.Message}");
                 }
-                
+
                 //var notificationResponse = await CMMSNotification.sendNotification(CMMS.CMMS_Modules.VEGETATION_PLAN, (CMMS.CMMS_Status)status, new int[] { userId }, plan);
             }
 
@@ -307,7 +307,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 CMMCPlan _ViewPlanList = await GetPlanDetails(request.id, facilitytimeZone);
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.VEGETATION_PLAN, CMMS.CMMS_Status.VEG_PLAN_APPROVED, new[] { userID }, _ViewPlanList);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 // response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Failed to send Vegetation Notification");
                 Console.WriteLine($"Failed to send Vegetation Notification: {e.Message}");
@@ -319,12 +319,12 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.MC_TASK, CMMS.CMMS_Status.VEG_TASK_APPROVED, new[] { userID }, _ViewTaskList);
             }
 
-            catch(Exception e)
+            catch (Exception e)
             {
                 // response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Failed to send Vegetation Notification");
                 Console.WriteLine($"Failed to send Vegetation Notification: {e.Message}");
             }
-            
+
 
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Plan Approved");
             return response;
@@ -337,6 +337,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
             foreach (CMMCPlan request in requests)
             {
+                int rid = request.planId;
 
                 string Query = "UPDATE cleaning_plan SET ";
                 if (request.title != null && request.title != "")
@@ -352,7 +353,13 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
                 Query += $"startDate = '{request.startDate}', ";
                 if (request.noOfCleaningDays > 0)
+                {
                     Query += $"durationDays = {request.noOfCleaningDays}, ";
+                }
+                if (request.resubmit == 1)
+                {
+                    Query += $"status = {(int)CMMS.CMMS_Status.VEG_PLAN_SUBMITTED}, ";
+                }
 
                 Query += $"updatedAt = '{UtilsRepository.GetUTCTime()}', updatedById = {userId} WHERE planId = {request.planId};";
 
@@ -445,15 +452,22 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                     await CMMSNotification.sendNotification(CMMS.CMMS_Modules.VEGETATION_PLAN, CMMS.CMMS_Status.VEG_PLAN_UPDATED, new[] { userId }, _ViewPlanList);
                 }
 
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     // response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Failed to send Vegetation Notification");
                     Console.WriteLine($"Failed to send Vegetation Notification: {ex.Message}");
                 }
-                
-                //var notificationResponse = await CMMSNotification.sendNotification(CMMS.CMMS_Modules.VEGETATION_PLAN, CMMS.CMMS_Status.UPDATED, new int[] { userId });
-            }
 
+                //var notificationResponse = await CMMSNotification.sendNotification(CMMS.CMMS_Modules.VEGETATION_PLAN, CMMS.CMMS_Status.UPDATED, new int[] { userId });
+                if (request.resubmit == 1)
+                {
+
+                    await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.VEGETATION_PLAN, rid, 0, 0, "Plan Updated Successfully", CMMS.CMMS_Status.VEG_PLAN_SUBMITTED, userId);
+
+                    return new CMDefaultResponse(rid, CMMS.RETRUNSTATUS.SUCCESS, $"Plan Updated Successfully");
+
+                }
+            }
             CMDefaultResponse response = new CMDefaultResponse(planId, CMMS.RETRUNSTATUS.SUCCESS, $"Plan Updated Successfully ");
             return response;
         }
@@ -593,10 +607,10 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
             }
 
-            catch(Exception e)
+            catch (Exception e)
             {
                 // response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Failed to send Vegetation Notification");
-                
+
             }
 
 
@@ -624,7 +638,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
             }
 
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine($"Failed to send Vegetation Notification: {e.Message}");
             }
@@ -678,7 +692,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
             }
 
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine($"Failed to send Vegetation Notification: {ex.Message}");
             }
@@ -710,11 +724,11 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 CMMCExecution _ViewTaskList = await GetExecutionDetails(request.id, facilitytimeZone);
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.VEGETATION_TASK, CMMS.CMMS_Status.VEG_TASK_ABANDONED, new[] { userId }, _ViewTaskList);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine($"Failed to send Vegetation Notification: {ex.Message}");
             }
-            
+
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, request.comment);
             return response;
         }
@@ -733,13 +747,14 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 CMMCExecution _ViewTaskList = await GetExecutionDetails(scheduleId, facilitytimeZone);
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.VEGETATION_TASK, CMMS.CMMS_Status.VEG_TASK_ABANDONED, new[] { userId }, _ViewTaskList);
             }
-            catch(Exception e) {
+            catch (Exception e)
+            {
                 Console.WriteLine($"Failed to send Vegetation Notification: {e.Message}");
-            
-            }
-            
 
-            
+            }
+
+
+
             CMDefaultResponse response = new CMDefaultResponse(scheduleId, CMMS.RETRUNSTATUS.SUCCESS, $"Schedule Execution Completed");
             return response;
         }
@@ -756,11 +771,12 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 CMMCExecution _ViewTaskList = await GetExecutionDetails(request.id, facilitytimeZone);
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.VEGETATION_EXECUTION, CMMS.CMMS_Status.VEG_TASK_END_APPROVED, new[] { userID }, _ViewTaskList);
             }
-            
-            catch(Exception ex) {
+
+            catch (Exception ex)
+            {
                 Console.WriteLine($"Failed to send Vegetation Notification: {ex.Message}");
             }
-            
+
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Execution Schedule Approved");
             return response;
 
@@ -792,8 +808,8 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.VEGETATION, executionId, 0, 0, "Execution Completed", (CMMS.CMMS_Status)status, userId);
 
-            CMMCExecution _ViewTaskList = await GetExecutionDetails(executionId, facilitytimeZone);
-            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.VEGETATION, CMMS.CMMS_Status.VEG_TASK_COMPLETED, new[] { userId }, _ViewTaskList);
+            // CMMCExecution _ViewTaskList = await GetExecutionDetails(executionId, facilitytimeZone);
+            //  await CMMSNotification.sendNotification(CMMS.CMMS_Modules.VEGETATION, CMMS.CMMS_Status.VEG_TASK_COMPLETED, new[] { userId }, _ViewTaskList);
 
 
             CMDefaultResponse response = new CMDefaultResponse(executionId, CMMS.RETRUNSTATUS.SUCCESS, $"Task Execution Completed");
@@ -845,8 +861,8 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 CMMCExecution _ViewTaskList = await GetExecutionDetails(request.id, facilitytimeZone);
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.VEGETATION_TASK, CMMS.CMMS_Status.VEG_TASK_END_APPROVED, new[] { userID }, _ViewTaskList);
             }
-            
-            catch(Exception ex)
+
+            catch (Exception ex)
             {
                 Console.WriteLine($"Failed to send Vegetation Notification: {ex.Message}");
             }
@@ -897,11 +913,11 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.VEGETATION_TASK, CMMS.CMMS_Status.VEG_TASK_STARTED, new[] { userID }, _ViewTaskList);
             }
 
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine($"Failed to send Vegetation Notification: {ex.Message}");
             }
-            
+
             return response;
         }
         internal async Task<CMDefaultResponse> AbandonExecutionVegetation(CMApproval request, int userId, string facilitytimeZone)
@@ -922,11 +938,11 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.VEGETATION_TASK, CMMS.CMMS_Status.VEG_TASK_ABANDONED, new[] { userId }, _ViewTaskList);
             }
 
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine($"Failed to send Vegetation Notification: {e.Message}");
             }
-            
+
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, request.comment);
             return response;
         }
@@ -952,11 +968,11 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.VEGETATION_TASK, CMMS.CMMS_Status.VEG_TASK_ABANDONED_REJECTED, new[] { userId }, _ViewTaskList);
             }
 
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine($"Failed to send Vegetation Notification: {e.Message}");
             }
-            
+
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, request.comment);
             return response;
         }
@@ -979,8 +995,8 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 CMMCExecution _ViewTaskList = await GetExecutionDetails(request.id, facilitytimeZone);
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.VEGETATION_TASK, CMMS.CMMS_Status.VEG_TASK_ABANDONED_APPROVED, new[] { userId }, _ViewTaskList);
             }
-            
-            catch(Exception ex)
+
+            catch (Exception ex)
             {
                 Console.WriteLine($"Failed to send Vegetation Notification: {ex.Message}");
             }
@@ -1030,11 +1046,11 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.VEGETATION_EXECUTION, CMMS.CMMS_Status.VEGETATION_LINKED_TO_PTW, new[] { userId }, _ViewTaskList);
             }
 
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine($"Failed to send Vegetation Notification: {e.Message}");
             }
-            
+
 
             response = new CMDefaultResponse(scheduleId, CMMS.RETRUNSTATUS.SUCCESS, $"Permit {permit_id} linked to MC Schedule {scheduleId} Successfully");
 
@@ -1057,7 +1073,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.VEGETATION_TASK, request.execution_id, 0, 0, request.comment, (CMMS.CMMS_Status)status, userID);
 
-           
+
 
             try
             {
@@ -1065,11 +1081,11 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.VEGETATION_TASK, CMMS.CMMS_Status.VEG_TASK_END_REJECTED, new[] { userID }, _ViewTaskList);
             }
 
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine($"Failed to send Vegetation Notification: {e.Message}");
             }
-            
+
             CMDefaultResponse response = new CMDefaultResponse(request.execution_id, CMMS.RETRUNSTATUS.SUCCESS, $"Execution End Rejected");
             return response;
 
@@ -1088,11 +1104,11 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.VEGETATION_TASK, CMMS.CMMS_Status.VEG_TASK_REJECTED, new[] { userID }, _ViewTaskList);
             }
 
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine($"Failed to send Vegetation Notification: {ex.Message}");
             }
-            
+
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Execution Rejected");
             return response;
         }
@@ -1138,7 +1154,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.VEGETATION_TASK, CMMS.CMMS_Status.VEG_TASK_APPROVED, new[] { userID }, _ViewTaskList);
             }
 
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine($"Failed to send Vegetation Notification: {ex.Message}");
             }
@@ -1147,11 +1163,11 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 CMMCExecution _ViewTaskList = await GetExecutionDetails(request.id, facilitytimeZone);
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.VEGETATION_TASK, CMMS.CMMS_Status.VEG_TASK_SCHEDULED, new[] { userID }, _ViewTaskList);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine($"Failed to send Vegetation Notification: {e.Message}");
             }
-            
+
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Execution Approved");
             return response;
 
@@ -1177,11 +1193,11 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 CMMCExecution _ViewTaskList = await GetExecutionDetails(request.id, facilitytimeZone);
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.VEGETATION_TASK, CMMS.CMMS_Status.VEG_TASK_END_REJECTED, new[] { userId }, _ViewTaskList);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine($"Failed to send Vegetation Notification: {e.Message}");
             }
-            
+
             CMDefaultResponse response = new CMDefaultResponse(request.schedule_id, CMMS.RETRUNSTATUS.SUCCESS, $"Execution Schedule Rejected");
             return response;
 
@@ -1432,11 +1448,11 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.VEGETATION_PLAN, CMMS.CMMS_Status.VEG_PLAN_DELETED, new[] { userID }, _ViewPlanList);
             }
 
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine($"Failed to send Vegetation Notification: {e.Message}");
             }
-            
+
 
             CMDefaultResponse response = new CMDefaultResponse(planid, CMMS.RETRUNSTATUS.SUCCESS, $"Plan Deleted");
             return response;

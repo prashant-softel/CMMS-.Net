@@ -231,7 +231,7 @@ namespace CMMSAPIs.Models.Notifications
 
                     users = await _userAccessRepository.GetUserByNotificationId(notification);
                     notificationQry = $"INSERT INTO escalationlog (moduleId, moduleRefId, moduleStatus, notifSentToId, notifSentAt) VALUES " +
-                                    $"({(int)moduleID}, {module_ref_id}, {notificationID}, {m_role}, '{UtilsRepository.GetUTCTime()}'); " +
+                                    $"({(int)moduleID}, {module_ref_id}, {(int)notificationID}, {m_role}, '{UtilsRepository.GetUTCTime()}'); " +
                                     $"SELECT LAST_INSERT_ID(); ";
 
 
@@ -277,12 +277,6 @@ namespace CMMSAPIs.Models.Notifications
                 notificationRecordsQry = notificationRecordsQry.TrimEnd(',');
                 System.Data.DataTable dt2 = await _conn.FetchData(notificationRecordsQry).ConfigureAwait(false);
             }
-            else
-            {
-
-                response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "NO Email Present");
-            }
-
             if (print)
             {
                 response = new CMDefaultResponse(1, CMMS.RETRUNSTATUS.SUCCESS, "");

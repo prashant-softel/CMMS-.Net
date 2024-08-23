@@ -1167,17 +1167,21 @@ namespace CMMSAPIs.Repositories.Inventory
                 myQuery += " WHERE a.id= " + id;
             }
             List<CMViewInventory> _ViewInventoryList = await Context.GetData<CMViewInventory>(myQuery).ConfigureAwait(false);
-            string myQuery18 = "SELECT  asset.id as id, file_path as fileName,  U.File_Size as fileSize, U.status,U.description FROM uploadedfiles AS U " +
+            string myQuery18 = "SELECT  asset.id as id, file_path as fileName,  U.File_Size as fileSize,CONCAT(usr.firstName,' ',usr.lastName)  as created_by,U.created_at, U.status,U.description FROM uploadedfiles AS U " +
                              "Left JOIN assets as  asset on asset.id = U.module_ref_id  " +
+                             " Left JOIN users as  usr on usr.id = U.created_by    " +
                              "where module_ref_id =" + id + " and U.module_type = " + (int)CMMS.CMMS_Modules.INVENTORY + ";";
             List<CMFileDetailJc> in_image = await Context.GetData<CMFileDetailJc>(myQuery18).ConfigureAwait(false);
-            string myQuery19 = "SELECT  asset.id as id, file_path as fileName,  U.File_Size as fileSize, U.status,U.description FROM uploadedfiles AS U " +
+            string myQuery19 = "SELECT  asset.id as id, file_path as fileName,  U.File_Size as fileSize,CONCAT(usr.firstName,' ',usr.lastName) as  created_by,U.created_at, U.status,U.description FROM uploadedfiles AS U " +
                              "Left JOIN assets as  asset on asset.id = U.module_ref_id  " +
+                             " Left JOIN users as  usr on usr.id = U.created_by    " +
+
                              "where module_ref_id =" + id + " and U.module_type = " + (int)CMMS.CMMS_Modules.WARRANTY_CLAIM + ";";
             List<CMFileDetailJc> warranty_file = await Context.GetData<CMFileDetailJc>(myQuery19).ConfigureAwait(false);
 
-            string myQuery20 = "SELECT  asset.id as id, file_path as fileName,  U.File_Size as fileSize, U.status,U.description FROM uploadedfiles AS U " +
+            string myQuery20 = "SELECT  asset.id as id, file_path as fileName,  U.File_Size as fileSize,CONCAT(usr.firstName,' ',usr.lastName) as  created_by ,U.created_at, U.status,U.description FROM uploadedfiles AS U " +
                              "Left JOIN assets as  asset on asset.id = U.module_ref_id  " +
+                              " Left JOIN users as  usr on usr.id = U.created_by    " +
                              "where module_ref_id =" + id + " and U.module_type = " + (int)CMMS.CMMS_Modules.CALIBRATION + ";";
             List<CMFileDetailJc> calibration_file = await Context.GetData<CMFileDetailJc>(myQuery20).ConfigureAwait(false);
             _ViewInventoryList[0].inventory_image = in_image;
@@ -1227,7 +1231,7 @@ namespace CMMSAPIs.Repositories.Inventory
                             " manufacturerId,parent_equipment_no,supplierId,serialNumber,createdBy,photoId,model,stockCount,moduleQuantity, " +
                             " cost,currency,specialTool,specialToolEmpId,calibrationDueDate,calibrationLastDate, " +
                             " calibrationFrequencyType,calibrationFrequency,calibrationReminderDays,retirementStatus,multiplier,  " +
-                            " vendorId,calibrationNextDueDate,acRating,dcRating,descMaintenace,barcode,unspCode,purchaseCode,createdAt,num_of_module) values ";
+                            " vendorId,calibrationNextDueDate,acRating,dcRating,descMaintenace,barcode,unspCode,purchaseCode,createdAt,num_of_module,area) values ";
                 count++;
                 assetName = unit.name;
                 if (assetName.Length <= 0)
@@ -1281,7 +1285,7 @@ namespace CMMSAPIs.Repositories.Inventory
                        "','" + unit.retirementStatus + "','" + unit.multiplier + "','" + unit.vendorId +
                        "'," + nextCalibrationDate + ",'" + unit.acRating + "','" + unit.dcRating +
                        "','" + unit.descMaintenace + "','" + unit.barcode + "','" + unit.unspCode +
-                       "','" + unit.purchaseCode + "','" + UtilsRepository.GetUTCTime() + "','" + unit.num_of_module + "'); ";
+                       "','" + unit.purchaseCode + "','" + UtilsRepository.GetUTCTime() + "','" + unit.num_of_module + "','" + unit.area + "'); ";
                 qry += "select LAST_INSERT_ID(); ";
 
                 //List<CMInventoryList> newInventory = await Context.GetData<CMInventoryList>(qry).ConfigureAwait(false);
@@ -1317,7 +1321,7 @@ namespace CMMSAPIs.Repositories.Inventory
                 {
                     foreach (int cimage_id in unit.uplaodfile_of_calibration)
                     {
-                        string qryuploadFiles = $"UPDATE uploadedfiles SET facility_id = {unit.facilityId}, module_type={(int)CMMS.CMMS_Modules.CALIBRATION},module_ref_id={retID} where id = {cimage_id}";
+                        string qryuploadFiles = $"UPDATE uploadedfiles SET facility_id = {unit.facilityId}, module_type={(int)CMMS.CMMS_Modules.CALIBRATION},module_ref_id={retID}, created_by={userID}, created_at = '{UtilsRepository.GetUTCTime()}' where id = {cimage_id}";
                         await Context.ExecuteNonQry<int>(qryuploadFiles).ConfigureAwait(false);
                     }
                 }
@@ -1325,7 +1329,7 @@ namespace CMMSAPIs.Repositories.Inventory
                 {
                     foreach (int Wimage_id in unit.uplaodfile_of_warranty)
                     {
-                        string qryuploadFiles = $"UPDATE uploadedfiles SET facility_id = {unit.facilityId}, module_type={(int)CMMS.CMMS_Modules.WARRANTY_CLAIM},module_ref_id={retID} where id = {Wimage_id}";
+                        string qryuploadFiles = $"UPDATE uploadedfiles SET facility_id = {unit.facilityId}, module_type={(int)CMMS.CMMS_Modules.WARRANTY_CLAIM}, created_by={userID}, created_at = '{UtilsRepository.GetUTCTime()}', module_ref_id={retID} where id = {Wimage_id}";
                         await Context.ExecuteNonQry<int>(qryuploadFiles).ConfigureAwait(false);
                     }
                 }
@@ -1333,7 +1337,7 @@ namespace CMMSAPIs.Repositories.Inventory
                 {
                     foreach (int data in unit.uplaodfile_ids)
                     {
-                        string qryuploadFiles = $"UPDATE uploadedfiles SET facility_id = {unit.facilityId}, module_type={(int)CMMS.CMMS_Modules.INVENTORY},module_ref_id={retID} where id = {data}";
+                        string qryuploadFiles = $"UPDATE uploadedfiles SET facility_id = {unit.facilityId},created_by={userID}, created_at = '{UtilsRepository.GetUTCTime()}', module_type={(int)CMMS.CMMS_Modules.INVENTORY},module_ref_id={retID} where id = {data}";
                         await Context.ExecuteNonQry<int>(qryuploadFiles).ConfigureAwait(false);
                     }
                 }
@@ -1883,6 +1887,11 @@ namespace CMMSAPIs.Repositories.Inventory
                 updateQry += $" manufacturerid= '{request.manufacturerId}',";
 
             }
+            if (request.area != 0)
+            {
+                updateQry += $" area= '{request.area}',";
+
+            }
             if (request.supplierId != 0)
             {
                 updateQry += $" supplierId= '{request.supplierId}',";
@@ -1979,7 +1988,8 @@ namespace CMMSAPIs.Repositories.Inventory
                 foreach (int data_cal in request.uplaodfile_of_calibration)
                 {
 
-                    string qryuploadFiles = $"UPDATE uploadedfiles SET facility_id = {request.facilityId}, module_type={(int)CMMS.CMMS_Modules.CALIBRATION},module_ref_id={request.id} where id = {data_cal}";
+                    string qryuploadFiles = $"UPDATE uploadedfiles SET facility_id = {request.facilityId}, module_type={(int)CMMS.CMMS_Modules.CALIBRATION}, " +
+                        $"module_ref_id={request.id}, created_by={userID}, created_at = '{UtilsRepository.GetUTCTime()}'  where id = {data_cal}";
                     await Context.ExecuteNonQry<int>(qryuploadFiles).ConfigureAwait(false);
                 }
             }
@@ -1988,7 +1998,7 @@ namespace CMMSAPIs.Repositories.Inventory
                 foreach (int data_war in request.uplaodfile_of_warranty)
                 {
 
-                    string qryuploadFiles = $"UPDATE uploadedfiles SET facility_id = {request.facilityId}, module_type={(int)CMMS.CMMS_Modules.WARRANTY_CLAIM},module_ref_id={request.id} where id = {data_war}";
+                    string qryuploadFiles = $"UPDATE uploadedfiles SET facility_id = {request.facilityId}, created_by={userID}, created_at = '{UtilsRepository.GetUTCTime()}', module_type={(int)CMMS.CMMS_Modules.WARRANTY_CLAIM},module_ref_id={request.id} where id = {data_war}";
                     await Context.ExecuteNonQry<int>(qryuploadFiles).ConfigureAwait(false);
                 }
             }

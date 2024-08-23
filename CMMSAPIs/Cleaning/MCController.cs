@@ -242,7 +242,9 @@ namespace CMMSAPIs.Controllers.MC
             }
             catch (Exception ex)
             {
-                throw;
+                ExceptionResponse item = new ExceptionResponse();
+                item.Message = ex.Message;
+                return Ok(item);
             }
         }
 
