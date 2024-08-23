@@ -72,6 +72,8 @@ public class CMFileDetailJc
     public double fileSize { get; set; }
     public int status { get; set; }
     public string PTWFiles { get; set; }
+    public dynamic created_at { get; set; }
+    public string created_by { get; set; }
     public string description { get; set; }
 }
 

@@ -36,7 +36,7 @@ namespace CMMSAPIs.BS.Cleaning
         public Task<CMDefaultResponse> EndScheduleExecution(int scheduleId, int userId, string facilitytime);
         public Task<CMDefaultResponse> EndExecution(int executionId, int userId, string facilitytime);
         public Task<CMDefaultResponse> ApproveExecution(CMApproval request, int userID, string facilitytime);
-        public Task<CMDefaultResponse> RejectExecution(CMApproval request, int userID,string facilitytime);
+        public Task<CMDefaultResponse> RejectExecution(CMApproval request, int userID, string facilitytime);
         // public Task<List<CMMCTaskEquipmentList>> GetVegTaskEquipmentList(int taskId, string facilitytime);
         public Task<CMDefaultResponse> LinkPermitToModuleCleaning(int task_id, int permit_id, int userId, string facilitytime);
 
@@ -487,7 +487,7 @@ namespace CMMSAPIs.BS.Cleaning
         internal async Task<CMDefaultResponse> ApproveScheduleExecution(ApproveMC request, int userId, string facilitytime)
         {
             try
-            {   
+            {
                 //using (var repos = new MCRepository(getDB))
                 {
 

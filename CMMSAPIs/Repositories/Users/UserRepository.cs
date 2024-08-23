@@ -997,7 +997,7 @@ namespace CMMSAPIs.Repositories.Users
         internal async Task<List<CMUser>> GetUserByNotificationId(CMUserByNotificationId notification)
         {
             // Pending convert user_ids into string for where condition
-            int notification_id = (int) notification.module_id;
+            int notification_id = (int)notification.module_id;
             int facility_id = notification.facility_id;
             string user_ids_str = "";
             if (notification.user_ids != null)

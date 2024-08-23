@@ -10,7 +10,6 @@ using CMMSAPIs.Repositories.Jobs;
 using CMMSAPIs.Repositories.Permits;
 using CMMSAPIs.Repositories.Utils;
 using Microsoft.Extensions.Configuration;
-using MySqlX.XDevAPI;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -232,20 +231,20 @@ namespace CMMSAPIs.Repositories.EM
             CMEscalationResponse response = null;
             string responseString = "";
             var esvalationList = await GetEscalationMatrixList(0);
-            if(esvalationList.Count <=0)
+            if (esvalationList.Count <= 0)
             {
                 responseString += "No esclations defined";
             }
-            for (var i=0;i<= esvalationList.Count; i++)
+            for (var i = 0; i <= esvalationList.Count; i++)
             {
                 int module = esvalationList[i].module_id;
                 int status = esvalationList[i].status_id;
 
-                if(0 == (int)moduleId && statusId == 0)
+                if (0 == (int)moduleId && statusId == 0)
                 {
                     responseString += Escalate_ForStatus((CMMS.CMMS_Modules)module, status, userID, facilitytimeZone);
                 }
-                else if (moduleId > 0 && module == (int) moduleId)
+                else if (moduleId > 0 && module == (int)moduleId)
                 {
                     if (status == statusId)
                     {
@@ -259,8 +258,8 @@ namespace CMMSAPIs.Repositories.EM
 
             return response;
         }
-        public async Task<string> Escalate_ForStatus(CMMS.CMMS_Modules moduleId, int statusId, int userID, string facilitytimeZone) 
-        {            
+        public async Task<string> Escalate_ForStatus(CMMS.CMMS_Modules moduleId, int statusId, int userID, string facilitytimeZone)
+        {
             CMEscalationResponse response = null;
             string responseString = "";
             var MyConfig = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
@@ -283,7 +282,7 @@ namespace CMMSAPIs.Repositories.EM
                                 $" ORDER BY createdAt DESC;";
             }
             //string qry1 = "SELECT Jobs.id,Jobs.status as status, Jobs.statusUpdatedAt as updateDate FROM Jobs WHERE Jobs.status = 101;";
-            if(Context == null)
+            if (Context == null)
             {
                 MYSQLDBHelper mYSQLDB = new MYSQLDBHelper(ConnectionString);
                 Context = mYSQLDB;
@@ -293,20 +292,20 @@ namespace CMMSAPIs.Repositories.EM
             // form this loop we are getting forms with particular status
             //var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(Microsoft.AspNetCore.Http.HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
 
-            for(var i=0;i< dt1.Rows.Count; i++)
+            for (var i = 0; i < dt1.Rows.Count; i++)
             {
-            
+
                 int module_ref_id = Convert.ToInt32(dt1.Rows[i]["id"]);
                 var diff = DateTime.UtcNow.Date - Convert.ToDateTime(dt1.Rows[0]["updateDate"]).Date;
                 int delayDays = diff.Days;
-             
-/*
-            string qry1 = "SELECT Jobs.id,Jobs.status as status, Jobs.statusUpdatedAt as updateDate FROM Jobs WHERE Jobs.status = 101;";
-            DataTable dt1 = await Context.FetchData(qry1).ConfigureAwait(false);
-            { 
-                int module_ref_id = 19;// Convert.ToInt32(dt1.Rows[i]["id"]);
-                int delayDays = 4;
-*/
+
+                /*
+                            string qry1 = "SELECT Jobs.id,Jobs.status as status, Jobs.statusUpdatedAt as updateDate FROM Jobs WHERE Jobs.status = 101;";
+                            DataTable dt1 = await Context.FetchData(qry1).ConfigureAwait(false);
+                            { 
+                                int module_ref_id = 19;// Convert.ToInt32(dt1.Rows[i]["id"]);
+                                int delayDays = 4;
+                */
                 //int status = Convert.ToInt32(dt1.Rows[0]["status"]);
                 string qry2 = $"SELECT days, roleId FROM escalationmatrix WHERE moduleId = {(int)moduleId} AND statusId = {statusId} " +
                                 $"ORDER BY days DESC;";
@@ -342,6 +341,7 @@ namespace CMMSAPIs.Repositories.EM
                         }
                         else if (moduleId == CMMS.CMMS_Modules.JOBCARD)
                         {
+
                             List<CMJCDetail> _jcDetails = await _JCRepo.GetJCDetail(module_ref_id, facilitytimeZone);
 
                             await CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOBCARD, (CMMS.CMMS_Status)statusId, userIDs, module_ref_id, role, delayDays, _jcDetails[0]);
@@ -359,8 +359,8 @@ namespace CMMSAPIs.Repositories.EM
 
             return responseString;
         }
-       
-        
+
+
         public async Task<List<CMEscalationLog>> GetEscalationLog(CMMS.CMMS_Modules module, int module_ref_id, int userID, string facilitytimeZone)
         {
             /*

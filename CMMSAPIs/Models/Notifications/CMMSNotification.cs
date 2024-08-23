@@ -9,6 +9,7 @@ using CMMSAPIs.Models.Jobs;
 using CMMSAPIs.Models.Mails;
 using CMMSAPIs.Models.MC;
 using CMMSAPIs.Models.Permits;
+using CMMSAPIs.Models.SM;
 using CMMSAPIs.Models.Users;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Models.WC;
@@ -180,17 +181,33 @@ namespace CMMSAPIs.Models.Notifications
             //m_delayDays = delayDays;
             CMDefaultResponse response = new CMDefaultResponse();
 
+
             List<CMUser> emailList = new List<CMUser>();
 
             int notificationID_int = (int)notificationID;
             // emailList = GetUserByNotificationId(notificationID);
 
-            string subject;
-            string printBody;
 
-            if (m_notificationType == 2)
-            {
-                subject = getEMSubject(args);
+                string subject;
+                string printBody;
+
+                if (m_notificationType == 2)
+                {
+                    subject = getEMSubject(args);
+
+                }
+                else
+                {
+                    subject = getSubject(args);
+                }
+
+                //string HTMLBody = getHTMLBody(args);
+                string HTMLHeader = getHTMLHeader(args);
+                string HTMLFooter = getHTMLFooter(args);
+                string HTMLSignature = getHTMLSignature(args);
+                int module_ref_id = getId(args);
+
+
 
             }
             else
@@ -222,41 +239,50 @@ namespace CMMSAPIs.Models.Notifications
                     notificationQry = $"INSERT INTO escalationlog (moduleId, moduleRefId, moduleStatus, notifSentToId, notifSentAt) VALUES " +
                                     $"({(int)moduleID}, {module_ref_id}, {notificationID}, {m_role}, '{UtilsRepository.GetUTCTime()}'); " +
                                     $"SELECT LAST_INSERT_ID(); ";
+
                 }
-                else
+                catch (Exception e)
                 {
+
+
                     users = await _userAccessRepository.GetEMUsers(facilityId, m_role, (int)notificationID);
                     notificationQry = $"INSERT INTO escalationlog (moduleId, moduleRefId, moduleStatus, notifSentToId, notifSentAt) VALUES " +
                                     $"({(int)moduleID}, {module_ref_id}, {(int)notificationID}, {m_role}, '{UtilsRepository.GetUTCTime()}'); " +
                                     $"SELECT LAST_INSERT_ID(); ";
-                }
-            }
-            catch (Exception e)
-            {
 
-                if (users == null || users.Count == 0)
+                }
+                List<string> EmailTo = new List<string>();
+                // List<CMUser> EmailTo = users;
+
+                System.Data.DataTable dt1 = await _conn.FetchData(notificationQry).ConfigureAwait(false);
+                int escalationlogID = Convert.ToInt32(dt1.Rows[0][0]);
+
+                string notificationRecordsQry = "INSERT INTO escalationsentto (escalationLogId, notifSentTo) VALUES ";
+                string delimiter = "";
+                int emailCount = 0;
+                foreach (var email in users)
                 {
-                    return response = new CMDefaultResponse(2, CMMS.RETRUNSTATUS.INVALID_ARG, $"Email List for notification {notificationID} is empty "); ;
+                    if (email != null)
+                    {
+                        //EmailTo.Add(email.user_name);     //Temp . Remove when testing done
+                        notificationRecordsQry += $"({escalationlogID}, '{email.id}'),";
+                        emailCount++;
+                    }
                 }
-            }
-            List<string> EmailTo = new List<string>();
-            // List<CMUser> EmailTo = users;
-
-            System.Data.DataTable dt1 = await _conn.FetchData(notificationQry).ConfigureAwait(false);
-            int escalationlogID = Convert.ToInt32(dt1.Rows[0][0]);
-
-            string notificationRecordsQry = "INSERT INTO escalationsentto (escalationLogId, notifSentTo) VALUES ";
-            string delimiter = "";
-            int emailCount = 0;
-            foreach (var email in users)
-            {
-                if (email != null)
+                if (emailCount > 0)
                 {
-                    //EmailTo.Add(email.user_name);     //Temp . Remove when testing done
-                    notificationRecordsQry += $"({escalationlogID}, '{email.id}'),";
-                    emailCount++;
+                    EmailTo.Add("cmms@softeltech.in");
+                    notificationRecordsQry = notificationRecordsQry.TrimEnd(',');
+
+
+                    System.Data.DataTable dt2 = await _conn.FetchData(notificationRecordsQry).ConfigureAwait(false);
                 }
-            }
+                else
+                {
+
+                    Console.WriteLine("No users to notify.");
+                }
+
             if (users.Count > 0)
             {
                 EmailTo.Add("cmms@softeltech.in");
@@ -265,13 +291,20 @@ namespace CMMSAPIs.Models.Notifications
             System.Data.DataTable dt2 = await _conn.FetchData(notificationRecordsQry).ConfigureAwait(false);
 
 
-            if (print)
+
+                if (print)
+                {
+                    response = new CMDefaultResponse(1, CMMS.RETRUNSTATUS.SUCCESS, "");
+                }
+                else
+                {
+                    response = await sendEmail(subject, printBody, HTMLHeader, HTMLFooter, HTMLSignature, EmailTo);
+
+            catch (Exception ex)
             {
-                response = new CMDefaultResponse(1, CMMS.RETRUNSTATUS.SUCCESS, "");
+                var msg = ex;
+                throw ex;
             }
-            else
-            {
-                response = await sendEmail(subject, printBody, HTMLHeader, HTMLFooter, HTMLSignature, EmailTo);
 
             }
             return response;
@@ -375,6 +408,7 @@ namespace CMMSAPIs.Models.Notifications
                 notificationObj = new GrievanceNotification(moduleID, notificationID, _Grievance);
                 //facilityId = _Inventory.facility_id;
             }
+
             else if (moduleID == CMMS.CMMS_Modules.MC_PLAN)
             {
                 CMMCPlan _Plan = (CMMCPlan)args[0];
@@ -398,6 +432,7 @@ namespace CMMSAPIs.Models.Notifications
                 CMMCExecution _Task = (CMMCExecution)args[0];
                 notificationObj = new VegetationNotification(moduleID, notificationID, null, _Task);
                 //facilityId = _Inventory.facility_id;
+
             }
             //create else if block for your module and add Notification class for  your module to implement yous notification
             retValue = await notificationObj.sendEmailNotification(moduleID, notificationID, userID, facilityId, module_ref_id, 0, 0, notificationType, args);

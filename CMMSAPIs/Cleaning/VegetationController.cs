@@ -1,5 +1,4 @@
-﻿using CMMSAPIs.BS.Facility;
-using CMMSAPIs.Cleaning;
+﻿using CMMSAPIs.Cleaning;
 using CMMSAPIs.Models.MC;
 using CMMSAPIs.Models.Utils;
 using Microsoft.AspNetCore.Http;
@@ -68,7 +67,7 @@ namespace CMMSAPIs.Controllers.Vegetation
             {
                 var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _vegetationBS.CreatePlan(request, userId,  facilitytimeZone);
+                var data = await _vegetationBS.CreatePlan(request, userId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -82,7 +81,8 @@ namespace CMMSAPIs.Controllers.Vegetation
         public async Task<IActionResult> UpdateVegetationPlan(List<CMMCPlan> request, int facilityId)
         {
             try
-            {   var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
+            {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
                 var data = await _vegetationBS.UpdatePlan(request, userId, facilitytimeZone);
                 return Ok(data);
@@ -292,7 +292,7 @@ namespace CMMSAPIs.Controllers.Vegetation
         public async Task<IActionResult> AbandonExecutionVegetation(CMApproval request, int facilityId)
         {
             try
-            {   
+            {
                 var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
                 var data = await _vegetationBS.AbandonExecutionVegetation(request, userId, facilitytimeZone);
@@ -311,7 +311,7 @@ namespace CMMSAPIs.Controllers.Vegetation
             {
                 var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _vegetationBS.AbandonScheduleVegetation(request, userId,  facilitytimeZone);
+                var data = await _vegetationBS.AbandonScheduleVegetation(request, userId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -440,7 +440,7 @@ namespace CMMSAPIs.Controllers.Vegetation
             {
                 var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _vegetationBS.ApproveScheduleExecutionVegetation(request, userId,  facilitytimeZone);
+                var data = await _vegetationBS.ApproveScheduleExecutionVegetation(request, userId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -486,7 +486,7 @@ namespace CMMSAPIs.Controllers.Vegetation
         [Route("StartVegetationExecution")]
         [HttpPut]
         public async Task<IActionResult> StartVegetationExecution(int executionId, int facilityId)
-        { 
+        {
             try
             {
                 var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
