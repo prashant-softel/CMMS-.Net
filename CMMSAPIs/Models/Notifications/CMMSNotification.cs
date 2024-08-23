@@ -181,107 +181,119 @@ namespace CMMSAPIs.Models.Notifications
                 //m_delayDays = delayDays;
                 CMDefaultResponse response = new CMDefaultResponse();
 
-            List<CMUser> emailList = new List<CMUser>();
-            // emailList = GetUserByNotificationId(notificationID);
+                List<CMUser> emailList = new List<CMUser>();
+                // emailList = GetUserByNotificationId(notificationID);
 
-            string subject;
-            string printBody;
+                string subject;
+                string printBody;
 
-            if (m_notificationType == 2)
-            {
-                subject = getEMSubject(args);
-
-            }
-            else
-            {
-                subject = getSubject(args);
-            }
-        
-            //string HTMLBody = getHTMLBody(args);
-            string HTMLHeader = getHTMLHeader(args);
-            string HTMLFooter = getHTMLFooter(args);
-            string HTMLSignature = getHTMLSignature(args);
-            int module_ref_id = getId(args);
-           
-                printBody = getHTMLBody(args);
-          
-        
-
-            CMUserByNotificationId notification = new CMUserByNotificationId();
-            notification.facility_id = facilityId;
-            notification.module_id = moduleID;
-            notification.role_id = m_role;
-            notification.user_ids = userID;
-
-            List<CMUser> users = new List<CMUser>();
-            string notificationQry = "";
-            try
-            {
-                //CMMSNotification objc = new CMMSNotification(_conn);
-                // UserAccessRepository obj = new UserAccessRepository(_conn);
                 if (m_notificationType == 2)
-              
                 {
-                    users = await _userAccessRepository.GetEMUsers(facilityId, m_role, (int)moduleID);
-                    notificationQry =   $"INSERT INTO escalationlog (moduleId, moduleRefId, moduleStatus, notifSentToId, notifSentAt) VALUES " +
-                                    $"({(int)moduleID}, {module_ref_id}, {(int)notificationID}, {m_role}, '{UtilsRepository.GetUTCTime()}'); " +
-                                    $"SELECT LAST_INSERT_ID(); ";
+                    subject = getEMSubject(args);
+
                 }
                 else
                 {
-                    
-                    users = await _userAccessRepository.GetUserByNotificationId(notification);
-                    notificationQry = $"INSERT INTO escalationlog (moduleId, moduleRefId, moduleStatus, notifSentToId, notifSentAt) VALUES " +
-                                    $"({(int)moduleID}, {module_ref_id}, {notificationID}, {m_role}, '{UtilsRepository.GetUTCTime()}'); " +
-                                    $"SELECT LAST_INSERT_ID(); ";
-                    
-                
+                    subject = getSubject(args);
                 }
-            }
-            catch (Exception e)
-            {
 
-                if (users == null || users.Count == 0)
+                //string HTMLBody = getHTMLBody(args);
+                string HTMLHeader = getHTMLHeader(args);
+                string HTMLFooter = getHTMLFooter(args);
+                string HTMLSignature = getHTMLSignature(args);
+                int module_ref_id = getId(args);
+
+                printBody = getHTMLBody(args);
+
+
+
+                CMUserByNotificationId notification = new CMUserByNotificationId();
+                notification.facility_id = facilityId;
+                notification.module_id = moduleID;
+                notification.role_id = m_role;
+                notification.user_ids = userID;
+
+                List<CMUser> users = new List<CMUser>();
+                string notificationQry = "";
+                try
                 {
-                    return response = new CMDefaultResponse(2, CMMS.RETRUNSTATUS.INVALID_ARG, $"Email List for notification {notificationID} is empty "); ;
+                    //CMMSNotification objc = new CMMSNotification(_conn);
+                    // UserAccessRepository obj = new UserAccessRepository(_conn);
+                    if (m_notificationType == 2)
+
+                    {
+                        users = await _userAccessRepository.GetEMUsers(facilityId, m_role, (int)moduleID);
+                        notificationQry = $"INSERT INTO escalationlog (moduleId, moduleRefId, moduleStatus, notifSentToId, notifSentAt) VALUES " +
+                                        $"({(int)moduleID}, {module_ref_id}, {(int)notificationID}, {m_role}, '{UtilsRepository.GetUTCTime()}'); " +
+                                        $"SELECT LAST_INSERT_ID(); ";
+                    }
+                    else
+                    {
+
+                        users = await _userAccessRepository.GetUserByNotificationId(notification);
+                        notificationQry = $"INSERT INTO escalationlog (moduleId, moduleRefId, moduleStatus, notifSentToId, notifSentAt) VALUES " +
+                                        $"({(int)moduleID}, {module_ref_id}, {notificationID}, {m_role}, '{UtilsRepository.GetUTCTime()}'); " +
+                                        $"SELECT LAST_INSERT_ID(); ";
+
+
+                    }
                 }
-            }
-            List<string> EmailTo = new List<string>();
-            // List<CMUser> EmailTo = users;
-
-            System.Data.DataTable dt1 = await _conn.FetchData(notificationQry).ConfigureAwait(false);
-            int escalationlogID = Convert.ToInt32(dt1.Rows[0][0]);
-
-            string notificationRecordsQry = "INSERT INTO escalationsentto (escalationLogId, notifSentTo) VALUES ";
-            string delimiter = "";
-            int emailCount = 0;
-            foreach (var email in users)
-            {
-                if (email != null)
+                catch (Exception e)
                 {
-                    //EmailTo.Add(email.user_name);     //Temp . Remove when testing done
-                    notificationRecordsQry += $"({escalationlogID}, '{email.id}'),";
-                    emailCount++;
+
+                    if (users == null || users.Count == 0)
+                    {
+                        return response = new CMDefaultResponse(2, CMMS.RETRUNSTATUS.INVALID_ARG, $"Email List for notification {notificationID} is empty "); ;
+                    }
                 }
-            }
-            if(users.Count > 0)
-            {
-                EmailTo.Add("cmms@softeltech.in");
-                notificationRecordsQry = notificationRecordsQry.Substring(0,notificationRecordsQry.Length - 1);
-            }
-            System.Data.DataTable dt2 = await _conn.FetchData(notificationRecordsQry).ConfigureAwait(false);
+                List<string> EmailTo = new List<string>();
+                // List<CMUser> EmailTo = users;
 
+                System.Data.DataTable dt1 = await _conn.FetchData(notificationQry).ConfigureAwait(false);
+                int escalationlogID = Convert.ToInt32(dt1.Rows[0][0]);
 
-            if (print)
-            {
-                response = new CMDefaultResponse(1, CMMS.RETRUNSTATUS.SUCCESS, "");
-            }
-            else
-            {
-                response = await sendEmail(subject, printBody, HTMLHeader, HTMLFooter, HTMLSignature, EmailTo);
+                string notificationRecordsQry = "INSERT INTO escalationsentto (escalationLogId, notifSentTo) VALUES ";
+                string delimiter = "";
+                int emailCount = 0;
+                foreach (var email in users)
+                {
+                    if (email != null)
+                    {
+                        //EmailTo.Add(email.user_name);     //Temp . Remove when testing done
+                        notificationRecordsQry += $"({escalationlogID}, '{email.id}'),";
+                        emailCount++;
+                    }
+                }
+                /*
+                if (users.Count > 0)
+                {
+                    EmailTo.Add("cmms@softeltech.in");
+                    notificationRecordsQry = notificationRecordsQry.Substring(0, notificationRecordsQry.Length - 1);
+                }
+                System.Data.DataTable dt2 = await _conn.FetchData(notificationRecordsQry).ConfigureAwait(false);*/
+                if (emailCount > 0)
+                {
+                    EmailTo.Add("cmms@softeltech.in");
 
-            }
-            return response;
+                    notificationRecordsQry = notificationRecordsQry.TrimEnd(',');
+                    System.Data.DataTable dt2 = await _conn.FetchData(notificationRecordsQry).ConfigureAwait(false);
+                }
+                else
+                {
+
+                    response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "NO Email Present");
+                }
+
+                if (print)
+                {
+                    response = new CMDefaultResponse(1, CMMS.RETRUNSTATUS.SUCCESS, "");
+                }
+                else
+                {
+                    response = await sendEmail(subject, printBody, HTMLHeader, HTMLFooter, HTMLSignature, EmailTo);
+
+                }
+                return response;
             }
             catch (Exception ex)
             {
@@ -297,14 +309,14 @@ namespace CMMSAPIs.Models.Notifications
             CMDefaultResponse retValue;
 
             int notificationType = 2;
-/*
-            if (moduleID == CMMS.CMMS_Modules.JOB)     //JOB
-            {
-                CMJobView _jobView = (CMJobView)args[0];
-                notificationObj = new JobNotification(moduleID, notificationID, _jobView, notificationType);
-                facilityId = _jobView.facility_id;
-            }
-*/
+            /*
+                        if (moduleID == CMMS.CMMS_Modules.JOB)     //JOB
+                        {
+                            CMJobView _jobView = (CMJobView)args[0];
+                            notificationObj = new JobNotification(moduleID, notificationID, _jobView, notificationType);
+                            facilityId = _jobView.facility_id;
+                        }
+            */
 
             //create else if block for your module and add Notification class for  your module to implement yous notification
             retValue = await sendBaseNotification(moduleID, notificationID, userID, module_ref_id, role, delayDays, notificationType, args);
@@ -343,7 +355,7 @@ namespace CMMSAPIs.Models.Notifications
                 notificationObj.m_notificationType = notificationType;
                 notificationObj.m_role = role;
                 facilityId = _jobView.facility_id;
-//                module_ref_id = _jobView.id;
+                //                module_ref_id = _jobView.id;
             }
             else if (moduleID == CMMS.CMMS_Modules.PTW)    //PTW
             {
