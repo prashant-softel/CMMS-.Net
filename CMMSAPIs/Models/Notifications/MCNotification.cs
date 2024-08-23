@@ -88,13 +88,13 @@ namespace CMMSAPIs.Models.Notifications
                     retValue += String.Format("MC Plan <{0}> Deleted by {1} ", planObj.planId, planObj.deletedBy);
                     break;
                 case CMMS.CMMS_Status.MC_PLAN_UPDATED:
-                    retValue += String.Format("MC Plan <{0}> Updated started by {1} ", planObj.planId, planObj.updatedBy);
+                    retValue += String.Format("MC Plan <{0}> Updated by {1} ", planObj.planId, planObj.updatedBy);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_SCHEDULED:
                     retValue += String.Format("MC Task <{0}> Scheduled by {1} ", executionObj.executionId, executionObj.schedules);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_STARTED:
-                    retValue += String.Format("MC Task <{0}> Started by {1} ", executionObj.executionId, executionObj.startedAt);
+                    retValue += String.Format("MC Task <{0}> Started by {1} ", executionObj.executionId, executionObj.startedBy);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_ENDED:
                     retValue += String.Format("MC Task <{0}> Ended by {1} ", executionObj.executionId, executionObj.endedBy);
@@ -103,10 +103,10 @@ namespace CMMSAPIs.Models.Notifications
                     retValue += String.Format("MC Task <{0}> Completed by {1} ", executionObj.executionId, executionObj.endedBy);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_ABANDONED:
-                    retValue += String.Format("MC Task <{0}> Abandon by {1} ", executionObj.executionId, executionObj.abandonedBy);
+                    retValue += String.Format("MC Task <{0}> Abandoned by {1} ", executionObj.executionId, executionObj.abandonedBy);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_APPROVED:
-                    retValue += String.Format("MC Task <{0}> Approved started by {1} ", executionObj.executionId, executionObj.approvedById);
+                    retValue += String.Format("MC Task <{0}> Approved  by {1} ", executionObj.executionId, executionObj.approvedById);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_REJECTED:
                     retValue += String.Format("MC Task <{0}> Rejected by {1} ", executionObj.executionId, executionObj.rejectedById);
@@ -115,16 +115,16 @@ namespace CMMSAPIs.Models.Notifications
                     retValue += String.Format("MC Task <{0}> Updated by {1} ", executionObj.executionId, executionObj.updatedBy);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_ABANDONED_REJECTED:
-                    retValue += String.Format("MC Task <{0}> Abandoned Rejected by {1} ", executionObj.executionId, executionObj.abandonedBy, executionObj.rejectedById);
+                    retValue += String.Format("MC Task <{0}> Abandoned Rejected by {1} ", executionObj.executionId, executionObj.rejectedById);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_ABANDONED_APPROVED:
-                    retValue += String.Format("MC Task <{0}> Abandoned Approved by {1} ", executionObj.executionId, executionObj.abandonedBy, executionObj.approvedById);
+                    retValue += String.Format("MC Task <{0}> Abandoned Approved by {1} ", executionObj.executionId, executionObj.approvedById);
                     break;
                 case CMMS.CMMS_Status.SCHEDULED_LINKED_TO_PTW:
-                    retValue += String.Format("MC Task <{0}> Deleted by {1} ", executionObj.executionId);
+                    retValue += String.Format("MC Task <{0}> Deleted by {1} ", executionObj.schedules);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_END_APPROVED:
-                    retValue += String.Format("MC Task <{0}> Approved started by {1} ", executionObj.executionId, executionObj.endedBy, executionObj.approvedById);
+                    retValue += String.Format("MC Task <{0}> Approved started by {1} ", executionObj.executionId, executionObj.approvedById);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_END_REJECTED:
                     retValue += String.Format("MC Task <{0}> Rejected by {1} ", executionObj.executionId, executionObj.rejectedById);
@@ -155,6 +155,7 @@ namespace CMMSAPIs.Models.Notifications
 
             string retValue = "My job subject";
 
+
             switch (m_notificationID)
             {
                 case CMMS.CMMS_Status.MC_PLAN_DRAFT:
@@ -164,7 +165,7 @@ namespace CMMSAPIs.Models.Notifications
                     retValue += String.Format("MC Plan <{0}> Submitted by {1} ", planObj.planId, planObj.createdBy);
                     break;
                 case CMMS.CMMS_Status.MC_PLAN_REJECTED:
-                    retValue += String.Format("MC Plan <{0}> Rejected by {1} ", planObj.planId, planObj.approvedBy);
+                    retValue += String.Format("MC Plan <{0}> Rejected by {1} ", planObj.planId, planObj.rejectedBy);
                     break;
                 case CMMS.CMMS_Status.MC_PLAN_APPROVED:
                     retValue += String.Format("MC Plan <{0}> Approved by {1} ", planObj.planId, planObj.approvedBy);
@@ -188,10 +189,10 @@ namespace CMMSAPIs.Models.Notifications
                     retValue += String.Format("MC Task <{0}> Completed by {1} ", executionObj.executionId, executionObj.endedBy);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_ABANDONED:
-                    retValue += String.Format("MC Task <{0}> Abandon by {1} ", executionObj.executionId, executionObj.abandonedBy);
+                    retValue += String.Format("MC Task <{0}> Abandoned by {1} ", executionObj.executionId, executionObj.abandonedBy);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_APPROVED:
-                    retValue += String.Format("MC Task <{0}> Approved started by {1} ", executionObj.executionId, executionObj.approvedById);
+                    retValue += String.Format("MC Task <{0}> Approved  by {1} ", executionObj.executionId, executionObj.approvedById);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_REJECTED:
                     retValue += String.Format("MC Task <{0}> Rejected by {1} ", executionObj.executionId, executionObj.rejectedById);
@@ -200,22 +201,22 @@ namespace CMMSAPIs.Models.Notifications
                     retValue += String.Format("MC Task <{0}> Updated by {1} ", executionObj.executionId, executionObj.updatedBy);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_ABANDONED_REJECTED:
-                    retValue += String.Format("MC Task <{0}> Abandoned Rejected by {1} ", executionObj.executionId, executionObj.abandonedBy, executionObj.rejectedById);
+                    retValue += String.Format("MC Task <{0}> Abandoned Rejected by {1} ", executionObj.executionId, executionObj.rejectedById);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_ABANDONED_APPROVED:
-                    retValue += String.Format("MC Task <{0}> Abandoned Approved by {1} ", executionObj.executionId, executionObj.abandonedBy, executionObj.approvedById);
+                    retValue += String.Format("MC Task <{0}> Abandoned Approved by {1} ", executionObj.executionId, executionObj.approvedById);
                     break;
                 case CMMS.CMMS_Status.SCHEDULED_LINKED_TO_PTW:
-                    retValue += String.Format("MC Task <{0}> Deleted by {1} ", executionObj.executionId);
+                    retValue += String.Format("MC Task <{0}> Linked by {1} ", executionObj.executionId, executionObj.schedules);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_END_APPROVED:
-                    retValue += String.Format("MC Task <{0}> Approved started by {1} ", executionObj.executionId, executionObj.endedBy, executionObj.approvedById);
+                    retValue += String.Format("MC Task <{0}> Approved started by {1} ", executionObj.executionId, executionObj.approvedById);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_END_REJECTED:
                     retValue += String.Format("MC Task <{0}> Rejected by {1} ", executionObj.executionId, executionObj.rejectedById);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_SCHEDULE_APPROVED:
-                    retValue += String.Format("MC Task <{0}> Scheduled Approvved by {1} ", executionObj.executionId, executionObj.approvedById);
+                    retValue += String.Format("MC Task <{0}> Scheduled Approved by {1} ", executionObj.executionId, executionObj.approvedById);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_SCHEDULE_REJECT:
                     retValue += String.Format("MC Task <{0}> Scheduled Rejected by {1} ", executionObj.executionId, executionObj.rejectedById);
@@ -224,12 +225,14 @@ namespace CMMSAPIs.Models.Notifications
                     retValue += String.Format("MC Task <{0}> Rescheduled by {1} ", executionObj.executionId, executionObj.schedules);
                     break;
                 case CMMS.CMMS_Status.RESCHEDULED_TASK:
-                    retValue += String.Format("MC Task <{0}> Rescheduled Task started by {1} ", executionObj.executionId, executionObj.schedules);
+                    retValue += String.Format("MC Task <{0}> Rescheduled  by {1} ", executionObj.executionId, executionObj.schedules);
                     break;
             }
             return retValue;
 
         }
+
+
 
         override protected string getHTMLBody(params object[] args)
         {
@@ -291,52 +294,52 @@ namespace CMMSAPIs.Models.Notifications
                         retValue += "</table>"; break;
                         break;
                     case CMMS.CMMS_Status.MC_TASK_APPROVED:
-                        retValue += String.Format(templateEnd, "Approved By", executionObj.approvedById);
+                        retValue += String.Format(templateEnd, "MC Task Schedule Approved By", executionObj.approvedById);
                         break;
                     case CMMS.CMMS_Status.MC_TASK_ENDED:
-                        retValue += String.Format(templateEnd, "Ended By", executionObj.endedBy);
+                        retValue += String.Format(templateEnd, "MC Task Scheduled Ended By", executionObj.endedBy);
                         break;
                     case CMMS.CMMS_Status.MC_TASK_COMPLETED:
-                        retValue += String.Format(templateEnd, "Completed By", executionObj.endedBy);
+                        retValue += String.Format(templateEnd, "MC Task Scheduled Completed By", executionObj.endedBy);
                         break;
                     case CMMS.CMMS_Status.MC_TASK_UPDATED:
-                        retValue += String.Format(templateEnd, "Updated By", executionObj.updatedBy);
+                        retValue += String.Format(templateEnd, "MC Task Scheduled Updated By", executionObj.updatedBy);
                         break;
                     case CMMS.CMMS_Status.MC_TASK_ABANDONED:
-                        retValue += String.Format(templateEnd, "Abandoned By", executionObj.abandonedBy);
+                        retValue += String.Format(templateEnd, "MC Task Scheduled Abandoned By", executionObj.abandonedBy);
                         break;
                     case CMMS.CMMS_Status.MC_TASK_REJECTED:
-                        retValue += String.Format(templateEnd, "Rejected By", executionObj.rejectedById);
+                        retValue += String.Format(templateEnd, "MC Task Scheduled Rejected By", executionObj.rejectedById);
                         break;
                     case CMMS.CMMS_Status.MC_TASK_ABANDONED_REJECTED:
-                        retValue += String.Format(templateEnd, "Abandoned By", executionObj.abandonedBy);
+                        retValue += String.Format(templateEnd, "MC Task Scheduled Abandoned Rejected By", executionObj.rejectedById);
                         break;
                     case CMMS.CMMS_Status.MC_TASK_ABANDONED_APPROVED:
-                        retValue += String.Format(templateEnd, "Approved By", executionObj.approvedById);
+                        retValue += String.Format(templateEnd, "MC Task Scheduled Abandoned Approved By", executionObj.approvedById);
                         break;
-                    /*case CMMS.CMMS_Status.SCHEDULED_LINKED_TO_PTW:
-                        retValue += String.Format(templateEnd, "Lnked By", executionObj.l);
-                        break;*/
+                    case CMMS.CMMS_Status.SCHEDULED_LINKED_TO_PTW:
+                        retValue += String.Format(templateEnd, "MC Task Schedule Linked By", executionObj.schedules);
+                        break;
                     case CMMS.CMMS_Status.MC_TASK_END_APPROVED:
-                        retValue += String.Format(templateEnd, "End Approved By", executionObj.approvedById);
+                        retValue += String.Format(templateEnd, "MC Task Schedule End Approved By", executionObj.approvedById);
                         break;
                     case CMMS.CMMS_Status.MC_TASK_END_REJECTED:
-                        retValue += String.Format(templateEnd, "Rejected By", executionObj.rejectedById);
+                        retValue += String.Format(templateEnd, "MC Task Schedule End Rejected By", executionObj.rejectedById);
                         break;
                     case CMMS.CMMS_Status.MC_TASK_SCHEDULE_APPROVED:
-                        retValue += String.Format(templateEnd, "Approved By", executionObj.approvedById);
+                        retValue += String.Format(templateEnd, "MC Task Schedule Approved By", executionObj.approvedById);
                         break;
                     case CMMS.CMMS_Status.MC_TASK_SCHEDULE_REJECT:
-                        retValue += String.Format(templateEnd, "ScheduleRejected By", executionObj.rejectedById);
+                        retValue += String.Format(templateEnd, "MC Task Schedule Rejected By", executionObj.rejectedById);
                         break;
                     case CMMS.CMMS_Status.MC_TASK_RESCHEDULED:
-                        retValue += String.Format(templateEnd, "Updated By", executionObj.schedules);
+                        retValue += String.Format(templateEnd, "MC Task Rescheduled By", executionObj.schedules);
                         break;
                     case CMMS.CMMS_Status.MC_ASSIGNED:
-                        retValue += String.Format(templateEnd, "Assigned to", executionObj.assignedTo);
+                        retValue += String.Format(templateEnd, "MC Task Schedule Assigned to", executionObj.assignedTo);
                         break;
                     case CMMS.CMMS_Status.RESCHEDULED_TASK:
-                        retValue += String.Format(templateEnd, "Deleted By", executionObj.schedules);
+                        retValue += String.Format(templateEnd, "MC Task Rescheduled  by", executionObj.schedules);
                         break;
                     default:
                         break;

@@ -341,7 +341,8 @@ namespace CMMSAPIs.Repositories.EM
                         }
                         else if (moduleId == CMMS.CMMS_Modules.JOBCARD)
                         {
-                            List<CMJCDetail> _jcDetails = await _JCRepo.GetJCDetail(module_ref_id, "");
+
+                            List<CMJCDetail> _jcDetails = await _JCRepo.GetJCDetail(module_ref_id, facilitytimeZone);
 
                             await CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOBCARD, (CMMS.CMMS_Status)statusId, userIDs, module_ref_id, role, delayDays, _jcDetails[0]);
 
