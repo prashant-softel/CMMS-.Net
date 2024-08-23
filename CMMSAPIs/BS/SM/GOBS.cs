@@ -24,7 +24,7 @@ namespace CMMSAPIs.BS
         Task<CMDefaultResponse> RejectGO(CMApproval request, int userId);
         Task<List<CMPURCHASEDATA>> GetGoodsOrderData(int plantID, string empRole, DateTime fromDate, DateTime toDate, string status, string order_type,string facilitytime);
         Task<CMGOMaster> GetGODetailsByID(int id);
-        Task<CMDefaultResponse> SubmitPurchaseData(CMSUBMITPURCHASEDATA request);
+        Task<CMDefaultResponse> SubmitPurchaseData(CMSUBMITPURCHASEDATA request, int userId);
         Task<List<CMGOListByFilter>> GetSubmitPurchaseOrderList(int facility_id, DateTime fromDate, DateTime toDate, int Status, string facilitytime);
 
         Task<CMDefaultResponse> UpdateGOReceive(CMGoodsOrderList request, int userID);
@@ -213,13 +213,13 @@ namespace CMMSAPIs.BS
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> SubmitPurchaseData(CMSUBMITPURCHASEDATA request)
+        public async Task<CMDefaultResponse> SubmitPurchaseData(CMSUBMITPURCHASEDATA request, int userId)
         {
             try
             {
                 using (var repos = new GORepository(getDB))
                 {
-                    return await repos.SubmitPurchaseData(request);
+                    return await repos.SubmitPurchaseData(request, userId) ;
 
                 }
             }

@@ -1,5 +1,6 @@
 using CMMSAPIs.Helper;
 using CMMSAPIs.Models;
+using CMMSAPIs.Models.Notifications;
 using CMMSAPIs.Models.SM;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Utils;
@@ -348,6 +349,17 @@ namespace CMMSAPIs.Repositories
             string mainQuery = $"UPDATE smgoodsorder SET status = {(int)CMMS.CMMS_Status.GO_DELETED}, remarks = '{request.comment}', updated_by = {userID}, updatedOn = '{DateTime.Now.ToString("yyyy-MM-dd")}' WHERE ID = " + request.id + "";
             await Context.ExecuteNonQry<int>(mainQuery);
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_GO, request.id, 0, 0, "Goods order deleted.", CMMS.CMMS_Status.GO_DELETED);
+            string myQuery = $"SELECT   ID ,facilityID ,vendorID ,receiverID ,generated_by ,purchaseDate ,orderDate ,challan_no ,po_no ,\r\n     " +
+                                 $" freight ,transport ,no_pkg_received ,lr_no ,\r\n      " +
+                                 $"condition_pkg_received ,vehicle_no ,gir_no ,challan_date ,po_date ,\r\n      " +
+                                 $"job_ref ,amount ,currency as currencyID,status ,\r\n     " +
+                                 $" lastModifiedDate ,generate_flag ,s2s_generated_by ,case when received_on = '0000-00-00 00:00:00' then null else received_on end as                           received_on ,invoice_copy ,issued_by ,issued_on ,\r\n    " +
+                                 $"  approved_by ,approvedOn ,withdraw_by ,withdrawOn ,reorder_flag ,\r\n     " +
+                                 $" order_type ,remarks ,updated_by ,updatedOn ,rejected_by ,rejectedOn" +
+                                 $" \r\nFROM smgoodsorder where id = {request.id}";
+            List<CMGoodsOrderList> _WCList = await Context.GetData<CMGoodsOrderList>(myQuery).ConfigureAwait(false);
+
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_GO, CMMS.CMMS_Status.GO_DELETED, new[] { userID }, _WCList);
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Goods order deleted.");
             return response;
         }
@@ -357,6 +369,18 @@ namespace CMMSAPIs.Repositories
             await Context.ExecuteNonQry<int>(mainQuery);
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_GO, request.id, 0, 0, request.remarks, CMMS.CMMS_Status.GO_CLOSED);
+
+            string myQuery = $"SELECT   ID ,facilityID ,vendorID ,receiverID ,generated_by ,purchaseDate ,orderDate ,challan_no ,po_no ,\r\n     " +
+                                 $" freight ,transport ,no_pkg_received ,lr_no ,\r\n      " +
+                                 $"condition_pkg_received ,vehicle_no ,gir_no ,challan_date ,po_date ,\r\n      " +
+                                 $"job_ref ,amount ,currency as currencyID,status ,\r\n     " +
+                                 $" lastModifiedDate ,generate_flag ,s2s_generated_by ,case when received_on = '0000-00-00 00:00:00' then null else received_on end as                           received_on ,invoice_copy ,issued_by ,issued_on ,\r\n    " +
+                                 $"  approved_by ,approvedOn ,withdraw_by ,withdrawOn ,reorder_flag ,\r\n     " +
+                                 $" order_type ,remarks ,updated_by ,updatedOn ,rejected_by ,rejectedOn" +
+                                 $" \r\nFROM smgoodsorder where id = {request.id}";
+            List<CMGoodsOrderList> _WCList = await Context.GetData<CMGoodsOrderList>(myQuery).ConfigureAwait(false);
+
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_GO, CMMS.CMMS_Status.GO_CLOSED, new[] { userID }, _WCList);
 
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Goods order withdrawn successfully.");
             return response;
@@ -469,7 +493,7 @@ namespace CMMSAPIs.Repositories
             // Entry in TransactionDetails
 
 
-            string myQuery = $"SELECT   ID ,facilityID ,vendorID ,receiverID ,generated_by ,purchaseDate ,orderDate ,challan_no ,po_no ,\r\n     " +
+            /*string myQuery = $"SELECT   ID ,facilityID ,vendorID ,receiverID ,generated_by ,purchaseDate ,orderDate ,challan_no ,po_no ,\r\n     " +
                 $" freight ,transport ,no_pkg_received ,lr_no ,\r\n      " +
                 $"condition_pkg_received ,vehicle_no ,gir_no ,challan_date ,po_date ,\r\n      " +
                 $"job_ref ,amount ,currency as currencyID,status ,\r\n     " +
@@ -477,7 +501,7 @@ namespace CMMSAPIs.Repositories
                 $"  approved_by ,approvedOn ,withdraw_by ,withdrawOn ,reorder_flag ,\r\n     " +
                 $" order_type ,remarks ,updated_by ,updatedOn ,rejected_by ,rejectedOn" +
                 $" \r\nFROM smgoodsorder where id = {request.id}";
-            List<CMGoodsOrderList> _List = await Context.GetData<CMGoodsOrderList>(myQuery).ConfigureAwait(false);
+            List<CMGoodsOrderList> _List = await Context.GetData<CMGoodsOrderList>(myQuery).ConfigureAwait(false);*/
             //CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_GO, CMMS.CMMS_Status.SM_PO_CLOSED_APPROVED, _List[0]);
             // Entry for stock items
 
@@ -625,6 +649,18 @@ namespace CMMSAPIs.Repositories
             }
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_GO, request.id, 0, 0, request.comment, CMMS.CMMS_Status.GO_APPROVED);
 
+            string myQuery = $"SELECT   ID ,facilityID ,vendorID ,receiverID ,generated_by ,purchaseDate ,orderDate ,challan_no ,po_no ,\r\n     " +
+                                 $" freight ,transport ,no_pkg_received ,lr_no ,\r\n      " +
+                                 $"condition_pkg_received ,vehicle_no ,gir_no ,challan_date ,po_date ,\r\n      " +
+                                 $"job_ref ,amount ,currency as currencyID,status ,\r\n     " +
+                                 $" lastModifiedDate ,generate_flag ,s2s_generated_by ,case when received_on = '0000-00-00 00:00:00' then null else received_on end as                           received_on ,invoice_copy ,issued_by ,issued_on ,\r\n    " +
+                                 $"  approved_by ,approvedOn ,withdraw_by ,withdrawOn ,reorder_flag ,\r\n     " +
+                                 $" order_type ,remarks ,updated_by ,updatedOn ,rejected_by ,rejectedOn" +
+                                 $" \r\nFROM smgoodsorder where id = {request.id}";
+            List<CMGoodsOrderList> _WCList = await Context.GetData<CMGoodsOrderList>(myQuery).ConfigureAwait(false);
+
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_GO, CMMS.CMMS_Status.GO_APPROVED, new[] { userId }, _WCList);
+
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Goods Order {request.id} approved successfully.");
             return response;
         }
@@ -663,7 +699,8 @@ namespace CMMSAPIs.Repositories
        $" order_type ,remarks ,updated_by ,updatedOn ,rejected_by ,rejectedOn" +
        $" \r\nFROM smgoodsorder where id = {request.id}";
             List<CMGoodsOrderList> _WCList = await Context.GetData<CMGoodsOrderList>(myQuery).ConfigureAwait(false);
-            //CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_GO, CMMS.CMMS_Status.SM_PO_CLOSED_REJECTED, _WCList[0]);
+
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_GO, CMMS.CMMS_Status.GO_REJECTED, new[] { userId }, _WCList);
 
 
 
@@ -862,7 +899,7 @@ namespace CMMSAPIs.Repositories
         }
 
 
-        public async Task<CMDefaultResponse> SubmitPurchaseData(CMSUBMITPURCHASEDATA request)
+        public async Task<CMDefaultResponse> SubmitPurchaseData(CMSUBMITPURCHASEDATA request,int userId)
         {
             try
             {
@@ -989,6 +1026,18 @@ namespace CMMSAPIs.Repositories
                     historyRemark = request.remarks;
                 }
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_GO, purchaseId, 0, 0, historyRemark, CMMS.CMMS_Status.GO_SUBMITTED);
+
+                string myQuery = $"SELECT   ID ,facilityID ,vendorID ,receiverID ,generated_by ,purchaseDate ,orderDate ,challan_no ,po_no ,\r\n     " +
+                                 $" freight ,transport ,no_pkg_received ,lr_no ,\r\n      " +
+                                 $"condition_pkg_received ,vehicle_no ,gir_no ,challan_date ,po_date ,\r\n      " +
+                                 $"job_ref ,amount ,currency as currencyID,status ,\r\n     " +
+                                 $" lastModifiedDate ,generate_flag ,s2s_generated_by ,case when received_on = '0000-00-00 00:00:00' then null else received_on end as                           received_on ,invoice_copy ,issued_by ,issued_on ,\r\n    " +
+                                 $"  approved_by ,approvedOn ,withdraw_by ,withdrawOn ,reorder_flag ,\r\n     " +
+                                 $" order_type ,remarks ,updated_by ,updatedOn ,rejected_by ,rejectedOn" +
+                                 $" \r\nFROM smgoodsorder where id = {request.purchaseID}";
+                List<CMGoodsOrderList> _WCList = await Context.GetData<CMGoodsOrderList>(myQuery).ConfigureAwait(false);
+
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_GO, CMMS.CMMS_Status.GO_SUBMITTED, new[] { userId }, _WCList);
 
                 CMDefaultResponse response = new CMDefaultResponse(purchaseId, CMMS.RETRUNSTATUS.SUCCESS, "Goods order submitted successfully.");
                 return response;
@@ -1423,8 +1472,8 @@ namespace CMMSAPIs.Repositories
                 $"  approved_by ,approvedOn ,withdraw_by ,withdrawOn ,reorder_flag ,\r\n     " +
                 $" order_type ,remarks ,updated_by ,updatedOn ,rejected_by ,rejectedOn" +
                 $" \r\nFROM smgoodsorder where id = {request.id}";
-            List<CMGoodsOrderList> _List = await Context.GetData<CMGoodsOrderList>(myQuery).ConfigureAwait(false);
-            //CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_GO, CMMS.CMMS_Status.SM_PO_CLOSED_APPROVED, _List[0]);
+            List<CMGoodsOrderList> _WCList = await Context.GetData<CMGoodsOrderList>(myQuery).ConfigureAwait(false);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_GO, CMMS.CMMS_Status.GO_RECEIVED_APPROVED, new[] { userId }, _WCList);
             string historyRemark = "";
             if (request.comment == null || request.comment == "")
             {
@@ -1482,7 +1531,7 @@ namespace CMMSAPIs.Repositories
        $" order_type ,remarks ,updated_by ,updatedOn ,rejected_by ,rejectedOn" +
        $" \r\nFROM smgoodsorder where id = {request.id}";
             List<CMGoodsOrderList> _WCList = await Context.GetData<CMGoodsOrderList>(myQuery).ConfigureAwait(false);
-            //CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_GO, CMMS.CMMS_Status.SM_PO_CLOSED_REJECTED, _WCList[0]);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_GO, CMMS.CMMS_Status.GO_RECEIVED_REJECTED,new[] { userId }, _WCList);
 
 
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Goods order receive {request.id} rejected successfully.");

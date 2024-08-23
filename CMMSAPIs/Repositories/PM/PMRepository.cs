@@ -1,5 +1,6 @@
 using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Masters;
+using CMMSAPIs.Models.Notifications;
 using CMMSAPIs.Models.PM;
 using CMMSAPIs.Models.Users;
 using CMMSAPIs.Models.Utils;
@@ -20,6 +21,7 @@ namespace CMMSAPIs.Repositories.PM
         private UtilsRepository _utilsRepo;
         ErrorLog m_errorLog;
         private MYSQLDBHelper sqlDBHelper;
+        private string facilitytimeZone;
 
         public PMRepository(MYSQLDBHelper sqlDBHelper, IWebHostEnvironment iwebhostobj) : base(sqlDBHelper)
         {
@@ -84,7 +86,7 @@ namespace CMMSAPIs.Repositories.PM
             return retValue;
 
         }
-        internal async Task<CMDefaultResponse> CreatePMPlan(CMPMPlanDetail pm_plan, int userID)
+        internal async Task<CMDefaultResponse> CreatePMPlan(CMPMPlanDetail pm_plan, int userID, string facilitytimeZone)
         {
             int status = pm_plan.isDraft > 0 ? (int)CMMS.CMMS_Status.PM_PLAN_DRAFT : (int)CMMS.CMMS_Status.PM_PLAN_CREATED;
 
@@ -128,10 +130,12 @@ namespace CMMSAPIs.Repositories.PM
             await Context.ExecuteNonQry<int>(mapChecklistQry).ConfigureAwait(false);
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_PLAN, id, 0, 0, "PM Plan added", CMMS.CMMS_Status.PM_PLAN_CREATED, userID);
+            CMPMPlanDetail _WCList = await GetPMPlanDetail(id, facilitytimeZone);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.WARRANTY_CLAIM, CMMS.CMMS_Status.PM_PLAN_CREATED, new[] { userID }, _WCList);
             CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Plan added successfully");
             return response;
         }
-        internal async Task<CMDefaultResponse> UpdatePMPlan(CMPMPlanDetail request, int userID)
+        internal async Task<CMDefaultResponse> UpdatePMPlan(CMPMPlanDetail request, int userID, string facilitytimeZone)
         {
             string date = Convert.ToString(request.plan_date.ToString("yyyy-MM-dd"));
             string myQuery = "UPDATE pm_plan SET ";
@@ -172,6 +176,8 @@ namespace CMMSAPIs.Repositories.PM
             sb.Append(": " + request.comment);
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_PLAN, request.plan_id, 0, 0, sb.ToString(), CMMS.CMMS_Status.PM_PLAN_UPDATED);
+            CMPMPlanDetail _WCList = await GetPMPlanDetail(request.plan_id, facilitytimeZone);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PM_PLAN, CMMS.CMMS_Status.PM_PLAN_UPDATED, new[] { userID }, _WCList);
 
             CMDefaultResponse response = new CMDefaultResponse(request.plan_id, CMMS.RETRUNSTATUS.SUCCESS, $"Plan Updated Successfully ");
             return response;
@@ -465,7 +471,7 @@ namespace CMMSAPIs.Repositories.PM
             return responseList;
         }
 
-        internal async Task<CMDefaultResponse> ApprovePMPlan(CMApproval request, int userId)
+        internal async Task<CMDefaultResponse> ApprovePMPlan(CMApproval request, int userId, string facilitytimeZone)
         {
 
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
@@ -506,13 +512,15 @@ namespace CMMSAPIs.Repositories.PM
 
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_PLAN, request.id, 0, 0, string.IsNullOrEmpty(request.comment) ? "PM Plan Approved " : request.comment, CMMS.CMMS_Status.PM_PLAN_APPROVED);
+            CMPMPlanDetail _WCList = await GetPMPlanDetail(id, facilitytimeZone);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PM_PLAN, CMMS.CMMS_Status.PM_PLAN_APPROVED, new[] { userId }, _WCList);
 
             //await CMMSNotification.sendNotification(CMMS.CMMS_Modules.WARRANTY_CLAIM, CMMS.CMMS_Status.APPROVED, new[] { _WCList[0].created_by }, _WCList[0]);
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "PM Plan Approved Successfully");
             return response;
         }
 
-        internal async Task<CMDefaultResponse> RejectPMPlan(CMApproval request, int userId)
+        internal async Task<CMDefaultResponse> RejectPMPlan(CMApproval request, int userId, string facilitytimeZone)
         {
 
             if (request.id <= 0)
@@ -534,18 +542,20 @@ namespace CMMSAPIs.Repositories.PM
             }
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_PLAN, request.id, 0, 0, string.IsNullOrEmpty(request.comment) ? "PM Plan Rejected " : request.comment, CMMS.CMMS_Status.PM_PLAN_REJECTED);
-
-            //await CMMSNotification.sendNotification(CMMS.CMMS_Modules.WARRANTY_CLAIM, CMMS.CMMS_Status.REJECTED, new[] { _WCList[0].created_by }, _WCList[0]);
+            CMPMPlanDetail _WCList = await GetPMPlanDetail(request.id, facilitytimeZone);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.WARRANTY_CLAIM, CMMS.CMMS_Status.PM_PLAN_REJECTED, new[] { userId }, _WCList);
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "PM Plan Rejected Successfully");
             return response;
         }
 
-        internal async Task<CMDefaultResponse> DeletePMPlan(int planId, int userID)
+        internal async Task<CMDefaultResponse> DeletePMPlan(int planId, int userID, string facilitytimeZone)
         {
             string approveQuery = $"update pm_plan set status_id = 0 where id = {planId}; ";
             await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_PLAN, planId, 0, 0, $"PM Plan Deleted by user {userID}", CMMS.CMMS_Status.PM_PLAN_DELETED);
+            CMPMPlanDetail _WCList = await GetPMPlanDetail(planId, facilitytimeZone);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PM_PLAN, CMMS.CMMS_Status.PM_PLAN_DELETED, new[] { userID }, _WCList);
 
             CMDefaultResponse response = new CMDefaultResponse(planId, CMMS.RETRUNSTATUS.SUCCESS, $" PM Plan Deleted");
             return response;
@@ -833,7 +843,7 @@ namespace CMMSAPIs.Repositories.PM
                                 updatePlan.facility_id = Convert.ToInt32(newR["plantID"]);
                                 updatePlan.category_id = Convert.ToInt32(newR["categoryID"]);
                                 updatePlan.assigned_to_id = Convert.ToInt32(newR["assignedToID"]);
-                                var resPlan = await UpdatePMPlan(updatePlan, userID);
+                                var resPlan = await UpdatePMPlan(updatePlan, userID, "");
                                 updateCount++;
                                 string myQuery2 = $"Update pm_plan set status = {(int)CMMS.CMMS_Status.PM_PLAN_CREATED},approved_by = null where id = {updatePlan.plan_id};";
                                 await Context.ExecuteNonQry<int>(myQuery2).ConfigureAwait(false);
@@ -1157,7 +1167,7 @@ namespace CMMSAPIs.Repositories.PM
 
                         foreach (var plans in approval)
                         {
-                            var approvePlan = await ApprovePMPlan(plans, userID);
+                            var approvePlan = await ApprovePMPlan(plans, userID, facilitytimeZone);
                         }
                     }
                 }

@@ -1,4 +1,5 @@
 using CMMSAPIs.Helper;
+using CMMSAPIs.Models.Notifications;
 using CMMSAPIs.Models.SM;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Utils;
@@ -290,7 +291,7 @@ namespace CMMSAPIs.Repositories.SM
             return retValue;
         }
 
-        internal async Task<CMDefaultResponse> CreateMRS(CMMRS request, int UserID)
+        internal async Task<CMDefaultResponse> CreateMRS(CMMRS request, int UserID, string facilitytimeZone)
         {
             /* isEditMode =0 for creating new MRS*/
 
@@ -421,8 +422,10 @@ namespace CMMSAPIs.Repositories.SM
                 CMMrsApproval approve_request = new CMMrsApproval();
                 approve_request.id = request.ID;
                 approve_request.comment = "MRS approval not required.";
-                var mrsApproved = await mrsApproval(approve_request, UserID);
-                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_MRS, request.ID, 0, 0, approve_request.comment, CMMS.CMMS_Status.MRS_REQUEST_APPROVED);
+                var mrsApproved = await mrsApproval(approve_request, UserID, facilitytimeZone);
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_MRS, request.ID, 0, 0, approve_request.comment, CMMS.CMMS_Status.MRS_SUBMITTED);
+                CMMRSList _MRSList = await getMRSDetails(UserID, facilitytimeZone);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_MRS, CMMS.CMMS_Status.MRS_SUBMITTED, new[] { UserID }, _MRSList);
             }
 
             return response;
@@ -864,7 +867,7 @@ namespace CMMSAPIs.Repositories.SM
         //    return response;
         //}
 
-        internal async Task<CMDefaultResponse> mrsApproval(CMMrsApproval request, int userId)
+        internal async Task<CMDefaultResponse> mrsApproval(CMMrsApproval request, int userId, string facilitytimeZone)
         {
             CMDefaultResponse response = null;
             string stmtSelect = $"SELECT ID,facility_ID, requested_by_emp_ID,reference,from_actor_type_id,from_actor_id,to_actor_type_id,to_actor_id FROM smmrs WHERE ID = {request.id}";
@@ -1036,11 +1039,13 @@ namespace CMMSAPIs.Repositories.SM
                 historyComment = "MRS Approved";
             }
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_MRS, request.id, 0, 0, request.comment, CMMS.CMMS_Status.MRS_REQUEST_APPROVED);
+            CMMRSList _MRSList = await getMRSDetails(userId, facilitytimeZone);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_MRS, CMMS.CMMS_Status.MRS_REQUEST_APPROVED, new[] { userId }, _MRSList);
 
             return response;
         }
 
-        internal async Task<CMDefaultResponse> mrsReject(CMApproval request, int userId)
+        internal async Task<CMDefaultResponse> mrsReject(CMApproval request, int userId, string facilitytimeZone)
         {
             CMDefaultResponse response = null;
             string stmtSelect = $"SELECT ID FROM smmrs WHERE ID = {request.id}";
@@ -1058,6 +1063,8 @@ namespace CMMSAPIs.Repositories.SM
                 response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.FAILURE, "Invalid mrs updated.");
             }
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_MRS, request.id, 0, 0, "MRS rejected.", CMMS.CMMS_Status.MRS_REQUEST_REJECTED);
+            CMMRSList _MRSList = await getMRSDetails(userId, facilitytimeZone);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_MRS, CMMS.CMMS_Status.MRS_REQUEST_REJECTED, new[] { userId }, _MRSList);
 
             return response;
         }
@@ -2167,7 +2174,7 @@ namespace CMMSAPIs.Repositories.SM
             return response;
         }
 
-        internal async Task<CMDefaultResponse> ApproveMRSIssue(CMApproval request, int userId)
+        internal async Task<CMDefaultResponse> ApproveMRSIssue(CMApproval request, int userId, string facilitytimeZone)
         {
             CMDefaultResponse response = null;
             string stmtSelect = $"SELECT ID FROM smmrs WHERE ID = {request.id}";
@@ -2185,10 +2192,12 @@ namespace CMMSAPIs.Repositories.SM
                 response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.FAILURE, "Invalid MRS Id passed.");
             }
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_MRS, request.id, 0, 0, "MRS Request Issued Approved.", CMMS.CMMS_Status.MRS_REQUEST_ISSUED_APPROVED);
+            CMMRSList _MRSList = await getMRSDetails(userId, facilitytimeZone);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_MRS, CMMS.CMMS_Status.MRS_REQUEST_ISSUED_APPROVED, new[] { userId }, _MRSList);
 
             return response;
         }
-        internal async Task<CMDefaultResponse> RejectMRSIssue(CMApproval request, int userId)
+        internal async Task<CMDefaultResponse> RejectMRSIssue(CMApproval request, int userId, string facilitytimeZone)
         {
             CMDefaultResponse response = null;
             string stmtSelect = $"SELECT ID FROM smmrs WHERE ID = {request.id}";
@@ -2206,6 +2215,8 @@ namespace CMMSAPIs.Repositories.SM
                 response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.FAILURE, "Invalid MRS Id Passed.");
             }
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_MRS, request.id, 0, 0, "MRS Request Issued rejected.", CMMS.CMMS_Status.MRS_REQUEST_ISSUED_REJECTED);
+            CMMRSList _MRSList = await getMRSDetails(userId, facilitytimeZone);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_MRS, CMMS.CMMS_Status.MRS_REQUEST_ISSUED_REJECTED, new[] { userId }, _MRSList);
 
             return response;
         }

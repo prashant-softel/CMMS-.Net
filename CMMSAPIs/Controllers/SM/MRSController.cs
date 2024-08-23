@@ -34,12 +34,13 @@ namespace CMMSAPIs.Controllers.SM
         //[Authorize]
         [Route("CreateMRS")]
         [HttpPost]
-        public async Task<IActionResult> CreateMRS(CMMRS request)
+        public async Task<IActionResult> CreateMRS(CMMRS request, int facility_id)
         {
             try
             {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _MRSBS.CreateMRS(request, userID);
+                var data = await _MRSBS.CreateMRS(request, userID, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -218,12 +219,13 @@ namespace CMMSAPIs.Controllers.SM
         //[Authorize]
         [Route("mrsApproval")]
         [HttpPost]
-        public async Task<IActionResult> mrsApproval(CMMrsApproval request)
+        public async Task<IActionResult> mrsApproval(CMMrsApproval request, int facility_id)
         {
             try
             {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _MRSBS.mrsApproval(request, userID);
+                var data = await _MRSBS.mrsApproval(request, userID, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -240,12 +242,13 @@ namespace CMMSAPIs.Controllers.SM
         //[Authorize]
         [Route("mrsReject")]
         [HttpPost]
-        public async Task<IActionResult> mrsReject(CMApproval request)
+        public async Task<IActionResult> mrsReject(CMApproval request, int facility_id)
         {
             try
             {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _MRSBS.mrsReject(request, userID);
+                var data = await _MRSBS.mrsReject(request, userID, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -474,12 +477,13 @@ namespace CMMSAPIs.Controllers.SM
         //[Authorize]
         [Route("ApproveMRSIssue")]
         [HttpPost]
-        public async Task<IActionResult> ApproveMRSIssue(CMApproval request)
+        public async Task<IActionResult> ApproveMRSIssue(CMApproval request, int facility_id)
         {
             try
             {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _MRSBS.ApproveMRSIssue(request, userID);
+                var data = await _MRSBS.ApproveMRSIssue(request, userID, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -494,12 +498,13 @@ namespace CMMSAPIs.Controllers.SM
         //[Authorize]
         [Route("RejectMRSIssue")]
         [HttpPost]
-        public async Task<IActionResult> RejectMRSIssue(CMApproval request)
+        public async Task<IActionResult> RejectMRSIssue(CMApproval request, int facility_id)
         {
             try
             {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _MRSBS.RejectMRSIssue(request, userID);
+                var data = await _MRSBS.RejectMRSIssue(request, userID, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
