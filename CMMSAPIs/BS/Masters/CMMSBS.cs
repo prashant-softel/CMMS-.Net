@@ -48,7 +48,7 @@ namespace CMMSAPIs.BS.Masters
         Task<List<CMModule>> GetModuleList(bool return_all);
         Task<List<CMStatus>> GetStatusList();
         Task<List<CMFrequency>> GetFrequencyList();
-        Task<string> Print(int id, CMMS.CMMS_Modules moduleID);
+        Task<string> Print(int id, CMMS.CMMS_Modules moduleID, int userID, string facilitytimeZone);
         Task<string> DownloadFile(int id);
         Task<List<CMDashboadModuleWiseList>> getDashboadDetails(string facilityId, CMMS.CMMS_Modules moduleID, DateTime fromDate, DateTime toDate);
         Task<CMStatus1> GetStatusbymodule(CMMS.CMMS_Modules module);
@@ -607,13 +607,13 @@ namespace CMMSAPIs.BS.Masters
             }
         }
 
-        public async Task<string> Print(int id, CMMS.CMMS_Modules moduleID)
+        public async Task<string> Print(int id, CMMS.CMMS_Modules moduleID, int userID, string facilitytimeZone)
         {
             try
             {
                 using (var repos = new CMMSRepository(getDB))
                 {
-                    return await repos.Print(id, moduleID);
+                    return await repos.Print(id, moduleID, userID, facilitytimeZone);
                 }
             }
             catch (Exception ex)

@@ -1,14 +1,22 @@
 using CMMSAPIs.Helper;
+using CMMSAPIs.Models.Calibration;
 using CMMSAPIs.Models.EM;
+using CMMSAPIs.Models.Incident_Reports;
+using CMMSAPIs.Models.Inventory;
 using CMMSAPIs.Models.JC;
 using CMMSAPIs.Models.Jobs;
 using CMMSAPIs.Models.Notifications;
 using CMMSAPIs.Models.Permits;
 using CMMSAPIs.Models.Utils;
+using CMMSAPIs.Models.WC;
+using CMMSAPIs.Repositories.Calibration;
+using CMMSAPIs.Repositories.Incident_Reports;
+using CMMSAPIs.Repositories.Inventory;
 using CMMSAPIs.Repositories.JC;
 using CMMSAPIs.Repositories.Jobs;
 using CMMSAPIs.Repositories.Permits;
 using CMMSAPIs.Repositories.Utils;
+using CMMSAPIs.Repositories.WC;
 using Microsoft.Extensions.Configuration;
 using MySqlX.XDevAPI;
 using System;
@@ -21,15 +29,15 @@ namespace CMMSAPIs.Repositories.EM
     public class EMRepository : GenericRepository
     {
         private UtilsRepository _utilsRepo;
-        private JobRepository _JobRepo;
-        private PermitRepository _PermitRepo;
-        private JCRepository _JCRepo;
+        public static Microsoft.AspNetCore.Hosting.IWebHostEnvironment _environment;
+        private MYSQLDBHelper getDB;
+        private ErrorLog m_errorLog;
+
         public EMRepository(MYSQLDBHelper sqlDBHelper) : base(sqlDBHelper)
         {
             _utilsRepo = new UtilsRepository(sqlDBHelper);
-            _JobRepo = new JobRepository(sqlDBHelper);
-            _PermitRepo = new PermitRepository(sqlDBHelper);
-            _JCRepo = new JCRepository(sqlDBHelper);
+            //m_errorLog = new ErrorLog(_webHost);
+            getDB = sqlDBHelper;
         }
         public async Task<CMDefaultResponse> SetEscalationMatrix(List<CMSetMasterEM> request, int userID)
         {
@@ -220,7 +228,7 @@ namespace CMMSAPIs.Repositories.EM
             return response;
         }
 
-        public async Task<CMEscalationResponse> Escalate_2(CMMS.CMMS_Modules moduleId, int statusId, int userID, string facilitytimeZone)
+        public async Task<CMEscalationResponse> Escalate_2(CMMS.CMMS_Modules moduleId, CMMS.CMMS_Status statusId, int userID, string facilitytimeZone)
         {
             /*
              * Checks the current UTC time with the time since status was last updated
@@ -243,23 +251,23 @@ namespace CMMSAPIs.Repositories.EM
 
                 if(0 == (int)moduleId && statusId == 0)
                 {
-                    responseString += Escalate_ForStatus((CMMS.CMMS_Modules)module, status, userID, facilitytimeZone);
+                    responseString += await Escalate_ForStatus((CMMS.CMMS_Modules)module, (CMMS.CMMS_Status)status, userID, facilitytimeZone);
                 }
                 else if (moduleId > 0 && module == (int) moduleId)
                 {
-                    if (status == statusId)
+                    if (status == (int)statusId)
                     {
-                        responseString += Escalate_ForStatus((CMMS.CMMS_Modules)module, status, userID, facilitytimeZone);
+                        responseString += await Escalate_ForStatus((CMMS.CMMS_Modules)module, (CMMS.CMMS_Status)status, userID, facilitytimeZone);
                         break;
                     }
                 }
 
             }
-            response = new CMEscalationResponse(moduleId, statusId, CMMS.RETRUNSTATUS.SUCCESS, responseString);
+            response = new CMEscalationResponse(moduleId, (int)statusId, CMMS.RETRUNSTATUS.SUCCESS, responseString);
 
             return response;
         }
-        public async Task<string> Escalate_ForStatus(CMMS.CMMS_Modules moduleId, int statusId, int userID, string facilitytimeZone) 
+        public async Task<string> Escalate_ForStatus(CMMS.CMMS_Modules moduleId, CMMS.CMMS_Status statusId, int userID, string facilitytimeZone) 
         {            
             CMEscalationResponse response = null;
             string responseString = "";
@@ -274,7 +282,7 @@ namespace CMMSAPIs.Repositories.EM
                 string table = Convert.ToString(dt0.Rows[0]["tableName"]);
                 string timeCol = Convert.ToString(dt0.Rows[0]["updateTimeColumn"]);
                 string statCol = Convert.ToString(dt0.Rows[0]["statusColumn"]);
-                qry1 = $"SELECT {table}.id,{table}.{statCol} as status, {table}.{timeCol} as updateDate FROM {table} WHERE {table}.{statCol} = {statusId};";
+                qry1 = $"SELECT {table}.id,{table}.{statCol} as status, {table}.{timeCol} as updateDate FROM {table} WHERE {table}.{statCol} = {(int)statusId};";
             }
             else
             {
@@ -308,7 +316,7 @@ namespace CMMSAPIs.Repositories.EM
                 int delayDays = 4;
 */
                 //int status = Convert.ToInt32(dt1.Rows[0]["status"]);
-                string qry2 = $"SELECT days, roleId FROM escalationmatrix WHERE moduleId = {(int)moduleId} AND statusId = {statusId} " +
+                string qry2 = $"SELECT days, roleId FROM escalationmatrix WHERE moduleId = {(int)moduleId} AND statusId = {(int)statusId} " +
                                 $"ORDER BY days DESC;";
                 MYSQLDBHelper mYSQLDB = new MYSQLDBHelper(ConnectionString);
                 if (Context == null)
@@ -326,37 +334,62 @@ namespace CMMSAPIs.Repositories.EM
                         int role = escalation.Value;
                         //raise this escalation
                         int[] userIDs = { userID };
-                        if (moduleId == CMMS.CMMS_Modules.JOB)
-                        {
-                            CMJobView _ViewJobList = null;
-                            _ViewJobList = await _JobRepo.GetJobDetails(module_ref_id, facilitytimeZone);
-                            await CMMSNotification.sendEMNotification(CMMS.CMMS_Modules.JOB, (CMMS.CMMS_Status)statusId, userIDs, module_ref_id, role, delayDays, _ViewJobList);
-                        }
-                        else if (moduleId == CMMS.CMMS_Modules.PTW)
+                        //await CMMSNotification.sendEMNotification2(moduleId, statusId, userIDs, module_ref_id, role, delayDays);
+                        int id = module_ref_id;
+                        switch (moduleId)
                         {
 
-                            CMPermitDetail permitDetails = await _PermitRepo.GetPermitDetails(module_ref_id, facilitytimeZone);
-
-                            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOBCARD, (CMMS.CMMS_Status)statusId, userIDs, module_ref_id, role, delayDays, permitDetails);
-
+                            case CMMS.CMMS_Modules.JOB:
+                                JobRepository obj = new JobRepository(getDB);
+                                CMJobView _jobView = await obj.GetJobDetails(id, facilitytimeZone);
+                                //notificationID = (CMMS.CMMS_Status)(_jobView.status);
+                                await CMMSNotification.sendEMNotification(moduleId, statusId, userIDs, module_ref_id, role, delayDays, _jobView);
+                                break;
+                            case CMMS.CMMS_Modules.PTW:
+                                PermitRepository obj1 = new PermitRepository(getDB);
+                                CMPermitDetail _Permit = await obj1.GetPermitDetails(id, facilitytimeZone);
+                                //notificationID = (CMMS.CMMS_Status)(_Permit.ptwStatus);
+                                await CMMSNotification.sendEMNotification(moduleId, statusId, userIDs, module_ref_id, role, delayDays, _Permit);
+                                break;
+                            case CMMS.CMMS_Modules.JOBCARD:
+                                JCRepository obj2 = new JCRepository(getDB);
+                                List<CMJCDetail> _JobCard = await obj2.GetJCDetail(id, facilitytimeZone);
+                                //notificationID = (CMMS.CMMS_Status)(_JobCard[0].status);
+                                await CMMSNotification.sendEMNotification(moduleId, statusId, userIDs, module_ref_id, role, delayDays, _JobCard[0]);
+                                break;
+                            case CMMS.CMMS_Modules.INCIDENT_REPORT:
+                                IncidentReportRepository obj3 = new IncidentReportRepository(getDB);
+                                CMViewIncidentReport _IncidentReport = await obj3.GetIncidentDetailsReport(id, facilitytimeZone);
+                                //notificationID = (CMMS.CMMS_Status)(_IncidentReport.status);
+                                await CMMSNotification.sendEMNotification(moduleId, statusId, userIDs, module_ref_id, role, delayDays, _IncidentReport);
+                                break;
+                            case CMMS.CMMS_Modules.WARRANTY_CLAIM:
+                                WCRepository obj4 = new WCRepository(getDB);
+                                CMWCDetail _WC = await obj4.GetWCDetails(id, facilitytimeZone);
+                                //notificationID = (CMMS.CMMS_Status)(_WC.status);
+                                await CMMSNotification.sendEMNotification(moduleId, statusId, userIDs, module_ref_id, role, delayDays, _WC);
+                                break;
+                            case CMMS.CMMS_Modules.CALIBRATION:
+                                CalibrationRepository obj5 = new CalibrationRepository(getDB);
+                                CMCalibrationDetails _Calibration = await obj5.GetCalibrationDetails(id, facilitytimeZone);
+                                //notificationID = (CMMS.CMMS_Status)(_Calibration.statusID + 100);
+                                await CMMSNotification.sendEMNotification(moduleId, statusId, userIDs, module_ref_id, role, delayDays, _Calibration);
+                                break;
+                            case CMMS.CMMS_Modules.INVENTORY:
+                                InventoryRepository obj6 = new InventoryRepository(getDB, _environment);
+                                CMViewInventory _Inventory = await obj6.GetInventoryDetails(id, facilitytimeZone);
+                                //notificationID = (CMMS.CMMS_Status)(_Inventory[0].status + 100);
+                                CMMSNotification.sendEMNotification(moduleId, statusId, userIDs, module_ref_id, role, delayDays, _Inventory);
+                                break;
+                            default:
+                                responseString += $"Escalation performed for {moduleId} {module_ref_id} for role {role} for {delayDays} days period.";
+                                break;
                         }
-                        else if (moduleId == CMMS.CMMS_Modules.JOBCARD)
-                        {
-                            List<CMJCDetail> _jcDetails = await _JCRepo.GetJCDetail(module_ref_id, facilitytimeZone);
-
-                            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOBCARD, (CMMS.CMMS_Status)statusId, userIDs, module_ref_id, role, delayDays, _jcDetails[0]);
-
-                        }
-                        else
-                        {
-                            responseString += $"Escalation performed for {moduleId} {module_ref_id} for role {role} for {delayDays} days period.";
-                        }
-                        responseString += $"Escalation performed for {moduleId} {module_ref_id} for role {role} for {delayDays} days period.";
+                        
                         break;
                     }
                 }
             }
-
             return responseString;
         }
        

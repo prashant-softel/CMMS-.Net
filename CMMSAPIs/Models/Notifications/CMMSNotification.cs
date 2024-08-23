@@ -12,13 +12,20 @@ using CMMSAPIs.Models.Permits;
 using CMMSAPIs.Models.Users;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Models.WC;
-using CMMSAPIs.Repositories.Users;
+using CMMSAPIs.Repositories.Calibration;
+using CMMSAPIs.Repositories.Incident_Reports;
+using CMMSAPIs.Repositories.JC;
+using CMMSAPIs.Repositories.Jobs;
+using CMMSAPIs.Repositories.Permits;
 using CMMSAPIs.Repositories.Utils;
+using CMMSAPIs.Repositories.WC;
+using CMMSAPIs.Repositories.Users;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using CMMSAPIs.Repositories.Inventory;
 
 //using CommonUtilities;
 //using CMMSAPIs.Models.Notifications;
@@ -45,10 +52,12 @@ namespace CMMSAPIs.Models.Notifications
 
         private static IConfigurationRoot MyConfig;
         private static string _conString;
-        public static MYSQLDBHelper _conn;
+        public static MYSQLDBHelper getDB;
 
 
         private UserAccessRepository _userAccessRepository;
+        public static Microsoft.AspNetCore.Hosting.IWebHostEnvironment _environment;
+
         public CMMSNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID)
         {
             m_moduleID = moduleID;
@@ -56,11 +65,14 @@ namespace CMMSAPIs.Models.Notifications
 
             MyConfig = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
             _conString = MyConfig.GetValue<string>("ConnectionStrings:Con");
-            _conn = new MYSQLDBHelper(_conString);
+            if (getDB == null)
+            {
+                getDB = new MYSQLDBHelper(_conString);
+            }
 
             IWebHostEnvironment webHostEnvironment = null;
             IConfiguration configuration = null;
-            _userAccessRepository = new UserAccessRepository(_conn, webHostEnvironment, configuration);
+            _userAccessRepository = new UserAccessRepository(getDB, webHostEnvironment, configuration);
         }
 
 
@@ -186,7 +198,7 @@ namespace CMMSAPIs.Models.Notifications
             // emailList = GetUserByNotificationId(notificationID);
 
             string subject;
-            string printBody;
+            //string printBody;
 
             if (m_notificationType == 2)
             {
@@ -206,6 +218,7 @@ namespace CMMSAPIs.Models.Notifications
 
             CMUserByNotificationId notification = new CMUserByNotificationId();
             notification.facility_id = facilityId;
+            notification.module_id = moduleID;
             notification.notification_id = (int)notificationID;
             notification.user_ids = userID;
             notification.role_id = m_role;
@@ -216,16 +229,16 @@ namespace CMMSAPIs.Models.Notifications
             {
                 //CMMSNotification objc = new CMMSNotification(_conn);
                 // UserAccessRepository obj = new UserAccessRepository(_conn);
-                if (m_notificationType == 1)
+                if (m_notificationType == 2)
                 {
-                    users = await _userAccessRepository.GetUserByNotificationId(notification);
+                    users = await _userAccessRepository.GetEMUsers(notification);
                     notificationQry = $"INSERT INTO escalationlog (moduleId, moduleRefId, moduleStatus, notifSentToId, notifSentAt) VALUES " +
-                                    $"({(int)moduleID}, {module_ref_id}, {notificationID}, {m_role}, '{UtilsRepository.GetUTCTime()}'); " +
+                                    $"({(int)moduleID}, {module_ref_id}, {(int)notificationID}, {m_role}, '{UtilsRepository.GetUTCTime()}'); " +
                                     $"SELECT LAST_INSERT_ID(); ";
                 }
                 else
                 {
-                    users = await _userAccessRepository.GetEMUsers(facilityId, m_role, (int)notificationID);
+                    users = await _userAccessRepository.GetUserByNotificationId(notification);
                     notificationQry = $"INSERT INTO escalationlog (moduleId, moduleRefId, moduleStatus, notifSentToId, notifSentAt) VALUES " +
                                     $"({(int)moduleID}, {module_ref_id}, {(int)notificationID}, {m_role}, '{UtilsRepository.GetUTCTime()}'); " +
                                     $"SELECT LAST_INSERT_ID(); ";
@@ -242,7 +255,11 @@ namespace CMMSAPIs.Models.Notifications
             List<string> EmailTo = new List<string>();
             // List<CMUser> EmailTo = users;
 
-            System.Data.DataTable dt1 = await _conn.FetchData(notificationQry).ConfigureAwait(false);
+            if (getDB == null)
+            {
+                getDB = new MYSQLDBHelper(_conString);
+            }
+            System.Data.DataTable dt1 = await getDB.FetchData(notificationQry).ConfigureAwait(false);
             int escalationlogID = Convert.ToInt32(dt1.Rows[0][0]);
 
             string notificationRecordsQry = "INSERT INTO escalationsentto (escalationLogId, notifSentTo) VALUES ";
@@ -259,10 +276,14 @@ namespace CMMSAPIs.Models.Notifications
             }
             if (users.Count > 0)
             {
-                EmailTo.Add("cmms@softeltech.in");
+                EmailTo.Add("notifications@softeltech.in");
                 notificationRecordsQry = notificationRecordsQry.Substring(0, notificationRecordsQry.Length - 1);
             }
-            System.Data.DataTable dt2 = await _conn.FetchData(notificationRecordsQry).ConfigureAwait(false);
+            if (getDB == null)
+            {
+                getDB = new MYSQLDBHelper(_conString);
+            }
+            System.Data.DataTable dt2 = await getDB.FetchData(notificationRecordsQry).ConfigureAwait(false);
 
 
             if (print)
@@ -278,6 +299,72 @@ namespace CMMSAPIs.Models.Notifications
 
         }
 
+        public static async Task<CMDefaultResponse> sendEMNotification2(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, int[] userID, int module_ref_id, int role, int delayDays)
+        {
+            CMDefaultResponse retValue;
+            int notificationType = 2;
+            string facilitytimeZone = "";
+            if (getDB == null)
+            {
+                getDB = new MYSQLDBHelper(_conString);
+            }
+
+            switch (moduleID)
+            {                            
+                case CMMS.CMMS_Modules.JOB:
+                    JobRepository obj0 = new JobRepository(getDB);
+                    CMJobView _jobView = await obj0.GetJobDetails(module_ref_id, facilitytimeZone);
+                    //notificationID = (CMMS.CMMS_Status)(_jobView.status);
+                    retValue = await sendBaseNotification(moduleID, notificationID, userID, module_ref_id, role, delayDays, notificationType, _jobView);
+                    break;
+                case CMMS.CMMS_Modules.PTW:
+                    PermitRepository obj1 = new PermitRepository(getDB);
+                    CMPermitDetail _Permit = await obj1.GetPermitDetails(module_ref_id, facilitytimeZone);
+                    //notificationID = (CMMS.CMMS_Status)(_Permit.ptwStatus);
+                    retValue = await sendBaseNotification(moduleID, notificationID, userID, module_ref_id, role, delayDays, notificationType, _Permit);
+                    break;
+                case CMMS.CMMS_Modules.JOBCARD:
+                    JCRepository obj2 = new JCRepository(getDB);
+                    List<CMJCDetail> _JobCard = await obj2.GetJCDetail(module_ref_id, facilitytimeZone);
+                    //notificationID = (CMMS.CMMS_Status)(_JobCard[0].status);
+                    retValue = await sendBaseNotification(moduleID, notificationID, userID, module_ref_id, role, delayDays, notificationType, _JobCard[0]);
+                    break;
+                case CMMS.CMMS_Modules.INCIDENT_REPORT:
+                    IncidentReportRepository obj3 = new IncidentReportRepository(getDB);
+                    CMViewIncidentReport _IncidentReport = await obj3.GetIncidentDetailsReport(module_ref_id, facilitytimeZone);
+                    //notificationID = (CMMS.CMMS_Status)(_IncidentReport.status);
+                    retValue = await sendBaseNotification(moduleID, notificationID, userID, module_ref_id, role, delayDays, notificationType, _IncidentReport);
+                    break;
+                case CMMS.CMMS_Modules.WARRANTY_CLAIM:
+                    WCRepository obj4 = new WCRepository(getDB);
+                    CMWCDetail _WC = await obj4.GetWCDetails(module_ref_id, facilitytimeZone);
+                    //notificationID = (CMMS.CMMS_Status)(_WC.status);
+                    retValue = await sendBaseNotification(moduleID, notificationID, userID, module_ref_id, role, delayDays, notificationType, _WC);
+                    break;
+                case CMMS.CMMS_Modules.CALIBRATION:
+                    CalibrationRepository obj5 = new CalibrationRepository(getDB);
+                    CMCalibrationDetails _Calibration = await obj5.GetCalibrationDetails(module_ref_id, facilitytimeZone);
+                    //notificationID = (CMMS.CMMS_Status)(_Calibration.statusID + 100);
+                    retValue = await sendBaseNotification(moduleID, notificationID, userID, module_ref_id, role, delayDays, notificationType, _Calibration);
+                    break;
+                case CMMS.CMMS_Modules.INVENTORY:
+                    InventoryRepository obj6 = new InventoryRepository(getDB, _environment);
+                    CMViewInventory _Inventory = await obj6.GetInventoryDetails(module_ref_id, facilitytimeZone);
+                    //notificationID = (CMMS.CMMS_Status)(_Inventory[0].status + 100);
+                    retValue = await sendBaseNotification(moduleID, notificationID, userID, module_ref_id, role, delayDays, notificationType, _Inventory);
+                    break;
+                default:
+                    string sReturn = $"Escalation performed for {moduleID} {module_ref_id} for role {role} for {delayDays} days period.";
+                    //throw  System.SystemException(sReturn);
+                    retValue = new CMDefaultResponse(module_ref_id, CMMS.RETRUNSTATUS.INVALID_ARG, sReturn);
+                    break;
+            }
+            //await CMMSNotification.sendEMNotification(moduleID, notificationID, userID, module_ref_id, role, delayDays, _jobView);
+
+//            retValue = await sendBaseNotification(moduleID, notificationID, userID, module_ref_id, role, delayDays, notificationType, obj);
+            return retValue;
+
+        }
 
         public static async Task<CMDefaultResponse> sendEMNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, int[] userID, int module_ref_id, int role, int delayDays, params object[] args)
         {

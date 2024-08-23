@@ -41,13 +41,29 @@ namespace CMMSAPIs.Models.WC
         public string corrective_action_by_buyer { get; set; }
         public string request_to_supplier { get; set; }
         public int created_by { get; set; }
+        public int created_by_name { get; set; }
+        public dynamic created_at { get; set; }
         public int approved_by { get; set; }
         public string approver_name { get; set; }
+        public dynamic approved_at { get; set; }
+        public int rejected_by { get; set; }
+        public string rejected_by_name { get; set; }
+        public dynamic rejected_at { get; set; }
         public dynamic last_updated_at { get; set; }
         public dynamic closed_at { get; set; }
         public int closed_by { get; set; }
-        public int status { get; set; }
+        public string closed_by_name { get; set; }
+        public int closed_approved_by { get; set; }
+        public string closed_approver_name { get; set; }
+        public dynamic closed_approved_at { get; set; }
+        public int closed_rejected_by { get; set; }
+        public string closed_rejected_by_name { get; set; }
+        public dynamic closed_rejected_at { get; set; }
+        public dynamic cancelled_at { get; set; }
+        public int cancelled_by { get; set; }
+        public string cancelled_by_name { get; set; }
         public List<CMLog> log { get; set; }
+        public int status { get; set; }
         public string status_short { get; set; }
         //public string srNumber { get; set; }
         public string status_long { get; set; }

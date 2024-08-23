@@ -603,14 +603,14 @@ namespace CMMSAPIs.Controllers.Masters
 
         [Route("Print")]
         [HttpGet]
-        public async Task<FileResult> Print(int id, CMMS.CMMS_Modules moduleID)
+        public async Task<FileResult> Print(int id, CMMS.CMMS_Modules moduleID, int facilityId)
         {
             try
             {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
 
-                //CMMSRepository obj = new CMMSRepository( );
-
-                var data = await _CMMSBS.Print(id, moduleID);
+                var data = await _CMMSBS.Print(id, moduleID, userID, facilitytimeZone);
                 var body = data.ToString();
 
                 using (MemoryStream stream = new System.IO.MemoryStream())
