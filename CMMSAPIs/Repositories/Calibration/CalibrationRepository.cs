@@ -180,7 +180,7 @@ namespace CMMSAPIs.Repositories.Calibration
             string myQuery4 = "";
             if (_calibrationDetails[0].reschedule == 0 && _calibrationDetails[0].prev_task_id > 0)
             {
-                myQuery20 = "SELECT  asset.id as id, file_path as fileName,  U.File_Size as fileSize, U.status,U.description FROM uploadedfiles AS U " +
+                myQuery20 = "SELECT  asset.id as id, file_path as fileName,  U.File_Size as fileSize,U.created_by ,U.created_at, U.status,U.description FROM uploadedfiles AS U " +
                          "Left JOIN assets as  asset on asset.id = U.module_ref_id  " +
                          "where module_ref_id =" + _calibrationDetails[0].prev_task_id + " and U.module_type = " + (int)CMMS.CMMS_Modules.CALIBRATION + ";";
 
@@ -523,7 +523,12 @@ namespace CMMSAPIs.Repositories.Calibration
             {
                 for (var i = 0; i < request.uploaded_file_id.Count; i++)
                 {
-                    string update_Q = $"update uploadedfiles set module_type = {(int)CMMS.CMMS_Modules.CALIBRATION} , module_ref_id = {request.calibration_id} where id = {request.uploaded_file_id[i]};";
+                    int cretedby = userID;
+                    string time = UtilsRepository.GetUTCTime();
+                    string update_Q = $"update uploadedfiles set module_type = {(int)CMMS.CMMS_Modules.CALIBRATION} , " +
+                        $"module_ref_id = {request.calibration_id}, " +
+                        $"created_by={cretedby} , created_at = '{time}' " +
+                        $"where id = {request.uploaded_file_id[i]};";
                     int result = await Context.ExecuteNonQry<int>(update_Q).ConfigureAwait(false);
                 }
             }
