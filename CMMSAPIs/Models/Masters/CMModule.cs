@@ -128,7 +128,7 @@ namespace CMMSAPIs.Models.Masters
         public DateTime? grn_date { get; set; }
         public decimal grn_qty { get; set; }
         public string MC_Type { get; set; }
-        public DateTime Start_Date { get; set; }
+
         public DateTime End_Date_done { get; set; }
     }
     public class CMROLE
