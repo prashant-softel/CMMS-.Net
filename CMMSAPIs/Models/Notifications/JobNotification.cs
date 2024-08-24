@@ -16,7 +16,7 @@ namespace CMMSAPIs.Models.Notifications
         int m_jobId;
         CMJobView m_jobObj;
         private JobRepository _JobRepo;
-        int m_notificationType = 1;
+        //int m_notificationType = 1;
 
         public JobNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMJobView jobObj, int notificationType = 1) : base(moduleID, notificationID)
         {
@@ -25,7 +25,7 @@ namespace CMMSAPIs.Models.Notifications
             m_notificationType = notificationType;
         }
 
-        protected virtual int getId(params object[] args)
+        override protected int getId(params object[] args)
         {
             return m_jobObj.id;
         }
@@ -119,7 +119,7 @@ namespace CMMSAPIs.Models.Notifications
 
             if (m_jobObj.current_ptw_id > 0)
             {
-                retValue += String.Format(template, "PTW Id", m_jobObj.current_ptw_id);
+                retValue += String.Format(template, "PTW Id", "PTW" + m_jobObj.current_ptw_id);
                 retValue += String.Format(template, "PTW Title", m_jobObj.current_ptw_title);
             }
             retValue += String.Format(template, "Created by", m_jobObj.created_by_name);
@@ -129,11 +129,11 @@ namespace CMMSAPIs.Models.Notifications
                 retValue += String.Format(template, "Assigned To", m_jobObj.assigned_name);
                 //retValue += String.Format(template, "Assigned At", m_jobObj.created_by_name);
             }
-            //if (!m_jobObj.closed_at.IsNull)
-            //{
+            if (!m_jobObj.close.closed_at.IsNull)
+            {
                 //retValue += String.Format(template, "Closed By", m_jobObj.assigned_name);
                 retValue += String.Format(templateEnd, "Closed At", m_jobObj.closed_at);
-            //}
+            }
 
 
 

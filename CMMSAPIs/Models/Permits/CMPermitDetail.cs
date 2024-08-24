@@ -79,6 +79,14 @@ namespace CMMSAPIs.Models.Permits
         public string cancelRequestRejectedByDesignation { get; set; }
         public string cancelRequestRejectedByCompany { get; set; }
 
+        public int extendRequestby_id { get; set; }
+        public string extendRequestByName { get; set; }
+        public int extendRequestRejectedby_id { get; set; }
+        public string extendRequestRejectedByName { get; set; }
+        public DateTime? extend_at { get; set; }
+        public int extendRequestApprovedby_id { get; set; }
+        public string extendRequestApprovedByName { get; set; }
+
         public double latitude { get; set; }
         public double longitude { get; set; }
         public List<int> category_ids { get; set; }

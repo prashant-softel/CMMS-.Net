@@ -33,7 +33,7 @@ namespace CMMSAPIs.Models.Jobs
         public int current_ptw_id { get; set; }
         public string current_ptw_title { get; set; }
 
-        public dynamic closed_at { get; set; }
+        //public dynamic closed_at { get; set; }
         public DateTime Job_closed_on { get; set; }
         public DateTime Breakdown_end_time { get; set; }
         public DateTime Breakdown_start_time { get; set; }

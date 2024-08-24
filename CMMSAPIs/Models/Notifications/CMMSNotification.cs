@@ -173,15 +173,21 @@ namespace CMMSAPIs.Models.Notifications
             request.Body = Body;
             request.Headers = HTMLHeader;
 
+            CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
+
             try
             {
                 var res = MailService.SendEmailAsync(request, _settings);
+                //if(sucess code)
+                {
+                    retCode = CMMS.RETRUNSTATUS.SUCCESS;
+                }
             }
-            catch (Exception e)
+                catch (Exception e)
             {
                 string msg = e.Message;
             }
-            CMDefaultResponse retValue = new CMDefaultResponse(1, CMMS.RETRUNSTATUS.SUCCESS, "mail send");
+            CMDefaultResponse retValue = new CMDefaultResponse(1, retCode, "mail with subject <" + subject + "> sent");
 
             return retValue;
         }

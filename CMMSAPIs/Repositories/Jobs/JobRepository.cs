@@ -51,12 +51,12 @@ namespace CMMSAPIs.Repositories.Jobs
             {
                 if (list != null && list.breakdown_time != null)
                     list.breakdown_time = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)list.breakdown_time);
-                if (list != null && list.closed_at != null)
-                    list.breakdown_time = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.closed_at);
+                if (list != null && list.Breakdown_end_time != null)
+                    list.Breakdown_end_time = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)list.Breakdown_end_time);
+                if (list != null && list.Job_closed_on != null)
+                    list.Job_closed_on = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.Job_closed_on);
                 if (list != null && list.created_at != null)
-                    list.breakdown_time = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)list.created_at);
-
-
+                    list.created_at = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)list.created_at);
             }
             return _ViewJobList;
         }
@@ -404,11 +404,12 @@ namespace CMMSAPIs.Repositories.Jobs
             {
                 if (list != null && list.breakdown_time != null)
                     list.breakdown_time = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)list.breakdown_time);
-                if (list != null && list.closed_at != null)
-                    list.closed_at = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.closed_at);
+                if (list != null && list.Breakdown_end_time != null)
+                    list.Breakdown_end_time = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)list.Breakdown_end_time);
+                if (list != null && list.Job_closed_on != null)
+                    list.Job_closed_on = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.Job_closed_on);
                 if (list != null && list.created_at != null)
                     list.created_at = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)list.created_at);
-
             }
 
             return _ViewJobList[0];
