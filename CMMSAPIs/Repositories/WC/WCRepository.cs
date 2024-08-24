@@ -366,12 +366,12 @@ namespace CMMSAPIs.Repositories.WC
 
 
             // Retrieve external emails associated with the warranty claim
-            string internalEmailsQuery = $"SELECT user_id, name, email,role  FROM wc_emails WHERE wc_id = {id} and type = 'Internal'";
-            List<CMWCExternalEmail> internalEmails = await Context.GetData<CMWCExternalEmail>(internalEmailsQuery).ConfigureAwait(false);
+            string internalEmailsQuery = $"SELECT user_id  as id, name, email as login_id,role  FROM wc_emails WHERE wc_id = {id} and type = 'Internal'";
+            List<CMWCinternalEmail> internalEmails = await Context.GetData<CMWCinternalEmail>(internalEmailsQuery).ConfigureAwait(false);
             GetWCDetails[0].additionalEmailEmployees = internalEmails;
 
             // Retrieve external emails associated with the warranty claim
-            string externalEmailsQuery = $"SELECT user_id, name, email,rolename as rolename,mobile as mobile FROM wc_emails WHERE wc_id = {id} and type = 'External'";
+            string externalEmailsQuery = $"SELECT user_id , name, email ,rolename as rolename,mobile as mobile FROM wc_emails WHERE wc_id = {id} and type = 'External'";
             List<CMWCExternalEmail> externalEmails = await Context.GetData<CMWCExternalEmail>(externalEmailsQuery).ConfigureAwait(false);
             GetWCDetails[0].externalEmails = externalEmails;
 

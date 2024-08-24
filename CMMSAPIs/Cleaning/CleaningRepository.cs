@@ -379,26 +379,42 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 foreach (var schedule in request.schedules)
                 {
 
-                    string checkQuery = $"SELECT scheduleId FROM cleaning_plan_schedules WHERE planId = {request.planId};";
-                    List<int> existingScheduleIds = await Context.ExecuteNonQrys<int>(checkQuery).ConfigureAwait(false);
+                    /* string checkQuery = $"SELECT scheduleId FROM cleaning_plan_schedules WHERE planId = {request.planId};";
+                     List<int> existingScheduleIds = await Context.ExecuteNonQrys<int>(checkQuery).ConfigureAwait(false);
 
 
-                    bool exists = existingScheduleIds.Contains(schedule.scheduleId);
-
-                    if (exists)
+                     bool exists = existingScheduleIds.Contains(schedule.scheduleId);*/
+                    bool check = true;
+                    int schedule_Id = 0;
+                    if (schedule.scheduleId > 0)
                     {
                         myQuery += $"UPDATE cleaning_plan_schedules SET updatedAt = '{UtilsRepository.GetUTCTime()}', updatedById = {userId}, plannedDay = {schedule.cleaningDay}  " +
                                    $"WHERE  planId = {request.planId} AND scheduleId = {schedule.scheduleId};";
+
                     }
                     else
                     {
-                        myQuery += $"INSERT INTO cleaning_plan_schedules (planId, scheduleId, plannedDay,moduleType,cleaningType, updatedAt, updatedById, createdAt, createdById) " +
-                                   $"VALUES ({request.planId}, {schedule.scheduleId}, {schedule.cleaningDay},{moduleType},{request.cleaningType}, '{UtilsRepository.GetUTCTime()}', {userId}, '{UtilsRepository.GetUTCTime()}', {userId});";
+                        string myQuery1 = $"INSERT INTO cleaning_plan_schedules (planId,plannedDay,moduleType,cleaningType, updatedAt, updatedById, createdAt, createdById) " +
+                                          $"VALUES ({request.planId}, {schedule.cleaningDay},{moduleType},{request.cleaningType}, '{UtilsRepository.GetUTCTime()}', {userId}, '{UtilsRepository.GetUTCTime()}', {userId});" +
+                                          $"SELECT LAST_INSERT_ID();";
+                        DataTable dt = await Context.FetchData(myQuery1).ConfigureAwait(false);
+                        schedule_Id = Convert.ToInt32(dt.Rows[0][0]);
+                        check = false;
                     }
 
                     // Delete existing cleaning plan items for this scheduleId
+
                     myQuery += $"DELETE FROM cleaning_plan_items WHERE scheduleId = {schedule.scheduleId};";
 
+                    int sc_id = 0;
+                    if (check)
+                    {
+                        sc_id = schedule.scheduleId;
+                    }
+                    else
+                    {
+                        sc_id = schedule_Id;
+                    }
                     // Insert new cleaning plan items if there are any equipments
                     if (schedule.equipments.Count > 0)
                     {
@@ -406,14 +422,12 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
                         foreach (var equipment in schedule.equipments)
                         {
-                            myQuery += $"({request.planId}, {moduleType}, {schedule.scheduleId}, {equipment.id}, " +
+                            myQuery += $"({request.planId}, {moduleType}, {sc_id}, {equipment.id}, " +
                                        $"(SELECT {measure} FROM assets WHERE id = {equipment.id}), " +
                                        $"{schedule.cleaningDay}, {userId}, '{UtilsRepository.GetUTCTime()}', " +
                                        $"(SELECT createdById FROM cleaning_plan WHERE planId = {request.planId}), " +
                                        $"(SELECT createdAt FROM cleaning_plan WHERE planId = {request.planId})),";
                         }
-
-                        // Remove the trailing comma and finalize the SQL statement
                         myQuery = myQuery.TrimEnd(',') + ";";
                         planId = request.planId;
                     }
@@ -752,6 +766,8 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                     ViewMCTaskList.startDate = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, ViewMCTaskList.startDate);
                 if (ViewMCTaskList != null && ViewMCTaskList.lastDoneDate != null)
                     ViewMCTaskList.lastDoneDate = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, ViewMCTaskList.lastDoneDate);
+                if (ViewMCTaskList != null && ViewMCTaskList.Abondond_done_date != null)
+                    ViewMCTaskList.Abondond_done_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, ViewMCTaskList.Abondond_done_date);
 
             }
             return _ViewMCTaskList;

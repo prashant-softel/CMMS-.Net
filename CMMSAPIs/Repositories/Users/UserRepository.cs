@@ -168,14 +168,10 @@ namespace CMMSAPIs.Repositories.Users
                 List<CMUser> reportToDetails = await Context.GetData<CMUser>(reportToDetailsQry).ConfigureAwait(false);
 
 
-                //CMResposibility reponsibility2 = new CMResposibility();
-                //reponsibility2.id = 2;
-                //reponsibility2.name = "Plumber";
-                //reponsibility2.since = DateTime.Parse("12-12-2018");
-                //reponsibility2.experianceYears = 4;
+
                 user_detail[0].responsibility = await GetUserResponsibity(user_id);
 
-                //user_detail[0].responsibility.Add(reponsibility2);
+
 
                 if (reportToDetails.Count > 0)
                     user_detail[0].report_to = reportToDetails[0];
@@ -278,7 +274,8 @@ namespace CMMSAPIs.Repositories.Users
                 { "Is Employee", new Tuple<string, Type>("isEmployee", typeof(string)) },
                 { "Joining Date", new Tuple<string, Type>("joiningDate", typeof(DateTime)) },
                 { "Plant Associated", new Tuple<string, Type>("plant_name", typeof(string)) },
-                { "Report To", new Tuple<string, Type>("report_to_email", typeof(string)) }
+                { "Report To", new Tuple<string, Type>("report_to_email", typeof(string)) },
+                { "Designation", new Tuple<string, Type>("Designation", typeof(string)) }
             };
             string query1 = $"SELECT file_path FROM uploadedfiles WHERE id = {file_id};";
             DataTable dt1 = await Context.FetchData(query1).ConfigureAwait(false);
@@ -325,6 +322,7 @@ namespace CMMSAPIs.Repositories.Users
                         dt2.Columns.Add("plant_id", typeof(int));
                         dt2.Columns.Add("report_to_id", typeof(int));
                         dt2.Columns.Add("row_no", typeof(int));
+                        dt2.Columns.Add("designation_id", typeof(int));
                         for (int rN = 2; rN <= sheet.Dimension.End.Row; rN++)
                         {
                             ExcelRange row = sheet.Cells[rN, 1, rN, sheet.Dimension.End.Column];
@@ -433,11 +431,11 @@ namespace CMMSAPIs.Repositories.Users
                             }
                             try
                             {
-                                newR["designation"] = Designation[Convert.ToString(newR["Designation"]).ToUpper()];
+                                newR["designation_id"] = Designation[Convert.ToString(newR["Designation"]).ToUpper()];
                             }
                             catch (KeyNotFoundException)
                             {
-                                newR["designation"] = 0;
+                                newR["designation_id"] = 0;
                             }
                             try
                             {
@@ -789,9 +787,6 @@ namespace CMMSAPIs.Repositories.Users
                     string addFacility = $"INSERT INTO userfacilities(userId, facilityId, createdAt, createdBy, status,isemployee) " +
                                             $"VALUES ({id}, {user.facilitiesid.FirstOrDefault()},'{UtilsRepository.GetUTCTime()}', {userID}, 1,{isemp});";
                     await Context.ExecuteNonQry<int>(addFacility).ConfigureAwait(false);
-
-
-
 
                     CMUserAccess userAccess = new CMUserAccess()
                     {
