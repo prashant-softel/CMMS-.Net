@@ -287,6 +287,25 @@ namespace CMMSAPIs.Repositories.Facility
                                 $" AND uf.facilityId = {facility_id} GROUP BY u.id ORDER BY u.id;";
                 _FacilityByFeatureid = await Context.GetData<FacilityListEmployee>(myQuery).ConfigureAwait(false);
             }
+            else if (isattendence == 1 && featureid == 0)
+            {
+                string myQuery1 = $"SELECT u.id, loginId as login_id, concat(firstName,' ', lastName) as name,uf.isemployee, usd.designationName as designation, birthday as birthdate, gender, mobileNumber, cities.name as city, states.name as state, countries.name as country, zipcode as pin  " +
+                                $"FROM  Users as u  JOIN UserFacilities as uf ON u.id = uf.userId  " +
+                                $"LEFT JOIN cities as cities ON cities.id = u.cityId  " +
+                                $"LEFT JOIN states as states ON states.id = u.stateId and states.id = cities.state_id  " +
+                                $"LEFT JOIN countries as countries ON countries.id = u.countryId and countries.id = cities.country_id and countries.id = states.country_id  " +
+                                $"LEFT JOIN usersaccess as access ON u.id = access.userId  " +
+                                $"LEFT JOIN  userdesignation as usd on  usd.id = u.designation_id " +
+                                $"LEFT JOIN employee_attendance as es on es.employee_id = u.id " +
+                                $"WHERE uf.isemployee = 1  and  u.status = 1 " +
+                                $" AND  uf.status = 1  " +
+                                $" AND  es.present=1 and es.Date=current_date() AND  uf.status = 1 " +
+                                $" AND TIME(STR_TO_DATE(es.in_time, '%l:%i %p')) < CURTIME() " +
+                                $" AND TIME(STR_TO_DATE(es.out_time, '%l:%i %p')) > CURTIME() " +
+                                $" AND uf.facilityId = {facility_id} GROUP BY u.id ORDER BY u.id;";
+
+                _FacilityByFeatureid = await Context.GetData<FacilityListEmployee>(myQuery1).ConfigureAwait(false);
+            }
             else
             {
                 string myQuery = $"SELECT u.id, loginId as login_id, concat(firstName,' ', lastName) as name,uf.isemployee, usd.designationName as designation, birthday as birthdate, gender, mobileNumber, cities.name as city, states.name as state, countries.name as country, zipcode as pin  " +

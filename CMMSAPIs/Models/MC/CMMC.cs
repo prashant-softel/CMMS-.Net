@@ -63,7 +63,7 @@ namespace CMMSAPIs.Models.MC
         public string updatedBy { get; set; }
         public string rejectedBy { get; set; }
 
-
+        public int resubmit { get; set; }
         public bool scheduleAdded = false;
 
 
@@ -294,6 +294,7 @@ namespace CMMSAPIs.Models.MC
         public DateTime startDate { get; set; }
         public DateTime doneDate { get; set; }
         public DateTime lastDoneDate { get; set; }
+        public DateTime Abondond_done_date { get; set; }
         public int status { get; set; }
         public string status_short { get; set; }
         public int water_used { get; set; }

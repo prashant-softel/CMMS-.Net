@@ -22,7 +22,7 @@ namespace CMMSAPIs.Repositories.WC
             { 196, "Rejected By Manufacturer" },
             { 197, "Approved By Manufacturer" },
             { 198, "Item Replenished" },
-            { 199, "Closed Waiting for Approval" },
+            { 199, "Close Waiting for Approval" },
             { 200, "Closed-Approved" },
             { 201, "Closed- Reject" },
 
@@ -201,14 +201,24 @@ namespace CMMSAPIs.Repositories.WC
                     draftStatus = (CMMS.CMMS_Status)(int)CMMS.CMMS_Status.WC_DRAFT;
                 }
 
+                /* string qry = "insert into wc(status_updated_at, facilityId, equipment_id, good_order_id, affected_part, order_reference_number, affected_sr_no, " +
+                                 "cost_of_replacement,approxdailyloss , currencyId, warranty_start_date, warranty_end_date, warranty_claim_title, warranty_description, " +
+                                 "corrective_action_by_buyer,severity, request_to_supplier, approver_id, status, wc_fac_code, failure_time,date_of_claim, created_by,comment) values" +
+                                 $"('{UtilsRepository.GetUTCTime()}', {unit.facilityId}, {unit.equipmentId}, '{unit.goodsOrderId}', '{unit.affectedPart}', '{unit.orderReference}', " +
+                                 $"'{unit.affectedSrNo}', '{unit.costOfReplacement}',{unit.approxdailyloss}, {unit.currencyId}, '{((DateTime)unit.warrantyStartAt).ToString("yyyy'-'MM'-'dd")}', " +
+                                 $"'{((DateTime)unit.warrantyEndAt).ToString("yyyy'-'MM'-'dd")}', '{unit.warrantyClaimTitle}', '{unit.warrantyDescription}', " +
+                                 $"'{unit.correctiveActionByBuyer}','{unit.severity}' ,'{unit.requestToSupplier}', {unit.approverId},{(int)draftStatus}, " +
+                                 $"'FAC{1000 + unit.facilityId}', '{((DateTime)unit.failureTime).ToString("yyyy-MM-dd HH-mm")}','{((DateTime)unit.date_of_claim).ToString("yyyy-MM-dd HH-mm")}', {userID},'{unit.comment}'); select LAST_INSERT_ID(); ";
+                 DataTable dt = await Context.FetchData(qry).ConfigureAwait(false);
+                 int id = Convert.ToInt32(dt.Rows[0][0]);*/
                 string qry = "insert into wc(status_updated_at, facilityId, equipment_id, good_order_id, affected_part, order_reference_number, affected_sr_no, " +
                                 "cost_of_replacement,approxdailyloss , currencyId, warranty_start_date, warranty_end_date, warranty_claim_title, warranty_description, " +
-                                "corrective_action_by_buyer,severity, request_to_supplier, approver_id, status, wc_fac_code, failure_time,date_of_claim, created_by,comment) values" +
+                                "corrective_action_by_buyer,severity, request_to_supplier, status, wc_fac_code, failure_time,date_of_claim, created_at, created_by,comment) values" +
                                 $"('{UtilsRepository.GetUTCTime()}', {unit.facilityId}, {unit.equipmentId}, '{unit.goodsOrderId}', '{unit.affectedPart}', '{unit.orderReference}', " +
                                 $"'{unit.affectedSrNo}', '{unit.costOfReplacement}',{unit.approxdailyloss}, {unit.currencyId}, '{((DateTime)unit.warrantyStartAt).ToString("yyyy'-'MM'-'dd")}', " +
-                                $"'{((DateTime)unit.warrantyEndAt).ToString("yyyy'-'MM'-'dd")}', '{unit.warrantyClaimTitle}', '{unit.warrantyDescription}', " +
-                                $"'{unit.correctiveActionByBuyer}','{unit.severity}' ,'{unit.requestToSupplier}', {unit.approverId},{(int)draftStatus}, " +
-                                $"'FAC{1000 + unit.facilityId}', '{((DateTime)unit.failureTime).ToString("yyyy-MM-dd HH-mm")}','{((DateTime)unit.date_of_claim).ToString("yyyy-MM-dd HH-mm")}', {userID},'{unit.comment}'); select LAST_INSERT_ID(); ";
+                                $"'{((DateTime)unit.warrantyEndAt).ToString("yyyy'-'MM'-'dd")}', '{unit.warrantyClaimTitle}', '{unit.warrantyDescription}', '{unit.correctiveActionByBuyer}'," +
+                                $"'{unit.severity}' ,'{unit.requestToSupplier}', {(int)draftStatus}, 'FAC{1000 + unit.facilityId}','{((DateTime)unit.failureTime).ToString("yyyy-MM-dd HH-mm")}'," +
+                                $"'{((DateTime)unit.date_of_claim).ToString("yyyy-MM-dd HH-mm")}','{UtilsRepository.GetUTCTime()}', {userID},'{unit.comment}'); select LAST_INSERT_ID(); ";
                 DataTable dt = await Context.FetchData(qry).ConfigureAwait(false);
                 int id = Convert.ToInt32(dt.Rows[0][0]);
                 cw_id = id;
@@ -711,8 +721,8 @@ namespace CMMSAPIs.Repositories.WC
         internal async Task<CMDefaultResponse> ApprovedClosedWC(CMApproval request, int userId)
         {
             string UpdateQ = $"update wc " +
-             $"set Status = {(int)CMMS.CMMS_Status.WC_CLOSE_APPROVED} , closed_by = {userId}, " +
-             $"closed_at = '{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}', close_remarks = '{request.comment}' " +
+             $"set Status = {(int)CMMS.CMMS_Status.WC_CLOSE_APPROVED} , closed_approve_by = {userId}, " +
+             $"closed_approve_at = '{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}', close_approve_comment = '{request.comment}' " +
              $"where id = {request.id} ;";
             var result = await Context.ExecuteNonQry<int>(UpdateQ);
 
@@ -723,7 +733,7 @@ namespace CMMSAPIs.Repositories.WC
         internal async Task<CMDefaultResponse> RejectClosedWC(CMApproval request, int userID)
         {
             string approveQuery = $"Update  wc set Status = {(int)CMMS.CMMS_Status.WC_SUBMIT_APPROVED},  " +
-                $" rejecctedBy={userID},RejectedRemarks='{request.comment}', rejectedAt='{UtilsRepository.GetUTCTime()}' " +
+                $" rejecctedBy={userID},RejectedRemarks='{request.comment}', rejectedAt='{UtilsRepository.GetUTCTime()}', claim_status = 0  " +
                 $"  where id = {request.id} ;";
             await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
 

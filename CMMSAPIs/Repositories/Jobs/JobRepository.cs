@@ -469,7 +469,7 @@ namespace CMMSAPIs.Repositories.Jobs
             CMJobView _ViewJobList = await GetJobDetails(newJobID, "");
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, newJobID, 0, 0, "Job Created", CMMS.CMMS_Status.JOB_CREATED, userId);
-            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_CREATED, new[] { userId }, _ViewJobList);
+            //await CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_CREATED, new[] { userId }, _ViewJobList);
 
             string strJobStatusMsg = $"Job {newJobID} Created";
             int assigned_id = 1;
@@ -478,7 +478,7 @@ namespace CMMSAPIs.Repositories.Jobs
                 strJobStatusMsg = $"Job {newJobID} Created and Assigned to " + _ViewJobList.assigned_name;
 
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, newJobID, 0, 0, "Job Assigned", CMMS.CMMS_Status.JOB_ASSIGNED, userId);
-                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_ASSIGNED, new[] { userId }, _ViewJobList);
+                // await CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_ASSIGNED, new[] { userId }, _ViewJobList);
             }
 
             // File Upload code for JOB
