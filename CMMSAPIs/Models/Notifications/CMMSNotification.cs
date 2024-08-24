@@ -12,6 +12,7 @@ using CMMSAPIs.Models.Permits;
 using CMMSAPIs.Models.Users;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Models.WC;
+using CMMSAPIs.Models.SM;
 using CMMSAPIs.Repositories.Calibration;
 using CMMSAPIs.Repositories.Incident_Reports;
 using CMMSAPIs.Repositories.JC;
@@ -20,12 +21,12 @@ using CMMSAPIs.Repositories.Permits;
 using CMMSAPIs.Repositories.Utils;
 using CMMSAPIs.Repositories.WC;
 using CMMSAPIs.Repositories.Users;
+using CMMSAPIs.Repositories.Inventory;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using CMMSAPIs.Repositories.Inventory;
 
 //using CommonUtilities;
 //using CMMSAPIs.Models.Notifications;
@@ -492,6 +493,17 @@ namespace CMMSAPIs.Models.Notifications
                 notificationObj = new VegetationNotification(moduleID, notificationID, null, _Task);
                 //facilityId = _Inventory.facility_id;
             }
+            else if (moduleID == CMMS.CMMS_Modules.SM_MRS)     //MRS Report
+            {
+                CMMRSList _MRS = (CMMRSList)args[0];
+                notificationObj = new MRSNotification(moduleID, notificationID, _MRS);
+                facilityId = _MRS.facilityId;   // CMMRSList update the query to facilityid in a list
+            }
+            else
+            {
+                throw new Exception("Notification code is not implemented for module <" + moduleID + ">");
+            }
+
             //create else if block for your module and add Notification class for  your module to implement yous notification
             retValue = await notificationObj.sendEmailNotification(moduleID, notificationID, userID, facilityId, module_ref_id, 0, 0, notificationType, args);
             return retValue;

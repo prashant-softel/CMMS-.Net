@@ -1,4 +1,5 @@
 using CMMSAPIs.Helper;
+using CMMSAPIs.Models.Notifications;
 using CMMSAPIs.Models.SM;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Utils;
@@ -290,7 +291,7 @@ namespace CMMSAPIs.Repositories.SM
             return retValue;
         }
 
-        internal async Task<CMDefaultResponse> CreateMRS(CMMRS request, int UserID)
+        internal async Task<CMDefaultResponse> CreateMRS(CMMRS request, int UserID, string facilitytimeZone)
         {
             /* isEditMode =0 for creating new MRS*/
 
@@ -421,9 +422,11 @@ namespace CMMSAPIs.Repositories.SM
                 CMMrsApproval approve_request = new CMMrsApproval();
                 approve_request.id = request.ID;
                 approve_request.comment = "MRS approval not required.";
-                var mrsApproved = await mrsApproval(approve_request, UserID);
-                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_MRS, request.ID, 0, 0, approve_request.comment, CMMS.CMMS_Status.MRS_REQUEST_APPROVED);
+                var mrsApproved = await mrsApproval(approve_request, UserID, facilitytimeZone);
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_MRS, request.ID, 0, 0, approve_request.comment, CMMS.CMMS_Status.MRS_SUBMITTED);
             }
+                CMMRSList _MRSList = await getMRSDetails(request.ID, facilitytimeZone);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_MRS, CMMS.CMMS_Status.MRS_SUBMITTED, new[] { UserID }, _MRSList);
 
             return response;
         }
@@ -451,7 +454,7 @@ namespace CMMSAPIs.Repositories.SM
             request.requested_by_emp_ID = UserID;
             CMDefaultResponse response = null;
 
-            string updatestmt = $" START TRANSACTION; UPDATE smmrs SET facility_ID = {request.facility_ID}, requested_by_emp_ID = {request.requested_by_emp_ID}, requested_date = '{DateTime.Now.ToString("yyyy-MM-dd  HH:mm")}'," +
+            string updatestmt = $" START TRANSACTION; UPDATE smmrs SET facility_ID = {request.facility_ID}, updated_by_emp_ID = {request.requested_by_emp_ID}, requested_date = '{DateTime.Now.ToString("yyyy-MM-dd  HH:mm")}'," +
                                 $" setAsTemplate = '{request.setAsTemplate}',  approval_status = {request.approval_status}, activity='{request.activity}',whereUsedType={request.whereUsedType},whereUsedRefID={request.whereUsedRefID}, remarks = '{request.remarks}'" +
                                 $" , from_actor_type_id = {request.from_actor_type_id}, from_actor_id = {request.from_actor_id}, to_actor_type_id = {request.to_actor_type_id} " +
                                 $" , to_actor_id = {request.to_actor_id}, status={status} WHERE ID = {request.ID} ;" +
@@ -700,9 +703,15 @@ namespace CMMSAPIs.Repositories.SM
     "sm.approval_comment,CONCAT(ed.firstName,' ',ed.lastName) as requested_by_name, sm.status, sm.activity, sm.whereUsedType," +
     " case when sm.whereUsedType = 1 then 'Job' when sm.whereUsedType = 2 then 'PM' when sm.whereUsedType = 4 then 'JOBCARD' when sm.whereUsedType = 27 then 'PMTASK' else 'Invalid' end as whereUsedTypeName,  sm.whereUsedRefID, sm.remarks " +
     ", DATE_FORMAT(sm.issuedAt,'%Y-%m-%d %H:%i') as issued_date, CONCAT(issuedUser.firstName,' ',issuedUser.lastName) as issued_name " +
+    ", sm.updated_by_emp_ID, CONCAT(updateUser.firstName, ' ', updateUser.lastName) as request_updated_by_name, sm.rejected_by_emp_ID , CONCAT(rejectedByUser.firstName, ' ', rejectedByUser.lastName) as request_rejected_by_name, sm.issue_approved_by_emp_ID, CONCAT(issuedApproveUser.firstName, ' ', issuedApproveUser.lastName) as issue_appoved_by_name , sm.issue_rejected_by_emp_ID, CONCAT(issuedRejectUser.firstName, ' ', issuedRejectUser.lastName) as issue_rejected_by_name " +
     " FROM smmrs sm LEFT JOIN users ed ON ed.id = sm.requested_by_emp_ID " +
     " LEFT JOIN users ed1 ON ed1.id = sm.approved_by_emp_ID " +
     " LEFT JOIN users issuedUser ON issuedUser.id = sm.issued_by_emp_ID " +
+    " LEFT JOIN users updateUser ON updateUser.id = sm.updated_by_emp_ID " +
+    " LEFT JOIN users rejectedByUser ON rejectedByUser.id = sm.rejected_by_emp_ID " +
+    " LEFT JOIN users issuedApproveUser ON issuedApproveUser.id = sm.issue_approved_by_emp_ID " +
+    " LEFT JOIN users issuedRejectUser ON issuedRejectUser.id = sm.issue_rejected_by_emp_ID " +
+
     "WHERE sm.id = " + ID + ";";
             List<CMMRSList> _List = await Context.GetData<CMMRSList>(stmt).ConfigureAwait(false);
 
@@ -864,7 +873,7 @@ namespace CMMSAPIs.Repositories.SM
         //    return response;
         //}
 
-        internal async Task<CMDefaultResponse> mrsApproval(CMMrsApproval request, int userId)
+        internal async Task<CMDefaultResponse> mrsApproval(CMMrsApproval request, int userId, string facilitytimeZone)
         {
             CMDefaultResponse response = null;
             string stmtSelect = $"SELECT ID,facility_ID, requested_by_emp_ID,reference,from_actor_type_id,from_actor_id,to_actor_type_id,to_actor_id FROM smmrs WHERE ID = {request.id}";
@@ -1036,11 +1045,13 @@ namespace CMMSAPIs.Repositories.SM
                 historyComment = "MRS Approved";
             }
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_MRS, request.id, 0, 0, request.comment, CMMS.CMMS_Status.MRS_REQUEST_APPROVED);
+            CMMRSList _MRSList = await getMRSDetails(request.id, facilitytimeZone);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_MRS, CMMS.CMMS_Status.MRS_REQUEST_APPROVED, new[] { userId }, _MRSList);
 
             return response;
         }
 
-        internal async Task<CMDefaultResponse> mrsReject(CMApproval request, int userId)
+        internal async Task<CMDefaultResponse> mrsReject(CMApproval request, int userId, string facilitytimeZone)
         {
             CMDefaultResponse response = null;
             string stmtSelect = $"SELECT ID FROM smmrs WHERE ID = {request.id}";
@@ -1048,9 +1059,11 @@ namespace CMMSAPIs.Repositories.SM
 
             if (mrsList.Count > 0)
             {
-                string stmt = $"UPDATE smmrs SET rejected_by_emp_ID = {userId}, rejected_date='{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}'," +
+                string stmt1 = $"UPDATE smmrs SET rejected_by_emp_ID = {userId}, rejected_date='{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}'," +
                                    $" status ={(int)CMMS.CMMS_Status.MRS_REQUEST_REJECTED} , rejected_comment = '{request.comment}' WHERE ID = {request.id}";
-                await Context.ExecuteNonQry<int>(stmt);
+                 int id=await Context.ExecuteNonQry<int>(stmt1);
+
+
                 response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Status updated.");
             }
             else
@@ -1058,6 +1071,8 @@ namespace CMMSAPIs.Repositories.SM
                 response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.FAILURE, "Invalid mrs updated.");
             }
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_MRS, request.id, 0, 0, "MRS rejected.", CMMS.CMMS_Status.MRS_REQUEST_REJECTED);
+            CMMRSList _MRSList = await getMRSDetails(request.id, facilitytimeZone);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_MRS, CMMS.CMMS_Status.MRS_REQUEST_REJECTED, new[] { userId }, _MRSList);
 
             return response;
         }
@@ -2060,22 +2075,22 @@ namespace CMMSAPIs.Repositories.SM
             {
 
                 case CMMS.CMMS_Status.MRS_SUBMITTED:
-                    retValue = $"MRS {Id} Submitted.";
+                    retValue = $"MRS{Id} Submitted.";
                     break;
                 case CMMS.CMMS_Status.MRS_REQUEST_REJECTED:
-                    retValue = $"MRS {Id} Request Rejected";
+                    retValue = $"MRS{Id} Request Rejected";
                     break;
                 case CMMS.CMMS_Status.MRS_REQUEST_APPROVED:
-                    retValue = $"MRS {Id} Request Approved";
+                    retValue = $"MRS{Id} Request Approved";
                     break;
                 case CMMS.CMMS_Status.MRS_REQUEST_ISSUED:
-                    retValue = $"MRS {Id} Request Issued";
+                    retValue = $"MRS{Id} Request Issued";
                     break;
                 case CMMS.CMMS_Status.MRS_REQUEST_ISSUED_REJECTED:
-                    retValue = $"MRS {Id} Request Issued Rejected";
+                    retValue = $"MRS{Id} Request Issued Rejected";
                     break;
                 case CMMS.CMMS_Status.MRS_REQUEST_ISSUED_APPROVED:
-                    retValue = $"MRS {Id} Request Issued Approved";
+                    retValue = $"MRS{Id} Request Issued Approved";
                     break;
                 default:
                     retValue = "Unknown <" + m_notificationID + ">";
@@ -2084,7 +2099,7 @@ namespace CMMSAPIs.Repositories.SM
             return retValue;
         }
 
-        internal async Task<CMDefaultResponse> MRSIssue(CMMRS request, int UserID)
+        internal async Task<CMDefaultResponse> MRSIssue(CMMRS request, int UserID, string facilitytimeZone)
         {
             CMDefaultResponse response = null;
             bool Queryflag = false;
@@ -2146,6 +2161,8 @@ namespace CMMSAPIs.Repositories.SM
                 else
                 {
                     response = new CMDefaultResponse(request.ID, CMMS.RETRUNSTATUS.SUCCESS, "MRS Request Issued.");
+                    CMMRSList _MRSList = await getMRSDetails(request.ID, facilitytimeZone);
+                    await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_MRS, CMMS.CMMS_Status.MRS_REQUEST_ISSUED, new[] { UserID }, _MRSList);
                 }
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_MRS, request.ID, 0, 0, request.approval_comment, CMMS.CMMS_Status.MRS_REQUEST_ISSUED);
 
@@ -2167,7 +2184,7 @@ namespace CMMSAPIs.Repositories.SM
             return response;
         }
 
-        internal async Task<CMDefaultResponse> ApproveMRSIssue(CMApproval request, int userId)
+        internal async Task<CMDefaultResponse> ApproveMRSIssue(CMApproval request, int userId,string facilitytimeZone)
         {
             CMDefaultResponse response = null;
             string stmtSelect = $"SELECT ID FROM smmrs WHERE ID = {request.id}";
@@ -2175,9 +2192,9 @@ namespace CMMSAPIs.Repositories.SM
 
             if (mrsList.Count > 0)
             {
-                string stmt = $"UPDATE smmrs SET issue_approved_by_emp_ID = {userId}, issue_approved_date='{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}'," +
+                string stmt = $"UPDATE smmrs SET issue_approved_by_emp_ID = {userId}, issue_approved_date='{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}', lastmodifieddate='{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}'," +
                                    $" status ={(int)CMMS.CMMS_Status.MRS_REQUEST_ISSUED_APPROVED} , issue_approval_comment = '{request.comment}' WHERE ID = {request.id}";
-                await Context.ExecuteNonQry<int>(stmt);
+                int id= await Context.ExecuteNonQry<int>(stmt);
                 response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Status updated.");
             }
             else
@@ -2185,10 +2202,12 @@ namespace CMMSAPIs.Repositories.SM
                 response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.FAILURE, "Invalid MRS Id passed.");
             }
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_MRS, request.id, 0, 0, "MRS Request Issued Approved.", CMMS.CMMS_Status.MRS_REQUEST_ISSUED_APPROVED);
+            CMMRSList _MRSList = await getMRSDetails(request.id, facilitytimeZone);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_MRS, CMMS.CMMS_Status.MRS_REQUEST_ISSUED_APPROVED, new[] { userId }, _MRSList);
 
             return response;
         }
-        internal async Task<CMDefaultResponse> RejectMRSIssue(CMApproval request, int userId)
+        internal async Task<CMDefaultResponse> RejectMRSIssue(CMApproval request, int userId, string facilitytimeZone)
         {
             CMDefaultResponse response = null;
             string stmtSelect = $"SELECT ID FROM smmrs WHERE ID = {request.id}";
@@ -2196,7 +2215,7 @@ namespace CMMSAPIs.Repositories.SM
 
             if (mrsList.Count > 0)
             {
-                string stmt = $"UPDATE smmrs SET issue_rejected_by_emp_ID = {userId}, issue_rejected_date='{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}'," +
+                string stmt = $"UPDATE smmrs SET issue_rejected_by_emp_ID = {userId}, issue_rejected_date='{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}', lastmodifieddate='{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}'," +
                                    $" status ={(int)CMMS.CMMS_Status.MRS_REQUEST_ISSUED_REJECTED} , issue_rejected_comment = '{request.comment}' WHERE ID = {request.id}";
                 await Context.ExecuteNonQry<int>(stmt);
                 response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Status updated.");
@@ -2206,6 +2225,8 @@ namespace CMMSAPIs.Repositories.SM
                 response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.FAILURE, "Invalid MRS Id Passed.");
             }
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_MRS, request.id, 0, 0, "MRS Request Issued rejected.", CMMS.CMMS_Status.MRS_REQUEST_ISSUED_REJECTED);
+            CMMRSList _MRSList = await getMRSDetails(request.id, facilitytimeZone);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_MRS, CMMS.CMMS_Status.MRS_REQUEST_ISSUED_REJECTED, new[] { userId }, _MRSList);
 
             return response;
         }

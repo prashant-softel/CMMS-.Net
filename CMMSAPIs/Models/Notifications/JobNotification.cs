@@ -129,10 +129,10 @@ namespace CMMSAPIs.Models.Notifications
                 retValue += String.Format(template, "Assigned To", m_jobObj.assigned_name);
                 //retValue += String.Format(template, "Assigned At", m_jobObj.created_by_name);
             }
-            if (!m_jobObj.close.closed_at.IsNull)
+            //if (!m_jobObj.Job_closed_on.IsNull)
             {
                 //retValue += String.Format(template, "Closed By", m_jobObj.assigned_name);
-                retValue += String.Format(templateEnd, "Closed At", m_jobObj.closed_at);
+                retValue += String.Format(templateEnd, "Closed At", m_jobObj.Job_closed_on);
             }
 
 

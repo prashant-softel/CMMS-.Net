@@ -38,8 +38,10 @@ namespace CMMSAPIs.Controllers.SM
         {
             try
             {
+                int facility_id = request.facility_ID;
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _MRSBS.CreateMRS(request, userID);
+                var data = await _MRSBS.CreateMRS(request, userID, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -84,7 +86,6 @@ namespace CMMSAPIs.Controllers.SM
         {
             try
             {
-
                 var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_ID)?.timezone;
                 var data = await _MRSBS.getMRSList(facility_ID, emp_id, Convert.ToDateTime(toDate), Convert.ToDateTime(fromDate), status, facilitytimeZone);
                 return Ok(data);
@@ -222,8 +223,10 @@ namespace CMMSAPIs.Controllers.SM
         {
             try
             {
+                int facility_id = request.facility_ID;
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _MRSBS.mrsApproval(request, userID);
+                var data = await _MRSBS.mrsApproval(request, userID, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -244,8 +247,10 @@ namespace CMMSAPIs.Controllers.SM
         {
             try
             {
+                int facility_id = request.facility_id;
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _MRSBS.mrsReject(request, userID);
+                var data = await _MRSBS.mrsReject(request, userID, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -457,8 +462,10 @@ namespace CMMSAPIs.Controllers.SM
         {
             try
             {
+                int facility_id = request.facility_ID;
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _MRSBS.MRSIssue(request, userID);
+                var data = await _MRSBS.MRSIssue(request, userID, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -478,8 +485,10 @@ namespace CMMSAPIs.Controllers.SM
         {
             try
             {
+                int facility_id = request.facility_id;
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _MRSBS.ApproveMRSIssue(request, userID);
+                var data = await _MRSBS.ApproveMRSIssue(request, userID, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -498,15 +507,17 @@ namespace CMMSAPIs.Controllers.SM
         {
             try
             {
+                int facility_id = request.facility_id;
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _MRSBS.RejectMRSIssue(request, userID);
+                var data = await _MRSBS.RejectMRSIssue(request, userID, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
             {
                 ExceptionResponse item = new ExceptionResponse();
                 item.Status = 400;
-                item.Message = "Invalid data sent.";
+                item.Message = ex.Message;
                 return Ok(item);
             }
         }
