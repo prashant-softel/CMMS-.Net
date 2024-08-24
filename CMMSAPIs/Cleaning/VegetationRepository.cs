@@ -378,21 +378,51 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                     {
                         int cleaningType = schedule.cleaningType;
 
-                        //if (moduleType == 2)
-                        //    cleaningType = 0;
 
+                        /*
                         scheduleQry = "insert into `cleaning_plan_schedules` (`planId`,`moduleType`,cleaningType,`plannedDay`,`createdById`,`createdAt`) VALUES ";
-                        scheduleQry += $"({request.planId},{moduleType},{request.cleaningType},{schedule.cleaningDay},'{userId}','{UtilsRepository.GetUTCTime()}');" +
-                                           $"SELECT LAST_INSERT_ID() as id ;";
+                         scheduleQry += $"({request.planId},{moduleType},{request.cleaningType},{schedule.cleaningDay},'{userId}','{UtilsRepository.GetUTCTime()}');" +
+                                            $"SELECT LAST_INSERT_ID() as id ;";
 
-                        List<CMMCSchedule> schedule_ = await Context.GetData<CMMCSchedule>(scheduleQry).ConfigureAwait(false);
-                        var scheduleId = Convert.ToInt16(schedule_[0].id.ToString());
+                         List<CMMCSchedule> schedule_ = await Context.GetData<CMMCSchedule>(scheduleQry).ConfigureAwait(false);
+                         var scheduleId = Convert.ToInt16(schedule_[0].id.ToString());*/
+                        bool check = true;
+                        int schedule_Id = 0;
+                        if (schedule.scheduleId > 0)
+                        {
+                            myQuery += $"UPDATE cleaning_plan_schedules SET updatedAt = '{UtilsRepository.GetUTCTime()}', updatedById = {userId}, plannedDay = {schedule.cleaningDay}  " +
+                                       $"WHERE  planId = {request.planId} AND scheduleId = {schedule.scheduleId};";
+
+                        }
+                        else
+                        {
+                            string myQuery1 = $"INSERT INTO cleaning_plan_schedules (planId,plannedDay,moduleType,cleaningType, updatedAt, updatedById, createdAt, createdById) " +
+                                              $"VALUES ({request.planId}, {schedule.cleaningDay},{moduleType},{request.cleaningType}, '{UtilsRepository.GetUTCTime()}', {userId}, '{UtilsRepository.GetUTCTime()}', {userId});" +
+                                              $"SELECT LAST_INSERT_ID();";
+                            DataTable dt = await Context.FetchData(myQuery1).ConfigureAwait(false);
+                            schedule_Id = Convert.ToInt32(dt.Rows[0][0]);
+                            check = false;
+                        }
+
+                        // Delete existing cleaning plan items for this scheduleId
+
+                        myQuery += $"DELETE FROM cleaning_plan_items WHERE scheduleId = {schedule.scheduleId};";
+
+                        int sc_id = 0;
+                        if (check)
+                        {
+                            sc_id = schedule.scheduleId;
+                        }
+                        else
+                        {
+                            sc_id = schedule_Id;
+                        }
 
                         if (schedule.equipments.Count > 0)
                         {
                             foreach (var equipment in schedule.equipments)
                             {
-                                equipmentQry += $"({request.planId},{moduleType},{scheduleId},{equipment.id},{schedule.cleaningDay},'{userId}','{UtilsRepository.GetUTCTime()}'),";
+                                equipmentQry += $"({request.planId},{moduleType},{sc_id},{equipment.id},{schedule.cleaningDay},'{userId}','{UtilsRepository.GetUTCTime()}'),";
                             }
 
                         }
@@ -407,44 +437,16 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                         await Context.GetData<CMMCPlan>(equipmentQry).ConfigureAwait(false);
                     }
                 }
+                //var notificationResponse = await CMMSNotification.sendNotification(CMMS.CMMS_Modules.VEGETATION_PLAN, CMMS.CMMS_Status.UPDATED, new int[] { userId });
+                if (request.resubmit == 1)
+                {
 
+                    await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.VEGETATION_PLAN, rid, 0, 0, "Plan Updated Successfully", CMMS.CMMS_Status.VEG_PLAN_SUBMITTED, userId);
 
-                /* if (request.schedules.Count > 0)
-                 {
+                    return new CMDefaultResponse(rid, CMMS.RETRUNSTATUS.SUCCESS, $"Plan Updated Successfully");
 
-                     foreach (var schedule in request.schedules)
-                     {
+                }
 
-                         if (moduleType == 2)
-                         {
-                             //(CASE WHEN { schedule.cleaningType} = 'Wet' then 1 else WHEN { schedule.cleaningType} = 'Dry' then 2 end)
-                             // if (schedule.cleaningType != 0)
-                             // cleaningType = { schedule.cleaningType},
-                             myQuery += $"UPDATE cleaning_plan_schedules SET updatedAt = '{UtilsRepository.GetUTCTime()}', updatedById = {userId} where plannedDay ={schedule.cleaningDay} and planId={request.planId};";
-                         }
-
-                         myQuery += $"Delete from cleaning_plan_items where scheduleId = {schedule.scheduleId};";
-
-                         if (schedule.equipments.Count > 0)
-                         {
-                             myQuery += $"insert into `cleaning_plan_items` (`planId`,`scheduleId`,`assetId`,`{measure}`,`plannedDay`,`updatedById`,`updatedAt`,`createdById`,`createdAt`) VALUES ";
-
-
-                             foreach (var equipment in schedule.equipments)
-                             {
-                                 myQuery += $"({request.planId},{schedule.scheduleId},{equipment.id},(select {measure} from assets where id={equipment.id}),{schedule.cleaningDay},{userId},'{UtilsRepository.GetUTCTime()}',(select createdById from cleaning_plan where planId={request.planId}),(select createdAt from cleaning_plan where planId={request.planId})),";
-                                 // if (equipment.noOfPlanDay > 0)
-                                 //myQuery += $"UPDATE cleaning_plan_items SET plannedDay ={equipment.noOfPlanDay},updatedAt = '{UtilsRepository.GetUTCTime()}', updatedBy = {userId} where assetId = {equipment.id} and scheduleId={schedule.scheduleId};";
-                             }
-                             myQuery = myQuery.Substring(0, myQuery.Length - 1);
-                             myQuery += ";";
-                             planId = request.planId;
-                         }
-
-                     }
-                     await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
-                 }
-                */
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.VEGETATION, request.planId, 0, 0, "Plan Updated", CMMS.CMMS_Status.VEG_PLAN_DRAFT, userId);
                 try
                 {
@@ -456,16 +458,6 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 {
                     // response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Failed to send Vegetation Notification");
                     Console.WriteLine($"Failed to send Vegetation Notification: {ex.Message}");
-                }
-
-                //var notificationResponse = await CMMSNotification.sendNotification(CMMS.CMMS_Modules.VEGETATION_PLAN, CMMS.CMMS_Status.UPDATED, new int[] { userId });
-                if (request.resubmit == 1)
-                {
-
-                    await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.VEGETATION_PLAN, rid, 0, 0, "Plan Updated Successfully", CMMS.CMMS_Status.VEG_PLAN_SUBMITTED, userId);
-
-                    return new CMDefaultResponse(rid, CMMS.RETRUNSTATUS.SUCCESS, $"Plan Updated Successfully");
-
                 }
             }
             CMDefaultResponse response = new CMDefaultResponse(planId, CMMS.RETRUNSTATUS.SUCCESS, $"Plan Updated Successfully ");
@@ -1248,7 +1240,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             }
             statusOut += $"ELSE 'Invalid Status' END";
 
-            string myQuery1 = $"select mc.id as executionId ,mp.title,mc.planId,mc.status, CONCAT(createdBy.firstName, createdBy.lastName) as responsibility , mc.startDate, mc.endedAt as doneDate,mc.prevTaskDoneDate as lastDoneDate,freq.name as frequency,mc.noOfDays, {statusOut} as status_short from cleaning_execution as mc left join cleaning_plan as mp on mp.planId = mc.planId LEFT JOIN Frequency as freq on freq.id = mp.frequencyId LEFT JOIN users as createdBy ON createdBy.id = mc.assignedTo LEFT JOIN users as approvedBy ON approvedBy.id = mc.approvedByID where mc.moduleType={moduleType} ";
+            string myQuery1 = $"select mc.id as executionId ,mp.title,mc.planId,mc.status,mc.abandonedAt as Abondond_done_date, CONCAT(createdBy.firstName, createdBy.lastName) as responsibility , mc.startDate, mc.endedAt as doneDate,mc.prevTaskDoneDate as lastDoneDate,freq.name as frequency,mc.noOfDays, {statusOut} as status_short from cleaning_execution as mc left join cleaning_plan as mp on mp.planId = mc.planId LEFT JOIN Frequency as freq on freq.id = mp.frequencyId LEFT JOIN users as createdBy ON createdBy.id = mc.assignedTo LEFT JOIN users as approvedBy ON approvedBy.id = mc.approvedByID where mc.moduleType={moduleType} ";
 
             if (facilityId > 0)
             {
@@ -1263,6 +1255,8 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                     ViewMCTaskList.startDate = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, ViewMCTaskList.startDate);
                 if (ViewMCTaskList != null && ViewMCTaskList.lastDoneDate != null)
                     ViewMCTaskList.lastDoneDate = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, ViewMCTaskList.lastDoneDate);
+                if (ViewMCTaskList != null && ViewMCTaskList.Abondond_done_date != null)
+                    ViewMCTaskList.Abondond_done_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, ViewMCTaskList.Abondond_done_date);
 
             }
             return _ViewMCTaskList;

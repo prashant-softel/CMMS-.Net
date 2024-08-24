@@ -75,6 +75,16 @@ namespace CMMSAPIs.Models.WC
         public string role { get; set; }
         public dynamic mobile { get; set; }
     }
+    public class CMWCinternalEmail
+    {
+        public int id { get; set; }
+
+        public string name { get; set; }
+        public string login_id { get; set; }
+        public string rolename { get; set; }
+        public string role { get; set; }
+        public dynamic mobile { get; set; }
+    }
 
     public class CMWCSupplierActions
     {
