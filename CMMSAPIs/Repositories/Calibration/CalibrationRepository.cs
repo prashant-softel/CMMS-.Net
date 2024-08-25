@@ -455,7 +455,7 @@ namespace CMMSAPIs.Repositories.Calibration
             }
             return _calibrationList[0];
         }
-        internal async Task<CMDefaultResponse> StartCalibration(int calibration_id)
+        internal async Task<CMDefaultResponse> StartCalibration(int calibration_id, int userID, string facilitytime)
         {
             /*
              * Update the Calibration table status and History log
@@ -469,15 +469,12 @@ namespace CMMSAPIs.Repositories.Calibration
                                 $"start_date = '{UtilsRepository.GetUTCTime()}' " +
                                 $"WHERE id = {calibration_id} AND status = {(int)CMMS.CMMS_Status.CALIBRATION_REQUEST_APPROVED};";
             int retVal = await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
-            string userIDQuery = $"SELECT requested_by FROM calibration where id = {calibration_id};";
-            DataTable dtUser = await Context.FetchData(userIDQuery).ConfigureAwait(false);
-            int userID = Convert.ToInt32(dtUser.Rows[0][0]);
             string assetIDQuery = $"SELECT asset_id FROM calibration where id = {calibration_id};";
             DataTable dtAsset = await Context.FetchData(assetIDQuery).ConfigureAwait(false);
             int assetID = Convert.ToInt32(dtAsset.Rows[0][0]);
-            string myQuery1 = $"UPDATE assets  SET calibrationStartDate = '{UtilsRepository.GetUTCTime()}' " +
-                              $"WHERE id = {assetID} ;";
-            int retVal1 = await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
+            //string myQuery1 = $"UPDATE assets  SET calibrationStartDate = '{UtilsRepository.GetUTCTime()}' " +
+            //                  $"WHERE id = {assetID} ;";
+            //int retVal1 = await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
             CMMS.RETRUNSTATUS returnStatus = CMMS.RETRUNSTATUS.FAILURE;
             if (retVal > 0)
                 returnStatus = CMMS.RETRUNSTATUS.SUCCESS;
@@ -602,7 +599,7 @@ namespace CMMSAPIs.Repositories.Calibration
             DataTable dt = await Context.FetchData(myQuery2).ConfigureAwait(false);
             int frequencyId = Convert.ToInt32(dt.Rows[0][0]);
             DateTime nextDate = UtilsRepository.Reschedule(nextRequest[0].next_calibration_date, frequencyId);
-            string myQuery3 = $"UPDATE assets SET vendorId = {nextRequest[0].vendor_id}, calibrationDueDate = '{nextDate.ToString("yyyy-MM-dd HH:mm:ss")}', calibrationLastDate = '{nextRequest[0].next_calibration_date.ToString("yyyy-MM-dd HH:mm:ss")}' WHERE id = {nextRequest[0].asset_id};";
+            string myQuery3 = $"UPDATE assets SET vendorId = {nextRequest[0].vendor_id}, calibrationDueDate = '{nextDate.ToString("yyyy-MM-dd HH:mm:ss")}', calibrationLastDate = '{nextRequest[0].calibrationdonedate.ToString("yyyy-MM-dd HH:mm:ss")}' WHERE id = {nextRequest[0].asset_id};";
             nextRequest[0].next_calibration_date = nextDate;
             await Context.ExecuteNonQry<int>(myQuery3).ConfigureAwait(false);
             string myQuery4 = $"UPDATE calibration SET approved_by = {userID},reschedule=1,  " +

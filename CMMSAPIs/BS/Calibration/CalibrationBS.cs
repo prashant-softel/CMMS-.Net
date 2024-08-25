@@ -20,7 +20,7 @@ namespace CMMSAPIs.BS.Calibration
         Task<CMDefaultResponse> ApproveRequestCalibration(CMApproval request, int userID);
         Task<CMDefaultResponse> RejectRequestCalibration(CMApproval request, int userID);
         Task<CMPreviousCalibration> GetPreviousCalibration(int asset_id, string facilitytime);
-        Task<CMDefaultResponse> StartCalibration(int calibration_id);
+        Task<CMDefaultResponse> StartCalibration(int calibration_id, int userID, string facilitytime);
         Task<CMDefaultResponse> CompleteCalibration(CMCompleteCalibration request, int userID);
         Task<CMDefaultResponse> CloseCalibration(CMCloseCalibration request, int userID);
         Task<CMRescheduleApprovalResponse> ApproveCalibration(CMApproval request, int userID);
@@ -126,13 +126,13 @@ namespace CMMSAPIs.BS.Calibration
             }
         }
 
-        public async Task<CMDefaultResponse> StartCalibration(int calibration_id)
+        public async Task<CMDefaultResponse> StartCalibration(int calibration_id, int userID, string facilitytime)
         {
             try
             {
                 using (var repos = new CalibrationRepository(getDB))
                 {
-                    return await repos.StartCalibration(calibration_id);
+                    return await repos.StartCalibration(calibration_id, userID, facilitytime);
                 }
             }
             catch (Exception ex)
