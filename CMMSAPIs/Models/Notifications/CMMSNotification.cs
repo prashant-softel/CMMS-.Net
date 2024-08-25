@@ -9,6 +9,7 @@ using CMMSAPIs.Models.Jobs;
 using CMMSAPIs.Models.Mails;
 using CMMSAPIs.Models.MC;
 using CMMSAPIs.Models.Permits;
+using CMMSAPIs.Models.PM;
 using CMMSAPIs.Models.Users;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Models.WC;
@@ -499,17 +500,17 @@ namespace CMMSAPIs.Models.Notifications
                 notificationObj = new MRSNotification(moduleID, notificationID, _MRS);
                 facilityId = _MRS.facilityId;   // CMMRSList update the query to facilityid in a list
             }
-            else if (moduleID == CMMS.CMMS_Modules.SM_RO)      //RO Report
+            else if (moduleID == CMMS.CMMS_Modules.PM_PLAN)
             {
-                CMCreateRequestOrderGET _SMRO = (CMCreateRequestOrderGET)args[0];
-                notificationObj = new SMNotification(moduleID, notificationID, _SMRO);
-                facilityId = _SMRO.facilityID;
+                CMPMPlanDetail _Plan = (CMPMPlanDetail)args[0];
+                notificationObj = new PMNotification(moduleID, notificationID, _Plan);
+                //facilityId = _Inventory.facility_id;
             }
-            else if (moduleID == CMMS.CMMS_Modules.INVENTORY)    //Incident Report
+            else if (moduleID == CMMS.CMMS_Modules.PM_TASK)
             {
-                CMViewInventory _Inventory = (CMViewInventory)args[0];
-                notificationObj = new InventoryNotification(moduleID, notificationID, _Inventory);
-                facilityId = _Inventory.facilityId;
+                CMPMTaskView _Task = (CMPMTaskView)args[0];
+                notificationObj = new PMNotification(moduleID, notificationID, _Task);
+                //facilityId = _Inventory.facility_id;
             }
             else
             {

@@ -40,6 +40,8 @@ namespace CMMSAPIs.Models.PM
         public DateTime close_Date { get; set; }
         public string close_comment { get; set; }
         public string comment { get; set; }
+        public string started_by_name { get; set; }
+        public int task_id { get; set; }
     }
     public class CMPMPlanDetail : CMPMPlanList
     {

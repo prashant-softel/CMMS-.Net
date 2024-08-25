@@ -110,7 +110,8 @@ namespace CMMSAPIs.Models.PM
         public List<string> Employees { get; set; }
         public string Isolation_taken { get; set; }
         public string Isolated_equipment { get; set; }
-
+        public int cancelledbyName { get; set; }
+        public int cancelledrejectedbyName { get; set; }
         public DateTime TBT_done_time { get; set; }
         public DateTime Start_time { get; set; }
         public int Status_PTW { get; set; }

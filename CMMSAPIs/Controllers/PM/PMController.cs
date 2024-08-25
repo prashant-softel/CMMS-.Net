@@ -29,8 +29,27 @@ namespace CMMSAPIs.Controllers.PM
         {
             try
             {
+                // Access the facility_id directly from the pm_plan object
+                int facilityId = pm_plan.facility_id;
+
+                if (facilityId == 0)
+                {
+                    return BadRequest("Invalid facility ID.");
+                }
+                // Retrieve the facility timezone based on the facilityId
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo"))
+                    .FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
+
+                if (facilitytimeZone == null)
+                {
+                    return NotFound("Facility timezone not found.");
+                }
+
+                // Retrieve the user ID from the session
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _PMBS.CreatePMPlan(pm_plan, userID);
+
+                // Call the business service to create the PM plan
+                var data = await _PMBS.CreatePMPlan(pm_plan, userID, facilitytimeZone);
                 return Ok(data);
             }
             catch (ArgumentException ex)
@@ -43,14 +62,15 @@ namespace CMMSAPIs.Controllers.PM
             }
         }
 
+
         [Route("UpdatePMPlan")]
         [HttpPost]
-        public async Task<IActionResult> UpdatePMPlan(CMPMPlanDetail request)
+        public async Task<IActionResult> UpdatePMPlan(CMPMPlanDetail request, string facilitytime)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _PMBS.UpdatePMPlan(request, userID);
+                var data = await _PMBS.UpdatePMPlan(request, userID, facilitytime);
                 return Ok(data);
             }
             catch (ArgumentException ex)
@@ -89,12 +109,13 @@ namespace CMMSAPIs.Controllers.PM
         //[Authorize]
         [Route("ApprovePMPlan")]
         [HttpPut]
-        public async Task<IActionResult> ApprovePMPlan(CMApproval request)
+        public async Task<IActionResult> ApprovePMPlan(CMApproval request, int facility_id)
         {
             try
             {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _PMBS.ApprovePMPlan(request, userID);
+                var data = await _PMBS.ApprovePMPlan(request, userID, facilitytimeZone);
                 return Ok(data);
             }
             catch (ArgumentException ex)
@@ -110,12 +131,13 @@ namespace CMMSAPIs.Controllers.PM
         //[Authorize]
         [Route("RejectPMPlan")]
         [HttpPut]
-        public async Task<IActionResult> RejectPMPlan(CMApproval request)
+        public async Task<IActionResult> RejectPMPlan(CMApproval request, int facility_id)
         {
             try
             {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _PMBS.RejectPMPlan(request, userID);
+                var data = await _PMBS.RejectPMPlan(request, userID, facilitytimeZone);
                 return Ok(data);
             }
             catch (ArgumentException ex)
@@ -133,13 +155,14 @@ namespace CMMSAPIs.Controllers.PM
         //[Authorize]
         [Route("DeletePMPlan")]
         [HttpPut]
-        public async Task<IActionResult> DeletePMPlan(int planId)
+        public async Task<IActionResult> DeletePMPlan(int planId, int facility_id)
 
         {
             try
             {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _PMBS.DeletePMPlan(planId, userID);
+                var data = await _PMBS.DeletePMPlan(planId, userID, facilitytimeZone);
                 return Ok(data);
             }
             catch (ArgumentException ex)
@@ -262,8 +285,9 @@ namespace CMMSAPIs.Controllers.PM
         {
             try
             {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _PMBS.ImportPMPlanFile(file_id, facility_id, userID);
+                var data = await _PMBS.ImportPMPlanFile(file_id, facility_id, userID, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -274,12 +298,13 @@ namespace CMMSAPIs.Controllers.PM
 
         [Route("DeletePMTask")]
         [HttpPost]
-        public async Task<IActionResult> DeletePMTask(CMApproval request)
+        public async Task<IActionResult> DeletePMTask(CMApproval request, int facility_id)
         {
             try
             {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _PMBS.DeletePMTask(request, userID);
+                var data = await _PMBS.DeletePMTask(request, userID, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)

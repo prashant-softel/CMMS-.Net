@@ -1,6 +1,7 @@
 using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Jobs;
 using CMMSAPIs.Models.Masters;
+using CMMSAPIs.Models.Notifications;
 using CMMSAPIs.Models.PM;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Jobs;
@@ -232,7 +233,7 @@ namespace CMMSAPIs.Repositories.PM
 
 
 
-        internal async Task<CMDefaultResponse> CancelPMTask(CMApproval request, int userID)
+        internal async Task<CMDefaultResponse> CancelPMTask(CMApproval request, int userID, string facilitytimeZone)
         {
             /*
              * Primary Table - PMSchedule
@@ -280,7 +281,19 @@ namespace CMMSAPIs.Repositories.PM
             await Context.ExecuteNonQry<int>(setCodeNameQuery);
             if (retVal > 0)
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
+            
+            
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_TASK, request.id, 0, 0, string.IsNullOrEmpty(request.comment) ? "PM Task Cancelled" : request.comment, CMMS.CMMS_Status.PM_CANCELLED, userID);
+            try
+            {
+                CMPMTaskView _PMTaskList = await GetPMTaskDetail(request.id, facilitytimeZone);
+                CMMSNotification.sendNotification(CMMS.CMMS_Modules.PM_TASK, CMMS.CMMS_Status.PM_CANCELLED, new[] { userID }, _PMTaskList);
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine($"Failed to send Task Notification: {ex.Message}");
+            }
+            
             CMDefaultResponse response = new CMDefaultResponse(request.id, retCode, "PM Task cancelled successfully");
             return response;
         }
@@ -311,18 +324,20 @@ namespace CMMSAPIs.Repositories.PM
             //string myQuery1 = $"SELECT id, PM_Maintenance_Order_Number as maintenance_order_number, PM_Schedule_date as schedule_date, PM_Schedule_Completed_date as completed_date, Asset_id as equipment_id, Asset_Name as equipment_name, Asset_Category_id as category_id, Asset_Category_name as category_name, PM_Frequecy_id as frequency_id, PM_Frequecy_Name as frequency_name, PM_Schedule_Emp_name as assigned_to_name, PTW_id as permit_id, status, {statusQry} as status_name, Facility_id as facility_id, Facility_Name as facility_name " +
             //                    $"FROM pm_schedule WHERE id = {schedule_id};";
 
-            string myQuery = $"SELECT pm_task.id, CONCAT('PMTASK',pm_task.id) as task_code, pm_plan.id as plan_id,facilities.name as site_name, pm_task.category_id,cat.name as category_name, pm_plan.plan_name as plan_title, pm_task.facility_id, pm_task.frequency_id as frequency_id, freq.name as frequency_name, pm_task.plan_date as due_date,closed_at as done_date, CONCAT(assignedTo.firstName,' ',assignedTo.lastName)  as assigned_to_name, CONCAT(closedBy.firstName,' ',closedBy.lastName)  as closed_by_name, pm_task.closed_at , CONCAT(approvedBy.firstName,' ',approvedBy.lastName)  as approved_by_name, pm_task.approved_at ,CONCAT(rejectedBy.firstName,' ',rejectedBy.lastName)  as rejected_by_name, pm_task.rejected_at ,CONCAT(cancelledBy.firstName,' ',cancelledBy.lastName)  as cancelled_by_name, pm_task.cancelled_at , pm_task.rejected_at ,CONCAT(startedBy.firstName,' ',startedBy.lastName)  as started_by_name, pm_task.started_at , pm_task.PTW_id as permit_id, CONCAT('PTW',pm_task.PTW_id) as permit_code,permit.status as ptw_status, PM_task.status, {statusQry} as status_short " +
-                               ",  CONCAT(tbtDone.firstName,' ',tbtDone.lastName)  as tbt_by_name, Case when permit.TBT_Done_By is null or  permit.TBT_Done_By =0 then 0 else 1 end ptw_tbt_done " +
+            string myQuery = $"SELECT pm_task.id, CONCAT('PMTASK',pm_task.id) as task_code, pm_plan.id as plan_id,facilities.name as site_name, pm_task.category_id,cat.name as category_name, pm_plan.plan_name as plan_title, pm_task.facility_id, pm_task.frequency_id as frequency_id, freq.name as frequency_name, pm_task.plan_date as due_date,closed_at as done_date, CONCAT(assignedTo.firstName,' ',assignedTo.lastName)  as assigned_to_name, CONCAT(closedBy.firstName,' ',closedBy.lastName)  as closed_by_name, pm_task.closed_at , CONCAT(approvedBy.firstName,' ',approvedBy.lastName)  as approved_by_name, pm_task.approved_at ,CONCAT(rejectedBy.firstName,' ',rejectedBy.lastName)  as rejected_by_name, pm_task.rejected_at ,CONCAT(cancelledBy.firstName,' ',cancelledBy.lastName)  as cancelled_by_name, pm_task.cancelled_at , pm_task.rejected_at ,CONCAT(startedBy.firstName,' ',startedBy.lastName)  as started_by_name, pm_task.started_at , pm_task.PTW_id as permit_id, CONCAT('PTW',pm_task.PTW_id) as permit_code,permit.status as ptw_status, PM_task.status, {statusQry} as status_short, " +
+                               "  CONCAT(tbtDone.firstName,' ',tbtDone.lastName)  as tbt_by_name, Case when permit.TBT_Done_By is null or  permit.TBT_Done_By =0 then 0 else 1 end ptw_tbt_done " +
                                " , permittypelists.title as permit_type,ptwu.id as Employee_ID,CONCAT(ptwu.firstName,ptwu.lastName) as Employee_name,bus.name as Company, " +
                                " passt.name as Isolated_equipments,CONCAT(tbtDone.firstName,' ',tbtDone.lastName) as TBT_conducted_by_name,permit.TBT_Done_At as TBT_done_time,permit.startDate Start_time,permit.description as workdescription ,pm_task.close_remarks as new_remark   ," +
-                               " permit.status as status_PTW, CONCAT(isotak.firstName,isotak.lastName) as Isolation_taken" +
+                               " permit.status as status_PTW, CONCAT(isotak.firstName,isotak.lastName) as Isolation_taken, " +
+                               " CONCAT(cancelledrejectedBy.firstName,' ',cancelledrejectedBy.lastName)  as cancelledrejectedbyName " +
                                " FROM pm_task " +
-
                                $"left join users as assignedTo on pm_task.assigned_to = assignedTo.id " +
                                $"left join users as closedBy on pm_task.closed_by = closedBy.id " +
                                $"left join users as approvedBy on pm_task.approved_by = approvedBy.id " +
                                $"left join users as rejectedBy on pm_task.rejected_by = rejectedBy.id " +
                                $"left join users as cancelledBy on pm_task.cancelled_by = cancelledBy.id " +
+                               $"left join users as cancelledrejectedBy on pm_task.cancel_rejected_by = cancelledrejectedBy.id " +
+                               $"left join users as closed on pm_task.closed_by = closed.id " +
                                $"left join users as startedBy on pm_task.started_by = startedBy.id " +
                                $"left join permits as permit on pm_task.PTW_id = permit.id " +
                                $"left join pm_plan  on pm_task.plan_id = pm_plan.id " +
@@ -495,7 +510,7 @@ namespace CMMSAPIs.Repositories.PM
             return taskViewDetail[0];
         }
 
-        internal async Task<CMDefaultResponse> LinkPermitToPMTask(int task_id, int permit_id, int userID)
+        internal async Task<CMDefaultResponse> LinkPermitToPMTask(int task_id, int permit_id, int userID, string facilitytimeZone)
         {
             /*
              * Primary Table - PMSchedule
@@ -541,7 +556,15 @@ namespace CMMSAPIs.Repositories.PM
             if (retVal > 0)
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_TASK, task_id, CMMS.CMMS_Modules.PTW, permit_id, "PTW linked to PM", CMMS.CMMS_Status.PM_LINK_PTW, userID);
-
+            try
+            {
+                CMPMTaskView _PMTaskList = await GetPMTaskDetail(task_id, facilitytimeZone);
+                CMMSNotification.sendNotification(CMMS.CMMS_Modules.PM_TASK, CMMS.CMMS_Status.PM_LINK_PTW, new[] { userID }, _PMTaskList);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to send Task Notification: {ex.Message}");
+            }
             response = new CMDefaultResponse(task_id, CMMS.RETRUNSTATUS.SUCCESS, $"Permit {permit_id} linked to Task {task_id}");
 
             return response;
@@ -564,10 +587,11 @@ namespace CMMSAPIs.Repositories.PM
             DataTable dt2 = await Context.FetchData(myQuery).ConfigureAwait(false);
             int id = Convert.ToInt32(dt2.Rows[0][0]);
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, request.schedule_id, CMMS.CMMS_Modules.CHECKPOINTS, 0, "Custom Checkpoint added", CMMS.CMMS_Status.PM_UPDATED, userID);
+
             return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, $"Custom checkpoint added successfully to PM Schedule PMSCH{request.schedule_id}");
         }
 
-        internal async Task<CMDefaultResponse> StartPMTask(int task_id, int userID)
+        internal async Task<CMDefaultResponse> StartPMTask(int task_id, int userID, string facilitytimeZone)
         {
             /*
              * Primary Table - PMExecution
@@ -668,13 +692,21 @@ namespace CMMSAPIs.Repositories.PM
             string startQry2 = $"UPDATE pm_task SET started_by = {userID}, started_at = '{UtilsRepository.GetUTCTime()}', status = {(int)CMMS.CMMS_Status.PM_START} WHERE id = {task_id};";
             await Context.ExecuteNonQry<int>(startQry2).ConfigureAwait(false);
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_TASK, task_id, 0, 0, $"PM Execution Started of assets ", CMMS.CMMS_Status.PM_START, userID);
-
+            try
+            {
+                CMPMTaskView _PMTaskList = await GetPMTaskDetail(task_id, facilitytimeZone);
+                CMMSNotification.sendNotification(CMMS.CMMS_Modules.PM_TASK, CMMS.CMMS_Status.PM_START, new[] { userID }, _PMTaskList);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to send Task Notification: {ex.Message}");
+            }
             response = new CMDefaultResponse(idList, CMMS.RETRUNSTATUS.SUCCESS, $"Execution PMTASK{task_id} Started Successfully");
 
             return response;
         }
 
-        internal async Task<List<CMDefaultResponse>> UpdatePMTaskExecution(CMPMExecutionDetail request, int userID)
+        internal async Task<List<CMDefaultResponse>> UpdatePMTaskExecution(CMPMExecutionDetail request, int userID, string facilitytimeZone)
         {
             /*
              * Primary Table - PMExecution
@@ -918,14 +950,22 @@ namespace CMMSAPIs.Repositories.PM
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_TASK, request.task_id, 0, 0, string.IsNullOrEmpty(request.comment) ? "PM Task Updated" : request.comment, CMMS.CMMS_Status.PM_UPDATED, userID);
-
+            try
+            {
+                CMPMTaskView _PMTaskList = await GetPMTaskDetail(request.task_id, facilitytimeZone);
+                CMMSNotification.sendNotification(CMMS.CMMS_Modules.PM_TASK, CMMS.CMMS_Status.PM_UPDATED, new[] { userID }, _PMTaskList);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to send Task Notification: {ex.Message}");
+            }
             CMDefaultResponse responseResult = new CMDefaultResponse(request.task_id, retCode, "PM Task Updated successfully");
             responseList.Add(responseResult);
 
             return responseList;
         }
 
-        internal async Task<CMDefaultResponse> ClosePMTaskExecution(CMApproval request, int userID)
+        internal async Task<CMDefaultResponse> ClosePMTaskExecution(CMApproval request, int userID, string facilitytimeZone)
         {
             /*
              * Primary Table - PMExecution
@@ -952,10 +992,19 @@ namespace CMMSAPIs.Repositories.PM
             if (retVal > 0)
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_TASK, request.id, 0, 0, string.IsNullOrEmpty(request.comment) ? "PM Task Close Requested " : request.comment, CMMS.CMMS_Status.PM_COMPLETED, userID);
+            try
+            {
+                CMPMTaskView _PMTaskList = await GetPMTaskDetail(request.id, facilitytimeZone);
+                CMMSNotification.sendNotification(CMMS.CMMS_Modules.PM_TASK, CMMS.CMMS_Status.PM_COMPLETED, new[] { userID }, _PMTaskList);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to send Task Notification: {ex.Message}");
+            }
             CMDefaultResponse response = new CMDefaultResponse(request.id, retCode, "PM Task Close Requested successfully");
             return response;
         }
-        internal async Task<CMDefaultResponse> CancelRejectedPMTaskExecution(CMApproval request, int userID)
+        internal async Task<CMDefaultResponse> CancelRejectedPMTaskExecution(CMApproval request, int userID, string facilitytimeZone)
         {
             string myQuery = "UPDATE pm_task SET " +
                                 $"cancel_rejected_by = {userID}, " +
@@ -970,10 +1019,19 @@ namespace CMMSAPIs.Repositories.PM
             if (retVal > 0)
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_TASK, request.id, 0, 0, string.IsNullOrEmpty(request.comment) ? "PM Task Cancel Rejected " : request.comment, CMMS.CMMS_Status.PM_CANCELLED_REJECTED, userID);
+            try
+            {
+                CMPMTaskView _PMTaskList = await GetPMTaskDetail(request.id, facilitytimeZone);
+                CMMSNotification.sendNotification(CMMS.CMMS_Modules.PM_TASK, CMMS.CMMS_Status.PM_CANCELLED_REJECTED, new[] { userID }, _PMTaskList);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to send Task Notification: {ex.Message}");
+            }
             CMDefaultResponse response = new CMDefaultResponse(request.id, retCode, "PM Task Cancel Rejected successfully.");
             return response;
         }
-        internal async Task<CMDefaultResponse> CancelApprovedPMTaskExecution(CMApproval request, int userID)
+        internal async Task<CMDefaultResponse> CancelApprovedPMTaskExecution(CMApproval request, int userID, string facilitytimeZone)
         {
             string myQuery = "UPDATE pm_task SET " +
                                 $"cancel_approved_by = {userID}, " +
@@ -987,12 +1045,21 @@ namespace CMMSAPIs.Repositories.PM
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
             if (retVal > 0)
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_TASK, request.id, 0, 0, string.IsNullOrEmpty(request.comment) ? "PM Task Cancel Rejected " : request.comment, CMMS.CMMS_Status.PM_CANCELLED_REJECTED, userID);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_TASK, request.id, 0, 0, string.IsNullOrEmpty(request.comment) ? "PM Task Cancel Rejected " : request.comment, CMMS.CMMS_Status.PM_CANCELLED_APPROVED, userID);
+            try
+            {
+                CMPMTaskView _PMTaskList = await GetPMTaskDetail(request.id, facilitytimeZone);
+                CMMSNotification.sendNotification(CMMS.CMMS_Modules.PM_TASK, CMMS.CMMS_Status.PM_CANCELLED_APPROVED, new[] { userID }, _PMTaskList);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to send Task Notification: {ex.Message}");
+            }
             CMDefaultResponse response = new CMDefaultResponse(request.id, retCode, "PM Task Cancel Rejected successfully.");
             return response;
         }
 
-        internal async Task<CMRescheduleApprovalResponse> ApprovePMTaskExecution(CMApproval request, int userID)
+        internal async Task<CMRescheduleApprovalResponse> ApprovePMTaskExecution(CMApproval request, int userID, string facilitytimeZone)
         {
             /*
              * Primary Table - PMExecution
@@ -1049,12 +1116,20 @@ namespace CMMSAPIs.Repositories.PM
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_TASK, request.id, 0, 0, string.IsNullOrEmpty(request.comment) ? $"PM Task Close Approved" : request.comment, CMMS.CMMS_Status.PM_APPROVED, userID);
             //CMPMScheduleViewDetail _PMList = await GetPMTaskDetail(request.id);
             //CMMSNotification.sendNotification(CMMS.CMMS_Modules.PM_SCHEDULE, CMMS.CMMS_Status.PM_APPROVED, _PMList);
-
+            try
+            {
+                CMPMTaskView _PMTaskList = await GetPMTaskDetail(request.id, facilitytimeZone);
+                CMMSNotification.sendNotification(CMMS.CMMS_Modules.PM_TASK, CMMS.CMMS_Status.PM_APPROVED, new[] { userID }, _PMTaskList);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to send Task Notification: {ex.Message}");
+            }
             CMRescheduleApprovalResponse response = new CMRescheduleApprovalResponse(id, request.id, retCode, $"PM Task Close Approved to PMTASK{id}");
             return response;
         }
 
-        internal async Task<CMDefaultResponse> RejectPMTaskExecution(CMApproval request, int userID)
+        internal async Task<CMDefaultResponse> RejectPMTaskExecution(CMApproval request, int userID, string facilitytimeZone)
         {
             /*
              * Primary Table - PMExecution
@@ -1083,10 +1158,20 @@ namespace CMMSAPIs.Repositories.PM
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_TASK, request.id, 0, 0, string.IsNullOrEmpty(request.comment) ? "PM Task Close Rejected" : request.comment, CMMS.CMMS_Status.PM_REJECTED, userID);
             CMDefaultResponse response = new CMDefaultResponse(request.id, retCode, "PM Task Close Rejected");
+            try
+            {
+                CMPMTaskView _PMPlanList = await GetPMTaskDetail(request.id, facilitytimeZone);
+                CMMSNotification.sendNotification(CMMS.CMMS_Modules.PM_TASK, CMMS.CMMS_Status.PM_REJECTED, new[] { userID }, _PMPlanList);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to send Task Notification: {ex.Message}");
+            }
+            
             return response;
         }
 
-        internal async Task<CMDefaultResponse> AssignPMTask(int task_id, int assign_to, int userID)
+        internal async Task<CMDefaultResponse> AssignPMTask(int task_id, int assign_to, int userID, string facilitytimeZone)
         {
             string statusQry = $"SELECT status FROM pm_task WHERE id = {task_id};";
             DataTable dt1 = await Context.FetchData(statusQry).ConfigureAwait(false);
@@ -1121,6 +1206,17 @@ namespace CMMSAPIs.Repositories.PM
             }
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_TASK, task_id, 0, 0, $"PM Task Assigned to user Id {assign_to}", CMMS.CMMS_Status.PM_ASSIGNED, userID);
+            try
+            {
+                CMPMTaskView _PMTask = await GetPMTaskDetail(task_id, facilitytimeZone);
+                CMMSNotification.sendNotification(CMMS.CMMS_Modules.PM_TASK, CMMS.CMMS_Status.PM_ASSIGNED, new[] { userID }, _PMTask);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to send Task Notification: {ex.Message}");
+            }
+            
+
             return response;
         }
         //private CMSetScheduleData CreateScheduleData(ScheduleIDData scheduleData)
@@ -1143,7 +1239,7 @@ namespace CMMSAPIs.Repositories.PM
         //    schData.asset_schedules.Add(asset_schedule);
         //    return schData;
         //}
-        internal async Task<List<CMDefaultResponse>> UpdatePMScheduleExecution(CMPMExecutionDetail request, int userID)
+        internal async Task<List<CMDefaultResponse>> UpdatePMScheduleExecution(CMPMExecutionDetail request, int userID, string facilitytimeZone)
         {
             /*
              * Primary Table - PMExecution
@@ -1328,6 +1424,9 @@ namespace CMMSAPIs.Repositories.PM
                                 await Context.ExecuteNonQry<int>(otherDetailsQry).ConfigureAwait(false);
                             }
                             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, schedule.schedule_id, CMMS.CMMS_Modules.PM_EXECUTION, schedule_detail.execution_id, $"{schedule_detail.pm_files.Count} file(s) attached to PMSCH{schedule.schedule_id}", CMMS.CMMS_Status.PM_UPDATED, userID);
+                           /* CMPMTaskView _PMTask = await GetPMTaskDetail(request.task_id, facilitytimeZone);
+                            CMMSNotification.sendNotification(CMMS.CMMS_Modules.PM_SCHEDULE, CMMS.CMMS_Status.PM_UPDATED, new[] { userID }, _PMTask);
+*/
                             response = new CMDefaultResponse(schedule_detail.execution_id, CMMS.RETRUNSTATUS.SUCCESS, $"{schedule_detail.pm_files.Count} file(s) attached to PM Successfully");
                             responseList.Add(response);
                             changeFlag++;
@@ -1364,6 +1463,9 @@ namespace CMMSAPIs.Repositories.PM
 
             //responseList.Add(responseSchedule);
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, request.task_id, 0, 0, $"PM Task {request.task_id} updated.", CMMS.CMMS_Status.PM_UPDATED, userID);
+          /*  CMPMTaskView _PMList = await GetPMTaskDetail(request.task_id, facilitytimeZone);
+            CMMSNotification.sendNotification(CMMS.CMMS_Modules.PM_SCHEDULE, CMMS.CMMS_Status.PM_UPDATED, new[] { userID }, _PMList);*/
+
             return responseList;
         }
 
