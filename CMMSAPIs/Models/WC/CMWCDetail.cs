@@ -34,7 +34,7 @@ namespace CMMSAPIs.Models.WC
         public DateTime failure_time { get; set; }
         public int estimated_cost { get; set; }
         public int quantity { get; set; }
-        public string cost_of_replacement { get; set; }
+        public int cost_of_replacement { get; set; }
         public int approxdailyloss { get; set; }
         public int currencyId { get; set; }
         public string currency { get; set; }

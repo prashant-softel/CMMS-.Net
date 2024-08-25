@@ -16,7 +16,7 @@ namespace CMMSAPIs.Models.Notifications
         int m_jobId;
         CMJobView m_jobObj;
         private JobRepository _JobRepo;
-        int m_notificationType = 1;
+//        int m_notificationType = 1;
 
         public JobNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMJobView jobObj, int notificationType = 1) : base(moduleID, notificationID)
         {
@@ -25,7 +25,7 @@ namespace CMMSAPIs.Models.Notifications
             m_notificationType = notificationType;
         }
 
-        protected virtual int getId(params object[] args)
+        override protected int getId(params object[] args)
         {
             return m_jobObj.id;
         }
