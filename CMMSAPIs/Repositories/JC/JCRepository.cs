@@ -67,46 +67,37 @@ namespace CMMSAPIs.Repositories.JC
 
         }
 
-        internal string getLongStatus(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMJCDetail jobObj)
+        internal string getLongStatus(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMJCDetail jobCardObj)
         {
             string retValue = "My job subject";
-            int jobId = jobObj.id;
+            int jobCardId = jobCardObj.id;
 
             switch (notificationID)
             {
                 case CMMS.CMMS_Status.JC_CREATED:
-                    retValue = String.Format("Job Card Created at {0}", jobObj.created_at);
+                    retValue = String.Format("JobCard JC{0} Created by {1}", jobCardId, jobCardObj.created_by);
                     break;
                 case CMMS.CMMS_Status.JC_STARTED:
-                    retValue = String.Format("Job Card Started by at {0}", jobObj.UpdatedByName);
-                    break;
-                case CMMS.CMMS_Status.JC_CLOSED:
-                    retValue = String.Format("Job Card Closed by {0} - Waiting for approval", jobObj.JC_Closed_by_Name);
-                    break;
-                case CMMS.CMMS_Status.JC_CLOSE_APPROVED:
-                    retValue = String.Format("Job Card Approved by {0}", jobObj.JC_Approved_By_Name);
-                    break;
-                case CMMS.CMMS_Status.JC_CLOSE_REJECTED:
-                    retValue = String.Format("Job Card Rejected by {0}", jobObj.JC_Rejected_By_Name);
+                    retValue = String.Format("JobCard JC{0} Started by at {1}", jobCardId, jobCardObj.JC_Start_By_Name);
                     break;
                 case CMMS.CMMS_Status.JC_CARRY_FORWARDED:
-                    retValue = String.Format("Job Card Carry Forward by {0} - Waiting for approval ", jobObj.JC_Start_By_Name);
+                    retValue = String.Format("JobCard JC{0} Carry Forward by {1} - Waiting for approval ", jobCardId, jobCardObj.JC_Start_By_Name);
                     break;
                 case CMMS.CMMS_Status.JC_CF_APPROVED:
-                    retValue = String.Format("Job Card Carry Forward Approved by {0}", jobObj.JC_Approved_By_Name);
+                    retValue = String.Format("JobCard JC{0} Carry Forward Approved by {1}", jobCardId, jobCardObj.JC_Approved_By_Name);
                     break;
                 case CMMS.CMMS_Status.JC_CF_REJECTED:
-                    retValue = String.Format("Job Card Carry Forward Rejected by {0}", jobObj.JC_Rejected_By_Name);
+                    retValue = String.Format("JobCard JC{0} Carry Forward Rejected by {1}", jobCardId, jobCardObj.JC_Rejected_By_Name);
                     break;
-                //case CMMS.CMMS_Status.JC_APPROVED:
-                //    retValue = String.Format("Job Card Approved by {0}", jobObj.JC_Approved_By_Name);
-                //    break;
-                //case CMMS.CMMS_Status.JC_REJECTED5:
-                //    retValue = String.Format("Job card Rejected by {0}", jobObj.JC_Rejected_By_Name);
-                //    break;
-                //case CMMS.CMMS_Status.JC_PTW_TIMED_OUT:
-                //    retValue = String.Format("PTW <{0}> Timed Out", jobObj.ptwId);
-                //    break;
+                case CMMS.CMMS_Status.JC_CLOSED:
+                    retValue = String.Format("JobCard JC{0} Closed by {1} - Waiting for approval", jobCardId, jobCardObj.JC_Closed_by_Name);
+                    break;
+                case CMMS.CMMS_Status.JC_CLOSE_APPROVED:
+                    retValue = String.Format("JobCard JC{0} Approved by {1}", jobCardId, jobCardObj.JC_Approved_By_Name);
+                    break;
+                case CMMS.CMMS_Status.JC_CLOSE_REJECTED:
+                    retValue = String.Format("JobCard JC{0} Rejected by {1}", jobCardId, jobCardObj.JC_Rejected_By_Name);
+                    break;
                 default:
                     break;
             }
@@ -242,7 +233,7 @@ namespace CMMSAPIs.Repositories.JC
 
               return response;
           }*/
-        internal async Task<CMDefaultResponse> StartJC(CMJCRequest requestList, int userID)
+        internal async Task<CMDefaultResponse> StartJC(CMJCRequest requestList, int userID, string facilitytimeZone)
         {
             int jc_id = requestList.jc_id;
             CMJCDetail request = requestList.request;
@@ -257,7 +248,6 @@ namespace CMMSAPIs.Repositories.JC
 
             //string myQuery1 = $"SELECT  jc.id as id , jc.PTW_id as ptwId, job.id as jobid, facilities.name as plant_name, asset_cat.name as asset_category_name, CONCAT(user.firstName + ' ' + user.lastName) as JC_Closed_by_Name, CONCAT(user1.firstName + ' ' + user1.lastName) as JC_Rejected_By_Name, jc.JC_Approved_By_Name as  JC_Approved_By_Name FROM jobs as job JOIN  jobmappingassets as mapAssets ON mapAssets.jobId = job.id join assetcategories as asset_cat ON mapAssets.categoryId = asset_cat.id JOIN facilities as facilities ON job.blockId = facilities.id LEFT JOIN jobcards as jc on jc.jobId = job.id LEFT JOIN users as user ON user.id = jc.JC_Update_by LEFT JOIN  users as user1 ON user1.id = jc.JC_Rejected_By_id where jc.id = {jc_id}";
 
-            List<CMJCDetail> _jcDetails = await GetJCDetail(jc_id, "");
             //upload Images
             if (request.uploadfile_ids != null)
             {
@@ -279,6 +269,7 @@ namespace CMMSAPIs.Repositories.JC
             }
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOBCARD, jc_id, 0, 0, "Job Card Started", CMMS.CMMS_Status.JC_STARTED, userID);
 
+            List<CMJCDetail> _jcDetails = await GetJCDetail(jc_id, facilitytimeZone);
             await CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOBCARD, CMMS.CMMS_Status.JC_STARTED, new[] { userID }, _jcDetails[0]);
 
             CMDefaultResponse response = new CMDefaultResponse(jc_id, CMMS.RETRUNSTATUS.SUCCESS, "Job Card Started");

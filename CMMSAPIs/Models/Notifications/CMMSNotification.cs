@@ -491,13 +491,25 @@ namespace CMMSAPIs.Models.Notifications
             {
                 CMMCExecution _Task = (CMMCExecution)args[0];
                 notificationObj = new VegetationNotification(moduleID, notificationID, null, _Task);
-                //facilityId = _Inventory.facility_id;
+                //facilityId = _Task.fa.facility_id;
             }
             else if (moduleID == CMMS.CMMS_Modules.SM_MRS)     //MRS Report
             {
                 CMMRSList _MRS = (CMMRSList)args[0];
                 notificationObj = new MRSNotification(moduleID, notificationID, _MRS);
                 facilityId = _MRS.facilityId;   // CMMRSList update the query to facilityid in a list
+            }
+            else if (moduleID == CMMS.CMMS_Modules.SM_RO)      //RO Report
+            {
+                CMCreateRequestOrderGET _SMRO = (CMCreateRequestOrderGET)args[0];
+                notificationObj = new SMNotification(moduleID, notificationID, _SMRO);
+                facilityId = _SMRO.facilityID;
+            }
+            else if (moduleID == CMMS.CMMS_Modules.INVENTORY)    //Incident Report
+            {
+                CMViewInventory _Inventory = (CMViewInventory)args[0];
+                notificationObj = new InventoryNotification(moduleID, notificationID, _Inventory);
+                facilityId = _Inventory.facilityId;
             }
             else
             {

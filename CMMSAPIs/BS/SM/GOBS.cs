@@ -16,20 +16,20 @@ namespace CMMSAPIs.BS
         Task<List<CMGOListByFilter>> GetGOList(int facility_id, DateTime fromDate, DateTime toDate, int Status, string facilitytime);
         Task<CMGoodsOrderList> GetGOItemByID(int id,string facilitytime);
         Task<List<CMGoodsOrderList>> GetAssetCodeDetails(int asset_code);
-        Task<CMDefaultResponse> CreateGO(CMGoodsOrderList request, int userID);
+        Task<CMDefaultResponse> CreateGO(CMGoodsOrderList request, int userID, string facilitytimeZone);
         Task<CMDefaultResponse> UpdateGO(CMGoodsOrderList request, int userID);
-        Task<CMDefaultResponse> DeleteGO(CMApproval request, int userID);
-        Task<CMDefaultResponse> CloseGO(CMGoodsOrderList request, int userID);
-        Task<CMDefaultResponse> ApproveGO(CMApproval request, int userId);
-        Task<CMDefaultResponse> RejectGO(CMApproval request, int userId);
+        Task<CMDefaultResponse> DeleteGO(CMApproval request, int userID, string facilitytimeZone);
+        Task<CMDefaultResponse> CloseGO(CMGoodsOrderList request, int userID, string facilitytimeZone);
+        Task<CMDefaultResponse> ApproveGO(CMApproval request, int userId, string facilitytimeZone);
+        Task<CMDefaultResponse> RejectGO(CMApproval request, int userId, string facilitytimeZone);
         Task<List<CMPURCHASEDATA>> GetGoodsOrderData(int plantID, string empRole, DateTime fromDate, DateTime toDate, string status, string order_type,string facilitytime);
-        Task<CMGOMaster> GetGODetailsByID(int id);
-        Task<CMDefaultResponse> SubmitPurchaseData(CMSUBMITPURCHASEDATA request);
+        Task<CMGOMaster> GetGODetailsByID(int id, string facilitytimeZone);
+        Task<CMDefaultResponse> SubmitPurchaseData(CMSUBMITPURCHASEDATA request, int userId, string facilitytimeZone);
         Task<List<CMGOListByFilter>> GetSubmitPurchaseOrderList(int facility_id, DateTime fromDate, DateTime toDate, int Status, string facilitytime);
 
         Task<CMDefaultResponse> UpdateGOReceive(CMGoodsOrderList request, int userID);
-        Task<CMDefaultResponse> ApproveGOReceive(CMApproval request, int userId);
-        Task<CMDefaultResponse> RejectGOReceive(CMApproval request, int userId);
+        Task<CMDefaultResponse> ApproveGOReceive(CMApproval request, int userId, string facilitytimeZone);
+        Task<CMDefaultResponse> RejectGOReceive(CMApproval request, int userId, string facilitytimeZone);
         Task<CMDefaultResponse> CloseRO(CMGoodsOrderList request, int userID);
     }
 
@@ -89,13 +89,13 @@ namespace CMMSAPIs.BS
             }
         }
 
-        public async Task<CMDefaultResponse> CreateGO(CMGoodsOrderList request, int userID)
+        public async Task<CMDefaultResponse> CreateGO(CMGoodsOrderList request, int userID, string facilitytimeZone)
         {
             try
             {
                 using (var repos = new GORepository(getDB))
                 {
-                    return await repos.CreateGO(request, userID);
+                    return await repos.CreateGO(request, userID, facilitytimeZone);
 
                 }
             }
@@ -121,13 +121,13 @@ namespace CMMSAPIs.BS
             }
         }
 
-        public async Task<CMDefaultResponse> DeleteGO(CMApproval request, int userID)
+        public async Task<CMDefaultResponse> DeleteGO(CMApproval request, int userID, string facilitytimeZone)
         {
             try
             {
                 using (var repos = new GORepository(getDB))
                 {
-                    return await repos.DeleteGO(request, userID);
+                    return await repos.DeleteGO(request, userID, facilitytimeZone);
 
                 }
             }
@@ -136,13 +136,13 @@ namespace CMMSAPIs.BS
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> CloseGO(CMGoodsOrderList request, int userID)
+        public async Task<CMDefaultResponse> CloseGO(CMGoodsOrderList request, int userID, string facilitytimeZone)
         {
             try
             {
                 using (var repos = new GORepository(getDB))
                 {
-                    return await repos.CloseGO(request, userID);
+                    return await repos.CloseGO(request, userID, facilitytimeZone);
 
                 }
             }
@@ -151,13 +151,13 @@ namespace CMMSAPIs.BS
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> ApproveGO(CMApproval request, int userId)
+        public async Task<CMDefaultResponse> ApproveGO(CMApproval request, int userId, string facilitytimeZone)
         {
             try
             {
                 using (var repos = new GORepository(getDB))
                 {
-                    return await repos.ApproveGoodsOrder(request, userId);
+                    return await repos.ApproveGoodsOrder(request, userId, facilitytimeZone);
 
                 }
             }
@@ -166,13 +166,13 @@ namespace CMMSAPIs.BS
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> RejectGO(CMApproval request, int userId)
+        public async Task<CMDefaultResponse> RejectGO(CMApproval request, int userId, string facilitytimeZone)
         {
             try
             {
                 using (var repos = new GORepository(getDB))
                 {
-                    return await repos.RejectGoodsOrder(request, userId);
+                    return await repos.RejectGoodsOrder(request, userId, facilitytimeZone);
 
                 }
             }
@@ -198,13 +198,13 @@ namespace CMMSAPIs.BS
             }
         }
 
-        public async Task<CMGOMaster> GetGODetailsByID(int id)
+        public async Task<CMGOMaster> GetGODetailsByID(int id, string facilitytimeZone)
         {
             try
             {
                 using (var repos = new GORepository(getDB))
                 {
-                    return await repos.GetGODetailsByID(id);
+                    return await repos.GetGODetailsByID(id, facilitytimeZone);
 
                 }
             }
@@ -213,13 +213,13 @@ namespace CMMSAPIs.BS
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> SubmitPurchaseData(CMSUBMITPURCHASEDATA request)
+        public async Task<CMDefaultResponse> SubmitPurchaseData(CMSUBMITPURCHASEDATA request, int userId, string facilitytimeZone)
         {
             try
             {
                 using (var repos = new GORepository(getDB))
                 {
-                    return await repos.SubmitPurchaseData(request);
+                    return await repos.SubmitPurchaseData(request, userId, facilitytimeZone) ;
 
                 }
             }
@@ -261,13 +261,13 @@ namespace CMMSAPIs.BS
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> ApproveGOReceive(CMApproval request, int userId)
+        public async Task<CMDefaultResponse> ApproveGOReceive(CMApproval request, int userId, string facilitytimeZone)
         {
             try
             {
                 using (var repos = new GORepository(getDB))
                 {
-                    return await repos.ApproveGoodsOrderReceive(request, userId);
+                    return await repos.ApproveGoodsOrderReceive(request, userId, facilitytimeZone);
 
                 }
             }
@@ -276,13 +276,13 @@ namespace CMMSAPIs.BS
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> RejectGOReceive(CMApproval request, int userId)
+        public async Task<CMDefaultResponse> RejectGOReceive(CMApproval request, int userId, string facilitytimeZone)
         {
             try
             {
                 using (var repos = new GORepository(getDB))
                 {
-                    return await repos.RejectGoodsOrderReceive(request, userId);
+                    return await repos.RejectGoodsOrderReceive(request, userId, facilitytimeZone);
 
                 }
             }
