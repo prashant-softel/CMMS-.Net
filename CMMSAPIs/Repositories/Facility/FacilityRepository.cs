@@ -282,7 +282,7 @@ namespace CMMSAPIs.Repositories.Facility
                                 $"LEFT JOIN countries as countries ON countries.id = u.countryId and countries.id = cities.country_id and countries.id = states.country_id  " +
                                 $"LEFT JOIN usersaccess as access ON u.id = access.userId  " +
                                 $"LEFT JOIN  userdesignation as usd on  usd.id = u.designation_id " +
-                                $"WHERE uf.isemployee = 1 and access.featureId ={featureid} and access.edit = 1 and u.status = 1 " +
+                                $"WHERE uf.isemployee = 1  and u.status = 1 " +
                                 $" AND  uf.status = 1  " +
                                 $" AND uf.facilityId = {facility_id} GROUP BY u.id ORDER BY u.id;";
                 _FacilityByFeatureid = await Context.GetData<FacilityListEmployee>(myQuery).ConfigureAwait(false);

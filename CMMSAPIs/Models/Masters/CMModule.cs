@@ -130,6 +130,9 @@ namespace CMMSAPIs.Models.Masters
         public string MC_Type { get; set; }
 
         public DateTime End_Date_done { get; set; }
+        public dynamic TotalWaterUsed { get; set; }
+        public dynamic plan_days { get; set; }
+        public dynamic no_of_cleaned { get; set; }
     }
     public class CMROLE
     {
@@ -143,7 +146,10 @@ namespace CMMSAPIs.Models.Masters
     }
     public class CMWATERUESD
     {
-        public string key { get; set; }
-        public decimal value { get; set; }
+        public string site_name { get; set; }
+        public dynamic TotalWaterUsed { get; set; }
+        public dynamic plan_days { get; set; }
+        public dynamic no_of_cleaned { get; set; }
+
     }
 }

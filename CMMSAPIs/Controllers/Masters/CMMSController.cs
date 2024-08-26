@@ -1,6 +1,7 @@
 using CMMSAPIs.BS.Masters;
 using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Masters;
+using CMMSAPIs.Models.SM;
 using CMMSAPIs.Models.Utils;
 using iTextSharp.text;
 using iTextSharp.text.pdf;
@@ -674,9 +675,12 @@ namespace CMMSAPIs.Controllers.Masters
                 var data = await _CMMSBS.getDashboadDetails(facilityId, moduleID, fromDate, toDate);
                 return Ok(data);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = StatusCodes.Status404NotFound;
+                item.Message = ex.Message;
+                return Ok(item);
             }
         }
         [Route("GetStatusbymodule")]

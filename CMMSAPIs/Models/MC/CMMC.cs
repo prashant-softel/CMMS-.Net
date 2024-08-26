@@ -225,6 +225,7 @@ namespace CMMSAPIs.Models.MC
         public UInt64 id { get; set; }
         public int executionId { get; set; }
         public string title { get; set; }
+        public string site_name { get; set; }
         public string description { get; set; }
         public int planId { get; set; }
         public string frequency { get; set; }
