@@ -44,7 +44,7 @@ namespace CMMSAPIs.Models.Users
         public dynamic createdAt { get; set; }
         public dynamic updatedAt { get; set; }
         public List<CMPlant> Facilities { get; set; }
-
+        public string designation { get; set; }
         public string SecondaryName { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }

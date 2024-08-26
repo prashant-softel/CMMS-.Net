@@ -35,6 +35,7 @@ namespace CMMSAPIs.Models.Inventory
         public string warrantyType { get; set; }
         public string warrantyProviderName { get; set; }
         public DateTime? start_date { get; set; }
+        public DateTime? expiry_date { get; set; }
         public int warrantyTenture { get; set; }
         public string certificate_number { get; set; }
         public double cost { get; set; }

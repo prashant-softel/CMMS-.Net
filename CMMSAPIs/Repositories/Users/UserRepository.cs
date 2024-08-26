@@ -1057,7 +1057,7 @@ namespace CMMSAPIs.Repositories.Users
         {
             int id = 0;
             string qry = $"SELECT " +
-                            $"u.id, CONCAT(firstName, ' ', lastName) as full_name, loginId as user_name,DATE_FORMAT(u.createdAt,'%Y-%m-%d ') as  createdAt ,DATE_FORMAT(u.updatedAt,'%Y-%m-%d ') as updatedAt, mobileNumber as contact_no," +
+                            $"u.id, CONCAT(firstName, ' ', lastName) as full_name, loginId as user_name,DATE_FORMAT(u.createdAt,'%Y-%m-%d ') as  createdAt ,DATE_FORMAT(u.updatedAt,'%Y-%m-%d ') as updatedAt, mobileNumber as contact_no,usd.designationName as designation ," +
                             $" r.id as role_id, r.name as role_name, CASE WHEN u.status=0 THEN 'Inactive' ELSE 'Active' END AS status, photo.id AS photoId, photo.file_path AS photoPath, sign.id AS signatureId, sign.file_path AS signaturePath, " +
                             $" u.secondaryEmail as SecondaryName,u.firstName,u.lastName,u.birthday,u.gender,u.mobileNumber,u.bloodGroup,u.landlineNumber,c.name as Country ,states.name as State ,cities.name as City,u.zipcode as zipcodes,u.isEmployee as employees, u.joiningDate as joining_dates " +
                          $"FROM " +
@@ -1066,6 +1066,8 @@ namespace CMMSAPIs.Repositories.Users
                             $"UserRoles as r ON u.roleId = r.id " +
                          $"JOIN " +
                             $"UserFacilities as uf ON uf.userId = u.id " +
+                             "LEFT JOIN " +
+                            "userdesignation as usd on  usd.id = u.designation_id   " +
                          $"LEFT JOIN " +
                             $"uploadedfiles as photo ON photo.id = u.photoId " +
                          $"LEFT JOIN " +
