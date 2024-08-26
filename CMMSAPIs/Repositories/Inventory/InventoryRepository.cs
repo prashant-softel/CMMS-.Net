@@ -57,21 +57,21 @@ namespace CMMSAPIs.Repositories.Inventory
 
         internal string getLongStatus(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMViewInventory InvObj)
         {
-            string retValue = "Job";
+            string retValue = "";
 
             switch (notificationID)
             {
                 case CMMS.CMMS_Status.INVENTORY_IMPORTED:
-                    retValue += String.Format("Assets Imported by {0} at {1}</p>", InvObj.added_by, InvObj.Imported_at);
+                    retValue += String.Format("Asset{0} Imported by {1}</p>", InvObj.id, InvObj.Imported_by);
                     break;
                 case CMMS.CMMS_Status.INVENTORY_ADDED:
-                    retValue += String.Format("Asset {0} Added by {1} at {2}</p>", InvObj.name, InvObj.added_by, InvObj.added_at);
+                    retValue += String.Format("Asset{0} Added by {1}</p>", InvObj.id, InvObj.added_by);
                     break;
                 case CMMS.CMMS_Status.INVENTORY_UPDATED:
-                    retValue += String.Format("Asset {0} Updated by {1} at {2}</p>", InvObj.name, InvObj.updated_by, InvObj.updated_at);
+                    retValue += String.Format("Asset{0} Updated by {1}</p>", InvObj.id, InvObj.updated_by);
                     break;
                 case CMMS.CMMS_Status.INVENTORY_DELETED:
-                    retValue += String.Format("Asset {0} Deleted by {1} at {2}</p>", InvObj.name, InvObj.deleted_by, InvObj.deleted_at);
+                    retValue += String.Format("Asset{0} Deleted by {1}</p>", InvObj.id, InvObj.deleted_by);
                     break;
                 default:
                     break;
@@ -1136,7 +1136,7 @@ namespace CMMSAPIs.Repositories.Inventory
            */
             /*Your code goes here*/
             string myQuery = "SELECT a.id ,frequency.name as calibrationFreqType ,a.name, a.description as asset_description, a.calibrationStartDate as calibrationSatrtDate,  " +
-                "cal.due_date as calibrationDueDate, cal.due_date as calibrationLastDate,a.vendorId as vendorid,a.area , " +
+                "a.calibrationDueDate as calibrationDueDate, a.calibrationLastDate as calibrationLastDate,a.vendorId as vendorid,a.area , " +
                 "a.stockCount as stockCount,a.photoId as photoId,a.retirementStatus as retirementStatus,w.meter_limit as meter_limit,w.meter_unit as meter_unit,a.moduleQuantity, ast.id as typeId, ast.name as type, a.supplierId as supplierId, b2.name as supplierName, manufacturertlb.id as manufacturerId, manufacturertlb.name as manufacturerName,a.parent_equipment_no ,b5.id as operatorId, b5.name as operatorName, ac.id as categoryId, ac.name as categoryName, a.serialNumber,a.cost as cost,a.currency as currencyId ,c.name as currency, a.model,a.calibrationFrequency,frequency.name as calibrationFrequencyType, a.calibrationReminderDays, " +
             "f.id as facilityId, f.name AS facilityName, bl.id as blockId, bl.name AS blockName, a2.id as parentId, a2.name as parentName, a2.serialNumber as parentSerial, custbl.id as customerId, custbl.name as customerName, owntbl.id as ownerId, owntbl.name as ownerName, s.id as statusId, s.name AS status,a.purchaseCode as purchaseCode, a.unspCode as unspCode, a.barcode as barcode,a.descMaintenace as descMaintenace,a.dcRating as dcRating ,a.acRating as acRating, a.specialTool,a.specialToolEmpId as specialToolEmp,  " +
             "w.start_date as start_date,w.expiry_date as expiry_date, w.id as warrantyId, w.warranty_description, w.certificate_number,wut.name as warranty_term_type,wt.id as warrantyTypeId, wt.name as warrantyType, wut.id as warrantyTermTypeId, wp.id as warrantyProviderId, wp.name as warrantyProviderName, files.file_path as warranty_certificate_path ," +
@@ -1145,7 +1145,6 @@ namespace CMMSAPIs.Repositories.Inventory
             "from assets as a " +
             "left join assettypes as ast on ast.id = a.typeId " +
             "left join currency as c ON c.id =a.currency " +
-            "left join calibration as cal on cal.asset_id = a.id " +
             "left join assetcategories as ac on ac.id= a.categoryId " +
             "left join business as custbl on custbl.id = a.customerId " +
             "left join business as owntbl" + " on owntbl.id = a.ownerId " +
@@ -1302,7 +1301,7 @@ namespace CMMSAPIs.Repositories.Inventory
                 }
                 else
                 {
-                    strRetMessage = "Warranty data for <" + assetName + "> does not exist. ";
+                    //strRetMessage = "Warranty data for <" + assetName + "> does not exist. ";
                 }
                 if (retID > 0)
                 {
@@ -1339,12 +1338,8 @@ namespace CMMSAPIs.Repositories.Inventory
                 }
                 CMViewInventory _inventoryAdded = await GetInventoryDetails(retID, "");
 
-                string _shortStatus = getShortStatus(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_ADDED);
-                _inventoryAdded.status_short = _shortStatus;
-
-                string _longStatus = getLongStatus(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_ADDED, _inventoryAdded);
-                _inventoryAdded.status_long = _longStatus;
-
+                strRetMessage = "New asset <" + assetName + "> added"; 
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, retID, 0, 0, strRetMessage, CMMS.CMMS_Status.INVENTORY_ADDED);
                 //await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_ADDED, new[] { userID }, _inventoryAdded);
             }
             if (count > 0)
@@ -1354,10 +1349,28 @@ namespace CMMSAPIs.Repositories.Inventory
                 if (count == 1)
                 {
                     strRetMessage = "New asset <" + assetName + "> added";
+                    CMViewInventory _inventoryAdded = await GetInventoryDetails(retID, "");
+                    //Last object notification will be sent
+                    string _shortStatus = getShortStatus(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_ADDED);
+                    _inventoryAdded.status_short = _shortStatus;
+
+                    string _longStatus = getLongStatus(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_ADDED, _inventoryAdded);
+                    _inventoryAdded.status_long = _longStatus;
+
+                    await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_ADDED, new[] { userID }, _inventoryAdded);
                 }
                 else
                 {
                     strRetMessage = "<" + count + "> new assets added";
+                    CMViewInventory _inventoryAdded = await GetInventoryDetails(retID, "");
+                    //Last object notification will be sent
+                    string _shortStatus = getShortStatus(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_ADDED);
+                    _inventoryAdded.status_short = _shortStatus;
+
+                    string _longStatus = getLongStatus(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_ADDED, _inventoryAdded);
+                    _inventoryAdded.status_long = _longStatus;
+
+                    await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_IMPORTED, new[] { userID }, _inventoryAdded);
                 }
             }
             else
@@ -1800,7 +1813,9 @@ namespace CMMSAPIs.Repositories.Inventory
             string _longStatus = getLongStatus(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_UPDATED, _inventoryAdded);
             _inventoryAdded.status_long = _longStatus;
 
-            //await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_UPDATED, new[] { userID } ,_inventoryAdded);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, request.id, 0, 0, _longStatus, CMMS.CMMS_Status.INVENTORY_UPDATED);
+
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_UPDATED, new[] { userID } ,_inventoryAdded);
 
             return obj;
         }
@@ -2033,7 +2048,7 @@ namespace CMMSAPIs.Repositories.Inventory
             string _longStatus = getLongStatus(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_UPDATED, _inventoryAdded);
             _inventoryAdded.status_long = _longStatus;
 
-            //await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_UPDATED, new[] { userID } ,_inventoryAdded);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_UPDATED, new[] { userID } ,_inventoryAdded);
 
             return obj;
         }
