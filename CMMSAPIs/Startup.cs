@@ -119,7 +119,7 @@ namespace CMMSAPIs
             services.AddScoped<AttendeceBS, _AttendeceBS>();
             services.AddScoped<TrainingCourseBS, Traningbs>();
             services.AddScoped<VegBS, vegetaion>();
-
+            services.AddHostedService<SchedulerService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
