@@ -33,7 +33,7 @@ namespace CMMSAPIs.Models.Inventory
         public string parent_equipment_no { get; set; }
 
         public double area { get; set; }
-        public string currency { get; set; }
+        public int currency { get; set; }
         public int currencyId { get; set; }
         public int stockCount { get; set; }
         public int moduleQuantity { get; set; }

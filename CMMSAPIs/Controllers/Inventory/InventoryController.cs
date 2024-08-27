@@ -37,10 +37,11 @@ namespace CMMSAPIs.Controllers.Inventory
 
             catch (Exception ex)
             {
-                ExceptionResponse item = new ExceptionResponse();
+                throw;
+                /*ExceptionResponse item = new ExceptionResponse();
 
                 item.Message = ex.Message;
-                return Ok(item);
+                return Ok(item);*/
             }
         }
 

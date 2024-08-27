@@ -1481,16 +1481,17 @@ namespace CMMSAPIs.Repositories.Masters
             string myQuery12 = $"select mc.facilityId as facility_id,F.name as facility_name, mc.id as wo_number ,mp.title as wo_decription,mc.planId,mc.status, CONCAT(createdBy.firstName, createdBy.lastName) as responsibility ," +
                 $" mc.startDate as start_date, mc.endedAt as doneDate,mc.prevTaskDoneDate as end_date,freq.name as frequency,mc.noOfDays, {statusOut} as " +
                 $"status_long , CASE WHEN mc.moduleType=1 THEN 'Wet' WHEN mc.moduleType=2 THEN 'Dry' ELSE 'Robotic' END as MC_Type,  " +
-                $"mc.startDate as  Start_Date ,mc.abandonedAt as  End_Date_done,mc.noOfDays as plan_days,sub1.TotalWaterUsed, sub2.no_of_cleaned " +
+                $"mc.startDate as  Start_Date ,mc.abandonedAt as  End_Date_done,mc.noOfDays as plan_days,sub1.TotalWaterUsed, sub2.no_of_cleaned,SUM(css.moduleQuantity) as Scheduled " +
                 $"from cleaning_execution as mc " +
                 $"LEFT join cleaning_plan as mp on mp.planId = mc.planId " +
+                $"LEFT join cleaning_execution_items as css on css.executionId = mc.id " +
                 $"LEFT JOIN (SELECT executionId, SUM(waterUsed) AS TotalWaterUsed FROM cleaning_execution_schedules GROUP BY executionId) sub1 ON mc.id = sub1.executionId " +
                 $"LEFT JOIN (SELECT executionId, SUM(moduleQuantity) AS no_of_cleaned FROM cleaning_execution_items where cleanedById>0 GROUP BY executionId) sub2 ON mc.id = sub2.executionId " +
                 $"LEFT JOIN Frequency as freq on freq.id = mp.frequencyId " +
                 $"LEFT JOIN users as createdBy ON createdBy.id = mc.assignedTo " +
                 $"LEFT JOIN users as approvedBy ON approvedBy.id = mc.approvedByID " +
                 $" left join facilities as F on F.id = mc.facilityId  " +
-                $"where (mc.moduleType=1 or rescheduled = 0)";
+                $"where (mc.moduleType=1 and rescheduled = 0)";
             myQuery12 += $" and mc.facilityId in ({facilityId})  group by mc.id ";
 
 

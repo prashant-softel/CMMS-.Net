@@ -888,12 +888,13 @@ namespace CMMSAPIs.Repositories.Inventory
                                 List<int> ids_ = (await UpdateInventoryWithParent(filteredDataTable, facility_id, userID)).id;
                                 insertedTable.Merge(filteredDataTable);
                                 childListCount++;
+                                //updateCount++;
                                 ids = string.Join(", ", ids_.Select(x => x.ToString()));
                                 if (ids != "")
                                 {
                                     filter = $" and id IN ({ids})";
                                 }
-                                idList.AddRange(ids_);
+                                updatedIdList.AddRange(ids_);
 
                             }
                         }
@@ -1497,6 +1498,7 @@ namespace CMMSAPIs.Repositories.Inventory
             return new CMDefaultResponse(idList, retCode, strRetMessage);
         }
         //update
+        //update1 with parent
         internal async Task<CMDefaultResponse> UpdateInventory(List<CMAddInventory> request, int userID)
         {
             /*
@@ -1506,6 +1508,7 @@ namespace CMMSAPIs.Repositories.Inventory
             int count = 0;
             int retID = 0;
             string assetName = "";
+            CMDefaultResponse obj = new CMDefaultResponse();
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.INVALID_ARG;
             string strRetMessage = "";
             int linkedToBlockId = 0;
@@ -1546,8 +1549,23 @@ namespace CMMSAPIs.Repositories.Inventory
                 {
                     unit.vendorId = unit.manufacturerId;
                 }
-                string qry = "update  assets set description='" + unit.assetdescription + "', parentId='" + unit.parentId + "', acCapacity='" + unit.acCapacity + "', dcCapacity='" + unit.dcCapacity + "', categoryId='" + unit.categoryId + "', typeId='" + unit.typeId + "', statusId='" + unit.statusId + "', facilityId='" + unit.facilityId + "', blockId='" + unit.blockId + "', linkedToBlockId='" + unit.blockId + "', customerId='" + unit.customerId + "', ownerId='" + unit.ownerId + "',operatorId='" + unit.operatorId + "', manufacturerId='" + unit.manufacturerId + "',supplierId='" + unit.supplierId + "',serialNumber='" + unit.serialNumber + "',createdBy='" + userID + "',photoId='" + unit.photoId + "',model='" + unit.model + "',stockCount='" + unit.stockCount + "',moduleQuantity='" + unit.moduleQuantity + "', cost='" + unit.cost + "',currency='" + unit.currency + "',specialTool='" + unit.specialToolId + "',specialToolEmpId='" + unit.specialToolEmpId + "',calibrationDueDate=" + firstCalibrationDate + ",calibrationLastDate=" + lastCalibrationDate + ",calibrationFrequencyType='" + unit.calibrationFrequencyType + "',calibrationFrequency='" + unit.calibrationFrequency + "',calibrationReminderDays='" + unit.calibrationReminderDays + "',retirementStatus='" + unit.retirementStatus + "',multiplier='" + unit.multiplier + "',vendorId='" + unit.vendorId + "',calibrationNextDueDate=" + nextCalibrationDate + ",acRating='" + unit.acRating + "',dcRating='" + unit.dcRating + "',descMaintenace='" + unit.descMaintenace + "',barcode='" + unit.barcode + "',unspCode='" + unit.unspCode + "'" +
-                    ",purchaseCode='" + unit.purchaseCode + "',area=" + unit.area + " where name = '" + unit.name + "' and facilityid='" + unit.facilityId + "' ";
+                string qry = "update  assets set description='" + unit.assetdescription + "', parentId='" + unit.parentId + "', " +
+                             "acCapacity='" + unit.acCapacity + "', dcCapacity='" + unit.dcCapacity + "', " +
+                             "categoryId='" + unit.categoryId + "', typeId='" + unit.typeId + "', statusId='" + unit.statusId + "', " +
+                             "facilityId='" + unit.facilityId + "', blockId='" + unit.blockId + "', linkedToBlockId='" + unit.blockId + "', " +
+                             "customerId='" + unit.customerId + "', ownerId='" + unit.ownerId + "',operatorId='" + unit.operatorId + "', " +
+                             "manufacturerId='" + unit.manufacturerId + "',supplierId='" + unit.supplierId + "',  " +
+                             "serialNumber='" + unit.serialNumber + "',createdBy='" + userID + "',photoId='" + unit.photoId + "',  " +
+                             "model='" + unit.model + "',stockCount='" + unit.stockCount + "',moduleQuantity='" + unit.moduleQuantity + "', " +
+                             "cost='" + unit.cost + "',currency='" + unit.currency + "',specialTool='" + unit.specialToolId + "',  " +
+                             "specialToolEmpId='" + unit.specialToolEmpId + "',calibrationDueDate=" + firstCalibrationDate + ",  " +
+                             "calibrationLastDate=" + lastCalibrationDate + ",calibrationFrequencyType='" + unit.calibrationFrequencyType + "',  " +
+                             "calibrationFrequency='" + unit.calibrationFrequency + "',calibrationReminderDays='" + unit.calibrationReminderDays + "',  " +
+                             "retirementStatus='" + unit.retirementStatus + "',multiplier='" + unit.multiplier + "',vendorId='" + unit.vendorId + "',   " +
+                             "calibrationNextDueDate=" + nextCalibrationDate + ",acRating='" + unit.acRating + "',dcRating='" + unit.dcRating + "',  " +
+                             "descMaintenace='" + unit.descMaintenace + "',barcode='" + unit.barcode + "',unspCode='" + unit.unspCode + "'" + ",  " +
+                             "purchaseCode='" + unit.purchaseCode + "',area=" + unit.area + " " +
+                             "where name = '" + unit.name + "' and facilityid='" + unit.facilityId + "' ";
                 //qry += "('" + unit.name + "','" + unit.description + "','" + unit.parentId + "','" + unit.acCapacity + "','" + unit.dcCapacity + "','" + unit.categoryId + "','" + unit.typeId + "','" + unit.statusId + "','" + unit.facilityId + "','" + unit.blockId + "','" + unit.blockId + "','" + unit.customerId + "','" + unit.ownerId + "','" + unit.operatorId + "','" + unit.manufacturerId + "','" + unit.supplierId + "','" + unit.serialNumber + "','" + userID + "','" + unit.photoId + "','" + unit.model + "','" + unit.stockCount + "','" + unit.moduleQuantity + "','" + unit.cost + "','" + unit.currency + "','" + unit.specialToolId + "','" + unit.specialToolEmpId + "'," + firstCalibrationDate + "," + lastCalibrationDate + ",'" + unit.calibrationFrequencyType + "','" + unit.calibrationFrequency + "','" + unit.calibrationReminderDays + "','" + unit.retirementStatus + "','" + unit.multiplier + "','" + unit.vendorId + "'," + nextCalibrationDate + ",'" + unit.acRating + "','" + unit.dcRating + "','" + unit.descMaintenace + "','" + unit.barcode + "','" + unit.unspCode + "','" + unit.purchaseCode + "'); ";
 
 
@@ -1568,21 +1586,18 @@ namespace CMMSAPIs.Repositories.Inventory
                 catch (Exception ex)
                 {
                     await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, 3333333, 0, 0, ex.Message, CMMS.CMMS_Status.INVENTORY_DELETED, 0);
-                    //return new CMDefaultResponse(idList, retCode, strRetMessage);
+                    // return new CMDefaultResponse(idList, retCode, strRetMessage);
                 }
-
-
-
-
+                obj = new CMDefaultResponse(unit.id, CMMS.RETRUNSTATUS.SUCCESS, "Inventory  <" + unit.id + "> has been updated");
                 //await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_ADDED, new[] { userID }, _inventoryAdded);
             }
 
-
-
-            return new CMDefaultResponse(idList, retCode, strRetMessage);
+            return obj;
+            // return new CMDefaultResponse(idList, retCode, strRetMessage);
         }
 
-
+        //update2
+        //NOrmal
         internal async Task<CMDefaultResponse> UpdateInventory(CMAddInventory request, int userID)
         {
 
@@ -1699,7 +1714,7 @@ namespace CMMSAPIs.Repositories.Inventory
             }
             if (request.currency != null)
             {
-                updateQry += $" currency = '{request.currency}',";
+                updateQry += $" currency = {request.currency},";
             }
             //if (request.currencyId != 0)
             //{
@@ -1914,9 +1929,9 @@ namespace CMMSAPIs.Repositories.Inventory
                 updateQry += $" serialNumber= '{request.serialNumber}',";
             }
 
-            if (request.currencyId != 0)
+            if (request.currencyId >= 0)
             {
-                updateQry += $" currency = '{request.currencyId}',";
+                updateQry += $" currency = {request.currencyId},";
 
             }
             if (request.photoId != 0)
@@ -2118,6 +2133,118 @@ namespace CMMSAPIs.Repositories.Inventory
             return obj;
 
         }
+        /*
+        internal async Task<CMDefaultResponse> CreateInventory(List<CMAddInventory> request, int userID)
+        {
+            int count = 0;
+            int retID = 0;
+            string assetName = "";
+            CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.INVALID_ARG;
+            string strRetMessage = "";
+            int linkedToBlockId = 0;
+            List<int> idList = new List<int>();
+
+            var insertQueries = new List<string>();
+            var warrantyQueries = new List<string>();
+            var calibrationQueries = new List<string>();
+
+            foreach (var unit in request)
+            {
+                count++;
+                assetName = unit.name;
+                if (assetName.Length <= 0)
+                {
+                    throw new ArgumentException($"name of asset cannot be empty on line {count}");
+                }
+
+                string firstCalibrationDate = (unit.calibrationFirstDueDate == null) ? "NULL" : $"'{((DateTime)unit.calibrationFirstDueDate.Value).ToString("yyyy-MM-dd")}'";
+
+                // Validation checks
+                if (unit.blockId > 0)
+                {
+                    linkedToBlockId = unit.blockId;
+                }
+                else if (unit.facilityId > 0)
+                {
+                    linkedToBlockId = unit.facilityId;
+                }
+                else
+                {
+                    throw new ArgumentException($"{assetName} does not have facility or block mapping on line {count}");
+                }
+
+                if (unit.categoryId <= 0)
+                {
+                    throw new ArgumentException($"{assetName} does not have category mapping on line {count}");
+                }
+
+                if (unit.vendorId <= 0)
+                {
+                    unit.vendorId = unit.manufacturerId;
+                }
+
+                // Create bulk insert query for assets
+                insertQueries.Add($"('{unit.name}', '{unit.assetdescription}', '{unit.parentId}', '{unit.acCapacity}', '{unit.dcCapacity}', '{unit.categoryId}', '{unit.typeId}', '{unit.statusId}', '{unit.facilityId}', '{unit.blockId}', '{unit.blockId}', '{unit.customerId}', '{unit.ownerId}', '{unit.operatorId}', '{unit.manufacturerId}', '{unit.parent_equipment_no}', '{unit.supplierId}', '{unit.serialNumber}', '{userID}', '{unit.photoId}', '{unit.model}', '{unit.stockCount}', '{unit.moduleQuantity}', '{unit.cost}', '{unit.currencyId}', '{unit.specialToolId}', '{unit.specialToolEmpId}', {firstCalibrationDate}, '{unit.calibrationFrequency}', '{unit.calibrationReminderDays}', '{unit.retirementStatus}', '{unit.multiplier}', '{unit.vendorId}', '{unit.acRating}', '{unit.dcRating}', '{unit.descMaintenace}', '{unit.barcode}', '{unit.unspCode}', '{unit.purchaseCode}', '{UtilsRepository.GetUTCTime()}', '{unit.num_of_module}', {unit.area})");
+
+                if (unit.warranty_type > 0 && unit.warranty_term_type > 0 && unit.warranty_provider_id > 0 && unit.start_date != null)
+                {
+                    string start_date = unit.start_date != null ? ((DateTime)unit.start_date).ToString("yyyy-MM-dd HH:mm:ss") : "0000:00:00 00:00";
+                    string warranty_description = unit.warranty_description == null ? "" : unit.warranty_description;
+                    string expiry_date = unit.expiry_date == null ? "" : ((DateTime)unit.expiry_date).ToString("yyyy-MM-dd HH:mm:ss");
+
+                    // Create bulk insert query for warranty
+                    warrantyQueries.Add($"({unit.warranty_certificate_file_id}, {unit.warranty_type}, '{warranty_description}', {unit.warranty_term_type}, {{0}}, '{start_date}', '{expiry_date}', {unit.meter_limit}, {unit.meter_unit}, {unit.warranty_provider_id}, '{unit.certificate_number}', '{UtilsRepository.GetUTCTime()}', {userID}, 1, {unit.warrantyTenture})");
+                }
+
+                if (retID > 0)
+                {
+                    // Create bulk insert query for calibration
+                    calibrationQueries.Add($"({unit.facilityId}, {retID}, {(int)CMMS.CMMS_Status.CALIBRATION_SCHEDULED}, {firstCalibrationDate})");
+                }
+            }
+
+            // Perform bulk insert for assets
+            if (insertQueries.Any())
+            {
+                string insertQry = $"INSERT INTO assets (name, description, parentId, acCapacity, dcCapacity, categoryId, typeId, statusId, facilityId, blockId, linkedToBlockId, customerId, ownerId, operatorId, manufacturerId, parent_equipment_no, supplierId, serialNumber, createdBy, photoId, model, stockCount, moduleQuantity, cost, currency, specialTool, specialToolEmpId, calibrationDueDate, calibrationFrequency, calibrationReminderDays, retirementStatus, multiplier, vendorId, acRating, dcRating, descMaintenace, barcode, unspCode, purchaseCode, createdAt, num_of_module, area) VALUES " + string.Join(", ", insertQueries);
+                await Context.ExecuteNonQry<int>(insertQry).ConfigureAwait(false);
+            }
+
+            // Perform bulk insert for warranty if any
+            if (warrantyQueries.Any())
+            {
+                foreach (var warrantyQuery in warrantyQueries)
+                {
+                    string warrantyQry = "INSERT INTO assetwarranty (certificate_file_id, warranty_type, warranty_description, warranty_term_type, asset_id, start_date, expiry_date, meter_limit, meter_unit, warranty_provider, certificate_number, addedAt, addedBy, status, warrantyTenture) VALUES " + warrantyQuery + "; SELECT LAST_INSERT_ID();";
+                    DataTable dt2 = await Context.FetchData(warrantyQry).ConfigureAwait(false);
+                    int warrantyId = Convert.ToInt32(dt2.Rows[0][0]);
+                    string addWarrantyId = $"UPDATE assets SET warrantyId = {warrantyId} WHERE id = {retID}";
+                    await Context.ExecuteNonQry<int>(addWarrantyId).ConfigureAwait(false);
+                }
+            }
+
+            // Perform bulk insert for calibration if any
+            if (calibrationQueries.Any())
+            {
+                string calibratoinQuery = "INSERT INTO calibration (facility_id, asset_id, status, due_date) VALUES " + string.Join(", ", calibrationQueries);
+                await Context.ExecuteNonQry<int>(calibratoinQuery).ConfigureAwait(false);
+            }
+
+            if (count > 0)
+            {
+                retCode = CMMS.RETRUNSTATUS.SUCCESS;
+                strRetMessage = count == 1 ? $"New asset <{assetName}> added" : $"<{count}> new assets added";
+            }
+            else
+            {
+                strRetMessage = "No assets to add";
+            }
+
+            return new CMDefaultResponse(idList, retCode, strRetMessage);
+        }
+
+        */
+
 
         #region Inventory Masters
         internal async Task<List<CMInventoryTypeList>> GetInventoryTypeList()
