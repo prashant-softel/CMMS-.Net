@@ -893,7 +893,7 @@ namespace CMMSAPIs.Repositories.Inventory
                                 {
                                     filter = $" and id IN ({ids})";
                                 }
-                                idList.AddRange(ids_);
+                                updatedIdList.AddRange(ids_);
 
                             }
                         }
@@ -1507,6 +1507,7 @@ namespace CMMSAPIs.Repositories.Inventory
             int count = 0;
             int retID = 0;
             string assetName = "";
+            CMDefaultResponse obj = new CMDefaultResponse();
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.INVALID_ARG;
             string strRetMessage = "";
             int linkedToBlockId = 0;
@@ -1547,8 +1548,23 @@ namespace CMMSAPIs.Repositories.Inventory
                 {
                     unit.vendorId = unit.manufacturerId;
                 }
-                string qry = "update  assets set description='" + unit.assetdescription + "', parentId='" + unit.parentId + "', acCapacity='" + unit.acCapacity + "', dcCapacity='" + unit.dcCapacity + "', categoryId='" + unit.categoryId + "', typeId='" + unit.typeId + "', statusId='" + unit.statusId + "', facilityId='" + unit.facilityId + "', blockId='" + unit.blockId + "', linkedToBlockId='" + unit.blockId + "', customerId='" + unit.customerId + "', ownerId='" + unit.ownerId + "',operatorId='" + unit.operatorId + "', manufacturerId='" + unit.manufacturerId + "',supplierId='" + unit.supplierId + "',serialNumber='" + unit.serialNumber + "',createdBy='" + userID + "',photoId='" + unit.photoId + "',model='" + unit.model + "',stockCount='" + unit.stockCount + "',moduleQuantity='" + unit.moduleQuantity + "', cost='" + unit.cost + "',currency='" + unit.currency + "',specialTool='" + unit.specialToolId + "',specialToolEmpId='" + unit.specialToolEmpId + "',calibrationStartDate=" + firstCalibrationDate + ",calibrationDueDate=" + firstCalibrationDate + ",calibrationLastDate=" + lastCalibrationDate + ",calibrationFrequencyType='" + unit.calibrationFrequencyType + "',calibrationFrequency='" + unit.calibrationFrequency + "',calibrationReminderDays='" + unit.calibrationReminderDays + "',retirementStatus='" + unit.retirementStatus + "',multiplier='" + unit.multiplier + "',vendorId='" + unit.vendorId + "',calibrationNextDueDate=" + nextCalibrationDate + ",acRating='" + unit.acRating + "',dcRating='" + unit.dcRating + "',descMaintenace='" + unit.descMaintenace + "',barcode='" + unit.barcode + "',unspCode='" + unit.unspCode + "'" +
-                    ",purchaseCode='" + unit.purchaseCode + "',area=" + unit.area + " where name = '" + unit.name + "' and facilityid='" + unit.facilityId + "' ";
+                string qry = "update  assets set description='" + unit.assetdescription + "', parentId='" + unit.parentId + "', " +
+                             "acCapacity='" + unit.acCapacity + "', dcCapacity='" + unit.dcCapacity + "', " +
+                             "categoryId='" + unit.categoryId + "', typeId='" + unit.typeId + "', statusId='" + unit.statusId + "', " +
+                             "facilityId='" + unit.facilityId + "', blockId='" + unit.blockId + "', linkedToBlockId='" + unit.blockId + "', " +
+                             "customerId='" + unit.customerId + "', ownerId='" + unit.ownerId + "',operatorId='" + unit.operatorId + "', " +
+                             "manufacturerId='" + unit.manufacturerId + "',supplierId='" + unit.supplierId + "',  " +
+                             "serialNumber='" + unit.serialNumber + "',createdBy='" + userID + "',photoId='" + unit.photoId + "',  " +
+                             "model='" + unit.model + "',stockCount='" + unit.stockCount + "',moduleQuantity='" + unit.moduleQuantity + "', " +
+                             "cost='" + unit.cost + "',currency='" + unit.currency + "',specialTool='" + unit.specialToolId + "',  " +
+                             "specialToolEmpId='" + unit.specialToolEmpId + "',calibrationDueDate=" + firstCalibrationDate + ",  " +
+                             "calibrationLastDate=" + lastCalibrationDate + ",calibrationFrequencyType='" + unit.calibrationFrequencyType + "',  " +
+                             "calibrationFrequency='" + unit.calibrationFrequency + "',calibrationReminderDays='" + unit.calibrationReminderDays + "',  " +
+                             "retirementStatus='" + unit.retirementStatus + "',multiplier='" + unit.multiplier + "',vendorId='" + unit.vendorId + "',   " +
+                             "calibrationNextDueDate=" + nextCalibrationDate + ",acRating='" + unit.acRating + "',dcRating='" + unit.dcRating + "',  " +
+                             "descMaintenace='" + unit.descMaintenace + "',barcode='" + unit.barcode + "',unspCode='" + unit.unspCode + "'" + ",  " +
+                             "purchaseCode='" + unit.purchaseCode + "',area=" + unit.area + " " +
+                             "where name = '" + unit.name + "' and facilityid='" + unit.facilityId + "' ";
                 //qry += "('" + unit.name + "','" + unit.description + "','" + unit.parentId + "','" + unit.acCapacity + "','" + unit.dcCapacity + "','" + unit.categoryId + "','" + unit.typeId + "','" + unit.statusId + "','" + unit.facilityId + "','" + unit.blockId + "','" + unit.blockId + "','" + unit.customerId + "','" + unit.ownerId + "','" + unit.operatorId + "','" + unit.manufacturerId + "','" + unit.supplierId + "','" + unit.serialNumber + "','" + userID + "','" + unit.photoId + "','" + unit.model + "','" + unit.stockCount + "','" + unit.moduleQuantity + "','" + unit.cost + "','" + unit.currency + "','" + unit.specialToolId + "','" + unit.specialToolEmpId + "'," + firstCalibrationDate + "," + lastCalibrationDate + ",'" + unit.calibrationFrequencyType + "','" + unit.calibrationFrequency + "','" + unit.calibrationReminderDays + "','" + unit.retirementStatus + "','" + unit.multiplier + "','" + unit.vendorId + "'," + nextCalibrationDate + ",'" + unit.acRating + "','" + unit.dcRating + "','" + unit.descMaintenace + "','" + unit.barcode + "','" + unit.unspCode + "','" + unit.purchaseCode + "'); ";
 
 
@@ -1571,16 +1587,12 @@ namespace CMMSAPIs.Repositories.Inventory
                     await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, 3333333, 0, 0, ex.Message, CMMS.CMMS_Status.INVENTORY_DELETED, 0);
                     //return new CMDefaultResponse(idList, retCode, strRetMessage);
                 }
-
-
-
-
+                obj = new CMDefaultResponse(unit.id, CMMS.RETRUNSTATUS.SUCCESS, "Inventory  <" + unit.id + "> has been updated");
                 //await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_ADDED, new[] { userID }, _inventoryAdded);
             }
 
-
-
-            return new CMDefaultResponse(idList, retCode, strRetMessage);
+            return obj;
+            // return new CMDefaultResponse(idList, retCode, strRetMessage);
         }
 
 
@@ -1700,7 +1712,7 @@ namespace CMMSAPIs.Repositories.Inventory
             }
             if (request.currency != null)
             {
-                updateQry += $" currency = '{request.currency}',";
+                updateQry += $" currency = {request.currency},";
             }
             //if (request.currencyId != 0)
             //{
@@ -1915,9 +1927,9 @@ namespace CMMSAPIs.Repositories.Inventory
                 updateQry += $" serialNumber= '{request.serialNumber}',";
             }
 
-            if (request.currencyId != 0)
+            if (request.currencyId >= 0)
             {
-                updateQry += $" currency = '{request.currencyId}',";
+                updateQry += $" currency = {request.currencyId},";
 
             }
             if (request.photoId != 0)
