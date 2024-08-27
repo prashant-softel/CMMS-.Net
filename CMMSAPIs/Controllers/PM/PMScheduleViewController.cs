@@ -339,5 +339,66 @@ namespace CMMSAPIs.Controllers.PM
                 }
             }
         }
+
+
+        [Route("GetScheduleData")]
+        [HttpGet]
+        public async Task<IActionResult> GetScheduleData(int facility_id, int category_id)
+        {
+            try
+            {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+
+                var data = await _PMScheduleViewBS.GetScheduleData(facility_id, category_id, facilitytimeZone);
+                return Ok(data);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [Route("SetScheduleData")]
+        [HttpPost]
+        public async Task<IActionResult> SetScheduleData(CMSetScheduleData request, int task_id, int schedule_id)
+        {
+            try
+            {
+                int facility_id = request.facility_id;
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _PMScheduleViewBS.SetScheduleData(request, userID, task_id, schedule_id, facilitytimeZone);
+                return Ok(data);
+            }/*
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }*/
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [Route("DeletePMTask")]
+        [HttpPost]
+        public async Task<IActionResult> DeletePMTask(CMApproval request, int facility_id)
+        {
+            try
+            {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _PMScheduleViewBS.DeletePMTask(request, userID, facilitytimeZone);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
     }
 }

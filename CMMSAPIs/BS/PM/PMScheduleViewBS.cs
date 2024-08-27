@@ -3,6 +3,7 @@ using CMMSAPIs.Models.PM;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.PM;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -28,6 +29,9 @@ namespace CMMSAPIs.BS.PM
         Task<CMPMScheduleExecutionDetail> GetPMTaskScheduleDetail(int task_id, int schedule_id, string facilitytime);
         Task<List<CMDefaultResponse>> cloneSchedule(int facility_id,int task_id, int from_schedule_id, int to_schedule_id,int cloneJobs, int userID);
         Task<List<AssetList>> getAssetListForClone(int task_id, int schedule_id);
+        Task<List<CMScheduleData>> GetScheduleData(int facility_id, int category_id, string facilitytime);
+        Task<List<CMDefaultResponse>> SetScheduleData(CMSetScheduleData request, int userID, int task_id, int schedule_id, string facilitytime);
+        Task<CMDefaultResponse> DeletePMTask(CMApproval request, int userID, string facilitytime);
 
     }
     public class PMScheduleViewBS : IPMScheduleViewBS
@@ -292,5 +296,51 @@ namespace CMMSAPIs.BS.PM
                 throw;
             }
         }
+
+        public async Task<List<CMScheduleData>> GetScheduleData(int facility_id, int category_id, string facilitytime)
+        {
+            try
+            {
+                using (var repos = new PMScheduleViewRepository(getDB))
+                {
+                    return await repos.GetScheduleData(facility_id, category_id, facilitytime);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<CMDefaultResponse>> SetScheduleData(CMSetScheduleData request, int userID, int task_id, int schedule_id, string facilitytime)
+        {
+            try
+            {
+                using (var repos = new PMScheduleViewRepository(getDB))
+                {
+                    return await repos.SetScheduleData(request, userID, task_id, schedule_id, facilitytime);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> DeletePMTask(CMApproval request, int userID, string facilitytime)
+        {
+            try
+            {
+                using (var repos = new PMScheduleViewRepository(getDB))
+                {
+                    return await repos.DeletePMTask(request, userID, facilitytime);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
     }
 }

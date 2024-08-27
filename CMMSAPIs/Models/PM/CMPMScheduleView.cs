@@ -81,10 +81,7 @@ namespace CMMSAPIs.Models.PM
         public string cancelledrejectedbyName { get; set; }
         public string PM_Schedule_updated_by { get; set; }
         public string cancelledapprovedbyName { get; set; }
-        
-
-
-
+        public string submittedByName { get; set; }
 
     }
     public class CMPMTaskView : CMPMTaskList
@@ -134,7 +131,8 @@ namespace CMMSAPIs.Models.PM
         public string completedbyName { get; set; }
         public string cancelledapprovedbyName { get; set; }
         public string createdbyName { get; set; }
-
+        public string deletedbyName { get; set; }
+        public int status { get; set; }
 
 
     }
