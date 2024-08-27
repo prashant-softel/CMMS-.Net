@@ -14,7 +14,7 @@ namespace CMMSAPIs.BS.PM
         Task<List<CMPMTaskList>> GetPMTaskList(int facility_id, DateTime? start_date, DateTime? end_date, string frequencyIds,string categoryIds, int userID, bool self_view,string facilitytime);
         Task<CMDefaultResponse> CancelPMTask(CMApproval request, int userID, string facilitytime);
         Task<CMPMTaskView> GetPMTaskDetail(int task_id, string facilitytime);
-        Task<CMDefaultResponse> AddCustomCheckpoint(CMCustomCheckPoint request, int userID);
+        Task<CMDefaultResponse> AddCustomCheckpoint(CMCustomCheckPoint request, int userID, string facilitytime);
         Task<CMDefaultResponse> StartPMTask(int task_id, int userID, string facilitytime);
         Task<List<CMDefaultResponse>> UpdatePMTaskExecution(CMPMExecutionDetail request, int userID, string facilitytime);
         Task<CMDefaultResponse> ClosePMTaskExecution(CMApproval request, int userID, string facilitytime);
@@ -99,13 +99,13 @@ namespace CMMSAPIs.BS.PM
             }
         }
 
-        public async Task<CMDefaultResponse> AddCustomCheckpoint(CMCustomCheckPoint request, int userID)
+        public async Task<CMDefaultResponse> AddCustomCheckpoint(CMCustomCheckPoint request, int userID, string facilitytime)
         {
             try
-            {
+            {   
                 using (var repos = new PMScheduleViewRepository(getDB))
                 {
-                    return await repos.AddCustomCheckpoint(request, userID);
+                    return await repos.AddCustomCheckpoint(request, userID, facilitytime);
                 }
             }
             catch (Exception)

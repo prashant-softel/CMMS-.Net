@@ -64,11 +64,27 @@ namespace CMMSAPIs.Models.PM
         public string asset_name { get; set; }
         public string checklist_name { get; set; }
         public string categoryname { get; set; }
+        public string PM_Execution_Started_by_name { get; set; }
+        public string rejectedbyName { get; set; }
         public List<ScheduleCheckList> checklist_observation { get; set; }
         public List<ScheduleLinkJob> schedule_link_job { get; set; }
-
+        public string startedbyName { get; set; }
         public int completedBy_id { get; set; }
         public string completedBy_name { get; set; }
+        public string approvedbyName { get; set; }
+        public string updatedbyName { get; set; }
+        public DateTime PM_Schedule_date { get; set; }
+        public string PM_Frequecy_Name { get; set; }
+        public string createdbyName { get; set; }
+        public int status {  get; set; }
+        public string status_long { get; set; }
+        public string cancelledrejectedbyName { get; set; }
+        public string PM_Schedule_updated_by { get; set; }
+        public string cancelledapprovedbyName { get; set; }
+        
+
+
+
 
     }
     public class CMPMTaskView : CMPMTaskList
@@ -115,6 +131,11 @@ namespace CMMSAPIs.Models.PM
         public DateTime TBT_done_time { get; set; }
         public DateTime Start_time { get; set; }
         public int Status_PTW { get; set; }
+        public string completedbyName { get; set; }
+        public string cancelledapprovedbyName { get; set; }
+        public string createdbyName { get; set; }
+
+
 
     }
     public class CMPMScheduleViewDetail : CMPMScheduleView
@@ -208,6 +229,7 @@ namespace CMMSAPIs.Models.PM
         public string check_point_name { get; set; }
         public int is_document_required { get; set; }
         public string requirement { get; set; }
+        public int task_id { get; set; }
     }
 
     public class CMPMExecutionDetail

@@ -512,6 +512,12 @@ namespace CMMSAPIs.Models.Notifications
                 notificationObj = new PMNotification(moduleID, notificationID, _Task);
                 //facilityId = _Inventory.facility_id;
             }
+            else if (moduleID == CMMS.CMMS_Modules.PM_SCHEDULE)
+            {
+                CMPMScheduleExecutionDetail _Schedule = (CMPMScheduleExecutionDetail)args[0];
+                notificationObj = new PMNotification(moduleID, notificationID, _Schedule);
+                //facilityId = _Inventory.facility_id;
+            }
             else
             {
                 throw new Exception("Notification code is not implemented for module <" + moduleID + ">");

@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Hosting;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Net.NetworkInformation;
 using System.Threading.Tasks;
 
 namespace CMMSAPIs.Repositories.PM
@@ -78,6 +79,50 @@ namespace CMMSAPIs.Repositories.PM
                     retValue = "Updated"; break;
                 case CMMS.CMMS_Status.PM_TASK_DELETED:
                     retValue = "Deleted"; break;
+                default:
+                    break;
+            }
+            return retValue;
+
+        }
+
+        internal string getLongStatus(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMPMScheduleExecutionDetail Obj)
+        {
+            string retValue = " ";
+
+
+            switch (notificationID)
+            {
+                case CMMS.CMMS_Status.PM_SCHEDULED:
+                    retValue = $"PM Task Scheduled "; break;
+              /*  case CMMS.CMMS_Status.PM_ASSIGNED:
+                    retValue = $"PM Task Assigned To {Obj.assigned_to_name} "; break;
+                case CMMS.CMMS_Status.PM_LINKED_TO_PTW:
+                    retValue = $"PM {Obj.id} Linked To PTW {Obj.permit_id} "; break;
+                case CMMS.CMMS_Status.PM_START:
+                    retValue = $"PM Task Started By {Obj.started_by_name}"; break;
+                case CMMS.CMMS_Status.PM_COMPLETED:
+                    retValue = $"PM Task Waiting for Approval "; break;
+                case CMMS.CMMS_Status.PM_REJECTED:
+                    retValue = $"PM Task Rejected "; break;
+                case CMMS.CMMS_Status.PM_APPROVED:
+                    retValue = $"PM Task Approved "; break;
+                case CMMS.CMMS_Status.PM_CLOSE_REJECTED:
+                    retValue = $"PM Task Close Rejected By {Obj.rejected_by_name}"; break;
+                case CMMS.CMMS_Status.PM_CLOSE_APPROVED:
+                    retValue = $"PM Task Close Approved By {Obj.approved_by}"; break;
+                case CMMS.CMMS_Status.PM_CANCELLED:
+                    retValue = $"PM Task Cancelled By {Obj.cancelled_by_name} "; break;
+                case CMMS.CMMS_Status.PM_CANCELLED_REJECTED:
+                    retValue = $"PM Task cancelled Rejected By {Obj.cancelled_by_name}"; break;
+                case CMMS.CMMS_Status.PM_CANCELLED_APPROVED:
+                    retValue = $"PM Task cancelled Approved By {Obj.approved_by}"; break;
+                case CMMS.CMMS_Status.PM_DELETED:
+                    retValue = $"PM Task Deleted "; break;
+                case CMMS.CMMS_Status.PM_UPDATED:
+                    retValue = $"PM Task Updated By {Obj.updated_by_name} "; break;
+                case CMMS.CMMS_Status.PM_TASK_DELETED:
+                    retValue = $"PM Task Deleted "; break;*/
                 default:
                     break;
             }
@@ -328,8 +373,11 @@ namespace CMMSAPIs.Repositories.PM
                                "  CONCAT(tbtDone.firstName,' ',tbtDone.lastName)  as tbt_by_name, Case when permit.TBT_Done_By is null or  permit.TBT_Done_By =0 then 0 else 1 end ptw_tbt_done " +
                                " , permittypelists.title as permit_type,ptwu.id as Employee_ID,CONCAT(ptwu.firstName,ptwu.lastName) as Employee_name,bus.name as Company, " +
                                " passt.name as Isolated_equipments,CONCAT(tbtDone.firstName,' ',tbtDone.lastName) as TBT_conducted_by_name,permit.TBT_Done_At as TBT_done_time,permit.startDate Start_time,permit.description as workdescription ,pm_task.close_remarks as new_remark   ," +
-                               " permit.status as status_PTW, CONCAT(isotak.firstName,isotak.lastName) as Isolation_taken, " +
-                               " CONCAT(cancelledrejectedBy.firstName,' ',cancelledrejectedBy.lastName)  as cancelledrejectedbyName " +
+                               " permit.status as status_PTW, CONCAT(isotak.firstName, ' ',isotak.lastName) as Isolation_taken, " +
+                               " CONCAT(cancelledrejectedBy.firstName,' ',cancelledrejectedBy.lastName)  as cancelledrejectedbyName, " +
+                               " CONCAT(completedBy.firstName,' ',completedBy.lastName)  as completedbyName, " +
+                               " CONCAT(cancelledapprovedBy.firstName,' ',cancelledapprovedBy.lastName)  as cancelledapprovedbyName, " +
+                               " CONCAT(createdBy.firstName,' ',createdBy.lastName)  as createdbyName " +
                                " FROM pm_task " +
                                $"left join users as assignedTo on pm_task.assigned_to = assignedTo.id " +
                                $"left join users as closedBy on pm_task.closed_by = closedBy.id " +
@@ -337,6 +385,9 @@ namespace CMMSAPIs.Repositories.PM
                                $"left join users as rejectedBy on pm_task.rejected_by = rejectedBy.id " +
                                $"left join users as cancelledBy on pm_task.cancelled_by = cancelledBy.id " +
                                $"left join users as cancelledrejectedBy on pm_task.cancel_rejected_by = cancelledrejectedBy.id " +
+                               $"left join users as completedBy on completedBy.id = pm_task.completedById " +
+                               $"left join users as cancelledapprovedBy on cancelledapprovedBy.id = pm_task.cancel_approved_by " +
+                               $"left join users as createdBy on createdBy.id = pm_task.createdById " + 
                                $"left join users as closed on pm_task.closed_by = closed.id " +
                                $"left join users as startedBy on pm_task.started_by = startedBy.id " +
                                $"left join permits as permit on pm_task.PTW_id = permit.id " +
@@ -569,14 +620,14 @@ namespace CMMSAPIs.Repositories.PM
 
             return response;
         }
-        internal async Task<CMDefaultResponse> AddCustomCheckpoint(CMCustomCheckPoint request, int userID)
+        internal async Task<CMDefaultResponse> AddCustomCheckpoint(CMCustomCheckPoint request, int userID, string facilitytimeZone)
         {
             /*
              * Primary Table - PMExecution
              * Add a custom checkpoint
              * Code goes here
             */
-            string statusQry = $"SELECT status FROM pm_schedule WHERE id = {request.schedule_id};";
+            string statusQry = $"SELECT task_id, status FROM pm_schedule WHERE id = {request.schedule_id};";
             DataTable dt1 = await Context.FetchData(statusQry).ConfigureAwait(false);
             CMMS.CMMS_Status status = (CMMS.CMMS_Status)Convert.ToInt32(dt1.Rows[0][0]);
             if (status != CMMS.CMMS_Status.PM_START && status != CMMS.CMMS_Status.PM_REJECTED)
@@ -587,7 +638,15 @@ namespace CMMSAPIs.Repositories.PM
             DataTable dt2 = await Context.FetchData(myQuery).ConfigureAwait(false);
             int id = Convert.ToInt32(dt2.Rows[0][0]);
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, request.schedule_id, CMMS.CMMS_Modules.CHECKPOINTS, 0, "Custom Checkpoint added", CMMS.CMMS_Status.PM_UPDATED, userID);
-
+            try
+            {
+                CMPMScheduleExecutionDetail PMTaskSchedule = await GetPMTaskScheduleDetail(request.task_id, request.schedule_id, facilitytimeZone);
+                CMMSNotification.sendNotification(CMMS.CMMS_Modules.PM_SCHEDULE, CMMS.CMMS_Status.PM_UPDATED, new[] { userID }, PMTaskSchedule);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to send Schedule Notification: {ex.Message}");
+            }
             return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, $"Custom checkpoint added successfully to PM Schedule PMSCH{request.schedule_id}");
         }
 
@@ -903,6 +962,15 @@ namespace CMMSAPIs.Repositories.PM
                                         await Context.ExecuteNonQry<int>(otherDetailsQry).ConfigureAwait(false);
                                     }
                                     await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, schedule.schedule_id, CMMS.CMMS_Modules.PM_EXECUTION, schedule_detail.execution_id, $"{schedule_detail.pm_files.Count} file(s) attached to PMSCH{schedule.schedule_id}", CMMS.CMMS_Status.PM_UPDATED, userID);
+                                    try
+                                    {
+                                        CMPMScheduleExecutionDetail PMTaskSchedule = await GetPMTaskScheduleDetail(request.task_id, schedule.schedule_id, facilitytimeZone);
+                                        CMMSNotification.sendNotification(CMMS.CMMS_Modules.PM_SCHEDULE, CMMS.CMMS_Status.PM_UPDATED, new[] { userID }, PMTaskSchedule);
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        Console.WriteLine($"Failed to send Schedule Notification: {ex.Message}");
+                                    }
                                     response = new CMDefaultResponse(schedule_detail.execution_id, CMMS.RETRUNSTATUS.SUCCESS, $"{schedule_detail.pm_files.Count} file(s) attached to PM Successfully");
                                     responseList.Add(response);
                                     changeFlag++;
@@ -1344,6 +1412,15 @@ namespace CMMSAPIs.Repositories.PM
                         updateQry += $"WHERE id = {schedule_detail.execution_id};";
                         await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
                         await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, schedule.schedule_id, CMMS.CMMS_Modules.PM_EXECUTION, schedule_detail.execution_id, message, CMMS.CMMS_Status.PM_UPDATED, userID);
+                        try
+                        {
+                            CMPMScheduleExecutionDetail PMTaskSchedule = await GetPMTaskScheduleDetail(request.task_id, schedule.schedule_id, facilitytimeZone);
+                            CMMSNotification.sendNotification(CMMS.CMMS_Modules.PM_SCHEDULE, CMMS.CMMS_Status.PM_UPDATED, new[] { userID }, PMTaskSchedule);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Failed to send Schedule Notification: {ex.Message}");
+                        }
                         responseList.Add(response);
                         changeFlag++;
                     }
@@ -1463,8 +1540,17 @@ namespace CMMSAPIs.Repositories.PM
 
             //responseList.Add(responseSchedule);
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, request.task_id, 0, 0, $"PM Task {request.task_id} updated.", CMMS.CMMS_Status.PM_UPDATED, userID);
-          /*  CMPMTaskView _PMList = await GetPMTaskDetail(request.task_id, facilitytimeZone);
-            CMMSNotification.sendNotification(CMMS.CMMS_Modules.PM_SCHEDULE, CMMS.CMMS_Status.PM_UPDATED, new[] { userID }, _PMList);*/
+            /*  CMPMTaskView _PMList = await GetPMTaskDetail(request.task_id, facilitytimeZone);
+              CMMSNotification.sendNotification(CMMS.CMMS_Modules.PM_SCHEDULE, CMMS.CMMS_Status.PM_UPDATED, new[] { userID }, _PMList);*/
+            try
+            {
+                CMPMScheduleExecutionDetail PMTaskSchedule = await GetPMTaskScheduleDetail(request.task_id, schedule.schedule_id, facilitytimeZone);
+                CMMSNotification.sendNotification(CMMS.CMMS_Modules.PM_SCHEDULE, CMMS.CMMS_Status.PM_UPDATED, new[] { userID }, PMTaskSchedule);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to send Schedule Notification: {ex.Message}");
+            }
 
             return responseList;
         }
@@ -1498,10 +1584,22 @@ namespace CMMSAPIs.Repositories.PM
             //if (taskViewDetail.Count == 0)
             //    throw new MissingMemberException("PM Task not found");
 
-            string myQuery2 = $"SELECT pm_schedule.id as schedule_id, assets.name as asset_name, checklist.checklist_number as checklist_name from pm_schedule " +
+            string myQuery2 = $"SELECT pm_schedule.id as schedule_id, assets.name as asset_name, checklist.checklist_number as checklist_name, " +
+                $" CONCAT(startedBy.firstName, ' ' ,startedBy.lastName) as PM_Execution_Started_by_name, CONCAT(updatedBy.firstName, ' ' ,updatedBy.lastName) as updatedbyName, " +
+                $" CONCAT(createdBy.firstName, ' ' ,createdBy.lastName) as createdbyName, pm_schedule.Status, PM_Schedule_date, PM_Frequecy_Name, CONCAT(rejectedBy.firstName, ' ' ,rejectedBy.lastName) as rejectedbyName, " +
+                $"CONCAT(approvedBy.firstName, ' ' , approvedBy.lastName) as approvedbyName, CONCAT(cancelledrejected.firstName, ' ' , cancelledrejected.lastName) as cancelledrejectedbyName, " +
+                $"CONCAT(cancelledapproved.firstName, ' ' , cancelledapproved.lastName) as cancelledapprovedbyName, PM_Schedule_updated_by  " +
+                $" from pm_schedule "  + 
                 $"left join assets on pm_schedule.asset_id = assets.id " +
                 $"left join checklist_number as checklist on pm_schedule.checklist_id = checklist.id " +
-                $"where pm_schedule.id = {schedule_id} and task_id = {task_id};";
+                $"left join users AS startedBy ON startedBy.id = pm_schedule.PM_Execution_Started_by_id "+
+                $"left join users AS updatedBy ON updatedBy.id = pm_schedule.PM_Schedule_updated_by "+
+                $"left join users AS createdBy ON createdBy.id = pm_schedule.createdById " +
+                $"left join users AS rejectedBy ON rejectedBy.id = pm_schedule.PM_Schedule_Rejected_by_id " +
+                $"left join users AS approvedBy ON approvedBy.id = pm_schedule.PM_Schedule_Approved_by_id " + 
+                $"left join users AS cancelledrejected ON cancelledrejected.id = pm_schedule.PM_Schedule_cancel_by_id " +
+                $"left join users AS cancelledapproved ON cancelledapproved.id = pm_schedule.PM_Schedule_Approved_by_id " + 
+                $"where pm_schedule.id = {schedule_id} and task_id = {task_id};"; 
 
             List<CMPMScheduleExecutionDetail> scheduleDetails = await Context.GetData<CMPMScheduleExecutionDetail>(myQuery2).ConfigureAwait(false);
 
@@ -1570,6 +1668,9 @@ namespace CMMSAPIs.Repositories.PM
                 if (detail != null && detail.job_date != null)
                     detail.job_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)detail.job_date);
             }
+            CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(scheduleDetails[0].status);
+            string _longStatus = getLongStatus(CMMS.CMMS_Modules.PM_SCHEDULE, _Status, scheduleDetails[0]);
+            scheduleDetails[0].status_long = _longStatus;
 
             return scheduleDetails[0];
         }

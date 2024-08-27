@@ -112,12 +112,13 @@ namespace CMMSAPIs.Controllers.PM
         //[Authorize]
         [Route("AddCustomCheckpoint")]
         [HttpPost]
-        public async Task<IActionResult> AddCustomCheckpoint(CMCustomCheckPoint request)
+        public async Task<IActionResult> AddCustomCheckpoint(CMCustomCheckPoint request, int facility_id)
         {
             try
             {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _PMScheduleViewBS.AddCustomCheckpoint(request, userID);
+                var data = await _PMScheduleViewBS.AddCustomCheckpoint(request, userID, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception)
