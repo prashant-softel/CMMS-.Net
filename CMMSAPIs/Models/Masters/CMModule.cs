@@ -133,6 +133,7 @@ namespace CMMSAPIs.Models.Masters
         public dynamic TotalWaterUsed { get; set; }
         public dynamic plan_days { get; set; }
         public dynamic no_of_cleaned { get; set; }
+        public dynamic Scheduled { get; set; }
     }
     public class CMROLE
     {
