@@ -56,11 +56,13 @@ namespace CMMSAPIs.Models.Inventory
         public int calibrationFrequency { get; set; }
         public string calibrationFreqType { get; set; }
         public int? calibrationReminderDays { get; set; }
+        public DateTime calibrationStartDate { get; set; }
+        public DateTime calibrationDueDate { get; set; }
         public DateTime calibrationLastDate { get; set; }
-
+        public DateTime? warranty_start_date { get; set; }
+        public DateTime? warranty_expiry_date { get; set; }
         public DateTime? start_date { get; set; }
         public DateTime? expiry_date { get; set; }
-        public DateTime calibrationDueDate { get; set; }
         public int specialTool { get; set; }
         public int specialToolEmp { get; set; }
         public int warrantyId { get; set; }
