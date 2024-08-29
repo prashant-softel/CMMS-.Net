@@ -35,6 +35,22 @@ namespace CMMSAPIs.Controllers.DSM
             }
         }
 
+        [Route("getDSMType")]
+        [HttpGet]
+        public async Task<IActionResult> getDSMType()
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _DSMBS.getDSMType();
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         ////[Authorize]
         [Route("importDSMFile")]
         [HttpPost]

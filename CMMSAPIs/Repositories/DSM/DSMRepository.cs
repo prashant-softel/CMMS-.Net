@@ -212,6 +212,13 @@ namespace CMMSAPIs.Repositories.DSM
 
             return data;
         }
+        public async Task<List<DSMTYPE>> getDSMType()
+        {
+            string competencyQry = $"SELECT id, name FROM dsm_type where status=1 ";
+            List<DSMTYPE> competencyList = await Context.GetData<DSMTYPE>(competencyQry).ConfigureAwait(false);
+            return competencyList;
 
+
+        }
     }
 }

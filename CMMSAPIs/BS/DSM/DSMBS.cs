@@ -13,6 +13,7 @@ namespace CMMSAPIs.BS.DSM
     public interface IDSMBS
     {
         Task<List<CMDSMData>> getDSMData(string fy, string month, string stateId, string spvId, string siteId);
+        Task<List<DSMTYPE>> getDSMType();
         Task<CMImportFileResponse> importDSMFile(int file_id, int userID);
     }
     public class DSMBS : IDSMBS
@@ -59,6 +60,21 @@ namespace CMMSAPIs.BS.DSM
                 throw;
             }
 
+        }
+
+        public async Task<List<DSMTYPE>> getDSMType()
+        {
+            try
+            {
+                using (var repos = new DSMRepository(getDB, _environment))
+                {
+                    return await repos.getDSMType();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
         }
     }
     //    public async Task<CMEscalationResponse> Escalate(CMMS.CMMS_Modules module, int id)

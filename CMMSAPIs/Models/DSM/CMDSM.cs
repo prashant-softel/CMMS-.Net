@@ -1,11 +1,7 @@
-using CMMSAPIs.Helper;
-using System;
-using System.Collections.Generic;
-
 namespace CMMSAPIs.Models.DSM
 {
     public class CMDSMData
-    { 
+    {
         public string fy { get; set; }
         public string month { get; set; }
         public string state { get; set; }
@@ -44,6 +40,12 @@ namespace CMMSAPIs.Models.DSM
         public int[] stateId { get; set; }
         public int[] siteId { get; set; }
         public int[] DSMTypeId { get; set; }
+
+    }
+    public class DSMTYPE
+    {
+        public int id { get; set; }
+        public string name { get; set; }
 
     }
 
