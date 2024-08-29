@@ -2,11 +2,13 @@ using CMMSAPIs.Helper;
 using CMMSAPIs.Models.SM;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Utils;
+using Microsoft.AspNetCore.Hosting;
 using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace CMMSAPIs.Repositories.SM
@@ -14,11 +16,12 @@ namespace CMMSAPIs.Repositories.SM
     public class SMMasterRepository : GenericRepository
     {
         private UtilsRepository _utilsRepo;
-        public SMMasterRepository(MYSQLDBHelper sqlDBHelper) : base(sqlDBHelper)
+        private ErrorLog m_errorLog;
+        public SMMasterRepository(MYSQLDBHelper sqlDBHelper, IWebHostEnvironment webHostEnvironment = null) : base(sqlDBHelper)
         {
             _utilsRepo = new UtilsRepository(sqlDBHelper);
+            m_errorLog = new ErrorLog(webHostEnvironment);
         }
-
 
         internal async Task<List<CMAssetTypes>> GetAssetTypeList(int ID)
         {
@@ -437,6 +440,7 @@ namespace CMMSAPIs.Repositories.SM
             string assetImportStartDate = "2024-03-31";
             string plantName = "";
             CMImportFileResponse response = null;
+
             DataTable dt2 = new DataTable();
             /* try
              {
@@ -484,6 +488,8 @@ namespace CMMSAPIs.Repositories.SM
             List<int> AssetMasterCodeIDs = dtAssetCode.GetColumn<int>("id");
             Dictionary<string, int> AssetCodeMasterList = new Dictionary<string, int>();
             AssetCodeMasterList.Merge(AssetMasterCodeNames, AssetMasterCodeIDs);
+
+
 
             string queryCat = "SELECT id, UPPER(name) as name FROM smunitmeasurement GROUP BY name ORDER BY id ASC;";
             DataTable dtCat = await Context.FetchData(queryCat).ConfigureAwait(false);
@@ -606,7 +612,22 @@ namespace CMMSAPIs.Repositories.SM
 
                                 continue;
                             }
+
+                            string newRowName = newR[0].ToString();
+
+                            bool isDuplicate = dt2.AsEnumerable().Any(row => row.Field<string>("name") == newRowName);
+
+                            if (isDuplicate)
+                            {
+                                m_errorLog.SetError($"[Matrial: {newR[0].ToString()}] Duplicate Materail .");
+                                newR.Delete();
+                                continue;
+                            }
+
                             newR["name"] = newR[0];
+
+
+
                             newR["description"] = newR[1];
                             try
                             {
@@ -620,6 +641,7 @@ namespace CMMSAPIs.Repositories.SM
                             }
 
                             newR["Name1"] = newR[3];
+
                             if (Convert.ToString(newR["description"]) == null || Convert.ToString(newR["description"]) == "")
                             {
                                 return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] Material Description cannot be null.");
@@ -831,7 +853,7 @@ namespace CMMSAPIs.Repositories.SM
             //   response.import_log = null;
             //}
 
-            return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.SUCCESS, null, null, "File imported successfully.");
+            return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.SUCCESS, null, m_errorLog.errorLog(), "File imported successfully.");
             //return response;*/
         }
 

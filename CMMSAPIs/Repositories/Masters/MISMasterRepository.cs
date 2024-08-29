@@ -2432,6 +2432,22 @@ namespace CMMSAPIs.Repositories.Masters
             List<KaizensData> data = await Context.GetData<KaizensData>(myQuery).ConfigureAwait(false);
             return data;
         }
+        //Cumulative_report? facility_ids=1,2& module=1&start_date=-------&end_date=-------; 
+        public async Task<List<KaizensData>> Cumulative_report(string facility_id, int module_id, string start_date, string end_date)
+        {
+
+            if (((int)CMMS.CMMS_Modules.JOB) == module_id)
+            {
+
+                string myQuery = "";
+
+                List<KaizensData> data = await Context.GetData<KaizensData>(myQuery).ConfigureAwait(false);
+                return data;
+            }
+
+            return null;
+
+        }
     }
 
 

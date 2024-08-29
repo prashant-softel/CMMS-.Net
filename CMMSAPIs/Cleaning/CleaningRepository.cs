@@ -741,15 +741,25 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             statusOut += $"ELSE 'Invalid Status' END";
 
             string myQuery1 = $"select mc.id as executionId ,mp.title,mc.planId,mc.status, CONCAT(createdBy.firstName, createdBy.lastName) as responsibility , " +
-                $" mc.startDate, mc.endedAt as doneDate,mc.abandonedAt as Abondond_done_date,  mc.prevTaskDoneDate as lastDoneDate,freq.name as frequency,mc.noOfDays, {statusOut} as status_short  " +
+                $" mc.startDate, mc.endedAt as doneDate,mc.abandonedAt as Abondond_done_date, " +
+                $" mc.prevTaskDoneDate as lastDoneDate,freq.name as frequency,mc.noOfDays, {statusOut} as status_short,  " +
+                $" f.name as sitename,CASE WHEN mc.moduleType=1 THEN 'Wet' WHEN mc.moduleType=2 THEN 'Dry' ELSE 'Robotic' END as cleaningType,sub1.TotalWaterUsed as waterused , " +
+                $" SUM(css.moduleQuantity) as  Scheduled_Qnty,sub2.no_of_cleaned as Actual_Qnty, Case When mc.abandonedById >0 THEN 'yes' ELSE 'no' END as Abondend ,  " +
+                $" mc.reasonForAbandon as Remark,( SUM(css.moduleQuantity) - sub2.no_of_cleaned)  as Deviation , " +
+                $" CASE  WHEN mc.abandonedAt IS NOT NULL THEN TIMESTAMPDIFF(MINUTE, mc.startDate, mc.abandonedAt)  ELSE TIMESTAMPDIFF(MINUTE, mc.startDate, mc.endedAt)  END as Time_taken " +
                 $" from cleaning_execution as mc left join cleaning_plan as mp on mp.planId = mc.planId " +
+                $" LEFT join cleaning_execution_items as css on css.executionId = mc.id " +
+                $" LEFT JOIN (SELECT executionId, SUM(waterUsed) AS TotalWaterUsed FROM cleaning_execution_schedules GROUP BY executionId) sub1 ON mc.id = sub1.executionId " +
+                $" LEFT JOIN (SELECT executionId, SUM(moduleQuantity) AS no_of_cleaned FROM cleaning_execution_items where cleanedById>0 GROUP BY executionId) sub2 ON mc.id = sub2.executionId " +
                 $" LEFT JOIN Frequency as freq on freq.id = mp.frequencyId " +
+                $" LEFT Join facilities as f on f.id = mc.facilityId " +
                 $" LEFT JOIN users as createdBy ON createdBy.id = mc.assignedTo " +
                 $" LEFT JOIN users as approvedBy ON approvedBy.id = mc.approvedByID where mc.moduleType={moduleType} ";
 
+
             if (facilityId > 0)
             {
-                myQuery1 += $" and mc.facilityId = {facilityId} ";
+                myQuery1 += $" and mc.facilityId = {facilityId}  group by mc.id ; ";
             }
             List<CMMCTaskList> _ViewMCTaskList = await Context.GetData<CMMCTaskList>(myQuery1).ConfigureAwait(false);
             foreach (var item in _ViewMCTaskList)

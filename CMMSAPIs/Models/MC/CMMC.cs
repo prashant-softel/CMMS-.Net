@@ -289,6 +289,7 @@ namespace CMMSAPIs.Models.MC
     {
         public int executionId { get; set; }
         public int planId { get; set; }
+        public string sitename { get; set; }
         public string responsibility { get; set; }
         public string frequency { get; set; }
         public int noOfDays { get; set; }
@@ -306,6 +307,14 @@ namespace CMMSAPIs.Models.MC
         public int permit_tbt_done_by { get; set; }
         public int ptw_id { get; set; }
         public string title { get; set; }
+        public string cleaningType { get; set; }
+        public dynamic waterused { get; set; }
+        public dynamic Scheduled_Qnty { get; set; }
+        public dynamic Actual_Qnty { get; set; }
+        public dynamic Abondend { get; set; }
+        public string Remark { get; set; }
+        public dynamic Deviation { get; set; }
+        public dynamic Time_taken { get; set; }
     }
     public class CMMCExecutionList
     {
