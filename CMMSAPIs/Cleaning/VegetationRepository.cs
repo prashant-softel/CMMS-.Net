@@ -63,8 +63,8 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             { (int)CMMS.CMMS_Status.EQUIP_CLEANED, "Cleaned" },
             { (int)CMMS.CMMS_Status.EQUIP_ABANDONED, "Abandoned" },
             { (int)CMMS.CMMS_Status.EQUIP_SCHEDULED, "Scheduled" },
-            { (int)CMMS.CMMS_Status.VEG_TASK_ABANDONED_REJECTED, "Task ABANDONED REJECTED" },
-            { (int)CMMS.CMMS_Status.VEG_TASK_ABANDONED_APPROVED, "Task ABANDONED APPROVED" },
+            { (int)CMMS.CMMS_Status.VEG_TASK_ABANDONED_REJECTED, " Abandoned Rejected" },
+            { (int)CMMS.CMMS_Status.VEG_TASK_ABANDONED_APPROVED, " Abandoned Approved" },
             { (int)CMMS.CMMS_Status.RESCHEDULED_TASK, "Rescheduled" }
 
         };
@@ -1234,17 +1234,32 @@ namespace CMMSAPIs.Repositories.CleaningRepository
         internal async Task<List<CMMCTaskList>> GetTaskList(int facilityId, string facilitytimeZone)
         {
             string statusOut = "CASE ";
+            //Scheduled Qnty	Actual Qnty	Deviation	Machine type	Time taken	Remarks
+            //SUM(css.moduleQuantity) as  Scheduled_Qnty,sub2.no_of_cleaned as Actual_Qnty,( SUM(css.moduleQuantity) - sub2.no_of_cleaned)  as Deviation
+            //CASE  WHEN mc.abandonedAt IS NOT NULL THEN TIMESTAMPDIFF(MINUTE, mc.startDate, mc.abandonedAt)  ELSE TIMESTAMPDIFF(MINUTE, mc.startDate, mc.endedAt)
+            //END as Time_taken , mc.reasonForAbandon as Remark
             foreach (KeyValuePair<int, string> status in StatusDictionary)
             {
                 statusOut += $"WHEN mc.status = {status.Key} THEN '{status.Value}' ";
             }
             statusOut += $"ELSE 'Invalid Status' END";
 
-            string myQuery1 = $"select mc.id as executionId ,mp.title,mc.planId,mc.status,mc.abandonedAt as Abondond_done_date, CONCAT(createdBy.firstName, createdBy.lastName) as responsibility , mc.startDate, mc.endedAt as doneDate,mc.prevTaskDoneDate as lastDoneDate,freq.name as frequency,mc.noOfDays, {statusOut} as status_short from cleaning_execution as mc left join cleaning_plan as mp on mp.planId = mc.planId LEFT JOIN Frequency as freq on freq.id = mp.frequencyId LEFT JOIN users as createdBy ON createdBy.id = mc.assignedTo LEFT JOIN users as approvedBy ON approvedBy.id = mc.approvedByID where mc.moduleType={moduleType} ";
+            string myQuery1 = $"select mc.id as executionId ,mp.title,mc.planId,mc.status,mc.abandonedAt as Abondond_done_date," +
+                              $" CONCAT(createdBy.firstName, createdBy.lastName) as responsibility , mc.startDate, mc.endedAt as doneDate, " +
+                              $" SUM(css.area) as  Scheduled_Qnty ,sub2.no_of_cleaned as Actual_Qnty, ( SUM(css.area) - sub2.no_of_cleaned)  as Deviation , Case When mc.abandonedById >0 THEN 'yes' ELSE 'no' END as Abondend , " +
+                              $" CASE  WHEN mc.abandonedAt IS NOT NULL THEN TIMESTAMPDIFF(MINUTE, mc.abandonedAt, mc.startDate)  ELSE TIMESTAMPDIFF(MINUTE,mc.endedAt, mc.startDate) END as Time_taken ,  mc.reasonForAbandon as Remark,  " +
+                              $" mc.prevTaskDoneDate as lastDoneDate,freq.name as frequency,mc.noOfDays, {statusOut} as status_short" +
+                              $" from cleaning_execution as mc left join cleaning_plan as mp on mp.planId = mc.planId " +
+                              $" LEFT JOIN (SELECT executionId, SUM(area) AS no_of_cleaned FROM cleaning_execution_items where cleanedById>0 GROUP BY executionId) sub2 ON mc.id = sub2.executionId " +
+                              $"LEFT join cleaning_execution_items as css on css.executionId = mc.id " +
+                              $"LEFT JOIN Frequency as freq on freq.id = mp.frequencyId " +
+                              $"LEFT JOIN users as createdBy ON createdBy.id = mc.assignedTo " +
+                              $"LEFT JOIN users as approvedBy ON approvedBy.id = mc.approvedByID" +
+                              $" where mc.moduleType=2  ";
 
             if (facilityId > 0)
             {
-                myQuery1 += $" and mc.facilityId = {facilityId} ";
+                myQuery1 += $" and mc.facilityId = {facilityId} group by mc.id ";
             }
             List<CMMCTaskList> _ViewMCTaskList = await Context.GetData<CMMCTaskList>(myQuery1).ConfigureAwait(false);
             foreach (var ViewMCTaskList in _ViewMCTaskList)
