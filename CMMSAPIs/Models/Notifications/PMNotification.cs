@@ -212,7 +212,7 @@ namespace CMMSAPIs.Models.Notifications
 
                 retValue += String.Format("<table style='width: 50%; margin:0 auto; border-collapse: collapse ; border-spacing: 10px; ' border='1'>");
                 retValue += String.Format(template, "Plan ID", m_pmPlanObj.plan_id);
-                retValue += String.Format(template, "Status", m_pmPlanObj.started_by_name);
+                retValue += String.Format(template, "Status", m_pmPlanObj.status_short);
                 retValue += String.Format(template, "Plan Name", m_pmPlanObj.plan_name);
                 retValue += String.Format(template, "Responsible Person", m_pmPlanObj.assigned_to_name);
                 // retValue += String.Format(template, "Check List", m_pmPlanObj.name);
@@ -288,7 +288,7 @@ namespace CMMSAPIs.Models.Notifications
                         retValue += String.Format(templateEnd, "PM Task Close Approved By", m_pmExecutionObj.approved_by);
                         break;*/
                     case CMMS.CMMS_Status.PM_CANCELLED:
-                        retValue += String.Format(templateEnd, "PM Task Cancelled By", m_pmExecutionObj.cancelledbyName);
+                        retValue += String.Format(templateEnd, "PM Task Cancelled By", m_pmExecutionObj.cancelled_by_name);
                         break;
                     case CMMS.CMMS_Status.PM_CANCELLED_REJECTED:
                         retValue += String.Format(templateEnd, "PM Task Cancelled Rejected By", m_pmExecutionObj.cancelledrejectedbyName);
@@ -317,8 +317,7 @@ namespace CMMSAPIs.Models.Notifications
            retValue = String.Format("<h3><b style='color:#31576D'>Status:</b>{0}</h3><br>", m_pmscheduleObj.status_long);
            retValue += String.Format("<table style='width: 50%; margin:0 auto; border-collapse: collapse ; border-spacing: 10px; ' border='1'>");
            retValue += String.Format(template, "ID", m_pmscheduleObj.schedule_id);
-           retValue += String.Format(template, "Status", m_pmscheduleObj.status);
-           retValue += String.Format(template, "Category Name", m_pmscheduleObj.categoryname);
+           retValue += String.Format(template, "Status", m_pmscheduleObj.status_short);
            //retValue += String.Format(template, "Responsible Person", m_pmscheduleObj.);
            //retValue += String.Format(template, "Check List", m_pmscheduleObj.);
            retValue += String.Format(template, "Frequency", m_pmscheduleObj.PM_Frequecy_Name);
@@ -339,13 +338,13 @@ namespace CMMSAPIs.Models.Notifications
                         retValue += String.Format(templateEnd, "PM Task Started By", m_pmscheduleObj.started_by_name);
                         break;*/
                     case CMMS.CMMS_Status.PM_COMPLETED:
-                        retValue += String.Format(templateEnd, "PM Task Completed By", m_pmscheduleObj.completedBy_name);
+                        retValue += String.Format(templateEnd, "PM Task Schedule Completed By", m_pmscheduleObj.completedBy_name);
                         break;
                     case CMMS.CMMS_Status.PM_REJECTED:
-                        retValue += String.Format(templateEnd, "PM Task Rejected By", m_pmscheduleObj.rejectedbyName);
+                        retValue += String.Format(templateEnd, "PM Task Schedule Rejected By", m_pmscheduleObj.rejectedbyName);
                         break;
                     case CMMS.CMMS_Status.PM_APPROVED:
-                        retValue += String.Format(templateEnd, "PM Task Approved By", m_pmscheduleObj.approvedbyName);
+                        retValue += String.Format(templateEnd, "PM Task Schedule Approved By", m_pmscheduleObj.approvedbyName);
                         break;
                     /*case CMMS.CMMS_Status.PM_CLOSE_REJECTED:
                         retValue += String.Format(templateEnd, "PM Task Closed Rejected By", m_pmscheduleObj.re);
@@ -357,19 +356,22 @@ namespace CMMSAPIs.Models.Notifications
                         retValue += String.Format(templateEnd, "PM Task Cancelled By", m_pmscheduleObj.ca);
                         break;*/
                     case CMMS.CMMS_Status.PM_CANCELLED_REJECTED:
-                        retValue += String.Format(templateEnd, "PM Task Cancelled Rejected By", m_pmscheduleObj.cancelledrejectedbyName);
+                        retValue += String.Format(templateEnd, "PM Schedule Cancelled Rejected By", m_pmscheduleObj.cancelledrejectedbyName);
                         break;
                     case CMMS.CMMS_Status.PM_CANCELLED_APPROVED:
-                        retValue += String.Format(templateEnd, "PM Task Cancelled Approved By", m_pmscheduleObj.cancelledapprovedbyName);
+                        retValue += String.Format(templateEnd, "PM Schedule Cancelled Approved By", m_pmscheduleObj.cancelledapprovedbyName);
                         break;
                     case CMMS.CMMS_Status.PM_DELETED:
-                        retValue += String.Format(templateEnd, "PM Task Deleted", m_pmscheduleObj.schedule_id);
+                        retValue += String.Format(templateEnd, "PM Schedule Deleted for ID", m_pmscheduleObj.schedule_id);
                         break;
                     case CMMS.CMMS_Status.PM_UPDATED:
-                        retValue += String.Format(templateEnd, "PM Task Updated By", m_pmscheduleObj.PM_Schedule_updated_by);
+                        retValue += String.Format(templateEnd, "PM Schedule Updated By", m_pmscheduleObj.PM_Schedule_updated_by);
+                        break;
+                    case CMMS.CMMS_Status.PM_START:
+                        retValue += String.Format(templateEnd, "PM Schedule Started By ", m_pmscheduleObj.PM_Execution_Started_by_name);
                         break;
                     case CMMS.CMMS_Status.PM_SUBMIT:
-                        retValue += String.Format(templateEnd, "PM Task Submited By", m_pmscheduleObj.submittedByName);
+                        retValue += String.Format(templateEnd, "PM Schedule Submitted By ", m_pmscheduleObj.submittedByName);
                         break;
                     default:
                         break;

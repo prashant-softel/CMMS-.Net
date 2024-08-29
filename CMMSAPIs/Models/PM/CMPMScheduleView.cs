@@ -77,6 +77,7 @@ namespace CMMSAPIs.Models.PM
         public string PM_Frequecy_Name { get; set; }
         public string createdbyName { get; set; }
         public int status {  get; set; }
+        public string status_short { get; set; }
         public string status_long { get; set; }
         public string cancelledrejectedbyName { get; set; }
         public string PM_Schedule_updated_by { get; set; }
@@ -123,8 +124,8 @@ namespace CMMSAPIs.Models.PM
         public List<string> Employees { get; set; }
         public string Isolation_taken { get; set; }
         public string Isolated_equipment { get; set; }
-        public int cancelledbyName { get; set; }
-        public int cancelledrejectedbyName { get; set; }
+        public string cancelledbyName { get; set; }
+        public string cancelledrejectedbyName { get; set; }
         public DateTime TBT_done_time { get; set; }
         public DateTime Start_time { get; set; }
         public int Status_PTW { get; set; }

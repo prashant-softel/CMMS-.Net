@@ -95,35 +95,37 @@ namespace CMMSAPIs.Repositories.PM
             switch (notificationID)
             {
                 case CMMS.CMMS_Status.PM_SCHEDULED:
-                    retValue = $"PM Task Scheduled "; break;
-              /*  case CMMS.CMMS_Status.PM_ASSIGNED:
-                    retValue = $"PM Task Assigned To {Obj.assigned_to_name} "; break;
-                case CMMS.CMMS_Status.PM_LINKED_TO_PTW:
-                    retValue = $"PM {Obj.id} Linked To PTW {Obj.permit_id} "; break;
-                case CMMS.CMMS_Status.PM_START:
-                    retValue = $"PM Task Started By {Obj.started_by_name}"; break;
+                    retValue += String.Format("PM {0} Schedule </p>", Obj.schedule_id); break;
+                case CMMS.CMMS_Status.PM_ASSIGNED:
+                    retValue += String.Format("PM Schedule {0} Assigned </p>", Obj.schedule_id);
+                    break;
                 case CMMS.CMMS_Status.PM_COMPLETED:
-                    retValue = $"PM Task Waiting for Approval "; break;
+                    retValue += String.Format("PM Schedule {0} Completed By {1} </p>", Obj.schedule_id, Obj.completedBy_name); ;
+                    break;
+                case CMMS.CMMS_Status.PM_SUBMIT:
+                    retValue += String.Format("PM Schedule {0} Submitted By {1} </p>", Obj.schedule_id, Obj.submittedByName);
+                    break;
+                case CMMS.CMMS_Status.PM_START:
+                    retValue += String.Format("PM Schedule {0} Started By {1} </p>", Obj.schedule_id, Obj.PM_Execution_Started_by_name);
+                    break;
                 case CMMS.CMMS_Status.PM_REJECTED:
-                    retValue = $"PM Task Rejected "; break;
+                    retValue += String.Format("PM  Schedule {0} Rejected By {1} </p>", Obj.schedule_id, Obj.rejectedbyName);
+                    break;
                 case CMMS.CMMS_Status.PM_APPROVED:
-                    retValue = $"PM Task Approved "; break;
-                case CMMS.CMMS_Status.PM_CLOSE_REJECTED:
-                    retValue = $"PM Task Close Rejected By {Obj.rejected_by_name}"; break;
-                case CMMS.CMMS_Status.PM_CLOSE_APPROVED:
-                    retValue = $"PM Task Close Approved By {Obj.approved_by}"; break;
-                case CMMS.CMMS_Status.PM_CANCELLED:
-                    retValue = $"PM Task Cancelled By {Obj.cancelled_by_name} "; break;
+                    retValue += String.Format("PM Schedule {0} Approved By {1} </p>", Obj.schedule_id, Obj.approvedbyName);
+                    break;
                 case CMMS.CMMS_Status.PM_CANCELLED_REJECTED:
-                    retValue = $"PM Task cancelled Rejected By {Obj.cancelled_by_name}"; break;
+                    retValue += String.Format("PM Schedule {0} Cancelled Rejected By {1} </p>", Obj.schedule_id,Obj.cancelledrejectedbyName);
+                    break;
                 case CMMS.CMMS_Status.PM_CANCELLED_APPROVED:
-                    retValue = $"PM Task cancelled Approved By {Obj.approved_by}"; break;
+                    retValue += String.Format("PM Schedule {0} Cancelled Approved By {1} </p>", Obj.schedule_id, Obj.cancelledapprovedbyName);
+                    break;
                 case CMMS.CMMS_Status.PM_DELETED:
-                    retValue = $"PM Task Deleted "; break;
+                    retValue += String.Format("PM Schedule of ID {0} Deleted </p>", Obj.schedule_id);
+                    break;
                 case CMMS.CMMS_Status.PM_UPDATED:
-                    retValue = $"PM Task Updated By {Obj.updated_by_name} "; break;
-                case CMMS.CMMS_Status.PM_TASK_DELETED:
-                    retValue = $"PM Task Deleted "; break;*/
+                    retValue += String.Format("PM Schedule {0} Updated By {1} </p>", Obj.schedule_id,Obj.PM_Schedule_updated_by);
+                    break;
                 default:
                     break;
             }
@@ -1589,10 +1591,11 @@ namespace CMMSAPIs.Repositories.PM
 
             string myQuery2 = $"SELECT pm_schedule.id as schedule_id, assets.name as asset_name, checklist.checklist_number as checklist_name, " +
                 $" CONCAT(startedBy.firstName, ' ' ,startedBy.lastName) as PM_Execution_Started_by_name, CONCAT(updatedBy.firstName, ' ' ,updatedBy.lastName) as updatedbyName, " +
-                $" CONCAT(createdBy.firstName, ' ' ,createdBy.lastName) as createdbyName, pm_schedule.Status, PM_Schedule_date, PM_Frequecy_Name, CONCAT(rejectedBy.firstName, ' ' ,rejectedBy.lastName) as rejectedbyName, " +
+                $" CONCAT(createdBy.firstName, ' ' ,createdBy.lastName) as createdbyName, pm_schedule.Status AS status, PM_Schedule_date, PM_Frequecy_Name, CONCAT(rejectedBy.firstName, ' ' ,rejectedBy.lastName) as rejectedbyName, " +
                 $"CONCAT(approvedBy.firstName, ' ' , approvedBy.lastName) as approvedbyName, CONCAT(cancelledrejected.firstName, ' ' , cancelledrejected.lastName) as cancelledrejectedbyName, " +
                 $"CONCAT(cancelledapproved.firstName, ' ' , cancelledapproved.lastName) as cancelledapprovedbyName, PM_Schedule_updated_by, " +
-                $"CONCAT(submittedBy.firstName, ' ' , submittedBy.lastName) as submittedByName" +
+                $"CONCAT(submittedBy.firstName, ' ' , submittedBy.lastName) as submittedByName, " +
+                $"CONCAT(completedbyName.firstName, ' ' , completedbyName.lastName) as completedBy_name" +
                 $" from pm_schedule "  + 
                 $"left join assets on pm_schedule.asset_id = assets.id " +
                 $"left join checklist_number as checklist on pm_schedule.checklist_id = checklist.id " +
@@ -1604,6 +1607,7 @@ namespace CMMSAPIs.Repositories.PM
                 $"left join users AS cancelledrejected ON cancelledrejected.id = pm_schedule.PM_Schedule_cancel_by_id " +
                 $"left join users AS cancelledapproved ON cancelledapproved.id = pm_schedule.PM_Schedule_Approved_by_id " +
                 $"left join users AS submittedBy ON submittedBy.id = pm_schedule.submittedById " +
+                $"left join users AS completedbyName ON completedbyName.id = pm_schedule.PM_Schedule_Completed_by_id " +
                 $"where pm_schedule.id = {schedule_id} and task_id = {task_id};"; 
 
             List<CMPMScheduleExecutionDetail> scheduleDetails = await Context.GetData<CMPMScheduleExecutionDetail>(myQuery2).ConfigureAwait(false);
@@ -1673,7 +1677,12 @@ namespace CMMSAPIs.Repositories.PM
                 if (detail != null && detail.job_date != null)
                     detail.job_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)detail.job_date);
             }
+
             CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(scheduleDetails[0].status);
+            string _shortStatus = getShortStatus(CMMS.CMMS_Modules.PM_SCHEDULE, _Status);
+            scheduleDetails[0].status_short = _shortStatus;
+
+            
             string _longStatus = getLongStatus(CMMS.CMMS_Modules.PM_SCHEDULE, _Status, scheduleDetails[0]);
             scheduleDetails[0].status_long = _longStatus;
 

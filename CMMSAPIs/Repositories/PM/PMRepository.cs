@@ -111,11 +111,12 @@ namespace CMMSAPIs.Repositories.PM
                 return new CMDefaultResponse(0, CMMS.RETRUNSTATUS.INVALID_ARG,
                     $"{invalidChecklists.Count} invalid checklists [{string.Join(',', invalidChecklists)}] " +
                     $"and {invalidAssets.Count} invalid assets [{string.Join(',', invalidAssets)}] linked");
+            int statusId = (int)CMMS.CMMS_Status.PM_PLAN_CREATED;
 
             string addPlanQry = $"INSERT INTO pm_plan(plan_name, facility_id, category_id, frequency_id, " +
                                 $"status, plan_date,assigned_to, created_by, created_at, updated_by, updated_at,next_schedule_date) VALUES " +
                                 $"('{pm_plan.plan_name}', {pm_plan.facility_id}, {pm_plan.category_id}, {pm_plan.plan_freq_id}, " +
-                                $"{status}, '{pm_plan.plan_date.ToString("yyyy-MM-dd")}',{pm_plan.assigned_to_id}, " +
+                                $"{statusId}, '{pm_plan.plan_date.ToString("yyyy-MM-dd")}',{pm_plan.assigned_to_id}, " +
                                 $"{userID}, '{UtilsRepository.GetUTCTime()}', {userID}, '{UtilsRepository.GetUTCTime()}','{pm_plan.plan_date.ToString("yyyy-MM-dd HH:mm")}'); " +
                                 $"SELECT LAST_INSERT_ID(); ";
             DataTable dt3 = await Context.FetchData(addPlanQry).ConfigureAwait(false);
@@ -284,7 +285,7 @@ namespace CMMSAPIs.Repositories.PM
 
             if (id <= 0)
                 throw new ArgumentException("Invalid Plan ID");
-            string planListQry = $"SELECT plan.id as plan_id, plan.plan_name, plan.status as status_id, statuses.statusName as status_short, plan.plan_date, " +
+            string planListQry = $"SELECT plan.id as plan_id, plan.plan_name, plan.status as status_id,  statuses.statusName as status_short, plan.plan_date, " +
                         $"facilities.id as facility_id, facilities.name as facility_name, category.id as category_id, category.name as category_name, " +
                         $"frequency.id as plan_freq_id, frequency.name as plan_freq_name, createdBy.id as created_by_id, " +
                         $"CONCAT(createdBy.firstName, ' ', createdBy.lastName) as created_by_name, plan.created_at, " +
@@ -292,7 +293,8 @@ namespace CMMSAPIs.Repositories.PM
                         $"rejectedBy.id as rejected_by_id, CONCAT(rejectedBy.firstName, ' ', rejectedBy.lastName) as rejected_by_name, plan.rejected_at, " +
                         $"CONCAT(assignedTo.firstName, ' ', assignedTo.lastName) as assigned_to_name, updatedBy.id as updated_by_id, " +
                         $"CONCAT(updatedBy.firstName, ' ', updatedBy.lastName) as updated_by_name, plan.updated_at, " +
-                        $"CONCAT(startedBy.firstName, ' ', startedBy.lastName) as started_by_name " +  // Added started_by_name
+                        $"CONCAT(startedBy.firstName, ' ', startedBy.lastName) as started_by_name, " +
+                        $"CONCAT(status.firstName, ' ', status.lastName) as status_name " + // Added started_by_name
                         $"FROM pm_plan as plan " +
                         $"LEFT JOIN statuses ON plan.status = statuses.softwareId " +
                         $"JOIN facilities ON plan.facility_id = facilities.id " +
@@ -303,6 +305,7 @@ namespace CMMSAPIs.Repositories.PM
                         $"LEFT JOIN users as approvedBy ON approvedBy.id = plan.approved_by " +
                         $"LEFT JOIN users as rejectedBy ON rejectedBy.id = plan.rejected_by " +
                         $"LEFT JOIN users as assignedTo ON assignedTo.id = plan.assigned_to " +
+                        $"LEFT JOIN users as status ON status.id = plan.status " +
                         $"LEFT JOIN pm_task as task ON task.plan_id = plan.id " +  // Added join with pm_task table
                         $"LEFT JOIN users as startedBy ON startedBy.id = task.started_by " +  // Added join with users for started_by
                         $"WHERE plan.id = {id} ";
@@ -390,6 +393,8 @@ namespace CMMSAPIs.Repositories.PM
 
             return _scheduleList;
         }
+
+
 
         internal async Task<List<CMDefaultResponse>> SetScheduleData(CMSetScheduleData request, int userID)
         {
