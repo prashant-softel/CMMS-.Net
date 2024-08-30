@@ -2438,10 +2438,10 @@ namespace CMMSAPIs.Repositories.Masters
 
             if (((int)CMMS.CMMS_Modules.JOB) == module_id)
             {
-                string myQueryJob = "SELECT fc.name as Site_name,  COUNT( js.createdBy > 0) AS JobsCreated, COUNT( jc.JC_End_By_id > 0) as jobsClosed,  COUNT( jc.JC_End_By_id > 0) AS JobsCardsEnded , " +
-                                    "COUNT( js.cancelledBy) AS JobsCancelled , COUNT(jc.JC_Start_By_id = 0) AS JobsNotStarted, " +
-                                    "COUNT( jc.JC_End_By_id = 0) AS JobsOngoing, COUNT(jc.JC_End_By_id = 0 ) AS JobsClosedOnTime, " +
-                                    "COUNT( jc.JC_End_By_id = 0) AS JobsClosedWithExtension, COUNT( jc.JC_End_By_id = 0 ) AS JobClosedOnTime " +
+                string myQueryJob = "SELECT fc.name as Site_name,  COUNT( js.createdBy > 0) AS Created, COUNT( jc.JC_End_By_id > 0) as Closed,  COUNT( jc.JC_End_By_id > 0) AS CardsEnded , " +
+                                    "COUNT( js.cancelledBy) AS Cancelled , COUNT(jc.JC_Start_By_id = 0) AS NotStarted, " +
+                                    "COUNT( jc.JC_End_By_id = 0) AS Ongoing, COUNT(jc.JC_End_By_id = 0 ) AS ClosedOnTime, " +
+                                    "COUNT( jc.JC_End_By_id = 0) AS ClosedWithExtension, COUNT( jc.JC_End_By_id = 0 ) AS JobClosedOnTime " +
                                     "FROM jobs AS js LEFT JOIN jobcards AS jc ON js.id = jc.jobId " +
                                     "LEFT JOIN facilities AS fc ON js.facilityId = fc.id " +
                                     $"Where js.facilityId in({facility_id}) group by js.facilityId ;";
@@ -2450,11 +2450,11 @@ namespace CMMSAPIs.Repositories.Masters
             }
             if (((int)CMMS.CMMS_Modules.PM_PLAN) == module_id)
             {
-                string myQueryJob = "SELECT fc.name as Site_name,  COUNT( js.createdBy > 0) AS JobsCreated, COUNT( jc.JC_End_By_id > 0) as jobsClosed,  COUNT( jc.JC_End_By_id > 0) AS JobsCardsEnded , " +
-                                    "COUNT( js.cancelledBy) AS JobsCancelled , COUNT(jc.JC_Start_By_id = 0) AS JobsNotStarted, " +
-                                    "COUNT( jc.JC_End_By_id = 0) AS JobsOngoing, COUNT(jc.JC_End_By_id = 0 ) AS JobsClosedOnTime, " +
-                                    "COUNT( jc.JC_End_By_id = 0) AS JobsClosedWithExtension, COUNT( jc.JC_End_By_id = 0 ) AS JobClosedOnTime " +
-                                    "FROM jobs AS js LEFT JOIN jobcards AS jc ON js.id = jc.jobId " +
+                string myQueryJob = "SELECT fc.name as Site_name,  COUNT( js.createdBy > 0) AS Created, COUNT( jc.JC_End_By_id > 0) as Closed,  COUNT( jc.JC_End_By_id > 0) AS CardsEnded , " +
+                                    "COUNT( js.cancelledBy) AS Cancelled , COUNT(jc.JC_Start_By_id = 0) AS NotStarted, " +
+                                    "COUNT( jc.JC_End_By_id = 0) AS Ongoing, COUNT(jc.JC_End_By_id = 0 ) AS ClosedOnTime, " +
+                                    "COUNT( jc.JC_End_By_id = 0) AS ClosedWithExtension, COUNT( jc.JC_End_By_id = 0 ) AS JobClosedOnTime " +
+                                    "FROM  AS js LEFT JOIN jobcards AS jc ON js.id = jc.jobId " +
                                     "LEFT JOIN facilities AS fc ON js.facilityId = fc.id " +
                                     $"Where js.facilityId in({facility_id}) group by js.facilityId ;";
                 List<CumalativeReport> data = await Context.GetData<CumalativeReport>(myQueryJob).ConfigureAwait(false);
@@ -2462,11 +2462,11 @@ namespace CMMSAPIs.Repositories.Masters
             }
             if (((int)CMMS.CMMS_Modules.MC_PLAN) == module_id)
             {
-                string myQueryJob = "SELECT fc.name as Site_name,  COUNT( js.createdBy > 0) AS JobsCreated, COUNT( jc.JC_End_By_id > 0) as jobsClosed,  COUNT( jc.JC_End_By_id > 0) AS JobsCardsEnded , " +
-                                    "COUNT( js.cancelledBy) AS JobsCancelled , COUNT(jc.JC_Start_By_id = 0) AS JobsNotStarted, " +
-                                    "COUNT( jc.JC_End_By_id = 0) AS JobsOngoing, COUNT(jc.JC_End_By_id = 0 ) AS JobsClosedOnTime, " +
-                                    "COUNT( jc.JC_End_By_id = 0) AS JobsClosedWithExtension, COUNT( jc.JC_End_By_id = 0 ) AS JobClosedOnTime " +
-                                    "FROM jobs AS js LEFT JOIN jobcards AS jc ON js.id = jc.jobId " +
+                string myQueryJob = "SELECT fc.name as Site_name,  COUNT( js.createdBy > 0) AS Created, COUNT( jc.JC_End_By_id > 0) as Closed,  COUNT( jc.JC_End_By_id > 0) AS CardsEnded , " +
+                                    "COUNT( js.cancelledBy) AS Cancelled , COUNT(jc.JC_Start_By_id = 0) AS NotStarted, " +
+                                    "COUNT( jc.JC_End_By_id = 0) AS Ongoing, COUNT(jc.JC_End_By_id = 0 ) AS ClosedOnTime, " +
+                                    "COUNT( jc.JC_End_By_id = 0) AS ClosedWithExtension, COUNT( jc.JC_End_By_id = 0 ) AS JobClosedOnTime " +
+                                    "FROM   AS js LEFT JOIN jobcards AS jc ON js.id = jc.jobId " +
                                     "LEFT JOIN facilities AS fc ON js.facilityId = fc.id " +
                                     $"Where js.facilityId in({facility_id}) group by js.facilityId ;";
                 List<CumalativeReport> data = await Context.GetData<CumalativeReport>(myQueryJob).ConfigureAwait(false);
@@ -2474,11 +2474,11 @@ namespace CMMSAPIs.Repositories.Masters
             }
             if (((int)CMMS.CMMS_Modules.VEGETATION_PLAN) == module_id)
             {
-                string myQueryJob = "SELECT fc.name as Site_name,  COUNT( js.createdBy > 0) AS JobsCreated, COUNT( jc.JC_End_By_id > 0) as jobsClosed,  COUNT( jc.JC_End_By_id > 0) AS JobsCardsEnded , " +
-                                    "COUNT( js.cancelledBy) AS JobsCancelled , COUNT(jc.JC_Start_By_id = 0) AS JobsNotStarted, " +
-                                    "COUNT( jc.JC_End_By_id = 0) AS JobsOngoing, COUNT(jc.JC_End_By_id = 0 ) AS JobsClosedOnTime, " +
-                                    "COUNT( jc.JC_End_By_id = 0) AS JobsClosedWithExtension, COUNT( jc.JC_End_By_id = 0 ) AS JobClosedOnTime " +
-                                    "FROM jobs AS js LEFT JOIN jobcards AS jc ON js.id = jc.jobId " +
+                string myQueryJob = "SELECT fc.name as Site_name,  COUNT( js.createdBy > 0) AS Created, COUNT( jc.JC_End_By_id > 0) as Closed,  COUNT( jc.JC_End_By_id > 0) AS CardsEnded , " +
+                                    "COUNT( js.cancelledBy) AS Cancelled , COUNT(jc.JC_Start_By_id = 0) AS NotStarted, " +
+                                    "COUNT( jc.JC_End_By_id = 0) AS Ongoing, COUNT(jc.JC_End_By_id = 0 ) AS ClosedOnTime, " +
+                                    "COUNT( jc.JC_End_By_id = 0) AS ClosedWithExtension, COUNT( jc.JC_End_By_id = 0 ) AS JobClosedOnTime " +
+                                    "FROM  AS js LEFT JOIN jobcards AS jc ON js.id = jc.jobId " +
                                     "LEFT JOIN facilities AS fc ON js.facilityId = fc.id " +
                                     $"Where js.facilityId in({facility_id}) group by js.facilityId ;";
                 List<CumalativeReport> data = await Context.GetData<CumalativeReport>(myQueryJob).ConfigureAwait(false);
