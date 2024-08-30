@@ -27,12 +27,32 @@ namespace CMMSAPIs.Repositories.DSM
 
         internal async Task<CMImportFileResponse> importDSMFile(int file_id, int userID)
         {
+            var dictionayfordsm = new Dictionary<string, string>()
+            {
+                {"site","SELECT id,site as name FROM site_master;" },
+                { "Vendor","SELECT id,name FROM spv ;" },
+                { "category","SELECT id,name FROM assetcategories ;"},
+                {"dsmtype","SELECT id,name FROM dsm_type where status=1 ;"}
+            };
+            Dictionary<string, DataTable> dsmdic = await Context.ExecuteNonQryDictonary(dictionayfordsm).ConfigureAwait(false);
+            DataTable siteTable = dsmdic["site"];
+            DataTable vendorTable = dsmdic["Vendor"];
+            DataTable categoryTable = dsmdic["category"];
+            DataTable dsmtypeTable = dsmdic["dsmtype"];
+
+
+            List<string> names = siteTable.AsEnumerable().Select(row => row.Field<string>("name")).ToList();
+            List<int> ids = siteTable.AsEnumerable().Select(row => row.Field<int>("id")).ToList();
+            Dictionary<string, int> dsmtyp = new Dictionary<string, int>();
+            dsmtyp.Merge(names, ids);
+
             CMImportFileResponse response = null;
             string query1 = $"SELECT file_path FROM uploadedfiles WHERE id = {file_id};";
             DataTable dt1 = await Context.FetchData(query1).ConfigureAwait(false);
             string path = Convert.ToString(dt1.Rows[0][0]);
             string dir = Path.GetDirectoryName(path);
             string filename = Path.GetFileName(path);
+
 
             if (!Directory.Exists(dir))
                 m_errorLog.SetError($"Directory '{dir}' cannot be found");
@@ -127,6 +147,7 @@ namespace CMMSAPIs.Repositories.DSM
                                         fy = dr["Year"] is DBNull || string.IsNullOrEmpty((string)dr["Year"]) ? "" : Convert.ToString(dr["Year"]),
 
                                         month = dr["Month"] is DBNull || string.IsNullOrEmpty((string)dr["Month"]) ? "Nil" : Convert.ToString(dr["Month"]),
+
 
                                         site = dr["Site"] is DBNull || string.IsNullOrEmpty((string)dr["Site"]) ? "Nil" : Convert.ToString(dr["Site"]),
 
