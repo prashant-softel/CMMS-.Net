@@ -142,21 +142,38 @@ namespace CMMSAPIs.Repositories.JC
 
 
             List<CMJCList> _ViewJobCardList = await Context.GetData<CMJCList>(myQuery1).ConfigureAwait(false);
-
+            string job_id = "";
             foreach (var jc in _ViewJobCardList)
             {
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(jc.status);
                 CMMS.ApprovalStatus _Approval = (CMMS.ApprovalStatus)(jc.approvedStatus);
                 string _shortStatus = getShortStatus(CMMS.CMMS_Modules.JOBCARD, _Status, _Approval);
                 jc.status_short = _shortStatus;
+
             }
             //job equipment category
-            string myQuery2 = $"SELECT asset_cat.id as equipmentCat_id, asset_cat.name as equipmentCat_name,Assets.name as Equipment_name   " +
-                              $"FROM assetcategories as asset_cat JOIN jobmappingassets as mapAssets ON mapAssets.categoryId = asset_cat.id  LEFT JOIN assets as Assets ON Assets.id =mapAssets.assetId " +
-                              $" JOIN jobs as job ON mapAssets.jobId = job.id WHERE job.id = {_ViewJobCardList[0].jobid} and job.facilityId = {facility_id}";
-            List<equipmentCatList> _equipmentCatList = await Context.GetData<equipmentCatList>(myQuery2).ConfigureAwait(false);
 
-            _ViewJobCardList[0].LstequipmentCatList = _equipmentCatList;
+
+            foreach (var jc in _ViewJobCardList)
+            {
+                string myQuery2 = $"SELECT asset_cat.id as equipmentCat_id, asset_cat.name as equipmentCat_name,Assets.name as Equipment_name   " +
+                                  $"FROM assetcategories as asset_cat JOIN jobmappingassets as mapAssets ON mapAssets.categoryId = asset_cat.id " +
+                                  $" LEFT JOIN assets as Assets ON Assets.id =mapAssets.assetId " +
+                                  $" JOIN jobs as job ON mapAssets.jobId = job.id WHERE job.id in ({jc.jobid}) and job.facilityId = {facility_id}";
+                List<equipmentCatList> _equipmentCatList = await Context.GetData<equipmentCatList>(myQuery2).ConfigureAwait(false);
+                jc.LstequipmentCatList = _equipmentCatList;
+
+                string myQuery4 = "SELECT distinct(workType.id) AS id, workType.workTypeName as workType FROM jobs AS job " +
+                   "left JOIN jobmappingassets AS mapAssets ON mapAssets.jobId = job.id " +
+                   "left JOIN assetcategories AS asset_cat ON mapAssets.categoryId = asset_cat.id " +
+                   "LEFT JOIN jobassociatedworktypes as mapWorkTypes on mapWorkTypes.jobId = job.id " +
+                   "LEFT JOIN jobworktypes AS workType ON mapWorkTypes.workTypeId = workType.id " +
+                   $"WHERE job.id =  ({jc.jobid})  ";
+                List<CMWorkType> _WorkType = await Context.GetData<CMWorkType>(myQuery4).ConfigureAwait(false);
+                jc._WorkTypes = _WorkType;
+            }
+
+
             foreach (var v in _ViewJobCardList)
             {
 

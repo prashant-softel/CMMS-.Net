@@ -29,6 +29,7 @@ namespace CMMSAPIs.Controllers.PM
         {
             try
             {
+
                 // Access the facility_id directly from the pm_plan object
                 int facilityId = pm_plan.facility_id;
 
@@ -45,7 +46,6 @@ namespace CMMSAPIs.Controllers.PM
                     return NotFound("Facility timezone not found.");
                 }
 
-                // Retrieve the user ID from the session
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
 
                 // Call the business service to create the PM plan

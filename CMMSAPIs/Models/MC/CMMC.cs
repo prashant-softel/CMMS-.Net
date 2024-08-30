@@ -62,8 +62,8 @@ namespace CMMSAPIs.Models.MC
         public string status_long { get; set; }
         public string updatedBy { get; set; }
         public string rejectedBy { get; set; }
-        
 
+        public int resubmit { get; set; }
         public bool scheduleAdded = false;
 
 
@@ -225,6 +225,7 @@ namespace CMMSAPIs.Models.MC
         public UInt64 id { get; set; }
         public int executionId { get; set; }
         public string title { get; set; }
+        public string site_name { get; set; }
         public string description { get; set; }
         public int planId { get; set; }
         public string frequency { get; set; }
@@ -288,12 +289,14 @@ namespace CMMSAPIs.Models.MC
     {
         public int executionId { get; set; }
         public int planId { get; set; }
+        public string sitename { get; set; }
         public string responsibility { get; set; }
         public string frequency { get; set; }
         public int noOfDays { get; set; }
         public DateTime startDate { get; set; }
         public DateTime doneDate { get; set; }
         public DateTime lastDoneDate { get; set; }
+        public DateTime Abondond_done_date { get; set; }
         public int status { get; set; }
         public string status_short { get; set; }
         public int water_used { get; set; }
@@ -304,6 +307,14 @@ namespace CMMSAPIs.Models.MC
         public int permit_tbt_done_by { get; set; }
         public int ptw_id { get; set; }
         public string title { get; set; }
+        public string cleaningType { get; set; }
+        public dynamic waterused { get; set; }
+        public dynamic Scheduled_Qnty { get; set; }
+        public dynamic Actual_Qnty { get; set; }
+        public dynamic Abondend { get; set; }
+        public string Remark { get; set; }
+        public dynamic Deviation { get; set; }
+        public dynamic Time_taken { get; set; }
     }
     public class CMMCExecutionList
     {

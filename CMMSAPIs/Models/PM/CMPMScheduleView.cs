@@ -27,6 +27,7 @@ namespace CMMSAPIs.Models.PM
     public class CMPMTaskList
     {
         public int id { get; set; }
+        public int plan_id { get; set; }
         public int facility_id { get; set; }
         public string Site_name { get; set; }
         public string task_code { get; set; }

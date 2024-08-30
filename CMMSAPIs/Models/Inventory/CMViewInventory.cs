@@ -56,11 +56,13 @@ namespace CMMSAPIs.Models.Inventory
         public int calibrationFrequency { get; set; }
         public string calibrationFreqType { get; set; }
         public int? calibrationReminderDays { get; set; }
+        public DateTime calibrationStartDate { get; set; }
+        public DateTime calibrationDueDate { get; set; }
         public DateTime calibrationLastDate { get; set; }
-
+        public DateTime? warranty_start_date { get; set; }
+        public DateTime? warranty_expiry_date { get; set; }
         public DateTime? start_date { get; set; }
         public DateTime? expiry_date { get; set; }
-        public DateTime calibrationDueDate { get; set; }
         public int specialTool { get; set; }
         public int specialToolEmp { get; set; }
         public int warrantyId { get; set; }
@@ -83,8 +85,12 @@ namespace CMMSAPIs.Models.Inventory
         public DateTime? Imported_at { get; set; }
         public string Imported_by { get; set; }
         public DateTime? added_at { get; set; }
-        public string added_by { get; set; }
+        public string added_by_name { get; set; }
+        public string updated_by_name { get; set; }
+        public int added_by_id { get; set; }
         public DateTime? updated_at { get; set; }
+        public DateTime? createdAt { get; set; }
+        public DateTime? updatedAt { get; set; }
         public string updated_by { get; set; }
         public DateTime? deleted_at { get; set; }
         public string deleted_by { get; set; }

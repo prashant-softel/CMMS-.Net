@@ -1479,21 +1479,25 @@ namespace CMMSAPIs.Repositories.Masters
 
             string myQuery12 = $"select mc.facilityId as facility_id,F.name as facility_name, mc.id as wo_number ,mp.title as wo_decription,mc.planId,mc.status, CONCAT(createdBy.firstName, createdBy.lastName) as responsibility ," +
                 $" mc.startDate as start_date, mc.endedAt as doneDate,mc.prevTaskDoneDate as end_date,freq.name as frequency,mc.noOfDays, {statusOut} as " +
-                $"status_long " +
+                $"status_long , CASE WHEN mc.moduleType=1 THEN 'Wet' WHEN mc.moduleType=2 THEN 'Dry' ELSE 'Robotic' END as MC_Type,  " +
+                $"mc.startDate as  Start_Date ,mc.abandonedAt as  End_Date_done,mc.noOfDays as plan_days,sub1.TotalWaterUsed, sub2.no_of_cleaned,SUM(css.moduleQuantity) as Scheduled " +
                 $"from cleaning_execution as mc " +
-                $"left join cleaning_plan as mp on mp.planId = mc.planId " +
+                $"LEFT join cleaning_plan as mp on mp.planId = mc.planId " +
+                $"LEFT join cleaning_execution_items as css on css.executionId = mc.id " +
+                $"LEFT JOIN (SELECT executionId, SUM(waterUsed) AS TotalWaterUsed FROM cleaning_execution_schedules GROUP BY executionId) sub1 ON mc.id = sub1.executionId " +
+                $"LEFT JOIN (SELECT executionId, SUM(moduleQuantity) AS no_of_cleaned FROM cleaning_execution_items where cleanedById>0 GROUP BY executionId) sub2 ON mc.id = sub2.executionId " +
                 $"LEFT JOIN Frequency as freq on freq.id = mp.frequencyId " +
                 $"LEFT JOIN users as createdBy ON createdBy.id = mc.assignedTo " +
                 $"LEFT JOIN users as approvedBy ON approvedBy.id = mc.approvedByID " +
                 $" left join facilities as F on F.id = mc.facilityId  " +
-                $"where (mc.moduleType=1 or rescheduled = 0)";
-            myQuery12 += $" and mc.facilityId in ({facilityId}) ";
+                $"where (mc.moduleType=1 and rescheduled = 0)";
+            myQuery12 += $" and mc.facilityId in ({facilityId})  group by mc.id ";
 
 
             // end
 
             List<CMDashboadItemList> itemList = await Context.GetData<CMDashboadItemList>(myQuery12).ConfigureAwait(false);
-
+            result.WaterUsedTotal = await WaterUsedTotal(facilityId);
             result.created = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.MC_TASK_SCHEDULED).ToList().Count;
             result.rejected = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.MC_TASK_REJECTED).ToList().Count;
 
@@ -1524,7 +1528,21 @@ namespace CMMSAPIs.Repositories.Masters
             }
             return result;
         }
+        private async Task<List<CMWATERUESD>> WaterUsedTotal(string facility_id)
+        {
 
+            string Details_query = "SELECT f.name AS site_name, SUM(cs.waterUsed) AS TotalWaterUsed, SUM(ce.noOfDays) AS plan_days, " +
+                                   $"SUM(cse.moduleQuantity) AS no_of_cleaned " +
+                                   $"FROM cleaning_execution ce " +
+                                   $" LEFT JOIN cleaning_execution_schedules cs ON ce.id = cs.executionId " +
+                                   $" LEFT JOIN cleaning_execution_items cse ON cse.executionId = ce.id  " +
+                                   $" LEFT JOIN facilities f ON ce.facilityId = f.id " +
+                                   $" WHERE  cse.cleanedById > 0 AND ce.moduleType = 1 AND ce.facilityId IN ({facility_id}) " +
+                                   $" GROUP BY f.name ORDER BY f.name;";
+            List<CMWATERUESD> result = await Context.GetData<CMWATERUESD>(Details_query).ConfigureAwait(false);
+            return result;
+
+        }
         private Dictionary<int, string> StatusDictionary_IR = new Dictionary<int, string>()
         {
             { 181, "Created-waiting for approval" },
@@ -2047,20 +2065,20 @@ namespace CMMSAPIs.Repositories.Masters
         {
 
             string Plant_Stock_Opening_Details_query = $"select     facilityName, SUM(opening) AS Opening, SUM(inward) AS inward," +
-                 $" SUM(outward) AS outward  from (SELECT fc.name as facilityName, " +
+                $" SUM(outward) AS outward  from (SELECT fc.name as facilityName, " +
                 $" IFNULL((select SUM(smt1.qty) from smtransactiondetails smt1  where date_format(smt1.lastInsetedDateTime, '%Y-%m-%d') BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}'  and smt1.assetItemID = sm_trans.assetItemID  and smt1.fromActorType IN ({(int)CMMS.SM_Actor_Types.PM_Task},{(int)CMMS.SM_Actor_Types.JobCard},{(int)CMMS.SM_Actor_Types.Engineer}) and smt1.toActorType ={(int)CMMS.SM_Actor_Types.Inventory} and smt1.PlantId in (sm_trans.facilityID)),0) - " +
                 $" IFNULL((select SUM(smt.qty) from smtransactiondetails smt where date_format(smt.lastInsetedDateTime, '%Y-%m-%d') BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}' and  smt.fromActorType = {(int)CMMS.SM_Actor_Types.Vendor}  and smt.assetItemID = sm_trans.assetItemID and smt.toActorType ={(int)CMMS.SM_Actor_Types.Store} and smt.PlantId in (sm_trans.facilityID) ),0) as Opening," +
                 $"  IFNULL((select SUM(smt.qty) from smtransactiondetails smt where date_format(smt.lastInsetedDateTime, '%Y-%m-%d') " +
                 $" BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}' and  smt.fromActorType = {(int)CMMS.SM_Actor_Types.Vendor}  and smt.assetItemID = sm_trans.assetItemID and smt.toActorType ={(int)CMMS.SM_Actor_Types.Store} and smt.PlantId in (sm_trans.facilityID) ),0) as inward, " +
                 $"   IFNULL((select SUM(smt1.qty) from smtransactiondetails smt1  where date_format(smt1.lastInsetedDateTime, '%Y-%m-%d') " +
                 $" BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}'  and smt1.assetItemID = sm_trans.assetItemID  and smt1.fromActorType IN ({(int)CMMS.SM_Actor_Types.PM_Task},{(int)CMMS.SM_Actor_Types.JobCard},{(int)CMMS.SM_Actor_Types.Engineer}) and smt1.toActorType ={(int)CMMS.SM_Actor_Types.Inventory} and smt1.PlantId in (sm_trans.facilityID)),0) as outward  " +
-     $" FROM smtransition as sm_trans " +
-     $" JOIN smassetmasters as a_master ON a_master.ID = sm_trans.assetItemID " +
-     $" LEFT JOIN facilities fc ON fc.id = sm_trans.facilityID " +
-     $" Left join smassettypes AST on AST.id = a_master.asset_type_ID " +
-     $"  left join smitemcategory smc on smc.ID = a_master.item_category_ID " +
-     $" where sm_trans.actorType = {(int)CMMS.SM_Actor_Types.Store} and " +
-     $" sm_trans.actorID = sm_trans.facilityID   group by a_master.asset_code) a GROUP BY facilityName;";
+                $" FROM smtransition as sm_trans " +
+                $" JOIN smassetmasters as a_master ON a_master.ID = sm_trans.assetItemID " +
+                $" LEFT JOIN facilities fc ON fc.id = sm_trans.facilityID " +
+                $" Left join smassettypes AST on AST.id = a_master.asset_type_ID " +
+                $"  left join smitemcategory smc on smc.ID = a_master.item_category_ID " +
+                $" where sm_trans.actorType = {(int)CMMS.SM_Actor_Types.Store} and " +
+                $" sm_trans.actorID = sm_trans.facilityID   group by a_master.asset_code) a GROUP BY facilityName;";
 
             List<CMPlantStockOpening> Plant_Stock_Opening_Details_Reader = await Context.GetData<CMPlantStockOpening>(Plant_Stock_Opening_Details_query).ConfigureAwait(false);
             List<CMSMConsumptionByGoods> result = new List<CMSMConsumptionByGoods>();
@@ -2072,8 +2090,6 @@ namespace CMMSAPIs.Repositories.Masters
                 category_item.value = item.balance;
                 result.Add(category_item);
             }
-
-
 
             return result;
         }

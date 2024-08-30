@@ -314,7 +314,6 @@ namespace CMMSAPIs.Models.SM
         public string remarks { get; set; }
         public int is_splited { get; set; }
         public int is_mrs_return { get; set; }
-
         public string request_updated_by_name { get; set; }
         public int updated_by_emp_ID { get; set; }
         public string request_rejected_by_name { get; set; }
@@ -324,7 +323,14 @@ namespace CMMSAPIs.Models.SM
         public int issue_approved_by_emp_ID { get; set; }
         public string issue_rejected_by_name { get; set; }
         public int issue_rejected_by_emp_ID { get; set; }
-
+        public string updated_by_emp { get; set; }
+        public string rejected_by_emp { get; set; }
+        public string issue_approved_by_emp { get; set; }
+        public string issue_rejected_by_emp { get; set; }
+        public int UpdatedByEmpID { get; set; }
+        public int RejectedByEmpID { get; set; }
+        public int IssueApprovedByEmpID { get; set; }
+        public int IssueRejectedByEmpID { get; set; }
         public List<CMMRSItems> CMMRSItems { get; set; }
     }
 

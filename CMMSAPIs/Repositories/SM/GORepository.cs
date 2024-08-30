@@ -75,16 +75,16 @@ namespace CMMSAPIs.Repositories
             switch (status)
             {
                 case CMMS.CMMS_Status.GO_DRAFT:
-                    retValue = $"Goods order{Id} Drafted";
+                    retValue = $" Goods order{Id} Drafted";
                     break;
                 case CMMS.CMMS_Status.GO_SUBMITTED:
                     retValue = $"Goods order{Id} Submitted and Waiting for Appoval";
                     break;
-                case CMMS.CMMS_Status.GO_DELETED:
-                    retValue = $"Goods order{Id} deleted";
-                    break;
                 case CMMS.CMMS_Status.GO_CLOSED:
                     retValue = $"Goods order{Id} Closed";
+                    break;
+                case CMMS.CMMS_Status.GO_DELETED:
+                    retValue = $"Goods order{Id} deleted";
                     break;
                 case CMMS.CMMS_Status.GO_REJECTED:
                     retValue = $"Goods order{Id} rejected";
@@ -259,10 +259,9 @@ namespace CMMSAPIs.Repositories
                     int id = Convert.ToInt32(dtInsertPO.Rows[0][0]);
                 }
             }
-
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_GO, goid, 0, 0, request.remarks, CMMS.CMMS_Status.GO_DRAFT);
-            CMGOMaster _GOList = await GetGODetailsByID(request.id, facilitytimeZone);
-            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_GO, CMMS.CMMS_Status.GO_DRAFT, new[] { userID }, _GOList);
+            CMGOMaster _GOList = await GetGODetailsByID(goid, facilitytimeZone);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_GO, CMMS.CMMS_Status.GO_SUBMITTED, new[] { userID }, _GOList);
             CMDefaultResponse response = new CMDefaultResponse(goid, CMMS.RETRUNSTATUS.SUCCESS, "Goods order created successfully.");
             return response;
         }
@@ -478,7 +477,7 @@ namespace CMMSAPIs.Repositories
             // Entry in TransactionDetails
 
 
-            string myQuery = $"SELECT   ID ,facilityID ,vendorID ,receiverID ,generated_by ,purchaseDate ,orderDate ,challan_no ,po_no ,\r\n     " +
+            /*string myQuery = $"SELECT   ID ,facilityID ,vendorID ,receiverID ,generated_by ,purchaseDate ,orderDate ,challan_no ,po_no ,\r\n     " +
                 $" freight ,transport ,no_pkg_received ,lr_no ,\r\n      " +
                 $"condition_pkg_received ,vehicle_no ,gir_no ,challan_date ,po_date ,\r\n      " +
                 $"job_ref ,amount ,currency as currencyID,status ,\r\n     " +
@@ -486,7 +485,7 @@ namespace CMMSAPIs.Repositories
                 $"  approved_by ,approvedOn ,withdraw_by ,withdrawOn ,reorder_flag ,\r\n     " +
                 $" order_type ,remarks ,updated_by ,updatedOn ,rejected_by ,rejectedOn" +
                 $" \r\nFROM smgoodsorder where id = {request.id}";
-            List<CMGoodsOrderList> _List = await Context.GetData<CMGoodsOrderList>(myQuery).ConfigureAwait(false);
+            List<CMGoodsOrderList> _List = await Context.GetData<CMGoodsOrderList>(myQuery).ConfigureAwait(false);*/
             //CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_GO, CMMS.CMMS_Status.SM_PO_CLOSED_APPROVED, _List[0]);
             // Entry for stock items
 
@@ -666,9 +665,6 @@ namespace CMMSAPIs.Repositories
 
             CMGOMaster _GOList = await GetGODetailsByID(request.id, facilitytimeZone);
             await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_GO, CMMS.CMMS_Status.GO_REJECTED, new[] { userId }, _GOList);
-
-
-
             /*string myQuery = $"SELECT   ID ,facilityID ,vendorID ,receiverID ,generated_by ,purchaseDate ,orderDate ,challan_no ,po_no ,\r\n     " +
        $" freight ,transport ,no_pkg_received ,lr_no ,\r\n      " +
        $"condition_pkg_received ,vehicle_no ,gir_no ,challan_date ,po_date ,\r\n      " +
@@ -882,22 +878,9 @@ namespace CMMSAPIs.Repositories
         {
             try
             {
-                // Start a transaction.
-
-                // Get the purchase ID if it is not provided.
+                
                 int purchaseId = 0;
-                //if (request.purchaseID == null || request.purchaseID == 0)
-                //    {
-                //    purchaseId = await PurchaseOrderAsync(request.facilityId, request.vendor, request.empId, request.purchaseDate, request.generateFlag);
-                //    if (purchaseId == 0)
-                //    {
-                //        throw new Exception("Purchase ID not found");
-                //    }
-                //}
-                //else
-                //{
-                //    purchaseId = request.purchaseID;
-                //}
+                
 
                 purchaseId = request.purchaseID;
 
@@ -1005,10 +988,8 @@ namespace CMMSAPIs.Repositories
                     historyRemark = request.remarks;
                 }
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_GO, purchaseId, 0, 0, historyRemark, CMMS.CMMS_Status.GO_SUBMITTED);
-
                 CMGOMaster _GOList = await GetGODetailsByID(request.purchaseID, facilitytimeZone);
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_GO, CMMS.CMMS_Status.GO_SUBMITTED, new[] { userId }, _GOList);
-
                 CMDefaultResponse response = new CMDefaultResponse(purchaseId, CMMS.RETRUNSTATUS.SUCCESS, "Goods order submitted successfully.");
                 return response;
             }
@@ -1083,33 +1064,50 @@ namespace CMMSAPIs.Repositories
         }
         public async Task<CMGOMaster> GetGODetailsByID(int id, string facilitytimeZone)
         {
-            string query = "SELECT fc.name as facilityName,pod.ID as podID, facilityid as       facility_id,pod.spare_status,pod.remarks,sai.orderflag,sam.asset_type_ID," +
-        "pod.purchaseID,pod.assetItemID,sai.serial_number,sai.location_ID,pod.cost,pod.ordered_qty,\r\n bl.name as vendor_name,\r\n     " +
-        " po.purchaseDate,sam.asset_type_ID,sam.asset_name,po.receiverID,\r\n        " +
-        "po.vendorID,po.status,sam.asset_code,t1.asset_type,t2.cat_name,pod.received_qty,pod.damaged_qty,pod.accepted_qty," +
-        "f1.file_path,f1.Asset_master_id,sm.decimal_status,sm.spare_multi_selection,po.generated_by,pod.order_type as asset_type_ID_OrderDetails, receive_later, " +
-        "added_to_store,   \r\n      " +
-        "  po.challan_no, po.po_no, po.freight, po.transport, po.no_pkg_received, po.lr_no, po.condition_pkg_received, " +
-        "po.vehicle_no, po.gir_no, po.challan_date, po.job_ref, po.amount,  po.currency as currencyID , curr.name as currency , stt.asset_type as asset_type_Name,  po_no, po_date, requested_qty,lost_qty, ordered_qty\r\n    ,paid_by_ID, smpaidby.paid_by paid_by_name , case when po.received_on = '0000-00-00 00:00:00' then null else po.received_on end as receivedAt,sam.asset_type_ID,sam.asset_code,sam.asset_name" +
-        " , sic.cat_name,smat.asset_type, pod.is_splited, pod.sr_no, requestOrderId, requestOrderItemID, freight_value,inspection_report , " +
-        " (select storage_rack_no from smrequestreorder where requestID=" + id + " and assetItemID = pod.assetItemID limit 1) storage_rack_no," +
-        " (select storage_row_no from smrequestreorder where requestID=" + id + " and assetItemID = pod.assetItemID limit 1) storage_row_no," +
-        " (select storage_column_no from smrequestreorder where requestID=" + id + " and assetItemID = pod.assetItemID limit 1) storage_column_no" +
-        " FROM smgoodsorderdetails pod\r\n        LEFT JOIN smgoodsorder po ON po.ID = pod.purchaseID\r\n     " +
-        "   LEFT JOIN smassetitems sai ON sai.ID = pod.assetItemID\r\n       " +
-        " LEFT JOIN smassetmasters sam ON  sam.ID = pod.assetItemID\r\n      " +
-        "  LEFT JOIN smunitmeasurement sm ON sm.ID = sam.unit_of_measurement\r\n    " +
-        "    LEFT JOIN (\r\n            SELECT file.file_path,file.Asset_master_id as Asset_master_id FROM smassetmasterfiles file \r\n " +
-        "           LEFT join smassetmasters sam on file.Asset_master_id =  sam.id )\r\n        " +
-        "    f1 ON f1.Asset_master_id = sam.id\r\n        LEFT JOIN (\r\n         " +
-        "   SELECT sat.asset_type,s1.ID as master_ID FROM smassettypes sat\r\n      " +
-        "      LEFT JOIN smassetmasters s1 ON s1.asset_type_ID = sat.ID\r\n        )  t1 ON t1.master_ID = sam.ID\r\n     " +
-        "   LEFT JOIN (\r\n            SELECT sic.cat_name,s2.ID as master_ID FROM smitemcategory sic\r\n          " +
-        "  LEFT JOIN smassetmasters s2 ON s2.item_category_ID = sic.ID\r\n        )  t2 ON t2.master_ID = sam.ID\r\n " +
-        "       LEFT JOIN facilities fc ON fc.id = po.facilityID\r\nLEFT JOIN users as vendor on vendor.id=po.vendorID " +
-        "       LEFT JOIN business bl ON bl.id = po.vendorID left join smassettypes stt on stt.ID = pod.order_type LEFT JOIN currency curr ON curr.id = po.currency LEFT JOIN smpaidby as smpaidby on smpaidby.ID = pod.paid_by_ID " +
-        " LEFT JOIN smitemcategory sic ON sic.ID = sam.item_category_ID\r\n    LEFT JOIN smassettypes smat ON smat.ID = sam.asset_type_ID " +
-        " WHERE po.ID = " + id + " and pod.is_splited = 1 /*GROUP BY pod.ID*/";
+            string query = "SELECT fc.name as facilityName, pod.ID as podID, facilityid as facility_id, pod.spare_status, pod.remarks, sai.orderflag, sam.asset_type_ID, " +
+                "pod.purchaseID, pod.assetItemID, sai.serial_number, sai.location_ID, pod.cost, pod.ordered_qty, bl.name as vendor_name, " +
+                "po.purchaseDate, sam.asset_type_ID, sam.asset_name, po.receiverID, po.vendorID, po.status, sam.asset_code, t1.asset_type, t2.cat_name, " +
+                "pod.received_qty, pod.damaged_qty, pod.accepted_qty, f1.file_path, f1.Asset_master_id, sm.decimal_status, sm.spare_multi_selection, po.generated_by, " +
+                "pod.order_type as asset_type_ID_OrderDetails, receive_later, added_to_store, po.challan_no, po.po_no, po.freight, po.transport, po.no_pkg_received, " +
+                "po.lr_no, po.condition_pkg_received, po.vehicle_no, po.gir_no, po.challan_date, po.job_ref, po.amount, po.currency as currencyID, curr.name as currency, " +
+                "stt.asset_type as asset_type_Name, po_no, po_date, requested_qty, lost_qty, ordered_qty, paid_by_ID, smpaidby.paid_by as paid_by_name, " +
+                "CASE WHEN po.received_on = '0000-00-00 00:00:00' THEN NULL ELSE po.received_on END as receivedAt, sam.asset_type_ID, sam.asset_code, sam.asset_name, " +
+                "sic.cat_name, smat.asset_type, pod.is_splited, pod.sr_no, requestOrderId, requestOrderItemID, freight_value, inspection_report, " +
+                "(SELECT storage_rack_no FROM smrequestreorder WHERE requestID=" + id + " AND assetItemID = pod.assetItemID LIMIT 1) as storage_rack_no, " +
+                "(SELECT storage_row_no FROM smrequestreorder WHERE requestID=" + id + " AND assetItemID = pod.assetItemID LIMIT 1) as storage_row_no, " +
+                "(SELECT storage_column_no FROM smrequestreorder WHERE requestID=" + id + " AND assetItemID = pod.assetItemID LIMIT 1) as storage_column_no, " +
+                "CONCAT(submitUser.firstname, ' ', submitUser.lastname) as submitted_by_name, po.orderDate, " +
+                "CONCAT(closeUser.firstName, ' ', closeUser.lastName) as closed_by_name, po.withdrawOn, " +
+                "CONCAT(rejectUser.firstName, ' ', rejectUser.lastName) as rejected_by_name, po.rejectedOn , "+
+                "CONCAT(approveUser.firstName, ' ', approveUser.lastName) as approved_by_name, po.approvedOn, " +
+                "CONCAT(receiveSubmitUser.firstName, ' ', receiveSubmitUser.lastName) as receive_submit_by_name, po.updatedOn, " +
+                "CONCAT(receiveRejectUser.firstName, ' ', receiveRejectUser.lastName) as receive_rejected_by_name , po.receive_rejected_at, " +
+                "CONCAT(receiveApproveUser.firstName, ' ', receiveApproveUser.lastName) as receive_approved_by_name, po.receive_approved_at " +
+                "FROM smgoodsorderdetails pod " +
+                "LEFT JOIN smgoodsorder po ON po.ID = pod.purchaseID " +
+                "LEFT JOIN smassetitems sai ON sai.ID = pod.assetItemID " +
+                "LEFT JOIN smassetmasters sam ON sam.ID = pod.assetItemID " +
+                "LEFT JOIN smunitmeasurement sm ON sm.ID = sam.unit_of_measurement " +
+                "LEFT JOIN (SELECT file.file_path, file.Asset_master_id FROM smassetmasterfiles file LEFT JOIN smassetmasters sam ON file.Asset_master_id = sam.id) f1 ON f1.Asset_master_id = sam.id " +
+                "LEFT JOIN (SELECT sat.asset_type, s1.ID as master_ID FROM smassettypes sat LEFT JOIN smassetmasters s1 ON s1.asset_type_ID = sat.ID) t1 ON t1.master_ID = sam.ID " +
+                "LEFT JOIN (SELECT sic.cat_name, s2.ID as master_ID FROM smitemcategory sic LEFT JOIN smassetmasters s2 ON s2.item_category_ID = sic.ID) t2 ON t2.master_ID = sam.ID " +
+                "LEFT JOIN facilities fc ON fc.id = po.facilityID " +
+                "LEFT JOIN users as vendor ON vendor.id = po.vendorID " +
+                "LEFT JOIN business bl ON bl.id = po.vendorID " +
+                "LEFT JOIN smassettypes stt ON stt.ID = pod.order_type " +
+                "LEFT JOIN currency curr ON curr.id = po.currency " +
+                "LEFT JOIN smpaidby as smpaidby ON smpaidby.ID = pod.paid_by_ID " +
+                "LEFT JOIN smitemcategory sic ON sic.ID = sam.item_category_ID " +
+                "LEFT JOIN smassettypes smat ON smat.ID = sam.asset_type_ID " +
+                "LEFT JOIN users submitUser ON submitUser.id = po.generated_by " +
+                "LEFT JOIN users closeUser ON closeUser.id = po.withdraw_by " +
+                "LEFT JOIN users rejectUser ON rejectUser.id = po.rejected_by " +
+                "LEFT JOIN users approveUser ON approveUser.id = po.approved_by " +
+                "LEFT JOIN users receiveSubmitUser ON receiveSubmitUser.id = po.updated_by " +
+                "LEFT JOIN users receiveRejectUser ON receiveRejectUser.id = po.receive_rejected_by_id " +
+                "LEFT JOIN users receiveApproveUser ON receiveApproveUser.id = po.receive_approved_by_id " +
+                "WHERE po.ID =" + id + " and pod.is_splited = 1 /*GROUP BY pod.ID*/";
+
             List<CMGoodsOrderList> _List = await Context.GetData<CMGoodsOrderList>(query).ConfigureAwait(false);
 
             CMGOMaster _MasterList = _List.Select(p => new CMGOMaster
@@ -1140,7 +1138,23 @@ namespace CMMSAPIs.Repositories
                 purchaseDate = p.purchaseDate,
                 location_ID = p.location_ID,
                 freight_value = p.freight_value,
-                inspection_report = p.inspection_report
+                inspection_report = p.inspection_report,
+                approved_by_name = p.approvedBy,
+                receive_rejected_by_name = p.receive_rejected_by_name,
+                drafted_by_name = p.drafted_by_name,
+                closed_by_name = p.closed_by_name,
+                receive_approved_by_name = p.receive_approved_by_name,
+                rejected_by_name = p.rejected_by_name,
+                receive_submitted_by_name = p.receive_submit_by_name,
+                submitted_by_name = p.submitted_by_name,
+                rejected_at = p.rejectedOn,
+                submitted_at = p.orderDate,
+                closed_at = p.withdrawOn,
+                approved_at = p.approvedOn,
+                receive_submitted_at = p.updatedOn,
+                receive_rejected_at = p.receive_rejected_at,
+                receive_approved_at = p.receive_approved_at
+
 
             }).FirstOrDefault();
             if (_List.Count > 0)
@@ -1288,7 +1302,7 @@ namespace CMMSAPIs.Repositories
         }
 
 
-        internal async Task<CMDefaultResponse> UpdateGOReceive(CMGoodsOrderList request, int userID)
+        internal async Task<CMDefaultResponse> UpdateGOReceive(CMGoodsOrderList request, int userID, string facilitytimeZone)
         {
             string OrderQuery = "";
             string received_date = (request.receivedAt == null) ? "0001-01-01 00:00:00" : ((DateTime)request.receivedAt).ToString("yyyy-MM-dd HH:mm:ss");
@@ -1334,6 +1348,8 @@ namespace CMMSAPIs.Repositories
                 // Execute the query
                 var result = await Context.ExecuteNonQry<int>(insertQuery);
             }
+            CMGOMaster _GOList = await GetGODetailsByID(request.id, facilitytimeZone);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_GO, CMMS.CMMS_Status.GO_RECEIVED_SUBMITTED, new[] { userID }, _GOList);
 
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Goods order updated successfully.");
             return response;
@@ -1353,7 +1369,7 @@ namespace CMMSAPIs.Repositories
                 throw new ArgumentException("Invalid argument id<" + request.id + ">");
             }
 
-            string UpdatesqlQ = $" UPDATE smgoodsorder SET approved_by = {userId}, status = {(int)CMMS.CMMS_Status.GO_RECEIVED_APPROVED}, remarks = '{request.comment}',approvedOn = '{DateTime.Now.ToString("yyyy-MM-dd")}' WHERE ID = {request.id}";
+            string UpdatesqlQ = $" UPDATE smgoodsorder SET receive_approved_by_id = {userId}, status = {(int)CMMS.CMMS_Status.GO_RECEIVED_APPROVED}, remarks = '{request.comment}',receive_approved_at = '{DateTime.Now.ToString("yyyy-MM-dd")}' WHERE ID = {request.id}";
             int reject_id = await Context.ExecuteNonQry<int>(UpdatesqlQ).ConfigureAwait(false);
 
             retCode = CMMS.RETRUNSTATUS.SUCCESS;
@@ -1434,16 +1450,7 @@ namespace CMMSAPIs.Repositories
             //        }
             //    }
             //}
-            string myQuery = $"SELECT   ID ,facilityID ,vendorID ,receiverID ,generated_by ,purchaseDate ,orderDate ,challan_no ,po_no ,\r\n     " +
-                $" freight ,transport ,no_pkg_received ,lr_no ,\r\n      " +
-                $"condition_pkg_received ,vehicle_no ,gir_no ,challan_date ,po_date ,\r\n      " +
-                $"job_ref ,amount ,currency as currencyID,status ,\r\n     " +
-                $" lastModifiedDate ,generate_flag ,s2s_generated_by ,case when received_on = '0000-00-00 00:00:00' then null else received_on end as received_on ,invoice_copy ,issued_by ,issued_on ,\r\n    " +
-                $"  approved_by ,approvedOn ,withdraw_by ,withdrawOn ,reorder_flag ,\r\n     " +
-                $" order_type ,remarks ,updated_by ,updatedOn ,rejected_by ,rejectedOn" +
-                $" \r\nFROM smgoodsorder where id = {request.id}";
-            List<CMGoodsOrderList> _List = await Context.GetData<CMGoodsOrderList>(myQuery).ConfigureAwait(false);
-            //CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_GO, CMMS.CMMS_Status.SM_PO_CLOSED_APPROVED, _List[0]);
+            
             string historyRemark = "";
             if (request.comment == null || request.comment == "")
             {
@@ -1471,8 +1478,8 @@ namespace CMMSAPIs.Repositories
 
 
             string approveQuery = $"Update smgoodsorder set status = {(int)CMMS.CMMS_Status.GO_RECEIVED_REJECTED} , remarks = '{request.comment}' , " +
-                $" rejected_by = {userId}, rejectedOn = '{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}'" +
-                $" where id = {request.id}";
+                $" receive_rejected_by_id = {userId}, receive_rejected_at = '{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}'" +
+                $" where id = {request.id}"; 
             int reject_id = await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
 
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
@@ -1491,21 +1498,22 @@ namespace CMMSAPIs.Repositories
                 historyRemark = request.comment;
             }
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_GO, request.id, 0, 0, historyRemark, CMMS.CMMS_Status.GO_RECEIVED_REJECTED);
-
-            CMGoodsOrderList _GOList = await GetGOItemByID(request.id, facilitytimeZone);
+            CMGOMaster _GOList = await GetGODetailsByID(request.id, facilitytimeZone);
             await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_GO, CMMS.CMMS_Status.GO_RECEIVED_REJECTED, new[] { userId }, _GOList);
 
 
-            string myQuery = $"SELECT   ID ,facilityID ,vendorID ,receiverID ,generated_by ,purchaseDate ,orderDate ,challan_no ,po_no ,\r\n     " +
-       $" freight ,transport ,no_pkg_received ,lr_no ,\r\n      " +
-       $"condition_pkg_received ,vehicle_no ,gir_no ,challan_date ,po_date ,\r\n      " +
-       $"job_ref ,amount ,currency as currencyID,status ,\r\n     " +
-       $" lastModifiedDate ,generate_flag ,s2s_generated_by ,received_on ,invoice_copy ,issued_by ,issued_on ,\r\n    " +
-       $"  approved_by ,approvedOn ,withdraw_by ,withdrawOn ,reorder_flag ,\r\n     " +
-       $" order_type ,remarks ,updated_by ,updatedOn ,rejected_by ,rejectedOn" +
-       $" \r\nFROM smgoodsorder where id = {request.id}";
-            List<CMGoodsOrderList> _WCList = await Context.GetData<CMGoodsOrderList>(myQuery).ConfigureAwait(false);
-            //CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_GO, CMMS.CMMS_Status.SM_PO_CLOSED_REJECTED, _WCList[0]);
+
+
+              /*string myQuery = $"SELECT   ID ,facilityID ,vendorID ,receiverID ,generated_by ,purchaseDate ,orderDate ,challan_no ,po_no ,\r\n     " +
+         $" freight ,transport ,no_pkg_received ,lr_no ,\r\n      " +
+         $"condition_pkg_received ,vehicle_no ,gir_no ,challan_date ,po_date ,\r\n      " +
+         $"job_ref ,amount ,currency as currencyID,status ,\r\n     " +
+         $" lastModifiedDate ,generate_flag ,s2s_generated_by ,received_on ,invoice_copy ,issued_by ,issued_on ,\r\n    " +
+         $"  approved_by ,approvedOn ,withdraw_by ,withdrawOn ,reorder_flag ,\r\n     " +
+         $" order_type ,remarks ,updated_by ,updatedOn ,rejected_by ,rejectedOn" +
+         $" \r\nFROM smgoodsorder where id = {request.id}";
+              List<CMGoodsOrderList> _WCList = await Context.GetData<CMGoodsOrderList>(myQuery).ConfigureAwait(false);
+              await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_GO, CMMS.CMMS_Status.GO_RECEIVED_REJECTED,new[] { userId }, _WCList);*/
 
 
               CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Goods order receive {request.id} rejected successfully.");

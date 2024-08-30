@@ -80,7 +80,8 @@ namespace CMMSAPIs.Models.Masters
         public List<CMSMConsumptionByGoods> StockConsumptionBySites { get; set; }
         public List<CMSMConsumptionByGoods> StockAvailbleByGoods { get; set; }
         public List<CMSMConsumptionByGoods> StockAvailbleBySites { get; set; }
-    
+        public List<CMWATERUESD> WaterUsedTotal { get; set; }
+
     }
 
     public class CMDashboadItemList
@@ -126,6 +127,13 @@ namespace CMMSAPIs.Models.Masters
         public int total_amount { get; set; }
         public DateTime? grn_date { get; set; }
         public decimal grn_qty { get; set; }
+        public string MC_Type { get; set; }
+
+        public DateTime End_Date_done { get; set; }
+        public dynamic TotalWaterUsed { get; set; }
+        public dynamic plan_days { get; set; }
+        public dynamic no_of_cleaned { get; set; }
+        public dynamic Scheduled { get; set; }
     }
     public class CMROLE
     {
@@ -136,5 +144,13 @@ namespace CMMSAPIs.Models.Masters
     {
         public string key { get; set; }
         public decimal value { get; set; }
+    }
+    public class CMWATERUESD
+    {
+        public string site_name { get; set; }
+        public dynamic TotalWaterUsed { get; set; }
+        public dynamic plan_days { get; set; }
+        public dynamic no_of_cleaned { get; set; }
+
     }
 }

@@ -1,5 +1,4 @@
 using CMMSAPIs.Helper;
-using CMMSAPIs.Models.Masters;
 using CMMSAPIs.Models.Users;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Utils;
@@ -52,7 +51,7 @@ namespace CMMSAPIs.Repositories.Users
             string roleQry = $"SELECT id, name FROM UserRoles ";
             if (role_id > 0)
             {
-                roleQry += $"WHERE id = {role_id}";
+                roleQry += $"WHERE id = {role_id} and status = 1";
             }
             else
             {
@@ -353,7 +352,7 @@ namespace CMMSAPIs.Repositories.Users
 
                         // Insert the new setting
                         List<string> role_access = new List<string>();
-                     
+
                         foreach (var access in request.notification_list)
                         {
                             role_access.Add($"({role_id}, {access.notification_id}, {access.default_flag}, {access.can_change}, " +

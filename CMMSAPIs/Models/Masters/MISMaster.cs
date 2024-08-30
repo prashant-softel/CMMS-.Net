@@ -826,5 +826,19 @@ namespace CMMSAPIs.Models.Masters
         public int UpdatedBy { get; set; }
         public DateTime UpdatedAt { get; set; }
     }
+    public class CumalativeReport
+    {
+        public string Site_name { get; set; }
+        public dynamic JobsCreated { get; set; }
+
+        public dynamic JobsClosed { get; set; }
+        public dynamic JobsCancelled { get; set; }
+        public dynamic JobsNotStarted { get; set; }
+        public dynamic JobsOngoing { get; set; }
+        public dynamic JobsClosedOnTime { get; set; }
+        public dynamic JobsClosedWithExtension { get; set; }
+        public dynamic JobClosedOnTimeCreate { get; set; }
+
+    }
 }
 

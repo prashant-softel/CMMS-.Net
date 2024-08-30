@@ -24,7 +24,6 @@ namespace CMMSAPIs.Models.Inventory
         public string serialNumber { get; set; }
         public int specialTool { get; set; }
         public int warrantyId { get; set; }
-        public dynamic calibrationDueDate { get; set; }
         public string status { get; set; }
         public int moduleQuantity { get; set; }
         public int dccapacity { get; set; }
@@ -35,6 +34,7 @@ namespace CMMSAPIs.Models.Inventory
         public string warrantyType { get; set; }
         public string warrantyProviderName { get; set; }
         public DateTime? start_date { get; set; }
+        public DateTime? expiry_date { get; set; }
         public int warrantyTenture { get; set; }
         public string certificate_number { get; set; }
         public double cost { get; set; }
@@ -44,6 +44,8 @@ namespace CMMSAPIs.Models.Inventory
         public string purchaseCode { get; set; }
         public int calibrationReminderDays { get; set; }
         public int calibrationFrequency { get; set; }
+        public dynamic calibrationStartDate { get; set; }
+        public dynamic calibrationDueDate { get; set; }
         public DateTime? calibrationLastDate { get; set; }
         public DateTime? calibration_testing_date { get; set; }
         public string model { get; set; }

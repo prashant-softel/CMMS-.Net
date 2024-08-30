@@ -10,6 +10,7 @@ using CMMSAPIs.Models.Mails;
 using CMMSAPIs.Models.MC;
 using CMMSAPIs.Models.Permits;
 using CMMSAPIs.Models.PM;
+using CMMSAPIs.Models.SM;
 using CMMSAPIs.Models.Users;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Models.WC;
@@ -201,8 +202,6 @@ namespace CMMSAPIs.Models.Notifications
             CMDefaultResponse response = new CMDefaultResponse();
 
             List<CMUser> emailList = new List<CMUser>();
-
-            int notificationID_int = (int)notificationID;
             // emailList = GetUserByNotificationId(notificationID);
 
             string subject;
@@ -217,12 +216,16 @@ namespace CMMSAPIs.Models.Notifications
             {
                 subject = getSubject(args);
             }
+
             //string HTMLBody = getHTMLBody(args);
             string HTMLHeader = getHTMLHeader(args);
             string HTMLFooter = getHTMLFooter(args);
             string HTMLSignature = getHTMLSignature(args);
             int module_ref_id = getId(args);
+
             printBody = getHTMLBody(args);
+
+
 
             CMUserByNotificationId notification = new CMUserByNotificationId();
             notification.facility_id = facilityId;
@@ -230,6 +233,7 @@ namespace CMMSAPIs.Models.Notifications
             notification.notification_id = (int)notificationID;
             notification.user_ids = userID;
             notification.role_id = m_role;
+            notification.user_ids = userID;
 
             List<CMUser> users = new List<CMUser>();
             string notificationQry = "";
@@ -239,7 +243,7 @@ namespace CMMSAPIs.Models.Notifications
                 // UserAccessRepository obj = new UserAccessRepository(_conn);
                 if (m_notificationType == 2)
                 {
-                    users = await _userAccessRepository.GetEMUsers(notification);
+                    users = await _userAccessRepository.GetEMUsers(facilityId, m_role, (int)moduleID);
                     notificationQry = $"INSERT INTO escalationlog (moduleId, moduleRefId, moduleStatus, notifSentToId, notifSentAt) VALUES " +
                                     $"({(int)moduleID}, {module_ref_id}, {(int)notificationID}, {m_role}, '{UtilsRepository.GetUTCTime()}'); " +
                                     $"SELECT LAST_INSERT_ID(); ";
@@ -250,6 +254,8 @@ namespace CMMSAPIs.Models.Notifications
                     notificationQry = $"INSERT INTO escalationlog (moduleId, moduleRefId, moduleStatus, notifSentToId, notifSentAt) VALUES " +
                                     $"({(int)moduleID}, {module_ref_id}, {(int)notificationID}, {m_role}, '{UtilsRepository.GetUTCTime()}'); " +
                                     $"SELECT LAST_INSERT_ID(); ";
+
+
                 }
             }
             catch (Exception e)
@@ -282,18 +288,12 @@ namespace CMMSAPIs.Models.Notifications
                     emailCount++;
                 }
             }
-            if (users.Count > 0)
-            {
-                EmailTo.Add("notifications@softeltech.in");
-                notificationRecordsQry = notificationRecordsQry.Substring(0, notificationRecordsQry.Length - 1);
+           EmailTo.Add("notifications@softeltech.in");
+            if (emailCount > 0)
+            {  
+                notificationRecordsQry = notificationRecordsQry.TrimEnd(',');
+                System.Data.DataTable dt2 = await _conn.FetchData(notificationRecordsQry).ConfigureAwait(false);
             }
-            if (getDB == null)
-            {
-                getDB = new MYSQLDBHelper(_conString);
-            }
-            System.Data.DataTable dt2 = await getDB.FetchData(notificationRecordsQry).ConfigureAwait(false);
-
-
             if (print)
             {
                 response = new CMDefaultResponse(1, CMMS.RETRUNSTATUS.SUCCESS, "");
@@ -304,7 +304,6 @@ namespace CMMSAPIs.Models.Notifications
 
             }
             return response;
-
         }
 
         public static async Task<CMDefaultResponse> sendEMNotification2(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, int[] userID, int module_ref_id, int role, int delayDays)
@@ -461,7 +460,7 @@ namespace CMMSAPIs.Models.Notifications
             {
                 CMViewInventory _Inventory = (CMViewInventory)args[0];
                 notificationObj = new InventoryNotification(moduleID, notificationID, _Inventory);
-                //facilityId = _Inventory.facility_id;
+                facilityId = _Inventory.facilityId;
             }
 
             else if (moduleID == CMMS.CMMS_Modules.GRIEVANCE)
@@ -470,11 +469,11 @@ namespace CMMSAPIs.Models.Notifications
                 notificationObj = new GrievanceNotification(moduleID, notificationID, _Grievance);
                 //facilityId = _Inventory.facility_id;
             }
-            else if (moduleID == CMMS.CMMS_Modules.MC_PLAN)
+            else if (moduleID == CMMS.CMMS_Modules.SM_GO)      //GO Report
             {
-                CMMCPlan _Plan = (CMMCPlan)args[0];
-                notificationObj = new MCNotification(moduleID, notificationID, _Plan, null);
-                //facilityId = _Inventory.facility_id;
+                CMGOMaster _GO = (CMGOMaster)args[0];
+                notificationObj = new GONotification(moduleID, notificationID, _GO);
+                facilityId = _GO.facility_id;
             }
             else if (moduleID == CMMS.CMMS_Modules.MC_TASK)
             {
@@ -482,11 +481,11 @@ namespace CMMSAPIs.Models.Notifications
                 notificationObj = new MCNotification(moduleID, notificationID, null, _Task);
                 //facilityId = _Inventory.facility_id;
             }
-            else if (moduleID == CMMS.CMMS_Modules.VEGETATION_PLAN)
+            else if (moduleID == CMMS.CMMS_Modules.SM_RO)      //RO Report
             {
-                CMMCPlan _Plan = (CMMCPlan)args[0];
-                notificationObj = new VegetationNotification(moduleID, notificationID, _Plan, null);
-                //facilityId = _Inventory.facility_id;
+                CMCreateRequestOrderGET _SMRO = (CMCreateRequestOrderGET)args[0];
+                notificationObj = new SMNotification(moduleID, notificationID, _SMRO);
+                facilityId = _SMRO.facilityID;
             }
             else if (moduleID == CMMS.CMMS_Modules.VEGETATION_TASK)
             {
@@ -505,6 +504,7 @@ namespace CMMSAPIs.Models.Notifications
                 CMPMPlanDetail _Plan = (CMPMPlanDetail)args[0];
                 notificationObj = new PMNotification(moduleID, notificationID, _Plan);
                 //facilityId = _Inventory.facility_id;
+
             }
             else if (moduleID == CMMS.CMMS_Modules.PM_TASK)
             {

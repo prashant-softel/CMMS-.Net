@@ -32,13 +32,34 @@ namespace CMMSAPIs.Controllers.SM
         // First 
 
         //[Authorize]
+        /* [Route("CreateMRS")]
+         [HttpPost]
+         public async Task<IActionResult> CreateMRS(CMMRS request)
+         {
+             try
+             {
+                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                 var data = await _MRSBS.CreateMRS(request, userID);
+                 return Ok(data);
+             }
+             catch (Exception ex)
+             {
+                 _logger.LogInformation(ex.ToString());
+                 _logger.LogError(ex.ToString());
+                 ExceptionResponse item = new ExceptionResponse();
+                 item.Status = 400;
+                 item.Message = "Invalid data sent.";
+                 return Ok(item);
+             }
+         }*/
         [Route("CreateMRS")]
         [HttpPost]
-        public async Task<IActionResult> CreateMRS(CMMRS request)
+        public async Task<IActionResult> CreateMRS(CMMRS request, int facility_id)
         {
             try
             {
                 int facility_id = request.facility_ID;
+
                 var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
                 var data = await _MRSBS.CreateMRS(request, userID, facilitytimeZone);
@@ -54,7 +75,6 @@ namespace CMMSAPIs.Controllers.SM
                 return Ok(item);
             }
         }
-
 
         //[Authorize]
         [Route("updateMRS")]

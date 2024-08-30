@@ -168,14 +168,10 @@ namespace CMMSAPIs.Repositories.Users
                 List<CMUser> reportToDetails = await Context.GetData<CMUser>(reportToDetailsQry).ConfigureAwait(false);
 
 
-                //CMResposibility reponsibility2 = new CMResposibility();
-                //reponsibility2.id = 2;
-                //reponsibility2.name = "Plumber";
-                //reponsibility2.since = DateTime.Parse("12-12-2018");
-                //reponsibility2.experianceYears = 4;
+
                 user_detail[0].responsibility = await GetUserResponsibity(user_id);
 
-                //user_detail[0].responsibility.Add(reponsibility2);
+
 
                 if (reportToDetails.Count > 0)
                     user_detail[0].report_to = reportToDetails[0];
@@ -217,6 +213,13 @@ namespace CMMSAPIs.Repositories.Users
             List<int> roleIds = dtRole.GetColumn<int>("id");
             Dictionary<string, int> roles = new Dictionary<string, int>();
             roles.Merge(roleNames, roleIds);
+
+            string desigqry = "SELECT id, UPPER(designationName) as name FROM userdesignation ";
+            DataTable dgRole = await Context.FetchData(desigqry).ConfigureAwait(false);
+            List<string> Designame = dgRole.GetColumn<string>("name");
+            List<int> desigid = dgRole.GetColumn<int>("id");
+            Dictionary<string, int> Designation = new Dictionary<string, int>();
+            Designation.Merge(Designame, desigid);
 
             string countryQry = "SELECT id, UPPER(name) as name FROM countries";
             DataTable dtCountry = await Context.FetchData(countryQry).ConfigureAwait(false);
@@ -271,7 +274,8 @@ namespace CMMSAPIs.Repositories.Users
                 { "Is Employee", new Tuple<string, Type>("isEmployee", typeof(string)) },
                 { "Joining Date", new Tuple<string, Type>("joiningDate", typeof(DateTime)) },
                 { "Plant Associated", new Tuple<string, Type>("plant_name", typeof(string)) },
-                { "Report To", new Tuple<string, Type>("report_to_email", typeof(string)) }
+                { "Report To", new Tuple<string, Type>("report_to_email", typeof(string)) },
+                { "Designation", new Tuple<string, Type>("Designation", typeof(string)) }
             };
             string query1 = $"SELECT file_path FROM uploadedfiles WHERE id = {file_id};";
             DataTable dt1 = await Context.FetchData(query1).ConfigureAwait(false);
@@ -318,6 +322,7 @@ namespace CMMSAPIs.Repositories.Users
                         dt2.Columns.Add("plant_id", typeof(int));
                         dt2.Columns.Add("report_to_id", typeof(int));
                         dt2.Columns.Add("row_no", typeof(int));
+                        dt2.Columns.Add("designation_id", typeof(int));
                         for (int rN = 2; rN <= sheet.Dimension.End.Row; rN++)
                         {
                             ExcelRange row = sheet.Cells[rN, 1, rN, sheet.Dimension.End.Column];
@@ -345,16 +350,27 @@ namespace CMMSAPIs.Repositories.Users
                             }
                             newR["row_no"] = rN;
                             if (Convert.ToString(newR["user_name"]) == null || Convert.ToString(newR["user_name"]) == "")
+                            {
                                 m_errorLog.SetError($"Login ID cannot be empty. [Row: {rN}]");
+                            }
+
                             else if (!Convert.ToString(newR["user_name"]).IsEmail())
+                            {
                                 m_errorLog.SetError($"Invalid format for login ID. Should be in email address format. [Row: {rN}]");
+                            }
                             else
                             {
                                 string loginIdQuery = "SELECT loginId FROM users;";
                                 DataTable dtLogin = await Context.FetchData(loginIdQuery).ConfigureAwait(false);
-                                List<string> loginList = dtLogin.GetColumn<string>("loginId");
-                                if (loginList.Contains(newR["user_name"]))
+                                List<string> loginList1 = dtLogin.GetColumn<string>("loginId");
+                                if (loginList1.Contains(newR["user_name"]))
+                                {
                                     m_errorLog.SetError($"Login ID already exists. [Row: {rN}]");
+                                    newR.Delete();
+                                    continue;
+                                }
+
+
                             }
                             if (Convert.ToString(newR["password"]) == null || Convert.ToString(newR["password"]) == "")
                                 m_errorLog.SetError($"Password cannot be empty. [Row: {rN}]");
@@ -426,6 +442,14 @@ namespace CMMSAPIs.Repositories.Users
                             }
                             try
                             {
+                                newR["designation_id"] = Designation[Convert.ToString(newR["Designation"]).ToUpper()];
+                            }
+                            catch (KeyNotFoundException)
+                            {
+                                newR["designation_id"] = 0;
+                            }
+                            try
+                            {
                                 newR["plant_id"] = plants[Convert.ToString(newR["plant_name"]).ToUpper()];
                             }
                             catch (KeyNotFoundException)
@@ -491,56 +515,55 @@ namespace CMMSAPIs.Repositories.Users
                                 newR["isEmployee"] = $"{index}";
                             dt2.Rows.Add(newR);
                         }
-                        if (m_errorLog.GetErrorCount() == 0)
+
+                        dt2.ConvertColumnType("isEmployee", typeof(int));
+                        dt2.ConvertColumnType("zipcode", typeof(int));
+
+                        string userQry = "SELECT loginId FROM users";
+                        DataTable userDt = await Context.FetchData(userQry).ConfigureAwait(false);
+
+                        List<List<string>> loginList = new List<List<string>>() { userDt.GetColumn<string>("loginId") };
+
+                        List<DataTable> userPriority = new List<DataTable>();
+
+                        List<string> usernames = new List<string>();
+                        usernames.AddRange(userDt.GetColumn<string>("loginId"));
+                        usernames.AddRange(dt2.GetColumn<string>("user_name"));
+                        usernames.Contains("");
+                        DataRow[] filterRows = dt2.AsEnumerable()
+                                   .Where(row => !usernames.Contains(row.Field<string>("report_to_email"), StringComparison.OrdinalIgnoreCase))
+                                   .ToArray();
+                        if (filterRows.Length > 0)
                         {
-                            dt2.ConvertColumnType("isEmployee", typeof(int));
-                            dt2.ConvertColumnType("zipcode", typeof(int));
-
-                            string userQry = "SELECT loginId FROM users";
-                            DataTable userDt = await Context.FetchData(userQry).ConfigureAwait(false);
-
-                            List<List<string>> loginList = new List<List<string>>() { userDt.GetColumn<string>("loginId") };
-
-                            List<DataTable> userPriority = new List<DataTable>();
-
-                            List<string> usernames = new List<string>();
-                            usernames.AddRange(userDt.GetColumn<string>("loginId"));
-                            usernames.AddRange(dt2.GetColumn<string>("user_name"));
-                            usernames.Contains("");
-                            DataRow[] filterRows = dt2.AsEnumerable()
-                                       .Where(row => !usernames.Contains(row.Field<string>("report_to_email"), StringComparison.OrdinalIgnoreCase))
-                                       .ToArray();
-                            if (filterRows.Length > 0)
-                            {
-                                userPriority.Insert(0, filterRows.CopyToDataTable());
-                                loginList.Insert(0, userPriority[userPriority.Count - 1].GetColumn<string>("user_name"));
-                            }
-
-                            foreach (var item in loginList)
-                            {
-                                List<string> temp = item;
-                                do
-                                {
-                                    filterRows = dt2.AsEnumerable()
-                                       .Where(row => temp.Contains(row.Field<string>("report_to_email"), StringComparison.OrdinalIgnoreCase))
-                                       .ToArray();
-                                    if (filterRows.Length == 0)
-                                        continue;
-                                    userPriority.Add(filterRows.CopyToDataTable());
-                                    temp = userPriority[userPriority.Count - 1].GetColumn<string>("user_name");
-                                } while (filterRows.Length != 0);
-                            }
-                            List<int> idList = new List<int>();
-
-                            foreach (DataTable dtUsers in userPriority)
-                            {
-                                idList.AddRange((await AddUsers(dtUsers, userID)).id);
-                            }
-                            response = new CMImportFileResponse(idList, CMMS.RETRUNSTATUS.SUCCESS, null, null, $"{idList.Count} user(s) added successfully");
+                            userPriority.Insert(0, filterRows.CopyToDataTable());
+                            loginList.Insert(0, userPriority[userPriority.Count - 1].GetColumn<string>("user_name"));
                         }
+
+                        foreach (var item in loginList)
+                        {
+                            List<string> temp = item;
+                            do
+                            {
+                                filterRows = dt2.AsEnumerable()
+                                   .Where(row => temp.Contains(row.Field<string>("report_to_email"), StringComparison.OrdinalIgnoreCase))
+                                   .ToArray();
+                                if (filterRows.Length == 0)
+                                    continue;
+                                userPriority.Add(filterRows.CopyToDataTable());
+                                temp = userPriority[userPriority.Count - 1].GetColumn<string>("user_name");
+                            } while (filterRows.Length != 0);
+                        }
+                        List<int> idList = new List<int>();
+
+                        foreach (DataTable dtUsers in userPriority)
+                        {
+                            idList.AddRange((await AddUsers(dtUsers, userID)).id);
+                        }
+                        response = new CMImportFileResponse(idList, CMMS.RETRUNSTATUS.SUCCESS, null, null, $"{idList.Count} user(s) added successfully");
                     }
                 }
             }
+
             string logPath = m_errorLog.SaveAsText($"ImportLog\\ImportUsers_File{file_id}_{DateTime.UtcNow.ToString("yyyyMMdd_HHmmss")}");
             string logQry = $"UPDATE uploadedfiles SET logfile = '{logPath}' WHERE id = {file_id}";
             await Context.ExecuteNonQry<int>(logQry).ConfigureAwait(false);
@@ -755,55 +778,49 @@ namespace CMMSAPIs.Repositories.Users
                 if (dt2.Rows.Count == 0)
                     m_errorLog.SetError($"{city} is not situated in {state}, {country}. [Index: {index}]");
             }
-            if (m_errorLog.GetErrorCount() == 0)
+            // if (m_errorLog.GetErrorCount() == 0)
+            //{
+            foreach (var user in request)
+
             {
-                foreach (var user in request)
+                string myQuery = "INSERT INTO users(loginId, password, secondaryEmail, firstName, lastName, birthday, genderId, gender, bloodGroupId, bloodGroup, photoId, " +
+                                   "mobileNumber, landlineNumber, countryId, stateId, cityId, zipcode, roleId, isEmployee,companyId,designation_id, joiningDate, createdBy, createdAt, reportToId, status) " +
+                                   $"VALUES ('{user.credentials.user_name}', '{user.credentials.password}', '{user.secondaryEmail}', '{user.first_name}', '{user.last_name}', " +
+                                   $"'{((DateTime)user.DOB).ToString("yyyy-MM-dd")}', {(int)user.gender_id}, '{user.gender_id}', {user.blood_group_id}, '{CMMS.BLOOD_GROUPS[user.blood_group_id]}', " +
+                                   $"{user.photoId}, '{user.contact_no}','{user.landline_number}', {user.country_id}, {user.state_id}, {user.city_id}, {user.zipcode}, " +
+                                   $"{user.role_id}, {(user.isEmployee == null ? 0 : user.isEmployee)},{user.company_id},{user.designation_id},'{((DateTime)user.joiningDate).ToString("yyyy-MM-dd HH:mm:ss")}', " +
+                                   $"{userID}, '{UtilsRepository.GetUTCTime()}', {user.report_to_id}, 1); SELECT LAST_INSERT_ID(); ";
+
+                DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
+                int id = Convert.ToInt32(dt.Rows[0][0]);
+                /*  */
+                int? isemp = user.isEmployee;
+                string addFacility = $"INSERT INTO userfacilities(userId, facilityId, createdAt, createdBy, status,isemployee) " +
+                                        $"VALUES ({id}, {user.facilitiesid.FirstOrDefault()},'{UtilsRepository.GetUTCTime()}', {userID}, 1,{isemp});";
+                await Context.ExecuteNonQry<int>(addFacility).ConfigureAwait(false);
+
+                CMUserAccess userAccess = new CMUserAccess()
                 {
-                    string myQuery = "INSERT INTO users(loginId, password, secondaryEmail, firstName, lastName, birthday, genderId, gender, bloodGroupId, bloodGroup, photoId, " +
-                                       "mobileNumber, landlineNumber, countryId, stateId, cityId, zipcode, roleId, isEmployee,companyId,designation_id, joiningDate, createdBy, createdAt, reportToId, status) " +
-                                       $"VALUES ('{user.credentials.user_name}', '{user.credentials.password}', '{user.secondaryEmail}', '{user.first_name}', '{user.last_name}', " +
-                                       $"'{((DateTime)user.DOB).ToString("yyyy-MM-dd")}', {(int)user.gender_id}, '{user.gender_id}', {user.blood_group_id}, '{CMMS.BLOOD_GROUPS[user.blood_group_id]}', " +
-                                       $"{user.photoId}, '{user.contact_no}','{user.landline_number}', {user.country_id}, {user.state_id}, {user.city_id}, {user.zipcode}, " +
-                                       $"{user.role_id}, {(user.isEmployee == null ? 0 : user.isEmployee)},{user.company_id},{user.designation_id},'{((DateTime)user.joiningDate).ToString("yyyy-MM-dd HH:mm:ss")}', " +
-                                       $"{userID}, '{UtilsRepository.GetUTCTime()}', {user.report_to_id}, 1); SELECT LAST_INSERT_ID(); ";
-
-                    DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
-                    int id = Convert.ToInt32(dt.Rows[0][0]);
-                    /*  */
-                    int? isemp = user.isEmployee;
-                    string addFacility = $"INSERT INTO userfacilities(userId, facilityId, createdAt, createdBy, status,isemployee) " +
-                                            $"VALUES ({id}, {user.facilitiesid.FirstOrDefault()},'{UtilsRepository.GetUTCTime()}', {userID}, 1,{isemp});";
-                    await Context.ExecuteNonQry<int>(addFacility).ConfigureAwait(false);
-
-
-
-
-                    CMUserAccess userAccess = new CMUserAccess()
-                    {
-                        user_id = id,
-                        access_list = user.access_list
-                    };
-                    CMUserNotifications userNotifications = new CMUserNotifications()
-                    {
-                        user_id = id,
-                        notification_list = user.notification_list
-                    };
-                    using (var repos = new UtilsRepository(_conn))
-                    {
-                        await repos.AddHistoryLog(CMMS.CMMS_Modules.USER, id, 0, 0, "User Added", CMMS.CMMS_Status.CREATED, userID);
-                    }
-                    await SetUserAccess(userAccess, userID);
-                    await SetUserNotifications(userNotifications, userID);
-                    await SetUserResponsibility(user.user_responsibility_list, id, userID);
-                    idList.Add(id);
+                    user_id = id,
+                    access_list = user.access_list
+                };
+                CMUserNotifications userNotifications = new CMUserNotifications()
+                {
+                    user_id = id,
+                    notification_list = user.notification_list
+                };
+                using (var repos = new UtilsRepository(_conn))
+                {
+                    await repos.AddHistoryLog(CMMS.CMMS_Modules.USER, id, 0, 0, "User Added", CMMS.CMMS_Status.CREATED, userID);
                 }
-                response = new CMDefaultResponse(idList, CMMS.RETRUNSTATUS.SUCCESS, $"{idList.Count} user(s) added successfully");
+                await SetUserAccess(userAccess, userID);
+                await SetUserNotifications(userNotifications, userID);
+                await SetUserResponsibility(user.user_responsibility_list, id, userID);
+                idList.Add(id);
             }
-            else
-            {
-                response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, $"{string.Join("\r\n", m_errorLog.errorLog().ToArray())/**/}");
-            }
-            /*    */
+            response = new CMDefaultResponse(idList, CMMS.RETRUNSTATUS.SUCCESS, $"{idList.Count} user(s) added successfully");
+
+
             return response;
         }
         internal async Task<CMDefaultResponse> UpdateUser(CMUpdateUser request, int userID)
@@ -1001,7 +1018,7 @@ namespace CMMSAPIs.Repositories.Users
         internal async Task<List<CMUser>> GetUserByNotificationId(CMUserByNotificationId notification)
         {
             // Pending convert user_ids into string for where condition
-            int notification_id = (int) notification.module_id;
+            int notification_id = (int)notification.module_id;
             int facility_id = notification.facility_id;
             string user_ids_str = "";
             if (notification.user_ids != null && user_ids_str.Length > 0)
@@ -1051,7 +1068,7 @@ namespace CMMSAPIs.Repositories.Users
         {
             int id = 0;
             string qry = $"SELECT " +
-                            $"u.id, CONCAT(firstName, ' ', lastName) as full_name, loginId as user_name,DATE_FORMAT(u.createdAt,'%Y-%m-%d ') as  createdAt ,DATE_FORMAT(u.updatedAt,'%Y-%m-%d ') as updatedAt, mobileNumber as contact_no," +
+                            $"u.id, CONCAT(firstName, ' ', lastName) as full_name, loginId as user_name,DATE_FORMAT(u.createdAt,'%Y-%m-%d ') as  createdAt ,DATE_FORMAT(u.updatedAt,'%Y-%m-%d ') as updatedAt, mobileNumber as contact_no,usd.designationName as designation ," +
                             $" r.id as role_id, r.name as role_name, CASE WHEN u.status=0 THEN 'Inactive' ELSE 'Active' END AS status, photo.id AS photoId, photo.file_path AS photoPath, sign.id AS signatureId, sign.file_path AS signaturePath, " +
                             $" u.secondaryEmail as SecondaryName,u.firstName,u.lastName,u.birthday,u.gender,u.mobileNumber,u.bloodGroup,u.landlineNumber,c.name as Country ,states.name as State ,cities.name as City,u.zipcode as zipcodes,u.isEmployee as employees, u.joiningDate as joining_dates " +
                          $"FROM " +
@@ -1060,6 +1077,8 @@ namespace CMMSAPIs.Repositories.Users
                             $"UserRoles as r ON u.roleId = r.id " +
                          $"JOIN " +
                             $"UserFacilities as uf ON uf.userId = u.id " +
+                             "LEFT JOIN " +
+                            "userdesignation as usd on  usd.id = u.designation_id   " +
                          $"LEFT JOIN " +
                             $"uploadedfiles as photo ON photo.id = u.photoId " +
                          $"LEFT JOIN " +

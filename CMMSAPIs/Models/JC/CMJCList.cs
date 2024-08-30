@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CMMSAPIs.Models.Jobs;
+using System;
 using System.Collections.Generic;
 namespace CMMSAPIs.Models.JC
 {
@@ -26,6 +27,7 @@ namespace CMMSAPIs.Models.JC
         public string permit_type { get; set; }
         public string Isolation_taken { get; set; }
         public List<equipmentCatList> LstequipmentCatList { get; set; }
+        public List<CMWorkType> _WorkTypes { get; set; }
     }
 
     public class CMJCListForJob
@@ -52,4 +54,5 @@ public class equipmentCatList
 {
     public int equipmentCat_id { get; set; }
     public string equipmentCat_name { get; set; }
+    public string Equipment_name { get; set; }
 }

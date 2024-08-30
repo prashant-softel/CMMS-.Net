@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using CMMSAPIs.Helper;
+﻿using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Grievance;
-using CMMSAPIs.Models.Utils;
-using CMMSAPIs.Repositories.Utils;
+using System;
 
 namespace CMMSAPIs.Models.Notifications
 {
@@ -48,7 +43,7 @@ namespace CMMSAPIs.Models.Notifications
             return retValue;
         }
 
-         
+
         override protected string getSubject(params object[] args)
         {
 
@@ -56,7 +51,7 @@ namespace CMMSAPIs.Models.Notifications
 
             switch (m_notificationID)
             {
-                
+
                 case CMMS.CMMS_Status.Grievance_ADDED:
                     retValue += String.Format("Grievance {0} Added by {1} at {2}</p>", GrievanceObj.grievanceType, GrievanceObj.createdByName, GrievanceObj.createdAt);
                     break;
@@ -64,8 +59,9 @@ namespace CMMSAPIs.Models.Notifications
                     retValue += String.Format("Grievance {0} Updated by {1} at {2}</p>", GrievanceObj.grievanceType, GrievanceObj.updatedByName, GrievanceObj.updatedAt);
                     break;
                 case CMMS.CMMS_Status.GRIEVANCE_ONGOING:
+
                     retValue += String.Format("Grievance {0} Ongoing, created by {1} at {2}</p>", GrievanceObj.grievanceType, GrievanceObj.createdByName, GrievanceObj.createdAt);
-                     break;
+                     break;                  
                 case CMMS.CMMS_Status.Grievance_DELETED:
                     retValue += String.Format("Grievance {0} Deleted by {1} at {2}</p>", GrievanceObj.grievanceType, GrievanceObj.deletedByName, GrievanceObj.deletedAt);
                     break;
@@ -84,6 +80,7 @@ namespace CMMSAPIs.Models.Notifications
             string retValue = "";
 
             retValue = String.Format("<h3><b style='color:#31576D'>Status:</b>{0}</h3><br>", GrievanceObj.statusLong);
+
 
             retValue += String.Format("<table style='width: 50%; margin:0 auto; border-collapse: collapse ; border-spacing: 10px; ' border='1'>");
             retValue += String.Format(template, "ID" ,GrievanceObj.id);
@@ -105,13 +102,11 @@ namespace CMMSAPIs.Models.Notifications
             {
                 retValue += String.Format(template, "Closed By", GrievanceObj.closedByName);
             }
-            
-            
 
             switch (m_notificationID)
             {
 
-               
+
                 case CMMS.CMMS_Status.Grievance_ADDED:
                     retValue += String.Format(templateEnd, "Added By", GrievanceObj.createdByName);
                     break;

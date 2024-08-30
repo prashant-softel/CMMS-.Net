@@ -1,5 +1,6 @@
 ﻿using CMMSAPIs.Helper;
 using CMMSAPIs.Models.MC;
+using CMMSAPIs.Models.Notifications;
 using CMMSAPIs.Models.PM;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Utils;
@@ -8,9 +9,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
 using static CMMSAPIs.Helper.CMMS;
-using CMMSAPIs.Models.Notifications;
-using System.Numerics;
-using CMMSAPIs.Models.Users;
 
 namespace CMMSAPIs.Repositories.CleaningRepository
 {
@@ -65,8 +63,8 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             { (int)CMMS.CMMS_Status.EQUIP_CLEANED, "Cleaned" },
             { (int)CMMS.CMMS_Status.EQUIP_ABANDONED, "Abandoned" },
             { (int)CMMS.CMMS_Status.EQUIP_SCHEDULED, "Scheduled" },
-            { (int)CMMS.CMMS_Status.VEG_TASK_ABANDONED_REJECTED, "Task ABANDONED REJECTED" },
-            { (int)CMMS.CMMS_Status.VEG_TASK_ABANDONED_APPROVED, "Task ABANDONED APPROVED" },
+            { (int)CMMS.CMMS_Status.VEG_TASK_ABANDONED_REJECTED, " Abandoned Rejected" },
+            { (int)CMMS.CMMS_Status.VEG_TASK_ABANDONED_APPROVED, " Abandoned Approved" },
             { (int)CMMS.CMMS_Status.RESCHEDULED_TASK, "Rescheduled" }
 
         };
@@ -266,12 +264,12 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                     await CMMSNotification.sendNotification(CMMS.CMMS_Modules.VEGETATION_PLAN, (CMMS.CMMS_Status)status, new[] { userId }, _ViewPlanList);
 
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
-                   // response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Failed to send Vegetation Notification");
+                    // response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Failed to send Vegetation Notification");
                     Console.WriteLine($"Failed to send Vegetation Notification: {e.Message}");
                 }
-                
+
                 //var notificationResponse = await CMMSNotification.sendNotification(CMMS.CMMS_Modules.VEGETATION_PLAN, (CMMS.CMMS_Status)status, new int[] { userId }, plan);
             }
 
@@ -309,7 +307,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 CMMCPlan _ViewPlanList = await GetPlanDetails(request.id, facilitytimeZone);
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.VEGETATION_PLAN, CMMS.CMMS_Status.VEG_PLAN_APPROVED, new[] { userID }, _ViewPlanList);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 // response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Failed to send Vegetation Notification");
                 Console.WriteLine($"Failed to send Vegetation Notification: {e.Message}");
@@ -321,12 +319,12 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.MC_TASK, CMMS.CMMS_Status.VEG_TASK_APPROVED, new[] { userID }, _ViewTaskList);
             }
 
-            catch(Exception e)
+            catch (Exception e)
             {
                 // response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Failed to send Vegetation Notification");
                 Console.WriteLine($"Failed to send Vegetation Notification: {e.Message}");
             }
-            
+
 
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Plan Approved");
             return response;
@@ -339,6 +337,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
             foreach (CMMCPlan request in requests)
             {
+                int rid = request.planId;
 
                 string Query = "UPDATE cleaning_plan SET ";
                 if (request.title != null && request.title != "")
@@ -354,7 +353,13 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
                 Query += $"startDate = '{request.startDate}', ";
                 if (request.noOfCleaningDays > 0)
+                {
                     Query += $"durationDays = {request.noOfCleaningDays}, ";
+                }
+                if (request.resubmit == 1)
+                {
+                    Query += $"status = {(int)CMMS.CMMS_Status.VEG_PLAN_SUBMITTED}, ";
+                }
 
                 Query += $"updatedAt = '{UtilsRepository.GetUTCTime()}', updatedById = {userId} WHERE planId = {request.planId};";
 
@@ -373,21 +378,51 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                     {
                         int cleaningType = schedule.cleaningType;
 
-                        //if (moduleType == 2)
-                        //    cleaningType = 0;
 
+                        /*
                         scheduleQry = "insert into `cleaning_plan_schedules` (`planId`,`moduleType`,cleaningType,`plannedDay`,`createdById`,`createdAt`) VALUES ";
-                        scheduleQry += $"({request.planId},{moduleType},{request.cleaningType},{schedule.cleaningDay},'{userId}','{UtilsRepository.GetUTCTime()}');" +
-                                           $"SELECT LAST_INSERT_ID() as id ;";
+                         scheduleQry += $"({request.planId},{moduleType},{request.cleaningType},{schedule.cleaningDay},'{userId}','{UtilsRepository.GetUTCTime()}');" +
+                                            $"SELECT LAST_INSERT_ID() as id ;";
 
-                        List<CMMCSchedule> schedule_ = await Context.GetData<CMMCSchedule>(scheduleQry).ConfigureAwait(false);
-                        var scheduleId = Convert.ToInt16(schedule_[0].id.ToString());
+                         List<CMMCSchedule> schedule_ = await Context.GetData<CMMCSchedule>(scheduleQry).ConfigureAwait(false);
+                         var scheduleId = Convert.ToInt16(schedule_[0].id.ToString());*/
+                        bool check = true;
+                        int schedule_Id = 0;
+                        if (schedule.scheduleId > 0)
+                        {
+                            myQuery += $"UPDATE cleaning_plan_schedules SET updatedAt = '{UtilsRepository.GetUTCTime()}', updatedById = {userId}, plannedDay = {schedule.cleaningDay}  " +
+                                       $"WHERE  planId = {request.planId} AND scheduleId = {schedule.scheduleId};";
+
+                        }
+                        else
+                        {
+                            string myQuery1 = $"INSERT INTO cleaning_plan_schedules (planId,plannedDay,moduleType,cleaningType, updatedAt, updatedById, createdAt, createdById) " +
+                                              $"VALUES ({request.planId}, {schedule.cleaningDay},{moduleType},{request.cleaningType}, '{UtilsRepository.GetUTCTime()}', {userId}, '{UtilsRepository.GetUTCTime()}', {userId});" +
+                                              $"SELECT LAST_INSERT_ID();";
+                            DataTable dt = await Context.FetchData(myQuery1).ConfigureAwait(false);
+                            schedule_Id = Convert.ToInt32(dt.Rows[0][0]);
+                            check = false;
+                        }
+
+                        // Delete existing cleaning plan items for this scheduleId
+
+                        myQuery += $"DELETE FROM cleaning_plan_items WHERE scheduleId = {schedule.scheduleId};";
+
+                        int sc_id = 0;
+                        if (check)
+                        {
+                            sc_id = schedule.scheduleId;
+                        }
+                        else
+                        {
+                            sc_id = schedule_Id;
+                        }
 
                         if (schedule.equipments.Count > 0)
                         {
                             foreach (var equipment in schedule.equipments)
                             {
-                                equipmentQry += $"({request.planId},{moduleType},{scheduleId},{equipment.id},{schedule.cleaningDay},'{userId}','{UtilsRepository.GetUTCTime()}'),";
+                                equipmentQry += $"({request.planId},{moduleType},{sc_id},{equipment.id},{schedule.cleaningDay},'{userId}','{UtilsRepository.GetUTCTime()}'),";
                             }
 
                         }
@@ -402,44 +437,16 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                         await Context.GetData<CMMCPlan>(equipmentQry).ConfigureAwait(false);
                     }
                 }
+                //var notificationResponse = await CMMSNotification.sendNotification(CMMS.CMMS_Modules.VEGETATION_PLAN, CMMS.CMMS_Status.UPDATED, new int[] { userId });
+                if (request.resubmit == 1)
+                {
 
+                    await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.VEGETATION_PLAN, rid, 0, 0, "Plan Updated Successfully", CMMS.CMMS_Status.VEG_PLAN_SUBMITTED, userId);
 
-                /* if (request.schedules.Count > 0)
-                 {
+                    return new CMDefaultResponse(rid, CMMS.RETRUNSTATUS.SUCCESS, $"Plan Updated Successfully");
 
-                     foreach (var schedule in request.schedules)
-                     {
+                }
 
-                         if (moduleType == 2)
-                         {
-                             //(CASE WHEN { schedule.cleaningType} = 'Wet' then 1 else WHEN { schedule.cleaningType} = 'Dry' then 2 end)
-                             // if (schedule.cleaningType != 0)
-                             // cleaningType = { schedule.cleaningType},
-                             myQuery += $"UPDATE cleaning_plan_schedules SET updatedAt = '{UtilsRepository.GetUTCTime()}', updatedById = {userId} where plannedDay ={schedule.cleaningDay} and planId={request.planId};";
-                         }
-
-                         myQuery += $"Delete from cleaning_plan_items where scheduleId = {schedule.scheduleId};";
-
-                         if (schedule.equipments.Count > 0)
-                         {
-                             myQuery += $"insert into `cleaning_plan_items` (`planId`,`scheduleId`,`assetId`,`{measure}`,`plannedDay`,`updatedById`,`updatedAt`,`createdById`,`createdAt`) VALUES ";
-
-
-                             foreach (var equipment in schedule.equipments)
-                             {
-                                 myQuery += $"({request.planId},{schedule.scheduleId},{equipment.id},(select {measure} from assets where id={equipment.id}),{schedule.cleaningDay},{userId},'{UtilsRepository.GetUTCTime()}',(select createdById from cleaning_plan where planId={request.planId}),(select createdAt from cleaning_plan where planId={request.planId})),";
-                                 // if (equipment.noOfPlanDay > 0)
-                                 //myQuery += $"UPDATE cleaning_plan_items SET plannedDay ={equipment.noOfPlanDay},updatedAt = '{UtilsRepository.GetUTCTime()}', updatedBy = {userId} where assetId = {equipment.id} and scheduleId={schedule.scheduleId};";
-                             }
-                             myQuery = myQuery.Substring(0, myQuery.Length - 1);
-                             myQuery += ";";
-                             planId = request.planId;
-                         }
-
-                     }
-                     await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
-                 }
-                */
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.VEGETATION, request.planId, 0, 0, "Plan Updated", CMMS.CMMS_Status.VEG_PLAN_DRAFT, userId);
                 try
                 {
@@ -447,15 +454,12 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                     await CMMSNotification.sendNotification(CMMS.CMMS_Modules.VEGETATION_PLAN, CMMS.CMMS_Status.VEG_PLAN_UPDATED, new[] { userId }, _ViewPlanList);
                 }
 
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     // response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Failed to send Vegetation Notification");
                     Console.WriteLine($"Failed to send Vegetation Notification: {ex.Message}");
                 }
-                
-                //var notificationResponse = await CMMSNotification.sendNotification(CMMS.CMMS_Modules.VEGETATION_PLAN, CMMS.CMMS_Status.UPDATED, new int[] { userId });
             }
-
             CMDefaultResponse response = new CMDefaultResponse(planId, CMMS.RETRUNSTATUS.SUCCESS, $"Plan Updated Successfully ");
             return response;
         }
@@ -595,10 +599,10 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
             }
 
-            catch(Exception e)
+            catch (Exception e)
             {
                 // response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Failed to send Vegetation Notification");
-                
+
             }
 
 
@@ -626,7 +630,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
             }
 
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine($"Failed to send Vegetation Notification: {e.Message}");
             }
@@ -680,7 +684,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
             }
 
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine($"Failed to send Vegetation Notification: {ex.Message}");
             }
@@ -712,11 +716,11 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 CMMCExecution _ViewTaskList = await GetExecutionDetails(request.id, facilitytimeZone);
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.VEGETATION_TASK, CMMS.CMMS_Status.VEG_TASK_ABANDONED, new[] { userId }, _ViewTaskList);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine($"Failed to send Vegetation Notification: {ex.Message}");
             }
-            
+
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, request.comment);
             return response;
         }
@@ -735,13 +739,14 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 CMMCExecution _ViewTaskList = await GetExecutionDetails(scheduleId, facilitytimeZone);
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.VEGETATION_TASK, CMMS.CMMS_Status.VEG_TASK_ABANDONED, new[] { userId }, _ViewTaskList);
             }
-            catch(Exception e) {
+            catch (Exception e)
+            {
                 Console.WriteLine($"Failed to send Vegetation Notification: {e.Message}");
-            
-            }
-            
 
-            
+            }
+
+
+
             CMDefaultResponse response = new CMDefaultResponse(scheduleId, CMMS.RETRUNSTATUS.SUCCESS, $"Schedule Execution Completed");
             return response;
         }
@@ -758,11 +763,12 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 CMMCExecution _ViewTaskList = await GetExecutionDetails(request.id, facilitytimeZone);
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.VEGETATION_EXECUTION, CMMS.CMMS_Status.VEG_TASK_END_APPROVED, new[] { userID }, _ViewTaskList);
             }
-            
-            catch(Exception ex) {
+
+            catch (Exception ex)
+            {
                 Console.WriteLine($"Failed to send Vegetation Notification: {ex.Message}");
             }
-            
+
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Execution Schedule Approved");
             return response;
 
@@ -793,18 +799,11 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             }
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.VEGETATION, executionId, 0, 0, "Execution Completed", (CMMS.CMMS_Status)status, userId);
-            try
-            {
-                CMMCExecution _ViewTaskList = await GetExecutionDetails(executionId, facilitytimeZone);
-                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.VEGETATION, CMMS.CMMS_Status.VEG_TASK_COMPLETED, new[] { userId }, _ViewTaskList);
-            }
-            
-            catch(Exception ex)
-            {
-                Console.WriteLine($"Failed to send Vegetation Notification: {ex.Message}");
-            }
 
-            
+            // CMMCExecution _ViewTaskList = await GetExecutionDetails(executionId, facilitytimeZone);
+            //  await CMMSNotification.sendNotification(CMMS.CMMS_Modules.VEGETATION, CMMS.CMMS_Status.VEG_TASK_COMPLETED, new[] { userId }, _ViewTaskList);
+
+
             CMDefaultResponse response = new CMDefaultResponse(executionId, CMMS.RETRUNSTATUS.SUCCESS, $"Task Execution Completed");
             return response;
         }
@@ -854,8 +853,8 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 CMMCExecution _ViewTaskList = await GetExecutionDetails(request.id, facilitytimeZone);
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.VEGETATION_TASK, CMMS.CMMS_Status.VEG_TASK_END_APPROVED, new[] { userID }, _ViewTaskList);
             }
-            
-            catch(Exception ex)
+
+            catch (Exception ex)
             {
                 Console.WriteLine($"Failed to send Vegetation Notification: {ex.Message}");
             }
@@ -906,11 +905,11 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.VEGETATION_TASK, CMMS.CMMS_Status.VEG_TASK_STARTED, new[] { userID }, _ViewTaskList);
             }
 
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine($"Failed to send Vegetation Notification: {ex.Message}");
             }
-            
+
             return response;
         }
         internal async Task<CMDefaultResponse> AbandonExecutionVegetation(CMApproval request, int userId, string facilitytimeZone)
@@ -931,11 +930,11 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.VEGETATION_TASK, CMMS.CMMS_Status.VEG_TASK_ABANDONED, new[] { userId }, _ViewTaskList);
             }
 
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine($"Failed to send Vegetation Notification: {e.Message}");
             }
-            
+
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, request.comment);
             return response;
         }
@@ -961,11 +960,11 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.VEGETATION_TASK, CMMS.CMMS_Status.VEG_TASK_ABANDONED_REJECTED, new[] { userId }, _ViewTaskList);
             }
 
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine($"Failed to send Vegetation Notification: {e.Message}");
             }
-            
+
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, request.comment);
             return response;
         }
@@ -988,8 +987,8 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 CMMCExecution _ViewTaskList = await GetExecutionDetails(request.id, facilitytimeZone);
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.VEGETATION_TASK, CMMS.CMMS_Status.VEG_TASK_ABANDONED_APPROVED, new[] { userId }, _ViewTaskList);
             }
-            
-            catch(Exception ex)
+
+            catch (Exception ex)
             {
                 Console.WriteLine($"Failed to send Vegetation Notification: {ex.Message}");
             }
@@ -1031,18 +1030,20 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
             if (retVal > 0)
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.VEGETATION_EXECUTION, scheduleId, CMMS.CMMS_Modules.PTW, permit_id, "PTW linked to MC", CMMS.CMMS_Status.SCHEDULED_LINKED_TO_PTW, userId);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.VEGETATION_EXECUTION, scheduleId, CMMS.CMMS_Modules.PTW, permit_id, "PTW linked to VC", CMMS.CMMS_Status.SCHEDULED_LINKED_TO_PTW, userId);
+
             try
             {
                 CMMCExecution _ViewTaskList = await GetExecutionDetails(scheduleId, facilitytimeZone);
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.VEGETATION_EXECUTION, CMMS.CMMS_Status.VEGETATION_LINKED_TO_PTW, new[] { userId }, _ViewTaskList);
             }
 
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine($"Failed to send Vegetation Notification: {e.Message}");
             }
-            
+
+
             response = new CMDefaultResponse(scheduleId, CMMS.RETRUNSTATUS.SUCCESS, $"Permit {permit_id} linked to MC Schedule {scheduleId} Successfully");
 
             return response;
@@ -1064,7 +1065,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.VEGETATION_TASK, request.execution_id, 0, 0, request.comment, (CMMS.CMMS_Status)status, userID);
 
-           
+
 
             try
             {
@@ -1072,11 +1073,11 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.VEGETATION_TASK, CMMS.CMMS_Status.VEG_TASK_END_REJECTED, new[] { userID }, _ViewTaskList);
             }
 
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine($"Failed to send Vegetation Notification: {e.Message}");
             }
-            
+
             CMDefaultResponse response = new CMDefaultResponse(request.execution_id, CMMS.RETRUNSTATUS.SUCCESS, $"Execution End Rejected");
             return response;
 
@@ -1095,11 +1096,11 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.VEGETATION_TASK, CMMS.CMMS_Status.VEG_TASK_REJECTED, new[] { userID }, _ViewTaskList);
             }
 
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine($"Failed to send Vegetation Notification: {ex.Message}");
             }
-            
+
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Execution Rejected");
             return response;
         }
@@ -1145,7 +1146,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.VEGETATION_TASK, CMMS.CMMS_Status.VEG_TASK_APPROVED, new[] { userID }, _ViewTaskList);
             }
 
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine($"Failed to send Vegetation Notification: {ex.Message}");
             }
@@ -1154,11 +1155,11 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 CMMCExecution _ViewTaskList = await GetExecutionDetails(request.id, facilitytimeZone);
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.VEGETATION_TASK, CMMS.CMMS_Status.VEG_TASK_SCHEDULED, new[] { userID }, _ViewTaskList);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine($"Failed to send Vegetation Notification: {e.Message}");
             }
-            
+
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Execution Approved");
             return response;
 
@@ -1184,11 +1185,11 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 CMMCExecution _ViewTaskList = await GetExecutionDetails(request.id, facilitytimeZone);
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.VEGETATION_TASK, CMMS.CMMS_Status.VEG_TASK_END_REJECTED, new[] { userId }, _ViewTaskList);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine($"Failed to send Vegetation Notification: {e.Message}");
             }
-            
+
             CMDefaultResponse response = new CMDefaultResponse(request.schedule_id, CMMS.RETRUNSTATUS.SUCCESS, $"Execution Schedule Rejected");
             return response;
 
@@ -1233,17 +1234,32 @@ namespace CMMSAPIs.Repositories.CleaningRepository
         internal async Task<List<CMMCTaskList>> GetTaskList(int facilityId, string facilitytimeZone)
         {
             string statusOut = "CASE ";
+            //Scheduled Qnty	Actual Qnty	Deviation	Machine type	Time taken	Remarks
+            //SUM(css.moduleQuantity) as  Scheduled_Qnty,sub2.no_of_cleaned as Actual_Qnty,( SUM(css.moduleQuantity) - sub2.no_of_cleaned)  as Deviation
+            //CASE  WHEN mc.abandonedAt IS NOT NULL THEN TIMESTAMPDIFF(MINUTE, mc.startDate, mc.abandonedAt)  ELSE TIMESTAMPDIFF(MINUTE, mc.startDate, mc.endedAt)
+            //END as Time_taken , mc.reasonForAbandon as Remark
             foreach (KeyValuePair<int, string> status in StatusDictionary)
             {
                 statusOut += $"WHEN mc.status = {status.Key} THEN '{status.Value}' ";
             }
             statusOut += $"ELSE 'Invalid Status' END";
 
-            string myQuery1 = $"select mc.id as executionId ,mp.title,mc.planId,mc.status, CONCAT(createdBy.firstName, createdBy.lastName) as responsibility , mc.startDate, mc.endedAt as doneDate,mc.prevTaskDoneDate as lastDoneDate,freq.name as frequency,mc.noOfDays, {statusOut} as status_short from cleaning_execution as mc left join cleaning_plan as mp on mp.planId = mc.planId LEFT JOIN Frequency as freq on freq.id = mp.frequencyId LEFT JOIN users as createdBy ON createdBy.id = mc.assignedTo LEFT JOIN users as approvedBy ON approvedBy.id = mc.approvedByID where mc.moduleType={moduleType} ";
+            string myQuery1 = $"select mc.id as executionId ,mp.title,mc.planId,mc.status,mc.abandonedAt as Abondond_done_date," +
+                              $" CONCAT(createdBy.firstName, createdBy.lastName) as responsibility , mc.startDate, mc.endedAt as doneDate, " +
+                              $" SUM(css.area) as  Scheduled_Qnty ,sub2.no_of_cleaned as Actual_Qnty, ( SUM(css.area) - sub2.no_of_cleaned)  as Deviation , Case When mc.abandonedById >0 THEN 'yes' ELSE 'no' END as Abondend , " +
+                              $" CASE  WHEN mc.abandonedAt IS NOT NULL THEN TIMESTAMPDIFF(MINUTE, mc.abandonedAt, mc.startDate)  ELSE TIMESTAMPDIFF(MINUTE,mc.endedAt, mc.startDate) END as Time_taken ,  mc.reasonForAbandon as Remark,  " +
+                              $" mc.prevTaskDoneDate as lastDoneDate,freq.name as frequency,mc.noOfDays, {statusOut} as status_short" +
+                              $" from cleaning_execution as mc left join cleaning_plan as mp on mp.planId = mc.planId " +
+                              $" LEFT JOIN (SELECT executionId, SUM(area) AS no_of_cleaned FROM cleaning_execution_items where cleanedById>0 GROUP BY executionId) sub2 ON mc.id = sub2.executionId " +
+                              $"LEFT join cleaning_execution_items as css on css.executionId = mc.id " +
+                              $"LEFT JOIN Frequency as freq on freq.id = mp.frequencyId " +
+                              $"LEFT JOIN users as createdBy ON createdBy.id = mc.assignedTo " +
+                              $"LEFT JOIN users as approvedBy ON approvedBy.id = mc.approvedByID" +
+                              $" where mc.moduleType=2  ";
 
             if (facilityId > 0)
             {
-                myQuery1 += $" and mc.facilityId = {facilityId} ";
+                myQuery1 += $" and mc.facilityId = {facilityId} group by mc.id ";
             }
             List<CMMCTaskList> _ViewMCTaskList = await Context.GetData<CMMCTaskList>(myQuery1).ConfigureAwait(false);
             foreach (var ViewMCTaskList in _ViewMCTaskList)
@@ -1254,6 +1270,8 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                     ViewMCTaskList.startDate = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, ViewMCTaskList.startDate);
                 if (ViewMCTaskList != null && ViewMCTaskList.lastDoneDate != null)
                     ViewMCTaskList.lastDoneDate = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, ViewMCTaskList.lastDoneDate);
+                if (ViewMCTaskList != null && ViewMCTaskList.Abondond_done_date != null)
+                    ViewMCTaskList.Abondond_done_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, ViewMCTaskList.Abondond_done_date);
 
             }
             return _ViewMCTaskList;
@@ -1439,11 +1457,11 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.VEGETATION_PLAN, CMMS.CMMS_Status.VEG_PLAN_DELETED, new[] { userID }, _ViewPlanList);
             }
 
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine($"Failed to send Vegetation Notification: {e.Message}");
             }
-            
+
 
             CMDefaultResponse response = new CMDefaultResponse(planid, CMMS.RETRUNSTATUS.SUCCESS, $"Plan Deleted");
             return response;

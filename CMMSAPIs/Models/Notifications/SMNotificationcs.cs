@@ -150,32 +150,25 @@ namespace CMMSAPIs.Models.Notifications
 
             switch (m_notificationID)
             {
-
-                case CMMS.CMMS_Status.SM_RO_DRAFT:
-                    break;
                 case CMMS.CMMS_Status.SM_RO_SUBMITTED:
-                    retValue += String.Format(templateEnd, "Added By", m_SMROObj.generatedBy);
-                    break;
-                case CMMS.CMMS_Status.SM_RO_SUBMIT_REJECTED:
-                    retValue += String.Format(template, "Added By",m_SMROObj.generatedBy);
-                    retValue += String.Format(templateEnd, "Deleted By", m_SMROObj.approvedBy);
+                    retValue += "</table>";
+                    retValue += String.Format(templateEnd, "Submitted By", m_SMROObj.generatedBy);
                     break;
                 case CMMS.CMMS_Status.SM_RO_SUBMIT_APPROVED:
-                    retValue += String.Format(template, "Added By", m_SMROObj.generatedBy);
-                    retValue += String.Format(templateEnd, "Deleted By",m_SMROObj.deleted_by);
+                    retValue += String.Format(templateEnd, "Approved By", m_SMROObj.approvedBy);
+                    break;
+                case CMMS.CMMS_Status.SM_RO_SUBMIT_REJECTED:
+                    retValue += String.Format(templateEnd, "Rejected By", m_SMROObj.rejectedBy);
                     break;
                 case CMMS.CMMS_Status.SM_RO_CLOSED:
-                    retValue += String.Format(template, "Added By", m_SMROObj.generatedBy);
-                    retValue += String.Format(templateEnd, "Deleted By", m_SMROObj.deleted_by);
+                    retValue += String.Format(templateEnd, "Closed By", m_SMROObj.closed_by);
                     break;
                 case CMMS.CMMS_Status.SM_RO_DELETED:
-                    retValue += String.Format(template, "Added By", m_SMROObj.generatedBy);
                     retValue += String.Format(templateEnd, "Deleted By", m_SMROObj.deleted_by);
                     break;
-                default:
+                    default:
                     break;
             }
-
             return retValue;
         }
     }

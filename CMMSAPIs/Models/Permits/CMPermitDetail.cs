@@ -82,7 +82,9 @@ namespace CMMSAPIs.Models.Permits
         public int extendRequestby_id { get; set; }
         public string extendRequestByName { get; set; }
         public int extendRequestRejectedby_id { get; set; }
+
         public string extendRequestRejectedByName { get; set; }
+
         public DateTime? extend_at { get; set; }
         public int extendRequestApprovedby_id { get; set; }
         public string extendRequestApprovedByName { get; set; }

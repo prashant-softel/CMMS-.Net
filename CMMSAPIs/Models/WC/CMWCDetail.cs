@@ -70,7 +70,7 @@ namespace CMMSAPIs.Models.WC
         public DateTime warrantyEndDate { get; set; }
         public int claim_status { get; set; }
         public dynamic long_claim_status { get; set; }
-        public List<CMWCExternalEmail> additionalEmailEmployees { get; set; }
+        public List<CMWCinternalEmail> additionalEmailEmployees { get; set; }
         public List<CMWCExternalEmail> externalEmails { get; set; }
         public List<CMWCSupplierActions> supplierActions { get; set; }
         public List<affectedParts> affectedParts { get; set; }

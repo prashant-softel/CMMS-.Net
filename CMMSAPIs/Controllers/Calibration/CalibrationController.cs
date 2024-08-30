@@ -147,11 +147,13 @@ namespace CMMSAPIs.Controllers.Calibration
         //[Authorize]
         [Route("StartCalibration")]
         [HttpPut]
-        public async Task<IActionResult> StartCalibration(int calibration_id)
+        public async Task<IActionResult> StartCalibration(int calibration_id, int facility_id)
         {
             try
             {
-                var data = await _CalibrationBS.StartCalibration(calibration_id);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+                var data = await _CalibrationBS.StartCalibration(calibration_id, userID, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)

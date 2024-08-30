@@ -44,6 +44,7 @@ namespace CMMSAPIs.Controllers.MC
 
         [Route("GetMCTaskList")]
         [HttpGet]
+
         public async Task<IActionResult> GetMCTaskList(int facility_Id)
         {
             try
@@ -242,7 +243,9 @@ namespace CMMSAPIs.Controllers.MC
             }
             catch (Exception ex)
             {
-                throw;
+                ExceptionResponse item = new ExceptionResponse();
+                item.Message = ex.Message;
+                return Ok(item);
             }
         }
 

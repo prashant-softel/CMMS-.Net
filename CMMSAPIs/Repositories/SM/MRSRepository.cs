@@ -362,7 +362,7 @@ namespace CMMSAPIs.Repositories.SM
                     var IsSpareSelectionEnable = await getMultiSpareSelectionStatus(asset_code, asset_type_ID);
                     if (approval_required == 1)
                     {
-                        isApproval_required = true;
+                        isApproval_required = false;
                     }
 
                     if (asset_type_ID == (int)CMMS.SM_AssetTypes.Spare && request.cmmrsItems[i].requested_qty > 0)
@@ -422,14 +422,153 @@ namespace CMMSAPIs.Repositories.SM
                 CMMrsApproval approve_request = new CMMrsApproval();
                 approve_request.id = request.ID;
                 approve_request.comment = "MRS approval not required.";
-                var mrsApproved = await mrsApproval(approve_request, UserID, facilitytimeZone);
+                var mrsApproved = await mrsApproval(approve_request, UserID);
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_MRS, request.ID, 0, 0, approve_request.comment, CMMS.CMMS_Status.MRS_SUBMITTED);
+                CMMRSList _MRSList = await getMRSDetails(UserID, facilitytimeZone);
             }
                 CMMRSList _MRSList = await getMRSDetails(request.ID, facilitytimeZone);
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_MRS, CMMS.CMMS_Status.MRS_SUBMITTED, new[] { UserID }, _MRSList);
 
             return response;
         }
+        /*
+                internal async Task<CMDefaultResponse> CreateMRS(CMMRS request, int UserID)
+                {
+                    *//* isEditMode =0 for creating new MRS*//*
+
+                    // added validation for issue_qty > 0 and issue_qty < requested_qty for each item
+
+                    bool isApproval_required = false;
+
+                    for (var j = 0; j < request.cmmrsItems.Count; j++)
+                    {
+                        if (request.cmmrsItems[j].issued_qty < 0)
+                        {
+                            return new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Issued quantity should be less than 0 for asset item " + request.cmmrsItems[j].asset_item_ID + ".");
+                        }
+                    }
+
+                    request.isEditMode = 0;
+                    request.requested_by_emp_ID = UserID;
+                    bool Queryflag = false;
+                    CMDefaultResponse response = null;
+                    string flag = "MRS_REQUEST";
+                    int setAsTemplate = 0;
+                    if (request.setTemplateflag != null)
+                    {
+                        setAsTemplate = 1;
+                    }
+                    if (request.isEditMode == 1)
+                    {
+                        // update CMMRS
+
+                        var lastMRSID = request.ID;
+                        var refType = "MRSEdit";
+                        var mailSub = "CMMRS Request Updated";
+                        string updatestmt = $" START TRANSACTION; UPDATE smmrs SET facility_ID = {request.facility_ID}, requested_by_emp_ID = {request.requested_by_emp_ID}, requested_date = {DateTime.Now.ToString("yyyy-MM-dd  HH:mm")}," +
+                            $" setAsTemplate = '{request.setAsTemplate}', templateName = {request.templateName}, approval_status = {request.approval_status}, activity='{request.activity}',whereUsedType={request.whereUsedType},whereUsedRefID={request.whereUsedRefID}, remarks = '{request.remarks}' WHERE ID = {request.ID}" +
+                            $"DELETE FROM smrsitems WHERE mrs_ID =  {lastMRSID} ; COMMIT;";
+                        await Context.ExecuteNonQry<int>(updatestmt);
+
+                    }
+                    else
+                    {
+                        var refType = "MRS";
+                        var mailSub = "MRS Request";
+                        string insertStmt = $"START TRANSACTION; INSERT INTO smmrs (facility_ID,requested_by_emp_ID,requested_date," +
+                            $"status,flag,setAsTemplate,templateName, approved_by_emp_ID, approved_date,activity,whereUsedType,whereUsedRefID,remarks," +
+                            $"from_actor_type_id,from_actor_id,to_actor_type_id,to_actor_id)" +
+                            $" VALUES ({request.facility_ID},{request.requested_by_emp_ID},'{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}'" +
+                            $",{(int)CMMS.CMMS_Status.MRS_SUBMITTED},{1},'{request.setAsTemplate}','{request.templateName}',0,'{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}','{request.activity}',{request.whereUsedType},{request.whereUsedRefID}, '{request.remarks}'," +
+                            $" {request.from_actor_type_id}, {request.from_actor_id},{request.to_actor_type_id}, {request.to_actor_id}); SELECT LAST_INSERT_ID(); COMMIT;";
+                        DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
+                        request.ID = Convert.ToInt32(dt2.Rows[0][0]);
+                    }
+                    int is_splited = 0;
+                    if (request.ID != null)
+                    {
+                        for (var i = 0; i < request.cmmrsItems.Count; i++)
+                        {
+                            int equipmentID = request.cmmrsItems[i].asset_item_ID;
+                            decimal quantity = request.cmmrsItems[i].qty;
+
+                            string selectQuery = "SELECT approval_required, asset_code, asset_type_ID FROM  " +
+                                       " smassetmasters  " +
+                                       "WHERE ID = " + equipmentID;
+
+                            List<CMSMMaster> assetList = await Context.GetData<CMSMMaster>(selectQuery).ConfigureAwait(false);
+                            var approval_required = assetList[0].approval_required;
+                            var asset_type_ID = assetList[0].asset_type_ID;
+                            var asset_code = assetList[0].asset_code;
+                            var IsSpareSelectionEnable = await getMultiSpareSelectionStatus(asset_code, asset_type_ID);
+                            if (approval_required == 1)
+                            {
+                                isApproval_required = true;
+                            }
+
+                            if (asset_type_ID == (int)CMMS.SM_AssetTypes.Spare && request.cmmrsItems[i].requested_qty > 0)
+                            {
+                                is_splited = 0;
+                            }
+                            else
+                            {
+                                is_splited = 1;
+                            }
+                            if (Convert.ToInt32(IsSpareSelectionEnable) == 0 || asset_type_ID != 0)
+                            {
+                                try
+                                {
+                                    string insertStmt = $"START TRANSACTION; " +
+                                    $"INSERT INTO smrsitems (mrs_ID,asset_item_ID,asset_MDM_code,requested_qty,status,flag,approval_required,mrs_return_ID,issued_qty,returned_qty,used_qty,available_qty,is_splited,serial_number)" +
+                                    $"VALUES ({request.ID},{request.cmmrsItems[i].asset_item_ID},'{asset_code}',{request.cmmrsItems[i].requested_qty},0,0,{approval_required},0,{request.cmmrsItems[i].issued_qty}, {request.cmmrsItems[i].returned_qty}, {request.cmmrsItems[i].used_qty}, {request.cmmrsItems[i].available_qty},1,'{request.cmmrsItems[i].serial_number}')" +
+                                    $"; SELECT LAST_INSERT_ID();COMMIT;";
+                                    DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
+                                }
+                                catch (Exception ex)
+                                { throw ex; }
+                            }
+                            else
+                            {
+                                try
+                                {
+                                    string insertStmt = $"START TRANSACTION; " +
+                                    $"INSERT INTO smrsitems (mrs_ID,asset_item_ID,asset_MDM_code,requested_qty,status,flag,approval_required,mrs_return_ID,issued_qty,returned_qty,used_qty,available_qty,is_splited, serial_number)" +
+                                    $"VALUES ({request.ID},{request.cmmrsItems[i].asset_item_ID},'{asset_code}',1,0,0,{approval_required},0,{request.cmmrsItems[i].issued_qty}," +
+                                    $" {request.cmmrsItems[i].returned_qty}, {request.cmmrsItems[i].used_qty}, {request.cmmrsItems[i].available_qty}, 1,'{request.cmmrsItems[i].serial_number}')" +
+                                    $"; SELECT LAST_INSERT_ID();COMMIT;";
+                                    DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
+                                }
+                                catch (Exception ex)
+                                { throw ex; }
+                            }
+                            if (Convert.ToInt32(IsSpareSelectionEnable) == 1 && asset_type_ID != 2)
+                            {
+                                UpdateAssetStatus(request.cmmrsItems[i].asset_item_ID, 2);
+                            }
+                            Queryflag = true;
+                        }
+                    }
+                    if (!Queryflag)
+                    {
+                        response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Failed to submit MRS.");
+                    }
+                    else
+                    {
+                        response = new CMDefaultResponse(request.ID, CMMS.RETRUNSTATUS.SUCCESS, "Request has been submitted.");
+                    }
+                    await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_MRS, request.ID, 0, 0, request.remarks, CMMS.CMMS_Status.MRS_SUBMITTED);
+                    // Adding code for isApproval_required=0 then go for MRS approval automatically.
+                    if (isApproval_required == false)
+                    {
+                        CMMrsApproval approve_request = new CMMrsApproval();
+                        approve_request.id = request.ID;
+                        approve_request.comment = "MRS approval not required.";
+                        var mrsApproved = await mrsApproval(approve_request, UserID);
+                        await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_MRS, request.ID, 0, 0, approve_request.comment, CMMS.CMMS_Status.MRS_REQUEST_APPROVED);
+                    }
+
+                    return response;
+                }*/
 
         public async Task<CMDefaultResponse> updateMRS(CMMRS request, int UserID)
         {
@@ -711,10 +850,8 @@ namespace CMMSAPIs.Repositories.SM
     " LEFT JOIN users rejectedByUser ON rejectedByUser.id = sm.rejected_by_emp_ID " +
     " LEFT JOIN users issuedApproveUser ON issuedApproveUser.id = sm.issue_approved_by_emp_ID " +
     " LEFT JOIN users issuedRejectUser ON issuedRejectUser.id = sm.issue_rejected_by_emp_ID " +
-
     "WHERE sm.id = " + ID + ";";
             List<CMMRSList> _List = await Context.GetData<CMMRSList>(stmt).ConfigureAwait(false);
-
             for (var i = 0; i < _List.Count; i++)
             {
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_List[i].status);
