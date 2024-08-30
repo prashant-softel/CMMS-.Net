@@ -379,7 +379,7 @@ namespace CMMSAPIs.Models.Notifications
             {
                 CMViewInventory _Inventory = (CMViewInventory)args[0];
                 notificationObj = new InventoryNotification(moduleID, notificationID, _Inventory);
-                //facilityId = _Inventory.facility_id;
+                facilityId = _Inventory.facilityId;
             }
 
             else if (moduleID == CMMS.CMMS_Modules.GRIEVANCE)
@@ -400,11 +400,11 @@ namespace CMMSAPIs.Models.Notifications
                 notificationObj = new MCNotification(moduleID, notificationID, null, _Task);
                 //facilityId = _Inventory.facility_id;
             }
-            else if (moduleID == CMMS.CMMS_Modules.VEGETATION_PLAN)
+            else if (moduleID == CMMS.CMMS_Modules.SM_RO)      //RO Report
             {
-                CMMCPlan _Plan = (CMMCPlan)args[0];
-                notificationObj = new VegetationNotification(moduleID, notificationID, _Plan, null);
-                //facilityId = _Inventory.facility_id;
+                CMCreateRequestOrderGET _SMRO = (CMCreateRequestOrderGET)args[0];
+                notificationObj = new SMNotification(moduleID, notificationID, _SMRO);
+                facilityId = _SMRO.facilityID;
             }
             else if (moduleID == CMMS.CMMS_Modules.VEGETATION_TASK)
             {
