@@ -819,11 +819,7 @@ namespace CMMSAPIs.Repositories.Users
                 idList.Add(id);
             }
             response = new CMDefaultResponse(idList, CMMS.RETRUNSTATUS.SUCCESS, $"{idList.Count} user(s) added successfully");
-            /*}
-            *//*else
-            {
-                response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, $"{string.Join("\r\n", m_errorLog.errorLog().ToArray())/**//*}");
-            }*/
+
 
             return response;
         }
