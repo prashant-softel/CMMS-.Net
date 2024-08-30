@@ -14,9 +14,9 @@ namespace CMMSAPIs.Models.Notifications
             m_permitId = m_permitObj.insertedId;
         }
 
-        override protected string getSubject(params object[] args)
+        override protected string getEMSubject(params object[] args)
         {
-            string retValue = "My permit subject";
+            string retValue = "ESCALATE : ";
             m_permitId = m_permitObj.insertedId;
             string desc = m_permitObj.description;
 
@@ -24,75 +24,157 @@ namespace CMMSAPIs.Models.Notifications
             {
                 case CMMS.CMMS_Status.PTW_CREATED:
                     //description is sent at 1 index of arg for this notification, so developer fetch it and use to format the subject
-                    retValue = String.Format("Permit <{0}> created Permit Description <{1}>", m_permitId, desc);
+                    retValue += String.Format("PTW{0} <{1}> requested by  <{2}>", m_permitId, desc, m_permitObj.issuedByName);
                     break;
                 case CMMS.CMMS_Status.PTW_ISSUED:
-                    retValue = String.Format("Permit <{0}> Issued Permit Issued by <{1}> Permit Description <{2}>", m_permitObj.permitNo, m_permitObj.issuedByName, desc);
+                    retValue = String.Format("PTW{0} <{1}> issued by <{2}>", m_permitObj.permitNo, desc, m_permitObj.issuedByName);
                     break;
                 case CMMS.CMMS_Status.PTW_REJECTED_BY_ISSUER:
-                    retValue = String.Format("Permit <{0}> Rejected By Issuer Permit Rejected By Issuer<{1}> Permit Description <{2}>", m_permitObj.permitNo, m_permitObj.cancelRequestByName, desc);
+                    retValue = String.Format("PTW{0} <{1}> Rejected By <{2}>", m_permitObj.permitNo, desc, m_permitObj.rejectedByName);
                     break;
                 case CMMS.CMMS_Status.PTW_APPROVED:
-                    retValue = String.Format("Permit <{0}> Approved Permit Approved By Name <{1}> Permit Description <{2}>", m_permitObj.permitNo, m_permitObj.approvedByName, desc);
+                    retValue = String.Format("PTW{0} <{1}> Approved By <{2}>", m_permitObj.permitNo, desc, m_permitObj.approvedByName);
                     break;
                 case CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER:
-                    retValue = String.Format("Permit <{0}> Rejected By Approver  Permit Rejected By Approver Name <{1}> Permit Description <{2}>", m_permitObj.permitNo, m_permitObj.approvedByName, desc);
+                    retValue = String.Format("PTW{0} <{1}> Rejected By <{2}>", m_permitObj.permitNo, desc, m_permitObj.rejectedByName);
                     break;
                 case CMMS.CMMS_Status.PTW_CLOSED:
-                    retValue = String.Format("Permit <{0}> Closed Permit Closed By Nmae <{1}> Permit Description <{2}>", m_permitObj.permitNo, m_permitObj.closedByName, desc);
+                    retValue = String.Format("PTW{0} <{1}> Closed By <{2}>", m_permitObj.permitNo, desc, m_permitObj.closedByName);
                     break;
                 case CMMS.CMMS_Status.PTW_CANCELLED_BY_ISSUER:
-                    retValue = String.Format("Permit <{0}> Cancelled By Issuer Permit Cancelled By Issuer Name <{1}> Permit Description <{2}>", m_permitObj.permitNo, m_permitObj.cancelRequestByName, desc);
+                    retValue = String.Format("PTW{0} <{1}> Cancelled by Issuer <{2}> ", m_permitObj.permitNo, desc, m_permitObj.cancelRequestByName);
                     break;
                 case CMMS.CMMS_Status.PTW_CANCELLED_BY_HSE:
-                    retValue = String.Format("Pemit <{0}> cancelled by HSE Permit Description <{1}>>", m_permitObj.permitNo, desc);
+                    retValue = String.Format("PTW{0} <{1}> Cancelled by HSE <{2}> ", m_permitObj.permitNo, desc, m_permitObj.cancelRequestByName);
                     break;
                 case CMMS.CMMS_Status.PTW_CANCELLED_BY_APPROVER:
-                    retValue = String.Format("Permit <{0}> cancelled by approver Permit cancelled by approver Name <{1}> Permit Description <{2}>", m_permitObj.permitNo, m_permitObj.approvedByName, desc);
+                    retValue = String.Format("PTW{0} <{1}> Cancelled by approver <{2}> ", m_permitObj.permitNo, desc, m_permitObj.cancelRequestByName);
                     break;
                 case CMMS.CMMS_Status.PTW_CANCEL_REQUESTED:
-                    retValue = String.Format("Permit <{0}> Cancel Requested By Permit Cancel Requested By Name <{1}>Permit Description <{2}>", m_permitObj.permitNo, m_permitObj.issuedByName, desc);
+                    retValue = String.Format("PTW{0} <{1}> Cancel Requested by <{2}>", m_permitObj.permitNo, desc, m_permitObj.cancelRequestByName);
                     break;
                 case CMMS.CMMS_Status.PTW_CANCEL_REQUEST_APPROVED:
-                    retValue = String.Format("Permit <{0}> Cancel Request Approve Permit Cancel Requested Approve By Name <{1}> Permit Description <{2}>", m_permitObj.permitNo, m_permitObj.approvedByName, desc);
+                    retValue = String.Format("PTW{0} <{1}> Cancel Request Approve by <{2}>", m_permitObj.permitNo, desc, m_permitObj.cancelRequestApprovedByName);
                     break;
                 case CMMS.CMMS_Status.PTW_CANCEL_REQUEST_REJECTED:
-                    retValue = String.Format("Permit <{0}> Cancel Request Rejected Permit Cancel Request Rejected by name <{1}> Permit Description <{2}>", m_permitObj.permitNo, m_permitObj.cancelRequestByName, desc);
+                    retValue = String.Format("PTW{0} <{1}> Cancel Requested Rejected by <{2}>", m_permitObj.permitNo, desc, m_permitObj.cancelRequestRejectedByName);
                     break;
                 case CMMS.CMMS_Status.PTW_EXTEND_REQUESTED:
-                    retValue = String.Format("Permit <{0}> Extend Requested By Permit Extend Requested By Name <{1}>Permit Description <{2}>", m_permitObj.permitNo, m_permitObj.issuedByName, desc);
+                    retValue = String.Format("PTW{0} <{1}> Extend Requested By <{2}>", m_permitObj.permitNo, desc, m_permitObj.extendRequestByName);
                     break;
                 case CMMS.CMMS_Status.PTW_EXTEND_REQUEST_APPROVE:
-                    retValue = String.Format("Permit <{0}> Extend Request Approve Permit Extend Requested Approve By Name <{1}> Permit Description <{2}>", m_permitObj.permitNo, m_permitObj.approvedByName, desc);
+                    retValue = String.Format("PTW{0} <{1}> Cancel Requested Approve by <{2}>", m_permitObj.permitNo, desc, m_permitObj.extendRequestApprovedByName);
                     break;
                 case CMMS.CMMS_Status.PTW_EXTEND_REQUEST_REJECTED:
-                    retValue = String.Format("Permit <{0}> Extend Request Rejected Permit Extend Request Rejected by name <{1}> Permit Description <{2}>", m_permitObj.permitNo, m_permitObj.cancelRequestByName, desc);
+                    retValue = String.Format("PTW{0} <{1}> Cancel Requested Rejected by <{2}>", m_permitObj.permitNo, desc, m_permitObj.extendRequestRejectedByName);
                     break;
                 case CMMS.CMMS_Status.PTW_LINKED_TO_JOB:
-                    retValue = String.Format("Permit <{0}> Linked to Job Permit Description <{1}>", m_permitObj.permitNo, desc);
+                    retValue = String.Format("PTW{0} <{1}> Linked to Job", m_permitObj.permitNo, desc);
                     break;
                 case CMMS.CMMS_Status.PTW_LINKED_TO_PM:
-                    retValue = String.Format("Permit <{0}> Linked to PM Permit Description <{1}>", m_permitObj.permitNo, desc);
+                    retValue = String.Format("PTW{0} <{1}> Linked to PM Permit", m_permitObj.permitNo, desc);
                     break;
                 case CMMS.CMMS_Status.PTW_LINKED_TO_AUDIT:
-                    retValue = String.Format("Permit <{0}> Linked to Audit Permit Description <{1}>", m_permitObj.permitNo, desc);
+                    retValue = String.Format("PTW{0} <{1}> Linked to Audit", m_permitObj.permitNo, desc);
                     break;
                 case CMMS.CMMS_Status.PTW_LINKED_TO_HOTO:
-                    retValue = String.Format("Permit <{0}> Linked to Hoto Permit Description <{1}>", m_permitObj.permitNo, desc);
+                    retValue = String.Format("PTW{0} <{1}> Linked to Hoto", m_permitObj.permitNo, desc);
                     break;
                 case CMMS.CMMS_Status.PTW_EXPIRED:
-                    retValue = String.Format("Permit <{0}> Expired Permit Description <{1}>", m_permitObj.permitNo, desc);
+                    retValue = String.Format("PTW{0} <{1}> Expired", m_permitObj.permitNo, desc);
                     break;
                 case CMMS.CMMS_Status.PTW_UPDATED:
-                    retValue = String.Format("Permit <{0}> Updated Permit Description <{1}>", m_permitObj.permitNo, desc);
+                    retValue = String.Format("PTW{0} <{1}> Updated", m_permitObj.permitNo, desc);
                     break;
                 default:
+                    retValue = String.Format("PTW{0} <{1}> Unknow status <{3}>", m_permitObj.permitNo, desc, m_notificationID);
+                    break;
+            }
+            retValue += $" for {m_delayDays} days";
+            return retValue;
+        }
+
+
+        override protected string getSubject(params object[] args)
+        {
+            string retValue = "My permit subject";
+            m_permitId = m_permitObj.insertedId;
+            string desc = m_permitObj.title;
+
+            switch (m_notificationID)
+            {
+                case CMMS.CMMS_Status.PTW_CREATED:
+                    //description is sent at 1 index of arg for this notification, so developer fetch it and use to format the subject
+                    retValue = String.Format("PTW{0} <{1}> requested by ", m_permitId, desc, m_permitObj.issuedByName);
+                    break;
+                case CMMS.CMMS_Status.PTW_ISSUED:
+                    retValue = String.Format("PTW{0} <{1}> issued by <{2}>", m_permitObj.permitNo, desc, m_permitObj.issuedByName);
+                    break;
+                case CMMS.CMMS_Status.PTW_REJECTED_BY_ISSUER:
+                    retValue = String.Format("PTW{0} <{1}> Rejected By <{2}>", m_permitObj.permitNo, desc, m_permitObj.rejectedByName);
+  
+                    break;
+                case CMMS.CMMS_Status.PTW_APPROVED:
+                    retValue = String.Format("PTW{0} <{1}> Approved By <{2}>", m_permitObj.permitNo, desc, m_permitObj.approvedByName);
+                    break;
+                case CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER:
+                    retValue = String.Format("PTW{0} <{1}> Rejected By <{2}>", m_permitObj.permitNo, desc, m_permitObj.rejectedByName);
+                    break;
+                case CMMS.CMMS_Status.PTW_CLOSED:
+                    retValue = String.Format("PTW{0} <{1}> Closed By <{2}>", m_permitObj.permitNo, desc, m_permitObj.closedByName);
+                    break;
+                case CMMS.CMMS_Status.PTW_CANCELLED_BY_ISSUER:
+                    retValue = String.Format("PTW{0} <{1}> cancelled by Issuer <{2}> ", m_permitObj.permitNo, desc, m_permitObj.cancelRequestByName);
+                    break;
+                case CMMS.CMMS_Status.PTW_CANCELLED_BY_HSE:
+                    retValue = String.Format("PTW{0} <{1}> cancelled by HSE <{2}> ", m_permitObj.permitNo, desc, m_permitObj.cancelRequestByName);
+                    break;
+                case CMMS.CMMS_Status.PTW_CANCELLED_BY_APPROVER:
+                    retValue = String.Format("PTW{0} <{1}> cancelled by approver <{2}> ", m_permitObj.permitNo, desc, m_permitObj.cancelRequestByName);
+                    break;
+                case CMMS.CMMS_Status.PTW_CANCEL_REQUESTED:
+                    retValue = String.Format("PTW{0} <{1}> Cancel Requested by <{2}>", m_permitObj.permitNo, desc, m_permitObj.cancelRequestByName);
+                    break;
+                case CMMS.CMMS_Status.PTW_CANCEL_REQUEST_APPROVED:
+                    retValue = String.Format("PTW{0} <{1}> Cancel Requested Approve by <{2}>", m_permitObj.permitNo, desc, m_permitObj.cancelRequestApprovedByName);
+                    break;
+                case CMMS.CMMS_Status.PTW_CANCEL_REQUEST_REJECTED:
+                    retValue = String.Format("PTW{0} <{1}> Cancel Requested Rejected by <{2}>", m_permitObj.permitNo, desc, m_permitObj.cancelRequestRejectedByName);
+                    break;
+                case CMMS.CMMS_Status.PTW_EXTEND_REQUESTED:
+                    retValue = String.Format("PTW{0} <{1}> Extend Requested By <{2}>", m_permitObj.permitNo, desc, m_permitObj.extendRequestByName);
+                    break;
+                case CMMS.CMMS_Status.PTW_EXTEND_REQUEST_APPROVE:
+                    retValue = String.Format("PTW{0} <{1}> Cancel Requested Approve by <{2}>", m_permitObj.permitNo, desc, m_permitObj.extendRequestApprovedByName);
+                    break;
+                case CMMS.CMMS_Status.PTW_EXTEND_REQUEST_REJECTED:
+                    retValue = String.Format("PTW{0} <{1}> Cancel Requested Rejected by <{2}>", m_permitObj.permitNo, desc, m_permitObj.extendRequestRejectedByName);
+                    break;
+                case CMMS.CMMS_Status.PTW_LINKED_TO_JOB:
+                    retValue = String.Format("PTW{0} <{1}> Linked to Job", m_permitObj.permitNo, desc);
+                    break;
+                case CMMS.CMMS_Status.PTW_LINKED_TO_PM:
+                    retValue = String.Format("PTW{0} <{1}> Linked to PM Permit", m_permitObj.permitNo, desc);
+                    break;
+                case CMMS.CMMS_Status.PTW_LINKED_TO_AUDIT:
+                    retValue = String.Format("PTW{0} <{1}> Linked to Audit", m_permitObj.permitNo, desc);
+                    break;
+                case CMMS.CMMS_Status.PTW_LINKED_TO_HOTO:
+                    retValue = String.Format("PTW{0} <{1}> Linked to Hoto", m_permitObj.permitNo, desc);
+                    break;
+                case CMMS.CMMS_Status.PTW_EXPIRED:
+                    retValue = String.Format("PTW{0} <{1}> Expired", m_permitObj.permitNo, desc);
+                    break;
+                case CMMS.CMMS_Status.PTW_UPDATED:
+                    retValue = String.Format("PTW{0} <{1}> Updated", m_permitObj.permitNo, desc);
+                    break;
+                default:
+                    retValue = String.Format("PTW{0} <{1}> Unknow status <{3}>", m_permitObj.permitNo, desc, m_notificationID);
                     break;
             }
             return retValue;
 
         }
-
 
         override protected string getHTMLBody(params object[] args)
         {
@@ -113,61 +195,22 @@ namespace CMMSAPIs.Models.Notifications
             retValue += String.Format(template, "PTW Title", m_permitObj.PermitTypeName);
             retValue += String.Format(template, "PTW Description", m_permitObj.description);
             retValue += String.Format(template, "Created By", m_permitObj.requestedByName);
+            if (m_permitObj.rejecter_id > 0)
+            {
+                retValue += String.Format(templateEnd, "Rejected By", m_permitObj.rejectedByName);
+            }
+            if (m_permitObj.approver_id > 0)
+            {
+                retValue += String.Format(templateEnd, "Approved By", m_permitObj.approvedByName);
+            }
 
             switch (m_notificationID)
             {
-                case CMMS.CMMS_Status.PTW_CREATED:     //Created
-                    retValue += "</table>";
-                    break;
                 case CMMS.CMMS_Status.PTW_ISSUED:     //Assigned
                     retValue += String.Format(templateEnd, "Issued By", m_permitObj.issuedByName);
                     break;
-                case CMMS.CMMS_Status.PTW_REJECTED_BY_ISSUER:     //Closed
-                    retValue += String.Format(templateEnd, "Rejected By", m_permitObj.issuedByName);
-                    break;
-                case CMMS.CMMS_Status.PTW_APPROVED:     //Linked to PTW
-                    retValue += String.Format(templateEnd, "Approved By", m_permitObj.approvedByName);
-                    break;
-                case CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER:     //Linked to PTW
-                    retValue += String.Format(templateEnd, "Rejected By", m_permitObj.approvedByName);
-
-                    break;
-                case CMMS.CMMS_Status.PTW_CLOSED:
-                    retValue += String.Format(templateEnd, "Closed By", m_permitObj.closedByName);
-
-                    break;
-                case CMMS.CMMS_Status.PTW_CANCELLED_BY_ISSUER:     //Linked to PTW
-                    retValue += String.Format(templateEnd, "Cancelled By", m_permitObj.issuedByName);
-
-                    break;
-                case CMMS.CMMS_Status.PTW_CANCELLED_BY_HSE:     //Linked to PTW
-                    retValue += String.Format(templateEnd, "Cancelled By", m_permitObj.cancelRequestByName);
-
-                    break;
-                case CMMS.CMMS_Status.PTW_CANCELLED_BY_APPROVER:     //Linked to PTW
-                    retValue += String.Format(templateEnd, "Cancelled By", m_permitObj.approvedByName);
-                    break;
-                case CMMS.CMMS_Status.PTW_CANCEL_REQUESTED:     //Linked to PTW
-                    retValue += String.Format(templateEnd, "Cancel Requested By", m_permitObj.requestedByName);
-                    break;
-                case CMMS.CMMS_Status.PTW_CANCEL_REQUEST_APPROVED:     //Linked to PTW
-                    retValue += String.Format(templateEnd, "Cancel Request Approved By", m_permitObj.approvedByName);
-                    break;
-                case CMMS.CMMS_Status.PTW_CANCEL_REQUEST_REJECTED:     //Linked to PTW
-                    retValue += String.Format(templateEnd, "Cancel Request Rejected by", m_permitObj.approvedByName);
-                    break;
-                case CMMS.CMMS_Status.PTW_EXTEND_REQUESTED:     //Linked to PTW
-                    retValue += String.Format(templateEnd, "Extend Requested By", m_permitObj.requestedByName);
-                    break;
-                case CMMS.CMMS_Status.PTW_EXTEND_REQUEST_APPROVE:     //Linked to PTW
-                    retValue += String.Format(templateEnd, "Extend Request Approved By", m_permitObj.approvedByName);
-                    break;
-                case CMMS.CMMS_Status.PTW_EXTEND_REQUEST_REJECTED:     //Linked to PTW
-                    retValue += String.Format(templateEnd, "Extend Request Rejected by", m_permitObj.approvedByName);
-                    break;
                 case CMMS.CMMS_Status.PTW_LINKED_TO_JOB:     //Linked to PTW
                     retValue += String.Format(template, "Linked Job", m_permitObj.job_type_id);
-                    retValue += String.Format(templateEnd, "Job Title", m_permitObj.job_type_name);
                     break;
                 case CMMS.CMMS_Status.PTW_LINKED_TO_PM:     //Linked to PTW                   
                     retValue += String.Format(templateEnd, "Linked PM", m_permitObj.permitNo);
@@ -178,19 +221,30 @@ namespace CMMSAPIs.Models.Notifications
                 case CMMS.CMMS_Status.PTW_LINKED_TO_HOTO:     //Linked to PTW
                     retValue += String.Format(templateEnd, "Linked HOTO", m_permitObj.permitNo);
                     break;
-                case CMMS.CMMS_Status.PTW_EXPIRED:     //Linked to PTW
-                    //retValue += String.Format("<tr><td style='text-align: left; padding:0.5rem; background-color:#31576D;color:#ffffff'><b>&nbsp;&nbsp;Closed by</b></td><td style='text-align: left; padding:0.5rem;'>&nbsp;&nbsp;{0}</td></table>", m_permitObj.JC_Closed_by_Name); break;
-                    break;
-                case CMMS.CMMS_Status.PTW_UPDATED:
-                    retValue += String.Format(templateEnd, "Permit Updated", m_permitObj.permitNo);
-                    break;
                 default:
                     break;
             }
 
-            return retValue;
-        }
+            if (m_permitObj.cancelRequestby_id > 0)
+            {
+                retValue += String.Format(templateEnd, "Extend Requested By", m_permitObj.requestedByName);
+                retValue += String.Format(templateEnd, "Extend Request Approved By", m_permitObj.approvedByName);
+                retValue += String.Format(templateEnd, "Extend Request Rejected by", m_permitObj.approvedByName);
+            }
+            if (m_permitObj.cancelRequestby_id > 0)
+            {
+                retValue += String.Format(templateEnd, "Cancel Requested By", m_permitObj.cancelRequestByName);
+                retValue += String.Format(templateEnd, "Cancel Request Approved By", m_permitObj.cancelRequestApprovedByName);
+                retValue += String.Format(templateEnd, "Cancel Request Rejected by", m_permitObj.cancelRequestRejectedByName);
+            }
+            if (m_permitObj.closedby_id > 0)
+            {
+                retValue += String.Format(templateEnd, "Closed By", m_permitObj.closedByName);
+            }
 
+            retValue += "</table>";
+
+            return retValue;
         internal string getHTMLBodyTemplate(params object[] args)
         {
             string template = String.Format("<h1>This is Permit Title {0}</h1>", m_permitObj.description);
@@ -298,6 +352,7 @@ namespace CMMSAPIs.Models.Notifications
             }
             template += String.Format("<p><B>Permit description: </b>{0}</p>", m_permitObj.description);
             return template;
+
         }
     }
 }

@@ -26,22 +26,22 @@ namespace CMMSAPIs.Models.Notifications
             switch (m_notificationID)
             {
                 case CMMS.CMMS_Status.SM_RO_DRAFT:
-                    retValue += String.Format("Request order{0} drafted by {1}</p>", m_SMROObj.request_order_id, m_SMROObj.generatedBy);
+                    retValue += String.Format("Request order{0} drafted by {1}", m_SMROObj.request_order_id, m_SMROObj.generatedBy);
                     break;
                 case CMMS.CMMS_Status.SM_RO_SUBMITTED:
-                    retValue += String.Format("Request order{0} submitted and waiting for approval by {1}</p>", m_SMROObj.request_order_id, m_SMROObj.generatedBy);
+                    retValue += String.Format("Request order{0} submitted and waiting for approval by {1}", m_SMROObj.request_order_id, m_SMROObj.generatedBy);
                     break;
                 case CMMS.CMMS_Status.SM_RO_SUBMIT_REJECTED:
-                    retValue += String.Format("Request order{0} Submitted but rejected by {1}</p>", m_SMROObj.request_order_id, m_SMROObj.rejectedBy);
+                    retValue += String.Format("Request order{0} Submitted but rejected by {1}", m_SMROObj.request_order_id, m_SMROObj.rejectedBy);
                     break;
                 case CMMS.CMMS_Status.SM_RO_SUBMIT_APPROVED:
-                    retValue += String.Format("Request order{0} approved by {1}</p>", m_SMROObj.request_order_id, m_SMROObj.approvedBy);
+                    retValue += String.Format("Request order{0} approved by {1}", m_SMROObj.request_order_id, m_SMROObj.approvedBy);
                     break;
                 case CMMS.CMMS_Status.SM_RO_CLOSED:
                     retValue += String.Format("Request order{0} deleted by {1}", m_SMROObj.request_order_id ,m_SMROObj.deleted_by); 
                     break;
                 case CMMS.CMMS_Status.SM_RO_DELETED:
-                    retValue += String.Format("Request order{0} closed by {1}</p>", m_SMROObj.request_order_id, m_SMROObj.closed_by);
+                    retValue += String.Format("Request order{0} closed by {1}", m_SMROObj.request_order_id, m_SMROObj.closed_by);
                     break;
                 default:
                     break;
@@ -58,6 +58,9 @@ namespace CMMSAPIs.Models.Notifications
 
             switch (m_notificationID)
             {
+                case CMMS.CMMS_Status.SM_RO_DRAFT:
+                    retValue = String.Format("RO{0} Drafted by {1}", m_SMROObj.request_order_id, m_SMROObj);
+                    break;
                 case CMMS.CMMS_Status.SM_RO_SUBMITTED:
                     retValue = String.Format("RO{0} Submitted by {1}", m_SMROObj.request_order_id, m_SMROObj.generatedBy);
                     break;
@@ -163,12 +166,11 @@ namespace CMMSAPIs.Models.Notifications
                 case CMMS.CMMS_Status.SM_RO_DELETED:
                     retValue += String.Format(templateEnd, "Deleted By", m_SMROObj.deleted_by);
                     break;
-                default:
+                    default:
                     break;
-
             }
-
             return retValue;
         }
     }
 }
+

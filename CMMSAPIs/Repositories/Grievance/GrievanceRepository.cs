@@ -52,8 +52,11 @@ namespace CMMSAPIs.Repositories.Grievance
                 case CMMS.CMMS_Status.Grievance_ADDED:
                     retValue = "Added";
                     break;
-                case CMMS.CMMS_Status.GRIEVANCE_ONGOING:
+                case CMMS.CMMS_Status.Grievance_UPDATED:
                     retValue = "Updated";
+                    break;
+                case CMMS.CMMS_Status.GRIEVANCE_ONGOING:
+                    retValue = "Ongoing";
                     break;
                 case CMMS.CMMS_Status.GRIEVANCE_CLOSED:
                     retValue = "Closed";
@@ -80,7 +83,7 @@ namespace CMMSAPIs.Repositories.Grievance
                     retValue += String.Format("Asset {0} Added by {1} at {2}</p>", InvObj.grievanceType, InvObj.createdByName, InvObj.createdAt);
                     break;
                 case CMMS.CMMS_Status.GRIEVANCE_CLOSED:
-                    retValue += String.Format("Asset {0} Added by {1} at {2}</p>", InvObj.grievanceType, InvObj.closedByName, InvObj.closedAt);
+                    retValue += String.Format("Asset {0} Closed by {1} at {2}</p>", InvObj.grievanceType, InvObj.closedByName, InvObj.closedAt);
                     break;
                 case CMMS.CMMS_Status.Grievance_UPDATED:
                     retValue += String.Format("Asset {0} Updated by {1} at {2}</p>", InvObj.grievanceType, InvObj.updatedBy, InvObj.updatedAt);
@@ -88,8 +91,11 @@ namespace CMMSAPIs.Repositories.Grievance
                 case CMMS.CMMS_Status.Grievance_DELETED:
                     retValue += String.Format("Asset {0} Deleted by {1} at {2}</p>", InvObj.grievanceType, InvObj.deletedBy, InvObj.deletedAt);
                     break;
-                default:
+                case CMMS.CMMS_Status.GRIEVANCE_ONGOING:
+                    retValue += String.Format("Asset {0} Ongoing by {1} at {2}</p>", InvObj.grievanceType, InvObj.deletedBy, InvObj.deletedAt);
                     break;
+                default:
+                    break; 
             }
             return retValue;
 
@@ -152,9 +158,17 @@ namespace CMMSAPIs.Repositories.Grievance
             string myQuery =
                 "SELECT g.id, g.facilityId, g.grievanceType AS grievanceTypeId, g.concern, g.actionTaken, " +
                 "g.resolutionLevel, g.description, g.closedDate, g.status_id as statusId, g.createdAt, g.createdBy as createdById, g.updatedBy as updatedById, " +
-                "t.name AS grievanceType, t.description AS type_description, t.status, t.addedBy, t.addedAt, t.updatedBy, t.updatedAt " +
+                "t.name AS grievanceType, t.description AS type_description, t.status, t.addedBy, t.addedAt, t.updatedBy, t.updatedAt, " +
+                "CONCAT(createdBy.firstName, ' ', createdBy.lastName) AS createdByName, " +
+                "CONCAT(deletedBy.firstName, ' ', deletedBy.lastName) AS deletedByName, " +
+                "CONCAT(closedBy.firstName, ' ', closedBy.lastName) AS closedByName, " +
+                "CONCAT(updatedBy.firstName, ' ', updatedBy.lastName) AS updatedByName " +
                 "FROM mis_grievance g " +
                 "LEFT JOIN mis_m_grievancetype t ON g.grievanceType = t.id " +
+                "LEFT JOIN users createdBy ON g.createdBy = createdBy.id " +
+                "LEFT JOIN users deletedBy ON g.deletedBy = deletedBy.id " +
+                "LEFT JOIN users closedBy ON g.closedBy = closedBy.id " +
+                 "LEFT JOIN users updatedBy ON g.updatedBy = updatedBy.id " +
                 "WHERE g.id = " + id;
 
 
@@ -215,9 +229,17 @@ namespace CMMSAPIs.Repositories.Grievance
 
 
                 //idList.Add(retID);
-                CMGrievance _GrievanceAdded = await GetGrievanceDetails(retID);
+                try
+                {
+                    CMGrievance _GrievanceAdded = await GetGrievanceDetails(retID);
+                    await CMMSNotification.sendNotification(CMMS.CMMS_Modules.GRIEVANCE, CMMS.CMMS_Status.Grievance_ADDED, new int[] { userID }, _GrievanceAdded);
+                }
 
-                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.GRIEVANCE, CMMS.CMMS_Status.Grievance_ADDED, new int[] { userID }, _GrievanceAdded);
+                catch(Exception ex)
+                {
+                    Console.WriteLine("Failed to send Grievance", ex.Message);
+                }
+
 
 
             }
@@ -344,15 +366,18 @@ namespace CMMSAPIs.Repositories.Grievance
             idList.Add(retID);
             CMGrievance _GrievanceAdded = await GetGrievanceDetails(retID);
 
-            string _shortStatus = getShortStatus(CMMS.CMMS_Modules.GRIEVANCE, CMMS.CMMS_Status.Grievance_ADDED);
-            _GrievanceAdded.statusShort = _shortStatus;
+            /*string _shortStatus = getShortStatus(CMMS.CMMS_Modules.GRIEVANCE, CMMS.CMMS_Status.Grievance_ADDED);
+            _GrievanceAdded.statusShort = _shortStatus;*/
             // String _shortStatus = getShortStatus(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_ADDED);
             // _inventoryAdded.status_short = _shortStatus;
 
             //_GrievanceAdded.status_short = Convert.ToInt32(_shortStatus);
 
-            string _longStatus = getLongStatus(CMMS.CMMS_Modules.GRIEVANCE, CMMS.CMMS_Status.GRIEVANCE_CLOSED, _GrievanceAdded);
-            _GrievanceAdded.statusLong = _longStatus;
+           /* string _longStatus = getLongStatus(CMMS.CMMS_Modules.GRIEVANCE, CMMS.CMMS_Status.GRIEVANCE_CLOSED, _GrievanceAdded);
+            _GrievanceAdded.statusLong = _longStatus;*/
+
+
+
             await CMMSNotification.sendNotification(CMMS.CMMS_Modules.GRIEVANCE, CMMS.CMMS_Status.GRIEVANCE_CLOSED, new int[] { userID }, _GrievanceAdded);
             //add to history
 

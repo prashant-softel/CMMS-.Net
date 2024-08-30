@@ -80,11 +80,9 @@ namespace CMMSAPIs.Repositories
                 case CMMS.CMMS_Status.GO_SUBMITTED:
                     retValue = $"Goods order{Id} Submitted and Waiting for Appoval";
                     break;
-
                 case CMMS.CMMS_Status.GO_CLOSED:
                     retValue = $"Goods order{Id} Closed";
                     break;
-
                 case CMMS.CMMS_Status.GO_DELETED:
                     retValue = $"Goods order{Id} deleted";
                     break;
@@ -261,7 +259,6 @@ namespace CMMSAPIs.Repositories
                     int id = Convert.ToInt32(dtInsertPO.Rows[0][0]);
                 }
             }
-
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_GO, goid, 0, 0, request.remarks, CMMS.CMMS_Status.GO_DRAFT);
             CMGOMaster _GOList = await GetGODetailsByID(goid, facilitytimeZone);
             await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_GO, CMMS.CMMS_Status.GO_SUBMITTED, new[] { userID }, _GOList);
@@ -668,9 +665,6 @@ namespace CMMSAPIs.Repositories
 
             CMGOMaster _GOList = await GetGODetailsByID(request.id, facilitytimeZone);
             await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_GO, CMMS.CMMS_Status.GO_REJECTED, new[] { userId }, _GOList);
-
-
-
             /*string myQuery = $"SELECT   ID ,facilityID ,vendorID ,receiverID ,generated_by ,purchaseDate ,orderDate ,challan_no ,po_no ,\r\n     " +
        $" freight ,transport ,no_pkg_received ,lr_no ,\r\n      " +
        $"condition_pkg_received ,vehicle_no ,gir_no ,challan_date ,po_date ,\r\n      " +
@@ -994,10 +988,8 @@ namespace CMMSAPIs.Repositories
                     historyRemark = request.remarks;
                 }
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_GO, purchaseId, 0, 0, historyRemark, CMMS.CMMS_Status.GO_SUBMITTED);
-
-                CMGOMaster _GOList = await GetGODetailsByID(request.id, facilitytimeZone);
+                CMGOMaster _GOList = await GetGODetailsByID(request.purchaseID, facilitytimeZone);
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_GO, CMMS.CMMS_Status.GO_SUBMITTED, new[] { userId }, _GOList);
-
                 CMDefaultResponse response = new CMDefaultResponse(purchaseId, CMMS.RETRUNSTATUS.SUCCESS, "Goods order submitted successfully.");
                 return response;
             }
@@ -1506,7 +1498,6 @@ namespace CMMSAPIs.Repositories
                 historyRemark = request.comment;
             }
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_GO, request.id, 0, 0, historyRemark, CMMS.CMMS_Status.GO_RECEIVED_REJECTED);
-
             CMGOMaster _GOList = await GetGODetailsByID(request.id, facilitytimeZone);
             await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_GO, CMMS.CMMS_Status.GO_RECEIVED_REJECTED, new[] { userId }, _GOList);
 
@@ -1525,7 +1516,7 @@ namespace CMMSAPIs.Repositories
               await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_GO, CMMS.CMMS_Status.GO_RECEIVED_REJECTED,new[] { userId }, _WCList);*/
 
 
-            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Goods order receive {request.id} rejected successfully.");
+              CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Goods order receive {request.id} rejected successfully.");
 
 
             return response;

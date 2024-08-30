@@ -83,6 +83,7 @@ namespace CMMSAPIs.Models.Notifications
             if (m_notificationID != CMMS.CMMS_Status.INVENTORY_IMPORTED)
             {
                 retValue += String.Format("<table style='width: 50%; margin:0 auto; border-collapse: collapse ; border-spacing: 10px; ' border='1'>");
+
                 retValue += String.Format(template, "ID","Inventory"+m_InvObj.id);
                 retValue += String.Format(template, "Name", m_InvObj.name);
                 retValue += String.Format(template, "Facility Name", m_InvObj.facilityName);
@@ -131,7 +132,6 @@ namespace CMMSAPIs.Models.Notifications
                     break;
                 default:
                     break;
-
             }
 
             return retValue;

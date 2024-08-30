@@ -24,6 +24,7 @@ namespace CMMSAPIs.Models.Notifications
 
             switch (m_notificationID)
             {
+
                 case CMMS.CMMS_Status.GO_SUBMITTED:
                     retValue += String.Format("GO{0} Submitted By{1}", m_GOObj.Id, m_GOObj.submitted_by_name);
                     break; 
@@ -88,7 +89,6 @@ namespace CMMSAPIs.Models.Notifications
             }
             return retValue;
         }
-
         override protected string getHTMLBody(params object[] args)
         {
             string retValue = "";
@@ -115,6 +115,16 @@ namespace CMMSAPIs.Models.Notifications
                 retValue += String.Format(template, "Submitted By", m_GOObj.submitted_by_name);
                 retValue += String.Format(template, "Submitted At", m_GOObj.submitted_at);
             }
+            if (!string.IsNullOrEmpty(m_GOObj.closed_by_name))
+            {
+                retValue += String.Format(template, "Closed By", m_GOObj.closed_by_name);
+                retValue += String.Format(template, "Closed At", m_GOObj.closed_at);
+            }
+            if (!string.IsNullOrEmpty(m_GOObj.deleted_by_name))
+            {
+                retValue += String.Format(template, "Deleted By", m_GOObj.deleted_by_name);
+                retValue += String.Format(template, "Deleted At", m_GOObj.deleted_at);
+            }         
             if (!string.IsNullOrEmpty(m_GOObj.rejected_by_name))
             {
                 retValue += String.Format(template, "Rejected By", m_GOObj.rejected_by_name);
@@ -124,7 +134,7 @@ namespace CMMSAPIs.Models.Notifications
             {
                 retValue += String.Format(template, "Approved By", m_GOObj.approved_by_name);
                 retValue += String.Format(template, "Approved At", m_GOObj.approved_at);
-            }
+            }         
             if (!string.IsNullOrEmpty(m_GOObj.receive_submitted_by_name))
             {
                 retValue += String.Format(template, "Receive Request Submitted By", m_GOObj.receive_submitted_by_name);
@@ -176,9 +186,7 @@ namespace CMMSAPIs.Models.Notifications
                 retValue += String.Format("<td>{0}</td>", item.lost_qty);
                 retValue += "</tr>";
             }
-
             retValue += "</table><br><br>";
-
             switch (m_notificationID)
             {
                 case CMMS.CMMS_Status.GO_DRAFT:
@@ -208,11 +216,9 @@ namespace CMMSAPIs.Models.Notifications
                 case CMMS.CMMS_Status.GO_RECEIVED_APPROVED:
                     retValue += String.Format(templateEnd, "Received Request Approved By", m_GOObj.receive_approved_by_name);
                     break;
-
                 default:
                     break;
             }
-
             return retValue;
         }
     }

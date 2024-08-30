@@ -94,7 +94,7 @@ namespace CMMSAPIs.Repositories.Permits
             string statusName = "";
             switch (status)
             {
-                case CMMS.CMMS_Status.PTW_CREATED:
+                case CMMS.CMMS_Status.PTW_CREATED:      //121
                     statusName = "Waiting for Approval";
                     break;
                 case CMMS.CMMS_Status.PTW_ISSUED:
@@ -103,13 +103,13 @@ namespace CMMSAPIs.Repositories.Permits
                 case CMMS.CMMS_Status.PTW_REJECTED_BY_ISSUER:
                     statusName = "Rejected By Issuer";
                     break;
-                case CMMS.CMMS_Status.PTW_APPROVED:
-                    statusName = "Approved";
-                    break;
-                case CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER:
+                case CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER: //124
                     statusName = "Rejected By Approver";
                     break;
-                case CMMS.CMMS_Status.PTW_CLOSED:
+                case CMMS.CMMS_Status.PTW_APPROVED:     //125
+                    statusName = "Approved";
+                    break;
+                case CMMS.CMMS_Status.PTW_CLOSED:       //126
                     statusName = "Closed";
                     break;
                 case CMMS.CMMS_Status.PTW_CANCELLED_BY_ISSUER:
@@ -121,23 +121,23 @@ namespace CMMSAPIs.Repositories.Permits
                 case CMMS.CMMS_Status.PTW_CANCELLED_BY_APPROVER:
                     statusName = "Cancelled By Approver";
                     break;
-                case CMMS.CMMS_Status.PTW_CANCEL_REQUESTED:
-                    statusName = "Cancelled";
+                case CMMS.CMMS_Status.PTW_CANCEL_REQUESTED:     //130
+                    statusName = "Cancel Requested";
                     break;
                 case CMMS.CMMS_Status.PTW_CANCEL_REQUEST_REJECTED:
                     statusName = "Cancel Request Rejected";
                     break;
-                case CMMS.CMMS_Status.PTW_CANCEL_REQUEST_APPROVED:
+                case CMMS.CMMS_Status.PTW_CANCEL_REQUEST_APPROVED:      //132
                     statusName = "Cancelled";
                     break;
                 case CMMS.CMMS_Status.PTW_EXTEND_REQUESTED:
                     statusName = "Requested for Extension";
                     break;
-                case CMMS.CMMS_Status.PTW_EXTEND_REQUEST_APPROVE:
-                    statusName = "Approved Extension";
-                    break;
                 case CMMS.CMMS_Status.PTW_EXTEND_REQUEST_REJECTED:
-                    statusName = "Rejected Extension";
+                    statusName = "Extension Rejected";
+                    break;
+                case CMMS.CMMS_Status.PTW_EXTEND_REQUEST_APPROVE:       //135
+                    statusName = "Extension Approved";
                     break;
                 case CMMS.CMMS_Status.PTW_LINKED_TO_JOB:
                     statusName = "Linked to Job";
@@ -158,7 +158,7 @@ namespace CMMSAPIs.Repositories.Permits
                     statusName = "Updated";
                     break;
                 default:
-                    statusName = "Invalid";
+                    statusName = "Invalid status " + status;
                     break;
             }
             return statusName;
@@ -167,77 +167,80 @@ namespace CMMSAPIs.Repositories.Permits
         public static string LongStatus(int statusID, CMPermitDetail permitObj)
         {
             CMMS.CMMS_Status status = (CMMS.CMMS_Status)statusID;
-            string statusName = "";
+            int permitId = permitObj.insertedId;
+            string title = permitObj.title;
+            string retValue = "";
+
             switch (status)
             {
                 case CMMS.CMMS_Status.PTW_CREATED:
-                    statusName = "Permit Waiting for Approval";
+                    retValue += String.Format("PTW{0} <{1}> requested by  <{2}>", permitId, title, permitObj.issuedByName);
                     break;
                 case CMMS.CMMS_Status.PTW_ISSUED:
-                    statusName = "Permit Issued";
+                    retValue = String.Format("PTW{0} <{1}> issued by <{2}>", permitId, title, permitObj.issuedByName);
                     break;
                 case CMMS.CMMS_Status.PTW_REJECTED_BY_ISSUER:
-                    statusName = "Permit Rejected By Issuer";
+                    retValue = String.Format("PTW{0} <{1}> Rejected By <{2}>", permitId, title, permitObj.rejectedByName);
                     break;
                 case CMMS.CMMS_Status.PTW_APPROVED:
-                    statusName = "Permit Approved";
+                    retValue = String.Format("PTW{0} <{1}> Approved By <{2}>", permitId, title, permitObj.approvedByName);
                     break;
                 case CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER:
-                    statusName = "Permit Rejected By Approver";
+                    retValue = String.Format("PTW{0} <{1}> Rejected By <{2}>", permitId, title, permitObj.rejectedByName);
                     break;
                 case CMMS.CMMS_Status.PTW_CLOSED:
-                    statusName = "Permit Closed";
+                    retValue = String.Format("PTW{0} <{1}> Closed By <{2}>", permitId, title, permitObj.closedByName);
                     break;
                 case CMMS.CMMS_Status.PTW_CANCELLED_BY_ISSUER:
-                    statusName = "Permit Cancelled BY Issuer";
+                    retValue = String.Format("PTW{0} <{1}> cancelled by Issuer <{2}> ", permitId, title, permitObj.cancelRequestByName);
                     break;
                 case CMMS.CMMS_Status.PTW_CANCELLED_BY_HSE:
-                    statusName = "Permit Cancelled By HSE";
+                    retValue = String.Format("PTW{0} <{1}> cancelled by HSE <{2}> ", permitId, title, permitObj.cancelRequestByName);
                     break;
                 case CMMS.CMMS_Status.PTW_CANCELLED_BY_APPROVER:
-                    statusName = "Permit Cancelled By Approver";
+                    retValue = String.Format("PTW{0} <{1}> cancelled by approver <{2}> ", permitId, title, permitObj.cancelRequestByName);
                     break;
                 case CMMS.CMMS_Status.PTW_CANCEL_REQUESTED:
-                    statusName = "Permit Cancelled";
-                    break;
-                case CMMS.CMMS_Status.PTW_CANCEL_REQUEST_REJECTED:
-                    statusName = "Cancel Request Rejected for Permit";
+                    retValue = String.Format("PTW{0} <{1}> Cancel Requested by <{2}>", permitId, title, permitObj.cancelRequestByName);
                     break;
                 case CMMS.CMMS_Status.PTW_CANCEL_REQUEST_APPROVED:
-                    statusName = "Permit Cancelled";
+                    retValue = String.Format("PTW{0} <{1}> Cancel Requested Approve by <{2}>", permitId, title, permitObj.cancelRequestApprovedByName);
+                    break;
+                case CMMS.CMMS_Status.PTW_CANCEL_REQUEST_REJECTED:
+                    retValue = String.Format("PTW{0} <{1}> Cancel Requested Rejected by <{2}>", permitId, title, permitObj.cancelRequestRejectedByName);
                     break;
                 case CMMS.CMMS_Status.PTW_EXTEND_REQUESTED:
-                    statusName = "Requested for Permit Extension";
+                    retValue = String.Format("PTW{0} <{1}> Extend Requested By <{2}>", permitId, title, permitObj.extendRequestByName);
                     break;
                 case CMMS.CMMS_Status.PTW_EXTEND_REQUEST_APPROVE:
-                    statusName = "Approved Extension for Permit";
+                    retValue = String.Format("PTW{0} <{1}> Cancel Requested Approve by <{2}>", permitId, title, permitObj.extendRequestApprovedByName);
                     break;
                 case CMMS.CMMS_Status.PTW_EXTEND_REQUEST_REJECTED:
-                    statusName = "Rejected Extension for Permit";
+                    retValue = String.Format("PTW{0} <{1}> Cancel Requested Rejected by <{2}>", permitId, title, permitObj.extendRequestRejectedByName);
                     break;
                 case CMMS.CMMS_Status.PTW_LINKED_TO_JOB:
-                    statusName = "Permit Linked to Job";
+                    retValue = String.Format("PTW{0} <{1}> Linked to Job", permitId, title);
                     break;
                 case CMMS.CMMS_Status.PTW_LINKED_TO_PM:
-                    statusName = "Permit Linked to PM";
+                    retValue = String.Format("PTW{0} <{1}> Linked to PM Permit", permitId, title);
                     break;
                 case CMMS.CMMS_Status.PTW_LINKED_TO_AUDIT:
-                    statusName = "Permit Linked to Audit";
+                    retValue = String.Format("PTW{0} <{1}> Linked to Audit", permitId, title);
                     break;
                 case CMMS.CMMS_Status.PTW_LINKED_TO_HOTO:
-                    statusName = "Permit Linked to HOTO";
+                    retValue = String.Format("PTW{0} <{1}> Linked to Hoto", permitId, title);
                     break;
                 case CMMS.CMMS_Status.PTW_EXPIRED:
-                    statusName = "Permit Expired";
+                    retValue = String.Format("PTW{0} <{1}> Expired", permitId, title);
                     break;
                 case CMMS.CMMS_Status.PTW_UPDATED:
-                    statusName = "Permit Updated";
+                    retValue = String.Format("PTW{0} <{1}> Updated", permitId, title);
                     break;
                 default:
-                    statusName = "Invalid";
+                    retValue = String.Format("PTW{0} <{1}> Unknow status <{3}>", permitId, title, status);
                     break;
             }
-            return statusName;
+            return retValue;
         }
         internal static string getShortJobStatus(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status m_notificationID)
         {
@@ -261,21 +264,22 @@ namespace CMMSAPIs.Repositories.Permits
                     retValue = "Job Cancelled";
                     break;
                 default:
-                    retValue = "Unknown Status";
+                    retValue = "Unknown Status " + m_notificationID;
                     break;
             }
             return retValue;
 
         }
+
+
         internal async Task<List<CMDefaultList>> GetPermitTypeList(int facility_id)
         {
             /*
              * return permit_type_id, name from PermitTypeLists table for requsted facility_id 
             */
-            string myQuery = $"SELECT id, description,title as name FROM permittypelists ";
+            string myQuery = $"SELECT id, description, title as name FROM permittypelists ";
             if (facility_id <= 0)
                 throw new ArgumentException("Invalid Facility ID");
-            // myQuery += $"WHERE facilityId = { facility_id } and status = 1  ORDER BY id DESC;";
             myQuery += $"WHERE facilityId  in ({facility_id},0)  and status = 1  ORDER BY id DESC;";
             List<CMDefaultList> _PermitTypeList = await Context.GetData<CMDefaultList>(myQuery).ConfigureAwait(false);
             return _PermitTypeList;
@@ -1272,7 +1276,7 @@ namespace CMMSAPIs.Repositories.Permits
                 string fileIds = "";
                 fileIds += (request?.fileIds?.Length > 0 ? " " + string.Join(" , ", request.fileIds) + " " : string.Empty);
 
-                string updateQry = $"update permits set extendReason = '{request.comment}', extendByMinutes = '{extendMinutes}', extendTime = '{UtilsRepository.GetUTCTime()}',extendFile = '{fileIds}', extendStatus = 0, status = {(int)CMMS.CMMS_Status.PTW_EXTEND_REQUESTED} where id = {request.id}";
+                string updateQry = $"update permits set extendReason = '{request.comment}', extendByMinutes = '{extendMinutes}', extendTime = '{UtilsRepository.GetUTCTime()}', status_updated_at = '{UtilsRepository.GetUTCTime()}, extendFile = '{fileIds}', extendRequestById = '{userID}', extendStatus = 0, status = {(int)CMMS.CMMS_Status.PTW_EXTEND_REQUESTED} where id = {request.id}";
 
                 await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
 
@@ -1321,7 +1325,7 @@ namespace CMMSAPIs.Repositories.Permits
 
         internal async Task<CMDefaultResponse> PermitExtendApprove(CMApproval request, int userID)
         {
-            string updateQry = $"update permits set extendStatus = 1, status = {(int)CMMS.CMMS_Status.PTW_EXTEND_REQUEST_APPROVE}, extendApproveTime = '{UtilsRepository.GetUTCTime()}', endDate = ADDDATE(endDate, INTERVAL extendByMinutes MINUTE) where id = {request.id}";
+            string updateQry = $"update permits set extendStatus = 1, status = {(int)CMMS.CMMS_Status.PTW_EXTEND_REQUEST_APPROVE}, extendRequestApprovedById = '{userID}', status_updated_at = '{UtilsRepository.GetUTCTime()}, extendApproveTime = '{UtilsRepository.GetUTCTime()}', endDate = ADDDATE(endDate, INTERVAL extendByMinutes MINUTE) where id = {request.id}";
 
             List<CMDefaultResp> _Employee = await Context.GetData<CMDefaultResp>(updateQry).ConfigureAwait(false);
             int retValue = await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
@@ -1344,7 +1348,7 @@ namespace CMMSAPIs.Repositories.Permits
 
         internal async Task<CMDefaultResponse> PermitExtendReject(CMApproval request, int userID)
         {
-            string updateQry = $"update permits set extendStatus = 0, status = {(int)CMMS.CMMS_Status.PTW_EXTEND_REQUEST_REJECTED}, status_updated_at = '{UtilsRepository.GetUTCTime()}', extendRejectReason = '{request.comment}' where id = {request.id}";
+            string updateQry = $"update permits set extendStatus = 0, status = {(int)CMMS.CMMS_Status.PTW_EXTEND_REQUEST_REJECTED}, extendRequestRejectedById = '{userID}', status_updated_at = '{UtilsRepository.GetUTCTime()}', extendRejectReason = '{request.comment}' where id = {request.id}";
             int retValue = await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
 
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
@@ -1540,9 +1544,9 @@ namespace CMMSAPIs.Repositories.Permits
             await Context.ExecuteNonQry<int>(qryCondition).ConfigureAwait(false);
 
 
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.id, 0, 0, request.comment, CMMS.CMMS_Status.PTW_CANCEL_REQUEST_APPROVED, userID);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.id, 0, 0, request.comment, CMMS.CMMS_Status.PTW_CANCEL_REQUESTED, userID);
 
-            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_CANCEL_REQUEST_APPROVED, new[] { userID }, permitDetails);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_CANCEL_REQUESTED, new[] { userID }, permitDetails);
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $" Permit  PTW{request.id} Cancelled");
             return response;
         }
@@ -1649,6 +1653,32 @@ namespace CMMSAPIs.Repositories.Permits
 
             await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_CANCEL_REQUEST_REJECTED, new[] { userID }, permitDetails);
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Cancel Request Rejected for Permit **PTW{request.id}** ");
+            return response;
+        }
+        
+        internal async Task<CMDefaultResponse> PermitCancelApprove(CMApproval request, int userID)
+        {
+            /*
+             * Update Permit Table 	cancelReccomendations, cancelRequestDate, cancelRequestStatus
+             * Return Message Cancelled successfully
+            */
+
+            string updateQry = $"update permits set cancelRequestApproveStatus = 1, status = {(int)CMMS.CMMS_Status.PTW_CANCEL_REQUEST_APPROVED}, status_updated_at = '{UtilsRepository.GetUTCTime()}', cancelRequestApproveDate = '{UtilsRepository.GetUTCTime()}', cancelRequestApproveById = {userID}  where id = {request.id}";
+            int retValue = await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+
+            CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
+
+            if (retValue > 0)
+            {
+                retCode = CMMS.RETRUNSTATUS.SUCCESS;
+            }
+
+            CMPermitDetail permitDetails = await GetPermitDetails(request.id, "");
+
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.id, 0, 0, "Permit Cancel Request Rejected" + "" + request.comment, CMMS.CMMS_Status.PTW_CANCEL_REQUEST_APPROVED, userID);
+
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_CANCEL_REQUEST_APPROVED, new[] { userID }, permitDetails);
+            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Cancel Request Approved for Permit **PTW{request.id}** ");
             return response;
         }
 

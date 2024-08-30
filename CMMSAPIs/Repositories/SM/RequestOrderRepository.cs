@@ -52,10 +52,7 @@ namespace CMMSAPIs.Repositories.SM
             }
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_RO, ReturnID, 0, 0, request.comment, CMMS.CMMS_Status.SM_RO_SUBMITTED);
-
             List<CMCreateRequestOrderGET> _ROList = await GetRODetailsByID(ReturnID.ToString(), facilityTimeZone);
-
-
             foreach (var ro in _ROList)
             {
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_RO, CMMS.CMMS_Status.SM_RO_SUBMITTED, new[] { userID }, ro);
@@ -91,7 +88,6 @@ namespace CMMSAPIs.Repositories.SM
             CMDefaultResponse response = new CMDefaultResponse(request.request_order_id, CMMS.RETRUNSTATUS.SUCCESS, "Request order updated successfully.");
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_RO, request.request_order_id, 0, 0, request.comment, CMMS.CMMS_Status.SM_RO_UPDATED);
             List<CMCreateRequestOrderGET> _ROList = await GetRODetailsByID(request.request_order_id.ToString(), facilityTimeZone);
-
             foreach (var ro in _ROList)
             {
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_RO, CMMS.CMMS_Status.SM_RO_UPDATED, new[] { userID }, ro);
@@ -105,7 +101,6 @@ namespace CMMSAPIs.Repositories.SM
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Request order deleted.");
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_RO, request.id, 0, 0, request.comment, CMMS.CMMS_Status.SM_RO_DELETED);
             List<CMCreateRequestOrderGET> _ROList = await GetRODetailsByID(request.id.ToString(), facilityTimeZone);
-
             foreach (var ro in _ROList)
             {
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_RO, CMMS.CMMS_Status.SM_RO_DELETED, new[] { userID }, ro);
@@ -120,7 +115,6 @@ namespace CMMSAPIs.Repositories.SM
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Request order {" + request.id + "} closed.");
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_RO, request.id, 0, 0, request.comment, CMMS.CMMS_Status.SM_RO_CLOSED);
             List<CMCreateRequestOrderGET> _ROList = await GetRODetailsByID(request.id.ToString(), facilityTimeZone);
-
             foreach (var ro in _ROList)
             {
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_RO, CMMS.CMMS_Status.SM_RO_CLOSED, new[] { userID }, ro);
@@ -294,7 +288,6 @@ namespace CMMSAPIs.Repositories.SM
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_RO, request.id, 0, 0, request.comment, CMMS.CMMS_Status.SM_RO_SUBMIT_APPROVED);
 
             List<CMCreateRequestOrderGET> _ROList = await GetRODetailsByID(request.id.ToString(), facilityTimeZone);
-
             foreach (var ro in _ROList)
             {
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_RO, CMMS.CMMS_Status.SM_RO_SUBMIT_APPROVED, new[] { userId }, ro);
@@ -325,12 +318,10 @@ namespace CMMSAPIs.Repositories.SM
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_RO, request.id, 0, 0, request.comment, CMMS.CMMS_Status.SM_RO_SUBMIT_REJECTED);
 
             List<CMCreateRequestOrderGET> _ROList = await GetRODetailsByID(request.id.ToString(), facilityTimeZone);
-
             foreach (var ro in _ROList)
             {
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_RO, CMMS.CMMS_Status.SM_RO_SUBMIT_REJECTED, new[] { userId }, ro);
             }
-
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Rejected request order.");
             return response;
         }
