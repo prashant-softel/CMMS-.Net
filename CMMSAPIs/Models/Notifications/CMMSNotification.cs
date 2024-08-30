@@ -9,6 +9,8 @@ using CMMSAPIs.Models.Jobs;
 using CMMSAPIs.Models.Mails;
 using CMMSAPIs.Models.MC;
 using CMMSAPIs.Models.Permits;
+using CMMSAPIs.Models.PM;
+using CMMSAPIs.Models.SM;
 using CMMSAPIs.Models.Users;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Models.WC;
@@ -386,12 +388,11 @@ namespace CMMSAPIs.Models.Notifications
                 notificationObj = new GrievanceNotification(moduleID, notificationID, _Grievance);
                 //facilityId = _Inventory.facility_id;
             }
-
-            else if (moduleID == CMMS.CMMS_Modules.MC_PLAN)
+            else if (moduleID == CMMS.CMMS_Modules.SM_GO)      //GO Report
             {
-                CMMCPlan _Plan = (CMMCPlan)args[0];
-                notificationObj = new MCNotification(moduleID, notificationID, _Plan, null);
-                //facilityId = _Inventory.facility_id;
+                CMGOMaster _GO = (CMGOMaster)args[0];
+                notificationObj = new GONotification(moduleID, notificationID, _GO);
+                facilityId = _GO.facility_id;
             }
             else if (moduleID == CMMS.CMMS_Modules.MC_TASK)
             {
