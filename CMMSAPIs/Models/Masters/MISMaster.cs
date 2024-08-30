@@ -829,15 +829,15 @@ namespace CMMSAPIs.Models.Masters
     public class CumalativeReport
     {
         public string Site_name { get; set; }
-        public dynamic JobsCreated { get; set; }
+        public dynamic Created { get; set; }
 
-        public dynamic JobsClosed { get; set; }
-        public dynamic JobsCancelled { get; set; }
-        public dynamic JobsNotStarted { get; set; }
-        public dynamic JobsOngoing { get; set; }
-        public dynamic JobsClosedOnTime { get; set; }
-        public dynamic JobsClosedWithExtension { get; set; }
-        public dynamic JobClosedOnTimeCreate { get; set; }
+        public dynamic Closed { get; set; }
+        public dynamic Cancelled { get; set; }
+        public dynamic NotStarted { get; set; }
+        public dynamic Ongoing { get; set; }
+        public dynamic ClosedOnTime { get; set; }
+        public dynamic ClosedWithExtension { get; set; }
+        public dynamic ClosedOnTimeCreate { get; set; }
 
     }
 }

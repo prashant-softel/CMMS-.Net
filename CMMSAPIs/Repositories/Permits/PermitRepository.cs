@@ -112,6 +112,9 @@ namespace CMMSAPIs.Repositories.Permits
                 case CMMS.CMMS_Status.PTW_CLOSED:
                     statusName = "Closed";
                     break;
+                case CMMS.CMMS_Status.PTW_RESUBMIT:
+                    statusName = "Resubmited";
+                    break;
                 case CMMS.CMMS_Status.PTW_CANCELLED_BY_ISSUER:
                     statusName = "Cancelled BY Issuer";
                     break;
@@ -232,6 +235,9 @@ namespace CMMSAPIs.Repositories.Permits
                     break;
                 case CMMS.CMMS_Status.PTW_UPDATED:
                     statusName = "Permit Updated";
+                    break;
+                case CMMS.CMMS_Status.PTW_RESUBMIT:
+                    statusName = "Permit Resubmited";
                     break;
                 default:
                     statusName = "Invalid";
@@ -1826,7 +1832,7 @@ namespace CMMSAPIs.Repositories.Permits
             {
                 System.Text.StringBuilder sb = new System.Text.StringBuilder(request.description);
                 sb.Append(" " + request.comment);
-                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.permit_id, 0, 0, sb.ToString(), CMMS.CMMS_Status.PTW_CREATED, userID);
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.permit_id, 0, 0, sb.ToString(), CMMS.CMMS_Status.PTW_RESUBMIT, userID);
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_CREATED, new[] { userID }, permitDetails);
                 response = new CMDefaultResponse(request.permit_id, CMMS.RETRUNSTATUS.SUCCESS, $"Permit Resubmitted for Approval");
 
