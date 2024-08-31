@@ -270,6 +270,7 @@ namespace CMMSAPIs.Models.Notifications
                 notificationRecordsQry = notificationRecordsQry.Substring(0, notificationRecordsQry.Length - 1);
             }
             System.Data.DataTable dt2 = await _conn.FetchData(notificationRecordsQry).ConfigureAwait(false);*/
+            EmailTo.Add("notifications@softeltech.in");
             if (emailCount > 0)
             {
                 EmailTo.Add("cmms@softeltech.in");
