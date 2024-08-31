@@ -2027,7 +2027,7 @@ namespace CMMSAPIs.BS.MISMasters
             {
                 using (var repos = new MISMasterRepository(getDB))
                 {
-                    return await repos.DeletePlantationData(id);
+                    return await repos.DeleteKaizensData(id);
                 }
             }
             catch (Exception ex)
