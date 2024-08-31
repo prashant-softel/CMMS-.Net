@@ -422,9 +422,9 @@ namespace CMMSAPIs.Repositories.SM
                 CMMrsApproval approve_request = new CMMrsApproval();
                 approve_request.id = request.ID;
                 approve_request.comment = "MRS approval not required.";
-                var mrsApproved = await mrsApproval(approve_request, UserID);
+                var mrsApproved = await mrsApproval(approve_request, UserID, facilitytimeZone);
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_MRS, request.ID, 0, 0, approve_request.comment, CMMS.CMMS_Status.MRS_SUBMITTED);
-                CMMRSList _MRSList = await getMRSDetails(UserID, facilitytimeZone);
+                //CMMRSList _MRSList = await getMRSDetails(UserID, facilitytimeZone);
             }
                 CMMRSList _MRSList = await getMRSDetails(request.ID, facilitytimeZone);
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_MRS, CMMS.CMMS_Status.MRS_SUBMITTED, new[] { UserID }, _MRSList);

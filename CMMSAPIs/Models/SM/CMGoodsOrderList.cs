@@ -76,12 +76,6 @@ namespace CMMSAPIs.Models
         public string storage_rack_no { get; set; }
         public string storage_row_no { get; set; }
         public string storage_column_no { get; set; }
-        public string closed_by { get; set; }
-        public string deleted_by { get; set; }
-        public string rejected_by_name { get; set; }
-        public string received_submitted_by { get; set; }
-        public string received_rejected_by { get; set; }
-        public string received_approved_by { get; set; }
         public string closed_by_name { get; set; }
         public string deleted_by { get; set; }
         public string drafted_by_name { get; set; }
@@ -106,7 +100,11 @@ namespace CMMSAPIs.Models
         public DateTime? receive_rejected_at { get; set; }
 
         public string submitted_by_name { get; set; }
-         public List<CMGO_ITEMS> go_items { get; set; }
+
+
+
+
+        public List<CMGO_ITEMS> go_items { get; set; }
     }
     public class CMGO_ITEMS
     {
@@ -270,26 +268,6 @@ namespace CMMSAPIs.Models
         public string title { get; set; }
         public int order_by_type { get; set; }
         public string remarks { get; set; }
-        public string drafted_by_name { get; set; }
-        public string drafted_at { get; set; }
-        public string submitted_by_name { get; set; }
-        public string submitted_at { get; set; }
-        public string closed_by_name { get; set; }
-        public string closed_at { get; set; }
-        public string deleted_by_name { get; set; }
-        public string deleted_at { get; set; }
-        public string Rejected_by_name { get; set; }
-        public string Rejected_at { get; set; }
-        public string approved_by_name { get; set; }
-        public string approved_at { get; set; }
-        public string receive_draft_by_name { get; set; }
-        public string receive_draft_at { get; set; }
-        public string receive_submitted_by_name { get; set; }
-        public string receive_submitted_at { get; set; }
-        public string receive_rejected_by_name { get; set; }
-        public string receive_rejected_at { get; set; }
-        public string receive_approved_by_name { get; set; }
-        public string receive_approved_at { get; set; }
         public int drafted_by_id { get; set; }
         public string drafted_by_name { get; set; }
         public DateTime? drafted_at { get; set; }

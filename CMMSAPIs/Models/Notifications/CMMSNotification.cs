@@ -56,6 +56,7 @@ namespace CMMSAPIs.Models.Notifications
         private static IConfigurationRoot MyConfig;
         private static string _conString;
         public static MYSQLDBHelper getDB;
+        public static MYSQLDBHelper _conn;
 
 
         private UserAccessRepository _userAccessRepository;
@@ -497,7 +498,7 @@ namespace CMMSAPIs.Models.Notifications
             {
                 CMMRSList _MRS = (CMMRSList)args[0];
                 notificationObj = new MRSNotification(moduleID, notificationID, _MRS);
-                facilityId = _MRS.facilityId;   // CMMRSList update the query to facilityid in a list
+                //facilityId = _MRS.facilityId;   // CMMRSList update the query to facilityid in a list
             }
             else if (moduleID == CMMS.CMMS_Modules.PM_PLAN)
             {

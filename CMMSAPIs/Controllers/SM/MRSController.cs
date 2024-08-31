@@ -58,7 +58,7 @@ namespace CMMSAPIs.Controllers.SM
         {
             try
             {
-                int facility_id = request.facility_ID;
+                //int facility_id = request.facility_ID;
 
                 var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
