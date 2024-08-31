@@ -26,12 +26,12 @@ namespace CMMSAPIs.Controllers.PM
         //[Authorize]
         [Route("CancelPMTask")]
         [HttpPut]
-        public async Task<IActionResult> CancelPMTask(CMApproval request)
+        public async Task<IActionResult> CancelPMTask(CMApproval request, string facilitytime)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _PMScheduleViewBS.CancelPMTask(request, userID);
+                var data = await _PMScheduleViewBS.CancelPMTask(request, userID, facilitytime);
                 return Ok(data);
             }
             catch (Exception)
@@ -95,12 +95,12 @@ namespace CMMSAPIs.Controllers.PM
         //[Authorize]
         [Route("LinkPermitToPMTask")]
         [HttpPut]
-        public async Task<IActionResult> LinkPermitToPMTask(int task_id, int permit_id)
+        public async Task<IActionResult> LinkPermitToPMTask(int task_id, int permit_id, string facilitytime)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _PMScheduleViewBS.LinkPermitToPMTask(task_id, permit_id, userID);
+                var data = await _PMScheduleViewBS.LinkPermitToPMTask(task_id, permit_id, userID, facilitytime);
                 return Ok(data);
             }
             catch (Exception)
@@ -112,12 +112,13 @@ namespace CMMSAPIs.Controllers.PM
         //[Authorize]
         [Route("AddCustomCheckpoint")]
         [HttpPost]
-        public async Task<IActionResult> AddCustomCheckpoint(CMCustomCheckPoint request)
+        public async Task<IActionResult> AddCustomCheckpoint(CMCustomCheckPoint request, int facility_id)
         {
             try
             {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _PMScheduleViewBS.AddCustomCheckpoint(request, userID);
+                var data = await _PMScheduleViewBS.AddCustomCheckpoint(request, userID, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception)
@@ -129,12 +130,12 @@ namespace CMMSAPIs.Controllers.PM
         //[Authorize]
         [Route("StartPMTask")]
         [HttpPost]
-        public async Task<IActionResult> StartPMTask(int task_id)
+        public async Task<IActionResult> StartPMTask(int task_id, string facilitytime)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _PMScheduleViewBS.StartPMTask(task_id, userID);
+                var data = await _PMScheduleViewBS.StartPMTask(task_id, userID, facilitytime);
                 return Ok(data);
             }
             catch (FieldAccessException ex)
@@ -150,12 +151,12 @@ namespace CMMSAPIs.Controllers.PM
         //[Authorize]
         [Route("UpdatePMTaskExecution")]
         [HttpPatch]
-        public async Task<IActionResult> UpdatePMTaskExecution(CMPMExecutionDetail request)
+        public async Task<IActionResult> UpdatePMTaskExecution(CMPMExecutionDetail request, string facilitytime)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _PMScheduleViewBS.UpdatePMTaskExecution(request, userID);
+                var data = await _PMScheduleViewBS.UpdatePMTaskExecution(request, userID, facilitytime);
                 return Ok(data);
             }
             catch (Exception)
@@ -167,12 +168,12 @@ namespace CMMSAPIs.Controllers.PM
         //[Authorize]
         [Route("ClosePMTaskExecution")]
         [HttpPut]
-        public async Task<IActionResult> ClosePMTaskExecution(CMApproval request)
+        public async Task<IActionResult> ClosePMTaskExecution(CMApproval request, string facilitytime)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _PMScheduleViewBS.ClosePMTaskExecution(request, userID);
+                var data = await _PMScheduleViewBS.ClosePMTaskExecution(request, userID, facilitytime);
                 //request.comment = "Approved";
                 //var data2 = _PMScheduleViewBS.ApprovePMTaskExecution(request, userID);
                 return Ok(data);
@@ -185,12 +186,12 @@ namespace CMMSAPIs.Controllers.PM
 
         [Route("CancelApprovedPMTaskExecution")]
         [HttpPut]
-        public async Task<IActionResult> CancelApprovedPMTaskExecution(CMApproval request)
+        public async Task<IActionResult> CancelApprovedPMTaskExecution(CMApproval request, string facilitytime)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _PMScheduleViewBS.CancelApprovedPMTaskExecution(request, userID);
+                var data = await _PMScheduleViewBS.CancelApprovedPMTaskExecution(request, userID, facilitytime);
                 //request.comment = "Approved";
                 //var data2 = _PMScheduleViewBS.ApprovePMTaskExecution(request, userID);
                 return Ok(data);
@@ -202,12 +203,12 @@ namespace CMMSAPIs.Controllers.PM
         }
         [Route("CancelRejectedPMTaskExecution")]
         [HttpPut]
-        public async Task<IActionResult> CancelRejectedPMTaskExecution(CMApproval request)
+        public async Task<IActionResult> CancelRejectedPMTaskExecution(CMApproval request, string facilitytime)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _PMScheduleViewBS.CancelRejectedPMTaskExecution(request, userID);
+                var data = await _PMScheduleViewBS.CancelRejectedPMTaskExecution(request, userID, facilitytime);
                 //request.comment = "Approved";
                 //var data2 = _PMScheduleViewBS.ApprovePMTaskExecution(request, userID);
                 return Ok(data);
@@ -221,12 +222,12 @@ namespace CMMSAPIs.Controllers.PM
         //[Authorize]
         [Route("ApprovePMTaskExecution")]
         [HttpPut]
-        public async Task<IActionResult> ApprovePMTaskExecution(CMApproval request)
+        public async Task<IActionResult> ApprovePMTaskExecution(CMApproval request, string facilitytime)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _PMScheduleViewBS.ApprovePMTaskExecution(request, userID);
+                var data = await _PMScheduleViewBS.ApprovePMTaskExecution(request, userID, facilitytime);
                 return Ok(data);
             }
             catch (Exception)
@@ -238,12 +239,12 @@ namespace CMMSAPIs.Controllers.PM
         //[Authorize]
         [Route("RejectPMTaskExecution")]
         [HttpPut]
-        public async Task<IActionResult> RejectPMTaskExecution(CMApproval request)
+        public async Task<IActionResult> RejectPMTaskExecution(CMApproval request, string facilitytime)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _PMScheduleViewBS.RejectPMTaskExecution(request, userID);
+                var data = await _PMScheduleViewBS.RejectPMTaskExecution(request, userID, facilitytime);
                 return Ok(data);
             }
             catch (Exception)
@@ -254,12 +255,12 @@ namespace CMMSAPIs.Controllers.PM
 
         [Route("AssignPMTask")]
         [HttpPut]
-        public async Task<IActionResult> AssignPMTask(int task_id, int assign_to)
+        public async Task<IActionResult> AssignPMTask(int task_id, int assign_to, string facilitytime)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _PMScheduleViewBS.AssignPMTask(task_id, assign_to, userID);
+                var data = await _PMScheduleViewBS.AssignPMTask(task_id, assign_to, userID, facilitytime);
                 return Ok(data);
             }
             catch (Exception)
@@ -270,12 +271,12 @@ namespace CMMSAPIs.Controllers.PM
 
         [Route("UpdatePMScheduleExecution")]
         [HttpPatch]
-        public async Task<IActionResult> UpdatePMScheduleExecution(CMPMExecutionDetail request)
+        public async Task<IActionResult> UpdatePMScheduleExecution(CMPMExecutionDetail request, string facilitytime)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _PMScheduleViewBS.UpdatePMScheduleExecution(request, userID);
+                var data = await _PMScheduleViewBS.UpdatePMScheduleExecution(request, userID, facilitytime);
                 return Ok(data);
             }
             catch (Exception)
@@ -336,6 +337,67 @@ namespace CMMSAPIs.Controllers.PM
                 {
                     throw;
                 }
+            }
+        }
+
+
+        [Route("GetScheduleData")]
+        [HttpGet]
+        public async Task<IActionResult> GetScheduleData(int facility_id, int category_id)
+        {
+            try
+            {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+
+                var data = await _PMScheduleViewBS.GetScheduleData(facility_id, category_id, facilitytimeZone);
+                return Ok(data);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [Route("SetScheduleData")]
+        [HttpPost]
+        public async Task<IActionResult> SetScheduleData(CMSetScheduleData request, int task_id, int schedule_id)
+        {
+            try
+            {
+                int facility_id = request.facility_id;
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _PMScheduleViewBS.SetScheduleData(request, userID, task_id, schedule_id, facilitytimeZone);
+                return Ok(data);
+            }/*
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }*/
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [Route("DeletePMTask")]
+        [HttpPost]
+        public async Task<IActionResult> DeletePMTask(CMApproval request, int facility_id)
+        {
+            try
+            {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _PMScheduleViewBS.DeletePMTask(request, userID, facilitytimeZone);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
             }
         }
     }

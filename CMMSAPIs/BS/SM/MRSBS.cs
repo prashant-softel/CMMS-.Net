@@ -10,7 +10,8 @@ namespace CMMSAPIs.BS.SM
 {
     public interface IMRSBS
     {
-        Task<CMDefaultResponse> CreateMRS(CMMRS request, int UserID, string facilitytime);
+
+        Task<CMDefaultResponse> CreateMRS(CMMRS request, int UserID, string facilitytimeZone);
         Task<CMDefaultResponse> updateMRS(CMMRS request, int UserID);
         Task<List<CMMRSList>> getMRSList(int facility_ID, int emp_id, DateTime toDate, DateTime fromDate, int status, string facilitytime);
         Task<List<CMMRSListByModule>> getMRSListByModule(int jobId, int pmId, string facilitytime);
@@ -23,16 +24,16 @@ namespace CMMSAPIs.BS.SM
         Task<CMDefaultResponse> CreateReturnMRS(CMMRS request, int UserID);
         Task<CMDefaultResponse> CreateReturnFaultyMRS(CMMRS request, int UserID);
         Task<CMDefaultResponse> UpdateReturnMRS(CMMRS request, int UserID);
-        Task<CMDefaultResponse> mrsApproval(CMMrsApproval request, int userId);
-        Task<CMDefaultResponse> mrsReject(CMApproval request, int userId);
+        Task<CMDefaultResponse> mrsApproval(CMMrsApproval request, int userId, string facilitytimeZone);
+        Task<CMDefaultResponse> mrsReject(CMApproval request, int userId, string facilitytimeZone);
         Task<CMDefaultResponse> ApproveMRSReturn(CMApproval request, int UserID);
         Task<CMDefaultResponse> RejectMRSReturn(CMApproval request, int UserID);
         void UpdateAssetStatus(int assetItemID, int status);
         Task<CMMRS> getLastTemplateData(int ID);
         Task<List<CMAssetItem>> GetAssetItems(int facility_ID, bool isGroupByCode = false);
-        Task<CMDefaultResponse> MRSIssue(CMMRS request, int UserID);
-        Task<CMDefaultResponse> ApproveMRSIssue(CMApproval request, int userId);
-        Task<CMDefaultResponse> RejectMRSIssue(CMApproval request, int userId);
+        Task<CMDefaultResponse> MRSIssue(CMMRS request, int UserID, string facilitytimeZone);
+        Task<CMDefaultResponse> ApproveMRSIssue(CMApproval request, int userId, string facilitytimeZone);
+        Task<CMDefaultResponse> RejectMRSIssue(CMApproval request, int userId, string facilitytimeZone);
         Task<List<CMMRSList>> GetMRSReturnList(int facility_ID, bool self_view, int userID, string facilitytime);
         Task<CMDefaultResponse> TransactionDetails(List<CMTransferItems> request);
         Task<CMDefaultResponse> updateUsedQty(List<CMTransferItems> request);
@@ -49,13 +50,14 @@ namespace CMMSAPIs.BS.SM
             databaseProvider = dbProvider;
         }
 
-        public async Task<CMDefaultResponse> CreateMRS(CMMRS request, int UserID, string facilitytime)
+
+        public async Task<CMDefaultResponse> CreateMRS(CMMRS request, int UserID, string facilitytimeZone)
         {
             try
             {
                 using (var repos = new MRSRepository(getDB))
                 {
-                    return await repos.CreateMRS(request, UserID, facilitytime);
+                    return await repos.CreateMRS(request, UserID, facilitytimeZone);
                 }
             }
             catch (Exception ex)
@@ -241,13 +243,13 @@ namespace CMMSAPIs.BS.SM
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> mrsApproval(CMMrsApproval request, int userId)
+        public async Task<CMDefaultResponse> mrsApproval(CMMrsApproval request, int userId, string facilitytimeZone)
         {
             try
             {
                 using (var repos = new MRSRepository(getDB))
                 {
-                    return await repos.mrsApproval(request, userId);
+                    return await repos.mrsApproval(request, userId, facilitytimeZone);
                 }
             }
             catch (Exception ex)
@@ -256,13 +258,13 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<CMDefaultResponse> mrsReject(CMApproval request, int userId)
+        public async Task<CMDefaultResponse> mrsReject(CMApproval request, int userId, string facilitytimeZone)
         {
             try
             {
                 using (var repos = new MRSRepository(getDB))
                 {
-                    return await repos.mrsReject(request, userId);
+                    return await repos.mrsReject(request, userId, facilitytimeZone);
                 }
             }
             catch (Exception ex)
@@ -345,13 +347,13 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<CMDefaultResponse> MRSIssue(CMMRS request, int UserID)
+        public async Task<CMDefaultResponse> MRSIssue(CMMRS request, int UserID, string facilitytimeZone)
         {
             try
             {
                 using (var repos = new MRSRepository(getDB))
                 {
-                    return await repos.MRSIssue(request, UserID);
+                    return await repos.MRSIssue(request, UserID, facilitytimeZone);
                 }
             }
             catch (Exception ex)
@@ -360,13 +362,13 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<CMDefaultResponse> ApproveMRSIssue(CMApproval request, int userId)
+        public async Task<CMDefaultResponse> ApproveMRSIssue(CMApproval request, int userId, string facilitytimeZone)
         {
             try
             {
                 using (var repos = new MRSRepository(getDB))
                 {
-                    return await repos.ApproveMRSIssue(request, userId);
+                    return await repos.ApproveMRSIssue(request, userId, facilitytimeZone);
                 }
             }
             catch (Exception ex)
@@ -375,13 +377,13 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<CMDefaultResponse> RejectMRSIssue(CMApproval request, int userId)
+        public async Task<CMDefaultResponse> RejectMRSIssue(CMApproval request, int userId, string facilitytimeZone)
         {
             try
             {
                 using (var repos = new MRSRepository(getDB))
                 {
-                    return await repos.RejectMRSIssue(request, userId);
+                    return await repos.RejectMRSIssue(request, userId, facilitytimeZone);
                 }
             }
             catch (Exception ex)

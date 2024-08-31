@@ -448,6 +448,7 @@ namespace CMMSAPIs.Helper
             WC_CLOSE_APPROVED,
             WC_CLOSED_REJECTED,
             WC_CANCELLED,
+            WC_UPDATED,
 
             CALIBRATION_SCHEDULED = 211,
             CALIBRATION_REQUEST,

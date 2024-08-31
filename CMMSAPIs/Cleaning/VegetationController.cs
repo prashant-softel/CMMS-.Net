@@ -61,11 +61,27 @@ namespace CMMSAPIs.Controllers.Vegetation
 
         [Route("CreateVegetationPlan")]
         [HttpPost]
-        public async Task<IActionResult> CreateVegetationPlan(List<CMMCPlan> request, int facilityId)
+        public async Task<IActionResult> CreateVegetationPlan(List<CMMCPlan> request)
         {
             try
             {
-                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
+                // Assuming the facilityId is the same for all plans in the request list,
+                // we can just take the facilityId from the first item in the list.
+                int facilityId = request.FirstOrDefault()?.facilityId ?? 0;
+
+                if (facilityId == 0)
+                {
+                    return BadRequest("Invalid facility ID.");
+                }
+
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo"))
+                    .FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
+
+                if (facilitytimeZone == null)
+                {
+                    return NotFound("Facility timezone not found.");
+                }
+
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
                 var data = await _vegetationBS.CreatePlan(request, userId, facilitytimeZone);
                 return Ok(data);
@@ -76,13 +92,32 @@ namespace CMMSAPIs.Controllers.Vegetation
             }
         }
 
+
         [Route("UpdateVegetationPlan")]
         [HttpPost]
-        public async Task<IActionResult> UpdateVegetationPlan(List<CMMCPlan> request, int facilityId)
+        public async Task<IActionResult> UpdateVegetationPlan(List<CMMCPlan> request)
         {
             try
             {
-                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
+
+                // Extract the facilityId from the first item in the request list
+                int facilityId = request.FirstOrDefault()?.facilityId ?? 0;
+
+                if (facilityId == 0)
+                {
+                    return BadRequest("Invalid facility ID.");
+                }
+
+                // Get the facility timezone based on the extracted facilityId
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo"))
+                    .FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
+
+                if (facilitytimeZone == null)
+                {
+                    return NotFound("Facility timezone not found.");
+                }
+
+                // Get the user ID from the session
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
                 var data = await _vegetationBS.UpdatePlan(request, userId, facilitytimeZone);
                 return Ok(data);

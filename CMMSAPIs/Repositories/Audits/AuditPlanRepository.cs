@@ -871,8 +871,8 @@ namespace CMMSAPIs.Repositories.Audits
             {
                 if (vlt.breakdown_time != null && vlt.breakdown_time != null)
                     vlt.breakdown_time = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)vlt.breakdown_time);
-                if (vlt.closed_at != null && vlt.closed_at != null)
-                    vlt.closed_at = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, vlt.closed_at);
+                if (vlt.Job_closed_on != null && vlt.Job_closed_on != null)
+                    vlt.Job_closed_on = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, vlt.Job_closed_on);
                 if (vlt.created_at != null && vlt.created_at != null)
                     vlt.created_at = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)vlt.created_at);
 

@@ -1,9 +1,11 @@
 ﻿using CMMSAPIs.Helper;
+using CMMSAPIs.Repositories.Inventory;
 using CMMSAPIs.Models.Inventory;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Inventory;
 using Microsoft.AspNetCore.Hosting;
 using System;
+using System.Data;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -13,7 +15,7 @@ namespace CMMSAPIs.BS.Inventory
     {
         Task<List<CMInventoryList>> GetInventoryList(int facilityId, int linkedToBlockId, int status, string categoryIds, string facilitytime);
         Task<CMViewInventory> GetInventoryDetails(int id, string facilitytime);
-        Task<CMDefaultResponse> AddInventory(List<CMAddInventory> request, int userID);
+        Task<CMDefaultResponse> AddInventory(List<CMAddInventory> request, int userID, string facilitytimeZone);
         Task<CMImportFileResponse> ImportInventories(int file_id, int facility_id, int userID);
         Task<CMDefaultResponse> UpdateInventory(CMAddInventory request, int userID);
         Task<CMDefaultResponse> DeleteInventory(int id, int userID);
@@ -80,13 +82,13 @@ namespace CMMSAPIs.BS.Inventory
             }
         }
 
-        public async Task<CMDefaultResponse> AddInventory(List<CMAddInventory> request, int userID)
+        public async Task<CMDefaultResponse> AddInventory(List<CMAddInventory> request, int userID, string facilitytimeZone)
         {
             try
             {
                 using (var repos = new InventoryRepository(getDB, _environment))
                 {
-                    return await repos.AddInventory(request, userID);
+                    return await repos.AddInventory(request, userID, facilitytimeZone);
 
                 }
             }

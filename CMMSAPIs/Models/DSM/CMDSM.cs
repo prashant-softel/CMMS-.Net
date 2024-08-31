@@ -52,5 +52,11 @@ namespace CMMSAPIs.Models.DSM
         public int[] DSMTypeId { get; set; }
 
     }
+    public class DSMTYPE
+    {
+        public int id { get; set; }
+        public string name { get; set; }
+
+    }
 
 }

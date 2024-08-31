@@ -12,12 +12,12 @@ namespace CMMSAPIs.BS.SM
     {
         Task<List<CMCreateRequestOrder>> GetRequestOrderList(int facilityID, DateTime fromDate, DateTime toDate, string facilitytime);
         Task<List<CMCreateRequestOrderGET>> GetRODetailsByID(string IDs, string facilitytime);
-        Task<CMDefaultResponse> CreateRequestOrder(CMCreateRequestOrder request, int userID);
-        Task<CMDefaultResponse> UpdateRequestOrder(CMCreateRequestOrder request, int userID);
-        Task<CMDefaultResponse> DeleteRequestOrder(CMApproval request, int userID);
-        Task<CMDefaultResponse> ApproveRequestOrder(CMApproval request, int userID);
-        Task<CMDefaultResponse> RejectRequestOrder(CMApproval request, int userID);
-        Task<CMDefaultResponse> CloseRequestOrder(CMApproval request, int userID);
+        Task<CMDefaultResponse> CreateRequestOrder(CMCreateRequestOrder request, int userID, string facilityTimeZone);
+        Task<CMDefaultResponse> UpdateRequestOrder(CMCreateRequestOrder request, int userID, string facilityTimeZone);
+        Task<CMDefaultResponse> DeleteRequestOrder(CMApproval request, int userID, string facilityTimeZone);
+        Task<CMDefaultResponse> ApproveRequestOrder(CMApproval request, int userID, string facilityTimeZone);
+        Task<CMDefaultResponse> RejectRequestOrder(CMApproval request, int userID, string facilityTimeZone);
+        Task<CMDefaultResponse> CloseRequestOrder(CMApproval request, int userID, string facilityTimeZone);
     }
     public class RequestOrderBS : IRequestOrderBS
     {
@@ -57,13 +57,13 @@ namespace CMMSAPIs.BS.SM
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> CreateRequestOrder(CMCreateRequestOrder request, int userID)
+        public async Task<CMDefaultResponse> CreateRequestOrder(CMCreateRequestOrder request, int userID, string facilityTimeZone)
         {
             try
             {
                 using (var repos = new RequestOrderRepository(getDB))
                 {
-                    return await repos.CreateRequestOrder(request, userID);
+                    return await repos.CreateRequestOrder(request, userID, facilityTimeZone);
 
                 }
             }
@@ -72,13 +72,13 @@ namespace CMMSAPIs.BS.SM
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> UpdateRequestOrder(CMCreateRequestOrder request, int userID)
+        public async Task<CMDefaultResponse> UpdateRequestOrder(CMCreateRequestOrder request, int userID, string facilityTimeZone)
         {
             try
             {
                 using (var repos = new RequestOrderRepository(getDB))
                 {
-                    return await repos.UpdateRequestOrder(request, userID);
+                    return await repos.UpdateRequestOrder(request, userID, facilityTimeZone);
 
                 }
             }
@@ -87,29 +87,13 @@ namespace CMMSAPIs.BS.SM
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> DeleteRequestOrder(CMApproval request, int userID)
+        public async Task<CMDefaultResponse> DeleteRequestOrder(CMApproval request, int userID, string facilityTimeZone)
         {
             try
             {
                 using (var repos = new RequestOrderRepository(getDB))
                 {
-                    return await repos.DeleteRequestOrder(request, userID);
-
-                }
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        }
-
-        public async Task<CMDefaultResponse> CloseRequestOrder(CMApproval request, int userID)
-        {
-            try
-            {
-                using (var repos = new RequestOrderRepository(getDB))
-                {
-                    return await repos.CloseRequestOrder(request, userID);
+                    return await repos.DeleteRequestOrder(request, userID, facilityTimeZone);
 
                 }
             }
@@ -119,13 +103,13 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<CMDefaultResponse> ApproveRequestOrder(CMApproval request, int userID)
+        public async Task<CMDefaultResponse> CloseRequestOrder(CMApproval request, int userID, string facilityTimeZone)
         {
             try
             {
                 using (var repos = new RequestOrderRepository(getDB))
                 {
-                    return await repos.ApproveRequestOrder(request, userID);
+                    return await repos.CloseRequestOrder(request, userID, facilityTimeZone);
 
                 }
             }
@@ -135,13 +119,29 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<CMDefaultResponse> RejectRequestOrder(CMApproval request, int userID)
+        public async Task<CMDefaultResponse> ApproveRequestOrder(CMApproval request, int userID, string facilityTimeZone)
         {
             try
             {
                 using (var repos = new RequestOrderRepository(getDB))
                 {
-                    return await repos.RejectRequestOrder(request, userID);
+                    return await repos.ApproveRequestOrder(request, userID, facilityTimeZone);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> RejectRequestOrder(CMApproval request, int userID, string facilityTimeZone)
+        {
+            try
+            {
+                using (var repos = new RequestOrderRepository(getDB))
+                {
+                    return await repos.RejectRequestOrder(request, userID, facilityTimeZone);
 
                 }
             }

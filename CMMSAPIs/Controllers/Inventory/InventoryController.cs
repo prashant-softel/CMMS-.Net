@@ -106,7 +106,7 @@ namespace CMMSAPIs.Controllers.Inventory
         //[Authorize]
         [Route("AddInventory")]
         [HttpPost]
-        public async Task<IActionResult> AddInventory(List<CMAddInventory> request, int userID)
+        public async Task<IActionResult> AddInventory(List<CMAddInventory> request, int facility_id)
         {
             if (request is null)
             {
@@ -115,7 +115,9 @@ namespace CMMSAPIs.Controllers.Inventory
 
             try
             {
-                var data = await _InventoryBS.AddInventory(request, userID);
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _InventoryBS.AddInventory(request, userID, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)

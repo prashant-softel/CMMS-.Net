@@ -184,6 +184,11 @@ namespace CMMSAPIs.Models.SM
         public DateTime? generatedAt { get; set; }
         public int number_of_masters { get; set; }
         public int number_of_item_count { get; set; }
+        public string deleted_by { get; set; }
+        public string deleted_at { get; set; }
+        public string closed_by { get; set; }
+        public string closed_at { get; set; }
+        public string drafted_by { get; set; }
         public List<CMRequestOrder_ITEMS_GET> request_order_items { get; set; }
     }
     public class CMRequestOrder_ITEMS_GET

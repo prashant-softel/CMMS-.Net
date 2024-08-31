@@ -85,8 +85,12 @@ namespace CMMSAPIs.Models.Inventory
         public DateTime? Imported_at { get; set; }
         public string Imported_by { get; set; }
         public DateTime? added_at { get; set; }
-        public string added_by { get; set; }
+        public string added_by_name { get; set; }
+        public string updated_by_name { get; set; }
+        public int added_by_id { get; set; }
         public DateTime? updated_at { get; set; }
+        public DateTime? createdAt { get; set; }
+        public DateTime? updatedAt { get; set; }
         public string updated_by { get; set; }
         public DateTime? deleted_at { get; set; }
         public string deleted_by { get; set; }
