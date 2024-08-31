@@ -72,7 +72,7 @@ namespace CMMSAPIs.Controllers.EM
         //[Authorize]
         [Route("Escalate")]
         [HttpPost]
-        public async Task<IActionResult> Escalate(CMMS.CMMS_Modules moduleId, int statusId, int facilityId)
+        public async Task<IActionResult> Escalate(CMMS.CMMS_Modules moduleId, CMMS.CMMS_Status statusId, int facilityId)
         {
             try
             {

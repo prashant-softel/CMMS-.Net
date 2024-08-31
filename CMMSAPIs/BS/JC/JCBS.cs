@@ -18,7 +18,7 @@ namespace CMMSAPIs.BS.JC
         Task<CMDefaultResponse> CloseJC(CMJCClose request, int userID);
         Task<List<CMDefaultResponse>> ApproveJC(CMJCApprove request, int userID);
         Task<CMDefaultResponse> RejectJC(CMJCReject request, int userID);
-        Task<CMDefaultResponse> StartJC(CMJCRequest request, int userID);
+        Task<CMDefaultResponse> StartJC(CMJCRequest request, int userID, string facilitytime);
         Task<CMDefaultResponse> CarryForwardJC(CMApproval request, int userID);
         Task<CMDefaultResponse> RejectJCCF(CMJCReject request, int userID);
         Task<CMDefaultResponse> ApproveJCCF(CMJCApprove request, int userID);
@@ -153,13 +153,13 @@ namespace CMMSAPIs.BS.JC
             }
         }
 
-        public async Task<CMDefaultResponse> StartJC(CMJCRequest request, int userID)
+        public async Task<CMDefaultResponse> StartJC(CMJCRequest request, int userID, string facilitytime)
         {
             try
             {
                 using (var repos = new JCRepository(getDB))
                 {
-                    return await repos.StartJC(request, userID);
+                    return await repos.StartJC(request, userID, facilitytime);
                 }
             }
             catch (Exception ex)

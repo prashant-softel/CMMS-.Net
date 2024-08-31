@@ -1,4 +1,5 @@
 using CMMSAPIs.Helper;
+using CMMSAPIs.Models.Notifications;
 using CMMSAPIs.Models.SM;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Utils;
@@ -18,7 +19,7 @@ namespace CMMSAPIs.Repositories.SM
             _utilsRepo = new UtilsRepository(sqlDBHelper);
         }
 
-        internal async Task<CMDefaultResponse> CreateRequestOrder(CMCreateRequestOrder request, int userID)
+        internal async Task<CMDefaultResponse> CreateRequestOrder(CMCreateRequestOrder request, int userID, string facilityTimeZone)
         {
             CMDefaultResponse response = null;
             int ReturnID = 0;
@@ -51,9 +52,17 @@ namespace CMMSAPIs.Repositories.SM
             }
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_RO, ReturnID, 0, 0, request.comment, CMMS.CMMS_Status.SM_RO_SUBMITTED);
+            List<CMCreateRequestOrderGET> _ROList = await GetRODetailsByID(ReturnID.ToString(), facilityTimeZone);
+            foreach (var ro in _ROList)
+            {
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_RO, CMMS.CMMS_Status.SM_RO_SUBMITTED, new[] { userID }, ro);
+            }
+
+
+
             return response;
         }
-        internal async Task<CMDefaultResponse> UpdateRequestOrder(CMCreateRequestOrder request, int userID)
+        internal async Task<CMDefaultResponse> UpdateRequestOrder(CMCreateRequestOrder request, int userID, string facilityTimeZone)
         {
             //string mainQuery = $"UPDATE smgoodsorderdetails SET generate_flag = " +request.generate_flag + ",status = "+request.status+", vendorID = "+request.vendorID+" WHERE ID = "+request.id+"";
 
@@ -78,23 +87,38 @@ namespace CMMSAPIs.Repositories.SM
             }
             CMDefaultResponse response = new CMDefaultResponse(request.request_order_id, CMMS.RETRUNSTATUS.SUCCESS, "Request order updated successfully.");
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_RO, request.request_order_id, 0, 0, request.comment, CMMS.CMMS_Status.SM_RO_UPDATED);
+            List<CMCreateRequestOrderGET> _ROList = await GetRODetailsByID(request.request_order_id.ToString(), facilityTimeZone);
+            foreach (var ro in _ROList)
+            {
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_RO, CMMS.CMMS_Status.SM_RO_UPDATED, new[] { userID }, ro);
+            }
             return response;
         }
-        internal async Task<CMDefaultResponse> DeleteRequestOrder(CMApproval request, int userID)
+        internal async Task<CMDefaultResponse> DeleteRequestOrder(CMApproval request, int userID, string facilityTimeZone)
         {
             string mainQuery = $"UPDATE smrequestorder SET status = {(int)CMMS.CMMS_Status.SM_RO_DELETED}, remarks= '{request.comment}' WHERE ID = " + request.id + "";
             await Context.ExecuteNonQry<int>(mainQuery);
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Request order deleted.");
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_RO, request.id, 0, 0, request.comment, CMMS.CMMS_Status.SM_RO_DELETED);
+            List<CMCreateRequestOrderGET> _ROList = await GetRODetailsByID(request.id.ToString(), facilityTimeZone);
+            foreach (var ro in _ROList)
+            {
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_RO, CMMS.CMMS_Status.SM_RO_DELETED, new[] { userID }, ro);
+            }
             return response;
         }
-        internal async Task<CMDefaultResponse> CloseRequestOrder(CMApproval request, int userID)
+        internal async Task<CMDefaultResponse> CloseRequestOrder(CMApproval request, int userID, string facilityTimeZone)
         {
             //validate request.id
             string mainQuery = $"UPDATE smrequestorder SET status = {(int)CMMS.CMMS_Status.SM_RO_CLOSED}, remarks= '{request.comment}' WHERE ID = " + request.id + "";
             await Context.ExecuteNonQry<int>(mainQuery);
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Request order {" + request.id + "} closed.");
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_RO, request.id, 0, 0, request.comment, CMMS.CMMS_Status.SM_RO_CLOSED);
+            List<CMCreateRequestOrderGET> _ROList = await GetRODetailsByID(request.id.ToString(), facilityTimeZone);
+            foreach (var ro in _ROList)
+            {
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_RO, CMMS.CMMS_Status.SM_RO_CLOSED, new[] { userID }, ro);
+            }
             return response;
         }
 
@@ -246,7 +270,7 @@ namespace CMMSAPIs.Repositories.SM
         //}
 
 
-        internal async Task<CMDefaultResponse> ApproveRequestOrder(CMApproval request, int userId)
+        internal async Task<CMDefaultResponse> ApproveRequestOrder(CMApproval request, int userId,string facilityTimeZone)
         {
 
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
@@ -262,10 +286,16 @@ namespace CMMSAPIs.Repositories.SM
             retCode = CMMS.RETRUNSTATUS.SUCCESS;
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Approved request order  " + request.id + "  successfully.");
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_RO, request.id, 0, 0, request.comment, CMMS.CMMS_Status.SM_RO_SUBMIT_APPROVED);
+
+            List<CMCreateRequestOrderGET> _ROList = await GetRODetailsByID(request.id.ToString(), facilityTimeZone);
+            foreach (var ro in _ROList)
+            {
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_RO, CMMS.CMMS_Status.SM_RO_SUBMIT_APPROVED, new[] { userId }, ro);
+            }
             return response;
         }
 
-        internal async Task<CMDefaultResponse> RejectRequestOrder(CMApproval request, int userId)
+        internal async Task<CMDefaultResponse> RejectRequestOrder(CMApproval request, int userId, string facilityTimeZone)
         {
 
             if (request.id <= 0)
@@ -287,6 +317,11 @@ namespace CMMSAPIs.Repositories.SM
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_RO, request.id, 0, 0, request.comment, CMMS.CMMS_Status.SM_RO_SUBMIT_REJECTED);
 
+            List<CMCreateRequestOrderGET> _ROList = await GetRODetailsByID(request.id.ToString(), facilityTimeZone);
+            foreach (var ro in _ROList)
+            {
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_RO, CMMS.CMMS_Status.SM_RO_SUBMIT_REJECTED, new[] { userId }, ro);
+            }
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Rejected request order.");
             return response;
         }
@@ -528,22 +563,22 @@ namespace CMMSAPIs.Repositories.SM
             switch (m_notificationID)
             {
                 case CMMS.CMMS_Status.SM_RO_DRAFT:
-                    retValue = $"Request order {ID} drafted";
+                    retValue = $"Request order{ID} drafted";
                     break;
                 case CMMS.CMMS_Status.SM_RO_SUBMITTED:
-                    retValue = $"Request order {ID} submitted and waiting for approval";
+                    retValue = $"Request order{ID} submitted and waiting for approval";
                     break;
                 case CMMS.CMMS_Status.SM_RO_SUBMIT_REJECTED:
-                    retValue = $"Request order {ID} Submitted but rejected";
+                    retValue = $"Request order{ID} Submitted but rejected";
                     break;
                 case CMMS.CMMS_Status.SM_RO_SUBMIT_APPROVED:
-                    retValue = $"Request order {ID} approved";
+                    retValue = $"Request order{ID} approved";
                     break;
                 case CMMS.CMMS_Status.SM_RO_DELETED:
-                    retValue = $"Request order {ID} deleted";
+                    retValue = $"Request order{ID} deleted";
                     break;
                 case CMMS.CMMS_Status.SM_RO_CLOSED:
-                    retValue = $"Request order {ID} closed";
+                    retValue = $"Request order{ID} closed";
                     break;
                 default:
                     retValue = "Unknown <" + m_notificationID + ">";

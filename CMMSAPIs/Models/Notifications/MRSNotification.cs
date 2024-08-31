@@ -17,30 +17,60 @@ namespace CMMSAPIs.Models.Notifications
             m_MRSId = m_MRSObj.ID;
         }
 
-        override protected string getSubject(params object[] args)
+        override protected string getEMSubject(params object[] args)
         {
-            string retValue = "My Job Card subject";
-            m_MRSId = m_MRSObj.ID;
+            string retValue = "ESCALATION : ";
 
             switch (m_notificationID)
             {
                 case CMMS.CMMS_Status.MRS_SUBMITTED:
-                    retValue = String.Format("MRS {0} Submitted.", m_MRSObj.ID, m_MRSObj.issued_name);
+                    retValue += String.Format("MRS{0} Submitted By <{1}>.", m_MRSObj.ID, m_MRSObj.requested_by_name);
                     break;
                 case CMMS.CMMS_Status.MRS_REQUEST_REJECTED:
-                    retValue = String.Format("MRS {0} Request Rejected", m_MRSObj.issued_name);
+                    retValue += String.Format("MRS{0} Request Rejected By <{1}>", m_MRSObj.ID, m_MRSObj.request_rejected_by_name);
                     break;
                 case CMMS.CMMS_Status.MRS_REQUEST_APPROVED:
-                    retValue = String.Format("MRS {0} Request Approved", m_MRSObj.approver_name);
+                    retValue += String.Format("MRS{0} Request Approved By <{1}>", m_MRSObj.ID, m_MRSObj.approver_name);
                     break;
                 case CMMS.CMMS_Status.MRS_REQUEST_ISSUED:
-                    retValue = String.Format("MRS {0} Request Issued", m_MRSObj.issued_name);
+                    retValue += String.Format("MRS{0} Issue Requested By <{1}>", m_MRSObj.ID, m_MRSObj.issued_name);
                     break;
                 case CMMS.CMMS_Status.MRS_REQUEST_ISSUED_REJECTED:
-                    retValue = String.Format("MRS {0} Request Issued Rejected", m_MRSObj.ID, m_MRSObj.status);
+                    retValue += String.Format("MRS{0} Issue Rejected By <{1}>", m_MRSObj.ID, m_MRSObj.issue_rejected_by_name);
                     break;
                 case CMMS.CMMS_Status.MRS_REQUEST_ISSUED_APPROVED:
-                    retValue = String.Format("MRS {0} Request Issued Approved", m_MRSObj.ID, m_MRSObj.approver_name);
+                    retValue += String.Format("MRS{0} Issue Approved By <{1}>", m_MRSObj.ID, m_MRSObj.issue_appoved_by_name);
+                    break;
+
+            }
+            retValue += $" for {m_delayDays} days";
+            return retValue;
+
+        }
+
+        override protected string getSubject(params object[] args)
+        {
+            string retValue = "My Job Card subject";
+
+            switch (m_notificationID)
+            {
+                case CMMS.CMMS_Status.MRS_SUBMITTED:
+                    retValue = String.Format("MRS{0} Submitted By <{1}>.", m_MRSObj.ID, m_MRSObj.requested_by_name);
+                    break;
+                case CMMS.CMMS_Status.MRS_REQUEST_REJECTED:
+                    retValue = String.Format("MRS{0} Request Rejected By <{1}>", m_MRSObj.ID, m_MRSObj.request_rejected_by_name);
+                    break;
+                case CMMS.CMMS_Status.MRS_REQUEST_APPROVED:
+                    retValue = String.Format("MRS{0} Request Approved By <{1}>", m_MRSObj.ID, m_MRSObj.approver_name);
+                    break;
+                case CMMS.CMMS_Status.MRS_REQUEST_ISSUED:
+                    retValue = String.Format("MRS{0} Issue Requested By <{1}>", m_MRSObj.ID, m_MRSObj.issued_name);
+                    break;
+                case CMMS.CMMS_Status.MRS_REQUEST_ISSUED_REJECTED:
+                    retValue = String.Format("MRS{0} Issue Request Rejected By <{1}>", m_MRSObj.ID,  m_MRSObj.issue_rejected_by_name); 
+                    break;
+                case CMMS.CMMS_Status.MRS_REQUEST_ISSUED_APPROVED:
+                    retValue = String.Format("MRS{0} Issue Request Approved By <{1}>", m_MRSObj.ID, m_MRSObj.issue_appoved_by_name);
                     break;
 
             }
@@ -68,21 +98,37 @@ namespace CMMSAPIs.Models.Notifications
                 retValue += String.Format(template, "Requested By", m_MRSObj.requested_by_name);
                 retValue += String.Format(template, "Requested At", m_MRSObj.requestd_date);
             }
+            if (!string.IsNullOrEmpty(m_MRSObj.request_rejected_by_name))
+            {
+                retValue += String.Format(template, "Request Rejected By", m_MRSObj.request_rejected_by_name);
+                //retValue += String.Format(template, "Request Rejected At", m_MRSObj.request_rejected_at);
+            }
             if (!string.IsNullOrEmpty(m_MRSObj.approver_name))
             {
-                retValue += String.Format(template, "Approved By", m_MRSObj.approver_name);
-                retValue += String.Format(template, "Approved At", m_MRSObj.approval_date);
+                retValue += String.Format(template, "Request Approved By", m_MRSObj.approver_name);
+                retValue += String.Format(template, "Request Approved At", m_MRSObj.approval_date);
             }
             if (!string.IsNullOrEmpty(m_MRSObj.issued_name))
             {
                 retValue += String.Format(template, "Issued By", m_MRSObj.issued_name);
-                retValue += String.Format(template, "Issued At", m_MRSObj.issued_date);
+                //retValue += String.Format(template, "Issued At", m_MRSObj.issued_date);
             }
+            if (m_MRSObj.issue_approved_by_emp_ID > 0)
+            {
+                retValue += String.Format(template, "Issue Approved  By", m_MRSObj.issue_appoved_by_name);
+                //retValue += String.Format(template, "Issue Approved At", m_MRSObj.issued_date);
+            }
+            if (m_MRSObj.issue_rejected_by_emp_ID > 0)
+            {
+                retValue += String.Format(template, "Issue Rejected By", m_MRSObj.issue_rejected_by_name);
+                //retValue += String.Format(template, "Issue Rejected At", m_MRSObj.issued_date);
+            }
+
 
             retValue += "</table><br><br>";
 
             // MRS Items Table
-            retValue += "<h4>GO Items</h4>";
+            retValue += "<h4>MRS Items</h4>";
             retValue += "<table style='width: 80%; margin:0 auto; border-collapse: collapse; border-spacing: 10px;' border='1'>";
             retValue += "<tr>";
             retValue += "<th>Item Name</th>";
@@ -108,10 +154,10 @@ namespace CMMSAPIs.Models.Notifications
             switch (m_notificationID)
             {
                 case CMMS.CMMS_Status.MRS_SUBMITTED:
-                    retValue += String.Format(templateEnd, "Submitted By", m_MRSObj.approver_name);
+                    retValue += String.Format(templateEnd, "Submitted By", m_MRSObj.requested_by_name);
                     break;
                 case CMMS.CMMS_Status.MRS_REQUEST_REJECTED:
-                    retValue += String.Format(templateEnd, "Request Rejected By",m_MRSObj.requested_by_name);
+                    retValue += String.Format(templateEnd, "Request Rejected By",m_MRSObj.request_rejected_by_name);
                     break;
                 case CMMS.CMMS_Status.MRS_REQUEST_APPROVED:
                     retValue += String.Format(templateEnd, "Request Approved By",m_MRSObj.approver_name);
@@ -120,10 +166,10 @@ namespace CMMSAPIs.Models.Notifications
                     retValue += String.Format(templateEnd, "Request Issued By", m_MRSObj.issued_name);
                     break;
                 case CMMS.CMMS_Status.MRS_REQUEST_ISSUED_REJECTED:
-                    retValue += String.Format(templateEnd, "Request Issued Rejected By", m_MRSObj.issued_name);
+                    retValue += String.Format(templateEnd, "Request Issued Rejected By", m_MRSObj.issue_rejected_by_name);
                     break;
                 case CMMS.CMMS_Status.MRS_REQUEST_ISSUED_APPROVED:
-                    retValue += String.Format(templateEnd, "Request Issued Approved By", m_MRSObj.issued_name);
+                    retValue += String.Format(templateEnd, "Request Issued Approved By", m_MRSObj.issue_appoved_by_name);
                     break;
 
                 default:

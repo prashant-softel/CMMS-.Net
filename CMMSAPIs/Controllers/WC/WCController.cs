@@ -4,8 +4,10 @@ using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Models.WC;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace CMMSAPIs.Controllers.WC
@@ -27,7 +29,9 @@ namespace CMMSAPIs.Controllers.WC
         {
             try
             {
-                var data = await _WCBS.GetWCList(facilityId, start_Date, end_Date, statusId);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
+                var data = await _WCBS.GetWCList(facilityId, start_Date, end_Date, statusId, userID, facilitytimeZone);
                 return Ok(data);
             }
             catch (ArgumentException ex)
@@ -47,8 +51,10 @@ namespace CMMSAPIs.Controllers.WC
         {
             try
             {
+                int facilityId = request[0].facilityId;
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _WCBS.CreateWC(request, userID);
+                var data = await _WCBS.CreateWC(request, userID, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -64,11 +70,14 @@ namespace CMMSAPIs.Controllers.WC
         //[Authorize]
         [Route("GetWCDetails")]
         [HttpGet]
-        public async Task<IActionResult> GetWCDetails(int wc_id)
+        public async Task<IActionResult> GetWCDetails(int wc_id, int facilityId)
         {
             try
             {
-                var data = await _WCBS.GetWCDetails(wc_id);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
+
+                var data = await _WCBS.GetWCDetails(wc_id, userID, facilitytimeZone);
                 return Ok(data);
             }
             catch (ArgumentException ex)
@@ -95,8 +104,10 @@ namespace CMMSAPIs.Controllers.WC
         {
             try
             {
+                int facilityId = request.facilityId;
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _WCBS.UpdateWC(request, userID);
+                var data = await _WCBS.UpdateWC(request, userID, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -115,8 +126,10 @@ namespace CMMSAPIs.Controllers.WC
         {
             try
             {
+                int facilityId = request.facility_id;
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _WCBS.ApproveWC(request, userID);
+                var data = await _WCBS.ApproveWC(request, userID, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -133,8 +146,10 @@ namespace CMMSAPIs.Controllers.WC
         {
             try
             {
+                int facilityId = request.facilityId;
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _WCBS.updateWCimages(request, userID);
+                var data = await _WCBS.updateWCimages(request, userID, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -151,8 +166,10 @@ namespace CMMSAPIs.Controllers.WC
         {
             try
             {
+                int facilityId = request.facility_id;
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _WCBS.ClosedWC(request, userID);
+                var data = await _WCBS.ClosedWC(request, userID, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -169,8 +186,10 @@ namespace CMMSAPIs.Controllers.WC
         {
             try
             {
+                int facilityId = request.facility_id;
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _WCBS.ApprovedClosedWC(request, userID);
+                var data = await _WCBS.ApprovedClosedWC(request, userID, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -187,8 +206,10 @@ namespace CMMSAPIs.Controllers.WC
         {
             try
             {
+                int facilityId = request.facility_id;
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _WCBS.RejectClosedWC(request, userID);
+                var data = await _WCBS.RejectClosedWC(request, userID, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -206,8 +227,10 @@ namespace CMMSAPIs.Controllers.WC
         {
             try
             {
+                int facilityId = request.facility_id;
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _WCBS.RejectWC(request, userID);
+                var data = await _WCBS.RejectWC(request, userID, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -217,7 +240,26 @@ namespace CMMSAPIs.Controllers.WC
                 item.Message = ex.Message;
                 return Ok(item);
             }
-
+        }
+        [Route("CancelWC")]
+        [HttpPost]
+        public async Task<IActionResult> CancelWC(CMApproval request)
+        {
+            try
+            {
+                int facilityId = request.facility_id;
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _WCBS.CancelWC(request, userID, facilitytimeZone);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = ex.Message;
+                return Ok(item);
+            }
         }
     }
 }

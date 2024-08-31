@@ -25,7 +25,7 @@ namespace CMMSAPIs.Repositories.Jobs
         internal async Task<List<CMJobView>> GetJobView(int jobID, string facilitytimeZone)
         {
             string myQuery = "SELECT " +
-                                    "job.id as id, facilities.id as facility_id, facilities.name as facility_name, blocks.id as block_id, blocks.name as block_name, job.status as status, created_user.id as created_by_id, CONCAT(created_user.firstName, created_user.lastName) as created_by_name, user.id as assigned_id, CONCAT(user.firstName, user.lastName) as assigned_name, job.title as job_title, job.description as job_description, job.breakdownTime as breakdown_time, ptw.id as current_ptw_id, ptw.title as current_ptw_title " +
+                                    "job.id as id, facilities.id as facility_id, facilities.name as facility_name, blocks.id as block_id, blocks.name as block_name, job.status as status, created_user.id as created_by_id, CONCAT(created_user.firstName, ' ', created_user.lastName) as created_by_name, user.id as assigned_id, CONCAT(user.firstName, ' ', user.lastName) as assigned_name, job.title as job_title, job.description as job_description, job.breakdownTime as breakdown_time, ptw.id as current_ptw_id, ptw.title as current_ptw_title " +
                                       "FROM " +
                                             "jobs as job " +
                                       "LEFT JOIN " +
@@ -51,12 +51,12 @@ namespace CMMSAPIs.Repositories.Jobs
             {
                 if (list != null && list.breakdown_time != null)
                     list.breakdown_time = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)list.breakdown_time);
-                if (list != null && list.closed_at != null)
-                    list.breakdown_time = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.closed_at);
+                if (list != null && list.Breakdown_end_time != null)
+                    list.Breakdown_end_time = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)list.Breakdown_end_time);
+                if (list != null && list.Job_closed_on != null)
+                    list.Job_closed_on = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.Job_closed_on);
                 if (list != null && list.created_at != null)
-                    list.breakdown_time = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)list.created_at);
-
-
+                    list.created_at = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)list.created_at);
             }
             return _ViewJobList;
         }
@@ -73,13 +73,9 @@ namespace CMMSAPIs.Repositories.Jobs
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(job.status);
                 string _shortStatus = getShortStatus(CMMS.CMMS_Modules.JOB, _Status);
                 job.status_short = _shortStatus;
-            }
-            foreach (var list in _ViewJobList)
-            {
-                if (list != null && list.breakdownTime != null)
-                    list.breakdownTime = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.breakdownTime);
 
-
+                if (job != null && job.breakdownTime != null)
+                    job.breakdownTime = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, job.breakdownTime);
             }
 
             return _ViewJobList;
@@ -284,11 +280,11 @@ namespace CMMSAPIs.Repositories.Jobs
 
             string myQuery = "SELECT " +
                                     "job.id as id, facilities.id as facility_id, facilities.name as facility_name, blocks.id as block_id, blocks.name as block_name, job.status as status, job.createdAt as created_at,created_user.id as created_by_id," +
-                                    " CONCAT(created_user.firstName, created_user.lastName) as created_by_name,bus_user.name as Company, user.id as assigned_id, CONCAT(user.firstName, user.lastName) as assigned_name, job.title as job_title, " +
+                                    " CONCAT(created_user.firstName, ' ', created_user.lastName) as created_by_name,bus_user.name as Company, user.id as assigned_id, CONCAT(user.firstName, ' ', user.lastName) as assigned_name, job.title as job_title, " +
                                     "job.description as job_description, job.breakdownTime as breakdown_time, ptw.id as current_ptw_id, ptw.title as current_ptw_title, ptw.description as current_ptw_desc, jc.id as latestJCid, " +
                                     " passt.name as Isolated_equipments, CONCAT(tbtDone.firstName, ' ', tbtDone.lastName) as TBT_conducted_by_name,ptw.TBT_Done_At as TBT_done_time,ptw.startDate Start_time, " +
                                     "jc.JC_Status as latestJCStatus, jc.JC_Approved as latestJCApproval, jc.JC_Date_Stop as Job_closed_on ," +
-                                    " jc.JC_Date_Stop as Breakdown_end_time,job.breakdownTime as Breakdown_start_time,ptw.status as status_PTW, CONCAT(isotak.firstName,isotak.lastName) as Isolation_taken  " +
+                                    " jc.JC_Date_Stop as Breakdown_end_time,job.breakdownTime as Breakdown_start_time,ptw.status as status_PTW, CONCAT(isotak.firstName, ' ', isotak.lastName) as Isolation_taken  " +
                                       "FROM " +
                                             "jobs as job " +
                                       "LEFT JOIN " +
@@ -408,11 +404,12 @@ namespace CMMSAPIs.Repositories.Jobs
             {
                 if (list != null && list.breakdown_time != null)
                     list.breakdown_time = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)list.breakdown_time);
-                if (list != null && list.closed_at != null)
-                    list.closed_at = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.closed_at);
+                if (list != null && list.Breakdown_end_time != null)
+                    list.Breakdown_end_time = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)list.Breakdown_end_time);
+                if (list != null && list.Job_closed_on != null)
+                    list.Job_closed_on = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.Job_closed_on);
                 if (list != null && list.created_at != null)
                     list.created_at = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, (DateTime)list.created_at);
-
             }
 
             return _ViewJobList[0];
@@ -471,7 +468,7 @@ namespace CMMSAPIs.Repositories.Jobs
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, newJobID, 0, 0, "Job Created", CMMS.CMMS_Status.JOB_CREATED, userId);
             //await CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_CREATED, new[] { userId }, _ViewJobList);
 
-            string strJobStatusMsg = $"Job {newJobID} Created";
+            string strJobStatusMsg = $"Job{newJobID} Created";
             int assigned_id = 1;
             if (_ViewJobList.assigned_id > 0)
             {
@@ -554,7 +551,7 @@ namespace CMMSAPIs.Repositories.Jobs
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, jobID, 0, 0, "Job Updated", CMMS.CMMS_Status.JOB_UPDATED, userId);
             await CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_UPDATED, new[] { userId }, _ViewJobList);
 
-            string strJobStatusMsg = $"Job {jobID} Updated";
+            string strJobStatusMsg = $"Job{jobID} Updated";
             CMDefaultResponse response = new CMDefaultResponse(jobID, CMMS.RETRUNSTATUS.SUCCESS, strJobStatusMsg);
 
             return response;
@@ -615,7 +612,7 @@ namespace CMMSAPIs.Repositories.Jobs
         internal async Task<CMDefaultResponse> CancelJob(int job_id, int cancelledBy, string Cancelremark)
         {
             /*Your code goes here*/
-            string updateQry = $"update jobs set updatedBy = {cancelledBy}, statusUpdatedAt = '{UtilsRepository.GetUTCTime()}', cancellationRemarks = '{Cancelremark}',  status = {(int)CMMS.CMMS_Status.JOB_CANCELLED}, cancelStatus = 'N'  where id = {job_id};";
+            string updateQry = $"update jobs set updatedBy = {cancelledBy}, statusUpdatedAt = '{UtilsRepository.GetUTCTime()}', cancelledBy = {cancelledBy}, cancelledAt = '{UtilsRepository.GetUTCTime()}',cancellationRemarks = '{Cancelremark}',  status = {(int)CMMS.CMMS_Status.JOB_CANCELLED}, cancelStatus = 'Y'  where id = {job_id};";
             int retValue = await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
 
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;

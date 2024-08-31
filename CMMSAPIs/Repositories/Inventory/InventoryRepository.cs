@@ -62,16 +62,16 @@ namespace CMMSAPIs.Repositories.Inventory
             switch (notificationID)
             {
                 case CMMS.CMMS_Status.INVENTORY_IMPORTED:
-                    retValue += String.Format("Assets Imported by {0} at {1}</p>", InvObj.added_by, InvObj.Imported_at);
+                    retValue += String.Format("Asset{0} Imported by {1}</p>", InvObj.id, InvObj.Imported_by);
                     break;
                 case CMMS.CMMS_Status.INVENTORY_ADDED:
-                    retValue += String.Format("Asset <{0}> Added by {1} at {2}</p>", InvObj.name, InvObj.added_by, InvObj.added_at);
+                    retValue += String.Format("Asset{0} Added by {1}</p>", InvObj.id, InvObj.added_by_name);
                     break;
                 case CMMS.CMMS_Status.INVENTORY_UPDATED:
-                    retValue += String.Format("Asset <{0}> Updated by {1} at {2}</p>", InvObj.name, InvObj.updated_by, InvObj.updated_at);
+                    retValue += String.Format("Asset{0} Updated by {1}</p>", InvObj.id, InvObj.updated_by);
                     break;
                 case CMMS.CMMS_Status.INVENTORY_DELETED:
-                    retValue += String.Format("Asset <{0}> Deleted by {1} at {2}</p>", InvObj.name, InvObj.deleted_by, InvObj.deleted_at);
+                    retValue += String.Format("Asset{0} Deleted by {1}</p>", InvObj.id, InvObj.deleted_by);
                     break;
                 default:
                     break;
@@ -1136,13 +1136,14 @@ namespace CMMSAPIs.Repositories.Inventory
             * Business - owner, operator, customer
            */
             /*Your code goes here*/
-            string myQuery = "SELECT a.id,frequency.name as calibrationFreqType ,a.name, a.description as asset_description,  " +
-                "a.calibrationStartDate,a.calibrationDueDate, a.calibrationLastDate,a.calibrationStartDate as calibrationLastDate, a.vendorId as vendorid,a.area , " +
+            string myQuery = "SELECT a.id ,frequency.name as calibrationFreqType ,a.name, a.description as asset_description, a.calibrationStartDate as calibrationSatrtDate,  " +
+                "a.calibrationDueDate as calibrationDueDate, a.calibrationLastDate as calibrationLastDate,a.vendorId as vendorid,a.area , " +
                 "a.stockCount as stockCount,a.photoId as photoId,a.retirementStatus as retirementStatus,w.meter_limit as meter_limit,w.meter_unit as meter_unit,a.moduleQuantity, ast.id as typeId, ast.name as type, a.supplierId as supplierId, b2.name as supplierName, manufacturertlb.id as manufacturerId, manufacturertlb.name as manufacturerName,a.parent_equipment_no ,b5.id as operatorId, b5.name as operatorName, ac.id as categoryId, ac.name as categoryName, a.serialNumber,a.cost as cost,a.currency as currencyId ,c.name as currency, a.model,a.calibrationFrequency,frequency.name as calibrationFrequencyType, a.calibrationReminderDays, " +
             "f.id as facilityId, f.name AS facilityName, bl.id as blockId, bl.name AS blockName, a2.id as parentId, a2.name as parentName, a2.serialNumber as parentSerial, custbl.id as customerId, custbl.name as customerName, owntbl.id as ownerId, owntbl.name as ownerName, s.id as statusId, s.name AS status,a.purchaseCode as purchaseCode, a.unspCode as unspCode, a.barcode as barcode,a.descMaintenace as descMaintenace,a.dcRating as dcRating ,a.acRating as acRating, a.specialTool,a.specialToolEmpId as specialToolEmp,  " +
-            "w.start_date as start_date,w.expiry_date as expiry_date, w.start_date as warranty_start_date,w.expiry_date as warranty_expiry_date, w.id as warrantyId, w.warranty_description, w.certificate_number,wut.name as warranty_term_type,wt.id as warrantyTypeId, wt.name as warrantyType, wut.id as warrantyTermTypeId, wp.id as warrantyProviderId, wp.name as warrantyProviderName, files.file_path as warranty_certificate_path ," +
-            "CASE  WHEN w.start_date IS NULL THEN 'Inactive' WHEN w.expiry_date IS NULL THEN 'Inactive'" +
-            " WHEN w.start_date IS NULL OR CURDATE() < w.start_date OR CURDATE() > w.expiry_date THEN 'Expired' ELSE 'Active'  END AS WarrantyStatus " +
+            "w.start_date as start_date,w.expiry_date as expiry_date, w.id as warrantyId, w.warranty_description, w.certificate_number,wut.name as warranty_term_type,wt.id as warrantyTypeId, wt.name as warrantyType, wut.id as warrantyTermTypeId, wp.id as warrantyProviderId, wp.name as warrantyProviderName, files.file_path as warranty_certificate_path ," +
+            "CONCAT(adduser.firstName, ' ', adduser.lastName) as added_by_name,a.createdAt, " +
+            "CONCAT(updateuser.firstName, ' ', updateuser.lastName) as updated_by_name,a.updatedAt, " +
+            "CASE WHEN w.start_date IS NULL OR CURDATE() < w.start_date OR CURDATE() > w.expiry_date THEN 'Inactive' ELSE 'Active' END AS WarrantyStatus " +
             "from assets as a " +
             "left join assettypes as ast on ast.id = a.typeId " +
             "left join currency as c ON c.id =a.currency " +
@@ -1161,6 +1162,8 @@ namespace CMMSAPIs.Repositories.Inventory
             "left join warrantytype as wt ON w.warranty_type = wt.id " +
             "left join warrantyusageterm as wut ON w.warranty_term_type = wut.id " +
             "left join business as wp ON w.warranty_provider = wp.id " +
+            "left join users adduser ON adduser.id = a.createdBy " +
+            "left join users updateuser ON updateuser.id = a.updatedBy " +
             "left join frequency as frequency ON frequency.id = a.calibrationFrequency ";
             if (id != 0)
             {
@@ -1207,7 +1210,7 @@ namespace CMMSAPIs.Repositories.Inventory
             return _ViewInventoryList[0];
         }
 
-        internal async Task<CMDefaultResponse> AddInventory(List<CMAddInventory> request, int userID)
+        internal async Task<CMDefaultResponse> AddInventory(List<CMAddInventory> request, int userID, string facilitytimeZone)
         {
             /*
              * Add all data in assets table and warranty table
@@ -1308,7 +1311,7 @@ namespace CMMSAPIs.Repositories.Inventory
                 }
                 else
                 {
-                    strRetMessage = "Warranty data for <" + assetName + "> does not exist. ";
+                    //strRetMessage = "Warranty data for <" + assetName + "> does not exist. ";
                 }
                 if (retID > 0)
                 {
@@ -1343,7 +1346,13 @@ namespace CMMSAPIs.Repositories.Inventory
                         await Context.ExecuteNonQry<int>(qryuploadFiles).ConfigureAwait(false);
                     }
                 }
-                CMViewInventory _inventoryAdded = await GetInventoryDetails(retID, "");
+
+                CMViewInventory _inventoryAdded = await GetInventoryDetails(retID, facilitytimeZone);
+
+
+                //strRetMessage = "New asset <" + assetName + "> added"; 
+               // await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, retID, 0, 0, strRetMessage, CMMS.CMMS_Status.INVENTORY_ADDED);
+                //await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_ADDED, new[] { userID }, _inventoryAdded);
 
                 string _shortStatus = getShortStatus(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_ADDED);
                 _inventoryAdded.status_short = _shortStatus;
@@ -1351,7 +1360,7 @@ namespace CMMSAPIs.Repositories.Inventory
                 string _longStatus = getLongStatus(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_ADDED, _inventoryAdded);
                 _inventoryAdded.status_long = _longStatus;
 
-                //await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_ADDED, new[] { userID }, _inventoryAdded);
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, 3333333, 0, 0, _longStatus, 0);
             }
             if (count > 0)
             {
@@ -1360,17 +1369,37 @@ namespace CMMSAPIs.Repositories.Inventory
                 if (count == 1)
                 {
                     strRetMessage = "New asset <" + assetName + "> added";
+                    CMViewInventory _inventoryAdded = await GetInventoryDetails(retID, "");
+                    //Last object notification will be sent
+                    string _shortStatus = getShortStatus(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_ADDED);
+                    _inventoryAdded.status_short = _shortStatus;
+
+                    string _longStatus = getLongStatus(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_ADDED, _inventoryAdded);
+                    _inventoryAdded.status_long = _longStatus;
+
+                    await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_ADDED, new[] { userID }, _inventoryAdded);
                 }
                 else
                 {
                     strRetMessage = "<" + count + "> new assets added";
+                    CMViewInventory _inventoryAdded = await GetInventoryDetails(retID, "");
+                    //Last object notification will be sent
+                    string _shortStatus = getShortStatus(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_ADDED);
+                    _inventoryAdded.status_short = _shortStatus;
+
+                    string _longStatus = getLongStatus(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_ADDED, _inventoryAdded);
+                    _inventoryAdded.status_long = _longStatus;
+
+                    await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_IMPORTED, new[] { userID }, _inventoryAdded);
                 }
             }
             else
             {
                 strRetMessage = "No assets to add";
             }
+            CMViewInventory _inventoryAdded1 = await GetInventoryDetails(retID, facilitytimeZone);
 
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_ADDED, new[] { userID }, _inventoryAdded1);
 
             return new CMDefaultResponse(retID, retCode, strRetMessage);
         }
@@ -1591,8 +1620,11 @@ namespace CMMSAPIs.Repositories.Inventory
                     await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, 3333333, 0, 0, ex.Message, CMMS.CMMS_Status.INVENTORY_DELETED, 0);
                     // return new CMDefaultResponse(idList, retCode, strRetMessage);
                 }
-                obj = new CMDefaultResponse(unit.id, CMMS.RETRUNSTATUS.SUCCESS, "Inventory  <" + unit.id + "> has been updated");
-                //await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_ADDED, new[] { userID }, _inventoryAdded);
+
+
+                CMViewInventory _inventoryAdded = await GetInventoryDetails(retID, "");
+
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_ADDED, new[] { userID }, _inventoryAdded);
             }
 
             return obj;
@@ -1821,9 +1853,8 @@ namespace CMMSAPIs.Repositories.Inventory
 
             string _longStatus = getLongStatus(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_UPDATED, _inventoryAdded);
             _inventoryAdded.status_long = _longStatus;
-
-            //await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_UPDATED, new[] { userID } ,_inventoryAdded);
-
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, request.id, 0, 0, _longStatus, CMMS.CMMS_Status.INVENTORY_UPDATED);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_UPDATED, new[] { userID } ,_inventoryAdded);
             return obj;
         }
         internal async Task<CMDefaultResponse> UpdateInventries(CMAddInventory request, int userID)
@@ -2144,7 +2175,7 @@ namespace CMMSAPIs.Repositories.Inventory
             string _longStatus = getLongStatus(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_UPDATED, _inventoryAdded);
             _inventoryAdded.status_long = _longStatus;
 
-            //await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_UPDATED, new[] { userID } ,_inventoryAdded);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_UPDATED, new[] { userID } ,_inventoryAdded);
 
             return obj;
         }
