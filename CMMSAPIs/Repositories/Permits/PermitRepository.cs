@@ -240,7 +240,7 @@ namespace CMMSAPIs.Repositories.Permits
                     retValue = String.Format("PTW{0} <{1}> Updated", permitId, title);
                     break;
                 case CMMS.CMMS_Status.PTW_RESUBMIT:
-                    statusName = "Permit Resubmited";
+                    retValue = String.Format("PTW{0} <{1}> Resubmited", permitId, title);
                     break;
                 default:
                     retValue = String.Format("PTW{0} <{1}> Unknow status <{3}>", permitId, title, status);
@@ -1663,7 +1663,7 @@ namespace CMMSAPIs.Repositories.Permits
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Cancel Request Rejected for Permit **PTW{request.id}** ");
             return response;
         }
-        
+
         internal async Task<CMDefaultResponse> PermitCancelApprove(CMApproval request, int userID)
         {
             /*
