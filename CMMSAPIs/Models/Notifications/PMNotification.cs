@@ -12,7 +12,7 @@ namespace CMMSAPIs.Models.Notifications
     internal class PMNotification : CMMSNotification
     {
         int m_PMId;
-        CMPMScheduleExecutionDetail m_pmscheduleObj; 
+        CMPMScheduleExecutionDetail m_pmscheduleObj;
         CMPMPlanDetail m_pmPlanObj;
         CMPMTaskView m_pmExecutionObj;
 
@@ -47,55 +47,55 @@ namespace CMMSAPIs.Models.Notifications
             switch (m_notificationID)
             {
                 case CMMS.CMMS_Status.PM_START:     //Created                  
-                    retValue = String.Format("Preventive Order <{0}> Task  Started By <{1}>", m_pmscheduleObj.schedule_id, m_pmscheduleObj.PM_Execution_Started_by_name);
+                    retValue = String.Format("PMS<{0}> Schedule Started By <{1}>", m_pmscheduleObj.schedule_id, m_pmscheduleObj.PM_Execution_Started_by_name);
                     break;
                 case CMMS.CMMS_Status.PM_UPDATED:     //Assigned
-                    retValue = String.Format("Preventive Order <{0}> Schedule Updated By <{1}>", m_pmscheduleObj.schedule_id, m_pmscheduleObj.updatedbyName);
+                    retValue = String.Format("PMS<{0}> Schedule Updated By <{1}>", m_pmscheduleObj.schedule_id, m_pmscheduleObj.updatedbyName);
                     break;
                 case CMMS.CMMS_Status.PM_SUBMIT:     //Linked
-                    retValue = String.Format("Preventive Order <{0}> Task Submitted By <{1}>", m_pmscheduleObj.schedule_id, m_pmscheduleObj.submittedByName);
+                    retValue = String.Format("PMS<{0}> Schedule Submitted By <{1}>", m_pmscheduleObj.schedule_id, m_pmscheduleObj.submittedByName);
                     break;
                 case CMMS.CMMS_Status.PM_LINK_PTW:     //Closed
-                    retValue = String.Format("Preventive Order <{0}> Task Linked to PTW", m_pmExecutionObj.id);
+                    retValue = String.Format("PMT<{0}> Task Linked to PTW", m_pmExecutionObj.id);
                     break;
                 case CMMS.CMMS_Status.PM_COMPLETED:     //Cancelled
-                    retValue = String.Format("Preventive Order <{0}> Task Completed By <{1}>", m_pmExecutionObj.id, m_pmExecutionObj.completedbyName);
+                    retValue = String.Format("PMT<{0}> Task Completed By <{1}>", m_pmExecutionObj.id, m_pmExecutionObj.completedbyName);
                     break;
                 case CMMS.CMMS_Status.PM_APPROVED:     //Closed
-                    retValue = String.Format("Preventive Order <{0}> Task Approved By <{1}>", m_pmExecutionObj.id, m_pmExecutionObj.approved_by);
+                    retValue = String.Format("PMT<{0}> Task Approved By <{1}>", m_pmExecutionObj.id, m_pmExecutionObj.approved_by);
                     break;
                 case CMMS.CMMS_Status.PM_REJECTED:     //Cancelled
-                    retValue = String.Format("Preventive Order <{0}> Task Rejected By <{1}>", m_pmExecutionObj.id, m_pmPlanObj.rejected_by_name);
+                    retValue = String.Format("PMT<{0}> Task Rejected By <{1}>", m_pmExecutionObj.id, m_pmPlanObj.rejected_by_name);
                     break;
                 case CMMS.CMMS_Status.PM_CANCELLED:     //Closed
-                    retValue = String.Format("Preventive Order <{0}> Task Cancelled By <{1}>", m_pmExecutionObj.id, m_pmExecutionObj.cancelled_by_name);
+                    retValue = String.Format("PMT<{0}> Task Cancelled By <{1}>", m_pmExecutionObj.id, m_pmExecutionObj.cancelled_by_name);
                     break;
                 case CMMS.CMMS_Status.PM_DELETED:     //Cancelled
-                    retValue = String.Format("Preventive Order <{0}> Scheduled Deleted", m_pmscheduleObj.schedule_id);
-                    break;     //Cancelled
+                    retValue = String.Format("PMS<{0}> Schedule Deleted", m_pmscheduleObj.schedule_id);
+                    break;
                 case CMMS.CMMS_Status.PM_PLAN_CREATED:     //Cancelled
-                    retValue = String.Format("PM Plan <{0}> Created By <{1}> ", m_pmPlanObj.plan_id, m_pmPlanObj.created_by_name);
+                    retValue = String.Format("PMP<{0}> Plan Created By <{1}> ", m_pmPlanObj.plan_id, m_pmPlanObj.created_by_name);
                     break;
                 case CMMS.CMMS_Status.PM_PLAN_DRAFT:     //Cancelled
-                    retValue = String.Format("PM  <{0}> Task  Drafted By <{1}>", m_pmExecutionObj.id, m_pmPlanObj.created_by_name);
+                    retValue = String.Format("PMT<{0}> Task  Drafted By <{1}>", m_pmPlanObj.plan_id, m_pmPlanObj.created_by_name);
                     break;
                 case CMMS.CMMS_Status.PM_PLAN_UPDATED:
-                    retValue = String.Format("PM Plan <{0}> Updated By <{1}> ", m_pmExecutionObj.id, m_pmPlanObj.updated_by_name);
+                    retValue = String.Format("PMP<{0}> Plan Updated By <{1}> ", m_pmPlanObj.plan_id, m_pmPlanObj.updated_by_name);
                     break;
                 case CMMS.CMMS_Status.PM_PLAN_DELETED:
-                    retValue = String.Format("PM Plan <{0}> Deleted ", m_pmPlanObj.plan_id);
+                    retValue = String.Format("PMP<{0}> Plan Deleted ", m_pmPlanObj.plan_id);
                     break;
                 case CMMS.CMMS_Status.PM_PLAN_APPROVED:
-                    retValue = String.Format("PM Plan <{0}> Approved By <{1}> ", m_pmPlanObj.plan_id, m_pmPlanObj.approved_by_name);
+                    retValue = String.Format("PMP<{0}> Plan Approved By <{1}> ", m_pmPlanObj.plan_id, m_pmPlanObj.approved_by_name);
                     break;
                 case CMMS.CMMS_Status.PM_PLAN_REJECTED:
-                    retValue = String.Format("PM Plan <{0}> Rejected By <{1}> ", m_pmPlanObj.plan_id, m_pmPlanObj.rejected_by_name);
+                    retValue = String.Format("PMP<{0}> Plan Rejected By <{1}> ", m_pmPlanObj.plan_id, m_pmPlanObj.rejected_by_name);
                     break;
                 case CMMS.CMMS_Status.PM_SCHEDULED:     //Cancelled
-                    retValue = String.Format("PM Task <{0}> Scheduled By <{1}> ", m_pmscheduleObj.schedule_id, m_pmscheduleObj.createdbyName);
+                    retValue = String.Format("PMS<{0}> Scheduled By <{1}> ", m_pmscheduleObj.schedule_id, m_pmscheduleObj.createdbyName);
                     break;
                 case CMMS.CMMS_Status.PM_ASSIGNED:
-                    retValue = String.Format("Preventive Order <{0}> Task Assigned to <{1}> ", m_pmExecutionObj.id, m_pmPlanObj.assigned_to_name);
+                    retValue = String.Format("PMT<{0}> Task Assigned to <{1}> ", m_pmExecutionObj.id, m_pmExecutionObj.assigned_to_name);
                     break;
                 /*case CMMS.CMMS_Status.PM_CLOSE_REJECTED:
                     retValue = String.Format("Preventive Task <{0}> Close Rejected By <{1}> ", m_pmExecutionObj.id, m_pmExecutionObj.cl);
@@ -104,10 +104,11 @@ namespace CMMSAPIs.Models.Notifications
                      retValue = String.Format("Preventive Order <{0}> Rejected By <{1}> ", m_pmExecutionObj.id, m_pmPlanObj.approved_close_by_name);
                      break;*/
                 case CMMS.CMMS_Status.PM_TASK_DELETED:
-                    retValue = String.Format("Preventive Order <{0}> Deleted By <{0}>", m_pmExecutionObj.id, m_pmExecutionObj.deletedbyName);
+                    retValue = String.Format("PMT<{0}> Task Deleted By <{1}>", m_pmExecutionObj.id, m_pmExecutionObj.deletedbyName);
                     break;
                 default:
-                    if(m_pmPlanObj != null && m_pmPlanObj.plan_id != 0){
+                    if (m_pmPlanObj != null && m_pmPlanObj.plan_id != 0)
+                    {
                         retValue += String.Format("PM Plan{0} Undefined status {1}", m_pmPlanObj.plan_id, m_notificationID);
                     }
                     else if (m_pmExecutionObj != null && m_pmExecutionObj.id != 0)
@@ -118,7 +119,7 @@ namespace CMMSAPIs.Models.Notifications
                     {
                         retValue += String.Format("PM Schedule{0} Undefined status {1}", m_pmscheduleObj.schedule_id, m_notificationID);
                     }
-                        break;
+                    break;
             }
             return retValue;
 
@@ -131,69 +132,69 @@ namespace CMMSAPIs.Models.Notifications
             {
                 m_PMId = m_pmPlanObj.plan_id;
             }
-           
+
 
             switch (m_notificationID)
             {
                 case CMMS.CMMS_Status.PM_START:     //Created                  
-                    retValue = String.Format("Preventive Order <{0}> Task  Started By <{1}>", m_pmscheduleObj.schedule_id, m_pmscheduleObj.PM_Execution_Started_by_name);
+                    retValue = String.Format("PMS<{0}> Schedule Started By <{1}>", m_pmscheduleObj.schedule_id, m_pmscheduleObj.PM_Execution_Started_by_name);
                     break;
                 case CMMS.CMMS_Status.PM_UPDATED:     //Assigned
-                    retValue = String.Format("Preventive Order <{0}> Schedule Updated By <{1}>", m_pmscheduleObj.schedule_id, m_pmscheduleObj.updatedbyName);
+                    retValue = String.Format("PMS<{0}> Schedule Updated By <{1}>", m_pmscheduleObj.schedule_id, m_pmscheduleObj.updatedbyName);
                     break;
                 case CMMS.CMMS_Status.PM_SUBMIT:     //Linked
-                    retValue = String.Format("Preventive Order <{0}> Task Submitted By <{1}>", m_pmscheduleObj.schedule_id, m_pmscheduleObj.submittedByName);
+                    retValue = String.Format("PMS<{0}> Schedule Submitted By <{1}>", m_pmscheduleObj.schedule_id, m_pmscheduleObj.submittedByName);
                     break;
                 case CMMS.CMMS_Status.PM_LINK_PTW:     //Closed
-                    retValue = String.Format("Preventive Order <{0}> Task Linked to PTW", m_pmExecutionObj.id);
+                    retValue = String.Format("PMT<{0}> Task Linked to PTW", m_pmExecutionObj.id);
                     break;
                 case CMMS.CMMS_Status.PM_COMPLETED:     //Cancelled
-                    retValue = String.Format("Preventive Order <{0}> Task Completed By <{1}>", m_pmExecutionObj.id, m_pmExecutionObj.completedbyName);
+                    retValue = String.Format("PMT<{0}> Task Completed By <{1}>", m_pmExecutionObj.id, m_pmExecutionObj.completedbyName);
                     break;
                 case CMMS.CMMS_Status.PM_APPROVED:     //Closed
-                    retValue = String.Format("Preventive Order <{0}> Task Approved By <{1}>", m_pmExecutionObj.id, m_pmExecutionObj.approved_by);
+                    retValue = String.Format("PMT<{0}> Task Approved By <{1}>", m_pmExecutionObj.id, m_pmExecutionObj.approved_by);
                     break;
                 case CMMS.CMMS_Status.PM_REJECTED:     //Cancelled
-                    retValue = String.Format("Preventive Order <{0}> Task Rejected By <{1}>", m_pmExecutionObj.id, m_pmPlanObj.rejected_by_name);
+                    retValue = String.Format("PMT<{0}> Task Rejected By <{1}>", m_pmExecutionObj.id, m_pmPlanObj.rejected_by_name);
                     break;
                 case CMMS.CMMS_Status.PM_CANCELLED:     //Closed
-                    retValue = String.Format("Preventive Order <{0}> Task Cancelled By <{1}>", m_pmExecutionObj.id, m_pmExecutionObj.cancelled_by_name);
+                    retValue = String.Format("PMT<{0}> Task Cancelled By <{1}>", m_pmExecutionObj.id, m_pmExecutionObj.cancelled_by_name);
                     break;
                 case CMMS.CMMS_Status.PM_DELETED:     //Cancelled
-                    retValue = String.Format("Preventive Order <{0}> Scheduled Deleted", m_pmscheduleObj.schedule_id);
+                    retValue = String.Format("PMS<{0}> Schedule Deleted", m_pmscheduleObj.schedule_id);
                     break;
                 case CMMS.CMMS_Status.PM_PLAN_CREATED:     //Cancelled
-                    retValue = String.Format("PM Plan <{0}> Created By <{1}> ", m_pmPlanObj.plan_id, m_pmPlanObj.created_by_name);
+                    retValue = String.Format("PMP<{0}> Plan Created By <{1}> ", m_pmPlanObj.plan_id, m_pmPlanObj.created_by_name);
                     break;
                 case CMMS.CMMS_Status.PM_PLAN_DRAFT:     //Cancelled
-                    retValue = String.Format("PM  <{0}> Task  Drafted By <{1}>", m_pmExecutionObj.id, m_pmPlanObj.created_by_name);
+                    retValue = String.Format("PMT<{0}> Task  Drafted By <{1}>", m_pmPlanObj.plan_id, m_pmPlanObj.created_by_name);
                     break;
                 case CMMS.CMMS_Status.PM_PLAN_UPDATED:
-                    retValue = String.Format("PM Plan <{0}> Updated By <{1}> ", m_pmExecutionObj.id, m_pmPlanObj.updated_by_name);
+                    retValue = String.Format("PMP<{0}> Plan Updated By <{1}> ", m_pmPlanObj.plan_id, m_pmPlanObj.updated_by_name);
                     break;
                 case CMMS.CMMS_Status.PM_PLAN_DELETED:
-                    retValue = String.Format("PM Plan <{0}> Deleted ", m_pmPlanObj.plan_id);
+                    retValue = String.Format("PMP<{0}> Plan Deleted ", m_pmPlanObj.plan_id);
                     break;
                 case CMMS.CMMS_Status.PM_PLAN_APPROVED:
-                    retValue = String.Format("PM Plan <{0}> Approved By <{1}> ", m_pmPlanObj.plan_id, m_pmPlanObj.approved_by_name);
+                    retValue = String.Format("PMP<{0}> Plan Approved By <{1}> ", m_pmPlanObj.plan_id, m_pmPlanObj.approved_by_name);
                     break;
                 case CMMS.CMMS_Status.PM_PLAN_REJECTED:
-                    retValue = String.Format("PM Plan <{0}> Rejected By <{1}> ", m_pmPlanObj.plan_id, m_pmPlanObj.rejected_by_name);
+                    retValue = String.Format("PMP<{0}> Plan Rejected By <{1}> ", m_pmPlanObj.plan_id, m_pmPlanObj.rejected_by_name);
                     break;
                 case CMMS.CMMS_Status.PM_SCHEDULED:     //Cancelled
-                    retValue = String.Format("PM  <{0}> Task  Scheduled By <{1}> ", m_pmscheduleObj.schedule_id, m_pmscheduleObj.createdbyName);
+                    retValue = String.Format("PMS<{0}> Scheduled By <{1}> ", m_pmscheduleObj.schedule_id, m_pmscheduleObj.createdbyName);
                     break;
                 case CMMS.CMMS_Status.PM_ASSIGNED:
-                    retValue = String.Format("Preventive Order <{0}> Task Assigned to <{1}> ", m_pmExecutionObj.id, m_pmPlanObj.assigned_to_name);
+                    retValue = String.Format("PMT<{0}> Task Assigned to <{1}> ", m_pmExecutionObj.id, m_pmExecutionObj.assigned_to_name);
                     break;
                 /*case CMMS.CMMS_Status.PM_CLOSE_REJECTED:
                     retValue = String.Format("Preventive Task <{0}> Close Rejected By <{1}> ", m_pmExecutionObj.id, m_pmExecutionObj.cl);
                     break;*/
-               /* case CMMS.CMMS_Status.PM_CLOSE_APPROVED:
-                    retValue = String.Format("Preventive Order <{0}> Rejected By <{1}> ", m_pmExecutionObj.id, m_pmPlanObj.approved_close_by_name);
-                    break;*/
+                /* case CMMS.CMMS_Status.PM_CLOSE_APPROVED:
+                     retValue = String.Format("Preventive Order <{0}> Rejected By <{1}> ", m_pmExecutionObj.id, m_pmPlanObj.approved_close_by_name);
+                     break;*/
                 case CMMS.CMMS_Status.PM_TASK_DELETED:
-                    retValue = String.Format("Preventive Order <{0}> Deleted By <{0}>", m_pmExecutionObj.id, m_pmExecutionObj.deletedbyName);
+                    retValue = String.Format("PMT<{0}> Task Deleted By <{1}>", m_pmExecutionObj.id, m_pmExecutionObj.deletedbyName);
                     break;
                 default:
                     break;
@@ -211,7 +212,7 @@ namespace CMMSAPIs.Models.Notifications
                 retValue = String.Format("<h3><b style='color:#31576D'>Status:</b>{0}</h3><br>", m_pmPlanObj.status_long);
 
                 retValue += String.Format("<table style='width: 50%; margin:0 auto; border-collapse: collapse ; border-spacing: 10px; ' border='1'>");
-                retValue += String.Format(template, "Plan ID", m_pmPlanObj.plan_id);
+                retValue += String.Format(template, "Plan ID", "PMP" + m_pmPlanObj.plan_id);
                 retValue += String.Format(template, "Status", m_pmPlanObj.status_short);
                 retValue += String.Format(template, "Plan Name", m_pmPlanObj.plan_name);
                 retValue += String.Format(template, "Responsible Person", m_pmPlanObj.assigned_to_name);
@@ -247,9 +248,9 @@ namespace CMMSAPIs.Models.Notifications
                 retValue = String.Format("<h3><b style='color:#31576D'>Status:</b>{0}</h3><br>", m_pmExecutionObj.status_long);
 
                 retValue += String.Format("<table style='width: 50%; margin:0 auto; border-collapse: collapse ; border-spacing: 10px; ' border='1'>");
-                retValue += String.Format(template, "Task ID ", m_pmExecutionObj.id);
-                retValue += String.Format(template, "Status ", m_pmExecutionObj.status);
-               // retValue += String.Format(template, "Task Name", m_pmExecutionObj.);
+                retValue += String.Format(template, "Task ID ", "PMT" + m_pmExecutionObj.id);
+                retValue += String.Format(template, "Status ", m_pmExecutionObj.status_short);
+                // retValue += String.Format(template, "Task Name", m_pmExecutionObj.);
                 retValue += String.Format(template, "Responsible Person ", m_pmExecutionObj.assigned_to_name);
                 retValue += String.Format(template, "Started By ", m_pmExecutionObj.started_by_name);
                 retValue += String.Format(template, "Frequency ", m_pmExecutionObj.frequency_name);
@@ -314,14 +315,14 @@ namespace CMMSAPIs.Models.Notifications
             }
             else if (m_pmscheduleObj != null && m_pmscheduleObj.schedule_id != 0)
             {
-           retValue = String.Format("<h3><b style='color:#31576D'>Status:</b>{0}</h3><br>", m_pmscheduleObj.status_long);
-           retValue += String.Format("<table style='width: 50%; margin:0 auto; border-collapse: collapse ; border-spacing: 10px; ' border='1'>");
-           retValue += String.Format(template, "ID", m_pmscheduleObj.schedule_id);
-           retValue += String.Format(template, "Status", m_pmscheduleObj.status_short);
-           //retValue += String.Format(template, "Responsible Person", m_pmscheduleObj.);
-           //retValue += String.Format(template, "Check List", m_pmscheduleObj.);
-           retValue += String.Format(template, "Frequency", m_pmscheduleObj.PM_Frequecy_Name);
-           retValue += String.Format(template, "Scheduled Date", m_pmscheduleObj.PM_Schedule_date);
+                retValue = String.Format("<h3><b style='color:#31576D'>Status:</b>{0}</h3><br>", m_pmscheduleObj.status_long);
+                retValue += String.Format("<table style='width: 50%; margin:0 auto; border-collapse: collapse ; border-spacing: 10px; ' border='1'>");
+                retValue += String.Format(template, "ID", "PMS" + m_pmscheduleObj.schedule_id);
+                retValue += String.Format(template, "Status", m_pmscheduleObj.status_short);
+                //retValue += String.Format(template, "Responsible Person", m_pmscheduleObj.);
+                //retValue += String.Format(template, "Check List", m_pmscheduleObj.);
+                retValue += String.Format(template, "Frequency", m_pmscheduleObj.PM_Frequecy_Name);
+                retValue += String.Format(template, "Scheduled Date", m_pmscheduleObj.PM_Schedule_date);
 
 
                 switch (m_notificationID)
@@ -334,9 +335,9 @@ namespace CMMSAPIs.Models.Notifications
                     /*case CMMS.CMMS_Status.PM_LINKED_TO_PTW:
                         retValue += String.Format(templateEnd, "PM Task Linked By", m_pmExecutionObj.updated_by_name);
                         break;*/
-                   /* case CMMS.CMMS_Status.PM_START:
-                        retValue += String.Format(templateEnd, "PM Task Started By", m_pmscheduleObj.started_by_name);
-                        break;*/
+                    /* case CMMS.CMMS_Status.PM_START:
+                         retValue += String.Format(templateEnd, "PM Task Started By", m_pmscheduleObj.started_by_name);
+                         break;*/
                     case CMMS.CMMS_Status.PM_COMPLETED:
                         retValue += String.Format(templateEnd, "PM Task Schedule Completed By", m_pmscheduleObj.completedBy_name);
                         break;
@@ -356,13 +357,13 @@ namespace CMMSAPIs.Models.Notifications
                         retValue += String.Format(templateEnd, "PM Task Cancelled By", m_pmscheduleObj.ca);
                         break;*/
                     case CMMS.CMMS_Status.PM_CANCELLED_REJECTED:
-                        retValue += String.Format(templateEnd, "PM Schedule Cancelled Rejected By", m_pmscheduleObj.cancelledrejectedbyName);
+                        retValue += String.Format(templateEnd, "PM Schedule Cancelled Rejected By ", m_pmscheduleObj.cancelledrejectedbyName);
                         break;
                     case CMMS.CMMS_Status.PM_CANCELLED_APPROVED:
-                        retValue += String.Format(templateEnd, "PM Schedule Cancelled Approved By", m_pmscheduleObj.cancelledapprovedbyName);
+                        retValue += String.Format(templateEnd, "PM Schedule Cancelled Approved By ", m_pmscheduleObj.cancelledapprovedbyName);
                         break;
                     case CMMS.CMMS_Status.PM_DELETED:
-                        retValue += String.Format(templateEnd, "PM Schedule Deleted for ID", m_pmscheduleObj.schedule_id);
+                        retValue += String.Format(templateEnd, "PM Schedule Deleted for ID ", m_pmscheduleObj.schedule_id);
                         break;
                     case CMMS.CMMS_Status.PM_UPDATED:
                         retValue += String.Format(templateEnd, "PM Schedule Updated By", m_pmscheduleObj.PM_Schedule_updated_by);
@@ -386,72 +387,6 @@ namespace CMMSAPIs.Models.Notifications
     }
 
 
-          /*  retValue = String.Format("<h3><b style='color:#31576D'>Status:</b>{0}</h3><br>", m_pmscheduleObj.status_long);
 
-            retValue += String.Format("<table style='width: 50%; margin:0 auto; border-collapse: collapse ; border-spacing: 10px; ' border='1'>");
-            retValue += String.Format(template, "ID", m_pmscheduleObj.id);
-            retValue += String.Format(template, "Status", m_pmscheduleObj.status_short);
-            retValue += String.Format(template, "Equipment Name", m_pmscheduleObj.equipment_name);
-            retValue += String.Format(template, "Responsible Person", m_pmscheduleObj.assigned_to_name);
-            retValue += String.Format(template, "Check List", m_pmscheduleObj.checklist_name);
-            retValue += String.Format(template, "Frequency", m_pmscheduleObj.frequency_name);
-            retValue += String.Format(template, "Last Done Date", m_pmscheduleObj.last_done_date);
-            retValue += String.Format(template, "Scheduled Date", m_pmscheduleObj.schedule_date);*/
-
-
-           /* if (m_pmscheduleObj.schedule_link_job.Count != 0)
-            {
-                retValue += String.Format(template, "Associated Jobs", m_pmscheduleObj.schedule_link_job);
-            }
-            if (string.IsNullOrEmpty(m_pmscheduleObj.permit_code))
-            {
-                retValue += String.Format(template, "Permit ID", m_pmscheduleObj.permit_id);
-            }
-*/
-            /*switch (m_notificationID)
-            {
-                case CMMS.CMMS_Status.PM_START:
-                    retValue += String.Format(template, "Started By", m_pmscheduleObj.started_by);
-                    retValue += String.Format(templateEnd, "Started At", m_pmscheduleObj.started_at);
-                    break;
-                case CMMS.CMMS_Status.PM_UPDATED:
-                    retValue += String.Format(template, "Updated By", m_pmscheduleObj.updated_by);
-                    retValue += String.Format(templateEnd, "Updated At", m_pmscheduleObj.updated_at);
-                    break;
-                case CMMS.CMMS_Status.PM_SUBMIT:
-                    retValue += String.Format(template, "Submitted By", m_pmscheduleObj.submitted_by);
-                    retValue += String.Format(templateEnd, "Submitted At", m_pmscheduleObj.submitted_at);
-                    break;
-                case CMMS.CMMS_Status.PM_LINK_PTW:
-                    retValue += "</table>"; break;
-                case CMMS.CMMS_Status.PM_COMPLETED:
-                    retValue += String.Format(templateEnd, "Completed At", m_pmscheduleObj.completed_at);
-                    break;
-                case CMMS.CMMS_Status.PM_APPROVED:
-                    retValue += String.Format(template, "Approved By", m_pmscheduleObj.approved_by);
-                    retValue += String.Format(templateEnd, "Approved At", m_pmscheduleObj.approved_at);
-                    break;
-                case CMMS.CMMS_Status.PM_REJECTED:
-                    retValue += String.Format(template, "Rejected By", m_pmscheduleObj.rejected_by);
-                    retValue += String.Format(templateEnd, "Rejected At", m_pmscheduleObj.rejected_at);
-                    break;
-                case CMMS.CMMS_Status.PM_CANCELLED:
-                    retValue += String.Format(template, "Cancelled By", m_pmscheduleObj.cancelled_by);
-                    retValue += String.Format(templateEnd, "Cancelled At", m_pmscheduleObj.cancelled_at);
-                    break;
-                case CMMS.CMMS_Status.PM_DELETED:
-                    retValue += String.Format(template, "Deleted By", m_pmscheduleObj.deleted_by);
-                    retValue += String.Format(templateEnd, "Deleted At", m_pmscheduleObj.deleted_at); break;
-                //case CMMS.CMMS_Status.PM_SCHEDULED:     //Cancelled
-                //    retValue = String.Format("Maintenance Order <{0}> Cancelled", m_pmscheduleObj.maintenance_order_number);
-                //    break;
-                default:
-                    break;
-            }
-
-            return retValue;
-        }*/
-
-
-    }
+}
 

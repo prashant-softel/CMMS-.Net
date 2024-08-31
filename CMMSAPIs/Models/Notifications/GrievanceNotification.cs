@@ -47,7 +47,7 @@ namespace CMMSAPIs.Models.Notifications
         override protected string getSubject(params object[] args)
         {
 
-            string retValue = "My job subject";
+            string retValue = "";
 
             switch (m_notificationID)
             {

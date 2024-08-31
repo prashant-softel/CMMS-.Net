@@ -111,47 +111,40 @@ namespace CMMSAPIs.Models.Notifications
             retValue += String.Format(template, "Status", WCObj.status_short);
             retValue += String.Format(template, "Warranty Claim Title", WCObj.warranty_claim_title);
             retValue += String.Format(template, "Warranty Claim  Description", WCObj.warranty_description);
-            retValue += String.Format(template, "Submitted By", WCObj.created_by_name);
+            retValue += String.Format(template, "Created By", WCObj.created_by_name);
 
-            if (WCObj.approved_by > 0)
+            switch (m_notificationID)
             {
-                retValue += String.Format(template, "Claim open Approved By", WCObj.approver_name);
-            }
-            else if (WCObj.rejected_by > 0)
-            {
-                retValue += String.Format(template, "Claim opening  Rejected By", WCObj.rejected_by_name);
-            }
+                case CMMS.CMMS_Status.WC_SUBMITTED:
+                    retValue += "</table>"; break;
+                /*case CMMS.CMMS_Status.PM_LINKED_TO_PTW:
+                    retValue += String.Format(templateEnd, "PM Task Linked By", m_pmExecutionObj.updated_by_name);
+                    break;*/
+                case CMMS.CMMS_Status.WC_SUBMIT_REJECTED:
+                    retValue += String.Format(templateEnd, "Warranty Claim Rejected By ", WCObj.rejected_by_name);
+                    break;
+                case CMMS.CMMS_Status.WC_SUBMIT_APPROVED:
+                    retValue += String.Format(templateEnd, "Warranty Claim Approved By ", WCObj.approver_name);
+                    break;
+                case CMMS.CMMS_Status.WC_CLOSED:
+                    retValue += String.Format(templateEnd, "Warranty Claim Closed By ", WCObj.closed_approver_name);
+                    break;
+                case CMMS.CMMS_Status.WC_CLOSED_REJECTED:
+                    retValue += String.Format(templateEnd, "Warranty Claim Closed Rejected By ", WCObj.closed_rejected_by_name);
+                    break;
+                case CMMS.CMMS_Status.WC_CLOSE_APPROVED:
+                    retValue += String.Format(templateEnd, "Warranty Claim Closed Approved By ", WCObj.closed_approver_name);
+                    break;
+                case CMMS.CMMS_Status.WC_CANCELLED:
+                    retValue += String.Format(templateEnd, "Warranty Claim Cancelled By ", WCObj.cancelled_by_name);
+                    break;
+                case CMMS.CMMS_Status.WC_UPDATED:
+                    retValue += String.Format(templateEnd, "Warranty Claim Updated By ", WCObj.updatedbyIdName);
+                    break;
+                default:
+                    retValue += String.Format(templateEnd, "Warranty Claim Undefined Status for ", m_notificationID);
+                    break;
 
-            string sClaimStatus = "In Process";
-            if(WCObj.claim_status == 1)
-            {
-                sClaimStatus = "Done";
-            }
-            else if (WCObj.claim_status == 1)
-            {
-                sClaimStatus = "rejected";
-            }
-            else if (WCObj.claim_status == 1)
-            {
-                sClaimStatus = "Partially done";
-            }
-            retValue += String.Format(template, "Claim status", sClaimStatus);
-
-            if (WCObj.closed_by > 0)
-            {
-                retValue += String.Format(template, "Claim Closed By", WCObj.closed_by_name);
-            }
-            if (WCObj.closed_approved_by > 0)
-            {
-                retValue += String.Format(template, "Claim close Approved By", WCObj.closed_approver_name);
-            }
-            else if (WCObj.closed_rejected_by > 0)
-            {
-                retValue += String.Format(template, "Claim opening  Rejected By", WCObj.closed_rejected_by_name);
-            }
-            if (WCObj.cancelled_by > 0)
-            {
-                retValue += String.Format(template, "Claim Cancelled By", WCObj.cancelled_by_name);
             }
 
             return retValue;
