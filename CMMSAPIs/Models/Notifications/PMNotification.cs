@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using CMMSAPIs.BS.Grievance;
 using CMMSAPIs.Helper;
 using CMMSAPIs.Models.PM;
 using CMMSAPIs.Models.Utils;
@@ -109,18 +110,19 @@ namespace CMMSAPIs.Models.Notifications
                 default:
                     if (m_pmPlanObj != null && m_pmPlanObj.plan_id != 0)
                     {
-                        retValue += String.Format("PM Plan{0} Undefined status {1}", m_pmPlanObj.plan_id, m_notificationID);
+                        retValue += String.Format("PMP{0} Undefined status {1}", m_pmPlanObj.plan_id, m_notificationID);
                     }
                     else if (m_pmExecutionObj != null && m_pmExecutionObj.id != 0)
                     {
-                        retValue += String.Format("PM Task{0} Undefined status {1}", m_pmExecutionObj.id, m_notificationID);
+                        retValue += String.Format("PMT{0} Undefined status {1}", m_pmExecutionObj.id, m_notificationID);
                     }
                     else if (m_pmscheduleObj != null && m_pmscheduleObj.schedule_id != 0)
                     {
-                        retValue += String.Format("PM Schedule{0} Undefined status {1}", m_pmscheduleObj.schedule_id, m_notificationID);
+                        retValue += String.Format("PMS{0} Undefined status {1}", m_pmscheduleObj.schedule_id, m_notificationID);
                     }
                     break;
             }
+            retValue += $" for {m_delayDays} days";
             return retValue;
 
         }
@@ -206,6 +208,18 @@ namespace CMMSAPIs.Models.Notifications
                     retValue = String.Format("PMT<{0}> Task Deleted By <{1}>", m_pmExecutionObj.id, m_pmExecutionObj.deletedbyName);
                     break;
                 default:
+                    if (m_pmPlanObj != null && m_pmPlanObj.plan_id != 0)
+                    {
+                        retValue += String.Format("PMP{0} Undefined status {1}", m_pmPlanObj.plan_id, m_notificationID);
+                    }
+                    else if (m_pmExecutionObj != null && m_pmExecutionObj.id != 0)
+                    {
+                        retValue += String.Format("PMT{0} Undefined status {1}", m_pmExecutionObj.id, m_notificationID);
+                    }
+                    else if (m_pmscheduleObj != null && m_pmscheduleObj.schedule_id != 0)
+                    {
+                        retValue += String.Format("PMS{0} Undefined status {1}", m_pmscheduleObj.schedule_id, m_notificationID);
+                    }
                     break;
             }
             return retValue;
