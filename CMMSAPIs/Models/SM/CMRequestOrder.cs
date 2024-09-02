@@ -189,6 +189,7 @@ namespace CMMSAPIs.Models.SM
         public string closed_by { get; set; }
         public string closed_at { get; set; }
         public string drafted_by { get; set; }
+        public string currency { get; set; }
         public List<CMRequestOrder_ITEMS_GET> request_order_items { get; set; }
     }
     public class CMRequestOrder_ITEMS_GET

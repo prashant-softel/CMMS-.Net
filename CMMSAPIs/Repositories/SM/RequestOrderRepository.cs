@@ -474,7 +474,8 @@ namespace CMMSAPIs.Repositories.SM
                 generatedAt = p.request_date,
                 approvedBy = p.approvedBy,
                 rejectedBy = p.rejectedBy,
-                rejectedAt = p.rejectedAt
+                rejectedAt = p.rejectedAt,
+                currency = p.currency
 
             }).ToList();
             List<CMRequestOrder_ITEMS_GET> _itemList = _List.Select(p => new CMRequestOrder_ITEMS_GET

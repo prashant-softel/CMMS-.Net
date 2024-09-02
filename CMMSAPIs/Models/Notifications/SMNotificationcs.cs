@@ -93,7 +93,8 @@ namespace CMMSAPIs.Models.Notifications
                 retValue += String.Format("<table style='width: 50%; margin:0 auto; border-collapse: collapse ; border-spacing: 10px; ' border='1'>");
                 retValue += String.Format(template, "ID","RO"+m_SMROObj.request_order_id);    
                 retValue += String.Format(template, "Facility Name", m_SMROObj.facilityName);
-                retValue += String.Format(template, "Cost", m_SMROObj.cost);
+                retValue += String.Format(template, "Cost", $"{m_SMROObj.cost} [{m_SMROObj.currency}]");
+
                 retValue += String.Format(template, "Comment", m_SMROObj.comment);
                 retValue += String.Format(template, "Status", m_SMROObj.status_short);
 
