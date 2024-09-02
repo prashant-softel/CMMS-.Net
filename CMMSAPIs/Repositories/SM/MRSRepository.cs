@@ -267,7 +267,7 @@ namespace CMMSAPIs.Repositories.SM
             switch (m_notificationID)
             {
                 case CMMS.CMMS_Status.MRS_SUBMITTED:
-                    retValue = "Submitted";
+                    retValue = "Requested";
                     break;
                 case CMMS.CMMS_Status.MRS_REQUEST_REJECTED:
                     retValue = "Request Rejected";
@@ -279,10 +279,10 @@ namespace CMMSAPIs.Repositories.SM
                     retValue = "Request Issued";
                     break;
                 case CMMS.CMMS_Status.MRS_REQUEST_ISSUED_REJECTED:
-                    retValue = "Request Issued Rejected";
+                    retValue = "Issue Rejected";
                     break;
                 case CMMS.CMMS_Status.MRS_REQUEST_ISSUED_APPROVED:
-                    retValue = "Request Issued Approved";
+                    retValue = "Issue Approved";
                     break;
                 default:
                     retValue = "Unknown <" + m_notificationID + ">";
@@ -841,8 +841,8 @@ namespace CMMSAPIs.Repositories.SM
     "DATE_FORMAT(sm.returnDate,'%Y-%m-%d %H:%i') as returnDate,if(sm.approval_status != '',DATE_FORMAT(sm.approved_date,'%Y-%m-%d %H:%i'),'') as approval_date,sm.approval_status," +
     "sm.approval_comment,CONCAT(ed.firstName,' ',ed.lastName) as requested_by_name, sm.status, sm.activity, sm.whereUsedType," +
     " case when sm.whereUsedType = 1 then 'Job' when sm.whereUsedType = 2 then 'PM' when sm.whereUsedType = 4 then 'JOBCARD' when sm.whereUsedType = 27 then 'PMTASK' else 'Invalid' end as whereUsedTypeName,  sm.whereUsedRefID, sm.remarks " +
-    ", DATE_FORMAT(sm.issuedAt,'%Y-%m-%d %H:%i') as issued_date, CONCAT(issuedUser.firstName,' ',issuedUser.lastName) as issued_name " +
-    ", sm.updated_by_emp_ID, CONCAT(updateUser.firstName, ' ', updateUser.lastName) as request_updated_by_name, sm.rejected_by_emp_ID , CONCAT(rejectedByUser.firstName, ' ', rejectedByUser.lastName) as request_rejected_by_name, sm.issue_approved_by_emp_ID, CONCAT(issuedApproveUser.firstName, ' ', issuedApproveUser.lastName) as issue_appoved_by_name , sm.issue_rejected_by_emp_ID, CONCAT(issuedRejectUser.firstName, ' ', issuedRejectUser.lastName) as issue_rejected_by_name " +
+    ", DATE_FORMAT(sm.issuedAt,'%Y-%m-%d %H:%i') as issued_date, CONCAT(issuedUser.firstName,' ',issuedUser.lastName) as issued_name,sm.issuedAt " +
+    ", sm.updated_by_emp_ID, CONCAT(updateUser.firstName, ' ', updateUser.lastName) as request_updated_by_name, sm.rejected_by_emp_ID , CONCAT(rejectedByUser.firstName, ' ', rejectedByUser.lastName) as request_rejected_by_name, sm.issue_approved_by_emp_ID, CONCAT(issuedApproveUser.firstName, ' ', issuedApproveUser.lastName) as issue_appoved_by_name,sm.issue_approved_date , sm.issue_rejected_by_emp_ID, CONCAT(issuedRejectUser.firstName, ' ', issuedRejectUser.lastName) as issue_rejected_by_name,sm.issue_rejected_date,sm.issue_rejected_date " +
     " FROM smmrs sm LEFT JOIN users ed ON ed.id = sm.requested_by_emp_ID " +
     " LEFT JOIN users ed1 ON ed1.id = sm.approved_by_emp_ID " +
     " LEFT JOIN users issuedUser ON issuedUser.id = sm.issued_by_emp_ID " +
@@ -2212,7 +2212,7 @@ namespace CMMSAPIs.Repositories.SM
             {
 
                 case CMMS.CMMS_Status.MRS_SUBMITTED:
-                    retValue = $"MRS{Id} Submitted.";
+                    retValue = $"MRS{Id} Requested.";
                     break;
                 case CMMS.CMMS_Status.MRS_REQUEST_REJECTED:
                     retValue = $"MRS{Id} Request Rejected";
@@ -2221,13 +2221,13 @@ namespace CMMSAPIs.Repositories.SM
                     retValue = $"MRS{Id} Request Approved";
                     break;
                 case CMMS.CMMS_Status.MRS_REQUEST_ISSUED:
-                    retValue = $"MRS{Id} Request Issued";
+                    retValue = $"MRS{Id} Issued";
                     break;
                 case CMMS.CMMS_Status.MRS_REQUEST_ISSUED_REJECTED:
-                    retValue = $"MRS{Id} Request Issued Rejected";
+                    retValue = $"MRS{Id} Issue Rejected";
                     break;
                 case CMMS.CMMS_Status.MRS_REQUEST_ISSUED_APPROVED:
-                    retValue = $"MRS{Id} Request Issued Approved";
+                    retValue = $"MRS{Id} Issue Approved";
                     break;
                 default:
                     retValue = "Unknown <" + m_notificationID + ">";

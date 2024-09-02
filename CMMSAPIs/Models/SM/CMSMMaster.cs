@@ -331,6 +331,8 @@ namespace CMMSAPIs.Models.SM
         public int RejectedByEmpID { get; set; }
         public int IssueApprovedByEmpID { get; set; }
         public int IssueRejectedByEmpID { get; set; }
+        public DateTime? issue_approved_date { get; set; }
+        public DateTime? issue_rejected_date { get; set; }
         public List<CMMRSItems> CMMRSItems { get; set; }
     }
 
