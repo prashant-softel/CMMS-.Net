@@ -130,7 +130,6 @@ namespace CMMSAPIs.Models.Notifications
           
             else
             {
-                
                 retValue += String.Format(template, "Vendor Name", m_GOObj.vendor_name ?? "N/A");
                 retValue += String.Format(template, "PO No.", m_GOObj.po_no);
                 retValue += String.Format(template, "Amount", $"{m_GOObj.amount} [{m_GOObj.currency}]");
@@ -188,30 +187,80 @@ namespace CMMSAPIs.Models.Notifications
 
             retValue += "</table><br><br>";
 
-            // GO Items Table
-            retValue += "<h4>Selected Material</h4>";
-            retValue += "<table style='width: 80%; margin:0 auto; border-collapse: collapse; border-spacing: 10px;' border='1'>";
-            retValue += "<tr>";
-            retValue += "<th>Material</th>";
-            retValue += "<th>Requested Quantity</th>";
-            retValue += "<th>Unit Cost</th>";
-            retValue += "<th>Dispatch Quantity</th>";
-            retValue += "<th>Paid By</th>";
-            
-            retValue += "</tr>";
 
-            foreach (var item in m_GOObj.GODetails)
+            bool check1 = !string.IsNullOrEmpty(m_GOObj.receive_submitted_by_name);
+            bool check2 = !string.IsNullOrEmpty(m_GOObj.receive_rejected_by_name);
+            bool check3 = !string.IsNullOrEmpty(m_GOObj.receive_approved_by_name);
+            bool check4 = !string.IsNullOrEmpty(m_GOObj.closed_by_name);
+
+            if (check1 || check2 || check3 || check4 == true)
             {
+                // GO Items Table
+                retValue += "<h4>Selected Material</h4>";
+                retValue += "<table style='width: 80%; margin:0 auto; border-collapse: collapse; border-spacing: 10px;' border='1'>";
                 retValue += "<tr>";
-                retValue += String.Format("<td>{0}</td>", item.assetItem_Name);
-                retValue += String.Format("<td>{0}</td>", item.requested_qty);
-                retValue += String.Format("<td>{0}</td>", item.cost);
-                retValue += String.Format("<td>{0}</td>", item.ordered_qty);
-                retValue += String.Format("<td>{0}</td>", item.paid_by_name);
+                retValue += "<th>Material</th>";
+                retValue += "<th>Requested Quantity</th>";
+                retValue += "<th>Unit Cost</th>";
+                retValue += "<th>Dispatch Quantity</th>";
+                retValue += "<th>Paid By</th>";
+
+                retValue += "<th>Receive Quantity</th>";
+                retValue += "<th>Accepted Quantity</th>";
+                retValue += "<th>Damamaged Items</th>";
+                retValue += "<th>Rack No.</th>";
+                retValue += "<th>Row No.</th>";
+                retValue += "<th>Column No.</th>";
                 retValue += "</tr>";
+
+                foreach (var item in m_GOObj.GODetails)
+                {
+                    retValue += "<tr>";
+                    retValue += String.Format("<td>{0}</td>", item.assetItem_Name);
+                    retValue += String.Format("<td>{0}</td>", item.requested_qty);
+                    retValue += String.Format("<td>{0}</td>", item.cost);
+                    retValue += String.Format("<td>{0}</td>", item.ordered_qty);
+                    retValue += String.Format("<td>{0}</td>", item.paid_by_name);
+
+                    retValue += String.Format("<td>{0}</td>", item.received_qty);
+                    retValue += String.Format("<td>{0}</td>", item.accepted_qty);
+                    retValue += String.Format("<td>{0}</td>", item.damaged_qty);
+                    retValue += String.Format("<td>{0}</td>", item.storage_rack_no);
+                    retValue += String.Format("<td>{0}</td>", item.storage_row_no);
+                    retValue += String.Format("<td>{0}</td>", item.storage_column_no);
+                    retValue += "</tr>";
+                }
+                retValue += "</table><br><br>";
             }
-            retValue += "</table><br><br>";
-            switch (m_notificationID)
+            else
+            {
+                retValue += "<h4>Selected Material</h4>";
+                retValue += "<table style='width: 80%; margin:0 auto; border-collapse: collapse; border-spacing: 10px;' border='1'>";
+                retValue += "<tr>";
+                retValue += "<th>Material</th>";
+                retValue += "<th>Requested Quantity</th>";
+                retValue += "<th>Unit Cost</th>";
+                retValue += "<th>Dispatch Quantity</th>";
+                retValue += "<th>Paid By</th>";
+
+                foreach (var item in m_GOObj.GODetails)
+                {
+                    retValue += "<tr>";
+                    retValue += String.Format("<td>{0}</td>", item.assetItem_Name);
+                    retValue += String.Format("<td>{0}</td>", item.requested_qty);
+                    retValue += String.Format("<td>{0}</td>", item.cost);
+                    retValue += String.Format("<td>{0}</td>", item.ordered_qty);
+                    retValue += String.Format("<td>{0}</td>", item.paid_by_name);
+                }
+                retValue += "</table><br><br>";
+
+            }
+
+
+
+
+
+                switch (m_notificationID)
             {
                 case CMMS.CMMS_Status.GO_DRAFT:
                     retValue += "</table>";
