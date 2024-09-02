@@ -26,6 +26,7 @@ namespace CMMSAPIs.BS.Cleaning
         public Task<CMDefaultResponse> UpdateScheduleExecution(CMMCGetScheduleExecution schedule, int userId, string facilitytime);
         public Task<CMMCExecutionSchedule> GetScheduleExecutionSummary(CMMCGetScheduleExecution schedule, string facilitytime);
         public Task<CMMCExecution> GetExecutionDetails(int id, string facilitytime);
+        public Task<CMMCExecutionSchedule> GetScheduleDetails(int id, string facilitytime);
         public Task<CMDefaultResponse> AbandonExecution(CMApproval request, int userId, string facilitytime);
         public Task<CMDefaultResponse> RejectAbandonExecution(CMApproval request, int userId, string facilitytime);
         public Task<CMDefaultResponse> ApproveAbandonExecution(CMApproval request, int userId, string facilitytime);
@@ -324,6 +325,21 @@ namespace CMMSAPIs.BS.Cleaning
                 // using (var repos = new MCRepository(getDB))
                 {
                     return await repos.GetExecutionDetails(executionId, facilitytime);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMMCExecutionSchedule> GetScheduleDetails(int scheduleId, string facilitytime)
+        {
+            try
+            {
+                // using (var repos = new MCRepository(getDB))
+                {
+                    return await repos.GetScheduleDetails(scheduleId, facilitytime);
                 }
             }
             catch (Exception ex)
