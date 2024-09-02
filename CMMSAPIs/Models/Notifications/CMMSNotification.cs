@@ -497,18 +497,28 @@ namespace CMMSAPIs.Models.Notifications
                 notificationObj = new GrievanceNotification(moduleID, notificationID, _Grievance);
                 facilityId = _Grievance.facilityId;
             }
-            else if (moduleID == CMMS.CMMS_Modules.MC_PLAN)
-            {
-                CMMCPlan _Plan = (CMMCPlan)args[0];
-                notificationObj = new MCNotification(moduleID, notificationID, _Plan, null);
-                facilityId = _Plan.facilityId;
-            }
             else if (moduleID == CMMS.CMMS_Modules.MC_TASK)
             {
                 CMMCExecution _Task = (CMMCExecution)args[0];
-                notificationObj = new MCNotification(moduleID, notificationID, null, _Task);
-                //facilityId = _Task.facilityId;
+
+                notificationObj = new MCNotification(moduleID, notificationID, _Task);
+                facilityId = _Task.facility_id;
             }
+
+            else if (moduleID == CMMS.CMMS_Modules.MC_EXECUTION)
+            {
+                CMMCExecutionSchedule _Schedule = (CMMCExecutionSchedule)args[0];
+                notificationObj = new MCNotification(moduleID, notificationID, _Schedule);
+                facilityId = _Schedule.facility_id;
+            }
+            else if (moduleID == CMMS.CMMS_Modules.MC_PLAN)
+            {
+                CMMCPlan Plan = (CMMCPlan)args[0];
+                notificationObj = new MCNotification(moduleID, notificationID, Plan);
+                facilityId = Plan.facility_id;
+            }
+
+
             else if (moduleID == CMMS.CMMS_Modules.VEGETATION_PLAN)
             {
                 CMMCPlan _Plan = (CMMCPlan)args[0];
@@ -550,7 +560,8 @@ namespace CMMSAPIs.Models.Notifications
                 CMGOMaster _GO = (CMGOMaster)args[0];
                 notificationObj = new GONotification(moduleID, notificationID, _GO);
                 facilityId = _GO.facility_id;
-            }else if (moduleID == CMMS.CMMS_Modules.SM_RO)      //RO Report
+            }
+            else if (moduleID == CMMS.CMMS_Modules.SM_RO)      //RO Report
             {
                 CMCreateRequestOrderGET _SMRO = (CMCreateRequestOrderGET)args[0];
                 notificationObj = new SMNotification(moduleID, notificationID, _SMRO);
