@@ -102,14 +102,14 @@ namespace CMMSAPIs.Models.PM
         public int closed_by_id { get; set; }
         public string closed_by_name { get; set; }
         public DateTime closed_at { get; set; }
-        public int cancelled_by_id { get; set; }
+        public int cancelled_by { get; set; }
         public string cancelled_by_name { get; set; }
         public DateTime cancelled_at { get; set; }
         public int approved_by_id { get; set; }
-        public string approved_by { get; set; }
+        public string approved_by_name { get; set; }
         public DateTime approved_at { get; set; }
         public int rejected_by_id { get; set; }
-        public string rejected_by_name { get; set; }
+        public string closeRejectedbyName { get; set; }
         public DateTime rejected_at { get; set; }
         public int updated_by_id { get; set; }
         public string updated_by_name { get; set; }
@@ -137,6 +137,7 @@ namespace CMMSAPIs.Models.PM
         public string createdbyName { get; set; }
         public string deletedbyName { get; set; }
         public int status { get; set; }
+        public int closed_by { get; set; }
 
 
     }
@@ -162,7 +163,6 @@ namespace CMMSAPIs.Models.PM
         public DateTime? approved_at { get; set; }
         public string approved_by { get; set; }
         public DateTime? rejected_at { get; set; }
-        public string rejected_by { get; set; }
         public DateTime? cancelled_at { get; set; }
         public string cancelled_by { get; set; }
         public DateTime? deleted_at { get; set; }

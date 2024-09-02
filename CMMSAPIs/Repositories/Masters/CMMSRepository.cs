@@ -1331,7 +1331,7 @@ namespace CMMSAPIs.Repositories.Masters
                 plan.status_long = _shortStatus;
             }
             result.created = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.PM_ASSIGNED).ToList().Count;
-            result.rejected = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.PM_REJECTED || x.status == (int)CMMS.CMMS_Status.PM_CLOSE_REJECTED || x.status == (int)CMMS.CMMS_Status.PM_PLAN_REJECTED).ToList().Count;
+            result.rejected = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.PM_CLOSE_REJECTED|| x.status == (int)CMMS.CMMS_Status.PM_CLOSE_REJECTED || x.status == (int)CMMS.CMMS_Status.PM_PLAN_REJECTED).ToList().Count;
             result.assigned = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.PM_ASSIGNED).ToList().Count;
             result.submitted = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.PM_SUBMIT).ToList().Count;
             result.pm_closed_count = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED).ToList().Count;
@@ -1375,12 +1375,8 @@ namespace CMMSAPIs.Repositories.Masters
                     retValue = "Linked To PTW"; break;
                 case CMMS.CMMS_Status.PM_START:
                     retValue = "Started"; break;
-                case CMMS.CMMS_Status.PM_COMPLETED:
+                case CMMS.CMMS_Status.PM_CLOSED:
                     retValue = "Close - Waiting for Approval"; break;
-                case CMMS.CMMS_Status.PM_REJECTED:
-                    retValue = "Rejected"; break;
-                case CMMS.CMMS_Status.PM_APPROVED:
-                    retValue = "Approved"; break;
                 case CMMS.CMMS_Status.PM_CLOSE_REJECTED:
                     retValue = "Close - Rejected"; break;
                 case CMMS.CMMS_Status.PM_CLOSE_APPROVED:

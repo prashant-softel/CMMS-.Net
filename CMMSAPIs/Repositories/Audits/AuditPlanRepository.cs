@@ -83,7 +83,7 @@ namespace CMMSAPIs.Repositories.Audits
             string filter = " where st.id = " + id + "";
             string SelectQ = "select st.id,plan_number,  f.name as facility_name, concat(au.firstName, ' ', au.lastName)  Auditee_Emp_Name, " +
                 "concat(u.firstName, ' ', u.lastName) Auditor_Emp_Name , st.frequency, st.status, case when st.frequency = 0 then 'False' else 'True' end as FrequencyApplicable, st.Description,st.Schedule_Date, st.checklist_id, " +
-                " checklist_number as checklist_name, frequency.name as frequency_name, st.created_at, concat(created.firstName, ' ', created.lastName) created_by, st.approved_Date, concat(ct.firstName, ' ', ct.lastName) approved_by, st.module_type_id as Module_Type_id, case when st.module_type_id = 1 then 'PM'  when st.module_type_id = 2 then 'HOTO'  when st.module_type_id = 3 then 'Audit' \r\n  when st.module_type_id = 4 then 'MIS' end as  Module_Type,   assignedTo,Employees,  case when is_PTW = 1 then 'True' else 'False' end is_PTW" +
+                " checklist_number as checklist_name, frequency.name as frequency_name, st.created_at, concat(created.firstName, ' ', created.lastName) created_by, st.approved_Date, concat(ct.firstName, ' ', ct.lastName) approved_by_name, st.module_type_id as Module_Type_id, case when st.module_type_id = 1 then 'PM'  when st.module_type_id = 2 then 'HOTO'  when st.module_type_id = 3 then 'Audit' \r\n  when st.module_type_id = 4 then 'MIS' end as  Module_Type,   assignedTo,Employees,  case when is_PTW = 1 then 'True' else 'False' end is_PTW" +
                 " from st_audit st " +
                 "inner join facilities f ON st.Facility_id = f.id " +
                 "left join users au on au.id = st.Auditee_Emp_ID " +
@@ -488,7 +488,7 @@ namespace CMMSAPIs.Repositories.Audits
             string statusQry = $"SELECT status FROM pm_task WHERE id = {request.task_id};";
             DataTable dt1 = await Context.FetchData(statusQry).ConfigureAwait(false);
             CMMS.CMMS_Status status = (CMMS.CMMS_Status)Convert.ToInt32(dt1.Rows[0][0]);
-            if (status == CMMS.CMMS_Status.PM_SCHEDULED || status == CMMS.CMMS_Status.PM_REJECTED)
+            if (status == CMMS.CMMS_Status.PM_SCHEDULED || status == CMMS.CMMS_Status.PM_CLOSE_REJECTED)
             {
                 responseList.Add(new CMDefaultResponse(request.task_id, CMMS.RETRUNSTATUS.FAILURE,
                     "Execution must be rejected or in progress to modify execution details"));
@@ -1084,7 +1084,7 @@ namespace CMMSAPIs.Repositories.Audits
                 $" frequency.id as plan_freq_id, frequency.name as plan_freq_name, createdBy.id as created_by_id, " +
                 $" CONCAT(createdBy.firstName, ' ', createdBy.lastName) as created_by_name, plan.created_at,approvedBy.id as approved_by_id," +
                 $" CONCAT(approvedBy.firstName, ' ', approvedBy.lastName) as approved_by_name, plan.approved_Date approved_at, rejectedBy.id as rejected_by_id, " +
-                $" CONCAT(rejectedBy.firstName, ' ', rejectedBy.lastName) as rejected_by_name, plan.rejected_Date rejected_at," +
+                $" CONCAT(rejectedBy.firstName, ' ', rejectedBy.lastName) as closeRejectedbyName, plan.rejected_Date rejected_at," +
                 $" CONCAT(assignedTo.firstName, ' ', assignedTo.lastName) as assigned_to_name," +
                 $" CONCAT(rejected_close_by.firstName, ' ', rejected_close_by.lastName) as rejected_close_by_name," +
                 $" CONCAT(approved_close_by.firstName, ' ', approved_close_by.lastName) as approved_close_by_name," +
@@ -1456,9 +1456,9 @@ namespace CMMSAPIs.Repositories.Audits
                 case CMMS.CMMS_Status.AUDIT_DELETED:
                     retValue = $"Audit Deleted "; break;
                 case CMMS.CMMS_Status.AUDIT_APPROVED:
-                    retValue = $"Audit Approved By {Obj.approved_by}"; break;
+                    retValue = $"Audit Approved By {Obj.approved_by_name}"; break;
                 case CMMS.CMMS_Status.AUDIT_REJECTED:
-                    retValue = $"Audit Rejected By {Obj.rejected_by_name}"; break;
+                    retValue = $"Audit Rejected By {Obj.closeRejectedbyName}"; break;
                 case CMMS.CMMS_Status.AUDIT_CLOSED:
                     retValue = $"Audit Closed By {Obj.closed_by_name}"; break;
                 case CMMS.CMMS_Status.PTW_LINKED_TO_AUDIT:

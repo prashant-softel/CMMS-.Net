@@ -182,11 +182,12 @@ namespace CMMSAPIs.Models.MC
         public int status { get; set; }
         public string rejectedById { get; set; }
         public DateTime? rejectedAt { get; set; }
-        public string approvedById { get; set; }
+        public string approvedBy { get; set; }
         public DateTime? approvedAt { get; set; }
         public string status_short { get; set; }
         public string status_long_schedule { get; set; }
         public int facility_id { get; set; }
+        public string executedBy { get; set; }
         public List<CMMCExecutionEquipment> equipments { get; set; }
     }
 
