@@ -56,7 +56,7 @@ namespace CMMSAPIs.Models.Notifications
         private static IConfigurationRoot MyConfig;
         private static string _conString;
         public static MYSQLDBHelper getDB;
-        public static MYSQLDBHelper _conn;
+        //public static MYSQLDBHelper _conn;
 
 
         private UserAccessRepository _userAccessRepository;
@@ -178,20 +178,32 @@ namespace CMMSAPIs.Models.Notifications
             request.Headers = HTMLHeader;
 
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
-
+            string strMessage = "mail with subject <" + subject + "> sent";
             try
             {
                 var res = MailService.SendEmailAsync(request, _settings);
-                //if(sucess code)
+
+                if (res.Exception != null)
+                {
+                    if (res.Exception.InnerExceptions.Count > 0)
+                    {
+                        strMessage = res.Exception.Message;
+                    }
+                    else
+                    {
+                        strMessage = "Some error";
+                    }
+                }
+                else
                 {
                     retCode = CMMS.RETRUNSTATUS.SUCCESS;
                 }
             }
                 catch (Exception e)
             {
-                string msg = e.Message;
+                strMessage = e.Message;
             }
-            CMDefaultResponse retValue = new CMDefaultResponse(1, retCode, "mail with subject <" + subject + "> sent");
+            CMDefaultResponse retValue = new CMDefaultResponse(1, retCode, strMessage );
 
             return retValue;
         }
@@ -203,6 +215,8 @@ namespace CMMSAPIs.Models.Notifications
             CMDefaultResponse response = new CMDefaultResponse();
 
             List<CMUser> emailList = new List<CMUser>();
+
+            //int notificationID_int = (int)notificationID;
             // emailList = GetUserByNotificationId(notificationID);
 
             string subject;
@@ -223,7 +237,6 @@ namespace CMMSAPIs.Models.Notifications
             string HTMLFooter = getHTMLFooter(args);
             string HTMLSignature = getHTMLSignature(args);
             int module_ref_id = getId(args);
-
             printBody = getHTMLBody(args);
 
 
@@ -234,7 +247,7 @@ namespace CMMSAPIs.Models.Notifications
             notification.notification_id = (int)notificationID;
             notification.user_ids = userID;
             notification.role_id = m_role;
-            notification.user_ids = userID;
+            //notification.user_ids = userID;
 
             List<CMUser> users = new List<CMUser>();
             string notificationQry = "";
@@ -244,18 +257,59 @@ namespace CMMSAPIs.Models.Notifications
                 // UserAccessRepository obj = new UserAccessRepository(_conn);
                 if (m_notificationType == 2)
                 {
-                    users = await _userAccessRepository.GetEMUsers(facilityId, m_role, (int)moduleID);
-                    notificationQry = $"INSERT INTO escalationlog (moduleId, moduleRefId, moduleStatus, notifSentToId, notifSentAt) VALUES " +
-                                    $"({(int)moduleID}, {module_ref_id}, {(int)notificationID}, {m_role}, '{UtilsRepository.GetUTCTime()}'); " +
+                    users = await _userAccessRepository.GetEMUsers(notification);
+                    notificationQry = $"INSERT INTO escalationlog (moduleId, moduleRefId, moduleStatus, notifSentToId, notifSentAt, emailUserCount, notificationType) VALUES " +
+                                    $"({(int)moduleID}, {module_ref_id}, {(int)notificationID}, {m_role}, '{UtilsRepository.GetUTCTime()}', {users.Count}, {m_notificationType}); " +
                                     $"SELECT LAST_INSERT_ID(); ";
                 }
                 else
                 {
                     users = await _userAccessRepository.GetUserByNotificationId(notification);
-                    notificationQry = $"INSERT INTO escalationlog (moduleId, moduleRefId, moduleStatus, notifSentToId, notifSentAt) VALUES " +
-                                    $"({(int)moduleID}, {module_ref_id}, {(int)notificationID}, {m_role}, '{UtilsRepository.GetUTCTime()}'); " +
+                    notificationQry = $"INSERT INTO escalationlog (moduleId, moduleRefId, moduleStatus, notifSentToId, notifSentAt, emailUserCount, notificationType) VALUES " +
+                                    $"({(int)moduleID}, {module_ref_id}, {(int)notificationID}, {m_role}, '{UtilsRepository.GetUTCTime()}', {users.Count}, {m_notificationType}); " +
                                     $"SELECT LAST_INSERT_ID(); ";
+                }
+                List<string> EmailTo = new List<string>();
 
+                if (getDB == null)
+                {
+                    getDB = new MYSQLDBHelper(_conString);
+                }
+                System.Data.DataTable dt1 = await getDB.FetchData(notificationQry).ConfigureAwait(false);
+                int escalationlogID = Convert.ToInt32(dt1.Rows[0][0]);
+
+                string notificationRecordsQry = "INSERT INTO escalationsentto (escalationLogId, notifSentTo) VALUES ";
+                string delimiter = "";
+                int emailCount = 0;
+                foreach (var email in users)
+                {
+                    if (email != null)
+                    {
+                        //EmailTo.Add(email.user_name);     //Temp . Remove when testing done
+                        notificationRecordsQry += $"({escalationlogID}, '{email.id}'),";
+                        emailCount++;
+                    }
+                }
+
+                EmailTo.Add("notifications@softeltech.in");
+                if (users.Count > 0)
+                {
+                    notificationRecordsQry = notificationRecordsQry.Substring(0, notificationRecordsQry.Length - 1);
+                    if (getDB == null)
+                    {
+                        getDB = new MYSQLDBHelper(_conString);
+                    }
+                    System.Data.DataTable dt2 = await getDB.FetchData(notificationRecordsQry).ConfigureAwait(false);
+                }
+
+
+                if (print)
+                {
+                    response = new CMDefaultResponse(1, CMMS.RETRUNSTATUS.SUCCESS, "");
+                }
+                else
+                {
+                    response = await sendEmail(subject, printBody, HTMLHeader, HTMLFooter, HTMLSignature, EmailTo);
 
                 }
             }
@@ -266,56 +320,29 @@ namespace CMMSAPIs.Models.Notifications
                 {
                     return response = new CMDefaultResponse(2, CMMS.RETRUNSTATUS.INVALID_ARG, $"Email List for notification {notificationID} is empty "); ;
                 }
-            }
-            List<string> EmailTo = new List<string>();
-            // List<CMUser> EmailTo = users;
-
-            if (getDB == null)
-            {
-                getDB = new MYSQLDBHelper(_conString);
-            }
-            System.Data.DataTable dt1 = await getDB.FetchData(notificationQry).ConfigureAwait(false);
-            int escalationlogID = Convert.ToInt32(dt1.Rows[0][0]);
-
-            string notificationRecordsQry = "INSERT INTO escalationsentto (escalationLogId, notifSentTo) VALUES ";
-            string delimiter = "";
-            int emailCount = 0;
-            foreach (var email in users)
-            {
-                if (email != null)
-                {
-                    //EmailTo.Add(email.user_name);     //Temp . Remove when testing done
-                    notificationRecordsQry += $"({escalationlogID}, '{email.id}'),";
-                    emailCount++;
+                else
+                { 
+                    response = new CMDefaultResponse(1, CMMS.RETRUNSTATUS.SUCCESS, e.Message);
                 }
-            }
-           EmailTo.Add("notifications@softeltech.in");
-            if (emailCount > 0)
-            {  
-                notificationRecordsQry = notificationRecordsQry.TrimEnd(',');
-                System.Data.DataTable dt2 = await _conn.FetchData(notificationRecordsQry).ConfigureAwait(false);
-            }
-            if (print)
-            {
-                response = new CMDefaultResponse(1, CMMS.RETRUNSTATUS.SUCCESS, "");
-            }
-            else
-            {
-                response = await sendEmail(subject, printBody, HTMLHeader, HTMLFooter, HTMLSignature, EmailTo);
 
             }
             return response;
         }
 
-        public static async Task<CMDefaultResponse> sendEMNotification2(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, int[] userID, int module_ref_id, int role, int delayDays)
+        public static async Task<CMDefaultResponse> sendEMNotification2(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, int module_ref_id, int role, int delayDays)
         {
             CMDefaultResponse retValue;
             int notificationType = 2;
             string facilitytimeZone = "";
             if (getDB == null)
             {
+                MyConfig = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
+                _conString = MyConfig.GetValue<string>("ConnectionStrings:Con");
+
                 getDB = new MYSQLDBHelper(_conString);
             }
+            int userIDs  = 2;
+            int[] userID = { userIDs };
 
             switch (moduleID)
             {                            
@@ -437,13 +464,13 @@ namespace CMMSAPIs.Models.Notifications
             {
                 CMJCDetail _JobCard = (CMJCDetail)args[0];
                 notificationObj = new JCNotification(moduleID, notificationID, _JobCard);
-                // facilityId = _JobCard.facility_id;
+                facilityId = _JobCard.facility_id;
             }
             else if (moduleID == CMMS.CMMS_Modules.INCIDENT_REPORT)    //Incident Report
             {
                 CMViewIncidentReport _IncidentReport = (CMViewIncidentReport)args[0];
                 notificationObj = new IncidentReportNotification(moduleID, notificationID, _IncidentReport);
-                //facilityId = _IncidentReport.facility_id;
+                facilityId = _IncidentReport.facility_id;
             }
             else if (moduleID == CMMS.CMMS_Modules.WARRANTY_CLAIM)    //Incident Report
             {
@@ -455,7 +482,7 @@ namespace CMMSAPIs.Models.Notifications
             {
                 CMCalibrationDetails _Calibration = (CMCalibrationDetails)args[0];
                 notificationObj = new CalibrationNotification(moduleID, notificationID, _Calibration);
-                //facilityId = _Calibration.facility_id;
+                facilityId = _Calibration.facilityId;
             }
             else if (moduleID == CMMS.CMMS_Modules.INVENTORY)    //Incident Report
             {
@@ -468,57 +495,67 @@ namespace CMMSAPIs.Models.Notifications
             {
                 CMGrievance _Grievance = (CMGrievance)args[0];
                 notificationObj = new GrievanceNotification(moduleID, notificationID, _Grievance);
-                //facilityId = _Inventory.facility_id;
+                facilityId = _Grievance.facilityId;
             }
-            else if (moduleID == CMMS.CMMS_Modules.SM_GO)      //GO Report
+            else if (moduleID == CMMS.CMMS_Modules.MC_PLAN)
             {
-                CMGOMaster _GO = (CMGOMaster)args[0];
-                notificationObj = new GONotification(moduleID, notificationID, _GO);
-                facilityId = _GO.facility_id;
+                CMMCPlan _Plan = (CMMCPlan)args[0];
+                notificationObj = new MCNotification(moduleID, notificationID, _Plan, null);
+                facilityId = _Plan.facilityId;
             }
             else if (moduleID == CMMS.CMMS_Modules.MC_TASK)
             {
                 CMMCExecution _Task = (CMMCExecution)args[0];
                 notificationObj = new MCNotification(moduleID, notificationID, null, _Task);
-                //facilityId = _Inventory.facility_id;
+                //facilityId = _Task.facilityId;
             }
-            else if (moduleID == CMMS.CMMS_Modules.SM_RO)      //RO Report
+            else if (moduleID == CMMS.CMMS_Modules.VEGETATION_PLAN)
             {
-                CMCreateRequestOrderGET _SMRO = (CMCreateRequestOrderGET)args[0];
-                notificationObj = new SMNotification(moduleID, notificationID, _SMRO);
-                facilityId = _SMRO.facilityID;
+                CMMCPlan _Plan = (CMMCPlan)args[0];
+                notificationObj = new VegetationNotification(moduleID, notificationID, _Plan, null);
+                //facilityId = _Inventory.facility_id;
             }
             else if (moduleID == CMMS.CMMS_Modules.VEGETATION_TASK)
             {
                 CMMCExecution _Task = (CMMCExecution)args[0];
                 notificationObj = new VegetationNotification(moduleID, notificationID, null, _Task);
-                //facilityId = _Task.fa.facility_id;
+                //facilityId = _Task.facility_id;
             }
             else if (moduleID == CMMS.CMMS_Modules.SM_MRS)     //MRS Report
             {
                 CMMRSList _MRS = (CMMRSList)args[0];
                 notificationObj = new MRSNotification(moduleID, notificationID, _MRS);
-                //facilityId = _MRS.facilityId;   // CMMRSList update the query to facilityid in a list
+                facilityId = _MRS.facilityId;   // CMMRSList update the query to facilityid in a list
             }
             else if (moduleID == CMMS.CMMS_Modules.PM_PLAN)
             {
                 CMPMPlanDetail _Plan = (CMPMPlanDetail)args[0];
                 notificationObj = new PMNotification(moduleID, notificationID, _Plan);
-                //facilityId = _Inventory.facility_id;
-
+                facilityId = _Plan.facility_id;
             }
             else if (moduleID == CMMS.CMMS_Modules.PM_TASK)
             {
                 CMPMTaskView _Task = (CMPMTaskView)args[0];
                 notificationObj = new PMNotification(moduleID, notificationID, _Task);
-                //facilityId = _Inventory.facility_id;
+                facilityId = _Task.facility_id;
             }
             else if (moduleID == CMMS.CMMS_Modules.PM_SCHEDULE)
             {
                 CMPMScheduleExecutionDetail _Schedule = (CMPMScheduleExecutionDetail)args[0];
                 notificationObj = new PMNotification(moduleID, notificationID, _Schedule);
-                //facilityId = _Inventory.facility_id;
+                //facilityId = _Schedule.facility_id;
             }
+			else if (moduleID == CMMS.CMMS_Modules.SM_GO)      //GO Report
+            {
+                CMGOMaster _GO = (CMGOMaster)args[0];
+                notificationObj = new GONotification(moduleID, notificationID, _GO);
+                facilityId = _GO.facility_id;
+            }else if (moduleID == CMMS.CMMS_Modules.SM_RO)      //RO Report
+            {
+                CMCreateRequestOrderGET _SMRO = (CMCreateRequestOrderGET)args[0];
+                notificationObj = new SMNotification(moduleID, notificationID, _SMRO);
+                facilityId = _SMRO.facilityID;
+            }			
             else
             {
                 throw new Exception("Notification code is not implemented for module <" + moduleID + ">");

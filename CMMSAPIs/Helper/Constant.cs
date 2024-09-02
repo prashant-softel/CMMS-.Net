@@ -341,7 +341,7 @@ namespace CMMSAPIs.Helper
 
         public enum CMMS_Status
         {
-            Invalid = 0,
+            Undefined = 0,
             CREATED = 1,
             UPDATED,
             DELETED,
