@@ -2142,14 +2142,29 @@ namespace CMMSAPIs.Repositories.Masters
             List<CMDocumentVersionList> Data = await Context.GetData<CMDocumentVersionList>(myQuery).ConfigureAwait(false);
             return Data;
         }
+        Dictionary<int, string> MonthDictionary = new Dictionary<int, string>
+        {
+             {1, "January"},
+             {2, "February"},
+             {3, "March"},
+             {4, "April"},
+             {5, "May"},
+             {6, "June"},
+             {7, "July"},
+             {8, "August"},
+             {9, "September"},
+             {10, "October"},
+             {11, "November"},
+             {12, "December"}
+        };
         //Chages For Mis Health Data
         internal async Task<CMDefaultResponse> CreateHealthData(OccupationalHealthData request, int userID)
         {
-            string date = request.Date.ToString("yyyy-MM-dd");
+
             string myqry1 = $"INSERT INTO MIS_OccupationalHealthData " +
-                      $"(Date, NoOfHealthExamsOfNewJoiner, PeriodicTests, OccupationaIllnesses, Status, CreatedBy, CreatedAt) " +
+                      $"(month_id, NoOfHealthExamsOfNewJoiner, PeriodicTests, OccupationaIllnesses, Status, CreatedBy, CreatedAt) " +
                       $"VALUES " +
-                      $"('{date}', {request.NoOfHealthExamsOfNewJoiner}, {request.PeriodicTests}, {request.OccupationalIllnesses},1 , " +
+                      $"({request.month_id}, {request.NoOfHealthExamsOfNewJoiner}, {request.PeriodicTests}, {request.OccupationalIllnesses},1 , " +
                       $"{userID}, '{UtilsRepository.GetUTCTime()}'); " +
                       $"SELECT LAST_INSERT_ID();";
 
@@ -2163,12 +2178,12 @@ namespace CMMSAPIs.Repositories.Masters
 
         internal async Task<CMDefaultResponse> UpdateHealthData(OccupationalHealthData request, int userID)
         {
-            string date = request.Date.ToString("yyyy-MM-dd");
+
             string updateQry = "UPDATE MIS_OccupationalHealthData SET ";
 
-            if (request.Date != null)
+            if (request.month_id != 0)
             {
-                updateQry += $"Date = '{date}', ";
+                updateQry += $"month_id = {request.month_id}, ";
             }
             if (request.NoOfHealthExamsOfNewJoiner >= 0)
             {
@@ -2202,22 +2217,29 @@ namespace CMMSAPIs.Repositories.Masters
 
         internal async Task<List<OccupationalHealthData>> GetHealthData()
         {
-            string myQuery = "SELECT id, Date,MONTHNAME(Date) as month_name,Month(Date) as month_id, NoOfHealthExamsOfNewJoiner, PeriodicTests, OccupationaIllnesses as OccupationalIllnesses, Status, " +
+            string myQuery = "SELECT id, month_id, NoOfHealthExamsOfNewJoiner, PeriodicTests, OccupationaIllnesses as OccupationalIllnesses, Status, " +
                              "CreatedBy, CreatedAt, UpdatedBy, UpdatedAt " +
                              "FROM MIS_OccupationalHealthData " +
                              "WHERE  Status = 1 ;";
             List<OccupationalHealthData> data = await Context.GetData<OccupationalHealthData>(myQuery).ConfigureAwait(false);
+            Parallel.ForEach(data, item =>
+            {
+                if (MonthDictionary.TryGetValue(item.month_id, out string monthName))
+                {
+                    item.month_name = monthName;
+                }
+            });
             return data;
         }
         //Create Vsitor Data
         internal async Task<CMDefaultResponse> CreateVisitsAndNotices(VisitsAndNotices request, int userID)
         {
-            string date = request.Date.ToString("yyyy-MM-dd");
+
             string myqry1 = $"INSERT INTO mis_visitsandnotices " +
-                            $"(Date, GovtAuthVisits, NoOfFineByThirdParty, NoOfShowCauseNoticesByThirdParty, " +
+                            $"(month_id, GovtAuthVisits, NoOfFineByThirdParty, NoOfShowCauseNoticesByThirdParty, " +
                             $"NoticesToContractor, AmountOfPenaltiesToContractors, AnyOther, Status, CreatedBy, CreatedAt) " +
                             $"VALUES " +
-                            $"('{date}', {request.GovtAuthVisits}, {request.NoOfFineByThirdParty}, " +
+                            $"({request.month_id}, {request.GovtAuthVisits}, {request.NoOfFineByThirdParty}, " +
                             $"{request.NoOfShowCauseNoticesByThirdParty}, {request.NoticesToContractor}, " +
                             $"{request.AmountOfPenaltiesToContractors}, {request.AnyOther}, 1, " +
                             $"{userID}, '{UtilsRepository.GetUTCTime()}'); " +
@@ -2230,11 +2252,11 @@ namespace CMMSAPIs.Repositories.Masters
         }
         internal async Task<CMDefaultResponse> UpdateVisitsAndNotices(VisitsAndNotices request, int userID)
         {
-            string date = request.Date.ToString("yyyy-MM-dd");
+
             string updateQry = "UPDATE mis_visitsandnotices SET ";
 
-            if (request.Date != null)
-                updateQry += $"Date = '{date}', ";
+            if (request.month_id != 0)
+                updateQry += $"month_id = {request.month_id}, ";
             if (request.GovtAuthVisits > 0)
                 updateQry += $"GovtAuthVisits = {request.GovtAuthVisits}, ";
             if (request.NoOfFineByThirdParty > 0)
@@ -2264,20 +2286,26 @@ namespace CMMSAPIs.Repositories.Masters
         }
         internal async Task<List<VisitsAndNotices>> GetVisitsAndNotices()
         {
-            string myQuery = "SELECT id, Date,MONTHNAME(Date) as month_name,Month(Date) as month_id, GovtAuthVisits, NoOfFineByThirdParty, NoOfShowCauseNoticesByThirdParty, " +
+            string myQuery = "SELECT id,month_id, GovtAuthVisits, NoOfFineByThirdParty, NoOfShowCauseNoticesByThirdParty, " +
                              "NoticesToContractor, AmountOfPenaltiesToContractors, AnyOther, Status, CreatedBy, CreatedAt, UpdatedBy, UpdatedAt " +
                              "FROM mis_visitsandnotices " +
                              "WHERE Status =1 ; ";
             List<VisitsAndNotices> data = await Context.GetData<VisitsAndNotices>(myQuery).ConfigureAwait(false);
-
+            Parallel.ForEach(data, item =>
+            {
+                if (MonthDictionary.TryGetValue(item.month_id, out string monthName))
+                {
+                    item.month_name = monthName;
+                }
+            });
             return data;
         }
         //Fuel Consumption
         internal async Task<CMDefaultResponse> CreateFuelConsumption(FuelData request, int userID)
         {
-            string myqry1 = $"INSERT INTO mis_fueldata (Date, DieselConsumedForVehicles, PetrolConsumedForVehicles, PetrolConsumedForGrassCuttingAndMovers, DieselConsumedAtSite, PetrolConsumedAtSite, Status, CreatedBy, CreatedAt) " +
+            string myqry1 = $"INSERT INTO mis_fueldata (month_id, DieselConsumedForVehicles, PetrolConsumedForVehicles, PetrolConsumedForGrassCuttingAndMovers, DieselConsumedAtSite, PetrolConsumedAtSite, Status, CreatedBy, CreatedAt) " +
                              $"VALUES " +
-                             $"('{request.Date:yyyy-MM-dd}', " +
+                             $"({request.month_id}, " +
                              $"{request.DieselConsumedForVehicles}, " +
                              $"{request.PetrolConsumedForVehicles}, " +
                              $"{request.PetrolConsumedForGrassCuttingAndMovers}, " +
@@ -2295,7 +2323,7 @@ namespace CMMSAPIs.Repositories.Masters
         internal async Task<CMDefaultResponse> UpdateFuelConsumption(FuelData request, int userID)
         {
             string updateQry = "UPDATE mis_fueldata SET ";
-            updateQry += $"Date = '{request.Date:yyyy-MM-dd}', ";
+            updateQry += $"month_id = {request.month_id}, ";
             updateQry += $"DieselConsumedForVehicles = {request.DieselConsumedForVehicles}, ";
             updateQry += $"PetrolConsumedForVehicles = {request.PetrolConsumedForVehicles}, ";
             updateQry += $"PetrolConsumedForGrassCuttingAndMovers = {request.PetrolConsumedForGrassCuttingAndMovers}, ";
@@ -2318,10 +2346,17 @@ namespace CMMSAPIs.Repositories.Masters
         }
         internal async Task<List<FuelData>> GetFuelConsumption()
         {
-            string myQuery = "SELECT id, Date,MONTHNAME(Date) as month_name,Month(Date) as month_id, DieselConsumedForVehicles, PetrolConsumedForVehicles, PetrolConsumedForGrassCuttingAndMovers, DieselConsumedAtSite, PetrolConsumedAtSite, CreatedBy, CreatedAt, UpdatedBy, UpdatedAt " +
+            string myQuery = "SELECT id,  month_id, DieselConsumedForVehicles, PetrolConsumedForVehicles, PetrolConsumedForGrassCuttingAndMovers, DieselConsumedAtSite, PetrolConsumedAtSite, CreatedBy, CreatedAt, UpdatedBy, UpdatedAt " +
                              "FROM mis_fueldata " +
                              "WHERE Status=1";
             List<FuelData> data = await Context.GetData<FuelData>(myQuery).ConfigureAwait(false);
+            Parallel.ForEach(data, item =>
+            {
+                if (MonthDictionary.TryGetValue(item.month_id, out string monthName))
+                {
+                    item.month_name = monthName;
+                }
+            });
             return data;
         }
 
@@ -2329,10 +2364,10 @@ namespace CMMSAPIs.Repositories.Masters
 
         public async Task<CMDefaultResponse> CreatePlantationData(PlantationData request, int userID)
         {
-            string date = request.Date.ToString("yyyy-MM-dd");
-            string myqry1 = $"INSERT INTO mis_plantationdata (Date, SaplingsPlanted, SaplingsSurvived, SaplingsDied, Status, CreatedBy, CreatedAt) " +
+
+            string myqry1 = $"INSERT INTO mis_plantationdata (month_id, SaplingsPlanted, SaplingsSurvived, SaplingsDied, Status, CreatedBy, CreatedAt) " +
                             $"VALUES " +
-                            $"('{date}', " +
+                            $"({request.month_id}, " +
                             $"{request.SaplingsPlanted}, " +
                             $"{request.SaplingsSurvived}, " +
                             $"{request.SaplingsDied},1, " +
@@ -2348,9 +2383,9 @@ namespace CMMSAPIs.Repositories.Masters
 
         public async Task<CMDefaultResponse> UpdatePlantationData(PlantationData request, int userID)
         {
-            string date = request.Date.ToString("yyyy-MM-dd");
+
             string updateQry = "UPDATE mis_plantationdata SET ";
-            updateQry += $"Date = '{date}', ";
+            updateQry += $"month_id = {request.month_id}, ";
             updateQry += $"SaplingsPlanted = {request.SaplingsPlanted}, ";
             updateQry += $"SaplingsSurvived = {request.SaplingsSurvived}, ";
             updateQry += $"SaplingsDied = {request.SaplingsDied}, ";
@@ -2373,20 +2408,27 @@ namespace CMMSAPIs.Repositories.Masters
 
         public async Task<List<PlantationData>> GetPlantationData()
         {
-            string myQuery = "SELECT id, Date, MONTHNAME(Date) as month_name,Month(Date) as month_id, SaplingsPlanted, SaplingsSurvived, SaplingsDied, CreatedBy, CreatedAt, UpdatedBy, UpdatedAt " +
+            string myQuery = "SELECT id, month_id,  SaplingsPlanted, SaplingsSurvived, SaplingsDied, CreatedBy, CreatedAt, UpdatedBy, UpdatedAt " +
                              "FROM mis_plantationdata " +
                              "WHERE Status=1";
             List<PlantationData> data = await Context.GetData<PlantationData>(myQuery).ConfigureAwait(false);
+            Parallel.ForEach(data, item =>
+            {
+                if (MonthDictionary.TryGetValue(item.month_id, out string monthName))
+                {
+                    item.month_name = monthName;
+                }
+            });
             return data;
         }
 
         //Kizensdata
         public async Task<CMDefaultResponse> CreateKaizensData(KaizensData request, int userID)
         {
-            string date = request.Date.ToString("yyyy-MM-dd");
-            string myqry1 = $"INSERT INTO mis_kaizensdata (Date, KaizensImplemented, CostForImplementation, CostSavedFromImplementation, Status, CreatedBy, CreatedAt) " +
+
+            string myqry1 = $"INSERT INTO mis_kaizensdata (month_id, KaizensImplemented, CostForImplementation, CostSavedFromImplementation, Status, CreatedBy, CreatedAt) " +
                             $"VALUES " +
-                            $"('{date}', " +
+                            $"({request.month_id}, " +
                             $"{request.KaizensImplemented}, " +
                             $"{request.CostForImplementation}, " +
                             $"{request.CostSavedFromImplementation},1, " +
@@ -2401,9 +2443,9 @@ namespace CMMSAPIs.Repositories.Masters
 
         public async Task<CMDefaultResponse> UpdateKaizensData(KaizensData request, int userID)
         {
-            string date = request.Date.ToString("yyyy-MM-dd");
+
             string updateQry = "UPDATE mis_kaizensdata SET ";
-            updateQry += $"Date = '{date}', ";
+            updateQry += $"month_id = {request.month_id}, ";
             updateQry += $"KaizensImplemented = {request.KaizensImplemented}, ";
             updateQry += $"CostForImplementation = {request.CostForImplementation}, ";
             updateQry += $"CostSavedFromImplementation = {request.CostSavedFromImplementation}, ";
@@ -2426,11 +2468,19 @@ namespace CMMSAPIs.Repositories.Masters
 
         public async Task<List<KaizensData>> GetKaizensData()
         {
-            string myQuery = "SELECT id, Date, MONTHNAME(Date) as month_name,Month(Date) as month_id, KaizensImplemented, CostForImplementation, CostSavedFromImplementation, CreatedBy, CreatedAt, UpdatedBy, UpdatedAt " +
+            string myQuery = "SELECT id, month_id, KaizensImplemented, CostForImplementation, CostSavedFromImplementation, CreatedBy, CreatedAt, UpdatedBy, UpdatedAt " +
                              "FROM mis_kaizensdata " +
                              "WHERE Status=1";
             List<KaizensData> data = await Context.GetData<KaizensData>(myQuery).ConfigureAwait(false);
+            Parallel.ForEach(data, item =>
+            {
+                if (MonthDictionary.TryGetValue(item.month_id, out string monthName))
+                {
+                    item.month_name = monthName;
+                }
+            });
             return data;
+
         }
 
         public async Task<List<CumalativeReport>> Cumulativereport(string facility_id, int module_id, string start_date, string end_date)
