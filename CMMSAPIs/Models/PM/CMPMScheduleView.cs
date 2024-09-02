@@ -54,6 +54,7 @@ namespace CMMSAPIs.Models.PM
         public string status_plan_short { get; set; }
         public long ptw_tbt_done { get; set; }
         public string status_short_ptw { get; set; }
+        public string closeRejectedbyName { get; set; }
     }
 
     public class CMPMScheduleExecutionDetail
@@ -84,6 +85,7 @@ namespace CMMSAPIs.Models.PM
         public string PM_Schedule_updated_by { get; set; }
         public string cancelledapprovedbyName { get; set; }
         public string submittedByName { get; set; }
+       
 
     }
     public class CMPMTaskView : CMPMTaskList
@@ -92,7 +94,7 @@ namespace CMMSAPIs.Models.PM
         public List<Materialconsumption> Material_consumption { get; set; }
 
         public int plan_id { get; set; }
-
+        public string closedApprovedByName { get; set; }
         public DateTime Schedule_Date { get; set; }
         public int started_by_id { get; set; }
         public string started_by_name { get; set; }

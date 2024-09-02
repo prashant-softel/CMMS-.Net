@@ -1,5 +1,4 @@
 using CMMSAPIs.Helper;
-using CMMSAPIs.Models.Calibration;
 using CMMSAPIs.Models.Masters;
 using CMMSAPIs.Models.Notifications;
 using CMMSAPIs.Models.PM;
@@ -8,6 +7,7 @@ using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Utils;
 using Microsoft.AspNetCore.Hosting;
 using OfficeOpenXml;
+using Org.BouncyCastle.Asn1.Ocsp;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -131,10 +131,10 @@ namespace CMMSAPIs.Repositories.PM
             await Context.ExecuteNonQry<int>(mapChecklistQry).ConfigureAwait(false);
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_PLAN, id, 0, 0, "PM Plan added", CMMS.CMMS_Status.PM_PLAN_CREATED, userID);
-            
-                 try
+
+            try
             {
-                CMPMPlanDetail _ViewPMPlan = await GetPMPlanDetail(id, facilityTimeZone);
+                CMPMPlanDetail _ViewPMPlan = await GetPMPlanDetail(pm_plan.plan_id, facilityTimeZone);
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PM_PLAN, CMMS.CMMS_Status.PM_PLAN_CREATED, new[] { userID }, _ViewPMPlan);
             }
 

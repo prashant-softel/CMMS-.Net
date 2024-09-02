@@ -415,7 +415,8 @@ namespace CMMSAPIs.Helper
             PM_CANCELLED_REJECTED,
             PM_CANCELLED_APPROVED,
             PM_DELETED,
-            PM_UPDATED, //Only for notification purpose
+            PM_UPDATED,
+            PM_TASK_UPDATED,//Only for notification purpose
 
             PM_SUBMIT,//for temp only
             PM_LINK_PTW,

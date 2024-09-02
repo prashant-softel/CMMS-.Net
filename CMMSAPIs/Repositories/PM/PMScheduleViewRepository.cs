@@ -94,36 +94,36 @@ namespace CMMSAPIs.Repositories.PM
             switch (notificationID)
             {
                 case CMMS.CMMS_Status.PM_SCHEDULED:
-                    retValue += String.Format("PM {0} Schedule </p>", Obj.schedule_id); break;
+                    retValue += String.Format("PMS{0} Schedule </p>", Obj.schedule_id); break;
                 case CMMS.CMMS_Status.PM_ASSIGNED:
-                    retValue += String.Format("PM Schedule {0} Assigned </p>", Obj.schedule_id);
+                    retValue += String.Format("PMS{0} Assigned </p>", Obj.schedule_id);
                     break;
                 case CMMS.CMMS_Status.PM_COMPLETED:
-                    retValue += String.Format("PM Schedule {0} Completed By {1} </p>", Obj.schedule_id, Obj.completedBy_name); ;
+                    retValue += String.Format("PMS{0} Completed By {1} </p>", Obj.schedule_id, Obj.completedBy_name); ;
                     break;
                 case CMMS.CMMS_Status.PM_SUBMIT:
-                    retValue += String.Format("PM Schedule {0} Submitted By {1} </p>", Obj.schedule_id, Obj.submittedByName);
+                    retValue += String.Format("PMS{0} Submitted By {1} </p>", Obj.schedule_id, Obj.submittedByName);
                     break;
                 case CMMS.CMMS_Status.PM_START:
-                    retValue += String.Format("PM Schedule {0} Started By {1} </p>", Obj.schedule_id, Obj.PM_Execution_Started_by_name);
+                    retValue += String.Format("PMS{0} Started By {1} </p>", Obj.schedule_id, Obj.PM_Execution_Started_by_name);
                     break;
                 case CMMS.CMMS_Status.PM_REJECTED:
-                    retValue += String.Format("PM  Schedule {0} Rejected By {1} </p>", Obj.schedule_id, Obj.rejectedbyName);
+                    retValue += String.Format("PMS{0} Rejected By {1} </p>", Obj.schedule_id, Obj.rejectedbyName);
                     break;
                 case CMMS.CMMS_Status.PM_APPROVED:
-                    retValue += String.Format("PM Schedule {0} Approved By {1} </p>", Obj.schedule_id, Obj.approvedbyName);
+                    retValue += String.Format("PMS{0} Approved By {1} </p>", Obj.schedule_id, Obj.approvedbyName);
                     break;
                 case CMMS.CMMS_Status.PM_CANCELLED_REJECTED:
-                    retValue += String.Format("PM Schedule {0} Cancelled Rejected By {1} </p>", Obj.schedule_id, Obj.cancelledrejectedbyName);
+                    retValue += String.Format("PMS{0} Cancelled Rejected By {1} </p>", Obj.schedule_id,Obj.cancelledrejectedbyName);
                     break;
                 case CMMS.CMMS_Status.PM_CANCELLED_APPROVED:
-                    retValue += String.Format("PM Schedule {0} Cancelled Approved By {1} </p>", Obj.schedule_id, Obj.cancelledapprovedbyName);
+                    retValue += String.Format("PMS{0} Cancelled Approved By {1} </p>", Obj.schedule_id, Obj.cancelledapprovedbyName);
                     break;
                 case CMMS.CMMS_Status.PM_DELETED:
-                    retValue += String.Format("PM Schedule of ID {0} Deleted </p>", Obj.schedule_id);
+                    retValue += String.Format("PMS{0} Deleted </p>", Obj.schedule_id);
                     break;
                 case CMMS.CMMS_Status.PM_UPDATED:
-                    retValue += String.Format("PM Schedule {0} Updated By {1} </p>", Obj.schedule_id, Obj.PM_Schedule_updated_by);
+                    retValue += String.Format("PMS{0} Updated By {1} </p>", Obj.schedule_id,Obj.PM_Schedule_updated_by);
                     break;
                 default:
                     break;
@@ -144,31 +144,29 @@ namespace CMMSAPIs.Repositories.PM
                 case CMMS.CMMS_Status.PM_ASSIGNED:
                     retValue = $"PM Task Assigned To {Obj.assigned_to_name} "; break;
                 case CMMS.CMMS_Status.PM_LINKED_TO_PTW:
-                    retValue = $"PM {Obj.id} Linked To PTW {Obj.permit_id} "; break;
+                    retValue = $"Permit {Obj.id} Linked To Permit Id {Obj.permit_id} "; break;
                 case CMMS.CMMS_Status.PM_START:
                     retValue = $"PM Task Started By {Obj.started_by_name}"; break;
                 case CMMS.CMMS_Status.PM_COMPLETED:
-                    retValue = $"PM Task Waiting for Approval "; break;
+                    retValue = $"PM Task Closed By {Obj.closed_by_name} "; break;
                 case CMMS.CMMS_Status.PM_REJECTED:
-                    retValue = $"PM Task Rejected "; break;
+                    retValue = $"PM Task Rejected By {Obj.rejected_by_name} "; break;
                 case CMMS.CMMS_Status.PM_APPROVED:
-                    retValue = $"PM Task Approved "; break;
+                    retValue = $"PM Task Approved By {Obj.approved_by}"; break;
                 case CMMS.CMMS_Status.PM_CLOSE_REJECTED:
-                    retValue = $"PM Task Close Rejected By {Obj.rejected_by_name}"; break;
+                    retValue = $"PM Task Closed Rejected By {Obj.closeRejectedbyName}"; break;
                 case CMMS.CMMS_Status.PM_CLOSE_APPROVED:
-                    retValue = $"PM Task Close Approved By {Obj.approved_by}"; break;
+                    retValue = $"PM Task Closed Approved By {Obj.closedApprovedByName}"; break;
                 case CMMS.CMMS_Status.PM_CANCELLED:
                     retValue = $"PM Task Cancelled By {Obj.cancelled_by_name} "; break;
                 case CMMS.CMMS_Status.PM_CANCELLED_REJECTED:
-                    retValue = $"PM Task cancelled Rejected By {Obj.cancelled_by_name}"; break;
+                    retValue = $"PM Task Cancelled Rejected By {Obj.cancelledrejectedbyName}"; break;
                 case CMMS.CMMS_Status.PM_CANCELLED_APPROVED:
-                    retValue = $"PM Task cancelled Approved By {Obj.approved_by}"; break;
-                case CMMS.CMMS_Status.PM_DELETED:
-                    retValue = $"PM Task Deleted "; break;
+                    retValue = $"PM Task cancelled Approved By {Obj.cancelledapprovedbyName}"; break;
                 case CMMS.CMMS_Status.PM_UPDATED:
                     retValue = $"PM Task Updated By {Obj.updated_by_name} "; break;
                 case CMMS.CMMS_Status.PM_TASK_DELETED:
-                    retValue = $"PM Task Deleted "; break;
+                    retValue = $"PM Task Deleted By {Obj.deletedbyName} "; break;
                 default:
                     break;
             }
@@ -380,7 +378,7 @@ namespace CMMSAPIs.Repositories.PM
                                " CONCAT(completedBy.firstName,' ',completedBy.lastName)  as completedbyName, " +
                                " CONCAT(cancelledapprovedBy.firstName,' ',cancelledapprovedBy.lastName)  as cancelledapprovedbyName, " +
                                " CONCAT(createdBy.firstName,' ',createdBy.lastName)  as createdbyName, " +
-                               " CONCAT(deletedBy.firstName,' ',deletedBy.lastName)  as deletedbyName, pm_task.status " +
+                               " CONCAT(deletedBy.firstName,' ',deletedBy.lastName)  as deletedbyName,  CONCAT(closeRejected.firstName,' ', closeRejected.lastName) AS closeRejectedbyName, pm_task.status " +
                                " FROM pm_task " +
                                $"left join users as assignedTo on pm_task.assigned_to = assignedTo.id " +
                                $"left join users as closedBy on pm_task.closed_by = closedBy.id " +
@@ -405,6 +403,7 @@ namespace CMMSAPIs.Repositories.PM
                                $"left join users as tbtDone on permit.TBT_Done_By = tbtDone.id " +
                                $"left join business as bus on bus.id = ptwu.companyId " +
                                $"left join permittypelists on permittypelists.id = permit.typeId  " +
+                               $"LEFT JOIN users AS closeRejected ON pm_task.close_rejected_by_id = closeRejected.id " +
                                $" where pm_task.id = {task_id} ";
 
             List<CMPMTaskView> taskViewDetail = await Context.GetData<CMPMTaskView>(myQuery).ConfigureAwait(false);
@@ -966,15 +965,7 @@ namespace CMMSAPIs.Repositories.PM
                                         await Context.ExecuteNonQry<int>(otherDetailsQry).ConfigureAwait(false);
                                     }
                                     await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, schedule.schedule_id, CMMS.CMMS_Modules.PM_EXECUTION, schedule_detail.execution_id, $"{schedule_detail.pm_files.Count} file(s) attached to PMSCH{schedule.schedule_id}", CMMS.CMMS_Status.PM_UPDATED, userID);
-                                    try
-                                    {
-                                        CMPMScheduleExecutionDetail PMTaskSchedule = await GetPMTaskScheduleDetail(request.task_id, schedule.schedule_id, facilitytimeZone);
-                                        CMMSNotification.sendNotification(CMMS.CMMS_Modules.PM_SCHEDULE, CMMS.CMMS_Status.PM_UPDATED, new[] { userID }, PMTaskSchedule);
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        Console.WriteLine($"Failed to send Schedule Notification: {ex.Message}");
-                                    }
+           
                                     response = new CMDefaultResponse(schedule_detail.execution_id, CMMS.RETRUNSTATUS.SUCCESS, $"{schedule_detail.pm_files.Count} file(s) attached to PM Successfully");
                                     responseList.Add(response);
                                     changeFlag++;
@@ -1025,7 +1016,7 @@ namespace CMMSAPIs.Repositories.PM
             try
             {
                 CMPMTaskView _PMTaskList = await GetPMTaskDetail(request.task_id, facilitytimeZone);
-                CMMSNotification.sendNotification(CMMS.CMMS_Modules.PM_TASK, CMMS.CMMS_Status.PM_UPDATED, new[] { userID }, _PMTaskList);
+                CMMSNotification.sendNotification(CMMS.CMMS_Modules.PM_TASK, CMMS.CMMS_Status.PM_TASK_UPDATED, new[] { userID }, _PMTaskList);
             }
             catch (Exception ex)
             {
