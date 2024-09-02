@@ -1655,7 +1655,7 @@ namespace CMMSAPIs.Repositories.Permits
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Cancel Request Rejected for Permit **PTW{request.id}** ");
             return response;
         }
-        
+
         internal async Task<CMDefaultResponse> PermitCancelApprove(CMApproval request, int userID)
         {
             /*
