@@ -8,6 +8,7 @@ using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Utils;
 using Microsoft.AspNetCore.Hosting;
 using OfficeOpenXml;
+using Org.BouncyCastle.Asn1.Ocsp;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -134,7 +135,7 @@ namespace CMMSAPIs.Repositories.PM
             
                  try
             {
-                CMPMPlanDetail _ViewPMPlan = await GetPMPlanDetail(id, facilityTimeZone);
+                CMPMPlanDetail _ViewPMPlan = await GetPMPlanDetail(pm_plan.plan_id, facilityTimeZone);
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PM_PLAN, CMMS.CMMS_Status.PM_PLAN_CREATED, new[] { userID }, _ViewPMPlan);
             }
 
@@ -275,6 +276,7 @@ namespace CMMSAPIs.Repositories.PM
                 detail.rejected_at = (DateTime)await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, detail.rejected_at);
                 detail.updated_at = (DateTime)await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, detail.updated_at);
             }
+
 
             return plan_list;
         }
@@ -542,7 +544,7 @@ namespace CMMSAPIs.Repositories.PM
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_PLAN, request.id, 0, 0, string.IsNullOrEmpty(request.comment) ? "PM Plan Approved " : request.comment, CMMS.CMMS_Status.PM_PLAN_APPROVED);
             try
             {
-                CMPMPlanDetail _ViewPMPlan = await GetPMPlanDetail(id, facilityTimeZone);
+                CMPMPlanDetail _ViewPMPlan = await GetPMPlanDetail(request.id, facilityTimeZone);
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PM_PLAN, CMMS.CMMS_Status.PM_PLAN_APPROVED, new[] { userId }, _ViewPMPlan);
             }
 
