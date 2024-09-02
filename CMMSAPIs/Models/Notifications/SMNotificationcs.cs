@@ -86,15 +86,13 @@ namespace CMMSAPIs.Models.Notifications
         {
             string retValue = "";
 
-            retValue = String.Format("<h3><b style='color:#31576D'>Status:</b>{0}</h3><br>", m_SMROObj.status_long);
+            retValue = String.Format("<h3><b style='color:#31576D'>Status : </b>{0}</h3><br>", m_SMROObj.status_long);
 
             
             
                 retValue += String.Format("<table style='width: 50%; margin:0 auto; border-collapse: collapse ; border-spacing: 10px; ' border='1'>");
                 retValue += String.Format(template, "ID","RO"+m_SMROObj.request_order_id);    
                 retValue += String.Format(template, "Facility Name", m_SMROObj.facilityName);
-                retValue += String.Format(template, "Cost", $"{m_SMROObj.cost} [{m_SMROObj.currency}]");
-
                 retValue += String.Format(template, "Comment", m_SMROObj.comment);
                 retValue += String.Format(template, "Status", m_SMROObj.status_short);
 
@@ -128,26 +126,28 @@ namespace CMMSAPIs.Models.Notifications
             retValue += "</table><br><br>";
 
             // Request Order Item Table
-            retValue += "<h4>RO Items</h4>";
+            retValue += "<h4>Selected Materials</h4>";
             retValue += "<table style='width: 60%; margin:0 auto; border-collapse: collapse; border-spacing: 10px;' border='1'>";
             retValue += "<tr>";
             retValue += "<th>Item Name</th>";
-            retValue += "<th>Number Of Items</th>";
-            retValue += "<th>Ordered Quantity</th>";
-            retValue += "<th>Accepted Quantity</th>";
+            retValue += "<th>Currency</th>";
+            retValue += "<th>Unit Cost</th>";
+            retValue += "<th>Requested Quantity</th>";
+            retValue += "<th>Comment</th>";
             retValue += "</tr>";
 
             foreach (var item in m_SMROObj.request_order_items)
             {
                 retValue += "<tr>";
                 retValue += String.Format("<td>{0}</td>", item.asset_name);
-                retValue += String.Format("<td>{0}</td>", m_SMROObj.number_of_item_count);
+                retValue += String.Format("<td>{0}</td>", item.currency);
+                retValue += String.Format("<td>{0}</td>", item.cost);
                 retValue += String.Format("<td>{0}</td>", item.ordered_qty);
-                retValue += String.Format("<td>{0}</td>", item.accepted_qty);              
+                retValue += String.Format("<td>{0}</td>", item.comment);
                 retValue += "</tr>";
             }
 
-            retValue += "</table>";
+            retValue += "</table><br><br>";
 
             switch (m_notificationID)
             {

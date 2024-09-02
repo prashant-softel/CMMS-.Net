@@ -56,6 +56,7 @@ namespace CMMSAPIs.Repositories.SM
             foreach (var ro in _ROList)
             {
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_RO, CMMS.CMMS_Status.SM_RO_SUBMITTED, new[] { userID }, ro);
+                break;
             }
 
 
@@ -91,6 +92,7 @@ namespace CMMSAPIs.Repositories.SM
             foreach (var ro in _ROList)
             {
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_RO, CMMS.CMMS_Status.SM_RO_UPDATED, new[] { userID }, ro);
+                break;
             }
             return response;
         }
@@ -104,6 +106,7 @@ namespace CMMSAPIs.Repositories.SM
             foreach (var ro in _ROList)
             {
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_RO, CMMS.CMMS_Status.SM_RO_DELETED, new[] { userID }, ro);
+                break;
             }
             return response;
         }
@@ -118,6 +121,7 @@ namespace CMMSAPIs.Repositories.SM
             foreach (var ro in _ROList)
             {
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_RO, CMMS.CMMS_Status.SM_RO_CLOSED, new[] { userID }, ro);
+                break;
             }
             return response;
         }
@@ -291,6 +295,7 @@ namespace CMMSAPIs.Repositories.SM
             foreach (var ro in _ROList)
             {
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_RO, CMMS.CMMS_Status.SM_RO_SUBMIT_APPROVED, new[] { userId }, ro);
+                break;
             }
             return response;
         }
@@ -321,6 +326,7 @@ namespace CMMSAPIs.Repositories.SM
             foreach (var ro in _ROList)
             {
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_RO, CMMS.CMMS_Status.SM_RO_SUBMIT_REJECTED, new[] { userId }, ro);
+                break;
             }
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Rejected request order.");
             return response;

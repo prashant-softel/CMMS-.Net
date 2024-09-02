@@ -93,7 +93,7 @@ namespace CMMSAPIs.Models.Notifications
         {
             string retValue = "";
 
-            retValue = String.Format("<h3><b style='color:#31576D'>Status:</b>{0}</h3><br>", m_GOObj.status_long);
+            retValue = String.Format("<h3><b style='color:#31576D'>Status : </b>{0}</h3><br>", m_GOObj.status_long);
 
             retValue += String.Format("<table style='width: 50%; margin:0 auto; border-collapse: collapse ; border-spacing: 10px; ' border='1'>");
             retValue += String.Format(template, "ID", "GO"+m_GOObj.Id ?? "N/A");
@@ -145,7 +145,6 @@ namespace CMMSAPIs.Models.Notifications
                 retValue += String.Format(template, "LR No.", m_GOObj.lr_no);
             }
 
-
             if (!string.IsNullOrEmpty(m_GOObj.submitted_by_name))
             {
                 retValue += String.Format(template, "Submitted By", m_GOObj.submitted_by_name);
@@ -190,26 +189,25 @@ namespace CMMSAPIs.Models.Notifications
             retValue += "</table><br><br>";
 
             // GO Items Table
-            retValue += "<h4>GO Items</h4>";
+            retValue += "<h4>Selected Material</h4>";
             retValue += "<table style='width: 80%; margin:0 auto; border-collapse: collapse; border-spacing: 10px;' border='1'>";
             retValue += "<tr>";
-            retValue += "<th>Item Name</th>";
-            retValue += "<th>Ordered Quantity</th>";
-            retValue += "<th>Received Quantity</th>";
-            retValue += "<th>Accepted Quantity</th>";
-            retValue += "<th>Damaged Quantity</th>";
-            retValue += "<th>Lost Quantity</th>";
+            retValue += "<th>Material</th>";
+            retValue += "<th>Requested Quantity</th>";
+            retValue += "<th>Unit Cost</th>";
+            retValue += "<th>Dispatch Quantity</th>";
+            retValue += "<th>Paid By</th>";
+            
             retValue += "</tr>";
 
             foreach (var item in m_GOObj.GODetails)
             {
                 retValue += "<tr>";
                 retValue += String.Format("<td>{0}</td>", item.assetItem_Name);
+                retValue += String.Format("<td>{0}</td>", item.requested_qty);
+                retValue += String.Format("<td>{0}</td>", item.cost);
                 retValue += String.Format("<td>{0}</td>", item.ordered_qty);
-                retValue += String.Format("<td>{0}</td>", item.received_qty);
-                retValue += String.Format("<td>{0}</td>", item.accepted_qty);
-                retValue += String.Format("<td>{0}</td>", item.damaged_qty);
-                retValue += String.Format("<td>{0}</td>", item.lost_qty);
+                retValue += String.Format("<td>{0}</td>", item.paid_by_name);
                 retValue += "</tr>";
             }
             retValue += "</table><br><br>";
