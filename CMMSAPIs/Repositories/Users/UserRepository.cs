@@ -994,10 +994,10 @@ namespace CMMSAPIs.Repositories.Users
 
 
 
-        internal async Task<List<CMUser>> GetEMUsers( int facility_id, int role_id, int notification_id)
+        internal async Task<List<CMUser>> GetEMUsers(int facility_id, int role_id, int notification_id)
         {
-            
-         
+
+
             string userQry = $"select u.id as id, u.loginId as user_name, concat(firstName, ' ', lastName) as full_name, u.mobileNumber as contact_no, userroles.id as role_id," +
                 $" userroles.name as role_name " +
                 $" FROM users as u " +
@@ -1294,7 +1294,7 @@ namespace CMMSAPIs.Repositories.Users
                 foreach (var access in def_notif.Values)
                 {
                     user_access.Add($"({user_id}, {access.notification_id}, {access.can_change}, {access.user_flag}, " +
-                                    $"'{UtilsRepository.GetUTCTime()}', {userID})");
+                                    $"'{UtilsRepository.GetUTCTime()}', {userID},0)");
                 }
                 // inserting values from notification table for new user
                 if (def_notif.Values.Count == 0)
@@ -1304,7 +1304,7 @@ namespace CMMSAPIs.Repositories.Users
                     foreach (var access in itemList)
                     {
                         user_access.Add($"({user_id}, {access.notification_id}, 1, 1, " +
-                                        $"'{UtilsRepository.GetUTCTime()}', {UtilsRepository.GetUserID()})");
+                                        $"'{UtilsRepository.GetUTCTime()}', {UtilsRepository.GetUserID()},0)");
                     }
                 }
 
@@ -1313,7 +1313,7 @@ namespace CMMSAPIs.Repositories.Users
                 if (user_access_insert_str != "" && user_access_insert_str != null)
                 {
                     string insert_query = $"INSERT INTO UserNotifications" +
-                                        $"(userId, notificationId, `canChange`, `userPreference`, `lastModifiedAt`, `lastModifiedBy`) " +
+                                        $"(userId, notificationId, `canChange`, `userPreference`, `lastModifiedAt`, `lastModifiedBy`,self) " +
                                         $" VALUES {user_access_insert_str}";
                     await Context.ExecuteNonQry<int>(insert_query).ConfigureAwait(false);
                 }
