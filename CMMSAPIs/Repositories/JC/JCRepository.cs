@@ -295,8 +295,8 @@ namespace CMMSAPIs.Repositories.JC
                                  $"CONCAT(user1.firstName , ' ' , user1.lastName) as JC_Rejected_By_Name, " +
                                  $"CONCAT(user2.firstName , ' ' , user2.lastName) as created_by, " +
                                  $"CONCAT(user3.firstName , ' ' , user3.lastName) as JC_Start_By_Name, " +
-                                 $"CONCAT(user4.firstName , ' ' , user4.lastName) as JC_Closed_by_Name " +
-                                 $"CONCAT(user5.firstName , ' ' , user5.lastName) as JC_Approved_By_Name, " +
+                                 $"CONCAT(user4.firstName , ' ' , user4.lastName) as JC_Closed_by_Name, " +
+                                 $"CONCAT(user5.firstName , ' ' , user5.lastName) as JC_Approved_By_Name " +
                                  $"FROM jobs as job " +
                                  $"LEFT JOIN  jobmappingassets as mapAssets ON mapAssets.jobId = job.id " +
                                  $"Left join assetcategories as asset_cat ON mapAssets.categoryId = asset_cat.id " +
