@@ -9,6 +9,7 @@ namespace CMMSAPIs.Models.Calibration
 
     public class CMCalibrationList
     {
+        public int facilityId { get; set; }
         public int calibration_id { get; set; }
         public int asset_id { get; set; }
         public int is_damaged { get; set; }
