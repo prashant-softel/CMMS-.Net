@@ -994,9 +994,11 @@ namespace CMMSAPIs.Repositories.Users
 
 
 
-        internal async Task<List<CMUser>> GetEMUsers( int facility_id, int role_id, int notification_id)
+        internal async Task<List<CMUser>> GetEMUsers(CMUserByNotificationId notification)
         {
-            
+            int facility_id = notification.facility_id;
+            int notification_id = (int)notification.module_id;
+            int role_id = notification.role_id;
          
             string userQry = $"select u.id as id, u.loginId as user_name, concat(firstName, ' ', lastName) as full_name, u.mobileNumber as contact_no, userroles.id as role_id," +
                 $" userroles.name as role_name " +
@@ -1016,7 +1018,7 @@ namespace CMMSAPIs.Repositories.Users
         internal async Task<List<CMUser>> GetUserByNotificationId(CMUserByNotificationId notification)
         {
             // Pending convert user_ids into string for where condition
-            int notification_id = (int)notification.module_id;
+            int notification_id = (int) notification.module_id;
             int facility_id = notification.facility_id;
             string user_ids_str = "";
             if (notification.user_ids != null && user_ids_str.Length > 0)

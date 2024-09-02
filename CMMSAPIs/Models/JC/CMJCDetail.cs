@@ -9,6 +9,7 @@ namespace CMMSAPIs.Models.JC
     {
 
         public int id { get; set; }
+        public int facility_id { get; set; }
         public string plant_name { get; set; }
         public string block_name { get; set; }
         //  public string asset_category_name { get; set; }
@@ -19,14 +20,21 @@ namespace CMMSAPIs.Models.JC
         public int ptwId { get; set; }
         public dynamic created_at { get; set; }
         public string created_by { get; set; }
+        public int created_by_id { get; set; }
+        public int JC_Start_By_id { get; set; }
         public dynamic JC_Start_At { get; set; }
         public string JC_Start_By_Name { get; set; }
+        public int JC_Close_By_id { get; set; }
+        public dynamic JC_Closed_At { get; set; }
+        public string JC_Closed_By_Name { get; set; }
         public string JC_Approved_By_Name { get; set; }
+        public string JC_Approve_Reason { get; set; }        
         public string JC_Rejected_By_Name { get; set; }
-        public string JC_Closed_by_Name { get; set; }
-        public string UpdatedByName { get; set; }
+        public string JC_Rejected_Reason { get; set; }
+        public int JC_Update_by { get; set; }
+
+        public string JC_UpdatedByName { get; set; }
         public int JC_Approved { get; set; }
-        public string current_status { get; set; }
         public int status { get; set; }
         public string Remark_new { get; set; }
         public string status_short { get; set; }
