@@ -24,11 +24,8 @@ namespace CMMSAPIs.Models.SM
         public decimal inward { get; set; }
         public decimal outward { get; set; }
         public decimal balance { get; set; }
-
+        public dynamic amount { get; set; }
     }
-
-
-
     public class CMEmployeeStockReport
     {
         public string facilityName { get; set; }
