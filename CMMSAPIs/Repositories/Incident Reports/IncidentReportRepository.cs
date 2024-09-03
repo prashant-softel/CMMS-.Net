@@ -113,7 +113,6 @@ namespace CMMSAPIs.Repositories.Incident_Reports
                     break;
             }
             return retValue;
-
         }
 
         internal async Task<List<CMIncidentList>> GetIncidentList(int facility_id, DateTime start_date, DateTime end_date, string facilitytimeZone)
@@ -310,7 +309,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
                     string investigation_IQuery = "INSERT INTO investigation_team (incidents_id, person_id, person_type, designation, investigation_date,person_name) ";
                     foreach (var item in request.investigation_team)
                     {
-                        investigation_IQuery = investigation_IQuery + $" select {incident_id}, '{item.person_id}', {item.person_type},'{item.designation}' ,'{item.investigation_date.Value.ToString("yyyy-MM-dd HH:mm:ss")}', '{item.person_name}' UNION ALL ";
+                        investigation_IQuery = investigation_IQuery + $" select {incident_id}, '{item.designation}' , '{item.person_name}' UNION ALL ";
                     }
                     investigation_IQuery = investigation_IQuery.TrimEnd("UNION ALL ".ToCharArray());
                     var Query_result = await Context.ExecuteNonQry<int>(investigation_IQuery).ConfigureAwait(false);
@@ -607,7 +606,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
                     string investigation_IQuery = "INSERT INTO investigation_team (incidents_id, person_id, person_type, designation, investigation_date,person_name) ";
                     foreach (var item in request.investigation_team)
                     {
-                        investigation_IQuery = investigation_IQuery + $" select {incident_id}, '{item.person_id}', {item.person_type},'{item.designation}' ,'{item.investigation_date.Value.ToString("yyyy-MM-dd HH:mm:ss")}', '{item.person_name}' UNION ALL ";
+                        investigation_IQuery = investigation_IQuery + $" select {incident_id}, '{item.designation}' , '{item.person_name}' UNION ALL ";
                     }
                     investigation_IQuery = investigation_IQuery.TrimEnd("UNION ALL ".ToCharArray());
                     var Query_result = await Context.ExecuteNonQry<int>(investigation_IQuery).ConfigureAwait(false);
@@ -1039,10 +1038,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
                     {
                         StringBuilder investigation_UQuery = new StringBuilder();
                         investigation_UQuery.Append("UPDATE investigation_team ");
-                        investigation_UQuery.Append("SET person_id = '" + item.person_id + "', ");
-                        investigation_UQuery.Append("person_type = '" + item.person_type + "', ");
-                        investigation_UQuery.Append("person_name = '" + item.person_name + "', ");
-                        investigation_UQuery.Append("investigation_date = '" + item.investigation_date.Value.ToString("yyyy-MM-dd HH:mm:ss") + "', ");
+                        investigation_UQuery.Append("SET  person_name = '" + item.person_name + "', ");
                         investigation_UQuery.Append("designation = '" + item.designation + "' ");
                         investigation_UQuery.Append("WHERE id = " + item.investigation_item_id);
                         var investigation_UQuery_result = await Context.ExecuteNonQry<int>(investigation_UQuery.ToString()).ConfigureAwait(false);
@@ -1314,7 +1310,8 @@ namespace CMMSAPIs.Repositories.Incident_Reports
         }
         internal async Task<List<CMInvestigation_team>> Getinvestigation_team(int incidents_id)
         {
-            string selectqry = "select i.id as investigation_item_id, incidents_id,case when person_type = 1 then 'Employee' when person_type = 2 then 'Contractor' \r\n when person_type = 3 then 'Other' else '' end as person_type_name, person_id, person_type, designation, investigation_date,\r\n case when i.person_type =1 then concat(u.firstName, ' ', u.lastname)\r\n when i.person_type =2 then b.name\r\n else person_name\r\n end as person_name \r\n from investigation_team i\r\nleft join users u on u.id = i.person_id\r\nleft join business b on b.id = i.person_id  where incidents_id = " + incidents_id + ";";
+            //string selectqry = "select i.id as investigation_item_id, incidents_id,case when person_type = 1 then 'Employee' when person_type = 2 then 'Contractor' \r\n when person_type = 3 then 'Other' else '' end as person_type_name, person_id, person_type, designation, investigation_date,\r\n case when i.person_type =1 then concat(u.firstName, ' ', u.lastname)\r\n when i.person_type =2 then b.name\r\n else person_name\r\n end as person_name \r\n from investigation_team i\r\nleft join users u on u.id = i.person_id\r\nleft join business b on b.id = i.person_id  where incidents_id = " + incidents_id + ";";
+            string selectqry = "select i.id as investigation_item_id, incidents_id, person_id, designation ,person_name from investigation_team where incidents_id = " + incidents_id + ";";
             List<CMInvestigation_team> result = await Context.GetData<CMInvestigation_team>(selectqry).ConfigureAwait(false);
             return result;
         }

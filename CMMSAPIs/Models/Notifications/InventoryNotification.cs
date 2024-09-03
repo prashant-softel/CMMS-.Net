@@ -32,13 +32,13 @@ namespace CMMSAPIs.Models.Notifications
                     retValue += String.Format("Asset{0} Imorted by {1}", m_InvObj.id, m_InvObj.Imported_by);
                     break;
                 case CMMS.CMMS_Status.INVENTORY_ADDED:
-                    retValue += String.Format("Asset{0} Added by {1}", m_InvObj.id, m_InvObj.added_by_name);
+                    retValue += String.Format("Asset{0} <{1}> Added by {2}", m_InvObj.id, m_InvObj.name, m_InvObj.added_by_name);
                     break;
                 case CMMS.CMMS_Status.INVENTORY_UPDATED:
-                    retValue += String.Format("Asset{0} Updated by {1}", m_InvObj.id, m_InvObj.updated_by_name);
+                    retValue += String.Format("Asset{0} <{1}> Updated by {2}", m_InvObj.id, m_InvObj.name, m_InvObj.updated_by_name);
                     break;
                 case CMMS.CMMS_Status.INVENTORY_DELETED:
-                    retValue += String.Format("Asset{0} Deleted by {1}", m_InvObj.id, m_InvObj.deleted_by);
+                    retValue += String.Format("Asset{0} <{1}> Deleted by {2}", m_InvObj.id, m_InvObj.name, m_InvObj.deleted_by);
                     break;
                 default:
                     break;
@@ -60,13 +60,13 @@ namespace CMMSAPIs.Models.Notifications
                     retValue = String.Format("Asset{0} Imorted by {1}", m_InvObj.id, m_InvObj.Imported_by);
                     break;
                 case CMMS.CMMS_Status.INVENTORY_ADDED:
-                    retValue = String.Format("Asset{0} Added by {1}", m_InvObj.id, m_InvObj.added_by_name);
+                    retValue = String.Format("Asset{0} <{1}> Added by {2}", m_InvObj.id, m_InvObj.name, m_InvObj.added_by_name);
                     break;
                 case CMMS.CMMS_Status.INVENTORY_UPDATED:
-                    retValue = String.Format("Asset{0} Updated by {1}", m_InvObj.id, m_InvObj.updated_by_name);
+                    retValue = String.Format("Asset{0} <{1}> Updated by {2}", m_InvObj.id, m_InvObj.name, m_InvObj.updated_by_name);
                     break;
                 case CMMS.CMMS_Status.INVENTORY_DELETED:
-                    retValue = String.Format("Asset{0} Deleted by {1}", m_InvObj.id, m_InvObj.deleted_by);
+                    retValue = String.Format("Asset{0} <{1}> Deleted by {2}", m_InvObj.id, m_InvObj.name, m_InvObj.deleted_by);
                     break;
                 default:
                     break;
@@ -84,7 +84,7 @@ namespace CMMSAPIs.Models.Notifications
             {
                 retValue += String.Format("<table style='width: 50%; margin:0 auto; border-collapse: collapse ; border-spacing: 10px; ' border='1'>");
 
-                retValue += String.Format(template, "ID","Inventory"+m_InvObj.id);
+                retValue += String.Format(template, "ID","Asset"+m_InvObj.id);
                 retValue += String.Format(template, "Name", m_InvObj.name);
                 retValue += String.Format(template, "Facility Name", m_InvObj.facilityName);
                 retValue += String.Format(template, "Block Name", m_InvObj.blockName);
@@ -111,6 +111,14 @@ namespace CMMSAPIs.Models.Notifications
             {
                 retValue += String.Format(template, "Deleted By", m_InvObj.deleted_by);
                 retValue += String.Format(template, "Deleted At", m_InvObj.deleted_at);
+            }
+            if (m_InvObj.warrantyId > 0)
+            {
+                retValue += String.Format(template, "Warranty Provider Name", m_InvObj.warrantyProviderName);
+                retValue += String.Format(template, "Warranty StartDate", m_InvObj.warranty_start_date);
+                retValue += String.Format(template, "Warranty End Date", m_InvObj.warranty_expiry_date);
+                retValue += String.Format(template, "Warranty Term Type", m_InvObj.warranty_term_type);
+                retValue += String.Format(template, "Warranty Type", m_InvObj.warrantyType);
             }
 
             retValue += "</table><br><br>";

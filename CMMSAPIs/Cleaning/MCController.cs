@@ -380,7 +380,7 @@ namespace CMMSAPIs.Controllers.MC
             try
             {
                 var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
-                var data = await _CleaningBS.GetExecutionDetails(scheduleId, facilitytimeZone);
+                var data = await _CleaningBS.GetScheduleDetails(scheduleId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)

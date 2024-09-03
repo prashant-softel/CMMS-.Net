@@ -113,13 +113,49 @@ namespace CMMSAPIs.Models.Notifications
             retValue += String.Format(template, "Job Status", m_jobObj.status_short);
             retValue += String.Format(template, "Job Title", m_jobObj.job_title);
             retValue += String.Format(template, "Job Description", m_jobObj.job_description);
-            retValue += String.Format(template, "Breakdown time", m_jobObj.breakdown_time);
+            retValue += String.Format(template, "Facility name", m_jobObj.facility_name);
+            retValue += String.Format(template, "Block name", m_jobObj.block_name);
 
-            if (m_jobObj.current_ptw_id > 0)
+            if (m_jobObj.equipment_cat_list.Count > 0)
             {
-                retValue += String.Format(template, "PTW Id", "PTW" + m_jobObj.current_ptw_id);
-                retValue += String.Format(template, "PTW Title", m_jobObj.current_ptw_title);
+                int i = 0;
+                string categoryNames = "";
+                foreach (var item in m_jobObj.equipment_cat_list)
+                {
+                    i++;
+                    categoryNames += item.name;
+                    if (m_jobObj.equipment_cat_list.Count > 1)
+                    {
+                        categoryNames += ", ";
+                    }
+                }
+
+                if (i > 0)
+                {
+                    retValue += String.Format(template, "Equipment categories", categoryNames);
+                }
             }
+
+            if (m_jobObj.working_area_name_list.Count > 0)
+            {
+                int i = 0;
+                string eqNames = "";
+                foreach (var item in m_jobObj.working_area_name_list)
+                {
+                    i++;
+                    eqNames += item.name;
+                    if (m_jobObj.working_area_name_list.Count > 1 && i < m_jobObj.working_area_name_list.Count)
+                    {
+                        eqNames += ", ";
+                    }
+                }
+
+                if (i > 0)
+                {
+                    retValue += String.Format(template, "Equipment Names", eqNames);
+                }
+            }
+            retValue += String.Format(template, "Breakdown time", m_jobObj.breakdown_time);
             retValue += String.Format(template, "Created by", m_jobObj.created_by_name);
             retValue += String.Format(template, "Created At", m_jobObj.created_at);
             if (m_jobObj.assigned_id > 0)
@@ -127,60 +163,65 @@ namespace CMMSAPIs.Models.Notifications
                 retValue += String.Format(template, "Assigned To", m_jobObj.assigned_name);
                 //retValue += String.Format(template, "Assigned At", m_jobObj.created_by_name);
             }
-            //if (!m_jobObj.Job_closed_on.IsNull)
+            if (m_jobObj.status == (int)CMMS.CMMS_Status.JOB_CLOSED)
             {
                 //retValue += String.Format(template, "Closed By", m_jobObj.assigned_name);
-                retValue += String.Format(templateEnd, "Closed At", m_jobObj.Job_closed_on);
+                retValue += String.Format(template, "Closed At", m_jobObj.Job_closed_on);
             }
 
-
-
-            //switch (m_notificationID)
-            //{
-            //    case CMMS.CMMS_Status.JOB_CREATED:
-            //        retValue += "</table>";            //Created
-            //        break;
-            //    case CMMS.CMMS_Status.JOB_ASSIGNED:     //Assigned
-            //        retValue += String.Format(templateEnd, "Assigned To", m_jobObj.assigned_name);
-            //        break;
-            //    case CMMS.CMMS_Status.JOB_CLOSED:     //Closed
-            //        retValue += String.Format(templateEnd, "Closed At", m_jobObj.closed_at);
-
-            //        break;
-            //    case CMMS.CMMS_Status.JOB_LINKED:     //Linked to PTW
-            //        retValue += String.Format(template, "PTW Id", m_jobObj.current_ptw_id);
-            //        retValue += String.Format(templateEnd, "PTW Title", m_jobObj.current_ptw_title);
-            //        break;
-            //    default:
-            //        break;
-            //}
-
-            return retValue;
-        }
-
-        internal string getHTMLBodyTemplate(params object[] args)
-        {
-            string template = String.Format("<h1>This is Job Title {0}</h1>",m_jobObj.job_title);
-            switch (m_notificationID)
+            if (m_jobObj.current_ptw_id > 0)
             {
-                case CMMS.CMMS_Status.JOB_CREATED:     //Created
-                    template += String.Format("<p><b>{0}</b> Created{0}</p>",m_jobObj.job_title);
-                    break;
-                case CMMS.CMMS_Status.JOB_ASSIGNED:     //Assigned
-                    template += String.Format("<p><b>Job status is : Assiged</p>");
-                    template += String.Format("<p><b>Job assigned to:</b> {0} </p>",m_jobObj.assigned_name);
-                    break;
-                case CMMS.CMMS_Status.JOB_CLOSED:     //Closed
-                    template += String.Format("<p><b>Job status is : Closed</p>");
-                    break;
-                case CMMS.CMMS_Status.JOB_LINKED:     //Linked to PTW
-                    template += String.Format("<p><b>Job status is : Assigned to {0} Job Id {1} Linked to PTW ID {2}<p>",m_jobObj.assigned_name,m_jobObj.id,m_jobObj.current_ptw_id);
-                    break;
-                default:
-                    break;
+                retValue += String.Format(template, "PTW Id", "PTW" + m_jobObj.current_ptw_id);
+                retValue += String.Format(template, "PTW Title", m_jobObj.current_ptw_title);
+                retValue += String.Format(template, "TBT Conducted by", m_jobObj.TBT_conducted_by_name);
             }
-            template += "<p><B>Job description: </b>{1}</p>";
-            return template;
+            if(m_jobObj.latestJCid > 0)
+            {
+                retValue += String.Format(template, "Latest Job card", "JC" + m_jobObj.latestJCid + " (" + m_jobObj.latestJCStatusShort + ")");
+
+            }
+
+            if (m_jobObj.work_type_list.Count > 0)
+            {
+                int i = 0;
+                string displayList = "";
+                foreach (var item in m_jobObj.work_type_list)
+                {
+                    i++;
+                    displayList += item.workType;
+                    if (m_jobObj.work_type_list.Count > 1)
+                    {
+                        displayList += ", ";
+                    }
+                }
+
+                if (i > 0)
+                {
+                    retValue += String.Format(template, "Work type", displayList);
+                }
+            }
+            if (m_jobObj.tools_required_list.Count > 0)
+            {
+                int i = 0;
+                string displayList = "";
+                foreach (var item in m_jobObj.tools_required_list)
+                {
+                    i++;
+                    displayList += item.linkedToolName;
+                    if (m_jobObj.tools_required_list.Count > 1)
+                    {
+                        displayList += ", ";
+                    }
+                }
+
+                if (i > 0)
+                {
+                    retValue += String.Format(template, "Tootls required", displayList);
+                }
+            }
+
+            retValue += "</table><br><br>";
+            return retValue;
         }
     }
 }
