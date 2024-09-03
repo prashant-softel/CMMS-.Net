@@ -102,7 +102,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                     retValue = String.Format("Vegetation Task <{0}>  Execution Abandoned by {1} ", executionObj.executionId, executionObj.abandonedBy);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_REJECTED:
-                    retValue = String.Format("Vegetation Task <{0}> Rejected ", executionObj.rejectedById);
+                    retValue = String.Format("Vegetation Task <{0}> Rejected ", executionObj.rejectedBy);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_APPROVED:
                     retValue = String.Format("Vegetation Task <{0}> Approved ", executionObj.approvedById);

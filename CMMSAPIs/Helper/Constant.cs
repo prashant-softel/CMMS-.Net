@@ -418,6 +418,12 @@ namespace CMMSAPIs.Helper
             PM_TASK_UPDATED,//Only for notification purpose
 
             MC_EXECUTION_STARTED,
+            MC_EXECUTION_CLOSED,
+            MC_EXECUTION_UPDATED,
+            MC_EXECUTION_ABANDONED,
+            MC_EXECUTION_ENDED,
+            MC_EXECUTION_ABANDONED_REJECTED,
+            
 
             PM_SUBMIT,//for temp only
             PM_LINK_PTW,
@@ -553,6 +559,8 @@ namespace CMMSAPIs.Helper
             MC_TASK_RESCHEDULED,
             MC_ASSIGNED,
             RESCHEDULED_TASK,
+
+            
 
             PM_PLAN_CREATED = 401,
             PM_PLAN_DRAFT,
