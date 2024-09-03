@@ -237,8 +237,38 @@ namespace CMMSAPIs.Models.Notifications
                 retValue += String.Format(template, "Frequency", planObj.frequency);
                 retValue += String.Format(template, "Created By", planObj.createdBy);
                 retValue += String.Format(template, "Assigned To", planObj.assignedTo);
-
                 
+
+                if(planObj.schedules.Count > 0) 
+                {
+                    retValue += "<h4>Selected Material</h4>";
+                    retValue += "<table style='width: 80%; margin:0 auto; border-collapse: collapse; border-spacing: 10px;' border='1'>";
+                    retValue += "<tr>";
+                    retValue += "<th>Day</th>";
+                    retValue += "<th>No. Of Inverters</th>";
+                    retValue += "<th>No. Of SMBs</th>";
+                    retValue += "<th>CleaningDay</th>";
+                    retValue += "<th>No.of Modules</th>";
+                    retValue += "<th>cleaningTypeName</th>";
+                    retValue += "<th>Planned Date</th>";
+                    retValue += "<th>Status</th>";
+                   
+                    foreach (var item in planObj.schedules)
+                    {
+                        retValue += "<tr>";
+                        retValue += String.Format("<td>{0}</td>", item.id);
+                        retValue += String.Format("<td>{0}</td>", item.Invs);
+                        retValue += String.Format("<td>{0}</td>", item.smbs);
+                        retValue += String.Format("<td>{0}</td>", item.cleaningDay);
+                        retValue += String.Format("<td>{0}</td>", item.ScheduledModules);
+                        retValue += String.Format("<td>{0}</td>", item.cleaningTypeName);
+                        retValue += String.Format("<td>{0}</td>", item.ScheduledModules);
+                        retValue += String.Format("<td>{0}</td>", item.plannedDate.ToString());
+                        retValue += String.Format("<td>{0}</td>", item.status_short);
+                    }
+                    retValue += "</table><br><br>";
+
+                }
 
 
                 switch (m_notificationID)

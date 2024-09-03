@@ -275,89 +275,92 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             return _ViewMCPlanList;
         }
 
-        internal async Task<CMDefaultResponse> CreatePlan(List<CMMCPlan> request, int userId, string facilitytimeZone)
-        {
-            int planIds = 0;
-            int status = (int)CMMS.CMMS_Status.MC_PLAN_SUBMITTED;
-            int cleaningType;
+         internal async Task<CMDefaultResponse> CreatePlan(List<CMMCPlan> request, int userId, string facilitytimeZone)
+         {
+             int planIds = 0;
+             int status = (int)CMMS.CMMS_Status.MC_PLAN_SUBMITTED;
+             int cleaningType;
 
-            foreach (CMMCPlan plan in request)
-            {
-                cleaningType = plan.cleaningType;
-                string startDate = "NULL";
+             foreach (CMMCPlan plan in request)
+             {
+                 cleaningType = plan.cleaningType;
+                 string startDate = "NULL";
 
-                /* if (plan.startDate != null && plan.startDate != Convert.ToDateTime("01-01-0001 00:00:00"))
+                 /* if (plan.startDate != null && plan.startDate != Convert.ToDateTime("01-01-0001 00:00:00"))
+                  {
+                      startDate = " '" + plan.startDate.ToString("yyyy-MM-dd hh:MM:ss")+"' ";
+
+                  }*/
+                 string qry = "insert into `cleaning_plan` (`moduleType`,`facilityId`,`title`,`description`, `durationDays`,`frequencyId`,cleaningType,`startDate`,`assignedTo`,`status`,`createdById`,`createdAt`) VALUES " +
+                             $"({moduleType},'{plan.facilityId}','{plan.title}','{plan.description}','{plan.noOfCleaningDays}','{plan.frequencyId}',{plan.cleaningType},'{plan.startDate}','{plan.assignedToId}',{status},'{userId}','{UtilsRepository.GetUTCTime()}');" +
+                              "SELECT LAST_INSERT_ID() as id ;";
+
+                 List<CMMCPlan> planQry = await Context.GetData<CMMCPlan>(qry).ConfigureAwait(false);
+
+                 var planId = Convert.ToInt16(planQry[0].id.ToString());
+
+                 string scheduleQry = " ";
+                 string equipmentQry = $"insert into `cleaning_plan_items` (`planId`,`moduleType`,`scheduleId`,`assetId`,`plannedDay`,`createdById`,`createdAt`) VALUES ";
+
+                 if (plan.schedules.Count > 0)
                  {
-                     startDate = " '" + plan.startDate.ToString("yyyy-MM-dd hh:MM:ss")+"' ";
 
-                 }*/
-                string qry = "insert into `cleaning_plan` (`moduleType`,`facilityId`,`title`,`description`, `durationDays`,`frequencyId`,cleaningType,`startDate`,`assignedTo`,`status`,`createdById`,`createdAt`) VALUES " +
-                            $"({moduleType},'{plan.facilityId}','{plan.title}','{plan.description}','{plan.noOfCleaningDays}','{plan.frequencyId}',{plan.cleaningType},'{plan.startDate}','{plan.assignedToId}',{status},'{userId}','{UtilsRepository.GetUTCTime()}');" +
-                             "SELECT LAST_INSERT_ID() as id ;";
-
-                List<CMMCPlan> planQry = await Context.GetData<CMMCPlan>(qry).ConfigureAwait(false);
-
-                var planId = Convert.ToInt16(planQry[0].id.ToString());
-
-                string scheduleQry = " ";
-                string equipmentQry = $"insert into `cleaning_plan_items` (`planId`,`moduleType`,`scheduleId`,`assetId`,`plannedDay`,`createdById`,`createdAt`) VALUES ";
-
-                if (plan.schedules.Count > 0)
-                {
-
-                    foreach (var schedule in plan.schedules)
-                    {
+                     foreach (var schedule in plan.schedules)
+                     {
 
 
-                        scheduleQry = "insert into `cleaning_plan_schedules` (`planId`,`moduleType`,cleaningType,`plannedDay`,`createdById`,`createdAt`) VALUES ";
-                        scheduleQry += $"({planId},{moduleType},{cleaningType},{schedule.cleaningDay},'{userId}','{UtilsRepository.GetUTCTime()}');" +
-                                           $"SELECT LAST_INSERT_ID() as id ;";
+                         scheduleQry = "insert into `cleaning_plan_schedules` (`planId`,`moduleType`,cleaningType,`plannedDay`,`createdById`,`createdAt`) VALUES ";
+                         scheduleQry += $"({planId},{moduleType},{cleaningType},{schedule.cleaningDay},'{userId}','{UtilsRepository.GetUTCTime()}');" +
+                                            $"SELECT LAST_INSERT_ID() as id ;";
 
-                        List<CMMCSchedule> schedule_ = await Context.GetData<CMMCSchedule>(scheduleQry).ConfigureAwait(false);
-                        var scheduleId = Convert.ToInt16(schedule_[0].id.ToString());
+                         List<CMMCSchedule> schedule_ = await Context.GetData<CMMCSchedule>(scheduleQry).ConfigureAwait(false);
+                         var scheduleId = Convert.ToInt16(schedule_[0].id.ToString());
 
-                        if (schedule.equipments.Count > 0)
-                        {
-                            foreach (var equipment in schedule.equipments)
-                            {
-                                equipmentQry += $"({planId},{moduleType},{scheduleId},{equipment.id},{schedule.cleaningDay},'{userId}','{UtilsRepository.GetUTCTime()}'),";
-                            }
+                         if (schedule.equipments.Count > 0)
+                         {
+                             foreach (var equipment in schedule.equipments)
+                             {
+                                 equipmentQry += $"({planId},{moduleType},{scheduleId},{equipment.id},{schedule.cleaningDay},'{userId}','{UtilsRepository.GetUTCTime()}'),";
+                             }
 
-                        }
+                         }
 
-                    }
+                     }
 
-                    if (plan.schedules[0].equipments.Count > 0)
-                    {
-                        equipmentQry = equipmentQry.Substring(0, equipmentQry.Length - 1);
+                     if (plan.schedules[0].equipments.Count > 0)
+                     {
+                         equipmentQry = equipmentQry.Substring(0, equipmentQry.Length - 1);
 
-                        equipmentQry += $"; update cleaning_plan_items left join assets on cleaning_plan_items.assetId = assets.id set cleaning_plan_items.{measure} = assets.{measure} where planId ={planId};";
+                         equipmentQry += $"; update cleaning_plan_items left join assets on cleaning_plan_items.assetId = assets.id set cleaning_plan_items.{measure} = assets.{measure} where planId ={planId};";
 
-                        await Context.GetData<CMMCPlan>(equipmentQry).ConfigureAwait(false);
-                    }
-                }
-                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MC_PLAN, planId, 0, 0, "Plan Created", (CMMS.CMMS_Status)status, userId);
-                try
-                {
-                    CMMCPlan _ViewPlanList = await GetPlanDetails(plan.planId, facilitytimeZone);
-                    await CMMSNotification.sendNotification(CMMS.CMMS_Modules.MC_PLAN, (CMMS.CMMS_Status)status, new[] { userId }, _ViewPlanList);
-                }
-                catch(Exception ex)
-                {
-                    Console.WriteLine(ex.ToString());
-                }
-               // planIds = planId;
-
-                
-                
-                //API_ErrorLog(msg);
+                         await Context.GetData<CMMCPlan>(equipmentQry).ConfigureAwait(false);
+                     }
+                 }
+                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MC_PLAN, planId, 0, 0, "Plan Created", (CMMS.CMMS_Status)status, userId);
+                 try
+                 {
+                     CMMCPlan _ViewPlanList = await GetPlanDetails(planId, facilitytimeZone);
+                     await CMMSNotification.sendNotification(CMMS.CMMS_Modules.MC_PLAN, (CMMS.CMMS_Status)status, new[] { userId }, _ViewPlanList);
+                 }
+                 catch(Exception ex)
+                 {
+                     Console.WriteLine(ex.ToString());
+                 }
+                // planIds = planId;
 
 
-            }
 
-            CMDefaultResponse response = new CMDefaultResponse(planIds, CMMS.RETRUNSTATUS.SUCCESS, $"Plan Created Successfully");
-            return response;
-        }
+                 //API_ErrorLog(msg);
+
+
+             }
+
+             CMDefaultResponse response = new CMDefaultResponse(planIds, CMMS.RETRUNSTATUS.SUCCESS, $"Plan Created Successfully");
+             return response;
+         }
+
+
+
 
         internal async Task<CMDefaultResponse> UpdatePlan(List<CMMCPlan> requests, int userId, string facilitytimeZone)
         {
