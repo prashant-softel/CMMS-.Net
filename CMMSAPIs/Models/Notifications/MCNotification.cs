@@ -262,7 +262,6 @@ namespace CMMSAPIs.Models.Notifications
                         retValue += String.Format("<td>{0}</td>", item.cleaningDay);
                         retValue += String.Format("<td>{0}</td>", item.ScheduledModules);
                         retValue += String.Format("<td>{0}</td>", item.cleaningTypeName);
-                        retValue += String.Format("<td>{0}</td>", item.ScheduledModules);
                         retValue += String.Format("<td>{0}</td>", item.plannedDate.ToString());
                         retValue += String.Format("<td>{0}</td>", item.status_short);
                     }
