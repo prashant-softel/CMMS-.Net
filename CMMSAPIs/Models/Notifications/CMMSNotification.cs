@@ -14,16 +14,15 @@ using CMMSAPIs.Models.SM;
 using CMMSAPIs.Models.Users;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Models.WC;
-using CMMSAPIs.Models.SM;
 using CMMSAPIs.Repositories.Calibration;
 using CMMSAPIs.Repositories.Incident_Reports;
+using CMMSAPIs.Repositories.Inventory;
 using CMMSAPIs.Repositories.JC;
 using CMMSAPIs.Repositories.Jobs;
 using CMMSAPIs.Repositories.Permits;
+using CMMSAPIs.Repositories.Users;
 using CMMSAPIs.Repositories.Utils;
 using CMMSAPIs.Repositories.WC;
-using CMMSAPIs.Repositories.Users;
-using CMMSAPIs.Repositories.Inventory;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using System;
@@ -199,11 +198,11 @@ namespace CMMSAPIs.Models.Notifications
                     retCode = CMMS.RETRUNSTATUS.SUCCESS;
                 }
             }
-                catch (Exception e)
+            catch (Exception e)
             {
                 strMessage = e.Message;
             }
-            CMDefaultResponse retValue = new CMDefaultResponse(1, retCode, strMessage );
+            CMDefaultResponse retValue = new CMDefaultResponse(1, retCode, strMessage);
 
             return retValue;
         }
@@ -286,7 +285,7 @@ namespace CMMSAPIs.Models.Notifications
                     if (email != null)
                     {
                         EmailTo.Add(email.user_name);     //Temp . Remove when testing done
-                        notificationRecordsQry += $"({escalationlogID}, '{email.id}'), '{UtilsRepository.GetUTCTime()}',";
+                        notificationRecordsQry += $"({escalationlogID}, '{email.id}', '{UtilsRepository.GetUTCTime()}'),";
                         emailCount++;
                     }
                 }
@@ -294,7 +293,8 @@ namespace CMMSAPIs.Models.Notifications
                 EmailTo.Add("notifications@softeltech.in");
                 if (users.Count > 0)
                 {
-                    notificationRecordsQry = notificationRecordsQry.Substring(0, notificationRecordsQry.Length - 1);
+                    notificationRecordsQry = notificationRecordsQry.TrimEnd(',');
+                    //notificationRecordsQry = notificationRecordsQry.Substring(0, notificationRecordsQry.Length - 1);
                     if (getDB == null)
                     {
                         getDB = new MYSQLDBHelper(_conString);
@@ -321,7 +321,7 @@ namespace CMMSAPIs.Models.Notifications
                     return response = new CMDefaultResponse(2, CMMS.RETRUNSTATUS.INVALID_ARG, $"Email List for notification {notificationID} is empty "); ;
                 }
                 else
-                { 
+                {
                     response = new CMDefaultResponse(1, CMMS.RETRUNSTATUS.SUCCESS, e.Message);
                 }
 
@@ -341,11 +341,11 @@ namespace CMMSAPIs.Models.Notifications
 
                 getDB = new MYSQLDBHelper(_conString);
             }
-            int userIDs  = 2;
+            int userIDs = 2;
             int[] userID = { userIDs };
 
             switch (moduleID)
-            {                            
+            {
                 case CMMS.CMMS_Modules.JOB:
                     JobRepository obj0 = new JobRepository(getDB);
                     CMJobView _jobView = await obj0.GetJobDetails(module_ref_id, facilitytimeZone);
@@ -396,7 +396,7 @@ namespace CMMSAPIs.Models.Notifications
             }
             //await CMMSNotification.sendEMNotification(moduleID, notificationID, userID, module_ref_id, role, delayDays, _jobView);
 
-//            retValue = await sendBaseNotification(moduleID, notificationID, userID, module_ref_id, role, delayDays, notificationType, obj);
+            //            retValue = await sendBaseNotification(moduleID, notificationID, userID, module_ref_id, role, delayDays, notificationType, obj);
             return retValue;
 
         }
@@ -445,14 +445,9 @@ namespace CMMSAPIs.Models.Notifications
 
             if (moduleID == CMMS.CMMS_Modules.JOB)     //JOB
             {
-                CMJobView _jobView = (CMJobView)args[0];
-                notificationObj = new JobNotification(moduleID, notificationID, _jobView);
-                notificationObj.module_ref_id = module_ref_id;
-                notificationObj.m_delayDays = delayDays;
-                notificationObj.m_notificationType = notificationType;
-                notificationObj.m_role = role;
-                facilityId = _jobView.facility_id;
-                //                module_ref_id = _jobView.id;
+                CMJobView _Job = (CMJobView)args[0];
+                notificationObj = new JobNotification(moduleID, notificationID, _Job);
+                facilityId = _Job.facility_id;
             }
             else if (moduleID == CMMS.CMMS_Modules.PTW)    //PTW
             {
@@ -555,7 +550,7 @@ namespace CMMSAPIs.Models.Notifications
                 notificationObj = new PMNotification(moduleID, notificationID, _Schedule);
                 //facilityId = _Schedule.facility_id;
             }
-			else if (moduleID == CMMS.CMMS_Modules.SM_GO)      //GO Report
+            else if (moduleID == CMMS.CMMS_Modules.SM_GO)      //GO Report
             {
                 CMGOMaster _GO = (CMGOMaster)args[0];
                 notificationObj = new GONotification(moduleID, notificationID, _GO);
@@ -566,7 +561,7 @@ namespace CMMSAPIs.Models.Notifications
                 CMCreateRequestOrderGET _SMRO = (CMCreateRequestOrderGET)args[0];
                 notificationObj = new SMNotification(moduleID, notificationID, _SMRO);
                 facilityId = _SMRO.facilityID;
-            }			
+            }
             else
             {
                 throw new Exception("Notification code is not implemented for module <" + moduleID + ">");
