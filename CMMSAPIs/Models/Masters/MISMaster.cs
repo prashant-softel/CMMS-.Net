@@ -748,6 +748,9 @@ namespace CMMSAPIs.Models.Masters
         public int id { get; set; }
         public string month_name { get; set; }
         public int month_id { get; set; }
+        public int facility_id { get; set; }
+        public string facility_name { get; set; }
+        public int year { get; set; }
         public int DieselConsumedForVehicles { get; set; }
         public int PetrolConsumedForVehicles { get; set; }
         public int PetrolConsumedForGrassCuttingAndMovers { get; set; }
@@ -765,6 +768,9 @@ namespace CMMSAPIs.Models.Masters
         public int id { get; set; }
         public string month_name { get; set; }
         public int month_id { get; set; }
+        public int facility_id { get; set; }
+        public string facility_name { get; set; }
+        public int year { get; set; }
         public int KaizensImplemented { get; set; }
         public int CostForImplementation { get; set; }
         public int CostSavedFromImplementation { get; set; }
@@ -779,6 +785,9 @@ namespace CMMSAPIs.Models.Masters
         public int id { get; set; }
         public string month_name { get; set; }
         public int month_id { get; set; }
+        public int facility_id { get; set; }
+        public string facility_name { get; set; }
+        public int year { get; set; }
         public int SaplingsPlanted { get; set; }
         public int SaplingsSurvived { get; set; }
         public int SaplingsDied { get; set; }
@@ -793,6 +802,9 @@ namespace CMMSAPIs.Models.Masters
         public int id { get; set; }
         public string month_name { get; set; }
         public int month_id { get; set; }
+        public int facility_id { get; set; }
+        public string facility_name { get; set; }
+        public int year { get; set; }
         public int GovtAuthVisits { get; set; }
         public int NoOfFineByThirdParty { get; set; }
         public int NoOfShowCauseNoticesByThirdParty { get; set; }
@@ -809,8 +821,12 @@ namespace CMMSAPIs.Models.Masters
     public class OccupationalHealthData
     {
         public int id { get; set; }
+
         public int month_id { get; set; }
         public string month_name { get; set; }
+        public int facility_id { get; set; }
+        public string facility_name { get; set; }
+        public int year { get; set; }
         public int NoOfHealthExamsOfNewJoiner { get; set; }
         public int PeriodicTests { get; set; }
         public int OccupationalIllnesses { get; set; }

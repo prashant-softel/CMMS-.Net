@@ -2162,9 +2162,9 @@ namespace CMMSAPIs.Repositories.Masters
         {
 
             string myqry1 = $"INSERT INTO MIS_OccupationalHealthData " +
-                      $"(month_id, NoOfHealthExamsOfNewJoiner, PeriodicTests, OccupationaIllnesses, Status, CreatedBy, CreatedAt) " +
+                      $"(month_id,facility_id,year, NoOfHealthExamsOfNewJoiner, PeriodicTests, OccupationaIllnesses, Status, CreatedBy, CreatedAt) " +
                       $"VALUES " +
-                      $"({request.month_id}, {request.NoOfHealthExamsOfNewJoiner}, {request.PeriodicTests}, {request.OccupationalIllnesses},1 , " +
+                      $"({request.month_id},{request.facility_id},{request.year}, {request.NoOfHealthExamsOfNewJoiner}, {request.PeriodicTests}, {request.OccupationalIllnesses},1 , " +
                       $"{userID}, '{UtilsRepository.GetUTCTime()}'); " +
                       $"SELECT LAST_INSERT_ID();";
 
@@ -2175,7 +2175,6 @@ namespace CMMSAPIs.Repositories.Masters
 
             return response;
         }
-
         internal async Task<CMDefaultResponse> UpdateHealthData(OccupationalHealthData request, int userID)
         {
 
@@ -2184,6 +2183,14 @@ namespace CMMSAPIs.Repositories.Masters
             if (request.month_id != 0)
             {
                 updateQry += $"month_id = {request.month_id}, ";
+            }
+            if (request.facility_id != 0)
+            {
+                updateQry += $"month_id = {request.facility_id}, ";
+            }
+            if (request.year != 0)
+            {
+                updateQry += $"month_id = {request.year}, ";
             }
             if (request.NoOfHealthExamsOfNewJoiner >= 0)
             {
@@ -2217,7 +2224,7 @@ namespace CMMSAPIs.Repositories.Masters
 
         internal async Task<List<OccupationalHealthData>> GetHealthData()
         {
-            string myQuery = "SELECT id, month_id, NoOfHealthExamsOfNewJoiner, PeriodicTests, OccupationaIllnesses as OccupationalIllnesses, Status, " +
+            string myQuery = "SELECT id,facility_id,year, month_id, NoOfHealthExamsOfNewJoiner, PeriodicTests, OccupationaIllnesses as OccupationalIllnesses, Status, " +
                              "CreatedBy, CreatedAt, UpdatedBy, UpdatedAt " +
                              "FROM MIS_OccupationalHealthData " +
                              "WHERE  Status = 1 ;";
@@ -2236,10 +2243,10 @@ namespace CMMSAPIs.Repositories.Masters
         {
 
             string myqry1 = $"INSERT INTO mis_visitsandnotices " +
-                            $"(month_id, GovtAuthVisits, NoOfFineByThirdParty, NoOfShowCauseNoticesByThirdParty, " +
+                            $"(month_id,facility_id,year, GovtAuthVisits, NoOfFineByThirdParty, NoOfShowCauseNoticesByThirdParty, " +
                             $"NoticesToContractor, AmountOfPenaltiesToContractors, AnyOther, Status, CreatedBy, CreatedAt) " +
                             $"VALUES " +
-                            $"({request.month_id}, {request.GovtAuthVisits}, {request.NoOfFineByThirdParty}, " +
+                            $"({request.month_id},{request.facility_id},{request.year}, {request.GovtAuthVisits}, {request.NoOfFineByThirdParty}, " +
                             $"{request.NoOfShowCauseNoticesByThirdParty}, {request.NoticesToContractor}, " +
                             $"{request.AmountOfPenaltiesToContractors}, {request.AnyOther}, 1, " +
                             $"{userID}, '{UtilsRepository.GetUTCTime()}'); " +
@@ -2259,6 +2266,10 @@ namespace CMMSAPIs.Repositories.Masters
                 updateQry += $"month_id = {request.month_id}, ";
             if (request.GovtAuthVisits > 0)
                 updateQry += $"GovtAuthVisits = {request.GovtAuthVisits}, ";
+            if (request.facility_id != 0)
+                updateQry += $"month_id = {request.facility_id}, ";
+            if (request.year != 0)
+                updateQry += $"month_id = {request.year}, ";
             if (request.NoOfFineByThirdParty > 0)
                 updateQry += $"NoOfFineByThirdParty = {request.NoOfFineByThirdParty}, ";
             if (request.NoOfShowCauseNoticesByThirdParty > 0)
@@ -2286,7 +2297,7 @@ namespace CMMSAPIs.Repositories.Masters
         }
         internal async Task<List<VisitsAndNotices>> GetVisitsAndNotices()
         {
-            string myQuery = "SELECT id,month_id, GovtAuthVisits, NoOfFineByThirdParty, NoOfShowCauseNoticesByThirdParty, " +
+            string myQuery = "SELECT id,month_id,facility_id,year, GovtAuthVisits, NoOfFineByThirdParty, NoOfShowCauseNoticesByThirdParty, " +
                              "NoticesToContractor, AmountOfPenaltiesToContractors, AnyOther, Status, CreatedBy, CreatedAt, UpdatedBy, UpdatedAt " +
                              "FROM mis_visitsandnotices " +
                              "WHERE Status =1 ; ";
@@ -2303,9 +2314,10 @@ namespace CMMSAPIs.Repositories.Masters
         //Fuel Consumption
         internal async Task<CMDefaultResponse> CreateFuelConsumption(FuelData request, int userID)
         {
-            string myqry1 = $"INSERT INTO mis_fueldata (month_id, DieselConsumedForVehicles, PetrolConsumedForVehicles, PetrolConsumedForGrassCuttingAndMovers, DieselConsumedAtSite, PetrolConsumedAtSite, Status, CreatedBy, CreatedAt) " +
+            string myqry1 = $"INSERT INTO mis_fueldata (month_id,facility_id,year, DieselConsumedForVehicles, PetrolConsumedForVehicles, PetrolConsumedForGrassCuttingAndMovers, DieselConsumedAtSite, PetrolConsumedAtSite, Status, CreatedBy, CreatedAt) " +
                              $"VALUES " +
                              $"({request.month_id}, " +
+                             $"{request.facility_id},{request.year}," +
                              $"{request.DieselConsumedForVehicles}, " +
                              $"{request.PetrolConsumedForVehicles}, " +
                              $"{request.PetrolConsumedForGrassCuttingAndMovers}, " +
@@ -2325,6 +2337,8 @@ namespace CMMSAPIs.Repositories.Masters
             string updateQry = "UPDATE mis_fueldata SET ";
             updateQry += $"month_id = {request.month_id}, ";
             updateQry += $"DieselConsumedForVehicles = {request.DieselConsumedForVehicles}, ";
+            updateQry += $"month_id = {request.facility_id}, ";
+            updateQry += $"month_id = {request.year}, ";
             updateQry += $"PetrolConsumedForVehicles = {request.PetrolConsumedForVehicles}, ";
             updateQry += $"PetrolConsumedForGrassCuttingAndMovers = {request.PetrolConsumedForGrassCuttingAndMovers}, ";
             updateQry += $"DieselConsumedAtSite = {request.DieselConsumedAtSite}, ";
@@ -2346,7 +2360,7 @@ namespace CMMSAPIs.Repositories.Masters
         }
         internal async Task<List<FuelData>> GetFuelConsumption()
         {
-            string myQuery = "SELECT id,  month_id, DieselConsumedForVehicles, PetrolConsumedForVehicles, PetrolConsumedForGrassCuttingAndMovers, DieselConsumedAtSite, PetrolConsumedAtSite, CreatedBy, CreatedAt, UpdatedBy, UpdatedAt " +
+            string myQuery = "SELECT id,  month_id,facility_id,year, DieselConsumedForVehicles, PetrolConsumedForVehicles, PetrolConsumedForGrassCuttingAndMovers, DieselConsumedAtSite, PetrolConsumedAtSite, CreatedBy, CreatedAt, UpdatedBy, UpdatedAt " +
                              "FROM mis_fueldata " +
                              "WHERE Status=1";
             List<FuelData> data = await Context.GetData<FuelData>(myQuery).ConfigureAwait(false);
@@ -2365,9 +2379,9 @@ namespace CMMSAPIs.Repositories.Masters
         public async Task<CMDefaultResponse> CreatePlantationData(PlantationData request, int userID)
         {
 
-            string myqry1 = $"INSERT INTO mis_plantationdata (month_id, SaplingsPlanted, SaplingsSurvived, SaplingsDied, Status, CreatedBy, CreatedAt) " +
+            string myqry1 = $"INSERT INTO mis_plantationdata (month_id,facility_id,year, SaplingsPlanted, SaplingsSurvived, SaplingsDied, Status, CreatedBy, CreatedAt) " +
                             $"VALUES " +
-                            $"({request.month_id}, " +
+                            $"({request.month_id},{request.facility_id},{request.year}, " +
                             $"{request.SaplingsPlanted}, " +
                             $"{request.SaplingsSurvived}, " +
                             $"{request.SaplingsDied},1, " +
@@ -2386,6 +2400,8 @@ namespace CMMSAPIs.Repositories.Masters
 
             string updateQry = "UPDATE mis_plantationdata SET ";
             updateQry += $"month_id = {request.month_id}, ";
+            updateQry += $"month_id = {request.facility_id}, ";
+            updateQry += $"month_id = {request.year}, ";
             updateQry += $"SaplingsPlanted = {request.SaplingsPlanted}, ";
             updateQry += $"SaplingsSurvived = {request.SaplingsSurvived}, ";
             updateQry += $"SaplingsDied = {request.SaplingsDied}, ";
@@ -2408,7 +2424,7 @@ namespace CMMSAPIs.Repositories.Masters
 
         public async Task<List<PlantationData>> GetPlantationData()
         {
-            string myQuery = "SELECT id, month_id,  SaplingsPlanted, SaplingsSurvived, SaplingsDied, CreatedBy, CreatedAt, UpdatedBy, UpdatedAt " +
+            string myQuery = "SELECT id, month_id,facility_id,year,  SaplingsPlanted, SaplingsSurvived, SaplingsDied, CreatedBy, CreatedAt, UpdatedBy, UpdatedAt " +
                              "FROM mis_plantationdata " +
                              "WHERE Status=1";
             List<PlantationData> data = await Context.GetData<PlantationData>(myQuery).ConfigureAwait(false);
@@ -2426,9 +2442,9 @@ namespace CMMSAPIs.Repositories.Masters
         public async Task<CMDefaultResponse> CreateKaizensData(KaizensData request, int userID)
         {
 
-            string myqry1 = $"INSERT INTO mis_kaizensdata (month_id, KaizensImplemented, CostForImplementation, CostSavedFromImplementation, Status, CreatedBy, CreatedAt) " +
+            string myqry1 = $"INSERT INTO mis_kaizensdata (month_id,facility_id,year, KaizensImplemented, CostForImplementation, CostSavedFromImplementation, Status, CreatedBy, CreatedAt) " +
                             $"VALUES " +
-                            $"({request.month_id}, " +
+                            $"({request.month_id},{request.facility_id},{request.year}, " +
                             $"{request.KaizensImplemented}, " +
                             $"{request.CostForImplementation}, " +
                             $"{request.CostSavedFromImplementation},1, " +
@@ -2446,6 +2462,8 @@ namespace CMMSAPIs.Repositories.Masters
 
             string updateQry = "UPDATE mis_kaizensdata SET ";
             updateQry += $"month_id = {request.month_id}, ";
+            updateQry += $"month_id = {request.facility_id}, ";
+            updateQry += $"month_id = {request.year}, ";
             updateQry += $"KaizensImplemented = {request.KaizensImplemented}, ";
             updateQry += $"CostForImplementation = {request.CostForImplementation}, ";
             updateQry += $"CostSavedFromImplementation = {request.CostSavedFromImplementation}, ";
@@ -2468,7 +2486,7 @@ namespace CMMSAPIs.Repositories.Masters
 
         public async Task<List<KaizensData>> GetKaizensData()
         {
-            string myQuery = "SELECT id, month_id, KaizensImplemented, CostForImplementation, CostSavedFromImplementation, CreatedBy, CreatedAt, UpdatedBy, UpdatedAt " +
+            string myQuery = "SELECT id, month_id,facility_id,year, KaizensImplemented, CostForImplementation, CostSavedFromImplementation, CreatedBy, CreatedAt, UpdatedBy, UpdatedAt " +
                              "FROM mis_kaizensdata " +
                              "WHERE Status=1";
             List<KaizensData> data = await Context.GetData<KaizensData>(myQuery).ConfigureAwait(false);
