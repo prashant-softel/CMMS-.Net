@@ -278,15 +278,15 @@ namespace CMMSAPIs.Models.Notifications
                 System.Data.DataTable dt1 = await getDB.FetchData(notificationQry).ConfigureAwait(false);
                 int escalationlogID = Convert.ToInt32(dt1.Rows[0][0]);
 
-                string notificationRecordsQry = "INSERT INTO escalationsentto (escalationLogId, notifSentTo) VALUES ";
+                string notificationRecordsQry = "INSERT INTO escalationsentto (escalationLogId, notifSentTo,notifSentAt) VALUES ";
                 string delimiter = "";
                 int emailCount = 0;
                 foreach (var email in users)
                 {
                     if (email != null)
                     {
-                        //EmailTo.Add(email.user_name);     //Temp . Remove when testing done
-                        notificationRecordsQry += $"({escalationlogID}, '{email.id}'),";
+                        EmailTo.Add(email.user_name);     //Temp . Remove when testing done
+                        notificationRecordsQry += $"({escalationlogID}, '{email.id}'), '{UtilsRepository.GetUTCTime()}',";
                         emailCount++;
                     }
                 }
