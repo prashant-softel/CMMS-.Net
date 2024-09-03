@@ -382,6 +382,7 @@ namespace CMMSAPIs.Helper
             PTW_EXPIRED,
             PTW_UPDATED,
             PTW_UPDATED_WITH_TBT,
+            PTW_RESUBMIT,
 
             //JC_CREATED = 151,
             //JC_STARTED,

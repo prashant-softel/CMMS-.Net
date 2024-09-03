@@ -2,11 +2,13 @@ using CMMSAPIs.Helper;
 using CMMSAPIs.Models.SM;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Utils;
+using Microsoft.AspNetCore.Hosting;
 using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace CMMSAPIs.Repositories.SM
@@ -14,9 +16,11 @@ namespace CMMSAPIs.Repositories.SM
     public class SMMasterRepository : GenericRepository
     {
         private UtilsRepository _utilsRepo;
-        public SMMasterRepository(MYSQLDBHelper sqlDBHelper) : base(sqlDBHelper)
+        private ErrorLog m_errorLog;
+        public SMMasterRepository(MYSQLDBHelper sqlDBHelper, IWebHostEnvironment webHostEnvironment = null) : base(sqlDBHelper)
         {
             _utilsRepo = new UtilsRepository(sqlDBHelper);
+            m_errorLog = new ErrorLog(webHostEnvironment);
         }
 
 
@@ -606,7 +610,22 @@ namespace CMMSAPIs.Repositories.SM
 
                                 continue;
                             }
+
+                            string newRowName = newR[0].ToString();
+
+                            bool isDuplicate = dt2.AsEnumerable().Any(row => row.Field<string>("name") == newRowName);
+
+                            if (isDuplicate)
+                            {
+                                m_errorLog.SetError($"[Matrial: {newR[0].ToString()}] Duplicate Materail .");
+                                newR.Delete();
+                                continue;
+                            }
+
                             newR["name"] = newR[0];
+
+
+
                             newR["description"] = newR[1];
                             try
                             {
@@ -620,6 +639,7 @@ namespace CMMSAPIs.Repositories.SM
                             }
 
                             newR["Name1"] = newR[3];
+
                             if (Convert.ToString(newR["description"]) == null || Convert.ToString(newR["description"]) == "")
                             {
                                 return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, $"[Row: {rN}] Material Description cannot be null.");
@@ -831,7 +851,7 @@ namespace CMMSAPIs.Repositories.SM
             //   response.import_log = null;
             //}
 
-            return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.SUCCESS, null, null, "File imported successfully.");
+            return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.SUCCESS, null, m_errorLog.errorLog(), "File imported successfully.");
             //return response;*/
         }
 
