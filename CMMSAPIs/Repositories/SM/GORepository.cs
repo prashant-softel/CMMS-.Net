@@ -1139,7 +1139,7 @@ namespace CMMSAPIs.Repositories
                 location_ID = p.location_ID,
                 freight_value = p.freight_value,
                 inspection_report = p.inspection_report,
-                approved_by_name = p.approvedBy,
+                approved_by_name = p.approved_by_name,
                 receive_rejected_by_name = p.receive_rejected_by_name,
                 drafted_by_name = p.drafted_by_name,
                 closed_by_name = p.closed_by_name,
@@ -1154,6 +1154,7 @@ namespace CMMSAPIs.Repositories
                 receive_submitted_at = p.updatedOn,
                 receive_rejected_at = p.receive_rejected_at,
                 receive_approved_at = p.receive_approved_at
+                
 
 
             }).FirstOrDefault();
