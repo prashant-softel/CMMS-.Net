@@ -10,6 +10,7 @@ namespace CMMSAPIs.Models.Calibration
     public class CMCalibrationList
     {
         public int facilityId { get; set; }
+        public string facility_name { get; set; }
         public int calibration_id { get; set; }
         public int asset_id { get; set; }
         public int is_damaged { get; set; }
@@ -36,7 +37,6 @@ namespace CMMSAPIs.Models.Calibration
 
     public class CMCalibrationDetails : CMCalibrationList
     {
-        public DateTime? calibration_due_date { get; set; }
         public string calibration_certificate_path { get; set; }
         public string request_approved_by { get; set; }
         public string request_rejected_by { get; set; }
@@ -45,6 +45,11 @@ namespace CMMSAPIs.Models.Calibration
         public string approved_by { get; set; }
         public string rejected_by { get; set; }
         public DateTime? started_at { get; set; }
+        public int started_by_id { get; set; }
+        public string started_by { get; set; }
+        public DateTime? skipped_at { get; set; }
+        public int skipped_by_id { get; set; }
+        public string skipped_by { get; set; }
         public string status_short { get; set; }
         public string status_long { get; set; }
         public DateTime? requested_at { get; set; }
@@ -53,7 +58,6 @@ namespace CMMSAPIs.Models.Calibration
         public string completed_by { get; set; }
         public DateTime? Closed_at { get; set; }
         public string Closed_by { get; set; }
-        public int is_damaged { get; set; }
         public int prev_task_id { get; set; }
         public List<CMFileDetailJc> file_list_calibration { get; set; }
         public List<CMFileDetailJc> file_list { get; set; }

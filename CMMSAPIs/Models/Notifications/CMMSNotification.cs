@@ -44,7 +44,7 @@ namespace CMMSAPIs.Models.Notifications
         protected CMMS.CMMS_Status m_notificationID;
         protected int m_notificationType = 1;
         protected int m_delayDays = 0;
-        protected int module_ref_id = 0;
+        protected int m_module_ref_id = 0;
         protected int m_role = 0;
 
 
@@ -81,7 +81,12 @@ namespace CMMSAPIs.Models.Notifications
 
         protected virtual int getId(params object[] args)
         {
-            return 0;
+            return m_module_ref_id;
+        }
+        //protected abstract string getURL(params object[] args);
+        protected virtual string getURL(params object[] args)
+        {
+            return "http://172.20.43.9:82/#/LaunchCMMSView?module=" + (int)m_moduleID + "&id=" + m_module_ref_id;
         }
 
         protected virtual string getModuleName(params object[] args)
@@ -207,7 +212,6 @@ namespace CMMSAPIs.Models.Notifications
             return retValue;
         }
 
-
         public async Task<CMDefaultResponse> sendEmailNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, int[] userID, int facilityId, params object[] args)
         {
             //m_delayDays = delayDays;
@@ -237,7 +241,7 @@ namespace CMMSAPIs.Models.Notifications
             string HTMLSignature = getHTMLSignature(args);
             int module_ref_id = getId(args);
             printBody = getHTMLBody(args);
-
+            string url = getURL(args);
 
 
             CMUserByNotificationId notification = new CMUserByNotificationId();
@@ -400,26 +404,18 @@ namespace CMMSAPIs.Models.Notifications
             return retValue;
 
         }
+        /*
+                public static async Task<CMDefaultResponse> sendEMNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, int[] userID, int module_ref_id, int role, int delayDays, params object[] args)
+                {
+                    CMDefaultResponse retValue;
 
-        public static async Task<CMDefaultResponse> sendEMNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, int[] userID, int module_ref_id, int role, int delayDays, params object[] args)
-        {
-            CMDefaultResponse retValue;
+                    int notificationType = 2;
 
-            int notificationType = 2;
-            /*
-                        if (moduleID == CMMS.CMMS_Modules.JOB)     //JOB
-                        {
-                            CMJobView _jobView = (CMJobView)args[0];
-                            notificationObj = new JobNotification(moduleID, notificationID, _jobView, notificationType);
-                            facilityId = _jobView.facility_id;
-                        }
+                    //create else if block for your module and add Notification class for  your module to implement yous notification
+                    retValue = await sendBaseNotification(moduleID, notificationID, userID, module_ref_id, role, delayDays, notificationType, args);
+                    return retValue;
+                }
             */
-
-            //create else if block for your module and add Notification class for  your module to implement yous notification
-            retValue = await sendBaseNotification(moduleID, notificationID, userID, module_ref_id, role, delayDays, notificationType, args);
-            return retValue;
-        }
-
         public static async Task<CMDefaultResponse> sendNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, int[] userID, params object[] args)
         {
             CMDefaultResponse retValue;
@@ -436,7 +432,7 @@ namespace CMMSAPIs.Models.Notifications
 
         //create else if block for your module and add Notification class for  your module to implement yous notification
         /*    public static CMMS.RETRUNSTATUS sendNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, params object[] args)*/
-        public static async Task<CMDefaultResponse> sendBaseNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, int[] userID, int module_ref_id, int role, int delayDays, int notificationType, params object[] args)
+        public static async Task<CMDefaultResponse> sendBaseNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, int[] userIDs, int module_ref_id, int role, int delayDays, int notificationType, params object[] args)
         {
             CMDefaultResponse retValue = new CMDefaultResponse();
 
@@ -526,12 +522,6 @@ namespace CMMSAPIs.Models.Notifications
                 notificationObj = new VegetationNotification(moduleID, notificationID, _Task);
                 //facilityId = _Task.facility_id;
             }
-            else if (moduleID == CMMS.CMMS_Modules.VEGETATION_EXECUTION)
-            {
-                CMMCExecution _Schedule = (CMMCExecution)args[0];
-                notificationObj = new VegetationNotification(moduleID, notificationID, _Schedule);
-                //facilityId = _Task.facility_id;
-            }
             else if (moduleID == CMMS.CMMS_Modules.SM_MRS)     //MRS Report
             {
                 CMMRSList _MRS = (CMMRSList)args[0];
@@ -572,13 +562,10 @@ namespace CMMSAPIs.Models.Notifications
             {
                 throw new Exception("Notification code is not implemented for module <" + moduleID + ">");
             }
-
+            notificationObj.m_notificationType = notificationType;
             //create else if block for your module and add Notification class for  your module to implement yous notification
-            retValue = await notificationObj.sendEmailNotification(moduleID, notificationID, userID, facilityId, module_ref_id, 0, 0, notificationType, args);
+            retValue = await notificationObj.sendEmailNotification(moduleID, notificationID, userIDs, facilityId, args);
             return retValue;
         }
-
-
-
     }
 }
