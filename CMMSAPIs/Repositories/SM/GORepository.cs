@@ -287,7 +287,7 @@ namespace CMMSAPIs.Repositories
                         $"challan_no = '{request.challan_no}',po_no='{request.po_no}', freight='{request.freight}',no_pkg_received='{request.no_pkg_received}'," +
                         $"lr_no='{request.lr_no}',condition_pkg_received='{request.condition_pkg_received}',vehicle_no='{request.vehicle_no}', gir_no='{request.gir_no}', " +
                         $"challan_date = '{request.challan_date.Value.ToString("yyyy-MM-dd HH:mm:ss")}', " +
-                        $"job_ref='{request.job_ref}',amount='{request.amount}', currency={request.currencyID},go_updated_by = {userID},go_updatedOn = '{UtilsRepository.GetUTCTime()}', status = {(int)CMMS.CMMS_Status.GO_DRAFT}, received_on = '{received_date}', po_date = '{request.po_date.Value.ToString("yyyy-MM-dd HH:mm:ss")}', purchaseDate= '{request.purchaseDate.Value.ToString("yyyy-MM-dd HH:mm:ss")}' where ID={request.id}";
+                        $"job_ref='{request.job_ref}',amount='{request.amount}', currency={request.currencyID},go_updated_by = {userID},go_updatedOn = '{UtilsRepository.GetUTCTime()}', status = {(int)CMMS.CMMS_Status.GO_SUBMITTED}, received_on = '{received_date}', po_date = '{request.po_date.Value.ToString("yyyy-MM-dd HH:mm:ss")}', purchaseDate= '{request.purchaseDate.Value.ToString("yyyy-MM-dd HH:mm:ss")}' where ID={request.id}";
             }
             await Context.ExecuteNonQry<int>(OrderQuery);
 
@@ -339,7 +339,7 @@ namespace CMMSAPIs.Repositories
             else
             {
                 CMGOMaster _GOList = await GetGODetailsByID(request.id, facilitytimeZone);
-                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_GO, CMMS.CMMS_Status.GO_DRAFT, new[] { userID }, _GOList);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_GO, CMMS.CMMS_Status.GO_SUBMITTED, new[] { userID }, _GOList);
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_GO, request.id, 0, 0, request.remarks, CMMS.CMMS_Status.GO_SUBMITTED);
             }
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Goods order updated successfully.");

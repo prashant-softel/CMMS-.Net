@@ -549,6 +549,9 @@ namespace CMMSAPIs.Repositories.SM
                 case CMMS.CMMS_Status.SM_RO_SUBMITTED:
                     retValue = "Waiting for approval";
                     break;
+                case CMMS.CMMS_Status.SM_RO_UPDATED:
+                    retValue = "Waiting for approval";
+                    break;
                 case CMMS.CMMS_Status.SM_RO_SUBMIT_REJECTED:
                     retValue = "Submit rejected";
                     break;

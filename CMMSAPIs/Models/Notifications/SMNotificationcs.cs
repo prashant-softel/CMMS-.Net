@@ -31,6 +31,9 @@ namespace CMMSAPIs.Models.Notifications
                 case CMMS.CMMS_Status.SM_RO_SUBMITTED:
                     retValue += String.Format("{0} RO{1} Submitted By {2}", m_SMROObj.facilityName, m_SMROObj.request_order_id, m_SMROObj.generatedBy);
                     break;
+                case CMMS.CMMS_Status.SM_RO_UPDATED:
+                    retValue += String.Format("{0} RO{1} Updated By {2}", m_SMROObj.facilityName, m_SMROObj.request_order_id, m_SMROObj.updated_by);
+                    break;
                 case CMMS.CMMS_Status.SM_RO_SUBMIT_REJECTED:
                     retValue += String.Format("{0} RO{1} Rejected By {2}", m_SMROObj.facilityName, m_SMROObj.request_order_id, m_SMROObj.rejectedBy);
                     break;
