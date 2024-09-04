@@ -274,7 +274,7 @@ namespace CMMSAPIs.Models.Notifications
                 }
                 List<string> EmailTo = new List<string>();
 
-                if (getDB == null)
+                /*if (getDB == null)
                 {
                     getDB = new MYSQLDBHelper(_conString);
                 }
@@ -292,10 +292,10 @@ namespace CMMSAPIs.Models.Notifications
                         notificationRecordsQry += $"({escalationlogID}, '{email.id}', '{UtilsRepository.GetUTCTime()}'),";
                         emailCount++;
                     }
-                }
+                }*/
 
-                EmailTo.Add("notifications@softeltech.in");
-                if (users.Count > 0)
+                EmailTo.Add("avaneesh1305@gmail.com");
+               /* if (users.Count > 0)
                 {
                     notificationRecordsQry = notificationRecordsQry.TrimEnd(',');
                     //notificationRecordsQry = notificationRecordsQry.Substring(0, notificationRecordsQry.Length - 1);
@@ -304,7 +304,7 @@ namespace CMMSAPIs.Models.Notifications
                         getDB = new MYSQLDBHelper(_conString);
                     }
                     System.Data.DataTable dt2 = await getDB.FetchData(notificationRecordsQry).ConfigureAwait(false);
-                }
+                }*/
 
 
                 if (print)
@@ -520,6 +520,12 @@ namespace CMMSAPIs.Models.Notifications
             {
                 CMMCExecution _Task = (CMMCExecution)args[0];
                 notificationObj = new VegetationNotification(moduleID, notificationID, _Task);
+                //facilityId = _Task.facility_id;
+            }
+            else if (moduleID == CMMS.CMMS_Modules.VEGETATION_EXECUTION)
+            {
+                CMMCExecution _Schedule = (CMMCExecution)args[0];
+                notificationObj = new VegetationNotification(moduleID, notificationID, _Schedule);
                 //facilityId = _Task.facility_id;
             }
             else if (moduleID == CMMS.CMMS_Modules.SM_MRS)     //MRS Report
