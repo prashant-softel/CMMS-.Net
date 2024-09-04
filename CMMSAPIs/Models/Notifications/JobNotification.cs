@@ -13,52 +13,44 @@ namespace CMMSAPIs.Models.Notifications
 {
     internal class JobNotification : CMMSNotification
     {
-        int m_jobId;
         CMJobView m_jobObj;
-        private JobRepository _JobRepo;
-        public JobNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMJobView jobObj, int notificationType = 1) : base(moduleID, notificationID)
+        public JobNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMJobView jobObj) : base(moduleID, notificationID)
         {
             m_jobObj = jobObj;
-            m_jobId = m_jobObj.id;
-            m_notificationType = notificationType;
+            m_module_ref_id = m_jobObj.id;
+            //m_notificationType = notificationType;
         }
 
         override protected int getId(params object[] args)
         {
-            return m_jobObj.id;
+            return m_module_ref_id;
         }
-
         override protected string getSubject(params object[] args)
         {
-            //if (m_notificationType == 2)
-            //    return getEMSubject(args);
-
             string retValue = "";
-            m_jobId = m_jobObj.id;
-          
+            
             switch (m_notificationID)
             {
                 case CMMS.CMMS_Status.JOB_CREATED:     //Created
-                    string desc = m_jobObj.job_title;
-                    retValue = String.Format("JOB{0} <{1}> created", m_jobId, desc);
+                    retValue = String.Format("{0} BM JOB{1} Created", m_jobObj.facility_name, m_module_ref_id);
                     break;
                 case CMMS.CMMS_Status.JOB_ASSIGNED:     //Assigned
-                    retValue = String.Format("JOB{0} <{1}> assigned to <{2}>", m_jobId, m_jobObj.job_title, m_jobObj.assigned_name);
+                    retValue = String.Format("{0} BM JOB{1} Assigned", m_jobObj.facility_name, m_module_ref_id);
                     break;
                 case CMMS.CMMS_Status.JOB_LINKED:     //Linked
-                    retValue = String.Format("JOB{0} <{1}> linked to PTW{2}", m_jobId, m_jobObj.job_title,m_jobObj.current_ptw_id);
+                    retValue = String.Format("{0} BM JOB{1} linked to PTW{2}", m_jobObj.facility_name, m_module_ref_id, m_jobObj.current_ptw_id);
                     break;
                 case CMMS.CMMS_Status.JOB_CLOSED:     //Closed
-                    retValue = String.Format("JOB{0} <{1}> closed", m_jobId, m_jobObj.job_title);
+                    retValue = String.Format("{0} BM JOB{1} Closed", m_jobObj.facility_name, m_module_ref_id);
                     break;
                 case CMMS.CMMS_Status.JOB_CANCELLED:     //Cancelled
-                    retValue = String.Format("JOB{0} <{1}> cancelled", m_jobId, m_jobObj.job_title);
+                    retValue = String.Format("{0} BM JOB{1} Cancelled by", m_jobObj.facility_name, m_module_ref_id, m_jobObj.cancelled_by_name);
                     break;
                 case CMMS.CMMS_Status.JOB_UPDATED:     //Updated
-                    retValue = String.Format("JOB{0} <{1}> updated", m_jobId, m_jobObj.job_title);
+                    retValue = String.Format("{0} BM JOB{1} updated", m_jobObj.facility_name, m_module_ref_id);
                     break;
                 default:
-                    retValue = String.Format("Undefined status for JOB{0} <{1}> ", m_jobId, m_jobObj.job_title);
+                    retValue = String.Format("{0} BM JOB{1} undefined status", m_jobObj.facility_name, m_module_ref_id);
                     break;
             }
             return retValue;
@@ -68,29 +60,28 @@ namespace CMMSAPIs.Models.Notifications
         {
 
             string retValue = "ESCALATION : ";
-            m_jobId = m_jobObj.id;
+            m_module_ref_id = m_jobObj.id;
 
             switch (m_notificationID)
             {
                 case CMMS.CMMS_Status.JOB_CREATED:     //Created
-                    //description is sent at 1 index of arg for this notification, so developer fetch it and use to format the subject
-                    string desc = m_jobObj.job_description;
-                    retValue += String.Format("JOB{0} <{1}> created", m_jobId, desc);
+                    string desc = m_jobObj.job_title;
+                    retValue += String.Format("{0} BM JOB{1} Created", m_jobObj.facility_name, m_module_ref_id);
                     break;
                 case CMMS.CMMS_Status.JOB_ASSIGNED:     //Assigned
-                    retValue += String.Format("JOB{0} <{1}> assigned to <{2}>", m_jobId, m_jobObj.job_title, m_jobObj.assigned_name);
+                    retValue += String.Format("{0} BM JOB{1} Assigned", m_jobObj.facility_name, m_module_ref_id);
                     break;
                 case CMMS.CMMS_Status.JOB_LINKED:     //Linked
-                    retValue += String.Format("JOB{0} <{1}> linked to PTW{2}", m_jobId, m_jobObj.job_title, m_jobObj.current_ptw_id);
+                    retValue += String.Format("{0} BM JOB{1} linked to PTW{2}", m_jobObj.facility_name, m_module_ref_id, m_jobObj.current_ptw_id);
                     break;
                 case CMMS.CMMS_Status.JOB_CLOSED:     //Closed
-                    retValue += String.Format("JOB{0} <{1}> closed", m_jobId, m_jobObj.job_title);
+                    retValue += String.Format("{0} BM JOB{1} Closed", m_jobObj.facility_name, m_module_ref_id);
                     break;
                 case CMMS.CMMS_Status.JOB_CANCELLED:     //Cancelled
-                    retValue += String.Format("JOB{0} <{1}> Cancelled", m_jobId, m_jobObj.job_title);
+                    retValue += String.Format("{0} BM JOB{1} Cancelled", m_jobObj.facility_name, m_module_ref_id);
                     break;
                 default:
-                    retValue += String.Format("Job{0}  <{1}> Undefined status {2}", m_jobId, m_jobObj.job_title, m_notificationID);
+                    retValue += String.Format("{0} BM JOB{1} undefined status", m_jobObj.facility_name, m_module_ref_id);
                     break;
             }
             retValue += $" for {m_delayDays} days";
@@ -110,7 +101,7 @@ namespace CMMSAPIs.Models.Notifications
 
             retValue += String.Format("<table style='width: 50%; margin:0 auto; border-collapse: collapse ; border-spacing: 10px; ' border='1'>");
             retValue += String.Format(template, "Job ID", "JOB" + m_jobObj.id);
-            retValue += String.Format(template, "Job Status", m_jobObj.status_short);
+            retValue += String.Format(template, "Job Status", m_jobObj.status_long + " at " + m_jobObj.facility_name);
             retValue += String.Format(template, "Job Title", m_jobObj.job_title);
             retValue += String.Format(template, "Job Description", m_jobObj.job_description);
             retValue += String.Format(template, "Facility name", m_jobObj.facility_name);
@@ -167,6 +158,11 @@ namespace CMMSAPIs.Models.Notifications
             {
                 //retValue += String.Format(template, "Closed By", m_jobObj.assigned_name);
                 retValue += String.Format(template, "Closed At", m_jobObj.Job_closed_on);
+            }
+            if (m_jobObj.cancelled_by_id > 0)
+            {
+                retValue += String.Format(template, "Cancelled by", m_jobObj.cancelled_by_name);
+                retValue += String.Format(template, "Cancelled At", m_jobObj.cancelled_at);
             }
 
             if (m_jobObj.current_ptw_id > 0)

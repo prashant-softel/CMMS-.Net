@@ -634,7 +634,15 @@ namespace CMMSAPIs.Helper
             VEG_TASK_END_APPROVED,
             VEG_TASK_END_REJECTED,
             VEG_TASK_UPDATED,
-            VEG_TASK_ASSIGNED
+            VEG_TASK_ASSIGNED,
+
+            VEG_EXECUTION_STARTED,
+            VEG_EXECUTION_APPROVED,
+            VEG_EXECUTION_UPDATED,
+            VEG_EXECUTION_END_REJECTED,
+            VEG_EXECUTION_ABANDONED,
+            VEG_EXECUTION_COMPLETED,
+            
         }
 
         public enum ApprovalStatus

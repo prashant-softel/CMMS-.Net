@@ -23,6 +23,11 @@ namespace CMMSAPIs.Models.Jobs
         public string Company { get; set; }
         public int assigned_id { get; set; }
         public string assigned_name { get; set; }
+
+        public int cancelled_by_id { get; set; }
+        public string cancelled_by_name { get; set; }
+        public string cancelled_at { get; set; }
+
         public int job_type { get; set; }
         public string work_type { get; set; }
         public string standard_action { get; set; }

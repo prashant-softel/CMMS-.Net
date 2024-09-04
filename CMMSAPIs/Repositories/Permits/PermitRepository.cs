@@ -174,7 +174,7 @@ namespace CMMSAPIs.Repositories.Permits
             switch (status)
             {
                 case CMMS.CMMS_Status.PTW_CREATED:
-                    retValue += String.Format("PTW{0} <{1}> requested by  <{2}>", permitId, title, permitObj.issuedByName);
+                    retValue += String.Format("PTW{0} <{1}> requested by <{2}>", permitId, title, permitObj.issuedByName);
                     break;
                 case CMMS.CMMS_Status.PTW_ISSUED:
                     retValue = String.Format("PTW{0} <{1}> issued by <{2}>", permitId, title, permitObj.issuedByName);

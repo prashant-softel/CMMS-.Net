@@ -65,7 +65,7 @@ namespace CMMSAPIs.Models.MC
 
         public int resubmit { get; set; }
         public bool scheduleAdded = false;
-
+        public string facilityidbyName { get; set; }
         public int facility_id { get; set; }
 
         public List<CMMCSchedule> schedules { get; set; }
@@ -195,6 +195,8 @@ namespace CMMSAPIs.Models.MC
         public string updatedbyName { get; set; }
         public string title { get; set; }
         public string description { get; set; }
+        public string facilityidbyName { get; set; }
+        
         public List<CMMCExecutionEquipment> equipments { get; set; }
     }
 
@@ -265,6 +267,7 @@ namespace CMMSAPIs.Models.MC
         public string rescheduledBy { get; set; }
         public string endapprovedbyName { get; set; }
         public string endrejectedbyName { get; set; }
+        public string facilityidbyName { get; set; }
         
         // public string siteName { get; set; }
         //public List<CMMCEquipmentDetails> smbIds;
