@@ -517,13 +517,19 @@ namespace CMMSAPIs.Models.Notifications
             else if (moduleID == CMMS.CMMS_Modules.VEGETATION_PLAN)
             {
                 CMMCPlan _Plan = (CMMCPlan)args[0];
-                notificationObj = new VegetationNotification(moduleID, notificationID, _Plan, null);
+                notificationObj = new VegetationNotification(moduleID, notificationID, _Plan);
                 //facilityId = _Inventory.facility_id;
             }
             else if (moduleID == CMMS.CMMS_Modules.VEGETATION_TASK)
             {
                 CMMCExecution _Task = (CMMCExecution)args[0];
-                notificationObj = new VegetationNotification(moduleID, notificationID, null, _Task);
+                notificationObj = new VegetationNotification(moduleID, notificationID, _Task);
+                //facilityId = _Task.facility_id;
+            }
+            else if (moduleID == CMMS.CMMS_Modules.VEGETATION_EXECUTION)
+            {
+                CMMCExecution _Schedule = (CMMCExecution)args[0];
+                notificationObj = new VegetationNotification(moduleID, notificationID, _Schedule);
                 //facilityId = _Task.facility_id;
             }
             else if (moduleID == CMMS.CMMS_Modules.SM_MRS)     //MRS Report
