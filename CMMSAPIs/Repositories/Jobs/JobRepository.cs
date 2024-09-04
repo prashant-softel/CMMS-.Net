@@ -247,20 +247,20 @@ namespace CMMSAPIs.Repositories.Jobs
                     }
                     else
                     {
-                        retValue = String.Format("Job{0} Created by {1} and Assigned to {2}", jobId, jobObj.created_by_name, jobObj.assigned_name);
+                        retValue = String.Format("Job{0} created by {1} and assigned to {2}", jobId, jobObj.created_by_name, jobObj.assigned_name);
                     }
                     break;
                 case CMMS.CMMS_Status.JOB_ASSIGNED:     //Assigned
                     retValue = String.Format("Job{0} assigned to <{1}>", jobId, jobObj.assigned_name);
                     break;
                 case CMMS.CMMS_Status.JOB_LINKED:     //Linked
-                    retValue = String.Format("Job{0} linked to PTW{1}", jobId, jobObj.job_title, jobObj.current_ptw_id);
+                    retValue = String.Format("Job{0} linked to PTW{1}", jobId, jobObj.current_ptw_id);
                     break;
                 case CMMS.CMMS_Status.JOB_CLOSED:     //Closed
                     retValue = String.Format("Job{0} closed", jobId);
                     break;
                 case CMMS.CMMS_Status.JOB_CANCELLED:     //Cancelled
-                    retValue = String.Format("Job{0} <{1}> cancelled", jobId);
+                    retValue = String.Format("Job{0} cancelled by <{1}>", jobId, jobObj.cancelled_by_name);
                     break;
                 default:
                     break;
@@ -282,8 +282,8 @@ namespace CMMSAPIs.Repositories.Jobs
                                     "job.id as id, facilities.id as facility_id, facilities.name as facility_name, blocks.id as block_id, blocks.name as block_name, job.status as status, job.createdAt as created_at,created_user.id as created_by_id," +
                                     " CONCAT(created_user.firstName, ' ', created_user.lastName) as created_by_name,bus_user.name as Company, user.id as assigned_id, CONCAT(user.firstName, ' ', user.lastName) as assigned_name, job.title as job_title, " +
                                     "job.description as job_description, job.breakdownTime as breakdown_time, ptw.id as current_ptw_id, ptw.title as current_ptw_title, ptw.description as current_ptw_desc, jc.id as latestJCid, " +
-                                    " passt.name as Isolated_equipments, CONCAT(tbtDone.firstName, ' ', tbtDone.lastName) as TBT_conducted_by_name,ptw.TBT_Done_At as TBT_done_time,ptw.startDate Start_time, " +
-                                    "jc.JC_Status as latestJCStatus, jc.JC_Approved as latestJCApproval, jc.JC_Date_Stop as Job_closed_on ," +
+                                    " passt.name as Isolated_equipments, CONCAT(tbtDone.firstName, ' ', tbtDone.lastName) as TBT_conducted_by_name, ptw.TBT_Done_At as TBT_done_time,ptw.startDate Start_time, job.cancelledAt as cancelled_at, job.cancelledBy as cancelled_by_id, " +
+                                    " jc.JC_Status as latestJCStatus, jc.JC_Approved as latestJCApproval, jc.JC_Date_Stop as Job_closed_on, CONCAT(cancelledByUser.firstName, ' ', cancelledByUser.lastName) as cancelled_by_name, " +
                                     " jc.JC_Date_Stop as Breakdown_end_time,job.breakdownTime as Breakdown_start_time,ptw.status as status_PTW, CONCAT(isotak.firstName, ' ', isotak.lastName) as Isolation_taken  " +
                                       "FROM " +
                                             "jobs as job " +
@@ -302,6 +302,7 @@ namespace CMMSAPIs.Repositories.Jobs
                                             "LEFT join  assets as passt on ptw.physicalIsoEquips = passt.id " +
                                             "Left join users as isotak on ptw.physicalIsolation = isotak.id  " +
                                             "left join users as tbtDone on ptw.TBT_Done_By = tbtDone.id " +
+                                            "LEFT join users as cancelledByUser ON cancelledByUser.id = job.cancelledBy " +
                                       "LEFT JOIN " +
                                             "users as user ON user.id = job.assignedId " +
                                       "WHERE job.id = " + job_id;
