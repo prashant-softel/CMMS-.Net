@@ -26,28 +26,31 @@ namespace CMMSAPIs.Models.Notifications
             {
 
                 case CMMS.CMMS_Status.GO_SUBMITTED:
-                    retValue += String.Format("GO{0} Submitted By{1}", m_GOObj.Id, m_GOObj.submitted_by_name);
+                    retValue += String.Format("{0} GO{1} Submitted By {2}", m_GOObj.facilityName, m_GOObj.Id, m_GOObj.submitted_by_name);
                     break; 
                 case CMMS.CMMS_Status.GO_REJECTED:
-                    retValue += String.Format("GO{0} Rejected By {1}", m_GOObj.Id, m_GOObj.rejected_by_name);
+                    retValue += String.Format("{0} GO{1} Rejected By {2}", m_GOObj.facilityName, m_GOObj.Id, m_GOObj.rejected_by_name);
                     break;
                 case CMMS.CMMS_Status.GO_APPROVED:
-                    retValue += String.Format("GO{0} Approved By {1}", m_GOObj.Id, m_GOObj.approved_by_name);
+                    retValue += String.Format("{0} GO{1} Approved By {2}", m_GOObj.facilityName, m_GOObj.Id, m_GOObj.approved_by_name);
+                    break;
+                case CMMS.CMMS_Status.GO_DRAFT:
+                    retValue += String.Format("{0} GO{1} Updated By {2}", m_GOObj.facilityName, m_GOObj.Id, m_GOObj.go_updated_by_name);
                     break;
                 case CMMS.CMMS_Status.GO_RECEIVED_SUBMITTED:
-                    retValue += String.Format("GO{0} Receive Request Submitted By {1}", m_GOObj.Id, m_GOObj.receive_submitted_by_name);
+                    retValue += String.Format("{0} GO{1} Receive Request Submitted By {2}", m_GOObj.facilityName, m_GOObj.Id, m_GOObj.receive_submitted_by_name);
                     break;
                 case CMMS.CMMS_Status.GO_RECEIVED_REJECTED:
-                    retValue += String.Format("GO{0} Receive Request Rejected By {1}", m_GOObj.Id, m_GOObj.receive_rejected_by_name);
+                    retValue += String.Format("{0} GO{1} Receive Request Rejected By {2}", m_GOObj.facilityName, m_GOObj.Id, m_GOObj.receive_rejected_by_name);
                     break;
                 case CMMS.CMMS_Status.GO_RECEIVED_APPROVED:
-                    retValue += String.Format("GO{0} Receive Request Approved By {1}", m_GOObj.Id, m_GOObj.receive_approved_by_name);
+                    retValue += String.Format("{0} GO{1} Receive Request Approved By {2}", m_GOObj.facilityName, m_GOObj.Id, m_GOObj.receive_approved_by_name);
                     break;
                 case CMMS.CMMS_Status.GO_CLOSED:
-                    retValue += String.Format("GO{0} Closed By {1}", m_GOObj.Id, m_GOObj.closed_by_name);
+                    retValue += String.Format("{0} GO{1} Closed By {2}", m_GOObj.facilityName, m_GOObj.Id, m_GOObj.closed_by_name);
                     break;
                 case CMMS.CMMS_Status.GO_DELETED:
-                    retValue += String.Format("GO{0} Deleted By {1}", m_GOObj.Id, m_GOObj.deleted_by_name);
+                    retValue += String.Format("{0} GO{1} Deleted By {2}", m_GOObj.facilityName, m_GOObj.Id, m_GOObj.deleted_by_name);
                     break;
 
             }
@@ -63,28 +66,31 @@ namespace CMMSAPIs.Models.Notifications
             switch (m_notificationID)
             {
                 case CMMS.CMMS_Status.GO_SUBMITTED:
-                    retValue = String.Format("GO{0} Submitted By {1}", m_GOObj.Id, m_GOObj.submitted_by_name);
+                    retValue = String.Format("{0} GO{1} Submitted By {2}",m_GOObj.facilityName, m_GOObj.Id, m_GOObj.submitted_by_name);
                     break;
                 case CMMS.CMMS_Status.GO_REJECTED:
-                    retValue = String.Format("GO{0} Rejected By {1}", m_GOObj.Id, m_GOObj.rejected_by_name);
+                    retValue = String.Format("{0} GO{1} Rejected By {2}", m_GOObj.facilityName, m_GOObj.Id, m_GOObj.rejected_by_name);
                     break;
                 case CMMS.CMMS_Status.GO_APPROVED:
-                    retValue = String.Format("GO{0} Approved By {1}", m_GOObj.Id, m_GOObj.approved_by_name);
+                    retValue = String.Format("{0} GO{1} Approved By {2}", m_GOObj.facilityName, m_GOObj.Id, m_GOObj.approved_by_name);
+                    break;
+                case CMMS.CMMS_Status.GO_DRAFT:
+                    retValue = String.Format("{0} GO{1} Updated By {2}", m_GOObj.facilityName, m_GOObj.Id, m_GOObj.go_updated_by_name);
                     break;
                 case CMMS.CMMS_Status.GO_RECEIVED_SUBMITTED:
-                    retValue = String.Format("GO{0} Receive Request Submitted By {1}", m_GOObj.Id, m_GOObj.receive_submitted_by_name);
+                    retValue = String.Format("{0} GO{1} Receive Request Submitted By {2}", m_GOObj.facilityName, m_GOObj.Id, m_GOObj.receive_submitted_by_name);
                     break;
                 case CMMS.CMMS_Status.GO_RECEIVED_REJECTED:
-                    retValue = String.Format("GO{0} Receive Request Rejected By {1}", m_GOObj.Id, m_GOObj.receive_rejected_by_name);
+                    retValue = String.Format("{0} GO{1} Receive Request Rejected By {2}", m_GOObj.facilityName, m_GOObj.Id, m_GOObj.receive_rejected_by_name);
                     break;
                 case CMMS.CMMS_Status.GO_RECEIVED_APPROVED:
-                    retValue = String.Format("GO{0} Receive Request Approved By {1}", m_GOObj.Id, m_GOObj.receive_approved_by_name);
+                    retValue = String.Format("{0} GO{1} Receive Request Approved By {2}", m_GOObj.facilityName, m_GOObj.Id, m_GOObj.receive_approved_by_name);
                     break;
                 case CMMS.CMMS_Status.GO_CLOSED:
-                    retValue = String.Format("GO{0} Closed By {1}", m_GOObj.Id, m_GOObj.closed_by_name);
+                    retValue = String.Format("{0} GO{1} Closed By {2}", m_GOObj.facilityName, m_GOObj.Id, m_GOObj.closed_by_name);
                     break;
                 case CMMS.CMMS_Status.GO_DELETED:
-                    retValue = String.Format("GO{0} Deleted By {1}", m_GOObj.Id, m_GOObj.deleted_by_name);
+                    retValue = String.Format("{0} GO{1} Deleted By {2}", m_GOObj.facilityName, m_GOObj.Id, m_GOObj.deleted_by_name);
                     break;
             }
             return retValue;
@@ -102,8 +108,9 @@ namespace CMMSAPIs.Models.Notifications
             bool check2 = !string.IsNullOrEmpty(m_GOObj.receive_rejected_by_name);
             bool check3 = !string.IsNullOrEmpty(m_GOObj.receive_approved_by_name);
             bool check4 = !string.IsNullOrEmpty(m_GOObj.closed_by_name);
+            bool check5 = string.IsNullOrEmpty(m_GOObj.go_updated_by_name);
 
-            if (check1 || check2 || check3 || check4)
+            if ((check1 || check2 || check3 || check4) && check5)
             {
                 
                 retValue += "<div style='display: flex; justify-content: space-between; width: 100%; max-width: 1200px;'>";
@@ -192,10 +199,10 @@ namespace CMMSAPIs.Models.Notifications
                 retValue += String.Format(template, "Closed By", m_GOObj.closed_by_name);
                 retValue += String.Format(template, "Closed At", m_GOObj.closed_at);
             }
-            if (!string.IsNullOrEmpty(m_GOObj.deleted_by_name))
+            if (!string.IsNullOrEmpty(m_GOObj.go_updated_by_name))
             {
-                retValue += String.Format(template, "Deleted By", m_GOObj.deleted_by_name);
-                retValue += String.Format(template, "Deleted At", m_GOObj.deleted_at);
+                retValue += String.Format(template, "Updated By", m_GOObj.go_updated_by_name);
+                retValue += String.Format(template, "Updated At", m_GOObj.go_updatedOn);
             }
             retValue += "</table>";
             retValue += "</div>";
@@ -281,7 +288,7 @@ namespace CMMSAPIs.Models.Notifications
             switch (m_notificationID)
             {
                 case CMMS.CMMS_Status.GO_DRAFT:
-                    retValue += "</table>";
+                    retValue += String.Format(templateEnd, "Updated By", m_GOObj.go_updated_by_name);
                     break;
                 case CMMS.CMMS_Status.GO_SUBMITTED:
                     retValue += String.Format(templateEnd, "Submitted By", m_GOObj.submitted_by_name);

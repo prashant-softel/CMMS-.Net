@@ -102,6 +102,11 @@ namespace CMMSAPIs.Models
         public string submitted_by_name { get; set; }
         public string approved_by { get; set; }
         public string approved_by_name { get; set; }
+        public string go_updated_by_name { get; set; }
+        public DateTime? go_updatedOn { get; set; }
+        public int go_updated_by { get; set; }
+
+
 
         public List<CMGO_ITEMS> go_items { get; set; }
     }
@@ -298,6 +303,8 @@ namespace CMMSAPIs.Models
         public string receive_approved_by_name { get; set; }
         public DateTime? receive_approved_at { get; set; }
         public string approved_by { get; set; }
+        public string go_updated_by_name { get; set; }
+        public DateTime? go_updatedOn { get; set; }
         public List<CMGODetails> GODetails { get; set; }
     }
 

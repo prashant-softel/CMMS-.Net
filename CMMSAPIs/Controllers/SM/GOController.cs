@@ -124,8 +124,10 @@ namespace CMMSAPIs.Controllers
         {
             try
             {
+                int facility_id = request.facility_id;
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _GOBS.UpdateGO(request, userID);
+                var data = await _GOBS.UpdateGO(request, userID, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
