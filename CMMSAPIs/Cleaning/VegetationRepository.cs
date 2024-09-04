@@ -120,7 +120,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                     retValue = String.Format("VE{0} Rejected by {1} at {2} ", executionObj.id, executionObj.rejectedBy, executionObj.facilityidbyName);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_APPROVED:
-                    retValue = String.Format("VE{0} Started by {1} at {2} ", executionObj.id, executionObj.startedBy, executionObj.facilityidbyName);
+                    retValue = String.Format("VE{0} Approved by {1} at {2} ", executionObj.id, executionObj.approvedBy, executionObj.facilityidbyName);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_END_APPROVED:
                     retValue = String.Format("VE{0} End Approved by {1} at {2} ", executionObj.id, executionObj.endapprovedbyName, executionObj.facilityidbyName);
@@ -134,14 +134,6 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 case CMMS.CMMS_Status.VEG_TASK_END_REJECTED:
                     retValue = String.Format("VE{0} End Rejected by {1} at {2} ", executionObj.id, executionObj.endrejectedbyName, executionObj.facilityidbyName);
                     break;
-
-                    
-
-
-
-
-
-
                 default:
                     break;
             }
@@ -178,21 +170,6 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 case CMMS.CMMS_Status.VEG_EXECUTION_COMPLETED:
                     retValue = String.Format("VE{0} Closed by {1} at {2} ", scheduleObj.id, scheduleObj.endedbyName, scheduleObj.facilityidbyName);
                     break;
-
-
-
-                    
-
-
-
-
-
-
-
-
-
-
-
                 default:
                     retValue = String.Format("Status Not avaialble for ", notificationID);
                     break;
