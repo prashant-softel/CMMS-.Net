@@ -34,15 +34,17 @@ namespace CMMSAPIs.Models.Notifications
         override protected string getEMSubject(params object[] args)
         {
 
-            string retValue = "ESCALATION : ";
+            string retValue = "ESCALATION : "; 
+                
+              
 
-            switch (m_notificationID)
+                switch (m_notificationID)
             {
                 case CMMS.CMMS_Status.MC_PLAN_DRAFT:
                     retValue += String.Format("MCP<{0}> Drafted by {1} ", planObj.planId, planObj.createdBy);
                     break;
                 case CMMS.CMMS_Status.MC_PLAN_SUBMITTED:
-                    retValue += String.Format("MCP<{0}> Submitted by {1} ", planObj.planId, planObj.createdBy);
+                    retValue = String.Format("{0} Module-Cleaning{1}-Created by {2}", planObj.facilityidbyName, planObj.planId, planObj.createdBy);
                     break;
                 case CMMS.CMMS_Status.MC_PLAN_REJECTED:
                     retValue += String.Format("MCP<{0}> Rejected by {1} ", planObj.planId, planObj.rejectedBy);
@@ -137,7 +139,7 @@ namespace CMMSAPIs.Models.Notifications
                     retValue += String.Format("MCP<{0}> Draft by {1} ", planObj.planId, planObj.createdBy);
                     break;
                 case CMMS.CMMS_Status.MC_PLAN_SUBMITTED:
-                    retValue += String.Format("MCP<{0}> Submitted by {1} ", planObj.planId, planObj.createdBy);
+                    retValue = String.Format("{0} Module-Cleaning{1}-Created by {2}", planObj.facilityidbyName, planObj.planId, planObj.createdBy);
                     break;
                 case CMMS.CMMS_Status.MC_PLAN_REJECTED:
                     retValue += String.Format("MCP<{0}> Rejected by {1} ", planObj.planId, planObj.rejectedBy);
