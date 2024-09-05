@@ -382,6 +382,7 @@ namespace CMMSAPIs.Helper
             PTW_EXPIRED,
             PTW_UPDATED,
             PTW_UPDATED_WITH_TBT,
+            PTW_RESUBMIT,
 
             //JC_CREATED = 151,
             //JC_STARTED,
@@ -423,7 +424,7 @@ namespace CMMSAPIs.Helper
             MC_EXECUTION_ABANDONED,
             MC_EXECUTION_ENDED,
             MC_EXECUTION_ABANDONED_REJECTED,
-            
+
 
             PM_SUBMIT,//for temp only
             PM_LINK_PTW,
@@ -560,7 +561,7 @@ namespace CMMSAPIs.Helper
             MC_ASSIGNED,
             RESCHEDULED_TASK,
 
-            
+
 
             PM_PLAN_CREATED = 401,
             PM_PLAN_DRAFT,
@@ -642,7 +643,7 @@ namespace CMMSAPIs.Helper
             VEG_EXECUTION_END_REJECTED,
             VEG_EXECUTION_ABANDONED,
             VEG_EXECUTION_COMPLETED,
-            
+
         }
 
         public enum ApprovalStatus

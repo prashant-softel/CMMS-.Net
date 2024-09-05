@@ -2173,11 +2173,11 @@ namespace CMMSAPIs.Repositories.Masters
             }
             if (request.facility_id != 0)
             {
-                updateQry += $"month_id = {request.facility_id}, ";
+                updateQry += $"facility_id = {request.facility_id}, ";
             }
             if (request.year != 0)
             {
-                updateQry += $"month_id = {request.year}, ";
+                updateQry += $"year = {request.year}, ";
             }
             if (request.NoOfHealthExamsOfNewJoiner >= 0)
             {
@@ -2214,10 +2214,11 @@ namespace CMMSAPIs.Repositories.Masters
 
             string myQuery = "SELECT mis_o.id, mis_o.facility_id, mis_o.year, mis_o.month_id, mis_o.NoOfHealthExamsOfNewJoiner, " +
                             "mis_o.PeriodicTests, mis_o.OccupationaIllnesses AS OccupationalIllnesses, mis_o.Status, " +
-                            "mis_o.CreatedBy, CONCAT(u.firstName, u.lastName) AS Submitted_by, mis_o.CreatedAt, " +
+                            "mis_o.CreatedBy, CONCAT(u.firstName, u.lastName) AS submited_by, mis_o.CreatedAt, " +
                             "mis_o.UpdatedBy, CONCAT(u.firstName, u.lastName) AS Updated_by_name, mis_o.UpdatedAt " +
                             "FROM MIS_OccupationalHealthData AS mis_o " +
                             "LEFT JOIN users AS u ON u.id = mis_o.CreatedBy " +
+                            "LEFT JOIN facilities AS f ON f.id = mis_o.facility_id " +
                             "WHERE mis_o.Status = 1;";
 
             List<OccupationalHealthData> data = await Context.GetData<OccupationalHealthData>(myQuery).ConfigureAwait(false);
@@ -2259,9 +2260,9 @@ namespace CMMSAPIs.Repositories.Masters
             if (request.GovtAuthVisits > 0)
                 updateQry += $"GovtAuthVisits = {request.GovtAuthVisits}, ";
             if (request.facility_id != 0)
-                updateQry += $"month_id = {request.facility_id}, ";
+                updateQry += $"facility_id = {request.facility_id}, ";
             if (request.year != 0)
-                updateQry += $"month_id = {request.year}, ";
+                updateQry += $"year = {request.year}, ";
             if (request.NoOfFineByThirdParty > 0)
                 updateQry += $"NoOfFineByThirdParty = {request.NoOfFineByThirdParty}, ";
             if (request.NoOfShowCauseNoticesByThirdParty > 0)
@@ -2292,7 +2293,7 @@ namespace CMMSAPIs.Repositories.Masters
             string myQuery = "SELECT mis_v.id, mis_v.month_id, mis_v.facility_id, mis_v.year, " +
                  "mis_v.GovtAuthVisits, mis_v.NoOfFineByThirdParty, mis_v.NoOfShowCauseNoticesByThirdParty, " +
                  "mis_v.NoticesToContractor, mis_v.AmountOfPenaltiesToContractors, mis_v.AnyOther, mis_v.Status, " +
-                 "mis_v.CreatedBy, CONCAT(u.firstName, u.lastName) AS Submitted_by, mis_v.CreatedAt, " +
+                 "mis_v.CreatedBy, CONCAT(u.firstName, u.lastName) AS submited_by, mis_v.CreatedAt, " +
                  "mis_v.UpdatedBy, CONCAT(u.firstName, u.lastName) AS Updated_by_name, mis_v.UpdatedAt " +
                  "FROM mis_visitsandnotices AS mis_v " +
                  "LEFT JOIN users AS u ON u.id = mis_v.CreatedBy " +
@@ -2334,8 +2335,8 @@ namespace CMMSAPIs.Repositories.Masters
             string updateQry = "UPDATE mis_fueldata SET ";
             updateQry += $"month_id = {request.month_id}, ";
             updateQry += $"DieselConsumedForVehicles = {request.DieselConsumedForVehicles}, ";
-            updateQry += $"month_id = {request.facility_id}, ";
-            updateQry += $"month_id = {request.year}, ";
+            updateQry += $"facility_id = {request.facility_id}, ";
+            updateQry += $"year = {request.year}, ";
             updateQry += $"PetrolConsumedForVehicles = {request.PetrolConsumedForVehicles}, ";
             updateQry += $"PetrolConsumedForGrassCuttingAndMovers = {request.PetrolConsumedForGrassCuttingAndMovers}, ";
             updateQry += $"DieselConsumedAtSite = {request.DieselConsumedAtSite}, ";
@@ -2361,7 +2362,7 @@ namespace CMMSAPIs.Repositories.Masters
             string myQuery = "SELECT mis_f.id, mis_f.month_id, mis_f.facility_id, mis_f.year, " +
                              "mis_f.DieselConsumedForVehicles, mis_f.PetrolConsumedForVehicles, " +
                              "mis_f.PetrolConsumedForGrassCuttingAndMovers, mis_f.DieselConsumedAtSite, " +
-                             "mis_f.PetrolConsumedAtSite, mis_f.CreatedBy, CONCAT(u.firstName, u.lastName) AS Submitted_by, " +
+                             "mis_f.PetrolConsumedAtSite, mis_f.CreatedBy, CONCAT(u.firstName, u.lastName) AS submited_by, " +
                              "mis_f.CreatedAt, mis_f.UpdatedBy, CONCAT(u.firstName, u.lastName) AS Updated_by_name, mis_f.UpdatedAt " +
                              "FROM mis_fueldata AS mis_f " +
                              "LEFT JOIN users AS u ON u.id = mis_f.CreatedBy " +
@@ -2405,8 +2406,8 @@ namespace CMMSAPIs.Repositories.Masters
 
             string updateQry = "UPDATE mis_plantationdata SET ";
             updateQry += $"month_id = {request.month_id}, ";
-            updateQry += $"month_id = {request.facility_id}, ";
-            updateQry += $"month_id = {request.year}, ";
+            updateQry += $"facility_id = {request.facility_id}, ";
+            updateQry += $"year = {request.year}, ";
             updateQry += $"SaplingsPlanted = {request.SaplingsPlanted}, ";
             updateQry += $"SaplingsSurvived = {request.SaplingsSurvived}, ";
             updateQry += $"SaplingsDied = {request.SaplingsDied}, ";
@@ -2430,8 +2431,9 @@ namespace CMMSAPIs.Repositories.Masters
         public async Task<List<PlantationData>> GetPlantationData()
         {
             string myQuery = "SELECT mis_p.id, mis_p.month_id, mis_p.facility_id, mis_p.year, mis_p.SaplingsPlanted, mis_p.SaplingsSurvived, " +
-                             "mis_p.SaplingsDied, mis_p.CreatedBy, CONCAT(u.firstName, u.lastName) AS Submitted_by, mis_p.CreatedAt, " +
-                             "mis_p.UpdatedBy, CONCAT(u.firstName, u.lastName) AS Updated_by_name mis_p.UpdatedAt FROM mis_plantationdata AS mis_p " +
+                             "mis_p.SaplingsDied, mis_p.CreatedBy, CONCAT(u.firstName, u.lastName) AS submited_by, mis_p.CreatedAt, " +
+                             "mis_p.UpdatedBy, CONCAT(u.firstName, u.lastName) AS Updated_by_name, mis_p.UpdatedAt " +
+                             "FROM mis_plantationdata AS mis_p " +
                              "LEFT JOIN users AS u ON u.id = mis_p.CreatedBy WHERE mis_p.Status = 1;";
 
             List<PlantationData> data = await Context.GetData<PlantationData>(myQuery).ConfigureAwait(false);
@@ -2469,8 +2471,8 @@ namespace CMMSAPIs.Repositories.Masters
 
             string updateQry = "UPDATE mis_kaizensdata SET ";
             updateQry += $"month_id = {request.month_id}, ";
-            updateQry += $"month_id = {request.facility_id}, ";
-            updateQry += $"month_id = {request.year}, ";
+            updateQry += $"facility_id = {request.facility_id}, ";
+            updateQry += $"year = {request.year}, ";
             updateQry += $"KaizensImplemented = {request.KaizensImplemented}, ";
             updateQry += $"CostForImplementation = {request.CostForImplementation}, ";
             updateQry += $"CostSavedFromImplementation = {request.CostSavedFromImplementation}, ";
@@ -2508,9 +2510,12 @@ namespace CMMSAPIs.Repositories.Masters
         public async Task<List<KaizensData>> GetKaizensData()
         {
             string myQuery = "SELECT mis_k.id, mis_k.month_id, mis_k.facility_id, mis_k.year, mis_k.KaizensImplemented, mis_k.CostForImplementation," +
-                             "mis_k.CostSavedFromImplementation, mis_k.CreatedBy, CONCAT(u.firstName, u.lastName) AS Submitted_by, " +
+                             "mis_k.CostSavedFromImplementation, mis_k.CreatedBy, CONCAT(u.firstName, u.lastName) AS submited_by, " +
                              "mis_k.CreatedAt, mis_k.UpdatedBy, CONCAT(u.firstName, u.lastName) AS Updated_by_name, mis_k.UpdatedAt " +
-                             "FROM mis_kaizensdata AS mis_k \r\nLEFT JOIN users AS u ON u.id = mis_k.CreatedBy  WHERE mis_k.Status = 1;";
+                             "FROM mis_kaizensdata AS mis_k " +
+                             "LEFT JOIN users AS u ON u.id = mis_k.CreatedBy " +
+                             "LEFT JOIN facilities as f on f.id=mis_k.facility_id " +
+                             " WHERE mis_k.Status = 1;";
             List<KaizensData> data = await Context.GetData<KaizensData>(myQuery).ConfigureAwait(false);
             Parallel.ForEach(data, item =>
             {

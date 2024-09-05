@@ -1,3 +1,5 @@
+using System;
+
 namespace CMMSAPIs.Models.Permits
 {
     public class CMPermitList
@@ -22,12 +24,14 @@ namespace CMMSAPIs.Models.Permits
         public dynamic issued_datetime { get; set; }
         public int approved_by_id { get; set; }
         public string approved_by_name { get; set; }
+        public DateTime? startDate { get; set; }
         public dynamic endDate { get; set; }
         public dynamic approved_datetime { get; set; }
         public string current_status_short { get; set; }
         public string current_status_long { get; set; }
         public int TBT_Done_By_id { get; set; }
         public int TBT_Done_Check { get; set; }
+        public dynamic tbt_start { get; set; }
     }
     public class CMSafetyMeasurementQuestionList
     {

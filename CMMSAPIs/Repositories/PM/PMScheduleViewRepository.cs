@@ -2,7 +2,6 @@ using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Jobs;
 using CMMSAPIs.Models.Masters;
 using CMMSAPIs.Models.Notifications;
-using CMMSAPIs.Models.Permits;
 using CMMSAPIs.Models.PM;
 using CMMSAPIs.Models.Users;
 using CMMSAPIs.Models.Utils;
@@ -37,7 +36,7 @@ namespace CMMSAPIs.Repositories.PM
             { CMMS.CMMS_Status.PM_SUBMIT, "PM Submitted" },
             { CMMS.CMMS_Status.PM_LINK_PTW, "PM Linked to PTW" },
             { CMMS.CMMS_Status.PM_START, "PM Started" },
-            { CMMS.CMMS_Status.PM_CLOSED, "PM Closed" },  
+            { CMMS.CMMS_Status.PM_CLOSED, "PM Closed" },
             { CMMS.CMMS_Status.PM_CLOSE_REJECTED, "PM Rejected" },
             { CMMS.CMMS_Status.PM_CLOSE_APPROVED, "PM Approved" },
             { CMMS.CMMS_Status.PM_CANCELLED, "PM Cancelled" },
@@ -113,7 +112,7 @@ namespace CMMSAPIs.Repositories.PM
                     retValue += String.Format("PMS{0} Approved By {1} </p>", Obj.schedule_id, Obj.approvedbyName);
                     break;
                 case CMMS.CMMS_Status.PM_CANCELLED_REJECTED:
-                    retValue += String.Format("PMS{0} Cancelled Rejected By {1} </p>", Obj.schedule_id,Obj.cancelledrejectedbyName);
+                    retValue += String.Format("PMS{0} Cancelled Rejected By {1} </p>", Obj.schedule_id, Obj.cancelledrejectedbyName);
                     break;
                 case CMMS.CMMS_Status.PM_CANCELLED_APPROVED:
                     retValue += String.Format("PMS{0} Cancelled Approved By {1} </p>", Obj.schedule_id, Obj.cancelledapprovedbyName);
@@ -122,7 +121,7 @@ namespace CMMSAPIs.Repositories.PM
                     retValue += String.Format("PMS{0} Deleted </p>", Obj.schedule_id);
                     break;
                 case CMMS.CMMS_Status.PM_UPDATED:
-                    retValue += String.Format("PMS{0} Updated By {1} </p>", Obj.schedule_id,Obj.PM_Schedule_updated_by);
+                    retValue += String.Format("PMS{0} Updated By {1} </p>", Obj.schedule_id, Obj.PM_Schedule_updated_by);
                     break;
                 default:
                     break;
@@ -381,7 +380,7 @@ namespace CMMSAPIs.Repositories.PM
                                $"left join users as cancelledBy on pm_task.cancelled_by = cancelledBy.id " +
                                $"left join users as cancelledrejectedBy on pm_task.cancel_rejected_by = cancelledrejectedBy.id " +
                                $"left join users as cancelledapprovedBy on cancelledapprovedBy.id = pm_task.cancel_approved_by " +
-                               $"left join users as createdBy on createdBy.id = pm_task.createdById " + 
+                               $"left join users as createdBy on createdBy.id = pm_task.createdById " +
                                $"left join users as startedBy on pm_task.started_by = startedBy.id " +
                                $"left join users as deletedBy on pm_task.deletedById = deletedBy.id " +
                                $"left join permits as permit on pm_task.PTW_id = permit.id " +
@@ -399,7 +398,7 @@ namespace CMMSAPIs.Repositories.PM
                                $"LEFT JOIN users AS closedBy ON pm_task.closed_by = closedBy.id " +
                                $"LEFT JOIN users AS updatedBy ON pm_task.updated_by = updatedBy.id " +
                                $" where pm_task.id = {task_id} ";
-            
+
 
             List<CMPMTaskView> taskViewDetail = await Context.GetData<CMPMTaskView>(myQuery).ConfigureAwait(false);
             string Materialconsumption = "SELECT sam.ID as Material_ID,sam.asset_name as  Material_name,smi.asset_item_ID as Equipment_ID, " +
@@ -1226,7 +1225,7 @@ namespace CMMSAPIs.Repositories.PM
             {
                 Console.WriteLine($"Failed to send Task Notification: {ex.Message}");
             }
-            
+
             return response;
         }
 
@@ -1274,7 +1273,7 @@ namespace CMMSAPIs.Repositories.PM
             {
                 Console.WriteLine($"Failed to send Task Notification: {ex.Message}");
             }
-            
+
 
             return response;
         }

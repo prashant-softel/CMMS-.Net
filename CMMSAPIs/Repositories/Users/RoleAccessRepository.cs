@@ -198,6 +198,48 @@ namespace CMMSAPIs.Repositories.Users
                         await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.ROLE_DEFAULT_ACCESS_MODULE, request.role_id, 0, 0, JsonSerializer.Serialize(old_access.access_list), CMMS.CMMS_Status.UPDATED, userID);
                         // Add previous setting to log table                       
                     }
+                    else
+                    {
+                        List<string> role_access = new List<string>();
+
+                        foreach (var access in request.access_list)
+                        {
+
+                            string updateCommand = $"UPDATE RoleAccess SET " +
+                                                   $"`add` = {access.add}, " +
+                                                   $"`edit` = {access.edit}, " +
+                                                   $"`view` = {access.view}, " +
+                                                   $"`delete` = {access.delete}, " +
+                                                   $"`issue` = {access.issue}, " +
+                                                   $"`approve` = {access.approve}, " +
+                                                   $"`selfView` = {access.selfView}, " +
+                                                   $"lastModifiedAt = '{UtilsRepository.GetUTCTime()}', " +
+                                                   $"lastModifiedBy = {UtilsRepository.GetUserID()} " +
+                                                   $"WHERE roleId = {request.role_id} AND featureId = {access.feature_id};";
+
+                            role_access.Add(updateCommand);
+                        }
+
+
+                        string role_access_update_str = string.Join(' ', role_access);
+
+                        try
+                        {
+
+                            await Context.GetData<List<int>>(role_access_update_str).ConfigureAwait(false);
+                        }
+                        catch (Exception ex)
+                        {
+
+                            Console.WriteLine($"An error occurred while updating RoleAccess: {ex.Message}");
+
+                        }
+
+
+                        await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.ROLE_DEFAULT_ACCESS_MODULE, request.role_id, 0, 0, JsonSerializer.Serialize(old_access.access_list), CMMS.CMMS_Status.UPDATED, userID);
+
+
+                    }
                 }
 
                 if (request.set_existing_users)
