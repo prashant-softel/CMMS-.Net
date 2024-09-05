@@ -135,7 +135,7 @@ namespace CMMSAPIs.Repositories.PM
             
                  try
             {
-                CMPMPlanDetail _ViewPMPlan = await GetPMPlanDetail(pm_plan.plan_id, facilityTimeZone);
+                CMPMPlanDetail _ViewPMPlan = await GetPMPlanDetail(id, facilityTimeZone);
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PM_PLAN, CMMS.CMMS_Status.PM_PLAN_CREATED, new[] { userID }, _ViewPMPlan);
             }
 
