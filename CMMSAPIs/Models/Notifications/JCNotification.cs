@@ -105,13 +105,13 @@ namespace CMMSAPIs.Models.Notifications
         {
             string retValue = "";
 
-            retValue = String.Format("<h3><b style='color:#31576D'>Status:</b>{0}</h3><br>", m_JCObj.status_long);
+            retValue = String.Format("<h3><b style='color:#31576D'>Status:</b>{0}</h3><br>", m_JCObj.status_long + " at " + m_JCObj.plant_name);
 
             retValue += String.Format("<table style='width: 50%; margin:0 auto; border-collapse: collapse ; border-spacing: 10px; ' border='1'>");
-            retValue += String.Format(template, "ID", m_JCObj.id);
-            retValue += String.Format(template, "Status", m_JCObj.status_short + " at " + m_JCObj.plant_name);
-            retValue += String.Format(template, "Job ID", m_JCObj.jobid);
-            retValue += String.Format(template, "PTW ID", m_JCObj.ptwId);
+            retValue += String.Format(template, "JC ID", "JC" + m_JCObj.id);
+            retValue += String.Format(template, "Status", m_JCObj.status_short);
+            retValue += String.Format(template, "Job ID", "JOB" + m_JCObj.jobid);
+            retValue += String.Format(template, "PTW ID", "PTW" + m_JCObj.ptwId);
             retValue += String.Format(template, "Job Card Description", m_JCObj.description);
             retValue += String.Format(template, "Created By", m_JCObj.created_by);
             retValue += String.Format(template, "Created At", m_JCObj.created_at);
@@ -155,6 +155,66 @@ namespace CMMSAPIs.Models.Notifications
                 default:
                     break;
             }
+        
+            if (m_JCObj.asset_category_name != null && m_JCObj.asset_category_name.Count > 0)
+            {
+                int i = 0;
+                string categoryNames = "";
+                foreach (var item in m_JCObj.asset_category_name)
+                {
+                    i++;
+                    categoryNames += item.Equipment_name + "(" + item.Equipment_category + ")";
+                    if (m_JCObj.asset_category_name.Count > 1 && i<m_JCObj.asset_category_name.Count)
+                    {
+                        categoryNames += ", ";
+                    }
+}
+
+                if (i > 0)
+                {
+                    retValue += String.Format(template, "Equipments", categoryNames);
+                }
+            }
+            if (m_JCObj.LstCMJCLotoDetailList != null && m_JCObj.LstCMJCLotoDetailList.Count > 0)
+            {
+                int i = 0;
+                string categoryNames = "";
+                foreach (var item in m_JCObj.LstCMJCLotoDetailList)
+                {
+                    i++;
+                    categoryNames += item.isolated_assest_loto;
+                    if (m_JCObj.LstCMJCLotoDetailList.Count > 1 && i < m_JCObj.LstCMJCLotoDetailList.Count)
+                    {
+                        categoryNames += ", ";
+                    }
+                }
+
+                if (i > 0)
+                {
+                    retValue += String.Format(template, "Loto Details", categoryNames);
+                }
+            }
+
+            if (m_JCObj.Material_consumption != null && m_JCObj.Material_consumption.Count > 0)
+            {
+                int i = 0;
+                string categoryNames = "";
+                foreach (var item in m_JCObj.Material_consumption)
+                {
+                    i++;
+                    categoryNames += item.Material_name + "(" + item.Material_type + ")";
+                    if (m_JCObj.Material_consumption.Count > 1 && i<m_JCObj.Material_consumption.Count)
+                    {
+                        categoryNames += ", ";
+                    }
+                }
+
+                if (i > 0)
+                {
+                    retValue += String.Format(template, "Material consumption", categoryNames);
+                }
+            }
+
             retValue += "</table>";
             return retValue;
         }

@@ -240,22 +240,27 @@ namespace CMMSAPIs.Repositories.JC
             string myQuery = $"UPDATE jobcards SET JC_Status = {(int)CMMS.CMMS_Status.JC_STARTED}, status_updated_at = '{UtilsRepository.GetUTCTime()}', JC_Date_Start = '{UtilsRepository.GetUTCTime()}', JC_Start_By_id = {userID} WHERE id = {jc_id};";
             await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
 
-            //EMP LIST
-            string fq = $"SELECT Facility_id as fid from jobcards where id={jc_id}";
-            DataTable dt = await Context.FetchData(fq).ConfigureAwait(false);
-            int fid = Convert.ToInt32(dt.Rows[0][0]);
-
-
             //string myQuery1 = $"SELECT  jc.id as id , jc.PTW_id as ptwId, job.id as jobid, facilities.name as plant_name, asset_cat.name as asset_category_name, CONCAT(user.firstName + ' ' + user.lastName) as JC_Closed_by_Name, CONCAT(user1.firstName + ' ' + user1.lastName) as JC_Rejected_By_Name, jc.JC_Approved_By_Name as  JC_Approved_By_Name FROM jobs as job JOIN  jobmappingassets as mapAssets ON mapAssets.jobId = job.id join assetcategories as asset_cat ON mapAssets.categoryId = asset_cat.id JOIN facilities as facilities ON job.blockId = facilities.id LEFT JOIN jobcards as jc on jc.jobId = job.id LEFT JOIN users as user ON user.id = jc.JC_Update_by LEFT JOIN  users as user1 ON user1.id = jc.JC_Rejected_By_id where jc.id = {jc_id}";
 
             //upload Images
             if (request.uploadfile_ids != null)
             {
-                foreach (int data in request.uploadfile_ids)
+                string fq = $"SELECT Facility_id from jobcards where id={jc_id}";
+                DataTable dt = await Context.FetchData(fq).ConfigureAwait(false);
+                int fid = 0;
+                if (dt.Rows.Count > 0)
                 {
+                    fid = Convert.ToInt32(dt.Rows[0][0]);
+                    foreach (int data in request.uploadfile_ids)
+                    {
 
-                    string qryuploadFiles = $"UPDATE uploadedfiles SET facility_id = {fid}, module_type={(int)CMMS.CMMS_Modules.JOB},module_ref_id={jc_id} where id = {data}";
-                    await Context.ExecuteNonQry<int>(qryuploadFiles).ConfigureAwait(false);
+                        string qryuploadFiles = $"UPDATE uploadedfiles SET facility_id = {fid}, module_type={(int)CMMS.CMMS_Modules.JOB},module_ref_id={jc_id} where id = {data}";
+                        await Context.ExecuteNonQry<int>(qryuploadFiles).ConfigureAwait(false);
+                    }
+                }
+                else
+                {
+                    int i = 0;
                 }
             }
 
