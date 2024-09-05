@@ -162,7 +162,7 @@ namespace CMMSAPIs.Repositories.Calibration
                              "LEFT JOIN users as request_by ON a_calibration.requested_by= request_by.id " +
                              "LEFT JOIN users as request_approved_by on a_calibration.request_approved_by = request_approved_by.id " +
                              "LEFT JOIN users as request_rejected_by on a_calibration.request_rejected_by = request_rejected_by.id " +
-                             "LEFT JOIN users as started_by on a_calibration.started_by = completed_by.id " +
+                             "LEFT JOIN users as started_by on a_calibration.started_by = started_by.id " +
                              "LEFT JOIN users as completed_by on a_calibration.completed_by = completed_by.id " +
                              "LEFT JOIN users as approved_by on a_calibration.approved_by = approved_by.id " +
                              "LEFT JOIN users as rejected_by on a_calibration.rejected_by = rejected_by.id " +
@@ -246,9 +246,29 @@ namespace CMMSAPIs.Repositories.Calibration
              * Your Code goes here */
             int status;
             if (request.asset_id <= 0)
-                throw new ArgumentException("Invalid Asset ID");
+                throw new ArgumentException("Invalid Asset ID" + request.asset_id);
+
+            int calibrationId = 0;
+            string getIdQuery = $"SELECT id FROM calibration WHERE asset_id = {request.asset_id} and status = {(int)CMMS.CMMS_Status.CALIBRATION_SCHEDULED};";
+            DataTable dt1 = await Context.FetchData(getIdQuery).ConfigureAwait(false);
+
+            if (dt1.Rows.Count > 0)
+            {
+                calibrationId = Convert.ToInt32(dt1.Rows[0][0]);
+                if(calibrationId != request.id)
+                {
+                    throw new ArgumentException("Calibration record in scheduled state has id " + calibrationId + " and requested id is " + request.id + " for " + request.asset_id);
+                }
+            }
+            else
+            {
+                throw new ArgumentException("Calibration record in scheduled state not found for " + request.asset_id + " to start calibration");
+            }
+
+
             if (request.vendor_id <= 0)
             {
+                //if vendor id is not passed, take assets vendor id
                 string vendorQry = $"SELECT vendorId FROM assets WHERE id = {request.asset_id};";
                 DataTable dtVendor = await Context.FetchData(vendorQry).ConfigureAwait(false);
                 if (dtVendor.Rows.Count > 0)
@@ -260,7 +280,7 @@ namespace CMMSAPIs.Repositories.Calibration
                 }
                 else
                 {
-                    throw new ArgumentException("Invalid Vendor ID");
+                    throw new ArgumentException("Invalid Vendor ID " + request.vendor_id);
                 }
             }
             if (request.next_calibration_date == null)
@@ -277,15 +297,17 @@ namespace CMMSAPIs.Repositories.Calibration
                 }
                 else
                 {
-                    throw new ArgumentException("Invalid Due Date");
+                    throw new ArgumentException("Invalid Due Date " + request.next_calibration_date);
                 }
             }
-            string statusQuery = $"SELECT id, status FROM calibration where due_date=(SELECT MAX(due_date) FROM calibration WHERE asset_id={request.asset_id} AND due_date is not null ORDER BY requested_at DESC) and asset_id={request.asset_id};";
+            string statusQuery = $"SELECT id, status, facility_id FROM calibration where due_date=(SELECT MAX(due_date) FROM calibration WHERE asset_id={request.asset_id} AND due_date is not null ORDER BY requested_at DESC) and asset_id={request.asset_id};";
             DataTable dt0 = await Context.FetchData(statusQuery).ConfigureAwait(false);
-            status = Convert.ToInt32(dt0.Rows[0]["status"]);
+            int facilityId = 0;
             bool exists = false;
             if (dt0.Rows.Count > 0)
             {
+                status = Convert.ToInt32(dt0.Rows[0]["status"]);
+                facilityId = Convert.ToInt32(dt0.Rows[0][0]);
 
                 int[] status_array = { (int)CMMS.CMMS_Status.CALIBRATION_REQUEST,
                               (int)CMMS.CMMS_Status.CALIBRATION_REQUEST_APPROVED,
@@ -297,20 +319,24 @@ namespace CMMSAPIs.Repositories.Calibration
                               (int)CMMS.CMMS_Status.CALIBRATION_REJECTED};
                 exists = Array.Exists(status_array, element => element == status);
             }
+            else
+            {
+                throw new ArgumentException("Calibration record does not exist for Asset ID " + request.asset_id);
+            }
             //  if (status >211 (int)CMMS.CMMS_Status.CALIBRATION_REQUEST)
             /*if (status > 211)
             {
                 int id = Convert.ToInt32(dt0.Rows[0]["id"]);
                 CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.FAILURE, "Calibration cannot be requested as asset is already sent or requested for calibration");
                 return response;
-            }*/
+            }
             string facilityQuery = $"SELECT facilityId FROM assets WHERE assets.id = {request.asset_id};";
             DataTable dt1 = await Context.FetchData(facilityQuery).ConfigureAwait(false);
             int facilityId = 0;
             if (dt1.Rows.Count > 0)
             {
                 facilityId = Convert.ToInt32(dt1.Rows[0][0]);
-            }
+            }*/
             string facilityq = $"SELECT reschedule FROM calibration  WHERE  id= {request.id};";
             DataTable dt12 = await Context.FetchData(facilityq).ConfigureAwait(false);
             int res = 0;
@@ -343,14 +369,6 @@ namespace CMMSAPIs.Repositories.Calibration
             }
             else
             {
-                int id = 0;
-                string getIdQuery = $"SELECT id FROM calibration WHERE asset_id = {request.asset_id} or status = {(int)CMMS.CMMS_Status.CALIBRATION_SCHEDULED};";
-                DataTable dt2 = await Context.FetchData(getIdQuery).ConfigureAwait(false);
-
-                if (dt2.Rows.Count > 0)
-                {
-                    id = Convert.ToInt32(dt2.Rows[0][0]);
-                }
                 // Update query instead of insert
                 string updateQuery = $"UPDATE calibration SET facility_id = {facilityId}, vendor_id = {request.vendor_id}, " +
                                     $"due_date = '{request.next_calibration_date.ToString("yyyy-MM-dd")}', " +
@@ -360,13 +378,21 @@ namespace CMMSAPIs.Repositories.Calibration
                                    $"WHERE asset_id = {request.asset_id} and id={request.id} " +
                                    $"AND status != {(int)CMMS.CMMS_Status.CALIBRATION_COMPLETED};";
                 int affectedRows = await Context.ExecuteNonQry<int>(updateQuery).ConfigureAwait(false);
-                //  string setDueDate = $"UPDATE assets SET calibrationDueDate = '{request.next_calibration_date.ToString("yyyy-MM-dd HH:mm:ss")}' WHERE id = {request.asset_id};";
-                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.CALIBRATION, request.id, CMMS.CMMS_Modules.CALIBRATION, id, "Calibration Requested", CMMS.CMMS_Status.CALIBRATION_REQUEST, userID);
+                CMDefaultResponse response = null;
+                if (affectedRows > 0)
+                { 
+                    //  string setDueDate = $"UPDATE assets SET calibrationDueDate = '{request.next_calibration_date.ToString("yyyy-MM-dd HH:mm:ss")}' WHERE id = {request.asset_id};";
+                    await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.CALIBRATION, request.id, CMMS.CMMS_Modules.CALIBRATION, request.id, "Calibration Requested", CMMS.CMMS_Status.CALIBRATION_REQUEST, userID);
 
-                CMCalibrationDetails _ViewCalibration = await GetCalibrationDetails(id, "");
+                    CMCalibrationDetails _ViewCalibration = await GetCalibrationDetails(request.id, "");
 
-                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.CALIBRATION, CMMS.CMMS_Status.CALIBRATION_REQUEST, new[] { userID }, _ViewCalibration);
-                CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Calibration requested successfully");
+                    await CMMSNotification.sendNotification(CMMS.CMMS_Modules.CALIBRATION, CMMS.CMMS_Status.CALIBRATION_REQUEST, new[] { userID }, _ViewCalibration);
+                    response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Calibration requested successfully");
+                }
+                else
+                {
+                    response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.FAILURE, "Calibration request failed for asset id " + request.asset_id + " and calibration id " + request.id);
+                }
                 return response;
             }
         }

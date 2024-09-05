@@ -14,8 +14,8 @@ namespace CMMSAPIs.Models.Notifications
         {
             calibObj = CaliObj;
             m_module_ref_id = CaliObj.calibration_id;
-
         }
+
         override protected string getEMSubject(params object[] args)
         {
             string retValue = "ESCLATION : ";
@@ -129,7 +129,7 @@ namespace CMMSAPIs.Models.Notifications
         {
             string retValue = "";
 
-            retValue = String.Format("<h3><b style='color:#31576D'>Status:</b>{0}</h3><br>", calibObj.status_long);
+            retValue = String.Format("<h3><b style='color:#31576D'>Status:</b>{0}</h3><br>", calibObj.status_long + " at " + calibObj.facility_name);
 
             retValue += String.Format("<table style='width: 50%; margin:0 auto; border-collapse: collapse ; border-spacing: 10px; ' border='1'>");
             retValue += String.Format(template, "ID", "CAL" + calibObj.calibration_id);
@@ -145,7 +145,6 @@ namespace CMMSAPIs.Models.Notifications
             switch (m_notificationID)
             {
                 case CMMS.CMMS_Status.CALIBRATION_REQUEST:
-                    retValue += "</table>";            //Created
                     break;
                 case CMMS.CMMS_Status.CALIBRATION_REQUEST_APPROVED:     //Assigned                 
                     retValue += String.Format(templateEnd, "Request Approved By", calibObj.request_approved_by);
@@ -200,10 +199,8 @@ namespace CMMSAPIs.Models.Notifications
                     retValue += String.Format(templateEnd, "Closed At", calibObj.Closed_at);
                     break;
             }
-
+            retValue += "</table>";            //Created
             return retValue;
         }
-
-
     }
 }
