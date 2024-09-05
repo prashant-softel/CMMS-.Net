@@ -109,7 +109,7 @@ namespace CMMSAPIs.Models.Notifications
                 {
                     i++;
                     categoryNames += item.name;
-                    if (m_jobObj.equipment_cat_list.Count > 1)
+                    if (m_jobObj.equipment_cat_list.Count > 1 && i < m_jobObj.equipment_cat_list.Count)
                     {
                         categoryNames += ", ";
                     }

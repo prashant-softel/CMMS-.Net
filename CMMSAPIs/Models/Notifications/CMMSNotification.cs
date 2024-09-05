@@ -86,7 +86,7 @@ namespace CMMSAPIs.Models.Notifications
         }
         protected virtual string getURL(params object[] args)
         {
-            return $"{m_baseURL}/{m_moduleID}/{m_module_ref_id}";
+            return $"{m_baseURL}/{(int)m_moduleID}/{m_module_ref_id}";
         }
 
         protected virtual string getModuleName(params object[] args)
