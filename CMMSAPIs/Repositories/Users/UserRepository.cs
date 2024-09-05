@@ -1021,7 +1021,8 @@ namespace CMMSAPIs.Repositories.Users
             int notification_id = (int) notification.module_id;
             int facility_id = notification.facility_id;
             string user_ids_str = "";
-            if (notification.user_ids != null && user_ids_str.Length > 0)
+
+            if (notification.user_ids != null && notification.user_ids.Length > 0)
             {
                 user_ids_str += string.Join(",", notification.user_ids.ToArray());
             }
@@ -1043,7 +1044,7 @@ namespace CMMSAPIs.Repositories.Users
 
             if (!user_ids_str.IsNullOrEmpty())
             {
-                qry += $" AND (self = 0 and u.id IN({user_ids_str}))";
+                qry += $" AND (self = 0 or u.id IN({user_ids_str}))";
             }
             else
             {
