@@ -357,7 +357,7 @@ namespace CMMSAPIs.Models.Notifications
                 retValue += String.Format(template, "MC Schedule Title", scheduleObj.title);
                 retValue += String.Format(template, "Description", scheduleObj.description);
                 retValue += String.Format(template, "Started By", scheduleObj.startedbyName);
-                retValue += String.Format(template, "Started By", scheduleObj.start_date);
+                retValue += String.Format(template, "Started At", scheduleObj.start_date);
 
 
                 switch (m_notificationID)
