@@ -20,11 +20,6 @@ namespace CMMSAPIs.Models.Notifications
             m_module_ref_id = m_jobObj.id;
             //m_notificationType = notificationType;
         }
-
-        override protected int getId(params object[] args)
-        {
-            return m_module_ref_id;
-        }
         override protected string getSubject(params object[] args)
         {
             string retValue = "";
@@ -60,7 +55,6 @@ namespace CMMSAPIs.Models.Notifications
         {
 
             string retValue = "ESCALATION : ";
-            m_module_ref_id = m_jobObj.id;
 
             switch (m_notificationID)
             {
@@ -95,13 +89,13 @@ namespace CMMSAPIs.Models.Notifications
             int jobID = m_jobObj.id; //jobid
             var jobTitle = m_jobObj.job_title;//job title
             var jobDesc = m_jobObj.job_description;//job desc
-            string encodedStatusLong = HttpUtility.HtmlEncode(m_jobObj.status_long);
+            string encodedStatusLong = HttpUtility.HtmlEncode(m_jobObj.status_long + " at " + m_jobObj.facility_name);
 
             retValue = String.Format("<h3><b style='color:#31576D'>Status: </b>{0}</h3><br>", encodedStatusLong);
 
             retValue += String.Format("<table style='width: 50%; margin:0 auto; border-collapse: collapse ; border-spacing: 10px; ' border='1'>");
             retValue += String.Format(template, "Job ID", "JOB" + m_jobObj.id);
-            retValue += String.Format(template, "Job Status", m_jobObj.status_long + " at " + m_jobObj.facility_name);
+            retValue += String.Format(template, "Job Status", m_jobObj.status_long);
             retValue += String.Format(template, "Job Title", m_jobObj.job_title);
             retValue += String.Format(template, "Job Description", m_jobObj.job_description);
             retValue += String.Format(template, "Facility name", m_jobObj.facility_name);
@@ -185,7 +179,7 @@ namespace CMMSAPIs.Models.Notifications
                 {
                     i++;
                     displayList += item.workType;
-                    if (m_jobObj.work_type_list.Count > 1)
+                    if (m_jobObj.work_type_list.Count > 1 && i < m_jobObj.work_type_list.Count)
                     {
                         displayList += ", ";
                     }
@@ -204,7 +198,7 @@ namespace CMMSAPIs.Models.Notifications
                 {
                     i++;
                     displayList += item.linkedToolName;
-                    if (m_jobObj.tools_required_list.Count > 1)
+                    if (m_jobObj.tools_required_list.Count > 1 && i < m_jobObj.tools_required_list.Count)
                     {
                         displayList += ", ";
                     }
@@ -212,7 +206,7 @@ namespace CMMSAPIs.Models.Notifications
 
                 if (i > 0)
                 {
-                    retValue += String.Format(template, "Tootls required", displayList);
+                    retValue += String.Format(template, "Tools required", displayList);
                 }
             }
 

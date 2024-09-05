@@ -251,7 +251,7 @@ namespace CMMSAPIs.Repositories.Jobs
                     }
                     break;
                 case CMMS.CMMS_Status.JOB_ASSIGNED:     //Assigned
-                    retValue = String.Format("Job{0} assigned to <{1}>", jobId, jobObj.assigned_name);
+                    retValue = String.Format("Job{0} assigned to {1}", jobId, jobObj.assigned_name);
                     break;
                 case CMMS.CMMS_Status.JOB_LINKED:     //Linked
                     retValue = String.Format("Job{0} linked to PTW{1}", jobId, jobObj.current_ptw_id);
