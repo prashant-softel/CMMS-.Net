@@ -174,70 +174,70 @@ namespace CMMSAPIs.Repositories.Permits
             switch (status)
             {
                 case CMMS.CMMS_Status.PTW_CREATED:
-                    retValue += String.Format("PTW{0} <{1}> requested by <{2}>", permitId, title, permitObj.issuedByName);
+                    retValue += String.Format("PTW{0} requested by <{1}>", permitId, permitObj.issuedByName);
                     break;
                 case CMMS.CMMS_Status.PTW_ISSUED:
-                    retValue = String.Format("PTW{0} <{1}> issued by <{2}>", permitId, title, permitObj.issuedByName);
+                    retValue = String.Format("PTW{0} issued by <{1}>", permitId, permitObj.issuedByName);
                     break;
                 case CMMS.CMMS_Status.PTW_REJECTED_BY_ISSUER:
-                    retValue = String.Format("PTW{0} <{1}> Rejected By <{2}>", permitId, title, permitObj.rejectedByName);
+                    retValue = String.Format("PTW{0} Rejected By <{1}>", permitId, permitObj.rejectedByName);
                     break;
                 case CMMS.CMMS_Status.PTW_APPROVED:
-                    retValue = String.Format("PTW{0} <{1}> Approved By <{2}>", permitId, title, permitObj.approvedByName);
+                    retValue = String.Format("PTW{0} Approved By <{1}>", permitId, permitObj.approvedByName);
                     break;
                 case CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER:
-                    retValue = String.Format("PTW{0} <{1}> Rejected By <{2}>", permitId, title, permitObj.rejectedByName);
+                    retValue = String.Format("PTW{0} Rejected By <{1}>", permitId, permitObj.rejectedByName);
                     break;
                 case CMMS.CMMS_Status.PTW_CLOSED:
-                    retValue = String.Format("PTW{0} <{1}> Closed By <{2}>", permitId, title, permitObj.closedByName);
+                    retValue = String.Format("PTW{0} Closed By <{1}>", permitId, permitObj.closedByName);
                     break;
                 case CMMS.CMMS_Status.PTW_CANCELLED_BY_ISSUER:
-                    retValue = String.Format("PTW{0} <{1}> cancelled by Issuer <{2}> ", permitId, title, permitObj.cancelRequestByName);
+                    retValue = String.Format("PTW{0} cancelled by Issuer <{1}> ", permitId, permitObj.cancelRequestByName);
                     break;
                 case CMMS.CMMS_Status.PTW_CANCELLED_BY_HSE:
-                    retValue = String.Format("PTW{0} <{1}> cancelled by HSE <{2}> ", permitId, title, permitObj.cancelRequestByName);
+                    retValue = String.Format("PTW{0} cancelled by HSE <{1}> ", permitId, permitObj.cancelRequestByName);
                     break;
                 case CMMS.CMMS_Status.PTW_CANCELLED_BY_APPROVER:
-                    retValue = String.Format("PTW{0} <{1}> cancelled by approver <{2}> ", permitId, title, permitObj.cancelRequestByName);
+                    retValue = String.Format("PTW{0} cancelled by approver <{1}> ", permitId, permitObj.cancelRequestByName);
                     break;
                 case CMMS.CMMS_Status.PTW_CANCEL_REQUESTED:
-                    retValue = String.Format("PTW{0} <{1}> Cancel Requested by <{2}>", permitId, title, permitObj.cancelRequestByName);
+                    retValue = String.Format("PTW{0} Cancel Requested by <{1}>", permitId, permitObj.cancelRequestByName);
                     break;
                 case CMMS.CMMS_Status.PTW_CANCEL_REQUEST_APPROVED:
-                    retValue = String.Format("PTW{0} <{1}> Cancel Requested Approve by <{2}>", permitId, title, permitObj.cancelRequestApprovedByName);
+                    retValue = String.Format("PTW{0} Cancel Requested Approve by <{1}>", permitId, permitObj.cancelRequestApprovedByName);
                     break;
                 case CMMS.CMMS_Status.PTW_CANCEL_REQUEST_REJECTED:
-                    retValue = String.Format("PTW{0} <{1}> Cancel Requested Rejected by <{2}>", permitId, title, permitObj.cancelRequestRejectedByName);
+                    retValue = String.Format("PTW{0} Cancel Requested Rejected by <{1}>", permitId, permitObj.cancelRequestRejectedByName);
                     break;
                 case CMMS.CMMS_Status.PTW_EXTEND_REQUESTED:
-                    retValue = String.Format("PTW{0} <{1}> Extend Requested By <{2}>", permitId, title, permitObj.extendRequestByName);
+                    retValue = String.Format("PTW{0} Extend Requested By <{1}>", permitId, permitObj.extendRequestByName);
                     break;
                 case CMMS.CMMS_Status.PTW_EXTEND_REQUEST_APPROVE:
-                    retValue = String.Format("PTW{0} <{1}> Cancel Requested Approve by <{2}>", permitId, title, permitObj.extendRequestApprovedByName);
+                    retValue = String.Format("PTW{0} Cancel Requested Approve by <{1}>", permitId, permitObj.extendRequestApprovedByName);
                     break;
                 case CMMS.CMMS_Status.PTW_EXTEND_REQUEST_REJECTED:
-                    retValue = String.Format("PTW{0} <{1}> Cancel Requested Rejected by <{2}>", permitId, title, permitObj.extendRequestRejectedByName);
+                    retValue = String.Format("PTW{0} Cancel Requested Rejected by <{1}>", permitId, permitObj.extendRequestRejectedByName);
                     break;
                 case CMMS.CMMS_Status.PTW_LINKED_TO_JOB:
-                    retValue = String.Format("PTW{0} <{1}> Linked to Job", permitId, title);
+                    retValue = String.Format("PTW{0} Linked to Job", permitId, title);
                     break;
                 case CMMS.CMMS_Status.PTW_LINKED_TO_PM:
-                    retValue = String.Format("PTW{0} <{1}> Linked to PM Permit", permitId, title);
+                    retValue = String.Format("PTW{0} Linked to PM Permit", permitId, title);
                     break;
                 case CMMS.CMMS_Status.PTW_LINKED_TO_AUDIT:
-                    retValue = String.Format("PTW{0} <{1}> Linked to Audit", permitId, title);
+                    retValue = String.Format("PTW{0} Linked to Audit", permitId, title);
                     break;
                 case CMMS.CMMS_Status.PTW_LINKED_TO_HOTO:
-                    retValue = String.Format("PTW{0} <{1}> Linked to Hoto", permitId, title);
+                    retValue = String.Format("PTW{0} Linked to Hoto", permitId, title);
                     break;
                 case CMMS.CMMS_Status.PTW_EXPIRED:
-                    retValue = String.Format("PTW{0} <{1}> Expired", permitId, title);
+                    retValue = String.Format("PTW{0} Expired", permitId, title);
                     break;
                 case CMMS.CMMS_Status.PTW_UPDATED:
-                    retValue = String.Format("PTW{0} <{1}> Updated", permitId, title);
+                    retValue = String.Format("PTW{0} Updated", permitId, title);
                     break;
                 default:
-                    retValue = String.Format("PTW{0} <{1}> Unknow status <{3}>", permitId, title, status);
+                    retValue = String.Format("PTW{0} Unknow status <{2}>", permitId, status);
                     break;
             }
             return retValue;
@@ -542,17 +542,7 @@ namespace CMMSAPIs.Repositories.Permits
             }
             statusSubQuery += $"ELSE '{getShortStatus(0)}' END";
             string myQuery = "SELECT " +
-                                 $"ptw.id as permitId, CASE when ptw.endDate < '{UtilsRepository.GetUTCTime()}' then 1 else 0 END as isExpired, " +
-                                 $"ptw.startDate as startDate, CASE when ptw.startDate <  now() then 1 else 0 END as tbt_start," +
-                                 $"CASE when ptw.startDate < now()  then false else true END as is_tbt_strat, " +
-                                 $"ptw.TBT_Done_By as TBT_Done_By_id, ptw.code, ptw.status as ptwStatus,jc.id as jc_id,jc.JC_Status as jc_status,  " +
-                                 $"ptw.permitNumber as permit_site_no, permitType.id as permit_type, permitType.title as PermitTypeName, " +
-                                 $"group_concat(distinct asset_cat.name order by asset_cat.id separator ', ') as equipment_categories, " +
-                                 $"facilities.id as workingAreaId, facilities.name as workingAreaName, ptw.title as title, ptw.description as description, " +
-                                 $"acceptedUser.id as request_by_id, CONCAT(acceptedUser.firstName , ' ' , acceptedUser.lastName) as request_by_name, " +
-                                 $"ptw.acceptedDate as request_datetime, issuedUser.id as issued_by_id, CONCAT(issuedUser.firstName , ' ' , issuedUser.lastName) as issued_by_name, " +
-                                 $"ptw.issuedDate as issue_datetime,ptw.endDate as endDate, approvedUser.id as approved_by_id, CONCAT(approvedUser.firstName , ' ' , approvedUser.lastName) as approved_by_name,   " +
-                                 $"ptw.TBT_Done_Check as TBT_Done_Check, ptw.approvedDate as approved_datetime, {statusSubQuery} as current_status_short " +
+                                 $"ptw.id as permitId, CASE when ptw.endDate < '{UtilsRepository.GetUTCTime()}' then 1 else 0 END as isExpired,ptw.TBT_Done_By as TBT_Done_By_id, ptw.code, ptw.status as ptwStatus,jc.id as jc_id,jc.JC_Status as jc_status,ptw.permitNumber as permit_site_no, permitType.id as permit_type, permitType.title as PermitTypeName, group_concat(distinct asset_cat.name order by asset_cat.id separator ', ') as equipment_categories, facilities.id as workingAreaId, facilities.name as workingAreaName, ptw.title as title, ptw.description as description, acceptedUser.id as request_by_id, CONCAT(acceptedUser.firstName , ' ' , acceptedUser.lastName) as request_by_name, ptw.acceptedDate as request_datetime, issuedUser.id as issued_by_id, CONCAT(issuedUser.firstName , ' ' , issuedUser.lastName) as issued_by_name, ptw.issuedDate as issue_datetime,ptw.endDate as endDate, approvedUser.id as approved_by_id, CONCAT(approvedUser.firstName , ' ' , approvedUser.lastName) as approved_by_name,ptw.TBT_Done_Check as TBT_Done_Check, ptw.approvedDate as approved_datetime, {statusSubQuery} as current_status_short " +
                                  " FROM " +
                                         "permits as ptw " +
                                   "JOIN " +
