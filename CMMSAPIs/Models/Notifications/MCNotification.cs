@@ -47,76 +47,76 @@ namespace CMMSAPIs.Models.Notifications
                     retValue = String.Format("{0} Module-Cleaning{1}-Created by {2}", planObj.facilityidbyName, planObj.planId, planObj.createdBy);
                     break;
                 case CMMS.CMMS_Status.MC_PLAN_REJECTED:
-                    retValue += String.Format("MCP<{0}> Rejected by {1} ", planObj.planId, planObj.rejectedBy);
+                    retValue += String.Format("{0} Module-Cleaning{1}-Rejected by {2}", planObj.facilityidbyName, planObj.planId, planObj.rejectedBy);
                     break;
                 case CMMS.CMMS_Status.MC_PLAN_APPROVED:
-                    retValue += String.Format("MCP<{0}> Approved by {1} ", planObj.planId, planObj.approvedBy);
+                    retValue += String.Format("{0} Module-Cleaning{1}-Approved by {2}", planObj.facilityidbyName, planObj.planId, planObj.approvedBy);
                     break;
                 case CMMS.CMMS_Status.MC_PLAN_DELETED:
-                    retValue += String.Format("MCP<{0}> Deleted ", planObj.planId);
+                    retValue += String.Format("{0} Module-Cleaning{1}-Deleted", planObj.facilityidbyName, planObj.planId);
                     break;
                 case CMMS.CMMS_Status.MC_PLAN_UPDATED:
-                    retValue += String.Format("MCP<{0}> Updated by {1} ", planObj.planId, planObj.updatedBy);
+                    retValue += String.Format("{0} Module-Cleaning{1}-Updated by {2}", planObj.facilityidbyName, planObj.planId, planObj.updatedBy);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_STARTED:
-                    retValue += String.Format("MCT<{0}> Started by {1} ", executionObj.executionId, executionObj.startedBy);
+                    retValue += String.Format("{0} Module-Cleaning{1}-Started by {2}", planObj.facilityidbyName, executionObj.executionId, executionObj.startedBy);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_ENDED:
-                    retValue += String.Format("MCT<{0}> Ended by {1} ", executionObj.executionId, executionObj.endedBy);
+                    retValue += String.Format("{0} Module-Cleaning{1}-Closed by {2}", planObj.facilityidbyName, executionObj.executionId, executionObj.endedBy);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_COMPLETED:
-                    retValue += String.Format("MCT<{0}> Completed by {1} ", executionObj.executionId, executionObj.endedBy);
+                    retValue += String.Format("{0} Module-Cleaning{1}-Closed by {2}", planObj.facilityidbyName, executionObj.executionId, executionObj.endedBy);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_ABANDONED:
-                    retValue += String.Format("MCT<{0}> Abandoned by {1} ", executionObj.executionId, executionObj.abandonedBy);
+                    retValue += String.Format("{0} Module-Cleaning{1}-Abandoned by {2}", planObj.facilityidbyName, executionObj.executionId, executionObj.abandonedBy); 
                     break;
                 case CMMS.CMMS_Status.MC_TASK_APPROVED:
-                    retValue += String.Format("MCT<{0}> Approved  by {1} ", executionObj.executionId, executionObj.approvedBy);
+                    retValue += String.Format("{0} Module-Cleaning{1}-Approved by {2}", planObj.facilityidbyName, executionObj.executionId, executionObj.approvedBy);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_REJECTED:
-                    retValue += String.Format("MCT<{0}> Rejected by {1} ", executionObj.executionId, executionObj.rejectedBy);
+                    retValue += String.Format("{0} Module-Cleaning{1}-Rejected by {2}", planObj.facilityidbyName, executionObj.executionId, executionObj.rejectedBy);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_UPDATED:
-                    retValue += String.Format("MCT<{0}> Updated by {1} ", executionObj.executionId, executionObj.updatedBy);
+                    retValue += String.Format("{0} Module-Cleaning{1}-Updated by {2}", planObj.facilityidbyName, executionObj.executionId, executionObj.updatedBy);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_ABANDONED_REJECTED:
-                    retValue += String.Format("MCT<{0}> Abandoned Rejected by {1} ", executionObj.executionId, executionObj.abandonedBy);
+                    retValue += String.Format("{0} Module-Cleaning{1}-Abandoned Rejected by {2}", planObj.facilityidbyName, executionObj.executionId, executionObj.abandonedBy);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_ABANDONED_APPROVED:
-                    retValue += String.Format("MCT<{0}> Abandoned Approved by {1} ", executionObj.executionId, executionObj.abandonedBy);
+                    retValue += String.Format("{0} Module-Cleaning{1}-Abandoned Approved by {2}", planObj.facilityidbyName, executionObj.executionId, executionObj.abandonedBy);
                     break;
                 case CMMS.CMMS_Status.SCHEDULED_LINKED_TO_PTW:
                     retValue += String.Format("Permit ID<{0}> Linked With Schedule ID{1} ", scheduleObj.permit_id, scheduleObj.scheduleId);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_END_APPROVED:
-                    retValue += String.Format("MCT<{0}> End Approved started by {1} ", executionObj.executionId, executionObj.endapprovedbyName);
+                    retValue += String.Format("{0} Module-Cleaning{1}-End Approved by {2}", planObj.facilityidbyName, executionObj.executionId, executionObj.endapprovedbyName);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_END_REJECTED:
-                    retValue += String.Format("MCT<{0}> Rejected by {1} ", executionObj.executionId, executionObj.endrejectedbyName);
+                    retValue += String.Format("{0} Module-Cleaning{1}-End Rejected by {2}", planObj.facilityidbyName, executionObj.executionId, executionObj.endrejectedbyName);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_SCHEDULE_APPROVED:
-                    retValue += String.Format("MCS<{0}>  Approved by {1} ", scheduleObj.scheduleId, scheduleObj.approvedBy);
+                    retValue += String.Format("{0} Module-Cleaning{1}-Approved by {2}", scheduleObj.facilityidbyName, scheduleObj.scheduleId, scheduleObj.approvedBy);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_SCHEDULE_REJECT:
-                    retValue += String.Format("MCT<{0}> Scheduled Rejected by {1} ", scheduleObj.scheduleId, scheduleObj.rejectedBy);
+                    retValue += String.Format("{0} Module-Cleaning{1}-Rejected by {2}", scheduleObj.facilityidbyName, scheduleObj.scheduleId, scheduleObj.rejectedBy);
                     break;
                 case CMMS.CMMS_Status.MC_EXECUTION_STARTED:
-                    retValue = String.Format("MCS<{0}> Started By <{1}> ", scheduleObj.scheduleId, scheduleObj.executedBy);
+                    retValue = String.Format("{0} Module-Cleaning{1}-Started by {2}", scheduleObj.facilityidbyName, scheduleObj.scheduleId, scheduleObj.createdbyName);
                     break;
                 case CMMS.CMMS_Status.MC_EXECUTION_CLOSED:
-                    retValue = String.Format("MCS<{0}> Closed By <{1}> ", scheduleObj.scheduleId, scheduleObj.endedbyName);
+                    retValue = String.Format("{0} Module-Cleaning{1}-Closed by {2}", scheduleObj.facilityidbyName, scheduleObj.scheduleId, scheduleObj.endedbyName);
                     break;
                 case CMMS.CMMS_Status.MC_EXECUTION_UPDATED:
-                    retValue = String.Format("MCS<{0}> Updated By <{1}> ", scheduleObj.scheduleId, scheduleObj.updatedbyName);
+                    retValue = String.Format("{0} Module-Cleaning{1}-Updated by {2}", scheduleObj.facilityidbyName, scheduleObj.scheduleId, scheduleObj.updatedbyName);
                     break;
                 case CMMS.CMMS_Status.MC_EXECUTION_ABANDONED:
-                    retValue = String.Format("MCS<{0}> Abandoned Approved By <{1}> ", scheduleObj.scheduleId, scheduleObj.abandonedbyName);
+                    retValue = String.Format("{0} Module-Cleaning{1}-Abandoned Approved by {2}", scheduleObj.facilityidbyName, scheduleObj.scheduleId, scheduleObj.abandonedbyName);
                     break;
                 case CMMS.CMMS_Status.MC_EXECUTION_ABANDONED_REJECTED:
-                    retValue = String.Format("MCS<{0}> Abandoned Rejected By <{1}> ", scheduleObj.scheduleId, scheduleObj.abandonedbyName);
+                    retValue = String.Format("{0} Module-Cleaning{1}-Abandoned Rejected by {2}", scheduleObj.facilityidbyName, scheduleObj.scheduleId, scheduleObj.abandonedbyName);
                     break;
                 case CMMS.CMMS_Status.MC_ASSIGNED:
-                    retValue = String.Format("MCT<{0}> Assigned to <{1}> ", executionObj.executionId, executionObj.assignedTo);
+                    retValue = String.Format("{0} Module-Cleaning{1}-Assigned to {2}", executionObj.facilityidbyName, executionObj.executionId, executionObj.assignedTo);
                     break;
                 default:
                     retValue += String.Format("MCT<{0}> Undefined status {1} ", executionObj.id, m_notificationID);
@@ -136,85 +136,82 @@ namespace CMMSAPIs.Models.Notifications
             switch (m_notificationID)
             {
                 case CMMS.CMMS_Status.MC_PLAN_DRAFT:
-                    retValue += String.Format("MCP<{0}> Draft by {1} ", planObj.planId, planObj.createdBy);
+                    retValue += String.Format("MCP<{0}> Drafted by {1} ", planObj.planId, planObj.createdBy);
                     break;
                 case CMMS.CMMS_Status.MC_PLAN_SUBMITTED:
                     retValue = String.Format("{0} Module-Cleaning{1}-Created by {2}", planObj.facilityidbyName, planObj.planId, planObj.createdBy);
                     break;
                 case CMMS.CMMS_Status.MC_PLAN_REJECTED:
-                    retValue += String.Format("MCP<{0}> Rejected by {1} ", planObj.planId, planObj.rejectedBy);
+                    retValue += String.Format("{0} Module-Cleaning{1}-Rejected by {2}", planObj.facilityidbyName, planObj.planId, planObj.rejectedBy);
                     break;
                 case CMMS.CMMS_Status.MC_PLAN_APPROVED:
-                    retValue += String.Format("MCP<{0}> Approved by {1} ", planObj.planId, planObj.approvedBy);
+                    retValue += String.Format("{0} Module-Cleaning{1}-Approved by {2}", planObj.facilityidbyName, planObj.planId, planObj.approvedBy);
                     break;
                 case CMMS.CMMS_Status.MC_PLAN_DELETED:
-                    retValue += String.Format("MCP<{0}> Deleted ", planObj.planId);
+                    retValue += String.Format("{0} Module-Cleaning{1}-Deleted", planObj.facilityidbyName, planObj.planId);
                     break;
                 case CMMS.CMMS_Status.MC_PLAN_UPDATED:
-                    retValue += String.Format("MCT<{0}> Execution started by {1} ", planObj.planId, planObj.updatedBy);
-                    break;
-                case CMMS.CMMS_Status.MC_TASK_SCHEDULED:
-                    retValue += String.Format("MCT<{0}> Scheduled by {1} ", executionObj.executionId, executionObj.schedules);
+                    retValue += String.Format("{0} Module-Cleaning{1}-Updated by {2}", planObj.facilityidbyName, planObj.planId, planObj.updatedBy);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_STARTED:
-                    retValue += String.Format("MCT<{0}> Started by {1} ", executionObj.executionId, executionObj.startedBy);
+                    retValue += String.Format("{0} Module-Cleaning{1}-Started by {2}", planObj.facilityidbyName, executionObj.executionId, executionObj.startedBy);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_ENDED:
-                    retValue += String.Format("MCT<{0}> Ended by {1} ", executionObj.executionId, executionObj.endedBy);
+                    retValue += String.Format("{0} Module-Cleaning{1}-Closed by {2}", planObj.facilityidbyName, executionObj.executionId, executionObj.endedBy);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_COMPLETED:
-                    retValue += String.Format("MCT<{0}> Completed by {1} ", executionObj.executionId, executionObj.endedBy);
+                    retValue += String.Format("{0} Module-Cleaning{1}-Closed by {2}", planObj.facilityidbyName, executionObj.executionId, executionObj.endedBy);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_ABANDONED:
-                    retValue += String.Format("MCT<{0}> Abandoned by {1} ", executionObj.executionId, executionObj.abandonedBy);
+                    retValue += String.Format("{0} Module-Cleaning{1}-Abandoned by {2}", planObj.facilityidbyName, executionObj.executionId, executionObj.abandonedBy);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_APPROVED:
-                    retValue += String.Format("MCT<{0}> Approved  by {1} ", executionObj.executionId, executionObj.approvedBy);
+                    retValue += String.Format("{0} Module-Cleaning{1}-Approved by {2}", planObj.facilityidbyName, executionObj.executionId, executionObj.approvedBy);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_REJECTED:
-                    retValue += String.Format("MCT<{0}> Rejected by {1} ", executionObj.executionId, executionObj.rejectedBy);
+                    retValue += String.Format("{0} Module-Cleaning{1}-Rejected by {2}", planObj.facilityidbyName, executionObj.executionId, executionObj.rejectedBy);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_UPDATED:
-                    retValue += String.Format("MCT<{0}> Updated by {1} ", executionObj.executionId, executionObj.updatedBy);
+                    retValue += String.Format("{0} Module-Cleaning{1}-Updated by {2}", planObj.facilityidbyName, executionObj.executionId, executionObj.updatedBy);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_ABANDONED_REJECTED:
-                    retValue += String.Format("MCT<{0}> Abandoned Rejected by {1} ", executionObj.executionId, executionObj.abandonedBy);
+                    retValue += String.Format("{0} Module-Cleaning{1}-Abandoned Rejected by {2}", planObj.facilityidbyName, executionObj.executionId, executionObj.abandonedBy);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_ABANDONED_APPROVED:
-                    retValue += String.Format("MCT<{0}> Abandoned Approved by {1} ", executionObj.executionId, executionObj.abandonedBy);
+                    retValue += String.Format("{0} Module-Cleaning{1}-Abandoned Approved by {2}", planObj.facilityidbyName, executionObj.executionId, executionObj.abandonedBy);
                     break;
                 case CMMS.CMMS_Status.SCHEDULED_LINKED_TO_PTW:
-                    retValue += String.Format("PermitId<{0}> Linked to Schedule ID {1} ", scheduleObj.permit_id, scheduleObj.scheduleId);
+                    retValue += String.Format("Permit ID<{0}> Linked With Schedule ID{1} ", scheduleObj.permit_id, scheduleObj.scheduleId);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_END_APPROVED:
-                    retValue += String.Format("MCT<{0}> Approved started by {1} ", executionObj.executionId, executionObj.endapprovedbyName);
+                    retValue += String.Format("{0} Module-Cleaning{1}-End Approved by {2}", planObj.facilityidbyName, executionObj.executionId, executionObj.endapprovedbyName);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_END_REJECTED:
-                    retValue += String.Format("MCT<{0}> Rejected by {1} ", executionObj.executionId, executionObj.endrejectedbyName);
+                    retValue += String.Format("{0} Module-Cleaning{1}-End Rejected by {2}", planObj.facilityidbyName, executionObj.executionId, executionObj.endrejectedbyName);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_SCHEDULE_APPROVED:
-                    retValue += String.Format("MCT<{0}> Scheduled Approved by {1} ", scheduleObj.scheduleId, scheduleObj.approvedBy);
+                    retValue += String.Format("{0} Module-Cleaning{1}-Approved by {2}", scheduleObj.facilityidbyName, scheduleObj.scheduleId, scheduleObj.approvedBy);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_SCHEDULE_REJECT:
-                    retValue += String.Format("MCT<{0}> Scheduled Rejected by {1} ", scheduleObj.scheduleId, scheduleObj.rejectedBy);
+                    retValue += String.Format("{0} Module-Cleaning{1}-Rejected by {2}", scheduleObj.facilityidbyName, scheduleObj.scheduleId, scheduleObj.rejectedBy);
                     break;
                 case CMMS.CMMS_Status.MC_EXECUTION_STARTED:
-                    retValue = String.Format("MCS<{0}> Started By <{1}> ", scheduleObj.scheduleId, scheduleObj.executedBy);
+                    retValue = String.Format("{0} Module-Cleaning{1}-Started by {2}", scheduleObj.facilityidbyName, scheduleObj.scheduleId, scheduleObj.createdbyName);
                     break;
                 case CMMS.CMMS_Status.MC_EXECUTION_CLOSED:
-                    retValue = String.Format("MCS<{0}> Closed By <{1}> ", scheduleObj.scheduleId, scheduleObj.endedbyName);
+                    retValue = String.Format("{0} Module-Cleaning{1}-Closed by {2}", scheduleObj.facilityidbyName, scheduleObj.scheduleId, scheduleObj.endedbyName);
                     break;
                 case CMMS.CMMS_Status.MC_EXECUTION_UPDATED:
-                    retValue = String.Format("MCS<{0}> Updated By <{1}> ", scheduleObj.scheduleId, scheduleObj.updatedbyName);
+                    retValue = String.Format("{0} Module-Cleaning{1}-Updated by {2}", scheduleObj.facilityidbyName, scheduleObj.scheduleId, scheduleObj.updatedbyName);
                     break;
                 case CMMS.CMMS_Status.MC_EXECUTION_ABANDONED:
-                    retValue = String.Format("MCS<{0}> Abandoned Approved By <{1}> ", scheduleObj.scheduleId, scheduleObj.abandonedbyName);
+                    retValue = String.Format("{0} Module-Cleaning{1}-Abandoned Approved by {2}", scheduleObj.facilityidbyName, scheduleObj.scheduleId, scheduleObj.abandonedbyName);
                     break;
                 case CMMS.CMMS_Status.MC_EXECUTION_ABANDONED_REJECTED:
-                    retValue = String.Format("MCS<{0}> Abandoned Rejected By <{1}> ", scheduleObj.scheduleId, scheduleObj.abandonedbyName);
+                    retValue = String.Format("{0} Module-Cleaning{1}-Abandoned Rejected by {2}", scheduleObj.facilityidbyName, scheduleObj.scheduleId, scheduleObj.abandonedbyName);
                     break;
                 case CMMS.CMMS_Status.MC_ASSIGNED:
-                    retValue = String.Format("MCT<{0}> Assigned to <{1}> ", executionObj.executionId, executionObj.assignedTo);
+                    retValue = String.Format("{0} Module-Cleaning{1}-Assigned to {2}", executionObj.facilityidbyName, executionObj.executionId, executionObj.assignedTo);
                     break;
             }
             return retValue;
@@ -246,10 +243,10 @@ namespace CMMSAPIs.Models.Notifications
                     retValue += "<h4>Selected Material</h4>";
                     retValue += "<table style='width: 80%; margin:0 auto; border-collapse: collapse; border-spacing: 10px;' border='1'>";
                     retValue += "<tr>";
-                    retValue += "<th>Day</th>";
+                    retValue += "<th>SR.No</th>";
+                    retValue += "<th>Cleaning Day</th>";
                     retValue += "<th>No. Of Inverters</th>";
                     retValue += "<th>No. Of SMBs</th>";
-                    retValue += "<th>CleaningDay</th>";
                     retValue += "<th>No.of Modules</th>";
                     retValue += "<th>cleaningTypeName</th>";
                     int i = 0;
@@ -257,9 +254,9 @@ namespace CMMSAPIs.Models.Notifications
                     {
                         retValue += "<tr>";
                         retValue += String.Format("<td>{0}</td>", ++i);
+                        retValue += String.Format("<td>{0}</td>", item.cleaningDay);
                         retValue += String.Format("<td>{0}</td>", item.Invs);
                         retValue += String.Format("<td>{0}</td>", item.smbs);
-                        retValue += String.Format("<td>{0}</td>", item.cleaningDay);
                         retValue += String.Format("<td>{0}</td>", item.ScheduledModules);
                         retValue += String.Format("<td>{0}</td>", item.cleaningTypeName);
                     }

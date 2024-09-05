@@ -158,7 +158,7 @@ namespace CMMSAPIs.Models.Notifications
                     retValue += String.Format("{0} Vegetation{1}-Updated by {2}", planObj.facilityidbyName, planObj.planId, planObj.updatedBy);
                     break;
                 case CMMS.CMMS_Status.VEG_PLAN_DELETED:
-                    retValue = String.Format("Vegetation Plan <{0}> Deleted by {1} ", planObj.planId, planObj.deletedBy);
+                    retValue = String.Format("{0} Vegetation{1}-Deleted by {2}", planObj.facilityidbyName, planObj.planId);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_SCHEDULED:
                     retValue = String.Format("Vegetation Task <{0}> Execution started by {1} ", executionObj.id, executionObj.startedBy);
@@ -314,10 +314,10 @@ namespace CMMSAPIs.Models.Notifications
                         retValue += String.Format(template, "Abandoned By ", executionObj.abandonedBy);
                         break;
                     case CMMS.CMMS_Status.VEG_TASK_ABANDONED_REJECTED:
-                        retValue += String.Format(templateEnd, "VegetationTask Abandoned Rejected  By", executionObj.abandonedBy);
+                        retValue += String.Format(templateEnd, "Vegetation Task Abandoned Rejected  By", executionObj.abandonedBy);
                         break;
                     case CMMS.CMMS_Status.VEG_TASK_ABANDONED_APPROVED:
-                        retValue += String.Format(templateEnd, "VegetationTask Abandoned Rejected  By", executionObj.abandonedBy);
+                        retValue += String.Format(templateEnd, "Vegetation Task Abandoned Rejected  By", executionObj.abandonedBy);
                         break;
                     case CMMS.CMMS_Status.VEG_TASK_APPROVED:
                         retValue += String.Format(templateEnd, "Vegetation Task Approved By", executionObj.approvedBy);
