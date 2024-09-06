@@ -176,64 +176,77 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
         }
 
-
-
-
-
-
         public static string Status_PTW(int statusID)
         {
             CMMS.CMMS_Status status = (CMMS.CMMS_Status)statusID;
             string statusName = "";
             switch (status)
             {
-                case CMMS.CMMS_Status.SCHEDULED_LINKED_TO_PTW:
-                    statusName = "Permit Linked With Schedule";
+                case CMMS.CMMS_Status.PTW_CREATED:
+                    statusName = "Waiting for Approval";
                     break;
-                case CMMS.CMMS_Status.MC_EXECUTION_STARTED:
-                    statusName = "MC Execution Started";
+                case CMMS.CMMS_Status.PTW_ISSUED:
+                    statusName = "Issued";
                     break;
-                case CMMS.CMMS_Status.MC_EXECUTION_CLOSED:
-                    statusName = "MC Execution Closed";
+                case CMMS.CMMS_Status.PTW_REJECTED_BY_ISSUER:
+                    statusName = "Rejected By Issuer";
                     break;
-                case CMMS.CMMS_Status.MC_EXECUTION_UPDATED:
-                    statusName = "MC Execution Updated";
+                case CMMS.CMMS_Status.PTW_APPROVED:
+                    statusName = "Approved";
                     break;
-                case CMMS.CMMS_Status.MC_TASK_COMPLETED:
-                    statusName = "MC Task Completed";
+                case CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER:
+                    statusName = "Rejected By Approver";
                     break;
-                case CMMS.CMMS_Status.MC_EXECUTION_ABANDONED:
-                    statusName = "MC Execution Abandoned Approved";
+                case CMMS.CMMS_Status.PTW_CLOSED:
+                    statusName = "Closed";
                     break;
-                case CMMS.CMMS_Status.MC_EXECUTION_ABANDONED_REJECTED:
-                    statusName = "MC Execution Abandoned Rejected";
+                case CMMS.CMMS_Status.PTW_CANCELLED_BY_ISSUER:
+                    statusName = "Cancelled BY Issuer";
                     break;
-                case CMMS.CMMS_Status.MC_TASK_ABANDONED_APPROVED:
-                    statusName = "MC Task Abandoned Approved";
+                case CMMS.CMMS_Status.PTW_CANCELLED_BY_HSE:
+                    statusName = "Cancelled By HSE";
                     break;
-                case CMMS.CMMS_Status.MC_ASSIGNED:
-                    statusName = "MC Task Assigned ";
+                case CMMS.CMMS_Status.PTW_CANCELLED_BY_APPROVER:
+                    statusName = "Cancelled By Approver";
                     break;
-                case CMMS.CMMS_Status.MC_TASK_APPROVED:
-                    statusName = "MC Task Approved ";
+                case CMMS.CMMS_Status.PTW_CANCEL_REQUESTED:
+                    statusName = "Cancelled";
                     break;
-                case CMMS.CMMS_Status.MC_TASK_END_APPROVED:
-                    statusName = "MC Task End Approved ";
+                case CMMS.CMMS_Status.PTW_CANCEL_REQUEST_REJECTED:
+                    statusName = "Cancel Request Rejected";
                     break;
-                case CMMS.CMMS_Status.MC_TASK_END_REJECTED:
-                    statusName = "MC Task End Rejected ";
+                case CMMS.CMMS_Status.PTW_CANCEL_REQUEST_APPROVED:
+                    statusName = "Cancelled";
                     break;
-                case CMMS.CMMS_Status.MC_TASK_SCHEDULE_APPROVED:
-                    statusName = "MC Schedule Approved  ";
+                case CMMS.CMMS_Status.PTW_EXTEND_REQUESTED:
+                    statusName = "Requested for Extension";
                     break;
-                case CMMS.CMMS_Status.MC_TASK_SCHEDULE_REJECT:
-                    statusName = "MC Schedule Rejected  ";
+                case CMMS.CMMS_Status.PTW_EXTEND_REQUEST_APPROVE:
+                    statusName = "Approved Extension";
                     break;
-                case CMMS.CMMS_Status.MC_TASK_REJECTED:
-                    statusName = "MC Task Rejected  ";
+                case CMMS.CMMS_Status.PTW_EXTEND_REQUEST_REJECTED:
+                    statusName = "Rejected Extension";
+                    break;
+                case CMMS.CMMS_Status.PTW_LINKED_TO_JOB:
+                    statusName = "Linked to Job";
+                    break;
+                case CMMS.CMMS_Status.PTW_LINKED_TO_PM:
+                    statusName = "Linked to PM";
+                    break;
+                case CMMS.CMMS_Status.PTW_LINKED_TO_AUDIT:
+                    statusName = "Linked to Audit";
+                    break;
+                case CMMS.CMMS_Status.PTW_LINKED_TO_HOTO:
+                    statusName = "Linked to HOTO";
+                    break;
+                case CMMS.CMMS_Status.PTW_EXPIRED:
+                    statusName = "Expired";
+                    break;
+                case CMMS.CMMS_Status.PTW_UPDATED:
+                    statusName = "Updated";
                     break;
                 default:
-                    statusName = "Status Unavaialble";
+                    statusName = "Invalid";
                     break;
             }
             return statusName;

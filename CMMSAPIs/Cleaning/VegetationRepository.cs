@@ -141,7 +141,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
         }
 
-       
+
 
         internal string getLongStatus(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMMCExecutionSchedule scheduleObj)
         {
@@ -178,69 +178,74 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
         }
 
-
         public static string Status_PTW(int statusID)
         {
             CMMS.CMMS_Status status = (CMMS.CMMS_Status)statusID;
             string statusName = "";
             switch (status)
             {
-                case CMMS.CMMS_Status.VEG_PLAN_SUBMITTED:
-                    statusName = "Vegetation Plan Created";
+                case CMMS.CMMS_Status.PTW_CREATED:
+                    statusName = "Waiting for Approval";
                     break;
-                case CMMS.CMMS_Status.VEG_PLAN_APPROVED:
-                    statusName = "Vegetation Plan Approved";
+                case CMMS.CMMS_Status.PTW_ISSUED:
+                    statusName = "Issued";
                     break;
-                case CMMS.CMMS_Status.VEG_PLAN_UPDATED:
-                    statusName = "Vegetation Plan Updated";
+                case CMMS.CMMS_Status.PTW_REJECTED_BY_ISSUER:
+                    statusName = "Rejected By Issuer";
                     break;
-                case CMMS.CMMS_Status.VEG_TASK_STARTED:
-                    statusName = "Vegetation Task Started";
+                case CMMS.CMMS_Status.PTW_APPROVED:
+                    statusName = "Approved";
                     break;
-                case CMMS.CMMS_Status.VEG_EXECUTION_STARTED:
-                    statusName = "Vegetation Execution Started";
+                case CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER:
+                    statusName = "Rejected By Approver";
                     break;
-                case CMMS.CMMS_Status.VEG_EXECUTION_APPROVED:
-                    statusName = "Vegetation Execution Approved";
+                case CMMS.CMMS_Status.PTW_CLOSED:
+                    statusName = "Closed";
                     break;
-                case CMMS.CMMS_Status.VEG_EXECUTION_UPDATED:
-                    statusName = "Vegetation Execution Updated";
+                case CMMS.CMMS_Status.PTW_CANCELLED_BY_ISSUER:
+                    statusName = "Cancelled BY Issuer";
                     break;
-                case CMMS.CMMS_Status.VEG_TASK_APPROVED:
-                    statusName = "Vegetation Task Approved";
+                case CMMS.CMMS_Status.PTW_CANCELLED_BY_HSE:
+                    statusName = "Cancelled By HSE";
                     break;
-                case CMMS.CMMS_Status.VEG_EXECUTION_END_REJECTED:
-                    statusName = "Vegetation Execution Closed Rejected";
+                case CMMS.CMMS_Status.PTW_CANCELLED_BY_APPROVER:
+                    statusName = "Cancelled By Approver";
                     break;
-                case CMMS.CMMS_Status.VEG_EXECUTION_ABANDONED:
-                    statusName = "Vegetation Execution Abandoned";
+                case CMMS.CMMS_Status.PTW_CANCEL_REQUESTED:
+                    statusName = "Cancelled";
                     break;
-                case CMMS.CMMS_Status.VEG_EXECUTION_COMPLETED:
-                    statusName = "Vegetation Execution Closed";
+                case CMMS.CMMS_Status.PTW_CANCEL_REQUEST_REJECTED:
+                    statusName = "Cancel Request Rejected";
                     break;
-                case CMMS.CMMS_Status.VEG_TASK_END_APPROVED:
-                    statusName = "Vegetation Task End Approved Closed";
+                case CMMS.CMMS_Status.PTW_CANCEL_REQUEST_APPROVED:
+                    statusName = "Cancelled";
                     break;
-                case CMMS.CMMS_Status.VEG_TASK_ASSIGNED:
-                    statusName = "Vegetation Task Assigned";
+                case CMMS.CMMS_Status.PTW_EXTEND_REQUESTED:
+                    statusName = "Requested for Extension";
                     break;
-                case CMMS.CMMS_Status.VEG_TASK_ABANDONED:
-                    statusName = "Vegetation Task Abandoned";
+                case CMMS.CMMS_Status.PTW_EXTEND_REQUEST_APPROVE:
+                    statusName = "Approved Extension";
                     break;
-                case CMMS.CMMS_Status.VEG_TASK_ABANDONED_REJECTED:
-                    statusName = "Vegetation Abandoned Rejected";
+                case CMMS.CMMS_Status.PTW_EXTEND_REQUEST_REJECTED:
+                    statusName = "Rejected Extension";
                     break;
-                case CMMS.CMMS_Status.SCHEDULED_LINKED_TO_PTW:
-                    statusName = "PTW ID Linked to Schedule ID";
+                case CMMS.CMMS_Status.PTW_LINKED_TO_JOB:
+                    statusName = "Linked to Job";
                     break;
-                case CMMS.CMMS_Status.VEG_TASK_REJECTED:
-                    statusName = "Vegetation Task Rejected";
+                case CMMS.CMMS_Status.PTW_LINKED_TO_PM:
+                    statusName = "Linked to PM";
                     break;
-                case CMMS.CMMS_Status.VEG_PLAN_REJECTED:
-                    statusName = "Vegetation Plan Rejected";
+                case CMMS.CMMS_Status.PTW_LINKED_TO_AUDIT:
+                    statusName = "Linked to Audit";
                     break;
-                case CMMS.CMMS_Status.VEG_PLAN_DELETED:
-                    statusName = "Vegetation Plan Deleted";
+                case CMMS.CMMS_Status.PTW_LINKED_TO_HOTO:
+                    statusName = "Linked to HOTO";
+                    break;
+                case CMMS.CMMS_Status.PTW_EXPIRED:
+                    statusName = "Expired";
+                    break;
+                case CMMS.CMMS_Status.PTW_UPDATED:
+                    statusName = "Updated";
                     break;
                 default:
                     statusName = "Invalid";
@@ -860,7 +865,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.VEGETATION, CMMS.CMMS_Status.VEG_TASK_COMPLETED, new[] { userId }, _ViewTaskList);
 
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
 
                 Console.WriteLine(ex.ToString());
@@ -1428,7 +1433,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                             $" LEFT JOIN users as rescheduled ON rescheduled.id = ex.rescheduled" +
                             $" LEFT JOIN users as endApproved ON endApproved.id = ex.end_approved_id" +
                             $" LEFT JOIN users as endRejected ON endRejected.id = ex.end_rejected_id" +
-                            $" LEFT JOIN facilities as facility ON facility.id = ex.facilityId" + 
+                            $" LEFT JOIN facilities as facility ON facility.id = ex.facilityId" +
                             $" LEFT JOIN users as assignedTo ON assignedTo.id = ex.assignedTo where ex.id={exectionId};";
 
 
@@ -1449,7 +1454,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
             List<CMMCExecutionSchedule> _ViewSchedule = await Context.GetData<CMMCExecutionSchedule>(scheduleQuery).ConfigureAwait(false);
 
-     
+
 
             _ViewExecution[0].noOfDays = _ViewSchedule.Count;
             _ViewExecution[0].schedules = _ViewSchedule;
@@ -1523,7 +1528,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                                    $" left join cleaning_plan as cp on schedule.planId= cp.planId " +
                                    $" left join cleaning_plan as title on schedule.planId= title.planId " +
                                    $" left join cleaning_plan as description on schedule.planId= description.planId " +
-                                   $" left join facilities as facility on schedule.facilityId= facility.id " + 
+                                   $" left join facilities as facility on schedule.facilityId= facility.id " +
                                    $" where schedule.scheduleId = {scheduleId} group by schedule.scheduleId;";
 
             List<CMMCExecutionSchedule> _ViewSchedule = await Context.GetData<CMMCExecutionSchedule>(scheduleQuery).ConfigureAwait(false);
@@ -1591,7 +1596,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MC_PLAN, planid, 0, 0, "Plan Deleted", CMMS.CMMS_Status.VEG_PLAN_DELETED, userID);
-     
+
 
 
             CMDefaultResponse response = new CMDefaultResponse(planid, CMMS.RETRUNSTATUS.SUCCESS, $"Plan Deleted");
