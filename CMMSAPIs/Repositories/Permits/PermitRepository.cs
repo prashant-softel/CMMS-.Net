@@ -177,7 +177,7 @@ namespace CMMSAPIs.Repositories.Permits
             switch (status)
             {
                 case CMMS.CMMS_Status.PTW_CREATED:
-                    retValue += String.Format("PTW{0} requested by <{1}>", permitId, permitObj.issuedByName);
+                    retValue = String.Format("PTW{0} requested by <{1}>", permitId, permitObj.issuedByName);
                     break;
                 case CMMS.CMMS_Status.PTW_ISSUED:
                     retValue = String.Format("PTW{0} issued by <{1}>", permitId, permitObj.issuedByName);
@@ -1704,10 +1704,6 @@ namespace CMMSAPIs.Repositories.Permits
                 updatePermitQry += $"facilityId = {request.facility_id}, ";
             if (request.blockId > 0)
                 updatePermitQry += $"blockId = {request.blockId}, ";
-            if (request.start_datetime != null)
-                updatePermitQry += $"startDate = '{((DateTime)request.start_datetime).ToString("yyyy-MM-dd HH:mm:ss")}', ";
-            if (request.end_datetime != null)
-                updatePermitQry += $"endDate = '{((DateTime)request.end_datetime).ToString("yyyy-MM-dd HH:mm:ss")}', ";
             if (request.description != null && request.description != "")
                 updatePermitQry += $"description = '{request.description}', ";
             if (request.job_type_id > 0)
@@ -1716,26 +1712,37 @@ namespace CMMSAPIs.Repositories.Permits
                 updatePermitQry += $"typeId = {request.typeId}, ";
             if (request.sop_type_id > 0)
                 updatePermitQry += $"TBTId = {request.sop_type_id}, ";
-            if (request.issuer_id > 0)
-                updatePermitQry += $"issuedById = {request.issuer_id}, ";
-            if (request.approver_id > 0)
-                updatePermitQry += $"approvedById = {request.approver_id}, ";
-            if (request.resubmit == true)
-                updatePermitQry += $"status = {(int)CMMS.CMMS_Status.PTW_CREATED}, ";
             if (request.physical_iso_remark != null)
                 updatePermitQry += $"physicalIsoRemark = '{request.physical_iso_remark}', ";
-
-
-            updatePermitQry += $" TBT_Done_By = {request.TBT_Done_By},";
-            int id = request.TBT_Done_By;
-            if (id != null && id != 0)
+            if (request.start_datetime != null)
+                updatePermitQry += $"startDate = '{((DateTime)request.start_datetime).ToString("yyyy-MM-dd HH:mm:ss")}', ";
+            if (request.end_datetime != null)
+                updatePermitQry += $"endDate = '{((DateTime)request.end_datetime).ToString("yyyy-MM-dd HH:mm:ss")}', ";
+            if (request.resubmit == true)
             {
-
-                updatePermitQry += $"TBT_Done_Check=1,";
+                updatePermitQry += $"status = {(int)CMMS.CMMS_Status.PTW_CREATED}, ";
+                updatePermitQry += $"approvedById = 0, ";
+                string resetTime = "'0001-01-01 00:00:00'";
+                //reset tbt
+                updatePermitQry += $" TBT_Done_By = 0,";
+                updatePermitQry += $"TBT_Done_Check = 0,";
+                updatePermitQry += $"TBT_Done_At = {resetTime} ";
             }
-
-            string TBT_Done_At = (request.TBT_Done_At == null) ? "'0001-01-01 00:00:00'" : "'" + ((DateTime)request.TBT_Done_At).ToString("yyyy-MM-dd HH:mm:ss") + "'";
-            updatePermitQry += $"TBT_Done_At = {TBT_Done_At} ";
+            else
+            {
+                /*if (request.issuer_id > 0)
+                    updatePermitQry += $"issuedById = {request.issuer_id}, ";
+                if (request.approver_id > 0)
+                    updatePermitQry += $"approvedById = {request.approver_id}, ";*/
+                int id = request.TBT_Done_By;
+                if (id != null && id != 0)
+                {
+                    updatePermitQry += $" TBT_Done_By = {request.TBT_Done_By},";
+                    updatePermitQry += $"TBT_Done_Check=1,";
+                }
+                string TBT_Done_At = (request.TBT_Done_At == null) ? "'0001-01-01 00:00:00'" : "'" + ((DateTime)request.TBT_Done_At).ToString("yyyy-MM-dd HH:mm:ss") + "'";
+                updatePermitQry += $"TBT_Done_At = {TBT_Done_At} ";
+            }
 
             updatePermitQry = updatePermitQry.Substring(0, updatePermitQry.Length - 1);
             updatePermitQry += $" where id = {request.permit_id}; ";
@@ -1865,7 +1872,7 @@ namespace CMMSAPIs.Repositories.Permits
                 System.Text.StringBuilder sb = new System.Text.StringBuilder(request.description);
                 sb.Append(" " + request.comment);
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.permit_id, 0, 0, sb.ToString(), CMMS.CMMS_Status.PTW_RESUBMIT, userID);
-                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_CREATED, new[] { userID }, permitDetails);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_RESUBMIT, new[] { userID }, permitDetails);
                 response = new CMDefaultResponse(request.permit_id, CMMS.RETRUNSTATUS.SUCCESS, $"Permit Resubmitted for Approval");
 
             }
@@ -1874,7 +1881,7 @@ namespace CMMSAPIs.Repositories.Permits
                 System.Text.StringBuilder sb = new System.Text.StringBuilder(request.physical_iso_remark);
                 sb.Append(" " + request.comment);
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.permit_id, 0, 0, sb.ToString(), CMMS.CMMS_Status.PTW_UPDATED_WITH_TBT, userID);
-                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_UPDATED, new[] { userID }, permitDetails);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_UPDATED_WITH_TBT, new[] { userID }, permitDetails);
                 // response = new CMDefaultResponse(request.permit_id, CMMS.RETRUNSTATUS.SUCCESS, $"Permit Updated Successfully");
                 response = new CMDefaultResponse(request.permit_id, CMMS.RETRUNSTATUS.SUCCESS, responseText);
 

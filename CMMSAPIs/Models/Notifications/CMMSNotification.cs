@@ -170,8 +170,8 @@ namespace CMMSAPIs.Models.Notifications
 
             Body += HTMLBody;
             string url = getURL(args);
-            string disclaimer = "Information contained in this email is strictly confidential, proprietary of Hero Future Energies and intended solely for the use of the addressee. If you are not the intended recipient, please notify the sender, delete this mail from your system immediately and do not disseminate, distribute, or copy this e-mail/its contents.";
-            Body += "</div><br><div><p style='text-align:center;'>visit:<a href=" + url + "> click here </a></p></div><br><p style='padding:0.5rem; '><b>Disclaimer:</b> " + disclaimer + " </p>";
+            //string disclaimer = "Information contained in this email is strictly confidential, proprietary of Hero Future Energies and intended solely for the use of the addressee. If you are not the intended recipient, please notify the sender, delete this mail from your system immediately and do not disseminate, distribute, or copy this e-mail/its contents.";
+            //Body += "</div><br><div><p style='text-align:center;'>visit:<a href=" + url + "> click here </a></p></div><br><p style='padding:0.5rem; '><b>Disclaimer:</b> " + disclaimer + " </p>";
 
             CMMailRequest request = new CMMailRequest();
 
@@ -188,7 +188,7 @@ namespace CMMSAPIs.Models.Notifications
             {
                 var res = MailService.SendEmailAsync(request, _settings);
 
-                if (res.Exception != null)
+                if (res != null && res.Exception != null)
                 {
                     if (res.Exception.InnerExceptions.Count > 0)
                     {
