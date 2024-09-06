@@ -134,7 +134,7 @@ namespace CMMSAPIs.Repositories.PM
 
             try
             {
-                CMPMPlanDetail _ViewPMPlan = await GetPMPlanDetail(pm_plan.plan_id, facilityTimeZone);
+                CMPMPlanDetail _ViewPMPlan = await GetPMPlanDetail(id, facilityTimeZone);
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PM_PLAN, CMMS.CMMS_Status.PM_PLAN_CREATED, new[] { userID }, _ViewPMPlan);
             }
 
@@ -378,7 +378,7 @@ namespace CMMSAPIs.Repositories.PM
                                     "RIGHT JOIN frequency ON a.PM_Frequecy_id = frequency.id " +
                                     "WHERE a.PM_Schedule_date = (SELECT CASE WHEN MAX(b.PM_Schedule_date) IS NOT NULL THEN MAX(b.PM_Schedule_date) ELSE NULL END AS schdate " +
                                     "FROM pm_schedule as b WHERE a.Asset_id = b.Asset_id AND a.PM_Frequecy_id = b.PM_Frequecy_id AND b.status NOT IN " +
-                                    $"({(int)CMMS.CMMS_Status.PM_CANCELLED}, {(int)CMMS.CMMS_Status.PM_APPROVED}) AND " +
+                                    $"({(int)CMMS.CMMS_Status.PM_CANCELLED}, {(int)CMMS.CMMS_Status.PM_CLOSE_APPROVED}) AND " +
                                     $"PM_Rescheduled = 0) AND a.Asset_id = {schedule.asset_id} GROUP BY frequency.id ORDER BY frequency.id;";
                 List<ScheduleFrequencyData> _freqData = await Context.GetData<ScheduleFrequencyData>(query2).ConfigureAwait(false);
                 schedule.frequency_dates = _freqData;

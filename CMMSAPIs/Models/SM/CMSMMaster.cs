@@ -293,6 +293,8 @@ namespace CMMSAPIs.Models.SM
     {
         public int ID { get; set; }
         public int facilityId { get; set; }
+        public string facilityName { get; set; }
+        
         public int requested_by_emp_ID { get; set; }
         public string approver_name { get; set; }
         public string? requestd_date { get; set; }
@@ -331,6 +333,8 @@ namespace CMMSAPIs.Models.SM
         public int RejectedByEmpID { get; set; }
         public int IssueApprovedByEmpID { get; set; }
         public int IssueRejectedByEmpID { get; set; }
+        public DateTime? issue_approved_date { get; set; }
+        public DateTime? issue_rejected_date { get; set; }
         public List<CMMRSItems> CMMRSItems { get; set; }
     }
 

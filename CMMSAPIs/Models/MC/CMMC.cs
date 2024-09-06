@@ -65,7 +65,8 @@ namespace CMMSAPIs.Models.MC
 
         public int resubmit { get; set; }
         public bool scheduleAdded = false;
-
+        public string facilityidbyName { get; set; }
+        public int facility_id { get; set; }
 
         public List<CMMCSchedule> schedules { get; set; }
 
@@ -179,11 +180,23 @@ namespace CMMSAPIs.Models.MC
         public string status_short_ptw { get; set; }
         public string remark { get; set; }
         public int status { get; set; }
-        public string rejectedById { get; set; }
+        public string rejectedBy { get; set; }
         public DateTime? rejectedAt { get; set; }
-        public string approvedById { get; set; }
+        public string approvedBy { get; set; }
         public DateTime? approvedAt { get; set; }
         public string status_short { get; set; }
+        public string status_long_schedule { get; set; }
+        public int facility_id { get; set; }
+        public string executedBy { get; set; }
+        public string createdbyName { get; set; }
+        public string startedbyName { get; set; }
+        public string endedbyName { get; set; }
+        public string abandonedbyName { get; set; }
+        public string updatedbyName { get; set; }
+        public string title { get; set; }
+        public string description { get; set; }
+        public string facilityidbyName { get; set; }
+        
         public List<CMMCExecutionEquipment> equipments { get; set; }
     }
 
@@ -240,7 +253,7 @@ namespace CMMSAPIs.Models.MC
         public DateTime startedAt { get; set; }
         public string abandonedBy { get; set; }
         public DateTime abandonedAt { get; set; }
-        public string rejectedById { get; set; }
+        public string rejectedBy { get; set; }
         public DateTime? rejectedAt { get; set; }
         public string approvedById { get; set; }
         public DateTime? approvedAt { get; set; }
@@ -249,7 +262,13 @@ namespace CMMSAPIs.Models.MC
         public int status { get; set; }     //Completed
         public string status_short { get; set; }
         public string status_long { get; set; }
-
+        public int facility_id { get; set; }
+        public string approvedBy { get; set; }
+        public string rescheduledBy { get; set; }
+        public string endapprovedbyName { get; set; }
+        public string endrejectedbyName { get; set; }
+        public string facilityidbyName { get; set; }
+        
         // public string siteName { get; set; }
         //public List<CMMCEquipmentDetails> smbIds;
         public List<CMMCExecutionSchedule> schedules { get; set; }

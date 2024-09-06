@@ -160,6 +160,24 @@ namespace CMMSAPIs.Controllers.Vegetation
                 throw;
             }
         }
+
+        [Route("GetVegScheduleDetails")]
+        [HttpGet]
+        public async Task<IActionResult> GetVegScheduleDetails(int scheduleId, int facility_id)
+        {
+            try
+            {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+                var data = await _vegetationBS.GetScheduleDetails(scheduleId, facilitytimeZone);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+
+            }
+        }
+
         [Route("GetVegEquipmentList")]
         [HttpGet]
         public async Task<IActionResult> GetVegEquipmentList(int facilityId)

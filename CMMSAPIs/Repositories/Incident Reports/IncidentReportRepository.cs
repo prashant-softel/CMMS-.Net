@@ -306,10 +306,10 @@ namespace CMMSAPIs.Repositories.Incident_Reports
             {
                 try
                 {
-                    string investigation_IQuery = "INSERT INTO investigation_team (incidents_id, person_id, person_type, designation, investigation_date,person_name) ";
+                    string investigation_IQuery = "INSERT INTO investigation_team (incidents_id, designation,person_name) ";
                     foreach (var item in request.investigation_team)
                     {
-                        investigation_IQuery = investigation_IQuery + $" select {incident_id}, '{item.designation}' , '{item.person_name}' UNION ALL ";
+                        investigation_IQuery = investigation_IQuery + $" select {incident_id}, '{item.designation}' , '{item.name}' UNION ALL ";
                     }
                     investigation_IQuery = investigation_IQuery.TrimEnd("UNION ALL ".ToCharArray());
                     var Query_result = await Context.ExecuteNonQry<int>(investigation_IQuery).ConfigureAwait(false);
@@ -603,10 +603,10 @@ namespace CMMSAPIs.Repositories.Incident_Reports
             {
                 try
                 {
-                    string investigation_IQuery = "INSERT INTO investigation_team (incidents_id, person_id, person_type, designation, investigation_date,person_name) ";
+                    string investigation_IQuery = "INSERT INTO investigation_team (incidents_id, designation,person_name) ";
                     foreach (var item in request.investigation_team)
                     {
-                        investigation_IQuery = investigation_IQuery + $" select {incident_id}, '{item.designation}' , '{item.person_name}' UNION ALL ";
+                        investigation_IQuery = investigation_IQuery + $" select {incident_id}, '{item.designation}' , '{item.name}' UNION ALL ";
                     }
                     investigation_IQuery = investigation_IQuery.TrimEnd("UNION ALL ".ToCharArray());
                     var Query_result = await Context.ExecuteNonQry<int>(investigation_IQuery).ConfigureAwait(false);
@@ -619,13 +619,13 @@ namespace CMMSAPIs.Repositories.Incident_Reports
 
             if (incident_id > 0)
             {
-                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INCIDENT_REPORT, incident_id, 0, 0, "Incident Report Created", CMMS.CMMS_Status.IR_CREATED_INITIAL, userId);
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INCIDENT_REPORT, incident_id, 0, 0, "Incident Report updated", CMMS.CMMS_Status.IR_CREATED_INITIAL, userId);
 
                 CMViewIncidentReport _IncidentReportDetails = await GetIncidentDetailsReport(incident_id, "");
 
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INCIDENT_REPORT, CMMS.CMMS_Status.IR_CREATED_INITIAL, new[] { userId }, _IncidentReportDetails);
 
-                response = new CMDefaultResponse(incident_id, CMMS.RETRUNSTATUS.SUCCESS, "Created Incident Investigation Report");
+                response = new CMDefaultResponse(incident_id, CMMS.RETRUNSTATUS.SUCCESS, "Update Incident Investigation Report");
             }
             else
             {
@@ -1038,7 +1038,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
                     {
                         StringBuilder investigation_UQuery = new StringBuilder();
                         investigation_UQuery.Append("UPDATE investigation_team ");
-                        investigation_UQuery.Append("SET  person_name = '" + item.person_name + "', ");
+                        investigation_UQuery.Append("SET  person_name = '" + item.name + "', ");
                         investigation_UQuery.Append("designation = '" + item.designation + "' ");
                         investigation_UQuery.Append("WHERE id = " + item.investigation_item_id);
                         var investigation_UQuery_result = await Context.ExecuteNonQry<int>(investigation_UQuery.ToString()).ConfigureAwait(false);
@@ -1311,7 +1311,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
         internal async Task<List<CMInvestigation_team>> Getinvestigation_team(int incidents_id)
         {
             //string selectqry = "select i.id as investigation_item_id, incidents_id,case when person_type = 1 then 'Employee' when person_type = 2 then 'Contractor' \r\n when person_type = 3 then 'Other' else '' end as person_type_name, person_id, person_type, designation, investigation_date,\r\n case when i.person_type =1 then concat(u.firstName, ' ', u.lastname)\r\n when i.person_type =2 then b.name\r\n else person_name\r\n end as person_name \r\n from investigation_team i\r\nleft join users u on u.id = i.person_id\r\nleft join business b on b.id = i.person_id  where incidents_id = " + incidents_id + ";";
-            string selectqry = "select i.id as investigation_item_id, incidents_id, person_id, designation ,person_name from investigation_team where incidents_id = " + incidents_id + ";";
+            string selectqry = "select id as investigation_item_id, incidents_id, designation ,person_name as name from investigation_team where incidents_id = " + incidents_id + ";";
             List<CMInvestigation_team> result = await Context.GetData<CMInvestigation_team>(selectqry).ConfigureAwait(false);
             return result;
         }

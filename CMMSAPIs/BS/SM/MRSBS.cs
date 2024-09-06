@@ -21,13 +21,13 @@ namespace CMMSAPIs.BS.SM
         Task<CMMRSList> getMRSDetails(int ID, string facilitytime);
         Task<CMMRSReturnList> getReturnDataByID(int ID, string facilitytime);
         Task<CMMRSAssetTypeList> getAssetTypeByItemID(int ItemID);
-        Task<CMDefaultResponse> CreateReturnMRS(CMMRS request, int UserID);
+        Task<CMDefaultResponse> CreateReturnMRS(CMMRS request, int UserID, string facilitytimeZone);
         Task<CMDefaultResponse> CreateReturnFaultyMRS(CMMRS request, int UserID);
-        Task<CMDefaultResponse> UpdateReturnMRS(CMMRS request, int UserID);
+        Task<CMDefaultResponse> UpdateReturnMRS(CMMRS request, int UserID, string facilitytimeZone);
         Task<CMDefaultResponse> mrsApproval(CMMrsApproval request, int userId, string facilitytimeZone);
         Task<CMDefaultResponse> mrsReject(CMApproval request, int userId, string facilitytimeZone);
-        Task<CMDefaultResponse> ApproveMRSReturn(CMApproval request, int UserID);
-        Task<CMDefaultResponse> RejectMRSReturn(CMApproval request, int UserID);
+        Task<CMDefaultResponse> ApproveMRSReturn(CMApproval request, int UserID, string facilitytimeZone);
+        Task<CMDefaultResponse> RejectMRSReturn(CMApproval request, int UserID, string facilitytimeZone);
         void UpdateAssetStatus(int assetItemID, int status);
         Task<CMMRS> getLastTemplateData(int ID);
         Task<List<CMAssetItem>> GetAssetItems(int facility_ID, bool isGroupByCode = false);
@@ -199,13 +199,13 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<CMDefaultResponse> CreateReturnMRS(CMMRS request, int UserID)
+        public async Task<CMDefaultResponse> CreateReturnMRS(CMMRS request, int UserID, string facilitytimeZone)
         {
             try
             {
                 using (var repos = new MRSRepository(getDB))
                 {
-                    return await repos.CreateReturnMRS(request, UserID);
+                    return await repos.CreateReturnMRS(request, UserID, facilitytimeZone);
                 }
             }
             catch (Exception ex)
@@ -229,13 +229,13 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<CMDefaultResponse> UpdateReturnMRS(CMMRS request, int UserID)
+        public async Task<CMDefaultResponse> UpdateReturnMRS(CMMRS request, int UserID, string facilitytimeZone)
         {
             try
             {
                 using (var repos = new MRSRepository(getDB))
                 {
-                    return await repos.UpdateReturnMRS(request, UserID);
+                    return await repos.UpdateReturnMRS(request, UserID, facilitytimeZone);
                 }
             }
             catch (Exception ex)
@@ -273,13 +273,13 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<CMDefaultResponse> ApproveMRSReturn(CMApproval request, int UserID)
+        public async Task<CMDefaultResponse> ApproveMRSReturn(CMApproval request, int UserID, string facilitytimeZone)
         {
             try
             {
                 using (var repos = new MRSRepository(getDB))
                 {
-                    return await repos.ApproveMRSReturn(request, UserID);
+                    return await repos.ApproveMRSReturn(request, UserID, facilitytimeZone);
                 }
             }
             catch (Exception ex)
@@ -288,13 +288,13 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<CMDefaultResponse> RejectMRSReturn(CMApproval request, int UserID)
+        public async Task<CMDefaultResponse> RejectMRSReturn(CMApproval request, int UserID, string facilitytimeZone)
         {
             try
             {
                 using (var repos = new MRSRepository(getDB))
                 {
-                    return await repos.RejectMRSReturn(request, UserID);
+                    return await repos.RejectMRSReturn(request, UserID, facilitytimeZone);
                 }
             }
             catch (Exception ex)

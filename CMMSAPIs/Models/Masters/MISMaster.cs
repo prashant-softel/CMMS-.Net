@@ -758,8 +758,10 @@ namespace CMMSAPIs.Models.Masters
         public int PetrolConsumedAtSite { get; set; }
         public int Status { get; set; }
         public int CreatedBy { get; set; }
+        public string Submited_by { get; set; }
         public DateTime CreatedAt { get; set; }
         public int UpdatedBy { get; set; }
+        public string Updated_by_name { get; set; }
         public DateTime UpdatedAt { get; set; }
     }
 
@@ -770,6 +772,7 @@ namespace CMMSAPIs.Models.Masters
         public int month_id { get; set; }
         public int facility_id { get; set; }
         public string facility_name { get; set; }
+        public string Submited_by { get; set; }
         public int year { get; set; }
         public int KaizensImplemented { get; set; }
         public int CostForImplementation { get; set; }
@@ -778,6 +781,7 @@ namespace CMMSAPIs.Models.Masters
         public int CreatedBy { get; set; }
         public DateTime CreatedAt { get; set; }
         public int UpdatedBy { get; set; }
+        public string Updated_by_name { get; set; }
         public DateTime UpdatedAt { get; set; }
     }
     public class PlantationData
@@ -794,7 +798,9 @@ namespace CMMSAPIs.Models.Masters
         public int Status { get; set; }
         public int CreatedBy { get; set; }
         public DateTime CreatedAt { get; set; }
+        public string Submited_by { get; set; }
         public int UpdatedBy { get; set; }
+        public string Updated_by_name { get; set; }
         public DateTime UpdatedAt { get; set; }
     }
     public class VisitsAndNotices
@@ -813,8 +819,10 @@ namespace CMMSAPIs.Models.Masters
         public int AnyOther { get; set; }
         public int Status { get; set; }
         public int CreatedBy { get; set; }
+        public string Submited_by { get; set; }
         public DateTime CreatedAt { get; set; }
         public int UpdatedBy { get; set; }
+        public string Updated_by_name { get; set; }
         public DateTime UpdatedAt { get; set; }
     }
 
@@ -832,8 +840,10 @@ namespace CMMSAPIs.Models.Masters
         public int OccupationalIllnesses { get; set; }
         public int Status { get; set; }
         public int CreatedBy { get; set; }
+        public string Submited_by { get; set; }
         public DateTime CreatedAt { get; set; }
         public int UpdatedBy { get; set; }
+        public string Updated_by_name { get; set; }
         public DateTime UpdatedAt { get; set; }
     }
     public class CumalativeReport

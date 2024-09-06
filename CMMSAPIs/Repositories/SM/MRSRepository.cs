@@ -39,7 +39,8 @@ namespace CMMSAPIs.Repositories.SM
             {
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_List[i].status);
                 string _shortStatus = getShortStatus(CMMS.CMMS_Modules.SM_MRS, _Status);
-                string _status_long = getLongStatus(_Status, _List[i].ID);
+                CMMRSList m_MRSObj = new CMMRSList();
+                string _status_long = getLongStatus(_Status, _List[i].ID, m_MRSObj);
                 _List[i].status_short = _shortStatus;
                 _List[i].status_long = _status_long;
                 if (_List[i].is_mrs_return == 0)
@@ -267,7 +268,7 @@ namespace CMMSAPIs.Repositories.SM
             switch (m_notificationID)
             {
                 case CMMS.CMMS_Status.MRS_SUBMITTED:
-                    retValue = "Submitted";
+                    retValue = "Requested";
                     break;
                 case CMMS.CMMS_Status.MRS_REQUEST_REJECTED:
                     retValue = "Request Rejected";
@@ -279,10 +280,10 @@ namespace CMMSAPIs.Repositories.SM
                     retValue = "Request Issued";
                     break;
                 case CMMS.CMMS_Status.MRS_REQUEST_ISSUED_REJECTED:
-                    retValue = "Request Issued Rejected";
+                    retValue = "Issue Rejected";
                     break;
                 case CMMS.CMMS_Status.MRS_REQUEST_ISSUED_APPROVED:
-                    retValue = "Request Issued Approved";
+                    retValue = "Issue Approved";
                     break;
                 default:
                     retValue = "Unknown <" + m_notificationID + ">";
@@ -702,16 +703,6 @@ namespace CMMSAPIs.Repositories.SM
         }
         internal async Task<List<CMMRSItems>> getMRSItems(int ID, string facilitytimeZone)
         {
-            //string stmt = "SELECT smi.ID,smi.return_remarks,smi.mrs_return_ID,smi.finalRemark,smi.asset_item_ID,smi.asset_MDM_code," +
-            //    "t1.serial_number,smi.returned_qty,smi.available_qty,smi.used_qty,smi.ID,smi.issued_qty,sm.flag as status,DATE_FORMAT(sm.returnDate,'%Y-%m-%d') as returnDate," +
-            //    "sm.approval_status,DATE_FORMAT(sm.approved_date,'%Y-%m-%d') as approved_date,DATE_FORMAT(sm.requested_date,'%Y-%m-%d') as issued_date," +
-            //    "DATE_FORMAT(sm.returnDate, '%Y-%m-%d') as returnDate, smi.requested_qty,if(smi.approval_required = 1,'Yes','No') as approval_required,\r\n " +
-            //    "t1.asset_name,t1.asset_type_ID,t1.asset_type,COALESCE(t1.file_path,'') as file_path,t1.Asset_master_id , smi.is_splited\r\n        FROM smrsitems smi\r\n " +
-            //    " LEFT JOIN smmrs sm ON sm.ID = smi.mrs_ID         \r\n        LEFT JOIN (SELECT sai.ID as asset_item_ID, sai.serial_number, sam.asset_name, " +
-            //    "sam.asset_type_ID,sat.asset_type,COALESCE(file.file_path,'') as file_path,file.Asset_master_id\r\n        FROM smassetitems sai  " +
-            //    "LEFT JOIN smassetmasters sam ON sam.asset_code = sai.asset_code LEFT JOIN smassetmasterfiles  file ON file.Asset_master_id =  sam.ID " +
-            //    "LEFT JOIN smassettypes sat ON sat.ID = sam.asset_type_ID) as t1 ON t1.asset_item_ID = smi.asset_item_ID" +
-            //    "  WHERE smi.mrs_ID = " + ID + " /*GROUP BY smi.ID*/";
 
             string stmt = "SELECT smi.ID,smi.return_remarks,smi.mrs_return_ID,smi.finalRemark,smi.asset_item_ID, smtd.fromActorID,smtd.fromActorType," +
                 "smi.asset_MDM_code as asset_code,smi.returned_qty," +
@@ -734,7 +725,9 @@ namespace CMMSAPIs.Repositories.SM
             {
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_List[i].status);
                 string _shortStatus = getShortStatus(CMMS.CMMS_Modules.SM_MRS, _Status);
-                string _status_long = getLongStatus(_Status, _List[i].ID);
+                CMMRSList m_MRSObj = new CMMRSList();
+                //var data=m_MRSObj.CMMRSItems;
+                string _status_long = getLongStatus(_Status, _List[i].ID, m_MRSObj);
                 _List[i].status_short = _shortStatus;
                 _List[i].status_long = _status_long;
             }
@@ -776,7 +769,8 @@ namespace CMMSAPIs.Repositories.SM
             {
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_List[i].status);
                 string _shortStatus = getShortStatus(CMMS.CMMS_Modules.SM_MRS, _Status);
-                string _status_long = getLongStatus(_Status, _List[i].ID);
+                CMMRSList m_MRSObj = new CMMRSList();
+                string _status_long = getLongStatus(_Status, _List[i].ID, m_MRSObj);
                 _List[i].status_short = _shortStatus;
                 _List[i].status_long = _status_long;
             }
@@ -837,29 +831,70 @@ namespace CMMSAPIs.Repositories.SM
             //    _List[i].status_short = _shortStatus;
             //}
             //return _List;
-            string stmt = "SELECT sm.ID,sm.requested_by_emp_ID,CONCAT(ed1.firstName,' ',ed1.lastName) as approver_name,DATE_FORMAT(sm.requested_date,'%Y-%m-%d %H:%i') as requestd_date," +
-    "DATE_FORMAT(sm.returnDate,'%Y-%m-%d %H:%i') as returnDate,if(sm.approval_status != '',DATE_FORMAT(sm.approved_date,'%Y-%m-%d %H:%i'),'') as approval_date,sm.approval_status," +
-    "sm.approval_comment,CONCAT(ed.firstName,' ',ed.lastName) as requested_by_name, sm.status, sm.activity, sm.whereUsedType," +
-    " case when sm.whereUsedType = 1 then 'Job' when sm.whereUsedType = 2 then 'PM' when sm.whereUsedType = 4 then 'JOBCARD' when sm.whereUsedType = 27 then 'PMTASK' else 'Invalid' end as whereUsedTypeName,  sm.whereUsedRefID, sm.remarks " +
-    ", DATE_FORMAT(sm.issuedAt,'%Y-%m-%d %H:%i') as issued_date, CONCAT(issuedUser.firstName,' ',issuedUser.lastName) as issued_name " +
-    ", sm.updated_by_emp_ID, CONCAT(updateUser.firstName, ' ', updateUser.lastName) as request_updated_by_name, sm.rejected_by_emp_ID , CONCAT(rejectedByUser.firstName, ' ', rejectedByUser.lastName) as request_rejected_by_name, sm.issue_approved_by_emp_ID, CONCAT(issuedApproveUser.firstName, ' ', issuedApproveUser.lastName) as issue_appoved_by_name , sm.issue_rejected_by_emp_ID, CONCAT(issuedRejectUser.firstName, ' ', issuedRejectUser.lastName) as issue_rejected_by_name " +
-    " FROM smmrs sm LEFT JOIN users ed ON ed.id = sm.requested_by_emp_ID " +
-    " LEFT JOIN users ed1 ON ed1.id = sm.approved_by_emp_ID " +
-    " LEFT JOIN users issuedUser ON issuedUser.id = sm.issued_by_emp_ID " +
-    " LEFT JOIN users updateUser ON updateUser.id = sm.updated_by_emp_ID " +
-    " LEFT JOIN users rejectedByUser ON rejectedByUser.id = sm.rejected_by_emp_ID " +
-    " LEFT JOIN users issuedApproveUser ON issuedApproveUser.id = sm.issue_approved_by_emp_ID " +
-    " LEFT JOIN users issuedRejectUser ON issuedRejectUser.id = sm.issue_rejected_by_emp_ID " +
-    "WHERE sm.id = " + ID + ";";
+            string stmt = "SELECT fc.name AS facilityName, " +
+                          "facility_id AS facilityid, " +
+                          "sm.ID, " +
+                          "sm.requested_by_emp_ID, " +
+                          "CONCAT(ed1.firstName, ' ', ed1.lastName) AS approver_name, " +
+                          "DATE_FORMAT(sm.requested_date, '%Y-%m-%d %H:%i') AS requestd_date, " +
+                          "DATE_FORMAT(sm.returnDate, '%Y-%m-%d %H:%i') AS returnDate, " +
+                          "IF(sm.approval_status != '', " +
+                          "DATE_FORMAT(sm.approved_date, '%Y-%m-%d %H:%i'), '') AS approval_date, " +
+                          "sm.approval_status, " +
+                          "sm.approval_comment, " +
+                          "sm.status, " +
+                          "sm.activity, " +
+                          "sm.is_mrs_return, " +
+                          "sm.whereUsedType, " +
+                          "CASE " +
+                              "WHEN sm.whereUsedType = 1 THEN 'Job' " +
+                              "WHEN sm.whereUsedType = 2 THEN 'PM' " +
+                              "WHEN sm.whereUsedType = 4 THEN 'JOBCARD' " +
+                              "WHEN sm.whereUsedType = 27 THEN 'PMTASK' " +
+                              "ELSE 'Invalid' " +
+                          "END AS whereUsedTypeName, " +
+                          "sm.whereUsedRefID, " +
+                          "sm.remarks, " +
+                          "DATE_FORMAT(sm.issuedAt, '%Y-%m-%d %H:%i') AS issued_date, " +
+                          "CONCAT(ed.firstName, ' ', ed.lastName) AS requested_by_name, " +
+                          "CONCAT(issuedUser.firstName, ' ', issuedUser.lastName) AS issued_name, " +
+                          "sm.issuedAt, " +
+                          "sm.updated_by_emp_ID, " +
+                          "CONCAT(updateUser.firstName, ' ', updateUser.lastName) AS request_updated_by_name, " +
+                          "sm.rejected_by_emp_ID, " +
+                          "CONCAT(rejectedByUser.firstName, ' ', rejectedByUser.lastName) AS request_rejected_by_name, " +
+                          "sm.issue_approved_by_emp_ID, " +
+                          "CONCAT(issuedApproveUser.firstName, ' ', issuedApproveUser.lastName) AS issue_approved_by_name, " +
+                          "sm.issue_approved_date, " +
+                          "sm.issue_rejected_by_emp_ID, " +
+                          "CONCAT(issuedRejectUser.firstName, ' ', issuedRejectUser.lastName) AS issue_rejected_by_name, " +
+                          "sm.issue_rejected_date " +
+                          "FROM smmrs sm " +
+                          "LEFT JOIN users ed ON ed.id = sm.requested_by_emp_ID " +
+                          "LEFT JOIN users ed1 ON ed1.id = sm.approved_by_emp_ID " +
+                          "LEFT JOIN facilities fc ON fc.id = sm.facility_ID " +
+                          "LEFT JOIN users issuedUser ON issuedUser.id = sm.issued_by_emp_ID " +
+                          "LEFT JOIN users updateUser ON updateUser.id = sm.updated_by_emp_ID " +
+                          "LEFT JOIN users rejectedByUser ON rejectedByUser.id = sm.rejected_by_emp_ID " +
+                          "LEFT JOIN users issuedApproveUser ON issuedApproveUser.id = sm.issue_approved_by_emp_ID " +
+                          "LEFT JOIN users issuedRejectUser ON issuedRejectUser.id = sm.issue_rejected_by_emp_ID " +
+                          "WHERE sm.id = " + ID + ";";
             List<CMMRSList> _List = await Context.GetData<CMMRSList>(stmt).ConfigureAwait(false);
             for (var i = 0; i < _List.Count; i++)
             {
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_List[i].status);
                 string _shortStatus = getShortStatus(CMMS.CMMS_Modules.SM_MRS, _Status);
-                string _status_long = getLongStatus(_Status, _List[i].ID);
+                //CMMRSList m_MRSObj = new CMMRSList();
+                string _status_long = getLongStatus(_Status, _List[i].ID, _List[0]);
                 _List[i].status_short = _shortStatus;
                 _List[i].status_long = _status_long;
+               /* if (_List[i].is_mrs_return == 1)
+                {
+                    _List[i].CMMRSItems = await getMRSItemsReturn(_List[i].CMMRSItems[i].mrs_return_ID, facilitytimeZone);
+                }*/
                 _List[i].CMMRSItems = await getMRSItems(_List[i].ID, facilitytimeZone);
+                
+                
             }
 
             return _List[0];
@@ -896,7 +931,8 @@ namespace CMMSAPIs.Repositories.SM
             {
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_List[i].status);
                 string _shortStatus = getShortStatus(CMMS.CMMS_Modules.SM_MRS, _Status);
-                string _status_long = getLongStatus(_Status, _List[i].ID);
+                CMMRSList m_MRSObj = new CMMRSList();
+                string _status_long = getLongStatus(_Status, _List[i].ID, m_MRSObj);
                 _List[i].status_short = _shortStatus;
                 _List[i].status_long = _status_long;
                 _List[i].CMMRSItems = await getMRSReturnItems(_List[i].ID, facilitytimeZone);
@@ -1559,7 +1595,7 @@ namespace CMMSAPIs.Repositories.SM
             }
         }
 
-        internal async Task<CMDefaultResponse> CreateReturnMRS(CMMRS request, int UserID)
+        internal async Task<CMDefaultResponse> CreateReturnMRS(CMMRS request, int UserID, string facilitytimeZone)
         {
             CMDefaultResponse response = null;
             bool Queryflag = false;
@@ -1574,7 +1610,7 @@ namespace CMMSAPIs.Repositories.SM
             try
             {
                 DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
-                //request.mrsreturnID = Convert.ToInt32(dt2.Rows[0][0]);
+  
                 MRS_ReturnID = Convert.ToInt32(dt2.Rows[0][0]);
             }
             catch (Exception ex)
@@ -1593,22 +1629,6 @@ namespace CMMSAPIs.Repositories.SM
 
                     try
                     {
-                        //if (request.cmmrsItems[i].is_faulty == 1)
-                        //{
-                        //    string insertStmt = $"START TRANSACTION; " +
-                        //                $"Update smmrs SET status = {(int)CMMS.CMMS_Status.MRS_SUBMITTED} where id = {request.mrsreturnID} ;INSERT INTO smrsitems (mrs_ID,mrs_return_ID,asset_item_ID,available_qty,requested_qty,returned_qty,return_remarks,flag, is_faulty,is_splited,issued_qty)" +
-                        //                $"VALUES ({request.mrsreturnID},0,{request.cmmrsItems[i].asset_item_ID},{request.cmmrsItems[i].qty}, {request.cmmrsItems[i].requested_qty}, {request.cmmrsItems[i].returned_qty}, '{request.cmmrsItems[i].return_remarks}', 2, {request.cmmrsItems[i].is_faulty},1,{request.cmmrsItems[i].issued_qty})" +
-                        //                $"; SELECT LAST_INSERT_ID(); COMMIT;";
-                        //    DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
-                        //}
-                        //else
-                        //{
-                        //    string insertStmt = $"START TRANSACTION; " +
-                        //        $"INSERT INTO smrsitems (mrs_ID,mrs_return_ID,asset_item_ID,available_qty,requested_qty,returned_qty,return_remarks,flag, is_faulty,is_splited,issued_qty)" +
-                        //        $"VALUES ({request.mrsreturnID},{MRS_ReturnID},{request.cmmrsItems[i].asset_item_ID},{request.cmmrsItems[i].qty}, {request.cmmrsItems[i].requested_qty}, {request.cmmrsItems[i].returned_qty}, '{request.cmmrsItems[i].return_remarks}', 2, {request.cmmrsItems[i].is_faulty},1,{request.cmmrsItems[i].issued_qty})" +
-                        //        $"; SELECT LAST_INSERT_ID(); COMMIT;";
-                        //    DataTable dt2 = await Context.FetchData(insertStmt).ConfigureAwait(false);
-                        //}
 
                         int asset_item_ID = 0;
                         int qty = 0;
@@ -1757,10 +1777,15 @@ namespace CMMSAPIs.Repositories.SM
             }
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_MRS, MRS_ReturnID, 0, 0, "MRS return submitted.", CMMS.CMMS_Status.MRS_SUBMITTED);
 
+            //CMMRSList _MRSList = await getMRSDetails(MRS_ReturnID, facilitytimeZone);
+            CMMRSReturnList _MRSList = await getReturnDataByID(MRS_ReturnID, facilitytimeZone);
+
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_MRS, CMMS.CMMS_Status.MRS_SUBMITTED, new[] { UserID }, _MRSList);
+
             return response;
         }
 
-        internal async Task<CMDefaultResponse> UpdateReturnMRS(CMMRS request, int UserID)
+        internal async Task<CMDefaultResponse> UpdateReturnMRS(CMMRS request, int UserID, string facilitytimeZone)
         {
             CMDefaultResponse response = null;
             bool Queryflag = false;
@@ -1891,9 +1916,12 @@ namespace CMMSAPIs.Repositories.SM
             }
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_MRS, MRS_ReturnID, 0, 0, "MRS return submitted.", CMMS.CMMS_Status.MRS_SUBMITTED);
 
+            CMMRSList _MRSList = await getMRSDetails(request.ID, facilitytimeZone);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_MRS, CMMS.CMMS_Status.MRS_SUBMITTED, new[] { UserID }, _MRSList);
+
             return response;
         }
-        internal async Task<CMDefaultResponse> ApproveMRSReturn(CMApproval request, int UserID)
+        internal async Task<CMDefaultResponse> ApproveMRSReturn(CMApproval request, int UserID, string facilitytimeZone)
         {
             CMDefaultResponse response = null;
             var executeUpdateStmt = 0;
@@ -1902,39 +1930,6 @@ namespace CMMSAPIs.Repositories.SM
 
             string stmtSelect = "SELECT ID,facility_ID,requested_by_emp_ID, reference,from_actor_id,from_actor_type_id,to_actor_id,to_actor_type_id FROM smmrs WHERE ID = " + request.id + "";
             List<CMMRS> mrsList = await Context.GetData<CMMRS>(stmtSelect).ConfigureAwait(false);
-            //for (int i = 0; i < request.cmmrsItems.Count; i++)
-            //{
-            //    decimal req_qty = request.cmmrsItems[i].returned_qty;
-            //    //MRS_REQUEST_REJECT contains 2 as enum value
-            //    if (request.approval_status ==   (int)CMMS.CMMS_Status.MRS_REQUEST_REJECTED)
-            //    {
-            //        req_qty = 0;
-            //    }
-            //    string stmt = "UPDATE smrsitems SET returned_qty = " + request.cmmrsItems[i].returned_qty + ", finalRemark = '" + request.cmmrsItems[i].return_remarks + "' WHERE ID = " + request.cmmrsItems[i].id;  
-            //    try
-            //    {
-            //      executeUpdateStmt = await Context.ExecuteNonQry<int>(stmt);
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        throw ex;
-            //    }
-            //    if (executeUpdateStmt == null || executeUpdateStmt == 0)
-            //    {
-            //        return new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Failed to update MRS item return.");
-            //    }
-            //    Queryflag = true;
-
-            //    // MRS_REQUEST_APPROVE == 1 in constant.cs file
-            //    if (request.approval_status == (int)CMMS.CMMS_Status.MRS_REQUEST_APPROVED)
-            //    {
-            //        var tResult = await TransactionDetails(mrsList[0].facility_ID, mrsList[0].requested_by_emp_ID, 2, mrsList[0].facility_ID, 2, request.cmmrsItems[0].id, Convert.ToInt32(request.cmmrsItems[0].received_qty), Convert.ToInt32(mrsList[0].reference), request.ID, request.return_remarks, request.mrs_return_ID);
-            //        if (!tResult)
-            //        {
-            //            return new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Transaction details failed.");                        
-            //        }
-            //    }
-            //}
 
             comment = "MRS Return Approved";
 
@@ -1987,45 +1982,23 @@ namespace CMMSAPIs.Repositories.SM
             {
                 return new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "MRS Item update details failed.");
             }
+
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_MRS, request.id, 0, 0, "MRS return Approved.", CMMS.CMMS_Status.MRS_REQUEST_APPROVED);
+
+            CMMRSList _MRSList = await getMRSDetails(request.id, facilitytimeZone);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_MRS, CMMS.CMMS_Status.MRS_REQUEST_APPROVED, new[] { UserID }, _MRSList);
+
             return response;
         }
 
-        internal async Task<CMDefaultResponse> RejectMRSReturn(CMApproval request, int UserID)
+        internal async Task<CMDefaultResponse> RejectMRSReturn(CMApproval request, int UserID, string facilitytimeZone)
         {
             CMDefaultResponse response = null;
             var executeUpdateStmt = 0;
             bool Queryflag = false;
             string comment = "";
 
-            //string stmtSelect = "SELECT * FROM smmrs WHERE ID = " + request.id + "";
-            //List<CMMRS> mrsList = await Context.GetData<CMMRS>(stmtSelect).ConfigureAwait(false);
-            //for (int i = 0; i < request.cmmrsItems.Count; i++)
-            //{
-            //    decimal req_qty = request.cmmrsItems[i].returned_qty;                
-            //    req_qty = 0;
-            //    string stmt = "UPDATE smrsitems SET returned_qty = " + request.cmmrsItems[i].returned_qty + ", finalRemark = '" + request.cmmrsItems[i].return_remarks + "' WHERE ID = " + request.cmmrsItems[i].id;
-            //    try
-            //    {
-            //        executeUpdateStmt = await Context.ExecuteNonQry<int>(stmt);
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        throw ex;
-            //    }
-            //    if (executeUpdateStmt == null || executeUpdateStmt == 0)
-            //    {
-            //        return new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Failed to update MRS item return.");
-            //    }
-            //    Queryflag = true;
-
-            //    // MRS_REQUEST_APPROVE == 1 in constant.cs file
-
-            //}
-
-
             comment = "MRS Return Rejected. Reason : " + request.comment + "";
-
-
 
             var stmtUpdate = $"UPDATE smmrs SET rejected_by_emp_ID = {UserID}, rejected_date = '{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}'," +
             $"status = {(int)CMMS.CMMS_Status.MRS_REQUEST_REJECTED}, approval_comment = '{request.comment}'" +
@@ -2038,12 +2011,18 @@ namespace CMMSAPIs.Repositories.SM
             {
                 return new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "MRS Item update details failed.");
             }
-            if (executeUpdateStmt == 0 || executeUpdateStmt == null)
+            if (executeUpdateStmt == 0)
             {
                 return new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "MRS Item update details failed.");
             }
 
             response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, comment);
+
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_MRS, request.id, 0, 0, "MRS return Rejected.", CMMS.CMMS_Status.MRS_REQUEST_REJECTED);
+
+            CMMRSList _MRSList = await getMRSDetails(request.id, facilitytimeZone);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_MRS, CMMS.CMMS_Status.MRS_REQUEST_REJECTED, new[] { UserID }, _MRSList);
+
             return response;
         }
         internal async Task<CMMRSAssetTypeList> getAssetTypeByItemID(int ItemID)
@@ -2204,7 +2183,7 @@ namespace CMMSAPIs.Repositories.SM
             return Listitem;
         }
 
-        private static string getLongStatus(CMMS.CMMS_Status m_notificationID, int Id)
+        private static string getLongStatus(CMMS.CMMS_Status m_notificationID, int Id, CMMRSList m_MRSObj)
         {
             CMMS.CMMS_Status status = (CMMS.CMMS_Status)m_notificationID;
             string retValue = "";
@@ -2212,22 +2191,43 @@ namespace CMMSAPIs.Repositories.SM
             {
 
                 case CMMS.CMMS_Status.MRS_SUBMITTED:
-                    retValue = $"MRS{Id} Submitted.";
+                    if (m_MRSObj.is_mrs_return == 1)
+                    {
+                        retValue = String.Format("RMRS{0} Requested By {1} At {2}", m_MRSObj.ID, m_MRSObj.requested_by_name, m_MRSObj.facilityName);
+                    }
+                    else
+                    {
+                        retValue = String.Format("MRS{0} Requested By {1} At {2}", m_MRSObj.ID, m_MRSObj.requested_by_name, m_MRSObj.facilityName);
+                    }
                     break;
                 case CMMS.CMMS_Status.MRS_REQUEST_REJECTED:
-                    retValue = $"MRS{Id} Request Rejected";
+                    if (m_MRSObj.is_mrs_return == 1)
+                    {
+                        retValue = String.Format("RMRS{0} Request Rejected By {1} At {2}", m_MRSObj.ID, m_MRSObj.request_rejected_by_name, m_MRSObj.facilityName);
+                    }
+                    else
+                    {
+                        retValue = String.Format("MRS{0} Request Rejected By {1} At {2}", m_MRSObj.ID, m_MRSObj.request_rejected_by_name, m_MRSObj.facilityName);
+                    }
                     break;
                 case CMMS.CMMS_Status.MRS_REQUEST_APPROVED:
-                    retValue = $"MRS{Id} Request Approved";
+                    if (m_MRSObj.is_mrs_return == 1)
+                    {
+                        retValue = String.Format("RMRS{0} Request Approved By {1} At {2}", m_MRSObj.ID, m_MRSObj.approver_name, m_MRSObj.facilityName);
+                    }
+                    else
+                    {
+                        retValue = String.Format("MRS{0} Request Approved By {1} At {2}", m_MRSObj.ID, m_MRSObj.approver_name, m_MRSObj.facilityName);
+                    }
                     break;
                 case CMMS.CMMS_Status.MRS_REQUEST_ISSUED:
-                    retValue = $"MRS{Id} Request Issued";
+                    retValue = String.Format("MRS{0} Issued By {1} At {2}", m_MRSObj.ID, m_MRSObj.issued_name, m_MRSObj.facilityName);
                     break;
                 case CMMS.CMMS_Status.MRS_REQUEST_ISSUED_REJECTED:
-                    retValue = $"MRS{Id} Request Issued Rejected";
+                    retValue = String.Format("MRS{0} Issue Rejected By {1} At {2}", m_MRSObj.ID, m_MRSObj.issue_rejected_by_name, m_MRSObj.facilityName);
                     break;
                 case CMMS.CMMS_Status.MRS_REQUEST_ISSUED_APPROVED:
-                    retValue = $"MRS{Id} Request Issued Approved";
+                    retValue = String.Format("MRS{0} Issue Approved By {1} At {2}", m_MRSObj.ID, m_MRSObj.issue_appoved_by_name, m_MRSObj.facilityName);
                     break;
                 default:
                     retValue = "Unknown <" + m_notificationID + ">";
@@ -2415,7 +2415,8 @@ namespace CMMSAPIs.Repositories.SM
             {
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_List[i].status);
                 string _shortStatus = getShortStatus(CMMS.CMMS_Modules.SM_MRS, _Status);
-                string _status_long = getLongStatus(_Status, _List[i].ID);
+                CMMRSList m_MRSObj = new CMMRSList();
+                string _status_long = getLongStatus(_Status, _List[i].ID, m_MRSObj);
                 _List[i].status_short = _shortStatus;
                 _List[i].status_long = _status_long;
                 _List[i].CMMRSItems = await getMRSReturnItems(_List[i].ID, facilitytimeZone);
@@ -2448,7 +2449,8 @@ namespace CMMSAPIs.Repositories.SM
             {
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_List[i].status);
                 string _shortStatus = getShortStatus(CMMS.CMMS_Modules.SM_MRS, _Status);
-                string _status_long = getLongStatus(_Status, _List[i].ID);
+                CMMRSList m_MRSObj = new CMMRSList();
+                string _status_long = getLongStatus(_Status, _List[i].ID, m_MRSObj);
                 _List[i].status_short = _shortStatus;
                 _List[i].status_long = _status_long;
                 if (_List[i].is_faulty == 1)

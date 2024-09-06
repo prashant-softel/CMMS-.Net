@@ -337,8 +337,10 @@ namespace CMMSAPIs.Controllers.SM
         {
             try
             {
+                int facility_id = request.facility_ID;
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _MRSBS.CreateReturnMRS(request, userID);
+                var data = await _MRSBS.CreateReturnMRS(request, userID, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -377,8 +379,10 @@ namespace CMMSAPIs.Controllers.SM
         {
             try
             {
+                int facility_id = request.facility_ID;
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _MRSBS.UpdateReturnMRS(request, userID);
+                var data = await _MRSBS.UpdateReturnMRS(request, userID, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -398,8 +402,10 @@ namespace CMMSAPIs.Controllers.SM
         {
             try
             {
+                int facility_id = request.facility_id;
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _MRSBS.ApproveMRSReturn(request, userID);
+                var data = await _MRSBS.ApproveMRSReturn(request, userID, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -418,8 +424,10 @@ namespace CMMSAPIs.Controllers.SM
         {
             try
             {
+                int facility_id = request.facility_id;
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _MRSBS.RejectMRSReturn(request, userID);
+                var data = await _MRSBS.RejectMRSReturn(request, userID, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)

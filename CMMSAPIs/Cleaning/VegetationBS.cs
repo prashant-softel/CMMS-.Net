@@ -35,6 +35,8 @@ namespace CMMSAPIs.Cleaning
         public Task<List<CMMCEquipmentList>> GetVegEquipmentList(int facilityId);
         public Task<List<CMMCTaskEquipmentList>> GetTaskEquipmentList(int taskId, string facilitytimeZone);
         public Task<CMMCExecution> GetExecutionDetails(int executionId, string facilitytimeZone);
+        public Task<CMMCExecutionSchedule> GetScheduleDetails(int scheduleId, string facilitytimeZone);
+        
         //Task<List<CMMCPlan>> GetPlanList(int facilityId, string facilitytimeZone);
         // Task<List<CMMCPlan>> GetPlanList(int facilityId, string facilitytimeZone);
     }
@@ -452,6 +454,22 @@ namespace CMMSAPIs.Cleaning
 
 
         }
+
+        public async Task<CMMCExecutionSchedule> GetScheduleDetails(int scheduleId, string facilitytime)
+        {
+            try
+            {
+                using (var repos = new VegetationRepository(getDB))
+                {
+                    return await repos.GetScheduleDetails(scheduleId, facilitytime);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
         internal async Task<List<CMMCPlan>> GetPlanList(int facilityId, string facilitytimeZone)
         {
             try

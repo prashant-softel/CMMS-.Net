@@ -341,7 +341,7 @@ namespace CMMSAPIs.Helper
 
         public enum CMMS_Status
         {
-            Invalid = 0,
+            Undefined = 0,
             CREATED = 1,
             UPDATED,
             DELETED,
@@ -406,9 +406,9 @@ namespace CMMSAPIs.Helper
             PM_ASSIGNED,
             PM_LINKED_TO_PTW,
             PM_START,
-            PM_COMPLETED, // close task
-            PM_REJECTED,    // not used
-            PM_APPROVED,      // not used
+            PM_CLOSED, // close task
+            /*PM_REJECTED,    // not used
+            PM_APPROVED, */     // not used
             PM_CLOSE_REJECTED,
             PM_CLOSE_APPROVED,
             PM_CANCELLED,
@@ -417,6 +417,14 @@ namespace CMMSAPIs.Helper
             PM_DELETED,
             PM_UPDATED,
             PM_TASK_UPDATED,//Only for notification purpose
+
+            MC_EXECUTION_STARTED,
+            MC_EXECUTION_CLOSED,
+            MC_EXECUTION_UPDATED,
+            MC_EXECUTION_ABANDONED,
+            MC_EXECUTION_ENDED,
+            MC_EXECUTION_ABANDONED_REJECTED,
+
 
             PM_SUBMIT,//for temp only
             PM_LINK_PTW,
@@ -553,6 +561,8 @@ namespace CMMSAPIs.Helper
             MC_ASSIGNED,
             RESCHEDULED_TASK,
 
+
+
             PM_PLAN_CREATED = 401,
             PM_PLAN_DRAFT,
             PM_PLAN_UPDATED,
@@ -625,7 +635,15 @@ namespace CMMSAPIs.Helper
             VEG_TASK_END_APPROVED,
             VEG_TASK_END_REJECTED,
             VEG_TASK_UPDATED,
-            VEG_TASK_ASSIGNED
+            VEG_TASK_ASSIGNED,
+
+            VEG_EXECUTION_STARTED,
+            VEG_EXECUTION_APPROVED,
+            VEG_EXECUTION_UPDATED,
+            VEG_EXECUTION_END_REJECTED,
+            VEG_EXECUTION_ABANDONED,
+            VEG_EXECUTION_COMPLETED,
+
         }
 
         public enum ApprovalStatus

@@ -991,13 +991,12 @@ namespace CMMSAPIs.Repositories.Users
             CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "User Deleted");
             return response;
         }
-
-
-
         internal async Task<List<CMUser>> GetEMUsers(int facility_id, int role_id, int notification_id)
         {
 
-
+            int facility_id = notification.facility_id;
+            int notification_id = (int)notification.module_id;
+            int role_id = notification.role_id;
             string userQry = $"select u.id as id, u.loginId as user_name, concat(firstName, ' ', lastName) as full_name, u.mobileNumber as contact_no, userroles.id as role_id," +
                 $" userroles.name as role_name " +
                 $" FROM users as u " +
@@ -1016,10 +1015,11 @@ namespace CMMSAPIs.Repositories.Users
         internal async Task<List<CMUser>> GetUserByNotificationId(CMUserByNotificationId notification)
         {
             // Pending convert user_ids into string for where condition
-            int notification_id = (int)notification.module_id;
+            int notification_id = (int) notification.module_id;
             int facility_id = notification.facility_id;
             string user_ids_str = "";
-            if (notification.user_ids != null && user_ids_str.Length > 0)
+
+            if (notification.user_ids != null && notification.user_ids.Length > 0)
             {
                 user_ids_str += string.Join(",", notification.user_ids.ToArray());
             }
@@ -1041,7 +1041,7 @@ namespace CMMSAPIs.Repositories.Users
 
             if (!user_ids_str.IsNullOrEmpty())
             {
-                qry += $" AND (self = 0 and u.id IN({user_ids_str}))";
+                qry += $" AND (self = 0 or u.id IN({user_ids_str}))";
             }
             else
             {

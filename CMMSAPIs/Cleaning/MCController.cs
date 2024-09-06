@@ -373,6 +373,26 @@ namespace CMMSAPIs.Controllers.MC
             }
         }
 
+        [Route("GetMCScheduleDetails")]
+        [HttpGet]
+        public async Task<IActionResult> GetMCScheduleDetails(int scheduleId, int facility_id)
+        {
+            try
+            {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+                var data = await _CleaningBS.GetScheduleDetails(scheduleId, facilitytimeZone);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 200;
+                item.Message = "No Data Found For This executionId";
+                return Ok(item);
+
+            }
+        }
+
         //[Authorize]
         [Route("AbandonMcExecution")]
         [HttpPut]

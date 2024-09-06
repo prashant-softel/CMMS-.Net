@@ -2158,6 +2158,8 @@ namespace CMMSAPIs.Repositories.Masters
              {12, "December"}
         };
         //Chages For Mis Health Data
+
+        //Plantation Data
         internal async Task<CMDefaultResponse> CreateHealthData(OccupationalHealthData request, int userID)
         {
 
@@ -2186,11 +2188,11 @@ namespace CMMSAPIs.Repositories.Masters
             }
             if (request.facility_id != 0)
             {
-                updateQry += $"month_id = {request.facility_id}, ";
+                updateQry += $"facility_id = {request.facility_id}, ";
             }
             if (request.year != 0)
             {
-                updateQry += $"month_id = {request.year}, ";
+                updateQry += $"year = {request.year}, ";
             }
             if (request.NoOfHealthExamsOfNewJoiner >= 0)
             {
@@ -2224,10 +2226,15 @@ namespace CMMSAPIs.Repositories.Masters
 
         internal async Task<List<OccupationalHealthData>> GetHealthData()
         {
-            string myQuery = "SELECT id,facility_id,year, month_id, NoOfHealthExamsOfNewJoiner, PeriodicTests, OccupationaIllnesses as OccupationalIllnesses, Status, " +
-                             "CreatedBy, CreatedAt, UpdatedBy, UpdatedAt " +
-                             "FROM MIS_OccupationalHealthData " +
-                             "WHERE  Status = 1 ;";
+
+            string myQuery = "SELECT mis_o.id, mis_o.facility_id, mis_o.year, mis_o.month_id, mis_o.NoOfHealthExamsOfNewJoiner, " +
+                            "mis_o.PeriodicTests, mis_o.OccupationaIllnesses AS OccupationalIllnesses, mis_o.Status, " +
+                            "mis_o.CreatedBy, CONCAT(u.firstName, u.lastName) AS submited_by, mis_o.CreatedAt, " +
+                            "mis_o.UpdatedBy, CONCAT(u.firstName, u.lastName) AS Updated_by_name, mis_o.UpdatedAt " +
+                            "FROM MIS_OccupationalHealthData AS mis_o " +
+                            "LEFT JOIN users AS u ON u.id = mis_o.CreatedBy " +
+                            "LEFT JOIN facilities AS f ON f.id = mis_o.facility_id " +
+                            "WHERE mis_o.Status = 1;";
             List<OccupationalHealthData> data = await Context.GetData<OccupationalHealthData>(myQuery).ConfigureAwait(false);
             Parallel.ForEach(data, item =>
             {
@@ -2267,9 +2274,9 @@ namespace CMMSAPIs.Repositories.Masters
             if (request.GovtAuthVisits > 0)
                 updateQry += $"GovtAuthVisits = {request.GovtAuthVisits}, ";
             if (request.facility_id != 0)
-                updateQry += $"month_id = {request.facility_id}, ";
+                updateQry += $"facility_id = {request.facility_id}, ";
             if (request.year != 0)
-                updateQry += $"month_id = {request.year}, ";
+                updateQry += $"year = {request.year}, ";
             if (request.NoOfFineByThirdParty > 0)
                 updateQry += $"NoOfFineByThirdParty = {request.NoOfFineByThirdParty}, ";
             if (request.NoOfShowCauseNoticesByThirdParty > 0)
@@ -2297,10 +2304,14 @@ namespace CMMSAPIs.Repositories.Masters
         }
         internal async Task<List<VisitsAndNotices>> GetVisitsAndNotices()
         {
-            string myQuery = "SELECT id,month_id,facility_id,year, GovtAuthVisits, NoOfFineByThirdParty, NoOfShowCauseNoticesByThirdParty, " +
-                             "NoticesToContractor, AmountOfPenaltiesToContractors, AnyOther, Status, CreatedBy, CreatedAt, UpdatedBy, UpdatedAt " +
-                             "FROM mis_visitsandnotices " +
-                             "WHERE Status =1 ; ";
+            string myQuery = "SELECT mis_v.id, mis_v.month_id, mis_v.facility_id, mis_v.year, " +
+                 "mis_v.GovtAuthVisits, mis_v.NoOfFineByThirdParty, mis_v.NoOfShowCauseNoticesByThirdParty, " +
+                 "mis_v.NoticesToContractor, mis_v.AmountOfPenaltiesToContractors, mis_v.AnyOther, mis_v.Status, " +
+                 "mis_v.CreatedBy, CONCAT(u.firstName, u.lastName) AS submited_by, mis_v.CreatedAt, " +
+                 "mis_v.UpdatedBy, CONCAT(u.firstName, u.lastName) AS Updated_by_name, mis_v.UpdatedAt " +
+                 "FROM mis_visitsandnotices AS mis_v " +
+                 "LEFT JOIN users AS u ON u.id = mis_v.CreatedBy " +
+                 "WHERE mis_v.Status = 1;";
             List<VisitsAndNotices> data = await Context.GetData<VisitsAndNotices>(myQuery).ConfigureAwait(false);
             Parallel.ForEach(data, item =>
             {
@@ -2337,8 +2348,8 @@ namespace CMMSAPIs.Repositories.Masters
             string updateQry = "UPDATE mis_fueldata SET ";
             updateQry += $"month_id = {request.month_id}, ";
             updateQry += $"DieselConsumedForVehicles = {request.DieselConsumedForVehicles}, ";
-            updateQry += $"month_id = {request.facility_id}, ";
-            updateQry += $"month_id = {request.year}, ";
+            updateQry += $"facility_id = {request.facility_id}, ";
+            updateQry += $"year = {request.year}, ";
             updateQry += $"PetrolConsumedForVehicles = {request.PetrolConsumedForVehicles}, ";
             updateQry += $"PetrolConsumedForGrassCuttingAndMovers = {request.PetrolConsumedForGrassCuttingAndMovers}, ";
             updateQry += $"DieselConsumedAtSite = {request.DieselConsumedAtSite}, ";
@@ -2360,9 +2371,15 @@ namespace CMMSAPIs.Repositories.Masters
         }
         internal async Task<List<FuelData>> GetFuelConsumption()
         {
-            string myQuery = "SELECT id,  month_id,facility_id,year, DieselConsumedForVehicles, PetrolConsumedForVehicles, PetrolConsumedForGrassCuttingAndMovers, DieselConsumedAtSite, PetrolConsumedAtSite, CreatedBy, CreatedAt, UpdatedBy, UpdatedAt " +
-                             "FROM mis_fueldata " +
-                             "WHERE Status=1";
+
+            string myQuery = "SELECT mis_f.id, mis_f.month_id, mis_f.facility_id, mis_f.year, " +
+                             "mis_f.DieselConsumedForVehicles, mis_f.PetrolConsumedForVehicles, " +
+                             "mis_f.PetrolConsumedForGrassCuttingAndMovers, mis_f.DieselConsumedAtSite, " +
+                             "mis_f.PetrolConsumedAtSite, mis_f.CreatedBy, CONCAT(u.firstName, u.lastName) AS submited_by, " +
+                             "mis_f.CreatedAt, mis_f.UpdatedBy, CONCAT(u.firstName, u.lastName) AS Updated_by_name, mis_f.UpdatedAt " +
+                             "FROM mis_fueldata AS mis_f " +
+                             "LEFT JOIN users AS u ON u.id = mis_f.CreatedBy " +
+                             "WHERE mis_f.Status = 1 ;";
             List<FuelData> data = await Context.GetData<FuelData>(myQuery).ConfigureAwait(false);
             Parallel.ForEach(data, item =>
             {
@@ -2400,8 +2417,8 @@ namespace CMMSAPIs.Repositories.Masters
 
             string updateQry = "UPDATE mis_plantationdata SET ";
             updateQry += $"month_id = {request.month_id}, ";
-            updateQry += $"month_id = {request.facility_id}, ";
-            updateQry += $"month_id = {request.year}, ";
+            updateQry += $"facility_id = {request.facility_id}, ";
+            updateQry += $"year = {request.year}, ";
             updateQry += $"SaplingsPlanted = {request.SaplingsPlanted}, ";
             updateQry += $"SaplingsSurvived = {request.SaplingsSurvived}, ";
             updateQry += $"SaplingsDied = {request.SaplingsDied}, ";
@@ -2424,9 +2441,11 @@ namespace CMMSAPIs.Repositories.Masters
 
         public async Task<List<PlantationData>> GetPlantationData()
         {
-            string myQuery = "SELECT id, month_id,facility_id,year,  SaplingsPlanted, SaplingsSurvived, SaplingsDied, CreatedBy, CreatedAt, UpdatedBy, UpdatedAt " +
-                             "FROM mis_plantationdata " +
-                             "WHERE Status=1";
+            string myQuery = "SELECT mis_p.id, mis_p.month_id, mis_p.facility_id, mis_p.year, mis_p.SaplingsPlanted, mis_p.SaplingsSurvived, " +
+                             "mis_p.SaplingsDied, mis_p.CreatedBy, CONCAT(u.firstName, u.lastName) AS submited_by, mis_p.CreatedAt, " +
+                             "mis_p.UpdatedBy, CONCAT(u.firstName, u.lastName) AS Updated_by_name, mis_p.UpdatedAt " +
+                             "FROM mis_plantationdata AS mis_p " +
+                             "LEFT JOIN users AS u ON u.id = mis_p.CreatedBy WHERE mis_p.Status = 1;";
             List<PlantationData> data = await Context.GetData<PlantationData>(myQuery).ConfigureAwait(false);
             Parallel.ForEach(data, item =>
             {
@@ -2462,8 +2481,8 @@ namespace CMMSAPIs.Repositories.Masters
 
             string updateQry = "UPDATE mis_kaizensdata SET ";
             updateQry += $"month_id = {request.month_id}, ";
-            updateQry += $"month_id = {request.facility_id}, ";
-            updateQry += $"month_id = {request.year}, ";
+            updateQry += $"facility_id = {request.facility_id}, ";
+            updateQry += $"year = {request.year}, ";
             updateQry += $"KaizensImplemented = {request.KaizensImplemented}, ";
             updateQry += $"CostForImplementation = {request.CostForImplementation}, ";
             updateQry += $"CostSavedFromImplementation = {request.CostSavedFromImplementation}, ";
@@ -2483,12 +2502,30 @@ namespace CMMSAPIs.Repositories.Masters
 
             return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Kaizens Data Deleted");
         }
-
+        Dictionary<int, string> MonthDictionary = new Dictionary<int, string>
+        {
+             {1, "January"},
+             {2, "February"},
+             {3, "March"},
+             {4, "April"},
+             {5, "May"},
+             {6, "June"},
+             {7, "July"},
+             {8, "August"},
+             {9, "September"},
+             {10, "October"},
+             {11, "November"},
+             {12, "December"}
+        };
         public async Task<List<KaizensData>> GetKaizensData()
         {
-            string myQuery = "SELECT id, month_id,facility_id,year, KaizensImplemented, CostForImplementation, CostSavedFromImplementation, CreatedBy, CreatedAt, UpdatedBy, UpdatedAt " +
-                             "FROM mis_kaizensdata " +
-                             "WHERE Status=1";
+            string myQuery = "SELECT mis_k.id, mis_k.month_id, mis_k.facility_id, mis_k.year, mis_k.KaizensImplemented, mis_k.CostForImplementation," +
+                             "mis_k.CostSavedFromImplementation, mis_k.CreatedBy, CONCAT(u.firstName, u.lastName) AS submited_by, " +
+                             "mis_k.CreatedAt, mis_k.UpdatedBy, CONCAT(u.firstName, u.lastName) AS Updated_by_name, mis_k.UpdatedAt " +
+                             "FROM mis_kaizensdata AS mis_k " +
+                             "LEFT JOIN users AS u ON u.id = mis_k.CreatedBy " +
+                             "LEFT JOIN facilities as f on f.id=mis_k.facility_id " +
+                             " WHERE mis_k.Status = 1;";
             List<KaizensData> data = await Context.GetData<KaizensData>(myQuery).ConfigureAwait(false);
             Parallel.ForEach(data, item =>
             {
@@ -2498,9 +2535,7 @@ namespace CMMSAPIs.Repositories.Masters
                 }
             });
             return data;
-
         }
-
         public async Task<List<CumalativeReport>> Cumulativereport(string facility_id, int module_id, string start_date, string end_date)
         {
 

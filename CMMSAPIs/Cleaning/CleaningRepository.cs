@@ -56,99 +56,79 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             { (int)CMMS.CMMS_Status.MC_ASSIGNED, "Reassigned" },
         };
 
-        internal string getLongStatus(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMMCPlan planObj, CMMCExecution executionObj)
+        internal string getLongStatus(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMMCPlan planObj)
         {
             string retValue = "";
 
             switch (notificationID)
             {
                 case CMMS.CMMS_Status.MC_PLAN_DRAFT:
-                    retValue = String.Format("Module Cleaning Plan <{0}> Draft by {1} ", planObj.planId, planObj.createdBy);
+                    retValue = String.Format("MCP<{0}> Draft by {1} ", planObj.planId, planObj.createdBy);
                     break;
                 case CMMS.CMMS_Status.MC_PLAN_SUBMITTED:
-                    retValue = String.Format("Module Cleaning Plan <{0}> Waiting for Approval ", planObj.planId, planObj.createdBy);
+                    retValue = String.Format("MCP{0} Created by {1} at {2} ", planObj.planId, planObj.createdBy, planObj.facilityidbyName);
+                    break;
+                case CMMS.CMMS_Status.MC_PLAN_UPDATED:
+                    retValue = String.Format("MCP{0} Updated by {1} at {2} ", planObj.planId, planObj.updatedBy, planObj.facilityidbyName);
                     break;
                 case CMMS.CMMS_Status.MC_PLAN_REJECTED:
-                    retValue = String.Format("Module Cleaning Plan <{0}> Rejected by {1} ", planObj.planId, planObj.approvedBy);
+                    retValue = String.Format("MCP{0} Rejected by {1} at {2} ", planObj.planId, planObj.rejectedBy, planObj.facilityidbyName);
                     break;
                 case CMMS.CMMS_Status.MC_PLAN_APPROVED:
-                    retValue = String.Format("Module Cleaning Plan <{0}> Approved by {1} ", planObj.planId, planObj.approvedBy);
+                    retValue = String.Format("MCP{0} Approved by {1} at {2} ", planObj.planId, planObj.approvedBy, planObj.facilityidbyName);
                     break;
                 case CMMS.CMMS_Status.MC_PLAN_DELETED:
-                    retValue = String.Format("Module Cleaning Plan <{0}> Deleted by {1} ", planObj.planId, planObj.deletedBy);
+                    retValue = String.Format("MCP<{0}> Deleted", planObj.planId);
                     break;
+                default:
+                    break;
+            }
+            return retValue;
+
+        }
+
+
+
+        internal string getLongStatus(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMMCExecution executionObj)
+        {
+            string retValue = "";
+
+            switch (notificationID)
+            {
+
+
                 case CMMS.CMMS_Status.MC_TASK_SCHEDULED:
-                    retValue = String.Format("Module Cleaning Task <{0}> Scheduled ", executionObj.executionId, executionObj.startedBy);
+                    retValue = String.Format("MCT<{0}> Scheduled ", executionObj.executionId, executionObj.startedBy);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_STARTED:
-                    retValue = String.Format("Module Cleaning Task <{0}> Execution started by {1} ", executionObj.executionId, executionObj.startedBy);
+                    retValue = String.Format("MCT{0} Started by {1} at {2} ", executionObj.executionId, executionObj.startedBy, executionObj.facilityidbyName);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_COMPLETED:
-                    retValue = String.Format("Module Cleaning Task <{0}> Execution Completed - Waiting for Approval", executionObj.executionId, executionObj.startedBy);
+                    retValue = String.Format("MCT{0} Closed by {1} at {2} ", executionObj.executionId, executionObj.endedBy, executionObj.facilityidbyName);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_ABANDONED:
-                    retValue = String.Format("Module Cleaning Task <{0}>  Execution Abandoned ", executionObj.executionId, executionObj.abandonedBy);
+                    retValue = String.Format("MCT{0} Abandoned by {1} at {2} ", executionObj.executionId, executionObj.abandonedBy, executionObj.facilityidbyName);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_ABANDONED_REJECTED:
-                    retValue = String.Format("Module Cleaning Task <{0}>  Task Abandoned Rejected", executionObj.executionId, executionObj.abandonedBy);
+                    retValue = String.Format("MCT{0} Abandoned Rejected by {1} at {2} ", executionObj.executionId, executionObj.abandonedBy, executionObj.facilityidbyName);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_ABANDONED_APPROVED:
-                    retValue = String.Format("Module Cleaning Task <{0}>  Task Abandoned Approved", executionObj.executionId, executionObj.abandonedBy);
+                    retValue = String.Format("MCT{0} Abandoned Approved by {1} at {2} ", executionObj.executionId, executionObj.abandonedBy, executionObj.facilityidbyName);
                     break;
-
                 case CMMS.CMMS_Status.MC_TASK_REJECTED:
-                    retValue = String.Format("Module Cleaning Task <{0}> Rejected ", executionObj.executionId);
+                    retValue = String.Format("MCT{0}  Rejected by {1} at {2} ", executionObj.executionId, executionObj.rejectedBy, executionObj.facilityidbyName);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_APPROVED:
-                    retValue = String.Format("Module Cleaning Task <{0}> Approved ", executionObj.executionId);
-                    break;
-                case CMMS.CMMS_Status.SCHEDULED_LINKED_TO_PTW:
-                    retValue = String.Format("Module Cleaning Task <{0}> PTW_Linked ", executionObj.executionId);
+                    retValue = String.Format("MCT{0} Approved by {1} at {2} ", executionObj.executionId, executionObj.approvedBy, executionObj.facilityidbyName);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_END_APPROVED:
-                    retValue = String.Format("Module Cleaning Task <{0}> Approved ", executionObj.executionId);
+                    retValue = String.Format("MCT{0} End Approved by {1} at {2} ", executionObj.executionId, executionObj.endapprovedbyName, executionObj.facilityidbyName);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_END_REJECTED:
-                    retValue = String.Format("Module Cleaning Task <{0}> Rejected ", executionObj.executionId);
+                    retValue = String.Format("MCT{0} End Rejected by {1} at {2} ", executionObj.executionId, executionObj.endrejectedbyName, executionObj.facilityidbyName);
                     break;
-                case CMMS.CMMS_Status.MC_TASK_SCHEDULE_REJECT:
-                    retValue = String.Format("Module Cleaning Task <{0}> Rejected ", executionObj.executionId);
-                    break;
-                case CMMS.CMMS_Status.MC_TASK_RESCHEDULED:
-                    retValue = String.Format("Module Cleaning Task <{0}> Reschdule ", executionObj.executionId);
-                    break;
-                case CMMS.CMMS_Status.VEG_PLAN_DRAFT:
-                    retValue = String.Format("Vegetation Plan <{0}> Draft by {1} ", planObj.planId, planObj.createdBy);
-                    break;
-                case CMMS.CMMS_Status.VEG_PLAN_SUBMITTED:
-                    retValue = String.Format("Vegetation Plan <{0}> Submitted by {1} ", planObj.planId, planObj.createdBy);
-                    break;
-                case CMMS.CMMS_Status.VEG_PLAN_REJECTED:
-                    retValue = String.Format("Vegetation Plan <{0}> Rejected by {1} ", planObj.planId, planObj.approvedBy);
-                    break;
-                case CMMS.CMMS_Status.VEG_PLAN_APPROVED:
-                    retValue = String.Format("Vegetation Plan <{0}> Approved by {1} ", planObj.planId, planObj.approvedBy);
-                    break;
-                case CMMS.CMMS_Status.VEG_PLAN_DELETED:
-                    retValue = String.Format("Vegetation Plan <{0}> Deleted ", planObj.planId, planObj.deletedBy);
-                    break;
-                case CMMS.CMMS_Status.VEG_TASK_SCHEDULED:
-                    retValue = String.Format("Vegetation Task <{0}> Execution started by {1} ", executionObj.executionId, executionObj.startedBy);
-                    break;
-                case CMMS.CMMS_Status.VEG_TASK_STARTED:
-                    retValue = String.Format("Vegetation Task <{0}> Execution started by {1} ", executionObj.executionId, executionObj.startedBy);
-                    break;
-                case CMMS.CMMS_Status.VEG_TASK_COMPLETED:
-                    retValue = String.Format("Vegetation Cleaning Task <{0}> Execution Completed by {1} ", executionObj.executionId, executionObj.startedBy);
-                    break;
-                case CMMS.CMMS_Status.VEG_TASK_ABANDONED:
-                    retValue = String.Format("Vegetation Task <{0}>  Execution Abandoned by {1} ", executionObj.executionId, executionObj.abandonedBy);
-                    break;
-                case CMMS.CMMS_Status.VEG_TASK_REJECTED:
-                    retValue = String.Format("Vegetation Task <{0}> Rejected ", executionObj.executionId);
-                    break;
-                case CMMS.CMMS_Status.VEG_TASK_APPROVED:
-                    retValue = String.Format("Vegetation Task <{0}> Approved ", executionObj.executionId);
+                case CMMS.CMMS_Status.MC_ASSIGNED:
+                    retValue = String.Format("MCT{0} Assigned to {1} at {2} ", executionObj.executionId, executionObj.assignedTo, executionObj.facilityidbyName);
                     break;
 
                 default:
@@ -157,77 +137,103 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             return retValue;
 
         }
+
+        internal string getLongStatus(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMMCExecutionSchedule scheduleObj)
+        {
+            string retValue = "";
+
+            switch (notificationID)
+            {
+                case CMMS.CMMS_Status.SCHEDULED_LINKED_TO_PTW:
+                    retValue = String.Format("PTW{0} Linked to SCH{1} of MCT{2} ", scheduleObj.permit_id, scheduleObj.scheduleId, scheduleObj.executedBy);
+                    break;
+                case CMMS.CMMS_Status.MC_EXECUTION_STARTED:
+                    retValue = String.Format("MCS{0} Started by {1} at {2} ", scheduleObj.scheduleId, scheduleObj.startedbyName, scheduleObj.facilityidbyName);
+                    break;
+                case CMMS.CMMS_Status.MC_EXECUTION_CLOSED:
+                    retValue = String.Format("MCS{0} Closed by {1} at {2} ", scheduleObj.scheduleId, scheduleObj.endedbyName, scheduleObj.facilityidbyName);
+                    break;
+                case CMMS.CMMS_Status.MC_EXECUTION_UPDATED:
+                    retValue = String.Format("MCS{0} Updated by {1} at {2} ", scheduleObj.scheduleId, scheduleObj.updatedbyName, scheduleObj.facilityidbyName);
+                    break;
+                case CMMS.CMMS_Status.MC_EXECUTION_ABANDONED:
+                    retValue = String.Format("MCS{0} Abandoned by {1} at {2} ", scheduleObj.scheduleId, scheduleObj.abandonedbyName, scheduleObj.facilityidbyName);
+                    break;
+                case CMMS.CMMS_Status.MC_EXECUTION_ABANDONED_REJECTED:
+                    retValue = String.Format("MCS{0} Abandoned Rejected by {1} at {2} ", scheduleObj.scheduleId, scheduleObj.abandonedbyName, scheduleObj.facilityidbyName);
+                    break;
+                case CMMS.CMMS_Status.MC_TASK_SCHEDULE_APPROVED:
+                    retValue = String.Format("MCS{0} Approved by {1} at {2} ", scheduleObj.scheduleId, scheduleObj.approvedBy, scheduleObj.facilityidbyName);
+                    break;
+                case CMMS.CMMS_Status.MC_TASK_SCHEDULE_REJECT:
+                    retValue = String.Format("MCS{0} Rejected by {1} at {2} ", scheduleObj.scheduleId, scheduleObj.rejectedBy, scheduleObj.facilityidbyName);
+                    break;
+                default:
+                    retValue = String.Format("Status Not avaialble for ", notificationID);
+                    break;
+            }
+            return retValue;
+
+        }
+
+
+
+
+
+
         public static string Status_PTW(int statusID)
         {
             CMMS.CMMS_Status status = (CMMS.CMMS_Status)statusID;
             string statusName = "";
             switch (status)
             {
-                case CMMS.CMMS_Status.PTW_CREATED:
-                    statusName = "Waiting for Approval";
+                case CMMS.CMMS_Status.SCHEDULED_LINKED_TO_PTW:
+                    statusName = "Permit Linked With Schedule";
                     break;
-                case CMMS.CMMS_Status.PTW_ISSUED:
-                    statusName = "Issued";
+                case CMMS.CMMS_Status.MC_EXECUTION_STARTED:
+                    statusName = "MC Execution Started";
                     break;
-                case CMMS.CMMS_Status.PTW_REJECTED_BY_ISSUER:
-                    statusName = "Rejected By Issuer";
+                case CMMS.CMMS_Status.MC_EXECUTION_CLOSED:
+                    statusName = "MC Execution Closed";
                     break;
-                case CMMS.CMMS_Status.PTW_APPROVED:
-                    statusName = "Approved";
+                case CMMS.CMMS_Status.MC_EXECUTION_UPDATED:
+                    statusName = "MC Execution Updated";
                     break;
-                case CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER:
-                    statusName = "Rejected By Approver";
+                case CMMS.CMMS_Status.MC_TASK_COMPLETED:
+                    statusName = "MC Task Completed";
                     break;
-                case CMMS.CMMS_Status.PTW_CLOSED:
-                    statusName = "Closed";
+                case CMMS.CMMS_Status.MC_EXECUTION_ABANDONED:
+                    statusName = "MC Execution Abandoned Approved";
                     break;
-                case CMMS.CMMS_Status.PTW_CANCELLED_BY_ISSUER:
-                    statusName = "Cancelled BY Issuer";
+                case CMMS.CMMS_Status.MC_EXECUTION_ABANDONED_REJECTED:
+                    statusName = "MC Execution Abandoned Rejected";
                     break;
-                case CMMS.CMMS_Status.PTW_CANCELLED_BY_HSE:
-                    statusName = "Cancelled By HSE";
+                case CMMS.CMMS_Status.MC_TASK_ABANDONED_APPROVED:
+                    statusName = "MC Task Abandoned Approved";
                     break;
-                case CMMS.CMMS_Status.PTW_CANCELLED_BY_APPROVER:
-                    statusName = "Cancelled By Approver";
+                case CMMS.CMMS_Status.MC_ASSIGNED:
+                    statusName = "MC Task Assigned ";
                     break;
-                case CMMS.CMMS_Status.PTW_CANCEL_REQUESTED:
-                    statusName = "Cancelled";
+                case CMMS.CMMS_Status.MC_TASK_APPROVED:
+                    statusName = "MC Task Approved ";
                     break;
-                case CMMS.CMMS_Status.PTW_CANCEL_REQUEST_REJECTED:
-                    statusName = "Cancel Request Rejected";
+                case CMMS.CMMS_Status.MC_TASK_END_APPROVED:
+                    statusName = "MC Task End Approved ";
                     break;
-                case CMMS.CMMS_Status.PTW_CANCEL_REQUEST_APPROVED:
-                    statusName = "Cancelled";
+                case CMMS.CMMS_Status.MC_TASK_END_REJECTED:
+                    statusName = "MC Task End Rejected ";
                     break;
-                case CMMS.CMMS_Status.PTW_EXTEND_REQUESTED:
-                    statusName = "Requested for Extension";
+                case CMMS.CMMS_Status.MC_TASK_SCHEDULE_APPROVED:
+                    statusName = "MC Schedule Approved  ";
                     break;
-                case CMMS.CMMS_Status.PTW_EXTEND_REQUEST_APPROVE:
-                    statusName = "Approved Extension";
+                case CMMS.CMMS_Status.MC_TASK_SCHEDULE_REJECT:
+                    statusName = "MC Schedule Rejected  ";
                     break;
-                case CMMS.CMMS_Status.PTW_EXTEND_REQUEST_REJECTED:
-                    statusName = "Rejected Extension";
-                    break;
-                case CMMS.CMMS_Status.PTW_LINKED_TO_JOB:
-                    statusName = "Linked to Job";
-                    break;
-                case CMMS.CMMS_Status.PTW_LINKED_TO_PM:
-                    statusName = "Linked to PM";
-                    break;
-                case CMMS.CMMS_Status.PTW_LINKED_TO_AUDIT:
-                    statusName = "Linked to Audit";
-                    break;
-                case CMMS.CMMS_Status.PTW_LINKED_TO_HOTO:
-                    statusName = "Linked to HOTO";
-                    break;
-                case CMMS.CMMS_Status.PTW_EXPIRED:
-                    statusName = "Expired";
-                    break;
-                case CMMS.CMMS_Status.PTW_UPDATED:
-                    statusName = "Updated";
+                case CMMS.CMMS_Status.MC_TASK_REJECTED:
+                    statusName = "MC Task Rejected  ";
                     break;
                 default:
-                    statusName = "Invalid";
+                    statusName = "Status Unavaialble";
                     break;
             }
             return statusName;
@@ -241,15 +247,14 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 statusOut += $"WHEN mc.status = {status.Key} THEN '{status.Value}' ";
             }
             statusOut += $"ELSE 'Invalid Status' END";
-
             string myQuery1 = $"select mc.planId,mc.status, mc.frequencyId,mc.assignedTo as assignedToId,mc.startDate,mc.durationDays as noOfCleaningDays, " +
-                $"mc.facilityId,mc.title,CONCAT(createdBy.firstName, createdBy.lastName) as createdBy , " +
-                $"mc.createdAt,CONCAT(approvedBy.firstName, approvedBy.lastName) as approvedBy,mc.approvedAt,freq.name as" +
-                $" frequency,CONCAT(assignedTo.firstName, ' ', assignedTo.lastName) as assignedTo,mc.durationDays,{statusOut} as status_short" +
-                $" from cleaning_plan as mc LEFT JOIN Frequency as freq on freq.id = mc.frequencyId " +
-                $"LEFT JOIN users as assignedTo ON assignedTo.id = mc.assignedTo " +
-                $"LEFT JOIN users as createdBy ON createdBy.id = mc.createdById " +
-                $"LEFT JOIN users as approvedBy ON approvedBy.id = mc.approvedById where moduleType={moduleType} ";
+                              $"mc.facilityId,mc.title,CONCAT(createdBy.firstName, createdBy.lastName) as createdBy , " +
+                              $"mc.createdAt,CONCAT(approvedBy.firstName, approvedBy.lastName) as approvedBy,mc.approvedAt,freq.name as" +
+                              $"frequency,CONCAT(assignedTo.firstName, ' ', assignedTo.lastName) as assignedTo,mc.durationDays,{statusOut} as status_short" +
+                              $"from cleaning_plan as mc LEFT JOIN Frequency as freq on freq.id = mc.frequencyId " +
+                              $"LEFT JOIN users as assignedTo ON assignedTo.id = mc.assignedTo " +
+                              $"LEFT JOIN users as createdBy ON createdBy.id = mc.createdById " +
+                              $"LEFT JOIN users as approvedBy ON approvedBy.id = mc.approvedById where moduleType={moduleType} ";
 
             if (facilityId > 0)
             {
@@ -330,18 +335,31 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                         await Context.GetData<CMMCPlan>(equipmentQry).ConfigureAwait(false);
                     }
                 }
-                CMMCPlan _ViewPlanList = await GetPlanDetails(planId, facilitytimeZone);
-                planIds = planId;
-
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MC_PLAN, planId, 0, 0, "Plan Created", (CMMS.CMMS_Status)status, userId);
-                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.MC_PLAN, (CMMS.CMMS_Status)status, new[] { userId }, _ViewPlanList);
+                try
+                {
+                    CMMCPlan _ViewPlanList = await GetPlanDetails(planId, facilitytimeZone);
+                    await CMMSNotification.sendNotification(CMMS.CMMS_Modules.MC_PLAN, (CMMS.CMMS_Status)status, new[] { userId }, _ViewPlanList);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                }
+                // planIds = planId;
+
+
+
                 //API_ErrorLog(msg);
+
 
             }
 
             CMDefaultResponse response = new CMDefaultResponse(planIds, CMMS.RETRUNSTATUS.SUCCESS, $"Plan Created Successfully");
             return response;
         }
+
+
+
 
         internal async Task<CMDefaultResponse> UpdatePlan(List<CMMCPlan> requests, int userId, string facilitytimeZone)
         {
@@ -435,18 +453,28 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                     //myQuery = $"SELECT * FROM cleaning_plan_items";
                     await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
                 }
-                CMMCPlan _ViewPlanList = await GetPlanDetails(planId, facilitytimeZone);
+
                 if (request.resubmit == 1)
                 {
 
-                    await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MC_PLAN, rid, 0, 0, "Plan Updated Successfully", CMMS.CMMS_Status.MC_PLAN_SUBMITTED, userId);
+                    await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MC_PLAN, rid, 0, 0, "Plan Updated Successfully", CMMS.CMMS_Status.MC_PLAN_UPDATED, userId);
 
                     return new CMDefaultResponse(rid, CMMS.RETRUNSTATUS.SUCCESS, $"Plan Updated Successfully");
 
                 }
 
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MC_PLAN, request.planId, 0, 0, "Plan Updated", CMMS.CMMS_Status.MC_PLAN_UPDATED, userId);
-                //  await CMMSNotification.sendNotification(CMMS.CMMS_Modules.MC_PLAN, CMMS.CMMS_Status.MC_PLAN_UPDATED, new[] { userId }, _ViewPlanList);
+
+                try
+                {
+                    CMMCPlan _ViewPlanList = await GetPlanDetails(planId, facilitytimeZone);
+                    await CMMSNotification.sendNotification(CMMS.CMMS_Modules.MC_PLAN, CMMS.CMMS_Status.MC_PLAN_UPDATED, new[] { userId }, _ViewPlanList);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                }
+
             }
 
             CMDefaultResponse response = new CMDefaultResponse(planId, CMMS.RETRUNSTATUS.SUCCESS, $"Plan Updated Successfully ");
@@ -462,15 +490,15 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             }
             statusOut += $"ELSE 'Invalid Status' END";
 
-            string planQuery = $"select plan.planId,plan.title,plan.startDate ,plan.frequencyId,plan.assignedTo as assignedToId ,plan.approvedById,plan.createdById,plan.facilityId,f.name as siteName, CONCAT(createdBy.firstName, createdBy.lastName) as createdBy , plan.createdAt,freq.name as frequency, " +
-                $" plan.durationDays as noOfCleaningDays, CONCAT(approvedBy.firstName, approvedBy.lastName) as approvedBy , plan.approvedAt as approvedAt, CONCAT(createdBy.firstName, createdBy.lastName) as updatedBy, CONCAT(assignedTo.firstName, ' ', assignedTo.lastName) as assignedTo,plan.status,{statusOut} as status_short," +
-                $"CONCAT(rejectedBy.firstName, rejectedBy.lastName) as rejectedBy ," +
-                $" plan.cleaningType as cleaningType ,CASE plan.cleaningType WHEN 1 then 'Wet' When 2 then 'Dry' when 3 then 'Robotic' else 'Wet 'end as cleaningTypeName  from cleaning_plan as plan " +
-                $" LEFT JOIN Frequency as freq on freq.id = plan.frequencyId " +
-                $" LEFT JOIN users as createdBy ON createdBy.id = plan.createdById LEFT JOIN users as approvedBy ON approvedBy.id = plan.approvedById LEFT JOIN facilities as f  on f.id=plan.facilityId " +
-                $"LEFT JOIN users AS createdBy1 ON plan.updatedById = createdBy1.id  " +
-                $"LEFT JOIN users AS rejectedBy ON rejectedBy.id = plan.approvedById " +
-                $"LEFT JOIN users as assignedTo ON assignedTo.id = plan.assignedTo where plan.planId = {planId}  ;";
+            string planQuery = $"select plan.planId,plan.title,plan.startDate ,plan.frequencyId,plan.assignedTo as assignedToId ,plan.approvedById,plan.createdById,plan.facilityId,f.name as siteName, CONCAT(createdBy.firstName, ' ',createdBy.lastName) as createdBy , plan.createdAt,freq.name as frequency, " +
+                $" plan.durationDays as noOfCleaningDays, CONCAT(approvedBy.firstName, ' ',approvedBy.lastName) as approvedBy , " +
+                $" plan.approvedAt as approvedAt, CONCAT(assignedTo.firstName, ' ', assignedTo.lastName) as assignedTo,plan.status, " +
+                $" facility.name AS facilityidbyName," +
+                $" {statusOut} as status_short from cleaning_plan as plan  LEFT JOIN Frequency as freq on freq.id = plan.frequencyId " +
+                $"LEFT JOIN users as createdBy ON createdBy.id = plan.createdById " +
+                $"LEFT JOIN facilities as facility ON facility.id = plan.facilityId " +
+                $" LEFT JOIN users as approvedBy ON approvedBy.id = plan.approvedById LEFT JOIN facilities as f  on f.id=plan.facilityId    " +
+              $"LEFT JOIN users as assignedTo ON assignedTo.id = plan.assignedTo where plan.planId = {planId}  ;";
 
             List<CMMCPlan> _ViewMCPlan = await Context.GetData<CMMCPlan>(planQuery).ConfigureAwait(false);
 
@@ -510,7 +538,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             _ViewMCPlan[0].schedules = _Schedules;
 
             CMMS.CMMS_Status _Status_long = (CMMS.CMMS_Status)(_ViewMCPlan[0].status);
-            string _longStatus = getLongStatus(CMMS.CMMS_Modules.MC_PLAN, _Status_long, _ViewMCPlan[0], null);
+            string _longStatus = getLongStatus(CMMS.CMMS_Modules.MC_PLAN, _Status_long, _ViewMCPlan[0]);
             _ViewMCPlan[0].status_long = _longStatus;
             foreach (var list in _ViewMCPlan)
             {
@@ -660,8 +688,15 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MC_PLAN, request.id, 0, 0, request.comment, CMMS.CMMS_Status.MC_PLAN_REJECTED, userID);
-            CMMCPlan _ViewPlanList = await GetPlanDetails(request.id, facilitytimeZone);
-            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.MC_PLAN, CMMS.CMMS_Status.MC_PLAN_REJECTED, new[] { userID }, _ViewPlanList);
+            try
+            {
+                CMMCPlan _ViewPlanList = await GetPlanDetails(request.id, facilitytimeZone);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.MC_PLAN, CMMS.CMMS_Status.MC_PLAN_REJECTED, new[] { userID }, _ViewPlanList);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
 
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Plan Rejected");
 
@@ -670,8 +705,17 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
         internal async Task<CMDefaultResponse> DeletePlan(int planid, int userID, string facilitytimeZone)
         {
-            CMMCPlan _ViewPlanList = await GetPlanDetails(planid, facilitytimeZone);
-            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.MC_PLAN, CMMS.CMMS_Status.MC_PLAN_DELETED, new[] { userID }, _ViewPlanList);
+            try
+            {
+                CMMCPlan _ViewPlanList = await GetPlanDetails(planid, facilitytimeZone);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.MC_PLAN, CMMS.CMMS_Status.MC_PLAN_DELETED, new[] { userID }, _ViewPlanList);
+            }
+
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
             string approveQuery = $"Delete from cleaning_plan where planId ={planid};Delete from cleaning_plan_schedules where planId ={planid};Delete from cleaning_plan_items where planId ={planid}"; ;
             await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
 
@@ -722,7 +766,20 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             if (retVal > 0)
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MC_EXECUTION, scheduleId, CMMS.CMMS_Modules.PTW, permit_id, "PTW linked to MC", CMMS.CMMS_Status.SCHEDULED_LINKED_TO_PTW, userID);
-            //add a new method get task detaild from task_id
+
+            try
+            {
+                CMMCExecutionSchedule _ViewTaskList = await GetScheduleDetails(scheduleId, facilitytimeZone);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.MC_EXECUTION, CMMS.CMMS_Status.SCHEDULED_LINKED_TO_PTW, new[] { userID }, _ViewTaskList);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Failed to send Notification", ex.Message);
+            }
+            // Call getLongStatus method and pass the necessary parameters
+
+
+            // Send notification (uncomment this if you need to use it)
             //CMMCExecution _ViewTaskList = await GetExecutionDetails(executionId, facilitytimeZone);
             // await CMMSNotification.sendNotification(CMMS.CMMS_Modules.MC_TASK, CMMS.CMMS_Status.SCHEDULED_LINKED_TO_PTW, new[] { userID }, _ViewTaskList);
 
@@ -826,8 +883,15 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             }
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MC_TASK, executionId, 0, 0, "Execution Started", (CMMS.CMMS_Status)status, userId);
-            // CMMCExecution _ViewTaskList = await GetExecutionDetails(executionId, facilitytimeZone);
-            // await CMMSNotification.sendNotification(CMMS.CMMS_Modules.MC_TASK, CMMS.CMMS_Status.MC_TASK_STARTED, new[] { userId }, _ViewTaskList);
+            try
+            {
+                CMMCExecution _ViewTaskList = await GetExecutionDetails(executionId, facilitytimeZone);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.MC_TASK, CMMS.CMMS_Status.MC_TASK_STARTED, new[] { userId }, _ViewTaskList);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
 
 
             CMDefaultResponse response = new CMDefaultResponse(executionId, CMMS.RETRUNSTATUS.SUCCESS, $"Task Execution started");
@@ -859,8 +923,15 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             }
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MC_TASK, executionId, 0, 0, "Execution Completed", (CMMS.CMMS_Status)status, userId);
-            // CMMCExecution _ViewTaskList = await GetExecutionDetails(executionId, facilitytimeZone);
-            //   await CMMSNotification.sendNotification(CMMS.CMMS_Modules.MC_TASK, CMMS.CMMS_Status.MC_TASK_ENDED, new[] { userId }, _ViewTaskList);
+            try
+            {
+                CMMCExecution _ViewTaskList = await GetExecutionDetails(executionId, facilitytimeZone);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.MC_TASK, CMMS.CMMS_Status.MC_TASK_COMPLETED, new[] { userId }, _ViewTaskList);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
 
             CMDefaultResponse response = new CMDefaultResponse(executionId, CMMS.RETRUNSTATUS.SUCCESS, $"Task Execution Completed");
             return response;
@@ -892,10 +963,14 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
             string executionQuery = $"select ex.id as executionId,ex.status ,ex.startDate,CONCAT(assignedTo.firstName, assignedTo.lastName) as assignedTo ,F.name as site_name , " +
                 $"plan.title, CONCAT(createdBy.firstName, ' ' , createdBy.lastName) as plannedBy ,plan.createdAt as plannedAt,freq.name as frequency, CONCAT(startedBy.firstName, ' ' ,startedBy.lastName) as startedBy ," +
-                $" ex.executionStartedAt as startedAt , CONCAT(rejectedById.firstName, ' ', rejectedById.lastName) as rejectedById,ex.rejectedAt,CONCAT(approvedById.firstName, approvedById.lastName) as approvedById,ex.approvedAt,  {statusEx} as status_short, " +
+                $" ex.executionStartedAt as startedAt , CONCAT(rejectedById.firstName, ' ', rejectedById.lastName) as rejectedBy,ex.rejectedAt,CONCAT(approvedById.firstName, ' ',approvedById.lastName) as approvedBy,ex.approvedAt,  {statusEx} as status_short, " +
                 $" CONCAT(ended.firstName, ' ', ended.lastName) as endedBy," +
                 $" CONCAT(abandoned.firstName,' ', abandoned.lastName) as abandonedBy, " +
-                $" CONCAT(updatedBy.firstName,' ', updatedBy.lastName) as updatedBy" +
+                $" CONCAT(updatedBy.firstName,' ', updatedBy.lastName) as updatedBy, " +
+                $" CONCAT(rescheduled.firstName,' ', rescheduled.lastName) as rescheduledBy, " +
+                $" CONCAT(endApproved.firstName,' ', endApproved.lastName) as endapprovedbyName," +
+                $" CONCAT(endRejected.firstName,' ', endRejected.lastName) as endrejectedbyName," +
+                $" facility.name AS facilityidbyName " +
                 $" from cleaning_execution as ex JOIN cleaning_plan as plan on ex.planId = plan.planId " +
                 $" LEFT JOIN Frequency as freq on freq.id = plan.frequencyId " +
                 $" left join facilities as F on F.id = ex.facilityId  " +
@@ -906,6 +981,10 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 $" LEFT JOIN users as ended ON ended.id = ex.endedById" +
                 $" LEFT JOIN users as updatedBy ON updatedBy.id = ex.updatedById" +
                 $" LEFT JOIN users as abandoned ON abandoned.id = ex.abandonedById" +
+                $" LEFT JOIN users as rescheduled ON rescheduled.id = ex.rescheduled" +
+                $" LEFT JOIN users as endApproved ON endApproved.id = ex.end_approved_id" +
+                $" LEFT JOIN users as endRejected ON endRejected.id = ex.end_rejected_id" +
+                $" LEFT JOIN facilities as facility ON facility.id = ex.facilityId" +
                 $" LEFT JOIN users as assignedTo ON assignedTo.id = ex.assignedTo where ex.id={executionId};";
 
 
@@ -921,6 +1000,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                                    $" left join permits as permit on permit.id = schedule.ptw_id " +
                                    $" LEFT JOIN users as rejectedById ON rejectedById.id = schedule.rejectedById " +
                                    $" LEFT JOIN users as approvedById ON approvedById.id = schedule.approvedById " +
+
                                    $" left join cleaning_plan as cp on schedule.planId= cp.planId " +
                                    $" where schedule.executionId = {executionId} group by schedule.scheduleId;";
 
@@ -936,7 +1016,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             }
 
             CMMS.CMMS_Status _Status_long = (CMMS.CMMS_Status)(_ViewExecution[0].status);
-            string _longStatus = getLongStatus(CMMS.CMMS_Modules.MC_TASK, _Status_long, null, _ViewExecution[0]);
+            string _longStatus = getLongStatus(CMMS.CMMS_Modules.MC_TASK, _Status_long, _ViewExecution[0]);
             _ViewExecution[0].status_long = _longStatus;
             foreach (var item in _ViewSchedule)
             {
@@ -960,6 +1040,80 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
             return _ViewExecution[0];
         }
+
+        internal async Task<CMMCExecutionSchedule> GetScheduleDetails(int scheduleId, string facilitytimeZone)
+        {
+
+            string statusEx = "CASE ";
+            foreach (KeyValuePair<int, string> status in StatusDictionary)
+            {
+                statusEx += $"WHEN ex.status = {status.Key} THEN '{status.Value}' ";
+            }
+            statusEx += $"ELSE 'Invalid Status' END";
+
+            string statusSc = "CASE ";
+            foreach (KeyValuePair<int, string> status in StatusDictionary)
+            {
+                statusSc += $"WHEN schedule.status = {status.Key} THEN '{status.Value}' ";
+            }
+            statusSc += $"ELSE 'Invalid Status' END";
+
+            string statusEquip = "CASE ";
+            foreach (KeyValuePair<int, string> status in StatusDictionary)
+            {
+                statusEquip += $"WHEN item.status = {status.Key} THEN '{status.Value}' ";
+            }
+            statusEquip += $"ELSE 'Invalid Status' END";
+
+
+            string scheduleQuery = $"select schedule.scheduleId as scheduleId ,schedule.status ,schedule.executionId, schedule.actualDay as cleaningDay ,schedule.startedAt as start_date,schedule.endedAt as end_date  , " +
+                                   $" cp.cleaningType ,CASE cp.cleaningType WHEN 1 then 'Wet' When 2 then 'Dry' when 3 then 'Robotic'  else 'Wet '  end as cleaningTypeName, SUM({measure}) as scheduled , " +
+                                   $" permit.id as permit_id,permit.code as  permit_code , CONCAT(rejectedById.firstName, ' ',rejectedById.lastName) as rejectedBy,schedule.rejectedAt, CONCAT(approvedById.firstName, ' ',approvedById.lastName) as approvedBy, CONCAT(createdBy.firstName, createdBy.lastName) as createdbyName,  CONCAT(startedBy.firstName, ' ',startedBy.lastName) as startedbyName ," +
+                                   $" schedule.approvedAt, title.title AS title, description.description AS description, facility.name AS facilityidbyName, CONCAT(endedBy.firstName, ' ',endedBy.lastName) as endedbyName, CONCAT(abandonedBy.firstName, ' ',abandonedBy.lastName) as abandonedbyName, CONCAT(updatedBy.firstName, ' ',updatedBy.lastName) as updatedbyName," +
+                                   $" Case when permit.TBT_Done_By is null or permit.TBT_Done_By = 0 then 0 else 1 end ptw_tbt_done,permit.status as ptw_status ," +
+                                   $" SUM(CASE WHEN item.status = {(int)CMMS.CMMS_Status.EQUIP_CLEANED} THEN {measure} ELSE 0 END) as cleaned , SUM(CASE WHEN item.status = {(int)CMMS.CMMS_Status.EQUIP_ABANDONED} THEN {measure} ELSE 0 END) as abandoned , " +
+                                   $" SUM(CASE WHEN item.status = {(int)CMMS.CMMS_Status.EQUIP_SCHEDULED} THEN {measure} ELSE 0 END) as pending ,schedule.remark_of_schedule as remark_of_schedule ,schedule.waterUsed, schedule.remark as remark ,{statusSc} as status_short from cleaning_execution_schedules as schedule " +
+                                   $" left join cleaning_execution_items as item on schedule.scheduleId = item.scheduleId " +
+                                   $" left join permits as permit on permit.id = schedule.ptw_id " +
+                                   $" LEFT JOIN users as rejectedById ON rejectedById.id = schedule.rejectedById " +
+                                   $" LEFT JOIN users as approvedById ON approvedById.id = schedule.approvedById " +
+                                   $" LEFT JOIN users as createdBy ON createdBy.id = schedule.createdbyId " +
+                                   $" LEFT JOIN users as startedBy ON startedBy.id = schedule.startedById " +
+                                   $" LEFT JOIN users as endedBy ON endedBy.id = schedule.endedById " +
+                                   $" LEFT JOIN users as abandonedBy ON abandonedBy.id = schedule.abandonedById " +
+                                   $" LEFT JOIN users as updatedBy ON updatedBy.id = schedule.updatedById " +
+                                   $" left join cleaning_plan as cp on schedule.planId= cp.planId " +
+                                   $" left join cleaning_plan as title on schedule.planId= title.planId " +
+                                   $"LEFT JOIN facilities as facility ON facility.id = schedule.facilityId " +
+                                   $" left join cleaning_plan as description on schedule.planId= description.planId " +
+                                   $" where schedule.scheduleId = {scheduleId} group by schedule.scheduleId;";
+
+            List<CMMCExecutionSchedule> _ViewSchedule = await Context.GetData<CMMCExecutionSchedule>(scheduleQuery).ConfigureAwait(false);
+
+
+
+
+
+            CMMS.CMMS_Status _Status_long_Schedule = (CMMS.CMMS_Status)(_ViewSchedule[0].status);
+            _ViewSchedule[0].status_short = Status_PTW(_ViewSchedule[0].status);
+
+            string _longStatus_Schedule = getLongStatus(CMMS.CMMS_Modules.MC_EXECUTION, _Status_long_Schedule, _ViewSchedule[0]);
+            _ViewSchedule[0].status_long_schedule = _longStatus_Schedule;
+
+
+            foreach (var item in _ViewSchedule)
+            {
+                CMMS.CMMS_Status ptw_status1 = (CMMS.CMMS_Status)(item.ptw_status);
+                item.status_short_ptw = Status_PTW((int)ptw_status1);
+            }
+
+
+
+            return _ViewSchedule[0];
+
+
+        }
+
 
         internal async Task<CMMCExecutionSchedule> GetScheduleExecutionSummary(CMMCGetScheduleExecution request, string facilitytimeZone)
         {
@@ -995,7 +1149,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
         }
         internal async Task<CMDefaultResponse> StartScheduleExecution(int scheduleId, int userId, string facilitytimeZone)
         {
-            int status = (int)CMMS.CMMS_Status.MC_TASK_STARTED;
+            int status = (int)CMMS.CMMS_Status.MC_EXECUTION_STARTED;
 
 
             string scheduleQuery = $"Update cleaning_execution_schedules set status = {status},startedById={userId},startedAt='{UtilsRepository.GetUTCTime()}' where scheduleId = {scheduleId}; ";
@@ -1004,8 +1158,16 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             await Context.GetData<CMMCExecutionSchedule>(scheduleQuery).ConfigureAwait(false);
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MC_TASK, scheduleId, 0, 0, "schedule Started", (CMMS.CMMS_Status)status, userId);
-            //CMMCExecution _ViewTaskList = await GetExecutionDetails(scheduleId, facilitytimeZone);
-            //  await CMMSNotification.sendNotification(CMMS.CMMS_Modules.MC_TASK, CMMS.CMMS_Status.MC_TASK_STARTED, new[] { userId }, _ViewTaskList);
+            try
+            {
+                CMMCExecutionSchedule _ViewTaskList = await GetScheduleDetails(scheduleId, facilitytimeZone);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.MC_EXECUTION, CMMS.CMMS_Status.MC_EXECUTION_STARTED, new[] { userId }, _ViewTaskList);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+
 
             CMDefaultResponse response = new CMDefaultResponse(scheduleId, CMMS.RETRUNSTATUS.SUCCESS, $"Schedule started Successfully");
             return response;
@@ -1013,7 +1175,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
         internal async Task<CMDefaultResponse> EndScheduleExecution(int scheduleId, int userId, string facilitytimeZone)
         {
-            int status = (int)CMMS.CMMS_Status.MC_TASK_COMPLETED;
+            int status = (int)CMMS.CMMS_Status.MC_EXECUTION_CLOSED;
 
             string scheduleQuery = $"Update cleaning_execution_schedules set status = {status},endedById={userId},endedAt='{UtilsRepository.GetUTCTime()}' where scheduleId = {scheduleId}; ";
             //$"Update cleaning_execution_items set status = {status} where scheduleId = {scheduleId}";
@@ -1022,8 +1184,16 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MC_TASK, scheduleId, 0, 0, "schedule Execution Completed", (CMMS.CMMS_Status)status, userId);
 
-            // CMMCExecution _ViewTaskList = await GetExecutionDetails(scheduleId, facilitytimeZone);
-            // await CMMSNotification.sendNotification(CMMS.CMMS_Modules.MC_TASK, CMMS.CMMS_Status.MC_TASK_COMPLETED, new[] { userId }, _ViewTaskList);
+            try
+            {
+                CMMCExecutionSchedule _ViewTaskList = await GetScheduleDetails(scheduleId, facilitytimeZone);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.MC_EXECUTION, CMMS.CMMS_Status.MC_EXECUTION_CLOSED, new[] { userId }, _ViewTaskList);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
+
 
             CMDefaultResponse response = new CMDefaultResponse(scheduleId, CMMS.RETRUNSTATUS.SUCCESS, $"Schedule Execution Completed");
             return response;
@@ -1071,16 +1241,24 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MC_TASK, request.scheduleId, 0, 0, "schedule Updated", CMMS.CMMS_Status.MC_TASK_UPDATED, userId);
-
+            try
+            {
+                CMMCExecutionSchedule _ViewTaskList = await GetScheduleDetails(request.scheduleId, facilitytimeZone);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.MC_EXECUTION, CMMS.CMMS_Status.MC_EXECUTION_UPDATED, new[] { userId }, _ViewTaskList);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
             CMDefaultResponse response = new CMDefaultResponse(request.scheduleId, CMMS.RETRUNSTATUS.SUCCESS, $"Schedule Updated Successfully");
             return response;
         }
 
         internal async Task<CMDefaultResponse> AbandonSchedule(CMApproval request, int userId, string facilitytimeZone)
         {
-            int status = (int)CMMS.CMMS_Status.MC_TASK_ABANDONED;
+            int status = (int)CMMS.CMMS_Status.MC_EXECUTION_ABANDONED;
             int equipstatus = (int)CMMS.CMMS_Status.EQUIP_ABANDONED;
-            int notStatus = (int)CMMS.CMMS_Status.MC_TASK_COMPLETED;
+            int notStatus = (int)CMMS.CMMS_Status.MC_EXECUTION_ENDED;
             if (moduleType == 2)
             {
                 status = (int)CMMS.CMMS_Status.VEG_TASK_ABANDONED;
@@ -1095,9 +1273,15 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MC_TASK, request.id, 0, 0, request.comment, (CMMS.CMMS_Status)status, userId);
 
-
-            // CMMCExecution _ViewTaskList = await GetExecutionDetails(request.id, facilitytimeZone);
-            // await CMMSNotification.sendNotification(CMMS.CMMS_Modules.MC_TASK, CMMS.CMMS_Status.MC_TASK_ABANDONED, new[] { userId }, _ViewTaskList);
+            try
+            {
+                CMMCExecutionSchedule _ViewTaskList = await GetScheduleDetails(request.id, facilitytimeZone);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.MC_EXECUTION, CMMS.CMMS_Status.MC_EXECUTION_ABANDONED, new[] { userId }, _ViewTaskList);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
 
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, request.comment);
             return response;
@@ -1113,16 +1297,23 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MC_TASK, request.id, 0, 0, request.comment, (CMMS.CMMS_Status)status, userId);
 
-            //CMMCExecution _ViewTaskList = await GetExecutionDetails(request.id, facilitytimeZone);
-            //await CMMSNotification.sendNotification(CMMS.CMMS_Modules.MC_TASK, CMMS.CMMS_Status.MC_TASK_ABANDONED, new[] { userId }, _ViewTaskList);
+            try
+            {
+                CMMCExecution _ViewTaskList = await GetExecutionDetails(request.id, facilitytimeZone);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.MC_TASK, CMMS.CMMS_Status.MC_TASK_ABANDONED, new[] { userId }, _ViewTaskList);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, request.comment);
             return response;
         }
 
         internal async Task<CMDefaultResponse> RejectAbandonExecution(CMApproval request, int userId, string facilitytimeZone)
         {
-            int status = (int)CMMS.CMMS_Status.MC_TASK_ABANDONED_REJECTED;
-            int notStatus = (int)CMMS.CMMS_Status.MC_TASK_COMPLETED;
+            int status = (int)CMMS.CMMS_Status.MC_EXECUTION_ABANDONED_REJECTED;
+            int notStatus = (int)CMMS.CMMS_Status.MC_EXECUTION_CLOSED;
             if (moduleType == 2)
             {
                 status = (int)CMMS.CMMS_Status.VEG_TASK_ABANDONED_REJECTED;
@@ -1134,8 +1325,17 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             await Context.GetData<CMMCExecutionSchedule>(Query).ConfigureAwait(false);
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MC_TASK, request.id, 0, 0, request.comment, (CMMS.CMMS_Status)status, userId);
-            // CMMCExecution _ViewTaskList = await GetExecutionDetails(request.id, facilitytimeZone);
-            //  await CMMSNotification.sendNotification(CMMS.CMMS_Modules.MC_TASK, CMMS.CMMS_Status.MC_TASK_ABANDONED_REJECTED, new[] { userId }, _ViewTaskList);
+            try
+            {
+                CMMCExecutionSchedule _ViewTaskList = await GetScheduleDetails(request.id, facilitytimeZone);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.MC_EXECUTION, CMMS.CMMS_Status.MC_EXECUTION_ABANDONED_REJECTED, new[] { userId }, _ViewTaskList);
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+
 
 
 
@@ -1159,8 +1359,15 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             await Context.GetData<CMMCExecutionSchedule>(Query).ConfigureAwait(false);
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MC_TASK, request.id, 0, 0, request.comment, (CMMS.CMMS_Status)status, userId);
-            //CMMCExecution _ViewTaskList = await GetExecutionDetails(request.id, facilitytimeZone);
-            // await CMMSNotification.sendNotification(CMMS.CMMS_Modules.MC_TASK, CMMS.CMMS_Status.MC_TASK_ABANDONED_APPROVED, new[] { userId }, _ViewTaskList);
+            try
+            {
+                CMMCExecution _ViewTaskList = await GetExecutionDetails(request.id, facilitytimeZone);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.MC_TASK, CMMS.CMMS_Status.MC_TASK_ABANDONED_APPROVED, new[] { userId }, _ViewTaskList);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
 
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, request.comment);
             return response;
@@ -1199,9 +1406,18 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             {
                 response = new CMDefaultResponse(task_id, retCode, $"MC Task Reassigned To user Id {assign_to}");
             }
-
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MC_TASK, task_id, 0, 0, $"MC Task Assigned to user_Id {assign_to}", CMMS.CMMS_Status.MC_ASSIGNED, userID);
-            CMMCExecution _ViewTaskList = await GetExecutionDetails(task_id, facilitytimeZone);
+            try
+            {
+                CMMCExecution _ViewTaskList = await GetExecutionDetails(task_id, facilitytimeZone);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.MC_TASK, CMMS.CMMS_Status.MC_ASSIGNED, new[] { userID }, _ViewTaskList);
+            }
+
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+
             //  await CMMSNotification.sendNotification(CMMS.CMMS_Modules.MC_TASK, CMMS.CMMS_Status.MC_ASSIGNED, new[] { userID }, _ViewTaskList);
             return response;
         }
@@ -1242,9 +1458,17 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MC_TASK, taskid, 0, 0, "Execution scheduled", CMMS.CMMS_Status.MC_TASK_SCHEDULED, userID);
 
-            CMMCExecution _ViewTaskList = await GetExecutionDetails(request.id, facilitytimeZone);
-            // await CMMSNotification.sendNotification(CMMS.CMMS_Modules.MC_TASK, CMMS.CMMS_Status.MC_TASK_APPROVED, new[] { userID }, _ViewTaskList);
-            // await CMMSNotification.sendNotification(CMMS.CMMS_Modules.MC_TASK, CMMS.CMMS_Status.MC_TASK_SCHEDULED, new[] { userID }, _ViewTaskList);
+            try
+            {
+
+                CMMCExecution _ViewTaskList = await GetExecutionDetails(request.id, facilitytimeZone);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.MC_TASK, CMMS.CMMS_Status.MC_TASK_APPROVED, new[] { userID }, _ViewTaskList);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+
+            }
 
 
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Execution Approved");
@@ -1259,7 +1483,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             {
                 status = (int)CMMS.CMMS_Status.VEG_TASK_END_APPROVED;
             }
-            string approveQuery = $"Update cleaning_execution set status= {status} ,approvedById={userID}, " +
+            string approveQuery = $"Update cleaning_execution set status= {status} ,end_approved_id={userID}, " +
                 $" approvedAt='{UtilsRepository.GetUTCTime()}',rescheduled = 1 where id = {request.id} ";
             await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
 
@@ -1296,9 +1520,16 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MC_TASK, request.id, 0, 0, request.comment, CMMS.CMMS_Status.MC_PLAN_APPROVED, userID);
 
             CMDefaultResponse response = new CMRescheduleApprovalResponse(taskid, request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Execution End Approved To Mc Task {taskid}");
+            try
+            {
+                CMMCExecution _ViewTaskList = await GetExecutionDetails(request.id, facilitytimeZone);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.MC_TASK, CMMS.CMMS_Status.MC_TASK_END_APPROVED, new[] { userID }, _ViewTaskList);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
 
-            //CMMCExecution _ViewTaskList = await GetExecutionDetails(request.id, facilitytimeZone);
-            //  await CMMSNotification.sendNotification(CMMS.CMMS_Modules.MC_TASK, CMMS.CMMS_Status.MC_TASK_END_APPROVED, new[] { userID }, _ViewTaskList);
 
             return response;
 
@@ -1314,12 +1545,19 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
             }
 
-            string approveQuery = $"Update cleaning_execution set status= {status},rejectedById={userID},executionRejectedRemarks='{request.comment}', rejectedAt='{UtilsRepository.GetUTCTime()}', executionRejectedAt = '{UtilsRepository.GetUTCTime()}' where id = {request.id}";
+            string approveQuery = $"Update cleaning_execution set status= {status},end_rejected_id={userID},executionRejectedRemarks='{request.comment}', rejectedAt='{UtilsRepository.GetUTCTime()}', executionRejectedAt = '{UtilsRepository.GetUTCTime()}' where id = {request.id}";
             await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MC_TASK, request.execution_id, 0, 0, request.comment, (CMMS.CMMS_Status)status, userID);
-            // CMMCExecution _ViewTaskList = await GetExecutionDetails(request.id, facilitytimeZone);
-            // await CMMSNotification.sendNotification(CMMS.CMMS_Modules.MC_TASK, CMMS.CMMS_Status.MC_TASK_END_REJECTED, new[] { userID }, _ViewTaskList);
+            try
+            {
+                CMMCExecution _ViewTaskList = await GetExecutionDetails(request.id, facilitytimeZone);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.MC_TASK, CMMS.CMMS_Status.MC_TASK_END_REJECTED, new[] { userID }, _ViewTaskList);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
 
 
             CMDefaultResponse response = new CMDefaultResponse(request.execution_id, CMMS.RETRUNSTATUS.SUCCESS, $"Execution End Rejected");
@@ -1333,8 +1571,15 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             string approveQuery = $"Update cleaning_execution_schedules set status= {status} ,approvedById={userID}, remark='{request.comment}', approvedAt='{UtilsRepository.GetUTCTime()}' where  scheduleId= {request.id} ";
             await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MC_TASK, request.schedule_id, 0, 0, request.comment, (CMMS.CMMS_Status)status, userID);
-            // CMMCExecution _ViewTaskList = await GetExecutionDetails(request.id, facilitytimeZone);
-            //  await CMMSNotification.sendNotification(CMMS.CMMS_Modules.MC_TASK, CMMS.CMMS_Status.MC_TASK_SCHEDULE_APPROVED, new[] { userID }, _ViewTaskList);
+            try
+            {
+                CMMCExecution _ViewTaskList = await GetExecutionDetails(request.id, facilitytimeZone);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.MC_EXECUTION, CMMS.CMMS_Status.MC_TASK_SCHEDULE_APPROVED, new[] { userID }, _ViewTaskList);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
 
             CMDefaultResponse response = new CMDefaultResponse(request.schedule_id, CMMS.RETRUNSTATUS.SUCCESS, $"Execution Schedule Approved");
             return response;
@@ -1351,8 +1596,16 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MC_TASK, request.schedule_id, 0, 0, request.comment, (CMMS.CMMS_Status)status, userID);
-            //CMMCExecution _ViewTaskList = await GetExecutionDetails(request.id, facilitytimeZone);
-            //  await CMMSNotification.sendNotification(CMMS.CMMS_Modules.MC_TASK, (CMMS.CMMS_Status)status, new[] { userID }, _ViewTaskList);
+            try
+            {
+                CMMCExecution _ViewTaskList = await GetExecutionDetails(request.id, facilitytimeZone);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.MC_EXECUTION, (CMMS.CMMS_Status)status, new[] { userID }, _ViewTaskList);
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
 
             CMDefaultResponse response = new CMDefaultResponse(request.schedule_id, CMMS.RETRUNSTATUS.SUCCESS, $"Execution Schedule Rejected");
             return response;
@@ -1373,10 +1626,17 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MC_TASK, request.id, 0, 0, request.comment, (CMMS.CMMS_Status)status, userID);
             CMMCPlan _ViewPlanList = await GetPlanDetails(request.id, facilitytimeZone);
-            //  await CMMSNotification.sendNotification(CMMS.CMMS_Modules.MC_PLAN, (CMMS.CMMS_Status)status, new[] { userID }, _ViewPlanList);
+            try
+            {
+                CMMCExecution _ViewTaskList = await GetExecutionDetails(request.id, facilitytimeZone);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.MC_TASK, (CMMS.CMMS_Status)status, new[] { userID }, _ViewTaskList);
 
-            // CMMCExecution _ViewTaskList = await GetExecutionDetails(request.id, facilitytimeZone);
-            // await CMMSNotification.sendNotification(CMMS.CMMS_Modules.MC_TASK, (CMMS.CMMS_Status)status, new[] { userID }, _ViewTaskList);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+
 
 
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Execution Rejected");

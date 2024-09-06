@@ -36,37 +36,37 @@ namespace CMMSAPIs.Repositories.Calibration
         internal string getLongStatus(CMMS.CMMS_Status notificationID, CMCalibrationDetails CaliObj)
         {
             string retValue = " ";
-
+            int calibrationId = CaliObj.calibration_id;
 
             switch (notificationID)
             {
                 case CMMS.CMMS_Status.CALIBRATION_REQUEST:
-                    retValue = String.Format("Calibration Requested by {0}", CaliObj.responsible_person);
+                    retValue = String.Format("Calibration CAL{0} Requested by {1}", calibrationId, CaliObj.responsible_person);
                     break;
                 case CMMS.CMMS_Status.CALIBRATION_REQUEST_APPROVED:
-                    retValue = String.Format("Calibration Request Approved by {0}", CaliObj.request_approved_by);
+                    retValue = String.Format("Calibration CAL{0} Request Approved by {1}", calibrationId, CaliObj.request_approved_by);
                     break;
                 case CMMS.CMMS_Status.CALIBRATION_REQUEST_REJECTED:
-                    retValue = String.Format("Calibration  Request Rejected by {0}", CaliObj.request_rejected_by);
+                    retValue = String.Format("Calibration CAL{0} Request Rejected by {1}", calibrationId, CaliObj.request_rejected_by);
                     break;
                 case CMMS.CMMS_Status.CALIBRATION_STARTED:
-                    retValue = String.Format("Calibration started at {0}", CaliObj.started_at);
+                    retValue = String.Format("Calibration CAL{0} started at {1}", calibrationId, CaliObj.started_at);
                     break;
                 case CMMS.CMMS_Status.CALIBRATION_COMPLETED:
                     //retValue = String.Format("Calibration Dispachted by {0} at {1}", CaliObj.dispatched_by, CaliObj.dispatched_at);
-                    retValue = String.Format("Calibration Completed by {0} at {1}", CaliObj.completed_by, CaliObj.completed_at);
+                    retValue = String.Format("Calibration Completed by {0} at {1}", calibrationId, CaliObj.completed_by, CaliObj.completed_at);
                     break;
                 case CMMS.CMMS_Status.CALIBRATION_CLOSED:
-                    retValue = String.Format("Calibration by {0} at {1}", CaliObj.Closed_at, CaliObj.Closed_by);
+                    retValue = String.Format("Calibration CAL{0} Closed by {0} at {1}", calibrationId, CaliObj.Closed_at, CaliObj.Closed_by);
                     break;
                 case CMMS.CMMS_Status.CALIBRATION_APPROVED:
-                    retValue = String.Format("Calibration Approved by {0}", CaliObj.approved_by);
+                    retValue = String.Format("Calibration CAL{0} Closed/Skip request Approved by {1}", calibrationId, CaliObj.approved_by);
                     break;
                 case CMMS.CMMS_Status.CALIBRATION_REJECTED:
-                    retValue = String.Format("Calibration Rejected by {0}", CaliObj.rejected_by);
+                    retValue = String.Format("Calibration CAL{0} Closed/Skip request Rejected by {1}", calibrationId, CaliObj.rejected_by);
                     break;
                 case CMMS.CMMS_Status.CALIBRATION_SKIPPED:
-                    retValue = String.Format("Calibration Skipped by {0}", CaliObj.approved_by);
+                    retValue = String.Format("Calibration CAL{0} Skip requested by {1}", calibrationId, CaliObj.approved_by);
                     break;
                 default:
                     break;
@@ -147,8 +147,8 @@ namespace CMMSAPIs.Repositories.Calibration
             }
             statusOut += $"ELSE 'Invalid Status' END";
             string myQuery = "SELECT " +
-                                $" prev_task_id,a_calibration.asset_id, assets.name as asset_name, assets.serialNumber as asset_serial, files.file_path as calibration_certificate_path, CASE WHEN categories.name is null THEN 'Others' ELSE categories.name END as category_name, {statusOut} as calibration_status, {statusOut} as status_short, a_calibration.status as statusID, frequency.id as frequency_id, frequency.name as frequency_name, " +
-                                $" CASE WHEN a_calibration.LastcalibrationDoneDate = '0000-00-00 00:00:00' THEN NULL ELSE a_calibration.LastcalibrationDoneDate END as last_calibration_date, CASE WHEN assets.calibrationDueDate = '0000-00-00 00:00:00' THEN NULL ELSE assets.calibrationDueDate END as next_calibration_due_date, vendor.id as vendor_id, vendor.name as vendor_name, CONCAT(request_by.firstName,' ',request_by.lastName) as responsible_person, CONCAT(request_approved_by.firstName,' ',request_approved_by.lastName) as request_approved_by, CONCAT(request_rejected_by.firstName,' ',request_rejected_by.lastName) as request_rejected_by,CONCAT(completed_by.firstName,' ',completed_by.lastName) as completed_by, CONCAT(approved_by.firstName,' ',approved_by.lastName) as approved_by,CONCAT(rejected_by.firstName,' ',rejected_by.lastName) as rejected_by,CONCAT(close_by.firstName,' ',close_by.lastName) as Closed_by, CASE WHEN a_calibration.received_date = '0000-00-00 00:00:00' THEN NULL ELSE a_calibration.received_date END AS received_date, a_calibration.requested_by,CASE WHEN a_calibration.requested_at = '0000-00-00 00:00:00' THEN NULL ELSE a_calibration.requested_at END AS requested_at, CASE WHEN a_calibration.request_approved_at = '0000-00-00 00:00:00' THEN NULL ELSE a_calibration.request_approved_at END AS request_approved_at, CASE WHEN a_calibration.request_rejected_at = '0000-00-00 00:00:00' THEN NULL ELSE a_calibration.request_rejected_at END AS request_rejected_at,a_calibration.is_damaged, CASE WHEN a_calibration.start_date = '0000-00-00 00:00:00' THEN NULL ELSE a_calibration.start_date END AS started_at,CASE WHEN a_calibration.done_date = '0000-00-00 00:00:00' THEN NULL ELSE a_calibration.done_date END AS completed_at, CASE WHEN a_calibration.approved_at = '0000-00-00 00:00:00' THEN NULL ELSE a_calibration.approved_at END AS approved_at, a_calibration.health_status as asset_health_status, CASE WHEN a_calibration.due_date = '0000-00-00 00:00:00' THEN NULL ELSE a_calibration.due_date END AS calibration_due_date,a_calibration.start_date as schedule_start_date,assets.calibrationDueDate  AS last_calibration_due_date,a_calibration.done_date  AS calibration_date   " +
+                                $" assets.facilityId,  prev_task_id,a_calibration.asset_id, assets.name as asset_name, assets.serialNumber as asset_serial, files.file_path as calibration_certificate_path, CASE WHEN categories.name is null THEN 'Others' ELSE categories.name END as category_name, {statusOut} as calibration_status, {statusOut} as status_short, a_calibration.status as statusID, frequency.id as frequency_id, frequency.name as frequency_name, " +
+                                $" CASE WHEN a_calibration.LastcalibrationDoneDate = '0000-00-00 00:00:00' THEN NULL ELSE a_calibration.LastcalibrationDoneDate END as last_calibration_date, CASE WHEN assets.calibrationDueDate = '0000-00-00 00:00:00' THEN NULL ELSE assets.calibrationDueDate END as next_calibration_due_date, vendor.id as vendor_id, vendor.name as vendor_name, CONCAT(request_by.firstName,' ',request_by.lastName) as responsible_person, CONCAT(request_approved_by.firstName,' ',request_approved_by.lastName) as request_approved_by, CONCAT(request_rejected_by.firstName,' ',request_rejected_by.lastName) as request_rejected_by, a_calibration.started_by as started_by_id, CONCAT(started_by.firstName,' ',started_by.lastName) as started_by, CONCAT(completed_by.firstName,' ',completed_by.lastName) as completed_by, CONCAT(approved_by.firstName,' ',approved_by.lastName) as approved_by,CONCAT(rejected_by.firstName,' ',rejected_by.lastName) as rejected_by,CONCAT(close_by.firstName,' ',close_by.lastName) as Closed_by, CASE WHEN a_calibration.received_date = '0000-00-00 00:00:00' THEN NULL ELSE a_calibration.received_date END AS received_date, a_calibration.requested_by,CASE WHEN a_calibration.requested_at = '0000-00-00 00:00:00' THEN NULL ELSE a_calibration.requested_at END AS requested_at, CASE WHEN a_calibration.request_approved_at = '0000-00-00 00:00:00' THEN NULL ELSE a_calibration.request_approved_at END AS request_approved_at, CASE WHEN a_calibration.request_rejected_at = '0000-00-00 00:00:00' THEN NULL ELSE a_calibration.request_rejected_at END AS request_rejected_at,a_calibration.is_damaged, CASE WHEN a_calibration.start_date = '0000-00-00 00:00:00' THEN NULL ELSE a_calibration.start_date END AS started_at,CASE WHEN a_calibration.done_date = '0000-00-00 00:00:00' THEN NULL ELSE a_calibration.done_date END AS completed_at, CASE WHEN a_calibration.approved_at = '0000-00-00 00:00:00' THEN NULL ELSE a_calibration.approved_at END AS approved_at, a_calibration.health_status as asset_health_status, CASE WHEN a_calibration.due_date = '0000-00-00 00:00:00' THEN NULL ELSE a_calibration.due_date END AS calibration_due_date,a_calibration.start_date as schedule_start_date,assets.calibrationDueDate  AS last_calibration_due_date,a_calibration.done_date  AS calibration_date   " +
                              "FROM assets " +
                              "LEFT JOIN " +
                                 "frequency ON assets.calibrationFrequency = frequency.id " +
@@ -162,6 +162,7 @@ namespace CMMSAPIs.Repositories.Calibration
                              "LEFT JOIN users as request_by ON a_calibration.requested_by= request_by.id " +
                              "LEFT JOIN users as request_approved_by on a_calibration.request_approved_by = request_approved_by.id " +
                              "LEFT JOIN users as request_rejected_by on a_calibration.request_rejected_by = request_rejected_by.id " +
+                             "LEFT JOIN users as started_by on a_calibration.started_by = started_by.id " +
                              "LEFT JOIN users as completed_by on a_calibration.completed_by = completed_by.id " +
                              "LEFT JOIN users as approved_by on a_calibration.approved_by = approved_by.id " +
                              "LEFT JOIN users as rejected_by on a_calibration.rejected_by = rejected_by.id " +
@@ -245,9 +246,29 @@ namespace CMMSAPIs.Repositories.Calibration
              * Your Code goes here */
             int status;
             if (request.asset_id <= 0)
-                throw new ArgumentException("Invalid Asset ID");
+                throw new ArgumentException("Invalid Asset ID" + request.asset_id);
+
+            int calibrationId = 0;
+            string getIdQuery = $"SELECT id FROM calibration WHERE asset_id = {request.asset_id} and status = {(int)CMMS.CMMS_Status.CALIBRATION_SCHEDULED};";
+            DataTable dt1 = await Context.FetchData(getIdQuery).ConfigureAwait(false);
+
+            if (dt1.Rows.Count > 0)
+            {
+                calibrationId = Convert.ToInt32(dt1.Rows[0][0]);
+                if(calibrationId != request.id)
+                {
+                    throw new ArgumentException("Calibration record in scheduled state has id " + calibrationId + " and requested id is " + request.id + " for " + request.asset_id);
+                }
+            }
+            else
+            {
+                throw new ArgumentException("Calibration record in scheduled state not found for " + request.asset_id + " to start calibration");
+            }
+
+
             if (request.vendor_id <= 0)
             {
+                //if vendor id is not passed, take assets vendor id
                 string vendorQry = $"SELECT vendorId FROM assets WHERE id = {request.asset_id};";
                 DataTable dtVendor = await Context.FetchData(vendorQry).ConfigureAwait(false);
                 if (dtVendor.Rows.Count > 0)
@@ -259,7 +280,7 @@ namespace CMMSAPIs.Repositories.Calibration
                 }
                 else
                 {
-                    throw new ArgumentException("Invalid Vendor ID");
+                    throw new ArgumentException("Invalid Vendor ID " + request.vendor_id);
                 }
             }
             if (request.next_calibration_date == null)
@@ -276,15 +297,17 @@ namespace CMMSAPIs.Repositories.Calibration
                 }
                 else
                 {
-                    throw new ArgumentException("Invalid Due Date");
+                    throw new ArgumentException("Invalid Due Date " + request.next_calibration_date);
                 }
             }
-            string statusQuery = $"SELECT id, status FROM calibration where due_date=(SELECT MAX(due_date) FROM calibration WHERE asset_id={request.asset_id} AND due_date is not null ORDER BY requested_at DESC) and asset_id={request.asset_id};";
+            string statusQuery = $"SELECT id, status, facility_id FROM calibration where due_date=(SELECT MAX(due_date) FROM calibration WHERE asset_id={request.asset_id} AND due_date is not null ORDER BY requested_at DESC) and asset_id={request.asset_id};";
             DataTable dt0 = await Context.FetchData(statusQuery).ConfigureAwait(false);
-            status = Convert.ToInt32(dt0.Rows[0]["status"]);
+            int facilityId = 0;
             bool exists = false;
             if (dt0.Rows.Count > 0)
             {
+                status = Convert.ToInt32(dt0.Rows[0]["status"]);
+                facilityId = Convert.ToInt32(dt0.Rows[0][0]);
 
                 int[] status_array = { (int)CMMS.CMMS_Status.CALIBRATION_REQUEST,
                               (int)CMMS.CMMS_Status.CALIBRATION_REQUEST_APPROVED,
@@ -296,20 +319,24 @@ namespace CMMSAPIs.Repositories.Calibration
                               (int)CMMS.CMMS_Status.CALIBRATION_REJECTED};
                 exists = Array.Exists(status_array, element => element == status);
             }
+            else
+            {
+                throw new ArgumentException("Calibration record does not exist for Asset ID " + request.asset_id);
+            }
             //  if (status >211 (int)CMMS.CMMS_Status.CALIBRATION_REQUEST)
             /*if (status > 211)
             {
                 int id = Convert.ToInt32(dt0.Rows[0]["id"]);
                 CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.FAILURE, "Calibration cannot be requested as asset is already sent or requested for calibration");
                 return response;
-            }*/
+            }
             string facilityQuery = $"SELECT facilityId FROM assets WHERE assets.id = {request.asset_id};";
             DataTable dt1 = await Context.FetchData(facilityQuery).ConfigureAwait(false);
             int facilityId = 0;
             if (dt1.Rows.Count > 0)
             {
                 facilityId = Convert.ToInt32(dt1.Rows[0][0]);
-            }
+            }*/
             string facilityq = $"SELECT reschedule FROM calibration  WHERE  id= {request.id};";
             DataTable dt12 = await Context.FetchData(facilityq).ConfigureAwait(false);
             int res = 0;
@@ -342,14 +369,6 @@ namespace CMMSAPIs.Repositories.Calibration
             }
             else
             {
-                int id = 0;
-                string getIdQuery = $"SELECT id FROM calibration WHERE asset_id = {request.asset_id} or status = {(int)CMMS.CMMS_Status.CALIBRATION_SCHEDULED};";
-                DataTable dt2 = await Context.FetchData(getIdQuery).ConfigureAwait(false);
-
-                if (dt2.Rows.Count > 0)
-                {
-                    id = Convert.ToInt32(dt2.Rows[0][0]);
-                }
                 // Update query instead of insert
                 string updateQuery = $"UPDATE calibration SET facility_id = {facilityId}, vendor_id = {request.vendor_id}, " +
                                     $"due_date = '{request.next_calibration_date.ToString("yyyy-MM-dd")}', " +
@@ -359,13 +378,21 @@ namespace CMMSAPIs.Repositories.Calibration
                                    $"WHERE asset_id = {request.asset_id} and id={request.id} " +
                                    $"AND status != {(int)CMMS.CMMS_Status.CALIBRATION_COMPLETED};";
                 int affectedRows = await Context.ExecuteNonQry<int>(updateQuery).ConfigureAwait(false);
-                //  string setDueDate = $"UPDATE assets SET calibrationDueDate = '{request.next_calibration_date.ToString("yyyy-MM-dd HH:mm:ss")}' WHERE id = {request.asset_id};";
-                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.CALIBRATION, request.id, CMMS.CMMS_Modules.CALIBRATION, id, "Calibration Requested", CMMS.CMMS_Status.CALIBRATION_REQUEST, userID);
+                CMDefaultResponse response = null;
+                if (affectedRows > 0)
+                { 
+                    //  string setDueDate = $"UPDATE assets SET calibrationDueDate = '{request.next_calibration_date.ToString("yyyy-MM-dd HH:mm:ss")}' WHERE id = {request.asset_id};";
+                    await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.CALIBRATION, request.id, CMMS.CMMS_Modules.CALIBRATION, request.id, "Calibration Requested", CMMS.CMMS_Status.CALIBRATION_REQUEST, userID);
 
-                CMCalibrationDetails _ViewCalibration = await GetCalibrationDetails(id, "");
+                    CMCalibrationDetails _ViewCalibration = await GetCalibrationDetails(request.id, "");
 
-                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.CALIBRATION, CMMS.CMMS_Status.CALIBRATION_REQUEST, new[] { userID }, _ViewCalibration);
-                CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Calibration requested successfully");
+                    await CMMSNotification.sendNotification(CMMS.CMMS_Modules.CALIBRATION, CMMS.CMMS_Status.CALIBRATION_REQUEST, new[] { userID }, _ViewCalibration);
+                    response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Calibration requested successfully");
+                }
+                else
+                {
+                    response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.FAILURE, "Calibration request failed for asset id " + request.asset_id + " and calibration id " + request.id);
+                }
                 return response;
             }
         }
@@ -466,7 +493,7 @@ namespace CMMSAPIs.Repositories.Calibration
             //  DateTime start_date = Convert.ToDateTime(dt.Rows[0][0]);
             string myQuery = $"UPDATE calibration SET status = {(int)CMMS.CMMS_Status.CALIBRATION_STARTED}, " +
                                 $"status_updated_at = '{UtilsRepository.GetUTCTime()}', " +
-                                $"start_date = '{UtilsRepository.GetUTCTime()}' " +
+                                $"started_by = {userID}, start_date = '{UtilsRepository.GetUTCTime()}' " +
                                 $"WHERE id = {calibration_id} AND status = {(int)CMMS.CMMS_Status.CALIBRATION_REQUEST_APPROVED};";
             int retVal = await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
             string assetIDQuery = $"SELECT asset_id FROM calibration where id = {calibration_id};";
@@ -700,7 +727,7 @@ namespace CMMSAPIs.Repositories.Calibration
             int assetID = Convert.ToInt32(dtAsset.Rows[0][0]);
             // updating old to CALIBRATION_SKIPPED
 
-            string myQuery = $"UPDATE calibration SET " +
+            string myQuery = $"UPDATE calibration SET skipped_by = {userID}, skipped_at = '{UtilsRepository.GetUTCTime()}', " +
                                 $"status = {(int)CMMS.CMMS_Status.CALIBRATION_SKIPPED}, status_updated_at = '{UtilsRepository.GetUTCTime()}' " +
                                 $"WHERE id = {request.id} ;";
 

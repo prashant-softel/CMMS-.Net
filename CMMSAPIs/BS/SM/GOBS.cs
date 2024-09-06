@@ -17,7 +17,7 @@ namespace CMMSAPIs.BS
         Task<CMGoodsOrderList> GetGOItemByID(int id,string facilitytime);
         Task<List<CMGoodsOrderList>> GetAssetCodeDetails(int asset_code);
         Task<CMDefaultResponse> CreateGO(CMGoodsOrderList request, int userID, string facilitytimeZone);
-        Task<CMDefaultResponse> UpdateGO(CMGoodsOrderList request, int userID);
+        Task<CMDefaultResponse> UpdateGO(CMGoodsOrderList request, int userID,string facilitytimeZone);
         Task<CMDefaultResponse> DeleteGO(CMApproval request, int userID, string facilitytimeZone);
         Task<CMDefaultResponse> CloseGO(CMGoodsOrderList request, int userID, string facilitytimeZone);
         Task<CMDefaultResponse> ApproveGO(CMApproval request, int userId, string facilitytimeZone);
@@ -104,13 +104,13 @@ namespace CMMSAPIs.BS
             }
         }
 
-        public async Task<CMDefaultResponse> UpdateGO(CMGoodsOrderList request, int userID)
+        public async Task<CMDefaultResponse> UpdateGO(CMGoodsOrderList request, int userID, string facilitytimeZone)
         {
             try
             {
                 using (var repos = new GORepository(getDB))
                 {
-                    return await repos.UpdateGO(request, userID);
+                    return await repos.UpdateGO(request, userID, facilitytimeZone);
 
                 }
             }
