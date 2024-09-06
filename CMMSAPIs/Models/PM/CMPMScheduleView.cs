@@ -85,7 +85,8 @@ namespace CMMSAPIs.Models.PM
         public string PM_Schedule_updated_by { get; set; }
         public string cancelledapprovedbyName { get; set; }
         public string submittedByName { get; set; }
-       
+        public string facilityidbyName { get; set; }
+        
 
     }
     public class CMPMTaskView : CMPMTaskList
@@ -93,6 +94,7 @@ namespace CMMSAPIs.Models.PM
         public List<CMPMScheduleExecutionDetail> schedules { get; set; }
         public List<Materialconsumption> Material_consumption { get; set; }
 
+        public int plan_id { get; set; }
         public string closedApprovedByName { get; set; }
         public DateTime Schedule_Date { get; set; }
         public int started_by_id { get; set; }
@@ -137,7 +139,10 @@ namespace CMMSAPIs.Models.PM
         public string deletedbyName { get; set; }
         public int status { get; set; }
         public int closed_by { get; set; }
-
+        public string status_updated_by_name { get; set; }
+        public string facilityidbyName { get; set; }
+        public string categoryName { get; set; }
+        public string title { get; set; }
 
     }
     public class CMPMScheduleViewDetail : CMPMScheduleView

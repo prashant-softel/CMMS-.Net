@@ -67,17 +67,16 @@ namespace CMMSAPIs.Repositories.PM
                     retValue = String.Format("PM Plan in Draft by {0}", PlanObj.created_by_name);
                     break;
                 case CMMS.CMMS_Status.PM_PLAN_CREATED:
-                    retValue = String.Format("PM Plan submitted by {0}", PlanObj.created_by_name);
+                    retValue = String.Format("PM{0} Created by {1} at {2} ", PlanObj.plan_id, PlanObj.started_by_name, PlanObj.facilityidbyName);
                     break;
                 case CMMS.CMMS_Status.PM_PLAN_REJECTED:
-                    retValue = String.Format("PM Plan Rejected by {0}", PlanObj.rejected_by_name);
+                    retValue = String.Format("PM{0} Rejected by {1} at {2} ", PlanObj.plan_id, PlanObj.rejected_by_name, PlanObj.facilityidbyName);
                     break;
                 case CMMS.CMMS_Status.PM_PLAN_APPROVED:
-                    retValue = String.Format("PM Plan Approved by {0}", PlanObj.approved_by_name);
+                    retValue = String.Format("PM{0} Approved by {1} at {2} ", PlanObj.plan_id, PlanObj.approved_by_name, PlanObj.facilityidbyName);
                     break;
                 case CMMS.CMMS_Status.PM_PLAN_DELETED:
-                    //retValue = String.Format("Warranty Claim Dispachted by {0} at {1}", WCObj.dispatched_by, WCObj.dispatched_at);
-                    retValue = String.Format("PM Plan Deleted by {0} ", PlanObj.created_by_name);
+                    retValue = String.Format("PM{0} Deleted  at {1} ", PlanObj.plan_id, PlanObj.facilityidbyName);
                     break;
 
                 default:
@@ -131,8 +130,8 @@ namespace CMMSAPIs.Repositories.PM
             await Context.ExecuteNonQry<int>(mapChecklistQry).ConfigureAwait(false);
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_PLAN, id, 0, 0, "PM Plan added", CMMS.CMMS_Status.PM_PLAN_CREATED, userID);
-
-            try
+            
+                 try
             {
                 CMPMPlanDetail _ViewPMPlan = await GetPMPlanDetail(id, facilityTimeZone);
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PM_PLAN, CMMS.CMMS_Status.PM_PLAN_CREATED, new[] { userID }, _ViewPMPlan);
@@ -286,16 +285,16 @@ namespace CMMSAPIs.Repositories.PM
 
             if (id <= 0)
                 throw new ArgumentException("Invalid Plan ID");
-            string planListQry = $"SELECT plan.id as plan_id, plan.plan_name, plan.status as status_id,  statuses.statusName as status_short, plan.plan_date, " +
+            string planListQry = $"SELECT plan.id as plan_id, plan.plan_name, plan.status as status_id, plan.plan_date,  statuses.statusName as status_short, plan.plan_date, " +
                         $"facilities.id as facility_id, facilities.name as facility_name, category.id as category_id, category.name as category_name, " +
                         $"frequency.id as plan_freq_id, frequency.name as plan_freq_name, createdBy.id as created_by_id, " +
                         $"CONCAT(createdBy.firstName, ' ', createdBy.lastName) as created_by_name, plan.created_at, " +
                         $"approvedBy.id as approved_by_id, CONCAT(approvedBy.firstName, ' ', approvedBy.lastName) as approved_by_name, plan.approved_at, " +
                         $"rejectedBy.id as rejected_by_id, CONCAT(rejectedBy.firstName, ' ', rejectedBy.lastName) as rejected_by_name, plan.rejected_at, " +
-                        $"CONCAT(assignedTo.firstName, ' ', assignedTo.lastName) as assigned_to_name, updatedBy.id as updated_by_id, " +
+                        $"CONCAT(assignedTo.firstName, ' ', assignedTo.lastName) as assigned_to_name,CONCAT(delete.firstName, ' ', delete.lastName) as deleted_by_name, updatedBy.id as updated_by_id, " +
                         $"CONCAT(updatedBy.firstName, ' ', updatedBy.lastName) as updated_by_name, plan.updated_at, " +
                         $"CONCAT(startedBy.firstName, ' ', startedBy.lastName) as started_by_name, " +
-                        $"CONCAT(status.firstName, ' ', status.lastName) as status_name " + // Added started_by_name
+                        $"CONCAT(status.firstName, ' ', status.lastName) as status_name,facility.name AS facilityidbyName " + // Added started_by_name
                         $"FROM pm_plan as plan " +
                         $"LEFT JOIN statuses ON plan.status = statuses.softwareId " +
                         $"JOIN facilities ON plan.facility_id = facilities.id " +
@@ -308,7 +307,9 @@ namespace CMMSAPIs.Repositories.PM
                         $"LEFT JOIN users as assignedTo ON assignedTo.id = plan.assigned_to " +
                         $"LEFT JOIN users as status ON status.id = plan.status " +
                         $"LEFT JOIN pm_task as task ON task.plan_id = plan.id " +  // Added join with pm_task table
-                        $"LEFT JOIN users as startedBy ON startedBy.id = task.started_by " +  // Added join with users for started_by
+                        $"LEFT JOIN users as delete ON delete.id = plan.deleted_by " +
+                        $"LEFT JOIN users as startedBy ON startedBy.id = plan.created_by " +// Added join with users for started_by
+                        $"LEFT JOIN facilities as facility ON facility.id = plan.facility_id " +
                         $"WHERE plan.id = {id} ";
 
 
@@ -605,7 +606,7 @@ namespace CMMSAPIs.Repositories.PM
             {
                 Console.WriteLine($"Failed to send PM Notification: {e.Message}");
             }
-            string approveQuery = $"update pm_plan set status_id = 0 where id = {planId}; ";
+            string approveQuery = $"update pm_plan set deleted_by = {userID}, status_id = 0 where id = {planId}; ";
             await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_PLAN, planId, 0, 0, $"PM Plan Deleted by user {userID}", CMMS.CMMS_Status.PM_PLAN_DELETED);
