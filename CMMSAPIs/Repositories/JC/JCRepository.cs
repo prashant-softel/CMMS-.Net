@@ -725,7 +725,7 @@ namespace CMMSAPIs.Repositories.JC
             // keeping on_time_status_flag as default value as 0 = Backlog
             int on_time_status_flag = (int)CMMS.JCDashboardStatus.Backlog;
 
-            if (hour_diff < 8)
+            if (hour_diff < 8 && hour_diff > -0)
             {
                 on_time_status_flag = (int)CMMS.JCDashboardStatus.OnTime;
             }

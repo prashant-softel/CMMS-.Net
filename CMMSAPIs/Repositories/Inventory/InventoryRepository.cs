@@ -1351,7 +1351,7 @@ namespace CMMSAPIs.Repositories.Inventory
 
 
                 //strRetMessage = "New asset <" + assetName + "> added"; 
-               // await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, retID, 0, 0, strRetMessage, CMMS.CMMS_Status.INVENTORY_ADDED);
+                // await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, retID, 0, 0, strRetMessage, CMMS.CMMS_Status.INVENTORY_ADDED);
                 //await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_ADDED, new[] { userID }, _inventoryAdded);
 
                 string _shortStatus = getShortStatus(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_ADDED);
@@ -1854,7 +1854,7 @@ namespace CMMSAPIs.Repositories.Inventory
             string _longStatus = getLongStatus(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_UPDATED, _inventoryAdded);
             _inventoryAdded.status_long = _longStatus;
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, request.id, 0, 0, _longStatus, CMMS.CMMS_Status.INVENTORY_UPDATED);
-            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_UPDATED, new[] { userID } ,_inventoryAdded);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_UPDATED, new[] { userID }, _inventoryAdded);
             return obj;
         }
         internal async Task<CMDefaultResponse> UpdateInventries(CMAddInventory request, int userID)
@@ -2175,7 +2175,7 @@ namespace CMMSAPIs.Repositories.Inventory
             string _longStatus = getLongStatus(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_UPDATED, _inventoryAdded);
             _inventoryAdded.status_long = _longStatus;
 
-            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_UPDATED, new[] { userID } ,_inventoryAdded);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_UPDATED, new[] { userID }, _inventoryAdded);
 
             return obj;
         }

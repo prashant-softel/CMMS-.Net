@@ -199,18 +199,24 @@ namespace CMMSAPIs.Repositories.DSM
             filter += (!string.IsNullOrEmpty(spvId) ? " AND sm.spvId IN (" + string.Join(",", spvId) + ")" : string.Empty);
             filter += (!string.IsNullOrEmpty(siteId) ? " AND sm.id IN (" + string.Join(",", siteId) + ")" : string.Empty);
 
-            string qry = "SELECT fy, month, dsm.site, spv.name AS spv, states.name AS state, category, dmsType as dsmType, vendor AS forcasterName, dsmPenalty, actualKwh, scheduleKwh, " +
+            /*string qry = "SELECT fy, month, dsm.site, spv.name AS spv, states.name AS state, category, dmsType as dsmType, vendor AS forcasterName, dsmPenalty, actualKwh, scheduleKwh, " +
                          "SUM(dsmPenalty / actualKwh) * 100 AS dsmPer " +
                          "FROM dsm " +
-                         "LEFT JOIN site_master AS sm ON sm.site = dsm.site " +
+                         "LEFT JOIN site_master AS sm ON sm.site = dsm.site_id " +
                          "LEFT JOIN spv ON spv.id = sm.spvId " +
                          "LEFT JOIN states ON states.id = sm.stateId " +
                          "WHERE 1 = 1 " + filter + " " +
-                         "GROUP BY fy, month, site";
+                         "GROUP BY fy, month, site";*/
+            /* string qry = "SELECT fy, month, sm.site, spv.name AS spv, states.name AS state,ast.name as category, " +
+                 "dsm.dsm_type as dsmType, dsm.vendor_id AS forcasterName, dsmPenalty, actualKwh, " +
+                 "scheduleKwh, SUM(dsmPenalty / actualKwh) * 100 AS dsmPer FROM dsm  " +
+                 "LEFT JOIN site_master AS sm ON sm.site = dsm.site_id \r\nLEFT JOIN spv ON spv.id = sm.spvId  " +
+                 "LEFT JOIN  assetcategories ast on ast.id=dsm.category_id\r\nLEFT JOIN states ON states.id = sm.stateId " +
+                 "WHERE 1 = 1  GROUP BY fy, month, site;";
 
-            List<CMDSMData> data = await Context.GetData<CMDSMData>(qry).ConfigureAwait(false);
+             List<CMDSMData> data = await Context.GetData<CMDSMData>(qry).ConfigureAwait(false);*/
 
-            return data;
+            return null;
         }
         public async Task<List<DSMTYPE>> getDSMType()
         {
