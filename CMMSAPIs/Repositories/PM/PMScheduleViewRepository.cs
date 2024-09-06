@@ -1487,7 +1487,7 @@ namespace CMMSAPIs.Repositories.PM
                                                             "pmf.File_Size_Units = f.file_size_units, " +
                                                             "pmf.File_Size_bytes = f.file_size_bytes, " +
                                                             "pmf.File_Type_ext = SUBSTRING_INDEX(f.file_path, '.', -1) " +
-                                                         $"WHERE pmf.id = {id};";
+                                                            $"WHERE pmf.id = {id};";
                                 await Context.ExecuteNonQry<int>(otherDetailsQry).ConfigureAwait(false);
                             }
                             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, schedule.schedule_id, CMMS.CMMS_Modules.PM_EXECUTION, schedule_detail.execution_id, $"{schedule_detail.pm_files.Count} file(s) attached to PMSCH{schedule.schedule_id}", CMMS.CMMS_Status.PM_UPDATED, userID);

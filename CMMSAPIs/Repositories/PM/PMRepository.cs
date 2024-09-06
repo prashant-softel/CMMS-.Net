@@ -1,5 +1,4 @@
 using CMMSAPIs.Helper;
-using CMMSAPIs.Models.Calibration;
 using CMMSAPIs.Models.Masters;
 using CMMSAPIs.Models.Notifications;
 using CMMSAPIs.Models.PM;
@@ -132,8 +131,8 @@ namespace CMMSAPIs.Repositories.PM
             await Context.ExecuteNonQry<int>(mapChecklistQry).ConfigureAwait(false);
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_PLAN, id, 0, 0, "PM Plan added", CMMS.CMMS_Status.PM_PLAN_CREATED, userID);
-            
-                 try
+
+            try
             {
                 CMPMPlanDetail _ViewPMPlan = await GetPMPlanDetail(id, facilityTimeZone);
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PM_PLAN, CMMS.CMMS_Status.PM_PLAN_CREATED, new[] { userID }, _ViewPMPlan);
