@@ -261,7 +261,7 @@ namespace CMMSAPIs.Models.Notifications
                 // UserAccessRepository obj = new UserAccessRepository(_conn);
                 if (m_notificationType == 2)
                 {
-                    users = await _userAccessRepository.GetEMUsers(facilityId, m_role, (int)notificationID);
+                    users = await _userAccessRepository.GetEMUsers(notification);
                     notificationQry = $"INSERT INTO escalationlog (moduleId, moduleRefId, moduleStatus, notifSentToId, notifSentAt, emailUserCount, notificationType) VALUES " +
                                     $"({(int)moduleID}, {module_ref_id}, {(int)notificationID}, {m_role}, '{UtilsRepository.GetUTCTime()}', {users.Count}, {m_notificationType}); " +
                                     $"SELECT LAST_INSERT_ID(); ";
@@ -329,8 +329,7 @@ namespace CMMSAPIs.Models.Notifications
                 {
                     response = new CMDefaultResponse(1, CMMS.RETRUNSTATUS.SUCCESS, e.Message);
                 }
-            }
-
+            }            
             return response;
         }
 

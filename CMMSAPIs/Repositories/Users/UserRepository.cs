@@ -991,7 +991,7 @@ namespace CMMSAPIs.Repositories.Users
             CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "User Deleted");
             return response;
         }
-        internal async Task<List<CMUser>> GetEMUsers(int facility_id, int role_id, int notification_id)
+        internal async Task<List<CMUser>> GetEMUsers(CMUserByNotificationId notification)
         {
             string userQry = $"select u.id as id, u.loginId as user_name, concat(firstName, ' ', lastName) as full_name, u.mobileNumber as contact_no, userroles.id as role_id," +
                 $" userroles.name as role_name " +

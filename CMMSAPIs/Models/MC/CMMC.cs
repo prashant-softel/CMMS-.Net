@@ -196,7 +196,7 @@ namespace CMMSAPIs.Models.MC
         public string title { get; set; }
         public string description { get; set; }
         public string facilityidbyName { get; set; }
-        
+
         public List<CMMCExecutionEquipment> equipments { get; set; }
     }
 
@@ -268,7 +268,7 @@ namespace CMMSAPIs.Models.MC
         public string endapprovedbyName { get; set; }
         public string endrejectedbyName { get; set; }
         public string facilityidbyName { get; set; }
-        
+
         // public string siteName { get; set; }
         //public List<CMMCEquipmentDetails> smbIds;
         public List<CMMCExecutionSchedule> schedules { get; set; }
