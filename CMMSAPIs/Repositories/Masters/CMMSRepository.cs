@@ -1494,7 +1494,6 @@ namespace CMMSAPIs.Repositories.Masters
             myQuery12 += $" and mc.facilityId in ({facilityId})  group by mc.id ";
 
 
-            // end
 
             List<CMDashboadItemList> itemList = await Context.GetData<CMDashboadItemList>(myQuery12).ConfigureAwait(false);
             result.WaterUsedTotal = await WaterUsedTotal(facilityId);
