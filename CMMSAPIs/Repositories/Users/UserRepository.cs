@@ -991,7 +991,7 @@ namespace CMMSAPIs.Repositories.Users
             CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "User Deleted");
             return response;
         }
-        internal async Task<List<CMUser>> GetEMUsers(int facility_id, int role_id, int notification_id)
+        internal async Task<List<CMUser>> GetEMUsers(CMUserByNotificationId notification)
         {
 
             int facility_id = notification.facility_id;
