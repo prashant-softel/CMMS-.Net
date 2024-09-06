@@ -261,7 +261,7 @@ namespace CMMSAPIs.Models.Notifications
                 // UserAccessRepository obj = new UserAccessRepository(_conn);
                 if (m_notificationType == 2)
                 {
-                    users = await _userAccessRepository.GetEMUsers(notification);
+                    users = await _userAccessRepository.GetEMUsers(facilityId, m_role, (int)notificationID);
                     notificationQry = $"INSERT INTO escalationlog (moduleId, moduleRefId, moduleStatus, notifSentToId, notifSentAt, emailUserCount, notificationType) VALUES " +
                                     $"({(int)moduleID}, {module_ref_id}, {(int)notificationID}, {m_role}, '{UtilsRepository.GetUTCTime()}', {users.Count}, {m_notificationType}); " +
                                     $"SELECT LAST_INSERT_ID(); ";
@@ -330,28 +330,7 @@ namespace CMMSAPIs.Models.Notifications
                     response = new CMDefaultResponse(1, CMMS.RETRUNSTATUS.SUCCESS, e.Message);
                 }
             }
-            /*
-            if (users.Count > 0)
-            {
-                EmailTo.Add("cmms@softeltech.in");
-                notificationRecordsQry = notificationRecordsQry.Substring(0, notificationRecordsQry.Length - 1);
-            }
-            System.Data.DataTable dt2 = await _conn.FetchData(notificationRecordsQry).ConfigureAwait(false);*/
-            EmailTo.Add("notifications@softeltech.in");
-            if (emailCount > 0)
-            {  
-                notificationRecordsQry = notificationRecordsQry.TrimEnd(',');
-                System.Data.DataTable dt2 = await _conn.FetchData(notificationRecordsQry).ConfigureAwait(false);
-            }
-            if (print)
-            {
-                response = new CMDefaultResponse(1, CMMS.RETRUNSTATUS.SUCCESS, "");
-            }
-            else
-            {
-                response = await sendEmail(subject, printBody, HTMLHeader, HTMLFooter, HTMLSignature, EmailTo);
 
-            }
             return response;
         }
 

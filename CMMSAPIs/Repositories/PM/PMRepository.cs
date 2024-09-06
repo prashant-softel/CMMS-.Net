@@ -7,7 +7,6 @@ using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Utils;
 using Microsoft.AspNetCore.Hosting;
 using OfficeOpenXml;
-using Org.BouncyCastle.Asn1.Ocsp;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -130,8 +129,8 @@ namespace CMMSAPIs.Repositories.PM
             await Context.ExecuteNonQry<int>(mapChecklistQry).ConfigureAwait(false);
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_PLAN, id, 0, 0, "PM Plan added", CMMS.CMMS_Status.PM_PLAN_CREATED, userID);
-            
-                 try
+
+            try
             {
                 CMPMPlanDetail _ViewPMPlan = await GetPMPlanDetail(id, facilityTimeZone);
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PM_PLAN, CMMS.CMMS_Status.PM_PLAN_CREATED, new[] { userID }, _ViewPMPlan);
@@ -291,7 +290,7 @@ namespace CMMSAPIs.Repositories.PM
                         $"CONCAT(createdBy.firstName, ' ', createdBy.lastName) as created_by_name, plan.created_at, " +
                         $"approvedBy.id as approved_by_id, CONCAT(approvedBy.firstName, ' ', approvedBy.lastName) as approved_by_name, plan.approved_at, " +
                         $"rejectedBy.id as rejected_by_id, CONCAT(rejectedBy.firstName, ' ', rejectedBy.lastName) as rejected_by_name, plan.rejected_at, " +
-                        $"CONCAT(assignedTo.firstName, ' ', assignedTo.lastName) as assigned_to_name,CONCAT(delete.firstName, ' ', delete.lastName) as deleted_by_name, updatedBy.id as updated_by_id, " +
+                        $"CONCAT(assignedTo.firstName, ' ', assignedTo.lastName) as assigned_to_name, updatedBy.id as updated_by_id, " +
                         $"CONCAT(updatedBy.firstName, ' ', updatedBy.lastName) as updated_by_name, plan.updated_at, " +
                         $"CONCAT(startedBy.firstName, ' ', startedBy.lastName) as started_by_name, " +
                         $"CONCAT(status.firstName, ' ', status.lastName) as status_name,facility.name AS facilityidbyName " + // Added started_by_name
@@ -306,8 +305,7 @@ namespace CMMSAPIs.Repositories.PM
                         $"LEFT JOIN users as rejectedBy ON rejectedBy.id = plan.rejected_by " +
                         $"LEFT JOIN users as assignedTo ON assignedTo.id = plan.assigned_to " +
                         $"LEFT JOIN users as status ON status.id = plan.status " +
-                        $"LEFT JOIN pm_task as task ON task.plan_id = plan.id " +  // Added join with pm_task table
-                        $"LEFT JOIN users as delete ON delete.id = plan.deleted_by " +
+                        $"LEFT JOIN pm_task as task ON task.plan_id = plan.id " +  // Added join with pm_task table                   
                         $"LEFT JOIN users as startedBy ON startedBy.id = plan.created_by " +// Added join with users for started_by
                         $"LEFT JOIN facilities as facility ON facility.id = plan.facility_id " +
                         $"WHERE plan.id = {id} ";

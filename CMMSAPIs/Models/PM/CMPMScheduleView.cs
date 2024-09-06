@@ -78,7 +78,7 @@ namespace CMMSAPIs.Models.PM
         public DateTime PM_Schedule_date { get; set; }
         public string PM_Frequecy_Name { get; set; }
         public string createdbyName { get; set; }
-        public int status {  get; set; }
+        public int status { get; set; }
         public string status_short { get; set; }
         public string status_long { get; set; }
         public string cancelledrejectedbyName { get; set; }
@@ -86,7 +86,7 @@ namespace CMMSAPIs.Models.PM
         public string cancelledapprovedbyName { get; set; }
         public string submittedByName { get; set; }
         public string facilityidbyName { get; set; }
-        
+
 
     }
     public class CMPMTaskView : CMPMTaskList
@@ -214,7 +214,7 @@ namespace CMMSAPIs.Models.PM
         public string job_description { get; set; }
         public DateTime? job_date { get; set; }
         public string job_status { get; set; }
-        public int No_of_tools { get; set; }
+        public dynamic No_of_tools { get; set; }
         public string Tool_name { get; set; }
 
     }

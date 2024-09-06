@@ -175,65 +175,77 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             return retValue;
 
         }
-
-
-
-
-
-
         public static string Status_PTW(int statusID)
         {
             CMMS.CMMS_Status status = (CMMS.CMMS_Status)statusID;
             string statusName = "";
             switch (status)
             {
-                case CMMS.CMMS_Status.SCHEDULED_LINKED_TO_PTW:
-                    statusName = "Permit Linked With Schedule";
+                case CMMS.CMMS_Status.PTW_CREATED:
+                    statusName = "Waiting for Approval";
                     break;
-                case CMMS.CMMS_Status.MC_EXECUTION_STARTED:
-                    statusName = "MC Execution Started";
+                case CMMS.CMMS_Status.PTW_ISSUED:
+                    statusName = "Issued";
                     break;
-                case CMMS.CMMS_Status.MC_EXECUTION_CLOSED:
-                    statusName = "MC Execution Closed";
+                case CMMS.CMMS_Status.PTW_REJECTED_BY_ISSUER:
+                    statusName = "Rejected By Issuer";
                     break;
-                case CMMS.CMMS_Status.MC_EXECUTION_UPDATED:
-                    statusName = "MC Execution Updated";
+                case CMMS.CMMS_Status.PTW_APPROVED:
+                    statusName = "Approved";
                     break;
-                case CMMS.CMMS_Status.MC_TASK_COMPLETED:
-                    statusName = "MC Task Completed";
+                case CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER:
+                    statusName = "Rejected By Approver";
                     break;
-                case CMMS.CMMS_Status.MC_EXECUTION_ABANDONED:
-                    statusName = "MC Execution Abandoned Approved";
+                case CMMS.CMMS_Status.PTW_CLOSED:
+                    statusName = "Closed";
                     break;
-                case CMMS.CMMS_Status.MC_EXECUTION_ABANDONED_REJECTED:
-                    statusName = "MC Execution Abandoned Rejected";
+                case CMMS.CMMS_Status.PTW_CANCELLED_BY_ISSUER:
+                    statusName = "Cancelled BY Issuer";
                     break;
-                case CMMS.CMMS_Status.MC_TASK_ABANDONED_APPROVED:
-                    statusName = "MC Task Abandoned Approved";
+                case CMMS.CMMS_Status.PTW_CANCELLED_BY_HSE:
+                    statusName = "Cancelled By HSE";
                     break;
-                case CMMS.CMMS_Status.MC_ASSIGNED:
-                    statusName = "MC Task Assigned ";
+                case CMMS.CMMS_Status.PTW_CANCELLED_BY_APPROVER:
+                    statusName = "Cancelled By Approver";
                     break;
-                case CMMS.CMMS_Status.MC_TASK_APPROVED:
-                    statusName = "MC Task Approved ";
+                case CMMS.CMMS_Status.PTW_CANCEL_REQUESTED:
+                    statusName = "Cancelled";
                     break;
-                case CMMS.CMMS_Status.MC_TASK_END_APPROVED:
-                    statusName = "MC Task End Approved ";
+                case CMMS.CMMS_Status.PTW_CANCEL_REQUEST_REJECTED:
+                    statusName = "Cancel Request Rejected";
                     break;
-                case CMMS.CMMS_Status.MC_TASK_END_REJECTED:
-                    statusName = "MC Task End Rejected ";
+                case CMMS.CMMS_Status.PTW_CANCEL_REQUEST_APPROVED:
+                    statusName = "Cancelled";
                     break;
-                case CMMS.CMMS_Status.MC_TASK_SCHEDULE_APPROVED:
-                    statusName = "MC Schedule Approved  ";
+                case CMMS.CMMS_Status.PTW_EXTEND_REQUESTED:
+                    statusName = "Requested for Extension";
                     break;
-                case CMMS.CMMS_Status.MC_TASK_SCHEDULE_REJECT:
-                    statusName = "MC Schedule Rejected  ";
+                case CMMS.CMMS_Status.PTW_EXTEND_REQUEST_APPROVE:
+                    statusName = "Approved Extension";
                     break;
-                case CMMS.CMMS_Status.MC_TASK_REJECTED:
-                    statusName = "MC Task Rejected  ";
+                case CMMS.CMMS_Status.PTW_EXTEND_REQUEST_REJECTED:
+                    statusName = "Rejected Extension";
+                    break;
+                case CMMS.CMMS_Status.PTW_LINKED_TO_JOB:
+                    statusName = "Linked to Job";
+                    break;
+                case CMMS.CMMS_Status.PTW_LINKED_TO_PM:
+                    statusName = "Linked to PM";
+                    break;
+                case CMMS.CMMS_Status.PTW_LINKED_TO_AUDIT:
+                    statusName = "Linked to Audit";
+                    break;
+                case CMMS.CMMS_Status.PTW_LINKED_TO_HOTO:
+                    statusName = "Linked to HOTO";
+                    break;
+                case CMMS.CMMS_Status.PTW_EXPIRED:
+                    statusName = "Expired";
+                    break;
+                case CMMS.CMMS_Status.PTW_UPDATED:
+                    statusName = "Updated";
                     break;
                 default:
-                    statusName = "Status Unavaialble";
+                    statusName = "Invalid";
                     break;
             }
             return statusName;
@@ -249,9 +261,10 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             statusOut += $"ELSE 'Invalid Status' END";
             string myQuery1 = $"select mc.planId,mc.status, mc.frequencyId,mc.assignedTo as assignedToId,mc.startDate,mc.durationDays as noOfCleaningDays, " +
                               $"mc.facilityId,mc.title,CONCAT(createdBy.firstName, createdBy.lastName) as createdBy , " +
-                              $"mc.createdAt,CONCAT(approvedBy.firstName, approvedBy.lastName) as approvedBy,mc.approvedAt,freq.name as" +
-                              $"frequency,CONCAT(assignedTo.firstName, ' ', assignedTo.lastName) as assignedTo,mc.durationDays,{statusOut} as status_short" +
-                              $"from cleaning_plan as mc LEFT JOIN Frequency as freq on freq.id = mc.frequencyId " +
+                              $"mc.createdAt,CONCAT(approvedBy.firstName, approvedBy.lastName) as approvedBy,mc.approvedAt,freq.name as frequency," +
+                              $" CONCAT(assignedTo.firstName, ' ', assignedTo.lastName) as assignedTo,mc.durationDays,{statusOut} as status_short " +
+                              $"from cleaning_plan as mc" +
+                              $" LEFT JOIN Frequency as freq on freq.id = mc.frequencyId " +
                               $"LEFT JOIN users as assignedTo ON assignedTo.id = mc.assignedTo " +
                               $"LEFT JOIN users as createdBy ON createdBy.id = mc.createdById " +
                               $"LEFT JOIN users as approvedBy ON approvedBy.id = mc.approvedById where moduleType={moduleType} ";
@@ -325,7 +338,6 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                         }
 
                     }
-
                     if (plan.schedules[0].equipments.Count > 0)
                     {
                         equipmentQry = equipmentQry.Substring(0, equipmentQry.Length - 1);
@@ -960,7 +972,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 statusEquip += $"WHEN item.status = {status.Key} THEN '{status.Value}' ";
             }
             statusEquip += $"ELSE 'Invalid Status' END";
-
+            //end_rejected_id
             string executionQuery = $"select ex.id as executionId,ex.status ,ex.startDate,CONCAT(assignedTo.firstName, assignedTo.lastName) as assignedTo ,F.name as site_name , " +
                 $"plan.title, CONCAT(createdBy.firstName, ' ' , createdBy.lastName) as plannedBy ,plan.createdAt as plannedAt,freq.name as frequency, CONCAT(startedBy.firstName, ' ' ,startedBy.lastName) as startedBy ," +
                 $" ex.executionStartedAt as startedAt , CONCAT(rejectedById.firstName, ' ', rejectedById.lastName) as rejectedBy,ex.rejectedAt,CONCAT(approvedById.firstName, ' ',approvedById.lastName) as approvedBy,ex.approvedAt,  {statusEx} as status_short, " +
@@ -1014,7 +1026,6 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             {
                 _ViewExecution[0].schedules = _ViewSchedule;
             }
-
             CMMS.CMMS_Status _Status_long = (CMMS.CMMS_Status)(_ViewExecution[0].status);
             string _longStatus = getLongStatus(CMMS.CMMS_Modules.MC_TASK, _Status_long, _ViewExecution[0]);
             _ViewExecution[0].status_long = _longStatus;
@@ -1023,7 +1034,6 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 CMMS.CMMS_Status ptw_status1 = (CMMS.CMMS_Status)(item.ptw_status);
                 item.status_short_ptw = Status_PTW((int)ptw_status1);
             }
-
             foreach (var view in _ViewExecution)
             {
                 if (view != null && view.abandonedAt != null)
@@ -1106,14 +1116,8 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 CMMS.CMMS_Status ptw_status1 = (CMMS.CMMS_Status)(item.ptw_status);
                 item.status_short_ptw = Status_PTW((int)ptw_status1);
             }
-
-
-
             return _ViewSchedule[0];
-
-
         }
-
 
         internal async Task<CMMCExecutionSchedule> GetScheduleExecutionSummary(CMMCGetScheduleExecution request, string facilitytimeZone)
         {
@@ -1149,7 +1153,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
         }
         internal async Task<CMDefaultResponse> StartScheduleExecution(int scheduleId, int userId, string facilitytimeZone)
         {
-            int status = (int)CMMS.CMMS_Status.MC_EXECUTION_STARTED;
+            int status = (int)CMMS.CMMS_Status.MC_TASK_STARTED;
 
 
             string scheduleQuery = $"Update cleaning_execution_schedules set status = {status},startedById={userId},startedAt='{UtilsRepository.GetUTCTime()}' where scheduleId = {scheduleId}; ";
@@ -1175,7 +1179,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
         internal async Task<CMDefaultResponse> EndScheduleExecution(int scheduleId, int userId, string facilitytimeZone)
         {
-            int status = (int)CMMS.CMMS_Status.MC_EXECUTION_CLOSED;
+            int status = (int)CMMS.CMMS_Status.MC_TASK_COMPLETED;
 
             string scheduleQuery = $"Update cleaning_execution_schedules set status = {status},endedById={userId},endedAt='{UtilsRepository.GetUTCTime()}' where scheduleId = {scheduleId}; ";
             //$"Update cleaning_execution_items set status = {status} where scheduleId = {scheduleId}";
@@ -1256,9 +1260,9 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
         internal async Task<CMDefaultResponse> AbandonSchedule(CMApproval request, int userId, string facilitytimeZone)
         {
-            int status = (int)CMMS.CMMS_Status.MC_EXECUTION_ABANDONED;
+            int status = (int)CMMS.CMMS_Status.MC_TASK_ABANDONED;
             int equipstatus = (int)CMMS.CMMS_Status.EQUIP_ABANDONED;
-            int notStatus = (int)CMMS.CMMS_Status.MC_EXECUTION_ENDED;
+            int notStatus = (int)CMMS.CMMS_Status.MC_TASK_COMPLETED;
             if (moduleType == 2)
             {
                 status = (int)CMMS.CMMS_Status.VEG_TASK_ABANDONED;
@@ -1312,8 +1316,8 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
         internal async Task<CMDefaultResponse> RejectAbandonExecution(CMApproval request, int userId, string facilitytimeZone)
         {
-            int status = (int)CMMS.CMMS_Status.MC_EXECUTION_ABANDONED_REJECTED;
-            int notStatus = (int)CMMS.CMMS_Status.MC_EXECUTION_CLOSED;
+            int status = (int)CMMS.CMMS_Status.MC_TASK_ABANDONED_REJECTED;
+            int notStatus = (int)CMMS.CMMS_Status.MC_TASK_COMPLETED;
             if (moduleType == 2)
             {
                 status = (int)CMMS.CMMS_Status.VEG_TASK_ABANDONED_REJECTED;

@@ -96,7 +96,7 @@ namespace CMMSAPIs.Repositories.PM
 
                 case CMMS.CMMS_Status.PM_SUBMIT:
                     retValue = String.Format("PM{0} Submitted by {1} at {2} ", Obj.schedule_id, Obj.submittedByName, Obj.facilityidbyName);
-                    break;   
+                    break;
                 case CMMS.CMMS_Status.PM_START:
                     retValue = String.Format("PM{0} Started by {1} at {2} ", Obj.schedule_id, Obj.startedbyName, Obj.facilityidbyName);
                     break;
@@ -104,7 +104,7 @@ namespace CMMSAPIs.Repositories.PM
                     retValue += String.Format("PM{0} Deleted by {1} at {2} ", Obj.schedule_id, Obj.facilityidbyName);
                     break;
                 case CMMS.CMMS_Status.PM_UPDATED:
-                    retValue = String.Format("PM{0} Updated by {1} at {2} ", Obj.schedule_id, Obj.updatedbyName, Obj.facilityidbyName); 
+                    retValue = String.Format("PM{0} Updated by {1} at {2} ", Obj.schedule_id, Obj.updatedbyName, Obj.facilityidbyName);
                     break;
                 default:
                     break;
@@ -118,7 +118,7 @@ namespace CMMSAPIs.Repositories.PM
             string retValue = " ";
 
 
-            switch (notificationID) 
+            switch (notificationID)
             {
                 case CMMS.CMMS_Status.PM_SCHEDULED:
                     retValue = $"PM Task Scheduled "; break;
@@ -161,7 +161,7 @@ namespace CMMSAPIs.Repositories.PM
                 default:
                     break;
             }
-            return retValue; 
+            return retValue;
 
         }
 
@@ -368,20 +368,20 @@ namespace CMMSAPIs.Repositories.PM
                                " CONCAT(cancelledrejectedBy.firstName,' ',cancelledrejectedBy.lastName)  as cancelledrejectedbyName, " +
                                " CONCAT(cancelledapprovedBy.firstName,' ',cancelledapprovedBy.lastName)  as cancelledapprovedbyName, " +
                                " CONCAT(createdBy.firstName,' ',createdBy.lastName)  as createdbyName, " +
-                               " CONCAT(closedBy.firstName,' ',closedBy.lastName)  as closed_by_name, " + 
+                               " CONCAT(closedBy.firstName,' ',closedBy.lastName)  as closed_by_name, " +
                                " CONCAT(statusBy.firstName,' ',statusBy.lastName)  as status_updated_by_name, " +
                                " CONCAT(deletedBy.firstName,' ',deletedBy.lastName)  as deletedbyName,  title.plan_name AS title, category.name AS categoryName, " +
                                "facility.name AS facilityidbyName, CONCAT(closeRejected.firstName,' ', closeRejected.lastName) AS closeRejectedbyName, " +
                                "CONCAT(updatedBy.firstName,' ',updatedBy.lastName)  as updated_by_name, CONCAT(closeapprovedBy.firstName,' ',closeapprovedBy.lastName)  as closedApprovedByName,  CONCAT(statusBy.firstName,' ', statusBy.lastName) AS status_updated_by_name " +
-                               " FROM pm_task " + 
+                               " FROM pm_task " +
                                $"left join users as assignedTo on pm_task.assigned_to = assignedTo.id " +
                                $"left join users as approvedBy on pm_task.approved_by = approvedBy.id " +
                                $"left join users as rejectedBy on pm_task.rejected_by = rejectedBy.id " +
                                $"left join users as cancelledBy on pm_task.cancelled_by = cancelledBy.id " +
                                $"left join users as cancelledrejectedBy on pm_task.cancel_rejected_by = cancelledrejectedBy.id " +
                                $"left join users as cancelledapprovedBy on cancelledapprovedBy.id = pm_task.cancel_approved_by " +
-                               $"left join users as closeRejected on closeRejected.id = pm_task.close_rejected_by_id " + 
-                               $"left join users as createdBy on createdBy.id = pm_task.started_by " + 
+                               $"left join users as closeRejected on closeRejected.id = pm_task.close_rejected_by_id " +
+                               $"left join users as createdBy on createdBy.id = pm_task.started_by " +
                                $"left join users as startedBy on pm_task.started_by = startedBy.id " +
                                $"left join users as deletedBy on pm_task.deletedById = deletedBy.id " +
                                $"left join users as closeapprovedBy on pm_task.approved_by = closeapprovedBy.id " +
@@ -403,7 +403,7 @@ namespace CMMSAPIs.Repositories.PM
                                $"LEFT JOIN assetcategories AS cat ON pm_task.category_id = cat.id " +
                                $"LEFT JOIN users AS statusBy ON pm_task.status_updated_by = statusBy.id " +
                                $" where pm_task.id = {task_id} ";
-            
+
 
             List<CMPMTaskView> taskViewDetail = await Context.GetData<CMPMTaskView>(myQuery).ConfigureAwait(false);
             string Materialconsumption = "SELECT sam.ID as Material_ID,sam.asset_name as  Material_name,smi.asset_item_ID as Equipment_ID, " +
@@ -472,21 +472,16 @@ namespace CMMSAPIs.Repositories.PM
                 {
                     List<ScheduleLinkJob> linked_jobs = await Context.GetData<ScheduleLinkJob>(myQuery4).ConfigureAwait(false);
                     List<CMLog> log = await _utilsRepo.GetHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, schedule.schedule_id, "");
-                    schedule.schedule_link_job = linked_jobs;
-
+                    if (linked_jobs[0].job_id > 0)
+                    {
+                        schedule.schedule_link_job = linked_jobs;
+                    }
                 }
                 catch (Exception e)
                 {
 
                 }
 
-                //if (checklist_collection.Count > 0)
-                //{
-                //    taskViewDetail[0].checklist_id = checklist_collection[0].id;
-                //    taskViewDetail[0].checklist_name = checklist_collection[0].name;
-                //}
-                //taskViewDetail[0].schedule_check_points = scheduleCheckList;
-                //taskViewDetail[0].history_log = log; 
 
                 schedule.checklist_observation = scheduleCheckList;
             }
@@ -1230,7 +1225,7 @@ namespace CMMSAPIs.Repositories.PM
             {
                 Console.WriteLine($"Failed to send Task Notification: {ex.Message}");
             }
-            
+
             return response;
         }
 
@@ -1278,7 +1273,7 @@ namespace CMMSAPIs.Repositories.PM
             {
                 Console.WriteLine($"Failed to send Task Notification: {ex.Message}");
             }
-            
+
 
             return response;
         }
