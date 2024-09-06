@@ -42,8 +42,10 @@ namespace CMMSAPIs.Models.PM
         public string comment { get; set; }
         public string started_by_name { get; set; }
         public int task_id { get; set; }
-
+        public string facilityidbyName { get; set; }
         public string status_name { get; set; }
+        public string deleted_by_name { get; set; }
+
     }
     public class CMPMPlanDetail : CMPMPlanList
     {

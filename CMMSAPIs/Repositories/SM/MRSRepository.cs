@@ -363,7 +363,7 @@ namespace CMMSAPIs.Repositories.SM
                     var IsSpareSelectionEnable = await getMultiSpareSelectionStatus(asset_code, asset_type_ID);
                     if (approval_required == 1)
                     {
-                        isApproval_required = false;
+                        isApproval_required = true;
                     }
 
                     if (asset_type_ID == (int)CMMS.SM_AssetTypes.Spare && request.cmmrsItems[i].requested_qty > 0)
