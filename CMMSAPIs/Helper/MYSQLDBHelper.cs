@@ -303,6 +303,44 @@ namespace CMMSAPIs.Helper
 
             }
         }
+        internal async Task<Dictionary<string, DataTable>> ExecuteNonQryDictonary(Dictionary<string, string> data)
+        {
+            Dictionary<string, DataTable> result = new Dictionary<string, DataTable>();
+            try
+            {
+
+                foreach (var kvp in data)
+                {
+                    string key = kvp.Key;
+                    string qry = kvp.Value;
+
+                    using (MySqlConnection conn = TheConnection)
+                    {
+                        using (MySqlCommand cmd = getQryCommand(qry, conn))
+                        {
+                            cmd.CommandTimeout = 99999;
+                            cmd.CommandType = CommandType.Text;
+                            await conn.OpenAsync();
+
+                            using (DbDataReader dataReader = await cmd.ExecuteReaderAsync(CommandBehavior.CloseConnection))
+                            {
+                                DataTable dt = new DataTable();
+                                dt.Load(dataReader);
+                                result[key] = dt;
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return result;
+        }
+
+
         internal async Task<List<T>> ExecuteToDataTable<T>(string SpName, MySqlParameter[] sqlpara = null) where T : class, new()
         {
             try
@@ -367,6 +405,7 @@ namespace CMMSAPIs.Helper
             cmd.CommandText = qry;
             return cmd;
         }
+
         internal void Dispose()
         {
             if (TheConnection != null)

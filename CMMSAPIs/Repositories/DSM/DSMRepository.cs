@@ -27,145 +27,279 @@ namespace CMMSAPIs.Repositories.DSM
 
         internal async Task<CMImportFileResponse> importDSMFile(int file_id, int userID)
         {
+            var dictionayfordsm = new Dictionary<string, string>()
+            {
+                {"site","SELECT id,site as name FROM site_master;" },
+                { "Vendor","SELECT id,name FROM business where type=10 ;" },
+                { "category","SELECT id,name FROM dsm_category Where status=1 ;"},
+                {"dsmtype","SELECT id,name FROM dsm_type where status=1 ;"}
+            };
+            Dictionary<string, DataTable> dsmdic = await Context.ExecuteNonQryDictonary(dictionayfordsm).ConfigureAwait(false);
+            DataTable siteTable = dsmdic["site"];
+            DataTable vendorTable = dsmdic["Vendor"];
+            DataTable categoryTable = dsmdic["category"];
+            DataTable dsmtypeTable = dsmdic["dsmtype"];
+
+            Dictionary<string, int> siteDictionary = new Dictionary<string, int>();
+            Dictionary<string, int> dsmTypeDictionary = new Dictionary<string, int>();
+            Dictionary<string, int> vendorDictionary = new Dictionary<string, int>();
+            Dictionary<string, int> CategoryDictionary = new Dictionary<string, int>();
+
+            List<string> siteNames = siteTable.AsEnumerable().Select(row => row.Field<string>("name")).ToList();
+            List<int> siteIds = siteTable.AsEnumerable().Select(row => row.Field<int>("id")).ToList();
+            siteDictionary.Merge(siteNames.ToUpper(), siteIds);
+
+            List<string> dsmTypeNames = dsmtypeTable.AsEnumerable().Select(row => row.Field<string>("name")).ToList();
+            List<int> dsmTypeIds = dsmtypeTable.AsEnumerable().Select(row => row.Field<int>("id")).ToList();
+            dsmTypeDictionary.Merge(dsmTypeNames.ToUpper(), dsmTypeIds);
+
+            List<string> CategoryType = categoryTable.AsEnumerable().Select(row => row.Field<string>("name")).ToList();
+            List<int> CategoryIds = categoryTable.AsEnumerable().Select(row => row.Field<int>("id")).ToList();
+            CategoryDictionary.Merge(CategoryType.ToUpper(), CategoryIds);
+
+            List<string> vendorNames = vendorTable.AsEnumerable().Select(row => row.Field<string>("name")).ToList();
+            List<int> vendorIds = vendorTable.AsEnumerable().Select(row => row.Field<int>("id")).ToList();
+            vendorDictionary.Merge(vendorNames.ToUpper(), vendorIds);
+
+            Dictionary<string, Tuple<string, Type>> Columnames = new Dictionary<string, Tuple<string, Type>>()
+            {
+
+                {"FY",new Tuple<string, Type>("FY",typeof(string))},
+                {"Month",new Tuple<string, Type>("Month",typeof(string))},
+                {"Site",new Tuple<string, Type>("Site",typeof(string))},
+                {"DSM Type",new Tuple<string, Type>("DSM Type",typeof(string))},
+                {"Vendor",new Tuple<string, Type>("Vendor",typeof(string))},
+                {"Category",new Tuple<string, Type>("Category",typeof(string))},
+                {"DSM Penalty (Rs.)",new Tuple<string, Type>("DSM Penalty (Rs.)",typeof(Int64))},
+                {"Schedule (kWh)",new Tuple<string, Type>("Schedule (kWh)",typeof(Int64))},
+                {"Actual (kWh)",new Tuple<string, Type>("Actual (kWh)",typeof(Int64))},
+            };
+
             CMImportFileResponse response = null;
             string query1 = $"SELECT file_path FROM uploadedfiles WHERE id = {file_id};";
             DataTable dt1 = await Context.FetchData(query1).ConfigureAwait(false);
             string path = Convert.ToString(dt1.Rows[0][0]);
             string dir = Path.GetDirectoryName(path);
-            string filename = Path.GetFileName(path);
-
             if (!Directory.Exists(dir))
+            {
                 m_errorLog.SetError($"Directory '{dir}' cannot be found");
+            }
             else if (!File.Exists(path))
-                m_errorLog.SetError($"File '{filename}' cannot be found in directory '{dir}'");
+            {
+                m_errorLog.SetError($"File '{path}' cannot be found in directory '{dir}'");
+            }
             else
             {
                 FileInfo info = new FileInfo(path);
                 if (info.Extension == ".xlsx")
                 {
                     ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-                    var excel = new ExcelPackage(path);
-                    var sheet = excel.Workbook.Worksheets["DSM"];
-                    if (sheet == null)
-                    {
 
-                        return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, "Invalid sheet name. Sheet name must be DSM");
-                    }
-                    else
+                    using (var excel = new ExcelPackage(new FileInfo(path)))
                     {
-                        List<CMDSMImportData> dataList = new List<CMDSMImportData>();
-                        try
+                        var sheet = excel.Workbook.Worksheets["DSM"];
+                        if (sheet == null)
                         {
-                            DataTable dt = new DataTable();
+                            return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.FAILURE, null, null, "Invalid sheet name. Sheet name must be DSM");
+                        }
+                        else
+                        {
 
-                            using (var package = new ExcelPackage(path))
+                            List<CMDSMImportData> dataList = new List<CMDSMImportData>();
+
+                            try
                             {
-                                if (package.Workbook.Worksheets.Count == 0)
+                                DataTable dt = new DataTable();
+                                foreach (var header in sheet.Cells[1, 1, 1, sheet.Dimension.End.Column])
                                 {
-                                    throw new Exception("No worksheets found in the Excel file. Total worksheets in the file: " + package.Workbook.Worksheets.Count);
-                                }
-
-                                dt.TableName = "DSM";
-                                var workSheet = package.Workbook.Worksheets["DSM"]; // Assuming data is in the first worksheet
-
-                                int rowNumber = 0;
-                                try
-                                {
-                                    foreach (var header in workSheet.Cells[1, 1, 1, workSheet.Dimension.End.Column])
+                                    try
+                                    {
+                                        dt.Columns.Add(Columnames[header.Text].Item1, Columnames[header.Text].Item2);
+                                    }
+                                    catch (KeyNotFoundException)
                                     {
                                         dt.Columns.Add(header.Text);
                                     }
-                                    for (int rN = 2; rN <= workSheet.Dimension.End.Row; rN++)
+                                }
+                                dt.Columns.Add("year", typeof(string));
+                                dt.Columns.Add("month", typeof(string));
+                                dt.Columns.Add("site_id", typeof(int));
+                                dt.Columns.Add("dsm_type", typeof(int));
+                                dt.Columns.Add("vendor_id", typeof(int));
+                                dt.Columns.Add("category_id", typeof(int));
+                                dt.Columns.Add("dsm_panelty", typeof(Int64));
+                                dt.Columns.Add("schedule", typeof(Int64));
+                                dt.Columns.Add("actual", typeof(Int64));
+
+                                List<string> headers = dt.Columns.Cast<DataColumn>().Select(c => c.ColumnName).ToList();
+                                foreach (var item in Columnames.Values)
+                                {
+                                    if (!headers.Contains(item.Item1))
                                     {
-                                        ExcelRange row = workSheet.Cells[rN, 1, rN, workSheet.Dimension.End.Column];
-                                        DataRow newR = dt.NewRow();
-                                        foreach (var cell in row)
+                                        dt.Columns.Add(item.Item1, item.Item2);
+                                    }
+                                }
+                                for (int rN = 2; rN <= sheet.Dimension.End.Row; rN++)
+                                {
+                                    DataRow newR = dt.NewRow();
+                                    ExcelRange row = sheet.Cells[rN, 1, rN, sheet.Dimension.End.Column];
+
+                                    foreach (var cell in row)
+                                    {
+
+                                        try
                                         {
-                                            try
-                                            {
-                                                newR[cell.Start.Column - 1] = cell.Text;
-                                            }
-                                            catch (Exception ex)
-                                            {
-                                                m_errorLog.SetError($"Exception Caught : " + ex.Message);
-                                            }
+                                            if (string.IsNullOrWhiteSpace(cell.Text)) continue;
+                                            newR[cell.Start.Column - 1] = Convert.ChangeType(cell.Text, dt.Columns[cell.Start.Column - 1].DataType);
                                         }
-                                        dt.Rows.Add(newR);
-                                    }
-                                    DataTable dt2 = dt;
-                                }
-                                catch (Exception ex)
-                                {
-
-                                    m_errorLog.SetError($"Exception Caught : " + ex.Message);
-
-                                }
-                                foreach (DataRow dr in dt.Rows.Cast<DataRow>().ToArray())
-                                {
-                                    bool isEmpty = true;
-                                    foreach (var item in dr.ItemArray)
-                                    {
-                                        if (item != DBNull.Value && !string.IsNullOrWhiteSpace(item.ToString()))
+                                        catch (Exception ex)
                                         {
-                                            isEmpty = false;
-                                            break;
+                                            m_errorLog.SetError($"Error in cell {cell.Address}: {ex.Message}");
                                         }
                                     }
-
-                                    if (isEmpty)
+                                    if (newR.IsEmpty())
                                     {
-                                        dr.Delete();
+                                        m_errorLog.SetInformation($"Row {rN} is empty.");
+                                        continue;
                                     }
-                                }
-                                string qry = "insert into dsm (fy, month, site,dmsType, vendor, category, dsmPenalty, scheduleKwh, actualKwh) Values ";
 
-                                foreach (DataRow dr in dt.Rows)
-                                {
-
-                                    CMDSMImportData unit = new CMDSMImportData
+                                    if (newR["FY"].ToString() != "")
                                     {
-                                        fy = dr["Year"] is DBNull || string.IsNullOrEmpty((string)dr["Year"]) ? "" : Convert.ToString(dr["Year"]),
+                                        newR["year"] = newR["FY"].ToString();
+                                    }
+                                    else
+                                    {
+                                        m_errorLog.SetError($"FY cannot be empty. [Row: {rN}]");
+                                    }
+                                    if (newR["Month"].ToString() != "")
+                                    {
+                                        newR["month"] = newR["Month"].ToString();
+                                    }
+                                    else
+                                    {
+                                        m_errorLog.SetError($"Month cannot be empty. [Row: {rN}]");
+                                    }
+                                    try
+                                    {
 
-                                        month = dr["Month"] is DBNull || string.IsNullOrEmpty((string)dr["Month"]) ? "Nil" : Convert.ToString(dr["Month"]),
+                                        newR["site_id"] = siteDictionary[Convert.ToString(newR["Site"]).ToUpper()];
+                                    }
+                                    catch
+                                    {
+                                        m_errorLog.SetError($"Invalid  Site Name. [Row: {rN}]");
+                                        newR["site_id"] = 0;
 
-                                        site = dr["Site"] is DBNull || string.IsNullOrEmpty((string)dr["Site"]) ? "Nil" : Convert.ToString(dr["Site"]),
-
-                                        dsmType = dr["DSM Type"] is DBNull || string.IsNullOrEmpty((string)dr["DSM Type"]) ? "Nil" : Convert.ToString(dr["DSM Type"]),
-
-                                        vendor = dr["Vendor"] is DBNull || string.IsNullOrEmpty((string)dr["Vendor"]) ? "Nil" : Convert.ToString(dr["Vendor"]),
-
-                                        category = dr["Category"] is DBNull || string.IsNullOrEmpty((string)dr["Category"]) ? "Nil" : Convert.ToString(dr["Category"]),
-
-                                        dsmPenalty = dr["DSM Penalty (Rs.)"] is DBNull || string.IsNullOrEmpty((string)dr["DSM Penalty (Rs.)"]) ? 0 : Convert.ToInt32(dr["DSM Penalty (Rs.)"]),
-
-                                        scheduleKwh = dr["Schedule (kWh)"] is DBNull || string.IsNullOrEmpty((string)dr["Schedule (kWh)"]) ? 0 : Convert.ToInt32(dr["Schedule (kWh)"]),
-
-                                        actualKwh = dr["Actual (kWh)"] is DBNull || string.IsNullOrEmpty((string)dr["Actual (kWh)"]) ? 0 : Convert.ToInt32(dr["Actual (kWh)"])
-                                    };
-
-                                    qry += "('" + unit.fy + "','" + unit.month + "','" + unit.site + "','" + unit.dsmType + "','" + unit.vendor + "','" + unit.category + "','" + unit.dsmPenalty + "','" + unit.scheduleKwh + "','" + unit.actualKwh + "'), ";
+                                    }
+                                    try
+                                    {
+                                        newR["dsm_type"] = dsmTypeDictionary[Convert.ToString(newR["DSM Type"]).ToUpper()];
+                                    }
+                                    catch
+                                    {
+                                        m_errorLog.SetError($"Invalid  DSM Type. [Row: {rN}]");
+                                        newR["dsm_type"] = 0;
+                                    }
+                                    try
+                                    {
+                                        newR["vendor_id"] = vendorDictionary[Convert.ToString(newR["Vendor"]).ToUpper()];
+                                    }
+                                    catch
+                                    {
+                                        m_errorLog.SetError($"Invalid Vendro Name. [Row: {rN}]");
+                                        newR["vendor_id"] = 0;
+                                    }
+                                    try
+                                    {
+                                        newR["category_id"] = CategoryDictionary[Convert.ToString(newR["Category"]).ToUpper()];
+                                    }
+                                    catch
+                                    {
+                                        m_errorLog.SetError($"Invalid Category Name. [Row: {rN}]");
+                                        newR["category_id"] = 0;
+                                    }
+                                    if (newR["DSM Penalty (Rs.)"].ToString() != "")
+                                    {
+                                        newR["dsm_panelty"] = Convert.ToInt64(newR["DSM Penalty (Rs.)"]);
+                                    }
+                                    else
+                                    {
+                                        m_errorLog.SetError($"DSM Penalty cannot be empty. [Row: {rN}]");
+                                    }
+                                    if (newR["Schedule (kWh)"].ToString() != "")
+                                    {
+                                        newR["schedule"] = Convert.ToInt64(newR["Schedule (kWh)"]);
+                                    }
+                                    else
+                                    {
+                                        m_errorLog.SetError($"Schedule (kWh) cannot be empty. [Row: {rN}]");
+                                    }
+                                    if (newR["Actual (kWh)"].ToString() != "")
+                                    {
+                                        newR["actual"] = Convert.ToInt64(newR["Actual (kWh)"]);
+                                    }
+                                    else
+                                    {
+                                        m_errorLog.SetError($"Actual (kWh) cannot be empty. [Row: {rN}]");
+                                    }
+                                    dt.Rows.Add(newR);
                                 }
 
-                                qry = qry.Substring(0, (qry.Length - 2)) + ";";
-                                await Context.ExecuteNonQry<int>(qry).ConfigureAwait(false);
+                                dt.Clone();
+                                List<CMDSMImportData> importDSm = dt.MapTo<CMDSMImportData>();
+                                List<int> idList = new List<int>();
+
+                                idList.AddRange((await Createdsmdata(importDSm, userID)).id);
+
+                                response = new CMImportFileResponse(idList, CMMS.RETRUNSTATUS.SUCCESS, null, null, $"{idList.Count} Dsm Imported successfully");
 
                             }
-                        }
-                        catch (Exception ex)
-                        {
-                            // Handle exceptions
-                            Console.WriteLine("An error occurred: " + ex.Message);
-                            throw ex;
+                            catch (Exception ex)
+                            {
+                                m_errorLog.SetError($"Exception Caught : " + ex.Message);
+                            }
 
                         }
                     }
                 }
             }
-            response = new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.SUCCESS, "", null, "File imported successfully.");
-
             return response;
         }
 
+        internal async Task<CMDefaultResponse> Createdsmdata(List<CMDSMImportData> request, int userID)
+        {
+
+            CMDefaultResponse response;
+            CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.SUCCESS;
+            string strRetMessage = "";
+            List<int> idList = new List<int>();
+            int id = 0;
+            string qry = "insert into dsm (fy, month, site_id,dsm_type, vendor_id, category_id, dsmPenalty, scheduleKwh, actualKwh) Values ";
+            foreach (CMDSMImportData unit in request)
+            {
+                qry += "('" + unit.fy + "','" + unit.month + "','" + unit.site_id + "','" + unit.dsm_type + "','" + unit.vendor_id + "','" + unit.category_id + "','" + unit.dsm_panelty + "','" + unit.schedule + "','" + unit.actual + "') ,";
+            }
+            qry = qry = qry.TrimEnd(',') + ";";
+            try
+            {
+                id = await Context.ExecuteNonQry<int>(qry).ConfigureAwait(false);
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            idList.Add(id);
+            if (idList.Count > 0)
+            {
+                strRetMessage = "DSM  <" + id + "> added";
+            }
+            else
+            {
+                strRetMessage = "No Dsm Data Added";
+            }
+            return new CMDefaultResponse(idList, retCode, strRetMessage);
+        }
         public async Task<List<CMDSMData>> getDSMData(string fy, string month, string stateId, string spvId, string siteId)
         {
             string[] fyArray = null;
@@ -203,7 +337,16 @@ namespace CMMSAPIs.Repositories.DSM
                          "SUM(dsmPenalty / actualKwh) * 100 AS dsmPer " +
                          "FROM dsm " +
                          "LEFT JOIN site_master AS sm ON sm.site = dsm.site_id " +
+            string qry = "SELECT dsm.id as id , fy, month,sm.site as site,dsm.site_id ,spv.id as spv_id, sm.stateId, spv.name AS spv, states.name AS state,dct.name as  category, " +
+                         "dst.name as dsmtype ,dst.id as dsm_type_id , " +
+                         "bus.name  AS forcasterName, dsmPenalty, actualKwh, scheduleKwh, " +
+                         "SUM(dsmPenalty / actualKwh) * 100 AS dsmPer " +
+                         "FROM dsm " +
+                         "LEFT JOIN site_master AS sm ON sm.id = dsm.site_id " +
                          "LEFT JOIN spv ON spv.id = sm.spvId " +
+                         "LEFT JOIN dsm_category as dct on dsm.category_id = dct.id " +
+                         "LEFT JOIN business as bus ON bus.id = dsm.vendor_id " +
+                         "LEFT JOIN dsm_type as dst on dsm.dsm_type = dst.id  " +
                          "LEFT JOIN states ON states.id = sm.stateId " +
                          "WHERE 1 = 1 " + filter + " " +
                          "GROUP BY fy, month, site";*/
@@ -214,8 +357,8 @@ namespace CMMSAPIs.Repositories.DSM
                  "LEFT JOIN  assetcategories ast on ast.id=dsm.category_id\r\nLEFT JOIN states ON states.id = sm.stateId " +
                  "WHERE 1 = 1  GROUP BY fy, month, site;";
 
+                         "GROUP BY dsm.id, fy, month, site";
              List<CMDSMData> data = await Context.GetData<CMDSMData>(qry).ConfigureAwait(false);*/
-
             return null;
         }
         public async Task<List<DSMTYPE>> getDSMType()

@@ -112,6 +112,9 @@ namespace CMMSAPIs.Repositories.Permits
                 case CMMS.CMMS_Status.PTW_CLOSED:       //126
                     statusName = "Closed";
                     break;
+                case CMMS.CMMS_Status.PTW_RESUBMIT:
+                    statusName = "Resubmited";
+                    break;
                 case CMMS.CMMS_Status.PTW_CANCELLED_BY_ISSUER:
                     statusName = "Cancelled BY Issuer";
                     break;
@@ -235,6 +238,9 @@ namespace CMMSAPIs.Repositories.Permits
                     break;
                 case CMMS.CMMS_Status.PTW_UPDATED:
                     retValue = String.Format("PTW{0} Updated", permitId, title);
+                    break;
+                case CMMS.CMMS_Status.PTW_RESUBMIT:
+                    retValue = String.Format("PTW{0} <{1}> Resubmited", permitId, title);
                     break;
                 default:
                     retValue = String.Format("PTW{0} Unknow status <{2}>", permitId, status);
@@ -1513,7 +1519,9 @@ namespace CMMSAPIs.Repositories.Permits
             string fileIds = "";
             fileIds += (request?.fileIds?.Length > 0 ? " " + string.Join(" , ", request.fileIds) + " " : string.Empty);
 
-            string updateQry = $"update permits set cancelReccomendations = '{request.comment}', cancelFile ='{fileIds}',cancelRequestStatus = 1, status = {(int)CMMS.CMMS_Status.PTW_CANCEL_REQUEST_APPROVED}, status_updated_at = '{UtilsRepository.GetUTCTime()}', cancelRequestDate = '{UtilsRepository.GetUTCTime()}', cancelRequestById = {userID}  where id = {request.id}";
+            string updateQry = $"update permits set cancelReccomendations = '{request.comment}', cancelFile ='{fileIds}',cancelRequestStatus = 1, TBT_Done_Check=0 ,TBT_Done_By=0, " +
+                               $"status = {(int)CMMS.CMMS_Status.PTW_CANCEL_REQUEST_APPROVED}, status_updated_at = '{UtilsRepository.GetUTCTime()}', " +
+                               $"cancelRequestDate = '{UtilsRepository.GetUTCTime()}', cancelRequestById = {userID}  where id = {request.id}";
             int retValue = await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
 
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
@@ -1856,7 +1864,7 @@ namespace CMMSAPIs.Repositories.Permits
             {
                 System.Text.StringBuilder sb = new System.Text.StringBuilder(request.description);
                 sb.Append(" " + request.comment);
-                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.permit_id, 0, 0, sb.ToString(), CMMS.CMMS_Status.PTW_CREATED, userID);
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.permit_id, 0, 0, sb.ToString(), CMMS.CMMS_Status.PTW_RESUBMIT, userID);
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_CREATED, new[] { userID }, permitDetails);
                 response = new CMDefaultResponse(request.permit_id, CMMS.RETRUNSTATUS.SUCCESS, $"Permit Resubmitted for Approval");
 
