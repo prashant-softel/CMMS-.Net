@@ -709,7 +709,7 @@ namespace CMMSAPIs.Repositories.JC
             /*Your code goes here*/
             //Pending   add JC_End_date
 
-            string query_bmtime_query = "select id, breakdownTime from jobs where id in (select jobId from jobcards where id = 31 ); ";
+            string query_bmtime_query = $"select id, breakdownTime from jobs where id in (select jobId from jobcards where id = {request.id} ); ";
             DataTable dt = await Context.FetchData(query_bmtime_query).ConfigureAwait(false);
             DateTime breakdownTime = DateTime.Now;
             int jobs_id = 0;
