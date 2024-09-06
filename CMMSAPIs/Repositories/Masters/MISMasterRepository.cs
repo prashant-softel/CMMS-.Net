@@ -2502,21 +2502,6 @@ namespace CMMSAPIs.Repositories.Masters
 
             return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Kaizens Data Deleted");
         }
-        Dictionary<int, string> MonthDictionary = new Dictionary<int, string>
-        {
-             {1, "January"},
-             {2, "February"},
-             {3, "March"},
-             {4, "April"},
-             {5, "May"},
-             {6, "June"},
-             {7, "July"},
-             {8, "August"},
-             {9, "September"},
-             {10, "October"},
-             {11, "November"},
-             {12, "December"}
-        };
         public async Task<List<KaizensData>> GetKaizensData()
         {
             string myQuery = "SELECT mis_k.id, mis_k.month_id, mis_k.facility_id, mis_k.year, mis_k.KaizensImplemented, mis_k.CostForImplementation," +
