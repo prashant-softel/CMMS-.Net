@@ -255,14 +255,31 @@ namespace CMMSAPIs.Repositories.Masters
 
         internal async Task<CMDefaultResponse> CloseObservation(CMApproval request, int userId)
         {
-            string deleteQry = $"UPDATE observations SET status_code = {(int)CMMS_Status.OBSERVATION_CLOSED}, closed_by = '{userId}' , closed_at='{UtilsRepository.GetUTCTime()}' , updated_at = '{UtilsRepository.GetUTCTime()}' WHERE id = {request.id};";
-            await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
-            System.Text.StringBuilder sb = new System.Text.StringBuilder("Observation Updated");
-            if (request.comment.Length > 0)
+            string deleteQry = "";
+            if (request.type == (int)CMMS.OBSERVATION_TYPE.PM_EXECUTION)  
             {
-                sb.Append(": " + request.comment);
+                deleteQry = $"UPDATE pm_execution SET Observation_Status = {(int)CMMS_Status.OBSERVATION_CLOSED}, action_taken = '{request.comment}'WHERE id = {request.id};";
+                await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
+                System.Text.StringBuilder sb = new System.Text.StringBuilder("Observation Updated");
+                if (request.comment.Length > 0)
+                {
+                    sb.Append(": " + request.comment);
+                }
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_EXECUTION, request.id, 0, 0, sb.ToString(), CMMS.CMMS_Status.OBSERVATION_CLOSED, userId); ;
             }
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.OBSERVATION, request.id, 0, 0, sb.ToString(), CMMS.CMMS_Status.OBSERVATION_CLOSED, userId); ;
+            else
+            {
+                deleteQry = $"UPDATE observations SET status_code = {(int)CMMS_Status.OBSERVATION_CLOSED}, closed_by = '{userId}' , closed_at='{UtilsRepository.GetUTCTime()}' , updated_at = '{UtilsRepository.GetUTCTime()}' WHERE id = {request.id};";
+               
+                await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
+               
+                System.Text.StringBuilder sb = new System.Text.StringBuilder("Observation Updated");
+                if (request.comment.Length > 0)
+                {
+                    sb.Append(": " + request.comment);
+                }
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.OBSERVATION, request.id, 0, 0, sb.ToString(), CMMS.CMMS_Status.OBSERVATION_CLOSED, userId); ;
+            }
             return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Observation {request.id} closed");
         }
 
@@ -2559,6 +2576,33 @@ namespace CMMSAPIs.Repositories.Masters
             }
             return null;
 
+        }
+        public async Task<CMDefaultResponse> AssingtoObservation(AssignToObservation request)
+        {
+            string updateQry = "";
+            if (request.type_of_observation == (int)CMMS.OBSERVATION_TYPE.PM_EXECUTION)
+            {
+                updateQry = "UPDATE pm_execution SET ";
+                updateQry += $"assign_to = {request.user_id}, ";
+                updateQry += $"target_date = '{request.target_date.ToString("yyyy-MM-dd")}', ";
+                updateQry += $"Observation_Status = {(int)CMMS.CMMS_Modules.OBSERVATION_ASSIGNED} ";
+                updateQry += $"WHERE id = {request.id};";
+                await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_EXECUTION, request.id, 0, 0, request.comment, CMMS.CMMS_Status.ASSIGNED, request.user_id);
+
+            }
+            else 
+            {
+                updateQry = "UPDATE observations SET ";
+                updateQry += $"assign_to = {request.user_id}, ";
+                updateQry += $"target_date = '{request.target_date.ToString("yyyy-MM-dd")}',";
+                updateQry += $"status_code =  {(int)CMMS.CMMS_Modules.OBSERVATION_ASSIGNED} ";
+                updateQry += $"WHERE id = {request.id};";
+                await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.OBSERVATION, request.id, 0, 0, request.comment, CMMS.CMMS_Status.ASSIGNED, request.user_id);
+
+            }
+            return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Assing Observation ");
         }
     }
 

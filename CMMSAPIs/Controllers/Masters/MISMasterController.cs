@@ -2013,7 +2013,21 @@ namespace CMMSAPIs.Controllers.Masters
                 return BadRequest(ex.Message);
             }
         }
-
+        [Route("AssingtoObservation")]
+        [HttpPost]
+        public async Task<IActionResult> AssingtoObservation(AssignToObservation request)
+        {
+            try
+            {
+               var data = await _IMISMasterBS.AssingtoObservation(request);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+      
     }
 }
 
