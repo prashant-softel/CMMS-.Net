@@ -993,6 +993,10 @@ namespace CMMSAPIs.Repositories.Users
         }
         internal async Task<List<CMUser>> GetEMUsers(CMUserByNotificationId notification)
         {
+            int facility_id = notification.facility_id;
+            int role_id = notification.role_id;
+            int notification_id = notification.notification_id;
+
             string userQry = $"select u.id as id, u.loginId as user_name, concat(firstName, ' ', lastName) as full_name, u.mobileNumber as contact_no, userroles.id as role_id," +
                 $" userroles.name as role_name " +
                 $" FROM users as u " +
