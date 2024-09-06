@@ -9,18 +9,16 @@ namespace CMMSAPIs.Models.Notifications
 {
     public class GONotification : CMMSNotification
     {
-        int m_GOId;
         CMGOMaster m_GOObj;
         public GONotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMGOMaster GOObj) : base(moduleID, notificationID)
         {
             m_GOObj = GOObj;
-            m_GOId = m_GOObj.Id;
+            m_module_ref_id = m_GOObj.Id;
         }
 
         override protected string getEMSubject(params object[] args)
         {
             string retValue = "ESCALATION : ";
-            m_GOId = m_GOObj.Id;
 
             switch (m_notificationID)
             {
@@ -61,7 +59,7 @@ namespace CMMSAPIs.Models.Notifications
         override protected string getSubject(params object[] args)
         {
             string retValue = "My Job Card subject";
-            m_GOId = m_GOObj.Id;
+            m_module_ref_id = m_GOObj.Id;
 
             switch (m_notificationID)
             {
@@ -99,9 +97,9 @@ namespace CMMSAPIs.Models.Notifications
         {
             string retValue = "";
 
-            retValue = String.Format("<h3><b style='color:#31576D'>Status : </b>{0}</h3><br>", m_GOObj.status_long);
+            retValue = String.Format("<h3><b style='color:#31576D'>Status : </b>{0}</h3><br>", m_GOObj.status_long + " at " + m_GOObj.facilityName);
 
-            
+
             retValue += "<div style='display: flex; flex-direction: column; align-items: center;'>";
 
             bool check1 = !string.IsNullOrEmpty(m_GOObj.receive_submitted_by_name);

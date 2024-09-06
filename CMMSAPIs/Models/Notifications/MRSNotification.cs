@@ -9,7 +9,6 @@ namespace CMMSAPIs.Models.Notifications
 {
     public class MRSNotification : CMMSNotification
     {
-        int m_MRSId;
         CMMRSList m_MRSObj;
 
         /*int m_RMRSId;
@@ -18,7 +17,7 @@ namespace CMMSAPIs.Models.Notifications
         public MRSNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMMRSList MRSObj) : base(moduleID, notificationID)
         {
             m_MRSObj = MRSObj;
-            m_MRSId = m_MRSObj.ID;
+            m_module_ref_id = m_MRSObj.ID;
         }
 
         /*public MRSNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMMRSReturnList RMRSObj) : base(moduleID, notificationID)
@@ -126,7 +125,7 @@ namespace CMMSAPIs.Models.Notifications
         {
             string retValue = "";
 
-            retValue = String.Format("<h3><b style='color:#31576D'>Status : </b>{0}</h3><br>", m_MRSObj.status_long);
+            retValue = String.Format("<h3><b style='color:#31576D'>Status : </b>{0}</h3><br>", m_MRSObj.status_long + " at " + m_MRSObj.facilityName);
 
             retValue += String.Format("<table style='width: 50%; margin:0 auto; border-collapse: collapse ; border-spacing: 10px; ' border='1'>");
             

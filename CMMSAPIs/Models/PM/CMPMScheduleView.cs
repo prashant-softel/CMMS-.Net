@@ -93,7 +93,6 @@ namespace CMMSAPIs.Models.PM
         public List<CMPMScheduleExecutionDetail> schedules { get; set; }
         public List<Materialconsumption> Material_consumption { get; set; }
 
-        public int plan_id { get; set; }
         public string closedApprovedByName { get; set; }
         public DateTime Schedule_Date { get; set; }
         public int started_by_id { get; set; }

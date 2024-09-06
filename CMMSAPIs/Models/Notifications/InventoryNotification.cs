@@ -11,34 +11,32 @@ namespace CMMSAPIs.Models.Notifications
 {
     internal class InventoryNotification : CMMSNotification
     {
-        int m_InvObjID;
         CMViewInventory m_InvObj;
 
         public InventoryNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMViewInventory InvObj) : base(moduleID, notificationID)
         {
             m_InvObj = InvObj;
-            m_InvObjID = InvObj.id;
+            m_module_ref_id = InvObj.id;
         }
 
 
         override protected string getEMSubject(params object[] args)
         {
             string retValue = "ESCALATION : ";
-            m_InvObjID = m_InvObj.id;
 
             switch (m_notificationID)
             {
                 case CMMS.CMMS_Status.INVENTORY_IMPORTED:
-                    retValue += String.Format("Asset{0} Imorted by {1}", m_InvObj.id, m_InvObj.Imported_by);
+                    retValue += String.Format("{0} Asset{1} <{2}> Imorted by {3}", m_InvObj.facilityName, m_InvObj.id, m_InvObj.name, m_InvObj.Imported_by);
                     break;
                 case CMMS.CMMS_Status.INVENTORY_ADDED:
-                    retValue += String.Format("Asset{0} <{1}> Added by {2}", m_InvObj.id, m_InvObj.name, m_InvObj.added_by_name);
+                    retValue += String.Format("{0} Asset{1} <{2}> Added by {3}", m_InvObj.facilityName, m_InvObj.id, m_InvObj.name, m_InvObj.added_by_name);
                     break;
                 case CMMS.CMMS_Status.INVENTORY_UPDATED:
-                    retValue += String.Format("Asset{0} <{1}> Updated by {2}", m_InvObj.id, m_InvObj.name, m_InvObj.updated_by_name);
+                    retValue += String.Format("{0} Asset{1} <{1}> Updated by {3}", m_InvObj.facilityName, m_InvObj.id, m_InvObj.name, m_InvObj.updated_by_name);
                     break;
                 case CMMS.CMMS_Status.INVENTORY_DELETED:
-                    retValue += String.Format("Asset{0} <{1}> Deleted by {2}", m_InvObj.id, m_InvObj.name, m_InvObj.deleted_by);
+                    retValue += String.Format("{0} Asset{1} <{2}> Deleted by {3}", m_InvObj.facilityName, m_InvObj.id, m_InvObj.name, m_InvObj.deleted_by);
                     break;
                 default:
                     break;
@@ -52,21 +50,21 @@ namespace CMMSAPIs.Models.Notifications
         override protected string getSubject(params object[] args)
         {
 
-            string retValue = "My job subject";
+            string retValue = "";
 
             switch (m_notificationID)
             {
                 case CMMS.CMMS_Status.INVENTORY_IMPORTED:
-                    retValue = String.Format("Asset{0} Imorted by {1}", m_InvObj.id, m_InvObj.Imported_by);
+                    retValue = String.Format("{0} Asset{1} <{2}> Imorted by {3}", m_InvObj.facilityName, m_InvObj.id, m_InvObj.name, m_InvObj.Imported_by);
                     break;
                 case CMMS.CMMS_Status.INVENTORY_ADDED:
-                    retValue = String.Format("Asset{0} <{1}> Added by {2}", m_InvObj.id, m_InvObj.name, m_InvObj.added_by_name);
+                    retValue = String.Format("{0} Asset{1} <{2}> Added by {3}", m_InvObj.facilityName, m_InvObj.id, m_InvObj.name, m_InvObj.added_by_name);
                     break;
                 case CMMS.CMMS_Status.INVENTORY_UPDATED:
-                    retValue = String.Format("Asset{0} <{1}> Updated by {2}", m_InvObj.id, m_InvObj.name, m_InvObj.updated_by_name);
+                    retValue = String.Format("{0} Asset{1} <{1}> Updated by {3}", m_InvObj.facilityName, m_InvObj.id, m_InvObj.name, m_InvObj.updated_by_name);
                     break;
                 case CMMS.CMMS_Status.INVENTORY_DELETED:
-                    retValue = String.Format("Asset{0} <{1}> Deleted by {2}", m_InvObj.id, m_InvObj.name, m_InvObj.deleted_by);
+                    retValue = String.Format("{0} Asset{1} <{2}> Deleted by {3}", m_InvObj.facilityName, m_InvObj.id, m_InvObj.name, m_InvObj.deleted_by);
                     break;
                 default:
                     break;
@@ -78,7 +76,7 @@ namespace CMMSAPIs.Models.Notifications
         {
             string retValue = "";
 
-            retValue = String.Format("<h3><b style='color:#31576D'>Status:</b>{0}</h3><br>", m_InvObj.status_long);
+            retValue = String.Format("<h3><b style='color:#31576D'>Status:</b>{0}</h3><br>", m_InvObj.status_long + " at " + m_InvObj.facilityName);
 
             if (m_notificationID != CMMS.CMMS_Status.INVENTORY_IMPORTED)
             {

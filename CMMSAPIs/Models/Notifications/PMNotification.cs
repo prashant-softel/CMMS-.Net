@@ -12,7 +12,6 @@ namespace CMMSAPIs.Models.Notifications
 {
     internal class PMNotification : CMMSNotification
     {
-        int m_PMId;
         CMPMScheduleExecutionDetail m_pmscheduleObj;
         CMPMPlanDetail m_pmPlanObj;
         CMPMTaskView m_pmExecutionObj;
@@ -20,19 +19,19 @@ namespace CMMSAPIs.Models.Notifications
         public PMNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMPMTaskView executionObj) : base(moduleID, notificationID)
         {
             m_pmExecutionObj = executionObj;
-            m_PMId = m_pmExecutionObj.id;
+            m_module_ref_id = m_pmExecutionObj.id;
         }
 
         public PMNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMPMPlanDetail pmObj) : base(moduleID, notificationID)
         {
             m_pmPlanObj = pmObj;
-            m_PMId = m_pmPlanObj.plan_id;
+            m_module_ref_id = m_pmPlanObj.plan_id;
         }
 
         public PMNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMPMScheduleExecutionDetail pmscheduleObj) : base(moduleID, notificationID)
         {
             m_pmscheduleObj = pmscheduleObj;
-            m_PMId = m_pmscheduleObj.schedule_id;
+            m_module_ref_id = m_pmscheduleObj.schedule_id;
         }
 
         override protected string getEMSubject(params object[] args)
@@ -41,7 +40,7 @@ namespace CMMSAPIs.Models.Notifications
             string retValue = "ESCALATION: ";
             if (m_pmPlanObj != null)
             {
-                m_PMId = m_pmPlanObj.plan_id;
+                m_module_ref_id = m_pmPlanObj.plan_id;
             }
 
 
@@ -130,11 +129,6 @@ namespace CMMSAPIs.Models.Notifications
         {
 
             string retValue = "";
-            if (m_pmPlanObj != null)
-            {
-                m_PMId = m_pmPlanObj.plan_id;
-            }
-
 
             switch (m_notificationID)
             {
@@ -232,7 +226,7 @@ namespace CMMSAPIs.Models.Notifications
 
             if (m_pmPlanObj != null && m_pmPlanObj.plan_id != 0)
             {
-                retValue = String.Format("<h3><b style='color:#31576D'>Status:</b>{0}</h3><br>", m_pmPlanObj.status_long);
+                retValue = String.Format("<h3><b style='color:#31576D'>Status:</b>{0}</h3><br>", m_pmPlanObj.status_long + " at " + m_pmPlanObj.facility_name);
 
                 retValue += String.Format("<table style='width: 50%; margin:0 auto; border-collapse: collapse ; border-spacing: 10px; ' border='1'>");
                 retValue += String.Format(template, "Plan ID", "PMP" + m_pmPlanObj.plan_id);
@@ -268,7 +262,7 @@ namespace CMMSAPIs.Models.Notifications
             }
             else if (m_pmExecutionObj != null && m_pmExecutionObj.id != 0)
             {
-                retValue = String.Format("<h3><b style='color:#31576D'>Status:</b>{0}</h3><br>", m_pmExecutionObj.status_long);
+                retValue = String.Format("<h3><b style='color:#31576D'>Status:</b>{0}</h3><br>", m_pmExecutionObj.status_long + " at " + m_pmExecutionObj.Site_name);
 
                 retValue += String.Format("<table style='width: 50%; margin:0 auto; border-collapse: collapse ; border-spacing: 10px; ' border='1'>");
                 retValue += String.Format(template, "Task ID ", "PMT" + m_pmExecutionObj.id);
