@@ -231,7 +231,7 @@ namespace CMMSAPIs.Repositories.PM
                         if (task.ptw_status == (int)CMMS.CMMS_Status.PTW_APPROVED)
                         {
                             string startQry2 = $"UPDATE pm_task SET  status = {(int)CMMS.CMMS_Status.PM_CLOSE_APPROVED} WHERE id = {task.id};";
-                            await Context.ExecuteNonQry<int>(startQry2).ConfigureAwait(false);
+                            //await Context.ExecuteNonQry<int>(startQry2).ConfigureAwait(false);
                         }
                         task.status_short = "Permit - " + PermitRepository.getShortStatus(task.ptw_status);
                     }
@@ -669,11 +669,11 @@ namespace CMMSAPIs.Repositories.PM
                 ptw_status = (CMMS.CMMS_Status)Convert.ToInt32(dt1.Rows[0][2]);
             }
 
-
+            
             if (ptw_status == CMMS.CMMS_Status.PTW_APPROVED)
             {
                 string updateQ = $"UPDATE pm_task SET  status = {(int)CMMS.CMMS_Status.PM_CLOSE_APPROVED} WHERE id = {task_id};";
-                await Context.ExecuteNonQry<int>(updateQ).ConfigureAwait(false);
+                //await Context.ExecuteNonQry<int>(updateQ).ConfigureAwait(false);
             }
             else
             {
@@ -1134,7 +1134,7 @@ namespace CMMSAPIs.Repositories.PM
                                 $"approved_by = {userID}, " +
                                 $"approved_at = '{UtilsRepository.GetUTCTime()}', " +
                                 $"approve_remarks = '{request.comment}', " +
-                                $"status = {(int)CMMS.CMMS_Status.PM_CLOSE_APPROVED}, " +
+                                //$"status = {(int)CMMS.CMMS_Status.PM_CLOSE_APPROVED}, " +
                                 $"status_updated_at = '{UtilsRepository.GetUTCTime()}', " +
                                 $"status_updated_by = {userID} , " +
                                 $"rescheduled = 1 " +
