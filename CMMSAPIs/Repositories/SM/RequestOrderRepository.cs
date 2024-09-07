@@ -68,7 +68,7 @@ namespace CMMSAPIs.Repositories.SM
             //string mainQuery = $"UPDATE smgoodsorderdetails SET generate_flag = " +request.generate_flag + ",status = "+request.status+", vendorID = "+request.vendorID+" WHERE ID = "+request.id+"";
 
             string updateRO = $" UPDATE smrequestorder SET facilityID = '{request.facilityID}'," +
-                $" remarks = '{request.comment}', updated_by = {userID},updated_at='{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}', status={(int)CMMS.CMMS_Status.SM_RO_UPDATED} where id = {request.request_order_id}";
+                $" remarks = '{request.comment}', updated_by = {userID},updated_at='{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}' where id = {request.request_order_id}";
             var ResultROQuery = await Context.ExecuteNonQry<int>(updateRO);
             for (var i = 0; i < request.request_order_items.Count; i++)
             {
