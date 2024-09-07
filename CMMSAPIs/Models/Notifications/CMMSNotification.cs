@@ -38,7 +38,7 @@ namespace CMMSAPIs.Models.Notifications
     abstract public class CMMSNotification
     {
         public static bool print = false;
-        public static string printBody = "";
+        public static string HTMLBody = "";
 
         protected CMMS.CMMS_Modules m_moduleID;
         protected CMMS.CMMS_Status m_notificationID;
@@ -103,12 +103,6 @@ namespace CMMSAPIs.Models.Notifications
         {
             //default implementation of subject
             return String.Format("subject : My module {0} Event {1}", m_moduleID, m_notificationID);
-        }
-
-        //This method needs to be implemented for each 
-        protected string getEMHTMLBody(params object[] args)
-        {
-            return String.Format("Implement EM HTML Body for module {}", m_moduleID);
         }
 
         protected virtual string getSubject(params object[] args)
@@ -224,7 +218,6 @@ namespace CMMSAPIs.Models.Notifications
             // emailList = GetUserByNotificationId(notificationID);
 
             string subject;
-            //string printBody;
 
             if (m_notificationType == 2)
             {
@@ -236,12 +229,11 @@ namespace CMMSAPIs.Models.Notifications
                 subject = getSubject(args);
             }
 
-            //string HTMLBody = getHTMLBody(args);
+            HTMLBody = getHTMLBody(args);
             string HTMLHeader = getHTMLHeader(args);
             string HTMLFooter = getHTMLFooter(args);
             string HTMLSignature = getHTMLSignature(args);
             int module_ref_id = getId(args);
-            printBody = getHTMLBody(args);
             string url = getURL(args);
 
 
@@ -314,7 +306,7 @@ namespace CMMSAPIs.Models.Notifications
                 }
                 else
                 {
-                    response = await sendEmail(subject, printBody, HTMLHeader, HTMLFooter, HTMLSignature, EmailTo);
+                    response = await sendEmail(subject, HTMLBody, HTMLHeader, HTMLFooter, HTMLSignature, EmailTo);
 
                 }
             }
