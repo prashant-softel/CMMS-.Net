@@ -11,20 +11,11 @@ namespace CMMSAPIs.Models.Notifications
     {
         CMMRSList m_MRSObj;
 
-        /*int m_RMRSId;
-        CMMRSReturnList m_RMRSObj;*/
-
         public MRSNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMMRSList MRSObj) : base(moduleID, notificationID)
         {
             m_MRSObj = MRSObj;
             m_module_ref_id = m_MRSObj.ID;
         }
-
-        /*public MRSNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMMRSReturnList RMRSObj) : base(moduleID, notificationID)
-        {
-            m_RMRSObj = RMRSObj;
-            m_RMRSId = m_MRSObj.ID;
-        }*/
 
         override protected string getEMSubject(params object[] args)
         {
@@ -33,15 +24,7 @@ namespace CMMSAPIs.Models.Notifications
             switch (m_notificationID)
             {
                 case CMMS.CMMS_Status.MRS_SUBMITTED:
-                    if (m_MRSObj.is_mrs_return == 1)
-                    {
-                        retValue += String.Format("{0} RMRS{1} Requested By {2}.", m_MRSObj.facilityName, m_MRSObj.ID, m_MRSObj.requested_by_name);
-                    }
-                    else
-                    {
-                        retValue += String.Format("{0} MRS{1} Requested By {2}.", m_MRSObj.facilityName, m_MRSObj.ID, m_MRSObj.requested_by_name);
-                    }
-
+                    retValue += String.Format("MRS{0} MRS{1} Requested By {2}.", m_MRSObj.facilityName, m_MRSObj.ID, m_MRSObj.requested_by_name);
                     break;
                 case CMMS.CMMS_Status.MRS_REQUEST_REJECTED:
                     retValue += String.Format("MRS{0} Request Rejected By {1}", m_MRSObj.ID, m_MRSObj.request_rejected_by_name);
@@ -74,34 +57,13 @@ namespace CMMSAPIs.Models.Notifications
             switch (m_notificationID)
             {
                 case CMMS.CMMS_Status.MRS_SUBMITTED:
-                    if (m_MRSObj.is_mrs_return == 1)
-                    {
-                        retValue = String.Format("{0} RMRS{1} Requested By {2}.", m_MRSObj.facilityName, m_MRSObj.ID, m_MRSObj.requested_by_name);
-                    }
-                    else
-                    {
-                        retValue = String.Format("{0} MRS{1} Requested By {2}.", m_MRSObj.facilityName, m_MRSObj.ID, m_MRSObj.requested_by_name);
-                    }
+                    retValue = String.Format("{0} MRS{1} Requested By {2}.", m_MRSObj.facilityName, m_MRSObj.ID, m_MRSObj.requested_by_name);
                     break;
                 case CMMS.CMMS_Status.MRS_REQUEST_REJECTED:
-                    if (m_MRSObj.is_mrs_return == 1)
-                    {
-                        retValue = String.Format("{0} RMRS{1} Request Rejected By {2}", m_MRSObj.facilityName, m_MRSObj.ID, m_MRSObj.request_rejected_by_name);
-                    }
-                    else
-                    {
-                        retValue = String.Format("{0} MRS{1} Request Rejected By {2}", m_MRSObj.facilityName, m_MRSObj.ID, m_MRSObj.request_rejected_by_name);
-                    }
+                    retValue = String.Format("{0} MRS{1} Request Rejected By {2}", m_MRSObj.facilityName, m_MRSObj.ID, m_MRSObj.request_rejected_by_name);
                     break;
                 case CMMS.CMMS_Status.MRS_REQUEST_APPROVED:
-                    if (m_MRSObj.is_mrs_return == 1)
-                    {
-                        retValue = String.Format("{0} RMRS{1} Request Approved By {2}", m_MRSObj.facilityName, m_MRSObj.ID, m_MRSObj.approver_name);
-                    }
-                    else
-                    {
-                        retValue = String.Format("{0} MRS{1} Request Approved By {2}", m_MRSObj.facilityName, m_MRSObj.ID, m_MRSObj.approver_name);
-                    }
+                    retValue = String.Format("{0} MRS{1} Request Approved By {2}", m_MRSObj.facilityName, m_MRSObj.ID, m_MRSObj.approver_name);
                     break;
                 case CMMS.CMMS_Status.MRS_REQUEST_ISSUED:
                     retValue = String.Format("{0} MRS{1} Issued By {2}", m_MRSObj.facilityName, m_MRSObj.ID, m_MRSObj.issued_name);
@@ -129,14 +91,7 @@ namespace CMMSAPIs.Models.Notifications
 
             retValue += String.Format("<table style='width: 50%; margin:0 auto; border-collapse: collapse ; border-spacing: 10px; ' border='1'>");
             
-            if (m_MRSObj.is_mrs_return == 1)
-            {
-                retValue += String.Format(template, "ID", "RMRS" + m_MRSObj.ID);
-            }
-            else
-            {
-                retValue += String.Format(template, "ID", "MRS" + m_MRSObj.ID);
-            }
+            retValue += String.Format(template, "ID", "MRS" + m_MRSObj.ID);
             retValue += String.Format(template, "Status", m_MRSObj.status_short);
             retValue += String.Format(template, "Activity", m_MRSObj.activity);
             retValue += String.Format(template, "Where Used", $"{m_MRSObj.whereUsedTypeName} {m_MRSObj.whereUsedRefID}");
@@ -152,7 +107,7 @@ namespace CMMSAPIs.Models.Notifications
             if (!string.IsNullOrEmpty(m_MRSObj.request_rejected_by_name))
             {
                 retValue += String.Format(template, "Request Rejected By", m_MRSObj.request_rejected_by_name);
-                retValue += String.Format(template, "Request Rejected At", m_MRSObj.issue_rejected_by_name);
+                retValue += String.Format(template, "Request Rejected At", m_MRSObj.request_rejected_at);
             }
             if (!string.IsNullOrEmpty(m_MRSObj.approver_name))
             {
@@ -202,35 +157,6 @@ namespace CMMSAPIs.Models.Notifications
             }
 
             retValue += "</table><br><br>";
-
-
-            if (m_MRSObj.is_mrs_return == 1)
-            {
-                retValue += "<h4>Faulty Return Materials</h4>";
-                retValue += "<table style='width: 80%; margin:0 auto; border-collapse: collapse; border-spacing: 10px;' border='1'>";
-                retValue += "<tr>";
-                retValue += "<th>Material Name</th>";
-                retValue += "<th>Remove From</th>";
-                retValue += "<th>material Code</th>";
-                retValue += "<th>Serial No.</th>";
-                retValue += "<th>Return Quantity</th>";
-                retValue += "<th>Remarks</th>";
-                retValue += "</tr>";
-
-                foreach (var item in m_MRSObj.CMMRSItems)
-                {
-                    retValue += "<tr>";
-                    retValue += String.Format("<td>{0}</td>", item.asset_name);
-                    retValue += String.Format("<td>{0}</td>", item.fromActorName);
-                    retValue += String.Format("<td>{0}</td>", item.asset_code);
-                    retValue += String.Format("<td>{0}</td>", item.serial_number);
-                    retValue += String.Format("<td>{0}</td>", item.returned_qty);
-                    retValue += String.Format("<td>{0}</td>", item.return_remarks);
-                    //retValue += "</tr>";
-                }
-
-                retValue += "</table><br><br>";
-            }
 
             switch (m_notificationID)
             {
