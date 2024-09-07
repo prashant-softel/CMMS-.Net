@@ -114,7 +114,10 @@ namespace CMMSAPIs.Models.Notifications
             retValue += String.Format(template, "JC ID", "JC" + m_JCObj.id);
             retValue += String.Format(template, "Status", m_JCObj.status_short);
             retValue += String.Format(template, "Job ID", "JOB" + m_JCObj.jobid);
-            retValue += String.Format(template, "PTW ID", "PTW" + m_JCObj.ptwId);
+            if (m_JCObj.ptwId > 0)
+            {
+                retValue += String.Format(template, "PTW ID", "PTW" + m_JCObj.ptwId);
+            }
             retValue += String.Format(template, "Job Card Description", m_JCObj.description);
             retValue += String.Format(template, "Created By", m_JCObj.created_by);
             retValue += String.Format(template, "Created At", m_JCObj.created_at);
@@ -167,7 +170,7 @@ namespace CMMSAPIs.Models.Notifications
                 {
                     i++;
                     categoryNames += item.Equipment_name + "(" + item.Equipment_category + ")";
-                    if (m_JCObj.asset_category_name.Count > 1 && i<m_JCObj.asset_category_name.Count)
+                    if (m_JCObj.asset_category_name.Count > 1 && i < m_JCObj.asset_category_name.Count)
                     {
                         categoryNames += ", ";
                     }
@@ -198,26 +201,25 @@ namespace CMMSAPIs.Models.Notifications
                 }
             }
 
-            if (m_JCObj.Material_consumption != null && m_JCObj.Material_consumption.Count > 0)
+            retValue += "<h4>Material Consumption</h4>";
+            retValue += "<table style='width: 80%; margin:0 auto; border-collapse: collapse; border-spacing: 10px;' border='1'>";
+            retValue += "<tr>";
+            retValue += "<th>SrNo</th>";
+            retValue += "<th>Material</th>";
+            retValue += "<th>Material Type</th>";
+            retValue += "<th>Issued Quantity</th>";
+            retValue += "<th>Used Quantity</th>";
+            int ii = 1;
+            foreach (var item in m_JCObj.Material_consumption)
             {
-                int i = 0;
-                string categoryNames = "";
-                foreach (var item in m_JCObj.Material_consumption)
-                {
-                    i++;
-                    categoryNames += item.Material_name + "(" + item.Material_type + ")";
-                    if (m_JCObj.Material_consumption.Count > 1 && i<m_JCObj.Material_consumption.Count)
-                    {
-                        categoryNames += ", ";
-                    }
-                }
-
-                if (i > 0)
-                {
-                    retValue += String.Format(template, "Material consumption", categoryNames);
-                }
+                retValue += "<tr>";
+                retValue += String.Format("<td style='word-wrap: break-word;'>{0}</td>", ii++);
+                retValue += String.Format("<td style='word-wrap: break-word;'>{0}</td>", item.Material_name);
+                retValue += String.Format("<td style='word-wrap: break-word;'>{0}</td>", item.Material_type);
+                retValue += String.Format("<td style='word-wrap: break-word;'>{0}</td>", item.issued_qty);
+                retValue += String.Format("<td style='word-wrap: break-word;'>{0}</td>", item.used_qty);
             }
-
+            retValue += "</table><br><br>";
             retValue += "</table>";
             return retValue;
         }

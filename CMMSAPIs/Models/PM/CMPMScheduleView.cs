@@ -222,11 +222,11 @@ namespace CMMSAPIs.Models.PM
     public class Materialconsumption
     {
         public int Material_ID { get; set; }
-        public string Material_name { get; set; }
-        public dynamic used_qty { get; set; }
-        public dynamic issued_qty { get; set; }
-        public string Material_type { get; set; }
         public int Equipment_ID { get; set; }
+        public string Material_name { get; set; }
+        public string Material_type { get; set; }
+        public dynamic issued_qty { get; set; }
+        public dynamic used_qty { get; set; }
     }
 
     public class CMCustomCheckPoint

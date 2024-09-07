@@ -431,7 +431,7 @@ namespace CMMSAPIs.Repositories.JC
                     "Left join smmrs as smm on smm.id=smi.mrs_ID " +
                     "Left join smassettypes as smtype on smtype.ID=sam.asset_type_ID " +
                     "left join smassetitems sai on sai.assetMasterID =  sam.id " +
-                    $"WHERE  smm.whereUsedRefID={id};";
+                    $"WHERE  smm.whereUsedRefID={jc_id};";
             List<Materialconsumption> Material = await Context.GetData<Materialconsumption>(Materialconsumptionofjob).ConfigureAwait(false);
 
 
