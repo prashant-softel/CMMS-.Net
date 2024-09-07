@@ -838,6 +838,7 @@ namespace CMMSAPIs.Repositories.SM
                           "facility_id AS facilityid, " +
                           "sm.ID, " +
                           "sm.requested_by_emp_ID, " +
+                          "sm.approved_by_emp_ID, " +
                           "CONCAT(ed1.firstName, ' ', ed1.lastName) AS approver_name, " +
                           "DATE_FORMAT(sm.requested_date, '%Y-%m-%d %H:%i') AS requestd_date, " +
                           "DATE_FORMAT(sm.returnDate, '%Y-%m-%d %H:%i') AS returnDate, " +

@@ -95,8 +95,12 @@ namespace CMMSAPIs.Models.Notifications
             retValue += String.Format(template, "Status", m_MRSObj.status_short);
             retValue += String.Format(template, "Activity", m_MRSObj.activity);
             retValue += String.Format(template, "Where Used", $"{m_MRSObj.whereUsedTypeName} {m_MRSObj.whereUsedRefID}");
-            retValue += String.Format(template, "Approval Status", m_MRSObj.approval_status);
-            retValue += String.Format(template, "Approval Comment", m_MRSObj.approval_comment);
+            if (m_MRSObj.approved_by_emp_ID > 0)
+            {
+                retValue += String.Format(template, "Approval By", m_MRSObj.approver_name + " at " + m_MRSObj.approval_date);
+                retValue += String.Format(template, "Approval Status", m_MRSObj.approval_status);
+                retValue += String.Format(template, "Approval Comment", m_MRSObj.approval_comment);
+            }
             retValue += String.Format(template, "Remarks", m_MRSObj.remarks  ?? "N/A");
 
             if (m_MRSObj.requested_by_emp_ID > 0)
