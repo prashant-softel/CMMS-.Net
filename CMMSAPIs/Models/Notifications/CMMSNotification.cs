@@ -530,7 +530,7 @@ namespace CMMSAPIs.Models.Notifications
             {
                 CMMRSReturnList _RMRS = (CMMRSReturnList)args[0];
                 notificationObj = new ReturnMRSNotification(moduleID, notificationID, _RMRS);
-                //facilityId = _RMRS.facilityId;   // CMMRSList update the query to facilityid in a list
+                facilityId = _RMRS.facilityId;   // CMMRSList update the query to facilityid in a list
             }
             else if (moduleID == CMMS.CMMS_Modules.PM_PLAN)
             {

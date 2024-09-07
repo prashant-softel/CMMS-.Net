@@ -126,7 +126,7 @@ namespace CMMSAPIs.Models.Notifications
                 retValue += "<th>Remarks</th>";
                 retValue += "</tr>";
 
-                foreach (var item in m_RMRSObj.CMMRSItems)
+                foreach (var item in m_RMRSObj.CMMRSFaultyItems)
                 {
                     retValue += "<tr>";
                     retValue += String.Format("<td>{0}</td>", item.asset_name);

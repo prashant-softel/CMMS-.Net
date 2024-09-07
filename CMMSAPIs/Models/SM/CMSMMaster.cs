@@ -343,7 +343,8 @@ namespace CMMSAPIs.Models.SM
     {
         public int ID { get; set; }
         public int mrs_id { get; set; }
-
+        public int facilityId { get; set; }
+        public string facilityName { get; set; }
         public int requested_by_emp_ID { get; set; }
         public string approver_name { get; set; }
         public DateTime? requested_date { get; set; }
@@ -365,7 +366,6 @@ namespace CMMSAPIs.Models.SM
         public int is_splited { get; set; }
         public int is_mrs_return { get; set; }
         public int return_mrs { get; set; }
-        public string facilityName { get; set; }
         public string request_rejected_by_name { get; set; }
         public dynamic rejected_date { get; set; }
         public List<CMMRSItems> CMMRSItems { get; set; }

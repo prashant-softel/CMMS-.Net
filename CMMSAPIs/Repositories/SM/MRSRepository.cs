@@ -909,7 +909,7 @@ namespace CMMSAPIs.Repositories.SM
         {
             string stmt = "SELECT  sm.ID," +
                           "fc.name AS facilityName, " +
-                          "facility_id AS facilityid, " +
+                          "facility_id AS facilityId, " +
                           "sm.requested_by_emp_ID as requested_by_emp_ID,CONCAT(ed1.firstName,' ',ed1.lastName) as approver_name,sm.remarks as remarks ," +
                           "DATE_FORMAT(sm.returnDate,'%Y-%m-%d %H:%i') as returnDate," +
                           "sm.approved_date, " +
