@@ -1134,7 +1134,7 @@ namespace CMMSAPIs.Repositories.PM
                                 $"approved_by = {userID}, " +
                                 $"approved_at = '{UtilsRepository.GetUTCTime()}', " +
                                 $"approve_remarks = '{request.comment}', " +
-                                //$"status = {(int)CMMS.CMMS_Status.PM_CLOSE_APPROVED}, " +
+                                $"status = {(int)CMMS.CMMS_Status.PM_CLOSE_APPROVED}, " +
                                 $"status_updated_at = '{UtilsRepository.GetUTCTime()}', " +
                                 $"status_updated_by = {userID} , " +
                                 $"rescheduled = 1 " +
