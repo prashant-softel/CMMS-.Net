@@ -407,8 +407,8 @@ namespace CMMSAPIs.Helper
             PM_LINKED_TO_PTW,
             PM_START,
             PM_CLOSED, // close task
-            /*PM_REJECTED,    // not used
-            PM_APPROVED, */     // not used
+            //PM_REJECTED,    // not used
+            //PM_APPROVED,      // not used
             PM_CLOSE_REJECTED,
             PM_CLOSE_APPROVED,
             PM_CANCELLED,

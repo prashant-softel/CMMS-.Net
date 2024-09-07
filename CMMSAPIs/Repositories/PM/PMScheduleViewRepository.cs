@@ -490,13 +490,13 @@ namespace CMMSAPIs.Repositories.PM
 
             if (taskViewDetail[0].status == (int)CMMS.CMMS_Status.PM_LINKED_TO_PTW)
             {
-                if (taskViewDetail[0].ptw_status == (int)CMMS.CMMS_Status.PTW_APPROVED)
+                /*if (taskViewDetail[0].ptw_status == (int)CMMS.CMMS_Status.PTW_APPROVED)
                 {
                     string startQry2 = $"UPDATE pm_task SET  status = {(int)CMMS.CMMS_Status.PM_CLOSE_APPROVED} WHERE id = {taskViewDetail[0].id};";
                     await Context.ExecuteNonQry<int>(startQry2).ConfigureAwait(false);
-                }
+                }*/
                 taskViewDetail[0].status_short = "Permit - " + PermitRepository.getShortStatus(taskViewDetail[0].ptw_status);
-                taskViewDetail[0].status_short = PermitRepository.LongStatus(taskViewDetail[0].ptw_status, await _permitRepo.GetPermitDetails(taskViewDetail[0].permit_id, facilitytimeZone));
+                taskViewDetail[0].status_long = PermitRepository.LongStatus(taskViewDetail[0].ptw_status, await _permitRepo.GetPermitDetails(taskViewDetail[0].permit_id, facilitytimeZone));
                 string _shortStatus_PTW = Status_PTW(taskViewDetail[0].ptw_status);
                 taskViewDetail[0].status_short_ptw = _shortStatus_PTW;
             }
