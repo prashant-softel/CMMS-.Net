@@ -569,7 +569,6 @@ namespace CMMSAPIs.Models.Notifications
             notificationObj.m_notificationType = notificationType;
             notificationObj.m_delayDays = delayDays;
             notificationObj.m_role = role;
-            notificationObj.m_module_ref_id = module_ref_id;
             //create else if block for your module and add Notification class for  your module to implement yous notification
             retValue = await notificationObj.sendEmailNotification(moduleID, notificationID, userIDs, facilityId, args);
             return retValue;

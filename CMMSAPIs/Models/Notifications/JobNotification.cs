@@ -140,6 +140,27 @@ namespace CMMSAPIs.Models.Notifications
                     retValue += String.Format(template, "Equipment Names", eqNames);
                 }
             }
+
+            if (m_jobObj.work_type_list.Count > 0)
+            {
+                int i = 0;
+                string displayList = "";
+                foreach (var item in m_jobObj.work_type_list)
+                {
+                    i++;
+                    displayList += item.workType;
+                    if (m_jobObj.work_type_list.Count > 1 && i < m_jobObj.work_type_list.Count)
+                    {
+                        displayList += ", ";
+                    }
+                }
+
+                if (i > 0)
+                {
+                    retValue += String.Format(template, "Fault", displayList);
+                }
+            }
+
             retValue += String.Format(template, "Breakdown time", m_jobObj.breakdown_time);
             retValue += String.Format(template, "Created by", m_jobObj.created_by_name);
             retValue += String.Format(template, "Created At", m_jobObj.created_at);
@@ -163,7 +184,10 @@ namespace CMMSAPIs.Models.Notifications
             {
                 retValue += String.Format(template, "PTW Id", "PTW" + m_jobObj.current_ptw_id);
                 retValue += String.Format(template, "PTW Title", m_jobObj.current_ptw_title);
-                retValue += String.Format(template, "TBT Conducted by", m_jobObj.TBT_conducted_by_name);
+                if (!m_jobObj.TBT_conducted_by_name.IsNullOrEmpty())
+                {
+                    retValue += String.Format(template, "TBT Conducted by", m_jobObj.TBT_conducted_by_name);
+                }
             }
             if(m_jobObj.latestJCid > 0)
             {
@@ -171,25 +195,6 @@ namespace CMMSAPIs.Models.Notifications
 
             }
 
-            if (m_jobObj.work_type_list.Count > 0)
-            {
-                int i = 0;
-                string displayList = "";
-                foreach (var item in m_jobObj.work_type_list)
-                {
-                    i++;
-                    displayList += item.workType;
-                    if (m_jobObj.work_type_list.Count > 1 && i < m_jobObj.work_type_list.Count)
-                    {
-                        displayList += ", ";
-                    }
-                }
-
-                if (i > 0)
-                {
-                    retValue += String.Format(template, "Work type", displayList);
-                }
-            }
             if (m_jobObj.tools_required_list.Count > 0)
             {
                 int i = 0;
