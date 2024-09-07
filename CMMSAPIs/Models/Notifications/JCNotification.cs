@@ -26,31 +26,31 @@ namespace CMMSAPIs.Models.Notifications
             {
                 case CMMS.CMMS_Status.JC_CREATED:
                     int jcId = m_JCObj.id;
-                    retValue += String.Format("{0} BM JC{1} for JOB{2} Created By <{3}>", m_JCObj.plant_name, m_JCObj.id, m_JCObj.jobid, m_JCObj.created_by);
+                    retValue += String.Format("{0} BM JC{1} for JOB{2} Created By {3}", m_JCObj.plant_name, m_JCObj.id, m_JCObj.jobid, m_JCObj.created_by);
                     break;
                 case CMMS.CMMS_Status.JC_STARTED:    //updated name 
-                    retValue += String.Format("{0} BM JC{1} of JOB{2} Started By <{3}> but not closed", m_JCObj.plant_name, m_JCObj.id, m_JCObj.jobid, m_JCObj.JC_Start_By_Name);
+                    retValue += String.Format("{0} BM JC{1} of JOB{2} Started By {3} but not closed", m_JCObj.plant_name, m_JCObj.id, m_JCObj.jobid, m_JCObj.JC_Start_By_Name);
                     break;
                 case CMMS.CMMS_Status.JC_CARRY_FORWARDED:
-                    retValue += String.Format("{0} BM JC{1} of JOB{2} Carry forwarded approval requested By <{3}>  and waiting for approval", m_JCObj.plant_name, m_JCObj.id, m_JCObj.jobid, m_JCObj.JC_Closed_By_Name);
+                    retValue += String.Format("{0} BM JC{1} of JOB{2} Carry forwarded approval requested By {3}  and waiting for approval", m_JCObj.plant_name, m_JCObj.id, m_JCObj.jobid, m_JCObj.JC_Closed_By_Name);
                     break;
                 case CMMS.CMMS_Status.JC_CF_APPROVED:  
-                    retValue += String.Format("{0} BM JC{1} of JOB{2} Carryforward request Approved By <{3}>", m_JCObj.plant_name, m_JCObj.id, m_JCObj.jobid, m_JCObj.JC_Approved_By_Name);
+                    retValue += String.Format("{0} BM JC{1} of JOB{2} Carryforward request Approved By {3}", m_JCObj.plant_name, m_JCObj.id, m_JCObj.jobid, m_JCObj.JC_Approved_By_Name);
                     break;
                 case CMMS.CMMS_Status.JC_CF_REJECTED:
-                    retValue += String.Format("{0} BM JC{1} of JOB{2} Carryforward request Rejected By <{3}>", m_JCObj.plant_name, m_JCObj.id, m_JCObj.jobid, m_JCObj.JC_Rejected_By_Name);
+                    retValue += String.Format("{0} BM JC{1} of JOB{2} Carryforward request Rejected By {3}", m_JCObj.plant_name, m_JCObj.id, m_JCObj.jobid, m_JCObj.JC_Rejected_By_Name);
                     break;
                 case CMMS.CMMS_Status.JC_CLOSED:
-                    retValue += String.Format("{0} BM JC{1} of JOB{2} Close approval requested By <{3}> and waiting for approval", m_JCObj.plant_name, m_JCObj.id, m_JCObj.jobid, m_JCObj.JC_Closed_By_Name);
+                    retValue += String.Format("{0} BM JC{1} of JOB{2} Close approval requested By {3} and waiting for approval", m_JCObj.plant_name, m_JCObj.id, m_JCObj.jobid, m_JCObj.JC_Closed_By_Name);
                     break;
                 case CMMS.CMMS_Status.JC_CLOSE_APPROVED:   
-                    retValue += String.Format("{0} BM JC{1} of JOB{2} Close request Approved By <{3}>", m_JCObj.plant_name, m_JCObj.id, m_JCObj.jobid, m_JCObj.JC_Approved_By_Name);
+                    retValue += String.Format("{0} BM JC{1} of JOB{2} Close request Approved By {3}", m_JCObj.plant_name, m_JCObj.id, m_JCObj.jobid, m_JCObj.JC_Approved_By_Name);
                     break;
                 case CMMS.CMMS_Status.JC_CLOSE_REJECTED:
-                    retValue += String.Format("{0} BM JC{1} of JOB{2} Close request rejected By <{3}> and waiting for resubmit", m_JCObj.plant_name, m_JCObj.id, m_JCObj.jobid, m_JCObj.JC_Rejected_By_Name);
+                    retValue += String.Format("{0} BM JC{1} of JOB{2} Close request rejected By {3} and waiting for resubmit", m_JCObj.plant_name, m_JCObj.id, m_JCObj.jobid, m_JCObj.JC_Rejected_By_Name);
                     break;
                 default:
-                    retValue += String.Format("{0} BM JC{1} of JOB{2} unknown status <{3}>", m_JCObj.plant_name, m_JCObj.id, m_JCObj.jobid, m_notificationID);
+                    retValue += String.Format("{0} BM JC{1} of JOB{2} unknown status {3}", m_JCObj.plant_name, m_JCObj.id, m_JCObj.jobid, m_notificationID);
                     break;
             }
 
@@ -69,31 +69,34 @@ namespace CMMSAPIs.Models.Notifications
             {
                 case CMMS.CMMS_Status.JC_CREATED:
                     int jcId = m_JCObj.id;
-                    retValue = String.Format("{0} BM JC{1} for JOB{2} Created By <{3}>", m_JCObj.plant_name, m_JCObj.id, m_JCObj.jobid, m_JCObj.created_by);
+                    retValue = String.Format("{0} BM JC{1} for JOB{2} Created By {3}", m_JCObj.plant_name, m_JCObj.id, m_JCObj.jobid, m_JCObj.created_by);
                     break;
                 case CMMS.CMMS_Status.JC_STARTED:    //updated name 
-                    retValue = String.Format("{0} BM JC{1} of JOB{2} Started By <{3}> ", m_JCObj.plant_name, m_JCObj.id, m_JCObj.jobid, m_JCObj.JC_Start_By_Name);
+                    retValue = String.Format("{0} BM JC{1} of JOB{2} Started By {3} ", m_JCObj.plant_name, m_JCObj.id, m_JCObj.jobid, m_JCObj.JC_Start_By_Name);
                     break;
                 case CMMS.CMMS_Status.JC_CARRY_FORWARDED:
-                    retValue = String.Format("{0} BM JC{1} of JOB{2} Carry forwarded By <{3}>", m_JCObj.plant_name, m_JCObj.id, m_JCObj.jobid, m_JCObj.JC_Closed_By_Name);
+                    retValue = String.Format("{0} BM JC{1} of JOB{2} Carry forwarded By {3}", m_JCObj.plant_name, m_JCObj.id, m_JCObj.jobid, m_JCObj.JC_Closed_By_Name);
                     break;
                 case CMMS.CMMS_Status.JC_CF_APPROVED:   //approved name   permit issuer = jc  approver
-                    retValue = String.Format("{0} BM JC{1} of JOB{2} Carryforward request Approved By <{3}>", m_JCObj.plant_name, m_JCObj.id, m_JCObj.jobid, m_JCObj.JC_Approved_By_Name);
+                    retValue = String.Format("{0} BM JC{1} of JOB{2} Carryforward request Approved By {3}", m_JCObj.plant_name, m_JCObj.id, m_JCObj.jobid, m_JCObj.JC_Approved_By_Name);
                     break;
                 case CMMS.CMMS_Status.JC_CF_REJECTED:
-                    retValue = String.Format("{0} BM JC{1} of JOB{2} Carryforward request Rejected By <{3}>", m_JCObj.plant_name, m_JCObj.id, m_JCObj.jobid, m_JCObj.JC_Rejected_By_Name);
+                    retValue = String.Format("{0} BM JC{1} of JOB{2} Carryforward request Rejected By {3}", m_JCObj.plant_name, m_JCObj.id, m_JCObj.jobid, m_JCObj.JC_Rejected_By_Name);
                     break;
                 case CMMS.CMMS_Status.JC_CLOSED:
-                    retValue = String.Format("{0} BM JC{1} of JOB{2} Close approval requested By <{3}>", m_JCObj.plant_name, m_JCObj.id, m_JCObj.jobid, m_JCObj.JC_Closed_By_Name);
+                    retValue = String.Format("{0} BM JC{1} of JOB{2} Close approval requested By {3}", m_JCObj.plant_name, m_JCObj.id, m_JCObj.jobid, m_JCObj.JC_Closed_By_Name);
                     break;
                 case CMMS.CMMS_Status.JC_CLOSE_APPROVED:   //approved name   permit issuer = jc  approver
-                    retValue = String.Format("{0} BM JC{1} of JOB{2} Close request Approved By <{3}>", m_JCObj.plant_name, m_JCObj.id, m_JCObj.jobid, m_JCObj.JC_Approved_By_Name);
+                    retValue = String.Format("{0} BM JC{1} of JOB{2} Close request Approved By {3}", m_JCObj.plant_name, m_JCObj.id, m_JCObj.jobid, m_JCObj.JC_Approved_By_Name);
                     break;
                 case CMMS.CMMS_Status.JC_CLOSE_REJECTED:
-                    retValue = String.Format("{0} BM JC{1} of JOB{2} Close request rejected By <{3}>", m_JCObj.plant_name, m_JCObj.id, m_JCObj.jobid, m_JCObj.JC_Rejected_By_Name);
+                    retValue = String.Format("{0} BM JC{1} of JOB{2} Close request rejected By {3}", m_JCObj.plant_name, m_JCObj.id, m_JCObj.jobid, m_JCObj.JC_Rejected_By_Name);
+                    break;
+                case CMMS.CMMS_Status.JC_UPDATED:
+                    retValue = String.Format("{0} BM JC{1} of JOB{2} updated By {3}", m_JCObj.plant_name, m_JCObj.id, m_JCObj.jobid, m_JCObj.JC_UpdatedByName);
                     break;
                 default:
-                    retValue = String.Format("{0} BM JC{1} of JOB{2} unknown status <{3}> rejected By <{3}>", m_JCObj.plant_name, m_JCObj.id, m_JCObj.jobid, m_notificationID);
+                    retValue = String.Format("{0} BM JC{1} of JOB{2} unknown status {3}", m_JCObj.plant_name, m_JCObj.id, m_JCObj.jobid, m_notificationID);
                     break;
             }
             return retValue;
