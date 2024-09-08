@@ -1,0 +1,169 @@
+﻿using System;
+using CMMSAPIs.BS.WC;
+using CMMSAPIs.Helper;
+using CMMSAPIs.Models.MC;
+
+namespace CMMSAPIs.Models.Notifications
+{
+    internal class MCScheduleNotification : CMMSNotification
+    {
+        int VegId;
+        //CMMCPlan planObj;
+        CMMCExecutionSchedule scheduleObj;
+
+        public MCScheduleNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMMCExecutionSchedule mcScheduleObj) : base(moduleID, notificationID)
+        {
+            scheduleObj = mcScheduleObj;
+
+        }
+
+    
+         
+        override protected string getEMSubject(params object[] args)
+        {
+
+            string retValue = "ESCALATION : ";
+
+            switch (m_notificationID)
+            {
+                case CMMS.CMMS_Status.MC_TASK_STARTED:
+                    retValue += String.Format("{0} SCH{1} Started by {2}", scheduleObj.facilityidName, scheduleObj.scheduleId, scheduleObj.startedbyName);
+                    break;
+                case CMMS.CMMS_Status.MC_TASK_COMPLETED:
+                    retValue += String.Format("{0} SCH{1} Closed by {2}", scheduleObj.facilityidName, scheduleObj.scheduleId, scheduleObj.endedbyName);
+                    break;
+                case CMMS.CMMS_Status.MC_TASK_ABANDONED:
+                    retValue += String.Format("{0} SCH{1} Abandoned by {2}", scheduleObj.facilityidName, scheduleObj.scheduleId, scheduleObj.abandonedbyName);
+                    break;
+                case CMMS.CMMS_Status.MC_TASK_SCHEDULE_APPROVED:
+                    retValue += String.Format("{0} SCH{1} Approved by {2}", scheduleObj.facilityidName, scheduleObj.scheduleId, scheduleObj.approvedBy);
+                    break;
+                case CMMS.CMMS_Status.MC_TASK_SCHEDULE_REJECT:
+                    retValue += String.Format("{0} SCH{1} Rejected by {2}", scheduleObj.facilityidName, scheduleObj.scheduleId, scheduleObj.rejectedBy);
+                    break;
+                case CMMS.CMMS_Status.SCHEDULED_LINKED_TO_PTW:
+                    retValue += String.Format("{0} PTW{1} Linked with SCH{2} of MCT{3}", scheduleObj.facilityidName, scheduleObj.permit_id, scheduleObj.scheduleId, scheduleObj.executionId);
+                    break;
+                default:
+                   
+                    break;
+            }
+            retValue += $" for {m_delayDays} days";
+            return retValue;
+
+        }
+    
+        override protected string getSubject(params object[] args)
+        {
+
+            string retValue = "";
+
+
+            switch (m_notificationID)
+            {
+             case CMMS.CMMS_Status.MC_TASK_STARTED:
+                    retValue += String.Format("{0} SCH{1} Started by {2}", scheduleObj.facilityidName, scheduleObj.scheduleId, scheduleObj.startedbyName);
+                    break;
+                case CMMS.CMMS_Status.MC_TASK_COMPLETED:
+                    retValue += String.Format("{0} SCH{1} Closed by {2}", scheduleObj.facilityidName, scheduleObj.scheduleId, scheduleObj.endedbyName);
+                    break;
+                case CMMS.CMMS_Status.MC_TASK_ABANDONED:
+                    retValue += String.Format("{0} SCH{1} Abandoned by {2}", scheduleObj.facilityidName, scheduleObj.scheduleId, scheduleObj.abandonedbyName);
+                    break;
+                case CMMS.CMMS_Status.MC_TASK_SCHEDULE_APPROVED:
+                    retValue += String.Format("{0} SCH{1} Approved by {2}", scheduleObj.facilityidName, scheduleObj.scheduleId, scheduleObj.approvedBy);
+                    break;
+                case CMMS.CMMS_Status.MC_TASK_SCHEDULE_REJECT:
+                    retValue += String.Format("{0} SCH{1} Rejected by {2}", scheduleObj.facilityidName, scheduleObj.scheduleId, scheduleObj.rejectedBy);
+                    break;
+                case CMMS.CMMS_Status.SCHEDULED_LINKED_TO_PTW:
+                    retValue += String.Format("{0} PTW{1} Linked with SCH{2} of MCT{3}", scheduleObj.facilityidName, scheduleObj.permit_id, scheduleObj.scheduleId, scheduleObj.executionId);
+                    break;
+                default:
+                    break;
+            }
+            return retValue;
+
+        }
+
+
+
+        override protected string getHTMLBody(params object[] args)
+        {
+            string retValue = "";
+            if (scheduleObj != null && scheduleObj.scheduleId != 0)
+            {
+                retValue = String.Format("<h3><b style='color:#31576D'>Status:</b>{0}</h3><br>", scheduleObj.status_long_schedule + " at " + scheduleObj.facilityidName);
+
+                retValue += String.Format("<table style='width: 50%; margin:0 auto; border-collapse: collapse ; border-spacing: 10px; ' border='1'>");
+                retValue += String.Format(template, "Schedule ID", "SCH" + scheduleObj.scheduleId );
+                retValue += String.Format(template, "Task ID", "MCT" + scheduleObj.executionId);
+                retValue += String.Format(template, "Status", scheduleObj.status_short);
+                // retValue += String.Format(template, "cleaned Status", scheduleObj.cleaned);
+                retValue += String.Format(template, "MC Schedule Title", scheduleObj.title);
+                retValue += String.Format(template, "Description", scheduleObj.description);
+                retValue += String.Format(template, "cleaningDay", scheduleObj.cleaningDay);
+                retValue += String.Format(template, "cleaningTypeName", scheduleObj.cleaningTypeName);
+                //retValue += String.Format(template, "waterUsed", scheduleObj.waterUsed);
+
+                if (scheduleObj.permit_id > 0)
+                {
+                    retValue += String.Format(template, "permit_code", scheduleObj.permit_code);
+                    retValue += String.Format(template, "PTW status", scheduleObj.ptw_status);
+                    retValue += String.Format(template, "PTW status", scheduleObj.status_short_ptw);
+                }
+                if (scheduleObj.startedById > 0)
+                {
+                    retValue += String.Format(template, "Started By", scheduleObj.startedbyName + " at " + scheduleObj.start_date);
+                }
+                if (scheduleObj.rejectedById > 0)
+                {
+                    retValue += String.Format(template, "MC Execution Rejected By", scheduleObj.rejectedBy + " at " + scheduleObj.rejectedAt);
+                }
+                if (scheduleObj.approvedById > 0)
+                {
+                    retValue += String.Format(template, "Approved By", scheduleObj.approvedBy + " at " + scheduleObj.approvedAt);
+                }
+                if (scheduleObj.endedById > 0)
+                {
+                    retValue += String.Format(template, "Started By", scheduleObj.endedbyName + " at " + scheduleObj.end_date);
+                }
+                if (scheduleObj.abandoned > 0)
+                {
+                    retValue += String.Format(template, "MC Execution Abandoned By", scheduleObj.abandonedbyName + " at " + scheduleObj.approvedAt);
+                }
+                switch (m_notificationID)
+                {
+                    case CMMS.CMMS_Status.SCHEDULED_LINKED_TO_PTW:
+                        retValue += String.Format(templateEnd, "Permit ID Linked to Schedule ID by ", scheduleObj.updatedbyName);
+                        break;
+                    /* 
+                     case CMMS.CMMS_Status.MC_TASK_SCHEDULED:
+                         retValue += "</table>"; break;
+
+
+                     case CMMS.CMMS_Status.MC_TASK_STARTED:
+                         retValue += String.Format(templateEnd, "MC Task Started By ", scheduleObj.startedbyName);
+                         break;
+
+
+                     case CMMS.CMMS_Status.MC_TASK_ABANDONED:
+                         retValue += String.Format(templateEnd, "MC Execution Abandoned By ", scheduleObj.abandonedbyName);
+                         break;
+                     case CMMS.CMMS_Status.MC_TASK_SCHEDULE_REJECT:
+                         retValue += String.Format(templateEnd, "MC Execution Rejected By ", scheduleObj.rejectedBy);
+                         break;
+                    */
+
+                    default:
+                        break;
+
+                }
+                retValue += "</table>";
+            }
+            return retValue;
+        }
+
+
+    }
+}

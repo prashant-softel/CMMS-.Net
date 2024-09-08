@@ -78,19 +78,19 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                     retValue = String.Format("Vegetation Plan <{0}> Draft by {1} ", planObj.planId, planObj.createdBy);
                     break;
                 case CMMS.CMMS_Status.VEG_PLAN_SUBMITTED:
-                    retValue = String.Format("VC{0} Created by {1} at {2} ", planObj.planId, planObj.createdBy, planObj.facilityidbyName);
+                    retValue = String.Format("VC{0} Created by {1} at {2} ", planObj.planId, planObj.createdBy, planObj.facilityidName);
                     break;
                 case CMMS.CMMS_Status.VEG_PLAN_REJECTED:
-                    retValue = String.Format("VC{0} Rejected by {1} at {2} ", planObj.planId, planObj.rejectedBy, planObj.facilityidbyName);
+                    retValue = String.Format("VC{0} Rejected by {1} at {2} ", planObj.planId, planObj.rejectedbyName, planObj.facilityidName);
                     break;
                 case CMMS.CMMS_Status.VEG_PLAN_APPROVED:
-                    retValue = String.Format("VC{0} Approved by {1} at {2} ", planObj.planId, planObj.approvedBy, planObj.facilityidbyName);
+                    retValue = String.Format("VC{0} Approved by {1} at {2} ", planObj.planId, planObj.approvedbyName, planObj.facilityidName);
                     break;
                 case CMMS.CMMS_Status.VEG_PLAN_UPDATED:
-                    retValue = String.Format("VC{0} Updated by {1} at {2} ", planObj.planId, planObj.updatedBy, planObj.facilityidbyName);
+                    retValue = String.Format("VC{0} Updated by {1} at {2} ", planObj.planId, planObj.updatedbyName, planObj.facilityidName);
                     break;
                 case CMMS.CMMS_Status.VEG_PLAN_DELETED:
-                    retValue = String.Format("VC{0} Deleted by {1} at {2} ", planObj.planId, planObj.deletedBy, planObj.facilityidbyName);
+                    retValue = String.Format("VC{0} Deleted by {1} at {2} ", planObj.planId, planObj.deletedBy, planObj.facilityidName);
                     break;
                 default:
                     break;
@@ -108,31 +108,31 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                     retValue = String.Format("Vegetation Task <{0}> Execution started by {1} ", executionObj.executionId, executionObj.startedBy);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_STARTED:
-                    retValue = String.Format("VE{0} Started by {1} at {2} ", executionObj.id, executionObj.startedBy, executionObj.facilityidbyName);
+                    retValue = String.Format("VE{0} Started by {1} at {2} ", executionObj.id, executionObj.startedBy, executionObj.facilityidName);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_COMPLETED:
-                    retValue = String.Format("VE{0} Closed by {1} at {2} ", executionObj.id, executionObj.endedBy, executionObj.facilityidbyName);
+                    retValue = String.Format("VE{0} Closed by {1} at {2} ", executionObj.id, executionObj.endedBy, executionObj.facilityidName);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_ABANDONED:
-                    retValue = String.Format("VE{0} Abandoned by {1} at {2} ", executionObj.id, executionObj.abandonedBy, executionObj.facilityidbyName);
+                    retValue = String.Format("VE{0} Abandoned by {1} at {2} ", executionObj.id, executionObj.abandonedBy, executionObj.facilityidName);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_REJECTED:
-                    retValue = String.Format("VE{0} Rejected by {1} at {2} ", executionObj.id, executionObj.rejectedBy, executionObj.facilityidbyName);
+                    retValue = String.Format("VE{0} Rejected by {1} at {2} ", executionObj.id, executionObj.rejectedbyName, executionObj.facilityidName);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_APPROVED:
-                    retValue = String.Format("VE{0} Approved by {1} at {2} ", executionObj.id, executionObj.approvedBy, executionObj.facilityidbyName);
+                    retValue = String.Format("VE{0} Approved by {1} at {2} ", executionObj.id, executionObj.approvedbyName, executionObj.facilityidName);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_END_APPROVED:
-                    retValue = String.Format("VE{0} End Approved by {1} at {2} ", executionObj.id, executionObj.endapprovedbyName, executionObj.facilityidbyName);
+                    retValue = String.Format("VE{0} End Approved by {1} at {2} ", executionObj.id, executionObj.endapprovedbyName, executionObj.facilityidName);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_ASSIGNED:
-                    retValue = String.Format("VE{0} Assigned to {1} at {2} ", executionObj.id, executionObj.assignedTo, executionObj.facilityidbyName);
+                    retValue = String.Format("VE{0} Assigned to {1} at {2} ", executionObj.id, executionObj.assignedTo, executionObj.facilityidName);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_ABANDONED_REJECTED:
-                    retValue = String.Format("VE{0} Abandoned Rejected by {1} at {2} ", executionObj.id, executionObj.abandonedBy, executionObj.facilityidbyName);
+                    retValue = String.Format("VE{0} Abandoned Rejected by {1} at {2} ", executionObj.id, executionObj.abandonedBy, executionObj.facilityidName);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_END_REJECTED:
-                    retValue = String.Format("VE{0} End Rejected by {1} at {2} ", executionObj.id, executionObj.endrejectedbyName, executionObj.facilityidbyName);
+                    retValue = String.Format("VE{0} End Rejected by {1} at {2} ", executionObj.id, executionObj.endrejectedbyName, executionObj.facilityidName);
                     break;
                 default:
                     break;
@@ -153,10 +153,10 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                     retValue = String.Format("PTW{0} Linked to SCH{1} of MCT{2} ", scheduleObj.permit_id, scheduleObj.scheduleId, scheduleObj.executionId);
                     break;
                 case CMMS.CMMS_Status.VEG_EXECUTION_STARTED:
-                    retValue = String.Format("VE{0} Started by {1} at {2} ", scheduleObj.id, scheduleObj.createdbyName, scheduleObj.facilityidbyName);
+                    retValue = String.Format("VE{0} Started by {1} at {2} ", scheduleObj.id, scheduleObj.startedbyName, scheduleObj.facilityidName);
                     break;
                 case CMMS.CMMS_Status.VEG_EXECUTION_APPROVED:
-                    retValue = String.Format("VE{0} Approved by {1} at {2} ", scheduleObj.id, scheduleObj.approvedBy, scheduleObj.facilityidbyName);
+                    retValue = String.Format("VE{0} Approved by {1} at {2} ", scheduleObj.id, scheduleObj.approvedBy, scheduleObj.facilityidName);
                     break;
                 case CMMS.CMMS_Status.VEG_EXECUTION_UPDATED:
                     retValue = String.Format("VE{0} Updated by {1} at {2} ", scheduleObj.id, scheduleObj.updatedbyName, scheduleObj.facilityidbyName);
@@ -526,14 +526,19 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             statusOut += $"ELSE 'Invalid Status' END";
 
             string planQuery = $"select plan.planId,plan.title,plan.startDate ,plan.frequencyId,plan.assignedTo as assignedToId ,plan.approvedById,plan.createdById,plan.facilityId,f.name as siteName, CONCAT(createdBy.firstName, createdBy.lastName) as createdBy , plan.createdAt,freq.name as frequency, " +
-                $" plan.durationDays as noOfCleaningDays, CONCAT(approvedBy.firstName, approvedBy.lastName) as approvedBy , " +
-                $" plan.approvedAt as approvedAt, CONCAT(assignedTo.firstName, ' ', assignedTo.lastName) as assignedTo,plan.status, " +
-                $" facility.name AS facilityidbyName," +
-                $" {statusOut} as status_short from cleaning_plan as plan  LEFT JOIN Frequency as freq on freq.id = plan.frequencyId " +
-                $"LEFT JOIN users as createdBy ON createdBy.id = plan.createdById " +
-                $"LEFT JOIN facilities as facility ON facility.id = plan.facilityId " +
-                $" LEFT JOIN users as approvedBy ON approvedBy.id = plan.approvedById LEFT JOIN facilities as f  on f.id=plan.facilityId    " +
-              $"LEFT JOIN users as assignedTo ON assignedTo.id = plan.assignedTo where plan.planId = {planId}  ;";
+                 $" plan.durationDays as noOfCleaningDays, facility.name, plan.approvedAt as approvedAt, CONCAT(updatedBy.firstName, updatedBy.lastName) as updatedbyName, CONCAT(assignedTo.firstName, ' ', assignedTo.lastName) as assignedTo,plan.status,{statusOut} as status_short," +
+                 $"CONCAT(approvedBy.firstName, approvedBy.lastName) as approvedbyName ," +
+                 $"CONCAT(approvedBy.firstName, approvedBy.lastName) as rejectedbyName ," +
+                 $"CONCAT(deletedBy.firstName, deletedBy.lastName) as deletedbyName , facility.name AS facilityidName, " +
+                 $" plan.cleaningType as cleaningType ,CASE plan.cleaningType WHEN 1 then 'Wet' When 2 then 'Dry' when 3 then 'Robotic' else 'Wet 'end as cleaningTypeName  from cleaning_plan as plan " +
+                 $" LEFT JOIN Frequency as freq on freq.id = plan.frequencyId " +
+                 $" LEFT JOIN users as createdBy ON createdBy.id = plan.createdById " +
+                 $" LEFT JOIN users as deletedBy ON deletedBy.id = plan.deleted_by_id " +
+                 $" LEFT JOIN users as approvedBy ON approvedBy.id = plan.approvedById " +
+                 $"LEFT JOIN facilities as f on f.id=plan.facilityId " +
+                 $"LEFT JOIN users AS updatedBy ON plan.updatedById = updatedBy.id  " +
+                 $"LEFT JOIN facilities as facility ON facility.id = plan.facilityId " +
+                 $"LEFT JOIN users as assignedTo ON assignedTo.id = plan.assignedTo where plan.planId = {planId}  ;";
 
             List<CMMCPlan> _ViewMCPlan = await Context.GetData<CMMCPlan>(planQuery).ConfigureAwait(false);
 
@@ -1275,12 +1280,12 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
             string myQuery1 = $"select mc.planId,mc.status, mc.frequencyId,mc.assignedTo as assignedToId,mc.startDate,mc.durationDays as noOfCleaningDays, " +
                 $"mc.facilityId,mc.title,CONCAT(createdBy.firstName, createdBy.lastName) as createdBy , " +
-                $"mc.createdAt,CONCAT(approvedBy.firstName, approvedBy.lastName) as approvedBy,mc.approvedAt,freq.name as" +
+                $"mc.createdAt,CONCAT(approvedbyName.firstName, approvedbyName.lastName) as approvedbyName,mc.approvedAt,freq.name as" +
                 $" frequency,CONCAT(assignedTo.firstName, ' ', assignedTo.lastName) as assignedTo,mc.durationDays,{statusOut} as status_short" +
                 $" from cleaning_plan as mc LEFT JOIN Frequency as freq on freq.id = mc.frequencyId " +
              $"LEFT JOIN users as assignedTo ON assignedTo.id = mc.assignedTo " +
             $"LEFT JOIN users as createdBy ON createdBy.id = mc.createdById " +
-            $"LEFT JOIN users as approvedBy ON approvedBy.id = mc.approvedById where moduleType={moduleType} ";
+            $"LEFT JOIN users as approvedbyName ON approvedbyName.id = mc.approvedById where moduleType={moduleType} ";
 
             if (facilityId > 0)
             {
@@ -1325,6 +1330,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                               $"LEFT JOIN users as createdBy ON createdBy.id = mc.assignedTo " +
                               $"LEFT JOIN users as approvedBy ON approvedBy.id = mc.approvedByID" +
                               $" where mc.moduleType=2  ";
+
 
             if (facilityId > 0)
             {
@@ -1410,47 +1416,47 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             }
             statusEquip += $"ELSE 'Invalid Status' END";
 
-            string executionQuery = $"select ex.id as executionId,ex.status ,ex.startDate,CONCAT(assignedTo.firstName, assignedTo.lastName) as assignedTo ,F.name as site_name , " +
-                            $"plan.title, CONCAT(createdBy.firstName, ' ' , createdBy.lastName) as plannedBy ,plan.createdAt as plannedAt,freq.name as frequency, CONCAT(startedBy.firstName, ' ' ,startedBy.lastName) as startedBy ," +
-                            $" ex.executionStartedAt as startedAt , CONCAT(rejectedById.firstName, ' ', rejectedById.lastName) as rejectedBy,ex.rejectedAt,CONCAT(approvedById.firstName, approvedById.lastName) as approvedBy,ex.approvedAt,  {statusEx} as status_short, " +
-                            $" CONCAT(ended.firstName, ' ', ended.lastName) as endedBy," +
-                            $" CONCAT(abandoned.firstName,' ', abandoned.lastName) as abandonedBy, " +
-                            $" CONCAT(updatedBy.firstName,' ', updatedBy.lastName) as updatedBy, " +
-                            $" CONCAT(rescheduled.firstName,' ', rescheduled.lastName) as rescheduledBy, " +
-                            $" CONCAT(endApproved.firstName,' ', endApproved.lastName) as endapprovedbyName," +
-                            $" CONCAT(endRejected.firstName,' ', endRejected.lastName) as endrejectedbyName," +
-                            $" facility.name AS facilityidbyName" +
-                            $" from cleaning_execution as ex JOIN cleaning_plan as plan on ex.planId = plan.planId " +
-                            $" LEFT JOIN Frequency as freq on freq.id = plan.frequencyId " +
-                            $" left join facilities as F on F.id = ex.facilityId  " +
-                            $" LEFT JOIN users as createdBy ON createdBy.id = plan.createdById " +
-                            $" LEFT JOIN users as rejectedById ON rejectedById.id = ex.rejectedById " +
-                            $" LEFT JOIN users as approvedById ON approvedById.id = ex.approvedById " +
-                            $" LEFT JOIN users as startedBy ON startedBy.id = ex.executedById " +
-                            $" LEFT JOIN users as ended ON ended.id = ex.endedById" +
-                            $" LEFT JOIN users as updatedBy ON updatedBy.id = ex.updatedById" +
-                            $" LEFT JOIN users as abandoned ON abandoned.id = ex.abandonedById" +
-                            $" LEFT JOIN users as rescheduled ON rescheduled.id = ex.rescheduled" +
-                            $" LEFT JOIN users as endApproved ON endApproved.id = ex.end_approved_id" +
-                            $" LEFT JOIN users as endRejected ON endRejected.id = ex.end_rejected_id" +
-                            $" LEFT JOIN facilities as facility ON facility.id = ex.facilityId" +
-                            $" LEFT JOIN users as assignedTo ON assignedTo.id = ex.assignedTo where ex.id={exectionId};";
+            string executionQuery = $"select ex.id as executionId,ex.status ,ex.startDate,ex.assignedTo as assignedToId, CONCAT(assignedToUser.firstName, assignedToUser.lastName) as assignedTo ,F.name as site_name , " +
+               $"plan.title, CONCAT(createdBy.firstName, ' ' , createdBy.lastName) as plannedBy ,plan.createdAt as plannedAt,freq.name as frequency, ex.executedById as startedById, CONCAT(startedByUser.firstName, ' ' ,startedByUser.lastName) as startedBy ," +
+               $" ex.executionStartedAt as startedAt , ex.rejectedById, CONCAT(endrejectedUser.firstName, ' ', endrejectedUser.lastName) as rejectedbyName,ex.rejectedAt,ex.approvedById, CONCAT(approvedByUser.firstName,' ', approvedByUser.lastName) as approvedbyName,ex.approvedAt,  {statusEx} as status_short, " +
+               $" CONCAT(endedByUser.firstName, ' ', endedByUser.lastName) as endedBy, ex.endedById as endedById, f.name as facilityidName, " +
+               $" CONCAT(abandonedUser.firstName,' ', abandonedUser.lastName) as abandonedBy,  ex.abandonedById, ex.end_approved_at, ex.end_rejected_at, " +
+               $" CONCAT(updatedByUser.firstName,' ', updatedByUser.lastName) as updatedBy, ex.updatedById as updatedById, " +
+               $" CONCAT(endapprovedUser.firstName,' ', endapprovedUser.lastName) as endapprovedbyName, ex.end_approved_id as endapprovedbyId, " +
+               $" CONCAT(endrejectedUser.firstName,' ', endrejectedUser.lastName) as endrejectedbyName, ex.end_rejected_id as endrejectedbyId, " +
+               $" CONCAT(abandonApprovedUser.firstName,' ', abandonApprovedUser.lastName) as abandonApprovedByName, ex.abandonApprovedBy as abandonApprovedById, " +
+               $" CONCAT(abandonRejectedUser.firstName,' ', abandonRejectedUser.lastName) as abandonRejectedByName, ex.abandonRejectedBy as abandonRejectedById " +
+               $" from cleaning_execution as ex JOIN cleaning_plan as plan on ex.planId = plan.planId " +
+               $" LEFT JOIN Frequency as freq on freq.id = plan.frequencyId " +
+               $" left join facilities as F on F.id = ex.facilityId  " +
+               $" LEFT JOIN users as createdBy ON createdBy.id = plan.createdById " +
+               $" LEFT JOIN users as rejectedByUser ON rejectedByUser.id = ex.rejectedById " +
+               $" LEFT JOIN users as approvedByUser ON approvedByUser.id = ex.approvedById " +
+               $" LEFT JOIN users as endapprovedUser ON endapprovedUser.id = ex.end_approved_id " +
+               $" LEFT JOIN users as endrejectedUser ON endrejectedUser.id = ex.end_rejected_id " +
+               $" LEFT JOIN users as startedByUser ON startedByUser.id = ex.executedById " +
+               $" LEFT JOIN users as endedByUser ON endedByUser.id = ex.endedById" +
+               $" LEFT JOIN users as updatedByUser ON updatedByUser.id = ex.updatedById" +
+               $" LEFT JOIN users as abandonedUser ON abandonedUser.id = ex.abandonedById" +
+               $" LEFT JOIN users as abandonApprovedUser ON abandonApprovedUser.id = ex.abandonApprovedBy " +
+               $" LEFT JOIN users as abandonRejectedUser ON abandonRejectedUser.id = ex.abandonRejectedBy " +
+               $" LEFT JOIN users as assignedToUser ON assignedToUser.id = ex.assignedTo where ex.id={exectionId};";
 
 
             List<CMMCExecution> _ViewExecution = await Context.GetData<CMMCExecution>(executionQuery).ConfigureAwait(false);
 
             string scheduleQuery = $"select schedule.scheduleId as scheduleId ,schedule.status ,schedule.executionId, schedule.actualDay as cleaningDay ,schedule.startedAt as start_date,schedule.endedAt as end_date  , " +
-                                   $" cp.cleaningType ,CASE cp.cleaningType WHEN 1 then 'Wet' When 2 then 'Dry' when 3 then 'Robotic'  else 'Wet '  end as cleaningTypeName, SUM({measure}) as scheduled , " +
-                                   $" permit.id as permit_id,permit.code as  permit_code , CONCAT(rejectedById.firstName, rejectedById.lastName) as rejectedById,schedule.rejectedAt,CONCAT(approvedById.firstName, approvedById.lastName) as approvedById,schedule.approvedAt, " +
-                                   $" Case when permit.TBT_Done_By is null or permit.TBT_Done_By = 0 then 0 else 1 end ptw_tbt_done,permit.status as ptw_status ," +
-                                   $" SUM(CASE WHEN item.status = {(int)CMMS.CMMS_Status.EQUIP_CLEANED} THEN {measure} ELSE 0 END) as cleaned , SUM(CASE WHEN item.status = {(int)CMMS.CMMS_Status.EQUIP_ABANDONED} THEN {measure} ELSE 0 END) as abandoned , " +
-                                   $" SUM(CASE WHEN item.status = {(int)CMMS.CMMS_Status.EQUIP_SCHEDULED} THEN {measure} ELSE 0 END) as pending ,schedule.remark_of_schedule as remark_of_schedule ,schedule.waterUsed, schedule.remark as remark ,{statusSc} as status_short from cleaning_execution_schedules as schedule " +
-                                   $" left join cleaning_execution_items as item on schedule.scheduleId = item.scheduleId " +
-                                   $" left join permits as permit on permit.id = schedule.ptw_id " +
-                                   $" LEFT JOIN users as rejectedById ON rejectedById.id = schedule.rejectedById " +
-                                   $" LEFT JOIN users as approvedById ON approvedById.id = schedule.approvedById " +
-                                   $" left join cleaning_plan as cp on schedule.planId= cp.planId " +
-                                   $" where schedule.executionId = {exectionId} group by schedule.scheduleId;";
+                                  $" cp.cleaningType ,CASE cp.cleaningType WHEN 1 then 'Wet' When 2 then 'Dry' when 3 then 'Robotic'  else 'Wet '  end as cleaningTypeName, SUM({measure}) as scheduled , " +
+                                  $" permit.id as permit_id,permit.code as  permit_code, schedule.rejectedById, CONCAT(rejectedByUser.firstName, rejectedByUser.lastName) as rejectedBy, schedule.rejectedAt,schedule.approvedById, CONCAT(approvedByUser.firstName, approvedByUser.lastName) as approvedBy, schedule.approvedAt, " +
+                                  $" Case when permit.TBT_Done_By is null or permit.TBT_Done_By = 0 then 0 else 1 end ptw_tbt_done,permit.status as ptw_status ," +
+                                  $" SUM(CASE WHEN item.status = {(int)CMMS.CMMS_Status.EQUIP_CLEANED} THEN {measure} ELSE 0 END) as cleaned , SUM(CASE WHEN item.status = {(int)CMMS.CMMS_Status.EQUIP_ABANDONED} THEN {measure} ELSE 0 END) as abandoned , " +
+                                  $" SUM(CASE WHEN item.status = {(int)CMMS.CMMS_Status.EQUIP_SCHEDULED} THEN {measure} ELSE 0 END) as pending ,schedule.remark_of_schedule as remark_of_schedule ,schedule.waterUsed, schedule.remark as remark ,{statusSc} as status_short from cleaning_execution_schedules as schedule " +
+                                  $" left join cleaning_execution_items as item on schedule.scheduleId = item.scheduleId " +
+                                  $" left join permits as permit on permit.id = schedule.ptw_id " +
+                                  $" LEFT JOIN users as rejectedByUser ON rejectedByUser.id = schedule.rejectedById " +
+                                  $" LEFT JOIN users as approvedByUser ON approvedByUser.id = schedule.approvedById " +
+                                  $" left join cleaning_plan as cp on schedule.planId= cp.planId " +
+                                  $" where schedule.executionId = {exectionId} group by schedule.scheduleId;";
 
             List<CMMCExecutionSchedule> _ViewSchedule = await Context.GetData<CMMCExecutionSchedule>(scheduleQuery).ConfigureAwait(false);
 
@@ -1510,26 +1516,27 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
 
             string scheduleQuery = $"select schedule.scheduleId as scheduleId ,schedule.status ,schedule.executionId, schedule.actualDay as cleaningDay ,schedule.startedAt as start_date,schedule.endedAt as end_date  , " +
-                                   $" cp.cleaningType ,CASE cp.cleaningType WHEN 1 then 'Wet' When 2 then 'Dry' when 3 then 'Robotic'  else 'Wet '  end as cleaningTypeName, SUM({measure}) as scheduled , " +
-                                   $" permit.id as permit_id,permit.code as  permit_code , CONCAT(rejectedById.firstName, rejectedById.lastName) as rejectedBy,schedule.rejectedAt, CONCAT(approvedById.firstName, approvedById.lastName) as approvedBy, CONCAT(createdBy.firstName, createdBy.lastName) as createdbyName,  CONCAT(startedBy.firstName, startedBy.lastName) as startedbyName ," +
-                                   $" schedule.approvedAt, title.title AS title, description.description AS description, CONCAT(endedBy.firstName, endedBy.lastName) as endedbyName, facility.name AS facilityidbyName, CONCAT(abandonedBy.firstName, abandonedBy.lastName) as abandonedbyName, CONCAT(updatedBy.firstName, updatedBy.lastName) as updatedbyName," +
-                                   $" Case when permit.TBT_Done_By is null or permit.TBT_Done_By = 0 then 0 else 1 end ptw_tbt_done,permit.status as ptw_status ," +
-                                   $" SUM(CASE WHEN item.status = {(int)CMMS.CMMS_Status.EQUIP_CLEANED} THEN {measure} ELSE 0 END) as cleaned , SUM(CASE WHEN item.status = {(int)CMMS.CMMS_Status.EQUIP_ABANDONED} THEN {measure} ELSE 0 END) as abandoned , " +
-                                   $" SUM(CASE WHEN item.status = {(int)CMMS.CMMS_Status.EQUIP_SCHEDULED} THEN {measure} ELSE 0 END) as pending ,schedule.remark_of_schedule as remark_of_schedule ,schedule.waterUsed, schedule.remark as remark ,{statusSc} as status_short from cleaning_execution_schedules as schedule " +
-                                   $" left join cleaning_execution_items as item on schedule.scheduleId = item.scheduleId " +
-                                   $" left join permits as permit on permit.id = schedule.ptw_id " +
-                                   $" LEFT JOIN users as rejectedById ON rejectedById.id = schedule.rejectedById " +
-                                   $" LEFT JOIN users as approvedById ON approvedById.id = schedule.approvedById " +
-                                   $" LEFT JOIN users as createdBy ON createdBy.id = schedule.createdbyId " +
-                                   $" LEFT JOIN users as startedBy ON startedBy.id = schedule.startedById " +
-                                   $" LEFT JOIN users as endedBy ON endedBy.id = schedule.endedById " +
-                                   $" LEFT JOIN users as abandonedBy ON abandonedBy.id = schedule.abandonedById " +
-                                   $" LEFT JOIN users as updatedBy ON updatedBy.id = schedule.updatedById " +
-                                   $" left join cleaning_plan as cp on schedule.planId= cp.planId " +
-                                   $" left join cleaning_plan as title on schedule.planId= title.planId " +
-                                   $" left join cleaning_plan as description on schedule.planId= description.planId " +
-                                   $" left join facilities as facility on schedule.facilityId= facility.id " +
-                                   $" where schedule.scheduleId = {scheduleId} group by schedule.scheduleId;";
+                                              $" cp.cleaningType ,CASE cp.cleaningType WHEN 1 then 'Wet' When 2 then 'Dry' when 3 then 'Robotic'  else 'Wet '  end as cleaningTypeName, SUM({measure}) as scheduled , " +
+                                              $" permit.id as permit_id,permit.code as  permit_code , schedule.rejectedById, CONCAT(rejectedByUser.firstName, ' ',rejectedByUser.lastName) as rejectedBy,schedule.rejectedAt, schedule.approvedById, CONCAT(approvedByUser.firstName, ' ',approvedByUser.lastName) as approvedBy, schedule.createdbyId, CONCAT(createdByUser.firstName, createdByUser.lastName) as createdbyName, schedule.startedById, CONCAT(startedByUser.firstName, ' ',startedByUser.lastName) as startedbyName ," +
+                                              $" schedule.approvedAt, title.title AS title, description.description AS description, schedule.endedById, CONCAT(endedByUser.firstName, ' ',endedByUser.lastName) as endedbyName, schedule.abandonedById, CONCAT(abandonedByUser.firstName, ' ',abandonedByUser.lastName) as abandonedbyName, schedule.updatedById, CONCAT(updatedByUser.firstName, ' ',updatedByUser.lastName) as updatedbyName," +
+                                              $" Case when permit.TBT_Done_By is null or permit.TBT_Done_By = 0 then 0 else 1 end ptw_tbt_done,permit.status as ptw_status , f.name AS facilityidName, " +
+                                              $" SUM(CASE WHEN item.status = {(int)CMMS.CMMS_Status.EQUIP_CLEANED} THEN {measure} ELSE 0 END) as cleaned , SUM(CASE WHEN item.status = {(int)CMMS.CMMS_Status.EQUIP_ABANDONED} THEN {measure} ELSE 0 END) as abandoned , " +
+                                              $" SUM(CASE WHEN item.status = {(int)CMMS.CMMS_Status.EQUIP_SCHEDULED} THEN {measure} ELSE 0 END) as pending ,schedule.remark_of_schedule as remark_of_schedule ,schedule.waterUsed, schedule.remark as remark ,{statusSc} as status_short from cleaning_execution_schedules as schedule " +
+                                              $" left join cleaning_execution_items as item on schedule.scheduleId = item.scheduleId " +
+                                              $" left join permits as permit on permit.id = schedule.ptw_id " +
+                                              $" LEFT JOIN users as rejectedByUser ON rejectedByUser.id = schedule.rejectedById " +
+                                              $" LEFT JOIN users as approvedByUser ON approvedByUser.id = schedule.approvedById " +
+                                              $" LEFT JOIN users as createdByUser ON createdByUser.id = schedule.createdbyId " +
+                                              $" LEFT JOIN users as startedByUser ON startedByUser.id = schedule.startedById " +
+                                              $" LEFT JOIN users as endedByUser ON endedByUser.id = schedule.endedById " +
+                                              $" LEFT JOIN users as abandonedByUser ON abandonedByUser.id = schedule.abandonedById " +
+                                              $" LEFT JOIN users as updatedByUser ON updatedByUser.id = schedule.updatedById " +
+                                              $" left join cleaning_plan as cp on schedule.planId= cp.planId " +
+                                              $" left join cleaning_plan as title on schedule.planId= title.planId " +
+                                              $" LEFT JOIN cleaning_execution t ON schedule.executionId = t.id  " +
+                                              $" LEFT JOIN  facilities f ON t.facilityId = f.id " +
+                                              $" left join cleaning_plan as description on schedule.planId= description.planId " +
+                                              $" where schedule.scheduleId = {scheduleId} group by schedule.scheduleId;";
 
             List<CMMCExecutionSchedule> _ViewSchedule = await Context.GetData<CMMCExecutionSchedule>(scheduleQuery).ConfigureAwait(false);
 

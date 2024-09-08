@@ -54,19 +54,18 @@ namespace CMMSAPIs.Models.MC
         public string createdBy { get; set; }
         public DateTime createdAt { get; set; }
         public int approvedById { get; set; }
-        public string approvedBy { get; set; }
+        public string approvedbyName { get; set; }
         public DateTime approvedAt { get; set; }
         public string deletedBy { get; set; }
         public int status { get; set; }
         public string status_short { get; set; }
         public string status_long { get; set; }
-        public string updatedBy { get; set; }
-        public string rejectedBy { get; set; }
-
+        public string updatedbyName { get; set; }
+        public string rejectedbyName { get; set; }
+        public string facilityidName { get; set; }
         public int resubmit { get; set; }
         public bool scheduleAdded = false;
-        public string facilityidbyName { get; set; }
-        public int facility_id { get; set; }
+        public string deletedbyName { get; set; }
 
         public List<CMMCSchedule> schedules { get; set; }
 
@@ -162,6 +161,10 @@ namespace CMMSAPIs.Models.MC
         public UInt64 id { get; set; }
         public int scheduleId { get; set; }
         public int executionId { get; set; }
+        public int facility_id { get; set; }
+        public string facilityidName { get; set; }
+        public string title { get; set; }
+        public string description { get; set; }
         public int cleaningDay { get; set; }  //First, second etc day
         public int cleaningType { get; set; }  //First, second etc day
         public string cleaningTypeName { get; set; }
@@ -180,21 +183,22 @@ namespace CMMSAPIs.Models.MC
         public string status_short_ptw { get; set; }
         public string remark { get; set; }
         public int status { get; set; }
-        public string rejectedBy { get; set; }
+        public int rejectedById { get; set; }
         public DateTime? rejectedAt { get; set; }
-        public string approvedBy { get; set; }
+        public string rejectedBy { get; set; }
+        public int approvedById { get; set; }
         public DateTime? approvedAt { get; set; }
+        public string approvedBy { get; set; }
         public string status_short { get; set; }
-        public string status_long_schedule { get; set; }
-        public int facility_id { get; set; }
-        public string executedBy { get; set; }
-        public string createdbyName { get; set; }
+        public int startedById { get; set; }
         public string startedbyName { get; set; }
+        public int endedById { get; set; }
         public string endedbyName { get; set; }
+        public string status_long_schedule { get; set; }
+        public int abandonedById { get; set; }
         public string abandonedbyName { get; set; }
         public string updatedbyName { get; set; }
-        public string title { get; set; }
-        public string description { get; set; }
+
         public string facilityidbyName { get; set; }
 
         public List<CMMCExecutionEquipment> equipments { get; set; }
@@ -244,31 +248,49 @@ namespace CMMSAPIs.Models.MC
         public string frequency { get; set; }
         //  public int cleaningType { get; set; }  //First, second etc day
         //  public string cleaningTypeName { get; set; }
+        public int assignedToId { get; set; }
         public string assignedTo { get; set; }
         public DateTime startDate { get; set; }
         public int noOfDays { get; set; }
+
+        public int plannedById { get; set; }
+        public int startedById { get; set; }
+        public int updatedById { get; set; }
+        public int endedById { get; set; }
+        public int abandonedById { get; set; }
+        public int approvedbyId { get; set; }
+        public int rejectedbyId { get; set; }
+        public int endapprovedbyId { get; set; }
+        public int endrejectedbyId { get; set; }
+        public int abandonApprovedById { get; set; }
+        public string abandonApprovedByName { get; set; }
+        public int abandonRejectedById { get; set; }
+        public string abandonRejectedByName { get; set; }
+
+        
         public string plannedBy { get; set; }
         public DateTime plannedAt { get; set; }
         public string startedBy { get; set; }
         public DateTime startedAt { get; set; }
         public string abandonedBy { get; set; }
         public DateTime abandonedAt { get; set; }
-        public string rejectedBy { get; set; }
+        public string rejectedbyName { get; set; }
         public DateTime? rejectedAt { get; set; }
-        public string approvedById { get; set; }
+        //public string approvedById { get; set; }
+        public string approvedbyName { get; set; }
         public DateTime? approvedAt { get; set; }
         public string updatedBy { get; set; }
         public string endedBy { get; set; }
         public int status { get; set; }     //Completed
         public string status_short { get; set; }
         public string status_long { get; set; }
-        public int facility_id { get; set; }
-        public string approvedBy { get; set; }
-        public string rescheduledBy { get; set; }
+        public DateTime? end_approved_at { get; set; }
+        public DateTime? end_rejected_at { get; set; }
         public string endapprovedbyName { get; set; }
         public string endrejectedbyName { get; set; }
-        public string facilityidbyName { get; set; }
 
+        public int facility_id { get; set; }
+        public string facilityidName { get; set; }
         // public string siteName { get; set; }
         //public List<CMMCEquipmentDetails> smbIds;
         public List<CMMCExecutionSchedule> schedules { get; set; }

@@ -267,6 +267,7 @@ namespace CMMSAPIs.Models.Notifications
                 }
                 List<string> EmailTo = new List<string>();
 
+                
                 if (getDB == null)
                 {
                     getDB = new MYSQLDBHelper(_conString);
@@ -288,17 +289,17 @@ namespace CMMSAPIs.Models.Notifications
                 }
 
                 EmailTo.Add("notifications@softeltech.in");
-                if (users.Count > 0)
-                {
-                    notificationRecordsQry = notificationRecordsQry.TrimEnd(',');
-                    //notificationRecordsQry = notificationRecordsQry.Substring(0, notificationRecordsQry.Length - 1);
-                    if (getDB == null)
-                    {
-                        getDB = new MYSQLDBHelper(_conString);
-                    }
-                    System.Data.DataTable dt2 = await getDB.FetchData(notificationRecordsQry).ConfigureAwait(false);
-                }
-
+                 if (users.Count > 0)
+                 {
+                     notificationRecordsQry = notificationRecordsQry.TrimEnd(',');
+                     //notificationRecordsQry = notificationRecordsQry.Substring(0, notificationRecordsQry.Length - 1);
+                     if (getDB == null)
+                     {
+                         getDB = new MYSQLDBHelper(_conString);
+                     }
+                     System.Data.DataTable dt2 = await getDB.FetchData(notificationRecordsQry).ConfigureAwait(false);
+                 }
+                 
 
                 if (print)
                 {
@@ -480,33 +481,31 @@ namespace CMMSAPIs.Models.Notifications
                 notificationObj = new GrievanceNotification(moduleID, notificationID, _Grievance);
                 facilityId = _Grievance.facilityId;
             }
+
+
+            else if (moduleID == CMMS.CMMS_Modules.MC_PLAN)
+            {
+                CMMCPlan _Plan = (CMMCPlan)args[0];
+                notificationObj = new MCNotification(moduleID, notificationID, _Plan);
+                facilityId = _Plan.facilityId;
+            }
             else if (moduleID == CMMS.CMMS_Modules.MC_TASK)
             {
                 CMMCExecution _Task = (CMMCExecution)args[0];
-
-                notificationObj = new MCNotification(moduleID, notificationID, _Task);
+                notificationObj = new MCNotificationTask(moduleID, notificationID, _Task);
                 facilityId = _Task.facility_id;
             }
-
             else if (moduleID == CMMS.CMMS_Modules.MC_EXECUTION)
             {
-                CMMCExecutionSchedule _Schedule = (CMMCExecutionSchedule)args[0];
-                notificationObj = new MCNotification(moduleID, notificationID, _Schedule);
-                facilityId = _Schedule.facility_id;
+                CMMCExecutionSchedule _TaskSchedule = (CMMCExecutionSchedule)args[0];
+                notificationObj = new MCScheduleNotification(moduleID, notificationID, _TaskSchedule);
+                facilityId = _TaskSchedule.facility_id;
             }
-            else if (moduleID == CMMS.CMMS_Modules.MC_PLAN)
-            {
-                CMMCPlan Plan = (CMMCPlan)args[0];
-                notificationObj = new MCNotification(moduleID, notificationID, Plan);
-                facilityId = Plan.facility_id;
-            }
-
-
             else if (moduleID == CMMS.CMMS_Modules.VEGETATION_PLAN)
             {
                 CMMCPlan _Plan = (CMMCPlan)args[0];
                 notificationObj = new VegetationNotification(moduleID, notificationID, _Plan);
-                facilityId = _Plan.facility_id;
+                facilityId = _Plan.facilityId;
             }
             else if (moduleID == CMMS.CMMS_Modules.VEGETATION_TASK)
             {
@@ -564,7 +563,7 @@ namespace CMMSAPIs.Models.Notifications
             }
             else
             {
-                throw new Exception("Notification code is not implemented for module <" + moduleID + ">");
+                throw new Exception("Notification code is  implemented for module <" + moduleID + ">");
             }
             notificationObj.m_notificationType = notificationType;
             notificationObj.m_delayDays = delayDays;
