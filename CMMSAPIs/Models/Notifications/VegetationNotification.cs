@@ -251,41 +251,81 @@ namespace CMMSAPIs.Models.Notifications
 
             if (planObj != null && planObj.planId != 0)
             {
-
+                // Display plan status
                 retValue = String.Format("<h3><b style='color:#31576D'>Status:</b>{0}</h3><br>", planObj.status_long);
 
-                retValue += String.Format("<table style='width: 50%; margin:0 auto; border-collapse: collapse ; border-spacing: 10px; ' border='1'>");
-                retValue += String.Format(template, "ID", planObj.planId);
+                // Table for plan details
+                retValue += String.Format("<table style='width: 50%; margin:0 auto; border-collapse: collapse; border-spacing: 10px;' border='1'>");
+                retValue += String.Format(template, "VC ID", planObj.planId);
                 retValue += String.Format(template, "Status", planObj.status_short);
                 retValue += String.Format(template, "Vegetation Plan Title", planObj.title);
                 retValue += String.Format(template, "Frequency", planObj.frequency);
                 retValue += String.Format(template, "Created By", planObj.createdBy);
 
-
+                // Switch case for different notification IDs
                 switch (m_notificationID)
                 {
                     case CMMS.CMMS_Status.VEG_PLAN_DRAFT:
-                        retValue += "</table>"; break;
                     case CMMS.CMMS_Status.VEG_PLAN_SUBMITTED:
-                        retValue += "</table>"; break;
+                        // Close the table when no additional rows are needed
+                        retValue += "</table><br>";
                         break;
+
                     case CMMS.CMMS_Status.VEG_PLAN_REJECTED:
                         retValue += String.Format(templateEnd, "Rejected By", planObj.rejectedbyName);
                         break;
+
                     case CMMS.CMMS_Status.VEG_PLAN_APPROVED:
                         retValue += String.Format(templateEnd, "Approved By", planObj.approvedbyName);
                         break;
+
                     case CMMS.CMMS_Status.VEG_PLAN_UPDATED:
                         retValue += String.Format(templateEnd, "Updated By", planObj.updatedbyName);
                         break;
+
                     case CMMS.CMMS_Status.VEG_PLAN_DELETED:
                         retValue += String.Format(templateEnd, "Deleted By", planObj.deletedBy);
                         break;
+
                     default:
-                        retValue += String.Format("MC Task <{0}> Undefined status {1} ", executionObj.id, m_notificationID);
+                        retValue += String.Format("MC Task <{0}> Undefined status {1}", executionObj.id, m_notificationID);
                         break;
                 }
+
+                // Display schedules if available
+                if (planObj.schedules.Count > 0)
+                {
+                    // Display the 'Selected Material' header centered
+                    retValue += "<div style='text-align: center; margin-top: 20px;'><h4>Schedules</h4></div>";
+
+                    // Table for schedules
+                    retValue += "<table style='width: 80%; margin:0 auto; border-collapse: collapse; border-spacing: 10px;' border='1'>";
+                    retValue += "<tr>";
+                    retValue += "<th>SR.No</th>";
+                    retValue += "<th>Cleaning Day</th>";
+                    retValue += "<th>No. Of SMBs</th>";
+                    retValue += "<th>No. Of Inverters</th>";
+                    retValue += "<th>Grass Cutting Area</th>";
+                    retValue += "</tr>";
+
+                    int i = 0;
+                    foreach (var item in planObj.schedules)
+                    {
+                        retValue += "<tr>";
+                        retValue += String.Format("<td>{0}</td>", ++i);
+                        retValue += String.Format("<td>{0}</td>", item.cleaningDay);
+                        retValue += String.Format("<td>{0}</td>", item.smbs);
+                        retValue += String.Format("<td>{0}</td>", item.Invs);
+                        retValue += String.Format("<td>{0}</td>", item.area);
+                        retValue += "</tr>";  // Ensure each row is properly closed
+                    }
+
+                    retValue += "</table><br><br>";
+                }
             }
+
+
+
             else if (executionObj != null && executionObj.executionId != 0)
             {
                 retValue = String.Format("<h3><b style='color:#31576D'>Status:</b>{0}</h3><br>", executionObj.status_long);
@@ -382,12 +422,6 @@ namespace CMMSAPIs.Models.Notifications
                     case CMMS.CMMS_Status.VEG_EXECUTION_COMPLETED:
                         retValue = String.Format(templateEnd, "Vegetation Execution Ended By ", scheduleObj.endedbyName);
                         break;
-
-                        
-
-
-
-
 
                     default:
                         break;
