@@ -104,19 +104,19 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                     retValue = String.Format("MC{0} Abandoned by {1} ", executionObj.executionId, executionObj.abandonedBy);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_ABANDONED_REJECTED:
-                    retValue = String.Format("MC{0} Abandoned by {1} ", executionObj.executionId, executionObj.abandonRejectedByName);
+                    retValue = String.Format("MC{0} Abandoned Rejected by {1} ", executionObj.executionId, executionObj.abandonRejectedByName);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_ABANDONED_APPROVED:
-                    retValue = String.Format("MC{0} Abandoned by {1} ", executionObj.executionId, executionObj.abandonApprovedByName);
+                    retValue = String.Format("MC{0} Abandoned Approved by {1} ", executionObj.executionId, executionObj.abandonApprovedByName);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_ENDED:
                     retValue = String.Format("MC{0} Closed by {1} ", executionObj.executionId, executionObj.endedBy);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_REJECTED:
-                    retValue = String.Format("MC{0} Rejected by {1} ", executionObj.executionId, executionObj.rejectedbyName);
+                    retValue = String.Format("MC{0} Task Rejected by {1} ", executionObj.executionId, executionObj.rejectedbyName);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_APPROVED:
-                    retValue = String.Format("MC{0} Approved by {1} ", executionObj.executionId, executionObj.approvedbyName);
+                    retValue = String.Format("MC{0} Task Approved by {1} ", executionObj.executionId, executionObj.approvedbyName);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_END_APPROVED:
                     retValue = String.Format("MC{0} End Approved by {1} ", executionObj.executionId, executionObj.endapprovedbyName);
@@ -124,11 +124,12 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 case CMMS.CMMS_Status.MC_TASK_END_REJECTED:
                     retValue = String.Format("MC{0} End Rejected by {1} ", executionObj.executionId, executionObj.endrejectedbyName);
                     break;
+                case CMMS.CMMS_Status.MC_TASK_ASSIGNED:
                 case CMMS.CMMS_Status.MC_ASSIGNED:
                     retValue = String.Format("MC{0} Assigned to {1} ", executionObj.executionId, executionObj.assignedTo);
                     break;
                 default:
-                    retValue = String.Format(" No status for MC {0} at {1) ", executionObj.executionId, executionObj.facilityidName);
+                    retValue = String.Format("Unsupported status {0} for MC{1} ", notificationID, executionObj.executionId);
                     break;
             }
 
@@ -967,7 +968,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 statusEquip += $"WHEN item.status = {status.Key} THEN '{status.Value}' ";
             }
             statusEquip += $"ELSE 'Invalid Status' END";
-            //Pending testing : PS Modified query
+
             string executionQuery = $"select ex.id as executionId,ex.status ,ex.startDate,ex.assignedTo as assignedToId, CONCAT(assignedToUser.firstName, assignedToUser.lastName) as assignedTo ,F.name as site_name , " +
                 $"plan.title, CONCAT(createdBy.firstName, ' ' , createdBy.lastName) as plannedBy ,plan.createdAt as plannedAt,freq.name as frequency, ex.executedById as startedById, CONCAT(startedByUser.firstName, ' ' ,startedByUser.lastName) as startedBy ," +
                 $" ex.executionStartedAt as startedAt , ex.rejectedById, CONCAT(endrejectedUser.firstName, ' ', endrejectedUser.lastName) as rejectedbyName,ex.rejectedAt,ex.approvedById, CONCAT(approvedByUser.firstName,' ', approvedByUser.lastName) as approvedbyName,ex.approvedAt,  {statusEx} as status_short, " +

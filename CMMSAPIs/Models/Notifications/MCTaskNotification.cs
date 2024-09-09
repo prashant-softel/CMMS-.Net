@@ -101,10 +101,10 @@ namespace CMMSAPIs.Models.Notifications
                     retValue += String.Format("{0} MC{1} Updated by {2}", taskObj.facilityidName, taskObj.executionId, taskObj.updatedBy);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_ABANDONED_REJECTED:
-                    retValue += String.Format("{0} MC{1} Abandoned Rejected by {2}", taskObj.facilityidName, taskObj.executionId, taskObj.abandonedBy);
+                    retValue += String.Format("{0} MC{1} Abandoned Rejected by {2}", taskObj.facilityidName, taskObj.executionId, taskObj.abandonRejectedByName);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_ABANDONED_APPROVED:
-                    retValue += String.Format("{0} MC{1} Abandoned Approved by {2}", taskObj.facilityidName, taskObj.executionId, taskObj.abandonedBy);
+                    retValue += String.Format("{0} MC{1} Abandoned Approved by {2}", taskObj.facilityidName, taskObj.executionId, taskObj.abandonApprovedByName);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_END_APPROVED:
                     retValue += String.Format("{0} MC{1} End Approved by {2}", taskObj.facilityidName, taskObj.executionId, taskObj.endapprovedbyName);

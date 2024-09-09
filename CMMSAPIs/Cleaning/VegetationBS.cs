@@ -265,7 +265,7 @@ namespace CMMSAPIs.Cleaning
             {
                 using (var repos = new VegetationRepository(getDB))
                 {
-                    return await repos.ApproveEndExecutionVegetation(request, userId, facilitytimeZone);
+                    return await repos.ApproveExecutionVegetation(request, userId, facilitytimeZone);
                 }
             }
             catch (Exception ex)

@@ -266,9 +266,7 @@ namespace CMMSAPIs.Models.Notifications
                                     $"SELECT LAST_INSERT_ID(); ";
                 }
                 List<string> EmailTo = new List<string>();
-
-                
-                if (getDB == null)
+           if (getDB == null)
                 {
                     getDB = new MYSQLDBHelper(_conString);
                 }
@@ -289,7 +287,7 @@ namespace CMMSAPIs.Models.Notifications
                 }
 
                 EmailTo.Add("notifications@softeltech.in");
-                 if (users.Count > 0)
+                if (users.Count > 0)
                  {
                      notificationRecordsQry = notificationRecordsQry.TrimEnd(',');
                      //notificationRecordsQry = notificationRecordsQry.Substring(0, notificationRecordsQry.Length - 1);
@@ -510,13 +508,13 @@ namespace CMMSAPIs.Models.Notifications
             else if (moduleID == CMMS.CMMS_Modules.VEGETATION_TASK)
             {
                 CMMCExecution _Task = (CMMCExecution)args[0];
-                notificationObj = new VegetationNotification(moduleID, notificationID, _Task);
+                notificationObj = new VEGNotificationTask(moduleID, notificationID, _Task);
                 facilityId = _Task.facility_id;
             }
             else if (moduleID == CMMS.CMMS_Modules.VEGETATION_EXECUTION)
             {
-                CMMCExecution _Schedule = (CMMCExecution)args[0];
-                notificationObj = new VegetationNotification(moduleID, notificationID, _Schedule);
+                CMMCExecutionSchedule _Schedule = (CMMCExecutionSchedule)args[0];
+                notificationObj = new VEGScheduleNotification(moduleID, notificationID, _Schedule);
                 facilityId = _Schedule.facility_id;
             }
             else if (moduleID == CMMS.CMMS_Modules.SM_MRS)     //MRS Report
