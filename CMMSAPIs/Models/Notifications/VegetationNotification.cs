@@ -41,19 +41,19 @@ namespace CMMSAPIs.Models.Notifications
                     retValue += String.Format("Vegetation Plan <{0}> Draft by {1} ", planObj.planId, planObj.createdBy);
                     break;
                 case CMMS.CMMS_Status.VEG_PLAN_SUBMITTED:
-                    retValue = String.Format("{0} Vegetation{1}-Created by {2}", planObj.facilityidName, planObj.planId, planObj.createdBy);
+                    retValue = String.Format("{0} VEG{1}-Created by {2}", planObj.facilityidName, planObj.planId, planObj.createdBy);
                     break;
                 case CMMS.CMMS_Status.VEG_PLAN_REJECTED:
-                    retValue += String.Format("{0} Vegetation{1} Rejected by {2}", planObj.facilityidName, planObj.planId, planObj.rejectedbyName);
+                    retValue += String.Format("{0} VEG{1} Rejected by {2}", planObj.facilityidName, planObj.planId, planObj.rejectedbyName);
                     break;
                 case CMMS.CMMS_Status.VEG_PLAN_APPROVED:
-                    retValue += String.Format("{0} Vegetation{1} Approved by {2}", planObj.facilityidName, planObj.planId, planObj.approvedbyName);
+                    retValue += String.Format("{0} VEG{1} Approved by {2}", planObj.facilityidName, planObj.planId, planObj.approvedbyName);
                     break;
                 case CMMS.CMMS_Status.VEG_PLAN_UPDATED:
-                    retValue += String.Format("{0} Vegetation{1} Updated by {2}", planObj.facilityidName, planObj.planId, planObj.updatedbyName);
+                    retValue += String.Format("{0} VEG{1} Updated by {2}", planObj.facilityidName, planObj.planId, planObj.updatedbyName);
                     break;
                 case CMMS.CMMS_Status.VEG_PLAN_DELETED:
-                    retValue += String.Format("{0} Vegetation{1} Deleted by {2}", planObj.facilityidName, planObj.planId, planObj.deletedBy);
+                    retValue += String.Format("{0} VEG{1} Deleted by {2}", planObj.facilityidName, planObj.planId, planObj.deletedBy);
                     break;
 
 
@@ -61,10 +61,10 @@ namespace CMMSAPIs.Models.Notifications
                     retValue += String.Format("Vegetation Task <{0}> Execution started by {1} ", executionObj.id, executionObj.startedBy);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_STARTED:
-                    retValue += String.Format("{0} Vegetation{1} Started by {2}", executionObj.facilityidName, executionObj.id, executionObj.startedBy);
+                    retValue += String.Format("{0} VEG{1} Started by {2}", executionObj.facilityidName, executionObj.id, executionObj.startedBy);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_COMPLETED:
-                    retValue += String.Format("{0} Vegetation{1} Closed by {2}", executionObj.facilityidName, executionObj.id, executionObj.endedBy);
+                    retValue += String.Format("{0} VEG{1} Closed by {2}", executionObj.facilityidName, executionObj.id, executionObj.endedBy);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_ENDED:
                     retValue += String.Format("Vegetation Task <{0}> Closed  by {1} ", executionObj.id, executionObj.endedBy);
@@ -73,54 +73,54 @@ namespace CMMSAPIs.Models.Notifications
                     retValue += String.Format("Vegetation Task <{0}>  Linked by {1} ", executionObj.id, executionObj.schedules);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_ABANDONED:
-                    retValue += String.Format("{0} Vegetation{1} Abandoned by {2}", executionObj.facilityidName, executionObj.id, executionObj.abandonedBy);
+                    retValue += String.Format("{0} VEG{1} Abandoned by {2}", executionObj.facilityidName, executionObj.id, executionObj.abandonedBy);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_ABANDONED_REJECTED:
-                    retValue += String.Format("{0} Vegetation{1} Abandoned Rejected by {2}", executionObj.facilityidName, executionObj.id, executionObj.rejectedbyName);
+                    retValue += String.Format("{0} VEG{1} Abandoned Rejected by {2}", executionObj.facilityidName, executionObj.id, executionObj.rejectedbyName);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_ABANDONED_APPROVED:
-                    retValue += String.Format("{0} Vegetation{1} Abandoned Approved by {2}", executionObj.facilityidName, executionObj.id, executionObj.abandonedBy);
+                    retValue += String.Format("{0} VEG{1} Abandoned Approved by {2}", executionObj.facilityidName, executionObj.id, executionObj.abandonedBy);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_APPROVED:
-                    retValue += String.Format("{0} Vegetation{1} Approved by {2}", executionObj.facilityidName, executionObj.id, executionObj.approvedbyName);
+                    retValue += String.Format("{0} VEG{1} Approved by {2}", executionObj.facilityidName, executionObj.id, executionObj.approvedbyName);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_REJECTED:
-                    retValue += String.Format("{0} Vegetation{1} Rejected by {2}", executionObj.facilityidName, executionObj.id, executionObj.rejectedbyName);
+                    retValue += String.Format("{0} VEG{1} Rejected by {2}", executionObj.facilityidName, executionObj.id, executionObj.rejectedbyName);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_END_APPROVED:
-                    retValue += String.Format("{0} Vegetation{1} End Approved by {2}", executionObj.facilityidName, executionObj.id, executionObj.endapprovedbyName);
+                    retValue += String.Format("{0} VEG{1} End Approved by {2}", executionObj.facilityidName, executionObj.id, executionObj.endapprovedbyName);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_ASSIGNED:
-                    retValue += String.Format("{0} Vegetation{1} Assigned to {2}", executionObj.facilityidName, executionObj.id, executionObj.assignedTo);
+                    retValue += String.Format("{0} VEG{1} Assigned to {2}", executionObj.facilityidName, executionObj.id, executionObj.assignedTo);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_END_REJECTED:
-                    retValue += String.Format("{0} Vegetation{1} End Rejected by {2}", executionObj.facilityidName, executionObj.id, executionObj.endrejectedbyName);
+                    retValue += String.Format("{0} VEG{1} End Rejected by {2}", executionObj.facilityidName, executionObj.id, executionObj.endrejectedbyName);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_UPDATED:
-                    retValue += String.Format("{0} Vegetation{1} Updated by {2}", executionObj.facilityidName, executionObj.id, executionObj.updatedBy);
+                    retValue += String.Format("{0} VEG{1} Updated by {2}", executionObj.facilityidName, executionObj.id, executionObj.updatedBy);
                     break;
 
 
                 case CMMS.CMMS_Status.VEG_EXECUTION_STARTED:
-                    retValue += String.Format("{0} Vegetation{1} Started by {2}", scheduleObj.facilityidName, scheduleObj.id, scheduleObj.startedbyName);
+                    retValue += String.Format("{0} VEG{1} Started by {2}", scheduleObj.facilityidName, scheduleObj.id, scheduleObj.startedbyName);
                     break;
                 case CMMS.CMMS_Status.VEG_EXECUTION_APPROVED:
-                    retValue += String.Format("{0} Vegetation{1} Approved by {2}", scheduleObj.facilityidName, scheduleObj.id, scheduleObj.approvedBy);
+                    retValue += String.Format("{0} VEG{1} Approved by {2}", scheduleObj.facilityidName, scheduleObj.id, scheduleObj.approvedBy);
                     break;
                 case CMMS.CMMS_Status.VEG_EXECUTION_UPDATED:
-                    retValue += String.Format("{0} Vegetation{1} Updated by {2}", scheduleObj.facilityidName, scheduleObj.id, scheduleObj.updatedbyName);
+                    retValue += String.Format("{0} VEG{1} Updated by {2}", scheduleObj.facilityidName, scheduleObj.id, scheduleObj.updatedbyName);
                     break;
                 case CMMS.CMMS_Status.VEG_EXECUTION_END_REJECTED:
-                    retValue += String.Format("{0} Vegetation{1} Closed Rejected by {2}", scheduleObj.facilityidName, scheduleObj.id, scheduleObj.endedbyName);
+                    retValue += String.Format("{0} VEG{1} Closed Rejected by {2}", scheduleObj.facilityidName, scheduleObj.id, scheduleObj.endedbyName);
                     break;
                 case CMMS.CMMS_Status.VEG_EXECUTION_ABANDONED:
-                    retValue += String.Format("{0} Vegetation{1} Abandoned by {2}", scheduleObj.facilityidName, scheduleObj.id, scheduleObj.abandonedbyName);
+                    retValue += String.Format("{0} VEG{1} Abandoned by {2}", scheduleObj.facilityidName, scheduleObj.id, scheduleObj.abandonedbyName);
                     break;
                 case CMMS.CMMS_Status.VEG_EXECUTION_COMPLETED:
-                    retValue += String.Format("{0} Vegetation{1} Closed by {2}", scheduleObj.facilityidName, scheduleObj.id, scheduleObj.endedbyName);
+                    retValue += String.Format("{0} VEG{1} Closed by {2}", scheduleObj.facilityidName, scheduleObj.id, scheduleObj.endedbyName);
                     break;
                 case CMMS.CMMS_Status.SCHEDULED_LINKED_TO_PTW:
-                    retValue += String.Format("{0} Vegetation{1} Permit Linked to {2}", scheduleObj.facilityidName, scheduleObj.id, scheduleObj.scheduleId);
+                    retValue += String.Format("{0} VEG{1} Permit Linked to {2}", scheduleObj.facilityidName, scheduleObj.id, scheduleObj.scheduleId);
                     break;
 
  
@@ -145,19 +145,19 @@ namespace CMMSAPIs.Models.Notifications
                     retValue = String.Format("Vegetation Plan <{0}> Draft by {1} ", planObj.planId, planObj.createdBy);
                     break;
                 case CMMS.CMMS_Status.VEG_PLAN_SUBMITTED:
-                    retValue = String.Format("{0} Vegetation{1} Created by {2}", planObj.facilityidName, planObj.planId, planObj.createdBy);
+                    retValue = String.Format("{0} VEG{1} Created by {2}", planObj.facilityidName, planObj.planId, planObj.createdBy);
                     break;
                 case CMMS.CMMS_Status.VEG_PLAN_REJECTED:
-                    retValue = String.Format("{0} Vegetation{1} Rejected by {2}", planObj.facilityidName, planObj.planId, planObj.rejectedbyName);
+                    retValue = String.Format("{0} VEG{1} Rejected by {2}", planObj.facilityidName, planObj.planId, planObj.rejectedbyName);
                     break;
                 case CMMS.CMMS_Status.VEG_PLAN_APPROVED:
-                    retValue += String.Format("{0} Vegetation{1} Approved by {2}", planObj.facilityidName, planObj.planId, planObj.approvedbyName);
+                    retValue += String.Format("{0} VEG{1} Approved by {2}", planObj.facilityidName, planObj.planId, planObj.approvedbyName);
                     break;
                 case CMMS.CMMS_Status.VEG_PLAN_UPDATED:
-                    retValue += String.Format("{0} Vegetation{1} Updated by {2}", planObj.facilityidName, planObj.planId, planObj.updatedbyName);
+                    retValue += String.Format("{0} VEG{1} Updated by {2}", planObj.facilityidName, planObj.planId, planObj.updatedbyName);
                     break;
                 case CMMS.CMMS_Status.VEG_PLAN_DELETED:
-                    retValue = String.Format("{0} Vegetation{1} Deleted by {2}", planObj.facilityidName, planObj.planId, planObj.deletedbyName);
+                    retValue = String.Format("{0} VEG{1} Deleted by {2}", planObj.facilityidName, planObj.planId, planObj.deletedbyName);
                     break;
 
 

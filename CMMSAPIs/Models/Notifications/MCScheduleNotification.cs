@@ -116,20 +116,21 @@ namespace CMMSAPIs.Models.Notifications
                 }
                 if (scheduleObj.rejectedById > 0)
                 {
-                    retValue += String.Format(template, "MC Execution Rejected By", scheduleObj.rejectedBy + " at " + scheduleObj.rejectedAt);
+                    retValue += String.Format(template, "Rejected By", scheduleObj.rejectedBy + " at " + scheduleObj.rejectedAt);
                 }
                 if (scheduleObj.approvedById > 0)
                 {
                     retValue += String.Format(template, "Approved By", scheduleObj.approvedBy + " at " + scheduleObj.approvedAt);
                 }
+                if (scheduleObj.abandonedById > 0)
+                {
+                    retValue += String.Format(template, "Abandoned By", scheduleObj.abandonedbyName + " at " + scheduleObj.abandonedAt);
+                }
                 if (scheduleObj.endedById > 0)
                 {
                     retValue += String.Format(template, "Ended By", scheduleObj.endedbyName + " at " + scheduleObj.end_date);
                 }
-                if (scheduleObj.abandoned > 0)
-                {
-                    retValue += String.Format(template, "MC Execution Abandoned By", scheduleObj.abandonedbyName + " at " + scheduleObj.approvedAt);
-                }
+              
                 if (scheduleObj.permit_id > 0)
                 {
                     retValue += String.Format(template, "permit_code", scheduleObj.permit_code);
@@ -141,7 +142,7 @@ namespace CMMSAPIs.Models.Notifications
                         retValue += String.Format(template, "Permit ID Linked by ", scheduleObj.updatedbyName);
                         break;
                     case CMMS.CMMS_Status.MC_TASK_UPDATED:
-                        retValue += String.Format(template, "Updated by", scheduleObj.updatedbyName);
+                        retValue += String.Format(template, "Updated by", scheduleObj.updatedbyName + " at " + scheduleObj.updatedAt);
                         break;
                     /* 
                      case CMMS.CMMS_Status.MC_TASK_SCHEDULED:

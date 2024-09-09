@@ -120,21 +120,22 @@ case CMMS.CMMS_Status.VEG_TASK_STARTED:
                 }
                 if (scheduleObj.rejectedById > 0)
                 {
-                    retValue += String.Format(template, "Execution Rejected By", scheduleObj.rejectedBy + " at " + scheduleObj.rejectedAt);
+                    retValue += String.Format(template, "Rejected By", scheduleObj.rejectedBy + " at " + scheduleObj.rejectedAt);
                 }
                 if (scheduleObj.approvedById > 0)
                 {
                     retValue += String.Format(template, "Approved By", scheduleObj.approvedBy + " at " + scheduleObj.approvedAt);
+                }
+                if (scheduleObj.abandonedById > 0)
+                {
+                    retValue += String.Format(template, "Abandoned By", scheduleObj.abandonedbyName + " at " + scheduleObj.abandonedAt);
                 }
 
                 if (scheduleObj.endedById > 0)
                 {
                     retValue += String.Format(template, "Ended By", scheduleObj.endedbyName + " at " + scheduleObj.end_date);
                 }
-                if (scheduleObj.abandoned > 0)
-                {
-                    retValue += String.Format(template, "Execution Abandoned By", scheduleObj.abandonedbyName + " at " + scheduleObj.approvedAt);
-                }
+
                 if (scheduleObj.permit_id > 0)
                 {
                     retValue += String.Format(template, "Permit Code", scheduleObj.permit_code);
@@ -146,7 +147,7 @@ case CMMS.CMMS_Status.VEG_TASK_STARTED:
                         retValue += String.Format(template, "Permit ID Linked by ", scheduleObj.updatedbyName);
                         break;
                     case CMMS.CMMS_Status.VEG_TASK_UPDATED:
-                        retValue += String.Format(template, "Updated by", scheduleObj.updatedbyName);
+                        retValue += String.Format(template, "Updated by", scheduleObj.updatedbyName + " at " + scheduleObj.updatedAt);
                         break;
 
                     /* 

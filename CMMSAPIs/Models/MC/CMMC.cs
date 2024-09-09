@@ -197,8 +197,9 @@ namespace CMMSAPIs.Models.MC
         public string status_long_schedule { get; set; }
         public int abandonedById { get; set; }
         public string abandonedbyName { get; set; }
+        public  DateTime? abandonedAt {get; set;}
         public string updatedbyName { get; set; }
-
+        public DateTime? updatedAt { get; set; }
         public string facilityidbyName { get; set; }
 
         public List<CMMCExecutionEquipment> equipments { get; set; }
@@ -267,7 +268,7 @@ namespace CMMSAPIs.Models.MC
         public int abandonRejectedById { get; set; }
         public string abandonRejectedByName { get; set; }
 
-
+        
         public string plannedBy { get; set; }
         public DateTime plannedAt { get; set; }
         public string startedBy { get; set; }
