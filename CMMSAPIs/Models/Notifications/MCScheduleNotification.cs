@@ -105,7 +105,10 @@ namespace CMMSAPIs.Models.Notifications
                 retValue += String.Format(template, "Status", scheduleObj.status_short);
                 // retValue += String.Format(template, "cleaned Status", scheduleObj.cleaned);
                 retValue += String.Format(template, "MC Schedule Title", scheduleObj.title);
-                retValue += String.Format(template, "Description", scheduleObj.description);
+                if (!string.IsNullOrEmpty(scheduleObj.description))
+                {
+                    retValue += String.Format(template, "Description", scheduleObj.description);
+                }
                 retValue += String.Format(template, "Cleaning Day", scheduleObj.cleaningDay);
                 retValue += String.Format(template, "Cleaning Type Name", scheduleObj.cleaningTypeName);
                 //retValue += String.Format(template, "waterUsed", scheduleObj.waterUsed);

@@ -27,40 +27,40 @@ namespace CMMSAPIs.Models.Notifications
             switch (m_notificationID)
             {
                 case CMMS.CMMS_Status.VEG_TASK_STARTED:
-                    retValue += String.Format("{0} VEG{1} Started by {2}", taskObj.facilityidName, taskObj.executionId, taskObj.startedBy);
+                    retValue += String.Format("{0} VE{1} Started by {2}", taskObj.facilityidName, taskObj.executionId, taskObj.startedBy);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_ENDED:
-                    retValue += String.Format("{0} VEG{1} Closed by {2}", taskObj.facilityidName, taskObj.executionId, taskObj.endedBy);
+                    retValue += String.Format("{0} VE{1} Closed by {2}", taskObj.facilityidName, taskObj.executionId, taskObj.endedBy);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_COMPLETED:
-                    retValue += String.Format("{0} VEG{1} Closed by {2}", taskObj.facilityidName, taskObj.executionId, taskObj.endedBy);
+                    retValue += String.Format("{0} VE{1} Closed by {2}", taskObj.facilityidName, taskObj.executionId, taskObj.endedBy);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_ABANDONED:
-                    retValue += String.Format("{0} VEG{1} Abandoned by {2}", taskObj.facilityidName, taskObj.executionId, taskObj.abandonedBy);
+                    retValue += String.Format("{0} VE{1} Abandoned by {2}", taskObj.facilityidName, taskObj.executionId, taskObj.abandonedBy);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_APPROVED:
-                    retValue += String.Format("{0} VEG{1} Approved by {2}", taskObj.facilityidName, taskObj.executionId, taskObj.approvedbyName);
+                    retValue += String.Format("{0} VE{1} Approved by {2}", taskObj.facilityidName, taskObj.executionId, taskObj.approvedbyName);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_REJECTED:
-                    retValue += String.Format("{0} VEG{1} Rejected by {2}", taskObj.facilityidName, taskObj.executionId, taskObj.rejectedbyName);
+                    retValue += String.Format("{0} VE{1} Rejected by {2}", taskObj.facilityidName, taskObj.executionId, taskObj.rejectedbyName);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_UPDATED:
-                    retValue += String.Format("{0} VEG{1} Updated by {2}", taskObj.facilityidName, taskObj.executionId, taskObj.updatedBy);
+                    retValue += String.Format("{0} VE{1} Updated by {2}", taskObj.facilityidName, taskObj.executionId, taskObj.updatedBy);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_ABANDONED_REJECTED:
-                    retValue += String.Format("{0} VEG{1} Abandoned Rejected by {2}", taskObj.facilityidName, taskObj.executionId, taskObj.abandonRejectedByName);
+                    retValue += String.Format("{0} VE{1} Abandoned Rejected by {2}", taskObj.facilityidName, taskObj.executionId, taskObj.abandonRejectedByName);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_ABANDONED_APPROVED:
-                    retValue += String.Format("{0} VEG{1} Abandoned Approved by {2}", taskObj.facilityidName, taskObj.executionId, taskObj.abandonApprovedByName);
+                    retValue += String.Format("{0} VE{1} Abandoned Approved by {2}", taskObj.facilityidName, taskObj.executionId, taskObj.abandonApprovedByName);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_END_APPROVED:
-                    retValue += String.Format("{0} VEG{1} End Approved by {2}", taskObj.facilityidName, taskObj.executionId, taskObj.endapprovedbyName);
+                    retValue += String.Format("{0} VE{1} End Approved by {2}", taskObj.facilityidName, taskObj.executionId, taskObj.endapprovedbyName);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_END_REJECTED:
-                    retValue += String.Format("{0} VEG{1} End Rejected by {2}", taskObj.facilityidName, taskObj.executionId, taskObj.endrejectedbyName);
+                    retValue += String.Format("{0} VE{1} End Rejected by {2}", taskObj.facilityidName, taskObj.executionId, taskObj.endrejectedbyName);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_ASSIGNED:
-                    retValue = String.Format("{0} VEG{1} Re Assigned by {2} to {3}", taskObj.facilityidName, taskObj.executionId, taskObj.updatedBy, taskObj.assignedTo);
+                    retValue = String.Format("{0} VE{1} Re Assigned by {2} to {3}", taskObj.facilityidName, taskObj.executionId, taskObj.updatedBy, taskObj.assignedTo);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_REASSIGNED:
                     retValue = String.Format("{0} VEG(1} Re Assigned by {2} to {3}", taskObj.facilityidName, taskObj.executionId, taskObj.updatedBy, taskObj.assignedTo);
@@ -78,40 +78,40 @@ namespace CMMSAPIs.Models.Notifications
             switch (m_notificationID)
             {
                 case CMMS.CMMS_Status.VEG_TASK_STARTED:
-                    retValue += String.Format("{0} VEG{1} Started by {2}", taskObj.facilityidName, taskObj.executionId, taskObj.startedBy);
+                    retValue += String.Format("{0} VE{1} Started by {2}", taskObj.facilityidName, taskObj.executionId, taskObj.startedBy);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_ENDED:
-                    retValue += String.Format("{0} VEG{1} Closed by {2}", taskObj.facilityidName, taskObj.executionId, taskObj.endedBy);
+                    retValue += String.Format("{0} VE{1} Closed by {2}", taskObj.facilityidName, taskObj.executionId, taskObj.endedBy);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_COMPLETED:
-                    retValue += String.Format("{0} VEG{1} Closed by {2}", taskObj.facilityidName, taskObj.executionId, taskObj.endedBy);
+                    retValue += String.Format("{0} VE{1} Closed by {2}", taskObj.facilityidName, taskObj.executionId, taskObj.endedBy);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_ABANDONED:
-                    retValue += String.Format("{0} VEG{1} Abandoned by {2}", taskObj.facilityidName, taskObj.executionId, taskObj.abandonedBy);
+                    retValue += String.Format("{0} VE{1} Abandoned by {2}", taskObj.facilityidName, taskObj.executionId, taskObj.abandonedBy);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_APPROVED:
-                    retValue += String.Format("{0} VEG{1} Approved by {2}", taskObj.facilityidName, taskObj.executionId, taskObj.approvedbyName);
+                    retValue += String.Format("{0} VE{1} Approved by {2}", taskObj.facilityidName, taskObj.executionId, taskObj.approvedbyName);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_REJECTED:
-                    retValue += String.Format("{0} VEG{1} Rejected by {2}", taskObj.facilityidName, taskObj.executionId, taskObj.rejectedbyName);
+                    retValue += String.Format("{0} VE{1} Rejected by {2}", taskObj.facilityidName, taskObj.executionId, taskObj.rejectedbyName);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_UPDATED:
-                    retValue += String.Format("{0} VEG{1} Updated by {2}", taskObj.facilityidName, taskObj.executionId, taskObj.updatedBy);
+                    retValue += String.Format("{0} VE{1} Updated by {2}", taskObj.facilityidName, taskObj.executionId, taskObj.updatedBy);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_ABANDONED_REJECTED:
-                    retValue += String.Format("{0} VEG{1} Abandoned Rejected by {2}", taskObj.facilityidName, taskObj.executionId, taskObj.abandonRejectedByName);
+                    retValue += String.Format("{0} VE{1} Abandoned Rejected by {2}", taskObj.facilityidName, taskObj.executionId, taskObj.abandonRejectedByName);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_ABANDONED_APPROVED:
-                    retValue += String.Format("{0} VEG{1} Abandoned Approved by {2}", taskObj.facilityidName, taskObj.executionId, taskObj.abandonApprovedByName);
+                    retValue += String.Format("{0} VE{1} Abandoned Approved by {2}", taskObj.facilityidName, taskObj.executionId, taskObj.abandonApprovedByName);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_END_APPROVED:
-                    retValue += String.Format("{0} VEG{1} End Approved by {2}", taskObj.facilityidName, taskObj.executionId, taskObj.endapprovedbyName);
+                    retValue += String.Format("{0} VE{1} End Approved by {2}", taskObj.facilityidName, taskObj.executionId, taskObj.endapprovedbyName);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_END_REJECTED:
-                    retValue += String.Format("{0} VEG{1} End Rejected by {2}", taskObj.facilityidName, taskObj.executionId, taskObj.endrejectedbyName);
+                    retValue += String.Format("{0} VE{1} End Rejected by {2}", taskObj.facilityidName, taskObj.executionId, taskObj.endrejectedbyName);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_ASSIGNED:
-                    retValue = String.Format("{0} VEG{1} Re Assigned by {2} to {3}", taskObj.facilityidName, taskObj.executionId, taskObj.updatedBy, taskObj.assignedTo);
+                    retValue = String.Format("{0} VE{1} Re Assigned by {2} to {3}", taskObj.facilityidName, taskObj.executionId, taskObj.updatedBy, taskObj.assignedTo);
                     break;
                 default:
                     break;
