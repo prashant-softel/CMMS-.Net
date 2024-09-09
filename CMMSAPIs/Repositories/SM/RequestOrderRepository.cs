@@ -437,12 +437,12 @@ namespace CMMSAPIs.Repositories.SM
                 IDs = "0";
             }
 
-            string query = "SELECT fc.name as facilityName, pod.ID as requestDetailsID, facilityid as facility_id, pod.spare_status, po.remarks, sai.orderflag, " +
+            string query = " SELECT fc.name as facilityName, pod.ID as requestDetailsID, facilityid as facility_id, pod.spare_status, po.remarks, sai.orderflag, " +
                            "sam.asset_type_ID, pod.requestID, pod.assetItemID, sai.serial_number, sai.location_ID, pod.cost, pod.ordered_qty, " +
                            "po.request_date, sam.asset_type_ID, sam.asset_name, po.receiverID, po.status, sam.asset_code, t1.asset_type, t2.cat_name, " +
                            "pod.received_qty, pod.damaged_qty, pod.accepted_qty, f1.file_path, f1.Asset_master_id, sm.decimal_status, sm.spare_multi_selection, " +
                            "po.generated_by, pod.order_type as asset_type_ID_OrderDetails, receive_later, added_to_store, reject_reccomendations as rejectedRemark, " +
-                           "po.amount, po.currency as currencyID, curr.name as currency, CONCAT(ed.firstName,' ',ed.lastName) as generatedBy, " +
+                           "po.amount, pod.currencyId as currencyId, curr.name as currency, CONCAT(ed.firstName,' ',ed.lastName) as generatedBy, " +
                            "po.received_on as generatedAt, approvedOn as approvedAt, CONCAT(ed1.firstName,' ',ed1.lastName) as receivedBy, " +
                            "pod.remarks as itemcomment, CONCAT(ed2.firstName,' ',ed2.lastName) as approvedBy, " +
                            "CONCAT(ed3.firstName,' ',ed3.lastName) as rejectedBy, " +

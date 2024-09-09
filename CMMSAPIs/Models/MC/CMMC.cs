@@ -267,7 +267,7 @@ namespace CMMSAPIs.Models.MC
         public int abandonRejectedById { get; set; }
         public string abandonRejectedByName { get; set; }
 
-        
+
         public string plannedBy { get; set; }
         public DateTime plannedAt { get; set; }
         public string startedBy { get; set; }

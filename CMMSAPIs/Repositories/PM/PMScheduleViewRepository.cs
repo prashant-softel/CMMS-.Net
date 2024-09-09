@@ -316,7 +316,6 @@ namespace CMMSAPIs.Repositories.PM
             CMDefaultResponse response = new CMDefaultResponse(request.id, retCode, "PM Task cancelled successfully");
             return response;
         }
-
         internal async Task<CMPMTaskView> GetPMTaskDetail(int task_id, string facilitytimeZone)
         {
             /*
@@ -397,6 +396,16 @@ namespace CMMSAPIs.Repositories.PM
                     "left join smassetitems sai on sai.assetMasterID =  sam.id " +
                     $"WHERE  smm.whereUsedRefID={task_id};";
             List<Materialconsumption> Material = await Context.GetData<Materialconsumption>(Materialconsumption).ConfigureAwait(false);
+            if (Material != null && Material.Count > 0 && Material[0].Material_ID > 0)
+            {
+                taskViewDetail[0].Material_consumption = Material;
+            }
+            else
+            {
+                taskViewDetail[0].Material_consumption = new List<Materialconsumption>();
+            }
+
+
             if (taskViewDetail.Count == 0)
                 throw new MissingMemberException("PM Task not found");
 
@@ -437,8 +446,6 @@ namespace CMMSAPIs.Repositories.PM
                         scheduleCheckPoint.files = fileList;
                     }
                 }
-
-
                 string jobStatusQry = "CASE ";
                 for (CMMS.CMMS_Status jobStatus = CMMS.CMMS_Status.JOB_CREATED; jobStatus <= CMMS.CMMS_Status.JOB_UPDATED; jobStatus++)
                     jobStatusQry += $"WHEN jobs.status={(int)jobStatus} THEN '{JobRepository.getShortStatus(CMMS.CMMS_Modules.JOB, jobStatus)}' ";
@@ -453,7 +460,6 @@ namespace CMMSAPIs.Repositories.PM
                                         $"LEFT JOIN jobassociatedworktypes  jas on jas.jobId = jobs.id " +
                                         $"LEFT JOIN worktypemasterassets as a ON a.workTypeId = jas.workTypeId " +
                                         $"WHERE pm_execution.PM_Schedule_Id  = {schedule.schedule_id};";
-
                     List<ScheduleLinkJob> linked_jobs = await Context.GetData<ScheduleLinkJob>(myQuery4).ConfigureAwait(false);
                     List<CMLog> log = await _utilsRepo.GetHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, schedule.schedule_id, "");
                     if (linked_jobs != null && linked_jobs.Count > 0 && linked_jobs[0].job_id > 0)
@@ -464,15 +470,10 @@ namespace CMMSAPIs.Repositories.PM
                     {
                         schedule.schedule_link_job = new List<ScheduleLinkJob>();
                     }
-
-
                 }
-
-
                 schedule.checklist_observation = scheduleCheckList;
             }
             taskViewDetail[0].schedules = checklist_collection;
-            taskViewDetail[0].Material_consumption = Material;
 
             if (taskViewDetail[0].status == (int)CMMS.CMMS_Status.PM_LINKED_TO_PTW)
             {
