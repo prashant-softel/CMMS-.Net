@@ -1871,8 +1871,13 @@ namespace CMMSAPIs.Repositories.Permits
             }
             if (request.resubmit == true)
             {
-                System.Text.StringBuilder sb = new System.Text.StringBuilder(request.description);
-                sb.Append(" " + request.comment);
+                string stemp = request.comment;
+                if(stemp.Length <= 0)
+                {
+                    stemp = "Permit Resubmitted for Approval";
+                }
+                System.Text.StringBuilder sb = new System.Text.StringBuilder(stemp);
+                //sb.Append(" " + request.comment);
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.permit_id, 0, 0, sb.ToString(), CMMS.CMMS_Status.PTW_RESUBMIT, userID);
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_RESUBMIT, new[] { userID }, permitDetails);
                 response = new CMDefaultResponse(request.permit_id, CMMS.RETRUNSTATUS.SUCCESS, $"Permit Resubmitted for Approval");
