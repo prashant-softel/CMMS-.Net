@@ -224,7 +224,7 @@ namespace CMMSAPIs.Models.Notifications
                         retValue += String.Format(templateEnd, "Deleted By", planObj.deletedbyName);
                         break;
                     default:
-                        retValue += String.Format("MC Task <{0}> Undefined status {1}", executionObj.id, m_notificationID);
+                        retValue += String.Format("VC Task <{0}> Undefined status {1}", executionObj.id, m_notificationID);
                         break;
                 }
 

@@ -26,7 +26,7 @@ namespace CMMSAPIs.Models.Notifications
 
             switch (m_notificationID)
             {
-                case CMMS.CMMS_Status.VEG_TASK_STARTED:
+case CMMS.CMMS_Status.VEG_TASK_STARTED:
                     retValue += String.Format("{0} SCH{1} Started by {2}", scheduleObj.facilityidName, scheduleObj.scheduleId, scheduleObj.startedbyName);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_COMPLETED:
@@ -105,10 +105,10 @@ namespace CMMSAPIs.Models.Notifications
 
                 retValue += String.Format("<table style='width: 50%; margin:0 auto; border-collapse: collapse ; border-spacing: 10px; ' border='1'>");
                 retValue += String.Format(template, "Schedule ID", "SCH" + scheduleObj.scheduleId );
-                retValue += String.Format(template, "Task ID", "MCT" + scheduleObj.executionId);
+                retValue += String.Format(template, "Task ID", "VE" + scheduleObj.executionId);
                 retValue += String.Format(template, "Status", scheduleObj.status_short);
                 // retValue += String.Format(template, "cleaned Status", scheduleObj.cleaned);
-                retValue += String.Format(template, "MC Schedule Title", scheduleObj.title);
+                retValue += String.Format(template, "Title", scheduleObj.title);
                 retValue += String.Format(template, "Description", scheduleObj.description);
                 retValue += String.Format(template, "Cleaning Day", scheduleObj.cleaningDay);
                 retValue += String.Format(template, "Cleaning Type Name", scheduleObj.cleaningTypeName);
@@ -120,7 +120,7 @@ namespace CMMSAPIs.Models.Notifications
                 }
                 if (scheduleObj.rejectedById > 0)
                 {
-                    retValue += String.Format(template, "MC Execution Rejected By", scheduleObj.rejectedBy + " at " + scheduleObj.rejectedAt);
+                    retValue += String.Format(template, "Execution Rejected By", scheduleObj.rejectedBy + " at " + scheduleObj.rejectedAt);
                 }
                 if (scheduleObj.approvedById > 0)
                 {
@@ -133,7 +133,7 @@ namespace CMMSAPIs.Models.Notifications
                 }
                 if (scheduleObj.abandoned > 0)
                 {
-                    retValue += String.Format(template, "MC Execution Abandoned By", scheduleObj.abandonedbyName + " at " + scheduleObj.approvedAt);
+                    retValue += String.Format(template, "Execution Abandoned By", scheduleObj.abandonedbyName + " at " + scheduleObj.approvedAt);
                 }
                 if (scheduleObj.permit_id > 0)
                 {

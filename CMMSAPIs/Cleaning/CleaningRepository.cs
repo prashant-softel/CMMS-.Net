@@ -124,7 +124,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 case CMMS.CMMS_Status.MC_TASK_END_REJECTED:
                     retValue = String.Format("MC{0} End Rejected by {1} ", executionObj.executionId, executionObj.endrejectedbyName);
                     break;
-                case CMMS.CMMS_Status.MC_TASK_ASSIGNED:
+                case CMMS.CMMS_Status.MC_TASK_REASSIGNED:
                 case CMMS.CMMS_Status.MC_ASSIGNED:
                     retValue = String.Format("MC{0} Assigned to {1} ", executionObj.executionId, executionObj.assignedTo);
                     break;
