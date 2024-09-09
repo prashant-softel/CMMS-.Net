@@ -28,7 +28,7 @@ namespace CMMSAPIs.Models.JC
         public dynamic JC_Closed_At { get; set; }
         public string JC_Closed_By_Name { get; set; }
         public string JC_Approved_By_Name { get; set; }
-        public string JC_Approve_Reason { get; set; }        
+        public string JC_Approve_Reason { get; set; }
         public string JC_Rejected_By_Name { get; set; }
         public string JC_Rejected_Reason { get; set; }
         public int JC_Update_by { get; set; }
@@ -130,7 +130,7 @@ public class CMJCPermitDetail
     public DateTime TBT_done_time { get; set; }
     public DateTime Start_time { get; set; }
     public int Status_PTW { get; set; }
-
+    public dynamic tbt_start { get; set; }
     public int TBT_Done_Check { get; set; }
 
 }

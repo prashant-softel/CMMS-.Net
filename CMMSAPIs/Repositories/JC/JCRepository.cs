@@ -352,7 +352,7 @@ namespace CMMSAPIs.Repositories.JC
             List<CMJCAssetName> asset_category_name = await Context.GetData<CMJCAssetName>(myquery12).ConfigureAwait(false);
 
             //permit details
-            string myQuery3 = $"SELECT ptw.id as permit_id,ptw.status as status, ptw.permitNumber as site_permit_no, " +
+            string myQuery3 = $"SELECT ptw.id as permit_id,ptw.status as status, ptw.permitNumber as site_permit_no,CASE when ptw.startDate <  now() then 1 else 0 END as tbt_start, " +
                 "passt.name as Isolated_equipments, CONCAT(tbtDone.firstName, ' ', tbtDone.lastName) as TBT_conducted_by_name," +
                 "ptw.TBT_Done_At as TBT_done_time,ptw.startDate Start_time, " +
                 $"permitType.title as permit_type, ptw.description as permit_description,CONCAT(isotak.firstName,isotak.lastName) as Isolation_taken, " +

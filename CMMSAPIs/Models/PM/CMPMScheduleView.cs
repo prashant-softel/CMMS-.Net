@@ -143,7 +143,7 @@ namespace CMMSAPIs.Models.PM
         public string facilityidbyName { get; set; }
         public string categoryName { get; set; }
         public string title { get; set; }
-
+        public dynamic tbt_start { get; set; }
     }
     public class CMPMScheduleViewDetail : CMPMScheduleView
     {
