@@ -140,7 +140,7 @@ namespace CMMSAPIs.Models.Notifications
                 // Table for task details
                 retValue += "<div style='width: 100%;'>";
                 retValue += String.Format("<table style='width: 50%; margin:0 auto; border-collapse: collapse; border-spacing: 10px;' border='1'>");
-                retValue += String.Format(template, "Execution ID", "VE" + taskObj.executionId);
+                retValue += String.Format(template, "Task ID", "VE" + taskObj.executionId);
                 retValue += String.Format(template, "Status", taskObj.status_short);
                 retValue += String.Format(template, "Title", taskObj.title);
                 retValue += String.Format(template, "Frequency", taskObj.frequency);
