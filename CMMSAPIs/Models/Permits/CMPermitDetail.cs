@@ -7,6 +7,7 @@ namespace CMMSAPIs.Models.Permits
     public class CMPermitDetail
     {
         public Int64 isExpired { get; set; }
+        public dynamic tbt_start { get; set; }
         public int isExtended { get; set; }
         public int insertedId { get; set; }
         public int permitNo { get; set; }
@@ -19,6 +20,7 @@ namespace CMMSAPIs.Models.Permits
         public int blockId { get; set; }
         public string siteName { get; set; }
         public string BlockName { get; set; }
+        public DateTime? startDate { get; set; }
         public DateTime? start_datetime { get; set; }
         public DateTime? end_datetime { get; set; }
         //Loto?

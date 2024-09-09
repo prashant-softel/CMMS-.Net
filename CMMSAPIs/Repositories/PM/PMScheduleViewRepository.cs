@@ -1159,7 +1159,7 @@ namespace CMMSAPIs.Repositories.PM
             string statusQry = $"SELECT status FROM pm_task WHERE id = {request.task_id};";
             DataTable dt1 = await Context.FetchData(statusQry).ConfigureAwait(false);
             CMMS.CMMS_Status status = (CMMS.CMMS_Status)Convert.ToInt32(dt1.Rows[0][0]);
-            if (status != CMMS.CMMS_Status.PM_START && status != CMMS.CMMS_Status.PM_REJECTED)
+            if (status != CMMS.CMMS_Status.PM_START && status != CMMS.CMMS_Status.PM_CLOSE_REJECTED)
             {
                 responseList.Add(new CMDefaultResponse(request.task_id, CMMS.RETRUNSTATUS.FAILURE,
                     "Task Execution must be rejected or in progress to modify execution details"));

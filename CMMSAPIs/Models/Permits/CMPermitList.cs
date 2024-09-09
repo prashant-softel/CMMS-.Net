@@ -1,3 +1,5 @@
+using System;
+
 namespace CMMSAPIs.Models.Permits
 {
     public class CMPermitList
@@ -28,6 +30,8 @@ namespace CMMSAPIs.Models.Permits
         public string current_status_long { get; set; }
         public int TBT_Done_By_id { get; set; }
         public int TBT_Done_Check { get; set; }
+        public dynamic tbt_start { get; set; }
+        public DateTime? startDate { get; set; }
     }
     public class CMSafetyMeasurementQuestionList
     {
