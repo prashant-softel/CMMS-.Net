@@ -74,14 +74,14 @@ namespace CMMSAPIs.Repositories.SM
             {
                 if (request.request_order_items[i].itemID > 0)
                 {
-                    string updateQ = $"UPDATE smrequestorderdetails SET assetItemID = {request.request_order_items[i].assetMasterItemID} , cost = {request.request_order_items[i].cost} , ordered_qty = {request.request_order_items[i].ordered_qty}, remarks = '{request.request_order_items[i].comment}'" +
+                    string updateQ = $"UPDATE smrequestorderdetails SET assetItemID = {request.request_order_items[i].assetMasterItemID} , cost = {request.request_order_items[i].cost} , ordered_qty = {request.request_order_items[i].ordered_qty}, remarks = '{request.request_order_items[i].comment}', currencyId={request.request_order_items[i].currencyId} " +
                         $" WHERE ID = {request.request_order_items[i].itemID}";
                     var result = await Context.ExecuteNonQry<int>(updateQ);
                 }
                 else
                 {
-                    string poDetailsQuery = $"INSERT INTO smrequestorderdetails (requestID,assetItemID,cost,ordered_qty,remarks) " +
-                       "values(" + request.request_order_id + ", " + request.request_order_items[i].assetMasterItemID + ",  " + request.request_order_items[i].cost + ", " + request.request_order_items[i].ordered_qty + ", '" + request.request_order_items[i].comment + "') ; SELECT LAST_INSERT_ID();";
+                    string poDetailsQuery = $"INSERT INTO smrequestorderdetails (requestID,assetItemID,cost,ordered_qty,remarks,currencyId) " +
+                       "values(" + request.request_order_id + ", " + request.request_order_items[i].assetMasterItemID + ",  " + request.request_order_items[i].cost + ", " + request.request_order_items[i].ordered_qty + ", '" + request.request_order_items[i].comment + "'," + request.request_order_items[i].currencyId + " ) ; SELECT LAST_INSERT_ID();";
                     DataTable dtInsertPO = await Context.FetchData(poDetailsQuery).ConfigureAwait(false);
                     int id = Convert.ToInt32(dtInsertPO.Rows[0][0]);
                 }
@@ -275,7 +275,7 @@ namespace CMMSAPIs.Repositories.SM
         //}
 
 
-        internal async Task<CMDefaultResponse> ApproveRequestOrder(CMApproval request, int userId,string facilityTimeZone)
+        internal async Task<CMDefaultResponse> ApproveRequestOrder(CMApproval request, int userId, string facilityTimeZone)
         {
 
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;

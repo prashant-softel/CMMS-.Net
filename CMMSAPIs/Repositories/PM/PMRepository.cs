@@ -146,6 +146,7 @@ namespace CMMSAPIs.Repositories.PM
         internal async Task<CMDefaultResponse> UpdatePMPlan(CMPMPlanDetail request, int userID, string facilityTimeZone)
         {
             string date = Convert.ToString(request.plan_date.ToString("yyyy-MM-dd"));
+
             string myQuery = "UPDATE pm_plan SET ";
             if (request.plan_name != null && request.plan_name != "")
                 myQuery += $"plan_name = '{request.plan_name}', ";
@@ -162,7 +163,7 @@ namespace CMMSAPIs.Repositories.PM
             if (request.assigned_to_id > 0)
                 myQuery += $"assigned_to = {request.assigned_to_id}, ";
 
-            myQuery += $"updated_at = '{UtilsRepository.GetUTCTime()}', updated_by = {userID} WHERE id = {request.plan_id} and facility_id = {request.facility_id};";
+            myQuery += $"updated_at = '{UtilsRepository.GetUTCTime()}',status={(int)CMMS.CMMS_Status.PM_PLAN_CREATED}, updated_by = {userID} WHERE id = {request.plan_id} and facility_id = {request.facility_id};";
 
             string myQuery2 = $"Delete from pmplanassetchecklist where planId = {request.plan_id};";
             await Context.ExecuteNonQry<int>(myQuery2).ConfigureAwait(false);
@@ -176,20 +177,16 @@ namespace CMMSAPIs.Repositories.PM
                 mapChecklistQry = mapChecklistQry.Substring(0, mapChecklistQry.Length - 2) + ";";
                 await Context.ExecuteNonQry<int>(mapChecklistQry).ConfigureAwait(false);
             }
-
             await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
-
             String car = request.comment;
             System.Text.StringBuilder sb = new System.Text.StringBuilder("PM Plan Updated");
             sb.Append(": " + request.comment);
-
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_PLAN, request.plan_id, 0, 0, sb.ToString(), CMMS.CMMS_Status.PM_PLAN_UPDATED);
             try
             {
                 CMPMPlanDetail _ViewPMPlan = await GetPMPlanDetail(request.plan_id, facilityTimeZone);
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PM_PLAN, CMMS.CMMS_Status.PM_PLAN_UPDATED, new[] { userID }, _ViewPMPlan);
             }
-
             catch (Exception e)
             {
                 Console.WriteLine($"Failed to send PM Notification: {e.Message}");
@@ -197,7 +194,6 @@ namespace CMMSAPIs.Repositories.PM
             CMDefaultResponse response = new CMDefaultResponse(request.plan_id, CMMS.RETRUNSTATUS.SUCCESS, $"Plan Updated Successfully ");
             return response;
         }
-
         internal async Task<List<CMPMPlanList>> GetPMPlanList(int facility_id, string category_id, string frequency_id, DateTime? start_date, DateTime? end_date, string facilitytimeZone)
         {
             if (facility_id <= 0)

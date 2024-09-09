@@ -288,7 +288,8 @@ namespace CMMSAPIs.Helper
             MARK_ATTENDENCE,
             EXECUTE_SCHEDULE,
             STATUTORY,
-            OBSERVATION
+            OBSERVATION,
+            OBSERVATION_ASSIGNED
         }
 
         public enum INCIDENT_RISK_LEVEL
@@ -297,7 +298,12 @@ namespace CMMSAPIs.Helper
             MEDIUM = 2,
             LOW = 3
         }
+        public enum OBSERVATION_TYPE
+        {
+            OBSERVATION = 0,
+            PM_EXECUTION = 1,
 
+        }
         public static Dictionary<string, int> INCIDENT_RISK_TYPE = new Dictionary<string, int>() { { "First-Aids Injury", 1 }, { "Electric Short", 2 } };
 
         public static Dictionary<string, int> INCIDENT_SEVERITY = new Dictionary<string, int>()
@@ -348,6 +354,7 @@ namespace CMMSAPIs.Helper
             CANCELLED,
             ASSIGNED,
             ISSUED,
+            CLOSED,
             APPROVED,
             REJECTED,
 
@@ -611,6 +618,7 @@ namespace CMMSAPIs.Helper
             STATUTORY_REJECTED,
             STATUTORY_RENEWD,
             OBSERVATION_CREATED = 551,
+            OBSERVATION_ASSIGNED,
             OBSERVATION_CLOSED,
             OBSERVATION_DELETED,
             OBSERVATION_UPDATED,

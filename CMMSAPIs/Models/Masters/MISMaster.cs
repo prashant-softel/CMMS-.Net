@@ -859,5 +859,15 @@ namespace CMMSAPIs.Models.Masters
         public dynamic ClosedOnTimeCreate { get; set; }
 
     }
+    public class AssignToObservation
+    {
+        public int id { get; set; }
+        public int user_id { get; set; }
+        public int type_of_observation { get; set; }
+        public DateTime target_date { get; set; }
+        public string comment { get; set; }
+
+
+    }
 }
 

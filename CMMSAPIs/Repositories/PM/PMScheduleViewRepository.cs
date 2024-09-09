@@ -298,23 +298,6 @@ namespace CMMSAPIs.Repositories.PM
                 retVal = await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
             }
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
-            string mainQuery = $"INSERT INTO pm_task(plan_id,facility_id,category_id,frequency_id,plan_Date,assigned_to,status,prev_task_id,prev_task_done_date)  " +
-                             $"select plan_id as plan_id,facility_id,category_id,frequency_id,CASE when  pm_task.frequency_id in( 4,5,6)  then\r\nDATE_ADD(plan_date, INTERVAL freq.months MONTH) \r\n  WHEN pm_task.frequency_id = 7 THEN \r\n DATE_ADD(plan_date, INTERVAL 1 YEAR)\r\nelse DATE_ADD(plan_date, INTERVAL freq.days DAY) end as plan_date,assigned_to,{(int)CMMS.CMMS_Status.PM_SCHEDULED} as status,{request.id} as prev_task_id, '{UtilsRepository.GetUTCTime()}' as prev_task_done_date from pm_task " +
-                             $"left join frequency as freq on pm_task.frequency_id = freq.id where pm_task.id = {request.id}; " +
-                             $"SELECT LAST_INSERT_ID(); ";
-            DataTable dt3 = await Context.FetchData(mainQuery).ConfigureAwait(false);
-            int id = Convert.ToInt32(dt3.Rows[0][0]);
-
-            string scheduleQry = $"INSERT INTO pm_schedule(task_id,plan_id,Asset_id,checklist_id,PM_Schedule_date,status) " +
-                                $"select {id} as task_id, plan_id, Asset_id, checklist_id, PM_Schedule_date,{(int)CMMS.CMMS_Status.PM_SCHEDULED} as status from pm_schedule where task_id = {request.id}";
-            await Context.ExecuteNonQry<int>(scheduleQry);
-
-            string setCodeNameQuery = "UPDATE pm_schedule " +
-                                        "SET PM_Schedule_Code = CONCAT(id,Facility_Code,Asset_Category_Code,Asset_Code,PM_Frequecy_Code), " +
-                                        "PM_Schedule_Name = CONCAT(id,' ',Facility_Name,' ',Asset_Category_name,' ',Asset_Name), " +
-                                        "PM_Schedule_Number = CONCAT('SCH',id), " +
-                                        "PM_Maintenance_Order_Number = CONCAT('PMSCH',id);";
-            await Context.ExecuteNonQry<int>(setCodeNameQuery);
             if (retVal > 0)
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
 
@@ -455,30 +438,33 @@ namespace CMMSAPIs.Repositories.PM
                     }
                 }
 
+
                 string jobStatusQry = "CASE ";
                 for (CMMS.CMMS_Status jobStatus = CMMS.CMMS_Status.JOB_CREATED; jobStatus <= CMMS.CMMS_Status.JOB_UPDATED; jobStatus++)
                     jobStatusQry += $"WHEN jobs.status={(int)jobStatus} THEN '{JobRepository.getShortStatus(CMMS.CMMS_Modules.JOB, jobStatus)}' ";
                 jobStatusQry += "ELSE 'Invalid Status' END ";
-
-                string myQuery4 = $"SELECT jobs.id as job_id, jobs.title as job_title, jobs.description as job_description, " +
-                                  $"CASE WHEN jobs.createdAt = '0000-00-00 00:00:00' THEN NULL ELSE jobs.createdAt END as job_date, " +
-                                  $"{jobStatusQry}   AS job_status,  a.assetName AS Tool_name,SUM(a.id) AS No_of_tools  " +
-                                    $"FROM jobs " +
-                                    $"JOIN pm_execution ON jobs.id = pm_execution.linked_job_id " +
-                                    $"LEFT JOIN jobassociatedworktypes  jas on jas.jobId = jobs.id " +
-                                    $"LEFT JOIN worktypemasterassets as a ON a.workTypeId = jas.workTypeId " +
-                                    $"WHERE pm_execution.PM_Schedule_Id  = {schedule.schedule_id};";
-                try
+                if (schedule.schedule_id > 0)
                 {
+                    string myQuery4 = $"SELECT jobs.id as job_id, jobs.title as job_title, jobs.description as job_description, " +
+                                      $"CASE WHEN jobs.createdAt = '0000-00-00 00:00:00' THEN NULL ELSE jobs.createdAt END as job_date, " +
+                                      $"{jobStatusQry}   AS job_status,  a.assetName AS Tool_name,SUM(a.id) AS No_of_tools  " +
+                                        $"FROM jobs " +
+                                        $"JOIN pm_execution ON jobs.id = pm_execution.linked_job_id " +
+                                        $"LEFT JOIN jobassociatedworktypes  jas on jas.jobId = jobs.id " +
+                                        $"LEFT JOIN worktypemasterassets as a ON a.workTypeId = jas.workTypeId " +
+                                        $"WHERE pm_execution.PM_Schedule_Id  = {schedule.schedule_id};";
+
                     List<ScheduleLinkJob> linked_jobs = await Context.GetData<ScheduleLinkJob>(myQuery4).ConfigureAwait(false);
                     List<CMLog> log = await _utilsRepo.GetHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, schedule.schedule_id, "");
-                    if (linked_jobs[0].job_id > 0)
+                    if (linked_jobs != null && linked_jobs.Count > 0 && linked_jobs[0].job_id > 0)
                     {
                         schedule.schedule_link_job = linked_jobs;
                     }
-                }
-                catch (Exception e)
-                {
+                    else
+                    {
+                        schedule.schedule_link_job = new List<ScheduleLinkJob>();
+                    }
+
 
                 }
 
@@ -669,7 +655,7 @@ namespace CMMSAPIs.Repositories.PM
                 ptw_status = (CMMS.CMMS_Status)Convert.ToInt32(dt1.Rows[0][2]);
             }
 
-            
+
             if (ptw_status == CMMS.CMMS_Status.PTW_APPROVED)
             {
                 string updateQ = $"UPDATE pm_task SET  status = {(int)CMMS.CMMS_Status.PM_CLOSE_APPROVED} WHERE id = {task_id};";
@@ -1064,11 +1050,18 @@ namespace CMMSAPIs.Repositories.PM
         }
         internal async Task<CMDefaultResponse> CancelRejectedPMTaskExecution(CMApproval request, int userID, string facilitytimeZone)
         {
+            int status = 0;
+            status = request.status switch
+            {
+                161 => (int)CMMS.CMMS_Status.PM_SCHEDULED,
+                162 => (int)CMMS.CMMS_Status.PM_ASSIGNED,
+                163 => (int)CMMS.CMMS_Status.PM_LINKED_TO_PTW,
+            };
             string myQuery = "UPDATE pm_task SET " +
                                 $"cancel_rejected_by = {userID}, " +
                                 $"cancel_rejected_at = '{UtilsRepository.GetUTCTime()}', " +
                                 $"cancel_remarks = '{request.comment}', " +
-                                $"status = {(int)CMMS.CMMS_Status.PM_CANCELLED_REJECTED}, " +
+                                $"status = {status}, " +
                                 $"status_updated_at = '{UtilsRepository.GetUTCTime()}', " +
                                 $"status_updated_by = {userID} " +
                                 $"WHERE id = {request.id};";
@@ -1101,6 +1094,23 @@ namespace CMMSAPIs.Repositories.PM
                                 $"WHERE id = {request.id};";
             int retVal = await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
+            string mainQuery = $"INSERT INTO pm_task(plan_id,facility_id,category_id,frequency_id,plan_Date,assigned_to,status,prev_task_id,prev_task_done_date)  " +
+                            $"select plan_id as plan_id,facility_id,category_id,frequency_id,CASE when  pm_task.frequency_id in( 4,5,6)  then\r\nDATE_ADD(plan_date, INTERVAL freq.months MONTH) \r\n  WHEN pm_task.frequency_id = 7 THEN \r\n DATE_ADD(plan_date, INTERVAL 1 YEAR)\r\nelse DATE_ADD(plan_date, INTERVAL freq.days DAY) end as plan_date,assigned_to,{(int)CMMS.CMMS_Status.PM_SCHEDULED} as status,{request.id} as prev_task_id, '{UtilsRepository.GetUTCTime()}' as prev_task_done_date from pm_task " +
+                            $"left join frequency as freq on pm_task.frequency_id = freq.id where pm_task.id = {request.id}; " +
+                            $"SELECT LAST_INSERT_ID(); ";
+            DataTable dt3 = await Context.FetchData(mainQuery).ConfigureAwait(false);
+            int id = Convert.ToInt32(dt3.Rows[0][0]);
+
+            string scheduleQry = $"INSERT INTO pm_schedule(task_id,plan_id,Asset_id,checklist_id,PM_Schedule_date,status) " +
+                                $"select {id} as task_id, plan_id, Asset_id, checklist_id, PM_Schedule_date,{(int)CMMS.CMMS_Status.PM_SCHEDULED} as status from pm_schedule where task_id = {request.id}";
+            await Context.ExecuteNonQry<int>(scheduleQry);
+
+            string setCodeNameQuery = "UPDATE pm_schedule " +
+                                        "SET PM_Schedule_Code = CONCAT(id,Facility_Code,Asset_Category_Code,Asset_Code,PM_Frequecy_Code), " +
+                                        "PM_Schedule_Name = CONCAT(id,' ',Facility_Name,' ',Asset_Category_name,' ',Asset_Name), " +
+                                        "PM_Schedule_Number = CONCAT('SCH',id), " +
+                                        "PM_Maintenance_Order_Number = CONCAT('PMSCH',id);";
+            await Context.ExecuteNonQry<int>(setCodeNameQuery);
             if (retVal > 0)
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_TASK, request.id, 0, 0, string.IsNullOrEmpty(request.comment) ? "PM Task Cancel Rejected " : request.comment, CMMS.CMMS_Status.PM_CANCELLED_APPROVED, userID);
@@ -1113,7 +1123,7 @@ namespace CMMSAPIs.Repositories.PM
             {
                 Console.WriteLine($"Failed to send Task Notification: {ex.Message}");
             }
-            CMDefaultResponse response = new CMDefaultResponse(request.id, retCode, "PM Task Cancel Rejected successfully.");
+            CMDefaultResponse response = new CMRescheduleApprovalResponse(id, request.id, retCode, "PM Task Approved  successfully.");
             return response;
         }
 

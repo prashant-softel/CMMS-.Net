@@ -911,16 +911,21 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             string scheduleQry = $"INSERT INTO cleaning_execution_schedules(executionId,planId,moduleType,actualDay,cleaningType,status) " +
                                 $"select {taskid} as executionId,planId as planId,{moduleType},actualDay,cleaningType,{(int)CMMS.CMMS_Status.VEG_TASK_SCHEDULED} as status from cleaning_execution_schedules where cleaning_execution_schedules.executionId = {request.id}";
             await Context.ExecuteNonQry<int>(scheduleQry);
+            //for clone of item
+            string scheduleOld = $"SELECT scheduleId as id FROM cleaning_execution_schedules where executionId = {taskid}";
+            List<ApproveMC> new_sc_ = await Context.GetData<ApproveMC>(scheduleOld);
+            string scheduleNew = $"SELECT scheduleId as schedule_id FROM cleaning_execution_schedules where executionId = {request.id}";
+            List<ApproveMC> old_sc_ = await Context.GetData<ApproveMC>(scheduleNew);
+            for (int i = 0; i < old_sc_.Count; i++)
+            {
+                string equipmentQry = $"INSERT INTO cleaning_execution_items (`executionId`,`moduleType`,`scheduleId`,`assetId`,`{measure}`,`plannedDate`,`plannedDay`,`createdById`,`createdAt`,`status`) " +
+               $"SELECT '{taskid}' as executionId,item.moduleType,{new_sc_[i].id}, item.assetId,{measure},DATE_ADD('{DateTime.Now.ToString("yyyy-MM-dd")}',interval item.plannedDay - 1  DAY) as plannedDate, " +
+               $"item.plannedDay,item.createdById,item.createdAt,  " +
+               $"{(int)CMMS.CMMS_Status.EQUIP_SCHEDULED} as status from cleaning_execution_items as item  " +
+               $"join cleaning_execution as schedule on item.executionId = schedule.id  where item.executionId= {request.id} and item.scheduleId={old_sc_[i].schedule_id}";
 
-
-            string equipmentQry = $"INSERT INTO cleaning_execution_items (`executionId`,`moduleType`,`scheduleId`,`assetId`,`{measure}`,`plannedDate`,`plannedDay`,`createdById`,`createdAt`,`status`) " +
-                $"SELECT '{taskid}' as executionId,item.moduleType,item.scheduleId, item.assetId,{measure},DATE_ADD('{DateTime.Now.ToString("yyyy-MM-dd")}',interval item.plannedDay - 1  DAY) as plannedDate, " +
-                $"item.plannedDay,item.createdById,item.createdAt,  " +
-                $"{(int)CMMS.CMMS_Status.EQUIP_SCHEDULED} as status from cleaning_execution_items as item  " +
-                $"join cleaning_execution as schedule on item.executionId = schedule.id and item.plannedDay = schedule.noOfDays where item.executionId= {request.id}";
-
-            var retVal = await Context.ExecuteNonQry<int>(equipmentQry).ConfigureAwait(false);
-
+                var retVal = await Context.ExecuteNonQry<int>(equipmentQry).ConfigureAwait(false);
+            }
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.VEGETATION_EXECUTION, request.id, 0, 0, request.comment, CMMS.CMMS_Status.VEG_PLAN_APPROVED, userID);
             try
             {
