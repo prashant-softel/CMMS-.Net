@@ -1457,7 +1457,7 @@ namespace CMMSAPIs.Repositories.Masters
             }
             statusOut += $"ELSE 'Invalid Status' END";
 
-            string myQuery12 = $"select mc.facilityId as facility_id,F.name as facility_name, mc.id as wo_number ,mp.title as wo_decription,mc.planId,mc.status, CONCAT(createdBy.firstName, createdBy.lastName) as responsibility ," +
+            string myQuery12 = $"select mc.facilityId as facility_id,F.name as facility_name,mc.planId as plan_id, mc.id as wo_number ,mp.title as wo_decription,mc.planId,mc.status, CONCAT(createdBy.firstName, createdBy.lastName) as responsibility ," +
                 $" mc.startDate as start_date, mc.endedAt as doneDate,mc.prevTaskDoneDate as end_date,freq.name as frequency,mc.noOfDays, {statusOut} as " +
                 $"status_long , CASE WHEN mc.moduleType=1 THEN 'Wet' WHEN mc.moduleType=2 THEN 'Dry' ELSE 'Robotic' END as MC_Type,  " +
                 $"mc.startDate as  Start_Date ,mc.abandonedAt as  End_Date_done,mc.noOfDays as plan_days,sub1.TotalWaterUsed, sub2.no_of_cleaned,SUM(css.moduleQuantity) as Scheduled " +
