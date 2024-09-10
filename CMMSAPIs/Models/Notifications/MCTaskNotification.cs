@@ -59,11 +59,8 @@ namespace CMMSAPIs.Models.Notifications
                 case CMMS.CMMS_Status.MC_TASK_END_REJECTED:
                     retValue += String.Format("{0} MC{1} End Rejected by {2}", taskObj.facilityidName, taskObj.executionId, taskObj.endrejectedbyName);
                     break;
-                case CMMS.CMMS_Status.MC_ASSIGNED:
-                    retValue = String.Format("{0} MC{1} Assigned to {2}", taskObj.facilityidName, taskObj.executionId, taskObj.assignedTo);
-                    break;
-                case CMMS.CMMS_Status.MC_TASK_REASSIGNED:
-                    retValue = String.Format("{0} MC{1} Re Assigned by {2} to {3}", taskObj.facilityidName, taskObj.executionId, taskObj.updatedBy, taskObj.assignedTo);
+                case CMMS.CMMS_Status.MC_TASK_ASSIGNED:
+                    retValue = String.Format("{0} MC{1} Assigned by {2} to {3}", taskObj.facilityidName, taskObj.executionId, taskObj.updatedBy, taskObj.assignedTo);
                     break;
             }
             retValue += $" for {m_delayDays} days";
@@ -112,13 +109,9 @@ namespace CMMSAPIs.Models.Notifications
                 case CMMS.CMMS_Status.MC_TASK_END_REJECTED:
                     retValue += String.Format("{0} MC{1} End Rejected by {2}", taskObj.facilityidName, taskObj.executionId, taskObj.endrejectedbyName);
                     break;
-                case CMMS.CMMS_Status.MC_ASSIGNED:
+                case CMMS.CMMS_Status.MC_TASK_ASSIGNED:
                     retValue = String.Format("{0} MC{1} Assigned to {2}", taskObj.facilityidName, taskObj.executionId, taskObj.assignedTo);
                     break;
-                case CMMS.CMMS_Status.MC_TASK_REASSIGNED:
-                    retValue = String.Format("{0} MC{1} Re Assigned by {2} to {3}", taskObj.facilityidName, taskObj.executionId, taskObj.updatedBy, taskObj.assignedTo);
-                    break;
-
             }
             return retValue;
 
@@ -166,7 +159,7 @@ namespace CMMSAPIs.Models.Notifications
 
                 if (taskObj.startedById > 0)
                 {
-                    retValue += String.Format(template, "Started By", taskObj.startedBy + " at " + taskObj.startDate);
+                    retValue += String.Format(template, "Started By", taskObj.startedBy + " at " + taskObj.startedAt);
                 }
 
                 if (taskObj.endedById > 0)
@@ -205,7 +198,7 @@ namespace CMMSAPIs.Models.Notifications
                         retValue += String.Format(template, "MC Task Updated By", taskObj.updatedBy);
                         break;
 
-                    case CMMS.CMMS_Status.MC_TASK_REASSIGNED:
+                    case CMMS.CMMS_Status.MC_TASK_ASSIGNED:
                         retValue += String.Format(template, "MC Task Reassigned By", taskObj.updatedBy);
                         break;
 

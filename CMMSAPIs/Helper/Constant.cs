@@ -565,9 +565,7 @@ namespace CMMSAPIs.Helper
             MC_TASK_SCHEDULE_APPROVED,
             MC_TASK_SCHEDULE_REJECT,
             MC_TASK_RESCHEDULED,
-            MC_ASSIGNED,
-            RESCHEDULED_TASK,
-            MC_TASK_REASSIGNED,
+            MC_TASK_ASSIGNED,
 
 
 
@@ -645,6 +643,8 @@ namespace CMMSAPIs.Helper
             VEG_TASK_END_REJECTED,
             VEG_TASK_UPDATED,
             VEG_TASK_ASSIGNED,
+            VEG_TASK_RESCHEDULED,
+
 
             VEG_EXECUTION_STARTED,
             VEG_EXECUTION_APPROVED,

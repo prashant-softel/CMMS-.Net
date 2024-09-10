@@ -282,7 +282,8 @@ namespace CMMSAPIs.Repositories.PM
             CMMS.CMMS_Status status = (CMMS.CMMS_Status)Convert.ToInt32(dt1.Rows[0][0]);
 
 
-            if (status != CMMS.CMMS_Status.RESCHEDULED_TASK && status != CMMS.CMMS_Status.PM_CLOSE_APPROVED)
+//            if (status != CMMS.CMMS_Status.RESCHEDULED_TASK && status != CMMS.CMMS_Status.PM_CLOSE_APPROVED)
+            if(status != CMMS.CMMS_Status.PM_CLOSE_APPROVED)
             {
                 // return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.FAILURE, "Only a PM Task that has not been executed can be cancelled.");
                 string myQuery = "UPDATE pm_task SET " +

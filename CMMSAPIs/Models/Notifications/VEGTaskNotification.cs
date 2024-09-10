@@ -62,7 +62,7 @@ namespace CMMSAPIs.Models.Notifications
                 case CMMS.CMMS_Status.VEG_TASK_ASSIGNED:
                     retValue = String.Format("{0} VE{1} Re Assigned by {2} to {3}", taskObj.facilityidName, taskObj.executionId, taskObj.updatedBy, taskObj.assignedTo);
                     break;
-                case CMMS.CMMS_Status.MC_TASK_REASSIGNED:
+                case CMMS.CMMS_Status.MC_TASK_ASSIGNED:
                     retValue = String.Format("{0} VEG(1} Re Assigned by {2} to {3}", taskObj.facilityidName, taskObj.executionId, taskObj.updatedBy, taskObj.assignedTo);
                     break;
             }
@@ -162,7 +162,7 @@ namespace CMMSAPIs.Models.Notifications
 
                 if (taskObj.startedById > 0)
                 {
-                    retValue += String.Format(template, "Started By", taskObj.startedBy + " at " + taskObj.startDate);
+                    retValue += String.Format(template, "Started By", taskObj.startedBy + " at " + taskObj.startedAt);
                 }
 
                 if (taskObj.endedById > 0)

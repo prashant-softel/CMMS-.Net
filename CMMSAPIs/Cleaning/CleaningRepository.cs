@@ -51,9 +51,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             { (int)CMMS.CMMS_Status.EQUIP_ABANDONED, "Abandoned" },
             { (int)CMMS.CMMS_Status.EQUIP_SCHEDULED, "Scheduled" },
             { (int)CMMS.CMMS_Status.MC_TASK_ABANDONED_REJECTED, "Abandoned - Rejected" },
-            { (int)CMMS.CMMS_Status.MC_TASK_ABANDONED_APPROVED, "Abandoned - Approved" },
-            { (int)CMMS.CMMS_Status.RESCHEDULED_TASK, "Reschedule" },
-            { (int)CMMS.CMMS_Status.MC_ASSIGNED, "Reassigned" },
+            { (int)CMMS.CMMS_Status.MC_TASK_ABANDONED_APPROVED, "Abandoned - Approved" }
         };
 
         internal string getLongStatus(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMMCPlan planObj)
@@ -124,8 +122,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 case CMMS.CMMS_Status.MC_TASK_END_REJECTED:
                     retValue = String.Format("MC{0} End Rejected by {1} ", executionObj.executionId, executionObj.endrejectedbyName);
                     break;
-                case CMMS.CMMS_Status.MC_TASK_REASSIGNED:
-                case CMMS.CMMS_Status.MC_ASSIGNED:
+                case CMMS.CMMS_Status.MC_TASK_ASSIGNED:
                     retValue = String.Format("MC{0} Assigned to {1} ", executionObj.executionId, executionObj.assignedTo);
                     break;
                 default:
@@ -649,8 +646,8 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             string approveQuery = $"Update cleaning_plan set isApproved = 1,status= {(int)CMMS.CMMS_Status.MC_PLAN_APPROVED} ,approvedById={userID}, ApprovalReason='{request.comment}', approvedAt='{UtilsRepository.GetUTCTime()}' where planId = {request.id}";
             await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
 
-            string mainQuery = $"INSERT INTO cleaning_execution(planId,moduleType,facilityId,frequencyId,noOfDays,assignedTo,status)  " +
-                              $"select planId as planId,{moduleType} as moduleType,facilityId,frequencyId,durationDays as noOfDays ,assignedTo," +
+            string mainQuery = $"INSERT INTO cleaning_execution(planId,moduleType,facilityId,frequencyId,noOfDays,startdate,assignedTo,status)  " +
+                              $"select planId as planId,{moduleType} as moduleType,facilityId,frequencyId,durationDays as noOfDays,startDate,assignedTo," +
                               $"{(int)CMMS.CMMS_Status.MC_TASK_SCHEDULED} as status " +
                               $"from cleaning_plan where planId = {request.id}; " +
                               $"SELECT LAST_INSERT_ID(); ";
@@ -806,7 +803,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
 
             string myQuery1 = $"select mc.id as executionId ,mp.title,mc.planId,mc.status, CONCAT(createdBy.firstName, createdBy.lastName) as responsibility , " +
-                $" mc.startDate, mc.endedAt as doneDate,mc.abandonedAt as Abondond_done_date, " +
+                $" mc.startDate as scheduledDate, mc.endedAt as doneDate,mc.abandonedAt as Abondond_done_date, " +
                 $" mc.prevTaskDoneDate as lastDoneDate,freq.name as frequency,mc.noOfDays, {statusOut} as status_short,  " +
                 $" f.name as sitename,CASE WHEN mc.moduleType=1 THEN 'Wet' WHEN mc.moduleType=2 THEN 'Dry' ELSE 'Robotic' END as cleaningType,sub1.TotalWaterUsed as waterused , " +
                 $" SUM(css.moduleQuantity) as  Scheduled_Qnty,sub2.no_of_cleaned as Actual_Qnty, Case When mc.abandonedById >0 THEN 'yes' ELSE 'no' END as Abondend ,  " +
@@ -837,8 +834,8 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             {
                 if (ViewMCTaskList != null && ViewMCTaskList.doneDate != null)
                     ViewMCTaskList.doneDate = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, ViewMCTaskList.doneDate);
-                if (ViewMCTaskList != null && ViewMCTaskList.startDate != null)
-                    ViewMCTaskList.startDate = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, ViewMCTaskList.startDate);
+                if (ViewMCTaskList != null && ViewMCTaskList.scheduledDate != null)
+                    ViewMCTaskList.scheduledDate = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, ViewMCTaskList.scheduledDate);
                 if (ViewMCTaskList != null && ViewMCTaskList.lastDoneDate != null)
                     ViewMCTaskList.lastDoneDate = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, ViewMCTaskList.lastDoneDate);
                 if (ViewMCTaskList != null && ViewMCTaskList.Abondond_done_date != null)
@@ -854,7 +851,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             int status = (int)CMMS.CMMS_Status.MC_TASK_STARTED;
             //int statusSch = (int)CMMS.CMMS_Status.MC_TASK_SCHEDULED;
 
-            string Query = $"Update cleaning_execution set status = {status},executedById={userId},executionStartedAt='{UtilsRepository.GetUTCTime()}',startDate='{UtilsRepository.GetUTCTime()}'  where id = {executionId}; ";
+            string Query = $"Update cleaning_execution set status = {status},executedById={userId},executionStartedAt='{UtilsRepository.GetUTCTime()}' where id = {executionId}; ";
             //$"Update cleaning_execution_schedules set status = {status} where scheduleId = {scheduleId}";
 
             int retVal = await Context.ExecuteNonQry<int>(Query).ConfigureAwait(false);
@@ -969,7 +966,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             }
             statusEquip += $"ELSE 'Invalid Status' END";
 
-            string executionQuery = $"select ex.id as executionId,ex.status ,ex.startDate,ex.assignedTo as assignedToId, CONCAT(assignedToUser.firstName, assignedToUser.lastName) as assignedTo ,F.name as site_name , " +
+            string executionQuery = $"select ex.id as executionId,ex.status ,ex.startDate as scheduledDate,ex.assignedTo as assignedToId, CONCAT(assignedToUser.firstName, assignedToUser.lastName) as assignedTo ,F.name as site_name , " +
                 $"plan.title, CONCAT(createdBy.firstName, ' ' , createdBy.lastName) as plannedBy ,plan.createdAt as plannedAt,freq.name as frequency, ex.executedById as startedById, CONCAT(startedByUser.firstName, ' ' ,startedByUser.lastName) as startedBy ," +
                 $" ex.executionStartedAt as startedAt , ex.rejectedById, CONCAT(endrejectedUser.firstName, ' ', endrejectedUser.lastName) as rejectedbyName,ex.rejectedAt,ex.approvedById, CONCAT(approvedByUser.firstName,' ', approvedByUser.lastName) as approvedbyName,ex.approvedAt,  {statusEx} as status_short, " +
                 $" CONCAT(endedByUser.firstName, ' ', endedByUser.lastName) as endedBy, ex.endedById as endedById, f.name as facilityidName, " +
@@ -1035,12 +1032,12 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                     view.abandonedAt = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, view.abandonedAt);
                 if (view != null && view.plannedAt != null)
                     view.plannedAt = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, view.plannedAt);
-                if (view != null && view.startDate != null)
-                    view.startDate = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, view.startDate);
+                if (view != null && view.scheduledDate != null)
+                    view.scheduledDate = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, view.scheduledDate);
                 if (view != null && view.startedAt != null)
                     view.startedAt = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, view.startedAt);
-                if (view != null && view.startDate != null)
-                    view.startedAt = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, view.startDate);
+                if (view != null && view.doneDate != null)
+                    view.doneDate = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, view.doneDate);
             }
 
             return _ViewExecution[0];
@@ -1381,14 +1378,14 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             DataTable dt1 = await Context.FetchData(statusQry).ConfigureAwait(false);
             CMMS.CMMS_Status status = (CMMS.CMMS_Status)Convert.ToInt32(dt1.Rows[0][0]);
 
-            if (status != CMMS.CMMS_Status.RESCHEDULED_TASK && status != CMMS.CMMS_Status.MC_PLAN_APPROVED && status != CMMS.CMMS_Status.SCHEDULED_LINKED_TO_PTW)
+            if (status != CMMS.CMMS_Status.MC_TASK_RESCHEDULED && status != CMMS.CMMS_Status.MC_PLAN_APPROVED && status != CMMS.CMMS_Status.SCHEDULED_LINKED_TO_PTW)
             {
                 return new CMDefaultResponse(task_id, CMMS.RETRUNSTATUS.FAILURE, "Only Scheduled Tasks can be assigned ");
             }
 
             string myQuery = "UPDATE cleaning_execution SET " +
                                 $"assignedTo = {assign_to}, " +
-                                $"status = {(int)CMMS.CMMS_Status.MC_TASK_SCHEDULED}, " +
+                                $"status = {(int)CMMS.CMMS_Status.MC_TASK_ASSIGNED}, " +
                                 $"updatedAt = '{UtilsRepository.GetUTCTime()}', " +
                                 $"updatedById = {userID}  " +
                                 $"WHERE id = {task_id} ;";
@@ -1408,11 +1405,11 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             {
                 response = new CMDefaultResponse(task_id, retCode, $"MC Task Reassigned To user Id {assign_to}");
             }
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MC_TASK, task_id, 0, 0, $"MC Task Assigned to user_Id {assign_to}", CMMS.CMMS_Status.MC_ASSIGNED, userID);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MC_TASK, task_id, 0, 0, $"MC Task Assigned to user_Id {assign_to}", CMMS.CMMS_Status.MC_TASK_ASSIGNED, userID);
             try
             {
                 CMMCExecution _ViewTaskList = await GetExecutionDetails(task_id, facilitytimeZone);
-                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.MC_TASK, CMMS.CMMS_Status.MC_TASK_REASSIGNED, new[] { userID }, _ViewTaskList);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.MC_TASK, CMMS.CMMS_Status.MC_TASK_ASSIGNED, new[] { userID }, _ViewTaskList);
             }
 
             catch (Exception ex)
@@ -1498,7 +1495,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             string mainQuery = $"INSERT INTO cleaning_execution(planId,moduleType,facilityId,frequencyId,noOfDays,startDate,assignedTo,status,prevTaskId,prevTaskDoneDate)  " +
                               $"select planId as planId,{moduleType} as moduleType,facilityId,frequencyId,noOfDays as noOfDays , " +
                               $"Case WHEN cleaning_execution.frequencyId in(4,5,6) THEN DATE_ADD(startDate,INTERVAL freq.months MONTH) WHEN  cleaning_execution.frequencyId=7 THEN DATE_ADD(startDate,INTERVAL 1 YEAR)  else DATE_ADD(startDate, INTERVAL freq.days DAY) end as startDate,assignedTo , " +
-                              $"{(int)CMMS.CMMS_Status.RESCHEDULED_TASK} as status,{request.id} as prevTaskId, '{UtilsRepository.GetUTCTime()}' as prevTaskDoneDate " +
+                              $"{(int)CMMS.CMMS_Status.MC_TASK_SCHEDULED} as status,{request.id} as prevTaskId, '{UtilsRepository.GetUTCTime()}' as prevTaskDoneDate " +
                               $" from cleaning_execution left join frequency as freq on cleaning_execution.frequencyId= freq.id " +
                               $" where cleaning_execution.id = {request.id}; " +
                               $"SELECT LAST_INSERT_ID(); ";

@@ -66,9 +66,6 @@ namespace CMMSAPIs.Models.Notifications
                 case CMMS.CMMS_Status.VEG_TASK_COMPLETED:
                     retValue += String.Format("{0} VE{1} Closed by {2}", executionObj.facilityidName, executionObj.id, executionObj.endedBy);
                     break;
-                case CMMS.CMMS_Status.VEG_TASK_ENDED:
-                    retValue += String.Format("Vegetation Task <{0}> Closed  by {1} ", executionObj.id, executionObj.endedBy);
-                    break;
                 case CMMS.CMMS_Status.VEGETATION_LINKED_TO_PTW:
                     retValue += String.Format("Vegetation Task <{0}>  Linked by {1} ", executionObj.id, executionObj.schedules);
                     break;
@@ -87,14 +84,17 @@ namespace CMMSAPIs.Models.Notifications
                 case CMMS.CMMS_Status.VEG_TASK_REJECTED:
                     retValue += String.Format("{0} VE{1} Rejected by {2}", executionObj.facilityidName, executionObj.id, executionObj.rejectedbyName);
                     break;
+                case CMMS.CMMS_Status.VEG_TASK_ENDED:
+                    retValue += String.Format("Vegetation Task <{0}> Closed  by {1} ", executionObj.id, executionObj.endedBy);
+                    break;
+                case CMMS.CMMS_Status.VEG_TASK_END_REJECTED:
+                    retValue += String.Format("{0} VE{1} Close Rejected by {2}", executionObj.facilityidName, executionObj.id, executionObj.endrejectedbyName);
+                    break;
                 case CMMS.CMMS_Status.VEG_TASK_END_APPROVED:
-                    retValue += String.Format("{0} VE{1} End Approved by {2}", executionObj.facilityidName, executionObj.id, executionObj.endapprovedbyName);
+                    retValue += String.Format("{0} VE{1} Close Approved by {2}", executionObj.facilityidName, executionObj.id, executionObj.endapprovedbyName);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_ASSIGNED:
                     retValue += String.Format("{0} VE{1} Assigned to {2}", executionObj.facilityidName, executionObj.id, executionObj.assignedTo);
-                    break;
-                case CMMS.CMMS_Status.VEG_TASK_END_REJECTED:
-                    retValue += String.Format("{0} VE{1} End Rejected by {2}", executionObj.facilityidName, executionObj.id, executionObj.endrejectedbyName);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_UPDATED:
                     retValue += String.Format("{0} VE{1} Updated by {2}", executionObj.facilityidName, executionObj.id, executionObj.updatedBy);

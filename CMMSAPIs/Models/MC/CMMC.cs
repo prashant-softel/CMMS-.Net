@@ -251,13 +251,14 @@ namespace CMMSAPIs.Models.MC
         //  public string cleaningTypeName { get; set; }
         public int assignedToId { get; set; }
         public string assignedTo { get; set; }
-        public DateTime startDate { get; set; }
+        public DateTime scheduledDate { get; set; }
         public int noOfDays { get; set; }
 
         public int plannedById { get; set; }
         public int startedById { get; set; }
         public int updatedById { get; set; }
         public int endedById { get; set; }
+        public DateTime? endedAt { get; set; }
         public int abandonedById { get; set; }
         public int approvedbyId { get; set; }
         public int rejectedbyId { get; set; }
@@ -272,7 +273,8 @@ namespace CMMSAPIs.Models.MC
         public string plannedBy { get; set; }
         public DateTime plannedAt { get; set; }
         public string startedBy { get; set; }
-        public DateTime startedAt { get; set; }
+        public DateTime startedAt { get; set; }       
+        public DateTime doneDate { get; set; }
         public string abandonedBy { get; set; }
         public DateTime abandonedAt { get; set; }
         public string rejectedbyName { get; set; }
@@ -335,7 +337,7 @@ namespace CMMSAPIs.Models.MC
         public string responsibility { get; set; }
         public string frequency { get; set; }
         public int noOfDays { get; set; }
-        public DateTime startDate { get; set; }
+        public DateTime scheduledDate { get; set; }
         public DateTime doneDate { get; set; }
         public DateTime lastDoneDate { get; set; }
         public DateTime Abondond_done_date { get; set; }

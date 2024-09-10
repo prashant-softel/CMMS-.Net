@@ -85,8 +85,7 @@ namespace CMMSAPIs.Repositories.Permits
             { (int)CMMS.CMMS_Status.EQUIP_SCHEDULED, "Scheduled" },
             { (int)CMMS.CMMS_Status.MC_TASK_ABANDONED_REJECTED, "TASK ABANDONED REJECTED" },
             { (int)CMMS.CMMS_Status.MC_TASK_ABANDONED_APPROVED, "TASK ABANDONED APPROVED" },
-            { (int)CMMS.CMMS_Status.RESCHEDULED_TASK, "TASK RESCHEDULE" },
-            { (int)CMMS.CMMS_Status.MC_ASSIGNED, "TASK REASSING" },
+            { (int)CMMS.CMMS_Status.MC_TASK_ASSIGNED, "TASK REASSING" },
         };
         public static string getShortStatus(int statusID)
         {
