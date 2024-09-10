@@ -1017,12 +1017,8 @@ namespace CMMSAPIs.Repositories.Users
             // Pending convert user_ids into string for where condition
             int notification_id = (int)notification.module_id;
             int facility_id = notification.facility_id;
-            string user_ids_str = "";
+            string user_ids_str = notification.additional_user_ids;
 
-            if (notification.user_ids != null && notification.user_ids.Length > 0)
-            {
-                user_ids_str += string.Join(",", notification.user_ids.ToArray());
-            }
             string qry = $"SELECT " +
                             $"u.id as id, u.loginId as user_name, concat(firstName, ' ', lastName) as full_name, ur.id as role_id, ur.name as role_name, u.mobileNumber as contact_no " +
                          $"FROM " +

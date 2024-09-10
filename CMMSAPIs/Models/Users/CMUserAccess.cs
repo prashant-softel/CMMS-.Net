@@ -53,7 +53,7 @@ namespace CMMSAPIs.Models.Users
         public int facility_id { get; set; }
         public CMMS.CMMS_Modules module_id { get; set; }
         public int role_id { get; set; }
-        public int[] user_ids { get; set; }
+        public string additional_user_ids { get; set; }        //Comma delimited additional userids
         public int notification_id { get; set; }
     }
     public class CMAccessList1

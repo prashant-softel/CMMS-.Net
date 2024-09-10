@@ -1,6 +1,7 @@
 using CMMSAPIs.BS.Mails;
 using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Calibration;
+using CMMSAPIs.Models.EM;
 using CMMSAPIs.Models.Grievance;
 using CMMSAPIs.Models.Incident_Reports;
 using CMMSAPIs.Models.Inventory;
@@ -207,7 +208,7 @@ namespace CMMSAPIs.Models.Notifications
             return retValue;
         }
 
-        public async Task<CMDefaultResponse> sendEmailNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, int[] userID, int facilityId, params object[] args)
+        public async Task<CMDefaultResponse> sendEmailNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, string userIDs, int facilityId, params object[] args)
         {
             //m_delayDays = delayDays;
             CMDefaultResponse response = new CMDefaultResponse();
@@ -241,7 +242,7 @@ namespace CMMSAPIs.Models.Notifications
             notification.facility_id = facilityId;
             notification.module_id = moduleID;
             notification.notification_id = (int)notificationID;
-            notification.user_ids = userID;
+            notification.additional_user_ids = userIDs;
             notification.role_id = m_role;
             //notification.user_ids = userID;
 
@@ -324,11 +325,10 @@ namespace CMMSAPIs.Models.Notifications
             return response;
         }
 
-        public static async Task<CMDefaultResponse> sendEMNotification2(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, int module_ref_id, int role, int delayDays)
+        public static async Task<CMDefaultResponse> sendNotification2(int notificationType, CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, int module_ref_id, string additionalUserIds, int userId, string facilitytimeZone, int role=0, int delayDays=0)
         {
             CMDefaultResponse retValue;
-            int notificationType = 2;
-            string facilitytimeZone = "";
+            //string facilitytimeZone = "";
             if (getDB == null)
             {
                 MyConfig = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
@@ -336,8 +336,6 @@ namespace CMMSAPIs.Models.Notifications
 
                 getDB = new MYSQLDBHelper(_conString);
             }
-            int userIDs = 2;
-            int[] userID = { userIDs };
 
             switch (moduleID)
             {
@@ -345,43 +343,43 @@ namespace CMMSAPIs.Models.Notifications
                     JobRepository obj0 = new JobRepository(getDB);
                     CMJobView _jobView = await obj0.GetJobDetails(module_ref_id, facilitytimeZone);
                     //notificationID = (CMMS.CMMS_Status)(_jobView.status);
-                    retValue = await sendBaseNotification(moduleID, notificationID, userID, module_ref_id, role, delayDays, notificationType, _jobView);
+                    retValue = await sendBaseNotification(moduleID, notificationID, module_ref_id, additionalUserIds, role, delayDays, notificationType, _jobView);
                     break;
                 case CMMS.CMMS_Modules.PTW:
                     PermitRepository obj1 = new PermitRepository(getDB);
                     CMPermitDetail _Permit = await obj1.GetPermitDetails(module_ref_id, facilitytimeZone);
                     //notificationID = (CMMS.CMMS_Status)(_Permit.ptwStatus);
-                    retValue = await sendBaseNotification(moduleID, notificationID, userID, module_ref_id, role, delayDays, notificationType, _Permit);
+                    retValue = await sendBaseNotification(moduleID, notificationID, module_ref_id, additionalUserIds, role, delayDays, notificationType, _Permit);
                     break;
                 case CMMS.CMMS_Modules.JOBCARD:
                     JCRepository obj2 = new JCRepository(getDB);
                     List<CMJCDetail> _JobCard = await obj2.GetJCDetail(module_ref_id, facilitytimeZone);
                     //notificationID = (CMMS.CMMS_Status)(_JobCard[0].status);
-                    retValue = await sendBaseNotification(moduleID, notificationID, userID, module_ref_id, role, delayDays, notificationType, _JobCard[0]);
+                    retValue = await sendBaseNotification(moduleID, notificationID, module_ref_id, additionalUserIds, role, delayDays, notificationType, _JobCard[0]);
                     break;
                 case CMMS.CMMS_Modules.INCIDENT_REPORT:
                     IncidentReportRepository obj3 = new IncidentReportRepository(getDB);
                     CMViewIncidentReport _IncidentReport = await obj3.GetIncidentDetailsReport(module_ref_id, facilitytimeZone);
                     //notificationID = (CMMS.CMMS_Status)(_IncidentReport.status);
-                    retValue = await sendBaseNotification(moduleID, notificationID, userID, module_ref_id, role, delayDays, notificationType, _IncidentReport);
+                    retValue = await sendBaseNotification(moduleID, notificationID, module_ref_id, additionalUserIds, role, delayDays, notificationType, _IncidentReport);
                     break;
                 case CMMS.CMMS_Modules.WARRANTY_CLAIM:
                     WCRepository obj4 = new WCRepository(getDB);
                     CMWCDetail _WC = await obj4.GetWCDetails(module_ref_id, facilitytimeZone);
                     //notificationID = (CMMS.CMMS_Status)(_WC.status);
-                    retValue = await sendBaseNotification(moduleID, notificationID, userID, module_ref_id, role, delayDays, notificationType, _WC);
+                    retValue = await sendBaseNotification(moduleID, notificationID, module_ref_id, additionalUserIds, role, delayDays, notificationType, _WC);
                     break;
                 case CMMS.CMMS_Modules.CALIBRATION:
                     CalibrationRepository obj5 = new CalibrationRepository(getDB);
                     CMCalibrationDetails _Calibration = await obj5.GetCalibrationDetails(module_ref_id, facilitytimeZone);
                     //notificationID = (CMMS.CMMS_Status)(_Calibration.statusID + 100);
-                    retValue = await sendBaseNotification(moduleID, notificationID, userID, module_ref_id, role, delayDays, notificationType, _Calibration);
+                    retValue = await sendBaseNotification(moduleID, notificationID, module_ref_id, additionalUserIds, role, delayDays, notificationType, _Calibration);
                     break;
                 case CMMS.CMMS_Modules.INVENTORY:
                     InventoryRepository obj6 = new InventoryRepository(getDB, _environment);
                     CMViewInventory _Inventory = await obj6.GetInventoryDetails(module_ref_id, facilitytimeZone);
                     //notificationID = (CMMS.CMMS_Status)(_Inventory[0].status + 100);
-                    retValue = await sendBaseNotification(moduleID, notificationID, userID, module_ref_id, role, delayDays, notificationType, _Inventory);
+                    retValue = await sendBaseNotification(moduleID, notificationID, module_ref_id, additionalUserIds, role, delayDays, notificationType, _Inventory);
                     break;
                 default:
                     string sReturn = $"Escalation performed for {moduleID} {module_ref_id} for role {role} for {delayDays} days period.";
@@ -389,41 +387,47 @@ namespace CMMSAPIs.Models.Notifications
                     retValue = new CMDefaultResponse(module_ref_id, CMMS.RETRUNSTATUS.INVALID_ARG, sReturn);
                     break;
             }
-            //await CMMSNotification.sendEMNotification(moduleID, notificationID, userID, module_ref_id, role, delayDays, _jobView);
+            //await CMMSNotification.sendEMNotification(moduleID, notificationID, module_ref_id, additionalUserIds, role, delayDays, _jobView);
 
             //            retValue = await sendBaseNotification(moduleID, notificationID, userID, module_ref_id, role, delayDays, notificationType, obj);
             return retValue;
 
         }
-        /*
-                public static async Task<CMDefaultResponse> sendEMNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, int[] userID, int module_ref_id, int role, int delayDays, params object[] args)
-                {
-                    CMDefaultResponse retValue;
 
-                    int notificationType = 2;
+        public static async Task<CMDefaultResponse> sendNotification(CMMS.CMMS_Modules moduleId, CMMS.CMMS_Status statusId, int moduleRefId, int userID, string facilitytimeZone)
+        {
+            int notificationType = 1;
+            string additionalUserIds = "";
+            return await sendNotification2(notificationType, moduleId, statusId, moduleRefId, additionalUserIds, userID, facilitytimeZone);
+        }
+        public static async Task<CMDefaultResponse> sendNotification(CMNotification request, int userID, string facilitytimeZone)
+        {
+            int notificationType = 1;
+            return await sendNotification2(notificationType, request.moduleId, request.statusId, request.moduleRefId, request.additionalUserIds, userID, facilitytimeZone);
+        }
+        public static async Task<CMDefaultResponse> sendEMNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, int module_ref_id, int userID, string facilitytimeZone, string additionalUserIds, int role, int delayDays)
+        {
+            int notificationType = 2;
 
-                    //create else if block for your module and add Notification class for  your module to implement yous notification
-                    retValue = await sendBaseNotification(moduleID, notificationID, userID, module_ref_id, role, delayDays, notificationType, args);
-                    return retValue;
-                }
-            */
+            return await sendNotification2(notificationType, moduleID, notificationID, module_ref_id, additionalUserIds, userID, facilitytimeZone, role, delayDays);
+        }
+
         public static async Task<CMDefaultResponse> sendNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, int[] userID, params object[] args)
         {
             CMDefaultResponse retValue;
             int notificationType = 1;
             int module_ref_id = 0;
+            string additionalUserIds = "";
             int role = 0;
             int delayDays = 0;
 
             //retValue = await sendBaseNotification(moduleID, notificationID, userID, args);
-            retValue = await sendBaseNotification(moduleID, notificationID, userID, module_ref_id, role, delayDays, notificationType, args);
+            retValue = await sendBaseNotification(moduleID, notificationID, module_ref_id, additionalUserIds, role, delayDays, notificationType, args);
             return retValue;
         }
 
 
-        //create else if block for your module and add Notification class for  your module to implement yous notification
-        /*    public static CMMS.RETRUNSTATUS sendNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, params object[] args)*/
-        public static async Task<CMDefaultResponse> sendBaseNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, int[] userIDs, int module_ref_id, int role, int delayDays, int notificationType, params object[] args)
+        public static async Task<CMDefaultResponse> sendBaseNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, int module_ref_id, string userIDs, int role, int delayDays, int notificationType, params object[] args)
         {
             CMDefaultResponse retValue = new CMDefaultResponse();
 

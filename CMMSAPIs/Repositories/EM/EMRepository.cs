@@ -227,7 +227,7 @@ namespace CMMSAPIs.Repositories.EM
             return response;
         }
 
-        public async Task<CMEscalationResponse> Escalate_2(CMMS.CMMS_Modules moduleId, CMMS.CMMS_Status statusId, int userID, string facilitytimeZone)
+        public async Task<CMEscalationResponse> Escalate_2(CMMS.CMMS_Modules moduleId, CMMS.CMMS_Status statusId, string additionalUserIds, int userID, string facilitytimeZone)
         {
             /*
              * Checks the current UTC time with the time since status was last updated
@@ -253,7 +253,7 @@ namespace CMMSAPIs.Repositories.EM
                 if (0 == (int)moduleId && statusId == 0)
                 {
                     //Escalation for all status of the given module (When statusId is 0
-                    responseString += await Escalate_ForStatus((CMMS.CMMS_Modules)module, (CMMS.CMMS_Status)status, userID, facilitytimeZone);
+                    responseString += await Escalate_ForStatus((CMMS.CMMS_Modules)module, (CMMS.CMMS_Status)status, additionalUserIds, userID, facilitytimeZone);
                     processedCount++;
                 }
                 else if (moduleId > 0 && module == (int)moduleId)
@@ -261,7 +261,7 @@ namespace CMMSAPIs.Repositories.EM
                     if (status == (int)statusId || statusId == 0)
                     {
                         //Escalation for specific module and status
-                        responseString += await Escalate_ForStatus((CMMS.CMMS_Modules)module, (CMMS.CMMS_Status)status, userID, facilitytimeZone);
+                        responseString += await Escalate_ForStatus((CMMS.CMMS_Modules)module, (CMMS.CMMS_Status)status, additionalUserIds, userID, facilitytimeZone);
                         processedCount++;
                         if (statusId != 0)
                             break;
@@ -278,7 +278,11 @@ namespace CMMSAPIs.Repositories.EM
             return response;
         }
 
-        public async Task<string> Escalate_ForStatus(CMMS.CMMS_Modules moduleId, CMMS.CMMS_Status statusId, int userID, string facilitytimeZone) 
+        public async Task<CMDefaultResponse> sendNotification(CMNotification request, int userID, string facilitytimeZone)
+        {
+            return await CMMSNotification.sendNotification(request, userID, facilitytimeZone);
+        }
+        public async Task<string> Escalate_ForStatus(CMMS.CMMS_Modules moduleId, CMMS.CMMS_Status statusId, string additionalUserIds, int userID, string facilitytimeZone) 
         {
             CMDefaultResponse retValue = null;
             //CMEscalationResponse response = null;
@@ -341,7 +345,10 @@ namespace CMMSAPIs.Repositories.EM
                         int role = escalation.Value;
                         //raise this escalation
                         int[] userIDs = { userID };
-                        retValue = await CMMSNotification.sendEMNotification2(moduleId, statusId, module_ref_id, role, delayDays);
+                        int notificationType = 2;
+                        
+
+                        retValue = await CMMSNotification.sendEMNotification(moduleId, statusId, module_ref_id, userID, facilitytimeZone, additionalUserIds, role, delayDays);
                         if (retValue.return_status == CMMS.RETRUNSTATUS.SUCCESS)
                         {
                             //retValue.insertedId.Add((int)statusId);
