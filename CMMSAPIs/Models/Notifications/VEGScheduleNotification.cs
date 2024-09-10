@@ -26,7 +26,7 @@ namespace CMMSAPIs.Models.Notifications
 
             switch (m_notificationID)
             {
-case CMMS.CMMS_Status.VEG_TASK_STARTED:
+                    case CMMS.CMMS_Status.VEG_TASK_STARTED:
                     retValue += String.Format("{0} SCH{1} Started by {2}", scheduleObj.facilityidName, scheduleObj.scheduleId, scheduleObj.startedbyName);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_COMPLETED:
@@ -36,10 +36,10 @@ case CMMS.CMMS_Status.VEG_TASK_STARTED:
                     retValue += String.Format("{0} SCH{1} Abandoned by {2}", scheduleObj.facilityidName, scheduleObj.scheduleId, scheduleObj.abandonedbyName);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_END_APPROVED:
-                    retValue += String.Format("{0} SCH{1} Approved by {2}", scheduleObj.facilityidName, scheduleObj.scheduleId, scheduleObj.approvedBy);
+                    retValue += String.Format("{0} SCH{1} Close Approved by {2}", scheduleObj.facilityidName, scheduleObj.scheduleId, scheduleObj.approvedBy);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_END_REJECTED:
-                    retValue += String.Format("{0} SCH{1} Rejected by {2}", scheduleObj.facilityidName, scheduleObj.scheduleId, scheduleObj.rejectedBy);
+                    retValue += String.Format("{0} SCH{1} Close Rejected by {2}", scheduleObj.facilityidName, scheduleObj.scheduleId, scheduleObj.rejectedBy);
                     break;
                 case CMMS.CMMS_Status.SCHEDULED_LINKED_TO_PTW:
                     retValue += String.Format("{0} PTW{1} Linked with SCH{2} of MCT{3}", scheduleObj.facilityidName, scheduleObj.permit_id, scheduleObj.scheduleId, scheduleObj.executionId);

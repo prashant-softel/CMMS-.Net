@@ -150,10 +150,10 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                     retValue = String.Format("SCH{0} Abandoned by {1} ", scheduleObj.scheduleId, scheduleObj.abandonedbyName);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_SCHEDULE_APPROVED:
-                    retValue = String.Format("SCH{0} Abandoned by {1} ", scheduleObj.scheduleId, scheduleObj.approvedBy);
+                    retValue = String.Format("SCH{0} Close Approved by {1} ", scheduleObj.scheduleId, scheduleObj.approvedBy);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_SCHEDULE_REJECT:
-                    retValue = String.Format("SCH{0} Rejected by {1} ", scheduleObj.scheduleId, scheduleObj.rejectedBy);
+                    retValue = String.Format("SCH{0} Close Rejected by {1} ", scheduleObj.scheduleId, scheduleObj.rejectedBy);
                     break;
                 case CMMS.CMMS_Status.SCHEDULED_LINKED_TO_PTW:
                     retValue = String.Format("PTW{0} Linked with SCH{1} of MCT{1} ", scheduleObj.permit_id, scheduleObj.scheduleId, scheduleObj.executionId);

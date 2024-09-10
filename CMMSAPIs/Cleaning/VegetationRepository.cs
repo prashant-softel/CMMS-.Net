@@ -171,10 +171,10 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                     retValue = String.Format("PTW{0} Linked with SCH{1} of MCT{1} ", scheduleObj.permit_id, scheduleObj.scheduleId, scheduleObj.executionId);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_END_APPROVED:
-                    retValue = String.Format("SCH{0} Approved by {1} ", scheduleObj.scheduleId, scheduleObj.approvedBy);
+                    retValue = String.Format("SCH{0} Close Approved by {1} ", scheduleObj.scheduleId, scheduleObj.approvedBy);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_END_REJECTED:
-                    retValue = String.Format("SCH{0} Rejected by {1} ", scheduleObj.scheduleId, scheduleObj.rejectedBy);
+                    retValue = String.Format("SCH{0} Close Rejected by {1} ", scheduleObj.scheduleId, scheduleObj.rejectedBy);
                     break;
                 default:
                     retValue = String.Format("No status for SCH{0} at {1) ", scheduleObj.scheduleId, scheduleObj.facilityidName);
@@ -1556,7 +1556,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
 
             CMMS.CMMS_Status _Status_long_Schedule = (CMMS.CMMS_Status)(_ViewSchedule[0].status);
-            _ViewSchedule[0].status_short = Status_PTW(_ViewSchedule[0].status);
+
 
             string _longStatus_Schedule = getLongStatus(CMMS.CMMS_Modules.MC_EXECUTION, _Status_long_Schedule, _ViewSchedule[0]);
             _ViewSchedule[0].status_long_schedule = _longStatus_Schedule;
