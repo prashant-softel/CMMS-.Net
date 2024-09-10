@@ -188,9 +188,15 @@ namespace CMMSAPIs.Models.Notifications
                 retValue += String.Format(template, "Status", executionObj.status_short);
                 retValue += String.Format(template, "MC Execution Title", executionObj.title);
                 retValue += String.Format(template, "Frequency", executionObj.frequency);
-                retValue += String.Format(template, "Started By", executionObj.startedBy);
-                retValue += String.Format(template, "Started At", executionObj.startDate);
-
+                retValue += String.Format(template, "Scheduled At", executionObj.scheduledDate);
+                if (executionObj.startedById > 0)
+                {
+                    retValue += String.Format(template, "Started By", executionObj.startedBy + " at " + executionObj.startedAt);
+                }
+                if (executionObj.endedById > 0)
+                {
+                    retValue += String.Format(template, "Ended By", executionObj.endedBy + " at " + executionObj.endedAt);
+                }
 
                 switch (m_notificationID)
                 {
@@ -229,7 +235,7 @@ namespace CMMSAPIs.Models.Notifications
                     case CMMS.CMMS_Status.MC_TASK_END_REJECTED:
                         retValue += String.Format(templateEnd, "MC Task Schedule End Rejected By", executionObj.endrejectedbyName);
                         break;
-                    case CMMS.CMMS_Status.MC_ASSIGNED:
+                    case CMMS.CMMS_Status.MC_TASK_ASSIGNED:
                         retValue += String.Format(templateEnd, "MC Task Schedule Assigned to", executionObj.assignedTo);
                         break;
                     default:
