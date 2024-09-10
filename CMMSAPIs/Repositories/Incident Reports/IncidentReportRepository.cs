@@ -1323,7 +1323,9 @@ namespace CMMSAPIs.Repositories.Incident_Reports
 
         internal async Task<List<CMProposed_action_plan>> Getproposed_action_plan(int incidents_id)
         {
-            string selectqry = "select id as proposed_item_id,incidents_id,actions_as_per_plan,responsibility, target_date,remarks,hse_remark,id_Status,CASE WHEN id_Status=1 then 'open' else 'close' as status_name from proposed_action_plan where incidents_id = " + incidents_id + ";";
+            string selectqry = "select id as proposed_item_id,incidents_id,actions_as_per_plan,responsibility, " +
+                               "target_date,remarks,hse_remark,id_Status,CASE WHEN id_Status=1 then 'open' else 'close' END as status_name" +
+                               " from proposed_action_plan where incidents_id = " + incidents_id + ";";
             List<CMProposed_action_plan> result = await Context.GetData<CMProposed_action_plan>(selectqry).ConfigureAwait(false);
 
             return result;

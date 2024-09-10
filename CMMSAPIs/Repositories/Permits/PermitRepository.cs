@@ -787,21 +787,21 @@ namespace CMMSAPIs.Repositories.Permits
             DataTable dt = await Context.FetchData(qryPermitBasic).ConfigureAwait(false);
             int insertedId = Convert.ToInt32(dt.Rows[0][0]);
 
-/*            string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as start_datetime, ptw.endDate as end_datetime, facilities.id as facility_id, facilities.name as siteName, ptw.id as permitNo, CAST(ptw.permitNumber as char(100))  as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, blocks.id as blockId, blocks.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.title as title, ptw.description as description, ptw.jobTypeId as job_type_id, jobType.title as job_type_name, ptw.TBTId as sop_type_id, sop.title as sop_type_name, user1.id as issuer_id, CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, user2.id as approver_id, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, user3.id as requester_id, CONCAT(user3.firstName,' ',user3.lastName) as requestedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, CONCAT(user5.firstName,' ',user5.lastName) as closedByName, ptw.cancelRequestDate as cancel_at " +
-              "FROM permits as ptw " +
-              "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
-              "LEFT JOIN permitjobtypelist as jobType ON ptw.jobTypeId = jobType.id " +
-              "LEFT JOIN permittbtjoblist as sop ON ptw.TBTId = sop.id " +
-              "JOIN facilities as facilities  ON ptw.facilityId = facilities.id " +
-              "JOIN facilities as blocks  ON ptw.blockId = blocks.id " +
-              "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
-              "LEFT JOIN users as user2 ON user2.id = ptw.approvedById " +
-              "LEFT JOIN users as user3 ON user3.id = ptw.acceptedById " +
-              "LEFT JOIN users as user4 ON user4.id = ptw.cancelRequestById " +
-              "LEFT JOIN users as user5 ON user5.id = ptw.completedById order by ptw.id desc limit 1";
+            /*            string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as start_datetime, ptw.endDate as end_datetime, facilities.id as facility_id, facilities.name as siteName, ptw.id as permitNo, CAST(ptw.permitNumber as char(100))  as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, blocks.id as blockId, blocks.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.title as title, ptw.description as description, ptw.jobTypeId as job_type_id, jobType.title as job_type_name, ptw.TBTId as sop_type_id, sop.title as sop_type_name, user1.id as issuer_id, CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, user2.id as approver_id, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, user3.id as requester_id, CONCAT(user3.firstName,' ',user3.lastName) as requestedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, CONCAT(user5.firstName,' ',user5.lastName) as closedByName, ptw.cancelRequestDate as cancel_at " +
+                          "FROM permits as ptw " +
+                          "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
+                          "LEFT JOIN permitjobtypelist as jobType ON ptw.jobTypeId = jobType.id " +
+                          "LEFT JOIN permittbtjoblist as sop ON ptw.TBTId = sop.id " +
+                          "JOIN facilities as facilities  ON ptw.facilityId = facilities.id " +
+                          "JOIN facilities as blocks  ON ptw.blockId = blocks.id " +
+                          "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
+                          "LEFT JOIN users as user2 ON user2.id = ptw.approvedById " +
+                          "LEFT JOIN users as user3 ON user3.id = ptw.acceptedById " +
+                          "LEFT JOIN users as user4 ON user4.id = ptw.cancelRequestById " +
+                          "LEFT JOIN users as user5 ON user5.id = ptw.completedById order by ptw.id desc limit 1";
 
-            List<CMPermitDetail> permitDetails = await Context.GetData<CMPermitDetail>(myQuery).ConfigureAwait(false);
-*/
+                        List<CMPermitDetail> permitDetails = await Context.GetData<CMPermitDetail>(myQuery).ConfigureAwait(false);
+            */
             string ptwCodeQry = $"UPDATE permits SET code = CONCAT('PTW', id);";
             await Context.ExecuteNonQry<int>(ptwCodeQry).ConfigureAwait(false);
 
@@ -918,19 +918,20 @@ namespace CMMSAPIs.Repositories.Permits
               "LEFT JOIN permittbtjoblist as sop ON ptw.TBTId = sop.id " +
               "LEFT JOIN facilities as facilities  ON ptw.facilityId = facilities.id " +
               "LEFT JOIN facilities as blocks  ON ptw.blockId = blocks.id " +
-              "LEFT JOIN users as user1 ON user1.id = ptw.issuedById  LEFT JOIN users as userT1 ON user1.id = ptw.extendRequestby_id  left join userroles as ud1 on  user1.roleId = ud1.id left join business as co1 on  user1.companyId = co1.id  " +
-              "LEFT JOIN users as user2 ON user2.id = ptw.approvedById LEFT JOIN users as userT2 ON user1.id = ptw.extendRequestApprovedby_id  left join userroles as ud2 on  user2.roleId = ud2.id left join business as co2 on  user2.companyId = co2.id  " +
-              "LEFT JOIN users as user3 ON user3.id = ptw.acceptedById left join userroles as ud3 on  user3.roleId = ud3.id left join business as co3 on  user3.companyId = co3.id  " +
-              "LEFT JOIN users as user4 ON user4.id = ptw.cancelRequestById left join userroles as ud4 on  user4.roleId = ud4.id left join business as co4 on  user4.companyId = co4.id  " +
-              "LEFT JOIN users as user5 ON user5.id = ptw.completedById left join userroles as ud5 on  user5.roleId = ud5.id left join business as co5 on  user5.companyId = co5.id  " +
-              $"LEFT JOIN users as user6 ON user6.id = ptw.rejectedById and ptw.status = {(int)CMMS.CMMS_Status.PTW_REJECTED_BY_ISSUER} left join userroles as ud6 on  user6.roleId = ud6.id left join business as co6 on  user6.companyId = co6.id  " +
-              $"LEFT JOIN users as user7 ON user7.id = ptw.rejectedById and ptw.status > {(int)CMMS.CMMS_Status.PTW_REJECTED_BY_ISSUER} left join userroles as ud7 on  user7.roleId = ud7.id left join business as co7 on  user7.companyId = co7.id  " +
-              "LEFT JOIN users as user8 ON user8.id = ptw.cancelRequestApproveById left join userroles as ud8 on  user8.roleId = ud8.id left join business as co8 on  user8.companyId = co8.id " +
-              "LEFT JOIN users as user9 ON user9.id = ptw.cancelRequestRejectById left join userroles as ud9 on  user9.roleId = ud9.id left join business as co9 on  user9.companyId = co9.id " +
+              "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
+              "LEFT JOIN users as userT1 ON user1.id = ptw.extendRequestby_id " +
+              "left join userroles as ud1 on  user1.roleId = ud1.id " +
+              "left join business as co1 on facilities.operatorId = co1.id  " +
+              "LEFT JOIN users as user2 ON user2.id = ptw.approvedById LEFT JOIN users as userT2 ON user1.id = ptw.extendRequestApprovedby_id  left join userroles as ud2 on  user2.roleId = ud2.id left join business as co2 on  facilities.operatorId = co2.id  " +
+              "LEFT JOIN users as user3 ON user3.id = ptw.acceptedById left join userroles as ud3 on  user3.roleId = ud3.id left join business as co3 on  facilities.operatorId = co3.id  " +
+              "LEFT JOIN users as user4 ON user4.id = ptw.cancelRequestById left join userroles as ud4 on  user4.roleId = ud4.id left join business as co4 on  facilities.operatorId = co4.id  " +
+              "LEFT JOIN users as user5 ON user5.id = ptw.completedById left join userroles as ud5 on  user5.roleId = ud5.id left join business as co5 on  facilities.operatorId = co5.id  " +
+              $"LEFT JOIN users as user6 ON user6.id = ptw.rejectedById and ptw.status = {(int)CMMS.CMMS_Status.PTW_REJECTED_BY_ISSUER} left join userroles as ud6 on  user6.roleId = ud6.id left join business as co6 on  facilities.operatorId = co6.id  " +
+              $"LEFT JOIN users as user7 ON user7.id = ptw.rejectedById and ptw.status > {(int)CMMS.CMMS_Status.PTW_REJECTED_BY_ISSUER} left join userroles as ud7 on  user7.roleId = ud7.id left join business as co7 on facilities.operatorId = co7.id  " +
+              "LEFT JOIN users as user8 ON user8.id = ptw.cancelRequestApproveById left join userroles as ud8 on  user8.roleId = ud8.id left join business as co8 on  facilities.operatorId = co8.id " +
+              "LEFT JOIN users as user9 ON user9.id = ptw.cancelRequestRejectById left join userroles as ud9 on  user9.roleId = ud9.id left join business as co9 on  facilities.operatorId = co9.id " +
               " LEFT JOIN users as userTBT ON userTBT.id = ptw.TBT_Done_By " +
-
                 $"where ptw.id = {permit_id}";
-
             List<CMPermitDetail> _PermitDetailsList = await Context.GetData<CMPermitDetail>(myQuery).ConfigureAwait(false);
 
             if (_PermitDetailsList.Count == 0)
@@ -1491,7 +1492,9 @@ namespace CMMSAPIs.Repositories.Permits
 
         internal async Task<CMDefaultResponse> PermitReject(CMApproval request, int userID)
         {
-            string updateQry = $"update permits set rejectReason = '{request.comment}', rejectStatus = 1, status = {(int)CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER}, status_updated_at = '{UtilsRepository.GetUTCTime()}', rejectedDate ='{UtilsRepository.GetUTCTime()}', rejectedById = {userID}  where id = {request.id}";
+            string updateQry = $"update permits set rejectReason = '{request.comment}', " +
+                               $"rejectStatus = 1, status = {(int)CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER}, status_updated_at = '{UtilsRepository.GetUTCTime()}', " +
+                               $"rejectedDate ='{UtilsRepository.GetUTCTime()}', rejectedById = {userID}  where id = {request.id}";
             int retValue = await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
 
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
@@ -1503,7 +1506,7 @@ namespace CMMSAPIs.Repositories.Permits
 
             CMPermitDetail permitDetails = await GetPermitDetails(request.id, "");
 
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.id, 0, 0, "Permit rejected by Approver. Reason :  " + request.comment, CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER, userID);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.id, 0, 0, request.comment, CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER, userID);
 
             await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER, new[] { userID }, permitDetails);
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $" Permit  {request.id} Rejected");
@@ -1871,7 +1874,7 @@ namespace CMMSAPIs.Repositories.Permits
             if (request.resubmit == true)
             {
                 string stemp = request.comment;
-                if(stemp.Length <= 0)
+                if (stemp.Length <= 0)
                 {
                     stemp = "Permit Resubmitted for Approval";
                 }

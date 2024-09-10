@@ -1339,7 +1339,7 @@ namespace CMMSAPIs.Repositories.Audits
                 $"where task_id = {task_id} and Asset_id=0;";
 
             List<CMPMScheduleExecutionDetail> checklist_collection = await Context.GetData<CMPMScheduleExecutionDetail>(myQuery2).ConfigureAwait(false);
-
+            taskViewDetail[0].Material_consumption = new List<Materialconsumption>();
 
             //string myQuery2 = $"SELECT DISTINCT checklist.id, checklist.checklist_number AS name FROM pm_execution " + 
             //                    $"JOIN checkpoint on pm_execution.Check_Point_id = checkpoint.id " + 

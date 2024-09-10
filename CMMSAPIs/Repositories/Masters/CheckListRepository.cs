@@ -862,11 +862,21 @@ namespace CMMSAPIs.Repositories.Masters
                             else if (Convert.ToString(newR["check_point"]) != "" && newR["checklist_id"] != DBNull.Value)
                             {
 
+                                /* string checkpoint_q = "select * from checkpoint where check_point = \"" + Convert.ToString(newR["check_point"]) + "\" and check_list_id=" + Convert.ToInt32(newR["checklist_id"]) + ";";
+                                 //checkpoint_q = System.Text.RegularExpressions.Regex.Replace(checkpoint_q, "[@,\\.\";'\\\\]", string.Empty);
+                                 DataTable st_cp = await Context.FetchData(checkpoint_q).ConfigureAwait(false);
+                                 if (st_cp.Rows.Count == 0)
+                                 {
+                                     m_errorLog.SetError($"[Checkpoint: Row {rN}] checkpoint empty for checklist.{newR["checklist_name"].ToString()}");
+                                     newR.Delete();
+                                     continue;
+                                 }*/
                                 string checkpoint_q = "select * from checkpoint where check_point = \"" + Convert.ToString(newR["check_point"]) + "\" and check_list_id=" + Convert.ToInt32(newR["checklist_id"]) + ";";
                                 //checkpoint_q = System.Text.RegularExpressions.Regex.Replace(checkpoint_q, "[@,\\.\";'\\\\]", string.Empty);
                                 DataTable st_cp = await Context.FetchData(checkpoint_q).ConfigureAwait(false);
                                 if (st_cp.Rows.Count > 0)
                                 {
+                                    m_errorLog.SetError($"[Checkpoint: Row {rN}] checkpoint empty for checklist.{newR["checklist_name"].ToString()}");
                                     newR.Delete();
                                     continue;
                                 }

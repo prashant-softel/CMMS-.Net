@@ -282,8 +282,8 @@ namespace CMMSAPIs.Repositories.PM
             CMMS.CMMS_Status status = (CMMS.CMMS_Status)Convert.ToInt32(dt1.Rows[0][0]);
 
 
-//            if (status != CMMS.CMMS_Status.RESCHEDULED_TASK && status != CMMS.CMMS_Status.PM_CLOSE_APPROVED)
-            if(status != CMMS.CMMS_Status.PM_CLOSE_APPROVED)
+            //            if (status != CMMS.CMMS_Status.RESCHEDULED_TASK && status != CMMS.CMMS_Status.PM_CLOSE_APPROVED)
+            if (status != CMMS.CMMS_Status.PM_CLOSE_APPROVED)
             {
                 // return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.FAILURE, "Only a PM Task that has not been executed can be cancelled.");
                 string myQuery = "UPDATE pm_task SET " +
@@ -592,7 +592,7 @@ namespace CMMSAPIs.Repositories.PM
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
             if (retVal > 0)
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_TASK, task_id, CMMS.CMMS_Modules.PTW, permit_id, "PTW linked to PM", CMMS.CMMS_Status.PM_LINK_PTW, userID);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_TASK, task_id, CMMS.CMMS_Modules.PTW, permit_id, "PTW linked to PM", CMMS.CMMS_Status.PM_LINKED_TO_PTW, userID);
             try
             {
                 CMPMTaskView _PMTaskList = await GetPMTaskDetail(task_id, facilitytimeZone);
