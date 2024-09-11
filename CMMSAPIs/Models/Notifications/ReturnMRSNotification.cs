@@ -72,18 +72,15 @@ namespace CMMSAPIs.Models.Notifications
 
             if (m_RMRSObj.requested_by_emp_ID > 0)
             {
-                retValue += String.Format(template, "Requested By", m_RMRSObj.requested_by_name);
-                retValue += String.Format(template, "Requested At", m_RMRSObj.requested_date);
+                retValue += String.Format(template, "Requested By", m_RMRSObj.requested_by_name + " at " + m_RMRSObj.requested_date);
             }
             if (!string.IsNullOrEmpty(m_RMRSObj.request_rejected_by_name))
             {
-                retValue += String.Format(template, "Request Rejected By", m_RMRSObj.request_rejected_by_name);
-                retValue += String.Format(template, "Request Rejected At", m_RMRSObj.rejected_date);
+                retValue += String.Format(template, "Request Rejected By", m_RMRSObj.request_rejected_by_name + " at " + m_RMRSObj.rejected_date);
             }
             if (!string.IsNullOrEmpty(m_RMRSObj.approver_name))
             {
-                retValue += String.Format(template, "Request Approved By", m_RMRSObj.approver_name);
-                retValue += String.Format(template, "Request Approved At", m_RMRSObj.approved_date);
+                retValue += String.Format(template, "Request Approved By", m_RMRSObj.approver_name + " at " + m_RMRSObj.approved_date);
             }
 
             retValue += "</table><br><br>";

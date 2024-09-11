@@ -97,8 +97,7 @@ namespace CMMSAPIs.Models.Notifications
         {
             string retValue = "";
 
-            retValue = String.Format("<h3><b style='color:#31576D'>Status : </b>{0}</h3><br>", m_GOObj.status_long + " at " + m_GOObj.facilityName);
-
+            retValue = String.Format("<table style='width: 50%; margin: 0 auto; border-collapse: collapse; border-spacing: 10px'><tr><td style='white-space: nowrap;'><h3><b style='color:#31576D'>Status : </b>{0}</h3></td></tr></table>", m_GOObj.status_long);
 
             retValue += "<div style='display: flex; flex-direction: column; align-items: center;'>";
 
@@ -164,43 +163,35 @@ namespace CMMSAPIs.Models.Notifications
             retValue += String.Format("<table style='width: 100%; margin:0 auto; border-collapse: collapse; border-spacing: 10px;' border='1'>");
             if (!string.IsNullOrEmpty(m_GOObj.submitted_by_name))
             {
-                retValue += String.Format(template, "Submitted By", m_GOObj.submitted_by_name);
-                retValue += String.Format(template, "Submitted At", m_GOObj.submitted_at);
+                retValue += String.Format(template, "Submitted By", m_GOObj.submitted_by_name + " at " + m_GOObj.submitted_at);
             }
             if (!string.IsNullOrEmpty(m_GOObj.rejected_by_name))
             {
-                retValue += String.Format(template, "Rejected By", m_GOObj.rejected_by_name);
-                retValue += String.Format(template, "Rejected At", m_GOObj.rejected_at);
+                retValue += String.Format(template, "Rejected By", m_GOObj.rejected_by_name + " at " + m_GOObj.rejected_at);
             }
             if (!string.IsNullOrEmpty(m_GOObj.approved_by_name))
             {
-                retValue += String.Format(template, "Approved By", m_GOObj.approved_by_name);
-                retValue += String.Format(template, "Approved At", m_GOObj.approved_at);
+                retValue += String.Format(template, "Approved By", m_GOObj.approved_by_name + " at " + m_GOObj.approved_at);
             }
             if (!string.IsNullOrEmpty(m_GOObj.receive_submitted_by_name))
             {
-                retValue += String.Format(template, "Receive Request Submitted By", m_GOObj.receive_submitted_by_name);
-                retValue += String.Format(template, "Receive Request Submitted At", m_GOObj.receive_submitted_at);
+                retValue += String.Format(template, "Receive Request Submitted By", m_GOObj.receive_submitted_by_name + " at " + m_GOObj.receive_submitted_at);
             }
             if (!string.IsNullOrEmpty(m_GOObj.receive_rejected_by_name))
             {
-                retValue += String.Format(template, "Receive Request Rejected By", m_GOObj.receive_rejected_by_name);
-                retValue += String.Format(template, "Receive Request Rejected At", m_GOObj.receive_rejected_at);
+                retValue += String.Format(template, "Receive Request Rejected By", m_GOObj.receive_rejected_by_name + " at " + m_GOObj.receive_rejected_at);
             }
             if (!string.IsNullOrEmpty(m_GOObj.receive_approved_by_name))
             {
-                retValue += String.Format(template, "Receive Request Approved By", m_GOObj.receive_approved_by_name);
-                retValue += String.Format(template, "Receive Request Approved At", m_GOObj.receive_approved_at);
+                retValue += String.Format(template, "Receive Request Approved By", m_GOObj.receive_approved_by_name + " at " + m_GOObj.receive_approved_at);
             }
             if (!string.IsNullOrEmpty(m_GOObj.closed_by_name))
             {
-                retValue += String.Format(template, "Closed By", m_GOObj.closed_by_name);
-                retValue += String.Format(template, "Closed At", m_GOObj.closed_at);
+                retValue += String.Format(template, "Closed By", m_GOObj.closed_by_name + " at " + m_GOObj.closed_at);
             }
             if (!string.IsNullOrEmpty(m_GOObj.go_updated_by_name))
             {
-                retValue += String.Format(template, "Updated By", m_GOObj.go_updated_by_name);
-                retValue += String.Format(template, "Updated At", m_GOObj.go_updatedOn);
+                retValue += String.Format(template, "Updated By", m_GOObj.go_updated_by_name + " at " + m_GOObj.go_updatedOn);
             }
             retValue += "</table>";
             retValue += "</div>";
@@ -211,7 +202,7 @@ namespace CMMSAPIs.Models.Notifications
             if (check1 || check2 || check3 || check4 == true)
             {
                 // GO Items Table
-                retValue += "<h4>Selected Material</h4>";
+                retValue += "<h4 style='text-align:center;'>Selected Material</h4>";
                 retValue += "<table style='width: 100%; margin:0 auto; border-collapse: collapse; border-spacing: 10px; table-layout: auto;' border='1'>";
                 retValue += "<tr>";
                 retValue += "<th>Material</th>";
@@ -229,9 +220,6 @@ namespace CMMSAPIs.Models.Notifications
 
                 retValue += "<th>Accepted Quantity</th>";
                 retValue += "<th>Damamaged Items</th>";
-                //retValue += "<th>Rack No.</th>";
-                //retValue += "<th>Row No.</th>";
-                //retValue += "<th>Column No.</th>";
                 retValue += "</tr>";
 
                 foreach (var item in m_GOObj.GODetails)
@@ -248,19 +236,15 @@ namespace CMMSAPIs.Models.Notifications
                     {
                         retValue += String.Format("<td style='word-wrap: break-word;'>{0}</td>", item.sr_no);
                     }
-
                     retValue += String.Format("<td style='word-wrap: break-word;'>{0}</td>", item.accepted_qty);
                     retValue += String.Format("<td style='word-wrap: break-word;'>{0}</td>", item.damaged_qty);
-                    //retValue += String.Format("<td style='word-wrap: break-word;'>{0}</td>", item.storage_rack_no);
-                    //retValue += String.Format("<td style='word-wrap: break-word;'>{0}</td>", item.storage_row_no);
-                    //retValue += String.Format("<td style='word-wrap: break-word;'>{0}</td>", item.storage_column_no);
                     retValue += "</tr>";
                 }
                 retValue += "</table><br><br>";
             }
             else
             {
-                retValue += "<h4>Selected Material</h4>";
+                retValue += "<h4 style='text-align:center;'>Selected Material</h4>";
                 retValue += "<table style='width: 80%; margin:0 auto; border-collapse: collapse; border-spacing: 10px;' border='1'>";
                 retValue += "<tr>";
                 retValue += "<th>Material</th>";
@@ -282,7 +266,7 @@ namespace CMMSAPIs.Models.Notifications
 
             }
 
-
+            retValue += "<div style='text-align:center;'>";
             switch (m_notificationID)
             {
                 case CMMS.CMMS_Status.GO_DRAFT:

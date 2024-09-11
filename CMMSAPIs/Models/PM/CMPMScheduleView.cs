@@ -143,7 +143,15 @@ namespace CMMSAPIs.Models.PM
         public string facilityidbyName { get; set; }
         public string categoryName { get; set; }
         public string title { get; set; }
-        public dynamic tbt_start { get; set; }
+        public string checklist_name { get; set; }
+        public string skip_by_name { get; set; }
+        public DateTime? skip_date { get; set; }
+        public string skip_rejected_by_name { get; set; }
+        public DateTime? Skip_rejected_Date { get; set; }
+        public string skip_approved_by_name { get; set; }
+        public DateTime? skip_approved_at { get; set; }
+        public string facility_name { get; set; }
+
     }
     public class CMPMScheduleViewDetail : CMPMScheduleView
     {

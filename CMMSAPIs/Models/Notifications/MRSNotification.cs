@@ -87,7 +87,7 @@ namespace CMMSAPIs.Models.Notifications
         {
             string retValue = "";
 
-            retValue = String.Format("<h3><b style='color:#31576D'>Status : </b>{0}</h3><br>", m_MRSObj.status_long + " at " + m_MRSObj.facilityName);
+            retValue = String.Format("<table style='width: 50%; margin: 0 auto; border-collapse: collapse; border-spacing: 10px'><tr><td style='white-space: nowrap;'><h3><b style='color:#31576D'>Status : </b>{0}</h3></td></tr></table>", m_MRSObj.status_long + " at " + m_MRSObj.facilityName);
 
             retValue += String.Format("<table style='width: 50%; margin:0 auto; border-collapse: collapse ; border-spacing: 10px; ' border='1'>");
             
@@ -105,39 +105,33 @@ namespace CMMSAPIs.Models.Notifications
 
             if (m_MRSObj.requested_by_emp_ID > 0)
             {
-                retValue += String.Format(template, "Requested By", m_MRSObj.requested_by_name);
-                retValue += String.Format(template, "Requested At", m_MRSObj.requestd_date);
+                retValue += String.Format(template, "Requested By", m_MRSObj.requested_by_name + " at " + m_MRSObj.requestd_date);
             }
             if (!string.IsNullOrEmpty(m_MRSObj.request_rejected_by_name))
             {
-                retValue += String.Format(template, "Request Rejected By", m_MRSObj.request_rejected_by_name);
-                retValue += String.Format(template, "Request Rejected At", m_MRSObj.request_rejected_at);
+                retValue += String.Format(template, "Request Rejected By", m_MRSObj.request_rejected_by_name + " at " + m_MRSObj.request_rejected_at);
             }
             if (!string.IsNullOrEmpty(m_MRSObj.approver_name))
             {
-                retValue += String.Format(template, "Request Approved By", m_MRSObj.approver_name);
-                retValue += String.Format(template, "Request Approved At", m_MRSObj.approval_date);
+                retValue += String.Format(template, "Request Approved By", m_MRSObj.approver_name + " at " + m_MRSObj.approval_date);
             }
             if (!string.IsNullOrEmpty(m_MRSObj.issued_name))
             {
-                retValue += String.Format(template, "Issued By", m_MRSObj.issued_name);
-                retValue += String.Format(template, "Issued At", m_MRSObj.issuedAt);
+                retValue += String.Format(template, "Issued By", m_MRSObj.issued_name + " at " + m_MRSObj.issuedAt);
             }
             if (m_MRSObj.issue_approved_by_emp_ID > 0)
             {
-                retValue += String.Format(template, "Issue Approved  By", m_MRSObj.issue_appoved_by_name);
-                retValue += String.Format(template, "Issue Approved At", m_MRSObj.issue_approved_date);
+                retValue += String.Format(template, "Issue Approved  By", m_MRSObj.issue_appoved_by_name + " at " + m_MRSObj.issue_approved_date);
             }
             if (m_MRSObj.issue_rejected_by_emp_ID > 0)
             {
-                retValue += String.Format(template, "Issue Rejected By", m_MRSObj.issue_rejected_by_name);
-                retValue += String.Format(template, "Issue Rejected At", m_MRSObj.issue_rejected_date);
+                retValue += String.Format(template, "Issue Rejected By", m_MRSObj.issue_rejected_by_name + " at " + m_MRSObj.issue_rejected_date);
             }
 
             retValue += "</table><br><br>";
 
             // MRS Items Table
-            retValue += "<h4>Materials</h4>";
+            retValue += "<h4 style='text-align:center;'>Materials</h4>";
             retValue += "<table style='width: 80%; margin:0 auto; border-collapse: collapse; border-spacing: 10px;' border='1'>";
             retValue += "<tr>";
             retValue += "<th>Material Name</th>";
@@ -162,6 +156,7 @@ namespace CMMSAPIs.Models.Notifications
 
             retValue += "</table><br><br>";
 
+            retValue += "<div style='text-align:center;'>";
             switch (m_notificationID)
             {
                 case CMMS.CMMS_Status.MRS_SUBMITTED:

@@ -15,13 +15,13 @@ namespace CMMSAPIs.BS.Audits
     {
         Task<List<CMAuditPlanList>> GetAuditPlanList(int facility_id, DateTime fromDate, DateTime toDate,string facilitytime, int module_type_id);
         Task<CMAuditPlanList> GetAuditPlanByID(int id,string facilitytime);
-        Task<CMDefaultResponse> CreateAuditPlan(CMCreateAuditPlan request, int userID);
+        Task<CMDefaultResponse> CreateAuditPlan(CMCreateAuditPlan request, int userID, string facilitytimeZone);
         Task<CMDefaultResponse> UpdateAuditPlan(CMCreateAuditPlan request);
-        Task<CMDefaultResponse> DeleteAuditPlan(int audit_plan_id);
-        Task<CMDefaultResponse> ApproveAuditPlan(CMApproval request, int userId);
-        Task<CMDefaultResponse> RejectAuditPlan(CMApproval request, int userId);
+        Task<CMDefaultResponse> DeleteAuditPlan(CMApproval request, int userId, string facilitytimeZone);
+        Task<CMDefaultResponse> ApproveAuditPlan(CMApproval request, int userId, string facilitytimeZone);
+        Task<CMDefaultResponse> RejectAuditPlan(CMApproval request, int userId, string facilitytimeZone);
         Task<CMDefaultResponse> CreateAuditPlan(CMPMPlanDetail pm_plan, int userID);
-        Task<CMDefaultResponse> StartAuditTask(int task_id, int userID);
+        Task<CMDefaultResponse> StartAuditTask(int task_id, int userID, string facilitytimeZone);
         Task<List<CMDefaultResponse>> UpdateAuditTaskExecution(CMPMExecutionDetail request, int userID);
         Task<CMDefaultResponse> DeletePlan(int planId, int userID);
         Task<CMDefaultResponse> ApprovePlan(CMApproval request, int userId);
@@ -30,13 +30,13 @@ namespace CMMSAPIs.BS.Audits
         Task<CMPMPlanDetail> GetPlanDetail(int id, string facilitytime);
         Task<List<CMPMTaskList>> GetTaskList(int facility_id, DateTime? start_date, DateTime? end_date, string frequencyIds, string facilitytime, int module_type_id);
         Task<CMPMTaskView> GetTaskDetail(int task_id,string facilitytime);
-        Task<CMDefaultResponse> CreateAuditSkip(CMApproval request, int userId);
-        Task<CMDefaultResponse> RejectAuditSkip(CMApproval request, int userId);
-        Task<CMDefaultResponse> ApproveAuditSkip(CMApproval request, int userId);
-        Task<CMDefaultResponse> CloseAuditPlan(CMApproval request, int userId);
-        Task<CMDefaultResponse> RejectCloseAuditPlan(CMApproval request, int userId);
-        Task<CMDefaultResponse> ApproveClosedAuditPlan(CMApproval request, int userId);
-        Task<CMDefaultResponse> AuditLinkToPermit(int audit_id, int ptw_id, int updatedBy);
+        Task<CMDefaultResponse> CreateAuditSkip(CMApproval request, int userId, string facilitytimeZone);
+        Task<CMDefaultResponse> RejectAuditSkip(CMApproval request, int userId, string facilitytimeZone);
+        Task<CMDefaultResponse> ApproveAuditSkip(CMApproval request, int userId, string facilitytimeZone);
+        Task<CMDefaultResponse> CloseAuditPlan(CMApproval request, int userId, string facilitytimeZone);
+        Task<CMDefaultResponse> RejectCloseAuditPlan(CMApproval request, int userId, string facilitytimeZone);
+        Task<CMDefaultResponse> ApproveClosedAuditPlan(CMApproval request, int userId, string facilitytimeZone);
+        Task<CMDefaultResponse> AuditLinkToPermit(int audit_id, int ptw_id, int updatedBy, string facilitytimeZone);
         Task<CMDefaultResponse> AssignAuditTask(int task_id, int assign_to, int userID);
     }
     public class AuditPlanBS : IAuditPlanBS
@@ -80,13 +80,13 @@ namespace CMMSAPIs.BS.Audits
             }
         }
 
-        public async Task<CMDefaultResponse> CreateAuditPlan(CMCreateAuditPlan request, int userID)
+        public async Task<CMDefaultResponse> CreateAuditPlan(CMCreateAuditPlan request, int userID, string facilitytimeZone)
         {
             try
             {
                 using (var repos = new AuditPlanRepository(getDB))
                 {
-                    return await repos.CreateAuditPlan(request, userID);
+                    return await repos.CreateAuditPlan(request, userID, facilitytimeZone);
 
                 }
             }
@@ -112,13 +112,13 @@ namespace CMMSAPIs.BS.Audits
             }
         }
 
-        public async Task<CMDefaultResponse> DeleteAuditPlan(int audit_plan_id)
+        public async Task<CMDefaultResponse> DeleteAuditPlan(CMApproval request,int userId, string facilitytimeZone)
         {
             try
             {
                 using (var repos = new AuditPlanRepository(getDB))
                 {
-                    return await repos.DeleteAuditPlan(audit_plan_id);
+                    return await repos.DeleteAuditPlan(request, userId, facilitytimeZone);
 
                 }
             }
@@ -128,13 +128,13 @@ namespace CMMSAPIs.BS.Audits
             }
         }
 
-        public async Task<CMDefaultResponse> ApproveAuditPlan(CMApproval request, int userId)
+        public async Task<CMDefaultResponse> ApproveAuditPlan(CMApproval request, int userId, string facilitytimeZone)
         {
             try
             {
                 using (var repos = new AuditPlanRepository(getDB))
                 {
-                    return await repos.ApproveAuditPlan(request, userId);
+                    return await repos.ApproveAuditPlan(request, userId, facilitytimeZone);
 
                 }
             }
@@ -144,13 +144,13 @@ namespace CMMSAPIs.BS.Audits
             }
         }
 
-        public async Task<CMDefaultResponse> RejectAuditPlan(CMApproval request, int userId)
+        public async Task<CMDefaultResponse> RejectAuditPlan(CMApproval request, int userId, string facilitytimeZone)
         {
             try
             {
                 using (var repos = new AuditPlanRepository(getDB))
                 {
-                    return await repos.RejectAuditPlan(request, userId);
+                    return await repos.RejectAuditPlan(request, userId, facilitytimeZone);
 
                 }
             }
@@ -174,13 +174,13 @@ namespace CMMSAPIs.BS.Audits
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> StartAuditTask(int task_id, int userID)
+        public async Task<CMDefaultResponse> StartAuditTask(int task_id, int userID, string facilitytimeZone)
         {
             try
             {
                 using (var repos = new AuditPlanRepository(getDB))
                 {
-                    return await repos.StartAuditTask(task_id, userID);
+                    return await repos.StartAuditTask(task_id, userID, facilitytimeZone);
 
                 }
             }
@@ -318,13 +318,13 @@ namespace CMMSAPIs.BS.Audits
             }
         }
 
-        public async Task<CMDefaultResponse> CreateAuditSkip(CMApproval request, int userId)
+        public async Task<CMDefaultResponse> CreateAuditSkip(CMApproval request, int userId, string facilitytimeZone)
         {
             try
             {
                 using (var repos = new AuditPlanRepository(getDB))
                 {
-                    return await repos.CreateAuditSkip(request, userId);
+                    return await repos.CreateAuditSkip(request, userId, facilitytimeZone);
 
                 }
             }
@@ -334,13 +334,13 @@ namespace CMMSAPIs.BS.Audits
             }
         }
 
-        public async Task<CMDefaultResponse> RejectAuditSkip(CMApproval request, int userId)
+        public async Task<CMDefaultResponse> RejectAuditSkip(CMApproval request, int userId, string facilitytimeZone)
         {
             try
             {
                 using (var repos = new AuditPlanRepository(getDB))
                 {
-                    return await repos.RejectAuditSkip(request, userId);
+                    return await repos.RejectAuditSkip(request, userId, facilitytimeZone);
 
                 }
             }
@@ -349,13 +349,13 @@ namespace CMMSAPIs.BS.Audits
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> ApproveAuditSkip(CMApproval request, int userId)
+        public async Task<CMDefaultResponse> ApproveAuditSkip(CMApproval request, int userId, string facilitytimeZone)
         {
             try
             {
                 using (var repos = new AuditPlanRepository(getDB))
                 {
-                    return await repos.ApproveAuditSkip(request, userId);
+                    return await repos.ApproveAuditSkip(request, userId, facilitytimeZone);
 
                 }
             }
@@ -364,13 +364,13 @@ namespace CMMSAPIs.BS.Audits
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> CloseAuditPlan(CMApproval request, int userId)
+        public async Task<CMDefaultResponse> CloseAuditPlan(CMApproval request, int userId, string facilitytimeZone)
         {
             try
             {
                 using (var repos = new AuditPlanRepository(getDB))
                 {
-                    return await repos.CloseAuditPlan(request, userId);
+                    return await repos.CloseAuditPlan(request, userId, facilitytimeZone);
 
                 }
             }
@@ -379,13 +379,13 @@ namespace CMMSAPIs.BS.Audits
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> RejectCloseAuditPlan(CMApproval request, int userId)
+        public async Task<CMDefaultResponse> RejectCloseAuditPlan(CMApproval request, int userId, string facilitytimeZone)
         {
             try
             {
                 using (var repos = new AuditPlanRepository(getDB))
                 {
-                    return await repos.RejectCloseAuditPlan(request, userId);
+                    return await repos.RejectCloseAuditPlan(request, userId, facilitytimeZone);
 
                 }
             }
@@ -394,13 +394,13 @@ namespace CMMSAPIs.BS.Audits
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> ApproveClosedAuditPlan(CMApproval request, int userId)
+        public async Task<CMDefaultResponse> ApproveClosedAuditPlan(CMApproval request, int userId, string facilitytimeZone)
         {
             try
             {
                 using (var repos = new AuditPlanRepository(getDB))
                 {
-                    return await repos.ApproveClosedAuditPlan(request, userId);
+                    return await repos.ApproveClosedAuditPlan(request, userId, facilitytimeZone);
 
                 }
             }
@@ -409,13 +409,13 @@ namespace CMMSAPIs.BS.Audits
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> AuditLinkToPermit(int audit_id, int ptw_id, int updatedBy)
+        public async Task<CMDefaultResponse> AuditLinkToPermit(int audit_id, int ptw_id, int updatedBy, string facilitytimeZone)
         {
             try
             {
                 using (var repos = new AuditPlanRepository(getDB))
                 {
-                    return await repos.AuditLinkToPermit(audit_id, ptw_id, updatedBy);
+                    return await repos.AuditLinkToPermit(audit_id, ptw_id, updatedBy, facilitytimeZone);
 
                 }
             }

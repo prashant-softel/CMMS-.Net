@@ -563,6 +563,18 @@ namespace CMMSAPIs.Models.Notifications
                 notificationObj = new SMNotification(moduleID, notificationID, _SMRO);
                 facilityId = _SMRO.facilityID;
             }
+            else if (moduleID == CMMS.CMMS_Modules.AUDIT_TASK)      //Audit Task
+            {
+                CMPMTaskView _Audit = (CMPMTaskView)args[0];
+                notificationObj = new AuditTasknotification(moduleID, notificationID, _Audit);
+                //facilityId = _SMRO.facilityID;
+            }
+            else if (moduleID == CMMS.CMMS_Modules.AUDIT_PLAN)      //Audit Plan
+            {
+                CMPMPlanDetail _AuditPlan = (CMPMPlanDetail)args[0];
+                notificationObj = new AuditPlannotification(moduleID, notificationID, _AuditPlan);
+                //facilityId = _SMRO.facilityID;
+            }
             else
             {
                 throw new Exception("Notification code is  implemented for module <" + moduleID + ">");

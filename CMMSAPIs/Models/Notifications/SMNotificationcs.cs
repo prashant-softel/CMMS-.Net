@@ -92,10 +92,8 @@ namespace CMMSAPIs.Models.Notifications
         {
             string retValue = "";
 
-            retValue = String.Format("<h3><b style='color:#31576D'>Status : </b>{0}</h3><br>", m_SMROObj.status_long);
+                retValue = String.Format("<table style='width: 50%; margin: 0 auto; border-collapse: collapse; border-spacing: 10px'><tr><td style='white-space: nowrap;'><h3><b style='color:#31576D'>Status : </b>{0}</h3></td></tr></table>", m_SMROObj.status_long);
 
-            
-            
                 retValue += String.Format("<table style='width: 50%; margin:0 auto; border-collapse: collapse ; border-spacing: 10px; ' border='1'>");
                 retValue += String.Format(template, "ID","RO"+m_SMROObj.request_order_id);    
                 retValue += String.Format(template, "Facility Name", m_SMROObj.facilityName);
@@ -105,34 +103,29 @@ namespace CMMSAPIs.Models.Notifications
 
             if (!string.IsNullOrEmpty(m_SMROObj.generatedBy))
             {
-                retValue += String.Format(template, "Submitted By", m_SMROObj.generatedBy);
-                retValue += String.Format(template, "Submitted At", m_SMROObj.generatedAt);
+                retValue += String.Format(template, "Submitted By", m_SMROObj.generatedBy + " at " + m_SMROObj.generatedAt);
             }
             if (!string.IsNullOrEmpty(m_SMROObj.approvedBy))
             {
-                retValue += String.Format(template, "Approved By", m_SMROObj.approvedBy);
-                retValue += String.Format(template, "Approved At", m_SMROObj.approvedAt);
+                retValue += String.Format(template, "Approved By", m_SMROObj.approvedBy + " at " + m_SMROObj.approvedAt);
             }
             if (!string.IsNullOrEmpty(m_SMROObj.rejectedBy))
             {
-                retValue += String.Format(template, "Rejected By", m_SMROObj.rejectedBy);
-                retValue += String.Format(template, "Rejected At", m_SMROObj.rejectedAt);
+                retValue += String.Format(template, "Rejected By", m_SMROObj.rejectedBy + " at " + m_SMROObj.rejectedAt);
             }
             if (!string.IsNullOrEmpty(m_SMROObj.closed_by))
             {
-                retValue += String.Format(template, "Closed By", m_SMROObj.closed_by);
-                retValue += String.Format(template, "Closed At", m_SMROObj.closed_at);
+                retValue += String.Format(template, "Closed By", m_SMROObj.closed_by + " at " + m_SMROObj.closed_at);
             }
             if (!string.IsNullOrEmpty(m_SMROObj.updated_by))
             {
-                retValue += String.Format(template, "Updated By", m_SMROObj.updated_by);
-                retValue += String.Format(template, "Updated At", m_SMROObj.updated_by);
+                retValue += String.Format(template, "Updated By", m_SMROObj.updated_by + " at " + m_SMROObj.updated_by);
             }
 
             retValue += "</table><br><br>";
 
             // Request Order Item Table
-            retValue += "<h4>Selected Materials</h4>";
+            retValue += "<h4 style='text-align:center;'>Selected Materials</h4>";
             retValue += "<table style='width: 60%; margin:0 auto; border-collapse: collapse; border-spacing: 10px;' border='1'>";
             retValue += "<tr>";
             retValue += "<th>Item Name</th>";
@@ -155,6 +148,7 @@ namespace CMMSAPIs.Models.Notifications
 
             retValue += "</table><br><br>";
 
+            retValue += "<div style='text-align:center;'>";
             switch (m_notificationID)
             {
                 case CMMS.CMMS_Status.SM_RO_SUBMITTED:
