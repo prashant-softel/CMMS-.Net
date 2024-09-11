@@ -921,15 +921,15 @@ namespace CMMSAPIs.Repositories.Permits
               "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
               "LEFT JOIN users as userT1 ON user1.id = ptw.extendRequestby_id " +
               "left join userroles as ud1 on  user1.roleId = ud1.id " +
-              "left join business as co1 on facilities.operatorId = co1.id  " +
-              "LEFT JOIN users as user2 ON user2.id = ptw.approvedById LEFT JOIN users as userT2 ON user1.id = ptw.extendRequestApprovedby_id  left join userroles as ud2 on  user2.roleId = ud2.id left join business as co2 on  facilities.operatorId = co2.id  " +
-              "LEFT JOIN users as user3 ON user3.id = ptw.acceptedById left join userroles as ud3 on  user3.roleId = ud3.id left join business as co3 on  facilities.operatorId = co3.id  " +
-              "LEFT JOIN users as user4 ON user4.id = ptw.cancelRequestById left join userroles as ud4 on  user4.roleId = ud4.id left join business as co4 on  facilities.operatorId = co4.id  " +
-              "LEFT JOIN users as user5 ON user5.id = ptw.completedById left join userroles as ud5 on  user5.roleId = ud5.id left join business as co5 on  facilities.operatorId = co5.id  " +
-              $"LEFT JOIN users as user6 ON user6.id = ptw.rejectedById and ptw.status = {(int)CMMS.CMMS_Status.PTW_REJECTED_BY_ISSUER} left join userroles as ud6 on  user6.roleId = ud6.id left join business as co6 on  facilities.operatorId = co6.id  " +
-              $"LEFT JOIN users as user7 ON user7.id = ptw.rejectedById and ptw.status > {(int)CMMS.CMMS_Status.PTW_REJECTED_BY_ISSUER} left join userroles as ud7 on  user7.roleId = ud7.id left join business as co7 on facilities.operatorId = co7.id  " +
-              "LEFT JOIN users as user8 ON user8.id = ptw.cancelRequestApproveById left join userroles as ud8 on  user8.roleId = ud8.id left join business as co8 on  facilities.operatorId = co8.id " +
-              "LEFT JOIN users as user9 ON user9.id = ptw.cancelRequestRejectById left join userroles as ud9 on  user9.roleId = ud9.id left join business as co9 on  facilities.operatorId = co9.id " +
+              "left join business as co1 on user1.companyId = co1.id  " +
+              "LEFT JOIN users as user2 ON user2.id = ptw.approvedById LEFT JOIN users as userT2 ON user1.id = ptw.extendRequestApprovedby_id  left join userroles as ud2 on  user2.roleId = ud2.id left join business as co2 on user2.companyId = co2.id  " +
+              "LEFT JOIN users as user3 ON user3.id = ptw.acceptedById left join userroles as ud3 on  user3.roleId = ud3.id left join business as co3 on  user3.companyId = co3.id  " +
+              "LEFT JOIN users as user4 ON user4.id = ptw.cancelRequestById left join userroles as ud4 on  user4.roleId = ud4.id left join business as co4 on  user4.companyId = co4.id  " +
+              "LEFT JOIN users as user5 ON user5.id = ptw.completedById left join userroles as ud5 on  user5.roleId = ud5.id left join business as co5 on  user5.companyId = co5.id  " +
+              $"LEFT JOIN users as user6 ON user6.id = ptw.rejectedById and ptw.status = {(int)CMMS.CMMS_Status.PTW_REJECTED_BY_ISSUER} left join userroles as ud6 on  user6.roleId = ud6.id left join business as co6 on  user6.companyId = co6.id  " +
+              $"LEFT JOIN users as user7 ON user7.id = ptw.rejectedById and ptw.status > {(int)CMMS.CMMS_Status.PTW_REJECTED_BY_ISSUER} left join userroles as ud7 on  user7.roleId = ud7.id left join business as co7 on user7.companyId = co7.id  " +
+              "LEFT JOIN users as user8 ON user8.id = ptw.cancelRequestApproveById left join userroles as ud8 on  user8.roleId = ud8.id left join business as co8 on  user8.companyId = co8.id " +
+              "LEFT JOIN users as user9 ON user9.id = ptw.cancelRequestRejectById left join userroles as ud9 on  user9.roleId = ud9.id left join business as co9 on user9.companyId = co9.id " +
               " LEFT JOIN users as userTBT ON userTBT.id = ptw.TBT_Done_By " +
                 $"where ptw.id = {permit_id}";
             List<CMPermitDetail> _PermitDetailsList = await Context.GetData<CMPermitDetail>(myQuery).ConfigureAwait(false);
@@ -1024,7 +1024,8 @@ namespace CMMSAPIs.Repositories.Permits
                 $"left join pm_schedule as pmassets on pm.id = pmassets.task_id " +
                 $"left join assets on assets.id = pmassets.Asset_id " +
                 $"left join assetcategories as asset_cat on asset_cat.id = assets.categoryid " +
-                $"left join users as user on user.id = pm.assigned_to where pm.ptw_id = {permit_id} group by pm.id; ";
+                $"left join users as user on user.id = pm.assigned_to " +
+                $"where pm.ptw_id = {permit_id} group by pm.id; ";
 
             List<CMAssociatedPMList> _AssociatedPMList = await Context.GetData<CMAssociatedPMList>(pmlist).ConfigureAwait(false);
 
@@ -1873,14 +1874,8 @@ namespace CMMSAPIs.Repositories.Permits
             }
             if (request.resubmit == true)
             {
-                string stemp = request.comment;
-                if (stemp.Length <= 0)
-                {
-                    stemp = "Permit Resubmitted for Approval";
-                }
-                System.Text.StringBuilder sb = new System.Text.StringBuilder(stemp);
-                //sb.Append(" " + request.comment);
-                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.permit_id, 0, 0, sb.ToString(), CMMS.CMMS_Status.PTW_RESUBMIT, userID);
+
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.permit_id, 0, 0, request.comment, CMMS.CMMS_Status.PTW_RESUBMIT, userID);
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_RESUBMIT, new[] { userID }, permitDetails);
                 response = new CMDefaultResponse(request.permit_id, CMMS.RETRUNSTATUS.SUCCESS, $"Permit Resubmitted for Approval");
 

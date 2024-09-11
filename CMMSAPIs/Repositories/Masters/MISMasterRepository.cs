@@ -2512,7 +2512,8 @@ namespace CMMSAPIs.Repositories.Masters
 
             if (((int)CMMS.CMMS_Modules.JOB) == module_id)
             {
-                string myQueryJob = "SELECT fc.name as Site_name,  COUNT( js.createdBy > 0) AS Created, COUNT( jc.JC_End_By_id > 0) as Closed,  COUNT( jc.JC_End_By_id > 0) AS CardsEnded , " +
+                string myQueryJob = "SELECT fc.name as Site_name,  COUNT( js.createdBy > 0) AS Created, COUNT( jc.JC_End_By_id > 0) as Closed, " +
+                                    " COUNT( jc.JC_End_By_id > 0) AS CardsEnded , " +
                                     "COUNT( js.cancelledBy) AS Cancelled , COUNT(jc.JC_Start_By_id = 0) AS NotStarted, " +
                                     "COUNT(jc.JC_End_By_id = 0 and jc.JC_Start_By_id = 0) AS Ongoing, " +
                                     "count(DATEDIFF(jc.JC_Date_Start, jc.JC_Date_Stop))  AS ClosedOnTime, " +
@@ -2541,27 +2542,64 @@ namespace CMMSAPIs.Repositories.Masters
             }
             if (((int)CMMS.CMMS_Modules.MC_PLAN) == module_id)
             {
-                string myQueryJob = "SELECT fc.name as Site_name,  COUNT( js.createdBy > 0) AS Created, COUNT( jc.JC_End_By_id > 0) as Closed,  COUNT( jc.JC_End_By_id > 0) AS CardsEnded , " +
-                                    "COUNT( js.cancelledBy) AS Cancelled , COUNT(jc.JC_Start_By_id = 0) AS NotStarted, " +
-                                    "COUNT( jc.JC_End_By_id = 0) AS Ongoing, COUNT(jc.JC_End_By_id = 0 ) AS ClosedOnTime, " +
-                                    "COUNT( jc.JC_End_By_id = 0) AS ClosedWithExtension, COUNT( jc.JC_End_By_id = 0 ) AS JobClosedOnTime " +
-                                    "FROM   AS js LEFT JOIN jobcards AS jc ON js.id = jc.jobId " +
-                                    "LEFT JOIN facilities AS fc ON js.facilityId = fc.id " +
-                                    $"Where js.facilityId in({facility_id}) group by js.facilityId ;";
+
+                string myQueryJob = "SELECT f.name AS sitename, " +
+                                    "CASE WHEN mc.moduleType = 1 THEN 'Wet' " +
+                                       "WHEN mc.moduleType = 2 THEN 'Dry' ELSE 'Robotic' END AS CleaningType, " +
+                                       "sub1.TotalWaterUsed AS WaterUsed, " +
+                                       "SUM(css.moduleQuantity) AS ScheduledQuantity, " +
+                                       "sub2.no_of_cleaned AS actualQuantity, " +
+                                       "CASE WHEN mc.abandonedById > 0 THEN 'yes' ELSE 'no' END AS Abandoned, " +
+                                       "mc.reasonForAbandon AS Remark, " +
+                                       "(SUM(css.moduleQuantity) - sub2.no_of_cleaned) AS Deviation, " +
+                                       "CASE WHEN mc.abandonedAt IS NOT NULL THEN TIMESTAMPDIFF(MINUTE, mc.startDate, mc.abandonedAt) " +
+                                       "ELSE TIMESTAMPDIFF(MINUTE, mc.startDate, mc.endedAt) END AS TimeTaken " +
+                                       "FROM cleaning_execution AS mc " +
+                                       "LEFT JOIN cleaning_plan AS mp ON mp.planId = mc.planId " +
+                                       "LEFT JOIN cleaning_execution_items AS css ON css.executionId = mc.id " +
+                                       "LEFT JOIN (SELECT executionId, SUM(waterUsed) AS TotalWaterUsed " +
+                                       "FROM cleaning_execution_schedules GROUP BY executionId) sub1 " +
+                                       "ON mc.id = sub1.executionId " +
+                                       "LEFT JOIN (SELECT executionId, SUM(moduleQuantity) AS no_of_cleaned " +
+                                       "FROM cleaning_execution_items WHERE cleanedById > 0 GROUP BY executionId) sub2 " +
+                                       "ON mc.id = sub2.executionId " +
+                                       "LEFT JOIN Frequency AS freq ON freq.id = mp.frequencyId " +
+                                       "LEFT JOIN facilities AS f ON f.id = mc.facilityId " +
+                                       $"WHERE mc.facilityId IN ({facility_id}) AND mc.moduleType = 1 group by mc.facilityId;";
+
+
                 List<CumalativeReport> data = await Context.GetData<CumalativeReport>(myQueryJob).ConfigureAwait(false);
                 return data;
             }
             if (((int)CMMS.CMMS_Modules.VEGETATION_PLAN) == module_id)
             {
-                string myQueryJob = "SELECT fc.name as Site_name,  COUNT( js.createdBy > 0) AS Created, COUNT( jc.JC_End_By_id > 0) as Closed,  COUNT( jc.JC_End_By_id > 0) AS CardsEnded , " +
-                                    "COUNT( js.cancelledBy) AS Cancelled , COUNT(jc.JC_Start_By_id = 0) AS NotStarted, " +
-                                    "COUNT( jc.JC_End_By_id = 0) AS Ongoing, COUNT(jc.JC_End_By_id = 0 ) AS ClosedOnTime, " +
-                                    "COUNT( jc.JC_End_By_id = 0) AS ClosedWithExtension, COUNT( jc.JC_End_By_id = 0 ) AS JobClosedOnTime " +
-                                    "FROM  AS js LEFT JOIN jobcards AS jc ON js.id = jc.jobId " +
-                                    "LEFT JOIN facilities AS fc ON js.facilityId = fc.id " +
-                                    $"Where js.facilityId in({facility_id}) group by js.facilityId ;";
+                string myQueryJob = "SELECT f.name AS sitename, " +
+                                   "CASE WHEN mc.moduleType = 1 THEN 'Wet' " +
+                                      "WHEN mc.moduleType = 2 THEN 'Dry' ELSE 'Robotic' END AS CleaningType, " +
+                                      "sub1.TotalWaterUsed AS WaterUsed, " +
+                                      "SUM(css.moduleQuantity) AS ScheduledQuantity, " +
+                                      "sub2.no_of_cleaned AS actualQuantity, " +
+                                      "CASE WHEN mc.abandonedById > 0 THEN 'yes' ELSE 'no' END AS Abandoned, " +
+                                      "mc.reasonForAbandon AS Remark, " +
+                                      "(SUM(css.moduleQuantity) - sub2.no_of_cleaned) AS Deviation, " +
+                                      "CASE WHEN mc.abandonedAt IS NOT NULL THEN TIMESTAMPDIFF(MINUTE, mc.startDate, mc.abandonedAt) " +
+                                      "ELSE TIMESTAMPDIFF(MINUTE, mc.startDate, mc.endedAt) END AS TimeTaken " +
+                                      "FROM cleaning_execution AS mc " +
+                                      "LEFT JOIN cleaning_plan AS mp ON mp.planId = mc.planId " +
+                                      "LEFT JOIN cleaning_execution_items AS css ON css.executionId = mc.id " +
+                                      "LEFT JOIN (SELECT executionId, SUM(waterUsed) AS TotalWaterUsed " +
+                                      "FROM cleaning_execution_schedules GROUP BY executionId) sub1 " +
+                                      "ON mc.id = sub1.executionId " +
+                                      "LEFT JOIN (SELECT executionId, SUM(moduleQuantity) AS no_of_cleaned " +
+                                      "FROM cleaning_execution_items WHERE cleanedById > 0 GROUP BY executionId) sub2 " +
+                                      "ON mc.id = sub2.executionId " +
+                                      "LEFT JOIN Frequency AS freq ON freq.id = mp.frequencyId " +
+                                      "LEFT JOIN facilities AS f ON f.id = mc.facilityId " +
+                                      $"WHERE mc.facilityId IN ({facility_id}) AND mc.moduleType = 2 group by mc.facilityId;";
                 List<CumalativeReport> data = await Context.GetData<CumalativeReport>(myQueryJob).ConfigureAwait(false);
+
                 return data;
+
             }
             return null;
 

@@ -176,6 +176,8 @@ namespace CMMSAPIs.Models.MC
         public int waterUsed { get; set; }
         public DateTime start_date { get; set; }
         public DateTime end_date { get; set; }
+        public dynamic tbt_start { get; set; }
+        public DateTime startDate { get; set; }
         public int permit_id { get; set; }
         public string permit_code { get; set; }
         public int ptw_status { get; set; }
@@ -197,14 +199,12 @@ namespace CMMSAPIs.Models.MC
         public string status_long_schedule { get; set; }
         public int abandonedById { get; set; }
         public string abandonedbyName { get; set; }
-        public  DateTime? abandonedAt {get; set;}
+        public DateTime? abandonedAt { get; set; }
         public string updatedbyName { get; set; }
         public DateTime? updatedAt { get; set; }
         public string facilityidbyName { get; set; }
-
         public List<CMMCExecutionEquipment> equipments { get; set; }
     }
-
     public class CMMCGetScheduleExecution
     {
         public int executionId { get; set; }
@@ -269,11 +269,11 @@ namespace CMMSAPIs.Models.MC
         public int abandonRejectedById { get; set; }
         public string abandonRejectedByName { get; set; }
 
-        
+
         public string plannedBy { get; set; }
         public DateTime plannedAt { get; set; }
         public string startedBy { get; set; }
-        public DateTime startedAt { get; set; }       
+        public DateTime startedAt { get; set; }
         public DateTime doneDate { get; set; }
         public string abandonedBy { get; set; }
         public DateTime abandonedAt { get; set; }

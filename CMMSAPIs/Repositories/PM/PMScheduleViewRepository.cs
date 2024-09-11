@@ -1053,12 +1053,23 @@ namespace CMMSAPIs.Repositories.PM
         internal async Task<CMDefaultResponse> CancelRejectedPMTaskExecution(CMApproval request, int userID, string facilitytimeZone)
         {
             int status = 0;
-            status = request.status switch
+
+            if (request.status == 161)
             {
-                161 => (int)CMMS.CMMS_Status.PM_SCHEDULED,
-                162 => (int)CMMS.CMMS_Status.PM_ASSIGNED,
-                163 => (int)CMMS.CMMS_Status.PM_LINKED_TO_PTW,
-            };
+                status = (int)CMMS.CMMS_Status.PM_SCHEDULED;
+            }
+            if (request.status == 162)
+            {
+                status = (int)CMMS.CMMS_Status.PM_ASSIGNED;
+            }
+            if (request.status == 163)
+            {
+                status = (int)CMMS.CMMS_Status.PM_LINKED_TO_PTW;
+            }
+            if (request.status == 164)
+            {
+                status = (int)CMMS.CMMS_Status.PM_LINKED_TO_PTW;
+            }
             string myQuery = "UPDATE pm_task SET " +
                                 $"cancel_rejected_by = {userID}, " +
                                 $"cancel_rejected_at = '{UtilsRepository.GetUTCTime()}', " +

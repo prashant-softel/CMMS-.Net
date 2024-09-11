@@ -143,7 +143,20 @@ namespace CMMSAPIs.Repositories.Incident_Reports
             }
             severityName += $"ELSE 'Invalid severity' END";
 
-            string selectqry = $"SELECT incident.id as id,{severityName} as severity,  incident.description as description , facilities.name as facility_name,blockName.name as block_name, assets.name as equipment_name, incident.risk_level as risk_level, CONCAT(created_by.firstName ,' ' , created_by.lastName) as reported_by_name, incident.created_at as reported_at,CONCAT(user.firstName ,' ' , user.lastName) as approved_by, incident.approved_at as approved_at, CONCAT(user1.firstName , ' ' , user1.lastName) as reported_by_name , {statusOut} as status_short , incident.location_of_incident, incident_datetime, type_of_job,title,\r\nincident.status, incident.is_why_why_required, incident.is_investigation_required FROM incidents as incident left JOIN facilities AS facilities on facilities.id = incident.facility_id LEFT JOIN facilities AS blockName on blockName.id = incident.block_id  and blockName.isBlock = 1 LEFT JOIN assets as assets on incident.equipment_id = assets.id LEFT JOIN users as user on incident.approved_by = user.id LEFT JOIN users as created_by on incident.created_by = created_by.id LEFT JOIN users as user1 on incident.verified_by = user1.id where " + filter + " order by incident.id asc";
+            string selectqry = $"SELECT incident.id as id,{severityName} as severity,  incident.description as description , " +
+                               $"facilities.name as facility_name,blockName.name as block_name, assets.name as equipment_name, incident.risk_level as risk_level, " +
+                               $"CONCAT(created_by.firstName ,' ' , created_by.lastName) as reported_by_name, incident.created_at as reported_at,  " +
+                               $"CONCAT(user.firstName ,' ' , user.lastName) as approved_by, incident.approved_at as approved_at, " +
+                               $"CONCAT(user1.firstName , ' ' , user1.lastName) as reported_by_name , {statusOut} as status_short , " +
+                               $"incident.location_of_incident, incident_datetime, type_of_job,title,  " +
+                               $"incident.status, incident.is_why_why_required, incident.is_investigation_required " +
+                               $"FROM incidents as incident " +
+                               $"left JOIN facilities AS facilities on facilities.id = incident.facility_id " +
+                               $"LEFT JOIN facilities AS blockName on blockName.id = incident.block_id  and blockName.isBlock = 1 " +
+                               $"LEFT JOIN assets as assets on incident.equipment_id = assets.id " +
+                               $"LEFT JOIN users as user on incident.approved_by = user.id " +
+                               $"LEFT JOIN users as created_by on incident.created_by = created_by.id " +
+                               $"LEFT JOIN users as user1 on incident.verified_by = user1.id where " + filter + " order by incident.id asc";
 
             List<CMIncidentList> getIncidentList = await Context.GetData<CMIncidentList>(selectqry).ConfigureAwait(false);
             foreach (var getlist in getIncidentList)
@@ -452,8 +465,6 @@ namespace CMMSAPIs.Repositories.Incident_Reports
                     return new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Incident Report update failed other_injured");
                 }
             }
-
-
             if (request.Otherinjured_person != null && request.Otherinjured_person.Count > 0)
             {
 
@@ -502,7 +513,6 @@ namespace CMMSAPIs.Repositories.Incident_Reports
                     return response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Incident Report creation failed");
                 }
             }
-
             if (request.root_cause != null && request.root_cause.Count > 0)
             {
                 try
@@ -534,7 +544,6 @@ namespace CMMSAPIs.Repositories.Incident_Reports
                     return response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Incident Report creation failed");
                 }
             }
-
             if (request.immediate_correction != null && request.immediate_correction.Count > 0)
             {
                 try
@@ -587,7 +596,6 @@ namespace CMMSAPIs.Repositories.Incident_Reports
                             proposedActionPlanUQuery.Append("id_Status = " + item.id_Status + " ");
                             proposedActionPlanUQuery.Append("WHERE id = " + item.proposed_item_id);
                             var proposedActionPlanQuery_result = await Context.ExecuteNonQry<int>(proposedActionPlanUQuery.ToString()).ConfigureAwait(false);
-
                         }
                         else
                         {
@@ -780,7 +788,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
             if (request.block_id > 0)
                 updateQry += $" block_id = {request.block_id},";
             if (request.risk_level > 0)
-                updateQry += $" equipment_id = {request.risk_level},";
+                updateQry += $" risk_level = {request.risk_level},";
             updateQry += $" severity = '{request.severity}' ,";
             if (request.equipment_id > 0)
                 updateQry += $" equipment_id = {request.equipment_id},";

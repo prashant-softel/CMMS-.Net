@@ -1484,9 +1484,8 @@ namespace CMMSAPIs.Repositories.Inventory
                 {
                     strRetMessage = "Warranty data for <" + assetName + "> does not exist. ";
                 }
-                if (retID > 0)
+                if (firstCalibrationDate != "NULL")
                 {
-
                     string calibratoinquery = "insert into calibration (facility_id,asset_id,status,due_date) VALUES ";
                     calibratoinquery += $"({unit.facilityId},{retID},{(int)CMMS.CMMS_Status.CALIBRATION_SCHEDULED},{firstCalibrationDate});" +
                         $" SELECT LAST_INSERT_ID();";

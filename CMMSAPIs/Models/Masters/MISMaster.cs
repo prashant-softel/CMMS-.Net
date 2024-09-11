@@ -857,8 +857,16 @@ namespace CMMSAPIs.Models.Masters
         public dynamic ClosedOnTime { get; set; }
         public dynamic ClosedWithExtension { get; set; }
         public dynamic ClosedOnTimeCreate { get; set; }
-
+        public dynamic CleaningType { get; set; }
+        public dynamic WaterUsed { get; set; }
+        public dynamic ScheduledQuantity { get; set; }
+        public dynamic ActualQuantity { get; set; }
+        public dynamic Abandoned { get; set; }
+        public dynamic Remark { get; set; }
+        public dynamic Deviation { get; set; }
+        public dynamic TimeTaken { get; set; }
     }
+
     public class AssignToObservation
     {
         public int id { get; set; }
