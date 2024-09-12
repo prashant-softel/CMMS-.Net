@@ -1,4 +1,5 @@
-﻿using CMMSAPIs.BS.Inventory;
+using CMMSAPIs.BS.Inventory;
+using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Inventory;
 using CMMSAPIs.Models.SM;
 using CMMSAPIs.Models.Utils;
@@ -413,11 +414,11 @@ namespace CMMSAPIs.Controllers.Inventory
         //[Authorize]
         [Route("GetWarrantyCertificate")]
         [HttpGet]
-        public async Task<IActionResult> GetWarrantyCertificate()
+        public async Task<IActionResult> GetWarrantyCertificate(string facility_id, DateTime from_date, DateTime to_date)
         {
             try
             {
-                var data = await _InventoryBS.GetWarrantyCertificate();
+                var data = await _InventoryBS.GetWarrantyCertificate(facility_id, from_date, to_date);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -429,11 +430,11 @@ namespace CMMSAPIs.Controllers.Inventory
         //[Authorize]
         [Route("GetCalibrationList")]
         [HttpGet]
-        public async Task<IActionResult> GetCalibrationList(int facilityId)
+        public async Task<IActionResult> GetCalibrationList(string facilityId)
         {
             try
             {
-                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId.ToInt())?.timezone;
 
                 var data = await _InventoryBS.GetCalibrationList(facilityId, facilitytimeZone);
                 return Ok(data);
