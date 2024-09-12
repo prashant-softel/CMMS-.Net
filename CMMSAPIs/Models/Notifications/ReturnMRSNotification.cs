@@ -61,7 +61,7 @@ namespace CMMSAPIs.Models.Notifications
         {
             string retValue = "";
 
-            retValue = String.Format("<h3 style='text-align:center;'><b style='color:#31576D'>Status : </b>{0}</h3><br>", m_RMRSObj.status_long);
+            retValue = String.Format("<h3 style='text-align:center;'><b style='color:#31576D'>Status : </b>{0}</h3><br>", m_RMRSObj.status_long + " at " + m_RMRSObj.facilityName);
 
             retValue += String.Format("<table style='width: 50%; margin:0 auto; border-collapse: collapse ; border-spacing: 10px; ' border='1'>");
             

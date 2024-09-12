@@ -75,34 +75,34 @@ namespace CMMSAPIs.Repositories
             switch (status)
             {
                 case CMMS.CMMS_Status.GO_DRAFT:
-                    retValue = String.Format("GO{0} Updated By {1} At {2}", m_GOObj.Id, m_GOObj.go_updated_by_name, m_GOObj.facilityName);
+                    retValue = String.Format("GO{0} Updated By {1}", m_GOObj.Id, m_GOObj.go_updated_by_name);
                     break;
                 case CMMS.CMMS_Status.GO_SUBMITTED:
-                    retValue = String.Format("GO{0} Submitted and Waiting for Appoval By {1} At {2}", m_GOObj.Id, m_GOObj.submitted_by_name, m_GOObj.facilityName);
+                    retValue = String.Format("GO{0} Submitted and Waiting for Appoval By {1}", m_GOObj.Id, m_GOObj.submitted_by_name);
                     break;
                 case CMMS.CMMS_Status.GO_CLOSED:
-                    retValue = String.Format("GO{0} Closed By {1} At {2}", m_GOObj.Id, m_GOObj.closed_by_name, m_GOObj.facilityName);
+                    retValue = String.Format("GO{0} Closed By {1}", m_GOObj.Id, m_GOObj.closed_by_name);
                     break;
                 case CMMS.CMMS_Status.GO_DELETED:
-                    retValue = String.Format("GO{0} deleted By {1} At {2}", m_GOObj.Id, m_GOObj.deleted_by_name, m_GOObj.facilityName);
+                    retValue = String.Format("GO{0} deleted By {1}", m_GOObj.Id, m_GOObj.deleted_by_name);
                     break;
                 case CMMS.CMMS_Status.GO_REJECTED:
-                    retValue = String.Format("GO{0} rejected By {1} At {2}", m_GOObj.Id, m_GOObj.rejected_by_name, m_GOObj.facilityName);
+                    retValue = String.Format("GO{0} rejected By {1}", m_GOObj.Id, m_GOObj.rejected_by_name);
                     break;
                 case CMMS.CMMS_Status.GO_APPROVED:
-                    retValue = String.Format("GO{0} approved By {1} At {2}", m_GOObj.Id, m_GOObj.approved_by_name, m_GOObj.facilityName);
+                    retValue = String.Format("GO{0} approved By {1}", m_GOObj.Id, m_GOObj.approved_by_name);
                     break;
                 case CMMS.CMMS_Status.GO_RECEIVE_DRAFT:
-                    retValue = String.Format("GO{0} receive draft By {1} At {2}", m_GOObj.Id, m_GOObj.receive_submitted_by_name, m_GOObj.facilityName);
+                    retValue = String.Format("GO{0} receive draft By {1}", m_GOObj.Id, m_GOObj.receive_submitted_by_name);
                     break;
                 case CMMS.CMMS_Status.GO_RECEIVED_SUBMITTED:
-                    retValue = String.Format("GO{0} receive submitted By {1} At {2}", m_GOObj.Id, m_GOObj.receive_submitted_by_name, m_GOObj.facilityName);
+                    retValue = String.Format("GO{0} receive submitted By {1}", m_GOObj.Id, m_GOObj.receive_submitted_by_name);
                     break;
                 case CMMS.CMMS_Status.GO_RECEIVED_REJECTED:
-                    retValue = String.Format("GO{0} receive rejected By {1} At {2}", m_GOObj.Id, m_GOObj.receive_rejected_by_name, m_GOObj.facilityName);
+                    retValue = String.Format("GO{0} receive rejected By {1}", m_GOObj.Id, m_GOObj.receive_rejected_by_name);
                     break;
                 case CMMS.CMMS_Status.GO_RECEIVED_APPROVED:
-                    retValue = String.Format("GO{0} receive approved By {1} At {2}", m_GOObj.Id, m_GOObj.receive_approved_by_name, m_GOObj.facilityName);
+                    retValue = String.Format("GO{0} receive approved By {1}", m_GOObj.Id, m_GOObj.receive_approved_by_name);
                     break;
                 default:
                     retValue = "Unknown <" + m_notificationID + ">";

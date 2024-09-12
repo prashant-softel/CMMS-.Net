@@ -2213,41 +2213,41 @@ namespace CMMSAPIs.Repositories.SM
                 case CMMS.CMMS_Status.MRS_SUBMITTED:
                     if (m_RMRSObj.return_mrs == 1)
                     {
-                        retValue = String.Format("RMRS{0} Requested By {1} At {2}", m_RMRSObj.ID, m_RMRSObj.requested_by_name, m_RMRSObj.facilityName);
+                        retValue = String.Format("RMRS{0} Requested By {1}", m_RMRSObj.ID, m_RMRSObj.requested_by_name);
                     }
                     else
                     {
-                        retValue = String.Format("MRS{0} Requested By {1} At {2}", m_MRSObj.ID, m_MRSObj.requested_by_name, m_MRSObj.facilityName);
+                        retValue = String.Format("MRS{0} Requested By {1}", m_MRSObj.ID, m_MRSObj.requested_by_name);
                     }
                     break;
                 case CMMS.CMMS_Status.MRS_REQUEST_REJECTED:
                     if (m_RMRSObj.return_mrs == 1)
                     {
-                        retValue = String.Format("RMRS{0} Request Rejected By {1} At {2}", m_RMRSObj.ID, m_RMRSObj.request_rejected_by_name, m_RMRSObj.facilityName);
+                        retValue = String.Format("RMRS{0} Request Rejected By {1}", m_RMRSObj.ID, m_RMRSObj.request_rejected_by_name);
                     }
                     else
                     {
-                        retValue = String.Format("MRS{0} Request Rejected By {1} At {2}", m_MRSObj.ID, m_MRSObj.request_rejected_by_name, m_MRSObj.facilityName);
+                        retValue = String.Format("MRS{0} Request Rejected By {1}", m_MRSObj.ID, m_MRSObj.request_rejected_by_name);
                     }
                     break;
                 case CMMS.CMMS_Status.MRS_REQUEST_APPROVED:
                     if (m_RMRSObj.return_mrs == 1)
                     {
-                        retValue = String.Format("RMRS{0} Request Approved By {1} At {2}", m_RMRSObj.ID, m_RMRSObj.approver_name, m_RMRSObj.facilityName);
+                        retValue = String.Format("RMRS{0} Request Approved By {1}", m_RMRSObj.ID, m_RMRSObj.approver_name);
                     }
                     else
                     {
-                        retValue = String.Format("MRS{0} Request Approved By {1} At {2}", m_MRSObj.ID, m_MRSObj.approver_name, m_MRSObj.facilityName);
+                        retValue = String.Format("MRS{0} Request Approved By {1}", m_MRSObj.ID, m_MRSObj.approver_name);
                     }
                     break;
                 case CMMS.CMMS_Status.MRS_REQUEST_ISSUED:
-                    retValue = String.Format("MRS{0} Issued By {1} At {2}", m_MRSObj.ID, m_MRSObj.issued_name, m_MRSObj.facilityName);
+                    retValue = String.Format("MRS{0} Issued By {1}", m_MRSObj.ID, m_MRSObj.issued_name);
                     break;
                 case CMMS.CMMS_Status.MRS_REQUEST_ISSUED_REJECTED:
-                    retValue = String.Format("MRS{0} Issue Rejected By {1} At {2}", m_MRSObj.ID, m_MRSObj.issue_rejected_by_name, m_MRSObj.facilityName);
+                    retValue = String.Format("MRS{0} Issue Rejected By {1}", m_MRSObj.ID, m_MRSObj.issue_rejected_by_name);
                     break;
                 case CMMS.CMMS_Status.MRS_REQUEST_ISSUED_APPROVED:
-                    retValue = String.Format("MRS{0} Issue Approved By {1} At {2}", m_MRSObj.ID, m_MRSObj.issue_appoved_by_name, m_MRSObj.facilityName);
+                    retValue = String.Format("MRS{0} Issue Approved By {1}", m_MRSObj.ID, m_MRSObj.issue_appoved_by_name);
                     break;
                 default:
                     retValue = "Unknown <" + m_notificationID + ">";

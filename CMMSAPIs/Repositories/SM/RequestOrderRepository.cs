@@ -582,22 +582,22 @@ namespace CMMSAPIs.Repositories.SM
                     retValue = $"Request order{ID} drafted";
                     break;
                 case CMMS.CMMS_Status.SM_RO_SUBMITTED:
-                    retValue = String.Format("RO{0} Submitted and Waiting for Appoval By {1} At {2}", m_SMROObj.request_order_id, m_SMROObj.generatedBy, m_SMROObj.facilityName);
+                    retValue = String.Format("RO{0} Submitted and Waiting for Appoval By {1}", m_SMROObj.request_order_id, m_SMROObj.generatedBy);
                     break;
                 case CMMS.CMMS_Status.SM_RO_SUBMIT_REJECTED:
-                    retValue = String.Format("RO{0} Rejected By {1} At {2}", m_SMROObj.request_order_id, m_SMROObj.rejectedBy, m_SMROObj.facilityName);
+                    retValue = String.Format("RO{0} Rejected By {1}", m_SMROObj.request_order_id, m_SMROObj.rejectedBy);
                     break;
                 case CMMS.CMMS_Status.SM_RO_UPDATED:
-                    retValue = String.Format("RO{0} Updated By {1} At {2}", m_SMROObj.request_order_id, m_SMROObj.updated_by, m_SMROObj.facilityName);
+                    retValue = String.Format("RO{0} Updated By {1}", m_SMROObj.request_order_id, m_SMROObj.updated_by);
                     break;
                 case CMMS.CMMS_Status.SM_RO_SUBMIT_APPROVED:
-                    retValue = String.Format("RO{0} Approved By {1} At {2}", m_SMROObj.request_order_id, m_SMROObj.approvedBy, m_SMROObj.facilityName);
+                    retValue = String.Format("RO{0} Approved By {1}", m_SMROObj.request_order_id, m_SMROObj.approvedBy);
                     break;
                 case CMMS.CMMS_Status.SM_RO_DELETED:
-                    retValue = String.Format("RO{0} Deleted By {1} At {2}", m_SMROObj.request_order_id, m_SMROObj.deleted_by, m_SMROObj.facilityName);
+                    retValue = String.Format("RO{0} Deleted By {1}", m_SMROObj.request_order_id, m_SMROObj.deleted_by);
                     break;
                 case CMMS.CMMS_Status.SM_RO_CLOSED:
-                    retValue = String.Format("RO{0} Closed By {1} At {2}", m_SMROObj.request_order_id, m_SMROObj.closed_by, m_SMROObj.facilityName);
+                    retValue = String.Format("RO{0} Closed By {1}", m_SMROObj.request_order_id, m_SMROObj.closed_by);
                     break;
                 default:
                     retValue = "Unknown <" + m_notificationID + ">";

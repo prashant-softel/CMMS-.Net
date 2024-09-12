@@ -15,7 +15,8 @@ namespace CMMSAPIs.Models.Notifications
         public SMNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMCreateRequestOrderGET SMROObj) : base(moduleID, notificationID)
         {
             m_SMROObj = SMROObj;
-            m_SMROObjID = SMROObj.request_order_id;
+            //m_SMROObjID = SMROObj.request_order_id;
+            m_module_ref_id = SMROObj.request_order_id;
         }
 
         override protected string getEMSubject(params object[] args)
@@ -92,9 +93,9 @@ namespace CMMSAPIs.Models.Notifications
         {
             string retValue = "";
 
-                retValue = String.Format("<table style='width: 50%; margin: 0 auto; border-collapse: collapse; border-spacing: 10px'><tr><td style='white-space: nowrap;'><h3><b style='color:#31576D'>Status : </b>{0}</h3></td></tr></table>", m_SMROObj.status_long);
+                retValue = String.Format("<table style='width: 50%; margin: 0 auto; border-collapse: collapse; border-spacing: 10px'><tr><td style='white-space: nowrap;'><h3><b style='color:#31576D'>Status : </b>{0}</h3></td></tr></table>", m_SMROObj.status_long + " at " + m_SMROObj.facilityName);
 
-                retValue += String.Format("<table style='width: 50%; margin:0 auto; border-collapse: collapse ; border-spacing: 10px; ' border='1'>");
+            retValue += String.Format("<table style='width: 50%; margin:0 auto; border-collapse: collapse ; border-spacing: 10px; ' border='1'>");
                 retValue += String.Format(template, "ID","RO"+m_SMROObj.request_order_id);    
                 retValue += String.Format(template, "Facility Name", m_SMROObj.facilityName);
                 retValue += String.Format(template, "Comment", m_SMROObj.comment);

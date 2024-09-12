@@ -15,15 +15,20 @@ using CMMSAPIs.Models.SM;
 using CMMSAPIs.Models.Users;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Models.WC;
+using CMMSAPIs.Repositories;
+using CMMSAPIs.Repositories.Audits;
 using CMMSAPIs.Repositories.Calibration;
 using CMMSAPIs.Repositories.Incident_Reports;
 using CMMSAPIs.Repositories.Inventory;
 using CMMSAPIs.Repositories.JC;
 using CMMSAPIs.Repositories.Jobs;
 using CMMSAPIs.Repositories.Permits;
+using CMMSAPIs.Repositories.SM;
 using CMMSAPIs.Repositories.Users;
 using CMMSAPIs.Repositories.Utils;
+using CMMSAPIs.Repositories.CleaningRepository;
 using CMMSAPIs.Repositories.WC;
+using CMMSAPIs.Repositories.PM;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using System;
@@ -381,6 +386,89 @@ namespace CMMSAPIs.Models.Notifications
                     //notificationID = (CMMS.CMMS_Status)(_Inventory[0].status + 100);
                     retValue = await sendBaseNotification(moduleID, notificationID, module_ref_id, additionalUserIds, role, delayDays, notificationType, _Inventory);
                     break;
+                case CMMS.CMMS_Modules.MC_PLAN:
+                    CleaningRepository obj15 = new CleaningRepository(getDB);
+                    CMMCPlan _ViewPlan = await obj15.GetPlanDetails(module_ref_id, facilitytimeZone);
+                    retValue = await sendBaseNotification(moduleID, notificationID, module_ref_id, additionalUserIds, role, delayDays, notificationType, _ViewPlan);
+                    break;
+                case CMMS.CMMS_Modules.MC_TASK:
+                    CleaningRepository obj16 = new CleaningRepository(getDB);
+                    CMMCExecution _ViewTask = await obj16.GetExecutionDetails(module_ref_id, facilitytimeZone);
+                    retValue = await sendBaseNotification(moduleID, notificationID, module_ref_id, additionalUserIds, role, delayDays, notificationType, _ViewTask);
+                    break;
+                case CMMS.CMMS_Modules.MC_EXECUTION:
+                    CleaningRepository obj17 = new CleaningRepository(getDB);
+                    CMMCExecutionSchedule _ViewSchedule = await obj17.GetScheduleDetails(module_ref_id, facilitytimeZone);
+                    retValue = await sendBaseNotification(moduleID, notificationID, module_ref_id, additionalUserIds, role, delayDays, notificationType, _ViewSchedule);
+                    break;
+
+                case CMMS.CMMS_Modules.VEGETATION_PLAN:
+                    VegetationRepository obj18 = new VegetationRepository(getDB);
+                    CMMCPlan _ViewPlanList = await obj18.GetPlanDetails(module_ref_id, facilitytimeZone);
+                    retValue = await sendBaseNotification(moduleID, notificationID, module_ref_id, additionalUserIds, role, delayDays, notificationType, _ViewPlanList);
+                    break;
+                case CMMS.CMMS_Modules.VEGETATION_TASK:
+                    VegetationRepository obj19 = new VegetationRepository(getDB);
+                    CMMCExecution _ViewTaskList = await obj19.GetExecutionDetails(module_ref_id, facilitytimeZone);
+                    retValue = await sendBaseNotification(moduleID, notificationID, module_ref_id, additionalUserIds, role, delayDays, notificationType, _ViewTaskList);
+                    break;
+                case CMMS.CMMS_Modules.VEGETATION_EXECUTION:
+                    VegetationRepository obj20 = new VegetationRepository(getDB);
+                    CMMCExecutionSchedule _ViewVegSchedule = await obj20.GetScheduleDetails(module_ref_id, facilitytimeZone);
+                    retValue = await sendBaseNotification(moduleID, notificationID, module_ref_id, additionalUserIds, role, delayDays, notificationType, _ViewVegSchedule);
+                    break;
+
+                case CMMS.CMMS_Modules.PM_PLAN:
+                    PMRepository obj21 = new PMRepository(getDB, _environment);
+                    CMPMPlanDetail _ViewPMPlan = await obj21.GetPMPlanDetail(module_ref_id, facilitytimeZone);
+                    retValue = await sendBaseNotification(moduleID, notificationID, module_ref_id, additionalUserIds, role, delayDays, notificationType, _ViewPMPlan);
+                    break;
+                case CMMS.CMMS_Modules.PM_TASK:
+                    PMScheduleViewRepository obj22 = new PMScheduleViewRepository(getDB);
+                    CMPMTaskView _PMTaskList = await obj22.GetPMTaskDetail(module_ref_id, facilitytimeZone);
+                    retValue = await sendBaseNotification(moduleID, notificationID, module_ref_id, additionalUserIds, role, delayDays, notificationType, _PMTaskList);
+                    break;
+                case CMMS.CMMS_Modules.PM_SCHEDULE:
+                    PMScheduleViewRepository obj23 = new PMScheduleViewRepository(getDB);
+                    CMPMScheduleExecutionDetail PMTaskSchedule = await obj23.GetPMTaskScheduleDetail(0, module_ref_id, facilitytimeZone);
+                    retValue = await sendBaseNotification(moduleID, notificationID, module_ref_id, additionalUserIds, role, delayDays, notificationType, PMTaskSchedule);
+                    break;
+                case CMMS.CMMS_Modules.SM_MRS:
+                    MRSRepository obj7 = new MRSRepository(getDB);
+                    CMMRSList _MRS = await obj7.getMRSDetails(module_ref_id, facilitytimeZone);
+                    //notificationID = (CMMS.CMMS_Status)(_MRS[0].status + 100);
+                    retValue = await sendBaseNotification(moduleID, notificationID, module_ref_id, additionalUserIds, role, delayDays, notificationType, _MRS);
+                    break;
+                case CMMS.CMMS_Modules.SM_MRS_RETURN:
+                    MRSRepository obj8 = new MRSRepository(getDB);
+                    CMMRSReturnList _RMRS = await obj8.getReturnDataByID(module_ref_id, facilitytimeZone);
+                    //notificationID = (CMMS.CMMS_Status)(_RMRS[0].status + 100);
+                    retValue = await sendBaseNotification(moduleID, notificationID, module_ref_id, additionalUserIds, role, delayDays, notificationType, _RMRS);
+                    break;
+                case CMMS.CMMS_Modules.SM_GO:
+                    GORepository obj9 = new GORepository(getDB);
+                    CMGOMaster _GO = await obj9.GetGODetailsByID(module_ref_id, facilitytimeZone);
+                    //notificationID = (CMMS.CMMS_Status)(_GO[0].status + 100);
+                    retValue = await sendBaseNotification(moduleID, notificationID, module_ref_id, additionalUserIds, role, delayDays, notificationType, _GO);
+                    break;
+                case CMMS.CMMS_Modules.SM_RO:
+                    RequestOrderRepository obj10 = new RequestOrderRepository(getDB);
+                    List<CMCreateRequestOrderGET> _SMRO = await obj10.GetRODetailsByID(module_ref_id.ToString(), facilitytimeZone);
+                    //notificationID = (CMMS.CMMS_Status)(_SMRO[0].status + 100);
+                    retValue = await sendBaseNotification(moduleID, notificationID, module_ref_id, additionalUserIds, role, delayDays, notificationType, _SMRO);
+                    break;
+                case CMMS.CMMS_Modules.AUDIT_TASK:
+                    AuditPlanRepository obj11 = new AuditPlanRepository(getDB);
+                    CMPMTaskView _Audit = await obj11.GetTaskDetail(module_ref_id, facilitytimeZone);
+                    //notificationID = (CMMS.CMMS_Status)(_Audit[0].status + 100);
+                    retValue = await sendBaseNotification(moduleID, notificationID, module_ref_id, additionalUserIds, role, delayDays, notificationType, _Audit);
+                    break;
+                case CMMS.CMMS_Modules.AUDIT_PLAN:
+                    AuditPlanRepository obj12 = new AuditPlanRepository(getDB);
+                    CMPMPlanDetail _AuditPlan = await obj12.GetAuditPlanDetail(module_ref_id, facilitytimeZone);
+                    //notificationID = (CMMS.CMMS_Status)(_AuditPlan[0].status + 100);
+                    retValue = await sendBaseNotification(moduleID, notificationID, module_ref_id, additionalUserIds, role, delayDays, notificationType, _AuditPlan);
+                    break;
                 default:
                     string sReturn = $"Escalation performed for {moduleID} {module_ref_id} for role {role} for {delayDays} days period.";
                     //throw  System.SystemException(sReturn);
@@ -525,13 +613,13 @@ namespace CMMSAPIs.Models.Notifications
             {
                 CMMRSList _MRS = (CMMRSList)args[0];
                 notificationObj = new MRSNotification(moduleID, notificationID, _MRS);
-                facilityId = _MRS.facilityId;   // CMMRSList update the query to facilityid in a list
+                facilityId = _MRS.facilityId;   
             }
             else if (moduleID == CMMS.CMMS_Modules.SM_MRS_RETURN)     //Return MRS Report
             {
                 CMMRSReturnList _RMRS = (CMMRSReturnList)args[0];
                 notificationObj = new ReturnMRSNotification(moduleID, notificationID, _RMRS);
-                facilityId = _RMRS.facilityId;   // CMMRSList update the query to facilityid in a list
+                facilityId = _RMRS.facilityId;   
             }
             else if (moduleID == CMMS.CMMS_Modules.PM_PLAN)
             {
@@ -567,13 +655,13 @@ namespace CMMSAPIs.Models.Notifications
             {
                 CMPMTaskView _Audit = (CMPMTaskView)args[0];
                 notificationObj = new AuditTasknotification(moduleID, notificationID, _Audit);
-                //facilityId = _SMRO.facilityID;
+                facilityId = _Audit.facility_id;
             }
             else if (moduleID == CMMS.CMMS_Modules.AUDIT_PLAN)      //Audit Plan
             {
                 CMPMPlanDetail _AuditPlan = (CMPMPlanDetail)args[0];
                 notificationObj = new AuditPlannotification(moduleID, notificationID, _AuditPlan);
-                //facilityId = _SMRO.facilityID;
+                facilityId = _AuditPlan.facility_id;
             }
             else
             {
