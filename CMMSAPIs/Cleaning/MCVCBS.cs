@@ -1,13 +1,12 @@
 ﻿using CMMSAPIs.Helper;
 using CMMSAPIs.Models.MC;
 using CMMSAPIs.Models.Utils;
-using CMMSAPIs.Repositories.CleaningRepository;
 using CMMSAPIs.Repositories.MCVCRepository;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace CMMSAPIs.Cleaning
+namespace CMMSAPIs.BS.Cleaning
 {
     public interface IMCVCBS
     {

@@ -1,5 +1,6 @@
 using CMMSAPIs.BS.Mails;
 using CMMSAPIs.Helper;
+using static CMMSAPIs.Helper.CMMS;
 using CMMSAPIs.Models.Calibration;
 using CMMSAPIs.Models.EM;
 using CMMSAPIs.Models.Grievance;
@@ -26,7 +27,7 @@ using CMMSAPIs.Repositories.Permits;
 using CMMSAPIs.Repositories.SM;
 using CMMSAPIs.Repositories.Users;
 using CMMSAPIs.Repositories.Utils;
-using CMMSAPIs.Repositories.CleaningRepository;
+using CMMSAPIs.Repositories.MCVCRepository;
 using CMMSAPIs.Repositories.WC;
 using CMMSAPIs.Repositories.PM;
 using Microsoft.AspNetCore.Hosting;
@@ -387,33 +388,33 @@ namespace CMMSAPIs.Models.Notifications
                     retValue = await sendBaseNotification(moduleID, notificationID, module_ref_id, additionalUserIds, role, delayDays, notificationType, _Inventory);
                     break;
                 case CMMS.CMMS_Modules.MC_PLAN:
-                    CleaningRepository obj15 = new CleaningRepository(getDB);
+                    MCVCRepository obj15 = new MCVCRepository(getDB, cleaningType.ModuleCleaning);
                     CMMCPlan _ViewPlan = await obj15.GetPlanDetails(module_ref_id, facilitytimeZone);
                     retValue = await sendBaseNotification(moduleID, notificationID, module_ref_id, additionalUserIds, role, delayDays, notificationType, _ViewPlan);
                     break;
                 case CMMS.CMMS_Modules.MC_TASK:
-                    CleaningRepository obj16 = new CleaningRepository(getDB);
+                    MCVCRepository obj16 = new MCVCRepository(getDB, cleaningType.ModuleCleaning);
                     CMMCExecution _ViewTask = await obj16.GetExecutionDetails(module_ref_id, facilitytimeZone);
                     retValue = await sendBaseNotification(moduleID, notificationID, module_ref_id, additionalUserIds, role, delayDays, notificationType, _ViewTask);
                     break;
                 case CMMS.CMMS_Modules.MC_EXECUTION:
-                    CleaningRepository obj17 = new CleaningRepository(getDB);
+                    MCVCRepository obj17 = new MCVCRepository(getDB, cleaningType.ModuleCleaning);
                     CMMCExecutionSchedule _ViewSchedule = await obj17.GetScheduleDetails(module_ref_id, facilitytimeZone);
                     retValue = await sendBaseNotification(moduleID, notificationID, module_ref_id, additionalUserIds, role, delayDays, notificationType, _ViewSchedule);
                     break;
 
                 case CMMS.CMMS_Modules.VEGETATION_PLAN:
-                    VegetationRepository obj18 = new VegetationRepository(getDB);
+                    MCVCRepository obj18 = new MCVCRepository(getDB, cleaningType.Vegetation);
                     CMMCPlan _ViewPlanList = await obj18.GetPlanDetails(module_ref_id, facilitytimeZone);
                     retValue = await sendBaseNotification(moduleID, notificationID, module_ref_id, additionalUserIds, role, delayDays, notificationType, _ViewPlanList);
                     break;
                 case CMMS.CMMS_Modules.VEGETATION_TASK:
-                    VegetationRepository obj19 = new VegetationRepository(getDB);
+                    MCVCRepository obj19 = new MCVCRepository(getDB, cleaningType.Vegetation);
                     CMMCExecution _ViewTaskList = await obj19.GetExecutionDetails(module_ref_id, facilitytimeZone);
                     retValue = await sendBaseNotification(moduleID, notificationID, module_ref_id, additionalUserIds, role, delayDays, notificationType, _ViewTaskList);
                     break;
                 case CMMS.CMMS_Modules.VEGETATION_EXECUTION:
-                    VegetationRepository obj20 = new VegetationRepository(getDB);
+                    MCVCRepository obj20 = new MCVCRepository(getDB, cleaningType.Vegetation);
                     CMMCExecutionSchedule _ViewVegSchedule = await obj20.GetScheduleDetails(module_ref_id, facilitytimeZone);
                     retValue = await sendBaseNotification(moduleID, notificationID, module_ref_id, additionalUserIds, role, delayDays, notificationType, _ViewVegSchedule);
                     break;

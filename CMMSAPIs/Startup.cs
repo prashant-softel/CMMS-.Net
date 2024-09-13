@@ -20,7 +20,6 @@ using CMMSAPIs.BS.SM;
 using CMMSAPIs.BS.Users;
 using CMMSAPIs.BS.Utils;
 using CMMSAPIs.BS.WC;
-using CMMSAPIs.Cleaning;
 using CMMSAPIs.Helper;
 using CMMSAPIs.Middlewares;
 using CMMSAPIs.Models.Mails;
@@ -105,10 +104,9 @@ namespace CMMSAPIs
             services.AddScoped<ICalibrationBS, CalibrationBS>();
             services.AddScoped<IAuditScheduleViewBS, AuditScheduleViewBS>();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-            /*services.AddScoped<IMRSBS, MRSBS>();*/
+            services.AddScoped<IMRSBS, MRSBS>();
             services.AddScoped<IGOBS, GOBS>();
             services.AddScoped<IReOrderBS, ReOrderBS>();
-            //services.AddScoped<IMCVCBS>();
             services.AddScoped<ISMReportsBS, ReportsBS>();
             services.AddScoped<IRequestOrderBS, RequestOrderBS>();
             services.AddScoped<IEMBS, EMBS>();

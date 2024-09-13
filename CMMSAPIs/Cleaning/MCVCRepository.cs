@@ -1,16 +1,14 @@
-﻿using CMMSAPIs.Cleaning;
-using CMMSAPIs.Helper;
+﻿using CMMSAPIs.Helper;
+using static CMMSAPIs.Helper.CMMS;
 using CMMSAPIs.Models.MC;
 using CMMSAPIs.Models.Notifications;
 using CMMSAPIs.Models.PM;
-using CMMSAPIs.Models.Users;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Utils;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
-using static CMMSAPIs.Helper.CMMS;
 
 namespace CMMSAPIs.Repositories.MCVCRepository
 {
