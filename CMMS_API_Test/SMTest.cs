@@ -21,8 +21,8 @@ namespace CMMS_API_Test
         string EP_GetAssetBySerialNo = "/api/SMMaster/GetAssetBySerialNo";
 
         //Asset Category Master
-        string EP_GetAssetCategoryList = "/api/SMMaster/GetAssetCategoryList";
-        string EP_AddAssetCategory = "/api/SMMaster/AddAssetCategory";
+        string EP_GetAssetCategoryList = "/api/Inventory/GetInventoryCategoryList";
+        string EP_AddAssetCategory = "/api/Inventory/AddInventoryCategory";
         string EP_UpdateAssetCategory = "/api/SMMaster/UpdateAssetCategory";
         string EP_DeleteAssetCategory = "/api/SMMaster/DeleteAssetCategory";
 
@@ -70,7 +70,7 @@ namespace CMMS_API_Test
             //Assert.AreEqual("Consulmable", response[0].description);
         }
         [TestMethod]
-        public void CreateAssetType()
+        public void VerifyCreateAssetType()
         {
             var asset_type = "";
             string payload = @"{
@@ -152,19 +152,20 @@ namespace CMMS_API_Test
 
         }
         [TestMethod]
-        public void CreateAssetCategory()
+        public void VerifyCreateAssetCategory()
         {
             string payload = @"{
-                            ""cat_name"":""Testing AssetType FRom test automation""
-                           
-                        }";
+                                ""name"":""Test asset api"",
+                                ""description"":""testing Insert query"",
+                                ""calibration_required"":1
+                            }";
             var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.Utils.CMDefaultResponse>();
             var response = ptwService.CreateItem(EP_AddAssetCategory, payload);
             int myNewItemId = response.id[0];
 
             var getList = new CMMS_Services.APIService<CMMSAPIs.Models.SM.CMItemCategory>();
             var responseForInsertedVAlue = getList.GetItemList(EP_GetAssetCategoryList + "?ID=" + myNewItemId);
-            Assert.AreEqual(1, responseForInsertedVAlue.Count);
+            Assert.AreEqual(78, responseForInsertedVAlue.Count);
         }
         [TestMethod]
         public void VerifyUpdateAssetCategory()
@@ -446,7 +447,7 @@ namespace CMMS_API_Test
         }
 
         [TestMethod]
-        public void createGO()
+        public void VerifycreateGO()
         {
             string payload = @"{
                                ""purchaseID"":7,
@@ -470,7 +471,7 @@ namespace CMMS_API_Test
             Assert.AreEqual(myNewItemId, responseForItem[0].id);
         }
         [TestMethod]
-        public void updateGO()
+        public void VerifyupdateGO()
         {
 
             string payload = @"{
@@ -493,7 +494,7 @@ namespace CMMS_API_Test
         }
 
         [TestMethod]
-        public void GOApproval()
+        public void VerifyGOApproval()
         {
 
             string payload = @"{
@@ -511,7 +512,7 @@ namespace CMMS_API_Test
         }
 
         [TestMethod]
-        public void withdrawGO()
+        public void VerifyWithdrawGO()
         {
 
             string payload = @"{
@@ -529,7 +530,7 @@ namespace CMMS_API_Test
         }
 
         [TestMethod]
-        public void GetAssetBySerialNo()
+        public void VerifyGetAssetBySerialNo()
         {
 
             string serial_number = "3000009";
@@ -540,7 +541,7 @@ namespace CMMS_API_Test
 
         }
         [TestMethod]
-        public void GetPurchaseData()
+        public void VerifyGetPurchaseData()
         {
 
             int plantID = 45;
@@ -555,7 +556,7 @@ namespace CMMS_API_Test
             //Assert.AreEqual(19, response[0].orderID); 
         }
         [TestMethod]
-        public void GetPurchaseDetailsByID()
+        public void VerifyGetPurchaseDetailsByID()
         {
 
             int id = 19;
@@ -566,7 +567,7 @@ namespace CMMS_API_Test
         }
 
         [TestMethod]
-        public void SubmitPurchaseOrderData()
+        public void VerifySubmitPurchaseOrderData()
         {
 
             string payload = @"{
