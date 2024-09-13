@@ -105,10 +105,10 @@ namespace CMMSAPIs
             services.AddScoped<ICalibrationBS, CalibrationBS>();
             services.AddScoped<IAuditScheduleViewBS, AuditScheduleViewBS>();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-            services.AddScoped<IMRSBS, MRSBS>();
+            /*services.AddScoped<IMRSBS, MRSBS>();*/
             services.AddScoped<IGOBS, GOBS>();
             services.AddScoped<IReOrderBS, ReOrderBS>();
-            services.AddScoped<CleaningBS>();
+            //services.AddScoped<IMCVCBS>();
             services.AddScoped<ISMReportsBS, ReportsBS>();
             services.AddScoped<IRequestOrderBS, RequestOrderBS>();
             services.AddScoped<IEMBS, EMBS>();
@@ -118,7 +118,7 @@ namespace CMMSAPIs
             services.AddScoped<IMoMBS, MoMBS>();
             services.AddScoped<AttendeceBS, _AttendeceBS>();
             services.AddScoped<TrainingCourseBS, Traningbs>();
-            services.AddScoped<VegBS, vegetaion>();
+            services.AddScoped<IMCVCBS, MCVCBS>();
 
         }
 
