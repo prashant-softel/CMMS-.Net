@@ -362,8 +362,10 @@ namespace CMMSAPIs.Repositories.Users
                             {
                                 string loginIdQuery = "SELECT loginId FROM users;";
                                 DataTable dtLogin = await Context.FetchData(loginIdQuery).ConfigureAwait(false);
-                                List<string> loginList1 = dtLogin.GetColumn<string>("loginId");
-                                if (loginList1.Contains(newR["user_name"]))
+                                List<string> loginList1 = dtLogin.GetColumn<string>("loginId")
+                                   .Select(id => id.ToUpper())
+                                   .ToList();
+                                if (loginList1.Contains(Convert.ToString(newR["user_name"]).ToUpper()))
                                 {
                                     m_errorLog.SetError($"Login ID already exists. [Row: {rN}]");
                                     newR.Delete();
@@ -537,8 +539,8 @@ namespace CMMSAPIs.Repositories.Users
                         {
                             userPriority.Insert(0, filterRows.CopyToDataTable());
                             loginList.Insert(0, userPriority[userPriority.Count - 1].GetColumn<string>("user_name"));
-                        }
 
+                        }
                         foreach (var item in loginList)
                         {
                             List<string> temp = item;

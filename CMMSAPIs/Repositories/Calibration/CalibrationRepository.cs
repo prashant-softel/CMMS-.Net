@@ -249,13 +249,14 @@ namespace CMMSAPIs.Repositories.Calibration
                 throw new ArgumentException("Invalid Asset ID" + request.asset_id);
 
             int calibrationId = 0;
-            string getIdQuery = $"SELECT id FROM calibration WHERE asset_id = {request.asset_id} and status = {(int)CMMS.CMMS_Status.CALIBRATION_SCHEDULED};";
+            string getIdQuery = $"SELECT id FROM calibration WHERE asset_id = {request.asset_id} and " +
+                $"status = {(int)CMMS.CMMS_Status.CALIBRATION_APPROVED} and reschedule=1 order by due_date desc limit 1;";
             DataTable dt1 = await Context.FetchData(getIdQuery).ConfigureAwait(false);
 
             if (dt1.Rows.Count > 0)
             {
                 calibrationId = Convert.ToInt32(dt1.Rows[0][0]);
-                if(calibrationId != request.id)
+                if (calibrationId != request.id)
                 {
                     throw new ArgumentException("Calibration record in scheduled state has id " + calibrationId + " and requested id is " + request.id + " for " + request.asset_id);
                 }
@@ -380,7 +381,7 @@ namespace CMMSAPIs.Repositories.Calibration
                 int affectedRows = await Context.ExecuteNonQry<int>(updateQuery).ConfigureAwait(false);
                 CMDefaultResponse response = null;
                 if (affectedRows > 0)
-                { 
+                {
                     //  string setDueDate = $"UPDATE assets SET calibrationDueDate = '{request.next_calibration_date.ToString("yyyy-MM-dd HH:mm:ss")}' WHERE id = {request.asset_id};";
                     await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.CALIBRATION, request.id, CMMS.CMMS_Modules.CALIBRATION, request.id, "Calibration Requested", CMMS.CMMS_Status.CALIBRATION_REQUEST, userID);
 

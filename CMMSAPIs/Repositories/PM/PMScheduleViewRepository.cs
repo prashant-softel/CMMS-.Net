@@ -280,7 +280,7 @@ namespace CMMSAPIs.Repositories.PM
             string statusQry = $"SELECT status FROM pm_task WHERE id = {request.id};";
             DataTable dt1 = await Context.FetchData(statusQry).ConfigureAwait(false);
             CMMS.CMMS_Status status = (CMMS.CMMS_Status)Convert.ToInt32(dt1.Rows[0][0]);
-
+            int status1 = (int)status;
 
             //            if (status != CMMS.CMMS_Status.RESCHEDULED_TASK && status != CMMS.CMMS_Status.PM_CLOSE_APPROVED)
             if (status != CMMS.CMMS_Status.PM_CLOSE_APPROVED)
@@ -288,6 +288,7 @@ namespace CMMSAPIs.Repositories.PM
                 // return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.FAILURE, "Only a PM Task that has not been executed can be cancelled.");
                 string myQuery = "UPDATE pm_task SET " +
                                     $"cancelled_by = {userID}, " +
+                                    $"previous_status= {status1}, " +
                                     $"cancelled_at = '{UtilsRepository.GetUTCTime()}', " +
                                     $"cancel_remarks = '{request.comment}', " +
                                     $"status = {(int)CMMS.CMMS_Status.PM_CANCELLED}, " +
@@ -1052,8 +1053,8 @@ namespace CMMSAPIs.Repositories.PM
         }
         internal async Task<CMDefaultResponse> CancelRejectedPMTaskExecution(CMApproval request, int userID, string facilitytimeZone)
         {
-            int status = 0;
 
+            /*
             if (request.status == 161)
             {
                 status = (int)CMMS.CMMS_Status.PM_SCHEDULED;
@@ -1065,16 +1066,21 @@ namespace CMMSAPIs.Repositories.PM
             if (request.status == 163)
             {
                 status = (int)CMMS.CMMS_Status.PM_LINKED_TO_PTW;
-            }
-            if (request.status == 164)
+            }        
+            */
+            string statusQry = $"SELECT previous_status FROM pm_task WHERE id = {request.id};";
+            DataTable dt1 = await Context.FetchData(statusQry).ConfigureAwait(false);
+            CMMS.CMMS_Status status = (CMMS.CMMS_Status)Convert.ToInt32(dt1.Rows[0][0]);
+            int status1 = (int)status;
+            if (status1 == 164)
             {
-                status = (int)CMMS.CMMS_Status.PM_LINKED_TO_PTW;
+                status1 = 163;
             }
             string myQuery = "UPDATE pm_task SET " +
                                 $"cancel_rejected_by = {userID}, " +
                                 $"cancel_rejected_at = '{UtilsRepository.GetUTCTime()}', " +
                                 $"cancel_remarks = '{request.comment}', " +
-                                $"status = {status}, " +
+                                $"status = {status1}, " +
                                 $"status_updated_at = '{UtilsRepository.GetUTCTime()}', " +
                                 $"status_updated_by = {userID} " +
                                 $"WHERE id = {request.id};";
