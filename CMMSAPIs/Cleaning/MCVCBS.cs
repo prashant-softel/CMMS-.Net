@@ -16,7 +16,7 @@ namespace CMMSAPIs.BS.Cleaning
         public Task<List<CMMCPlan>> GetPlanList(int facilityId, string facilitytimeZone, string startDate, string endDate); /// DONE ///
         public Task<List<CMMCTaskList>> GetTaskList(int facilityId, string facilitytimeZone, string startDate, string endDate); /// DONE ///
         public Task<CMMCPlan> GetPlanDetails(int planId, string facilitytimeZone);
-       // public Task<CMMCPlan> GetPlanDetailsSummary(int planId, CMMCPlanSummary request);
+        // public Task<CMMCPlan> GetPlanDetailsSummary(int planId, CMMCPlanSummary request);
         public Task<List<CMMCTaskEquipmentList>> GetTaskEquipmentList(int taskId, string facilitytimeZone);
         public Task<List<CMMCEquipmentList>> GetEquipmentList(int facilityId);
         public Task<CMMCExecution> GetExecutionDetails(int executionId, string facilitytimeZone);
@@ -52,8 +52,8 @@ namespace CMMSAPIs.BS.Cleaning
         public Task<CMDefaultResponse> AbandonSchedule(CMApproval request, int userId, string facilitytimeZone);
         public Task<CMDefaultResponse> LinkPermitToMCVC(int task_id, int permit_id, int userId, string facilitytimeZone);
 
-       // public Task<CMDefaultResponse> CompleteExecution(CMMCExecution request, int userId);
-     
+        // public Task<CMDefaultResponse> CompleteExecution(CMMCExecution request, int userId);
+
     }
 
     public class MCVCBS : IMCVCBS
@@ -76,15 +76,15 @@ namespace CMMSAPIs.BS.Cleaning
         {
             this.module = module;
 
-           /* if (CMMS.cleaningType.ModuleCleaning == module)
-            {
-                repos = new MCVCRepository(getDB);
-            }
-            if (CMMS.cleaningType.Vegetation == module)
-            {
-                repos = new MCVCRepository(getDB);
+            /* if (CMMS.cleaningType.ModuleCleaning == module)
+             {
+                 repos = new MCVCRepository(getDB);
+             }
+             if (CMMS.cleaningType.Vegetation == module)
+             {
+                 repos = new MCVCRepository(getDB);
 
-            }*/
+             }*/
             return 1;
         }
 
@@ -107,9 +107,9 @@ namespace CMMSAPIs.BS.Cleaning
         {
             try
             {
-               using (var repos = new MCVCRepository(getDB, module))
+                using (var repos = new MCVCRepository(getDB, module))
                 {
-                    return await repos.GetTaskList(facilityId, facilitytimeZone, startDate,  endDate);
+                    return await repos.GetTaskList(facilityId, facilitytimeZone, startDate, endDate);
                 }
             }
             catch (Exception ex)
@@ -122,7 +122,7 @@ namespace CMMSAPIs.BS.Cleaning
         {
             try
             {
-               using (var repos = new MCVCRepository(getDB, module))
+                using (var repos = new MCVCRepository(getDB, module))
                 {
                     return await repos.GetPlanDetails(planId, facilitytime);
                 }
@@ -437,7 +437,7 @@ namespace CMMSAPIs.BS.Cleaning
         {
             try
             {
-                 using (var repos = new MCVCRepository(getDB, module))
+                using (var repos = new MCVCRepository(getDB, module))
                 {
                     return await repos.ApproveExecution(request, userId, facilitytimeZone);
                 }
@@ -482,7 +482,7 @@ namespace CMMSAPIs.BS.Cleaning
         }
 
         public async Task<CMDefaultResponse> ApproveScheduleExecution(ApproveMC request, int userId, string facilitytimeZone)
-            {
+        {
             try
             {
                 using (var repos = new MCVCRepository(getDB, module))
@@ -556,25 +556,25 @@ namespace CMMSAPIs.BS.Cleaning
         }
 
 
-      /*  public async Task<CMDefaultResponse> CompleteExecutionVegetation(CMMCExecution request, int userId)
-        {
-            try
-            {
-               using (var repos = new MCVCRepository(getDB, module))
-                {
-                    return await repos.CompleteExecution(request, userId);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        }*/
+        /*  public async Task<CMDefaultResponse> CompleteExecutionVegetation(CMMCExecution request, int userId)
+          {
+              try
+              {
+                 using (var repos = new MCVCRepository(getDB, module))
+                  {
+                      return await repos.CompleteExecution(request, userId);
+                  }
+              }
+              catch (Exception ex)
+              {
+                  throw;
+              }
+          }*/
 
 
     }
 
-   
+
 }
 
 

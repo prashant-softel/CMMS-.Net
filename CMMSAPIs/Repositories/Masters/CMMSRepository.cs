@@ -1473,8 +1473,6 @@ namespace CMMSAPIs.Repositories.Masters
                 $"where (mc.moduleType=1 and rescheduled = 0)";
             myQuery12 += $" and mc.facilityId in ({facilityId})  group by mc.id ";
 
-
-
             List<CMDashboadItemList> itemList = await Context.GetData<CMDashboadItemList>(myQuery12).ConfigureAwait(false);
             result.WaterUsedTotal = await WaterUsedTotal(facilityId);
             result.created = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.MC_TASK_SCHEDULED).ToList().Count;
@@ -1818,7 +1816,6 @@ namespace CMMSAPIs.Repositories.Masters
                 "       LEFT JOIN facilities fc ON fc.id = po.facilityID\r\nLEFT JOIN users as vendor on vendor.id=po.vendorID " +
                 "       LEFT JOIN business bl ON bl.id = po.vendorID left join smassettypes stt on stt.ID = pod.order_type LEFT JOIN currency curr ON curr.id = po.currency LEFT JOIN users ed ON ed.id = po.generated_by" +
                 " WHERE " + filter + " " + datefilter + "";
-
 
             List<CMGoodsOrderList> _List = await Context.GetData<CMGoodsOrderList>(query).ConfigureAwait(false);
 

@@ -1,5 +1,4 @@
 ﻿using CMMSAPIs.Helper;
-using static CMMSAPIs.Helper.CMMS;
 using CMMSAPIs.Models.MC;
 using CMMSAPIs.Models.Notifications;
 using CMMSAPIs.Models.PM;
@@ -9,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
+using static CMMSAPIs.Helper.CMMS;
 
 namespace CMMSAPIs.Repositories.MCVCRepository
 {
@@ -38,8 +38,8 @@ namespace CMMSAPIs.Repositories.MCVCRepository
             }
 
         }
-        
-            
+
+
 
 
         private Dictionary<int, string> StatusDictionary = new Dictionary<int, string>()
@@ -242,7 +242,7 @@ namespace CMMSAPIs.Repositories.MCVCRepository
                     retValue = String.Format("SCH{0} Close Rejected by {1} ", scheduleObj.scheduleId, scheduleObj.rejectedBy);
                     break;
 
-                    
+
                 case CMMS.CMMS_Status.SCHEDULED_LINKED_TO_PTW:
                     retValue = String.Format("PTW{0} Linked with SCH{1} of MCT{1} ", scheduleObj.permit_id, scheduleObj.scheduleId, scheduleObj.executionId);
                     break;
@@ -804,7 +804,7 @@ namespace CMMSAPIs.Repositories.MCVCRepository
             {
                 Console.WriteLine(ex.ToString());
             }
-            
+
 
             foreach (var item in _ViewSchedule)
             {
@@ -822,7 +822,7 @@ namespace CMMSAPIs.Repositories.MCVCRepository
             int planIds = 0;
             CMMS.CMMS_Modules module = CMMS.CMMS_Modules.MC_PLAN;
             int status = (int)CMMS.CMMS_Status.MC_PLAN_SUBMITTED;
-            
+
 
             // Determine status and module based on moduleType
             if (moduleType == cleaningType.Vegetation)
@@ -830,7 +830,7 @@ namespace CMMSAPIs.Repositories.MCVCRepository
                 module = CMMS.CMMS_Modules.VEGETATION_PLAN;
                 status = (int)CMMS.CMMS_Status.VEG_PLAN_SUBMITTED;
             }
-       
+
             foreach (CMMCPlan plan in request)
             {
                 int cleaningType = plan.cleaningType;
@@ -962,7 +962,7 @@ namespace CMMSAPIs.Repositories.MCVCRepository
                         Query += $"status = {(int)CMMS.CMMS_Status.VEG_PLAN_SUBMITTED}, ";
                     }
                 }
-             
+
 
                 Query += $"updatedAt = '{UtilsRepository.GetUTCTime()}', updatedById = {userId} WHERE planId = {request.planId};";
 
@@ -1041,7 +1041,7 @@ namespace CMMSAPIs.Repositories.MCVCRepository
                     }
                 }
 
-                if(moduleType == cleaningType.ModuleCleaning)
+                if (moduleType == cleaningType.ModuleCleaning)
                 {
                     if (request.resubmit == 1)
                     {
@@ -1053,7 +1053,7 @@ namespace CMMSAPIs.Repositories.MCVCRepository
                     }
 
                 }
-                else if(moduleType == cleaningType.Vegetation)
+                else if (moduleType == cleaningType.Vegetation)
                 {
                     await _utilsRepo.AddHistoryLog(module, rid, 0, 0, "Plan Updated Successfully", CMMS.CMMS_Status.VEG_PLAN_SUBMITTED, userId);
 
@@ -1061,11 +1061,11 @@ namespace CMMSAPIs.Repositories.MCVCRepository
                 }
                 //var notificationResponse = await CMMSNotification.sendNotification(CMMS.CMMS_Modules.VEGETATION_PLAN, CMMS.CMMS_Status.UPDATED, new int[] { userId });
 
-                if(moduleType == cleaningType.ModuleCleaning)
+                if (moduleType == cleaningType.ModuleCleaning)
                 {
                     await _utilsRepo.AddHistoryLog(module, request.planId, 0, 0, "Plan Updated", CMMS.CMMS_Status.MC_PLAN_DRAFT, userId);
                 }
-                else if(moduleType == cleaningType.Vegetation)
+                else if (moduleType == cleaningType.Vegetation)
                 {
                     await _utilsRepo.AddHistoryLog(module, request.planId, 0, 0, "Plan Updated", CMMS.CMMS_Status.VEG_PLAN_DRAFT, userId);
                 }
@@ -1122,50 +1122,50 @@ namespace CMMSAPIs.Repositories.MCVCRepository
 
             var retVal = await Context.ExecuteNonQry<int>(equipmentQry).ConfigureAwait(false);
             await _utilsRepo.AddHistoryLog(module, request.id, task_module, taskid, request.comment, (CMMS.CMMS_Status)status, userID);
-//            await _utilsRepo.AddHistoryLog(task_module, taskid, 0, 0, "Execution scheduled", (CMMS.CMMS_Status)status, userID);
-/*
-            if (moduleType == cleaningType.ModuleCleaning)
-            {
-                string mainQuery = $"INSERT INTO cleaning_execution(planId,moduleType,facilityId,frequencyId,noOfDays,startDate,assignedTo,status)  " +
-                              $"select planId as planId,{(int)moduleType} as moduleType,facilityId,frequencyId,durationDays as noOfDays ,startDate,assignedTo," +
-                              $"{(int)CMMS.CMMS_Status.MC_TASK_SCHEDULED} as status " +
-                              $"from cleaning_plan where planId = {request.id}; " +
-                              $"SELECT LAST_INSERT_ID(); ";
-                
-                DataTable dt3 = await Context.FetchData(mainQuery).ConfigureAwait(false);
-                int taskid = Convert.ToInt32(dt3.Rows[0][0]);
-                string scheduleQry = $"INSERT INTO cleaning_execution_schedules(executionId,planId,actualDay,moduleType,cleaningType,status) " +
-                                $"select {taskid} as executionId,planId as planId, plannedDay,{(int)moduleType},cleaningType,{(int)CMMS.CMMS_Status.MC_TASK_SCHEDULED} as status from cleaning_plan_schedules where planId = {request.id}";
-                await Context.ExecuteNonQry<int>(scheduleQry);
-                string equipmentQry = $"INSERT INTO cleaning_execution_items (`executionId`,`moduleType`,`scheduleId`,`assetId`,`{measure}`,`plannedDate`,`plannedDay`,`createdById`,`createdAt`,`status`) SELECT '{taskid}' as executionId,item.moduleType,schedule.scheduleId,item.assetId,{measure},DATE_ADD('{DateTime.Now.ToString("yyyy-MM-dd")}',interval item.plannedDay - 1  DAY) as plannedDate,item.plannedDay,schedule.createdById,schedule.createdAt,{(int)CMMS.CMMS_Status.EQUIP_SCHEDULED} as status from cleaning_plan_items as item join cleaning_execution_schedules as schedule on item.planId = schedule.planId and item.plannedDay = schedule.actualDay where schedule.executionId = {taskid}";
+            //            await _utilsRepo.AddHistoryLog(task_module, taskid, 0, 0, "Execution scheduled", (CMMS.CMMS_Status)status, userID);
+            /*
+                        if (moduleType == cleaningType.ModuleCleaning)
+                        {
+                            string mainQuery = $"INSERT INTO cleaning_execution(planId,moduleType,facilityId,frequencyId,noOfDays,startDate,assignedTo,status)  " +
+                                          $"select planId as planId,{(int)moduleType} as moduleType,facilityId,frequencyId,durationDays as noOfDays ,startDate,assignedTo," +
+                                          $"{(int)CMMS.CMMS_Status.MC_TASK_SCHEDULED} as status " +
+                                          $"from cleaning_plan where planId = {request.id}; " +
+                                          $"SELECT LAST_INSERT_ID(); ";
 
-                var retVal = await Context.ExecuteNonQry<int>(equipmentQry).ConfigureAwait(false);
-                await _utilsRepo.AddHistoryLog(module, request.id, 0, 0, request.comment, (CMMS.CMMS_Status)status, userID);
-                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MC_TASK, taskid, 0, 0, "Execution scheduled", (CMMS.CMMS_Status)status, userID);
+                            DataTable dt3 = await Context.FetchData(mainQuery).ConfigureAwait(false);
+                            int taskid = Convert.ToInt32(dt3.Rows[0][0]);
+                            string scheduleQry = $"INSERT INTO cleaning_execution_schedules(executionId,planId,actualDay,moduleType,cleaningType,status) " +
+                                            $"select {taskid} as executionId,planId as planId, plannedDay,{(int)moduleType},cleaningType,{(int)CMMS.CMMS_Status.MC_TASK_SCHEDULED} as status from cleaning_plan_schedules where planId = {request.id}";
+                            await Context.ExecuteNonQry<int>(scheduleQry);
+                            string equipmentQry = $"INSERT INTO cleaning_execution_items (`executionId`,`moduleType`,`scheduleId`,`assetId`,`{measure}`,`plannedDate`,`plannedDay`,`createdById`,`createdAt`,`status`) SELECT '{taskid}' as executionId,item.moduleType,schedule.scheduleId,item.assetId,{measure},DATE_ADD('{DateTime.Now.ToString("yyyy-MM-dd")}',interval item.plannedDay - 1  DAY) as plannedDate,item.plannedDay,schedule.createdById,schedule.createdAt,{(int)CMMS.CMMS_Status.EQUIP_SCHEDULED} as status from cleaning_plan_items as item join cleaning_execution_schedules as schedule on item.planId = schedule.planId and item.plannedDay = schedule.actualDay where schedule.executionId = {taskid}";
 
-            }
-            else if(moduleType == cleaningType.Vegetation)
-            {
-                string mainQuery = $"INSERT INTO cleaning_execution(planId,moduleType,facilityId,frequencyId,noOfDays,startDate,assignedTo,status)  " +
-                          $"select planId as planId,{(int)moduleType} as moduleType,facilityId,frequencyId,durationDays as noOfDays ,startDate,assignedTo," +
-                          $"{(int)CMMS.CMMS_Status.VEG_TASK_SCHEDULED} as status " +
-                          $"from cleaning_plan where planId = {request.id}; " +
-                          $"SELECT LAST_INSERT_ID(); ";
-               
-                DataTable dt3 = await Context.FetchData(mainQuery).ConfigureAwait(false);
-                int taskid = Convert.ToInt32(dt3.Rows[0][0]);
-                string scheduleQry = $"INSERT INTO cleaning_execution_schedules(executionId,planId,actualDay,moduleType,cleaningType,status) " +
-                                $"select {taskid} as executionId,planId as planId, plannedDay,{(int)moduleType},cleaningType,{(int)CMMS.CMMS_Status.VEG_TASK_SCHEDULED} as status from cleaning_plan_schedules where planId = {request.id}";
-                await Context.ExecuteNonQry<int>(scheduleQry);
-                string equipmentQry = $"INSERT INTO cleaning_execution_items (`executionId`,`moduleType`,`scheduleId`,`assetId`,`{measure}`,`plannedDate`,`plannedDay`,`createdById`,`createdAt`,`status`) SELECT '{taskid}' as executionId,item.moduleType,schedule.scheduleId,item.assetId,{measure},DATE_ADD('{DateTime.Now.ToString("yyyy-MM-dd")}',interval item.plannedDay - 1  DAY) as plannedDate,item.plannedDay,schedule.createdById,schedule.createdAt,{(int)CMMS.CMMS_Status.EQUIP_SCHEDULED} as status from cleaning_plan_items as item join cleaning_execution_schedules as schedule on item.planId = schedule.planId and item.plannedDay = schedule.actualDay where schedule.executionId = {taskid}";
-                var retVal = await Context.ExecuteNonQry<int>(equipmentQry).ConfigureAwait(false);
-                await _utilsRepo.AddHistoryLog(module, request.id, 0, 0, request.comment, (CMMS.CMMS_Status)status, userID);
-                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.VEGETATION_TASK, taskid, 0, 0, "Execution scheduled", (CMMS.CMMS_Status)status, userID);
+                            var retVal = await Context.ExecuteNonQry<int>(equipmentQry).ConfigureAwait(false);
+                            await _utilsRepo.AddHistoryLog(module, request.id, 0, 0, request.comment, (CMMS.CMMS_Status)status, userID);
+                            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MC_TASK, taskid, 0, 0, "Execution scheduled", (CMMS.CMMS_Status)status, userID);
+
+                        }
+                        else if(moduleType == cleaningType.Vegetation)
+                        {
+                            string mainQuery = $"INSERT INTO cleaning_execution(planId,moduleType,facilityId,frequencyId,noOfDays,startDate,assignedTo,status)  " +
+                                      $"select planId as planId,{(int)moduleType} as moduleType,facilityId,frequencyId,durationDays as noOfDays ,startDate,assignedTo," +
+                                      $"{(int)CMMS.CMMS_Status.VEG_TASK_SCHEDULED} as status " +
+                                      $"from cleaning_plan where planId = {request.id}; " +
+                                      $"SELECT LAST_INSERT_ID(); ";
+
+                            DataTable dt3 = await Context.FetchData(mainQuery).ConfigureAwait(false);
+                            int taskid = Convert.ToInt32(dt3.Rows[0][0]);
+                            string scheduleQry = $"INSERT INTO cleaning_execution_schedules(executionId,planId,actualDay,moduleType,cleaningType,status) " +
+                                            $"select {taskid} as executionId,planId as planId, plannedDay,{(int)moduleType},cleaningType,{(int)CMMS.CMMS_Status.VEG_TASK_SCHEDULED} as status from cleaning_plan_schedules where planId = {request.id}";
+                            await Context.ExecuteNonQry<int>(scheduleQry);
+                            string equipmentQry = $"INSERT INTO cleaning_execution_items (`executionId`,`moduleType`,`scheduleId`,`assetId`,`{measure}`,`plannedDate`,`plannedDay`,`createdById`,`createdAt`,`status`) SELECT '{taskid}' as executionId,item.moduleType,schedule.scheduleId,item.assetId,{measure},DATE_ADD('{DateTime.Now.ToString("yyyy-MM-dd")}',interval item.plannedDay - 1  DAY) as plannedDate,item.plannedDay,schedule.createdById,schedule.createdAt,{(int)CMMS.CMMS_Status.EQUIP_SCHEDULED} as status from cleaning_plan_items as item join cleaning_execution_schedules as schedule on item.planId = schedule.planId and item.plannedDay = schedule.actualDay where schedule.executionId = {taskid}";
+                            var retVal = await Context.ExecuteNonQry<int>(equipmentQry).ConfigureAwait(false);
+                            await _utilsRepo.AddHistoryLog(module, request.id, 0, 0, request.comment, (CMMS.CMMS_Status)status, userID);
+                            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.VEGETATION_TASK, taskid, 0, 0, "Execution scheduled", (CMMS.CMMS_Status)status, userID);
 
 
-            }
-*/
-            
+                        }
+            */
+
             try
             {
                 CMMCPlan _ViewPlanList = await GetPlanDetails(request.id, facilitytimeZone);
@@ -1346,7 +1346,7 @@ namespace CMMSAPIs.Repositories.MCVCRepository
                 var retVal = await Context.ExecuteNonQry<int>(equipmentQry).ConfigureAwait(false);
             }
 
-            await _utilsRepo.AddHistoryLog(module, request.id, 0, 0, request.comment, (CMMS.CMMS_Status) status, userID);
+            await _utilsRepo.AddHistoryLog(module, request.id, 0, 0, request.comment, (CMMS.CMMS_Status)status, userID);
 
             try
             {
@@ -1368,7 +1368,7 @@ namespace CMMSAPIs.Repositories.MCVCRepository
         internal async Task<CMDefaultResponse> EndExecution(int executionId, int userId, string facilitytimeZone)
         {
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
-           
+
             CMMS.CMMS_Modules module = CMMS.CMMS_Modules.MC_TASK;
             int status = (int)CMMS.CMMS_Status.MC_TASK_COMPLETED;
 
@@ -1465,8 +1465,8 @@ namespace CMMSAPIs.Repositories.MCVCRepository
         {
             CMMS.CMMS_Modules module;
             int theStatus;
-            int retVal=0;
-            
+            int retVal = 0;
+
 
             module = CMMS.CMMS_Modules.MC_TASK;
             theStatus = (int)CMMS.CMMS_Status.MC_TASK_ASSIGNED;
@@ -1487,7 +1487,7 @@ namespace CMMSAPIs.Repositories.MCVCRepository
             CMMS.CMMS_Status status = (CMMS.CMMS_Status)Convert.ToInt32(dt1.Rows[0][0]);
 
             //prndong. write common code
-            if(moduleType == cleaningType.ModuleCleaning)
+            if (moduleType == cleaningType.ModuleCleaning)
             {
                 if (status != CMMS.CMMS_Status.MC_TASK_RESCHEDULED && status != CMMS.CMMS_Status.MC_PLAN_APPROVED && status != CMMS.CMMS_Status.SCHEDULED_LINKED_TO_PTW)
                 {
@@ -1504,7 +1504,7 @@ namespace CMMSAPIs.Repositories.MCVCRepository
                 retVal = await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
             }
 
-            else if(moduleType == cleaningType.Vegetation)
+            else if (moduleType == cleaningType.Vegetation)
             {
                 if (status != CMMS.CMMS_Status.VEG_TASK_RESCHEDULED && status != CMMS.CMMS_Status.VEG_PLAN_APPROVED && status != CMMS.CMMS_Status.VEGETATION_LINKED_TO_PTW)
                 {
@@ -1524,7 +1524,7 @@ namespace CMMSAPIs.Repositories.MCVCRepository
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
             response = new CMDefaultResponse();
 
-            if(moduleType == cleaningType.ModuleCleaning)
+            if (moduleType == cleaningType.ModuleCleaning)
             {
                 if (status == CMMS.CMMS_Status.MC_TASK_SCHEDULED)
                 {
@@ -1535,7 +1535,7 @@ namespace CMMSAPIs.Repositories.MCVCRepository
                     response = new CMDefaultResponse(task_id, retCode, $"Vegetation Task Reassigned To user Id {assign_to}");
                 }
             }
-            else if(moduleType == cleaningType.Vegetation)
+            else if (moduleType == cleaningType.Vegetation)
             {
                 if (status == CMMS.CMMS_Status.VEG_TASK_SCHEDULED)
                 {
@@ -1577,12 +1577,8 @@ namespace CMMSAPIs.Repositories.MCVCRepository
                 module = CMMS.CMMS_Modules.VEGETATION_TASK;
                 status = (int)CMMS.CMMS_Status.VEG_TASK_ABANDONED;
             }
-
-
             string Query = $"Update cleaning_execution set status = {status},abandonedById={userId},abandonedAt='{UtilsRepository.GetUTCTime()}' ,reasonForAbandon = '{request.comment}', status_updated_at = '{UtilsRepository.GetUTCTime()}' where id = {request.id};";
-
             await Context.GetData<CMMCExecutionSchedule>(Query).ConfigureAwait(false);
-
             await _utilsRepo.AddHistoryLog(module, request.id, 0, 0, request.comment, (CMMS.CMMS_Status)status, userId);
             try
             {
@@ -1655,9 +1651,9 @@ namespace CMMSAPIs.Repositories.MCVCRepository
             }
 
             // Determine status and module based on moduleType
-         
+
             string Query = $"Update cleaning_execution set status = {status},abandonRejectedBy={userId},abandonRejectedAt='{UtilsRepository.GetUTCTime()}' ,reasonForAbandon = '{request.comment}', status_updated_at = '{UtilsRepository.GetUTCTime()}' where id = {request.id};";
-            
+
             await Context.GetData<CMMCExecutionSchedule>(Query).ConfigureAwait(false);
 
             await _utilsRepo.AddHistoryLog(module, request.id, 0, 0, request.comment, (CMMS.CMMS_Status)status, userId);
@@ -1755,9 +1751,9 @@ namespace CMMSAPIs.Repositories.MCVCRepository
 
             int status;
             int status2;
-          
+
             CMMS.CMMS_Modules module;
-          
+
             module = CMMS.CMMS_Modules.MC_TASK;
             status = (int)CMMS.CMMS_Status.MC_TASK_APPROVED;
             status2 = (int)CMMS.CMMS_Status.MC_TASK_SCHEDULED;
@@ -1770,7 +1766,7 @@ namespace CMMSAPIs.Repositories.MCVCRepository
                 status = (int)CMMS.CMMS_Status.VEG_TASK_APPROVED;
                 status2 = (int)CMMS.CMMS_Status.VEG_TASK_SCHEDULED;
             }
-            
+
 
 
 
@@ -1811,7 +1807,7 @@ namespace CMMSAPIs.Repositories.MCVCRepository
             {
                 Console.WriteLine($"Failed to send Vegetation Notification: {ex.Message}");
             }
-       
+
 
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Execution Approved");
             return response;
@@ -1883,7 +1879,7 @@ namespace CMMSAPIs.Repositories.MCVCRepository
             string approveQuery = $"Update cleaning_execution_schedules set status= {status},rejectedById={userId},remark='{request.comment}', rejectedAt='{UtilsRepository.GetUTCTime()}', status_updated_at = '{UtilsRepository.GetUTCTime()}' where scheduleId = {request.id}";
             await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
 
-            if(moduleType == cleaningType.ModuleCleaning)
+            if (moduleType == cleaningType.ModuleCleaning)
             {
 
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.MC_TASK, request.schedule_id, 0, 0, request.comment, (CMMS.CMMS_Status)status, userId);
@@ -1893,7 +1889,7 @@ namespace CMMSAPIs.Repositories.MCVCRepository
             {
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.VEGETATION_TASK, request.schedule_id, 0, 0, request.comment, (CMMS.CMMS_Status)status, userId);
             }
-           
+
             try
             {
                 CMMCExecutionSchedule _ViewTaskList = await GetScheduleDetails(request.id, facilitytimeZone);
@@ -2069,7 +2065,7 @@ namespace CMMSAPIs.Repositories.MCVCRepository
 
             int val = await Context.ExecuteNonQry<int>(Query).ConfigureAwait(false);
 
-        
+
             await _utilsRepo.AddHistoryLog(module, request.id, 0, 0, request.comment, (CMMS.CMMS_Status)status, userId);
             try
             {
@@ -2099,13 +2095,9 @@ namespace CMMSAPIs.Repositories.MCVCRepository
 
             module = CMMS.CMMS_Modules.MC_EXECUTION;
             theStatus = (int)CMMS.CMMS_Status.SCHEDULED_LINKED_TO_PTW;
-
-
-            // Determine status and module based on moduleType
             if (moduleType == cleaningType.Vegetation)
             {
                 module = CMMS.CMMS_Modules.VEGETATION_EXECUTION;
-               // theStatus = (int)CMMS.CMMS_Status.VEGETATION_LINKED_TO_PTW;
             }
 
             CMDefaultResponse response;
@@ -2137,16 +2129,15 @@ namespace CMMSAPIs.Repositories.MCVCRepository
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
             if (retVal > 0)
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
-            
-            if(moduleType == cleaningType.ModuleCleaning)
+
+            if (moduleType == cleaningType.ModuleCleaning)
             {
                 await _utilsRepo.AddHistoryLog(module, scheduleId, CMMS.CMMS_Modules.PTW, permit_id, "PTW linked to MC", CMMS.CMMS_Status.SCHEDULED_LINKED_TO_PTW, userId);
             }
-            if(moduleType == cleaningType.Vegetation)
+            if (moduleType == cleaningType.Vegetation)
             {
                 await _utilsRepo.AddHistoryLog(module, scheduleId, CMMS.CMMS_Modules.PTW, permit_id, "PTW linked to VC", CMMS.CMMS_Status.SCHEDULED_LINKED_TO_PTW, userId);
             }
-
 
             try
             {
@@ -2157,33 +2148,12 @@ namespace CMMSAPIs.Repositories.MCVCRepository
             {
                 Console.WriteLine(ex.ToString());
             }
-
-
             response = new CMDefaultResponse(scheduleId, CMMS.RETRUNSTATUS.SUCCESS, $"Permit {permit_id} linked to  SCH{scheduleId} Successfully");
-                return response;
-
+            return response;
         }
         internal async Task<CMDefaultResponse> CompleteExecution(CMMCExecution request, int userId)
         {
             return null;
         }
-
-       
-
-      
-
-       
-       
-       
-        
-        
-      
-
-      
-
-
-      
-
-      
     }
 }

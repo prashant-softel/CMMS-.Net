@@ -124,6 +124,7 @@ namespace CMMSAPIs.Models.PM
         public string new_remark { get; set; }
         public string employee_list { get; set; }
         public string is_PTW { get; set; }
+        public dynamic tbt_start { get; set; }
         public string TBT_conducted_by_name { get; set; }
         public List<string> Employees { get; set; }
         public string Isolation_taken { get; set; }

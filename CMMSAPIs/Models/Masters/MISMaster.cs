@@ -608,6 +608,7 @@ namespace CMMSAPIs.Models.Masters
     public class CMObservation
     {
         public int id { get; set; }
+        public int observation_type { get; set; }  // added type of enum 
         public int facility_id { get; set; }
         public string contractor_name { get; set; }
         public int risk_type_id { get; set; }
@@ -615,9 +616,6 @@ namespace CMMSAPIs.Models.Masters
         public string preventive_action { get; set; }
         public string responsible_person { get; set; }
         public string contact_number { get; set; }
-
-
-
         public int cost_type { get; set; }
         public DateTime closed_date { get; set; }
         public string observation_status { get; set; }
