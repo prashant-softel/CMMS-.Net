@@ -449,7 +449,7 @@ namespace CMMSAPIs.Repositories.WC
             if (request.facilityId > 0)
                 updateQry += $"facilityId = {request.facilityId}, wc_fac_code = 'FAC{1000 + request.facilityId}', updatedbyId = {userID}, status = {(int)CMMS.CMMS_Status.WC_UPDATED}";
             if (request.equipmentId > 0)
-                updateQry += $"equipment_id = {request.equipmentId}, " +
+                updateQry += $" , equipment_id = {request.equipmentId}, " +
                                 $"equipment_cat_id = (SELECT categoryId FROM assets WHERE assets.id = {request.equipmentId}), " +
                                 $"equipment_sr_no = (SELECT serialNumber FROM assets WHERE assets.id = {request.equipmentId}), " +
                                 $"supplier_id = (SELECT supplierId FROM assets WHERE assets.id = {request.equipmentId}), ";
