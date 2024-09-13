@@ -253,7 +253,7 @@ namespace CMMSAPIs.Repositories.Masters
             return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Source CMObservation Deleted");
         }
 
-        internal async Task<CMDefaultResponse> CloseObservation(CMApproval request, int userId)
+        internal async Task<CMDefaultResponse> CloseObservation_old(CMApproval request, int userId)
         {
             string deleteQry = "";
             if (request.type == (int)CMMS.OBSERVATION_TYPE.PM_EXECUTION)  

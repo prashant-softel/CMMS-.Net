@@ -1988,7 +1988,7 @@ namespace CMMSAPIs.Repositories.MCVCRepository
             int status1 = (int)CMMS.CMMS_Status.EQUIP_CLEANED;
             int abandonStatus1 = (int)CMMS.CMMS_Status.EQUIP_ABANDONED;
 
-            string field = $"waterUsed ={request.waterUsed},";
+            string waterUsedUpdate = $"waterUsed ={request.waterUsed},";
 
             CMMS.CMMS_Modules module;
             int status;
@@ -2002,12 +2002,12 @@ namespace CMMSAPIs.Repositories.MCVCRepository
             {
                 module = CMMS.CMMS_Modules.VEGETATION_EXECUTION;
                 status = (int)CMMS.CMMS_Status.VEG_TASK_UPDATED;
+                waterUsedUpdate = "";
             }
 
-            field = "";
 
 
-            string scheduleQuery = $"Update cleaning_execution_schedules set {field} updatedById={userId},remark_of_schedule='{request.remark}',updatedAt='{UtilsRepository.GetUTCTime()}', status_updated_at = '{UtilsRepository.GetUTCTime()}' where scheduleId = {request.scheduleId};";
+            string scheduleQuery = $"Update cleaning_execution_schedules set {waterUsedUpdate} updatedById={userId},remark_of_schedule='{request.remark}',updatedAt='{UtilsRepository.GetUTCTime()}', status_updated_at = '{UtilsRepository.GetUTCTime()}' where scheduleId = {request.scheduleId};";
             //  $" Update cleaning_execution_items set status = {(int)CMMS.CMMS_Status.EQUIP_SCHEDULED} where scheduleId = {request.scheduleId} ;";
 
             int val = await Context.ExecuteNonQry<int>(scheduleQuery).ConfigureAwait(false);
