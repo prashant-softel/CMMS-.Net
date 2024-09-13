@@ -101,7 +101,7 @@ namespace CMMSAPIs.Models.Notifications
             string retValue = "";
             if (scheduleObj != null && scheduleObj.scheduleId != 0)
             {
-                retValue = String.Format("<h3><b style='color:#31576D'>Status:</b>{0}</h3><br>", scheduleObj.status_long_schedule + " at " + scheduleObj.facilityidName);
+                retValue = String.Format("<div style='text-align: center;'><h3><b style='color:#31576D'>Status:</b> {0}</h3></div><br>", scheduleObj.status_long_schedule + " at " + scheduleObj.facilityidName);
 
                 retValue += String.Format("<table style='width: 50%; margin:0 auto; border-collapse: collapse ; border-spacing: 10px; ' border='1'>");
                 retValue += String.Format(template, "Schedule ID", "SCH" + scheduleObj.scheduleId );
@@ -144,6 +144,7 @@ namespace CMMSAPIs.Models.Notifications
                 {
                     retValue += String.Format(template, "Permit Code", scheduleObj.permit_code);
                     retValue += String.Format(template, "PTW status", scheduleObj.status_short_ptw);
+                    retValue += String.Format(template, "Permit ID Linked by ", scheduleObj.updatedbyName);
                 }
                 switch (m_notificationID)
                 {

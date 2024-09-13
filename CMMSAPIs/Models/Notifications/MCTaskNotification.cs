@@ -144,17 +144,17 @@ namespace CMMSAPIs.Models.Notifications
 
                 if (taskObj.assignedToId > 0)
                 {
-                    retValue += String.Format(template, "MC Task Schedule Assigned to", taskObj.assignedTo);
+                    retValue += String.Format(template, "MC Task  Assigned to", taskObj.assignedTo);
                 }
 
                 if (taskObj.rejectedbyId > 0)
                 {
-                    retValue += String.Format(template, "MC Task Rejected By", taskObj.rejectedbyName);
+                    retValue += String.Format(template, "MC Task Rejected By", taskObj.rejectedbyName + " at " + taskObj.rejectedAt);
                 }
 
                 if (taskObj.approvedbyId > 0)
                 {
-                    retValue += String.Format(template, "MC Task Approved By", taskObj.approvedbyName);
+                    retValue += String.Format(template, "MC Task Approved By", taskObj.approvedbyName + " at " + taskObj.approvedAt);
                 }
 
                 if (taskObj.startedById > 0)
@@ -164,7 +164,7 @@ namespace CMMSAPIs.Models.Notifications
 
                 if (taskObj.endedById > 0)
                 {
-                    retValue += String.Format(template, "MC Task Scheduled Closed By", taskObj.endedBy);
+                    retValue += String.Format(template, "MC Task  Closed By", taskObj.endedBy + " at " + taskObj.endedAt);
 
                     if (taskObj.endrejectedbyId > 0)
                     {
@@ -179,16 +179,16 @@ namespace CMMSAPIs.Models.Notifications
 
                 if (taskObj.abandonedById > 0)
                 {
-                    retValue += String.Format(template, "MC Task Abandoned By", taskObj.abandonedBy);
+                    retValue += String.Format(template, "MC Task Abandoned By", taskObj.abandonedBy + " at " + taskObj.abandonedAt);
 
                     if (taskObj.abandonRejectedById > 0)
                     {
-                        retValue += String.Format(template, "MC Task Abandoned Rejected By", taskObj.abandonRejectedByName);
+                        retValue += String.Format(template, "MC Task Abandoned Rejected By", taskObj.abandonRejectedByName + " at " + taskObj.abandonRejectedAt);
                     }
 
                     if (taskObj.abandonApprovedById > 0)
                     {
-                        retValue += String.Format(template, "MC Task Abandoned Approved By", taskObj.abandonApprovedByName);
+                        retValue += String.Format(template, "MC Task Abandoned Approved By", taskObj.abandonApprovedByName + " at " + taskObj.abandonApprovedAt);
                     }
                 }
 

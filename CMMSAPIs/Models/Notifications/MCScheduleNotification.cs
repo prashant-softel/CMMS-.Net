@@ -97,9 +97,9 @@ namespace CMMSAPIs.Models.Notifications
             string retValue = "";
             if (scheduleObj != null && scheduleObj.scheduleId != 0)
             {
-                retValue = String.Format("<h3><b style='color:#31576D'>Status:</b>{0}</h3><br>", scheduleObj.status_long_schedule + " at " + scheduleObj.facilityidName);
+                retValue = String.Format("<div style='text-align: center;'><h3><b style='color:#31576D'>Status:</b> {0}</h3></div><br>", scheduleObj.status_long_schedule + " at " + scheduleObj.facilityidName);
 
-                retValue += String.Format("<table style='width: 50%; margin:0 auto; border-collapse: collapse ; border-spacing: 10px; ' border='1'>");
+                retValue += String.Format("<table style='width: 50%; margin:0 auto; border-collapse: collapse ; border-spacing: 0px; ' border='1'>");
                 retValue += String.Format(template, "Schedule ID", "SCH" + scheduleObj.scheduleId );
                 retValue += String.Format(template, "Task ID", "MCT" + scheduleObj.executionId);
                 retValue += String.Format(template, "Status", scheduleObj.status_short);
@@ -138,12 +138,10 @@ namespace CMMSAPIs.Models.Notifications
                 {
                     retValue += String.Format(template, "permit_code", scheduleObj.permit_code);
                     retValue += String.Format(template, "PTW status", scheduleObj.status_short_ptw);
+                    retValue += String.Format(template, "Permit ID Linked to Schedule ID by ", scheduleObj.updatedbyName);
                 }
                 switch (m_notificationID)
-                {
-                    case CMMS.CMMS_Status.SCHEDULED_LINKED_TO_PTW:
-                        retValue += String.Format(template, "Permit ID Linked by ", scheduleObj.updatedbyName);
-                        break;
+                {   
                     case CMMS.CMMS_Status.MC_TASK_UPDATED:
                         retValue += String.Format(template, "Updated by", scheduleObj.updatedbyName + " at " + scheduleObj.updatedAt);
                         break;
@@ -166,7 +164,6 @@ namespace CMMSAPIs.Models.Notifications
                     */
 
                     default:
-                        retValue += String.Format(template, "Permit ID Linked to Schedule ID by ", scheduleObj.updatedbyName);
                         break;
 
                 }

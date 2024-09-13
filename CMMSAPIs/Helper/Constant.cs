@@ -260,7 +260,7 @@ namespace CMMSAPIs.Helper
             MC_EXECUTION = 83,
             CORRECTIVE_MAINTENANCE = 91,
             CALIBRATION = 101,
-            VEGETATION = 111,
+            //VEGETATION = 111,
             VEGETATION_EXECUTION = 112,
             WARRANTY_CLAIM = 121,
             INCIDENT_REPORT = 131,
@@ -275,7 +275,7 @@ namespace CMMSAPIs.Helper
             ROLE_DEFAULT_ACCESS_MODULE,
 
             DSM = 181,
-            JobCard = 182,
+            //JobCard = 182,
 
             GRIEVANCE = 301,
             VEGETATION_TASK = 311,

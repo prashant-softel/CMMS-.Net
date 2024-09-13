@@ -41,19 +41,19 @@ namespace CMMSAPIs.Models.Notifications
                     retValue += String.Format("Vegetation Plan <{0}> Draft by {1} ", planObj.planId, planObj.createdBy);
                     break;
                 case CMMS.CMMS_Status.VEG_PLAN_SUBMITTED:
-                    retValue = String.Format("{0} VE{1}-Created by {2}", planObj.facilityidName, planObj.planId, planObj.createdBy);
+                    retValue = String.Format("{0} VC{1}-Created by {2}", planObj.facilityidName, planObj.planId, planObj.createdBy);
                     break;
                 case CMMS.CMMS_Status.VEG_PLAN_REJECTED:
-                    retValue += String.Format("{0} VE{1} Rejected by {2}", planObj.facilityidName, planObj.planId, planObj.rejectedbyName);
+                    retValue += String.Format("{0} VC{1} Rejected by {2}", planObj.facilityidName, planObj.planId, planObj.rejectedbyName);
                     break;
                 case CMMS.CMMS_Status.VEG_PLAN_APPROVED:
-                    retValue += String.Format("{0} VE{1} Approved by {2}", planObj.facilityidName, planObj.planId, planObj.approvedbyName);
+                    retValue += String.Format("{0} VC{1} Approved by {2}", planObj.facilityidName, planObj.planId, planObj.approvedbyName);
                     break;
                 case CMMS.CMMS_Status.VEG_PLAN_UPDATED:
-                    retValue += String.Format("{0} VE{1} Updated by {2}", planObj.facilityidName, planObj.planId, planObj.updatedbyName);
+                    retValue += String.Format("{0} VC{1} Updated by {2}", planObj.facilityidName, planObj.planId, planObj.updatedbyName);
                     break;
                 case CMMS.CMMS_Status.VEG_PLAN_DELETED:
-                    retValue += String.Format("{0} VE{1} Deleted by {2}", planObj.facilityidName, planObj.planId, planObj.deletedBy);
+                    retValue += String.Format("{0} VC{1} Deleted by {2}", planObj.facilityidName, planObj.planId, planObj.deletedBy);
                     break;
 
 
@@ -148,16 +148,16 @@ namespace CMMSAPIs.Models.Notifications
                     retValue = String.Format("{0} VE{1} Created by {2}", planObj.facilityidName, planObj.planId, planObj.createdBy);
                     break;
                 case CMMS.CMMS_Status.VEG_PLAN_REJECTED:
-                    retValue = String.Format("{0} VE{1} Rejected by {2}", planObj.facilityidName, planObj.planId, planObj.rejectedbyName);
+                    retValue = String.Format("{0} VC{1} Rejected by {2}", planObj.facilityidName, planObj.planId, planObj.rejectedbyName);
                     break;
                 case CMMS.CMMS_Status.VEG_PLAN_APPROVED:
-                    retValue += String.Format("{0} VE{1} Approved by {2}", planObj.facilityidName, planObj.planId, planObj.approvedbyName);
+                    retValue += String.Format("{0} VC{1} Approved by {2}", planObj.facilityidName, planObj.planId, planObj.approvedbyName);
                     break;
                 case CMMS.CMMS_Status.VEG_PLAN_UPDATED:
-                    retValue += String.Format("{0} VE{1} Updated by {2}", planObj.facilityidName, planObj.planId, planObj.updatedbyName);
+                    retValue += String.Format("{0} VC{1} Updated by {2}", planObj.facilityidName, planObj.planId, planObj.updatedbyName);
                     break;
                 case CMMS.CMMS_Status.VEG_PLAN_DELETED:
-                    retValue = String.Format("{0} VE{1} Deleted by {2}", planObj.facilityidName, planObj.planId, planObj.deletedbyName);
+                    retValue = String.Format("{0} VC{1} Deleted by {2}", planObj.facilityidName, planObj.planId, planObj.deletedbyName);
                     break;
 
 

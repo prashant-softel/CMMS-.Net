@@ -505,7 +505,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
 
                 }
 
-                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.VEGETATION, request.planId, 0, 0, "Plan Updated", CMMS.CMMS_Status.VEG_PLAN_DRAFT, userId);
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.VEGETATION_PLAN, request.planId, 0, 0, "Plan Updated", CMMS.CMMS_Status.VEG_PLAN_DRAFT, userId);
                 try
                 {
                     CMMCPlan _ViewPlanList = await GetPlanDetails(planId, facilitytimeZone);
@@ -584,7 +584,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
             _ViewMCPlan[0].schedules = _Schedules;
 
             CMMS.CMMS_Status _Status_long = (CMMS.CMMS_Status)(_ViewMCPlan[0].status);
-            string _longStatus = getLongStatus(CMMS.CMMS_Modules.VEGETATION, _Status_long, _ViewMCPlan[0]);
+            string _longStatus = getLongStatus(CMMS.CMMS_Modules.VEGETATION_PLAN, _Status_long, _ViewMCPlan[0]);
             _ViewMCPlan[0].status_long = _longStatus;
 
             foreach (var list in _ViewMCPlan)
@@ -868,7 +868,7 @@ namespace CMMSAPIs.Repositories.CleaningRepository
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
             }
 
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.VEGETATION, executionId, 0, 0, "Execution Completed", (CMMS.CMMS_Status)status, userId);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.VEGETATION_TASK, executionId, 0, 0, "Execution Completed", (CMMS.CMMS_Status)status, userId);
 
             try
             {

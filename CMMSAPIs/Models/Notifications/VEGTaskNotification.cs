@@ -152,12 +152,12 @@ namespace CMMSAPIs.Models.Notifications
 
                 if (taskObj.rejectedbyId > 0)
                 {
-                    retValue += String.Format(template, "VEG Task Rejected By", taskObj.rejectedbyName);
+                    retValue += String.Format(template, "VEG Task Rejected By", taskObj.rejectedbyName + " at " + taskObj.rejectedAt);
                 }
 
                 if (taskObj.approvedbyId > 0)
                 {
-                    retValue += String.Format(template, "VEG Task Approved By", taskObj.approvedbyName);
+                    retValue += String.Format(template, "VEG Task Approved By", taskObj.approvedbyName +  " at " + taskObj.approvedAt);
                 }
 
                 if (taskObj.startedById > 0)
@@ -167,11 +167,11 @@ namespace CMMSAPIs.Models.Notifications
 
                 if (taskObj.endedById > 0)
                 {
-                    retValue += String.Format(template, "VEG Task Closed By", taskObj.endedBy);
+                    retValue += String.Format(template, "VEG Task Closed By", taskObj.endedBy + " at " + taskObj.endedAt);
 
                     if (taskObj.endrejectedbyId > 0)
                     {
-                        retValue += String.Format(template, "VEG Task End Rejected By", taskObj.endrejectedbyName + " At " + taskObj.end_rejected_at);
+                        retValue += String.Format(template, "VEG Task End Rejected By", taskObj.endrejectedbyName + " at " + taskObj.end_rejected_at);
                     }
 
                     if (taskObj.endapprovedbyId > 0)
@@ -182,16 +182,16 @@ namespace CMMSAPIs.Models.Notifications
 
                 if (taskObj.abandonedById > 0)
                 {
-                    retValue += String.Format(template, "VEG Task Abandoned By", taskObj.abandonedBy);
+                    retValue += String.Format(template, "VEG Task Abandoned By", taskObj.abandonedBy + " at " + taskObj.abandonedAt);
 
                     if (taskObj.abandonRejectedById > 0)
                     {
-                        retValue += String.Format(template, "VEG Task Abandoned Rejected By", taskObj.abandonRejectedByName);
+                        retValue += String.Format(template, "VEG Task Abandoned Rejected By", taskObj.abandonRejectedByName + " at " + taskObj.abandonRejectedAt);
                     }
 
                     if (taskObj.abandonApprovedById > 0)
                     {
-                        retValue += String.Format(template, "VEG Task Abandoned Approved By", taskObj.abandonApprovedByName);
+                        retValue += String.Format(template, "VEG Task Abandoned Approved By", taskObj.abandonApprovedByName + " at " + taskObj.abandonApprovedAt);
                     }
                 }
 
