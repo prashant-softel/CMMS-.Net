@@ -1,11 +1,9 @@
 using CMMSAPIs.Helper;
-using CMMSAPIs.Repositories.Inventory;
 using CMMSAPIs.Models.Inventory;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Inventory;
 using Microsoft.AspNetCore.Hosting;
 using System;
-using System.Data;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 

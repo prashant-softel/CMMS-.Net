@@ -249,21 +249,27 @@ namespace CMMSAPIs.Repositories.Calibration
                 throw new ArgumentException("Invalid Asset ID" + request.asset_id);
 
             int calibrationId = 0;
-            string getIdQuery = $"SELECT id FROM calibration WHERE asset_id = {request.asset_id} and " +
-                $"status = {(int)CMMS.CMMS_Status.CALIBRATION_APPROVED} and reschedule=1 order by due_date desc limit 1;";
-            DataTable dt1 = await Context.FetchData(getIdQuery).ConfigureAwait(false);
+            string getQuery = $"SELECT status FROM calibration WHERE asset_id = {request.asset_id} order by id desc ;";
+            DataTable dt21 = await Context.FetchData(getQuery).ConfigureAwait(false);
+            int newstatus = dt21.Rows[0][0].ToInt();
+            if (newstatus != 211 && newstatus != 222 && newstatus != 213)
+            {
+                string getIdQuery = $"SELECT id FROM calibration WHERE asset_id = {request.asset_id} and " +
+                    $"status = {(int)CMMS.CMMS_Status.CALIBRATION_APPROVED}  and reschedule=1 order by due_date desc limit 1;";
+                DataTable dt1 = await Context.FetchData(getIdQuery).ConfigureAwait(false);
 
-            if (dt1.Rows.Count > 0)
-            {
-                calibrationId = Convert.ToInt32(dt1.Rows[0][0]);
-                if (calibrationId != request.id)
+                if (dt1.Rows.Count > 0)
                 {
-                    throw new ArgumentException("Calibration record in scheduled state has id " + calibrationId + " and requested id is " + request.id + " for " + request.asset_id);
+                    calibrationId = Convert.ToInt32(dt1.Rows[0][0]);
+                    if (calibrationId != request.id)
+                    {
+                        throw new ArgumentException("Calibration record in scheduled state has id " + calibrationId + " and requested id is " + request.id + " for " + request.asset_id);
+                    }
                 }
-            }
-            else
-            {
-                throw new ArgumentException("Calibration record in scheduled state not found for " + request.asset_id + " to start calibration");
+                else
+                {
+                    throw new ArgumentException("Calibration record in scheduled state not found for " + request.asset_id + " to start calibration");
+                }
             }
             if (request.vendor_id <= 0)
             {

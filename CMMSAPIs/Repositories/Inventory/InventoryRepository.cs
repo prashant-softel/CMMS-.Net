@@ -1140,7 +1140,7 @@ namespace CMMSAPIs.Repositories.Inventory
                 "a.calibrationDueDate as calibrationDueDate, a.calibrationLastDate as calibrationLastDate,a.vendorId as vendorid,a.area , " +
                 "a.stockCount as stockCount,a.photoId as photoId,a.retirementStatus as retirementStatus,w.meter_limit as meter_limit,w.meter_unit as meter_unit,a.moduleQuantity, ast.id as typeId, ast.name as type, a.supplierId as supplierId, b2.name as supplierName, manufacturertlb.id as manufacturerId, manufacturertlb.name as manufacturerName,a.parent_equipment_no ,b5.id as operatorId, b5.name as operatorName, ac.id as categoryId, ac.name as categoryName, a.serialNumber,a.cost as cost,a.currency as currencyId ,c.name as currency, a.model,a.calibrationFrequency,frequency.name as calibrationFrequencyType, a.calibrationReminderDays, " +
             "f.id as facilityId, f.name AS facilityName, bl.id as blockId, bl.name AS blockName, a2.id as parentId, a2.name as parentName, a2.serialNumber as parentSerial, custbl.id as customerId, custbl.name as customerName, owntbl.id as ownerId, owntbl.name as ownerName, s.id as statusId, s.name AS status,a.purchaseCode as purchaseCode, a.unspCode as unspCode, a.barcode as barcode,a.descMaintenace as descMaintenace,a.dcRating as dcRating ,a.acRating as acRating, a.specialTool,a.specialToolEmpId as specialToolEmp,  " +
-            "w.start_date as start_date,w.expiry_date as expiry_date, w.id as warrantyId, w.warranty_description, w.certificate_number,wut.name as warranty_term_type,wt.id as warrantyTypeId, wt.name as warrantyType, wut.id as warrantyTermTypeId, wp.id as warrantyProviderId, wp.name as warrantyProviderName, files.file_path as warranty_certificate_path ," +
+            "w.start_date as start_date,w.expiry_date as expiry_date, w.id as warrantyId, w.warranty_description,w.voendor_id as  vendor_id , w.certificate_number,wut.name as warranty_term_type,wt.id as warrantyTypeId,b3.name as warranty_vendor_name , wt.name as warrantyType, wut.id as warrantyTermTypeId, wp.id as warrantyProviderId, wp.name as warrantyProviderName, files.file_path as warranty_certificate_path ," +
             "CONCAT(adduser.firstName, ' ', adduser.lastName) as added_by_name,a.createdAt, " +
             "CONCAT(updateuser.firstName, ' ', updateuser.lastName) as updated_by_name,a.updatedAt, " +
             "CASE WHEN w.start_date IS NULL OR CURDATE() < w.start_date OR CURDATE() > w.expiry_date THEN 'Inactive' ELSE 'Active' END AS WarrantyStatus " +
@@ -1158,10 +1158,11 @@ namespace CMMSAPIs.Repositories.Inventory
             "left JOIN facilities as f ON f.id = a.facilityId " +
             "left JOIN facilities as bl ON bl.id = a.blockId " +
             "left join assetwarranty as w ON a.warrantyId = w.id " +
+            "left JOIN business AS b3 ON w.voendor_id= b3.id " +
             "left join uploadedfiles as files ON files.id = w.certificate_file_id " +
             "left join warrantytype as wt ON w.warranty_type = wt.id " +
             "left join warrantyusageterm as wut ON w.warranty_term_type = wut.id " +
-            "left join business as wp ON w.warranty_provider = wp.id " +
+            "left join businesstype as wp ON w.warranty_provider = wp.id " +
             "left join users adduser ON adduser.id = a.createdBy " +
             "left join users updateuser ON updateuser.id = a.updatedBy " +
             "left join frequency as frequency ON frequency.id = a.calibrationFrequency ";
@@ -1301,8 +1302,8 @@ namespace CMMSAPIs.Repositories.Inventory
                     string start_date = unit.start_date != null ? ((DateTime)unit.start_date).ToString("yyyy-MM-dd HH:mm:ss") : "0000:00:00 00:00";
                     string warranty_description = unit.warranty_description == null ? "" : unit.warranty_description;
                     string expiry_date = unit.expiry_date == null ? "0000:00:00 00:00" : ((DateTime)unit.expiry_date).ToString("yyyy-MM-dd HH:mm:ss");
-                    string warrantyQry = "insert into assetwarranty (certificate_file_id, warranty_type, warranty_description, warranty_term_type, asset_id, start_date, expiry_date, meter_limit, meter_unit, warranty_provider, certificate_number, addedAt, addedBy, status,warrantyTenture) VALUES ";
-                    warrantyQry += $"({unit.warranty_certificate_file_id}, {unit.warranty_type}, '{warranty_description}', {unit.warranty_term_type}, {retID},'{start_date}',' {expiry_date}', {unit.meter_limit}, {unit.meter_unit}, {unit.warranty_provider_id}, '{unit.certificate_number}', '{UtilsRepository.GetUTCTime()}', {userID}, 1,{unit.warrantyTenture});" +
+                    string warrantyQry = "insert into assetwarranty (certificate_file_id, warranty_type, warranty_description, warranty_term_type, asset_id, start_date, expiry_date, meter_limit, meter_unit, warranty_provider, certificate_number, addedAt, addedBy, status,warrantyTenture,voendor_id) VALUES ";
+                    warrantyQry += $"({unit.warranty_certificate_file_id}, {unit.warranty_type}, '{warranty_description}', {unit.warranty_term_type}, {retID},'{start_date}',' {expiry_date}', {unit.meter_limit}, {unit.meter_unit}, {unit.warranty_provider_id}, '{unit.certificate_number}', '{UtilsRepository.GetUTCTime()}', {userID}, 1,{unit.warrantyTenture},{unit.Warranty_vendor_Id});" +
                         $" SELECT LAST_INSERT_ID();";
                     DataTable dt2 = await Context.FetchData(warrantyQry).ConfigureAwait(false);
                     int warrantyId = Convert.ToInt32(dt2.Rows[0][0]);
@@ -1469,11 +1470,20 @@ namespace CMMSAPIs.Repositories.Inventory
                 retID = Convert.ToInt32(dt.Rows[0][0]);
                 if (unit.warranty_type > 0 && unit.warranty_term_type > 0 && unit.warranty_provider_id > 0 && unit.start_date != null)
                 {
+                    int warranty_typr_Id = 0;
+                    int v_id = 0;
+                    v_id = unit.warranty_provider_id;
+                    string qry1 = $"SELECT type FROM business where id = {unit.warranty_provider_id};";
+                    DataTable dt21 = await Context.FetchData(qry1).ConfigureAwait(false);
+                    if (dt21.Rows.Count > 0)
+                    {
+                        warranty_typr_Id = Convert.ToInt32(dt21.Rows[0][0]);
+                    }
                     string start_date = unit.start_date != null ? ((DateTime)unit.start_date).ToString("yyyy-MM-dd HH:mm:ss") : "0000:00:00 00:00";
                     string warranty_description = unit.warranty_description == null ? "" : unit.warranty_description;
                     string expiry_date = unit.expiry_date == null ? "" : ((DateTime)unit.expiry_date).ToString("yyyy-MM-dd HH:mm:ss");
-                    string warrantyQry = "insert into assetwarranty (certificate_file_id, warranty_type, warranty_description, warranty_term_type, asset_id, start_date, expiry_date, meter_limit, meter_unit, warranty_provider, certificate_number, addedAt, addedBy, status,warrantyTenture) VALUES ";
-                    warrantyQry += $"({unit.warranty_certificate_file_id}, {unit.warranty_type}, '{warranty_description}', {unit.warranty_term_type}, {retID}, '{start_date}', '{expiry_date}', {unit.meter_limit}, {unit.meter_unit}, {unit.warranty_provider_id}, '{unit.certificate_number}', '{UtilsRepository.GetUTCTime()}', {userID}, 1,{unit.warrantyTenture});" +
+                    string warrantyQry = "insert into assetwarranty (certificate_file_id, warranty_type, warranty_description, warranty_term_type, asset_id, start_date, expiry_date, meter_limit, meter_unit, certificate_number, addedAt, addedBy, status,warrantyTenture,voendor_id,warranty_provider) VALUES ";
+                    warrantyQry += $"({unit.warranty_certificate_file_id}, {unit.warranty_type}, '{warranty_description}', {unit.warranty_term_type}, {retID}, '{start_date}', '{expiry_date}', {unit.meter_limit}, {unit.meter_unit}, '{unit.certificate_number}', '{UtilsRepository.GetUTCTime()}', {userID}, 1,{unit.warrantyTenture},{v_id},{warranty_typr_Id});" +
                         $" SELECT LAST_INSERT_ID();";
                     DataTable dt2 = await Context.FetchData(warrantyQry).ConfigureAwait(false);
                     int warrantyId = Convert.ToInt32(dt2.Rows[0][0]);
@@ -2142,7 +2152,7 @@ namespace CMMSAPIs.Repositories.Inventory
                     warrantyQry += $"Update assetwarranty SET   warranty_type={request.warranty_type}, " +
                        $"warranty_description='{warranty_description}', certificate_number='{request.certificate_number}' , " +
                        $"warranty_term_type={request.warranty_term_type} ,start_date='{start_date}', " +
-                       $"expiry_date='{expiry_date}', warranty_provider= {request.warranty_provider_id}  " +
+                       $"expiry_date='{expiry_date}', warranty_provider= {request.warranty_provider_id},voendor_id={request.Warranty_vendor_Id}  " +
                        $"where  asset_id={request.id}  ;";
                     int retVal = await Context.ExecuteNonQry<int>(warrantyQry).ConfigureAwait(false);
                 }
@@ -2151,8 +2161,8 @@ namespace CMMSAPIs.Repositories.Inventory
                     string start_date = request.start_date != null ? ((DateTime)request.start_date).ToString("yyyy-MM-dd HH:mm:ss") : "0000:00:00 00:00";
                     string warranty_description = request.warranty_description == null ? "" : request.warranty_description;
                     string expiry_date = request.expiry_date == null ? "0000:00:00 00:00" : ((DateTime)request.expiry_date).ToString("yyyy-MM-dd HH:mm:ss");
-                    string warrantyQry = "insert into assetwarranty (certificate_file_id, warranty_type, warranty_description, warranty_term_type, asset_id, start_date, expiry_date, meter_limit, meter_unit, warranty_provider, certificate_number, addedAt, addedBy, status,warrantyTenture) VALUES ";
-                    warrantyQry += $"({request.warranty_certificate_file_id}, {request.warranty_type}, '{warranty_description}', {request.warranty_term_type}, {request.id},'{start_date}',' {expiry_date}', {request.meter_limit}, {request.meter_unit}, {request.warranty_provider_id}, '{request.certificate_number}', '{UtilsRepository.GetUTCTime()}', {userID}, 1,{request.warrantyTenture});" +
+                    string warrantyQry = "insert into assetwarranty (certificate_file_id, warranty_type, warranty_description, warranty_term_type, asset_id, start_date, expiry_date, meter_limit, meter_unit, warranty_provider, certificate_number, addedAt, addedBy, status,warrantyTenture,voendor_id) VALUES ";
+                    warrantyQry += $"({request.warranty_certificate_file_id}, {request.warranty_type}, '{warranty_description}', {request.warranty_term_type}, {request.id},'{start_date}',' {expiry_date}', {request.meter_limit}, {request.meter_unit}, {request.warranty_provider_id}, '{request.certificate_number}', '{UtilsRepository.GetUTCTime()}', {userID}, 1,{request.warrantyTenture},{request.Warranty_vendor_Id});" +
                         $" SELECT LAST_INSERT_ID();";
                     DataTable dt5 = await Context.FetchData(warrantyQry).ConfigureAwait(false);
                     int warrantyId = Convert.ToInt32(dt5.Rows[0][0]);
@@ -2507,14 +2517,14 @@ namespace CMMSAPIs.Repositories.Inventory
                 "ON assetwarranty.warranty_provider = provider.id\r\nLEFT JOIN assetcategories as category " +
                 "ON assets.categoryId = category.id\r\nLEFT JOIN uploadedfiles as certificate ON assetwarranty.certificate_file_id = certificate.id  left join facilities as fc on fc.id =   facilityId  " +
                 "WHERE provider.id > 0  and start_date <> '0000-00-00 00:00:00' and expiry_date <> '0000-00-00 00:00:00' ";
-            
-            if(facility_id != "" && facility_id != null)
+
+            if (facility_id != "" && facility_id != null)
             {
-                myQuery = myQuery + " and facilityId in ("+facility_id+")";
+                myQuery = myQuery + " and facilityId in (" + facility_id + ")";
             }
-            if(from_date != null && to_date != null)
+            if (from_date != null && to_date != null)
             {
-                myQuery = myQuery + " and start_date >= '"+from_date.ToString("yyyy-MM-dd HH:mm:ss") + "' and expiry_date <= '"+to_date.ToString("yyyy-MM-dd HH:mm:ss") + "'";
+                myQuery = myQuery + " and start_date >= '" + from_date.ToString("yyyy-MM-dd HH:mm:ss") + "' and expiry_date <= '" + to_date.ToString("yyyy-MM-dd HH:mm:ss") + "'";
             }
 
             List<CMWarrantyCertificate> _AssetCategory = await Context.GetData<CMWarrantyCertificate>(myQuery).ConfigureAwait(false);

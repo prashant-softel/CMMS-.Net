@@ -256,7 +256,7 @@ namespace CMMSAPIs.Repositories.Masters
         internal async Task<CMDefaultResponse> CloseObservation_old(CMApproval request, int userId)
         {
             string deleteQry = "";
-            if (request.type == (int)CMMS.OBSERVATION_TYPE.PM_EXECUTION)  
+            if (request.type == (int)CMMS.OBSERVATION_TYPE.PM_EXECUTION)
             {
                 deleteQry = $"UPDATE pm_execution SET Observation_Status = {(int)CMMS_Status.OBSERVATION_CLOSED}, preventive_action = '{request.comment}'WHERE id = {request.id};";
                 await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
@@ -270,9 +270,9 @@ namespace CMMSAPIs.Repositories.Masters
             else
             {
                 deleteQry = $"UPDATE observations SET status_code = {(int)CMMS_Status.OBSERVATION_CLOSED}, closed_by = '{userId}' , closed_at='{UtilsRepository.GetUTCTime()}' , updated_at = '{UtilsRepository.GetUTCTime()}' WHERE id = {request.id};";
-               
+
                 await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
-               
+
                 System.Text.StringBuilder sb = new System.Text.StringBuilder("Observation Updated");
                 if (request.comment.Length > 0)
                 {
@@ -1785,8 +1785,8 @@ namespace CMMSAPIs.Repositories.Masters
                                      request.risk_type_id == (int)RiskType.Significant ||
                                      request.risk_type_id == (int)RiskType.Moderate;
 
-            bool isValidCostType = request.cost_type == (int)CostType.Capex ||
-                                           request.cost_type == (int)CostType.Opex;
+            bool isValidCostType = request.cost_type == (int)CMMS.CostType.Capex || request.cost_type == (int)CostType.Opex;
+
 
             // Collect errors
             List<string> errors = new List<string>();
@@ -1843,7 +1843,7 @@ namespace CMMSAPIs.Repositories.Masters
 
                 // Create history log if there is a comment
                 System.Text.StringBuilder sb = new System.Text.StringBuilder("Observation Created");
-                if (request.comment.Length > 0)
+                if (request.comment != null)
                 {
                     sb.Append(": " + request.comment);
                 }
@@ -1993,7 +1993,7 @@ namespace CMMSAPIs.Repositories.Masters
             " left join facilities ON pm_task.facility_id = facilities.id left join checkpoint as ckp ON ckp.check_list_id = pm_execution.Check_Point_id " +
             " left join ir_risktype ON ckp.risk_type = ir_risktype.id left join mis_m_typeofobservation ON ckp.type_of_observation = mis_m_typeofobservation.id " +
             " left join users createdBy on createdBy.id = pm_task.createdById left join users updatedBy  on updatedBy.id = pm_task.updated_by " +
-            " left join business on business.id = createdBy.companyId and business.type = 2 "+
+            " left join business on business.id = createdBy.companyId and business.type = 2 " +
             " where date_format(PM_Schedule_Observation_add_date, '%Y-%m-%d') between '" + fromDate.ToString("yyyy-MM-dd") + "' and '" + toDate.ToString("yyyy-MM-dd") + "' ";
             List<CMObservation> Result1 = await Context.GetData<CMObservation>(pmexecutionquery).ConfigureAwait(false);
 
@@ -2008,7 +2008,7 @@ namespace CMMSAPIs.Repositories.Masters
                 task1.observation_type = 2;
             }
             Result.AddRange(Result1);
-            
+
             return Result;
         }
         internal async Task<CMObservationByIdList> GetObservationById(int observation_id)
@@ -2699,7 +2699,7 @@ namespace CMMSAPIs.Repositories.Masters
                 if (request.type == (int)CMMS.OBSERVATION_TYPE.PM_EXECUTION)
                 {
 
-                    deleteQry = $"UPDATE pm_execution SET Observation_Status = {(int)CMMS_Status.OBSERVATION_CLOSED}, action_taken = '{request.comment}'WHERE id = {request.id};";
+                    deleteQry = $"UPDATE pm_execution SET Observation_Status = {(int)CMMS_Status.OBSERVATION_CLOSED}, preventive_action = '{request.comment}'WHERE id = {request.id};";
                     await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
                     sb = new System.Text.StringBuilder("Observation Updated");
                     if (request.comment.Length > 0)
@@ -2739,7 +2739,7 @@ namespace CMMSAPIs.Repositories.Masters
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_EXECUTION, request.id, 0, 0, request.comment, CMMS.CMMS_Status.ASSIGNED, request.user_id);
 
             }
-            else 
+            else
             {
                 updateQry = "UPDATE observations SET ";
                 updateQry += $"assign_to = {request.user_id}, ";
@@ -2756,5 +2756,3 @@ namespace CMMSAPIs.Repositories.Masters
 
 
 }
-
-
