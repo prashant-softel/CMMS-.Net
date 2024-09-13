@@ -265,8 +265,6 @@ namespace CMMSAPIs.Repositories.Calibration
             {
                 throw new ArgumentException("Calibration record in scheduled state not found for " + request.asset_id + " to start calibration");
             }
-
-
             if (request.vendor_id <= 0)
             {
                 //if vendor id is not passed, take assets vendor id
