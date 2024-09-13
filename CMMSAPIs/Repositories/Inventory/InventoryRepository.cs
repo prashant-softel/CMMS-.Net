@@ -2493,9 +2493,9 @@ namespace CMMSAPIs.Repositories.Inventory
             warrentyUsageTermType.Add(new CMDefaultList() { id = 4, name = "Process completion" });
             return warrentyUsageTermType;
         }
-        internal async Task<List<CMWarrantyCertificate>> GetWarrantyCertificate()
+        internal async Task<List<CMWarrantyCertificate>> GetWarrantyCertificate(string facility_id, DateTime from_date, DateTime to_date)
         {
-            string myQuery = "SELECT assets.id as asset_id, assets.name as asset_name, category.id as categoryId, category.name as categoryName, " +
+            string myQuery = "SELECT facilityId as facility_id,fc.name as facility_name, assets.id as asset_id, assets.name as asset_name, category.id as categoryId, category.name as categoryName, " +
                 "assetwarranty.warranty_description, warrantytype.id as warrantyTypeId, warrantytype.name as warrantyTypeName, " +
                 "warrantyusageterm.id as warrantyTermId, warrantyusageterm.name as warrantyTermName, assetwarranty.certificate_number, " +
                 "certificate.file_path AS warranty_certificate_file_path, CASE WHEN assetwarranty.start_date = '0000-00-00 00:00:00' " +
@@ -2505,11 +2505,22 @@ namespace CMMSAPIs.Repositories.Inventory
                 "LEFT JOIN warrantytype ON assetwarranty.warranty_type = warrantytype.id\r\nLEFT JOIN warrantyusageterm " +
                 "ON assetwarranty.warranty_term_type = warrantyusageterm.id\r\nLEFT JOIN business as provider " +
                 "ON assetwarranty.warranty_provider = provider.id\r\nLEFT JOIN assetcategories as category " +
-                "ON assets.categoryId = category.id\r\nLEFT JOIN uploadedfiles as certificate ON assetwarranty.certificate_file_id = certificate.id  WHERE provider.id > 0";
+                "ON assets.categoryId = category.id\r\nLEFT JOIN uploadedfiles as certificate ON assetwarranty.certificate_file_id = certificate.id  left join facilities as fc on fc.id =   facilityId  " +
+                "WHERE provider.id > 0  and start_date <> '0000-00-00 00:00:00' and expiry_date <> '0000-00-00 00:00:00' ";
+            
+            if(facility_id != "" && facility_id != null)
+            {
+                myQuery = myQuery + " and facilityId in ("+facility_id+")";
+            }
+            if(from_date != null && to_date != null)
+            {
+                myQuery = myQuery + " and start_date >= '"+from_date.ToString("yyyy-MM-dd HH:mm:ss") + "' and expiry_date <= '"+to_date.ToString("yyyy-MM-dd HH:mm:ss") + "'";
+            }
+
             List<CMWarrantyCertificate> _AssetCategory = await Context.GetData<CMWarrantyCertificate>(myQuery).ConfigureAwait(false);
             return _AssetCategory;
         }
-        internal async Task<List<CMCalibrationAssets>> GetCalibrationList(int facilityId, string facilitytimeZone)
+        internal async Task<List<CMCalibrationAssets>> GetCalibrationList(string facilityId, string facilitytimeZone)
         {
             string myQuery = "SELECT assets.id, assets.name, category.id as categoryId, category.name as categoryName, " +
             "vendor.id as vendorId, vendor.name as vendorName, assets.calibrationFrequencyType, " +
@@ -2519,7 +2530,7 @@ namespace CMMSAPIs.Repositories.Inventory
             "LEFT JOIN assetcategories as category ON category.id = assets.categoryId " +
             "LEFT JOIN business as vendor ON vendor.id = assets.vendorId " +
             "LEFT JOIN frequency ON assets.calibrationFrequency = frequency.id " +
-            $"WHERE category.calibrationStatus = 1 AND facilityId = {facilityId} ";
+            $"WHERE category.calibrationStatus = 1 AND facilityId in ({facilityId}) ";
             List<CMCalibrationAssets> _AssetCategory = await Context.GetData<CMCalibrationAssets>(myQuery).ConfigureAwait(false);
             foreach (var a in _AssetCategory)
             {

@@ -260,7 +260,7 @@ namespace CMMSAPIs.Helper
             MC_EXECUTION = 83,
             CORRECTIVE_MAINTENANCE = 91,
             CALIBRATION = 101,
-            VEGETATION = 111,
+            //VEGETATION = 111,
             VEGETATION_EXECUTION = 112,
             WARRANTY_CLAIM = 121,
             INCIDENT_REPORT = 131,
@@ -275,7 +275,7 @@ namespace CMMSAPIs.Helper
             ROLE_DEFAULT_ACCESS_MODULE,
 
             DSM = 181,
-            JobCard = 182,
+            //JobCard = 182,
 
             GRIEVANCE = 301,
             VEGETATION_TASK = 311,
@@ -424,18 +424,20 @@ namespace CMMSAPIs.Helper
             PM_DELETED,
             PM_UPDATED,
             PM_TASK_UPDATED,//Only for notification purpose
-
-            MC_EXECUTION_STARTED,
-            MC_EXECUTION_CLOSED,
-            MC_EXECUTION_UPDATED,
-            MC_EXECUTION_ABANDONED,
-            MC_EXECUTION_ENDED,
-            MC_EXECUTION_ABANDONED_REJECTED,
-
-
-            PM_SUBMIT,//for temp only
-            PM_LINK_PTW,
             PM_TASK_DELETED,
+            PM_SUBMIT,
+
+            /*
+                        MC_EXECUTION_STARTED,
+                        MC_EXECUTION_CLOSED,
+                        MC_EXECUTION_UPDATED,
+                        MC_EXECUTION_ABANDONED,
+                        MC_EXECUTION_ENDED,
+                        MC_EXECUTION_ABANDONED_REJECTED,
+            */
+
+            //PM_SUBMIT,//for temp only
+            //PM_LINK_PTW,
 
 
             IR_CREATED_INITIAL = 181,

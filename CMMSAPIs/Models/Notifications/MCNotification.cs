@@ -265,7 +265,7 @@ namespace CMMSAPIs.Models.Notifications
                     case CMMS.CMMS_Status.SCHEDULED_LINKED_TO_PTW:
                          retValue += String.Format(templateEnd, "Permit ID Linked to Schedule ID ", scheduleObj.scheduleId);
                          break;
-                    case CMMS.CMMS_Status.MC_EXECUTION_STARTED:
+/*                    case CMMS.CMMS_Status.MC_EXECUTION_STARTED:
                         retValue = String.Format(templateEnd, "MC Execution Started By ", scheduleObj.startedbyName);
                         break;
                     case CMMS.CMMS_Status.MC_EXECUTION_CLOSED:
@@ -279,7 +279,7 @@ namespace CMMSAPIs.Models.Notifications
                         break;
                     case CMMS.CMMS_Status.MC_EXECUTION_ABANDONED_REJECTED:
                         retValue = String.Format(templateEnd, "MC Execution Abandoned Rejected By ", scheduleObj.abandonedbyName);
-                        break;
+                        break;*/
                     case CMMS.CMMS_Status.MC_TASK_SCHEDULE_APPROVED:
                         retValue += String.Format(templateEnd, "MC Execution Approved By ", scheduleObj.approvedBy);
                         break;

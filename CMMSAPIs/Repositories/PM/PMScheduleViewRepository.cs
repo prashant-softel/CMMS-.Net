@@ -34,7 +34,7 @@ namespace CMMSAPIs.Repositories.PM
         Dictionary<CMMS.CMMS_Status, string> statusList = new Dictionary<CMMS.CMMS_Status, string>()
         {
             { CMMS.CMMS_Status.PM_SUBMIT, "PM Submitted" },
-            { CMMS.CMMS_Status.PM_LINK_PTW, "PM Linked to PTW" },
+            { CMMS.CMMS_Status.PM_LINKED_TO_PTW, "PM Linked to PTW" },
             { CMMS.CMMS_Status.PM_START, "PM Started" },
             { CMMS.CMMS_Status.PM_CLOSED, "PM Closed" },
             { CMMS.CMMS_Status.PM_CLOSE_REJECTED, "PM Rejected" },
@@ -122,7 +122,7 @@ namespace CMMSAPIs.Repositories.PM
             {
                 case CMMS.CMMS_Status.PM_SCHEDULED:
                     retValue = $"PM Task Scheduled "; break;
-                case CMMS.CMMS_Status.PM_LINK_PTW:
+                case CMMS.CMMS_Status.PM_LINKED_TO_PTW:
                     retValue = String.Format("PTW{0} Linked to taskId{1} at {2} ", Obj.permit_id, Obj.id, Obj.facilityidbyName); break;
                 case CMMS.CMMS_Status.PM_START:
                     retValue = $"PM Task Started By {Obj.started_by_name} at {Obj.facilityidbyName}"; break;
@@ -597,7 +597,7 @@ namespace CMMSAPIs.Repositories.PM
             try
             {
                 CMPMTaskView _PMTaskList = await GetPMTaskDetail(task_id, facilitytimeZone);
-                CMMSNotification.sendNotification(CMMS.CMMS_Modules.PM_TASK, CMMS.CMMS_Status.PM_LINK_PTW, new[] { userID }, _PMTaskList);
+                CMMSNotification.sendNotification(CMMS.CMMS_Modules.PM_TASK, CMMS.CMMS_Status.PM_LINKED_TO_PTW, new[] { userID }, _PMTaskList);
             }
             catch (Exception ex)
             {

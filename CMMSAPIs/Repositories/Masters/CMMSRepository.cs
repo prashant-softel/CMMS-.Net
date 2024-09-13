@@ -72,7 +72,7 @@ namespace CMMSAPIs.Repositories.Masters
             { CMMS.CMMS_Modules.WARRANTY_CLAIM, 30 },
             { CMMS.CMMS_Modules.CALIBRATION, 31 },
            // { CMMS.CMMS_Modules.MODULE_CLEANING, 32 },
-            { CMMS.CMMS_Modules.VEGETATION, 33 }
+            { CMMS.CMMS_Modules.VEGETATION_PLAN, 33 }
         };
         public CMMSRepository(MYSQLDBHelper sqlDBHelper, IWebHostEnvironment _webHost = null) : base(sqlDBHelper)
         {

@@ -415,7 +415,9 @@ namespace CMMSAPIs.BS.SM
                     CMDefaultResponse response = new CMDefaultResponse();
                     foreach (var request in requestList)
                     {
-                        var result = await repos.TransferMaterialInTransaction(request);
+                        //var result = await repos.TransferMaterialInTransaction(request);
+                        var result = await repos.TransferMaterialInTransaction_dbTransaction(request);
+                        
                         //if (result)
                         //{
                         //    response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.SUCCESS, "Item transferred.");
