@@ -64,7 +64,7 @@ namespace CMMSAPIs.Models.Notifications
 
 
 
-                case CMMS.CMMS_Status.PM_LINK_PTW:     //Closed
+                case CMMS.CMMS_Status.PM_LINKED_TO_PTW:     //Closed
                     retValue = String.Format("{0} PTW{1} Linked by {2}", m_pmExecutionObj.facilityidbyName, m_pmExecutionObj.permit_id, m_pmExecutionObj.status_updated_by_name);
                     break;
                 case CMMS.CMMS_Status.PM_CLOSE_APPROVED:     //Closed
@@ -159,7 +159,7 @@ namespace CMMSAPIs.Models.Notifications
 
 
 
-                case CMMS.CMMS_Status.PM_LINK_PTW:     //Closed
+                case CMMS.CMMS_Status.PM_LINKED_TO_PTW:     //Closed
                     retValue = String.Format("{0} PTW{1} Linked by {2}", m_pmExecutionObj.facilityidbyName, m_pmExecutionObj.permit_id, m_pmExecutionObj.status_updated_by_name);
                     break;
                 case CMMS.CMMS_Status.PM_CLOSE_APPROVED:     //Closed
@@ -379,7 +379,7 @@ namespace CMMSAPIs.Models.Notifications
                     case CMMS.CMMS_Status.PM_TASK_DELETED:
                         retValue += String.Format(templateEnd, "PM Task Deleted By", m_pmExecutionObj.deletedbyName);
                         break;
-                    case CMMS.CMMS_Status.PM_LINK_PTW:
+                    case CMMS.CMMS_Status.PM_LINKED_TO_PTW:
                         retValue += String.Format(templateEnd, "PM Task Linked By", m_pmExecutionObj.status_updated_by_name);
                         break;
                     case CMMS.CMMS_Status.PM_CLOSE_APPROVED:

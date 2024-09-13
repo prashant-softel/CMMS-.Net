@@ -424,18 +424,20 @@ namespace CMMSAPIs.Helper
             PM_DELETED,
             PM_UPDATED,
             PM_TASK_UPDATED,//Only for notification purpose
-
-            MC_EXECUTION_STARTED,
-            MC_EXECUTION_CLOSED,
-            MC_EXECUTION_UPDATED,
-            MC_EXECUTION_ABANDONED,
-            MC_EXECUTION_ENDED,
-            MC_EXECUTION_ABANDONED_REJECTED,
-
-
-            PM_SUBMIT,//for temp only
-            PM_LINK_PTW,
             PM_TASK_DELETED,
+            PM_SUBMIT,
+
+            /*
+                        MC_EXECUTION_STARTED,
+                        MC_EXECUTION_CLOSED,
+                        MC_EXECUTION_UPDATED,
+                        MC_EXECUTION_ABANDONED,
+                        MC_EXECUTION_ENDED,
+                        MC_EXECUTION_ABANDONED_REJECTED,
+            */
+
+            //PM_SUBMIT,//for temp only
+            //PM_LINK_PTW,
 
 
             IR_CREATED_INITIAL = 181,
