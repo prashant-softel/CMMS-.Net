@@ -114,7 +114,8 @@ namespace CMMSAPIs.Controllers.WC
             {
                 ExceptionResponse item = new ExceptionResponse();
                 item.Status = 400;
-                item.Message = ex.Message;
+                //item.Message = ex.Message;
+                item.Message = "Data failed to save.";
                 return Ok(item);
             }
         }
