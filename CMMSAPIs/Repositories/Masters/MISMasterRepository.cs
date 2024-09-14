@@ -1267,22 +1267,57 @@ namespace CMMSAPIs.Repositories.Masters
 
         internal async Task<List<CMChecklistInspectionReport>> GetChecklistInspectionReport(string facility_id, int module_type, DateTime fromDate, DateTime toDate)
         {
-            string myQuery = " select distinct  st.id, checklist_number as checklist_name , '' SOP_number, " +
-                " frequency.name as frequency, case when  is_ok = 0 then 'No' when is_ok = 1 then 'Yes' else 'NA' end as inspection_status, " +
-                " PM_Schedule_Observation_add_date as date_of_inspection, monthname(PM_Schedule_Observation_add_date) as month, " +
-                " case when file_required = 0 then 'No' else 'Yes' end  as checklist_attachment" +
-                " from st_audit st " +
-                " left join pm_task task on task.plan_id = st.id " +
-                " left join pm_execution pm_execution on pm_execution.task_id = task.id" +
-                " left join checklist_number checklist_number on checklist_number.id = st.Checklist_id " +
-                " left join frequency frequency on frequency.id = st.Frequency" +
-                " where st.facility_id in ( " + facility_id + ") and st.module_type_id = " + module_type + " and DATE_FORMAT(PM_Schedule_Observation_add_date,'%Y-%m-%d') BETWEEN '" + fromDate.ToString("yyyy-MM-dd") + "' AND '" + toDate.ToString("yyyy-MM-dd") + "'" +
-                "  group by st.id order by st.id desc; ";
-            List<CMChecklistInspectionReport> response = await Context.GetData<CMChecklistInspectionReport>(myQuery).ConfigureAwait(false);
+
+
+            string facilityQuery = $"SELECT DISTINCT f.id as facility_id, f.name AS facility_name FROM st_audit st LEFT JOIN facilities f ON f.id = st.facility_id WHERE st.facility_id IN ({facility_id});";
+            List<CMChecklistInspectionReport> facilities = await Context.GetData<CMChecklistInspectionReport>(facilityQuery).ConfigureAwait(false);
+
+
+            string checklistQuery = "SELECT  f.id as facility_id, f.name AS facility_name,st.id, checklist_number AS checklist_name, '' AS SOP_number, " +
+                                    "frequency.name AS frequency, CASE WHEN is_ok = 0 THEN 'No' WHEN is_ok = 1 THEN 'Yes' ELSE 'NA' END AS inspection_status, " +
+                                    "PM_Schedule_Observation_add_date AS date_of_inspection, MONTHNAME(PM_Schedule_Observation_add_date) AS month, " +
+                                    "MONTH(PM_Schedule_Observation_add_date) AS month_id, YEAR(PM_Schedule_Observation_add_date) AS year_id, " +
+                                    "CASE WHEN file_required = 0 THEN 'No' ELSE 'Yes' END AS checklist_attachment " +
+                                    "FROM st_audit st " +
+                                    "LEFT JOIN pm_task task ON task.plan_id = st.id " +
+                                    "LEFT JOIN pm_execution pm_execution ON pm_execution.task_id = task.id " +
+                                    "LEFT JOIN checklist_number checklist_number ON checklist_number.id = st.Checklist_id " +
+                                    "LEFT JOIN frequency frequency ON frequency.id = st.Frequency " +
+                                    "LEFT JOIN facilities f ON f.id = st.facility_id " +
+                                    "WHERE st.facility_id IN (" + facility_id + ") AND st.module_type_id = " + module_type + " " +
+                                    "AND DATE_FORMAT(PM_Schedule_Observation_add_date, '%Y-%m-%d') BETWEEN '" + fromDate.ToString("yyyy-MM-dd") + "' AND '" + toDate.ToString("yyyy-MM-dd") + "' " +
+                                    "GROUP BY st.id ORDER BY st.id DESC;";
+            List<Checklist1> checklistData = await Context.GetData<Checklist1>(checklistQuery).ConfigureAwait(false);
+
+            var groupedChecklistData = checklistData
+                .GroupBy(cd => new { cd.month, cd.month_id, cd.year_id })
+                .Select(g => new Checklist1
+                {
+                    month = g.Key.month,
+                    month_id = g.Key.month_id,
+                    year_id = g.Key.year_id,
+                    Details = g.Select(cd => new ChecklistDetails
+                    {
+                        checklist_name = cd.checklist_name,
+                        SOP_number = cd.SOP_number,
+                        frequency = cd.frequency,
+                        inspection_status = cd.inspection_status,
+                        date_of_inspection = cd.date_of_inspection,
+                        checklist_attachment = cd.checklist_attachment,
+                        no_of_unsafe_observation = 0
+                    }).ToList()
+                }).ToList();
+
+            var response = facilities.Select(facility => new CMChecklistInspectionReport
+            {
+                facility_id = facility.facility_id,
+                facility_name = facility.facility_name,
+                checklist = groupedChecklistData
+            }).ToList();
+
             return response;
+
         }
-
-
         internal async Task<List<CMObservationReport>> GetObservationSheetReport(string facility_id, DateTime fromDate, DateTime toDate)
         {
             string myQuery = " select  distinct monthname(PM_Schedule_Observation_add_date) as month_of_observation,st.id, " +
@@ -1302,6 +1337,7 @@ namespace CMMSAPIs.Repositories.Masters
                 " where st.facility_id in ( " + facility_id + ") and is_ok = 0 and DATE_FORMAT(PM_Schedule_Observation_add_date,'%Y-%m-%d') BETWEEN '" + fromDate.ToString("yyyy-MM-dd") + "' AND '" + toDate.ToString("yyyy-MM-dd") + "' " +
                 "  group by st.id  order by st.id desc;";
             List<CMObservationReport> response = await Context.GetData<CMObservationReport>(myQuery).ConfigureAwait(false);
+
             return response;
         }
 
@@ -2737,7 +2773,6 @@ namespace CMMSAPIs.Repositories.Masters
                 updateQry += $"WHERE id = {request.id};";
                 await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_EXECUTION, request.id, 0, 0, request.comment, CMMS.CMMS_Status.ASSIGNED, request.user_id);
-
             }
             else
             {
@@ -2748,7 +2783,6 @@ namespace CMMSAPIs.Repositories.Masters
                 updateQry += $"WHERE id = {request.id};";
                 await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.OBSERVATION, request.id, 0, 0, request.comment, CMMS.CMMS_Status.ASSIGNED, request.user_id);
-
             }
             return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Assing Observation ");
         }

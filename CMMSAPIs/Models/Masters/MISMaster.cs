@@ -396,15 +396,28 @@ namespace CMMSAPIs.Models.Masters
 
     public class CMChecklistInspectionReport
     {
-        public int id { get; set; }
+        public int facility_id { get; set; }
+        public string facility_name { get; set; }
+        public List<Checklist1> checklist { get; set; }
+    }
+    public class ChecklistDetails
+    {
         public string checklist_name { get; set; }
         public string SOP_number { get; set; }
         public string frequency { get; set; }
-        public string month { get; set; }
         public string inspection_status { get; set; }
         public DateTime? date_of_inspection { get; set; }
         public string checklist_attachment { get; set; }
         public int no_of_unsafe_observation { get; set; }
+    }
+
+    public class Checklist1 : ChecklistDetails
+    {
+        public dynamic month { get; set; }
+        public dynamic month_id { get; set; }
+        public dynamic year_id { get; set; }
+        public List<ChecklistDetails> Details { get; set; }
+
     }
     public class CMObservationReport
     {
