@@ -27,7 +27,7 @@ namespace CMMSAPIs.Models.GO
         public DateTime received_on { get; set; }
         public string receivedBy { get; set; }
         public string approvedBy { get; set; }
-        public DateTime approvedOn { get; set; }
+        public DateTime? approvedOn { get; set; }
 
 
         public List<go_items> go_items { get;set; }

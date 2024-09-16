@@ -167,7 +167,7 @@ namespace CMMS_API_Test
             var pmService2 = new CMMS_Services.APIService<CMMSAPIs.Models.PM.CMPMScheduleViewDetail>(true);
             var response3 = pmService2.GetItem($"/api/PMScheduleView/GetPMTaskDetail?schedule_id={pm_schedule_id}");
             Assert.IsNotNull(response3);
-            Assert.AreEqual((int)CMMS.CMMS_Status.PM_LINK_PTW, response3.status);
+            Assert.AreEqual((int)CMMS.CMMS_Status.PM_LINKED_TO_PTW, response3.status);
             Assert.AreEqual(ptw_id, response3.permit_id);
         }
         [TestMethod]

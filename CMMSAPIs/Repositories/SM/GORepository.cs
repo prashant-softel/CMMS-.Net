@@ -667,19 +667,6 @@ namespace CMMSAPIs.Repositories
 
             CMGOMaster _GOList = await GetGODetailsByID(request.id, facilitytimeZone);
             await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_GO, CMMS.CMMS_Status.GO_REJECTED, new[] { userId }, _GOList);
-            /*string myQuery = $"SELECT   ID ,facilityID ,vendorID ,receiverID ,generated_by ,purchaseDate ,orderDate ,challan_no ,po_no ,\r\n     " +
-       $" freight ,transport ,no_pkg_received ,lr_no ,\r\n      " +
-       $"condition_pkg_received ,vehicle_no ,gir_no ,challan_date ,po_date ,\r\n      " +
-       $"job_ref ,amount ,currency as currencyID,status ,\r\n     " +
-       $" lastModifiedDate ,generate_flag ,s2s_generated_by ,case when received_on = '0000-00-00 00:00:00' then null else received_on end as received_on ,invoice_copy ,issued_by ,issued_on ,\r\n    " +
-       $"  approved_by ,approvedOn ,withdraw_by ,withdrawOn ,reorder_flag ,\r\n     " +
-       $" order_type ,remarks ,updated_by ,updatedOn ,rejected_by ,rejectedOn" +
-       $" \r\nFROM smgoodsorder where id = {request.id}";
-            List<CMGoodsOrderList> _WCList = await Context.GetData<CMGoodsOrderList>(myQuery).ConfigureAwait(false);
-
-            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_GO, CMMS.CMMS_Status.GO_REJECTED, new[] { userId }, _WCList);*/
-
-
 
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Goods Order {request.id} rejected successfully.");
 
