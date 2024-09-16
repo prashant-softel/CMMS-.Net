@@ -1866,8 +1866,8 @@ namespace CMMSAPIs.Repositories.Masters
                                      $"date_of_observation, type_of_observation, location_of_observation, source_of_observation, target_date, " +
                                      $"observation_description, created_at, created_by, is_active,status_code) VALUES " +
                                      $"({request.facility_id},'{request.contractor_name}', {request.risk_type_id}, '{request.preventive_action}', '{request.responsible_person}', '{request.contact_number}', " +
-                                     $"'{request.cost_type}', '{request.date_of_observation:yyyy-MM-dd HH:mm:ss}', '{request.type_of_observation}', '{request.location_of_observation}', " +
-                                     $"'{request.source_of_observation}', '{request.target_date:yyyy-MM-dd HH:mm:ss}', '{request.observation_description}', " +
+                                     $"{request.cost_type}, '{request.date_of_observation:yyyy-MM-dd HH:mm:ss}', {request.type_of_observation}, '{request.location_of_observation}', " +
+                                     $"{request.source_of_observation}, '{request.target_date:yyyy-MM-dd HH:mm:ss}', '{request.observation_description}', " +
                                      $"'{UtilsRepository.GetUTCTime()}', {UserID}, 1,{(int)CMMS.CMMS_Status.OBSERVATION_CREATED}); " +
                                      $"SELECT LAST_INSERT_ID();";
 
@@ -1876,7 +1876,14 @@ namespace CMMSAPIs.Repositories.Masters
                 {
                     insertedValue = Convert.ToInt32(dt.Rows[0][0]);
                 }
-
+                if (request.uploadfileIds.Count > 0)
+                {
+                    foreach (int data in request.uploadfileIds)
+                    {
+                        string uploadfilkr = $"UPDATE uploadedfiles SET facility_id = {request.facility_id}, module_type={(int)CMMS.CMMS_Modules.OBSERVATION}, module_ref_id={insertedValue} where id={data} ;";
+                        await Context.ExecuteNonQry<int>(uploadfilkr).ConfigureAwait(false);
+                    }
+                }
                 // Create history log if there is a comment
                 System.Text.StringBuilder sb = new System.Text.StringBuilder("Observation Created");
                 if (request.comment != null)
@@ -1905,11 +1912,12 @@ namespace CMMSAPIs.Repositories.Masters
                                      $"preventive_action = '{request.preventive_action}', " +
                                      $"responsible_person = '{request.responsible_person}', " +
                                      $"contact_number = '{request.contact_number}', " +
-                                     $"cost_type = '{request.cost_type}', " +
+                                     $"cost_type = {request.cost_type}, " +
                                      $"date_of_observation = '{request.date_of_observation:yyyy-MM-dd HH:mm:ss}', " +
                                      $"type_of_observation = '{request.type_of_observation}', " +
                                      $"location_of_observation = '{request.location_of_observation}', " +
                                      $"source_of_observation = '{request.source_of_observation}', " +
+                                     $"comment = '{request.comment}', " +
                                      $"target_date = '{request.target_date:yyyy-MM-dd HH:mm:ss}', " +
                                      $"observation_description = '{request.observation_description}', " +
                                      $"status_code={(int)CMMS.CMMS_Status.OBSERVATION_UPDATED}," +
@@ -1918,16 +1926,21 @@ namespace CMMSAPIs.Repositories.Masters
                                      $"WHERE id = {request.id};";
                 await Context.ExecuteNonQry<int>(updateQuery).ConfigureAwait(false);
 
-
+                if (request.uploadfileIds.Count > 0)
+                {
+                    foreach (int data in request.uploadfileIds)
+                    {
+                        string uploadfilkr = $"UPDATE uploadedfiles SET facility_id = {request.facility_id}, module_type={(int)CMMS.CMMS_Modules.OBSERVATION}, module_ref_id={request.id} where id={data} ;";
+                        await Context.ExecuteNonQry<int>(uploadfilkr).ConfigureAwait(false);
+                    }
+                }
                 System.Text.StringBuilder sb = new System.Text.StringBuilder("Observation Updated");
-                if (request.comment.Length > 0)
+                if (request.comment != null)
                 {
                     sb.Append(": " + request.comment);
                 }
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.OBSERVATION, request.id, 0, 0, sb.ToString(), CMMS.CMMS_Status.OBSERVATION_UPDATED, UserID);
                 response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Observation data updated successfully.");
-
-
             }
             catch (Exception ex)
             {
@@ -1938,7 +1951,6 @@ namespace CMMSAPIs.Repositories.Masters
         internal async Task<CMDefaultResponse> DeleteObservation(int id, int UserID, string comment)
         {
             CMDefaultResponse response = null;
-
             try
             {
                 string updateQuery = $"UPDATE observations SET " +
@@ -1967,7 +1979,7 @@ namespace CMMSAPIs.Repositories.Masters
         internal async Task<List<CMObservation>> GetObservationList(int facility_Id, DateTime fromDate, DateTime toDate)
         {
             string myQuery = "select observations.id,observations.facility_id,facilities.name facility_name,status_code,observations.short_status, " +
-                " contractor_name, risk_type_id,ir_risktype.risktype as risk_type, preventive_action, responsible_person, contact_number, cost_type, " +
+                " contractor_name , risk_type_id,ir_risktype.risktype as risk_type, preventive_action, responsible_person, contact_number, cost_type, " +
                 " date_of_observation, type_of_observation, location_of_observation, source_of_observation, " +
                 " monthname(observations.date_of_observation) as month_of_observation,observations.target_date as closer_date,observations.closed_at as closed_date, concat(createdBy.firstName, ' ', createdBy.lastName) as action_taken, " +
                 " observations.preventive_action as  corrective_action, DATEDIFF(observations.target_date, observations.date_of_observation) AS remaining_days," +
@@ -2015,6 +2027,7 @@ namespace CMMSAPIs.Repositories.Masters
             " left join checkpoint as ckp on ckp.check_list_id = pm_execution.Check_Point_id " +
             " where date_format(PM_Schedule_Observation_add_date, '%Y-%m-%d') between '" + fromDate.ToString("yyyy-MM-dd") + "' and '" + toDate.ToString("yyyy-MM-dd") + "' ";
             */
+
             string pmexecutionquery = "select pm_execution.id,pm_task.facility_id,facilities.name facility_name, " +
             " Observation_Status as status_code,business.name as contractor_name, ckp.risk_type as risk_type_id,ir_risktype.risktype as risk_type, " +
             " preventive_action,business.contactPerson as responsible_person, business.contactNumber as contact_number,ckp.cost_type, " +
@@ -2030,7 +2043,7 @@ namespace CMMSAPIs.Repositories.Masters
             " left join ir_risktype ON ckp.risk_type = ir_risktype.id left join mis_m_typeofobservation ON ckp.type_of_observation = mis_m_typeofobservation.id " +
             " left join users createdBy on createdBy.id = pm_task.createdById left join users updatedBy  on updatedBy.id = pm_task.updated_by " +
             " left join business on business.id = createdBy.companyId and business.type = 2 " +
-            " where date_format(PM_Schedule_Observation_add_date, '%Y-%m-%d') between '" + fromDate.ToString("yyyy-MM-dd") + "' and '" + toDate.ToString("yyyy-MM-dd") + "' ";
+            $" where  pm_task.facility_id = {facility_Id} and date_format(PM_Schedule_Observation_add_date, '%Y-%m-%d') between '" + fromDate.ToString("yyyy-MM-dd") + "' and '" + toDate.ToString("yyyy-MM-dd") + "' ";
             List<CMObservation> Result1 = await Context.GetData<CMObservation>(pmexecutionquery).ConfigureAwait(false);
 
             foreach (var task in Result)
@@ -2050,7 +2063,7 @@ namespace CMMSAPIs.Repositories.Masters
         internal async Task<CMObservationByIdList> GetObservationById(int observation_id)
         {
             string myQuery = "select observations.id,observations.facility_id,facilities.name facility_name,status_code,observations.short_status, " +
-                " contractor_name, risk_type_id,ir_risktype.risktype as risk_type_name, preventive_action, responsible_person, contact_number, cost_type, " +
+                " contractor_name, risk_type_id,ir_risktype.risktype as risk_type_name, preventive_action, responsible_person, contact_number, cost_type ,CASE WHEN cost_type=1 THEN 'Capex' ELSE 'Opex' END as Cost_name ,  " +
                 " date_of_observation, type_of_observation, location_of_observation, source_of_observation,mis.name as source_of_observation_name,  " +
                  " monthname(observations.date_of_observation) as month_of_observation,observations.target_date as closer_date, concat(createdBy.firstName, ' ', createdBy.lastName) as action_taken, " +
                 " observations.preventive_action as  corrective_action, DATEDIFF(observations.target_date, observations.date_of_observation) AS remaining_days," +

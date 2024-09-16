@@ -667,7 +667,8 @@ namespace CMMSAPIs.Models.Masters
         public int status_code { get; set; }
         public string short_status { get; set; }
         public string contact_number { get; set; }
-        public string cost_type { get; set; }
+        public int cost_type { get; set; }
+        public string Cost_name { get; set; }
         public DateTime? date_of_observation { get; set; }
         public int type_of_observation { get; set; }
         public string type_of_observation_name { get; set; }
