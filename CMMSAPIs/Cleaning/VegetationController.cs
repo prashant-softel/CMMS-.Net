@@ -1,4 +1,4 @@
-﻿using CMMSAPIs.Cleaning;
+﻿using CMMSAPIs.BS.Cleaning;
 using CMMSAPIs.Models.MC;
 using CMMSAPIs.Models.Utils;
 using Microsoft.AspNetCore.Http;
@@ -16,24 +16,26 @@ namespace CMMSAPIs.Controllers.Vegetation
     [ApiController]
     public class VegetationController : Controller
     {
-        private readonly vegetaion _vegetationBS;
+//        private readonly vegetaion _vegetationBS;
+        private readonly IMCVCBS _vegetationBS;
 
 
-        public VegetationController(VegBS vegetationBS)
+
+        public VegetationController(IMCVCBS vegetationBS)
         {
-            _vegetationBS = (vegetaion)vegetationBS;
+            _vegetationBS = vegetationBS;
             _vegetationBS.setModuleType(cleaningType.Vegetation);
         }
 
 
         [Route("GetVegetationPlanList")]
         [HttpGet]
-        public async Task<IActionResult> GetVegetationPlanList(int facilityId)
+        public async Task<IActionResult> GetVegetationPlanList(int facilityId, string startDate, string endDate)
         {
             try
             {
                 var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
-                var data = await _vegetationBS.GetPlanList(facilityId, facilitytimeZone);
+                var data = await _vegetationBS.GetPlanList(facilityId, facilitytimeZone,startDate, endDate);
                 return Ok(data);
 
             }
@@ -44,13 +46,13 @@ namespace CMMSAPIs.Controllers.Vegetation
         }
         [Route("GetVegetationTaskList")]
         [HttpGet]
-        public async Task<IActionResult> GetVegetationTaskList(int facility_Id)
+        public async Task<IActionResult> GetVegetationTaskList(int facility_Id, string startDate, string endDate)
         {
             try
             {
                 var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_Id)?.timezone;
 
-                var data = await _vegetationBS.GetTaskList(facility_Id, facilitytimeZone);
+                var data = await _vegetationBS.GetTaskList(facility_Id, facilitytimeZone, startDate, endDate);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -61,11 +63,27 @@ namespace CMMSAPIs.Controllers.Vegetation
 
         [Route("CreateVegetationPlan")]
         [HttpPost]
-        public async Task<IActionResult> CreateVegetationPlan(List<CMMCPlan> request, int facilityId)
+        public async Task<IActionResult> CreateVegetationPlan(List<CMMCPlan> request)
         {
             try
             {
-                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
+                // Assuming the facilityId is the same for all plans in the request list,
+                // we can just take the facilityId from the first item in the list.
+                int facilityId = request.FirstOrDefault()?.facilityId ?? 0;
+
+                if (facilityId == 0)
+                {
+                    return BadRequest("Invalid facility ID.");
+                }
+
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo"))
+                    .FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
+
+                if (facilitytimeZone == null)
+                {
+                    return NotFound("Facility timezone not found.");
+                }
+
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
                 var data = await _vegetationBS.CreatePlan(request, userId, facilitytimeZone);
                 return Ok(data);
@@ -76,13 +94,32 @@ namespace CMMSAPIs.Controllers.Vegetation
             }
         }
 
+
         [Route("UpdateVegetationPlan")]
         [HttpPost]
-        public async Task<IActionResult> UpdateVegetationPlan(List<CMMCPlan> request, int facilityId)
+        public async Task<IActionResult> UpdateVegetationPlan(List<CMMCPlan> request)
         {
             try
             {
-                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
+
+                // Extract the facilityId from the first item in the request list
+                int facilityId = request.FirstOrDefault()?.facilityId ?? 0;
+
+                if (facilityId == 0)
+                {
+                    return BadRequest("Invalid facility ID.");
+                }
+
+                // Get the facility timezone based on the extracted facilityId
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo"))
+                    .FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
+
+                if (facilitytimeZone == null)
+                {
+                    return NotFound("Facility timezone not found.");
+                }
+
+                // Get the user ID from the session
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
                 var data = await _vegetationBS.UpdatePlan(request, userId, facilitytimeZone);
                 return Ok(data);
@@ -125,13 +162,31 @@ namespace CMMSAPIs.Controllers.Vegetation
                 throw;
             }
         }
+
+        [Route("GetVegScheduleDetails")]
+        [HttpGet]
+        public async Task<IActionResult> GetVegScheduleDetails(int scheduleId, int facility_id)
+        {
+            try
+            {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+                var data = await _vegetationBS.GetScheduleDetails(scheduleId, facilitytimeZone);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+
+            }
+        }
+
         [Route("GetVegEquipmentList")]
         [HttpGet]
         public async Task<IActionResult> GetVegEquipmentList(int facilityId)
         {
             try
             {
-                var data = await _vegetationBS.GetVegEquipmentList(facilityId);
+                var data = await _vegetationBS.GetEquipmentList(facilityId);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -157,13 +212,13 @@ namespace CMMSAPIs.Controllers.Vegetation
         }
         [Route("ApproveExecutionVegetation")]
         [HttpPut]
-        public async Task<IActionResult> ApproveExecutionVegetation(ApproveMC request, int facilityId)
+        public async Task<IActionResult> ApproveExecutionVegetation(CMApproval request, int facilityId)
         {
             try
             {
                 var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _vegetationBS.ApproveExecutionVegetation(request, userId, facilitytimeZone);
+                var data = await _vegetationBS.ApproveExecution(request, userId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -179,7 +234,7 @@ namespace CMMSAPIs.Controllers.Vegetation
             {
                 var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _vegetationBS.RejectExecutionVegetation(request, userId, facilitytimeZone);
+                var data = await _vegetationBS.RejectExecution(request, userId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -195,7 +250,7 @@ namespace CMMSAPIs.Controllers.Vegetation
             {
                 var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _vegetationBS.RejectEndExecutionVegetation(request, userId, facilitytimeZone);
+                var data = await _vegetationBS.RejectEndExecution(request, userId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -211,7 +266,7 @@ namespace CMMSAPIs.Controllers.Vegetation
             {
                 var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _vegetationBS.LinkPermitToVegetation(scheduleId, permit_id, userId, facilitytimeZone);
+                var data = await _vegetationBS.LinkPermitToMCVC(scheduleId, permit_id, userId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -227,7 +282,7 @@ namespace CMMSAPIs.Controllers.Vegetation
             {
                 var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _vegetationBS.StartExecutionVegetation(executionId, userId, facilitytimeZone);
+                var data = await _vegetationBS.StartExecution(executionId, userId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -245,7 +300,7 @@ namespace CMMSAPIs.Controllers.Vegetation
             {
                 var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _vegetationBS.EndExecutionVegetation(executionId, userId, facilitytimeZone);
+                var data = await _vegetationBS.EndExecution(executionId, userId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -262,7 +317,7 @@ namespace CMMSAPIs.Controllers.Vegetation
             {
                 var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _vegetationBS.StartScheduleExecutionVegetation(scheduleId, userId, facilitytimeZone);
+                var data = await _vegetationBS.StartScheduleExecution(scheduleId, userId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -278,7 +333,7 @@ namespace CMMSAPIs.Controllers.Vegetation
             {
                 var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _vegetationBS.UpdateScheduleExecutionVegetation(schedule, userId, facilitytimeZone);
+                var data = await _vegetationBS.UpdateScheduleExecution(schedule, userId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -295,7 +350,7 @@ namespace CMMSAPIs.Controllers.Vegetation
             {
                 var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _vegetationBS.AbandonExecutionVegetation(request, userId, facilitytimeZone);
+                var data = await _vegetationBS.AbandonExecution(request, userId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -311,7 +366,7 @@ namespace CMMSAPIs.Controllers.Vegetation
             {
                 var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _vegetationBS.AbandonScheduleVegetation(request, userId, facilitytimeZone);
+                var data = await _vegetationBS.AbandonSchedule(request, userId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -327,7 +382,7 @@ namespace CMMSAPIs.Controllers.Vegetation
             {
                 var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _vegetationBS.ApproveAbandonExecutionVegetation(request, userId, facilitytimeZone);
+                var data = await _vegetationBS.ApproveAbandonExecution(request, userId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -343,7 +398,7 @@ namespace CMMSAPIs.Controllers.Vegetation
             {
                 var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _vegetationBS.RejectAbandonExecutionVegetation(request, userId, facilitytimeZone);
+                var data = await _vegetationBS.RejectAbandonExecution(request, userId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -351,21 +406,21 @@ namespace CMMSAPIs.Controllers.Vegetation
                 throw;
             }
         }
-        [Route("CompleteExecutionVegetation")]
+       /* [Route("CompleteExecutionVegetation")]
         [HttpPost]
         public async Task<IActionResult> CompleteExecutionVegetation(CMMCExecution request)
         {
             try
             {
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _vegetationBS.CompleteExecutionVegetation(request, userId);
+                var data = await _vegetationBS.CompleteExecution(request, userId);
                 return Ok(data);
             }
             catch (Exception ex)
             {
                 throw;
             }
-        }
+        }*/
         [Route("ApproveVegetationPlan")]
         [HttpPost]
         public async Task<IActionResult> ApproveVegetationPlan(CMApproval request, int facilityId)
@@ -374,7 +429,7 @@ namespace CMMSAPIs.Controllers.Vegetation
             {
                 var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _vegetationBS.ApproveVegetationPlan(request, userId, facilitytimeZone);
+                var data = await _vegetationBS.ApprovePlan(request, userId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -385,13 +440,13 @@ namespace CMMSAPIs.Controllers.Vegetation
 
         [Route("ApproveEndExecutionVegetation")]
         [HttpPut]
-        public async Task<IActionResult> ApproveEndExecutionVegetation(ApproveMC request, int facilityId)
+        public async Task<IActionResult> ApproveEndExecutionVegetation(CMApproval request, int facilityId)
         {
             try
             {
                 var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _vegetationBS.ApproveEndExecutionVegetation(request, userId, facilitytimeZone);
+                var data = await _vegetationBS.ApproveEndExecution(request, userId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -407,7 +462,7 @@ namespace CMMSAPIs.Controllers.Vegetation
             {
                 var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _vegetationBS.EndScheduleExecutionVegetation(scheduleId, userId, facilitytimeZone);
+                var data = await _vegetationBS.EndScheduleExecution(scheduleId, userId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -423,7 +478,7 @@ namespace CMMSAPIs.Controllers.Vegetation
             {
                 var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _vegetationBS.RejectScheduleExecutionVegetation(request, userId, facilitytimeZone);
+                var data = await _vegetationBS.RejectScheduleExecution(request, userId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -440,7 +495,7 @@ namespace CMMSAPIs.Controllers.Vegetation
             {
                 var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _vegetationBS.ApproveScheduleExecutionVegetation(request, userId, facilitytimeZone);
+                var data = await _vegetationBS.ApproveScheduleExecution(request, userId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -491,7 +546,7 @@ namespace CMMSAPIs.Controllers.Vegetation
             {
                 var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _vegetationBS.StartExecutionVegetation(executionId, userId, facilitytimeZone);
+                var data = await _vegetationBS.StartExecution(executionId, userId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -508,7 +563,7 @@ namespace CMMSAPIs.Controllers.Vegetation
             {
                 var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _vegetationBS.ReAssignTaskVegetation(task_id, assign_to, userID, facilitytimeZone);
+                var data = await _vegetationBS.ReAssignTask(task_id, assign_to, userID, facilitytimeZone);
                 return Ok(data);
 
             }

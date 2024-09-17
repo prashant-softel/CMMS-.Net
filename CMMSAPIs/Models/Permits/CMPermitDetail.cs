@@ -20,8 +20,8 @@ namespace CMMSAPIs.Models.Permits
         public int blockId { get; set; }
         public string siteName { get; set; }
         public string BlockName { get; set; }
-        public DateTime? startDate { get; set; }
         public DateTime? start_datetime { get; set; }
+        public DateTime? startDate { get; set; }
         public DateTime? end_datetime { get; set; }
         //Loto?
         public string permitArea { get; set; }
@@ -84,6 +84,9 @@ namespace CMMSAPIs.Models.Permits
         public int extendRequestby_id { get; set; }
         public string extendRequestByName { get; set; }
         public int extendRequestRejectedby_id { get; set; }
+
+        public string extendRequestRejectedByName { get; set; }
+
         public DateTime? extend_at { get; set; }
         public int extendRequestApprovedby_id { get; set; }
         public string extendRequestApprovedByName { get; set; }

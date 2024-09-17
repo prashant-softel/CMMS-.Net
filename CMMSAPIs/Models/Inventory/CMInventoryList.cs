@@ -80,6 +80,8 @@ namespace CMMSAPIs.Models.Inventory
     public class CMWarrantyCertificate
     {
 
+        public int facility_id { get; set; }
+        public string facility_name { get; set; }
         public int asset_id { get; set; }
         public int categoryId { get; set; }
         public string asset_name { get; set; }

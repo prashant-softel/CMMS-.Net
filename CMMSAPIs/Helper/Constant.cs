@@ -260,7 +260,7 @@ namespace CMMSAPIs.Helper
             MC_EXECUTION = 83,
             CORRECTIVE_MAINTENANCE = 91,
             CALIBRATION = 101,
-            VEGETATION = 111,
+            //VEGETATION = 111,
             VEGETATION_EXECUTION = 112,
             WARRANTY_CLAIM = 121,
             INCIDENT_REPORT = 131,
@@ -275,7 +275,7 @@ namespace CMMSAPIs.Helper
             ROLE_DEFAULT_ACCESS_MODULE,
 
             DSM = 181,
-            JobCard = 182,
+            //JobCard = 182,
 
             GRIEVANCE = 301,
             VEGETATION_TASK = 311,
@@ -288,7 +288,8 @@ namespace CMMSAPIs.Helper
             MARK_ATTENDENCE,
             EXECUTE_SCHEDULE,
             STATUTORY,
-            OBSERVATION
+            OBSERVATION,
+            OBSERVATION_ASSIGNED
         }
 
         public enum INCIDENT_RISK_LEVEL
@@ -297,7 +298,12 @@ namespace CMMSAPIs.Helper
             MEDIUM = 2,
             LOW = 3
         }
+        public enum OBSERVATION_TYPE
+        {
+            OBSERVATION = 0,
+            PM_EXECUTION = 1,
 
+        }
         public static Dictionary<string, int> INCIDENT_RISK_TYPE = new Dictionary<string, int>() { { "First-Aids Injury", 1 }, { "Electric Short", 2 } };
 
         public static Dictionary<string, int> INCIDENT_SEVERITY = new Dictionary<string, int>()
@@ -341,13 +347,14 @@ namespace CMMSAPIs.Helper
 
         public enum CMMS_Status
         {
-            Invalid = 0,
+            Undefined = 0,
             CREATED = 1,
             UPDATED,
             DELETED,
             CANCELLED,
             ASSIGNED,
             ISSUED,
+            CLOSED,
             APPROVED,
             REJECTED,
 
@@ -406,7 +413,7 @@ namespace CMMSAPIs.Helper
             PM_ASSIGNED,
             PM_LINKED_TO_PTW,
             PM_START,
-            PM_COMPLETED, // close task
+            PM_CLOSED, // close task
             PM_REJECTED,    // not used
             PM_APPROVED,      // not used
             PM_CLOSE_REJECTED,
@@ -415,13 +422,22 @@ namespace CMMSAPIs.Helper
             PM_CANCELLED_REJECTED,
             PM_CANCELLED_APPROVED,
             PM_DELETED,
-            PM_UPDATED, //Only for notification purpose
-
-            PM_SUBMIT,//for temp only
-            PM_LINK_PTW,
+            PM_UPDATED,
+            PM_TASK_UPDATED,//Only for notification purpose
             PM_TASK_DELETED,
+            PM_SUBMIT,
 
+            /*
+                        MC_EXECUTION_STARTED,
+                        MC_EXECUTION_CLOSED,
+                        MC_EXECUTION_UPDATED,
+                        MC_EXECUTION_ABANDONED,
+                        MC_EXECUTION_ENDED,
+                        MC_EXECUTION_ABANDONED_REJECTED,
+            */
 
+            //PM_SUBMIT,//for temp only
+            //PM_LINK_PTW,
 
 
             IR_CREATED_INITIAL = 181,
@@ -450,6 +466,7 @@ namespace CMMSAPIs.Helper
             WC_CLOSE_APPROVED,
             WC_CLOSED_REJECTED,
             WC_CANCELLED,
+            WC_UPDATED,
 
             CALIBRATION_SCHEDULED = 211,
             CALIBRATION_REQUEST,
@@ -550,8 +567,9 @@ namespace CMMSAPIs.Helper
             MC_TASK_SCHEDULE_APPROVED,
             MC_TASK_SCHEDULE_REJECT,
             MC_TASK_RESCHEDULED,
-            MC_ASSIGNED,
-            RESCHEDULED_TASK,
+            MC_TASK_ASSIGNED,
+
+
 
             PM_PLAN_CREATED = 401,
             PM_PLAN_DRAFT,
@@ -600,6 +618,7 @@ namespace CMMSAPIs.Helper
             STATUTORY_REJECTED,
             STATUTORY_RENEWD,
             OBSERVATION_CREATED = 551,
+            OBSERVATION_ASSIGNED,
             OBSERVATION_CLOSED,
             OBSERVATION_DELETED,
             OBSERVATION_UPDATED,
@@ -625,7 +644,17 @@ namespace CMMSAPIs.Helper
             VEG_TASK_END_APPROVED,
             VEG_TASK_END_REJECTED,
             VEG_TASK_UPDATED,
-            VEG_TASK_ASSIGNED
+            VEG_TASK_ASSIGNED,
+            VEG_TASK_RESCHEDULED,
+
+
+            VEG_EXECUTION_STARTED,
+            VEG_EXECUTION_APPROVED,
+            VEG_EXECUTION_UPDATED,
+            VEG_EXECUTION_END_REJECTED,
+            VEG_EXECUTION_ABANDONED,
+            VEG_EXECUTION_COMPLETED,
+
         }
 
         public enum ApprovalStatus

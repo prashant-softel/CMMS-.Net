@@ -104,6 +104,7 @@ namespace CMMSAPIs.Models.Masters
         public int latestJCPTWStatus { get; set; }
         public int latestJCApproval { get; set; }
         public int on_time_status { get; set; }
+        public dynamic time_condition { get; set; }
 
         // IR module
 

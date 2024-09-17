@@ -858,7 +858,7 @@ namespace CMMSAPIs.Repositories.Masters
                             {
                                 m_errorLog.SetError($"[Checkpoint: Row {rN}] Checkpoint name cannot be empty.");
                             }
-                            else if (Convert.ToString(newR["check_point"]) != "")
+                            else if (Convert.ToString(newR["check_point"]) != "" && Convert.ToInt32(newR["checklist_id"]) != 0)
                             {
                                 string checkpoint_q = "select * from checkpoint where check_point = \"" + Convert.ToString(newR["check_point"]) + "\" and check_list_id=" + Convert.ToInt32(newR["checklist_id"]) + ";";
                                 //checkpoint_q = System.Text.RegularExpressions.Regex.Replace(checkpoint_q, "[@,\\.\";'\\\\]", string.Empty);
@@ -908,14 +908,23 @@ namespace CMMSAPIs.Repositories.Masters
                             }
 
                             if (Convert.ToString(newR["range_min"]) == null || Convert.ToString(newR["range_min"]) == "")
+                            {
+
                                 newR["range_min"] = 0;
+                            }
                             else
+                            {
                                 newR["range_min"] = newR["range_min"].ToInt();
+                            }
 
                             if (Convert.ToString(newR["range_max"]) == null || Convert.ToString(newR["range_max"]) == "")
+                            {
                                 newR["range_max"] = 0;
+                            }
                             else
+                            {
                                 newR["range_max"] = newR["range_max"].ToInt();
+                            }
 
                             dt2.Rows.Add(newR);
                             /*

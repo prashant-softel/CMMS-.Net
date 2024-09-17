@@ -362,8 +362,10 @@ namespace CMMSAPIs.Repositories.Users
                             {
                                 string loginIdQuery = "SELECT loginId FROM users;";
                                 DataTable dtLogin = await Context.FetchData(loginIdQuery).ConfigureAwait(false);
-                                List<string> loginList1 = dtLogin.GetColumn<string>("loginId");
-                                if (loginList1.Contains(newR["user_name"]))
+                                List<string> loginList1 = dtLogin.GetColumn<string>("loginId")
+                                   .Select(id => id.ToUpper())
+                                   .ToList();
+                                if (loginList1.Contains(Convert.ToString(newR["user_name"]).ToUpper()))
                                 {
                                     m_errorLog.SetError($"Login ID already exists. [Row: {rN}]");
                                     newR.Delete();
@@ -537,8 +539,8 @@ namespace CMMSAPIs.Repositories.Users
                         {
                             userPriority.Insert(0, filterRows.CopyToDataTable());
                             loginList.Insert(0, userPriority[userPriority.Count - 1].GetColumn<string>("user_name"));
-                        }
 
+                        }
                         foreach (var item in loginList)
                         {
                             List<string> temp = item;
@@ -554,6 +556,7 @@ namespace CMMSAPIs.Repositories.Users
                             } while (filterRows.Length != 0);
                         }
                         List<int> idList = new List<int>();
+
                         foreach (DataTable dtUsers in userPriority)
                         {
                             idList.AddRange((await AddUsers(dtUsers, userID)).id);
@@ -589,8 +592,15 @@ namespace CMMSAPIs.Repositories.Users
             List<string> userNames = dtUser.GetColumn<string>("loginId");
             List<int> userIds = dtUser.GetColumn<int>("id");
             Dictionary<string, int> userDict = new Dictionary<string, int>();
-            userDict.Merge(userNames, userIds);
-
+            for (int i = 0; i < userNames.Count; i++)
+            {
+                string key = userNames[i];
+                int value = userIds[i];
+                if (!userDict.ContainsKey(key))
+                {
+                    userDict.Add(key, value);
+                }
+            }
             foreach (DataRow row in users.Rows)
             {
                 try
@@ -742,25 +752,31 @@ namespace CMMSAPIs.Repositories.Users
                 int index = request.FindIndex(x => x == user);
                 string loginIdQuery = "SELECT loginId FROM users;";
                 DataTable dtLogin = await Context.FetchData(loginIdQuery).ConfigureAwait(false);
+
                 string[] loginList = dtLogin.GetColumn<string>("loginId").ToArray();
                 if (Array.Exists(loginList, loginId => loginId == user.credentials.user_name))
                     m_errorLog.SetError($"Login ID already exists. [Index: {index}]");
+
                 string country, state, city;
                 string getCountryQry = $"SELECT name FROM countries WHERE id = {user.country_id};";
                 DataTable dtCountry = await Context.FetchData(getCountryQry).ConfigureAwait(false);
+
                 if (dtCountry.Rows.Count == 0)
                     m_errorLog.SetError($"Invalid Country. [Index: {index}]");
                 country = Convert.ToString(dtCountry.Rows[0][0]);
+
                 string getStateQry = $"SELECT name, country_id FROM states WHERE id = {user.state_id};";
                 DataTable dtState = await Context.FetchData(getStateQry).ConfigureAwait(false);
                 if (dtState.Rows.Count == 0)
                     m_errorLog.SetError($"Invalid State. [Index: {index}]");
                 state = Convert.ToString(dtState.Rows[0]["name"]);
+
                 string getCityQry = $"SELECT name FROM cities WHERE id = {user.city_id};";
                 DataTable dtCity = await Context.FetchData(getCityQry).ConfigureAwait(false);
                 if (dtCity.Rows.Count == 0)
                     m_errorLog.SetError($"Invalid City. [Index: {index}]");
                 city = Convert.ToString(dtCity.Rows[0][0]);
+
                 string myQuery1 = $"SELECT * FROM states WHERE id = {user.state_id} AND country_id = {user.country_id};";
                 DataTable dt1 = await Context.FetchData(myQuery1).ConfigureAwait(false);
                 if (dt1.Rows.Count == 0)
@@ -772,15 +788,14 @@ namespace CMMSAPIs.Repositories.Users
                     dtCountry = await Context.FetchData(getCountryQry).ConfigureAwait(false);
                     country = Convert.ToString(dtCountry.Rows[0][0]);
                 }
+
                 string myQuery2 = $"SELECT * FROM cities WHERE id = {user.city_id} AND state_id = {user.state_id} AND country_id = {user.country_id};";
                 DataTable dt2 = await Context.FetchData(myQuery2).ConfigureAwait(false);
                 if (dt2.Rows.Count == 0)
                     m_errorLog.SetError($"{city} is not situated in {state}, {country}. [Index: {index}]");
             }
-            // if (m_errorLog.GetErrorCount() == 0)
-            //{
-            foreach (var user in request)
 
+            foreach (var user in request)
             {
                 string myQuery = "INSERT INTO users(loginId, password, secondaryEmail, firstName, lastName, birthday, genderId, gender, bloodGroupId, bloodGroup, photoId, " +
                                    "mobileNumber, landlineNumber, countryId, stateId, cityId, zipcode, roleId, isEmployee,companyId,designation_id, joiningDate, createdBy, createdAt, reportToId, status) " +
@@ -789,7 +804,6 @@ namespace CMMSAPIs.Repositories.Users
                                    $"{user.photoId}, '{user.contact_no}','{user.landline_number}', {user.country_id}, {user.state_id}, {user.city_id}, {user.zipcode}, " +
                                    $"{user.role_id}, {(user.isEmployee == null ? 0 : user.isEmployee)},{user.company_id},{user.designation_id},'{((DateTime)user.joiningDate).ToString("yyyy-MM-dd HH:mm:ss")}', " +
                                    $"{userID}, '{UtilsRepository.GetUTCTime()}', {user.report_to_id}, 1); SELECT LAST_INSERT_ID(); ";
-
                 DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
                 int id = Convert.ToInt32(dt.Rows[0][0]);
                 /*  */
@@ -818,6 +832,7 @@ namespace CMMSAPIs.Repositories.Users
                 idList.Add(id);
             }
             response = new CMDefaultResponse(idList, CMMS.RETRUNSTATUS.SUCCESS, $"{idList.Count} user(s) added successfully");
+
 
             return response;
         }
@@ -989,20 +1004,21 @@ namespace CMMSAPIs.Repositories.Users
             CMDefaultResponse response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "User Deleted");
             return response;
         }
-
-
-
-        internal async Task<List<CMUser>> GetEMUsers(int facilityId, int role, int notificationID)
+        internal async Task<List<CMUser>> GetEMUsers(CMUserByNotificationId notification)
         {
+            int facility_id = notification.facility_id;
+            int role_id = notification.role_id;
+            int notification_id = notification.notification_id;
+
             string userQry = $"select u.id as id, u.loginId as user_name, concat(firstName, ' ', lastName) as full_name, u.mobileNumber as contact_no, userroles.id as role_id," +
                 $" userroles.name as role_name " +
                 $" FROM users as u " +
                 $" inner join userroles on userroles.id = u.roleId " +
                 $" LEFT JOIN UserFacilities as uf ON uf.userId = u.id " +
                 $" left join UserNotifications as un on u.id = un.userId  " +
-                $" WHERE userroles.status=1 and roleId >= {role}" +
-                $" and uf.facilityId = {facilityId}" +
-                $"  and userPreference = 1 and un.notificationId =  {notificationID}" +
+                $" WHERE userroles.status=1 and roleId >= {role_id}" +
+                $" and uf.facilityId = {facility_id}" +
+                $"  and userPreference = 1 and un.notificationId =  {notification_id}" +
                 $" order by sort_order asc;";
 
             List<CMUser> user_list = await Context.GetData<CMUser>(userQry).ConfigureAwait(false);
@@ -1014,11 +1030,8 @@ namespace CMMSAPIs.Repositories.Users
             // Pending convert user_ids into string for where condition
             int notification_id = (int)notification.module_id;
             int facility_id = notification.facility_id;
-            string user_ids_str = "";
-            if (notification.user_ids != null)
-            {
-                user_ids_str += string.Join(",", notification.user_ids.ToArray());
-            }
+            string user_ids_str = notification.additional_user_ids;
+
             string qry = $"SELECT " +
                             $"u.id as id, u.loginId as user_name, concat(firstName, ' ', lastName) as full_name, ur.id as role_id, ur.name as role_name, u.mobileNumber as contact_no " +
                          $"FROM " +
@@ -1037,7 +1050,7 @@ namespace CMMSAPIs.Repositories.Users
 
             if (!user_ids_str.IsNullOrEmpty())
             {
-                qry += $" AND (self = 0 and u.id IN({user_ids_str}))";
+                qry += $" AND (self = 0 or u.id IN({user_ids_str}))";
             }
             else
             {

@@ -100,8 +100,10 @@ namespace CMMSAPIs.Controllers
         {
             try
             {
+                int facility_id = request.facility_id;
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _GOBS.CreateGO(request, userID);
+                var data = await _GOBS.CreateGO(request, userID, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -122,8 +124,10 @@ namespace CMMSAPIs.Controllers
         {
             try
             {
+                int facility_id = request.facility_id;
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _GOBS.UpdateGO(request, userID);
+                var data = await _GOBS.UpdateGO(request, userID, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -144,8 +148,10 @@ namespace CMMSAPIs.Controllers
         {
             try
             {
+                int facility_id = request.facility_id;
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _GOBS.DeleteGO(request, userID);
+                var data = await _GOBS.DeleteGO(request, userID, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -166,8 +172,10 @@ namespace CMMSAPIs.Controllers
         {
             try
             {
+                int facility_id = request.facility_id;
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _GOBS.CloseGO(request, userID);
+                var data = await _GOBS.CloseGO(request, userID, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -188,8 +196,10 @@ namespace CMMSAPIs.Controllers
         {
             try
             {
+                int facility_id = request.facility_id;
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _GOBS.ApproveGO(request, userId);
+                var data = await _GOBS.ApproveGO(request, userId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -210,8 +220,10 @@ namespace CMMSAPIs.Controllers
         {
             try
             {
+                int facility_id = request.facility_id;
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _GOBS.RejectGO(request, userId);
+                var data = await _GOBS.RejectGO(request, userId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -251,11 +263,12 @@ namespace CMMSAPIs.Controllers
         //[Authorize]
         [Route("GetGODetailsByID")]
         [HttpGet]
-        public async Task<IActionResult> GetGODetailsByID(int id)
+        public async Task<IActionResult> GetGODetailsByID(int id, int facility_id)
         {
             try
             {
-                var data = await _GOBS.GetGODetailsByID(id);
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+                var data = await _GOBS.GetGODetailsByID(id, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -276,7 +289,10 @@ namespace CMMSAPIs.Controllers
         {
             try
             {
-                var data = await _GOBS.SubmitPurchaseData(request);
+                int facility_id = request.facilityId;
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _GOBS.SubmitPurchaseData(request, userID, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -320,8 +336,10 @@ namespace CMMSAPIs.Controllers
         {
             try
             {
+                int facility_id = request.facility_id;
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _GOBS.UpdateGOReceive(request, userID);
+                var data = await _GOBS.UpdateGOReceive(request, userID, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -342,8 +360,10 @@ namespace CMMSAPIs.Controllers
         {
             try
             {
+                int facility_id = request.facility_id;
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _GOBS.ApproveGOReceive(request, userId);
+                var data = await _GOBS.ApproveGOReceive(request, userId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -364,8 +384,10 @@ namespace CMMSAPIs.Controllers
         {
             try
             {
+                int facility_id = request.facility_id;
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _GOBS.RejectGOReceive(request, userId);
+                var data = await _GOBS.RejectGOReceive(request, userId, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)

@@ -23,6 +23,39 @@ namespace CMMSAPIs.Controllers.EM
             _EMBS = em;
         }
 
+
+        #region Notification
+
+        //[Authorize]
+        [Route("SendNotification")]
+        [HttpPost]
+        public async Task<IActionResult> SendNotification(CMNotification request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == request.facilityId)?.timezone;
+                var data = await _EMBS.SendNotification(request, userID, facilitytimeZone);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+                /*
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = ex.Message;
+                return Ok(item);
+                */
+            }
+        }
+
+
+        #endregion //Notification functions
+
+        #region Escalation
+
+
         //[Authorize]
         [Route("SetEscalationMatrix")]
         [HttpPost]
@@ -72,13 +105,13 @@ namespace CMMSAPIs.Controllers.EM
         //[Authorize]
         [Route("Escalate")]
         [HttpPost]
-        public async Task<IActionResult> Escalate(CMMS.CMMS_Modules moduleId, int statusId, int facilityId)
+        public async Task<IActionResult> Escalate(CMMS.CMMS_Modules moduleId, CMMS.CMMS_Status statusId, int facilityId, string additionalUserIds)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
                 var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
-                var data = await _EMBS.Escalate(moduleId, statusId, userID, facilitytimeZone);
+                var data = await _EMBS.Escalate(moduleId, statusId, additionalUserIds, userID, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception)
@@ -104,5 +137,6 @@ namespace CMMSAPIs.Controllers.EM
                 throw;
             }
         }
+        #endregion //Escalation functions
     }
 }

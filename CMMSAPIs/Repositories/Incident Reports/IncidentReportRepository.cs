@@ -144,7 +144,20 @@ namespace CMMSAPIs.Repositories.Incident_Reports
             }
             severityName += $"ELSE 'Invalid severity' END";
 
-            string selectqry = $"SELECT incident.id as id,{severityName} as severity,  incident.description as description , facilities.name as facility_name,blockName.name as block_name, assets.name as equipment_name, incident.risk_level as risk_level, CONCAT(created_by.firstName ,' ' , created_by.lastName) as reported_by_name, incident.created_at as reported_at,CONCAT(user.firstName ,' ' , user.lastName) as approved_by, incident.approved_at as approved_at, CONCAT(user1.firstName , ' ' , user1.lastName) as reported_by_name , {statusOut} as status_short , incident.location_of_incident, incident_datetime, type_of_job,title,\r\nincident.status, incident.is_why_why_required, incident.is_investigation_required FROM incidents as incident left JOIN facilities AS facilities on facilities.id = incident.facility_id LEFT JOIN facilities AS blockName on blockName.id = incident.block_id  and blockName.isBlock = 1 LEFT JOIN assets as assets on incident.equipment_id = assets.id LEFT JOIN users as user on incident.approved_by = user.id LEFT JOIN users as created_by on incident.created_by = created_by.id LEFT JOIN users as user1 on incident.verified_by = user1.id where " + filter + " order by incident.id asc";
+            string selectqry = $"SELECT incident.id as id,{severityName} as severity,  incident.description as description , " +
+                               $"facilities.name as facility_name,blockName.name as block_name, assets.name as equipment_name, incident.risk_level as risk_level, " +
+                               $"CONCAT(created_by.firstName ,' ' , created_by.lastName) as reported_by_name, incident.created_at as reported_at,  " +
+                               $"CONCAT(user.firstName ,' ' , user.lastName) as approved_by, incident.approved_at as approved_at, " +
+                               $"CONCAT(user1.firstName , ' ' , user1.lastName) as reported_by_name , {statusOut} as status_short , " +
+                               $"incident.location_of_incident, incident_datetime, type_of_job,title,  " +
+                               $"incident.status, incident.is_why_why_required, incident.is_investigation_required " +
+                               $"FROM incidents as incident " +
+                               $"left JOIN facilities AS facilities on facilities.id = incident.facility_id " +
+                               $"LEFT JOIN facilities AS blockName on blockName.id = incident.block_id  and blockName.isBlock = 1 " +
+                               $"LEFT JOIN assets as assets on incident.equipment_id = assets.id " +
+                               $"LEFT JOIN users as user on incident.approved_by = user.id " +
+                               $"LEFT JOIN users as created_by on incident.created_by = created_by.id " +
+                               $"LEFT JOIN users as user1 on incident.verified_by = user1.id where " + filter + " order by incident.id asc";
 
             List<CMIncidentList> getIncidentList = await Context.GetData<CMIncidentList>(selectqry).ConfigureAwait(false);
             foreach (var getlist in getIncidentList)
@@ -307,10 +320,10 @@ namespace CMMSAPIs.Repositories.Incident_Reports
             {
                 try
                 {
-                    string investigation_IQuery = "INSERT INTO investigation_team (incidents_id, person_id, person_type, designation, investigation_date,person_name) ";
+                    string investigation_IQuery = "INSERT INTO investigation_team (incidents_id, designation,person_name) ";
                     foreach (var item in request.investigation_team)
                     {
-                        investigation_IQuery = investigation_IQuery + $" select {incident_id}, '{item.person_id}', {item.person_type},'{item.designation}' ,'{item.investigation_date.Value.ToString("yyyy-MM-dd HH:mm:ss")}', '{item.person_name}' UNION ALL ";
+                        investigation_IQuery = investigation_IQuery + $" select {incident_id}, '{item.designation}' , '{item.name}' UNION ALL ";
                     }
                     investigation_IQuery = investigation_IQuery.TrimEnd("UNION ALL ".ToCharArray());
                     var Query_result = await Context.ExecuteNonQry<int>(investigation_IQuery).ConfigureAwait(false);
@@ -531,31 +544,59 @@ namespace CMMSAPIs.Repositories.Incident_Reports
             {
                 try
                 {
-                    string why_why_IQuery = "INSERT INTO why_why_analysis (incidents_id, why, cause) ";
                     foreach (var item in request.why_why_analysis)
                     {
-                        why_why_IQuery = why_why_IQuery + $" select {incident_id}, '{item.why}', '{item.cause}' UNION ALL ";
+                        if (item.why_item_id > 0)
+                        {
+                            StringBuilder why_why_UQuery = new StringBuilder();
+                            why_why_UQuery.Append("UPDATE why_why_analysis ");
+                            why_why_UQuery.Append("SET why = '" + item.why + "', ");
+                            why_why_UQuery.Append("incidents_id = '" + incident_id + "', ");
+                            why_why_UQuery.Append("cause = '" + item.cause + "' ");
+                            why_why_UQuery.Append("WHERE id = " + item.why_item_id);
+                            var why_why_Query_result = await Context.ExecuteNonQry<int>(why_why_UQuery.ToString()).ConfigureAwait(false);
+                        }
+                        else
+                        {
+                            string why_why_IQuery = "INSERT INTO why_why_analysis (incidents_id, why, cause) ";
+
+                            why_why_IQuery = why_why_IQuery + $" select {incident_id}, '{item.why}', '{item.cause}' UNION ALL ";
+
+                            why_why_IQuery = why_why_IQuery.TrimEnd("UNION ALL ".ToCharArray());
+                            var why_why_Query_result = await Context.ExecuteNonQry<int>(why_why_IQuery).ConfigureAwait(false);
+                        }
                     }
-                    why_why_IQuery = why_why_IQuery.TrimEnd("UNION ALL ".ToCharArray());
-                    var why_why_Query_result = await Context.ExecuteNonQry<int>(why_why_IQuery).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
                     return response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Incident Report creation failed");
                 }
             }
-
             if (request.root_cause != null && request.root_cause.Count > 0)
             {
                 try
                 {
-                    string root_IQuery = "INSERT INTO root_cause (incidents_id, cause) ";
+
                     foreach (var item in request.root_cause)
                     {
-                        root_IQuery = root_IQuery + $" select {incident_id}, '{item.cause}' UNION ALL ";
+                        if (item.root_item_id > 0)
+                        {
+                            StringBuilder root_UQuery = new StringBuilder();
+                            root_UQuery.Append("UPDATE root_cause ");
+                            root_UQuery.Append("SET cause = '" + item.cause + "' ");
+                            root_UQuery.Append("WHERE id = " + item.root_item_id);
+                            var root_Query_result = await Context.ExecuteNonQry<int>(root_UQuery.ToString()).ConfigureAwait(false);
+                        }
+                        else
+                        {
+                            string root_IQuery = "INSERT INTO root_cause (incidents_id, cause) ";
+
+                            root_IQuery = root_IQuery + $" select {incident_id}, '{item.cause}' UNION ALL ";
+
+                            root_IQuery = root_IQuery.TrimEnd("UNION ALL ".ToCharArray());
+                            var root_Query_result = await Context.ExecuteNonQry<int>(root_IQuery).ConfigureAwait(false);
+                        }
                     }
-                    root_IQuery = root_IQuery.TrimEnd("UNION ALL ".ToCharArray());
-                    var root_Query_result = await Context.ExecuteNonQry<int>(root_IQuery).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
@@ -567,32 +608,66 @@ namespace CMMSAPIs.Repositories.Incident_Reports
             {
                 try
                 {
-                    string immediate_IQuery = "INSERT INTO immediate_correction (incidents_id, details) ";
+
                     foreach (var item in request.immediate_correction)
                     {
-                        immediate_IQuery = immediate_IQuery + $" select {incident_id}, '{item.details}' UNION ALL ";
+                        if (item.ic_item_id > 0)
+                        {
+                            StringBuilder immediate_UQuery = new StringBuilder();
+                            immediate_UQuery.Append("UPDATE immediate_correction ");
+                            immediate_UQuery.Append("SET details = '" + item.details + "' ");
+                            immediate_UQuery.Append("WHERE id = " + item.ic_item_id);
+                            var immediate_Query_result = await Context.ExecuteNonQry<int>(immediate_UQuery.ToString()).ConfigureAwait(false);
+                        }
+
+                        else
+                        {
+
+                            string immediate_IQuery = "INSERT INTO immediate_correction (incidents_id, details) ";
+                            immediate_IQuery = immediate_IQuery + $" select {incident_id}, '{item.details}' UNION ALL ";
+                            immediate_IQuery = immediate_IQuery.TrimEnd("UNION ALL ".ToCharArray());
+                            var immediate_Query_result = await Context.ExecuteNonQry<int>(immediate_IQuery).ConfigureAwait(false);
+
+                        }
                     }
-                    immediate_IQuery = immediate_IQuery.TrimEnd("UNION ALL ".ToCharArray());
-                    var immediate_Query_result = await Context.ExecuteNonQry<int>(immediate_IQuery).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
                     return response = new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Incident Report creation failed");
                 }
             }
-
-
             if (request.proposed_action_plan != null && request.proposed_action_plan.Count > 0)
             {
                 try
                 {
-                    string proposed_action_plan_IQuery = "INSERT INTO proposed_action_plan (incidents_id, actions_as_per_plan, responsibility, target_date, remarks,hse_remark,id_Status) ";
                     foreach (var item in request.proposed_action_plan)
                     {
-                        proposed_action_plan_IQuery = proposed_action_plan_IQuery + $" select {incident_id}, '{item.actions_as_per_plan}', '{item.responsibility}', '{item.target_date.Value.ToString("yyyy-MM-dd HH:mm:ss")}', '{item.remarks}','{item.hse_remark}',{item.id_Status} UNION ALL ";
+                        if (item.proposed_item_id > 0)
+                        {
+
+
+                            StringBuilder proposedActionPlanUQuery = new StringBuilder();
+                            proposedActionPlanUQuery.Append("UPDATE proposed_action_plan ");
+                            proposedActionPlanUQuery.Append("SET actions_as_per_plan = '" + item.actions_as_per_plan + "', ");
+                            proposedActionPlanUQuery.Append("responsibility = '" + item.responsibility + "', ");
+                            proposedActionPlanUQuery.Append("target_date = '" + item.target_date.Value.ToString("yyyy-MM-dd HH:mm:ss") + "', ");
+                            proposedActionPlanUQuery.Append("remarks = '" + item.remarks + "', ");
+                            proposedActionPlanUQuery.Append("hse_remark = '" + item.hse_remark + "', ");
+                            proposedActionPlanUQuery.Append("id_Status = " + item.id_Status + " ");
+                            proposedActionPlanUQuery.Append("WHERE id = " + item.proposed_item_id);
+                            var proposedActionPlanQuery_result = await Context.ExecuteNonQry<int>(proposedActionPlanUQuery.ToString()).ConfigureAwait(false);
+                        }
+                        else
+                        {
+                            string proposed_action_plan_IQuery = "INSERT INTO proposed_action_plan (incidents_id, actions_as_per_plan, responsibility, target_date, remarks,hse_remark,id_Status) ";
+
+                            proposed_action_plan_IQuery = proposed_action_plan_IQuery + $" select {incident_id}, '{item.actions_as_per_plan}', '{item.responsibility}', '{item.target_date.Value.ToString("yyyy-MM-dd HH:mm:ss")}', '{item.remarks}','{item.hse_remark}',{item.id_Status} UNION ALL ";
+
+                            proposed_action_plan_IQuery = proposed_action_plan_IQuery.TrimEnd("UNION ALL ".ToCharArray());
+                            var Query_result = await Context.ExecuteNonQry<int>(proposed_action_plan_IQuery).ConfigureAwait(false);
+
+                        }
                     }
-                    proposed_action_plan_IQuery = proposed_action_plan_IQuery.TrimEnd("UNION ALL ".ToCharArray());
-                    var Query_result = await Context.ExecuteNonQry<int>(proposed_action_plan_IQuery).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
@@ -604,13 +679,25 @@ namespace CMMSAPIs.Repositories.Incident_Reports
             {
                 try
                 {
-                    string investigation_IQuery = "INSERT INTO investigation_team (incidents_id, person_id, person_type, designation, investigation_date,person_name) ";
                     foreach (var item in request.investigation_team)
                     {
-                        investigation_IQuery = investigation_IQuery + $" select {incident_id}, '{item.person_id}', {item.person_type},'{item.designation}' ,'{item.investigation_date.Value.ToString("yyyy-MM-dd HH:mm:ss")}', '{item.person_name}' UNION ALL ";
+                        if (item.investigation_item_id > 0)
+                        {
+                            StringBuilder investigation_UQuery = new StringBuilder();
+                            investigation_UQuery.Append("UPDATE investigation_team ");
+                            investigation_UQuery.Append("SET  person_name = '" + item.name + "', ");
+                            investigation_UQuery.Append("designation = '" + item.designation + "' ");
+                            investigation_UQuery.Append("WHERE id = " + item.investigation_item_id);
+                            var investigation_UQuery_result = await Context.ExecuteNonQry<int>(investigation_UQuery.ToString()).ConfigureAwait(false);
+                        }
+                        else
+                        {
+                            string investigation_IQuery = "INSERT INTO investigation_team (incidents_id, designation,person_name) ";
+                            investigation_IQuery = investigation_IQuery + $" select {incident_id}, '{item.designation}' , '{item.name}' UNION ALL ";
+                            investigation_IQuery = investigation_IQuery.TrimEnd("UNION ALL ".ToCharArray());
+                            var Query_result = await Context.ExecuteNonQry<int>(investigation_IQuery).ConfigureAwait(false);
+                        }
                     }
-                    investigation_IQuery = investigation_IQuery.TrimEnd("UNION ALL ".ToCharArray());
-                    var Query_result = await Context.ExecuteNonQry<int>(investigation_IQuery).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
@@ -620,13 +707,13 @@ namespace CMMSAPIs.Repositories.Incident_Reports
 
             if (incident_id > 0)
             {
-                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INCIDENT_REPORT, incident_id, 0, 0, "Incident Report Created", CMMS.CMMS_Status.IR_CREATED_INITIAL, userId);
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INCIDENT_REPORT, incident_id, 0, 0, "Incident Report updated", CMMS.CMMS_Status.IR_CREATED_INITIAL, userId);
 
                 CMViewIncidentReport _IncidentReportDetails = await GetIncidentDetailsReport(incident_id, "");
 
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INCIDENT_REPORT, CMMS.CMMS_Status.IR_CREATED_INITIAL, new[] { userId }, _IncidentReportDetails);
 
-                response = new CMDefaultResponse(incident_id, CMMS.RETRUNSTATUS.SUCCESS, "Created Incident Investigation Report");
+                response = new CMDefaultResponse(incident_id, CMMS.RETRUNSTATUS.SUCCESS, "Update Incident Investigation Report");
             }
             else
             {
@@ -761,7 +848,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
             if (request.block_id > 0)
                 updateQry += $" block_id = {request.block_id},";
             if (request.risk_level > 0)
-                updateQry += $" equipment_id = {request.risk_level},";
+                updateQry += $" risk_level = {request.risk_level},";
             updateQry += $" severity = '{request.severity}' ,";
             if (request.equipment_id > 0)
                 updateQry += $" equipment_id = {request.equipment_id},";
@@ -1039,10 +1126,7 @@ namespace CMMSAPIs.Repositories.Incident_Reports
                     {
                         StringBuilder investigation_UQuery = new StringBuilder();
                         investigation_UQuery.Append("UPDATE investigation_team ");
-                        investigation_UQuery.Append("SET person_id = '" + item.person_id + "', ");
-                        investigation_UQuery.Append("person_type = '" + item.person_type + "', ");
-                        investigation_UQuery.Append("person_name = '" + item.person_name + "', ");
-                        investigation_UQuery.Append("investigation_date = '" + item.investigation_date.Value.ToString("yyyy-MM-dd HH:mm:ss") + "', ");
+                        investigation_UQuery.Append("SET  person_name = '" + item.name + "', ");
                         investigation_UQuery.Append("designation = '" + item.designation + "' ");
                         investigation_UQuery.Append("WHERE id = " + item.investigation_item_id);
                         var investigation_UQuery_result = await Context.ExecuteNonQry<int>(investigation_UQuery.ToString()).ConfigureAwait(false);
@@ -1307,14 +1391,17 @@ namespace CMMSAPIs.Repositories.Incident_Reports
 
         internal async Task<List<CMProposed_action_plan>> Getproposed_action_plan(int incidents_id)
         {
-            string selectqry = "select id as proposed_item_id,incidents_id,actions_as_per_plan,responsibility, target_date,remarks,hse_remark,id_Status from proposed_action_plan where incidents_id = " + incidents_id + ";";
+            string selectqry = "select id as proposed_item_id,incidents_id,actions_as_per_plan,responsibility, " +
+                               "target_date,remarks,hse_remark,id_Status,CASE WHEN id_Status=1 then 'open' else 'close' END as status_name" +
+                               " from proposed_action_plan where incidents_id = " + incidents_id + ";";
             List<CMProposed_action_plan> result = await Context.GetData<CMProposed_action_plan>(selectqry).ConfigureAwait(false);
 
             return result;
         }
         internal async Task<List<CMInvestigation_team>> Getinvestigation_team(int incidents_id)
         {
-            string selectqry = "select i.id as investigation_item_id, incidents_id,case when person_type = 1 then 'Employee' when person_type = 2 then 'Contractor' \r\n when person_type = 3 then 'Other' else '' end as person_type_name, person_id, person_type, designation, investigation_date,\r\n case when i.person_type =1 then concat(u.firstName, ' ', u.lastname)\r\n when i.person_type =2 then b.name\r\n else person_name\r\n end as person_name \r\n from investigation_team i\r\nleft join users u on u.id = i.person_id\r\nleft join business b on b.id = i.person_id  where incidents_id = " + incidents_id + ";";
+            //string selectqry = "select i.id as investigation_item_id, incidents_id,case when person_type = 1 then 'Employee' when person_type = 2 then 'Contractor' \r\n when person_type = 3 then 'Other' else '' end as person_type_name, person_id, person_type, designation, investigation_date,\r\n case when i.person_type =1 then concat(u.firstName, ' ', u.lastname)\r\n when i.person_type =2 then b.name\r\n else person_name\r\n end as person_name \r\n from investigation_team i\r\nleft join users u on u.id = i.person_id\r\nleft join business b on b.id = i.person_id  where incidents_id = " + incidents_id + ";";
+            string selectqry = "select id as investigation_item_id, incidents_id, designation ,person_name as name from investigation_team where incidents_id = " + incidents_id + ";";
             List<CMInvestigation_team> result = await Context.GetData<CMInvestigation_team>(selectqry).ConfigureAwait(false);
             return result;
         }

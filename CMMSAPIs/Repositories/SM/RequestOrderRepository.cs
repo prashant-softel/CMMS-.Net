@@ -1,4 +1,5 @@
 using CMMSAPIs.Helper;
+using CMMSAPIs.Models.Notifications;
 using CMMSAPIs.Models.SM;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Utils;
@@ -18,7 +19,7 @@ namespace CMMSAPIs.Repositories.SM
             _utilsRepo = new UtilsRepository(sqlDBHelper);
         }
 
-        internal async Task<CMDefaultResponse> CreateRequestOrder(CMCreateRequestOrder request, int userID)
+        internal async Task<CMDefaultResponse> CreateRequestOrder(CMCreateRequestOrder request, int userID, string facilityTimeZone)
         {
             CMDefaultResponse response = null;
             int ReturnID = 0;
@@ -51,50 +52,77 @@ namespace CMMSAPIs.Repositories.SM
             }
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_RO, ReturnID, 0, 0, request.comment, CMMS.CMMS_Status.SM_RO_SUBMITTED);
+            List<CMCreateRequestOrderGET> _ROList = await GetRODetailsByID(ReturnID.ToString(), facilityTimeZone);
+            foreach (var ro in _ROList)
+            {
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_RO, CMMS.CMMS_Status.SM_RO_SUBMITTED, new[] { userID }, ro);
+                break;
+            }
+
+
+
             return response;
         }
-        internal async Task<CMDefaultResponse> UpdateRequestOrder(CMCreateRequestOrder request, int userID)
+        internal async Task<CMDefaultResponse> UpdateRequestOrder(CMCreateRequestOrder request, int userID, string facilityTimeZone)
         {
             //string mainQuery = $"UPDATE smgoodsorderdetails SET generate_flag = " +request.generate_flag + ",status = "+request.status+", vendorID = "+request.vendorID+" WHERE ID = "+request.id+"";
 
             string updateRO = $" UPDATE smrequestorder SET facilityID = '{request.facilityID}'," +
-                $" remarks = '{request.comment}', updated_by = {userID},updated_at='{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}', status={(int)CMMS.CMMS_Status.SM_RO_SUBMITTED} where id = {request.request_order_id}";
+                $" remarks = '{request.comment}', updated_by = {userID},updated_at='{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}' where id = {request.request_order_id}";
             var ResultROQuery = await Context.ExecuteNonQry<int>(updateRO);
             for (var i = 0; i < request.request_order_items.Count; i++)
             {
                 if (request.request_order_items[i].itemID > 0)
                 {
-                    string updateQ = $"UPDATE smrequestorderdetails SET assetItemID = {request.request_order_items[i].assetMasterItemID} , cost = {request.request_order_items[i].cost} , ordered_qty = {request.request_order_items[i].ordered_qty}, remarks = '{request.request_order_items[i].comment}'" +
+                    string updateQ = $"UPDATE smrequestorderdetails SET assetItemID = {request.request_order_items[i].assetMasterItemID} , cost = {request.request_order_items[i].cost} , ordered_qty = {request.request_order_items[i].ordered_qty}, remarks = '{request.request_order_items[i].comment}', currencyId={request.request_order_items[i].currencyId} " +
                         $" WHERE ID = {request.request_order_items[i].itemID}";
                     var result = await Context.ExecuteNonQry<int>(updateQ);
                 }
                 else
                 {
-                    string poDetailsQuery = $"INSERT INTO smrequestorderdetails (requestID,assetItemID,cost,ordered_qty,remarks) " +
-                       "values(" + request.request_order_id + ", " + request.request_order_items[i].assetMasterItemID + ",  " + request.request_order_items[i].cost + ", " + request.request_order_items[i].ordered_qty + ", '" + request.request_order_items[i].comment + "') ; SELECT LAST_INSERT_ID();";
+                    string poDetailsQuery = $"INSERT INTO smrequestorderdetails (requestID,assetItemID,cost,ordered_qty,remarks,currencyId) " +
+                       "values(" + request.request_order_id + ", " + request.request_order_items[i].assetMasterItemID + ",  " + request.request_order_items[i].cost + ", " + request.request_order_items[i].ordered_qty + ", '" + request.request_order_items[i].comment + "'," + request.request_order_items[i].currencyId + " ) ; SELECT LAST_INSERT_ID();";
                     DataTable dtInsertPO = await Context.FetchData(poDetailsQuery).ConfigureAwait(false);
                     int id = Convert.ToInt32(dtInsertPO.Rows[0][0]);
                 }
             }
             CMDefaultResponse response = new CMDefaultResponse(request.request_order_id, CMMS.RETRUNSTATUS.SUCCESS, "Request order updated successfully.");
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_RO, request.request_order_id, 0, 0, request.comment, CMMS.CMMS_Status.SM_RO_UPDATED);
+            List<CMCreateRequestOrderGET> _ROList = await GetRODetailsByID(request.request_order_id.ToString(), facilityTimeZone);
+            foreach (var ro in _ROList)
+            {
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_RO, CMMS.CMMS_Status.SM_RO_UPDATED, new[] { userID }, ro);
+                break;
+            }
             return response;
         }
-        internal async Task<CMDefaultResponse> DeleteRequestOrder(CMApproval request, int userID)
+        internal async Task<CMDefaultResponse> DeleteRequestOrder(CMApproval request, int userID, string facilityTimeZone)
         {
             string mainQuery = $"UPDATE smrequestorder SET status = {(int)CMMS.CMMS_Status.SM_RO_DELETED}, remarks= '{request.comment}' WHERE ID = " + request.id + "";
             await Context.ExecuteNonQry<int>(mainQuery);
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Request order deleted.");
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_RO, request.id, 0, 0, request.comment, CMMS.CMMS_Status.SM_RO_DELETED);
+            List<CMCreateRequestOrderGET> _ROList = await GetRODetailsByID(request.id.ToString(), facilityTimeZone);
+            foreach (var ro in _ROList)
+            {
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_RO, CMMS.CMMS_Status.SM_RO_DELETED, new[] { userID }, ro);
+                break;
+            }
             return response;
         }
-        internal async Task<CMDefaultResponse> CloseRequestOrder(CMApproval request, int userID)
+        internal async Task<CMDefaultResponse> CloseRequestOrder(CMApproval request, int userID, string facilityTimeZone)
         {
             //validate request.id
             string mainQuery = $"UPDATE smrequestorder SET status = {(int)CMMS.CMMS_Status.SM_RO_CLOSED}, remarks= '{request.comment}' WHERE ID = " + request.id + "";
             await Context.ExecuteNonQry<int>(mainQuery);
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Request order {" + request.id + "} closed.");
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_RO, request.id, 0, 0, request.comment, CMMS.CMMS_Status.SM_RO_CLOSED);
+            List<CMCreateRequestOrderGET> _ROList = await GetRODetailsByID(request.id.ToString(), facilityTimeZone);
+            foreach (var ro in _ROList)
+            {
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_RO, CMMS.CMMS_Status.SM_RO_CLOSED, new[] { userID }, ro);
+                break;
+            }
             return response;
         }
 
@@ -172,7 +200,8 @@ namespace CMMSAPIs.Repositories.SM
                 _MasterList[i].request_order_items = _itemList.Where(group => group.requestID == _MasterList[i].request_order_id).ToList();
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_MasterList[i].status);
                 string _shortStatus = getShortStatus(CMMS.CMMS_Modules.SM_RO, _Status);
-                string _longStatus = getLongStatus(_MasterList[i].request_order_id, _Status);
+                CMCreateRequestOrderGET m_SMROObj = new CMCreateRequestOrderGET();
+                string _longStatus = getLongStatus(_MasterList[i].request_order_id, _Status, m_SMROObj);
                 _MasterList[i].status_short = _shortStatus;
                 _MasterList[i].status_long = _longStatus;
             }
@@ -246,7 +275,7 @@ namespace CMMSAPIs.Repositories.SM
         //}
 
 
-        internal async Task<CMDefaultResponse> ApproveRequestOrder(CMApproval request, int userId)
+        internal async Task<CMDefaultResponse> ApproveRequestOrder(CMApproval request, int userId, string facilityTimeZone)
         {
 
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
@@ -262,10 +291,17 @@ namespace CMMSAPIs.Repositories.SM
             retCode = CMMS.RETRUNSTATUS.SUCCESS;
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Approved request order  " + request.id + "  successfully.");
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_RO, request.id, 0, 0, request.comment, CMMS.CMMS_Status.SM_RO_SUBMIT_APPROVED);
+
+            List<CMCreateRequestOrderGET> _ROList = await GetRODetailsByID(request.id.ToString(), facilityTimeZone);
+            foreach (var ro in _ROList)
+            {
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_RO, CMMS.CMMS_Status.SM_RO_SUBMIT_APPROVED, new[] { userId }, ro);
+                break;
+            }
             return response;
         }
 
-        internal async Task<CMDefaultResponse> RejectRequestOrder(CMApproval request, int userId)
+        internal async Task<CMDefaultResponse> RejectRequestOrder(CMApproval request, int userId, string facilityTimeZone)
         {
 
             if (request.id <= 0)
@@ -287,6 +323,12 @@ namespace CMMSAPIs.Repositories.SM
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_RO, request.id, 0, 0, request.comment, CMMS.CMMS_Status.SM_RO_SUBMIT_REJECTED);
 
+            List<CMCreateRequestOrderGET> _ROList = await GetRODetailsByID(request.id.ToString(), facilityTimeZone);
+            foreach (var ro in _ROList)
+            {
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_RO, CMMS.CMMS_Status.SM_RO_SUBMIT_REJECTED, new[] { userId }, ro);
+                break;
+            }
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Rejected request order.");
             return response;
         }
@@ -395,14 +437,16 @@ namespace CMMSAPIs.Repositories.SM
                 IDs = "0";
             }
 
-            string query = "SELECT fc.name as facilityName, pod.ID as requestDetailsID, facilityid as facility_id, pod.spare_status, po.remarks, sai.orderflag, " +
+            string query = " SELECT fc.name as facilityName, pod.ID as requestDetailsID, facilityid as facility_id, pod.spare_status, po.remarks, sai.orderflag, " +
                            "sam.asset_type_ID, pod.requestID, pod.assetItemID, sai.serial_number, sai.location_ID, pod.cost, pod.ordered_qty, " +
                            "po.request_date, sam.asset_type_ID, sam.asset_name, po.receiverID, po.status, sam.asset_code, t1.asset_type, t2.cat_name, " +
                            "pod.received_qty, pod.damaged_qty, pod.accepted_qty, f1.file_path, f1.Asset_master_id, sm.decimal_status, sm.spare_multi_selection, " +
                            "po.generated_by, pod.order_type as asset_type_ID_OrderDetails, receive_later, added_to_store, reject_reccomendations as rejectedRemark, " +
-                           "po.amount, po.currency as currencyID, curr.name as currency, CONCAT(ed.firstName,' ',ed.lastName) as generatedBy, " +
+                           "po.amount, pod.currencyId as currencyId, curr.name as currency, CONCAT(ed.firstName,' ',ed.lastName) as generatedBy, " +
                            "po.received_on as generatedAt, approvedOn as approvedAt, CONCAT(ed1.firstName,' ',ed1.lastName) as receivedBy, " +
-                           "pod.remarks as itemcomment, CONCAT(ed2.firstName,' ',ed2.lastName) as approvedBy, CONCAT(ed3.firstName,' ',ed3.lastName) as rejectedBy, " +
+                           "pod.remarks as itemcomment, CONCAT(ed2.firstName,' ',ed2.lastName) as approvedBy, " +
+                           "CONCAT(ed3.firstName,' ',ed3.lastName) as rejectedBy, " +
+                           "CONCAT(ed4.firstName,' ',ed4.lastName) as updated_by,po.updated_at, " +
                            "po.rejected_at as rejectedAt, sic.cat_name as asset_type_Name " +
                            "FROM smrequestorderdetails pod " +
                            "LEFT JOIN smrequestorder po ON po.ID = pod.requestID " +
@@ -422,6 +466,7 @@ namespace CMMSAPIs.Repositories.SM
                            "LEFT JOIN users ed ON ed.id = po.generated_by " +
                            "LEFT JOIN users ed1 ON ed1.id = po.receiverID " +
                            "LEFT JOIN users ed3 ON ed3.id = po.rejeccted_by " +
+                           "LEFT JOIN users ed4 ON ed4.id = po.updated_by " +
                            "WHERE  po.ID  IN (" + IDs + ") ;";
 
             List<CMRequestOrderList> _List = await Context.GetData<CMRequestOrderList>(query).ConfigureAwait(false);
@@ -439,7 +484,10 @@ namespace CMMSAPIs.Repositories.SM
                 generatedAt = p.request_date,
                 approvedBy = p.approvedBy,
                 rejectedBy = p.rejectedBy,
-                rejectedAt = p.rejectedAt
+                rejectedAt = p.rejectedAt,
+                currency = p.currency,
+                updated_by = p.updated_by,
+                updated_at = p.updated_at
 
             }).ToList();
             List<CMRequestOrder_ITEMS_GET> _itemList = _List.Select(p => new CMRequestOrder_ITEMS_GET
@@ -469,7 +517,7 @@ namespace CMMSAPIs.Repositories.SM
             {
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(MasterList.status);
                 string _shortStatus = getShortStatus(CMMS.CMMS_Modules.SM_RO, _Status);
-                string _longStatus = getLongStatus(MasterList.request_order_id, _Status);
+                string _longStatus = getLongStatus(MasterList.request_order_id, _Status, MasterList);
 
                 MasterList.status_short = _shortStatus;
                 MasterList.status_long = _longStatus;
@@ -501,6 +549,9 @@ namespace CMMSAPIs.Repositories.SM
                 case CMMS.CMMS_Status.SM_RO_SUBMITTED:
                     retValue = "Waiting for approval";
                     break;
+                case CMMS.CMMS_Status.SM_RO_UPDATED:
+                    retValue = "Waiting for approval";
+                    break;
                 case CMMS.CMMS_Status.SM_RO_SUBMIT_REJECTED:
                     retValue = "Submit rejected";
                     break;
@@ -521,29 +572,32 @@ namespace CMMSAPIs.Repositories.SM
 
         }
 
-        internal static string getLongStatus(int ID, CMMS.CMMS_Status m_notificationID)
+        internal static string getLongStatus(int ID, CMMS.CMMS_Status m_notificationID, CMCreateRequestOrderGET m_SMROObj)
         {
             string retValue;
 
             switch (m_notificationID)
             {
                 case CMMS.CMMS_Status.SM_RO_DRAFT:
-                    retValue = $"Request order {ID} drafted";
+                    retValue = $"Request order{ID} drafted";
                     break;
                 case CMMS.CMMS_Status.SM_RO_SUBMITTED:
-                    retValue = $"Request order {ID} submitted and waiting for approval";
+                    retValue = String.Format("RO{0} Submitted and Waiting for Appoval By {1}", m_SMROObj.request_order_id, m_SMROObj.generatedBy);
                     break;
                 case CMMS.CMMS_Status.SM_RO_SUBMIT_REJECTED:
-                    retValue = $"Request order {ID} Submitted but rejected";
+                    retValue = String.Format("RO{0} Rejected By {1}", m_SMROObj.request_order_id, m_SMROObj.rejectedBy);
+                    break;
+                case CMMS.CMMS_Status.SM_RO_UPDATED:
+                    retValue = String.Format("RO{0} Updated By {1}", m_SMROObj.request_order_id, m_SMROObj.updated_by);
                     break;
                 case CMMS.CMMS_Status.SM_RO_SUBMIT_APPROVED:
-                    retValue = $"Request order {ID} approved";
+                    retValue = String.Format("RO{0} Approved By {1}", m_SMROObj.request_order_id, m_SMROObj.approvedBy);
                     break;
                 case CMMS.CMMS_Status.SM_RO_DELETED:
-                    retValue = $"Request order {ID} deleted";
+                    retValue = String.Format("RO{0} Deleted By {1}", m_SMROObj.request_order_id, m_SMROObj.deleted_by);
                     break;
                 case CMMS.CMMS_Status.SM_RO_CLOSED:
-                    retValue = $"Request order {ID} closed";
+                    retValue = String.Format("RO{0} Closed By {1}", m_SMROObj.request_order_id, m_SMROObj.closed_by);
                     break;
                 default:
                     retValue = "Unknown <" + m_notificationID + ">";

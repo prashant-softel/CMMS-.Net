@@ -173,8 +173,9 @@ namespace CMMSAPIs.Controllers.JC
         {
             try
             {
+                string facilitytime = "";
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _JCBS.StartJC(request, userID);
+                var data = await _JCBS.StartJC(request, userID, facilitytime);
                 return Ok(data);
             }
             catch (Exception ex)

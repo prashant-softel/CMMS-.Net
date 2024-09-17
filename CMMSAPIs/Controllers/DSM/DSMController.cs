@@ -21,12 +21,28 @@ namespace CMMSAPIs.Controllers.DSM
         ////[Authorize]
         [Route("getDSMData")]
         [HttpGet]
-        public async Task<IActionResult> getDSMDatagetDSMData(string fy, string month, string stateId, string spvId, string siteId)
+        public async Task<IActionResult> getDSMDatagetDSMData(string fy, string month, string stateId, string spvId, string siteId, string dsmtype)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _DSMBS.getDSMData(fy, month, stateId, spvId, siteId);
+                var data = await _DSMBS.getDSMData(fy, month, stateId, spvId, siteId, dsmtype);
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [Route("getDSMType")]
+        [HttpGet]
+        public async Task<IActionResult> getDSMType()
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _DSMBS.getDSMType();
                 return Ok(data);
             }
             catch (Exception)

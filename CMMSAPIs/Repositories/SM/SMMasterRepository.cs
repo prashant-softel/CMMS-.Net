@@ -23,7 +23,6 @@ namespace CMMSAPIs.Repositories.SM
             m_errorLog = new ErrorLog(webHostEnvironment);
         }
 
-
         internal async Task<List<CMAssetTypes>> GetAssetTypeList(int ID)
         {
             /*
@@ -441,6 +440,7 @@ namespace CMMSAPIs.Repositories.SM
             string assetImportStartDate = "2024-03-31";
             string plantName = "";
             CMImportFileResponse response = null;
+
             DataTable dt2 = new DataTable();
             /* try
              {
@@ -488,6 +488,8 @@ namespace CMMSAPIs.Repositories.SM
             List<int> AssetMasterCodeIDs = dtAssetCode.GetColumn<int>("id");
             Dictionary<string, int> AssetCodeMasterList = new Dictionary<string, int>();
             AssetCodeMasterList.Merge(AssetMasterCodeNames, AssetMasterCodeIDs);
+
+
 
             string queryCat = "SELECT id, UPPER(name) as name FROM smunitmeasurement GROUP BY name ORDER BY id ASC;";
             DataTable dtCat = await Context.FetchData(queryCat).ConfigureAwait(false);

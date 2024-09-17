@@ -62,16 +62,16 @@ namespace CMMSAPIs.Repositories.Inventory
             switch (notificationID)
             {
                 case CMMS.CMMS_Status.INVENTORY_IMPORTED:
-                    retValue += String.Format("Assets Imported by {0} at {1}</p>", InvObj.added_by, InvObj.Imported_at);
+                    retValue += String.Format("Asset{0} Imported by {1}</p>", InvObj.id, InvObj.Imported_by);
                     break;
                 case CMMS.CMMS_Status.INVENTORY_ADDED:
-                    retValue += String.Format("Asset <{0}> Added by {1} at {2}</p>", InvObj.name, InvObj.added_by, InvObj.added_at);
+                    retValue += String.Format("Asset{0} Added by {1}</p>", InvObj.id, InvObj.added_by_name);
                     break;
                 case CMMS.CMMS_Status.INVENTORY_UPDATED:
-                    retValue += String.Format("Asset <{0}> Updated by {1} at {2}</p>", InvObj.name, InvObj.updated_by, InvObj.updated_at);
+                    retValue += String.Format("Asset{0} Updated by {1}</p>", InvObj.id, InvObj.updated_by);
                     break;
                 case CMMS.CMMS_Status.INVENTORY_DELETED:
-                    retValue += String.Format("Asset <{0}> Deleted by {1} at {2}</p>", InvObj.name, InvObj.deleted_by, InvObj.deleted_at);
+                    retValue += String.Format("Asset{0} Deleted by {1}</p>", InvObj.id, InvObj.deleted_by);
                     break;
                 default:
                     break;
@@ -763,10 +763,10 @@ namespace CMMSAPIs.Repositories.Inventory
                             }
                             try
                             {
-                                newR["id"] = assets[Convert.ToString(newR["name"]).Replace("_", "").ToUpper()];
+                                newR["id"] = assets[Convert.ToString(newR["name"]).Replace("_", "").Trim().ToUpper()];
                                 try
                                 {
-                                    newR["parentID"] = assets[Convert.ToString(newR["parentName"]).Replace("_", "").ToUpper()];
+                                    newR["parentID"] = assets[Convert.ToString(newR["parentName"]).Trim().Replace("_", "").ToUpper()];
                                 }
                                 catch
                                 {
@@ -775,8 +775,6 @@ namespace CMMSAPIs.Repositories.Inventory
 
                                 string myQuery = $"Select id from assets where id = {newR["id"]} and parentId = {newR["parentID"]}";
                                 DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
-                                //int id = Convert.ToInt32(dt.Rows[0][0]);
-                                //int retVal = await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
                                 if (dt.Rows.Count > 0 && Convert.ToInt32(dt.Rows[0][0]) > 0)
                                 {
 
@@ -842,12 +840,8 @@ namespace CMMSAPIs.Repositories.Inventory
 
                             List<string> assetnames = new List<string>();
                             assetnames.AddRange(assetDt.GetColumn<string>("name"));
-                            //assetnames.AddRange(dt2.GetColumn<string>("name"));
+
                             assetnames.Contains("");
-                            //DataRow[] filterRows = dt2.AsEnumerable()
-                            //           .Where(row => assetnames.Contains(row.Field<string>("parentName").Replace("_", "").ToUpper(), StringComparison.OrdinalIgnoreCase) ||
-                            //            assetnames.Contains(ConvertString(row.Field<string>("parentName")).Replace("_", "").ToUpper(), StringComparison.OrdinalIgnoreCase))
-                            //           .ToArray();
 
                             DataRow[] filterRows = dt2.AsEnumerable()
                                         .Where(row => assetnames.Contains(row.Field<string>("name").Replace("_", "").ToUpper(), StringComparison.OrdinalIgnoreCase))
@@ -866,14 +860,15 @@ namespace CMMSAPIs.Repositories.Inventory
                                 {
                                     notInsertedTable.ImportRow(row);
                                 }
-                                List<int> ids_ = (await AddInventoryWithParent(notInsertedTable, facility_id, userID)).id;
-                                idList.AddRange(ids_);
-
-                                //foreach (DataRow row in notInserted)
-                                //{
-                                //    m_errorLog.SetInformation($"Asset <{row.Field<string>("name")}> not inserted");
-                                //}
-
+                                var result1 = await AddInventoryWithParent(notInsertedTable, facility_id, userID);
+                                if (result1 != null && result1.id != null)
+                                {
+                                    List<int> ids_ = result1.id;
+                                    if (ids_.Count > 0)
+                                    {
+                                        idList.AddRange(ids_);
+                                    }
+                                }
                                 break;
                             }
                             else
@@ -887,14 +882,14 @@ namespace CMMSAPIs.Repositories.Inventory
                                 //List<int> ids_ = (await AddInventoryWithParent(filteredDataTable, facility_id, userID)).id;
                                 List<int> ids_ = (await UpdateInventoryWithParent(filteredDataTable, facility_id, userID)).id;
                                 insertedTable.Merge(filteredDataTable);
-                                childListCount++;
+                                //childListCount++;
+                                updateCount++;
                                 ids = string.Join(", ", ids_.Select(x => x.ToString()));
                                 if (ids != "")
                                 {
                                     filter = $" and id IN ({ids})";
                                 }
                                 updatedIdList.AddRange(ids_);
-
                             }
                         }
 
@@ -926,10 +921,10 @@ namespace CMMSAPIs.Repositories.Inventory
                         {
                             dt3.ImportRow(row);
                         }
-                        for (int i = 0; i < diccheckParentID.Count; i++)
+                        /*for (int i = 0; i < diccheckParentID.Count; i++)
                         {
 
-                        }
+                        }*/
 
 
                         Total_Inserted_Rows = updatedIdList.Count + idList.Count;
@@ -989,6 +984,7 @@ namespace CMMSAPIs.Repositories.Inventory
 
         internal async Task<CMDefaultResponse> AddInventoryWithParent(DataTable assets, int facility_id, int userID)
         {
+            CMDefaultResponse response = new CMDefaultResponse();
             string assetQry = $" SELECT id, REPLACE(UPPER(name), '_', '') as name FROM assets WHERE facilityId = {facility_id} GROUP BY name ORDER BY id;";
             DataTable dtAsset = await Context.FetchData(assetQry).ConfigureAwait(false);
             List<string> assetNames = dtAsset.GetColumn<string>("name");
@@ -1006,12 +1002,13 @@ namespace CMMSAPIs.Repositories.Inventory
 
                     //m_errorLog.SetWarning($"[Row: {row["row_no"]}] Asset named '{Convert.ToString(row["parentName"])}' '{Convert.ToString(row["parentName"]).Replace("_", "").ToUpper()}'not found. Setting parent ID as 0.");
                     row["parentId"] = 0;
-
                 }
             }
-
             List<CMAddInventory> importAssets = assets.MapTo<CMAddInventory>();
-            CMDefaultResponse response = await CreateInventory(importAssets, userID);
+            if (importAssets.Count > 0)
+            {
+                response = await CreateInventory(importAssets, userID);
+            }
             return response;
         }
         //update
@@ -1135,13 +1132,14 @@ namespace CMMSAPIs.Repositories.Inventory
             * Business - owner, operator, customer
            */
             /*Your code goes here*/
-            string myQuery = "SELECT a.id,frequency.name as calibrationFreqType ,a.name, a.description as asset_description,  " +
-                "a.calibrationStartDate,a.calibrationDueDate, a.calibrationLastDate,a.calibrationStartDate as calibrationLastDate, a.vendorId as vendorid,a.area , " +
+            string myQuery = "SELECT a.id ,frequency.name as calibrationFreqType ,a.name, a.description as asset_description, a.calibrationStartDate as calibrationSatrtDate,  " +
+                "a.calibrationDueDate as calibrationDueDate, a.calibrationLastDate as calibrationLastDate,a.vendorId as vendorid,a.area , " +
                 "a.stockCount as stockCount,a.photoId as photoId,a.retirementStatus as retirementStatus,w.meter_limit as meter_limit,w.meter_unit as meter_unit,a.moduleQuantity, ast.id as typeId, ast.name as type, a.supplierId as supplierId, b2.name as supplierName, manufacturertlb.id as manufacturerId, manufacturertlb.name as manufacturerName,a.parent_equipment_no ,b5.id as operatorId, b5.name as operatorName, ac.id as categoryId, ac.name as categoryName, a.serialNumber,a.cost as cost,a.currency as currencyId ,c.name as currency, a.model,a.calibrationFrequency,frequency.name as calibrationFrequencyType, a.calibrationReminderDays, " +
             "f.id as facilityId, f.name AS facilityName, bl.id as blockId, bl.name AS blockName, a2.id as parentId, a2.name as parentName, a2.serialNumber as parentSerial, custbl.id as customerId, custbl.name as customerName, owntbl.id as ownerId, owntbl.name as ownerName, s.id as statusId, s.name AS status,a.purchaseCode as purchaseCode, a.unspCode as unspCode, a.barcode as barcode,a.descMaintenace as descMaintenace,a.dcRating as dcRating ,a.acRating as acRating, a.specialTool,a.specialToolEmpId as specialToolEmp,  " +
-            "w.start_date as start_date,w.expiry_date as expiry_date, w.start_date as warranty_start_date,w.expiry_date as warranty_expiry_date, w.id as warrantyId, w.warranty_description, w.certificate_number,wut.name as warranty_term_type,wt.id as warrantyTypeId, wt.name as warrantyType, wut.id as warrantyTermTypeId, wp.id as warrantyProviderId, wp.name as warrantyProviderName, files.file_path as warranty_certificate_path ," +
-            "CASE  WHEN w.start_date IS NULL THEN 'Inactive' WHEN w.expiry_date IS NULL THEN 'Inactive'" +
-            " WHEN w.start_date IS NULL OR CURDATE() < w.start_date OR CURDATE() > w.expiry_date THEN 'Expired' ELSE 'Active'  END AS WarrantyStatus " +
+            "w.start_date as start_date,w.expiry_date as expiry_date, w.id as warrantyId, w.warranty_description,w.voendor_id as  vendor_id , w.certificate_number,wut.name as warranty_term_type,wt.id as warrantyTypeId,b3.name as warranty_vendor_name , wt.name as warrantyType, wut.id as warrantyTermTypeId, wp.id as warrantyProviderId, wp.name as warrantyProviderName, files.file_path as warranty_certificate_path ," +
+            "CONCAT(adduser.firstName, ' ', adduser.lastName) as added_by_name,a.createdAt, " +
+            "CONCAT(updateuser.firstName, ' ', updateuser.lastName) as updated_by_name,a.updatedAt, " +
+            "CASE WHEN w.start_date IS NULL OR CURDATE() < w.start_date OR CURDATE() > w.expiry_date THEN 'Inactive' ELSE 'Active' END AS WarrantyStatus " +
             "from assets as a " +
             "left join assettypes as ast on ast.id = a.typeId " +
             "left join currency as c ON c.id =a.currency " +
@@ -1156,10 +1154,13 @@ namespace CMMSAPIs.Repositories.Inventory
             "left JOIN facilities as f ON f.id = a.facilityId " +
             "left JOIN facilities as bl ON bl.id = a.blockId " +
             "left join assetwarranty as w ON a.warrantyId = w.id " +
+            "left JOIN business AS b3 ON w.voendor_id= b3.id " +
             "left join uploadedfiles as files ON files.id = w.certificate_file_id " +
             "left join warrantytype as wt ON w.warranty_type = wt.id " +
             "left join warrantyusageterm as wut ON w.warranty_term_type = wut.id " +
-            "left join business as wp ON w.warranty_provider = wp.id " +
+            "left join businesstype as wp ON w.warranty_provider = wp.id " +
+            "left join users adduser ON adduser.id = a.createdBy " +
+            "left join users updateuser ON updateuser.id = a.updatedBy " +
             "left join frequency as frequency ON frequency.id = a.calibrationFrequency ";
             if (id != 0)
             {
@@ -1206,7 +1207,7 @@ namespace CMMSAPIs.Repositories.Inventory
             return _ViewInventoryList[0];
         }
 
-        internal async Task<CMDefaultResponse> AddInventory(List<CMAddInventory> request, int userID)
+        internal async Task<CMDefaultResponse> AddInventory(List<CMAddInventory> request, int userID, string facilitytimeZone)
         {
             /*
              * Add all data in assets table and warranty table
@@ -1297,8 +1298,8 @@ namespace CMMSAPIs.Repositories.Inventory
                     string start_date = unit.start_date != null ? ((DateTime)unit.start_date).ToString("yyyy-MM-dd HH:mm:ss") : "0000:00:00 00:00";
                     string warranty_description = unit.warranty_description == null ? "" : unit.warranty_description;
                     string expiry_date = unit.expiry_date == null ? "0000:00:00 00:00" : ((DateTime)unit.expiry_date).ToString("yyyy-MM-dd HH:mm:ss");
-                    string warrantyQry = "insert into assetwarranty (certificate_file_id, warranty_type, warranty_description, warranty_term_type, asset_id, start_date, expiry_date, meter_limit, meter_unit, warranty_provider, certificate_number, addedAt, addedBy, status,warrantyTenture) VALUES ";
-                    warrantyQry += $"({unit.warranty_certificate_file_id}, {unit.warranty_type}, '{warranty_description}', {unit.warranty_term_type}, {retID},'{start_date}',' {expiry_date}', {unit.meter_limit}, {unit.meter_unit}, {unit.warranty_provider_id}, '{unit.certificate_number}', '{UtilsRepository.GetUTCTime()}', {userID}, 1,{unit.warrantyTenture});" +
+                    string warrantyQry = "insert into assetwarranty (certificate_file_id, warranty_type, warranty_description, warranty_term_type, asset_id, start_date, expiry_date, meter_limit, meter_unit, warranty_provider, certificate_number, addedAt, addedBy, status,warrantyTenture,vendor_id) VALUES ";
+                    warrantyQry += $"({unit.warranty_certificate_file_id}, {unit.warranty_type}, '{warranty_description}', {unit.warranty_term_type}, {retID},'{start_date}',' {expiry_date}', {unit.meter_limit}, {unit.meter_unit}, {unit.warranty_provider_id}, '{unit.certificate_number}', '{UtilsRepository.GetUTCTime()}', {userID}, 1,{unit.warrantyTenture},{unit.Warranty_vendor_Id});" +
                         $" SELECT LAST_INSERT_ID();";
                     DataTable dt2 = await Context.FetchData(warrantyQry).ConfigureAwait(false);
                     int warrantyId = Convert.ToInt32(dt2.Rows[0][0]);
@@ -1307,7 +1308,7 @@ namespace CMMSAPIs.Repositories.Inventory
                 }
                 else
                 {
-                    strRetMessage = "Warranty data for <" + assetName + "> does not exist. ";
+                    //strRetMessage = "Warranty data for <" + assetName + "> does not exist. ";
                 }
                 if (retID > 0)
                 {
@@ -1342,7 +1343,13 @@ namespace CMMSAPIs.Repositories.Inventory
                         await Context.ExecuteNonQry<int>(qryuploadFiles).ConfigureAwait(false);
                     }
                 }
-                CMViewInventory _inventoryAdded = await GetInventoryDetails(retID, "");
+
+                CMViewInventory _inventoryAdded = await GetInventoryDetails(retID, facilitytimeZone);
+
+
+                //strRetMessage = "New asset <" + assetName + "> added"; 
+                // await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, retID, 0, 0, strRetMessage, CMMS.CMMS_Status.INVENTORY_ADDED);
+                //await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_ADDED, new[] { userID }, _inventoryAdded);
 
                 string _shortStatus = getShortStatus(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_ADDED);
                 _inventoryAdded.status_short = _shortStatus;
@@ -1350,7 +1357,7 @@ namespace CMMSAPIs.Repositories.Inventory
                 string _longStatus = getLongStatus(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_ADDED, _inventoryAdded);
                 _inventoryAdded.status_long = _longStatus;
 
-                //await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_ADDED, new[] { userID }, _inventoryAdded);
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, 3333333, 0, 0, _longStatus, 0);
             }
             if (count > 0)
             {
@@ -1359,17 +1366,37 @@ namespace CMMSAPIs.Repositories.Inventory
                 if (count == 1)
                 {
                     strRetMessage = "New asset <" + assetName + "> added";
+                    CMViewInventory _inventoryAdded = await GetInventoryDetails(retID, "");
+                    //Last object notification will be sent
+                    string _shortStatus = getShortStatus(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_ADDED);
+                    _inventoryAdded.status_short = _shortStatus;
+
+                    string _longStatus = getLongStatus(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_ADDED, _inventoryAdded);
+                    _inventoryAdded.status_long = _longStatus;
+
+                    await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_ADDED, new[] { userID }, _inventoryAdded);
                 }
                 else
                 {
                     strRetMessage = "<" + count + "> new assets added";
+                    CMViewInventory _inventoryAdded = await GetInventoryDetails(retID, "");
+                    //Last object notification will be sent
+                    string _shortStatus = getShortStatus(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_ADDED);
+                    _inventoryAdded.status_short = _shortStatus;
+
+                    string _longStatus = getLongStatus(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_ADDED, _inventoryAdded);
+                    _inventoryAdded.status_long = _longStatus;
+
+                    await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_IMPORTED, new[] { userID }, _inventoryAdded);
                 }
             }
             else
             {
                 strRetMessage = "No assets to add";
             }
+            CMViewInventory _inventoryAdded1 = await GetInventoryDetails(retID, facilitytimeZone);
 
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_ADDED, new[] { userID }, _inventoryAdded1);
 
             return new CMDefaultResponse(retID, retCode, strRetMessage);
         }
@@ -1439,11 +1466,20 @@ namespace CMMSAPIs.Repositories.Inventory
                 retID = Convert.ToInt32(dt.Rows[0][0]);
                 if (unit.warranty_type > 0 && unit.warranty_term_type > 0 && unit.warranty_provider_id > 0 && unit.start_date != null)
                 {
+                    int warranty_typr_Id = 0;
+                    int v_id = 0;
+                    v_id = unit.warranty_provider_id;
+                    string qry1 = $"SELECT type FROM business where id = {unit.warranty_provider_id};";
+                    DataTable dt21 = await Context.FetchData(qry1).ConfigureAwait(false);
+                    if (dt21.Rows.Count > 0)
+                    {
+                        warranty_typr_Id = Convert.ToInt32(dt21.Rows[0][0]);
+                    }
                     string start_date = unit.start_date != null ? ((DateTime)unit.start_date).ToString("yyyy-MM-dd HH:mm:ss") : "0000:00:00 00:00";
                     string warranty_description = unit.warranty_description == null ? "" : unit.warranty_description;
                     string expiry_date = unit.expiry_date == null ? "" : ((DateTime)unit.expiry_date).ToString("yyyy-MM-dd HH:mm:ss");
-                    string warrantyQry = "insert into assetwarranty (certificate_file_id, warranty_type, warranty_description, warranty_term_type, asset_id, start_date, expiry_date, meter_limit, meter_unit, warranty_provider, certificate_number, addedAt, addedBy, status,warrantyTenture) VALUES ";
-                    warrantyQry += $"({unit.warranty_certificate_file_id}, {unit.warranty_type}, '{warranty_description}', {unit.warranty_term_type}, {retID}, '{start_date}', '{expiry_date}', {unit.meter_limit}, {unit.meter_unit}, {unit.warranty_provider_id}, '{unit.certificate_number}', '{UtilsRepository.GetUTCTime()}', {userID}, 1,{unit.warrantyTenture});" +
+                    string warrantyQry = "insert into assetwarranty (certificate_file_id, warranty_type, warranty_description, warranty_term_type, asset_id, start_date, expiry_date, meter_limit, meter_unit, certificate_number, addedAt, addedBy, status,warrantyTenture,vendor_id,warranty_provider) VALUES ";
+                    warrantyQry += $"({unit.warranty_certificate_file_id}, {unit.warranty_type}, '{warranty_description}', {unit.warranty_term_type}, {retID}, '{start_date}', '{expiry_date}', {unit.meter_limit}, {unit.meter_unit}, '{unit.certificate_number}', '{UtilsRepository.GetUTCTime()}', {userID}, 1,{unit.warrantyTenture},{v_id},{warranty_typr_Id});" +
                         $" SELECT LAST_INSERT_ID();";
                     DataTable dt2 = await Context.FetchData(warrantyQry).ConfigureAwait(false);
                     int warrantyId = Convert.ToInt32(dt2.Rows[0][0]);
@@ -1454,7 +1490,7 @@ namespace CMMSAPIs.Repositories.Inventory
                 {
                     strRetMessage = "Warranty data for <" + assetName + "> does not exist. ";
                 }
-                if (retID > 0)
+                if (firstCalibrationDate != "NULL")
                 {
 
                     string calibratoinquery = "insert into calibration (facility_id,asset_id,status,due_date) VALUES ";
@@ -1498,6 +1534,7 @@ namespace CMMSAPIs.Repositories.Inventory
             return new CMDefaultResponse(idList, retCode, strRetMessage);
         }
         //update
+        //update1 with parent
         internal async Task<CMDefaultResponse> UpdateInventory(List<CMAddInventory> request, int userID)
         {
             /*
@@ -1585,10 +1622,14 @@ namespace CMMSAPIs.Repositories.Inventory
                 catch (Exception ex)
                 {
                     await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, 3333333, 0, 0, ex.Message, CMMS.CMMS_Status.INVENTORY_DELETED, 0);
-                    //return new CMDefaultResponse(idList, retCode, strRetMessage);
+                    // return new CMDefaultResponse(idList, retCode, strRetMessage);
                 }
+
+
+                //CMViewInventory _inventoryAdded = await GetInventoryDetails(retID, "");
+
+                // await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_ADDED, new[] { userID }, _inventoryAdded);
                 obj = new CMDefaultResponse(unit.id, CMMS.RETRUNSTATUS.SUCCESS, "Inventory  <" + unit.id + "> has been updated");
-                //await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_ADDED, new[] { userID }, _inventoryAdded);
             }
 
             return obj;
@@ -1809,16 +1850,15 @@ namespace CMMSAPIs.Repositories.Inventory
             }
             CMDefaultResponse obj = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Inventory  <" + request.id + "> has been updated");
 
-            CMViewInventory _inventoryAdded = await GetInventoryDetails(request.id, "");
+            /*CMViewInventory _inventoryAdded = await GetInventoryDetails(request.id, "");
 
             string _shortStatus = getShortStatus(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_UPDATED);
             _inventoryAdded.status_short = _shortStatus;
 
             string _longStatus = getLongStatus(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_UPDATED, _inventoryAdded);
-            _inventoryAdded.status_long = _longStatus;
-
-            //await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_UPDATED, new[] { userID } ,_inventoryAdded);
-
+            _inventoryAdded.status_long = _longStatus;*/
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.INVENTORY, request.id, 0, 0, "INVENTORY_UPDATED", CMMS.CMMS_Status.INVENTORY_UPDATED);
+            //await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_UPDATED, new[] { userID }, _inventoryAdded);
             return obj;
         }
         internal async Task<CMDefaultResponse> UpdateInventries(CMAddInventory request, int userID)
@@ -2107,7 +2147,7 @@ namespace CMMSAPIs.Repositories.Inventory
                     warrantyQry += $"Update assetwarranty SET   warranty_type={request.warranty_type}, " +
                        $"warranty_description='{warranty_description}', certificate_number='{request.certificate_number}' , " +
                        $"warranty_term_type={request.warranty_term_type} ,start_date='{start_date}', " +
-                       $"expiry_date='{expiry_date}', warranty_provider= {request.warranty_provider_id}  " +
+                       $"expiry_date='{expiry_date}', warranty_provider= {request.warranty_provider_id},vendor_id={request.Warranty_vendor_Id}  " +
                        $"where  asset_id={request.id}  ;";
                     int retVal = await Context.ExecuteNonQry<int>(warrantyQry).ConfigureAwait(false);
                 }
@@ -2116,8 +2156,8 @@ namespace CMMSAPIs.Repositories.Inventory
                     string start_date = request.start_date != null ? ((DateTime)request.start_date).ToString("yyyy-MM-dd HH:mm:ss") : "0000:00:00 00:00";
                     string warranty_description = request.warranty_description == null ? "" : request.warranty_description;
                     string expiry_date = request.expiry_date == null ? "0000:00:00 00:00" : ((DateTime)request.expiry_date).ToString("yyyy-MM-dd HH:mm:ss");
-                    string warrantyQry = "insert into assetwarranty (certificate_file_id, warranty_type, warranty_description, warranty_term_type, asset_id, start_date, expiry_date, meter_limit, meter_unit, warranty_provider, certificate_number, addedAt, addedBy, status,warrantyTenture) VALUES ";
-                    warrantyQry += $"({request.warranty_certificate_file_id}, {request.warranty_type}, '{warranty_description}', {request.warranty_term_type}, {request.id},'{start_date}',' {expiry_date}', {request.meter_limit}, {request.meter_unit}, {request.warranty_provider_id}, '{request.certificate_number}', '{UtilsRepository.GetUTCTime()}', {userID}, 1,{request.warrantyTenture});" +
+                    string warrantyQry = "insert into assetwarranty (certificate_file_id, warranty_type, warranty_description, warranty_term_type, asset_id, start_date, expiry_date, meter_limit, meter_unit, warranty_provider, certificate_number, addedAt, addedBy, status,warrantyTenture,vendor_id) VALUES ";
+                    warrantyQry += $"({request.warranty_certificate_file_id}, {request.warranty_type}, '{warranty_description}', {request.warranty_term_type}, {request.id},'{start_date}',' {expiry_date}', {request.meter_limit}, {request.meter_unit}, {request.warranty_provider_id}, '{request.certificate_number}', '{UtilsRepository.GetUTCTime()}', {userID}, 1,{request.warrantyTenture},{request.Warranty_vendor_Id});" +
                         $" SELECT LAST_INSERT_ID();";
                     DataTable dt5 = await Context.FetchData(warrantyQry).ConfigureAwait(false);
                     int warrantyId = Convert.ToInt32(dt5.Rows[0][0]);
@@ -2139,7 +2179,7 @@ namespace CMMSAPIs.Repositories.Inventory
             string _longStatus = getLongStatus(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_UPDATED, _inventoryAdded);
             _inventoryAdded.status_long = _longStatus;
 
-            //await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_UPDATED, new[] { userID } ,_inventoryAdded);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_UPDATED, new[] { userID }, _inventoryAdded);
 
             return obj;
         }
@@ -2346,9 +2386,9 @@ namespace CMMSAPIs.Repositories.Inventory
             warrentyUsageTermType.Add(new CMDefaultList() { id = 4, name = "Process completion" });
             return warrentyUsageTermType;
         }
-        internal async Task<List<CMWarrantyCertificate>> GetWarrantyCertificate()
+        internal async Task<List<CMWarrantyCertificate>> GetWarrantyCertificate(string facility_id, DateTime from_date, DateTime to_date)
         {
-            string myQuery = "SELECT assets.id as asset_id, assets.name as asset_name, category.id as categoryId, category.name as categoryName, " +
+            string myQuery = "SELECT facilityId as facility_id,fc.name as facility_name, assets.id as asset_id, assets.name as asset_name, category.id as categoryId, category.name as categoryName, " +
                 "assetwarranty.warranty_description, warrantytype.id as warrantyTypeId, warrantytype.name as warrantyTypeName, " +
                 "warrantyusageterm.id as warrantyTermId, warrantyusageterm.name as warrantyTermName, assetwarranty.certificate_number, " +
                 "certificate.file_path AS warranty_certificate_file_path, CASE WHEN assetwarranty.start_date = '0000-00-00 00:00:00' " +
@@ -2358,11 +2398,22 @@ namespace CMMSAPIs.Repositories.Inventory
                 "LEFT JOIN warrantytype ON assetwarranty.warranty_type = warrantytype.id\r\nLEFT JOIN warrantyusageterm " +
                 "ON assetwarranty.warranty_term_type = warrantyusageterm.id\r\nLEFT JOIN business as provider " +
                 "ON assetwarranty.warranty_provider = provider.id\r\nLEFT JOIN assetcategories as category " +
-                "ON assets.categoryId = category.id\r\nLEFT JOIN uploadedfiles as certificate ON assetwarranty.certificate_file_id = certificate.id  WHERE provider.id > 0";
+                "ON assets.categoryId = category.id\r\nLEFT JOIN uploadedfiles as certificate ON assetwarranty.certificate_file_id = certificate.id  left join facilities as fc on fc.id =   facilityId  " +
+                "WHERE provider.id > 0  and start_date <> '0000-00-00 00:00:00' and expiry_date <> '0000-00-00 00:00:00' ";
+
+            if (facility_id != "" && facility_id != null)
+            {
+                myQuery = myQuery + " and facilityId in (" + facility_id + ")";
+            }
+            if (from_date != null && to_date != null)
+            {
+                myQuery = myQuery + " and start_date >= '" + from_date.ToString("yyyy-MM-dd HH:mm:ss") + "' and expiry_date <= '" + to_date.ToString("yyyy-MM-dd HH:mm:ss") + "'";
+            }
+
             List<CMWarrantyCertificate> _AssetCategory = await Context.GetData<CMWarrantyCertificate>(myQuery).ConfigureAwait(false);
             return _AssetCategory;
         }
-        internal async Task<List<CMCalibrationAssets>> GetCalibrationList(int facilityId, string facilitytimeZone)
+        internal async Task<List<CMCalibrationAssets>> GetCalibrationList(string facilityId, string facilitytimeZone)
         {
             string myQuery = "SELECT assets.id, assets.name, category.id as categoryId, category.name as categoryName, " +
             "vendor.id as vendorId, vendor.name as vendorName, assets.calibrationFrequencyType, " +
@@ -2372,7 +2423,7 @@ namespace CMMSAPIs.Repositories.Inventory
             "LEFT JOIN assetcategories as category ON category.id = assets.categoryId " +
             "LEFT JOIN business as vendor ON vendor.id = assets.vendorId " +
             "LEFT JOIN frequency ON assets.calibrationFrequency = frequency.id " +
-            $"WHERE category.calibrationStatus = 1 AND facilityId = {facilityId} ";
+            $"WHERE category.calibrationStatus = 1 AND facilityId in ({facilityId}) ";
             List<CMCalibrationAssets> _AssetCategory = await Context.GetData<CMCalibrationAssets>(myQuery).ConfigureAwait(false);
             foreach (var a in _AssetCategory)
             {

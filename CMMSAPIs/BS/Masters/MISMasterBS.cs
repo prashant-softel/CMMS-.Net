@@ -141,6 +141,8 @@ namespace CMMSAPIs.BS.MISMasters
         Task<CMDefaultResponse> CreateKaizensData(KaizensData request, int userID);
         Task<CMDefaultResponse> DeleteKaizensData(int id);
         Task<List<KaizensData>> GetKaizensData();
+        Task<List<CumalativeReport>> Cumulativereport(string facility_id, int module_id, string start_date, string end_date);
+        Task<CMDefaultResponse> AssingtoObservation(AssignToObservation request);
     }
     public class MISMasterBS : IMISMasterBS
     {
@@ -2026,7 +2028,7 @@ namespace CMMSAPIs.BS.MISMasters
             {
                 using (var repos = new MISMasterRepository(getDB))
                 {
-                    return await repos.DeletePlantationData(id);
+                    return await repos.DeleteKaizensData(id);
                 }
             }
             catch (Exception ex)
@@ -2049,6 +2051,36 @@ namespace CMMSAPIs.BS.MISMasters
             {
                 throw;
             }
+        }
+
+        public async Task<List<CumalativeReport>> Cumulativereport(string facility_id, int module_id, string start_date, string end_date)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.Cumulativereport(facility_id, module_id, start_date, end_date);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<CMDefaultResponse> AssingtoObservation(AssignToObservation request)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.AssingtoObservation(request);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+
         }
     }
 }

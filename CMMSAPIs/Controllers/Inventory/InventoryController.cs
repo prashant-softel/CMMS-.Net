@@ -1,4 +1,5 @@
 ﻿using CMMSAPIs.BS.Inventory;
+using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Inventory;
 using CMMSAPIs.Models.SM;
 using CMMSAPIs.Models.Utils;
@@ -37,10 +38,11 @@ namespace CMMSAPIs.Controllers.Inventory
 
             catch (Exception ex)
             {
-                ExceptionResponse item = new ExceptionResponse();
+                throw;
+                /*ExceptionResponse item = new ExceptionResponse();
 
                 item.Message = ex.Message;
-                return Ok(item);
+                return Ok(item);*/
             }
         }
 
@@ -105,7 +107,7 @@ namespace CMMSAPIs.Controllers.Inventory
         //[Authorize]
         [Route("AddInventory")]
         [HttpPost]
-        public async Task<IActionResult> AddInventory(List<CMAddInventory> request, int userID)
+        public async Task<IActionResult> AddInventory(List<CMAddInventory> request, int facility_id)
         {
             if (request is null)
             {
@@ -114,7 +116,9 @@ namespace CMMSAPIs.Controllers.Inventory
 
             try
             {
-                var data = await _InventoryBS.AddInventory(request, userID);
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _InventoryBS.AddInventory(request, userID, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -410,11 +414,11 @@ namespace CMMSAPIs.Controllers.Inventory
         //[Authorize]
         [Route("GetWarrantyCertificate")]
         [HttpGet]
-        public async Task<IActionResult> GetWarrantyCertificate()
+        public async Task<IActionResult> GetWarrantyCertificate(string facility_id, DateTime from_date, DateTime to_date)
         {
             try
             {
-                var data = await _InventoryBS.GetWarrantyCertificate();
+                var data = await _InventoryBS.GetWarrantyCertificate(facility_id, from_date, to_date);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -426,11 +430,11 @@ namespace CMMSAPIs.Controllers.Inventory
         //[Authorize]
         [Route("GetCalibrationList")]
         [HttpGet]
-        public async Task<IActionResult> GetCalibrationList(int facilityId)
+        public async Task<IActionResult> GetCalibrationList(string facilityId)
         {
             try
             {
-                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId.ToInt())?.timezone;
 
                 var data = await _InventoryBS.GetCalibrationList(facilityId, facilitytimeZone);
                 return Ok(data);

@@ -76,6 +76,37 @@ namespace CMMSAPIs.Models
         public string storage_rack_no { get; set; }
         public string storage_row_no { get; set; }
         public string storage_column_no { get; set; }
+        public string closed_by_name { get; set; }
+        public string deleted_by { get; set; }
+        public string drafted_by_name { get; set; }
+        public int drafted_by_id { get; set; }
+
+        public string rejected_by_name { get; set; }
+        public string receive_rejected_by_name { get; set; }
+        public int receive_approved_by_id { get; set; }
+        public DateTime? receive_approved_at { get; set; }
+        public string receive_approved_by_name { get; set; }
+        public string receive_submit_by_name { get; set; }
+        public DateTime? rejectedOn { get; set; }
+        public DateTime? rejected_at { get; set; }
+        public DateTime? orderDate { get; set; }
+        public DateTime? submitted_at { get; set; }
+        public DateTime? withdrawOn { get; set; }
+        public DateTime? closed_at { get; set; }
+        public DateTime? approved_at { get; set; }
+        public DateTime? approvedOn { get; set; }
+        public DateTime? updatedOn { get; set; }
+        public DateTime? receive_submitted_at { get; set; }
+        public DateTime? receive_rejected_at { get; set; }
+
+        public string submitted_by_name { get; set; }
+        public string approved_by { get; set; }
+        public string approved_by_name { get; set; }
+        public string go_updated_by_name { get; set; }
+        public DateTime? go_updatedOn { get; set; }
+        public int go_updated_by { get; set; }
+
+
 
         public List<CMGO_ITEMS> go_items { get; set; }
     }
@@ -132,6 +163,7 @@ namespace CMMSAPIs.Models
 
     public class CMSUBMITPURCHASEDATA
     {
+        public int id { get; set; }
         public int purchaseID { get; set; }
         public int facilityId { get; set; }
 
@@ -236,6 +268,43 @@ namespace CMMSAPIs.Models
         public string facilityName { get; set; }
         public string freight_value { get; set; }
         public string inspection_report { get; set; }
+        public int purchaseID { get; set; }
+        public string title { get; set; }
+        public int order_by_type { get; set; }
+        public string remarks { get; set; }
+        public int drafted_by_id { get; set; }
+        public string drafted_by_name { get; set; }
+        public DateTime? drafted_at { get; set; }
+        public int submitted_by_id { get; set; }
+        public string submitted_by_name { get; set; }
+        public DateTime? submitted_at { get; set; }
+        public int closed_by_id { get; set; }
+        public string closed_by_name { get; set; }
+        public DateTime? closed_at { get; set; }
+        public int deleted_by_id { get; set; }
+        public string deleted_by_name { get; set; }
+        public DateTime? deleted_at { get; set; }
+        public int rejected_by_id { get; set; }
+        public string rejected_by_name { get; set; }
+        public DateTime? rejected_at { get; set; }
+        public int approved_by_id { get; set; }
+        public string approved_by_name { get; set; }
+        public DateTime? approved_at { get; set; }
+        public int receive_draft_by_id { get; set; }
+        public string receive_draft_by_name { get; set; }
+        public DateTime? receive_draft_at { get; set; }
+        public int receive_submitted_by_id { get; set; }
+        public string receive_submitted_by_name { get; set; }
+        public DateTime? receive_submitted_at { get; set; }
+        public int receive_rejected_by_id { get; set; }
+        public string receive_rejected_by_name { get; set; }
+        public DateTime? receive_rejected_at { get; set; }
+        public int receive_approved_by_id { get; set; }
+        public string receive_approved_by_name { get; set; }
+        public DateTime? receive_approved_at { get; set; }
+        public string approved_by { get; set; }
+        public string go_updated_by_name { get; set; }
+        public DateTime? go_updatedOn { get; set; }
         public List<CMGODetails> GODetails { get; set; }
     }
 

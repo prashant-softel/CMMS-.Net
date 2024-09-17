@@ -9,7 +9,6 @@ namespace CMMSAPIs.Models.Inventory
         public string name { get; set; }
         public int facilityId { get; set; }
         public string facilityName { get; set; }
-
         public int stockCount { get; set; }
         public int blockId { get; set; }
         public string blockName { get; set; }
@@ -67,6 +66,8 @@ namespace CMMSAPIs.Models.Inventory
         public int specialToolEmp { get; set; }
         public int warrantyId { get; set; }
         public string warranty_description { get; set; }
+        public string warranty_vendor_name { get; set; }
+        public int vendor_id { get; set; }
         public string certificate_number { get; set; }
         public string warranty_certificate_path { get; set; }
         public int warrantyTypeId { get; set; }
@@ -76,6 +77,7 @@ namespace CMMSAPIs.Models.Inventory
         public string warrantyProviderName { get; set; }
         public int warrantyTermTypeId { get; set; }
         public string warranty_term_type { get; set; }
+
         // public AttachmentByReporter attachments { get; set; }
         public int mutliplier { get; set; }
         public int statusId { get; set; }
@@ -85,8 +87,12 @@ namespace CMMSAPIs.Models.Inventory
         public DateTime? Imported_at { get; set; }
         public string Imported_by { get; set; }
         public DateTime? added_at { get; set; }
-        public string added_by { get; set; }
+        public string added_by_name { get; set; }
+        public string updated_by_name { get; set; }
+        public int added_by_id { get; set; }
         public DateTime? updated_at { get; set; }
+        public DateTime? createdAt { get; set; }
+        public DateTime? updatedAt { get; set; }
         public string updated_by { get; set; }
         public DateTime? deleted_at { get; set; }
         public string deleted_by { get; set; }

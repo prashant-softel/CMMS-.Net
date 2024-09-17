@@ -66,10 +66,13 @@ namespace CMMSAPIs.Controllers.SM
         [HttpPost]
         public async Task<IActionResult> CreateRequestOrder(CMCreateRequestOrder request)
         {
+            
             try
             {
+                int facility_id = request.facilityID;
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _IRequestOrderBS.CreateRequestOrder(request, userID);
+                var data = await _IRequestOrderBS.CreateRequestOrder(request, userID,facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -85,8 +88,10 @@ namespace CMMSAPIs.Controllers.SM
         {
             try
             {
+                int facility_id = request.facilityID;
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _IRequestOrderBS.UpdateRequestOrder(request, userID);
+                var data = await _IRequestOrderBS.UpdateRequestOrder(request, userID, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -102,8 +107,10 @@ namespace CMMSAPIs.Controllers.SM
         {
             try
             {
+                int facility_id = request.facility_id;
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _IRequestOrderBS.DeleteRequestOrder(request, userID);
+                var data = await _IRequestOrderBS.DeleteRequestOrder(request, userID, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -119,8 +126,10 @@ namespace CMMSAPIs.Controllers.SM
         {
             try
             {
+                int facility_id = request.facility_id;
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _IRequestOrderBS.ApproveRequestOrder(request, userID);
+                var data = await _IRequestOrderBS.ApproveRequestOrder(request, userID, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -136,8 +145,10 @@ namespace CMMSAPIs.Controllers.SM
         {
             try
             {
+                int facility_id = request.facility_id;
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _IRequestOrderBS.RejectRequestOrder(request, userID);
+                var data = await _IRequestOrderBS.RejectRequestOrder(request, userID, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -151,8 +162,10 @@ namespace CMMSAPIs.Controllers.SM
         {
             try
             {
+                int facility_id = request.facility_id;
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _IRequestOrderBS.CloseRequestOrder(request, userID);
+                var data = await _IRequestOrderBS.CloseRequestOrder(request, userID, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)

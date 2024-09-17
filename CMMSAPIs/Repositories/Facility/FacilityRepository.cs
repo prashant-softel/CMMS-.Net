@@ -275,7 +275,7 @@ namespace CMMSAPIs.Repositories.Facility
 
             if (isattendence == 0)
             {
-                string myQuery = $"SELECT u.id, loginId as login_id, concat(firstName,' ', lastName) as name,uf.isemployee, usd.designationName as designation, birthday as birthdate, gender, mobileNumber, cities.name as city, states.name as state, countries.name as country, zipcode as pin  " +
+                string myQuery = $"SELECT u.id, loginId as login_id, concat(firstName,' ', lastName) as name,uf.isemployee, usd.designationName as designation, birthday as birthdate, gender, mobileNumber, cities.name as city, states.name as state, countries.name as country, zipcode as pin,TIMESTAMPDIFF(YEAR,u.joiningDate, CURDATE()) AS experince  " +
                                 $"FROM  Users as u  JOIN UserFacilities as uf ON u.id = uf.userId  " +
                                 $"LEFT JOIN cities as cities ON cities.id = u.cityId  " +
                                 $"LEFT JOIN states as states ON states.id = u.stateId and states.id = cities.state_id  " +
@@ -289,7 +289,7 @@ namespace CMMSAPIs.Repositories.Facility
             }
             else if (isattendence == 1 && featureid == 0)
             {
-                string myQuery1 = $"SELECT u.id, loginId as login_id, concat(firstName,' ', lastName) as name,uf.isemployee, usd.designationName as designation, birthday as birthdate, gender, mobileNumber, cities.name as city, states.name as state, countries.name as country, zipcode as pin  " +
+                string myQuery1 = $"SELECT u.id, loginId as login_id, concat(firstName,' ', lastName) as name,uf.isemployee, usd.designationName as designation, birthday as birthdate, gender, mobileNumber, cities.name as city, states.name as state, countries.name as country, zipcode as pin,TIMESTAMPDIFF(YEAR,u.joiningDate, CURDATE()) AS experince  " +
                                 $"FROM  Users as u  JOIN UserFacilities as uf ON u.id = uf.userId  " +
                                 $"LEFT JOIN cities as cities ON cities.id = u.cityId  " +
                                 $"LEFT JOIN states as states ON states.id = u.stateId and states.id = cities.state_id  " +
@@ -308,7 +308,7 @@ namespace CMMSAPIs.Repositories.Facility
             }
             else
             {
-                string myQuery = $"SELECT u.id, loginId as login_id, concat(firstName,' ', lastName) as name,uf.isemployee, usd.designationName as designation, birthday as birthdate, gender, mobileNumber, cities.name as city, states.name as state, countries.name as country, zipcode as pin  " +
+                string myQuery = $"SELECT u.id, loginId as login_id, concat(firstName,' ', lastName) as name,uf.isemployee, usd.designationName as designation, birthday as birthdate, gender, mobileNumber, cities.name as city, states.name as state, countries.name as country, zipcode as pin ,TIMESTAMPDIFF(YEAR,u.joiningDate, CURDATE()) AS experince " +
                                  $"FROM  Users as u  JOIN UserFacilities as uf ON u.id = uf.userId  " +
                                  $"LEFT JOIN cities as cities ON cities.id = u.cityId  " +
                                  $"LEFT JOIN states as states ON states.id = u.stateId and states.id = cities.state_id  " +

@@ -1999,6 +1999,34 @@ namespace CMMSAPIs.Controllers.Masters
                 return BadRequest(ex.Message);
             }
         }
+        [Route("Cumulativereport")]
+        [HttpGet]
+        public async Task<IActionResult> Cumulativereport(string facility_id, int module_id, string start_date, string end_date)
+        {
+            try
+            {
+                var data = await _IMISMasterBS.Cumulativereport(facility_id, module_id, start_date, end_date);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        [Route("AssingtoObservation")]
+        [HttpPost]
+        public async Task<IActionResult> AssingtoObservation(AssignToObservation request)
+        {
+            try
+            {
+                var data = await _IMISMasterBS.AssingtoObservation(request);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
 
     }
 }

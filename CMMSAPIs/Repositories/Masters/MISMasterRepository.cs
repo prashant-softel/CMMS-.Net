@@ -56,7 +56,7 @@ namespace CMMSAPIs.Repositories.Masters
             { CMMS.CMMS_Modules.WARRANTY_CLAIM, 30 },
             { CMMS.CMMS_Modules.CALIBRATION, 31 },
            // { CMMS.CMMS_Modules.MODULE_CLEANING, 32 },
-            { CMMS.CMMS_Modules.VEGETATION, 33 },
+            { CMMS.CMMS_Modules.VEGETATION_PLAN, 33 },
             {CMMS.CMMS_Modules.STATUTORY,34 }
         };
         public MISMasterRepository(MYSQLDBHelper sqlDBHelper, IWebHostEnvironment _webHost = null) : base(sqlDBHelper)
@@ -253,16 +253,33 @@ namespace CMMSAPIs.Repositories.Masters
             return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Source CMObservation Deleted");
         }
 
-        internal async Task<CMDefaultResponse> CloseObservation(CMApproval request, int userId)
+        internal async Task<CMDefaultResponse> CloseObservation_old(CMApproval request, int userId)
         {
-            string deleteQry = $"UPDATE observations SET status_code = {(int)CMMS_Status.OBSERVATION_CLOSED}, closed_by = '{userId}' , closed_at='{UtilsRepository.GetUTCTime()}' , updated_at = '{UtilsRepository.GetUTCTime()}' WHERE id = {request.id};";
-            await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
-            System.Text.StringBuilder sb = new System.Text.StringBuilder("Observation Updated");
-            if (request.comment.Length > 0)
+            string deleteQry = "";
+            if (request.type == (int)CMMS.OBSERVATION_TYPE.PM_EXECUTION)
             {
-                sb.Append(": " + request.comment);
+                deleteQry = $"UPDATE pm_execution SET Observation_Status = {(int)CMMS_Status.OBSERVATION_CLOSED}, preventive_action = '{request.comment}'WHERE id = {request.id};";
+                await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
+                System.Text.StringBuilder sb = new System.Text.StringBuilder("Observation Updated");
+                if (request.comment.Length > 0)
+                {
+                    sb.Append(": " + request.comment);
+                }
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_EXECUTION, request.id, 0, 0, sb.ToString(), CMMS.CMMS_Status.OBSERVATION_CLOSED, userId); ;
             }
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.OBSERVATION, request.id, 0, 0, sb.ToString(), CMMS.CMMS_Status.OBSERVATION_CLOSED, userId); ;
+            else
+            {
+                deleteQry = $"UPDATE observations SET status_code = {(int)CMMS_Status.OBSERVATION_CLOSED}, closed_by = '{userId}' , closed_at='{UtilsRepository.GetUTCTime()}' , updated_at = '{UtilsRepository.GetUTCTime()}' WHERE id = {request.id};";
+
+                await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
+
+                System.Text.StringBuilder sb = new System.Text.StringBuilder("Observation Updated");
+                if (request.comment.Length > 0)
+                {
+                    sb.Append(": " + request.comment);
+                }
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.OBSERVATION, request.id, 0, 0, sb.ToString(), CMMS.CMMS_Status.OBSERVATION_CLOSED, userId); ;
+            }
             return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Observation {request.id} closed");
         }
 
@@ -1250,22 +1267,57 @@ namespace CMMSAPIs.Repositories.Masters
 
         internal async Task<List<CMChecklistInspectionReport>> GetChecklistInspectionReport(string facility_id, int module_type, DateTime fromDate, DateTime toDate)
         {
-            string myQuery = " select distinct  st.id, checklist_number as checklist_name , '' SOP_number, " +
-                " frequency.name as frequency, case when  is_ok = 0 then 'No' when is_ok = 1 then 'Yes' else 'NA' end as inspection_status, " +
-                " PM_Schedule_Observation_add_date as date_of_inspection, monthname(PM_Schedule_Observation_add_date) as month, " +
-                " case when file_required = 0 then 'No' else 'Yes' end  as checklist_attachment" +
-                " from st_audit st " +
-                " left join pm_task task on task.plan_id = st.id " +
-                " left join pm_execution pm_execution on pm_execution.task_id = task.id" +
-                " left join checklist_number checklist_number on checklist_number.id = st.Checklist_id " +
-                " left join frequency frequency on frequency.id = st.Frequency" +
-                " where st.facility_id in ( " + facility_id + ") and st.module_type_id = " + module_type + " and DATE_FORMAT(PM_Schedule_Observation_add_date,'%Y-%m-%d') BETWEEN '" + fromDate.ToString("yyyy-MM-dd") + "' AND '" + toDate.ToString("yyyy-MM-dd") + "'" +
-                "  group by st.id order by st.id desc; ";
-            List<CMChecklistInspectionReport> response = await Context.GetData<CMChecklistInspectionReport>(myQuery).ConfigureAwait(false);
+
+
+            string facilityQuery = $"SELECT DISTINCT f.id as facility_id, f.name AS facility_name FROM st_audit st LEFT JOIN facilities f ON f.id = st.facility_id WHERE st.facility_id IN ({facility_id});";
+            List<CMChecklistInspectionReport> facilities = await Context.GetData<CMChecklistInspectionReport>(facilityQuery).ConfigureAwait(false);
+
+
+            string checklistQuery = "SELECT  f.id as facility_id, f.name AS facility_name,st.id, checklist_number AS checklist_name, '' AS SOP_number, " +
+                                    "frequency.name AS frequency, CASE WHEN is_ok = 0 THEN 'No' WHEN is_ok = 1 THEN 'Yes' ELSE 'NA' END AS inspection_status, " +
+                                    "PM_Schedule_Observation_add_date AS date_of_inspection, MONTHNAME(PM_Schedule_Observation_add_date) AS month, " +
+                                    "MONTH(PM_Schedule_Observation_add_date) AS month_id, YEAR(PM_Schedule_Observation_add_date) AS year_id, " +
+                                    "CASE WHEN file_required = 0 THEN 'No' ELSE 'Yes' END AS checklist_attachment " +
+                                    "FROM st_audit st " +
+                                    "LEFT JOIN pm_task task ON task.plan_id = st.id " +
+                                    "LEFT JOIN pm_execution pm_execution ON pm_execution.task_id = task.id " +
+                                    "LEFT JOIN checklist_number checklist_number ON checklist_number.id = st.Checklist_id " +
+                                    "LEFT JOIN frequency frequency ON frequency.id = st.Frequency " +
+                                    "LEFT JOIN facilities f ON f.id = st.facility_id " +
+                                    "WHERE st.facility_id IN (" + facility_id + ") AND st.module_type_id = " + module_type + " " +
+                                    "AND DATE_FORMAT(PM_Schedule_Observation_add_date, '%Y-%m-%d') BETWEEN '" + fromDate.ToString("yyyy-MM-dd") + "' AND '" + toDate.ToString("yyyy-MM-dd") + "' " +
+                                    "GROUP BY st.id ORDER BY st.id DESC;";
+            List<Checklist1> checklistData = await Context.GetData<Checklist1>(checklistQuery).ConfigureAwait(false);
+
+            var groupedChecklistData = checklistData
+                .GroupBy(cd => new { cd.month, cd.month_id, cd.year_id })
+                .Select(g => new Checklist1
+                {
+                    month = g.Key.month,
+                    month_id = g.Key.month_id,
+                    year_id = g.Key.year_id,
+                    Details = g.Select(cd => new ChecklistDetails
+                    {
+                        checklist_name = cd.checklist_name,
+                        SOP_number = cd.SOP_number,
+                        frequency = cd.frequency,
+                        inspection_status = cd.inspection_status,
+                        date_of_inspection = cd.date_of_inspection,
+                        checklist_attachment = cd.checklist_attachment,
+                        no_of_unsafe_observation = 0
+                    }).ToList()
+                }).ToList();
+
+            var response = facilities.Select(facility => new CMChecklistInspectionReport
+            {
+                facility_id = facility.facility_id,
+                facility_name = facility.facility_name,
+                checklist = groupedChecklistData
+            }).ToList();
+
             return response;
+
         }
-
-
         internal async Task<List<CMObservationReport>> GetObservationSheetReport(string facility_id, DateTime fromDate, DateTime toDate)
         {
             string myQuery = " select  distinct monthname(PM_Schedule_Observation_add_date) as month_of_observation,st.id, " +
@@ -1285,6 +1337,7 @@ namespace CMMSAPIs.Repositories.Masters
                 " where st.facility_id in ( " + facility_id + ") and is_ok = 0 and DATE_FORMAT(PM_Schedule_Observation_add_date,'%Y-%m-%d') BETWEEN '" + fromDate.ToString("yyyy-MM-dd") + "' AND '" + toDate.ToString("yyyy-MM-dd") + "' " +
                 "  group by st.id  order by st.id desc;";
             List<CMObservationReport> response = await Context.GetData<CMObservationReport>(myQuery).ConfigureAwait(false);
+
             return response;
         }
 
@@ -1768,8 +1821,8 @@ namespace CMMSAPIs.Repositories.Masters
                                      request.risk_type_id == (int)RiskType.Significant ||
                                      request.risk_type_id == (int)RiskType.Moderate;
 
-            bool isValidCostType = request.cost_type == (int)CostType.Capex ||
-                                           request.cost_type == (int)CostType.Opex;
+            bool isValidCostType = request.cost_type == (int)CMMS.CostType.Capex || request.cost_type == (int)CostType.Opex;
+
 
             // Collect errors
             List<string> errors = new List<string>();
@@ -1812,9 +1865,9 @@ namespace CMMSAPIs.Repositories.Masters
                                      $"facility_id, contractor_name, risk_type_id, preventive_action, responsible_person, contact_number, cost_type, " +
                                      $"date_of_observation, type_of_observation, location_of_observation, source_of_observation, target_date, " +
                                      $"observation_description, created_at, created_by, is_active,status_code) VALUES " +
-                                     $"({request.facility_id},'{request.contractor_name}', {request.risk_type_id}, '{request.preventive_action}', '{request.responsible_person}', '{request.contact_number}', " +
-                                     $"'{request.cost_type}', '{request.date_of_observation:yyyy-MM-dd HH:mm:ss}', '{request.type_of_observation}', '{request.location_of_observation}', " +
-                                     $"'{request.source_of_observation}', '{request.target_date:yyyy-MM-dd HH:mm:ss}', '{request.observation_description}', " +
+                                     $"({request.facility_id},'{request.contractor_name}', {request.risk_type_id}, '{request.preventive_action}', {request.responsible_person}, '{request.contact_number}', " +
+                                     $"{request.cost_type}, '{request.date_of_observation:yyyy-MM-dd HH:mm:ss}', {request.type_of_observation}, '{request.location_of_observation}', " +
+                                     $"{request.source_of_observation}, '{request.target_date:yyyy-MM-dd HH:mm:ss}', '{request.observation_description}', " +
                                      $"'{UtilsRepository.GetUTCTime()}', {UserID}, 1,{(int)CMMS.CMMS_Status.OBSERVATION_CREATED}); " +
                                      $"SELECT LAST_INSERT_ID();";
 
@@ -1823,10 +1876,17 @@ namespace CMMSAPIs.Repositories.Masters
                 {
                     insertedValue = Convert.ToInt32(dt.Rows[0][0]);
                 }
-
+                if (request.uploadfileIds.Count > 0)
+                {
+                    foreach (int data in request.uploadfileIds)
+                    {
+                        string uploadfilkr = $"UPDATE uploadedfiles SET facility_id = {request.facility_id}, module_type={(int)CMMS.CMMS_Modules.OBSERVATION}, module_ref_id={insertedValue} where id={data} ;";
+                        await Context.ExecuteNonQry<int>(uploadfilkr).ConfigureAwait(false);
+                    }
+                }
                 // Create history log if there is a comment
                 System.Text.StringBuilder sb = new System.Text.StringBuilder("Observation Created");
-                if (request.comment.Length > 0)
+                if (request.comment != null)
                 {
                     sb.Append(": " + request.comment);
                 }
@@ -1850,13 +1910,14 @@ namespace CMMSAPIs.Repositories.Masters
                                      $"contractor_name = '{request.contractor_name}', " +
                                      $"risk_type_id = {request.risk_type_id}, " +
                                      $"preventive_action = '{request.preventive_action}', " +
-                                     $"responsible_person = '{request.responsible_person}', " +
+                                     $"responsible_person = {request.responsible_person}, " +
                                      $"contact_number = '{request.contact_number}', " +
-                                     $"cost_type = '{request.cost_type}', " +
+                                     $"cost_type = {request.cost_type}, " +
                                      $"date_of_observation = '{request.date_of_observation:yyyy-MM-dd HH:mm:ss}', " +
                                      $"type_of_observation = '{request.type_of_observation}', " +
                                      $"location_of_observation = '{request.location_of_observation}', " +
                                      $"source_of_observation = '{request.source_of_observation}', " +
+                                     $"comment = '{request.comment}', " +
                                      $"target_date = '{request.target_date:yyyy-MM-dd HH:mm:ss}', " +
                                      $"observation_description = '{request.observation_description}', " +
                                      $"status_code={(int)CMMS.CMMS_Status.OBSERVATION_UPDATED}," +
@@ -1865,16 +1926,21 @@ namespace CMMSAPIs.Repositories.Masters
                                      $"WHERE id = {request.id};";
                 await Context.ExecuteNonQry<int>(updateQuery).ConfigureAwait(false);
 
-
+                if (request.uploadfileIds.Count > 0)
+                {
+                    foreach (int data in request.uploadfileIds)
+                    {
+                        string uploadfilkr = $"UPDATE uploadedfiles SET facility_id = {request.facility_id}, module_type={(int)CMMS.CMMS_Modules.OBSERVATION}, module_ref_id={request.id} where id={data} ;";
+                        await Context.ExecuteNonQry<int>(uploadfilkr).ConfigureAwait(false);
+                    }
+                }
                 System.Text.StringBuilder sb = new System.Text.StringBuilder("Observation Updated");
-                if (request.comment.Length > 0)
+                if (request.comment != null)
                 {
                     sb.Append(": " + request.comment);
                 }
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.OBSERVATION, request.id, 0, 0, sb.ToString(), CMMS.CMMS_Status.OBSERVATION_UPDATED, UserID);
                 response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Observation data updated successfully.");
-
-
             }
             catch (Exception ex)
             {
@@ -1885,7 +1951,6 @@ namespace CMMSAPIs.Repositories.Masters
         internal async Task<CMDefaultResponse> DeleteObservation(int id, int UserID, string comment)
         {
             CMDefaultResponse response = null;
-
             try
             {
                 string updateQuery = $"UPDATE observations SET " +
@@ -1914,11 +1979,11 @@ namespace CMMSAPIs.Repositories.Masters
         internal async Task<List<CMObservation>> GetObservationList(int facility_Id, DateTime fromDate, DateTime toDate)
         {
             string myQuery = "select observations.id,observations.facility_id,facilities.name facility_name,status_code,observations.short_status, " +
-                " contractor_name, risk_type_id,ir_risktype.risktype as risk_type, preventive_action, responsible_person, contact_number, cost_type, " +
+                " contractor_name , risk_type_id,ir_risktype.risktype as risk_type, preventive_action, responsible_person, contact_number, cost_type, CASE WHEN cost_type=1 THEN 'Capex' ELSE 'Opex' END as Cost_name , " +
                 " date_of_observation, type_of_observation, location_of_observation, source_of_observation, " +
                 " monthname(observations.date_of_observation) as month_of_observation,observations.target_date as closer_date,observations.closed_at as closed_date, concat(createdBy.firstName, ' ', createdBy.lastName) as action_taken, " +
                 " observations.preventive_action as  corrective_action, DATEDIFF(observations.target_date, observations.date_of_observation) AS remaining_days," +
-                " observations.target_date, observation_description, created_at, concat(createdBy.firstName, ' ', createdBy.lastName) created_by, " +
+                " observations.target_date, observation_description, created_at, concat(createdBy.firstName, ' ', createdBy.lastName) created_by,concat(responsible.firstName, ' ', responsible.lastName) as responsible_person_name,updated_by as updateid, created_by as createdid, " +
                 " updated_at, concat(updatedBy.firstName, ' ', updatedBy.lastName) updated_by,mis_m_typeofobservation.name as type_of_observation_name, mssheet.name  as source_of_observation_name, " +
                 "CASE " +
                 "WHEN observations.closed_at IS NOT NULL AND observations.closed_at <= observations.target_date THEN 'In Time' " +
@@ -1932,30 +1997,64 @@ namespace CMMSAPIs.Repositories.Masters
                 " left join mis_m_observationsheet as mssheet ON observations.source_of_observation  =mssheet.id " +
                 " left join users createdBy on createdBy.id = observations.created_by" +
                 " left join users updatedBy on updatedBy.id = observations.updated_by" +
+                " left join users responsible  on responsible.id = observations.responsible_person" +
                 " where is_active = 1 and observations.facility_id = " + facility_Id + " and date_format(created_at, '%Y-%m-%d') between '" + fromDate.ToString("yyyy-MM-dd") + "' and '" + toDate.ToString("yyyy-MM-dd") + "' ;";
             List<CMObservation> Result = await Context.GetData<CMObservation>(myQuery).ConfigureAwait(false);
+
+
+            string pmexecutionquery = "select pm_execution.id,pm_task.facility_id,facilities.name facility_name, " +
+            " Observation_Status as status_code,business.name as contractor_name, ckp.risk_type as risk_type_id,ir_risktype.risktype as risk_type, " +
+            " preventive_action,business.contactPerson as responsible_person, business.contactNumber as contact_number,ckp.cost_type, " +
+            " Observation_target_date as date_of_observation,ckp.type_of_observation,business.location as location_of_observation,business.id as source_of_observation, " +
+            " monthname(pm_execution.Observation_target_date) as month_of_observation,pm_execution.PM_Schedule_Observation_add_date as closer_date,pm_execution.PM_Schedule_Observation_update_date as closed_date, " +
+            " concat(createdBy.firstName, ' ', createdBy.lastName) as action_taken,pm_execution.preventive_action as corrective_action,DATEDIFF(pm_execution.Observation_target_date,pm_execution.PM_Schedule_Observation_add_date) AS remaining_days, " +
+            " pm_execution.Observation_target_date as target_date,pm_execution.Check_Point_Requirement as observation_description,PM_Schedule_Observation_add_date as created_at,concat(createdBy.firstName, ' ', createdBy.lastName) created_by, " +
+            " pm_task.updated_at, concat(updatedBy.firstName, ' ', updatedBy.lastName) updated_by,mis_m_typeofobservation.name as type_of_observation_name,ckp.check_point as source_of_observation_name, " +
+            " CASE WHEN pm_execution.PM_Schedule_Observation_add_date IS NOT NULL AND pm_execution.PM_Schedule_Observation_add_date <= pm_execution.PM_Schedule_Observation_add_date THEN 'In Time' " +
+            " WHEN pm_execution.PM_Schedule_Observation_add_date IS NOT NULL AND pm_execution.PM_Schedule_Observation_add_date > pm_execution.Observation_target_date THEN 'Out of Target Date' " +
+            " ELSE 'Open' END AS observation_status from pm_execution left join pm_task  ON pm_task.id = pm_execution.task_id " +
+            " left join facilities ON pm_task.facility_id = facilities.id left join checkpoint as ckp ON ckp.check_list_id = pm_execution.Check_Point_id " +
+            " left join ir_risktype ON ckp.risk_type = ir_risktype.id left join mis_m_typeofobservation ON ckp.type_of_observation = mis_m_typeofobservation.id " +
+            " left join users createdBy on createdBy.id = pm_task.createdById left join users updatedBy  on updatedBy.id = pm_task.updated_by " +
+            " left join business on business.id = createdBy.companyId and business.type = 2 " +
+            $" where  pm_task.facility_id = {facility_Id} and date_format(PM_Schedule_Observation_add_date, '%Y-%m-%d') between '" + fromDate.ToString("yyyy-MM-dd") + "' and '" + toDate.ToString("yyyy-MM-dd") + "' ";
+            List<CMObservation> Result1 = await Context.GetData<CMObservation>(pmexecutionquery).ConfigureAwait(false);
+
             foreach (var task in Result)
             {
                 string _shortStatus = Statusof(task.status_code);
                 task.short_status = _shortStatus;
+                task.observation_type = 1;
             }
+            foreach (var task1 in Result1)
+            {
+                task1.observation_type = 2;
+            }
+            Result.AddRange(Result1);
+
             return Result;
         }
         internal async Task<CMObservationByIdList> GetObservationById(int observation_id)
         {
             string myQuery = "select observations.id,observations.facility_id,facilities.name facility_name,status_code,observations.short_status, " +
-                " contractor_name, risk_type_id,ir_risktype.risktype as risk_type_name, preventive_action, responsible_person, contact_number, cost_type, " +
+                " contractor_name, risk_type_id,ir_risktype.risktype as risk_type_name, preventive_action, responsible_person, contact_number, cost_type ,CASE WHEN cost_type=1 THEN 'Capex' ELSE 'Opex' END as Cost_name ,  " +
                 " date_of_observation, type_of_observation, location_of_observation, source_of_observation,mis.name as source_of_observation_name,  " +
-                 " monthname(observations.date_of_observation) as month_of_observation,observations.target_date as closer_date, concat(createdBy.firstName, ' ', createdBy.lastName) as action_taken, " +
+                 " monthname(observations.date_of_observation) as month_of_observation,observations.target_date as closer_date, concat(createdBy.firstName, ' ', createdBy.lastName) as action_taken, updated_by as updateid, created_by as createdid ," +
                 " observations.preventive_action as  corrective_action, DATEDIFF(observations.target_date, observations.date_of_observation) AS remaining_days," +
-                " target_date, observation_description, created_at, concat(createdBy.firstName, ' ', createdBy.lastName) created_by, " +
-                " updated_at, concat(updatedBy.firstName, ' ', updatedBy.lastName) updated_by,mis_m_typeofobservation.name as type_of_observation_name " +
+                " target_date, observation_description, created_at, concat(createdBy.firstName, ' ', createdBy.lastName) created_by,concat(createdBy.firstName, ' ', createdBy.lastName) responsible_person_name, " +
+                " updated_at, concat(updatedBy.firstName, ' ', updatedBy.lastName) updated_by,mis_m_typeofobservation.name as type_of_observation_name , " +
+                "CASE " +
+                "WHEN observations.closed_at IS NOT NULL AND observations.closed_at <= observations.target_date THEN 'In Time' " +
+                "WHEN observations.closed_at IS NOT NULL AND observations.closed_at > observations.target_date THEN 'Out of Target Date' " +
+                "ELSE 'Open' " +
+                "END AS observation_status " +
                 " from observations" +
                 " left join ir_risktype ON observations.risk_type_id = ir_risktype.id" +
                 " left join mis_m_typeofobservation ON observations.type_of_observation  = mis_m_typeofobservation.id" +
                 " left join facilities ON observations.facility_id = facilities.id" +
                 " left join users createdBy on createdBy.id = observations.created_by" +
                 " left join mis_m_observationsheet as  mis on mis.id=observations.source_of_observation " +
+                " left join users responsible  on responsible.id = observations.responsible_person" +
                 " left join users updatedBy on updatedBy.id = observations.updated_by" +
                 " where is_active = 1 and observations.id = " + observation_id + ";";
             List<CMObservationByIdList> Result = await Context.GetData<CMObservationByIdList>(myQuery).ConfigureAwait(false);
@@ -2142,14 +2241,31 @@ namespace CMMSAPIs.Repositories.Masters
             List<CMDocumentVersionList> Data = await Context.GetData<CMDocumentVersionList>(myQuery).ConfigureAwait(false);
             return Data;
         }
+        Dictionary<int, string> MonthDictionary = new Dictionary<int, string>
+        {
+             {1, "January"},
+             {2, "February"},
+             {3, "March"},
+             {4, "April"},
+             {5, "May"},
+             {6, "June"},
+             {7, "July"},
+             {8, "August"},
+             {9, "September"},
+             {10, "October"},
+             {11, "November"},
+             {12, "December"}
+        };
         //Chages For Mis Health Data
+
+        //Plantation Data
         internal async Task<CMDefaultResponse> CreateHealthData(OccupationalHealthData request, int userID)
         {
-            string date = request.Date.ToString("yyyy-MM-dd");
+
             string myqry1 = $"INSERT INTO MIS_OccupationalHealthData " +
-                      $"(Date, NoOfHealthExamsOfNewJoiner, PeriodicTests, OccupationaIllnesses, Status, CreatedBy, CreatedAt) " +
+                      $"(month_id,facility_id,year, NoOfHealthExamsOfNewJoiner, PeriodicTests, OccupationaIllnesses, Status, CreatedBy, CreatedAt) " +
                       $"VALUES " +
-                      $"('{date}', {request.NoOfHealthExamsOfNewJoiner}, {request.PeriodicTests}, {request.OccupationalIllnesses},1 , " +
+                      $"({request.month_id},{request.facility_id},{request.year}, {request.NoOfHealthExamsOfNewJoiner}, {request.PeriodicTests}, {request.OccupationalIllnesses},1 , " +
                       $"{userID}, '{UtilsRepository.GetUTCTime()}'); " +
                       $"SELECT LAST_INSERT_ID();";
 
@@ -2160,15 +2276,22 @@ namespace CMMSAPIs.Repositories.Masters
 
             return response;
         }
-
         internal async Task<CMDefaultResponse> UpdateHealthData(OccupationalHealthData request, int userID)
         {
-            string date = request.Date.ToString("yyyy-MM-dd");
+
             string updateQry = "UPDATE MIS_OccupationalHealthData SET ";
 
-            if (request.Date != null)
+            if (request.month_id != 0)
             {
-                updateQry += $"Date = '{date}', ";
+                updateQry += $"month_id = {request.month_id}, ";
+            }
+            if (request.facility_id != 0)
+            {
+                updateQry += $"facility_id = {request.facility_id}, ";
+            }
+            if (request.year != 0)
+            {
+                updateQry += $"year = {request.year}, ";
             }
             if (request.NoOfHealthExamsOfNewJoiner >= 0)
             {
@@ -2202,22 +2325,34 @@ namespace CMMSAPIs.Repositories.Masters
 
         internal async Task<List<OccupationalHealthData>> GetHealthData()
         {
-            string myQuery = "SELECT id, Date,MONTHNAME(Date) as month_name,Month(Date) as month_id, NoOfHealthExamsOfNewJoiner, PeriodicTests, OccupationaIllnesses as OccupationalIllnesses, Status, " +
-                             "CreatedBy, CreatedAt, UpdatedBy, UpdatedAt " +
-                             "FROM MIS_OccupationalHealthData " +
-                             "WHERE  Status = 1 ;";
+
+            string myQuery = "SELECT mis_o.id, mis_o.facility_id, mis_o.year, mis_o.month_id, mis_o.NoOfHealthExamsOfNewJoiner, " +
+                            "mis_o.PeriodicTests, mis_o.OccupationaIllnesses AS OccupationalIllnesses, mis_o.Status, " +
+                            "mis_o.CreatedBy, CONCAT(u.firstName, u.lastName) AS submited_by, mis_o.CreatedAt, " +
+                            "mis_o.UpdatedBy, CONCAT(u.firstName, u.lastName) AS Updated_by_name, mis_o.UpdatedAt " +
+                            "FROM MIS_OccupationalHealthData AS mis_o " +
+                            "LEFT JOIN users AS u ON u.id = mis_o.CreatedBy " +
+                            "LEFT JOIN facilities AS f ON f.id = mis_o.facility_id " +
+                            "WHERE mis_o.Status = 1;";
             List<OccupationalHealthData> data = await Context.GetData<OccupationalHealthData>(myQuery).ConfigureAwait(false);
+            Parallel.ForEach(data, item =>
+            {
+                if (MonthDictionary.TryGetValue(item.month_id, out string monthName))
+                {
+                    item.month_name = monthName;
+                }
+            });
             return data;
         }
         //Create Vsitor Data
         internal async Task<CMDefaultResponse> CreateVisitsAndNotices(VisitsAndNotices request, int userID)
         {
-            string date = request.Date.ToString("yyyy-MM-dd");
+
             string myqry1 = $"INSERT INTO mis_visitsandnotices " +
-                            $"(Date, GovtAuthVisits, NoOfFineByThirdParty, NoOfShowCauseNoticesByThirdParty, " +
+                            $"(month_id,facility_id,year, GovtAuthVisits, NoOfFineByThirdParty, NoOfShowCauseNoticesByThirdParty, " +
                             $"NoticesToContractor, AmountOfPenaltiesToContractors, AnyOther, Status, CreatedBy, CreatedAt) " +
                             $"VALUES " +
-                            $"('{date}', {request.GovtAuthVisits}, {request.NoOfFineByThirdParty}, " +
+                            $"({request.month_id},{request.facility_id},{request.year}, {request.GovtAuthVisits}, {request.NoOfFineByThirdParty}, " +
                             $"{request.NoOfShowCauseNoticesByThirdParty}, {request.NoticesToContractor}, " +
                             $"{request.AmountOfPenaltiesToContractors}, {request.AnyOther}, 1, " +
                             $"{userID}, '{UtilsRepository.GetUTCTime()}'); " +
@@ -2230,13 +2365,17 @@ namespace CMMSAPIs.Repositories.Masters
         }
         internal async Task<CMDefaultResponse> UpdateVisitsAndNotices(VisitsAndNotices request, int userID)
         {
-            string date = request.Date.ToString("yyyy-MM-dd");
+
             string updateQry = "UPDATE mis_visitsandnotices SET ";
 
-            if (request.Date != null)
-                updateQry += $"Date = '{date}', ";
+            if (request.month_id != 0)
+                updateQry += $"month_id = {request.month_id}, ";
             if (request.GovtAuthVisits > 0)
                 updateQry += $"GovtAuthVisits = {request.GovtAuthVisits}, ";
+            if (request.facility_id != 0)
+                updateQry += $"facility_id = {request.facility_id}, ";
+            if (request.year != 0)
+                updateQry += $"year = {request.year}, ";
             if (request.NoOfFineByThirdParty > 0)
                 updateQry += $"NoOfFineByThirdParty = {request.NoOfFineByThirdParty}, ";
             if (request.NoOfShowCauseNoticesByThirdParty > 0)
@@ -2264,20 +2403,31 @@ namespace CMMSAPIs.Repositories.Masters
         }
         internal async Task<List<VisitsAndNotices>> GetVisitsAndNotices()
         {
-            string myQuery = "SELECT id, Date,MONTHNAME(Date) as month_name,Month(Date) as month_id, GovtAuthVisits, NoOfFineByThirdParty, NoOfShowCauseNoticesByThirdParty, " +
-                             "NoticesToContractor, AmountOfPenaltiesToContractors, AnyOther, Status, CreatedBy, CreatedAt, UpdatedBy, UpdatedAt " +
-                             "FROM mis_visitsandnotices " +
-                             "WHERE Status =1 ; ";
+            string myQuery = "SELECT mis_v.id, mis_v.month_id, mis_v.facility_id, mis_v.year, " +
+                 "mis_v.GovtAuthVisits, mis_v.NoOfFineByThirdParty, mis_v.NoOfShowCauseNoticesByThirdParty, " +
+                 "mis_v.NoticesToContractor, mis_v.AmountOfPenaltiesToContractors, mis_v.AnyOther, mis_v.Status, " +
+                 "mis_v.CreatedBy, CONCAT(u.firstName, u.lastName) AS submited_by, mis_v.CreatedAt, " +
+                 "mis_v.UpdatedBy, CONCAT(u.firstName, u.lastName) AS Updated_by_name, mis_v.UpdatedAt " +
+                 "FROM mis_visitsandnotices AS mis_v " +
+                 "LEFT JOIN users AS u ON u.id = mis_v.CreatedBy " +
+                 "WHERE mis_v.Status = 1;";
             List<VisitsAndNotices> data = await Context.GetData<VisitsAndNotices>(myQuery).ConfigureAwait(false);
-
+            Parallel.ForEach(data, item =>
+            {
+                if (MonthDictionary.TryGetValue(item.month_id, out string monthName))
+                {
+                    item.month_name = monthName;
+                }
+            });
             return data;
         }
         //Fuel Consumption
         internal async Task<CMDefaultResponse> CreateFuelConsumption(FuelData request, int userID)
         {
-            string myqry1 = $"INSERT INTO mis_fueldata (Date, DieselConsumedForVehicles, PetrolConsumedForVehicles, PetrolConsumedForGrassCuttingAndMovers, DieselConsumedAtSite, PetrolConsumedAtSite, Status, CreatedBy, CreatedAt) " +
+            string myqry1 = $"INSERT INTO mis_fueldata (month_id,facility_id,year, DieselConsumedForVehicles, PetrolConsumedForVehicles, PetrolConsumedForGrassCuttingAndMovers, DieselConsumedAtSite, PetrolConsumedAtSite, Status, CreatedBy, CreatedAt) " +
                              $"VALUES " +
-                             $"('{request.Date:yyyy-MM-dd}', " +
+                             $"({request.month_id}, " +
+                             $"{request.facility_id},{request.year}," +
                              $"{request.DieselConsumedForVehicles}, " +
                              $"{request.PetrolConsumedForVehicles}, " +
                              $"{request.PetrolConsumedForGrassCuttingAndMovers}, " +
@@ -2295,8 +2445,10 @@ namespace CMMSAPIs.Repositories.Masters
         internal async Task<CMDefaultResponse> UpdateFuelConsumption(FuelData request, int userID)
         {
             string updateQry = "UPDATE mis_fueldata SET ";
-            updateQry += $"Date = '{request.Date:yyyy-MM-dd}', ";
+            updateQry += $"month_id = {request.month_id}, ";
             updateQry += $"DieselConsumedForVehicles = {request.DieselConsumedForVehicles}, ";
+            updateQry += $"facility_id = {request.facility_id}, ";
+            updateQry += $"year = {request.year}, ";
             updateQry += $"PetrolConsumedForVehicles = {request.PetrolConsumedForVehicles}, ";
             updateQry += $"PetrolConsumedForGrassCuttingAndMovers = {request.PetrolConsumedForGrassCuttingAndMovers}, ";
             updateQry += $"DieselConsumedAtSite = {request.DieselConsumedAtSite}, ";
@@ -2318,10 +2470,23 @@ namespace CMMSAPIs.Repositories.Masters
         }
         internal async Task<List<FuelData>> GetFuelConsumption()
         {
-            string myQuery = "SELECT id, Date,MONTHNAME(Date) as month_name,Month(Date) as month_id, DieselConsumedForVehicles, PetrolConsumedForVehicles, PetrolConsumedForGrassCuttingAndMovers, DieselConsumedAtSite, PetrolConsumedAtSite, CreatedBy, CreatedAt, UpdatedBy, UpdatedAt " +
-                             "FROM mis_fueldata " +
-                             "WHERE Status=1";
+
+            string myQuery = "SELECT mis_f.id, mis_f.month_id, mis_f.facility_id, mis_f.year, " +
+                             "mis_f.DieselConsumedForVehicles, mis_f.PetrolConsumedForVehicles, " +
+                             "mis_f.PetrolConsumedForGrassCuttingAndMovers, mis_f.DieselConsumedAtSite, " +
+                             "mis_f.PetrolConsumedAtSite, mis_f.CreatedBy, CONCAT(u.firstName, u.lastName) AS submited_by, " +
+                             "mis_f.CreatedAt, mis_f.UpdatedBy, CONCAT(u.firstName, u.lastName) AS Updated_by_name, mis_f.UpdatedAt " +
+                             "FROM mis_fueldata AS mis_f " +
+                             "LEFT JOIN users AS u ON u.id = mis_f.CreatedBy " +
+                             "WHERE mis_f.Status = 1 ;";
             List<FuelData> data = await Context.GetData<FuelData>(myQuery).ConfigureAwait(false);
+            Parallel.ForEach(data, item =>
+            {
+                if (MonthDictionary.TryGetValue(item.month_id, out string monthName))
+                {
+                    item.month_name = monthName;
+                }
+            });
             return data;
         }
 
@@ -2329,10 +2494,10 @@ namespace CMMSAPIs.Repositories.Masters
 
         public async Task<CMDefaultResponse> CreatePlantationData(PlantationData request, int userID)
         {
-            string date = request.Date.ToString("yyyy-MM-dd");
-            string myqry1 = $"INSERT INTO mis_plantationdata (Date, SaplingsPlanted, SaplingsSurvived, SaplingsDied, Status, CreatedBy, CreatedAt) " +
+
+            string myqry1 = $"INSERT INTO mis_plantationdata (month_id,facility_id,year, SaplingsPlanted, SaplingsSurvived, SaplingsDied, Status, CreatedBy, CreatedAt) " +
                             $"VALUES " +
-                            $"('{date}', " +
+                            $"({request.month_id},{request.facility_id},{request.year}, " +
                             $"{request.SaplingsPlanted}, " +
                             $"{request.SaplingsSurvived}, " +
                             $"{request.SaplingsDied},1, " +
@@ -2348,9 +2513,11 @@ namespace CMMSAPIs.Repositories.Masters
 
         public async Task<CMDefaultResponse> UpdatePlantationData(PlantationData request, int userID)
         {
-            string date = request.Date.ToString("yyyy-MM-dd");
+
             string updateQry = "UPDATE mis_plantationdata SET ";
-            updateQry += $"Date = '{date}', ";
+            updateQry += $"month_id = {request.month_id}, ";
+            updateQry += $"facility_id = {request.facility_id}, ";
+            updateQry += $"year = {request.year}, ";
             updateQry += $"SaplingsPlanted = {request.SaplingsPlanted}, ";
             updateQry += $"SaplingsSurvived = {request.SaplingsSurvived}, ";
             updateQry += $"SaplingsDied = {request.SaplingsDied}, ";
@@ -2373,20 +2540,29 @@ namespace CMMSAPIs.Repositories.Masters
 
         public async Task<List<PlantationData>> GetPlantationData()
         {
-            string myQuery = "SELECT id, Date, MONTHNAME(Date) as month_name,Month(Date) as month_id, SaplingsPlanted, SaplingsSurvived, SaplingsDied, CreatedBy, CreatedAt, UpdatedBy, UpdatedAt " +
-                             "FROM mis_plantationdata " +
-                             "WHERE Status=1";
+            string myQuery = "SELECT mis_p.id, mis_p.month_id, mis_p.facility_id, mis_p.year, mis_p.SaplingsPlanted, mis_p.SaplingsSurvived, " +
+                             "mis_p.SaplingsDied, mis_p.CreatedBy, CONCAT(u.firstName, u.lastName) AS submited_by, mis_p.CreatedAt, " +
+                             "mis_p.UpdatedBy, CONCAT(u.firstName, u.lastName) AS Updated_by_name, mis_p.UpdatedAt " +
+                             "FROM mis_plantationdata AS mis_p " +
+                             "LEFT JOIN users AS u ON u.id = mis_p.CreatedBy WHERE mis_p.Status = 1;";
             List<PlantationData> data = await Context.GetData<PlantationData>(myQuery).ConfigureAwait(false);
+            Parallel.ForEach(data, item =>
+            {
+                if (MonthDictionary.TryGetValue(item.month_id, out string monthName))
+                {
+                    item.month_name = monthName;
+                }
+            });
             return data;
         }
 
         //Kizensdata
         public async Task<CMDefaultResponse> CreateKaizensData(KaizensData request, int userID)
         {
-            string date = request.Date.ToString("yyyy-MM-dd");
-            string myqry1 = $"INSERT INTO mis_kaizensdata (Date, KaizensImplemented, CostForImplementation, CostSavedFromImplementation, Status, CreatedBy, CreatedAt) " +
+
+            string myqry1 = $"INSERT INTO mis_kaizensdata (month_id,facility_id,year, KaizensImplemented, CostForImplementation, CostSavedFromImplementation, Status, CreatedBy, CreatedAt) " +
                             $"VALUES " +
-                            $"('{date}', " +
+                            $"({request.month_id},{request.facility_id},{request.year}, " +
                             $"{request.KaizensImplemented}, " +
                             $"{request.CostForImplementation}, " +
                             $"{request.CostSavedFromImplementation},1, " +
@@ -2401,9 +2577,11 @@ namespace CMMSAPIs.Repositories.Masters
 
         public async Task<CMDefaultResponse> UpdateKaizensData(KaizensData request, int userID)
         {
-            string date = request.Date.ToString("yyyy-MM-dd");
+
             string updateQry = "UPDATE mis_kaizensdata SET ";
-            updateQry += $"Date = '{date}', ";
+            updateQry += $"month_id = {request.month_id}, ";
+            updateQry += $"facility_id = {request.facility_id}, ";
+            updateQry += $"year = {request.year}, ";
             updateQry += $"KaizensImplemented = {request.KaizensImplemented}, ";
             updateQry += $"CostForImplementation = {request.CostForImplementation}, ";
             updateQry += $"CostSavedFromImplementation = {request.CostSavedFromImplementation}, ";
@@ -2423,18 +2601,185 @@ namespace CMMSAPIs.Repositories.Masters
 
             return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Kaizens Data Deleted");
         }
-
         public async Task<List<KaizensData>> GetKaizensData()
         {
-            string myQuery = "SELECT id, Date, MONTHNAME(Date) as month_name,Month(Date) as month_id, KaizensImplemented, CostForImplementation, CostSavedFromImplementation, CreatedBy, CreatedAt, UpdatedBy, UpdatedAt " +
-                             "FROM mis_kaizensdata " +
-                             "WHERE Status=1";
+            string myQuery = "SELECT mis_k.id, mis_k.month_id, mis_k.facility_id, mis_k.year, mis_k.KaizensImplemented, mis_k.CostForImplementation," +
+                             "mis_k.CostSavedFromImplementation, mis_k.CreatedBy, CONCAT(u.firstName, u.lastName) AS submited_by, " +
+                             "mis_k.CreatedAt, mis_k.UpdatedBy, CONCAT(u.firstName, u.lastName) AS Updated_by_name, mis_k.UpdatedAt " +
+                             "FROM mis_kaizensdata AS mis_k " +
+                             "LEFT JOIN users AS u ON u.id = mis_k.CreatedBy " +
+                             "LEFT JOIN facilities as f on f.id=mis_k.facility_id " +
+                             " WHERE mis_k.Status = 1;";
             List<KaizensData> data = await Context.GetData<KaizensData>(myQuery).ConfigureAwait(false);
+            Parallel.ForEach(data, item =>
+            {
+                if (MonthDictionary.TryGetValue(item.month_id, out string monthName))
+                {
+                    item.month_name = monthName;
+                }
+            });
             return data;
+        }
+        public async Task<List<CumalativeReport>> Cumulativereport(string facility_id, int module_id, string start_date, string end_date)
+        {
+
+            if (((int)CMMS.CMMS_Modules.JOB) == module_id)
+            {
+                string myQueryJob = "SELECT fc.name as Site_name,  COUNT( js.createdBy > 0) AS Created, COUNT( jc.JC_End_By_id > 0) as Closed, " +
+                                    " COUNT( jc.JC_End_By_id > 0) AS CardsEnded , " +
+                                    "COUNT( js.cancelledBy) AS Cancelled , COUNT(jc.JC_Start_By_id = 0) AS NotStarted, " +
+                                    "COUNT(jc.JC_End_By_id = 0 and jc.JC_Start_By_id = 0) AS Ongoing, " +
+                                    "count(DATEDIFF(jc.JC_Date_Start, jc.JC_Date_Stop))  AS ClosedOnTime, " +
+                                    "COUNT(per.extendStatus = 1 and  jc.JC_End_By_id > 0) AS ClosedWithExtension " +
+                                    "FROM jobs AS js LEFT JOIN jobcards AS jc ON js.id = jc.jobId " +
+                                    "LEFT JOIN facilities AS fc ON js.facilityId = fc.id " +
+                                    "LEFT JOIN permits AS per ON jc.PTW_id =per.id " +
+                                    $"Where js.facilityId in({facility_id}) group by js.facilityId ;";
+                List<CumalativeReport> data = await Context.GetData<CumalativeReport>(myQueryJob).ConfigureAwait(false);
+                return data;
+            }
+            if (((int)CMMS.CMMS_Modules.PM_PLAN) == module_id)
+            {
+                string myQueryJob = "SELECT fc.name as Site_name,  COUNT( js.created_by > 0) AS Created, COUNT( jc.closed_by > 0) as Closed, " +
+                                    "COUNT(jc.cancelled_by) AS Cancelled, COUNT(jc.started_by = 0) AS NotStarted, " +
+                                    "COUNT( jc.started_by = 0 and jc.closed_by = 0) AS Ongoing, " +
+                                    "count(DATEDIFF(jc.closed_at, jc.started_at)) AS PM_closed_on_time, " +
+                                    "count( permit.extendStatus = 1)   PMs_closed_with_extension " +
+                                    "FROM  pm_plan AS js " +
+                                    "LEFT JOIN pm_task AS jc ON js.id = jc.plan_id " +
+                                    "LEFT join permits AS permit on jc.ptw_id = permit.id " +
+                                    "LEFT JOIN facilities AS fc ON js.facility_id = fc.id " +
+                                    $"Where jc.facility_id in({facility_id}) group by jc.facility_Id;";
+                List<CumalativeReport> data = await Context.GetData<CumalativeReport>(myQueryJob).ConfigureAwait(false);
+                return data;
+            }
+            if (((int)CMMS.CMMS_Modules.MC_PLAN) == module_id)
+            {
+
+                string myQueryJob = "SELECT f.name AS sitename, " +
+                                    "CASE WHEN mc.moduleType = 1 THEN 'Wet' " +
+                                       "WHEN mc.moduleType = 2 THEN 'Dry' ELSE 'Robotic' END AS CleaningType, " +
+                                       "sub1.TotalWaterUsed AS WaterUsed, " +
+                                       "SUM(css.moduleQuantity) AS ScheduledQuantity, " +
+                                       "sub2.no_of_cleaned AS actualQuantity, " +
+                                       "CASE WHEN mc.abandonedById > 0 THEN 'yes' ELSE 'no' END AS Abandoned, " +
+                                       "mc.reasonForAbandon AS Remark, " +
+                                       "(SUM(css.moduleQuantity) - sub2.no_of_cleaned) AS Deviation, " +
+                                       "CASE WHEN mc.abandonedAt IS NOT NULL THEN TIMESTAMPDIFF(MINUTE, mc.startDate, mc.abandonedAt) " +
+                                       "ELSE TIMESTAMPDIFF(MINUTE, mc.startDate, mc.endedAt) END AS TimeTaken " +
+                                       "FROM cleaning_execution AS mc " +
+                                       "LEFT JOIN cleaning_plan AS mp ON mp.planId = mc.planId " +
+                                       "LEFT JOIN cleaning_execution_items AS css ON css.executionId = mc.id " +
+                                       "LEFT JOIN (SELECT executionId, SUM(waterUsed) AS TotalWaterUsed " +
+                                       "FROM cleaning_execution_schedules GROUP BY executionId) sub1 " +
+                                       "ON mc.id = sub1.executionId " +
+                                       "LEFT JOIN (SELECT executionId, SUM(moduleQuantity) AS no_of_cleaned " +
+                                       "FROM cleaning_execution_items WHERE cleanedById > 0 GROUP BY executionId) sub2 " +
+                                       "ON mc.id = sub2.executionId " +
+                                       "LEFT JOIN Frequency AS freq ON freq.id = mp.frequencyId " +
+                                       "LEFT JOIN facilities AS f ON f.id = mc.facilityId " +
+                                       $"WHERE mc.facilityId IN ({facility_id}) AND mc.moduleType = 1 group by mc.facilityId;";
+
+
+                List<CumalativeReport> data = await Context.GetData<CumalativeReport>(myQueryJob).ConfigureAwait(false);
+                return data;
+            }
+            if (((int)CMMS.CMMS_Modules.VEGETATION_PLAN) == module_id)
+            {
+                string myQueryJob = "SELECT f.name AS sitename, " +
+                                   "CASE WHEN mc.moduleType = 1 THEN 'Wet' " +
+                                      "WHEN mc.moduleType = 2 THEN 'Dry' ELSE 'Robotic' END AS CleaningType, " +
+                                      "sub1.TotalWaterUsed AS WaterUsed, " +
+                                      "SUM(css.moduleQuantity) AS ScheduledQuantity, " +
+                                      "sub2.no_of_cleaned AS actualQuantity, " +
+                                      "CASE WHEN mc.abandonedById > 0 THEN 'yes' ELSE 'no' END AS Abandoned, " +
+                                      "mc.reasonForAbandon AS Remark, " +
+                                      "(SUM(css.moduleQuantity) - sub2.no_of_cleaned) AS Deviation, " +
+                                      "CASE WHEN mc.abandonedAt IS NOT NULL THEN TIMESTAMPDIFF(MINUTE, mc.startDate, mc.abandonedAt) " +
+                                      "ELSE TIMESTAMPDIFF(MINUTE, mc.startDate, mc.endedAt) END AS TimeTaken " +
+                                      "FROM cleaning_execution AS mc " +
+                                      "LEFT JOIN cleaning_plan AS mp ON mp.planId = mc.planId " +
+                                      "LEFT JOIN cleaning_execution_items AS css ON css.executionId = mc.id " +
+                                      "LEFT JOIN (SELECT executionId, SUM(waterUsed) AS TotalWaterUsed " +
+                                      "FROM cleaning_execution_schedules GROUP BY executionId) sub1 " +
+                                      "ON mc.id = sub1.executionId " +
+                                      "LEFT JOIN (SELECT executionId, SUM(moduleQuantity) AS no_of_cleaned " +
+                                      "FROM cleaning_execution_items WHERE cleanedById > 0 GROUP BY executionId) sub2 " +
+                                      "ON mc.id = sub2.executionId " +
+                                      "LEFT JOIN Frequency AS freq ON freq.id = mp.frequencyId " +
+                                      "LEFT JOIN facilities AS f ON f.id = mc.facilityId " +
+                                      $"WHERE mc.facilityId IN ({facility_id}) AND mc.moduleType = 2 group by mc.facilityId;";
+                List<CumalativeReport> data = await Context.GetData<CumalativeReport>(myQueryJob).ConfigureAwait(false);
+
+                return data;
+
+            }
+            return null;
+
+        }
+        internal async Task<CMDefaultResponse> CloseObservation(CMApproval request, int userId)
+        {
+            string deleteQry = "";
+            string deleteQry1 = $"UPDATE observations SET status_code = {(int)CMMS_Status.OBSERVATION_CLOSED}, closed_by = '{userId}' , closed_at='{UtilsRepository.GetUTCTime()}' , updated_at = '{UtilsRepository.GetUTCTime()}' WHERE id = {request.id};";
+            await Context.ExecuteNonQry<int>(deleteQry1).ConfigureAwait(false);
+            System.Text.StringBuilder sb = new System.Text.StringBuilder("Observation Updated");
+            if (request.comment.Length > 0)
+
+                if (request.type == (int)CMMS.OBSERVATION_TYPE.PM_EXECUTION)
+                {
+
+                    deleteQry = $"UPDATE pm_execution SET Observation_Status = {(int)CMMS_Status.OBSERVATION_CLOSED}, preventive_action = '{request.comment}'WHERE id = {request.id};";
+                    await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
+                    sb = new System.Text.StringBuilder("Observation Updated");
+                    if (request.comment.Length > 0)
+                    {
+                        sb.Append(": " + request.comment);
+                    }
+                    await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_EXECUTION, request.id, 0, 0, sb.ToString(), CMMS.CMMS_Status.OBSERVATION_CLOSED, userId); ;
+                }
+                else
+                {
+                    sb.Append(": " + request.comment);
+                    deleteQry = $"UPDATE observations SET status_code = {(int)CMMS_Status.OBSERVATION_CLOSED}, closed_by = '{userId}' , closed_at='{UtilsRepository.GetUTCTime()}' , updated_at = '{UtilsRepository.GetUTCTime()}' WHERE id = {request.id};";
+
+                    await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
+
+                    sb = new System.Text.StringBuilder("Observation Updated");
+                    if (request.comment.Length > 0)
+                    {
+                        sb.Append(": " + request.comment);
+                    }
+                    await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.OBSERVATION, request.id, 0, 0, sb.ToString(), CMMS.CMMS_Status.OBSERVATION_CLOSED, userId); ;
+                }
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.OBSERVATION, request.id, 0, 0, sb.ToString(), CMMS.CMMS_Status.OBSERVATION_CLOSED, userId); ;
+            return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Observation {request.id} closed");
+        }
+        public async Task<CMDefaultResponse> AssingtoObservation(AssignToObservation request)
+        {
+            string updateQry = "";
+            if (request.type_of_observation == (int)CMMS.OBSERVATION_TYPE.PM_EXECUTION)
+            {
+                updateQry = "UPDATE pm_execution SET ";
+                updateQry += $"Observation_assign_to = {request.user_id}, ";
+                updateQry += $"Observation_target_date = '{request.target_date.ToString("yyyy-MM-dd")}', ";
+                updateQry += $"Observation_Status = {(int)CMMS.CMMS_Modules.OBSERVATION_ASSIGNED} ";
+                updateQry += $"WHERE id = {request.id};";
+                await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_EXECUTION, request.id, 0, 0, request.comment, CMMS.CMMS_Status.ASSIGNED, request.user_id);
+            }
+            else
+            {
+                updateQry = "UPDATE observations SET ";
+                updateQry += $"assign_to = {request.user_id}, ";
+                updateQry += $"target_date = '{request.target_date.ToString("yyyy-MM-dd")}',";
+                updateQry += $"status_code =  {(int)CMMS.CMMS_Modules.OBSERVATION_ASSIGNED} ";
+                updateQry += $"WHERE id = {request.id};";
+                await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.OBSERVATION, request.id, 0, 0, request.comment, CMMS.CMMS_Status.ASSIGNED, request.user_id);
+            }
+            return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Assing Observation ");
         }
     }
 
 
 }
-
-
