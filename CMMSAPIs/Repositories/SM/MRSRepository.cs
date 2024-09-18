@@ -835,6 +835,7 @@ namespace CMMSAPIs.Repositories.SM
             //    _List[i].status_short = _shortStatus;
             //}
             //return _List;
+            List<CMMRSList> _List = new List<CMMRSList>();
             string stmt = "SELECT fc.name AS facilityName, " +
                           "facility_id AS facilityid, " +
                           "sm.ID, " +
@@ -884,7 +885,8 @@ namespace CMMSAPIs.Repositories.SM
                           "LEFT JOIN users issuedApproveUser ON issuedApproveUser.id = sm.issue_approved_by_emp_ID " +
                           "LEFT JOIN users issuedRejectUser ON issuedRejectUser.id = sm.issue_rejected_by_emp_ID " +
                           "WHERE sm.id = " + ID + ";";
-            List<CMMRSList> _List = await Context.GetData<CMMRSList>(stmt).ConfigureAwait(false);
+
+            _List = await Context.GetData<CMMRSList>(stmt).ConfigureAwait(false);
             for (var i = 0; i < _List.Count; i++)
             {
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_List[i].status);

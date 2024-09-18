@@ -294,7 +294,7 @@ namespace CMMSAPIs.Models.SM
         public int ID { get; set; }
         public int facilityId { get; set; }
         public string facilityName { get; set; }
-        
+
         public int requested_by_emp_ID { get; set; }
         public int approved_by_emp_ID { get; set; }
         public string approver_name { get; set; }
@@ -320,7 +320,7 @@ namespace CMMSAPIs.Models.SM
         public string request_updated_by_name { get; set; }
         public int updated_by_emp_ID { get; set; }
         public string request_rejected_by_name { get; set; }
-        public int rejected_by_emp_ID { get; set; }
+        public dynamic rejected_by_emp_ID { get; set; }
         public dynamic request_rejected_at { get; set; }
         public string issue_appoved_by_name { get; set; }
         public int issue_approved_by_emp_ID { get; set; }
