@@ -46,12 +46,14 @@ namespace CMMSAPIs.BS.Masters
         Task<CMDefaultResponse> DeleteModule(int id);
         Task<CMModule> GetModuleDetail(int id);
         Task<List<CMModule>> GetModuleList(bool return_all);
+        Task<List<CMModule>> GetEscalationModuleList();
         Task<List<CMStatus>> GetStatusList();
         Task<List<CMFrequency>> GetFrequencyList();
         Task<string> Print(int id, CMMS.CMMS_Modules moduleID, int userID, string facilitytimeZone);
         Task<string> DownloadFile(int id);
         Task<List<CMDashboadModuleWiseList>> getDashboadDetails(string facilityId, CMMS.CMMS_Modules moduleID, DateTime fromDate, DateTime toDate);
         Task<CMStatus1> GetStatusbymodule(CMMS.CMMS_Modules module);
+        Task<CMStatus1> GetEscalationStatusbymodule(CMMS.CMMS_Modules module);
     }
     public class CMMSBS : ICMMSBS
     {
@@ -135,6 +137,21 @@ namespace CMMSAPIs.BS.Masters
                 using (var repos = new CMMSRepository(getDB))
                 {
                     return await repos.GetModuleList(return_all);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<CMModule>> GetEscalationModuleList()
+        {
+            try
+            {
+                using (var repos = new CMMSRepository(getDB))
+                {
+                    return await repos.GetEscalationModuleList();
                 }
             }
             catch (Exception ex)
@@ -674,6 +691,22 @@ namespace CMMSAPIs.BS.Masters
                 using (var repos = new CMMSRepository(getDB))
                 {
                     return await repos.GetStatusbymodule(module);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMStatus1> GetEscalationStatusbymodule(CMMS.CMMS_Modules module)
+        {
+            try
+            {
+                using (var repos = new CMMSRepository(getDB))
+                {
+                    return await repos.GetEscalationStatusbymodule(module);
 
                 }
             }

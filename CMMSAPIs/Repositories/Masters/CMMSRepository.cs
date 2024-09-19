@@ -185,6 +185,18 @@ namespace CMMSAPIs.Repositories.Masters
             return _moduleList;
         }
 
+        internal async Task<List<CMModule>> GetEscalationModuleList()
+        {
+            /*
+             * Return List of modules from Features table where escalate = 1
+            */
+            string myQuery = "SELECT * FROM features WHERE isActive = 1 AND escalate = 1;";
+
+            List<CMModule> _moduleList = await Context.GetData<CMModule>(myQuery).ConfigureAwait(false);
+            return _moduleList;
+        }
+
+
         //internal async Task<List<CMModule>> GetFeatureList()
         //{
         //    /*
@@ -225,6 +237,33 @@ namespace CMMSAPIs.Repositories.Masters
                                 "(SELECT CASE WHEN module_b.softwareId IN (SELECT DISTINCT status_b.moduleId FROM statuses as status_b) THEN " +
                                 "module_b.softwareId ELSE 0 END AS moduleId FROM features as module_b WHERE module_a.softwareId = module_b.softwareId) " +
                                 "WHERE module_a.softwareId > 0 ";
+            if (module > 0)
+                myQuery1 += $"AND module_a.softwareId = {(int)module} ";
+            myQuery += "ORDER BY module_a.softwareId ASC, status_a.softwareId ASC;";
+            List<Statusformodule> _status = await Context.GetData<Statusformodule>(myQuery1).ConfigureAwait(false);
+            _statusList[0].status = _status;
+            return _statusList[0];
+        }
+
+        internal async Task<CMStatus1> GetEscalationStatusbymodule(CMMS.CMMS_Modules module)
+        {
+            string myQuery = "SELECT module_a.id as module_id, module_a.softwareId as module_software_id, module_a.featureName as module_name, " +
+                                "status_a.softwareId as status_id, status_a.statusName as status_name " +
+                                "FROM features as module_a LEFT JOIN statuses AS status_a ON status_a.moduleId = " +
+                               "(SELECT CASE WHEN module_b.softwareId IN (SELECT DISTINCT status_b.moduleId FROM statuses as status_b) THEN " +
+                                "module_b.softwareId ELSE 0 END AS moduleId FROM features as module_b WHERE module_a.softwareId = module_b.softwareId and status_a.escalate = 1) " +
+                                "WHERE module_a.softwareId > 0 AND module_a.escalate = 1 ";
+            if (module > 0)
+                myQuery += $"AND module_a.softwareId = {(int)module} ";
+            myQuery += "ORDER BY module_a.softwareId ASC, status_a.softwareId ASC;";
+            List<CMStatus1> _statusList = await Context.GetData<CMStatus1>(myQuery).ConfigureAwait(false);
+
+            string myQuery1 = "SELECT DISTINCT status_a.softwareId as status_id, " +
+                              "status_a.statusName as status_name " +
+                              "FROM features as module_a LEFT JOIN statuses AS status_a ON status_a.moduleId = " +
+                                "(SELECT CASE WHEN module_b.softwareId IN (SELECT DISTINCT status_b.moduleId FROM statuses as status_b ) THEN " +
+                                "module_b.softwareId ELSE 0 END AS moduleId FROM features as module_b WHERE module_a.softwareId = module_b.softwareId and status_a.escalate = 1) " +
+                                "WHERE module_a.softwareId > 0 AND module_a.escalate = 1 ";
             if (module > 0)
                 myQuery1 += $"AND module_a.softwareId = {(int)module} ";
             myQuery += "ORDER BY module_a.softwareId ASC, status_a.softwareId ASC;";
