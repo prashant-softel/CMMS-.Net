@@ -1317,7 +1317,7 @@ namespace CMMSAPIs.Repositories.SM
                         decimal mrsitem_issued_qty = 0;
                         decimal mrsitem_used_qty = 0;
                         decimal mrsitem_returned_qty = 0;
-                        dynamic stored_used_qty = 0;
+                        decimal stored_used_qty = 0;
 
                         // Get quantities issued for this material
                         string stmtMRSItem = "SELECT i.issued_qty, i.used_qty, i.returned_qty FROM smrsitems i INNER JOIN smmrs m ON m.ID = i.mrs_ID WHERE i.mrs_ID = @mrsID AND i.ID = @mrsitemID AND is_splited = 1;";
@@ -1353,7 +1353,10 @@ namespace CMMSAPIs.Repositories.SM
                             cmd.Parameters.Add("@assetItemID", MySqlDbType.Int32).Value = assetItemID;
                             cmd.Parameters.Add("@mrsitemID", MySqlDbType.Int32).Value = mrsitemID;
 
-                            stored_used_qty = Convert.ToInt32(await cmd.ExecuteScalarAsync());
+                            //stored_used_qty = Convert.ToDouble(await cmd.ExecuteScalarAsync());
+                            object result = await cmd.ExecuteScalarAsync();
+                            stored_used_qty = result != DBNull.Value ? Convert.ToDecimal(result) : 0;
+
                         }
 
                         // Check if the quantity is already used by this asset
@@ -1381,12 +1384,12 @@ namespace CMMSAPIs.Repositories.SM
 
                         if (existingQty == qty)
                         {
-                            return 6; // Quantity unchanged
+                            return 6;
                         }
 
                         if (mrsitem_issued_qty > 0)
                         {
-                            int updatingMRSqty = qty + stored_used_qty - existingQty;
+                            int updatingMRSqty = (int)(qty + stored_used_qty - existingQty);
                             if (mrsitem_issued_qty >= updatingMRSqty)
                             {
                                 if (transaction_id == 0)
