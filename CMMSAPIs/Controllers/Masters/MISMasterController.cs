@@ -2027,7 +2027,37 @@ namespace CMMSAPIs.Controllers.Masters
                 throw ex;
             }
         }
+        [Route("CreateEvaluation")]
+        [HttpPost]
+        public async Task<IActionResult> CreateEvaluation(EvaluationCreate request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.CreateEvaluation(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
 
+        [Route("ApproveEvaluation")]
+        [HttpPost]
+        public async Task<IActionResult> ApproveEvaluation(CMApproval request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.ApproveEvaluation(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
     }
 }
 

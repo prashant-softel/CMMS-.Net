@@ -179,7 +179,7 @@ namespace CMMSAPIs.Repositories.PM
             //statusQry += "ELSE 'Unknown Status' END";
             //  
             string myQuery = $"SELECT pm_task.id,pm_plan.id as plan_id, pm_task.category_id,cat.name as category_name,  CONCAT('PMTASK',pm_task.id) as task_code,pm_plan.plan_name as plan_title,pm_task.facility_id, pm_task.frequency_id as frequency_id, freq.name as frequency_name, pm_task.plan_date as due_date,prev_task_done_date as last_done_date, closed_at as done_date, CONCAT(assignedTo.firstName,' ',assignedTo.lastName)  as assigned_to_name, pm_task.PTW_id as permit_id, CONCAT('PTW',pm_task.PTW_id) as permit_code,permit.status as ptw_status, PM_task.status " +
-                               ", f.name as Site_name,pm_task.started_at as start_date,pm_task.closed_at as close_time,CONCAT(isotak.firstName,isotak.lastName) as Isolation_taken,permitType.title as permit_type FROM pm_task " +
+                               ",f.name as Site_name,pm_task.started_at as start_date,pm_task.closed_at as close_time,CONCAT(isotak.firstName,isotak.lastName) as Isolation_taken,permitType.title as permit_type FROM pm_task " +
                                $"left join users as assignedTo on pm_task.assigned_to = assignedTo.id " +
                                $"left join pm_plan  on pm_task.plan_id = pm_plan.id " +
                                $"left join assetcategories as cat  on pm_task.category_id = cat.id " +
@@ -406,11 +406,8 @@ namespace CMMSAPIs.Repositories.PM
             {
                 taskViewDetail[0].Material_consumption = new List<Materialconsumption>();
             }
-
-
             if (taskViewDetail.Count == 0)
                 throw new MissingMemberException("PM Task not found");
-
             string myQuery2 = $"SELECT pm_schedule.id as schedule_id,assets.id as assetsID,assets.name as asset_name, " +
                 $"PM_Schedule_Completed_by_id as completedBy_id,  CONCAT(users.firstName, users.lastName) as   completedBy_name , asst.name as categoryname, " +
                 $" checklist.checklist_number as checklist_name from pm_schedule " +

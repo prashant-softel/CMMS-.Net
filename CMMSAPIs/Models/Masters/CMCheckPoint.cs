@@ -11,6 +11,7 @@
         public int? failure_weightage { get; set; } // in per
         public CMCPType? checkpoint_type { get; set; } // bool,renge
         public int? risk_type { get; set; }
+        public int? cost_type { get; set; }
         public int? type_of_observation { get; set; }
         public int type { get; set; }
         public int? status { get; set; }
@@ -49,6 +50,8 @@
         public int? type { get; set; }
         public string type_of_observation { get; set; }
         public string risk_type { get; set; }
+        public int Cost_Type { get; set; }
 
+        public string Cost_type_name { get; set; }
     }
 }

@@ -143,6 +143,8 @@ namespace CMMSAPIs.BS.MISMasters
         Task<List<KaizensData>> GetKaizensData();
         Task<List<CumalativeReport>> Cumulativereport(string facility_id, int module_id, string start_date, string end_date);
         Task<CMDefaultResponse> AssingtoObservation(AssignToObservation request);
+        Task<CMDefaultResponse> CreateEvaluation(EvaluationCreate request, int userID);
+        Task<CMDefaultResponse> ApproveEvaluation(CMApproval request, int userID);
     }
     public class MISMasterBS : IMISMasterBS
     {
@@ -2081,6 +2083,36 @@ namespace CMMSAPIs.BS.MISMasters
                 throw;
             }
 
+        }
+
+        public async Task<CMDefaultResponse> CreateEvaluation(EvaluationCreate request, int userID)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.CreateEvaluation(request, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> ApproveEvaluation(CMApproval request, int userID)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.ApproveEvaluation(request, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
         }
     }
 }

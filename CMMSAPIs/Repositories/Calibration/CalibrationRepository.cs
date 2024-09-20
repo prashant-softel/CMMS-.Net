@@ -717,15 +717,12 @@ namespace CMMSAPIs.Repositories.Calibration
 
             }
 
-
-
             // creating new entry for start date based on frequeny
             string insertQuery = $"INSERT INTO calibration ( asset_id, facility_id, due_date,LastcalibrationDoneDate, start_date, calibration_certificate_file_id, status, status_updated_at, received_date, is_damaged, requested_by, requested_at, request_approved_by, request_approved_at, request_approve_remark, request_rejected_by, request_rejected_at, request_reject_remark, vendor_id, completed_by, completed_remark, close_by, close_remark, approved_by, approved_at, approve_remark, rejected_by, rejected_at, reject_remark, health_status,prev_task_id) " +
                       $"SELECT asset_id, facility_id, '{due_date.ToString("yyyy-MM-dd")}',LastcalibrationDoneDate,start_date, calibration_certificate_file_id, status, status_updated_at, received_date, is_damaged, requested_by, requested_at, request_approved_by, request_approved_at, request_approve_remark, request_rejected_by, request_rejected_at, request_reject_remark, vendor_id, completed_by, completed_remark, close_by, close_remark, approved_by, approved_at, approve_remark, rejected_by, rejected_at, reject_remark, health_status,{request.id} " +
-                      $"FROM calibration WHERE id = {request.id};";
-
-
-            await Context.ExecuteNonQry<int>(insertQuery).ConfigureAwait(false);
+                      $"FROM calibration WHERE id = {request.id};  SELECT LAST_INSERT_ID();";
+            DataTable dt2 = await Context.FetchData(insertQuery).ConfigureAwait(false);
+            int nid = Convert.ToInt32(dt2.Rows[0][0]);
             string assetIDQuery = $"SELECT asset_id FROM calibration where id = {request.id};";
             DataTable dtAsset = await Context.FetchData(assetIDQuery).ConfigureAwait(false);
             int assetID = Convert.ToInt32(dtAsset.Rows[0][0]);
@@ -749,7 +746,8 @@ namespace CMMSAPIs.Repositories.Calibration
                 CMCalibrationDetails _ViewCalibration = await GetCalibrationDetails(request.id, "");
 
                 //await CMMSNotification.sendNotification(CMMS.CMMS_Modules.CALIBRATION, CMMS.CMMS_Status.CALIBRATION_SKIPPED, new[] { userID }, _ViewCalibration);
-                response = new CMDefaultResponse(request.id, returnStatus, "Calibration Skipped");
+
+                response = new CMRescheduleApprovalResponse(nid, request.id, returnStatus, $"Calibration Skipped. Next Calibration with ID {nid} on  '{due_date.ToString("yyyy'-'MM'-'dd")}'");
             }
             else
             {

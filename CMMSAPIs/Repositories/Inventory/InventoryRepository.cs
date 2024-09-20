@@ -1298,7 +1298,7 @@ namespace CMMSAPIs.Repositories.Inventory
                     string start_date = unit.start_date != null ? ((DateTime)unit.start_date).ToString("yyyy-MM-dd HH:mm:ss") : "0000:00:00 00:00";
                     string warranty_description = unit.warranty_description == null ? "" : unit.warranty_description;
                     string expiry_date = unit.expiry_date == null ? "0000:00:00 00:00" : ((DateTime)unit.expiry_date).ToString("yyyy-MM-dd HH:mm:ss");
-                    string warrantyQry = "insert into assetwarranty (certificate_file_id, warranty_type, warranty_description, warranty_term_type, asset_id, start_date, expiry_date, meter_limit, meter_unit, warranty_provider, certificate_number, addedAt, addedBy, status,warrantyTenture,vendor_id) VALUES ";
+                    string warrantyQry = "insert into assetwarranty (certificate_file_id, warranty_type, warranty_description, warranty_term_type, asset_id, start_date, expiry_date, meter_limit, meter_unit, warranty_provider, certificate_number, addedAt, addedBy, status,warrantyTenture,voendor_id) VALUES ";
                     warrantyQry += $"({unit.warranty_certificate_file_id}, {unit.warranty_type}, '{warranty_description}', {unit.warranty_term_type}, {retID},'{start_date}',' {expiry_date}', {unit.meter_limit}, {unit.meter_unit}, {unit.warranty_provider_id}, '{unit.certificate_number}', '{UtilsRepository.GetUTCTime()}', {userID}, 1,{unit.warrantyTenture},{unit.Warranty_vendor_Id});" +
                         $" SELECT LAST_INSERT_ID();";
                     DataTable dt2 = await Context.FetchData(warrantyQry).ConfigureAwait(false);
@@ -1478,7 +1478,7 @@ namespace CMMSAPIs.Repositories.Inventory
                     string start_date = unit.start_date != null ? ((DateTime)unit.start_date).ToString("yyyy-MM-dd HH:mm:ss") : "0000:00:00 00:00";
                     string warranty_description = unit.warranty_description == null ? "" : unit.warranty_description;
                     string expiry_date = unit.expiry_date == null ? "" : ((DateTime)unit.expiry_date).ToString("yyyy-MM-dd HH:mm:ss");
-                    string warrantyQry = "insert into assetwarranty (certificate_file_id, warranty_type, warranty_description, warranty_term_type, asset_id, start_date, expiry_date, meter_limit, meter_unit, certificate_number, addedAt, addedBy, status,warrantyTenture,vendor_id,warranty_provider) VALUES ";
+                    string warrantyQry = "insert into assetwarranty (certificate_file_id, warranty_type, warranty_description, warranty_term_type, asset_id, start_date, expiry_date, meter_limit, meter_unit, certificate_number, addedAt, addedBy, status,warrantyTenture,voendor_id,warranty_provider) VALUES ";
                     warrantyQry += $"({unit.warranty_certificate_file_id}, {unit.warranty_type}, '{warranty_description}', {unit.warranty_term_type}, {retID}, '{start_date}', '{expiry_date}', {unit.meter_limit}, {unit.meter_unit}, '{unit.certificate_number}', '{UtilsRepository.GetUTCTime()}', {userID}, 1,{unit.warrantyTenture},{v_id},{warranty_typr_Id});" +
                         $" SELECT LAST_INSERT_ID();";
                     DataTable dt2 = await Context.FetchData(warrantyQry).ConfigureAwait(false);
@@ -2147,7 +2147,7 @@ namespace CMMSAPIs.Repositories.Inventory
                     warrantyQry += $"Update assetwarranty SET   warranty_type={request.warranty_type}, " +
                        $"warranty_description='{warranty_description}', certificate_number='{request.certificate_number}' , " +
                        $"warranty_term_type={request.warranty_term_type} ,start_date='{start_date}', " +
-                       $"expiry_date='{expiry_date}', warranty_provider= {request.warranty_provider_id},vendor_id={request.Warranty_vendor_Id}  " +
+                       $"expiry_date='{expiry_date}', warranty_provider= {request.warranty_provider_id},voendor_id={request.Warranty_vendor_Id}  " +
                        $"where  asset_id={request.id}  ;";
                     int retVal = await Context.ExecuteNonQry<int>(warrantyQry).ConfigureAwait(false);
                 }
@@ -2156,7 +2156,7 @@ namespace CMMSAPIs.Repositories.Inventory
                     string start_date = request.start_date != null ? ((DateTime)request.start_date).ToString("yyyy-MM-dd HH:mm:ss") : "0000:00:00 00:00";
                     string warranty_description = request.warranty_description == null ? "" : request.warranty_description;
                     string expiry_date = request.expiry_date == null ? "0000:00:00 00:00" : ((DateTime)request.expiry_date).ToString("yyyy-MM-dd HH:mm:ss");
-                    string warrantyQry = "insert into assetwarranty (certificate_file_id, warranty_type, warranty_description, warranty_term_type, asset_id, start_date, expiry_date, meter_limit, meter_unit, warranty_provider, certificate_number, addedAt, addedBy, status,warrantyTenture,vendor_id) VALUES ";
+                    string warrantyQry = "insert into assetwarranty (certificate_file_id, warranty_type, warranty_description, warranty_term_type, asset_id, start_date, expiry_date, meter_limit, meter_unit, warranty_provider, certificate_number, addedAt, addedBy, status,warrantyTenture,voendor_id) VALUES ";
                     warrantyQry += $"({request.warranty_certificate_file_id}, {request.warranty_type}, '{warranty_description}', {request.warranty_term_type}, {request.id},'{start_date}',' {expiry_date}', {request.meter_limit}, {request.meter_unit}, {request.warranty_provider_id}, '{request.certificate_number}', '{UtilsRepository.GetUTCTime()}', {userID}, 1,{request.warrantyTenture},{request.Warranty_vendor_Id});" +
                         $" SELECT LAST_INSERT_ID();";
                     DataTable dt5 = await Context.FetchData(warrantyQry).ConfigureAwait(false);
