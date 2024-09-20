@@ -128,7 +128,7 @@ namespace CMMSAPIs.Repositories.PM
             mapChecklistQry = mapChecklistQry.Substring(0, mapChecklistQry.Length - 2) + ";";
             await Context.ExecuteNonQry<int>(mapChecklistQry).ConfigureAwait(false);
 
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_PLAN, id, 0, 0, "PM Plan added", CMMS.CMMS_Status.PM_PLAN_CREATED, userID);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_PLAN, id, 0, 0, "PM Plan  added", CMMS.CMMS_Status.PM_PLAN_CREATED, userID);
 
             try
             {
