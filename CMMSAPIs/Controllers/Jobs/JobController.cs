@@ -29,11 +29,19 @@ namespace CMMSAPIs.Controllers.Jobs
         //[Authorize]
         [Route("GetJobList")]
         [HttpGet]
-        public async Task<IActionResult> GetJobList(int facility_id, string startDate, string endDate, CMMS.CMMS_JobType jobType, int selfView, string status)
+        public async Task<IActionResult> GetJobList(string facility_id, string startDate, string endDate, CMMS.CMMS_JobType jobType, bool selfView, string status)
         {
             try
             {
-                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+                var facilityIds = facility_id.Split(',');
+
+                // Use the first facility ID from the array and convert it to an integer
+                int firstFacilityId = int.Parse(facilityIds.FirstOrDefault());
+
+                // Get the time zone for the first facility ID
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo"))
+                    .FirstOrDefault(x => x.facility_id == firstFacilityId)?.timezone;
+
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
                 var data = await _JobBS.GetJobList(facility_id,startDate, endDate, jobType, selfView, userID, status, facilitytimeZone);
                 return Ok(data);
