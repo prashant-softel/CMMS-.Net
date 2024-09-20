@@ -1461,7 +1461,6 @@ namespace CMMSAPIs.Repositories.Masters
             { (int)CMMS.CMMS_Status.MC_TASK_END_REJECTED,"MC_Task_Ended_Reject" },
             { (int)CMMS.CMMS_Status.MC_TASK_SCHEDULE_APPROVED,"MC_Task_Schedule_Approved" },
             { (int)CMMS.CMMS_Status.MC_TASK_SCHEDULE_REJECT,"MC_Task_Schedule_Reject" },
-            { (int)CMMS.CMMS_Status.MC_TASK_RESCHEDULED,"Reschedule" },
             { (int)CMMS.CMMS_Status.VEG_PLAN_DRAFT, "Draft" },
             { (int)CMMS.CMMS_Status.VEG_PLAN_SUBMITTED, "Waiting for Approval" },
             { (int)CMMS.CMMS_Status.VEG_PLAN_APPROVED, "Approved" },

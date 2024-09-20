@@ -361,6 +361,7 @@ namespace CMMSAPIs.Models.MC
         public string Remark { get; set; }
         public dynamic Deviation { get; set; }
         public dynamic Time_taken { get; set; }
+        public DateTime? startDate { get; set; }
     }
     public class CMMCExecutionList
     {
